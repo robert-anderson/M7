@@ -1,0 +1,202 @@
+  * process grid (1, 1) will be used
+    node-k98b-018                   
+
+  * using 24 threads per process
+
+  ===============================================================
+    BAGEL - Freshly leavened quantum chemistry                   
+  ===============================================================
+
+  *** Geometry ***
+
+  { "atom" : "Be", "xyz" : [     -0.000000,     -0.000000,     -0.000000 ] },
+
+  Number of auxiliary basis functions:       51
+
+  Since a DF basis is specified, we compute 2- and 3-index integrals:
+    o Being stored without compression. Storage requirement is 0.000 GB
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.01
+       - 2-index ints                              0.00
+       - computing inverse                         0.01
+        elapsed time:        0.03 sec.
+
+
+  Number of basis functions:        5
+  Number of electrons      :        4
+
+
+    * METHOD: MOLECULE                             0.05
+
+       - Overlap matrix                            0.00
+       - Hcore matrix                              0.00
+       - Overlap orthog                            0.00
+
+  *** RHF ***
+
+  === Nuclear Repulsion ===
+  
+     0.0000000000
+
+      * DIIS with orbital gradients will be used.
+
+       - SCF startup                               0.03
+
+  === RHF iteration (/home/mmm0043/Programs/bagel_master/src/basis/sto-3g.json) ===
+  
+               o Fock build                                  0.00
+      0        -14.35201087          0.00000000           0.00
+  
+    * SCF iteration converged.
+
+    * Permanent dipole moment:
+           (    0.000000,     0.000000,     0.000000) a.u.
+
+
+    * METHOD: HF                                   0.04
+
+  *** Geometry (Relativistic) ***
+       - 3-index ints post                         0.00
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.00
+       - 3-index ints post                         0.00
+
+       - Geometry relativistic (total)             0.00
+
+  *** Dirac HF ***
+
+       - 1-electron integrals                      0.00
+       - Coulomb: half trans                       0.00
+       - Coulomb: metric multiply                  0.03
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.00
+  === Nuclear Repulsion ===
+  
+     0.0000000000
+
+      * DIIS with orbital gradients will be used.
+
+       - SCF startup                               0.04
+
+  === Dirac RHF iteration (/home/mmm0043/Programs/bagel_master/src/basis/sto-3g.json, RKB) ===
+  
+       - Coulomb: half trans                       0.00
+       - Coulomb: metric multiply                  0.03
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.00
+               o Fock build                                  0.03
+      0        -14.35422050          0.00004213           0.03
+       - Coulomb: half trans                       0.00
+       - Coulomb: metric multiply                  0.03
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.00
+               o Fock build                                  0.03
+      1        -14.35422045          0.00000000           0.03
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.00
+       - Coulomb: metric multiply                  0.03
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.00
+               o Fock build                                  0.03
+      2        -14.35422045          0.00000000           0.03
+  
+    * SCF iteration converged.
+
+    * Permanent dipole moment: Dirac Hartree-Fock
+           (    0.000000,     0.000000,     0.000000) a.u.
+
+    * METHOD: DHF                                  0.15
+
+  ------------------------------
+  Spin-nonconserving complex FCI
+  ------------------------------
+
+    * nstate   :      1
+    * nclosed  :      0
+    * nact     :      5
+    * nvirt    :      0
+
+    * Relativistic FCI
+    * 4 active electrons in 5 orbitals.
+    * gaunt    : false
+    * breit    : false
+  *** Geometry (Relativistic) ***
+       - 3-index ints post                         0.00
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.00
+       - 3-index ints post                         0.00
+
+       - Geometry relativistic (total)             0.00
+
+    * Integral transformation done. Elapsed time: 0.01
+
+       - jop, kop                                  0.00
+       - denom                                     0.00
+     guess   0:   closed 11...                open .....               
+
+                 * guess generation                            0.00
+  === Relativistic FCI iteration ===
+
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      0   0        -14.35422045     1.11e-02      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      1   0        -14.40595303     7.83e-04      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      2   0        -14.40597584     5.30e-05      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      3   0        -14.40597603     4.56e-06      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      4   0        -14.40597603     1.94e-07      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      5   0        -14.40597603     1.24e-08      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      6   0        -14.40597603     5.15e-10      0.02
+                 * sigma vector                                0.02
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      7   0  *     -14.40597603     4.45e-11      0.02
+
+     * ci vector, state   0
+
+     * ci vector, state   0
+
+     * ci vector, state   0
+       22...  (0.9464410144,-0.0000000000)
+       2.2..  (-0.1085421111,-0.1515115369)
+       2..ba  (-0.0727519227,0.1591278468)
+       2..ab  (-0.1628454215,0.0639990826)
+       2..2.  (0.0479939423,0.0243985060)
+       2...2  (0.0217549678,0.0492486240)
+
+     * ci vector, state   0
+
+     * ci vector, state   0
+
+    * METHOD: ZFCI                                 0.16
+
+
+  
+  ===============================================================
+

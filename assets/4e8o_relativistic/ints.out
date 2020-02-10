@@ -1,0 +1,202 @@
+    nodek22.pri.rosalind2.alces.network
+
+  * using 6 threads per process
+
+  ===============================================================
+    BAGEL - Freshly leavened quantum chemistry                   
+  ===============================================================
+
+  *** Geometry ***
+
+  { "atom" : "F", "xyz" : [      0.000000,      0.000000,      0.000000 ] },
+  { "atom" : "H", "xyz" : [      0.000000,      0.000000,      1.889726 ] },
+
+  Number of auxiliary basis functions:       93
+
+  Since a DF basis is specified, we compute 2- and 3-index integrals:
+    o Being stored without compression. Storage requirement is 0.000 GB
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.04
+       - 2-index ints                              0.00
+       - computing inverse                         0.05
+        elapsed time:        0.09 sec.
+
+
+  Number of basis functions:       19
+  Number of electrons      :       10
+
+
+    * METHOD: MOLECULE                             0.11
+
+  *** Geometry (Relativistic) ***
+       - 3-index ints post                         0.00
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.05
+       - 3-index ints post                         0.00
+
+       - Geometry relativistic (total)             0.05
+
+  *** Dirac HF ***
+
+       - 1-electron integrals                      0.08
+  === Nuclear Repulsion ===
+  
+     4.7625948960
+
+      * DIIS with orbital gradients will be used.
+
+       - SCF startup                               0.02
+
+  === Dirac RHF iteration (/mnt/lustre/morty/k1507071/code/rja_bagel/src/basis/cc-pvdz.json, RKB) ===
+  
+       - Coulomb: half trans                       0.02
+       - Coulomb: metric multiply                  1.55
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.60
+      0        -93.75290267          0.05170590           1.60
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.70
+      1        -95.58461696          0.05290970           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.68
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.72
+      2        -98.35221163          0.04081386           1.72
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      3       -100.01849902          0.01046582           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.67
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.70
+      4       -100.09548548          0.00255278           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.55
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.58
+      5       -100.10069346          0.00024634           1.58
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.68
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.72
+      6       -100.10079645          0.00006339           1.72
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      7       -100.10080456          0.00000827           1.69
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      8       -100.10080468          0.00000075           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      9       -100.10080468          0.00000018           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.55
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.58
+     10       -100.10080468          0.00000006           1.58
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+     11       -100.10080468          0.00000002           1.69
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.63
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.67
+     12       -100.10080468          0.00000001           1.67
+  
+    * SCF iteration converged.
+
+    * Permanent dipole moment: Dirac Hartree-Fock
+           (    0.000000,    -0.000000,    -0.830597) a.u.
+    * Printing out population analysis to dhf.log
+
+    * METHOD: DHF                                 22.04
+
+  ------------------------------
+  Spin-nonconserving complex FCI
+  ------------------------------
+
+    * nstate   :      3
+    * nclosed  :      3
+    * nact     :      4
+    * nvirt    :     12
+
+    * Relativistic FCI
+    * 4 active electrons in 4 orbitals.
+    * gaunt    : false
+    * breit    : false
+  *** Geometry (Relativistic) ***
+       - 3-index ints post                         0.00
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.05
+       - 3-index ints post                         0.00
+
+       - Geometry relativistic (total)             0.05
+
+       - Coulomb: half trans                       0.00
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.01
+    * Integral transformation done. Elapsed time: 2.06
+
+       - jop, kop                                  0.00
+
+Writing relativistic integrals to FCIDUMP.REL file
+
+Number of AO basis functions: 76
+Number of MO basis functions to dump: 38
+Writing 2e integral block 1 / 16 : ( + + | + + )
+Writing 2e integral block 3 / 16 : ( + - | + + )
+Writing 2e integral block 4 / 16 : ( + - | + - )
+Writing 2e integral block 5 / 16 : ( + + | - + )
+Writing 2e integral block 6 / 16 : ( + + | - - )
+Writing 2e integral block 10 / 16 : ( - + | + - )
+Writing 2e integral block 12 / 16 : ( - - | + - )
+Writing 2e integral block 13 / 16 : ( - + | - + )
+Writing 2e integral block 14 / 16 : ( - + | - - )
+Writing 2e integral block 16 / 16 : ( - - | - - )
+Writing 1e integral block 1 / 4
+Writing 1e integral block 2 / 4
+Writing 1e integral block 3 / 4
+Writing 1e integral block 4 / 4
+  -- Termination requested --
+  message: Relativistic MO integrals are dumped on a file.
+
+  
+  ===============================================================
+

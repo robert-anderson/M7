@@ -1,0 +1,352 @@
+    nodek22.pri.rosalind2.alces.network
+
+  * using 6 threads per process
+
+  ===============================================================
+    BAGEL - Freshly leavened quantum chemistry                   
+  ===============================================================
+
+  *** Geometry ***
+
+  { "atom" : "F", "xyz" : [      0.000000,      0.000000,      0.000000 ] },
+  { "atom" : "H", "xyz" : [      0.000000,      0.000000,      1.889726 ] },
+
+  Number of auxiliary basis functions:       93
+
+  Since a DF basis is specified, we compute 2- and 3-index integrals:
+    o Being stored without compression. Storage requirement is 0.000 GB
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.02
+       - 2-index ints                              0.00
+       - computing inverse                         0.05
+        elapsed time:        0.07 sec.
+
+
+  Number of basis functions:       19
+  Number of electrons      :       10
+
+
+    * METHOD: MOLECULE                             0.09
+
+  *** Geometry (Relativistic) ***
+       - 3-index ints post                         0.00
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.05
+       - 3-index ints post                         0.00
+
+       - Geometry relativistic (total)             0.05
+
+  *** Dirac HF ***
+
+       - 1-electron integrals                      0.08
+  === Nuclear Repulsion ===
+  
+     4.7625948960
+
+      * DIIS with orbital gradients will be used.
+
+       - SCF startup                               0.02
+
+  === Dirac RHF iteration (/mnt/lustre/morty/k1507071/code/rja_bagel/src/basis/cc-pvdz.json, RKB) ===
+  
+       - Coulomb: half trans                       0.02
+       - Coulomb: metric multiply                  1.69
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.74
+      0        -93.75290267          0.05170590           1.74
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.67
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.71
+      1        -95.58461696          0.05290970           1.71
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.70
+      2        -98.35221163          0.04081386           1.71
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      3       -100.01849902          0.01046582           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.55
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.58
+      4       -100.09548548          0.00255278           1.58
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.64
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.68
+      5       -100.10069346          0.00024634           1.68
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      6       -100.10079645          0.00006339           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.69
+      7       -100.10080456          0.00000827           1.69
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.64
+       - Coulomb: J operator                       0.01
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.71
+      8       -100.10080468          0.00000075           1.72
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.55
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.58
+      9       -100.10080468          0.00000018           1.58
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.66
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.70
+     10       -100.10080468          0.00000006           1.70
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.65
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.68
+     11       -100.10080468          0.00000002           1.69
+               o DIIS                                        0.00
+       - Coulomb: half trans                       0.01
+       - Coulomb: metric multiply                  1.67
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.02
+               o Fock build                                  1.70
+     12       -100.10080468          0.00000001           1.70
+  
+    * SCF iteration converged.
+
+    * Permanent dipole moment: Dirac Hartree-Fock
+           (    0.000000,    -0.000000,    -0.830597) a.u.
+    * Printing out population analysis to dhf.log
+
+    * METHOD: DHF                                 22.18
+
+  ------------------------------
+  Spin-nonconserving complex FCI
+  ------------------------------
+
+    * nstate   :      3
+    * nclosed  :      3
+    * nact     :      4
+    * nvirt    :     12
+
+    * Relativistic FCI
+    * 4 active electrons in 4 orbitals.
+    * gaunt    : false
+    * breit    : false
+  *** Geometry (Relativistic) ***
+       - 3-index ints post                         0.00
+       - 3-index ints prep                         0.00
+       - 3-index ints                              0.05
+       - 3-index ints post                         0.00
+
+       - Geometry relativistic (total)             0.05
+
+       - Coulomb: half trans                       0.00
+       - Coulomb: metric multiply                  1.65
+       - Coulomb: J operator                       0.00
+       - Coulomb: K operator                       0.01
+    * Integral transformation done. Elapsed time: 2.05
+
+       - jop, kop                                  0.00
+       - denom                                     0.02
+     guess   0:   closed 11..                 open ....                
+
+     guess   1:   closed 1...                 open .11.                
+
+     guess   2:   closed 1...                 open .11.                
+
+                 * guess generation                            0.00
+  === Relativistic FCI iteration ===
+
+                 * sigma vector                                1.78
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+      0   0       -100.10080468     3.51e-03      1.78
+      0   1        -99.69705013     1.39e-02      0.00
+      0   2        -99.69689619     1.38e-02      0.00
+                 * sigma vector                                1.66
+                 * davidson                                    0.00
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      1   0       -100.10132787     2.45e-04      1.66
+      1   1        -99.72399855     1.48e-03      0.00
+      1   2        -99.72385972     1.51e-03      0.00
+                 * sigma vector                                1.75
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      2   0       -100.10132969     2.35e-05      1.75
+      2   1        -99.72607568     1.60e-03      0.00
+      2   2        -99.72606921     1.61e-03      0.00
+                 * sigma vector                                1.96
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      3   0       -100.10132972     1.46e-06      1.97
+      3   1        -99.72619843     1.61e-04      0.00
+      3   2        -99.72619175     1.60e-04      0.00
+                 * sigma vector                                1.88
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      4   0       -100.10132972     1.07e-07      1.89
+      4   1        -99.72620061     8.40e-05      0.00
+      4   2        -99.72619401     8.77e-05      0.00
+                 * sigma vector                                1.89
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      5   0       -100.10132972     1.87e-08      1.90
+      5   1        -99.72621854     5.20e-04      0.00
+      5   2        -99.72621366     5.42e-04      0.00
+                 * sigma vector                                1.89
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      6   0       -100.10132972     1.20e-09      1.90
+      6   1        -99.72628628     4.16e-04      0.00
+      6   2        -99.72628540     4.30e-04      0.00
+                 * sigma vector                                1.88
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      7   0  *    -100.10132972     4.71e-11      1.89
+      7   1        -99.72630114     4.22e-05      0.00
+      7   2        -99.72630113     4.26e-05      0.00
+                 * sigma vector                                1.29
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      8   0  *    -100.10132972     4.71e-11      1.29
+      8   1        -99.72630129     6.69e-06      0.00
+      8   2        -99.72630129     6.72e-06      0.00
+                 * sigma vector                                1.34
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      9   0  *    -100.10132972     4.71e-11      1.35
+      9   1        -99.72630129     6.31e-07      0.00
+      9   2        -99.72630129     6.31e-07      0.00
+                 * sigma vector                                1.38
+                 * davidson                                    0.03
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     10   0  *    -100.10132972     4.70e-11      1.42
+     10   1        -99.72630129     6.51e-08      0.00
+     10   2        -99.72630129     6.52e-08      0.00
+                 * sigma vector                                1.29
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     11   0  *    -100.10132972     4.61e-11      1.29
+     11   1        -99.72630129     9.74e-09      0.00
+     11   2        -99.72630129     1.01e-08      0.00
+                 * sigma vector                                1.29
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     12   0  *    -100.10132972     3.59e-11      1.30
+     12   1        -99.72630129     2.00e-08      0.00
+     12   2        -99.72630129     2.03e-08      0.00
+                 * sigma vector                                1.29
+                 * davidson                                    0.21
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     13   0  *    -100.10132972     3.53e-11      1.50
+     13   1        -99.72630129     1.52e-09      0.00
+     13   2        -99.72630129     1.52e-09      0.00
+                 * sigma vector                                1.29
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     14   0  *    -100.10132972     3.53e-11      1.30
+     14   1  *     -99.72630129     6.80e-11      0.00
+     14   2  *     -99.72630129     6.81e-11      0.00
+
+     * ci vector, state   0
+
+     * ci vector, state   1
+
+     * ci vector, state   2
+
+     * ci vector, state   0
+
+     * ci vector, state   1
+
+     * ci vector, state   2
+       2bb.  (0.6993071051,0.4736637536)
+       2b.b  (-0.0896295457,-0.1698135650)
+
+     * ci vector, state   0
+       22..  (-0.9998282143,0.0000000000)
+
+     * ci vector, state   1
+       2ba.  (0.3346549879,0.3541163671)
+       2b.a  (-0.0759640893,-0.0806130178)
+
+     * ci vector, state   2
+       2ab.  (0.0308008202,0.4862451247)
+       2a.b  (0.0458267096,-0.1008412414)
+
+     * ci vector, state   0
+
+     * ci vector, state   1
+       2aa.  (-0.1304318226,0.8344854509)
+       2a.a  (0.0299234690,-0.1896700559)
+
+     * ci vector, state   2
+
+     * ci vector, state   0
+
+     * ci vector, state   1
+
+     * ci vector, state   2
+
+    * METHOD: ZFCI                                26.30
+
+
+  
+  ===============================================================
+

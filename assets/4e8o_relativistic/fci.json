@@ -1,0 +1,48 @@
+{
+    "bagel": [
+        {
+            "title": "molecule",
+            "basis": "/mnt/lustre/morty/k1507071/code/rja_bagel/src/basis/cc-pvdz.json",
+            "df_basis": "/mnt/lustre/morty/k1507071/code/rja_bagel/src/basis/cc-pvdz-jkfit.json",
+            "angstrom": true,
+            "geometry": [
+                {
+                    "atom": "F",
+                    "xyz": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                {
+                    "atom": "H",
+                    "xyz": [
+                        0.0,
+                        0.0,
+                        1.0
+                    ]
+                }
+            ]
+        },
+        {
+            "robust": true,
+            "pop": true,
+            "title": "dhf",
+            "gaunt": false,
+            "breit": false
+        },
+        {
+            "title": "zfci",
+            "ncore": 3,
+            "only_ints": false,
+            "state": [
+                0,
+                0,
+                1
+            ],
+            "norb": 4,
+            "gaunt": false,
+            "breit": false
+        }
+    ]
+}

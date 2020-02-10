@@ -1,0 +1,35 @@
+{
+    "bagel" : [
+    {
+        "basis": "/home/mmm0043/Programs/bagel_master/src/basis/sto-3g.json",
+        "df_basis": "/home/mmm0043/Programs/bagel_master/src/basis/svp-jkfit.json",
+        "geometry": [
+                {
+                    "xyz": [
+                        -0.0,
+                        -0.0,
+                        -0.0
+                    ],
+                    "atom": "Be"
+                }
+            ],
+            "angstrom": true,
+            "title": "molecule"
+        },
+        {
+            "title" : "hf"
+        },
+        {
+            "title" : "dhf",
+            "gaunt" : false,
+            "breit" : false,
+            "robust" : true,
+            "thresh" : 1.0e-10,
+            "maxiter" : 1000
+        },
+        {
+            "title" : "zfci",
+            "state":[1]
+        }
+]
+}
