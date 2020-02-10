@@ -7,11 +7,14 @@
 
 #include <array>
 #include <mpi.h>
-#include "../data/DataTable.h"
+#include <assert.h>
+#include <iostream>
+#include "src/data/Table.h"
+#include "src/data/Specification.h"
 
 #define USE_MPI 1
 
-static const std::array<MPI_Datatype, nnumeric> type_to_mpi_type = {
+static const std::array<MPI_Datatype, numtypes::ntype> type_to_mpi_type = {
         (MPI_Datatype) MPI_COMPLEX,
         (MPI_Datatype) MPI_DOUBLE_COMPLEX,
         (MPI_Datatype) MPI_CXX_LONG_DOUBLE_COMPLEX,
@@ -33,7 +36,7 @@ static const std::array<MPI_Datatype, nnumeric> type_to_mpi_type = {
 
 template<typename T>
 MPI_Datatype mpi_type() {
-    return type_to_mpi_type[type_number<T>];
+    return type_to_mpi_type[numtypes::itype<T>];
 }
 
 class MPIWrapper {

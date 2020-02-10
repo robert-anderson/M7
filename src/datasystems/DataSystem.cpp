@@ -5,14 +5,14 @@
 #include "DataSystem.h"
 #include "../utils.h"
 
-DataSystem::DataSystem(DataTable& store, DataTable& send_buffer, DataTable& recv_buffer):
+DataSystem::DataSystem(Table& store, Table& send_buffer, Table& recv_buffer):
     m_store(store), m_send_buffer(send_buffer), m_recv_buffer(recv_buffer){}
 
 
 void DataSystem::communicate() {
     MPIWrapper mpi;
     defs::inds sendcounts = m_send_buffer.highwatermark();
-    for (auto &i : sendcounts) i*=m_send_buffer.total_datawords_used();
+    for (auto &i : sendcounts) i*=m_send_buffer.row_length();
     defs::inds recvcounts(mpi.nrank(), 0ul);
     mpi.all_to_all(sendcounts, recvcounts);
     auto &senddispls = m_send_buffer.segment_dataword_offsets();

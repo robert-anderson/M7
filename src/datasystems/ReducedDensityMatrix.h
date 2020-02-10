@@ -5,9 +5,9 @@
 #ifndef M7_REDUCEDDENSITYMATRIX_H
 #define M7_REDUCEDDENSITYMATRIX_H
 
-#include "../data/MappedDataTable.h"
+#include "src/data/MappedTable.h"
 
-class ReducedDensityMatrix : public MappedDataTable {
+class ReducedDensityMatrix : public MappedTable {
 
 };
 

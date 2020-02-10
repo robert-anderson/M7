@@ -6,15 +6,15 @@
 #define M7_DATASYSTEM_H
 
 
-#include "../data/DataTable.h"
+#include "src/data/Table.h"
 #include "../parallel/MPIWrapper.h"
 
 class DataSystem {
-    DataTable &m_store;
-    DataTable &m_send_buffer;
-    DataTable &m_recv_buffer;
+    Table &m_store;
+    Table &m_send_buffer;
+    Table &m_recv_buffer;
 public:
-    DataSystem(DataTable&, DataTable&, DataTable&);
+    DataSystem(Table&, Table&, Table&);
     void communicate();
 };
 

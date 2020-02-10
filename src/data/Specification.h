@@ -115,6 +115,10 @@ public:
      */
     Specification &commit();
 
+    bool operator==(const Specification &rhs) const;
+
+    bool operator!=(const Specification &rhs) const;
+
 private:
     static std::array<size_t, ntype> numeric_datawords_used(const std::array<size_t, ntype> &lengths);
 

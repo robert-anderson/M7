@@ -8,6 +8,8 @@
 #include <src/defs.h>
 #include <omp.h>
 #include <cstring>
+#include <assert.h>
+#include <src/parallel/MPIWrapper.h>
 #include "Specification.h"
 #include "BitfieldNew.h"
 
@@ -16,6 +18,12 @@ class Table {
     const Specification m_spec;
     const size_t &m_row_length;
     const size_t m_nsegment;
+public:
+    const Specification &spec() const;
+
+    const size_t nsegment() const;
+
+private:
     float m_nrow_growth_factor;
     size_t m_nrow{0ul};
     std::vector<defs::data_t> m_data{};
@@ -63,6 +71,12 @@ public:
     template<typename T>
     T *view(const size_t &isegment, const size_t &irow, const size_t &ientry) {
         return (T *) dataptr<T>(isegment, irow, ientry);
+    }
+
+    template<typename T>
+    T *claim_view(const size_t &isegment){
+        auto irow = claim_rows(isegment);
+        return view<T>(isegment, irow, 0ul);
     }
 
     template<typename T>
@@ -137,11 +151,17 @@ public:
         return m_data.data();
     }
 
+    const defs::data_t *baseptr() const {
+        return m_data.data();
+    }
+
     const std::vector<size_t> &highwatermark() const;
 
     const size_t total_datawords_used() const;
 
     const std::vector<size_t> &segment_dataword_offsets() const;
+
+    bool send_to(Table &recv) const;
 
 private:
     template<typename T>

@@ -6,16 +6,17 @@
 #define M7_STOCHASTICWAVEFUNCTION_H
 
 #include "DataSystem.h"
-#include "../data/PerforableMappedDataTable.h"
+/*
+#include "src/data/PerforableMappedTable.h"
 
 class StochasticWavefunction : public DataSystem {
     PerforableMappedDataTable store;
-    DataTable send_buffer;
-    DataTable recv_buffer;
+    Table send_buffer;
+    Table recv_buffer;
 public:
     //StochasticWavefunction();
 
 };
-
+*/
 
 #endif //M7_STOCHASTICWAVEFUNCTION_H

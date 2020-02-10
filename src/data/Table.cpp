@@ -5,6 +5,7 @@
 #include "Table.h"
 
 #include <iostream>
+#include <src/utils.h>
 
 Table::Table(Specification spec, size_t nrow_initial, size_t n_segment, float nrow_growth_factor) :
         m_spec(spec.commit()),
@@ -130,4 +131,34 @@ void *Table::row_dataptr(const size_t &isegment, const size_t &isegmentrow) cons
 
 void *Table::row_dataptr(const size_t &irow) const {
     return row_dataptr(0, irow);
+}
+
+const Specification &Table::spec() const {
+    return m_spec;
+}
+
+const size_t Table::nsegment() const {
+    return m_nsegment;
+}
+
+bool Table::send_to(Table &recv) const {
+    MPIWrapper mpi;
+    assert(m_nsegment==mpi.nrank());
+    assert(recv.nsegment()==1);
+    assert(m_spec==recv.spec());
+
+    defs::inds sendcounts = highwatermark();
+    for (auto &i : sendcounts) i*=row_length();
+    defs::inds recvcounts(mpi.nrank(), 0ul);
+    mpi.all_to_all(sendcounts, recvcounts);
+    auto &senddispls = segment_dataword_offsets();
+    /*
+     * place the received data contiguously in the recv buffer:
+     */
+    defs::inds recvdispls(mpi.nrank(), 0ul);
+    for (auto i{1ul}; i<mpi.nrank(); ++i)
+        recvdispls[i] = recvdispls[i-1]+sendcounts[i-1];
+
+    return mpi.all_to_allv(baseptr(), sendcounts, senddispls,
+                    recv.baseptr(), recvcounts, recvdispls);
 }

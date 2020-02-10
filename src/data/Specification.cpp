@@ -64,3 +64,19 @@ Specification::bitfield_offsets(const std::vector<size_t> &lengths, const std::v
     }
     return out;
 }
+
+bool Specification::operator==(const Specification &rhs) const {
+    return m_numeric_lengths == rhs.m_numeric_lengths &&
+           m_numeric_datawords_used == rhs.m_numeric_datawords_used &&
+           m_numeric_offsets == rhs.m_numeric_offsets &&
+           m_bitfield_lengths == rhs.m_bitfield_lengths &&
+           m_bitfield_datawords_used == rhs.m_bitfield_datawords_used &&
+           m_bitfield_offsets == rhs.m_bitfield_offsets &&
+           m_total_numeric_datawords_used == rhs.m_total_numeric_datawords_used &&
+           m_total_bitfield_datawords_used == rhs.m_total_bitfield_datawords_used &&
+           m_total_datawords_used == rhs.m_total_datawords_used;
+}
+
+bool Specification::operator!=(const Specification &rhs) const {
+    return !(rhs == *this);
+}
