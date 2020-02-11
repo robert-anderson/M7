@@ -24,20 +24,9 @@ Matrix<defs::ham_t, true>(source.m_nci)
             while(ket_enum.next(ket_setinds, iket)){
                 ket.zero();
                 ket.set(ket_setinds);
-
-                /*
-                std::cout << std::endl;
-                std::cout << "==============" << std::endl;
-                std::cout << bra.to_string() << std::endl;
-                std::cout << ket.to_string() << std::endl;
-                std::cout << bra.nexcit(ket) << std::endl;
-                std::cout << bra.phase(ket) << std::endl;
-                std::cout << ket.phase(bra) << std::endl;
-                 */
-
-
-                //auto h_elem = source.get_element(bra, ket);
-                //if (!consts::float_is_zero(h_elem)) set(ibra, iket, h_elem);
+                auto h_elem = source.get_element(bra, ket);
+                if (!consts::float_is_zero(h_elem)) set(ibra, iket, h_elem);
+                else assert(consts::floats_nearly_equal(h_elem, get(ibra, iket)));
             }
         }
     }

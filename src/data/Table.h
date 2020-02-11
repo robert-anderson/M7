@@ -29,10 +29,27 @@ private:
     std::vector<defs::data_t> m_data{};
     defs::inds m_highwatermark;
     defs::inds m_segment_dataword_offsets;
+    /*
+     * if this Table is a thread's private staging space for later inclusion within
+     * a shared Table, provide a pointer to that table so the transfer of data rows
+     * can be handled when a segment of this table is about to overflow
+     */
+    Table *const m_shared_table;
+    /*
+     * When handling overflow events involving private staging Tables, we must ensure
+     * that the rest of the team of threads are locked out from:
+     *  1. a segment of the table when one thread is claiming transfer space
+     *  2. the whole shared table if it is subject to its own overflow, and is
+     *     undergoing expansion via the grow method
+     *  In the former case, locking the appropriate element of m_segment_mutex is sufficient.
+     *  In the latter, a lock must be acquired on every element of that array to prevent all
+     *  shared table-related operations until the reallocation is complete
+     */
     std::vector<omp_lock_t> m_segment_mutex;
 
 public:
-    Table(Specification spec, size_t nrow_initial, size_t n_segment = 1, float nrow_growth_factor = 2.0);
+    Table(Specification spec, size_t nrow_initial, size_t n_segment = 1,
+          float nrow_growth_factor = 2.0, Table *const shared_table = nullptr);
 
     ~Table();
 
@@ -74,7 +91,7 @@ public:
     }
 
     template<typename T>
-    T *claim_view(const size_t &isegment){
+    T *claim_view(const size_t &isegment) {
         auto irow = claim_rows(isegment);
         return view<T>(isegment, irow, 0ul);
     }
@@ -105,11 +122,38 @@ public:
         decode(v, 0, irow);
     }
 
+    size_t grab_rows(size_t isegment, size_t nrow = 1);
+
     size_t claim_rows(size_t isegment, size_t nrow = 1);
+
+    size_t request_rows(size_t isegment, size_t nrow = 1);
 
     size_t row_length() const;
 
 private:
+
+    void lock_acquire(const size_t isegment) {
+        omp_set_lock(&m_segment_mutex[isegment]);
+    }
+
+    void lock_acquire() {
+        /*
+         * lock the entire table. Note that this must be undertaken critically
+         */
+#pragma omp critical
+        for (auto isegment{0ul}; isegment < m_nsegment; ++isegment) lock_acquire(isegment);
+    }
+
+    void lock_release(const size_t isegment) {
+        omp_unset_lock(&m_segment_mutex[isegment]);
+    }
+
+    size_t handle_overflow(const size_t &isegment, size_t &row_claimed) {
+        /*
+         * either this is a shared table
+         */
+        //if
+    }
 
     template<typename T>
     void *dataptr(const size_t &isegment, const size_t &isegmentrow, const size_t &ientry) const {

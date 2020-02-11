@@ -40,7 +40,7 @@ public:
     const size_t m_nreal_given;
     const defs::inds m_shape;
 
-    TensorFileIterator(const std::string &filename, const size_t &nind, const bool &indsfirst):
+    TensorFileIterator(const std::string filename, const size_t nind, const bool indsfirst):
             FileIterator(filename, std::regex(data_regex_string(nind, indsfirst))),
             m_nind(nind), m_indsfirst(indsfirst), m_data_regex_string(data_regex_string(nind, indsfirst)),
             m_data_regex(std::regex(m_data_regex_string)), m_nreal_given(nreal_given(filename, m_data_regex)),
@@ -58,7 +58,7 @@ public:
     bool next(defs::inds &inds, T &value) {
         std::string line;
         FileIterator::next(line);
-        if (line.empty()) return 0;
+        if (line.empty()) return false;
         extract_line(line, m_nind, m_nreal_given, m_indsfirst, inds, value);
         return !line.empty();
     }

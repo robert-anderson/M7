@@ -37,72 +37,44 @@ defs::ham_t AbInitioHamiltonian::get_element_0(const Determinant &det) const {
     return element;
 }
 
-defs::ham_t AbInitioHamiltonian::get_element_1(const Determinant &bra,
+defs::ham_t AbInitioHamiltonian::get_element_1(const Determinant &ket,
         const size_t &removed, const size_t &inserted) const {
-    size_t nperm = 0ul;
-    const size_t &min = std::min(removed, inserted);
-    const size_t &max = std::max(removed, inserted);
-    DeterminantSetEnumerator common_inds(bra);
+    DeterminantSetEnumerator common_inds(ket);
     size_t common;
-    defs::ham_t element = m_int_1.get(removed, inserted);
+    defs::ham_t element = m_int_1.get(inserted, removed);
     while(common_inds.next(common)){
         if (common==removed) continue;
-        if (common>min && common<max) ++nperm;
-        element+=m_int_2.get_phys_antisym(common, removed, common, inserted);
+        element+=m_int_2.get_phys_antisym(inserted, common, removed, common);
     }
-    return element;//nperm%2 ? element : -element;
+    return element;
 }
 
 defs::ham_t AbInitioHamiltonian::get_element_1(const Determinant &bra, const Determinant &ket) const {
     size_t removed, inserted;
     {
-        DeterminantAndNotEnumerator enumerator(bra, ket);
+        DeterminantAndNotEnumerator enumerator(ket, bra);
         enumerator.next(removed);
     }
     {
-        DeterminantAndNotEnumerator enumerator(ket, bra);
+        DeterminantAndNotEnumerator enumerator(bra, ket);
         enumerator.next(inserted);
     }
-    return get_element_1(bra, removed, inserted);
-}
-
-defs::ham_t AbInitioHamiltonian::get_element_2(const Determinant &bra, const size_t &removed1,
-                                               const size_t &removed2, const size_t &inserted1,
-                                               const size_t &inserted2) const {
-    auto result = m_int_2.get_phys_antisym(removed1, removed2, inserted1, inserted2);
-    const size_t &min_inserted = std::min(inserted1, inserted2);
-    const size_t &max_inserted = std::max(inserted1, inserted2);
-    const size_t &min_removed = std::min(removed1, removed2);
-    const size_t &max_removed = std::max(removed1, removed2);
-    const size_t &min_min = std::min(min_inserted, min_removed);
-    const size_t &max_min = std::max(min_inserted, min_removed);
-    const size_t &min_max = std::min(max_inserted, max_removed);
-    const size_t &max_max = std::max(max_inserted, max_removed);
-    size_t nperm = 0ul;
-    DeterminantSetEnumerator enumerator(bra);
-    size_t common;
-    while (enumerator.next(common)){
-        if (common==min_removed || common==max_removed) continue;
-        if (min_min<common && common < max_min) ++nperm;
-        if (min_max<common && common < max_max) ++nperm;
-    }
-    //return nperm%2 ? result:-result;
-    return result;
+    return get_element_1(ket, removed, inserted);
 }
 
 defs::ham_t AbInitioHamiltonian::get_element_2(const Determinant &bra, const Determinant &ket) const {
     size_t removed1, removed2, inserted1, inserted2;
     {
-        DeterminantAndNotEnumerator enumerator(bra, ket);
+        DeterminantAndNotEnumerator enumerator(ket, bra);
         enumerator.next(removed1);
         enumerator.next(removed2);
     }
     {
-        DeterminantAndNotEnumerator enumerator(ket, bra);
+        DeterminantAndNotEnumerator enumerator(bra, ket);
         enumerator.next(inserted1);
         enumerator.next(inserted2);
     }
-    return get_element_2(bra, removed1, removed2, inserted1, inserted2);
+    return m_int_2.get_phys_antisym(inserted1, inserted2, removed1, removed2);
 }
 
 defs::ham_t AbInitioHamiltonian::get_element(const Determinant &bra, const Determinant &ket) const {

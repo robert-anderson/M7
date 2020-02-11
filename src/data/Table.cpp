@@ -7,18 +7,19 @@
 #include <iostream>
 #include <src/utils.h>
 
-Table::Table(Specification spec, size_t nrow_initial, size_t n_segment, float nrow_growth_factor) :
+Table::Table(Specification spec, size_t nrow_initial, size_t n_segment,
+        float nrow_growth_factor, Table* const shared_table) :
         m_spec(spec.commit()),
         m_row_length(m_spec.m_total_datawords_used),
         m_nsegment(n_segment),
         m_nrow_growth_factor(nrow_growth_factor),
         m_highwatermark(m_nsegment, 0ul),
         m_segment_dataword_offsets(m_nsegment, 0ul),
+        m_shared_table(shared_table),
         m_segment_mutex(m_nsegment) {
     for (auto &i: m_segment_mutex) omp_init_lock(&i);
     grow(nrow_initial);
 }
-
 
 Table::~Table() {
     for (auto &i: m_segment_mutex) omp_destroy_lock(&i);
@@ -116,12 +117,27 @@ BitfieldNew Table::bitfield_view(const size_t &irow, const size_t &ientry) const
     return bitfield_view(0, irow, ientry);
 }
 
+size_t Table::grab_rows(size_t isegment, size_t nrow){
+    /*
+     * advance the highwatermark of the segment without mutex
+     */
+    size_t first_row;
+    first_row = m_highwatermark[isegment];
+    auto new_hwm = m_highwatermark[isegment] + nrow;
+    if (new_hwm<m_nrow) m_highwatermark[isegment] = new_hwm;
+    else {
+
+    }
+}
+
 size_t Table::claim_rows(size_t isegment, size_t nrow) {
     size_t first_row;
-    omp_set_lock(&m_segment_mutex[isegment]);
+    lock_acquire(isegment);
     first_row = m_highwatermark[isegment];
-    m_highwatermark[isegment] += nrow;
-    omp_unset_lock(&m_segment_mutex[isegment]);
+    auto new_hwm = m_highwatermark[isegment] + nrow;
+    if (new_hwm<m_nrow) m_highwatermark[isegment] = new_hwm;
+    else {}//handle_segment_overflow(isegment, first_row);
+    lock_release(isegment);
     return first_row;
 }
 

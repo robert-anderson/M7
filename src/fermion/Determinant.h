@@ -26,7 +26,10 @@ public:
     void set(const size_t &i);
     void set(const defs::inds &inds);
     size_t nexcit(const Determinant &other) const;
+    bool partial_phase(const defs::inds &removed, const size_t &nremoved) const;
+    bool partial_phase(const Determinant &other) const;
     bool phase(const Determinant &other) const;
+    size_t nelec() const;
 };
 
 

@@ -45,6 +45,30 @@ void Determinant::set(const defs::inds &inds){
     for (auto ind: inds) set(ind);
 }
 
+bool Determinant::partial_phase(const defs::inds &removed, const size_t &nremoved) const{
+    size_t nperm = 0ul;
+    DeterminantSetEnumerator set_enumerator(*this);
+    size_t set;
+    for (auto removed : removed){
+        while (set_enumerator.next(set) && set < removed) nperm++;
+    }
+    return nperm&1ul;
+}
+
+bool Determinant::partial_phase(const Determinant &other) const{
+    size_t nperm = 0ul;
+    size_t nperm_tot = 0ul;
+    DeterminantSetEnumerator set_enumerator(*this);
+    DeterminantAndNotEnumerator nand_enumerator(*this, other);
+    size_t removed;
+    size_t set;
+    while(nand_enumerator.next(removed)){
+        while (set_enumerator.next(set) && set < removed) nperm++;
+        nperm_tot+=nperm;
+    }
+    return nperm_tot&1ul;
+}
+
 bool Determinant::phase(const Determinant &other) const {
 
     /*
@@ -60,22 +84,9 @@ bool Determinant::phase(const Determinant &other) const {
      * <bra| ||              a     ||             a   |ket> = +/- 1
      *          i=0           I_i     i=0          R_i
      */
-    DeterminantSetEnumerator set_enumerator(*this);
-    DeterminantXorEnumerator xor_enumerator(*this, other);
+    return partial_phase(other)^other.partial_phase(*this);
+}
 
-    bool counting_perms = false;
-    size_t nperms = 0ul;
-
-    size_t next_moved;
-    xor_enumerator.next(next_moved);
-
-    size_t iset;
-    while(set_enumerator.next(iset)){
-        if (iset>=next_moved){
-            xor_enumerator.next(next_moved);
-            counting_perms = !counting_perms;
-        }
-        else if (counting_perms) ++nperms;
-    }
-    return nperms%2;
+size_t Determinant::nelec() const {
+    return m_bitfields[0].nsetbits()+m_bitfields[1].nsetbits();
 }

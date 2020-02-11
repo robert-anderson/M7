@@ -1,10 +1,9 @@
 #include <iostream>
 #include <iomanip>
-#include "data/DataTable.h"
-#include "data/BitfieldNew.h"
-#include "parallel/MPIWrapper.h"
-#include "datasystems/DataSystem.h"
-#include "io/InputOptions.h"
+#include <src/data/BitfieldNew.h>
+#include <src/parallel/MPIWrapper.h>
+#include <src/datasystems/FciqmcCalculation.h>
+#include <src/io/InputOptions.h>
 #include "CLI/CLI.hpp"
 
 int main(int argc, char **argv) {
@@ -33,56 +32,8 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    std::array<size_t, nnumeric> numeric_lengths;
-    //std::vector<size_t> bitfield_lengths{12, 18};
-    numeric_lengths[type_number<int>] = 3;
-    //numeric_lengths[index<std::complex<float>>] = 2;
-    numeric_lengths[type_number<float>] = 2;
-
-    //DataTable dataTable(numeric_lengths, bitfield_lengths, 5, 2);
-    DataTable store(numeric_lengths, defs::inds{}, 5, 1);
-    DataTable send(numeric_lengths, defs::inds{}, 5, mpi.nrank());
-    DataTable recv(numeric_lengths, defs::inds{}, 5, 1);
-
-    DataSystem dataSystem(store, send, recv);
-
-    size_t irow;
-
-    if (mpi.i_am(0)) {
-        irow = send.claim_rows(0);
-        *send.view<int>(0, irow, 0) = 9000;
-        *send.view<int>(0, irow, 1) = 9001;
-        *send.view<int>(0, irow, 2) = 9002;
-
-        irow = send.claim_rows(1);
-        *send.view<int>(1, irow, 0) = 9010;
-        *send.view<int>(1, irow, 1) = 9011;
-        *send.view<int>(1, irow, 2) = 9012;
-
-        irow = send.claim_rows(1);
-        *send.view<int>(1, irow, 0) = 9013;
-        *send.view<int>(1, irow, 1) = 9014;
-        *send.view<int>(1, irow, 2) = 9015;
-    }
-
-    if (mpi.i_am(1)) {
-        irow = send.claim_rows(0);
-        *send.view<int>(0, irow, 0) = 9100;
-        *send.view<int>(0, irow, 1) = 9101;
-        *send.view<int>(0, irow, 2) = 9102;
-    }
-
-    for (auto i{0ul}; i<mpi.nrank(); ++i){
-        mpi.barrier();
-        if (mpi.i_am(i)) send.print();
-    }
-
-    dataSystem.communicate();
-
-    for (auto i{0ul}; i<mpi.nrank(); ++i){
-        mpi.barrier();
-        if (mpi.i_am(i)) recv.print();
-    }
+    FciqmcCalculation calc;
+    calc.execute();
 
     MPIWrapper::finalize();
 
