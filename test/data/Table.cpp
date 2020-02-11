@@ -31,17 +31,7 @@ TEST(Table, AllToAllV) {
             }
         }
     }
-    if (mpi.i_am_root())
-        send_table.print();
-
     ASSERT_TRUE(send_table.send_to(recv_table));
-
-    for (auto irank{0ul}; irank < mpi.nrank(); ++irank) {
-        if (mpi.i_am(irank)) {
-            recv_table.print();
-            mpi.barrier();
-        }
-    }
 
     /*
      * check that all entries came through as expected

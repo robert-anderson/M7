@@ -30,9 +30,6 @@ TEST(Determinant, Phase){
             if (!inds[i]) ket.set(i-8);
         }
         if (bra.nelec()!=ket.nelec()) continue;
-        utils::print(inds);
-        bra.print();
-        ket.print();
         ASSERT_EQ(bra.phase(ket), ket.phase(bra));
         ASSERT_EQ(bra.phase(ket), value<0);
     }

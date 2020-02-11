@@ -135,7 +135,7 @@ size_t Table::claim_rows(size_t isegment, size_t nrow) {
     lock_acquire(isegment);
     first_row = m_highwatermark[isegment];
     auto new_hwm = m_highwatermark[isegment] + nrow;
-    if (new_hwm<m_nrow) m_highwatermark[isegment] = new_hwm;
+    if (new_hwm<=m_nrow) m_highwatermark[isegment] = new_hwm;
     else {}//handle_segment_overflow(isegment, first_row);
     lock_release(isegment);
     return first_row;
