@@ -32,5 +32,6 @@ int main(int argc, char **argv) {
 #endif
     // Run tests, then clean up and exit. RUN_ALL_TESTS() returns 0 if all tests
     // pass and 1 if some test fails.
-    return RUN_ALL_TESTS();
+    int result = RUN_ALL_TESTS();
+    return 0;
 }
