@@ -6,6 +6,7 @@
 #define M7_UTILS_H
 
 #include <vector>
+#include <complex>
 #include <iostream>
 #include <cmath>
 #include <assert.h>
@@ -20,6 +21,22 @@ namespace utils {
         string+="]";
         return string;
     }
+    template<typename T>
+    std::string num_to_string(T &entry, size_t padding = 0) {
+        auto tmp_string = std::to_string(entry);
+        auto decimal_length = std::numeric_limits<T>::digits10;
+        tmp_string.insert(tmp_string.begin(), padding + decimal_length - tmp_string.size(), ' ');
+        return tmp_string;
+    }
+
+    template<typename T>
+    std::string num_to_string(std::complex<T> &entry, size_t padding = 0) {
+        auto tmp_string = std::to_string(entry.real()) +
+                          (entry.imag() < 0 ? "" : "+") + std::to_string(entry.imag()) + "i";
+        tmp_string.insert(tmp_string.begin(), padding, ' ');
+        return tmp_string;
+    }
+
 
     template <typename T>
     void print(T v){

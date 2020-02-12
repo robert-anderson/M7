@@ -11,7 +11,7 @@ TEST(Table, AllToAllV) {
     MPIWrapper mpi;
     Specification spec;
     const size_t nint = 4;
-    spec.create<size_t>(nint);
+    spec.add<size_t>(nint);
     const size_t nrow_send = 10;
     Table send_table(spec, nrow_send, mpi.nrank());
     Table recv_table(spec, nrow_send * mpi.nrank(), 1);

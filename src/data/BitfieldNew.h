@@ -34,7 +34,7 @@ public:
 
     void zero();
 
-    std::string to_string() const;
+    std::string to_string(size_t padding=0) const;
 
     void print() const;
 
@@ -47,22 +47,23 @@ public:
     static size_t ndataword(const size_t &nbit) {
         return nbit == 0 ? 0 : 1 + (nbit - 1) / (8 * sizeof(defs::data_t));
     }
-    template <typename T>
-    static inline void clr_bit(T &x, size_t i){
-        x &= ~((T)1ul << i);
+
+    template<typename T>
+    static inline void clr_bit(T &x, size_t i) {
+        x &= ~((T) 1ul << i);
     }
 
-    template <typename T>
-    static inline void set_bit(T &x, size_t i){
-        x |= ((T)1ul << i);
+    template<typename T>
+    static inline void set_bit(T &x, size_t i) {
+        x |= ((T) 1ul << i);
     }
 
-    template <typename T>
+    template<typename T>
     static inline bool get_bit(T &x, size_t i) {
         return (x >> i) & T(1ul);
     }
 
-    size_t hash(const size_t modular_divisor=~0ul) const;
+    size_t hash(const size_t modular_divisor = ~0ul) const;
 };
 
 #endif //M7_BITFIELDNEW_H

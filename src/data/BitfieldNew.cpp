@@ -48,11 +48,12 @@ void BitfieldNew::zero(){
     memset((void*)m_data, 0, m_ndataword*sizeof(defs::data_t));
 }
 
-std::string BitfieldNew::to_string() const {
+std::string BitfieldNew::to_string(size_t padding) const {
     std::string out{};
     for (auto i{0ul}; i < m_nbit; ++i) {
         out+=get(i)?"1":"0";
     }
+    out.insert(out.begin(), padding, ' ');
     return out;
 }
 

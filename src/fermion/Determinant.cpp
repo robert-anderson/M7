@@ -13,6 +13,9 @@ m_bitfields({BitfieldNew(nspatorb), BitfieldNew(nspatorb)}){}
 Determinant::Determinant(const size_t &nspatorb, defs::data_t* data1, defs::data_t* data2) :
 m_bitfields({BitfieldNew(nspatorb, data1), BitfieldNew(nspatorb, data2)}){}
 
+Determinant::Determinant(const BitfieldNew &data1, const BitfieldNew &data2):
+    m_bitfields({data1, data2}){}
+
 std::string Determinant::to_string() const {
     return m_bitfields[0].to_string()+" "+m_bitfields[1].to_string();
 }

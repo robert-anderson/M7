@@ -102,16 +102,16 @@ public:
     explicit Specification(const std::vector<size_t> &bitfield_lengths);
 
     template<typename T>
-    size_t create(size_t n) {
-        m_numeric_lengths[itype<T>] = n;
-        return m_numeric_lengths.size()-n;
+    size_t add(size_t n) {
+        m_numeric_lengths[itype<T>] += n;
+        return m_numeric_lengths[itype<T>]-n;
     }
 
     /*
      * fruitful method to be called at DataTable instantiation, whereupon the
      * Specification is copied to a const owned by the DataTable instance.
      * This allows the Specification of a datatable to be created by multiple
-     * calls to the "create" methods, rather than having to pass ready-formed length
+     * calls to the "add" methods, rather than having to pass ready-formed length
      * arrays to a DataTable constructor
      */
     Specification &commit();

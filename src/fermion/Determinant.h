@@ -19,6 +19,7 @@ public:
     std::array<BitfieldNew, 2> m_bitfields;
     Determinant(const size_t &nspatorb);
     Determinant(const size_t &nspatorb, defs::data_t* data1, defs::data_t* data2);
+    Determinant(const BitfieldNew &data1, const BitfieldNew &data2);
     std::string to_string() const;
     void print() const;
     void zero();
@@ -26,10 +27,11 @@ public:
     void set(const size_t &i);
     void set(const defs::inds &inds);
     size_t nexcit(const Determinant &other) const;
-    bool partial_phase(const defs::inds &removed, const size_t &nremoved) const;
-    bool partial_phase(const Determinant &other) const;
     bool phase(const Determinant &other) const;
     size_t nelec() const;
+private:
+    bool partial_phase(const defs::inds &removed, const size_t &nremoved) const;
+    bool partial_phase(const Determinant &other) const;
 };
 
 

@@ -14,19 +14,19 @@ Specification::Specification(const std::vector<size_t> &bitfield_lengths) :
         Specification({}, bitfield_lengths) {}
 
 template<>
-size_t Specification::create<BitfieldNew>(size_t nbit) {
-    m_bitfield_lengths.push_back(nbit);
+size_t Specification::add<BitfieldNew>(size_t n) {
+    m_bitfield_lengths.push_back(n);
     return m_bitfield_lengths.size()-1;
 }
 
 template<>
-size_t Specification::create<Determinant>(size_t nspatorb) {
+size_t Specification::add<Determinant>(size_t n) {
     /*
      * views on this det will be accessed using the bitfield number of the
      * alpha channel bitfield returned from this function
      */
-    create<BitfieldNew>(nspatorb); // alpha spin (or Kramers +) channel
-    create<BitfieldNew>(nspatorb); // beta spin (or Kramers -) channel
+    add<BitfieldNew>(n); // alpha spin (or Kramers +) channel
+    add<BitfieldNew>(n); // beta spin (or Kramers -) channel
     return m_bitfield_lengths.size()-2;
 }
 
