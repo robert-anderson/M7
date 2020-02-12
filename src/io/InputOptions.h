@@ -19,23 +19,7 @@ public:
     double nadd_initiator = 3.0;
     size_t ndet_semistoch = 0;
 
-    InputOptions(CLI::App &app):m_app(app){
-
-        add_option("-f,--fcidump-path", fcidump_path,
-                   "Path to the FCIDUMP file, this is read-only");
-
-        add_option("-i,--nwalker-initial", nwalker_initial,
-                   "Number of walkers with which the populations will be initialized");
-
-        add_option("-n,--nwalker-target", nwalker_target,
-                "Number of walkers at which the population will be stabilised after the growth phase", true);
-
-        add_option("-a,--nadd-initiator", nadd_initiator,
-                "Number of walkers defining the initiator threshold");
-
-        add_option("-s,--ndet-semistoch", ndet_semistoch,
-                   "Number of determinants selected to comprise the deterministic subspace");
-    }
+    InputOptions(CLI::App &app);
 
     template <typename T>
     void add_option(const std::string cli_options,

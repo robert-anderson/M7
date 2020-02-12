@@ -102,8 +102,9 @@ public:
     explicit Specification(const std::vector<size_t> &bitfield_lengths);
 
     template<typename T>
-    void create(size_t n) {
+    size_t create(size_t n) {
         m_numeric_lengths[itype<T>] = n;
+        return m_numeric_lengths.size()-n;
     }
 
     /*

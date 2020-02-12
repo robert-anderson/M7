@@ -1,5 +1,5 @@
   * process grid (1, 1) will be used
-    node-k98b-018                   
+    login03                         
 
   * using 24 threads per process
 
@@ -16,17 +16,17 @@
   Since a DF basis is specified, we compute 2- and 3-index integrals:
     o Being stored without compression. Storage requirement is 0.000 GB
        - 3-index ints prep                         0.00
-       - 3-index ints                              0.01
+       - 3-index ints                              0.03
        - 2-index ints                              0.00
        - computing inverse                         0.01
-        elapsed time:        0.03 sec.
+        elapsed time:        0.04 sec.
 
 
   Number of basis functions:        5
   Number of electrons      :        4
 
 
-    * METHOD: MOLECULE                             0.05
+    * METHOD: MOLECULE                             0.06
 
        - Overlap matrix                            0.00
        - Hcore matrix                              0.00
@@ -40,7 +40,7 @@
 
       * DIIS with orbital gradients will be used.
 
-       - SCF startup                               0.03
+       - SCF startup                               0.04
 
   === RHF iteration (/home/mmm0043/Programs/bagel_master/src/basis/sto-3g.json) ===
   
@@ -53,7 +53,7 @@
            (    0.000000,     0.000000,     0.000000) a.u.
 
 
-    * METHOD: HF                                   0.04
+    * METHOD: HF                                   0.05
 
   *** Geometry (Relativistic) ***
        - 3-index ints post                         0.00
@@ -65,9 +65,9 @@
 
   *** Dirac HF ***
 
-       - 1-electron integrals                      0.00
+       - 1-electron integrals                      0.01
        - Coulomb: half trans                       0.00
-       - Coulomb: metric multiply                  0.03
+       - Coulomb: metric multiply                  0.12
        - Coulomb: J operator                       0.00
        - Coulomb: K operator                       0.00
   === Nuclear Repulsion ===
@@ -76,42 +76,42 @@
 
       * DIIS with orbital gradients will be used.
 
-       - SCF startup                               0.04
+       - SCF startup                               0.13
 
   === Dirac RHF iteration (/home/mmm0043/Programs/bagel_master/src/basis/sto-3g.json, RKB) ===
   
        - Coulomb: half trans                       0.00
-       - Coulomb: metric multiply                  0.03
+       - Coulomb: metric multiply                  0.10
        - Coulomb: J operator                       0.00
        - Coulomb: K operator                       0.00
-               o Fock build                                  0.03
-      0        -14.35422050          0.00004213           0.03
+               o Fock build                                  0.11
+      0        -14.35422050          0.00004213           0.11
        - Coulomb: half trans                       0.00
-       - Coulomb: metric multiply                  0.03
+       - Coulomb: metric multiply                  0.10
        - Coulomb: J operator                       0.00
        - Coulomb: K operator                       0.00
-               o Fock build                                  0.03
-      1        -14.35422045          0.00000000           0.03
+               o Fock build                                  0.11
+      1        -14.35422045          0.00000000           0.11
                o DIIS                                        0.00
        - Coulomb: half trans                       0.00
-       - Coulomb: metric multiply                  0.03
+       - Coulomb: metric multiply                  0.10
        - Coulomb: J operator                       0.00
        - Coulomb: K operator                       0.00
-               o Fock build                                  0.03
-      2        -14.35422045          0.00000000           0.03
+               o Fock build                                  0.11
+      2        -14.35422045          0.00000000           0.11
   
     * SCF iteration converged.
 
     * Permanent dipole moment: Dirac Hartree-Fock
            (    0.000000,     0.000000,     0.000000) a.u.
 
-    * METHOD: DHF                                  0.15
+    * METHOD: DHF                                  0.48
 
   ------------------------------
   Spin-nonconserving complex FCI
   ------------------------------
 
-    * nstate   :      1
+    * nstate   :      5
     * nclosed  :      0
     * nact     :      5
     * nvirt    :      0
@@ -128,73 +128,309 @@
 
        - Geometry relativistic (total)             0.00
 
-    * Integral transformation done. Elapsed time: 0.01
+    * Integral transformation done. Elapsed time: 0.03
 
        - jop, kop                                  0.00
        - denom                                     0.00
      guess   0:   closed 11...                open .....               
+     guess   1:   closed 1....                open .1.1.               
+     guess   2:   closed 1....                open .1..1               
+
+     guess   3:   closed 1....                open .11..               
+
+     guess   4:   closed 1....                open .11..               
 
                  * guess generation                            0.00
   === Relativistic FCI iteration ===
 
-                 * sigma vector                                0.02
+                 * sigma vector                                0.55
                  * davidson                                    0.00
                  * error                                       0.00
                  * denominator                                 0.00
-      0   0        -14.35422045     1.11e-02      0.02
-                 * sigma vector                                0.02
+      0   0        -14.35422045     1.11e-02      0.55
+      0   1        -14.28855231     2.59e-03      0.00
+      0   2        -14.27989673     3.75e-03      0.00
+      0   3        -14.25173509     5.76e-03      0.00
+      0   4        -14.22088464     6.73e-03      0.00
+                 * sigma vector                                0.44
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      1   0        -14.40595303     7.83e-04      0.45
+      1   1        -14.28882438     3.01e-04      0.00
+      1   2        -14.28875108     1.21e-03      0.00
+      1   3        -14.28868488     1.69e-03      0.00
+      1   4        -14.28858935     2.22e-03      0.00
+                 * sigma vector                                0.52
                  * davidson                                    0.00
                  * error                                       0.00
                  * denominator                                 0.00
-      1   0        -14.40595303     7.83e-04      0.02
-                 * sigma vector                                0.02
+
+      2   0        -14.40597584     5.30e-05      0.52
+      2   1        -14.28883635     2.21e-05      0.00
+      2   2        -14.28882481     4.76e-05      0.00
+      2   3        -14.28880452     4.52e-05      0.00
+      2   4        -14.28880101     2.58e-05      0.00
+                 * sigma vector                                0.44
                  * davidson                                    0.00
                  * error                                       0.00
                  * denominator                                 0.00
-      2   0        -14.40597584     5.30e-05      0.02
-                 * sigma vector                                0.02
+
+      3   0        -14.40597603     4.56e-06      0.44
+      3   1        -14.28883637     5.18e-07      0.00
+      3   2        -14.28882489     1.18e-06      0.00
+      3   3        -14.28880459     1.30e-06      0.00
+      3   4        -14.28880103     5.98e-07      0.00
+                 * sigma vector                                0.50
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      4   0        -14.40597603     1.94e-07      0.51
+      4   1        -14.28883637     6.40e-06      0.00
+      4   2        -14.28882489     2.33e-08      0.00
+      4   3        -14.28880461     2.85e-05      0.00
+      4   4        -14.28880104     6.54e-06      0.00
+                 * sigma vector                                0.69
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      5   0        -14.40597603     1.24e-08      0.70
+      5   1        -14.28883690     4.36e-05      0.00
+      5   2        -14.28882489     2.47e-07      0.00
+      5   3        -14.28882374     1.74e-04      0.00
+      5   4        -14.28882292     2.23e-04      0.00
+                 * sigma vector                                1.05
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+      6   0        -14.40597603     5.15e-10      1.06
+      6   1        -14.28883698     2.09e-06      0.00
+      6   2        -14.28882489     8.49e-09      0.00
+      6   3        -14.28882489     9.24e-06      0.00
+      6   4        -14.28882489     5.88e-06      0.00
+                 * sigma vector                                1.70
                  * davidson                                    0.00
                  * error                                       0.00
                  * denominator                                 0.00
-      3   0        -14.40597603     4.56e-06      0.02
-                 * sigma vector                                0.02
+
+      7   0  *     -14.40597603     4.45e-11      1.70
+      7   1        -14.28883698     4.39e-08      0.00
+      7   2        -14.28882489     5.71e-08      0.00
+      7   3        -14.28882489     1.71e-07      0.00
+      7   4        -14.28882489     2.21e-07      0.00
+                 * sigma vector                                0.48
                  * davidson                                    0.00
                  * error                                       0.00
                  * denominator                                 0.00
-      4   0        -14.40597603     1.94e-07      0.02
-                 * sigma vector                                0.02
-                 * davidson                                    0.00
+
+      8   0  *     -14.40597603     4.45e-11      0.49
+      8   1        -14.28883698     4.08e-07      0.00
+      8   2        -14.28882489     4.85e-10      0.00
+      8   3        -14.28882489     4.05e-09      0.00
+      8   4        -14.28882489     5.59e-06      0.00
+                 * sigma vector                                0.57
+                 * davidson                                    0.01
                  * error                                       0.00
                  * denominator                                 0.00
-      5   0        -14.40597603     1.24e-08      0.02
-                 * sigma vector                                0.02
-                 * davidson                                    0.00
+
+      9   0  *     -14.40597603     4.45e-11      0.57
+      9   1        -14.28883698     2.43e-08      0.00
+      9   2        -14.28882489     7.43e-08      0.00
+      9   3        -14.28882489     1.90e-07      0.00
+      9   4        -14.28882489     3.90e-07      0.00
+                 * sigma vector                                0.49
+    - linear dependency detected:    1 /   52    min eigenvalue:     3.1620e-11    max eigenvalue:     3.1620e-11
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.02
                  * error                                       0.00
                  * denominator                                 0.00
-      6   0        -14.40597603     5.15e-10      0.02
-                 * sigma vector                                0.02
-                 * davidson                                    0.00
+
+     10   0  *     -14.40597603     4.45e-11      0.52
+     10   1        -14.28883698     5.94e-10      0.00
+     10   2        -14.28882489     1.06e-09      0.00
+     10   3        -14.28882489     1.66e-09      0.00
+     10   4        -14.28882489     1.03e-08      0.00
+                 * sigma vector                                0.33
+    - linear dependency detected:    1 /   56    min eigenvalue:     7.5391e-15    max eigenvalue:     7.5391e-15
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.01
                  * error                                       0.00
                  * denominator                                 0.00
-      7   0  *     -14.40597603     4.45e-11      0.02
+
+     11   0  *     -14.40597603     4.45e-11      0.34
+     11   1        -14.28883698     3.55e-10      0.00
+     11   2        -14.28882489     3.66e-09      0.00
+     11   3        -14.28882489     8.75e-09      0.00
+     11   4        -14.28882489     2.42e-09      0.00
+                 * sigma vector                                0.28
+    - linear dependency detected:    2 /   60    min eigenvalue:     6.4903e-17    max eigenvalue:     3.2854e-09
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.02
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     12   0        -14.40597603     1.93e-10      0.30
+     12   1        -14.28883698     7.23e-09      0.00
+     12   2        -14.28882489     1.42e-08      0.00
+     12   3        -14.28882489     1.16e-08      0.00
+     12   4        -14.28882489     9.46e-09      0.00
+                 * sigma vector                                0.52
+    - linear dependency detected:    4 /   65    min eigenvalue:     3.5573e-16    max eigenvalue:     8.4158e-09
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.04
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     13   0  *     -14.40597603     2.69e-11      0.56
+     13   1        -14.28883698     1.49e-09      0.00
+     13   2        -14.28882489     6.16e-09      0.00
+     13   3        -14.28882489     7.91e-10      0.00
+     13   4        -14.28882489     7.88e-10      0.00
+                 * sigma vector                                0.53
+    - linear dependency detected:    4 /   69    min eigenvalue:     2.5769e-16    max eigenvalue:     2.7577e-11
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.01
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     14   0  *     -14.40597603     4.26e-12      0.55
+     14   1        -14.28883698     2.39e-10      0.00
+     14   2        -14.28882489     9.27e-10      0.00
+     14   3        -14.28882489     1.66e-10      0.00
+     14   4  *     -14.28882489     8.76e-11      0.00
+                 * sigma vector                                0.41
+    - linear dependency detected:    4 /   72    min eigenvalue:    -2.4539e-16    max eigenvalue:     1.9274e-13
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.02
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     15   0  *     -14.40597603     2.72e-12      0.42
+     15   1  *     -14.28883698     2.72e-11      0.00
+     15   2        -14.28882489     1.03e-10      0.00
+     15   3  *     -14.28882489     4.34e-12      0.00
+     15   4  *     -14.28882489     5.99e-12      0.00
+                 * sigma vector                                0.10
+    - linear dependency detected:    4 /   73    min eigenvalue:    -8.3604e-17    max eigenvalue:     1.5202e-15
+    * Using canonical orthogonalization due to linear dependency
+
+                 * davidson                                    0.02
+                 * error                                       0.00
+                 * denominator                                 0.00
+
+     16   0  *     -14.40597603     2.72e-12      0.11
+     16   1  *     -14.28883698     3.00e-12      0.00
+     16   2  *     -14.28882489     1.12e-11      0.00
+     16   3  *     -14.28882489     1.04e-12      0.00
+     16   4  *     -14.28882489     9.94e-13      0.00
 
      * ci vector, state   0
 
-     * ci vector, state   0
+     * ci vector, state   1
 
-     * ci vector, state   0
-       22...  (0.9464410144,-0.0000000000)
-       2.2..  (-0.1085421111,-0.1515115369)
-       2..ba  (-0.0727519227,0.1591278468)
-       2..ab  (-0.1628454215,0.0639990826)
-       2..2.  (0.0479939423,0.0243985060)
-       2...2  (0.0217549678,0.0492486240)
+     * ci vector, state   2
 
-     * ci vector, state   0
+     * ci vector, state   3
+
+     * ci vector, state   4
 
      * ci vector, state   0
 
-    * METHOD: ZFCI                                 0.16
+     * ci vector, state   1
+       2bb..  (0.6680810304,-0.1281012492)
+
+     * ci vector, state   2
+       2b..b  (-0.1577581291,-0.0104376699)
+       2b.b.  (0.0923814700,0.1262921216)
+       2bb..  (-0.1492421828,-0.0235071471)
+
+     * ci vector, state   3
+       2bb..  (0.0136658642,-0.4613592511)
+       2b.b.  (0.2590800887,-0.0558977178)
+       2b..b  (0.0574377168,-0.1233897193)
+
+     * ci vector, state   4
+       2bb..  (0.2001204022,-0.2868296077)
+       2b.b.  (0.2460317778,-0.0460851705)
+       2b..b  (-0.0372354252,-0.0659596397)
+
+     * ci vector, state   0
+       22...  (-0.9464200821,-0.0062946021)
+       2.2..  (0.1075320354,0.1522300789)
+       2..ba  (0.0738086433,-0.1586404681)
+       2..ab  (0.1632674659,-0.0629146128)
+       2...2  (-0.0214269433,-0.0493922231)
+       2..2.  (-0.0478306110,-0.0247171651)
+
+     * ci vector, state   1
+       2ab..  (0.1921728823,0.0172999854)
+       2ba..  (0.0683948446,0.1804213161)
+
+     * ci vector, state   2
+       2ab..  (0.6643736246,0.0056823916)
+       2ba..  (0.1221384234,0.3967859073)
+       2b.a.  (0.2802458828,0.2111937392)
+       2a.b.  (-0.1483641173,-0.2190280048)
+       2a..b  (0.0712362303,-0.1648839620)
+       2b..a  (0.0475986337,0.1620314570)
+
+     * ci vector, state   3
+       2ba..  (0.1780906357,-0.3681366291)
+       2a..b  (-0.2210174082,-0.1426838933)
+       2ab..  (0.1150010769,0.1850225603)
+       2b..a  (0.1714930009,-0.0604904452)
+       2b.a.  (-0.0543527792,0.1734695617)
+       2a.b.  (0.1251298056,-0.0569394000)
+
+     * ci vector, state   4
+       2ba..  (-0.5123040255,0.1996138823)
+       2ab..  (-0.0596485649,-0.3865975418)
+       2a..b  (0.2531313827,0.1873879398)
+       2b.a.  (0.0281715076,-0.2164702357)
+       2b..a  (-0.1049432143,0.1294095965)
+       2a.b.  (0.0194760064,-0.0571459836)
+
+     * ci vector, state   0
+
+     * ci vector, state   1
+       2aa..  (0.0564772163,0.6779030292)
+
+     * ci vector, state   2
+       2aa..  (-0.0723284439,-0.1577448509)
+       2a.a.  (-0.1517535790,-0.0542853973)
+       2a..a  (-0.0618598756,-0.0056136266)
+
+     * ci vector, state   3
+       2aa..  (-0.4885546606,-0.0172593261)
+       2a..a  (0.2763188200,0.0841423576)
+       2a.a.  (0.0817313458,0.0108022833)
+
+     * ci vector, state   4
+       2aa..  (-0.2137932148,-0.2082748119)
+       2a..a  (0.2597170105,0.0763182727)
+       2a.a.  (-0.0970331058,-0.0623590226)
+
+     * ci vector, state   0
+
+     * ci vector, state   1
+
+     * ci vector, state   2
+
+     * ci vector, state   3
+
+     * ci vector, state   4
+
+    * METHOD: ZFCI                                 9.85
 
 
   

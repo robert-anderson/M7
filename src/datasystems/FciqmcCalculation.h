@@ -13,9 +13,8 @@ class FciqmcCalculation {
 public:
     FciqmcCalculation(){
 
+        omp_set_num_threads(4);
         auto r = omp_get_num_threads();
-
-
     }
 
     void execute();

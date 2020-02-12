@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-02-09.
 //
 
+#include <src/fermion/Determinant.h>
 #include "Specification.h"
 #include "BitfieldNew.h"
 
@@ -13,8 +14,20 @@ Specification::Specification(const std::vector<size_t> &bitfield_lengths) :
         Specification({}, bitfield_lengths) {}
 
 template<>
-void Specification::create<BitfieldNew>(size_t n) {
-    m_bitfield_lengths.push_back(n);
+size_t Specification::create<BitfieldNew>(size_t nbit) {
+    m_bitfield_lengths.push_back(nbit);
+    return m_bitfield_lengths.size()-1;
+}
+
+template<>
+size_t Specification::create<Determinant>(size_t nspatorb) {
+    /*
+     * views on this det will be accessed using the bitfield number of the
+     * alpha channel bitfield returned from this function
+     */
+    create<BitfieldNew>(nspatorb); // alpha spin (or Kramers +) channel
+    create<BitfieldNew>(nspatorb); // beta spin (or Kramers -) channel
+    return m_bitfield_lengths.size()-2;
 }
 
 Specification &Specification::commit() {

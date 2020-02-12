@@ -13,6 +13,7 @@ class StochasticWavefunction {
     Table send_buffer;
     Table recv_buffer;
 public:
+    //StochasticWavefunction();
 /*
     void propagate() {
 #pragma omp parallel {

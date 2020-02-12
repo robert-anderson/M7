@@ -8,15 +8,13 @@
 
 int main(int argc, char **argv) {
 
-    MPIWrapper::initialize(&argc, &argv);
-    MPIWrapper mpi;
-
+    mpi::initialize(&argc, &argv);
     /*
      * Setup and read-in runtime options from the command line
      */
     CLI::App cli_app{InputOptions::description};
     InputOptions input(cli_app);
-    if(!mpi.i_am_root()){
+    if(!mpi::i_am_root()){
         /*
          * only allow standard output and error from the root MPI rank
          */
@@ -27,7 +25,7 @@ int main(int argc, char **argv) {
         cli_app.parse((argc), (argv));                                                                                   \
 
     } catch (const CLI::ParseError &e) {
-        MPIWrapper::finalize();
+        mpi::finalize();
         cli_app.exit(e);
         return 0;
     }
@@ -35,7 +33,7 @@ int main(int argc, char **argv) {
     FciqmcCalculation calc;
     calc.execute();
 
-    MPIWrapper::finalize();
+    mpi::finalize();
 
     return 0;
 

@@ -5,11 +5,11 @@
 #ifndef M7_TABLE_H
 #define M7_TABLE_H
 
-#include <src/defs.h>
+#include "src/defs.h"
 #include <omp.h>
 #include <cstring>
 #include <assert.h>
-#include <src/parallel/MPIWrapper.h>
+#include "src/parallel/MPIWrapper.h"
 #include "Specification.h"
 #include "BitfieldNew.h"
 
