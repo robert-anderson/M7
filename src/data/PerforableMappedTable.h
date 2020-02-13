@@ -7,7 +7,8 @@
 
 #include <src/data/MappedTable.h>
 
-class PerforableMappedTable : public MappedTable {
+template<typename T>
+class PerforableMappedTable : public MappedTable<T> {
 
 };
 

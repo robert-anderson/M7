@@ -5,5 +5,5 @@
 #include "src/datasystems/StochasticWavefunction.h"
 
 TEST(StochasticWavefunction, test){
-    StochasticWavefunction swf;
+    //StochasticWavefunction swf;
 }

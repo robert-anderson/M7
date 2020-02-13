@@ -33,6 +33,10 @@ public:
         }
         return out;
     }
+
+    bool is_zero(){
+        return this==0;
+    }
 };
 
 

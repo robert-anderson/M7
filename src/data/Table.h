@@ -14,45 +14,44 @@
 #include "BitfieldNew.h"
 #include "NumericView.h"
 #include "src/fermion/Determinant.h"
+#include "MutexVector.h"
 
 class Table {
     const Specification m_spec;
     const size_t &m_row_length;
+protected:
     const size_t m_nsegment;
-public:
-    const Specification &spec() const;
-
-    const size_t nsegment() const;
-
-private:
     float m_nrow_growth_factor;
     size_t m_nrow{0ul};
     std::vector<defs::data_t> m_data{};
     defs::inds m_highwatermark;
     defs::inds m_segment_dataword_offsets;
-    /*
-     * if this Table is a thread's private staging space for later inclusion within
-     * a shared Table, provide a pointer to that table so the transfer of data rows
-     * can be handled when a segment of this table is about to overflow
-     */
-    Table *const m_shared_table;
-    /*
-     * When handling overflow events involving private staging Tables, we must ensure
-     * that the rest of the team of threads are locked out from:
-     *  1. a segment of the table when one thread is claiming transfer space
-     *  2. the whole shared table if it is subject to its own overflow, and is
-     *     undergoing expansion via the grow method
-     *  In the former case, locking the appropriate element of m_segment_mutex is sufficient.
-     *  In the latter, a lock must be acquired on every element of that array to prevent all
-     *  shared table-related operations until the reallocation is complete
-     */
-    std::vector<omp_lock_t> m_segment_mutex;
+
+    const size_t m_nrow_mutex_blocks;
+    const bool m_segmentsafe;
+    const bool m_rowsafe;
+    MutexVector m_segment_mutex;
+    MutexVector m_row_mutex;
+
+    Table* m_shared = nullptr;
 
 public:
-    Table(Specification spec, size_t nrow_initial, size_t n_segment = 1,
-          float nrow_growth_factor = 2.0, Table *const shared_table = nullptr);
 
-    ~Table();
+    const Specification &spec() const;
+
+    const size_t nsegment() const;
+
+    const size_t nrow() const;
+
+    const size_t nrow_growth_factor() const;
+
+    Table(Specification spec, size_t nrow_initial, size_t m_nsegment = 1,
+          float nrow_growth_factor = 2.0, size_t nrow_mutex_blocks=0);
+
+    Table(Table *shared, size_t nrow_initial, size_t nrow_mutex_blocks=0);
+    Table(Table &shared, size_t nrow_initial, size_t nrow_mutex_blocks=0);
+
+    virtual ~Table();
 
     size_t get_irow(size_t isegment, size_t isegmentrow, size_t nrow = 0) const;
 
@@ -63,6 +62,8 @@ public:
     void move_segment(size_t isegment, size_t nrow_old, size_t nrow_new);
 
     void grow(size_t nrow_initial = 0);
+
+    void zero(size_t isegment=~0ul, size_t irow=~0ul);
 
     template<typename T>
     using view_t = typename std::conditional<
@@ -89,56 +90,26 @@ public:
         return view<T>(0, irow);
     }
 
-    size_t grab_rows(size_t isegment, size_t nrow = 1);
+    const defs::inds& highwatermark() const;
 
-    size_t claim_rows(size_t isegment, size_t nrow = 1);
+    void transfer(const size_t &isegment, const size_t n);
 
-    size_t request_rows(size_t isegment, size_t nrow = 1);
+    virtual size_t push(const size_t &isegment, const size_t &nrow);
+
+    virtual size_t safe_push(const size_t &isegment, const size_t &nrow);
 
     size_t row_length() const;
-
-private:
-
-    void lock_acquire(const size_t isegment) {
-        omp_set_lock(&m_segment_mutex[isegment]);
-    }
-
-    void lock_acquire() {
-        /*
-         * lock the entire table. Note that this must be undertaken critically
-         */
-#pragma omp critical
-        for (auto isegment{0ul}; isegment < m_nsegment; ++isegment) lock_acquire(isegment);
-    }
-
-    void lock_release(const size_t isegment) {
-        omp_unset_lock(&m_segment_mutex[isegment]);
-    }
-
-    size_t handle_overflow(const size_t &isegment, size_t &row_claimed) {
-        /*
-         * either this is a shared table
-         */
-        //if
-    }
 
     void *row_dataptr(const size_t &isegment, const size_t &isegmentrow) const;
 
     void *row_dataptr(const size_t &irow) const;
 
-public:
     /*
      * these methods must be exposed for the purpose of MPI communication
      */
-    defs::data_t *baseptr() {
-        return m_data.data();
-    }
+    defs::data_t *baseptr();
 
-    const defs::data_t *baseptr() const {
-        return m_data.data();
-    }
-
-    const std::vector<size_t> &highwatermark() const;
+    const defs::data_t *baseptr() const;
 
     const size_t total_datawords_used() const;
 
@@ -146,7 +117,6 @@ public:
 
     bool send_to(Table &recv) const;
 
-public:
     void print() const;
 
 };

@@ -6,7 +6,17 @@
 #include <src/io/InputOptions.h>
 #include "CLI/CLI.hpp"
 
+
+
+#include <src/data/MutexVector.h>
+
 int main(int argc, char **argv) {
+
+
+    MutexVector mutexVector(std::vector<int>{4,5,6,7,8});
+    std::cout << mutexVector.get(0);
+
+    return 0;
 
     mpi::initialize(&argc, &argv);
     /*

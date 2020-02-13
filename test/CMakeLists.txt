@@ -1,9 +1,5 @@
 project(tests)
 
-#add_subdirectory(
-#    ${CMAKE_SOURCE_DIR}/external/gtest-mpi-listener
-#    ${CMAKE_BINARY_DIR}/external/gtest-mpi-listener
-#    )
 add_subdirectory(
         ${CMAKE_SOURCE_DIR}/external/googletest
         ${CMAKE_BINARY_DIR}/external/googletest

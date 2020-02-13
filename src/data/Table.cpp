@@ -7,23 +7,29 @@
 #include <iostream>
 #include <src/utils.h>
 
-Table::Table(Specification spec, size_t nrow_initial, size_t n_segment,
-             float nrow_growth_factor, Table *const shared_table) :
+Table::Table(Specification spec, size_t nrow_initial, size_t m_nsegment,
+             float nrow_growth_factor, size_t nrow_mutex_blocks) :
         m_spec(spec.commit()),
         m_row_length(m_spec.m_total_datawords_used),
-        m_nsegment(n_segment),
+        m_nsegment(m_nsegment),
         m_nrow_growth_factor(nrow_growth_factor),
         m_highwatermark(m_nsegment, 0ul),
         m_segment_dataword_offsets(m_nsegment, 0ul),
-        m_shared_table(shared_table),
-        m_segment_mutex(m_nsegment) {
-    for (auto &i: m_segment_mutex) omp_init_lock(&i);
+        m_nrow_mutex_blocks(nrow_mutex_blocks),
+        m_segmentsafe(nrow_mutex_blocks <= m_nsegment),
+        m_rowsafe(nrow_mutex_blocks > 0),
+        m_segment_mutex(m_segmentsafe ? m_nsegment : 0),
+        m_row_mutex(0) {
     grow(nrow_initial);
 }
 
-Table::~Table() {
-    for (auto &i: m_segment_mutex) omp_destroy_lock(&i);
+Table::Table(Table *shared, size_t nrow_initial, size_t nrow_mutex_blocks):
+Table(shared->spec(), nrow_initial, shared->nsegment(), shared->nrow_growth_factor(), nrow_mutex_blocks){
+    m_shared = shared;
 }
+
+Table::Table(Table &shared, size_t nrow_initial, size_t nrow_mutex_blocks):
+Table(&shared, nrow_initial, nrow_mutex_blocks){}
 
 void Table::print() const {
     const auto padding{4ul};
@@ -56,10 +62,6 @@ void Table::print() const {
             std::cout << std::endl;
         }
     }
-}
-
-const std::vector<size_t> &Table::highwatermark() const {
-    return m_highwatermark;
 }
 
 const std::vector<size_t> &Table::segment_dataword_offsets() const {
@@ -96,6 +98,7 @@ void Table::grow(size_t nrow_initial) {
     if (nrow_initial) nrow = nrow_initial;
     else nrow = (size_t) (m_nrow * m_nrow_growth_factor);
     m_data.resize(nrow * m_nsegment * m_row_length, 0);
+    if (m_rowsafe) m_row_mutex.grow(nrow - m_nrow);
     /*
     * move all segments if they number more than one, starting with the one
     * nearest the end of the buffer
@@ -137,37 +140,8 @@ Determinant Table::view<Determinant>(const size_t &irow, const size_t &ientry) c
     return view<Determinant>(0, irow, ientry);
 }
 
-
-size_t Table::grab_rows(size_t isegment, size_t nrow) {
-    /*
-     * advance the highwatermark of the segment without mutex
-     */
-    size_t first_row;
-    first_row = m_highwatermark[isegment];
-    auto new_hwm = m_highwatermark[isegment] + nrow;
-    if (new_hwm < m_nrow) m_highwatermark[isegment] = new_hwm;
-    else {
-
-    }
-}
-
-size_t Table::claim_rows(size_t isegment, size_t nrow) {
-    size_t first_row;
-    lock_acquire(isegment);
-    first_row = m_highwatermark[isegment];
-    auto new_hwm = m_highwatermark[isegment] + nrow;
-    if (new_hwm <= m_nrow) m_highwatermark[isegment] = new_hwm;
-    else {}//handle_segment_overflow(isegment, first_row);
-    lock_release(isegment);
-    return first_row;
-}
-
 void *Table::row_dataptr(const size_t &isegment, const size_t &isegmentrow) const {
     return (char *) (m_data.data() + get_idataword_begin_row(isegment, isegmentrow));
-}
-
-void *Table::row_dataptr(const size_t &irow) const {
-    return row_dataptr(0, irow);
 }
 
 const Specification &Table::spec() const {
@@ -197,4 +171,71 @@ bool Table::send_to(Table &recv) const {
 
     return mpi::all_to_allv(baseptr(), sendcounts, senddispls,
                             recv.baseptr(), recvcounts, recvdispls);
+}
+
+const defs::inds &Table::highwatermark() const {
+    return m_highwatermark;
+}
+
+const size_t Table::nrow() const {
+    return m_nrow;
+}
+
+const size_t Table::nrow_growth_factor() const {
+    return m_nrow_growth_factor;
+}
+
+void Table::transfer(const size_t &isegment, const size_t n) {
+    assert(m_shared!= nullptr);
+    size_t irow = m_shared->safe_push(isegment, n);
+    memcpy(m_shared->row_dataptr(isegment, irow),
+           row_dataptr(isegment, 0),
+           n * row_length() * sizeof(defs::data_t));
+    m_highwatermark[isegment] = 0;
+    // clearing out is not necessary, remove the following after testing
+    zero(isegment);
+}
+
+size_t Table::push(const size_t &isegment, const size_t &nrow) {
+    size_t tmp = m_highwatermark[isegment];
+    if (tmp+nrow>m_nrow){
+        if (m_shared!= nullptr) transfer(isegment, tmp);
+        else throw std::runtime_error("Out of memory to push into Table segment.");
+        tmp = 0;
+    }
+    m_highwatermark[isegment] += nrow;
+    return tmp;
+}
+
+size_t Table::safe_push(const size_t &isegment, const size_t &nrow) {
+    m_segment_mutex.acquire_lock(isegment);
+    auto tmp = push(isegment, nrow);
+    m_segment_mutex.release_lock(isegment);
+    return tmp;
+}
+
+void Table::zero(size_t isegment, size_t irow) {
+    if (isegment!=~0ul){
+        if (irow!=~0ul) memset(row_dataptr(isegment, irow), 0, row_length()* sizeof(defs::data_t));
+        else memset(row_dataptr(isegment, 0), 0, row_length()*m_nrow* sizeof(defs::data_t));
+    }
+    else{
+        memset(baseptr(), 0, row_length()*m_nrow*m_nsegment*sizeof(defs::data_t));
+    }
+}
+
+const defs::data_t *Table::baseptr() const {
+    return m_data.data();
+}
+
+defs::data_t *Table::baseptr() {
+    return m_data.data();
+}
+
+Table::~Table() {
+    if (m_shared){
+        for (size_t isegment=0ul; isegment<m_nsegment; ++isegment){
+            transfer(isegment, m_highwatermark[isegment]);
+        }
+    }
 }

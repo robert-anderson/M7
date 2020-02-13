@@ -9,7 +9,7 @@
 #include "src/data/PerforableMappedTable.h"
 
 class StochasticWavefunction {
-    PerforableMappedTable store;
+    //PerforableMappedTable<Determinant> store;
     Table send_buffer;
     Table recv_buffer;
 public:
