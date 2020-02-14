@@ -40,13 +40,18 @@ public:
     bool has_subsequent(){
         return m_subsequent!= nullptr;
     }
+
+    virtual result_T default_result(){
+        return result_T{};
+    }
+
     std::vector<result_T> enumerate() {
-        std::vector<size_t> result{};
-        size_t item;
-        while (next(item)) {
-            result.push_back(item);
+        std::vector<result_T> results{};
+        auto result = default_result();
+        while (next(result)) {
+            results.push_back(result);
         }
-        return result;
+        return results;
     }
     size_t count(){
         size_t n = 0ul;

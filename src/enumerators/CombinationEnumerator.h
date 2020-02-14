@@ -18,6 +18,9 @@ class CombinationEnumerator : public Enumerator<defs::inds> {
 public:
     explicit CombinationEnumerator(size_t n, size_t r, Enumerator *subsequent = nullptr);
     inline bool next_element(defs::inds &result) override;
+    defs::inds default_result() override {
+        return defs::inds(m_r);
+    }
 };
 
 #endif //M7_COMBINATIONENUMERATOR_H

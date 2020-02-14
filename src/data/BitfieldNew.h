@@ -5,7 +5,8 @@
 #ifndef M7_BITFIELDNEW_H
 #define M7_BITFIELDNEW_H
 
-#include "../defs.h"
+#include "src/defs.h"
+#include <cstring>
 
 class BitfieldNew {
     /*
@@ -34,7 +35,7 @@ public:
 
     void zero();
 
-    std::string to_string(size_t padding=0) const;
+    std::string to_string(size_t padding = 0) const;
 
     void print() const;
 
@@ -64,6 +65,35 @@ public:
     }
 
     size_t hash(const size_t modular_divisor = ~0ul) const;
+
+    inline int compare(const BitfieldNew &rhs) const {
+        return memcmp((void *) (this->m_data), (void *) (rhs.m_data), m_ndataword * sizeof(defs::data_t));
+    }
+
+    BitfieldNew &operator=(const BitfieldNew &rhs) {
+        memcpy((void *) (this->m_data), (void *) (rhs.m_data), m_ndataword * sizeof(defs::data_t));
+        return *this;
+    }
+
+    bool operator==(const BitfieldNew &rhs) const {
+        return compare(rhs) == 0;
+    }
+
+    bool operator>(const BitfieldNew &rhs) const {
+        return compare(rhs) > 0;
+    }
+
+    bool operator<(const BitfieldNew &rhs) const {
+        return compare(rhs) < 0;
+    }
+
+    bool operator>=(const BitfieldNew &rhs) const {
+        return !(compare(rhs) < 0);
+    }
+
+    bool operator<=(const BitfieldNew &rhs) const {
+        return !(compare(rhs) > 0);
+    }
 };
 
 #endif //M7_BITFIELDNEW_H

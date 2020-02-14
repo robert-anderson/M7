@@ -45,6 +45,7 @@ void Determinant::set(const size_t &i){
 }
 
 void Determinant::set(const defs::inds &inds){
+    zero();
     for (auto ind: inds) set(ind);
 }
 
@@ -92,4 +93,24 @@ bool Determinant::phase(const Determinant &other) const {
 
 size_t Determinant::nelec() const {
     return m_bitfields[0].nsetbits()+m_bitfields[1].nsetbits();
+}
+
+size_t Determinant::nspatorb() const {
+    return m_bitfields[0].m_nbit;
+}
+
+bool Determinant::operator==(const Determinant &rhs) const {
+    return compare(rhs)==0;
+}
+
+int Determinant::compare(const Determinant &rhs) const {
+    auto t0 = m_bitfields[0].compare(rhs.m_bitfields[0]);
+    auto t1 = m_bitfields[1].compare(rhs.m_bitfields[1]);
+    return t0?t0:t1;
+}
+
+Determinant &Determinant::operator=(const Determinant &rhs) {
+    m_bitfields[0] = rhs.m_bitfields[0];
+    m_bitfields[1] = rhs.m_bitfields[1];
+    return *this;
 }

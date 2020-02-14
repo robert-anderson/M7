@@ -20,6 +20,9 @@ public:
     Determinant(const size_t &nspatorb);
     Determinant(const size_t &nspatorb, defs::data_t* data1, defs::data_t* data2);
     Determinant(const BitfieldNew &data1, const BitfieldNew &data2);
+    Determinant (const Determinant &det):Determinant(det.nspatorb()){
+        *this = det;
+    };
     std::string to_string() const;
     void print() const;
     void zero();
@@ -29,7 +32,12 @@ public:
     size_t nexcit(const Determinant &other) const;
     bool phase(const Determinant &other) const;
     size_t nelec() const;
-private:
+    size_t nspatorb() const;
+    inline int compare(const Determinant &rhs) const;
+
+    Determinant& operator=(const Determinant &rhs);
+    bool operator==(const Determinant& rhs) const;
+    //inline bool operator>(const BitfieldNew& rhs);
     bool partial_phase(const defs::inds &removed, const size_t &nremoved) const;
     bool partial_phase(const Determinant &other) const;
 };
