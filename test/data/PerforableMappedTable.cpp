@@ -35,8 +35,32 @@ TEST(PerforableMappedTable, DataIntegrity) {
     ASSERT_EQ(irow, 151);
     ASSERT_THROW(table.lookup_view<Determinant>(det), KeyException);
 
-    ASSERT_TRUE(table.lookup_view<Determinant>(det).is_zero());
     det.set(defs::inds{0, 1, 2, 3, 4});
     irow = table.push(0, det);
     ASSERT_EQ(irow, 151);
+}
+
+
+TEST(PerforableMappedTable, ThreadSafety) {
+    const size_t nspatorb = 6;
+    const size_t nelec = 4;
+
+    Specification specification;
+    specification.add<Determinant>(nspatorb);
+    specification.add<size_t>(1);
+    const size_t nrow = integer_utils::combinatorial(2*nspatorb, nelec);
+    PerforableMappedTable<Determinant> table(specification, nrow);
+
+    Determinant det(nspatorb);
+    auto all_combs = CombinationEnumerator(nspatorb*2, nelec).enumerate();
+#pragma omp parallel for
+    for (size_t icomb = 0ul; icomb<nrow; ++icomb){
+        det.set(all_combs[icomb]);
+        auto irow = table.safe_push(0, det);
+        *table.view<size_t>(irow) = icomb;
+    }
+    ASSERT_TRUE(table.highwatermark()[0]==nrow);
+
+    det.set(defs::inds{7, 8, 9, 10, 11});
+    ASSERT_EQ(table.lookup(det, 0), ~0ul);
 }
