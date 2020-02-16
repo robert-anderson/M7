@@ -13,8 +13,9 @@ class Wavefunction {
     Table send_buffer;
     Table recv_buffer;
 public:
+
     /*
-    Wavefunction(size_t ){
+    Wavefunction(const Determinant& reference){
 
     }*/
 /*

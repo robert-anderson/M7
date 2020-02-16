@@ -10,13 +10,12 @@
 #include "BitfieldHasher.h"
 #include "DeterminantHasher.h"
 
-class KeyException: public std::exception
-{
-    virtual const char* what() const throw()
-    {
+class KeyException : public std::exception {
+    virtual const char *what() const throw() {
         return "Trying to access a view on a row indexed by a key which was not found in the hashmap";
     }
 };
+
 static const KeyException key_exception;
 
 template<typename T>
@@ -64,7 +63,7 @@ public:
 
     virtual size_t push(const size_t &isegment, const T &key) {
         auto irow = lookup(key, isegment);
-        if (irow==~0ul){
+        if (irow == ~0ul) {
             // the key was not found in the hash map, so push a new row
             irow = Table::push(isegment, 1);
             insert(key, isegment, irow);
@@ -85,9 +84,9 @@ public:
     }
 
     template<typename data_T>
-    view_t <data_T> lookup_view(const size_t &isegment, const T &key, const size_t &ientry) const{
+    view_t <data_T> lookup_view(const size_t &isegment, const T &key, const size_t &ientry) const {
         auto irow = lookup(key, isegment);
-        if (irow==~0ul) throw KeyException();
+        if (irow == ~0ul) throw KeyException();
         return Table::view<data_T>(isegment, irow, ientry);
     }
 
@@ -116,6 +115,7 @@ public:
     view_t <data_T> push_view(const T &key) {
         return push_view(0, key, 0);
     }
+
     template<typename data_T>
     view_t <data_T> safe_push_view(const size_t &isegment, const T &key, const size_t &ientry) {
         auto irow = safe_push(isegment, key);

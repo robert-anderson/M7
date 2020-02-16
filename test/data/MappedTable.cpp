@@ -36,6 +36,7 @@ TEST(MappedTable, DataIntegrity) {
     ASSERT_EQ(table.lookup(det, 0), ~0ul);
 }
 
+
 TEST(MappedTable, ThreadSafety) {
     const size_t nspatorb = 6;
     const size_t nelec = 4;
@@ -43,18 +44,23 @@ TEST(MappedTable, ThreadSafety) {
     Specification specification;
     specification.add<Determinant>(nspatorb);
     specification.add<size_t>(1);
-    const size_t nrow = integer_utils::combinatorial(2*nspatorb, nelec);
+    const size_t nrow = integer_utils::combinatorial(2 * nspatorb, nelec);
     MappedTable<Determinant> table(specification, nrow);
 
-    Determinant det(nspatorb);
-    auto all_combs = CombinationEnumerator(nspatorb*2, nelec).enumerate();
-#pragma omp parallel for
-    for (size_t icomb = 0ul; icomb<nrow; ++icomb){
-        det.set(all_combs[icomb]);
-        auto irow = table.safe_push(0, det);
-        *table.view<size_t>(irow) = icomb;
+    auto all_combs = CombinationEnumerator(nspatorb * 2, nelec).enumerate();
+#pragma omp parallel
+    {
+        Determinant det(nspatorb);
+#pragma omp for
+        for (size_t icomb = 0ul; icomb < nrow; ++icomb) {
+            det.set(all_combs[icomb]);
+            auto irow = table.safe_push(0, det);
+            *table.view<size_t>(irow) = icomb;
+        }
     }
-    ASSERT_TRUE(table.highwatermark()[0]==nrow);
+
+    Determinant det(nspatorb);
+    ASSERT_EQ(table.highwatermark()[0], nrow);
 
     det.set(defs::inds{7, 8, 9, 10, 11});
     ASSERT_EQ(table.lookup(det, 0), ~0ul);

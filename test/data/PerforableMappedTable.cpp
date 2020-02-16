@@ -16,14 +16,14 @@ TEST(PerforableMappedTable, DataIntegrity) {
     Specification specification;
     specification.add<Determinant>(nspatorb);
     specification.add<size_t>(1);
-    const size_t nrow = integer_utils::combinatorial(2*nspatorb, nelec);
+    const size_t nrow = integer_utils::combinatorial(2 * nspatorb, nelec);
     PerforableMappedTable<Determinant> table(specification, nrow);
 
     Determinant det(nspatorb);
-    CombinationEnumerator enumerator(nspatorb*2, nelec);
+    CombinationEnumerator enumerator(nspatorb * 2, nelec);
     defs::inds inds(nelec);
     size_t count{~0ul};
-    while(enumerator.next(inds, count)){
+    while (enumerator.next(inds, count)) {
         det.set(inds);
         auto irow = table.push(0, det);
         *table.view<size_t>(irow) = count;
@@ -48,17 +48,22 @@ TEST(PerforableMappedTable, ThreadSafety) {
     Specification specification;
     specification.add<Determinant>(nspatorb);
     specification.add<size_t>(1);
-    const size_t nrow = integer_utils::combinatorial(2*nspatorb, nelec);
+    const size_t nrow = integer_utils::combinatorial(2 * nspatorb, nelec);
     PerforableMappedTable<Determinant> table(specification, nrow);
 
-    Determinant det(nspatorb);
-    auto all_combs = CombinationEnumerator(nspatorb*2, nelec).enumerate();
-#pragma omp parallel for
-    for (size_t icomb = 0ul; icomb<nrow; ++icomb){
-        det.set(all_combs[icomb]);
-        auto irow = table.safe_push(0, det);
-        *table.view<size_t>(irow) = icomb;
+    auto all_combs = CombinationEnumerator(nspatorb * 2, nelec).enumerate();
+#pragma omp parallel
+    {
+        Determinant det(nspatorb);
+#pragma omp for
+        for (size_t icomb = 0ul; icomb < nrow; ++icomb) {
+            det.set(all_combs[icomb]);
+            auto irow = table.safe_push(0, det);
+            *table.view<size_t>(irow) = icomb;
+        }
     }
+
+    Determinant det(nspatorb);
     ASSERT_EQ(table.highwatermark()[0], nrow);
 
     det.set(defs::inds{7, 8, 9, 10, 11});
