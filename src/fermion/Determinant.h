@@ -26,6 +26,7 @@ public:
     std::string to_string() const;
     void print() const;
     void zero();
+    bool is_zero() const;
     void set(const size_t &ispat, const size_t &ispin);
     void set(const size_t &i);
     void set(const defs::inds &inds);

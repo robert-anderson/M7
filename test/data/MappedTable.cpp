@@ -56,14 +56,6 @@ TEST(MappedTable, ThreadSafety) {
     }
     ASSERT_TRUE(table.highwatermark()[0]==nrow);
 
-    det.set(defs::inds{0, 6, 8, 11});
-    auto irow = table.lookup(det, 0);
-    ASSERT_EQ(*table.view<size_t>(irow), 151);
-
-    det.set(defs::inds{8, 9, 10, 11});
-    irow = table.lookup(det, 0);
-    ASSERT_EQ(*table.view<size_t>(irow), nrow-1);
-
     det.set(defs::inds{7, 8, 9, 10, 11});
     ASSERT_EQ(table.lookup(det, 0), ~0ul);
 }

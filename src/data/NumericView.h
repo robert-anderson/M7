@@ -6,6 +6,7 @@
 #define M7_NUMERICVIEW_H
 
 #include <src/utils.h>
+#include <cstring>
 
 template<typename T>
 class NumericView {
@@ -34,8 +35,12 @@ public:
         return out;
     }
 
-    bool is_zero(){
-        return this==0;
+    bool is_zero() {
+        return this == 0;
+    }
+
+    void zero() {
+        memset((void *) m_data, 0, m_size * sizeof(T));
     }
 };
 

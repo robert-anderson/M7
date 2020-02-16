@@ -35,6 +35,8 @@ public:
 
     void zero();
 
+    bool is_zero() const;
+
     std::string to_string(size_t padding = 0) const;
 
     void print() const;

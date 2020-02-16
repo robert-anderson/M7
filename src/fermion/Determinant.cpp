@@ -34,6 +34,11 @@ void Determinant::zero() {
     m_bitfields[1].zero();
 }
 
+bool Determinant::is_zero() const {
+    return m_bitfields[0].is_zero() && m_bitfields[1].is_zero();
+}
+
+
 void Determinant::set(const size_t &ispat, const size_t &ispin){
     assert(ispin==0 || ispin==1);
     assert(ispat>=0 && ispat<m_bitfields[0].m_nbit);

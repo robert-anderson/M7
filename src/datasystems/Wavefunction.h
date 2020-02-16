@@ -2,18 +2,18 @@
 // Created by Robert John Anderson on 2020-02-04.
 //
 
-#ifndef M7_STOCHASTICWAVEFUNCTION_H
-#define M7_STOCHASTICWAVEFUNCTION_H
+#ifndef M7_WAVEFUNCTION_H
+#define M7_WAVEFUNCTION_H
 
 #include "DataSystem.h"
 #include "src/data/PerforableMappedTable.h"
 
-class StochasticWavefunction {
-    //PerforableMappedTable<Determinant> store;
+class Wavefunction {
+    PerforableMappedTable<Determinant> store;
     Table send_buffer;
     Table recv_buffer;
 public:
-    //StochasticWavefunction();
+    //Wavefunction();
 /*
     void propagate() {
 #pragma omp parallel {
@@ -27,4 +27,4 @@ public:
 
 };
 
-#endif //M7_STOCHASTICWAVEFUNCTION_H
+#endif //M7_WAVEFUNCTION_H
