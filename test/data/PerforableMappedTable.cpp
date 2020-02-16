@@ -59,7 +59,7 @@ TEST(PerforableMappedTable, ThreadSafety) {
         auto irow = table.safe_push(0, det);
         *table.view<size_t>(irow) = icomb;
     }
-    ASSERT_TRUE(table.highwatermark()[0]==nrow);
+    ASSERT_EQ(table.highwatermark()[0], nrow);
 
     det.set(defs::inds{7, 8, 9, 10, 11});
     ASSERT_EQ(table.lookup(det, 0), ~0ul);

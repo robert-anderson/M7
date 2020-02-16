@@ -13,7 +13,10 @@ class Wavefunction {
     Table send_buffer;
     Table recv_buffer;
 public:
-    //Wavefunction();
+    /*
+    Wavefunction(size_t ){
+
+    }*/
 /*
     void propagate() {
 #pragma omp parallel {
