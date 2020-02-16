@@ -8,7 +8,7 @@
 
 int main(int argc, char **argv) {
 
-    int out;
+    int out = 0;
 
     // Filter out Google Test arguments
     ::testing::InitGoogleTest(&argc, argv);
