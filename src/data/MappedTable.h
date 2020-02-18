@@ -108,12 +108,12 @@ public:
 
     template<typename data_T>
     view_t <data_T> push_view(const size_t &isegment, const T &key) {
-        return push_view(isegment, key, 0);
+        return push_view<data_T>(isegment, key, 0);
     }
 
     template<typename data_T>
     view_t <data_T> push_view(const T &key) {
-        return push_view(0, key, 0);
+        return push_view<data_T>(0, key, 0);
     }
 
     template<typename data_T>
@@ -124,12 +124,12 @@ public:
 
     template<typename data_T>
     view_t <data_T> safe_push_view(const size_t &isegment, const T &key) {
-        return safe_push_view(isegment, key, 0);
+        return safe_push_view<data_T>(isegment, key, 0);
     }
 
     template<typename data_T>
     view_t <data_T> safe_push_view(const T &key) {
-        return safe_push_view(0, key, 0);
+        return safe_push_view<data_T>(0, key, 0);
     }
 
 };

@@ -46,12 +46,24 @@ void Determinant::set(const size_t &ispat, const size_t &ispin){
 }
 
 void Determinant::set(const size_t &i){
+    assert(i<nspatorb()*2);
     set(i%m_bitfields[0].m_nbit, i/m_bitfields[0].m_nbit);
 }
 
 void Determinant::set(const defs::inds &inds){
     zero();
     for (auto ind: inds) set(ind);
+}
+
+void Determinant::clr(const size_t &ispat, const size_t &ispin){
+    assert(ispin==0 || ispin==1);
+    assert(ispat>=0 && ispat<m_bitfields[0].m_nbit);
+    m_bitfields[ispin].clr(ispat);
+}
+
+void Determinant::clr(const size_t &i){
+    assert(i<nspatorb()*2);
+    clr(i%m_bitfields[0].m_nbit, i/m_bitfields[0].m_nbit);
 }
 
 bool Determinant::partial_phase(const defs::inds &removed, const size_t &nremoved) const{
@@ -112,6 +124,33 @@ int Determinant::compare(const Determinant &rhs) const {
     auto t0 = m_bitfields[0].compare(rhs.m_bitfields[0]);
     auto t1 = m_bitfields[1].compare(rhs.m_bitfields[1]);
     return t0?t0:t1;
+}
+
+Determinant Determinant::get_excited_det(const defs::inds &removed, const defs::inds &inserted) const{
+    auto out{*this};
+    for (auto iremoved : removed) out.clr(iremoved);
+    for (auto iinserted : inserted) out.set(iinserted);
+    return out;
+}
+
+Determinant Determinant::get_excited_det(const size_t &removed, const size_t &inserted) const{
+    auto out{*this};
+    out.clr(removed);
+    out.set(inserted);
+    return out;
+}
+
+
+Determinant Determinant::get_excited_det(
+        const size_t &removed1, const size_t &removed2,
+        const size_t &inserted1, const size_t &inserted2
+) const{
+    auto out{*this};
+    out.clr(removed1);
+    out.clr(removed2);
+    out.set(inserted1);
+    out.set(inserted2);
+    return out;
 }
 
 Determinant &Determinant::operator=(const Determinant &rhs) {

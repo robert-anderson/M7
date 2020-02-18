@@ -103,6 +103,7 @@ public:
 
     template<typename T>
     size_t add(size_t n) {
+        assert(itype<T>!=~0ul);
         m_numeric_lengths[itype<T>] += n;
         return m_numeric_lengths[itype<T>]-n;
     }

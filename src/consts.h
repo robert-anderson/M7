@@ -57,6 +57,56 @@ namespace consts {
     }
 
     template<typename T>
+    static constexpr T first_quadrant(T &v) {
+        return abs(v);
+    }
+
+    template<typename T>
+    static constexpr std::complex<T> first_quadrant(std::complex<T> v) {
+        return std::complex<T>(abs(v.real()), abs(v.imag()));
+    }
+
+    template<typename T>
+    static constexpr T l1_norm(T &v) {
+        return abs(v);
+    }
+
+    template<typename T>
+    static constexpr T l1_norm(std::complex<T> v) {
+        return abs(v.real())+abs(v.imag());
+    }
+
+    template<typename T>
+    static constexpr T component_norm(T &v) {
+        return abs(v);
+    }
+
+    template<typename T>
+    static constexpr std::complex<T> component_norm(std::complex<T> v) {
+        return std::complex<T>(abs(v.real()), abs(v.imag()));
+    }
+
+    template<typename T>
+    static constexpr T real_log(T &v) {
+        return std::log(abs(v));
+    }
+
+    template<typename T>
+    static constexpr std::complex<T> real_log(std::complex<T> v) {
+        return std::complex<T>(std::log(abs(v.real())), std::log(abs(v.imag())));
+    }
+
+    template<typename T>
+    static constexpr T real_ratio(T &v1, T &v2) {
+        return v1/v2;
+    }
+
+    template<typename T>
+    static constexpr std::complex<T> real_ratio(std::complex<T> v1, std::complex<T> v2) {
+        return std::complex<T>(v1.real()/v2.real(), v1.imag()/v2.imag());
+    }
+
+    template<typename T>
     struct component_t {
         typedef T type;
     };

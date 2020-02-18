@@ -20,7 +20,7 @@ protected:
 
 public:
 
-    virtual inline bool next(result_T &result) {
+    virtual bool next(result_T &result) {
         auto tmp = m_current->next_element(result);
         if (!tmp){
             if (!m_current->has_subsequent()) return false;
@@ -29,7 +29,7 @@ public:
         }
         return true;
     }
-    virtual inline bool next(result_T &result, size_t &i) {
+    virtual bool next(result_T &result, size_t &i) {
         ++i;
         return next(result);
     }
@@ -70,7 +70,7 @@ public:
     }
 
 private:
-    virtual inline bool next_element(result_T &result){}
+    virtual bool next_element(result_T &result){}
 };
 
 #endif //M7_ENUMERATOR_H

@@ -20,14 +20,21 @@ class AbInitioHamiltonian {
 
 public:
 
-    inline auto norb() const {return m_file_iterator.m_norb;}
-    inline auto nspatorb() const {return m_int_1.m_nspatorb;}
-    inline auto nelec() const {return m_file_iterator.m_nelec;}
-    inline auto spin_resolved() const {return m_file_iterator.m_spin_resolved;}
-    inline auto spin_conserving() const {return m_int_1.spin_conserving();}
+    inline auto norb() const { return m_file_iterator.m_norb; }
+
+    inline auto nspatorb() const { return m_int_1.m_nspatorb; }
+
+    inline auto nelec() const { return m_file_iterator.m_nelec; }
+
+    inline auto spin_resolved() const { return m_file_iterator.m_spin_resolved; }
+
+    inline auto spin_conserving() const { return m_int_1.spin_conserving(); }
 
     size_t m_nci;
+
     AbInitioHamiltonian(const std::string &fname);
+
+    consts::component_t<defs::ham_t>::type get_energy(const Determinant &det) const;
 
     defs::ham_t get_element_0(const Determinant &det) const;
 
@@ -36,12 +43,18 @@ public:
     defs::ham_t get_element_1(const Determinant &bra, const Determinant &ket) const;
 
     defs::ham_t get_element_2(const Determinant &bra,
-            const size_t &removed1, const size_t &removed2,
-            const size_t &inserted1, const size_t &inserted2) const;
+                              const size_t &removed1, const size_t &removed2,
+                              const size_t &inserted1, const size_t &inserted2) const;
 
     defs::ham_t get_element_2(const Determinant &bra, const Determinant &ket) const;
 
     defs::ham_t get_element(const Determinant &bra, const Determinant &ket) const;
+
+    Determinant guess_reference(const size_t &spin_level) const;
+
+    Determinant refine_guess_reference(const Determinant ref) const;
+
+    Determinant choose_reference(const size_t &spin_level) const;
 };
 
 

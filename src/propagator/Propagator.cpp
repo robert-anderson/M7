@@ -3,3 +3,6 @@
 //
 
 #include "Propagator.h"
+
+
+Propagator::Propagator(const AbInitioHamiltonian &h) : m_h(h) {}

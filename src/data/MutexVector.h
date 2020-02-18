@@ -14,9 +14,11 @@ class MutexVector {
 public:
     MutexVector(size_t n);
     ~MutexVector();
+    size_t size() const;
+    void resize(const size_t &n);
     void grow(const size_t &n_add);
-    void acquire_lock(size_t i);
-    void release_lock(size_t i);
+    void acquire_lock(const size_t &i);
+    void release_lock(const size_t &i);
 };
 
 

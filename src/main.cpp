@@ -7,16 +7,9 @@
 #include "CLI/CLI.hpp"
 
 
-
-#include <src/data/MutexVector.h>
+#include <src/enumerators/VectorCombinationEnumerator.h>
 
 int main(int argc, char **argv) {
-
-
-    MutexVector mutexVector(std::vector<int>{4,5,6,7,8});
-    std::cout << mutexVector.get(0);
-
-    return 0;
 
     mpi::initialize(&argc, &argv);
     /*
@@ -24,7 +17,7 @@ int main(int argc, char **argv) {
      */
     CLI::App cli_app{InputOptions::description};
     InputOptions input(cli_app);
-    if(!mpi::i_am_root()){
+    if (!mpi::i_am_root()) {
         /*
          * only allow standard output and error from the root MPI rank
          */
@@ -40,8 +33,8 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    FciqmcCalculation calc;
-    calc.execute();
+    FciqmcCalculation calc(input);
+    calc.run();
 
     mpi::finalize();
 

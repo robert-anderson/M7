@@ -33,7 +33,7 @@ protected:
     MutexVector m_segment_mutex;
     MutexVector m_row_mutex;
 
-    Table* m_shared = nullptr;
+    Table *m_shared = nullptr;
 
 public:
 
@@ -46,10 +46,11 @@ public:
     const size_t nrow_growth_factor() const;
 
     Table(Specification spec, size_t nrow_initial, size_t m_nsegment = 1,
-          float nrow_growth_factor = 2.0, size_t nrow_mutex_blocks=0);
+          float nrow_growth_factor = 2.0, size_t nrow_mutex_blocks = 0);
 
-    Table(Table *shared, size_t nrow_initial, size_t nrow_mutex_blocks=0);
-    Table(Table &shared, size_t nrow_initial, size_t nrow_mutex_blocks=0);
+    Table(Table *shared, size_t nrow_initial, size_t nrow_mutex_blocks = 0);
+
+    Table(Table &shared, size_t nrow_initial, size_t nrow_mutex_blocks = 0);
 
     virtual ~Table();
 
@@ -63,21 +64,21 @@ public:
 
     void grow(size_t nrow_initial = 0);
 
-    void zero(size_t isegment=~0ul, size_t irow=~0ul);
+    void zero(size_t isegment = ~0ul, size_t irow = ~0ul);
 
     template<typename T>
     using view_t = typename std::conditional<
-            std::is_same<T, BitfieldNew>::value || std::is_same<T, Determinant>::value,
-            T, NumericView<T> >::type;
+        std::is_same<T, BitfieldNew>::value || std::is_same<T, Determinant>::value,
+        T, NumericView<T> >::type;
 
     template<typename T>
     view_t<T> view(const size_t &isegment, const size_t &irow, const size_t &ientry) const {
         if (ientry >= m_spec.m_numeric_lengths[itype<T>])
             return NumericView<T>(nullptr, 0);
         return NumericView<T>(
-                (char *) (m_data.data() + (isegment * m_nrow + irow) * m_row_length +
-                          m_spec.m_numeric_offsets[itype<T>]) + ientry * sizeof(T),
-                m_spec.m_numeric_lengths[itype<T>] - ientry);
+            (char *) (m_data.data() + (isegment * m_nrow + irow) * m_row_length +
+                      m_spec.m_numeric_offsets[itype<T>]) + ientry * sizeof(T),
+            m_spec.m_numeric_lengths[itype<T>] - ientry);
     }
 
     template<typename T>
@@ -90,7 +91,9 @@ public:
         return view<T>(0, irow);
     }
 
-    const defs::inds& highwatermark() const;
+    const defs::inds &highwatermark() const;
+
+    void set_highwatermark(const size_t &isegment, const size_t &value);
 
     void transfer(const size_t &isegment, const size_t n);
 
@@ -115,7 +118,7 @@ public:
 
     const std::vector<size_t> &segment_dataword_offsets() const;
 
-    bool send_to(Table &recv) const;
+    bool send_to(Table &recv);
 
     void print() const;
 

@@ -6,6 +6,7 @@
 #include "src/parallel/MPIWrapper.h"
 #include "src/datasystems/FciqmcCalculation.h"
 
+/*
 TEST(FciqmcCalculation, test) {
     FciqmcCalculation fciqmc;
-}
+}*/
