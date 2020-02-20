@@ -7,9 +7,111 @@
 #include <iostream>
 #include <src/utils.h>
 
+
+Table::Table(Specification spec, size_t nrow) :
+    m_spec(spec) {
+    grow(nrow);
+}
+
+Table::Table(Specification spec, size_t nrow, defs::data_t *data_external) :
+    m_spec(spec) {
+    grow(data_external, nrow);
+}
+
+template<>
+BitfieldNew Table::view<BitfieldNew>(const size_t &irow, const size_t &ientry) const {
+    return BitfieldNew(
+        m_spec.m_bitfield_lengths[ientry],
+        (defs::data_t *) (m_data + irow * row_length() +
+                          m_spec.m_total_numeric_datawords_used +
+                          m_spec.m_bitfield_offsets[ientry]));
+}
+
+template<>
+Determinant Table::view<Determinant>(const size_t &irow, const size_t &ientry) const {
+    return Determinant(view<BitfieldNew>(irow, ientry), view<BitfieldNew>(irow, ientry + 1));
+}
+
+void Table::zero(size_t irow) {
+    if (irow != ~0ul) memset(m_data + irow * row_length(), 0, row_length() * sizeof(defs::data_t));
+    else memset(m_data, 0, row_length() * m_nrow * sizeof(defs::data_t));
+}
+
+
+void Table::print(size_t nrow) const {
+    if (nrow == ~0ul) nrow = m_nrow;
+    const auto padding{4ul};
+    std::cout << "\nnumber of rows: " << m_nrow << std::endl;
+    for (auto irow{0ul}; irow < nrow; ++irow) {
+        std::cout << view<std::complex<float>>(irow).to_string(padding);
+        std::cout << view<std::complex<double>>(irow).to_string(padding);
+        std::cout << view<std::complex<long double>>(irow).to_string(padding);
+        std::cout << view<float>(irow).to_string(padding);
+        std::cout << view<double>(irow).to_string(padding);
+        std::cout << view<long double>(irow).to_string(padding);
+        std::cout << view<char>(irow).to_string(padding);
+        std::cout << view<short int>(irow).to_string(padding);
+        std::cout << view<int>(irow).to_string(padding);
+        std::cout << view<long int>(irow).to_string(padding);
+        std::cout << view<long long int>(irow).to_string(padding);
+        std::cout << view<unsigned char>(irow).to_string(padding);
+        std::cout << view<unsigned short int>(irow).to_string(padding);
+        std::cout << view<unsigned int>(irow).to_string(padding);
+        std::cout << view<unsigned long int>(irow).to_string(padding);
+        std::cout << view<unsigned long long int>(irow).to_string(padding);
+        std::cout << view<bool>(irow).to_string(padding);
+
+        for (auto ibitfield{0ul}; ibitfield < m_spec.m_bitfield_lengths.size(); ++ibitfield) {
+            std::cout << view<BitfieldNew>(irow, ibitfield).to_string(padding);
+        }
+        std::cout << std::endl;
+    }
+}
+
+void Table::grow(const size_t &nrow) {
+    if (m_data && m_data != m_data_internal.data())
+        throw std::runtime_error("Cannot reallocate Table which does not own its buffer");
+    /*
+     * m_data points to m_data_internal, which only needs to be resized
+     */
+    m_data_internal.resize(nrow * row_length(), 0);
+    m_nrow = nrow;
+    m_data = m_data_internal.data();
+}
+
+void Table::grow(defs::data_t *const new_ptr, size_t nrow) {
+    if (m_data && m_data==m_data_internal.data())
+        throw std::runtime_error("Cannot move data of a Table which manages its own buffer");
+    /*
+     * m_data is external, so we trust that the necessary reallocation
+     * has already taken place, now we just need to move the data to new pointer
+     */
+    if (m_data)
+        memmove(m_data, new_ptr, high_water_mark() * row_length() * sizeof(defs::data_t));
+    m_data = new_ptr;
+    m_nrow = nrow;
+}
+
+const Specification &Table::spec() const {
+    return m_spec;
+}
+
+const size_t Table::nrow() const {
+    return m_nrow;
+}
+
+const size_t Table::row_length() const {
+    return m_spec.m_total_datawords_used;
+}
+
+const size_t Table::high_water_mark() const {
+    return m_nrow;
+}
+
+/*
 Table::Table(Specification spec, size_t nrow_initial, size_t m_nsegment,
              float nrow_growth_factor, size_t nrow_mutex_blocks) :
-    m_spec(spec.commit()),
+    m_spec(spec.compile()),
     m_row_length(m_spec.m_total_datawords_used),
     m_nsegment(m_nsegment),
     m_nrow_growth_factor(nrow_growth_factor),
@@ -31,38 +133,6 @@ Table::Table(Table *shared, size_t nrow_initial, size_t nrow_mutex_blocks) :
 Table::Table(Table &shared, size_t nrow_initial, size_t nrow_mutex_blocks) :
     Table(&shared, nrow_initial, nrow_mutex_blocks) {}
 
-void Table::print() const {
-    const auto padding{4ul};
-    std::cout << "\nnumber of segments: " << m_nsegment;
-    std::cout << "\nnumber of rows per segment: " << m_nrow << std::endl;
-    for (auto isegment{0ul}; isegment < m_nsegment; ++isegment) {
-        std::cout << "\nsegment " << isegment << std::endl;
-        for (auto irow{0ul}; irow < m_highwatermark[isegment]; ++irow) {
-            std::cout << view<std::complex<float>>(isegment, irow).to_string(padding);
-            std::cout << view<std::complex<double>>(isegment, irow).to_string(padding);
-            std::cout << view<std::complex<long double>>(isegment, irow).to_string(padding);
-            std::cout << view<float>(isegment, irow).to_string(padding);
-            std::cout << view<double>(isegment, irow).to_string(padding);
-            std::cout << view<long double>(isegment, irow).to_string(padding);
-            std::cout << view<char>(isegment, irow).to_string(padding);
-            std::cout << view<short int>(isegment, irow).to_string(padding);
-            std::cout << view<int>(isegment, irow).to_string(padding);
-            std::cout << view<long int>(isegment, irow).to_string(padding);
-            std::cout << view<long long int>(isegment, irow).to_string(padding);
-            std::cout << view<unsigned char>(isegment, irow).to_string(padding);
-            std::cout << view<unsigned short int>(isegment, irow).to_string(padding);
-            std::cout << view<unsigned int>(isegment, irow).to_string(padding);
-            std::cout << view<unsigned long int>(isegment, irow).to_string(padding);
-            std::cout << view<unsigned long long int>(isegment, irow).to_string(padding);
-            std::cout << view<bool>(isegment, irow).to_string(padding);
-
-            for (auto ibitfield{0ul}; ibitfield < m_spec.m_bitfield_lengths.size(); ++ibitfield) {
-                std::cout << view<BitfieldNew>(isegment, irow, ibitfield).to_string(padding);
-            }
-            std::cout << std::endl;
-        }
-    }
-}
 
 const std::vector<size_t> &Table::segment_dataword_offsets() const {
     return m_segment_dataword_offsets;
@@ -99,46 +169,15 @@ void Table::grow(size_t nrow_initial) {
     else nrow = (size_t) (m_nrow * m_nrow_growth_factor);
     m_data.resize(nrow * m_nsegment * m_row_length, 0);
     if (m_rowsafe) m_row_mutex.grow(nrow - m_nrow);
-    /*
-    * move all segments if they number more than one, starting with the one
-    * nearest the end of the buffer
-    */
     if (!nrow_initial) {
         for (auto i{m_nsegment}; i > 1ul; --i) move_segment(i, m_nrow, nrow);
     }
     m_nrow = nrow;
-    /*
-     * update the offsets for the beginnings of the segments
-     */
     for (auto i{0ul}; i < m_nsegment; ++i) {
         m_segment_dataword_offsets[i] = i * m_row_length * m_nrow;
     }
 }
 
-template<>
-BitfieldNew Table::view<BitfieldNew>(const size_t &isegment, const size_t &irow, const size_t &ientry) const {
-    return BitfieldNew(m_spec.m_bitfield_lengths[ientry],
-                       (defs::data_t *) (m_data.data() + get_idataword_begin_row(isegment, irow) +
-                                         m_spec.m_total_numeric_datawords_used + m_spec.m_bitfield_offsets[ientry]));
-}
-
-template<>
-BitfieldNew Table::view<BitfieldNew>(const size_t &irow, const size_t &ientry) const {
-    return view<BitfieldNew>(0, irow, ientry);
-}
-
-template<>
-Determinant Table::view<Determinant>(const size_t &isegment, const size_t &irow, const size_t &ientry) const {
-    return Determinant(
-        view<BitfieldNew>(isegment, irow, ientry),
-        view<BitfieldNew>(isegment, irow, ientry + 1)
-    );
-}
-
-template<>
-Determinant Table::view<Determinant>(const size_t &irow, const size_t &ientry) const {
-    return view<Determinant>(0, irow, ientry);
-}
 
 void *Table::row_dataptr(const size_t &isegment, const size_t &isegmentrow) const {
     return (char *) (m_data.data() + get_idataword_begin_row(isegment, isegmentrow));
@@ -162,9 +201,6 @@ bool Table::send_to(Table &recv) {
     defs::inds recvcounts(mpi::nrank(), 0ul);
     mpi::all_to_all(sendcounts, recvcounts);
     auto &senddispls = segment_dataword_offsets();
-    /*
-     * place the received data contiguously in the recv buffer:
-     */
     defs::inds recvdispls(mpi::nrank(), 0ul);
     for (auto i{1ul}; i < mpi::nrank(); ++i)
         recvdispls[i] = recvdispls[i - 1] + sendcounts[i - 1];
@@ -194,7 +230,7 @@ const size_t Table::nrow_growth_factor() const {
 
 void Table::transfer(const size_t &isegment, const size_t n) {
     assert(m_shared != nullptr);
-    size_t irow = m_shared->safe_push(isegment, n);
+    size_t irow = 0;//m_shared->safe_push(isegment, n);
     memcpy(m_shared->row_dataptr(isegment, irow),
            row_dataptr(isegment, 0),
            n * row_length() * sizeof(defs::data_t));
@@ -214,21 +250,8 @@ size_t Table::push(const size_t &isegment, const size_t &nrow) {
     return tmp;
 }
 
-size_t Table::safe_push(const size_t &isegment, const size_t &nrow) {
-    m_segment_mutex.acquire_lock(isegment);
-    auto tmp = push(isegment, nrow);
-    m_segment_mutex.release_lock(isegment);
-    return tmp;
-}
-
-void Table::zero(size_t isegment, size_t irow) {
-    if (isegment != ~0ul) {
-        if (irow != ~0ul) memset(row_dataptr(isegment, irow), 0, row_length() * sizeof(defs::data_t));
-        else memset(row_dataptr(isegment, 0), 0, row_length() * m_nrow * sizeof(defs::data_t));
-    } else {
-        memset(baseptr(), 0, row_length() * m_nrow * m_nsegment * sizeof(defs::data_t));
-    }
-    m_highwatermark.assign(m_nsegment, 0);
+size_t Table::push(Mutex &mutex, const size_t &nrow) {
+    return push(mutex.index(), nrow);
 }
 
 const defs::data_t *Table::baseptr() const {
@@ -246,3 +269,4 @@ Table::~Table() {
         }
     }
 }
+*/

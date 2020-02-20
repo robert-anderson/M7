@@ -37,6 +37,8 @@ public:
 
     bool is_zero() const;
 
+    bool is_null() const;
+
     std::string to_string(size_t padding = 0) const;
 
     void print() const;

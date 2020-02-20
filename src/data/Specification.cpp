@@ -8,7 +8,8 @@
 
 Specification::Specification(const std::array<size_t, ntype> &numeric_lengths,
                              const std::vector<size_t> &bitfield_lengths) :
-        m_numeric_lengths(numeric_lengths), m_bitfield_lengths(bitfield_lengths) {}
+        m_numeric_lengths(numeric_lengths), m_bitfield_lengths(bitfield_lengths) {
+}
 
 Specification::Specification(const std::vector<size_t> &bitfield_lengths) :
         Specification({}, bitfield_lengths) {}
@@ -16,6 +17,7 @@ Specification::Specification(const std::vector<size_t> &bitfield_lengths) :
 template<>
 size_t Specification::add<BitfieldNew>(size_t n) {
     m_bitfield_lengths.push_back(n);
+    compile();
     return m_bitfield_lengths.size()-1;
 }
 
@@ -27,10 +29,11 @@ size_t Specification::add<Determinant>(size_t n) {
      */
     add<BitfieldNew>(n); // alpha spin (or Kramers +) channel
     add<BitfieldNew>(n); // beta spin (or Kramers -) channel
+    compile();
     return m_bitfield_lengths.size()-2;
 }
 
-Specification &Specification::commit() {
+void Specification::compile() {
     m_numeric_datawords_used = numeric_datawords_used(m_numeric_lengths);
     m_numeric_offsets = numeric_offsets(m_numeric_lengths, m_numeric_datawords_used);
     m_total_numeric_datawords_used = m_numeric_offsets.back() + m_numeric_datawords_used.back();
@@ -39,7 +42,6 @@ Specification &Specification::commit() {
     m_total_bitfield_datawords_used = m_bitfield_lengths.empty() ? 0 :
                                       m_bitfield_offsets.back() + m_bitfield_datawords_used.back();
     m_total_datawords_used = m_total_numeric_datawords_used + m_total_bitfield_datawords_used;
-    return *this;
 }
 
 std::array<size_t, ntype> Specification::numeric_datawords_used(const std::array<size_t, ntype> &lengths) {

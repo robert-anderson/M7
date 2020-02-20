@@ -109,3 +109,7 @@ size_t BitfieldNew::hash(const size_t modular_divisor) const {
 bool BitfieldNew::is_zero() const {
     return nsetbits()==0;
 }
+
+bool BitfieldNew::is_null() const {
+    return m_nbit==0;
+}

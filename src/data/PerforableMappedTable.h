@@ -8,6 +8,7 @@
 #include <src/data/MappedTable.h>
 #include <stack>
 
+/*
 template<typename T>
 class PerforableMappedTable : public MappedTable<T> {
     using Table::m_segment_mutex;
@@ -59,7 +60,6 @@ public:
         }
         return irow;
     }
-
     size_t safe_push(const size_t &isegment, const T &key) {
         size_t irow;
         if (m_stack[isegment].empty()) {
@@ -73,7 +73,7 @@ public:
         return irow;
     }
 
-};
+};*/
 
 
 #endif //M7_PERFORABLEMAPPEDTABLE_H

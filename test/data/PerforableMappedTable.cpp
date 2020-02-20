@@ -8,7 +8,7 @@
 #include <src/enumerators/CombinationEnumerator.h>
 #include "src/data/PerforableMappedTable.h"
 
-
+/*
 TEST(PerforableMappedTable, DataIntegrity) {
     const size_t nspatorb = 6;
     const size_t nelec = 4;
@@ -69,3 +69,4 @@ TEST(PerforableMappedTable, ThreadSafety) {
     det.set(defs::inds{7, 8, 9, 10, 11});
     ASSERT_EQ(table.lookup(det, 0), ~0ul);
 }
+ */

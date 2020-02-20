@@ -7,6 +7,19 @@
 #include <src/data/Specification.h>
 #include "src/data/Table.h"
 
+TEST(Table, EncodeDecode) {
+    Specification spec;
+    const size_t nint = 4;
+    const size_t nbit = 20;
+    spec.add<size_t>(nint);
+    spec.add<BitfieldNew>(nbit);
+    const size_t nrow = 10;
+    Table table(spec, nrow);
+    table.print();
+}
+
+
+/*
 TEST(Table, AllToAllV) {
     Specification spec;
     const size_t nint = 4;
@@ -31,10 +44,12 @@ TEST(Table, AllToAllV) {
         }
     }
     ASSERT_TRUE(send_table.send_to(recv_table));
-
+*/
     /*
      * check that all entries came through as expected
      */
+
+    /*
     size_t irow_tot = 0;
     for (auto isend{0ul}; isend < mpi::nrank(); ++isend) {
         for (auto irow{0ul}; irow < nrow_send; ++irow) {
@@ -47,7 +62,9 @@ TEST(Table, AllToAllV) {
             irow_tot++;
         }
     }
-}
+}*/
+
+    /*
 
 TEST(Table, PrivateTempThreadSafety) {
     Specification specification;
@@ -75,4 +92,4 @@ TEST(Table, PrivateTempThreadSafety) {
         auto v = shared_table.view<size_t>(irow);
         ASSERT_EQ(v[2], f(v[0], v[1]));
     }
-}
+}*/

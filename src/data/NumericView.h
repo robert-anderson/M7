@@ -29,6 +29,7 @@ public:
 
     std::string to_string(size_t padding = 0) const {
         std::string out{};
+        if (!m_data) return out;
         for (auto i{0ul}; i < size(); ++i) {
             out += utils::num_to_string(m_data[i], padding);
         }

@@ -3,12 +3,12 @@
 //
 
 #include "Wavefunction.h"
-
+/*
 void Wavefunction::merge_recv_with_store(const Propagator &prop) {
     for (auto irow_recv{0ul}; irow_recv < m_recv_buffer->highwatermark()[0]; ++irow_recv) {
         auto det = m_recv_buffer->view<Determinant>(0, irow_recv, m_onv_buffer_entry);
         auto tmp = m_recv_buffer->view<defs::ham_t>(0, irow_recv, m_weight_buffer_entry)[0];
-        auto irow_store = m_store->safe_push(0, det);
+        auto irow_store = 0;//m_store->safe_push(0, det);
         auto delta_weight = m_recv_buffer->view<defs::ham_t>(0, irow_recv, m_weight_buffer_entry)[0];
         auto stored_weight = m_store->view<defs::ham_t>(0, irow_store, 0);
         if (consts::float_is_zero(*stored_weight)){
@@ -40,3 +40,4 @@ void Wavefunction::death(const Propagator &prop) {
     }
 }
 
+*/

@@ -36,6 +36,8 @@ public:
 
     bool is_zero() const;
 
+    bool is_null() const;
+
     void set(const size_t &ispat, const size_t &ispin);
 
     void set(const size_t &i);

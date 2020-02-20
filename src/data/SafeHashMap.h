@@ -1,148 +1,82 @@
 //
-// Created by Robert John Anderson on 2020-02-18.
+// Created by Robert John Anderson on 2020-02-19.
 //
 
 #ifndef M7_SAFEHASHMAP_H
 #define M7_SAFEHASHMAP_H
 
-#include <iostream>
-#include <functional>
-#include <forward_list>
-#include <src/fermion/Determinant.h>
-#include "DeterminantHasher.h"
-#include "BitfieldHasher.h"
+#include "HashMap.h"
 #include "MutexVector.h"
 
-template<typename T>
-struct HasherType {
-    typedef std::hash<T> type;
-};
-
-template<>
-struct HasherType<Determinant> {
-    typedef DeterminantHasher type;
-};
-
-template<>
-struct HasherType<BitfieldNew> {
-    typedef BitfieldHasher type;
-};
 
 template<typename T>
-class SafeHashMap {
-    std::vector<std::forward_list<std::pair<T, size_t>>> m_buckets;
-    typename HasherType<T>::type m_hasher;
-    MutexVector m_bucket_mutex;
+class SafeHashMap : public HashMap<T> {
+    using HashMap<T>::bucket;
+    mutable MutexVector m_bucket_mutex;
 public:
-    SafeHashMap(const size_t &nbucket) : m_buckets(nbucket), m_bucket_mutex(nbucket) {}
-    SafeHashMap(const SafeHashMap &old, const size_t &nbucket) :
-    SafeHashMap(nbucket) {
-        for (auto bucket:old.m_buckets){
-            for (auto it:bucket){
-                insert(it.first, it.second);
-            }
-        }
+    SafeHashMap(const size_t &nbucket) :
+        HashMap<T>(nbucket), m_bucket_mutex(nbucket) {}
+
+    SafeHashMap(const HashMap<T> &old, const size_t &nbucket) :
+        HashMap<T>(old, nbucket), m_bucket_mutex(nbucket) {}
+
+    Mutex get_mutex(const size_t &ibucket) const {
+        return m_bucket_mutex.get(ibucket);
     }
 
-    size_t bucket(const T &key) const {
-        return m_hasher(key) % m_buckets.size();
+    Mutex find_mutex(const T &key) const {
+        return m_bucket_mutex.get(bucket(key));
     }
 
-private:
-    std::pair<T, size_t>* no_mutex_lookup_pair(const T &key, const size_t &ibucket) const {
-        std::pair<T, size_t>* pair = nullptr;
-        for (auto it : m_buckets[ibucket]) {
-            if (it.first == key) {
-                pair = &it;
-                break;
-            }
-        }
-        return pair;
+    std::pair<T, size_t> *lookup_pair(Mutex mutex, const T &key) const {
+        return HashMap<T>::lookup_pair(mutex.index(), key);
     }
 
-    size_t no_mutex_lookup(const T &key, const size_t &ibucket) const {
-        auto tmp = no_mutex_lookup_pair(key, ibucket);
+    std::pair<T, size_t> *lookup_pair(const size_t &ibucket, const T &key) const {
+        auto mutex = get_mutex(ibucket);
+        return lookup_pair(mutex, key);
+    }
+
+    std::pair<T, size_t> *lookup_pair(const T &key) const {
+        auto mutex = get_mutex(bucket(key));
+        return lookup_pair(mutex, key);
+    }
+
+    size_t lookup(Mutex mutex, const T &key) const {
+        auto tmp = lookup_pair(mutex, key);
         if (tmp) return tmp->second;
         else return ~0ul;
     }
 
-    void no_mutex_insert(const T &key, const size_t &value, const size_t &ibucket) {
-        /*
-         * assumes the key is not already in the map
-         */
-        m_buckets[ibucket].emplace_front(std::pair<T, size_t>(key, value));
+    size_t lookup(const size_t &ibucket, const T &key) const {
+        auto mutex = get_mutex(ibucket);
+        return lookup(mutex, key);
     }
 
-public:
-
-    std::pair<T, size_t>* lookup_pair(const T &key) {
-        std::pair<T, size_t>* pair = nullptr;
-        size_t ibucket = bucket(key);
-        m_bucket_mutex.acquire_lock(ibucket);
-        for (auto it : m_buckets[ibucket]) {
-            if (it.first == key) {
-                pair = &it;
-                break;
-            }
-        }
-        m_bucket_mutex.release_lock(ibucket);
-        return pair;
+    size_t lookup(const T &key) const {
+        auto mutex = get_mutex(bucket(key));
+        return lookup(mutex, key);
     }
 
-    size_t lookup(const T &key) {
-        auto tmp = lookup_pair(key);
-        if (tmp) return tmp->second;
-        else return ~0ul;
+    void insert(Mutex mutex, const T &key, const size_t &value) {
+        HashMap<T>::insert(mutex.index(), key, value);
     }
 
-    void insert(const T &key, const size_t &value) {
-        size_t ibucket = bucket(key);
-        m_bucket_mutex.acquire_lock(ibucket);
-        no_mutex_insert(key, value, ibucket);
-        m_bucket_mutex.release_lock(ibucket);
+    virtual void insert(const T &key, const size_t &value) {
+        auto mutex = get_mutex(key);
+        return insert(mutex, key, value);
     }
 
-    void replace(const T &key, const size_t &value) {
-        size_t ibucket = bucket(key);
-        m_bucket_mutex.acquire_lock(ibucket);
-        auto pair = no_mutex_lookup_pair(key, ibucket);
+    void replace(Mutex mutex, const T &key, const size_t &value) {
+        auto pair = lookup_pair(mutex, key);
         if (pair) pair->second = value;
-        else no_mutex_insert(key, value, ibucket);
-        m_bucket_mutex.release_lock(ibucket);
+        else insert(mutex, key, value);
     }
 
-
-    size_t size() const {
-        /*
-         * not thread safe
-         */
-        size_t tmp = 0;
-        for (auto bucket : m_buckets) {
-            tmp += std::distance(bucket.begin(), bucket.end());
-        }
-        return tmp;
-    }
-
-    bool operator==(const SafeHashMap<T> &other) const {
-        if (size() != other.size()) return false;
-        auto ibucket = 0ul;
-        for (auto bucket : m_buckets) {
-            for (auto it : bucket) {
-                if (it.second != other.no_mutex_lookup(it.first, ibucket)) return false;
-            }
-            ibucket++;
-        }
-        return true;
-    }
-
-    void print() const {
-        for (auto bucket : m_buckets) {
-            for (auto it : bucket) {
-                std::cout << it.first << "->" << it.second << std::endl;
-            }
-        }
+    virtual void replace(const T &key, const size_t &value) {
+        auto mutex = find_mutex(key);
+        replace(mutex, key, value);
     }
 };
-
 
 #endif //M7_SAFEHASHMAP_H

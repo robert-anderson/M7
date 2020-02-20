@@ -20,14 +20,9 @@ void MutexVector::grow(const size_t &n_add) {
     resize(m_mutex.size() + n_add);
 }
 
-void MutexVector::acquire_lock(const size_t &i) {
-    assert(i<size());
-    omp_set_lock(m_mutex.data() + i);
-}
-
-void MutexVector::release_lock(const size_t &i) {
-    assert(i<size());
-    omp_unset_lock(m_mutex.data() + i);
+Mutex MutexVector::get(const size_t &i) {
+    assert(i < size());
+    return Mutex(m_mutex[i], i);
 }
 
 MutexVector::~MutexVector() {
@@ -36,4 +31,17 @@ MutexVector::~MutexVector() {
 
 size_t MutexVector::size() const {
     return m_mutex.size();
+}
+
+Mutex::Mutex(omp_lock_t &lock, const size_t &index) :
+    m_lock(lock), m_index(index) {
+    omp_set_lock(&m_lock);
+}
+
+Mutex::~Mutex() {
+    omp_unset_lock(&m_lock);
+}
+
+size_t Mutex::index() const {
+    return m_index;
 }

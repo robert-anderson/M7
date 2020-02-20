@@ -158,3 +158,7 @@ Determinant &Determinant::operator=(const Determinant &rhs) {
     m_bitfields[1] = rhs.m_bitfields[1];
     return *this;
 }
+
+bool Determinant::is_null() const {
+    return nspatorb()==0;
+}

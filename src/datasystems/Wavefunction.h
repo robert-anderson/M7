@@ -44,6 +44,7 @@ public:
     }
 };
 
+/*
 class Wavefunction {
     const InputOptions &m_input;
     std::unique_ptr<PerforableMappedTable<Determinant>> m_store;
@@ -113,13 +114,11 @@ public:
             m_buffer_spec, (size_t) (input.nwalker_target * input.store_factor_initial * mpi::nrank())
         );
 
-        m_store->push_view<defs::ham_t>(0, reference)[m_weight_store_entry] = input.nwalker_initial;
+        //m_store->push_view<defs::ham_t>(0, reference)[m_weight_store_entry] = input.nwalker_initial;
         m_square_norm = std::pow(input.nwalker_initial, 2);
         m_component_norm = input.nwalker_initial;
 
-        /*
-         * load balancing
-         */
+         // load balancing
         for (auto i{0ul}; i < m_det_block_destinations.size(); ++i) {
             m_det_block_destinations[i] = i % mpi::nrank();
         }
@@ -209,6 +208,6 @@ public:
         std::cout << "norm: " << std::sqrt(m_square_norm) <<std::endl;
     }
 
-};
+};*/
 
 #endif //M7_WAVEFUNCTION_H

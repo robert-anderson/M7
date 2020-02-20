@@ -16,16 +16,16 @@ class FciqmcCalculation {
     const InputOptions m_input;
     AbInitioHamiltonian m_h;
     Propagator m_p;
-    Wavefunction m_wf;
+    //Wavefunction m_wf;
 public:
-
+/*
     FciqmcCalculation(const InputOptions &input) :
             m_input(input),
             m_h(input.fcidump_path),
             m_p(m_h),
             m_wf(input, m_h.choose_reference(input.spin_level)) {
         m_wf.m_reference.print();
-    }
+    }*/
 
     void run();
 
