@@ -48,7 +48,7 @@ public:
         }
         BitfieldNew::clr_bit(m_work, result);
         result += m_offset;
-        if constexpr (op==not_op){
+        if (op==not_op){
             /*
              * enumeration over cleared bit positions must in all cases be terminated
              * at the length of the represented bitfield.

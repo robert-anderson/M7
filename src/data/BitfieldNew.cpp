@@ -65,7 +65,7 @@ void BitfieldNew::print() const {
 size_t BitfieldNew::nsetbits() const {
     auto n{0ul};
     for (auto i{0ul}; i < m_ndataword; ++i) {
-        if constexpr (sizeof(defs::data_t)==8) {
+        if (sizeof(defs::data_t)==8) {
             n += _popcnt64(m_data[i]);
         }
         else if (sizeof(defs::data_t)==4) {
@@ -78,7 +78,7 @@ size_t BitfieldNew::nsetbits() const {
 size_t BitfieldNew::nsetbits_common(const BitfieldNew &other) const {
     auto n{0ul};
     for (auto i{0ul}; i < m_ndataword; ++i) {
-        if constexpr (sizeof(defs::data_t)==8) {
+        if (sizeof(defs::data_t)==8) {
             n += _popcnt64(m_data[i]&other.m_data[i]);
         }
         else if (sizeof(defs::data_t)==4) {
@@ -92,7 +92,7 @@ size_t BitfieldNew::nsetbits_common(const BitfieldNew &other) const {
 size_t BitfieldNew::nsetbits_cleared(const BitfieldNew &other) const {
     auto n{0ul};
     for (auto i{0ul}; i < m_ndataword; ++i) {
-        if constexpr (sizeof(defs::data_t)==8) {
+        if (sizeof(defs::data_t)==8) {
             n += _popcnt64(m_data[i]&~other.m_data[i]);
         }
         else if (sizeof(defs::data_t)==4) {

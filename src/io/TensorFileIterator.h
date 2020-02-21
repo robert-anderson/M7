@@ -27,7 +27,8 @@ const std::regex space_delimited_uint_regex(space_delimited_uint_regex_string);
 
 template <typename T>
 class TensorFileIterator : public FileIterator{
-    static_assert(std::__is_static_castable<T, float>::value || std::__is_static_castable<T, std::complex<float>>::value);
+    static_assert(std::__is_static_castable<T, float>::value || std::__is_static_castable<T, std::complex<float>>::value, 
+			"Template parameter must be castable to float or complex float");
 public:
     static constexpr size_t m_nreal = std::__is_static_castable<T, float>::value?1:2;
     const size_t m_nind;
@@ -78,7 +79,7 @@ public:
         std::string line{fi.next()};
         std::smatch match;
         std::regex_search(line, match, complex_regex);
-        if constexpr(m_nreal==1){
+        if (m_nreal==1){
             // we mustn't try to store a complex-valued tensor in a real container
             assert(!match.size());
         }

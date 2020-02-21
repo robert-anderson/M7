@@ -5,7 +5,6 @@
 #include "DenseHamiltonian.h"
 #include "../enumerators/CombinationEnumerator.h"
 #include "../enumerators/BitfieldEnumerator.h"
-#include "../fermion/DeterminantConnection.h"
 
 DenseHamiltonian::DenseHamiltonian(const AbInitioHamiltonian &source):
 Matrix<defs::ham_t, true>(source.m_nci)

@@ -4,4 +4,3 @@
 
 #include "Aliaser.h"
 
-Aliaser::Aliaser() {}

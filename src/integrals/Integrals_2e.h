@@ -26,7 +26,7 @@ constexpr std::array<bool, 11> case_to_tconj{
 template <typename T, size_t isym>
 class Integrals_2e : public Integrals {
     //            none       i          ih         ihr
-    static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8);
+    static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8, "Invalid symmetry parameter specified.");
     const size_t m_norb2, m_norb3, m_nelem_8fold, m_nelem;
     std::vector<T> m_data;
 public:
@@ -167,30 +167,27 @@ public:
 
 private:
     constexpr size_t nelem(const size_t &norb) {
-        static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8);
-        if constexpr (isym == 1) {
-            return norb * norb * norb * norb;
-        } else if constexpr (isym == 2) {
-            return trig(0, norb * norb);
-        } else if constexpr (isym == 4) {
-            return 2 * trig(0, trig(0, norb));
-        } else if (isym == 8) {
-            return trig(0, trig(0, norb));
+    	static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8, "Invalid symmetry parameter specified.");
+		switch (isym){
+			case 1 : return norb * norb * norb * norb;
+			case 2 : return trig(0, norb * norb);
+			case 4 : return 2 * trig(0, trig(0, norb));
+			case 8 : return trig(0, trig(0, norb));
         }
     }
 
     constexpr size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-        if constexpr(isym==1) {
+        if (isym==1) {
             return 0;
         }
-        if constexpr(isym==2) {
+		else if (isym==2) {
             /*
              * Only assuming I symmetry
              * rect(i, k) <= rect(j, l)
              */
             return (i<j || (i==j && k<l)) ? 1 : 2;
         }
-        if constexpr(isym>2) {
+		else if (isym>2) {
             /*
              * in IH and IHR symmetry, there are 8 identifiable cases
              */

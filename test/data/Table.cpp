@@ -15,7 +15,6 @@ TEST(Table, EncodeDecode) {
     spec.add<BitfieldNew>(nbit);
     const size_t nrow = 10;
     Table table(spec, nrow);
-    table.print();
 }
 
 

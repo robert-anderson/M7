@@ -10,7 +10,7 @@
 #include <string>
 #include "Integrals_1e.h"
 #include "Integrals_2e.h"
-#include "../fermion/DeterminantConnection.h"
+#include "src/fermion/Determinant.h"
 
 class AbInitioHamiltonian {
     FcidumpFileIterator<defs::ham_t> m_file_iterator;
@@ -20,15 +20,15 @@ class AbInitioHamiltonian {
 
 public:
 
-    inline auto norb() const { return m_file_iterator.m_norb; }
+    inline size_t norb() const { return m_file_iterator.m_norb; }
 
-    inline auto nspatorb() const { return m_int_1.m_nspatorb; }
+    inline size_t nspatorb() const { return m_int_1.m_nspatorb; }
 
-    inline auto nelec() const { return m_file_iterator.m_nelec; }
+    inline size_t nelec() const { return m_file_iterator.m_nelec; }
 
-    inline auto spin_resolved() const { return m_file_iterator.m_spin_resolved; }
+    inline size_t spin_resolved() const { return m_file_iterator.m_spin_resolved; }
 
-    inline auto spin_conserving() const { return m_int_1.spin_conserving(); }
+    inline size_t spin_conserving() const { return m_int_1.spin_conserving(); }
 
     size_t m_nci;
 

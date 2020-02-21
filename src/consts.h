@@ -3,6 +3,7 @@
 //
 
 #include <complex>
+#include <limits>
 
 #ifndef M7_CONSTS_H
 #define M7_CONSTS_H
@@ -32,8 +33,7 @@ namespace consts {
 
     template<typename T>
     static constexpr T conj(T &v) {
-        if constexpr (is_complex<T>()) return std::conj(v);
-        else return v;
+	   	return is_complex<T>()?std::conj(v):v;
     }
 
     template<typename T>

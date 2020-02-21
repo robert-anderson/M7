@@ -70,8 +70,8 @@ bool Determinant::partial_phase(const defs::inds &removed, const size_t &nremove
     size_t nperm = 0ul;
     DeterminantSetEnumerator set_enumerator(*this);
     size_t set;
-    for (auto removed : removed){
-        while (set_enumerator.next(set) && set < removed) nperm++;
+    for (auto iorb : removed){
+        while (set_enumerator.next(set) && set < iorb) nperm++;
     }
     return nperm&1ul;
 }

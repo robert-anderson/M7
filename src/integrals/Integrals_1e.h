@@ -24,7 +24,7 @@
 template<typename T, size_t isym>
 class Integrals_1e : public Integrals {
     //            none       h
-    static_assert(isym == 1 || isym == 2);
+    static_assert(isym == 1 || isym == 2, "Invalid symmetry parameter specified.");
     const size_t m_nelem;
     std::vector<T> m_data;
 
@@ -47,7 +47,7 @@ public:
     }
 
     inline size_t flat_index(const size_t &i, const size_t &j) const {
-        if constexpr (isym == 1) return i + j * m_norb;
+        if (isym == 1) return i + j * m_norb;
         else return i <= j ? trig(i, j) : trig(j, i);
     }
 
@@ -55,8 +55,9 @@ public:
         auto iflat = flat_index(i, j);
         auto conjd_value = (isym == 2 && i > j) ? consts::conj(value) : value;
         if (consts::float_is_zero(m_data[iflat])) m_data[iflat] = conjd_value;
-        else
+        else {
             assert(consts::floats_nearly_equal(m_data[iflat], conjd_value));
+        }
     }
 
     void set(const size_t &ispat, const size_t &ispin,
@@ -112,10 +113,10 @@ public:
 
 private:
     constexpr size_t nelem(const size_t &norb) {
-        static_assert(isym == 1 || isym == 2);
-        if constexpr (isym == 1) {
+        static_assert(isym == 1 || isym == 2, "Invalid symmetry parameter specified.");
+        if (isym == 1) {
             return norb * norb;
-        } else if constexpr (isym == 2) {
+        } else if (isym == 2) {
             return trig(0, norb);
         }
     }

@@ -6,7 +6,26 @@
 #include <gtest/gtest.h>
 #include "../../src/integrals/Integrals_1e.h"
 
-TEST(Integrals_1e, TwoFoldCheck) {
+TEST(Integrals_1e, TwoFoldCheckReal) {
+    /*
+     * check that all integrals are properly stored by retrieving all
+     * values specified in the FCIDUMP and validating against stored values
+     */
+    typedef double T;
+    std::string fname = defs::assets_root+"/ROHF_Cr2_12o12e/FCIDUMP";
+    Integrals_1e<T, 2> ints(fname);
+    FcidumpFileIterator<T> file_iterator(fname);
+    defs::inds inds(4);
+    T value;
+    while (file_iterator.next(inds, value)) {
+        if (ints.valid_inds(inds)) {
+            std::cout << value << " " << ints.get(inds[0], inds[1]) <<std::endl;
+            ASSERT_TRUE(consts::floats_equal(value, ints.get(inds[0], inds[1])));
+        }
+    }
+}
+
+TEST(Integrals_1e, TwoFoldCheckComplex) {
     /*
      * check that all integrals are properly stored by retrieving all
      * values specified in the FCIDUMP and validating against stored values
@@ -19,7 +38,6 @@ TEST(Integrals_1e, TwoFoldCheck) {
     T value;
     while (file_iterator.next(inds, value)) {
         if (ints.valid_inds(inds)) {
-            auto pp = ints.get(inds[0], inds[1]);
             ASSERT_TRUE(consts::floats_equal(value, ints.get(inds[0], inds[1])));
         }
     }
