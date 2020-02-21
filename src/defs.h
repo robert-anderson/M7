@@ -15,6 +15,7 @@ namespace defs {
     typedef std::vector<size_t> inds;
     typedef std::complex<double> ham_t;
     typedef typename consts::component_t<ham_t>::type ham_comp_t;
+    typedef double prob_t;
     typedef uint64_t data_t;
     const size_t isym_1e = 2;
     const size_t isym_2e = 4;
