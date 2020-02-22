@@ -40,9 +40,9 @@ void Table::zero(size_t irow) {
 
 void Table::print(size_t nrow) const {
     if (nrow == ~0ul) nrow = m_nrow;
-    const auto padding{4ul};
+    const size_t padding = 4ul;
     std::cout << "\nnumber of rows: " << m_nrow << std::endl;
-    for (auto irow{0ul}; irow < nrow; ++irow) {
+    for (size_t irow=0ul; irow < nrow; ++irow) {
         std::cout << view<std::complex<float>>(irow).to_string(padding);
         std::cout << view<std::complex<double>>(irow).to_string(padding);
         std::cout << view<std::complex<long double>>(irow).to_string(padding);
@@ -61,7 +61,7 @@ void Table::print(size_t nrow) const {
         std::cout << view<unsigned long long int>(irow).to_string(padding);
         std::cout << view<bool>(irow).to_string(padding);
 
-        for (auto ibitfield{0ul}; ibitfield < m_spec.m_bitfield_lengths.size(); ++ibitfield) {
+        for (size_t ibitfield=0ul; ibitfield < m_spec.m_bitfield_lengths.size(); ++ibitfield) {
             std::cout << view<BitfieldNew>(irow, ibitfield).to_string(padding);
         }
         std::cout << std::endl;
@@ -173,7 +173,7 @@ void Table::grow(size_t nrow_initial) {
         for (auto i{m_nsegment}; i > 1ul; --i) move_segment(i, m_nrow, nrow);
     }
     m_nrow = nrow;
-    for (auto i{0ul}; i < m_nsegment; ++i) {
+    for (size_t i=0ul; i < m_nsegment; ++i) {
         m_segment_dataword_offsets[i] = i * m_row_length * m_nrow;
     }
 }
@@ -202,7 +202,7 @@ bool Table::send_to(Table &recv) {
     mpi::all_to_all(sendcounts, recvcounts);
     auto &senddispls = segment_dataword_offsets();
     defs::inds recvdispls(mpi::nrank(), 0ul);
-    for (auto i{1ul}; i < mpi::nrank(); ++i)
+    for (size_t i=1ul; i < mpi::nrank(); ++i)
         recvdispls[i] = recvdispls[i - 1] + sendcounts[i - 1];
 
     auto tmp = mpi::all_to_allv(baseptr(), sendcounts, senddispls,

@@ -91,8 +91,8 @@ private:
                     std::sort(inds.begin(), inds.end());
                     // still looking for an example of four distinct indices
                     if (std::adjacent_find(inds.begin(), inds.end()) == inds.end()) {
-                        for (auto i{1ul}; i < orderings.size(); ++i) {
-                            for (auto j{0ul}; j < 4; ++j) inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
+                        for (size_t i=1ul; i < orderings.size(); ++i) {
+                            for (size_t j=0ul; j < 4; ++j) inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
                         }
                         isymm++;
                     }

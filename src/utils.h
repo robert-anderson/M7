@@ -48,9 +48,9 @@ namespace utils {
 namespace integer_utils {
     static size_t factorial(const size_t &n){
         assert(n<((size_t)-1)/2);
-        size_t out{1ul};
+        size_t out = 1ul;
         if (n<1) return 1ul;
-        for (auto i{1ul}; i<=n; ++i) out*=i;
+        for (size_t i = 1ul; i<=n; ++i) out*=i;
         return out;
     }
 
@@ -65,9 +65,9 @@ namespace integer_utils {
         if (n == 1) return 1ul;
         if (r == n) return 1ul;
 
-        size_t out{1ul};
-        auto ni{0ul};
-        auto ri{0ul};
+        size_t out = 1ul;
+        size_t ni = 0ul;
+        size_t ri = 0ul;
         while (1){
             if (ri<r && out%(r-ri)==0) {
                 out/=r-(ri++);
@@ -84,7 +84,7 @@ namespace string_utils {
     static std::string join(const std::vector<std::string> &words, const std::string &divider, const bool &bookends) {
         std::string out{""};
         if (bookends) out += divider;
-        for (auto i{0ul}; i < words.size() - 1; ++i) {
+        for (size_t i=0ul; i < words.size() - 1; ++i) {
             out += words[i] + divider;
         }
         out += words[words.size() - 1];

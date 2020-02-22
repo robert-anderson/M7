@@ -106,8 +106,8 @@ public:
          * iterate through integrals looking for an example of a non-zero
          * spin non-conserving one-body integral
          */
-        for (auto i{0ul}; i < m_norb; ++i) {
-            for (auto j{0ul}; i < m_norb; ++i) {
+        for (size_t i=0ul; i < m_norb; ++i) {
+            for (size_t j=0ul; i < m_norb; ++i) {
                 if (!consts::float_is_zero(get(i, 0, j, 1))) return false;
             }
         }

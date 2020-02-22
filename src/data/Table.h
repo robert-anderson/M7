@@ -17,7 +17,7 @@
 class Table {
     const Specification m_spec;
 protected:
-    size_t m_nrow{0ul};
+    size_t m_nrow = 0ul;
     std::vector<defs::data_t> m_data_internal{};
     defs::data_t *m_data = nullptr;
 

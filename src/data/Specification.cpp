@@ -46,7 +46,7 @@ void Specification::compile() {
 
 std::array<size_t, ntype> Specification::numeric_datawords_used(const std::array<size_t, ntype> &lengths) {
     std::array<size_t, ntype> out{};
-    for (auto i{0ul}; i < ntype; ++i) {
+    for (size_t i=0ul; i < ntype; ++i) {
         out[i] = (lengths[i] * sizes[i]) / sizeof(defs::data_t) +
                  (((lengths[i] * sizes[i]) % sizeof(defs::data_t)) != 0);
     }
@@ -57,7 +57,7 @@ std::array<size_t, ntype> Specification::numeric_offsets(const std::array<size_t
                                                          const std::array<size_t, ntype> &datawords_used) {
     std::array<size_t, ntype> out{};
     out[0] = 0;
-    for (auto i{1ul}; i < ntype; ++i) {
+    for (size_t i = 1ul; i < ntype; ++i) {
         out[i] = out[i - 1] + datawords_used[i - 1];
     }
     return out;
@@ -65,7 +65,7 @@ std::array<size_t, ntype> Specification::numeric_offsets(const std::array<size_t
 
 std::vector<size_t> Specification::bitfield_datawords_used(const std::vector<size_t> &lengths) {
     std::vector<size_t> out(lengths.size(), 0ul);
-    for (auto i{0ul}; i < lengths.size(); ++i) {
+    for (size_t i=0ul; i < lengths.size(); ++i) {
         out[i] = lengths[i] / (sizeof(defs::data_t) * 8) + ((lengths[i] % (sizeof(defs::data_t) * 8)) != 0);
     }
     return out;
@@ -74,7 +74,7 @@ std::vector<size_t> Specification::bitfield_datawords_used(const std::vector<siz
 std::vector<size_t>
 Specification::bitfield_offsets(const std::vector<size_t> &lengths, const std::vector<size_t> &datawords_used) {
     std::vector<size_t> out(lengths.size(), 0ul);
-    for (auto i{1ul}; i < lengths.size(); ++i) {
+    for (size_t i=1ul; i < lengths.size(); ++i) {
         out[i] = out[i - 1] + datawords_used[i - 1];
     }
     return out;

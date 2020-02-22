@@ -119,7 +119,7 @@ public:
         m_component_norm = input.nwalker_initial;
 
          // load balancing
-        for (auto i{0ul}; i < m_det_block_destinations.size(); ++i) {
+        for (size_t i =0ul; i < m_det_block_destinations.size(); ++i) {
             m_det_block_destinations[i] = i % mpi::nrank();
         }
     }

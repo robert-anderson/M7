@@ -16,7 +16,7 @@ void DataSystem::communicate() {
     mpi::all_to_all(sendcounts, recvcounts);
     auto &senddispls = m_send_buffer.segment_dataword_offsets();
     defs::inds recvdispls(mpi::nrank(), 0ul);
-    for (auto i{1ul}; i<mpi::nrank(); ++i)
+    for (size_t i=1ul; i<mpi::nrank(); ++i)
         recvdispls[i] = recvdispls[i-1]+sendcounts[i-1];
 
     mpi::all_to_allv(m_send_buffer.baseptr(), sendcounts, senddispls,

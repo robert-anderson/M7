@@ -22,15 +22,15 @@ bool CombinationEnumerator::next_element(defs::inds &result) {
         m_allfound = false;
         return false;
     }
-    auto ipos{0ul};
-    for (auto i{0ul}; i<m_n; ++i) {
+    size_t ipos = 0ul;
+    for (size_t i=0ul; i<m_n; ++i) {
         if (m_bitmask[i]){
             result[ipos] = i;
             if (ipos++==m_r) break;
         }
     }
     auto is_ordered = [](const defs::inds inds){
-        for (auto i{1ul}; i<inds.size(); ++i) if (inds[i]<=inds[i-1]){return false;}
+        for (size_t i=1ul; i<inds.size(); ++i) if (inds[i]<=inds[i-1]){return false;}
         return true;
     };
     m_allfound = !std::prev_permutation(m_bitmask.begin(), m_bitmask.end());

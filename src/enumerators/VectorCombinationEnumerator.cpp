@@ -9,7 +9,7 @@
 bool VectorCombinationEnumerator::next_element(defs::inds &result) {
     auto tmp = CombinationEnumerator::next_element(result);
     if (!tmp) return false;
-    for (auto i{0ul}; i<result.size(); ++i) {
+    for (size_t i=0ul; i<result.size(); ++i) {
         assert(result[i]<m_vector.size());
         result[i] = m_vector[result[i]];
     }

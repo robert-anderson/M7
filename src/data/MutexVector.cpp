@@ -26,7 +26,7 @@ Mutex MutexVector::get(const size_t &i) {
 }
 
 MutexVector::~MutexVector() {
-    for (auto i{0ul}; i < m_mutex.size(); ++i) omp_destroy_lock(m_mutex.data() + i);
+    for (size_t i=0ul; i < m_mutex.size(); ++i) omp_destroy_lock(m_mutex.data() + i);
 }
 
 size_t MutexVector::size() const {

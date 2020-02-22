@@ -6,7 +6,7 @@
 
 FileIterator::FileIterator(const std::string &filename, const size_t &ifirstline):
         m_file(std::ifstream(filename)), m_ifirstline(ifirstline) {
-    for (auto i{0ul}; i<m_ifirstline; i++) next();
+    for (size_t i=0ul; i<m_ifirstline; i++) next();
     assert(m_file.is_open());
 }
 
@@ -24,7 +24,7 @@ const size_t FileIterator::line_number_from_regex(const std::string &filename, c
     std::smatch match;
     FileIterator fi(filename);
     std::string line;
-    size_t out{0ul};
+    size_t out=0ul;
     while (fi.next(line)) {
         std::regex_search(line, match, regex);
         if (match.size()) return out;

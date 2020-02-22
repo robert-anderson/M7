@@ -50,7 +50,7 @@ void BitfieldNew::zero(){
 
 std::string BitfieldNew::to_string(size_t padding) const {
     std::string out{};
-    for (auto i{0ul}; i < m_nbit; ++i) {
+    for (size_t i =0ul; i < m_nbit; ++i) {
         out+=get(i)?"1":"0";
     }
     out.insert(out.begin(), padding, ' ');
@@ -63,8 +63,8 @@ void BitfieldNew::print() const {
 
 
 size_t BitfieldNew::nsetbits() const {
-    auto n{0ul};
-    for (auto i{0ul}; i < m_ndataword; ++i) {
+    size_t n = 0ul;
+    for (size_t i=0ul; i < m_ndataword; ++i) {
         if (sizeof(defs::data_t)==8) {
             n += _popcnt64(m_data[i]);
         }
@@ -76,8 +76,8 @@ size_t BitfieldNew::nsetbits() const {
 }
 
 size_t BitfieldNew::nsetbits_common(const BitfieldNew &other) const {
-    auto n{0ul};
-    for (auto i{0ul}; i < m_ndataword; ++i) {
+    size_t n = 0ul;
+    for (size_t i=0ul; i < m_ndataword; ++i) {
         if (sizeof(defs::data_t)==8) {
             n += _popcnt64(m_data[i]&other.m_data[i]);
         }
@@ -90,8 +90,8 @@ size_t BitfieldNew::nsetbits_common(const BitfieldNew &other) const {
 
 
 size_t BitfieldNew::nsetbits_cleared(const BitfieldNew &other) const {
-    auto n{0ul};
-    for (auto i{0ul}; i < m_ndataword; ++i) {
+    size_t n = 0ul;
+    for (size_t i=0ul; i < m_ndataword; ++i) {
         if (sizeof(defs::data_t)==8) {
             n += _popcnt64(m_data[i]&~other.m_data[i]);
         }

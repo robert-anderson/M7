@@ -12,13 +12,13 @@ Matrix<defs::ham_t, true>(source.m_nci)
     Determinant bra(source.nspatorb());
     Determinant ket(source.nspatorb());
 
-    size_t ibra{~0ul}; defs::inds bra_setinds(source.nelec());
+    size_t ibra=~0ul; defs::inds bra_setinds(source.nelec());
     CombinationEnumerator bra_enum(source.norb(), source.nelec());
     while(bra_enum.next(bra_setinds, ibra)){
         bra.zero();
         bra.set(bra_setinds);
         {
-            size_t iket{~0ul}; defs::inds ket_setinds(source.nelec());
+            size_t iket=~0ul; defs::inds ket_setinds(source.nelec());
             CombinationEnumerator ket_enum(source.norb(), source.nelec());
             while(ket_enum.next(ket_setinds, iket)){
                 ket.zero();

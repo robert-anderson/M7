@@ -67,7 +67,7 @@ public:
     static size_t nind(const std::string &filename){
         FileIterator fi(filename, float_inds_regex);
         std::string line{fi.next()};
-        auto out{0ul};
+        size_t out=0ul;
         auto iter = std::sregex_iterator(line.begin(), line.end(), space_delimited_uint_regex);
         for (auto i=iter; i!=std::sregex_iterator(); ++i) ++out;
         assert(out);
@@ -101,7 +101,7 @@ public:
         std::istringstream iss(line);
         std::vector<std::string> split(std::istream_iterator<std::string>{iss},
                                        std::istream_iterator<std::string>());
-        for (auto i{0ul}; i<nind; ++i){
+        for (size_t i=0ul; i<nind; ++i){
             inds[i] = atoi((split.begin()+(indsfirst?0:1)+i)->data())-1;
         }
 
@@ -122,7 +122,7 @@ public:
         T value;
         while (fi.next(line)){
             extract_line(line, nind, nreal_given, indsfirst, inds, value);
-            for (auto i{0ul}; i<nind; ++i) {
+            for (size_t i=0ul; i<nind; ++i) {
                 if (inds[i]<(size_t)(-1) && inds[i]+1>shape[i]) shape[i]=inds[i]+1;
             }
         }
