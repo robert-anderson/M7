@@ -1,5 +1,5 @@
 //
-// Created by Robert John Anderson on 2020-02-11.
+// Created by Robert John Anderson on 2020-02-22.
 //
 
 #ifndef M7_HEATBATHSAMPLER_H

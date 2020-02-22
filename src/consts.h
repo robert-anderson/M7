@@ -33,11 +33,18 @@ namespace consts {
 
     template<typename T>
     static constexpr T conj(T &v) {
-	   	return is_complex<T>()?std::conj(v):v;
+        static_assert(!is_complex<T>(), "Complex values should be conjugated by overloads.");
+	   	return v;
+    }
+
+    template<typename T>
+    static constexpr std::complex<T> conj(const std::complex<T> &v) {
+        return std::conj(v);
     }
 
     template<typename T>
     static constexpr T real(T &v) {
+        static_assert(!is_complex<T>(), "Real part of complex values should be taken by overloads.");
         return v;
     }
 
@@ -48,6 +55,7 @@ namespace consts {
 
     template<typename T>
     static constexpr T imag(T &v) {
+        static_assert(!is_complex<T>(), "Imaginary part of complex values should be taken by overloads.");
         return T(0);
     }
 

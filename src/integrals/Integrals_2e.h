@@ -10,9 +10,9 @@
 #include <unordered_map>
 #include <array>
 #include <assert.h>
-#include "../maps/VariadicIndexer.h"
-#include "../consts.h"
-#include "../io/FcidumpFileIterator.h"
+#include "src/multidim/Indexer.h"
+#include "src/consts.h"
+#include "src/io/FcidumpFileIterator.h"
 #include "Integrals.h"
 
 /*

@@ -84,6 +84,9 @@ public:
     }
 
     T get(const size_t &i, const size_t &j) const {
+        /*
+         * return the one-body integral between the two SPINORS indexed by i and j
+         */
         auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
