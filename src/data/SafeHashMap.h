@@ -63,7 +63,7 @@ public:
     }
 
     virtual void insert(const T &key, const size_t &value) {
-        auto mutex = get_mutex(key);
+        auto mutex = find_mutex(key);
         return insert(mutex, key, value);
     }
 
@@ -71,6 +71,15 @@ public:
         auto pair = lookup_pair(mutex, key);
         if (pair) pair->second = value;
         else insert(mutex, key, value);
+    }
+
+    size_t remove(Mutex mutex, const T &key) {
+        return HashMap<T>::remove(mutex.index(), key);
+    }
+
+    virtual size_t remove(const T &key) {
+        auto mutex = find_mutex(key);
+        return remove(mutex, key);
     }
 
     virtual void replace(const T &key, const size_t &value) {

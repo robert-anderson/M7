@@ -33,11 +33,12 @@ class HashMap {
     std::vector<std::forward_list<std::pair<T, size_t>>> m_buckets;
     typename HasherType<T>::type m_hasher;
 public:
-    HashMap(const size_t &nbucket) : m_buckets(nbucket){}
+    HashMap(const size_t &nbucket) : m_buckets(nbucket) {}
+
     HashMap(const HashMap &old, const size_t &nbucket) :
-    HashMap(nbucket) {
-        for (auto bucket:old.m_buckets){
-            for (auto it:bucket){
+        HashMap(nbucket) {
+        for (auto bucket:old.m_buckets) {
+            for (auto it:bucket) {
                 insert(it.first, it.second);
             }
         }
@@ -47,8 +48,8 @@ public:
         return m_hasher(key) % m_buckets.size();
     }
 
-    virtual std::pair<T, size_t>* lookup_pair(const size_t &ibucket, const T &key) const {
-        std::pair<T, size_t>* pair = nullptr;
+    virtual std::pair<T, size_t> *lookup_pair(const size_t &ibucket, const T &key) const {
+        std::pair<T, size_t> *pair = nullptr;
         for (auto it : m_buckets[ibucket]) {
             if (it.first == key) {
                 pair = &it;
@@ -58,7 +59,7 @@ public:
         return pair;
     }
 
-    virtual std::pair<T, size_t>* lookup_pair(const T &key) const {
+    virtual std::pair<T, size_t> *lookup_pair(const T &key) const {
         return lookup_pair(bucket(key), key);
     }
 
@@ -72,14 +73,14 @@ public:
         return lookup(bucket(key), key);
     }
 
-    virtual void insert(const size_t &ibucket, const T& key, const size_t &value) {
+    virtual void insert(const size_t &ibucket, const T &key, const size_t &value) {
         /*
          * assumes the key is not already in the map
          */
         m_buckets[ibucket].emplace_front(std::pair<T, size_t>(key, value));
     }
 
-    virtual void insert(const T& key, const size_t &value) {
+    virtual void insert(const T &key, const size_t &value) {
         return insert(bucket(key), key, value);
     }
 
@@ -87,6 +88,26 @@ public:
         auto pair = lookup_pair(key);
         if (pair) pair->second = value;
         else insert(key, value);
+    }
+
+    virtual size_t remove(const size_t &ibucket, const T &key) {
+        size_t irow = ~0ul;
+        auto &list = m_buckets[ibucket];
+        auto prev = list.begin();
+        for (auto it = list.begin(); it != list.end(); it++) {
+            if (it->first == key) {
+                irow = it->second;
+                if (prev == it) list.pop_front();
+                else list.erase_after(prev);
+                break;
+            }
+            prev = it;
+        }
+        return irow;
+    }
+
+    virtual size_t remove(const T &key) {
+        return remove(bucket(key), key);
     }
 
     size_t size() const {
