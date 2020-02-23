@@ -3,3 +3,5 @@
 //
 
 #include "HeatBathSampler.h"
+
+HeatBathSampler::HeatBathSampler() {}

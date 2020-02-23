@@ -77,6 +77,12 @@ public:
     bool partial_phase(const defs::inds &removed, const size_t &nremoved) const;
 
     bool partial_phase(const Determinant &other) const;
+
+    defs::inds setinds() const;
+
+    defs::inds clrinds() const;
+
+    size_t orbspin(const size_t &orb) const;
 };
 
 

@@ -98,6 +98,11 @@ public:
     bool operator<=(const BitfieldNew &rhs) const {
         return !(compare(rhs) > 0);
     }
+
+    defs::inds setinds() const;
+
+    defs::inds clrinds() const;
+
 };
 
 #endif //M7_BITFIELDNEW_H

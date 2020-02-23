@@ -30,6 +30,9 @@ public:
 
     inline size_t spin_conserving() const { return m_int_1.spin_conserving(); }
 
+    auto &int_1() const {return m_int_1;}
+    auto &int_2() const {return m_int_2;}
+
     size_t m_nci;
 
     AbInitioHamiltonian(const std::string &fname);

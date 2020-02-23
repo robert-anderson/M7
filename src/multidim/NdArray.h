@@ -19,38 +19,38 @@ template<typename T, size_t nind>
 class NdArray {
 protected:
     const Indexer<nind> m_indexer;
-    std::vector<T> m_data;
+    std::vector<T> m_data_internal;
+    T* m_data = nullptr;
 
 public:
     template<typename ...Args>
     NdArray(const size_t &first, Args ...shape) : m_indexer(first, shape...),
-                             m_data(nelement(), 0) {}
-
+                             m_data_internal(nelement(), 0), m_data(m_data_internal.data()) {}
 
     template<typename ...Args>
-    NdArray(const std::array<size_t, nind> &shape) : m_indexer(shape){}
+    NdArray(T* data, const std::array<size_t, nind> &shape) : m_indexer(shape), m_data(data){}
 
     template<typename ...Args>
     T *view(Args ...inds) const {
-        return (T*)m_data.data()+m_indexer.get(inds...);
+        return m_data+m_indexer.get(inds...);
     }
 
     template<typename ...Args>
-    auto subarray(const size_t &first, Args ...subs){
-        std::array<size_t, nind-sizeof...(subs)-1> shape;
-        std::copy(m_indexer.shape().begin()+sizeof...(subs)-1,
+    NdArray<T, nind-sizeof...(Args)> subarray(Args ...subs){
+        std::array<size_t, nind-sizeof...(subs)> shape;
+        std::copy(m_indexer.shape().begin()+sizeof...(subs),
             m_indexer.shape().end(), shape.begin());
-        return NdArray<T, nind-sizeof...(subs)-1>(shape);
+        return NdArray<T, nind-sizeof...(subs)>(m_data+m_indexer.get_sub(subs...), shape);
     }
 
     void operator=(NdArray &src) {
-        assert(Indexer<nind>::m_shape == src.m_shape);
-        memcpy(m_data.data(), src.m_data, nelement() * sizeof(T));
+        assert(m_indexer.shape() == src.m_shape);
+        memcpy(m_data, src.m_data, nelement() * sizeof(T));
     }
 
     void operator=(std::vector<T> &src) {
-        assert(Indexer<nind>::nelement() == src.size());
-        memcpy(m_data.data(), src.data(), nelement() * sizeof(T));
+        assert(nelement() == src.size());
+        memcpy(m_data, src.data(), nelement() * sizeof(T));
     }
 
 

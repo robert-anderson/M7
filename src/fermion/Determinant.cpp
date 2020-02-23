@@ -162,3 +162,15 @@ Determinant &Determinant::operator=(const Determinant &rhs) {
 bool Determinant::is_null() const {
     return nspatorb()==0;
 }
+
+defs::inds Determinant::setinds() const {
+    return DeterminantSetEnumerator(*this).enumerate();
+}
+
+defs::inds Determinant::clrinds() const {
+    return DeterminantClrEnumerator(*this).enumerate();
+}
+
+size_t Determinant::orbspin(const size_t &orb) const{
+    return (size_t)(orb<nspatorb());
+}
