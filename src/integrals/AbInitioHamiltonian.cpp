@@ -78,6 +78,13 @@ defs::ham_t AbInitioHamiltonian::get_element_2(const Determinant &bra, const Det
     return m_int_2.get_phys_antisym(inserted1, inserted2, removed1, removed2);
 }
 
+defs::ham_t AbInitioHamiltonian::get_element_2(
+    const size_t &removed1, const size_t &removed2,
+    const size_t &inserted1, const size_t &inserted2) const {
+    return m_int_2.get_phys_antisym(inserted1, inserted2, removed1, removed2);
+}
+
+
 defs::ham_t AbInitioHamiltonian::get_element(const Determinant &bra, const Determinant &ket) const {
     bool phase;
     switch (bra.nexcit(ket)) {
@@ -102,8 +109,8 @@ consts::component_t<defs::ham_t>::type AbInitioHamiltonian::get_energy(const Det
 
 Determinant AbInitioHamiltonian::guess_reference(const size_t &spin_level) const {
     Determinant ref(nspatorb());
-    for (size_t i=0ul; i < nelec() / 2 + 2 * spin_level + nelec() % 2; ++i) ref.set(i, 0);
-    for (size_t i=0ul; i < nelec() / 2; ++i) ref.set(i, 1);
+    for (size_t i = 0ul; i < nelec() / 2 + 2 * spin_level + nelec() % 2; ++i) ref.set(i, 0);
+    for (size_t i = 0ul; i < nelec() / 2; ++i) ref.set(i, 1);
     return ref;
 }
 

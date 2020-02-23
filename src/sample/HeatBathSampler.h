@@ -50,7 +50,7 @@ public:
         Excitation m_double;
     };
 
-    class DeterminantSampler{
+    class DeterminantSampler {
         const HeatBathSampler &m_precomputed;
         const Determinant &m_det;
         const defs::inds m_occinds;
@@ -69,24 +69,14 @@ public:
         HeatBathExcitation draw(PRNG prng);
 
     private:
-        defs::prob_t proposal(const size_t &p, const size_t &r, const defs::ham_t &h){
-            defs::prob_t out = 0.0;
-            for (auto qp: m_occinds){
-                auto htot = m_precomputed.m_H_tot.view(p, qp, r);
-                defs::prob_t p_single = 1.0;
-                if ()
-                out+=
-                    m_P_tilde_1[p]*
-                    m_P_tilde_2[qp]*
-                    (*m_precomputed.m_P_tilde_3.view(p, qp, r))*
-                    prob
-            }
-        }
+        defs::prob_t proposal(const size_t &ip, const size_t &r, const defs::ham_t &h);
+
+        defs::prob_t proposal(const size_t &ip, const size_t &iq,
+                              const size_t &r, const size_t &s,
+                              const defs::ham_t &h);
     };
 
-    DeterminantSampler sample_excitations(const Determinant &det){
-        return DeterminantSampler(*this, det);
-    }
+    DeterminantSampler sample_excitations(const Determinant &det);
 
 };
 

@@ -45,8 +45,7 @@ public:
 
     defs::ham_t get_element_1(const Determinant &bra, const Determinant &ket) const;
 
-    defs::ham_t get_element_2(const Determinant &bra,
-                              const size_t &removed1, const size_t &removed2,
+    defs::ham_t get_element_2(const size_t &removed1, const size_t &removed2,
                               const size_t &inserted1, const size_t &inserted2) const;
 
     defs::ham_t get_element_2(const Determinant &bra, const Determinant &ket) const;
