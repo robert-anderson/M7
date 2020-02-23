@@ -127,14 +127,14 @@ int Determinant::compare(const Determinant &rhs) const {
 }
 
 Determinant Determinant::get_excited_det(const defs::inds &removed, const defs::inds &inserted) const{
-    auto out{*this};
+    auto out = *this;
     for (auto iremoved : removed) out.clr(iremoved);
     for (auto iinserted : inserted) out.set(iinserted);
     return out;
 }
 
 Determinant Determinant::get_excited_det(const size_t &removed, const size_t &inserted) const{
-    auto out{*this};
+    auto out = *this;
     out.clr(removed);
     out.set(inserted);
     return out;
@@ -145,7 +145,7 @@ Determinant Determinant::get_excited_det(
         const size_t &removed1, const size_t &removed2,
         const size_t &inserted1, const size_t &inserted2
 ) const{
-    auto out{*this};
+    auto out = *this;
     out.clr(removed1);
     out.clr(removed2);
     out.set(inserted1);

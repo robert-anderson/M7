@@ -52,13 +52,13 @@ public:
 
     template<typename T>
     view_t<T> view(const size_t &irow, const size_t &ientry) const {
-        if (ientry >= m_spec.m_numeric_lengths[itype<T>]) {
+        if (ientry >= m_spec.m_numeric_lengths[itype<T>()]) {
             return NumericView<T>(nullptr, 0);
         }
         return NumericView<T>(
             (char *) (m_data + irow * row_length() +
-                      m_spec.m_numeric_offsets[itype<T>]) + ientry * sizeof(T),
-            m_spec.m_numeric_lengths[itype<T>] - ientry);
+                      m_spec.m_numeric_offsets[itype<T>()]) + ientry * sizeof(T),
+            m_spec.m_numeric_lengths[itype<T>()] - ientry);
     }
 
     template<typename T>

@@ -10,8 +10,6 @@
 
 namespace consts {
 
-    template<typename T>
-    static constexpr bool is_floating_point = std::is_floating_point<T>::value;
 
     template<typename T>
     struct is_complex_t : public std::false_type {};

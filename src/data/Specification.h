@@ -12,52 +12,52 @@
 
 namespace numtypes {
     template<typename T>
-    constexpr size_t itype = ~0ul;
+    constexpr size_t itype() {return ~0ul;}
 
     // complex numbers
     template<>
-    constexpr size_t itype<std::complex<float>> = 0;
+    constexpr size_t itype<std::complex<float>>() {return 0;}
     template<>
-    constexpr size_t itype<std::complex<double>> = 1;
+    constexpr size_t itype<std::complex<double>>() {return 1;}
     template<>
-    constexpr size_t itype<std::complex<long double>> = 2;
+    constexpr size_t itype<std::complex<long double>>() {return 2;}
 
 
     // real numbers
     template<>
-    constexpr size_t itype<float> = 3;
+    constexpr size_t itype<float>() {return 3;}
     template<>
-    constexpr size_t itype<double> = 4;
+    constexpr size_t itype<double>() {return 4;}
     template<>
-    constexpr size_t itype<long double> = 5;
+    constexpr size_t itype<long double>() {return 5;}
 
     // signed integers
     template<>
-    constexpr size_t itype<char> = 6;
+    constexpr size_t itype<char>() {return 6;}
     template<>
-    constexpr size_t itype<short int> = 7;
+    constexpr size_t itype<short int>() {return 7;}
     template<>
-    constexpr size_t itype<int> = 8;
+    constexpr size_t itype<int>() {return 8;}
     template<>
-    constexpr size_t itype<long int> = 9;
+    constexpr size_t itype<long int>() {return 9;}
     template<>
-    constexpr size_t itype<long long int> = 10;
+    constexpr size_t itype<long long int>() {return 10;}
 
     // unsigned integers
     template<>
-    constexpr size_t itype<unsigned char> = 11;
+    constexpr size_t itype<unsigned char>() {return 11;}
     template<>
-    constexpr size_t itype<unsigned short int> = 12;
+    constexpr size_t itype<unsigned short int>() {return 12;}
     template<>
-    constexpr size_t itype<unsigned int> = 13;
+    constexpr size_t itype<unsigned int>() {return 13;}
     template<>
-    constexpr size_t itype<unsigned long int> = 14;
+    constexpr size_t itype<unsigned long int>() {return 14;}
     template<>
-    constexpr size_t itype<unsigned long long int> = 15;
+    constexpr size_t itype<unsigned long long int>() {return 15;}
 
     // boolean
     template<>
-    constexpr size_t itype<bool> = 16;
+    constexpr size_t itype<bool>() {return 16;}
 
     constexpr size_t ntype = 17;
 
@@ -103,10 +103,10 @@ public:
 
     template<typename T>
     size_t add(size_t n) {
-        assert(itype<T>!=~0ul);
-        m_numeric_lengths[itype<T>] += n;
+        assert(itype<T>()!=~0ul);
+        m_numeric_lengths[itype<T>()] += n;
         compile();
-        return m_numeric_lengths[itype<T>]-n;
+        return m_numeric_lengths[itype<T>()]-n;
     }
 
     void compile();
