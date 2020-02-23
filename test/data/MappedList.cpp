@@ -28,17 +28,17 @@ TEST(MappedList, ThreadSafety) {
 
     MappedList<size_t> list(specification, nrow, 0);
 
-//#pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < nrow; ++i) {
-        //{
+        {
             //enclose within scope to ensure destruction of mutex
-            //auto mutex = list.find_mutex(i * i);
-            //size_t irow = list.push(mutex, i * i);
-            size_t irow = list.push(i * i);
+            auto mutex = list.find_mutex(i * i);
+            size_t irow = list.push(mutex, i * i);
             list.view<size_t>(irow)[1] = i;
-        //}
+        }
     }
     for (size_t i = 0; i < nrow; ++i) {
-        ASSERT_EQ(list.view<size_t>(i * i)[1], i);
+        auto irow = list.lookup(i*i);
+        ASSERT_EQ(list.view<size_t>(irow)[1], i);
     }
 }
