@@ -11,6 +11,7 @@
 #include <cmath>
 #include <assert.h>
 #include <limits>
+#include <numeric>
 
 namespace utils {
     template <typename T>
@@ -115,6 +116,15 @@ namespace string_utils {
 
     static std::string join(const std::string &word, const size_t &nrepeat) {
         return join(word, nrepeat, " ", false);
+    }
+}
+
+namespace prob_utils {
+    template<typename T>
+    void normalize(std::vector<T> v, T norm=T(1)){
+        T tot = std::accumulate(v.begin(), v.end(), T(0));
+        T fac = norm/tot;
+        for (auto &i:v) i*=fac;
     }
 }
 

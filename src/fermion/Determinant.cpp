@@ -38,7 +38,6 @@ bool Determinant::is_zero() const {
     return m_bitfields[0].is_zero() && m_bitfields[1].is_zero();
 }
 
-
 void Determinant::set(const size_t &ispat, const size_t &ispin){
     assert(ispin==0 || ispin==1);
     assert(ispat>=0 && ispat<m_bitfields[0].m_nbit);
@@ -64,6 +63,18 @@ void Determinant::clr(const size_t &ispat, const size_t &ispin){
 void Determinant::clr(const size_t &i){
     assert(i<nspatorb()*2);
     clr(i%m_bitfields[0].m_nbit, i/m_bitfields[0].m_nbit);
+}
+
+
+bool Determinant::get(const size_t &ispat, const size_t &ispin) const{
+    assert(ispin==0 || ispin==1);
+    assert(ispat>=0 && ispat<m_bitfields[0].m_nbit);
+    return m_bitfields[ispin].get(ispat);
+}
+
+bool Determinant::get(const size_t &i) const{
+    assert(i<nspatorb()*2);
+    return get(i%m_bitfields[0].m_nbit, i/m_bitfields[0].m_nbit);
 }
 
 bool Determinant::partial_phase(const defs::inds &removed, const size_t &nremoved) const{

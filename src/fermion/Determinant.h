@@ -50,6 +50,10 @@ public:
 
     void clr(const defs::inds &inds);
 
+    bool get(const size_t &ispat, const size_t &ispin) const;
+
+    bool get(const size_t &i) const;
+
     size_t nexcit(const Determinant &other) const;
 
     bool phase(const Determinant &other) const;
