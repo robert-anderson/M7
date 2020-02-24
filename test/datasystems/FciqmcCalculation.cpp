@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "src/parallel/MPIWrapper.h"
-#include "src/datasystems/FciqmcCalculation.h"
+#include "src/dynamics/FciqmcCalculation.h"
 
 /*
 TEST(FciqmcCalculation, test) {

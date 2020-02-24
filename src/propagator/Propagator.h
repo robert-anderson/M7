@@ -6,7 +6,6 @@
 #define M7_PROPAGATOR_H
 
 
-#include <src/data/PerforableMappedTable.h>
 #include <src/integrals/AbInitioHamiltonian.h>
 #include <iomanip>
 

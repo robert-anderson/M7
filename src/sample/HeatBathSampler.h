@@ -76,7 +76,7 @@ public:
                               const defs::ham_t &h);
     };
 
-    DeterminantSampler sample_excitations(const Determinant &det);
+    DeterminantSampler sample_excitations(const Determinant &det) const;
 
 };
 

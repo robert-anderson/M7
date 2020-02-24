@@ -10,9 +10,9 @@
 
 /*
  * The PerforableMappedList extends the MappedList by supporting a
- * deletion mechanism which does not leak rows.
+ * removal mechanism which does not leak rows.
  * In the base class, List, new elements are always inserted at the
- * high-water-mark, and so if deletion were allowed on such objects,
+ * high-water-mark, and so if removal were allowed on such objects,
  * deleted entries would become abandoned rows.
  *
  * The obvious solution here is to employ a last-in-first-out stack
@@ -36,49 +36,78 @@
 
 template<typename T>
 class PerforableMappedList : public MappedList<T> {
-    defs::inds m_free_rows;
-    size_t m_nfree_row;
-    size_t m_free_rows_used;
-    defs::inds m_deleted_rows;
-    size_t m_ndeleted_row;
+    defs::inds m_free;
+    defs::inds m_removed;
+
+    size_t m_nfree = 0ul;
+    size_t m_nfree_used = 0ul;
+    size_t m_nremoved = 0ul;
 public:
 
     PerforableMappedList(Specification spec, size_t nrow, size_t key_entry) :
-    MappedList<T>(spec, nrow, key_entry),
-    m_free_rows(nrow, 0ul), m_nfree_row(0ul), m_free_rows_used(0ul),
-    m_deleted_rows(nrow, 0ul), m_ndeleted_row(0){}
+        MappedList<T>(spec, nrow, key_entry),
+        m_free(nrow, 0ul), m_removed(nrow, 0ul) {}
 
     PerforableMappedList(Specification spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
-    MappedList<T>(spec, nrow, key_entry, data_external){}
+        MappedList<T>(spec, nrow, key_entry, data_external) {}
 
-    void next_cycle(){
-
+    void synchronize() {
+        /*
+         * if the number of attempted accesses of the free stack exceeded the number
+         * of elements in the stack, then the stack was emptied.
+         * Now move the indices of the newly removed rows into the free stack
+         */
+        m_nfree = m_nfree_used>m_nfree? 0 : m_nfree-m_nfree_used;
+        std::move(m_removed.begin(), m_removed.end(), m_free.begin()+m_nfree);
+        m_nfree+=m_nremoved;
+        m_nremoved = 0ul;
+        m_nfree_used = 0ul;
     }
 
-    size_t push(Mutex &mutex, const T& key){
+    size_t push(Mutex &mutex, const T &key) {
         size_t irow;
         irow = MappedList<T>::m_map.lookup(mutex, key);
-        if (irow!=~0ul) {
+        if (irow != ~0ul) {
             return irow;
         }
         // key not found in table, so see if there are any free rows left
+        if (m_nfree_used<m_nfree) {
 #pragma omp atomic capture
-        irow = m_free_rows_used++;
-        if (irow<m_nfree_row) {
-            // free_row was available
-            irow=m_free_rows[irow];
+            irow = m_nfree_used++;
+            if (irow < m_nfree) {
+                // free_row was available
+                irow = m_free[irow];
+            }
+            else irow = ~0ul;
         }
-        else {
+        if (irow==~0ul) {
             // free_rows is empty, need to push back high-water-mark
             irow = List::push();
         }
         MappedList<T>::m_map.insert(mutex, key, irow);
+        List::view<T>(irow, MappedList<T>::m_key_entry) = key;
         return irow;
     }
 
-    size_t push(const T& key) {
+    size_t push(const T &key) {
         auto mutex = MappedList<T>::m_map.find_mutex(key);
         return push(mutex, key);
+    }
+
+    size_t remove(Mutex mutex, const T &key) {
+        auto irow = MappedList<T>::m_map.remove(mutex, key);
+        Table::zero(irow);
+        size_t iremoved;
+#pragma omp atomic capture
+        iremoved = m_nremoved++;
+        assert(iremoved<m_removed.size());
+        m_removed[iremoved] = irow;
+        return irow;
+    }
+
+    size_t remove(const T &key) {
+        auto mutex = MappedList<T>::find_mutex(key);
+        return remove(mutex, key);
     }
 
 

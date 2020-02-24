@@ -17,7 +17,6 @@ TEST(Table, EncodeDecode) {
     Table table(spec, nrow);
 }
 
-
 /*
 TEST(Table, AllToAllV) {
     Specification spec;

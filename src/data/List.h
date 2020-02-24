@@ -26,10 +26,10 @@ public:
         return tmp;
     }
 
-    size_t push(const size_t &irow) {
+    size_t push(const size_t &nrow) {
         size_t tmp;
 #pragma omp atomic capture
-        tmp = m_high_water_mark += irow;
+        tmp = m_high_water_mark += nrow;
         return tmp;
     }
 

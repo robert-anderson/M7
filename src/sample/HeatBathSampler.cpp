@@ -66,7 +66,7 @@ HeatBathSampler::HeatBathSampler(const AbInitioHamiltonian &h) :
     }
 }
 
-HeatBathSampler::DeterminantSampler HeatBathSampler::sample_excitations(const Determinant &det) {
+HeatBathSampler::DeterminantSampler HeatBathSampler::sample_excitations(const Determinant &det) const {
     return DeterminantSampler(*this, det);
 }
 

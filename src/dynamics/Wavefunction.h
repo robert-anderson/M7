@@ -5,6 +5,125 @@
 #ifndef M7_WAVEFUNCTION_H
 #define M7_WAVEFUNCTION_H
 
+#include <src/enumerators/VectorCombinationEnumerator.h>
+#include "src/dynamics/WalkerList.h"
+#include "src/sample/HeatBathSampler.h"
+#include "SpawnList.h"
+
+class Wavefunction {
+    WalkerList m_walker_list;
+    SpawnList m_spawn_list;
+
+public:
+
+    defs::ham_comp_t m_square_norm;
+    defs::ham_comp_t m_delta_square_norm;
+
+    Wavefunction(const Determinant &ref, size_t nwalker_initial, size_t nrow_walkers, size_t nrow_send,
+                 size_t nrow_recv) :
+        m_walker_list(ref.nspatorb() * 2, nrow_walkers),
+        m_spawn_list(ref.nspatorb() * 2, nrow_send, nrow_recv) {
+        auto irow = m_walker_list.m_list->push(ref);
+        *m_walker_list.m_list->view<defs::ham_t>(0) = nwalker_initial;
+        m_square_norm = std::pow(nwalker_initial, 2);
+    }
+
+    /*
+    void evolve(const HeatBathSampler &hb){
+#pragma omp parallel for
+        for (size_t irow=0ul; irow<m_walker_list.high_water_mark(); ++irow){
+            if (m_walker_list.is_free(irow)) continue;
+            auto weight = m_walker_list.weight(irow);
+            auto nattempt = std::ceil(std::abs(weight));
+            auto det = m_walker_list.det(irow);
+            {
+                auto sampler = hb.sample_excitations(det);
+                for (size_t iattempt=0ul; iattempt<nattempt; ++iattempt){
+                    auto excit = sampler.draw();
+                }
+            }
+        }
+    }*/
+
+
+    void annihilation() {
+        for (size_t irow_recv = 0ul; irow_recv < m_spawn_list.nrecv(); ++irow_recv) {
+            auto det = m_spawn_list.recv_det(irow_recv);
+            auto spawned_weight = m_spawn_list.recv_weight(irow_recv);
+
+            defs::ham_t stored_weight;
+            {
+                auto mutex = m_walker_list.m_list->find_mutex(det);
+                auto irow_store = m_walker_list.m_list->push(mutex, det);
+                stored_weight = *m_walker_list.m_list->view<defs::ham_t>(irow_store, m_walker_list.m_iweight);
+                *m_walker_list.m_list->view<defs::ham_t>(irow_store, m_walker_list.m_iweight) += spawned_weight;
+            }
+            m_delta_square_norm += std::pow(abs(stored_weight + spawned_weight), 2);
+            m_delta_square_norm -= std::pow(abs(stored_weight), 2);
+        }
+        m_spawn_list.m_conn->m_recv.zero();
+    }
+
+    void death(const AbInitioHamiltonian &h, const defs::ham_comp_t &shift) {
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
+            auto det = m_walker_list.det(irow);
+            auto hdiag = h.get_element_0(det);
+            auto stored_weight = m_walker_list.weight(irow);
+            auto delta_weight = -0.01 * (hdiag - shift) * stored_weight;
+            m_delta_square_norm += std::pow(abs(stored_weight + delta_weight), 2);
+            m_delta_square_norm -= std::pow(abs(stored_weight), 2);
+            *m_walker_list.m_list->view<defs::ham_t>(irow, m_walker_list.m_iweight) += delta_weight;
+        }
+    }
+
+    void spawn(const AbInitioHamiltonian &h, const defs::ham_t &weight,
+               const Determinant &det, const Determinant &excited) {
+
+        defs::ham_t helement = h.get_element(det, excited);
+        if (consts::float_is_zero(helement)) return;
+        auto idst_rank = 0;//m_det_block_destinations[DeterminantHasher()(ket) % m_det_block_destinations.size()];
+        m_spawn_list.create(excited, idst_rank, -0.01 * helement * weight, false);
+        //if (det==m_reference) m_hf_connection_buffer_flag->set(send, idst, irow);
+    }
+
+    void evolve_exact(const AbInitioHamiltonian &h) {
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
+            if (m_walker_list.is_free(irow)) continue;
+            auto weight = m_walker_list.weight(irow);
+            auto nattempt = std::ceil(std::abs(weight));
+            auto det = m_walker_list.det(irow);
+
+            auto occs = DeterminantSetEnumerator(det).enumerate();
+            assert(occs.size());
+            auto unoccs = DeterminantClrEnumerator(det).enumerate();
+            assert(unoccs.size());
+
+            Determinant excited(det.nspatorb());
+            for (auto occ : occs) {
+                for (auto unocc :unoccs) {
+                    excited = det.get_excited_det(occ, unocc);
+                    spawn(h, weight, det, excited);
+                }
+            }
+
+            VectorCombinationEnumerator occ_enumerator(occs, 2);
+            defs::inds occ_inds(2);
+
+            while (occ_enumerator.next(occ_inds)) {
+                {
+                    VectorCombinationEnumerator unocc_enumerator(unoccs, 2);
+                    defs::inds unocc_inds(2);
+                    while (unocc_enumerator.next(unocc_inds)) {
+                        excited = det.get_excited_det(occ_inds, unocc_inds);
+                        spawn(h, weight, det, excited);
+                    }
+                }
+            }
+        }
+    }
+};
+
+/*
 #include "DataSystem.h"
 #include "src/data/PerforableMappedTable.h"
 #include <memory>
@@ -43,6 +162,7 @@ public:
         return std::make_unique<Flag>(m_ispec, m_spec.m_bitfield_lengths[m_ispec]++);
     }
 };
+*/
 
 /*
 class Wavefunction {

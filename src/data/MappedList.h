@@ -10,6 +10,7 @@
 
 template<typename T>
 class MappedList : public List {
+protected:
     SafeHashMap<T> m_map;
     const size_t m_key_entry;
 public:

@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <src/data/BitfieldNew.h>
 #include <src/parallel/MPIWrapper.h>
-#include <src/datasystems/FciqmcCalculation.h>
+#include <src/dynamics/FciqmcCalculation.h>
 #include <src/io/InputOptions.h>
 #include "CLI/CLI.hpp"
 
