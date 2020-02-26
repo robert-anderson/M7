@@ -65,12 +65,11 @@ public:
     }
 
     size_t push(Mutex &mutex, const T &key) {
-        size_t irow;
-        irow = MappedList<T>::m_map.lookup(mutex, key);
-        if (irow != ~0ul) {
-            return irow;
-        }
-        // key not found in table, so see if there are any free rows left
+        size_t irow = MappedList<T>::m_map.lookup(mutex, key);
+        if (irow != ~0ul) return irow;
+        /*
+         * key not found in table, so see if there are any free rows left
+         */
         if (m_nfree_used<m_nfree) {
 #pragma omp atomic capture
             irow = m_nfree_used++;
@@ -85,12 +84,11 @@ public:
             irow = List::push();
         }
         MappedList<T>::m_map.insert(mutex, key, irow);
-        List::view<T>(irow, MappedList<T>::m_key_entry) = key;
         return irow;
     }
 
     size_t push(const T &key) {
-        auto mutex = MappedList<T>::m_map.find_mutex(key);
+        auto mutex = MappedList<T>::m_map.key_mutex(key);
         return push(mutex, key);
     }
 
@@ -106,7 +104,7 @@ public:
     }
 
     size_t remove(const T &key) {
-        auto mutex = MappedList<T>::find_mutex(key);
+        auto mutex = MappedList<T>::key_mutex(key);
         return remove(mutex, key);
     }
 

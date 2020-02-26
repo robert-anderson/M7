@@ -37,7 +37,7 @@ public:
     }
 
     bool is_free(const size_t &irow){
-        return det().is_zero();
+        return det(irow).is_zero();
     }
 
     defs::ham_t weight(const size_t &irow){

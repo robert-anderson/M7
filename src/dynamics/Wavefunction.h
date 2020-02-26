@@ -53,7 +53,7 @@ public:
 
             defs::ham_t stored_weight;
             {
-                auto mutex = m_walker_list.m_list->find_mutex(det);
+                auto mutex = m_walker_list.m_list->key_mutex(det);
                 auto irow_store = m_walker_list.m_list->push(mutex, det);
                 stored_weight = *m_walker_list.m_list->view<defs::ham_t>(irow_store, m_walker_list.m_iweight);
                 *m_walker_list.m_list->view<defs::ham_t>(irow_store, m_walker_list.m_iweight) += spawned_weight;

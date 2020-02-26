@@ -25,6 +25,13 @@ public:
 
     T &operator*() const { return *m_data; }
 
+
+    // allow the view to be implicitly converted to the data type it holds
+    operator T() const {
+        assert(m_data!= nullptr);
+        return *m_data;
+    }
+
     const size_t size() const { return m_size; }
 
     std::string to_string(size_t padding = 0) const {

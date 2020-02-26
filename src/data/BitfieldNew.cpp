@@ -9,7 +9,7 @@
 #include <src/enumerators/BitfieldEnumerator.h>
 #include "BitfieldNew.h"
 #include "../defs.h"
-#include "BitfieldHasher.h"
+#include "src/hash/BitfieldHasher.h"
 
 BitfieldNew::BitfieldNew(const size_t &nbit) :
     m_data_internal(ndataword(nbit)), m_nbit(nbit), m_ndataword(ndataword(nbit)) {

@@ -6,49 +6,73 @@
 #define M7_MAPPEDLIST_H
 
 #include "List.h"
-#include "SafeHashMap.h"
+#include "src/hash/SafeHashMap.h"
+
+template<typename T>
+class ListSafeHashMap;
 
 template<typename T>
 class MappedList : public List {
 protected:
-    SafeHashMap<T> m_map;
     const size_t m_key_entry;
+    ListSafeHashMap<T> m_map;
+
 public:
     MappedList(Specification spec, size_t nrow, size_t key_entry) :
-    List(spec, nrow), m_map(nrow), m_key_entry(key_entry) {}
-    MappedList(Specification spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
-    List(spec, nrow, data_external), m_map(nrow), m_key_entry(key_entry) {}
+            List(spec, nrow), m_key_entry(key_entry), m_map(*this, nrow) {}
 
-    Mutex get_mutex(const size_t &ibucket){
+    MappedList(Specification spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
+            List(spec, nrow, data_external), m_key_entry(key_entry), m_map(*this, nrow) {}
+
+    Mutex get_mutex(const size_t &ibucket) {
         return m_map.get_mutex(ibucket);
     }
 
-    Mutex find_mutex(const T& key){
-        return m_map.find_mutex(key);
+    Mutex key_mutex(const T &key) {
+        return m_map.key_mutex(key);
     }
 
-    size_t lookup(const T &key){
-        auto mutex = find_mutex(key);
+    size_t lookup(const T &key) {
+        auto mutex = key_mutex(key);
         return m_map.lookup(mutex, key);
     }
 
-    size_t lookup(Mutex &mutex, const T &key){
+    size_t lookup(Mutex &mutex, const T &key) {
         return m_map.lookup(mutex, key);
     }
 
-    size_t push(Mutex &mutex, const T &key){
+    size_t push(Mutex &mutex, const T &key) {
         size_t irow;
         irow = m_map.lookup(mutex, key);
-        if (irow!=~0ul) return irow;
+        if (irow != ~0ul) return irow;
         irow = List::push();
         m_map.insert(mutex, key, irow);
-        view<T>(irow, m_key_entry) = key;
         return irow;
     }
 
-    size_t push(const T& key){
-        auto mutex = find_mutex(key);
+    size_t push(const T &key) {
+        auto mutex = key_mutex(key);
         return push(mutex, key);
+    }
+
+    const size_t &key_entry() const {
+        return m_key_entry;
+    }
+};
+
+template<typename T>
+struct ListSafeHashMap : public SafeHashMap<T> {
+    MappedList<T> &m_list;
+
+    ListSafeHashMap(MappedList<T> &list, const size_t &nbucket) :
+            SafeHashMap<T>(nbucket), m_list(list) {}
+
+    T get_key(const size_t &key_index) const override {
+        return m_list.template view<T>(key_index, m_list.key_entry());
+    }
+
+    void set_key(const size_t &key_index, const T &key) override {
+        m_list.template view<T>(key_index, m_list.key_entry()) = key;
     }
 };
 

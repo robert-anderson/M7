@@ -29,7 +29,7 @@ public:
             recvdispls[i] = recvdispls[i - 1] + sendcounts[i - 1];
 
         auto tmp = mpi::all_to_allv(m_send.data(), sendcounts, senddispls,
-                                    m_recv, recvcounts, recvdispls);
+                                    m_recv.data(), recvcounts, recvdispls);
         //recv.set_highwatermark(0, (recvdispls.back() + recvcounts.back()) / row_length());
         //zero();
         return tmp;

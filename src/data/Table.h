@@ -41,7 +41,7 @@ public:
 
     void zero(size_t irow = ~0ul);
 
-    const defs::data_t * data() const{
+    defs::data_t * data() const{
         return m_data;
     }
 

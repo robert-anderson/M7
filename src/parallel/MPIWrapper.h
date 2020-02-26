@@ -44,7 +44,7 @@ struct mpi {
 
     template<typename T>
     static MPI_Datatype mpi_type() {
-        return type_to_mpi_type[numtypes::itype<T>];
+        return type_to_mpi_type[numtypes::itype<T>()];
     }
 
     static void barrier();
