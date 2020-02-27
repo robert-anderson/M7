@@ -6,7 +6,7 @@
 
 HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
     m_h(h),
-    m_nspinorb(h.m_nsite * 2),
+    m_nspinorb(h.nsite() * 2),
     m_spin_conserving(h.spin_conserving()),
     m_D(m_nspinorb, m_nspinorb),
     m_S(m_nspinorb),
@@ -35,9 +35,9 @@ HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
                 defs::prob_t numerator = 0.0;
                 defs::prob_t denominator = 0.0;
                 for (size_t sp = 0ul; sp < m_nspinorb; ++sp) {
-                    numerator += std::abs(h.int_2().get_phys_antisym(r, sp, p, q));
+                    numerator += std::abs(h.get_element_2(r, sp, p, q));
                     for (size_t rp = 0ul; rp < m_nspinorb; ++rp) {
-                        denominator += std::abs(h.int_2().get_phys_antisym(rp, sp, p, q));
+                        denominator += std::abs(h.get_element_2(rp, sp, p, q));
                     }
                 }
                 *m_P_tilde_3.view(p, q, r) = numerator / denominator;
@@ -50,15 +50,15 @@ HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
             for (size_t r = 0ul; r < m_nspinorb; ++r) {
                 *m_H_tot.view(p, q, r) = 0.0;
                 for (size_t s = 0ul; s < m_nspinorb; ++s) {
-                    *m_H_tot.view(p, q, r) += std::abs(h.int_2().get_phys_antisym(r, s, p, q));
+                    *m_H_tot.view(p, q, r) += std::abs(h.get_element_2(r, s, p, q));
 
                     *m_P_tilde_4.view(p, q, r, s) = 0.0;
                     for (size_t sp = 0ul; sp < m_nspinorb; ++sp) {
                         *m_P_tilde_4.view(p, q, r, s) +=
-                            std::abs(h.int_2().get_phys_antisym(r, sp, p, q));
+                            std::abs(h.get_element_2(r, sp, p, q));
                     }
                     *m_P_tilde_4.view(p, q, r, s) =
-                        std::abs(h.int_2().get_phys_antisym(r, s, p, q)) /
+                        std::abs(h.get_element_2(r, s, p, q)) /
                         *m_P_tilde_4.view(p, q, r, s);
                 }
             }

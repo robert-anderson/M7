@@ -17,6 +17,7 @@ public:
             m_data((T *) data), m_size(size) {}
 
     void operator=(const T &value) { m_data[0] = value; }
+    void operator=(const NumericView<T> &value) { m_data[0] = value.m_data[0]; }
 
     T &operator[](size_t i) const {
         assert(i < m_size);
@@ -26,6 +27,8 @@ public:
     T &operator*() const { return *m_data; }
 
     void operator*=(const T& value){m_data[0]*=value;}
+    void operator+=(const T& value){m_data[0]+=value;}
+    void operator+=(const NumericView<T>& value){m_data[0]+=value.m_data[0];}
 
 
     // allow the view to be implicitly converted to the data type it holds

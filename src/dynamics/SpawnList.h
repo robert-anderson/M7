@@ -1,13 +1,15 @@
 //
-// Created by Robert John Anderson on 2020-02-24.
+// Created by rja on 27/02/2020.
 //
 
 #ifndef M7_SPAWNLIST_H
 #define M7_SPAWNLIST_H
 
-#include <memory>
+
+#include <cstddef>
+#include "src/fermion/Determinant.h"
+#include "src/data/Specification.h"
 #include "src/data/List.h"
-#include "src/data/TableCommunicator.h"
 
 struct SpawnListSpecification : public Specification {
     size_t idet;
@@ -20,30 +22,21 @@ struct SpawnListSpecification : public Specification {
     }
 };
 
+class SpawnList : public List {
+public:
+    using spec_t = SpawnListSpecification;
 
-class SpawnList : public TableCommunicator<List> {
-    SpawnList(size_t nsite, size_t nrow_send, size_t nrow_recv):
-    TableCommunicator<List>(SpawnListSpecification(nsite), nrow_send, nrow_recv);
+    SpawnList(const spec_t &spec, size_t nrow, defs::data_t *data_external);
 
-    void create(const Determinant &det, const size_t &idst_rank, const defs::ham_t &weight, bool initiator){
-        auto &list = m_send[idst_rank];
-        size_t irow = list.push();
-        list.view<Determinant>(irow, m_idet) = det;
-        *list.view<defs::ham_t>(irow, m_iweight) = weight;
-        *list.view<bool>(irow, m_iflag_parent_initiator) = initiator;
-    }
+    SpawnList(const spec_t &spec, size_t nrow);
 
-    size_t nrecv() const{
-        return m_recv.high_water_mark();
-    }
+    const spec_t &spec() const;
 
-    Determinant recv_det(const size_t &irow){
-        return m_recv.view<Determinant>(irow, m_idet);
-    }
-    defs::ham_t recv_weight(const size_t &irow){
-        return m_recv.view<defs::ham_t>(irow, m_iweight);
-    }
+    Determinant get_determinant(const size_t &irow);
 
+    NumericView<defs::ham_t> get_weight(const size_t &irow);
+
+    NumericView<bool> get_flag_parent_initiator(const size_t &irow);
 };
 
 

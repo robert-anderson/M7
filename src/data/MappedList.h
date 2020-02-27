@@ -18,10 +18,10 @@ protected:
     ListSafeHashMap<T> m_map;
 
 public:
-    MappedList(Specification spec, size_t nrow, size_t key_entry) :
+    MappedList(spec_t spec, size_t nrow, size_t key_entry) :
             List(spec, nrow), m_key_entry(key_entry), m_map(*this, nrow) {}
 
-    MappedList(Specification spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
+    MappedList(spec_t spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
             List(spec, nrow, data_external), m_key_entry(key_entry), m_map(*this, nrow) {}
 
     Mutex get_mutex(const size_t &ibucket) {

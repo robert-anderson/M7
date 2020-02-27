@@ -14,6 +14,27 @@
 
 #define USE_MPI 1
 
+static const std::array<MPI_Datatype, numtypes::ntype> type_to_mpi_type =
+        {
+                MPI_Datatype(MPI_COMPLEX),
+                MPI_Datatype(MPI_DOUBLE_COMPLEX),
+                MPI_Datatype(MPI_CXX_LONG_DOUBLE_COMPLEX),
+                MPI_Datatype(MPI_FLOAT),
+                MPI_Datatype(MPI_DOUBLE),
+                MPI_Datatype(MPI_LONG_DOUBLE),
+                MPI_Datatype(MPI_CHAR),
+                MPI_Datatype(MPI_SHORT),
+                MPI_Datatype(MPI_INT),
+                MPI_Datatype(MPI_LONG_INT),
+                MPI_Datatype(MPI_LONG_LONG_INT),
+                MPI_Datatype(MPI_UNSIGNED_CHAR),
+                MPI_Datatype(MPI_UNSIGNED_SHORT),
+                MPI_Datatype(MPI_UNSIGNED),
+                MPI_Datatype(MPI_UNSIGNED_LONG),
+                MPI_Datatype(MPI_UNSIGNED_LONG_LONG),
+                MPI_Datatype(MPI_CXX_BOOL)
+        };
+
 struct mpi {
 
     static size_t nrank();
@@ -21,26 +42,6 @@ struct mpi {
     static size_t irank();
 
     static std::string processor_name();
-
-    static constexpr std::array<MPI_Datatype, numtypes::ntype> type_to_mpi_type = {
-            (MPI_Datatype) MPI_COMPLEX,
-            (MPI_Datatype) MPI_DOUBLE_COMPLEX,
-            (MPI_Datatype) MPI_CXX_LONG_DOUBLE_COMPLEX,
-            (MPI_Datatype) MPI_FLOAT,
-            (MPI_Datatype) MPI_DOUBLE,
-            (MPI_Datatype) MPI_LONG_DOUBLE,
-            (MPI_Datatype) MPI_CHAR,
-            (MPI_Datatype) MPI_SHORT,
-            (MPI_Datatype) MPI_INT,
-            (MPI_Datatype) MPI_LONG_INT,
-            (MPI_Datatype) MPI_LONG_LONG_INT,
-            (MPI_Datatype) MPI_UNSIGNED_CHAR,
-            (MPI_Datatype) MPI_UNSIGNED_SHORT,
-            (MPI_Datatype) MPI_UNSIGNED,
-            (MPI_Datatype) MPI_UNSIGNED_LONG,
-            (MPI_Datatype) MPI_UNSIGNED_LONG_LONG,
-            (MPI_Datatype) MPI_CXX_BOOL
-    };
 
     template<typename T>
     static MPI_Datatype mpi_type() {
@@ -55,12 +56,12 @@ struct mpi {
 
 private:
     template<typename T>
-    bool reduce(const T *send, T *recv, MPI_Op op, size_t ndata = 1, size_t iroot = 0) {
+    static bool reduce(const T *send, T *recv, MPI_Op op, size_t ndata = 1, size_t iroot = 0) {
         return MPI_Reduce(send, recv, ndata, mpi_type<T>(), op, iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
-    bool all_reduce(const T *send, T *recv, MPI_Op op, size_t ndata = 1) {
+    static bool all_reduce(const T *send, T *recv, MPI_Op op, size_t ndata = 1) {
         return MPI_Allreduce(send, recv, ndata, mpi_type<T>(), op, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 

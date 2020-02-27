@@ -15,25 +15,28 @@ struct WalkerListSpecification : public Specification {
     size_t iflag_reference_connection;
     size_t iflag_initiator;
     size_t iflag_deterministic;
-    WalkerListSpecification(size_t nsite) : Specification(){
-        idet = add<Determinant>(nsite);
-        iweight = add<defs::ham_t>(1);
-        ihdiag = add<defs::ham_comp_t>(1);
-        iflag_reference_connection = add<bool>(1);
-        iflag_initiator = add<bool>(1);
-        iflag_deterministic = add<bool>(1);
-    }
+    WalkerListSpecification(size_t nsite);
 };
 
 class WalkerList : public PerforableMappedList<Determinant> {
-
 public:
-    WalkerList(const size_t &nsite, const size_t &nrow) :
-    PerforableMappedList<Determinant>(WalkerListSpecification(nsite), nrow, 0){}
+    using spec_t = WalkerListSpecification;
 
-    const WalkerListSpecification &spec() const{
-        return static_cast<const WalkerListSpecification &>(m_spec);
-    }
+    WalkerList(const spec_t &spec, size_t nrow);
+
+    const spec_t &spec() const;
+
+    Determinant get_determinant(const size_t &irow);
+
+    NumericView<defs::ham_t> get_weight(const size_t &irow);
+
+    NumericView<defs::ham_comp_t> get_hdiag(const size_t &irow);
+
+    NumericView<bool> get_flag_reference_connection(const size_t &irow);
+
+    NumericView<bool> get_flag_initiator(const size_t &irow);
+
+    NumericView<bool> get_flag_deterministic(const size_t &irow);
 };
 
 

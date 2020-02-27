@@ -11,7 +11,9 @@
 #include "src/fermion/Determinant.h"
 
 class Hamiltonian {
+protected:
     const size_t m_nsite;
+    size_t m_nci;
 
 public:
     Hamiltonian(const size_t &nsite);
@@ -35,7 +37,21 @@ public:
         return m_nsite;
     }
 
+    size_t nci() const {
+        return m_nci;
+    }
+
     virtual bool spin_conserving() const = 0;
+
+    virtual size_t nelec() const = 0;
+
+    virtual bool spin_resolved() const = 0;
+
+    Determinant guess_reference(const size_t &spin_level) const;
+
+    Determinant refine_guess_reference(const Determinant ref) const;
+
+    Determinant choose_reference(const size_t &spin_level) const;
 
 };
 

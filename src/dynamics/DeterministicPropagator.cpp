@@ -5,4 +5,5 @@
 #include "DeterministicPropagator.h"
 
 DeterministicPropagator::DeterministicPropagator(const std::unique_ptr<Hamiltonian> &ham,
-                                                 double tau, defs::ham_comp_t shift) : Propagator(ham, tau, shift) {}
+                                                 const RankAllocator<Determinant> &rankAllocator, double tau,
+                                                 defs::ham_comp_t shift) : Propagator(ham, rankAllocator, tau, shift) {}

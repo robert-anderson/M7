@@ -40,7 +40,7 @@ class StatsFile {
     std::vector<StatColumn> m_columns{};
 
 public:
-    StatsFile(const std::string &fname) : m_fname(fname), m_file(std::ofstream(fname)) {}
+    StatsFile(const std::string &fname="M7.stats") : m_fname(fname), m_file(std::ofstream(fname)) {}
 
     ~StatsFile() {
         m_file.close();

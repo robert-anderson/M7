@@ -19,7 +19,8 @@ class InputError: public std::exception
     }
 };
 
-class InputOptions {
+struct InputOptions {
+private:
     CLI::App &m_app;
 public:
     std::string fcidump_path = "FCIDUMP";
@@ -28,10 +29,11 @@ public:
     double nadd_initiator = 3.0;
     size_t ndet_semistoch = 0;
     size_t spin_level = 0;
-    double store_factor_initial = 1.0;
+    double walker_factor_initial = 1.0;
     double buffer_factor_initial = 10.0;
-    double buffer_temp_factor_initial = 0.01;
     size_t nload_balance_block = 10;
+    double tau_initial = 0.01;
+    double shift_initial = 0.0;
 
     InputOptions(CLI::App &app);
 

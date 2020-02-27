@@ -16,32 +16,33 @@
 
 class Table {
 protected:
-    const Specification m_spec;
+    using spec_t = Specification;
+    const spec_t m_spec;
     size_t m_nrow = 0ul;
     std::vector<defs::data_t> m_data_internal{};
     defs::data_t *m_data = nullptr;
 
 public:
 
-    virtual const Specification &spec() const;
+    virtual const spec_t &spec() const;
 
-    const size_t nrow() const;
+    size_t nrow() const;
 
-    const size_t row_length() const;
+    size_t row_length() const;
 
-    virtual const size_t high_water_mark() const;
+    virtual size_t high_water_mark() const;
 
-    Table(Specification spec, size_t nrow);
+    Table(spec_t spec, size_t nrow);
 
-    Table(Specification spec, size_t nrow, defs::data_t *data_external);
+    Table(spec_t spec, size_t nrow, defs::data_t *data_external);
 
     virtual void grow(const size_t &nrow);
 
     virtual void grow(defs::data_t *const new_ptr, size_t nrow);
 
-    void zero(size_t irow);
+    virtual void zero(size_t irow);
 
-    void zero();
+    virtual void zero();
 
     defs::data_t * data() const{
         return m_data;

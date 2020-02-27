@@ -19,7 +19,7 @@ AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
         else if (m_int_1.valid_inds(inds)) m_int_1.set_from_fcidump(inds, value);
         else if (inds[0] == ((size_t) -1)) m_int_0 = value;
     }
-    m_nci = integer_utils::combinatorial(norb(), nelec());
+    m_nci = integer_utils::combinatorial(nsite(), nelec());
 }
 
 defs::ham_t AbInitioHamiltonian::get_element_0(const Determinant &det) const {
@@ -108,48 +108,12 @@ defs::ham_comp_t AbInitioHamiltonian::get_energy(const Determinant &det) const {
     return consts::real(get_element_0(det));
 }
 
-Determinant AbInitioHamiltonian::guess_reference(const size_t &spin_level) const {
-    Determinant ref(nspatorb());
-    for (size_t i = 0ul; i < nelec() / 2 + 2 * spin_level + nelec() % 2; ++i) ref.set(i, 0);
-    for (size_t i = 0ul; i < nelec() / 2; ++i) ref.set(i, 1);
-    return ref;
-}
+size_t AbInitioHamiltonian::nelec() const { return m_file_iterator.m_nelec; }
 
-Determinant AbInitioHamiltonian::refine_guess_reference(const Determinant ref) const {
+bool AbInitioHamiltonian::spin_resolved() const { return m_file_iterator.m_spin_resolved; }
 
-    auto e_ref = get_energy(ref);
-    /*
-    * check that none of the single and double connections have a lower energy
-    */
+bool AbInitioHamiltonian::spin_conserving() const { return m_int_1.spin_conserving(); }
 
-    auto occs = DeterminantSetEnumerator(ref).enumerate();
-    auto unoccs = DeterminantClrEnumerator(ref).enumerate();
+auto &AbInitioHamiltonian::int_1() const { return m_int_1; }
 
-    Determinant excited(nspatorb());
-    for (auto occ:occs) {
-        for (auto unocc:unoccs) {
-            excited = ref.get_excited_det(occ, unocc);
-            if (get_energy(excited) < e_ref) return refine_guess_reference(excited);
-        }
-    }
-
-    VectorCombinationEnumerator occ_enumerator(occs, 2);
-    defs::inds occ_inds(2);
-    while (occ_enumerator.next(occ_inds)) {
-        {
-            VectorCombinationEnumerator unocc_enumerator(unoccs, 2);
-            defs::inds unocc_inds(2);
-            while (unocc_enumerator.next(unocc_inds)) {
-                excited = ref.get_excited_det(occ_inds, unocc_inds);
-                if (get_energy(excited) < e_ref) return refine_guess_reference(excited);
-            }
-        }
-    }
-    return ref;
-}
-
-Determinant AbInitioHamiltonian::choose_reference(const size_t &spin_level) const {
-    auto ref = guess_reference(spin_level);
-    ref = refine_guess_reference(ref);
-    return ref;
-}
+auto &AbInitioHamiltonian::int_2() const { return m_int_2; }

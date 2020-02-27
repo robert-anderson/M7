@@ -39,26 +39,15 @@ public:
     defs::ham_t get_element(const Determinant &bra, const Determinant &ket) const override;
 
 
-    inline size_t norb() const { return m_file_iterator.m_norb; }
+    size_t nelec() const override;
 
-    inline size_t nspatorb() const { return m_int_1.m_nspatorb; }
+    bool spin_resolved() const override;
 
-    inline size_t nelec() const { return m_file_iterator.m_nelec; }
+    bool spin_conserving() const override;
 
-    inline size_t spin_resolved() const { return m_file_iterator.m_spin_resolved; }
+    auto &int_1() const;
 
-    bool spin_conserving() const override { return m_int_1.spin_conserving(); }
-
-    auto &int_1() const {return m_int_1;}
-    auto &int_2() const {return m_int_2;}
-
-    size_t m_nci;
-
-    Determinant guess_reference(const size_t &spin_level) const;
-
-    Determinant refine_guess_reference(const Determinant ref) const;
-
-    Determinant choose_reference(const size_t &spin_level) const;
+    auto &int_2() const;
 };
 
 

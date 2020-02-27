@@ -5,7 +5,7 @@
 #include <iostream>
 #include "src/parallel/MPIWrapper.h"
 
-namespace log {
+namespace logger {
 
     enum level{debug, info, warning};
 

@@ -5,18 +5,19 @@
 #ifndef M7_TABLEARRAY_H
 #define M7_TABLEARRAY_H
 
-#include "Specification.h"
 #include "src/defs.h"
+#include "Table.h"
 #include <iostream>
 
 template<typename table_T>
 class TableArray {
-    const Specification m_spec;
+    static_assert(std::is_base_of<Table, table_T>::value);
+    const typename table_T::spec_t m_spec;
     std::vector<defs::data_t> m_data{};
     std::vector<table_T> m_tables{};
     defs::inds m_offsets;
 public:
-    TableArray(size_t ntable, Specification spec, size_t nrow_per_table) :
+    TableArray(size_t ntable, typename table_T::spec_t spec, size_t nrow_per_table) :
         m_spec(spec), m_offsets(ntable) {
         for (size_t itable = 0ul; itable < ntable; ++itable)
             m_tables.emplace_back(spec, 0, nullptr);
@@ -49,7 +50,7 @@ public:
 
     defs::inds high_water_marks() const {
         defs::inds out;
-        for (auto table:m_tables) out.push_back(table.high_water_mark());
+        for (auto &table:m_tables) out.push_back(table.high_water_mark());
         return out;
     }
 
@@ -63,6 +64,10 @@ public:
 
     defs::inds &offsets() {
         return m_offsets;
+    }
+
+    void zero(){
+        for (auto &table:m_tables) table.zero();
     }
 };
 

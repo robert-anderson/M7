@@ -5,6 +5,7 @@
 #include <src/defs.h>
 #include "SemistochasticPropagator.h"
 
-SemistochasticPropagator::SemistochasticPropagator(const std::unique_ptr<Hamiltonian> &ham, double tau,
-                                                   const defs::ham_comp_t &shift) : StochasticPropagator(ham, tau,
-                                                                                                         shift) {}
+SemistochasticPropagator::SemistochasticPropagator(const std::unique_ptr<Hamiltonian> &ham,
+                                                   const RankAllocator<Determinant> &rank_allocator, double tau,
+                                                   defs::ham_comp_t shift, size_t seed) :
+        StochasticPropagator(ham, rank_allocator, tau, shift, seed) {}

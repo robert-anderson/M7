@@ -4,6 +4,8 @@
 
 #include "StochasticPropagator.h"
 
-StochasticPropagator::StochasticPropagator(const std::unique_ptr <Hamiltonian> &ham,
-                                           double tau, defs::ham_comp_t shift) : Propagator(ham, tau, shift) {}
 
+StochasticPropagator::StochasticPropagator(const std::unique_ptr<Hamiltonian> &ham,
+                                           const RankAllocator<Determinant> &rankAllocator, double tau,
+                                           defs::ham_comp_t shift, size_t seed) :
+                                           Propagator(ham, rankAllocator, tau, shift), m_prng(seed) {}

@@ -4,8 +4,8 @@
 
 
 #include <gtest/gtest.h>
-#include "../../src/integrals/AbInitioHamiltonian.h"
-#include "../../src/enumerators/BitfieldEnumerator.h"
+#include "src/enumerators/BitfieldEnumerator.h"
+#include "src/hamiltonian/AbInitioHamiltonian.h"
 
 TEST(AbInitioHamiltonian, DhfEnergy){
     AbInitioHamiltonian ham(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP");

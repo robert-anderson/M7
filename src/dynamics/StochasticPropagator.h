@@ -6,10 +6,14 @@
 #define M7_STOCHASTICPROPAGATOR_H
 
 
+#include <src/sample/PRNG.h>
+#include "Propagator.h"
+
 class StochasticPropagator : public Propagator {
     PRNG m_prng;
 public:
-    StochasticPropagator(const std::unique_ptr<Hamiltonian> &ham, double tau, defs::ham_comp_t shift);
+    StochasticPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rankAllocator,
+                         double tau, defs::ham_comp_t shift, size_t seed);
 };
 
 

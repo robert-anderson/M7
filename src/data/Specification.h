@@ -9,6 +9,7 @@
 #include <complex>
 #include <vector>
 #include <array>
+#include <assert.h>
 
 namespace numtypes {
     template<typename T>

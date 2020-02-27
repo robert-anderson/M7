@@ -8,9 +8,9 @@
 #include "Propagator.h"
 
 class DeterministicPropagator : public Propagator {
-
-    DeterministicPropagator(const std::unique_ptr<Hamiltonian> &ham,
-               double tau, defs::ham_comp_t shift);
+public:
+    DeterministicPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rankAllocator,
+                            double tau, defs::ham_comp_t shift);
 };
 
 

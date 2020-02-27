@@ -12,7 +12,8 @@
 class SemistochasticPropagator : public StochasticPropagator{
     std::unique_ptr<DeterministicPropagator> m_detprop = nullptr;
 public:
-    SemistochasticPropagator(const std::unique_ptr <Hamiltonian> &ham, double tau, const defs::ham_comp_t &shift);
+    SemistochasticPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rank_allocator,
+                             double tau, defs::ham_comp_t shift, size_t seed);
 
 };
 
