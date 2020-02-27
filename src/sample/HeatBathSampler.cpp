@@ -4,9 +4,9 @@
 
 #include "HeatBathSampler.h"
 
-HeatBathSampler::HeatBathSampler(const AbInitioHamiltonian &h) :
+HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
     m_h(h),
-    m_nspinorb(h.nspatorb() * 2),
+    m_nspinorb(h.m_nsite * 2),
     m_spin_conserving(h.spin_conserving()),
     m_D(m_nspinorb, m_nspinorb),
     m_S(m_nspinorb),

@@ -7,16 +7,15 @@
 
 
 #include <omp.h>
-#include <src/io/InputOptions.h>
-#include <src/integrals/AbInitioHamiltonian.h>
-#include <src/propagator/Propagator.h>
+#include "src/io/InputOptions.h"
+#include "src/hamiltonian/Hamiltonian.h"
+#include "Propagator.h"
 #include "Wavefunction.h"
 
 class FciqmcCalculation {
     const InputOptions m_input;
-    AbInitioHamiltonian m_h;
-    Propagator m_p;
-    //Wavefunction m_wf;
+    Propagator m_prop;
+    Wavefunction m_psi;
 public:
 /*
     FciqmcCalculation(const InputOptions &input) :
@@ -27,7 +26,7 @@ public:
         m_wf.m_reference.print();
     }*/
 
-    void run();
+    void execute(size_t ncycle);
 
 };
 

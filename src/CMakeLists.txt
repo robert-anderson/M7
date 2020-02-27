@@ -4,7 +4,7 @@ file(GLOB CPP_SOURCE_FILES ./*/*.cpp)
 file(GLOB CPP_HEADER_FILES ./*/*.h)
 
 add_executable(release main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
-add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} hash/KeyMap.h)
+add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
 
 
 

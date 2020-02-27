@@ -9,7 +9,7 @@
 #include <src/defs.h>
 #include <src/fermion/Excitation.h>
 #include "src/multidim/NdArray.h"
-#include "src/integrals/AbInitioHamiltonian.h"
+#include "src/hamiltonian/Hamiltonian.h"
 #include "src/enumerators/BitfieldEnumerator.h"
 #include "Aliaser.h"
 
@@ -34,7 +34,7 @@
 
 class HeatBathSampler {
 public:
-    const AbInitioHamiltonian &m_h;
+    const Hamiltonian &m_h;
     const size_t m_nspinorb;
     const bool m_spin_conserving;
     NdArray<defs::prob_t, 2> m_D;
@@ -43,7 +43,7 @@ public:
     NdArray<defs::prob_t, 3> m_H_tot;
     NdArray<defs::prob_t, 4> m_P_tilde_4;
 
-    HeatBathSampler(const AbInitioHamiltonian &h);
+    HeatBathSampler(const Hamiltonian &h);
 
     struct HeatBathExcitation {
         Excitation m_single;

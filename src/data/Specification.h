@@ -88,8 +88,7 @@ namespace numtypes {
 }
 using namespace numtypes;
 
-class Specification {
-public:
+struct Specification {
     std::array<size_t, ntype> m_numeric_lengths;
     std::array<size_t, ntype> m_numeric_datawords_used;
     std::array<size_t, ntype> m_numeric_offsets;

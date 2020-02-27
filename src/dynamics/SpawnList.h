@@ -9,28 +9,24 @@
 #include "src/data/List.h"
 #include "src/data/TableCommunicator.h"
 
-class SpawnList {
-public:
-    std::unique_ptr<TableCommunicator<List>> m_conn = nullptr;
-    Specification m_spec{};
-
-    size_t m_idet;
-    size_t m_iweight;
-    size_t m_iflag_parent_initiator;
-
-    SpawnList(const size_t &nspinorb, const size_t &nrow_send, const size_t &nrow_recv) {
-        m_idet = m_spec.add<Determinant>(nspinorb);
-        m_iweight = m_spec.add<defs::ham_t>(1);
-        m_iflag_parent_initiator = m_spec.add<bool>(1);
-        m_conn = std::make_unique<TableCommunicator<List>>(m_spec, nrow_send, nrow_recv);
+struct SpawnListSpecification : public Specification {
+    size_t idet;
+    size_t iweight;
+    size_t iflag_parent_initiator;
+    SpawnListSpecification(size_t nsite) : Specification(){
+        idet = add<Determinant>(nsite);
+        iweight = add<defs::ham_t>(1);
+        iflag_parent_initiator = add<bool>(1);
     }
+};
 
-    bool communicate() {
-        return m_conn->communicate();
-    }
+
+class SpawnList : public TableCommunicator<List> {
+    SpawnList(size_t nsite, size_t nrow_send, size_t nrow_recv):
+    TableCommunicator<List>(SpawnListSpecification(nsite), nrow_send, nrow_recv);
 
     void create(const Determinant &det, const size_t &idst_rank, const defs::ham_t &weight, bool initiator){
-        auto &list = m_conn->m_send[idst_rank];
+        auto &list = m_send[idst_rank];
         size_t irow = list.push();
         list.view<Determinant>(irow, m_idet) = det;
         *list.view<defs::ham_t>(irow, m_iweight) = weight;
@@ -38,14 +34,14 @@ public:
     }
 
     size_t nrecv() const{
-        return m_conn->m_recv.high_water_mark();
+        return m_recv.high_water_mark();
     }
 
     Determinant recv_det(const size_t &irow){
-        return m_conn->m_recv.view<Determinant>(irow, m_idet);
+        return m_recv.view<Determinant>(irow, m_idet);
     }
     defs::ham_t recv_weight(const size_t &irow){
-        return *m_conn->m_recv.view<defs::ham_t>(irow, m_iweight);
+        return m_recv.view<defs::ham_t>(irow, m_iweight);
     }
 
 };

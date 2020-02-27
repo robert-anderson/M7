@@ -25,6 +25,8 @@ public:
 
     T &operator*() const { return *m_data; }
 
+    void operator*=(const T& value){m_data[0]*=value;}
+
 
     // allow the view to be implicitly converted to the data type it holds
     operator T() const {

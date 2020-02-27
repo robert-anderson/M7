@@ -8,6 +8,7 @@
 #include "../enumerators/BitfieldEnumerator.h"
 
 AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
+    Hamiltonian(m_file_iterator.m_norb),
     m_file_iterator(fname),
     m_int_1{m_file_iterator.m_norb, spin_resolved()},
     m_int_2{m_file_iterator.m_norb, spin_resolved()} {
@@ -103,7 +104,7 @@ defs::ham_t AbInitioHamiltonian::get_element(const Determinant &bra, const Deter
     }
 }
 
-consts::component_t<defs::ham_t>::type AbInitioHamiltonian::get_energy(const Determinant &det) const {
+defs::ham_comp_t AbInitioHamiltonian::get_energy(const Determinant &det) const {
     return consts::real(get_element_0(det));
 }
 

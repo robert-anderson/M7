@@ -9,6 +9,8 @@
 
 class DeterministicPropagator : public Propagator {
 
+    DeterministicPropagator(const std::unique_ptr<Hamiltonian> &ham,
+               double tau, defs::ham_comp_t shift);
 };
 
 

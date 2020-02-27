@@ -15,15 +15,15 @@
 #include "src/fermion/Determinant.h"
 
 class Table {
-    const Specification m_spec;
 protected:
+    const Specification m_spec;
     size_t m_nrow = 0ul;
     std::vector<defs::data_t> m_data_internal{};
     defs::data_t *m_data = nullptr;
 
 public:
 
-    const Specification &spec() const;
+    virtual const Specification &spec() const;
 
     const size_t nrow() const;
 
@@ -39,7 +39,9 @@ public:
 
     virtual void grow(defs::data_t *const new_ptr, size_t nrow);
 
-    void zero(size_t irow = ~0ul);
+    void zero(size_t irow);
+
+    void zero();
 
     defs::data_t * data() const{
         return m_data;

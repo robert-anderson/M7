@@ -58,6 +58,10 @@ public:
     const size_t &key_entry() const {
         return m_key_entry;
     }
+
+    bool row_empty(const size_t &irow) const {
+        return view<T>(irow).is_zero();
+    }
 };
 
 template<typename T>

@@ -33,8 +33,11 @@ Determinant Table::view<Determinant>(const size_t &irow, const size_t &ientry) c
 }
 
 void Table::zero(size_t irow) {
-    if (irow != ~0ul) memset(m_data + irow * row_length(), 0, row_length() * sizeof(defs::data_t));
-    else memset(m_data, 0, row_length() * m_nrow * sizeof(defs::data_t));
+    memset(m_data + irow * row_length(), 0, row_length() * sizeof(defs::data_t));
+}
+
+void Table::zero(){
+    memset(m_data, 0, row_length() * m_nrow * sizeof(defs::data_t));
 }
 
 

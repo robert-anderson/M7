@@ -6,13 +6,16 @@
 #define M7_WAVEFUNCTION_H
 
 #include <src/enumerators/VectorCombinationEnumerator.h>
-#include "src/dynamics/WalkerList.h"
+#include "WalkerList.h"
 #include "src/sample/HeatBathSampler.h"
 #include "SpawnList.h"
+#include "Propagator.h"
+#include "RankAllocator.h"
 
 class Wavefunction {
     WalkerList m_walker_list;
     SpawnList m_spawn_list;
+    RankAllocator<Determinant> m_rank_allocator;
 
 public:
 
@@ -21,32 +24,78 @@ public:
 
     Wavefunction(const Determinant &ref, size_t nwalker_initial, size_t nrow_walkers, size_t nrow_send,
                  size_t nrow_recv) :
-        m_walker_list(ref.nspatorb() * 2, nrow_walkers),
-        m_spawn_list(ref.nspatorb() * 2, nrow_send, nrow_recv) {
+            m_walker_list(ref.nspatorb(), nrow_walkers),
+            m_spawn_list(ref.nspatorb(), nrow_send, nrow_recv) {
         auto irow = m_walker_list.m_list->push(ref);
         *m_walker_list.m_list->view<defs::ham_t>(0) = nwalker_initial;
         m_square_norm = std::pow(nwalker_initial, 2);
     }
 
-    /*
-    void evolve(const HeatBathSampler &hb){
-#pragma omp parallel for
-        for (size_t irow=0ul; irow<m_walker_list.high_water_mark(); ++irow){
-            if (m_walker_list.is_free(irow)) continue;
-            auto weight = m_walker_list.weight(irow);
-            auto nattempt = std::ceil(std::abs(weight));
-            auto det = m_walker_list.det(irow);
-            {
-                auto sampler = hb.sample_excitations(det);
-                for (size_t iattempt=0ul; iattempt<nattempt; ++iattempt){
-                    auto excit = sampler.draw();
-                }
+    auto get_determinant(const size_t &irow) {
+        return m_walker_list.view<Determinant>(irow, m_walker_list.spec().idet);
+    }
+
+    auto get_weight(const size_t &irow) {
+        return m_walker_list.view<defs::ham_t>(irow, m_walker_list.spec().iweight);
+    }
+
+    auto get_hdiag(const size_t &irow) {
+        return m_walker_list.view<defs::ham_comp_t>(irow, m_walker_list.spec().ihdiag);
+    }
+
+    auto get_flag_reference_connection(const size_t &irow) {
+        return m_walker_list.view<bool>(m_walker_list.spec().iflag_reference_connection);
+    }
+
+    auto get_flag_initiator(const size_t &irow) {
+        return m_walker_list.view<bool>(m_walker_list.spec().iflag_initiator);
+    }
+
+    auto get_flag_deterministic(const size_t &irow) {
+        return m_walker_list.view<bool>(m_walker_list.spec().iflag_deterministic);
+    }
+
+    void propagate(const Propagator propagator) {
+        m_delta_square_norm = 0;
+        defs::ham_comp_t delta_square_norm;
+#pragma omp parallel default(none) shared(m_walker_list, m_delta_square_norm) private(delta_square_norm)
+        {
+#pragma omp for
+            for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
+                if (m_walker_list.row_empty(irow)) continue;
+                auto det = get_determinant(irow);
+                auto weight = get_weight(irow);
+                auto hdiag = get_hdiag(irow);
+                auto flag_deterministic = get_flag_deterministic(irow);
+                auto flag_initiator = get_flag_initiator(irow);
+                propagator.off_diagonal(det, weight, flag_deterministic, flag_initiator, m_spawn_list);
+                propagator.diagonal(hdiag, weight, delta_square_norm);
             }
+#pragma omp atomic update
+            m_delta_square_norm += delta_square_norm;
         }
-    }*/
+    }
+
+    void communicate(){
+        m_spawn_list.communicate();
+    }
+
+    void consolidate_incoming_weight(){
+        // TODO
+    }
+
+    void annihilate() {
+        defs::ham_comp_t delta_square_norm;
+#pragma omp parallel default(none) shared(m_spawn_list, m_delta_square_norm) private(delta_square_norm)
+
+        for (size_t irow_recv = 0ul; irow_recv < m_spawn_list.nrecv(); ++irow_recv) {
+
+        }
+    }
 
 
-    void annihilation() {
+
+    void annihilate() {
         for (size_t irow_recv = 0ul; irow_recv < m_spawn_list.nrecv(); ++irow_recv) {
             auto det = m_spawn_list.recv_det(irow_recv);
             auto spawned_weight = m_spawn_list.recv_weight(irow_recv);
@@ -64,7 +113,7 @@ public:
         m_spawn_list.m_conn->m_recv.zero();
     }
 
-    void death(const AbInitioHamiltonian &h, const defs::ham_comp_t &shift) {
+    void death(const Hamiltonian &h, const defs::ham_comp_t &shift) {
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
             auto det = m_walker_list.det(irow);
             auto hdiag = h.get_element_0(det);
@@ -76,7 +125,7 @@ public:
         }
     }
 
-    void spawn(const AbInitioHamiltonian &h, const defs::ham_t &weight,
+    void spawn(const Hamiltonian &h, const defs::ham_t &weight,
                const Determinant &det, const Determinant &excited) {
 
         defs::ham_t helement = h.get_element(det, excited);
@@ -86,7 +135,7 @@ public:
         //if (det==m_reference) m_hf_connection_buffer_flag->set(send, idst, irow);
     }
 
-    void evolve_exact(const AbInitioHamiltonian &h) {
+    void evolve_exact(const Hamiltonian &h) {
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
             if (m_walker_list.is_free(irow)) continue;
             auto weight = m_walker_list.weight(irow);
