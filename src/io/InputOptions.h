@@ -32,8 +32,10 @@ public:
     double walker_factor_initial = 1.0;
     double buffer_factor_initial = 10.0;
     size_t nload_balance_block = 10;
-    double tau_initial = 0.01;
+    double tau_initial = 0.05;
     double shift_initial = 0.0;
+    double shift_damp = 0.0;
+    double shift_update_period = 0.0;
 
     InputOptions(CLI::App &app);
 

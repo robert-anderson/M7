@@ -8,12 +8,12 @@
 #include <src/utils.h>
 
 
-Table::Table(spec_t spec, size_t nrow) :
+Table::Table(spec_T spec, size_t nrow) :
     m_spec(spec) {
     grow(nrow);
 }
 
-Table::Table(spec_t spec, size_t nrow, defs::data_t *data_external) :
+Table::Table(spec_T spec, size_t nrow, defs::data_t *data_external) :
     m_spec(spec) {
     grow(data_external, nrow);
 }
@@ -42,9 +42,11 @@ void Table::zero(){
 
 
 void Table::print(size_t nrow) const {
-    if (nrow == ~0ul) nrow = m_nrow;
     const size_t padding = 4ul;
-    std::cout << "\nnumber of rows: " << m_nrow << std::endl;
+    if (nrow==m_nrow)
+        std::cout << "\nnumber of total rows: " << m_nrow << std::endl;
+    else
+        std::cout << "\nnumber of rows shown: " << nrow << std::endl;
     for (size_t irow=0ul; irow < nrow; ++irow) {
         std::cout << view<std::complex<float>>(irow).to_string(padding);
         std::cout << view<std::complex<double>>(irow).to_string(padding);
@@ -71,6 +73,10 @@ void Table::print(size_t nrow) const {
     }
 }
 
+void Table::print() const {
+    print(m_nrow);
+}
+
 void Table::grow(const size_t &nrow) {
     if (m_data && m_data != m_data_internal.data())
         throw std::runtime_error("Cannot reallocate Table which does not own its buffer");
@@ -93,10 +99,6 @@ void Table::grow(defs::data_t *const new_ptr, size_t nrow) {
         memmove(m_data, new_ptr, high_water_mark() * row_length() * sizeof(defs::data_t));
     m_data = new_ptr;
     m_nrow = nrow;
-}
-
-const Table::spec_t &Table::spec() const {
-    return m_spec;
 }
 
 size_t Table::nrow() const {

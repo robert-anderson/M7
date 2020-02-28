@@ -3,8 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include "../../src/integrals/AbInitioHamiltonian.h"
-#include "../../src/linalg/DenseHamiltonian.h"
+#include "src/hamiltonian/AbInitioHamiltonian.h"
+#include "src/linalg/DenseHamiltonian.h"
 
 
 TEST(DenseHamiltonian, FciEnergyCheck) {

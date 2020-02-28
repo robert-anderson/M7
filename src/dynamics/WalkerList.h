@@ -20,11 +20,11 @@ struct WalkerListSpecification : public Specification {
 
 class WalkerList : public PerforableMappedList<Determinant> {
 public:
-    using spec_t = WalkerListSpecification;
-
-    WalkerList(const spec_t &spec, size_t nrow);
-
-    const spec_t &spec() const;
+    using spec_T = WalkerListSpecification;
+protected:
+    const spec_T m_spec;
+public:
+    WalkerList(const spec_T &spec, size_t nrow);
 
     Determinant get_determinant(const size_t &irow);
 

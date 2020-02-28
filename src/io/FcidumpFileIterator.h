@@ -9,16 +9,18 @@
 
 static const std::regex header_terminator_regex{R"(\&END)"};
 
-static constexpr std::array<std::array<size_t, 4>, 8> orderings{{
-                                                                        {0, 1, 2, 3},
-                                                                        {1, 0, 2, 3},
-                                                                        {0, 1, 3, 2},
-                                                                        {1, 0, 3, 2},
-                                                                        {2, 3, 0, 1},
-                                                                        {2, 3, 1, 0},
-                                                                        {3, 2, 0, 1},
-                                                                        {3, 2, 1, 0}
-                                                                }};
+static constexpr std::array<std::array<size_t, 4>, 8> orderings{
+        {
+                {0, 1, 2, 3},
+                {1, 0, 2, 3},
+                {0, 1, 3, 2},
+                {1, 0, 3, 2},
+                {2, 3, 0, 1},
+                {2, 3, 1, 0},
+                {3, 2, 0, 1},
+                {3, 2, 1, 0}
+        }
+};
 
 template<typename T>
 class FcidumpFileIterator : public TensorFileIterator<T> {
@@ -50,6 +52,13 @@ public:
         assert(m_norb == TensorFileIterator<T>::m_shape[0]);
     }
 
+    size_t nspinorb() const{
+        return m_spin_resolved?m_norb:m_norb*2;
+    }
+
+    size_t nsite() const{
+        return m_spin_resolved?m_norb/2:m_norb;
+    }
 private:
 
     /*
@@ -91,8 +100,9 @@ private:
                     std::sort(inds.begin(), inds.end());
                     // still looking for an example of four distinct indices
                     if (std::adjacent_find(inds.begin(), inds.end()) == inds.end()) {
-                        for (size_t i=1ul; i < orderings.size(); ++i) {
-                            for (size_t j=0ul; j < 4; ++j) inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
+                        for (size_t i = 1ul; i < orderings.size(); ++i) {
+                            for (size_t j = 0ul; j < 4; ++j)
+                                inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
                         }
                         isymm++;
                     }

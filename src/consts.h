@@ -93,13 +93,13 @@ namespace consts {
     }
 
     template<typename T>
-    static constexpr T real_log(T &v) {
-        return std::log(abs(v));
+    static T real_log(T &v) {
+        return std::log(std::abs(v));
     }
 
     template<typename T>
-    static constexpr std::complex<T> real_log(std::complex<T> v) {
-        return std::complex<T>(std::log(abs(v.real())), std::log(abs(v.imag())));
+    static std::complex<T> real_log(std::complex<T> v) {
+        return std::complex<T>(std::log(std::abs(v.real())), std::log(std::abs(v.imag())));
     }
 
     template<typename T>

@@ -11,33 +11,21 @@ class List : public Table {
     size_t m_high_water_mark{};
 
 public:
-    List(spec_t spec, size_t nrow) : Table(spec, nrow) {}
+    List(const spec_T &spec, size_t nrow);
 
-    List(spec_t spec, size_t nrow, defs::data_t *data_external) : Table(spec, nrow, data_external) {}
+    List(const spec_T &spec, size_t nrow, defs::data_t *data_external);
 
-    virtual size_t high_water_mark() const {
-        return m_high_water_mark;
-    }
+    virtual size_t high_water_mark() const;
 
-    size_t push() {
-        size_t tmp;
-#pragma omp atomic capture
-        tmp = m_high_water_mark++;
-        return tmp;
-    }
+    void high_water_mark(const size_t& value);
 
-    size_t push(const size_t &nrow) {
-        size_t tmp;
-#pragma omp atomic capture
-        tmp = m_high_water_mark += nrow;
-        return tmp;
-    }
+    size_t push();
 
-    void zero() override {
-        // TODO: no need to memset zero here, only included initially for clarity in debugging
-        Table::zero();
-        m_high_water_mark = 0ul;
-    }
+    size_t push(const size_t &nrow);
+
+    void zero() override;
+
+    void print() const override ;
 
 };
 

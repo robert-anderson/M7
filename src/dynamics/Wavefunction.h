@@ -16,14 +16,18 @@ class Wavefunction {
     WalkerList m_walker_list;
     WalkerCommunicator m_walker_communicator;
 
+    Determinant m_reference;
+    defs::ham_t m_reference_energy_numerator;
+    defs::ham_t m_reference_energy_denominator;
+
 public:
 
     defs::ham_comp_t m_square_norm;
     defs::ham_comp_t m_delta_square_norm;
     double m_norm_growth_rate = 0;
 
-    Wavefunction(const Determinant &ref, size_t nwalker_initial, size_t nrow_walkers,
-            size_t nrow_send, size_t nrow_recv);
+    Wavefunction(const std::unique_ptr<Propagator> &propagator, const Determinant &reference,
+            double nwalker_initial, size_t nrow_walkers, size_t nrow_send, size_t nrow_recv);
 
     void propagate(const std::unique_ptr<Propagator> &propagator);
 
@@ -33,11 +37,13 @@ public:
         // TODO
     }
 
-    void annihilate();
+    void annihilate(const std::unique_ptr<Propagator> &propagator);
 
     void write_iter_stats(){
-
+        std::cout << "=====   " << m_reference_energy_numerator/m_reference_energy_denominator << std::endl;
     }
+
+    defs::ham_comp_t norm() const;
 
 };
 

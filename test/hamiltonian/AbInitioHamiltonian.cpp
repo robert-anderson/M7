@@ -9,7 +9,7 @@
 
 TEST(AbInitioHamiltonian, DhfEnergy){
     AbInitioHamiltonian ham(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP");
-    Determinant hf_det(ham.nspatorb());
+    Determinant hf_det(ham.nsite());
     hf_det.m_bitfields[0].set(defs::inds{0,1});
     hf_det.m_bitfields[1].set(defs::inds{0,1});
     auto elem = ham.get_element_0(hf_det);
@@ -19,7 +19,7 @@ TEST(AbInitioHamiltonian, DhfEnergy){
 
 TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
     AbInitioHamiltonian ham(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP");
-    Determinant hf_det(ham.nspatorb());
+    Determinant hf_det(ham.nsite());
     hf_det.m_bitfields[0].set(defs::inds{0,1});
     hf_det.m_bitfields[1].set(defs::inds{0,1});
     size_t removed, inserted;

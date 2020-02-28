@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     }
 
     FciqmcCalculation calc(input);
-    calc.execute(100);
+    calc.execute(~0ul);
 
     mpi::finalize();
 

@@ -43,6 +43,12 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-S,--shift_initial", shift_initial,
             "initial diagonal shift relative to the automatically assumed shift given by the reference energy.");
 
+    add_option("-d,--shift_damp", shift_damp,
+               "damping factor regulating the shift updates");
+
+    add_option("-T,--shift_update_period", shift_update_period,
+               "number of cycles between shift updates");
+
 
 }
 

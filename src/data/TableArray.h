@@ -12,25 +12,24 @@
 template<typename table_T>
 class TableArray {
     static_assert(std::is_base_of<Table, table_T>::value);
-    const typename table_T::spec_t m_spec;
     std::vector<defs::data_t> m_data{};
     std::vector<table_T> m_tables{};
     defs::inds m_offsets;
 public:
-    TableArray(size_t ntable, typename table_T::spec_t spec, size_t nrow_per_table) :
-        m_spec(spec), m_offsets(ntable) {
+    TableArray(size_t ntable, const typename table_T::spec_T &spec, size_t nrow_per_table) :
+        m_offsets(ntable) {
         for (size_t itable = 0ul; itable < ntable; ++itable)
             m_tables.emplace_back(spec, 0, nullptr);
         grow(nrow_per_table);
     }
 
     void grow(const size_t &nrow_per_table) {
-        m_data.resize(m_tables.size() * nrow_per_table * m_spec.m_total_datawords_used, 0);
+        m_data.resize(m_tables.size() * nrow_per_table * row_length(), 0);
         /*
          * move tables in reverse order to avoid corruption due to overlap
          */
         for (size_t itable = m_tables.size() - 1; itable != ~0ul; --itable) {
-            m_offsets[itable] = itable * nrow_per_table * m_spec.m_total_datawords_used;
+            m_offsets[itable] = itable * nrow_per_table * row_length();
             m_tables[itable].grow(data() + m_offsets[itable], nrow_per_table);
         }
     }
@@ -55,7 +54,7 @@ public:
     }
 
     const size_t row_length() const {
-        return m_spec.m_total_datawords_used;
+        return m_tables[0].row_length();
     }
 
     defs::data_t *data() {

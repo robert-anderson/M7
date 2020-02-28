@@ -18,10 +18,10 @@ protected:
     ListSafeHashMap<T> m_map;
 
 public:
-    MappedList(spec_t spec, size_t nrow, size_t key_entry) :
+    MappedList(spec_T spec, size_t nrow, size_t key_entry) :
             List(spec, nrow), m_key_entry(key_entry), m_map(*this, nrow) {}
 
-    MappedList(spec_t spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
+    MappedList(spec_T spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
             List(spec, nrow, data_external), m_key_entry(key_entry), m_map(*this, nrow) {}
 
     Mutex get_mutex(const size_t &ibucket) {
@@ -41,18 +41,27 @@ public:
         return m_map.lookup(mutex, key);
     }
 
-    size_t push(Mutex &mutex, const T &key) {
-        size_t irow;
-        irow = m_map.lookup(mutex, key);
-        if (irow != ~0ul) return irow;
-        irow = List::push();
+    virtual size_t push(Mutex &mutex, const T &key) {
+        size_t irow = List::push();
         m_map.insert(mutex, key, irow);
         return irow;
     }
 
-    size_t push(const T &key) {
+    virtual size_t push(const T &key) {
         auto mutex = key_mutex(key);
         return push(mutex, key);
+    }
+
+    size_t lookup_push(Mutex &mutex, const T &key) {
+        size_t irow;
+        irow = m_map.lookup(mutex, key);
+        if (irow != ~0ul) return irow;
+        else return push(mutex, key);
+    }
+
+    size_t lookup_push(const T &key) {
+        auto mutex = key_mutex(key);
+        return lookup_push(mutex, key);
     }
 
     const size_t &key_entry() const {

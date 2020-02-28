@@ -15,8 +15,9 @@ class TableCommunicator {
 public:
     TableArray <table_T> m_send;
     table_T m_recv;
-    TableCommunicator(typename table_T::spec_t spec, size_t nrow_send, size_t nrow_recv) :
-        m_send(mpi::nrank(), spec, nrow_send), m_recv(spec, nrow_recv) {}
+    TableCommunicator(const typename table_T::spec_T &spec, size_t nrow_send, size_t nrow_recv) :
+        m_send(mpi::nrank(), spec, nrow_send), m_recv(spec, nrow_recv) {
+    }
 
     bool communicate() {
         defs::inds sendcounts(m_send.high_water_marks());
@@ -30,7 +31,8 @@ public:
 
         auto tmp = mpi::all_to_allv(m_send.data(), sendcounts, senddispls,
                                     m_recv.data(), recvcounts, recvdispls);
-        //recv.set_highwatermark(0, (recvdispls.back() + recvcounts.back()) / row_length());
+
+        m_recv.high_water_mark((recvdispls.back() + recvcounts.back()) / m_recv.row_length());
         m_send.zero();
         return tmp;
     }

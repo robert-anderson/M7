@@ -12,8 +12,8 @@
 class StochasticPropagator : public Propagator {
     PRNG m_prng;
 public:
-    StochasticPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rankAllocator,
-                         double tau, defs::ham_comp_t shift, size_t seed);
+    StochasticPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rank_allocator,
+                         defs::ham_comp_t target_shift, double tau, defs::ham_comp_t shift, size_t seed);
 };
 
 

@@ -36,7 +36,7 @@
 
 template<typename T>
 class PerforableMappedList : public MappedList<T> {
-    using spec_t = typename MappedList<T>::spec_t;
+    using typename MappedList<T>::spec_T;
     defs::inds m_free;
     defs::inds m_removed;
 
@@ -45,11 +45,11 @@ class PerforableMappedList : public MappedList<T> {
     size_t m_nremoved = 0ul;
 public:
 
-    PerforableMappedList(spec_t spec, size_t nrow, size_t key_entry) :
+    PerforableMappedList(spec_T spec, size_t nrow, size_t key_entry) :
         MappedList<T>(spec, nrow, key_entry),
         m_free(nrow, 0ul), m_removed(nrow, 0ul) {}
 
-    PerforableMappedList(spec_t spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
+    PerforableMappedList(spec_T spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
         MappedList<T>(spec, nrow, key_entry, data_external) {}
 
     void synchronize() {
@@ -65,12 +65,9 @@ public:
         m_nfree_used = 0ul;
     }
 
-    size_t push(Mutex &mutex, const T &key) {
-        size_t irow = MappedList<T>::m_map.lookup(mutex, key);
-        if (irow != ~0ul) return irow;
-        /*
-         * key not found in table, so see if there are any free rows left
-         */
+    size_t push(Mutex &mutex, const T &key) override {
+        size_t irow = ~0ul;
+        // first see if there are any free rows left
         if (m_nfree_used<m_nfree) {
 #pragma omp atomic capture
             irow = m_nfree_used++;
@@ -88,7 +85,7 @@ public:
         return irow;
     }
 
-    size_t push(const T &key) {
+    size_t push(const T &key) override {
         auto mutex = MappedList<T>::m_map.key_mutex(key);
         return push(mutex, key);
     }

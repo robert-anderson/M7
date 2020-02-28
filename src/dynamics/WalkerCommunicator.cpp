@@ -5,4 +5,4 @@
 #include "WalkerCommunicator.h"
 
 WalkerCommunicator::WalkerCommunicator(size_t nsite, size_t nrow_send, size_t nrow_recv) :
-        TableCommunicator<SpawnList>(SpawnList::spec_t(nsite), nrow_send, nrow_recv){}
+        TableCommunicator<SpawnList>(SpawnList::spec_T(nsite), nrow_send, nrow_recv){}

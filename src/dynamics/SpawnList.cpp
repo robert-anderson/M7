@@ -5,24 +5,21 @@
 #include "SpawnList.h"
 
 
-SpawnList::SpawnList(const spec_t &spec, size_t nrow, defs::data_t *data_external) :
-        List(spec, nrow, data_external){}
+SpawnList::SpawnList(const spec_T &spec, size_t nrow, defs::data_t *data_external) :
+        List(spec, nrow, data_external), m_spec(spec) {}
 
-SpawnList::SpawnList(const spec_t &spec, size_t nrow) : SpawnList(spec, nrow, nullptr){}
-
-const SpawnList::spec_t &SpawnList::spec() const {
-    return static_cast<const spec_t &>(m_spec);
-}
+SpawnList::SpawnList(const spec_T &spec, size_t nrow) :
+        List(spec, nrow), m_spec(spec) {}
 
 Determinant SpawnList::get_determinant(const size_t &irow) {
-    return view<Determinant>(irow, spec().idet);
+    return view<Determinant>(irow, m_spec.idet);
 }
 
 NumericView<defs::ham_t> SpawnList::get_weight(const size_t &irow) {
-    return view<defs::ham_t>(irow, spec().iweight);
+    return view<defs::ham_t>(irow, m_spec.iweight);
 }
 
 NumericView<bool> SpawnList::get_flag_parent_initiator(const size_t &irow) {
-    return view<bool>(spec().iflag_parent_initiator);
+    return view<bool>(m_spec.iflag_parent_initiator);
 }
 

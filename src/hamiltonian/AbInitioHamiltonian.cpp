@@ -8,10 +8,10 @@
 #include "../enumerators/BitfieldEnumerator.h"
 
 AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
-    Hamiltonian(m_file_iterator.m_norb),
+    Hamiltonian(FcidumpFileIterator<defs::ham_t>(fname).nsite()),
     m_file_iterator(fname),
-    m_int_1{m_file_iterator.m_norb, spin_resolved()},
-    m_int_2{m_file_iterator.m_norb, spin_resolved()} {
+    m_int_1(m_file_iterator.m_norb, spin_resolved()),
+    m_int_2(m_file_iterator.m_norb, spin_resolved()) {
     defs::inds inds(4);
     defs::ham_t value;
     while (m_file_iterator.next(inds, value)) {
@@ -19,7 +19,7 @@ AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
         else if (m_int_1.valid_inds(inds)) m_int_1.set_from_fcidump(inds, value);
         else if (inds[0] == ((size_t) -1)) m_int_0 = value;
     }
-    m_nci = integer_utils::combinatorial(nsite(), nelec());
+    m_nci = integer_utils::combinatorial(nsite()*2, nelec());
 }
 
 defs::ham_t AbInitioHamiltonian::get_element_0(const Determinant &det) const {

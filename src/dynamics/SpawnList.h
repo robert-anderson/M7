@@ -24,13 +24,14 @@ struct SpawnListSpecification : public Specification {
 
 class SpawnList : public List {
 public:
-    using spec_t = SpawnListSpecification;
+    using spec_T = SpawnListSpecification;
+protected:
+    spec_T m_spec;
 
-    SpawnList(const spec_t &spec, size_t nrow, defs::data_t *data_external);
+public:
+    SpawnList(const spec_T &spec, size_t nrow, defs::data_t *data_external);
 
-    SpawnList(const spec_t &spec, size_t nrow);
-
-    const spec_t &spec() const;
+    SpawnList(const spec_T &spec, size_t nrow);
 
     Determinant get_determinant(const size_t &irow);
 
