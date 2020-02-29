@@ -9,8 +9,8 @@
 
 class DeterministicPropagator : public Propagator {
 public:
-    DeterministicPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rankAllocator,
-                            defs::ham_comp_t target_norm, double tau, defs::ham_comp_t shift);
+    DeterministicPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
+                                                     const RankAllocator<Determinant> &rank_allocator);
 };
 
 

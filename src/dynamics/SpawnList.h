@@ -15,7 +15,8 @@ struct SpawnListSpecification : public Specification {
     size_t idet;
     size_t iweight;
     size_t iflag_parent_initiator;
-    SpawnListSpecification(size_t nsite) : Specification(){
+
+    SpawnListSpecification(size_t nsite) : Specification() {
         idet = add<Determinant>(nsite);
         iweight = add<defs::ham_t>(1);
         iflag_parent_initiator = add<bool>(1);
@@ -38,6 +39,14 @@ public:
     NumericView<defs::ham_t> get_weight(const size_t &irow);
 
     NumericView<bool> get_flag_parent_initiator(const size_t &irow);
+
+    size_t push(const Determinant &determinant, const defs::ham_t &weight,
+                bool flag_parent_initiator) {
+        auto irow = List::push();
+        get_determinant(irow) = determinant;
+        get_weight(irow) = weight;
+        get_flag_parent_initiator(irow) = flag_parent_initiator;
+    }
 };
 
 

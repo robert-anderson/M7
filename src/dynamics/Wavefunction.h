@@ -6,6 +6,8 @@
 #define M7_WAVEFUNCTION_H
 
 #include <src/enumerators/VectorCombinationEnumerator.h>
+#include <src/io/StatsFile.h>
+#include <src/io/FciqmcStatsFile.h>
 #include "WalkerList.h"
 #include "src/sample/HeatBathSampler.h"
 #include "WalkerCommunicator.h"
@@ -18,7 +20,7 @@ class Wavefunction {
 
     Determinant m_reference;
     defs::ham_t m_reference_energy_numerator;
-    defs::ham_t m_reference_energy_denominator;
+    defs::ham_t m_reference_weight;
 
 public:
 
@@ -39,9 +41,7 @@ public:
 
     void annihilate(const std::unique_ptr<Propagator> &propagator);
 
-    void write_iter_stats(){
-        std::cout << "=====   " << m_reference_energy_numerator/m_reference_energy_denominator << std::endl;
-    }
+    void write_iter_stats(FciqmcStatsFile &stats_file);
 
     defs::ham_comp_t norm() const;
 

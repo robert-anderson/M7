@@ -7,13 +7,14 @@
 
 
 #include <omp.h>
-#include <src/io/StatsFile.h>
 #include <src/hamiltonian/AbInitioHamiltonian.h>
+#include <src/io/FciqmcStatsFile.h>
 #include "src/io/InputOptions.h"
 #include "src/hamiltonian/Hamiltonian.h"
 #include "Propagator.h"
 #include "Wavefunction.h"
 #include "ExactPropagator.h"
+
 
 class FciqmcCalculation {
     const InputOptions m_input;
@@ -21,11 +22,13 @@ class FciqmcCalculation {
     std::unique_ptr<Hamiltonian> m_ham;
     std::unique_ptr<Propagator> m_prop;
     std::unique_ptr<Wavefunction> m_psi;
-    StatsFile m_stats_file;
+    FciqmcStatsFile m_stats_file;
 public:
     explicit FciqmcCalculation(const InputOptions &input);
 
     void execute(size_t ncycle);
+
+    void write_iter_stats(size_t icycle);
 
 };
 

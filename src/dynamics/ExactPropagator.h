@@ -10,8 +10,8 @@
 class ExactPropagator : public DeterministicPropagator {
 
 public:
-    ExactPropagator(const std::unique_ptr<Hamiltonian> &ham, const RankAllocator<Determinant> &rank_allocator,
-                    defs::ham_comp_t target_norm, double tau, defs::ham_comp_t shift);
+    ExactPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
+                    const RankAllocator<Determinant> &rank_allocator);
 
     void off_diagonal(const Determinant &determinant, const NumericView<defs::ham_t> &weight,
                       const NumericView<bool> flag_deterministic, const NumericView<bool> flag_initiator,

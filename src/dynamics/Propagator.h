@@ -12,21 +12,21 @@
 #include <iomanip>
 #include <iostream>
 #include <src/data/NumericView.h>
+#include <src/io/FciqmcStatsFile.h>
 
 class Propagator {
 public:
+    const InputOptions &m_input;
     const std::unique_ptr<Hamiltonian> &m_ham;
     const RankAllocator<Determinant> &m_rank_allocator;
     double m_tau;
-    bool vary_shift = false;
-    defs::ham_comp_t m_target_norm;
     defs::ham_comp_t m_shift;
+    bool vary_shift = false;
     defs::ham_comp_t m_largest_spawn_magnitude = 0;
 
-    Propagator(const std::unique_ptr<Hamiltonian> &ham,
-               const RankAllocator<Determinant> &rank_allocator,
-               defs::ham_comp_t target_norm,
-               double tau, defs::ham_comp_t shift);
+    Propagator(const InputOptions &input,
+               const std::unique_ptr<Hamiltonian> &ham,
+               const RankAllocator<Determinant> &rank_allocator);
 
     void diagonal(const NumericView<defs::ham_comp_t> &hdiag, NumericView<defs::ham_t> &weight,
                   defs::ham_comp_t &delta_square_norm) const;
@@ -40,14 +40,17 @@ public:
 
     void update(const size_t icycle, defs::ham_comp_t norm, defs::ham_comp_t norm_growth) {
         if (!vary_shift) {
-            if (norm < m_target_norm) return;
+            if (norm < m_input.wf_norm_target) return;
             else vary_shift = true;
         }
-
-        std::cout << "growth: " << std::setprecision(10) << norm_growth << std::endl;
-        m_shift -= 0.1*consts::real_log(norm_growth) / m_tau;
-        std::cout << "shift: " << std::setprecision(10) << m_shift << std::endl;
+        m_shift -= 0.1 * consts::real_log(norm_growth) / m_tau;
     }
+
+    void write_iter_stats(FciqmcStatsFile &stats_file) {
+        stats_file.m_timestep->write(m_tau);
+        stats_file.m_diagonal_shift->write(m_shift);
+    }
+
 
 //void evolve(const Perforable)
 };

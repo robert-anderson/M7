@@ -23,9 +23,9 @@ void Wavefunction::propagate(const std::unique_ptr<Propagator> &propagator) {
     m_delta_square_norm = 0;
     m_reference_energy_numerator = 0;
     // capture the reference weight before death step is applied in the loop below
-    m_reference_energy_denominator = 0;
+    m_reference_weight = 0;
     size_t irow = m_walker_list.lookup(m_reference);
-    if (irow!=~0ul) m_reference_energy_denominator = *m_walker_list.get_weight(irow);
+    if (irow!=~0ul) m_reference_weight = *m_walker_list.get_weight(irow);
 
 #pragma omp parallel default(none) shared(m_walker_list, propagator)
     {
@@ -91,9 +91,15 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
     m_square_norm = mpi::all_sum(m_square_norm);
     m_norm_growth_rate = std::sqrt((m_square_norm+m_delta_square_norm) / m_square_norm);
     m_square_norm += m_delta_square_norm;
-    logger::write("norm: "+std::to_string(std::sqrt(m_square_norm)));
 }
 
 defs::ham_comp_t Wavefunction::norm() const {
     return std::sqrt(m_square_norm);
+}
+
+void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
+    stats_file.m_reference_projected_energy_numerator->write(m_reference_energy_numerator);
+    stats_file.m_reference_weight->write(m_reference_weight);
+    stats_file.m_reference_energy->write(m_reference_energy_numerator/m_reference_weight);
+    stats_file.m_wavefunction_l2_norm->write(norm());
 }

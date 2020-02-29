@@ -7,11 +7,9 @@
 #include "ExactPropagator.h"
 
 
-ExactPropagator::ExactPropagator(const std::unique_ptr<Hamiltonian> &ham,
-                                 const RankAllocator<Determinant> &rank_allocator,
-                                 defs::ham_comp_t target_norm,
-                                 double tau, defs::ham_comp_t shift)
-        : DeterministicPropagator(ham, rank_allocator, target_norm, tau, shift) {}
+ExactPropagator::ExactPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
+                                 const RankAllocator<Determinant> &rank_allocator)
+        : DeterministicPropagator(input, ham, rank_allocator) {}
 
 
 void ExactPropagator::off_diagonal(const Determinant &determinant, const NumericView<defs::ham_t> &weight,

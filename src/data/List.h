@@ -19,7 +19,7 @@ public:
 
     void high_water_mark(const size_t& value);
 
-    size_t push();
+    virtual size_t push();
 
     size_t push(const size_t &nrow);
 

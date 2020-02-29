@@ -7,12 +7,13 @@
 
 #include <string>
 #include <external/CLI11/include/CLI/App.hpp>
+#include <utility>
 
 
 class InputError: public std::exception
 {
     const std::string m_msg;
-    InputError(const std::string &msg):m_msg(msg){}
+    InputError(std::string msg):m_msg(std::move(msg)){}
     virtual const char* what() const throw()
     {
         return m_msg.c_str();
@@ -24,9 +25,11 @@ private:
     CLI::App &m_app;
 public:
     std::string fcidump_path = "FCIDUMP";
-    double nwalker_initial = 1.0;
-    double nwalker_target = 0.0;
+    std::string stats_path = "M7.stats";
+    double wf_norm_initial = 1.0;
+    double wf_norm_target = 0.0;
     double nadd_initiator = 3.0;
+    size_t prng_seed = 0;
     size_t ndet_semistoch = 0;
     size_t spin_level = 0;
     double walker_factor_initial = 1.0;
@@ -37,7 +40,7 @@ public:
     double shift_damp = 0.0;
     double shift_update_period = 0.0;
 
-    InputOptions(CLI::App &app);
+    explicit InputOptions(CLI::App &app);
 
     template <typename T>
     void add_option(const std::string cli_options,

@@ -5,8 +5,16 @@
 #include "StochasticPropagator.h"
 
 
-StochasticPropagator::StochasticPropagator(const std::unique_ptr<Hamiltonian> &ham,
-                                           const RankAllocator<Determinant> &rank_allocator,
-                                           defs::ham_comp_t target_shift, double tau,
-                                           defs::ham_comp_t shift, size_t seed) :
-        Propagator(ham, rank_allocator, target_shift, tau, shift), m_prng(seed) {}
+StochasticPropagator::StochasticPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
+                                           const RankAllocator<Determinant> &rank_allocator) :
+        Propagator(input, ham, rank_allocator), m_prng(input.prng_seed) {}
+
+void StochasticPropagator::off_diagonal(const Determinant &determinant, const NumericView<defs::ham_t> &weight,
+                                        const NumericView<bool> flag_deterministic,
+                                        const NumericView<bool> flag_initiator,
+                                        TableArray<SpawnList> &spawn_list) const {
+    size_t nattempt = std::ceil(std::abs(*weight));
+    for (size_t iattempt=0ul; iattempt<nattempt; ++iattempt){
+
+    }
+}

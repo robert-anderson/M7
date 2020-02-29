@@ -13,14 +13,20 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-f,--fcidump_path", fcidump_path,
                "Path to the FCIDUMP file, this is read-only");
 
-    add_option("-i,--nwalker_initial", nwalker_initial,
-               "Number of walkers with which the populations will be initialized");
+    add_option("-O,--stats_path", fcidump_path,
+               "Path to the file to which MC cycle statistics will be output");
 
-    add_option("-n,--nwalker_target", nwalker_target,
-               "Number of walkers at which the population will be stabilised after the growth phase", true);
+    add_option("-i,--wf_norm_initial", wf_norm_initial,
+               "L2 norm of the wavefunction corresponding to the initial walker populations.");
+
+    add_option("-n,--wf_norm_target", wf_norm_target,
+               "L2 norm at which the wavefunction will be stabilized after the growth phase", true);
 
     add_option("-a,--nadd_initiator", nadd_initiator,
                "Number of walkers defining the initiator threshold");
+
+    add_option("-R,--prng_seed", prng_seed,
+               "Seed value for the mt19937 PRNG");
 
     add_option("-s,--ndet_semistoch", ndet_semistoch,
                "Number of determinants selected to comprise the deterministic subspace");

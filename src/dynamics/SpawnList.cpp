@@ -22,4 +22,3 @@ NumericView<defs::ham_t> SpawnList::get_weight(const size_t &irow) {
 NumericView<bool> SpawnList::get_flag_parent_initiator(const size_t &irow) {
     return view<bool>(m_spec.iflag_parent_initiator);
 }
-
