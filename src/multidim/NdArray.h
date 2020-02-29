@@ -53,6 +53,13 @@ public:
         memcpy(m_data, src.data(), nelement() * sizeof(T));
     }
 
+    void operator*=(const T& factor){
+        for (auto i=m_data; i!=m_data+nelement(); ++i) *i*=factor;
+    }
+
+    void operator/=(const T& factor){
+        for (auto i=m_data; i!=m_data+nelement(); ++i) *i/=factor;
+    }
 
     const std::array<size_t, nind> &shape() const {
         return m_indexer.shape();

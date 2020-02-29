@@ -66,7 +66,17 @@ public:
     public:
         DeterminantSampler(const HeatBathSampler &precomputed, const Determinant &det);
 
-        HeatBathExcitation draw(PRNG prng);
+        std::vector<defs::prob_t> make_m_P_tilde_1(const HeatBathSampler &precomputed,
+                                    const defs::inds &occinds, const size_t &noccind) {
+            std::vector<defs::prob_t> result(noccind, 0ul);
+            for (size_t ioccind = 0ul; ioccind < noccind; ++ioccind) {
+                result[ioccind] = *precomputed.m_S.view(occinds[ioccind]);
+            }
+            prob_utils::normalize(result);
+            return result;
+        }
+
+        HeatBathExcitation draw(PRNG &prng);
 
     private:
         defs::prob_t proposal(const size_t &ip, const size_t &r, const defs::ham_t &h);

@@ -6,7 +6,7 @@
 #include <src/enumerators/VectorCombinationEnumerator.h>
 #include "Hamiltonian.h"
 
-Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite){
+Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
 
 }
 
@@ -54,4 +54,45 @@ Determinant Hamiltonian::choose_reference(const size_t &spin_level) const {
     auto ref = guess_reference(spin_level);
     ref = refine_guess_reference(ref);
     return ref;
+}
+
+MappedList<Determinant> Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps) const {
+    Specification spec;
+    spec.add<Determinant>(m_nsite);
+    spec.add<defs::ham_t>(1);
+    MappedList<Determinant> list(spec, 100, 0);
+
+    auto occs = DeterminantSetEnumerator(ref).enumerate();
+    auto unoccs = DeterminantClrEnumerator(ref).enumerate();
+
+    Determinant excited(m_nsite);
+    for (auto occ:occs) {
+        for (auto unocc:unoccs) {
+            excited = ref.get_excited_det(occ, unocc);
+            auto helement = get_element(ref, excited);
+            if (!consts::float_nearly_zero(std::abs(helement), eps)) {
+                size_t irow = list.push(excited);
+                *list.view<defs::ham_t>(irow) = helement;
+            }
+        }
+    }
+
+    VectorCombinationEnumerator occ_enumerator(occs, 2);
+    defs::inds occ_inds(2);
+    while (occ_enumerator.next(occ_inds)) {
+        {
+            VectorCombinationEnumerator unocc_enumerator(unoccs, 2);
+            defs::inds unocc_inds(2);
+            while (unocc_enumerator.next(unocc_inds)) {
+                excited = ref.get_excited_det(occ_inds, unocc_inds);
+                auto helement = get_element(ref, excited);
+                if (!consts::float_nearly_zero(std::abs(helement), eps)) {
+                    size_t irow = list.push(excited);
+                    *list.view<defs::ham_t>(irow) = helement;
+                    assert(list.lookup(list.view<Determinant>(irow, 0))==irow);
+                }
+            }
+        }
+    }
+    return list;
 }

@@ -48,6 +48,7 @@ void Table::print(size_t nrow) const {
     else
         std::cout << "\nnumber of rows shown: " << nrow << std::endl;
     for (size_t irow=0ul; irow < nrow; ++irow) {
+        std::cout << utils::num_to_string(irow, 6) << " | ";
         std::cout << view<std::complex<float>>(irow).to_string(padding);
         std::cout << view<std::complex<double>>(irow).to_string(padding);
         std::cout << view<std::complex<long double>>(irow).to_string(padding);

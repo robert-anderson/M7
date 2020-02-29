@@ -20,8 +20,8 @@ public:
         return m_mt19937();
     }
 
-    float draw_float(){
-        return float(draw_uint())/std::mt19937::max();
+    double draw_float(){
+        return double(draw_uint())/(1+std::mt19937::max());
     }
 
 };

@@ -5,14 +5,14 @@
 #include "HeatBathSampler.h"
 
 HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
-    m_h(h),
-    m_nspinorb(h.nsite() * 2),
-    m_spin_conserving(h.spin_conserving()),
-    m_D(m_nspinorb, m_nspinorb),
-    m_S(m_nspinorb),
-    m_P_tilde_3(m_nspinorb, m_nspinorb, m_nspinorb),
-    m_H_tot(m_nspinorb, m_nspinorb, m_nspinorb),
-    m_P_tilde_4(m_nspinorb, m_nspinorb, m_nspinorb, m_nspinorb) {
+        m_h(h),
+        m_nspinorb(h.nsite() * 2),
+        m_spin_conserving(h.spin_conserving()),
+        m_D(m_nspinorb, m_nspinorb),
+        m_S(m_nspinorb),
+        m_P_tilde_3(m_nspinorb, m_nspinorb, m_nspinorb),
+        m_H_tot(m_nspinorb, m_nspinorb, m_nspinorb),
+        m_P_tilde_4(m_nspinorb, m_nspinorb, m_nspinorb, m_nspinorb) {
 
     for (size_t p = 0ul; p < m_nspinorb; ++p) {
         *m_S.view(p) = 0;
@@ -20,7 +20,7 @@ HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
             if (p == q) continue;
             for (size_t r = 0ul; r < m_nspinorb; ++r) {
                 for (size_t s = 0ul; s < m_nspinorb; ++s) {
-                    *m_D.view(p, q) = std::abs(h.get_element_2(r, s, p, q));
+                    *m_D.view(p, q) += std::abs(h.get_element_2(r, s, p, q));
                 }
             }
             *m_S.view(p) += *m_D.view(p, q);
@@ -31,6 +31,7 @@ HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
         for (size_t q = 0ul; q < m_nspinorb; ++q) {
             if (p == q) continue;
             for (size_t r = 0ul; r < m_nspinorb; ++r) {
+                if (p == r) continue;
                 if (q == r) continue;
                 defs::prob_t numerator = 0.0;
                 defs::prob_t denominator = 0.0;
@@ -47,19 +48,25 @@ HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
 
     for (size_t p = 0ul; p < m_nspinorb; ++p) {
         for (size_t q = 0ul; q < m_nspinorb; ++q) {
+            if (p == q) continue;
             for (size_t r = 0ul; r < m_nspinorb; ++r) {
+                if (p == r) continue;
+                if (q == r) continue;
                 *m_H_tot.view(p, q, r) = 0.0;
                 for (size_t s = 0ul; s < m_nspinorb; ++s) {
+                    if (p == s) continue;
+                    if (q == s) continue;
+                    if (r == s) continue;
                     *m_H_tot.view(p, q, r) += std::abs(h.get_element_2(r, s, p, q));
 
                     *m_P_tilde_4.view(p, q, r, s) = 0.0;
                     for (size_t sp = 0ul; sp < m_nspinorb; ++sp) {
                         *m_P_tilde_4.view(p, q, r, s) +=
-                            std::abs(h.get_element_2(r, sp, p, q));
+                                std::abs(h.get_element_2(r, sp, p, q));
                     }
                     *m_P_tilde_4.view(p, q, r, s) =
-                        std::abs(h.get_element_2(r, s, p, q)) /
-                        *m_P_tilde_4.view(p, q, r, s);
+                            std::abs(h.get_element_2(r, s, p, q)) /
+                            *m_P_tilde_4.view(p, q, r, s);
                 }
             }
         }
@@ -71,28 +78,23 @@ HeatBathSampler::DeterminantSampler HeatBathSampler::sample_excitations(const De
 }
 
 HeatBathSampler::DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed, const Determinant &det) :
-    m_precomputed(precomputed), m_det(det),
-    m_occinds(det.setinds()), m_noccind(m_occinds.size()),
-    m_uncinds(det.clrinds()), m_nuncind(m_uncinds.size()),
-    m_P_tilde_1(m_noccind, 0.0),
-    m_P_tilde_2(m_noccind, 0.0),
-    m_P_tilde_3(det.nspatorb() * 2, 0.0),
-    m_P_tilde_4(det.nspatorb() * 2, 0.0),
-    m_P_tilde_1_aliaser(m_P_tilde_1) {
-    for (size_t ioccind = 0ul; ioccind < m_noccind; ++ioccind) {
-        m_P_tilde_1[ioccind] = *m_precomputed.m_S.view(m_occinds[ioccind]);
-    }
-    prob_utils::normalize(m_P_tilde_1);
-}
+        m_precomputed(precomputed), m_det(det),
+        m_occinds(det.setinds()), m_noccind(m_occinds.size()),
+        m_uncinds(det.clrinds()), m_nuncind(m_uncinds.size()),
+        m_P_tilde_1(make_m_P_tilde_1(precomputed, m_occinds, m_noccind)),
+        m_P_tilde_2(m_noccind, 0.0),
+        m_P_tilde_3(det.nspatorb() * 2, 0.0),
+        m_P_tilde_4(det.nspatorb() * 2, 0.0),
+        m_P_tilde_1_aliaser(m_P_tilde_1) {}
 
 HeatBathSampler::HeatBathExcitation
-HeatBathSampler::DeterminantSampler::draw(PRNG prng) {
+HeatBathSampler::DeterminantSampler::draw(PRNG &prng) {
     /*
      * This method follows the algorithm detailed in Appendix A of the paper
      */
 
     // (1) draw the first occupied orbital
-    size_t ip = m_occinds[m_P_tilde_1_aliaser.draw(prng)];
+    size_t ip = m_P_tilde_1_aliaser.draw(prng);
     size_t p = m_occinds[ip];
 
     // (2) iterate over occupied orbital to construct the probability table for the
@@ -106,12 +108,13 @@ HeatBathSampler::DeterminantSampler::draw(PRNG prng) {
 
     Aliaser P_tilde_2_aliaser(m_P_tilde_2);
     size_t iq = P_tilde_2_aliaser.draw(prng);
+    assert(iq != ip);
     size_t q = m_occinds[iq];
 
     // (3) try to generate the first unoccupied orbital index
     for (size_t r = 0ul; r < m_det.nspatorb() * 2; ++r) {
-        if (r == ip || r == iq) m_P_tilde_3[r] = 0.0;
-        m_P_tilde_3[r] = *m_precomputed.m_P_tilde_3.view(p, q, r);
+        if (r == p || r == q) m_P_tilde_3[r] = 0.0;
+        else m_P_tilde_3[r] = *m_precomputed.m_P_tilde_3.view(p, q, r);
     }
     prob_utils::normalize(m_P_tilde_3);
     Aliaser P_tilde_3_aliaser(m_P_tilde_3);
@@ -122,7 +125,7 @@ HeatBathSampler::DeterminantSampler::draw(PRNG prng) {
     if (m_det.get(r)) return HeatBathExcitation{Excitation(m_det), Excitation(m_det)};
 
     // (4) decide which excitation ranks are to be generated
-    auto h_rp = m_precomputed.m_h.get_element_1(p, r);
+    auto h_rp = m_precomputed.m_h.get_element_1(m_det, p, r);
     auto htot_rpq = *m_precomputed.m_H_tot.view(r, p, q);
 
     defs::prob_t p_single = 0.0;
@@ -135,8 +138,8 @@ HeatBathSampler::DeterminantSampler::draw(PRNG prng) {
         p_single = std::abs(h_rp) / (htot_rpq + std::abs(h_rp));
         if (prng.draw_float() < p_single) {
             // just the single
-            auto factor = proposal(r, p, p_single);
-            return HeatBathExcitation{Excitation(m_det, ip, r, factor), Excitation(m_det)};
+            auto prob = proposal(r, p, h_rp);
+            return HeatBathExcitation{Excitation(m_det, ip, r, h_rp, prob), Excitation(m_det)};
         } else {
             p_single = 0.0;
         }
@@ -144,8 +147,8 @@ HeatBathSampler::DeterminantSampler::draw(PRNG prng) {
 
     // (5) need a double excitation, so choose the second unoccupied
     for (size_t s = 0ul; s < m_det.nspatorb() * 2; ++s) {
-        if (s == ip || s == iq || s == r) m_P_tilde_3[s] = 0.0;
-        m_P_tilde_4[s] = *m_precomputed.m_P_tilde_4.view(p, q, r, s);
+        if (s == p || s == q || s == r) m_P_tilde_4[s] = 0.0;
+        else m_P_tilde_4[s] = *m_precomputed.m_P_tilde_4.view(p, q, r, s);
     }
 
     Aliaser P_tilde_4_aliaser(m_P_tilde_4);
@@ -159,25 +162,25 @@ HeatBathSampler::DeterminantSampler::draw(PRNG prng) {
          */
         if (p_single > 0) {
             return HeatBathExcitation{
-                Excitation(m_det, ip, r, proposal(r, p, h_rp)),
-                Excitation(m_det)
+                    Excitation(m_det, p, r, h_rp, proposal(r, p, h_rp)),
+                    Excitation(m_det)
             };
         } else {
             return HeatBathExcitation{
-                Excitation(m_det),
-                Excitation(m_det)
+                    Excitation(m_det),
+                    Excitation(m_det)
             };
         }
     } else {
         if (p_single > 0) {
             return HeatBathExcitation{
-                Excitation(m_det, ip, r, proposal(r, p, h_rp)),
-                Excitation(m_det, ip, iq, r, s, proposal(ip, iq, r, s, h_rspq))
+                    Excitation(m_det, p, r, h_rp, proposal(r, p, h_rp)),
+                    Excitation(m_det, p, q, r, s, h_rspq, proposal(ip, iq, r, s, h_rspq))
             };
         } else {
             return HeatBathExcitation{
-                Excitation(m_det),
-                Excitation(m_det, ip, iq, r, s, proposal(ip, iq, r, s, h_rspq))
+                    Excitation(m_det),
+                    Excitation(m_det, p, q, r, s, h_rspq, proposal(ip, iq, r, s, h_rspq))
             };
         }
     }
@@ -203,7 +206,7 @@ HeatBathSampler::DeterminantSampler::proposal(const size_t &ip, const size_t &iq
     auto p = m_occinds[ip];
     auto q = m_occinds[iq];
 
-    auto p_double = [h, this](const size_t &p, const size_t &q, const size_t &r){
+    auto p_double = [h, this](const size_t &p, const size_t &q, const size_t &r) {
         auto h_tot = *m_precomputed.m_H_tot.view(p, q, r);
         if (std::abs(h) < h_tot) return h_tot / (h_tot + std::abs(h));
         return 1.0;
@@ -211,13 +214,13 @@ HeatBathSampler::DeterminantSampler::proposal(const size_t &ip, const size_t &iq
 
     result += m_P_tilde_1[ip] * m_P_tilde_2[iq] *
               (
-                  (*m_precomputed.m_P_tilde_3.view(p, q, r)) *
-                  p_double(p, q, r) *
-                  (*m_precomputed.m_P_tilde_4.view(p, q, r, s))
-                  +
-                  (*m_precomputed.m_P_tilde_3.view(p, q, s)) *
-                  p_double(p, q, s) *
-                  (*m_precomputed.m_P_tilde_4.view(p, q, s, r))
+                      (*m_precomputed.m_P_tilde_3.view(p, q, r)) *
+                      p_double(p, q, r) *
+                      (*m_precomputed.m_P_tilde_4.view(p, q, r, s))
+                      +
+                      (*m_precomputed.m_P_tilde_3.view(p, q, s)) *
+                      p_double(p, q, s) *
+                      (*m_precomputed.m_P_tilde_4.view(p, q, s, r))
               );
     // repurpose m_P_tilde_2 for the case in which q was picked first
     for (size_t ipp = 0ul; ipp < m_noccind; ++ipp) {
@@ -229,13 +232,13 @@ HeatBathSampler::DeterminantSampler::proposal(const size_t &ip, const size_t &iq
 
     result += m_P_tilde_1[iq] * m_P_tilde_2[ip] *
               (
-                  (*m_precomputed.m_P_tilde_3.view(q, p, r)) *
-                  p_double(q, p, r) *
-                  (*m_precomputed.m_P_tilde_4.view(q, p, r, s))
-                  +
-                  (*m_precomputed.m_P_tilde_3.view(q, p, s)) *
-                  p_double(q, p, s) *
-                  (*m_precomputed.m_P_tilde_4.view(q, p, s, r))
+                      (*m_precomputed.m_P_tilde_3.view(q, p, r)) *
+                      p_double(q, p, r) *
+                      (*m_precomputed.m_P_tilde_4.view(q, p, r, s))
+                      +
+                      (*m_precomputed.m_P_tilde_3.view(q, p, s)) *
+                      p_double(q, p, s) *
+                      (*m_precomputed.m_P_tilde_4.view(q, p, s, r))
               );
     return result;
 }

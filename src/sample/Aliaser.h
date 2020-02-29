@@ -42,11 +42,12 @@ public:
             if (m_prob_table[large] < m_norm) smaller.push(large);
             else larger.push(large);
         }
-        utils::print(m_prob_table);
     }
 
     size_t draw(PRNG &prng) const {
         size_t iprob = std::floor(prng.draw_float() * m_nprob);
+        assert(iprob>=0);
+        assert(iprob<m_nprob);
         if (prng.draw_float()*m_norm < m_prob_table[iprob]) return iprob;
         else return m_alias_table[iprob];
     }

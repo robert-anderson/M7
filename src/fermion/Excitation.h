@@ -9,37 +9,34 @@
 #include <src/defs.h>
 #include "Determinant.h"
 
-class Excitation {
+struct Excitation {
     const Determinant &m_det;
-    defs::inds m_removed;
-    defs::inds m_inserted;
-    /*
-     * m_factor is the ratio of the H element to the probability of
-     * proposing the excitation
-     *
-     * the update to the weight of the connected determinant due to this
-     * excitation is -tau * m_factor * (weight of m_det) / (number of spawning attempts)
-     */
-    defs::ham_t m_factor;
-public:
+    const defs::inds m_removed;
+    const defs::inds m_inserted;
+
+    const defs::ham_t m_helement;
+    const defs::prob_t m_prob;
+
     Excitation(const Determinant &det, const defs::inds &removed,
-        const defs::inds &inserted, const defs::ham_t &factor);
+        const defs::inds &inserted, const defs::ham_t &helement, const defs::prob_t &prob);
 
     // null excitation
     Excitation(const Determinant &det);
 
     // single
     Excitation(const Determinant &det, const size_t &removed,
-        const size_t &inserted, const defs::ham_t &factor);
+        const size_t &inserted, const defs::ham_t &helement, const defs::prob_t &prob);
 
     //double
     Excitation(const Determinant &det,
                const size_t &removed_1, const size_t &removed_2,
-               const size_t &inserted_1, const size_t &inserted_2, const defs::ham_t &factor);
+               const size_t &inserted_1, const size_t &inserted_2,
+               const defs::ham_t &helement, const defs::prob_t &prob);
 
     bool is_null() const;
 
     Determinant get_connection() const {
+        return m_det.get_excited_det(m_removed, m_inserted);
     }
 };
 

@@ -9,6 +9,7 @@
 #include "src/consts.h"
 #include "src/defs.h"
 #include "src/fermion/Determinant.h"
+#include <src/data/MappedList.h>
 
 class Hamiltonian {
 protected:
@@ -52,6 +53,8 @@ public:
     Determinant refine_guess_reference(const Determinant ref) const;
 
     Determinant choose_reference(const size_t &spin_level) const;
+
+    MappedList<Determinant> all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps=0.0) const;
 
 };
 
