@@ -52,7 +52,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-d,--shift_damp", shift_damp,
                "damping factor regulating the shift updates");
 
-    add_option("-T,--shift_update_period", shift_update_period,
+    add_option("-A,--shift_update_period", shift_update_period,
                "number of cycles between shift updates");
 
 

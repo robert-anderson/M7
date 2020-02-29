@@ -29,5 +29,11 @@ FciqmcStatsFile::FciqmcStatsFile(const InputOptions &input) : StatsFile(input.st
     m_wavefunction_l2_norm =
             add_column<defs::ham_comp_t>("Wavefunction L2 norm");
 
+    m_ninitiator =
+            add_column<size_t>("Number of initiators");
+
+    m_aborted_weight =
+            add_column<defs::ham_comp_t>("Aborted weight due to initiator criteria");
+
     write_header();
 }

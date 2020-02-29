@@ -14,13 +14,7 @@ FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
     m_prop = std::make_unique<ExactPropagator>(input, m_ham, m_rank_allocator);
     auto reference = m_ham->guess_reference(input.spin_level);
     m_prop->m_shift += m_ham->get_energy(reference);
-    m_psi = std::make_unique<Wavefunction>(
-            m_prop,
-            reference,
-            m_input.wf_norm_initial,
-            (size_t) (m_input.wf_norm_target * m_input.walker_factor_initial),
-            (size_t) (m_input.wf_norm_target * m_input.buffer_factor_initial),
-            (size_t) (m_input.wf_norm_target * m_input.buffer_factor_initial * mpi::nrank()));
+    m_psi = std::make_unique<Wavefunction>(input, m_prop, reference);
 }
 
 void FciqmcCalculation::execute(size_t ncycle){

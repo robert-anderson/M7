@@ -17,6 +17,8 @@ public:
     StatColumn *m_reference_weight;
     StatColumn *m_reference_energy;
     StatColumn *m_wavefunction_l2_norm;
+    StatColumn *m_ninitiator;
+    StatColumn *m_aborted_weight;
 
     explicit FciqmcStatsFile(const InputOptions &input);
 };

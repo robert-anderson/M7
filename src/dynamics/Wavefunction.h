@@ -21,21 +21,24 @@ class Wavefunction {
     Determinant m_reference;
     defs::ham_t m_reference_energy_numerator;
     defs::ham_t m_reference_weight;
+    defs::ham_comp_t m_aborted_weight;
+    size_t m_ninitiator = 0;
 
 public:
 
+    const InputOptions &m_input;
     defs::ham_comp_t m_square_norm;
     defs::ham_comp_t m_delta_square_norm;
     double m_norm_growth_rate = 0;
 
-    Wavefunction(const std::unique_ptr<Propagator> &propagator, const Determinant &reference,
-            double nwalker_initial, size_t nrow_walkers, size_t nrow_send, size_t nrow_recv);
+    Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
+                 const Determinant &reference);
 
     void propagate(const std::unique_ptr<Propagator> &propagator);
 
     void communicate();
 
-    void consolidate_incoming_weight(){
+    void consolidate_incoming_weight() {
         // TODO
     }
 

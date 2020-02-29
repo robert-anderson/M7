@@ -37,8 +37,8 @@ public:
     size_t nload_balance_block = 10;
     double tau_initial = 0.05;
     double shift_initial = 0.0;
-    double shift_damp = 0.0;
-    double shift_update_period = 0.0;
+    double shift_damp = 1.0;
+    size_t shift_update_period = 1;
 
     explicit InputOptions(CLI::App &app);
 
