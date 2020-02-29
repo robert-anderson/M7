@@ -29,7 +29,7 @@ public:
         return m_bucket_mutex.get(bucket(key));
     }
 
-    size_t lookup(Mutex mutex, const T &key) const {
+    size_t lookup(Mutex &mutex, const T &key) const {
         return HashMap<T>::lookup(mutex.index(), key);
     }
 
@@ -38,7 +38,7 @@ public:
         return lookup(mutex, key);
     }
 
-    void insert(Mutex mutex, const T &key, const size_t &key_index) {
+    void insert(Mutex &mutex, const T &key, const size_t &key_index) {
         HashMap<T>::insert(mutex.index(), key, key_index);
     }
 
@@ -47,7 +47,7 @@ public:
         insert(mutex, key, key_index);
     }
 
-    size_t remove(Mutex mutex, const size_t &key_index) {
+    size_t remove(Mutex &mutex, const size_t &key_index) {
         return HashMap<T>::remove(mutex.index(), key_index);
     }
 

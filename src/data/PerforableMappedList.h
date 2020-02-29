@@ -90,7 +90,7 @@ public:
         return push(mutex, key);
     }
 
-    size_t remove(Mutex mutex, const T &key) {
+    size_t remove(Mutex &mutex, const T &key) {
         auto irow = MappedList<T>::m_map.remove(mutex, key);
         Table::zero(irow);
         size_t iremoved;
