@@ -21,7 +21,7 @@ public:
     }
 
     double draw_float(){
-        return double(draw_uint())/(1+std::mt19937::max());
+        return double(draw_uint())/(1ul+std::mt19937::max());
     }
 
 };

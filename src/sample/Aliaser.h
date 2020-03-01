@@ -19,11 +19,11 @@ class Aliaser {
     const defs::prob_t m_norm;
 
 public:
-    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob = 0) :
-            m_nprob(nprob > 0 ? nprob : probs.size()),
-            m_prob_table(m_nprob, 0.0),
-            m_alias_table(m_nprob, 0ul),
-            m_norm(std::accumulate(probs.begin(), probs.begin()+m_nprob, 0.0)){
+    Aliaser(const defs::prob_t* probs, const size_t nprob) :
+        m_nprob(nprob),
+        m_prob_table(m_nprob, 0.0),
+        m_alias_table(m_nprob, 0ul),
+        m_norm(std::accumulate(probs, probs+nprob, 0.0)) {
         std::stack<size_t> smaller;
         std::stack<size_t> larger;
         for (size_t iprob = 0ul; iprob < m_nprob; ++iprob) {
@@ -44,12 +44,23 @@ public:
         }
     }
 
+    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob) :
+        Aliaser(probs.data(), nprob) {}
+
+    Aliaser(const std::vector<defs::prob_t> &probs):
+        Aliaser(probs.data(), probs.size()){}
+
+
     size_t draw(PRNG &prng) const {
         size_t iprob = std::floor(prng.draw_float() * m_nprob);
-        assert(iprob>=0);
-        assert(iprob<m_nprob);
-        if (prng.draw_float()*m_norm < m_prob_table[iprob]) return iprob;
+        assert(iprob >= 0);
+        assert(iprob < m_nprob);
+        if (prng.draw_float() * m_norm < m_prob_table[iprob]) return iprob;
         else return m_alias_table[iprob];
+    }
+
+    defs::prob_t norm() const{
+        return m_norm;
     }
 };
 

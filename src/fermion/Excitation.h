@@ -14,24 +14,23 @@ struct Excitation {
     const defs::inds m_removed;
     const defs::inds m_inserted;
 
-    const defs::ham_t m_helement;
     const defs::prob_t m_prob;
+    const defs::ham_t m_helement;
 
-    Excitation(const Determinant &det, const defs::inds &removed,
-        const defs::inds &inserted, const defs::ham_t &helement, const defs::prob_t &prob);
+    Excitation(const Determinant &det, const defs::inds &removed, const defs::inds &inserted,
+               const defs::prob_t &prob, const defs::ham_t &helement);
 
     // null excitation
     Excitation(const Determinant &det);
 
     // single
-    Excitation(const Determinant &det, const size_t &removed,
-        const size_t &inserted, const defs::ham_t &helement, const defs::prob_t &prob);
+    Excitation(const Determinant &det, const size_t &removed, const size_t &inserted,
+               const defs::prob_t &prob, const defs::ham_t &helement);
 
     //double
-    Excitation(const Determinant &det,
-               const size_t &removed_1, const size_t &removed_2,
+    Excitation(const Determinant &det, const size_t &removed_1, const size_t &removed_2,
                const size_t &inserted_1, const size_t &inserted_2,
-               const defs::ham_t &helement, const defs::prob_t &prob);
+               const defs::prob_t &prob, const defs::ham_t &helement);
 
     bool is_null() const;
 

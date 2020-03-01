@@ -6,110 +6,157 @@
 
 
 DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed, const Determinant &det) :
-        m_precomputed(precomputed), m_det(det),
-        m_occinds(det.setinds()), m_noccind(m_occinds.size()),
-        m_uncinds(det.clrinds()), m_nuncind(m_uncinds.size()),
-        m_P1(make_P1(precomputed, m_occinds, m_noccind)),
-        m_P2_qp(det.nspatorb() * 2, 0.0),
-        m_P2_pq(det.nspatorb() * 2, 0.0),
-        m_P3(det.nspatorb() * 2, 0.0),
-        m_P4(det.nspatorb() * 2, 0.0),
-        m_P1_aliaser(m_P1) {}
+    m_precomputed(precomputed), m_det(det),
+    m_occinds(det.setinds()), m_noccind(m_occinds.size()),
+    m_uncinds(det.clrinds()), m_nuncind(m_uncinds.size()),
+    m_P1(make_P1(precomputed, m_occinds, m_noccind)),
+    m_P2_qp(det.nspatorb() * 2, 0.0),
+    m_P2_pq(det.nspatorb() * 2, 0.0),
+    m_P1_aliaser(m_P1) {}
 
-HeatBathExcitation DeterminantSampler::draw(PRNG &prng) {
-    /*
-     * This method follows the algorithm detailed in Appendix A of the paper
-     */
+void DeterminantSampler::draw_pq(PRNG &prng, size_t &p, size_t &q) {
 
     // (1) draw the first occupied orbital
-    size_t p = m_P1_aliaser.draw(prng);
-
+    p = m_P1_aliaser.draw(prng);
     // (2) iterate over occupied orbital to construct the probability table for the
     // picking of the second occupied orbital. The probability of picking p is set to zero.
     make_P2(m_P2_qp, p);
-
     Aliaser P_tilde_2_aliaser(m_P2_qp);
-    size_t q = P_tilde_2_aliaser.draw(prng);
+    q = P_tilde_2_aliaser.draw(prng);
     assert(q != p);
+}
 
-    // (3) try to generate the first unoccupied orbital index
-    make_P3(m_P3, p, q);
-    Aliaser P_tilde_3_aliaser(m_P3);
-    size_t r = P_tilde_3_aliaser.draw(prng);
+void DeterminantSampler::draw_pq(PRNG &prng, size_t &p, size_t &q, defs::prob_t &prob) {
+    draw_pq(prng, p, q);
+    assert(0<m_P1[p] && m_P1[p]<=1);
+    assert(0<m_P2_qp[q] && m_P2_qp[q]<=1);
+    prob = m_P1[p] * m_P2_qp[q];
+    assert(0<prob && prob<=1);
+}
 
-    // this draw is made out of all spin orbitals, if the candidate unoccupied orbital
-    // we have drawn is in fact occupied, then we have a null excitation
-    if (m_det.get(r)) return HeatBathExcitation{Excitation(m_det), Excitation(m_det)};
+void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r){
+    Aliaser aliaser(m_precomputed.m_P3.view(p, q, 0), m_precomputed.m_nspinorb);
+    assert(consts::floats_nearly_equal(aliaser.norm(), 1.0, 1e-14));
+    r = aliaser.draw(prng);
+    if (m_det.get(r)) r = ~0ul;
+}
 
+void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r, defs::prob_t &prob){
+    draw_r(prng, p, q, r);
+    if (r!=0ul) prob = *m_precomputed.m_P3.view(p, q, r);
+    else prob = 0.0;
+    assert(0<=prob && prob<=1);
+}
+
+
+void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r){
+    draw_pq(prng, p, q);
+    draw_r(prng, p, q, r);
+}
+
+void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r, defs::prob_t &prob){
+    defs::prob_t prob_pq, prob_r;
+    draw_pq(prng, p, q, prob_pq);
+    draw_r(prng, p, q, r, prob_r);
+    prob = prob_pq*prob_r;
+    assert(0<=prob && prob<=1);
+}
+
+void DeterminantSampler::draw_s(PRNG &prng, const size_t &p, const size_t &q, const size_t &r, size_t &s) {
+    // (5) need a double excitation, so choose the second unoccupied
+    Aliaser aliaser(m_precomputed.m_P4.view(p, q, r, 0), m_precomputed.m_nspinorb);
+    assert(consts::floats_nearly_equal(aliaser.norm(), 1.0, 1e-14));
+    s = aliaser.draw(prng);
+    if (m_det.get(s)) s = ~0ul;
+}
+
+
+void DeterminantSampler::draw(PRNG &prng, size_t &p, size_t &q, size_t &r, size_t &s,
+                                   defs::prob_t &prob_single, defs::prob_t &prob_double,
+                                   defs::ham_t &helement_single, defs::ham_t &helement_double){
+    s = ~0ul;
+    draw_pqr(prng, p, q, r);
+    if (r==~0ul){
+        prob_single = 0.0;
+        prob_double = 0.0;
+        return;
+    }
     // (4) decide which excitation ranks are to be generated
-    auto h_rp = m_precomputed.m_h.get_element_1(m_det, p, r);
+    helement_single = m_precomputed.m_h.get_element_1(m_det, p, r);
     auto htot_rpq = *m_precomputed.m_H_tot.view(p, q, r);
+    helement_double = 0.0;
 
-    defs::prob_t p_single = 0.0;
-    /*
-
-if (std::abs(h_rp) > htot_rpq) {
-    // spawn both single and double
-    p_single = 1.0;
-    p_double = 1.0;
-} else {
-    p_single = std::abs(h_rp) / (htot_rpq + std::abs(h_rp));
-    if (prng.draw_float() < p_single) {
-        // just the single
-        auto prob = proposal(r, p, h_rp);
-        return HeatBathExcitation{Excitation(m_det, p, r, h_rp, prob), Excitation(m_det)};
+    if (std::abs(helement_single) > htot_rpq) {
+        // spawn both single and double
+        prob_single = proposal(p, r, helement_single);
+        draw_s(prng, p, q, r, s);
+        if (s==~0ul) {
+            prob_double = 0.0; return;
+        }
+        helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
+        prob_double = proposal(p, q, r, s, helement_double);
     } else {
-        p_single = 0.0;
+        prob_single = std::abs(helement_single) / (htot_rpq + std::abs(helement_single));
+        if (prng.draw_float() < prob_single) {
+            // just the single
+            prob_double = 0.0;
+            prob_single = proposal(r, p, helement_single);
+        } else {
+            // just the double
+            prob_single = 0.0;
+            draw_s(prng, p, q, r, s);
+            if (s==~0ul) {
+                prob_double = 0.0; return;
+            }
+            helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
+            prob_double = proposal(p, q, r, s, helement_double);
+        }
     }
 }
- */
 
-    // (5) need a double excitation, so choose the second unoccupied
-    make_P4(m_P4, p, q, r);
+HeatBathExcitation DeterminantSampler::draw(PRNG &prng) {
+    size_t p, q, r, s;
+    defs::prob_t prob_single, prob_double;
+    defs::ham_t helement_single, helement_double;
+    draw(prng, p, q, r, s, prob_single, prob_double, helement_single, helement_double);
 
-    Aliaser P_tilde_4_aliaser(m_P4);
-    size_t s = P_tilde_4_aliaser.draw(prng);
-
-    auto h_rspq = m_precomputed.m_h.get_element_2(p, q, r, s);
-    return HeatBathExcitation{
+    if (r != ~0ul && s != ~0ul)
+        return HeatBathExcitation{
             Excitation(m_det),
-            Excitation(m_det, p, q, r, s, h_rspq, proposal(p, q, r, s, h_rspq))
-    };
+            Excitation(m_det, p, q, r, s,
+                       m_P1[p] * m_P2_qp[q] *(*m_precomputed.m_P3.view(p, q, r)) *
+                       (*m_precomputed.m_P4.view(p, q, r, s)),
+                helement_double)
+        };
+    else {
+        return HeatBathExcitation{
+            Excitation(m_det),
+            Excitation(m_det)
+        };
+    }
 
-
-
-    if (m_det.get(s)) {
-        /*
-         * no double excitation generated
-         */
-
-        if (p_single > 0) {
-            /*
-            assert(0);
+    if (prob_double>0) {
+        if (prob_single > 0)
             return HeatBathExcitation{
-                    Excitation(m_det, p, r, h_rp, proposal(r, p, h_rp)),
-                    Excitation(m_det)
-            };*/
-        } else {
-            assert(0);
-            return HeatBathExcitation{
-                    Excitation(m_det),
-                    Excitation(m_det)
+                Excitation(m_det, p, q, prob_single, helement_single),
+                Excitation(m_det, p, q, r, s, prob_double, helement_double)
             };
-        }
+        else
+            return HeatBathExcitation{
+                Excitation(m_det),
+                Excitation(m_det, p, q, r, s, prob_double, helement_double)
+            };
     } else {
-        if (p_single > 0) {
-            assert(0);
+        if (prob_single > 0)
             return HeatBathExcitation{
-                    Excitation(m_det, p, r, h_rp, proposal(r, p, h_rp)),
-                    Excitation(m_det, p, q, r, s, h_rspq, proposal(p, q, r, s, h_rspq))
+                Excitation(m_det, p, q, prob_single, helement_single),
+                Excitation(m_det)
             };
-        } else {
+        else
             return HeatBathExcitation{
-                    Excitation(m_det),
-                    Excitation(m_det, p, q, r, s, h_rspq, proposal(p, q, r, s, h_rspq))
+                Excitation(m_det),
+                Excitation(m_det)
             };
-        }
     }
 }
 
@@ -147,31 +194,38 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
         }
         return 1.0;
     };
-    return m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
+    assert(*m_precomputed.m_P3.view(p, q, r)>=0);
+    assert(*m_precomputed.m_P3.view(p, q, r)<=1);
+    assert(*m_precomputed.m_P4.view(p, q, r, s)>=0);
+    assert(*m_precomputed.m_P4.view(p, q, r, s)<=1);
+    //return m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
+    //       (*m_precomputed.m_P4.view(p, q, r, s));
+    return m_P1[p] * m_P2_qp[q] *(*m_precomputed.m_P3.view(p, q, r)) *
            (*m_precomputed.m_P4.view(p, q, r, s));
+
 
 
     result += m_P1[p] * m_P2_qp[q] *
               (
-                      (*m_precomputed.m_P3.view(p, q, r)) *
-                      p_double(p, q, r) *
-                      (*m_precomputed.m_P4.view(p, q, r, s))
-                      +
-                      (*m_precomputed.m_P3.view(p, q, s)) *
-                      p_double(p, q, s) *
-                      (*m_precomputed.m_P4.view(p, q, s, r))
+                  (*m_precomputed.m_P3.view(p, q, r)) *
+                  p_double(p, q, r) *
+                  (*m_precomputed.m_P4.view(p, q, r, s))
+                  +
+                  (*m_precomputed.m_P3.view(p, q, s)) *
+                  p_double(p, q, s) *
+                  (*m_precomputed.m_P4.view(p, q, s, r))
               );
     make_P2(m_P2_pq, q);
 
     result += m_P1[q] * m_P2_pq[p] *
               (
-                      (*m_precomputed.m_P3.view(q, p, r)) *
-                      p_double(q, p, r) *
-                      (*m_precomputed.m_P4.view(q, p, r, s))
-                      +
-                      (*m_precomputed.m_P3.view(q, p, s)) *
-                      p_double(q, p, s) *
-                      (*m_precomputed.m_P4.view(q, p, s, r))
+                  (*m_precomputed.m_P3.view(q, p, r)) *
+                  p_double(q, p, r) *
+                  (*m_precomputed.m_P4.view(q, p, r, s))
+                  +
+                  (*m_precomputed.m_P3.view(q, p, s)) *
+                  p_double(q, p, s) *
+                  (*m_precomputed.m_P4.view(q, p, s, r))
               );
     assert(result > 0);
     return result;
@@ -182,8 +236,9 @@ std::vector<defs::prob_t> DeterminantSampler::make_P1(const HeatBathSampler &pre
     const auto n = precomputed.m_S.nelement();
     std::vector<defs::prob_t> result(n, 0);
     auto occind = occinds.begin();
+    assert(occinds.begin()+noccind==occinds.end());
     for (size_t p = 0ul; p < n; ++p) {
-        if (p == *occind) {
+        if (occind!=occinds.end() && p == *occind) {
             result[p] = *precomputed.m_S.view(p);
             occind++;
         }
@@ -197,30 +252,11 @@ void DeterminantSampler::make_P2(std::vector<defs::prob_t> &P2, const size_t &p)
     const auto n = P2.size();
     auto occind = m_occinds.begin();
     for (size_t q = 0ul; q < n; ++q) {
-        if (q == *occind) {
+        if (occind!=m_occinds.end() && q == *occind) {
             if (q == p) P2[q] = 0.0;
             else P2[q] = *m_precomputed.m_D.view(p, q);
             occind++;
         } else P2[q] = 0.0;
     }
     prob_utils::normalize(P2);
-}
-
-
-void DeterminantSampler::make_P3(std::vector<defs::prob_t> &P3, const size_t &p, const size_t &q) {
-    const auto n = P3.size();
-    for (size_t r = 0ul; r < n; ++r) {
-        if (r == p || r == q) m_P3[r] = 0.0;
-        else P3[r] = *m_precomputed.m_P3.view(p, q, r);
-    }
-    prob_utils::normalize(P3);
-}
-
-void DeterminantSampler::make_P4(std::vector<defs::prob_t> &P4, const size_t &p, const size_t &q, const size_t &r) {
-    const auto n = P4.size();
-    for (size_t s = 0ul; s < n; ++s) {
-        if (s == p || s == q || s==r) m_P4[s] = 0.0;
-        else P4[s] = *m_precomputed.m_P4.view(p, q, r, s);
-    }
-    prob_utils::normalize(P4);
 }

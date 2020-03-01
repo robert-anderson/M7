@@ -121,7 +121,7 @@ namespace string_utils {
 
 namespace prob_utils {
     template<typename T>
-    void normalize(std::vector<T> v, T norm=T(1)){
+    void normalize(std::vector<T> &v, T norm=T(1)){
         T tot = std::accumulate(v.begin(), v.end(), T(0));
         T fac = norm/tot;
         for (auto &i:v) i*=fac;
