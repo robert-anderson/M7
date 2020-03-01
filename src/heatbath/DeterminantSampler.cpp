@@ -120,6 +120,7 @@ HeatBathExcitation DeterminantSampler::draw(PRNG &prng) {
     defs::ham_t helement_single, helement_double;
     draw(prng, p, q, r, s, prob_single, prob_double, helement_single, helement_double);
 
+
     if (r != ~0ul && s != ~0ul)
         return HeatBathExcitation{
             Excitation(m_det),

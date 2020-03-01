@@ -79,17 +79,17 @@ namespace consts {
 
     template<typename T>
     static constexpr T l1_norm(std::complex<T> v) {
-        return abs(v.real())+abs(v.imag());
+        return std::abs(v.real())+std::abs(v.imag());
     }
 
     template<typename T>
     static constexpr T component_norm(T &v) {
-        return abs(v);
+        return std::abs(v);
     }
 
     template<typename T>
     static constexpr std::complex<T> component_norm(std::complex<T> v) {
-        return std::complex<T>(abs(v.real()), abs(v.imag()));
+        return std::complex<T>(std::abs(v.real()), std::abs(v.imag()));
     }
 
     template<typename T>
@@ -129,7 +129,7 @@ namespace consts {
 
     template<typename T>
     static constexpr bool float_nearly_zero(T v, typename component_t<T>::type eps){
-        return abs(v)<eps;
+        return std::abs(v)<eps;
     }
 
     template<typename T>
