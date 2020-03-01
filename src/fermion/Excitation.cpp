@@ -2,11 +2,14 @@
 // Created by Robert John Anderson on 2020-02-23.
 //
 
+#include <assert.h>
 #include "Excitation.h"
 
 Excitation::Excitation(const Determinant &det, const defs::inds &removed,
                        const defs::inds &inserted, const defs::ham_t &helement, const defs::prob_t &prob) :
-        m_det(det), m_removed(removed), m_inserted(inserted), m_helement(helement), m_prob(prob){}
+        m_det(det), m_removed(removed), m_inserted(inserted), m_helement(helement), m_prob(prob){
+    assert(prob>0.0);
+}
 
 Excitation::Excitation(const Determinant &det) : m_det(det), m_helement(0.0), m_prob(0.0) {}
 

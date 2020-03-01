@@ -9,7 +9,7 @@
 #include <src/io/StatsFile.h>
 #include <src/io/FciqmcStatsFile.h>
 #include "WalkerList.h"
-#include "src/sample/HeatBathSampler.h"
+#include "src/heatbath/HeatBathSampler.h"
 #include "WalkerCommunicator.h"
 #include "Propagator.h"
 #include "RankAllocator.h"
