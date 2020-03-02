@@ -55,7 +55,7 @@ public:
 
 
 private:
-    defs::prob_t proposal(const size_t &ip, const size_t &r, const defs::ham_t &h);
+    defs::prob_t proposal(const size_t &ip, const size_t &r, const defs::ham_t &helement_single);
 
     defs::prob_t proposal(const size_t &ip, const size_t &iq,
                           const size_t &r, const size_t &s,

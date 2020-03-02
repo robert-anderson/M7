@@ -6,13 +6,13 @@
 
 
 DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed, const Determinant &det) :
-    m_precomputed(precomputed), m_det(det),
-    m_occinds(det.setinds()), m_noccind(m_occinds.size()),
-    m_uncinds(det.clrinds()), m_nuncind(m_uncinds.size()),
-    m_P1(make_P1(precomputed, m_occinds, m_noccind)),
-    m_P2_qp(det.nspatorb() * 2, 0.0),
-    m_P2_pq(det.nspatorb() * 2, 0.0),
-    m_P1_aliaser(m_P1) {}
+        m_precomputed(precomputed), m_det(det),
+        m_occinds(det.setinds()), m_noccind(m_occinds.size()),
+        m_uncinds(det.clrinds()), m_nuncind(m_uncinds.size()),
+        m_P1(make_P1(precomputed, m_occinds, m_noccind)),
+        m_P2_qp(det.nspatorb() * 2, 0.0),
+        m_P2_pq(det.nspatorb() * 2, 0.0),
+        m_P1_aliaser(m_P1) {}
 
 void DeterminantSampler::draw_pq(PRNG &prng, size_t &p, size_t &q) {
 
@@ -43,7 +43,7 @@ void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, si
 
 void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r, defs::prob_t &prob) {
     draw_r(prng, p, q, r);
-    if (r != 0ul) prob = *m_precomputed.m_P3.view(p, q, r);
+    if (r != ~0ul) prob = *m_precomputed.m_P3.view(p, q, r);
     else prob = 0.0;
     assert(0 <= prob && prob <= 1);
 }
@@ -95,13 +95,13 @@ void DeterminantSampler::draw(PRNG &prng, size_t &p, size_t &q, size_t &r, size_
             return;
         }
         helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
-        prob_double = proposal(p, q, r, s, helement_double);
+        prob_double = proposal(p, q, r, s, helement_single);
     } else {
         prob_single = std::abs(helement_single) / (htot_rpq + std::abs(helement_single));
         if (prng.draw_float() < prob_single) {
             // just the single
             prob_double = 0.0;
-            prob_single = proposal(r, p, helement_single);
+            prob_single = proposal(p, r, helement_single);
         } else {
             // just the double
             prob_single = 0.0;
@@ -111,7 +111,7 @@ void DeterminantSampler::draw(PRNG &prng, size_t &p, size_t &q, size_t &r, size_
                 return;
             }
             helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
-            prob_double = proposal(p, q, r, s, helement_double);
+            prob_double = proposal(p, q, r, s, helement_single);
         }
     }
 }
@@ -122,71 +122,54 @@ HeatBathExcitation DeterminantSampler::draw(PRNG &prng) {
     defs::ham_t helement_single, helement_double;
     draw(prng, p, q, r, s, prob_single, prob_double, helement_single, helement_double);
 
-
-    if (r != ~0ul && s != ~0ul)
-        return HeatBathExcitation{
-            Excitation(m_det),
-            Excitation(m_det, p, q, r, s, prob_double, helement_double)
-        };
-    else {
-        return HeatBathExcitation{
-            Excitation(m_det),
-            Excitation(m_det)
-        };
-    }
-
     if (prob_double > 0) {
         if (prob_single > 0)
             return HeatBathExcitation{
-                Excitation(m_det, p, q, prob_single, helement_single),
-                Excitation(m_det, p, q, r, s, prob_double, helement_double)
+                    Excitation(m_det, p, r, prob_single, helement_single),
+                    Excitation(m_det, p, q, r, s, prob_double, helement_double)
             };
         else
             return HeatBathExcitation{
-                Excitation(m_det),
-                Excitation(m_det, p, q, r, s, prob_double, helement_double)
+                    Excitation(m_det),
+                    Excitation(m_det, p, q, r, s, prob_double, helement_double)
             };
     } else {
         if (prob_single > 0)
             return HeatBathExcitation{
-                Excitation(m_det, p, q, prob_single, helement_single),
-                Excitation(m_det)
+                    Excitation(m_det, p, r, prob_single, helement_single),
+                    Excitation(m_det)
             };
         else
             return HeatBathExcitation{
-                Excitation(m_det),
-                Excitation(m_det)
+                    Excitation(m_det),
+                    Excitation(m_det)
             };
     }
 }
 
-defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &r, const defs::ham_t &h) {
+defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &r, const defs::ham_t &helement_single) {
     defs::prob_t result = 0.0;
+    assert(m_P1[p]>0.0);
     for (auto qp: m_occinds) {
         auto h_tot = *m_precomputed.m_H_tot.view(p, qp, r);
         defs::prob_t p_single = 1.0;
-        if (std::abs(h) < h_tot) p_single = std::abs(h) / (h_tot + std::abs(h));
+        if (std::abs(helement_single) < h_tot) p_single = std::abs(helement_single) / (h_tot + std::abs(helement_single));
+        assert(p_single>0.0);
         result += m_P1[p] * m_P2_qp[qp] *
                   (*m_precomputed.m_P3.view(p, qp, r)) * p_single;
     }
+    assert(result>0.0);
     return result;
 }
 
 defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, const size_t &r, const size_t &s,
-                                          const defs::ham_t &h) {
+                                          const defs::ham_t &helement_single) {
     defs::prob_t result = 0.0;
 
-/*
-    auto p_double = [h, this](const size_t &p, const size_t &q, const size_t &r) {
+    auto p_double = [helement_single, this](const size_t &p, const size_t &q, const size_t &r) {
         auto h_tot = *m_precomputed.m_H_tot.view(p, q, r);
-        if (std::abs(h) < h_tot) return h_tot / (h_tot + std::abs(h));
-        return 1.0;
-    };
-    */
-    auto p_double = [h, this](const size_t &p, const size_t &q, const size_t &r) {
-        auto h_tot = *m_precomputed.m_H_tot.view(p, q, r);
-        if (std::abs(h) < h_tot) {
-            auto tmp = h_tot / (h_tot + std::abs(h));
+        if (std::abs(helement_single) < h_tot) {
+            auto tmp = h_tot / (h_tot + std::abs(helement_single));
             assert(tmp > 0);
             return tmp;
         }
@@ -196,31 +179,35 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
     assert(*m_precomputed.m_P3.view(p, q, r) <= 1);
     assert(*m_precomputed.m_P4.view(p, q, r, s) >= 0);
     assert(*m_precomputed.m_P4.view(p, q, r, s) <= 1);
-    return m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
-           (*m_precomputed.m_P4.view(p, q, r, s));
 
+
+    /*
+     * alternative probability given in Appendix B of the reference
+    return 0.25*m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
+           (*m_precomputed.m_P4.view(p, q, r, s));
+     */
 
     result += m_P1[p] * m_P2_qp[q] *
               (
-                  (*m_precomputed.m_P3.view(p, q, r)) *
-                  p_double(p, q, r) *
-                  (*m_precomputed.m_P4.view(p, q, r, s))
-                  +
-                  (*m_precomputed.m_P3.view(p, q, s)) *
-                  p_double(p, q, s) *
-                  (*m_precomputed.m_P4.view(p, q, s, r))
+                      (*m_precomputed.m_P3.view(p, q, r)) *
+                      p_double(p, q, r) *
+                      (*m_precomputed.m_P4.view(p, q, r, s))
+                      +
+                      (*m_precomputed.m_P3.view(p, q, s)) *
+                      p_double(p, q, s) *
+                      (*m_precomputed.m_P4.view(p, q, s, r))
               );
     make_P2(m_P2_pq, q);
 
     result += m_P1[q] * m_P2_pq[p] *
               (
-                  (*m_precomputed.m_P3.view(q, p, r)) *
-                  p_double(q, p, r) *
-                  (*m_precomputed.m_P4.view(q, p, r, s))
-                  +
-                  (*m_precomputed.m_P3.view(q, p, s)) *
-                  p_double(q, p, s) *
-                  (*m_precomputed.m_P4.view(q, p, s, r))
+                      (*m_precomputed.m_P3.view(q, p, r)) *
+                      p_double(q, p, r) *
+                      (*m_precomputed.m_P4.view(q, p, r, s))
+                      +
+                      (*m_precomputed.m_P3.view(q, p, s)) *
+                      p_double(q, p, s) *
+                      (*m_precomputed.m_P4.view(q, p, s, r))
               );
     assert(result > 0);
     return result;
