@@ -28,38 +28,38 @@ void DeterminantSampler::draw_pq(PRNG &prng, size_t &p, size_t &q) {
 
 void DeterminantSampler::draw_pq(PRNG &prng, size_t &p, size_t &q, defs::prob_t &prob) {
     draw_pq(prng, p, q);
-    assert(0<m_P1[p] && m_P1[p]<=1);
-    assert(0<m_P2_qp[q] && m_P2_qp[q]<=1);
+    assert(0 < m_P1[p] && m_P1[p] <= 1);
+    assert(0 < m_P2_qp[q] && m_P2_qp[q] <= 1);
     prob = m_P1[p] * m_P2_qp[q];
-    assert(0<prob && prob<=1);
+    assert(0 < prob && prob <= 1);
 }
 
-void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r){
+void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r) {
     Aliaser aliaser(m_precomputed.m_P3.view(p, q, 0), m_precomputed.m_nspinorb);
     assert(consts::floats_nearly_equal(aliaser.norm(), 1.0, 1e-14));
     r = aliaser.draw(prng);
     if (m_det.get(r)) r = ~0ul;
 }
 
-void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r, defs::prob_t &prob){
+void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r, defs::prob_t &prob) {
     draw_r(prng, p, q, r);
-    if (r!=0ul) prob = *m_precomputed.m_P3.view(p, q, r);
+    if (r != 0ul) prob = *m_precomputed.m_P3.view(p, q, r);
     else prob = 0.0;
-    assert(0<=prob && prob<=1);
+    assert(0 <= prob && prob <= 1);
 }
 
 
-void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r){
+void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r) {
     draw_pq(prng, p, q);
     draw_r(prng, p, q, r);
 }
 
-void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r, defs::prob_t &prob){
+void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r, defs::prob_t &prob) {
     defs::prob_t prob_pq, prob_r;
     draw_pq(prng, p, q, prob_pq);
     draw_r(prng, p, q, r, prob_r);
-    prob = prob_pq*prob_r;
-    assert(0<=prob && prob<=1);
+    prob = prob_pq * prob_r;
+    assert(0 <= prob && prob <= 1);
 }
 
 void DeterminantSampler::draw_s(PRNG &prng, const size_t &p, const size_t &q, const size_t &r, size_t &s) {
@@ -72,11 +72,11 @@ void DeterminantSampler::draw_s(PRNG &prng, const size_t &p, const size_t &q, co
 
 
 void DeterminantSampler::draw(PRNG &prng, size_t &p, size_t &q, size_t &r, size_t &s,
-                                   defs::prob_t &prob_single, defs::prob_t &prob_double,
-                                   defs::ham_t &helement_single, defs::ham_t &helement_double){
+                              defs::prob_t &prob_single, defs::prob_t &prob_double,
+                              defs::ham_t &helement_single, defs::ham_t &helement_double) {
     s = ~0ul;
     draw_pqr(prng, p, q, r);
-    if (r==~0ul){
+    if (r == ~0ul) {
         prob_single = 0.0;
         prob_double = 0.0;
         return;
@@ -90,8 +90,9 @@ void DeterminantSampler::draw(PRNG &prng, size_t &p, size_t &q, size_t &r, size_
         // spawn both single and double
         prob_single = proposal(p, r, helement_single);
         draw_s(prng, p, q, r, s);
-        if (s==~0ul) {
-            prob_double = 0.0; return;
+        if (s == ~0ul) {
+            prob_double = 0.0;
+            return;
         }
         helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
         prob_double = proposal(p, q, r, s, helement_double);
@@ -105,8 +106,9 @@ void DeterminantSampler::draw(PRNG &prng, size_t &p, size_t &q, size_t &r, size_
             // just the double
             prob_single = 0.0;
             draw_s(prng, p, q, r, s);
-            if (s==~0ul) {
-                prob_double = 0.0; return;
+            if (s == ~0ul) {
+                prob_double = 0.0;
+                return;
             }
             helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
             prob_double = proposal(p, q, r, s, helement_double);
@@ -124,10 +126,7 @@ HeatBathExcitation DeterminantSampler::draw(PRNG &prng) {
     if (r != ~0ul && s != ~0ul)
         return HeatBathExcitation{
             Excitation(m_det),
-            Excitation(m_det, p, q, r, s,
-                       m_P1[p] * m_P2_qp[q] *(*m_precomputed.m_P3.view(p, q, r)) *
-                       (*m_precomputed.m_P4.view(p, q, r, s)),
-                helement_double)
+            Excitation(m_det, p, q, r, s, prob_double, helement_double)
         };
     else {
         return HeatBathExcitation{
@@ -136,7 +135,7 @@ HeatBathExcitation DeterminantSampler::draw(PRNG &prng) {
         };
     }
 
-    if (prob_double>0) {
+    if (prob_double > 0) {
         if (prob_single > 0)
             return HeatBathExcitation{
                 Excitation(m_det, p, q, prob_single, helement_single),
@@ -185,8 +184,6 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
     };
     */
     auto p_double = [h, this](const size_t &p, const size_t &q, const size_t &r) {
-        return 1.0;
-
         auto h_tot = *m_precomputed.m_H_tot.view(p, q, r);
         if (std::abs(h) < h_tot) {
             auto tmp = h_tot / (h_tot + std::abs(h));
@@ -195,15 +192,12 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
         }
         return 1.0;
     };
-    assert(*m_precomputed.m_P3.view(p, q, r)>=0);
-    assert(*m_precomputed.m_P3.view(p, q, r)<=1);
-    assert(*m_precomputed.m_P4.view(p, q, r, s)>=0);
-    assert(*m_precomputed.m_P4.view(p, q, r, s)<=1);
-    //return m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
-    //       (*m_precomputed.m_P4.view(p, q, r, s));
-    return m_P1[p] * m_P2_qp[q] *(*m_precomputed.m_P3.view(p, q, r)) *
+    assert(*m_precomputed.m_P3.view(p, q, r) >= 0);
+    assert(*m_precomputed.m_P3.view(p, q, r) <= 1);
+    assert(*m_precomputed.m_P4.view(p, q, r, s) >= 0);
+    assert(*m_precomputed.m_P4.view(p, q, r, s) <= 1);
+    return m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
            (*m_precomputed.m_P4.view(p, q, r, s));
-
 
 
     result += m_P1[p] * m_P2_qp[q] *
@@ -237,9 +231,9 @@ std::vector<defs::prob_t> DeterminantSampler::make_P1(const HeatBathSampler &pre
     const auto n = precomputed.m_S.nelement();
     std::vector<defs::prob_t> result(n, 0);
     auto occind = occinds.begin();
-    assert(occinds.begin()+noccind==occinds.end());
+    assert(occinds.begin() + noccind == occinds.end());
     for (size_t p = 0ul; p < n; ++p) {
-        if (occind!=occinds.end() && p == *occind) {
+        if (occind != occinds.end() && p == *occind) {
             result[p] = *precomputed.m_S.view(p);
             occind++;
         }
@@ -253,7 +247,7 @@ void DeterminantSampler::make_P2(std::vector<defs::prob_t> &P2, const size_t &p)
     const auto n = P2.size();
     auto occind = m_occinds.begin();
     for (size_t q = 0ul; q < n; ++q) {
-        if (occind!=m_occinds.end() && q == *occind) {
+        if (occind != m_occinds.end() && q == *occind) {
             if (q == p) P2[q] = 0.0;
             else P2[q] = *m_precomputed.m_D.view(p, q);
             occind++;

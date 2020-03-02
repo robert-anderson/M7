@@ -175,16 +175,13 @@ TEST(HeatBathSampler, Unbiased) {
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
         auto excit = det_sampler.draw(prng);
         if (!excit.m_single.is_null()) {
-            assert(0);
             auto det = excit.m_single.get_connection();
-            //det.print();
             irow = all_connections.lookup(det);
             if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 1);
             else weighted_frequencies[irow]+=1.0/excit.m_single.m_prob;
         }
         if (!excit.m_double.is_null()) {
             auto det = excit.m_double.get_connection();
-            //det.print();
             irow = all_connections.lookup(det);
             if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 2);
             else weighted_frequencies[irow]+=1.0/excit.m_double.m_prob;
