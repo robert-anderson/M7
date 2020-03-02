@@ -15,7 +15,7 @@ public:
 
     void off_diagonal(const Determinant &determinant, const NumericView<defs::ham_t> &weight,
                       const NumericView<bool> flag_deterministic, const NumericView<bool> flag_initiator,
-                      TableArray<SpawnList> &spawn_list) const override;
+                      TableArray<SpawnList> &spawn_list) override;
 };
 
 

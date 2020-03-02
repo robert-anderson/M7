@@ -14,7 +14,7 @@ ExactPropagator::ExactPropagator(const InputOptions &input, const std::unique_pt
 
 void ExactPropagator::off_diagonal(const Determinant &determinant, const NumericView<defs::ham_t> &weight,
                                    const NumericView<bool> flag_deterministic, const NumericView<bool> flag_initiator,
-                                   TableArray<SpawnList> &spawn_list) const {
+                                   TableArray<SpawnList> &spawn_list) {
     auto occs = DeterminantSetEnumerator(determinant).enumerate();
     assert(occs.size());
     auto unoccs = DeterminantClrEnumerator(determinant).enumerate();

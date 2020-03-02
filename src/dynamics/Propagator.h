@@ -36,7 +36,7 @@ public:
 
     virtual void off_diagonal(const Determinant &determinant, const NumericView<defs::ham_t> &weight,
                               const NumericView<bool> flag_deterministic,
-                              const NumericView<bool> flag_initiator, TableArray<SpawnList> &spawn_list) const = 0;
+                              const NumericView<bool> flag_initiator, TableArray<SpawnList> &spawn_list) = 0;
 
     void update(const size_t icycle, defs::ham_comp_t norm, defs::ham_comp_t norm_growth) {
         if (icycle%m_input.shift_update_period) return;

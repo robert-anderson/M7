@@ -21,7 +21,7 @@ class AbInitioHamiltonian : public Hamiltonian {
 
 public:
 
-    AbInitioHamiltonian(const std::string &fname);
+    explicit AbInitioHamiltonian(const std::string &fname);
 
     defs::ham_comp_t get_energy(const Determinant &det) const override;
 
