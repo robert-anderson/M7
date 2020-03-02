@@ -55,6 +55,10 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-A,--shift_update_period", shift_update_period,
                "number of cycles between shift updates");
 
+    add_option("-N,--ncycle", ncycle,
+               "number of cycles to execute before exit.");
+
+
 
 }
 

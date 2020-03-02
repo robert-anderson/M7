@@ -90,8 +90,8 @@ public:
         return push(mutex, key);
     }
 
-    size_t remove(Mutex &mutex, const T &key) {
-        auto irow = MappedList<T>::m_map.remove(mutex, key);
+    size_t remove(Mutex &mutex, const size_t &key_index) {
+        auto irow = MappedList<T>::m_map.remove(mutex, key_index);
         Table::zero(irow);
         size_t iremoved;
 #pragma omp atomic capture
@@ -101,9 +101,9 @@ public:
         return irow;
     }
 
-    size_t remove(const T &key) {
+    size_t remove(const T &key, const size_t &key_index) {
         auto mutex = MappedList<T>::key_mutex(key);
-        return remove(mutex, key);
+        return remove(mutex, key_index);
     }
 
 

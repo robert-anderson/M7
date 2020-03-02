@@ -39,3 +39,15 @@ void StochasticPropagator::off_diagonal(const Determinant &determinant, const Nu
 
     }
 }
+
+defs::ham_t StochasticPropagator::round(const defs::ham_t &weight) {
+    if (std::abs(weight)<1.0){
+        if (m_prng.draw_float()>std::abs(weight)){
+            return 0.0;
+        }
+        else {
+            return 1.0;
+        }
+    }
+    return weight;
+}

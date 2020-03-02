@@ -22,7 +22,7 @@ Wavefunction::Wavefunction(const InputOptions &input, const std::unique_ptr<Prop
     m_square_norm = std::pow(std::abs(*ref_weight), 2);
 }
 
-void Wavefunction::propagate(const std::unique_ptr<Propagator> &propagator) {
+void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
     m_delta_square_norm = 0;
     m_reference_energy_numerator = 0;
     // capture the reference weight before death step is applied in the loop below
@@ -38,8 +38,11 @@ void Wavefunction::propagate(const std::unique_ptr<Propagator> &propagator) {
 #pragma omp for
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
-            auto det = m_walker_list.get_determinant(irow);
             auto weight = m_walker_list.get_weight(irow);
+            auto det = m_walker_list.get_determinant(irow);
+            weight = propagator->round(*weight);
+            if (std::abs(*weight==0.0)) m_walker_list.remove(det, irow);
+
             auto flag_initiator = m_walker_list.get_flag_initiator(irow);
             if (!*flag_initiator && std::abs(*weight) >= m_input.nadd_initiator) {
                 // initiator status granted
@@ -114,6 +117,7 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
         m_delta_square_norm += delta_square_norm;
     }
     m_walker_communicator.m_recv.zero();
+    m_ninitiator = mpi::all_sum(m_ninitiator);
     m_delta_square_norm = mpi::all_sum(m_delta_square_norm);
     m_square_norm = mpi::all_sum(m_square_norm);
     m_norm_growth_rate = std::sqrt((m_square_norm + m_delta_square_norm) / m_square_norm);
@@ -130,4 +134,5 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
     stats_file.m_reference_energy->write(m_reference_energy_numerator / m_reference_weight);
     stats_file.m_wavefunction_l2_norm->write(norm());
     stats_file.m_aborted_weight->write(m_aborted_weight);
+    stats_file.m_ninitiator->write(m_ninitiator);
 }

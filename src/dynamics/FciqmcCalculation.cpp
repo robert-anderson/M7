@@ -11,7 +11,7 @@ FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
         m_input(input), m_rank_allocator(input.nload_balance_block),
         m_stats_file(input)
         {
-    m_ham = std::make_unique<AbInitioHamiltonian>(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    m_ham = std::make_unique<AbInitioHamiltonian>(input.fcidump_path);
     //m_prop = std::make_unique<ExactPropagator>(input, m_ham, m_rank_allocator);
     m_prop = std::make_unique<StochasticPropagator>(input, m_ham, m_rank_allocator);
     auto reference = m_ham->guess_reference(input.spin_level);
@@ -19,9 +19,9 @@ FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
     m_psi = std::make_unique<Wavefunction>(input, m_prop, reference);
 }
 
-void FciqmcCalculation::execute(size_t ncycle){
+void FciqmcCalculation::execute(){
     logger::write("Starting FCIQMC main loop.");
-    for(size_t icycle=0ul; icycle<ncycle; ++icycle){
+    for(size_t icycle=0ul; icycle<m_input.ncycle; ++icycle){
         m_psi->propagate(m_prop);
         m_psi->communicate();
         m_psi->consolidate_incoming_weight();

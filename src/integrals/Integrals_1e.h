@@ -84,16 +84,23 @@ public:
     }
 
     T get(const size_t &i, const size_t &j) const {
-        /*
-         * return the one-body integral between the two SPINORS indexed by i and j
-         */
-        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
+        //auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
+        auto iflat = flat_index(i, j);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
 
     T get(const size_t &ispat, const size_t &ispin,
           const size_t &jspat, const size_t &jspin) const {
         return get(spinorb(ispat, ispin), spinorb(jspat, jspin));
+    }
+
+
+    T element(const size_t &i, const size_t &j) const {
+        /*
+         * return the one-body integral between the two SPINORS indexed by i and j
+         */
+        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
+        return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
 
     static bool valid_inds(const defs::inds &inds) {
@@ -106,8 +113,8 @@ public:
          * iterate through integrals looking for an example of a non-zero
          * spin non-conserving one-body integral
          */
-        for (size_t i=0ul; i < m_norb; ++i) {
-            for (size_t j=0ul; i < m_norb; ++i) {
+        for (size_t i = 0ul; i < m_norb; ++i) {
+            for (size_t j = 0ul; i < m_norb; ++i) {
                 if (!consts::float_is_zero(get(i, 0, j, 1))) return false;
             }
         }

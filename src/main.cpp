@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
         std::cerr.setstate(std::ios_base::failbit);
     }
     try {
-        cli_app.parse((argc), (argv));                                                                                   \
+        cli_app.parse((argc), (argv));
 
     } catch (const CLI::ParseError &e) {
         mpi::finalize();
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     }
 
     FciqmcCalculation calc(input);
-    calc.execute(~0ul);
+    calc.execute();
 
     mpi::finalize();
 

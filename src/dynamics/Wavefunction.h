@@ -34,7 +34,7 @@ public:
     Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
                  const Determinant &reference);
 
-    void propagate(const std::unique_ptr<Propagator> &propagator);
+    void propagate(std::unique_ptr<Propagator> &propagator);
 
     void communicate();
 

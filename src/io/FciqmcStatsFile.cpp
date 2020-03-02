@@ -35,5 +35,8 @@ FciqmcStatsFile::FciqmcStatsFile(const InputOptions &input) : StatsFile(input.st
     m_aborted_weight =
             add_column<defs::ham_comp_t>("Aborted weight due to initiator criteria");
 
+    m_noccupied_determinant =
+            add_column<size_t>("Number of occupied determinants");
+
     write_header();
 }

@@ -20,7 +20,7 @@
  */
 constexpr std::array<bool, 11> case_to_tconj{
         false, false, false, false, false, false, true, true, false, true, true};
-//  1      2             4/8    isym
+//      1      2             4/8    isym
 
 
 template<typename T, size_t isym>
@@ -121,43 +121,55 @@ public:
     }
 
     T get(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+        assert(i<m_norb && j<m_norb && k<m_norb && l<m_norb);
         auto icase = get_case(i, j, k, l);
         auto iflat = flat_index(icase, i, j, k, l);
         return case_to_tconj[icase] ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
 
-    T get(
-            const size_t &ispat, const size_t &ispin,
-            const size_t &jspat, const size_t &jspin,
-            const size_t &kspat, const size_t &kspin,
-            const size_t &lspat, const size_t &lspin) {
-        return get(spinorb(ispat, ispin), spinorb(jspat, jspin),
-                   spinorb(kspat, kspin), spinorb(lspat, lspin));
+    T element(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+        /*
+         * return spin-orbital indexed integral from indices in chemists' ordering
+         */
+        if (m_spin_resolved) return get(i, j, k, l);
+        else return get(i%m_norb, j%m_norb, k%m_norb, l%m_norb);
     }
 
-    T get_phys(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-        return get(i, k, j, l);
-    }
-
-    T get_phys(
-            const size_t &ispat, const size_t &ispin,
-            const size_t &jspat, const size_t &jspin,
-            const size_t &kspat, const size_t &kspin,
-            const size_t &lspat, const size_t &lspin) {
-        return get_phys(spinorb(ispat, ispin), spinorb(jspat, jspin),
-                        spinorb(kspat, kspin), spinorb(lspat, lspin));
-    }
-
-    T get_phys_antisym(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-        return get_phys(i, j, k, l) - get_phys(i, j, l, k);
-    }
-
-    T get_phys_antisym(
+    T element(
             const size_t &ispat, const size_t &ispin,
             const size_t &jspat, const size_t &jspin,
             const size_t &kspat, const size_t &kspin,
             const size_t &lspat, const size_t &lspin) const {
-        return get_phys_antisym(spinorb(ispat, ispin), spinorb(jspat, jspin),
+        return element(spinorb(ispat, ispin), spinorb(jspat, jspin),
+                   spinorb(kspat, kspin), spinorb(lspat, lspin));
+    }
+
+    T phys_element(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+        /*
+         * return spin-orbital indexed integral from indices in physicists' ordering
+         */
+        return element(i, k, j, l);
+    }
+
+    T phys_element(
+            const size_t &ispat, const size_t &ispin,
+            const size_t &jspat, const size_t &jspin,
+            const size_t &kspat, const size_t &kspin,
+            const size_t &lspat, const size_t &lspin) {
+        return phys_element(spinorb(ispat, ispin), spinorb(jspat, jspin),
+                        spinorb(kspat, kspin), spinorb(lspat, lspin));
+    }
+
+    T phys_antisym_element(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+        return phys_element(i, j, k, l) - phys_element(i, j, l, k);
+    }
+
+    T phys_antisym_element(
+            const size_t &ispat, const size_t &ispin,
+            const size_t &jspat, const size_t &jspin,
+            const size_t &kspat, const size_t &kspin,
+            const size_t &lspat, const size_t &lspin) const {
+        return phys_antisym_element(spinorb(ispat, ispin), spinorb(jspat, jspin),
                                 spinorb(kspat, kspin), spinorb(lspat, lspin));
     }
 

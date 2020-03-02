@@ -122,7 +122,7 @@ private:
     }
 
     static size_t read_header_int(const std::string &fname, const std::string &label, size_t default_ = 0) {
-        const auto regex = std::regex(label + R"(\s?\=\s+[0-9]+)");
+        const auto regex = std::regex(label + R"(\s*\=\s*[0-9]+)");
         FileIterator iterator(fname);
         std::string line;
         std::smatch match;

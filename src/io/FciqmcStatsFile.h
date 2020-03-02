@@ -19,6 +19,7 @@ public:
     StatColumn *m_wavefunction_l2_norm;
     StatColumn *m_ninitiator;
     StatColumn *m_aborted_weight;
+    StatColumn *m_noccupied_determinant;
 
     explicit FciqmcStatsFile(const InputOptions &input);
 };

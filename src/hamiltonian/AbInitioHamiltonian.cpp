@@ -27,12 +27,12 @@ defs::ham_t AbInitioHamiltonian::get_element_0(const Determinant &det) const {
     DeterminantSetEnumerator set_inds_outer(det);
     size_t i;
     while (set_inds_outer.next(i)) {
-        element += m_int_1.get(i, i);
+        element += m_int_1.element(i, i);
         {
             size_t j;
             DeterminantSetEnumerator set_inds_inner(det);
             while (set_inds_inner.next(j) && j < i) {
-                element += m_int_2.get_phys_antisym(i, j, i, j);
+                element += m_int_2.phys_antisym_element(i, j, i, j);
             }
         }
     }
@@ -43,10 +43,10 @@ defs::ham_t AbInitioHamiltonian::get_element_1(const Determinant &ket,
                                                const size_t &removed, const size_t &inserted) const {
     DeterminantSetEnumerator common_inds(ket);
     size_t common;
-    defs::ham_t element = m_int_1.get(inserted, removed);
+    defs::ham_t element = m_int_1.element(inserted, removed);
     while (common_inds.next(common)) {
         if (common == removed) continue;
-        element += m_int_2.get_phys_antisym(inserted, common, removed, common);
+        element += m_int_2.phys_antisym_element(inserted, common, removed, common);
     }
     return element;
 }
@@ -76,13 +76,13 @@ defs::ham_t AbInitioHamiltonian::get_element_2(const Determinant &bra, const Det
         enumerator.next(inserted1);
         enumerator.next(inserted2);
     }
-    return m_int_2.get_phys_antisym(inserted1, inserted2, removed1, removed2);
+    return m_int_2.phys_antisym_element(inserted1, inserted2, removed1, removed2);
 }
 
 defs::ham_t AbInitioHamiltonian::get_element_2(
     const size_t &removed1, const size_t &removed2,
     const size_t &inserted1, const size_t &inserted2) const {
-    return m_int_2.get_phys_antisym(inserted1, inserted2, removed1, removed2);
+    return m_int_2.phys_antisym_element(inserted1, inserted2, removed1, removed2);
 }
 
 

@@ -2,14 +2,14 @@
 Many-body Stochastic Expectation Value Estimation Networks (M7) is a stochastic electronic structure program written in C++ which primarily implements the Full Configuration Interaction Quantum Monte Carlo (FCIQMC) method.
 
 # Installation
-To install M7, you only need:
-* git
-* A C++11 compiler which implements MPI
-* A CMake installation at least as recent as version 3.14
+To install M7, you will need:
+* C++11 compiler which implements MPI
+* CMake installation at least as recent as version 3.10
+* LAPACK implementation
 
-The program depends on several VCS-hosted packages, which must be collected through git with the following clone command:
+Retrieve the program code from the VCS:
 ```bash
-git clone --recurse-submodules https://github.com/robert-anderson/M7.git
+git clone https://github.com/robert-anderson/M7.git
 ```
 Then create a directory in which CMake can build its targets---typically under the repository root directory---and point CMake to the top level CMakeLists.txt file of the project.
 ```bash

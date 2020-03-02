@@ -19,7 +19,7 @@ TEST(Integrals_2e, FourFoldCheck) {
     T disk_value;
     while (file_iterator.next(inds, disk_value)) {
         if (ints.valid_inds(inds)){
-            auto memory_value = ints.get(
+            auto memory_value = ints.element(
                     inds[0]/2, inds[0]%2, inds[1]/2, inds[1]%2,
                     inds[2]/2, inds[2]%2, inds[3]/2, inds[3]%2);
             ASSERT_TRUE(consts::floats_equal(disk_value, memory_value));

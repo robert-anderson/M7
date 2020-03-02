@@ -26,7 +26,7 @@ class FciqmcCalculation {
 public:
     explicit FciqmcCalculation(const InputOptions &input);
 
-    void execute(size_t ncycle);
+    void execute();
 
     void write_iter_stats(size_t icycle);
 
