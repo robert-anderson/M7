@@ -10,10 +10,14 @@ Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
 
 }
 
-Determinant Hamiltonian::guess_reference(const size_t &spin_level) const {
+Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     Determinant ref(m_nsite);
-    for (size_t i = 0ul; i < nelec() / 2 + 2 * spin_level + nelec() % 2; ++i) ref.set(i, 0);
-    for (size_t i = 0ul; i < nelec() / 2; ++i) ref.set(i, 1);
+    assert(abs(spin_restrict)%2==nelec()%2);
+    size_t n_spin_0 = (nelec()+spin_restrict)/2;
+    size_t n_spin_1 = nelec()-n_spin_0;
+    for (size_t i = 0ul; i < n_spin_0; ++i) ref.set(i, 0);
+    for (size_t i = 0ul; i < n_spin_1; ++i) ref.set(i, 1);
+    assert(ref.spin()==spin_restrict);
     return ref;
 }
 
@@ -50,7 +54,7 @@ Determinant Hamiltonian::refine_guess_reference(const Determinant ref) const {
     return ref;
 }
 
-Determinant Hamiltonian::choose_reference(const size_t &spin_level) const {
+Determinant Hamiltonian::choose_reference(const int &spin_level) const {
     auto ref = guess_reference(spin_level);
     ref = refine_guess_reference(ref);
     return ref;

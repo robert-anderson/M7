@@ -48,11 +48,11 @@ public:
 
     virtual bool spin_resolved() const = 0;
 
-    Determinant guess_reference(const size_t &spin_level) const;
+    Determinant guess_reference(const int &spin_level) const;
 
     Determinant refine_guess_reference(const Determinant ref) const;
 
-    Determinant choose_reference(const size_t &spin_level) const;
+    Determinant choose_reference(const int &spin_level) const;
 
     MappedList<Determinant> all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps=0.0) const;
 

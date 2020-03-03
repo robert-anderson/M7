@@ -6,61 +6,60 @@
 #define M7_MATRIX_H
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
+#include <assert.h>
 #include <memory>
 #include "../consts.h"
-#include <Eigen/Eigen>
 
+template<typename T>
+class EigenSolver;
 
-template<typename T, bool herm>
-struct eigensolver_t {
-    typedef typename std::conditional<herm,
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic >>,
-            Eigen::EigenSolver<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic >>>::type type;
-};
+extern "C" double ddot_(int *n, double *sx, int *incx, double *sy, int *incy);
+extern "C" void dsyev_( char* jobz, char* uplo, int* n, double* a, int* lda, double* w, double* work, int* lwork, int* info);
+extern "C" void zheev_( char* jobz, char* uplo, int* n, std::complex<double>* a, int* lda, double* w,
+                        std::complex<double>* work, int* lwork, double* rwork, int* info);
 
-
-template<typename T, bool herm>
-struct eigensolver_t<std::complex<T>, herm> {
-    typedef typename std::conditional<herm,
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix<std::complex<T>, Eigen::Dynamic, Eigen::Dynamic >>,
-            Eigen::ComplexEigenSolver<Eigen::Matrix<std::complex<T>, Eigen::Dynamic, Eigen::Dynamic >>>::type type;
-};
-
-template <typename T, bool herm>
+template<typename T>
 class Matrix {
-    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic > M_t;
-    typedef typename eigensolver_t<T, herm>::type ES_t;
+    std::vector<T> m_data;
 public:
     const size_t m_nrow, m_ncol;
-private:
-    M_t m_data;
-public:
-    Matrix(const size_t &nrow, const size_t &ncol):
-    m_nrow(nrow), m_ncol(ncol), m_data(m_nrow, m_ncol){}
+    Matrix(size_t nrow, size_t ncol):m_data(nrow*ncol, T(0)), m_nrow(nrow), m_ncol(ncol){}
+    Matrix(size_t n): Matrix(n, n){}
 
-    Matrix(const size_t &nrow): Matrix(nrow, nrow){}
-
-
-    T get(const size_t &irow, const size_t &icol){
-        return m_data(irow, icol);
+    T& operator()(const size_t &irow, const size_t &icol) {
+        assert(irow>=0 && irow<m_nrow);
+        assert(icol>=0 && icol<m_ncol);
+        return m_data[icol*m_nrow+irow];
     }
-    void set(const size_t &irow, const size_t &icol, const T &value){
-        m_data(irow, icol) = value;
-        if (herm && irow!=icol) {
-            assert(consts::float_is_zero(get(icol, irow)) ||
-                    consts::floats_nearly_equal(get(icol, irow), consts::conj(value)));
-            m_data(icol, irow) = consts::conj(value);
+
+    bool is_square() const{
+        return m_ncol==m_nrow;
+    }
+
+    EigenSolver<T> diagonalize() const{
+        return EigenSolver<T>(*this);
+    }
+
+    void print()  {
+        std::cout << std::setprecision(10);
+        for (size_t irow=0ul; irow<m_nrow; ++irow){
+            for (size_t icol=0ul; icol<m_ncol; ++icol){
+                std::cout << operator()(irow, icol) << "  ";
+            }
+            std::cout << std::endl;
         }
     }
-    bool is_square(){
-        return m_nrow==m_ncol;
-    }
-    std::unique_ptr<ES_t> diagonalise(){
-        assert(is_square());
-        auto es = std::make_unique<ES_t>();
-        es.get()->compute(m_data);
-        return es;
+
+};
+
+template<typename T>
+class ColumnVector : public Matrix<T> {
+public:
+    ColumnVector(size_t nrow):Matrix<T>(nrow, 1){}
+    T& operator()(const size_t &irow){
+        return Matrix<T>::operator()(irow, 0);
     }
 };
 

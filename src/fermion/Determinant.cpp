@@ -127,6 +127,10 @@ size_t Determinant::nspatorb() const {
     return m_bitfields[0].m_nbit;
 }
 
+int Determinant::spin() const {
+    return (int)m_bitfields[0].nsetbits()-(int)m_bitfields[1].nsetbits();
+}
+
 bool Determinant::operator==(const Determinant &rhs) const {
     return compare(rhs)==0;
 }

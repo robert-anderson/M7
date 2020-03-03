@@ -9,7 +9,7 @@
 #include "Matrix.h"
 #include "src/hamiltonian/Hamiltonian.h"
 
-class DenseHamiltonian : public Matrix<defs::ham_t, true>{
+class DenseHamiltonian : public Matrix<defs::ham_t>{
 public:
     DenseHamiltonian(const Hamiltonian &source);
 };
