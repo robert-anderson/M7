@@ -11,7 +11,7 @@
 
 template<typename table_T>
 class TableArray {
-    static_assert(std::is_base_of<Table, table_T>::value);
+    static_assert(std::is_base_of<Table, table_T>::value, "Template type parameter must derive from Table");
     std::vector<defs::data_t> m_data{};
     std::vector<table_T> m_tables{};
     defs::inds m_offsets;

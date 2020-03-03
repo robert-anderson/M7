@@ -8,6 +8,7 @@
 #include <fstream>
 #include <assert.h>
 #include <string>
+#include <memory>
 #include <utility>
 #include <vector>
 #include <src/data/Specification.h>
@@ -65,17 +66,17 @@ public:
 struct StatsFile {
 protected:
     const std::string m_fname;
-    std::ofstream m_file;
+    std::unique_ptr<std::ofstream> m_file;
     std::list<StatColumn> m_columns{};
 
-    StatsFile(const std::string &fname) : m_fname(fname), m_file(std::ofstream(fname)) {
+    StatsFile(const std::string &fname) : m_fname(fname), m_file(std::make_unique<std::ofstream>(fname)) {
         if (!mpi::i_am_root())
             throw std::runtime_error("StatsFiles must only be instantiated on the root process");
     }
 
 public:
     ~StatsFile() {
-        m_file.close();
+        m_file->close();
     }
 
     template<typename T>

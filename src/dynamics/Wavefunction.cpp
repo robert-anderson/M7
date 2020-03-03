@@ -30,7 +30,7 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
     size_t irow = m_walker_list.lookup(m_reference);
     if (irow != ~0ul) m_reference_weight = *m_walker_list.get_weight(irow);
 
-#pragma omp parallel default(none) shared(m_walker_list, propagator)
+#pragma omp parallel default(none) shared(propagator)
     {
         defs::ham_comp_t delta_square_norm = 0;
         defs::ham_t reference_energy_numerator = 0;
@@ -78,7 +78,7 @@ void Wavefunction::communicate() {
 
 void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
     m_aborted_weight = 0;
-#pragma omp parallel default(none) shared(m_walker_communicator, m_delta_square_norm, propagator)
+#pragma omp parallel default(none) shared(propagator)
     {
         defs::ham_comp_t aborted_weight = 0;
         defs::ham_comp_t delta_square_norm = 0;

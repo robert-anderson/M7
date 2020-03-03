@@ -108,8 +108,7 @@ public:
         std::smatch match;
         std::regex_search(line, match, nreal_given==1?float_regex:complex_regex);
         if (!match.size()) return false;
-        iss = std::istringstream(match.str());
-        iss >> value;
+        std::istringstream(match.str()) >> value;
         return true;
     }
 

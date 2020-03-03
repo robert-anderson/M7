@@ -7,12 +7,13 @@
 
 #include <fstream>
 #include <regex>
+#include <memory>
 #include <assert.h>
 
 
 class FileIterator {
 protected:
-    std::ifstream m_file;
+    std::unique_ptr<std::ifstream> m_file;
     const size_t m_ifirstline;
 public:
     FileIterator(const std::string &filename, const size_t &ifirstline);

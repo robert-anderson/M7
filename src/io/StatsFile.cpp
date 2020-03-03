@@ -7,7 +7,7 @@
 void StatsFile::write_header() {
     size_t ncolumn = 0ul;
     for (auto &column : m_columns) ncolumn += column.nsubcolumn();
-    m_file <<
+    *m_file <<
            "################################\n"
            "#    M7 FCIQMC Stats Output    #\n"
            "################################\n"
@@ -19,19 +19,19 @@ void StatsFile::write_header() {
     size_t icol = 1ul;
     for (auto &column : m_columns) {
         if (numtypes::is_complex(column.itype())) {
-            m_file << "#  " << icol++ << ".  " << column.description() << " (real)\n";
-            m_file << "#  " << icol++ << ".  " << column.description() << " (imag)\n";
+            *m_file << "#  " << icol++ << ".  " << column.description() << " (real)\n";
+            *m_file << "#  " << icol++ << ".  " << column.description() << " (imag)\n";
         } else {
-            m_file << "#  " << icol++ << ".  " << column.description() << " \n";
+            *m_file << "#  " << icol++ << ".  " << column.description() << " \n";
         }
     }
-    m_file << std::endl;
+    *m_file << std::endl;
 }
 
 void StatsFile::flush() {
     for (auto &column : m_columns) {
-        m_file << column.output() << "  ";
+        *m_file << column.output() << "  ";
         column.reset();
     }
-    m_file << std::endl;
+    *m_file << std::endl;
 }

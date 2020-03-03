@@ -60,10 +60,7 @@ namespace numtypes {
     template<>
     constexpr size_t itype<bool>() {return 16;}
 
-    constexpr bool is_complex(size_t itype){
-        if (itype<3) return true;
-        else return false;
-    }
+    constexpr bool is_complex(size_t itype){return (itype<3);}
 
     constexpr size_t ntype = 17;
 

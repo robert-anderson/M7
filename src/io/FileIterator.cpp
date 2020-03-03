@@ -5,9 +5,9 @@
 #include "FileIterator.h"
 
 FileIterator::FileIterator(const std::string &filename, const size_t &ifirstline):
-        m_file(std::ifstream(filename)), m_ifirstline(ifirstline) {
+        m_file(std::make_unique<std::ifstream>(filename)), m_ifirstline(ifirstline) {
     for (size_t i=0ul; i<m_ifirstline; i++) next();
-    assert(m_file.is_open());
+    assert(m_file->is_open());
 }
 
 FileIterator::FileIterator(const std::string &filename):
@@ -17,7 +17,7 @@ FileIterator::FileIterator(const std::string &filename, const std::regex &regex)
         FileIterator(filename, line_number_from_regex(filename, regex)){}
 
 FileIterator::~FileIterator() {
-    m_file.close();
+    m_file->close();
 }
 
 const size_t FileIterator::line_number_from_regex(const std::string &filename, const std::regex &regex){
@@ -34,12 +34,12 @@ const size_t FileIterator::line_number_from_regex(const std::string &filename, c
 }
 
 bool FileIterator::next(std::string &line){
-    getline(m_file, line);
+    getline(*m_file, line);
     return !line.empty();
 }
 
 std::string FileIterator::next(){
     std::string line;
-    getline(m_file, line);
+    getline(*m_file, line);
     return line;
 }

@@ -9,7 +9,8 @@
 #include <vector>
 #include <memory>
 #include "../consts.h"
-#include <Eigen/Eigen>
+#include <Eigen/Eigenvalues>
+
 
 
 template<typename T, bool herm>
