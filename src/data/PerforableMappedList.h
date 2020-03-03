@@ -106,7 +106,12 @@ public:
         return remove(mutex, key_index);
     }
 
-
+    size_t remove(const T &key) {
+        auto mutex = MappedList<T>::key_mutex(key);
+        auto key_index = MappedList<T>::lookup(mutex, key);
+        if (key_index==~0ul) return key_index;
+        return remove(mutex, key_index);
+    }
 };
 
 

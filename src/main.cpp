@@ -26,7 +26,6 @@ int main(int argc, char **argv) {
     }
     try {
         cli_app.parse((argc), (argv));
-
     } catch (const CLI::ParseError &e) {
         mpi::finalize();
         cli_app.exit(e);

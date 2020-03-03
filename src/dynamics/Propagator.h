@@ -45,7 +45,7 @@ public:
     void update(const size_t icycle, defs::ham_comp_t norm, defs::ham_comp_t norm_growth) {
         if (icycle % m_input.shift_update_period) return;
         if (!vary_shift) {
-            if (norm < m_input.wf_norm_target) return;
+            if (norm < m_input.nwalker_target) return;
             else vary_shift = true;
         }
         m_shift -= m_input.shift_damp * consts::real_log(norm_growth) / m_tau;

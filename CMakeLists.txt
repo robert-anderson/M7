@@ -14,7 +14,6 @@ endif()
 
 #INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/external/eigen")
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/eigen)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/CLI11)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")

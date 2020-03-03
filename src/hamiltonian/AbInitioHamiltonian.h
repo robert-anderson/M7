@@ -38,7 +38,6 @@ public:
 
     defs::ham_t get_element(const Determinant &bra, const Determinant &ket) const override;
 
-
     size_t nelec() const override;
 
     bool spin_resolved() const override;

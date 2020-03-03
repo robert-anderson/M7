@@ -8,14 +8,14 @@
 Wavefunction::Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
                            const Determinant &reference) :
         m_input(input),
-        m_walker_list(reference.nspatorb(), (size_t) (input.wf_norm_target * input.walker_factor_initial)),
+        m_walker_list(reference.nspatorb(), (size_t) (input.nwalker_target * input.walker_factor_initial)),
         m_walker_communicator(reference.nspatorb(),
-                              (size_t) (input.wf_norm_target * input.buffer_factor_initial),
-                              (size_t) (input.wf_norm_target * input.buffer_factor_initial * mpi::nrank())),
+                              (size_t) (input.nwalker_target * input.buffer_factor_initial),
+                              (size_t) (input.nwalker_target * input.buffer_factor_initial * mpi::nrank())),
         m_reference(reference) {
     auto irow = m_walker_list.push(reference);
     auto ref_weight = m_walker_list.get_weight(irow);
-    ref_weight = std::max(m_input.wf_norm_initial, m_input.nadd_initiator);
+    ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
     m_walker_list.get_hdiag(irow) = propagator->m_ham->get_energy(reference);
     m_walker_list.get_flag_reference_connection(irow) = true;
 

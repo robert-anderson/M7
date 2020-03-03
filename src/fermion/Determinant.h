@@ -62,6 +62,8 @@ public:
 
     size_t nspatorb() const;
 
+    int spin() const;
+
     inline int compare(const Determinant &rhs) const;
 
     Determinant get_excited_det(const defs::inds &removed, const defs::inds &inserted) const;

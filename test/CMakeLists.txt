@@ -14,7 +14,11 @@ add_executable(unittest ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} ${CPP_TEST_SOURC
 set(GTEST_INCLUDE_DIR, "${CMAKE_BINARY_DIR}/external/googletest/googletest/include")
 target_include_directories(unittest PUBLIC ${GTEST_INCLUDE_DIR})
 target_link_libraries(unittest gtest gtest_main)
-target_link_libraries (unittest Eigen3::Eigen)
+
+find_package(LAPACK REQUIRED)
+if(LAPACK_FOUND)
+    target_link_libraries (unittest ${LAPACK_LIBRARIES})
+endif()
 target_link_libraries (unittest ${MPI_LIBRARIES})
 
 target_compile_definitions(unittest PRIVATE DEBUG=1)
