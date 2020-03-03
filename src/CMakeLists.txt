@@ -14,6 +14,12 @@ target_link_libraries (debug ${MPI_LIBRARIES})
 target_include_directories(release PRIVATE ${CMAKE_SOURCE_DIR}/external/CLI11/include)
 target_include_directories(debug PRIVATE ${CMAKE_SOURCE_DIR}/external/CLI11/include)
 
+find_package(LAPACK REQUIRED)
+if(LAPACK_FOUND)
+    target_link_libraries (release ${LAPACK_LIBRARIES})
+    target_link_libraries (debug ${LAPACK_LIBRARIES})
+endif()
+
 target_compile_definitions(debug PRIVATE DEBUG=1)
 include_directories($ENV{INCLUDE_PATH})
 SET(CMAKE_CXX_FLAGS "-fopenmp -march=native")
