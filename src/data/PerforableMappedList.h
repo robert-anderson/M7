@@ -36,7 +36,6 @@
 
 template<typename T>
 class PerforableMappedList : public MappedList<T> {
-    using typename MappedList<T>::spec_T;
     defs::inds m_free;
     defs::inds m_removed;
 
@@ -45,11 +44,11 @@ class PerforableMappedList : public MappedList<T> {
     size_t m_nremoved = 0ul;
 public:
 
-    PerforableMappedList(spec_T spec, size_t nrow, size_t key_entry) :
+    PerforableMappedList(Specification spec, size_t nrow, size_t key_entry) :
         MappedList<T>(spec, nrow, key_entry),
         m_free(nrow, 0ul), m_removed(nrow, 0ul) {}
 
-    PerforableMappedList(spec_T spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
+    PerforableMappedList(Specification spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
         MappedList<T>(spec, nrow, key_entry, data_external) {}
 
     void synchronize() {
@@ -111,6 +110,10 @@ public:
         auto key_index = MappedList<T>::lookup(mutex, key);
         if (key_index==~0ul) return key_index;
         return remove(mutex, key_index);
+    }
+
+    size_t nfilled() const{
+        return MappedList<T>::high_water_mark()-m_nfree;
     }
 };
 

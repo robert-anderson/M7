@@ -8,12 +8,12 @@
 #include <src/utils.h>
 
 
-Table::Table(spec_T spec, size_t nrow) :
+Table::Table(Specification spec, size_t nrow) :
     m_spec(spec) {
     grow(nrow);
 }
 
-Table::Table(spec_T spec, size_t nrow, defs::data_t *data_external) :
+Table::Table(Specification spec, size_t nrow, defs::data_t *data_external) :
     m_spec(spec) {
     grow(data_external, nrow);
 }

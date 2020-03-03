@@ -16,7 +16,7 @@ class TableArray {
     std::vector<table_T> m_tables{};
     defs::inds m_offsets;
 public:
-    TableArray(size_t ntable, const typename table_T::spec_T &spec, size_t nrow_per_table) :
+    TableArray(size_t ntable, const Specification &spec, size_t nrow_per_table) :
         m_offsets(ntable) {
         for (size_t itable = 0ul; itable < ntable; ++itable)
             m_tables.emplace_back(spec, 0, nullptr);

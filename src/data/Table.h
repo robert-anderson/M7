@@ -15,10 +15,8 @@
 #include "src/fermion/Determinant.h"
 
 class Table {
-public:
-    using spec_T = Specification;
 protected:
-    const spec_T m_spec;
+    const Specification m_spec;
     size_t m_nrow = 0ul;
     std::vector<defs::data_t> m_data_internal{};
     defs::data_t *m_data = nullptr;
@@ -31,9 +29,9 @@ public:
 
     virtual size_t high_water_mark() const;
 
-    Table(spec_T spec, size_t nrow);
+    Table(Specification spec, size_t nrow);
 
-    Table(spec_T spec, size_t nrow, defs::data_t *data_external);
+    Table(Specification spec, size_t nrow, defs::data_t *data_external);
 
     virtual void grow(const size_t &nrow);
 

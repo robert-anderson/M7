@@ -8,23 +8,29 @@
 #include "src/data/PerforableMappedList.h"
 #include <memory>
 
-struct WalkerListSpecification : public Specification {
+struct WalkerListFields {
+    Specification m_spec;
     size_t idet;
     size_t iweight;
     size_t ihdiag;
     size_t iflag_reference_connection;
     size_t iflag_initiator;
     size_t iflag_deterministic;
-    WalkerListSpecification(size_t nsite);
+
+    WalkerListFields(size_t nsite) {
+        idet = m_spec.add<Determinant>(nsite);
+        iweight = m_spec.add<defs::ham_t>(1);
+        ihdiag = m_spec.add<defs::ham_comp_t>(1);
+        iflag_reference_connection = m_spec.add<bool>(1);
+        iflag_initiator = m_spec.add<bool>(1);
+        iflag_deterministic = m_spec.add<bool>(1);
+    }
 };
 
 class WalkerList : public PerforableMappedList<Determinant> {
+    WalkerListFields m_fields;
 public:
-    using spec_T = WalkerListSpecification;
-protected:
-    const spec_T m_spec;
-public:
-    WalkerList(const spec_T &spec, size_t nrow);
+    WalkerList(size_t nsite, size_t nrow);
 
     Determinant get_determinant(const size_t &irow);
 

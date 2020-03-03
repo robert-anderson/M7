@@ -29,6 +29,7 @@ public:
     const InputOptions &m_input;
     defs::ham_comp_t m_square_norm;
     defs::ham_comp_t m_delta_square_norm;
+    size_t m_noccupied_determinant;
     double m_norm_growth_rate = 0;
 
     Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,

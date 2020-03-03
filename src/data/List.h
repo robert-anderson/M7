@@ -11,9 +11,9 @@ class List : public Table {
     size_t m_high_water_mark{};
 
 public:
-    List(const spec_T &spec, size_t nrow);
+    List(const Specification &spec, size_t nrow);
 
-    List(const spec_T &spec, size_t nrow, defs::data_t *data_external);
+    List(const Specification &spec, size_t nrow, defs::data_t *data_external);
 
     virtual size_t high_water_mark() const;
 

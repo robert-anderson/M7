@@ -4,9 +4,9 @@
 
 #include "List.h"
 
-List::List(const Table::spec_T &spec, size_t nrow) : Table(spec, nrow) {}
+List::List(const Specification &spec, size_t nrow) : Table(spec, nrow) {}
 
-List::List(const Table::spec_T &spec, size_t nrow, defs::data_t *data_external) : Table(spec, nrow, data_external) {}
+List::List(const Specification &spec, size_t nrow, defs::data_t *data_external) : Table(spec, nrow, data_external) {}
 
 size_t List::high_water_mark() const {
     return m_high_water_mark;

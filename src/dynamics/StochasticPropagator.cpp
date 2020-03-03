@@ -36,7 +36,6 @@ void StochasticPropagator::off_diagonal(const Determinant &determinant, const Nu
                          (m_ham->get_element(excited, determinant) / excit.m_double.m_prob);
             add_to_spawn_list(excited, delta, flag_initiator, spawn_list);
         }
-
     }
 }
 

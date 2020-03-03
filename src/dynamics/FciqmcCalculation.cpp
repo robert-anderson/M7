@@ -22,9 +22,13 @@ FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
 void FciqmcCalculation::execute(){
     logger::write("Starting FCIQMC main loop.");
     for(size_t icycle=0ul; icycle<m_input.ncycle; ++icycle){
+        logger::write("iteration "+std::to_string(icycle));
+        logger::write("\npropagating...");
         m_psi->propagate(m_prop);
+        logger::write("\ncommunicating...");
         m_psi->communicate();
         m_psi->consolidate_incoming_weight();
+        logger::write("\nannihilating...");
         m_psi->annihilate(m_prop);
         m_prop->update(icycle, m_psi->norm(), m_psi->m_norm_growth_rate);
         write_iter_stats(icycle);

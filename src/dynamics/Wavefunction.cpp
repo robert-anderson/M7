@@ -30,12 +30,12 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
     size_t irow = m_walker_list.lookup(m_reference);
     if (irow != ~0ul) m_reference_weight = *m_walker_list.get_weight(irow);
 
-#pragma omp parallel default(none) shared(propagator)
+//#pragma omp parallel default(none) shared(propagator)
     {
         defs::ham_comp_t delta_square_norm = 0;
         defs::ham_t reference_energy_numerator = 0;
         int delta_ninitiator = 0;
-#pragma omp for
+//#pragma omp for
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
             auto weight = m_walker_list.get_weight(irow);
@@ -120,6 +120,8 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
     m_ninitiator = mpi::all_sum(m_ninitiator);
     m_delta_square_norm = mpi::all_sum(m_delta_square_norm);
     m_square_norm = mpi::all_sum(m_square_norm);
+    m_noccupied_determinant = m_walker_list.nfilled();
+    m_noccupied_determinant = mpi::all_sum(m_noccupied_determinant);
     m_norm_growth_rate = std::sqrt((m_square_norm + m_delta_square_norm) / m_square_norm);
     m_square_norm += m_delta_square_norm;
 }
@@ -135,4 +137,5 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
     stats_file.m_wavefunction_l2_norm->write(norm());
     stats_file.m_aborted_weight->write(m_aborted_weight);
     stats_file.m_ninitiator->write(m_ninitiator);
+    stats_file.m_noccupied_determinant->write(m_noccupied_determinant);
 }

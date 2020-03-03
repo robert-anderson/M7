@@ -11,28 +11,26 @@
 #include "src/data/Specification.h"
 #include "src/data/List.h"
 
-struct SpawnListSpecification : public Specification {
+struct SpawnListFields {
+    Specification m_spec;
     size_t idet;
     size_t iweight;
     size_t iflag_parent_initiator;
 
-    SpawnListSpecification(size_t nsite) : Specification() {
-        idet = add<Determinant>(nsite);
-        iweight = add<defs::ham_t>(1);
-        iflag_parent_initiator = add<bool>(1);
+    SpawnListFields(size_t nsite) {
+        idet = m_spec.add<Determinant>(nsite);
+        iweight = m_spec.add<defs::ham_t>(1);
+        iflag_parent_initiator = m_spec.add<bool>(1);
     }
+
 };
 
 class SpawnList : public List {
+    SpawnListFields m_fields;
 public:
-    using spec_T = SpawnListSpecification;
-protected:
-    spec_T m_spec;
+    SpawnList(size_t nsite, size_t nrow, defs::data_t *data_external);
 
-public:
-    SpawnList(const spec_T &spec, size_t nrow, defs::data_t *data_external);
-
-    SpawnList(const spec_T &spec, size_t nrow);
+    SpawnList(size_t nsite, size_t nrow);
 
     Determinant get_determinant(const size_t &irow);
 

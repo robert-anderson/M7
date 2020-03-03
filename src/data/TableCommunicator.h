@@ -15,7 +15,7 @@ class TableCommunicator {
 public:
     TableArray <table_T> m_send;
     table_T m_recv;
-    TableCommunicator(const typename table_T::spec_T &spec, size_t nrow_send, size_t nrow_recv) :
+    TableCommunicator(const Specification &spec, size_t nrow_send, size_t nrow_recv) :
         m_send(mpi::nrank(), spec, nrow_send), m_recv(spec, nrow_recv) {
     }
 
