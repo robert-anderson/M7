@@ -44,12 +44,8 @@ class PerforableMappedList : public MappedList<T> {
     size_t m_nremoved = 0ul;
 public:
 
-    PerforableMappedList(Specification spec, size_t nrow, size_t key_entry) :
-        MappedList<T>(spec, nrow, key_entry),
-        m_free(nrow, 0ul), m_removed(nrow, 0ul) {}
-
-    PerforableMappedList(Specification spec, size_t nrow, size_t key_entry, defs::data_t *data_external) :
-        MappedList<T>(spec, nrow, key_entry, data_external) {}
+    PerforableMappedList(size_t nbucket, size_t key_entry, defs::data_t *data_external = nullptr) :
+        MappedList<T>(nbucket, key_entry, data_external) {}
 
     void synchronize() {
         /*

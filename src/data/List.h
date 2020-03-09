@@ -11,13 +11,12 @@ class List : public Table {
     size_t m_high_water_mark{};
 
 public:
-    List(const Specification &spec, size_t nrow);
 
-    List(const Specification &spec, size_t nrow, defs::data_t *data_external);
+    explicit List(defs::data_t *data_external = nullptr);
 
     virtual size_t high_water_mark() const;
 
-    void high_water_mark(const size_t& value);
+    void high_water_mark(const size_t &value);
 
     virtual size_t push();
 
@@ -25,7 +24,7 @@ public:
 
     void zero() override;
 
-    void print() const override ;
+    void print(size_t irank) const override;
 
 };
 

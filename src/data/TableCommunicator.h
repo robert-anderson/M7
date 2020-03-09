@@ -15,8 +15,10 @@ class TableCommunicator {
 public:
     TableArray <table_T> m_send;
     table_T m_recv;
-    TableCommunicator(const Specification &spec, size_t nrow_send, size_t nrow_recv) :
-        m_send(mpi::nrank(), spec, nrow_send), m_recv(spec, nrow_recv) {
+    template <typename factory_T>
+    TableCommunicator(factory_T factory, size_t nrow) :
+        m_send(factory, 4, nrow), m_recv(factory()) {
+        m_recv.grow(nrow*mpi::nrank());
     }
 
     bool communicate() {

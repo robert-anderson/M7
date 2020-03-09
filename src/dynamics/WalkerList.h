@@ -8,41 +8,16 @@
 #include "src/data/PerforableMappedList.h"
 #include <memory>
 
-struct WalkerListFields {
-    Specification m_spec;
-    size_t idet;
-    size_t iweight;
-    size_t ihdiag;
-    size_t iflag_reference_connection;
-    size_t iflag_initiator;
-    size_t iflag_deterministic;
-
-    WalkerListFields(size_t nsite) {
-        idet = m_spec.add<Determinant>(nsite);
-        iweight = m_spec.add<defs::ham_t>(1);
-        ihdiag = m_spec.add<defs::ham_comp_t>(1);
-        iflag_reference_connection = m_spec.add<bool>(1);
-        iflag_initiator = m_spec.add<bool>(1);
-        iflag_deterministic = m_spec.add<bool>(1);
-    }
-};
-
 class WalkerList : public PerforableMappedList<Determinant> {
-    WalkerListFields m_fields;
 public:
+    Field<Determinant> m_determinant;
+    Field<defs::ham_t> m_weight;
+    Field<defs::ham_comp_t> m_hdiag;
+    Field<bool> m_reference_connection;
+    Field<bool> m_initiator;
+    Field<bool> m_deterministic;
+
     WalkerList(size_t nsite, size_t nrow);
-
-    Determinant get_determinant(const size_t &irow);
-
-    NumericView<defs::ham_t> get_weight(const size_t &irow);
-
-    NumericView<defs::ham_comp_t> get_hdiag(const size_t &irow);
-
-    NumericView<bool> get_flag_reference_connection(const size_t &irow);
-
-    NumericView<bool> get_flag_initiator(const size_t &irow);
-
-    NumericView<bool> get_flag_deterministic(const size_t &irow);
 };
 
 

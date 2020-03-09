@@ -6,7 +6,7 @@
 #include "src/io/Logging.h"
 #include "StochasticPropagator.h"
 
-
+#if 0
 FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
         m_input(input), m_rank_allocator(input.nload_balance_block),
         m_stats_file(input)
@@ -41,3 +41,5 @@ void FciqmcCalculation::write_iter_stats(size_t icycle) {
     m_psi->write_iter_stats(m_stats_file);
     m_stats_file.flush();
 }
+
+#endif

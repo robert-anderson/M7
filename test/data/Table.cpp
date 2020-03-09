@@ -3,18 +3,34 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/parallel/MPIWrapper.h>
-#include <src/data/Specification.h>
 #include "src/data/Table.h"
+#include "src/enumerators/BitfieldEnumerator.h"
 
 TEST(Table, EncodeDecode) {
-    Specification spec;
+    struct TestTable : public Table {
+        Field<BitfieldNew> m_bitfield;
+        Field<size_t> m_integers;
+        TestTable(size_t nbit, size_t nint):
+        Table(),
+        m_bitfield(this, nbit),
+        m_integers(this, nint){}
+    };
     const size_t nint = 4;
     const size_t nbit = 20;
-    spec.add<size_t>(nint);
-    spec.add<BitfieldNew>(nbit);
-    const size_t nrow = 10;
-    Table table(spec, nrow);
+
+    TestTable table(nbit, nint);
+    table.grow(8);
+    table.m_integers.get(3, 3) = 6;
+    defs::inds setinds = {3, 7, 14, 16, 19};
+    table.m_bitfield.get(7).set(setinds);
+    table.print();
+    ASSERT_EQ(table.m_integers.get(3, 3), 6);
+    auto setind = setinds.begin();
+    BitfieldSetEnumerator enumerator(table.m_bitfield.get(7));
+    size_t encoded_setind;
+    while (enumerator.next(encoded_setind)){
+        ASSERT_EQ(encoded_setind, *(setind++));
+    }
 }
 
 /*

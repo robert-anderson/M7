@@ -14,9 +14,10 @@
 #include "Propagator.h"
 #include "RankAllocator.h"
 
+#if 0
 class Wavefunction {
     WalkerList m_walker_list;
-    WalkerCommunicator m_walker_communicator;
+    //WalkerCommunicator m_walker_communicator;
 
     Determinant m_reference;
     defs::ham_t m_reference_energy_numerator;
@@ -52,4 +53,5 @@ public:
 };
 
 
+#endif //M7_WAVEFUNCTION_H
 #endif //M7_WAVEFUNCTION_H

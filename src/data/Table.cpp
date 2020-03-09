@@ -6,25 +6,18 @@
 
 #include <iostream>
 #include <src/utils.h>
+#include <src/parallel/MPIWrapper.h>
 
-
-Table::Table(Specification spec, size_t nrow) :
-    m_spec(spec) {
-    grow(nrow);
-}
-
-Table::Table(Specification spec, size_t nrow, defs::data_t *data_external) :
-    m_spec(spec) {
-    grow(data_external, nrow);
-}
+Table::Table(defs::data_t *data_external) :
+        m_spec() {}
 
 template<>
 BitfieldNew Table::view<BitfieldNew>(const size_t &irow, const size_t &ientry) const {
     return BitfieldNew(
-        m_spec.m_bitfield_lengths[ientry],
-        (defs::data_t *) (m_data + irow * row_length() +
-                          m_spec.m_total_numeric_datawords_used +
-                          m_spec.m_bitfield_offsets[ientry]));
+            m_spec.m_bitfield_lengths[ientry],
+            (defs::data_t *) (m_data + irow * row_length() +
+                              m_spec.m_total_numeric_datawords_used +
+                              m_spec.m_bitfield_offsets[ientry]));
 }
 
 template<>
@@ -36,19 +29,20 @@ void Table::zero(size_t irow) {
     memset(m_data + irow * row_length(), 0, row_length() * sizeof(defs::data_t));
 }
 
-void Table::zero(){
+void Table::zero() {
     memset(m_data, 0, row_length() * m_nrow * sizeof(defs::data_t));
 }
 
 
-void Table::print(size_t nrow) const {
+void Table::print(size_t nrow, size_t irank) const {
+    std::cout << "\nMPI Rank: " << irank << std::endl;
     const size_t padding = 4ul;
-    if (nrow==m_nrow)
+    if (nrow == m_nrow)
         std::cout << "\nnumber of total rows: " << m_nrow << std::endl;
     else
         std::cout << "\nnumber of rows shown: " << nrow << std::endl;
-    for (size_t irow=0ul; irow < nrow; ++irow) {
-        std::cout << utils::num_to_string(irow, 6) << " | ";
+    for (size_t irow = 0ul; irow < nrow; ++irow) {
+        std::cout << utils::num_to_string(irow, 6) << "  |";
         std::cout << view<std::complex<float>>(irow).to_string(padding);
         std::cout << view<std::complex<double>>(irow).to_string(padding);
         std::cout << view<std::complex<long double>>(irow).to_string(padding);
@@ -67,15 +61,24 @@ void Table::print(size_t nrow) const {
         std::cout << view<unsigned long long int>(irow).to_string(padding);
         std::cout << view<bool>(irow).to_string(padding);
 
-        for (size_t ibitfield=0ul; ibitfield < m_spec.m_bitfield_lengths.size(); ++ibitfield) {
+        for (size_t ibitfield = 0ul; ibitfield < m_spec.m_bitfield_lengths.size(); ++ibitfield) {
             std::cout << view<BitfieldNew>(irow, ibitfield).to_string(padding);
         }
         std::cout << std::endl;
     }
 }
 
+void Table::print(size_t irank) const {
+    print(m_nrow, irank);
+}
+
 void Table::print() const {
-    print(m_nrow);
+    for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+        if (mpi::i_am(irank)) {
+            print(irank);
+        }
+        mpi::barrier();
+    }
 }
 
 void Table::grow(const size_t &nrow) {
@@ -90,7 +93,7 @@ void Table::grow(const size_t &nrow) {
 }
 
 void Table::grow(defs::data_t *const new_ptr, size_t nrow) {
-    if (m_data && m_data==m_data_internal.data())
+    if (m_data && m_data == m_data_internal.data())
         throw std::runtime_error("Cannot move data of a Table which manages its own buffer");
     /*
      * m_data is external, so we trust that the necessary reallocation

@@ -5,6 +5,7 @@
 #include "Wavefunction.h"
 #include "src/io/Logging.h"
 
+#if 0
 Wavefunction::Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
                            const Determinant &reference) :
         m_input(input),
@@ -139,3 +140,4 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
     stats_file.m_ninitiator->write(m_ninitiator);
     stats_file.m_noccupied_determinant->write(m_noccupied_determinant);
 }
+#endif

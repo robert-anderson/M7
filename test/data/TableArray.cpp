@@ -8,6 +8,7 @@
 #include "src/data/TableArray.h"
 #include "src/data/BitfieldNew.h"
 
+#if 0
 TEST(TableArray, SingleTableCase) {
     Specification spec;
     const size_t nint = 4;
@@ -38,3 +39,4 @@ TEST(TableArray, EncodeDecode) {
 }
 
 
+#endif

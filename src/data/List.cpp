@@ -4,9 +4,7 @@
 
 #include "List.h"
 
-List::List(const Specification &spec, size_t nrow) : Table(spec, nrow) {}
-
-List::List(const Specification &spec, size_t nrow, defs::data_t *data_external) : Table(spec, nrow, data_external) {}
+List::List(defs::data_t *data_external) : Table(data_external) {}
 
 size_t List::high_water_mark() const {
     return m_high_water_mark;
@@ -34,8 +32,8 @@ void List::zero() {
     m_high_water_mark = 0ul;
 }
 
-void List::print() const {
-    Table::print(high_water_mark());
+void List::print(size_t irank) const {
+    Table::print(high_water_mark(), irank);
 }
 
 void List::high_water_mark(const size_t &value) {

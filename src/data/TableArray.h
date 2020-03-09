@@ -8,6 +8,7 @@
 #include "src/defs.h"
 #include "Table.h"
 #include <iostream>
+#include <src/parallel/MPIWrapper.h>
 
 template<typename table_T>
 class TableArray {
@@ -16,10 +17,12 @@ class TableArray {
     std::vector<table_T> m_tables{};
     defs::inds m_offsets;
 public:
-    TableArray(size_t ntable, const Specification &spec, size_t nrow_per_table) :
+    template <typename factory_T>
+    TableArray(factory_T factory, size_t ntable, size_t nrow_per_table) :
         m_offsets(ntable) {
-        for (size_t itable = 0ul; itable < ntable; ++itable)
-            m_tables.emplace_back(spec, 0, nullptr);
+        for (size_t itable = 0ul; itable < ntable; ++itable) {
+            m_tables.push_back(factory());
+        }
         grow(nrow_per_table);
     }
 
@@ -35,10 +38,15 @@ public:
     }
 
     void print() {
-        std::cout << std::endl << "Table Array (" << m_tables.size() << ") tables" << std::endl;
-        for (size_t itable = 0ul; itable < m_tables.size(); ++itable) {
-            std::cout << "Table " << itable << std::endl;
-            m_tables[itable].print();
+        for (size_t irank=0ul; irank<mpi::nrank(); ++irank){
+            if (mpi::i_am(irank)) {
+                std::cout << std::endl << "Table Array (" << m_tables.size() << ") tables" << std::endl;
+                for (size_t itable = 0ul; itable < m_tables.size(); ++itable) {
+                    std::cout << "Table " << itable << std::endl;
+                    m_tables[itable].print(irank);
+                }
+            }
+            mpi::barrier();
         }
     }
 

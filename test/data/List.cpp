@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include "src/data/List.h"
 
-
+#if 0
 TEST(List, ThreadSafety) {
     Specification specification;
     specification.add<size_t>(1);
@@ -24,3 +24,4 @@ TEST(List, ThreadSafety) {
         ASSERT_EQ(*v, irow);
     }
 }
+#endif

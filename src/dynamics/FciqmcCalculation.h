@@ -15,6 +15,7 @@
 #include "Wavefunction.h"
 #include "ExactPropagator.h"
 
+#if 0
 
 class FciqmcCalculation {
     const InputOptions m_input;
@@ -33,4 +34,5 @@ public:
 };
 
 
+#endif //M7_FCIQMCCALCULATION_H
 #endif //M7_FCIQMCCALCULATION_H
