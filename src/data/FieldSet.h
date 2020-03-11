@@ -9,21 +9,17 @@
 #include <iostream>
 #include <assert.h>
 #include <src/multidim/Indexer.h>
-
-struct FieldBase;
-
-template <typename T>
-struct Field;
+#include <typeindex>
 
 /*
  * FieldSets both define the layout of data stored in a defs::data_t buffer,
- * and provides a namespace in which the stored data can be accessed by
- * variables with the Field type.
+ * and provide a namespace in which the stored data can be accessed by
+ * symbols with the Field type.
  *
  * Specification of the data layout is done by building up the member fields
  * in the list initialization of the FieldSet struct. Consecutively added 
  * fields of the same data type are allowed to share a defs::data_t word,
- * with the exception of boolean fields of length>1 (aka bitfields). Bitfields
+ * with the exception of boolean fields of length >1 (aka bitfields). Bitfields
  * are always allotted a whole number of data words.
  *
  * e.g. A: 3 floats
@@ -40,6 +36,7 @@ struct Field;
  * |DDDDDDDD|DDDDDDDD|DDDDDDDD|DDDD____|________|________|________|________|
  * |EFG_____|________|________|________|________|________|________|________|
  *
+ *
  */
 
 struct FieldSet {
@@ -47,39 +44,58 @@ struct FieldSet {
     size_t m_length = 0ul;
 
     template<typename T>
-    size_t add_field(Field<T> *field) {
+    static size_t nbit_per_element() {
+        return std::is_same<T, bool>::value ? 1 : sizeof(T) * 8;
     }
 
-    /*
-    template<typename T>
-    size_t add_field(Field<T> *field) {
-        auto advance = [&]() {
-            auto tmp = m_nbit % size_in_bits<defs::data_t>();
-            if (tmp) m_nbit += size_in_bits<defs::data_t>() - tmp;
-        };
+    struct FieldBase {
+        FieldSet *m_field_set;
+        // length of the indexer
+        const size_t m_nelement;
+        const size_t m_nbit_per_element;
+        const std::type_index m_type_index;
+        // first value is dataword offset, second is offset in elements from start of dataword
+        const std::pair<size_t, size_t> m_offset;
 
-        size_t this_type = typeid(T).hash_code();
-        if (m_nbit > 0) {
-            if (this_type != m_last_type) advance();
-        }
+        virtual std::string to_string(size_t irow) = 0;
 
-        auto offset = m_nbit / size_in_bits<T>();
-        m_nbit += field->m_length * size_in_bits<T>();
-        m_length = m_nbit / size_in_bits<defs::data_t>();
-        if (m_nbit % size_in_bits<defs::data_t>()) m_length++;
-        m_last_type = this_type;
-        m_fields.push_back(field);
-        return offset;
-    }
-     */
+        FieldBase(FieldSet *field_set, size_t nbit, size_t nelement, const std::type_info &type_info) :
+                m_field_set(field_set), m_nbit_per_element(nbit), m_nelement(nelement),
+                m_type_index(type_info), m_offset(field_set->add_field(this)) {}
+
+    };
 
     std::vector<FieldBase *> m_fields;
 
+    std::pair<size_t, size_t> add_field(FieldBase *field) {
+        size_t dataword_offset = 0ul;
+        size_t element_offset = 0ul;
+        if (!m_fields.empty()) {
+            if (field->m_type_index != m_fields.back()->m_type_index) {
+                // different type to last field
+                dataword_offset = m_length;
+                element_offset = 0;
+            } else {
+                // same type as last field
+                element_offset = m_fields.back()->m_offset.second + m_fields.back()->m_nelement;
+                element_offset *= field->m_nbit_per_element;
+                dataword_offset = m_fields.back()->m_offset.first;
+                dataword_offset += element_offset / nbit_per_element<defs::data_t>();
+                element_offset %= nbit_per_element<defs::data_t>();
+            }
+        }
+        m_length = dataword_offset * nbit_per_element<defs::data_t>();
+        m_length += (element_offset + field->m_nelement) * field->m_nbit_per_element;
+        m_length = integer_utils::divceil(m_length, nbit_per_element<defs::data_t>());
+        m_fields.push_back(field);
+        return {dataword_offset, element_offset};
+    }
+
     FieldSet(defs::data_t *buffer) : m_buffer(buffer) {}
 
-    defs::inds field_lengths();
+    defs::inds field_nelements();
 
-    defs::inds field_offsets();
+    std::vector<std::pair<size_t, size_t>> field_offsets();
 
     void print(size_t irow);
 };

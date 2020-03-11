@@ -47,6 +47,13 @@ namespace utils {
 }
 
 namespace integer_utils {
+
+    template<typename T>
+    static typename std::enable_if<std::is_integral<T>::value, T>::type
+    divceil(const T& num, const T& denom){
+        return num%denom ? num/denom+1:num/denom;
+    }
+
     static size_t factorial(const size_t &n){
         assert(n<((size_t)-1)/2);
         size_t out = 1ul;
