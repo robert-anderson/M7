@@ -5,137 +5,205 @@
 #ifndef M7_FIELD_H
 #define M7_FIELD_H
 
-#include <src/multidim/Indexer.h>
-#include "FieldSet.h"
+#include <src/multidim/ArrayIndexer.h>
+#include "src/utils.h"
+#include "TableNew.h"
 #include <cstring>
+#include <algorithm>
 
 
 template<typename T, size_t nind = 1>
-struct Field : public FieldSet::FieldBase {
-    const Indexer<nind> m_indexer;
-
-    template<typename ...Args>
-    Field(FieldSet *field_set, Args... shape) :
-            FieldBase(field_set, FieldSet::nbit_per_element<T>(), Indexer<nind>(shape...).nelement(), typeid(T)),
-            m_indexer(Indexer<nind>(shape...)) {}
-
+struct Field : public TableNew::FieldBase {
+    const ArrayIndexer<nind> m_indexer;
 private:
-    inline T *flat_get(const size_t &irow, const size_t &flat) {
-        assert(flat < m_nelement);
-        return (T *) (m_field_set->m_buffer + irow * m_field_set->m_length +
-                      m_offset.first) + m_offset.second + flat;
+    static std::array<size_t, nind> data_shape(size_t nelement) {
+        std::array<size_t, nind> result;
+        result.fill(nelement);
+        return result;
     }
 
 public:
-    template<typename U=T, typename ...Args>
-    typename std::enable_if<!std::is_same<U, void>::value, U *>::type
-    zero(const size_t &irow){
-        std::memset(flat_get(irow, 0), 0, m_nelement*sizeof(U));
+    Field(TableNew *table, const std::array<size_t, nind> &shape) :
+            FieldBase(table, TableNew::nbit_per_element<T>(), ArrayIndexer<nind>(shape).nelement(), typeid(T)),
+            m_indexer(ArrayIndexer<nind>(shape)) {}
+
+    Field(TableNew *table, const size_t &nelement) : Field(table, data_shape(nelement)) {}
+
+    Field(TableNew *table) : Field(table, 1) {}
+
+    inline T *flat_get_ptr(const size_t &irow, const size_t &flat) const {
+        assert(flat < m_nelement);
+        return (T *) (m_table->m_data.data() + irow * m_table->m_ndatawords_padded +
+                      m_offset.first) + m_offset.second + flat;
     }
 
-
-    template<typename U=T, typename ...Args>
-    typename std::enable_if<!std::is_same<U, bool>::value, U *>::type
-    operator()(const size_t &irow, Args... inds) {
-        return flat_get(irow, m_indexer.get(inds...));
+    inline T &flat_get(const size_t &irow, const size_t &flat) const {
+        assert(flat < m_nelement);
+        return *((T *) (m_table->m_data.data() + irow * m_table->m_ndatawords_padded +
+                        m_offset.first) + m_offset.second + flat);
     }
 
-    template<typename ...Args>
-    std::string to_string(size_t irow, Args... inds) {
-        return std::to_string(*(*this)(irow, inds...));
+    struct Row {
+        Field<T, nind> &m_field;
+        const size_t m_i;
+
+        Row(Field<T, nind> &field, const size_t &i) : m_field(field), m_i(i) {}
+
+        template<typename U=T>
+        typename std::enable_if<!std::is_same<U, bool>::value, T &>::type
+        operator()(const size_t &flat = 0) {
+            return m_field.flat_get(m_i, flat);
+        }
+
+        template<typename U=T>
+        typename std::enable_if<!std::is_same<U, bool>::value, T &>::type
+        operator()(const std::array<size_t, nind> &inds) {
+            return m_field.flat_get(m_i, m_field.m_indexer.get(inds));
+        }
+
+        void operator=(const Row &rhs) {
+            assert(m_field.m_indexer == rhs.m_field.m_indexer);
+            std::copy(
+                    rhs.m_field.flat_get_ptr(m_i, 0),
+                    rhs.m_field.flat_get_ptr(m_i, m_field.m_nelement),
+                    m_field.flat_get_ptr(m_i, 0));
+        }
+
+        void operator=(const T &rhs) {
+            /*
+             * set all elements to the rhs
+             */
+            std::memset(m_field.flat_get_ptr(m_i, 0), rhs, m_field.m_nelement * sizeof(T));
+        }
+
+        int compare(const Row &rhs) const {
+            assert(m_field.m_indexer == rhs.m_field.m_indexer);
+            return std::memcmp(m_field.flat_get_ptr(m_i, 0), rhs.m_field.flat_get_ptr(m_i, 0), m_field.m_nelement);
+        }
+
+        bool operator==(const Row &rhs) const {
+            return !compare(rhs);
+        }
+
+        bool operator==(const T &rhs) const {
+            /*
+             * all elements equal to the rhs?
+             */
+            return std::all_of(m_field.flat_get_ptr(m_i, 0), m_field.flat_get_ptr(m_i, m_field.m_nelement - 1),
+                               [&rhs](const T &v) { return v == rhs; });
+        }
+    };
+
+    template<typename U=T>
+    typename std::enable_if<!std::is_same<U, void>::value, void>::type
+    zero(const size_t &irow) {
+        std::memset(flat_get(irow, 0), 0, m_nelement * sizeof(U));
+    }
+
+    template<typename U=T>
+    typename std::enable_if<!std::is_same<U, void>::value, void>::type
+    zero(const defs::pair &pair) {
+        zero(m_table->pair_to_irow(pair));
+    }
+
+    Row row(const size_t &irow) {
+        assert(irow < m_table->nrow());
+        return Row(*this, irow);
+    }
+
+    Row row(const defs::pair &pair) {
+        return Row(*this, m_table->pair_to_irow(pair));
+    }
+
+    T &operator()(const size_t &irow, const size_t &iflat = 0) {
+        return flat_get(irow, iflat);
+    }
+
+    T &operator()(const defs::pair &pair, const size_t &iflat = 0) {
+        return flat_get(m_table->pair_to_irow(pair), iflat);
+    }
+
+    T &operator()(const size_t &irow, const std::array<size_t, nind> &inds) {
+        return flat_get(irow, m_indexer.get(inds));
+    }
+
+    T &operator()(const defs::pair &pair, const std::array<size_t, nind> &inds) {
+        return flat_get(m_table->pair_to_irow(pair), m_indexer.get(inds));
+    }
+
+    std::string to_string(size_t irow, const std::array<size_t, nind> &inds) {
+        return std::to_string(element(irow, inds));
     }
 
     std::string to_string(size_t irow) override {
         std::string out = "";
-        for (size_t i = 0ul; i < m_nelement; ++i) out += std::to_string(*flat_get(irow, i))+" ";
+        for (size_t i = 0ul; i < m_nelement; ++i) out += std::to_string(flat_get(irow, i)) + " ";
         return out;
     }
 };
 
-template<typename T>
-static inline void clr_bit(T &x, size_t i) {
-    x &= ~((T) 1ul << i);
-}
-
-template<typename T>
-static inline void set_bit(T &x, size_t i) {
-    x |= ((T) 1ul << i);
-}
-
-template<typename T>
-static inline bool get_bit(T &x, size_t i) {
-    return (x >> i) & T(1ul);
-}
 
 template<size_t nind = 1>
 struct Flag : public Field<bool, nind> {
-    template<typename ...Args>
-    Flag(FieldSet *field_set, Args... shape) : Field<bool, nind>(field_set, shape...) {}
 
-    using Field<bool, nind>::m_field_set;
+    Flag(TableNew *table, const std::array<size_t, nind> &shape) : Field<bool, nind>(table, shape) {}
+
+    using Field<bool, nind>::m_table;
     using Field<bool, nind>::m_offset;
+    using Field<bool, nind>::m_indexer;
+    using Field<bool, nind>::m_nelement;
 
-    template<typename ...Args>
-    void set(const size_t &irow, Args... inds) {
-        set_bit(*(m_field_set->m_buffer + irow * m_field_set->m_length + m_offset.first), m_offset.second);
+    void set(const size_t &irow, const size_t &flat = 0) {
+        assert(flat < m_nelement);
+        assert(irow < m_table->nrow());
+        auto bit_offset = m_offset.second + flat;
+        auto dataword = m_table->m_data.data() + irow * m_table->m_ndatawords_padded
+                        + m_offset.first + bit_offset / TableNew::nbit_per_element<defs::data_t>();
+        bit_utils::set(*dataword, bit_offset % TableNew::nbit_per_element<defs::data_t>());
     }
 
-    template<typename ...Args>
-    void clr(const size_t &irow, Args... inds) {
-        clr_bit(*(m_field_set->m_buffer + irow * m_field_set->m_length + m_offset.first), m_offset.second);
+    void set(const size_t &irow, const std::array<size_t, nind> &inds) {
+        set(irow, m_indexer.get(inds));
     }
 
-    template<typename ...Args>
-    bool get(const size_t &irow, Args... inds) {
-        return get_bit(*(m_field_set->m_buffer + irow * m_field_set->m_length + m_offset.first), m_offset.second);
+    void set(const defs::pair &pair, const std::array<size_t, nind> &inds) {
+        set(m_table->pair_to_irow(pair), inds);
     }
+
+    void clr(const size_t &irow, const size_t &flat = 0) {
+        assert(flat < m_nelement);
+        assert(irow < m_table->nrow());
+        auto bit_offset = m_offset.second + flat;
+        auto dataword = m_table->m_data.data() + irow * m_table->m_ndatawords_padded
+                        + m_offset.first + bit_offset / TableNew::nbit_per_element<defs::data_t>();
+        bit_utils::clr(*dataword, bit_offset % TableNew::nbit_per_element<defs::data_t>());
+    }
+
+    void clr(const size_t &irow, const std::array<size_t, nind> &inds) {
+        clr(irow, m_indexer.get(inds));
+    }
+
+    void clr(const defs::pair &pair, const std::array<size_t, nind> &inds) {
+        clr(m_table->pair_to_irow(pair), inds);
+    }
+
+    bool get(const size_t &irow, const size_t &flat = 0) {
+        assert(flat < m_nelement);
+        assert(irow < m_table->nrow());
+        auto bit_offset = m_offset.second + flat;
+        auto dataword = m_table->m_data.data() + irow * m_table->m_ndatawords_padded
+                        + m_offset.first + bit_offset / TableNew::nbit_per_element<defs::data_t>();
+        return bit_utils::get(*dataword, bit_offset % TableNew::nbit_per_element<defs::data_t>());
+    }
+
+    bool get(const size_t &irow, const std::array<size_t, nind> &inds) {
+        return get(irow, m_indexer.get(inds));
+    }
+
+    bool get(const defs::pair &pair, const std::array<size_t, nind> &inds) {
+        return get(m_table->pair_to_irow(pair), inds);
+    }
+
 };
-
-
-template<size_t nind = 1>
-struct Bitfield : public Field<defs::data_t, nind+1> {
-    const size_t m_nbit;
-
-    template<typename ...Args>
-    Bitfield(FieldSet *field_set, size_t nbit, Args... shape) : Field<defs::data_t, nind+1>(
-            field_set, shape..., integer_utils::divceil(nbit, FieldSet::nbit_per_element<defs::data_t>())),
-            m_nbit(nbit) {}
-
-    using Field<defs::data_t, nind+1>::m_field_set;
-    using Field<defs::data_t, nind+1>::m_offset;
-
-    template<typename ...Args>
-    void set(const size_t &irow, const size_t &ibit, Args... inds) {
-        set_bit(*(*this)(inds..., ibit/FieldSet::nbit_per_element<defs::data_t>()),
-            ibit%FieldSet::nbit_per_element<defs::data_t>());
-    }
-
-    template<typename ...Args>
-    void clr(const size_t &irow, const size_t &ibit, Args... inds) {
-        clr_bit(*(*this)(inds..., ibit/FieldSet::nbit_per_element<defs::data_t>()),
-                ibit%FieldSet::nbit_per_element<defs::data_t>());
-    }
-
-    template<typename ...Args>
-    bool get(const size_t &irow, const size_t &ibit, Args... inds) {
-        return get_bit(*(*this)(inds..., ibit/FieldSet::nbit_per_element<defs::data_t>()),
-                ibit%FieldSet::nbit_per_element<defs::data_t>());
-    }
-
-    /*
-    template<typename ...Args>
-    std::string to_string(size_t irow, Args... inds) override {
-        return std::to_string(*(*this)(irow, inds...));
-    }*/
-};
-
-
-template<size_t nind = 1>
-struct DeterminantField : public Bitfield<nind+1>{
-    template<typename ...Args>
-    DeterminantField(FieldSet *field_set, size_t nbit, Args... shape) : Bitfield<nind+1>(
-            field_set, nbit, shape..., 2){}
-};
-
 
 #endif //M7_FIELD_H

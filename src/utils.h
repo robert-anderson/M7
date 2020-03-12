@@ -87,6 +87,23 @@ namespace integer_utils {
     }
 }
 
+namespace bit_utils{
+    template<typename T>
+    static inline void clr(T &x, size_t i) {
+        x &= ~((T) 1ul << i);
+    }
+
+    template<typename T>
+    static inline void set(T &x, size_t i) {
+        x |= ((T) 1ul << i);
+    }
+
+    template<typename T>
+    static inline bool get(const T &x, size_t i) {
+        return (x >> i) & T(1ul);
+    }
+}
+
 
 namespace string_utils {
     static std::string join(const std::vector<std::string> &words, const std::string &divider, const bool &bookends) {

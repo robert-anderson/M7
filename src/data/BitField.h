@@ -10,7 +10,7 @@
 #if 0
 
 template<size_t nind = 1>
-struct BitField : public FieldSet::FieldBase {
+struct BitField : public TableNew::FieldBase {
 
 };
 

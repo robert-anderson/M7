@@ -3,25 +3,30 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/data/List.h"
+#include "src/data/Field.h"
+#include "src/data/ListNew.h"
 
-#if 0
 TEST(List, ThreadSafety) {
-    Specification specification;
-    specification.add<size_t>(1);
+    struct TestList : public ListNew {
+        Field<size_t> counter;
+        TestList() :
+                ListNew(),
+                counter(this)
+                {}
+    };
+
     size_t nrow = 3600;
+    TestList list;
+    list.extend(nrow);
 
-    List list(specification, nrow);
-
-#pragma omp parallel for
+#pragma omp parallel for default(none), shared(nrow, list)
     for (size_t i = 0; i < nrow; ++i) {
         size_t irow = list.push();
-        list.view<size_t>(irow)[0] = irow;
+        list.counter(irow) = irow;
     }
 
     for (auto irow{0ul}; irow < list.nrow(); ++irow) {
-        auto v = list.view<size_t>(irow);
-        ASSERT_EQ(*v, irow);
+        ASSERT_EQ(list.counter(irow), irow);
     }
 }
-#endif
+
