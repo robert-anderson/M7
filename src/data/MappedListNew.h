@@ -10,19 +10,18 @@
 #include "Field.h"
 #include "src/hash/SafeHashMap.h"
 
-#if 0
-template<typename T>
+template<typename Hashable_T>
 class ListSafeHashMap;
 
-template<typename T>
+template<typename Field_T>
 class MappedListNew : public ListNew {
 protected:
-    ListSafeHashMap<T> m_map;
-    const Field<T> &m_key_field;
+    ListSafeHashMap<typename Field_T::Element> m_map;
+    const Field_T &m_key_field;
 
 public:
 
-    MappedListNew(size_t nbucket, const Field<T> &key_field, size_t nsegment=1) :
+    MappedListNew(size_t nbucket, const Field_T &key_field, size_t nsegment=1) :
             ListNew(nsegment), m_key_field(key_field), m_map(*this, nbucket) {
         assert(key_field->m_nelement==1);
     }
@@ -92,5 +91,4 @@ struct ListSafeHashMap : public SafeHashMap<T> {
     }
 };
 
-#endif
 #endif //M7_MAPPEDLISTNEW_H

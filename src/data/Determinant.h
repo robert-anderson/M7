@@ -35,8 +35,6 @@ public:
 
         std::array<typename Base::Element, 2> m_bitfields;
 
-    public:
-
         Element(DeterminantField<nind> &field, const size_t &irow, const size_t &flat) :
                 m_field(field), m_irow(irow), m_flat(flat),
                 m_bitfields{

@@ -9,6 +9,7 @@
 #include <memory>
 #include <forward_list>
 #include <src/fermion/Determinant.h>
+#include <src/data/Determinant.h>
 #include "DeterminantHasher.h"
 #include "BitfieldHasher.h"
 #include "src/data/MutexVector.h"
@@ -19,7 +20,7 @@ struct HasherType {
 };
 
 template<>
-struct HasherType<Determinant> {
+struct HasherType<typename DeterminantField<>::Element> {
     typedef DeterminantHasher type;
 };
 
@@ -65,6 +66,7 @@ public:
 
     virtual T get_key(const size_t &key_index) const = 0;
     virtual void set_key(const size_t &key_index, const T& key) = 0;
+
 
     size_t bucket(const T &key) const {
         return m_hasher(key) % m_buckets.size();

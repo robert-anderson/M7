@@ -14,6 +14,7 @@
 
 template<typename T, size_t nind = 1>
 struct Field : public TableNew::FieldBase {
+    typedef T& Element;
     const ArrayIndexer<nind> m_indexer;
 private:
     static std::array<size_t, nind> data_shape(size_t nelement) {
@@ -50,13 +51,13 @@ public:
         Row(Field<T, nind> &field, const size_t &i) : m_field(field), m_i(i) {}
 
         template<typename U=T>
-        typename std::enable_if<!std::is_same<U, bool>::value, T &>::type
+        typename std::enable_if<!std::is_same<U, bool>::value, Element>::type
         operator()(const size_t &flat = 0) {
             return m_field.flat_get(m_i, flat);
         }
 
         template<typename U=T>
-        typename std::enable_if<!std::is_same<U, bool>::value, T &>::type
+        typename std::enable_if<!std::is_same<U, bool>::value, Element>::type
         operator()(const std::array<size_t, nind> &inds) {
             return m_field.flat_get(m_i, m_field.m_indexer.get(inds));
         }
@@ -115,19 +116,19 @@ public:
         return Row(*this, m_table->pair_to_irow(pair));
     }
 
-    T &operator()(const size_t &irow, const size_t &iflat = 0) {
+    Element operator()(const size_t &irow, const size_t &iflat = 0) {
         return flat_get(irow, iflat);
     }
 
-    T &operator()(const defs::pair &pair, const size_t &iflat = 0) {
+    Element operator()(const defs::pair &pair, const size_t &iflat = 0) {
         return flat_get(m_table->pair_to_irow(pair), iflat);
     }
 
-    T &operator()(const size_t &irow, const std::array<size_t, nind> &inds) {
+    Element operator()(const size_t &irow, const std::array<size_t, nind> &inds) {
         return flat_get(irow, m_indexer.get(inds));
     }
 
-    T &operator()(const defs::pair &pair, const std::array<size_t, nind> &inds) {
+    Element operator()(const defs::pair &pair, const std::array<size_t, nind> &inds) {
         return flat_get(m_table->pair_to_irow(pair), m_indexer.get(inds));
     }
 
