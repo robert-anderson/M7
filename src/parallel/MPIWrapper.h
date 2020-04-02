@@ -9,31 +9,36 @@
 #include <mpi.h>
 #include <assert.h>
 #include <iostream>
-#include "src/data/Table.h"
-#include "src/data/Specification.h"
+#include <src/defs.h>
+#include "src/utils.h"
 
 #define USE_MPI 1
 
-static const std::array<MPI_Datatype, numtypes::ntype> type_to_mpi_type =
-        {
-                MPI_Datatype(MPI_COMPLEX),
-                MPI_Datatype(MPI_DOUBLE_COMPLEX),
-                MPI_Datatype(MPI_CXX_LONG_DOUBLE_COMPLEX),
-                MPI_Datatype(MPI_FLOAT),
-                MPI_Datatype(MPI_DOUBLE),
-                MPI_Datatype(MPI_LONG_DOUBLE),
-                MPI_Datatype(MPI_CHAR),
-                MPI_Datatype(MPI_SHORT),
-                MPI_Datatype(MPI_INT),
-                MPI_Datatype(MPI_LONG_INT),
-                MPI_Datatype(MPI_LONG_LONG_INT),
-                MPI_Datatype(MPI_UNSIGNED_CHAR),
-                MPI_Datatype(MPI_UNSIGNED_SHORT),
-                MPI_Datatype(MPI_UNSIGNED),
-                MPI_Datatype(MPI_UNSIGNED_LONG),
-                MPI_Datatype(MPI_UNSIGNED_LONG_LONG),
-                MPI_Datatype(MPI_CXX_BOOL)
-        };
+template<typename T>
+static const MPI_Datatype mpi_type() {return MPI_Datatype();}
+
+template<> const MPI_Datatype mpi_type<char>(){return MPI_CHAR;}
+template<> const MPI_Datatype mpi_type<short int>(){return MPI_SHORT;}
+template<> const MPI_Datatype mpi_type<int>(){return MPI_INT;}
+template<> const MPI_Datatype mpi_type<long int>(){return MPI_LONG;}
+template<> const MPI_Datatype mpi_type<long long int>(){return MPI_LONG_LONG_INT;}
+
+template<> const MPI_Datatype mpi_type<unsigned char>(){return MPI_UNSIGNED_CHAR;}
+template<> const MPI_Datatype mpi_type<unsigned short int>(){return MPI_UNSIGNED_SHORT;}
+template<> const MPI_Datatype mpi_type<unsigned int>(){return MPI_UNSIGNED;}
+template<> const MPI_Datatype mpi_type<unsigned long int>(){return MPI_UNSIGNED_LONG;}
+template<> const MPI_Datatype mpi_type<unsigned long long int>(){return MPI_UNSIGNED_LONG_LONG;}
+
+template<> const MPI_Datatype mpi_type<float>(){return MPI_FLOAT;}
+template<> const MPI_Datatype mpi_type<double>(){return MPI_DOUBLE;}
+template<> const MPI_Datatype mpi_type<long double>(){return MPI_LONG_DOUBLE;}
+
+template<> const MPI_Datatype mpi_type<std::complex<float>>(){return MPI_FLOAT;}
+template<> const MPI_Datatype mpi_type<std::complex<double>>(){return MPI_DOUBLE;}
+template<> const MPI_Datatype mpi_type<std::complex<long double>>(){return MPI_LONG_DOUBLE;}
+
+template<> const MPI_Datatype mpi_type<bool>(){return MPI_CXX_BOOL;}
+
 
 struct mpi {
 
@@ -42,11 +47,6 @@ struct mpi {
     static size_t irank();
 
     static std::string processor_name();
-
-    template<typename T>
-    static MPI_Datatype mpi_type() {
-        return type_to_mpi_type[numtypes::itype<T>()];
-    }
 
     static void barrier();
 /*

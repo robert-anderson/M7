@@ -7,8 +7,8 @@
 
 #include <cstddef>
 #include <vector>
+#include <src/core/io/FcidumpFileIterator.h>
 #include "Integrals.h"
-#include "../io/FcidumpFileIterator.h"
 #include "../consts.h"
 
 /*

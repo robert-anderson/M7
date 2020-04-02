@@ -7,8 +7,6 @@
 
 #include <memory>
 #include "SpawnList.h"
-#include "src/data/List.h"
-#include "src/data/TableCommunicator.h"
 
 #if 0
 class WalkerCommunicator : public TableCommunicator<SpawnList> {

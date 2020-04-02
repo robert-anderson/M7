@@ -12,7 +12,7 @@
 #include <assert.h>
 #include "src/multidim/Indexer.h"
 #include "src/consts.h"
-#include "src/io/FcidumpFileIterator.h"
+#include "src/core/io/FcidumpFileIterator.h"
 #include "Integrals.h"
 
 /*

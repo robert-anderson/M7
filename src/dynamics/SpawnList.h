@@ -5,7 +5,7 @@
 #ifndef M7_SPAWNLIST_H
 #define M7_SPAWNLIST_H
 
-
+#if 0
 #include <cstddef>
 #include "src/fermion/Determinant.h"
 #include "src/data/Specification.h"
@@ -29,4 +29,5 @@ public:
 };
 
 
+#endif //M7_SPAWNLIST_H
 #endif //M7_SPAWNLIST_H

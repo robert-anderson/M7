@@ -5,6 +5,7 @@
 #ifndef M7_SAFEHASHMAP_H
 #define M7_SAFEHASHMAP_H
 
+#if 0
 #include "HashMap.h"
 #include "src/data/MutexVector.h"
 
@@ -53,4 +54,5 @@ public:
 
 };
 
+#endif //M7_SAFEHASHMAP_H
 #endif //M7_SAFEHASHMAP_H

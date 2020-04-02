@@ -6,11 +6,13 @@
 #define M7_PROPAGATOR_H
 
 
-#include "src/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 #include "WalkerCommunicator.h"
 #include "RankAllocator.h"
 #include <iomanip>
 #include <iostream>
+
+#if 0
 #include <src/data/NumericView.h>
 #include <src/io/FciqmcStatsFile.h>
 
@@ -61,4 +63,5 @@ public:
 };
 
 
+#endif //M7_PROPAGATOR_H
 #endif //M7_PROPAGATOR_H

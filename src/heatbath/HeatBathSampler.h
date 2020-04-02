@@ -5,12 +5,12 @@
 #ifndef M7_HEATBATHSAMPLER_H
 #define M7_HEATBATHSAMPLER_H
 
-
+#if 0
 #include <src/defs.h>
 #include <src/fermion/Excitation.h>
 #include "src/multidim/NdArray.h"
 #include "src/hamiltonian/Hamiltonian.h"
-#include "src/enumerators/BitfieldEnumerator.h"
+#include "src/enumerators/BitsetEnumerator.h"
 #include "src/sample/Aliaser.h"
 
 /*
@@ -35,7 +35,7 @@
 class HeatBathSampler {
 public:
     const Hamiltonian &m_h;
-    const size_t m_nspinorb;
+    const size_t m_nbit;
     const bool m_spin_conserving;
     NdArray<defs::prob_t, 2> m_D;
     NdArray<defs::prob_t, 1> m_S;
@@ -48,4 +48,5 @@ public:
 };
 
 
+#endif //M7_HEATBATHSAMPLER_H
 #endif //M7_HEATBATHSAMPLER_H

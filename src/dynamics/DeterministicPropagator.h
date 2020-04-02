@@ -7,6 +7,7 @@
 
 #include "Propagator.h"
 
+#if 0
 class DeterministicPropagator : public Propagator {
 public:
     DeterministicPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
@@ -14,4 +15,5 @@ public:
 };
 
 
+#endif //M7_DETERMINISTICPROPAGATOR_H
 #endif //M7_DETERMINISTICPROPAGATOR_H

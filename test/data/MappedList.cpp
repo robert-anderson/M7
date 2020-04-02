@@ -3,7 +3,6 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/data/MappedList.h"
 
 #if 0
 TEST(MappedList, DataIntegrity) {

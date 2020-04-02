@@ -9,6 +9,8 @@
 #include "StochasticPropagator.h"
 #include "DeterministicPropagator.h"
 
+#if 0
+
 class SemistochasticPropagator : public StochasticPropagator {
     std::unique_ptr<DeterministicPropagator> m_detprop = nullptr;
 public:
@@ -18,4 +20,5 @@ public:
 };
 
 
+#endif //M7_SEMISTOCHASTICPROPAGATOR_H
 #endif //M7_SEMISTOCHASTICPROPAGATOR_H

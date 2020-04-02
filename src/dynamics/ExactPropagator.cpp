@@ -2,11 +2,9 @@
 // Created by rja on 27/02/2020.
 //
 
-#include <src/enumerators/BitfieldEnumerator.h>
-#include <src/enumerators/VectorCombinationEnumerator.h>
 #include "ExactPropagator.h"
 
-
+#if 0
 ExactPropagator::ExactPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
                                  const RankAllocator<Determinant> &rank_allocator)
         : DeterministicPropagator(input, ham, rank_allocator) {}
@@ -44,3 +42,4 @@ void ExactPropagator::off_diagonal(const Determinant &determinant, const Numeric
         }
     }
 }
+#endif

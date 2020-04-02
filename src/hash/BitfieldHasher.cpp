@@ -4,6 +4,7 @@
 
 #include "BitfieldHasher.h"
 
+#if 0
 size_t BitfieldHasher::operator()(const BitfieldNew &key) const {
     size_t hash = 0ul;
     for (size_t idataword = 0ul; idataword < key.m_ndataword; ++idataword) {
@@ -11,3 +12,4 @@ size_t BitfieldHasher::operator()(const BitfieldNew &key) const {
     }
     return hash;
 }
+#endif

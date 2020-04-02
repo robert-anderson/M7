@@ -4,7 +4,7 @@
 
 #include "DeterminantSampler.h"
 
-
+#if 0
 DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed, const Determinant &det) :
         m_precomputed(precomputed), m_det(det),
         m_occinds(det.setinds()), m_noccind(m_occinds.size()),
@@ -35,7 +35,7 @@ void DeterminantSampler::draw_pq(PRNG &prng, size_t &p, size_t &q, defs::prob_t 
 }
 
 void DeterminantSampler::draw_r(PRNG &prng, const size_t &p, const size_t &q, size_t &r) {
-    Aliaser aliaser(m_precomputed.m_P3.view(p, q, 0), m_precomputed.m_nspinorb);
+    Aliaser aliaser(m_precomputed.m_P3.view(p, q, 0), m_precomputed.m_nbit);
     assert(consts::floats_nearly_equal(aliaser.norm(), 1.0, 1e-14));
     r = aliaser.draw(prng);
     if (m_det.get(r)) r = ~0ul;
@@ -64,7 +64,7 @@ void DeterminantSampler::draw_pqr(PRNG &prng, size_t &p, size_t &q, size_t &r, d
 
 void DeterminantSampler::draw_s(PRNG &prng, const size_t &p, const size_t &q, const size_t &r, size_t &s) {
     // (5) need a double excitation, so choose the second unoccupied
-    Aliaser aliaser(m_precomputed.m_P4.view(p, q, r, 0), m_precomputed.m_nspinorb);
+    Aliaser aliaser(m_precomputed.m_P4.view(p, q, r, 0), m_precomputed.m_nbit);
     assert(consts::floats_nearly_equal(aliaser.norm(), 1.0, 1e-14));
     s = aliaser.draw(prng);
     if (m_det.get(s)) s = ~0ul;
@@ -242,3 +242,4 @@ void DeterminantSampler::make_P2(std::vector<defs::prob_t> &P2, const size_t &p)
     }
     prob_utils::normalize(P2);
 }
+#endif

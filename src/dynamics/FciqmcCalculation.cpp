@@ -3,7 +3,7 @@
 //
 
 #include "FciqmcCalculation.h"
-#include "src/io/Logging.h"
+#include "src/core/io/Logging.h"
 #include "StochasticPropagator.h"
 
 #if 0

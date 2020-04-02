@@ -5,7 +5,7 @@
 #ifndef M7_HEATBATHEXCITATION_H
 #define M7_HEATBATHEXCITATION_H
 
-
+#if 0
 #include <src/fermion/Excitation.h>
 
 struct HeatBathExcitation {
@@ -13,4 +13,5 @@ struct HeatBathExcitation {
     Excitation m_double;
 };
 
+#endif //M7_HEATBATHEXCITATION_H
 #endif //M7_HEATBATHEXCITATION_H

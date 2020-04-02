@@ -6,7 +6,7 @@
 #include "StochasticPropagator.h"
 #include "src/consts.h"
 
-
+#if 0
 StochasticPropagator::StochasticPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
                                            const RankAllocator<Determinant> &rank_allocator) :
         Propagator(input, ham, rank_allocator), m_prng(input.prng_seed),
@@ -50,3 +50,4 @@ defs::ham_t StochasticPropagator::round(const defs::ham_t &weight) {
     }
     return weight;
 }
+#endif

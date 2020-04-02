@@ -8,6 +8,7 @@
 #include <stack>
 #include "HashMap.h"
 
+#if 0
 class KeyError : public std::exception {
     virtual const char *what() const throw() {
         return "Key does not exist in hash table";
@@ -67,4 +68,5 @@ public:
     }
 };
 
+#endif //M7_HASHTABLE_H
 #endif //M7_HASHTABLE_H

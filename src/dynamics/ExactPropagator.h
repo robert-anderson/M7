@@ -6,7 +6,7 @@
 #define M7_EXACTPROPAGATOR_H
 
 #include "DeterministicPropagator.h"
-
+#if 0
 class ExactPropagator : public DeterministicPropagator {
 
 public:
@@ -18,5 +18,5 @@ public:
                       TableArray<SpawnList> &spawn_list) override;
 };
 
-
+#endif //M7_EXACTPROPAGATOR_H
 #endif //M7_EXACTPROPAGATOR_H

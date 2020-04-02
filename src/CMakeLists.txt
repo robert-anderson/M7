@@ -1,10 +1,10 @@
 project(src)
 
-file(GLOB CPP_SOURCE_FILES ./*/*.cpp)
-file(GLOB CPP_HEADER_FILES ./*/*.h)
+file(GLOB CPP_SOURCE_FILES ./*.cpp ./*/*.cpp ./*/*/*.cpp)
+file(GLOB CPP_HEADER_FILES ./*.h ./*/*.h ./*/*/*.h)
 
 add_executable(release main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
-add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
+add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} core/hash/HashMap.cpp core/hash/HashMap.h)
 
 target_link_libraries (release CLI11::CLI11)
 target_link_libraries (release ${MPI_LIBRARIES})

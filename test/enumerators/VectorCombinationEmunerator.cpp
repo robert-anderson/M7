@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-02-16.
 //
 
+#if 0
 #include "gtest/gtest.h"
 #include <src/enumerators/VectorCombinationEnumerator.h>
 #include <src/utils.h>
@@ -50,3 +51,4 @@ TEST(VectorCombinationEnumerator, Nested) {
         }
     }
 }
+#endif

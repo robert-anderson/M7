@@ -5,11 +5,12 @@
 #ifndef M7_BITFIELDHASHER_H
 #define M7_BITFIELDHASHER_H
 
-
+#if 0
 #include "src/data/BitfieldNew.h"
 
 struct BitfieldHasher {
     size_t operator()(const BitfieldNew &key) const;
 };
 
+#endif //M7_BITFIELDHASHER_H
 #endif //M7_BITFIELDHASHER_H

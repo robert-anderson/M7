@@ -5,6 +5,7 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
+#if 0
 #include "src/hash/HashMap.h"
 
 template<typename T>
@@ -18,9 +19,10 @@ public:
     }
 
     size_t get_rank(const T& key) const{
-        return m_data[m_hasher(key)%m_data.size()];
+        //return m_data[m_hasher(key)%m_data.size()];
     }
 };
 
 
+#endif //M7_RANKALLOCATOR_H
 #endif //M7_RANKALLOCATOR_H

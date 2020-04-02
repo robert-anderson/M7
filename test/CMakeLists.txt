@@ -5,9 +5,10 @@ add_subdirectory(
         ${CMAKE_BINARY_DIR}/external/googletest
 )
 
-file(GLOB CPP_SOURCE_FILES test.cpp ../src/*/*.cpp)
-file(GLOB CPP_HEADER_FILES ../src/*/*.h)
-file(GLOB CPP_TEST_SOURCE_FILES ./*/*.cpp)
+file(GLOB CPP_SOURCE_FILES ../src/*/*.cpp ../src/*/*/*.cpp)
+file(GLOB CPP_HEADER_FILES ../src/*.h ../src/*/*.h ../src/*/*/*.h)
+
+file(GLOB CPP_TEST_SOURCE_FILES ./*.cpp ./*/*.cpp ./*/*/*.cpp)
 # adding the Google_Tests_run target
 add_executable(unittest ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} ${CPP_TEST_SOURCE_FILES})
 

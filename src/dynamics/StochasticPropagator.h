@@ -5,6 +5,7 @@
 #ifndef M7_STOCHASTICPROPAGATOR_H
 #define M7_STOCHASTICPROPAGATOR_H
 
+#if 0
 
 #include <src/sample/PRNG.h>
 #include <src/heatbath/HeatBathSampler.h>
@@ -28,3 +29,4 @@ public:
 
 
 #endif //M7_STOCHASTICPROPAGATOR_H
+#endif

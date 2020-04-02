@@ -5,9 +5,8 @@
 #ifndef M7_WAVEFUNCTION_H
 #define M7_WAVEFUNCTION_H
 
-#include <src/enumerators/VectorCombinationEnumerator.h>
-#include <src/io/StatsFile.h>
-#include <src/io/FciqmcStatsFile.h>
+#include <src/core/io/StatsFile.h>
+#include <src/core/io/FciqmcStatsFile.h>
 #include "WalkerList.h"
 #include "src/heatbath/HeatBathSampler.h"
 #include "WalkerCommunicator.h"

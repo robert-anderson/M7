@@ -5,6 +5,7 @@
 #ifndef M7_WALKERLIST_H
 #define M7_WALKERLIST_H
 
+#if 0
 #include "src/data/PerforableMappedList.h"
 #include <memory>
 
@@ -21,4 +22,5 @@ public:
 };
 
 
+#endif //M7_WALKERLIST_H
 #endif //M7_WALKERLIST_H

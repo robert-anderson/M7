@@ -1,6 +1,7 @@
 //
 // Created by rja on 05/03/2020.
 //
+#if 0
 
 #include <src/data/TableNew.h>
 #include <src/data/Determinant.h>
@@ -69,9 +70,4 @@ TEST(FieldSet, NonNumeric){
     };
 
 }
-
-
-
-
-
-
+#endif

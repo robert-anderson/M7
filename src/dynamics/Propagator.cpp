@@ -4,6 +4,7 @@
 
 #include "Propagator.h"
 
+#if 0
 
 Propagator::Propagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
                        const RankAllocator<Determinant> &rank_allocator) :
@@ -26,3 +27,4 @@ void Propagator::add_to_spawn_list(const Determinant &determinant, const defs::h
     auto &spawn_list = spawn_lists[m_rank_allocator.get_rank(determinant)];
     spawn_list.push(determinant, weight, flag_parent_initiator);
 }
+#endif

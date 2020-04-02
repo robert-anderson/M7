@@ -4,6 +4,7 @@
 
 #include "WalkerList.h"
 
+#if 0
 WalkerList::WalkerList(size_t nsite, size_t nrow):
 PerforableMappedList<Determinant>(nrow, 0),
         m_determinant(this, nsite),
@@ -13,3 +14,4 @@ PerforableMappedList<Determinant>(nrow, 0),
         m_initiator(this),
         m_deterministic(this)
         {}
+#endif

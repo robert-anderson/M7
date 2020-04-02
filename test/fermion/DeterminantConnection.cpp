@@ -4,13 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#include "../../src/fermion/Determinant.h"
-
-/*
- * This test set is much like that defined for CharLookups, except
- * here the multi-byte case is considered.
- */
-
 
 /*
 TEST(DeterminantConnection, NSetBits) {

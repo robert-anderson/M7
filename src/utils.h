@@ -12,6 +12,8 @@
 #include <assert.h>
 #include <limits>
 #include <numeric>
+#include <x86intrin.h>
+#include <climits>
 
 namespace utils {
     template <typename T>
@@ -24,7 +26,7 @@ namespace utils {
         return string;
     }
     template<typename T>
-    std::string num_to_string(T &entry, size_t padding = 0) {
+    std::string num_to_string(const T &entry, size_t padding = 0) {
         auto tmp_string = std::to_string(entry);
         auto decimal_length = std::numeric_limits<T>::digits10;
         tmp_string.insert(tmp_string.begin(), padding + decimal_length - tmp_string.size(), ' ');
@@ -32,7 +34,7 @@ namespace utils {
     }
 
     template<typename T>
-    std::string num_to_string(std::complex<T> &entry, size_t padding = 0) {
+    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0) {
         auto tmp_string = std::to_string(entry.real()) +
                           (entry.imag() < 0 ? "" : "+") + std::to_string(entry.imag()) + "i";
         tmp_string.insert(tmp_string.begin(), padding, ' ');
@@ -102,6 +104,62 @@ namespace bit_utils{
     static inline bool get(const T &x, size_t i) {
         return (x >> i) & T(1ul);
     }
+
+    template <typename T>
+    static inline size_t next_setbit(T& work);
+
+    template <>
+    inline size_t next_setbit(unsigned long long &work) {
+        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        size_t result = __tzcnt_u64(work);
+        bit_utils::clr(work, result);
+        return result;
+    }
+
+    template <>
+    inline size_t next_setbit(unsigned long &work) {
+        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        size_t result = __tzcnt_u64(work);
+        bit_utils::clr(work, result);
+        return result;
+    }
+
+    template <>
+    inline size_t next_setbit(unsigned &work) {
+        static_assert(sizeof(typeof(work))==4, "Data length not supported");
+        size_t result = __tzcnt_u32(work);
+        bit_utils::clr(work, result);
+        return result;
+    }
+
+
+    template <typename T>
+    static inline size_t nsetbit(const T& work);
+
+    template <>
+    inline size_t nsetbit(const unsigned long long& work){
+        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        return _popcnt64(work);
+    }
+
+    template <>
+    inline size_t nsetbit(const unsigned long& work){
+        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        return _popcnt64(work);
+    }
+
+    template <>
+    inline size_t nsetbit(const unsigned& work){
+        static_assert(sizeof(typeof(work))==4, "Data length not supported");
+        return _popcnt32(work);
+    }
+
+    template <typename T>
+    T truncate(T &v, size_t n){
+        const auto nbit = sizeof(T)*CHAR_BIT-n;
+        return (v<<nbit)>>nbit;
+    }
+
 }
 
 

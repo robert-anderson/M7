@@ -7,10 +7,9 @@
 
 
 #include <omp.h>
-#include <src/hamiltonian/AbInitioHamiltonian.h>
-#include <src/io/FciqmcStatsFile.h>
-#include "src/io/InputOptions.h"
-#include "src/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/AbInitioHamiltonian.h"
+#include "src/core/io/FciqmcStatsFile.h"
+#include "src/core/io/InputOptions.h"
 #include "Propagator.h"
 #include "Wavefunction.h"
 #include "ExactPropagator.h"

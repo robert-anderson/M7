@@ -9,7 +9,7 @@
 #include "HeatBathSampler.h"
 #include "HeatBathExcitation.h"
 
-
+#if 0
 class DeterminantSampler {
     const HeatBathSampler &m_precomputed;
     const Determinant &m_det;
@@ -63,4 +63,5 @@ private:
 };
 
 
+#endif //M7_DETERMINANTSAMPLER_H
 #endif //M7_DETERMINANTSAMPLER_H

@@ -8,10 +8,10 @@
 #include <iostream>
 #include <memory>
 #include <forward_list>
-#include <src/fermion/Determinant.h>
-#include <src/data/Determinant.h>
 #include "DeterminantHasher.h"
 #include "BitfieldHasher.h"
+
+#if 0
 #include "src/data/MutexVector.h"
 
 template<typename T>
@@ -19,6 +19,7 @@ struct HasherType {
     typedef std::hash<T> type;
 };
 
+/*
 template<>
 struct HasherType<typename DeterminantField<>::Element> {
     typedef DeterminantHasher type;
@@ -28,6 +29,7 @@ template<>
 struct HasherType<BitfieldNew> {
     typedef BitfieldHasher type;
 };
+*/
 
 /*
  * HashMap maps a set of keys onto a set of integral indices via a hash function.
@@ -153,4 +155,5 @@ public:
 };
 
 
+#endif //M7_HASHMAP_H
 #endif //M7_HASHMAP_H

@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 /*
-#include "../../src/enumerators/SetBitEnumerator.h"
+#include "../../src/enumerator/SetBitEnumerator.h"
 
 TEST(SetBitEnumerator, Bitfield) {
     Bitfield bitfield(200);

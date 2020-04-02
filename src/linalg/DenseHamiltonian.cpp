@@ -3,9 +3,8 @@
 //
 
 #include "DenseHamiltonian.h"
-#include "../enumerators/CombinationEnumerator.h"
-#include "../enumerators/BitfieldEnumerator.h"
 
+#if 0
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
         Matrix<defs::ham_t>(source.nci()) {
     Determinant bra(source.nsite());
@@ -34,3 +33,4 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
     }
 }
 
+#endif
