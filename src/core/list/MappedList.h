@@ -7,7 +7,6 @@
 
 #include <src/core/hash/SafeHashMap.h>
 #include <src/core/table/NumericField.h>
-#include <src/dynamics/Propagator.h>
 #include "src/core/list/List.h"
 
 template<typename T> class MappedList;
@@ -31,12 +30,13 @@ struct ListSafeHashMap : public SafeHashMap<T> {
 template<typename T>
 class MappedList : public List {
     typedef typename T::Field_T Field_T;
+protected:
     Field_T &m_key_field;
     ListSafeHashMap<T> m_map;
 
 public:
-    MappedList(Field_T& key_field, size_t nbucket_per_segment, size_t nsegment=1): List(nsegment),
-    m_key_field(key_field), m_map(*this, nbucket_per_segment*nsegment){}
+    MappedList(Field_T& key_field, size_t nbucket): List(),
+    m_key_field(key_field), m_map(*this, nbucket){}
 
     Field_T &key_field() const {
         return m_key_field;

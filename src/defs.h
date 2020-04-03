@@ -16,7 +16,9 @@ namespace defs {
     typedef std::vector<size_t> inds;
     typedef std::pair<size_t, size_t> pair;
     typedef std::complex<double> ham_t;
+    typedef ham_t wf_t;
     typedef typename consts::component_t<ham_t>::type ham_comp_t;
+    typedef typename consts::component_t<wf_t>::type wf_comp_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef uint64_t data_t;

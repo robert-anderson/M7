@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include "src/parallel/MPIWrapper.h"
+#include "src/core/parallel/MPIWrapper.h"
 
 namespace logger {
 

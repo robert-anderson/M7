@@ -26,6 +26,17 @@ public:
         auto element = m_field->element(0);
         m_begin = element.begin();
     }
+
+    Determinant& operator=(const DeterminantElement& rhs){
+        DeterminantElement::operator=(rhs);
+        return *this;
+    }
+
+    Determinant& operator=(const Determinant& rhs){
+        *this=rhs;
+        return *this;
+    }
+
 };
 
 #endif //M7_DETERMINANT_H

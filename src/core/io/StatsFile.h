@@ -11,7 +11,6 @@
 #include <memory>
 #include <utility>
 #include <vector>
-#include <src/parallel/MPIWrapper.h>
 #include <list>
 
 #if 0

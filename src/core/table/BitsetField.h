@@ -41,7 +41,6 @@ public:
     size_t nsetbit() const;
 
     bool is_zero() const override;
-
 };
 
 class BitsetField : public Field {

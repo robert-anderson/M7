@@ -4,18 +4,17 @@
 
 #include "Table.h"
 
-Table::Table(size_t nsegment) : m_nsegment(nsegment) {}
+Table::Table(size_t nsegment) : m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
 
 char *Table::field_begin(const Field *field, const size_t &irow, const size_t isegment) {
     return ((char*)m_data.data())+irow*m_padded_row_size+isegment*m_segment_size+field->m_offset;
 }
 
-void Table::expand(size_t delta_rows) {
-
+void Table::expand(size_t delta_nrow) {
     /*
      * add more rows to each segment
      */
-    m_data.resize(m_data.size() + delta_rows * m_nsegment * m_padded_row_dsize , 0);
+    m_data.resize(m_data.size() + delta_nrow * m_nsegment * m_padded_row_dsize , 0);
     /*
      * move segments backwards to help avoid overlap. std::move will handle overlap correctly if it occurs
      */
@@ -23,10 +22,13 @@ void Table::expand(size_t delta_rows) {
         std::move(
             m_data.begin() + isegment * m_segment_dsize,
             m_data.begin() + (isegment + 1) * m_segment_dsize,
-            m_data.begin() + isegment * m_padded_row_dsize*(m_nrow_per_segment + delta_rows)
+            m_data.begin() + isegment * m_padded_row_dsize*(m_nrow_per_segment + delta_nrow)
         );
     }
-    increment_nrow_per_segment(delta_rows);
+    increment_nrow_per_segment(delta_nrow);
+    for (size_t isegment=1ul; isegment<m_nsegment; ++isegment) {
+        m_segment_doffsets[isegment] = m_segment_doffsets[isegment - 1] + m_padded_row_dsize * m_nrow_per_segment;
+    }
 }
 
 size_t Table::irow(const size_t &irow, const size_t &isegment) const {
@@ -61,6 +63,10 @@ void Table::print() {
     utils::print(m_data);
 }
 
+const size_t &Table::nrow_per_segment() const {
+    return m_nrow_per_segment;
+}
+
 void Table::update_row_size(size_t size) {
     m_row_size = size;
     m_padded_row_size = defs::cache_line_size*integer_utils::divceil(size, defs::cache_line_size);
@@ -86,3 +92,12 @@ void Table::increment_nrow_per_segment(size_t delta) {
     update_nrow_per_segment(m_nrow_per_segment+delta);
 }
 
+bool Table::compatible_with(const Table &other) const {
+    if (m_fields.size()!=other.m_fields.size()) return false;
+    for (size_t ifield=0ul; ifield<m_fields.size(); ++ifield){
+        if (!m_fields[ifield]->compatible_with(*other.m_fields[ifield])) return false;
+    }
+    return m_row_size == other.m_row_size &&
+           m_padded_row_size == other.m_padded_row_size &&
+           m_padded_row_dsize == other.m_padded_row_dsize;
+}

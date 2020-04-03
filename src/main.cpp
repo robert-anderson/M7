@@ -1,13 +1,9 @@
 #include <iostream>
 #include <iomanip>
-#include <src/data/BitfieldNew.h>
-#include <src/parallel/MPIWrapper.h>
-#include <src/dynamics/FciqmcCalculation.h>
-#include <src/io/InputOptions.h>
+#include <src/core/parallel/MPIWrapper.h>
+#include <src/core/dynamics/FciqmcCalculation.h>
+#include <src/core/io/InputOptions.h>
 #include "CLI/CLI.hpp"
-
-
-#include <src/enumerators/VectorCombinationEnumerator.h>
 
 int main(int argc, char **argv) {
 

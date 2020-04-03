@@ -38,7 +38,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "number of rows initially allocated in the wavefunction store table as a multiple of the target walker number");
 
     add_option("-B,--buffer_factor_initial", buffer_factor_initial,
-               "number of rows initially allocated in each segment of the wavefunction send buffer table as a multiple of the target walker number");
+               "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
     add_option("-K,--nload_balance_block", nload_balance_block,
                "number of blocks per process to use for load balancing determinants among processes");

@@ -2,9 +2,10 @@
 // Created by rja on 27/02/2020.
 //
 
+#include <src/core/enumerator/VectorCombinationEnumerator.h>
+#include <src/core/fermion/DecodedDeterminant.h>
 #include "Hamiltonian.h"
 
-#if 0
 Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
 
 }
@@ -20,37 +21,41 @@ Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     return ref;
 }
 
-Determinant Hamiltonian::refine_guess_reference(const Determinant ref) const {
+Determinant Hamiltonian::refine_guess_reference(const DeterminantElement &ref) const {
 
     auto e_ref = get_energy(ref);
     /*
     * check that none of the single and double connections have a lower energy
     */
 
-    auto occs = DeterminantSetEnumerator(ref).enumerate();
-    auto unoccs = DeterminantClrEnumerator(ref).enumerate();
+    OccupiedOrbitals occs(ref);
+    VacantOrbitals vacs(ref);
 
     Determinant excited(m_nsite);
-    for (auto occ:occs) {
-        for (auto unocc:unoccs) {
-            excited = ref.get_excited_det(occ, unocc);
+
+    for (auto occ : occs.m_inds) {
+        for (auto vac : vacs.m_inds) {
+            excited = ref;
+            excited.excite(vac, occ);
             if (get_energy(excited) < e_ref) return refine_guess_reference(excited);
         }
     }
 
-    VectorCombinationEnumerator occ_enumerator(occs, 2);
+    VectorCombinationEnumerator occ_enumerator(occs.m_inds, 2);
     defs::inds occ_inds(2);
     while (occ_enumerator.next(occ_inds)) {
         {
-            VectorCombinationEnumerator unocc_enumerator(unoccs, 2);
-            defs::inds unocc_inds(2);
-            while (unocc_enumerator.next(unocc_inds)) {
-                excited = ref.get_excited_det(occ_inds, unocc_inds);
+            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, 2);
+            defs::inds vac_inds(2);
+            while (vac_enumerator.next(vac_inds)) {
+                excited = ref;
+                excited.excite(vac_inds[0], vac_inds[1], occ_inds[0], occ_inds[1]);
                 if (get_energy(excited) < e_ref) return refine_guess_reference(excited);
             }
         }
     }
-    return ref;
+    excited = ref;
+    return excited;
 }
 
 Determinant Hamiltonian::choose_reference(const int &spin_level) const {
@@ -59,55 +64,45 @@ Determinant Hamiltonian::choose_reference(const int &spin_level) const {
     return ref;
 }
 
-MappedList<Determinant> Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps) const {
-#if 0
-    Specification spec;
-    spec.add<Determinant>(m_nsite);
-    spec.add<defs::ham_t>(1);
-    class ConnectionList : public MappedList<Determinant> {
-    public:
-        Field <Determinant> m_determinant;
-        Field <defs::ham_t> m_helement;
+Hamiltonian::ConnectionList
+Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps) const {
 
-        ConnectionList(size_t nsite, size_t nbucket) : MappedList(nbucket, 0),
-                                                       m_determinant(this, nsite), m_helement(this) {}
-    };
     auto nbucket = integer_utils::combinatorial(nsite(), nelec());
     ConnectionList list(m_nsite, nbucket);
 
-    auto occs = DeterminantSetEnumerator(ref).enumerate();
-    auto unoccs = DeterminantClrEnumerator(ref).enumerate();
+    OccupiedOrbitals occs(ref);
+    VacantOrbitals vacs(ref);
 
     Determinant excited(m_nsite);
-    for (auto occ:occs) {
-        for (auto unocc:unoccs) {
-            excited = ref.get_excited_det(occ, unocc);
+    for (auto occ : occs.m_inds) {
+        for (auto vac : vacs.m_inds) {
+            excited = ref;
+            excited.excite(vac, occ);
             auto helement = get_element(ref, excited);
             if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                 size_t irow = list.push(excited);
-                *list.view<defs::ham_t>(irow) = helement;
+                list.helement.element(irow) = helement;
             }
         }
     }
 
-    VectorCombinationEnumerator occ_enumerator(occs, 2);
+    VectorCombinationEnumerator occ_enumerator(occs.m_inds, 2);
     defs::inds occ_inds(2);
     while (occ_enumerator.next(occ_inds)) {
         {
-            VectorCombinationEnumerator unocc_enumerator(unoccs, 2);
-            defs::inds unocc_inds(2);
-            while (unocc_enumerator.next(unocc_inds)) {
-                excited = ref.get_excited_det(occ_inds, unocc_inds);
+            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, 2);
+            defs::inds vac_inds(2);
+            while (vac_enumerator.next(vac_inds)) {
+                excited = ref;
+                excited.excite(vac_inds[0], vac_inds[1], occ_inds[0], occ_inds[1]);
                 auto helement = get_element(ref, excited);
                 if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                     size_t irow = list.push(excited);
-                    *list.view<defs::ham_t>(irow) = helement;
-                    assert(list.lookup(list.view<Determinant>(irow, 0)) == irow);
+                    list.helement.element(irow) = helement;
+                    assert(list.lookup(list.helement.element(irow)) == irow);
                 }
             }
         }
     }
     return list;
-#endif
 }
-#endif

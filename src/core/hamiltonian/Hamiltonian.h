@@ -6,12 +6,11 @@
 #define M7_HAMILTONIAN_H
 
 #include <cstddef>
+#include <src/core/fermion/Determinant.h>
+#include <src/core/list/MappedList.h>
 #include "src/consts.h"
 #include "src/defs.h"
 #include "src/core/table/DeterminantField.h"
-//#include <src/data/MappedList.h>
-
-#if 0
 
 class Hamiltonian {
 protected:
@@ -21,20 +20,20 @@ protected:
 public:
     Hamiltonian(const size_t &nsite);
 
-    virtual consts::component_t<defs::ham_t>::type get_energy(const Determinant &det) const = 0;
+    virtual consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const = 0;
 
-    virtual defs::ham_t get_element_0(const Determinant &det) const = 0;
+    virtual defs::ham_t get_element_0(const DeterminantElement& det) const = 0;
 
-    virtual defs::ham_t get_element_1(const Determinant &bra, const size_t &removed, const size_t &inserted) const = 0;
+    virtual defs::ham_t get_element_1(const DeterminantElement &bra, const size_t &removed, const size_t &inserted) const = 0;
 
-    virtual defs::ham_t get_element_1(const Determinant &bra, const Determinant &ket) const = 0;
+    virtual defs::ham_t get_element_1(const DeterminantElement &bra, const DeterminantElement &ket) const = 0;
 
     virtual defs::ham_t get_element_2(const size_t &removed1, const size_t &removed2,
                               const size_t &inserted1, const size_t &inserted2) const = 0;
 
-    virtual defs::ham_t get_element_2(const Determinant &bra, const Determinant &ket) const = 0;
+    virtual defs::ham_t get_element_2(const DeterminantElement &bra, const DeterminantElement &ket) const = 0;
 
-    virtual defs::ham_t get_element(const Determinant &bra, const Determinant &ket) const = 0;
+    virtual defs::ham_t get_element(const DeterminantElement &bra, const DeterminantElement &ket) const = 0;
 
     size_t nsite() const {
         return m_nsite;
@@ -52,14 +51,21 @@ public:
 
     Determinant guess_reference(const int &spin_level) const;
 
-    Determinant refine_guess_reference(const Determinant ref) const;
+    Determinant refine_guess_reference(const DeterminantElement& ref) const;
 
     Determinant choose_reference(const int &spin_level) const;
 
-    //MappedList<Determinant> all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps=0.0) const;
+    class ConnectionList : public MappedList<DeterminantElement> {
+    public:
+        DeterminantField determinant;
+        NumericField<defs::ham_t> helement;
+
+        ConnectionList(size_t nsite, size_t nbucket) :
+            MappedList(determinant, nbucket),
+            determinant(this, 1, nsite), helement(this) {}
+    };
+    ConnectionList all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps=0.0) const;
 
 };
 
-
-#endif //M7_HAMILTONIAN_H
 #endif //M7_HAMILTONIAN_H

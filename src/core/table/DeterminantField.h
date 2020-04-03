@@ -29,6 +29,21 @@ public:
 
     size_t nsite() const;
 
+    void excite(const size_t &i, const size_t &j){
+        /*
+         * single excitation i<-j
+         */
+        BitsetElement::clr(j); BitsetElement::set(i);
+    }
+
+    void excite(const size_t &i, const size_t &j, const size_t &k, const size_t &l){
+        /*
+         * double excitation i,j<-k,l
+         */
+        BitsetElement::clr(k); BitsetElement::clr(l);
+        BitsetElement::set(i); BitsetElement::set(j);
+    }
+
     class DatawordEnumerator : public Enumerator<defs::data_t> {
         size_t m_idataword = 0ul;
         const DeterminantElement &m_data;
@@ -70,20 +85,11 @@ class DeterminantField : public BitsetField {
 public:
     const size_t m_nsite;
 
-    DeterminantField(Table *table, size_t nelement, size_t nsite) :
-        BitsetField(table, nelement, nsite*2), m_nsite(nsite) {}
+    DeterminantField(Table *table, size_t nelement, size_t nsite);
 
-    DeterminantElement element(const size_t &irow, const size_t &isegment, const size_t &ielement) {
-        return DeterminantElement(this, element_begin(irow, isegment, ielement));
-    }
+    DeterminantElement element(const size_t &irow, const size_t &isegment=0, const size_t &ielement=0);
 
-    virtual std::string to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend) {
-        std::string result = "";
-        for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) {
-            result += element(irow, isegment, ielement).to_string() + " ";
-        }
-        return result;
-    }
+    virtual std::string to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend);
 };
 
 

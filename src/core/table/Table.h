@@ -13,9 +13,9 @@
 #include "Field.h"
 
 class Table {
+protected:
     // data buffer
     std::vector<defs::data_t> m_data;
-protected:
     // all associated fields
     std::vector<Field *> m_fields;
     // size of one row in bytes
@@ -25,20 +25,22 @@ protected:
     // size of each row in data_t words padded to cache line width
     size_t m_padded_row_dsize = 0;
     // data buffers may be divided into segments of an equal number of rows
-    size_t m_nsegment;
+    const size_t m_nsegment;
     // the number of rows in a table segment, may be increased by a call to "expand"
     size_t m_nrow_per_segment = 0;
     // size of each segment in bytes (recomputed each expand)
     size_t m_segment_size = 0;
     // size of each segment in data_t words (recomputed each expand)
     size_t m_segment_dsize = 0;
+    // offset of the beginning of each segment from the beginning of the table
+    defs::inds m_segment_doffsets;
 public:
 
     Table(size_t nsegment = 1);
 
     char *field_begin(const Field *field, const size_t &irow, const size_t isegment = 0);
 
-    void expand(size_t delta_rows);
+    virtual void expand(size_t delta_nrow);
 
     size_t irow(const size_t &irow, const size_t &isegment = 0) const;
 
@@ -50,9 +52,9 @@ public:
 
     void print();
 
-    const size_t &nrow_per_segment() const {
-        return m_nrow_per_segment;
-    };
+    const size_t &nrow_per_segment() const;;
+
+    bool compatible_with(const Table &other) const;
 
 private:
     void update_row_size(size_t size);

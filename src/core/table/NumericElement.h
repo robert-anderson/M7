@@ -25,7 +25,11 @@ public:
         m_begin = (char *) &m_internal_value;
     }
 
+    T to_number() const {return *((T *) m_begin);}
+
     explicit operator T() const { return *((T *) m_begin); }
+
+    //explicit operator T&() const { return *((T *) m_begin); }
 
     NumericElement<T> &operator=(const T &v) {
         *((T *) m_begin) = v;
@@ -58,7 +62,7 @@ public:
     }
 
     std::string to_string() const override {
-        const T v = *this;
+        const T v = to_number();
         return utils::num_to_string(v);
     }
 };
