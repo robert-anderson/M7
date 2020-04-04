@@ -4,7 +4,7 @@
 
 
 #include <gtest/gtest.h>
-#include "../../src/integrals/Integrals_1e.h"
+#include "src/core/integrals/Integrals_1e.h"
 
 TEST(Integrals_1e, TwoFoldCheckReal) {
     /*
@@ -19,7 +19,6 @@ TEST(Integrals_1e, TwoFoldCheckReal) {
     T value;
     while (file_iterator.next(inds, value)) {
         if (ints.valid_inds(inds)) {
-            std::cout << value << " " << ints.get(inds[0], inds[1]) <<std::endl;
             ASSERT_TRUE(consts::floats_equal(value, ints.get(inds[0], inds[1])));
         }
     }

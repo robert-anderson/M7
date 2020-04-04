@@ -10,11 +10,11 @@ DeterminantElement::DeterminantElement(DeterminantField *field, char *begin) :
 
 std::string DeterminantElement::to_string() const {
     std::string result;
-    for (size_t ibit = 0; ibit < m_field->nbit(); ++ibit) {
+    for (size_t ibit = 0; ibit < nsite(); ++ibit) {
         result += BitsetElement::get(ibit) ? "1" : "0";
     }
     result += "|";
-    for (size_t ibit = 0; ibit < m_field->nbit(); ++ibit) {
+    for (size_t ibit = 0; ibit < nsite(); ++ibit) {
         result += BitsetElement::get(nsite() + ibit) ? "1" : "0";
     }
     return result;

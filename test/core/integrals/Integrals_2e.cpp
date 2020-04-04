@@ -4,7 +4,7 @@
 
 
 #include <gtest/gtest.h>
-#include "../../src/integrals/Integrals_2e.h"
+#include "src/core/integrals/Integrals_2e.h"
 
 TEST(Integrals_2e, FourFoldCheck) {
     /*

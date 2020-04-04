@@ -3,9 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/sample/PRNG.h>
 #include <src/defs.h>
-#include <src/sample/Aliaser.h>
+#include <src/core/sample/Aliaser.h>
 
 TEST(Aliaser, DistributionCheck) {
     //std::vector<defs::prob_t> probs = {2.3, 0.2, 0.5, 0.15, 0.15, 0.4, 1.2};

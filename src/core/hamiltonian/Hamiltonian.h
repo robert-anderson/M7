@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <src/core/fermion/Determinant.h>
 #include <src/core/list/MappedList.h>
+#include <src/core/fermion/Connection.h>
 #include "src/consts.h"
 #include "src/defs.h"
 #include "src/core/table/DeterminantField.h"
@@ -22,18 +23,18 @@ public:
 
     virtual consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const = 0;
 
-    virtual defs::ham_t get_element_0(const DeterminantElement& det) const = 0;
+    virtual defs::ham_t get_element_0(const DeterminantElement &det) const = 0;
 
     virtual defs::ham_t get_element_1(const DeterminantElement &bra, const size_t &removed, const size_t &inserted) const = 0;
-
-    virtual defs::ham_t get_element_1(const DeterminantElement &bra, const DeterminantElement &ket) const = 0;
 
     virtual defs::ham_t get_element_2(const size_t &removed1, const size_t &removed2,
                               const size_t &inserted1, const size_t &inserted2) const = 0;
 
-    virtual defs::ham_t get_element_2(const DeterminantElement &bra, const DeterminantElement &ket) const = 0;
+    virtual defs::ham_t get_element(const DeterminantElement &ket, const AntisymConnection &connection) const = 0;
 
-    virtual defs::ham_t get_element(const DeterminantElement &bra, const DeterminantElement &ket) const = 0;
+    defs::ham_t get_element(const DeterminantElement &bra, const DeterminantElement &ket) const {
+        return get_element(ket, AntisymConnection(ket, bra));
+    }
 
     size_t nsite() const {
         return m_nsite;

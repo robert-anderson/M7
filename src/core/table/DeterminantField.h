@@ -79,6 +79,21 @@ public:
             Enumerator<defs::data_t>(), m_data(data),
             m_getter(getter(anti)), m_trunc_getter(trunc_getter(anti)){}
     };
+
+    int spin() const {
+        int spin = 0;
+        size_t idataword = ~0ul;
+        defs::data_t work;
+        DeterminantElement::DatawordEnumerator enumerator(*this);
+        while(enumerator.next(work, idataword)){
+            while (work) {
+                size_t ibit = bit_utils::next_setbit(work);
+                if (ibit<nsite()) ++spin;
+                else --spin;
+            }
+        }
+        return spin;
+    }
 };
 
 class DeterminantField : public BitsetField {

@@ -3,7 +3,6 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/sample/PRNG.h>
 #include <src/defs.h>
 #include <src/heatbath/HeatBathSampler.h>
 #include <src/core/hamiltonian/AbInitioHamiltonian.h>

@@ -9,11 +9,8 @@
 #include <cstddef>
 #include <string>
 #include "Hamiltonian.h"
-#include "src/integrals/Integrals_1e.h"
-#include "src/integrals/Integrals_2e.h"
-
-#if 0
-#include "src/fermion/Determinant.h"
+#include "src/core/integrals/Integrals_1e.h"
+#include "src/core/integrals/Integrals_2e.h"
 
 class AbInitioHamiltonian : public Hamiltonian {
     FcidumpFileIterator<defs::ham_t> m_file_iterator;
@@ -25,20 +22,16 @@ public:
 
     explicit AbInitioHamiltonian(const std::string &fname);
 
-    defs::ham_comp_t get_energy(const Determinant &det) const override;
+    defs::ham_comp_t get_energy(const DeterminantElement &det) const override;
 
-    defs::ham_t get_element_0(const Determinant &det) const override;
+    defs::ham_t get_element_0(const DeterminantElement &det) const override;
 
-    defs::ham_t get_element_1(const Determinant &bra, const size_t &removed, const size_t &inserted) const override;
-
-    defs::ham_t get_element_1(const Determinant &bra, const Determinant &ket) const override;
+    defs::ham_t get_element_1(const DeterminantElement &bra, const size_t &removed, const size_t &inserted) const override;
 
     defs::ham_t get_element_2(const size_t &removed1, const size_t &removed2, const size_t &inserted1,
                               const size_t &inserted2) const override;
 
-    defs::ham_t get_element_2(const Determinant &bra, const Determinant &ket) const override;
-
-    defs::ham_t get_element(const Determinant &bra, const Determinant &ket) const override;
+    defs::ham_t get_element(const DeterminantElement &ket, const AntisymConnection &connection) const override;
 
     size_t nelec() const override;
 
@@ -52,5 +45,4 @@ public:
 };
 
 
-#endif //M7_ABINITIOHAMILTONIAN_H
 #endif //M7_ABINITIOHAMILTONIAN_H

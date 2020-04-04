@@ -10,7 +10,7 @@
 #include <vector>
 #include <assert.h>
 #include <memory>
-#include "../consts.h"
+#include "src/consts.h"
 
 template<typename T>
 class EigenSolver;

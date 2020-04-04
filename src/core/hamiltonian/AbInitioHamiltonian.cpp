@@ -2,10 +2,11 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
+#include <src/core/fermion/DecodedDeterminant.h>
+#include <src/core/fermion/Connection.h>
 #include "AbInitioHamiltonian.h"
 #include "src/core/io/FcidumpFileIterator.h"
 
-#if 0
 AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
     Hamiltonian(FcidumpFileIterator<defs::ham_t>(fname).nsite()),
     m_file_iterator(fname),
@@ -18,64 +19,36 @@ AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
         else if (m_int_1.valid_inds(inds)) m_int_1.set_from_fcidump(inds, value);
         else if (inds[0] == ((size_t) -1)) m_int_0 = value;
     }
-    m_nci = integer_utils::combinatorial(nsite()*2, nelec());
+    m_nci = integer_utils::combinatorial(nsite() * 2, nelec());
 }
 
-defs::ham_t AbInitioHamiltonian::get_element_0(const Determinant &det) const {
+defs::ham_t AbInitioHamiltonian::get_element_0(const DeterminantElement &det) const {
     defs::ham_t element = m_int_0;
-    DeterminantSetEnumerator set_inds_outer(det);
-    size_t i;
-    while (set_inds_outer.next(i)) {
-        element += m_int_1.element(i, i);
-        {
-            size_t j;
-            DeterminantSetEnumerator set_inds_inner(det);
-            while (set_inds_inner.next(j) && j < i) {
-                element += m_int_2.phys_antisym_element(i, j, i, j);
-            }
+    OccupiedOrbitals occs(det);
+    for (size_t i=0ul; i<occs.m_nind; ++i) {
+        const auto &icommon = occs.m_inds[i];
+        element += m_int_1.element(icommon, icommon);
+        for (size_t j=0ul; j<i; ++j) {
+            const auto &jcommon = occs.m_inds[j];
+            element += m_int_2.phys_antisym_element(icommon, jcommon, icommon, jcommon);
         }
     }
     return element;
 }
 
-defs::ham_t AbInitioHamiltonian::get_element_1(const Determinant &ket,
+defs::ham_t AbInitioHamiltonian::get_element_1(const DeterminantElement &ket,
                                                const size_t &removed, const size_t &inserted) const {
-    DeterminantSetEnumerator common_inds(ket);
-    size_t common;
+    OccupiedOrbitals occs(ket);
     defs::ham_t element = m_int_1.element(inserted, removed);
-    while (common_inds.next(common)) {
-        if (common == removed) continue;
-        element += m_int_2.phys_antisym_element(inserted, common, removed, common);
+
+    for (size_t i=0ul; i<occs.m_nind; ++i) {
+        const auto &icommon = occs.m_inds[i];
+        if (icommon == removed) continue;
+        assert(icommon!=removed);
+        assert(icommon!=inserted);
+        element += m_int_2.phys_antisym_element(inserted, icommon, removed, icommon);
     }
     return element;
-}
-
-defs::ham_t AbInitioHamiltonian::get_element_1(const Determinant &bra, const Determinant &ket) const {
-    size_t removed, inserted;
-    {
-        DeterminantAndNotEnumerator enumerator(ket, bra);
-        enumerator.next(removed);
-    }
-    {
-        DeterminantAndNotEnumerator enumerator(bra, ket);
-        enumerator.next(inserted);
-    }
-    return get_element_1(ket, removed, inserted);
-}
-
-defs::ham_t AbInitioHamiltonian::get_element_2(const Determinant &bra, const Determinant &ket) const {
-    size_t removed1, removed2, inserted1, inserted2;
-    {
-        DeterminantAndNotEnumerator enumerator(ket, bra);
-        enumerator.next(removed1);
-        enumerator.next(removed2);
-    }
-    {
-        DeterminantAndNotEnumerator enumerator(bra, ket);
-        enumerator.next(inserted1);
-        enumerator.next(inserted2);
-    }
-    return m_int_2.phys_antisym_element(inserted1, inserted2, removed1, removed2);
 }
 
 defs::ham_t AbInitioHamiltonian::get_element_2(
@@ -84,26 +57,26 @@ defs::ham_t AbInitioHamiltonian::get_element_2(
     return m_int_2.phys_antisym_element(inserted1, inserted2, removed1, removed2);
 }
 
-
-defs::ham_t AbInitioHamiltonian::get_element(const Determinant &bra, const Determinant &ket) const {
-    bool phase;
-    switch (bra.nexcit(ket)) {
+defs::ham_t AbInitioHamiltonian::get_element(
+    const DeterminantElement &ket, const AntisymConnection &connection) const {
+    defs::ham_t helement = 0;
+    const auto &cre = connection.m_cre;
+    const auto &des = connection.m_des;
+    switch (connection.nexcit()) {
         case 0:
-            return get_element_0(bra);
+            return get_element_0(ket);
         case 1:
-            phase = bra.phase(ket);
-            assert(phase == ket.phase(bra));
-            return phase ? -get_element_1(bra, ket) : get_element_1(bra, ket);
+            helement = get_element_1(ket, des[0], cre[0]);
+            break;
         case 2:
-            phase = bra.phase(ket);
-            assert(phase == ket.phase(bra));
-            return phase ? -get_element_2(bra, ket) : get_element_2(bra, ket);
+            helement = get_element_2(des[0], des[1], cre[0], cre[1]);
         default:
             return 0;
     }
+    return connection.m_phase ? -helement : helement;
 }
 
-defs::ham_comp_t AbInitioHamiltonian::get_energy(const Determinant &det) const {
+defs::ham_comp_t AbInitioHamiltonian::get_energy(const DeterminantElement &det) const {
     return consts::real(get_element_0(det));
 }
 
@@ -116,5 +89,3 @@ bool AbInitioHamiltonian::spin_conserving() const { return m_int_1.spin_conservi
 auto &AbInitioHamiltonian::int_1() const { return m_int_1; }
 
 auto &AbInitioHamiltonian::int_2() const { return m_int_2; }
-
-#endif
