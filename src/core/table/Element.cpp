@@ -53,7 +53,7 @@ defs::data_t Element::get_antidataword(const size_t &idataword, const size_t &nb
 }
 
 int Element::cmp(const Element &rhs) const {
-    std::memcmp(m_begin, rhs.m_begin, m_field->m_element_size);
+    return std::memcmp(m_begin, rhs.m_begin, m_field->m_element_size);
 }
 
 Element& Element::operator=(const Element& rhs) {
@@ -85,4 +85,8 @@ void Element::zero() {
 bool Element::is_zero() const {
     std::vector<char> zero(m_field->m_element_size, 0);
     return memcmp(m_begin, zero.data(), m_field->m_element_size);
+}
+
+void Element::print() const {
+    std::cout << to_string() << std::endl;
 }

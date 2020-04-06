@@ -26,6 +26,7 @@ public:
     virtual size_t size() const;
     virtual size_t dsize() const;
     virtual std::string to_string() const;
+    void print() const;
     bool compatible_with(const Element &rhs) const;
     defs::data_t &dataword(const size_t &idataword) const;
     defs::data_t get_dataword(const size_t &idataword) const;

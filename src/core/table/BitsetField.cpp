@@ -24,11 +24,11 @@ void BitsetElement::set(const defs::inds &inds) {
 void BitsetElement::clr(const defs::pair &pair) {
     assert(pair.first < size());
     const auto offset = BitsetField::rectify_offset(pair);
-    bit_utils::set(*(m_begin + offset.first), offset.second);
+    bit_utils::clr(*(m_begin + offset.first), offset.second);
 }
 
 void BitsetElement::clr(const size_t &ibit) {
-    set(defs::pair{0, ibit});
+    clr(defs::pair{0, ibit});
 }
 
 bool BitsetElement::get(const defs::pair &pair) const {

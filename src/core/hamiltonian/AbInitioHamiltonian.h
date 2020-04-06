@@ -22,16 +22,14 @@ public:
 
     explicit AbInitioHamiltonian(const std::string &fname);
 
-    defs::ham_comp_t get_energy(const DeterminantElement &det) const override;
+    using Hamiltonian::get_element_0;
+    defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const override;
 
-    defs::ham_t get_element_0(const DeterminantElement &det) const override;
+    using Hamiltonian::get_element_1;
+    defs::ham_t get_element_1(const AntisymConnection &connection) const override;
 
-    defs::ham_t get_element_1(const DeterminantElement &bra, const size_t &removed, const size_t &inserted) const override;
-
-    defs::ham_t get_element_2(const size_t &removed1, const size_t &removed2, const size_t &inserted1,
-                              const size_t &inserted2) const override;
-
-    defs::ham_t get_element(const DeterminantElement &ket, const AntisymConnection &connection) const override;
+    using Hamiltonian::get_element_2;
+    defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const override;
 
     size_t nelec() const override;
 

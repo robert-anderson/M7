@@ -25,10 +25,9 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
                 ket.zero();
                 ket.set(ket_setinds);
                 auto h_elem = source.get_element(bra, ket);
-                if (!consts::float_is_zero(h_elem))
-                    (*this)(ibra, iket) = h_elem;
-                else
-                    assert(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
+
+                if (!consts::float_is_zero(h_elem)) (*this)(ibra, iket) = h_elem;
+                else assert(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
             }
         }
     }

@@ -4,6 +4,7 @@
 
 #include <src/core/fermion/Determinant.h>
 #include <src/core/fermion/Connection.h>
+#include <src/core/io/TensorFileIterator.h>
 #include "gtest/gtest.h"
 
 TEST(Connection, ParticleNumberConserving){
@@ -22,25 +23,57 @@ TEST(Connection, ParticleNumberConserving){
 
     Connection conn(ket, bra);
 
-    ASSERT_EQ(conn.m_ndes, 3);
-    ASSERT_EQ(conn.m_ncre, 3);
+    ASSERT_EQ(conn.nann(), 3);
+    ASSERT_EQ(conn.ncre(), 3);
 
-    ASSERT_EQ(conn.m_des[0], 8);
-    ASSERT_EQ(conn.m_des[1], 20);
-    ASSERT_EQ(conn.m_des[2], 39);
+    ASSERT_EQ(conn.ann(0), 8);
+    ASSERT_EQ(conn.ann(1), 20);
+    ASSERT_EQ(conn.ann(2), 39);
 
-    ASSERT_EQ(conn.m_cre[0], 5);
-    ASSERT_EQ(conn.m_cre[1], 9);
-    ASSERT_EQ(conn.m_cre[2], 37);
+    ASSERT_EQ(conn.cre(0), 5);
+    ASSERT_EQ(conn.cre(1), 9);
+    ASSERT_EQ(conn.cre(2), 37);
 
     AntisymConnection aconn(ket, bra);
-    ASSERT_EQ(aconn.m_ncom, 6);
-    ASSERT_EQ(aconn.m_com[0], 1);
-    ASSERT_EQ(aconn.m_com[1], 4);
-    ASSERT_EQ(aconn.m_com[2], 6);
-    ASSERT_EQ(aconn.m_com[3], 11);
-    ASSERT_EQ(aconn.m_com[4], 19);
-    ASSERT_EQ(aconn.m_com[5], 38);
+    ASSERT_EQ(aconn.ncom(), 6);
+    ASSERT_EQ(aconn.com(0), 1);
+    ASSERT_EQ(aconn.com(1), 4);
+    ASSERT_EQ(aconn.com(2), 6);
+    ASSERT_EQ(aconn.com(3), 11);
+    ASSERT_EQ(aconn.com(4), 19);
+    ASSERT_EQ(aconn.com(5), 38);
 
-    ASSERT_FALSE(aconn.m_phase);
+    ASSERT_FALSE(aconn.phase());
+}
+
+TEST(Connection, Phase) {
+
+    TensorFileIterator<float> file_iterator(defs::assets_root + "/parity_test/parity_8.txt", 16ul, false);
+
+    defs::inds inds(16);
+    float value;
+
+    Determinant bra(4);
+    Determinant ket(4);
+    Determinant work_det(4);
+    AntisymConnection connection(ket);
+
+    while (file_iterator.next(inds, value)) {
+        bra.zero();
+        ket.zero();
+        for (auto i{0ul}; i < 8; ++i) {
+            if (!inds[i]) bra.set(i);
+        }
+        for (auto i{8ul}; i < 16; ++i) {
+            if (!inds[i]) ket.set(i - 8);
+        }
+        if (bra.nsetbit() != ket.nsetbit()) continue;
+        connection.connect(ket, bra);
+        ASSERT_EQ(connection.phase(), value < 0);
+        connection.apply(ket, work_det);
+        ket.print();
+        bra.print();
+        ASSERT_EQ(connection.phase(), value < 0);
+        ASSERT_TRUE(bra==work_det);
+    }
 }

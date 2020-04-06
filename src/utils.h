@@ -17,14 +17,20 @@
 
 namespace utils {
     template <typename T>
-    std::string to_string(T v){
+    std::string to_string(T v, size_t n){
         std::string string("[");
-        for (auto i : v){
-            string+=std::to_string(i)+" ";
+        for (size_t i=0ul; i<n; ++i){
+            string+=std::to_string(v[i])+" ";
         }
         string+="]";
         return string;
     }
+
+    template <typename T>
+    std::string to_string(T v) {
+        return to_string(v, v.size());
+    }
+
     template<typename T>
     std::string num_to_string(const T &entry, size_t padding = 0) {
         auto tmp_string = std::to_string(entry);
@@ -45,6 +51,11 @@ namespace utils {
     template <typename T>
     void print(T v){
         std::cout << to_string(v) << std::endl;
+    }
+
+    template <typename T>
+    void print(T v, size_t n){
+        std::cout << to_string(v, n) << std::endl;
     }
 }
 

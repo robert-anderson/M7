@@ -21,10 +21,13 @@ public:
 
     void set(const size_t &ispin, const size_t &iorb);
 
+    using BitsetElement::set;
     void set(const defs::inds &ispinorbs);
 
+    using BitsetElement::clr;
     void clr(const size_t &ispin, const size_t &iorb);
 
+    using BitsetElement::get;
     bool get(const size_t &ispin, const size_t &iorb) const;
 
     size_t nsite() const;

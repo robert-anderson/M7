@@ -9,6 +9,7 @@
 #include <src/core/fermion/Determinant.h>
 #include <src/core/list/MappedList.h>
 #include <src/core/fermion/Connection.h>
+#include <src/core/fermion/DecodedDeterminant.h>
 #include "src/consts.h"
 #include "src/defs.h"
 #include "src/core/table/DeterminantField.h"
@@ -21,19 +22,53 @@ protected:
 public:
     Hamiltonian(const size_t &nsite);
 
-    virtual consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const = 0;
+    consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const {
+        return consts::real(get_element_0(det));
+    }
 
-    virtual defs::ham_t get_element_0(const DeterminantElement &det) const = 0;
+    virtual defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const = 0;
 
-    virtual defs::ham_t get_element_1(const DeterminantElement &bra, const size_t &removed, const size_t &inserted) const = 0;
+    defs::ham_t get_element_0(const OccupiedOrbitals &occs) const {
+        return get_element_0(occs.m_inds, occs.m_nind);
+    }
 
-    virtual defs::ham_t get_element_2(const size_t &removed1, const size_t &removed2,
-                              const size_t &inserted1, const size_t &inserted2) const = 0;
+    defs::ham_t get_element_0(const DeterminantElement &det) const {
+        OccupiedOrbitals occs(det);
+        return get_element_0(occs.m_inds, occs.m_nind);
+    }
 
-    virtual defs::ham_t get_element(const DeterminantElement &ket, const AntisymConnection &connection) const = 0;
+    defs::ham_t get_element_0(const AntisymConnection &connection) const {
+        return get_element_0(connection.com(), connection.ncom());
+    }
+
+    virtual defs::ham_t get_element_1(const AntisymConnection &connection) const = 0;
+
+    virtual defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const = 0;
+
+    defs::ham_t get_element_2(const Connection &connection) const {
+        return get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
+    }
+
+    defs::ham_t get_element_2(const AntisymConnection &connection) const {
+        const auto element = get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
+        return connection.phase() ? -element : element;
+    }
+
+    defs::ham_t get_element(const AntisymConnection &connection) const {
+        switch (connection.nexcit()) {
+            case 0:
+                return get_element_0(connection);
+            case 1:
+                return get_element_1(connection);
+            case 2:
+                return get_element_2(connection);
+            default:
+                return 0;
+        }
+    }
 
     defs::ham_t get_element(const DeterminantElement &bra, const DeterminantElement &ket) const {
-        return get_element(ket, AntisymConnection(ket, bra));
+        return get_element(AntisymConnection(ket, bra));
     }
 
     size_t nsite() const {
@@ -52,7 +87,7 @@ public:
 
     Determinant guess_reference(const int &spin_level) const;
 
-    Determinant refine_guess_reference(const DeterminantElement& ref) const;
+    Determinant refine_guess_reference(const DeterminantElement &ref) const;
 
     Determinant choose_reference(const int &spin_level) const;
 
@@ -65,7 +100,8 @@ public:
             MappedList(determinant, nbucket),
             determinant(this, 1, nsite), helement(this) {}
     };
-    ConnectionList all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps=0.0) const;
+
+    ConnectionList all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps = 0.0) const;
 
 };
 
