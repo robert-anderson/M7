@@ -4,7 +4,6 @@
 
 
 #include <gtest/gtest.h>
-#include "src/hash/HashTable.h"
 
 #if 0
 TEST(HashTable, SimpleLookup) {

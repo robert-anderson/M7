@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/multidim/Indexer.h"
+#include "src/core/multidim/Indexer.h"
 
 TEST(Indexer, CorrectMapping) {
     Indexer<3> indexer(2, 4, 3);

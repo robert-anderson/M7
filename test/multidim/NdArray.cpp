@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/multidim/NdArray.h"
+#include "src/core/multidim/NdArray.h"
 
 TEST(NdArray, CorrectMapping) {
     NdArray<double, 3> array(2, 4, 3);

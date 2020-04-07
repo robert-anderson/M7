@@ -4,7 +4,6 @@
 
 
 #include <gtest/gtest.h>
-#include <src/hash/SafeHashMap.h>
 
 #if 0
 template <typename T>
