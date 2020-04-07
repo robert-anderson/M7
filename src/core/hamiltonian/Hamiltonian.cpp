@@ -15,8 +15,8 @@ Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     assert(abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
     size_t n_spin_1 = nelec() - n_spin_0;
-    for (size_t i = 0ul; i < n_spin_0; ++i) ref.set(i, 0);
-    for (size_t i = 0ul; i < n_spin_1; ++i) ref.set(i, 1);
+    for (size_t i = 0ul; i < n_spin_0; ++i) ref.set(0, i);
+    for (size_t i = 0ul; i < n_spin_1; ++i) ref.set(1, i);
     assert(ref.spin() == spin_restrict);
     return ref;
 }
@@ -67,18 +67,23 @@ Determinant Hamiltonian::choose_reference(const int &spin_level) const {
 Hamiltonian::ConnectionList
 Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps) const {
 
-    auto nbucket = integer_utils::combinatorial(nsite(), nelec());
+    auto nbucket = integer_utils::combinatorial(2*nsite(), nelec());
     ConnectionList list(m_nsite, nbucket);
+    list.expand(nbucket);
 
     OccupiedOrbitals occs(ref);
     VacantOrbitals vacs(ref);
+    AntisymConnection connection(ref);
 
     Determinant excited(m_nsite);
-    for (auto occ : occs.m_inds) {
-        for (auto vac : vacs.m_inds) {
-            excited = ref;
-            excited.excite(vac, occ);
-            auto helement = get_element(ref, excited);
+    for (size_t iocc=0ul; iocc<occs.m_nind; ++iocc) {
+        const auto &occ = occs.m_inds[iocc];
+        for (size_t ivac=0ul; ivac<vacs.m_nind; ++ivac) {
+            const auto &vac = vacs.m_inds[ivac];
+            connection.zero();
+            connection.add(occ, vac);
+            connection.apply(ref, excited);
+            auto helement = get_element(connection);
             if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                 size_t irow = list.push(excited);
                 list.helement.element(irow) = helement;
@@ -86,16 +91,17 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
         }
     }
 
-    VectorCombinationEnumerator occ_enumerator(occs.m_inds, 2);
+    VectorCombinationEnumerator occ_enumerator(occs.m_inds, occs.m_nind, 2);
     defs::inds occ_inds(2);
     while (occ_enumerator.next(occ_inds)) {
         {
-            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, 2);
+            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, vacs.m_nind, 2);
             defs::inds vac_inds(2);
             while (vac_enumerator.next(vac_inds)) {
-                excited = ref;
-                excited.excite(vac_inds[0], vac_inds[1], occ_inds[0], occ_inds[1]);
-                auto helement = get_element(ref, excited);
+                connection.zero();
+                connection.add(occ_inds[0], occ_inds[1], vac_inds[0], vac_inds[1]);
+                connection.apply(ref, excited);
+                auto helement = get_element(connection);
                 if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                     size_t irow = list.push(excited);
                     list.helement.element(irow) = helement;

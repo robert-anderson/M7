@@ -90,3 +90,5 @@ bool Element::is_zero() const {
 void Element::print() const {
     std::cout << to_string() << std::endl;
 }
+
+const Field *Element::field() const {return m_field;}

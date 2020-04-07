@@ -5,13 +5,10 @@
 #ifndef M7_HEATBATHSAMPLER_H
 #define M7_HEATBATHSAMPLER_H
 
-#if 0
 #include <src/defs.h>
-#include <src/fermion/Excitation.h>
 #include "src/multidim/NdArray.h"
-#include "src/hamiltonian/Hamiltonian.h"
-#include "src/enumerators/BitsetEnumerator.h"
-#include "src/sample/Aliaser.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/sample/Aliaser.h"
 
 /*
  * An implementation of the Heat Bath Excitation generator of A. A. Holmes et al
@@ -48,5 +45,4 @@ public:
 };
 
 
-#endif //M7_HEATBATHSAMPLER_H
 #endif //M7_HEATBATHSAMPLER_H

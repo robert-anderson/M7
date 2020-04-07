@@ -6,7 +6,7 @@
 #include "src/core/sample/PRNG.h"
 
 TEST(PRNG, MeanCheck) {
-    PRNG prng(0);
+    PRNG prng(0, 100);
     const size_t n=10000000;
     float tot = 0;
     for (size_t i=0; i<n; ++i){

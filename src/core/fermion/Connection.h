@@ -6,6 +6,7 @@
 #define M7_CONNECTION_H
 
 #include <src/core/fermion/Determinant.h>
+#include <algorithm>
 
 /*
  * <bra| ...cre... ...ann... |ket>
@@ -35,6 +36,7 @@ protected:
     size_t m_nann, m_ncre;
 
 public:
+    explicit Connection(const Field* field);
     Connection(const DeterminantElement &ket, const DeterminantElement &bra);
     explicit Connection(const DeterminantElement &ket);
 
@@ -54,11 +56,20 @@ public:
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
     void add(const size_t &ann, const size_t &cre){
+        assert(m_nann+1<m_nbit);
+        assert(m_ncre+1<m_nbit);
         m_ann[m_nann++] = ann; m_cre[m_ncre++] = cre;
     }
     void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2){
+        assert(m_nann+2<m_nbit);
+        assert(m_ncre+2<m_nbit);
         m_ann[m_nann++] = ann1; m_ann[m_nann++] = ann2;
         m_cre[m_ncre++] = cre1; m_cre[m_ncre++] = cre2;
+    }
+
+    void sort(){
+        std::sort(m_cre.begin(), m_cre.begin()+m_ncre);
+        std::sort(m_ann.begin(), m_ann.begin()+m_nann);
     }
 
     const size_t &nexcit() const;
@@ -74,8 +85,9 @@ class AntisymConnection : public Connection {
     bool m_phase;
 
 public:
+    explicit AntisymConnection(const Field* field);
     AntisymConnection(const DeterminantElement &ket, const DeterminantElement &bra);
-    AntisymConnection(const DeterminantElement &ket);
+    explicit AntisymConnection(const DeterminantElement &ket);
 
     void connect(const DeterminantElement &ket, const DeterminantElement &bra) override;
     void apply(const DeterminantElement &ket);

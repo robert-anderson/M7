@@ -4,7 +4,6 @@
 
 #include "HeatBathSampler.h"
 
-#if 0
 HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
         m_h(h),
         m_nbit(h.nsite() * 2),
@@ -71,4 +70,3 @@ HeatBathSampler::HeatBathSampler(const Hamiltonian &h) :
         }
     }
 }
-#endif

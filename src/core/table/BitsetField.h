@@ -52,7 +52,7 @@ public:
         update_nbit(nbit);
     }
 
-    size_t nbit() override {
+    size_t nbit() const override {
         return m_nbit;
     }
 

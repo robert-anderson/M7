@@ -7,26 +7,15 @@
 #include <src/core/sample/Aliaser.h>
 
 TEST(Aliaser, DistributionCheck) {
-    //std::vector<defs::prob_t> probs = {2.3, 0.2, 0.5, 0.15, 0.15, 0.4, 1.2};
-    //std::vector<defs::prob_t> probs = {0.23, 0.02, 0.25, 0.15, 0.15, 0.04, 0.02};
+    PRNG prng(0, 100);
     std::vector<defs::prob_t> probs =
-            {0,
-             0.064873574974962489,
-             0.0025173208479459656,
-             0.0035622845145094205,
-             0.0035622841267661802,
-             0,
-             0.064873574975044465,
-             0.0025173209231894949,
-             0.0035622842321977096,
-             0.0035622844941649518};
-    Aliaser aliaser(probs);
+        {0, 0.648, 0.025, 0.035, 0.036, 0, 0.0648, 0.053, 0.0723, 0.1234};
+    Aliaser aliaser(probs, prng);
     defs::inds results(probs.size(), 0ul);
 
-    PRNG prng(0);
     const size_t n_attempts = 1000000;
     for (size_t i = 0ul; i < n_attempts; ++i) {
-        results[aliaser.draw(prng)]++;
+        results[aliaser.draw()]++;
     }
     auto norm = std::accumulate(probs.begin(), probs.end(), 0.0);
     for (size_t i = 0ul; i < probs.size(); ++i) {

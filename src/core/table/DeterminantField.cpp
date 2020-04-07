@@ -21,7 +21,7 @@ std::string DeterminantElement::to_string() const {
 }
 
 void DeterminantElement::set(const size_t &ispin, const size_t &iorb) {
-    BitsetElement::set(defs::pair{ispin ? nsite() : 0, iorb});
+    BitsetElement::set(defs::pair{0, ispin ? nsite()+iorb:iorb});
 }
 
 void DeterminantElement::set(const defs::inds &ispinorbs) {
@@ -54,3 +54,11 @@ std::string DeterminantField::to_string(size_t irow, size_t isegment, size_t ibe
 
 DeterminantField::DeterminantField(Table *table, size_t nelement, size_t nsite) :
     BitsetField(table, nelement, nsite*2), m_nsite(nsite) {}
+
+size_t DeterminantElement::AntiDatawordEnumerator::get_dataword(const size_t &idataword) {
+    return m_data.get_antidataword(idataword);
+}
+
+size_t DeterminantElement::AntiDatawordEnumerator::get_dataword(const size_t &idataword, const size_t &nbit) {
+    return m_data.get_antidataword(idataword, nbit);
+}

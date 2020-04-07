@@ -11,6 +11,8 @@
 class VectorCombinationEnumerator : public CombinationEnumerator {
     const defs::inds &m_vector;
 public:
+    VectorCombinationEnumerator(const defs::inds &vector, size_t n, size_t r, Enumerator *subsequent = nullptr):
+        CombinationEnumerator(n, r, subsequent), m_vector(vector){}
     VectorCombinationEnumerator(const defs::inds &vector, size_t r, Enumerator *subsequent = nullptr):
         CombinationEnumerator(vector.size(), r, subsequent), m_vector(vector){}
     bool next_element(defs::inds &result) override;

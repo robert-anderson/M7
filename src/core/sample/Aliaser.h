@@ -14,16 +14,20 @@
 
 class Aliaser {
     const size_t m_nprob;
+    PRNG &m_prng;
     std::vector<defs::prob_t> m_prob_table;
     defs::inds m_alias_table;
-    const defs::prob_t m_norm;
+    defs::prob_t m_norm;
 
 public:
-    Aliaser(const defs::prob_t* probs, const size_t nprob) :
+    Aliaser(const size_t nprob, PRNG &prng) :
         m_nprob(nprob),
+        m_prng(prng),
         m_prob_table(m_nprob, 0.0),
-        m_alias_table(m_nprob, 0ul),
-        m_norm(std::accumulate(probs, probs+nprob, 0.0)) {
+        m_alias_table(m_nprob, 0ul){}
+
+    void update(const defs::prob_t *probs, const size_t nprob) {
+        m_norm = std::accumulate(probs, probs+nprob, 0.0);
         std::stack<size_t> smaller;
         std::stack<size_t> larger;
         for (size_t iprob = 0ul; iprob < m_nprob; ++iprob) {
@@ -44,24 +48,34 @@ public:
         }
     }
 
-    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob) :
-        Aliaser(probs.data(), nprob) {}
+    void update(const std::vector<defs::prob_t> &probs) {
+        update(probs.data(), probs.size());
+    }
 
-    Aliaser(const std::vector<defs::prob_t> &probs):
-        Aliaser(probs.data(), probs.size()){}
+    Aliaser(const defs::prob_t *probs, const size_t nprob, PRNG &prng) :
+        Aliaser(nprob, prng) {
+        update(probs, nprob);
+    }
+
+    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob, PRNG &prng) :
+        Aliaser(probs.data(), nprob, prng) {}
+
+    Aliaser(const std::vector<defs::prob_t> &probs, PRNG &prng) :
+        Aliaser(probs.data(), probs.size(), prng) {}
 
 
-    size_t draw(PRNG &prng) const {
-        size_t iprob = std::floor(prng.draw_float() * m_nprob);
+    size_t draw() const {
+        size_t iprob = std::floor(m_prng.draw_float() * m_nprob);
         assert(iprob >= 0);
         assert(iprob < m_nprob);
-        if (prng.draw_float() * m_norm < m_prob_table[iprob]) return iprob;
+        if (m_prng.draw_float() * m_norm < m_prob_table[iprob]) return iprob;
         else return m_alias_table[iprob];
     }
 
-    defs::prob_t norm() const{
+    defs::prob_t norm() const {
         return m_norm;
     }
+
 };
 
 

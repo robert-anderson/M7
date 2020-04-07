@@ -43,7 +43,7 @@ public:
 
     bool compatible_with(const Field &rhs) const;
 
-    virtual size_t nbit();
+    virtual size_t nbit() const;
 
     virtual size_t element_dsize() const;
 

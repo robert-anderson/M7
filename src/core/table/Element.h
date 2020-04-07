@@ -41,6 +41,7 @@ public:
     size_t nbit() const;
     void zero();
     virtual bool is_zero() const;
+    const Field* field() const;
 };
 
 #endif //SANDBOX2_ELEMENT_H

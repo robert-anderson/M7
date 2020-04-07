@@ -9,16 +9,18 @@
 #include "src/core/table/Table.h"
 
 class List : public Table {
-    List* m_recv = nullptr;
+    List *m_recv = nullptr;
     defs::inds m_high_water_mark;
 public:
-    explicit List(size_t nsegment=1);
+    explicit List(size_t nsegment = 1);
 
-    void recv(List* list);
+    void recv(List *list);
 
     void expand(size_t delta_nrow) override;
 
     const defs::inds &high_water_mark() const;
+
+    const size_t &high_water_mark(const size_t isegment) const;
 
     virtual size_t push(const size_t &isegment = 0);
 

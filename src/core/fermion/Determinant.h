@@ -33,7 +33,7 @@ public:
     }
 
     Determinant& operator=(const Determinant& rhs){
-        *this=rhs;
+        DeterminantElement::operator=(rhs);
         return *this;
     }
 

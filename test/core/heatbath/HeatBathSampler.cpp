@@ -4,93 +4,82 @@
 
 #include <gtest/gtest.h>
 #include <src/defs.h>
-#include <src/heatbath/HeatBathSampler.h>
+#include <src/core/heatbath/HeatBathSampler.h>
 #include <src/core/hamiltonian/AbInitioHamiltonian.h>
-#include <src/heatbath/DeterminantSampler.h>
+#include <src/core/heatbath/DeterminantSampler.h>
 
-#if 0
 TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     HeatBathSampler heat_bath_sampler(ham);
     auto source_det = ham.guess_reference(0);
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
-    PRNG prng(18);
+    PRNG prng(18, 1e4);
+    Determinant work_det(ham.nsite());
+
+    DeterminantSampler det_sampler(heat_bath_sampler, source_det, prng);
 
     const size_t nattempt = 1e8;
     const defs::ham_comp_t eps = 100.0 / nattempt;
     auto all_connections = ham.all_connections_of_det(source_det, eps);
-    defs::inds frequencies(all_connections.high_water_mark(), 0ul);
+    defs::inds frequencies(all_connections.high_water_mark(0), 0ul);
 
     size_t irow;
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        auto excit = det_sampler.draw(prng);
-        if (!excit.m_single.is_null()) {
-            auto det = excit.m_single.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 1);
-            if (irow == ~0ul) ASSERT_EQ(source_det.nexcit(det), 1);
-            else frequencies[irow]++;
-            frequencies[irow]++;
+        det_sampler.draw();
+
+        // Brillouin's theorem:
+        ASSERT_FALSE(det_sampler.single_generated());
+
+        if (det_sampler.double_generated()) {
+            det_sampler.get_double().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) frequencies[irow]++;
         }
-        if (!excit.m_double.is_null()) {
-            auto det = excit.m_double.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 2);
-            if (irow == ~0ul) ASSERT_EQ(source_det.nexcit(det), 2);
-            else frequencies[irow]++;
-        }
-        if (std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; })) {
-            break;
-        }
+        if (std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; })) break;
     }
     ASSERT_EQ(std::accumulate(frequencies.begin(), frequencies.end(), 0ul), 786387);
     ASSERT_TRUE(std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; }));
 }
 
-
 TEST(HeatBathSampler, AllExcitsGeneratedFromExcitedDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     HeatBathSampler heat_bath_sampler(ham);
 
-    auto source_det = Determinant(ham.nsite());
+    Determinant source_det(ham.nsite());
     /*
      * arbitrary choice of source determinant
      */
     source_det.set(defs::inds{1, 4, 6, 7});
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
-    PRNG prng(18);
+    PRNG prng(18, 1e4);
+    Determinant work_det(ham.nsite());
+
+    DeterminantSampler det_sampler(heat_bath_sampler, source_det, prng);
+
 
     const size_t nattempt = 1e6;
     const defs::ham_comp_t eps = 100.0 / nattempt;
     auto all_connections = ham.all_connections_of_det(source_det, eps);
-    defs::inds frequencies(all_connections.high_water_mark(), 0ul);
+    defs::inds frequencies(all_connections.high_water_mark(0), 0ul);
 
     size_t irow;
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        auto excit = det_sampler.draw(prng);
-        if (!excit.m_single.is_null()) {
-            auto det = excit.m_single.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 1);
-            if (irow == ~0ul) ASSERT_EQ(source_det.nexcit(det), 1);
-            else frequencies[irow]++;
-            frequencies[irow]++;
+        det_sampler.draw();
+        if (det_sampler.single_generated()) {
+            det_sampler.get_single().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) frequencies[irow]++;
         }
-        if (!excit.m_double.is_null()) {
-            auto det = excit.m_double.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 2);
-            if (irow == ~0ul) ASSERT_EQ(source_det.nexcit(det), 2);
-            else frequencies[irow]++;
+        if (det_sampler.double_generated()) {
+            det_sampler.get_double().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) frequencies[irow]++;
         }
         if (std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; })) {
             break;
         }
     }
-    ASSERT_EQ(std::accumulate(frequencies.begin(), frequencies.end(), 0ul), 2919);
+    ASSERT_EQ(std::accumulate(frequencies.begin(), frequencies.end(), 0ul), 2417);
     ASSERT_TRUE(std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; }));
 }
-
 
 TEST(HeatBathSampler, UnbiasedElecPairComplex4c) {
     /*
@@ -99,9 +88,9 @@ TEST(HeatBathSampler, UnbiasedElecPairComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     HeatBathSampler heat_bath_sampler(ham);
     auto source_det = ham.guess_reference(0);
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
+    PRNG prng(18, 1e4);
 
-    PRNG prng(18);
+    DeterminantSampler det_sampler(heat_bath_sampler, source_det, prng);
 
     const size_t nattempt = 1e7;
     NdArray<defs::prob_t, 2> weighted_frequencies(ham.nsite() * 2, ham.nsite() * 2);
@@ -118,7 +107,7 @@ TEST(HeatBathSampler, UnbiasedElecPairComplex4c) {
     size_t p, q;
     defs::prob_t prob;
     for (iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        det_sampler.draw_pq(prng, p, q, prob);
+        det_sampler.draw_pq(p, q, prob);
         ASSERT_GT(prob, 0.0);
         ASSERT_LE(prob, 1.0);
         *weighted_frequencies.view(p, q) += 1.0 / prob;
@@ -139,9 +128,9 @@ TEST(HeatBathSampler, UnbiasedElecPairAndFirstVirtualComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     HeatBathSampler heat_bath_sampler(ham);
     auto source_det = ham.guess_reference(0);
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
+    PRNG prng(18, 1e4);
 
-    PRNG prng(18);
+    DeterminantSampler det_sampler(heat_bath_sampler, source_det, prng);
 
     const size_t nattempt = 1e6;
     const auto nspinorb = ham.nsite() * 2;
@@ -158,7 +147,7 @@ TEST(HeatBathSampler, UnbiasedElecPairAndFirstVirtualComplex4c) {
     size_t p, q, r;
     defs::prob_t prob;
     for (iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        det_sampler.draw_pqr(prng, p, q, r, prob);
+        det_sampler.draw_pqr(p, q, r, prob);
         if (r == ~0ul) continue;
         ASSERT_GT(prob, 0.0);
         ASSERT_LE(prob, 1.0);
@@ -186,7 +175,6 @@ TEST(HeatBathSampler, UnbiasedElecPairAndFirstVirtualComplex4c) {
 
 }
 
-
 TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantComplex4c) {
     /*
      * ensure that the ratio of generation frequency to proposal probability is uniform
@@ -194,36 +182,32 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     HeatBathSampler heat_bath_sampler(ham);
     auto source_det = ham.guess_reference(0);
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
+    PRNG prng(18, 1e4);
+    Determinant work_det(ham.nsite());
 
-    PRNG prng(18);
+    DeterminantSampler det_sampler(heat_bath_sampler, source_det, prng);
 
     const size_t nattempt = 1e6;
     const defs::ham_comp_t eps = 1e-2;
     auto all_connections = ham.all_connections_of_det(source_det, eps);
-    //all_connections.print();
-    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(), 0);
+    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
 
     size_t irow;
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        auto excit = det_sampler.draw(prng);
-        if (!excit.m_single.is_null()) {
-            auto det = excit.m_single.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 1);
-            else weighted_frequencies[irow] += 1.0 / excit.m_single.m_prob;
+        det_sampler.draw();
+        if (det_sampler.single_generated()) {
+            det_sampler.get_single().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / det_sampler.get_single_prob();
         }
-        if (!excit.m_double.is_null()) {
-            auto det = excit.m_double.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 2);
-            else weighted_frequencies[irow] += 1.0 / excit.m_double.m_prob;
+        if (det_sampler.double_generated()) {
+            det_sampler.get_double().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / det_sampler.get_double_prob();
         }
     }
-    for (auto f: weighted_frequencies) std::cout << f / (defs::prob_t) nattempt << std::endl;
     ASSERT_TRUE(std::all_of(weighted_frequencies.begin(), weighted_frequencies.end(), [](size_t i) { return i > 0; }));
 }
-
 
 TEST(HeatBathSampler, UnbiasedFromExcitedDeterminantComplex4c) {
     /*
@@ -236,35 +220,32 @@ TEST(HeatBathSampler, UnbiasedFromExcitedDeterminantComplex4c) {
      * arbitrary choice of source determinant
      */
     source_det.set(defs::inds{1, 4, 6, 7});
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
+    PRNG prng(18, 1e4);
+    Determinant work_det(ham.nsite());
 
-    PRNG prng(18);
+    DeterminantSampler det_sampler (heat_bath_sampler, source_det, prng);
 
     const size_t nattempt = 1e7;
     const defs::ham_comp_t eps = 1e-2;
     auto all_connections = ham.all_connections_of_det(source_det, eps);
-    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(), 0);
+    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
 
     size_t irow;
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        auto excit = det_sampler.draw(prng);
-        if (!excit.m_single.is_null()) {
-            auto det = excit.m_single.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 1);
-            else weighted_frequencies[irow] += 1.0 / excit.m_single.m_prob;
+        det_sampler.draw();
+        if (det_sampler.single_generated()){
+            det_sampler.get_single().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / det_sampler.get_single_prob();
         }
-        if (!excit.m_double.is_null()) {
-            auto det = excit.m_double.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 2);
-            else weighted_frequencies[irow] += 1.0 / excit.m_double.m_prob;
+        if (det_sampler.double_generated()){
+            det_sampler.get_double().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / det_sampler.get_double_prob();
         }
     }
-    for (auto f: weighted_frequencies) std::cout << f / (defs::prob_t) nattempt << std::endl;
     ASSERT_TRUE(std::all_of(weighted_frequencies.begin(), weighted_frequencies.end(), [](size_t i) { return i > 0; }));
 }
-
 
 
 TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
@@ -274,34 +255,29 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/ROHF_Cr2_12o12e/FCIDUMP");
     HeatBathSampler heat_bath_sampler(ham);
     auto source_det = ham.guess_reference(0);
-    auto det_sampler = DeterminantSampler(heat_bath_sampler, source_det);
+    PRNG prng(18, 1e4);
+    Determinant work_det(ham.nsite());
 
-    PRNG prng(18);
+    DeterminantSampler det_sampler(heat_bath_sampler, source_det, prng);
 
     const size_t nattempt = 1e6;
     const defs::ham_comp_t eps = 1e-2;
     auto all_connections = ham.all_connections_of_det(source_det, eps);
-    //all_connections.print();
-    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(), 0);
+    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
 
     size_t irow;
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        auto excit = det_sampler.draw(prng);
-        if (!excit.m_single.is_null()) {
-            auto det = excit.m_single.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 1);
-            else weighted_frequencies[irow] += 1.0 / excit.m_single.m_prob;
+        det_sampler.draw();
+        if (det_sampler.single_generated()){
+            det_sampler.get_single().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / det_sampler.get_single_prob();
         }
-        if (!excit.m_double.is_null()) {
-            auto det = excit.m_double.get_connection();
-            irow = all_connections.lookup(det);
-            if (irow == ~0ul) ASSERT_EQ(det.nexcit(source_det), 2);
-            else weighted_frequencies[irow] += 1.0 / excit.m_double.m_prob;
+        if (det_sampler.double_generated()){
+            det_sampler.get_double().apply(source_det, work_det);
+            irow = all_connections.lookup(work_det);
+            if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / det_sampler.get_double_prob();
         }
     }
-    for (auto f: weighted_frequencies) std::cout << f / (defs::prob_t) nattempt << std::endl;
     ASSERT_TRUE(std::all_of(weighted_frequencies.begin(), weighted_frequencies.end(), [](size_t i) { return i > 0; }));
 }
-
-#endif

@@ -16,6 +16,10 @@ const defs::inds &List::high_water_mark() const {
     return m_high_water_mark;
 }
 
+const size_t &List::high_water_mark(const size_t isegment) const {
+    return m_high_water_mark[isegment];
+}
+
 size_t List::push(const size_t &isegment) {
     assert(isegment<m_nsegment);
     size_t tmp;

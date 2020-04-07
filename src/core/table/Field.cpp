@@ -20,7 +20,7 @@ Element Field::element(const size_t &irow, const size_t &isegment, const size_t 
     return Element(this, element_begin(irow, isegment, ielement));
 }
 
-size_t Field::nbit() {
+size_t Field::nbit() const{
     return CHAR_BIT*m_element_size;
 }
 
