@@ -18,7 +18,7 @@ char *Field::begin(const size_t &irow, const size_t &isegment) {
     return m_table->field_begin(this, irow, isegment);
 }
 
-Element Field::element(const size_t &irow, const size_t &isegment, const size_t &ielement) {
+Element Field::operator()(const size_t &irow, const size_t &isegment, const size_t &ielement) {
     return Element(this, element_begin(irow, isegment, ielement));
 }
 

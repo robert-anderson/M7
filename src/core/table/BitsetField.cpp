@@ -61,6 +61,9 @@ bool BitsetElement::is_zero() const {
     return nsetbit()==0;
 }
 
+std::string BitsetElement::to_string() {
+    return to_string(0, nbit());
+}
 
 defs::pair BitsetField::rectify_offset(const defs::pair &pair) {
     /*

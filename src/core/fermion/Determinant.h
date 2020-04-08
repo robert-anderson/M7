@@ -23,7 +23,7 @@ class Determinant : public DeterminantElement {
 public:
     Determinant(size_t nsite) : DeterminantElement(nullptr, nullptr), internal_table(this, nsite) {
         m_field = &internal_table.field;
-        auto element = m_field->element(0);
+        auto element = (*m_field)(0);
         m_begin = element.begin();
     }
 

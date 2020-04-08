@@ -34,7 +34,7 @@ public:
     Field(Table *table, size_t element_size, size_t nelement, const std::type_info &type_info,
     const std::string& description="");
 
-    Element element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
+    Element operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 
     /*
     Element operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0){

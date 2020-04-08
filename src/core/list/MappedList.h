@@ -19,11 +19,11 @@ struct ListSafeHashMap : public SafeHashMap<T> {
         SafeHashMap<T>(nbucket), m_list(list) {}
 
     T get_key(const size_t &key_index) const override {
-        return m_list.key_field().element(key_index);
+        return m_list.key_field()(key_index);
     }
 
     void set_key(const size_t &key_index, const T &key) override{
-        m_list.key_field().element(key_index) = key;
+        m_list.key_field()(key_index) = key;
     }
 };
 
@@ -83,7 +83,7 @@ public:
     }
 
     bool row_empty(const size_t &irow) const {
-        return m_key_field.element(irow).is_zero();
+        return m_key_field(irow).is_zero();
     }
 
     void print_map() const {

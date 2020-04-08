@@ -22,9 +22,7 @@ public:
 
     virtual std::string to_string(size_t ibegin, size_t iend);
 
-    static std::string to_string_fn(Element* element){
-        return dynamic_cast<BitsetElement*>(element)->to_string(0, element->nbit());
-    }
+    virtual std::string to_string() override;
 
     void set(const defs::pair &pair);
 
@@ -58,7 +56,7 @@ public:
         return m_nbit;
     }
 
-    BitsetElement element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0){
+    BitsetElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0){
         assert(ielement<m_nelement);
         return BitsetElement(this, element_begin(irow, isegment, ielement));
     }

@@ -95,7 +95,7 @@ public:
     }
 
 
-    T element(const size_t &i, const size_t &j) const {
+    T operator()(const size_t &i, const size_t &j) const {
         /*
          * return the one-body integral between the two SPINORS indexed by i and j
          */

@@ -8,16 +8,14 @@ DeterminantElement::DeterminantElement(DeterminantField *field, char *begin) :
     BitsetElement(field, begin) {
 }
 
-std::string DeterminantElement::to_string_fn(const Element *element) {
-    auto cast_element = dynamic_cast<const DeterminantElement *>(element);
-    const auto nsite = cast_element->nsite();
+std::string DeterminantElement::to_string() {
     std::string result;
-    for (size_t ibit = 0; ibit < nsite; ++ibit) {
-        result += cast_element->BitsetElement::get(ibit) ? "1" : "0";
+    for (size_t ibit = 0; ibit < nsite(); ++ibit) {
+        result += BitsetElement::get(ibit) ? "1" : "0";
     }
     result += "|";
-    for (size_t ibit = 0; ibit < nsite; ++ibit) {
-        result += cast_element->BitsetElement::get(nsite + ibit) ? "1" : "0";
+    for (size_t ibit = 0; ibit < nsite(); ++ibit) {
+        result += BitsetElement::get(nsite() + ibit) ? "1" : "0";
     }
     return result;
 }
@@ -42,14 +40,14 @@ size_t DeterminantElement::nsite() const {
     return dynamic_cast<DeterminantField *>(m_field)->m_nsite;
 }
 
-DeterminantElement DeterminantField::element(const size_t &irow, const size_t &isegment, const size_t &ielement) {
+DeterminantElement DeterminantField::operator()(const size_t &irow, const size_t &isegment, const size_t &ielement) {
     return DeterminantElement(this, element_begin(irow, isegment, ielement));
 }
 
 std::string DeterminantField::to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend) {
     std::string result = "";
     for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) {
-        result += element(irow, isegment, ielement).Element::to_string() + " ";
+        result += (*this)(irow, isegment, ielement).to_string() + " ";
     }
     return result;
 }

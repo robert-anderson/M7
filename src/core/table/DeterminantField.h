@@ -17,7 +17,7 @@ public:
 
     DeterminantElement(DeterminantField *field, char *begin);
 
-    static std::string to_string_fn(const Element* element);
+    virtual std::string to_string();
 
     void set(const size_t &ispin, const size_t &iorb);
 
@@ -112,7 +112,7 @@ public:
 
     DeterminantField(Table *table, size_t nelement, size_t nsite, const std::string &description = "");
 
-    DeterminantElement element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
+    DeterminantElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 
     virtual std::string to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend);
 };

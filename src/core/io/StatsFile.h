@@ -94,9 +94,9 @@ public:
         }
         auto printer = m_printers.begin();
         for (auto &column : m_fields) {
-            auto element = column->element(0);
+            auto element = (*column)(0);
             *m_file << (*printer)(&element) << "  ";
-            column->element(0).zero();
+            element.zero();
             printer++;
         }
         *m_file << std::endl;
@@ -121,7 +121,7 @@ public:
         file->m_printers.push_back(StatsElement<T>::to_string_fn);
     }
 
-    StatsElement<T> element(const size_t &ielement = 0) {
+    StatsElement<T> operator()(const size_t &ielement = 0) {
         assert(ielement < m_nelement);
         if (!m_table->is_allocated()) m_table->expand(1);
         return StatsElement<T>(this, begin(0, 0) + ielement * m_element_size);

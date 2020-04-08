@@ -15,7 +15,7 @@ public:
     NumericField(Table *table, size_t nelement = 1, const std::string &description = "") :
         Field(table, sizeof(T), nelement, typeid(T), description) {}
 
-    NumericElement<T> element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) {
+    NumericElement<T> operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) {
         assert(ielement < m_nelement);
         return NumericElement<T>(this, begin(irow, isegment) + ielement * m_element_size);
     }

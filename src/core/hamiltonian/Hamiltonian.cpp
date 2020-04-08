@@ -86,7 +86,7 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
             auto helement = get_element(connection);
             if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                 size_t irow = list.push(excited);
-                list.helement.element(irow) = helement;
+                list.helement(irow) = helement;
             }
         }
     }
@@ -104,8 +104,8 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
                 auto helement = get_element(connection);
                 if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                     size_t irow = list.push(excited);
-                    list.helement.element(irow) = helement;
-                    assert(list.lookup(list.determinant.element(irow)) == irow);
+                    list.helement(irow) = helement;
+                    assert(list.lookup(list.determinant(irow)) == irow);
                 }
             }
         }

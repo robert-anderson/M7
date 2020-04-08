@@ -19,7 +19,7 @@ class Bitset : public BitsetElement {
 public:
     Bitset(size_t nbit):BitsetElement(nullptr, nullptr), internal_table(this, nbit){
         m_field = &internal_table.field;
-        auto element = m_field->element(0);
+        auto element = (*m_field)(0);
         m_begin = element.begin();
     }
 };

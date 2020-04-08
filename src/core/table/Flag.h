@@ -46,7 +46,7 @@ class Flag {
 public:
     Flag(FlagField *field, size_t nelement);
 
-    FlagElement element(const size_t &irow, const size_t &isegment, const size_t &ielement);
+    FlagElement operator()(const size_t &irow, const size_t &isegment, const size_t &ielement);
 
     friend class FlagField;
 };

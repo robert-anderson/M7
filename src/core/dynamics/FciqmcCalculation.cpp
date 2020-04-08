@@ -9,8 +9,8 @@ FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
         m_input(input), m_rank_allocator(input.nload_balance_block),
         m_stats_file(input)
         {
-    m_stats_file.m_ninitiator.element() = 13;
-    m_stats_file.m_ref_weight.element() = {1,2};
+    m_stats_file.m_ninitiator() = 13;
+    m_stats_file.m_ref_weight() = {1,2};
     m_stats_file.flush();
     //m_ham = std::make_unique<AbInitioHamiltonian>(input.fcidump_path);
     //m_prop = std::make_unique<ExactPropagator>(input, m_ham, m_rank_allocator);

@@ -36,7 +36,7 @@ defs::ham_t AbInitioHamiltonian::get_element_0(const defs::inds &occs, const siz
     defs::ham_t element = m_int_0;
     for (size_t i=0ul; i<nocc; ++i) {
         auto const &occi = occs[i];
-        element += m_int_1.element(occi, occi);
+        element += m_int_1(occi, occi);
         for (size_t j=0ul; j<i; ++j) {
             auto const &occj = occs[j];
             element += m_int_2.phys_antisym_element(occi, occj, occi, occj);
@@ -51,7 +51,7 @@ defs::ham_t AbInitioHamiltonian::get_element_1(const AntisymConnection &connecti
     const auto &coms = connection.com();
     const auto &ncom = connection.ncom();
 
-    defs::ham_t element = m_int_1.element(cre, ann);
+    defs::ham_t element = m_int_1(cre, ann);
     for (size_t icom=0ul; icom<ncom; ++icom)
         element += m_int_2.phys_antisym_element(cre, coms[icom], ann, coms[icom]);
     return connection.phase()?-element:element;
