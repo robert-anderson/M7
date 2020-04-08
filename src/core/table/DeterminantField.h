@@ -17,7 +17,7 @@ public:
 
     DeterminantElement(DeterminantField *field, char *begin);
 
-    std::string to_string() const override;
+    static std::string to_string_fn(const Element* element);
 
     void set(const size_t &ispin, const size_t &iorb);
 
@@ -110,7 +110,7 @@ class DeterminantField : public BitsetField {
 public:
     const size_t m_nsite;
 
-    DeterminantField(Table *table, size_t nelement, size_t nsite);
+    DeterminantField(Table *table, size_t nelement, size_t nsite, const std::string &description = "");
 
     DeterminantElement element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 

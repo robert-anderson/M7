@@ -7,6 +7,7 @@
 Table::Table(size_t nsegment) : m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
 
 char *Table::field_begin(const Field *field, const size_t &irow, const size_t isegment) {
+    assert(is_allocated());
     return ((char*)m_data.data())+irow*m_padded_row_size+isegment*m_segment_size+field->m_offset;
 }
 
@@ -14,7 +15,7 @@ void Table::expand(size_t delta_nrow) {
     /*
      * add more rows to each segment
      */
-    m_data.resize(m_data.size() + delta_nrow * m_nsegment * m_padded_row_dsize , 0);
+    m_data.resize((m_nrow_per_segment+delta_nrow) * m_nsegment * m_padded_row_dsize , 0);
     /*
      * move segments backwards to help avoid overlap. std::move will handle overlap correctly if it occurs
      */
@@ -101,3 +102,5 @@ bool Table::compatible_with(const Table &other) const {
            m_padded_row_size == other.m_padded_row_size &&
            m_padded_row_dsize == other.m_padded_row_dsize;
 }
+
+bool Table::is_allocated() const {return m_data.data()!= nullptr;}

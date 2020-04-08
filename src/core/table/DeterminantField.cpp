@@ -8,20 +8,22 @@ DeterminantElement::DeterminantElement(DeterminantField *field, char *begin) :
     BitsetElement(field, begin) {
 }
 
-std::string DeterminantElement::to_string() const {
+std::string DeterminantElement::to_string_fn(const Element *element) {
+    auto cast_element = dynamic_cast<const DeterminantElement *>(element);
+    const auto nsite = cast_element->nsite();
     std::string result;
-    for (size_t ibit = 0; ibit < nsite(); ++ibit) {
-        result += BitsetElement::get(ibit) ? "1" : "0";
+    for (size_t ibit = 0; ibit < nsite; ++ibit) {
+        result += cast_element->BitsetElement::get(ibit) ? "1" : "0";
     }
     result += "|";
-    for (size_t ibit = 0; ibit < nsite(); ++ibit) {
-        result += BitsetElement::get(nsite() + ibit) ? "1" : "0";
+    for (size_t ibit = 0; ibit < nsite; ++ibit) {
+        result += cast_element->BitsetElement::get(nsite + ibit) ? "1" : "0";
     }
     return result;
 }
 
 void DeterminantElement::set(const size_t &ispin, const size_t &iorb) {
-    BitsetElement::set(defs::pair{0, ispin ? nsite()+iorb:iorb});
+    BitsetElement::set(defs::pair{0, ispin ? nsite() + iorb : iorb});
 }
 
 void DeterminantElement::set(const defs::inds &ispinorbs) {
@@ -47,13 +49,13 @@ DeterminantElement DeterminantField::element(const size_t &irow, const size_t &i
 std::string DeterminantField::to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend) {
     std::string result = "";
     for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) {
-        result += element(irow, isegment, ielement).to_string() + " ";
+        result += element(irow, isegment, ielement).Element::to_string() + " ";
     }
     return result;
 }
 
-DeterminantField::DeterminantField(Table *table, size_t nelement, size_t nsite) :
-    BitsetField(table, nelement, nsite*2), m_nsite(nsite) {}
+DeterminantField::DeterminantField(Table *table, size_t nelement, size_t nsite, const std::string &description) :
+    BitsetField(table, nelement, nsite * 2, description), m_nsite(nsite) {}
 
 size_t DeterminantElement::AntiDatawordEnumerator::get_dataword(const size_t &idataword) {
     return m_data.get_antidataword(idataword);

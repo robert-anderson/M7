@@ -31,7 +31,8 @@ protected:
     std::string m_description;
 
 public:
-    Field(Table *table, size_t element_size, size_t nelement, const std::type_info &type_info);
+    Field(Table *table, size_t element_size, size_t nelement, const std::type_info &type_info,
+    const std::string& description="");
 
     Element element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 
@@ -46,6 +47,14 @@ public:
     virtual size_t nbit() const;
 
     virtual size_t element_dsize() const;
+
+    virtual bool is_complex() const {return false;}
+
+    const std::string &description() const {return m_description;}
+
+    void expand_table(size_t delta_nrow);
+
+    bool is_allocated() const;
 
     friend class Table;
 

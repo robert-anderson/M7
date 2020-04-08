@@ -22,8 +22,8 @@ size_t Element::dsize() const {
     return m_field->m_element_dsize;
 }
 
-std::string Element::to_string() const {
-    return std::string(m_begin, size());
+std::string Element::to_string() {
+    return std::string(begin(), size());
 }
 
 bool Element::compatible_with(const Element &rhs) const {
@@ -87,8 +87,10 @@ bool Element::is_zero() const {
     return memcmp(m_begin, zero.data(), m_field->m_element_size);
 }
 
-void Element::print() const {
+void Element::print() {
     std::cout << to_string() << std::endl;
 }
 
 const Field *Element::field() const {return m_field;}
+
+bool Element::is_complex() const {return m_field->is_complex();}

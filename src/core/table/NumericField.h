@@ -9,16 +9,19 @@
 #include "Field.h"
 #include "NumericElement.h"
 
-template <typename T>
-class NumericField : public Field{
+template<typename T>
+class NumericField : public Field {
 public:
-    NumericField(Table *table, size_t nelement=1):
-    Field(table, sizeof(T), nelement, typeid(T)){}
+    NumericField(Table *table, size_t nelement = 1, const std::string &description = "") :
+        Field(table, sizeof(T), nelement, typeid(T), description) {}
 
     NumericElement<T> element(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) {
-        assert(ielement<m_nelement);
-        return NumericElement<T>(this, begin(irow, isegment)+ielement*m_element_size);
+        assert(ielement < m_nelement);
+        return NumericElement<T>(this, begin(irow, isegment) + ielement * m_element_size);
     }
+
+    bool is_complex() const override { return consts::is_complex<T>(); }
+
 };
 
 #endif //SANDBOX2_NUMERICFIELD_H

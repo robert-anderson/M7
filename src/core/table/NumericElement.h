@@ -31,12 +31,12 @@ public:
 
     //explicit operator T&() const { return *((T *) m_begin); }
 
-    NumericElement<T> &operator=(const T &v) {
+    virtual NumericElement<T> &operator=(const T &v) {
         *((T *) m_begin) = v;
         return *this;
     }
 
-    NumericElement &operator=(const NumericElement<T> &v) {
+    virtual NumericElement<T> &operator=(const NumericElement<T> &v) {
         std::memcpy(m_begin, v.m_begin, sizeof(T));
         return *this;
     }
@@ -61,11 +61,13 @@ public:
         return sizeof(T);
     }
 
-    std::string to_string() const override {
-        const T v = to_number();
-        return utils::num_to_string(v);
+    static std::string to_string_fn(const Element *element){
+        return utils::num_to_string(*((T *) element->begin()));
+    }
+
+    virtual std::string to_string() const {
+        to_string_fn(this);
     }
 };
-
 
 #endif //SANDBOX2_NUMERICELEMENT_H

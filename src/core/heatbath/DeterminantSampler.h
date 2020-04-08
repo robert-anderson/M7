@@ -7,7 +7,6 @@
 
 
 #include "HeatBathSampler.h"
-#include "HeatBathExcitation.h"
 
 class DeterminantSampler {
 public:

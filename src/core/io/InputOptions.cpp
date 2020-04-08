@@ -20,7 +20,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "sum of walker magnitudes with which to initialize the populations.");
 
     add_option("-n,--nwalker_target", nwalker_target,
-               "sum of walker magnitudes at which to begin varying the diagonal shift");
+               "sum of walker magnitudes at which to begin varying the diagonal shift", true);
 
     add_option("-a,--nadd_initiator", nadd_initiator,
                "Number of walkers defining the initiator threshold");

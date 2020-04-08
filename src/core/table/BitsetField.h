@@ -20,9 +20,11 @@ public:
 
     BitsetElement(BitsetField *field, char *begin);
 
-    virtual std::string to_string(size_t ibegin, size_t iend) const;
+    virtual std::string to_string(size_t ibegin, size_t iend);
 
-    std::string to_string() const override;
+    static std::string to_string_fn(Element* element){
+        return dynamic_cast<BitsetElement*>(element)->to_string(0, element->nbit());
+    }
 
     void set(const defs::pair &pair);
 
@@ -47,8 +49,8 @@ class BitsetField : public Field {
 protected:
     size_t m_nbit;
 public:
-    BitsetField(Table *table, size_t nelement, size_t nbit) :
-        Field(table, sizeof(defs::data_t), nelement, typeid(defs::data_t)) {
+    BitsetField(Table *table, size_t nelement, size_t nbit, const std::string &description = "") :
+        Field(table, sizeof(defs::data_t), nelement, typeid(defs::data_t), description) {
         update_nbit(nbit);
     }
 
@@ -63,18 +65,20 @@ public:
 
     static defs::pair rectify_offset(const defs::pair &pair);
 
+/*
     virtual std::string to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend) {
         std::string result = "";
         for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) {
             result += element(irow, isegment, ielement).to_string() + " ";
         }
         return result;
-    }
+    }*/
 
+/*
     std::string to_string(size_t irow, size_t isegment) {
         return to_string(irow, isegment, 0, m_nbit);
     }
-
+*/
 
 protected:
     virtual void update_nbit(size_t nbit) {

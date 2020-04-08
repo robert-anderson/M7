@@ -52,9 +52,11 @@ public:
 
     void print();
 
-    const size_t &nrow_per_segment() const;;
+    const size_t &nrow_per_segment() const;
 
     bool compatible_with(const Table &other) const;
+
+    bool is_allocated() const;
 
 private:
     void update_row_size(size_t size);

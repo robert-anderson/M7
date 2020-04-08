@@ -4,7 +4,7 @@
 
 #include "BitsetField.h"
 
-BitsetElement::BitsetElement(BitsetField *field, char *begin) :Element(field, begin){}
+BitsetElement::BitsetElement(BitsetField *field, char *begin): Element(field, begin){}
 
 void BitsetElement::set(const defs::pair &pair) {
     assert(pair.first < size());
@@ -41,16 +41,12 @@ bool BitsetElement::get(const size_t &ibit) const {
     return get({0, ibit});
 }
 
-std::string BitsetElement::to_string(size_t ibegin, size_t iend) const {
+std::string BitsetElement::to_string(size_t ibegin, size_t iend) {
     std::string result;
     for (size_t ibit = ibegin; ibit < iend; ++ibit) {
         result += get(ibit) ? "1" : "0";
     }
     return result;
-}
-
-std::string BitsetElement::to_string() const{
-    return to_string(0, m_field->nbit());
 }
 
 size_t BitsetElement::nsetbit() const {

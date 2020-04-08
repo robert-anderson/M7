@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <src/defs.h>
 #include "Field.h"
 
@@ -25,8 +26,8 @@ public:
     virtual size_t hash() const;
     virtual size_t size() const;
     virtual size_t dsize() const;
-    virtual std::string to_string() const;
-    void print() const;
+    virtual std::string to_string();
+    void print();
     bool compatible_with(const Element &rhs) const;
     defs::data_t &dataword(const size_t &idataword) const;
     defs::data_t get_dataword(const size_t &idataword) const;
@@ -42,6 +43,7 @@ public:
     void zero();
     virtual bool is_zero() const;
     const Field* field() const;
+    virtual bool is_complex() const;
 };
 
 #endif //SANDBOX2_ELEMENT_H

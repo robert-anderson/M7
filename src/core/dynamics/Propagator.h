@@ -12,7 +12,6 @@
 #include <iostream>
 
 #if 0
-#include <src/data/NumericView.h>
 #include <src/io/FciqmcStatsFile.h>
 
 class Propagator {
