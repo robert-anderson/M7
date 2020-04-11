@@ -39,12 +39,12 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
-//#pragma omp parallel default(none) shared(propagator)
+#pragma omp parallel default(none) shared(propagator)
     {
         defs::ham_comp_t delta_square_norm = 0;
         defs::ham_t reference_energy_numerator = 0;
         int delta_ninitiator = 0;
-//#pragma omp for
+#pragma omp for
         for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
             if (m_data.row_empty(irow)) {
                 continue;
@@ -64,7 +64,6 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
                 flag_initiator = true;
                 delta_ninitiator++;
             } else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
-                assert((bool) (flag_initiator));
                 // initiator status revoked
                 flag_initiator = false;
                 delta_ninitiator--;
@@ -128,12 +127,12 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, const std::unique_ptr
 
 void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
     m_aborted_weight = 0;
-//#pragma omp parallel default(none) shared(propagator)
+#pragma omp parallel default(none) shared(propagator)
     {
         Connection connection(m_reference);
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
-//#pragma omp for
+#pragma omp for
         for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
             annihilate_row(irow_recv, propagator, connection, aborted_weight, delta_square_norm);
         }

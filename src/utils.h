@@ -14,6 +14,7 @@
 #include <numeric>
 #include <x86intrin.h>
 #include <climits>
+#include <iomanip>
 
 namespace utils {
     template <typename T>
@@ -32,18 +33,28 @@ namespace utils {
     }
 
     template<typename T>
-    std::string num_to_string(const T &entry, size_t padding = 0) {
-        auto tmp_string = std::to_string(entry);
-        auto decimal_length = std::numeric_limits<T>::digits10;
-        assert(tmp_string.size()<=decimal_length);
-        tmp_string.insert(tmp_string.begin(), padding + decimal_length - tmp_string.size(), ' ');
-        return tmp_string;
+    std::string fp_to_string(const T &v, size_t fp_precision=6){
+        assert(std::is_floating_point<T>::value);
+        std::stringstream tmp;
+        tmp << std::scientific << std::setprecision(fp_precision) << v;
+        return tmp.str();
     }
 
     template<typename T>
-    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0) {
-        auto tmp_string = std::to_string(entry.real()) +
-                          (entry.imag() < 0 ? "" : "+") + std::to_string(entry.imag()) + "i";
+    std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision=6) {
+        std::string result;
+        if (std::is_floating_point<T>::value) result = fp_to_string(entry, fp_precision);
+        else if (std::is_integral<T>::value) result = std::to_string(entry);
+        auto decimal_length = std::numeric_limits<T>::digits10;
+        //assert(result.size()<=decimal_length);
+        //result.insert(result.begin(), padding + decimal_length - result.size(), ' ');
+        return result;
+    }
+
+    template<typename T>
+    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision=6) {
+        auto tmp_string = fp_to_string(entry.real(), fp_precision) +
+                          (entry.imag() < 0 ? "" : "+") + fp_to_string(entry.imag(), fp_precision) + "i";
         tmp_string.insert(tmp_string.begin(), padding, ' ');
         return tmp_string;
     }
@@ -143,7 +154,6 @@ namespace bit_utils{
         bit_utils::clr(work, result);
         return result;
     }
-
 
     template <typename T>
     static inline size_t nsetbit(const T& work);

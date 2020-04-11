@@ -26,6 +26,7 @@ private:
 public:
     std::string fcidump_path = "FCIDUMP";
     std::string stats_path = "M7.stats";
+    bool exact_propagation = false;
     double nwalker_initial = 1.0;
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;

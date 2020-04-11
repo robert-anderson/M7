@@ -17,17 +17,22 @@
 #include <src/core/parallel/MPIWrapper.h>
 
 template<typename T>
+class StatsField;
+
+template<typename T>
 class StatsElement : public NumericElement<T> {
     using NumericElement<T>::m_field;
 public:
 
-    StatsElement<T>(NumericField<T> *field, char *begin) : NumericElement<T>(field, begin) {}
+    StatsElement<T>(StatsField<T> *field, char *begin) : NumericElement<T>(field, begin) {}
 
     StatsElement<T> &operator=(const T &v) override {
         if (!m_field->is_allocated()) m_field->expand_table(1);
         NumericElement<T>::operator=(v);
         return *this;
     }
+
+    const size_t &fp_precision() const { return dynamic_cast<StatsField<T>*>(m_field)->m_fp_precision;}
 
     StatsElement<T> &operator=(const NumericElement<T> &v) override {
         if (!m_field->is_allocated()) m_field->expand_table(1);
@@ -38,9 +43,9 @@ public:
     std::string to_string() override {
         const T v = **this;
         if (consts::is_complex<T>())
-            return utils::num_to_string(consts::real(v))
-                   + utils::num_to_string(consts::imag(v));
-        else return utils::num_to_string(v);
+            return utils::num_to_string(consts::real(v), 0, fp_precision())
+                   + utils::num_to_string(consts::imag(v), 0, fp_precision());
+        else return utils::num_to_string(v, 0, fp_precision());
     }
 };
 
@@ -108,9 +113,11 @@ public:
     using NumericField<T>::m_nelement;
     using NumericField<T>::m_element_size;
     using NumericField<T>::begin;
+    const size_t m_fp_precision;
 
-    StatsField(StatsFile *file, size_t nelement = 1, const std::string &description = "") :
-        NumericField<T>(file, nelement, description) {}
+    StatsField(StatsFile *file, size_t nelement = 1, const std::string &description = "",
+        size_t fp_precision=6) :
+        NumericField<T>(file, nelement, description), m_fp_precision(fp_precision) {}
 
     StatsElement<T> operator()(const size_t &ielement = 0) {
         assert(ielement < m_nelement);
