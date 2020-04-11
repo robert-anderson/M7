@@ -35,6 +35,7 @@ namespace utils {
     std::string num_to_string(const T &entry, size_t padding = 0) {
         auto tmp_string = std::to_string(entry);
         auto decimal_length = std::numeric_limits<T>::digits10;
+        assert(tmp_string.size()<=decimal_length);
         tmp_string.insert(tmp_string.begin(), padding + decimal_length - tmp_string.size(), ' ');
         return tmp_string;
     }
@@ -220,6 +221,5 @@ namespace prob_utils {
         for (auto &i:v) i*=fac;
     }
 }
-
 
 #endif //M7_UTILS_H

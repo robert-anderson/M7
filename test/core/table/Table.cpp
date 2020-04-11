@@ -34,16 +34,16 @@ TEST(Table, DataIntegrity) {
     for (size_t isegment = 0ul; isegment < nsegment; ++isegment) {
         for (size_t irow = 0ul; irow < nrow; ++irow) {
             for (size_t ielement = 0ul; ielement < nelement; ++ielement) {
-                ASSERT_EQ(table.test_longs.element(irow, isegment, ielement), 0ul);
-                ASSERT_EQ(table.test_floats.element(irow, isegment, ielement), 0);
-                ASSERT_EQ(table.test_chars.element(irow, isegment, ielement), 0);
-                ASSERT_EQ(table.test_shorts.element(irow, isegment, ielement), 0);
-                //ASSERT_EQ(table.test_complexes.element(irow, isegment, ielement), 0);
-                table.test_longs.element(irow, isegment, ielement) = i;
-                table.test_floats.element(irow, isegment, ielement) = i;
-                table.test_chars.element(irow, isegment, ielement) = i; // will overflow
-                table.test_shorts.element(irow, isegment, ielement) = i;
-                //table.test_complexes.element(irow, isegment, ielement) = i;
+                ASSERT_EQ(table.test_longs(irow, isegment, ielement), 0ul);
+                ASSERT_EQ(table.test_floats(irow, isegment, ielement), 0);
+                ASSERT_EQ(table.test_chars(irow, isegment, ielement), 0);
+                ASSERT_EQ(table.test_shorts(irow, isegment, ielement), 0);
+                //ASSERT_EQ(table.test_complexes(irow, isegment, ielement), 0);
+                table.test_longs(irow, isegment, ielement) = i;
+                table.test_floats(irow, isegment, ielement) = i;
+                table.test_chars(irow, isegment, ielement) = i; // will overflow
+                table.test_shorts(irow, isegment, ielement) = i;
+                //table.test_complexes(irow, isegment, ielement) = i;
                 ++i;
             }
         }
@@ -53,11 +53,11 @@ TEST(Table, DataIntegrity) {
     for (size_t isegment = 0ul; isegment < nsegment; ++isegment) {
         for (size_t irow = 0ul; irow < nrow; ++irow) {
             for (size_t ielement = 0ul; ielement < nelement; ++ielement) {
-                ASSERT_EQ(table.test_longs.element(irow, isegment, ielement), i);
-                ASSERT_EQ(table.test_floats.element(irow, isegment, ielement), i);
-                ASSERT_EQ(table.test_chars.element(irow, isegment, ielement), i); // will overflow
-                ASSERT_EQ(table.test_shorts.element(irow, isegment, ielement), i);
-                //ASSERT_EQ(table.test_complexes.element(irow, isegment, ielement), i);
+                ASSERT_EQ(table.test_longs(irow, isegment, ielement), i);
+                ASSERT_EQ(table.test_floats(irow, isegment, ielement), i);
+                ASSERT_EQ(table.test_chars(irow, isegment, ielement), i); // will overflow
+                ASSERT_EQ(table.test_shorts(irow, isegment, ielement), i);
+                //ASSERT_EQ(table.test_complexes(irow, isegment, ielement), i);
                 ++i;
             }
         }
@@ -83,7 +83,7 @@ TEST(Table, DataIntegrityDeterminants) {
     size_t i = 0;
 
     std::vector<DeterminantElement> v;
-    table.test_dets.element(0, 0, 0).set({1, 4, 6, 23});
-    v.push_back(table.test_dets.element(0, 0, 0));
+    table.test_dets(0, 0, 0).set({1, 4, 6, 23});
+    v.push_back(table.test_dets(0, 0, 0));
     std::cout << v[0].to_string() <<std::endl;
 }

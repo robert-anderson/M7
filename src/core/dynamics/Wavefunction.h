@@ -10,16 +10,19 @@
 #include <src/core/io/InputOptions.h>
 #include "WalkerList.h"
 #include "SpawnList.h"
+#include "Propagator.h"
 
 class Wavefunction {
     WalkerList m_data;
     SpawnList m_send, m_recv;
 
     Determinant m_reference;
-    defs::ham_t m_reference_energy_numerator;
+    defs::ham_t m_ref_proj_energy_num;
     defs::wf_t m_reference_weight;
+    size_t m_reference_row;
+
     defs::wf_t m_aborted_weight;
-    size_t m_ninitiator = 0;
+    int m_ninitiator = 0;
 
 public:
 
@@ -38,7 +41,6 @@ public:
 
     size_t m_noccupied_determinant;
 
-/*
 
     Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
                  const Determinant &reference);
@@ -56,7 +58,10 @@ public:
     void write_iter_stats(FciqmcStatsFile &stats_file);
 
     defs::ham_comp_t norm() const;
-    */
+
+private:
+    void annihilate_row(const size_t& irow_recv, const std::unique_ptr<Propagator> &propagator,
+                        Connection& connection, defs::wf_comp_t& aborted_weight, defs::wf_comp_t &delta_square_norm);
 };
 
 

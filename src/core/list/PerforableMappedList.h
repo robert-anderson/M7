@@ -87,11 +87,14 @@ public:
 
     size_t remove(Mutex &mutex, const size_t &key_index) {
         auto irow = MappedList<T>::m_map.remove(mutex, key_index);
+        assert(irow!=~0ul);
         size_t iremoved;
 #pragma omp atomic capture
         iremoved = m_nremoved++;
         assert(iremoved<m_removed.size());
         m_removed[iremoved] = irow;
+        MappedList<T>::m_key_field(irow).zero();
+        assert(MappedList<T>::m_key_field(irow).is_zero());
         return irow;
     }
 
@@ -108,7 +111,7 @@ public:
     }
 
     size_t nfilled() const{
-        return MappedList<T>::high_water_mark()-m_nfree;
+        return MappedList<T>::high_water_mark(0)-m_nfree;
     }
 
     void expand(size_t delta_rows) override {

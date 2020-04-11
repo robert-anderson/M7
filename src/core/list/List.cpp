@@ -41,7 +41,7 @@ size_t List::push(const size_t &isegment, const size_t &nrow) {
 void List::zero() {
     // TODO: no need to memset zero here, only included initially for clarity in debugging
     Table::zero();
-    m_high_water_mark.assign(0ul, m_nsegment);
+    m_high_water_mark.assign(m_nsegment, 0ul);
 }
 
 void List::communicate() {
@@ -49,6 +49,7 @@ void List::communicate() {
     defs::inds sendcounts(m_high_water_mark);
     for (auto &i : sendcounts) i *= m_padded_row_dsize;
     defs::inds recvcounts(mpi::nrank(), 0ul);
+
     mpi::all_to_all(sendcounts, recvcounts);
 
     auto senddispls = m_segment_doffsets;
@@ -68,4 +69,8 @@ void List::communicate() {
 void List::expand(size_t delta_nrow) {
     Table::expand(delta_nrow);
     if (m_recv) m_recv->expand(delta_nrow);
+}
+
+std::string List::to_string() {
+    return Table::to_string(m_high_water_mark);
 }

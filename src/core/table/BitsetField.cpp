@@ -41,9 +41,9 @@ bool BitsetElement::get(const size_t &ibit) const {
     return get({0, ibit});
 }
 
-std::string BitsetElement::to_string(size_t ibegin, size_t iend) {
+std::string BitsetElement::to_string() {
     std::string result;
-    for (size_t ibit = ibegin; ibit < iend; ++ibit) {
+    for (size_t ibit = 0ul; ibit < nbit(); ++ibit) {
         result += get(ibit) ? "1" : "0";
     }
     return result;
@@ -61,14 +61,14 @@ bool BitsetElement::is_zero() const {
     return nsetbit()==0;
 }
 
-std::string BitsetElement::to_string() {
-    return to_string(0, nbit());
-}
-
 defs::pair BitsetField::rectify_offset(const defs::pair &pair) {
     /*
      * if the bit-offset in a (byte-offset, bit-offset) pair exceeds CHAR_BIT
      * this function will advance the byte-offset accordingly
      */
     return {pair.first + pair.second / CHAR_BIT, pair.second % CHAR_BIT};
+}
+
+std::string BitsetField::to_string(size_t irow, size_t isegment, size_t ielement) {
+    return (*this)(irow, isegment, ielement).to_string();
 }

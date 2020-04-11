@@ -18,11 +18,11 @@ TEST(MappedList, DataIntegrity) {
     list.expand(nrow);
     for (size_t i = 0; i < nrow; ++i) {
         size_t irow = list.push(i * i);
-        list.value.element(irow) = i;
+        list.value(irow) = i;
     }
     auto irow = list.lookup(27 * 27);
     ASSERT_NE(irow, ~0ul);
-    ASSERT_EQ((size_t)list.value.element(irow), 27);
+    ASSERT_EQ((size_t)list.value(irow), 27);
 }
 
 TEST(MappedList, ThreadSafety) {
@@ -37,13 +37,13 @@ TEST(MappedList, ThreadSafety) {
             auto key = i*i;
             auto mutex = list.key_mutex(key);
             size_t irow = list.push(mutex, key);
-            list.value.element(irow) = i;
+            list.value(irow) = i;
         }
     }
     for (size_t i = 0; i < nrow; ++i) {
         auto key = i*i;
         auto irow = list.lookup(key);
         ASSERT_NE(irow, ~0ul);
-        ASSERT_EQ((size_t)list.value.element(irow), i);
+        ASSERT_EQ((size_t)list.value(irow), i);
     }
 }

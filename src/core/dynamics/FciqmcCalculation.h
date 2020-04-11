@@ -17,13 +17,10 @@ class FciqmcCalculation {
     const InputOptions m_input;
     RankAllocator<DeterminantElement> m_rank_allocator;
     FciqmcStatsFile m_stats_file;
-
-#if 0
-
     std::unique_ptr<Hamiltonian> m_ham;
     std::unique_ptr<Propagator> m_prop;
-    std::unique_ptr<Wavefunction> m_psi;
-#endif //M7_FCIQMCCALCULATION_H
+    std::unique_ptr<Wavefunction> m_wf;
+
 public:
     explicit FciqmcCalculation(const InputOptions &input);
 

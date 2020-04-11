@@ -25,7 +25,8 @@ public:
         m_begin = (char *) &m_internal_value;
     }
 
-    T to_number() const {return *((T *) m_begin);}
+    // explicit conversion
+    T& operator*() const {return *((T *) m_begin);}
 
     explicit operator T() const { return *((T *) m_begin); }
 
@@ -53,6 +54,26 @@ public:
         return T(*this) != T(other);
     }
 
+    NumericElement<T> &operator*=(const T& v){
+        **this*=v;
+        return *this;
+    }
+
+    NumericElement<T> &operator/=(const T& v){
+        **this/=v;
+        return *this;
+    }
+
+    NumericElement<T> &operator+=(const T& v){
+        **this+=v;
+        return *this;
+    }
+
+    NumericElement<T> &operator-=(const T& v){
+        **this*=v;
+        return *this;
+    }
+
     bool is_zero() const override {
         return *this == 0;
     }
@@ -61,12 +82,8 @@ public:
         return sizeof(T);
     }
 
-    static std::string to_string_fn(const Element *element){
-        return utils::num_to_string(*((T *) element->begin()));
-    }
-
-    virtual std::string to_string() const {
-        to_string_fn(this);
+    virtual std::string to_string() {
+        return utils::num_to_string(**this);
     }
 };
 

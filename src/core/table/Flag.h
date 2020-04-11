@@ -19,23 +19,18 @@
  */
 
 class FlagField;
+class Flag;
 
 class FlagElement {
     BitsetElement m_bitset_element;
-    const size_t m_ielement;
+    Flag* m_flag;
 
 public:
-    FlagElement(BitsetElement bitset_element, const size_t &ielement):
-    m_bitset_element(bitset_element), m_ielement(ielement){}
+    FlagElement(Flag *flag, BitsetElement bitset_element);
 
-    void operator=(bool v){
-        if (v){
-            m_bitset_element.set(m_ielement);
-        } else {
-            m_bitset_element.clr(m_ielement);
-        }
-    }
-    operator bool() { return m_bitset_element.get(m_ielement); }
+    void operator=(bool v);
+
+    operator bool();
 };
 
 class Flag {
@@ -43,10 +38,13 @@ class Flag {
     const size_t m_nelement;
     // flag offset is given by (offset of char, bit number in char)
     const defs::pair m_offset;
+    const std::string m_description;
 public:
-    Flag(FlagField *field, size_t nelement);
+    Flag(FlagField *field, size_t nelement, const std::string& description="");
 
-    FlagElement operator()(const size_t &irow, const size_t &isegment, const size_t &ielement);
+    FlagElement operator()(const size_t &irow, const size_t &isegment=0);
+
+    const defs::pair &offset() const {return m_offset;}
 
     friend class FlagField;
 };

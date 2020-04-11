@@ -6,6 +6,7 @@
 #include "src/core/io/Logging.h"
 
 #if 0
+
 Wavefunction::Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
                            const Determinant &reference) :
         m_input(input),

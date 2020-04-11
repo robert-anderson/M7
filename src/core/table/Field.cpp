@@ -47,3 +47,11 @@ void Field::expand_table(size_t delta_nrow) {
 bool Field::is_allocated() const {
     return m_table->is_allocated();
 }
+
+std::string Field::to_string(size_t irow, size_t isegment, size_t ielement) {
+    return (*this)(irow, isegment, ielement).to_string();
+}
+
+void Field::zero(size_t irow, size_t isegment) {
+    std::memset(begin(irow, isegment), 0, m_nelement*m_element_size);
+}

@@ -20,10 +20,6 @@ public:
 
     BitsetElement(BitsetField *field, char *begin);
 
-    virtual std::string to_string(size_t ibegin, size_t iend);
-
-    virtual std::string to_string() override;
-
     void set(const defs::pair &pair);
 
     virtual void set(const size_t &ibit);
@@ -36,7 +32,9 @@ public:
 
     bool get(const defs::pair &pair) const;
 
-    virtual bool get(const size_t &ibit) const;
+    bool get(const size_t &ibit) const;
+
+    std::string to_string() override;
 
     size_t nsetbit() const;
 
@@ -63,20 +61,7 @@ public:
 
     static defs::pair rectify_offset(const defs::pair &pair);
 
-/*
-    virtual std::string to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend) {
-        std::string result = "";
-        for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) {
-            result += element(irow, isegment, ielement).to_string() + " ";
-        }
-        return result;
-    }*/
-
-/*
-    std::string to_string(size_t irow, size_t isegment) {
-        return to_string(irow, isegment, 0, m_nbit);
-    }
-*/
+    std::string to_string(size_t irow, size_t isegment, size_t ielement) override;
 
 protected:
     virtual void update_nbit(size_t nbit) {

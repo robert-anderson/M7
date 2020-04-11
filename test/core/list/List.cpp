@@ -23,11 +23,11 @@ TEST(List, ThreadSafety) {
 #pragma omp parallel for default(none), shared(nrow, list)
     for (size_t i = 0; i < nrow; ++i) {
         size_t irow = list.push();
-        list.counter.element(irow) = irow;
+        list.counter(irow) = irow;
     }
 
     for (auto irow{0ul}; irow < list.nrow_per_segment(); ++irow) {
-        ASSERT_EQ(list.counter.element(irow), irow);
+        ASSERT_EQ(list.counter(irow), irow);
     }
 }
 
@@ -49,7 +49,7 @@ TEST(List, Communication){
         for (auto irow{0ul}; irow < nrow; ++irow) {
             ASSERT_EQ(send.push(idst_rank), irow);
             for (auto iint{0ul}; iint < nint; ++iint) {
-                send.counter.element(irow, idst_rank, iint) = flat_index(mpi::irank(), idst_rank, irow, iint);
+                send.counter(irow, idst_rank, iint) = flat_index(mpi::irank(), idst_rank, irow, iint);
             }
         }
     }
@@ -64,7 +64,7 @@ TEST(List, Communication){
         for (auto irow{0ul}; irow < nrow; ++irow) {
             for (auto iint{0ul}; iint < nint; ++iint) {
                 ASSERT_EQ(
-                    recv.counter.element(irow_tot, 0, iint),
+                    recv.counter(irow_tot, 0, iint),
                     flat_index(isend, mpi::irank(), irow, iint)
                 );
             }

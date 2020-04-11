@@ -44,16 +44,12 @@ DeterminantElement DeterminantField::operator()(const size_t &irow, const size_t
     return DeterminantElement(this, element_begin(irow, isegment, ielement));
 }
 
-std::string DeterminantField::to_string(size_t irow, size_t isegment, size_t ibegin, size_t iend) {
-    std::string result = "";
-    for (size_t ielement = 0ul; ielement < m_nelement; ++ielement) {
-        result += (*this)(irow, isegment, ielement).to_string() + " ";
-    }
-    return result;
-}
-
 DeterminantField::DeterminantField(Table *table, size_t nelement, size_t nsite, const std::string &description) :
     BitsetField(table, nelement, nsite * 2, description), m_nsite(nsite) {}
+
+std::string DeterminantField::to_string(size_t irow, size_t isegment, size_t ielement) {
+    return (*this)(irow, isegment, ielement).to_string();
+}
 
 size_t DeterminantElement::AntiDatawordEnumerator::get_dataword(const size_t &idataword) {
     return m_data.get_antidataword(idataword);

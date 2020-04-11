@@ -22,6 +22,11 @@ public:
 
     bool is_complex() const override { return consts::is_complex<T>(); }
 
+public:
+    std::string to_string(size_t irow, size_t isegment, size_t ielement) override {
+        return (*this)(irow, isegment, ielement).to_string();
+    }
+
 };
 
 #endif //SANDBOX2_NUMERICFIELD_H

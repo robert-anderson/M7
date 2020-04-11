@@ -8,26 +8,35 @@
 #include <src/core/table/FlagField.h>
 #include <src/core/table/DeterminantField.h>
 #include <src/core/table/NumericField.h>
-#include <src/core/list/PerforableMappedList.h>
+#include <src/core/list/List.h>
 
 
-struct SpawnList : public PerforableMappedList<DeterminantElement> {
-    DeterminantField determinant;
-    NumericField <defs::wf_t> weight;
+struct SpawnList : public List {
+    DeterminantField m_determinant;
+    NumericField <defs::wf_t> m_weight;
 private:
     struct Flags : public FlagField {
-        Flag parent_initiator;
-        Flags(Table *table, size_t nelement = 1) :
-            FlagField(table, nelement),
-            parent_initiator(this, nelement){}
+        Flag m_parent_initiator;
+        Flags(Table *table, size_t nelement = 1, const std::string &description="") :
+            FlagField(table, nelement, description),
+            m_parent_initiator(this, nelement){}
     };
 
 public:
-    Flags flags;
+    Flags m_flags;
 
-    SpawnList(size_t nsite, size_t nbucket) :
-        PerforableMappedList<DeterminantElement>(determinant, nbucket),
-        determinant(this, 1, nsite), weight(this), flags(this) {}
+    SpawnList(size_t nsite, size_t nsegment) : List(nsegment),
+        m_determinant(this, 1, nsite, "Determinant"),
+        m_weight(this, 1, "Weight"),
+        m_flags(this, 1, "Flags") {}
+
+    size_t add(const size_t isegment, const DeterminantElement &determinant, const defs::wf_t &weight,
+               bool flag_parent_initiator){
+        auto irow = List::push(isegment);
+        m_determinant(irow, isegment) = determinant;
+        m_weight(irow, isegment) = weight;
+        m_flags.m_parent_initiator(irow, isegment) = flag_parent_initiator;
+    }
 };
 
 

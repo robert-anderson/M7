@@ -22,7 +22,7 @@ TEST(PerforableMappedList, Removal) {
             //enclose within scope to ensure destruction of mutex
             auto mutex = list.key_mutex(i * i);
             size_t irow = list.push(mutex, i * i);
-            list.value.element(irow) = i;
+            list.value(irow) = i;
         }
     }
     list.remove(6*6);
@@ -40,7 +40,7 @@ TEST(PerforableMappedList, RemovalAndReuse) {
             //enclose within scope to ensure destruction of mutex
             auto mutex = list.key_mutex(i * i);
             size_t irow = list.push(mutex, i * i);
-            list.value.element(irow) = i;
+            list.value(irow) = i;
         }
     }
     auto irow_available = list.remove(6*6);

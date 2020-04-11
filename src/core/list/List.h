@@ -28,6 +28,9 @@ public:
 
     void zero() override;
 
+    std::string to_string();
+
+
     void communicate();
 };
 

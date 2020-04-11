@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <string>
 #include <typeindex>
+#include <functional>
+#include <cstring>
 
 class Element;
 class Table;
@@ -50,17 +52,22 @@ public:
 
     virtual bool is_complex() const {return false;}
 
-    const std::string &description() const {return m_description;}
+    virtual const std::string description() const {return m_description;}
 
     void expand_table(size_t delta_nrow);
 
     bool is_allocated() const;
+
+    virtual std::string to_string(size_t irow, size_t isegment, size_t ielement);
+
+    void zero(size_t irow, size_t isegment=0);
 
     friend class Table;
 
     friend class Element;
 
 protected:
+
     char *begin(const size_t &irow, const size_t &isegment = 0);
 
     char *element_begin(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);

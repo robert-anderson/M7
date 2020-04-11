@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <cstring>
+#include <functional>
 #include "src/defs.h"
 #include "src/utils.h"
 #include "Field.h"
@@ -34,6 +35,8 @@ protected:
     size_t m_segment_dsize = 0;
     // offset of the beginning of each segment from the beginning of the table
     defs::inds m_segment_doffsets;
+    // for stats output, debugging and other reporting tasks:
+    std::vector<std::function<std::string(const Element *)>> m_printers;
 public:
 
     Table(size_t nsegment = 1);
@@ -57,6 +60,14 @@ public:
     bool compatible_with(const Table &other) const;
 
     bool is_allocated() const;
+
+    std::string row_to_string(size_t irow, size_t isegment);
+
+    virtual std::string to_string();
+
+    virtual std::string to_string(const defs::inds &nrows);
+
+    void print_row(size_t irow, size_t isegment);
 
 private:
     void update_row_size(size_t size);

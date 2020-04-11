@@ -81,16 +81,16 @@ public:
 
     template<typename T>
     static T max(const T *send, size_t iroot = 0) {
-        T *recv;
-        max(send, recv, 1, iroot);
-        return *recv;
+        T recv;
+        max(send, &recv, 1, iroot);
+        return recv;
     }
 
     template<typename T>
     static T all_max(const T *send) {
-        T *recv;
-        all_max(send, recv, 1);
-        return *recv;
+        T recv;
+        all_max(send, &recv, 1);
+        return recv;
     }
 
     template<typename T>
@@ -113,16 +113,16 @@ public:
 
     template<typename T>
     static T min(const T *send, size_t iroot = 0) {
-        T *recv;
-        min(send, recv, 1, iroot);
-        return *recv;
+        T recv;
+        min(send, &recv, 1, iroot);
+        return recv;
     }
 
     template<typename T>
     static T all_min(const T *send) {
-        T *recv;
-        all_min(send, recv, 1);
-        return *recv;
+        T recv;
+        all_min(send, &recv, 1);
+        return recv;
     }
 
     template<typename T>
@@ -145,16 +145,16 @@ public:
 
     template<typename T>
     static T sum(const T *send, size_t iroot = 0) {
-        T *recv;
-        sum(send, recv, 1, iroot);
-        return *recv;
+        T recv;
+        sum(send, &recv, 1, iroot);
+        return recv;
     }
 
     template<typename T>
     static T all_sum(const T *send) {
-        T *recv;
-        all_sum(send, recv, 1);
-        return *recv;
+        T recv;
+        all_sum(send, &recv, 1);
+        return recv;
     }
 
     template<typename T>

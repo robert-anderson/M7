@@ -61,7 +61,7 @@ void Table::update_last_field() {
 }
 
 void Table::print() {
-    utils::print(m_data);
+    std::cout << to_string() << std::endl;
 }
 
 const size_t &Table::nrow_per_segment() const {
@@ -104,3 +104,37 @@ bool Table::compatible_with(const Table &other) const {
 }
 
 bool Table::is_allocated() const {return m_data.data()!= nullptr;}
+
+std::string Table::row_to_string(size_t irow, size_t isegment) {
+    std::string result;
+    for (auto &field : m_fields) {
+        for (size_t ielement = 0ul; ielement < field->m_nelement; ++ielement) {
+            result += field->to_string(irow, isegment, ielement)+"  ";
+        }
+    }
+    return result;
+}
+
+std::string Table::to_string(const defs::inds& nrows) {
+    std::string result = "\nTABLE\n";
+    result+="# fields: "+std::to_string(m_fields.size())+"\n";
+    for (size_t ifield=0ul; ifield<m_fields.size(); ++ifield){
+        result+="  "+std::to_string(ifield)+": "+m_fields[ifield]->description()+"\n";
+    }
+    for (size_t isegment = 0ul; isegment < m_nsegment; ++isegment) {
+        if (!m_nsegment) result += "SEGMENT " + std::to_string(isegment) + "\n";
+        result+="# rows: "+std::to_string(nrows[isegment])+"\n";
+        for (size_t irow = 0ul; irow < nrows[isegment]; ++irow) {
+            result += utils::num_to_string(unsigned(irow))+":  "+row_to_string(irow, isegment) +"\n";
+        }
+    }
+    return result;
+}
+
+std::string Table::to_string() {
+    return to_string(defs::inds(m_nsegment, m_nrow_per_segment));
+}
+
+void Table::print_row(size_t irow, size_t isegment) {
+    std::cout << row_to_string(irow, isegment) << std::endl;
+}

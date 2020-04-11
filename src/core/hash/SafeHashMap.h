@@ -24,7 +24,9 @@ public:
     }
 
     Mutex key_mutex(const T &key) const {
-        return m_bucket_mutex.get(HashMap<T>::bucket(key));
+        const auto result = m_bucket_mutex.get(HashMap<T>::bucket(key));
+        assert(result.index()<HashMap<T>::m_buckets.size());
+        return result;
     }
 
     size_t lookup(Mutex &mutex, const T &key) const {

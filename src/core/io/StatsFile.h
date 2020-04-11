@@ -19,10 +19,6 @@
 template<typename T>
 class StatsElement : public NumericElement<T> {
     using NumericElement<T>::m_field;
-    std::string to_string() const override {
-        const T v = NumericElement<T>::to_number();
-        return utils::num_to_string(v);
-    }
 public:
 
     StatsElement<T>(NumericField<T> *field, char *begin) : NumericElement<T>(field, begin) {}
@@ -39,12 +35,12 @@ public:
         return *this;
     }
 
-    static std::string to_string_fn(const Element *element){
-        auto value = *((T *) element->begin());
+    std::string to_string() override {
+        const T v = **this;
         if (consts::is_complex<T>())
-            return utils::num_to_string(consts::real(value))
-                +utils::num_to_string(consts::imag(value));
-        else return utils::num_to_string(value);
+            return utils::num_to_string(consts::real(v))
+                   + utils::num_to_string(consts::imag(v));
+        else return utils::num_to_string(v);
     }
 };
 
@@ -53,13 +49,11 @@ protected:
     const std::string m_fname;
     std::unique_ptr<std::ofstream> m_file;
     size_t m_nflush = 0;
-public:
-    std::vector<std::function<std::string(const Element*)>> m_printers;
 
 protected:
     void write_header() {
         size_t ncolumn = 0ul;
-        for (auto &column : m_fields) ncolumn += column->is_complex();
+        for (auto &column : m_fields) ncolumn += column->is_complex() ? 2:1;
         *m_file <<
                 "################################\n"
                 "#    M7 FCIQMC Stats Output    #\n"
@@ -92,15 +86,14 @@ public:
             if (!is_allocated()) return; //nothing written
             write_header();
         }
-        auto printer = m_printers.begin();
-        for (auto &column : m_fields) {
-            auto element = (*column)(0);
-            *m_file << (*printer)(&element) << "  ";
-            element.zero();
-            printer++;
-        }
-        *m_file << std::endl;
+        *m_file << to_string() << std::endl;
+        for (auto &column : m_fields) column->zero(0, 0);
         m_nflush++;
+    }
+
+
+    std::string to_string() override {
+        return row_to_string(0, 0);
     }
 
     ~StatsFile() {
@@ -117,9 +110,7 @@ public:
     using NumericField<T>::begin;
 
     StatsField(StatsFile *file, size_t nelement = 1, const std::string &description = "") :
-        NumericField<T>(file, nelement, description){
-        file->m_printers.push_back(StatsElement<T>::to_string_fn);
-    }
+        NumericField<T>(file, nelement, description) {}
 
     StatsElement<T> operator()(const size_t &ielement = 0) {
         assert(ielement < m_nelement);
@@ -128,6 +119,10 @@ public:
     }
 
     bool is_complex() const override { return consts::is_complex<T>(); }
+
+    std::string to_string(size_t irow, size_t isegment, size_t ielement) override {
+        return (*this)(ielement).to_string();
+    }
 
 };
 
