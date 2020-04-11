@@ -43,7 +43,7 @@ public:
     std::string to_string() override {
         const T v = **this;
         if (consts::is_complex<T>())
-            return utils::num_to_string(consts::real(v), 0, fp_precision())
+            return utils::num_to_string(consts::real(v), 0, fp_precision())+" "
                    + utils::num_to_string(consts::imag(v), 0, fp_precision());
         else return utils::num_to_string(v, 0, fp_precision());
     }

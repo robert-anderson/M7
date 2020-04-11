@@ -6,14 +6,16 @@
 #define M7_MPIWRAPPER_H
 
 #include <array>
-#include <mpi.h>
+#ifdef HAVE_MPI
+    #include <mpi.h>
+#endif
 #include <assert.h>
 #include <iostream>
+#include <cstring>
 #include <src/defs.h>
 #include "src/utils.h"
 
-#define USE_MPI 1
-
+#ifdef HAVE_MPI
 template<typename T>
 static const MPI_Datatype mpi_type() {return MPI_Datatype();}
 
@@ -38,7 +40,7 @@ template<> const MPI_Datatype mpi_type<std::complex<double>>(){return MPI_DOUBLE
 template<> const MPI_Datatype mpi_type<std::complex<long double>>(){return MPI_LONG_DOUBLE;}
 
 template<> const MPI_Datatype mpi_type<bool>(){return MPI_CXX_BOOL;}
-
+#endif
 
 struct mpi {
 
@@ -49,6 +51,13 @@ struct mpi {
     static std::string processor_name();
 
     static void barrier();
+
+    enum MpiOp {MpiMax, MpiMin, MpiSum};
+
+#ifdef HAVE_MPI
+    const std::array<MPI_Op, 3> op_map {MPI_MAX, MPI_MIN, MPI_SUM};
+#endif
+
 /*
  * int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
                MPI_Op op, int root, MPI_Comm comm)
@@ -56,13 +65,23 @@ struct mpi {
 
 private:
     template<typename T>
-    static bool reduce(const T *send, T *recv, MPI_Op op, size_t ndata = 1, size_t iroot = 0) {
-        return MPI_Reduce(send, recv, ndata, mpi_type<T>(), op, iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+    static bool reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1, size_t iroot = 0) {
+#ifdef HAVE_MPI
+        return MPI_Reduce(send, recv, ndata, mpi_type<T>(), op_map[op], iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        std::memcpy(recv, send, sizeof(T)*ndata);
+        return true;
+#endif
     }
 
     template<typename T>
-    static bool all_reduce(const T *send, T *recv, MPI_Op op, size_t ndata = 1) {
-        return MPI_Allreduce(send, recv, ndata, mpi_type<T>(), op, MPI_COMM_WORLD) == MPI_SUCCESS;
+    static bool all_reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1) {
+#ifdef HAVE_MPI
+        return MPI_Allreduce(send, recv, ndata, mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        std::memcpy(recv, send, sizeof(T)*ndata);
+        return true;
+#endif
     }
 
 public:
@@ -71,12 +90,12 @@ public:
      */
     template<typename T>
     static bool max(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
-        return reduce(send, recv, MPI_MAX, ndata, iroot);
+        return reduce(send, recv, MpiMax, ndata, iroot);
     }
 
     template<typename T>
     static bool all_max(const T *send, T *recv, size_t ndata = 1) {
-        return all_reduce(send, recv, MPI_MAX, ndata);
+        return all_reduce(send, recv, MpiMax, ndata);
     }
 
     template<typename T>
@@ -103,12 +122,12 @@ public:
      */
     template<typename T>
     static bool min(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
-        return reduce(send, recv, MPI_MIN, ndata, iroot);
+        return reduce(send, recv, MpiMin, ndata, iroot);
     }
 
     template<typename T>
     static bool all_min(const T *send, T *recv, size_t ndata = 1) {
-        return all_reduce(send, recv, MPI_MIN, ndata);
+        return all_reduce(send, recv, MpiMin, ndata);
     }
 
     template<typename T>
@@ -135,12 +154,12 @@ public:
      */
     template<typename T>
     static bool sum(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
-        return reduce(send, recv, MPI_SUM, ndata, iroot);
+        return reduce(send, recv, MpiSum, ndata, iroot);
     }
 
     template<typename T>
     static bool all_sum(const T *send, T *recv, size_t ndata = 1) {
-        return all_reduce(send, recv, MPI_SUM, ndata);
+        return all_reduce(send, recv, MpiSum, ndata);
     }
 
     template<typename T>
@@ -167,7 +186,11 @@ public:
      */
     template<typename T>
     static bool bcast(T *data, const size_t ndata = 1, size_t iroot = 0) {
+#ifdef HAVE_MPI
         return MPI_Bcast((void *) data, ndata, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return true;
+#endif
     }
 
     template<typename T>
@@ -177,14 +200,23 @@ public:
 
     template<typename T>
     static bool bcast(std::vector<T> &data, size_t ndata = 0, size_t iroot = 0) {
+#ifdef HAVE_MPI
         if (!ndata) ndata = data.size();
         return MPI_Bcast((void *) data.data(), ndata, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return true;
+#endif
     }
 
     template<typename T>
     static bool all_to_all(const T *send, const size_t nsend, T *recv, const size_t nrecv) {
+#ifdef HAVE_MPI
         return MPI_Alltoall((void *) send, nsend, mpi_type<T>(),
                             (void *) recv, nrecv, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        assert(nsend==nrecv);
+        return all_reduce(send, recv, MpiMax, nsend);
+#endif
     }
 
     template<typename T>
@@ -200,9 +232,13 @@ private:
     static bool all_to_allv(
             const T *send, const int *sendcounts, const int *senddispls,
             T *recv, const int *recvcounts, const int *recvdispls) {
+#ifdef HAVE_MPI
         return MPI_Alltoallv(
                 (void *) send, sendcounts, senddispls, mpi_type<T>(),
                 (void *) recv, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, senddispls[0]+sendcounts[0], recv, recvdispls[0]+recvcounts[0]);
+#endif
     }
 
 public:
