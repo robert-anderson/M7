@@ -10,18 +10,23 @@
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 #include "src/core/io/FciqmcStatsFile.h"
 #include "src/core/io/InputOptions.h"
+#include "src/core/fermion/DecodedDeterminant.h"
+#include "src/core/thread/PrivateStore.h"
 #include "Propagator.h"
 #include "Wavefunction.h"
+#include "FciqmcScratch.h"
 
 class FciqmcCalculation {
+public:
     const InputOptions m_input;
     RankAllocator<DeterminantElement> m_rank_allocator;
     FciqmcStatsFile m_stats_file;
     std::unique_ptr<Hamiltonian> m_ham;
+    Determinant m_reference;
     std::unique_ptr<Propagator> m_prop;
-    std::unique_ptr<Wavefunction> m_wf;
+    Wavefunction m_wf;
+    std::unique_ptr<FciqmcScratch> m_scratch;
 
-public:
     explicit FciqmcCalculation(const InputOptions &input);
 
     void execute();

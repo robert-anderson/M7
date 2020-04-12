@@ -4,10 +4,10 @@
 
 #if 0
 #include "gtest/gtest.h"
-#include <src/enumerators/VectorCombinationEnumerator.h>
+#include <src/enumerators/ContainerCombinationEnumerator.h>
 #include <src/utils.h>
 
-TEST(VectorCombinationEnumerator, Test) {
+TEST(ContainerCombinationEnumerator, Test) {
     std::vector<std::vector<size_t>> results =
         {
             {10, 11},
@@ -27,7 +27,7 @@ TEST(VectorCombinationEnumerator, Test) {
             {14, 15}
         };
     defs::inds vec{10, 11, 12, 13, 14, 15};
-    VectorCombinationEnumerator enumerator(vec, 2);
+    ContainerCombinationEnumerator enumerator(vec, 2);
     defs::inds inds(2);
     for (auto result : results) {
         enumerator.next(inds);
@@ -36,14 +36,14 @@ TEST(VectorCombinationEnumerator, Test) {
     }
 }
 
-TEST(VectorCombinationEnumerator, Nested) {
+TEST(ContainerCombinationEnumerator, Nested) {
     defs::inds outer{10, 11, 12, 13, 14};
     defs::inds inner{20, 22, 24};
-    VectorCombinationEnumerator outer_enumerator(outer, 3);
+    ContainerCombinationEnumerator outer_enumerator(outer, 3);
     defs::inds outer_inds(3);
     while(outer_enumerator.next(outer_inds)){
         {
-            VectorCombinationEnumerator inner_enumerator(inner, 2);
+            ContainerCombinationEnumerator inner_enumerator(inner, 2);
             defs::inds inner_inds(2);
             while(inner_enumerator.next(inner_inds)) {
                 std::cout << utils::to_string(outer_inds) << utils::to_string(inner_inds) << std::endl;

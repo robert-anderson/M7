@@ -2,7 +2,7 @@
 // Created by rja on 27/02/2020.
 //
 
-#include <src/core/enumerator/VectorCombinationEnumerator.h>
+#include <src/core/enumerator/ContainerCombinationEnumerator.h>
 #include <src/core/fermion/DecodedDeterminant.h>
 #include "Hamiltonian.h"
 
@@ -41,11 +41,11 @@ Determinant Hamiltonian::refine_guess_reference(const DeterminantElement &ref) c
         }
     }
 
-    VectorCombinationEnumerator occ_enumerator(occs.m_inds, 2);
+    ContainerCombinationEnumerator<defs::det_work> occ_enumerator(occs.m_inds, 2);
     defs::inds occ_inds(2);
     while (occ_enumerator.next(occ_inds)) {
         {
-            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, 2);
+            ContainerCombinationEnumerator<defs::det_work> vac_enumerator(vacs.m_inds, 2);
             defs::inds vac_inds(2);
             while (vac_enumerator.next(vac_inds)) {
                 excited = ref;
@@ -91,11 +91,11 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
         }
     }
 
-    VectorCombinationEnumerator occ_enumerator(occs.m_inds, occs.m_nind, 2);
+    ContainerCombinationEnumerator<defs::det_work> occ_enumerator(occs.m_inds, occs.m_nind, 2);
     defs::inds occ_inds(2);
     while (occ_enumerator.next(occ_inds)) {
         {
-            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, vacs.m_nind, 2);
+            ContainerCombinationEnumerator<defs::det_work> vac_enumerator(vacs.m_inds, vacs.m_nind, 2);
             defs::inds vac_inds(2);
             while (vac_enumerator.next(vac_inds)) {
                 connection.zero();

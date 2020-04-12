@@ -2,7 +2,7 @@
 // Created by rja on 27/02/2020.
 //
 
-#include <src/core/enumerator/VectorCombinationEnumerator.h>
+#include <src/core/enumerator/ContainerCombinationEnumerator.h>
 #include "ExactPropagator.h"
 
 ExactPropagator::ExactPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
@@ -41,12 +41,12 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
         }
     }
 
-    VectorCombinationEnumerator occ_enumerator(occs.m_inds, occs.m_nind, 2);
+    ContainerCombinationEnumerator<defs::det_work> occ_enumerator(occs.m_inds, occs.m_nind, 2);
     defs::inds occ_inds(2);
 
     while (occ_enumerator.next(occ_inds)) {
         {
-            VectorCombinationEnumerator vac_enumerator(vacs.m_inds, vacs.m_nind, 2);
+            ContainerCombinationEnumerator<defs::det_work> vac_enumerator(vacs.m_inds, vacs.m_nind, 2);
             defs::inds vac_inds(2);
             while (vac_enumerator.next(vac_inds)) {
 

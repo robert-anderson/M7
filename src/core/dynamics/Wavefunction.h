@@ -12,11 +12,17 @@
 #include "SpawnList.h"
 #include "Propagator.h"
 
+class FciqmcCalculation;
+
 class Wavefunction {
+    FciqmcCalculation *m_fciqmc;
+    const InputOptions &m_input;
+    Determinant& m_reference;
+    const std::unique_ptr<Propagator> &m_prop;
+
     WalkerList m_data;
     SpawnList m_send, m_recv;
 
-    Determinant m_reference;
     defs::ham_t m_ref_proj_energy_num;
     defs::wf_t m_reference_weight;
     size_t m_reference_row;
@@ -26,7 +32,6 @@ class Wavefunction {
 
 public:
 
-    const InputOptions &m_input;
     /*
      * Square norm is sum_i(|w_i|^2)
      */
@@ -42,10 +47,9 @@ public:
     size_t m_noccupied_determinant;
 
 
-    Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
-                 const Determinant &reference);
+    Wavefunction(FciqmcCalculation *fciqmc);
 
-    void propagate(std::unique_ptr<Propagator> &propagator);
+    void propagate();
 
     void communicate();
 
@@ -53,14 +57,13 @@ public:
         // TODO
     }
 
-    void annihilate(const std::unique_ptr<Propagator> &propagator);
+    void annihilate();
 
     void write_iter_stats(FciqmcStatsFile &stats_file);
 
 private:
-    void annihilate_row(const size_t &irow_recv, const std::unique_ptr<Propagator> &propagator,
-                                  Connection &connection, defs::wf_comp_t &aborted_weight,
-                                  defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw);
+    void annihilate_row(const size_t &irow_recv, defs::wf_comp_t &aborted_weight,
+                        defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw);
 };
 
 

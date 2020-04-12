@@ -7,15 +7,14 @@
 
 #include "src/core/table/DeterminantField.h"
 
-struct DecodedDeterminant {
+struct alignas(defs::cache_line_size) DecodedDeterminant {
     const size_t m_nbit;
     const size_t m_element_dsize;
-    defs::inds m_inds;
+    defs::det_work m_inds{};
     size_t m_nind = 0ul;
 
     explicit DecodedDeterminant(const Field* field):
-    m_nbit(field->nbit()), m_element_dsize(field->element_dsize()),
-    m_inds(m_nbit) {}
+    m_nbit(field->nbit()), m_element_dsize(field->element_dsize()) {}
 
     explicit DecodedDeterminant(const DeterminantElement &det_elem):
     DecodedDeterminant(det_elem.field()){}
@@ -23,13 +22,13 @@ struct DecodedDeterminant {
     virtual void update(const DeterminantElement &det_elem) = 0;
 };
 
-struct OccupiedOrbitals : DecodedDeterminant {
+struct alignas(defs::cache_line_size) OccupiedOrbitals : DecodedDeterminant {
     OccupiedOrbitals(const Field* field);
     OccupiedOrbitals(const DeterminantElement &det_elem);
     void update(const DeterminantElement &det_elem) override;
 };
 
-struct VacantOrbitals : DecodedDeterminant {
+struct alignas(defs::cache_line_size) VacantOrbitals : DecodedDeterminant {
     VacantOrbitals(const Field* field);
     VacantOrbitals(const DeterminantElement &det_elem);
     void update(const DeterminantElement &det_elem) override;

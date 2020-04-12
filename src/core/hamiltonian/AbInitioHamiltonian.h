@@ -23,7 +23,7 @@ public:
     explicit AbInitioHamiltonian(const std::string &fname);
 
     using Hamiltonian::get_element_0;
-    defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const override;
+    defs::ham_t get_element_0(const defs::det_work &occs, const size_t &nocc) const override;
 
     using Hamiltonian::get_element_1;
     defs::ham_t get_element_1(const AntisymConnection &connection) const override;

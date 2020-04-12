@@ -32,7 +32,7 @@ auto &AbInitioHamiltonian::int_1() const { return m_int_1; }
 
 auto &AbInitioHamiltonian::int_2() const { return m_int_2; }
 
-defs::ham_t AbInitioHamiltonian::get_element_0(const defs::inds &occs, const size_t &nocc) const {
+defs::ham_t AbInitioHamiltonian::get_element_0(const defs::det_work &occs, const size_t &nocc) const {
     defs::ham_t element = m_int_0;
     for (size_t i=0ul; i<nocc; ++i) {
         auto const &occi = occs[i];

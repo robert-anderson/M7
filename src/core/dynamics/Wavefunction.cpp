@@ -4,25 +4,24 @@
 
 #include <src/core/thread/Atomic.h>
 #include "Wavefunction.h"
+#include "FciqmcCalculation.h"
 
 
-Wavefunction::Wavefunction(const InputOptions &input, const std::unique_ptr<Propagator> &propagator,
-                           const Determinant &reference) :
-    m_input(input),
-    m_send(reference.nsite(), mpi::nrank()), m_recv(reference.nsite(), 1),
-    m_data(reference.nsite(), input.nwalker_target * input.walker_factor_initial),
-    m_reference(reference) {
-    m_data.expand((size_t) (input.walker_factor_initial * input.nwalker_target));
+Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
+    m_fciqmc(fciqmc), m_input(fciqmc->m_input), m_reference(m_fciqmc->m_reference),
+    m_prop(fciqmc->m_prop), m_send(m_reference.nsite(), mpi::nrank()), m_recv(m_reference.nsite(), 1),
+    m_data(m_reference.nsite(), m_input.nwalker_target * m_input.walker_factor_initial) {
+    m_data.expand((size_t) (m_input.walker_factor_initial * m_input.nwalker_target));
     m_send.recv(&m_recv);
-    m_send.expand((size_t) (input.buffer_factor_initial * input.nwalker_target));
-    m_recv.expand((size_t) (input.buffer_factor_initial * input.nwalker_target));
+    m_send.expand((size_t) (m_input.buffer_factor_initial * m_input.nwalker_target));
+    m_recv.expand((size_t) (m_input.buffer_factor_initial * m_input.nwalker_target));
     auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
     m_reference_row =
-        m_data.add(reference, ref_weight, propagator->m_ham->get_energy(reference), true, true, false);
+        m_data.add(m_reference, ref_weight, m_fciqmc->m_ham->get_energy(m_reference), true, true, false);
     m_square_norm = std::pow(std::abs(ref_weight), 2);
 }
 
-void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
+void Wavefunction::propagate() {
     /*
      * Loop over all rows in the m_data list and if the row is not empty:
      *      ascertain the initiator status of the determinant
@@ -40,7 +39,7 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
-#pragma omp parallel default(none) shared(propagator)
+#pragma omp parallel default(none)
     {
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
@@ -53,7 +52,7 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
             }
             auto weight = m_data.m_weight(irow);
             const auto det = m_data.m_determinant(irow);
-            weight = propagator->round(*weight);
+            weight = m_prop->round(*weight);
 
             if (std::abs(*weight) == 0.0) {
                 m_data.remove(det, irow);
@@ -71,15 +70,15 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
                 delta_ninitiator--;
             }
             if (m_data.m_flags.m_reference_connection(irow)) {
-                const auto contrib = *weight * propagator->m_ham->get_element(m_reference, det);
+                const auto contrib = *weight * m_prop->m_ham->get_element(m_reference, det);
                 reference_energy_numerator += contrib;
             }
             auto hdiag = m_data.m_hdiag(irow);
             auto flag_deterministic = m_data.m_flags.m_deterministic(irow);
 
             //const_cast<DeterminantElement&>(det).print();
-            propagator->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
-            propagator->diagonal(hdiag, weight, delta_square_norm, delta_nw);
+            m_prop->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
+            m_prop->diagonal(hdiag, weight, delta_square_norm, delta_nw);
         }
         as_atomic(m_ninitiator) += delta_ninitiator;
         as_atomic(m_delta_square_norm) += delta_square_norm;
@@ -93,9 +92,10 @@ void Wavefunction::communicate() {
     m_send.communicate();
 }
 
-void Wavefunction::annihilate_row(const size_t &irow_recv, const std::unique_ptr<Propagator> &propagator,
-                                  Connection &connection, defs::wf_comp_t &aborted_weight,
+void Wavefunction::annihilate_row(const size_t &irow_recv, defs::wf_comp_t &aborted_weight,
                                   defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw) {
+    auto conn = m_fciqmc->m_scratch->conn->get(0);
+
     auto det = m_recv.m_determinant(irow_recv);
     auto delta_weight = m_recv.m_weight(irow_recv);
     // zero magnitude weights should not have been communicated
@@ -114,14 +114,14 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, const std::unique_ptr
             return;
         }
         irow_main = m_data.push(mutex, det);
-        m_data.m_hdiag(irow_main) = propagator->m_ham->get_energy(det);
-        connection.zero();
-        connection.connect(m_reference, det);
-        if (connection.nexcit() < 3) {
+        m_data.m_hdiag(irow_main) = m_prop->m_ham->get_energy(det);
+        conn.zero();
+        conn.connect(m_reference, det);
+        if (conn.nexcit() < 3) {
             m_data.m_flags.m_reference_connection(irow_main) = true;
             assert(m_data.m_flags.m_reference_connection(irow_main));
-        }
-        else assert(!m_data.m_flags.m_reference_connection(irow_main));
+        } else
+            assert(!m_data.m_flags.m_reference_connection(irow_main));
     }
     auto weight = m_data.m_weight(irow_main);
     delta_square_norm += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
@@ -129,9 +129,9 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, const std::unique_ptr
     weight += *delta_weight;
 }
 
-void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
+void Wavefunction::annihilate(){
     m_aborted_weight = 0;
-#pragma omp parallel default(none) shared(propagator)
+#pragma omp parallel default(none)
     {
         Connection connection(m_reference);
         defs::wf_comp_t aborted_weight = 0;
@@ -139,7 +139,7 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
         defs::wf_comp_t delta_nw = 0;
 #pragma omp for
         for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
-            annihilate_row(irow_recv, propagator, connection, aborted_weight, delta_square_norm, delta_nw);
+            annihilate_row(irow_recv, aborted_weight, delta_square_norm, delta_nw);
         }
         as_atomic(m_aborted_weight) += aborted_weight;
         as_atomic(m_delta_square_norm) += delta_square_norm;
@@ -162,7 +162,7 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
     //assert(m_data.m_flags.m_reference_connection(23));
     stats_file.m_ref_proj_energy_num() = m_ref_proj_energy_num;
     stats_file.m_ref_weight() = m_reference_weight;
-    stats_file.m_ref_proj_energy() = m_ref_proj_energy_num/m_reference_weight;
+    stats_file.m_ref_proj_energy() = m_ref_proj_energy_num / m_reference_weight;
     stats_file.m_nwalker() = m_nw;
     stats_file.m_aborted_weight() = m_aborted_weight;
     stats_file.m_ninitiator() = m_ninitiator;

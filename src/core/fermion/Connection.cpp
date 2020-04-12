@@ -6,8 +6,7 @@
 #include <algorithm>
 
 Connection::Connection(const Field* field):
-    m_element_dsize(field->element_dsize()), m_nbit(field->nbit()), m_ann(m_nbit), m_cre(m_nbit) {
-}
+    m_element_dsize(field->element_dsize()), m_nbit(field->nbit()) {}
 
 Connection::Connection(const DeterminantElement &ket, const DeterminantElement &bra) : Connection(ket.field()) {
     assert(ket.compatible_with(bra));
@@ -56,10 +55,10 @@ const size_t &Connection::nexcit() const {
 }
 
 
-AntisymConnection::AntisymConnection(const Field *field): Connection(field), m_com(m_nbit){}
+AntisymConnection::AntisymConnection(const Field *field): Connection(field) {}
 
 AntisymConnection::AntisymConnection(const DeterminantElement &ket, const DeterminantElement &bra) :
-    Connection(ket, bra), m_com(m_nbit) {
+    Connection(ket, bra) {
     connect(ket, bra);
 }
 

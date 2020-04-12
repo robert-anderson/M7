@@ -28,11 +28,11 @@
  * add: append annihilation/creation index pair
  */
 
-class Connection {
+class alignas(defs::cache_line_size) Connection {
     const size_t m_element_dsize;
 protected:
     const size_t m_nbit;
-    defs::inds m_ann, m_cre;
+    defs::det_work m_ann{}, m_cre{};
     size_t m_nann, m_ncre;
 
 public:
@@ -40,13 +40,13 @@ public:
     Connection(const DeterminantElement &ket, const DeterminantElement &bra);
     explicit Connection(const DeterminantElement &ket);
 
-    const defs::inds& ann() const {return m_ann;}
-    void ann(const defs::inds &v) {m_ann.assign(v.begin(), v.end()); m_nann=v.size();}
+    const defs::det_work& ann() const {return m_ann;}
+    //void ann(const defs::inds &v) {m_ann.assign(v.begin(), v.end()); m_nann=v.size();}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
     const size_t& nann() const {return m_nann;}
 
-    const defs::inds& cre() const {return m_cre;}
-    void cre(const defs::inds &v) {m_cre.assign(v.begin(), v.end()); m_ncre=v.size();}
+    const defs::det_work& cre() const {return m_cre;}
+    //void cre(const defs::inds &v) {m_cre.assign(v.begin(), v.end()); m_ncre=v.size();}
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     const size_t& ncre() const {return m_ncre;}
 
@@ -79,8 +79,8 @@ public:
 /*
  * a connection in which the common indices and antisymmetric phase is computed
  */
-class AntisymConnection : public Connection {
-    defs::inds m_com;
+class alignas(defs::cache_line_size) AntisymConnection : public Connection {
+    defs::det_work m_com{};
     size_t m_ncom;
     bool m_phase;
 
@@ -93,8 +93,8 @@ public:
     void apply(const DeterminantElement &ket);
     void apply(const DeterminantElement &ket, DeterminantElement &bra) override;
 
-    const defs::inds& com() const {return m_com;}
-    void com(const defs::inds &v) {m_com.assign(v.begin(), v.end()); m_ncom=v.size();}
+    const defs::det_work& com() const {return m_com;}
+    //void com(const defs::inds &v) {m_com.assign(v.begin(), v.end()); m_ncom=v.size();}
     const size_t& com(const size_t& i) const {return m_com[i];}
     const size_t& ncom() const {return m_ncom;}
     const bool& phase() const {return m_phase;}

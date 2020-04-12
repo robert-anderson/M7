@@ -40,6 +40,8 @@ template<> const MPI_Datatype mpi_type<std::complex<double>>(){return MPI_DOUBLE
 template<> const MPI_Datatype mpi_type<std::complex<long double>>(){return MPI_LONG_DOUBLE;}
 
 template<> const MPI_Datatype mpi_type<bool>(){return MPI_CXX_BOOL;}
+
+const std::array<MPI_Op, 3> op_map {MPI_MAX, MPI_MIN, MPI_SUM};
 #endif
 
 struct mpi {
@@ -53,10 +55,6 @@ struct mpi {
     static void barrier();
 
     enum MpiOp {MpiMax, MpiMin, MpiSum};
-
-#ifdef HAVE_MPI
-    const std::array<MPI_Op, 3> op_map {MPI_MAX, MPI_MIN, MPI_SUM};
-#endif
 
 /*
  * int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,

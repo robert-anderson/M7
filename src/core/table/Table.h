@@ -11,12 +11,13 @@
 #include <functional>
 #include "src/defs.h"
 #include "src/utils.h"
+#include "src/core/thread/AlignedAllocator.h"
 #include "Field.h"
 
 class Table {
 protected:
     // data buffer
-    std::vector<defs::data_t> m_data;
+    std::vector<defs::data_t, AlignedAllocator<defs::data_t, defs::cache_line_size>> m_data;
     // all associated fields
     std::vector<Field *> m_fields;
     // size of one row in bytes
