@@ -29,7 +29,7 @@ public:
                const RankAllocator<DeterminantElement> &rank_allocator);
 
     void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
-                  defs::ham_comp_t &delta_square_norm) const;
+                  defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) const;
 
 
     virtual void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
@@ -39,22 +39,19 @@ public:
         return weight;
     }
 
-    void update(const size_t icycle, defs::ham_comp_t norm, defs::ham_comp_t norm_growth) {
+    void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
         if (icycle % m_input.shift_update_period) return;
         if (!vary_shift) {
-            if (norm < m_input.nwalker_target) return;
+            if (nwalker < m_input.nwalker_target) return;
             else vary_shift = true;
         }
-        m_shift -= m_input.shift_damp * consts::real_log(norm_growth) / m_tau;
+        m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / m_tau;
     }
 
     void write_iter_stats(FciqmcStatsFile &stats_file) {
         stats_file.m_timestep() = m_tau;
         stats_file.m_diagonal_shift() = m_shift;
     }
-
-
-//void evolve(const Perforable)
 };
 
 

@@ -32,7 +32,7 @@ void FciqmcCalculation::execute() {
         m_wf->consolidate_incoming_weight();
         //logger::write("\nannihilating...");
         m_wf->annihilate(m_prop);
-        m_prop->update(icycle, m_wf->norm(), m_wf->m_nw_growth_rate);
+        m_prop->update(icycle, m_wf->m_nw, m_wf->m_nw_growth_rate);
         write_iter_stats(icycle);
     }
 }

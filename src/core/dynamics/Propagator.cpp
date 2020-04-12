@@ -14,9 +14,10 @@ Propagator::Propagator(const InputOptions &input, const std::unique_ptr<Hamilton
 
 
 void Propagator::diagonal(
-    const NumericElement<defs::ham_comp_t> &hdiag,
-    NumericElement<defs::ham_t> &weight, defs::ham_comp_t &delta_square_norm) const {
-    auto tmp = weight;
+    const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight, 
+    defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) const {
+    auto tmp = *weight;
     weight *= (1.0 - (*hdiag - m_shift) * m_tau);
-    delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(*tmp), 2);
+    delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
+    delta_nw += std::abs(*weight) - std::abs(tmp);
 }

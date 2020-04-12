@@ -35,13 +35,15 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
 
     m_data.synchronize();
     m_delta_square_norm = 0;
+    m_delta_nw = 0;
     m_ref_proj_energy_num = 0;
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
 #pragma omp parallel default(none) shared(propagator)
     {
-        defs::ham_comp_t delta_square_norm = 0;
+        defs::wf_comp_t delta_square_norm = 0;
+        defs::wf_comp_t delta_nw = 0;
         defs::ham_t reference_energy_numerator = 0;
         int delta_ninitiator = 0;
 #pragma omp for
@@ -77,10 +79,11 @@ void Wavefunction::propagate(std::unique_ptr<Propagator> &propagator) {
 
             //const_cast<DeterminantElement&>(det).print();
             propagator->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
-            propagator->diagonal(hdiag, weight, delta_square_norm);
+            propagator->diagonal(hdiag, weight, delta_square_norm, delta_nw);
         }
         as_atomic(m_ninitiator) += delta_ninitiator;
         as_atomic(m_delta_square_norm) += delta_square_norm;
+        as_atomic(m_delta_nw) += delta_nw;
         as_atomic(m_ref_proj_energy_num) += reference_energy_numerator;
     }
     assert(m_ninitiator >= 0);
@@ -92,7 +95,7 @@ void Wavefunction::communicate() {
 
 void Wavefunction::annihilate_row(const size_t &irow_recv, const std::unique_ptr<Propagator> &propagator,
                                   Connection &connection, defs::wf_comp_t &aborted_weight,
-                                  defs::wf_comp_t &delta_square_norm) {
+                                  defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw) {
     auto det = m_recv.m_determinant(irow_recv);
     auto delta_weight = m_recv.m_weight(irow_recv);
     // zero magnitude weights should not have been communicated
@@ -122,6 +125,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, const std::unique_ptr
     }
     auto weight = m_data.m_weight(irow_main);
     delta_square_norm += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
+    delta_nw += std::abs(*weight + *delta_weight) - std::abs(*weight);
     weight += *delta_weight;
 }
 
@@ -132,12 +136,14 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
         Connection connection(m_reference);
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
+        defs::wf_comp_t delta_nw = 0;
 #pragma omp for
         for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
-            annihilate_row(irow_recv, propagator, connection, aborted_weight, delta_square_norm);
+            annihilate_row(irow_recv, propagator, connection, aborted_weight, delta_square_norm, delta_nw);
         }
         as_atomic(m_aborted_weight) += aborted_weight;
         as_atomic(m_delta_square_norm) += delta_square_norm;
+        as_atomic(m_delta_nw) += delta_nw;
     }
     m_recv.zero();
     m_ninitiator = mpi::all_sum(m_ninitiator);
@@ -145,13 +151,9 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
     m_square_norm = mpi::all_sum(m_square_norm);
     m_noccupied_determinant = m_data.nfilled();
     m_noccupied_determinant = mpi::all_sum(m_noccupied_determinant);
-    //m_nw_growth_rate = std::sqrt((m_square_norm + m_delta_square_norm) / m_square_norm);
+    m_nw_growth_rate = (m_nw + m_delta_nw) / m_nw;
     m_square_norm += m_delta_square_norm;
-    assert(m_data.m_flags.m_reference_connection(23));
-}
-
-defs::ham_comp_t Wavefunction::norm() const {
-    return std::sqrt(m_square_norm);
+    m_nw += m_delta_nw;
 }
 
 void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
@@ -159,7 +161,7 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
     stats_file.m_ref_proj_energy_num() = m_ref_proj_energy_num;
     stats_file.m_ref_weight() = m_reference_weight;
     stats_file.m_ref_proj_energy() = m_ref_proj_energy_num/m_reference_weight;
-    stats_file.m_nwalker() = norm();
+    stats_file.m_nwalker() = m_nw;
     stats_file.m_aborted_weight() = m_aborted_weight;
     stats_file.m_ninitiator() = m_ninitiator;
     stats_file.m_noccupied_det() = m_noccupied_determinant;

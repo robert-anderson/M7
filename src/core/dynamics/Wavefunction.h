@@ -57,11 +57,10 @@ public:
 
     void write_iter_stats(FciqmcStatsFile &stats_file);
 
-    defs::ham_comp_t norm() const;
-
 private:
-    void annihilate_row(const size_t& irow_recv, const std::unique_ptr<Propagator> &propagator,
-                        Connection& connection, defs::wf_comp_t& aborted_weight, defs::wf_comp_t &delta_square_norm);
+    void annihilate_row(const size_t &irow_recv, const std::unique_ptr<Propagator> &propagator,
+                                  Connection &connection, defs::wf_comp_t &aborted_weight,
+                                  defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw);
 };
 
 
