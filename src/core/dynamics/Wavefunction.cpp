@@ -148,7 +148,9 @@ void Wavefunction::annihilate(const std::unique_ptr<Propagator> &propagator) {
     m_recv.zero();
     m_ninitiator = mpi::all_sum(m_ninitiator);
     m_delta_square_norm = mpi::all_sum(m_delta_square_norm);
+    m_delta_nw = mpi::all_sum(m_delta_nw);
     m_square_norm = mpi::all_sum(m_square_norm);
+    m_nw = mpi::all_sum(m_nw);
     m_noccupied_determinant = m_data.nfilled();
     m_noccupied_determinant = mpi::all_sum(m_noccupied_determinant);
     m_nw_growth_rate = (m_nw + m_delta_nw) / m_nw;
