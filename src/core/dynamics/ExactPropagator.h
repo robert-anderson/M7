@@ -10,8 +10,7 @@
 class ExactPropagator : public Propagator {
 
 public:
-    ExactPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
-                    const RankAllocator<DeterminantElement> &rank_allocator);
+    ExactPropagator(FciqmcCalculation *fciqmc);
 
     void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
                               SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override ;

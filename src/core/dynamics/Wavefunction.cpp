@@ -133,7 +133,6 @@ void Wavefunction::annihilate(){
     m_aborted_weight = 0;
 #pragma omp parallel default(none)
     {
-        Connection connection(m_reference);
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
@@ -159,7 +158,6 @@ void Wavefunction::annihilate(){
 }
 
 void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
-    //assert(m_data.m_flags.m_reference_connection(23));
     stats_file.m_ref_proj_energy_num() = m_ref_proj_energy_num;
     stats_file.m_ref_weight() = m_reference_weight;
     stats_file.m_ref_proj_energy() = m_ref_proj_energy_num / m_reference_weight;

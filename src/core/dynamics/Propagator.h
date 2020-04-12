@@ -14,8 +14,11 @@
 
 #include <src/core/io/FciqmcStatsFile.h>
 
+class FciqmcCalculation;
+
 class Propagator {
 public:
+    FciqmcCalculation *m_fciqmc;
     const InputOptions &m_input;
     const std::unique_ptr<Hamiltonian> &m_ham;
     const RankAllocator<DeterminantElement> &m_rank_allocator;
@@ -24,9 +27,7 @@ public:
     bool vary_shift = false;
     defs::ham_comp_t m_largest_spawn_magnitude = 0;
 
-    Propagator(const InputOptions &input,
-               const std::unique_ptr<Hamiltonian> &ham,
-               const RankAllocator<DeterminantElement> &rank_allocator);
+    Propagator(FciqmcCalculation *fciqmc);
 
     void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
                   defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) const;
