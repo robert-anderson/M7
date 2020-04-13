@@ -6,13 +6,13 @@
 #define M7_ALIGNEDALLOCATOR_H
 
 #include <cstddef>
+#include <stdlib.h>
 #include <assert.h>
 #include <limits>
 #include <src/defs.h>
 
 template<class T, size_t alignment>
 class AlignedAllocator {
-    T *m_malloc_ptr = nullptr;
 public:
     // type definitions
     typedef T value_type;
@@ -41,11 +41,9 @@ public:
      * - nothing to do because the allocator has no state
      */
     AlignedAllocator() throw() {
-        //assert(alignof(T) == alignment);
     }
 
     AlignedAllocator(const AlignedAllocator &alloc) throw() {
-        m_malloc_ptr = alloc.m_malloc_ptr;
     }
 
     template<class U>
@@ -62,9 +60,10 @@ public:
 
     // allocate but don't initialize num elements of type T
     pointer allocate(size_type num, const void * = 0) {
-        m_malloc_ptr = (pointer) (::operator new(num * sizeof(T) + alignment));
-        const auto overshoot = ((size_t) m_malloc_ptr) % alignment;
-        return pointer((char *) m_malloc_ptr + alignment - overshoot);
+        void *ret;
+        posix_memalign(&ret, alignment, num * sizeof(T));
+        assert(((size_t)ret)%alignment==0);
+        return (pointer)ret;
     }
 
     // initialize elements of allocated storage p with value value
@@ -81,7 +80,7 @@ public:
 
     // deallocate storage p of deleted elements
     void deallocate(pointer p, size_type num) {
-        ::operator delete((void *) m_malloc_ptr);
+        ::operator delete((void *) p);
     }
 };
 

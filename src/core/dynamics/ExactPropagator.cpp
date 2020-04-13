@@ -11,6 +11,8 @@ ExactPropagator::ExactPropagator(FciqmcCalculation *fciqmc): Propagator(fciqmc) 
 void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                                    SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
 
+    defs::ham_comp_t largest_spawned_magnitude = 0.0;
+
     auto anticonn = m_fciqmc->m_scratch->anticonn->get(0);
     OccupiedOrbitals occs(src_det);
     assert(occs.m_nind>0);
@@ -33,9 +35,8 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
             if (consts::float_is_zero(helement)) continue;
 
             auto delta = -*weight * m_tau * helement;
-            auto irank = m_rank_allocator.get_rank(dst_det);
             if (consts::float_is_zero(delta)) continue;
-            spawn_list.add(irank, dst_det, delta, flag_initiator);
+            spawn(spawn_list, dst_det, delta, largest_spawned_magnitude, flag_initiator);
         }
     }
 
@@ -55,9 +56,8 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
                 if (consts::float_is_zero(helement)) continue;
 
                 auto delta = -*weight * m_tau * helement;
-                auto irank = m_rank_allocator.get_rank(dst_det);
                 if (consts::float_is_zero(delta)) continue;
-                spawn_list.add(irank, dst_det, delta, flag_initiator);
+                spawn(spawn_list, dst_det, delta, largest_spawned_magnitude, flag_initiator);
             }
         }
     }

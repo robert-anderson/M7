@@ -9,6 +9,7 @@
 #include "src/core/multidim/NdArray.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/sample/Aliaser.h"
+#include "src/core/thread/PrivateStore.h"
 
 /*
  * An implementation of the Heat Bath Excitation generator of A. A. Holmes et al
@@ -28,10 +29,14 @@
  * determinant in question.
  */
 
+class StochasticPropagator;
+
+class DeterminantSampler;
 
 class HeatBathSampler {
 public:
-    const Hamiltonian &m_h;
+    const Hamiltonian* m_h;
+    PRNG &m_prng;
     const size_t m_nbit;
     const bool m_spin_conserving;
     NdArray<defs::prob_t, 2> m_D;
@@ -40,7 +45,10 @@ public:
     NdArray<defs::prob_t, 3> m_H_tot;
     NdArray<defs::prob_t, 4> m_P4;
 
-    HeatBathSampler(const Hamiltonian &h);
+    static const size_t nelement_det_sampler;
+    std::unique_ptr<PrivateStore<DeterminantSampler>> det_sampler;
+
+    HeatBathSampler(const Hamiltonian* m_h, PRNG &prng);
 
 };
 

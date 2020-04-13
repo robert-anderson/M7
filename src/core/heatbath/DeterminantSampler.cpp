@@ -4,18 +4,14 @@
 
 #include "DeterminantSampler.h"
 
-DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed, const Field *field, PRNG &prng) :
-    m_precomputed(precomputed), m_prng(prng), m_work_connection(field), m_det(precomputed.m_h.nsite()),
-    m_occ(field), m_vac(field), m_nspinorb(precomputed.m_nbit),
+DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed):
+    m_precomputed(precomputed), m_prng(precomputed.m_prng),
+    m_det(precomputed.m_h->nsite()), m_anticonn(m_det),
+    m_occ(m_det), m_vac(m_det), m_nspinorb(precomputed.m_nbit),
     m_P1(m_nspinorb, 0.0), m_P2_qp(m_nspinorb, 0.0), m_P2_pq(m_nspinorb, 0.0),
-    m_P1_aliaser(m_nspinorb, prng), m_P2_aliaser(m_nspinorb, prng),
-    m_P3_aliaser(m_nspinorb, prng), m_P4_aliaser(m_nspinorb, prng),
-    m_single_excitation(field), m_double_excitation(field) {}
-
-DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed, const DeterminantElement &det, PRNG &prng) :
-    DeterminantSampler(precomputed, det.field(), prng) {
-    update(det);
-}
+    m_P1_aliaser(m_nspinorb, m_prng), m_P2_aliaser(m_nspinorb, m_prng),
+    m_P3_aliaser(m_nspinorb, m_prng), m_P4_aliaser(m_nspinorb, m_prng),
+    m_single_excitation(m_det), m_double_excitation(m_det) {}
 
 
 void DeterminantSampler::draw_pq(size_t &p, size_t &q) {
@@ -86,10 +82,10 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
         return;
     }
     // (4) decide which excitation ranks are to be generated
-    m_work_connection.zero();
-    m_work_connection.add(p, r);
-    m_work_connection.apply(m_det);
-    helement_single = m_precomputed.m_h.get_element_1(m_work_connection);
+    m_anticonn.zero();
+    m_anticonn.add(p, r);
+    m_anticonn.apply(m_det);
+    helement_single = m_precomputed.m_h->get_element_1(m_anticonn);
     auto htot_rpq = *m_precomputed.m_H_tot.view(p, q, r);
     helement_double = 0.0;
 
@@ -101,7 +97,7 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
             prob_double = 0.0;
             return;
         }
-        helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
+        helement_double = m_precomputed.m_h->get_element_2(p, q, r, s);
         prob_double = proposal(p, q, r, s, helement_single);
     } else {
         prob_single = std::abs(helement_single) / (htot_rpq + std::abs(helement_single));
@@ -117,13 +113,14 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
                 prob_double = 0.0;
                 return;
             }
-            helement_double = m_precomputed.m_h.get_element_2(p, q, r, s);
+            helement_double = m_precomputed.m_h->get_element_2(p, q, r, s);
             prob_double = proposal(p, q, r, s, helement_single);
         }
     }
 }
 
 void DeterminantSampler::draw() {
+    assert(!m_det.is_zero()); // call to update method required first
     size_t p, q, r, s;
     defs::prob_t single_prob, double_prob;
     defs::ham_t helement_single, helement_double;
@@ -246,4 +243,12 @@ void DeterminantSampler::set_P2(std::vector<defs::prob_t> &P2, const size_t &p) 
         } else P2[q] = 0.0;
     }
     prob_utils::normalize(P2);
+}
+
+void DeterminantSampler::update(const DeterminantElement &det) {
+    m_det = det;
+    m_occ.update(det);
+    m_vac.update(det);
+    set_P1(m_P1);
+    m_P1_aliaser.update(m_P1);
 }

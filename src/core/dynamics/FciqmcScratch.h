@@ -7,6 +7,7 @@
 
 #include <src/core/fermion/DecodedDeterminant.h>
 #include <src/core/fermion/Connection.h>
+#include <src/core/heatbath/DeterminantSampler.h>
 #include "src/core/thread/PrivateStore.h"
 
 struct FciqmcScratch {

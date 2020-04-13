@@ -5,6 +5,7 @@
 #include "FciqmcCalculation.h"
 #include "src/core/io/Logging.h"
 #include "ExactPropagator.h"
+#include "StochasticPropagator.h"
 
 
 FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
@@ -13,9 +14,13 @@ FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
     m_ham(std::make_unique<AbInitioHamiltonian>(input.fcidump_path)),
     m_reference(m_ham->guess_reference(input.spin_restrict)),
     m_wf(this), m_scratch(std::make_unique<FciqmcScratch>(m_reference)) {
-    m_prop = std::make_unique<ExactPropagator>(this),
-        //m_prop = std::make_unique<StochasticPropagator>(input, m_ham, m_rank_allocator);
-        m_prop->m_shift += m_ham->get_energy(m_reference);
+
+    if (input.exact_propagation) {
+        m_prop = std::make_unique<ExactPropagator>(this);
+    } else {
+        m_prop = std::make_unique<StochasticPropagator>(this);
+    }
+    m_prop->m_shift += m_ham->get_energy(m_reference);
 
     logger::write("Initializing FCIQMC Calculation...");
     logger::write("Reference determinant was detected to be: " + m_reference.to_string());

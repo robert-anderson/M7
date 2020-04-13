@@ -15,7 +15,7 @@ private:
     const HeatBathSampler &m_precomputed;
     PRNG &m_prng;
     Determinant m_det;
-    AntisymConnection m_work_connection;
+    AntisymConnection m_anticonn;
     OccupiedOrbitals m_occ;
     VacantOrbitals m_vac;
     const size_t &m_nspinorb;
@@ -33,17 +33,9 @@ private:
 
 public:
 
-    DeterminantSampler(const HeatBathSampler &precomputed, const Field* field, PRNG &prng);
+    DeterminantSampler(const HeatBathSampler &precomputed);
 
-    DeterminantSampler(const HeatBathSampler &precomputed, const DeterminantElement& det, PRNG &prng);
-
-    void update(const DeterminantElement& det){
-        m_det = det;
-        m_occ.update(det);
-        m_vac.update(det);
-        set_P1(m_P1);
-        m_P1_aliaser.update(m_P1);
-    }
+    void update(const DeterminantElement& det);
 
     void set_P1(std::vector<defs::prob_t> &P1);
 

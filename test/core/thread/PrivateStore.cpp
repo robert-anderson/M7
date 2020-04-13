@@ -16,7 +16,7 @@ struct alignas(defs::cache_line_size) TestType {
 
 TEST(PrivateStore, Test) {
     const size_t nelement = 6;
-    PrivateStore<TestType> store(nelement);
+    PrivateStore<TestType> store(nelement, TestType());
     bool all_passed = true;
 #pragma omp parallel
     {

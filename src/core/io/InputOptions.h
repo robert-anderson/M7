@@ -31,6 +31,7 @@ public:
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;
     size_t prng_seed = 0;
+    size_t prng_ngen = 1000;
     size_t ndet_semistoch = 0;
     size_t spin_restrict = 0;
     double walker_factor_initial = 1.0;

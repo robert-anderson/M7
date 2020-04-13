@@ -8,19 +8,44 @@
 #include <src/core/sample/PRNG.h>
 #include <src/core/heatbath/HeatBathSampler.h>
 #include "Propagator.h"
+#include "FciqmcCalculation.h"
 
 
 class StochasticPropagator : public Propagator {
+public:
     PRNG m_prng;
     HeatBathSampler m_precomputed_heat_bath_sampler;
-public:
-    StochasticPropagator(const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
-                         const RankAllocator<DeterminantElement> &rankAllocator);
+    StochasticPropagator(FciqmcCalculation *fciqmc) :
+        Propagator(fciqmc),
+        m_prng(fciqmc->m_input.prng_seed, fciqmc->m_input.prng_ngen),
+        m_precomputed_heat_bath_sampler(fciqmc->m_ham.get(), m_prng) {}
 
-public:
     void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
-                      SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override;
-
+                      SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override {
+#if 0
+        size_t nattempt = std::ceil(std::abs(*weight));
+        DeterminantSampler determinant_sampler(m_precomputed_heat_bath_sampler, determinant, m_prng);
+        for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
+            determinant_sampler.draw();
+            if (determinant_sampler.single_generated()) {
+                assert(!consts::float_is_zero(determinant_sampler..m_single.m_helement));
+                assert(!consts::float_is_zero(excit.m_single.m_prob));
+                auto excited = excit.m_single.get_connection();
+                auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau *
+                             (m_ham->get_element(excited, determinant) / excit.m_single.m_prob);
+                add_to_spawn_list(excited, delta, flag_initiator, spawn_list);
+            }
+        }
+        if (!excit.m_double.is_null()) {
+            assert(!consts::float_is_zero(excit.m_double.m_helement));
+            assert(!consts::float_is_zero(excit.m_double.m_prob));
+            auto excited = excit.m_double.get_connection();
+            auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau *
+                         (m_ham->get_element(excited, determinant) / excit.m_double.m_prob);
+            add_to_spawn_list(excited, delta, flag_initiator, spawn_list);
+        }
+#endif
+    }
 };
 
 #endif //M7_STOCHASTICPROPAGATOR_H

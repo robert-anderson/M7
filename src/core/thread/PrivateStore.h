@@ -16,10 +16,9 @@ class PrivateStore {
     std::vector<T, AlignedAllocator<T, defs::cache_line_size>> m_data;
 
 public:
-    template<typename ...Args>
-    PrivateStore(size_t nelement_per_thread, Args... construct_args):
+    PrivateStore(size_t nelement_per_thread, const T& t):
     m_nthread(omp_get_max_threads()), m_nelement_per_thread(nelement_per_thread),
-    m_data(m_nthread*nelement_per_thread, {construct_args...}){}
+    m_data(m_nthread*nelement_per_thread, t){}
 
     T& get(const size_t &ielement=0){
         auto const ithread = omp_get_thread_num();

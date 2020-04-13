@@ -31,6 +31,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-R,--prng_seed", prng_seed,
                "Seed value for the mt19937 PRNG");
 
+    add_option("--prng_ngen", prng_ngen,
+               "Number of PRNGs to batch generate with mt19937");
+
     add_option("-s,--ndet_semistoch", ndet_semistoch,
                "Number of determinants selected to comprise the deterministic subspace");
 
