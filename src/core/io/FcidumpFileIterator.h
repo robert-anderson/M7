@@ -25,15 +25,15 @@ static constexpr std::array<std::array<size_t, 4>, 8> orderings{
 template<typename T>
 class FcidumpFileIterator : public TensorFileIterator<T> {
 public:
-    const size_t m_isymm;
     const size_t m_norb;
+    const size_t m_isymm;
     const size_t m_nelec;
     const defs::inds m_orbsym;
     const bool m_spin_resolved;
 
     FcidumpFileIterator(const std::string &filename) :
             TensorFileIterator<T>(filename, 4, false),
-            m_isymm(isymm(filename)), m_norb(read_header_int(filename, "NORB")),
+            m_norb(read_header_int(filename, "NORB")), m_isymm(m_norb>3?isymm(filename):1),
             m_nelec(read_header_int(filename, "NELEC")),
             m_orbsym(read_header_array(filename, "ORBSYM")),
             m_spin_resolved(read_header_bool(filename, "UHF") || read_header_bool(filename, "TREL")) {

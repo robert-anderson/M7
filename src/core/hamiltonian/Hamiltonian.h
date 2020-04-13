@@ -101,7 +101,7 @@ public:
             determinant(this, 1, nsite), helement(this) {}
     };
 
-    ConnectionList all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps = 0.0) const;
+    ConnectionList all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps = 1e-1) const;
 
 };
 

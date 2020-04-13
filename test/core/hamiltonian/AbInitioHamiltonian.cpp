@@ -49,3 +49,16 @@ TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
         }
     }
 }
+
+TEST(AbInitioHamiltonian, RhfEnergy) {
+    const auto benchmark = -108.65146156994338;
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    Determinant hf_det(ham.nsite());
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){hf_det.set(0, i); hf_det.set(1, i);}
+    hf_det.print();
+
+    auto elem = ham.get_element_0(hf_det);
+    ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
+    ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
+    ASSERT_TRUE(consts::floats_equal(ham.get_energy(hf_det), benchmark));
+}

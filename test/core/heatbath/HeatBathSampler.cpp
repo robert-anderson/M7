@@ -252,7 +252,7 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
     /*
      * ensure that the ratio of generation frequency to proposal probability is uniform
      */
-    AbInitioHamiltonian ham(defs::assets_root + "/ROHF_Cr2_12o12e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
     PRNG prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
@@ -263,6 +263,10 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
     const size_t nattempt = 1e6;
     const defs::ham_comp_t eps = 1e-2;
     auto all_connections = ham.all_connections_of_det(source_det, eps);
+
+    for (size_t irow = 0ul; irow<all_connections.nrow_per_segment(); ++irow)
+        ASSERT_EQ(all_connections.determinant(irow).spin(), 0);
+
     std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
 
     size_t irow;

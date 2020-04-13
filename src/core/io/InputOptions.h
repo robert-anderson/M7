@@ -10,12 +10,12 @@
 #include <utility>
 
 
-class InputError: public std::exception
-{
+class InputError : public std::exception {
     const std::string m_msg;
-    InputError(std::string msg):m_msg(std::move(msg)){}
-    virtual const char* what() const throw()
-    {
+
+    InputError(std::string msg) : m_msg(std::move(msg)) {}
+
+    virtual const char *what() const throw() {
         return m_msg.c_str();
     }
 };
@@ -45,12 +45,16 @@ public:
 
     explicit InputOptions(CLI::App &app);
 
-    template <typename T>
+    template<typename T>
     void add_option(const std::string cli_options,
-            T &variable_to_bind, const std::string description, bool required=false){
+                    T &variable_to_bind, const std::string description, bool required = false) {
         auto opt = m_app.add_option(cli_options, variable_to_bind, description);
         if (required) opt->required();
         else opt->capture_default_str();
+    }
+
+    void add_flag(const std::string cli_options, bool &variable_to_bind, const std::string description) {
+        m_app.add_flag(cli_options, variable_to_bind, description);
     }
 
     static const std::string description;

@@ -68,7 +68,7 @@ public:
 
     void set(const defs::inds &inds, const T &value) {
         assert(inds.size() == 4);
-        assert(inds[2] == ((size_t) -1) && inds[3] == ((size_t) -1));
+        assert(inds[2] == ~0ul && inds[3] == ~0ul);
         set(inds[0], inds[1], value);
     }
 
@@ -99,7 +99,8 @@ public:
         /*
          * return the one-body integral between the two SPINORS indexed by i and j
          */
-        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
+        if (!m_spin_resolved && ((i<m_norb)!=(j<m_norb))) return 0.0;
+        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i % m_norb, j % m_norb);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
 

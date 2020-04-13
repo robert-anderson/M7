@@ -1,0 +1,112 @@
+#INFO: **** input file is /users/k1507071/work/N2/Li2/setup.py ****
+from neci_strings import write_inp
+import os
+from subprocess import PIPE, Popen
+import itertools
+import host_strings
+from glob import glob
+import pyscf
+from pyscf.fciqmcscf import serializable_nevpt2
+pyscf_dir = os.path.abspath('{}/..'.format(os.path.dirname(pyscf.__file__)))
+
+kwargs = {
+    'atom': 'Li 0 0 0; H 0 0 1.0',
+    'spin': 0,
+    'basis': 'sto-3g',
+    'verbose':4,
+    'symmetry': True,
+    'symmetry_subgroup': 'C2v'
+}
+
+mol = pyscf.gto.Mole(**kwargs)
+mol.build()
+mf = pyscf.scf.RHF(mol)
+mf.kernel()
+
+fciqmc = pyscf.fciqmcscf.FCIQMCCI(mol)
+try:
+    pyscf.fciqmcscf.fciqmc.run_standalone(fciqmc, mf)
+except OSError: pass
+
+fci = pyscf.fci.FCI(mol, mf.mo_coeff)
+print "FCI energy:", fci.kernel(verbose=4)[0]
+
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'login3.pri.rosalind2.alces.network', '3.10.0-957.5.1.el7.x86_64', '#1 SMP Fri Feb 1 14:54:57 UTC 2019', 'x86_64', 'x86_64')  Threads 24
+Python 2.7.16 |Anaconda, Inc.| (default, Mar 14 2019, 21:00:58) 
+[GCC 7.3.0]
+numpy 1.16.3  scipy 1.2.1
+Date: Mon Apr 13 16:51:46 2020
+PySCF version 1.6
+PySCF path  /users/k1507071/code/pyscf/pyscf
+GIT HEAD      ref: refs/heads/master
+GIT master branch  cdc56e168cb15f47e8cdc791a92d689fa9b655af
+
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 4
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry True subgroup C2v
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 Li     0.000000000000   0.000000000000  -0.250000000000 AA    0.000000000000   0.000000000000  -0.472431531141 Bohr
+[INPUT]  2 H      0.000000000000   0.000000000000   0.750000000000 AA    0.000000000000   0.000000000000   1.417294593424 Bohr
+
+nuclear repulsion = 1.58753163276
+point group symmetry = Coov, use subgroup C2v
+num. orbitals of irrep A1 = 4
+num. orbitals of irrep B1 = 1
+num. orbitals of irrep B2 = 1
+number of shells = 4
+number of NR pGTOs = 18
+number of NR cGTOs = 6
+basis = sto-3g
+ecp = {}
+CPU time:         2.60
+
+
+******** <class 'pyscf.scf.hf_symm.SymAdaptedRHF'> ********
+method = SymAdaptedRHF-RHF
+initial guess = minao
+damping factor = 0
+level shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+DIIS start cycle = 1
+DIIS space = 8
+SCF tol = 1e-09
+SCF gradient tol = None
+max. SCF cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /users/k1507071/work/N2/Li2/tmpPZUwh2
+max_memory 4000 MB (current use 57 MB)
+Freeze 0 electrons in irreps []
+    4 free electrons in irreps A1 B1 B2
+Set gradient conv threshold to 3.16228e-05
+init E= -7.66183428602915
+HOMO (A1) = -0.302199893571379  LUMO (A1) = 0.0234670422682057
+cycle= 1 E= -7.75982756133593  delta_E= -0.098  |g|= 0.0904  |ddm|= 1.27
+HOMO (A1) = -0.311319854848374  LUMO (A1) = 0.0789958050081163
+cycle= 2 E= -7.76580309002001  delta_E= -0.00598  |g|= 0.026  |ddm|= 0.196
+HOMO (A1) = -0.320917780362409  LUMO (A1) = 0.0767862591992271
+cycle= 3 E= -7.76707315269621  delta_E= -0.00127  |g|= 0.0102  |ddm|= 0.0911
+HOMO (A1) = -0.316787565225457  LUMO (A1) = 0.077002381178237
+cycle= 4 E= -7.7673617978875  delta_E= -0.000289  |g|= 0.000461  |ddm|= 0.0669
+HOMO (A1) = -0.31667379154151  LUMO (A1) = 0.0768038255208805
+cycle= 5 E= -7.76736212585109  delta_E= -3.28e-07  |g|= 9.39e-05  |ddm|= 0.00274
+HOMO (A1) = -0.316656920225016  LUMO (A1) = 0.0768476670261862
+cycle= 6 E= -7.76736213573781  delta_E= -9.89e-09  |g|= 2.01e-06  |ddm|= 0.000373
+HOMO (A1) = -0.316657091036748  LUMO (A1) = 0.0768482967782441
+cycle= 7 E= -7.76736213574847  delta_E= -1.07e-11  |g|= 3.17e-07  |ddm|= 1.23e-05
+HOMO (A1) = -0.316657039730157  LUMO (A1) = 0.0768484332867673
+Extra cycle  E= -7.76736213574856  delta_E= -8.88e-14  |g|= 8.15e-08  |ddm|= 8.69e-07
+converged SCF energy = -7.76736213574856
+rhf orbitals detected
+******** FCIQMC options ********
+Number of walkers = 10000
+Maximum number of iterations = -1
+FCIQMC output file: neci.out_9
+FCI energy: -7.784460280031213

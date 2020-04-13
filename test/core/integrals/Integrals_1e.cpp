@@ -12,7 +12,7 @@ TEST(Integrals_1e, TwoFoldCheckReal) {
      * values specified in the FCIDUMP and validating against stored values
      */
     typedef double T;
-    std::string fname = defs::assets_root+"/ROHF_Cr2_12o12e/FCIDUMP";
+    std::string fname = defs::assets_root+"/RHF_Cr2_12o12e/FCIDUMP";
     Integrals_1e<T, 2> ints(fname);
     FcidumpFileIterator<T> file_iterator(fname);
     defs::inds inds(4);

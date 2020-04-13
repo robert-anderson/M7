@@ -1,5 +1,9 @@
 
 add_subdirectory(DHF_Be_STO-3G)
+add_subdirectory(RHF_N2_6o6e)
+add_subdirectory(RHF_N2_CCPVTZ)
+add_subdirectory(RHF_LiH_STO-3G)
+add_subdirectory(RHF_H2_STO-3G)
 add_subdirectory(4e8o_relativistic)
-add_subdirectory(ROHF_Cr2_12o12e)
+add_subdirectory(RHF_Cr2_12o12e)
 add_subdirectory(parity_test)

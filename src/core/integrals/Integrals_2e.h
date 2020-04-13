@@ -84,8 +84,9 @@ public:
         auto iflat = flat_index(icase, i, j, k, l);
         auto conjd_value = case_to_tconj[icase] ? consts::conj(value) : value;
         if (consts::float_is_zero(m_data[iflat])) m_data[iflat] = conjd_value;
-        else
+        else {
             assert(consts::floats_nearly_equal(m_data[iflat], conjd_value));
+        }
     }
 
     void set(
@@ -132,7 +133,11 @@ public:
          * return spin-orbital indexed integral from indices in chemists' ordering
          */
         if (m_spin_resolved) return get(i, j, k, l);
-        else return get(i%m_norb, j%m_norb, k%m_norb, l%m_norb);
+        else {
+            // enforce spin symmetry
+            if (((i<m_norb)!=(j<m_norb)) || ((k<m_norb)!=(l<m_norb))) return 0.0;
+            return get(i%m_norb, j%m_norb, k%m_norb, l%m_norb);
+        }
     }
 
     T element(

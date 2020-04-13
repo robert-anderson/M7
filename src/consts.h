@@ -41,7 +41,7 @@ namespace consts {
     }
 
     template<typename T>
-    static constexpr T real(T &v) {
+    static constexpr T real(const T &v) {
         static_assert(!is_complex<T>(), "Real part of complex values should be taken by overloads.");
         return v;
     }
@@ -143,7 +143,7 @@ namespace consts {
     }
 
     template<typename T>
-    static constexpr bool floats_nearly_equal(T v1, T v2, typename component_t<T>::type eps=1e-14){
+    static constexpr bool floats_nearly_equal(T v1, T v2, typename component_t<T>::type eps=1e-12){
         return float_nearly_zero(v1-v2, eps);
     }
 

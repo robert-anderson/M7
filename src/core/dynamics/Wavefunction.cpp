@@ -39,13 +39,13 @@ void Wavefunction::propagate() {
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
-#pragma omp parallel default(none)
+//#pragma omp parallel default(none)
     {
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
         defs::ham_t reference_energy_numerator = 0;
         int delta_ninitiator = 0;
-#pragma omp for
+//#pragma omp for
         for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
             if (m_data.row_empty(irow)) {
                 continue;
@@ -54,7 +54,7 @@ void Wavefunction::propagate() {
             const auto det = m_data.m_determinant(irow);
             weight = m_prop->round(*weight);
 
-            if (std::abs(*weight) == 0.0) {
+            if (consts::float_is_zero(*weight)) {
                 m_data.remove(det, irow);
                 continue;
             }
@@ -102,6 +102,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, defs::wf_comp_t &abor
     assert(!consts::float_is_zero(*delta_weight));
     size_t irow_main;
 
+    det.print();
     auto mutex = m_data.key_mutex(det);
     irow_main = m_data.lookup(mutex, det);
     if (irow_main == ~0ul) {

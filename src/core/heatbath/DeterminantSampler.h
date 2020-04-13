@@ -8,13 +8,13 @@
 
 #include "HeatBathSampler.h"
 
-class DeterminantSampler {
+class alignas(defs::cache_line_size) DeterminantSampler {
 public:
     enum Outcome{no_excitations, single_excitation, double_excitation, both_excitations};
 private:
     const HeatBathSampler &m_precomputed;
     PRNG &m_prng;
-    Determinant m_det;
+    Determinant m_src_det;
     AntisymConnection m_anticonn;
     OccupiedOrbitals m_occ;
     VacantOrbitals m_vac;
@@ -28,7 +28,9 @@ private:
     std::vector<defs::prob_t> m_P2_pq; // prob of picking p given q picked first
 
     AntisymConnection m_single_excitation, m_double_excitation;
+    Determinant m_single_dst_det, m_double_dst_det;
     defs::prob_t m_single_prob, m_double_prob;
+
     Outcome m_outcome = no_excitations;
 
 public:
@@ -74,6 +76,16 @@ public:
     AntisymConnection& get_double() {
         assert(double_generated());
         return m_double_excitation;
+    }
+
+    const Determinant &get_single_dst_det(){
+        assert(single_generated());
+        return m_single_dst_det;
+    }
+
+    const Determinant &get_double_dst_det(){
+        assert(double_generated());
+        return m_double_dst_det;
     }
 
     const defs::prob_t& get_single_prob() const {return m_single_prob;}

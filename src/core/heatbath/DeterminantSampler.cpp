@@ -4,14 +4,15 @@
 
 #include "DeterminantSampler.h"
 
-DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed):
+DeterminantSampler::DeterminantSampler(const HeatBathSampler &precomputed) :
     m_precomputed(precomputed), m_prng(precomputed.m_prng),
-    m_det(precomputed.m_h->nsite()), m_anticonn(m_det),
-    m_occ(m_det), m_vac(m_det), m_nspinorb(precomputed.m_nbit),
+    m_src_det(precomputed.m_h->nsite()), m_anticonn(m_src_det),
+    m_occ(m_src_det), m_vac(m_src_det), m_nspinorb(precomputed.m_nbit),
     m_P1(m_nspinorb, 0.0), m_P2_qp(m_nspinorb, 0.0), m_P2_pq(m_nspinorb, 0.0),
     m_P1_aliaser(m_nspinorb, m_prng), m_P2_aliaser(m_nspinorb, m_prng),
     m_P3_aliaser(m_nspinorb, m_prng), m_P4_aliaser(m_nspinorb, m_prng),
-    m_single_excitation(m_det), m_double_excitation(m_det) {}
+    m_single_excitation(m_src_det), m_double_excitation(m_src_det),
+    m_single_dst_det(m_src_det), m_double_dst_det(m_src_det) {}
 
 
 void DeterminantSampler::draw_pq(size_t &p, size_t &q) {
@@ -38,7 +39,7 @@ void DeterminantSampler::draw_r(const size_t &p, const size_t &q, size_t &r) {
     m_P3_aliaser.update(m_precomputed.m_P3.view(p, q, 0), m_precomputed.m_nbit);
     assert(consts::floats_nearly_equal(m_P3_aliaser.norm(), 1.0, 1e-14));
     r = m_P3_aliaser.draw();
-    if (m_det.get(r)) r = ~0ul;
+    if (m_src_det.get(r)) r = ~0ul;
 }
 
 void DeterminantSampler::draw_r(const size_t &p, const size_t &q, size_t &r, defs::prob_t &prob) {
@@ -67,7 +68,7 @@ void DeterminantSampler::draw_s(const size_t &p, const size_t &q, const size_t &
     m_P4_aliaser.update(m_precomputed.m_P4.view(p, q, r, 0), m_nspinorb);
     assert(consts::floats_nearly_equal(m_P4_aliaser.norm(), 1.0, 1e-14));
     s = m_P4_aliaser.draw();
-    if (m_det.get(s)) s = ~0ul;
+    if (m_src_det.get(s)) s = ~0ul;
 }
 
 
@@ -84,7 +85,7 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
     // (4) decide which excitation ranks are to be generated
     m_anticonn.zero();
     m_anticonn.add(p, r);
-    m_anticonn.apply(m_det);
+    m_anticonn.apply(m_src_det);
     helement_single = m_precomputed.m_h->get_element_1(m_anticonn);
     auto htot_rpq = *m_precomputed.m_H_tot.view(p, q, r);
     helement_double = 0.0;
@@ -120,7 +121,7 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
 }
 
 void DeterminantSampler::draw() {
-    assert(!m_det.is_zero()); // call to update method required first
+    assert(!m_src_det.is_zero()); // call to update method required first
     size_t p, q, r, s;
     defs::prob_t single_prob, double_prob;
     defs::ham_t helement_single, helement_double;
@@ -130,10 +131,12 @@ void DeterminantSampler::draw() {
         m_double_excitation.zero();
         m_double_excitation.add(p, q, r, s);
         m_double_excitation.sort();
+        m_double_excitation.apply(m_src_det, m_double_dst_det);
         m_double_prob = double_prob;
         if (single_prob > 0) {
             m_single_excitation.zero();
             m_single_excitation.add(p, r);
+            m_single_excitation.apply(m_src_det, m_single_dst_det);
             m_single_prob = single_prob;
             m_outcome = both_excitations;
         } else {
@@ -143,6 +146,7 @@ void DeterminantSampler::draw() {
         if (single_prob > 0) {
             m_single_excitation.zero();
             m_single_excitation.add(p, r);
+            m_single_excitation.apply(m_src_det, m_single_dst_det);
             m_single_prob = single_prob;
             m_outcome = single_excitation;
         } else {
@@ -186,11 +190,10 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
     assert(*m_precomputed.m_P4.view(p, q, r, s) >= 0);
     assert(*m_precomputed.m_P4.view(p, q, r, s) <= 1);
 
-
     /*
      * alternative probability given in Appendix B of the reference
-    return 0.25*m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
-           (*m_precomputed.m_P4.view(p, q, r, s));
+     * return 0.25*m_P1[p] * m_P2_qp[q] * p_double(p, q, r) * (*m_precomputed.m_P3.view(p, q, r)) *
+     *      (*m_precomputed.m_P4.view(p, q, r, s));
      */
 
     result += m_P1[p] * m_P2_qp[q] *
@@ -246,7 +249,7 @@ void DeterminantSampler::set_P2(std::vector<defs::prob_t> &P2, const size_t &p) 
 }
 
 void DeterminantSampler::update(const DeterminantElement &det) {
-    m_det = det;
+    m_src_det = det;
     m_occ.update(det);
     m_vac.update(det);
     set_P1(m_P1);

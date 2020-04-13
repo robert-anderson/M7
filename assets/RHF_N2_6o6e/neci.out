@@ -1,0 +1,654 @@
+ Number of processors:                    12
+ Processor                     1 /                   12  as head node.
+ Processor                     3 /                   12  moving to local output.
+ Processor                     4 /                   12  moving to local output.
+ Processor                     5 /                   12  moving to local output.
+ outfile=NodeFile5           
+ Processor                     6 /                   12  moving to local output.
+ outfile=NodeFile6           
+ Processor                     7 /                   12  moving to local output.
+ outfile=NodeFile7           
+ Processor                     8 /                   12  moving to local output.
+ outfile=NodeFile8           
+ Processor                     9 /                   12  moving to local output.
+ outfile=NodeFile9           
+ Processor                    10 /                   12  moving to local output.
+ outfile=NodeFile10          
+ Processor                    11 /                   12  moving to local output.
+ outfile=NodeFile11          
+ Processor                    12 /                   12  moving to local output.
+ outfile=NodeFile12          
+ Processor                     2 /                   12  moving to local output.
+ outfile=NodeFile2           
+ outfile=NodeFile3           
+ outfile=NodeFile4           
+ Sum:                    78
+ Memory Manager initialised with  99999.0 MB
+
+ ================================================================
+ Compiled on Jul 31 2019 at 15:13:18
+ Compiled using configuration:
+     cmake-GNU-par-DEBUG
+ VCS BASE repository version:
+     8e31416eb6985c065a19c5c6623588283860e92e
+ Working directory: 
+     /mnt/lustre/morty/k1507071/code/auto_casscf/test/neci_0
+ Running on: nodek47.pri.rosalind2.alces.network
+ Started running on 01/08/2019 at 01:16:05
+ ================================================================
+
+ Processing arguments/mnt/lustre/morty/k1507071/code/auto_casscf/test/neci_0/neci.inp                                                                                                                                                                                               
+ Reading from file: /mnt/lustre/morty/k1507071/code/auto_casscf/test/neci_0/neci.inp
+ Using the default set of defaults.
+
+****************************************************************
+
+title
+system read noorder
+electrons 6
+symignoreenergies
+freeformat
+sym 0 0 0 0
+nobrillouintheorem
+nonuniformrandexcits 4ind-weighted
+endsys
+calc
+methods
+method vertex fcimc
+endmethods
+totalwalkers 100000.0
+memoryfacpart 10.0
+memoryfacspawn 20.0
+seed 14
+startsinglepart
+shiftdamp 0.05
+truncinitiator
+addtoinitiator 3.0
+allrealcoeff
+realspawncutoff 0.4
+jump-shift
+stepsshift 5
+maxwalkerbloom 3
+load-balance-blocks off
+nmcyc -1
+rdmsamplingiters 200
+semi-stochastic 1
+pops-core 100
+endcalc
+integral
+freeze 0 0
+endint
+logging
+calcrdmonfly 3 500 50
+write-spin-free-rdm
+printonerdm
+rdm-main-size-fac 1
+rdm-spawn-size-fac 1
+rdm-recv-size-fac 1
+binarypops
+endlog
+end
+
+****************************************************************
+
+ Allocating each processor as a separate node.
+ Processor      Node
+         0         0
+         1         1
+         2         2
+         3         3
+         4         4
+         5         5
+         6         6
+         7         7
+         8         8
+         9         9
+        10        10
+        11        11
+ I am the node root for node                     0
+======== SYSTEM ==========
+  NUMBER OF ELECTRONS :     6
+  No restriction on the spin state of the system, TSPN :  F
+  GLOBAL MS :                     0
+  *** GENERIC SYSTEM ***  
+ Only one irrep found. Turning off symmetry for rest of calculation.
+  NUMBER OF SPIN ORBITALS IN BASIS :    12
+*** CREATING BASIS FNs FROM FCIDUMP ***
+  Maximum number of symmetries:   1
+ Turning Symmetry off
+  Generating abelian symmetry table with  0 generators
+  Number of symmetry classes: 1
+HF determinant not yet defined.
+      1      1      0      0      0     -1 ( 0, 0, 0) 0   0       -2.969617689       -2.969617689
+      2      2      0      0      0      1 ( 0, 0, 0) 0   0       -2.969617689       -2.969617689
+      3      3      0      0      0     -1 ( 0, 0, 0) 0   0       -2.861045387       -2.861045387
+      4      4      0      0      0      1 ( 0, 0, 0) 0   0       -2.861045387       -2.861045387
+      5      5      0      0      0     -1 ( 0, 0, 0) 0   0       -2.861045387       -2.861045387
+      6      6      0      0      0      1 ( 0, 0, 0) 0   0       -2.861045387       -2.861045387
+      7      7      0      0      0     -1 ( 0, 0, 0) 0   0       -2.584926311       -2.584926311
+      8      8      0      0      0      1 ( 0, 0, 0) 0   0       -2.584926311       -2.584926311
+      9      9      0      0      0     -1 ( 0, 0, 0) 0   0       -2.584926311       -2.584926311
+     10     10      0      0      0      1 ( 0, 0, 0) 0   0       -2.584926311       -2.584926311
+     11     11      0      0      0     -1 ( 0, 0, 0) 0   0       -2.322903591       -2.322903591
+     12     12      0      0      0      1 ( 0, 0, 0) 0   0       -2.322903591       -2.322903591
+ Turning Symmetry off
+*** READING PRIMITIVE INTEGRALS FROM FCIDUMP ***
+ UMatSize:                   231
+Memory required for integral storage:     0.1762390137E-02 Mb/Shared Memory
+Two-electron integrals with a magnitude over    0.1000000E-07 are screened
+ Number of non-zero integrals:                   264
+ ECORE=  -98.333946744398901     
+ Setting normal GetUMatEl routine
+ N_alpha:3 ; N_beta:3 ; LMS:0 ; NEl:6
+ Total momentum                    0                    0                    0
+ Requested momentum                    0                    0                    0
+ Total spin                    0 Requested spin                    0
+ fDet                    1                    2                    3                    4                    5                    6
+ Fermi det (D0):(    1,    2,    3,    4,    5,    6)
+ Symmetry:  ( 0, 0, 0) 0
+ Fock operator energy:  -115.71736366826997     
+ Setting normal GetUMatEl routine
+ Double run in use.
+ Number of simultaneous walker distributions:                     2
+ Number of sign components in bit representation of determinant:                     2
+Setting integer length of determinants as bit-strings to:      4
+Setting integer bit-length of determinants as bit-strings to:     64
+ SYMMETRY MULTIPLICATION TABLE
+ No Symmetry table found.
+                    1  Symmetry PAIRS
+                    1  DISTINCT ORBITAL PAIR PRODUCT SYMS
+ Symmetry and spin of orbitals correctly set up for excitation generators.
+ Simply transferring this into a spin orbital representation.
+ SpinOrbSymLabel: 
+                    1                    0
+                    2                    0
+                    3                    0
+                    4                    0
+                    5                    0
+                    6                    0
+                    7                    0
+                    8                    0
+                    9                    0
+                   10                    0
+                   11                    0
+                   12                    0
+ SymInvLabel: 
+                    0                    0
+ Not storing the H matrix.
+ <D0|H|D0>=  -108.65146156994336     
+ <D0|T|D0>=  -17.383416923871081     
+ FDet has     3 alpha electrons, and     3 beta electrons.
+                         3  alpha-alpha occupied electron pairs
+                         3  beta-beta occupied electron pairs
+                         9  alpha-beta occupied electron pairs
+                         3 alpha-alpha (vacant) hole pairs
+                         3 beta-beta (vacant) hole pairs
+                         9 alpha-beta (vacant) hole pairs
+
+ Performing Parallel FCIQMC....
+
+ Generated reference determinants:
+(    1,    2,    3,    4,    5,    6) E =   -108.651461570
+(    1,    2,    3,    4,    5,    6) E =   -108.651461570
+Symmetry of reference determinant is:          0
+Symmetry of reference determinant from spin orbital symmetry info is:          0
+*********** INITIATOR METHOD IN USE ***********
+Starting with only the reference determinant in the fixed initiator space.
+Value for seed is:           14
+Reference Energy set to:      -108.6514615699
+Highest energy determinant is (approximately):     -106.522949969888    
+Corresponding to a correlation energy of:      2.12851160005556    
+ Calculating approximate pDoubles for use with excitation generator by looking a excitations from reference.
+     99 double excitations, and      18 single excitations found from reference. This will be used to calculate pDoubles.
+ pDoubles set to:       0.846154
+ pSingles set to:       0.153846
+Small system. Setting initial timestep to be  0.07500 although this may be inappropriate. Care needed
+ Using initial time-step:    7.4999999999999997E-002
+Will dynamically update timestep to limit spawning probability to   3.00000
+Initial Diagonal Shift:         0.0000000000
+ Connectivity of HF determinant is:                   117
+Low memory requested for walkers, so increasing memory to 20Mb to avoid memory errors
+Memory allocated for a maximum particle number per node of:         524288
+ The average current signs before death will be stored for use in the RDMs.
+ Determinant related persistent storage requires:      44.000000 Mb / processor
+Spawning vectors allowing for a total of       333320 particles to be spawned in any one iteration per core.
+Storing walkers in hash-table. Algorithm is now formally linear scaling with walker number
+Length of hash-table:            5833
+Length of hash-table as a fraction of targetwalkers:              0.70000
+Reference processor is:        4
+Initial reference is: (    1,    2,    3,    4,    5,    6)
+Initial number of particles set to          1 and shift will be held at     0.000 until particle number gets to           99996
+ Initial memory (without excitgens + temp arrays) consists of :      36.344238 Mb/Processor
+ Only one array of memory to store main particle list allocated...
+ Initial memory allocation sucessful...
+ =============================================
+ Stochastically calculating the reduced density matrices from the FCIQMC wavefunction
+ incl. explicit connections to the following HF determinant:(    1,    2,    3,    4,    5,    6)
+ Calculating the energy from the reduced density matrix. This requires the 2 electron RDM from which the 1-RDM can also be constructed.
+
+ About to allocate rank  2 RDM array, size per MPI process (MB):      0.005539
+ Main hash table maps        363 unique hashes to a maximum of       363 spawned RDM contributions
+ Allocation of rank  2 RDM array complete.
+ About to allocate   2 body RDM                                       spawning array, size per MPI process (MB):      0.009155
+ Spawn hash table maps        600 unique hashes to a maximum of       600 spawned RDM contributions
+ Allocation of rank  2 RDM spawning array complete.
+ About to allocate rank  2 RDM receiving arrays, size per MPI process (MB):      0.009155
+ Allocation of rank  2 RDM receiving arrays complete.
+
+ Main RDM memory arrays consists of:      15.284225 MB per MPI process.
+ RDM memory allocation complete.
+
+ Allocating temporary array for walkers spawned from a particular Di.
+ This requires       0.007629 Mb/Processor
+ 
+        Step    Shift           WalkerCng       GrowRate        TotWalkers      Annihil         NoDied          NoBorn          Proj.E          Av.Shift        Proj.E.Cyc      NoatHF          NoatDoubs       AccRat        UniqueDets    NumDetsSpawned   IterTime
+           0    0.000000        0.000000        0.000000        1.000000        0.000000        0.000000        0.000000        0.000000        0.000000        0.000000        1.000000        0.000000        0.000000               1           0   0.0000    
+           5    0.000000        1.000000        1.200000        2.000000        0.000000       0.6061833E-01    1.460618      -0.1776551E-01    0.000000      -0.1776551E-01    1.000000        1.000000        0.000000               2           0  0.16317E-03
+          10    0.000000        0.000000        1.666667        2.000000        0.000000       0.3030917       0.3030917      -0.5329653E-01    0.000000      -0.8882755E-01    1.000000        1.000000        0.000000               4           0  0.11266E-03
+          15    0.000000        2.000000        1.400000        4.000000        0.000000       0.4866146        3.286615      -0.6541074E-01    0.000000      -0.8963916E-01    1.000000        2.000000        0.000000               6           2  0.11487E-03
+          20    0.000000       -1.000000        1.571429        3.000000        0.000000       0.8247871        3.133947      -0.1106703        0.000000      -0.2464489        1.000000        3.000000        0.000000               7           3  0.11981E-03
+          25    0.000000        0.000000       0.6818182        3.000000        0.000000       0.5303341        1.962581      -0.1063017        0.000000      -0.8882755E-01    1.000000        2.000000        0.000000               6           1  0.80434E-04
+          30    0.000000       -1.000000       0.9333333        2.000000        0.000000       0.4365485        2.149776      -0.9900080E-01    0.000000      -0.6249618E-01    1.000000        1.000000        0.000000               7           2  0.98142E-04
+          35    0.000000        0.000000       0.7142857        2.000000        0.000000       0.2294037       0.7785925      -0.8500276E-01    0.000000      -0.1014508E-02    1.000000        1.000000        0.000000               7           1  0.66680E-04
+          40    0.000000        1.000000        1.100000        3.000000        0.000000       0.3234936        2.397693      -0.7683174E-01    0.000000      -0.1963462E-01    1.000000        2.000000        0.000000               9           5  0.77189E-04
+          45    0.000000        0.000000        1.363636        3.000000        0.000000       0.6998532        3.617321      -0.7875211E-01    0.000000      -0.9411506E-01    1.000000        2.000000        0.000000              11           3  0.73378E-04
+          50    0.000000        0.000000        1.000000        3.000000        0.000000       0.6998532        1.741209      -0.8028841E-01    0.000000      -0.9411506E-01    1.000000        2.000000        0.000000              11           4  0.66786E-04
+          55    0.000000        0.000000        1.200000        3.000000        0.000000       0.8678617        3.527016      -0.8358291E-01    0.000000      -0.1165280        1.000000        2.000000        0.000000              12           6  0.82228E-04
+          60    0.000000       -1.000000       0.8333333        2.000000        0.000000       0.5682920       0.5081059      -0.8629124E-01    0.000000      -0.1160828        1.000000        2.000000        0.000000              12           2  0.79795E-04
+          65    0.000000        1.000000       0.5333333        3.000000        0.000000       0.1821562        2.128684      -0.8093424E-01    0.000000      -0.1665032E-01    1.000000        1.000000        0.000000              12           7  0.74796E-04
+          70    0.000000       -1.000000        1.625000        2.000000        0.000000       0.3974866        2.437555      -0.8724725E-01    0.000000      -0.1693163        1.000000        1.000000        0.000000              13           9  0.76982E-04
+          75    0.000000        0.000000       0.7692308        2.000000        0.000000       0.1718521        1.076631      -0.9165004E-01    0.000000      -0.1532891        1.000000        1.000000        0.000000              15           8  0.75648E-04
+          80    0.000000        0.000000       0.8000000        2.000000        0.000000       0.1031112        1.468741      -0.9167025E-01    0.000000      -0.9197345E-01    1.000000        1.000000        0.000000              13           6  0.75384E-04
+          85    0.000000        1.776585        1.888292        3.776585        0.000000       0.3222751        3.003639      -0.9254146E-01    0.000000      -0.1011393        1.776585        2.000000        0.000000              14           3  0.74951E-04
+          90    0.000000        1.000000        1.316197        4.776585        0.000000       0.6080957        4.791135      -0.9425072E-01    0.000000      -0.1112042        1.776585        3.000000        0.000000              19          12  0.80104E-04
+          95    0.000000        2.720786        1.813286        7.497371        0.000000        1.395440        7.055608      -0.1067897        0.000000      -0.2323214        2.179113        6.365443        0.000000              21           6  0.83531E-04
+         100    0.000000        2.846373        1.273265        10.34374       0.8000000        1.605865        8.290967      -0.1238502        0.000000      -0.2908873        2.179113        7.771085        0.000000              22          15  0.93302E-04
+         105    0.000000       0.8683986        1.174119        11.21214        0.000000        1.756200        6.461190      -0.1422305        0.000000      -0.3115185        2.802379        8.526591        0.000000              22           8  0.92217E-04
+         110    0.000000        1.024773        1.075779        12.23692        1.600000        1.601115        10.00072      -0.1536726        0.000000      -0.2407928        3.578964        7.977794        0.000000              22          13  0.99858E-04
+         115    0.000000      -0.8105565        1.094071        11.42636        3.361163        1.848160        14.72998      -0.1618342        0.000000      -0.2290876        3.578964        7.973423        0.000000              22          12  0.10644E-03
+         120    0.000000       -2.475278       0.8576856        8.951081        2.408570        1.504142        6.634403      -0.1651634        0.000000      -0.1959258        3.578964        6.420956       0.8000000E-01          17           9  0.10744E-03
+         125    0.000000        3.080037       0.9582848        12.03112        1.015862        1.314441        11.05759      -0.1665727        0.000000      -0.1810042        3.578964        8.033027        0.000000              23          18  0.11548E-03
+         130    0.000000        2.649565        1.263927        14.68068       0.8000000        1.838134        10.97354      -0.1660491        0.000000      -0.1615480        5.155549        9.775779        0.000000              24          17  0.11674E-03
+         135    0.000000      -0.5406581        1.102339        14.14003        2.148398        2.051041        14.82157      -0.1654642        0.000000      -0.1603692        5.155549        9.126657       0.1256646              28          19  0.12713E-03
+         140    0.000000        2.359289        1.051328        16.49931       0.8000000        2.075751        13.08877      -0.1658491        0.000000      -0.1695871        5.155549        11.46308        0.000000              32          18  0.13288E-03
+         145    0.000000        2.608657        1.084812        19.10797        3.200000        2.058181        15.36854      -0.1660866        0.000000      -0.1684471        5.955549        12.06941       0.3459388              34          23  0.13986E-03
+         150    0.000000        2.606386        1.271543        21.71436        4.559526        2.694665        23.70355      -0.1683569        0.000000      -0.1897351        6.578815        15.90720       0.2317269              34          34  0.14229E-03
+         155    0.000000        3.009083        1.059326        24.72344       0.8000000        3.525729        14.78956      -0.1665916        0.000000      -0.1498894        7.105723        14.91360       0.2960287              37          35  0.14606E-03
+ Updating parallel-spin bias; new pParallel =   0.24094751982887114     
+ Updating time-step. New time-step =   0.45383724598318342     
+ Updating singles/doubles bias. pSingles =    3.9910133069284440E-002 , pDoubles =   0.96008986693071552     
+         160    0.000000        1.613055        1.094037        26.33650        2.350587        3.821261        16.30182      -0.1647133        0.000000      -0.1454964        7.505723        17.09245        0.000000              39          32  0.15240E-03
+         165    0.000000        36.18707        1.675547        62.52357        31.13879        42.92935        154.4521      -0.1684880        0.000000      -0.2058998        9.613496        34.04680       0.9795350              59          80  0.20555E-03
+ Updating parallel-spin bias; new pParallel =   0.24060274347501079     
+ Updating time-step. New time-step =   0.45321372390508269     
+ Updating singles/doubles bias. pSingles =    3.9855300969607987E-002 , pDoubles =   0.96014469903039201     
+         170    0.000000        49.81110        1.988578        112.3347        118.6533        100.1388        327.8574      -0.1707855        0.000000      -0.1872975        16.96584        67.70308       0.7474873              61         123  0.27689E-03
+         175    0.000000        65.87451        1.801127        178.2092        283.2919        190.0344        587.2145      -0.1633595        0.000000      -0.1360546        37.43908        124.2500       0.7565274              66         179  0.35348E-03
+         180    0.000000        83.16566        1.394952        261.3748        465.5769        267.1730        860.9572      -0.1572392        0.000000      -0.1406166        54.14902        130.5409       0.8023602              79         300  0.47189E-03
+         185    0.000000        124.7262        1.382489        386.1010        639.9230        369.1420        1167.867      -0.1579957        0.000000      -0.1599706        75.77872        201.2543       0.7154100              85         437  0.64946E-03
+         190    0.000000        108.6847        1.589069        494.7857        1053.959        597.5928        1786.895      -0.1600114        0.000000      -0.1649952        114.4837        294.0818       0.7515807              94         585  0.89329E-03
+         195    0.000000        148.3517        1.213077        643.1374        1300.693        682.5202        2164.390      -0.1602670        0.000000      -0.1609215        159.2387        342.1835       0.7410305              98         711  0.12547E-02
+         200    0.000000        326.9402        1.419728        970.0776        1721.977        954.6551        3026.191      -0.1602953        0.000000      -0.1603617        241.5047        500.8254       0.6868980             101        1104  0.15974E-02
+         205    0.000000        334.4830        1.416379        1304.561        2783.553        1309.534        4447.834      -0.1636927        0.000000      -0.1716281        349.7323        687.5718       0.7683950             100        1512  0.23895E-02
+         210    0.000000        556.4385        1.405835        1860.999        3784.658        1769.869        6132.149      -0.1609671        0.000000      -0.1549030        509.5617        1020.942       0.7571417              99        2109  0.32383E-02
+         215    0.000000        956.4702        1.440390        2817.469        5517.872        2501.700        8992.045      -0.1610676        0.000000      -0.1612965        710.8742        1460.618       0.7284164             102        2910  0.46609E-02
+         220    0.000000        900.2531        1.384935        3717.722        7652.335        3420.482        11985.54      -0.1611914        0.000000      -0.1614854        975.8551        1940.826       0.6572806             104        4085  0.66238E-02
+         225    0.000000        1362.811        1.352094        5080.534        10679.12        4572.322        16622.62      -0.1611494        0.000000      -0.1610468        1360.345        2650.206       0.7133838             103        5780  0.91643E-02
+         230    0.000000        2129.657        1.400693        7210.190        14762.45        6364.114        23263.11      -0.1602116        0.000000      -0.1579361        1955.530        3774.117       0.7366571             103        8097  0.13183E-01
+         235    0.000000        2974.703        1.409096        10184.89        20989.18        8778.267        32748.27      -0.1585227        0.000000      -0.1544834        2754.040        5302.887       0.6710653             104       11439  0.19052E-01
+         240    0.000000        4388.685        1.443490        14573.58        30102.68        12859.07        47355.81      -0.1586256        0.000000      -0.1588707        3951.190        7694.461       0.7394725             104       16522  0.28369E-01
+         245    0.000000        6532.923        1.432159        21106.50        43063.83        18556.90        68157.41      -0.1585281        0.000000      -0.1582981        5611.970        11020.44       0.7497446             103       23365  0.42857E-01
+ Allocating temporary array for walkers spawned from a particular Di.
+ This requires       0.009201 Mb/Processor
+         250    0.000000        8192.805        1.423109        29299.31        62678.40        26516.03        97390.23      -0.1587188        0.000000      -0.1591711        8033.275        15467.89       0.7726150             104       33461  0.63380E-01
+ Allocating temporary array for walkers spawned from a particular Di.
+ This requires       0.011398 Mb/Processor
+         255    0.000000        12150.23        1.402443        41449.54        87168.36        36983.71        136304.0      -0.1587985        0.000000      -0.1589887        11233.03        22072.01       0.7549147             104       46624  0.10146    
+ Allocating temporary array for walkers spawned from a particular Di.
+ This requires       0.017105 Mb/Processor
+Exiting the single particle growth phase on iteration:           260 - Shift can now change for population2
+         260    0.000000        16627.85        1.409676        58077.39        123046.3        52237.17        191912.8      -0.1588641        0.000000      -0.1590214        15889.15        30596.61       0.7222098             104       66324  0.16444    
+ ******
+ WARNING: Updating time step due to particle death magnitude
+ This occurs despite variable shift mode
+ Updating time-step. New time-step =   0.43698780860145542     
+ ******
+ Allocating temporary array for walkers spawned from a particular Di.
+ This requires       0.017906 Mb/Processor
+         265    0.000000        24349.32        1.406575        82426.71        173643.9        73277.22        271271.2      -0.1595555        0.000000      -0.1612311        22230.95        43696.40       0.7447647             104       78746  0.22574    
+ ******
+ WARNING: Updating time step due to particle death magnitude
+ This occurs despite variable shift mode
+ Updating time-step. New time-step =   0.43610612189169795     
+ ******
+Exiting the single particle growth phase on iteration:           270 - Shift can now change for population1
+         270  -0.1612311        32765.49        1.402811        115192.2        233287.5        98827.74        364881.2      -0.1599513        0.000000      -0.1609154        31217.99        60630.94       0.7085734             104       90018  0.28291    
+
+============ Semi-stochastic initialisation ============
+Generating the deterministic space...
+Total size of deterministic space:      100
+Size of deterministic space on this processor:       13
+Generating the Hamiltonian in the deterministic space...
+Time to create auxiliary arrays:    0.000
+Time to sort auxiliary arrays:    0.000
+Arrays for Hamiltonian successfully allocated...
+Time to create the Hamiltonian:    0.000
+total_time:    0.000
+Semi-stochastic initialisation complete.
+Time (seconds) taken for semi-stochastic initialisation:    0.023
+
+         275  -0.1658160       -664.2421        1.221341        114528.0        56758.88        161112.9        89151.23      -0.1601839        0.000000      -0.1608411        33342.46        64733.86       0.1477140             104         275  0.18391    
+ ******
+ WARNING: Updating time step due to particle death magnitude
+ This occurs despite variable shift mode
+ Updating time-step. New time-step =   0.43585754455758285     
+ ******
+         280  -0.1656180       -1495.770       0.9914060        113032.2        458.9273        160717.0        517.5779      -0.1601705        0.000000      -0.1601188        33000.05        64002.64       0.1944847E-02         104         230  0.13999    
+         285  -0.1653214       -1410.586       0.9871580        111621.6        428.2590        158519.9        499.4795      -0.1601409        0.000000      -0.1599958        32595.85        63178.30       0.1404466E-02         104         266  0.13831    
+         290  -0.1650391       -1322.945       0.9877706        110298.7        442.7164        156519.9        515.6346      -0.1601140        0.000000      -0.1599532        32212.52        62411.16       0.1853353E-02         104         251  0.13707    
+         295  -0.1647714       -1233.488       0.9883998        109065.2        425.5704        154641.8        499.2162      -0.1600921        0.000000      -0.1599371        31852.17        61695.04       0.1337436E-02         104         241  0.13568    
+         300  -0.1645185       -1161.135       0.9890379        107904.0        384.9397        152888.1        446.5043      -0.1600744        0.000000      -0.1599300        31513.91        61030.05       0.1752419E-02         104         228  0.13458    
+         305  -0.1642816       -1053.162       0.9897249        106850.9        347.2109        151260.7        453.6500      -0.1600600        0.000000      -0.1599270        31196.40        60434.75       0.1656179E-02         104         221  0.13325    
+         310  -0.1640579       -1033.477       0.9902978        105817.4        399.2635        149751.0        484.6033      -0.1600482        0.000000      -0.1599262        30898.25        59850.94       0.1154953E-02         104         203  0.13211    
+         315  -0.1638403       -954.9129       0.9905634        104862.5        390.7779        148275.0        458.7817      -0.1600383        0.000000      -0.1599251        30618.02        59282.82       0.1647056E-02         104         223  0.13119    
+         320  -0.1636347       -880.5770       0.9910779        103981.9        347.9876        146889.9        400.1539      -0.1600299        0.000000      -0.1599249        30354.74        58779.74       0.1557147E-02         104         247  0.13025    
+         325  -0.1634462       -856.8887       0.9918148        103125.0        424.9491        145650.7        477.2323      -0.1600227        0.000000      -0.1599241        30107.38        58314.79       0.1445652E-02         104         223  0.12913    
+         330  -0.1632628       -772.9781       0.9920392        102352.0        365.0254        144449.8        444.2649      -0.1600165        0.000000      -0.1599247        29874.60        57850.22       0.1106016E-02         104         218  0.12838    
+         335  -0.1630919       -755.4246       0.9925798        101596.6        387.8383        143343.7        452.4996      -0.1600111        0.000000      -0.1599250        29655.53        57424.75       0.1871163E-02         104         212  0.12744    
+         340  -0.1629252       -711.3597       0.9927627        100885.3        392.1596        142252.7        422.1799      -0.1600064        0.000000      -0.1599254        29449.25        57033.33       0.1184174E-02         104         216  0.12661    
+         345  -0.1627713       -652.4260       0.9933119        100232.8        380.6974        141270.8        443.4211      -0.1600021        0.000000      -0.1599248        29255.07        56658.93       0.1720260E-02         104         203  0.12601    
+         350  -0.1626220       -623.4660       0.9935143        99609.37        426.2779        140311.1        456.5069      -0.1599983        0.000000      -0.1599245        29072.09        56293.80       0.1864230E-02         104         212  0.12523    
+         355  -0.1624828       -574.9078       0.9939518        99034.46        372.4192        139434.0        419.5634      -0.1599949        0.000000      -0.1599257        28899.77        55960.09       0.1870136E-02         104         192  0.12470    
+         360  -0.1623523       -522.6630       0.9943257        98511.80        335.1776        138617.2        415.3152      -0.1599918        0.000000      -0.1599246        28737.28        55657.43       0.1756118E-02         104         212  0.12420    
+         365  -0.1622304       -515.1608       0.9947046        97996.64        389.6107        137867.0        476.6683      -0.1599890        0.000000      -0.1599256        28583.99        55353.41       0.1872652E-02         104         224  0.12360    
+         370  -0.1621128       -513.5526       0.9948839        97483.08        372.9064        137139.2        443.5565      -0.1599864        0.000000      -0.1599253        28439.21        55064.46       0.1430302E-02         104         221  0.12300    
+         375  -0.1619960       -459.5635       0.9949237        97023.52        371.8146        136409.3        437.5655      -0.1599840        0.000000      -0.1599240        28302.36        54813.94       0.1355577E-02         104         210  0.12262    
+         380  -0.1618924       -419.4315       0.9954961        96604.09        341.3997        135776.0        448.1803      -0.1599818        0.000000      -0.1599248        28173.40        54578.16       0.1374253E-02         104         188  0.12194    
+         385  -0.1617904       -438.4623       0.9955646        96165.63        384.2104        135154.7        448.1317      -0.1599798        0.000000      -0.1599249        28051.58        54324.72       0.1195486E-02         104         220  0.12162    
+         390  -0.1616918       -384.5746       0.9957102        95781.05        336.6028        134544.9        406.7712      -0.1599779        0.000000      -0.1599253        27936.48        54101.24       0.1601338E-02         104         221  0.12112    
+         395  -0.1616025       -346.4792       0.9961174        95434.57        327.1385        134003.2        425.2169      -0.1599762        0.000000      -0.1599251        27827.91        53905.59       0.1031957E-02         104         217  0.12076    
+         400  -0.1615142       -363.5291       0.9961553        95071.04        378.4015        133464.6        423.1626      -0.1599745        0.000000      -0.1599238        27725.17        53694.03       0.1554656E-02         104         223  0.12043    
+         405  -0.1614317       -342.0242       0.9964130        94729.02        358.7277        132967.9        405.6694      -0.1599729        0.000000      -0.1599238        27628.15        53502.59       0.1212967E-02         103         187  0.11993    
+         410  -0.1613551       -312.7454       0.9966666        94416.27        365.6543        132526.4        452.3300      -0.1599715        0.000000      -0.1599254        27536.60        53319.41       0.2376982E-02         104         230  0.11978    
+         415  -0.1612782       -299.4354       0.9966530        94116.84        368.8589        132046.2        412.8331      -0.1599702        0.000000      -0.1599244        27449.93        53162.42       0.1556891E-02         104         216  0.11955    
+         420  -0.1612127       -255.7348       0.9971498        93861.10        302.3799        131667.6        411.7400      -0.1599690        0.000000      -0.1599265        27368.22        53010.48       0.1602251E-02         104         187  0.11907    
+         425  -0.1611467       -277.7676       0.9971262        93583.34        367.6279        131278.5        444.8214      -0.1599678        0.000000      -0.1599255        27290.79        52853.70       0.1450330E-02         104         203  0.11906    
+         430  -0.1610809       -238.0163       0.9971371        93345.32        347.9648        130878.1        423.1467      -0.1599667        0.000000      -0.1599260        27217.50        52716.68       0.1998975E-02         104         211  0.11867    
+         435  -0.1610214       -229.5743       0.9974084        93115.74        314.0449        130524.3        382.5634      -0.1599656        0.000000      -0.1599247        27148.23        52580.67       0.1074484E-02         104         209  0.11837    
+         440  -0.1609680       -227.1331       0.9976773        92888.61        379.5934        130216.0        463.0539      -0.1599646        0.000000      -0.1599249        27082.73        52458.36       0.1814968E-02         104         217  0.11824    
+         445  -0.1609088       -206.2824       0.9974237        92682.33        305.7796        129853.2        356.1633      -0.1599637        0.000000      -0.1599249        27020.60        52321.99       0.1740290E-02         104         215  0.11788    
+         450  -0.1608598       -220.6197       0.9978668        92461.71        369.6602        129584.1        420.9787      -0.1599627        0.000000      -0.1599248        26962.00        52208.18       0.1525103E-02         104         222  0.11749    
+         455  -0.1608096       -170.7759       0.9978125        92290.93        329.0876        129274.8        392.1529      -0.1599619        0.000000      -0.1599250        26906.55        52108.32       0.1310501E-02         104         224  0.11731    
+         460  -0.1607679       -165.9236       0.9981842        92125.01        332.6947        129045.6        428.9089      -0.1599611        0.000000      -0.1599254        26854.16        52004.01       0.1618715E-02         104         223  0.11710    
+         465  -0.1607281       -178.8531       0.9982688        91946.16        321.3244        128828.9        430.0289      -0.1599603        0.000000      -0.1599243        26804.37        51920.53       0.1605121E-02         104         196  0.11694    
+         470  -0.1606825       -156.4337       0.9980143        91789.72        318.2950        128543.8        394.6100      -0.1599595        0.000000      -0.1599258        26757.07        51820.83       0.1353337E-02         104         191  0.11679    
+         475  -0.1606445       -152.8988       0.9983432        91636.82        325.3385        128323.0        404.4649      -0.1599588        0.000000      -0.1599251        26712.42        51749.53       0.1481254E-02         104         191  0.11668    
+         480  -0.1606061       -168.0697       0.9983290        91468.75        392.0438        128096.6        436.9669      -0.1599581        0.000000      -0.1599239        26670.07        51643.26       0.1593964E-02         104         192  0.11643    
+         485  -0.1605669       -121.3319       0.9982909        91347.42        333.1239        127867.5        392.8520      -0.1599574        0.000000      -0.1599255        26630.09        51566.17       0.1684363E-02         104         179  0.11645    
+         490  -0.1605360       -119.0979       0.9986555        91228.33        371.3859        127687.9        438.0777      -0.1599568        0.000000      -0.1599261        26592.44        51505.13       0.1122983E-02         104         225  0.11615    
+         495  -0.1605040       -146.5435       0.9986057        91081.78        402.7265        127499.6        430.6814      -0.1599562        0.000000      -0.1599262        26556.78        51434.87       0.1541490E-02         104         191  0.11604    
+         500  -0.1604749       -111.1513       0.9987315        90970.63        356.3220        127340.4        424.2132      -0.1599557        0.000000      -0.1599247        26522.91        51369.65       0.1955234E-02         104         217  0.11581    
+         505  -0.1604455       -95.81803       0.9987226        90874.81        310.8799        127167.8        378.4089      -0.1599551        0.000000      -0.1599243        26490.80        51300.49       0.7904491E-03         104         197  0.11577    
+         510  -0.1604181       -108.9156       0.9988052        90765.90        372.6306        127008.7        417.5186      -0.1599546        0.000000      -0.1599260        26460.47        51241.94       0.2050470E-02         104         193  0.11563    
+         515  -0.1603918       -117.7292       0.9988520        90648.17        354.8648        126851.7        375.8124      -0.1599540        0.000000      -0.1599242        26431.71        51184.76       0.1872755E-02         104         226  0.11563    
+         520  -0.1603669       -84.27528       0.9989169        90563.89        365.9012        126708.7        410.2065      -0.1599535        0.000000      -0.1599242        26404.49        51126.83       0.1340552E-02         104         172  0.11546    
+         525  -0.1603428       -76.18663       0.9989511        90487.71        330.8116        126569.4        370.2009      -0.1599530        0.000000      -0.1599249        26378.76        51076.03       0.2093679E-02         104         216  0.11553    
+         530  -0.1603229       -96.57660       0.9991343        90391.13        378.7667        126460.7        408.2078      -0.1599525        0.000000      -0.1599247        26354.46        51028.44       0.1242033E-02         104         170  0.11518    
+         535  -0.1603042       -55.80679       0.9991822        90335.32        324.4018        126356.3        400.7831      -0.1599521        0.000000      -0.1599244        26331.38        50989.81       0.1384404E-02         104         181  0.11518    
+         540  -0.1602855       -81.63251       0.9991867        90253.69        343.1119        126256.2        401.6454      -0.1599516        0.000000      -0.1599246        26309.37        50950.46       0.1759107E-02         104         192  0.11511    
+         545  -0.1602663       -80.91706       0.9991645        90172.77        340.5221        126145.5        391.2157      -0.1599512        0.000000      -0.1599247        26288.46        50906.34       0.1497147E-02         104         189  0.11506    
+         550  -0.1602472       -58.96400       0.9991654        90113.81        336.2551        126027.2        388.2360      -0.1599508        0.000000      -0.1599249        26268.71        50867.55       0.1218746E-02         104         214  0.11494    
+         555  -0.1602313       -68.67470       0.9993073        90045.13        369.0053        125942.5        419.3782      -0.1599504        0.000000      -0.1599249        26250.03        50827.48       0.1564101E-02         104         209  0.11497    
+         560  -0.1602147       -57.90672       0.9992776        89987.23        320.4135        125849.7        373.8393      -0.1599500        0.000000      -0.1599242        26232.30        50789.83       0.1892895E-02         104         172  0.11478    
+         565  -0.1602005       -50.53613       0.9993815        89936.69        316.3426        125766.4        376.4634      -0.1599496        0.000000      -0.1599252        26215.57        50774.92       0.1378062E-02         104         186  0.11477    
+         570  -0.1601862       -58.52188       0.9993772        89878.17        361.4045        125684.2        410.0159      -0.1599493        0.000000      -0.1599249        26199.67        50749.68       0.1900157E-02         104         185  0.11473    
+         575  -0.1601749       -23.56275       0.9995065        89854.61        339.4105        125619.6        430.5372      -0.1599489        0.000000      -0.1599235        26184.51        50723.59       0.1498979E-02         104         214  0.11462    
+         580  -0.1601648       -66.23693       0.9995613        89788.37        327.6779        125566.4        392.9652      -0.1599485        0.000000      -0.1599252        26170.14        50702.65       0.1118612E-02         104         190  0.11449    
+         585  -0.1601482       -62.79301       0.9992757        89725.58        350.5171        125465.4        387.0004      -0.1599482        0.000000      -0.1599252        26156.39        50654.78       0.1751575E-02         104         188  0.11455    
+         590  -0.1601377       -35.00484       0.9995413        89690.57        323.1751        125412.5        398.1029      -0.1599479        0.000000      -0.1599251        26143.50        50635.57       0.1372596E-02         104         212  0.11451    
+         595  -0.1601267       -41.02147       0.9995229        89649.55        329.2812        125354.5        399.0033      -0.1599476        0.000000      -0.1599254        26131.31        50601.67       0.1252387E-02         104         188  0.11452    
+         600  -0.1601149       -51.69400       0.9994832        89597.86        392.1591        125278.1        432.1130      -0.1599473        0.000000      -0.1599247        26119.70        50586.96       0.1448042E-02         104         210  0.11449    
+         605  -0.1601055       -33.43565       0.9995932        89564.42        340.0685        125227.1        403.0385      -0.1599470        0.000000      -0.1599274        26108.48        50559.58       0.8217686E-03         104         201  0.11444    
+         610  -0.1600950       -28.52903       0.9995424        89535.89        326.4573        125162.6        378.7950      -0.1599467        0.000000      -0.1599249        26098.14        50536.83       0.1616063E-02         104         190  0.11444    
+         615  -0.1600882       -21.65522       0.9997017        89514.24        294.5805        125136.0        375.3053      -0.1599464        0.000000      -0.1599245        26088.31        50525.57       0.1727358E-02         104         177  0.11442    
+         620  -0.1600795       -53.34135       0.9996230        89460.89        322.7361        125083.1        365.5050      -0.1599461        0.000000      -0.1599238        26078.91        50496.09       0.1388623E-02         104         177  0.11439    
+         625  -0.1600697       -24.31840       0.9995720        89436.58        344.8750        125018.7        397.1467      -0.1599459        0.000000      -0.1599253        26070.04        50488.51       0.1223310E-02         104         208  0.11426    
+         630  -0.1600637       -7.376337       0.9997372        89429.20        335.1356        124993.1        418.7126      -0.1599456        0.000000      -0.1599244        26061.68        50476.54       0.2213551E-02         104         193  0.11450    
+         635  -0.1600593       -18.19522       0.9998080        89411.00        321.9334        124977.8        417.2825      -0.1599454        0.000000      -0.1599242        26053.70        50461.72       0.1635572E-02         104         193  0.11425    
+         640  -0.1600542       -21.52566       0.9997793        89389.48        331.8629        124956.1        438.6231      -0.1599451        0.000000      -0.1599251        26046.05        50442.61       0.1505943E-02         104         201  0.11425    
+         645  -0.1600481       -65.70585       0.9997361        89323.77        356.2106        124929.5        427.1544      -0.1599449        0.000000      -0.1599255        26038.68        50418.89       0.1742086E-02         104         188  0.11427    
+         650  -0.1600345       -3.782244       0.9994076        89319.99        315.1132        124824.6        379.4176      -0.1599446        0.000000      -0.1599247        26031.65        50412.12       0.1397293E-02         104         197  0.11420    
+         655  -0.1600314       -13.93446       0.9998615        89306.06        347.0702        124809.7        417.3418      -0.1599444        0.000000      -0.1599248        26025.23        50415.87       0.1275084E-02         104         211  0.11417    
+         660  -0.1600256       -47.79932       0.9997508        89258.26        361.5218        124779.9        397.8481      -0.1599442        0.000000      -0.1599256        26019.22        50380.90       0.1660709E-02         104         206  0.11424    
+         665  -0.1600188       -4.176203       0.9997036        89254.08        306.4445        124736.4        371.6131      -0.1599440        0.000000      -0.1599239        26013.42        50370.34       0.1313904E-02         104         202  0.11419    
+         670  -0.1600144       -19.60542       0.9998041        89234.48        334.2266        124707.7        382.7517      -0.1599437        0.000000      -0.1599252        26008.01        50367.19       0.1261991E-02         104         205  0.11417    
+         675  -0.1600125       -4.027372       0.9999181        89230.45        315.1496        124703.8        398.7073      -0.1599435        0.000000      -0.1599260        26002.95        50372.29       0.1494793E-02         104         204  0.11404    
+         680  -0.1600111       -18.86647       0.9999416        89211.58        347.8476        124714.5        451.7451      -0.1599433        0.000000      -0.1599249        25997.99        50359.52       0.1876392E-02         104         197  0.11411    
+         685  -0.1600050       -37.87717       0.9997314        89173.70        347.9882        124675.1        418.4979      -0.1599432        0.000000      -0.1599262        25992.76        50337.43       0.1444252E-02         104         185  0.11418    
+         690  -0.1599967       -15.12634       0.9996406        89158.58        350.5586        124614.9        406.6131      -0.1599430        0.000000      -0.1599247        25988.16        50319.50       0.1422939E-02         104         196  0.11392    
+         695  -0.1599946        8.252675       0.9999077        89166.83        328.6117        124610.0        424.9992      -0.1599428        0.000000      -0.1599240        25983.97        50318.22       0.1608996E-02         104         204  0.11397    
+         700  -0.1599909       -13.37347       0.9998403        89153.46        309.6676        124585.4        377.3262      -0.1599426        0.000000      -0.1599251        25980.00        50315.39       0.1380143E-02         104         188  0.11395    
+         705  -0.1599902       -2.043666       0.9999656        89151.41        336.1083        124592.5        439.9019      -0.1599424        0.000000      -0.1599251        25976.25        50307.40       0.1827137E-02         104         203  0.11383    
+         710  -0.1599848       -34.17985       0.9997665        89117.23        356.6747        124550.9        405.8009      -0.1599422        0.000000      -0.1599259        25972.61        50288.06       0.1781836E-02         104         197  0.11386    
+         715  -0.1599797       -14.07682       0.9997778        89103.16        359.1273        124522.9        418.7111      -0.1599420        0.000000      -0.1599250        25969.16        50283.71       0.1612131E-02         104         193  0.11400    
+         720  -0.1599786       -1.537700       0.9999541        89101.62        319.1132        124513.6        395.7663      -0.1599419        0.000000      -0.1599247        25966.02        50290.40       0.9243364E-03         104         216  0.11397    
+         725  -0.1599768       -5.171164       0.9999177        89096.45        301.4106        124504.9        380.3059      -0.1599417        0.000000      -0.1599257        25963.00        50292.85       0.1056628E-02         104         205  0.11393    
+         730  -0.1599733       -19.50228       0.9998491        89076.95        331.2396        124484.1        388.9695      -0.1599415        0.000000      -0.1599260        25960.12        50276.68       0.1499133E-02         104         197  0.11408    
+         735  -0.1599703       -11.10970       0.9998712        89065.84        338.2188        124465.4        398.0559      -0.1599414        0.000000      -0.1599255        25957.39        50271.58       0.1629521E-02         104         181  0.11392    
+         740  -0.1599651       -8.453543       0.9997708        89057.38        354.5427        124429.7        396.0176      -0.1599412        0.000000      -0.1599245        25954.77        50252.23       0.1516136E-02         104         201  0.11389    
+         745  -0.1599627       -22.00121       0.9998956        89035.38        383.4807        124415.5        409.9922      -0.1599411        0.000000      -0.1599254        25952.46        50253.29       0.1161422E-02         104         178  0.11393    
+         750  -0.1599633        17.50594        1.000025        89052.89        273.4500        124423.7        358.4647      -0.1599409        0.000000      -0.1599248        25950.29        50276.29       0.1078955E-02         104         208  0.11389    
+         755  -0.1599640       -8.045820        1.000034        89044.84        336.3947        124431.6        412.7161      -0.1599408        0.000000      -0.1599254        25948.16        50261.12       0.1678308E-02         104         180  0.11391    
+         760  -0.1599613       -9.135559       0.9998785        89035.71        341.2940        124422.3        416.4043      -0.1599406        0.000000      -0.1599254        25945.99        50245.93       0.1205509E-02         104         215  0.11401    
+         765  -0.1599582        3.431520       0.9998684        89039.14        328.5372        124404.3        408.6185      -0.1599405        0.000000      -0.1599251        25943.94        50240.79       0.1817751E-02         104         226  0.11383    
+         770  -0.1599584       -28.41515        1.000007        89010.72        317.2625        124414.4        385.1097      -0.1599403        0.000000      -0.1599251        25942.02        50236.93       0.1716858E-02         104         191  0.11379    
+ Memory requirement for spawned arrays increased from    20.3442 to    30.5164 Mb/Processor
+Calculating the 2 electron density matrix on the fly.
+Beginning to fill the RDMs during iteration       771
+ Reset fdv av at iteration                   771
+         775  -0.1599541       -9.561751       0.9998133        89001.16        315.3741        124373.6        371.9689      -0.1599402        0.000000      -0.1599260        25940.19        50228.00       0.1596203E-02         104         210  0.11478    
+         780  -0.1599526        1.046670       0.9999328        89002.21        342.2091        124366.6        409.7259      -0.1599401        0.000000      -0.1599243        25938.50        50239.03       0.1966121E-02         104         192  0.11423    
+         785  -0.1599539        22.86157        1.000058        89025.07        314.5649        124385.0        430.3515      -0.1599399        0.000000      -0.1599239        25936.89        50231.04       0.1244713E-02         104         197  0.11420    
+         790  -0.1599527       -32.41638       0.9999481        88992.65        368.0656        124377.0        426.1468      -0.1599398        0.000000      -0.1599257        25935.27        50233.10       0.1497725E-02         104         236  0.11431    
+         795  -0.1599510       -6.059019       0.9999255        88986.59        341.5876        124365.4        421.8328      -0.1599397        0.000000      -0.1599262        25933.79        50231.59       0.1739628E-02         104         214  0.11422    
+         800  -0.1599466       -4.023523       0.9998077        88982.57        331.5252        124332.4        387.9706      -0.1599396        0.000000      -0.1599256        25932.33        50214.41       0.1622309E-02         104         191  0.11409    
+         805  -0.1599497        1.887490        1.000136        88984.46        317.5786        124359.7        415.4639      -0.1599394        0.000000      -0.1599242        25931.06        50240.04       0.1355343E-02         104         203  0.11421    
+         810  -0.1599465        1.756980       0.9998616        88986.21        322.7129        124335.6        402.5033      -0.1599393        0.000000      -0.1599261        25929.75        50218.09       0.1551264E-02         104         176  0.11423    
+         815  -0.1599483       -20.88945        1.000076        88965.33        352.0947        124355.5        434.9223      -0.1599392        0.000000      -0.1599255        25928.54        50224.87       0.1699394E-02         104         178  0.11422    
+WARNING: high load on 2 body RDM spawn hash table ( 105.33%)
+         820  -0.1599441       -6.541318       0.9998166        88958.78        321.5614        124319.5        388.1870      -0.1599391        0.000000      -0.1599252        25927.25        50220.43       0.1313913E-02         104         187  0.11439    
+ Writing RDMs to file at iteration                   820
+ Reset fdv av at iteration                   821
+         825  -0.1599422        16.42550       0.9999182        88975.21        294.3603        124307.1        377.6226      -0.1599390        0.000000      -0.1599249        25926.15        50212.94       0.1128496E-02         104         189  0.11387    
+         830  -0.1599429       -29.36928        1.000033        88945.84        389.9285        124318.4        443.2229      -0.1599388        0.000000      -0.1599257        25925.19        50206.38       0.1249324E-02         104         201  0.11387    
+         835  -0.1599406       -5.443682       0.9998990        88940.40        316.0542        124299.0        378.4263      -0.1599387        0.000000      -0.1599249        25924.21        50205.14       0.1376342E-02         104         219  0.11395    
+         840  -0.1599399       -1.598642       0.9999696        88938.80        324.1915        124295.8        390.4009      -0.1599386        0.000000      -0.1599250        25923.30        50210.00       0.1685672E-02         104         179  0.11384    
+         845  -0.1599356       -6.035167       0.9998118        88932.76        310.7658        124257.9        341.9100      -0.1599385        0.000000      -0.1599251        25922.46        50200.78       0.1444200E-02         104         190  0.11390    
+         850  -0.1599369        16.02898        1.000058        88948.79        285.7153        124272.5        357.9343      -0.1599384        0.000000      -0.1599252        25921.83        50212.03       0.1411753E-02         104         205  0.11374    
+         855  -0.1599403       -11.24835        1.000146        88937.54        319.4284        124303.2        396.1524      -0.1599383        0.000000      -0.1599241        25921.14        50205.89       0.1660086E-02         104         200  0.11398    
+         860  -0.1599362       -16.69707       0.9998219        88920.85        351.2075        124276.1        397.6911      -0.1599382        0.000000      -0.1599244        25920.29        50188.48       0.1717382E-02         104         176  0.11395    
+         865  -0.1599339        34.92950       0.9999007        88955.78        334.7080        124255.1        418.8599      -0.1599381        0.000000      -0.1599256        25919.24        50200.89       0.1379881E-02         104         209  0.11405    
+WARNING: high load on 2 body RDM spawn hash table ( 105.33%)
+         870  -0.1599380       -18.23412        1.000177        88937.54        355.6830        124297.8        430.8539      -0.1599380        0.000000      -0.1599252        25918.72        50192.62       0.1367444E-02         104         202  0.11422    
+ Writing RDMs to file at iteration                   870
+ Reset fdv av at iteration                   871
+         875  -0.1599337       -10.58318       0.9998144        88926.96        335.9747        124262.9        388.0769      -0.1599379        0.000000      -0.1599256        25918.08        50190.39       0.1533419E-02         104         189  0.11397    
+         880  -0.1599330       -2.891092       0.9999671        88924.07        349.5611        124252.9        402.1231      -0.1599378        0.000000      -0.1599256        25917.56        50189.37       0.1651045E-02         104         204  0.11391    
+         885  -0.1599327       -8.768870       0.9999862        88915.30        392.7691        124257.1        446.8842      -0.1599377        0.000000      -0.1599253        25917.14        50183.76       0.1700699E-02         104         236  0.11394    
+         890  -0.1599345        14.46701        1.000080        88929.77        306.2059        124269.9        396.2755      -0.1599376        0.000000      -0.1599247        25916.71        50199.15       0.1667762E-02         104         209  0.11389    
+         895  -0.1599330       -14.71479       0.9999345        88915.05        334.7772        124262.3        390.2164      -0.1599375        0.000000      -0.1599256        25916.22        50181.54       0.1571112E-02         104         192  0.11394    
+         900  -0.1599323        15.94916       0.9999705        88931.00        336.5804        124252.2        415.1318      -0.1599374        0.000000      -0.1599258        25915.81        50195.52       0.1806710E-02         104         225  0.11396    
+         905  -0.1599311       -18.74922       0.9999455        88912.25        364.0532        124245.7        403.9111      -0.1599373        0.000000      -0.1599256        25915.42        50182.21       0.1874446E-02         104         206  0.11398    
+         910  -0.1599294        12.12047       0.9999285        88924.37        366.8109        124234.2        427.6874      -0.1599372        0.000000      -0.1599243        25915.02        50179.05       0.2213454E-02         104         204  0.11398    
+         915  -0.1599314       -7.068839        1.000087        88917.30        371.7573        124251.7        432.6968      -0.1599371        0.000000      -0.1599247        25914.78        50181.61       0.2183204E-02         104         234  0.11376    
+WARNING: high load on 2 body RDM spawn hash table ( 105.33%)
+         920  -0.1599310       0.5819626       0.9999800        88917.88        302.9377        124240.7        363.2990      -0.1599371        0.000000      -0.1599264        25914.47        50188.25       0.8749166E-03         104         224  0.11407    
+ Writing RDMs to file at iteration                   920
+ Reset fdv av at iteration                   921
+         925  -0.1599315       -6.519685        1.000023        88911.36        366.7359        124246.9        427.1744      -0.1599370        0.000000      -0.1599240        25914.11        50193.11       0.1532876E-02         104         221  0.11380    
+         930  -0.1599324       -5.181137        1.000041        88906.18        326.3285        124254.2        394.6553      -0.1599369        0.000000      -0.1599264        25913.80        50191.65       0.1060477E-02         104         206  0.11387    
+         935  -0.1599299        18.68628       0.9998888        88924.87        293.1218        124240.0        373.9794      -0.1599368        0.000000      -0.1599243        25913.40        50180.35       0.1598126E-02         104         213  0.11386    
+         940  -0.1599314        2.844117        1.000068        88927.71        301.5952        124253.4        381.1169      -0.1599367        0.000000      -0.1599240        25913.05        50193.66       0.1123980E-02         104         206  0.11390    
+         945  -0.1599330       -18.63760        1.000067        88909.08        327.8151        124262.5        398.9267      -0.1599366        0.000000      -0.1599258        25912.74        50186.12       0.1244204E-02         104         187  0.11369    
+         950  -0.1599308       -9.048304       0.9999051        88900.03        308.1978        124244.1        372.8457      -0.1599366        0.000000      -0.1599249        25912.32        50188.88       0.1528806E-02         104         183  0.11378    
+         955  -0.1599266       -1.243983       0.9998170        88898.78        327.7811        124215.1        372.3100      -0.1599365        0.000000      -0.1599255        25912.00        50175.84       0.1685676E-02         104         199  0.11379    
+         960  -0.1599260        15.71805       0.9999739        88914.50        337.1320        124208.2        393.3881      -0.1599364        0.000000      -0.1599248        25911.86        50168.92       0.1617404E-02         104         204  0.11378    
+         965  -0.1599317        26.22983        1.000249        88940.73        283.2526        124260.7        401.3759      -0.1599363        0.000000      -0.1599241        25911.80        50186.70       0.1057939E-02         104         213  0.11398    
+WARNING: high load on 2 body RDM spawn hash table ( 105.33%)
+         970  -0.1599320       -17.07053        1.000012        88923.66        347.9101        124260.5        423.0424      -0.1599363        0.000000      -0.1599253        25911.48        50176.96       0.1233181E-02         104         203  0.11430    
+ Writing RDMs to file at iteration                   970
+RDM Sampling iteration number limit reached. Finishing FCIQMC loop...
+ - - - - - - - - - - - - - - - - - - - - - - - -
+ Total loop-time:    88.738192509000001     
+ Time lost due to load imbalance:    64.305725344750087     
+ - - - - - - - - - - - - - - - - - - - - - - - -
+
+*********************************
+Writing a 64-bit POPSFILEBIN...
+Writing a total of 104 determinants.
+*********************************
+
+
+**** RDMs CALCULATED STOCHASTICALLY ****
+
+ -----------------------------------------------------------------
+ Load report for   2 body RDM
+ iProc |  RDM elements stored | Spawning Rows | Receiving Capacity
+           0          40          66         363
+           1          31          66         363
+           2          43          66         363
+           3          37          66         363
+           4          36          66         363
+           5          39          66         363
+           6          35          66         363
+           7          34          66         363
+           8          32          66         363
+           9          38          66         363
+          10          27          66         363
+          11          34          66         363
+ -----------------------------------------------------------------
+RDM checksums modulo        65536 for   2 body RDM                                       main array:       57881       12333
+ == INFORMATION FOR FINAL 1-RDMS =========================================================
+
+ INFORMATION FOR 1-RDM 1:
+
+ SUM OF 1-RDM(i,i) FOR THE N LOWEST ENERGY HF ORBITALS:      5.6831171047770
+ Writing out the *normalised* 1 electron density matrix to file
+
+ =========================================================================================
+
+ Writing RDMs to file at iteration                   970
+ == INFORMATION FOR FINAL 2-RDMS =========================================================
+
+ 2-RDM ESTIMATES FOR STATE 1:
+ Trace of 2RDM before normalisation:  2.5724155586E+12
+ Trace of 2RDM after normalisation:  1.5000000000E+01
+
+ Energy contribution from the 1-RDM: -1.7286072405E+01
+ Energy contribution from the 2-RDM:  6.8086324964E+00
+ *TOTAL ENERGY* CALCULATED USING THE *REDUCED DENSITY MATRICES*: -1.0881138665334E+02
+
+ Hermiticity error estimates:
+             970        0.01470549372260441037     (Iteration, MAX ABS ERROR IN 2RDM HERMITI
+             970        2.67479012399366888886     (Iteration, SUM ABS ERROR IN 2RDM HERMITI
+
+ =========================================================================================
+ 
+Current reference: 
+(    1,    2,    3,    4,    5,    6)
+ Number of superinitiators                    1
+
+Input DEFINEDET line (includes frozen orbs):
+definedet     1-6
+ 
+Most occupied         15 determinants as excitations from reference: 
+
+ Excitation   ExcitLevel Seniority   Walkers(Re)   Walkers(Im)  Weight   Init?(Re)   Init?(Im)   Proc
+111111000000    0    0    25911.39        28238.78      0.92406  Y  Y      4
+110011110000    2    0   -5096.914       -5554.692      0.18177  Y  Y     10
+111100001100    2    0   -5096.911       -5554.686      0.18177  Y  Y      5
+111001011000    2    4   -2595.558       -2828.666      0.09256  Y  Y      8
+110110100100    2    4   -2595.519       -2828.619      0.09256  Y  Y      2
+110000111100    4    0    2353.807        2565.244      0.08394  Y  Y      5
+110110110000    2    2    1380.503        1504.452      0.04923  Y  Y      8
+110110001100    2    2   -1380.453       -1504.416      0.04923  Y  Y     10
+111100011000    2    2   -1380.395       -1504.448      0.04923  Y  Y      8
+110011100100    2    2   -1380.335       -1504.433      0.04923  Y  Y      4
+111001001100    2    2    1380.335        1504.394      0.04923  Y  Y      5
+111100100100    2    2    1380.255        1504.414      0.04923  Y  Y      9
+110011011000    2    2    1380.447        1504.168      0.04923  Y  Y      5
+111001110000    2    2   -1380.137       -1504.330      0.04922  Y  Y      3
+111001100100    2    4    1302.667        1419.586      0.04645  Y  Y      9
+ 
+
+ Load balancing information based on the last iteration:
+ Mean number of determinants/process       8.6666666667
+ Min number of determinants/process                  4
+ Max number of determinants/process                 14
+
+
+Calculating approximate errorbar for energy estimates...
+
+Attempting automatic reblocking analysis on data from iteration:          270
+Reading back in FCIMCStats datafile...
+After shift varies, reference population goes to zero
+Blocking will only start after non-zero population, at iteration            970
+Number of comment lines found in file:            3
+Number of data points found in file:          194
+Number of useable data points:            0
+No valid datapoints found in file. Exiting error analysis.
+ Current reference energy                            -108.651461569943
+ Projected correlation energy                          -0.159936255037
+ No automatic errorbar obtained for projected energy
+ No reliable averaged shift correlation energy could be obtained automatically
+
+ Total projected energy        -108.81139782
+
+
+ Final energy estimate for state 1:     -108.81139782498    
+ Final energy estimate for state 2:     -108.81138472487    
+
+ ================================================================
+ Memory usage
+ Maximum memory defined is (MB) :   99999.0
+ Maximum memory used is    (MB) :     100.7
+ 
+ Large memory allocations:
+ 
+ Name              Allocated in       Deallocated in         Size
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ global_determinantinit_global_det_datclean_global_det_da  44.0MB
+ WalkVecDets       InitFCIMCPar       DeallocFciMCMemPar   16.0MB
+ SpawnVec2         realloc_SpawnedPartDeallocFciMCMemPar   15.3MB
+ SpawnVec          realloc_SpawnedPartDeallocFciMCMemPar   15.3MB
+ SpawnVec          InitFCIMCPar       realloc_SpawnedPart  10.2MB
+ SpawnVec2         InitFCIMCPar       realloc_SpawnedPart  10.2MB
+ Spawned_Parents   init_rdms          dealloc_global_rdm_   7.6MB
+ Spawned_Parents_Ininit_rdms          dealloc_global_rdm_   2.5MB
+ TempSpawnedParts  population_check   DeallocFciMCMemPar   18.3KB
+ TempSpawnedParts  population_check   population_check     17.5KB
+ ================================================================
+
+ ================================================================
+ Timing report.
+
+ Timing of most expensive procedures.
+ Procedure                                 Calls       total time
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ SyncTime                                  1698     71.27
+ WalkerTime                                 970     13.70
+ NECICUBE                                     1      2.29
+ Compress Sort interface                    970      1.29
+ StatsCommsTime                             194      0.15
+ SysInit                                      1      0.04
+ CommsTime                                  970      0.04
+ Compression interface                      970      0.03
+ SemiStochInitTime                            1      0.02
+ SemiStochCommsTime                         699      0.01
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+ Total                                  88.83
+
+ Global wall clock time         88.99
+ ================================================================
+ Calculation ended 01/08/2019 at 01:17:34
+ ================================================================

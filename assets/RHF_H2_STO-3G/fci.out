@@ -1,0 +1,100 @@
+#INFO: **** input file is /users/k1507071/work/N2/Li2/setup.py ****
+from neci_strings import write_inp
+import os
+from subprocess import PIPE, Popen
+import itertools
+import host_strings
+from glob import glob
+import pyscf
+from pyscf.fciqmcscf import serializable_nevpt2
+pyscf_dir = os.path.abspath('{}/..'.format(os.path.dirname(pyscf.__file__)))
+
+kwargs = {
+    'atom': 'H 0 0 0; H 0 0 1.0',
+    'spin': 0,
+    'basis': 'sto-3g',
+    'verbose':4,
+    'symmetry': True,
+    'symmetry_subgroup': 'C2v'
+}
+
+mol = pyscf.gto.Mole(**kwargs)
+mol.build()
+mf = pyscf.scf.RHF(mol)
+mf.kernel()
+
+fciqmc = pyscf.fciqmcscf.FCIQMCCI(mol)
+try:
+    pyscf.fciqmcscf.fciqmc.run_standalone(fciqmc, mf)
+except OSError: pass
+
+fci = pyscf.fci.FCI(mol, mf.mo_coeff)
+print "FCI energy:", fci.kernel(verbose=4)[0]
+
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'login3.pri.rosalind2.alces.network', '3.10.0-957.5.1.el7.x86_64', '#1 SMP Fri Feb 1 14:54:57 UTC 2019', 'x86_64', 'x86_64')  Threads 24
+Python 2.7.16 |Anaconda, Inc.| (default, Mar 14 2019, 21:00:58) 
+[GCC 7.3.0]
+numpy 1.16.3  scipy 1.2.1
+Date: Mon Apr 13 16:59:44 2020
+PySCF version 1.6
+PySCF path  /users/k1507071/code/pyscf/pyscf
+GIT HEAD      ref: refs/heads/master
+GIT master branch  cdc56e168cb15f47e8cdc791a92d689fa9b655af
+
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 2
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry True subgroup C2v
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 H      0.000000000000   0.000000000000  -0.500000000000 AA    0.000000000000   0.000000000000  -0.944863062283 Bohr
+[INPUT]  2 H      0.000000000000   0.000000000000   0.500000000000 AA    0.000000000000   0.000000000000   0.944863062283 Bohr
+
+nuclear repulsion = 0.52917721092
+point group symmetry = Dooh, use subgroup C2v
+num. orbitals of irrep A1 = 2
+number of shells = 2
+number of NR pGTOs = 6
+number of NR cGTOs = 2
+basis = sto-3g
+ecp = {}
+CPU time:         2.43
+
+
+******** <class 'pyscf.scf.hf_symm.SymAdaptedRHF'> ********
+method = SymAdaptedRHF-RHF
+initial guess = minao
+damping factor = 0
+level shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+DIIS start cycle = 1
+DIIS space = 8
+SCF tol = 1e-09
+SCF gradient tol = None
+max. SCF cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /users/k1507071/work/N2/Li2/tmp_jiS2H
+max_memory 4000 MB (current use 57 MB)
+Freeze 0 electrons in irreps []
+    2 free electrons in irreps A1
+Set gradient conv threshold to 3.16228e-05
+init E= -0.691603264306376
+HOMO (A1) = -0.402206600618452  LUMO (A1) = 0.361046123922441
+cycle= 1 E= -1.06610864931794  delta_E= -0.375  |g|= 1.67e-16  |ddm|=  0.9
+HOMO (A1) = -0.484441680354209  LUMO (A1) = 0.457501939047874
+cycle= 2 E= -1.06610864931794  delta_E= -4.44e-16  |g|= 1.11e-16  |ddm|= 6.38e-16
+HOMO (A1) = -0.484441680354209  LUMO (A1) = 0.457501939047874
+Extra cycle  E= -1.06610864931794  delta_E=    0  |g|= 1.11e-16  |ddm|=    0
+converged SCF energy = -1.06610864931794
+rhf orbitals detected
+******** FCIQMC options ********
+Number of walkers = 10000
+Maximum number of iterations = -1
+FCIQMC output file: neci.out_10
+FCI energy: -1.101150330232619
