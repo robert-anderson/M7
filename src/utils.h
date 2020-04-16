@@ -133,7 +133,7 @@ namespace bit_utils{
 
     template <>
     inline size_t next_setbit(unsigned long long &work) {
-        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        static_assert(sizeof(work)==8, "Data length not supported");
         size_t result = __tzcnt_u64(work);
         bit_utils::clr(work, result);
         return result;
@@ -141,7 +141,7 @@ namespace bit_utils{
 
     template <>
     inline size_t next_setbit(unsigned long &work) {
-        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        static_assert(sizeof(work)==8, "Data length not supported");
         size_t result = __tzcnt_u64(work);
         bit_utils::clr(work, result);
         return result;
@@ -149,7 +149,7 @@ namespace bit_utils{
 
     template <>
     inline size_t next_setbit(unsigned &work) {
-        static_assert(sizeof(typeof(work))==4, "Data length not supported");
+        static_assert(sizeof(work)==4, "Data length not supported");
         size_t result = __tzcnt_u32(work);
         bit_utils::clr(work, result);
         return result;
@@ -160,19 +160,19 @@ namespace bit_utils{
 
     template <>
     inline size_t nsetbit(const unsigned long long& work){
-        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        static_assert(sizeof(work)==8, "Data length not supported");
         return _popcnt64(work);
     }
 
     template <>
     inline size_t nsetbit(const unsigned long& work){
-        static_assert(sizeof(typeof(work))==8, "Data length not supported");
+        static_assert(sizeof(work)==8, "Data length not supported");
         return _popcnt64(work);
     }
 
     template <>
     inline size_t nsetbit(const unsigned& work){
-        static_assert(sizeof(typeof(work))==4, "Data length not supported");
+        static_assert(sizeof(work)==4, "Data length not supported");
         return _popcnt32(work);
     }
 

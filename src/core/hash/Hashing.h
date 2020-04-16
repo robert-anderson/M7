@@ -11,7 +11,7 @@
 namespace hashing {
 
     template<typename hash_T>
-    static constexpr hash_T fnv_prime(){
+    static hash_T fnv_prime(){
         static_assert(std::is_unsigned<hash_T>::value &&
                       (sizeof(hash_T)==4 || sizeof(hash_T)==8), "Invalid hash type");
         switch (sizeof(hash_T)){
@@ -21,7 +21,7 @@ namespace hashing {
     }
 
     template<typename hash_T>
-    static constexpr hash_T fnv_offset_basis(){
+    static hash_T fnv_offset_basis(){
         static_assert(std::is_unsigned<hash_T>::value &&
                       (sizeof(hash_T)==4 || sizeof(hash_T)==8), "Invalid hash type");
         switch (sizeof(hash_T)){

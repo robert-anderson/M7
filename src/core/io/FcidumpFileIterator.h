@@ -108,7 +108,7 @@ private:
                     }
                 } else {
                     for (auto tmp : inds_distinct) {
-                        if (std::equal(inds.begin(), inds.end(), tmp.begin(), tmp.end())) {
+                        if (std::equal(inds.begin(), inds.end(), tmp.begin())){
                             isymm++;
                             break;
                         }

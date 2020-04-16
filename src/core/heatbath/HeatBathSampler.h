@@ -10,6 +10,7 @@
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/sample/Aliaser.h"
 #include "src/core/thread/PrivateStore.h"
+#include <memory>
 
 /*
  * An implementation of the Heat Bath Excitation generator of A. A. Holmes et al

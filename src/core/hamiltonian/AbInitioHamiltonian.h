@@ -37,9 +37,9 @@ public:
 
     bool spin_conserving() const override;
 
-    auto &int_1() const;
+    const Integrals_1e<defs::ham_t, defs::isym_1e> &int_1() const;
 
-    auto &int_2() const;
+    const Integrals_2e<defs::ham_t, defs::isym_2e> &int_2() const;
 };
 
 

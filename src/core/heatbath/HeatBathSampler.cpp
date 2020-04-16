@@ -80,6 +80,6 @@ HeatBathSampler(const Hamiltonian* h, PrivateStore<PRNG> &prng):
     logger::write("Heat bath sampler setup complete.");
 
     DeterminantSampler(*this);
-    det_sampler = std::make_unique<PrivateStore<DeterminantSampler>>(
-        nelement_det_sampler, DeterminantSampler(*this));
+    det_sampler = std::unique_ptr<PrivateStore<DeterminantSampler>>(
+            new PrivateStore<DeterminantSampler>(nelement_det_sampler, DeterminantSampler(*this)));
 }

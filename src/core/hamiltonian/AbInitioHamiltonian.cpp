@@ -31,9 +31,9 @@ bool AbInitioHamiltonian::spin_resolved() const { return m_file_iterator.m_spin_
 
 bool AbInitioHamiltonian::spin_conserving() const { return m_int_1.spin_conserving(); }
 
-auto &AbInitioHamiltonian::int_1() const { return m_int_1; }
+const Integrals_1e<defs::ham_t, defs::isym_1e> &AbInitioHamiltonian::int_1() const { return m_int_1; }
 
-auto &AbInitioHamiltonian::int_2() const { return m_int_2; }
+const Integrals_2e<defs::ham_t, defs::isym_2e> &AbInitioHamiltonian::int_2() const { return m_int_2; }
 
 defs::ham_t AbInitioHamiltonian::get_element_0(const defs::det_work &occs, const size_t &nocc) const {
     defs::ham_t element = m_int_0;

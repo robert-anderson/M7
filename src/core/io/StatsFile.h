@@ -80,7 +80,7 @@ protected:
     }
 
 public:
-    StatsFile(const std::string &fname) : Table(), m_fname(fname), m_file(std::make_unique<std::ofstream>(fname)) {
+    StatsFile(const std::string &fname) : Table(), m_fname(fname), m_file(std::unique_ptr<std::ofstream>(new std::ofstream(fname))) {
         if (!mpi::i_am_root())
             throw std::runtime_error(
                 "StatsFiles must only be instantiated on the root process");

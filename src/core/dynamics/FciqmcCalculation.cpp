@@ -11,14 +11,14 @@
 FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
     m_input(input), m_rank_allocator(input.nload_balance_block),
     m_stats_file(input),
-    m_ham(std::make_unique<AbInitioHamiltonian>(input.fcidump_path)),
+    m_ham(std::unique_ptr<AbInitioHamiltonian>(new AbInitioHamiltonian(input.fcidump_path))),
     m_reference(m_ham->guess_reference(input.spin_restrict)),
-    m_wf(this), m_scratch(std::make_unique<FciqmcScratch>(m_reference)) {
+    m_wf(this), m_scratch(std::unique_ptr<FciqmcScratch>(new FciqmcScratch(m_reference))) {
 
     if (input.exact_propagation) {
-        m_prop = std::make_unique<ExactPropagator>(this);
+        m_prop = std::unique_ptr<ExactPropagator>(new ExactPropagator(this));
     } else {
-        m_prop = std::make_unique<StochasticPropagator>(this);
+        m_prop = std::unique_ptr<StochasticPropagator>(new StochasticPropagator(this));
     }
     m_prop->m_shift += m_ham->get_energy(m_reference);
 
