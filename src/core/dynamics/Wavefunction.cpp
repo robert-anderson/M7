@@ -22,6 +22,7 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_data.add(m_reference, ref_weight, m_fciqmc->m_ham->get_energy(m_reference), true, true, false);
     m_ninitiator = 1;
     m_square_norm = std::pow(std::abs(ref_weight), 2);
+    m_nw = std::abs(ref_weight);
 }
 
 void Wavefunction::propagate() {
@@ -42,13 +43,13 @@ void Wavefunction::propagate() {
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
-//#pragma omp parallel default(none)
+#pragma omp parallel default(none)
     {
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
         defs::ham_t reference_energy_numerator = 0;
         int delta_ninitiator = 0;
-//#pragma omp for
+#pragma omp for
         for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
             if (m_data.row_empty(irow)) {
                 continue;
@@ -97,7 +98,7 @@ void Wavefunction::propagate() {
         as_atomic(m_delta_nw) += delta_nw;
         as_atomic(m_ref_proj_energy_num) += reference_energy_numerator;
     }
-    assert(m_ninitiator >= 0);
+    assert(m_ninitiator >= 0)
 }
 
 void Wavefunction::communicate() {
@@ -148,12 +149,12 @@ void Wavefunction::annihilate() {
     }
 #endif
     m_aborted_weight = 0;
-//#pragma omp parallel default(none)
+#pragma omp parallel default(none)
     {
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
-//#pragma omp for
+#pragma omp for
         for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
             annihilate_row(irow_recv, aborted_weight, delta_square_norm, delta_nw);
         }
