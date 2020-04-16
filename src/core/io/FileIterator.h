@@ -8,7 +8,6 @@
 #include <fstream>
 #include <regex>
 #include <memory>
-#include <assert.h>
 
 
 class FileIterator {

@@ -1,6 +1,7 @@
 
 add_subdirectory(DHF_Be_STO-3G)
 add_subdirectory(RHF_N2_6o6e)
+add_subdirectory(RHF_N2_CCPVDZ)
 add_subdirectory(RHF_N2_CCPVTZ)
 add_subdirectory(RHF_LiH_STO-3G)
 add_subdirectory(RHF_H2_STO-3G)

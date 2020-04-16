@@ -9,7 +9,6 @@
 #ifdef HAVE_MPI
     #include <mpi.h>
 #endif
-#include <assert.h>
 #include <iostream>
 #include <cstring>
 #include <src/defs.h>

@@ -102,7 +102,7 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
         prob_double = proposal(p, q, r, s, helement_single);
     } else {
         prob_single = std::abs(helement_single) / (htot_rpq + std::abs(helement_single));
-        if (m_prng.draw_float() < prob_single) {
+        if (m_prng.get().draw_float() < prob_single) {
             // just the single
             prob_double = 0.0;
             prob_single = proposal(p, r, helement_single);

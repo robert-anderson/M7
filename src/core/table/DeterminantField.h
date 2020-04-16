@@ -97,11 +97,12 @@ public:
         DeterminantElement::DatawordEnumerator enumerator(*this);
         while (enumerator.next(work, idataword)) {
             while (work) {
-                size_t ibit = bit_utils::next_setbit(work);
+                size_t ibit = idataword*defs::nbit_data+bit_utils::next_setbit(work);
                 if (ibit < nsite()) ++spin;
                 else --spin;
             }
         }
+        std::cout << spin <<std::endl;
         return spin;
     }
 };

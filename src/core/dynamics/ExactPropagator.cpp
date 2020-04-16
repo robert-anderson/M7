@@ -6,7 +6,7 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
-ExactPropagator::ExactPropagator(FciqmcCalculation *fciqmc): Propagator(fciqmc) {}
+ExactPropagator::ExactPropagator(FciqmcCalculation *fciqmc) : Propagator(fciqmc) {}
 
 void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                                    SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
@@ -15,9 +15,9 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
     auto anticonn = m_fciqmc->m_scratch->anticonn->get(0);
     OccupiedOrbitals occs(src_det);
-    assert(occs.m_nind>0);
+    assert(occs.m_nind > 0);
     VacantOrbitals vacs(src_det);
-    assert(vacs.m_nind>0);
+    assert(vacs.m_nind > 0);
 
     assert(!consts::float_is_zero(*weight));
 
@@ -61,4 +61,12 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
             }
         }
     }
+}
+
+void ExactPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
+                               defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) {
+    auto tmp = *weight;
+    weight *= (1.0 - (*hdiag - m_shift) * m_tau);
+    delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
+    delta_nw += std::abs(*weight) - std::abs(tmp);
 }

@@ -6,12 +6,12 @@
 #define M7_STATSFILE_H
 
 #include <fstream>
-#include <assert.h>
 #include <string>
 #include <memory>
 #include <utility>
 #include <vector>
 #include <list>
+#include "src/defs.h"
 #include <src/core/table/Table.h>
 #include <src/core/table/NumericField.h>
 #include <src/core/parallel/MPIWrapper.h>

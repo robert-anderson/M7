@@ -5,11 +5,11 @@
 #ifndef M7_UTILS_H
 #define M7_UTILS_H
 
+#include "src/defs.h"
 #include <vector>
 #include <complex>
 #include <iostream>
 #include <cmath>
-#include <assert.h>
 #include <limits>
 #include <numeric>
 #include <x86intrin.h>

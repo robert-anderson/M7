@@ -4,6 +4,7 @@
 
 #include <src/core/fermion/DecodedDeterminant.h>
 #include <src/core/fermion/Connection.h>
+#include <src/core/io/Logging.h>
 #include "AbInitioHamiltonian.h"
 #include "src/core/io/FcidumpFileIterator.h"
 
@@ -14,12 +15,14 @@ AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
     m_int_2(m_file_iterator.m_norb, spin_resolved()) {
     defs::inds inds(4);
     defs::ham_t value;
+    logger::write("Loading ab-initio Hamiltonian from FCIDUMP...");
     while (m_file_iterator.next(inds, value)) {
         if (m_int_2.valid_inds(inds)) m_int_2.set_from_fcidump(inds, value);
         else if (m_int_1.valid_inds(inds)) m_int_1.set_from_fcidump(inds, value);
         else if (inds[0] == ((size_t) -1)) m_int_0 = value;
     }
-    m_nci = integer_utils::combinatorial(nsite() * 2, nelec());
+    logger::write("FCIDUMP loading complete.");
+    //m_nci = integer_utils::combinatorial(nsite() * 2, nelec());
 }
 
 size_t AbInitioHamiltonian::nelec() const { return m_file_iterator.m_nelec; }

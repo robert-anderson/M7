@@ -5,9 +5,9 @@
 #ifndef SANDBOX2_NUMERICFIELD_H
 #define SANDBOX2_NUMERICFIELD_H
 
-#include <assert.h>
 #include "Field.h"
 #include "NumericElement.h"
+#include "src/defs.h"
 
 template<typename T>
 class NumericField : public Field {

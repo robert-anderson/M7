@@ -44,11 +44,15 @@ public:
 
     char *field_begin(const Field *field, const size_t &irow, const size_t isegment = 0);
 
+    char *row_begin(const size_t &irow, const size_t isegment = 0);
+
     virtual void expand(size_t delta_nrow);
 
     size_t irow(const size_t &irow, const size_t &isegment = 0) const;
 
     virtual void zero();
+
+    void zero_row(const size_t &irow, const size_t &isegment);
 
     size_t add_field(Field *field);
 
@@ -69,6 +73,8 @@ public:
     virtual std::string to_string(const defs::inds &nrows);
 
     void print_row(size_t irow, size_t isegment);
+
+    size_t dsize() const;
 
 private:
     void update_row_size(size_t size);

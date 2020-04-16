@@ -36,6 +36,7 @@ public:
     size_t spin_restrict = 0;
     double walker_factor_initial = 1.0;
     double buffer_factor_initial = 10.0;
+    double min_spawn_mag = 0.0;
     size_t nload_balance_block = 10;
     double tau_initial = 0.05;
     double shift_initial = 0.0;

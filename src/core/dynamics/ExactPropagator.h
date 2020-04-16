@@ -14,6 +14,9 @@ public:
 
     void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
                               SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override ;
+
+    void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
+                  defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) override;
 };
 
 #endif //M7_EXACTPROPAGATOR_H

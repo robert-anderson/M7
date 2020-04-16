@@ -6,33 +6,51 @@
 #define M7_PRNG_H
 
 #include <random>
-#include <assert.h>
 #include <algorithm>
+#include <complex>
+#include <src/core/thread/AlignedAllocator.h>
+#include "src/defs.h"
 
-class PRNG {
-    std::mt19937 m_mt19937;
-    std::vector<uint32_t> m_data;
-    std::vector<uint32_t>::const_iterator m_it = m_data.end();
+class alignas(defs::cache_line_size) PRNG {
+    //typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::cache_line_size>> U;
+    typedef std::vector<uint32_t> U;
+    U m_data;
+    U::const_iterator m_it;
+    const size_t m_seed;
 public:
-    PRNG(const size_t &seed, const size_t &block_size):
-    m_mt19937(seed), m_data(block_size) {
-        assert(m_mt19937.min()==0u);
-        assert(m_mt19937.max()==~0u);
+    PRNG(const size_t &seed, const size_t &block_size);
+
+    void refresh();
+
+    uint32_t draw_uint();
+
+    double draw_float();
+
+    template <typename T>
+    T stochastic_round(const T& v, const double& magnitude){
+        assert(magnitude>0);
+        static_assert(std::is_floating_point<T>::value, "Stochastic round is only applicable to floating point types");
+        const double ratio = v/magnitude;
+        const long int_ratio = ratio;
+        if (ratio>=0){
+            if (draw_float()<(ratio-int_ratio)) return (int_ratio+1)*magnitude;
+            else return int_ratio*magnitude;
+        }
+        else {
+            if (draw_float()<(int_ratio-ratio)) return (int_ratio-1)*magnitude;
+            else return int_ratio*magnitude;
+        }
     }
 
-    void refresh() {
-        std::uniform_int_distribution<uint32_t> dist(m_mt19937.min(), m_mt19937.max());
-        std::generate(m_data.begin(), m_data.end(), [&](){ return dist(m_mt19937); });
-        m_it = m_data.begin();
+    template <typename T>
+    std::complex<T> stochastic_round(const std::complex<T>& v, const double& magnitude) {
+        return stochastic_round(std::abs(v), magnitude)*v/std::abs(v);
     }
 
-    uint32_t draw_uint(){
-        if (m_it==m_data.end()) refresh();
-        return *m_it++;
-    }
-
-    double draw_float(){
-        return double(draw_uint())/(1ul+std::mt19937::max());
+    template <typename T>
+    T stochastic_threshold(const T& v, const double& magnitude){
+        if (std::abs(v)<magnitude) return stochastic_round(v, magnitude);
+        return v;
     }
 
 };

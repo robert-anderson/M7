@@ -70,7 +70,7 @@ public:
     }
 
     NumericElement<T> &operator-=(const T& v){
-        **this*=v;
+        **this-=v;
         return *this;
     }
 

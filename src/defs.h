@@ -7,10 +7,19 @@
 
 #include <string>
 #include <complex>
+#include <iostream>
 #include <vector>
+#include <exception>
 #include <array>
 #include <climits>
 #include "consts.h"
+
+#ifdef NDEBUG
+#define	assert(e)
+#else
+#define assert(e) \
+{if(!(e)){throw std::runtime_error(std::string("\nAssertion \"" #e "\" failed in file " __FILE__ )+" line: "+std::to_string( __LINE__ ));}}
+#endif
 
 namespace defs {
     const std::string assets_root = "../assets";

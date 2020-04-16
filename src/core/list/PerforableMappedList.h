@@ -53,9 +53,16 @@ public:
          * of elements in the stack, then the stack was emptied.
          * Now move the indices of the newly removed rows into the free stack
          */
+//        std::cout << "PerforableMappedList high water mark: " << List::high_water_mark(0) <<std::endl;
+//        std::cout << "PerforableMappedList free rows available: " << m_nfree <<std::endl;
+//        std::cout << "PerforableMappedList free rows used: " << m_nfree_used <<std::endl;
         m_nfree = m_nfree_used>m_nfree? 0 : m_nfree-m_nfree_used;
+//        std::cout << "PerforableMappedList free rows left over: " << m_nfree <<std::endl;
+//        std::cout << "PerforableMappedList rows removed: " << m_nremoved <<std::endl;
+//        std::cout << "PerforableMappedList zero rows: " << nzero_rows(0) <<std::endl;
         std::move(m_removed.begin(), m_removed.end(), m_free.begin()+m_nfree);
         m_nfree+=m_nremoved;
+        assert(m_nfree == nzero_rows(0));
         m_nremoved = 0ul;
         m_nfree_used = 0ul;
     }
@@ -65,10 +72,10 @@ public:
         // first see if there are any free rows left
         if (m_nfree_used<m_nfree) {
 #pragma omp atomic capture
-            irow = m_nfree_used++;
-            if (irow < m_nfree) {
-                // free_row was available
-                irow = m_free[irow];
+            irow = ++m_nfree_used;
+            if (irow <= m_nfree) {
+                // free_row was available, grab from back of stack
+                irow = m_free[m_nfree-irow];
             }
             else irow = ~0ul;
         }
@@ -94,6 +101,7 @@ public:
         assert(iremoved<m_removed.size());
         m_removed[iremoved] = irow;
         MappedList<T>::m_key_field(irow).zero();
+        Table::zero_row(irow, 0);
         assert(MappedList<T>::m_key_field(irow).is_zero());
         return irow;
     }
@@ -111,7 +119,16 @@ public:
     }
 
     size_t nfilled() const{
-        return MappedList<T>::high_water_mark(0)-m_nfree;
+        return MappedList<T>::high_water_mark(0)-(m_nfree+m_nremoved);
+    }
+
+    size_t nzero_rows(size_t isegment=0) const {
+        // debugging only
+        size_t result=0ul;
+        for (size_t irow = 0ul; irow<MappedList<T>::high_water_mark(isegment); ++irow) {
+            result += MappedList<T>::m_key_field(irow, isegment).is_zero();
+        }
+        return result;
     }
 
     void expand(size_t delta_rows) override {

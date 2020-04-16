@@ -36,7 +36,7 @@ class DeterminantSampler;
 class HeatBathSampler {
 public:
     const Hamiltonian* m_h;
-    PRNG &m_prng;
+    PrivateStore<PRNG> &m_prng;
     const size_t m_nbit;
     const bool m_spin_conserving;
     NdArray<defs::prob_t, 2> m_D;
@@ -48,7 +48,7 @@ public:
     static const size_t nelement_det_sampler;
     std::unique_ptr<PrivateStore<DeterminantSampler>> det_sampler;
 
-    HeatBathSampler(const Hamiltonian* m_h, PRNG &prng);
+    HeatBathSampler(const Hamiltonian* m_h, PrivateStore<PRNG> &prng);
 
 };
 

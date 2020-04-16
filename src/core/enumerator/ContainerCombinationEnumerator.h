@@ -6,7 +6,7 @@
 #define M7_CONTAINERCOMBINATIONENUMERATOR_H
 
 #include "CombinationEnumerator.h"
-#include "assert.h"
+#include "src/defs.h"
 
 template<typename T>
 class ContainerCombinationEnumerator : public CombinationEnumerator {

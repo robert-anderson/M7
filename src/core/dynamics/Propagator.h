@@ -29,16 +29,16 @@ public:
 
     Propagator(FciqmcCalculation *fciqmc);
 
-    void spawn(SpawnList& spawn_list, const DeterminantElement& dst_det, const defs::wf_t &delta,
-        defs::wf_comp_t largest_spawned_magnitude, bool flag_initiator){
+    void spawn(SpawnList &spawn_list, const DeterminantElement &dst_det, const defs::wf_t &delta,
+               defs::wf_comp_t largest_spawned_magnitude, bool flag_initiator) {
         auto const mag = std::abs(delta);
-        if (mag>largest_spawned_magnitude) largest_spawned_magnitude = mag;
+        if (mag > largest_spawned_magnitude) largest_spawned_magnitude = mag;
         auto irank = m_rank_allocator.get_rank(dst_det);
         spawn_list.add(irank, dst_det, delta, flag_initiator);
     }
 
-    void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
-                  defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) const;
+    virtual void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
+                          defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) = 0;
 
 
     virtual void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,

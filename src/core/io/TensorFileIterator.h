@@ -9,7 +9,6 @@
 #include "src/defs.h"
 #include "src/utils.h"
 #include <iostream>
-#include <assert.h>
 #include <complex>
 
 const std::string float_regex_string = R"([-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)";

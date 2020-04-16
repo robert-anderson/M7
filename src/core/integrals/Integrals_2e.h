@@ -9,9 +9,9 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
-#include <assert.h>
 #include "src/core/multidim/Indexer.h"
 #include "src/consts.h"
+#include "src/defs.h"
 #include "src/core/io/FcidumpFileIterator.h"
 #include "Integrals.h"
 

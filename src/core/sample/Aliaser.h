@@ -10,17 +10,18 @@
 #include <stack>
 #include <iostream>
 #include <src/utils.h>
+#include <src/core/thread/PrivateStore.h>
 #include "PRNG.h"
 
 class Aliaser {
     const size_t m_nprob;
-    PRNG &m_prng;
+    PrivateStore<PRNG> &m_prng;
     std::vector<defs::prob_t> m_prob_table;
     defs::inds m_alias_table;
     defs::prob_t m_norm;
 
 public:
-    Aliaser(const size_t nprob, PRNG &prng) :
+    Aliaser(const size_t nprob, PrivateStore<PRNG> &prng) :
         m_nprob(nprob),
         m_prng(prng),
         m_prob_table(m_nprob, 0.0),
@@ -52,23 +53,23 @@ public:
         update(probs.data(), probs.size());
     }
 
-    Aliaser(const defs::prob_t *probs, const size_t nprob, PRNG &prng) :
+    Aliaser(const defs::prob_t *probs, const size_t nprob, PrivateStore<PRNG> &prng) :
         Aliaser(nprob, prng) {
         update(probs, nprob);
     }
 
-    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob, PRNG &prng) :
+    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob, PrivateStore<PRNG> &prng) :
         Aliaser(probs.data(), nprob, prng) {}
 
-    Aliaser(const std::vector<defs::prob_t> &probs, PRNG &prng) :
+    Aliaser(const std::vector<defs::prob_t> &probs, PrivateStore<PRNG> &prng) :
         Aliaser(probs.data(), probs.size(), prng) {}
 
 
     size_t draw() const {
-        size_t iprob = std::floor(m_prng.draw_float() * m_nprob);
+        size_t iprob = std::floor(m_prng.get(0).draw_float() * m_nprob);
         assert(iprob >= 0);
         assert(iprob < m_nprob);
-        if (m_prng.draw_float() * m_norm < m_prob_table[iprob]) return iprob;
+        if (m_prng.get(0).draw_float() * m_norm < m_prob_table[iprob]) return iprob;
         else return m_alias_table[iprob];
     }
 

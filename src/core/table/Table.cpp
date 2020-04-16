@@ -11,6 +11,10 @@ char *Table::field_begin(const Field *field, const size_t &irow, const size_t is
     return ((char*)m_data.data())+irow*m_padded_row_size+isegment*m_segment_size+field->m_offset;
 }
 
+char *Table::row_begin(const size_t &irow, const size_t isegment) {
+    return ((char*)m_data.data())+irow*m_padded_row_size+isegment*m_segment_size;
+}
+
 void Table::expand(size_t delta_nrow) {
     /*
      * add more rows to each segment
@@ -37,7 +41,11 @@ size_t Table::irow(const size_t &irow, const size_t &isegment) const {
 }
 
 void Table::zero() {
-    std::memset(m_data.data(), 0, m_nsegment*m_padded_row_size* sizeof(defs::data_t));
+    std::memset(m_data.data(), 0, m_nsegment*m_nrow_per_segment*m_padded_row_size);
+}
+
+void Table::zero_row(const size_t &irow, const size_t &isegment) {
+    std::memset(row_begin(irow, isegment), 0, m_padded_row_size);
 }
 
 size_t Table::add_field(Field *field) {
@@ -137,4 +145,8 @@ std::string Table::to_string() {
 
 void Table::print_row(size_t irow, size_t isegment) {
     std::cout << row_to_string(irow, isegment) << std::endl;
+}
+
+size_t Table::dsize() const {
+    return m_segment_dsize*m_nsegment;
 }

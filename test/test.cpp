@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include "src/core/parallel/MPIWrapper.h"
-#include "gtest/gtest.h"
 
 int main(int argc, char **argv) {
 

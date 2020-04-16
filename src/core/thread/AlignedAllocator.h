@@ -7,7 +7,6 @@
 
 #include <cstddef>
 #include <stdlib.h>
-#include <assert.h>
 #include <limits>
 #include <src/defs.h>
 

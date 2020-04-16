@@ -2,9 +2,9 @@
 // Created by Robert John Anderson on 2020-02-13.
 //
 
-#include <assert.h>
 #include <iostream>
 #include "MutexVector.h"
+#include "src/defs.h"
 
 MutexVector::MutexVector(size_t n) {
     resize(n);

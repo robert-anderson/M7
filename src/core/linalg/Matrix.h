@@ -8,9 +8,9 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include <assert.h>
 #include <memory>
 #include "src/consts.h"
+#include "src/defs.h"
 
 template<typename T>
 class EigenSolver;

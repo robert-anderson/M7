@@ -49,8 +49,11 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-K,--nload_balance_block", nload_balance_block,
                "number of blocks per process to use for load balancing determinants among processes");
 
+    add_option("-m,--min_spawn_mag", min_spawn_mag,
+               "Minimum spawn magnitude (stochastic threshold spawned weights about value)");
+
     add_option("-t,--tau_initial", tau_initial,
-            "initial timestep");
+               "initial timestep");
 
     add_option("-S,--shift_initial", shift_initial,
             "initial diagonal shift relative to the automatically assumed shift given by the reference energy.");

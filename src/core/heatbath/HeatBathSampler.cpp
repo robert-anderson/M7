@@ -3,13 +3,14 @@
 //
 
 #include <src/core/dynamics/StochasticPropagator.h>
+#include <src/core/io/Logging.h>
 #include "HeatBathSampler.h"
 #include "DeterminantSampler.h"
 
 const size_t HeatBathSampler::nelement_det_sampler = 1;
 
 HeatBathSampler::
-HeatBathSampler(const Hamiltonian* h, PRNG &prng):
+HeatBathSampler(const Hamiltonian* h, PrivateStore<PRNG> &prng):
     m_h(h), m_prng(prng),
     m_nbit(m_h->nsite() * 2),
     m_spin_conserving(m_h->spin_conserving()),
@@ -18,6 +19,8 @@ HeatBathSampler(const Hamiltonian* h, PRNG &prng):
     m_P3(m_nbit, m_nbit, m_nbit),
     m_H_tot(m_nbit, m_nbit, m_nbit),
     m_P4(m_nbit, m_nbit, m_nbit, m_nbit) {
+
+    logger::write("Setting up Heat bath sampler...");
 
     for (size_t p = 0ul; p < m_nbit; ++p) {
         *m_S.view(p) = 0;
@@ -74,6 +77,8 @@ HeatBathSampler(const Hamiltonian* h, PRNG &prng):
             }
         }
     }
+    logger::write("Heat bath sampler setup complete.");
+
     DeterminantSampler(*this);
     det_sampler = std::make_unique<PrivateStore<DeterminantSampler>>(
         nelement_det_sampler, DeterminantSampler(*this));

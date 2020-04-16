@@ -13,7 +13,7 @@ public:
     enum Outcome{no_excitations, single_excitation, double_excitation, both_excitations};
 private:
     const HeatBathSampler &m_precomputed;
-    PRNG &m_prng;
+    PrivateStore<PRNG> &m_prng;
     Determinant m_src_det;
     AntisymConnection m_anticonn;
     OccupiedOrbitals m_occ;

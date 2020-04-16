@@ -128,7 +128,7 @@ void AntisymConnection::apply(const DeterminantElement &ket) {
                 nperm+=m_ncom;
                 continue;
             }
-            assert(cre_iter==cre_end || setbit!=*cre_iter);
+            assert((cre_iter==cre_end) || (setbit!=*cre_iter));
             com = setbit;
             while (cre_iter != cre_end && *cre_iter < com) {
                 cre_iter++;

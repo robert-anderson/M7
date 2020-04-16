@@ -44,7 +44,7 @@ public:
         assert(std::adjacent_find(
                 TensorFileIterator<T>::m_shape.begin(),
                 TensorFileIterator<T>::m_shape.end(),
-                std::not_equal_to<size_t>()) == TensorFileIterator<T>::m_shape.end());
+                std::not_equal_to<size_t>())==TensorFileIterator<T>::m_shape.end())
         /*
          * the number of orbitals read from the header should be equal to the elements
          * of the tensor shape array
