@@ -8,7 +8,7 @@
 FileIterator::FileIterator(const std::string &filename, const size_t &ifirstline):
         m_file(new std::ifstream(filename)), m_ifirstline(ifirstline) {
     for (size_t i=0ul; i<m_ifirstline; i++) next();
-    assert(m_file->is_open());
+    if (!m_file->is_open()) throw std::runtime_error("File \""+filename+"\" not found.");
 }
 
 FileIterator::FileIterator(const std::string &filename):
