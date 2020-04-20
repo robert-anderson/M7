@@ -12,12 +12,12 @@ Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
 
 Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     Determinant ref(m_nsite);
-    assert(abs(spin_restrict) % 2 == nelec() % 2);
+    ASSERT(abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
     size_t n_spin_1 = nelec() - n_spin_0;
     for (size_t i = 0ul; i < n_spin_0; ++i) ref.set(0, i);
     for (size_t i = 0ul; i < n_spin_1; ++i) ref.set(1, i);
-    assert(ref.spin() == spin_restrict);
+    ASSERT(ref.spin() == spin_restrict);
     return ref;
 }
 
@@ -105,7 +105,7 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
                 if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                     size_t irow = list.push(excited);
                     list.helement(irow) = helement;
-                    assert(list.lookup(list.determinant(irow)) == irow);
+                    ASSERT(list.lookup(list.determinant(irow)) == irow);
                 }
             }
         }

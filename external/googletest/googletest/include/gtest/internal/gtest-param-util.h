@@ -838,7 +838,7 @@ class CartesianProductGenerator
     // Advance should not be called on beyond-of-range iterators
     // so no component iterators must be beyond end of range, either.
     void Advance() override {
-      assert(!AtEnd());
+      ASSERT(!AtEnd());
       // Advance the last iterator.
       ++std::get<sizeof...(T) - 1>(current_);
       // if that reaches end, propagate that up.

@@ -85,7 +85,7 @@ public:
         auto conjd_value = case_to_tconj[icase] ? consts::conj(value) : value;
         if (consts::float_is_zero(m_data[iflat])) m_data[iflat] = conjd_value;
         else {
-            assert(consts::floats_nearly_equal(m_data[iflat], conjd_value));
+            ASSERT(consts::floats_nearly_equal(m_data[iflat], conjd_value));
         }
     }
 
@@ -99,7 +99,7 @@ public:
     }
 
     void set(const defs::inds &inds, const T &value) {
-        assert(inds.size() == 4);
+        ASSERT(inds.size() == 4);
         set(inds[0], inds[1], inds[2], inds[3], value);
     }
 
@@ -122,7 +122,7 @@ public:
     }
 
     T get(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-        assert(i<m_norb && j<m_norb && k<m_norb && l<m_norb);
+        ASSERT(i < m_norb && j < m_norb && k < m_norb && l < m_norb);
         auto icase = get_case(i, j, k, l);
         auto iflat = flat_index(icase, i, j, k, l);
         return case_to_tconj[icase] ? consts::conj(m_data[iflat]) : m_data[iflat];

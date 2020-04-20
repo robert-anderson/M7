@@ -7,13 +7,13 @@
 BitsetElement::BitsetElement(BitsetField *field, char *begin): Element(field, begin){}
 
 void BitsetElement::set(const defs::pair &pair) {
-    assert(pair.first < size());
+    ASSERT(pair.first < size());
     const auto offset = BitsetField::rectify_offset(pair);
     bit_utils::set(*(m_begin + offset.first), offset.second);
 }
 
 void BitsetElement::set(const size_t &ibit) {
-    assert(ibit<nbit());
+    ASSERT(ibit < nbit());
     set(defs::pair{0, ibit});
 }
 
@@ -22,7 +22,7 @@ void BitsetElement::set(const defs::inds &inds) {
 }
 
 void BitsetElement::clr(const defs::pair &pair) {
-    assert(pair.first < size());
+    ASSERT(pair.first < size());
     const auto offset = BitsetField::rectify_offset(pair);
     bit_utils::clr(*(m_begin + offset.first), offset.second);
 }
@@ -32,7 +32,7 @@ void BitsetElement::clr(const size_t &ibit) {
 }
 
 bool BitsetElement::get(const defs::pair &pair) const {
-    assert(pair.first < size());
+    ASSERT(pair.first < size());
     const auto offset = BitsetField::rectify_offset(pair);
     return bit_utils::get(*(m_begin + offset.first), offset.second);
 }

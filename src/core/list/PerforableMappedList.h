@@ -62,7 +62,7 @@ public:
 //        std::cout << "PerforableMappedList zero rows: " << nzero_rows(0) <<std::endl;
         std::move(m_removed.begin(), m_removed.end(), m_free.begin()+m_nfree);
         m_nfree+=m_nremoved;
-        assert(m_nfree == nzero_rows(0));
+        ASSERT(m_nfree == nzero_rows(0));
         m_nremoved = 0ul;
         m_nfree_used = 0ul;
     }
@@ -94,15 +94,15 @@ public:
 
     size_t remove(Mutex &mutex, const size_t &key_index) {
         auto irow = MappedList<T>::m_map.remove(mutex, key_index);
-        assert(irow!=~0ul);
+        ASSERT(irow != ~0ul);
         size_t iremoved;
 #pragma omp atomic capture
         iremoved = m_nremoved++;
-        assert(iremoved<m_removed.size());
+        ASSERT(iremoved < m_removed.size());
         m_removed[iremoved] = irow;
         MappedList<T>::m_key_field(irow).zero();
         Table::zero_row(irow, 0);
-        assert(MappedList<T>::m_key_field(irow).is_zero());
+        ASSERT(MappedList<T>::m_key_field(irow).is_zero());
         return irow;
     }
 

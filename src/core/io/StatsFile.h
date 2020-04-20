@@ -120,7 +120,7 @@ public:
         NumericField<T>(file, nelement, description), m_fp_precision(fp_precision) {}
 
     StatsElement<T> operator()(const size_t &ielement = 0) {
-        assert(ielement < m_nelement);
+        ASSERT(ielement < m_nelement);
         if (!m_table->is_allocated()) m_table->expand(1);
         return StatsElement<T>(this, begin(0, 0) + ielement * m_element_size);
     }

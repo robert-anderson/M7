@@ -31,7 +31,7 @@ const size_t FileIterator::line_number_from_regex(const std::string &filename, c
         if (match.size()) return out;
         out++;
     }
-    assert(!line.empty());
+    ASSERT(!line.empty());
 }
 
 bool FileIterator::next(std::string &line){

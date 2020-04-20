@@ -10,13 +10,13 @@
 CombinationEnumerator::CombinationEnumerator(size_t n, size_t r, Enumerator* subsequent) :
 Enumerator(subsequent), m_n(n), m_r(r), m_starting_bitmask(r, 1)
 {
-    assert(m_n>=m_r);
+    ASSERT(m_n >= m_r);
     m_starting_bitmask.resize(n, 0);
     m_bitmask = m_starting_bitmask;
 }
 
 bool CombinationEnumerator::next_element(defs::inds &result) {
-    assert(result.size() == m_r);
+    ASSERT(result.size() == m_r);
     if (m_allfound) {
         m_bitmask = m_starting_bitmask;
         m_allfound = false;
@@ -34,6 +34,6 @@ bool CombinationEnumerator::next_element(defs::inds &result) {
         return true;
     };
     m_allfound = !std::prev_permutation(m_bitmask.begin(), m_bitmask.end());
-    assert(is_ordered(result));
+    ASSERT(is_ordered(result));
     return true;
 }

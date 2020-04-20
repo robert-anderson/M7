@@ -41,15 +41,15 @@ public:
          * a valid FCIDUMP file will correspond to a tensor with all extents in the shape
          * array equal to one another
          */
-        assert(std::adjacent_find(
+        ASSERT(std::adjacent_find(
                 TensorFileIterator<T>::m_shape.begin(),
                 TensorFileIterator<T>::m_shape.end(),
-                std::not_equal_to<size_t>())==TensorFileIterator<T>::m_shape.end())
+                std::not_equal_to<size_t>()) == TensorFileIterator<T>::m_shape.end())
         /*
          * the number of orbitals read from the header should be equal to the elements
          * of the tensor shape array
          */
-        assert(m_norb == TensorFileIterator<T>::m_shape[0]);
+        ASSERT(m_norb == TensorFileIterator<T>::m_shape[0]);
     }
 
     size_t nspinorb() const{
@@ -116,7 +116,7 @@ private:
                 }
             }
         }
-        assert(isymm);
+        ASSERT(isymm);
         // 8->1; 4->2; 2->4; 1->8
         return 8 / isymm;
     }

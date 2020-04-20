@@ -67,8 +67,8 @@ public:
 
     size_t draw() const {
         size_t iprob = std::floor(m_prng.get(0).draw_float() * m_nprob);
-        assert(iprob >= 0);
-        assert(iprob < m_nprob);
+        ASSERT(iprob >= 0);
+        ASSERT(iprob < m_nprob);
         if (m_prng.get(0).draw_float() * m_norm < m_prob_table[iprob]) return iprob;
         else return m_alias_table[iprob];
     }

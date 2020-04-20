@@ -90,7 +90,7 @@ void Wavefunction::propagate() {
             if (consts::float_is_zero(*weight)) {
                 if (flag_initiator) delta_ninitiator--;
                 auto irow_removed = m_data.remove(det, irow);
-                assert(irow_removed==irow);
+                ASSERT(irow_removed == irow);
             }
         }
         as_atomic(m_ninitiator) += delta_ninitiator;
@@ -98,7 +98,7 @@ void Wavefunction::propagate() {
         as_atomic(m_delta_nw) += delta_nw;
         as_atomic(m_ref_proj_energy_num) += reference_energy_numerator;
     }
-    assert(m_ninitiator >= 0)
+    ASSERT(m_ninitiator >= 0)
 }
 
 void Wavefunction::communicate() {
@@ -112,7 +112,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, defs::wf_comp_t &abor
     auto det = m_recv.m_determinant(irow_recv);
     auto delta_weight = m_recv.m_weight(irow_recv);
     // zero magnitude weights should not have been communicated
-    assert(!consts::float_is_zero(*delta_weight));
+    ASSERT(!consts::float_is_zero(*delta_weight));
     size_t irow_main;
 
     auto mutex = m_data.key_mutex(det);
@@ -145,7 +145,7 @@ void Wavefunction::annihilate() {
     size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
     if (m_ninitiator!=ninitiator_verify){
         m_data.print();
-        assert(0)
+        ASSERT(0)
     }
 #endif
     m_aborted_weight = 0;

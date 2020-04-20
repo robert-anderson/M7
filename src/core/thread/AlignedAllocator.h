@@ -61,7 +61,7 @@ public:
     pointer allocate(size_type num, const void * = 0) {
         void *ret;
         posix_memalign(&ret, alignment, num * sizeof(T));
-        assert(((size_t)ret)%alignment==0);
+        ASSERT(((size_t)ret) % alignment == 0);
         return (pointer)ret;
     }
 

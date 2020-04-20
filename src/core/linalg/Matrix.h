@@ -29,8 +29,8 @@ public:
     Matrix(size_t n): Matrix(n, n){}
 
     T& operator()(const size_t &irow, const size_t &icol) {
-        assert(irow>=0 && irow<m_nrow);
-        assert(icol>=0 && icol<m_ncol);
+        ASSERT(irow >= 0 && irow < m_nrow);
+        ASSERT(icol >= 0 && icol < m_ncol);
         return m_data[icol*m_nrow+irow];
     }
 

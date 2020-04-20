@@ -57,7 +57,7 @@ public:
         m_weight(irow) = weight;
         m_hdiag(irow) = hdiag;
         m_flags.m_initiator(irow) = initiator;
-        assert(m_flags.m_initiator(irow) == true);
+        ASSERT(m_flags.m_initiator(irow) == true);
         m_flags.m_reference_connection(irow) = reference_connection;
         m_flags.m_deterministic(irow) = deterministic;
         return irow;

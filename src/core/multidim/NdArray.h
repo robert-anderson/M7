@@ -44,12 +44,12 @@ public:
     }
 
     void operator=(NdArray &src) {
-        assert(m_indexer.shape() == src.m_shape);
+        ASSERT(m_indexer.shape() == src.m_shape);
         memcpy(m_data, src.m_data, nelement() * sizeof(T));
     }
 
     void operator=(std::vector<T> &src) {
-        assert(nelement() == src.size());
+        ASSERT(nelement() == src.size());
         memcpy(m_data, src.data(), nelement() * sizeof(T));
     }
 

@@ -69,7 +69,7 @@ public:
         size_t out=0ul;
         auto iter = std::sregex_iterator(line.begin(), line.end(), space_delimited_uint_regex);
         for (auto i=iter; i!=std::sregex_iterator(); ++i) ++out;
-        assert(out);
+        ASSERT(out);
         return out;
     }
 
@@ -80,7 +80,7 @@ public:
         std::regex_search(line, match, complex_regex);
         if (m_nreal==1){
             // we mustn't try to store a complex-valued tensor in a real container
-            assert(!match.size());
+            ASSERT(!match.size());
         }
         if (match.size()) return 2;
         else return 1;
@@ -96,7 +96,7 @@ public:
 
     static bool extract_line(const std::string &line, const size_t &nind,
                              const size_t &nreal_given, const bool &indsfirst, defs::inds &inds, T &value){
-        assert(inds.size()>=nind);
+        ASSERT(inds.size() >= nind);
         std::istringstream iss(line);
         std::vector<std::string> split(std::istream_iterator<std::string>{iss},
                                        std::istream_iterator<std::string>());

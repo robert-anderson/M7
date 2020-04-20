@@ -32,7 +32,7 @@ public:
         size_t offset = 0) :
         Enumerator<size_t>(subsequent),
         m_data1(data1), m_data2(data2), m_offset(offset) {
-        assert(data1.compatible_with(data2));
+        ASSERT(data1.compatible_with(data2));
     }
 
     inline bool next_element(size_t &result) override {

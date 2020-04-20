@@ -7,7 +7,7 @@
 Table::Table(size_t nsegment) : m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
 
 char *Table::field_begin(const Field *field, const size_t &irow, const size_t isegment) {
-    assert(is_allocated());
+    ASSERT(is_allocated());
     return ((char*)m_data.data())+irow*m_padded_row_size+isegment*m_segment_size+field->m_offset;
 }
 
@@ -79,7 +79,7 @@ const size_t &Table::nrow_per_segment() const {
 void Table::update_row_size(size_t size) {
     m_row_size = size;
     m_padded_row_size = defs::cache_line_size*integer_utils::divceil(size, defs::cache_line_size);
-    assert(m_padded_row_size%sizeof(defs::data_t)==0);
+    ASSERT(m_padded_row_size % sizeof(defs::data_t) == 0);
     m_padded_row_dsize = m_padded_row_size/sizeof(defs::data_t);
 }
 

@@ -9,7 +9,7 @@ Connection::Connection(const Field* field):
     m_element_dsize(field->element_dsize()), m_nbit(field->nbit()) {}
 
 Connection::Connection(const DeterminantElement &ket, const DeterminantElement &bra) : Connection(ket.field()) {
-    assert(ket.compatible_with(bra));
+    ASSERT(ket.compatible_with(bra));
     connect(ket, bra);
 }
 
@@ -17,9 +17,9 @@ Connection::Connection(const DeterminantElement &ket) : Connection(ket, ket){}
 
 
 void Connection::connect(const DeterminantElement &ket, const DeterminantElement &bra) {
-    assert(ket.nbit() == m_nbit);
-    assert(ket.dsize() == m_element_dsize);
-    assert(ket.compatible_with(bra));
+    ASSERT(ket.nbit() == m_nbit);
+    ASSERT(ket.dsize() == m_element_dsize);
+    ASSERT(ket.compatible_with(bra));
     m_nann = 0ul;
     m_ncre = 0ul;
 
@@ -33,16 +33,16 @@ void Connection::connect(const DeterminantElement &ket, const DeterminantElement
         work = bra_work &~ ket_work;
         while (work) m_cre[m_ncre++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
     }
-    assert(m_ncre<m_cre.size());
-    assert(m_nann<m_ann.size());
+    ASSERT(m_ncre < m_cre.size());
+    ASSERT(m_nann < m_ann.size());
 }
 
 void Connection::apply(const DeterminantElement &ket, DeterminantElement &bra){
-    assert(m_ncre<m_cre.size());
-    assert(m_nann<m_ann.size());
+    ASSERT(m_ncre < m_cre.size());
+    ASSERT(m_nann < m_ann.size());
 #ifndef NDEBUG
-    for (size_t i=0ul; i<m_nann; ++i) assert(ket.get(m_ann[i]));
-    for (size_t i=0ul; i<m_ncre; ++i) assert(!ket.get(m_cre[i]));
+    for (size_t i=0ul; i<m_nann; ++i) ASSERT(ket.get(m_ann[i]));
+    for (size_t i=0ul; i<m_ncre; ++i) ASSERT(!ket.get(m_cre[i]));
 #endif
     bra = ket;
     for (size_t i=0ul; i<m_nann; ++i) bra.clr(m_ann[i]);
@@ -50,7 +50,7 @@ void Connection::apply(const DeterminantElement &ket, DeterminantElement &bra){
 }
 
 const size_t &Connection::nexcit() const {
-    assert(m_ncre==m_nann);
+    ASSERT(m_ncre == m_nann);
     return m_ncre;
 }
 
@@ -103,10 +103,10 @@ void AntisymConnection::connect(const DeterminantElement &ket, const Determinant
 }
 
 void AntisymConnection::apply(const DeterminantElement &ket) {
-    assert(m_ncre < m_nbit);
-    assert(m_nann < m_nbit);
-    assert(std::is_sorted(m_cre.begin(), m_cre.begin()+m_ncre));
-    assert(std::is_sorted(m_ann.begin(), m_ann.begin()+m_nann));
+    ASSERT(m_ncre < m_nbit);
+    ASSERT(m_nann < m_nbit);
+    ASSERT(std::is_sorted(m_cre.begin(), m_cre.begin() + m_ncre));
+    ASSERT(std::is_sorted(m_ann.begin(), m_ann.begin() + m_nann));
     m_ncom = 0ul;
     size_t nperm = 0ul;
 
@@ -128,7 +128,7 @@ void AntisymConnection::apply(const DeterminantElement &ket) {
                 nperm+=m_ncom;
                 continue;
             }
-            assert((cre_iter==cre_end) || (setbit!=*cre_iter));
+            ASSERT((cre_iter == cre_end) || (setbit != *cre_iter));
             com = setbit;
             while (cre_iter != cre_end && *cre_iter < com) {
                 cre_iter++;

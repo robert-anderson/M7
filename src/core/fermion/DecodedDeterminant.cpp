@@ -11,8 +11,8 @@ OccupiedOrbitals::OccupiedOrbitals(const DeterminantElement &det_elem) : Decoded
 }
 
 void OccupiedOrbitals::update(const DeterminantElement &det_elem) {
-    assert(det_elem.nbit() == m_nbit);
-    assert(det_elem.dsize() == m_element_dsize);
+    ASSERT(det_elem.nbit() == m_nbit);
+    ASSERT(det_elem.dsize() == m_element_dsize);
     m_nind = 0ul;
     size_t idataword = ~0ul;
     defs::data_t work;
@@ -29,8 +29,8 @@ VacantOrbitals::VacantOrbitals(const DeterminantElement &det_elem) : DecodedDete
 }
 
 void VacantOrbitals::update(const DeterminantElement &det_elem) {
-    assert(det_elem.nbit() == m_nbit);
-    assert(det_elem.dsize() == m_element_dsize);
+    ASSERT(det_elem.nbit() == m_nbit);
+    ASSERT(det_elem.dsize() == m_element_dsize);
     m_nind = 0ul;
     size_t idataword = ~0ul;
     defs::data_t work;

@@ -22,7 +22,7 @@ public:
         auto tmp = CombinationEnumerator::next_element(result);
         if (!tmp) return false;
         for (size_t i = 0ul; i < result.size(); ++i) {
-            assert(result[i] < m_container.size());
+            ASSERT(result[i] < m_container.size());
             result[i] = m_container[result[i]];
         }
         return tmp;

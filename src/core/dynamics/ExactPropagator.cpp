@@ -15,11 +15,11 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
     auto anticonn = m_fciqmc->m_scratch->anticonn->get(0);
     OccupiedOrbitals occs(src_det);
-    assert(occs.m_nind > 0);
+    ASSERT(occs.m_nind > 0);
     VacantOrbitals vacs(src_det);
-    assert(vacs.m_nind > 0);
+    ASSERT(vacs.m_nind > 0);
 
-    assert(!consts::float_is_zero(*weight));
+    ASSERT(!consts::float_is_zero(*weight));
 
     Determinant dst_det(src_det.nsite());
     for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {

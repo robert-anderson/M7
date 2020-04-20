@@ -22,7 +22,7 @@ const size_t &List::high_water_mark(const size_t isegment) const {
 }
 
 size_t List::push(const size_t &isegment) {
-    assert(isegment < m_nsegment);
+    ASSERT(isegment < m_nsegment);
     size_t tmp;
 #pragma omp atomic capture
     tmp = m_high_water_mark[isegment]++;
@@ -31,7 +31,7 @@ size_t List::push(const size_t &isegment) {
 }
 
 size_t List::push(const size_t &isegment, const size_t &nrow) {
-    assert(isegment < m_nsegment);
+    ASSERT(isegment < m_nsegment);
     size_t tmp;
 #pragma omp atomic capture
     tmp = m_high_water_mark[isegment] += nrow;
@@ -46,7 +46,7 @@ void List::zero() {
 }
 
 void List::communicate() {
-    assert(m_recv);
+    ASSERT(m_recv);
     defs::inds sendcounts(m_high_water_mark);
     for (auto &i : sendcounts) i *= m_padded_row_dsize;
     defs::inds recvcounts(mpi::nrank(), 0ul);

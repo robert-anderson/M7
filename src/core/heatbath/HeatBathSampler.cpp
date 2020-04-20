@@ -51,7 +51,7 @@ HeatBathSampler(const Hamiltonian* h, PrivateStore<PRNG> &prng):
                 if (!consts::float_is_zero(denom)) *m_P3.view(p, q, r) /= denom;
             }
             auto norm = std::accumulate(m_P3.view(p, q, 0), m_P3.view(p, q, 0) + m_nbit, 0.0);
-            assert(consts::float_is_zero(norm) || consts::floats_nearly_equal(norm, 1.0));
+            ASSERT(consts::float_is_zero(norm) || consts::floats_nearly_equal(norm, 1.0));
         }
     }
 
@@ -73,7 +73,7 @@ HeatBathSampler(const Hamiltonian* h, PrivateStore<PRNG> &prng):
                 }
                 auto norm = std::accumulate(m_P4.view(p, q, r, 0),
                                             m_P4.view(p, q, r, 0) + m_nbit, 0.0);
-                assert(consts::float_is_zero(norm) || consts::floats_nearly_equal(norm, 1.0));
+                ASSERT(consts::float_is_zero(norm) || consts::floats_nearly_equal(norm, 1.0));
             }
         }
     }

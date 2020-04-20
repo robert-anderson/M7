@@ -56,7 +56,7 @@ public:
         auto conjd_value = (isym == 2 && i > j) ? consts::conj(value) : value;
         if (consts::float_is_zero(m_data[iflat])) m_data[iflat] = conjd_value;
         else {
-            assert(consts::floats_nearly_equal(m_data[iflat], conjd_value));
+            ASSERT(consts::floats_nearly_equal(m_data[iflat], conjd_value));
         }
     }
 
@@ -67,8 +67,8 @@ public:
     }
 
     void set(const defs::inds &inds, const T &value) {
-        assert(inds.size() == 4);
-        assert(inds[2] == ~0ul && inds[3] == ~0ul);
+        ASSERT(inds.size() == 4);
+        ASSERT(inds[2] == ~0ul && inds[3] == ~0ul);
         set(inds[0], inds[1], value);
     }
 

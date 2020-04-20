@@ -69,22 +69,22 @@ public:
     bool double_generated() const {return m_outcome==double_excitation || m_outcome==both_excitations;}
 
     AntisymConnection& get_single() {
-        assert(single_generated());
+        ASSERT(single_generated());
         return m_single_excitation;
     }
 
     AntisymConnection& get_double() {
-        assert(double_generated());
+        ASSERT(double_generated());
         return m_double_excitation;
     }
 
     const Determinant &get_single_dst_det(){
-        assert(single_generated());
+        ASSERT(single_generated());
         return m_single_dst_det;
     }
 
     const Determinant &get_double_dst_det(){
-        assert(double_generated());
+        ASSERT(double_generated());
         return m_double_dst_det;
     }
 

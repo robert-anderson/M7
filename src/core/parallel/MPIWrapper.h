@@ -211,7 +211,7 @@ public:
         return MPI_Alltoall((void *) send, nsend, mpi_type<T>(),
                             (void *) recv, nrecv, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
-        assert(nsend==nrecv);
+        ASSERT(nsend == nrecv);
         return all_reduce(send, recv, MpiMax, nsend);
 #endif
     }

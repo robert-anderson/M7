@@ -81,7 +81,7 @@ private:
 
     template<size_t nind_get, typename ...Args>
     size_t partial_get(const size_t &first, Args ...trailing) const {
-        assert(first < m_shape[nind - sizeof...(trailing) - 1]);
+        ASSERT(first < m_shape[nind - sizeof...(trailing) - 1]);
         constexpr size_t iind = nind_get - sizeof...(trailing) - 1;
         if (iind < nind_get) {
             return m_strides[iind] * first + partial_get<nind_get>(trailing...);

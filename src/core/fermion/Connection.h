@@ -56,13 +56,13 @@ public:
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
     void add(const size_t &ann, const size_t &cre){
-        assert(m_nann+1<m_nbit);
-        assert(m_ncre+1<m_nbit);
+        ASSERT(m_nann + 1 < m_nbit);
+        ASSERT(m_ncre + 1 < m_nbit);
         m_ann[m_nann++] = ann; m_cre[m_ncre++] = cre;
     }
     void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2){
-        assert(m_nann+2<m_nbit);
-        assert(m_ncre+2<m_nbit);
+        ASSERT(m_nann + 2 < m_nbit);
+        ASSERT(m_ncre + 2 < m_nbit);
         m_ann[m_nann++] = ann1; m_ann[m_nann++] = ann2;
         m_cre[m_ncre++] = cre1; m_cre[m_ncre++] = cre2;
     }

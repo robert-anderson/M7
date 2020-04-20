@@ -24,20 +24,20 @@ void DeterminantSampler::draw_pq(size_t &p, size_t &q) {
     set_P2(m_P2_qp, p);
     m_P2_aliaser.update(m_P2_qp);
     q = m_P2_aliaser.draw();
-    assert(q != p);
+    ASSERT(q != p);
 }
 
 void DeterminantSampler::draw_pq(size_t &p, size_t &q, defs::prob_t &prob) {
     draw_pq(p, q);
-    assert(0 < m_P1[p] && m_P1[p] <= 1);
-    assert(0 < m_P2_qp[q] && m_P2_qp[q] <= 1);
+    ASSERT(0 < m_P1[p] && m_P1[p] <= 1);
+    ASSERT(0 < m_P2_qp[q] && m_P2_qp[q] <= 1);
     prob = m_P1[p] * m_P2_qp[q];
-    assert(0 < prob && prob <= 1);
+    ASSERT(0 < prob && prob <= 1);
 }
 
 void DeterminantSampler::draw_r(const size_t &p, const size_t &q, size_t &r) {
     m_P3_aliaser.update(m_precomputed.m_P3.view(p, q, 0), m_precomputed.m_nbit);
-    assert(consts::floats_nearly_equal(m_P3_aliaser.norm(), 1.0, 1e-14));
+    ASSERT(consts::floats_nearly_equal(m_P3_aliaser.norm(), 1.0, 1e-14));
     r = m_P3_aliaser.draw();
     if (m_src_det.get(r)) r = ~0ul;
 }
@@ -46,7 +46,7 @@ void DeterminantSampler::draw_r(const size_t &p, const size_t &q, size_t &r, def
     draw_r(p, q, r);
     if (r != ~0ul) prob = *m_precomputed.m_P3.view(p, q, r);
     else prob = 0.0;
-    assert(0 <= prob && prob <= 1);
+    ASSERT(0 <= prob && prob <= 1);
 }
 
 
@@ -60,13 +60,13 @@ void DeterminantSampler::draw_pqr(size_t &p, size_t &q, size_t &r, defs::prob_t 
     draw_pq(p, q, prob_pq);
     draw_r(p, q, r, prob_r);
     prob = prob_pq * prob_r;
-    assert(0 <= prob && prob <= 1);
+    ASSERT(0 <= prob && prob <= 1);
 }
 
 void DeterminantSampler::draw_s(const size_t &p, const size_t &q, const size_t &r, size_t &s) {
     // (5) need a double excitation, so choose the second unoccupied
     m_P4_aliaser.update(m_precomputed.m_P4.view(p, q, r, 0), m_nspinorb);
-    assert(consts::floats_nearly_equal(m_P4_aliaser.norm(), 1.0, 1e-14));
+    ASSERT(consts::floats_nearly_equal(m_P4_aliaser.norm(), 1.0, 1e-14));
     s = m_P4_aliaser.draw();
     if (m_src_det.get(s)) s = ~0ul;
 }
@@ -121,7 +121,7 @@ void DeterminantSampler::draw(size_t &p, size_t &q, size_t &r, size_t &s,
 }
 
 void DeterminantSampler::draw() {
-    assert(!m_src_det.is_zero()); // call to update method required first
+    ASSERT(!m_src_det.is_zero()); // call to update method required first
     size_t p, q, r, s;
     defs::prob_t single_prob, double_prob;
     defs::ham_t helement_single, helement_double;
@@ -157,18 +157,18 @@ void DeterminantSampler::draw() {
 
 defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &r, const defs::ham_t &helement_single) {
     defs::prob_t result = 0.0;
-    assert(m_P1[p] > 0.0);
+    ASSERT(m_P1[p] > 0.0);
     for (size_t iqp = 0ul; iqp < m_occ.m_nind; ++iqp) {
         const auto &qp = m_occ.m_inds[iqp];
         auto h_tot = *m_precomputed.m_H_tot.view(p, qp, r);
         defs::prob_t p_single = 1.0;
         if (std::abs(helement_single) < h_tot)
             p_single = std::abs(helement_single) / (h_tot + std::abs(helement_single));
-        assert(p_single > 0.0);
+        ASSERT(p_single > 0.0);
         result += m_P1[p] * m_P2_qp[qp] *
                   (*m_precomputed.m_P3.view(p, qp, r)) * p_single;
     }
-    assert(result > 0.0);
+    ASSERT(result > 0.0);
     return result;
 }
 
@@ -180,15 +180,15 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
         auto h_tot = *m_precomputed.m_H_tot.view(p, q, r);
         if (std::abs(helement_single) < h_tot) {
             auto tmp = h_tot / (h_tot + std::abs(helement_single));
-            assert(tmp > 0);
+            ASSERT(tmp > 0);
             return tmp;
         }
         return 1.0;
     };
-    assert(*m_precomputed.m_P3.view(p, q, r) >= 0);
-    assert(*m_precomputed.m_P3.view(p, q, r) <= 1);
-    assert(*m_precomputed.m_P4.view(p, q, r, s) >= 0);
-    assert(*m_precomputed.m_P4.view(p, q, r, s) <= 1);
+    ASSERT(*m_precomputed.m_P3.view(p, q, r) >= 0);
+    ASSERT(*m_precomputed.m_P3.view(p, q, r) <= 1);
+    ASSERT(*m_precomputed.m_P4.view(p, q, r, s) >= 0);
+    ASSERT(*m_precomputed.m_P4.view(p, q, r, s) <= 1);
 
     /*
      * alternative probability given in Appendix B of the reference
@@ -218,7 +218,7 @@ defs::prob_t DeterminantSampler::proposal(const size_t &p, const size_t &q, cons
                   p_double(q, p, s) *
                   (*m_precomputed.m_P4.view(q, p, s, r))
               );
-    assert(result > 0);
+    ASSERT(result > 0);
     return result;
 }
 

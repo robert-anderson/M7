@@ -53,7 +53,7 @@ int Element::cmp(const Element &rhs) const {
 }
 
 Element& Element::operator=(const Element& rhs) {
-    assert(compatible_with(rhs));
+    ASSERT(compatible_with(rhs));
     std::memcpy(m_begin, rhs.m_begin, size());
     return *this;
 }
@@ -76,7 +76,7 @@ size_t Element::nbit() const {
 
 void Element::zero() {
     std::memset(m_begin, 0, size());
-    assert(is_zero());
+    ASSERT(is_zero());
 }
 
 bool Element::is_zero() const {

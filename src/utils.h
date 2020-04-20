@@ -34,7 +34,7 @@ namespace utils {
 
     template<typename T>
     std::string fp_to_string(const T &v, size_t fp_precision=6){
-        assert(std::is_floating_point<T>::value);
+        ASSERT(std::is_floating_point<T>::value);
         std::stringstream tmp;
         tmp << std::scientific << std::setprecision(fp_precision) << v;
         return tmp.str();
@@ -80,7 +80,7 @@ namespace integer_utils {
     }
 
     static size_t factorial(const size_t &n){
-        assert(n<((size_t)-1)/2);
+        ASSERT(n < ((size_t)-1) / 2);
         size_t out = 1ul;
         if (n<1) return 1ul;
         for (size_t i = 1ul; i<=n; ++i) out*=i;
@@ -93,7 +93,7 @@ namespace integer_utils {
          * compute numerator and denominator simultaneously whenever an
          * exact quotient can be computed to avoid premature overflow
          */
-        assert(n>=r);
+        ASSERT(n >= r);
         if (r == 0) return 1ul;
         if (n == 1) return 1ul;
         if (r == n) return 1ul;
@@ -106,7 +106,7 @@ namespace integer_utils {
                 out/=r-(ri++);
             }
             else out*=n-(ni++);
-            assert(ni<=r); // overflow occurred.
+            ASSERT(ni <= r); // overflow occurred.
             if (ri==r && ni==r) return out;
         }
     }

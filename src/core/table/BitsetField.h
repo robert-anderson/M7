@@ -55,7 +55,7 @@ public:
     }
 
     BitsetElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0){
-        assert(ielement<m_nelement);
+        ASSERT(ielement < m_nelement);
         return BitsetElement(this, element_begin(irow, isegment, ielement));
     }
 

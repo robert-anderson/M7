@@ -28,7 +28,7 @@ public:
 
     template <typename T>
     T stochastic_round(const T& v, const double& magnitude){
-        assert(magnitude>0);
+        ASSERT(magnitude > 0);
         static_assert(std::is_floating_point<T>::value, "Stochastic round is only applicable to floating point types");
         const double ratio = v/magnitude;
         const long int_ratio = ratio;

@@ -21,7 +21,7 @@ void MutexVector::grow(const size_t &n_add) {
 }
 
 Mutex MutexVector::get(const size_t &i) {
-    assert(i < size());
+    ASSERT(i < size());
     return Mutex(m_mutex[i], i);
 }
 
