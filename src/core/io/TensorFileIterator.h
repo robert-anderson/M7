@@ -44,7 +44,9 @@ public:
             FileIterator(filename, std::regex(data_regex_string(nind, indsfirst))),
             m_nind(nind), m_indsfirst(indsfirst), m_data_regex_string(data_regex_string(nind, indsfirst)),
             m_data_regex(std::regex(m_data_regex_string)), m_nreal_given(nreal_given(filename, m_data_regex)),
-            m_shape(shape(filename, m_nind, m_nreal_given, m_indsfirst, m_data_regex)){}
+            m_shape(shape(filename, m_nind, m_nreal_given, m_indsfirst, m_data_regex)){
+            std::cout << "Tensor file \""+filename+"\" open for reading." << std::endl;
+            }
 
     static std::string uint_space_list_regex_string(const size_t &n) {
         return R"((^|\s))"+string_utils::join(R"(\d+)", n, R"(\s+)")+R"(($|\s))";
