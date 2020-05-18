@@ -15,7 +15,7 @@
 #include "consts.h"
 
 #ifdef NDEBUG
-#define	assert(e)
+#define	ASSERT(e)
 #else
 #define ASSERT(e) \
 {if(!(e)){throw std::runtime_error(std::string("\nAssertion \"" #e "\" failed in file " __FILE__ )+" line: "+std::to_string( __LINE__ ));}}

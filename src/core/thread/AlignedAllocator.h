@@ -60,7 +60,8 @@ public:
     // allocate but don't initialize num elements of type T
     pointer allocate(size_type num, const void * = 0) {
         void *ret;
-        posix_memalign(&ret, alignment, num * sizeof(T));
+        int err = posix_memalign(&ret, alignment, num * sizeof(T));
+        ASSERT(!err);
         ASSERT(((size_t)ret) % alignment == 0);
         return (pointer)ret;
     }

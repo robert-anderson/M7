@@ -16,7 +16,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-O,--stats_path", fcidump_path,
                "Path to the file to which MC cycle statistics will be output");
 
-    add_flag("-E,--exact-propagation", exact_propagation,
+    add_flag("-E,--exact_propagation", exact_propagation,
                "Perform fully deterministic projector FCI");
 
     add_option("-i,--nwalker_initial", nwalker_initial,
