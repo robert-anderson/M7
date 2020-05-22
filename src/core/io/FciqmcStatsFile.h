@@ -19,6 +19,7 @@ public:
     StatsField<size_t> m_ninitiator;
     StatsField<defs::wf_t> m_aborted_weight;
     StatsField<size_t> m_noccupied_det;
+    StatsField<defs::prob_t> m_psingle;
 
     explicit FciqmcStatsFile(const InputOptions &input):
     StatsFile(input.stats_path),
@@ -31,7 +32,9 @@ public:
     m_nwalker(this, 1, "Total number of walkers"),
     m_ninitiator(this, 1, "Number of initiator determinants"),
     m_aborted_weight(this, 1, "Aborted weight"),
-    m_noccupied_det(this, 1, "Number of occupied determinants"){}
+    m_noccupied_det(this, 1, "Number of occupied determinants"),
+    m_psingle(this, 1, "Probability that a stochastic single will be attempted")
+    {}
 };
 
 

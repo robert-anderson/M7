@@ -5,7 +5,7 @@
 #include "CombinationEnumerator.h"
 #include <algorithm>
 #include <iostream>
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 
 CombinationEnumerator::CombinationEnumerator(size_t n, size_t r, Enumerator* subsequent) :
 Enumerator(subsequent), m_n(n), m_r(r), m_starting_bitmask(r, 1)

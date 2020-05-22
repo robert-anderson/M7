@@ -9,8 +9,13 @@
 #include <iomanip>
 #include <vector>
 #include <memory>
-#include "src/consts.h"
-#include "src/defs.h"
+#include <cstring>
+#include "src/core/util/consts.h"
+#include "src/core/util/defs.h"
+
+
+template<typename T>
+class RowVector;
 
 template<typename T>
 class EigenSolver;
@@ -23,6 +28,10 @@ extern "C" void zheev_( char* jobz, char* uplo, int* n, std::complex<double>* a,
 template<typename T>
 class Matrix {
     std::vector<T> m_data;
+    T* data(const size_t &irow, const size_t &icol){
+        m_data[icol*m_nrow+irow];
+    }
+
 public:
     const size_t m_nrow, m_ncol;
     Matrix(size_t nrow, size_t ncol):m_data(nrow*ncol, T(0)), m_nrow(nrow), m_ncol(ncol){}
@@ -31,11 +40,16 @@ public:
     T& operator()(const size_t &irow, const size_t &icol) {
         ASSERT(irow >= 0 && irow < m_nrow);
         ASSERT(icol >= 0 && icol < m_ncol);
-        return m_data[icol*m_nrow+irow];
+        return *data(irow, icol);
     }
 
     bool is_square() const{
         return m_ncol==m_nrow;
+    }
+
+    void set_row(const size_t &irow, const RowVector<T> &v){
+        ASSERT(dynamic_cast<Matrix<T>>(v).m_nrow == m_ncol);
+        memcpy(data(irow), dynamic_cast<Matrix<T>>(v).data(0, 0), m_ncol*sizeof(T));
     }
 
     EigenSolver<T> diagonalize() const{
@@ -55,9 +69,9 @@ public:
 };
 
 template<typename T>
-class ColumnVector : public Matrix<T> {
+class RowVector : public Matrix<T> {
 public:
-    ColumnVector(size_t nrow):Matrix<T>(nrow, 1){}
+    RowVector(size_t nrow): Matrix<T>(nrow, 1){}
     T& operator()(const size_t &irow){
         return Matrix<T>::operator()(irow, 0);
     }

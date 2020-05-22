@@ -2,9 +2,9 @@
 // Created by Robert John Anderson on 2020-03-26.
 //
 
-#include <src/consts.h>
+#include <src/core/util/consts.h>
 #include <src/core/hash/Hashing.h>
-#include <src/utils.h>
+#include <src/core/util/utils.h>
 #include "Element.h"
 #include "Field.h"
 

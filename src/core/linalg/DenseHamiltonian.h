@@ -5,7 +5,7 @@
 #ifndef M7_DENSEHAMILTONIAN_H
 #define M7_DENSEHAMILTONIAN_H
 
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 #include "Matrix.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 

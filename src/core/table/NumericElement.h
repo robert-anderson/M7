@@ -5,7 +5,7 @@
 #ifndef SANDBOX2_NUMERICELEMENT_H
 #define SANDBOX2_NUMERICELEMENT_H
 
-#include <src/utils.h>
+#include <src/core/util/utils.h>
 #include "Element.h"
 
 template<typename T>

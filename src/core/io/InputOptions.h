@@ -30,6 +30,7 @@ public:
     double nwalker_initial = 1.0;
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;
+    double max_bloom = 1.0;
     size_t prng_seed = 0;
     size_t prng_ngen = 1000;
     size_t ndet_semistoch = 0;
@@ -39,6 +40,8 @@ public:
     double min_spawn_mag = 0.0;
     size_t nload_balance_block = 10;
     double tau_initial = 0.05;
+    bool dynamic_tau = false;
+    size_t nenough_spawns_for_dynamic_tau = 100;
     double shift_initial = 0.0;
     double shift_damp = 1.0;
     size_t shift_update_period = 1;

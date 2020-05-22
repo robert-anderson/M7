@@ -6,7 +6,7 @@
 #define M7_ATOMIC_H
 
 #include <complex>
-#include "src/consts.h"
+#include "src/core/util/consts.h"
 
 template<typename T>
 struct Atomic {

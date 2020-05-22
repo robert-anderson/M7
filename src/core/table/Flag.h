@@ -8,8 +8,8 @@
 
 #include <cstddef>
 #include <climits>
-#include "src/defs.h"
-#include "src/utils.h"
+#include "src/core/util/defs.h"
+#include "src/core/util/utils.h"
 #include "BitsetField.h"
 
 

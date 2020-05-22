@@ -6,10 +6,10 @@
 #define M7_ALIASER_H
 
 #include <vector>
-#include <src/defs.h>
+#include <src/core/util/defs.h>
 #include <stack>
 #include <iostream>
-#include <src/utils.h>
+#include <src/core/util/utils.h>
 #include <src/core/thread/PrivateStore.h>
 #include "PRNG.h"
 
@@ -75,6 +75,10 @@ public:
 
     defs::prob_t norm() const {
         return m_norm;
+    }
+
+    defs::prob_t prob(const size_t &i) const {
+        return m_prob_table[i]/m_norm;
     }
 
 };

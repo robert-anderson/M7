@@ -5,7 +5,7 @@
 #ifndef M7_HEATBATHSAMPLER_H
 #define M7_HEATBATHSAMPLER_H
 
-#include <src/defs.h>
+#include <src/core/util/defs.h>
 #include "src/core/multidim/NdArray.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/sample/Aliaser.h"

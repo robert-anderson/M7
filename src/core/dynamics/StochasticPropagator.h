@@ -6,7 +6,7 @@
 #define M7_STOCHASTICPROPAGATOR_H
 
 #include <src/core/sample/PRNG.h>
-#include <src/core/heatbath/HeatBathSampler.h>
+#include <src/core/pchb/HeatBathSamplers.h>
 #include "Propagator.h"
 #include "FciqmcCalculation.h"
 
@@ -15,41 +15,54 @@ class StochasticPropagator : public Propagator {
     const double &m_min_spawn_mag;
 public:
     PrivateStore<PRNG> m_prng;
-    HeatBathSampler m_precomputed_heat_bath_sampler;
+    HeatBathSamplers m_pchb;
+    Determinant m_dst_det;
+    OccupiedOrbitals m_occ;
+    VacantOrbitals m_vac;
+    AntisymConnection m_anticonn;
 
     StochasticPropagator(FciqmcCalculation *fciqmc) :
-        Propagator(fciqmc), m_min_spawn_mag(m_input.min_spawn_mag),
-        m_prng(1, PRNG(m_input.prng_seed, m_input.prng_ngen)),
-        m_precomputed_heat_bath_sampler(fciqmc->m_ham.get(), m_prng) {}
+            Propagator(fciqmc), m_min_spawn_mag(m_input.min_spawn_mag),
+            m_prng(1, PRNG(m_input.prng_seed, m_input.prng_ngen)),
+            m_pchb(fciqmc->m_ham.get(), m_prng),
+            m_dst_det(m_ham->nsite()), m_occ(m_dst_det), m_vac(m_dst_det), m_anticonn(m_dst_det) {}
 
-    void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
+    void off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                       SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override {
 
-        defs::ham_comp_t largest_spawned_magnitude = 0.0;
         ASSERT(!consts::float_is_zero(*weight));
 
+        m_occ.update(src_det);
+        m_vac.update(src_det);
+
         size_t nattempt = std::ceil(std::abs(*weight));
-        auto &det_sampler = m_precomputed_heat_bath_sampler.det_sampler->get(0);
-        det_sampler.update(determinant);
+        defs::prob_t prob;
+        defs::ham_t helem;
+        bool valid;
 
         for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-            det_sampler.draw();
-            if (det_sampler.single_generated()) {
-                ASSERT(!consts::float_is_zero(det_sampler.get_single_prob()));
-                auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau *
-                             (m_ham->get_element_1(det_sampler.get_single()) / det_sampler.get_single_prob());
-                delta = m_prng.get(0).stochastic_threshold(delta, m_min_spawn_mag);
-                if (consts::float_is_zero(delta)) continue;
-                spawn(spawn_list, det_sampler.get_single_dst_det(), delta, largest_spawned_magnitude, flag_initiator);
+            size_t nexcit = 2 - m_prng.get().stochastic_round(m_magnitude_logger.m_psingle, 1);
+            ASSERT(nexcit==2);
+            switch (nexcit) {
+                case 1:
+                    valid = m_pchb.draw_single(src_det, m_dst_det, m_occ, m_vac, prob, helem, m_anticonn);
+                    prob*=m_magnitude_logger.m_psingle;
+                    ASSERT(!consts::float_nearly_zero(prob, 1e-14));
+                    break;
+                case 2:
+                    // TODO: don't need m_vac for doubles.
+                    valid = m_pchb.draw_double(src_det, m_dst_det, m_occ, prob, helem, m_anticonn);
+                    prob*= 1.0-m_magnitude_logger.m_psingle;
+                    break;
             }
-            if (det_sampler.double_generated()) {
-                ASSERT(!consts::float_is_zero(det_sampler.get_double_prob()));
-                auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau *
-                             (m_ham->get_element_2(det_sampler.get_double()) / det_sampler.get_double_prob());
-                delta = m_prng.get(0).stochastic_threshold(delta, m_min_spawn_mag);
-                if (consts::float_is_zero(delta)) continue;
-                spawn(spawn_list, det_sampler.get_double_dst_det(), delta, largest_spawned_magnitude, flag_initiator);
-            }
+            if (!valid) continue;
+
+            ASSERT(!consts::float_is_zero(prob));
+            auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob;
+            delta = m_prng.get(0).stochastic_threshold(delta, m_min_spawn_mag);
+            if (consts::float_is_zero(delta)) continue;
+            spawn(spawn_list, m_dst_det, delta, flag_initiator);
+            m_magnitude_logger.log(nexcit, helem, prob);
         }
     }
 

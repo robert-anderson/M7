@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <complex>
 #include <src/core/thread/AlignedAllocator.h>
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 
 class alignas(defs::cache_line_size) PRNG {
     //typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::cache_line_size>> U;
@@ -23,6 +23,8 @@ public:
     void refresh();
 
     uint32_t draw_uint();
+
+    uint32_t draw_uint(uint32_t);
 
     double draw_float();
 

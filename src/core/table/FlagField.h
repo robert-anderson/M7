@@ -6,7 +6,7 @@
 #define SANDBOX2_FLAGFIELD_H
 
 
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 #include "Flag.h"
 #include "BitsetField.h"
 

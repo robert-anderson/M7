@@ -41,12 +41,11 @@ public:
     explicit Connection(const DeterminantElement &ket);
 
     const defs::det_work& ann() const {return m_ann;}
-    //void ann(const defs::inds &v) {m_ann.assign(v.begin(), v.end()); m_nann=v.size();}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
+    const size_t& ann(const size_t& i) {return m_ann[i];}
     const size_t& nann() const {return m_nann;}
 
     const defs::det_work& cre() const {return m_cre;}
-    //void cre(const defs::inds &v) {m_cre.assign(v.begin(), v.end()); m_ncre=v.size();}
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     const size_t& ncre() const {return m_ncre;}
 

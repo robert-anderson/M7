@@ -8,8 +8,8 @@
 
 #include "Field.h"
 #include "Element.h"
-#include "src/defs.h"
-#include "src/utils.h"
+#include "src/core/util/defs.h"
+#include "src/core/util/utils.h"
 #include "limits.h"
 
 class BitsetField;

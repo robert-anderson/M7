@@ -3,7 +3,7 @@
 //
 
 #include "FileIterator.h"
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 
 FileIterator::FileIterator(const std::string &filename, const size_t &ifirstline):
         m_file(new std::ifstream(filename)), m_ifirstline(ifirstline) {

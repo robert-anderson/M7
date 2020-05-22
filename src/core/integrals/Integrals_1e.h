@@ -9,7 +9,7 @@
 #include <vector>
 #include <src/core/io/FcidumpFileIterator.h>
 #include "Integrals.h"
-#include "src/consts.h"
+#include "src/core/util/consts.h"
 
 /*
  * notational conventions used are as follows:

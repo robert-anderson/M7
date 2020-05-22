@@ -128,6 +128,7 @@ void AntisymConnection::apply(const DeterminantElement &ket) {
                 nperm+=m_ncom;
                 continue;
             }
+            // check we aren't trying to create an electron in an occupied orbital
             ASSERT((cre_iter == cre_end) || (setbit != *cre_iter));
             com = setbit;
             while (cre_iter != cre_end && *cre_iter < com) {

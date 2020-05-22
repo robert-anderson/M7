@@ -5,7 +5,7 @@
 #include <src/core/fermion/DecodedDeterminant.h>
 #include "gtest/gtest.h"
 #include "src/core/thread/PrivateStore.h"
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 
 struct alignas(defs::cache_line_size) TestType {
     char i1, i2;

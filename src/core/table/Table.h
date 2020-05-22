@@ -9,8 +9,8 @@
 #include <vector>
 #include <cstring>
 #include <functional>
-#include "src/defs.h"
-#include "src/utils.h"
+#include "src/core/util/defs.h"
+#include "src/core/util/utils.h"
 #include "src/core/thread/AlignedAllocator.h"
 #include "Field.h"
 

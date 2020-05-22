@@ -102,8 +102,22 @@ public:
                 else --spin;
             }
         }
-        std::cout << spin <<std::endl;
         return spin;
+    }
+
+    int nalpha() const {
+        // number of electrons occupying spinors in the alpha spin channel
+        int nalpha = 0;
+        size_t idataword = ~0ul;
+        defs::data_t work;
+        DeterminantElement::DatawordEnumerator enumerator(*this);
+        while (enumerator.next(work, idataword)) {
+            while (work) {
+                size_t ibit = idataword*defs::nbit_data+bit_utils::next_setbit(work);
+                if (ibit >= nsite()) return nalpha;
+                nalpha++;
+            }
+        }
     }
 };
 

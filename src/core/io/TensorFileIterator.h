@@ -6,8 +6,8 @@
 #define M7_TENSORFILEITERATOR_H
 
 #include "FileIterator.h"
-#include "src/defs.h"
-#include "src/utils.h"
+#include "src/core/util/defs.h"
+#include "src/core/util/utils.h"
 #include <iostream>
 #include <complex>
 

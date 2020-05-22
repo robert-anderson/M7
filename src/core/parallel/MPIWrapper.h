@@ -11,8 +11,8 @@
 #endif
 #include <iostream>
 #include <cstring>
-#include <src/defs.h>
-#include "src/utils.h"
+#include <src/core/util/defs.h>
+#include "src/core/util/utils.h"
 
 #ifdef HAVE_MPI
 template<typename T>
@@ -40,7 +40,7 @@ template<> const MPI_Datatype mpi_type<std::complex<long double>>(){return MPI_L
 
 template<> const MPI_Datatype mpi_type<bool>(){return MPI_CXX_BOOL;}
 
-const std::array<MPI_Op, 3> op_map {MPI_MAX, MPI_MIN, MPI_SUM};
+const std::array<MPI_Op, 5> op_map {MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
 #endif
 
 struct mpi {
@@ -53,7 +53,7 @@ struct mpi {
 
     static void barrier();
 
-    enum MpiOp {MpiMax, MpiMin, MpiSum};
+    enum MpiOp {MpiMax, MpiMin, MpiSum, MpiLand, MpiLor};
 
 /*
  * int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
@@ -177,6 +177,40 @@ public:
     static T all_sum(const T &send) {
         return all_sum(&send);
     }
+
+    /*
+     * LOGICAL-AND REDUCE CONVENIENCE FUNCTIONS
+     */
+
+    template<typename T>
+    static bool land(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
+        return reduce(send, recv, MpiLand, ndata, iroot);
+    }
+
+    template<typename T>
+    static bool all_land(const T *send, T *recv, size_t ndata = 1) {
+        return all_reduce(send, recv, MpiLand, ndata);
+    }
+
+    template<typename T>
+    static T land(const T *send, size_t iroot = 0) {
+        T recv;
+        land(send, &recv, 1, iroot);
+        return recv;
+    }
+
+    template<typename T>
+    static T all_land(const T *send) {
+        T recv;
+        all_land(send, &recv, 1);
+        return recv;
+    }
+
+    template<typename T>
+    static T all_land(const T &send) {
+        return all_land(&send);
+    }
+
 
     /*
      * BCAST

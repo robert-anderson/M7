@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <array>
 #include "src/core/multidim/Indexer.h"
-#include "src/consts.h"
-#include "src/defs.h"
+#include "src/core/util/consts.h"
+#include "src/core/util/defs.h"
 #include "src/core/io/FcidumpFileIterator.h"
 #include "Integrals.h"
 

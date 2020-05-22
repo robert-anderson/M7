@@ -8,7 +8,7 @@
 
 #include <cstddef>
 #include <string>
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 #include "Enumerator.h"
 
 class CombinationEnumerator : public Enumerator<defs::inds> {

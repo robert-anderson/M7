@@ -21,6 +21,10 @@ uint32_t PRNG::draw_uint() {
     return *m_it++;
 }
 
+uint32_t PRNG::draw_uint(uint32_t modular_base) {
+    return draw_uint()%modular_base;
+}
+
 double PRNG::draw_float() {
     return double(draw_uint())/(1ul+std::mt19937::max());
 }

@@ -9,6 +9,7 @@
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "SpawnList.h"
+#include "MagnitudeLogger.h"
 #include <iomanip>
 #include <iostream>
 
@@ -22,6 +23,7 @@ public:
     const InputOptions &m_input;
     const std::unique_ptr<Hamiltonian> &m_ham;
     const RankAllocator<DeterminantElement> &m_rank_allocator;
+    MagnitudeLogger m_magnitude_logger;
     double m_tau;
     defs::ham_comp_t m_shift;
     bool vary_shift = false;
@@ -29,10 +31,8 @@ public:
 
     Propagator(FciqmcCalculation *fciqmc);
 
-    void spawn(SpawnList &spawn_list, const DeterminantElement &dst_det, const defs::wf_t &delta,
-               defs::wf_comp_t largest_spawned_magnitude, bool flag_initiator) {
+    void spawn(SpawnList &spawn_list, const DeterminantElement &dst_det, const defs::wf_t &delta, bool flag_initiator) {
         auto const mag = std::abs(delta);
-        if (mag > largest_spawned_magnitude) largest_spawned_magnitude = mag;
         auto irank = m_rank_allocator.get_rank(dst_det);
         spawn_list.add(irank, dst_det, delta, flag_initiator);
     }
@@ -55,12 +55,14 @@ public:
             else vary_shift = true;
         }
         m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / m_tau;
+        m_magnitude_logger.synchronize();
         m_largest_spawn_magnitude = mpi::all_max(m_largest_spawn_magnitude);
     }
 
     void write_iter_stats(FciqmcStatsFile &stats_file) {
         stats_file.m_timestep() = m_tau;
         stats_file.m_diagonal_shift() = m_shift;
+        stats_file.m_psingle() = m_magnitude_logger.m_psingle;
     }
 };
 

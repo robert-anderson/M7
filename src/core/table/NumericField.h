@@ -7,7 +7,7 @@
 
 #include "Field.h"
 #include "NumericElement.h"
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 
 template<typename T>
 class NumericField : public Field {

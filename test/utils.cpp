@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "../src/utils.h"
+#include "src/core/util/utils.h"
 
 using namespace integer_utils;
 
@@ -27,4 +27,47 @@ TEST(utils, combinatorial){
     }
     ASSERT_EQ(combinatorial(100, 5), 75287520ul);
     ASSERT_EQ(combinatorial(100, 10), 17310309456440ul);
+}
+
+TEST(utils, PairMaps){
+    const size_t N = 20;
+    size_t n, i, j;
+    size_t tmp_i, tmp_j;
+
+    size_t ij = 0ul;
+    for (size_t i=0ul; i<N; ++i){
+        for(size_t j=0ul; j<=i; ++j){
+            n = trigmap(i, j);
+            inv_trigmap(tmp_i, tmp_j, n);
+            ASSERT_EQ(n, ij);
+            ASSERT_EQ(tmp_i, i);
+            ASSERT_EQ(tmp_j, j);
+            ++ij;
+        }
+    }
+
+    ij = 0ul;
+    for (size_t i=0ul; i<N; ++i){
+        for(size_t j=0ul; j<i; ++j){
+            n = strigmap(i, j);
+            inv_strigmap(tmp_i, tmp_j, n);
+            ASSERT_EQ(n, ij);
+            ASSERT_EQ(tmp_i, i);
+            ASSERT_EQ(tmp_j, j);
+            ++ij;
+        }
+    }
+
+    ij = 0ul;
+    for (size_t i=0ul; i<N; ++i) {
+        for (size_t j = 0ul; j < N; ++j) {
+            n = rectmap(i, j, N);
+            inv_rectmap(tmp_i, tmp_j, N, n);
+            ASSERT_EQ(n, ij);
+            ASSERT_EQ(tmp_i, i);
+            ASSERT_EQ(tmp_j, j);
+            ++ij;
+        }
+    }
+
 }

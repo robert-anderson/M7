@@ -33,7 +33,8 @@ namespace defs {
     constexpr size_t det_work_size = 512;
     typedef std::array<size_t, det_work_size> det_work;
     typedef std::pair<size_t, size_t> pair;
-    typedef std::complex<double> ham_t;
+    //typedef std::complex<double> ham_t;
+    typedef double ham_t;
     //typedef double ham_t;
     typedef ham_t wf_t;
     typedef typename consts::component_t<ham_t>::type ham_comp_t;

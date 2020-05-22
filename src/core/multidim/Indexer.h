@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <array>
 #include <iostream>
-#include "src/utils.h"
+#include "src/core/util/utils.h"
 
 template<size_t nind>
 class Indexer {

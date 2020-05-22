@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 #include <list>
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 #include <src/core/table/Table.h>
 #include <src/core/table/NumericField.h>
 #include <src/core/parallel/MPIWrapper.h>

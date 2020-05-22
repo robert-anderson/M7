@@ -10,8 +10,8 @@
 #include <src/core/list/MappedList.h>
 #include <src/core/fermion/Connection.h>
 #include <src/core/fermion/DecodedDeterminant.h>
-#include "src/consts.h"
-#include "src/defs.h"
+#include "src/core/util/consts.h"
+#include "src/core/util/defs.h"
 #include "src/core/table/DeterminantField.h"
 
 class Hamiltonian {

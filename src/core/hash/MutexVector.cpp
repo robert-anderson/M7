@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "MutexVector.h"
-#include "src/defs.h"
+#include "src/core/util/defs.h"
 
 MutexVector::MutexVector(size_t n) {
     resize(n);
