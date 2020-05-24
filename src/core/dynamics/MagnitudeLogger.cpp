@@ -4,7 +4,7 @@
 
 #include "MagnitudeLogger.h"
 
-MagnitudeLogger::MagnitudeLogger(const InputOptions &input) :
+MagnitudeLogger::MagnitudeLogger(const Options &input) :
         m_input(input), m_tau(m_input.tau_initial){}
 
 void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {

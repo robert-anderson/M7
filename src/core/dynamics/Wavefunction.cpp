@@ -43,7 +43,7 @@ void Wavefunction::propagate() {
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
-#pragma omp parallel default(none)
+#pragma omp parallel default(none) shared(stderr)
     {
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;

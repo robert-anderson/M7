@@ -20,7 +20,7 @@ class FciqmcCalculation;
 class Propagator {
 public:
     FciqmcCalculation *m_fciqmc;
-    const InputOptions &m_input;
+    const Options &m_input;
     const std::unique_ptr<Hamiltonian> &m_ham;
     const RankAllocator<DeterminantElement> &m_rank_allocator;
     MagnitudeLogger m_magnitude_logger;

@@ -1,12 +1,12 @@
 //
-// Created by Robert John Anderson on 2020-02-08.
+// Created by rja on 24/05/2020.
 //
 
 #include "InputOptions.h"
 
 const std::string InputOptions::description =
-    "\nM7: Many-body Stochastic Expectation Value Estimation Networks\n"
-    "Command line interface\n";
+        "\nM7: Many-body Stochastic Expectation Value Estimation Networks\n"
+        "Command line interface\n";
 
 InputOptions::InputOptions(CLI::App &app) : m_app(app) {
 
@@ -17,7 +17,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "path to the file to which MC cycle statistics will be output");
 
     add_flag("-E,--exact_propagation", exact_propagation,
-               "perform fully deterministic projector FCI");
+             "perform fully deterministic projector FCI");
 
     add_option("-i,--nwalker_initial", nwalker_initial,
                "sum of walker magnitudes with which to initialize the populations.");
@@ -65,7 +65,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "number of spawns logged for excitation type magnitudes to be used in tau update");
 
     add_option("-S,--shift_initial", shift_initial,
-            "initial diagonal shift relative to the automatically assumed shift given by the reference energy.");
+               "initial diagonal shift relative to the automatically assumed shift given by the reference energy.");
 
     add_option("-d,--shift_damp", shift_damp,
                "damping factor regulating the shift updates");
@@ -75,11 +75,4 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
 
     add_option("-N,--ncycle", ncycle,
                "number of cycles to execute before exit.");
-
-
-
-}
-
-bool InputOptions::validate() const {
-    return true;
 }

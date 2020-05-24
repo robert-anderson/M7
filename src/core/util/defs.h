@@ -12,13 +12,22 @@
 #include <exception>
 #include <array>
 #include <climits>
+#include <cstdlib>
 #include "consts.h"
 
 #ifdef NDEBUG
 #define	ASSERT(e)
 #else
 #define ASSERT(e) \
-{if(!(e)){throw std::runtime_error(std::string("\nAssertion \"" #e "\" failed in file " __FILE__ )+" line: "+std::to_string( __LINE__ ));}}
+{ \
+    if(!(e)){ \
+        fputs("Assertion failed: \n\t", stderr); \
+        fputs(#e, stderr); \
+        fprintf(stderr, "\nin file \"%s\", line %d\n\n", __FILE__, __LINE__); \
+        fflush(stderr); \
+        abort(); \
+    } \
+}
 #endif
 
 namespace defs {

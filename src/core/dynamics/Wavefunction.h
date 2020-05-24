@@ -7,7 +7,7 @@
 
 
 #include <src/core/fermion/Determinant.h>
-#include <src/core/io/InputOptions.h>
+#include <src/core/io/Options.h>
 #include "WalkerList.h"
 #include "SpawnList.h"
 #include "Propagator.h"
@@ -16,7 +16,7 @@ class FciqmcCalculation;
 
 class Wavefunction {
     FciqmcCalculation *m_fciqmc;
-    const InputOptions &m_input;
+    const Options &m_input;
     Determinant& m_reference;
     const std::unique_ptr<Propagator> &m_prop;
 

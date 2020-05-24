@@ -6,7 +6,7 @@
 #define M7_FCIQMCSTATSFILE_H
 
 #include "StatsFile.h"
-#include "InputOptions.h"
+#include "Options.h"
 struct FciqmcStatsFile : public StatsFile {
 public:
     StatsField<size_t> m_cycle_number;
@@ -21,7 +21,7 @@ public:
     StatsField<size_t> m_noccupied_det;
     StatsField<defs::prob_t> m_psingle;
 
-    explicit FciqmcStatsFile(const InputOptions &input):
+    explicit FciqmcStatsFile(const Options &input):
     StatsFile(input.stats_path),
     m_cycle_number(this, 1, "Cycle number"),
     m_diagonal_shift(this, 1, "Diagonal shift", 12),

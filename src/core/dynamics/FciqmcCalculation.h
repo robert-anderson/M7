@@ -9,7 +9,7 @@
 #include <omp.h>
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 #include "src/core/io/FciqmcStatsFile.h"
-#include "src/core/io/InputOptions.h"
+#include "src/core/io/Options.h"
 #include "src/core/fermion/DecodedDeterminant.h"
 #include "src/core/thread/PrivateStore.h"
 #include "Propagator.h"
@@ -18,7 +18,7 @@
 
 class FciqmcCalculation {
 public:
-    const InputOptions m_input;
+    const Options m_input;
     RankAllocator<DeterminantElement> m_rank_allocator;
     FciqmcStatsFile m_stats_file;
     std::unique_ptr<Hamiltonian> m_ham;
@@ -27,7 +27,7 @@ public:
     Wavefunction m_wf;
     std::unique_ptr<FciqmcScratch> m_scratch;
 
-    explicit FciqmcCalculation(const InputOptions &input);
+    explicit FciqmcCalculation(const Options &input);
 
     void execute();
 

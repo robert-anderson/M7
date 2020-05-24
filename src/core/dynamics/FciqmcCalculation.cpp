@@ -8,7 +8,7 @@
 #include "StochasticPropagator.h"
 
 
-FciqmcCalculation::FciqmcCalculation(const InputOptions &input) :
+FciqmcCalculation::FciqmcCalculation(const Options &input) :
     m_input(input), m_rank_allocator(input.nload_balance_block),
     m_stats_file(input),
     m_ham(std::unique_ptr<AbInitioHamiltonian>(new AbInitioHamiltonian(input.fcidump_path))),

@@ -11,10 +11,10 @@
 #include <src/core/thread/PrivateStore.h>
 #include <src/core/thread/Reduction.h>
 #include <src/core/parallel/MPIWrapper.h>
-#include <src/core/io/InputOptions.h>
+#include <src/core/io/Options.h>
 
 class MagnitudeLogger {
-    const InputOptions &m_input;
+    const Options &m_input;
     size_t m_nsingle = 0;
     size_t m_ndouble = 0;
     PrivateStore<size_t> m_priv_nsingle;
@@ -33,7 +33,7 @@ public:
     double m_tau;
     defs::prob_t m_psingle = 0;//0.01; //TODO
 
-    MagnitudeLogger(const InputOptions &input);
+    MagnitudeLogger(const Options &input);
 
     void log(size_t nexcit, defs::ham_t helem, defs::prob_t prob);
 

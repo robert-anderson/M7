@@ -42,7 +42,6 @@ public:
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
-    const size_t& ann(const size_t& i) {return m_ann[i];}
     const size_t& nann() const {return m_nann;}
 
     const defs::det_work& cre() const {return m_cre;}
