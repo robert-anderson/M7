@@ -104,11 +104,18 @@ public:
         // i and j are positions in the occ list, convert to orb inds:
         i = occ.m_inds[i];
         j = occ.m_inds[j];
+        ASSERT(std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin()+occ.m_nind, [&i](const size_t &k) {return k == i;}));
+        ASSERT(std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin()+occ.m_nind, [&j](const size_t &k) {return k == j;}));
+        ASSERT(i<j);
+
         ij = integer_utils::strigmap(j, i);
         size_t ab = m_pick_ab_given_ij[ij].draw();
         integer_utils::inv_strigmap(b, a, ab);
-        if (std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin()+occ.m_nind,
-                [&a, &b](const size_t &i) { return i == a || i == b; })) return false;
+
+        auto either_vac_in_array = [&a, &b](const size_t &k) {return k == a || k == b;};
+
+        if (std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin()+occ.m_nind, either_vac_in_array)) return 0;
+
         anticonn.zero();
         anticonn.add(i, j, a, b);
         anticonn.apply(src_det, dst_det);
