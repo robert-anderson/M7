@@ -80,24 +80,27 @@ public:
 
     // deallocate storage p of deleted elements
     void deallocate(pointer p, size_type num) {
-        ::operator delete((void *) p);
+        free((void*) p);
     }
 };
 
-/*
+
 // return that all specializations of this allocator are interchangeable
-template<class T1, class T2, size_t alignment>
-bool operator==(const MyAlloc<T1, alignment> &,
-                const MyAlloc<T2, alignment> &) throw() {
+template <class T1, class T2, size_t alignment>
+bool operator== (const AlignedAllocator<T1, alignment>&,
+                 const AlignedAllocator<T2, alignment>&) throw() {
     return true;
 }
-
-template<class T1, class T2, size_t alignment>
-bool operator!=(const MyAlloc<T1, alignment> &,
-                const MyAlloc<T2, alignment> &) throw() {
+template <class T1, class T2, size_t alignment>
+bool operator!= (const AlignedAllocator<T1, alignment>&,
+                 const AlignedAllocator<T2, alignment>&) throw() {
     return false;
 }
- */
+
+
+
+
+
 
 
 #endif //M7_ALIGNEDALLOCATOR_H

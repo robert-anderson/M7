@@ -141,7 +141,7 @@ private:
     }
 
     static defs::inds read_header_array(const std::string &fname, const std::string &label) {
-        return defs::inds{0};
+        return defs::inds{0, 1};
     }
 
     static size_t read_header_bool(const std::string &fname, const std::string &label, size_t default_ = false) {

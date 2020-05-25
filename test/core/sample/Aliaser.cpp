@@ -7,7 +7,7 @@
 #include <src/core/sample/Aliaser.h>
 
 TEST(Aliaser, DistributionCheck) {
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
 
     std::vector<defs::prob_t> probs =
         {0, 0.648, 0.025, 0.035, 0.036, 0, 0.0648, 0.053, 0.0723, 0.1234};

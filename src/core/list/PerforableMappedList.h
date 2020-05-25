@@ -60,7 +60,7 @@ public:
 //        std::cout << "PerforableMappedList free rows left over: " << m_nfree <<std::endl;
 //        std::cout << "PerforableMappedList rows removed: " << m_nremoved <<std::endl;
 //        std::cout << "PerforableMappedList zero rows: " << nzero_rows(0) <<std::endl;
-        std::move(m_removed.begin(), m_removed.end(), m_free.begin()+m_nfree);
+        std::move(m_removed.begin(), m_removed.begin()+m_nremoved, m_free.begin()+m_nfree);
         m_nfree+=m_nremoved;
         ASSERT(m_nfree == nzero_rows(0));
         m_nremoved = 0ul;

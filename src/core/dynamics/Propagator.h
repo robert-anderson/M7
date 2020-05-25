@@ -60,9 +60,9 @@ public:
     }
 
     void write_iter_stats(FciqmcStatsFile &stats_file) {
-        stats_file.m_timestep() = m_tau;
-        stats_file.m_diagonal_shift() = m_shift;
-        stats_file.m_psingle() = m_magnitude_logger.m_psingle;
+        stats_file.m_timestep.write(m_tau);
+        stats_file.m_diagonal_shift.write(m_shift);
+        stats_file.m_psingle.write(m_magnitude_logger.m_psingle);
     }
 };
 

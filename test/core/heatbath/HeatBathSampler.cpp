@@ -10,11 +10,11 @@
 
 TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e8;
@@ -42,7 +42,7 @@ TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
 
 TEST(HeatBathSampler, AllExcitsGeneratedFromExcitedDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     Determinant source_det(ham.nsite());
     /*
@@ -50,7 +50,7 @@ TEST(HeatBathSampler, AllExcitsGeneratedFromExcitedDeterminantComplex4c) {
      */
     source_det.set(defs::inds{1, 4, 6, 7});
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e6;
@@ -84,11 +84,11 @@ TEST(HeatBathSampler, UnbiasedElecPairComplex4c) {
      * ensure that the ratio of generation frequency to proposal probability is uniform
      */
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e7;
@@ -124,11 +124,11 @@ TEST(HeatBathSampler, UnbiasedElecPairAndFirstVirtualComplex4c) {
      * ensure that the ratio of generation frequency to proposal probability is uniform
      */
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e6;
@@ -180,11 +180,11 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantComplex4c) {
      */
 
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e6;
@@ -215,7 +215,7 @@ TEST(HeatBathSampler, UnbiasedFromExcitedDeterminantComplex4c) {
      */
 
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     Determinant source_det(ham.nsite());
     /*
@@ -223,7 +223,7 @@ TEST(HeatBathSampler, UnbiasedFromExcitedDeterminantComplex4c) {
      */
     source_det.set(defs::inds{1, 4, 6, 7});
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e7;
@@ -253,11 +253,11 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
      * ensure that the ratio of generation frequency to proposal probability is uniform
      */
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
-    auto &det_sampler = heat_bath_sampler.det_sampler->get(0);
+    auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e6;

@@ -45,7 +45,7 @@ void FciqmcCalculation::execute() {
 }
 
 void FciqmcCalculation::write_iter_stats(size_t icycle) {
-    m_stats_file.m_cycle_number() = icycle;
+    m_stats_file.m_cycle_number.write(icycle);
     m_prop->write_iter_stats(m_stats_file);
     m_wf.write_iter_stats(m_stats_file);
     m_stats_file.flush();

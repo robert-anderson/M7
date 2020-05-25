@@ -32,7 +32,7 @@ public:
         return *this;
     }
 
-    const size_t &fp_precision() const { return dynamic_cast<StatsField<T>*>(m_field)->m_fp_precision;}
+    const size_t &fp_precision() const { return dynamic_cast<StatsField<T> *>(m_field)->m_fp_precision; }
 
     StatsElement<T> &operator=(const NumericElement<T> &v) override {
         if (!m_field->is_allocated()) m_field->expand_table(1);
@@ -43,7 +43,7 @@ public:
     std::string to_string() override {
         const T v = **this;
         if (consts::is_complex<T>())
-            return utils::num_to_string(consts::real(v), 0, fp_precision())+" "
+            return utils::num_to_string(consts::real(v), 0, fp_precision()) + " "
                    + utils::num_to_string(consts::imag(v), 0, fp_precision());
         else return utils::num_to_string(v, 0, fp_precision());
     }
@@ -58,7 +58,7 @@ protected:
 protected:
     void write_header() {
         size_t ncolumn = 0ul;
-        for (auto &column : m_fields) ncolumn += column->is_complex() ? 2:1;
+        for (auto &column : m_fields) ncolumn += column->is_complex() ? 2 : 1;
         *m_file <<
                 "################################\n"
                 "#    M7 FCIQMC Stats Output    #\n"
@@ -80,10 +80,11 @@ protected:
     }
 
 public:
-    StatsFile(const std::string &fname) : Table(), m_fname(fname), m_file(std::unique_ptr<std::ofstream>(new std::ofstream(fname))) {
+    StatsFile(const std::string &fname)
+            : Table(), m_fname(fname), m_file(std::unique_ptr<std::ofstream>(new std::ofstream(fname))) {
         if (!mpi::i_am_root())
             throw std::runtime_error(
-                "StatsFiles must only be instantiated on the root process");
+                    "StatsFiles must only be instantiated on the root process");
     }
 
     void flush() {
@@ -108,21 +109,28 @@ public:
 
 template<typename T>
 class StatsField : public NumericField<T> {
+    StatsElement<T> operator()(const size_t &ielement = 0) {
+        ASSERT(ielement < m_nelement);
+        if (!m_table->is_allocated()) m_table->expand(1);
+        return StatsElement<T>(this, begin(0, 0) + ielement * m_element_size);
+    }
+
 public:
     using NumericField<T>::m_table;
     using NumericField<T>::m_nelement;
     using NumericField<T>::m_element_size;
     using NumericField<T>::begin;
     const size_t m_fp_precision;
+    const bool m_retention;
+    std::vector<T> m_series;
 
     StatsField(StatsFile *file, size_t nelement = 1, const std::string &description = "",
-        size_t fp_precision=6) :
-        NumericField<T>(file, nelement, description), m_fp_precision(fp_precision) {}
+               size_t fp_precision = 6, bool retention = false) :
+            NumericField<T>(file, nelement, description), m_fp_precision(fp_precision), m_retention(retention) {}
 
-    StatsElement<T> operator()(const size_t &ielement = 0) {
-        ASSERT(ielement < m_nelement);
-        if (!m_table->is_allocated()) m_table->expand(1);
-        return StatsElement<T>(this, begin(0, 0) + ielement * m_element_size);
+    void write(const T &v, size_t ielement=0) {
+        if (m_retention) m_series.push_back(v);
+        (*this)(ielement) = v;
     }
 
     bool is_complex() const override { return consts::is_complex<T>(); }

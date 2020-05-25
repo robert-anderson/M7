@@ -14,6 +14,7 @@ struct alignas(defs::cache_line_size) TestType {
     std::complex<double> z2, z3;
 };
 
+#if 0
 TEST(PrivateStore, Test) {
     const size_t nelement = 6;
     PrivateStore<TestType> store(nelement, TestType());
@@ -33,3 +34,4 @@ TEST(PrivateStore, Test) {
     }
     ASSERT_TRUE(all_passed);
 };
+#endif

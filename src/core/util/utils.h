@@ -60,15 +60,20 @@ namespace utils {
     }
 
 
-    template<typename T>
-    void print(T v) {
-        std::cout << to_string(v) << std::endl;
+
+    template <typename T>
+    void print(typename std::vector<T>::const_iterator begin, typename std::vector<T>::const_iterator end){
+        for (auto iter = begin; iter!=end; iter++){
+            std::cout << *iter << " ";
+        }
+        std::cout << std::endl;
     }
 
     template<typename T>
-    void print(T v, size_t n) {
-        std::cout << to_string(v, n) << std::endl;
+    void print(const std::vector<T> &v) {
+        print<T>(v.cbegin(), v.cend());
     }
+
 }
 
 namespace integer_utils {

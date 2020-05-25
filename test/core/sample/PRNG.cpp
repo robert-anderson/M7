@@ -64,3 +64,14 @@ TEST(PRNG, StochasticThreshold) {
     }
     ASSERT_LT(std::abs(tot/n-v), 1e-4);
 }
+
+TEST(PRNG, ModularBase){
+    PRNG prng(0, 1000);
+    const uint32_t modular_base = 6;
+    std::vector<size_t> frequencies(modular_base, 0ul);
+    const size_t n=10000000;
+    for (size_t i=0; i<n; ++i){
+        frequencies[prng.draw_uint(modular_base)]++;
+    }
+    ASSERT_TRUE(std::all_of(frequencies.cbegin(), frequencies.cend(), [](const size_t &i){return i>0;}));
+}

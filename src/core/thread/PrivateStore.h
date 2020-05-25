@@ -12,19 +12,23 @@ template<typename T>
 class PrivateStore {
     //static_assert(alignof(T)%defs::cache_line_size==0, "Cannot store non-cache-aligned type in PrivateStore");
     const size_t m_nthread;
-    const size_t m_nelement_per_thread;
     std::vector<T, AlignedAllocator<T, defs::cache_line_size>> m_data;
 
 public:
-    PrivateStore(size_t nelement_per_thread, const T& t):
-    m_nthread(omp_get_max_threads()), m_nelement_per_thread(nelement_per_thread),
-    m_data(m_nthread*nelement_per_thread, t){}
+    template<typename ...Args>
+    PrivateStore(Args... construct_args):
+    m_nthread(omp_get_max_threads())
+    {
+        for (size_t i = 0ul; i<m_nthread; ++i){
+            m_data.emplace_back(construct_args...);
+        }
+    }
 
-    PrivateStore():PrivateStore(1, 0){}
+    PrivateStore():PrivateStore(1){}
 
-    T& get(const size_t &ielement=0){
+    T& get(){
         auto const ithread = omp_get_thread_num();
-        return m_data[m_nelement_per_thread*ithread+ielement];
+        return m_data[ithread];
     }
 
     const size_t& nthread() const {return m_nthread;}

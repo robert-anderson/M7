@@ -8,7 +8,7 @@
 
 TEST(HeatBathSamplers, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(18, 1e4));
+    PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSamplers pchb(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
@@ -42,7 +42,7 @@ TEST(HeatBathSamplers, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
 
 TEST(HeatBathSamplers, UnbiasedDoublesFromHartreeFockDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(16, 3e4));
+    PrivateStore<PRNG> prng(16, 3e4);
     HeatBathSamplers pchb(&ham, prng);
     auto source_det = ham.guess_reference(0);
     Determinant work_det(ham.nsite());
@@ -80,7 +80,7 @@ TEST(HeatBathSamplers, UnbiasedDoublesFromHartreeFockDeterminantComplex4c) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(16, 3e4));
+    PrivateStore<PRNG> prng(16, 3e4);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
@@ -127,7 +127,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(1, PRNG(16, 3e4));
+    PrivateStore<PRNG> prng(16, 3e4);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());

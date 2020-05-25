@@ -11,7 +11,7 @@ ExactPropagator::ExactPropagator(FciqmcCalculation *fciqmc) : Propagator(fciqmc)
 void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                                    SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
 
-    auto anticonn = m_fciqmc->m_scratch->anticonn->get(0);
+    auto anticonn = m_fciqmc->m_scratch->anticonn->get();
     OccupiedOrbitals occs(src_det);
     ASSERT(occs.m_nind > 0);
     VacantOrbitals vacs(src_det);

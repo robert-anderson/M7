@@ -121,7 +121,6 @@ public:
         anticonn.apply(src_det, dst_det);
         helem = m_h->get_element_2(anticonn);
         prob = std::abs(helem) / (m_pick_ab_given_ij[ij].norm() * m_nelec_pair);
-        //prob = m_pick_ab_given_ij[ij].prob(ab)/m_nelec_pair;
         if (consts::float_nearly_zero(prob, 1e-14)) {
             return false;
         }

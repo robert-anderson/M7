@@ -9,9 +9,9 @@
 
 
 Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
-    m_fciqmc(fciqmc), m_input(fciqmc->m_input), m_reference(m_fciqmc->m_reference),
-    m_prop(fciqmc->m_prop), m_send(m_reference.nsite(), mpi::nrank()), m_recv(m_reference.nsite(), 1),
-    m_data(m_reference.nsite(), m_input.nwalker_target * m_input.walker_factor_initial) {
+        m_fciqmc(fciqmc), m_input(fciqmc->m_input), m_reference(m_fciqmc->m_reference),
+        m_prop(fciqmc->m_prop), m_send(m_reference.nsite(), mpi::nrank()), m_recv(m_reference.nsite(), 1),
+        m_data(m_reference.nsite(), m_input.nwalker_target * m_input.walker_factor_initial) {
     const auto nrow_walker = (size_t) (m_input.walker_factor_initial * m_input.nwalker_target);
     m_data.expand(nrow_walker);
     m_send.recv(&m_recv);
@@ -19,7 +19,7 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
     m_send.expand(nrow_buffer);
     auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
     m_reference_row =
-        m_data.add(m_reference, ref_weight, m_fciqmc->m_ham->get_energy(m_reference), true, true, false);
+            m_data.add(m_reference, ref_weight, m_fciqmc->m_ham->get_energy(m_reference), true, true, false);
     m_ninitiator = 1;
     m_square_norm = std::pow(std::abs(ref_weight), 2);
     m_nw = std::abs(ref_weight);
@@ -43,7 +43,7 @@ void Wavefunction::propagate() {
     // capture the reference weight before death step is applied in the loop below
     m_reference_weight = *m_data.m_weight(m_reference_row);
 
-#pragma omp parallel default(none) shared(stderr)
+#pragma omp parallel
     {
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
@@ -107,7 +107,7 @@ void Wavefunction::communicate() {
 
 void Wavefunction::annihilate_row(const size_t &irow_recv, defs::wf_comp_t &aborted_weight,
                                   defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw) {
-    auto conn = m_fciqmc->m_scratch->conn->get(0);
+    auto conn = m_fciqmc->m_scratch->conn->get();
 
     auto det = m_recv.m_determinant(irow_recv);
     auto delta_weight = m_recv.m_weight(irow_recv);
@@ -143,13 +143,13 @@ void Wavefunction::annihilate() {
 
 #ifndef NDEBUG
     size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
-    if (m_ninitiator!=ninitiator_verify){
+    if (m_ninitiator != ninitiator_verify) {
         m_data.print();
         ASSERT(0)
     }
 #endif
     m_aborted_weight = 0;
-#pragma omp parallel default(none)
+#pragma omp parallel
     {
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
@@ -174,15 +174,15 @@ void Wavefunction::annihilate() {
     m_nw_growth_rate = (m_nw + m_delta_nw) / m_nw;
     m_square_norm += m_delta_square_norm;
     m_nw += m_delta_nw;
-    if (consts::float_is_zero(m_nw)) throw(std::runtime_error("All walkers died."));
+    if (consts::float_is_zero(m_nw)) throw (std::runtime_error("All walkers died."));
 }
 
 void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
-    stats_file.m_ref_proj_energy_num() = m_ref_proj_energy_num;
-    stats_file.m_ref_weight() = m_reference_weight;
-    stats_file.m_ref_proj_energy() = m_ref_proj_energy_num / m_reference_weight;
-    stats_file.m_nwalker() = m_nw;
-    stats_file.m_aborted_weight() = m_aborted_weight;
-    stats_file.m_ninitiator() = m_ninitiator;
-    stats_file.m_noccupied_det() = m_noccupied_determinant;
+    stats_file.m_ref_proj_energy_num.write(m_ref_proj_energy_num);
+    stats_file.m_ref_weight.write(m_reference_weight);
+    stats_file.m_ref_proj_energy.write(m_ref_proj_energy_num / m_reference_weight);
+    stats_file.m_nwalker.write(m_nw);
+    stats_file.m_aborted_weight.write(m_aborted_weight);
+    stats_file.m_ninitiator.write(m_ninitiator);
+    stats_file.m_noccupied_det.write(m_noccupied_determinant);
 }
