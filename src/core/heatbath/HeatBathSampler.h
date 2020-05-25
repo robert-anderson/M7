@@ -30,8 +30,6 @@
  * determinant in question.
  */
 
-class StochasticPropagator;
-
 class DeterminantSampler;
 
 class HeatBathSampler {

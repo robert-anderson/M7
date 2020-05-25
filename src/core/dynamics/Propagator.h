@@ -31,6 +31,8 @@ public:
 
     Propagator(FciqmcCalculation *fciqmc);
 
+    virtual ~Propagator()= default;
+
     void spawn(SpawnList &spawn_list, const DeterminantElement &dst_det, const defs::wf_t &delta, bool flag_initiator) {
         auto const mag = std::abs(delta);
         auto irank = m_rank_allocator.get_rank(dst_det);

@@ -6,6 +6,7 @@
 
 PRNG::PRNG(const size_t &seed, const size_t &block_size) :
     m_seed(seed), m_data(block_size, 0u) {
+    ASSERT(block_size>0);
     m_it = m_data.end();
 }
 
@@ -18,7 +19,10 @@ void PRNG::refresh() {
 
 uint32_t PRNG::draw_uint() {
     if (m_it==m_data.end()) refresh();
-    return *m_it++;
+    ASSERT(m_it!=m_data.end());
+    auto tmp = *m_it;
+    m_it++;
+    return tmp;
 }
 
 uint32_t PRNG::draw_uint(uint32_t modular_base) {

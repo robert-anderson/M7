@@ -13,7 +13,7 @@
  */
 
 class HeatBathSamplers {
-    std::vector<Aliaser> m_pick_ab_given_ij{};
+    std::vector<Aliaser> m_pick_ab_given_ij;
     const Hamiltonian *m_h;
     PrivateStore<PRNG> &m_prng;
     const size_t m_norb;

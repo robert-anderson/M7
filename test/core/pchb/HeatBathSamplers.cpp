@@ -121,7 +121,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
     utils::print(weighted_frequencies);
     utils::print(frequencies);
     std::cout << nnull <<std::endl;
-    ASSERT_EQ(nnull, 45562755);
+    ASSERT_EQ(nnull, 72649031);
     ASSERT_TRUE(std::all_of(weighted_frequencies.cbegin(), weighted_frequencies.cend(), [](const defs::prob_t i) { return i > 0; }));
 }
 

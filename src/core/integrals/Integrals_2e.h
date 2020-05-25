@@ -33,7 +33,7 @@ public:
     Integrals_2e(const size_t &norb, bool spin_resolved) :
             Integrals(norb, spin_resolved), m_norb2(m_norb * norb), m_norb3(m_norb2 * norb),
             m_nelem_8fold(trig(0, trig(0, norb))), m_nelem(nelem(norb)) {
-        m_data.assign(m_nelem, 0.0);
+        m_data.resize(m_nelem, 0.0);
     }
 
     Integrals_2e(std::string fname, bool spin_major = false) :

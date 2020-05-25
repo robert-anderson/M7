@@ -12,10 +12,9 @@
 #include "src/core/util/defs.h"
 
 class alignas(defs::cache_line_size) PRNG {
-    //typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::cache_line_size>> U;
-    typedef std::vector<uint32_t> U;
+    typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::cache_line_size>> U;
     U m_data;
-    U::const_iterator m_it;
+    U::iterator m_it;
     const size_t m_seed;
 public:
     PRNG(const size_t &seed, const size_t &block_size);

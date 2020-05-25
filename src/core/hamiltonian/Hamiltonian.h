@@ -26,6 +26,8 @@ public:
         return consts::real(get_element_0(det));
     }
 
+    virtual ~Hamiltonian()= default;
+
     virtual defs::ham_t get_element_0(const defs::det_work &occs, const size_t &nocc) const = 0;
 
     defs::ham_t get_element_0(const OccupiedOrbitals &occs) const {

@@ -53,9 +53,9 @@ public:
         return R"((^|\s))" + string_utils::join(R"(\d+)", n, R"(\s+)") + R"(($|\s))";
     }
 
-    static std::string data_regex_string(const size_t &nind, const bool &indsfirst) {
+    static const std::string data_regex_string(const size_t &nind, const bool &indsfirst) {
         if (indsfirst) return uint_space_list_regex_string(nind) + R"(.*)" + float_regex_string;
-        else return float_regex_string + R"(.*)" + uint_space_list_regex_string(nind);
+        else return std::string(float_regex_string + R"(.*)" + uint_space_list_regex_string(nind));
     }
 
     bool next(defs::inds &inds, T &value) {
@@ -132,5 +132,14 @@ public:
     }
 
 };
+
+
+struct ATest {
+    const std::string m_data_regex_string;
+    ATest(): m_data_regex_string(TensorFileIterator<std::complex<double>>::data_regex_string(4, 1)){
+
+    }
+};
+
 
 #endif //M7_TENSORFILEITERATOR_H

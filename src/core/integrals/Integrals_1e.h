@@ -31,7 +31,7 @@ class Integrals_1e : public Integrals {
 public:
     Integrals_1e(const size_t &norb, bool spin_resolved) :
             Integrals(norb, spin_resolved), m_nelem(nelem(norb)) {
-        m_data.assign(m_nelem, 0.0);
+        m_data.resize(m_nelem, 0.0);
     }
 
     Integrals_1e(std::string fname) :

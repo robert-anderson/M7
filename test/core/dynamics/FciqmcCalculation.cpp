@@ -2,6 +2,7 @@
 // Created by rja on 24/05/2020.
 //
 
+#include <src/core/dynamics/StochasticPropagator.h>
 #include "gtest/gtest.h"
 #include "src/core/dynamics/FciqmcCalculation.h"
 
