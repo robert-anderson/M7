@@ -8,6 +8,7 @@
 #include "FileIterator.h"
 #include "src/core/util/defs.h"
 #include "src/core/util/utils.h"
+#include "Logging.h"
 #include <iostream>
 #include <complex>
 
@@ -46,16 +47,15 @@ public:
             m_nind(nind), m_indsfirst(indsfirst), m_data_regex_string(data_regex_string(nind, indsfirst)),
             m_data_regex(std::regex(m_data_regex_string)), m_nreal_given(nreal_given(filename, m_data_regex)),
             m_shape(shape(filename, m_nind, m_nreal_given, m_indsfirst, m_data_regex)) {
-        std::cout << "Tensor file \"" + filename + "\" open for reading." << std::endl;
     }
 
     static std::string uint_space_list_regex_string(const size_t &n) {
         return R"((^|\s))" + string_utils::join(R"(\d+)", n, R"(\s+)") + R"(($|\s))";
     }
 
-    static const std::string data_regex_string(const size_t &nind, const bool &indsfirst) {
+    static std::string data_regex_string(const size_t &nind, const bool &indsfirst) {
         if (indsfirst) return uint_space_list_regex_string(nind) + R"(.*)" + float_regex_string;
-        else return std::string(float_regex_string + R"(.*)" + uint_space_list_regex_string(nind));
+        else return float_regex_string + R"(.*)" + uint_space_list_regex_string(nind);
     }
 
     bool next(defs::inds &inds, T &value) {
@@ -84,8 +84,14 @@ public:
         if (m_nreal == 1) {
             // we mustn't try to store a complex-valued tensor in a real container
             if (match.size()) throw std::runtime_error(
-                    "Trying to read a complex-valued Hamiltonian into a real-typed container. Recompile with -DNZ=2.");
+                    "Trying to read a complex-valued sparse array into a real-typed container. Recompile with -DNZ=2.");
         }
+        /*
+        if (m_nreal == 2) {
+            // storing a real-valued tensor in a complex container is allowed but inefficient, raise a warning
+            if (!match.size())
+                logger::write("Reading a real-valued sparse array into a complex-typed container. Consider recompiling with -DNZ=1.");
+        }*/
         if (match.size()) return 2;
         else return 1;
     }
@@ -132,14 +138,5 @@ public:
     }
 
 };
-
-
-struct ATest {
-    const std::string m_data_regex_string;
-    ATest(): m_data_regex_string(TensorFileIterator<std::complex<double>>::data_regex_string(4, 1)){
-
-    }
-};
-
 
 #endif //M7_TENSORFILEITERATOR_H

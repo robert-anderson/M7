@@ -17,7 +17,6 @@
 class Hamiltonian {
 protected:
     const size_t m_nsite;
-    size_t m_nci;
 
 public:
     Hamiltonian(const size_t &nsite);
@@ -78,7 +77,7 @@ public:
     }
 
     size_t nci() const {
-        return m_nci;
+        return integer_utils::combinatorial(2*nsite(), nelec());
     }
 
     virtual bool spin_conserving() const = 0;
@@ -103,7 +102,7 @@ public:
             determinant(this, 1, nsite), helement(this) {}
     };
 
-    ConnectionList all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps = 1e-1) const;
+    void all_connections_of_det(ConnectionList* list, const Determinant &ref, const defs::ham_comp_t eps) const;
 
 };
 

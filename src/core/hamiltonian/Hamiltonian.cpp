@@ -64,13 +64,7 @@ Determinant Hamiltonian::choose_reference(const int &spin_level) const {
     return ref;
 }
 
-Hamiltonian::ConnectionList
-Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp_t eps) const {
-
-    auto nbucket = integer_utils::combinatorial(2*nsite(), nelec());
-    ConnectionList list(m_nsite, nbucket);
-    list.expand(nbucket);
-
+void Hamiltonian::all_connections_of_det(ConnectionList* list, const Determinant &ref, const defs::ham_comp_t eps) const {
     OccupiedOrbitals occs(ref);
     VacantOrbitals vacs(ref);
     AntisymConnection connection(ref);
@@ -85,8 +79,8 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
             connection.apply(ref, excited);
             auto helement = get_element(connection);
             if (!consts::float_nearly_zero(std::abs(helement), eps)) {
-                size_t irow = list.push(excited);
-                list.helement(irow) = helement;
+                size_t irow = list->push(excited);
+                list->helement(irow) = helement;
             }
         }
     }
@@ -103,12 +97,11 @@ Hamiltonian::all_connections_of_det(const Determinant &ref, const defs::ham_comp
                 connection.apply(ref, excited);
                 auto helement = get_element(connection);
                 if (!consts::float_nearly_zero(std::abs(helement), eps)) {
-                    size_t irow = list.push(excited);
-                    list.helement(irow) = helement;
-                    ASSERT(list.lookup(list.determinant(irow)) == irow);
+                    size_t irow = list->push(excited);
+                    list->helement(irow) = helement;
+                    ASSERT(list->lookup(list->determinant(irow)) == irow);
                 }
             }
         }
     }
-    return list;
 }

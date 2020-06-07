@@ -16,7 +16,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
     m_wf(this), m_scratch(std::unique_ptr<FciqmcScratch>(new FciqmcScratch(m_reference))) {
 
     StochasticPropagator tmp(this);
-    std::cout << tmp.m_occ.m_nind <<std::endl;
+    std::cout << tmp.m_occ.get().m_nind <<std::endl;
 
     if (input.exact_propagation) {
         m_prop = std::unique_ptr<ExactPropagator>(new ExactPropagator(this));

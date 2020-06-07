@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "openmp-use-default-none"
 //
 // Created by Robert John Anderson on 2020-04-03.
 //
@@ -18,8 +20,11 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
     const auto nrow_buffer = (size_t) (m_input.buffer_factor_initial * m_input.nwalker_target);
     m_send.expand(nrow_buffer);
     auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
+    auto ref_energy = m_fciqmc->m_ham->get_energy(m_reference);
+    logger::write("Reference energy: " + std::to_string(ref_energy));
+
     m_reference_row =
-            m_data.add(m_reference, ref_weight, m_fciqmc->m_ham->get_energy(m_reference), true, true, false);
+            m_data.add(m_reference, ref_weight, ref_energy, true, true, false);
     m_ninitiator = 1;
     m_square_norm = std::pow(std::abs(ref_weight), 2);
     m_nw = std::abs(ref_weight);
@@ -149,12 +154,12 @@ void Wavefunction::annihilate() {
     }
 #endif
     m_aborted_weight = 0;
-#pragma omp parallel
+//#pragma omp parallel default(none) shared(stderr)
     {
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
-#pragma omp for
+//#pragma omp for
         for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
             annihilate_row(irow_recv, aborted_weight, delta_square_norm, delta_nw);
         }
@@ -186,3 +191,5 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
     stats_file.m_ninitiator.write(m_ninitiator);
     stats_file.m_noccupied_det.write(m_noccupied_determinant);
 }
+
+#pragma clang diagnostic pop

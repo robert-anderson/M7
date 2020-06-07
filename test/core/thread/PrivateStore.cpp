@@ -7,7 +7,7 @@
 #include "src/core/thread/PrivateStore.h"
 #include "src/core/util/defs.h"
 
-struct alignas(defs::cache_line_size) TestType {
+struct TestType {
     char i1, i2;
     int i3;
     std::complex<float> z1;

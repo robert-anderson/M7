@@ -53,16 +53,16 @@ public:
          * of elements in the stack, then the stack was emptied.
          * Now move the indices of the newly removed rows into the free stack
          */
-//        std::cout << "PerforableMappedList high water mark: " << List::high_water_mark(0) <<std::endl;
-//        std::cout << "PerforableMappedList free rows available: " << m_nfree <<std::endl;
-//        std::cout << "PerforableMappedList free rows used: " << m_nfree_used <<std::endl;
+        //std::cout << "PerforableMappedList high water mark: " << List::high_water_mark(0) <<std::endl;
+        //std::cout << "PerforableMappedList free rows available: " << m_nfree <<std::endl;
+        //std::cout << "PerforableMappedList free rows used: " << m_nfree_used <<std::endl;
         m_nfree = m_nfree_used>m_nfree? 0 : m_nfree-m_nfree_used;
-//        std::cout << "PerforableMappedList free rows left over: " << m_nfree <<std::endl;
-//        std::cout << "PerforableMappedList rows removed: " << m_nremoved <<std::endl;
-//        std::cout << "PerforableMappedList zero rows: " << nzero_rows(0) <<std::endl;
+        //std::cout << "PerforableMappedList free rows left over: " << m_nfree <<std::endl;
+        //std::cout << "PerforableMappedList rows removed: " << m_nremoved <<std::endl;
+        //std::cout << "PerforableMappedList zero rows: " << nzero_rows(0) <<std::endl;
         std::move(m_removed.begin(), m_removed.begin()+m_nremoved, m_free.begin()+m_nfree);
         m_nfree+=m_nremoved;
-        ASSERT(m_nfree == nzero_rows(0));
+        //ASSERT(m_nfree == nzero_rows(0));
         m_nremoved = 0ul;
         m_nfree_used = 0ul;
     }

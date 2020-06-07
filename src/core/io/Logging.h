@@ -2,6 +2,9 @@
 // Created by Robert John Anderson on 2020-01-04.
 //
 
+#ifndef M7_LOGGING_H
+#define M7_LOGGING_H
+
 #include <iostream>
 #include "src/core/parallel/MPIWrapper.h"
 
@@ -16,3 +19,5 @@ namespace logger {
         }
     }
 }
+
+#endif

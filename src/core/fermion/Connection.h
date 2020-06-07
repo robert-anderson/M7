@@ -28,7 +28,7 @@
  * add: append annihilation/creation index pair
  */
 
-class alignas(defs::cache_line_size) Connection {
+class Connection {
     const size_t m_element_dsize;
 protected:
     const size_t m_nbit;
@@ -77,7 +77,7 @@ public:
 /*
  * a connection in which the common indices and antisymmetric phase is computed
  */
-class alignas(defs::cache_line_size) AntisymConnection : public Connection {
+class AntisymConnection : public Connection {
     defs::det_work m_com{};
     size_t m_ncom;
     bool m_phase;

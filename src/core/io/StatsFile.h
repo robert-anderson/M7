@@ -128,7 +128,22 @@ public:
                size_t fp_precision = 6, bool retention = false) :
             NumericField<T>(file, nelement, description), m_fp_precision(fp_precision), m_retention(retention) {}
 
-    void write(const T &v, size_t ielement=0) {
+    std::pair<T,T> mean_std(size_t istart, size_t iend) const {
+        ASSERT(iend>istart);
+        auto cbegin = m_series.cbegin(); std::advance(cbegin, istart);
+        auto cend = m_series.cbegin(); std::advance(cend, iend);
+        return stat_utils::mean_std<T>(cbegin, cend);
+    }
+
+    std::pair<T,T> mean_std(size_t istart) {
+        return mean_std(istart, m_series.size());
+    }
+
+    std::pair<T,T> mean_std() {
+        return mean_std(0);
+    }
+
+    void write(const T &v, size_t ielement = 0) {
         if (m_retention) m_series.push_back(v);
         (*this)(ielement) = v;
     }

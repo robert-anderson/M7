@@ -22,6 +22,7 @@ class MagnitudeLogger {
     // highest magnitudes
     defs::ham_comp_t m_hi_mag_single = 0;
     defs::ham_comp_t m_hi_mag_double = 0;
+
     PrivateStore<defs::ham_comp_t> m_priv_hi_mag_single;
     PrivateStore<defs::ham_comp_t> m_priv_hi_mag_double;
 
@@ -31,7 +32,7 @@ class MagnitudeLogger {
 public:
     // the recommended timestep based on the hi_mag and the maximum acceptable bloom
     double m_tau;
-    defs::prob_t m_psingle = 0;//0.01; //TODO
+    defs::prob_t m_psingle = 0.001; //TODO
 
     MagnitudeLogger(const Options &input);
 

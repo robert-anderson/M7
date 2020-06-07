@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "openmp-use-default-none"
 //
 // Created by Robert John Anderson on 2020-02-23.
 //
@@ -35,7 +37,7 @@ TEST(PerforableMappedList, RemovalAndReuse) {
     TestPerforableMappedList list(nrow / 10);
     list.expand(nrow);
 
-#pragma omp parallel for default(none) shared(list)
+#pragma omp parallel for
     for (size_t i = 0; i < nrow; ++i) {
         {
             //enclose within scope to ensure destruction of mutex
@@ -73,3 +75,5 @@ TEST(PerforableMappedList, MultiRemovalAndReuse) {
         list.synchronize();
     }
 }
+
+#pragma clang diagnostic pop

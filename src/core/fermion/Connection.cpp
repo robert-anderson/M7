@@ -47,6 +47,7 @@ void Connection::apply(const DeterminantElement &ket, DeterminantElement &bra){
     bra = ket;
     for (size_t i=0ul; i<m_nann; ++i) bra.clr(m_ann[i]);
     for (size_t i=0ul; i<m_ncre; ++i) bra.set(m_cre[i]);
+    ASSERT(ket.nsetbit()==bra.nsetbit());
 }
 
 const size_t &Connection::nexcit() const {

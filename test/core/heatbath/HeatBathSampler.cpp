@@ -8,6 +8,7 @@
 #include <src/core/hamiltonian/AbInitioHamiltonian.h>
 #include <src/core/heatbath/DeterminantSampler.h>
 
+#if 0
 TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     PrivateStore<PRNG> prng(18, 1e4);
@@ -285,3 +286,4 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
     }
     ASSERT_TRUE(std::all_of(weighted_frequencies.begin(), weighted_frequencies.end(), [](size_t i) { return i > 0; }));
 }
+#endif

@@ -15,6 +15,10 @@ AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
     m_int_2(m_file_iterator.m_norb, spin_resolved()) {
     defs::inds inds(4);
     defs::ham_t value;
+
+    if (consts::is_complex<defs::ham_t>() && m_file_iterator.m_nreal_given==1)
+        logger::write("WARNING: Reading a real-valued sparse array into a complex-typed container. Consider recompiling with -DNZ=1.");
+
     logger::write("Loading ab-initio Hamiltonian from FCIDUMP...");
     while (m_file_iterator.next(inds, value)) {
         if (m_int_2.valid_inds(inds)) m_int_2.set_from_fcidump(inds, value);

@@ -17,7 +17,7 @@ public:
 
     DeterminantElement(DeterminantField *field, char *begin);
 
-    virtual std::string to_string();
+    virtual std::string to_string() const;
 
     void set(const size_t &ispin, const size_t &iorb);
 

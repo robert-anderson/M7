@@ -71,8 +71,6 @@ TEST(Connection, Phase) {
         connection.connect(ket, bra);
         ASSERT_EQ(connection.phase(), value < 0);
         connection.apply(ket, work_det);
-        ket.print();
-        bra.print();
         ASSERT_EQ(connection.phase(), value < 0);
         ASSERT_TRUE(bra==work_det);
     }

@@ -29,7 +29,8 @@ template<typename T>
 class Matrix {
     std::vector<T> m_data;
     T* data(const size_t &irow, const size_t &icol){
-        m_data[icol*m_nrow+irow];
+        ASSERT(icol*m_nrow+irow<m_data.size());
+        return m_data.data()+icol*m_nrow+irow;
     }
 
 public:

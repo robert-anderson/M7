@@ -8,7 +8,7 @@
 
 #include "HeatBathSampler.h"
 
-class alignas(defs::cache_line_size) DeterminantSampler {
+class DeterminantSampler {
 public:
     enum Outcome{no_excitations, single_excitation, double_excitation, both_excitations};
 private:

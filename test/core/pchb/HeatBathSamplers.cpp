@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "openmp-use-default-none"
 //
 // Created by rja on 09/05/2020.
 //
@@ -6,169 +8,184 @@
 #include "gtest/gtest.h"
 #include "src/core/pchb/HeatBathSamplers.h"
 
-TEST(HeatBathSamplers, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
+bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, size_t ndraw, size_t pc_freq_thresh) {
+    /*
+     * given:
+     *      ExcitationGenerator subclass instance
+     *      source determinant
+     *      number of draws "ndraw"
+     *      1% threshold frequency "pc_freq_thresh"
+     *
+     * this function will perform ndraw singles and ndraw doubles draws from src_det,
+     * storing the generation frequencies f1, and the cumulative weighted probabilities w1
+     *
+     * then a further n draws will be performed, accumulating a copy f2 of the frequencies f1
+     * and a copy w2 of the weighted probabilities w1.
+     *
+     * for the test to pass, the dst_dets indexed i with a f2[i]>=pc_freq_thresh, must be have a
+     * normalized w2[i] correct within 1%, and the normalized w2[i] must be closer to 1 than w1[i]
+     *
+     * for now, this is a fairly rough check, with weak criteria, and a more statistically rigorous
+     * scheme could certainly be devised
+     *
+     * a successful test is indicated by a non-zero return value
+     */
+
+    defs::prob_t dn = ndraw;
+
+    const defs::ham_comp_t eps = 100.0 / ndraw;
+
+    struct ExcitConnectionList : public Hamiltonian::ConnectionList {
+        NumericField<size_t> frequency;
+        NumericField<defs::prob_t> weight;
+        ExcitConnectionList(size_t nsite, size_t nbucket) :
+        ConnectionList(nsite, nbucket), frequency(this,2), weight(this,2){}
+    };
+    size_t nsite = src_det.nsite();
+    size_t nconn = integer_utils::combinatorial(2*nsite, 4); // comfortable upper bound
+    ExcitConnectionList connection_list(src_det.nsite(), nconn);
+    connection_list.expand(nconn);
+    exgen.ham()->all_connections_of_det(&connection_list, src_det, eps);
+    nconn = connection_list.high_water_mark(0);
+
+    size_t nnull = 0ul;
+
+    PrivateStore<OccupiedOrbitals> occ(src_det);
+    PrivateStore<VacantOrbitals> vac(src_det);
+    PrivateStore<AntisymConnection> anticonn(src_det);
+    PrivateStore<Determinant> work_det(src_det);
+
+    auto loop = [&](size_t ielement) {
+#pragma omp parallel
+        {
+            defs::prob_t prob;
+            defs::ham_t helem;
+            bool valid;
+#pragma omp for
+            for (size_t i = 0ul; i < 2 * ndraw; ++i) {
+                if (i < ndraw) {
+                    valid = exgen.draw_double(src_det, work_det.get(), occ.get(), prob, helem, anticonn.get());
+                    if (valid) ASSERT(anticonn.get().nexcit() == 2)
+                } else {
+                    valid = exgen.draw_single(src_det, work_det.get(), occ.get(), vac.get(), prob, helem, anticonn.get());
+                    if (valid) ASSERT(anticonn.get().nexcit() == 1)
+                }
+
+                if (!valid) {
+                    ++nnull;
+                    continue;
+                }
+                ASSERT(src_det.nsetbit() == work_det.get().nsetbit())
+                size_t irow = connection_list.lookup(work_det.get());
+                if (irow != ~0ul) {
+                    connection_list.weight(irow, 0, ielement) += 1.0 / prob;
+                    connection_list.frequency(irow, 0, ielement) += 1;
+                }
+            }
+        }
+        /*
+        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << w[irow] << " ";
+        std::cout <<std::endl;
+        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << f[irow] << " ";
+        std::cout <<std::endl;
+         */
+    };
+    loop(0);
+    loop(1);
+    defs::prob_t tot_err1 = 0;
+    defs::prob_t tot_err2 = 0;
+    for (size_t i = 0ul; i < nconn; ++i) {
+        auto f1 = *connection_list.frequency(i, 0, 0);
+        auto f2 = *connection_list.frequency(i, 0, 1);
+        f2+=f1;
+        auto w1 = *connection_list.weight(i, 0, 0);
+        auto w2 = *connection_list.weight(i, 0, 1);
+        w2+=w1;
+        // check that all accessible dst_dets have been generated at least once
+        if (f2 == 0) return false;
+        auto err1 = std::abs(w1 / (dn) - 1.0);
+        auto err2 = std::abs(w2 / (2 * dn) - 1.0);
+        tot_err1 += err1;
+        tot_err2 += err2;
+        if (f2 > pc_freq_thresh) {
+            if (err2 > 0.01) {
+                std::cout << err2 << " " << f2 << std::endl;
+                return false;
+            }
+        }
+    }
+    return tot_err2 < tot_err1;
+}
+
+
+TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSamplers pchb(&ham, prng);
-    auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
-    OccupiedOrbitals occ(source_det);
-    VacantOrbitals vac(source_det);
-    AntisymConnection anticonn(source_det);
 
-    const size_t nattempt = 1e8;
-    const defs::ham_comp_t eps = 100.0 / nattempt;
-    auto all_connections = ham.all_connections_of_det(source_det, eps);
-    defs::inds frequencies(all_connections.high_water_mark(0), 0ul);
-
-    size_t irow;
-    defs::prob_t prob;
-    defs::ham_t helem;
-    size_t nnull=0ul;
-    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        bool valid = pchb.draw_double(source_det, work_det, occ, prob, helem, anticonn);
-        if (!valid){
-            ++nnull;
-            continue;
-        }
-        irow = all_connections.lookup(work_det);
-        if (irow != ~0ul) frequencies[irow]++;
-        if (std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; })) break;
-    }
-    ASSERT_EQ(nnull, 5239381);
-    ASSERT_EQ(std::accumulate(frequencies.begin(), frequencies.end(), 0ul), 672869);
-    ASSERT_TRUE(std::all_of(frequencies.begin(), frequencies.end(), [](size_t i) { return i > 0; }));
+    Determinant source_det(ham.nsite());
+    defs::inds occ_inds = {0, 1, 4, 5};
+    source_det.set(occ_inds);
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
 }
-
-TEST(HeatBathSamplers, UnbiasedDoublesFromHartreeFockDeterminantComplex4c) {
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(16, 3e4);
-    HeatBathSamplers pchb(&ham, prng);
-    auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
-    OccupiedOrbitals occ(source_det);
-    VacantOrbitals vac(source_det);
-    AntisymConnection anticonn(source_det);
-
-    const size_t nattempt = 1e8;
-    const defs::ham_comp_t eps = 100.0 / nattempt;
-    auto all_connections = ham.all_connections_of_det(source_det, eps);
-    defs::inds frequencies(all_connections.high_water_mark(0), 0ul);
-    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
-
-    size_t irow;
-    defs::prob_t prob;
-    defs::ham_t helem;
-    size_t nnull=0ul;
-    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        bool valid = pchb.draw_double(source_det, work_det, occ, prob, helem, anticonn);
-        if (!valid){
-            ++nnull;
-            continue;
-        }
-        ASSERT_EQ(source_det.nsetbit(), work_det.nsetbit());
-        irow = all_connections.lookup(work_det);
-        if (irow != ~0ul) weighted_frequencies[irow] += 1.0 / (prob*nattempt);
-        if (irow != ~0ul) frequencies[irow]++;
-    }
-    //utils::print(weighted_frequencies);
-    //utils::print(frequencies);
-    ASSERT_EQ(nnull, 88623452);
-    ASSERT_TRUE(std::all_of(weighted_frequencies.cbegin(), weighted_frequencies.cend(), [](const defs::prob_t i) { return i > 0; }));
-}
-
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
+
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(16, 3e4);
+    PrivateStore<PRNG> prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
-    /*
-     * arbitrary choice of source determinant
-     */
     source_det.set(defs::inds{1, 4, 6, 7});
-    Determinant work_det(ham.nsite());
-    OccupiedOrbitals occ(source_det);
-    VacantOrbitals vac(source_det);
-    AntisymConnection anticonn(source_det);
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+}
 
-    const size_t nattempt = 1e8;
-    const defs::ham_comp_t eps = 100.0 / nattempt;
-    auto all_connections = ham.all_connections_of_det(source_det, eps);
-    defs::inds frequencies(all_connections.high_water_mark(0), 0ul);
-    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
+TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
 
-    size_t irow;
-    defs::prob_t prob;
-    defs::ham_t helem;
-    size_t nnull=0ul;
-    bool valid;
-    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        if (iattempt<nattempt/2)
-            valid = pchb.draw_double(source_det, work_det, occ, prob, helem, anticonn);
-        else
-            valid = pchb.draw_single(source_det, work_det, occ, vac, prob, helem, anticonn);
-        if (!valid){
-            ++nnull;
-            continue;
-        }
-        ASSERT_EQ(source_det.nsetbit(), work_det.nsetbit());
-        irow = all_connections.lookup(work_det);
-        if (irow != ~0ul) weighted_frequencies[irow] += 2.0 / (prob*nattempt);
-        if (irow != ~0ul) frequencies[irow]++;
-    }
-    utils::print(weighted_frequencies);
-    utils::print(frequencies);
-    std::cout << nnull <<std::endl;
-    ASSERT_EQ(nnull, 72649031);
-    ASSERT_TRUE(std::all_of(weighted_frequencies.cbegin(), weighted_frequencies.cend(), [](const defs::prob_t i) { return i > 0; }));
+    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    PrivateStore<PRNG> prng(15, 10000);
+    HeatBathSamplers pchb(&ham, prng);
+
+    Determinant source_det(ham.nsite());
+    source_det.set(defs::inds{1, 5, 6, 7});
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+}
+
+TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
+    PrivateStore<PRNG> prng(15, 10000);
+    HeatBathSamplers pchb(&ham, prng);
+
+    Determinant source_det(ham.nsite());
+    defs::inds occ_inds = {0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17};
+    source_det.set(occ_inds);
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(16, 3e4);
+    PrivateStore<PRNG> prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
-    /*
-     * arbitrary choice of source determinant
-     */
-    source_det.set(defs::inds{1, 4, 5, 7, 8, 10,   12, 14, 15, 16, 20, 21});
-    Determinant work_det(ham.nsite());
-    OccupiedOrbitals occ(source_det);
-    VacantOrbitals vac(source_det);
-    AntisymConnection anticonn(source_det);
-
-    const size_t nattempt = 1e8;
-    const defs::ham_comp_t eps = 100.0 / nattempt;
-    auto all_connections = ham.all_connections_of_det(source_det, eps);
-    defs::inds frequencies(all_connections.high_water_mark(0), 0ul);
-    std::vector<defs::prob_t> weighted_frequencies(all_connections.high_water_mark(0), 0);
-
-    size_t irow;
-    defs::prob_t prob;
-    defs::ham_t helem;
-    size_t nnull=0ul;
-    bool valid;
-    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        if (iattempt<nattempt/2)
-            valid = pchb.draw_double(source_det, work_det, occ, prob, helem, anticonn);
-        else
-            valid = pchb.draw_single(source_det, work_det, occ, vac, prob, helem, anticonn);
-        if (!valid){
-            ++nnull;
-            continue;
-        }
-        ASSERT_EQ(source_det.nsetbit(), work_det.nsetbit());
-        irow = all_connections.lookup(work_det);
-        if (irow != ~0ul) weighted_frequencies[irow] += 2.0 / (prob*nattempt);
-        if (irow != ~0ul) frequencies[irow]++;
-    }
-    utils::print(weighted_frequencies);
-    utils::print(frequencies);
-    std::cout << nnull <<std::endl;
-    ASSERT_EQ(nnull, 48899841);
-    ASSERT_TRUE(std::all_of(weighted_frequencies.cbegin(), weighted_frequencies.cend(), [](const defs::prob_t i) { return i > 0; }));
+    defs::inds occ_inds = {1, 4, 5, 7, 8, 10, 12, 14, 15, 16, 20, 21};
+    source_det.set(occ_inds);
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
 }
 
+TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
+    PrivateStore<PRNG> prng(15, 10000);
+    HeatBathSamplers pchb(&ham, prng);
+
+    Determinant source_det(ham.nsite());
+    defs::inds occ_inds = {1, 4, 5, 7, 8, 9, 10, 14, 15, 16, 20, 21};
+    source_det.set(occ_inds);
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+}
+
+
+#pragma clang diagnostic pop

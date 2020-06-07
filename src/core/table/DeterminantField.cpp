@@ -8,7 +8,7 @@ DeterminantElement::DeterminantElement(DeterminantField *field, char *begin) :
     BitsetElement(field, begin) {
 }
 
-std::string DeterminantElement::to_string() {
+std::string DeterminantElement::to_string() const {
     std::string result;
     for (size_t ibit = 0; ibit < nsite(); ++ibit) {
         result += BitsetElement::get(ibit) ? "1" : "0";

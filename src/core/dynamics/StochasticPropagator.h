@@ -15,23 +15,24 @@ class StochasticPropagator : public Propagator {
     const double &m_min_spawn_mag;
 public:
     PrivateStore<PRNG> m_prng;
-    HeatBathSamplers m_pchb;
-    Determinant m_dst_det;
-    OccupiedOrbitals m_occ;
-    VacantOrbitals m_vac;
-    AntisymConnection m_anticonn;
+    std::unique_ptr<ExcitationGenerator> m_exgen = nullptr;
+    PrivateStore<Determinant> m_dst_det;
+    PrivateStore<OccupiedOrbitals> m_occ;
+    PrivateStore<VacantOrbitals> m_vac;
+    PrivateStore<AntisymConnection> m_anticonn;
 
     StochasticPropagator(FciqmcCalculation *fciqmc) :
             Propagator(fciqmc), m_min_spawn_mag(m_input.min_spawn_mag),
             m_prng(m_input.prng_seed, m_input.prng_ngen),
-            m_pchb(fciqmc->m_ham.get(), m_prng),
-            m_dst_det(m_ham->nsite()), m_occ(m_dst_det), m_vac(m_dst_det), m_anticonn(m_dst_det) {}
+            m_dst_det(m_ham->nsite()), m_occ(m_dst_det.get()), m_vac(m_dst_det.get()), m_anticonn(m_dst_det.get()) {
+        m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(m_ham.get(), m_prng));
+    }
 
     void off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                       SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override {
         ASSERT(!consts::float_is_zero(*weight));
-        m_occ.update(src_det);
-        m_vac.update(src_det);
+        m_occ.get().update(src_det);
+        m_vac.get().update(src_det);
         size_t nattempt = std::ceil(std::abs(*weight));
         defs::prob_t prob;
         defs::ham_t helem;
@@ -39,27 +40,25 @@ public:
 
         for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
             size_t nexcit = 2 - m_prng.get().stochastic_round(m_magnitude_logger.m_psingle, 1);
-            ASSERT(nexcit==2);
             switch (nexcit) {
                 case 1:
-                    valid = m_pchb.draw_single(src_det, m_dst_det, m_occ, m_vac, prob, helem, m_anticonn);
+                    valid = m_exgen->draw_single(src_det, m_dst_det.get(), m_occ.get(), m_vac.get(), prob, helem, m_anticonn.get());
                     prob*=m_magnitude_logger.m_psingle;
                     ASSERT(!consts::float_nearly_zero(prob, 1e-14));
                     break;
                 case 2:
                     // TODO: don't need m_vac for doubles.
-                    valid = m_pchb.draw_double(src_det, m_dst_det, m_occ, prob, helem, m_anticonn);
+                    valid = m_exgen->draw_double(src_det, m_dst_det.get(), m_occ.get(), prob, helem, m_anticonn.get());
                     prob*= 1.0-m_magnitude_logger.m_psingle;
                     break;
             }
             if (!valid) continue;
 
-            ASSERT(!consts::float_is_zero(prob));
+            ASSERT(!consts::float_is_zero(prob))
             auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob;
             delta = m_prng.get().stochastic_threshold(delta, m_min_spawn_mag);
             if (consts::float_is_zero(delta)) continue;
-            std::cout << delta << std::endl;
-            spawn(spawn_list, m_dst_det, delta, flag_initiator);
+            spawn(spawn_list, m_dst_det.get(), delta, flag_initiator);
             m_magnitude_logger.log(nexcit, helem, prob);
         }
     }

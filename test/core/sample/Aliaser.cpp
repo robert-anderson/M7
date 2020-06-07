@@ -14,7 +14,7 @@ TEST(Aliaser, DistributionCheck) {
     Aliaser aliaser(probs, prng);
     defs::inds results(probs.size(), 0ul);
 
-    const size_t n_attempts = 10000000;
+    const size_t n_attempts = 20000000;
     for (size_t i = 0ul; i < n_attempts; ++i) {
         results[aliaser.draw()]++;
     }
