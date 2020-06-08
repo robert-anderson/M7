@@ -36,5 +36,5 @@ TEST(FciqmcCalculation, StochasticPropagation){
     auto den = fciqmc_calculation.m_stats_file->m_ref_weight.mean_std(options.ncycle/2);
     auto energy_mean_std = stat_utils::quotient(num, den);
     std::cout << std::setprecision(10)<< energy_mean_std.first <<std::endl;
-    ASSERT_TRUE(consts::floats_nearly_equal(energy_mean_std.first, -108.8113865756313, 1e-4));
+    ASSERT_TRUE(consts::floats_nearly_equal(energy_mean_std.first, -108.8113865756313, 1e-3));
 }
