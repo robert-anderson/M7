@@ -182,14 +182,15 @@ void Wavefunction::annihilate() {
     if (consts::float_is_zero(m_nw)) throw (std::runtime_error("All walkers died."));
 }
 
-void Wavefunction::write_iter_stats(FciqmcStatsFile &stats_file) {
-    stats_file.m_ref_proj_energy_num.write(m_ref_proj_energy_num);
-    stats_file.m_ref_weight.write(m_reference_weight);
-    stats_file.m_ref_proj_energy.write(m_ref_proj_energy_num / m_reference_weight);
-    stats_file.m_nwalker.write(m_nw);
-    stats_file.m_aborted_weight.write(m_aborted_weight);
-    stats_file.m_ninitiator.write(m_ninitiator);
-    stats_file.m_noccupied_det.write(m_noccupied_determinant);
+void Wavefunction::write_iter_stats(FciqmcStatsFile* stats_file) {
+    if (!mpi::i_am_root()) return;
+    stats_file->m_ref_proj_energy_num.write(m_ref_proj_energy_num);
+    stats_file->m_ref_weight.write(m_reference_weight);
+    stats_file->m_ref_proj_energy.write(m_ref_proj_energy_num / m_reference_weight);
+    stats_file->m_nwalker.write(m_nw);
+    stats_file->m_aborted_weight.write(m_aborted_weight);
+    stats_file->m_ninitiator.write(m_ninitiator);
+    stats_file->m_noccupied_det.write(m_noccupied_determinant);
 }
 
 #pragma clang diagnostic pop

@@ -63,7 +63,7 @@ public:
 
     void annihilate();
 
-    void write_iter_stats(FciqmcStatsFile &stats_file);
+    void write_iter_stats(FciqmcStatsFile* stats_file);
 
 private:
     void annihilate_row(const size_t &irow_recv, defs::wf_comp_t &aborted_weight,

@@ -10,13 +10,14 @@
 
 FciqmcCalculation::FciqmcCalculation(const Options &input) :
     m_input(input), m_rank_allocator(input.nload_balance_block),
-    m_stats_file(input),
     m_ham(std::unique_ptr<AbInitioHamiltonian>(new AbInitioHamiltonian(input.fcidump_path))),
     m_reference(m_ham->guess_reference(input.spin_restrict)),
     m_wf(this), m_scratch(std::unique_ptr<FciqmcScratch>(new FciqmcScratch(m_reference))) {
 
     StochasticPropagator tmp(this);
     std::cout << tmp.m_occ.get().m_nind <<std::endl;
+
+    if(mpi::i_am_root()) m_stats_file = std::unique_ptr<FciqmcStatsFile>(new FciqmcStatsFile(m_input));
 
     if (input.exact_propagation) {
         m_prop = std::unique_ptr<ExactPropagator>(new ExactPropagator(this));
@@ -34,7 +35,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
 void FciqmcCalculation::execute() {
     logger::write("Starting FCIQMC main loop.");
     for (size_t icycle = 0ul; icycle < m_input.ncycle; ++icycle) {
-        logger::write("iteration " + std::to_string(icycle));
+        //logger::write("iteration " + std::to_string(icycle));
         //logger::write("\npropagating...");
         m_wf.propagate();
         //logger::write("\ncommunicating...");
@@ -48,8 +49,9 @@ void FciqmcCalculation::execute() {
 }
 
 void FciqmcCalculation::write_iter_stats(size_t icycle) {
-    m_stats_file.m_cycle_number.write(icycle);
-    m_prop->write_iter_stats(m_stats_file);
-    m_wf.write_iter_stats(m_stats_file);
-    m_stats_file.flush();
+    if (!mpi::i_am_root()) return;
+    m_stats_file->m_cycle_number.write(icycle);
+    m_prop->write_iter_stats(m_stats_file.get());
+    m_wf.write_iter_stats(m_stats_file.get());
+    m_stats_file->flush();
 }

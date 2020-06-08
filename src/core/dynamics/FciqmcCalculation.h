@@ -20,7 +20,7 @@ class FciqmcCalculation {
 public:
     const Options m_input;
     RankAllocator<DeterminantElement> m_rank_allocator;
-    FciqmcStatsFile m_stats_file;
+    std::unique_ptr<FciqmcStatsFile> m_stats_file = nullptr;
     std::unique_ptr<Hamiltonian> m_ham;
     Determinant m_reference;
     std::unique_ptr<Propagator> m_prop;

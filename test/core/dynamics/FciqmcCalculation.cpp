@@ -17,8 +17,8 @@ TEST(FciqmcCalculation, ExactPropagation){
     options.exact_propagation = 1;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
-    auto final_energy = fciqmc_calculation.m_stats_file.m_ref_proj_energy_num.m_series.back()/
-            fciqmc_calculation.m_stats_file.m_ref_weight.m_series.back();
+    auto final_energy = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.m_series.back()/
+            fciqmc_calculation.m_stats_file->m_ref_weight.m_series.back();
     // check exact propagation energy against exact eigensolver
     auto exact_diag_energy = DenseHamiltonian(*fciqmc_calculation.m_ham).diagonalize().m_evals(0);
     ASSERT_FLOAT_EQ(consts::real(final_energy), exact_diag_energy);
@@ -32,8 +32,8 @@ TEST(FciqmcCalculation, StochasticPropagation){
     options.ncycle = 20000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
-    auto num = fciqmc_calculation.m_stats_file.m_ref_proj_energy_num.mean_std(options.ncycle/2);
-    auto den = fciqmc_calculation.m_stats_file.m_ref_weight.mean_std(options.ncycle/2);
+    auto num = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.mean_std(options.ncycle/2);
+    auto den = fciqmc_calculation.m_stats_file->m_ref_weight.mean_std(options.ncycle/2);
     auto energy_mean_std = stat_utils::quotient(num, den);
     std::cout << std::setprecision(10)<< energy_mean_std.first <<std::endl;
     ASSERT_TRUE(consts::floats_nearly_equal(energy_mean_std.first, -108.8113865756313, 1e-4));

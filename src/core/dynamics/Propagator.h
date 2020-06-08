@@ -61,10 +61,11 @@ public:
         m_largest_spawn_magnitude = mpi::all_max(m_largest_spawn_magnitude);
     }
 
-    void write_iter_stats(FciqmcStatsFile &stats_file) {
-        stats_file.m_timestep.write(m_tau);
-        stats_file.m_diagonal_shift.write(m_shift);
-        stats_file.m_psingle.write(m_magnitude_logger.m_psingle);
+    void write_iter_stats(FciqmcStatsFile* stats_file) {
+        if (!mpi::i_am_root()) return;
+        stats_file->m_timestep.write(m_tau);
+        stats_file->m_diagonal_shift.write(m_shift);
+        stats_file->m_psingle.write(m_magnitude_logger.m_psingle);
     }
 };
 
