@@ -16,6 +16,7 @@ TEST(NdArray, CorrectMapping) {
     ASSERT_EQ(*array.view(1, 2, 2), 4.5);
 }
 
+/*
 TEST(NdArray, SubArrays) {
     NdArray<double, 4> array(2, 4, 3, 7);
     auto subarray = array.subarray(1, 2);
@@ -23,7 +24,7 @@ TEST(NdArray, SubArrays) {
     ASSERT_EQ(subarray_shape, subarray.shape());
     *subarray.view(4, 3) = 1234.567;
     ASSERT_EQ(*array.view(1, 2, 4, 3), 1234.567);
-}
+}*/
 
 TEST(NdArray, VectorCase) {
     NdArray<double, 1> array(8);
