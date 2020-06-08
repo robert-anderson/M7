@@ -154,12 +154,12 @@ void Wavefunction::annihilate() {
     }
 #endif
     m_aborted_weight = 0;
-//#pragma omp parallel default(none) shared(stderr)
+#pragma omp parallel default(none) shared(stderr)
     {
         defs::wf_comp_t aborted_weight = 0;
         defs::wf_comp_t delta_square_norm = 0;
         defs::wf_comp_t delta_nw = 0;
-//#pragma omp for
+#pragma omp for
         for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
             annihilate_row(irow_recv, aborted_weight, delta_square_norm, delta_nw);
         }
