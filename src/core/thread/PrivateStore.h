@@ -15,7 +15,8 @@ class PrivateStore {
     };
     static_assert(alignof(aligned_T)%defs::cache_line_size==0, "non-cache-aligned type");
     const size_t m_nthread;
-    std::vector<aligned_T, AlignedAllocator<aligned_T, defs::cache_line_size>> m_data;
+    //std::vector<aligned_T, AlignedAllocator<aligned_T, defs::cache_line_size>> m_data;
+    std::vector<aligned_T> m_data;
 
 public:
     template<typename ...Args>
@@ -24,12 +25,14 @@ public:
         for (size_t i = 0ul; i<m_nthread; ++i){
             m_data.push_back(aligned_T{T(std::forward<Args>(construct_args)...)});
         }
+        /*
         // check alignment of first element
         ASSERT(((size_t)((void*)(m_data.data())))%defs::cache_line_size==0)
         // check that adjacent elements are properly spaced
         ASSERT(((size_t)((void*)(m_data.data()))-(size_t)((void*)(m_data.data()+1)) )%defs::cache_line_size==0)
         // check that adjacent elements are sufficiently spaced to contain type
         ASSERT(((size_t)((void*)(m_data.data()))-(size_t)((void*)(m_data.data()+1)) )>=sizeof(T))
+        */
     }
 
     PrivateStore():PrivateStore(1){}

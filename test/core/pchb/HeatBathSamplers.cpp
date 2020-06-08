@@ -78,6 +78,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
                 ASSERT(src_det.nsetbit() == work_det.get().nsetbit())
                 size_t irow = connection_list.lookup(work_det.get());
                 if (irow != ~0ul) {
+                    auto mutex = connection_list.key_mutex(work_det.get());
                     connection_list.weight(irow, 0, ielement) += 1.0 / prob;
                     connection_list.frequency(irow, 0, ielement) += 1;
                 }
@@ -178,7 +179,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(15, 10000);
+    PrivateStore<PRNG> prng(15, 100000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
