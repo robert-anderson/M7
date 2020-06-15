@@ -13,13 +13,24 @@ int main(int argc, char **argv) {
      */
     CLI::App cli_app{InputOptions::description};
     InputOptions input(cli_app);
+
+
+    std::ofstream ofstdout, ofstderr;
     if (!mpi::i_am_root()) {
         /*
          * only allow standard output and error from the root MPI rank
          */
+#ifdef DNDEBUG
         std::cout.setstate(std::ios_base::failbit);
         std::cerr.setstate(std::ios_base::failbit);
+#else
+        ofstdout = std::ofstream("rank_"+std::to_string(mpi::irank())+".out");
+        std::cout.rdbuf(ofstdout.rdbuf());
+        ofstderr = std::ofstream("rank_"+std::to_string(mpi::irank())+".err");
+        std::cerr.rdbuf(ofstderr.rdbuf());
+#endif
     }
+
     try {
         cli_app.parse((argc), (argv));
     } catch (const CLI::ParseError &e) {

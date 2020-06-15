@@ -267,4 +267,23 @@ namespace stat_utils {
 
 }
 
+namespace complex_utils {
+    template<typename T>
+    static std::complex<double> normal_from_polar(const T& arg){
+        /*
+         * arg is in radian
+         */
+        return {std::cos(arg), std::sin(arg)};
+    }
+
+    template<typename T>
+    static std::complex<double> normal_from_xy(const T& x, const T& y){
+        return std::complex<double>(x, y)/std::sqrt(x*x+y*y);
+    }
+
+    static std::complex<double> normal_from_sector(const size_t& isector, const size_t& nsector){
+        return normal_from_polar(consts::two_pi * double(isector)/double(nsector));
+    }
+}
+
 #endif //M7_UTILS_H

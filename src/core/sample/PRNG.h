@@ -14,7 +14,7 @@
 class PRNG {
     typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::cache_line_size>> U;
     U m_data;
-    U::iterator m_it;
+    size_t m_i;
     const size_t m_seed;
 public:
     PRNG(const size_t &seed, const size_t &block_size);

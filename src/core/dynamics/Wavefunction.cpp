@@ -23,8 +23,10 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
     auto ref_energy = m_fciqmc->m_ham->get_energy(m_reference);
     logger::write("Reference energy: " + std::to_string(ref_energy));
 
-    m_reference_row =
+    if (mpi::i_am_root())
+        m_reference_row =
             m_data.add(m_reference, ref_weight, ref_energy, true, true, false);
+    else m_reference_row = ~0ul;
     m_ninitiator = 1;
     m_square_norm = std::pow(std::abs(ref_weight), 2);
     m_nw = std::abs(ref_weight);
@@ -103,7 +105,6 @@ void Wavefunction::propagate() {
         as_atomic(m_delta_nw) += delta_nw;
         as_atomic(m_ref_proj_energy_num) += reference_energy_numerator;
     }
-    ASSERT(m_ninitiator >= 0)
 }
 
 void Wavefunction::communicate() {
@@ -147,10 +148,12 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, defs::wf_comp_t &abor
 void Wavefunction::annihilate() {
 
 #ifndef NDEBUG
-    size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
-    if (m_ninitiator != ninitiator_verify) {
-        m_data.print();
-        ASSERT(0)
+    if (mpi::nrank()==1) {
+        size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
+        if (m_ninitiator != ninitiator_verify) {
+            m_data.print();
+            ASSERT(0)
+        }
     }
 #endif
     m_aborted_weight = 0;
@@ -169,6 +172,7 @@ void Wavefunction::annihilate() {
     }
     m_recv.zero();
     m_ninitiator = mpi::all_sum(m_ninitiator);
+    ASSERT(m_ninitiator >= 0)
 
     m_delta_square_norm = mpi::all_sum(m_delta_square_norm);
     m_delta_nw = mpi::all_sum(m_delta_nw);

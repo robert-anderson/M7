@@ -35,6 +35,22 @@ struct Atomic {
     }
 };
 
+template<>
+struct Atomic<bool> {
+    bool &m_v;
+    Atomic(bool &v) : m_v(v) {}
+
+    bool &operator&=(const bool &rhs) {
+#pragma omp atomic update
+        m_v &= rhs;
+    }
+
+    bool &operator|=(const bool &rhs) {
+#pragma omp atomic update
+        m_v |= rhs;
+    }
+};
+
 template<typename T>
 struct Atomic<std::complex<T>> {
     T &m_real;

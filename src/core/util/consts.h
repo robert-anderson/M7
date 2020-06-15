@@ -147,6 +147,11 @@ namespace consts {
         return float_nearly_zero(v1-v2, eps);
     }
 
+    const double pi = std::atan(1.0)*4;
+    const double two_pi = 2*pi;
+    const double sqrt2 = std::sqrt(2.0);
+    const double invsqrt2 = 1.0/sqrt2;
+
 }
 
 

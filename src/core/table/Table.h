@@ -48,6 +48,8 @@ public:
 
     virtual void expand(size_t delta_nrow);
 
+    virtual void resize(size_t nrow);
+
     size_t irow(const size_t &irow, const size_t &isegment = 0) const;
 
     virtual void zero();

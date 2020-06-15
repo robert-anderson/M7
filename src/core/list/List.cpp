@@ -51,15 +51,19 @@ void List::communicate() {
     for (auto &i : sendcounts) i *= m_padded_row_dsize;
     defs::inds recvcounts(mpi::nrank(), 0ul);
 
+    std::cout << "Sending elements " << utils::to_string(sendcounts) << std::endl;
     mpi::all_to_all(sendcounts, recvcounts);
+    std::cout << "Receiving elements " << utils::to_string(recvcounts) << std::endl;
 
     auto senddispls = m_segment_doffsets;
     defs::inds recvdispls(mpi::nrank(), 0ul);
     for (size_t i = 1ul; i < mpi::nrank(); ++i)
-        recvdispls[i] = recvdispls[i - 1] + sendcounts[i - 1];
+        recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
+    std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
 
     const auto ndword_send_tot = senddispls[mpi::nrank() - 1] + sendcounts[mpi::nrank() - 1];
     const auto ndword_recv_tot = recvdispls[mpi::nrank() - 1] + recvcounts[mpi::nrank() - 1];
+
 
     logger::write("Send List usage fraction: "+
                   std::to_string(ndword_send_tot/double(m_segment_dsize)), 0, logger::debug);
@@ -67,7 +71,8 @@ void List::communicate() {
     std::to_string(ndword_send_tot/double(m_segment_dsize)), 0, logger::debug);
 
     if (ndword_recv_tot > m_recv->dsize()) {
-        throw std::runtime_error("Not enough space in receive list.");
+        logger::write("Insufficient space for received data: reallocating recv list...");
+        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
     }
 
     auto tmp = mpi::all_to_allv(m_data.data(), sendcounts, senddispls,
@@ -76,12 +81,13 @@ void List::communicate() {
     if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
     m_recv->m_high_water_mark[0] = (recvdispls.back() + recvcounts.back()) / m_padded_row_dsize;
+    std::cout << "Number of recvd elements " << m_recv->m_high_water_mark[0] << std::endl;
     zero();
 }
 
 void List::expand(size_t delta_nrow) {
     Table::expand(delta_nrow);
-    if (m_recv) m_recv->expand(delta_nrow);
+    if (m_recv) m_recv->expand(mpi::nrank()*delta_nrow);
 }
 
 std::string List::to_string() {

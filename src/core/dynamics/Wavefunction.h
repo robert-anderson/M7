@@ -53,6 +53,14 @@ public:
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
     }
 
+    defs::wf_t reference_weight(){
+        defs::wf_t res = 0.0;
+        if (m_reference_row!=~0ul){
+            res = 
+        }
+        mpi::bcast()
+    }
+
     void propagate();
 
     void communicate();

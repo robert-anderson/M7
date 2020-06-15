@@ -34,6 +34,8 @@ set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external/CLI11/include")
 
+add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
+
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(assets)

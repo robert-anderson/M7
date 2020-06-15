@@ -10,12 +10,12 @@ MagnitudeLogger::MagnitudeLogger(const Options &input) :
 void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
     defs::ham_comp_t tmp_hi_mag;
     if (nexcit == 1) {
-        m_priv_nsingle.get()++;
+        ++m_priv_nsingle.get();
         tmp_hi_mag = std::abs(helem) / prob;
         auto hi_mag = m_priv_hi_mag_single.get();
         if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
     } else if (nexcit == 2) {
-        m_priv_ndouble.get()++;
+        ++m_priv_ndouble.get();
         tmp_hi_mag = std::abs(helem) / prob;
         auto hi_mag = m_priv_hi_mag_double.get();
         if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;

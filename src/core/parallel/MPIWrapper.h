@@ -230,6 +230,11 @@ public:
     }
 
     template<typename T>
+    static bool bcast(T &data, size_t iroot = 0) {
+        return bcast(&data, 1, iroot);
+    }
+
+    template<typename T>
     static bool bcast(std::vector<T> &data, size_t ndata = 0, size_t iroot = 0) {
 #ifdef HAVE_MPI
         if (!ndata) ndata = data.size();

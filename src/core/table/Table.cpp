@@ -36,6 +36,11 @@ void Table::expand(size_t delta_nrow) {
     }
 }
 
+void Table::resize(size_t nrow) {
+    ASSERT(nrow>m_nrow_per_segment);
+    expand(m_nrow_per_segment-nrow);
+}
+
 size_t Table::irow(const size_t &irow, const size_t &isegment) const {
     return irow + isegment * m_nrow_per_segment;
 }

@@ -31,7 +31,7 @@
 #endif
 
 namespace defs {
-    const std::string assets_root = "../assets";
+    const std::string assets_root = PROJECT_ROOT"/assets";
     typedef std::vector<size_t> inds;
     /*
      * determinant decoding / sampling requires statically allocated arrays.
