@@ -17,11 +17,13 @@ TEST(FciqmcCalculation, ExactPropagation){
     options.exact_propagation = 1;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
-    auto final_energy = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.m_series.back()/
-            fciqmc_calculation.m_stats_file->m_ref_weight.m_series.back();
-    // check exact propagation energy against exact eigensolver
-    auto exact_diag_energy = DenseHamiltonian(*fciqmc_calculation.m_ham).diagonalize().m_evals(0);
-    ASSERT_FLOAT_EQ(consts::real(final_energy), exact_diag_energy);
+    if (mpi::i_am_root()) {
+        auto final_energy = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.m_series.back() /
+                            fciqmc_calculation.m_stats_file->m_ref_weight.m_series.back();
+        // check exact propagation energy against exact eigensolver
+        auto exact_diag_energy = DenseHamiltonian(*fciqmc_calculation.m_ham).diagonalize().m_evals(0);
+        ASSERT_FLOAT_EQ(consts::real(final_energy), exact_diag_energy);
+    }
 }
 
 TEST(FciqmcCalculation, StochasticPropagation){
