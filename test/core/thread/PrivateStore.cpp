@@ -68,7 +68,7 @@ TEST(PrivateStore, ReduceLogical) {
     {
         store.get() = omp_get_thread_num() ? false : true;
     }
-    ASSERT_FALSE(store.reduce_land());
+    ASSERT_EQ(omp_get_max_threads()==1, store.reduce_land());
     ASSERT_TRUE(store.reduce_lor());
 #pragma omp parallel default(none) shared(store)
     {

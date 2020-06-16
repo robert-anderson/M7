@@ -11,7 +11,7 @@
 
 template<typename T>
 class PrivateStore {
-    struct  aligned_T {
+    struct alignas(defs::cache_line_size) aligned_T {
         T v;
     };
     //static_assert(alignof(aligned_T)%defs::cache_line_size==0, "non-cache-aligned type");

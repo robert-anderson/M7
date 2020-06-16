@@ -24,8 +24,8 @@ TEST(MPIWrapper, AllMax){
 
 TEST(MPIWrapper, AllMin){
     size_t i = (23*(mpi::irank()+1))%5;
-    size_t res = mpi::all_max(i);
-    size_t test = 0ul;
+    size_t res = mpi::all_min(i);
+    size_t test = ~0ul;
     for (size_t j=0ul; j<mpi::nrank(); ++j){
         auto tmp = (23*(j+1))%5;
         if (tmp<test) test = tmp;
