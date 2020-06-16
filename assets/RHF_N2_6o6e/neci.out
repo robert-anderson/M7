@@ -185,7 +185,7 @@ Setting integer bit-length of determinants as bit-strings to:     64
                          3 beta-beta (vacant) hole pairs
                          9 alpha-beta (vacant) hole pairs
 
- Performing Parallel FCIQMC....
+ Performing Distributed FCIQMC....
 
  Generated reference determinants:
 (    1,    2,    3,    4,    5,    6) E =   -108.651461570

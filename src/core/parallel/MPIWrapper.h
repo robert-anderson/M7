@@ -225,11 +225,6 @@ public:
     }
 
     template<typename T>
-    static bool bcast(T &data) {
-        return bcast(&data);
-    }
-
-    template<typename T>
     static bool bcast(T &data, size_t iroot = 0) {
         return bcast(&data, 1, iroot);
     }

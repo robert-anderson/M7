@@ -11,6 +11,7 @@
 #include "WalkerList.h"
 #include "SpawnList.h"
 #include "Propagator.h"
+#include "src/core/parallel/Distributed.h"
 
 class FciqmcCalculation;
 
@@ -23,28 +24,29 @@ class Wavefunction {
     WalkerList m_data;
     SpawnList m_send, m_recv;
 
-    defs::ham_t m_ref_proj_energy_num;
-    defs::wf_t m_reference_weight;
+    Distributed<defs::ham_t> m_ref_proj_energy_num;
+    Distributed<defs::wf_t> m_reference_weight;
+    Distributed<size_t> m_irank_reference;
     size_t m_reference_row;
 
-    defs::wf_t m_aborted_weight;
-    int m_ninitiator = 0;
+    Distributed<defs::wf_t> m_aborted_weight;
+    Distributed<int> m_ninitiator;
 
 public:
 
     /*
      * Square norm is sum_i(|w_i|^2)
      */
-    defs::wf_comp_t m_square_norm;
-    defs::wf_comp_t m_delta_square_norm;
+    Distributed<defs::wf_comp_t> m_square_norm;
+    Distributed<defs::wf_comp_t> m_delta_square_norm;
     /*
      * Walker number is sum_i(|w_i|)
      */
-    defs::wf_comp_t m_nw;
-    defs::wf_comp_t m_delta_nw;
-    defs::wf_comp_t m_nw_growth_rate = 0;
+    Distributed<defs::wf_comp_t> m_nw;
+    Distributed<defs::wf_comp_t> m_delta_nw;
+    defs::wf_comp_t m_nw_growth_rate;
 
-    size_t m_noccupied_determinant;
+    Distributed<size_t> m_noccupied_determinant;
 
 
     Wavefunction(FciqmcCalculation *fciqmc);
@@ -53,13 +55,7 @@ public:
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
     }
 
-    defs::wf_t reference_weight(){
-        defs::wf_t res = 0.0;
-        if (m_reference_row!=~0ul){
-            res = 
-        }
-        mpi::bcast()
-    }
+    defs::wf_t get_reference_weight();
 
     void propagate();
 

@@ -30,6 +30,9 @@
 }
 #endif
 
+#define HERE() std::cout << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
+#define DBVAR(v) std::cout << "variable " << #v << " = " << v << " in " << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
+
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";
     typedef std::vector<size_t> inds;

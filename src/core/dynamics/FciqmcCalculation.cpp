@@ -35,15 +35,17 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
 void FciqmcCalculation::execute() {
     logger::write("Starting FCIQMC main loop.");
     for (size_t icycle = 0ul; icycle < m_input.ncycle; ++icycle) {
-        //logger::write("iteration " + std::to_string(icycle));
-        //logger::write("\npropagating...");
+        //std::cout << "iteration " + std::to_string(icycle) << std::endl;
+        //std::cout << "\npropagating..." << std::endl;
         m_wf.propagate();
-        //logger::write("\ncommunicating...");
+        //std::cout << "\ncommunicating..." << std::endl;
         m_wf.communicate();
         m_wf.consolidate_incoming_weight();
-        //logger::write("\nannihilating...");
+        //std::cout << "\nannihilating..." << std::endl;
         m_wf.annihilate();
-        m_prop->update(icycle, m_wf.m_nw, m_wf.m_nw_growth_rate);
+        //std::cout << "\nupdating propagator..." << std::endl;
+        m_prop->update(icycle, m_wf.m_nw.reduced(), m_wf.m_nw_growth_rate);
+        //std::cout << "\nwriting stats..." << std::endl;
         write_iter_stats(icycle);
     }
 }

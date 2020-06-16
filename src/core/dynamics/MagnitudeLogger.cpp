@@ -34,7 +34,6 @@ void MagnitudeLogger::synchronize() {
     m_hi_mag_double = m_priv_hi_mag_double.get();
     m_nsingle = m_priv_nsingle.get();
     m_ndouble = m_priv_ndouble.get();
-
     // process reduce
     m_hi_mag_single = mpi::all_max(m_hi_mag_single);
     m_hi_mag_double = mpi::all_max(m_hi_mag_double);

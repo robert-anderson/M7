@@ -12,8 +12,8 @@
 #include "MagnitudeLogger.h"
 #include <iomanip>
 #include <iostream>
-
 #include <src/core/io/FciqmcStatsFile.h>
+#include <src/core/parallel/Distributed.h>
 
 class FciqmcCalculation;
 
@@ -27,7 +27,7 @@ public:
     double m_tau;
     defs::ham_comp_t m_shift;
     bool vary_shift = false;
-    defs::wf_comp_t m_largest_spawn_magnitude = 0;
+    Distributed<defs::wf_comp_t> m_largest_spawn_magnitude;
 
     Propagator(FciqmcCalculation *fciqmc);
 
@@ -51,14 +51,14 @@ public:
     }
 
     void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
+        m_magnitude_logger.synchronize();
+        m_largest_spawn_magnitude.max();
         if (icycle % m_input.shift_update_period) return;
         if (!vary_shift) {
             if (nwalker < m_input.nwalker_target) return;
             else vary_shift = true;
         }
         m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / m_tau;
-        m_magnitude_logger.synchronize();
-        m_largest_spawn_magnitude = mpi::all_max(m_largest_spawn_magnitude);
     }
 
     void write_iter_stats(FciqmcStatsFile* stats_file) {
