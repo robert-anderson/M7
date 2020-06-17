@@ -21,7 +21,7 @@ TEST(FciqmcCalculation, ExactPropagation){
         auto final_energy = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.m_series.back() /
                             fciqmc_calculation.m_stats_file->m_ref_weight.m_series.back();
         // check exact propagation energy against exact eigensolver
-        auto exact_diag_energy = DenseHamiltonian(*fciqmc_calculation.m_ham).diagonalize().m_evals(0);
+        auto exact_diag_energy = DenseHamiltonian(*fciqmc_calculation.m_ham).diagonalize().m_evals[0];
         ASSERT_FLOAT_EQ(consts::real(final_energy), exact_diag_energy);
     }
 }

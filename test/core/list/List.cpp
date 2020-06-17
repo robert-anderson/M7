@@ -72,3 +72,40 @@ TEST(List, Communication){
         }
     }
 }
+
+TEST(List, AllGather) {
+    const size_t nrow = 10;
+    const size_t nint = 1;
+    TestList part(nint);
+    TestList full(nint);
+    for (size_t irow=0ul; irow<nrow; ++irow){
+        ASSERT_EQ(part.expand_push(), irow);
+        part.counter(irow)=irow+nrow*mpi::irank();
+    }
+    full.all_gather(part);
+    full.print();
+    for (size_t irow=0ul; irow<nrow*mpi::nrank(); ++irow){
+        ASSERT_EQ(*full.counter(irow), irow);
+    }
+}
+
+TEST(List, AllGatherRagged) {
+    const size_t salt = 213;
+    const size_t mod = 10;
+    const size_t nrow = (salt*(mpi::irank()+1))%mod;
+    const size_t nint = 1;
+    TestList part(nint);
+    TestList full(nint);
+    for (size_t irow=0ul; irow<nrow; ++irow){
+        ASSERT_EQ(part.expand_push(), irow);
+        part.counter(irow)=mpi::irank()*mod+irow;
+    }
+    full.all_gather(part);
+    size_t iflat = 0ul;
+    for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+        for (size_t irow=0ul; irow<(salt*(isrc+1))%mod; ++irow){
+            ASSERT_EQ(*full.counter(iflat), isrc*mod+irow);
+            ++iflat;
+        }
+    }
+}

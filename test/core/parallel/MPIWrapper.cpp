@@ -45,3 +45,57 @@ TEST(MPIWrapper, Alltoall){
         ASSERT_EQ(recv[isent], isent+salt*(1+mpi::irank()));
     }
 }
+
+TEST(MPIWrapper, Allgatherv){
+    const size_t n=4;
+    defs::inds send(n, 0ul);
+    defs::inds recv(n*mpi::nrank(), 0ul);
+    const size_t salt = 213;
+    for (size_t i=0ul; i<n; ++i){
+        send[i] = mpi::irank()+salt*(1+i);
+    }
+    defs::inds recvcounts(mpi::nrank(), n);
+    defs::inds displs(mpi::nrank(), 0);
+    for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+n;
+
+    mpi::all_gatherv(send.data(), n, recv.data(), recvcounts, displs);
+    size_t iflat = 0ul;
+    for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+        for (size_t i=0ul; i<n; ++i){
+            ASSERT_EQ(recv[iflat], isrc+salt*(1+i));
+            ++iflat;
+        }
+    }
+}
+
+TEST(MPIWrapper, AllgathervRagged){
+    const size_t salt = 213;
+    const size_t mod = 7;
+    const size_t nsend=((mpi::irank()+1)*salt)%mod;
+    defs::inds send(nsend, 0ul);
+    for (size_t i=0ul; i<nsend; ++i){
+        send[i] = mpi::irank()+salt*(1+i);
+    }
+
+    defs::inds recvcounts(mpi::nrank(), 0);
+    mpi::all_gather(&nsend, 1, recvcounts.data(), 1);
+    for (size_t i=0ul; i<mpi::nrank(); ++i){
+        ASSERT_EQ(recvcounts[i], ((i+1)*salt)%mod);
+    }
+
+    defs::inds displs(mpi::nrank(), 0);
+    for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
+
+    const size_t nrecv = displs.back()+recvcounts.back();
+    defs::inds recv(nrecv, 0ul);
+
+    mpi::all_gatherv(send.data(), nsend, recv.data(), recvcounts, displs);
+
+    size_t iflat = 0ul;
+    for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
+        for (size_t i=0ul; i<recvcounts[isrc]; ++i){
+            ASSERT_EQ(recv[iflat], isrc+salt*(1+i));
+            ++iflat;
+        }
+    }
+}

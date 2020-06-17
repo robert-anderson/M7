@@ -6,41 +6,75 @@
 #define M7_MPIWRAPPER_H
 
 #include <array>
+
 #ifdef HAVE_MPI
-    #include <mpi.h>
+
+#include <mpi.h>
+
 #endif
+
 #include <iostream>
 #include <cstring>
 #include <src/core/util/defs.h>
 #include "src/core/util/utils.h"
 
 #ifdef HAVE_MPI
+
 template<typename T>
-static const MPI_Datatype mpi_type() {return MPI_Datatype();}
+static const MPI_Datatype mpi_type() { return MPI_Datatype(); }
 
-template<> const MPI_Datatype mpi_type<char>(){return MPI_CHAR;}
-template<> const MPI_Datatype mpi_type<short int>(){return MPI_SHORT;}
-template<> const MPI_Datatype mpi_type<int>(){return MPI_INT;}
-template<> const MPI_Datatype mpi_type<long int>(){return MPI_LONG;}
-template<> const MPI_Datatype mpi_type<long long int>(){return MPI_LONG_LONG_INT;}
+template<>
+const MPI_Datatype mpi_type<char>() { return MPI_CHAR; }
 
-template<> const MPI_Datatype mpi_type<unsigned char>(){return MPI_UNSIGNED_CHAR;}
-template<> const MPI_Datatype mpi_type<unsigned short int>(){return MPI_UNSIGNED_SHORT;}
-template<> const MPI_Datatype mpi_type<unsigned int>(){return MPI_UNSIGNED;}
-template<> const MPI_Datatype mpi_type<unsigned long int>(){return MPI_UNSIGNED_LONG;}
-template<> const MPI_Datatype mpi_type<unsigned long long int>(){return MPI_UNSIGNED_LONG_LONG;}
+template<>
+const MPI_Datatype mpi_type<short int>() { return MPI_SHORT; }
 
-template<> const MPI_Datatype mpi_type<float>(){return MPI_FLOAT;}
-template<> const MPI_Datatype mpi_type<double>(){return MPI_DOUBLE;}
-template<> const MPI_Datatype mpi_type<long double>(){return MPI_LONG_DOUBLE;}
+template<>
+const MPI_Datatype mpi_type<int>() { return MPI_INT; }
 
-template<> const MPI_Datatype mpi_type<std::complex<float>>(){return MPI_FLOAT;}
-template<> const MPI_Datatype mpi_type<std::complex<double>>(){return MPI_DOUBLE;}
-template<> const MPI_Datatype mpi_type<std::complex<long double>>(){return MPI_LONG_DOUBLE;}
+template<>
+const MPI_Datatype mpi_type<long int>() { return MPI_LONG; }
 
-template<> const MPI_Datatype mpi_type<bool>(){return MPI_CXX_BOOL;}
+template<>
+const MPI_Datatype mpi_type<long long int>() { return MPI_LONG_LONG_INT; }
 
-const std::array<MPI_Op, 5> op_map {MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
+template<>
+const MPI_Datatype mpi_type<unsigned char>() { return MPI_UNSIGNED_CHAR; }
+
+template<>
+const MPI_Datatype mpi_type<unsigned short int>() { return MPI_UNSIGNED_SHORT; }
+
+template<>
+const MPI_Datatype mpi_type<unsigned int>() { return MPI_UNSIGNED; }
+
+template<>
+const MPI_Datatype mpi_type<unsigned long int>() { return MPI_UNSIGNED_LONG; }
+
+template<>
+const MPI_Datatype mpi_type<unsigned long long int>() { return MPI_UNSIGNED_LONG_LONG; }
+
+template<>
+const MPI_Datatype mpi_type<float>() { return MPI_FLOAT; }
+
+template<>
+const MPI_Datatype mpi_type<double>() { return MPI_DOUBLE; }
+
+template<>
+const MPI_Datatype mpi_type<long double>() { return MPI_LONG_DOUBLE; }
+
+template<>
+const MPI_Datatype mpi_type<std::complex<float>>() { return MPI_FLOAT; }
+
+template<>
+const MPI_Datatype mpi_type<std::complex<double>>() { return MPI_DOUBLE; }
+
+template<>
+const MPI_Datatype mpi_type<std::complex<long double>>() { return MPI_LONG_DOUBLE; }
+
+template<>
+const MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
+
+const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
 #endif
 
 struct mpi {
@@ -53,7 +87,9 @@ struct mpi {
 
     static void barrier();
 
-    enum MpiOp {MpiMax, MpiMin, MpiSum, MpiLand, MpiLor};
+    enum MpiOp {
+        MpiMax, MpiMin, MpiSum, MpiLand, MpiLor
+    };
 
 /*
  * int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
@@ -272,6 +308,19 @@ private:
 #endif
     }
 
+    template<typename T>
+    static bool all_gatherv(
+            const T *send, const int sendcount,
+            T *recv, const int *recvcounts, const int *displs) {
+#ifdef HAVE_MPI
+        return MPI_Allgatherv(
+                (void *) send, sendcount, mpi_type<T>(),
+                (void *) recv, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, senddispls[0]+sendcount, recv, displs[0]+recvcounts[0]);
+#endif
+    }
+
 public:
     template<typename T>
     static bool all_to_allv(
@@ -282,6 +331,28 @@ public:
                            recv, std::vector<int>(recvcounts.begin(), recvcounts.end()).data(),
                            std::vector<int>(recvdispls.begin(), recvdispls.end()).data());
     }
+
+    template<typename T>
+    static bool all_gatherv(
+            const T *send, const size_t &sendcount,
+            T *recv, const defs::inds &recvcounts, const defs::inds &recvdispls) {
+        return all_gatherv(send, sendcount,
+                           recv, std::vector<int>(recvcounts.begin(), recvcounts.end()).data(),
+                           std::vector<int>(recvdispls.begin(), recvdispls.end()).data());
+    }
+
+    template<typename T>
+    static bool all_gather(
+            const T *send, const int sendcount, T *recv, const int recvcount) {
+#ifdef HAVE_MPI
+        return MPI_Allgather(
+                (void *) send, sendcount, mpi_type<T>(), recv, recvcount, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, senddispls[0]+sendcount, recv, displs[0]+recvcount);
+#endif
+    }
+
+
 
     static bool i_am(const size_t i);
 

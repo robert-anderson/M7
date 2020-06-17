@@ -4,6 +4,7 @@
 
 #include <src/core/io/Logging.h>
 #include "List.h"
+#include "omp.h"
 
 List::List(size_t nsegment) : Table(nsegment), m_high_water_mark(nsegment, 0ul) {}
 
@@ -35,8 +36,17 @@ size_t List::push(const size_t &isegment, const size_t &nrow) {
     size_t tmp;
 #pragma omp atomic capture
     tmp = m_high_water_mark[isegment] += nrow;
-    if (tmp >= m_nrow_per_segment) throw std::runtime_error("Reached capacity of List");
-    return tmp;
+    if (tmp > m_nrow_per_segment) throw std::runtime_error("Reached capacity of List");
+    return tmp-nrow;
+}
+
+size_t List::expand_push(const size_t &isegment, const size_t &nrow, double factor) {
+    ASSERT(!omp_get_level()); // convenient but NOT threadsafe
+    ASSERT(factor>=1.0);
+    if (m_high_water_mark[isegment] + nrow > nrow_per_segment()){
+        resize(factor*double(m_high_water_mark[isegment] + nrow));
+    }
+    return push(isegment, nrow);
 }
 
 void List::zero() {
@@ -84,6 +94,20 @@ void List::communicate() {
     std::cout << "Number of recvd elements " << m_recv->m_high_water_mark[0] << std::endl;
     zero();
 }
+
+void List::all_gather(List &local){
+    ASSERT(compatible_with(local));
+    defs::inds recvcounts(mpi::nrank());
+    defs::inds displs(mpi::nrank(), 0ul);
+    size_t nsend = local.high_water_mark(0)*m_padded_row_dsize;
+    mpi::all_gather(&nsend, 1, recvcounts.data(), 1);
+    for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
+    size_t nrow = (displs.back()+recvcounts.back())/m_padded_row_dsize;
+    resize(nrow);
+    mpi::all_gatherv(local.m_data.data(), nsend, m_data.data(), recvcounts, displs);
+    m_high_water_mark[0] = nrow;
+}
+
 
 void List::expand(size_t delta_nrow) {
     Table::expand(delta_nrow);

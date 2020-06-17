@@ -12,8 +12,8 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
         DenseHamiltonian ham(AbInitioHamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP"));
         auto solver = ham.diagonalize();
         // compare the ground and first excited states to BAGEL's values
-        ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals(0), -14.40597603432, 1e-10));
-        ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals(1), -14.28883698406, 1e-10));
+        ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));
+        ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
     }
 }
 
@@ -22,5 +22,5 @@ TEST(DenseHamiltonian, FciEnergyCheckRhf) {
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values
-    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals(0), -108.81138657563143, 1e-10));
+    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -108.81138657563143, 1e-10));
 }

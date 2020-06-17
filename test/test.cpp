@@ -15,7 +15,10 @@ int main(int argc, char **argv) {
 
     mpi::initialize(&argc, &argv);
 
+    std::streambuf *original_stdout_buffer = nullptr;
+    std::streambuf *original_stderr_buffer = nullptr;
     std::ofstream ofstdout, ofstderr;
+
     if (!mpi::i_am_root()) {
         /*
          * only allow standard output and error from the root MPI rank
@@ -24,8 +27,11 @@ int main(int argc, char **argv) {
         std::cout.setstate(std::ios_base::failbit);
         std::cerr.setstate(std::ios_base::failbit);
 #else
+        original_stdout_buffer = std::cout.rdbuf();
         ofstdout = std::ofstream("rank_"+std::to_string(mpi::irank())+".out");
         std::cout.rdbuf(ofstdout.rdbuf());
+
+        original_stderr_buffer = std::cerr.rdbuf();
         ofstderr = std::ofstream("rank_"+std::to_string(mpi::irank())+".err");
         std::cerr.rdbuf(ofstderr.rdbuf());
 #endif
@@ -37,15 +43,20 @@ int main(int argc, char **argv) {
         delete listeners.Release(listeners.default_result_printer());
     }
 
-#if USE_MPI
-
-#endif
     // Run tests, then clean up and exit. RUN_ALL_TESTS() returns 0 if all tests
     // pass and 1 if some test fails.
     auto result = RUN_ALL_TESTS();
-    if (mpi::i_am_root()) out=result;
+
+    if (!mpi::i_am_root()) {
+        /*
+         * reinstate original buffers
+         */
+#ifndef DNDEBUG
+        std::cout.rdbuf(original_stdout_buffer);
+        std::cerr.rdbuf(original_stderr_buffer);
+#endif
+    }
 
     mpi::finalize();
-    return out;
-
+    return 0;
 }
