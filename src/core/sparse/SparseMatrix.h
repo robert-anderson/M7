@@ -46,10 +46,15 @@ public:
     bool empty(){return m_data.empty();}
 
     void multiply(const std::vector<T> &in, std::vector<T> &out){
-#pragma omp parallel for default(none) shared(in, out)
+        // each row of the out vector receives a contribution from every
+        // corresponding entry in the sparse matrix row
+        // out_i = sum_j H_ij in_j
+#pragma omp parallel for default(none) shared(in, out, std::cout)
         for (size_t irow=0; irow<m_data.size(); ++irow){
             for (auto entry=m_data[irow].begin(); entry!=m_data[irow].end(); entry++){
-                as_atomic(out[entry->icol])+=entry->element*in[irow];
+                auto& jrow = entry->icol;
+                auto& hij = entry->element;
+                as_atomic(out[irow])+=hij * in[jrow];
             }
         }
     }

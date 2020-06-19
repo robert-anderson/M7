@@ -48,14 +48,11 @@ public:
 
     Distributed<size_t> m_noccupied_determinant;
 
-
     Wavefunction(FciqmcCalculation *fciqmc);
 
     ~Wavefunction(){
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
     }
-
-    defs::wf_t get_reference_weight();
 
     void propagate();
 

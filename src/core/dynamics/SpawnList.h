@@ -17,9 +17,12 @@ struct SpawnList : public List {
 private:
     struct Flags : public FlagField {
         Flag m_parent_initiator;
+        Flag m_parent_deterministic;
         Flags(Table *table, size_t nelement = 1, const std::string &description="") :
             FlagField(table, nelement, description),
-            m_parent_initiator(this, nelement){}
+            m_parent_initiator(this, nelement),
+            m_parent_deterministic(this, nelement)
+            {}
     };
 
 public:

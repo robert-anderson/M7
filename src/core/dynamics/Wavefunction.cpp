@@ -144,6 +144,13 @@ void Wavefunction::annihilate_row(const size_t &irow_recv, defs::wf_comp_t &abor
         m_data.m_flags.m_reference_connection(irow_main) = conn.nexcit() < 3;
         m_data.m_flags.m_initiator(irow_main) = false;
     }
+    /*
+     * if we have stochastically generated a connection between determinants in a deterministic
+     * subspace, so we must reject this connection.
+     */
+    if (m_recv.m_flags.m_parent_deterministic(irow_recv) && m_data.m_flags.m_deterministic(irow_main)){
+        return;
+    }
     auto weight = m_data.m_weight(irow_main);
     delta_square_norm += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
     delta_nw += std::abs(*weight + *delta_weight) - std::abs(*weight);
