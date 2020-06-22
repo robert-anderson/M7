@@ -1,0 +1,55 @@
+\hypertarget{classNdArray}{}\section{Nd\+Array$<$ T, nind $>$ Class Template Reference}
+\label{classNdArray}\index{Nd\+Array$<$ T, nind $>$@{Nd\+Array$<$ T, nind $>$}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\{\bfseries Nd\+Array} (const size\+\_\+t \&first, Args...\+shape)\hypertarget{classNdArray_a9e042cc4285e41ed3a9bdfcf074555fa}{}\label{classNdArray_a9e042cc4285e41ed3a9bdfcf074555fa}
+
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\{\bfseries Nd\+Array} (T $\ast$data, const std\+::array$<$ size\+\_\+t, nind $>$ \&shape)\hypertarget{classNdArray_a0b0e4a91bc169ea766ee4e9c828af37f}{}\label{classNdArray_a0b0e4a91bc169ea766ee4e9c828af37f}
+
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\T $\ast$ {\bfseries view} (Args...\+inds) const \hypertarget{classNdArray_a1fd4c7ca9ffbab0ee557fd706156eeac}{}\label{classNdArray_a1fd4c7ca9ffbab0ee557fd706156eeac}
+
+\item 
+{\footnotesize template$<$typename... Args$>$ }\\\hyperlink{classNdArray}{Nd\+Array}$<$ T, nind-\/sizeof...(Args)$>$ {\bfseries subarray} (Args...\+subs)\hypertarget{classNdArray_a6835f0d3ef202f8a0b3f0119aa11fef1}{}\label{classNdArray_a6835f0d3ef202f8a0b3f0119aa11fef1}
+
+\item 
+void {\bfseries operator=} (\hyperlink{classNdArray}{Nd\+Array} \&src)\hypertarget{classNdArray_a91942f32157c1c27a9ae8aad24128bd6}{}\label{classNdArray_a91942f32157c1c27a9ae8aad24128bd6}
+
+\item 
+void {\bfseries operator=} (std\+::vector$<$ T $>$ \&src)\hypertarget{classNdArray_a58b8dc6c7a1af018e5db340c487be710}{}\label{classNdArray_a58b8dc6c7a1af018e5db340c487be710}
+
+\item 
+void {\bfseries operator$\ast$=} (const T \&factor)\hypertarget{classNdArray_a116dd08b9597a15a23305c9de8019080}{}\label{classNdArray_a116dd08b9597a15a23305c9de8019080}
+
+\item 
+void {\bfseries operator/=} (const T \&factor)\hypertarget{classNdArray_a9ad1ece332482cc4c413e626abed0bd5}{}\label{classNdArray_a9ad1ece332482cc4c413e626abed0bd5}
+
+\item 
+const std\+::array$<$ size\+\_\+t, nind $>$ \& {\bfseries shape} () const \hypertarget{classNdArray_aecaaa98567c6557750b6df6fd9bf3b33}{}\label{classNdArray_aecaaa98567c6557750b6df6fd9bf3b33}
+
+\item 
+const std\+::array$<$ size\+\_\+t, nind $>$ \& {\bfseries strides} () const \hypertarget{classNdArray_a02144f38edc02b17588da9307a151ee8}{}\label{classNdArray_a02144f38edc02b17588da9307a151ee8}
+
+\item 
+size\+\_\+t {\bfseries nelement} () const \hypertarget{classNdArray_a6034fb98cbd6650510e03b3ca73e3534}{}\label{classNdArray_a6034fb98cbd6650510e03b3ca73e3534}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classIndexer}{Indexer}$<$ nind $>$ {\bfseries m\+\_\+indexer}\hypertarget{classNdArray_a4082540c66c57d0c8c28520fc59ffbb0}{}\label{classNdArray_a4082540c66c57d0c8c28520fc59ffbb0}
+
+\item 
+std\+::vector$<$ T $>$ {\bfseries m\+\_\+data\+\_\+internal}\hypertarget{classNdArray_afcb35374f4e3b0147e93337515c0debe}{}\label{classNdArray_afcb35374f4e3b0147e93337515c0debe}
+
+\item 
+T $\ast$ {\bfseries m\+\_\+data} = nullptr\hypertarget{classNdArray_af6304855cc6c99ad4d17f28e6405859f}{}\label{classNdArray_af6304855cc6c99ad4d17f28e6405859f}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/multidim/Nd\+Array.\+h\end{DoxyCompactItemize}

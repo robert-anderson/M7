@@ -1,0 +1,144 @@
+\hypertarget{structmpi}{}\section{mpi Struct Reference}
+\label{structmpi}\index{mpi@{mpi}}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bfseries Mpi\+Op} \{ \\*
+{\bfseries Mpi\+Max}, 
+{\bfseries Mpi\+Min}, 
+{\bfseries Mpi\+Sum}, 
+{\bfseries Mpi\+Land}, 
+\\*
+{\bfseries Mpi\+Lor}
+ \}\hypertarget{structmpi_a36d359a805acaaff794699115e4a3bda}{}\label{structmpi_a36d359a805acaaff794699115e4a3bda}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static size\+\_\+t {\bfseries nrank} ()\hypertarget{structmpi_a7d43e58ab9cde786697be77606f4c49b}{}\label{structmpi_a7d43e58ab9cde786697be77606f4c49b}
+
+\item 
+static size\+\_\+t {\bfseries irank} ()\hypertarget{structmpi_ae48eaf3503c09495310a9c603456b1ce}{}\label{structmpi_ae48eaf3503c09495310a9c603456b1ce}
+
+\item 
+static std\+::string {\bfseries processor\+\_\+name} ()\hypertarget{structmpi_aa62660f0ce0da8b072095d71ca29b7ce}{}\label{structmpi_aa62660f0ce0da8b072095d71ca29b7ce}
+
+\item 
+static void {\bfseries barrier} ()\hypertarget{structmpi_a0419c570b0c53c6e1a8c959b3670938e}{}\label{structmpi_a0419c570b0c53c6e1a8c959b3670938e}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries max} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1, size\+\_\+t iroot=0)\hypertarget{structmpi_a20b53a6ca73b799ec2d4c55e3c36e667}{}\label{structmpi_a20b53a6ca73b799ec2d4c55e3c36e667}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+max} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1)\hypertarget{structmpi_a53cfbe4d5a402525cd4e1c315c308fda}{}\label{structmpi_a53cfbe4d5a402525cd4e1c315c308fda}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries max} (const T $\ast$send, size\+\_\+t iroot=0)\hypertarget{structmpi_a0df636aed76376ebb20d6fa515b72617}{}\label{structmpi_a0df636aed76376ebb20d6fa515b72617}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+max} (const T $\ast$send)\hypertarget{structmpi_a03d3a5ff490830241e18f1d46d2f0515}{}\label{structmpi_a03d3a5ff490830241e18f1d46d2f0515}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+max} (const T \&send)\hypertarget{structmpi_ab5bfe3cdce9e87bec1728a05dbdc1595}{}\label{structmpi_ab5bfe3cdce9e87bec1728a05dbdc1595}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries min} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1, size\+\_\+t iroot=0)\hypertarget{structmpi_ac7a214ea2c48c474b8501bcebaeca185}{}\label{structmpi_ac7a214ea2c48c474b8501bcebaeca185}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+min} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1)\hypertarget{structmpi_af2125d3ea819924ff37306c8774fc15f}{}\label{structmpi_af2125d3ea819924ff37306c8774fc15f}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries min} (const T $\ast$send, size\+\_\+t iroot=0)\hypertarget{structmpi_a753f41b28c7db7254387bd00620bebf9}{}\label{structmpi_a753f41b28c7db7254387bd00620bebf9}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+min} (const T $\ast$send)\hypertarget{structmpi_ac8b8ce1586a9398902d1ab48270d3714}{}\label{structmpi_ac8b8ce1586a9398902d1ab48270d3714}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+min} (const T \&send)\hypertarget{structmpi_a9941e65f36dbcf11f4a5cf3adf6f235d}{}\label{structmpi_a9941e65f36dbcf11f4a5cf3adf6f235d}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries sum} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1, size\+\_\+t iroot=0)\hypertarget{structmpi_ac29de348f5b29b4f1e273e3ee99265f9}{}\label{structmpi_ac29de348f5b29b4f1e273e3ee99265f9}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+sum} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1)\hypertarget{structmpi_a634c4bf3a3654980224929347850eaf0}{}\label{structmpi_a634c4bf3a3654980224929347850eaf0}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries sum} (const T $\ast$send, size\+\_\+t iroot=0)\hypertarget{structmpi_ab1104db0bc23a3a22a2bb1180e67d5e1}{}\label{structmpi_ab1104db0bc23a3a22a2bb1180e67d5e1}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+sum} (const T $\ast$send)\hypertarget{structmpi_a46dec749fc45bd597dd9b7dac0e21297}{}\label{structmpi_a46dec749fc45bd597dd9b7dac0e21297}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+sum} (const T \&send)\hypertarget{structmpi_a252bd79e2d5656a2944b3a4bb26ace72}{}\label{structmpi_a252bd79e2d5656a2944b3a4bb26ace72}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries land} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1, size\+\_\+t iroot=0)\hypertarget{structmpi_a720508d9b7b7a39dc2ee4c929e797b7d}{}\label{structmpi_a720508d9b7b7a39dc2ee4c929e797b7d}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+land} (const T $\ast$send, T $\ast$recv, size\+\_\+t ndata=1)\hypertarget{structmpi_a257e9741e0c2ed81c208fcc3746b3a0a}{}\label{structmpi_a257e9741e0c2ed81c208fcc3746b3a0a}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries land} (const T $\ast$send, size\+\_\+t iroot=0)\hypertarget{structmpi_a2fef5dad92aaa848704d2449d2ff336c}{}\label{structmpi_a2fef5dad92aaa848704d2449d2ff336c}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+land} (const T $\ast$send)\hypertarget{structmpi_a617c176abe3125eb814288dc1128694e}{}\label{structmpi_a617c176abe3125eb814288dc1128694e}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static T {\bfseries all\+\_\+land} (const T \&send)\hypertarget{structmpi_a758ed084bab0d4e5667bb65fbb126279}{}\label{structmpi_a758ed084bab0d4e5667bb65fbb126279}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries bcast} (T $\ast$data, const size\+\_\+t ndata=1, size\+\_\+t iroot=0)\hypertarget{structmpi_ab723a76539cce8aef7cbc5dc0135202e}{}\label{structmpi_ab723a76539cce8aef7cbc5dc0135202e}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries bcast} (T \&data, size\+\_\+t iroot=0)\hypertarget{structmpi_abce137a2bf43d2216447cfefce43813f}{}\label{structmpi_abce137a2bf43d2216447cfefce43813f}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries bcast} (std\+::vector$<$ T $>$ \&data, size\+\_\+t ndata=0, size\+\_\+t iroot=0)\hypertarget{structmpi_ad6917627733501d3bd9baf7444a59622}{}\label{structmpi_ad6917627733501d3bd9baf7444a59622}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+to\+\_\+all} (const T $\ast$send, const size\+\_\+t nsend, T $\ast$recv, const size\+\_\+t nrecv)\hypertarget{structmpi_ad6ee2131285f4d0bbb8f263e3845ba67}{}\label{structmpi_ad6ee2131285f4d0bbb8f263e3845ba67}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+to\+\_\+all} (const std\+::vector$<$ T $>$ \&send, std\+::vector$<$ T $>$ \&recv)\hypertarget{structmpi_a19f2bbd0ba6f91228e40251f410fdbfe}{}\label{structmpi_a19f2bbd0ba6f91228e40251f410fdbfe}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+to\+\_\+allv} (const T $\ast$send, const defs\+::inds \&sendcounts, const defs\+::inds \&senddispls, T $\ast$recv, const defs\+::inds \&recvcounts, const defs\+::inds \&recvdispls)\hypertarget{structmpi_aacd625bb0f764f7d67da1aaa61f28f20}{}\label{structmpi_aacd625bb0f764f7d67da1aaa61f28f20}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+gatherv} (const T $\ast$send, const size\+\_\+t \&sendcount, T $\ast$recv, const defs\+::inds \&recvcounts, const defs\+::inds \&recvdispls)\hypertarget{structmpi_a21b91ca1d7d0f2ca2b8dc6229554ad64}{}\label{structmpi_a21b91ca1d7d0f2ca2b8dc6229554ad64}
+
+\item 
+{\footnotesize template$<$typename T $>$ }\\static bool {\bfseries all\+\_\+gather} (const T $\ast$send, const int sendcount, T $\ast$recv, const int recvcount)\hypertarget{structmpi_a0acbc0ae6ec9f799fac752e65c45becd}{}\label{structmpi_a0acbc0ae6ec9f799fac752e65c45becd}
+
+\item 
+static bool {\bfseries i\+\_\+am} (const size\+\_\+t i)\hypertarget{structmpi_a42d19f01adb7413eaff8ffb1cda49a82}{}\label{structmpi_a42d19f01adb7413eaff8ffb1cda49a82}
+
+\item 
+static bool {\bfseries i\+\_\+am\+\_\+root} ()\hypertarget{structmpi_aa2c18e275823d9c53b1ef6d3f48088c8}{}\label{structmpi_aa2c18e275823d9c53b1ef6d3f48088c8}
+
+\item 
+static void {\bfseries rank\+\_\+print} (const std\+::string s, size\+\_\+t irank)\hypertarget{structmpi_a71e1846db31ce24abdf642573fa8ea55}{}\label{structmpi_a71e1846db31ce24abdf642573fa8ea55}
+
+\item 
+static void {\bfseries root\+\_\+print} (const std\+::string s)\hypertarget{structmpi_a7ceee095050664f6a6e733232644397d}{}\label{structmpi_a7ceee095050664f6a6e733232644397d}
+
+\item 
+static bool {\bfseries initialized} ()\hypertarget{structmpi_a3ba08520b44299d40f8aa067c9992e15}{}\label{structmpi_a3ba08520b44299d40f8aa067c9992e15}
+
+\item 
+static bool {\bfseries finalized} ()\hypertarget{structmpi_ae6e9e1345ba38aa99f6b3142d2afb764}{}\label{structmpi_ae6e9e1345ba38aa99f6b3142d2afb764}
+
+\item 
+static void {\bfseries initialize} (int $\ast$argc=N\+U\+LL, char $\ast$$\ast$$\ast$argv=N\+U\+LL)\hypertarget{structmpi_a43daaa66078a63ada3199185ed813af6}{}\label{structmpi_a43daaa66078a63ada3199185ed813af6}
+
+\item 
+static void {\bfseries finalize} ()\hypertarget{structmpi_ad33c704bbe732fa1ae5cb73bc16d26dc}{}\label{structmpi_ad33c704bbe732fa1ae5cb73bc16d26dc}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/parallel/M\+P\+I\+Wrapper.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/parallel/M\+P\+I\+Wrapper.\+cpp\end{DoxyCompactItemize}

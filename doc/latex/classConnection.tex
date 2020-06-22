@@ -1,0 +1,87 @@
+\hypertarget{classConnection}{}\section{Connection Class Reference}
+\label{classConnection}\index{Connection@{Connection}}
+
+
+Inheritance diagram for Connection\+:
+% FIG 0
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Connection} (const \hyperlink{classField}{Field} $\ast$field)\hypertarget{classConnection_af4ce8512ec2e108246299a672a8c6631}{}\label{classConnection_af4ce8512ec2e108246299a672a8c6631}
+
+\item 
+{\bfseries Connection} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&ket, const \hyperlink{classDeterminantElement}{Determinant\+Element} \&bra)\hypertarget{classConnection_a0b96cb58be47c490e4be42a13aae4830}{}\label{classConnection_a0b96cb58be47c490e4be42a13aae4830}
+
+\item 
+{\bfseries Connection} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&ket)\hypertarget{classConnection_ab9d08b55aa2848e5fb6243b543c7c1bb}{}\label{classConnection_ab9d08b55aa2848e5fb6243b543c7c1bb}
+
+\item 
+const defs\+::det\+\_\+work \& {\bfseries ann} () const \hypertarget{classConnection_a6be30329b0ea0260472704342cbd435c}{}\label{classConnection_a6be30329b0ea0260472704342cbd435c}
+
+\item 
+const size\+\_\+t \& {\bfseries ann} (const size\+\_\+t \&i) const \hypertarget{classConnection_ad672469fe1158702fabc342bb34fc31b}{}\label{classConnection_ad672469fe1158702fabc342bb34fc31b}
+
+\item 
+const size\+\_\+t \& {\bfseries nann} () const \hypertarget{classConnection_a3e3347717f29609432141b7eedf750ed}{}\label{classConnection_a3e3347717f29609432141b7eedf750ed}
+
+\item 
+const defs\+::det\+\_\+work \& {\bfseries cre} () const \hypertarget{classConnection_a7ac096bbf08c67fc11f7cd8be4e25e47}{}\label{classConnection_a7ac096bbf08c67fc11f7cd8be4e25e47}
+
+\item 
+const size\+\_\+t \& {\bfseries cre} (const size\+\_\+t \&i) const \hypertarget{classConnection_a4b466c63cf29f3c8f70b90e4824f2c49}{}\label{classConnection_a4b466c63cf29f3c8f70b90e4824f2c49}
+
+\item 
+const size\+\_\+t \& {\bfseries ncre} () const \hypertarget{classConnection_aa6f76ca038d3183e4fdf5f94e47e1a19}{}\label{classConnection_aa6f76ca038d3183e4fdf5f94e47e1a19}
+
+\item 
+virtual void {\bfseries connect} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&ket, const \hyperlink{classDeterminantElement}{Determinant\+Element} \&bra)\hypertarget{classConnection_a0c843525d4e2934fdaf10e9fad2bd50a}{}\label{classConnection_a0c843525d4e2934fdaf10e9fad2bd50a}
+
+\item 
+virtual void {\bfseries apply} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&ket, \hyperlink{classDeterminantElement}{Determinant\+Element} \&bra)\hypertarget{classConnection_a81b694174d09ef90256f705410b651e7}{}\label{classConnection_a81b694174d09ef90256f705410b651e7}
+
+\item 
+void {\bfseries zero} ()\hypertarget{classConnection_a07e46eda12da6ff7e5cfb66b00f716ac}{}\label{classConnection_a07e46eda12da6ff7e5cfb66b00f716ac}
+
+\item 
+void {\bfseries add\+\_\+cre} (const size\+\_\+t \&i)\hypertarget{classConnection_af617fea5e5082c941470eae7a795367c}{}\label{classConnection_af617fea5e5082c941470eae7a795367c}
+
+\item 
+void {\bfseries add\+\_\+ann} (const size\+\_\+t \&i)\hypertarget{classConnection_ad967f8812d0598ba228ef16b2f7436a5}{}\label{classConnection_ad967f8812d0598ba228ef16b2f7436a5}
+
+\item 
+void {\bfseries add} (const size\+\_\+t \&ann, const size\+\_\+t \&cre)\hypertarget{classConnection_af167b1fd395bceea3540d720437adf55}{}\label{classConnection_af167b1fd395bceea3540d720437adf55}
+
+\item 
+void {\bfseries add} (const size\+\_\+t \&ann1, const size\+\_\+t \&ann2, const size\+\_\+t \&cre1, const size\+\_\+t \&cre2)\hypertarget{classConnection_a4a7ab2893fb8b3a21162a055c3065c3c}{}\label{classConnection_a4a7ab2893fb8b3a21162a055c3065c3c}
+
+\item 
+void {\bfseries sort} ()\hypertarget{classConnection_ae50daf05c5a97ea366f26cbd7e2d0fe7}{}\label{classConnection_ae50daf05c5a97ea366f26cbd7e2d0fe7}
+
+\item 
+const size\+\_\+t \& {\bfseries nexcit} () const \hypertarget{classConnection_a7e83ced8023d813160513729b9216ede}{}\label{classConnection_a7e83ced8023d813160513729b9216ede}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const size\+\_\+t {\bfseries m\+\_\+nbit}\hypertarget{classConnection_a8aadc0ee3e3e3fe998c5f4815f04e2e8}{}\label{classConnection_a8aadc0ee3e3e3fe998c5f4815f04e2e8}
+
+\item 
+defs\+::det\+\_\+work {\bfseries m\+\_\+ann} \{\}\hypertarget{classConnection_aab1226dd30dcdd41602974626a2a1e71}{}\label{classConnection_aab1226dd30dcdd41602974626a2a1e71}
+
+\item 
+defs\+::det\+\_\+work {\bfseries m\+\_\+cre} \{\}\hypertarget{classConnection_a6885ccdb80c52b6042974655b2188340}{}\label{classConnection_a6885ccdb80c52b6042974655b2188340}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+nann}\hypertarget{classConnection_a3335fdc82d07554572094f3003aa3076}{}\label{classConnection_a3335fdc82d07554572094f3003aa3076}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+ncre}\hypertarget{classConnection_a705e6a0307c83e213a0587804a5c2c91}{}\label{classConnection_a705e6a0307c83e213a0587804a5c2c91}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/fermion/Connection.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/fermion/Connection.\+cpp\end{DoxyCompactItemize}

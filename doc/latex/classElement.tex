@@ -1,0 +1,100 @@
+\hypertarget{classElement}{}\section{Element Class Reference}
+\label{classElement}\index{Element@{Element}}
+
+
+Inheritance diagram for Element\+:
+% FIG 0
+
+
+Collaboration diagram for Element\+:
+% FIG 1
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classField}{Field} {\bfseries Field\+\_\+T}\hypertarget{classElement_af63af4ed8d72a9bf3abfe86e4cd2e074}{}\label{classElement_af63af4ed8d72a9bf3abfe86e4cd2e074}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Element} (\hyperlink{classField}{Field} $\ast$field, char $\ast$begin)\hypertarget{classElement_aed61f8f2a95c9a25046d24a7ed936c3a}{}\label{classElement_aed61f8f2a95c9a25046d24a7ed936c3a}
+
+\item 
+virtual size\+\_\+t {\bfseries hash} () const \hypertarget{classElement_a8f46e86dbbd8c7f18c3135742863f3d2}{}\label{classElement_a8f46e86dbbd8c7f18c3135742863f3d2}
+
+\item 
+virtual size\+\_\+t {\bfseries size} () const \hypertarget{classElement_a2b8bc248847a45f69cb93965f2a43fa2}{}\label{classElement_a2b8bc248847a45f69cb93965f2a43fa2}
+
+\item 
+virtual size\+\_\+t {\bfseries dsize} () const \hypertarget{classElement_a4ce1ba3e934357bd5b9e1bd417641b60}{}\label{classElement_a4ce1ba3e934357bd5b9e1bd417641b60}
+
+\item 
+virtual std\+::string {\bfseries to\+\_\+string} ()\hypertarget{classElement_aa9d6b55e58ea084033fb6a96878818da}{}\label{classElement_aa9d6b55e58ea084033fb6a96878818da}
+
+\item 
+void {\bfseries print} ()\hypertarget{classElement_a6301e3975df2893421cf3c2dfd64aacb}{}\label{classElement_a6301e3975df2893421cf3c2dfd64aacb}
+
+\item 
+bool {\bfseries compatible\+\_\+with} (const \hyperlink{classElement}{Element} \&rhs) const \hypertarget{classElement_ad6dc36d4e46416a511e7ec9d25591f28}{}\label{classElement_ad6dc36d4e46416a511e7ec9d25591f28}
+
+\item 
+defs\+::data\+\_\+t \& {\bfseries dataword} (const size\+\_\+t \&idataword) const \hypertarget{classElement_a2ea1802af0c80e1ae4d50dde26b768cd}{}\label{classElement_a2ea1802af0c80e1ae4d50dde26b768cd}
+
+\item 
+defs\+::data\+\_\+t {\bfseries get\+\_\+dataword} (const size\+\_\+t \&idataword) const \hypertarget{classElement_a60bffb4917907c0666faa2d63f7a9b03}{}\label{classElement_a60bffb4917907c0666faa2d63f7a9b03}
+
+\item 
+defs\+::data\+\_\+t {\bfseries get\+\_\+dataword} (const size\+\_\+t \&idataword, const size\+\_\+t \&nbit) const \hypertarget{classElement_a02754ff9c5e1c6339387c1055bd58ff0}{}\label{classElement_a02754ff9c5e1c6339387c1055bd58ff0}
+
+\item 
+defs\+::data\+\_\+t {\bfseries get\+\_\+antidataword} (const size\+\_\+t \&idataword) const \hypertarget{classElement_a71940579c45a95b3e10f4573d04e00bd}{}\label{classElement_a71940579c45a95b3e10f4573d04e00bd}
+
+\item 
+defs\+::data\+\_\+t {\bfseries get\+\_\+antidataword} (const size\+\_\+t \&idataword, const size\+\_\+t \&nbit) const \hypertarget{classElement_ae9c0921740d89731f4948c7da1087e4b}{}\label{classElement_ae9c0921740d89731f4948c7da1087e4b}
+
+\item 
+int {\bfseries cmp} (const \hyperlink{classElement}{Element} \&rhs) const \hypertarget{classElement_aca814eb1fa9444de47a9709019ccadbb}{}\label{classElement_aca814eb1fa9444de47a9709019ccadbb}
+
+\item 
+\hyperlink{classElement}{Element} \& {\bfseries operator=} (const \hyperlink{classElement}{Element} \&rhs)\hypertarget{classElement_a4ad595ed742ac39b2f36fa18ec16097c}{}\label{classElement_a4ad595ed742ac39b2f36fa18ec16097c}
+
+\item 
+bool {\bfseries operator==} (const \hyperlink{classElement}{Element} \&rhs) const \hypertarget{classElement_a644fb51331605fc442fb7b8927b4b6b5}{}\label{classElement_a644fb51331605fc442fb7b8927b4b6b5}
+
+\item 
+bool {\bfseries operator!=} (const \hyperlink{classElement}{Element} \&rhs) const \hypertarget{classElement_a46ebb3ceb148b0031deeb865d09a1dd6}{}\label{classElement_a46ebb3ceb148b0031deeb865d09a1dd6}
+
+\item 
+char $\ast$ {\bfseries begin} () const \hypertarget{classElement_a63b1dc792df7bf96dd2b466989499d33}{}\label{classElement_a63b1dc792df7bf96dd2b466989499d33}
+
+\item 
+size\+\_\+t {\bfseries nbit} () const \hypertarget{classElement_a5c3f292dae7456c38a38c8d2e3c0af7a}{}\label{classElement_a5c3f292dae7456c38a38c8d2e3c0af7a}
+
+\item 
+void {\bfseries zero} ()\hypertarget{classElement_ad62f7b8502dc5b6083240fd1fadb00ae}{}\label{classElement_ad62f7b8502dc5b6083240fd1fadb00ae}
+
+\item 
+virtual bool {\bfseries is\+\_\+zero} () const \hypertarget{classElement_a5ae575a558cb9d1047a6673cefe4daaa}{}\label{classElement_a5ae575a558cb9d1047a6673cefe4daaa}
+
+\item 
+const \hyperlink{classField}{Field} $\ast$ {\bfseries field} () const \hypertarget{classElement_ae9d675372592fc556c8a8ed83b81040b}{}\label{classElement_ae9d675372592fc556c8a8ed83b81040b}
+
+\item 
+virtual bool {\bfseries is\+\_\+complex} () const \hypertarget{classElement_a311d28ffc677c6cbb7f5383af8dcccf0}{}\label{classElement_a311d28ffc677c6cbb7f5383af8dcccf0}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classField}{Field} $\ast$ {\bfseries m\+\_\+field}\hypertarget{classElement_a32be443e21537c376e41c61a1f3fe302}{}\label{classElement_a32be443e21537c376e41c61a1f3fe302}
+
+\item 
+char $\ast$ {\bfseries m\+\_\+begin}\hypertarget{classElement_a43e5c2622b57e837a71fed98190d970a}{}\label{classElement_a43e5c2622b57e837a71fed98190d970a}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/table/Element.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/table/Element.\+cpp\end{DoxyCompactItemize}

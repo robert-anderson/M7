@@ -1,0 +1,63 @@
+\hypertarget{classAlignedAllocator}{}\section{Aligned\+Allocator$<$ T, alignment $>$ Class Template Reference}
+\label{classAlignedAllocator}\index{Aligned\+Allocator$<$ T, alignment $>$@{Aligned\+Allocator$<$ T, alignment $>$}}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structAlignedAllocator_1_1rebind}{rebind}
+\end{DoxyCompactItemize}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+typedef T {\bfseries value\+\_\+type}\hypertarget{classAlignedAllocator_a8156c3bcb3f481eee1ed5744f1bee588}{}\label{classAlignedAllocator_a8156c3bcb3f481eee1ed5744f1bee588}
+
+\item 
+typedef T $\ast$ {\bfseries pointer}\hypertarget{classAlignedAllocator_ace173cbb585102f35337af6a2f0773d0}{}\label{classAlignedAllocator_ace173cbb585102f35337af6a2f0773d0}
+
+\item 
+typedef const T $\ast$ {\bfseries const\+\_\+pointer}\hypertarget{classAlignedAllocator_aa0023d9d0cd46d1436908ca3438b4253}{}\label{classAlignedAllocator_aa0023d9d0cd46d1436908ca3438b4253}
+
+\item 
+typedef T \& {\bfseries reference}\hypertarget{classAlignedAllocator_aa7ea4f8ae44e6681548689059258f7ed}{}\label{classAlignedAllocator_aa7ea4f8ae44e6681548689059258f7ed}
+
+\item 
+typedef const T \& {\bfseries const\+\_\+reference}\hypertarget{classAlignedAllocator_a1f9389d4b2f98606022504b1695945b7}{}\label{classAlignedAllocator_a1f9389d4b2f98606022504b1695945b7}
+
+\item 
+typedef std\+::size\+\_\+t {\bfseries size\+\_\+type}\hypertarget{classAlignedAllocator_ab6e51b4656a9e595dce6cb55d5386aac}{}\label{classAlignedAllocator_ab6e51b4656a9e595dce6cb55d5386aac}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+pointer {\bfseries address} (reference value) const \hypertarget{classAlignedAllocator_a6e8856fc7ca2324ecb345d5f8a1a1492}{}\label{classAlignedAllocator_a6e8856fc7ca2324ecb345d5f8a1a1492}
+
+\item 
+const\+\_\+pointer {\bfseries address} (const\+\_\+reference value) const \hypertarget{classAlignedAllocator_adc90b489475b44c27664a0bb7036e8f5}{}\label{classAlignedAllocator_adc90b489475b44c27664a0bb7036e8f5}
+
+\item 
+{\bfseries Aligned\+Allocator} (const \hyperlink{classAlignedAllocator}{Aligned\+Allocator} \&alloc)  throw ()\hypertarget{classAlignedAllocator_aefcbc30120c4a8080a04cb0256ccbd94}{}\label{classAlignedAllocator_aefcbc30120c4a8080a04cb0256ccbd94}
+
+\item 
+{\footnotesize template$<$class U $>$ }\\{\bfseries Aligned\+Allocator} (const \hyperlink{classAlignedAllocator}{Aligned\+Allocator}$<$ U, alignment $>$ \&)  throw ()\hypertarget{classAlignedAllocator_a99d45b93a0a0e7a229cc0c1b954f21f0}{}\label{classAlignedAllocator_a99d45b93a0a0e7a229cc0c1b954f21f0}
+
+\item 
+size\+\_\+type {\bfseries max\+\_\+size} () const   throw ()\hypertarget{classAlignedAllocator_a8f70adbcd8e274ae18224f1204a3cb4e}{}\label{classAlignedAllocator_a8f70adbcd8e274ae18224f1204a3cb4e}
+
+\item 
+pointer {\bfseries allocate} (size\+\_\+type num, const void $\ast$=0)\hypertarget{classAlignedAllocator_afaa32dfd9b767ceccba057b0fdf9e8b9}{}\label{classAlignedAllocator_afaa32dfd9b767ceccba057b0fdf9e8b9}
+
+\item 
+void {\bfseries construct} (pointer p, const T \&value)\hypertarget{classAlignedAllocator_a9c352b5d0c908f15d869b2555211d6eb}{}\label{classAlignedAllocator_a9c352b5d0c908f15d869b2555211d6eb}
+
+\item 
+void {\bfseries destroy} (pointer p)\hypertarget{classAlignedAllocator_a46bb788a20e8166d20ccd4e3f47e48b1}{}\label{classAlignedAllocator_a46bb788a20e8166d20ccd4e3f47e48b1}
+
+\item 
+void {\bfseries deallocate} (pointer p, size\+\_\+type num)\hypertarget{classAlignedAllocator_afcdd0473a1bf2cd63800b047d8d540ae}{}\label{classAlignedAllocator_afcdd0473a1bf2cd63800b047d8d540ae}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/thread/Aligned\+Allocator.\+h\end{DoxyCompactItemize}

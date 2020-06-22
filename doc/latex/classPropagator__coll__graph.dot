@@ -1,0 +1,40 @@
+digraph "Propagator"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="Propagator",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_shift" ];
+  Node2 [label="consts::component_t\l\< ham_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structconsts_1_1component__t.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_input" ];
+  Node3 [label="Options",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structOptions.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_fciqmc" ];
+  Node4 [label="FciqmcCalculation",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classFciqmcCalculation.html"];
+  Node3 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_input" ];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_rank_allocator" ];
+  Node5 [label="RankAllocator\< Determinant\lElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classRankAllocator.html"];
+  Node6 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_reference" ];
+  Node6 [label="Determinant",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDeterminant.html"];
+  Node7 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node7 [label="DeterminantElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDeterminantElement.html"];
+  Node8 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node8 [label="BitsetElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classBitsetElement.html"];
+  Node9 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node9 [label="Element",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classElement.html"];
+  Node10 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_field" ];
+  Node10 [label="Field",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classField.html"];
+  Node11 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_table" ];
+  Node11 [label="Table",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classTable.html"];
+  Node12 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_wf" ];
+  Node12 [label="Wavefunction",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classWavefunction.html"];
+  Node13 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_square_norm\nm_delta_square_norm\nm_delta_nw\nm_nw" ];
+  Node13 [label="Distributed\< defs::\lwf_comp_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDistributed.html"];
+  Node14 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_nw_growth_rate" ];
+  Node14 [label="consts::component_t\l\< wf_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structconsts_1_1component__t.html"];
+  Node15 -> Node12 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_noccupied_determinant" ];
+  Node15 [label="Distributed\< size_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDistributed.html"];
+  Node5 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_rank_allocator" ];
+  Node16 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_magnitude_logger" ];
+  Node16 [label="MagnitudeLogger",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classMagnitudeLogger.html"];
+  Node13 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_largest_spawn_magnitude" ];
+}

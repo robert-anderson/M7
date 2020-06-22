@@ -1,0 +1,43 @@
+digraph "FciqmcStatsFile"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="FciqmcStatsFile",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="StatsFile",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsFile.html"];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="Table",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classTable.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_aborted_weight" ,fontname="Helvetica"];
+  Node4 [label="StatsField\< defs::wf_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsField.html"];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="NumericField\< defs\l::wf_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node6 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="Field",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classField.html"];
+  Node3 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_table" ,fontname="Helvetica"];
+  Node7 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_timestep" ,fontname="Helvetica"];
+  Node7 [label="StatsField\< double \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsField.html"];
+  Node8 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="NumericField\< double \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node6 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_ref_weight\nm_ref_proj_energy\l_num\nm_ref_proj_energy" ,fontname="Helvetica"];
+  Node9 [label="StatsField\< defs::ham_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsField.html"];
+  Node10 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="NumericField\< defs\l::ham_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node6 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_psingle" ,fontname="Helvetica"];
+  Node11 [label="StatsField\< defs::prob_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsField.html"];
+  Node12 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="NumericField\< defs\l::prob_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node6 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_nwalker\nm_diagonal_shift" ,fontname="Helvetica"];
+  Node13 [label="StatsField\< defs::ham\l_comp_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsField.html"];
+  Node14 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node14 [label="NumericField\< defs\l::ham_comp_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node6 -> Node14 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node15 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_noccupied_det\nm_ninitiator\nm_cycle_number" ,fontname="Helvetica"];
+  Node15 [label="StatsField\< size_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classStatsField.html"];
+  Node16 -> Node15 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node16 [label="NumericField\< size_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node6 -> Node16 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

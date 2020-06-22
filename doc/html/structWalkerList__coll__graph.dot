@@ -1,0 +1,42 @@
+digraph "WalkerList"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="WalkerList",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="PerforableMappedList\l\< DeterminantElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classPerforableMappedList.html"];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="MappedList\< DeterminantElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classMappedList.html"];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="List",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classList.html"];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="Table",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classTable.html"];
+  Node6 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_map" ,fontname="Helvetica"];
+  Node6 [label="ListSafeHashMap\< Determinant\lElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structListSafeHashMap.html"];
+  Node7 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="SafeHashMap\< Determinant\lElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classSafeHashMap.html"];
+  Node8 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="HashMap\< DeterminantElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classHashMap.html"];
+  Node3 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_list" ,fontname="Helvetica"];
+  Node9 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_hdiag" ,fontname="Helvetica"];
+  Node9 [label="NumericField\< defs\l::ham_comp_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node10 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="Field",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classField.html"];
+  Node5 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_table" ,fontname="Helvetica"];
+  Node11 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_flags" ,fontname="Helvetica"];
+  Node11 [label="WalkerList::Flags",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled"];
+  Node12 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="FlagField",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classFlagField.html"];
+  Node13 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="BitsetField",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classBitsetField.html"];
+  Node10 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node14 -> Node11 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_deterministic\nm_reference_connection\nm_initiator" ,fontname="Helvetica"];
+  Node14 [label="Flag",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classFlag.html"];
+  Node15 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_determinant" ,fontname="Helvetica"];
+  Node15 [label="DeterminantField",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDeterminantField.html"];
+  Node13 -> Node15 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node16 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_weight" ,fontname="Helvetica"];
+  Node16 [label="NumericField\< defs\l::wf_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classNumericField.html"];
+  Node10 -> Node16 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

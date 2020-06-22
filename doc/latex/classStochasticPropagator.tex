@@ -1,0 +1,48 @@
+\hypertarget{classStochasticPropagator}{}\section{Stochastic\+Propagator Class Reference}
+\label{classStochasticPropagator}\index{Stochastic\+Propagator@{Stochastic\+Propagator}}
+
+
+Inheritance diagram for Stochastic\+Propagator\+:
+% FIG 0
+
+
+Collaboration diagram for Stochastic\+Propagator\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Stochastic\+Propagator} (\hyperlink{classFciqmcCalculation}{Fciqmc\+Calculation} $\ast$fciqmc)\hypertarget{classStochasticPropagator_a8e047b2c7790401fba3ceac809c19c45}{}\label{classStochasticPropagator_a8e047b2c7790401fba3ceac809c19c45}
+
+\item 
+void {\bfseries off\+\_\+diagonal} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&src\+\_\+det, const \hyperlink{classNumericElement}{Numeric\+Element}$<$ defs\+::ham\+\_\+t $>$ \&weight, \hyperlink{structSpawnList}{Spawn\+List} \&spawn\+\_\+list, bool flag\+\_\+deterministic, bool flag\+\_\+initiator) override\hypertarget{classStochasticPropagator_ac6e8058f872699d0960ed6264be2511e}{}\label{classStochasticPropagator_ac6e8058f872699d0960ed6264be2511e}
+
+\item 
+void {\bfseries diagonal} (const \hyperlink{classNumericElement}{Numeric\+Element}$<$ defs\+::ham\+\_\+comp\+\_\+t $>$ \&hdiag, \hyperlink{classNumericElement}{Numeric\+Element}$<$ defs\+::ham\+\_\+t $>$ \&weight, defs\+::ham\+\_\+comp\+\_\+t \&delta\+\_\+square\+\_\+norm, defs\+::ham\+\_\+comp\+\_\+t \&delta\+\_\+nw) override\hypertarget{classStochasticPropagator_a358272ef0caf2f43520dbbcacca0dbf1}{}\label{classStochasticPropagator_a358272ef0caf2f43520dbbcacca0dbf1}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPrivateStore}{Private\+Store}$<$ \hyperlink{classPRNG}{P\+R\+NG} $>$ {\bfseries m\+\_\+prng}\hypertarget{classStochasticPropagator_a9701eaea25d3b07f61c4421d077c780b}{}\label{classStochasticPropagator_a9701eaea25d3b07f61c4421d077c780b}
+
+\item 
+std\+::unique\+\_\+ptr$<$ \hyperlink{classExcitationGenerator}{Excitation\+Generator} $>$ {\bfseries m\+\_\+exgen} = nullptr\hypertarget{classStochasticPropagator_aca146b724867f97bd6d6b1531b021403}{}\label{classStochasticPropagator_aca146b724867f97bd6d6b1531b021403}
+
+\item 
+\hyperlink{classPrivateStore}{Private\+Store}$<$ \hyperlink{classDeterminant}{Determinant} $>$ {\bfseries m\+\_\+dst\+\_\+det}\hypertarget{classStochasticPropagator_a904656d5488a2fcec4984ee97266f241}{}\label{classStochasticPropagator_a904656d5488a2fcec4984ee97266f241}
+
+\item 
+\hyperlink{classPrivateStore}{Private\+Store}$<$ \hyperlink{structOccupiedOrbitals}{Occupied\+Orbitals} $>$ {\bfseries m\+\_\+occ}\hypertarget{classStochasticPropagator_a36203ead28dbd5653f4fb99cabdda1a7}{}\label{classStochasticPropagator_a36203ead28dbd5653f4fb99cabdda1a7}
+
+\item 
+\hyperlink{classPrivateStore}{Private\+Store}$<$ \hyperlink{structVacantOrbitals}{Vacant\+Orbitals} $>$ {\bfseries m\+\_\+vac}\hypertarget{classStochasticPropagator_a3214e327b81f1877d91d8f328237d930}{}\label{classStochasticPropagator_a3214e327b81f1877d91d8f328237d930}
+
+\item 
+\hyperlink{classPrivateStore}{Private\+Store}$<$ \hyperlink{classAntisymConnection}{Antisym\+Connection} $>$ {\bfseries m\+\_\+anticonn}\hypertarget{classStochasticPropagator_a3cf9cca5ab79c154d55b91be4e381387}{}\label{classStochasticPropagator_a3cf9cca5ab79c154d55b91be4e381387}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/dynamics/Stochastic\+Propagator.\+h\end{DoxyCompactItemize}

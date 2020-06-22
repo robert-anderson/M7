@@ -1,0 +1,47 @@
+\hypertarget{classAbInitioHamiltonian}{}\section{Ab\+Initio\+Hamiltonian Class Reference}
+\label{classAbInitioHamiltonian}\index{Ab\+Initio\+Hamiltonian@{Ab\+Initio\+Hamiltonian}}
+
+
+Inheritance diagram for Ab\+Initio\+Hamiltonian\+:
+% FIG 0
+
+
+Collaboration diagram for Ab\+Initio\+Hamiltonian\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Ab\+Initio\+Hamiltonian} (const std\+::string \&fname)\hypertarget{classAbInitioHamiltonian_a4aa129e13515a9d1b1d6fd659d36432f}{}\label{classAbInitioHamiltonian_a4aa129e13515a9d1b1d6fd659d36432f}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const defs\+::det\+\_\+work \&occs, const size\+\_\+t \&nocc) const override\hypertarget{classAbInitioHamiltonian_a3d2a53be607a17c7f8461e5d9dd8380e}{}\label{classAbInitioHamiltonian_a3d2a53be607a17c7f8461e5d9dd8380e}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+1} (const \hyperlink{classAntisymConnection}{Antisym\+Connection} \&connection) const override\hypertarget{classAbInitioHamiltonian_ade6591be81ad6f1b9604ae5fc66f6010}{}\label{classAbInitioHamiltonian_ade6591be81ad6f1b9604ae5fc66f6010}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const size\+\_\+t \&i, const size\+\_\+t \&j, const size\+\_\+t \&k, const size\+\_\+t \&l) const override\hypertarget{classAbInitioHamiltonian_af8d0596a4876dd88db46eed075eba4c5}{}\label{classAbInitioHamiltonian_af8d0596a4876dd88db46eed075eba4c5}
+
+\item 
+size\+\_\+t {\bfseries nelec} () const override\hypertarget{classAbInitioHamiltonian_a9e636c2c9e129d8c10ea909be3b04e7c}{}\label{classAbInitioHamiltonian_a9e636c2c9e129d8c10ea909be3b04e7c}
+
+\item 
+bool {\bfseries spin\+\_\+resolved} () const override\hypertarget{classAbInitioHamiltonian_a929c348348755243865bf6a9c9e812cd}{}\label{classAbInitioHamiltonian_a929c348348755243865bf6a9c9e812cd}
+
+\item 
+bool {\bfseries spin\+\_\+conserving} () const override\hypertarget{classAbInitioHamiltonian_af2917e415e826b1b647a22e023115eb3}{}\label{classAbInitioHamiltonian_af2917e415e826b1b647a22e023115eb3}
+
+\item 
+const \hyperlink{classIntegrals__1e}{Integrals\+\_\+1e}$<$ defs\+::ham\+\_\+t, defs\+::isym\+\_\+1e $>$ \& {\bfseries int\+\_\+1} () const \hypertarget{classAbInitioHamiltonian_ae225b305af0ffde59b9c7dc9e451cfc6}{}\label{classAbInitioHamiltonian_ae225b305af0ffde59b9c7dc9e451cfc6}
+
+\item 
+const \hyperlink{classIntegrals__2e}{Integrals\+\_\+2e}$<$ defs\+::ham\+\_\+t, defs\+::isym\+\_\+2e $>$ \& {\bfseries int\+\_\+2} () const \hypertarget{classAbInitioHamiltonian_aac57c2866474e1a90be12b2c1d80e0cc}{}\label{classAbInitioHamiltonian_aac57c2866474e1a90be12b2c1d80e0cc}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/hamiltonian/Ab\+Initio\+Hamiltonian.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/hamiltonian/Ab\+Initio\+Hamiltonian.\+cpp\end{DoxyCompactItemize}

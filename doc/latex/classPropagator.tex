@@ -1,0 +1,70 @@
+\hypertarget{classPropagator}{}\section{Propagator Class Reference}
+\label{classPropagator}\index{Propagator@{Propagator}}
+
+
+Inheritance diagram for Propagator\+:
+% FIG 0
+
+
+Collaboration diagram for Propagator\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Propagator} (\hyperlink{classFciqmcCalculation}{Fciqmc\+Calculation} $\ast$fciqmc)\hypertarget{classPropagator_acd1e3b7e54bc7d5355147af9537ef293}{}\label{classPropagator_acd1e3b7e54bc7d5355147af9537ef293}
+
+\item 
+void {\bfseries spawn} (\hyperlink{structSpawnList}{Spawn\+List} \&spawn\+\_\+list, const \hyperlink{classDeterminantElement}{Determinant\+Element} \&dst\+\_\+det, const defs\+::wf\+\_\+t \&delta, bool flag\+\_\+initiator)\hypertarget{classPropagator_a108e9965b4c81d2d10eaa803c319ac1c}{}\label{classPropagator_a108e9965b4c81d2d10eaa803c319ac1c}
+
+\item 
+virtual void {\bfseries diagonal} (const \hyperlink{classNumericElement}{Numeric\+Element}$<$ defs\+::ham\+\_\+comp\+\_\+t $>$ \&hdiag, \hyperlink{classNumericElement}{Numeric\+Element}$<$ defs\+::ham\+\_\+t $>$ \&weight, defs\+::ham\+\_\+comp\+\_\+t \&delta\+\_\+square\+\_\+norm, defs\+::ham\+\_\+comp\+\_\+t \&delta\+\_\+nw)=0\hypertarget{classPropagator_aa8085bdb4936f6a949a9b67983c59dc8}{}\label{classPropagator_aa8085bdb4936f6a949a9b67983c59dc8}
+
+\item 
+virtual void {\bfseries off\+\_\+diagonal} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&determinant, const \hyperlink{classNumericElement}{Numeric\+Element}$<$ defs\+::ham\+\_\+t $>$ \&weight, \hyperlink{structSpawnList}{Spawn\+List} \&spawn\+\_\+list, bool flag\+\_\+deterministic, bool flag\+\_\+initiator)=0\hypertarget{classPropagator_a810395559ba2da04135c5ad2f0e66f5d}{}\label{classPropagator_a810395559ba2da04135c5ad2f0e66f5d}
+
+\item 
+virtual defs\+::ham\+\_\+t {\bfseries round} (const defs\+::ham\+\_\+t \&weight)\hypertarget{classPropagator_ac7ec659c02b60b85d2d85439f727a796}{}\label{classPropagator_ac7ec659c02b60b85d2d85439f727a796}
+
+\item 
+void {\bfseries update} (const size\+\_\+t icycle, defs\+::wf\+\_\+comp\+\_\+t nwalker, defs\+::wf\+\_\+comp\+\_\+t nwalker\+\_\+growth)\hypertarget{classPropagator_aaef6837a7e4ba4d2e2a45e88263ee93f}{}\label{classPropagator_aaef6837a7e4ba4d2e2a45e88263ee93f}
+
+\item 
+void {\bfseries write\+\_\+iter\+\_\+stats} (\hyperlink{structFciqmcStatsFile}{Fciqmc\+Stats\+File} $\ast$stats\+\_\+file)\hypertarget{classPropagator_aec8f6876201ced3fd9679a9ca7a69932}{}\label{classPropagator_aec8f6876201ced3fd9679a9ca7a69932}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classFciqmcCalculation}{Fciqmc\+Calculation} $\ast$ {\bfseries m\+\_\+fciqmc}\hypertarget{classPropagator_a4e8f77154491c0ba05aea63c7eaa7782}{}\label{classPropagator_a4e8f77154491c0ba05aea63c7eaa7782}
+
+\item 
+const \hyperlink{structOptions}{Options} \& {\bfseries m\+\_\+input}\hypertarget{classPropagator_af3d5e986c9a3e8ba8e7cbd99a72ba06e}{}\label{classPropagator_af3d5e986c9a3e8ba8e7cbd99a72ba06e}
+
+\item 
+const std\+::unique\+\_\+ptr$<$ \hyperlink{classHamiltonian}{Hamiltonian} $>$ \& {\bfseries m\+\_\+ham}\hypertarget{classPropagator_a833303c5ec4014fc38307efe9f4459d8}{}\label{classPropagator_a833303c5ec4014fc38307efe9f4459d8}
+
+\item 
+const \hyperlink{classRankAllocator}{Rank\+Allocator}$<$ \hyperlink{classDeterminantElement}{Determinant\+Element} $>$ \& {\bfseries m\+\_\+rank\+\_\+allocator}\hypertarget{classPropagator_ae414f3d7cac59531bf137cc21516150a}{}\label{classPropagator_ae414f3d7cac59531bf137cc21516150a}
+
+\item 
+\hyperlink{classMagnitudeLogger}{Magnitude\+Logger} {\bfseries m\+\_\+magnitude\+\_\+logger}\hypertarget{classPropagator_a5131b9c4e15c10470af5c3893409e17c}{}\label{classPropagator_a5131b9c4e15c10470af5c3893409e17c}
+
+\item 
+double {\bfseries m\+\_\+tau}\hypertarget{classPropagator_af39851af12a48a31dc3359e7ba79c59f}{}\label{classPropagator_af39851af12a48a31dc3359e7ba79c59f}
+
+\item 
+defs\+::ham\+\_\+comp\+\_\+t {\bfseries m\+\_\+shift}\hypertarget{classPropagator_aebcf610f2d5b46f7632c6fd598700449}{}\label{classPropagator_aebcf610f2d5b46f7632c6fd598700449}
+
+\item 
+bool {\bfseries vary\+\_\+shift} = false\hypertarget{classPropagator_a0ed4dce86ccd8630b96d9b1d6daae9ec}{}\label{classPropagator_a0ed4dce86ccd8630b96d9b1d6daae9ec}
+
+\item 
+\hyperlink{classDistributed}{Distributed}$<$ defs\+::wf\+\_\+comp\+\_\+t $>$ {\bfseries m\+\_\+largest\+\_\+spawn\+\_\+magnitude}\hypertarget{classPropagator_a5c0106298a20ccbcb79da68ffd2b6166}{}\label{classPropagator_a5c0106298a20ccbcb79da68ffd2b6166}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/dynamics/Propagator.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/dynamics/Propagator.\+cpp\end{DoxyCompactItemize}
