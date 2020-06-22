@@ -1,9 +1,10 @@
 <map id="DeterminantElement::DatawordEnumerator" name="DeterminantElement::DatawordEnumerator">
-<area shape="rect" id="node2" href="$classEnumerator.html" title="Enumerator\&lt; defs::data_t \&gt;" alt="" coords="42,367,225,393"/>
-<area shape="rect" id="node3" href="$classEnumerator.html" title="Enumerator\&lt; result_T \&gt;" alt="" coords="5,261,165,288"/>
-<area shape="rect" id="node4" href="$classDeterminantElement.html" title="DeterminantElement" alt="" coords="255,367,396,393"/>
-<area shape="rect" id="node5" href="$classBitsetElement.html" title="BitsetElement" alt="" coords="299,261,403,288"/>
-<area shape="rect" id="node6" href="$classElement.html" title="Element" alt="" coords="315,184,386,211"/>
-<area shape="rect" id="node7" href="$classField.html" title="Field" alt="" coords="325,95,376,121"/>
-<area shape="rect" id="node8" href="$classTable.html" title="Table" alt="" coords="323,5,378,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="170,456,323,497"/>
+<area shape="rect" id="node2" href="$classEnumerator.html" title=" " alt="" coords="42,367,225,393"/>
+<area shape="rect" id="node3" href="$classEnumerator.html" title=" " alt="" coords="5,261,165,288"/>
+<area shape="rect" id="node4" href="$classDeterminantElement.html" title=" " alt="" coords="255,367,396,393"/>
+<area shape="rect" id="node5" href="$classBitsetElement.html" title=" " alt="" coords="299,261,403,288"/>
+<area shape="rect" id="node6" href="$classElement.html" title=" " alt="" coords="315,184,386,211"/>
+<area shape="rect" id="node7" href="$classField.html" title=" " alt="" coords="325,95,376,121"/>
+<area shape="rect" id="node8" href="$classTable.html" title=" " alt="" coords="323,5,378,32"/>
 </map>

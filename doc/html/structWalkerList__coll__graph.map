@@ -1,16 +1,17 @@
 <map id="WalkerList" name="WalkerList">
-<area shape="rect" id="node2" href="$classPerforableMappedList.html" title="PerforableMappedList\l\&lt; DeterminantElement \&gt;" alt="" coords="1079,129,1244,171"/>
-<area shape="rect" id="node3" href="$classMappedList.html" title="MappedList\&lt; DeterminantElement \&gt;" alt="" coords="429,114,661,141"/>
-<area shape="rect" id="node6" href="$structListSafeHashMap.html" title="ListSafeHashMap\&lt; Determinant\lElement \&gt;" alt="" coords="845,40,1055,81"/>
-<area shape="rect" id="node4" href="$classList.html" title="List" alt="" coords="248,237,291,263"/>
-<area shape="rect" id="node5" href="$classTable.html" title="Table" alt="" coords="5,273,60,299"/>
-<area shape="rect" id="node10" href="$classField.html" title="Field" alt="" coords="244,331,295,358"/>
-<area shape="rect" id="node7" href="$classSafeHashMap.html" title="SafeHashMap\&lt; Determinant\lElement \&gt;" alt="" coords="451,5,639,47"/>
-<area shape="rect" id="node8" href="$classHashMap.html" title="HashMap\&lt; DeterminantElement \&gt;" alt="" coords="159,13,380,39"/>
-<area shape="rect" id="node9" href="$classNumericField.html" title="NumericField\&lt; defs\l::ham_comp_t \&gt;" alt="" coords="685,383,821,424"/>
-<area shape="rect" id="node13" href="$classBitsetField.html" title="BitsetField" alt="" coords="503,289,587,315"/>
-<area shape="rect" id="node16" href="$classNumericField.html" title="NumericField\&lt; defs\l::wf_t \&gt;" alt="" coords="685,332,821,373"/>
-<area shape="rect" id="node12" href="$classFlagField.html" title="FlagField" alt="" coords="913,187,987,214"/>
-<area shape="rect" id="node15" href="$classDeterminantField.html" title="DeterminantField" alt="" coords="1101,287,1222,314"/>
-<area shape="rect" id="node14" href="$classFlag.html" title="Flag" alt="" coords="927,238,973,265"/>
+<area shape="rect" id="node1" title=" " alt="" coords="1271,210,1355,237"/>
+<area shape="rect" id="node2" href="$classPerforableMappedList.html" title=" " alt="" coords="974,5,1139,47"/>
+<area shape="rect" id="node3" href="$classMappedList.html" title=" " alt="" coords="529,43,761,70"/>
+<area shape="rect" id="node4" href="$structListSafeHashMap.html" title=" " alt="" coords="952,77,1161,119"/>
+<area shape="rect" id="node5" href="$classSafeHashMap.html" title=" " alt="" coords="551,125,739,167"/>
+<area shape="rect" id="node6" href="$classHashMap.html" title=" " alt="" coords="259,133,480,159"/>
+<area shape="rect" id="node7" href="$classNumericField.html" title=" " alt="" coords="989,143,1125,184"/>
+<area shape="rect" id="node8" title=" " alt="" coords="995,271,1119,298"/>
+<area shape="rect" id="node9" href="$classFlagField.html" title=" " alt="" coords="608,261,683,287"/>
+<area shape="rect" id="node10" href="$classBitsetField.html" title=" " alt="" coords="327,230,411,257"/>
+<area shape="rect" id="node14" href="$classDeterminantField.html" title=" " alt="" coords="796,210,917,237"/>
+<area shape="rect" id="node11" href="$classField.html" title=" " alt="" coords="159,230,209,257"/>
+<area shape="rect" id="node12" href="$classTable.html" title=" " alt="" coords="5,230,60,257"/>
+<area shape="rect" id="node13" href="$classFlag.html" title=" " alt="" coords="622,325,669,351"/>
+<area shape="rect" id="node15" href="$classNumericField.html" title=" " alt="" coords="989,323,1125,364"/>
 </map>

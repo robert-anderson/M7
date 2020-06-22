@@ -1,5 +1,5 @@
-\hypertarget{classAbInitioHamiltonian}{}\section{Ab\+Initio\+Hamiltonian Class Reference}
-\label{classAbInitioHamiltonian}\index{Ab\+Initio\+Hamiltonian@{Ab\+Initio\+Hamiltonian}}
+\hypertarget{classAbInitioHamiltonian}{}\doxysection{Ab\+Initio\+Hamiltonian Class Reference}
+\label{classAbInitioHamiltonian}\index{AbInitioHamiltonian@{AbInitioHamiltonian}}
 
 
 Inheritance diagram for Ab\+Initio\+Hamiltonian\+:\nopagebreak
@@ -18,37 +18,61 @@ Collaboration diagram for Ab\+Initio\+Hamiltonian\+:\nopagebreak
 \includegraphics[width=181pt]{classAbInitioHamiltonian__coll__graph}
 \end{center}
 \end{figure}
-\subsection*{Public Member Functions}
+\doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-{\bfseries Ab\+Initio\+Hamiltonian} (const std\+::string \&fname)\hypertarget{classAbInitioHamiltonian_a4aa129e13515a9d1b1d6fd659d36432f}{}\label{classAbInitioHamiltonian_a4aa129e13515a9d1b1d6fd659d36432f}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_a4aa129e13515a9d1b1d6fd659d36432f}\label{classAbInitioHamiltonian_a4aa129e13515a9d1b1d6fd659d36432f}} 
+{\bfseries Ab\+Initio\+Hamiltonian} (const std\+::string \&fname)
 \item 
-defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const defs\+::det\+\_\+work \&occs, const size\+\_\+t \&nocc) const override\hypertarget{classAbInitioHamiltonian_a3d2a53be607a17c7f8461e5d9dd8380e}{}\label{classAbInitioHamiltonian_a3d2a53be607a17c7f8461e5d9dd8380e}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_a3d2a53be607a17c7f8461e5d9dd8380e}\label{classAbInitioHamiltonian_a3d2a53be607a17c7f8461e5d9dd8380e}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const defs\+::det\+\_\+work \&occs, const size\+\_\+t \&nocc) const override
 \item 
-defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+1} (const \hyperlink{classAntisymConnection}{Antisym\+Connection} \&connection) const override\hypertarget{classAbInitioHamiltonian_ade6591be81ad6f1b9604ae5fc66f6010}{}\label{classAbInitioHamiltonian_ade6591be81ad6f1b9604ae5fc66f6010}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_ade6591be81ad6f1b9604ae5fc66f6010}\label{classAbInitioHamiltonian_ade6591be81ad6f1b9604ae5fc66f6010}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+1} (const \mbox{\hyperlink{classAntisymConnection}{Antisym\+Connection}} \&connection) const override
 \item 
-defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const size\+\_\+t \&i, const size\+\_\+t \&j, const size\+\_\+t \&k, const size\+\_\+t \&l) const override\hypertarget{classAbInitioHamiltonian_af8d0596a4876dd88db46eed075eba4c5}{}\label{classAbInitioHamiltonian_af8d0596a4876dd88db46eed075eba4c5}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_af8d0596a4876dd88db46eed075eba4c5}\label{classAbInitioHamiltonian_af8d0596a4876dd88db46eed075eba4c5}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const size\+\_\+t \&i, const size\+\_\+t \&j, const size\+\_\+t \&k, const size\+\_\+t \&l) const override
 \item 
-size\+\_\+t {\bfseries nelec} () const override\hypertarget{classAbInitioHamiltonian_a9e636c2c9e129d8c10ea909be3b04e7c}{}\label{classAbInitioHamiltonian_a9e636c2c9e129d8c10ea909be3b04e7c}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_a9e636c2c9e129d8c10ea909be3b04e7c}\label{classAbInitioHamiltonian_a9e636c2c9e129d8c10ea909be3b04e7c}} 
+size\+\_\+t {\bfseries nelec} () const override
 \item 
-bool {\bfseries spin\+\_\+resolved} () const override\hypertarget{classAbInitioHamiltonian_a929c348348755243865bf6a9c9e812cd}{}\label{classAbInitioHamiltonian_a929c348348755243865bf6a9c9e812cd}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_a929c348348755243865bf6a9c9e812cd}\label{classAbInitioHamiltonian_a929c348348755243865bf6a9c9e812cd}} 
+bool {\bfseries spin\+\_\+resolved} () const override
 \item 
-bool {\bfseries spin\+\_\+conserving} () const override\hypertarget{classAbInitioHamiltonian_af2917e415e826b1b647a22e023115eb3}{}\label{classAbInitioHamiltonian_af2917e415e826b1b647a22e023115eb3}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_af2917e415e826b1b647a22e023115eb3}\label{classAbInitioHamiltonian_af2917e415e826b1b647a22e023115eb3}} 
+bool {\bfseries spin\+\_\+conserving} () const override
 \item 
-const \hyperlink{classIntegrals__1e}{Integrals\+\_\+1e}$<$ defs\+::ham\+\_\+t, defs\+::isym\+\_\+1e $>$ \& {\bfseries int\+\_\+1} () const \hypertarget{classAbInitioHamiltonian_ae225b305af0ffde59b9c7dc9e451cfc6}{}\label{classAbInitioHamiltonian_ae225b305af0ffde59b9c7dc9e451cfc6}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_ae3ee97b2fa22a7153553170715593456}\label{classAbInitioHamiltonian_ae3ee97b2fa22a7153553170715593456}} 
+const \mbox{\hyperlink{classIntegrals__1e}{Integrals\+\_\+1e}}$<$ defs\+::ham\+\_\+t, defs\+::isym\+\_\+1e $>$ \& {\bfseries int\+\_\+1} () const
 \item 
-const \hyperlink{classIntegrals__2e}{Integrals\+\_\+2e}$<$ defs\+::ham\+\_\+t, defs\+::isym\+\_\+2e $>$ \& {\bfseries int\+\_\+2} () const \hypertarget{classAbInitioHamiltonian_aac57c2866474e1a90be12b2c1d80e0cc}{}\label{classAbInitioHamiltonian_aac57c2866474e1a90be12b2c1d80e0cc}
-
+\mbox{\Hypertarget{classAbInitioHamiltonian_ac123532bdab22e9e707f0b24963a4536}\label{classAbInitioHamiltonian_ac123532bdab22e9e707f0b24963a4536}} 
+const \mbox{\hyperlink{classIntegrals__2e}{Integrals\+\_\+2e}}$<$ defs\+::ham\+\_\+t, defs\+::isym\+\_\+2e $>$ \& {\bfseries int\+\_\+2} () const
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_afed1192c0ee64815c60d11724347e723}\label{classAbInitioHamiltonian_afed1192c0ee64815c60d11724347e723}} 
+virtual defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const defs\+::det\+\_\+work \&occs, const size\+\_\+t \&nocc) const=0
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_a8944945ff8fe0ba62d39b0dfbe75ece6}\label{classAbInitioHamiltonian_a8944945ff8fe0ba62d39b0dfbe75ece6}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const \mbox{\hyperlink{structOccupiedOrbitals}{Occupied\+Orbitals}} \&occs) const
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_aaf20ea0c5334bf7ff6248b888508856c}\label{classAbInitioHamiltonian_aaf20ea0c5334bf7ff6248b888508856c}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const \mbox{\hyperlink{classDeterminantElement}{Determinant\+Element}} \&det) const
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_a829e544ae21fdd48056194a3d728a028}\label{classAbInitioHamiltonian_a829e544ae21fdd48056194a3d728a028}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const \mbox{\hyperlink{classAntisymConnection}{Antisym\+Connection}} \&connection) const
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_a632617dc34ee846167e9876ea0087992}\label{classAbInitioHamiltonian_a632617dc34ee846167e9876ea0087992}} 
+virtual defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+1} (const \mbox{\hyperlink{classAntisymConnection}{Antisym\+Connection}} \&connection) const=0
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_a1b8a14989abd4ab25ed6732ef7094398}\label{classAbInitioHamiltonian_a1b8a14989abd4ab25ed6732ef7094398}} 
+virtual defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const size\+\_\+t \&i, const size\+\_\+t \&j, const size\+\_\+t \&k, const size\+\_\+t \&l) const=0
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_a82271a080e62d9a6b48dca4dec4d2e6c}\label{classAbInitioHamiltonian_a82271a080e62d9a6b48dca4dec4d2e6c}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const \mbox{\hyperlink{classConnection}{Connection}} \&connection) const
+\item 
+\mbox{\Hypertarget{classAbInitioHamiltonian_a2c098a580ab7260fc092e4a8d5021e70}\label{classAbInitioHamiltonian_a2c098a580ab7260fc092e4a8d5021e70}} 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const \mbox{\hyperlink{classAntisymConnection}{Antisym\+Connection}} \&connection) const
 \end{DoxyCompactItemize}
-\subsection*{Additional Inherited Members}
+\doxysubsection*{Additional Inherited Members}
 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}

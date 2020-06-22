@@ -1,7 +1,8 @@
 <map id="Determinant" name="Determinant">
-<area shape="rect" id="node2" href="$classDeterminantElement.html" title="DeterminantElement" alt="" coords="5,336,147,363"/>
-<area shape="rect" id="node3" href="$classBitsetElement.html" title="BitsetElement" alt="" coords="24,260,128,287"/>
-<area shape="rect" id="node4" href="$classElement.html" title="Element" alt="" coords="41,184,111,211"/>
-<area shape="rect" id="node5" href="$classField.html" title="Field" alt="" coords="51,95,101,121"/>
-<area shape="rect" id="node6" href="$classTable.html" title="Table" alt="" coords="49,5,103,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="29,412,123,439"/>
+<area shape="rect" id="node2" href="$classDeterminantElement.html" title=" " alt="" coords="5,336,147,363"/>
+<area shape="rect" id="node3" href="$classBitsetElement.html" title=" " alt="" coords="24,260,128,287"/>
+<area shape="rect" id="node4" href="$classElement.html" title=" " alt="" coords="41,184,111,211"/>
+<area shape="rect" id="node5" href="$classField.html" title=" " alt="" coords="51,95,101,121"/>
+<area shape="rect" id="node6" href="$classTable.html" title=" " alt="" coords="49,5,103,32"/>
 </map>

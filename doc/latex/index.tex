@@ -1,7 +1,6 @@
-Many-\/body Stochastic Expectation Value Estimation Networks (M7) is a stochastic electronic structure program written in C++ which primarily implements the Full Configuration Interaction Quantum Monte Carlo (F\+C\+I\+Q\+MC) method.
-
-\section*{Installation}
-
+\label{index_md__home_teamcity_TeamCity_buildAgent_work_5343cdffda4690e5_README}%
+\Hypertarget{index_md__home_teamcity_TeamCity_buildAgent_work_5343cdffda4690e5_README}%
+Many-\/body Stochastic Expectation Value Estimation Networks (M7) is a stochastic electronic structure program written in C++ which primarily implements the Full Configuration Interaction Quantum Monte Carlo (F\+C\+I\+Q\+MC) method.\hypertarget{index_autotoc_md1}{}\doxysection{Installation}\label{index_autotoc_md1}
 To install M7, you will need\+:
 \begin{DoxyItemize}
 \item C++11 compiler which implements M\+PI
@@ -10,21 +9,22 @@ To install M7, you will need\+:
 \end{DoxyItemize}
 
 Retrieve the program code from the V\+CS\+: 
-\begin{DoxyCode}
-1 git clone https://github.com/robert-anderson/M7.git
+\begin{DoxyCode}{0}
+\DoxyCodeLine{git clone https://github.com/robert-\/anderson/M7.git}
 \end{DoxyCode}
- Then create a directory in which C\+Make can build its targets---typically under the repository root directory---and point C\+Make to the top level C\+Make\+Lists.\+txt file of the project. 
-\begin{DoxyCode}
-1 cd M7
-2 mkdir build
-3 cd build
-4 cmake ..
-5 make -j TARGET
+
+
+Then create a directory in which C\+Make can build its targets---typically under the repository root directory---and point C\+Make to the top level C\+Make\+Lists.\+txt file of the project. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd M7}
+\DoxyCodeLine{mkdir build}
+\DoxyCodeLine{cd build}
+\DoxyCodeLine{cmake ..}
+\DoxyCodeLine{make -\/j TARGET}
 \end{DoxyCode}
- Where T\+A\+R\+G\+ET is either debug, release or unittest. The binary will then appear at either src/debug, src/release, or test/unittest.
 
-\section*{Usage}
 
+Where T\+A\+R\+G\+ET is either debug, release or unittest. The binary will then appear at either src/debug, src/release, or test/unittest.\hypertarget{index_autotoc_md2}{}\doxysection{Usage}\label{index_autotoc_md2}
 The program takes all run time variables through the command line interface. The command line options available can be listed by executing the debug or release binaries with the -\/h or --help option.
 
 Complex configurations can become cumbersome to manage on the command line directly, so particular run time configurations can easily be split over multiple lines in a shell script.
