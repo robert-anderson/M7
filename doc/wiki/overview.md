@@ -2,6 +2,7 @@
 
 Contents for another tab. fdsfgadfg
 \f[
-    \Cinext = \Cj
+    C_{\mathbf{i}(n+1)}
+    = C_{\mathbf{j}}
 \f]
 
