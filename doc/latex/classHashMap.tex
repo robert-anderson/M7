@@ -1,0 +1,62 @@
+\hypertarget{classHashMap}{}\section{Hash\+Map$<$ T $>$ Class Template Reference}
+\label{classHashMap}\index{Hash\+Map$<$ T $>$@{Hash\+Map$<$ T $>$}}
+
+
+Inheritance diagram for Hash\+Map$<$ T $>$\+:
+% FIG 0
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Hash\+Map} (const size\+\_\+t \&nbucket)\hypertarget{classHashMap_ad3da0496d0d5c817818cc3d0de1cde13}{}\label{classHashMap_ad3da0496d0d5c817818cc3d0de1cde13}
+
+\item 
+{\bfseries Hash\+Map} (const \hyperlink{classHashMap}{Hash\+Map} \&old, const size\+\_\+t \&nbucket)\hypertarget{classHashMap_ad084f78eb6a7208b9cc67020703ff898}{}\label{classHashMap_ad084f78eb6a7208b9cc67020703ff898}
+
+\item 
+virtual T {\bfseries get\+\_\+key} (const size\+\_\+t \&key\+\_\+index) const =0\hypertarget{classHashMap_a6449e282ff3ee559f254f4f727e9cf63}{}\label{classHashMap_a6449e282ff3ee559f254f4f727e9cf63}
+
+\item 
+virtual void {\bfseries set\+\_\+key} (const size\+\_\+t \&key\+\_\+index, const T \&key)=0\hypertarget{classHashMap_a21b01a2502b7f45dd939bab7a3811a54}{}\label{classHashMap_a21b01a2502b7f45dd939bab7a3811a54}
+
+\item 
+size\+\_\+t {\bfseries bucket} (const T \&key) const \hypertarget{classHashMap_a36df7df6b87258c2817865583569199b}{}\label{classHashMap_a36df7df6b87258c2817865583569199b}
+
+\item 
+virtual size\+\_\+t {\bfseries lookup} (const size\+\_\+t \&ibucket, const T \&key) const \hypertarget{classHashMap_a2e14b85d148e08c85f20eabfa978c185}{}\label{classHashMap_a2e14b85d148e08c85f20eabfa978c185}
+
+\item 
+virtual size\+\_\+t {\bfseries lookup} (const T \&key) const \hypertarget{classHashMap_ac4ab5ba76fcb4436e9ccdad3c7790567}{}\label{classHashMap_ac4ab5ba76fcb4436e9ccdad3c7790567}
+
+\item 
+virtual void {\bfseries insert} (const size\+\_\+t \&ibucket, const T \&key, const size\+\_\+t \&key\+\_\+index)\hypertarget{classHashMap_aab21199d4692865f989168a2bf02b7e9}{}\label{classHashMap_aab21199d4692865f989168a2bf02b7e9}
+
+\item 
+virtual void {\bfseries insert} (const T \&key, const size\+\_\+t \&key\+\_\+index)\hypertarget{classHashMap_a2e75f0e3ffc44c9b4d5821e36756395a}{}\label{classHashMap_a2e75f0e3ffc44c9b4d5821e36756395a}
+
+\item 
+virtual size\+\_\+t {\bfseries remove} (const size\+\_\+t \&ibucket, const size\+\_\+t \&key\+\_\+index)\hypertarget{classHashMap_aeb1bfd294550522d4b99cb1fc5855981}{}\label{classHashMap_aeb1bfd294550522d4b99cb1fc5855981}
+
+\item 
+virtual size\+\_\+t {\bfseries remove} (const T \&key)\hypertarget{classHashMap_a37060379e724337f2b42cf185f34fdc9}{}\label{classHashMap_a37060379e724337f2b42cf185f34fdc9}
+
+\item 
+size\+\_\+t {\bfseries size} () const \hypertarget{classHashMap_a0649c3b72405bfef706d98e281df4bf7}{}\label{classHashMap_a0649c3b72405bfef706d98e281df4bf7}
+
+\item 
+bool {\bfseries operator==} (const \hyperlink{classHashMap}{Hash\+Map} \&other) const \hypertarget{classHashMap_a7601c385de515579179c5ad40b2f5865}{}\label{classHashMap_a7601c385de515579179c5ad40b2f5865}
+
+\item 
+void {\bfseries print} () const \hypertarget{classHashMap_a805dc87c2829ce7b657ced9f0fa0f958}{}\label{classHashMap_a805dc87c2829ce7b657ced9f0fa0f958}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ std\+::forward\+\_\+list$<$ size\+\_\+t $>$ $>$ {\bfseries m\+\_\+buckets}\hypertarget{classHashMap_a962a721172bfc7ec504c756e906b3af4}{}\label{classHashMap_a962a721172bfc7ec504c756e906b3af4}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/hash/Hash\+Map.\+h\end{DoxyCompactItemize}

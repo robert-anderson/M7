@@ -1,0 +1,70 @@
+\hypertarget{classTensorFileIterator}{}\section{Tensor\+File\+Iterator$<$ T $>$ Class Template Reference}
+\label{classTensorFileIterator}\index{Tensor\+File\+Iterator$<$ T $>$@{Tensor\+File\+Iterator$<$ T $>$}}
+
+
+Inheritance diagram for Tensor\+File\+Iterator$<$ T $>$\+:
+% FIG 0
+
+
+Collaboration diagram for Tensor\+File\+Iterator$<$ T $>$\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Tensor\+File\+Iterator} (const std\+::string filename, const size\+\_\+t nind, const bool indsfirst)\hypertarget{classTensorFileIterator_a5c8541d7ea6d3fca48a919f97dd8d636}{}\label{classTensorFileIterator_a5c8541d7ea6d3fca48a919f97dd8d636}
+
+\item 
+bool {\bfseries next} (defs\+::inds \&inds, T \&value)\hypertarget{classTensorFileIterator_ad623998d768fa6c788df182b2ab04b02}{}\label{classTensorFileIterator_ad623998d768fa6c788df182b2ab04b02}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::string {\bfseries uint\+\_\+space\+\_\+list\+\_\+regex\+\_\+string} (const size\+\_\+t \&n)\hypertarget{classTensorFileIterator_aa369a2ba6106dd3542e2621738da6cf1}{}\label{classTensorFileIterator_aa369a2ba6106dd3542e2621738da6cf1}
+
+\item 
+static std\+::string {\bfseries data\+\_\+regex\+\_\+string} (const size\+\_\+t \&nind, const bool \&indsfirst)\hypertarget{classTensorFileIterator_a63fc7eec45cbe6a123d2412c0953d5f8}{}\label{classTensorFileIterator_a63fc7eec45cbe6a123d2412c0953d5f8}
+
+\item 
+static size\+\_\+t {\bfseries nind} (const std\+::string \&filename)\hypertarget{classTensorFileIterator_a283ec3c802c280dd834a92a5477faf62}{}\label{classTensorFileIterator_a283ec3c802c280dd834a92a5477faf62}
+
+\item 
+static size\+\_\+t {\bfseries nreal\+\_\+given} (const std\+::string \&filename, const std\+::regex \&data\+\_\+regex)\hypertarget{classTensorFileIterator_a8f197acca49bcd9160041b17670891fe}{}\label{classTensorFileIterator_a8f197acca49bcd9160041b17670891fe}
+
+\item 
+static size\+\_\+t {\bfseries indsfirst} (const std\+::string \&filename)\hypertarget{classTensorFileIterator_a213c8deadd21886441f875c84db3ad7d}{}\label{classTensorFileIterator_a213c8deadd21886441f875c84db3ad7d}
+
+\item 
+static bool {\bfseries extract\+\_\+line} (const std\+::string \&line, const size\+\_\+t \&nind, const size\+\_\+t \&nreal\+\_\+given, const bool \&indsfirst, defs\+::inds \&inds, T \&value)\hypertarget{classTensorFileIterator_a926cb9a218a1a349465029a4679e756c}{}\label{classTensorFileIterator_a926cb9a218a1a349465029a4679e756c}
+
+\item 
+static defs\+::inds {\bfseries shape} (const std\+::string \&filename, const size\+\_\+t \&nind, const size\+\_\+t \&nreal\+\_\+given, const bool \&indsfirst, const std\+::regex \&data\+\_\+regex)\hypertarget{classTensorFileIterator_a9f9d9aac50dc525bbc76b521b875c30b}{}\label{classTensorFileIterator_a9f9d9aac50dc525bbc76b521b875c30b}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const size\+\_\+t {\bfseries m\+\_\+nind}\hypertarget{classTensorFileIterator_a481d3716868296e255edad5ffc42e7ae}{}\label{classTensorFileIterator_a481d3716868296e255edad5ffc42e7ae}
+
+\item 
+const bool {\bfseries m\+\_\+indsfirst}\hypertarget{classTensorFileIterator_a472db03c84fc8cfc8de1de758fb04431}{}\label{classTensorFileIterator_a472db03c84fc8cfc8de1de758fb04431}
+
+\item 
+const size\+\_\+t {\bfseries m\+\_\+nreal\+\_\+given}\hypertarget{classTensorFileIterator_a08239d7622fbc3ddec6420f818868354}{}\label{classTensorFileIterator_a08239d7622fbc3ddec6420f818868354}
+
+\item 
+const defs\+::inds {\bfseries m\+\_\+shape}\hypertarget{classTensorFileIterator_a06a3fd8c3bd0abb9fedea7b3af07c0ca}{}\label{classTensorFileIterator_a06a3fd8c3bd0abb9fedea7b3af07c0ca}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static constexpr size\+\_\+t {\bfseries m\+\_\+nreal} = std\+::\+\_\+\+\_\+is\+\_\+static\+\_\+castable$<$T, float$>$\+::value ? 1 \+: 2\hypertarget{classTensorFileIterator_a00ddc24bcbff039f39ece564b89bbf32}{}\label{classTensorFileIterator_a00ddc24bcbff039f39ece564b89bbf32}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/io/Tensor\+File\+Iterator.\+h\end{DoxyCompactItemize}

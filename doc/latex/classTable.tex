@@ -1,0 +1,108 @@
+\hypertarget{classTable}{}\section{Table Class Reference}
+\label{classTable}\index{Table@{Table}}
+
+
+Inheritance diagram for Table\+:
+% FIG 0
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Table} (size\+\_\+t nsegment=1)\hypertarget{classTable_ae1dbb32b5ecc4a00bdad1cb374abf8c7}{}\label{classTable_ae1dbb32b5ecc4a00bdad1cb374abf8c7}
+
+\item 
+char $\ast$ {\bfseries field\+\_\+begin} (const \hyperlink{classField}{Field} $\ast$field, const size\+\_\+t \&irow, const size\+\_\+t isegment=0)\hypertarget{classTable_a73fd205958befbe99b7bad0a8fcd5dcf}{}\label{classTable_a73fd205958befbe99b7bad0a8fcd5dcf}
+
+\item 
+char $\ast$ {\bfseries row\+\_\+begin} (const size\+\_\+t \&irow, const size\+\_\+t isegment=0)\hypertarget{classTable_a4d9e8c3c175e18396cc36794a724a332}{}\label{classTable_a4d9e8c3c175e18396cc36794a724a332}
+
+\item 
+virtual void {\bfseries expand} (size\+\_\+t delta\+\_\+nrow)\hypertarget{classTable_a8377eb2e687a2e59c00ce2a5ac57a019}{}\label{classTable_a8377eb2e687a2e59c00ce2a5ac57a019}
+
+\item 
+virtual void {\bfseries resize} (size\+\_\+t nrow)\hypertarget{classTable_a1b74b77f28744aa15c9a704a9577e80d}{}\label{classTable_a1b74b77f28744aa15c9a704a9577e80d}
+
+\item 
+size\+\_\+t {\bfseries irow} (const size\+\_\+t \&irow, const size\+\_\+t \&isegment=0) const \hypertarget{classTable_a4be760d5b55da5346bc596fc20665470}{}\label{classTable_a4be760d5b55da5346bc596fc20665470}
+
+\item 
+virtual void {\bfseries zero} ()\hypertarget{classTable_aa68576cdd35bf3994d2fbb4c21d30a49}{}\label{classTable_aa68576cdd35bf3994d2fbb4c21d30a49}
+
+\item 
+void {\bfseries zero\+\_\+row} (const size\+\_\+t \&irow, const size\+\_\+t \&isegment)\hypertarget{classTable_a5e76e637cd8ed9d8bcc1797ef416f2e6}{}\label{classTable_a5e76e637cd8ed9d8bcc1797ef416f2e6}
+
+\item 
+size\+\_\+t {\bfseries add\+\_\+field} (\hyperlink{classField}{Field} $\ast$field)\hypertarget{classTable_a61b74bcfa1a1f6c4e79b3c2579854961}{}\label{classTable_a61b74bcfa1a1f6c4e79b3c2579854961}
+
+\item 
+void {\bfseries update\+\_\+last\+\_\+field} ()\hypertarget{classTable_aa2ce71f46592e9be6f7221bc437d78f5}{}\label{classTable_aa2ce71f46592e9be6f7221bc437d78f5}
+
+\item 
+void {\bfseries print} ()\hypertarget{classTable_a0de5a9ca880b662ec7d608de686e309a}{}\label{classTable_a0de5a9ca880b662ec7d608de686e309a}
+
+\item 
+const size\+\_\+t \& {\bfseries nrow\+\_\+per\+\_\+segment} () const \hypertarget{classTable_a57ea2435e26974ec1aaa08772efc2e5e}{}\label{classTable_a57ea2435e26974ec1aaa08772efc2e5e}
+
+\item 
+bool {\bfseries compatible\+\_\+with} (const \hyperlink{classTable}{Table} \&other) const \hypertarget{classTable_a76d23a26905cc9b22f517c46bb388154}{}\label{classTable_a76d23a26905cc9b22f517c46bb388154}
+
+\item 
+bool {\bfseries is\+\_\+allocated} () const \hypertarget{classTable_ade2e3f7fc753c742d0157cebd1006216}{}\label{classTable_ade2e3f7fc753c742d0157cebd1006216}
+
+\item 
+std\+::string {\bfseries row\+\_\+to\+\_\+string} (size\+\_\+t irow, size\+\_\+t isegment)\hypertarget{classTable_ad08b3c049f18fe78e8558ed6a3a94873}{}\label{classTable_ad08b3c049f18fe78e8558ed6a3a94873}
+
+\item 
+virtual std\+::string {\bfseries to\+\_\+string} ()\hypertarget{classTable_ad6ab7c958c808b878cabd61e8df65e9f}{}\label{classTable_ad6ab7c958c808b878cabd61e8df65e9f}
+
+\item 
+virtual std\+::string {\bfseries to\+\_\+string} (const defs\+::inds \&nrows)\hypertarget{classTable_a7d8bd3433b4246a185058898632a2071}{}\label{classTable_a7d8bd3433b4246a185058898632a2071}
+
+\item 
+void {\bfseries print\+\_\+row} (size\+\_\+t irow, size\+\_\+t isegment)\hypertarget{classTable_ad7833264b3f9885c5477aaf5e97ca508}{}\label{classTable_ad7833264b3f9885c5477aaf5e97ca508}
+
+\item 
+size\+\_\+t {\bfseries dsize} () const \hypertarget{classTable_af0e08f84a00fa71c68194858ed58f925}{}\label{classTable_af0e08f84a00fa71c68194858ed58f925}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ defs\+::data\+\_\+t, \hyperlink{classAlignedAllocator}{Aligned\+Allocator}$<$ defs\+::data\+\_\+t, defs\+::cache\+\_\+line\+\_\+size $>$ $>$ {\bfseries m\+\_\+data}\hypertarget{classTable_ac53b53b44f038757f4ff525f1c40af29}{}\label{classTable_ac53b53b44f038757f4ff525f1c40af29}
+
+\item 
+std\+::vector$<$ \hyperlink{classField}{Field} $\ast$ $>$ {\bfseries m\+\_\+fields}\hypertarget{classTable_a34c933ab7a70f8993497ca038b9cf07d}{}\label{classTable_a34c933ab7a70f8993497ca038b9cf07d}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+row\+\_\+size} = 0\hypertarget{classTable_aeced958ceec106a4f1363626f591a3a7}{}\label{classTable_aeced958ceec106a4f1363626f591a3a7}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+padded\+\_\+row\+\_\+size} = 0\hypertarget{classTable_a36ec3e1ff200630605d6089d558e2e70}{}\label{classTable_a36ec3e1ff200630605d6089d558e2e70}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+padded\+\_\+row\+\_\+dsize} = 0\hypertarget{classTable_a1ad9d14adc0644eded9e1d0a6bc26172}{}\label{classTable_a1ad9d14adc0644eded9e1d0a6bc26172}
+
+\item 
+const size\+\_\+t {\bfseries m\+\_\+nsegment}\hypertarget{classTable_a461b749bf81e9ada2ff2556038d466a3}{}\label{classTable_a461b749bf81e9ada2ff2556038d466a3}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+nrow\+\_\+per\+\_\+segment} = 0\hypertarget{classTable_a4de9366dc6dfd1ed4460e1ab1a4ca234}{}\label{classTable_a4de9366dc6dfd1ed4460e1ab1a4ca234}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+segment\+\_\+size} = 0\hypertarget{classTable_a68ee298859ca4c2970322c9ba8941a80}{}\label{classTable_a68ee298859ca4c2970322c9ba8941a80}
+
+\item 
+size\+\_\+t {\bfseries m\+\_\+segment\+\_\+dsize} = 0\hypertarget{classTable_a3ddcc771a935fe76cde1e8ec334c3e30}{}\label{classTable_a3ddcc771a935fe76cde1e8ec334c3e30}
+
+\item 
+defs\+::inds {\bfseries m\+\_\+segment\+\_\+doffsets}\hypertarget{classTable_a89fb368e301134b6f5e9c0a1d54a27a1}{}\label{classTable_a89fb368e301134b6f5e9c0a1d54a27a1}
+
+\item 
+std\+::vector$<$ std\+::function$<$ std\+::string(const \hyperlink{classElement}{Element} $\ast$)$>$ $>$ {\bfseries m\+\_\+printers}\hypertarget{classTable_a2f1a4a01984b70bf66e8d63fe9bbbac4}{}\label{classTable_a2f1a4a01984b70bf66e8d63fe9bbbac4}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/table/Table.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/table/Table.\+cpp\end{DoxyCompactItemize}

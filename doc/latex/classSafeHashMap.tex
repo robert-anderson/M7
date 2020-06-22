@@ -1,0 +1,46 @@
+\hypertarget{classSafeHashMap}{}\section{Safe\+Hash\+Map$<$ T $>$ Class Template Reference}
+\label{classSafeHashMap}\index{Safe\+Hash\+Map$<$ T $>$@{Safe\+Hash\+Map$<$ T $>$}}
+
+
+Inheritance diagram for Safe\+Hash\+Map$<$ T $>$\+:
+% FIG 0
+
+
+Collaboration diagram for Safe\+Hash\+Map$<$ T $>$\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Safe\+Hash\+Map} (const size\+\_\+t \&nbucket)\hypertarget{classSafeHashMap_a495f302cfbdd81566cfc9a8c5f7d8a98}{}\label{classSafeHashMap_a495f302cfbdd81566cfc9a8c5f7d8a98}
+
+\item 
+{\bfseries Safe\+Hash\+Map} (const \hyperlink{classHashMap}{Hash\+Map}$<$ T $>$ \&old, const size\+\_\+t \&nbucket)\hypertarget{classSafeHashMap_af9ebb989c318b4bb9dea8aaf2b03e6a6}{}\label{classSafeHashMap_af9ebb989c318b4bb9dea8aaf2b03e6a6}
+
+\item 
+\hyperlink{classMutex}{Mutex} {\bfseries get\+\_\+mutex} (const size\+\_\+t \&ibucket) const \hypertarget{classSafeHashMap_a8662146dbaf25f047544a90efedfadb0}{}\label{classSafeHashMap_a8662146dbaf25f047544a90efedfadb0}
+
+\item 
+\hyperlink{classMutex}{Mutex} {\bfseries key\+\_\+mutex} (const T \&key) const \hypertarget{classSafeHashMap_a43f3929696652e2073c903a4182ddfa7}{}\label{classSafeHashMap_a43f3929696652e2073c903a4182ddfa7}
+
+\item 
+size\+\_\+t {\bfseries lookup} (\hyperlink{classMutex}{Mutex} \&mutex, const T \&key) const \hypertarget{classSafeHashMap_a85d03b86b12807d939a4f99a5451403f}{}\label{classSafeHashMap_a85d03b86b12807d939a4f99a5451403f}
+
+\item 
+size\+\_\+t {\bfseries lookup} (const T \&key) const override\hypertarget{classSafeHashMap_a90e15cc1085a1cea651db42e393da55f}{}\label{classSafeHashMap_a90e15cc1085a1cea651db42e393da55f}
+
+\item 
+void {\bfseries insert} (\hyperlink{classMutex}{Mutex} \&mutex, const T \&key, const size\+\_\+t \&key\+\_\+index)\hypertarget{classSafeHashMap_a87f3674c29490f34023e427f84811974}{}\label{classSafeHashMap_a87f3674c29490f34023e427f84811974}
+
+\item 
+void {\bfseries insert} (const T \&key, const size\+\_\+t \&key\+\_\+index) override\hypertarget{classSafeHashMap_a04620cef04074339b86368bfffef9151}{}\label{classSafeHashMap_a04620cef04074339b86368bfffef9151}
+
+\item 
+size\+\_\+t {\bfseries remove} (\hyperlink{classMutex}{Mutex} \&mutex, const size\+\_\+t \&key\+\_\+index)\hypertarget{classSafeHashMap_af37c6507b466dd6e36af3d0a9f556be7}{}\label{classSafeHashMap_af37c6507b466dd6e36af3d0a9f556be7}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/hash/Safe\+Hash\+Map.\+h\end{DoxyCompactItemize}

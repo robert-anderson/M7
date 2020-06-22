@@ -1,0 +1,89 @@
+\hypertarget{classHamiltonian}{}\section{Hamiltonian Class Reference}
+\label{classHamiltonian}\index{Hamiltonian@{Hamiltonian}}
+
+
+Inheritance diagram for Hamiltonian\+:
+% FIG 0
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classHamiltonian_1_1ConnectionList}{Connection\+List}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Hamiltonian} (const size\+\_\+t \&nsite)\hypertarget{classHamiltonian_aea9fe1aef1bf9bd4799a2b957c550f02}{}\label{classHamiltonian_aea9fe1aef1bf9bd4799a2b957c550f02}
+
+\item 
+\hyperlink{structconsts_1_1component__t}{consts\+::component\+\_\+t}$<$ defs\+::ham\+\_\+t $>$\+::type {\bfseries get\+\_\+energy} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&det) const \hypertarget{classHamiltonian_aed8eb6473b1540bdde9960a73393145e}{}\label{classHamiltonian_aed8eb6473b1540bdde9960a73393145e}
+
+\item 
+virtual defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const defs\+::det\+\_\+work \&occs, const size\+\_\+t \&nocc) const =0\hypertarget{classHamiltonian_a1042c841212b35ea08b0714942134dec}{}\label{classHamiltonian_a1042c841212b35ea08b0714942134dec}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const \hyperlink{structOccupiedOrbitals}{Occupied\+Orbitals} \&occs) const \hypertarget{classHamiltonian_a2e830dc13526070bc9b22033e11f100e}{}\label{classHamiltonian_a2e830dc13526070bc9b22033e11f100e}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&det) const \hypertarget{classHamiltonian_af24779f187d68cadd31c38e63e242c0e}{}\label{classHamiltonian_af24779f187d68cadd31c38e63e242c0e}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+0} (const \hyperlink{classAntisymConnection}{Antisym\+Connection} \&connection) const \hypertarget{classHamiltonian_a762f62b1bac356730f0a2e126f911d6e}{}\label{classHamiltonian_a762f62b1bac356730f0a2e126f911d6e}
+
+\item 
+virtual defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+1} (const \hyperlink{classAntisymConnection}{Antisym\+Connection} \&connection) const =0\hypertarget{classHamiltonian_aa1d2b517a085e7fb0488bc2874f075fe}{}\label{classHamiltonian_aa1d2b517a085e7fb0488bc2874f075fe}
+
+\item 
+virtual defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const size\+\_\+t \&i, const size\+\_\+t \&j, const size\+\_\+t \&k, const size\+\_\+t \&l) const =0\hypertarget{classHamiltonian_a85cb450f38fb23fcf415c6799c1a661f}{}\label{classHamiltonian_a85cb450f38fb23fcf415c6799c1a661f}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const \hyperlink{classConnection}{Connection} \&connection) const \hypertarget{classHamiltonian_a15912ad8b283d9ee745f3c2d21a32c40}{}\label{classHamiltonian_a15912ad8b283d9ee745f3c2d21a32c40}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element\+\_\+2} (const \hyperlink{classAntisymConnection}{Antisym\+Connection} \&connection) const \hypertarget{classHamiltonian_a667e1f7676d5e1e34bb38a4533673f3e}{}\label{classHamiltonian_a667e1f7676d5e1e34bb38a4533673f3e}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element} (const \hyperlink{classAntisymConnection}{Antisym\+Connection} \&connection) const \hypertarget{classHamiltonian_a2d83c983c71f6dbb10218c7d303fb261}{}\label{classHamiltonian_a2d83c983c71f6dbb10218c7d303fb261}
+
+\item 
+defs\+::ham\+\_\+t {\bfseries get\+\_\+element} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&bra, const \hyperlink{classDeterminantElement}{Determinant\+Element} \&ket) const \hypertarget{classHamiltonian_a351f134025885998d632c86227f1da15}{}\label{classHamiltonian_a351f134025885998d632c86227f1da15}
+
+\item 
+size\+\_\+t {\bfseries nsite} () const \hypertarget{classHamiltonian_a4e12daf4f223b7ff2c82078a709aabac}{}\label{classHamiltonian_a4e12daf4f223b7ff2c82078a709aabac}
+
+\item 
+size\+\_\+t {\bfseries nci} () const \hypertarget{classHamiltonian_a7ec2da6325e8eda1023f67d63c8c0a35}{}\label{classHamiltonian_a7ec2da6325e8eda1023f67d63c8c0a35}
+
+\item 
+virtual bool {\bfseries spin\+\_\+conserving} () const =0\hypertarget{classHamiltonian_ac74a988992ec2108d1fd0ef4455c810c}{}\label{classHamiltonian_ac74a988992ec2108d1fd0ef4455c810c}
+
+\item 
+virtual size\+\_\+t {\bfseries nelec} () const =0\hypertarget{classHamiltonian_a6fad47832ce13f6b36232f4c653aa04f}{}\label{classHamiltonian_a6fad47832ce13f6b36232f4c653aa04f}
+
+\item 
+virtual bool {\bfseries spin\+\_\+resolved} () const =0\hypertarget{classHamiltonian_a0499e9bce6f7adacce98cef9c0d124b1}{}\label{classHamiltonian_a0499e9bce6f7adacce98cef9c0d124b1}
+
+\item 
+\hyperlink{classDeterminant}{Determinant} {\bfseries guess\+\_\+reference} (const int \&spin\+\_\+level) const \hypertarget{classHamiltonian_a8285aa276fd0c82c0a4d5c0bfb092c01}{}\label{classHamiltonian_a8285aa276fd0c82c0a4d5c0bfb092c01}
+
+\item 
+\hyperlink{classDeterminant}{Determinant} {\bfseries refine\+\_\+guess\+\_\+reference} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&ref) const \hypertarget{classHamiltonian_a5baa86c26a113127513307fbb8507b88}{}\label{classHamiltonian_a5baa86c26a113127513307fbb8507b88}
+
+\item 
+\hyperlink{classDeterminant}{Determinant} {\bfseries choose\+\_\+reference} (const int \&spin\+\_\+level) const \hypertarget{classHamiltonian_a0fcd1d2527c37d2bd8072150b9624dfe}{}\label{classHamiltonian_a0fcd1d2527c37d2bd8072150b9624dfe}
+
+\item 
+void {\bfseries all\+\_\+connections\+\_\+of\+\_\+det} (\hyperlink{classHamiltonian_1_1ConnectionList}{Connection\+List} $\ast$list, const \hyperlink{classDeterminant}{Determinant} \&ref, const defs\+::ham\+\_\+comp\+\_\+t eps) const \hypertarget{classHamiltonian_ab2280ce8bff3fbd95a6c79200a57cda3}{}\label{classHamiltonian_ab2280ce8bff3fbd95a6c79200a57cda3}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const size\+\_\+t {\bfseries m\+\_\+nsite}\hypertarget{classHamiltonian_aec7c649696cbf62851f23d081fcb1e8d}{}\label{classHamiltonian_aec7c649696cbf62851f23d081fcb1e8d}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/hamiltonian/Hamiltonian.\+h\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/hamiltonian/Hamiltonian.\+cpp\end{DoxyCompactItemize}

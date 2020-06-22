@@ -1,0 +1,31 @@
+digraph "FciqmcCalculation"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="FciqmcCalculation",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_input" ];
+  Node2 [label="Options",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structOptions.html"];
+  Node3 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_rank_allocator" ];
+  Node3 [label="RankAllocator\< Determinant\lElement \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classRankAllocator.html"];
+  Node4 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_reference" ];
+  Node4 [label="Determinant",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDeterminant.html"];
+  Node5 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node5 [label="DeterminantElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDeterminantElement.html"];
+  Node6 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node6 [label="BitsetElement",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classBitsetElement.html"];
+  Node7 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node7 [label="Element",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classElement.html"];
+  Node8 -> Node7 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_field" ];
+  Node8 [label="Field",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classField.html"];
+  Node9 -> Node8 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_table" ];
+  Node9 [label="Table",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classTable.html"];
+  Node10 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_wf" ];
+  Node10 [label="Wavefunction",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classWavefunction.html"];
+  Node11 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_square_norm\nm_delta_square_norm\nm_delta_nw\nm_nw" ];
+  Node11 [label="Distributed\< defs::\lwf_comp_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDistributed.html"];
+  Node12 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_nw_growth_rate" ];
+  Node12 [label="consts::component_t\l\< wf_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structconsts_1_1component__t.html"];
+  Node13 -> Node10 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" m_noccupied_determinant" ];
+  Node13 [label="Distributed\< size_t \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classDistributed.html"];
+}

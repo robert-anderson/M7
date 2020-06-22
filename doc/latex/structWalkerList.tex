@@ -1,0 +1,49 @@
+\hypertarget{structWalkerList}{}\section{Walker\+List Struct Reference}
+\label{structWalkerList}\index{Walker\+List@{Walker\+List}}
+
+
+Inheritance diagram for Walker\+List\+:
+% FIG 0
+
+
+Collaboration diagram for Walker\+List\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries Walker\+List} (size\+\_\+t nsite, size\+\_\+t nbucket)\hypertarget{structWalkerList_aa8cb7220f0d8a5bf4167828670f02791}{}\label{structWalkerList_aa8cb7220f0d8a5bf4167828670f02791}
+
+\item 
+size\+\_\+t {\bfseries add} (\hyperlink{classMutex}{Mutex} \&mutex, const \hyperlink{classDeterminantElement}{Determinant\+Element} \&key, const defs\+::wf\+\_\+t \&weight, const defs\+::ham\+\_\+comp\+\_\+t \&hdiag, bool initiator=false, bool reference\+\_\+connection=false, bool deterministic=false)\hypertarget{structWalkerList_a7f662e9bcb96562ab6b2b1ecef93d55d}{}\label{structWalkerList_a7f662e9bcb96562ab6b2b1ecef93d55d}
+
+\item 
+size\+\_\+t {\bfseries add} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&key, const defs\+::wf\+\_\+t \&weight, const defs\+::ham\+\_\+comp\+\_\+t \&hdiag, bool initiator=false, bool reference\+\_\+connection=false, bool deterministic=false)\hypertarget{structWalkerList_a9b1b3dcff0a796f652630575c96f85f2}{}\label{structWalkerList_a9b1b3dcff0a796f652630575c96f85f2}
+
+\item 
+size\+\_\+t {\bfseries verify\+\_\+ninitiator} (const double \&nadd)\hypertarget{structWalkerList_a6ca9160362db9d5ae9e8de90e465459f}{}\label{structWalkerList_a6ca9160362db9d5ae9e8de90e465459f}
+
+\item 
+std\+::list$<$ size\+\_\+t $>$ {\bfseries top\+\_\+weighted} (size\+\_\+t n)\hypertarget{structWalkerList_a0f29c4bb03f4dbee1321bd8692bc87a0}{}\label{structWalkerList_a0f29c4bb03f4dbee1321bd8692bc87a0}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDeterminantField}{Determinant\+Field} {\bfseries m\+\_\+determinant}\hypertarget{structWalkerList_afdc4b394bf3c1731843cb64674a346a3}{}\label{structWalkerList_afdc4b394bf3c1731843cb64674a346a3}
+
+\item 
+\hyperlink{classNumericField}{Numeric\+Field}$<$ defs\+::wf\+\_\+t $>$ {\bfseries m\+\_\+weight}\hypertarget{structWalkerList_a1dbed384ca6ae915a96104098c7d2332}{}\label{structWalkerList_a1dbed384ca6ae915a96104098c7d2332}
+
+\item 
+\hyperlink{classNumericField}{Numeric\+Field}$<$ defs\+::ham\+\_\+comp\+\_\+t $>$ {\bfseries m\+\_\+hdiag}\hypertarget{structWalkerList_aca17e4a2b7e3f6cd7c57a555c48d229f}{}\label{structWalkerList_aca17e4a2b7e3f6cd7c57a555c48d229f}
+
+\item 
+Flags {\bfseries m\+\_\+flags}\hypertarget{structWalkerList_a1c6e5fa8f6f791796209680ae700cd46}{}\label{structWalkerList_a1c6e5fa8f6f791796209680ae700cd46}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/teamcity/\+Team\+City/build\+Agent/work/5343cdffda4690e5/src/core/dynamics/Walker\+List.\+h\end{DoxyCompactItemize}
