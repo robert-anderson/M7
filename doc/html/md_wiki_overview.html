@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.18"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>M7: This is another tab</title>
+<title>M7: Wiki</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,12 +21,31 @@
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
    TeX: { Macros: {
-    Ci: "{C_\\mathbf{i}}",
-    Cin: "{C_{\\mathbf{i}(n)}}",
-    Cinext: "{C_{\\mathbf{i}(n+1)}}",
-    Cj: "{C_\\mathbf{j}}",
-    Cjn: "{C_{\\mathbf{j}(n)}}",
-    Cjnext: "{C_{\\mathbf{j}(n+1)}}",
+    bfi: "{\\mathbf{i}}",
+    Ci: "{C_\\bfi}",
+    Cin: "{C_{\\bfi(n)}}",
+    Cinext: "{C_{\\bfi(n+1)}}",
+    bfj: "{\\mathbf{j}}",
+    Cj: "{C_\\bfj}",
+    Cjn: "{C_{\\bfj(n)}}",
+    Cjnext: "{C_{\\bfj(n+1)}}",
+    Hop: "{\\hat{H}}",
+    Hii: "{H_{\\bfi\\bfi}}",
+    Hjj: "{H_{\\bfj\\bfj}}",
+    Hij: "{H_{\\bfi\\bfj}}",
+    Hji: "{H_{\\bfj\\bfi}}",
+    Di: "{D_\\bfi}",
+    Dj: "{D_\\bfj}",
+    ketDi: "{|D_\\bfi\\rangle}",
+    ketDj: "{|D_\\bfj\\rangle}",
+    braDi: "{\\langle D_\\bfi|}",
+    braDj: "{\\langle D_\\bfj|}",
+    ketPsi: "{|\\Psi\\rangle}",
+    ketPsin: "{|\\Psi_{(n)}\\rangle}",
+    ketPsinext: "{|\\Psi_{(n+1)}\\rangle}",
+    braPsi: "{\\langle\\Psi|}",
+    braPsin: "{\\langle\\Psi_{(n)}|}",
+    braPsinext: "{\\langle\\Psi_{(n+1)}|}",
   } }
 });
 </script>
@@ -82,13 +101,20 @@ $(function() {
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">This is another tab </div>  </div>
+<div class="title">Wiki </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>M7 (<em>Many-body Stochastic Expectation Value Estimation Networks</em>) is a stochastic quantum chemistry software package which primarily implements the FCIQMC method <a class="el" href="citelist.html#CITEREF_doi:10.1063/1.3193710">[1]</a>. </p><p class="formulaDsp">
-\[ \Cinext = \Cjn \]
+<div class="textblock"><p>M7 (<em>Many-body Stochastic Expectation Value Estimation Networks</em>) is a stochastic quantum chemistry software package which primarily implements the FCIQMC method <a class="el" href="citelist.html#CITEREF_doi:10.1063/1.3193710">[1]</a>. The purpose of this wiki is to provide a space in which M7 users and developers can learn from and contribute to a body of knowledge, advice, and best practices accumulated over the entire lifetime of this project.</p>
+<p>The FCIQMC method is founded on the assumption that stochastic application of the projector method recursion relation </p><p class="formulaDsp">
+\[ \label{eq:master} \ketPsinext = (1-\tau\Hop)\ketPsin \]
 </p>
- </div></div><!-- contents -->
+<p> where the wavefunction is a linear superposition of Slater determinants </p><p class="formulaDsp">
+\[ \label{eq:psidef} \ketPsi \equiv \sum_\bfi \Ci \ketDi \]
+</p>
+<p> can yield accurate eigenvalues and other properties for configuration-interation problems far beyond the scope of exact diagonalisation methods.</p>
+<p>This delay in the onset of the "curse of dimensionality" faced by exponentially-scaling correlation methods is achieved by discretising the \(\Ci$\f coefficients as a population of *walkers*. Thus, at any given iteration of \f\ref{eq:master}\f, the number of determinants with any walker occupation is usually a shrinking minority of the total dimension of the space (provided that a single particle basis conducive to this sparsity e.g. the canonical Hartree-Fock orbitals is chosen). By this approach, the memory scaling of the FCI problem can be brought within practicable limits, provided that an efficient system of data structure can be devised to store and update a sparse, parallelised representation of \)\ketPsi$\f</p>
+<p>Computational tractability is also aided by the walker discretisation, since the accumulation of walkers on a given determinant indicates the number of attempts the algorithm should make to convey new walkers from that source. The processes by which the </p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
