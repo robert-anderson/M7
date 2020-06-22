@@ -16,13 +16,13 @@ where the wavefunction is a linear superposition of Slater determinants
 can yield accurate eigenvalues and other properties for configuration-interation problems far beyond the scope of exact diagonalisation methods.
 
 This delay in the onset of the "curse of dimensionality" faced by exponentially-scaling correlation methods is achieved by discretising the \f$\Ci\f$ coefficients as a population of *walkers*.
-Thus, at any given iteration of \f$\ref{eq:master}\f$, the number of determinants with any walker occupation is usually a shrinking minority of the total dimension of the space (provided that a single particle basis conducive to this sparsity e.g. the canonical Hartree-Fock orbitals is chosen).
-By this approach, the memory scaling of the FCI problem can be brought within practicable limits, provided that an efficient system of data structure can be devised to store and update a sparse, parallelised representation of \f$\ketPsi\f$
+Thus, at any given iteration of \f$\eqref{eq:master}\f$, the number of determinants with any walker occupation is usually a shrinking minority of the total dimension of the space (provided that a single particle basis conducive to this sparsity e.g. the canonical Hartree-Fock orbitals is chosen).
+By this approach, the memory scaling of the FCI problem can be brought within practicable limits, provided that an efficient system of data structures can be devised to store and update a sparse, parallelised representation of \f$\ketPsi\f$
 
 Computational tractability is also aided by the walker discretisation, since the accumulation of walkers on a given determinant indicates the number of attempts the algorithm should make to convey new walkers from that source.
 The processes by which the \f$\Ci\f$ coefficients are updated are called *spawning* (off-diagonal elements), and *death* (off-diagonal elements)
 \f[
-    \ketCinext = \ketCin - \tau \sum_{\bfj\neq\bfi} \Hij \Cjn - \tau(\Hii - S) \Cin
+    \Cinext = \Cin - \tau \sum_{\bfj\neq\bfi} \Hij \Cjn - \tau(\Hii - S) \Cin
 \f]
 
 
