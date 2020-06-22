@@ -1,83 +1,83 @@
-\hypertarget{classDeterminantSampler}{}\section{Determinant\+Sampler Class Reference}
-\label{classDeterminantSampler}\index{Determinant\+Sampler@{Determinant\+Sampler}}
-\subsection*{Public Types}
+\hypertarget{classDeterminantSampler}{}\doxysection{Determinant\+Sampler Class Reference}
+\label{classDeterminantSampler}\index{DeterminantSampler@{DeterminantSampler}}
+\doxysubsection*{Public Types}
 \begin{DoxyCompactItemize}
 \item 
+\mbox{\Hypertarget{classDeterminantSampler_ae5a3525e6db38b07812ae2eea419fb3d}\label{classDeterminantSampler_ae5a3525e6db38b07812ae2eea419fb3d}} 
 enum {\bfseries Outcome} \{ {\bfseries no\+\_\+excitations}, 
 {\bfseries single\+\_\+excitation}, 
 {\bfseries double\+\_\+excitation}, 
 {\bfseries both\+\_\+excitations}
- \}\hypertarget{classDeterminantSampler_ae5a3525e6db38b07812ae2eea419fb3d}{}\label{classDeterminantSampler_ae5a3525e6db38b07812ae2eea419fb3d}
-
+ \}
 \end{DoxyCompactItemize}
-\subsection*{Public Member Functions}
+\doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-{\bfseries Determinant\+Sampler} (const \hyperlink{classHeatBathSampler}{Heat\+Bath\+Sampler} \&precomputed)\hypertarget{classDeterminantSampler_abb078a6f42fccf201b920c09ba76046b}{}\label{classDeterminantSampler_abb078a6f42fccf201b920c09ba76046b}
-
+\mbox{\Hypertarget{classDeterminantSampler_abb078a6f42fccf201b920c09ba76046b}\label{classDeterminantSampler_abb078a6f42fccf201b920c09ba76046b}} 
+{\bfseries Determinant\+Sampler} (const \mbox{\hyperlink{classHeatBathSampler}{Heat\+Bath\+Sampler}} \&precomputed)
 \item 
-void {\bfseries update} (const \hyperlink{classDeterminantElement}{Determinant\+Element} \&det)\hypertarget{classDeterminantSampler_a2b2dfe2ed07235bb2b4164f992c2bdf2}{}\label{classDeterminantSampler_a2b2dfe2ed07235bb2b4164f992c2bdf2}
-
+\mbox{\Hypertarget{classDeterminantSampler_a2b2dfe2ed07235bb2b4164f992c2bdf2}\label{classDeterminantSampler_a2b2dfe2ed07235bb2b4164f992c2bdf2}} 
+void {\bfseries update} (const \mbox{\hyperlink{classDeterminantElement}{Determinant\+Element}} \&det)
 \item 
-void {\bfseries set\+\_\+\+P1} (std\+::vector$<$ defs\+::prob\+\_\+t $>$ \&P1)\hypertarget{classDeterminantSampler_a19293ae543a7207feea79427e1f55727}{}\label{classDeterminantSampler_a19293ae543a7207feea79427e1f55727}
-
+\mbox{\Hypertarget{classDeterminantSampler_a19293ae543a7207feea79427e1f55727}\label{classDeterminantSampler_a19293ae543a7207feea79427e1f55727}} 
+void {\bfseries set\+\_\+\+P1} (std\+::vector$<$ defs\+::prob\+\_\+t $>$ \&P1)
 \item 
-void {\bfseries set\+\_\+\+P2} (std\+::vector$<$ defs\+::prob\+\_\+t $>$ \&P2, const size\+\_\+t \&p)\hypertarget{classDeterminantSampler_a3c74bd49213c83a20b387cc2a9421505}{}\label{classDeterminantSampler_a3c74bd49213c83a20b387cc2a9421505}
-
+\mbox{\Hypertarget{classDeterminantSampler_a3c74bd49213c83a20b387cc2a9421505}\label{classDeterminantSampler_a3c74bd49213c83a20b387cc2a9421505}} 
+void {\bfseries set\+\_\+\+P2} (std\+::vector$<$ defs\+::prob\+\_\+t $>$ \&P2, const size\+\_\+t \&p)
 \item 
-void {\bfseries draw\+\_\+pq} (size\+\_\+t \&p, size\+\_\+t \&q)\hypertarget{classDeterminantSampler_a0dc046b3b9ecfaae06c89c1c1933460f}{}\label{classDeterminantSampler_a0dc046b3b9ecfaae06c89c1c1933460f}
-
+\mbox{\Hypertarget{classDeterminantSampler_a0dc046b3b9ecfaae06c89c1c1933460f}\label{classDeterminantSampler_a0dc046b3b9ecfaae06c89c1c1933460f}} 
+void {\bfseries draw\+\_\+pq} (size\+\_\+t \&p, size\+\_\+t \&q)
 \item 
-void {\bfseries draw\+\_\+pq} (size\+\_\+t \&p, size\+\_\+t \&q, defs\+::prob\+\_\+t \&prob)\hypertarget{classDeterminantSampler_ae9eb1d7f8e68b1dc5da726ed7b2c8ed7}{}\label{classDeterminantSampler_ae9eb1d7f8e68b1dc5da726ed7b2c8ed7}
-
+\mbox{\Hypertarget{classDeterminantSampler_ae9eb1d7f8e68b1dc5da726ed7b2c8ed7}\label{classDeterminantSampler_ae9eb1d7f8e68b1dc5da726ed7b2c8ed7}} 
+void {\bfseries draw\+\_\+pq} (size\+\_\+t \&p, size\+\_\+t \&q, defs\+::prob\+\_\+t \&prob)
 \item 
-void {\bfseries draw\+\_\+r} (const size\+\_\+t \&p, const size\+\_\+t \&q, size\+\_\+t \&r)\hypertarget{classDeterminantSampler_ace140c1bcbf11e1f9b1ed147bfa915b8}{}\label{classDeterminantSampler_ace140c1bcbf11e1f9b1ed147bfa915b8}
-
+\mbox{\Hypertarget{classDeterminantSampler_ace140c1bcbf11e1f9b1ed147bfa915b8}\label{classDeterminantSampler_ace140c1bcbf11e1f9b1ed147bfa915b8}} 
+void {\bfseries draw\+\_\+r} (const size\+\_\+t \&p, const size\+\_\+t \&q, size\+\_\+t \&r)
 \item 
-void {\bfseries draw\+\_\+r} (const size\+\_\+t \&p, const size\+\_\+t \&q, size\+\_\+t \&r, defs\+::prob\+\_\+t \&prob)\hypertarget{classDeterminantSampler_a12a39a2f854b9da9802bf2b51a2caa3a}{}\label{classDeterminantSampler_a12a39a2f854b9da9802bf2b51a2caa3a}
-
+\mbox{\Hypertarget{classDeterminantSampler_a12a39a2f854b9da9802bf2b51a2caa3a}\label{classDeterminantSampler_a12a39a2f854b9da9802bf2b51a2caa3a}} 
+void {\bfseries draw\+\_\+r} (const size\+\_\+t \&p, const size\+\_\+t \&q, size\+\_\+t \&r, defs\+::prob\+\_\+t \&prob)
 \item 
-void {\bfseries draw\+\_\+pqr} (size\+\_\+t \&p, size\+\_\+t \&q, size\+\_\+t \&r)\hypertarget{classDeterminantSampler_a9764cc8221fb895caf9014c07857b5eb}{}\label{classDeterminantSampler_a9764cc8221fb895caf9014c07857b5eb}
-
+\mbox{\Hypertarget{classDeterminantSampler_a9764cc8221fb895caf9014c07857b5eb}\label{classDeterminantSampler_a9764cc8221fb895caf9014c07857b5eb}} 
+void {\bfseries draw\+\_\+pqr} (size\+\_\+t \&p, size\+\_\+t \&q, size\+\_\+t \&r)
 \item 
-void {\bfseries draw\+\_\+pqr} (size\+\_\+t \&p, size\+\_\+t \&q, size\+\_\+t \&r, defs\+::prob\+\_\+t \&prob)\hypertarget{classDeterminantSampler_a479a10cf7c973805e1a70ac5c09654dd}{}\label{classDeterminantSampler_a479a10cf7c973805e1a70ac5c09654dd}
-
+\mbox{\Hypertarget{classDeterminantSampler_a479a10cf7c973805e1a70ac5c09654dd}\label{classDeterminantSampler_a479a10cf7c973805e1a70ac5c09654dd}} 
+void {\bfseries draw\+\_\+pqr} (size\+\_\+t \&p, size\+\_\+t \&q, size\+\_\+t \&r, defs\+::prob\+\_\+t \&prob)
 \item 
-void {\bfseries draw\+\_\+s} (const size\+\_\+t \&p, const size\+\_\+t \&q, const size\+\_\+t \&r, size\+\_\+t \&s)\hypertarget{classDeterminantSampler_a6c7b1d4a7f2acf36ec518346172a5dc3}{}\label{classDeterminantSampler_a6c7b1d4a7f2acf36ec518346172a5dc3}
-
+\mbox{\Hypertarget{classDeterminantSampler_a6c7b1d4a7f2acf36ec518346172a5dc3}\label{classDeterminantSampler_a6c7b1d4a7f2acf36ec518346172a5dc3}} 
+void {\bfseries draw\+\_\+s} (const size\+\_\+t \&p, const size\+\_\+t \&q, const size\+\_\+t \&r, size\+\_\+t \&s)
 \item 
-void {\bfseries draw\+\_\+s} (const size\+\_\+t \&p, const size\+\_\+t \&q, const size\+\_\+t \&r, size\+\_\+t \&s, defs\+::prob\+\_\+t \&prob)\hypertarget{classDeterminantSampler_af71dfd0ce319f32ff71e5595164cbfc6}{}\label{classDeterminantSampler_af71dfd0ce319f32ff71e5595164cbfc6}
-
+\mbox{\Hypertarget{classDeterminantSampler_af71dfd0ce319f32ff71e5595164cbfc6}\label{classDeterminantSampler_af71dfd0ce319f32ff71e5595164cbfc6}} 
+void {\bfseries draw\+\_\+s} (const size\+\_\+t \&p, const size\+\_\+t \&q, const size\+\_\+t \&r, size\+\_\+t \&s, defs\+::prob\+\_\+t \&prob)
 \item 
-void {\bfseries draw} (size\+\_\+t \&p, size\+\_\+t \&q, size\+\_\+t \&r, size\+\_\+t \&s, defs\+::prob\+\_\+t \&prob\+\_\+single, defs\+::prob\+\_\+t \&prob\+\_\+double, defs\+::ham\+\_\+t \&helement\+\_\+single, defs\+::ham\+\_\+t \&helement\+\_\+double)\hypertarget{classDeterminantSampler_a0ba6e15b20e2412fb07d0414e17dddfe}{}\label{classDeterminantSampler_a0ba6e15b20e2412fb07d0414e17dddfe}
-
+\mbox{\Hypertarget{classDeterminantSampler_a0ba6e15b20e2412fb07d0414e17dddfe}\label{classDeterminantSampler_a0ba6e15b20e2412fb07d0414e17dddfe}} 
+void {\bfseries draw} (size\+\_\+t \&p, size\+\_\+t \&q, size\+\_\+t \&r, size\+\_\+t \&s, defs\+::prob\+\_\+t \&prob\+\_\+single, defs\+::prob\+\_\+t \&prob\+\_\+double, defs\+::ham\+\_\+t \&helement\+\_\+single, defs\+::ham\+\_\+t \&helement\+\_\+double)
 \item 
-void {\bfseries draw} ()\hypertarget{classDeterminantSampler_afda44a408c15e263eecb24e81350c29c}{}\label{classDeterminantSampler_afda44a408c15e263eecb24e81350c29c}
-
+\mbox{\Hypertarget{classDeterminantSampler_afda44a408c15e263eecb24e81350c29c}\label{classDeterminantSampler_afda44a408c15e263eecb24e81350c29c}} 
+void {\bfseries draw} ()
 \item 
-bool {\bfseries single\+\_\+generated} () const \hypertarget{classDeterminantSampler_a00f9c10c39c279196ecf3fa0a292ba05}{}\label{classDeterminantSampler_a00f9c10c39c279196ecf3fa0a292ba05}
-
+\mbox{\Hypertarget{classDeterminantSampler_aac31f89b9879f341b72f092c0188b70f}\label{classDeterminantSampler_aac31f89b9879f341b72f092c0188b70f}} 
+bool {\bfseries single\+\_\+generated} () const
 \item 
-bool {\bfseries double\+\_\+generated} () const \hypertarget{classDeterminantSampler_af078b8fe1e6d20d9c2d90dba26014746}{}\label{classDeterminantSampler_af078b8fe1e6d20d9c2d90dba26014746}
-
+\mbox{\Hypertarget{classDeterminantSampler_af786eddca18a703aca6406e6d0b59696}\label{classDeterminantSampler_af786eddca18a703aca6406e6d0b59696}} 
+bool {\bfseries double\+\_\+generated} () const
 \item 
-\hyperlink{classAntisymConnection}{Antisym\+Connection} \& {\bfseries get\+\_\+single} ()\hypertarget{classDeterminantSampler_a495794b8f68f0dfec00cd2162123dd78}{}\label{classDeterminantSampler_a495794b8f68f0dfec00cd2162123dd78}
-
+\mbox{\Hypertarget{classDeterminantSampler_a495794b8f68f0dfec00cd2162123dd78}\label{classDeterminantSampler_a495794b8f68f0dfec00cd2162123dd78}} 
+\mbox{\hyperlink{classAntisymConnection}{Antisym\+Connection}} \& {\bfseries get\+\_\+single} ()
 \item 
-\hyperlink{classAntisymConnection}{Antisym\+Connection} \& {\bfseries get\+\_\+double} ()\hypertarget{classDeterminantSampler_a8a6ec6cd34ec3dbed33d550b03142a44}{}\label{classDeterminantSampler_a8a6ec6cd34ec3dbed33d550b03142a44}
-
+\mbox{\Hypertarget{classDeterminantSampler_a8a6ec6cd34ec3dbed33d550b03142a44}\label{classDeterminantSampler_a8a6ec6cd34ec3dbed33d550b03142a44}} 
+\mbox{\hyperlink{classAntisymConnection}{Antisym\+Connection}} \& {\bfseries get\+\_\+double} ()
 \item 
-const \hyperlink{classDeterminant}{Determinant} \& {\bfseries get\+\_\+single\+\_\+dst\+\_\+det} ()\hypertarget{classDeterminantSampler_a0433b57f3cb61e4c438f567dc8bbcb6b}{}\label{classDeterminantSampler_a0433b57f3cb61e4c438f567dc8bbcb6b}
-
+\mbox{\Hypertarget{classDeterminantSampler_a0433b57f3cb61e4c438f567dc8bbcb6b}\label{classDeterminantSampler_a0433b57f3cb61e4c438f567dc8bbcb6b}} 
+const \mbox{\hyperlink{classDeterminant}{Determinant}} \& {\bfseries get\+\_\+single\+\_\+dst\+\_\+det} ()
 \item 
-const \hyperlink{classDeterminant}{Determinant} \& {\bfseries get\+\_\+double\+\_\+dst\+\_\+det} ()\hypertarget{classDeterminantSampler_a971cee489d38916d37b8775b6badf55a}{}\label{classDeterminantSampler_a971cee489d38916d37b8775b6badf55a}
-
+\mbox{\Hypertarget{classDeterminantSampler_a971cee489d38916d37b8775b6badf55a}\label{classDeterminantSampler_a971cee489d38916d37b8775b6badf55a}} 
+const \mbox{\hyperlink{classDeterminant}{Determinant}} \& {\bfseries get\+\_\+double\+\_\+dst\+\_\+det} ()
 \item 
-const defs\+::prob\+\_\+t \& {\bfseries get\+\_\+single\+\_\+prob} () const \hypertarget{classDeterminantSampler_ace0b206ab8ad63e06beb5b7d3aeceb27}{}\label{classDeterminantSampler_ace0b206ab8ad63e06beb5b7d3aeceb27}
-
+\mbox{\Hypertarget{classDeterminantSampler_a2cd9d220ea45808d82abedc47da53880}\label{classDeterminantSampler_a2cd9d220ea45808d82abedc47da53880}} 
+const defs\+::prob\+\_\+t \& {\bfseries get\+\_\+single\+\_\+prob} () const
 \item 
-const defs\+::prob\+\_\+t \& {\bfseries get\+\_\+double\+\_\+prob} () const \hypertarget{classDeterminantSampler_aa5996c50c825bad211573ac90f91629f}{}\label{classDeterminantSampler_aa5996c50c825bad211573ac90f91629f}
-
+\mbox{\Hypertarget{classDeterminantSampler_a144ebb11c70698ebaff326ba71593b45}\label{classDeterminantSampler_a144ebb11c70698ebaff326ba71593b45}} 
+const defs\+::prob\+\_\+t \& {\bfseries get\+\_\+double\+\_\+prob} () const
 \end{DoxyCompactItemize}
 
 

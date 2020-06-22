@@ -1,8 +1,9 @@
 <map id="HeatBathSampler" name="HeatBathSampler">
-<area shape="rect" id="node2" href="$classNdArray.html" title="NdArray\&lt; defs::prob\l_t, 3 \&gt;" alt="" coords="14,5,154,47"/>
-<area shape="rect" id="node3" href="$classNdArray.html" title="NdArray\&lt; defs::prob\l_t, 2 \&gt;" alt="" coords="14,71,154,112"/>
-<area shape="rect" id="node4" href="$classNdArray.html" title="NdArray\&lt; defs::prob\l_t, 4 \&gt;" alt="" coords="14,136,154,177"/>
-<area shape="rect" id="node5" href="$classHamiltonian.html" title="Hamiltonian" alt="" coords="39,202,129,229"/>
-<area shape="rect" id="node6" href="$classNdArray.html" title="NdArray\&lt; defs::prob\l_t, 1 \&gt;" alt="" coords="14,253,154,295"/>
-<area shape="rect" id="node7" href="$classPrivateStore.html" title="PrivateStore\&lt; PRNG \&gt;" alt="" coords="5,319,163,346"/>
+<area shape="rect" id="node1" title=" " alt="" coords="265,173,391,199"/>
+<area shape="rect" id="node2" href="$classNdArray.html" title=" " alt="" coords="14,5,154,47"/>
+<area shape="rect" id="node3" href="$classNdArray.html" title=" " alt="" coords="14,71,154,112"/>
+<area shape="rect" id="node4" href="$classNdArray.html" title=" " alt="" coords="14,136,154,177"/>
+<area shape="rect" id="node5" href="$classHamiltonian.html" title=" " alt="" coords="39,202,129,229"/>
+<area shape="rect" id="node6" href="$classNdArray.html" title=" " alt="" coords="14,253,154,295"/>
+<area shape="rect" id="node7" href="$classPrivateStore.html" title=" " alt="" coords="5,319,163,346"/>
 </map>

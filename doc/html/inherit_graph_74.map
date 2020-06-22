@@ -1,13 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classTable.html" title="Table" alt="" coords="5,101,60,128"/>
-<area shape="rect" id="node2" href="$classList.html" title="List" alt="" coords="124,69,167,96"/>
-<area shape="rect" id="node10" href="$classStatsFile.html" title="StatsFile" alt="" coords="108,132,183,159"/>
-<area shape="rect" id="node3" href="$classMappedList.html" title="MappedList\&lt; T \&gt;" alt="" coords="286,5,407,32"/>
-<area shape="rect" id="node5" href="$classMappedList.html" title="MappedList\&lt; DeterminantElement \&gt;" alt="" coords="231,56,463,83"/>
-<area shape="rect" id="node9" href="$structSpawnList.html" title="SpawnList" alt="" coords="305,107,388,133"/>
-<area shape="rect" id="node4" href="$classPerforableMappedList.html" title="PerforableMappedList\&lt; T \&gt;" alt="" coords="514,5,694,32"/>
-<area shape="rect" id="node6" href="$classHamiltonian_1_1ConnectionList.html" title="Hamiltonian::ConnectionList" alt="" coords="511,56,697,83"/>
-<area shape="rect" id="node7" href="$classPerforableMappedList.html" title="PerforableMappedList\l\&lt; DeterminantElement \&gt;" alt="" coords="521,107,687,149"/>
-<area shape="rect" id="node8" href="$structWalkerList.html" title="WalkerList" alt="" coords="745,115,829,141"/>
-<area shape="rect" id="node11" href="$structFciqmcStatsFile.html" title="FciqmcStatsFile" alt="" coords="288,157,405,184"/>
+<area shape="rect" id="node1" href="$classPropagator.html" title=" " alt="" coords="5,31,91,57"/>
+<area shape="rect" id="node2" href="$classExactPropagator.html" title=" " alt="" coords="153,5,271,32"/>
+<area shape="rect" id="node3" href="$classStochasticPropagator.html" title=" " alt="" coords="139,56,285,83"/>
 </map>

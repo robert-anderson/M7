@@ -1,4 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classMatrix.html" title="Matrix\&lt; defs::ham_t \&gt;" alt="" coords="5,5,156,32"/>
-<area shape="rect" id="node2" href="$classDenseHamiltonian.html" title="DenseHamiltonian" alt="" coords="204,5,333,32"/>
+<area shape="rect" id="node1" href="$classMappedList.html" title=" " alt="" coords="5,35,237,61"/>
+<area shape="rect" id="node2" href="$classHamiltonian_1_1ConnectionList.html" title=" " alt="" coords="285,5,472,32"/>
+<area shape="rect" id="node3" href="$classPerforableMappedList.html" title=" " alt="" coords="296,57,461,98"/>
+<area shape="rect" id="node4" href="$structWalkerList.html" title=" " alt="" coords="520,64,604,91"/>
 </map>
