@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['m7',['M7',['../index.html',1,'']]],
   ['magnitudelogger',['MagnitudeLogger',['../classMagnitudeLogger.html',1,'']]],
   ['mappedlist',['MappedList',['../classMappedList.html',1,'']]],
   ['mappedlist_3c_20determinantelement_20_3e',['MappedList&lt; DeterminantElement &gt;',['../classMappedList.html',1,'']]],
