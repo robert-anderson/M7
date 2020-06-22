@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classElement.html" title="Element" alt="" coords="5,81,76,108"/>
+<area shape="rect" id="node2" href="$classBitsetElement.html" title="BitsetElement" alt="" coords="147,56,251,83"/>
+<area shape="rect" id="node6" href="$classNumericElement.html" title="NumericElement\&lt; T \&gt;" alt="" coords="124,107,275,133"/>
+<area shape="rect" id="node3" href="$classBitset.html" title="Bitset" alt="" coords="365,5,421,32"/>
+<area shape="rect" id="node4" href="$classDeterminantElement.html" title="DeterminantElement" alt="" coords="323,56,464,83"/>
+<area shape="rect" id="node5" href="$classDeterminant.html" title="Determinant" alt="" coords="512,56,605,83"/>
+<area shape="rect" id="node7" href="$classStatsElement.html" title="StatsElement\&lt; T \&gt;" alt="" coords="327,107,460,133"/>
+</map>

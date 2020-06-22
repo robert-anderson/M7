@@ -1,0 +1,17 @@
+<map id="FciqmcStatsFile" name="FciqmcStatsFile">
+<area shape="rect" id="node2" href="$classStatsFile.html" title="StatsFile" alt="" coords="233,43,308,69"/>
+<area shape="rect" id="node3" href="$classTable.html" title="Table" alt="" coords="5,129,60,156"/>
+<area shape="rect" id="node6" href="$classField.html" title="Field" alt="" coords="159,196,209,223"/>
+<area shape="rect" id="node4" href="$classStatsField.html" title="StatsField\&lt; defs::wf_t \&gt;" alt="" coords="549,79,711,105"/>
+<area shape="rect" id="node5" href="$classNumericField.html" title="NumericField\&lt; defs\l::wf_t \&gt;" alt="" coords="345,71,481,113"/>
+<area shape="rect" id="node8" href="$classNumericField.html" title="NumericField\&lt; double \&gt;" alt="" coords="332,137,493,164"/>
+<area shape="rect" id="node10" href="$classNumericField.html" title="NumericField\&lt; defs\l::ham_t \&gt;" alt="" coords="345,189,481,230"/>
+<area shape="rect" id="node12" href="$classNumericField.html" title="NumericField\&lt; defs\l::prob_t \&gt;" alt="" coords="345,254,481,295"/>
+<area shape="rect" id="node14" href="$classNumericField.html" title="NumericField\&lt; defs\l::ham_comp_t \&gt;" alt="" coords="345,319,481,361"/>
+<area shape="rect" id="node16" href="$classNumericField.html" title="NumericField\&lt; size_t \&gt;" alt="" coords="333,387,492,413"/>
+<area shape="rect" id="node7" href="$classStatsField.html" title="StatsField\&lt; double \&gt;" alt="" coords="559,132,701,159"/>
+<area shape="rect" id="node9" href="$classStatsField.html" title="StatsField\&lt; defs::ham_t \&gt;" alt="" coords="543,205,717,232"/>
+<area shape="rect" id="node11" href="$classStatsField.html" title="StatsField\&lt; defs::prob_t \&gt;" alt="" coords="543,260,717,287"/>
+<area shape="rect" id="node13" href="$classStatsField.html" title="StatsField\&lt; defs::ham\l_comp_t \&gt;" alt="" coords="555,314,705,355"/>
+<area shape="rect" id="node15" href="$classStatsField.html" title="StatsField\&lt; size_t \&gt;" alt="" coords="560,392,700,419"/>
+</map>
