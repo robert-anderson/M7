@@ -38,14 +38,19 @@ In the expression of the FCIQMC algorithm, it is convenient to use the following
 ------------------------|-------------|----------------|
  \f$\Cin\f$             | \f$0\f$     | \f$0\f$        |
 
-**walker list:** \f$\Cin+\ddeathn\f$, **send buffer:** \f$\dspawnn\f$, **receive buffer:** \f$0\f$
+
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cin+\ddeathn\f$    | \f$\dspawnn\f$ | \f$0\f$        |
+
 ### Communication
-**walker list:** \f$\Cin+\ddeathn\f$, **send buffer:** \f$0\f$, **receive buffer:** \f$\dspawnn\f$
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cin+\ddeathn\f$    | \f$0\f$        | \f$\dspawnn\f$ |
 ### Annihilation
-**walker list:** \f$\Cin+\dspawnn+\ddeathn\f\equiv\Cinext$, **send buffer:** \f$0\f$, **receive buffer:** \f$\0\f$
-
-
-
+ walker list            | send buffer | receive buffer |
+------------------------|-------------|----------------|
+ \f$\Cinext\f$          | \f$0\f$     | \f$0\f$        |
 
 
 <!--
