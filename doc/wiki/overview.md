@@ -34,7 +34,12 @@ In the expression of the FCIQMC algorithm, it is convenient to use the following
 \f]
 
 ### Spawning and Death
-**walker list:** \f$\Cin\f$, **send buffer:** \f$0\f$, **receive buffer:** \f$0\f$
+----------------------------------------------------------
+| **walker list** | **send buffer** | **receive buffer** |
+----------------------------------------------------------
+| \f$\Cin\f$      | \f$0\f$,        | \f$0\f$            |
+----------------------------------------------------------
+
 **walker list:** \f$\Cin+\ddeathn\f$, **send buffer:** \f$\dspawnn\f$, **receive buffer:** \f$0\f$
 ### Communication
 **walker list:** \f$\Cin+\ddeathn\f$, **send buffer:** \f$0\f$, **receive buffer:** \f$\dspawnn\f$
