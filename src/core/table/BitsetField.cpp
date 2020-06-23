@@ -31,6 +31,10 @@ void BitsetElement::clr(const size_t &ibit) {
     clr(defs::pair{0, ibit});
 }
 
+void BitsetElement::clr(const defs::inds &inds){
+    for (auto const &ind: inds) clr(ind);
+}
+
 bool BitsetElement::get(const defs::pair &pair) const {
     ASSERT(pair.first < size());
     const auto offset = BitsetField::rectify_offset(pair);

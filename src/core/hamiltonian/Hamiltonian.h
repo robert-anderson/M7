@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <src/core/fermion/Determinant.h>
 #include <src/core/list/MappedList.h>
+#include <src/core/dynamics/WalkerList.h>
 #include <src/core/fermion/Connection.h>
 #include <src/core/fermion/DecodedDeterminant.h>
 #include "src/core/util/consts.h"
@@ -102,7 +103,18 @@ public:
             determinant(this, 1, nsite), helement(this) {}
     };
 
+    class DeterminantList : public MappedList<DeterminantElement> {
+    public:
+        DeterminantField determinant;
+
+        DeterminantList(size_t nsite, size_t nbucket) :
+                MappedList(determinant, nbucket),
+                determinant(this, 1, nsite){}
+    };
+
     void all_connections_of_det(ConnectionList* list, const Determinant &ref, const defs::ham_comp_t eps) const;
+
+    void generate_ci_space(WalkerList* list, const int &spin_level) const;
 
 };
 

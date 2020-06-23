@@ -105,3 +105,31 @@ void Hamiltonian::all_connections_of_det(ConnectionList* list, const Determinant
         }
     }
 }
+
+void Hamiltonian::generate_ci_space(WalkerList *list, const int &spin_level) const {
+    size_t nalpha = nelec()/2+spin_level;
+    size_t nbeta = nelec()/2-spin_level;
+
+    defs::inds alpha_sites(nsite(), 0);
+    defs::inds beta_sites(nsite(), 0);
+
+    for (size_t i=0; i<nsite();++i) {
+        alpha_sites[i]=i; beta_sites[i]=nsite()+i;
+    }
+    ContainerCombinationEnumerator<defs::inds> alpha_enumerator(alpha_sites, nsite(), nalpha);
+    defs::inds alpha_inds(nalpha);
+    defs::inds beta_inds(nbeta);
+
+    while (alpha_enumerator.next(alpha_inds)){
+        ContainerCombinationEnumerator<defs::inds> beta_enumerator(beta_sites, nsite(), nbeta);
+        while (beta_enumerator.next(beta_inds)) {
+            auto irow = list->expand_push();
+            auto det = list->m_determinant(irow);
+            auto h_diag = list->m_hdiag(irow);
+            det.set(alpha_inds);
+            det.set(beta_inds);
+            h_diag = get_energy(det);
+        }
+    }
+    ASSERT(list->high_water_mark(0)==integer_utils::combinatorial(nsite(), nalpha)*integer_utils::combinatorial(nsite(), nbeta))
+}

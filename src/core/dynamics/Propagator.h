@@ -13,7 +13,7 @@
 #include <iomanip>
 #include <iostream>
 #include <src/core/io/FciqmcStatsFile.h>
-#include <src/core/parallel/Distributed.h>
+#include <src/core/parallel/Hybrid.h>
 
 class FciqmcCalculation;
 
@@ -27,7 +27,7 @@ public:
     double m_tau;
     defs::ham_comp_t m_shift;
     bool vary_shift = false;
-    Distributed<defs::wf_comp_t> m_largest_spawn_magnitude;
+    Hybrid<defs::wf_comp_t> m_largest_spawn_magnitude;
 
     Propagator(FciqmcCalculation *fciqmc);
 

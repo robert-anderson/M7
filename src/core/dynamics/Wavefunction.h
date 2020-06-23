@@ -24,29 +24,29 @@ class Wavefunction {
     WalkerList m_data;
     SpawnList m_send, m_recv;
 
-    Distributed<defs::ham_t> m_ref_proj_energy_num;
     Distributed<defs::wf_t> m_reference_weight;
     Distributed<size_t> m_irank_reference;
     size_t m_reference_row;
+    Hybrid<defs::ham_t> m_ref_proj_energy_num;
 
-    Distributed<defs::wf_t> m_aborted_weight;
-    Distributed<int> m_ninitiator;
+    Hybrid<defs::wf_t> m_aborted_weight;
+    Hybrid<int64_t> m_ninitiator;
 
 public:
 
     /*
      * Square norm is sum_i(|w_i|^2)
      */
-    Distributed<defs::wf_comp_t> m_square_norm;
-    Distributed<defs::wf_comp_t> m_delta_square_norm;
+    Hybrid<defs::wf_comp_t> m_square_norm;
+    Hybrid<defs::wf_comp_t> m_delta_square_norm;
     /*
      * Walker number is sum_i(|w_i|)
      */
     Distributed<defs::wf_comp_t> m_nw;
-    Distributed<defs::wf_comp_t> m_delta_nw;
+    Hybrid<defs::wf_comp_t> m_delta_nw;
     defs::wf_comp_t m_nw_growth_rate;
 
-    Distributed<size_t> m_noccupied_determinant;
+    Hybrid<size_t> m_noccupied_determinant;
 
     Wavefunction(FciqmcCalculation *fciqmc);
 
@@ -67,8 +67,7 @@ public:
     void write_iter_stats(FciqmcStatsFile* stats_file);
 
 private:
-    void annihilate_row(const size_t &irow_recv, defs::wf_comp_t &aborted_weight,
-                        defs::wf_comp_t &delta_square_norm, defs::wf_comp_t &delta_nw);
+    void annihilate_row(const size_t &irow_recv);
 };
 
 

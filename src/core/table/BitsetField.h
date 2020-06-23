@@ -30,6 +30,8 @@ public:
 
     virtual void clr(const size_t &ibit);
 
+    void clr(const defs::inds &inds);
+
     bool get(const defs::pair &pair) const;
 
     bool get(const size_t &ibit) const;

@@ -49,6 +49,17 @@ public:
         }
     }
 
+    void normalize(const size_t &ielement=0, const defs::wf_t &norm=1.0) {
+        defs::wf_comp_t tot = 0;
+        for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
+            tot += std::pow(std::abs(*m_weight(irow)), 2.0);
+        }
+        tot = std::sqrt(tot);
+        for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
+            m_weight(irow)*=norm/tot;
+        }
+    }
+
     using PerforableMappedList<DeterminantElement>::push;
 
     size_t add(Mutex &mutex, const DeterminantElement &key, const defs::wf_t &weight, const defs::ham_comp_t &hdiag,
