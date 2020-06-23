@@ -7,6 +7,5 @@ var searchData=
   ['bitsetenumerator_3c_20not_5fop_20_3e_14',['BitsetEnumerator&lt; not_op &gt;',['../classBitsetEnumerator.html',1,'']]],
   ['bitsetenumerator_3c_20null_5fop_20_3e_15',['BitsetEnumerator&lt; null_op &gt;',['../classBitsetEnumerator.html',1,'']]],
   ['bitsetfield_16',['BitsetField',['../classBitsetField.html',1,'']]],
-  ['bitsetsetenumerator_17',['BitsetSetEnumerator',['../classBitsetSetEnumerator.html',1,'']]],
-  ['bibliography_18',['Bibliography',['../citelist.html',1,'']]]
+  ['bitsetsetenumerator_17',['BitsetSetEnumerator',['../classBitsetSetEnumerator.html',1,'']]]
 ];

@@ -7,8 +7,6 @@ pdf: refman.pdf
 refman.pdf: clean refman.tex
 	$(LATEX_CMD) refman
 	makeindex refman.idx
-	bibtex refman
-	$(LATEX_CMD) refman
 	$(LATEX_CMD) refman
 	latex_count=8 ; \
 	while egrep -s 'Rerun (LaTeX|to get cross-references right)' refman.log && [ $$latex_count -gt 0 ] ;\
