@@ -46,6 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
+    dspawnn: "{\\Delta^\\mathrm{spawn}_{(n)}}",
+    ddeathn: "{\\Delta^\\mathrm{death}_{(n)}}",
   } }
 });
 </script>
@@ -105,10 +107,12 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>M7 (<em>Many-body Stochastic Expectation Value Estimation Networks</em>) is a stochastic quantum chemistry software package which primarily implements the FCIQMC method <a class="el" href="citelist.html#CITEREF_doi:10.1063/1.3193710">[1]</a>. The purpose of this wiki is to provide a space in which M7 users and developers can learn from and contribute to a body of knowledge, advice, and best practices accumulated over the entire lifetime of this project.</p>
+<h1><a class="anchor" id="autotoc_md4"></a>
+FCIQMC Algorithm</h1>
 <p>The FCIQMC method is founded on the assumption that stochastic application of the projector method recursion relation </p><p class="formulaDsp">
 \[ \label{eq:master} \ketPsinext = (1-\tau\Hop)\ketPsin \]
 </p>
-<p> where the wavefunction is a linear superposition of Slater determinants </p><p class="formulaDsp">
+<p> with a suitably small <em>timestep</em> \(\tau\), where the wavefunction is a linear superposition of Slater determinants </p><p class="formulaDsp">
 \[ \label{eq:psidef} \ketPsi \equiv \sum_\bfi \Ci \ketDi \]
 </p>
 <p> can yield accurate eigenvalues and other properties for configuration-interation problems far beyond the scope of exact diagonalisation methods.</p>
@@ -116,7 +120,19 @@ $(function() {
 <p>Computational tractability is also aided by the walker discretisation, since the accumulation of walkers on a given determinant indicates the number of attempts the algorithm should make to convey new walkers from that source. The processes by which the \(\Ci\) coefficients are updated are called <em>spawning</em> (off-diagonal elements), and <em>death</em> (off-diagonal elements) </p><p class="formulaDsp">
 \[ \Cinext = \Cin - \tau \sum_{\bfj\neq\bfi} \Hij \Cjn - \tau(\Hii - S) \Cin \]
 </p>
- </div></div><!-- contents -->
+<p> where \(S\) is an approximation to the exact ground-state eigenvalue called the <em>diagonal shift</em>. In the expression of the FCIQMC algorithm, it is convenient to use the following notation </p><p class="formulaDsp">
+\[ \Cinext \equiv \Cin + \dspawnn + \ddeathn \]
+</p>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Spawning and Death</h2>
+<p><b>walker list:</b> \(\Cin\), <b>send buffer:</b> \(0\), <b>receive buffer:</b> \(0\) <b>walker list:</b> \(\Cin+\ddeathn\), <b>send buffer:</b> \(\dspawnn\), <b>receive buffer:</b> \(0\) </p>
+<h2><a class="anchor" id="autotoc_md6"></a>
+Communication</h2>
+<p><b>walker list:</b> \(\Cin+\ddeathn\), <b>send buffer:</b> \(0\), <b>receive buffer:</b> \(\dspawnn\) </p>
+<h2><a class="anchor" id="autotoc_md7"></a>
+Annihilation</h2>
+<p><b>walker list:</b>  \(, **receive buffer:** \)\0 </p>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -3,11 +3,14 @@
 M7 (*Many-body Stochastic Expectation Value Estimation Networks*) is a stochastic quantum chemistry software package which primarily implements the FCIQMC method \cite doi:10.1063/1.3193710.
 The purpose of this wiki is to provide a space in which M7 users and developers can learn from and contribute to a body of knowledge, advice, and best practices accumulated over the entire lifetime of this project.
 
+## FCIQMC Algorithm
+
 The FCIQMC method is founded on the assumption that stochastic application of the projector method recursion relation
 \f[
     \label{eq:master}
     \ketPsinext = (1-\tau\Hop)\ketPsin
 \f]
+with a suitably small *timestep* \f$\tau\f$, 
 where the wavefunction is a linear superposition of Slater determinants
 \f[
     \label{eq:psidef}
@@ -24,6 +27,22 @@ The processes by which the \f$\Ci\f$ coefficients are updated are called *spawni
 \f[
     \Cinext = \Cin - \tau \sum_{\bfj\neq\bfi} \Hij \Cjn - \tau(\Hii - S) \Cin
 \f]
+where \f$S\f$ is an approximation to the exact ground-state eigenvalue called the *diagonal shift*.
+In the expression of the FCIQMC algorithm, it is convenient to use the following notation
+\f[
+    \Cinext \equiv \Cin + \dspawnn + \ddeathn
+\f]
+
+### Spawning and Death
+**walker list:** \f$\Cin\f$, **send buffer:** \f$0\f$, **receive buffer:** \f$0\f$
+**walker list:** \f$\Cin+\ddeathn\f$, **send buffer:** \f$\dspawnn\f$, **receive buffer:** \f$0\f$
+### Communication
+**walker list:** \f$\Cin+\ddeathn\f$, **send buffer:** \f$0\f$, **receive buffer:** \f$\dspawnn\f$
+### Annihilation
+**walker list:** \f$\Cin+\dspawnn+\ddeathn\f\equiv\Cinext$, **send buffer:** \f$0\f$, **receive buffer:** \f$\0\f$
+
+
+
 
 
 <!--
