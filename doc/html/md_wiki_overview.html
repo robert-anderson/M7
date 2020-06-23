@@ -123,17 +123,16 @@ FCIQMC Algorithm</h1>
 <p> where \(S\) is an approximation to the exact ground-state eigenvalue called the <em>diagonal shift</em>. In the expression of the FCIQMC algorithm, it is convenient to use the following notation </p><p class="formulaDsp">
 \[ \Cinext \equiv \Cin + \dspawnn + \ddeathn \]
 </p>
-<h1><a class="anchor" id="autotoc_md5"></a>
-### Spawning and Death</h1>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Spawning and Death</h2>
 <h1><a class="anchor" id="autotoc_md6"></a>
 | &lt;strong&gt;walker list&lt;/strong&gt; | &lt;strong&gt;send buffer&lt;/strong&gt; | &lt;strong&gt;receive buffer&lt;/strong&gt; |</h1>
-<h1><a class="anchor" id="autotoc_md7"></a>
-| \f$\Cin\f$      | \f$0\f$,        | \f$0\f$            |</h1>
+<p>| \(\Cin\) | \(0\), | \(0\) |</p>
 <p><b>walker list:</b> \(\Cin+\ddeathn\), <b>send buffer:</b> \(\dspawnn\), <b>receive buffer:</b> \(0\) </p>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md7"></a>
 Communication</h2>
 <p><b>walker list:</b> \(\Cin+\ddeathn\), <b>send buffer:</b> \(0\), <b>receive buffer:</b> \(\dspawnn\) </p>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 Annihilation</h2>
 <p><b>walker list:</b>  \(, **receive buffer:** \)\0 </p>
 </div></div><!-- contents -->
