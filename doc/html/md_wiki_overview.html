@@ -112,7 +112,7 @@ FCIQMC Algorithm</h1>
 <p>The FCIQMC method is founded on the assumption that stochastic application of the projector method recursion relation </p><p class="formulaDsp">
 \[ \label{eq:master} \ketPsinext = (1-\tau\Hop)\ketPsin \]
 </p>
-<p> with a suitably small <em>timestep</em> \(\tau\), where the wavefunction is a linear superposition of Slater determinants </p><p class="formulaDsp">
+<p> with a suitably small <em>timestep</em> \(\tau\), where the <a class="el" href="classWavefunction.html">Wavefunction</a> is a linear superposition of Slater determinants </p><p class="formulaDsp">
 \[ \label{eq:psidef} \ketPsi \equiv \sum_\bfi \Ci \ketDi \]
 </p>
 <p> can yield accurate eigenvalues and other properties for configuration-interation problems far beyond the scope of exact diagonalisation methods.</p>
@@ -123,6 +123,7 @@ FCIQMC Algorithm</h1>
 <p> where \(S\) is an approximation to the exact ground-state eigenvalue called the <em>diagonal shift</em>. In the expression of the FCIQMC algorithm, it is convenient to use the following notation </p><p class="formulaDsp">
 \[ \Cinext \equiv \Cin + \dspawnn + \ddeathn \]
 </p>
+<p>Structurally, the FCIQMC code is contained within a <a class="el" href="classFciqmcCalculation.html">FciqmcCalculation</a> object, which serves as a high-level class tying together the more intricate objects in the implementation. One such crucial object is the <a class="el" href="classWavefunction.html">Wavefunction</a>, which in turn contains a system of three central <a class="el" href="classList.html">List</a> objects: namely a <a class="el" href="structWalkerList.html">WalkerList</a> &mdash; which records the state of the discretised \(\ketPsin\) at an iteration \(n\), and two <a class="el" href="structSpawnList.html">SpawnList</a> objects &mdash; which are responsible for the MPI-based communication of stochastically-generated off-diagonal Monte Carlo moves.</p>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Spawning and Death</h2>
 <table class="markdownTable">
@@ -131,7 +132,7 @@ Spawning and Death</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">\(\Cin\) </td><td class="markdownTableBodyNone">\(0\) </td><td class="markdownTableBodyNone">\(0\)  </td></tr>
 </table>
-<p>The walker list is sequentially accessed, with each <em>source</em> determinant \(\Dj\) selecting zero or more <em>destination</em> determinants through an <a class="el" href="classExcitationGenerator.html">ExcitationGenerator</a>.</p>
+<p>The walker list is sequentially accessed, with each <em>source</em> determinant \(\Dj\) selecting zero or more <em>destination</em> determinants through an <a class="el" href="classExcitationGenerator.html">ExcitationGenerator</a>. The instantaneous walker weight on \(\Dj\) is conveyed as the ratio of \(\Cjn\) to the number of attempts made to generate a connected \(\Di\).</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">walker list </th><th class="markdownTableHeadNone">send buffer </th><th class="markdownTableHeadNone">receive buffer  </th></tr>

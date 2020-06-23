@@ -11,7 +11,7 @@ The FCIQMC method is founded on the assumption that stochastic application of th
     \ketPsinext = (1-\tau\Hop)\ketPsin
 \f]
 with a suitably small *timestep* \f$\tau\f$, 
-where the wavefunction is a linear superposition of Slater determinants
+where the \ref Wavefunction is a linear superposition of Slater determinants
 \f[
     \label{eq:psidef}
     \ketPsi \equiv \sum_\bfi \Ci \ketDi
@@ -33,11 +33,15 @@ In the expression of the FCIQMC algorithm, it is convenient to use the following
     \Cinext \equiv \Cin + \dspawnn + \ddeathn
 \f]
 
+Structurally, the FCIQMC code is contained within a \ref FciqmcCalculation object, which serves as a high-level class tying together the more intricate objects in the implementation.
+One such crucial object is the \ref Wavefunction, which in turn contains a system of three central \ref List objects: namely a \ref WalkerList --- which records the state of the discretised \f$\ketPsin\f$ at an iteration \f$n\f$, and two \ref SpawnList objects --- which are responsible for the MPI-based communication of stochastically-generated off-diagonal Monte Carlo moves.
+
 ### Spawning and Death
  walker list            | send buffer    | receive buffer |
 ------------------------|----------------|----------------|
  \f$\Cin\f$             | \f$0\f$        | \f$0\f$        |
 The walker list is sequentially accessed, with each *source* determinant \f$\Dj\f$ selecting zero or more *destination* determinants through an \ref ExcitationGenerator.
+The instantaneous walker weight on \f$\Dj\f$ is conveyed as the ratio of \f$\Cjn\f$ to the number of attempts made to generate a connected \f$\Di\f$.
 
 
  walker list            | send buffer    | receive buffer |
