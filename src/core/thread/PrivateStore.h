@@ -43,6 +43,10 @@ public:
         return m_data[ithread].v;
     }
 
+    void zero(){
+        memset(m_data.data(), 0, sizeof(aligned_T)*m_data.size());
+    }
+
     const size_t& nthread() const {return m_nthread;}
 
     template<typename U = T>

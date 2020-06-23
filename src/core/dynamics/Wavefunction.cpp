@@ -36,6 +36,8 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_ninitiator.local() = 0;
         m_nw = 0;
     }
+    m_nw.mpi_sum();
+    m_square_norm.mpi_sum();
 }
 
 void Wavefunction::propagate() {
@@ -97,8 +99,6 @@ void Wavefunction::propagate() {
         }
     }
     m_ninitiator.add_thread_sum();
-    m_delta_square_norm.put_thread_sum();
-    m_delta_nw.put_thread_sum();
     m_ref_proj_energy_num.put_thread_sum();
 }
 
@@ -152,11 +152,11 @@ void Wavefunction::annihilate() {
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
         annihilate_row(irow_recv);
     }
-    m_aborted_weight.add_thread_sum();
-    m_delta_square_norm.add_thread_sum();
-    m_delta_nw.add_thread_sum();
+    m_aborted_weight.put_thread_sum();
+    m_delta_square_norm.put_thread_sum();
+    m_delta_nw.put_thread_sum();
     m_recv.zero();
-    m_ninitiator.sum();
+    m_ninitiator.mpi_sum();
     ASSERT(m_ninitiator.reduced() >= 0)
 #ifndef NDEBUG
     if (mpi::nrank() == 1) {
@@ -167,19 +167,17 @@ void Wavefunction::annihilate() {
     }
 #endif
 
-    m_delta_square_norm.sum();
-    m_delta_nw.sum();
-    m_square_norm.sum();
-    m_nw.local()+=m_delta_nw.local();
-    m_nw.mpi_sum();
-    m_noccupied_determinant.sum();
-    m_noccupied_determinant.sum();
+    m_delta_square_norm.mpi_sum();
+    m_delta_nw.mpi_sum();
+    m_square_norm.mpi_sum();
+    m_noccupied_determinant.mpi_sum();
     m_nw_growth_rate = (m_nw.reduced() + m_delta_nw.reduced()) / m_nw.reduced();
     m_square_norm.local() += m_delta_square_norm.local();
-    m_nw.local() += m_delta_nw.local();
+    m_nw.local()+=m_delta_nw.local();
+    m_nw.mpi_sum();
     if (consts::float_is_zero(m_nw.reduced())) throw (std::runtime_error("All walkers died."));
-    m_ref_proj_energy_num.sum();
-    m_aborted_weight.sum();
+    m_ref_proj_energy_num.mpi_sum();
+    m_aborted_weight.mpi_sum();
 
     if (mpi::i_am(m_irank_reference.reduced())) {
         m_reference_weight = *m_data.m_weight(m_reference_row);

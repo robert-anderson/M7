@@ -14,17 +14,23 @@ class Hybrid : public Distributed<T> {
     using Distributed<T>::m_local;
 public:
     T& thread(){
+        ASSERT(omp_get_level())
         return m_thread.get();
     }
 
+    void zero_thread_values(){
+        ASSERT(!omp_get_level())
+        return m_thread.zero();
+    }
+
     Hybrid<T>& operator=(const T& rhs) override {
-        if (omp_get_level()) m_thread.get() = rhs;
+        if (omp_get_level()) thread() = rhs;
         else Distributed<T>::operator=(rhs);
         return *this;
     }
 
     Hybrid<T>& operator+=(const T& rhs) override {
-        if (omp_get_level()) m_thread.get()+= rhs;
+        if (omp_get_level()) thread() += rhs;
         else Distributed<T>::operator+=(rhs);
         return *this;
     }
@@ -35,14 +41,16 @@ public:
     }
 
     T& put_thread_sum(){
+        ASSERT(!omp_get_level())
         m_local=thread_sum();
-        thread() = T(0);
+        zero_thread_values();
         return m_local;
     }
 
     T& add_thread_sum(){
+        ASSERT(!omp_get_level())
         m_local+=thread_sum();
-        thread() = T(0);
+        zero_thread_values();
         return m_local;
     }
 

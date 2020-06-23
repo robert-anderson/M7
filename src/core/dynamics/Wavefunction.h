@@ -12,6 +12,7 @@
 #include "SpawnList.h"
 #include "Propagator.h"
 #include "src/core/parallel/Distributed.h"
+#include "DeterministicSubspace.h"
 
 class FciqmcCalculation;
 
