@@ -3,12 +3,15 @@
 M7 (*Many-body Stochastic Expectation Value Estimation Networks*) is a stochastic quantum chemistry software package which primarily implements the FCIQMC method \cite doi:10.1063/1.3193710.
 The purpose of this wiki is to provide a space in which M7 users and developers can learn from and contribute to a body of knowledge, advice, and best practices accumulated over the entire lifetime of this project.
 
+## FCIQMC Algorithm
+
 The FCIQMC method is founded on the assumption that stochastic application of the projector method recursion relation
 \f[
     \label{eq:master}
     \ketPsinext = (1-\tau\Hop)\ketPsin
 \f]
-where the wavefunction is a linear superposition of Slater determinants
+with a suitably small *timestep* \f$\tau\f$, 
+where the \ref Wavefunction is a linear superposition of Slater determinants
 \f[
     \label{eq:psidef}
     \ketPsi \equiv \sum_\bfi \Ci \ketDi
@@ -24,6 +27,41 @@ The processes by which the \f$\Ci\f$ coefficients are updated are called *spawni
 \f[
     \Cinext = \Cin - \tau \sum_{\bfj\neq\bfi} \Hij \Cjn - \tau(\Hii - S) \Cin
 \f]
+where \f$S\f$ is an approximation to the exact ground-state eigenvalue called the *diagonal shift*.
+In the expression of the FCIQMC algorithm, it is convenient to use the following notation
+\f[
+    \Cinext \equiv \Cin + \dspawnn + \ddeathn
+\f]
+
+Structurally, the FCIQMC code is contained within a \ref FciqmcCalculation object, which serves as a high-level class tying together the more intricate objects in the implementation.
+One such crucial object is the \ref Wavefunction, which in turn contains a system of three central \ref List objects: namely a \ref WalkerList --- which records the state of the discretised \f$\ketPsin\f$ at an iteration \f$n\f$, and two \ref SpawnList objects --- which are responsible for the MPI-based communication of stochastically-generated off-diagonal Monte Carlo moves.
+
+### Spawning and Death
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cin\f$             | \f$0\f$        | \f$0\f$        |
+The walker list is sequentially accessed, with each *source* \ref Determinant \f$\Dj\f$ selecting zero or more *destination* determinants through an \ref ExcitationGenerator.
+The instantaneous walker weight on \f$\Dj\f$ is conveyed as the ratio of \f$\Cjn\f$ to the number of attempts made to generate a connected \f$\Di\f$.
+The death contribution is taken into account in the same loop after all spawns have been generated. 
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cin+\ddeathn\f$    | \f$\dspawnn\f$ | \f$0\f$        |
+at the end of this loop over occupied determinants, the walker list reflects only the update to the approximate wavefunction due to the diagonal part of the shifted Hamiltonian.
+
+### Communication
+The generated spawns have been enumerated in a segmented \ref List, with the segment corresponding to the id of the MPI rank due to receive the spawned contribution. This rank is decided on a determinant block-by determinant block basis through a \ref RankAllocator, which can dynamically reallocate determinant blocks between MPI ranks an effort to eliminate performance stifling load imbalance.
+
+Sent spawns are scattered by and gathered to every process via the MPI_Alltoallv subroutine.
+
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cin+\ddeathn\f$    | \f$0\f$        | \f$\dspawnn\f$ |
+### Annihilation
+This step is a sequential access on the incoming spawned contributions, resulting in random access update of the walker list by hash table lookup.
+
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cinext\f$          | \f$0\f$        | \f$0\f$        |
 
 
 <!--
