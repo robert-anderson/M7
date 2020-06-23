@@ -40,19 +40,25 @@ One such crucial object is the \ref Wavefunction, which in turn contains a syste
  walker list            | send buffer    | receive buffer |
 ------------------------|----------------|----------------|
  \f$\Cin\f$             | \f$0\f$        | \f$0\f$        |
-The walker list is sequentially accessed, with each *source* determinant \f$\Dj\f$ selecting zero or more *destination* determinants through an \ref ExcitationGenerator.
+The walker list is sequentially accessed, with each *source* \ref Determinant \f$\Dj\f$ selecting zero or more *destination* determinants through an \ref ExcitationGenerator.
 The instantaneous walker weight on \f$\Dj\f$ is conveyed as the ratio of \f$\Cjn\f$ to the number of attempts made to generate a connected \f$\Di\f$.
-
-
+The death contribution is taken into account in the same loop after all spawns have been generated. 
  walker list            | send buffer    | receive buffer |
 ------------------------|----------------|----------------|
  \f$\Cin+\ddeathn\f$    | \f$\dspawnn\f$ | \f$0\f$        |
+at the end of this loop over occupied determinants, the walker list reflects only the update to the approximate wavefunction due to the diagonal part of the shifted Hamiltonian.
 
 ### Communication
+The generated spawns have been enumerated in a segmented \ref List, with the segment corresponding to the id of the MPI rank due to receive the spawned contribution. This rank is decided on a determinant block-by determinant block basis through a \ref RankAllocator, which can dynamically reallocate determinant blocks between MPI ranks an effort to eliminate performance stifling load imbalance.
+
+Sent spawns are scattered by and gathered to every process via the MPI_Alltoallv subroutine.
+
  walker list            | send buffer    | receive buffer |
 ------------------------|----------------|----------------|
  \f$\Cin+\ddeathn\f$    | \f$0\f$        | \f$\dspawnn\f$ |
 ### Annihilation
+This step is a sequential access on the incoming spawned contributions, resulting in random access update of the walker list by hash table lookup.
+
  walker list            | send buffer    | receive buffer |
 ------------------------|----------------|----------------|
  \f$\Cinext\f$          | \f$0\f$        | \f$0\f$        |

@@ -132,15 +132,17 @@ Spawning and Death</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">\(\Cin\) </td><td class="markdownTableBodyNone">\(0\) </td><td class="markdownTableBodyNone">\(0\)  </td></tr>
 </table>
-<p>The walker list is sequentially accessed, with each <em>source</em> determinant \(\Dj\) selecting zero or more <em>destination</em> determinants through an <a class="el" href="classExcitationGenerator.html">ExcitationGenerator</a>. The instantaneous walker weight on \(\Dj\) is conveyed as the ratio of \(\Cjn\) to the number of attempts made to generate a connected \(\Di\).</p>
-<table class="markdownTable">
+<p>The walker list is sequentially accessed, with each <em>source</em> <a class="el" href="classDeterminant.html">Determinant</a> \(\Dj\) selecting zero or more <em>destination</em> determinants through an <a class="el" href="classExcitationGenerator.html">ExcitationGenerator</a>. The instantaneous walker weight on \(\Dj\) is conveyed as the ratio of \(\Cjn\) to the number of attempts made to generate a connected \(\Di\). The death contribution is taken into account in the same loop after all spawns have been generated. </p><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">walker list </th><th class="markdownTableHeadNone">send buffer </th><th class="markdownTableHeadNone">receive buffer  </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">\(\Cin+\ddeathn\) </td><td class="markdownTableBodyNone">\(\dspawnn\) </td><td class="markdownTableBodyNone">\(0\)  </td></tr>
 </table>
+<p>at the end of this loop over occupied determinants, the walker list reflects only the update to the approximate wavefunction due to the diagonal part of the shifted <a class="el" href="classHamiltonian.html">Hamiltonian</a>.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
 Communication</h2>
+<p>The generated spawns have been enumerated in a segmented <a class="el" href="classList.html">List</a>, with the segment corresponding to the id of the MPI rank due to receive the spawned contribution. This rank is decided on a determinant block-by determinant block basis through a <a class="el" href="classRankAllocator.html">RankAllocator</a>, which can dynamically reallocate determinant blocks between MPI ranks an effort to eliminate performance stifling load imbalance.</p>
+<p>Sent spawns are scattered by and gathered to every process via the MPI_Alltoallv subroutine.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">walker list </th><th class="markdownTableHeadNone">send buffer </th><th class="markdownTableHeadNone">receive buffer  </th></tr>
@@ -149,6 +151,7 @@ Communication</h2>
 </table>
 <h2><a class="anchor" id="autotoc_md7"></a>
 Annihilation</h2>
+<p>This step is a sequential access on the incoming spawned contributions, resulting in random access update of the walker list by hash table lookup.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">walker list </th><th class="markdownTableHeadNone">send buffer </th><th class="markdownTableHeadNone">receive buffer  </th></tr>
