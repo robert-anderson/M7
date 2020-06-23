@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['vacantorbitals_285',['VacantOrbitals',['../structVacantOrbitals.html',1,'']]]
+  ['vacantorbitals_287',['VacantOrbitals',['../structVacantOrbitals.html',1,'']]]
 ];

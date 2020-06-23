@@ -1,32 +1,66 @@
-\label{index_md__home_teamcity_TeamCity_buildAgent_work_5343cdffda4690e5_README}%
-\Hypertarget{index_md__home_teamcity_TeamCity_buildAgent_work_5343cdffda4690e5_README}%
-Many-\/body Stochastic Expectation Value Estimation Networks (M7) is a stochastic electronic structure program written in C++ which primarily implements the Full Configuration Interaction Quantum Monte Carlo (F\+C\+I\+Q\+MC) method.\hypertarget{index_autotoc_md1}{}\doxysection{Installation}\label{index_autotoc_md1}
-To install M7, you will need\+:
-\begin{DoxyItemize}
-\item C++11 compiler which implements M\+PI
-\item C\+Make installation at least as recent as version 3.\+10
-\item L\+A\+P\+A\+CK implementation
-\end{DoxyItemize}
+\label{index_md_overview}%
+\Hypertarget{index_md_overview}%
+ M7 ({\itshape Many-\/body Stochastic Expectation Value Estimation Networks}) is a stochastic quantum chemistry software package which primarily implements the F\+C\+I\+Q\+MC method \cite{doi:10.1063/1.3193710}. The purpose of this overview page is to help users and developers understand where each module fits into the program at large. Modules will be introduced in a section on this page with a coarse-\/grained exposition of their relationships with other parts of the program. Each section will provide at least one hyperlink to the C++ class in which each piece of referenced functionality is implemented. The linked-\/to Doxygen pages will display the detailed information about the class, its members and methods, and thorough instructions for its utilization. Thus the documentation is almost completely code-\/driven, with the responsibility for maintaining the docs for a given module lying with the developer(s) who wrote the corresponding header files. The intent of this documentation website is to provide a space in which M7 users and developers can learn from and contribute to a body of knowledge, advice, and best practices accumulated over the entire lifetime of the project.\hypertarget{index_autotoc_md1}{}\doxysection{F\+C\+I\+Q\+M\+C Algorithm}\label{index_autotoc_md1}
+The F\+C\+I\+Q\+MC method is founded on the assumption that stochastic application of the projector method recursion relation \[ \label{eq:master} \ketPsinext = (1-\tau\Hop)\ketPsin \] with a suitably small {\itshape timestep} $\tau$, where the \mbox{\hyperlink{classWavefunction}{Wavefunction}} is a linear superposition of Slater determinants \[ \label{eq:psidef} \ketPsi \equiv \sum_\bfi \Ci \ketDi \] can yield accurate eigenvalues and other properties for configuration-\/interation problems far beyond the scope of exact diagonalisation methods.
 
-Retrieve the program code from the V\+CS\+: 
-\begin{DoxyCode}{0}
-\DoxyCodeLine{git clone https://github.com/robert-\/anderson/M7.git}
-\end{DoxyCode}
+This delay in the onset of the \char`\"{}curse of dimensionality\char`\"{} faced by exponentially-\/scaling correlation methods is achieved by discretising the $\Ci$ coefficients as a population of {\itshape walkers}. Thus, at any given iteration of $\eqref{eq:master}$, the number of determinants with any walker occupation is usually a shrinking minority of the total dimension of the space (provided that a single particle basis conducive to this sparsity e.\+g. the canonical Hartree-\/\+Fock orbitals is chosen). By this approach, the memory scaling of the F\+CI problem can be brought within practicable limits, provided that an efficient system of data structures can be devised to store and update a sparse, parallelised representation of $\ketPsi$
 
+Computational tractability is also aided by the walker discretisation, since the accumulation of walkers on a given determinant indicates the number of attempts the algorithm should make to convey new walkers from that source. The processes by which the $\Ci$ coefficients are updated are called {\itshape spawning} (off-\/diagonal elements), and {\itshape death} (off-\/diagonal elements) \[ \Cinext = \Cin - \tau \sum_{\bfj\neq\bfi} \Hij \Cjn - \tau(\Hii - S) \Cin \] where $S$ is an approximation to the exact ground-\/state eigenvalue called the {\itshape diagonal shift}. In the expression of the F\+C\+I\+Q\+MC algorithm, it is convenient to use the following notation \[ \Cinext \equiv \Cin + \dspawnn + \ddeathn \]
 
-Then create a directory in which C\+Make can build its targets---typically under the repository root directory---and point C\+Make to the top level C\+Make\+Lists.\+txt file of the project. 
-\begin{DoxyCode}{0}
-\DoxyCodeLine{cd M7}
-\DoxyCodeLine{mkdir build}
-\DoxyCodeLine{cd build}
-\DoxyCodeLine{cmake ..}
-\DoxyCodeLine{make -\/j TARGET}
-\end{DoxyCode}
+Structurally, the F\+C\+I\+Q\+MC code is contained within a \mbox{\hyperlink{classFciqmcCalculation}{Fciqmc\+Calculation}} object, which serves as a high-\/level class tying together the more intricate objects in the implementation. One such crucial object is the \mbox{\hyperlink{classWavefunction}{Wavefunction}}, which in turn contains a system of three central \mbox{\hyperlink{classList}{List}} objects\+: namely a \mbox{\hyperlink{structWalkerList}{Walker\+List}} --- which records the state of the discretised $\ketPsin$ at an iteration $n$, and two \mbox{\hyperlink{structSpawnList}{Spawn\+List}} objects --- which are responsible for the M\+P\+I-\/based communication of stochastically-\/generated off-\/diagonal Monte Carlo moves.\hypertarget{index_autotoc_md2}{}\doxysubsection{Spawning and Death}\label{index_autotoc_md2}
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endhead
+$\Cin$ &$0$ &$0$  \\\cline{1-3}
+\end{longtabu}
+The walker list is sequentially accessed, with each {\itshape source} \mbox{\hyperlink{classDeterminant}{Determinant}} $\Dj$ selecting zero or more {\itshape destination} determinants through an \mbox{\hyperlink{classExcitationGenerator}{Excitation\+Generator}}. The instantaneous walker weight on $\Dj$ is conveyed as the ratio of $\Cjn$ to the number of attempts made to generate a connected $\Di$. The death contribution is taken into account in the same loop after all spawns have been generated. \tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endhead
+$\Cin+\ddeathn$ &$\dspawnn$ &$0$  \\\cline{1-3}
+\end{longtabu}
+at the end of this loop over occupied determinants, the walker list reflects only the update to the approximate wavefunction due to the diagonal part of the shifted \mbox{\hyperlink{classHamiltonian}{Hamiltonian}}.\hypertarget{index_autotoc_md3}{}\doxysubsection{Communication}\label{index_autotoc_md3}
+The generated spawns have been enumerated in a segmented \mbox{\hyperlink{classList}{List}}, with the segment corresponding to the id of the M\+PI rank due to receive the spawned contribution. This rank is decided on a determinant block-\/by determinant block basis through a \mbox{\hyperlink{classRankAllocator}{Rank\+Allocator}}, which can dynamically reallocate determinant blocks between M\+PI ranks an effort to eliminate performance stifling load imbalance.
 
+Sent spawns are scattered by and gathered to every process via the M\+P\+I\+\_\+\+Alltoallv subroutine.
 
-Where T\+A\+R\+G\+ET is either debug, release or unittest. The binary will then appear at either src/debug, src/release, or test/unittest.\hypertarget{index_autotoc_md2}{}\doxysection{Usage}\label{index_autotoc_md2}
-The program takes all run time variables through the command line interface. The command line options available can be listed by executing the debug or release binaries with the -\/h or --help option.
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endhead
+$\Cin+\ddeathn$ &$0$ &$\dspawnn$  \\\cline{1-3}
+\end{longtabu}
+\hypertarget{index_autotoc_md4}{}\doxysubsection{Annihilation}\label{index_autotoc_md4}
+This step is a sequential access on the incoming spawned contributions, resulting in random access update of the walker list by hash table lookup.
 
-Complex configurations can become cumbersome to manage on the command line directly, so particular run time configurations can easily be split over multiple lines in a shell script.
-
-If the user chooses, the python/ directory contains a simple and convenient wrapper which encapsulates all options, and can handle the execution of distributed instances of M7. 
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{3}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ walker list }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ send buffer }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ receive buffer  }\\\cline{1-3}
+\endhead
+$\Cinext$ &$0$ &$0$  \\\cline{1-3}
+\end{longtabu}
