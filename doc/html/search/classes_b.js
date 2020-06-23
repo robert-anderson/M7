@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['occupiedorbitals_251',['OccupiedOrbitals',['../structOccupiedOrbitals.html',1,'']]],
-  ['options_252',['Options',['../structOptions.html',1,'']]]
+  ['occupiedorbitals_248',['OccupiedOrbitals',['../structOccupiedOrbitals.html',1,'']]],
+  ['options_249',['Options',['../structOptions.html',1,'']]]
 ];
