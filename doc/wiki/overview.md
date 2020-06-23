@@ -34,9 +34,10 @@ In the expression of the FCIQMC algorithm, it is convenient to use the following
 \f]
 
 ### Spawning and Death
- walker list            | send buffer | receive buffer |
-------------------------|-------------|----------------|
- \f$\Cin\f$             | \f$0\f$     | \f$0\f$        |
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cin\f$             | \f$0\f$        | \f$0\f$        |
+The walker list is sequentially accessed, with each *source* determinant \f$\Dj\f$ selecting zero or more *destination* determinants through an \ref ExcitationGenerator.
 
 
  walker list            | send buffer    | receive buffer |
@@ -48,9 +49,9 @@ In the expression of the FCIQMC algorithm, it is convenient to use the following
 ------------------------|----------------|----------------|
  \f$\Cin+\ddeathn\f$    | \f$0\f$        | \f$\dspawnn\f$ |
 ### Annihilation
- walker list            | send buffer | receive buffer |
-------------------------|-------------|----------------|
- \f$\Cinext\f$          | \f$0\f$     | \f$0\f$        |
+ walker list            | send buffer    | receive buffer |
+------------------------|----------------|----------------|
+ \f$\Cinext\f$          | \f$0\f$        | \f$0\f$        |
 
 
 <!--
