@@ -64,7 +64,7 @@ This step is a sequential access on the incoming spawned contributions, resultin
 \endhead
 $\Cinext$ &$0$ &$0$  \\\cline{1-3}
 \end{longtabu}
-\hypertarget{index_autotoc_md5}{}\doxysection{Hybrid Parallelised Variables}\label{index_autotoc_md5}
+\hypertarget{index_autotoc_md5}{}\doxysection{Hybrid Parallelized Variables}\label{index_autotoc_md5}
 Suppose we have an integer variable {\ttfamily n} which is accumulated in a hybrid parallel scheme which preserves the value of {\ttfamily n} local to the M\+PI rank. That is to say that the final value of {\ttfamily n} is an {\ttfamily M\+P\+I\+\_\+\+S\+UM} reduction of a sum reduction over partial values on each thread. This leads to an ugly proliferation of symbols e.\+g. 
 \begin{DoxyCode}{0}
 \DoxyCodeLine{\textcolor{keywordtype}{size\_t} n = 0ul; \textcolor{comment}{// the final MPI-\/reduced integer}}
@@ -88,4 +88,6 @@ We are in need of a solution to this problem in order to keep the code maintaina
 \DoxyCodeLine{\}}
 \DoxyCodeLine{n.sum(); \textcolor{comment}{// returns result of hybrid reduction}}
 \end{DoxyCode}
- 
+
+
+In situations where there is no need for thread-\/reduction, the base class \mbox{\hyperlink{classDistributed}{Distributed}} is an adequate solution. 
