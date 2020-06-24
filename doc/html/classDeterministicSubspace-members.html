@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -110,10 +110,15 @@ $(function() {
 <p>This is the complete list of members for <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>, including all inherited members.</p>
 <table class="directory">
   <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>add_determinant</b>(size_t irow_walker_list) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>build_hamiltonian</b>(const Hamiltonian *ham) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>DeterministicSubspace</b>(WalkerList *walker_list) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>nrow_full</b>() const (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>nrow_local</b>() const (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>build_from_det_connections</b>(const DeterminantElement &amp;ref, Hamiltonian *ham) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>build_from_whole_walker_list</b>(Hamiltonian *ham) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>DeterministicSubspace</b>(WalkerList *walker_list) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>gather_and_project</b>() (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>local_det</b>(const size_t &amp;irow) const (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>nrow_full</b>() const (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>nrow_local</b>() const (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>rayleigh_quotient</b>(Hybrid&lt; defs::ham_t &gt; &amp;num, Hybrid&lt; defs::ham_comp_t &gt; &amp;norm_square) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>update_weights</b>(const double &amp;tau) (defined in <a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a>)</td><td class="entry"><a class="el" href="classDeterministicSubspace.html">DeterministicSubspace</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
 </table></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

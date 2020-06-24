@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -104,38 +104,57 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classDistributed-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Distributed&lt; T &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Inheritance diagram for Distributed&lt; T &gt;:</div>
+<div class="dyncontent">
+<div class="center"><img src="classDistributed__inherit__graph.png" border="0" usemap="#Distributed_3_01T_01_4_inherit__map" alt="Inheritance graph"/></div>
+<map name="Distributed_3_01T_01_4_inherit__map" id="Distributed_3_01T_01_4_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,5,123,32"/>
+<area shape="rect" href="classHybrid.html" title=" " alt="" coords="18,80,110,107"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9a6165b77959bba3421431d6b8b225b4"><td class="memItemLeft" align="right" valign="top"><a id="a9a6165b77959bba3421431d6b8b225b4"></a>
-<a class="el" href="classDistributed.html">Distributed</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const T &amp;rhs)</td></tr>
-<tr class="separator:a9a6165b77959bba3421431d6b8b225b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa406491c5c5c40ed5863dc4469e5659"><td class="memItemLeft" align="right" valign="top"><a id="afa406491c5c5c40ed5863dc4469e5659"></a>
+virtual <a class="el" href="classDistributed.html">Distributed</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const T &amp;rhs)</td></tr>
+<tr class="separator:afa406491c5c5c40ed5863dc4469e5659"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1182ef89565a5569fe0ddd29c4bdcc73"><td class="memItemLeft" align="right" valign="top"><a id="a1182ef89565a5569fe0ddd29c4bdcc73"></a>
+virtual <a class="el" href="classDistributed.html">Distributed</a>&lt; T &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator+=</b> (const T &amp;rhs)</td></tr>
+<tr class="separator:a1182ef89565a5569fe0ddd29c4bdcc73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a218d6294ba8ff92a6255a2f4fbc01725"><td class="memItemLeft" align="right" valign="top"><a id="a218d6294ba8ff92a6255a2f4fbc01725"></a>
 T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>local</b> ()</td></tr>
 <tr class="separator:a218d6294ba8ff92a6255a2f4fbc01725"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a701315b13407247153f565a083c8edac"><td class="memItemLeft" align="right" valign="top"><a id="a701315b13407247153f565a083c8edac"></a>
 T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>reduced</b> ()</td></tr>
 <tr class="separator:a701315b13407247153f565a083c8edac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e1730d8e1a0ec4f3a3922e02aaa798c"><td class="memItemLeft" align="right" valign="top"><a id="a1e1730d8e1a0ec4f3a3922e02aaa798c"></a>
-T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>sum</b> ()</td></tr>
-<tr class="separator:a1e1730d8e1a0ec4f3a3922e02aaa798c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60683932ad5eb39d3af610d1906b0504"><td class="memItemLeft" align="right" valign="top"><a id="a60683932ad5eb39d3af610d1906b0504"></a>
-T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>max</b> ()</td></tr>
-<tr class="separator:a60683932ad5eb39d3af610d1906b0504"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90e34a3200e01d485d17fcf74f65a828"><td class="memItemLeft" align="right" valign="top"><a id="a90e34a3200e01d485d17fcf74f65a828"></a>
-T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>min</b> ()</td></tr>
-<tr class="separator:a90e34a3200e01d485d17fcf74f65a828"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c9b4dd31434fef8a4d98a4584930b1f"><td class="memItemLeft" align="right" valign="top"><a id="a4c9b4dd31434fef8a4d98a4584930b1f"></a>
-T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>bcast</b> (size_t irank)</td></tr>
-<tr class="separator:a4c9b4dd31434fef8a4d98a4584930b1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ae657377ba1109cc2995fb4e817a971"><td class="memItemLeft" align="right" valign="top"><a id="a7ae657377ba1109cc2995fb4e817a971"></a>
-<a class="el" href="structAtomic.html">Atomic</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>as_atomic</b> ()</td></tr>
-<tr class="separator:a7ae657377ba1109cc2995fb4e817a971"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32271aa55f24dabab522859c8bfed13c"><td class="memItemLeft" align="right" valign="top"><a id="a32271aa55f24dabab522859c8bfed13c"></a>
+T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mpi_sum</b> ()</td></tr>
+<tr class="separator:a32271aa55f24dabab522859c8bfed13c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c99add9baedb3f683ff471df3c68cc4"><td class="memItemLeft" align="right" valign="top"><a id="a5c99add9baedb3f683ff471df3c68cc4"></a>
+T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mpi_max</b> ()</td></tr>
+<tr class="separator:a5c99add9baedb3f683ff471df3c68cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fbbf78175911664d72bffd5396d9c97"><td class="memItemLeft" align="right" valign="top"><a id="a8fbbf78175911664d72bffd5396d9c97"></a>
+T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mpi_min</b> ()</td></tr>
+<tr class="separator:a8fbbf78175911664d72bffd5396d9c97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c74cb6ab8f16efe7bc74eb8ad1405f3"><td class="memItemLeft" align="right" valign="top"><a id="a4c74cb6ab8f16efe7bc74eb8ad1405f3"></a>
+T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mpi_bcast</b> (size_t irank)</td></tr>
+<tr class="separator:a4c74cb6ab8f16efe7bc74eb8ad1405f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:a72d30e892605cfb0a74688aac65f6e2e"><td class="memItemLeft" align="right" valign="top"><a id="a72d30e892605cfb0a74688aac65f6e2e"></a>
+T&#160;</td><td class="memItemRight" valign="bottom"><b>m_local</b> = 0</td></tr>
+<tr class="separator:a72d30e892605cfb0a74688aac65f6e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5bdb0e490c61aa164b6d060deccb068"><td class="memItemLeft" align="right" valign="top"><a id="ac5bdb0e490c61aa164b6d060deccb068"></a>
+T&#160;</td><td class="memItemRight" valign="bottom"><b>m_reduced</b> = std::numeric_limits&lt;T&gt;::max()</td></tr>
+<tr class="separator:ac5bdb0e490c61aa164b6d060deccb068"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/teamcity/TeamCity/buildAgent/work/5343cdffda4690e5/src/core/parallel/<a class="el" href="Distributed_8h_source.html">Distributed.h</a></li>

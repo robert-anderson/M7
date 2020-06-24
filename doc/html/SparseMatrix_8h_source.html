@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -158,18 +158,27 @@ $(function() {
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">bool</span> empty(){<span class="keywordflow">return</span> m_data.empty();}</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordtype">void</span> multiply(<span class="keyword">const</span> std::vector&lt;T&gt; &amp;in, std::vector&lt;T&gt; &amp;out){</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#pragma omp parallel for default(none) shared(in, out)</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> irow=0; irow&lt;m_data.size(); ++irow){</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            <span class="keywordflow">for</span> (<span class="keyword">auto</span> entry=m_data[irow].begin(); entry!=m_data[irow].end(); entry++){</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                as_atomic(out[entry-&gt;icol])+=entry-&gt;element*in[irow];</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            }</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        }</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;};</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif //M7_SPARSEMATRIX_H</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="comment">// each row of the out vector receives a contribution from every</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="comment">// corresponding entry in the sparse matrix row</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="comment">// out_i = sum_j H_ij in_j</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#pragma omp parallel for default(none) shared(in, out, stderr)</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> irow=0; irow&lt;m_data.size(); ++irow){</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            <span class="keywordflow">for</span> (<span class="keyword">auto</span> entry=m_data[irow].begin(); entry!=m_data[irow].end(); entry++){</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                <span class="keyword">auto</span>&amp; jrow = entry-&gt;icol;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                ASSERT(jrow&lt;in.size())</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                <span class="keyword">auto</span>&amp; hij = entry-&gt;element;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                ASSERT(hij==hij)</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                ASSERT(in[jrow]==in[jrow])</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                as_atomic(out[irow])+=hij * in[jrow];</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                ASSERT(out[irow]==out[irow])</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        }</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#endif //M7_SPARSEMATRIX_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassSparseMatrix_html"><div class="ttname"><a href="classSparseMatrix.html">SparseMatrix</a></div><div class="ttdef"><b>Definition:</b> SparseMatrix.h:20</div></div>
 <div class="ttc" id="astructSparseEntry_html"><div class="ttname"><a href="structSparseEntry.html">SparseEntry</a></div><div class="ttdef"><b>Definition:</b> SparseMatrix.h:14</div></div>

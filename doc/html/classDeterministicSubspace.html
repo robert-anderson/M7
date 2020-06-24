@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -113,6 +113,15 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a13fdd0e23b39605b254db4a00b3b34de"><td class="memItemLeft" align="right" valign="top"><a id="a13fdd0e23b39605b254db4a00b3b34de"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>gather_and_project</b> ()</td></tr>
+<tr class="separator:a13fdd0e23b39605b254db4a00b3b34de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a694d65435340cc23a6c67d6534f04ba7"><td class="memItemLeft" align="right" valign="top"><a id="a694d65435340cc23a6c67d6534f04ba7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>rayleigh_quotient</b> (<a class="el" href="classHybrid.html">Hybrid</a>&lt; defs::ham_t &gt; &amp;num, <a class="el" href="classHybrid.html">Hybrid</a>&lt; defs::ham_comp_t &gt; &amp;norm_square)</td></tr>
+<tr class="separator:a694d65435340cc23a6c67d6534f04ba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22cbdd2efc16aa61722c976dbb6297f9"><td class="memItemLeft" align="right" valign="top"><a id="a22cbdd2efc16aa61722c976dbb6297f9"></a>
+defs::ham_comp_t&#160;</td><td class="memItemRight" valign="bottom"><b>update_weights</b> (const double &amp;tau)</td></tr>
+<tr class="separator:a22cbdd2efc16aa61722c976dbb6297f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6872430fe91bcd2d55c23f13929e7ab1"><td class="memItemLeft" align="right" valign="top"><a id="a6872430fe91bcd2d55c23f13929e7ab1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>DeterministicSubspace</b> (<a class="el" href="structWalkerList.html">WalkerList</a> *walker_list)</td></tr>
 <tr class="separator:a6872430fe91bcd2d55c23f13929e7ab1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,9 +134,15 @@ const size_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>nrow_lo
 <tr class="memitem:ab020981773f467ad7aaa781b7322406b"><td class="memItemLeft" align="right" valign="top"><a id="ab020981773f467ad7aaa781b7322406b"></a>
 const size_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>nrow_full</b> () const</td></tr>
 <tr class="separator:ab020981773f467ad7aaa781b7322406b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae53f2cdc9e1730bfaecd5a2b0cb8ce70"><td class="memItemLeft" align="right" valign="top"><a id="ae53f2cdc9e1730bfaecd5a2b0cb8ce70"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>build_hamiltonian</b> (const <a class="el" href="classHamiltonian.html">Hamiltonian</a> *ham)</td></tr>
-<tr class="separator:ae53f2cdc9e1730bfaecd5a2b0cb8ce70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec2fe67ca62dee312a4a7c878ebef365"><td class="memItemLeft" align="right" valign="top"><a id="aec2fe67ca62dee312a4a7c878ebef365"></a>
+<a class="el" href="classDeterminantElement.html">DeterminantElement</a>&#160;</td><td class="memItemRight" valign="bottom"><b>local_det</b> (const size_t &amp;irow) const</td></tr>
+<tr class="separator:aec2fe67ca62dee312a4a7c878ebef365"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c18080fde4882a7652959c6be741280"><td class="memItemLeft" align="right" valign="top"><a id="a1c18080fde4882a7652959c6be741280"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>build_from_whole_walker_list</b> (<a class="el" href="classHamiltonian.html">Hamiltonian</a> *ham)</td></tr>
+<tr class="separator:a1c18080fde4882a7652959c6be741280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72266a2e0e0098674f3b370577739772"><td class="memItemLeft" align="right" valign="top"><a id="a72266a2e0e0098674f3b370577739772"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>build_from_det_connections</b> (const <a class="el" href="classDeterminantElement.html">DeterminantElement</a> &amp;ref, <a class="el" href="classHamiltonian.html">Hamiltonian</a> *ham)</td></tr>
+<tr class="separator:a72266a2e0e0098674f3b370577739772"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/teamcity/TeamCity/buildAgent/work/5343cdffda4690e5/src/core/dynamics/<a class="el" href="DeterministicSubspace_8h_source.html">DeterministicSubspace.h</a></li>

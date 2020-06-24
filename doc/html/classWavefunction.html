@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -115,10 +115,12 @@ Collaboration diagram for Wavefunction:</div>
 <div class="dyncontent">
 <div class="center"><img src="classWavefunction__coll__graph.png" border="0" usemap="#Wavefunction_coll__map" alt="Collaboration graph"/></div>
 <map name="Wavefunction_coll__map" id="Wavefunction_coll__map">
-<area shape="rect" title=" " alt="" coords="181,153,283,180"/>
-<area shape="rect" href="classDistributed.html" title=" " alt="" coords="5,5,136,47"/>
-<area shape="rect" href="structconsts_1_1component__t.html" title=" " alt="" coords="160,5,304,47"/>
-<area shape="rect" href="classDistributed.html" title=" " alt="" coords="328,13,472,39"/>
+<area shape="rect" title=" " alt="" coords="585,89,688,116"/>
+<area shape="rect" href="classHybrid.html" title=" " alt="" coords="230,5,349,32"/>
+<area shape="rect" href="classDistributed.html" title=" " alt="" coords="5,5,149,32"/>
+<area shape="rect" href="classDistributed.html" title=" " alt="" coords="12,77,143,118"/>
+<area shape="rect" href="classHybrid.html" title=" " alt="" coords="199,119,380,145"/>
+<area shape="rect" href="structconsts_1_1component__t.html" title=" " alt="" coords="217,170,361,211"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -127,9 +129,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3366527332e758ccb9717a185d3861dc"><td class="memItemLeft" align="right" valign="top"><a id="a3366527332e758ccb9717a185d3861dc"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Wavefunction</b> (<a class="el" href="classFciqmcCalculation.html">FciqmcCalculation</a> *fciqmc)</td></tr>
 <tr class="separator:a3366527332e758ccb9717a185d3861dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1e27036aa5e04ebc5c1fe8298dabe4d"><td class="memItemLeft" align="right" valign="top"><a id="ab1e27036aa5e04ebc5c1fe8298dabe4d"></a>
-defs::wf_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_reference_weight</b> ()</td></tr>
-<tr class="separator:ab1e27036aa5e04ebc5c1fe8298dabe4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0b4bde2e3c3f58048b79508f06ed5aa"><td class="memItemLeft" align="right" valign="top"><a id="ab0b4bde2e3c3f58048b79508f06ed5aa"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>propagate</b> ()</td></tr>
 <tr class="separator:ab0b4bde2e3c3f58048b79508f06ed5aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,24 +147,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>write_iter_stats</b> 
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a2b12b433ab467212f61c04df45c0047d"><td class="memItemLeft" align="right" valign="top"><a id="a2b12b433ab467212f61c04df45c0047d"></a>
-<a class="el" href="classDistributed.html">Distributed</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_square_norm</b></td></tr>
-<tr class="separator:a2b12b433ab467212f61c04df45c0047d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a383c80d45c0e7524c530846fbd451b5c"><td class="memItemLeft" align="right" valign="top"><a id="a383c80d45c0e7524c530846fbd451b5c"></a>
-<a class="el" href="classDistributed.html">Distributed</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_delta_square_norm</b></td></tr>
-<tr class="separator:a383c80d45c0e7524c530846fbd451b5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15b8c0648771c1723e134346d406153d"><td class="memItemLeft" align="right" valign="top"><a id="a15b8c0648771c1723e134346d406153d"></a>
+<a class="el" href="classHybrid.html">Hybrid</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_square_norm</b></td></tr>
+<tr class="separator:a15b8c0648771c1723e134346d406153d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accb39b47b92bcfa540007ca6c15a5261"><td class="memItemLeft" align="right" valign="top"><a id="accb39b47b92bcfa540007ca6c15a5261"></a>
+<a class="el" href="classHybrid.html">Hybrid</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_delta_square_norm</b></td></tr>
+<tr class="separator:accb39b47b92bcfa540007ca6c15a5261"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6bccdad37bae72a28cee4d377365c3be"><td class="memItemLeft" align="right" valign="top"><a id="a6bccdad37bae72a28cee4d377365c3be"></a>
 <a class="el" href="classDistributed.html">Distributed</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_nw</b></td></tr>
 <tr class="separator:a6bccdad37bae72a28cee4d377365c3be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a69206a03e11a812637effe3ecaf521f7"><td class="memItemLeft" align="right" valign="top"><a id="a69206a03e11a812637effe3ecaf521f7"></a>
-<a class="el" href="classDistributed.html">Distributed</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_delta_nw</b></td></tr>
-<tr class="separator:a69206a03e11a812637effe3ecaf521f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77a30684823ec6da20d9dbc03f2d78e3"><td class="memItemLeft" align="right" valign="top"><a id="a77a30684823ec6da20d9dbc03f2d78e3"></a>
+<a class="el" href="classHybrid.html">Hybrid</a>&lt; defs::wf_comp_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_delta_nw</b></td></tr>
+<tr class="separator:a77a30684823ec6da20d9dbc03f2d78e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c552cea17328ae24225dbb71b79c2f9"><td class="memItemLeft" align="right" valign="top"><a id="a6c552cea17328ae24225dbb71b79c2f9"></a>
 defs::wf_comp_t&#160;</td><td class="memItemRight" valign="bottom"><b>m_nw_growth_rate</b></td></tr>
 <tr class="separator:a6c552cea17328ae24225dbb71b79c2f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa208d094aea1ca0ad8d56f1ff5a05e00"><td class="memItemLeft" align="right" valign="top"><a id="aa208d094aea1ca0ad8d56f1ff5a05e00"></a>
-<a class="el" href="classDistributed.html">Distributed</a>&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_noccupied_determinant</b></td></tr>
-<tr class="separator:aa208d094aea1ca0ad8d56f1ff5a05e00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3328e4ad3c640ca33dbd5c5077f7390"><td class="memItemLeft" align="right" valign="top"><a id="ac3328e4ad3c640ca33dbd5c5077f7390"></a>
+<a class="el" href="classHybrid.html">Hybrid</a>&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_noccupied_determinant</b></td></tr>
+<tr class="separator:ac3328e4ad3c640ca33dbd5c5077f7390"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>/home/teamcity/TeamCity/buildAgent/work/5343cdffda4690e5/src/core/dynamics/<a class="el" href="Wavefunction_8h_source.html">Wavefunction.h</a></li>

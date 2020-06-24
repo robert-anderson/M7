@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -124,42 +124,42 @@ $(function() {
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;SpawnList.h&quot;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;Propagator.h&quot;</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;src/core/parallel/Distributed.h&quot;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">class </span><a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a>;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
-<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="classWavefunction.html">   18</a></span>&#160;<span class="keyword">class </span><a class="code" href="classWavefunction.html">Wavefunction</a> {</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a> *m_fciqmc;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keyword">const</span> <a class="code" href="structOptions.html">Options</a> &amp;m_input;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <a class="code" href="classDeterminant.html">Determinant</a>&amp; m_reference;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keyword">const</span> std::unique_ptr&lt;Propagator&gt; &amp;m_prop;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <a class="code" href="structWalkerList.html">WalkerList</a> m_data;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <a class="code" href="structSpawnList.html">SpawnList</a> m_send, m_recv;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::ham_t&gt;</a> m_ref_proj_energy_num;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;DeterministicSubspace.h&quot;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">class </span><a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a>;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
+<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="classWavefunction.html">   19</a></span>&#160;<span class="keyword">class </span><a class="code" href="classWavefunction.html">Wavefunction</a> {</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a> *m_fciqmc;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="keyword">const</span> <a class="code" href="structOptions.html">Options</a> &amp;m_input;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <a class="code" href="classDeterminant.html">Determinant</a>&amp; m_reference;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keyword">const</span> std::unique_ptr&lt;Propagator&gt; &amp;m_prop;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <a class="code" href="structWalkerList.html">WalkerList</a> m_data;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <a class="code" href="structSpawnList.html">SpawnList</a> m_send, m_recv;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_t&gt;</a> m_reference_weight;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;size_t&gt;</a> m_irank_reference;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keywordtype">size_t</span> m_reference_row;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_t&gt;</a> m_aborted_weight;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;int&gt;</a> m_ninitiator;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="comment">/*</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">     * Square norm is sum_i(|w_i|^2)</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> m_square_norm;</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> m_delta_square_norm;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="comment">/*</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">     * Walker number is sum_i(|w_i|)</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> m_nw;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> m_delta_nw;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    defs::wf_comp_t m_nw_growth_rate;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;size_t&gt;</a> m_noccupied_determinant;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;defs::ham_t&gt;</a> m_ref_proj_energy_num;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;defs::wf_t&gt;</a> m_aborted_weight;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;int64_t&gt;</a> m_ninitiator;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">     * Square norm is sum_i(|w_i|^2)</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;defs::wf_comp_t&gt;</a> m_square_norm;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;defs::wf_comp_t&gt;</a> m_delta_square_norm;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">     * Walker number is sum_i(|w_i|)</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> m_nw;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;defs::wf_comp_t&gt;</a> m_delta_nw;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    defs::wf_comp_t m_nw_growth_rate;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;size_t&gt;</a> m_noccupied_determinant;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <a class="code" href="classWavefunction.html">Wavefunction</a>(<a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a> *fciqmc);</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
@@ -167,36 +167,34 @@ $(function() {
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;# initiators: &quot;</span> &lt;&lt; m_data.verify_ninitiator(m_input.nadd_initiator)&lt;&lt; std::endl;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    }</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    defs::wf_t get_reference_weight();</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">void</span> propagate();</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordtype">void</span> propagate();</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordtype">void</span> communicate();</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordtype">void</span> communicate();</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordtype">void</span> consolidate_incoming_weight() {</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="comment">// TODO</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordtype">void</span> consolidate_incoming_weight() {</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="comment">// TODO</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordtype">void</span> annihilate();</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordtype">void</span> annihilate();</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordtype">void</span> write_iter_stats(<a class="code" href="structFciqmcStatsFile.html">FciqmcStatsFile</a>* stats_file);</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">void</span> write_iter_stats(<a class="code" href="structFciqmcStatsFile.html">FciqmcStatsFile</a>* stats_file);</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="keywordtype">void</span> annihilate_row(<span class="keyword">const</span> <span class="keywordtype">size_t</span> &amp;irow_recv, defs::wf_comp_t &amp;aborted_weight,</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                        defs::wf_comp_t &amp;delta_square_norm, defs::wf_comp_t &amp;delta_nw);</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;};</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif //M7_WAVEFUNCTION_H</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keywordtype">void</span> annihilate_row(<span class="keyword">const</span> <span class="keywordtype">size_t</span> &amp;irow_recv);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;};</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#endif //M7_WAVEFUNCTION_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
+<div class="ttc" id="aclassHybrid_html"><div class="ttname"><a href="classHybrid.html">Hybrid&lt; defs::ham_t &gt;</a></div></div>
 <div class="ttc" id="aclassDeterminant_html"><div class="ttname"><a href="classDeterminant.html">Determinant</a></div><div class="ttdef"><b>Definition:</b> Determinant.h:11</div></div>
 <div class="ttc" id="astructFciqmcStatsFile_html"><div class="ttname"><a href="structFciqmcStatsFile.html">FciqmcStatsFile</a></div><div class="ttdef"><b>Definition:</b> FciqmcStatsFile.h:10</div></div>
 <div class="ttc" id="astructSpawnList_html"><div class="ttname"><a href="structSpawnList.html">SpawnList</a></div><div class="ttdef"><b>Definition:</b> SpawnList.h:14</div></div>
 <div class="ttc" id="astructOptions_html"><div class="ttname"><a href="structOptions.html">Options</a></div><div class="ttdef"><b>Definition:</b> Options.h:10</div></div>
-<div class="ttc" id="astructWalkerList_html"><div class="ttname"><a href="structWalkerList.html">WalkerList</a></div><div class="ttdef"><b>Definition:</b> WalkerList.h:13</div></div>
-<div class="ttc" id="aclassDistributed_html"><div class="ttname"><a href="classDistributed.html">Distributed&lt; defs::ham_t &gt;</a></div></div>
+<div class="ttc" id="astructWalkerList_html"><div class="ttname"><a href="structWalkerList.html">WalkerList</a></div><div class="ttdef"><b>Definition:</b> WalkerList.h:14</div></div>
+<div class="ttc" id="aclassDistributed_html"><div class="ttname"><a href="classDistributed.html">Distributed&lt; defs::wf_t &gt;</a></div></div>
 <div class="ttc" id="aclassFciqmcCalculation_html"><div class="ttname"><a href="classFciqmcCalculation.html">FciqmcCalculation</a></div><div class="ttdef"><b>Definition:</b> FciqmcCalculation.h:19</div></div>
-<div class="ttc" id="aclassWavefunction_html"><div class="ttname"><a href="classWavefunction.html">Wavefunction</a></div><div class="ttdef"><b>Definition:</b> Wavefunction.h:18</div></div>
+<div class="ttc" id="aclassWavefunction_html"><div class="ttname"><a href="classWavefunction.html">Wavefunction</a></div><div class="ttdef"><b>Definition:</b> Wavefunction.h:19</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">

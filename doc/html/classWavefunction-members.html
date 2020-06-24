@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -112,17 +112,16 @@ $(function() {
   <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>annihilate</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
   <tr bgcolor="#f0f0f0"><td class="entry"><b>communicate</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
   <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>consolidate_incoming_weight</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>get_reference_weight</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_delta_nw</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_delta_square_norm</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_noccupied_determinant</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_nw</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_nw_growth_rate</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_square_norm</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>propagate</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>Wavefunction</b>(FciqmcCalculation *fciqmc) (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>write_iter_stats</b>(FciqmcStatsFile *stats_file) (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>~Wavefunction</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_delta_nw</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_delta_square_norm</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_noccupied_determinant</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_nw</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_nw_growth_rate</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_square_norm</b> (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>propagate</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>Wavefunction</b>(FciqmcCalculation *fciqmc) (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>write_iter_stats</b>(FciqmcStatsFile *stats_file) (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>~Wavefunction</b>() (defined in <a class="el" href="classWavefunction.html">Wavefunction</a>)</td><td class="entry"><a class="el" href="classWavefunction.html">Wavefunction</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
 </table></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

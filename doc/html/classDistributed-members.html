@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -109,14 +109,17 @@ $(function() {
 
 <p>This is the complete list of members for <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>, including all inherited members.</p>
 <table class="directory">
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>as_atomic</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>bcast</b>(size_t irank) (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>local</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>max</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>min</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>operator=</b>(const T &amp;rhs) (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>Distributed</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>local</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>m_local</b> (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>m_reduced</b> (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>mpi_bcast</b>(size_t irank) (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>mpi_max</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>mpi_min</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>mpi_sum</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>operator+=</b>(const T &amp;rhs) (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>operator=</b>(const T &amp;rhs) (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
   <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>reduced</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>sum</b>() (defined in <a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="classDistributed.html">Distributed&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
 </table></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

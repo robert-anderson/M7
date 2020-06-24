@@ -46,8 +46,8 @@
     braPsi: "{\\langle\\Psi|}",
     braPsin: "{\\langle\\Psi_{(n)}|}",
     braPsinext: "{\\langle\\Psi_{(n+1)}|}",
-    dspawnn: "{\\Delta^\\mathrm{spawn}_{\\bfi(n)}}",
-    ddeathn: "{\\Delta^\\mathrm{death}_{\\bfi(n)}}",
+    dspawnn: "{\\Delta C^\\mathrm{spawn}_{\\bfi(n)}}",
+    ddeathn: "{\\Delta C^\\mathrm{death}_{\\bfi(n)}}",
   } }
 });
 </script>
@@ -125,7 +125,7 @@ $(function() {
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;iomanip&gt;</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;iostream&gt;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;src/core/io/FciqmcStatsFile.h&gt;</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;src/core/parallel/Distributed.h&gt;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;src/core/parallel/Hybrid.h&gt;</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">class </span><a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a>;</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
@@ -139,7 +139,7 @@ $(function() {
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">double</span> m_tau;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    defs::ham_comp_t m_shift;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordtype">bool</span> vary_shift = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> m_largest_spawn_magnitude;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <a class="code" href="classHybrid.html">Hybrid&lt;defs::wf_comp_t&gt;</a> m_largest_spawn_magnitude;</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <a class="code" href="classPropagator.html">Propagator</a>(<a class="code" href="classFciqmcCalculation.html">FciqmcCalculation</a> *fciqmc);</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
@@ -184,12 +184,12 @@ $(function() {
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#endif //M7_PROPAGATOR_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
+<div class="ttc" id="aclassHybrid_html"><div class="ttname"><a href="classHybrid.html">Hybrid&lt; defs::wf_comp_t &gt;</a></div></div>
 <div class="ttc" id="aclassNumericElement_html"><div class="ttname"><a href="classNumericElement.html">NumericElement</a></div><div class="ttdef"><b>Definition:</b> NumericElement.h:15</div></div>
 <div class="ttc" id="aclassPropagator_html"><div class="ttname"><a href="classPropagator.html">Propagator</a></div><div class="ttdef"><b>Definition:</b> Propagator.h:20</div></div>
 <div class="ttc" id="astructFciqmcStatsFile_html"><div class="ttname"><a href="structFciqmcStatsFile.html">FciqmcStatsFile</a></div><div class="ttdef"><b>Definition:</b> FciqmcStatsFile.h:10</div></div>
 <div class="ttc" id="astructSpawnList_html"><div class="ttname"><a href="structSpawnList.html">SpawnList</a></div><div class="ttdef"><b>Definition:</b> SpawnList.h:14</div></div>
 <div class="ttc" id="astructOptions_html"><div class="ttname"><a href="structOptions.html">Options</a></div><div class="ttdef"><b>Definition:</b> Options.h:10</div></div>
-<div class="ttc" id="aclassDistributed_html"><div class="ttname"><a href="classDistributed.html">Distributed&lt; defs::wf_comp_t &gt;</a></div></div>
 <div class="ttc" id="aclassFciqmcCalculation_html"><div class="ttname"><a href="classFciqmcCalculation.html">FciqmcCalculation</a></div><div class="ttdef"><b>Definition:</b> FciqmcCalculation.h:19</div></div>
 <div class="ttc" id="aclassMagnitudeLogger_html"><div class="ttname"><a href="classMagnitudeLogger.html">MagnitudeLogger</a></div><div class="ttdef"><b>Definition:</b> MagnitudeLogger.h:16</div></div>
 <div class="ttc" id="aclassRankAllocator_html"><div class="ttname"><a href="classRankAllocator.html">RankAllocator&lt; DeterminantElement &gt;</a></div></div>
