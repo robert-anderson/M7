@@ -14,6 +14,7 @@
 #include "src/core/util/consts.h"
 #include "src/core/util/defs.h"
 #include "src/core/table/DeterminantField.h"
+#include <src/core/parallel/RankAllocator.h>
 
 class Hamiltonian {
 protected:
@@ -114,7 +115,7 @@ public:
 
     void all_connections_of_det(ConnectionList* list, const Determinant &ref, const defs::ham_comp_t eps) const;
 
-    void generate_ci_space(WalkerList* list, const int &spin_level) const;
+    void generate_ci_space(WalkerList* list, RankAllocator<DeterminantElement>& ra, const int &spin_level) const;
 
 };
 

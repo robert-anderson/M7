@@ -76,25 +76,26 @@ class DeterministicSubspace {
         mpi::all_gather(&nrow, 1, m_recvcounts.data(), 1);
         for (size_t i = 1ul; i < mpi::nrank(); ++i) m_displs[i] = m_displs[i - 1] + m_recvcounts[i - 1];
         ASSERT(m_displs.back() + m_recvcounts.back() == nrow_full());
-
     }
 
 public:
 
     void gather_and_project() {
-#pragma omp parallel for default(none)
+#pragma omp parallel for default(none) shared(stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
+            ASSERT(m_walker_list->m_flags.m_deterministic(irow_walker_list));
             m_local_weights[irow_local] = *m_walker_list->m_weight(irow_walker_list);
+            ASSERT(m_local_weights[irow_local]==m_local_weights[irow_local])
         }
+        ASSERT(nrow_local()==m_recvcounts[mpi::irank()])
+        ASSERT(nrow_local()==m_local_weights.size())
         mpi::all_gatherv(m_local_weights.data(), nrow_local(), m_full_weights.data(), m_recvcounts, m_displs);
         m_local_h_weights.assign(m_local_h_weights.size(), 0);
-        m_sparse_ham.multiply(m_local_weights, m_local_h_weights);
+        m_sparse_ham.multiply(m_full_weights, m_local_h_weights);
     }
 
-    std::pair<defs::ham_comp_t, defs::ham_comp_t> rayleigh_quotient(){
-        Hybrid<defs::ham_t> num;
-        Hybrid<defs::ham_comp_t> norm_square;
+    void rayleigh_quotient(Hybrid<defs::ham_t> &num, Hybrid<defs::ham_comp_t> &norm_square){
 #pragma omp parallel for default(none) shared(num, norm_square)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
@@ -103,15 +104,18 @@ public:
             num.thread()+=consts::conj(w)*hw;
             norm_square.thread()+=std::pow(std::abs(w), 2.0);
         }
-        return {std::real(num.sum()), norm_square.sum()};
+        num.put_thread_sum();
+        norm_square.put_thread_sum();
     }
 
     defs::ham_comp_t update_weights(const double &tau) {
-#pragma omp parallel for default(none) shared(tau)
+#pragma omp parallel for default(none) shared(tau, stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
             auto weight = m_walker_list->m_weight(irow_walker_list);
+            ASSERT(*weight==*weight)
             auto h_weight = m_local_h_weights[irow_local];
+            ASSERT(h_weight==h_weight)
             weight -= tau * h_weight;
         }
     }

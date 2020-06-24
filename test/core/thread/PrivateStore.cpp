@@ -242,3 +242,26 @@ TEST(PrivateStore, ComplexReduceMin) {
     }
     ASSERT_FLOAT_EQ(store.reduce_min(), min);
 }
+
+/*
+ * Shared access is said to be slower than private but this doesn't appear to be the case??!
+TEST(PrivateStore, SpeedComparison1){
+    PrivateStore<double> store;
+    const size_t n=1000000;
+#pragma omp parallel for default(none) shared(store)
+    for (size_t i=0ul; i<n; i++){
+        store.get()+=(double)i;
+    }
+}
+TEST(PrivateStore, SpeedComparison2){
+    const size_t n=1000000;
+#pragma omp parallel default(none)
+    {
+        double tot = 0.0;
+#pragma omp for
+        for (size_t i = 0ul; i < n; i++) {
+            tot += (double) i;
+        }
+    }
+}
+ */

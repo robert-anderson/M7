@@ -49,12 +49,16 @@ public:
         // each row of the out vector receives a contribution from every
         // corresponding entry in the sparse matrix row
         // out_i = sum_j H_ij in_j
-#pragma omp parallel for default(none) shared(in, out, std::cout)
+#pragma omp parallel for default(none) shared(in, out, stderr)
         for (size_t irow=0; irow<m_data.size(); ++irow){
             for (auto entry=m_data[irow].begin(); entry!=m_data[irow].end(); entry++){
                 auto& jrow = entry->icol;
+                ASSERT(jrow<in.size())
                 auto& hij = entry->element;
+                ASSERT(hij==hij)
+                ASSERT(in[jrow]==in[jrow])
                 as_atomic(out[irow])+=hij * in[jrow];
+                ASSERT(out[irow]==out[irow])
             }
         }
     }

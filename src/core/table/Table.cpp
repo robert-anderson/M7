@@ -7,6 +7,7 @@
 Table::Table(size_t nsegment) : m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
 
 char *Table::field_begin(const Field *field, const size_t &irow, const size_t isegment) {
+    ASSERT(irow<nrow_per_segment());
     ASSERT(is_allocated());
     return ((char *) m_data.data()) + irow * m_padded_row_size + isegment * m_segment_size + field->m_offset;
 }

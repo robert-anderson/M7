@@ -4,6 +4,7 @@
 
 #include <src/core/enumerator/ContainerCombinationEnumerator.h>
 #include <src/core/fermion/DecodedDeterminant.h>
+#include <src/core/parallel/RankAllocator.h>
 #include "Hamiltonian.h"
 
 Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
@@ -64,15 +65,16 @@ Determinant Hamiltonian::choose_reference(const int &spin_level) const {
     return ref;
 }
 
-void Hamiltonian::all_connections_of_det(ConnectionList* list, const Determinant &ref, const defs::ham_comp_t eps) const {
+void
+Hamiltonian::all_connections_of_det(ConnectionList *list, const Determinant &ref, const defs::ham_comp_t eps) const {
     OccupiedOrbitals occs(ref);
     VacantOrbitals vacs(ref);
     AntisymConnection connection(ref);
 
     Determinant excited(m_nsite);
-    for (size_t iocc=0ul; iocc<occs.m_nind; ++iocc) {
+    for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
         const auto &occ = occs.m_inds[iocc];
-        for (size_t ivac=0ul; ivac<vacs.m_nind; ++ivac) {
+        for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {
             const auto &vac = vacs.m_inds[ivac];
             connection.zero();
             connection.add(occ, vac);
@@ -106,23 +108,30 @@ void Hamiltonian::all_connections_of_det(ConnectionList* list, const Determinant
     }
 }
 
-void Hamiltonian::generate_ci_space(WalkerList *list, const int &spin_level) const {
-    size_t nalpha = nelec()/2+spin_level;
-    size_t nbeta = nelec()/2-spin_level;
+void
+Hamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElement> &ra, const int &spin_level) const {
+    size_t nalpha = nelec() / 2 + spin_level;
+    size_t nbeta = nelec() / 2 - spin_level;
 
     defs::inds alpha_sites(nsite(), 0);
     defs::inds beta_sites(nsite(), 0);
 
-    for (size_t i=0; i<nsite();++i) {
-        alpha_sites[i]=i; beta_sites[i]=nsite()+i;
+    for (size_t i = 0; i < nsite(); ++i) {
+        alpha_sites[i] = i;
+        beta_sites[i] = nsite() + i;
     }
     ContainerCombinationEnumerator<defs::inds> alpha_enumerator(alpha_sites, nsite(), nalpha);
     defs::inds alpha_inds(nalpha);
     defs::inds beta_inds(nbeta);
 
-    while (alpha_enumerator.next(alpha_inds)){
+    Determinant work_det(nsite());
+    while (alpha_enumerator.next(alpha_inds)) {
         ContainerCombinationEnumerator<defs::inds> beta_enumerator(beta_sites, nsite(), nbeta);
         while (beta_enumerator.next(beta_inds)) {
+            work_det.zero();
+            work_det.set(alpha_inds);
+            work_det.set(beta_inds);
+            if (!mpi::i_am(ra.get_rank(work_det))) continue;
             auto irow = list->expand_push();
             auto det = list->m_determinant(irow);
             auto h_diag = list->m_hdiag(irow);
@@ -131,5 +140,10 @@ void Hamiltonian::generate_ci_space(WalkerList *list, const int &spin_level) con
             h_diag = get_energy(det);
         }
     }
-    ASSERT(list->high_water_mark(0)==integer_utils::combinatorial(nsite(), nalpha)*integer_utils::combinatorial(nsite(), nbeta))
+#ifndef DNDEBUG
+    if (mpi::nrank()==1) {
+        ASSERT(list->high_water_mark(0) ==
+               integer_utils::combinatorial(nsite(), nalpha) * integer_utils::combinatorial(nsite(), nbeta))
+    }
+#endif
 }

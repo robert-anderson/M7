@@ -8,6 +8,7 @@
 #include <src/core/list/PerforableMappedList.h>
 #include <src/core/table/DeterminantField.h>
 #include <src/core/table/FlagField.h>
+#include <src/core/parallel/Distributed.h>
 #include <list>
 
 struct WalkerList : public PerforableMappedList<DeterminantElement> {
@@ -50,13 +51,16 @@ public:
     }
 
     void normalize(const size_t &ielement=0, const defs::wf_t &norm=1.0) {
-        defs::wf_comp_t tot = 0;
+        Distributed<defs::wf_comp_t> tot;
         for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
             tot += std::pow(std::abs(*m_weight(irow)), 2.0);
         }
-        tot = std::sqrt(tot);
+        tot.mpi_sum();
+        ASSERT(tot.reduced()>0);
+        auto factor = std::sqrt(tot.reduced());
+        ASSERT(factor==factor); // else NaN
         for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
-            m_weight(irow)*=norm/tot;
+            m_weight(irow)*=norm/factor;
         }
     }
 

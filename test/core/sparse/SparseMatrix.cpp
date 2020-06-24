@@ -18,9 +18,9 @@ TEST(SparseMatrix, RealMultiplication){
     }
     std::vector<T> res(n, 0);
     matrix.multiply(v, res);
-    ASSERT_EQ(res[0], -10);
-    ASSERT_EQ(res[1], 8);
-    ASSERT_EQ(res[2], 26);
+    ASSERT_EQ(res[0], 30);
+    ASSERT_EQ(res[1], 18);
+    ASSERT_EQ(res[2], 6);
 }
 
 TEST(SparseMatrix, ComplexMultiplication){
@@ -36,10 +36,10 @@ TEST(SparseMatrix, ComplexMultiplication){
     }
     std::vector<T> res(n, 0);
     matrix.multiply(v, res);
-    ASSERT_EQ(res[0].real(), -16);
-    ASSERT_EQ(res[0].imag(), 2);
-    ASSERT_EQ(res[1].real(), -4);
+    ASSERT_EQ(res[0].real(), 24);
+    ASSERT_EQ(res[0].imag(), 32);
+    ASSERT_EQ(res[1].real(), 6);
     ASSERT_EQ(res[1].imag(), 26);
-    ASSERT_EQ(res[2].real(), 8);
-    ASSERT_EQ(res[2].imag(), 50);
+    ASSERT_EQ(res[2].real(), -12);
+    ASSERT_EQ(res[2].imag(), 20);
 }

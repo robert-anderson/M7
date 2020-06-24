@@ -9,36 +9,47 @@
 
 TEST(DeterministicSubspace, FciCheck){
     AbInitioHamiltonian ham(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP");
+    auto ref_det = ham.guess_reference(0);
     WalkerList walker_list(ham.nsite(), 100);
-    ham.generate_ci_space(&walker_list, 0);
-    walker_list.m_weight(0)=1e-6;
+    RankAllocator<DeterminantElement> ra(10);
+    ham.generate_ci_space(&walker_list, ra, 0);
+    ASSERT_EQ(mpi::all_sum(walker_list.high_water_mark(0)), 400);
+    bool is_ref_rank = walker_list.m_determinant(0)==ref_det;
+    if (is_ref_rank)
+        walker_list.m_weight(0)=1;
     DeterministicSubspace detsub(&walker_list);
     detsub.build_from_whole_walker_list(&ham);
     double tau = 0.02;
 
     auto do_iter = [&](){
+        Hybrid<defs::ham_t> num;
+        Hybrid<defs::ham_comp_t> norm_square;
         detsub.gather_and_project();
-        auto rq = detsub.rayleigh_quotient();
+        detsub.rayleigh_quotient(num, norm_square);
         for (size_t i=0; i< walker_list.high_water_mark(0); ++i){
             auto hdiag = *walker_list.m_hdiag(i);
             auto weight = *walker_list.m_weight(i);
-            rq.first+=hdiag*std::pow(std::abs(weight), 2.0);
+            num.local()+=hdiag*std::pow(std::abs(weight), 2.0);
             walker_list.m_weight(i)*=1-tau*hdiag;
         }
         detsub.update_weights(tau);
         walker_list.normalize();
-        return rq.first/rq.second;
+        return consts::real(num.mpi_sum())/norm_square.mpi_sum();
     };
 
     defs::ham_comp_t energy;
     energy = do_iter();
-    ASSERT_FLOAT_EQ(energy, ham.get_energy(walker_list.m_determinant(0)));
+    if (is_ref_rank)
+        ASSERT_FLOAT_EQ(energy, ham.get_energy(ref_det));
+
+    energy = do_iter();
+    ASSERT_FLOAT_EQ(energy, -108.65403);
+
     const size_t niter = 10000;
     for (size_t i=0ul; i<niter; ++i){
         energy = do_iter();
     }
     ASSERT_TRUE(consts::floats_nearly_equal(energy, -108.8113865756313, 1e-6));
-
 }
 
 TEST(DeterministicSubspace, BuildFromDeterminantConnections){
