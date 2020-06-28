@@ -42,3 +42,21 @@ TEST(FciqmcCalculation, StochasticPropagation){
         ASSERT_TRUE(consts::floats_nearly_equal(energy_mean_std.first, -108.8113865756313, 1e-3));
     }
 }
+
+TEST(FciqmcCalculation, SemiStochasticPropagation){
+    Options options;
+    options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
+    options.tau_initial = 0.05;
+    options.nwalker_target = 100000;
+    options.ncycle = 20000;
+    options.do_semistochastic = true;
+    FciqmcCalculation fciqmc_calculation(options);
+    fciqmc_calculation.execute();
+    if (mpi::i_am_root()) {
+        auto num = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.mean_std(options.ncycle / 2);
+        auto den = fciqmc_calculation.m_stats_file->m_ref_weight.mean_std(options.ncycle / 2);
+        auto energy_mean_std = stat_utils::quotient(num, den);
+        std::cout << std::setprecision(10) << energy_mean_std.first << std::endl;
+        ASSERT_TRUE(consts::floats_nearly_equal(energy_mean_std.first, -108.8113865756313, 1e-3));
+    }
+}

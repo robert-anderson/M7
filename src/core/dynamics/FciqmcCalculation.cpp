@@ -36,6 +36,7 @@ void FciqmcCalculation::execute() {
     logger::write("Starting FCIQMC main loop.");
     for (size_t icycle = 0ul; icycle < m_input.ncycle; ++icycle) {
         //std::cout << "iteration " + std::to_string(icycle) << std::endl;
+        m_wf.update(icycle);
         //std::cout << "\npropagating..." << std::endl;
         m_wf.propagate();
         //std::cout << "\ncommunicating..." << std::endl;

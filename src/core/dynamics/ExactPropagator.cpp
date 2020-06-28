@@ -62,6 +62,7 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 }
 
 void ExactPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
+                               bool flag_deterministic,
                                defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) {
     auto tmp = *weight;
     weight *= (1.0 - (*hdiag - m_shift) * m_tau);

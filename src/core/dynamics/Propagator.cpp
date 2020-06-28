@@ -11,5 +11,7 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
     m_magnitude_logger(m_input){
     m_tau = m_input.tau_initial;
     m_shift = m_input.shift_initial;
+    m_icycle_vary_shift = ~0ul;
+    m_icycle_vary_shift.mpi_bcast(0);
 }
 

@@ -54,6 +54,8 @@ void Wavefunction::propagate() {
     m_data.synchronize();
     m_ref_proj_energy_num = 0;
 
+    if (m_in_semistochastic_epoch) m_detsub->gather_and_project();
+
 #pragma omp parallel for
     for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
         if (m_data.row_empty(irow)) {
@@ -90,9 +92,9 @@ void Wavefunction::propagate() {
         auto flag_deterministic = m_data.m_flags.m_deterministic(irow);
 
         m_prop->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
-        m_prop->diagonal(hdiag, weight, m_delta_square_norm.thread(), m_delta_nw.thread());
+        m_prop->diagonal(hdiag, weight, flag_deterministic, m_delta_square_norm.thread(), m_delta_nw.thread());
 
-        if (consts::float_is_zero(*weight)) {
+        if (!flag_deterministic && consts::float_is_zero(*weight)) {
             if (flag_initiator) m_ninitiator.thread()--;
             auto irow_removed = m_data.remove(det, irow);
             ASSERT(irow_removed == irow);
@@ -131,6 +133,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
         conn.zero();
         conn.connect(m_reference, det);
         m_data.m_flags.m_reference_connection(irow_main) = conn.nexcit() < 3;
+        m_data.m_flags.m_deterministic(irow_main) = false;
         m_data.m_flags.m_initiator(irow_main) = false;
     }
     /*
@@ -147,6 +150,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
 }
 
 void Wavefunction::annihilate() {
+    if (m_in_semistochastic_epoch) m_detsub->update_weights(m_prop->m_tau, m_delta_nw);
     m_aborted_weight = 0;
 #pragma omp parallel for
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
@@ -171,6 +175,9 @@ void Wavefunction::annihilate() {
     m_delta_nw.mpi_sum();
     m_square_norm.mpi_sum();
     m_noccupied_determinant.mpi_sum();
+    std::cout << std::endl;
+    DBVAR(m_nw.reduced())
+    DBVAR(m_delta_nw.reduced())
     m_nw_growth_rate = (m_nw.reduced() + m_delta_nw.reduced()) / m_nw.reduced();
     m_square_norm.local() += m_delta_square_norm.local();
     m_nw.local()+=m_delta_nw.local();

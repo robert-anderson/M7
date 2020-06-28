@@ -108,14 +108,15 @@ public:
         norm_square.put_thread_sum();
     }
 
-    defs::ham_comp_t update_weights(const double &tau) {
-#pragma omp parallel for default(none) shared(tau, stderr)
+    defs::ham_comp_t update_weights(const double &tau, Hybrid<defs::wf_t> &delta_nw) {
+#pragma omp parallel for default(none) shared(tau, delta_nw, stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
             auto weight = m_walker_list->m_weight(irow_walker_list);
             ASSERT(*weight==*weight)
             auto h_weight = m_local_h_weights[irow_local];
             ASSERT(h_weight==h_weight)
+            delta_nw.thread() += std::abs(tau*h_weight);
             weight -= tau * h_weight;
         }
     }
@@ -151,6 +152,7 @@ public:
     void build_from_det_connections(const DeterminantElement &ref, Hamiltonian *ham) {
         Connection conn(ref);
         for (size_t irow = 0ul; irow < m_walker_list->high_water_mark(0); ++irow) {
+            if (m_walker_list->row_empty(irow)) continue;
             auto det = m_walker_list->m_determinant(irow);
             conn.connect(ref, det);
             if (conn.nexcit() <= 2) add_determinant(irow);

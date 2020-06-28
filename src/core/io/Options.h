@@ -30,6 +30,8 @@ struct Options {
     double shift_damp = 1.0;
     size_t shift_update_period = 1;
     size_t ncycle = ~0ul;
+    bool do_semistochastic = false;
+    size_t niter_init_detsub = 1000;
 
     bool validate() const;
 

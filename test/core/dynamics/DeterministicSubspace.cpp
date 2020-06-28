@@ -24,6 +24,7 @@ TEST(DeterministicSubspace, FciCheck){
     auto do_iter = [&](){
         Hybrid<defs::ham_t> num;
         Hybrid<defs::ham_comp_t> norm_square;
+        Hybrid<defs::wf_t> delta_nw;
         detsub.gather_and_project();
         detsub.rayleigh_quotient(num, norm_square);
         for (size_t i=0; i< walker_list.high_water_mark(0); ++i){
@@ -32,7 +33,7 @@ TEST(DeterministicSubspace, FciCheck){
             num.local()+=hdiag*std::pow(std::abs(weight), 2.0);
             walker_list.m_weight(i)*=1-tau*hdiag;
         }
-        detsub.update_weights(tau);
+        detsub.update_weights(tau, delta_nw);
         walker_list.normalize();
         return consts::real(num.mpi_sum())/norm_square.mpi_sum();
     };
@@ -79,7 +80,8 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections){
     ASSERT_EQ(detsub.nrow_full(), mpi::nrank()*nconn_per_rank);
 
     detsub.gather_and_project();
-    detsub.update_weights(1.0);
+    Hybrid<defs::wf_t> delta_nw;
+    detsub.update_weights(1.0, delta_nw);
 
 }
 

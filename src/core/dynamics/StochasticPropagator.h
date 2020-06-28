@@ -64,16 +64,21 @@ public:
     }
 
     void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
+                  bool flag_deterministic,
                   defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) override {
 
         delta_square_norm -= std::pow(std::abs(*weight), 2);
         delta_nw -= std::abs(*weight);
 
-        // the probability that each unit walker will die
-        auto death_rate = (*hdiag - m_shift) * m_tau;
-        ASSERT(std::abs(death_rate) < 1)
-
-        weight = m_prng.get().stochastic_round(*weight, 1.0) * (1 - death_rate);
+        if (flag_deterministic){
+            weight *= 1 - (*hdiag - m_shift) * m_tau;
+        }
+        else {
+            // the probability that each unit walker will die
+            auto death_rate = (*hdiag - m_shift) * m_tau;
+            ASSERT(std::abs(death_rate) < 1)
+            weight = m_prng.get().stochastic_round(*weight, 1.0) * (1 - death_rate);
+        }
 
         delta_square_norm += std::pow(std::abs(*weight), 2);
         delta_nw += std::abs(*weight);

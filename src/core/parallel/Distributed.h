@@ -40,7 +40,7 @@ public:
     T& reduced(){
 #ifndef DNDEBUG
         // check that a reduction method was applied
-        ASSERT(m_reduced!=std::numeric_limits<T>::max());
+        //ASSERT(m_reduced!=std::numeric_limits<T>::max());
 #endif
         return m_reduced;
     }
