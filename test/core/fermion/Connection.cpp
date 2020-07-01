@@ -67,6 +67,7 @@ TEST(Connection, Phase) {
         for (auto i{8ul}; i < 16; ++i) {
             if (!inds[i]) ket.set(i - 8);
         }
+        if (bra.is_zero() || ket.is_zero()) continue;
         if (bra.nsetbit() != ket.nsetbit()) continue;
         connection.connect(ket, bra);
         ASSERT_EQ(connection.phase(), value < 0);
