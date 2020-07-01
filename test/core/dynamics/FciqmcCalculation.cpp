@@ -47,7 +47,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     Options options;
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
     options.tau_initial = 0.05;
-    options.nwalker_target = 100000;
+    options.nwalker_target = 10000;
     options.ncycle = 20000;
     options.do_semistochastic = true;
     options.niter_init_detsub = 500;

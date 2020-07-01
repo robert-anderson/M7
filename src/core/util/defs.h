@@ -31,7 +31,13 @@
 #endif
 
 #define HERE() std::cout << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
+
+#ifdef NDEBUG
+#define DBVAR(v)
+#else
 #define DBVAR(v) std::cout << "variable " << #v << " = " << v << " in " << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
+#endif
+
 
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";
