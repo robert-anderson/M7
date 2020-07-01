@@ -34,11 +34,12 @@ public:
         m_flags(this, 1, "Flags") {}
 
     size_t add(const size_t isegment, const DeterminantElement &determinant, const defs::wf_t &weight,
-               bool flag_parent_initiator){
+               bool flag_parent_initiator, bool flag_parent_deterministic){
         auto irow = List::push(isegment);
         m_determinant(irow, isegment) = determinant;
         m_weight(irow, isegment) = weight;
         m_flags.m_parent_initiator(irow, isegment) = flag_parent_initiator;
+        m_flags.m_parent_deterministic(irow, isegment) = flag_parent_deterministic;
     }
 };
 

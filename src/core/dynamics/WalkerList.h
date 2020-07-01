@@ -50,15 +50,30 @@ public:
         }
     }
 
-    void normalize(const size_t &ielement=0, const defs::wf_t &norm=1.0) {
+    defs::wf_comp_t l1_norm(const size_t &ielement=0) {
+        Distributed<defs::wf_comp_t> tot;
+        for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
+            tot += std::abs(*m_weight(irow));
+        }
+        tot.mpi_sum();
+        ASSERT(tot.reduced()==tot.reduced()); // else NaN
+        ASSERT(tot.reduced() > 0);
+        return tot.reduced();
+    }
+
+    defs::wf_comp_t square_norm(const size_t &ielement=0) {
         Distributed<defs::wf_comp_t> tot;
         for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
             tot += std::pow(std::abs(*m_weight(irow)), 2.0);
         }
         tot.mpi_sum();
-        ASSERT(tot.reduced()>0);
-        auto factor = std::sqrt(tot.reduced());
-        ASSERT(factor==factor); // else NaN
+        ASSERT(tot.reduced()==tot.reduced()); // else NaN
+        ASSERT(tot.reduced() > 0);
+        return tot.reduced();
+    }
+
+    void normalize(const size_t &ielement=0, const defs::wf_t &norm=1.0) {
+        auto factor = std::sqrt(square_norm(ielement));
         for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
             m_weight(irow)*=norm/factor;
         }

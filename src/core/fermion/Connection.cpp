@@ -17,6 +17,8 @@ Connection::Connection(const DeterminantElement &ket) : Connection(ket, ket){}
 
 
 void Connection::connect(const DeterminantElement &ket, const DeterminantElement &bra) {
+    ASSERT(!ket.is_zero());
+    ASSERT(!bra.is_zero());
     ASSERT(ket.nbit() == m_nbit);
     ASSERT(ket.dsize() == m_element_dsize);
     ASSERT(ket.compatible_with(bra));
@@ -38,6 +40,7 @@ void Connection::connect(const DeterminantElement &ket, const DeterminantElement
 }
 
 void Connection::apply(const DeterminantElement &ket, DeterminantElement &bra){
+    ASSERT(!ket.is_zero());
     ASSERT(m_ncre < m_cre.size());
     ASSERT(m_nann < m_ann.size());
 #ifndef NDEBUG
@@ -63,7 +66,7 @@ AntisymConnection::AntisymConnection(const DeterminantElement &ket, const Determ
     connect(ket, bra);
 }
 
-AntisymConnection::AntisymConnection(const DeterminantElement &ket) : AntisymConnection(ket, ket) {}
+AntisymConnection::AntisymConnection(const DeterminantElement &ket) : AntisymConnection(ket.field()) {}
 
 void AntisymConnection::connect(const DeterminantElement &ket, const DeterminantElement &bra) {
     Connection::connect(ket, bra);

@@ -27,13 +27,20 @@ TEST(DeterministicSubspace, FciCheck){
         Hybrid<defs::wf_t> delta_nw;
         detsub.gather_and_project();
         detsub.rayleigh_quotient(num, norm_square);
+        auto l1_init = walker_list.l1_norm(0);
         for (size_t i=0; i< walker_list.high_water_mark(0); ++i){
             auto hdiag = *walker_list.m_hdiag(i);
             auto weight = *walker_list.m_weight(i);
             num.local()+=hdiag*std::pow(std::abs(weight), 2.0);
+            delta_nw.local() -= std::abs(*walker_list.m_weight(i));
             walker_list.m_weight(i)*=1-tau*hdiag;
+            delta_nw.local() += std::abs(*walker_list.m_weight(i));
         }
         detsub.update_weights(tau, delta_nw);
+        auto l1_final = walker_list.l1_norm(0);
+        delta_nw.add_thread_sum();
+        delta_nw.mpi_sum();
+        ASSERT(consts::floats_nearly_equal(l1_init + delta_nw.reduced(), l1_final));
         walker_list.normalize();
         return consts::real(num.mpi_sum())/norm_square.mpi_sum();
     };

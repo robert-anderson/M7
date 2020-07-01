@@ -31,6 +31,8 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_ninitiator.local() = 1;
         m_square_norm = std::pow(std::abs(ref_weight), 2);
         m_nw = std::abs(ref_weight);
+        m_reference_weight = ref_weight;
+        m_ref_proj_energy_num = ref_energy*ref_weight;
     } else {
         m_reference_row = ~0ul;
         m_ninitiator.local() = 0;
@@ -38,6 +40,8 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
     }
     m_nw.mpi_sum();
     m_square_norm.mpi_sum();
+    m_reference_weight.mpi_sum();
+    m_ref_proj_energy_num.mpi_sum();
 }
 
 void Wavefunction::propagate() {
@@ -52,8 +56,6 @@ void Wavefunction::propagate() {
      */
 
     m_data.synchronize();
-    m_ref_proj_energy_num = 0;
-
     if (m_in_semistochastic_epoch) m_detsub->gather_and_project();
 
 #pragma omp parallel for
@@ -145,8 +147,9 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
     }
     auto weight = m_data.m_weight(irow_main);
     m_delta_square_norm.thread() += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
-    m_delta_nw.thread() += std::abs(*weight + *delta_weight) - std::abs(*weight);
+    m_delta_nw.thread() -= std::abs(*weight);
     weight += *delta_weight;
+    m_delta_nw.thread() += std::abs(*weight);
 }
 
 void Wavefunction::annihilate() {
@@ -178,12 +181,20 @@ void Wavefunction::annihilate() {
     std::cout << std::endl;
     DBVAR(m_nw.reduced())
     DBVAR(m_delta_nw.reduced())
-    m_nw_growth_rate = (m_nw.reduced() + m_delta_nw.reduced()) / m_nw.reduced();
+    m_nw_growth_rate = 1 + m_delta_nw.reduced() / m_nw.reduced();
     m_square_norm.local() += m_delta_square_norm.local();
+
     m_nw.local()+=m_delta_nw.local();
     m_nw.mpi_sum();
+
+    DBVAR(m_nw.reduced()-m_data.l1_norm(0))
+    ASSERT(consts::floats_nearly_equal(m_nw.reduced()/m_data.l1_norm(0), 1.0, 1e-8));
+
     if (consts::float_is_zero(m_nw.reduced())) throw (std::runtime_error("All walkers died."));
     m_ref_proj_energy_num.mpi_sum();
+    ASSERT(m_ref_proj_energy_num.reduced()!=0);
+    m_ref_proj_energy = consts::real(m_ref_proj_energy_num.reduced() / m_reference_weight.reduced());
+    m_ref_proj_energy_num = 0;
     m_aborted_weight.mpi_sum();
 
     if (mpi::i_am(m_irank_reference.reduced())) {
@@ -196,8 +207,9 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
     if (!mpi::i_am_root()) return;
     stats_file->m_ref_proj_energy_num.write(m_ref_proj_energy_num.reduced());
     stats_file->m_ref_weight.write(m_reference_weight.reduced());
-    stats_file->m_ref_proj_energy.write(m_ref_proj_energy_num.reduced() / m_reference_weight.reduced());
+    stats_file->m_ref_proj_energy.write(m_ref_proj_energy);
     stats_file->m_nwalker.write(m_nw.reduced());
+    stats_file->m_nw_growth_rate.write(m_nw_growth_rate);
     stats_file->m_aborted_weight.write(m_aborted_weight.reduced());
     stats_file->m_ninitiator.write(m_ninitiator.reduced());
     stats_file->m_noccupied_det.write(m_noccupied_determinant.reduced());

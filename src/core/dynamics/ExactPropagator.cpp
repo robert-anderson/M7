@@ -34,7 +34,7 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
             auto delta = -*weight * m_tau * helement;
             if (consts::float_is_zero(delta)) continue;
-            spawn(spawn_list, dst_det, delta, flag_initiator);
+            spawn(spawn_list, dst_det, delta, flag_initiator, flag_deterministic);
         }
     }
 
@@ -55,7 +55,7 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
                 auto delta = -*weight * m_tau * helement;
                 if (consts::float_is_zero(delta)) continue;
-                spawn(spawn_list, dst_det, delta, flag_initiator);
+                spawn(spawn_list, dst_det, delta, flag_initiator, flag_deterministic);
             }
         }
     }

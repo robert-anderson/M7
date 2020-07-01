@@ -116,8 +116,9 @@ public:
             ASSERT(*weight==*weight)
             auto h_weight = m_local_h_weights[irow_local];
             ASSERT(h_weight==h_weight)
-            delta_nw.thread() += std::abs(tau*h_weight);
+            delta_nw.thread() -= std::abs(*weight);
             weight -= tau * h_weight;
+            delta_nw.thread() += std::abs(*weight);
         }
     }
 
@@ -144,7 +145,7 @@ public:
 
     void build_from_whole_walker_list(Hamiltonian *ham) {
         for (size_t irow = 0ul; irow < m_walker_list->high_water_mark(0); ++irow) {
-            add_determinant(irow);
+            if (!m_walker_list->row_empty(irow)) add_determinant(irow);
         }
         build_hamiltonian(ham);
     }

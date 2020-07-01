@@ -16,6 +16,7 @@ public:
     StatsField<defs::ham_t> m_ref_weight;
     StatsField<defs::ham_t> m_ref_proj_energy;
     StatsField<defs::ham_comp_t> m_nwalker;
+    StatsField<defs::ham_comp_t> m_nw_growth_rate;
     StatsField<size_t> m_ninitiator;
     StatsField<defs::wf_t> m_aborted_weight;
     StatsField<size_t> m_noccupied_det;
@@ -30,6 +31,7 @@ public:
     m_ref_weight(this, 1, "Reference weight", 12, true),
     m_ref_proj_energy(this, 1, "Reference projected energy", 12),
     m_nwalker(this, 1, "Total number of walkers"),
+    m_nw_growth_rate(this, 1, "Walker growth rate"),
     m_ninitiator(this, 1, "Number of initiator determinants"),
     m_aborted_weight(this, 1, "Aborted weight"),
     m_noccupied_det(this, 1, "Number of occupied determinants"),

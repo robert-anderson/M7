@@ -30,6 +30,7 @@ class Wavefunction {
     Distributed<size_t> m_irank_reference;
     size_t m_reference_row;
     Hybrid<defs::ham_t> m_ref_proj_energy_num;
+    defs::ham_comp_t m_ref_proj_energy;
 
     Hybrid<defs::wf_t> m_aborted_weight;
     Hybrid<int64_t> m_ninitiator;
