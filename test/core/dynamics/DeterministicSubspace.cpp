@@ -5,6 +5,7 @@
 #include <src/core/dynamics/WalkerList.h>
 #include <src/core/hamiltonian/AbInitioHamiltonian.h>
 #include <src/core/dynamics/DeterministicSubspace.h>
+#include <src/core/util/Timer.h>
 #include "gtest/gtest.h"
 
 TEST(DeterministicSubspace, FciCheck){
@@ -89,7 +90,6 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections){
     detsub.gather_and_project();
     Hybrid<defs::wf_t> delta_nw;
     detsub.update_weights(1.0, delta_nw);
-
 }
 
 TEST(DeterministicSubspace, BuildFromHighestWeighted){
