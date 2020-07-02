@@ -59,17 +59,7 @@ public:
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
     }
 
-    void update(const size_t& icycle){
-        auto tmp = m_prop->icycle_vary_shift();
-        if (!m_in_semistochastic_epoch && tmp!=~0ul){
-            m_in_semistochastic_epoch = (icycle>tmp+m_input.niter_init_detsub);
-            if (m_in_semistochastic_epoch) {
-                std::cout << "Entering semistochastic epoch on MC cycle " << icycle << std::endl;
-                m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(&m_data));
-                m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
-            }
-        }
-    }
+    void update(const size_t& icycle);
 
     void propagate();
 
