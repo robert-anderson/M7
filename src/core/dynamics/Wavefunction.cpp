@@ -11,38 +11,62 @@
 
 
 Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
-        m_fciqmc(fciqmc), m_input(fciqmc->m_input), m_reference(m_fciqmc->m_reference),
-        m_prop(fciqmc->m_prop), m_send(m_reference.nsite(), mpi::nrank()), m_recv(m_reference.nsite(), 1),
-        m_data(m_reference.nsite(), m_input.nwalker_target * m_input.walker_factor_initial) {
+        m_fciqmc(fciqmc), m_input(fciqmc->m_input),
+        m_prop(fciqmc->m_prop), m_send(fciqmc->m_reference.nsite(), mpi::nrank()),
+        m_recv(fciqmc->m_reference.nsite(), 1),
+        m_data(fciqmc->m_reference.nsite(),
+               m_input.nwalker_target * m_input.walker_factor_initial),
+        m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference) {
     const auto nrow_walker = (size_t) (m_input.walker_factor_initial * m_input.nwalker_target);
     m_data.expand(nrow_walker);
     m_send.recv(&m_recv);
     const auto nrow_buffer = (size_t) (m_input.buffer_factor_initial * m_input.nwalker_target);
     m_send.expand(nrow_buffer);
-    auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
-    auto ref_energy = m_fciqmc->m_ham->get_energy(m_reference);
-    logger::write("Reference energy: " + std::to_string(ref_energy));
 
-    m_irank_reference = fciqmc->m_rank_allocator.get_rank(m_reference);
-    m_irank_reference.mpi_bcast(0);
-    if (mpi::i_am(m_irank_reference.reduced())) {
-        m_reference_row =
-                m_data.add(m_reference, ref_weight, ref_energy, true, true, false);
-        m_ninitiator.local() = 1;
+    if (m_reference.is_mine()) {
+        auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
+        auto ref_energy = m_fciqmc->m_ham->get_energy(m_reference);
+        logger::write("Reference energy: " + std::to_string(ref_energy));
+        m_data.m_weight(m_reference.irow()) = ref_weight;
+        m_data.m_hdiag(m_reference.irow()) = ref_energy;
+
+        m_ninitiator = 1;
         m_square_norm = std::pow(std::abs(ref_weight), 2);
-        m_nw = std::abs(ref_weight);
-        m_reference_weight = ref_weight;
-        m_ref_proj_energy_num = ref_energy*ref_weight;
+        m_nwalker = std::abs(ref_weight);
     } else {
-        m_reference_row = ~0ul;
-        m_ninitiator.local() = 0;
-        m_nw = 0;
+        m_ninitiator = 0;
+        m_nwalker = 0;
     }
-    m_nw.mpi_sum();
-    m_square_norm.mpi_sum();
-    m_reference_weight.mpi_sum();
-    m_ref_proj_energy_num.mpi_sum();
 }
+
+
+void Wavefunction::update(const size_t &icycle) {
+
+    m_nwalker += m_d_nwalker.local();
+    m_nwalker.mpi_sum();
+
+    m_square_norm += m_d_square_norm.local();
+    m_square_norm.mpi_sum();
+
+    m_reference.update();
+
+    // empty the list that receives new walkers
+    m_recv.zero();
+    auto tmp = m_prop->icycle_vary_shift();
+    if (!m_in_semistochastic_epoch && tmp != ~0ul) {
+        m_in_semistochastic_epoch = (icycle > tmp + m_input.niter_init_detsub);
+        if (m_in_semistochastic_epoch) {
+            std::cout << "Entering semistochastic epoch on MC cycle " << icycle << std::endl;
+            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(&m_data));
+            m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
+        }
+    }
+
+    if (consts::float_is_zero(m_nwalker.reduced())) throw (std::runtime_error("All walkers died."));
+    ASSERT(consts::floats_nearly_equal(m_nwalker.reduced() / m_data.l1_norm(0), 1.0, 1e-8));
+
+}
+
 
 void Wavefunction::propagate() {
     /*
@@ -88,13 +112,13 @@ void Wavefunction::propagate() {
          */
         if (m_data.m_flags.m_reference_connection(irow)) {
             const auto contrib = *weight * m_prop->m_ham->get_element(m_reference, det);
-            m_ref_proj_energy_num.thread() += contrib;
+            m_reference.proj_energy_num().thread() += contrib;
         }
         auto hdiag = m_data.m_hdiag(irow);
         auto flag_deterministic = m_data.m_flags.m_deterministic(irow);
 
         m_prop->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
-        m_prop->diagonal(hdiag, weight, flag_deterministic, m_delta_square_norm.thread(), m_delta_nw.thread());
+        m_prop->diagonal(hdiag, weight, flag_deterministic, m_d_square_norm.thread(), m_d_nwalker.thread());
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
             if (flag_initiator) m_ninitiator.thread()--;
@@ -102,8 +126,6 @@ void Wavefunction::propagate() {
             ASSERT(irow_removed == irow);
         }
     }
-    m_ninitiator.add_thread_sum();
-    m_ref_proj_energy_num.put_thread_sum();
 }
 
 void Wavefunction::communicate() {
@@ -112,7 +134,6 @@ void Wavefunction::communicate() {
 
 void Wavefunction::annihilate_row(const size_t &irow_recv) {
 
-    auto conn = m_fciqmc->m_scratch->conn->get();
     auto det = m_recv.m_determinant(irow_recv);
     auto delta_weight = m_recv.m_weight(irow_recv);
     // zero magnitude weights should not have been communicated
@@ -132,9 +153,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
         }
         irow_main = m_data.push(mutex, det);
         m_data.m_hdiag(irow_main) = m_prop->m_ham->get_energy(det);
-        conn.zero();
-        conn.connect(m_reference, det);
-        m_data.m_flags.m_reference_connection(irow_main) = conn.nexcit() < 3;
+        m_data.m_flags.m_reference_connection(irow_main) = m_reference.is_connected(det);
         m_data.m_flags.m_deterministic(irow_main) = false;
         m_data.m_flags.m_initiator(irow_main) = false;
     }
@@ -146,85 +165,146 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
         return;
     }
     auto weight = m_data.m_weight(irow_main);
-    m_delta_square_norm.thread() += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
-    m_delta_nw.thread() -= std::abs(*weight);
+    m_d_square_norm.thread() += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
+    m_d_nwalker.thread() -= std::abs(*weight);
     weight += *delta_weight;
-    m_delta_nw.thread() += std::abs(*weight);
+    m_d_nwalker.thread() += std::abs(*weight);
 }
 
 void Wavefunction::annihilate() {
-    if (m_in_semistochastic_epoch) m_detsub->update_weights(m_prop->m_tau, m_delta_nw);
+    if (m_in_semistochastic_epoch) m_detsub->update_weights(m_prop->m_tau, m_d_nwalker);
     m_aborted_weight = 0;
 #pragma omp parallel for
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
         annihilate_row(irow_recv);
     }
+}
+
+void Wavefunction::synchronize() {
+    /*
+     * This method handles the MPI communication involved in collating the Distributed and
+     * Hybrid members of the Wavefunction class.
+     * TODO: "communication syndicates" to avoid many blocking MPI reductions by combining in an array
+     *
+     * As with all iterative algorithms, it is easy to mix up which iteration corresponds
+     * to the current state of a variable. In parallel and hybrid-parallel algorithms this
+     * hazard is exacerbated. Thus, all communications in this method are well-annotated to
+     * clarify this issue at every stage.
+     *
+     * In general however, variables which describe the "current state" of the wavefunction
+     * (principal variables) refer to the pre-propagation state. This is because the current
+     * state is only determinable by a deterministic loop over occupied determinants, which
+     * only occurs once (propagate() method) in the whole algorithm.
+     *
+     * Members of this class are conceptually divided according to the following scheme
+     *
+     * PRINCIPAL VARIABLES (not subject to propagation at synchronization)
+     * ------------------------------------------------------------------------------------
+     *
+     *     ACCUMULATED PRINCIPAL VARIABLES (value persists between cycles and is updated
+     *     by a delta variable in update())
+     *     ---------------------------------------------------------------------------------
+     *       - m_nocc_det
+     *       - m_nwalker
+     *       - m_square_norm
+     *       - m_ninitiator
+     *
+     *     INSTANTANEOUS PRINCIPAL VARIABLES (value is reset to default value in update())
+     *     ---------------------------------------------------------------------------------
+     *       - m_reference_weight
+     *       - m_ref_proj_energy_num
+     *
+     * DELTA VARIABLES (relates directly to the propagation just performed)
+     * ------------------------------------------------------------------------------------
+     *  - m_d_nwalker
+     *  - m_d_square_norm
+     *  - m_aborted_weight
+     *
+     *
+     *  use the prefix "d_" to denote the delta variable containing the update to a principal
+     *  variable. Delta variables do not persist between iterations and are always reset to
+     *  their default value at update()
+     *
+     *  Any arithmetic expression involving a combination of principal and delta variables
+     *  is a delta variable
+     */
+
+    /*
+     *
+     * m_nwalker contains the local and sum-reduced walker number (l1-norm of the wavefunction)
+     * from the previous iteration (i.e. it has not been subject to the propagation just
+     * performed)
+     *
+     * m_d_nwalker contains the thread-resolved change in m_nwalker for the propagation just performed,
+     * this must be sum-reduced to set the local value
+     */
+    m_d_nwalker.put_thread_sum();
+    /*
+     * we also need the total change in walker number:
+     */
+    m_d_nwalker.mpi_sum();
+    /*
+     * local and reduced values of m_nwalker are not updated with those in m_d_nwalker at this stage,
+     * because the statistics based on the principal variables e.g. the reference-projected energy
+     * estimator are yet to be output.
+     *
+     * the delta due to the square_norm deserves the same treatment.
+     */
+    m_d_square_norm.put_thread_sum();
+    m_d_square_norm.mpi_sum();
+
+    /*
+     * m_aborted_weight is another thread-accumulated delta variable, but unlike the two norms, it
+     * does not correspond to a principal variable. It is reduced here, consumed in write_iter_stats
+     * and reset like any other delta variable in update()
+     */
     m_aborted_weight.put_thread_sum();
-    m_delta_square_norm.put_thread_sum();
-    m_delta_nw.put_thread_sum();
-    m_recv.zero();
-    m_ninitiator.mpi_sum();
-    ASSERT(m_ninitiator.reduced() >= 0)
-#ifndef NDEBUG
-    if (mpi::nrank() == 1) {
-        size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
-        DBVAR(ninitiator_verify);
-        DBVAR(m_ninitiator.reduced());
-        ASSERT(m_ninitiator.reduced() == ninitiator_verify);
-    }
-#endif
-
-    m_delta_square_norm.mpi_sum();
-    m_delta_nw.mpi_sum();
-    m_square_norm.mpi_sum();
-    m_noccupied_determinant.mpi_sum();
-    std::cout << std::endl;
-    DBVAR(m_nw.reduced())
-    DBVAR(m_delta_nw.reduced())
-    m_nw_growth_rate = 1 + m_delta_nw.reduced() / m_nw.reduced();
-    m_square_norm.local() += m_delta_square_norm.local();
-
-    m_nw.local()+=m_delta_nw.local();
-    m_nw.mpi_sum();
-
-    DBVAR(m_nw.reduced()-m_data.l1_norm(0))
-    ASSERT(consts::floats_nearly_equal(m_nw.reduced()/m_data.l1_norm(0), 1.0, 1e-8));
-
-    if (consts::float_is_zero(m_nw.reduced())) throw (std::runtime_error("All walkers died."));
-    m_ref_proj_energy_num.mpi_sum();
-    ASSERT(m_ref_proj_energy_num.reduced()!=0);
-    m_ref_proj_energy = consts::real(m_ref_proj_energy_num.reduced() / m_reference_weight.reduced());
-    m_ref_proj_energy_num = 0;
     m_aborted_weight.mpi_sum();
 
-    if (mpi::i_am(m_irank_reference.reduced())) {
-        m_reference_weight = *m_data.m_weight(m_reference_row);
-    }
-    m_reference_weight.mpi_bcast(m_irank_reference.reduced());
+    /*
+     * same for the change in occupied determinants
+     */
+    m_d_nocc_det.put_thread_sum();
+    m_d_nocc_det.mpi_sum();
+
+#if 0
+    ASSERT(m_ninitiator.reduced() >= 0)
+#ifndef NDEBUG
+    size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
+    ninitiator_verify = mpi::all_sum(ninitiator_verify);
+    ASSERT(m_ninitiator.reduced() == ninitiator_verify);
+#endif
+     */
+#endif
+
+    /*
+     * the growth rate is the ratio of the new walker number (after update is called) to
+     * the present value
+     */
+    m_nwalker_growth_rate = 1 + m_d_nwalker.reduced() / m_nwalker.reduced();
+
+    /*
+     * the numerator of the reference projected energy Rayleigh quotient is treated like a
+     * delta variable, but is an instantaneous principal variable determined by the pre-
+     * propagation walker distribution. This also enables the instantaneous Rayleigh quotient
+     * to be computed. This is a pure convenience to aid a "quick look" at the energy estimator
+     * in the stats file - the numerator and denominator should be independently analyzed to
+     * obtain the estimate. All of this is handled in the Reference class, so defer to the
+     * method implemented therein.
+     */
+    m_reference.synchronize();
 }
 
 void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
     if (!mpi::i_am_root()) return;
-    stats_file->m_ref_proj_energy_num.write(m_ref_proj_energy_num.reduced());
-    stats_file->m_ref_weight.write(m_reference_weight.reduced());
-    stats_file->m_ref_proj_energy.write(m_ref_proj_energy);
-    stats_file->m_nwalker.write(m_nw.reduced());
-    stats_file->m_nw_growth_rate.write(m_nw_growth_rate);
+    stats_file->m_ref_proj_energy_num.write(m_reference.proj_energy_num().reduced());
+    stats_file->m_ref_weight.write(m_reference.weight());
+    stats_file->m_ref_proj_energy.write(m_reference.proj_energy());
+    stats_file->m_nwalker.write(m_nwalker.reduced());
+    stats_file->m_nw_growth_rate.write(m_nwalker_growth_rate);
     stats_file->m_aborted_weight.write(m_aborted_weight.reduced());
     stats_file->m_ninitiator.write(m_ninitiator.reduced());
-    stats_file->m_noccupied_det.write(m_noccupied_determinant.reduced());
-}
-
-void Wavefunction::update(const size_t &icycle) {
-    auto tmp = m_prop->icycle_vary_shift();
-    if (!m_in_semistochastic_epoch && tmp!=~0ul){
-        m_in_semistochastic_epoch = (icycle>tmp+m_input.niter_init_detsub);
-        if (m_in_semistochastic_epoch) {
-            std::cout << "Entering semistochastic epoch on MC cycle " << icycle << std::endl;
-            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(&m_data));
-            m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
-        }
-    }
+    stats_file->m_noccupied_det.write(m_nocc_det.reduced());
 }
 
 #pragma clang diagnostic pop

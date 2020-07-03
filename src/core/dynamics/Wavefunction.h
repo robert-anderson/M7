@@ -13,24 +13,19 @@
 #include "Propagator.h"
 #include "src/core/parallel/Distributed.h"
 #include "DeterministicSubspace.h"
+#include "Reference.h"
 
 class FciqmcCalculation;
 
 class Wavefunction {
     FciqmcCalculation *m_fciqmc;
     const Options &m_input;
-    Determinant& m_reference;
+    Reference m_reference;
     const std::unique_ptr<Propagator> &m_prop;
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
 
     WalkerList m_data;
     SpawnList m_send, m_recv;
-
-    Distributed<defs::wf_t> m_reference_weight;
-    Distributed<size_t> m_irank_reference;
-    size_t m_reference_row;
-    Hybrid<defs::ham_t> m_ref_proj_energy_num;
-    defs::ham_comp_t m_ref_proj_energy;
 
     Hybrid<defs::wf_t> m_aborted_weight;
     Hybrid<int64_t> m_ninitiator;
@@ -43,15 +38,21 @@ public:
      * Square norm is sum_i(|w_i|^2)
      */
     Hybrid<defs::wf_comp_t> m_square_norm;
-    Hybrid<defs::wf_comp_t> m_delta_square_norm;
+    Hybrid<defs::wf_comp_t> m_d_square_norm;
     /*
      * Walker number is sum_i(|w_i|)
      */
-    Distributed<defs::wf_comp_t> m_nw;
-    Hybrid<defs::wf_comp_t> m_delta_nw;
-    defs::wf_comp_t m_nw_growth_rate;
+    Distributed<defs::wf_comp_t> m_nwalker;
+    Hybrid<defs::wf_comp_t> m_d_nwalker;
+    defs::wf_comp_t m_nwalker_growth_rate;
 
-    Hybrid<size_t> m_noccupied_determinant;
+    /*
+     * number of occupied determinants, the principal variable is distributed, since
+     * rank-resolved data could inform load balancing
+     */
+    Distributed<size_t> m_nocc_det;
+    Hybrid<int> m_d_nocc_det;
+
 
     Wavefunction(FciqmcCalculation *fciqmc);
 
@@ -59,6 +60,9 @@ public:
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
     }
 
+    /**
+     * Effect arithmetic updates on member variables (no communication)
+     */
     void update(const size_t& icycle);
 
     void propagate();
@@ -70,6 +74,11 @@ public:
     }
 
     void annihilate();
+
+    /**
+     * Perform the necessary thread and MPI reductions on members
+     */
+    void synchronize();
 
     void write_iter_stats(FciqmcStatsFile* stats_file);
 

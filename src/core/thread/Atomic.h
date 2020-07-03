@@ -7,6 +7,7 @@
 
 #include <complex>
 #include "src/core/util/consts.h"
+#include "omp.h"
 
 template<typename T>
 struct Atomic {

@@ -10,6 +10,7 @@
 #include <cstring>
 #include <functional>
 #include <src/core/util/defs.h>
+#include <src/core/parallel/MPIWrapper.h>
 #include "Field.h"
 
 class Field;
@@ -44,6 +45,7 @@ public:
     virtual bool is_zero() const;
     const Field* field() const;
     virtual bool is_complex() const;
+    void mpi_bcast(const size_t& iroot=0);
 };
 
 #endif //SANDBOX2_ELEMENT_H

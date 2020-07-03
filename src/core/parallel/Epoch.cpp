@@ -15,10 +15,10 @@ void Epoch::update(size_t icycle, bool condition) {
     m_icycle_start.mpi_min();
 }
 
-const size_t &Epoch::start() {
+const size_t &Epoch::start_cycle() {
     return m_icycle_start.reduced();
 }
 
 bool Epoch::has_begun() {
-    return start()!=~0ul;
+    return start_cycle()!=~0ul;
 }

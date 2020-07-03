@@ -33,11 +33,11 @@ public:
         return *this;
     }
 
-    T& local(){
+    T& local() {
         return m_local;
     }
 
-    T& reduced(){
+    const T& reduced() const {
 #ifndef DNDEBUG
         // check that a reduction method was applied
         //ASSERT(m_reduced!=std::numeric_limits<T>::max());

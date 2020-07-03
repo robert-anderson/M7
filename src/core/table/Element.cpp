@@ -95,3 +95,7 @@ std::string Element::to_string() {
 void Element::print() {
     std::cout << to_string() << std::endl;
 }
+
+void Element::mpi_bcast(const size_t &iroot) {
+    mpi::bcast(m_begin, m_field->m_element_size);
+}

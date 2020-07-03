@@ -41,6 +41,10 @@ public:
         *this=obj;
     }
 
+    Determinant(const DeterminantElement &obj):Determinant(obj.nsite()) {
+        *this=obj;
+    }
+
 };
 
 #endif //M7_DETERMINANT_H

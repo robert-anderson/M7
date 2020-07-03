@@ -41,7 +41,7 @@ class Epoch {
     /**
      * @return the MPI-synchronized cycle number on which the Epoch began
      */
-    const size_t& start();
+    const size_t& start_cycle();
 
     /**
      * @return the MPI-synchronized state of the Epoch

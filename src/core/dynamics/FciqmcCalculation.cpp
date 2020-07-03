@@ -41,8 +41,9 @@ void FciqmcCalculation::execute() {
         m_wf.consolidate_incoming_weight();
         //std::cout << "\nannihilating..." << std::endl;
         m_wf.annihilate();
+        m_wf.synchronize();
         //std::cout << "\nupdating propagator..." << std::endl;
-        m_prop->update(icycle, m_wf.m_nw.reduced(), m_wf.m_nw_growth_rate);
+        m_prop->update(icycle, m_wf.m_nwalker.reduced(), m_wf.m_nwalker_growth_rate);
         //std::cout << "\nwriting stats..." << std::endl;
         write_iter_stats(icycle);
     }
