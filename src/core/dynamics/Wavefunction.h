@@ -20,12 +20,13 @@ class FciqmcCalculation;
 class Wavefunction {
     FciqmcCalculation *m_fciqmc;
     const Options &m_input;
-    Reference m_reference;
     const std::unique_ptr<Propagator> &m_prop;
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
 
     WalkerList m_data;
     SpawnList m_send, m_recv;
+    Reference m_reference;
+
 
     Hybrid<defs::wf_t> m_aborted_weight;
     Hybrid<int64_t> m_ninitiator;
@@ -54,7 +55,7 @@ public:
     Hybrid<int> m_d_nocc_det;
 
 
-    Wavefunction(FciqmcCalculation *fciqmc);
+    explicit Wavefunction(FciqmcCalculation *fciqmc);
 
     ~Wavefunction(){
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;

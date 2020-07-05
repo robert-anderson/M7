@@ -28,8 +28,10 @@ class Reference : public Determinant {
 public:
     Reference(WalkerList &list, RankAllocator<DeterminantElement> &ra, DeterminantElement &det) :
             Determinant(det), m_list(list), m_ra(ra) {
+        if (m_list.nrow_per_segment()==0) m_list.expand(1);
         if (mpi::i_am(ra.get_rank(det))) {
-            m_irow = list.push(det);
+            m_irow = m_list.push(det);
+            ASSERT(m_irow!=~0ul)
             list.m_determinant(m_irow) = det;
             m_irank = mpi::irank();
         } else {
