@@ -23,7 +23,7 @@ TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     Determinant hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
-    size_t removed, inserted;
+    //size_t removed, inserted;
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);
@@ -70,7 +70,7 @@ TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
     Determinant hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, 2,  6, 7, 8});
-    size_t removed, inserted;
+    //size_t removed, inserted;
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);

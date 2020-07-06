@@ -29,6 +29,7 @@ public:
         }
         return true;
     }
+
     virtual bool next(result_T &result, size_t &i) {
         ++i;
         return next(result);
@@ -41,7 +42,7 @@ public:
         return m_subsequent!= nullptr;
     }
 
-    virtual result_T default_result(){
+    result_T default_result(){
         return result_T{};
     }
 
@@ -53,12 +54,14 @@ public:
         }
         return results;
     }
-    size_t count(){
+
+    size_t count(result_T& v){
         size_t n = 0ul;
-        result_T tmp;
+        result_T tmp = v;
         while(next(tmp)) n++;
         return n;
     }
+
     bool has_fewer_than_n_elements(size_t nmax) {
         size_t n = 0ul;
         result_T tmp;

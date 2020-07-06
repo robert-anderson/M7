@@ -21,7 +21,7 @@ FileIterator::~FileIterator() {
     m_file->close();
 }
 
-const size_t FileIterator::line_number_from_regex(const std::string &filename, const std::regex &regex){
+size_t FileIterator::line_number_from_regex(const std::string &filename, const std::regex &regex){
     std::smatch match;
     FileIterator fi(filename);
     std::string line;
@@ -32,6 +32,7 @@ const size_t FileIterator::line_number_from_regex(const std::string &filename, c
         out++;
     }
     ASSERT(!line.empty());
+    return out;
 }
 
 bool FileIterator::next(std::string &line){

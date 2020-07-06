@@ -31,7 +31,7 @@ TEST(utils, combinatorial){
 
 TEST(utils, PairMaps){
     const size_t N = 20;
-    size_t n, i, j;
+    size_t n;
     size_t tmp_i, tmp_j;
 
     size_t ij = 0ul;

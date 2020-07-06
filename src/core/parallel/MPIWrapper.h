@@ -21,58 +21,58 @@
 #ifdef HAVE_MPI
 
 template<typename T>
-static const MPI_Datatype mpi_type() { return MPI_Datatype(); }
+static MPI_Datatype mpi_type() { return MPI_Datatype(); }
 
 template<>
-const MPI_Datatype mpi_type<char>() { return MPI_CHAR; }
+MPI_Datatype mpi_type<char>() { return MPI_CHAR; }
 
 template<>
-const MPI_Datatype mpi_type<short int>() { return MPI_SHORT; }
+MPI_Datatype mpi_type<short int>() { return MPI_SHORT; }
 
 template<>
-const MPI_Datatype mpi_type<int>() { return MPI_INT; }
+MPI_Datatype mpi_type<int>() { return MPI_INT; }
 
 template<>
-const MPI_Datatype mpi_type<long int>() { return MPI_LONG; }
+MPI_Datatype mpi_type<long int>() { return MPI_LONG; }
 
 template<>
-const MPI_Datatype mpi_type<long long int>() { return MPI_LONG_LONG_INT; }
+MPI_Datatype mpi_type<long long int>() { return MPI_LONG_LONG_INT; }
 
 template<>
-const MPI_Datatype mpi_type<unsigned char>() { return MPI_UNSIGNED_CHAR; }
+MPI_Datatype mpi_type<unsigned char>() { return MPI_UNSIGNED_CHAR; }
 
 template<>
-const MPI_Datatype mpi_type<unsigned short int>() { return MPI_UNSIGNED_SHORT; }
+MPI_Datatype mpi_type<unsigned short int>() { return MPI_UNSIGNED_SHORT; }
 
 template<>
-const MPI_Datatype mpi_type<unsigned int>() { return MPI_UNSIGNED; }
+MPI_Datatype mpi_type<unsigned int>() { return MPI_UNSIGNED; }
 
 template<>
-const MPI_Datatype mpi_type<unsigned long int>() { return MPI_UNSIGNED_LONG; }
+MPI_Datatype mpi_type<unsigned long int>() { return MPI_UNSIGNED_LONG; }
 
 template<>
-const MPI_Datatype mpi_type<unsigned long long int>() { return MPI_UNSIGNED_LONG_LONG; }
+MPI_Datatype mpi_type<unsigned long long int>() { return MPI_UNSIGNED_LONG_LONG; }
 
 template<>
-const MPI_Datatype mpi_type<float>() { return MPI_FLOAT; }
+MPI_Datatype mpi_type<float>() { return MPI_FLOAT; }
 
 template<>
-const MPI_Datatype mpi_type<double>() { return MPI_DOUBLE; }
+MPI_Datatype mpi_type<double>() { return MPI_DOUBLE; }
 
 template<>
-const MPI_Datatype mpi_type<long double>() { return MPI_LONG_DOUBLE; }
+MPI_Datatype mpi_type<long double>() { return MPI_LONG_DOUBLE; }
 
 template<>
-const MPI_Datatype mpi_type<std::complex<float>>() { return MPI_FLOAT; }
+MPI_Datatype mpi_type<std::complex<float>>() { return MPI_FLOAT; }
 
 template<>
-const MPI_Datatype mpi_type<std::complex<double>>() { return MPI_DOUBLE; }
+MPI_Datatype mpi_type<std::complex<double>>() { return MPI_DOUBLE; }
 
 template<>
-const MPI_Datatype mpi_type<std::complex<long double>>() { return MPI_LONG_DOUBLE; }
+MPI_Datatype mpi_type<std::complex<long double>>() { return MPI_LONG_DOUBLE; }
 
 template<>
-const MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
+MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
 
 const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
 #endif

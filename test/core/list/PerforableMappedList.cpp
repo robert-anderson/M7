@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "openmp-use-default-none"
 //
 // Created by Robert John Anderson on 2020-02-23.
 //
@@ -75,5 +73,3 @@ TEST(PerforableMappedList, MultiRemovalAndReuse) {
         list.synchronize();
     }
 }
-
-#pragma clang diagnostic pop

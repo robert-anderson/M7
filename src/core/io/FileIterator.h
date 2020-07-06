@@ -23,7 +23,7 @@ public:
 
     virtual ~FileIterator();
 
-    static const size_t line_number_from_regex(const std::string &, const std::regex &);
+    static size_t line_number_from_regex(const std::string &, const std::regex &);
 
     bool next(std::string &);
 

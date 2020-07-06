@@ -31,10 +31,14 @@ include_directories(${MPI_INCLUDE_PATH})
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
+
+
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external/CLI11/include")
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
+add_definitions(-Wall -Wextra -Werror)
+add_definitions(-Wno-unused-function -Wno-unused-parameter)
 
 add_subdirectory(src)
 add_subdirectory(test)

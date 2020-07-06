@@ -81,7 +81,6 @@ public:
         auto &list = m_buckets[ibucket];
         auto prev = list.begin();
         for (auto it = list.begin(); it != list.end(); it++) {
-            auto t = *it;
             if (*it == key_index) {
                 if (prev == it) list.pop_front();
                 else list.erase_after(prev);

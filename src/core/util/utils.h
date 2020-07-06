@@ -17,6 +17,25 @@
 #include <iomanip>
 
 namespace utils {
+
+    /*
+     * tests whether all bytes are zero.
+     * This is slow, only use for checking that memsets and other zeroing operations
+     * have been successful in debug build
+     */
+    template<typename T>
+    bool is_zero(const T* v){
+        for (size_t ichar=0ul; ichar<sizeof(T); ++ichar){
+            if (*((char*)v + ichar)!=0) return false;
+        }
+        return true;
+    }
+
+    template<typename T>
+    bool is_zero(const T& v){
+        return is_zero(&v);
+    }
+
     template<typename T>
     std::string to_string(T v, size_t n) {
         std::string string("[");
@@ -45,7 +64,7 @@ namespace utils {
         std::string result;
         if (std::is_floating_point<T>::value) result = fp_to_string(entry, fp_precision);
         else if (std::is_integral<T>::value) result = std::to_string(entry);
-        auto decimal_length = std::numeric_limits<T>::digits10;
+        //auto decimal_length = std::numeric_limits<T>::digits10;
         //assert(result.size()<=decimal_length);
         //result.insert(result.begin(), padding + decimal_length - result.size(), ' ');
         return result;

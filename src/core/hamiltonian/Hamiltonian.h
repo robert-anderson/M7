@@ -62,6 +62,7 @@ public:
             case 0:
                 return get_element_0(connection);
             case 1:
+                ASSERT(connection.ncom()+connection.nexcit()==nelec());
                 return get_element_1(connection);
             case 2:
                 return get_element_2(connection);

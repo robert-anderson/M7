@@ -63,6 +63,7 @@ public:
     T& mpi_bcast(size_t irank){
         m_reduced = m_local;
         mpi::bcast(m_reduced, irank);
+        return m_reduced;
     }
 };
 

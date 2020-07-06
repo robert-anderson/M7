@@ -48,8 +48,9 @@ TEST(DeterministicSubspace, FciCheck){
 
     defs::ham_comp_t energy;
     energy = do_iter();
-    if (is_ref_rank)
+    if (is_ref_rank) {
         ASSERT_FLOAT_EQ(energy, ham.get_energy(ref_det));
+    }
 
     energy = do_iter();
     ASSERT_FLOAT_EQ(energy, -108.65403);
@@ -68,7 +69,7 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections){
     Hamiltonian::ConnectionList conn_list(ham.nsite(), 100);
     const size_t nconn = 48;
     conn_list.expand(nconn);
-    auto irow_ref = conn_list.push(ref);
+    //auto irow_ref = conn_list.push(ref);
 
     ham.all_connections_of_det(&conn_list, ref, 1e-12);
     ASSERT_EQ(conn_list.high_water_mark(0), nconn);

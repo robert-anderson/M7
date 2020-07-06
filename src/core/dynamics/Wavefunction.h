@@ -11,7 +11,7 @@
 #include "WalkerList.h"
 #include "SpawnList.h"
 #include "Propagator.h"
-#include "src/core/parallel/Distributed.h"
+#include "src/core/parallel/DistributedAccumulation.h"
 #include "DeterministicSubspace.h"
 #include "Reference.h"
 
@@ -27,9 +27,8 @@ class Wavefunction {
     SpawnList m_send, m_recv;
     Reference m_reference;
 
-
     Hybrid<defs::wf_t> m_aborted_weight;
-    Hybrid<int64_t> m_ninitiator;
+    DistributedAccumulation<size_t, int64_t> m_ninitiator;
 
     bool m_in_semistochastic_epoch = false;
 
@@ -38,22 +37,18 @@ public:
     /*
      * Square norm is sum_i(|w_i|^2)
      */
-    Hybrid<defs::wf_comp_t> m_square_norm;
-    Hybrid<defs::wf_comp_t> m_d_square_norm;
+    DistributedAccumulation<defs::wf_comp_t> m_square_norm;
     /*
      * Walker number is sum_i(|w_i|)
      */
-    Distributed<defs::wf_comp_t> m_nwalker;
-    Hybrid<defs::wf_comp_t> m_d_nwalker;
+    DistributedAccumulation<defs::wf_comp_t> m_nwalker;
     defs::wf_comp_t m_nwalker_growth_rate;
 
     /*
      * number of occupied determinants, the principal variable is distributed, since
      * rank-resolved data could inform load balancing
      */
-    Distributed<size_t> m_nocc_det;
-    Hybrid<int> m_d_nocc_det;
-
+    DistributedAccumulation<size_t, int64_t> m_nocc_det;
 
     explicit Wavefunction(FciqmcCalculation *fciqmc);
 

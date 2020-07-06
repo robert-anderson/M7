@@ -4,9 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <src/core/util/defs.h>
-#include <src/core/heatbath/HeatBathSampler.h>
 #include <src/core/hamiltonian/AbInitioHamiltonian.h>
-#include <src/core/heatbath/DeterminantSampler.h>
 
 #if 0
 TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {

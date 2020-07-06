@@ -40,6 +40,7 @@ public:
         m_weight(irow, isegment) = weight;
         m_flags.m_parent_initiator(irow, isegment) = flag_parent_initiator;
         m_flags.m_parent_deterministic(irow, isegment) = flag_parent_deterministic;
+        return irow;
     }
 };
 

@@ -8,6 +8,8 @@
 #include "AlignedAllocator.h"
 #include "omp.h"
 #include <numeric>
+#include <algorithm>
+#include "src/core/util/utils.h"
 
 template<typename T>
 class PrivateStore {
@@ -39,12 +41,17 @@ public:
 
     T& get(){
         auto const ithread = omp_get_thread_num();
-        ASSERT(ithread<m_nthread);
+        ASSERT((size_t)ithread<m_nthread);
         return m_data[ithread].v;
+    }
+
+    bool is_zero(){
+        return std::all_of(m_data.begin(), m_data.end(), [](const aligned_T& i){return utils::is_zero(i.v);});
     }
 
     void zero(){
         memset(m_data.data(), 0, sizeof(aligned_T)*m_data.size());
+        ASSERT(is_zero())
     }
 
     const size_t& nthread() const {return m_nthread;}

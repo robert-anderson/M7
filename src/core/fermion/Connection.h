@@ -98,4 +98,11 @@ public:
     const bool& phase() const {return m_phase;}
 };
 
+template<typename T>
+struct MatrixElement {
+    AntisymConnection aconn;
+    T element = 0;
+    MatrixElement(const DeterminantElement& det): aconn(AntisymConnection(det)) {}
+};
+
 #endif //M7_CONNECTION_H

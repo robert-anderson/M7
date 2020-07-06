@@ -18,7 +18,7 @@ class CombinationEnumerator : public Enumerator<defs::inds> {
 public:
     explicit CombinationEnumerator(size_t n, size_t r, Enumerator *subsequent = nullptr);
     virtual bool next_element(defs::inds &result);
-    defs::inds default_result() override {
+    defs::inds default_result() {
         return defs::inds(m_r);
     }
 };

@@ -80,7 +80,6 @@ TEST(Table, DataIntegrityDeterminants) {
 
     TestTable2 table(nsegment, nspatorb, nelement);
     table.expand(nrow);
-    size_t i = 0;
 
     std::vector<DeterminantElement> v;
     table.test_dets(0, 0, 0).set({1, 4, 6, 23});

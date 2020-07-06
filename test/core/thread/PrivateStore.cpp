@@ -214,7 +214,6 @@ TEST(PrivateStore, ComplexReduceProd) {
 TEST(PrivateStore, ComplexReduceMax) {
     PrivateStore<double> store;
     ASSERT_EQ(store.nthread(), omp_get_max_threads());
-    const auto z = complex_utils::normal_from_sector(1, 5);
 #pragma omp parallel default(none) shared(store)
     {
         store.get() = double((omp_get_thread_num() * 23) % 5) - 3;
@@ -230,7 +229,7 @@ TEST(PrivateStore, ComplexReduceMax) {
 TEST(PrivateStore, ComplexReduceMin) {
     PrivateStore<double> store;
     ASSERT_EQ(store.nthread(), omp_get_max_threads());
-    const auto z = complex_utils::normal_from_sector(1, 5);
+    //const auto z = complex_utils::normal_from_sector(1, 5);
 #pragma omp parallel default(none) shared(store)
     {
         store.get() = double((omp_get_thread_num() * 23) % 5) - 3;

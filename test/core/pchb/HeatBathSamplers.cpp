@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "openmp-use-default-none"
 //
 // Created by rja on 09/05/2020.
 //
@@ -187,6 +185,3 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
 }
-
-
-#pragma clang diagnostic pop

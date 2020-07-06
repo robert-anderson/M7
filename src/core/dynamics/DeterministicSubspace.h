@@ -50,7 +50,6 @@ class DeterministicSubspace {
     defs::inds m_recvcounts;
     defs::inds m_displs;
 
-
     void build_hamiltonian(const Hamiltonian *ham) {
         ASSERT(m_sparse_ham.empty());
         m_full_subspace_list->all_gather(*m_local_subspace_list);
@@ -80,52 +79,52 @@ class DeterministicSubspace {
 
 public:
 
+    DeterministicSubspace(WalkerList *walker_list) :
+            m_walker_list(walker_list),
+            m_local_subspace_list(std::unique_ptr<SubspaceList>(new SubspaceList(walker_list->m_determinant.m_nsite))),
+            m_full_subspace_list(std::unique_ptr<SubspaceList>(new SubspaceList(walker_list->m_determinant.m_nsite))),
+            m_recvcounts(mpi::nrank(), 0), m_displs(mpi::nrank(), 0) {}
+
     void gather_and_project() {
 #pragma omp parallel for default(none) shared(stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
             ASSERT(m_walker_list->m_flags.m_deterministic(irow_walker_list));
             m_local_weights[irow_local] = *m_walker_list->m_weight(irow_walker_list);
-            ASSERT(m_local_weights[irow_local]==m_local_weights[irow_local])
+            ASSERT(m_local_weights[irow_local] == m_local_weights[irow_local])
         }
-        ASSERT(nrow_local()==m_recvcounts[mpi::irank()])
-        ASSERT(nrow_local()==m_local_weights.size())
+        ASSERT(nrow_local() == m_recvcounts[mpi::irank()])
+        ASSERT(nrow_local() == m_local_weights.size())
         mpi::all_gatherv(m_local_weights.data(), nrow_local(), m_full_weights.data(), m_recvcounts, m_displs);
         m_local_h_weights.assign(m_local_h_weights.size(), 0);
         m_sparse_ham.multiply(m_full_weights, m_local_h_weights);
     }
 
-    void rayleigh_quotient(Hybrid<defs::ham_t> &num, Hybrid<defs::ham_comp_t> &norm_square){
+    void rayleigh_quotient(Hybrid<defs::ham_t> &num, Hybrid<defs::ham_comp_t> &norm_square) {
 #pragma omp parallel for default(none) shared(num, norm_square)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
-            auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
             auto w = m_local_weights[irow_local];
             auto hw = m_local_h_weights[irow_local];
-            num.thread()+=consts::conj(w)*hw;
-            norm_square.thread()+=std::pow(std::abs(w), 2.0);
+            num.thread() += consts::conj(w) * hw;
+            norm_square.thread() += std::pow(std::abs(w), 2.0);
         }
         num.put_thread_sum();
         norm_square.put_thread_sum();
     }
 
-    defs::ham_comp_t update_weights(const double &tau, Hybrid<defs::wf_t> &delta_nw) {
+    void update_weights(const double &tau, Hybrid<defs::wf_t> &delta_nw) {
 #pragma omp parallel for default(none) shared(tau, delta_nw, stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
             auto weight = m_walker_list->m_weight(irow_walker_list);
-            ASSERT(*weight==*weight)
+            ASSERT(*weight == *weight)
             auto h_weight = m_local_h_weights[irow_local];
-            ASSERT(h_weight==h_weight)
+            ASSERT(h_weight == h_weight)
             delta_nw.thread() -= std::abs(*weight);
             weight -= tau * h_weight;
             delta_nw.thread() += std::abs(*weight);
         }
     }
-
-    DeterministicSubspace(WalkerList *walker_list) :
-            m_local_subspace_list(std::unique_ptr<SubspaceList>(new SubspaceList(walker_list->m_determinant.m_nsite))),
-            m_full_subspace_list(std::unique_ptr<SubspaceList>(new SubspaceList(walker_list->m_determinant.m_nsite))),
-            m_recvcounts(mpi::nrank(), 0), m_displs(mpi::nrank(), 0), m_walker_list(walker_list) {}
 
     void add_determinant(size_t irow_walker_list) {
         size_t irow = m_local_subspace_list->expand_push();

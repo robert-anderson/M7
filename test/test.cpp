@@ -58,5 +58,6 @@ int main(int argc, char **argv) {
     }
 
     mpi::finalize();
-    return 0;
+    out = result;
+    return out;
 }

@@ -23,6 +23,10 @@ public:
         return m_thread.zero();
     }
 
+    bool threads_zeroed(){
+        return m_thread.is_zero();
+    }
+
     Hybrid<T>& operator=(const T& rhs) override {
         if (omp_get_level()) thread() = rhs;
         else Distributed<T>::operator=(rhs);

@@ -77,6 +77,7 @@ public:
             case 10:
                 return trig(trig(l, k), trig(j, i));
         }
+        return ~0ul;
     }
 
     void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l, const T &value) {

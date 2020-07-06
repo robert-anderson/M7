@@ -118,6 +118,7 @@ public:
                 nalpha++;
             }
         }
+        return nalpha;
     }
 };
 

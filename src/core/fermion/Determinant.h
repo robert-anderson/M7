@@ -12,7 +12,7 @@ class Determinant : public DeterminantElement {
     struct DeterminantTable : public Table {
         DeterminantField field;
 
-        DeterminantTable(Determinant *determinant, size_t nsite) :
+        DeterminantTable(size_t nsite) :
             Table(),
             field(this, 1, nsite) {
             expand(1);
@@ -21,7 +21,7 @@ class Determinant : public DeterminantElement {
 
     DeterminantTable internal_table;
 public:
-    Determinant(size_t nsite) : DeterminantElement(nullptr, nullptr), internal_table(this, nsite) {
+    Determinant(size_t nsite) : DeterminantElement(nullptr, nullptr), internal_table(nsite) {
         m_field = &internal_table.field;
         auto element = (*m_field)(0);
         m_begin = element.begin();

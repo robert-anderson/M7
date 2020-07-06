@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "openmp-use-default-none"
 //
 // Created by Robert John Anderson on 2020-04-03.
 //
@@ -12,10 +10,11 @@
 
 Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_fciqmc(fciqmc), m_input(fciqmc->m_input),
-        m_prop(fciqmc->m_prop), m_send(fciqmc->m_reference.nsite(), mpi::nrank()),
-        m_recv(fciqmc->m_reference.nsite(), 1),
+        m_prop(fciqmc->m_prop),
         m_data(fciqmc->m_reference.nsite(),
                m_input.nwalker_target * m_input.walker_factor_initial),
+        m_send(fciqmc->m_reference.nsite(), mpi::nrank()),
+        m_recv(fciqmc->m_reference.nsite(), 1),
         m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference) {
     const auto nrow_walker = (size_t) (m_input.walker_factor_initial * m_input.nwalker_target);
     m_data.expand(nrow_walker);
@@ -29,6 +28,8 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         logger::write("Reference energy: " + std::to_string(ref_energy));
         m_data.m_weight(m_reference.irow()) = ref_weight;
         m_data.m_hdiag(m_reference.irow()) = ref_energy;
+        m_data.m_flags.m_reference_connection(m_reference.irow()) = true;
+        m_data.m_flags.m_initiator(m_reference.irow()) = true;
 
         m_ninitiator = 1;
         m_square_norm = std::pow(std::abs(ref_weight), 2);
@@ -41,30 +42,40 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
 
 
 void Wavefunction::update(const size_t &icycle) {
+    ASSERT(m_nwalker.m_delta.threads_zeroed())
+    m_nwalker.accumulate();
+    ASSERT(m_square_norm.m_delta.threads_zeroed())
+    m_square_norm.accumulate();
+    //ASSERT(m_square_norm.reduced()==m_data.square_norm(0))
+    ASSERT(m_ninitiator.m_delta.threads_zeroed())
+    m_ninitiator.accumulate();
 
-    m_nwalker += m_d_nwalker.local();
-    m_nwalker.mpi_sum();
-
-    m_square_norm += m_d_square_norm.local();
-    m_square_norm.mpi_sum();
+#ifndef NDEBUG
+    size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
+    ninitiator_verify = mpi::all_sum(ninitiator_verify);
+    ASSERT(m_ninitiator.reduced() == ninitiator_verify);
+#endif
 
     m_reference.update();
 
-    // empty the list that receives new walkers
-    m_recv.zero();
     auto tmp = m_prop->icycle_vary_shift();
-    if (!m_in_semistochastic_epoch && tmp != ~0ul) {
+    if (m_input.do_semistochastic && !m_in_semistochastic_epoch && tmp != ~0ul) {
         m_in_semistochastic_epoch = (icycle > tmp + m_input.niter_init_detsub);
         if (m_in_semistochastic_epoch) {
             std::cout << "Entering semistochastic epoch on MC cycle " << icycle << std::endl;
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(&m_data));
-            m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
+            //m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
+            m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
         }
     }
 
     if (consts::float_is_zero(m_nwalker.reduced())) throw (std::runtime_error("All walkers died."));
-    ASSERT(consts::floats_nearly_equal(m_nwalker.reduced() / m_data.l1_norm(0), 1.0, 1e-8));
+    ASSERT(consts::floats_nearly_equal(m_nwalker.reduced() / m_data.l1_norm(0), 1.0));
 
+    // empty the list that receives new walkers
+    m_recv.zero();
+    // update space-recycling stacks in the sending PerforableMappedList
+    m_data.synchronize();
 }
 
 
@@ -79,21 +90,22 @@ void Wavefunction::propagate() {
      *      update local weight in the diagonal cloning/death step
      */
 
-    m_data.synchronize();
     if (m_in_semistochastic_epoch) m_detsub->gather_and_project();
 
-#pragma omp parallel for
+#pragma omp parallel for default(none) shared(stderr)
     for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
         if (m_data.row_empty(irow)) {
             continue;
         }
         auto weight = m_data.m_weight(irow);
         const auto det = m_data.m_determinant(irow);
-        weight = m_prop->round(*weight);
+
+        //weight = m_prop->round(*weight);
+
         auto flag_initiator = m_data.m_flags.m_initiator(irow);
 
-        if (consts::float_is_zero(*weight)) {
-            if (flag_initiator) m_ninitiator.thread()--;
+        if (consts::float_is_zero(*weight) && !m_data.m_flags.m_deterministic(irow)) {
+            if (flag_initiator) m_ninitiator.m_delta.thread()--;
             m_data.remove(det, irow);
             continue;
         }
@@ -101,7 +113,7 @@ void Wavefunction::propagate() {
         if (!flag_initiator && std::abs(*weight) >= m_input.nadd_initiator) {
             // initiator status granted
             flag_initiator = true;
-            m_ninitiator.thread()++;
+            m_ninitiator.m_delta.thread()++;
         }
         /*
         else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
@@ -118,10 +130,11 @@ void Wavefunction::propagate() {
         auto flag_deterministic = m_data.m_flags.m_deterministic(irow);
 
         m_prop->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
-        m_prop->diagonal(hdiag, weight, flag_deterministic, m_d_square_norm.thread(), m_d_nwalker.thread());
+        m_prop->diagonal(hdiag, weight, flag_deterministic,
+                         m_square_norm.m_delta.thread(), m_nwalker.m_delta.thread());
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
-            if (flag_initiator) m_ninitiator.thread()--;
+            if (flag_initiator) m_ninitiator.m_delta.thread()--;
             auto irow_removed = m_data.remove(det, irow);
             ASSERT(irow_removed == irow);
         }
@@ -165,16 +178,16 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
         return;
     }
     auto weight = m_data.m_weight(irow_main);
-    m_d_square_norm.thread() += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
-    m_d_nwalker.thread() -= std::abs(*weight);
+    m_square_norm.m_delta.thread() += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
+    m_nwalker.m_delta.thread() -= std::abs(*weight);
     weight += *delta_weight;
-    m_d_nwalker.thread() += std::abs(*weight);
+    m_nwalker.m_delta.thread() += std::abs(*weight);
 }
 
 void Wavefunction::annihilate() {
-    if (m_in_semistochastic_epoch) m_detsub->update_weights(m_prop->m_tau, m_d_nwalker);
+    if (m_in_semistochastic_epoch) m_detsub->update_weights(m_prop->m_tau, m_nwalker.m_delta);
     m_aborted_weight = 0;
-#pragma omp parallel for
+#pragma omp parallel for default(none)
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
         annihilate_row(irow_recv);
     }
@@ -238,11 +251,7 @@ void Wavefunction::synchronize() {
      * m_d_nwalker contains the thread-resolved change in m_nwalker for the propagation just performed,
      * this must be sum-reduced to set the local value
      */
-    m_d_nwalker.put_thread_sum();
-    /*
-     * we also need the total change in walker number:
-     */
-    m_d_nwalker.mpi_sum();
+    m_nwalker.reduce_delta();
     /*
      * local and reduced values of m_nwalker are not updated with those in m_d_nwalker at this stage,
      * because the statistics based on the principal variables e.g. the reference-projected energy
@@ -250,9 +259,7 @@ void Wavefunction::synchronize() {
      *
      * the delta due to the square_norm deserves the same treatment.
      */
-    m_d_square_norm.put_thread_sum();
-    m_d_square_norm.mpi_sum();
-
+    m_square_norm.reduce_delta();
     /*
      * m_aborted_weight is another thread-accumulated delta variable, but unlike the two norms, it
      * does not correspond to a principal variable. It is reduced here, consumed in write_iter_stats
@@ -264,24 +271,14 @@ void Wavefunction::synchronize() {
     /*
      * same for the change in occupied determinants
      */
-    m_d_nocc_det.put_thread_sum();
-    m_d_nocc_det.mpi_sum();
-
-#if 0
-    ASSERT(m_ninitiator.reduced() >= 0)
-#ifndef NDEBUG
-    size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
-    ninitiator_verify = mpi::all_sum(ninitiator_verify);
-    ASSERT(m_ninitiator.reduced() == ninitiator_verify);
-#endif
-     */
-#endif
+    m_nocc_det.reduce_delta();
+    m_ninitiator.reduce_delta();
 
     /*
      * the growth rate is the ratio of the new walker number (after update is called) to
      * the present value
      */
-    m_nwalker_growth_rate = 1 + m_d_nwalker.reduced() / m_nwalker.reduced();
+    m_nwalker_growth_rate = 1 + m_nwalker.m_delta.reduced() / m_nwalker.reduced();
 
     /*
      * the numerator of the reference projected energy Rayleigh quotient is treated like a
@@ -306,5 +303,3 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
     stats_file->m_ninitiator.write(m_ninitiator.reduced());
     stats_file->m_noccupied_det.write(m_nocc_det.reduced());
 }
-
-#pragma clang diagnostic pop

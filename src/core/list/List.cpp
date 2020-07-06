@@ -13,7 +13,6 @@ void List::recv(List *list) {
     m_recv = list;
 }
 
-
 const defs::inds &List::high_water_mark() const {
     return m_high_water_mark;
 }

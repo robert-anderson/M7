@@ -7,14 +7,14 @@
 
 
 Flag::Flag(FlagField* field, size_t nelement, const std::string &description):
-m_field(field), m_nelement(nelement), m_description(description), m_offset(field->add_flag(this)) {}
+m_field(field), m_nelement(nelement), m_offset(field->add_flag(this)), m_description(description) {}
 
 FlagElement Flag::operator()(const size_t &irow, const size_t &isegment) {
     return FlagElement(this, (*m_field)(irow, isegment));
 }
 
 FlagElement::FlagElement(Flag *flag, BitsetElement bitset_element) :
-    m_flag(flag), m_bitset_element(bitset_element){}
+    m_bitset_element(bitset_element), m_flag(flag){}
 
 void FlagElement::operator=(bool v) {
     if (v){

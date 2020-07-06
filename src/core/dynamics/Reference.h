@@ -27,7 +27,8 @@ class Reference : public Determinant {
 
 public:
     Reference(WalkerList &list, RankAllocator<DeterminantElement> &ra, DeterminantElement &det) :
-            Determinant(det), m_list(list), m_ra(ra) {
+            Determinant(det), m_list(list), m_ra(ra),
+            m_aconn(new PrivateStore<AntisymConnection>(det)) {
         if (m_list.nrow_per_segment()==0) m_list.expand(1);
         if (mpi::i_am(ra.get_rank(det))) {
             m_irow = m_list.push(det);

@@ -12,6 +12,7 @@
 #include <cstring>
 
 class Element;
+
 class Table;
 
 class Field {
@@ -34,7 +35,7 @@ protected:
 
 public:
     Field(Table *table, size_t element_size, size_t nelement, const std::type_info &type_info,
-    const std::string& description="");
+          const std::string &description = "");
 
     Element operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 
@@ -50,9 +51,9 @@ public:
 
     virtual size_t element_dsize() const;
 
-    virtual bool is_complex() const {return false;}
+    virtual bool is_complex() const { return false; }
 
-    virtual const std::string description() const {return m_description;}
+    virtual const std::string description() const { return m_description; }
 
     void expand_table(size_t delta_nrow);
 
@@ -60,7 +61,7 @@ public:
 
     virtual std::string to_string(size_t irow, size_t isegment, size_t ielement);
 
-    void zero(size_t irow, size_t isegment=0);
+    void zero(size_t irow, size_t isegment = 0);
 
     friend class Table;
 

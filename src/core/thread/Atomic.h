@@ -18,21 +18,25 @@ struct Atomic {
     T &operator+=(const T &rhs) {
 #pragma omp atomic update
         m_v += rhs;
+        return m_v;
     }
 
     T &operator-=(const T &rhs) {
 #pragma omp atomic update
         m_v += rhs;
+        return m_v;
     }
 
     T &operator*=(const T &rhs) {
 #pragma omp atomic update
         m_v += rhs;
+        return m_v;
     }
 
     T &operator/=(const T &rhs) {
 #pragma omp atomic update
         m_v += rhs;
+        return m_v;
     }
 };
 
@@ -44,53 +48,64 @@ struct Atomic<bool> {
     bool &operator&=(const bool &rhs) {
 #pragma omp atomic update
         m_v &= rhs;
+        return m_v;
     }
 
     bool &operator|=(const bool &rhs) {
 #pragma omp atomic update
         m_v |= rhs;
+        return m_v;
     }
 };
 
 template<typename T>
 struct Atomic<std::complex<T>> {
-    T &m_real;
-    T &m_imag;
+    std::complex<T> &m_v;
 
-    Atomic(std::complex<T> &v) :
-        m_real(reinterpret_cast<T(&)[2]>(v)[0]),
-        m_imag(reinterpret_cast<T(&)[2]>(v)[1]){}
+    Atomic(std::complex<T> &v) : m_v(v){}
 
     std::complex<T> &operator+=(const std::complex<T> &rhs) {
-        const T& real = rhs.real(); const T& imag = rhs.imag();
+        T& real = reinterpret_cast<T(&)[2]>(m_v)[0];
+        T& imag = reinterpret_cast<T(&)[2]>(m_v)[1];
+        const T& delta_real = rhs.real(); const T& delta_imag = rhs.imag();
 #pragma omp atomic update
-        m_real += real;
+        real += delta_real;
 #pragma omp atomic update
-        m_imag += imag;
+        imag += delta_imag;
+        return m_v;
     }
 
     std::complex<T> &operator-=(const std::complex<T> &rhs) {
-        const T& real = rhs.real(); const T& imag = rhs.imag();
+        T& real = reinterpret_cast<T(&)[2]>(m_v)[0];
+        T& imag = reinterpret_cast<T(&)[2]>(m_v)[1];
+        const T& delta_real = rhs.real(); const T& delta_imag = rhs.imag();
 #pragma omp atomic update
-        m_real -= real;
+        real -= delta_real;
 #pragma omp atomic update
-        m_imag -= imag;
+        imag -= delta_imag;
+        return m_v;
     }
 
     std::complex<T> &operator*=(const std::complex<T> &rhs) {
-        const T& real = rhs.real(); const T& imag = rhs.imag();
+        T& real = reinterpret_cast<T(&)[2]>(m_v)[0];
+        T& imag = reinterpret_cast<T(&)[2]>(m_v)[1];
+        const T& delta_real = rhs.real(); const T& delta_imag = rhs.imag();
 #pragma omp atomic update
-        m_real *= real;
+        real *= delta_real;
 #pragma omp atomic update
-        m_imag *= imag;
+        imag *= delta_imag;
+        return m_v;
     }
 
     std::complex<T> &operator/=(const std::complex<T> &rhs) {
-        const T& real = rhs.real(); const T& imag = rhs.imag();
+        T& real = reinterpret_cast<T(&)[2]>(m_v)[0];
+        T& imag = reinterpret_cast<T(&)[2]>(m_v)[1];
+        const T& delta_real = rhs.real(); const T& delta_imag = rhs.imag();
 #pragma omp atomic update
-        m_real /= real;
+        real /= delta_real;
 #pragma omp atomic update
-        m_imag /= imag;
+        imag /= delta_imag;
+        return m_v;
     }
 
 };

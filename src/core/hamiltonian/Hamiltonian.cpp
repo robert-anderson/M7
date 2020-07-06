@@ -13,7 +13,7 @@ Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
 
 Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     Determinant ref(m_nsite);
-    ASSERT(abs(spin_restrict) % 2 == nelec() % 2);
+    ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
     size_t n_spin_1 = nelec() - n_spin_0;
     for (size_t i = 0ul; i < n_spin_0; ++i) ref.set(0, i);

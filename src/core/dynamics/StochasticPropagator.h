@@ -36,7 +36,7 @@ public:
         size_t nattempt = std::ceil(std::abs(*weight));
         defs::prob_t prob;
         defs::ham_t helem;
-        bool valid;
+        bool valid = false;
 
         for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
             size_t nexcit = 2 - m_prng.get().stochastic_round(m_magnitude_logger.m_psingle, 1);
