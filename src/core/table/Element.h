@@ -36,7 +36,7 @@ public:
     defs::data_t get_antidataword(const size_t &idataword) const;
     defs::data_t get_antidataword(const size_t &idataword, const size_t &nbit) const;
     int cmp(const Element& rhs) const;
-    Element& operator=(const Element& rhs);
+    virtual Element& operator=(const Element& rhs);
     bool operator==(const Element& rhs) const;
     bool operator!=(const Element& rhs) const;
     char *begin() const;

@@ -132,7 +132,7 @@ Hamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElemen
             work_det.set(alpha_inds);
             work_det.set(beta_inds);
             if (!mpi::i_am(ra.get_rank(work_det))) continue;
-            auto irow = list->expand_push();
+            auto irow = list->expand_push(work_det);
             auto det = list->m_determinant(irow);
             auto h_diag = list->m_hdiag(irow);
             det.set(alpha_inds);

@@ -9,20 +9,21 @@
 #include <src/core/table/NumericField.h>
 #include "src/core/list/List.h"
 
-template<typename T> class MappedList;
+template<typename T>
+class MappedList;
 
-template <typename T>
+template<typename T>
 struct ListSafeHashMap : public SafeHashMap<T> {
     MappedList<T> &m_list;
 
-    ListSafeHashMap(MappedList<T> &list, const size_t &nbucket):
-        SafeHashMap<T>(nbucket), m_list(list) {}
+    ListSafeHashMap(MappedList<T> &list, const size_t &nbucket) :
+            SafeHashMap<T>(nbucket), m_list(list) {}
 
     T get_key(const size_t &key_index) const override {
         return m_list.key_field()(key_index);
     }
 
-    void set_key(const size_t &key_index, const T &key) override{
+    void set_key(const size_t &key_index, const T &key) override {
         m_list.key_field()(key_index) = key;
     }
 };
@@ -35,8 +36,8 @@ protected:
     ListSafeHashMap<T> m_map;
 
 public:
-    MappedList(Field_T& key_field, size_t nbucket): List(),
-    m_key_field(key_field), m_map(*this, nbucket){}
+    MappedList(Field_T &key_field, size_t nbucket) : List(),
+                                                     m_key_field(key_field), m_map(*this, nbucket) {}
 
     Field_T &key_field() const {
         return m_key_field;
@@ -88,6 +89,19 @@ public:
 
     void print_map() const {
         m_map.print();
+    }
+
+    size_t expand_push(const T &key, const size_t &isegment, const size_t &nrow, double factor = 1.5) {
+        ASSERT(!omp_get_level()); // convenient but NOT threadsafe
+        ASSERT(factor >= 1.0);
+        if (high_water_mark(isegment) + nrow > nrow_per_segment()) {
+            resize(factor * double(high_water_mark(isegment) + nrow));
+        }
+        return push(key);
+    }
+
+    size_t expand_push(const T &key) {
+        return expand_push(key, 0, 1);
     }
 };
 

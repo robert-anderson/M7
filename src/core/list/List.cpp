@@ -48,6 +48,10 @@ size_t List::expand_push(const size_t &isegment, const size_t &nrow, double fact
     return push(isegment, nrow);
 }
 
+size_t List::expand_push(const size_t &isegment, double factor) {
+    return expand_push(isegment, 1, factor);
+}
+
 void List::zero() {
     // TODO: no need to memset zero here, only included initially for clarity in debugging
     Table::zero();

@@ -28,9 +28,7 @@ public:
 
     size_t expand_push(const size_t &isegment, const size_t &nrow, double factor = 1.5);
 
-    size_t expand_push(const size_t &isegment=0, double factor = 1.5){
-        return expand_push(isegment, 1, factor);
-    }
+    size_t expand_push(const size_t &isegment=0, double factor = 1.5);
 
     void zero() override;
 
