@@ -3,6 +3,7 @@
 //
 
 #include <src/core/hamiltonian/AbInitioHamiltonian.h>
+#include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/pchb/HeatBathSamplers.h"
 
@@ -33,18 +34,29 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
 
     const defs::ham_comp_t eps = 100.0 / ndraw;
 
-    struct ExcitConnectionList : public Hamiltonian::ConnectionList {
-        NumericField<size_t> frequency;
-        NumericField<defs::prob_t> weight;
+    struct ExcitConnectionList : public MappedList<DeterminantElement> {
+        DeterminantField m_determinant;
+        NumericField<defs::ham_t> m_helement;
+        NumericField<size_t> m_frequency;
+        NumericField<defs::prob_t> m_weight;
+
         ExcitConnectionList(size_t nsite, size_t nbucket) :
-        ConnectionList(nsite, nbucket), frequency(this,2), weight(this,2){}
+                MappedList(m_determinant, nbucket),
+                m_determinant(this, 1, nsite), m_helement(this),
+                m_frequency(this, 2), m_weight(this, 2) {}
     };
     size_t nsite = src_det.nsite();
-    size_t nconn = integer_utils::combinatorial(2*nsite, 4); // comfortable upper bound
-    ExcitConnectionList connection_list(src_det.nsite(), nconn);
-    connection_list.expand(nconn);
-    exgen.ham()->all_connections_of_det(&connection_list, src_det, eps);
+    size_t nconn = integer_utils::combinatorial(2 * nsite, 4); // comfortable upper bound
+    ExcitConnectionList connection_list(nsite, nconn);
     nconn = connection_list.high_water_mark(0);
+    HamiltonianConnectionEnumerator enumerator(*exgen.ham(), src_det, eps);
+    MatrixElement<defs::ham_t> matel(src_det);
+    auto dst_det = src_det;
+    while (enumerator.next(matel)){
+        matel.aconn.apply(src_det, dst_det);
+        auto irow = connection_list.expand_push(dst_det);
+        connection_list.m_helement(irow) = matel.element;
+    }
 
     size_t nnull = 0ul;
 
@@ -65,7 +77,8 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
                     valid = exgen.draw_double(src_det, work_det.get(), occ.get(), prob, helem, anticonn.get());
                     if (valid) ASSERT(anticonn.get().nexcit() == 2)
                 } else {
-                    valid = exgen.draw_single(src_det, work_det.get(), occ.get(), vac.get(), prob, helem, anticonn.get());
+                    valid = exgen.draw_single(src_det, work_det.get(), occ.get(), vac.get(), prob, helem,
+                                              anticonn.get());
                     if (valid) ASSERT(anticonn.get().nexcit() == 1)
                 }
 
@@ -77,29 +90,27 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
                 size_t irow = connection_list.lookup(work_det.get());
                 if (irow != ~0ul) {
                     auto mutex = connection_list.key_mutex(work_det.get());
-                    connection_list.weight(irow, 0, ielement) += 1.0 / prob;
-                    connection_list.frequency(irow, 0, ielement) += 1;
+                    connection_list.m_weight(irow, 0, ielement) += 1.0 / prob;
+                    connection_list.m_frequency(irow, 0, ielement) += 1;
                 }
             }
         }
-        /*
-        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << w[irow] << " ";
+        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << *connection_list.m_weight(irow, 0, ielement)  << " ";
         std::cout <<std::endl;
-        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << f[irow] << " ";
+        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << *connection_list.m_frequency(irow, 0, ielement) << " ";
         std::cout <<std::endl;
-         */
     };
     loop(0);
     loop(1);
     defs::prob_t tot_err1 = 0;
     defs::prob_t tot_err2 = 0;
     for (size_t i = 0ul; i < nconn; ++i) {
-        auto f1 = *connection_list.frequency(i, 0, 0);
-        auto f2 = *connection_list.frequency(i, 0, 1);
-        f2+=f1;
-        auto w1 = *connection_list.weight(i, 0, 0);
-        auto w2 = *connection_list.weight(i, 0, 1);
-        w2+=w1;
+        auto f1 = *connection_list.m_frequency(i, 0, 0);
+        auto f2 = *connection_list.m_frequency(i, 0, 1);
+        f2 += f1;
+        auto w1 = *connection_list.m_weight(i, 0, 0);
+        auto w2 = *connection_list.m_weight(i, 0, 1);
+        w2 += w1;
         // check that all accessible dst_dets have been generated at least once
         if (f2 == 0) return false;
         auto err1 = std::abs(w1 / (dn) - 1.0);

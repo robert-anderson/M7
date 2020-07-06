@@ -66,49 +66,6 @@ Determinant Hamiltonian::choose_reference(const int &spin_level) const {
 }
 
 void
-Hamiltonian::all_connections_of_det(ConnectionList *list, const Determinant &ref, const defs::ham_comp_t eps) const {
-    OccupiedOrbitals occs(ref);
-    VacantOrbitals vacs(ref);
-    AntisymConnection connection(ref);
-
-    Determinant excited(m_nsite);
-    for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
-        const auto &occ = occs.m_inds[iocc];
-        for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {
-            const auto &vac = vacs.m_inds[ivac];
-            connection.zero();
-            connection.add(occ, vac);
-            connection.apply(ref, excited);
-            auto helement = get_element(connection);
-            if (!consts::float_nearly_zero(std::abs(helement), eps)) {
-                size_t irow = list->push(excited);
-                list->helement(irow) = helement;
-            }
-        }
-    }
-
-    ContainerCombinationEnumerator<defs::det_work> occ_enumerator(occs.m_inds, occs.m_nind, 2);
-    defs::inds occ_inds(2);
-    while (occ_enumerator.next(occ_inds)) {
-        {
-            ContainerCombinationEnumerator<defs::det_work> vac_enumerator(vacs.m_inds, vacs.m_nind, 2);
-            defs::inds vac_inds(2);
-            while (vac_enumerator.next(vac_inds)) {
-                connection.zero();
-                connection.add(occ_inds[0], occ_inds[1], vac_inds[0], vac_inds[1]);
-                connection.apply(ref, excited);
-                auto helement = get_element(connection);
-                if (!consts::float_nearly_zero(std::abs(helement), eps)) {
-                    size_t irow = list->push(excited);
-                    list->helement(irow) = helement;
-                    ASSERT(list->lookup(list->determinant(irow)) == irow);
-                }
-            }
-        }
-    }
-}
-
-void
 Hamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElement> &ra, const int &spin_level) const {
     size_t nalpha = nelec() / 2 + spin_level;
     size_t nbeta = nelec() / 2 - spin_level;

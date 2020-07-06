@@ -19,6 +19,7 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
 
     size_t m_occind = ~0ul;
     size_t m_vacind = ~0ul;
+    defs::ham_comp_t m_eps;
 
     MatrixElement<defs::ham_t> default_result() {
         return MatrixElement<defs::ham_t>(m_det);
@@ -33,7 +34,7 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
             );
             result.aconn.apply(m_det);
             result.element = m_h.get_element(result.aconn);
-            if (consts::float_is_zero(result.element)) {
+            if (consts::float_nearly_zero(result.element, m_eps)) {
                 return next_element(result);
             }
         } else {
@@ -50,8 +51,8 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
 
 public:
 
-    HamiltonianSingleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det) :
-            m_h(h), m_det(det), m_occs(det), m_vacs(det){
+    HamiltonianSingleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
+            m_h(h), m_det(det), m_occs(det), m_vacs(det), m_eps(eps){
         m_occind++;
     }
 };
@@ -66,6 +67,7 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
     CombinationEnumerator m_vac_enumerator;
 
     defs::inds m_occinds, m_vacinds;
+    defs::ham_comp_t m_eps;
 
     MatrixElement<defs::ham_t> default_result() {
         return MatrixElement<defs::ham_t>(m_det);
@@ -81,7 +83,7 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
                     m_vacs.m_inds[m_vacinds[1]]
             );
             result.element = m_h.get_element(result.aconn);
-            if (consts::float_is_zero(result.element)) {
+            if (consts::float_nearly_zero(result.element, m_eps)) {
                 return next_element(result);
             }
         } else {
@@ -96,11 +98,11 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
 
 public:
 
-    HamiltonianDoubleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det) :
+    HamiltonianDoubleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
             m_h(h), m_det(det), m_occs(det), m_vacs(det),
             m_occ_enumerator(m_occs.m_nind, 2),
             m_vac_enumerator(m_occs.m_nind, 2),
-            m_occinds(2, ~0ul), m_vacinds(2, ~0ul) {
+            m_occinds(2, ~0ul), m_vacinds(2, ~0ul), m_eps(eps){
         m_occ_enumerator.next(m_occinds);
     }
 };
@@ -109,7 +111,7 @@ public:
 class HamiltonianConnectionEnumerator : public HamiltonianSingleConnectionEnumerator {
     HamiltonianDoubleConnectionEnumerator doubles_enumerator;
 public:
-    HamiltonianConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det) :
+    HamiltonianConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
         HamiltonianSingleConnectionEnumerator(h, det), doubles_enumerator(h, det){
         m_subsequent = &doubles_enumerator;
     }

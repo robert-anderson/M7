@@ -95,16 +95,6 @@ public:
 
     Determinant choose_reference(const int &spin_level) const;
 
-    class ConnectionList : public MappedList<DeterminantElement> {
-    public:
-        DeterminantField determinant;
-        NumericField<defs::ham_t> helement;
-
-        ConnectionList(size_t nsite, size_t nbucket) :
-            MappedList(determinant, nbucket),
-            determinant(this, 1, nsite), helement(this) {}
-    };
-
     class DeterminantList : public MappedList<DeterminantElement> {
     public:
         DeterminantField determinant;
@@ -113,8 +103,6 @@ public:
                 MappedList(determinant, nbucket),
                 determinant(this, 1, nsite){}
     };
-
-    void all_connections_of_det(ConnectionList* list, const Determinant &ref, const defs::ham_comp_t eps) const;
 
     void generate_ci_space(WalkerList* list, RankAllocator<DeterminantElement>& ra, const int &spin_level) const;
 
