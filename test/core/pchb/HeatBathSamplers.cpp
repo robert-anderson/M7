@@ -48,7 +48,6 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
     size_t nsite = src_det.nsite();
     size_t nconn = integer_utils::combinatorial(2 * nsite, 4); // comfortable upper bound
     ExcitConnectionList connection_list(nsite, nconn);
-    nconn = connection_list.high_water_mark(0);
     HamiltonianConnectionEnumerator enumerator(*exgen.ham(), src_det, eps);
     MatrixElement<defs::ham_t> matel(src_det);
     auto dst_det = src_det;
@@ -57,6 +56,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
         auto irow = connection_list.expand_push(dst_det);
         connection_list.m_helement(irow) = matel.element;
     }
+    nconn = connection_list.high_water_mark(0);
 
     size_t nnull = 0ul;
 
@@ -137,7 +137,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
     Determinant source_det(ham.nsite());
     defs::inds occ_inds = {0, 1, 4, 5};
     source_det.set(occ_inds);
-    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
@@ -149,7 +149,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
 
     Determinant source_det(ham.nsite());
     source_det.set(defs::inds{1, 4, 6, 7});
-    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
@@ -161,7 +161,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
 
     Determinant source_det(ham.nsite());
     source_det.set(defs::inds{1, 5, 6, 7});
-    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
@@ -172,7 +172,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     Determinant source_det(ham.nsite());
     defs::inds occ_inds = {0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17};
     source_det.set(occ_inds);
-    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
@@ -183,7 +183,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     Determinant source_det(ham.nsite());
     defs::inds occ_inds = {1, 4, 5, 7, 8, 10, 12, 14, 15, 16, 20, 21};
     source_det.set(occ_inds);
-    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
@@ -194,5 +194,5 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     Determinant source_det(ham.nsite());
     defs::inds occ_inds = {1, 4, 5, 7, 8, 9, 10, 14, 15, 16, 20, 21};
     source_det.set(occ_inds);
-    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e7, 1e5));
+    ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
