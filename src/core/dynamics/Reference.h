@@ -34,6 +34,7 @@ public:
             m_irow = m_list.push(det);
             ASSERT(m_irow!=~0ul)
             list.m_determinant(m_irow) = det;
+
             m_irank = mpi::irank();
         } else {
             m_irow = ~0ul;

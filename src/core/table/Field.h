@@ -39,6 +39,8 @@ public:
 
     Element operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 
+    const Element operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) const;
+
     /*
     Element operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0){
         return element(irow, isegment, ielement);
@@ -71,7 +73,11 @@ protected:
 
     char *begin(const size_t &irow, const size_t &isegment = 0);
 
+    char *begin(const size_t &irow, const size_t &isegment = 0) const;
+
     char *element_begin(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
+
+    char *element_begin(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) const;
 
 };
 

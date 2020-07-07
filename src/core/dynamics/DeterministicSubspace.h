@@ -9,27 +9,26 @@
 #include <src/core/sparse/SparseMatrix.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/parallel/Hybrid.h>
+#include <src/core/fermion/DeterminantList.h>
 #include "WalkerList.h"
 
 class DeterministicSubspace {
 
-    WalkerList *m_walker_list = nullptr;
+    WalkerList &m_walker_list;
 
     /*
      * indices of the deterministic subspace determinants in the
      * walker list on this process
      */
-    struct SubspaceList : public List {
-        DeterminantField m_determinant;
-        NumericField<size_t> m_irow;
+    struct SubspaceList : public DeterminantList {
+        NumericField<size_t> m_irow; // row index in m_walker_list of DeterministicSubspace
         NumericField<size_t> m_irank;
 
-        SubspaceList(const size_t &nsite) :
-                m_determinant(this, 1, nsite), m_irow(this), m_irank(this) {}
+        SubspaceList(const size_t &nsite) : DeterminantList(1, nsite), m_irow(this), m_irank(this) {}
     };
 
-    std::unique_ptr<SubspaceList> m_local_subspace_list;
-    std::unique_ptr<SubspaceList> m_full_subspace_list;
+    SubspaceList m_local_subspace_list;
+    SubspaceList m_full_subspace_list;
     /*
      * just the weights stored on this MPI rank
      */
@@ -52,16 +51,16 @@ class DeterministicSubspace {
 
     void build_hamiltonian(const Hamiltonian *ham) {
         ASSERT(m_sparse_ham.empty());
-        m_full_subspace_list->all_gather(*m_local_subspace_list);
+        m_full_subspace_list.all_gather(m_local_subspace_list);
         m_sparse_ham.resize(nrow_local());
 #pragma omp parallel for default(none) shared(ham)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             // loop over local subspace (H rows)
-            auto row_det = m_local_subspace_list->m_determinant(irow_local);
+            auto row_det = m_local_subspace_list.m_determinant(irow_local);
             for (size_t irow_full = 0ul; irow_full < nrow_full(); ++irow_full) {
                 // loop over full subspace (H columns)
                 // only add to sparse H if dets are connected
-                auto col_det = m_full_subspace_list->m_determinant(irow_full);
+                auto col_det = m_full_subspace_list.m_determinant(irow_full);
                 if (row_det == col_det) continue;
                 auto helem = ham->get_element(row_det, col_det);
                 if (!consts::float_is_zero(helem)) m_sparse_ham(irow_local, irow_full) = helem;
@@ -79,18 +78,18 @@ class DeterministicSubspace {
 
 public:
 
-    DeterministicSubspace(WalkerList *walker_list) :
+    DeterministicSubspace(WalkerList &walker_list) :
             m_walker_list(walker_list),
-            m_local_subspace_list(std::unique_ptr<SubspaceList>(new SubspaceList(walker_list->m_determinant.m_nsite))),
-            m_full_subspace_list(std::unique_ptr<SubspaceList>(new SubspaceList(walker_list->m_determinant.m_nsite))),
+            m_local_subspace_list(SubspaceList(walker_list.m_determinant.m_nsite)),
+            m_full_subspace_list(SubspaceList(walker_list.m_determinant.m_nsite)),
             m_recvcounts(mpi::nrank(), 0), m_displs(mpi::nrank(), 0) {}
 
     void gather_and_project() {
 #pragma omp parallel for default(none) shared(stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
-            auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
-            ASSERT(m_walker_list->m_flags.m_deterministic(irow_walker_list));
-            m_local_weights[irow_local] = *m_walker_list->m_weight(irow_walker_list);
+            auto irow_walker_list = *m_local_subspace_list.m_irow(irow_local);
+            ASSERT(m_walker_list.m_flags.m_deterministic(irow_walker_list));
+            m_local_weights[irow_local] = *m_walker_list.m_weight(irow_walker_list);
             ASSERT(m_local_weights[irow_local] == m_local_weights[irow_local])
         }
         ASSERT(nrow_local() == m_recvcounts[mpi::irank()])
@@ -115,8 +114,8 @@ public:
     void update_weights(const double &tau, Hybrid<defs::wf_t> &delta_nw) {
 #pragma omp parallel for default(none) shared(tau, delta_nw, stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
-            auto irow_walker_list = *m_local_subspace_list->m_irow(irow_local);
-            auto weight = m_walker_list->m_weight(irow_walker_list);
+            auto irow_walker_list = *m_local_subspace_list.m_irow(irow_local);
+            auto weight = m_walker_list.m_weight(irow_walker_list);
             ASSERT(*weight == *weight)
             auto h_weight = m_local_h_weights[irow_local];
             ASSERT(h_weight == h_weight)
@@ -127,33 +126,33 @@ public:
     }
 
     void add_determinant(size_t irow_walker_list) {
-        size_t irow = m_local_subspace_list->expand_push();
-        m_local_subspace_list->m_determinant(irow) = m_walker_list->m_determinant(irow_walker_list);
-        m_local_subspace_list->m_irow(irow) = irow_walker_list;
-        m_walker_list->m_flags.m_deterministic(irow_walker_list) = true;
+        size_t irow = m_local_subspace_list.expand_push();
+        m_local_subspace_list.m_determinant(irow) = m_walker_list.m_determinant(irow_walker_list);
+        m_local_subspace_list.m_irow(irow) = irow_walker_list;
+        m_walker_list.m_flags.m_deterministic(irow_walker_list) = true;
     }
 
-    const size_t &nrow_local() const { return m_local_subspace_list->high_water_mark(0); }
+    const size_t &nrow_local() const { return m_local_subspace_list.high_water_mark(0); }
 
-    const size_t &nrow_full() const { return m_full_subspace_list->high_water_mark(0); }
+    const size_t &nrow_full() const { return m_full_subspace_list.high_water_mark(0); }
 
     DeterminantElement local_det(const size_t &irow) const {
-        ASSERT(irow < m_local_subspace_list->high_water_mark(0))
-        return m_local_subspace_list->m_determinant(irow);
+        ASSERT(irow < m_local_subspace_list.high_water_mark(0))
+        return m_local_subspace_list.m_determinant(irow);
     }
 
     void build_from_whole_walker_list(Hamiltonian *ham) {
-        for (size_t irow = 0ul; irow < m_walker_list->high_water_mark(0); ++irow) {
-            if (!m_walker_list->row_empty(irow)) add_determinant(irow);
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
+            if (!m_walker_list.row_empty(irow)) add_determinant(irow);
         }
         build_hamiltonian(ham);
     }
 
     void build_from_det_connections(const DeterminantElement &ref, Hamiltonian *ham) {
         Connection conn(ref);
-        for (size_t irow = 0ul; irow < m_walker_list->high_water_mark(0); ++irow) {
-            if (m_walker_list->row_empty(irow)) continue;
-            auto det = m_walker_list->m_determinant(irow);
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
+            if (m_walker_list.row_empty(irow)) continue;
+            auto det = m_walker_list.m_determinant(irow);
             conn.connect(ref, det);
             if (conn.nexcit() <= 2) add_determinant(irow);
         }

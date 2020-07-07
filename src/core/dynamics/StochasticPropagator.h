@@ -58,6 +58,7 @@ public:
             auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob;
             delta = m_prng.get().stochastic_threshold(delta, m_min_spawn_mag);
             if (consts::float_is_zero(delta)) continue;
+            ASSERT(m_dst_det.get().nsetbit()==src_det.nsetbit())
             spawn(spawn_list, m_dst_det.get(), delta, flag_initiator, flag_deterministic);
             m_magnitude_logger.log(nexcit, helem, prob);
         }

@@ -130,6 +130,8 @@ public:
 
     DeterminantElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0);
 
+    const DeterminantElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) const;
+
     std::string to_string(size_t irow, size_t isegment, size_t ielement) override;
 };
 

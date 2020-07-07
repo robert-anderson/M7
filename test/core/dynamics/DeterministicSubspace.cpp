@@ -19,7 +19,7 @@ TEST(DeterministicSubspace, FciCheck) {
     bool is_ref_rank = walker_list.m_determinant(0) == ref_det;
     if (is_ref_rank)
         walker_list.m_weight(0) = 1;
-    DeterministicSubspace detsub(&walker_list);
+    DeterministicSubspace detsub(walker_list);
     detsub.build_from_whole_walker_list(&ham);
     double tau = 0.02;
 
@@ -84,7 +84,7 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections) {
         auto irow = walker_list.push(excited);
         walker_list.m_weight(irow) = mpi::irank() + 1;
     }
-    DeterministicSubspace detsub(&walker_list);
+    DeterministicSubspace detsub(walker_list);
     detsub.build_from_det_connections(ref, &ham);
 
     ASSERT_EQ(detsub.nrow_local(), walker_list.high_water_mark(0));

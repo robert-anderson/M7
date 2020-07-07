@@ -26,10 +26,16 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
         auto ref_energy = m_fciqmc->m_ham->get_energy(m_reference);
         logger::write("Reference energy: " + std::to_string(ref_energy));
+        m_data.m_determinant(m_reference.irow()).print();
         m_data.m_weight(m_reference.irow()) = ref_weight;
+        m_data.m_determinant(m_reference.irow()).print();
+        abort();
         m_data.m_hdiag(m_reference.irow()) = ref_energy;
+        m_data.m_determinant(m_reference.irow()).print();
         m_data.m_flags.m_reference_connection(m_reference.irow()) = true;
+        m_data.m_determinant(m_reference.irow()).print();
         m_data.m_flags.m_initiator(m_reference.irow()) = true;
+        m_data.m_determinant(m_reference.irow()).print();
 
         m_ninitiator = 1;
         m_square_norm = std::pow(std::abs(ref_weight), 2);
@@ -63,9 +69,9 @@ void Wavefunction::update(const size_t &icycle) {
         m_in_semistochastic_epoch = (icycle > tmp + m_input.niter_init_detsub);
         if (m_in_semistochastic_epoch) {
             std::cout << "Entering semistochastic epoch on MC cycle " << icycle << std::endl;
-            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(&m_data));
-            //m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
-            m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
+            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_data));
+            m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
+            //m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
         }
     }
 
@@ -123,9 +129,11 @@ void Wavefunction::propagate() {
         }
          */
         if (m_data.m_flags.m_reference_connection(irow)) {
+            const_cast<DeterminantElement&>(det).print();
             const auto contrib = *weight * m_prop->m_ham->get_element(m_reference, det);
             m_reference.proj_energy_num().thread() += contrib;
         }
+        //abort();
         auto hdiag = m_data.m_hdiag(irow);
         auto flag_deterministic = m_data.m_flags.m_deterministic(irow);
 
@@ -135,8 +143,12 @@ void Wavefunction::propagate() {
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
             if (flag_initiator) m_ninitiator.m_delta.thread()--;
+#ifndef NDEBUG
             auto irow_removed = m_data.remove(det, irow);
             ASSERT(irow_removed == irow);
+#else
+            m_data.remove(det, irow);
+#endif
         }
     }
 }

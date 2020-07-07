@@ -18,6 +18,10 @@ char *Field::begin(const size_t &irow, const size_t &isegment) {
     return m_table->field_begin(this, irow, isegment);
 }
 
+char *Field::begin(const size_t &irow, const size_t &isegment) const {
+    return m_table->field_begin(this, irow, isegment);
+}
+
 Element Field::operator()(const size_t &irow, const size_t &isegment, const size_t &ielement) {
     return Element(this, element_begin(irow, isegment, ielement));
 }
@@ -37,6 +41,10 @@ bool Field::compatible_with(const Field &rhs) const {
 }
 
 char *Field::element_begin(const size_t &irow, const size_t &isegment, const size_t &ielement) {
+    return begin(irow, isegment) + ielement * m_element_size;
+}
+
+char *Field::element_begin(const size_t &irow, const size_t &isegment, const size_t &ielement) const {
     return begin(irow, isegment) + ielement * m_element_size;
 }
 

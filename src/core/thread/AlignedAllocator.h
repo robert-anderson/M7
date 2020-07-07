@@ -61,7 +61,7 @@ public:
     pointer allocate(size_type num, const void * = 0) {
         void *ret;
         int err = posix_memalign(&ret, alignment, num * sizeof(T));
-        ASSERT(!err);
+        if (err) throw std::runtime_error("posix_memalign failed");
         ASSERT(((size_t)ret) % alignment == 0);
         return (pointer)ret;
     }

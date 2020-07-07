@@ -16,7 +16,7 @@
 #include "consts.h"
 
 #ifdef NDEBUG
-#define	ASSERT(e)
+#define	ASSERT(e) {}
 #else
 #define ASSERT(e) \
 { \

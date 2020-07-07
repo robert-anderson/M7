@@ -29,11 +29,13 @@ bool CombinationEnumerator::next_element(defs::inds &result) {
             if (ipos++==m_r) break;
         }
     }
+    m_allfound = !std::prev_permutation(m_bitmask.begin(), m_bitmask.end());
+#ifndef NDEBUG
     auto is_ordered = [](const defs::inds inds){
         for (size_t i=1ul; i<inds.size(); ++i) if (inds[i]<=inds[i-1]){return false;}
         return true;
     };
-    m_allfound = !std::prev_permutation(m_bitmask.begin(), m_bitmask.end());
     ASSERT(is_ordered(result));
+#endif
     return true;
 }

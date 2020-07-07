@@ -39,5 +39,4 @@ public:
     void all_gather(List &local);
 };
 
-
 #endif //M7_LIST_H
