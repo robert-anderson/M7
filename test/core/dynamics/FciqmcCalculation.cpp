@@ -44,10 +44,10 @@ TEST(FciqmcCalculation, StochasticPropagation){
     }
 }
 
-TEST(FciqmcCalculation, StochasticPropagationLarge60orbs){
+TEST(FciqmcCalculation, StochasticPropagation60orbs){
     Options options;
     options.fcidump_path = defs::assets_root+"/RHF_N2_CCPVTZ/FCIDUMP";
-    options.tau_initial = 0.05;
+    options.tau_initial = 0.002;
     options.nwalker_target = 150000;
     options.ncycle = 4000;
     options.prng_seed = 12;

@@ -123,11 +123,10 @@ void Wavefunction::propagate() {
         }
          */
         if (m_data.m_flags.m_reference_connection(irow)) {
-            const_cast<DeterminantElement&>(det).print();
             const auto contrib = *weight * m_prop->m_ham->get_element(m_reference, det);
             m_reference.proj_energy_num().thread() += contrib;
         }
-        //abort();
+
         auto hdiag = m_data.m_hdiag(irow);
         auto flag_deterministic = m_data.m_flags.m_deterministic(irow);
 
