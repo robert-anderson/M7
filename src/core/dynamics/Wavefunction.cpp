@@ -26,16 +26,10 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         auto ref_weight = std::max(m_input.nwalker_initial, m_input.nadd_initiator);
         auto ref_energy = m_fciqmc->m_ham->get_energy(m_reference);
         logger::write("Reference energy: " + std::to_string(ref_energy));
-        m_data.m_determinant(m_reference.irow()).print();
-        m_data.m_weight(m_reference.irow()) = ref_weight;
-        m_data.m_determinant(m_reference.irow()).print();
-        abort();
+        m_data.m_weight(m_reference.irow()) = 0;//ref_weight;
         m_data.m_hdiag(m_reference.irow()) = ref_energy;
-        m_data.m_determinant(m_reference.irow()).print();
         m_data.m_flags.m_reference_connection(m_reference.irow()) = true;
-        m_data.m_determinant(m_reference.irow()).print();
         m_data.m_flags.m_initiator(m_reference.irow()) = true;
-        m_data.m_determinant(m_reference.irow()).print();
 
         m_ninitiator = 1;
         m_square_norm = std::pow(std::abs(ref_weight), 2);

@@ -12,7 +12,14 @@ Field::Field(Table *table, size_t element_size, size_t nelement, const std::type
 m_table(table), m_element_size(element_size),
 m_element_dsize(integer_utils::divceil(element_size, sizeof(defs::data_t))),
 m_nelement(nelement), m_type_index(type_info),
-m_offset(table ? table->add_field(this) : ~0ul), m_description(description) {}
+m_offset(table ? table->add_field(this) : ~0ul), m_description(description) {
+#ifndef NDEBUG
+    std::cout << "Adding field       " << m_description << std::endl;
+    std::cout << "size in bytes      " << m_element_size << std::endl;
+    std::cout << "size in uint64s    " << m_element_dsize << std::endl;
+    std::cout << "offset in bytes    " << m_offset << std::endl << std::endl;
+#endif
+}
 
 char *Field::begin(const size_t &irow, const size_t &isegment) {
     return m_table->field_begin(this, irow, isegment);

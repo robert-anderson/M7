@@ -35,7 +35,10 @@ public:
         m_determinant(this, 1, nsite, "Determinant"),
         m_weight(this, 1, "Weight"),
         m_hdiag(this, 1, "Diagonal Hamiltonian matrix element"),
-        m_flags(this, 1, "Flags") {}
+        m_flags(this, 1, "Flags") {
+        ASSERT(m_determinant.element_dsize()==
+            integer_utils::divceil(2*nsite, CHAR_BIT * sizeof(defs::data_t)))
+    }
 
     ~WalkerList() {
         const size_t n = 15;

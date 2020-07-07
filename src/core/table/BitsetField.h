@@ -48,7 +48,7 @@ protected:
     size_t m_nbit;
 public:
     BitsetField(Table *table, size_t nelement, size_t nbit, const std::string &description = "") :
-        Field(table, sizeof(defs::data_t), nelement, typeid(defs::data_t), description) {
+        Field(table, integer_utils::divceil(nbit, (size_t)CHAR_BIT), nelement, typeid(defs::data_t), description) {
         update_nbit(nbit);
     }
 
