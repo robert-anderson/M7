@@ -17,8 +17,8 @@ FciqmcStatsFile::FciqmcStatsFile(const Options &input) :
         m_ninitiator(this, 1, "Number of initiator determinants"),
         m_aborted_weight(this, 1, "Aborted weight"),
         m_noccupied_det(this, 1, "Number of occupied determinants"),
-        m_psingle(this, 1, "Probability that a stochastic single will be attempted")
-{
+        m_psingle(this, 1, "Probability that a stochastic single will be attempted"),
+        m_iter_time(this, 1, "Iteration time (seconds)"){
     if (!mpi::i_am_root())
         throw std::runtime_error(
                 "FciqmcStatsFiles must only be instantiated on the root process");

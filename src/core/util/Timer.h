@@ -9,16 +9,19 @@
 #include "defs.h"
 
 class Timer {
-    std::chrono::duration<double> m_start, m_elapsed;
+    std::chrono::duration<double> m_start, m_lap, m_total;
 public:
 
     Timer():m_start{std::chrono::duration<double>::max()} {}
 
+    void reset();
+
     void unpause();
 
-    std::chrono::duration<double> pause();
+    void pause();
 
-    double elapsed();
+    double total();
+    double lap();
 
 };
 

@@ -9,15 +9,24 @@ void Timer::unpause() {
     m_start = std::chrono::steady_clock::now().time_since_epoch();
 }
 
-std::chrono::duration<double> Timer::pause() {
+void Timer::pause() {
     ASSERT(m_start!=std::chrono::duration<double>::max())
     auto now = std::chrono::steady_clock::now().time_since_epoch();
-    auto diff = now-m_start;
-    m_elapsed += diff;
+    m_lap = now-m_start;
+    m_total += m_lap;
     m_start=std::chrono::duration<double>::max();
-    return diff;
 }
 
-double Timer::elapsed() {
-    return m_elapsed.count();
+double Timer::total() {
+    return m_total.count();
+}
+
+double Timer::lap() {
+    return m_lap.count();
+}
+
+void Timer::reset() {
+    ASSERT(m_start==std::chrono::duration<double>::max())
+    m_lap = std::chrono::duration<double>::zero();
+    m_total = std::chrono::duration<double>::zero();
 }

@@ -7,6 +7,7 @@
 
 
 #include <omp.h>
+#include <src/core/util/Timer.h>
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 #include "src/core/io/FciqmcStatsFile.h"
 #include "src/core/io/Options.h"
@@ -23,6 +24,7 @@ public:
     Determinant m_reference;
     std::unique_ptr<Propagator> m_prop;
     Wavefunction m_wf;
+    Timer m_timer;
 
     explicit FciqmcCalculation(const Options &input);
 

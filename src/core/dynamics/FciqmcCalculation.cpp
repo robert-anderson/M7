@@ -32,6 +32,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
 void FciqmcCalculation::execute() {
     logger::write("Starting FCIQMC main loop.");
     for (size_t icycle = 0ul; icycle < m_input.ncycle; ++icycle) {
+        mpi::barrier(); m_timer.unpause();
         //std::cout << "iteration " + std::to_string(icycle) << std::endl;
         m_wf.update(icycle);
         //std::cout << "\npropagating..." << std::endl;
@@ -44,6 +45,7 @@ void FciqmcCalculation::execute() {
         m_wf.synchronize();
         //std::cout << "\nupdating propagator..." << std::endl;
         m_prop->update(icycle, m_wf.m_nwalker.reduced(), m_wf.m_nwalker_growth_rate);
+        mpi::barrier(); m_timer.pause();
         //std::cout << "\nwriting stats..." << std::endl;
         write_iter_stats(icycle);
     }
@@ -52,6 +54,7 @@ void FciqmcCalculation::execute() {
 void FciqmcCalculation::write_iter_stats(size_t icycle) {
     if (!mpi::i_am_root()) return;
     m_stats_file->m_cycle_number.write(icycle);
+    m_stats_file->m_iter_time.write(m_timer.lap());
     m_prop->write_iter_stats(m_stats_file.get());
     m_wf.write_iter_stats(m_stats_file.get());
     m_stats_file->flush();
