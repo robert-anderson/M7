@@ -22,13 +22,9 @@ public:
 
     const size_t &high_water_mark(const size_t isegment) const;
 
-    virtual size_t push(const size_t &isegment = 0);
+    size_t push(const size_t &isegment=0, const size_t &nrow=1);
 
-    size_t push(const size_t &isegment, const size_t &nrow);
-
-    size_t expand_push(const size_t &isegment, const size_t &nrow, double factor = 1.5);
-
-    size_t expand_push(const size_t &isegment=0, double factor = 1.5);
+    size_t expand_push(const size_t &isegment=0, const size_t &nrow=1, double factor = 1.5);
 
     void zero() override;
 

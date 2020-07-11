@@ -17,7 +17,7 @@ class HeatBathSamplers : public ExcitationGenerator {
     std::vector<Aliaser> m_pick_ab_given_ij;
 
 public:
-    HeatBathSamplers(const Hamiltonian *h, PrivateStore<PRNG> &prng);
+    HeatBathSamplers(const Hamiltonian *h, PRNG &prng);
 
     bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,

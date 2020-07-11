@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-04-12.
 //
 
+#if 0
 #include <src/core/fermion/DecodedDeterminant.h>
-#include <src/core/thread/Atomic.h>
 #include "gtest/gtest.h"
 #include "src/core/thread/PrivateStore.h"
 #include "src/core/util/defs.h"
@@ -264,3 +264,4 @@ TEST(PrivateStore, SpeedComparison2){
     }
 }
  */
+#endif

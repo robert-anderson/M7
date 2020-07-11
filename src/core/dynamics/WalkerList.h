@@ -84,9 +84,9 @@ public:
 
     using PerforableMappedList<DeterminantElement>::push;
 
-    size_t add(Mutex &mutex, const DeterminantElement &key, const defs::wf_t &weight, const defs::ham_comp_t &hdiag,
+    size_t add(const DeterminantElement &key, const defs::wf_t &weight, const defs::ham_comp_t &hdiag,
                bool initiator = false, bool reference_connection = false, bool deterministic = false) {
-        auto irow = PerforableMappedList::push(mutex, key);
+        auto irow = PerforableMappedList::push(key);
         m_weight(irow) = weight;
         m_hdiag(irow) = hdiag;
         m_flags.m_initiator(irow) = initiator;
@@ -94,12 +94,6 @@ public:
         m_flags.m_reference_connection(irow) = reference_connection;
         m_flags.m_deterministic(irow) = deterministic;
         return irow;
-    }
-
-    size_t add(const DeterminantElement &key, const defs::wf_t &weight, const defs::ham_comp_t &hdiag,
-               bool initiator = false, bool reference_connection = false, bool deterministic = false) {
-        auto mutex = key_mutex(key);
-        return add(mutex, key, weight, hdiag, initiator, reference_connection, deterministic);
     }
 
     //debugging only

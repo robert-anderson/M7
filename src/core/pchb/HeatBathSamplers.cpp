@@ -4,7 +4,7 @@
 
 #include "HeatBathSamplers.h"
 
-HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PrivateStore<PRNG> &prng):
+HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng):
     ExcitationGenerator(h, prng){
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;
@@ -40,7 +40,7 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
         size_t nalpha_cases = nalpha * (m_h->nsite() - nalpha);
         size_t nbeta_cases = nbeta * (m_h->nsite() - nbeta);
         ncases = nalpha_cases + nbeta_cases;
-        ia = m_prng.get().draw_uint(ncases);
+        ia = m_prng.draw_uint(ncases);
         if (ia < nalpha_cases) {
             integer_utils::inv_rectmap(i, a, m_h->nsite() - nalpha, ia);
             ASSERT(i < nalpha);
@@ -58,7 +58,7 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
         }
     } else {
         ncases = m_nelec * (2 * m_h->nsite() - m_nelec);
-        ia = m_prng.get().draw_uint(ncases);
+        ia = m_prng.draw_uint(ncases);
         integer_utils::inv_rectmap(i, a, 2 * m_h->nsite() - m_nelec, ia);
     }
     i = occ.m_inds[i];
@@ -83,7 +83,7 @@ bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, Determinan
     // just draw uniform ij TODO! int weighted ij
     // return false if invalid excitation generated, true otherwise
     size_t i, j, a, b;
-    size_t ij = m_prng.get().draw_uint(m_nelec_pair);
+    size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb inds:
     i = occ.m_inds[i];

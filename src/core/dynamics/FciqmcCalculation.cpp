@@ -12,7 +12,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
     m_input(input), m_rank_allocator(input.nload_balance_block),
     m_ham(std::unique_ptr<AbInitioHamiltonian>(new AbInitioHamiltonian(input.fcidump_path))),
     m_reference(m_ham->guess_reference(input.spin_restrict)),
-    m_wf(this), m_scratch(std::unique_ptr<FciqmcScratch>(new FciqmcScratch(m_reference))) {
+    m_wf(this) {
 
     if(mpi::i_am_root()) m_stats_file = std::unique_ptr<FciqmcStatsFile>(new FciqmcStatsFile(m_input));
 

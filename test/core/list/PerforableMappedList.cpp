@@ -12,6 +12,7 @@ struct TestPerforableMappedList : public PerforableMappedList<NumericElement<siz
         PerforableMappedList(key, nbucket), key(this), value(this) {}
 };
 
+/*
 TEST(PerforableMappedList, Removal) {
     const size_t nrow = 3600;
     TestPerforableMappedList list(nrow / 10);
@@ -73,3 +74,4 @@ TEST(PerforableMappedList, MultiRemovalAndReuse) {
         list.synchronize();
     }
 }
+ */

@@ -6,7 +6,6 @@
 #define M7_SPARSEMATRIX_H
 
 #include <vector>
-#include <src/core/thread/Atomic.h>
 #include "src/core/linalg/Matrix.h"
 #include "omp.h"
 
@@ -49,7 +48,6 @@ public:
         // each row of the out vector receives a contribution from every
         // corresponding entry in the sparse matrix row
         // out_i = sum_j H_ij in_j
-#pragma omp parallel for default(none) shared(in, out, stderr)
         for (size_t irow=0; irow<m_data.size(); ++irow){
             for (auto entry=m_data[irow].begin(); entry!=m_data[irow].end(); entry++){
                 auto& jrow = entry->icol;
@@ -57,13 +55,11 @@ public:
                 auto& hij = entry->element;
                 ASSERT(hij==hij)
                 ASSERT(in[jrow]==in[jrow])
-                as_atomic(out[irow])+=hij * in[jrow];
+                out[irow]+=hij * in[jrow];
                 ASSERT(out[irow]==out[irow])
             }
         }
     }
-
 };
-
 
 #endif //M7_SPARSEMATRIX_H

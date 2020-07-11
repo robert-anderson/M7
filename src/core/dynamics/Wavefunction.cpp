@@ -2,7 +2,6 @@
 // Created by Robert John Anderson on 2020-04-03.
 //
 
-#include <src/core/thread/Atomic.h>
 #include <src/core/io/Logging.h>
 #include "Wavefunction.h"
 #include "FciqmcCalculation.h"
@@ -40,15 +39,14 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
     }
 }
 
-
 void Wavefunction::update(const size_t &icycle) {
-    ASSERT(m_nwalker.m_delta.threads_zeroed())
     m_nwalker.accumulate();
-    ASSERT(m_square_norm.m_delta.threads_zeroed())
+    ASSERT(m_nwalker.m_delta == 0.0)
     m_square_norm.accumulate();
+    ASSERT(m_square_norm.m_delta == 0.0)
     //ASSERT(m_square_norm.reduced()==m_data.square_norm(0))
-    ASSERT(m_ninitiator.m_delta.threads_zeroed())
     m_ninitiator.accumulate();
+    ASSERT(m_ninitiator.m_delta == 0.0)
 
 #ifndef NDEBUG
     size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
@@ -58,11 +56,11 @@ void Wavefunction::update(const size_t &icycle) {
 
     m_reference.update();
 
-    auto tmp = m_prop->icycle_vary_shift();
-    if (m_input.do_semistochastic && !m_in_semistochastic_epoch && tmp != ~0ul) {
-        m_in_semistochastic_epoch = (icycle > tmp + m_input.niter_init_detsub);
-        if (m_in_semistochastic_epoch) {
-            std::cout << "Entering semistochastic epoch on MC cycle " << icycle << std::endl;
+    auto shift_epoch = m_prop->variable_shift();
+    auto semistoch_epoch = m_prop->semi_stochastic();
+    if (shift_epoch) {
+        if (semistoch_epoch.update(icycle,
+                m_input.do_semistochastic && (icycle > shift_epoch.start() + m_input.niter_init_detsub))){
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_data));
             m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
             //m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
@@ -74,8 +72,6 @@ void Wavefunction::update(const size_t &icycle) {
 
     // empty the list that receives new walkers
     m_recv.zero();
-    // update space-recycling stacks in the sending PerforableMappedList
-    m_data.synchronize();
 }
 
 
@@ -90,9 +86,8 @@ void Wavefunction::propagate() {
      *      update local weight in the diagonal cloning/death step
      */
 
-    if (m_in_semistochastic_epoch) m_detsub->gather_and_project();
+    if (m_prop->semi_stochastic()) m_detsub->gather_and_project();
 
-#pragma omp parallel for default(none) shared(stderr)
     for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
         if (m_data.row_empty(irow)) {
             continue;
@@ -105,7 +100,7 @@ void Wavefunction::propagate() {
         auto flag_initiator = m_data.m_flags.m_initiator(irow);
 
         if (consts::float_is_zero(*weight) && !m_data.m_flags.m_deterministic(irow)) {
-            if (flag_initiator) m_ninitiator.m_delta.thread()--;
+            if (flag_initiator) m_ninitiator.m_delta--;
             m_data.remove(det, irow);
             continue;
         }
@@ -113,7 +108,7 @@ void Wavefunction::propagate() {
         if (!flag_initiator && std::abs(*weight) >= m_input.nadd_initiator) {
             // initiator status granted
             flag_initiator = true;
-            m_ninitiator.m_delta.thread()++;
+            m_ninitiator.m_delta++;
         }
         /*
         else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
@@ -124,7 +119,7 @@ void Wavefunction::propagate() {
          */
         if (m_data.m_flags.m_reference_connection(irow)) {
             const auto contrib = *weight * m_prop->m_ham->get_element(m_reference, det);
-            m_reference.proj_energy_num().thread() += contrib;
+            m_reference.proj_energy_num()+= contrib;
         }
 
         auto hdiag = m_data.m_hdiag(irow);
@@ -132,10 +127,10 @@ void Wavefunction::propagate() {
 
         m_prop->off_diagonal(det, weight, m_send, flag_deterministic, flag_initiator);
         m_prop->diagonal(hdiag, weight, flag_deterministic,
-                         m_square_norm.m_delta.thread(), m_nwalker.m_delta.thread());
+                         m_square_norm.m_delta, m_nwalker.m_delta);
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
-            if (flag_initiator) m_ninitiator.m_delta.thread()--;
+            if (flag_initiator) m_ninitiator.m_delta--;
 #ifndef NDEBUG
             auto irow_removed = m_data.remove(det, irow);
             ASSERT(irow_removed == irow);
@@ -158,18 +153,17 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
     ASSERT(!consts::float_is_zero(*delta_weight));
     size_t irow_main;
 
-    auto mutex = m_data.key_mutex(det);
-    irow_main = m_data.lookup(mutex, det);
+    irow_main = m_data.lookup(det);
     if (irow_main == ~0ul) {
         /*
          * the destination determinant is not currently occupied, so initiator rules
          * must be applied
          */
         if (!m_recv.m_flags.m_parent_initiator(irow_recv)) {
-            m_aborted_weight.thread() += std::abs(*delta_weight);
+            m_aborted_weight += std::abs(*delta_weight);
             return;
         }
-        irow_main = m_data.push(mutex, det);
+        irow_main = m_data.push(det);
         m_data.m_hdiag(irow_main) = m_prop->m_ham->get_energy(det);
         m_data.m_flags.m_reference_connection(irow_main) = m_reference.is_connected(det);
         m_data.m_flags.m_deterministic(irow_main) = false;
@@ -183,16 +177,15 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
         return;
     }
     auto weight = m_data.m_weight(irow_main);
-    m_square_norm.m_delta.thread() += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
-    m_nwalker.m_delta.thread() -= std::abs(*weight);
+    m_square_norm.m_delta += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
+    m_nwalker.m_delta -= std::abs(*weight);
     weight += *delta_weight;
-    m_nwalker.m_delta.thread() += std::abs(*weight);
+    m_nwalker.m_delta += std::abs(*weight);
 }
 
 void Wavefunction::annihilate() {
-    if (m_in_semistochastic_epoch) m_detsub->update_weights(m_prop->m_tau, m_nwalker.m_delta);
+    if (m_prop->semi_stochastic()) m_detsub->update_weights(m_prop->m_tau, m_nwalker.m_delta);
     m_aborted_weight = 0;
-#pragma omp parallel for default(none)
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
         annihilate_row(irow_recv);
     }
@@ -200,14 +193,13 @@ void Wavefunction::annihilate() {
 
 void Wavefunction::synchronize() {
     /*
-     * This method handles the MPI communication involved in collating the Distributed and
-     * Hybrid members of the Wavefunction class.
+     * This method handles the MPI communication involved in collating the Distributed members
+     * of the Wavefunction class.
      * TODO: "communication syndicates" to avoid many blocking MPI reductions by combining in an array
      *
      * As with all iterative algorithms, it is easy to mix up which iteration corresponds
-     * to the current state of a variable. In parallel and hybrid-parallel algorithms this
-     * hazard is exacerbated. Thus, all communications in this method are well-annotated to
-     * clarify this issue at every stage.
+     * to the current state of a variable. In parallel algorithms this hazard is exacerbated.
+     * Thus, all communications in this method are well-annotated to clarify this issue at every stage.
      *
      * In general however, variables which describe the "current state" of the wavefunction
      * (principal variables) refer to the pre-propagation state. This is because the current
@@ -270,7 +262,6 @@ void Wavefunction::synchronize() {
      * does not correspond to a principal variable. It is reduced here, consumed in write_iter_stats
      * and reset like any other delta variable in update()
      */
-    m_aborted_weight.put_thread_sum();
     m_aborted_weight.mpi_sum();
 
     /*

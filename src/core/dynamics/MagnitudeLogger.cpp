@@ -10,14 +10,14 @@ MagnitudeLogger::MagnitudeLogger(const Options &input) :
 void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
     defs::ham_comp_t tmp_hi_mag;
     if (nexcit == 1) {
-        ++m_priv_nsingle.get();
+        ++m_priv_nsingle;
         tmp_hi_mag = std::abs(helem) / prob;
-        auto hi_mag = m_priv_hi_mag_single.get();
+        auto hi_mag = m_priv_hi_mag_single;
         if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
     } else if (nexcit == 2) {
-        ++m_priv_ndouble.get();
+        ++m_priv_ndouble;
         tmp_hi_mag = std::abs(helem) / prob;
-        auto hi_mag = m_priv_hi_mag_double.get();
+        auto hi_mag = m_priv_hi_mag_double;
         if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
     }
 }
@@ -30,10 +30,10 @@ void MagnitudeLogger::synchronize() {
     reduction::max(m_priv_nsingle.get(), m_nsingle);
     reduction::max(m_priv_ndouble.get(), m_ndouble);
      */
-    m_hi_mag_single = m_priv_hi_mag_single.get();
-    m_hi_mag_double = m_priv_hi_mag_double.get();
-    m_nsingle = m_priv_nsingle.get();
-    m_ndouble = m_priv_ndouble.get();
+    m_hi_mag_single = m_priv_hi_mag_single;
+    m_hi_mag_double = m_priv_hi_mag_double;
+    m_nsingle = m_priv_nsingle;
+    m_ndouble = m_priv_ndouble;
     // process reduce
     m_hi_mag_single = mpi::all_max(m_hi_mag_single);
     m_hi_mag_double = mpi::all_max(m_hi_mag_double);

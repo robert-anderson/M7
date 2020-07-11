@@ -11,10 +11,8 @@
 #include "src/core/io/FciqmcStatsFile.h"
 #include "src/core/io/Options.h"
 #include "src/core/fermion/DecodedDeterminant.h"
-#include "src/core/thread/PrivateStore.h"
 #include "Propagator.h"
 #include "Wavefunction.h"
-#include "FciqmcScratch.h"
 
 class FciqmcCalculation {
 public:
@@ -25,7 +23,6 @@ public:
     Determinant m_reference;
     std::unique_ptr<Propagator> m_prop;
     Wavefunction m_wf;
-    std::unique_ptr<FciqmcScratch> m_scratch;
 
     explicit FciqmcCalculation(const Options &input);
 

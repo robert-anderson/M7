@@ -11,7 +11,6 @@ ExactPropagator::ExactPropagator(FciqmcCalculation *fciqmc) : Propagator(fciqmc)
 void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                                    SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
 
-    auto anticonn = m_fciqmc->m_scratch->anticonn->get();
     OccupiedOrbitals occs(src_det);
     ASSERT(occs.m_nind > 0);
     VacantOrbitals vacs(src_det);
@@ -26,10 +25,10 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
         for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {
             auto vac = vacs.m_inds[ivac];
 
-            anticonn.zero();
-            anticonn.add(occ, vac);
-            anticonn.apply(src_det, dst_det);
-            auto helement = m_ham->get_element_1(anticonn);
+            m_aconn.zero();
+            m_aconn.add(occ, vac);
+            m_aconn.apply(src_det, dst_det);
+            auto helement = m_ham->get_element_1(m_aconn);
             if (consts::float_is_zero(helement)) continue;
 
             auto delta = -*weight * m_tau * helement;
@@ -47,10 +46,10 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
             defs::inds vac_inds(2);
             while (vac_enumerator.next(vac_inds)) {
 
-                anticonn.zero();
-                anticonn.add(occ_inds[0], occ_inds[1], vac_inds[0], vac_inds[1]);
-                anticonn.apply(src_det, dst_det);
-                auto helement = m_ham->get_element_2(anticonn);
+                m_aconn.zero();
+                m_aconn.add(occ_inds[0], occ_inds[1], vac_inds[0], vac_inds[1]);
+                m_aconn.apply(src_det, dst_det);
+                auto helement = m_ham->get_element_2(m_aconn);
                 if (consts::float_is_zero(helement)) continue;
 
                 auto delta = -*weight * m_tau * helement;

@@ -22,12 +22,16 @@
 #ifndef M7_EPOCH_H
 #define M7_EPOCH_H
 
+#include <utility>
+
 #include "Distributed.h"
 
 class Epoch {
+    std::string m_name;
     Distributed<size_t> m_icycle_start;
 
-    Epoch();
+public:
+    explicit Epoch(std::string name);
 
     /**
      * Update the state of the Epoch, no need to check state before
@@ -35,18 +39,20 @@ class Epoch {
      *
      * @param icycle the current cycle of the main loop
      * @param condition local value of the condition for the Epoch to begin
+     * @return true if Epoch begins on icycle, else false
      */
-    void update(size_t icycle, bool condition);
+    bool update(size_t icycle, bool condition);
 
     /**
      * @return the MPI-synchronized cycle number on which the Epoch began
      */
-    const size_t& start_cycle();
+    const size_t& start() const;
 
     /**
      * @return the MPI-synchronized state of the Epoch
      */
-    bool has_begun();
+
+    operator bool() const;
 
 };
 

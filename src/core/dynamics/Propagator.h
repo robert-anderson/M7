@@ -13,7 +13,8 @@
 #include <iomanip>
 #include <iostream>
 #include <src/core/io/FciqmcStatsFile.h>
-#include <src/core/parallel/Hybrid.h>
+#include <src/core/parallel/Distributed.h>
+#include <src/core/parallel/Epoch.h>
 
 class FciqmcCalculation;
 
@@ -26,8 +27,15 @@ public:
     MagnitudeLogger m_magnitude_logger;
     double m_tau;
     defs::ham_comp_t m_shift;
-    Hybrid<defs::wf_comp_t> m_largest_spawn_magnitude;
-    Distributed<size_t> m_icycle_vary_shift;
+    Distributed<defs::wf_comp_t> m_largest_spawn_magnitude;
+
+    mutable Determinant m_dst_det;
+    mutable AntisymConnection m_aconn;
+    mutable OccupiedOrbitals m_occ;
+    mutable VacantOrbitals m_vac;
+
+    Epoch m_variable_shift;
+    Epoch m_semi_stochastic;
 
     Propagator(FciqmcCalculation *fciqmc);
 
@@ -51,24 +59,21 @@ public:
         return weight;
     }
 
-    bool varying_shift(){
-        return m_icycle_vary_shift.reduced() != ~0ul;
+    const Epoch &variable_shift() {
+        return m_variable_shift;
     }
 
-    const size_t &icycle_vary_shift(){
-        return m_icycle_vary_shift.reduced();
+    const Epoch &semi_stochastic() {
+        return m_semi_stochastic;
     }
 
     void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
         m_magnitude_logger.synchronize();
-        m_largest_spawn_magnitude.max();
+        // TODO
+        m_largest_spawn_magnitude.mpi_max();
         if (icycle % m_input.shift_update_period) return;
-        if (!varying_shift()) {
-            if (nwalker >= m_input.nwalker_target) m_icycle_vary_shift = icycle;
-            m_icycle_vary_shift.mpi_min();
-        }
-        if (varying_shift())
-            m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / m_tau;
+        m_variable_shift.update(icycle, nwalker >= m_input.nwalker_target);
+        if (m_variable_shift) m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / m_tau;
     }
 
     void write_iter_stats(FciqmcStatsFile* stats_file) {

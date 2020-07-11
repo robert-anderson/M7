@@ -8,8 +8,6 @@
 
 #include <cstddef>
 #include <src/core/util/defs.h>
-#include <src/core/thread/PrivateStore.h>
-#include <src/core/thread/Reduction.h>
 #include <src/core/parallel/MPIWrapper.h>
 #include <src/core/io/Options.h>
 
@@ -17,14 +15,14 @@ class MagnitudeLogger {
     const Options &m_input;
     size_t m_nsingle = 0;
     size_t m_ndouble = 0;
-    PrivateStore<size_t> m_priv_nsingle;
-    PrivateStore<size_t> m_priv_ndouble;
+    size_t m_priv_nsingle;
+    size_t m_priv_ndouble;
     // highest magnitudes
     defs::ham_comp_t m_hi_mag_single = 0;
     defs::ham_comp_t m_hi_mag_double = 0;
 
-    PrivateStore<defs::ham_comp_t> m_priv_hi_mag_single;
-    PrivateStore<defs::ham_comp_t> m_priv_hi_mag_double;
+    defs::ham_comp_t m_priv_hi_mag_single;
+    defs::ham_comp_t m_priv_hi_mag_double;
 
     bool m_enough_singles_for_dynamic_tau = false;
     bool m_enough_doubles_for_dynamic_tau = false;

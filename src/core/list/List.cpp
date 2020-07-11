@@ -21,35 +21,20 @@ const size_t &List::high_water_mark(const size_t isegment) const {
     return m_high_water_mark[isegment];
 }
 
-size_t List::push(const size_t &isegment) {
-    ASSERT(isegment < m_nsegment);
-    size_t tmp;
-#pragma omp atomic capture
-    tmp = m_high_water_mark[isegment]++;
-    if (tmp >= m_nrow_per_segment) throw std::runtime_error("Reached capacity of List");
-    return tmp;
-}
-
 size_t List::push(const size_t &isegment, const size_t &nrow) {
     ASSERT(isegment < m_nsegment);
-    size_t tmp;
-#pragma omp atomic capture
-    tmp = m_high_water_mark[isegment] += nrow;
+    auto tmp = m_high_water_mark[isegment] += nrow;
     if (tmp > m_nrow_per_segment) throw std::runtime_error("Reached capacity of List");
     return tmp-nrow;
 }
 
 size_t List::expand_push(const size_t &isegment, const size_t &nrow, double factor) {
-    ASSERT(!omp_get_level()); // convenient but NOT threadsafe
+    // convenient but inefficient
     ASSERT(factor>=1.0);
     if (m_high_water_mark[isegment] + nrow > nrow_per_segment()){
         resize(factor*double(m_high_water_mark[isegment] + nrow));
     }
     return push(isegment, nrow);
-}
-
-size_t List::expand_push(const size_t &isegment, double factor) {
-    return expand_push(isegment, 1, factor);
 }
 
 void List::zero() {

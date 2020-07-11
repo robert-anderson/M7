@@ -9,8 +9,7 @@
 #include <src/core/parallel/RankAllocator.h>
 #include <src/core/fermion/Determinant.h>
 #include <src/core/fermion/Connection.h>
-#include <src/core/thread/PrivateStore.h>
-#include <src/core/parallel/Hybrid.h>
+#include <src/core/parallel/Distributed.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include "WalkerList.h"
 
@@ -21,18 +20,17 @@ class Reference : public Determinant {
     size_t m_irow;
     Distributed<size_t> m_irank;
 
-    std::unique_ptr<PrivateStore<AntisymConnection>> m_aconn;
-    Hybrid<defs::ham_t> m_proj_energy_num;
+    mutable AntisymConnection m_aconn;
+    Distributed<defs::ham_t> m_proj_energy_num;
     Distributed<defs::wf_t> m_weight;
 
 public:
     Reference(WalkerList &list, RankAllocator<DeterminantElement> &ra, DeterminantElement &det) :
-            Determinant(det), m_list(list), m_ra(ra),
-            m_aconn(new PrivateStore<AntisymConnection>(det)) {
-        if (m_list.nrow_per_segment()==0) m_list.expand(1);
+            Determinant(det), m_list(list), m_ra(ra), m_aconn(det) {
+        if (m_list.nrow_per_segment() == 0) m_list.expand(1);
         if (mpi::i_am(ra.get_rank(det))) {
             m_irow = m_list.push(det);
-            ASSERT(m_irow!=~0ul)
+            ASSERT(m_irow != ~0ul)
             list.m_determinant(m_irow) = det;
 
             m_irank = mpi::irank();
@@ -50,7 +48,6 @@ public:
     }
 
     void synchronize() {
-        m_proj_energy_num.put_thread_sum();
         m_proj_energy_num.mpi_sum();
     }
 
@@ -63,18 +60,17 @@ public:
     }
 
     bool is_connected(DeterminantElement &det) const {
-        auto &aconn = m_aconn->get();
+        auto &aconn = m_aconn;
         aconn.connect(*this, det);
         return aconn.nexcit() < 3;
     }
 
     void add_to_numerator(const Hamiltonian *ham, const DeterminantElement &det, const defs::wf_t &weight) {
-        auto &aconn = m_aconn->get();
-        aconn.connect(*this, det);
-        m_proj_energy_num.thread() += ham->get_element(aconn) * weight;
+        m_aconn.connect(*this, det);
+        m_proj_energy_num += ham->get_element(m_aconn) * weight;
     }
 
-    Hybrid<defs::ham_t>& proj_energy_num() {
+    Distributed<defs::ham_t> &proj_energy_num() {
         return m_proj_energy_num;
     }
 

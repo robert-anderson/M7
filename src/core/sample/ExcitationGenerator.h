@@ -7,20 +7,19 @@
 
 
 #include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/thread/PrivateStore.h>
 #include "PRNG.h"
 
 class ExcitationGenerator {
 protected:
     const Hamiltonian *m_h;
-    PrivateStore<PRNG> &m_prng;
+    PRNG &m_prng;
     const size_t m_norb;
     const size_t m_nelec;
     const size_t m_norb_pair;
     const size_t m_nelec_pair;
     const bool m_spin_conserving;
 public:
-    ExcitationGenerator(const Hamiltonian *h, PrivateStore<PRNG> &prng) :
+    ExcitationGenerator(const Hamiltonian *h, PRNG &prng) :
             m_h(h), m_prng(prng),
             m_norb(m_h->nsite() * 2),
             m_nelec(m_h->nelec()),

@@ -51,7 +51,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
     HamiltonianConnectionEnumerator enumerator(*exgen.ham(), src_det, eps);
     MatrixElement<defs::ham_t> matel(src_det);
     auto dst_det = src_det;
-    while (enumerator.next(matel)){
+    while (enumerator.next(matel)) {
         matel.aconn.apply(src_det, dst_det);
         auto irow = connection_list.expand_push(dst_det);
         connection_list.m_helement(irow) = matel.element;
@@ -60,45 +60,40 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
 
     size_t nnull = 0ul;
 
-    PrivateStore<OccupiedOrbitals> occ(src_det);
-    PrivateStore<VacantOrbitals> vac(src_det);
-    PrivateStore<AntisymConnection> anticonn(src_det);
-    PrivateStore<Determinant> work_det(src_det);
+    OccupiedOrbitals occ(src_det);
+    VacantOrbitals vac(src_det);
+    AntisymConnection anticonn(src_det);
+    Determinant work_det(src_det);
 
     auto loop = [&](size_t ielement) {
-#pragma omp parallel
-        {
-            defs::prob_t prob;
-            defs::ham_t helem;
-            bool valid;
-#pragma omp for
-            for (size_t i = 0ul; i < 2 * ndraw; ++i) {
-                if (i < ndraw) {
-                    valid = exgen.draw_double(src_det, work_det.get(), occ.get(), prob, helem, anticonn.get());
-                    if (valid) ASSERT(anticonn.get().nexcit() == 2)
-                } else {
-                    valid = exgen.draw_single(src_det, work_det.get(), occ.get(), vac.get(), prob, helem,
-                                              anticonn.get());
-                    if (valid) ASSERT(anticonn.get().nexcit() == 1)
-                }
+        defs::prob_t prob;
+        defs::ham_t helem;
+        bool valid;
+        for (size_t i = 0ul; i < 2 * ndraw; ++i) {
+            if (i < ndraw) {
+                valid = exgen.draw_double(src_det, work_det, occ, prob, helem, anticonn);
+                if (valid) ASSERT(anticonn.nexcit() == 2)
+            } else {
+                valid = exgen.draw_single(src_det, work_det, occ, vac, prob, helem,anticonn);
+                if (valid) ASSERT(anticonn.nexcit() == 1)
+            }
 
-                if (!valid) {
-                    ++nnull;
-                    continue;
-                }
-                ASSERT(src_det.nsetbit() == work_det.get().nsetbit())
-                size_t irow = connection_list.lookup(work_det.get());
-                if (irow != ~0ul) {
-                    auto mutex = connection_list.key_mutex(work_det.get());
-                    connection_list.m_weight(irow, 0, ielement) += 1.0 / prob;
-                    connection_list.m_frequency(irow, 0, ielement) += 1;
-                }
+            if (!valid) {
+                ++nnull;
+                continue;
+            }
+            ASSERT(src_det.nsetbit() == work_det.nsetbit())
+            size_t irow = connection_list.lookup(work_det);
+            if (irow != ~0ul) {
+                connection_list.m_weight(irow, 0, ielement) += 1.0 / prob;
+                connection_list.m_frequency(irow, 0, ielement) += 1;
             }
         }
-        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << *connection_list.m_weight(irow, 0, ielement)  << " ";
-        std::cout <<std::endl;
-        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << *connection_list.m_frequency(irow, 0, ielement) << " ";
-        std::cout <<std::endl;
+        for (size_t irow = 0ul; irow < nconn; ++irow) std::cout << *connection_list.m_weight(irow, 0, ielement) << " ";
+        std::cout << std::endl;
+        for (size_t irow = 0ul; irow < nconn; ++irow)
+            std::cout << *connection_list.m_frequency(irow, 0, ielement) << " ";
+        std::cout << std::endl;
     };
     loop(0);
     loop(1);
@@ -131,7 +126,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
 TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(18, 1e4);
+    PRNG prng(18, 1e4);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
@@ -144,7 +139,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
 
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(15, 10000);
+    PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
@@ -156,7 +151,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
 
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
-    PrivateStore<PRNG> prng(15, 10000);
+    PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
@@ -166,7 +161,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(15, 10000);
+    PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
@@ -177,7 +172,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(15, 10000);
+    PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());
@@ -188,7 +183,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
-    PrivateStore<PRNG> prng(15, 100000);
+    PRNG prng(15, 100000);
     HeatBathSamplers pchb(&ham, prng);
 
     Determinant source_det(ham.nsite());

@@ -27,10 +27,8 @@ class Wavefunction {
     SpawnList m_send, m_recv;
     Reference m_reference;
 
-    Hybrid<defs::wf_t> m_aborted_weight;
+    Distributed<defs::wf_t> m_aborted_weight;
     DistributedAccumulation<size_t, int64_t> m_ninitiator;
-
-    bool m_in_semistochastic_epoch = false;
 
 public:
 

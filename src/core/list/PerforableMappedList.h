@@ -5,6 +5,7 @@
 #ifndef M7_PERFORABLEMAPPEDLIST_H
 #define M7_PERFORABLEMAPPEDLIST_H
 
+#include <stack>
 #include "MappedList.h"
 
 /*
@@ -36,90 +37,37 @@
 template<typename T>
 class PerforableMappedList : public MappedList<T> {
     typedef typename T::Field_T Field_T;
-    defs::inds m_free;
-    defs::inds m_removed;
+    std::stack<size_t> m_free_rows;
 
-    size_t m_nfree = 0ul;
-    size_t m_nfree_used = 0ul;
-    size_t m_nremoved = 0ul;
 public:
 
     PerforableMappedList(Field_T& key_field, size_t nbucket):
         MappedList<T>(key_field, nbucket) {}
 
-    void synchronize() {
-        /*
-         * if the number of attempted accesses of the free stack exceeded the number
-         * of elements in the stack, then the stack was emptied.
-         * Now move the indices of the newly removed rows into the free stack
-         */
-        //std::cout << "PerforableMappedList high water mark: " << List::high_water_mark(0) <<std::endl;
-        //std::cout << "PerforableMappedList free rows available: " << m_nfree <<std::endl;
-        //std::cout << "PerforableMappedList free rows used: " << m_nfree_used <<std::endl;
-        m_nfree = m_nfree_used>m_nfree? 0 : m_nfree-m_nfree_used;
-        //std::cout << "PerforableMappedList free rows left over: " << m_nfree <<std::endl;
-        //std::cout << "PerforableMappedList rows removed: " << m_nremoved <<std::endl;
-        //std::cout << "PerforableMappedList zero rows: " << nzero_rows(0) <<std::endl;
-        std::move(m_removed.begin(), m_removed.begin()+m_nremoved, m_free.begin()+m_nfree);
-        m_nfree+=m_nremoved;
-        //ASSERT(m_nfree == nzero_rows(0));
-        m_nremoved = 0ul;
-        m_nfree_used = 0ul;
-    }
-
-    size_t push(Mutex &mutex, const T &key) override {
+    size_t push(const T &key) override {
         size_t irow = ~0ul;
         // first see if there are any free rows left
-        if (m_nfree_used<m_nfree) {
-#pragma omp atomic capture
-            irow = ++m_nfree_used;
-            if (irow <= m_nfree) {
-                // free_row was available, grab from back of stack
-                irow = m_free[m_nfree-irow];
-            }
-            else irow = ~0ul;
+        if (!m_free_rows.empty()){
+            // free row was available, grab from top of stack
+            irow = m_free_rows.top();
+            m_free_rows.pop();
         }
-        if (irow==~0ul) {
-            // free_rows is empty, need to push back high-water-mark
+        else {
             irow = List::push();
         }
-        MappedList<T>::m_map.insert(mutex, key, irow);
+        MappedList<T>::m_map.insert(key, irow);
         return irow;
     }
 
-    size_t push(const T &key) override {
-        auto mutex = MappedList<T>::m_map.key_mutex(key);
-        return push(mutex, key);
-    }
-
-    size_t remove(Mutex &mutex, const size_t &key_index) {
-        auto irow = MappedList<T>::m_map.remove(mutex, key_index);
+    size_t remove(const T &key, const size_t &irow) {
+        auto irow_rm = MappedList<T>::m_map.remove(key, irow);
         ASSERT(irow != ~0ul);
-        size_t iremoved;
-#pragma omp atomic capture
-        iremoved = m_nremoved++;
-        ASSERT(iremoved < m_removed.size());
-        m_removed[iremoved] = irow;
-        MappedList<T>::m_key_field(irow).zero();
+        m_free_rows.push(irow_rm);
+        MappedList<T>::m_key_field(irow_rm).zero();
         Table::zero_row(irow, 0);
-        ASSERT(MappedList<T>::m_key_field(irow).is_zero());
-        return irow;
-    }
-
-    size_t remove(const T &key, const size_t &key_index) {
-        auto mutex = MappedList<T>::key_mutex(key);
-        return remove(mutex, key_index);
-    }
-
-    size_t remove(const T &key) {
-        auto mutex = MappedList<T>::key_mutex(key);
-        auto key_index = MappedList<T>::lookup(mutex, key);
-        if (key_index==~0ul) return key_index;
-        return remove(mutex, key_index);
-    }
-
-    size_t nfilled() const{
-        return MappedList<T>::high_water_mark(0)-(m_nfree+m_nremoved);
+        ASSERT(MappedList<T>::m_key_field(irow_rm).is_zero());
+        ASSERT(irow_rm==irow)
+        return irow_rm;
     }
 
     size_t nzero_rows(size_t isegment=0) const {
@@ -129,12 +77,6 @@ public:
             result += MappedList<T>::m_key_field(irow, isegment).is_zero();
         }
         return result;
-    }
-
-    void expand(size_t delta_rows) override {
-        Table::expand(delta_rows);
-        m_free.resize(m_free.size()+delta_rows);
-        m_removed.resize(m_removed.size()+delta_rows);
     }
 
 };

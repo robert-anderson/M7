@@ -6,7 +6,6 @@
 #define M7_DISTRIBUTED_H
 
 #include "MPIWrapper.h"
-#include "src/core/thread/Atomic.h"
 
 template<typename T>
 class Distributed {
@@ -18,30 +17,52 @@ protected:
 public:
 
     Distributed(){
-        if (omp_get_level()) throw std::runtime_error("Distributed variable must be declared outside parallel region");
     }
 
-    virtual Distributed<T>& operator=(const T& rhs){
+    operator T&() { return m_local; }
+    //operator T() const { return m_local; }
+
+    Distributed<T>& operator=(const T& rhs){
         m_local = rhs;
         m_reduced = std::numeric_limits<T>::max();
         return *this;
     }
 
-    virtual Distributed<T>& operator+=(const T& rhs){
+    void reset(){
+        *this=0;
+    }
+
+    Distributed<T>& operator+=(const T& rhs){
         m_local += rhs;
         m_reduced = std::numeric_limits<T>::max();
         return *this;
     }
+
+    /*
+    bool operator==(const T &rhs) const {
+        return m_local == rhs;
+    }
+
+    bool operator!=(const T &rhs) const {
+        return !(rhs == *this);
+    }
+
+    const Distributed<T> operator++(int) {
+        m_local++;
+        return *this;
+    }
+
+    const Distributed<T> operator--(int) {
+        m_local--;
+        return *this;
+    }
+     */
 
     T& local() {
         return m_local;
     }
 
     const T& reduced() const {
-#ifndef DNDEBUG
-        // check that a reduction method was applied
-        //ASSERT(m_reduced!=std::numeric_limits<T>::max());
-#endif
         return m_reduced;
     }
 

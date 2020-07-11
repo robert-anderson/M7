@@ -8,7 +8,7 @@
 
 #include <src/core/sparse/SparseMatrix.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/parallel/Hybrid.h>
+#include <src/core/parallel/Distributed.h>
 #include <src/core/fermion/DeterminantList.h>
 #include "WalkerList.h"
 
@@ -53,7 +53,6 @@ class DeterministicSubspace {
         ASSERT(m_sparse_ham.empty());
         m_full_subspace_list.all_gather(m_local_subspace_list);
         m_sparse_ham.resize(nrow_local());
-#pragma omp parallel for default(none) shared(ham)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             // loop over local subspace (H rows)
             auto row_det = m_local_subspace_list.m_determinant(irow_local);
@@ -85,7 +84,6 @@ public:
             m_recvcounts(mpi::nrank(), 0), m_displs(mpi::nrank(), 0) {}
 
     void gather_and_project() {
-#pragma omp parallel for default(none) shared(stderr)
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list.m_irow(irow_local);
             ASSERT(m_walker_list.m_flags.m_deterministic(irow_walker_list));
@@ -99,29 +97,25 @@ public:
         m_sparse_ham.multiply(m_full_weights, m_local_h_weights);
     }
 
-    void rayleigh_quotient(Hybrid<defs::ham_t> &num, Hybrid<defs::ham_comp_t> &norm_square) {
-#pragma omp parallel for default(none) shared(num, norm_square)
+    void rayleigh_quotient(defs::ham_t &num, defs::ham_comp_t &norm_square) {
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto w = m_local_weights[irow_local];
             auto hw = m_local_h_weights[irow_local];
-            num.thread() += consts::conj(w) * hw;
-            norm_square.thread() += std::pow(std::abs(w), 2.0);
+            num += consts::conj(w) * hw;
+            norm_square += std::pow(std::abs(w), 2.0);
         }
-        num.put_thread_sum();
-        norm_square.put_thread_sum();
     }
 
-    void update_weights(const double &tau, Hybrid<defs::wf_t> &delta_nw) {
-#pragma omp parallel for default(none) shared(tau, delta_nw, stderr)
+    void update_weights(const double &tau, defs::wf_t &delta_nw) {
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list.m_irow(irow_local);
             auto weight = m_walker_list.m_weight(irow_walker_list);
             ASSERT(*weight == *weight)
             auto h_weight = m_local_h_weights[irow_local];
             ASSERT(h_weight == h_weight)
-            delta_nw.thread() -= std::abs(*weight);
+            delta_nw -= std::abs(*weight);
             weight -= tau * h_weight;
-            delta_nw.thread() += std::abs(*weight);
+            delta_nw += std::abs(*weight);
         }
     }
 

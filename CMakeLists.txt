@@ -18,7 +18,7 @@ endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/CLI11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mbmi -fopenmp -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mbmi -march=native")
 
 FIND_PACKAGE(MPI)
 MESSAGE (STATUS "MPI_FOUND ${MPI_FOUND}")
