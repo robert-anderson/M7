@@ -30,8 +30,8 @@ private:
 public:
     Flags m_flags;
 
-    WalkerList(size_t nsite, size_t nbucket) :
-        PerforableMappedList<DeterminantElement>(m_determinant, nbucket),
+    WalkerList(std::string name, size_t nsite, size_t nbucket) :
+        PerforableMappedList<DeterminantElement>(name, m_determinant, nbucket),
         m_determinant(this, 1, nsite, "Determinant"),
         m_weight(this, 1, "Weight"),
         m_hdiag(this, 1, "Diagonal Hamiltonian matrix element"),

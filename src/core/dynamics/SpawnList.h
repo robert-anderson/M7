@@ -28,7 +28,7 @@ private:
 public:
     Flags m_flags;
 
-    SpawnList(size_t nsite, size_t nsegment) : List(nsegment),
+    SpawnList(std::string name, size_t nsite, size_t nsegment) : List(name, nsegment),
         m_determinant(this, 1, nsite, "Determinant"),
         m_weight(this, 1, "Weight"),
         m_flags(this, 1, "Flags") {}

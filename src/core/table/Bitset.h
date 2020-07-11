@@ -12,7 +12,7 @@ class Bitset : public BitsetElement {
     struct BitsetTable : public Table {
         BitsetField field;
         BitsetTable(Bitset* bitset, size_t nbit) :
-            Table(),
+            Table("Working Bitset"),
             field(this, 1, nbit){expand(1);}
     };
     BitsetTable internal_table;

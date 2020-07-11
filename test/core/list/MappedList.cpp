@@ -9,7 +9,7 @@
 struct TestMappedList : public MappedList<NumericElement<size_t>> {
     NumericField<size_t> key, value;
     TestMappedList(size_t nbucket, size_t nsegment=1):
-    MappedList(key, nbucket), key(this), value(this) {}
+    MappedList("test mapped list", key, nbucket), key(this), value(this) {}
 };
 
 TEST(MappedList, DataIntegrity) {

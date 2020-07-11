@@ -36,7 +36,7 @@ protected:
     ListHashMap<T> m_map;
 
 public:
-    MappedList(Field_T &key_field, size_t nbucket) : List(),
+    MappedList(std::string name, Field_T &key_field, size_t nbucket) : List(name),
                                                      m_key_field(key_field), m_map(*this, nbucket) {}
 
     Field_T &key_field() const {

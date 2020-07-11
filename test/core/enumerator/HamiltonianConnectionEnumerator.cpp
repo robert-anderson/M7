@@ -13,7 +13,7 @@ public:
     NumericField<defs::ham_t> m_helement;
 
     ConnectionList(const Hamiltonian &h, const Determinant &ref, size_t nbucket, const defs::ham_comp_t eps) :
-            MappedList(m_determinant, nbucket),
+            MappedList("test connection list", m_determinant, nbucket),
             m_determinant(this, 1, ref.nsite()), m_helement(this) {
         OccupiedOrbitals occs(ref);
         VacantOrbitals vacs(ref);

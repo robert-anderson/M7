@@ -81,7 +81,7 @@ protected:
 
 public:
     StatsFile(const std::string &fname)
-            : Table(), m_fname(fname), m_file(std::unique_ptr<std::ofstream>(new std::ofstream(fname))) {
+            : Table("Stats File"), m_fname(fname), m_file(std::unique_ptr<std::ofstream>(new std::ofstream(fname))) {
     }
 
     void flush() {

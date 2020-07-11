@@ -6,7 +6,7 @@
 #include "List.h"
 #include "omp.h"
 
-List::List(size_t nsegment) : Table(nsegment), m_high_water_mark(nsegment, 0ul) {}
+List::List(std::string name, size_t nsegment) : Table(name, nsegment), m_high_water_mark(nsegment, 0ul) {}
 
 void List::recv(List *list) {
     if (!compatible_with(*list)) throw std::runtime_error("Receiving List is not compatible");

@@ -9,7 +9,7 @@
 struct TestList : public List{
     NumericField<int> counter;
     TestList(size_t ncount=1, size_t nsegment=1):
-    List(nsegment),
+    List("test list", nsegment),
     counter(this, ncount)
     {}
 };

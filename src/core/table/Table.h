@@ -15,6 +15,7 @@
 #include "Field.h"
 
 class Table {
+    const std::string m_name;
 protected:
     // data buffer
     std::vector<defs::data_t, AlignedAllocator<defs::data_t, defs::cache_line_size>> m_data;
@@ -40,7 +41,7 @@ protected:
     std::vector<std::function<std::string(const Element *)>> m_printers;
 public:
 
-    Table(size_t nsegment = 1);
+    Table(std::string name, size_t nsegment = 1);
 
     char *field_begin(const Field *field, const size_t &irow, const size_t isegment = 0);
 

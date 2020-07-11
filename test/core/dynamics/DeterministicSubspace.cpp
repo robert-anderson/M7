@@ -12,7 +12,7 @@
 TEST(DeterministicSubspace, FciCheck) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
     auto ref_det = ham.guess_reference(0);
-    WalkerList walker_list(ham.nsite(), 100);
+    WalkerList walker_list("test walker list", ham.nsite(), 100);
     RankAllocator<DeterminantElement> ra(10);
     ham.generate_ci_space(&walker_list, ra, 0);
     ASSERT_EQ(mpi::all_sum(walker_list.high_water_mark(0)), 400);
@@ -64,7 +64,7 @@ TEST(DeterministicSubspace, FciCheck) {
 
 TEST(DeterministicSubspace, BuildFromDeterminantConnections) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
-    WalkerList walker_list(ham.nsite(), 100);
+    WalkerList walker_list("test walker list", ham.nsite(), 100);
     auto ref = ham.guess_reference(0);
     auto excited = ref;
     const size_t nconn = 48;

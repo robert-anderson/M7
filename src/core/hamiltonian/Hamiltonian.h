@@ -99,8 +99,8 @@ public:
     public:
         DeterminantField determinant;
 
-        DeterminantList(size_t nsite, size_t nbucket) :
-                MappedList(determinant, nbucket),
+        DeterminantList(std::string name, size_t nsite, size_t nbucket) :
+                MappedList(name, determinant, nbucket),
                 determinant(this, 1, nsite){}
     };
 

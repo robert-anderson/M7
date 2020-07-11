@@ -41,8 +41,8 @@ class PerforableMappedList : public MappedList<T> {
 
 public:
 
-    PerforableMappedList(Field_T& key_field, size_t nbucket):
-        MappedList<T>(key_field, nbucket) {}
+    PerforableMappedList(std::string name, Field_T& key_field, size_t nbucket):
+        MappedList<T>(name, key_field, nbucket) {}
 
     size_t push(const T &key) override {
         size_t irow = ~0ul;

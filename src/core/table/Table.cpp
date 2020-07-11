@@ -4,7 +4,9 @@
 
 #include "Table.h"
 
-Table::Table(size_t nsegment) : m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
+#include <utility>
+
+Table::Table(std::string name, size_t nsegment) : m_name(std::move(name)), m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
 
 char *Table::field_begin(const Field *field, const size_t &irow, const size_t isegment) {
     ASSERT(irow<nrow_per_segment());

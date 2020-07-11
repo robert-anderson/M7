@@ -13,7 +13,7 @@ class Determinant : public DeterminantElement {
         DeterminantField field;
 
         DeterminantTable(size_t nsite) :
-            Table(),
+            Table("Working determinant"),
             field(this, 1, nsite) {
             expand(1);
         }

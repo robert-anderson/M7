@@ -11,7 +11,7 @@
 
 struct MappedDeterminantList : public MappedList<DeterminantElement>{
     DeterminantField m_determinant;
-    MappedDeterminantList(size_t nelement, size_t nsite, size_t nbucket);
+    MappedDeterminantList(std::string name, size_t nelement, size_t nsite, size_t nbucket);
 };
 
 

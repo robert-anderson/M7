@@ -41,7 +41,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
         NumericField<defs::prob_t> m_weight;
 
         ExcitConnectionList(size_t nsite, size_t nbucket) :
-                MappedList(m_determinant, nbucket),
+                MappedList("test excitation connection list", m_determinant, nbucket),
                 m_determinant(this, 1, nsite), m_helement(this),
                 m_frequency(this, 2), m_weight(this, 2) {}
     };

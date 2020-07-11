@@ -4,5 +4,5 @@
 
 #include "DeterminantList.h"
 
-DeterminantList::DeterminantList(const size_t &nelement, const size_t &nsite, size_t nsegment) :
-        m_determinant(this, nelement, nsite, "determinant"){}
+DeterminantList::DeterminantList(std::string name, const size_t &nelement, const size_t &nsite, size_t nsegment) :
+        List(name), m_determinant(this, nelement, nsite, "determinant") {}

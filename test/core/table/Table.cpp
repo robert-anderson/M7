@@ -15,7 +15,7 @@ struct TestTable1 : public Table {
     //NumericField<std::complex<double>> test_complexes;
 
     TestTable1(size_t nsegment, size_t nint, size_t nfloat, size_t nchar, size_t nshort, size_t ncomplex) :
-        Table(nsegment),
+        Table("test table", nsegment),
         test_longs(this, nint),
         test_floats(this, nfloat),
         test_chars(this, nchar),
@@ -68,7 +68,7 @@ struct TestTable2 : public Table {
     DeterminantField test_dets;
 
     TestTable2(size_t nsegment, size_t nspatorb, size_t ndet) :
-        Table(nsegment),
+        Table("test table", nsegment),
         test_dets(this, ndet, nspatorb) {}
 };
 

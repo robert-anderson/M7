@@ -11,7 +11,7 @@
 
 struct DeterminantList : public List {
     DeterminantField m_determinant;
-    explicit DeterminantList(const size_t& nelement, const size_t& nsite, size_t nsegment = 1);
+    DeterminantList(std::string name, const size_t& nelement, const size_t& nsite, size_t nsegment = 1);
 };
 
 

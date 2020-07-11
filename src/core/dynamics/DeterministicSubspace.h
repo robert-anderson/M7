@@ -24,7 +24,7 @@ class DeterministicSubspace {
         NumericField<size_t> m_irow; // row index in m_walker_list of DeterministicSubspace
         NumericField<size_t> m_irank;
 
-        SubspaceList(const size_t &nsite) : DeterminantList(1, nsite), m_irow(this), m_irank(this) {}
+        SubspaceList(std::string name, const size_t &nsite) : DeterminantList(name,1, nsite), m_irow(this), m_irank(this) {}
     };
 
     SubspaceList m_local_subspace_list;
@@ -79,8 +79,8 @@ public:
 
     DeterministicSubspace(WalkerList &walker_list) :
             m_walker_list(walker_list),
-            m_local_subspace_list(SubspaceList(walker_list.m_determinant.m_nsite)),
-            m_full_subspace_list(SubspaceList(walker_list.m_determinant.m_nsite)),
+            m_local_subspace_list(SubspaceList("local deterministic subspace", walker_list.m_determinant.m_nsite)),
+            m_full_subspace_list(SubspaceList("full deterministic subspace", walker_list.m_determinant.m_nsite)),
             m_recvcounts(mpi::nrank(), 0), m_displs(mpi::nrank(), 0) {}
 
     void gather_and_project() {

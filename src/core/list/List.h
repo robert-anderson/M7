@@ -12,7 +12,7 @@ class List : public Table {
     List *m_recv = nullptr;
     defs::inds m_high_water_mark;
 public:
-    explicit List(size_t nsegment = 1);
+    explicit List(std::string name, size_t nsegment = 1);
 
     void recv(List *list);
 

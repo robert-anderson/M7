@@ -9,7 +9,7 @@ struct TestPerforableMappedList : public PerforableMappedList<NumericElement<siz
     NumericField<size_t> key, value;
 
     TestPerforableMappedList(size_t nbucket) :
-        PerforableMappedList(key, nbucket), key(this), value(this) {}
+        PerforableMappedList("test perforable mapped list", key, nbucket), key(this), value(this) {}
 };
 
 /*
