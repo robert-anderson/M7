@@ -47,3 +47,20 @@ TEST(MappedList, ThreadSafety) {
         ASSERT_EQ((size_t)list.value(irow), i);
     }
 }
+
+TEST(MappedList, ThreadSerialization) {
+    const size_t nrow = 1e7;
+    TestMappedList list(100000, 1);
+    list.expand(nrow);
+
+    auto do_something = [](size_t i){while (i%213){i = 3*i+1;}};
+
+#pragma omp parallel for default(none) shared(list, do_something)
+    for (size_t i = 0; i < nrow; ++i) {
+        do_something(i);
+        auto key = i*i;
+        auto mutex = list.key_mutex(key);
+        size_t irow = list.push(mutex, key);
+        list.value(irow) = i;
+    }
+}

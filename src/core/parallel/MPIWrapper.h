@@ -317,7 +317,7 @@ private:
                 (void *) send, sendcount, mpi_type<T>(),
                 (void *) recv, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
-        return all_to_all(send, senddispls[0]+sendcount, recv, displs[0]+recvcounts[0]);
+        return all_to_all(send, sendcount, recv, recvcounts[0]);
 #endif
     }
 
@@ -348,7 +348,7 @@ public:
         return MPI_Allgather(
                 (void *) send, sendcount, mpi_type<T>(), recv, recvcount, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
-        return all_to_all(send, senddispls[0]+sendcount, recv, displs[0]+recvcount);
+        return all_to_all(send, sendcount, recv, recvcount);
 #endif
     }
 

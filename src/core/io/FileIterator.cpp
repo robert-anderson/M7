@@ -40,8 +40,18 @@ bool FileIterator::next(std::string &line){
     return !line.empty();
 }
 
+bool FileIterator::next(std::string &line, size_t& i){
+    i++;
+    return next(line);
+}
+
 std::string FileIterator::next(){
     std::string line;
     getline(*m_file, line);
     return line;
+}
+
+std::string FileIterator::next(size_t& i){
+    i++;
+    return next();
 }

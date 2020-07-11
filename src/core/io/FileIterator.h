@@ -27,7 +27,11 @@ public:
 
     bool next(std::string &);
 
+    bool next(std::string &, size_t& i);
+
     std::string next();
+
+    std::string next(size_t& i);
 };
 
 

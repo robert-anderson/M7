@@ -31,6 +31,27 @@ TEST(List, ThreadSafety) {
     }
 }
 
+TEST(List, ThreadSerialization) {
+    /*
+     * Pushing to a List concurrently involves the resolution of thread contention
+     * since the pointer to the next available position in the list must be atomically
+     * incremented. This test is to make sure this contention is being resolved without
+     * effective loss of thread parallelism
+     */
+    const size_t nrow = 1e7;
+    TestList list;
+    list.expand(nrow);
+
+    auto do_something = [](size_t i){while (i%213){i = 3*i+1;}};
+
+#pragma omp parallel for default(none), shared(list, do_something)
+    for (size_t i = 0; i < nrow; ++i) {
+        do_something(i);
+        size_t irow = list.push();
+        list.counter(irow) = irow;
+    }
+}
+
 TEST(List, Communication){
     const size_t nrow = 100;
     const size_t nint = 6;

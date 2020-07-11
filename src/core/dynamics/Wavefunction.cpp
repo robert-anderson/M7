@@ -16,7 +16,7 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_send(fciqmc->m_reference.nsite(), mpi::nrank()),
         m_recv(fciqmc->m_reference.nsite(), 1),
         m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference) {
-    const auto nrow_walker = (size_t) (m_input.walker_factor_initial * m_input.nwalker_target);
+    const auto nrow_walker = (size_t) (m_input.nwalker_target*m_input.walker_factor_initial);
     m_data.expand(nrow_walker);
     m_send.recv(&m_recv);
     const auto nrow_buffer = (size_t) (m_input.buffer_factor_initial * m_input.nwalker_target);
