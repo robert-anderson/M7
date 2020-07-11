@@ -22,6 +22,9 @@ public:
     StatsField<size_t> m_noccupied_det;
     StatsField<defs::prob_t> m_psingle;
     StatsField<double> m_iter_time;
+    StatsField<double> m_prop_time;
+    StatsField<double> m_comm_time;
+    StatsField<double> m_anni_time;
 
     explicit FciqmcStatsFile(const Options &input);
 };

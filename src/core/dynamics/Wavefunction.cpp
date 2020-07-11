@@ -86,6 +86,8 @@ void Wavefunction::propagate() {
      *      update local weight in the diagonal cloning/death step
      */
 
+    mpi::barrier(); m_propagation_timer.unpause();
+
     if (m_prop->semi_stochastic()) m_detsub->gather_and_project();
 
     for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
@@ -139,10 +141,13 @@ void Wavefunction::propagate() {
 #endif
         }
     }
+    mpi::barrier(); m_propagation_timer.pause();
 }
 
 void Wavefunction::communicate() {
+    mpi::barrier(); m_communication_timer.unpause();
     m_send.communicate();
+    mpi::barrier(); m_communication_timer.pause();
 }
 
 void Wavefunction::annihilate_row(const size_t &irow_recv) {
@@ -184,11 +189,13 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
 }
 
 void Wavefunction::annihilate() {
+    mpi::barrier(); m_annihilation_timer.unpause();
     if (m_prop->semi_stochastic()) m_detsub->update_weights(m_prop->m_tau, m_nwalker.m_delta);
     m_aborted_weight = 0;
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
         annihilate_row(irow_recv);
     }
+    mpi::barrier(); m_annihilation_timer.pause();
 }
 
 void Wavefunction::synchronize() {
@@ -298,4 +305,7 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
     stats_file->m_aborted_weight.write(m_aborted_weight.reduced());
     stats_file->m_ninitiator.write(m_ninitiator.reduced());
     stats_file->m_noccupied_det.write(m_nocc_det.reduced());
+    stats_file->m_prop_time.write(m_propagation_timer.lap());
+    stats_file->m_comm_time.write(m_communication_timer.lap());
+    stats_file->m_anni_time.write(m_annihilation_timer.lap());
 }

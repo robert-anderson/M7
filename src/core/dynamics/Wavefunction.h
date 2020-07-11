@@ -8,6 +8,7 @@
 
 #include <src/core/fermion/Determinant.h>
 #include <src/core/io/Options.h>
+#include <src/core/util/Timer.h>
 #include "WalkerList.h"
 #include "SpawnList.h"
 #include "Propagator.h"
@@ -29,6 +30,13 @@ class Wavefunction {
 
     Distributed<defs::wf_t> m_aborted_weight;
     DistributedAccumulation<size_t, int64_t> m_ninitiator;
+
+    /*
+     * timers for the three main sections of the wavefunction evolution
+     */
+    Timer m_propagation_timer;
+    Timer m_communication_timer;
+    Timer m_annihilation_timer;
 
 public:
 
