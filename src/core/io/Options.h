@@ -24,6 +24,7 @@ struct Options {
     double buffer_factor_initial = 10.0;
     double min_spawn_mag = 0.0;
     size_t nload_balance_block = 10;
+    size_t load_balance_period = 10;
     double tau_initial = 0.05;
     bool dynamic_tau = false;
     size_t nenough_spawns_for_dynamic_tau = 100;

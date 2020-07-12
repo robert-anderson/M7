@@ -13,7 +13,7 @@ TEST(DeterministicSubspace, FciCheck) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
     auto ref_det = ham.guess_reference(0);
     WalkerList walker_list("test walker list", ham.nsite(), 100);
-    RankAllocator<DeterminantElement> ra(10);
+    RankAllocator<DeterminantElement> ra(10, 1);
     ham.generate_ci_space(&walker_list, ra, 0);
     ASSERT_EQ(mpi::all_sum(walker_list.high_water_mark(0)), 400);
     bool is_ref_rank = walker_list.m_determinant(0) == ref_det;
@@ -24,9 +24,9 @@ TEST(DeterministicSubspace, FciCheck) {
     double tau = 0.02;
 
     auto do_iter = [&]() {
-        Distributed<defs::ham_t> num;
-        Distributed<defs::ham_comp_t> norm_square;
-        Distributed<defs::wf_t> delta_nw;
+        Reducable<defs::ham_t> num;
+        Reducable<defs::ham_comp_t> norm_square;
+        Reducable<defs::wf_t> delta_nw;
         detsub.gather_and_project();
         detsub.rayleigh_quotient(num, norm_square);
         auto l1_init = walker_list.l1_norm(0);
@@ -90,7 +90,7 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections) {
     ASSERT_EQ(detsub.nrow_full(), mpi::nrank() * nconn_per_rank);
 
     detsub.gather_and_project();
-    Distributed<defs::wf_t> delta_nw;
+    Reducable<defs::wf_t> delta_nw;
     detsub.update_weights(1.0, delta_nw);
 }
 

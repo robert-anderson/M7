@@ -18,6 +18,8 @@
 class FciqmcCalculation {
 public:
     const Options m_input;
+    Epoch m_vary_shift;
+    Epoch m_semi_stochastic;
     RankAllocator<DeterminantElement> m_rank_allocator;
     std::unique_ptr<FciqmcStatsFile> m_stats_file = nullptr;
     std::unique_ptr<Hamiltonian> m_ham;

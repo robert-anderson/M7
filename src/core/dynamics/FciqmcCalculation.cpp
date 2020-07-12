@@ -9,7 +9,8 @@
 
 
 FciqmcCalculation::FciqmcCalculation(const Options &input) :
-    m_input(input), m_rank_allocator(input.nload_balance_block),
+    m_input(input), m_vary_shift("variable shift"), m_semi_stochastic("semi-stochastic"),
+    m_rank_allocator(input.nload_balance_block, input.load_balance_period, &m_vary_shift),
     m_ham(std::unique_ptr<AbInitioHamiltonian>(new AbInitioHamiltonian(input.fcidump_path))),
     m_reference(m_ham->guess_reference(input.spin_restrict)),
     m_wf(this) {
@@ -25,7 +26,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
 
     logger::write("Initializing FCIQMC Calculation...");
     logger::write("Shared memory parallelization: "+std::to_string(omp_get_max_threads())+" OpenMP threads");
-    logger::write("Distributed memory parallelization: "+std::to_string(mpi::nrank())+" MPI ranks");
+    logger::write("Reducable memory parallelization: "+std::to_string(mpi::nrank())+" MPI ranks");
     logger::write("Reference determinant was detected to be: " + m_reference.to_string());
 }
 

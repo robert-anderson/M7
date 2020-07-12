@@ -5,16 +5,16 @@
 #ifndef M7_DISTRIBUTEDACCUMULATION_H
 #define M7_DISTRIBUTEDACCUMULATION_H
 
-#include "Distributed.h"
+#include "Reducable.h"
 
 template<typename T, typename delta_T=T>
-class DistributedAccumulation : public Distributed<T> {
+class DistributedAccumulation : public Reducable<T> {
 public:
-    using Distributed<T>::local;
-    using Distributed<T>::mpi_sum;
-    using Distributed<T>::operator=;
-    using Distributed<T>::operator+=;
-    Distributed<delta_T> m_delta;
+    using Reducable<T>::local;
+    using Reducable<T>::mpi_sum;
+    using Reducable<T>::operator=;
+    using Reducable<T>::operator+=;
+    Reducable<delta_T> m_delta;
 
     delta_T& reduce_delta(){
         return m_delta.mpi_sum();

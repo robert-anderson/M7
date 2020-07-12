@@ -11,8 +11,8 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
     m_magnitude_logger(m_input),
     m_dst_det(m_ham->nsite()),
     m_aconn(m_dst_det), m_occ(m_dst_det), m_vac(m_dst_det),
-    m_variable_shift("variable shift"),
-    m_semi_stochastic("semi-stochastic")
+    m_variable_shift(fciqmc->m_vary_shift),
+    m_semi_stochastic(fciqmc->m_semi_stochastic)
     {
     m_tau = m_input.tau_initial;
     m_shift = m_input.shift_initial;

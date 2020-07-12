@@ -24,11 +24,11 @@
 
 #include <utility>
 
-#include "Distributed.h"
+#include "Reducable.h"
 
 class Epoch {
     std::string m_name;
-    Distributed<size_t> m_icycle_start;
+    Reducable<size_t> m_icycle_start;
 
 public:
     explicit Epoch(std::string name);

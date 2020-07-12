@@ -28,7 +28,7 @@ class Wavefunction {
     SpawnList m_send, m_recv;
     Reference m_reference;
 
-    Distributed<defs::wf_t> m_aborted_weight;
+    Reducable<defs::wf_t> m_aborted_weight;
     DistributedAccumulation<size_t, int64_t> m_ninitiator;
 
     /*

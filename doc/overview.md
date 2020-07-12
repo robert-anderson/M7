@@ -94,7 +94,7 @@ Hybrid<size_t> n;
 }
 n.sum(); // returns result of hybrid reduction
 ```
-In situations where there is no need for thread-reduction, the base class \ref Distributed is an adequate solution.
+In situations where there is no need for thread-reduction, the base class \ref Reducable is an adequate solution.
 
 
 <!--

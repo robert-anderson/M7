@@ -200,7 +200,7 @@ void Wavefunction::annihilate() {
 
 void Wavefunction::synchronize() {
     /*
-     * This method handles the MPI communication involved in collating the Distributed members
+     * This method handles the MPI communication involved in collating the Reducable members
      * of the Wavefunction class.
      * TODO: "communication syndicates" to avoid many blocking MPI reductions by combining in an array
      *

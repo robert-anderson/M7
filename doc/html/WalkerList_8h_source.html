@@ -120,7 +120,7 @@ $(function() {
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;src/core/list/PerforableMappedList.h&gt;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;src/core/table/DeterminantField.h&gt;</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;src/core/table/FlagField.h&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;src/core/parallel/Distributed.h&gt;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;src/core/parallel/Reducable.h&gt;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;list&gt;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
 <div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="structWalkerList.html">   14</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structWalkerList.html">WalkerList</a> : <span class="keyword">public</span> <a class="code" href="classPerforableMappedList.html">PerforableMappedList</a>&lt;DeterminantElement&gt; {</div>
@@ -163,7 +163,7 @@ $(function() {
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    }</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">void</span> normalize(<span class="keyword">const</span> <span class="keywordtype">size_t</span> &amp;ielement=0, <span class="keyword">const</span> defs::wf_t &amp;norm=1.0) {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <a class="code" href="classDistributed.html">Distributed&lt;defs::wf_comp_t&gt;</a> tot;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <a class="code" href="classDistributed.html">Reducable&lt;defs::wf_comp_t&gt;</a> tot;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> irow = 0ul; irow &lt; high_water_mark(0); irow++) {</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            tot += std::pow(std::abs(*m_weight(irow)), 2.0);</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        }</div>
@@ -230,7 +230,7 @@ $(function() {
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="aclassTable_html"><div class="ttname"><a href="classTable.html">Table</a></div><div class="ttdef"><b>Definition:</b> Table.h:17</div></div>
 <div class="ttc" id="astructWalkerList_html"><div class="ttname"><a href="structWalkerList.html">WalkerList</a></div><div class="ttdef"><b>Definition:</b> WalkerList.h:14</div></div>
-<div class="ttc" id="aclassDistributed_html"><div class="ttname"><a href="classDistributed.html">Distributed&lt; defs::wf_comp_t &gt;</a></div></div>
+<div class="ttc" id="aclassDistributed_html"><div class="ttname"><a href="classDistributed.html">Reducable&lt; defs::wf_comp_t &gt;</a></div></div>
 <div class="ttc" id="aclassDeterminantField_html"><div class="ttname"><a href="classDeterminantField.html">DeterminantField</a></div><div class="ttdef"><b>Definition:</b> DeterminantField.h:124</div></div>
 <div class="ttc" id="aclassNumericField_html"><div class="ttname"><a href="classNumericField.html">NumericField&lt; defs::wf_t &gt;</a></div></div>
 <div class="ttc" id="aclassMutex_html"><div class="ttname"><a href="classMutex.html">Mutex</a></div><div class="ttdef"><b>Definition:</b> MutexVector.h:11</div></div>

@@ -37,7 +37,7 @@
 \contentsline {section}{\numberline {3.32}Determinant\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Sampler Class Reference}{23}{section.3.32}
 \contentsline {section}{\numberline {3.33}Determinant\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Set\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Enumerator Class Reference}{24}{section.3.33}
 \contentsline {section}{\numberline {3.34}Deterministic\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Subspace Class Reference}{25}{section.3.34}
-\contentsline {section}{\numberline {3.35}Distributed$<$ T $>$ Class Template Reference}{25}{section.3.35}
+\contentsline {section}{\numberline {3.35}Reducable$<$ T $>$ Class Template Reference}{25}{section.3.35}
 \contentsline {section}{\numberline {3.36}Eigen\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Solver$<$ T $>$ Class Template Reference}{25}{section.3.36}
 \contentsline {section}{\numberline {3.37}Element Class Reference}{26}{section.3.37}
 \contentsline {section}{\numberline {3.38}Enumerator$<$ result\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}\_\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}T $>$ Class Template Reference}{26}{section.3.38}
