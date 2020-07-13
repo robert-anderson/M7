@@ -10,6 +10,7 @@
 #include "MPIWrapper.h"
 #include "Epoch.h"
 #include <forward_list>
+#include <algorithm>
 
 template<typename T>
 class RankAllocator {

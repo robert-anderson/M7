@@ -13,6 +13,7 @@
 #include "src/core/util/consts.h"
 #include "src/core/util/defs.h"
 #include "src/core/io/FcidumpFileIterator.h"
+#include "src/core/parallel/SharedArray.h"
 #include "Integrals.h"
 
 /*
@@ -28,12 +29,11 @@ class Integrals_2e : public Integrals {
     //            none       i          ih         ihr
     static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8, "Invalid symmetry parameter specified.");
     const size_t m_norb2, m_norb3, m_nelem_8fold, m_nelem;
-    std::vector<T> m_data;
+    SharedArray<T> m_data;
 public:
     Integrals_2e(const size_t &norb, bool spin_resolved) :
             Integrals(norb, spin_resolved), m_norb2(m_norb * norb), m_norb3(m_norb2 * norb),
-            m_nelem_8fold(trig(0, trig(0, norb))), m_nelem(nelem(norb)) {
-        m_data.resize(m_nelem, 0.0);
+            m_nelem_8fold(trig(0, trig(0, norb))), m_nelem(nelem(norb)), m_data(m_nelem){
     }
 
     Integrals_2e(std::string fname, bool spin_major = false) :

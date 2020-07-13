@@ -77,13 +77,67 @@ MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
 const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
 #endif
 
+static size_t g_irank;
+static size_t g_nrank;
+static std::string g_processor_name;
+#ifdef HAVE_MPI
+static MPI_Comm g_node_comm;
+#endif
+static size_t g_irank_on_node;
+static size_t g_nrank_on_node;
+
 struct mpi {
+    static void setup_mpi_globals(){
+#if HAVE_MPI
+        int tmp;
+        MPI_Comm_size(MPI_COMM_WORLD, &tmp);
+        g_nrank = tmp;
+        MPI_Comm_rank(MPI_COMM_WORLD, &tmp);
+        g_irank = tmp;
+        char processor_name[MPI_MAX_PROCESSOR_NAME];
+        MPI_Get_processor_name(processor_name, &tmp);
+        g_processor_name = std::string(processor_name, tmp);
+        MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
+        MPI_Comm_size(g_node_comm, &tmp);
+        g_nrank_on_node = tmp;
+        MPI_Comm_rank(g_node_comm, &tmp);
+        g_irank_on_node = tmp;
+#else
+        g_irank = 0;
+        g_nrank = 1;
+        g_processor_name = "";
+        g_irank_on_node = 0;
+        g_nrank_on_node = 1;
+#endif
+    }
 
-    static size_t nrank();
+    static size_t &nrank(){
+        return g_nrank;
+    }
 
-    static size_t irank();
+    static size_t &irank(){
+        return g_irank;
+    }
 
-    static std::string processor_name();
+    static size_t &nrank_on_node(){
+        return g_nrank_on_node;
+    }
+
+    static size_t &irank_on_node(){
+        return g_irank_on_node;
+    }
+
+    static std::string &processor_name(){
+        return g_processor_name;
+    }
+
+    static MPI_Comm* node_communicator(){
+#ifdef HAVE_MPI
+        return &g_node_comm;
+#else
+        return nullptr;
+#endif
+    }
 
     static void barrier();
 
@@ -356,7 +410,11 @@ public:
 
     static bool i_am(const size_t i);
 
+    static bool on_node_i_am(const size_t i);
+
     static bool i_am_root();
+
+    static bool on_node_i_am_root();
 
     static void rank_print(const std::string s, size_t irank) {
         if (i_am(irank)) std::cout << "rank " << irank << ": " << s << std::endl;

@@ -4,35 +4,6 @@
 
 #include "MPIWrapper.h"
 
-size_t mpi::nrank() {
-#if HAVE_MPI
-    int tmp;
-    MPI_Comm_size(MPI_COMM_WORLD, &tmp);
-    return tmp;
-#else
-    return 1;
-#endif
-}
-
-size_t mpi::irank() {
-#if HAVE_MPI
-    int tmp;
-    MPI_Comm_rank(MPI_COMM_WORLD, &tmp);
-    return tmp;
-#else
-    return 0;
-#endif
-}
-
-std::string mpi::processor_name() {
-#if HAVE_MPI
-    int tmp;
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    MPI_Get_processor_name(processor_name, &tmp);
-    return std::string(processor_name, tmp);
-#endif
-    return "node";
-}
 
 void mpi::barrier() {
 #if HAVE_MPI
@@ -60,7 +31,10 @@ bool mpi::finalized() {
 
 void mpi::initialize(int *argc, char ***argv) {
 #if HAVE_MPI
-    if (!initialized()) MPI_Init(argc, argv);
+    if (!initialized()) {
+        MPI_Init(argc, argv);
+        setup_mpi_globals();
+    }
 #endif
 }
 
@@ -76,4 +50,12 @@ bool mpi::i_am(const size_t i) {
 
 bool mpi::i_am_root() {
     return i_am(0);
+}
+
+bool mpi::on_node_i_am(const size_t i) {
+    return irank_on_node() == i;
+}
+
+bool mpi::on_node_i_am_root() {
+    return on_node_i_am(0);
 }
