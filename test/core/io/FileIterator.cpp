@@ -2,111 +2,81 @@
 // Created by rja on 10/07/2020.
 //
 
-#include <src/core/io/FileIterator.h>
 #include <src/core/util/defs.h>
 #include "gtest/gtest.h"
+#include <fstream>
+#include <algorithm>
 
+#include "src/core/io/FcidumpFileReader.h"
 
-template<typename T, size_t nind>
-struct SparseArrayFileIterator {//: public FileIterator {
-
-    enum Arithmetic {
-        None,
-        Real,
-        Complex
-    };
-    Arithmetic m_arithmetic = None;
-    bool m_brackets = false;
-    bool m_indsfirst = false;
-
-    SparseArrayFileIterator(){}//FileIterator(){}
-
-    /*
-    bool set_kind(const std::string& line){
-        ASSERT(m_arithmetic==None);
-        size_t iopen = line.find('(');
-        size_t iclose = line.find(')');
-        if (iopen!=~0ul && iclose==~0ul)
-            return false; // brackets are invalid
-        if (iopen==~0ul && iclose!=~0ul)
-            return false; // brackets are invalid
-
-        std::cout << iopen-~0ul << std::endl;
-        m_brackets = iopen;
-    }*/
-
-};
-
-double read_double(char*& ptr){
-    auto is_numeric = [](const char& c){
-        return '0'<=c && c<='9';
-    };
-    auto is_partial_standard_float = [&](const char& c){
-        return is_numeric(c) || c=='.' || c=='-';
-    };
-    auto is_partial_scientific = [&](const char& c){
-        return is_partial_standard_float(c) || c=='e' || c=='E'|| c=='d'|| c=='D'|| c=='+';
-    };
-    auto is_divider = [](const char& c){
-        return c==' ' || c==',' || c==')';
-    };
-    char* begin = nullptr;
-    //for(; *ptr!=0; ptr++){
-    while(*ptr!=0){
-        if (!begin){
-            if (is_partial_standard_float(*ptr)) begin = ptr;
-            DBVAR(*ptr)
-        }
-        else {
-            if (is_divider(*ptr)) {
-                DBVAR(*ptr)
-                return std::strtod(begin, &ptr);
-            }
-            else if (!is_partial_scientific(*ptr)) {
-                begin = nullptr;
-                DBVAR(*ptr)
-            }
-        }
-        ptr++;
+TEST(FcidumpFileReader, IndexReading) {
+    std::string line = "1 3 5 7";
+    const char *p = line.begin().base();
+    for (int i = 0; i < 4; ++i) {
+        ASSERT_EQ(FcidumpFileReader<float>::read_unsigned(p), 2 * i + 1);
     }
-    DBVAR((size_t)ptr)
-    if (begin && begin!=ptr) {
-        DBVAR(*ptr)
-        return std::strtod(begin, &ptr);
-    }
-    else {
-        DBVAR(*ptr)
-        return std::numeric_limits<double>::max();
-    }
+    ASSERT_EQ(FcidumpFileReader<float>::read_unsigned(p), ~0ul);
 }
 
-char read(char*& p){
-    char c = *p;
-    for(; *p!=0; p++){}
-    return c;
+TEST(FcidumpFileReader, EntryReadingComplexIndsLast) {
+    FcidumpFileReader<std::complex<double>> iterator(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    defs::inds inds(4);
+    std::complex<double> v;
+    iterator.next(inds, v);
+    ASSERT_EQ(inds, defs::inds({1, 1, 1, 1}));
+    ASSERT_EQ(v, std::complex<double>(2.27526379951093, 2.37934998859424e-17));
+    // on source file line #5 - advance 600 lines to #605
+    // (-0.00231725227868085,-0.00527081024253388)   5   4   1   8
+    for (size_t i = 0; i < 600; i++)
+        ASSERT_TRUE(iterator.next(inds, v));
+    ASSERT_EQ(inds, defs::inds({5, 4, 1, 8}));
+    ASSERT_EQ(v, std::complex<double>(-0.00231725227868085, -0.00527081024253388));
+    // last line is #2306
+    for (size_t i = 0; i < 2306 - 605; i++)
+        ASSERT_TRUE(iterator.next(inds, v));
+    ASSERT_EQ(inds, defs::inds({0, 0, 0, 0}));
+    ASSERT_EQ(v, std::complex<double>(0.0, 0.0));
+    ASSERT_FALSE(iterator.next(inds, v));
 }
 
-TEST(FileIterator, Test) {
-    std::string line = "TREL=.TRUE.";
-    char* p = line.begin().base();
-    while (*p!=0){
+TEST(FcidumpFileReader, EntryReadingRealIndsLastToComplexContainer) {
+    FcidumpFileReader<std::complex<double>> iterator(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    defs::inds inds(4);
+    std::complex<double> v;
+    iterator.next(inds, v);
+    ASSERT_EQ(inds, defs::inds({1, 1, 1, 1}));
+    ASSERT_EQ(v, std::complex<double>(0.536449840808463, 0));
+    // on source file line #5 - advance 250 lines to #255
+    //    0.0287053880352757   6   4   4   6
+    for (size_t i = 0; i < 250; i++)
+        ASSERT_TRUE(iterator.next(inds, v));
+    ASSERT_EQ(inds, defs::inds({6, 4, 4, 6}));
+    ASSERT_EQ(v, std::complex<double>(0.0287053880352757, 0.0));
+    // last line is #275
+    for (size_t i = 0; i < 275 - 255; i++)
+        ASSERT_TRUE(iterator.next(inds, v));
+    ASSERT_EQ(inds, defs::inds({0, 0, 0, 0}));
+    ASSERT_EQ(v, std::complex<double>(-98.3339467443989, 0.0));
+    ASSERT_FALSE(iterator.next(inds, v));
+}
 
-        //DBVAR((size_t)p)
-        //std::cout << read_double(p) << std::endl;
-        std::cout << read(p) << std::endl;
-        //DBVAR((size_t)p)
-
-
-    }
-
-//    FileIterator iterator(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP");
-//    std::string line;
-//    while (iterator.next(line)){
-//        std::cout << line << std::endl;
-//        ASSERT(*line.end().base()==0)
-//        char* p = line.begin().base();
-//        while (*p!=0){
-//            std::cout << p << "     " << read_double(p) << std::endl;
-//        }
-//    }
+TEST(FcidumpFileReader, EntryReadingRealIndsLastToRealContainer) {
+    FcidumpFileReader<double> iterator(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    defs::inds inds(4);
+    double v;
+    iterator.next(inds, v);
+    ASSERT_EQ(inds, defs::inds({1, 1, 1, 1}));
+    ASSERT_EQ(v, 0.536449840808463);
+    // on source file line #5 - advance 250 lines to #255
+    //    0.0287053880352757   6   4   4   6
+    for (size_t i = 0; i < 250; i++)
+        ASSERT_TRUE(iterator.next(inds, v));
+    ASSERT_EQ(inds, defs::inds({6, 4, 4, 6}));
+    ASSERT_EQ(v, 0.0287053880352757);
+    // last line is #275
+    for (size_t i = 0; i < 275 - 255; i++)
+        ASSERT_TRUE(iterator.next(inds, v));
+    ASSERT_EQ(inds, defs::inds({0, 0, 0, 0}));
+    ASSERT_EQ(v, -98.3339467443989);
+    ASSERT_FALSE(iterator.next(inds, v));
 }

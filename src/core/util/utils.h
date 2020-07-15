@@ -15,6 +15,7 @@
 #include <x86intrin.h>
 #include <climits>
 #include <iomanip>
+#include <cstring>
 
 namespace utils {
 
@@ -24,15 +25,15 @@ namespace utils {
      * have been successful in debug build
      */
     template<typename T>
-    bool is_zero(const T* v){
-        for (size_t ichar=0ul; ichar<sizeof(T); ++ichar){
-            if (*((char*)v + ichar)!=0) return false;
+    bool is_zero(const T *v) {
+        for (size_t ichar = 0ul; ichar < sizeof(T); ++ichar) {
+            if (*((char *) v + ichar) != 0) return false;
         }
         return true;
     }
 
     template<typename T>
-    bool is_zero(const T& v){
+    bool is_zero(const T &v) {
         return is_zero(&v);
     }
 
@@ -232,6 +233,28 @@ namespace string_utils {
     static std::string join(const std::string &word, const size_t &nrepeat) {
         return join(word, nrepeat, " ", false);
     }
+
+    static std::vector<std::string> split(const std::string &line, char delimiter) {
+        std::vector<std::string> result{};
+        std::stringstream ss(line);
+        std::string token;
+        while (std::getline(ss, token, delimiter)) {
+            if (token.size()) result.push_back(token);
+        }
+        return result;
+    }
+
+    static std::vector<std::string> split(const std::string &line, const std::string &delimiters) {
+        std::string mutable_copy = line;
+        std::vector<std::string> result{};
+        char *ptr;
+        ptr = strtok(const_cast<char*>(mutable_copy.c_str()), delimiters.c_str());
+        while (ptr != nullptr) {
+            result.emplace_back(ptr);
+            ptr = strtok(nullptr, delimiters.c_str());
+        }
+        return result;
+    }
 }
 
 namespace prob_utils {
@@ -248,16 +271,16 @@ namespace stat_utils {
     template<typename T>
     std::pair<T, T> mean_std(
             typename std::vector<T>::const_iterator begin,
-            typename std::vector<T>::const_iterator end){
+            typename std::vector<T>::const_iterator end) {
         T mean = 0.0;
         T sq_mean = 0.0;
         for (auto i = begin; i != end; i++) {
             mean += *i;
-            sq_mean += (*i)*(*i);
+            sq_mean += (*i) * (*i);
         }
         mean /= std::distance(begin, end);
         sq_mean /= std::distance(begin, end);
-        return {mean, std::sqrt(std::abs(sq_mean-mean*mean))};
+        return {mean, std::sqrt(std::abs(sq_mean - mean * mean))};
     }
 
     template<typename T>
@@ -286,9 +309,23 @@ namespace stat_utils {
 
 }
 
+namespace float_utils {
+    template<typename T>
+    bool is_integral(const T &v) {
+        static_assert(std::is_floating_point<T>::value, "T must be floating point");
+        return ceil(v) == v;
+    }
+}
+
 namespace complex_utils {
     template<typename T>
-    static std::complex<double> normal_from_polar(const T& arg){
+    void set_imag_part(T &v, const T &imag) {}
+
+    template<typename T>
+    void set_imag_part(std::complex<T> &v, const T &imag) { v.imag(imag); }
+
+    template<typename T>
+    static std::complex<double> normal_from_polar(const T &arg) {
         /*
          * arg is in radian
          */
@@ -296,12 +333,12 @@ namespace complex_utils {
     }
 
     template<typename T>
-    static std::complex<double> normal_from_xy(const T& x, const T& y){
-        return std::complex<double>(x, y)/std::sqrt(x*x+y*y);
+    static std::complex<double> normal_from_xy(const T &x, const T &y) {
+        return std::complex<double>(x, y) / std::sqrt(x * x + y * y);
     }
 
-    static std::complex<double> normal_from_sector(const size_t& isector, const size_t& nsector){
-        return normal_from_polar(consts::two_pi * double(isector)/double(nsector));
+    static std::complex<double> normal_from_sector(const size_t &isector, const size_t &nsector) {
+        return normal_from_polar(consts::two_pi * double(isector) / double(nsector));
     }
 }
 

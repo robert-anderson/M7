@@ -78,3 +78,19 @@ TEST(utils, MeanAndStd){
     ASSERT_FLOAT_EQ(mean_std.first,  1.8416666666666668);
     ASSERT_FLOAT_EQ(mean_std.second, 1.6110081384717527);
 }
+
+TEST(utils, JoinAndSplit){
+    const std::string line = " this is   an   example   string   ";
+    auto tokens = string_utils::split(line, ' ');
+    ASSERT_EQ(tokens.size(), 5);
+    auto joinder = string_utils::join(tokens, " ", false);
+    std::cout << joinder << std::endl;
+    // splitting will eliminate consecutive occurrences of the delimiter
+    ASSERT_EQ("this is an example string", joinder);
+}
+
+TEST(utils, Tokenize){
+    const std::string line = " this is   an,   example   string   ";
+    auto tokens = string_utils::split(line, " ,");
+    ASSERT_EQ(tokens.size(), 5);
+}
