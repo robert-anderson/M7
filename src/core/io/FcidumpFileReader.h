@@ -10,6 +10,20 @@
 
 static std::regex header_terminator_regex{R"(\&END)"};
 
+static constexpr std::array<std::array<size_t, 4>, 8> orderings{
+    {
+        {0, 1, 2, 3},
+        {1, 0, 2, 3},
+        {0, 1, 3, 2},
+        {1, 0, 3, 2},
+        {2, 3, 0, 1},
+        {2, 3, 1, 0},
+        {3, 2, 0, 1},
+        {3, 2, 1, 0}
+    }
+};
+
+
 template<typename T>
 class FcidumpFileReader : public SparseArrayFileReader<T> {
     const size_t m_norb;
@@ -66,6 +80,43 @@ public:
     }
 
 
+    static size_t isymm(const std::string &filename) {
+        auto index_is_defined = [](size_t i) { return i < (size_t) (-1); };
+        SparseArrayFileReader<T> reader(filename, 4);
+        defs::inds inds(4);
+        T value;
+        // this will eventually hold all orderings of the first example of an
+        // integral with 4 distinct indices
+        std::array<defs::inds, 8> inds_distinct{};
+        size_t isymm{};
+        while (reader.next(inds, value)) {
+            if (std::all_of(inds.begin(), inds.end(), index_is_defined)) {
+                // we have a two body integral
+                if (!isymm) {
+                    inds_distinct[0].assign(inds.begin(), inds.end());
+                    std::sort(inds.begin(), inds.end());
+                    // still looking for an example of four distinct indices
+                    if (std::adjacent_find(inds.begin(), inds.end()) == inds.end()) {
+                        for (size_t i = 1ul; i < orderings.size(); ++i) {
+                            for (size_t j = 0ul; j < 4; ++j)
+                                inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
+                        }
+                        isymm++;
+                    }
+                } else {
+                    for (auto tmp : inds_distinct) {
+                        if (std::equal(inds.begin(), inds.end(), tmp.begin())){
+                            isymm++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ASSERT(isymm);
+        // 8->1; 4->2; 2->4; 1->8
+        return 8 / isymm;
+    }
 };
 
 #endif //M7_FCIDUMPFILEREADER_H
