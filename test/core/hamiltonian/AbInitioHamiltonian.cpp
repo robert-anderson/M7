@@ -74,7 +74,6 @@ TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
     ASSERT_TRUE(ham.spin_conserving());
     Determinant hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, 2,  6, 7, 8});
-    //size_t removed, inserted;
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);

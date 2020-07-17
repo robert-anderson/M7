@@ -26,11 +26,16 @@ namespace consts {
     template<typename T>
     struct is_complex_t<const std::complex<T>&> : public std::true_type {};
 
+
+
+    template<typename T>
+    constexpr bool is_arithmetic() { return is_complex_t<T>::value || std::is_arithmetic<T>::value; }
+
     template<typename T>
     constexpr bool is_complex() { return is_complex_t<T>::value; }
 
     template<typename T>
-    static constexpr T conj(T &v) {
+    static constexpr T conj(const T &v) {
         static_assert(!is_complex<T>(), "Complex values should be conjugated by overloads.");
 	   	return v;
     }

@@ -36,6 +36,7 @@ public:
             m_nelem_8fold(trig(0, trig(0, norb))), m_nelem(nelem(norb)), m_data(m_nelem){
     }
 
+    /*
     Integrals_2e(std::string fname, bool spin_major = false) :
             Integrals_2e(FcidumpFileReader<T>(fname).m_norb, FcidumpFileReader<T>(fname).m_spin_resolved) {
         FcidumpFileReader<T> reader(fname);
@@ -47,6 +48,7 @@ public:
             }
         }
     }
+     */
 
     /*
     * given the indices and their identified case, return the flat indices
@@ -83,6 +85,7 @@ public:
     void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l, const T &value) {
         auto icase = get_case(i, j, k, l);
         auto iflat = flat_index(icase, i, j, k, l);
+        ASSERT(iflat<m_nelem)
         auto conjd_value = case_to_tconj[icase] ? consts::conj(value) : value;
         if (consts::float_is_zero(m_data[iflat])) m_data[iflat] = conjd_value;
         else {
@@ -102,24 +105,6 @@ public:
     void set(const defs::inds &inds, const T &value) {
         ASSERT(inds.size() == 4);
         set(inds[0], inds[1], inds[2], inds[3], value);
-    }
-
-    void set_from_fcidump(const defs::inds &inds, const T &value, bool spin_major = false) {
-        /*
-         * spin-resolved FCIDUMPs index in spinorbs, which may not may not be spin-major,
-         * depending on the program they were generated for. E.g. NECI uses spatial-major
-         * ordering throughout, so if the FCIDUMP supplied was intended for use with NECI,
-         * spin_major should be passed in as false.
-         */
-        if (!m_spin_resolved) set(inds, value);
-        else if (spin_major)
-            set(inds, value);
-        else
-            set(
-                    inds[0] / 2, inds[0] % 2, inds[1] / 2, inds[1] % 2,
-                    inds[2] / 2, inds[2] % 2, inds[3] / 2, inds[3] % 2, value
-            );
-
     }
 
     T get(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {

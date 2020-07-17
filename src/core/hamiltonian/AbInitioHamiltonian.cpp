@@ -7,9 +7,9 @@
 #include <src/core/io/Logging.h>
 #include "AbInitioHamiltonian.h"
 
-const Integrals_1e<defs::ham_t, defs::isym_1e> &AbInitioHamiltonian::int_1() const { return m_int_1; }
+const AbInitioHamiltonian::ints1_t &AbInitioHamiltonian::int_1() const { return m_int_1; }
 
-const Integrals_2e<defs::ham_t, defs::isym_2e> &AbInitioHamiltonian::int_2() const { return m_int_2; }
+const AbInitioHamiltonian::ints2_t &AbInitioHamiltonian::int_2() const { return m_int_2; }
 
 defs::ham_t AbInitioHamiltonian::get_element_0(const defs::det_work &occs, const size_t &nocc) const {
     defs::ham_t element = m_int_0;

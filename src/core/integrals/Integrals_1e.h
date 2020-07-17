@@ -74,17 +74,6 @@ public:
         set(inds[0], inds[1], value);
     }
 
-    void set_from_fcidump(const defs::inds &inds, const T &value, bool spin_major = false) {
-        /*
-         * spin-resolved FCIDUMPs index in spinorbs, which may not may not be spin-major,
-         * depending on the program they were generated for. E.g. NECI uses spatial-major
-         * ordering throughout, so if the FCIDUMP supplied was intended for use with NECI,
-         * spin_major should be passed in as false.
-         */
-        if (!m_spin_resolved) set(inds, value);
-        else set(inds[0] / 2, inds[0] % 2, inds[1] / 2, inds[1] % 2, value);
-    }
-
     T get(const size_t &i, const size_t &j) const {
         //auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
         auto iflat = flat_index(i, j);

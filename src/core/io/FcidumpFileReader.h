@@ -28,6 +28,12 @@ static constexpr std::array<std::array<size_t, 4>, 8> orderings{
 
 template<typename T>
 class FcidumpFileReader : public SparseArrayFileReader<T> {
+    /**
+     * spin-resolved FCIDUMPs index in spinorbs, which may not may not be spin-major,
+     * depending on the program they were generated for. E.g. NECI uses spatial-major
+     * ordering throughout, so if the FCIDUMP supplied was intended for use with NECI,
+     * spin_major should be passed in as false.
+     */
     const bool m_spin_major;
     const size_t m_norb;
     const size_t m_isymm;
@@ -40,11 +46,11 @@ class FcidumpFileReader : public SparseArrayFileReader<T> {
 
     // spin major and spin restricted (non-resolved) cases
     static void decrement_inds(defs::inds& inds){
-        for (auto i:inds) i--;
+        for (auto& i:inds) i--;
     }
     // spin minor case
-    static void decrement_inds_and_transpose(defs::inds& inds, const size_t& norb){
-        for (auto i:inds) i = (i-1)/2 + ((i&1ul)?0:norb);
+    static void decrement_inds_and_transpose(defs::inds& inds, const size_t& nspatorb){
+        for (auto& i:inds) i = (i==0 ? ~0ul:((i-1)/2 + ((i&1ul)?0:nspatorb)));
     }
 
 public:
@@ -91,6 +97,8 @@ public:
     bool next(defs::inds &inds, T &v) const override {
         auto result = SparseArrayFileReader<T>::next(inds, v);
         m_inds_to_orbs(inds);
+        // validate elements
+        ASSERT(!result || std::all_of(inds.begin(), inds.end(), [this](size_t i){return (i==~0ul)||(i<m_norb);}))
         return result;
     }
 

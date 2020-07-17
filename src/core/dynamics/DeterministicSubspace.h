@@ -106,7 +106,7 @@ public:
         }
     }
 
-    void update_weights(const double &tau, defs::wf_t &delta_nw) {
+    void update_weights(const double &tau, defs::wf_comp_t &delta_nw) {
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             auto irow_walker_list = *m_local_subspace_list.m_irow(irow_local);
             auto weight = m_walker_list.m_weight(irow_walker_list);
