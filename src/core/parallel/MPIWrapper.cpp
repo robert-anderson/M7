@@ -59,3 +59,12 @@ bool mpi::on_node_i_am(const size_t i) {
 bool mpi::on_node_i_am_root() {
     return on_node_i_am(0);
 }
+
+size_t g_irank = 0;
+size_t g_nrank = 1;
+std::string g_processor_name = "";
+#ifdef HAVE_MPI
+MPI_Comm g_node_comm;
+#endif
+size_t g_irank_on_node = 0;
+size_t g_nrank_on_node = 1;

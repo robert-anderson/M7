@@ -77,21 +77,22 @@ MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
 const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
 #endif
 
-static size_t g_irank;
-static size_t g_nrank;
-static std::string g_processor_name;
+extern size_t g_irank;
+extern size_t g_nrank;
+extern std::string g_processor_name;
 #ifdef HAVE_MPI
-static MPI_Comm g_node_comm;
+extern MPI_Comm g_node_comm;
 #endif
-static size_t g_irank_on_node;
-static size_t g_nrank_on_node;
+extern size_t g_irank_on_node;
+extern size_t g_nrank_on_node;
 
 struct mpi {
     static void setup_mpi_globals(){
-#if HAVE_MPI
+#ifdef HAVE_MPI
         int tmp;
         MPI_Comm_size(MPI_COMM_WORLD, &tmp);
         g_nrank = tmp;
+        ASSERT(g_nrank>0)
         MPI_Comm_rank(MPI_COMM_WORLD, &tmp);
         g_irank = tmp;
         char processor_name[MPI_MAX_PROCESSOR_NAME];
@@ -102,32 +103,26 @@ struct mpi {
         g_nrank_on_node = tmp;
         MPI_Comm_rank(g_node_comm, &tmp);
         g_irank_on_node = tmp;
-#else
-        g_irank = 0;
-        g_nrank = 1;
-        g_processor_name = "";
-        g_irank_on_node = 0;
-        g_nrank_on_node = 1;
 #endif
     }
 
-    static size_t &nrank(){
+    static const size_t &nrank(){
         return g_nrank;
     }
 
-    static size_t &irank(){
+    static const size_t &irank(){
         return g_irank;
     }
 
-    static size_t &nrank_on_node(){
+    static const size_t &nrank_on_node(){
         return g_nrank_on_node;
     }
 
-    static size_t &irank_on_node(){
+    static const size_t &irank_on_node(){
         return g_irank_on_node;
     }
 
-    static std::string &processor_name(){
+    static const std::string &processor_name(){
         return g_processor_name;
     }
 
