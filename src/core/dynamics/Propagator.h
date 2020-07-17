@@ -13,7 +13,7 @@
 #include <iomanip>
 #include <iostream>
 #include <src/core/io/FciqmcStatsFile.h>
-#include <src/core/parallel/Reducable.h>
+#include <src/core/parallel/Reducible.h>
 #include <src/core/parallel/Epoch.h>
 
 class FciqmcCalculation;
@@ -27,7 +27,7 @@ public:
     MagnitudeLogger m_magnitude_logger;
     double m_tau;
     defs::ham_comp_t m_shift;
-    Reducable<defs::wf_comp_t> m_largest_spawn_magnitude;
+    Reducible<defs::wf_comp_t> m_largest_spawn_magnitude;
 
     mutable Determinant m_dst_det;
     mutable AntisymConnection m_aconn;

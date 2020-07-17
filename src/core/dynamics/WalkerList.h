@@ -8,7 +8,7 @@
 #include <src/core/list/PerforableMappedList.h>
 #include <src/core/table/DeterminantField.h>
 #include <src/core/table/FlagField.h>
-#include <src/core/parallel/Reducable.h>
+#include <src/core/parallel/Reducible.h>
 #include <list>
 
 struct WalkerList : public PerforableMappedList<DeterminantElement> {
@@ -58,7 +58,7 @@ public:
     }
 
     defs::wf_comp_t l1_norm(const size_t &ielement=0) {
-        Reducable<defs::wf_comp_t> tot;
+        Reducible<defs::wf_comp_t> tot;
         for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
             tot += std::abs(*m_weight(irow));
         }
@@ -69,7 +69,7 @@ public:
     }
 
     defs::wf_comp_t square_norm(const size_t &ielement=0) {
-        Reducable<defs::wf_comp_t> tot;
+        Reducible<defs::wf_comp_t> tot;
         for (size_t irow = 0ul; irow < high_water_mark(0); irow++) {
             tot += std::pow(std::abs(*m_weight(irow)), 2.0);
         }

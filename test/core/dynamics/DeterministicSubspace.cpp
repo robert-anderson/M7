@@ -25,9 +25,9 @@ TEST(DeterministicSubspace, FciCheck) {
     double tau = 0.02;
 
     auto do_iter = [&]() {
-        Reducable<defs::ham_t> num;
-        Reducable<defs::ham_comp_t> norm_square;
-        Reducable<defs::wf_comp_t> delta_nw;
+        Reducible<defs::ham_t> num;
+        Reducible<defs::ham_comp_t> norm_square;
+        Reducible<defs::wf_comp_t> delta_nw;
         detsub.gather_and_project();
         detsub.rayleigh_quotient(num, norm_square);
         auto l1_init = walker_list.l1_norm(0);
@@ -92,7 +92,7 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections) {
     ASSERT_EQ(detsub.nrow_full(), mpi::nrank() * nconn_per_rank);
 
     detsub.gather_and_project();
-    Reducable<defs::wf_comp_t> delta_nw;
+    Reducible<defs::wf_comp_t> delta_nw;
     detsub.update_weights(1.0, delta_nw);
 }
 

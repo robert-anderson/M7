@@ -8,7 +8,7 @@
 
 #include <src/core/sparse/SparseMatrix.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/parallel/Reducable.h>
+#include <src/core/parallel/Reducible.h>
 #include <src/core/fermion/DeterminantList.h>
 #include "WalkerList.h"
 

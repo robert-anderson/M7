@@ -26,8 +26,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
     m_prop->m_shift += m_ham->get_energy(m_reference);
 
     logger::write("Initializing FCIQMC Calculation...");
-    logger::write("Shared memory parallelization: "+std::to_string(omp_get_max_threads())+" OpenMP threads");
-    logger::write("Reducable memory parallelization: "+std::to_string(mpi::nrank())+" MPI ranks");
+    logger::write("Distributed memory parallelization: "+std::to_string(mpi::nrank())+" MPI ranks");
     logger::write("Reference determinant was detected to be: " + m_reference.to_string());
 }
 

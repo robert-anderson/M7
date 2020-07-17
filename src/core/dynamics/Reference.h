@@ -9,7 +9,7 @@
 #include <src/core/parallel/RankAllocator.h>
 #include <src/core/fermion/Determinant.h>
 #include <src/core/fermion/Connection.h>
-#include <src/core/parallel/Reducable.h>
+#include <src/core/parallel/Reducible.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include "WalkerList.h"
 
@@ -18,11 +18,11 @@ class Reference : public Determinant {
     WalkerList &m_list;
     RankAllocator<DeterminantElement> &m_ra;
     size_t m_irow;
-    Reducable<size_t> m_irank;
+    Reducible<size_t> m_irank;
 
     mutable AntisymConnection m_aconn;
-    Reducable<defs::ham_t> m_proj_energy_num;
-    Reducable<defs::wf_t> m_weight;
+    Reducible<defs::ham_t> m_proj_energy_num;
+    Reducible<defs::wf_t> m_weight;
 
 public:
     Reference(WalkerList &list, RankAllocator<DeterminantElement> &ra, DeterminantElement &det) :
@@ -70,7 +70,7 @@ public:
         m_proj_energy_num += ham->get_element(m_aconn) * weight;
     }
 
-    Reducable<defs::ham_t> &proj_energy_num() {
+    Reducible<defs::ham_t> &proj_energy_num() {
         return m_proj_energy_num;
     }
 
