@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/core/io/TensorFileIterator.h>
+#include <src/core/io/SparseArrayFileReader.h>
 #if 0
 
 #include "src/enumerators/BitsetEnumerator.h"

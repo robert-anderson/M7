@@ -4,7 +4,7 @@
 
 #include "InputOptions.h"
 
-const std::string InputOptions::description =
+const std::string InputOptions::program_description =
         "\nM7: Many-body Stochastic Expectation Value Estimation Networks\n"
         "Command line interface\n";
 
@@ -13,7 +13,10 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-f,--fcidump_path", fcidump_path,
                "path to the FCIDUMP file, this is read-only");
 
-    add_option("-O,--stats_path", fcidump_path,
+    add_option("--spin_major", fcidump_spin_major,
+               "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.");
+
+    add_option("-O,--stats_path", stats_path,
                "path to the file to which MC cycle statistics will be output");
 
     add_flag("-E,--exact_propagation", exact_propagation,

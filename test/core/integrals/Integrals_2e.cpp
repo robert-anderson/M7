@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include "src/core/integrals/Integrals_2e.h"
 
+#if 0
 TEST(Integrals_2e, FourFoldCheck) {
     /*
      * check that all integrals are properly stored by retrieving all
@@ -35,3 +36,4 @@ TEST(Integrals_2e, FourFoldCheck) {
 
 
 }
+#endif

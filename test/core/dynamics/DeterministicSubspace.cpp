@@ -10,7 +10,8 @@
 #include "gtest/gtest.h"
 
 TEST(DeterministicSubspace, FciCheck) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     auto ref_det = ham.guess_reference(0);
     WalkerList walker_list("test walker list", ham.nsite(), 100);
     RankAllocator<DeterminantElement> ra(10, 1);
@@ -63,7 +64,8 @@ TEST(DeterministicSubspace, FciCheck) {
 }
 
 TEST(DeterministicSubspace, BuildFromDeterminantConnections) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     WalkerList walker_list("test walker list", ham.nsite(), 100);
     auto ref = ham.guess_reference(0);
     auto excited = ref;

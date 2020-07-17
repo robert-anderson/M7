@@ -6,34 +6,6 @@
 #include <src/core/fermion/Connection.h>
 #include <src/core/io/Logging.h>
 #include "AbInitioHamiltonian.h"
-#include "src/core/io/FcidumpFileIterator.h"
-
-AbInitioHamiltonian::AbInitioHamiltonian(const std::string &fname) :
-    Hamiltonian(FcidumpFileIterator<defs::ham_t>(fname).nsite()),
-    m_file_iterator(fname),
-    m_int_1(m_file_iterator.m_norb, spin_resolved()),
-    m_int_2(m_file_iterator.m_norb, spin_resolved()) {
-    defs::inds inds(4);
-    defs::ham_t value;
-
-    if (consts::is_complex<defs::ham_t>() && m_file_iterator.m_nreal_given==1)
-        logger::write("WARNING: Reading a real-valued sparse array into a complex-typed container. Consider recompiling with -DNZ=1.");
-
-    logger::write("Loading ab-initio Hamiltonian from FCIDUMP...");
-    while (m_file_iterator.next(inds, value)) {
-        if (m_int_2.valid_inds(inds)) m_int_2.set_from_fcidump(inds, value);
-        else if (m_int_1.valid_inds(inds)) m_int_1.set_from_fcidump(inds, value);
-        else if (inds[0] == ((size_t) -1)) m_int_0 = value;
-    }
-    logger::write("FCIDUMP loading complete.");
-    //m_nci = integer_utils::combinatorial(nsite() * 2, nelec());
-}
-
-size_t AbInitioHamiltonian::nelec() const { return m_file_iterator.m_nelec; }
-
-bool AbInitioHamiltonian::spin_resolved() const { return m_file_iterator.m_spin_resolved; }
-
-bool AbInitioHamiltonian::spin_conserving() const { return m_int_1.spin_conserving(); }
 
 const Integrals_1e<defs::ham_t, defs::isym_1e> &AbInitioHamiltonian::int_1() const { return m_int_1; }
 

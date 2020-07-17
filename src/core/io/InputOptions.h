@@ -37,7 +37,7 @@ public:
         m_app.add_flag(cli_options, variable_to_bind, description);
     }
 
-    static const std::string description;
+    static const std::string program_description;
 
 
 };

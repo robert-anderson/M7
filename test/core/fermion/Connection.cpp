@@ -4,7 +4,7 @@
 
 #include <src/core/fermion/Determinant.h>
 #include <src/core/fermion/Connection.h>
-#include <src/core/io/TensorFileIterator.h>
+#include <src/core/io/SparseArrayFileReader.h>
 #include "gtest/gtest.h"
 
 TEST(Connection, ParticleNumberConserving){
@@ -48,8 +48,7 @@ TEST(Connection, ParticleNumberConserving){
 
 TEST(Connection, Phase) {
 
-    TensorFileIterator<float> file_iterator(defs::assets_root + "/parity_test/parity_8.txt", 16ul, false);
-
+    SparseArrayFileReader<float> file_reader(defs::assets_root + "/parity_test/parity_8.txt", 16);
     defs::inds inds(16);
     float value;
 
@@ -58,7 +57,7 @@ TEST(Connection, Phase) {
     Determinant work_det(4);
     AntisymConnection connection(ket);
 
-    while (file_iterator.next(inds, value)) {
+    while (file_reader.next(inds, value)) {
         bra.zero();
         ket.zero();
         for (auto i{0ul}; i < 8; ++i) {

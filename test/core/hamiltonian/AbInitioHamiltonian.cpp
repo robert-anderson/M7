@@ -9,7 +9,8 @@
 TEST(AbInitioHamiltonian, DhfEnergy) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     const auto benchmark = -14.354220448530139;
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    ASSERT_FALSE(ham.spin_conserving());
     Determinant hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
     auto elem = ham.get_element_0(hf_det);
@@ -20,7 +21,8 @@ TEST(AbInitioHamiltonian, DhfEnergy) {
 
 TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    ASSERT_FALSE(ham.spin_conserving());
     Determinant hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
     //size_t removed, inserted;
@@ -54,7 +56,8 @@ TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
 
 TEST(AbInitioHamiltonian, RhfEnergy) {
     const auto benchmark = -108.65146156994338;
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     Determinant hf_det(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){hf_det.set(0, i); hf_det.set(1, i);}
     hf_det.print();
@@ -67,7 +70,8 @@ TEST(AbInitioHamiltonian, RhfEnergy) {
 
 
 TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     Determinant hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, 2,  6, 7, 8});
     //size_t removed, inserted;

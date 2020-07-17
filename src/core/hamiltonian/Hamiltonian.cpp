@@ -7,9 +7,8 @@
 #include <src/core/parallel/RankAllocator.h>
 #include "Hamiltonian.h"
 
-Hamiltonian::Hamiltonian(const size_t &nsite) : m_nsite(nsite) {
-
-}
+Hamiltonian::Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving):
+m_nelec(nelec), m_nsite(nsite), m_spin_conserving(spin_conserving){}
 
 Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     Determinant ref(m_nsite);

@@ -19,23 +19,26 @@ class SparseArrayFileReader : public FileReader {
     bool m_complex_valued;
 public:
     SparseArrayFileReader(const std::string &fname, size_t nind) :
-            FileReader(fname), m_nind(nind) {
-        size_t iline = first_valid_line(fname, m_nind, m_indsfirst, m_complex_valued);
-        if (iline == ~0ul) throw std::runtime_error("No valid entries found");
+    FileReader(fname), m_nind(nind) {
+        reset();
         if (m_complex_valued && !consts::is_complex<T>())
             throw std::runtime_error("Trying to read complex-valued array entries into a real container");
         else if (consts::is_complex<T>() && !m_complex_valued)
             std::cout << "Reading real-valued array into complex container, consider recompiling with real arithmetic"
                       << std::endl;
-        skip(iline);
     }
 
-    bool next(defs::inds &inds, T &v) {
+    virtual void reset() {
+        size_t iline = first_valid_line(m_fname, m_nind, m_indsfirst, m_complex_valued);
+        if (iline == ~0ul) throw std::runtime_error("No valid entries found");
+        FileReader::reset(iline);
+    }
+
+    virtual bool next(defs::inds &inds, T &v) const {
         std::string line;
         bool result = FileReader::next(line);
-        bool complex_valued = line.find(',') != ~0ul;
         if (!result) return false;
-        extract(line, m_nind, m_indsfirst, complex_valued, inds, v);
+        extract(line, m_nind, m_indsfirst, m_complex_valued, inds, v);
         return true;
     }
 
@@ -154,6 +157,10 @@ public:
         } else {
             return std::numeric_limits<size_t>::max();
         }
+    }
+
+    const bool& complex_valued(){
+        return m_complex_valued;
     }
 };
 

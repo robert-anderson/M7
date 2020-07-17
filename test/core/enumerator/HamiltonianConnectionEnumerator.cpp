@@ -58,7 +58,8 @@ public:
 };
 
 TEST(HamiltonianConnectionEnumerator, TestHfDet) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
 
     auto det = ham.guess_reference(0);
     HamiltonianConnectionEnumerator enumerator(ham, det);
@@ -80,7 +81,8 @@ TEST(HamiltonianConnectionEnumerator, TestHfDet) {
 
 
 TEST(HamiltonianConnectionEnumerator, ExcitedDet) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
 
     Determinant det(ham.nsite());
     det.set({0, 1, 2, 6, 7, 9});

@@ -7,6 +7,8 @@
 
 #include "SparseArrayFileReader.h"
 #include <regex>
+#include "src/core/integrals/Integrals_1e.h"
+#include "src/core/io/Logging.h"
 
 static std::regex header_terminator_regex{R"(\&END)"};
 
@@ -26,18 +28,86 @@ static constexpr std::array<std::array<size_t, 4>, 8> orderings{
 
 template<typename T>
 class FcidumpFileReader : public SparseArrayFileReader<T> {
+    const bool m_spin_major;
     const size_t m_norb;
     const size_t m_isymm;
     const size_t m_nelec;
     const defs::inds m_orbsym;
     const bool m_spin_resolved;
+    const size_t m_nspatorb;
+    std::function<void(defs::inds& inds)> m_inds_to_orbs;
+    bool m_spin_conserving = true;
+
+    // spin major and spin restricted (non-resolved) cases
+    static void decrement_inds(defs::inds& inds){
+        for (auto i:inds) i--;
+    }
+    // spin minor case
+    static void decrement_inds_and_transpose(defs::inds& inds, const size_t& norb){
+        for (auto i:inds) i = (i-1)/2 + ((i&1ul)?0:norb);
+    }
+
 public:
-    FcidumpFileReader(const std::string &fname) : SparseArrayFileReader<T>(fname, 4),
-    m_norb(read_header_int(fname, "NORB")), m_isymm(m_norb>3?isymm(fname):1),
+    FcidumpFileReader(const std::string &fname, bool spin_major) : SparseArrayFileReader<T>(fname, 4),
+    m_spin_major(spin_major),
+    m_norb(read_header_int(fname, "NORB")),
+    m_isymm(m_norb>3?isymm(fname):1),
     m_nelec(read_header_int(fname, "NELEC")),
     m_orbsym(read_header_array(fname, "ORBSYM")),
-    m_spin_resolved(read_header_bool(fname, "UHF") || read_header_bool(fname, "TREL"))
-            {
+    m_spin_resolved(read_header_bool(fname, "UHF") || read_header_bool(fname, "TREL")),
+    m_nspatorb(m_spin_resolved?m_norb/2:m_norb)
+    {
+        if (m_spin_resolved&!m_spin_major){
+            m_inds_to_orbs = [this](defs::inds& inds){
+                decrement_inds_and_transpose(inds, m_nspatorb);
+            };
+        }
+        else {
+            m_inds_to_orbs = [this](defs::inds& inds){
+                decrement_inds(inds);
+            };
+        }
+
+        if (m_spin_resolved) {
+            defs::inds inds(4);
+            T v;
+            while (next(inds, v)) {
+                if (((inds[0]<m_nspatorb)!=(inds[1]<m_nspatorb)) ||
+                    ((inds[2]<m_nspatorb)!=(inds[3]<m_nspatorb))){
+                    // spin non-conserving example found
+                    m_spin_conserving = false;
+                    break;
+                }
+            }
+            SparseArrayFileReader<T>::reset(); // go back to beginning of entries
+        }
+        if (m_spin_conserving) {
+            logger::write("FCIDUMP file conserves spin");
+        }else{
+            logger::write("FCIDUMP file does not conserve spin");
+        }
+    }
+
+    bool next(defs::inds &inds, T &v) const override {
+        auto result = SparseArrayFileReader<T>::next(inds, v);
+        m_inds_to_orbs(inds);
+        return result;
+    }
+
+    const size_t& norb()const{
+        return m_norb;
+    }
+    const size_t& nelec()const{
+        return m_nelec;
+    }
+    const size_t& nspatorb()const{
+        return m_nspatorb;
+    }
+    const bool& spin_resolved()const{
+        return m_spin_resolved;
+    }
+    const bool& spin_conserving()const{
+        return m_spin_conserving;
     }
 
     static size_t read_header_int(const std::string &fname, const std::string &label, size_t default_ = 0) {
@@ -81,16 +151,15 @@ public:
 
 
     static size_t isymm(const std::string &filename) {
-        auto index_is_defined = [](size_t i) { return i < (size_t) (-1); };
         SparseArrayFileReader<T> reader(filename, 4);
         defs::inds inds(4);
         T value;
         // this will eventually hold all orderings of the first example of an
         // integral with 4 distinct indices
         std::array<defs::inds, 8> inds_distinct{};
-        size_t isymm{};
+        size_t isymm = 0ul;
         while (reader.next(inds, value)) {
-            if (std::all_of(inds.begin(), inds.end(), index_is_defined)) {
+            if (std::all_of(inds.begin(), inds.end(), [](size_t i){return i>0;})) {
                 // we have a two body integral
                 if (!isymm) {
                     inds_distinct[0].assign(inds.begin(), inds.end());

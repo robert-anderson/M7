@@ -15,13 +15,16 @@
 #include "src/core/util/defs.h"
 #include "src/core/table/DeterminantField.h"
 #include <src/core/parallel/RankAllocator.h>
+#include <src/core/io/FcidumpFileReader.h>
 
 class Hamiltonian {
 protected:
+    const size_t m_nelec;
     const size_t m_nsite;
+    const bool m_spin_conserving;
 
 public:
-    Hamiltonian(const size_t &nsite);
+    Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving);
 
     consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const {
         return consts::real(get_element_0(det));
@@ -75,19 +78,21 @@ public:
         return get_element(AntisymConnection(ket, bra));
     }
 
-    size_t nsite() const {
-        return m_nsite;
-    }
-
     size_t nci() const {
         return integer_utils::combinatorial(2*nsite(), nelec());
     }
 
-    virtual bool spin_conserving() const = 0;
+    const size_t& nsite() const {
+        return m_nsite;
+    }
 
-    virtual size_t nelec() const = 0;
+    const bool& spin_conserving() const {
+        return m_spin_conserving;
+    }
 
-    virtual bool spin_resolved() const = 0;
+    const size_t& nelec() const {
+        return m_nelec;
+    }
 
     Determinant guess_reference(const int &spin_level) const;
 

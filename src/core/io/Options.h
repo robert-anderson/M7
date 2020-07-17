@@ -9,8 +9,9 @@
 
 struct Options {
     std::string fcidump_path = "FCIDUMP";
+    bool fcidump_spin_major = false;
     std::string stats_path = "M7.stats";
-    std::string parallel_stats_path = "M7.parallel";
+    std::string parallel_stats_path = "M7.rank";
     bool exact_propagation = false;
     double nwalker_initial = 1.0;
     double nwalker_target = 0.0;

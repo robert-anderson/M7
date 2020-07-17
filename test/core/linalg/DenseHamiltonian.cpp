@@ -8,17 +8,16 @@
 #include "src/core/linalg/DenseHamiltonian.h"
 
 TEST(DenseHamiltonian, FciEnergyCheck4c) {
-    if (consts::is_complex<defs::ham_comp_t>()) {
-        DenseHamiltonian ham(AbInitioHamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP"));
-        auto solver = ham.diagonalize();
-        // compare the ground and first excited states to BAGEL's values
-        ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));
-        ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
-    }
+    if (!consts::is_complex<defs::ham_comp_t>()) GTEST_SKIP();
+    DenseHamiltonian ham(AbInitioHamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
+    auto solver = ham.diagonalize();
+    // compare the ground and first excited states to BAGEL's values
+    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));
+    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
 }
 
 TEST(DenseHamiltonian, FciEnergyCheckRhf) {
-    AbInitioHamiltonian ham_src(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    AbInitioHamiltonian ham_src(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values

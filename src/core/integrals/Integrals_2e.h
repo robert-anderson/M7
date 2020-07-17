@@ -12,7 +12,7 @@
 #include "src/core/multidim/Indexer.h"
 #include "src/core/util/consts.h"
 #include "src/core/util/defs.h"
-#include "src/core/io/FcidumpFileIterator.h"
+#include "src/core/io/FcidumpFileReader.h"
 #include "src/core/parallel/SharedArray.h"
 #include "Integrals.h"
 
@@ -37,11 +37,11 @@ public:
     }
 
     Integrals_2e(std::string fname, bool spin_major = false) :
-            Integrals_2e(FcidumpFileIterator<T>(fname).m_norb, FcidumpFileIterator<T>(fname).m_spin_resolved) {
-        FcidumpFileIterator<T> file_iterator(fname);
+            Integrals_2e(FcidumpFileReader<T>(fname).m_norb, FcidumpFileReader<T>(fname).m_spin_resolved) {
+        FcidumpFileReader<T> reader(fname);
         defs::inds inds(4);
         T value;
-        while (file_iterator.next(inds, value)) {
+        while (reader.next(inds, value)) {
             if (valid_inds(inds)) {
                 set_from_fcidump(inds, value, spin_major);
             }
@@ -198,7 +198,7 @@ private:
         }
     }
 
-    constexpr size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+    inline size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
         if (isym == 1) {
             return 0;
         } else if (isym == 2) {

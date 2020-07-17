@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#include "src/core/io/TensorFileIterator.h"
+#include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
 #include "src/core/fermion/Determinant.h"
 

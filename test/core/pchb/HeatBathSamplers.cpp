@@ -125,7 +125,8 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    ASSERT_FALSE(ham.spin_conserving());
     PRNG prng(18, 1e4);
     HeatBathSamplers pchb(&ham, prng);
 
@@ -137,8 +138,8 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
-
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    ASSERT_FALSE(ham.spin_conserving());
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
@@ -150,7 +151,8 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
 TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
 
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    ASSERT_FALSE(ham.spin_conserving());
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
@@ -160,7 +162,8 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
@@ -171,7 +174,8 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
@@ -182,7 +186,8 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
 }
 
 TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(15, 100000);
     HeatBathSamplers pchb(&ham, prng);
 

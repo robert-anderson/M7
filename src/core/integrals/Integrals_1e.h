@@ -7,7 +7,7 @@
 
 #include <cstddef>
 #include <vector>
-#include <src/core/io/FcidumpFileIterator.h>
+#include <src/core/io/FcidumpFileReader.h>
 #include "Integrals.h"
 #include "src/core/util/consts.h"
 
@@ -34,9 +34,10 @@ public:
         m_data.resize(m_nelem, 0.0);
     }
 
+    /*
     Integrals_1e(std::string fname) :
-            Integrals_1e(FcidumpFileIterator<T>(fname).m_norb, FcidumpFileIterator<T>(fname).m_spin_resolved) {
-        FcidumpFileIterator<T> file_iterator(fname);
+            Integrals_1e(FcidumpFileReader<T>(fname).m_norb, FcidumpFileReader<T>(fname).m_spin_resolved) {
+        FcidumpFileReader<T> file_iterator(fname);
         defs::inds inds(4);
         T value;
         while (file_iterator.next(inds, value)) {
@@ -45,6 +46,7 @@ public:
             }
         }
     }
+     */
 
     inline size_t flat_index(const size_t &i, const size_t &j) const {
         if (isym == 1) return i + j * m_norb;

@@ -318,11 +318,11 @@ namespace float_utils {
 }
 
 namespace complex_utils {
-    template<typename T>
-    void set_imag_part(T &v, const T &imag) {}
+    template<typename T, typename U>
+    void set_imag_part(T &v, const U &imag) {}
 
-    template<typename T>
-    void set_imag_part(std::complex<T> &v, const T &imag) { v.imag(imag); }
+    template<typename T, typename U>
+    void set_imag_part(std::complex<T> &v, const U &imag) { v.imag(T(imag)); }
 
     template<typename T>
     static std::complex<double> normal_from_polar(const T &arg) {
