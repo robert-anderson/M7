@@ -24,12 +24,12 @@ public:
         else {
             auto ierr = MPI_Win_allocate_shared(0, sizeof(T), MPI_INFO_NULL, MPI_COMM_WORLD, (void*)&m_data, &m_win);
             if (ierr) throw std::runtime_error("MPI Shared memory error");
-            int disp_unit;
-            MPI_Aint alloc_size;
-            MPI_Win_shared_query(m_win, 0, &alloc_size, &disp_unit, (void*)&m_data);
-            ASSERT(disp_unit==sizeof(T))
-            ASSERT((size_t)alloc_size==(size*sizeof(T)))
         }
+        int disp_unit;
+        MPI_Aint alloc_size;
+        MPI_Win_shared_query(m_win, 0, &alloc_size, &disp_unit, (void*)&m_data);
+        ASSERT(disp_unit==sizeof(T))
+        ASSERT((size_t)alloc_size==(size*sizeof(T)))
 
 #else
         m_data = new T[](size);
@@ -49,6 +49,7 @@ public:
     }
 
     T& operator[](const size_t &i){
+        ASSERT(mpi::on_node_i_am_root())
         ASSERT(i<m_size)
         return *(m_data+i);
     }

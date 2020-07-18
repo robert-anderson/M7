@@ -5,26 +5,27 @@
 #ifndef M7_ALIASER_H
 #define M7_ALIASER_H
 
-#include <vector>
+#include<vector>
 #include <src/core/util/defs.h>
 #include <stack>
 #include <iostream>
 #include <src/core/util/utils.h>
+#include <src/core/parallel/SharedArray.h>
 #include "PRNG.h"
 
 class Aliaser {
     const size_t m_nprob;
     PRNG &m_prng;
-    std::vector<defs::prob_t> m_prob_table;
-    defs::inds m_alias_table;
+    SharedArray<defs::prob_t> m_prob_table;
+    SharedArray<size_t> m_alias_table;
     defs::prob_t m_norm;
 
 public:
     Aliaser(const size_t nprob, PRNG &prng) :
         m_nprob(nprob),
         m_prng(prng),
-        m_prob_table(m_nprob, 0.0),
-        m_alias_table(m_nprob, 0ul){}
+        m_prob_table(m_nprob),
+        m_alias_table(m_nprob){}
 
     void update(const defs::prob_t *probs, const size_t nprob) {
         m_norm = std::accumulate(probs, probs+nprob, 0.0);
