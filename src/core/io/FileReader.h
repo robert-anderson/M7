@@ -12,7 +12,7 @@ class FileReader {
 protected:
     const std::string m_fname;
     std::unique_ptr<std::ifstream> m_file = nullptr;
-    const size_t m_nline;
+    size_t m_nline;
     mutable size_t m_iline = ~0ul; // the index of the last extracted line
 
     size_t calc_nline(){
@@ -21,10 +21,12 @@ protected:
         reset();
         return nline;
     }
+
 public:
-    FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname), m_nline(calc_nline()) {
+    FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname), m_nline() {
         std::cout << "File \"" << fname << "\" opened for reading" << std::endl;
         reset(iline);
+        m_nline = calc_nline();
     }
 
     void reset(size_t iline=0ul){
