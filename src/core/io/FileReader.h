@@ -15,6 +15,7 @@ protected:
     mutable size_t m_iline = ~0ul; // the index of the last extracted line
 public:
     FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname) {
+        std::cout << "File \"" << fname << "\" opened for reading" << std::endl;
         reset(iline);
     }
 

@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     /*
      * Setup and read-in runtime options from the command line
      */
-    CLI::App cli_app{InputOptions::description};
+    CLI::App cli_app{InputOptions::program_description};
     InputOptions input(cli_app);
 
 

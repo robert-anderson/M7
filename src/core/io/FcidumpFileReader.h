@@ -162,6 +162,7 @@ public:
 
 
     static size_t isymm(const std::string &filename) {
+        std::cout << "Determining permutational symmetry of integral file entries" << std::endl;
         SparseArrayFileReader<T> reader(filename, 4);
         defs::inds inds(4);
         T value;
