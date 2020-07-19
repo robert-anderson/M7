@@ -195,6 +195,7 @@ public:
             }
         }
         ASSERT(isymm);
+        std::cout << "Permutational symmetry of integral file found to be " << 8/isymm << std::endl;
         // 8->1; 4->2; 2->4; 1->8
         return 8 / isymm;
     }
