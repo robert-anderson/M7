@@ -12,9 +12,17 @@ class FileReader {
 protected:
     const std::string m_fname;
     std::unique_ptr<std::ifstream> m_file = nullptr;
+    const size_t m_nline;
     mutable size_t m_iline = ~0ul; // the index of the last extracted line
+
+    size_t calc_nline(){
+        while (next()){}
+        auto nline = iline();
+        reset();
+        return nline;
+    }
 public:
-    FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname) {
+    FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname), m_nline(calc_nline()) {
         std::cout << "File \"" << fname << "\" opened for reading" << std::endl;
         reset(iline);
     }
@@ -34,6 +42,9 @@ public:
     const size_t &iline() {
         return m_iline;
     }
+    const size_t &nline() const {
+        return m_nline;
+    }
 
     bool next(std::string &line) const {
         m_iline++;
@@ -46,9 +57,10 @@ public:
         return next(tmp);
     }
 
-    void skip(size_t niter) {
-        for (size_t i = 0ul; i < niter; ++i) next();
+    void skip(size_t nline) {
+        for (size_t i = 0ul; i < nline; ++i) next();
     }
+
 };
 
 #endif //M7_FILEREADER_H

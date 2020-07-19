@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <string>
+#include <src/core/io/ProgressBar.h>
 #include "Hamiltonian.h"
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
@@ -30,11 +31,15 @@ public:
         defs::ham_t value;
 
         logger::write("Loading ab-initio Hamiltonian from FCIDUMP...");
+        ProgressBar progress_bar(file_reader.nline(), 100);
         while (file_reader.next(inds, value)) {
             if (ints2_t::valid_inds(inds)) m_int_2.set(inds, value);
             else if (ints1_t::valid_inds(inds)) m_int_1.set(inds, value);
             else if (inds[0] == ~0ul) m_int_0 = value;
+            ++progress_bar;
+            progress_bar.display();
         }
+        progress_bar.done();
         mpi::barrier();
         logger::write("FCIDUMP loading complete.");
     }
