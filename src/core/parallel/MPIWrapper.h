@@ -135,6 +135,7 @@ struct mpi {
     }
 
     static void barrier();
+    static void barrier_on_node();
 
     enum MpiOp {
         MpiMax, MpiMin, MpiSum, MpiLand, MpiLor

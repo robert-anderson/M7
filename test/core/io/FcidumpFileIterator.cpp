@@ -46,7 +46,9 @@ TEST(FcidumpFileIterator, Complex_10orb){
     ASSERT_TRUE(consts::floats_equal(v, T(2.2752637995109302, 2.379e-17)));
     // scan to arbitrary element
     for (size_t i=0; i<20; ++i) file_reader.next(inds, v);
-    test_inds = {4,2,6,0};
+    // (-0.00851916802083687,-0.005287130898791)   5   3   7   1
+    test_inds = {5,3,7,1};
+    file_reader.inds_to_orbs(test_inds);
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_TRUE(consts::floats_equal(v, T(-0.00851916802083687,-0.005287130898791)));
     // scan to final element

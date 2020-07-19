@@ -11,12 +11,12 @@ TEST(Aliaser, DistributionCheck) {
 
     std::vector<defs::prob_t> probs =
         {0, 0.648, 0.025, 0.035, 0.036, 0, 0.0648, 0.053, 0.0723, 0.1234};
-    Aliaser aliaser(probs, prng);
+    Aliaser aliaser(probs);
     defs::inds results(probs.size(), 0ul);
 
     const size_t n_attempts = 20000000;
     for (size_t i = 0ul; i < n_attempts; ++i) {
-        results[aliaser.draw()]++;
+        results[aliaser.draw(prng)]++;
     }
     auto norm = std::accumulate(probs.begin(), probs.end(), 0.0);
     for (size_t i = 0ul; i < probs.size(); ++i) {

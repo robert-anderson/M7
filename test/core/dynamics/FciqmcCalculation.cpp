@@ -31,6 +31,7 @@ TEST(FciqmcCalculation, StochasticPropagation){
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
     options.tau_initial = 0.05;
     options.nwalker_target = 150000;
+    options.nload_balance_block = 5;
     options.ncycle = 4000;
     options.prng_seed = 12;
     FciqmcCalculation fciqmc_calculation(options);
@@ -44,6 +45,28 @@ TEST(FciqmcCalculation, StochasticPropagation){
             consts::real(energy_mean_std.first), -108.8113865756313, 1e-3));
     }
 }
+
+TEST(FciqmcCalculation, StochasticPropagation4c){
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
+    Options options;
+    options.fcidump_path = defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP";
+    options.tau_initial = 0.05;
+    options.nwalker_target = 150000;
+    options.nload_balance_block = 5;
+    options.ncycle = 4000;
+    options.prng_seed = 12;
+    FciqmcCalculation fciqmc_calculation(options);
+    fciqmc_calculation.execute();
+    if (mpi::i_am_root()) {
+        auto num = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.mean_std(options.ncycle / 2);
+        auto den = fciqmc_calculation.m_stats_file->m_ref_weight.mean_std(options.ncycle / 2);
+        auto energy_mean_std = stat_utils::quotient(num, den);
+        std::cout << std::setprecision(10) << energy_mean_std.first << std::endl;
+        ASSERT_TRUE(consts::floats_nearly_equal(
+                consts::real(energy_mean_std.first), -14.28882489, 1e-3));
+    }
+}
+
 
 TEST(FciqmcCalculation, StochasticPropagation60orbs){
     Options options;

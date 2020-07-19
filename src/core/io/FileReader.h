@@ -18,7 +18,7 @@ public:
         reset(iline);
     }
 
-    virtual void reset(size_t iline=0ul){
+    void reset(size_t iline=0ul){
         if (m_file) m_file->close();
         m_file = std::unique_ptr<std::ifstream>(new std::ifstream(m_fname));
         if (!m_file->is_open()) throw std::runtime_error("File \"" + m_fname + "\" not found.");

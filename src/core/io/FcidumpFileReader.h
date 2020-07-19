@@ -46,11 +46,11 @@ class FcidumpFileReader : public SparseArrayFileReader<T> {
 
     // spin major and spin restricted (non-resolved) cases
     static void decrement_inds(defs::inds& inds){
-        for (auto& i:inds) i--;
+        for (auto& i:inds) i = ((i==0 || i==~0ul) ? ~0ul : i-1);
     }
     // spin minor case
     static void decrement_inds_and_transpose(defs::inds& inds, const size_t& nspatorb){
-        for (auto& i:inds) i = (i==0 ? ~0ul:((i-1)/2 + ((i&1ul)?0:nspatorb)));
+        for (auto& i:inds) i = ((i==0 || i==~0ul) ? ~0ul : ((i-1)/2 + ((i&1ul)?0:nspatorb)));
     }
 
 public:
@@ -98,7 +98,7 @@ public:
         auto result = SparseArrayFileReader<T>::next(inds, v);
         m_inds_to_orbs(inds);
         // validate elements
-        ASSERT(!result || std::all_of(inds.begin(), inds.end(), [this](size_t i){return (i==~0ul)||(i<m_norb);}))
+        ASSERT(!result || std::all_of(inds.begin(), inds.end(), [this](const size_t& i){return (i==~0ul)||(i<m_norb);}))
         return result;
     }
 
@@ -116,6 +116,9 @@ public:
     }
     const bool& spin_conserving()const{
         return m_spin_conserving;
+    }
+    void inds_to_orbs(defs::inds& inds){
+        m_inds_to_orbs(inds);
     }
 
     static size_t read_header_int(const std::string &fname, const std::string &label, size_t default_ = 0) {

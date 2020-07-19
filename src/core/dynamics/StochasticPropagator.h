@@ -32,23 +32,25 @@ public:
         defs::prob_t prob;
         defs::ham_t helem;
         bool valid = false;
-
         for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
             size_t nexcit = 2 - m_prng.stochastic_round(m_magnitude_logger.m_psingle, 1);
             switch (nexcit) {
                 case 1:
                     valid = m_exgen->draw_single(src_det, m_dst_det, m_occ, m_vac, prob, helem, m_aconn);
+                    ASSERT(prob<=1.0)
                     prob*=m_magnitude_logger.m_psingle;
                     ASSERT(!consts::float_nearly_zero(prob, 1e-14));
                     break;
                 case 2:
                     // TODO: don't need m_vac for doubles.
                     valid = m_exgen->draw_double(src_det, m_dst_det, m_occ, prob, helem, m_aconn);
+                    ASSERT(prob<=1.0)
                     prob*= 1.0-m_magnitude_logger.m_psingle;
                     break;
+                default:
+                    throw std::runtime_error("invalid excitation rank");
             }
             if (!valid) continue;
-
             ASSERT(!consts::float_is_zero(prob))
             auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob;
             delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag);

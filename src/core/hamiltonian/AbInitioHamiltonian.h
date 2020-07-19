@@ -35,6 +35,7 @@ public:
             else if (ints1_t::valid_inds(inds)) m_int_1.set(inds, value);
             else if (inds[0] == ~0ul) m_int_0 = value;
         }
+        mpi::barrier();
         logger::write("FCIDUMP loading complete.");
     }
 

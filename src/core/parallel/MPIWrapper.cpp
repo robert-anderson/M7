@@ -11,6 +11,12 @@ void mpi::barrier() {
 #endif
 }
 
+void mpi::barrier_on_node() {
+#if HAVE_MPI
+    MPI_Barrier(g_node_comm);
+#endif
+}
+
 bool mpi::initialized() {
 #if HAVE_MPI
     int tmp;

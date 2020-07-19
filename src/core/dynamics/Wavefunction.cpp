@@ -153,6 +153,8 @@ void Wavefunction::communicate() {
 void Wavefunction::annihilate_row(const size_t &irow_recv) {
 
     auto det = m_recv.m_determinant(irow_recv);
+    // check that the received determinant has come to the right place
+    ASSERT(m_fciqmc->m_rank_allocator.get_rank(det)==mpi::irank())
     auto delta_weight = m_recv.m_weight(irow_recv);
     // zero magnitude weights should not have been communicated
     ASSERT(!consts::float_is_zero(*delta_weight));

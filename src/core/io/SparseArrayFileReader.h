@@ -28,7 +28,7 @@ public:
                       << std::endl;
     }
 
-    virtual void reset() {
+    void reset() {
         size_t iline = first_valid_line(m_fname, m_nind, m_indsfirst, m_complex_valued);
         if (iline == ~0ul) throw std::runtime_error("No valid entries found");
         FileReader::reset(iline);
