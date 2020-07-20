@@ -17,6 +17,8 @@ public:
     StatsField<defs::ham_t> m_ref_proj_energy;
     StatsField<defs::ham_comp_t> m_nwalker;
     StatsField<defs::ham_comp_t> m_nw_growth_rate;
+    StatsField<defs::wf_comp_t> m_nw_at_doubles;
+    StatsField<defs::wf_comp_t> m_ref_candidate_weight;
     StatsField<size_t> m_ninitiator;
     StatsField<defs::wf_t> m_aborted_weight;
     StatsField<size_t> m_noccupied_det;

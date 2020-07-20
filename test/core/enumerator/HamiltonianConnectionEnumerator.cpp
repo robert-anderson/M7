@@ -85,7 +85,7 @@ TEST(HamiltonianConnectionEnumerator, ExcitedDet) {
     ASSERT_TRUE(ham.spin_conserving());
 
     Determinant det(ham.nsite());
-    det.set({0, 1, 2, 6, 7, 9});
+    det.set(defs::inds{0, 1, 2, 6, 7, 9});
     HamiltonianConnectionEnumerator enumerator(ham, det);
 
     auto excited = det;

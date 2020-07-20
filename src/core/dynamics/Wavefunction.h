@@ -60,6 +60,7 @@ public:
 
     ~Wavefunction(){
         std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
+        m_data.report_top_weighted();
     }
 
     /**

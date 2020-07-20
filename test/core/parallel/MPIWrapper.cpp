@@ -99,3 +99,30 @@ TEST(MPIWrapper, AllgathervRagged){
         }
     }
 }
+
+
+TEST(MPIWrapper, MaxLocMinLoc){
+    typedef double T;
+    std::pair<T, int> reduced;
+    auto to_T = [](size_t irank){
+        return std::pow(1.13, (irank+7*3)%5+1);
+    };
+    T local = to_T(mpi::irank());
+    std::pair<T, int> max{std::numeric_limits<T>::min(), 0};
+    std::pair<T, int> min{std::numeric_limits<T>::max(), 0};
+    for (size_t i=0ul; i<mpi::nrank(); ++i) {
+        auto d = to_T(i);
+        if (d>max.first) max = {d, i};
+        if (d<min.first) min = {d, i};
+    }
+
+    std::pair<T, int> mpi_max{std::numeric_limits<T>::min(), 0};
+    std::pair<T, int> mpi_min{std::numeric_limits<T>::max(), 0};
+
+    ASSERT_EQ(MPI_DOUBLE_INT, mpi_pair_type<T>());
+
+    ASSERT_TRUE(mpi::all_maxloc(local, mpi_max));
+    ASSERT_EQ(max, mpi_max);
+    ASSERT_TRUE(mpi::all_minloc(local, mpi_min));
+    ASSERT_EQ(min, mpi_min);
+}

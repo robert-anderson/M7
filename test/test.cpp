@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
     // Run tests, then clean up and exit. RUN_ALL_TESTS() returns 0 if all tests
     // pass and 1 if some test fails.
     auto result = RUN_ALL_TESTS();
-    std::cout << "result  " << result << std::endl;
 
     if (!mpi::i_am_root()) {
         /*

@@ -63,18 +63,62 @@ template<>
 MPI_Datatype mpi_type<long double>() { return MPI_LONG_DOUBLE; }
 
 template<>
-MPI_Datatype mpi_type<std::complex<float>>() { return MPI_FLOAT; }
+MPI_Datatype mpi_type<std::complex<float>>() { return MPI_COMPLEX; }
 
 template<>
-MPI_Datatype mpi_type<std::complex<double>>() { return MPI_DOUBLE; }
+MPI_Datatype mpi_type<std::complex<double>>() { return MPI_DOUBLE_COMPLEX; }
 
 template<>
-MPI_Datatype mpi_type<std::complex<long double>>() { return MPI_LONG_DOUBLE; }
+MPI_Datatype mpi_type<std::complex<long double>>() { return MPI_CXX_LONG_DOUBLE_COMPLEX; }
 
 template<>
 MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
 
+
+/*
+ * For use with minloc and maxloc
+ * MPI_FLOAT_INT: struct { float, int }
+ * MPI_LONG_INT: struct { long, int }
+ * MPI_DOUBLE_INT: struct { double, int }
+ * MPI_SHORT_INT: struct { short, int }
+ * MPI_2INT: struct { int, int }
+ * MPI_LONG_DOUBLE_INT: struct { long double, int }
+ */
+
+template<typename T>
+static MPI_Datatype mpi_pair_type() { return MPI_Datatype(); }
+
+template<>
+MPI_Datatype mpi_pair_type<float>() {return MPI_FLOAT_INT;}
+
+template<>
+MPI_Datatype mpi_pair_type<long>() {return MPI_LONG_INT;}
+
+template<>
+MPI_Datatype mpi_pair_type<double>() {return MPI_DOUBLE_INT;}
+
+template<>
+MPI_Datatype mpi_pair_type<short>() {return MPI_SHORT_INT;}
+
+template<>
+MPI_Datatype mpi_pair_type<int>() {return MPI_2INT;}
+
+template<>
+MPI_Datatype mpi_pair_type<long double>() {return MPI_LONG_DOUBLE_INT;}
+
+
 const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
+const std::array<MPI_Op, 2> pair_op_map{MPI_MAXLOC, MPI_MINLOC};
+
+enum MpiOp {
+    MpiMax, MpiMin, MpiSum, MpiLand, MpiLor
+};
+
+enum MpiPairOp {
+    MpiMaxLoc, MpiMinLoc
+};
+
+
 #endif
 
 extern size_t g_irank;
@@ -137,10 +181,6 @@ struct mpi {
     static void barrier();
     static void barrier_on_node();
 
-    enum MpiOp {
-        MpiMax, MpiMin, MpiSum, MpiLand, MpiLor
-    };
-
 /*
  * int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
                MPI_Op op, int root, MPI_Comm comm)
@@ -161,6 +201,16 @@ private:
     static bool all_reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1) {
 #ifdef HAVE_MPI
         return MPI_Allreduce(send, recv, ndata, mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        std::memcpy(recv, send, sizeof(T)*ndata);
+        return true;
+#endif
+    }
+
+    template<typename T>
+    static bool all_reduce(const std::pair<T, int> *send, std::pair<T, int> *recv, MpiPairOp op, size_t ndata = 1) {
+#ifdef HAVE_MPI
+        return MPI_Allreduce(send, recv, ndata, mpi_pair_type<T>(), pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         std::memcpy(recv, send, sizeof(T)*ndata);
         return true;
@@ -325,6 +375,28 @@ public:
 #endif
     }
 
+
+    /*
+     * MAXLOC CONVENIENCE FUNCTIONS
+     */
+
+    template<typename T>
+    static bool all_maxloc(const T &send, std::pair<T, int> &recv) {
+        std::pair<T, int> tmp {send, irank()};
+        return all_reduce(&tmp, &recv, MpiMaxLoc, 1);
+    }
+
+    /*
+     * MINLOC CONVENIENCE FUNCTIONS
+     */
+
+    template<typename T>
+    static bool all_minloc(const T &send, std::pair<T, int> &recv) {
+        std::pair<T, int> tmp {send, irank()};
+        return all_reduce(&tmp, &recv, MpiMinLoc, 1);
+    }
+
+
     template<typename T>
     static bool all_to_all(const T *send, const size_t nsend, T *recv, const size_t nrecv) {
 #ifdef HAVE_MPI
@@ -401,8 +473,6 @@ public:
         return all_to_all(send, sendcount, recv, recvcount);
 #endif
     }
-
-
 
     static bool i_am(const size_t i);
 

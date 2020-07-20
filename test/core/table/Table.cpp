@@ -82,7 +82,7 @@ TEST(Table, DataIntegrityDeterminants) {
     table.expand(nrow);
 
     std::vector<DeterminantElement> v;
-    table.test_dets(0, 0, 0).set({1, 4, 6, 23});
+    table.test_dets(0, 0, 0).set(defs::inds{1, 4, 6, 23});
     v.push_back(table.test_dets(0, 0, 0));
     std::cout << v[0].to_string() <<std::endl;
 }

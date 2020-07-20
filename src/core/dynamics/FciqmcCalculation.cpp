@@ -9,14 +9,14 @@
 
 
 FciqmcCalculation::FciqmcCalculation(const Options &input) :
-    m_input(input), m_vary_shift("variable shift"), m_semi_stochastic("semi-stochastic"),
-    m_rank_allocator(input.nload_balance_block, input.load_balance_period, &m_vary_shift),
-    m_ham(std::unique_ptr<AbInitioHamiltonian>(
-        new AbInitioHamiltonian(input.fcidump_path, input.fcidump_spin_major))),
-    m_reference(m_ham->guess_reference(input.spin_restrict)),
-    m_wf(this) {
+        m_input(input), m_vary_shift("variable shift"), m_semi_stochastic("semi-stochastic"),
+        m_rank_allocator(input.nload_balance_block, input.load_balance_period, &m_vary_shift),
+        m_ham(std::unique_ptr<AbInitioHamiltonian>(
+                new AbInitioHamiltonian(input.fcidump_path, input.fcidump_spin_major))),
+        m_reference(initial_reference(m_ham, input)),
+        m_wf(this) {
 
-    if(mpi::i_am_root()) m_stats_file = std::unique_ptr<FciqmcStatsFile>(new FciqmcStatsFile(m_input));
+    if (mpi::i_am_root()) m_stats_file = std::unique_ptr<FciqmcStatsFile>(new FciqmcStatsFile(m_input));
 
     if (input.exact_propagation) {
         m_prop = std::unique_ptr<ExactPropagator>(new ExactPropagator(this));
@@ -26,14 +26,15 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
     m_prop->m_shift += m_ham->get_energy(m_reference);
 
     logger::write("Initializing FCIQMC Calculation...");
-    logger::write("Distributed memory parallelization: "+std::to_string(mpi::nrank())+" MPI ranks");
+    logger::write("Distributed memory parallelization: " + std::to_string(mpi::nrank()) + " MPI ranks");
     logger::write("Reference determinant was detected to be: " + m_reference.to_string());
 }
 
 void FciqmcCalculation::execute() {
     logger::write("Starting FCIQMC main loop.");
     for (size_t icycle = 0ul; icycle < m_input.ncycle; ++icycle) {
-        mpi::barrier(); m_timer.unpause();
+        mpi::barrier();
+        m_timer.unpause();
         //std::cout << "iteration " + std::to_string(icycle) << std::endl;
         m_wf.update(icycle);
         //std::cout << "\npropagating..." << std::endl;
@@ -46,7 +47,8 @@ void FciqmcCalculation::execute() {
         m_wf.synchronize();
         //std::cout << "\nupdating propagator..." << std::endl;
         m_prop->update(icycle, m_wf.m_nwalker.reduced(), m_wf.m_nwalker_growth_rate);
-        mpi::barrier(); m_timer.pause();
+        mpi::barrier();
+        m_timer.pause();
         //std::cout << "\nwriting stats..." << std::endl;
         write_iter_stats(icycle);
     }

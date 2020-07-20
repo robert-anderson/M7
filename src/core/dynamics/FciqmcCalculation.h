@@ -34,6 +34,17 @@ public:
 
     void write_iter_stats(size_t icycle);
 
+    Determinant initial_reference(const std::unique_ptr<Hamiltonian>& ham, const Options& input){
+        if(m_input.initial_reference_det.empty()) {
+            return m_ham->guess_reference(input.spin_restrict);
+        }
+        else {
+            Determinant result(ham->nsite());
+            result.set(input.initial_reference_det);
+            return result;
+        }
+    }
+
 };
 
 

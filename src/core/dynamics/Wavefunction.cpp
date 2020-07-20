@@ -14,7 +14,7 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
                m_input.nwalker_target * m_input.walker_factor_initial),
         m_send("wavefunction outgoing spawn list", fciqmc->m_reference.nsite(), mpi::nrank()),
         m_recv("wavefunction incoming spawn list", fciqmc->m_reference.nsite(), 1),
-        m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference) {
+        m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference, m_input.reference_redefinition_thresh) {
     const auto nrow_walker = (size_t) (m_input.nwalker_target*m_input.walker_factor_initial);
     m_data.expand(nrow_walker);
     m_send.recv(&m_recv);
@@ -98,6 +98,14 @@ void Wavefunction::propagate() {
         const auto det = m_data.m_determinant(irow);
 
         //weight = m_prop->round(*weight);
+
+        m_reference.log_candidate_weight(irow, std::abs(*weight));
+        if (m_reference.in_redefinition_cycle()){
+            /*
+             * refresh reference connections
+             */
+            m_data.m_flags.m_reference_connection(irow) = m_reference.is_connected(det);
+        }
 
         auto flag_initiator = m_data.m_flags.m_initiator(irow);
 
@@ -304,6 +312,8 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
     stats_file->m_ref_proj_energy.write(m_reference.proj_energy());
     stats_file->m_nwalker.write(m_nwalker.reduced());
     stats_file->m_nw_growth_rate.write(m_nwalker_growth_rate);
+    stats_file->m_nw_at_doubles.write(m_reference.nwalker_at_doubles().reduced()-std::abs(m_reference.weight()));
+    stats_file->m_ref_candidate_weight.write(m_reference.candidate_weight().reduced());
     stats_file->m_aborted_weight.write(m_aborted_weight.reduced());
     stats_file->m_ninitiator.write(m_ninitiator.reduced());
     stats_file->m_noccupied_det.write(m_nocc_det.reduced());

@@ -28,6 +28,25 @@ void DeterminantElement::set(const defs::inds &ispinorbs) {
     for (const auto &ispinorb: ispinorbs) BitsetElement::set(ispinorb);
 }
 
+void DeterminantElement::set(const std::string& s){
+    zero();
+    size_t i=0ul;
+    for (auto c: s){
+        // divider
+        if (c!='|') {
+            if (c!='0' && c!='1') throw std::runtime_error("Determinant-defining string must contain only '0', '1', or '|'");
+            if (c=='1') set(i);
+            ++i;
+        }
+        else {
+            if (i!=nsite()) throw std::runtime_error("Pipe divider is not centralized in Determinant-defining string");
+        }
+    }
+    std::cout << i << " " << 2*nsite() << std::endl;
+    if (i<2*nsite()) throw std::runtime_error("Determinant-defining string not long enough");
+    if (i>2*nsite()) throw std::runtime_error("Determinant-defining string too long");
+}
+
 void DeterminantElement::clr(const size_t &ispin, const size_t &iorb) {
     BitsetElement::set(defs::pair{ispin ? nsite() : 0, iorb});
 }

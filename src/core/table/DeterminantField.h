@@ -25,6 +25,8 @@ public:
 
     void set(const defs::inds &ispinorbs);
 
+    void set(const std::string& s);
+
     using BitsetElement::clr;
 
     void clr(const size_t &ispin, const size_t &iorb);

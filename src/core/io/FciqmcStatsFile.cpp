@@ -14,6 +14,8 @@ FciqmcStatsFile::FciqmcStatsFile(const Options &input) :
         m_ref_proj_energy(this, 1, "Reference projected energy", 12),
         m_nwalker(this, 1, "Total number of walkers"),
         m_nw_growth_rate(this, 1, "Walker growth rate"),
+        m_nw_at_doubles(this, 1, "Number of walkers at double excitations of the reference"),
+        m_ref_candidate_weight(this, 1, "Weight on best candidate determinant for a reference change"),
         m_ninitiator(this, 1, "Number of initiator determinants"),
         m_aborted_weight(this, 1, "Aborted weight"),
         m_noccupied_det(this, 1, "Number of occupied determinants"),

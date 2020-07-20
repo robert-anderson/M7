@@ -13,6 +13,13 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-f,--fcidump_path", fcidump_path,
                "path to the FCIDUMP file, this is read-only");
 
+    add_option("-D,--initial-reference-det", initial_reference_det,
+               "initial reference determinant");
+
+    add_option("-y, --reference_redefinition_thresh", reference_redefinition_thresh,
+               "the reference will change to any determinant whose weight exceeds the reference weight by this factor");
+
+
     add_option("--spin_major", fcidump_spin_major,
                "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.");
 
