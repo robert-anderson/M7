@@ -19,7 +19,7 @@ struct Options {
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;
     double max_bloom = 1.0;
-    size_t prng_seed = 0;
+    size_t prng_seed = 12;
     size_t prng_ngen = 1000;
     size_t ndet_semistoch = 0;
     size_t spin_restrict = 0;
