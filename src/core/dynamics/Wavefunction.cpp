@@ -62,8 +62,8 @@ void Wavefunction::update(const size_t &icycle) {
         if (semistoch_epoch.update(icycle,
                 m_input.do_semistochastic && (icycle > shift_epoch.start() + m_input.niter_init_detsub))){
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_data));
-            m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
-            //m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
+            //m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get());
+            m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
         }
     }
 
