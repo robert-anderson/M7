@@ -201,7 +201,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
 
 void Wavefunction::annihilate() {
     mpi::barrier(); m_annihilation_timer.unpause();
-    if (m_prop->semi_stochastic()) m_detsub->update_weights(m_prop->m_tau, m_nwalker.m_delta);
+    if (m_prop->semi_stochastic()) m_detsub->update_weights(m_prop->tau(), m_nwalker.m_delta);
     m_aborted_weight = 0;
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
         annihilate_row(irow_recv);

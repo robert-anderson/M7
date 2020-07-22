@@ -74,10 +74,10 @@ public:
             }
             if (!valid) continue;
             ASSERT(!consts::float_is_zero(prob))
-            auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob;
+            auto delta = -(*weight / (defs::ham_comp_t) nattempt) * tau() * helem /prob;
             delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag);
 
-            ASSERT(consts::floats_equal(delta, -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob)
+            ASSERT(consts::floats_equal(delta, -(*weight / (defs::ham_comp_t) nattempt) * tau() * helem /prob)
                     || consts::float_is_zero(delta) || consts::float_is_zero(delta-m_min_spawn_mag))
 
             if (consts::float_is_zero(delta)) continue;
@@ -103,11 +103,11 @@ public:
         delta_nw -= std::abs(*weight);
 
         if (flag_deterministic){
-            weight *= 1 - (*hdiag - m_shift) * m_tau;
+            weight *= 1 - (*hdiag - m_shift) * tau();
         }
         else {
             // the probability that each unit walker will die
-            auto death_rate = (*hdiag - m_shift) * m_tau;
+            auto death_rate = (*hdiag - m_shift) * tau();
             ASSERT(std::abs(death_rate) < 1)
             weight = m_prng.stochastic_round(*weight, 1.0) * (1 - death_rate);
         }

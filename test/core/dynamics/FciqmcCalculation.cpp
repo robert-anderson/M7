@@ -92,7 +92,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     options.tau_initial = 0.05;
     options.prng_seed = 13;
     options.nwalker_target = 100000;
-    options.ncycle = 100;
+    options.ncycle = 10000;
     options.do_semistochastic = true;
     options.niter_init_detsub = 1000;
     FciqmcCalculation fciqmc_calculation(options);

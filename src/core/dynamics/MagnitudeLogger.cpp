@@ -4,56 +4,47 @@
 
 #include "MagnitudeLogger.h"
 
-MagnitudeLogger::MagnitudeLogger(const Options &input) :
-        m_input(input), m_tau(m_input.tau_initial) {}
+MagnitudeLogger::MagnitudeLogger(const Options &input, defs::prob_t psingle) :
+        m_input(input),
+        m_enough_singles_for_dynamic_tau("use singles ratio for dynamic tau"),
+        m_enough_doubles_for_dynamic_tau("use doubles ratio for dynamic tau"),
+        m_psingle(psingle), m_tau(m_input.tau_initial) {}
 
 void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
     defs::ham_comp_t tmp_hi_mag;
     if (nexcit == 1) {
-        ++m_priv_nsingle;
+        ++m_nsingle;
         tmp_hi_mag = std::abs(helem) / prob;
-        auto hi_mag = m_priv_hi_mag_single;
+        auto &hi_mag = m_hi_mag_single.local();
         if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
     } else if (nexcit == 2) {
-        ++m_priv_ndouble;
+        ++m_ndouble;
         tmp_hi_mag = std::abs(helem) / prob;
-        auto hi_mag = m_priv_hi_mag_double;
+        auto &hi_mag = m_hi_mag_double.local();
         if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
     }
 }
 
-void MagnitudeLogger::synchronize() {
-    // thread reduce
-    /*
-    reduction::max(m_priv_hi_mag_single.get(), m_hi_mag_single);
-    reduction::max(m_priv_hi_mag_double.get(), m_hi_mag_double);
-    reduction::max(m_priv_nsingle.get(), m_nsingle);
-    reduction::max(m_priv_ndouble.get(), m_ndouble);
-     */
-    m_hi_mag_single = m_priv_hi_mag_single;
-    m_hi_mag_double = m_priv_hi_mag_double;
-    m_nsingle = m_priv_nsingle;
-    m_ndouble = m_priv_ndouble;
-    // process reduce
-    m_hi_mag_single = mpi::all_max(m_hi_mag_single);
-    m_hi_mag_double = mpi::all_max(m_hi_mag_double);
-    if (m_input.dynamic_tau){
-        if (!m_enough_singles_for_dynamic_tau){
-            m_enough_singles_for_dynamic_tau = m_nsingle > m_input.nenough_spawns_for_dynamic_tau;
-            m_enough_singles_for_dynamic_tau = mpi::all_land(m_enough_singles_for_dynamic_tau);
-        }
-        if (!m_enough_doubles_for_dynamic_tau){
-            m_enough_doubles_for_dynamic_tau = m_ndouble > m_input.nenough_spawns_for_dynamic_tau;
-            m_enough_doubles_for_dynamic_tau = mpi::all_land(m_enough_doubles_for_dynamic_tau);
-        }
+void MagnitudeLogger::synchronize(size_t icycle) {
+    if (m_input.dynamic_tau) {
+        m_enough_singles_for_dynamic_tau.update(icycle, m_nsingle>m_input.nenough_spawns_for_dynamic_tau);
+        m_enough_doubles_for_dynamic_tau.update(icycle, m_ndouble>m_input.nenough_spawns_for_dynamic_tau);
 
-        defs::ham_comp_t hi_mag_sum = m_hi_mag_single + m_hi_mag_double;
-        ASSERT(hi_mag_sum>0.0);
-        /*
-         * highest transferred weight ~ tau x max(helem/prob)
-         * i.e. recommended tau = max bloom / max(helem/prob)
-         */
-        m_tau = m_input.max_bloom/hi_mag_sum;
-        m_psingle = m_hi_mag_single/hi_mag_sum;
+        if (m_enough_singles_for_dynamic_tau && m_enough_doubles_for_dynamic_tau) {
+            m_hi_mag_single.mpi_max();
+            m_hi_mag_double.mpi_max();
+            defs::ham_comp_t hi_mag_sum = m_hi_mag_single.reduced() + m_hi_mag_double.reduced();
+            ASSERT(hi_mag_sum > 0.0);
+            /*
+             * highest transferred weight ~ tau x max(helem/prob)
+             * i.e. recommended tau = max bloom / max(helem/prob)
+             */
+            m_tau = m_input.max_bloom / hi_mag_sum;
+            // go halfway to predicted value
+            m_psingle = (m_psingle+m_hi_mag_single / hi_mag_sum)/2;
+            m_psingle = std::max(m_psingle, m_input.min_excit_class_prob);
+            m_hi_mag_single = std::numeric_limits<defs::ham_comp_t>::min();
+            m_hi_mag_double = std::numeric_limits<defs::ham_comp_t>::min();
+        }
     }
 }

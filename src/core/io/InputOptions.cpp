@@ -71,6 +71,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_flag("--dynamic_tau", dynamic_tau,
              "update timestep dynamically");
 
+    add_option("--min_excit_class_prob", min_excit_class_prob,
+             "prevent the probability of drawing an excitatation class falling below this threshold");
+
     add_option("--nenough_spawns_for_dynamic_tau", nenough_spawns_for_dynamic_tau,
                "number of spawns logged for excitation type magnitudes to be used in tau update");
 

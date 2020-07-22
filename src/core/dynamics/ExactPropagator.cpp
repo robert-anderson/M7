@@ -31,7 +31,7 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
             auto helement = m_ham->get_element_1(m_aconn);
             if (consts::float_is_zero(helement)) continue;
 
-            auto delta = -*weight * m_tau * helement;
+            auto delta = -*weight * tau() * helement;
             if (consts::float_is_zero(delta)) continue;
             spawn(spawn_list, dst_det, delta, flag_initiator, flag_deterministic);
         }
@@ -52,7 +52,7 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
                 auto helement = m_ham->get_element_2(m_aconn);
                 if (consts::float_is_zero(helement)) continue;
 
-                auto delta = -*weight * m_tau * helement;
+                auto delta = -*weight * tau() * helement;
                 if (consts::float_is_zero(delta)) continue;
                 spawn(spawn_list, dst_det, delta, flag_initiator, flag_deterministic);
             }
@@ -64,7 +64,7 @@ void ExactPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdiag, Nu
                                bool flag_deterministic,
                                defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) {
     auto tmp = *weight;
-    weight *= (1.0 - (*hdiag - m_shift) * m_tau);
+    weight *= (1.0 - (*hdiag - m_shift) * tau());
     delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
     delta_nw += std::abs(*weight) - std::abs(tmp);
 }

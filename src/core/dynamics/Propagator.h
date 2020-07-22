@@ -25,9 +25,7 @@ public:
     const std::unique_ptr<Hamiltonian> &m_ham;
     const RankAllocator<DeterminantElement> &m_rank_allocator;
     MagnitudeLogger m_magnitude_logger;
-    double m_tau;
     defs::ham_comp_t m_shift;
-    Reducible<defs::wf_comp_t> m_largest_spawn_magnitude;
 
     mutable Determinant m_dst_det;
     mutable AntisymConnection m_aconn;
@@ -67,18 +65,20 @@ public:
         return m_semi_stochastic;
     }
 
+    const double& tau() const {
+        return m_magnitude_logger.m_tau;
+    }
+
     void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
-        m_magnitude_logger.synchronize();
-        // TODO
-        m_largest_spawn_magnitude.mpi_max();
+        m_magnitude_logger.synchronize(icycle);
         if (icycle % m_input.shift_update_period) return;
         m_variable_shift.update(icycle, nwalker >= m_input.nwalker_target);
-        if (m_variable_shift) m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / m_tau;
+        if (m_variable_shift) m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / tau();
     }
 
     void write_iter_stats(FciqmcStatsFile* stats_file) {
         if (!mpi::i_am_root()) return;
-        stats_file->m_timestep.write(m_tau);
+        stats_file->m_timestep.write(tau());
         stats_file->m_diagonal_shift.write(m_shift);
         stats_file->m_psingle.write(m_magnitude_logger.m_psingle);
     }

@@ -6,37 +6,37 @@
 #define M7_MAGNITUDELOGGER_H
 
 
-#include <cstddef>
+#include<cstddef>
 #include <src/core/util/defs.h>
-#include <src/core/parallel/MPIWrapper.h>
+#include <src/core/parallel/Reducible.h>
 #include <src/core/io/Options.h>
+#include <src/core/parallel/Epoch.h>
 
 class MagnitudeLogger {
     const Options &m_input;
     size_t m_nsingle = 0;
     size_t m_ndouble = 0;
-    size_t m_priv_nsingle;
-    size_t m_priv_ndouble;
     // highest magnitudes
-    defs::ham_comp_t m_hi_mag_single = 0;
-    defs::ham_comp_t m_hi_mag_double = 0;
+    Reducible<defs::ham_comp_t> m_hi_mag_single;
+    Reducible<defs::ham_comp_t> m_hi_mag_double;
 
-    defs::ham_comp_t m_priv_hi_mag_single;
-    defs::ham_comp_t m_priv_hi_mag_double;
-
-    bool m_enough_singles_for_dynamic_tau = false;
-    bool m_enough_doubles_for_dynamic_tau = false;
+    Epoch m_enough_singles_for_dynamic_tau;
+    Epoch m_enough_doubles_for_dynamic_tau;
 
 public:
     // the recommended timestep based on the hi_mag and the maximum acceptable bloom
+    defs::prob_t m_psingle;
     double m_tau;
-    defs::prob_t m_psingle = 0.001; //TODO
 
-    MagnitudeLogger(const Options &input);
+    MagnitudeLogger(const Options &input, defs::prob_t m_psingle);
+
+    MagnitudeLogger(const Options &input, size_t nsite, size_t nelec):
+    MagnitudeLogger(input,1/(integer_utils::combinatorial(2*nsite-nelec, 2)/double(2*nsite-nelec)+1))
+    {}
 
     void log(size_t nexcit, defs::ham_t helem, defs::prob_t prob);
 
-    void synchronize();
+    void synchronize(size_t icycle);
 
 };
 
