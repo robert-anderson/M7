@@ -59,19 +59,20 @@ void List::communicate() {
         recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
     std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
 
-    const auto ndword_send_tot = senddispls[mpi::nrank() - 1] + sendcounts[mpi::nrank() - 1];
-    const auto ndword_recv_tot = recvdispls[mpi::nrank() - 1] + recvcounts[mpi::nrank() - 1];
+//    const auto ndword_send_tot = senddispls[mpi::nrank() - 1] + sendcounts[mpi::nrank() - 1];
+//    const auto ndword_recv_tot = recvdispls[mpi::nrank() - 1] + recvcounts[mpi::nrank() - 1];
 
 
     logger::write("Send List usage fraction: "+
-                  std::to_string(ndword_send_tot/double(m_segment_dsize)), 0, logger::debug);
+                  std::to_string(sendcounts[mpi::irank()]/double(m_segment_dsize)), 0, logger::debug);
     logger::write("Receive List usage fraction: "+
-    std::to_string(ndword_send_tot/double(m_segment_dsize)), 0, logger::debug);
+    std::to_string(recvcounts[mpi::irank()]/double(m_segment_dsize)), 0, logger::debug);
 
-    if (ndword_recv_tot > m_recv->dsize()) {
-        logger::write("Insufficient space for received data: reallocating recv list...");
-        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
-    }
+    ASSERT(recvcounts[mpi::irank()]<m_recv->dsize())
+//    if (ndword_recv_tot > m_recv->dsize()) {
+//        logger::write("Insufficient space for received data: reallocating recv list...");
+//        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
+//    }
 
     auto tmp = mpi::all_to_allv(m_data.data(), sendcounts, senddispls,
                                 m_recv->m_data.data(), recvcounts, recvdispls);

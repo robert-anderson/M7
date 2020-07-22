@@ -15,13 +15,11 @@ void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
     if (nexcit == 1) {
         ++m_nsingle;
         tmp_hi_mag = std::abs(helem) / prob;
-        auto &hi_mag = m_hi_mag_single.local();
-        if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
+        if (tmp_hi_mag>m_hi_mag_single.local()) m_hi_mag_single = tmp_hi_mag;
     } else if (nexcit == 2) {
         ++m_ndouble;
         tmp_hi_mag = std::abs(helem) / prob;
-        auto &hi_mag = m_hi_mag_double.local();
-        if (tmp_hi_mag > hi_mag) hi_mag = tmp_hi_mag;
+        if (tmp_hi_mag>m_hi_mag_double.local()) m_hi_mag_double = tmp_hi_mag;
     }
 }
 
@@ -29,11 +27,10 @@ void MagnitudeLogger::synchronize(size_t icycle) {
     if (m_input.dynamic_tau) {
         m_enough_singles_for_dynamic_tau.update(icycle, m_nsingle>m_input.nenough_spawns_for_dynamic_tau);
         m_enough_doubles_for_dynamic_tau.update(icycle, m_ndouble>m_input.nenough_spawns_for_dynamic_tau);
-
         if (m_enough_singles_for_dynamic_tau && m_enough_doubles_for_dynamic_tau) {
             m_hi_mag_single.mpi_max();
             m_hi_mag_double.mpi_max();
-            defs::ham_comp_t hi_mag_sum = m_hi_mag_single.reduced() + m_hi_mag_double.reduced();
+            auto hi_mag_sum = m_hi_mag_single.reduced() + m_hi_mag_double.reduced();
             ASSERT(hi_mag_sum > 0.0);
             /*
              * highest transferred weight ~ tau x max(helem/prob)

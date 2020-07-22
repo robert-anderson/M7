@@ -13,13 +13,13 @@ Epoch::Epoch(std::string name) :m_name(std::move(name)) {
 bool Epoch::update(size_t icycle, bool condition) {
     if (*this) return false;
     ASSERT(start() == ~0ul)
-    if (condition) {
-        m_icycle_start = icycle;
-        m_icycle_start.mpi_min();
-        ASSERT(start() != ~0ul)
+    m_icycle_start = condition?icycle:~0ul;
+    m_icycle_start.mpi_min();
+    if (*this) {
         std::cout << "Entering \"" << m_name << "\" epoch on MC cycle " << icycle << std::endl;
+        return true;
     }
-    return *this;
+    return false;
 }
 
 Epoch::operator bool() const {

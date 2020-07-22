@@ -89,12 +89,12 @@ TEST(FciqmcCalculation, StochasticPropagation60orbs){
 TEST(FciqmcCalculation, SemiStochasticPropagation){
     Options options;
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
-    options.tau_initial = 0.05;
+    options.tau_initial = 0.01;
     options.prng_seed = 13;
     options.nwalker_target = 100000;
     options.ncycle = 10000;
     options.do_semistochastic = true;
-    options.niter_init_detsub = 1000;
+    options.niter_init_detsub = 3000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
     if (mpi::i_am_root()) {
