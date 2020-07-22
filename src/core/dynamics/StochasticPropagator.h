@@ -38,7 +38,7 @@ public:
 
     template<typename T>
     size_t get_nattempt(const std::complex<T>& weight) {
-        if (m_ham->complex_valued()) return get_nattempt(weight);
+        if (m_ham->complex_valued()) return get_nattempt(std::abs(weight));
         else return get_nattempt(consts::real(weight));
     }
 

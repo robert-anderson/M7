@@ -106,3 +106,20 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
             consts::real(energy_mean_std.first), -108.8113865756313, 1e-3));
     }
 }
+
+TEST(FciqmcCalculation, StochasticPropagation4cLarge){
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
+    Options options;
+    options.fcidump_path = defs::assets_root+"/DHF_Kr_CCPVDZ/FCIDUMP";
+    options.tau_initial = 0.01;
+    options.nwalker_target = 1000000;
+    options.nload_balance_block = 1000;
+    options.ncycle = 4000;
+    options.walker_factor_initial = 2.0;
+    options.buffer_factor_initial = 3.0;
+    options.do_semistochastic = true;
+    options.ncycle_init_detsub = 3000;
+    FciqmcCalculation fciqmc_calculation(options);
+    fciqmc_calculation.execute();
+
+}
