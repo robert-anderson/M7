@@ -16,11 +16,11 @@ public:
     using Reducible<T>::operator+=;
     Reducible<delta_T> m_delta;
 
-    delta_T& reduce_delta(){
+    const delta_T& reduce_delta(){
         return m_delta.mpi_sum();
     }
 
-    T& accumulate(){
+    const T& accumulate(){
         local() += m_delta.local();
         m_delta.reset();
         return mpi_sum();

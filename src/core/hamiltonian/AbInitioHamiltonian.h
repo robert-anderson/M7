@@ -24,7 +24,7 @@ class AbInitioHamiltonian : public Hamiltonian {
 public:
 
     AbInitioHamiltonian(const FcidumpFileReader<defs::ham_t>& file_reader) :
-        Hamiltonian(file_reader.nelec(), file_reader.nspatorb(), file_reader.spin_conserving()),
+        Hamiltonian(file_reader.nelec(), file_reader.nspatorb(), file_reader.spin_conserving(), file_reader.complex_valued()),
         m_int_1(file_reader.norb(), file_reader.spin_resolved()),
         m_int_2(file_reader.norb(), file_reader.spin_resolved()){
         defs::inds inds(4);

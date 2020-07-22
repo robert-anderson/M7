@@ -159,7 +159,7 @@ public:
         }
     }
 
-    const bool& complex_valued(){
+    const bool& complex_valued() const {
         return m_complex_valued;
     }
 };

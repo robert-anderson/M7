@@ -26,6 +26,8 @@ target_compile_options(prof PRIVATE -O2)
 target_compile_options(prof PRIVATE -pg)
 target_link_options(prof PRIVATE -pg)
 
+add_compile_definitions(VERBOSE=1)
+
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
     target_link_libraries (release ${LAPACK_LIBRARIES})

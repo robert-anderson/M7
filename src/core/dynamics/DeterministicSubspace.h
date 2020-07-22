@@ -142,13 +142,13 @@ public:
         build_hamiltonian(ham);
     }
 
-    void build_from_det_connections(const DeterminantElement &ref, Hamiltonian *ham) {
+    void build_from_det_connections(const DeterminantElement &ref, Hamiltonian *ham, size_t nexcit_max = 2) {
         Connection conn(ref);
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
             auto det = m_walker_list.m_determinant(irow);
             conn.connect(ref, det);
-            if (conn.nexcit() <= 2) add_determinant(irow);
+            if (conn.nexcit() <= nexcit_max) add_determinant(irow);
         }
         build_hamiltonian(ham);
     }

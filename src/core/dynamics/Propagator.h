@@ -59,11 +59,11 @@ public:
         return weight;
     }
 
-    const Epoch &variable_shift() {
+    Epoch &variable_shift() {
         return m_variable_shift;
     }
 
-    const Epoch &semi_stochastic() {
+    Epoch &semi_stochastic() {
         return m_semi_stochastic;
     }
 

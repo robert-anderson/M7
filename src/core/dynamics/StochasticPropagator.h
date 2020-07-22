@@ -23,12 +23,32 @@ public:
         m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(m_ham.get(), m_prng));
     }
 
+    template<typename T>
+    size_t get_nattempt(const T& weight){
+        static_assert(std::is_floating_point<T>::value, "template arg must be floating point");
+        /*
+         * We want to make nattempt = ceil(|weight|) spawning attempts.
+         * can't rely on std::abs to provide the right answer in the case of complex arithmetic with
+         * a real-valued Hamiltonian and an integral weight, since the sqrt function is not the exact
+         * inverse of squaring in finite precision arithmetic!
+         */
+        if (weight<0) return (-weight) < 1 ? 1 : std::round(-weight);
+        else return (weight) < 1 ? 1 : std::round(weight);
+    }
+
+    template<typename T>
+    size_t get_nattempt(const std::complex<T>& weight) {
+        if (m_ham->complex_valued()) return get_nattempt(weight);
+        else return get_nattempt(consts::real(weight));
+    }
+
     void off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                       SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override {
         ASSERT(!consts::float_is_zero(*weight));
+        ASSERT(consts::imag(*weight)==0.0 || m_ham->complex_valued())
         m_occ.update(src_det);
         m_vac.update(src_det);
-        size_t nattempt = std::ceil(std::abs(*weight));
+        size_t nattempt = get_nattempt(*weight);
         defs::prob_t prob;
         defs::ham_t helem;
         bool valid = false;
@@ -37,14 +57,16 @@ public:
             switch (nexcit) {
                 case 1:
                     valid = m_exgen->draw_single(src_det, m_dst_det, m_occ, m_vac, prob, helem, m_aconn);
-                    ASSERT(prob<=1.0)
+                    if (!valid) break;
+                    ASSERT(prob>=0.0 && prob<=1.0)
                     prob*=m_magnitude_logger.m_psingle;
                     ASSERT(!consts::float_nearly_zero(prob, 1e-14));
                     break;
                 case 2:
                     // TODO: don't need m_vac for doubles.
                     valid = m_exgen->draw_double(src_det, m_dst_det, m_occ, prob, helem, m_aconn);
-                    ASSERT(prob<=1.0)
+                    if (!valid) break;
+                    ASSERT(prob>=0.0 && prob<=1.0)
                     prob*= 1.0-m_magnitude_logger.m_psingle;
                     break;
                 default:
@@ -54,8 +76,20 @@ public:
             ASSERT(!consts::float_is_zero(prob))
             auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob;
             delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag);
+
+            ASSERT(consts::floats_equal(delta, -(*weight / (defs::ham_comp_t) nattempt) * m_tau * helem /prob)
+                    || consts::float_is_zero(delta) || consts::float_is_zero(delta-m_min_spawn_mag))
+
             if (consts::float_is_zero(delta)) continue;
             ASSERT(m_dst_det.nsetbit()==src_det.nsetbit())
+
+
+//             // verbose output
+//             std::cout << "attempt "<<(iattempt+1)<<"/"<<nattempt<<" "<<src_det.to_string()
+//                   << * " (" << consts::real(*weight) << ") -> " << m_dst_det.to_string()
+//                   << " " << consts::real(delta) << " prob: " << prob << " matel: "<< consts::real(helem) << std::endl;
+
+
             spawn(spawn_list, m_dst_det, delta, flag_initiator, flag_deterministic);
             m_magnitude_logger.log(nexcit, helem, prob);
         }

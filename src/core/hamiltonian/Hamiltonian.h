@@ -22,9 +22,10 @@ protected:
     const size_t m_nelec;
     const size_t m_nsite;
     const bool m_spin_conserving;
+    const bool m_complex_valued;
 
 public:
-    Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving);
+    Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving, bool complex_valued);
 
     consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const {
         return consts::real(get_element_0(det));
@@ -111,6 +112,9 @@ public:
 
     void generate_ci_space(WalkerList* list, RankAllocator<DeterminantElement>& ra, const int &spin_level) const;
 
+    const bool& complex_valued() const {
+        return m_complex_valued;
+    }
 };
 
 #endif //M7_HAMILTONIAN_H
