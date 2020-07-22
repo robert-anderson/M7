@@ -37,7 +37,7 @@ struct Options {
     size_t shift_update_period = 1;
     size_t ncycle = ~0ul;
     bool do_semistochastic = false;
-    size_t niter_init_detsub = 1000;
+    size_t ncycle_init_detsub = 1000;
 
     bool validate() const;
 

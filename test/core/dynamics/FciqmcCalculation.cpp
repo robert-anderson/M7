@@ -94,7 +94,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     options.nwalker_target = 100000;
     options.ncycle = 10000;
     options.do_semistochastic = true;
-    options.niter_init_detsub = 3000;
+    options.ncycle_init_detsub = 3000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
     if (mpi::i_am_root()) {

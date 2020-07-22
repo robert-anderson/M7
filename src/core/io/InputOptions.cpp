@@ -77,7 +77,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--nenough_spawns_for_dynamic_tau", nenough_spawns_for_dynamic_tau,
                "number of spawns logged for excitation type magnitudes to be used in tau update");
 
-    add_option("-S,--shift_initial", shift_initial,
+    add_option("--shift_initial", shift_initial,
                "initial diagonal shift relative to the automatically assumed shift given by the reference energy.");
 
     add_option("-d,--shift_damp", shift_damp,
@@ -87,5 +87,11 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "number of cycles between shift updates");
 
     add_option("-N,--ncycle", ncycle,
-               "number of cycles to execute before exit.");
+               "number of cycles to execute before exit");
+
+    add_flag("-S,--semistochastic", do_semistochastic,
+             "enable semistochastic adaptation");
+
+    add_option("--ncycle_init_detsub", ncycle_init_detsub,
+               "number of cycles after start of variable shift epoch begin semistochastic epoch");
 }
