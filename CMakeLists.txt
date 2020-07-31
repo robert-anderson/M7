@@ -38,7 +38,7 @@ include_directories("${CMAKE_SOURCE_DIR}/external/CLI11/include")
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 add_definitions(-Wall -Wextra -Werror)
-add_definitions(-Wno-unused-function -Wno-unused-parameter)
+add_definitions(-Wno-unused-function -Wno-unused-parameter -Wno-unused-value)
 
 add_subdirectory(src)
 add_subdirectory(test)

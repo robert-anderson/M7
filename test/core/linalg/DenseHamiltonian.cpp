@@ -23,3 +23,43 @@ TEST(DenseHamiltonian, FciEnergyCheckRhf) {
     // compare the ground and first excited states to BAGEL's values
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -108.81138657563143, 1e-10));
 }
+
+TEST(DenseHamiltonian, h2o) {
+
+    FcidumpFileReader<double> file_reader("/Users/robertjohnanderson/tmp/FCIDUMP", true);
+    ASSERT_TRUE(file_reader.spin_resolved());
+    AbInitioHamiltonian ham_src(file_reader);
+    auto hf_energy = -75.39080347949;
+    auto ci_energy = -3262.74560540;
+    auto ref = ham_src.guess_reference(0);
+    //ref.zero();
+    //ref.set("1001|1001");
+    std::cout << ham_src.get_energy(ref)-hf_energy << std::endl;
+    DenseHamiltonian ham(ham_src);
+    auto solver = ham.diagonalize();
+    std::cout << solver.m_evals[0]-ci_energy << std::endl;
+
+
+    //-8005.37440388
+
+//    auto hf_energy = -76.07451146988;
+//    auto ci_energy = -76.07535316;
+//    auto bagel_ci_energy = -76.07535816;
+//    std::cout << ci_energy-bagel_ci_energy << std::endl;
+//
+//    auto bagel_hf_energy_2zfit = -76.07449540;
+//    auto bagel_hf_energy_3zfit = -76.07451639;
+//    auto bagel_hf_energy_4zfit = -76.07452174;
+//    std::cout << hf_energy-bagel_hf_energy_2zfit << std::endl;
+//    std::cout << hf_energy-bagel_hf_energy_3zfit << std::endl;
+//    std::cout << hf_energy-bagel_hf_energy_4zfit << std::endl;
+//    FcidumpFileReader<double> file_reader("/Users/robertjohnanderson/tmp/FCIDUMP", true);
+//    ASSERT_TRUE(file_reader.spin_resolved());
+//    AbInitioHamiltonian ham_src(file_reader);
+//    std::cout << ham_src.guess_reference(0).to_string() << std::endl;
+//    std::cout << ham_src.get_energy(ham_src.guess_reference(0))-hf_energy;
+//    DenseHamiltonian ham(ham_src);
+//    auto solver = ham.diagonalize();
+//    // compare the ground and first excited states to DIRAC's values
+//    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], ci_energy, 1e-7));
+}
