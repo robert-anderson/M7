@@ -88,10 +88,8 @@ public:
         ASSERT(iflat<m_nelem)
         auto conjd_value = case_to_tconj[icase] ? consts::conj(value) : value;
         if (mpi::on_node_i_am_root()) {
-            if (consts::float_is_zero(m_data[iflat])) m_data.set(iflat, conjd_value);
-            else {
-                ASSERT(consts::floats_nearly_equal(m_data[iflat], conjd_value));
-            }
+            if (consts::float_is_zero(m_data[iflat]), 1e-14) m_data.set(iflat, conjd_value);
+            else throw std::runtime_error("Inconsistent integral specification");
         }
     }
 

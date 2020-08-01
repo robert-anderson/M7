@@ -83,7 +83,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
                 continue;
             }
             ASSERT(src_det.nsetbit() == work_det.nsetbit())
-            size_t irow = connection_list.lookup(work_det);
+            size_t irow = connection_list.lookup_irow(work_det);
             if (irow != ~0ul) {
                 connection_list.m_weight(irow, 0, ielement) += 1.0 / prob;
                 connection_list.m_frequency(irow, 0, ielement) += 1;

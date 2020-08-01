@@ -26,11 +26,11 @@ TEST(DenseHamiltonian, FciEnergyCheckRhf) {
 
 TEST(DenseHamiltonian, h2o) {
 
-    FcidumpFileReader<double> file_reader("/Users/robertjohnanderson/tmp/FCIDUMP", true);
+    FcidumpFileReader<double> file_reader("/Users/robertjohnanderson/tmp/FCIDUMP.out", false);
     ASSERT_TRUE(file_reader.spin_resolved());
     AbInitioHamiltonian ham_src(file_reader);
-    auto hf_energy = -75.39080347949;
-    auto ci_energy = -3262.74560540;
+    auto hf_energy = 0;//-98.73369952192;
+    auto ci_energy = 0;//-98.81346551;
     auto ref = ham_src.guess_reference(0);
     //ref.zero();
     //ref.set("1001|1001");
@@ -38,6 +38,11 @@ TEST(DenseHamiltonian, h2o) {
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     std::cout << solver.m_evals[0]-ci_energy << std::endl;
+
+    /*
+    -98.7337
+    -98.8571
+     */
 
 
     //-8005.37440388

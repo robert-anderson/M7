@@ -6,6 +6,7 @@
 #define M7_PERFORABLEMAPPEDLIST_H
 
 #include <stack>
+#include <src/core/hash/ConcurrentStack.h>
 #include "MappedList.h"
 
 /*
@@ -37,37 +38,34 @@
 template<typename T>
 class PerforableMappedList : public MappedList<T> {
     typedef typename T::Field_T Field_T;
-    std::stack<size_t> m_free_rows;
+    ConcurrentStack<size_t> m_free_rows;
+
+    using MappedList<T>::m_map;
 
 public:
 
     PerforableMappedList(std::string name, Field_T& key_field, size_t nbucket):
-        MappedList<T>(name, key_field, nbucket) {}
+        MappedList<T>(name, key_field, nbucket) {
+        m_map.m_delete_callback = [this](const size_t& irow) {
+            m_free_rows.append(irow);
+            MappedList<T>::m_key_field(irow).zero();
+            Table::zero_row(irow, 0);
+        };
+    }
 
     size_t push(const T &key) override {
         size_t irow = ~0ul;
-        // first see if there are any free rows left
-        if (!m_free_rows.empty()){
-            // free row was available, grab from top of stack
-            irow = m_free_rows.top();
-            m_free_rows.pop();
-        }
-        else {
-            irow = List::push();
-        }
+        if (!m_free_rows.pop(irow)) irow = List::push();
         MappedList<T>::m_map.insert(key, irow);
         return irow;
     }
 
-    size_t remove(const T &key, const size_t &irow) {
-        auto irow_rm = MappedList<T>::m_map.remove(key, irow);
-        ASSERT(irow != ~0ul);
-        m_free_rows.push(irow_rm);
-        MappedList<T>::m_key_field(irow_rm).zero();
-        Table::zero_row(irow, 0);
-        ASSERT(MappedList<T>::m_key_field(irow_rm).is_zero());
-        ASSERT(irow_rm==irow)
-        return irow_rm;
+    void mark_for_delete(const size_t &irow){
+        m_map.mark_for_delete(irow);
+    }
+
+    void synchronize(){
+        m_map.clear_tombstones();
     }
 
     size_t nzero_rows(size_t isegment=0) const {

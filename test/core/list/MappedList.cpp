@@ -20,7 +20,7 @@ TEST(MappedList, DataIntegrity) {
         size_t irow = list.push(i * i);
         list.value(irow) = i;
     }
-    auto irow = list.lookup(27 * 27);
+    auto irow = list.lookup_irow(27 * 27);
     ASSERT_NE(irow, ~0ul);
     ASSERT_EQ((size_t)list.value(irow), 27);
 }

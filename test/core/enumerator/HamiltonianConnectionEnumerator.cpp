@@ -49,7 +49,7 @@ public:
                     if (!consts::float_nearly_zero(std::abs(helement), eps)) {
                         size_t irow = expand_push(excited);
                         m_helement(irow) = helement;
-                        ASSERT(lookup(m_determinant(irow)) == irow);
+                        ASSERT(lookup_irow(m_determinant(irow)) == irow);
                     }
                 }
             }

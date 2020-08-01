@@ -112,7 +112,7 @@ void Wavefunction::propagate() {
 
         if (consts::float_is_zero(*weight) && !m_data.m_flags.m_deterministic(irow)) {
             if (flag_initiator) m_ninitiator.m_delta--;
-            m_data.remove(det, irow);
+            m_data.mark_for_delete(irow);
             continue;
         }
 
@@ -142,12 +142,7 @@ void Wavefunction::propagate() {
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
             if (flag_initiator) m_ninitiator.m_delta--;
-#ifndef NDEBUG
-            auto irow_removed = m_data.remove(det, irow);
-            ASSERT(irow_removed == irow);
-#else
-            m_data.remove(det, irow);
-#endif
+            m_data.mark_for_delete(irow);
         }
     }
     mpi::barrier(); m_propagation_timer.pause();
@@ -169,7 +164,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
     ASSERT(!consts::float_is_zero(*delta_weight));
     size_t irow_main;
 
-    irow_main = m_data.lookup(det);
+    irow_main = m_data.lookup_irow(det);
     if (irow_main == ~0ul) {
         /*
          * the destination determinant is not currently occupied, so initiator rules
