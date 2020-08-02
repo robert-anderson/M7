@@ -6,6 +6,7 @@
 #define M7_LIST_H
 
 #include <src/core/parallel/MPIWrapper.h>
+#include <src/core/sort/QuickSorter.h>
 #include "src/core/table/Table.h"
 
 class List : public Table {
@@ -33,6 +34,7 @@ public:
     void communicate();
 
     void all_gather(List &local);
+
 };
 
 #endif //M7_LIST_H
