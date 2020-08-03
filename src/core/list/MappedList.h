@@ -26,6 +26,10 @@ struct ListHashMap : public ConcurrentHashMap<T> {
     void set_key(const size_t &key_index, const T &key) override {
         m_list.key_field()(key_index) = key;
     }
+
+    size_t hash(const T &key) const override {
+        return key.hash();
+    }
 };
 
 template<typename T>
@@ -37,10 +41,7 @@ protected:
 
 public:
     MappedList(std::string name, Field_T &key_field, size_t nbucket) :
-        List(name), m_key_field(key_field), m_map(*this, nbucket) {
-        m_map.m_delete_callback = [](const size_t& irow){ throw std::runtime_error(
-                    "Cannot perform deletion on a MappedList (use PerforableMappedList instead)");};
-    }
+        List(name), m_key_field(key_field), m_map(*this, nbucket) {}
 
     Field_T &key_field() const {
         return m_key_field;

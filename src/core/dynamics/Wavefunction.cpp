@@ -58,6 +58,8 @@ void Wavefunction::update(const size_t &icycle) {
     //ASSERT(m_square_norm.reduced()==m_data.square_norm(0))
     m_ninitiator.accumulate();
     ASSERT(m_ninitiator.m_delta == 0.0)
+    m_nocc_det.accumulate();
+    ASSERT(m_nocc_det.m_delta == 0)
 
 #ifndef NDEBUG
     size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
@@ -111,9 +113,10 @@ void Wavefunction::propagate() {
         const auto det = m_data.m_determinant(irow);
 
 #ifdef VERBOSE_DEBUGGING
-        std::cout << consts::verb << "PARENT DETERMINANT" << std::endl;
-        std::cout << consts::verb << "bitstring: " << det.to_string() << std::endl;
-        std::cout << consts::verb << "weight:    " << *weight << std::endl;
+        std::cout << consts::verb << consts::chevs << "PARENT DETERMINANT" << std::endl;
+        std::cout << consts::verb << "walker list row:  " << irow << std::endl;
+        std::cout << consts::verb << "bitstring:        " << det.to_string() << std::endl;
+        std::cout << consts::verb << "weight:           " << *weight << std::endl;
 #endif
         //weight = m_prop->round(*weight);
 
@@ -128,8 +131,14 @@ void Wavefunction::propagate() {
         auto flag_initiator = m_data.m_flags.m_initiator(irow);
 
         if (consts::float_is_zero(*weight) && !m_data.m_flags.m_deterministic(irow)) {
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs << "ZERO WEIGHT: REMOVING FROM LIST" << std::endl;
+            std::cout << consts::verb << "is initiator:     " << flag_initiator << std::endl;
+            std::cout << consts::verb << "weight:           " << *weight << std::endl;
+#endif
             if (flag_initiator) m_ninitiator.m_delta--;
-            m_data.mark_for_delete(irow);
+            m_nocc_det.m_delta--;
+            m_data.remove(irow);
             continue;
         }
 
@@ -159,14 +168,33 @@ void Wavefunction::propagate() {
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
             if (flag_initiator) m_ninitiator.m_delta--;
-            m_data.mark_for_delete(irow);
+            m_nocc_det.m_delta--;
+            m_data.remove(irow);
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs << "ALL WALKERS DIED: REMOVING DETERMINANT FROM LIST" << std::endl;
+#endif
         }
     }
     mpi::barrier(); m_propagation_timer.pause();
 
-    std::cout << nrow_free+m_nocc_det.local() << " " <<
-              parallel_stats_file()->m_walker_list_high_water_mark.get() << std::endl;
-    ASSERT(nrow_free+m_nocc_det.local()==parallel_stats_file()->m_walker_list_high_water_mark.get())
+    m_data.clear_tombstones();
+
+#ifdef VERBOSE_DEBUGGING
+    std::cout << consts::verb << consts::chevs << "END OF PROPAGATION LOOP CHECKS" << std::endl;
+    std::cout << consts::verb << "free rows found in walker list:    " << nrow_free << std::endl;
+    std::cout << consts::verb << "occupied determinants before loop: " << m_nocc_det.local() << std::endl;
+    std::cout << consts::verb << "high water mark:                   " << m_data.high_water_mark(0) << std::endl;
+#endif
+
+#ifndef NDEBUG
+    auto chk_hwm = nrow_free+m_nocc_det.local();
+    if (chk_hwm!=m_data.high_water_mark(0)) {
+        m_data.print();
+        auto chk_nrow_in_free_stack = m_data.nrow_in_free_stack();
+        std::cout << "free rows in walker list " << chk_nrow_in_free_stack << std::endl;
+    }
+    ASSERT(chk_hwm==m_data.high_water_mark(0))
+#endif
 }
 
 void Wavefunction::communicate() {
@@ -199,6 +227,13 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
     size_t irow_main;
 
     irow_main = m_data.lookup_irow(det);
+
+#ifdef VERBOSE_DEBUGGING
+    std::cout << consts::verb << "bitstring:             " << det.to_string() << std::endl;
+    std::cout << consts::verb << "delta weight:          " << *delta_weight << std::endl;
+    std::cout << consts::verb << "found in walker list:  " << string_utils::yn(irow_main!=~0ul) << std::endl;
+#endif
+
     if (irow_main == ~0ul) {
         /*
          * the destination determinant is not currently occupied, so initiator rules
@@ -206,20 +241,33 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
          */
         if (!m_recv.m_flags.m_parent_initiator(irow_recv)) {
             m_aborted_weight += std::abs(*delta_weight);
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs <<
+                "ABORTED SPAWN TO UNOCCUPIED DETERMINANT: PARENT NON-INITIATOR" << std::endl;
+#endif
             return;
         }
         irow_main = m_data.push(det);
+        ASSERT(m_data.m_determinant(irow_main)==det)
         m_data.m_hdiag(irow_main) = m_prop->m_ham->get_energy(det);
         m_data.m_flags.m_reference_connection(irow_main) = m_reference.is_connected(det);
         m_data.m_flags.m_deterministic(irow_main) = false;
         m_data.m_flags.m_initiator(irow_main) = false;
-        m_nocc_det.m_delta.local()++;
+        m_nocc_det.m_delta++;
     }
+
+#ifdef VERBOSE_DEBUGGING
+    std::cout << consts::verb << "row in walker list:    " << irow_main << std::endl;
+#endif
     /*
      * if we have stochastically generated a connection between determinants in a deterministic
      * subspace, so we must reject this connection.
      */
     if (m_recv.m_flags.m_parent_deterministic(irow_recv) && m_data.m_flags.m_deterministic(irow_main)) {
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs <<
+                  "ABORTED SPAWN: STOCHASTICALLY GENERATED A DETERMINISTIC CONNECTION" << std::endl;
+#endif
         return;
     }
     auto weight = m_data.m_weight(irow_main);
@@ -234,9 +282,14 @@ void Wavefunction::annihilate() {
     if (m_prop->semi_stochastic()) m_detsub->update_weights(m_prop->tau(), m_nwalker.m_delta);
     m_aborted_weight = 0;
     for (size_t irow_recv = 0ul; irow_recv < m_recv.high_water_mark(0); ++irow_recv) {
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs << "RECEIVED DETERMINANT" << std::endl;
+        std::cout << consts::verb << "row in recv buffer:    " << irow_recv << std::endl;
+#endif
         annihilate_row(irow_recv);
     }
     mpi::barrier(); m_annihilation_timer.pause();
+    m_data.clear_tombstones();
 }
 
 void Wavefunction::synchronize() {
@@ -316,6 +369,7 @@ void Wavefunction::synchronize() {
      * same for the change in occupied determinants
      */
     m_nocc_det.reduce_delta();
+
     m_ninitiator.reduce_delta();
 
     /*

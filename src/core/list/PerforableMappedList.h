@@ -45,26 +45,38 @@ class PerforableMappedList : public MappedList<T> {
 public:
 
     PerforableMappedList(std::string name, Field_T& key_field, size_t nbucket):
-        MappedList<T>(name, key_field, nbucket) {
-        m_map.m_delete_callback = [this](const size_t& irow) {
-            m_free_rows.append(irow);
-            MappedList<T>::m_key_field(irow).zero();
-            Table::zero_row(irow, 0);
-        };
-    }
+        MappedList<T>(name, key_field, nbucket) {}
 
     size_t push(const T &key) override {
         size_t irow = ~0ul;
-        if (!m_free_rows.pop(irow)) irow = List::push();
+        if (m_free_rows.pop(irow)) {
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs << "POPPED AN EMPTY ROW FROM THE FREE STACK" << std::endl;
+            std::cout << consts::verb << "free rows remaining:    " << m_free_rows.size() << std::endl;
+#endif
+        }
+        else {
+            irow = List::push();
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs << "NO ROWS IN FREE STACK - PUSHING BACK THE HIGHWATER MARK" << std::endl;
+#endif
+        }
+        MappedList<T>::m_key_field(irow) = key;
         MappedList<T>::m_map.insert(key, irow);
         return irow;
     }
 
-    void mark_for_delete(const size_t &irow){
+    void remove(const size_t &irow){
+        std::cout << m_free_rows.is_empty() << std::endl;
+        std::cout << m_free_rows.m_last << std::endl;
+        std::cout << m_free_rows.m_next << std::endl;
+        std::cout << &m_free_rows << std::endl;
+        m_free_rows.append(irow);
+        MappedList<T>::m_key_field(irow).zero();
         m_map.mark_for_delete(irow);
     }
 
-    void synchronize(){
+    void clear_tombstones(){
         m_map.clear_tombstones();
     }
 
@@ -75,6 +87,12 @@ public:
             result += MappedList<T>::m_key_field(irow, isegment).is_zero();
         }
         return result;
+    }
+
+    size_t nrow_in_free_stack(size_t isegment=0) const {
+        // debugging only
+        m_free_rows.print();
+        return m_free_rows.size();
     }
 
 };

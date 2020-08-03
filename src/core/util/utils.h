@@ -255,6 +255,14 @@ namespace string_utils {
         }
         return result;
     }
+
+    static std::string yn(bool t){
+        return t ? "yes":"no";
+    }
+
+    static std::string YN(bool t){
+        return t ? "YES":"NO";
+    }
 }
 
 namespace prob_utils {

@@ -71,7 +71,7 @@ TEST(PerforableMappedList, MultiRemovalAndReuse) {
                 list.remove(mutex, irow);
             }
         }
-        list.synchronize();
+        list.clear_tombstones();
     }
 }
  */

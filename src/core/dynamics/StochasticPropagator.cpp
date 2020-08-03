@@ -4,40 +4,97 @@
 
 #include "StochasticPropagator.h"
 
-#if 0
-void
-StochasticPropagator::off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
-                                   SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
-
-    size_t nattempt = std::ceil(std::abs(*weight));
-    DeterminantSampler determinant_sampler(m_precomputed_heat_bath_sampler, determinant, m_prng);
-    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        determinant_sampler.draw();
-        if (determinant_sampler.single_generated()) {
-            assert(!consts::float_is_zero(determinant_sampler..m_single.m_helement));
-            assert(!consts::float_is_zero(excit.m_single.m_prob));
-            auto excited = excit.m_single.get_connection();
-            auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau *
-                         (m_ham->get_element(excited, determinant) / excit.m_single.m_prob);
-            add_to_spawn_list(excited, delta, flag_initiator, spawn_list);
-        }
-    }
-    if (!excit.m_double.is_null()) {
-        assert(!consts::float_is_zero(excit.m_double.m_helement));
-        assert(!consts::float_is_zero(excit.m_double.m_prob));
-        auto excited = excit.m_double.get_connection();
-        auto delta = -(*weight / (defs::ham_comp_t) nattempt) * m_tau *
-                     (m_ham->get_element(excited, determinant) / excit.m_double.m_prob);
-        add_to_spawn_list(excited, delta, flag_initiator, spawn_list);
-    }
-}
-
-}
-
-StochasticPropagator::StochasticPropagator(
-    const InputOptions &input, const std::unique_ptr<Hamiltonian> &ham,
-    const RankAllocator<DeterminantElement> &rankAllocator) :
-    Propagator(input, ham, rankAllocator), m_prng(input.prng_seed, 1000),
-    m_precomputed_heat_bath_sampler(*ham.get()) {}
-
+void StochasticPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
+                                        SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
+    ASSERT(!consts::float_is_zero(*weight));
+    ASSERT(consts::imag(*weight)==0.0 || m_ham->complex_valued())
+    m_occ.update(src_det);
+    m_vac.update(src_det);
+    size_t nattempt = get_nattempt(*weight);
+#ifdef VERBOSE_DEBUGGING
+    std::cout << consts::verb << "spawn attempts: " << nattempt << std::endl;
 #endif
+    defs::prob_t prob;
+    defs::ham_t helem;
+    bool valid = false;
+    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
+        size_t nexcit = 2 - m_prng.stochastic_round(m_magnitude_logger.m_psingle, 1);
+        switch (nexcit) {
+            case 1:
+                valid = m_exgen->draw_single(src_det, m_dst_det, m_occ, m_vac, prob, helem, m_aconn);
+                if (!valid) break;
+                ASSERT(prob>=0.0 && prob<=1.0)
+                prob*=m_magnitude_logger.m_psingle;
+                ASSERT(!consts::float_nearly_zero(prob, 1e-14));
+                break;
+            case 2:
+                // TODO: don't need m_vac for doubles.
+                valid = m_exgen->draw_double(src_det, m_dst_det, m_occ, prob, helem, m_aconn);
+                if (!valid) break;
+                ASSERT(prob>=0.0 && prob<=1.0)
+                prob*= 1.0-m_magnitude_logger.m_psingle;
+                break;
+            default:
+                throw std::runtime_error("invalid excitation rank");
+        }
+
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs << "EXCITATION GENERATED" << std::endl;
+        std::cout << consts::verb << "excitation rank:         " << nexcit << std::endl;
+        std::cout << consts::verb << "is valid:                " << string_utils::yn(valid) << std::endl;
+#endif
+
+        if (!valid) continue;
+        ASSERT(!consts::float_is_zero(prob))
+        auto delta = -(*weight / (defs::ham_comp_t) nattempt) * tau() * helem /prob;
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << "probability:             " << prob << std::endl;
+        std::cout << consts::verb << "H matrix element:        " << helem << std::endl;
+        std::cout << consts::verb << "continuous delta:        " << delta << std::endl;
+#endif
+        delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag);
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << "delta post-thresh:       " << delta << std::endl;
+#endif
+
+        ASSERT(consts::floats_equal(delta, -(*weight / (defs::ham_comp_t) nattempt) * tau() * helem /prob)
+               || consts::float_is_zero(delta) || consts::float_is_zero(delta-m_min_spawn_mag))
+
+        if (consts::float_is_zero(delta)) continue;
+        ASSERT(m_dst_det.nsetbit()==src_det.nsetbit())
+
+        spawn(spawn_list, m_dst_det, delta, flag_initiator, flag_deterministic);
+        m_magnitude_logger.log(nexcit, helem, prob);
+    }
+}
+
+void StochasticPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
+                                    bool flag_deterministic, defs::ham_comp_t &delta_square_norm,
+                                    defs::ham_comp_t &delta_nw) {
+
+    delta_square_norm -= std::pow(std::abs(*weight), 2);
+    delta_nw -= std::abs(*weight);
+
+    if (flag_deterministic){
+        weight *= 1 - (*hdiag - m_shift) * tau();
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs << "DETERMINISTIC DEATH" << std::endl;
+        std::cout << consts::verb << "new weight:     " << *weight << std::endl;
+#endif
+    }
+    else {
+        // the probability that each unit walker will die
+        auto death_rate = (*hdiag - m_shift) * tau();
+        ASSERT(std::abs(death_rate) < 1)
+        weight = m_prng.stochastic_round(*weight, 1.0) * (1 - death_rate);
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs << "STOCHASTIC DEATH" << std::endl;
+        std::cout << consts::verb << "death rate:      " << death_rate << std::endl;
+        std::cout << consts::verb << "new weight:      " << *weight << std::endl;
+        std::cout << consts::verb << "all died:        " << string_utils::yn(consts::float_is_zero(*weight)) << std::endl;
+#endif
+    }
+
+    delta_square_norm += std::pow(std::abs(*weight), 2);
+    delta_nw += std::abs(*weight);
+}

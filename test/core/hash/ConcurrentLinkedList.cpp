@@ -8,6 +8,7 @@
 
 TEST(LinkedList, Test) {
     ConcurrentLinkedList<size_t> list;
+    ASSERT_TRUE(list.is_empty());
     const size_t n = 100;
 #pragma omp parallel for
     for (size_t i=0ul; i<n; ++i){

@@ -15,16 +15,24 @@ template<typename T>
 struct ConcurrentStack : ConcurrentLinkedList<T> {
 
     using ConcurrentLinkedList<T>::m_next;
+    using ConcurrentLinkedList<T>::m_last;
 
     bool pop(T &payload) {
-        ConcurrentLinkedListNode<T> *first_node = nullptr;
-#pragma omp atomic capture
+        CarrierNode<T> *first_node = nullptr;
+//#pragma omp atomic capture
         {
             first_node = m_next;
             m_next = first_node ? first_node->m_next : nullptr;
         }
-        if (first_node) payload = m_next->m_payload;
-        return first_node;
+        if (first_node) {
+            payload = first_node->m_payload;
+            delete first_node;
+            return true;
+        } else {
+            m_last=this;
+            ASSERT(!m_next)
+            return false;
+        }
     }
 
 };

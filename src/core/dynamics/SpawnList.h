@@ -36,6 +36,9 @@ public:
     size_t add(const size_t isegment, const DeterminantElement &determinant, const defs::wf_t &weight,
                bool flag_parent_initiator, bool flag_parent_deterministic){
         auto irow = List::push(isegment);
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << "reserved row of segment: " << irow << std::endl;
+#endif
         m_determinant(irow, isegment) = determinant;
         m_weight(irow, isegment) = weight;
         m_flags.m_parent_initiator(irow, isegment) = flag_parent_initiator;

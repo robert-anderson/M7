@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include "src/core/util/defs.h"
 
 template<typename T>
 struct CarrierNode;
@@ -29,6 +30,7 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
     ConcurrentLinkedListNode<T> *m_last = this;
 
     void delete_after(ConcurrentLinkedListNode<T> *node) {
+        ASSERT(node)
         auto tmp = node->m_next;
         if (!tmp) return;
         node->m_next = tmp->m_next;
@@ -36,8 +38,8 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
         delete tmp;
     }
 
-    bool is_empty(){
-        return m_next;
+    bool is_empty() const {
+        return !m_next;
     }
 
     void clear() {
@@ -52,6 +54,7 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
      * returns the node pointing to the appended node
      */
     ConcurrentLinkedListNode<T> *append(const T &payload) {
+        ASSERT((m_last==this) || !is_empty())
         ConcurrentLinkedListNode<T> *old_last_node;
         auto new_node = new CarrierNode<T>(payload);
 #pragma omp atomic capture
@@ -59,11 +62,13 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
             old_last_node = m_last;
             m_last = new_node;
         }
+        ASSERT(old_last_node)
         old_last_node->m_next = new_node;
+        ASSERT(!is_empty())
         return old_last_node;
     }
 
-    void print() {
+    void print() const {
         for (CarrierNode<size_t>* node = this->m_next; node; node = node->m_next)
             std::cout << node->m_payload << " ";
         std::cout << std::endl;
