@@ -145,6 +145,10 @@ public:
         (*this)(ielement) = v;
     }
 
+    T get(size_t ielement = 0){
+        return *(*this)(ielement);
+    }
+
     bool is_complex() const override { return consts::is_complex<T>(); }
 
     std::string to_string(size_t irow, size_t isegment, size_t ielement) override {

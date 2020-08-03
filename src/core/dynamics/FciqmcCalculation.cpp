@@ -17,6 +17,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
         m_wf(this) {
 
     if (mpi::i_am_root()) m_stats_file = std::unique_ptr<FciqmcStatsFile>(new FciqmcStatsFile(m_input));
+    m_parallel_stats_file = std::unique_ptr<ParallelizationStatsFile>(new ParallelizationStatsFile(m_input));
 
     if (input.exact_propagation) {
         m_prop = std::unique_ptr<ExactPropagator>(new ExactPropagator(this));
@@ -51,10 +52,14 @@ void FciqmcCalculation::execute() {
         m_timer.pause();
         //std::cout << "\nwriting stats..." << std::endl;
         write_iter_stats(icycle);
+        m_wf.write_iter_stats(m_stats_file.get());
     }
 }
 
 void FciqmcCalculation::write_iter_stats(size_t icycle) {
+    m_parallel_stats_file->m_cycle_number.write(icycle);
+    m_parallel_stats_file->m_synchronization_wait_time.write(0.0);
+    m_parallel_stats_file->flush();
     if (!mpi::i_am_root()) return;
     m_stats_file->m_cycle_number.write(icycle);
     m_stats_file->m_iter_time.write(m_timer.lap());

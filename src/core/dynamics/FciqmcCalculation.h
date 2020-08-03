@@ -10,6 +10,7 @@
 #include <src/core/util/Timer.h>
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 #include "src/core/io/FciqmcStatsFile.h"
+#include "src/core/io/ParallelizationStatsFile.h"
 #include "src/core/io/Options.h"
 #include "src/core/fermion/DecodedDeterminant.h"
 #include "Propagator.h"
@@ -22,6 +23,8 @@ public:
     Epoch m_semi_stochastic;
     RankAllocator<DeterminantElement> m_rank_allocator;
     std::unique_ptr<FciqmcStatsFile> m_stats_file = nullptr;
+    std::unique_ptr<ParallelizationStatsFile> m_parallel_stats_file = nullptr;
+
     std::unique_ptr<Hamiltonian> m_ham;
     Determinant m_reference;
     std::unique_ptr<Propagator> m_prop;

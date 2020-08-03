@@ -15,6 +15,13 @@
 #include <cstdlib>
 #include "consts.h"
 
+#ifndef NDEBUG
+#ifdef VERBOSE
+#define VERBOSE_DEBUGGING
+#endif
+#endif
+
+
 #ifdef NDEBUG
 #define	ASSERT(e) {}
 #else
@@ -61,7 +68,7 @@ namespace defs {
     typedef uint64_t data_t;
     constexpr size_t nbit_data = CHAR_BIT * sizeof(data_t);
     const size_t isym_1e = 2;
-    const size_t isym_2e = 8;
+    const size_t isym_2e = 4;
 
     // width of the cache line in bytes
     constexpr size_t cache_line_size = 64;

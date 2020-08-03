@@ -42,6 +42,14 @@ public:
     void spawn(SpawnList &spawn_list, const DeterminantElement &dst_det, const defs::wf_t &delta,
             bool flag_initiator, bool flag_deterministic) {
         auto irank = m_rank_allocator.get_rank(dst_det);
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs << "SENDING SPAWNED WALKER" << std::endl;
+        std::cout << consts::verb << "generated determinant:   " << m_dst_det.to_string() << std::endl;
+        std::cout << consts::verb << "destination rank:        " << irank << std::endl;
+        std::cout << consts::verb << "spawned weight:          " << delta << std::endl;
+        std::cout << consts::verb << "parent is initiator:     " << flag_initiator << std::endl;
+        std::cout << consts::verb << "parent is deterministic: " << flag_deterministic << std::endl;
+#endif
         spawn_list.add(irank, dst_det, delta, flag_initiator, flag_deterministic);
     }
 

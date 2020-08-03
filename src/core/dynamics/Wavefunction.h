@@ -6,9 +6,10 @@
 #define M7_WAVEFUNCTION_H
 
 
-#include <src/core/fermion/Determinant.h>
-#include <src/core/io/Options.h>
-#include <src/core/util/Timer.h>
+#include <src/core/io/ParallelizationStatsFile.h>
+#include "src/core/fermion/Determinant.h"
+#include "src/core/io/Options.h"
+#include "src/core/util/Timer.h"
 #include "WalkerList.h"
 #include "SpawnList.h"
 #include "Propagator.h"
@@ -37,6 +38,10 @@ class Wavefunction {
     Timer m_propagation_timer;
     Timer m_communication_timer;
     Timer m_annihilation_timer;
+
+    size_t nrow_free = 0ul;
+
+    ParallelizationStatsFile* parallel_stats_file();;
 
 public:
 

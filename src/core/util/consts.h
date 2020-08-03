@@ -157,6 +157,10 @@ namespace consts {
     const double sqrt2 = std::sqrt(2.0);
     const double invsqrt2 = 1.0/sqrt2;
 
+    // for debugging output
+    const std::string verb = "\t[VERBOSE]  ";
+    const std::string chevs = " >>> ";
+
 }
 
 

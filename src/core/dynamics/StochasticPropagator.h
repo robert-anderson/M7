@@ -49,6 +49,9 @@ public:
         m_occ.update(src_det);
         m_vac.update(src_det);
         size_t nattempt = get_nattempt(*weight);
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << "spawn attempts: " << nattempt << std::endl;
+#endif
         defs::prob_t prob;
         defs::ham_t helem;
         bool valid = false;
@@ -72,23 +75,31 @@ public:
                 default:
                     throw std::runtime_error("invalid excitation rank");
             }
+
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs << "EXCITATION GENERATED" << std::endl;
+            std::cout << consts::verb << "excitation rank:         " << nexcit << std::endl;
+            std::cout << consts::verb << "is valid:                " << valid << std::endl;
+#endif
+
             if (!valid) continue;
             ASSERT(!consts::float_is_zero(prob))
             auto delta = -(*weight / (defs::ham_comp_t) nattempt) * tau() * helem /prob;
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << "probability:             " << prob << std::endl;
+            std::cout << consts::verb << "H matrix element:        " << helem << std::endl;
+            std::cout << consts::verb << "continuous delta:        " << delta << std::endl;
+#endif
             delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag);
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << "delta post-thresh:       " << delta << std::endl;
+#endif
 
             ASSERT(consts::floats_equal(delta, -(*weight / (defs::ham_comp_t) nattempt) * tau() * helem /prob)
                     || consts::float_is_zero(delta) || consts::float_is_zero(delta-m_min_spawn_mag))
 
             if (consts::float_is_zero(delta)) continue;
             ASSERT(m_dst_det.nsetbit()==src_det.nsetbit())
-
-
-//             // verbose output
-//             std::cout << "attempt "<<(iattempt+1)<<"/"<<nattempt<<" "<<src_det.to_string()
-//                   << * " (" << consts::real(*weight) << ") -> " << m_dst_det.to_string()
-//                   << " " << consts::real(delta) << " prob: " << prob << " matel: "<< consts::real(helem) << std::endl;
-
 
             spawn(spawn_list, m_dst_det, delta, flag_initiator, flag_deterministic);
             m_magnitude_logger.log(nexcit, helem, prob);

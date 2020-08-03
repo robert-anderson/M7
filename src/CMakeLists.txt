@@ -21,12 +21,12 @@ target_include_directories(prof PRIVATE ${CMAKE_SOURCE_DIR}/external/CLI11/inclu
 target_compile_definitions(release PRIVATE NDEBUG=1)
 target_compile_options(release PRIVATE -O3)
 
+target_compile_definitions(debug PRIVATE VERBOSE=1)
+
 target_compile_definitions(prof PRIVATE NDEBUG=1)
 target_compile_options(prof PRIVATE -O2)
 target_compile_options(prof PRIVATE -pg)
 target_link_options(prof PRIVATE -pg)
-
-add_compile_definitions(VERBOSE=1)
 
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)

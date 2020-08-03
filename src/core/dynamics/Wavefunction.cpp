@@ -14,7 +14,8 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
                m_input.nwalker_target * m_input.walker_factor_initial),
         m_send("wavefunction outgoing spawn list", fciqmc->m_reference.nsite(), mpi::nrank()),
         m_recv("wavefunction incoming spawn list", fciqmc->m_reference.nsite(), 1),
-        m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference, m_input.reference_redefinition_thresh) {
+        m_reference(m_data, m_fciqmc->m_rank_allocator, fciqmc->m_reference, m_input.reference_redefinition_thresh){
+
     const auto nrow_walker = (size_t) (m_input.nwalker_target*m_input.walker_factor_initial);
     m_data.expand(nrow_walker);
     m_send.recv(&m_recv);
@@ -33,6 +34,7 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_ninitiator = 1;
         m_square_norm = std::pow(std::abs(ref_weight), 2);
         m_nwalker = std::abs(ref_weight);
+        m_nocc_det.local()++;
     } else {
         m_ninitiator = 0;
         m_nwalker = 0;
@@ -40,6 +42,15 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
 }
 
 void Wavefunction::update(const size_t &icycle) {
+
+    /*
+     * parallelization stats are written out on each node
+     */
+    parallel_stats_file()->m_walker_list_high_water_mark.write(m_data.high_water_mark(0));
+    parallel_stats_file()->m_walker_list_high_water_mark_fraction.write(m_data.high_water_mark(0)/(double)m_data.nrow_per_segment());
+
+    nrow_free = 0ul;
+
     m_nwalker.accumulate();
     ASSERT(m_nwalker.m_delta == 0.0)
     m_square_norm.accumulate();
@@ -93,11 +104,17 @@ void Wavefunction::propagate() {
 
     for (size_t irow = 0ul; irow < m_data.high_water_mark(0); ++irow) {
         if (m_data.row_empty(irow)) {
+            nrow_free++;
             continue;
         }
         auto weight = m_data.m_weight(irow);
         const auto det = m_data.m_determinant(irow);
 
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << "PARENT DETERMINANT" << std::endl;
+        std::cout << consts::verb << "bitstring: " << det.to_string() << std::endl;
+        std::cout << consts::verb << "weight:    " << *weight << std::endl;
+#endif
         //weight = m_prop->round(*weight);
 
         m_reference.log_candidate_weight(irow, std::abs(*weight));
@@ -146,11 +163,28 @@ void Wavefunction::propagate() {
         }
     }
     mpi::barrier(); m_propagation_timer.pause();
+
+    std::cout << nrow_free+m_nocc_det.local() << " " <<
+              parallel_stats_file()->m_walker_list_high_water_mark.get() << std::endl;
+    ASSERT(nrow_free+m_nocc_det.local()==parallel_stats_file()->m_walker_list_high_water_mark.get())
 }
 
 void Wavefunction::communicate() {
     mpi::barrier(); m_communication_timer.unpause();
+
+    const auto& hwm = m_send.high_water_mark();
+    auto tot_sent = std::accumulate(hwm.begin(), hwm.end(), 0);
+    parallel_stats_file()->m_nrow_sent.write(tot_sent);
+    auto max_sent_iter = std::max_element(hwm.begin(), hwm.end());
+    parallel_stats_file()->m_largest_nrow_sent.write(*max_sent_iter);
+    parallel_stats_file()->m_largest_send_list_filled_fraction.write(*max_sent_iter/(double)m_send.nrow_per_segment());
+    parallel_stats_file()->m_irank_largest_nrow_sent.write(std::distance(hwm.begin(), max_sent_iter));
+
     m_send.communicate();
+
+    parallel_stats_file()->m_nrow_recv.write(m_recv.high_water_mark(0));
+    parallel_stats_file()->m_nrow_recv.write(m_recv.high_water_mark(0)/(double)m_recv.nrow_per_segment());
+
     mpi::barrier(); m_communication_timer.pause();
 }
 
@@ -179,6 +213,7 @@ void Wavefunction::annihilate_row(const size_t &irow_recv) {
         m_data.m_flags.m_reference_connection(irow_main) = m_reference.is_connected(det);
         m_data.m_flags.m_deterministic(irow_main) = false;
         m_data.m_flags.m_initiator(irow_main) = false;
+        m_nocc_det.m_delta.local()++;
     }
     /*
      * if we have stochastically generated a connection between determinants in a deterministic
@@ -299,6 +334,8 @@ void Wavefunction::synchronize() {
      * method implemented therein.
      */
     m_reference.synchronize();
+
+    parallel_stats_file()->m_nrow_free_walker_list.write(nrow_free);
 }
 
 void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
@@ -316,4 +353,8 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
     stats_file->m_prop_time.write(m_propagation_timer.lap());
     stats_file->m_comm_time.write(m_communication_timer.lap());
     stats_file->m_anni_time.write(m_annihilation_timer.lap());
+}
+
+ParallelizationStatsFile *Wavefunction::parallel_stats_file() {
+    return m_fciqmc->m_parallel_stats_file.get();
 }

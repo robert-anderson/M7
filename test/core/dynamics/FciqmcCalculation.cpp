@@ -107,6 +107,30 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     }
 }
 
+
+TEST(FciqmcCalculation, SemiStochasticPropagation4Fold){
+    Options options;
+    options.fcidump_path = defs::assets_root+"/HF_DIRAC_4fold/FCIDUMP";
+    options.tau_initial = 0.01;
+    options.prng_seed = 13;
+    options.nwalker_target = 100000;
+    options.ncycle = 10000;
+    options.do_semistochastic = true;
+    options.ncycle_init_detsub = 3000;
+    FciqmcCalculation fciqmc_calculation(options);
+    fciqmc_calculation.execute();
+    if (mpi::i_am_root()) {
+        auto num = fciqmc_calculation.m_stats_file->m_ref_proj_energy_num.mean_std(options.ncycle / 2);
+        auto den = fciqmc_calculation.m_stats_file->m_ref_weight.mean_std(options.ncycle / 2);
+        auto energy_mean_std = stat_utils::quotient(num, den);
+        std::cout << std::setprecision(10) << energy_mean_std.first << std::endl;
+        ASSERT_TRUE(consts::floats_nearly_equal(
+            consts::real(energy_mean_std.first), -108.8113865756313, 1e-3));
+    }
+}
+
+
+
 TEST(FciqmcCalculation, StochasticPropagation4cLarge){
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     Options options;
