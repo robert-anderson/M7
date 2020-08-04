@@ -77,12 +77,7 @@ public:
         return m_magnitude_logger.m_tau;
     }
 
-    void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
-        m_magnitude_logger.synchronize(icycle);
-        if (icycle % m_input.shift_update_period) return;
-        m_variable_shift.update(icycle, nwalker >= m_input.nwalker_target);
-        if (m_variable_shift) m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / tau();
-    }
+    void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth);
 
     void write_iter_stats(FciqmcStatsFile* stats_file) {
         if (!mpi::i_am_root()) return;

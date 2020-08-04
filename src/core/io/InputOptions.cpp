@@ -28,6 +28,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_flag("-E,--exact_propagation", exact_propagation,
              "perform fully deterministic projector FCI");
 
+    add_set("-e,--excit_gen", excit_gen, {"pchb", "uniform"},
+             "excitation generator to use for stochastic connections");
+
     add_option("-i,--nwalker_initial", nwalker_initial,
                "sum of walker magnitudes with which to initialize the populations.");
 

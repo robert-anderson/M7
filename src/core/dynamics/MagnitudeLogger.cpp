@@ -15,10 +15,22 @@ void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
     if (nexcit == 1) {
         ++m_nsingle;
         tmp_hi_mag = std::abs(helem) / prob;
+#ifdef VERBOSE_DEBUGGING
+        if (m_tau*tmp_hi_mag>m_input.max_bloom) {
+            std::cout << consts::verb << consts::chevs << "MAX BLOOM EXCEEDED BY SINGLE EXCITATION" << std::endl;
+            std::cout << consts::verb << "weight transferred:     " << m_tau*tmp_hi_mag << std::endl;
+        }
+#endif
         if (tmp_hi_mag>m_hi_mag_single.local()) m_hi_mag_single = tmp_hi_mag;
     } else if (nexcit == 2) {
         ++m_ndouble;
         tmp_hi_mag = std::abs(helem) / prob;
+#ifdef VERBOSE_DEBUGGING
+        if (m_tau*tmp_hi_mag>m_input.max_bloom) {
+            std::cout << consts::verb << consts::chevs << "MAX BLOOM EXCEEDED BY DOUBLE EXCITATION" << std::endl;
+            std::cout << consts::verb << "weight transferred:     " << m_tau*tmp_hi_mag << std::endl;
+        }
+#endif
         if (tmp_hi_mag>m_hi_mag_double.local()) m_hi_mag_double = tmp_hi_mag;
     }
 }

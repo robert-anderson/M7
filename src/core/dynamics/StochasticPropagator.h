@@ -6,6 +6,7 @@
 #define M7_STOCHASTICPROPAGATOR_H
 
 #include <src/core/sample/PRNG.h>
+#include <src/core/sample/UniformSampler.h>
 #include <src/core/pchb/HeatBathSamplers.h>
 #include "Propagator.h"
 #include "FciqmcCalculation.h"
@@ -20,7 +21,13 @@ public:
     StochasticPropagator(FciqmcCalculation *fciqmc) :
             Propagator(fciqmc), m_min_spawn_mag(m_input.min_spawn_mag),
             m_prng(m_input.prng_seed, m_input.prng_ngen) {
-        m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(m_ham.get(), m_prng));
+        if (m_input.excit_gen=="pchb"){
+            m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(m_ham.get(), m_prng));
+        }
+        else if (m_input.excit_gen=="uniform"){
+            //m_exgen = std::unique_ptr<ExcitationGenerator>(new UniformSampler(m_ham.get(), m_prng));
+        }
+
     }
 
     template<typename T>

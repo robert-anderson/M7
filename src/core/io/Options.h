@@ -15,6 +15,7 @@ struct Options {
     std::string stats_path = "M7.stats";
     std::string parallel_stats_path = "M7.rank";
     bool exact_propagation = false;
+    std::string excit_gen = "pchb";
     double nwalker_initial = 1.0;
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;
@@ -33,7 +34,7 @@ struct Options {
     double min_excit_class_prob = 1e-3;
     size_t nenough_spawns_for_dynamic_tau = 1000;
     double shift_initial = 0.0;
-    double shift_damp = 1.0;
+    double shift_damp = 0.05;
     size_t shift_update_period = 1;
     size_t ncycle = ~0ul;
     bool do_semistochastic = false;

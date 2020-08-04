@@ -37,6 +37,14 @@ public:
         m_app.add_flag(cli_options, variable_to_bind, description);
     }
 
+    template<typename T>
+    void add_set(const std::string cli_options,
+                    T &variable_to_bind, const std::set<T>& set, const std::string description, bool required = false) {
+        auto opt = m_app.add_set(cli_options, variable_to_bind, set, description);
+        if (required) opt->required();
+        else opt->capture_default_str();
+    }
+
     static const std::string program_description;
 
 

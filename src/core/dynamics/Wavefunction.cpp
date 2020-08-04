@@ -52,16 +52,16 @@ void Wavefunction::update(const size_t &icycle) {
 
     m_nwalker.accumulate();
     ASSERT(m_nwalker.m_delta == 0.0)
-    ASSERT(consts::floats_nearly_equal(m_nwalker.reduced()/nwalker(), 1.0))
+    ASSERT(consts::floats_nearly_equal(m_nwalker.reduced()/nwalker_check(), 1.0))
     m_square_norm.accumulate();
     ASSERT(m_square_norm.m_delta == 0.0)
     //ASSERT(m_square_norm.reduced()==m_data.square_norm(0))
     m_ninitiator.accumulate();
     ASSERT(m_ninitiator.m_delta == 0.0)
-    ASSERT(m_ninitiator.reduced()==ninitiator())
+    ASSERT(m_ninitiator.reduced()==ninitiator_check())
     m_nocc_det.accumulate();
     ASSERT(m_nocc_det.m_delta == 0)
-    ASSERT(m_nocc_det.reduced()==nocc())
+    ASSERT(m_nocc_det.reduced()==nocc_check())
 
 #ifndef NDEBUG
     size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
@@ -105,7 +105,7 @@ void Wavefunction::propagate() {
     m_data.print();
 #endif
 #ifndef NDEBUG
-    auto chk_proj_energy = projected_energy(m_prop->m_ham.get(), m_reference);
+    auto chk_proj_energy = projected_energy_check(m_prop->m_ham.get(), m_reference);
 #endif
 
     mpi::barrier(); m_propagation_timer.unpause();

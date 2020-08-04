@@ -5,7 +5,6 @@
 #ifndef M7_WAVEFUNCTION_H
 #define M7_WAVEFUNCTION_H
 
-
 #include <src/core/io/ParallelizationStatsFile.h>
 #include "src/core/fermion/Determinant.h"
 #include "src/core/io/Options.h"
@@ -90,10 +89,15 @@ public:
 
     void write_iter_stats(FciqmcStatsFile *stats_file);
 
+    defs::ham_comp_t ref_proj_energy(){
+        return m_reference.proj_energy();
+    }
+
 
 private:
+    void annihilate_row(const size_t &irow_recv);
 
-    defs::ham_comp_t projected_energy(Hamiltonian *ham, const DeterminantElement &ref) {
+    defs::ham_comp_t projected_energy_check(Hamiltonian *ham, const DeterminantElement &ref) {
         // debug only
         Reducible<defs::ham_t> e;
         Reducible<defs::wf_t> norm;
@@ -108,7 +112,7 @@ private:
         return consts::real(e.reduced() / norm.reduced());
     }
 
-    defs::wf_comp_t nwalker() {
+    defs::wf_comp_t nwalker_check() {
         // debug only
         Reducible<defs::wf_comp_t> nw;
         for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
@@ -119,7 +123,7 @@ private:
         return nw.reduced();
     }
 
-    size_t nocc() {
+    size_t nocc_check() {
         // debug only
         Reducible<size_t> nocc;
         for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
@@ -129,7 +133,7 @@ private:
         return nocc.reduced();
     }
 
-    size_t ninitiator() {
+    size_t ninitiator_check() {
         // debug only
         Reducible<size_t> ninit;
         for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
@@ -139,8 +143,6 @@ private:
         ninit.mpi_sum();
         return ninit.reduced();
     }
-
-    void annihilate_row(const size_t &irow_recv);
 
 };
 
