@@ -75,7 +75,7 @@ void StochasticPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdia
     delta_square_norm -= std::pow(std::abs(*weight), 2);
     delta_nw -= std::abs(*weight);
 
-    if (1||flag_deterministic){
+    if (flag_deterministic){
         weight *= 1 - (*hdiag - m_shift) * tau();
 #ifdef VERBOSE_DEBUGGING
         std::cout << consts::verb << consts::chevs << "DETERMINISTIC DEATH" << std::endl;
