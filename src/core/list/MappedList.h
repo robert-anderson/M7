@@ -20,11 +20,18 @@ struct ListHashMap : public ConcurrentHashMap<T> {
         ConcurrentHashMap<T>(nbucket), m_list(list) {}
 
     T get_key(const size_t &key_index) const override {
+        ASSERT(key_index<m_list.high_water_mark(0))
         return m_list.key_field()(key_index);
     }
 
     void set_key(const size_t &key_index, const T &key) override {
+        ASSERT(key_index<m_list.high_water_mark(0))
         m_list.key_field()(key_index) = key;
+    }
+
+    void zero_key(const size_t &index) override {
+        m_list.zero_row(index, 0);
+        // just the key: m_list.key_field()(index).zero();
     }
 
     size_t hash(const T &key) const override {
@@ -85,6 +92,19 @@ public:
     size_t expand_push(const T &key) {
         return expand_push(key, 0, 1);
     }
+
+    size_t map_size() const {
+        // debugging only
+        return m_map.size();
+    }
+
+#if 0
+    size_t ntombstone() const {
+        // debugging only
+        return m_map.ntombstone();
+    }
+#endif
+
 };
 
 #endif //M7_MAPPEDLIST_H

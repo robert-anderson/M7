@@ -3,6 +3,8 @@
 //
 
 #include "utils.h"
+#include "src/core/table/BitsetField.h"
+
 
 size_t integer_utils::rectmap(const size_t &irow, const size_t &icol, const size_t &ncol) {
     // rectangular map

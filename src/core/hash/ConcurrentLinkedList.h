@@ -32,7 +32,9 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
     void delete_after(ConcurrentLinkedListNode<T> *node) {
         ASSERT(node)
         auto tmp = node->m_next;
-        if (!tmp) return;
+        if (!tmp) {
+            throw std::runtime_error("can't delete the next node since it does not exist");
+        }
         node->m_next = tmp->m_next;
         if (tmp==m_last) m_last = node;
         delete tmp;
@@ -65,13 +67,15 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
         ASSERT(old_last_node)
         old_last_node->m_next = new_node;
         ASSERT(!is_empty())
+        ASSERT(m_last!=this)
         return old_last_node;
     }
 
-    void print() const {
-        for (CarrierNode<size_t>* node = this->m_next; node; node = node->m_next)
-            std::cout << node->m_payload << " ";
-        std::cout << std::endl;
+    std::vector<T> to_vector() const {
+        std::vector<T> out;
+        for (CarrierNode<T>* node = this->m_next; node; node = node->m_next)
+            out.push_back(node->m_payload);
+        return out;
     }
 
     /*
@@ -79,7 +83,7 @@ struct ConcurrentLinkedList : ConcurrentLinkedListNode<T> {
      */
     size_t size() const {
         size_t n = 0ul;
-        for (CarrierNode<size_t>* node = this->m_next; node; node = node->m_next) ++n;
+        for (CarrierNode<T>* node = this->m_next; node; node = node->m_next) ++n;
         return n;
     }
 

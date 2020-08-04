@@ -44,8 +44,8 @@ class PerforableMappedList : public MappedList<T> {
 
 public:
 
-    PerforableMappedList(std::string name, Field_T& key_field, size_t nbucket):
-        MappedList<T>(name, key_field, nbucket) {}
+    PerforableMappedList(std::string name, Field_T &key_field, size_t nbucket) :
+            MappedList<T>(name, key_field, nbucket) {}
 
     size_t push(const T &key) override {
         size_t irow = ~0ul;
@@ -54,11 +54,11 @@ public:
             std::cout << consts::verb << consts::chevs << "POPPED AN EMPTY ROW FROM THE FREE STACK" << std::endl;
             std::cout << consts::verb << "free rows remaining:    " << m_free_rows.size() << std::endl;
 #endif
-        }
-        else {
+        } else {
             irow = List::push();
 #ifdef VERBOSE_DEBUGGING
-            std::cout << consts::verb << consts::chevs << "NO ROWS IN FREE STACK - PUSHING BACK THE HIGHWATER MARK" << std::endl;
+            std::cout << consts::verb << consts::chevs << "NO ROWS IN FREE STACK - PUSHING BACK THE HIGHWATER MARK"
+                      << std::endl;
 #endif
         }
         MappedList<T>::m_key_field(irow) = key;
@@ -66,33 +66,36 @@ public:
         return irow;
     }
 
-    void remove(const size_t &irow){
-        std::cout << m_free_rows.is_empty() << std::endl;
-        std::cout << m_free_rows.m_last << std::endl;
-        std::cout << m_free_rows.m_next << std::endl;
-        std::cout << &m_free_rows << std::endl;
+    void remove(const size_t &irow) {
+        ASSERT(!MappedList<T>::m_key_field(irow, 0).is_zero());
         m_free_rows.append(irow);
-        MappedList<T>::m_key_field(irow).zero();
         m_map.mark_for_delete(irow);
     }
 
-    void clear_tombstones(){
+#if 0
+    void clear_tombstones() {
         m_map.clear_tombstones();
     }
+#endif
 
-    size_t nzero_rows(size_t isegment=0) const {
+    size_t nzero_rows(size_t isegment = 0) const {
         // debugging only
-        size_t result=0ul;
-        for (size_t irow = 0ul; irow<MappedList<T>::high_water_mark(isegment); ++irow) {
+        size_t result = 0ul;
+        for (size_t irow = 0ul; irow < MappedList<T>::high_water_mark(isegment); ++irow) {
             result += MappedList<T>::m_key_field(irow, isegment).is_zero();
         }
         return result;
     }
 
-    size_t nrow_in_free_stack(size_t isegment=0) const {
+    size_t nrow_in_free_stack(size_t isegment = 0) const {
         // debugging only
-        m_free_rows.print();
         return m_free_rows.size();
+    }
+
+    void print() override {
+        Table::print();
+        std::cout << "Free Rows:" << utils::to_string(m_free_rows.to_vector()) << std::endl;
+        std::cout << "Mapped Rows:" << utils::to_string(m_map.to_vector()) << std::endl;
     }
 
 };

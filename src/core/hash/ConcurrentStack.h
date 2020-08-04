@@ -25,6 +25,7 @@ struct ConcurrentStack : ConcurrentLinkedList<T> {
             m_next = first_node ? first_node->m_next : nullptr;
         }
         if (first_node) {
+            if (m_last==first_node) m_last = this;
             payload = first_node->m_payload;
             delete first_node;
             return true;

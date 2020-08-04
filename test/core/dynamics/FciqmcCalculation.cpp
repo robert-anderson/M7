@@ -92,6 +92,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     options.tau_initial = 0.01;
     options.prng_seed = 13;
     options.nwalker_target = 100000;
+    //options.nwalker_initial = 100;
     options.ncycle = 10000;
     options.do_semistochastic = true;
     options.ncycle_init_detsub = 3000;

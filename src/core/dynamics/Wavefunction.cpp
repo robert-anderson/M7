@@ -99,6 +99,9 @@ void Wavefunction::propagate() {
      *      perform all the off-diagonal propagation (fill send table)
      *      update local weight in the diagonal cloning/death step
      */
+#ifdef VERBOSE_DEBUGGING
+    m_data.print();
+#endif
 
     mpi::barrier(); m_propagation_timer.unpause();
 
@@ -136,19 +139,29 @@ void Wavefunction::propagate() {
             std::cout << consts::verb << "is initiator:     " << flag_initiator << std::endl;
             std::cout << consts::verb << "weight:           " << *weight << std::endl;
 #endif
-            if (flag_initiator) m_ninitiator.m_delta--;
+            if (flag_initiator) {
+#ifdef VERBOSE_DEBUGGING
+                std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: DETERMINANT REMOVED" << std::endl;
+#endif
+                m_ninitiator.m_delta--;
+            }
             m_nocc_det.m_delta--;
             m_data.remove(irow);
             continue;
         }
 
         if (!flag_initiator && std::abs(*weight) >= m_input.nadd_initiator) {
-            // initiator status granted
+#ifdef VERBOSE_DEBUGGING
+            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS GRANTED" << std::endl;
+#endif
             flag_initiator = true;
             m_ninitiator.m_delta++;
         }
         /*
         else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
+#ifdef VERBOSE_DEBUGGING
+                std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: WEIGHT FELL BELOW THRESHOLD MAGNITUDE" << std::endl;
+#endif
             // initiator status revoked
             // flag_initiator = false;
             // delta_ninitiator--;
@@ -167,26 +180,29 @@ void Wavefunction::propagate() {
                          m_square_norm.m_delta, m_nwalker.m_delta);
 
         if (!flag_deterministic && consts::float_is_zero(*weight)) {
-            if (flag_initiator) m_ninitiator.m_delta--;
-            m_nocc_det.m_delta--;
-            m_data.remove(irow);
 #ifdef VERBOSE_DEBUGGING
             std::cout << consts::verb << consts::chevs << "ALL WALKERS DIED: REMOVING DETERMINANT FROM LIST" << std::endl;
 #endif
+            if (flag_initiator) m_ninitiator.m_delta--;
+            m_nocc_det.m_delta--;
+            m_data.remove(irow);
         }
     }
     mpi::barrier(); m_propagation_timer.pause();
 
-    m_data.clear_tombstones();
-
 #ifdef VERBOSE_DEBUGGING
     std::cout << consts::verb << consts::chevs << "END OF PROPAGATION LOOP CHECKS" << std::endl;
     std::cout << consts::verb << "free rows found in walker list:    " << nrow_free << std::endl;
+    std::cout << consts::verb << "free rows after propagation:       " << m_data.nzero_rows() << std::endl;
     std::cout << consts::verb << "occupied determinants before loop: " << m_nocc_det.local() << std::endl;
+    std::cout << consts::verb << "delta in occupied determinants:    " << m_nocc_det.m_delta.local() << std::endl;
+    std::cout << consts::verb << "map size:                          " << m_data.map_size() << std::endl;
     std::cout << consts::verb << "high water mark:                   " << m_data.high_water_mark(0) << std::endl;
 #endif
 
 #ifndef NDEBUG
+    ASSERT(nrow_free-m_nocc_det.m_delta.local()==m_data.nzero_rows())
+
     auto chk_hwm = nrow_free+m_nocc_det.local();
     if (chk_hwm!=m_data.high_water_mark(0)) {
         m_data.print();
@@ -194,6 +210,7 @@ void Wavefunction::propagate() {
         std::cout << "free rows in walker list " << chk_nrow_in_free_stack << std::endl;
     }
     ASSERT(chk_hwm==m_data.high_water_mark(0))
+    ASSERT(chk_hwm-m_data.nzero_rows()==m_data.map_size())
 #endif
 }
 
@@ -289,7 +306,9 @@ void Wavefunction::annihilate() {
         annihilate_row(irow_recv);
     }
     mpi::barrier(); m_annihilation_timer.pause();
+#if 0
     m_data.clear_tombstones();
+#endif
 }
 
 void Wavefunction::synchronize() {

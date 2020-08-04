@@ -61,7 +61,7 @@ public:
 
     void update_last_field();
 
-    void print();
+    virtual void print();
 
     const size_t &nrow_per_segment() const;
 

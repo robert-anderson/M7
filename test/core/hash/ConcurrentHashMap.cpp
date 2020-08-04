@@ -21,6 +21,10 @@ TEST(ConcurrentHashMap, Test) {
             m_keys[index] = key;
         }
 
+        void zero_key(const size_t &index) override {
+            m_keys[index] = 0;
+        }
+
         size_t hash(const size_t &key) const override {
             return ((key*123ul)<<1ul)^124576781232133ul ;
         }
@@ -47,12 +51,7 @@ TEST(ConcurrentHashMap, Test) {
 
     map.mark_for_delete(6);
     map.mark_for_delete(1);
-    ASSERT_EQ(map.size(), 4);
-    map.clear_tombstones();
     ASSERT_EQ(map.size(), 2);
-
-    map.insert(35, 1);
-    ASSERT_EQ(map.size(), 3);
 }
 
 
