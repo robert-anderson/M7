@@ -52,9 +52,15 @@ int Element::cmp(const Element &rhs) const {
     return std::memcmp(m_begin, rhs.m_begin, m_field->m_element_size);
 }
 
+Element::Element(const Element& rhs): Element(rhs.field(), rhs.begin()){
+    *this=rhs;
+}
+
 Element &Element::operator=(const Element &rhs) {
-    ASSERT(compatible_with(rhs));
-    std::memcpy(m_begin, rhs.m_begin, size());
+    if (&rhs != this) {
+        ASSERT(compatible_with(rhs));
+        std::memcpy(m_begin, rhs.m_begin, size());
+    }
     return *this;
 }
 
@@ -84,7 +90,7 @@ bool Element::is_zero() const {
     return memcmp(m_begin, zero.data(), m_field->m_element_size);
 }
 
-const Field *Element::field() const { return m_field; }
+Field *Element::field() const { return m_field; }
 
 bool Element::is_complex() const { return m_field->is_complex(); }
 

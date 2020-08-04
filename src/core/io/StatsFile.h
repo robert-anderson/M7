@@ -34,11 +34,13 @@ public:
 
     const size_t &fp_precision() const { return dynamic_cast<StatsField<T> *>(m_field)->m_fp_precision; }
 
+    /*
     StatsElement<T> &operator=(const NumericElement<T> &v) override {
         if (!m_field->is_allocated()) m_field->expand_table(1);
         NumericElement<T>::operator=(v);
         return *this;
     }
+     */
 
     std::string to_string() override {
         const T v = **this;

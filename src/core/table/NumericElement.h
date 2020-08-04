@@ -37,11 +37,6 @@ public:
         return *this;
     }
 
-    virtual NumericElement<T> &operator=(const NumericElement<T> &v) {
-        std::memcpy(m_begin, v.m_begin, sizeof(T));
-        return *this;
-    }
-
     bool operator==(const T &v) const { return *((T *) m_begin) == v; }
 
     bool operator==(const NumericElement<T> &other) const {
