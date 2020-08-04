@@ -30,7 +30,7 @@ struct Options {
     size_t load_balance_period = 10;
     double tau_initial = 0.05;
     bool dynamic_tau = true;
-    double min_excit_class_prob = 1e-5;
+    double min_excit_class_prob = 1e-3;
     size_t nenough_spawns_for_dynamic_tau = 1000;
     double shift_initial = 0.0;
     double shift_damp = 1.0;

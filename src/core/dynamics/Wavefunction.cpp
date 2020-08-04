@@ -42,7 +42,6 @@ Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
 }
 
 void Wavefunction::update(const size_t &icycle) {
-
     /*
      * parallelization stats are written out on each node
      */
@@ -53,13 +52,16 @@ void Wavefunction::update(const size_t &icycle) {
 
     m_nwalker.accumulate();
     ASSERT(m_nwalker.m_delta == 0.0)
+    ASSERT(consts::floats_nearly_equal(m_nwalker.reduced()/nwalker(), 1.0))
     m_square_norm.accumulate();
     ASSERT(m_square_norm.m_delta == 0.0)
     //ASSERT(m_square_norm.reduced()==m_data.square_norm(0))
     m_ninitiator.accumulate();
     ASSERT(m_ninitiator.m_delta == 0.0)
+    ASSERT(m_ninitiator.reduced()==ninitiator())
     m_nocc_det.accumulate();
     ASSERT(m_nocc_det.m_delta == 0)
+    ASSERT(m_nocc_det.reduced()==nocc())
 
 #ifndef NDEBUG
     size_t ninitiator_verify = m_data.verify_ninitiator(m_input.nadd_initiator);
@@ -101,6 +103,9 @@ void Wavefunction::propagate() {
      */
 #ifdef VERBOSE_DEBUGGING
     m_data.print();
+#endif
+#ifndef NDEBUG
+    auto chk_proj_energy = projected_energy(m_prop->m_ham.get(), m_reference);
 #endif
 
     mpi::barrier(); m_propagation_timer.unpause();
@@ -190,6 +195,17 @@ void Wavefunction::propagate() {
     }
     mpi::barrier(); m_propagation_timer.pause();
 
+    /*
+     * the numerator of the reference projected energy Rayleigh quotient is treated like a
+     * delta variable, but is an instantaneous principal variable determined by the pre-
+     * propagation walker distribution. This also enables the instantaneous Rayleigh quotient
+     * to be computed. This is a pure convenience to aid a "quick look" at the energy estimator
+     * in the stats file - the numerator and denominator should be independently analyzed to
+     * obtain the estimate. All of this is handled in the Reference class, so defer to the
+     * method implemented therein.
+     */
+    m_reference.synchronize();
+
 #ifdef VERBOSE_DEBUGGING
     std::cout << consts::verb << consts::chevs << "END OF PROPAGATION LOOP CHECKS" << std::endl;
     std::cout << consts::verb << "free rows found in walker list:    " << nrow_free << std::endl;
@@ -211,6 +227,7 @@ void Wavefunction::propagate() {
     }
     ASSERT(chk_hwm==m_data.high_water_mark(0))
     ASSERT(chk_hwm-m_data.nzero_rows()==m_data.map_size())
+    ASSERT(consts::floats_equal(chk_proj_energy, m_reference.proj_energy()))
 #endif
 }
 
@@ -396,17 +413,6 @@ void Wavefunction::synchronize() {
      * the present value
      */
     m_nwalker_growth_rate = 1 + m_nwalker.m_delta.reduced() / m_nwalker.reduced();
-
-    /*
-     * the numerator of the reference projected energy Rayleigh quotient is treated like a
-     * delta variable, but is an instantaneous principal variable determined by the pre-
-     * propagation walker distribution. This also enables the instantaneous Rayleigh quotient
-     * to be computed. This is a pure convenience to aid a "quick look" at the energy estimator
-     * in the stats file - the numerator and denominator should be independently analyzed to
-     * obtain the estimate. All of this is handled in the Reference class, so defer to the
-     * method implemented therein.
-     */
-    m_reference.synchronize();
 
     parallel_stats_file()->m_nrow_free_walker_list.write(nrow_free);
 }

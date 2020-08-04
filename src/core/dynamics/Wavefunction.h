@@ -41,7 +41,7 @@ class Wavefunction {
 
     size_t nrow_free = 0ul;
 
-    ParallelizationStatsFile* parallel_stats_file();;
+    ParallelizationStatsFile *parallel_stats_file();;
 
 public:
 
@@ -63,15 +63,15 @@ public:
 
     explicit Wavefunction(FciqmcCalculation *fciqmc);
 
-    ~Wavefunction(){
-        std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator)<< std::endl;
+    ~Wavefunction() {
+        std::cout << "# initiators: " << m_data.verify_ninitiator(m_input.nadd_initiator) << std::endl;
         m_data.report_top_weighted();
     }
 
     /**
      * Effect arithmetic updates on member variables (no communication)
      */
-    void update(const size_t& icycle);
+    void update(const size_t &icycle);
 
     void propagate();
 
@@ -88,10 +88,60 @@ public:
      */
     void synchronize();
 
-    void write_iter_stats(FciqmcStatsFile* stats_file);
+    void write_iter_stats(FciqmcStatsFile *stats_file);
+
 
 private:
+
+    defs::ham_comp_t projected_energy(Hamiltonian *ham, const DeterminantElement &ref) {
+        // debug only
+        Reducible<defs::ham_t> e;
+        Reducible<defs::wf_t> norm;
+        for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
+            if (m_data.row_empty(i)) continue;
+            auto det = m_data.m_determinant(i);
+            if (det == ref) norm = *m_data.m_weight(i);
+            e += *m_data.m_weight(i) * ham->get_element(ref, m_data.m_determinant(i));
+        }
+        e.mpi_sum();
+        norm.mpi_sum();
+        return consts::real(e.reduced() / norm.reduced());
+    }
+
+    defs::wf_comp_t nwalker() {
+        // debug only
+        Reducible<defs::wf_comp_t> nw;
+        for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
+            if (m_data.row_empty(i)) continue;
+            nw += std::abs(*m_data.m_weight(i));
+        }
+        nw.mpi_sum();
+        return nw.reduced();
+    }
+
+    size_t nocc() {
+        // debug only
+        Reducible<size_t> nocc;
+        for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
+            nocc+=(size_t)!m_data.row_empty(i);
+        }
+        nocc.mpi_sum();
+        return nocc.reduced();
+    }
+
+    size_t ninitiator() {
+        // debug only
+        Reducible<size_t> ninit;
+        for (size_t i = 0ul; i < m_data.high_water_mark(0); ++i) {
+            if (m_data.row_empty(i)) continue;
+            ninit+=(size_t)m_data.m_flags.m_initiator(i);
+        }
+        ninit.mpi_sum();
+        return ninit.reduced();
+    }
+
     void annihilate_row(const size_t &irow_recv);
+
 };
 
 
