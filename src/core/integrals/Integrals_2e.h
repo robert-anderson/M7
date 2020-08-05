@@ -169,7 +169,7 @@ public:
     }
 
 private:
-    size_t nelem(const size_t &norb) {
+    static inline size_t nelem(const size_t &norb) {
         static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8, "Invalid symmetry parameter specified.");
         switch (isym) {
             case 1 :
@@ -181,9 +181,10 @@ private:
             case 8 :
                 return trig(0, trig(0, norb));
         }
+        return ~0ul;
     }
 
-    inline size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+    static inline size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
         if (isym == 1) {
             return 0;
         } else if (isym == 2) {
@@ -204,6 +205,7 @@ private:
                 else return (trig(j, i) <= trig(l, k)) ? 9 : 10;
             }
         }
+        return ~0ul;
     }
 };
 
