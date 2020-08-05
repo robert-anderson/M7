@@ -31,8 +31,7 @@ public:
     MagnitudeLogger(const Options &input, defs::prob_t m_psingle);
 
     MagnitudeLogger(const Options &input, size_t nsite, size_t nelec):
-    MagnitudeLogger(input,0.0)
-    //MagnitudeLogger(input,1/(integer_utils::combinatorial(2*nsite-nelec, 2)/double(2*nsite-nelec)+1))
+    MagnitudeLogger(input,1/(integer_utils::combinatorial(2*nsite-nelec, 2)/double(2*nsite-nelec)+1))
     {}
 
     void log(size_t nexcit, defs::ham_t helem, defs::prob_t prob);

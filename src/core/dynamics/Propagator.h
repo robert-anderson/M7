@@ -77,7 +77,7 @@ public:
         return m_magnitude_logger.m_tau;
     }
 
-    void update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth);
+    void update(const size_t& icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth);
 
     void write_iter_stats(FciqmcStatsFile* stats_file) {
         if (!mpi::i_am_root()) return;

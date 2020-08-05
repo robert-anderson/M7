@@ -2,6 +2,8 @@
 // Created by Robert John Anderson on 2020-02-20.
 //
 
+#include <omp.h>
+#include <src/core/parallel/MPIWrapper.h>
 #include "PRNG.h"
 
 PRNG::PRNG(const size_t &seed, const size_t &block_size) :
@@ -11,10 +13,11 @@ PRNG::PRNG(const size_t &seed, const size_t &block_size) :
 }
 
 void PRNG::refresh() {
-    std::mt19937 mt19937(m_seed + m_data.back());
+    std::mt19937 mt19937(m_seed+(mpi::irank()+1)*m_nrefresh);
     std::uniform_int_distribution<uint32_t> dist(mt19937.min(), mt19937.max());
     std::generate(m_data.begin(), m_data.end(), [&]() { return dist(mt19937); });
     m_i = 0;
+    m_nrefresh++;
 }
 
 uint32_t PRNG::draw_uint() {

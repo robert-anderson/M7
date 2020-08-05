@@ -79,11 +79,13 @@ public:
             defs::inds inds(4);
             T v;
             while (next(inds, v)) {
-                if (((inds[0]<m_nspatorb)!=(inds[1]<m_nspatorb)) ||
-                    ((inds[2]<m_nspatorb)!=(inds[3]<m_nspatorb))){
-                    // spin non-conserving example found
-                    m_spin_conserving = false;
-                    break;
+                if (!consts::float_is_zero(std::abs(v))) {
+                    if (((inds[0] < m_nspatorb) != (inds[1] < m_nspatorb)) ||
+                        ((inds[2] < m_nspatorb) != (inds[3] < m_nspatorb))) {
+                        // spin non-conserving example found
+                        m_spin_conserving = false;
+                        break;
+                    }
                 }
             }
             SparseArrayFileReader<T>::reset(); // go back to beginning of entries

@@ -16,6 +16,7 @@ class PRNG {
     U m_data;
     size_t m_i;
     const size_t m_seed;
+    size_t m_nrefresh = 0;
 public:
     PRNG(const size_t &seed, const size_t &block_size);
 

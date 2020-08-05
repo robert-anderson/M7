@@ -9,7 +9,7 @@
 
 struct Options {
     std::string fcidump_path = "FCIDUMP";
-    std::string initial_reference_det = "";
+    std::string initial_reference_det;
     double reference_redefinition_thresh = 2.0;
     bool fcidump_spin_major = false;
     std::string stats_path = "M7.stats";
@@ -21,7 +21,7 @@ struct Options {
     double nadd_initiator = 3.0;
     double max_bloom = 1.0;
     size_t prng_seed = 12;
-    size_t prng_ngen = 1000;
+    size_t prng_ngen = 10000;
     size_t ndet_semistoch = 0;
     size_t spin_restrict = 0;
     double walker_factor_initial = 1.0;

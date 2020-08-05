@@ -91,12 +91,12 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
     options.tau_initial = 0.24923054538193248;
     options.prng_seed = 13;
-    options.nwalker_target = 100000;
+    options.nwalker_target = 1000000;
     options.nwalker_initial = 100;
     options.ncycle = 10000;
     //options.exact_propagation = 1;
-    //options.do_semistochastic = true;
-    options.ncycle_init_detsub = 3000;
+    options.do_semistochastic = true;
+    options.ncycle_init_detsub = 1000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
 //    if (mpi::i_am_root()) {
@@ -113,10 +113,13 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
 TEST(FciqmcCalculation, SemiStochasticPropagation4Fold){
     Options options;
     options.fcidump_path = defs::assets_root+"/HF_DIRAC_4fold/FCIDUMP";
+    options.shift_initial = 0.2;
+    options.fcidump_spin_major = 1;
     options.tau_initial = 0.01;
     options.prng_seed = 13;
     options.nwalker_target = 100000;
-    options.ncycle = 10000;
+    options.nwalker_initial = 100;
+    options.ncycle = 50000;
     options.do_semistochastic = true;
     options.ncycle_init_detsub = 3000;
     FciqmcCalculation fciqmc_calculation(options);

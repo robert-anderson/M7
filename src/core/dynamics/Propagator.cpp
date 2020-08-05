@@ -17,7 +17,7 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
     m_shift = m_input.shift_initial;
 }
 
-void Propagator::update(const size_t icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
+void Propagator::update(const size_t& icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
     m_magnitude_logger.synchronize(icycle);
     if (icycle % m_input.shift_update_period) return;
     if (m_variable_shift.update(icycle, nwalker >= m_input.nwalker_target)) {

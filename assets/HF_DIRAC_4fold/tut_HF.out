@@ -181,7 +181,7 @@ Execution time and host
 -----------------------
 
  
-     Date and time (Linux)  : Sun Aug  2 16:54:24 2020
+     Date and time (Linux)  : Wed Aug  5 11:58:51 2020
      Host name              : not found                               
 
 
@@ -204,7 +204,7 @@ Contents of the input file
 .CI PROGRAM                                                                                         
 GASCIP                                                                                              
 !LUCIAREL                                                                                           
-.FCIDUMP                                                                                            
+!.FCIDUMP                                                                                           
 .CIROOTS                                                                                            
  0  1                                                                                               
 .MAX CI                                                                                             
@@ -762,155 +762,155 @@ Total no. of orbitals           (NORB):    38
              Improved by an estimate of the electronic screening (Slater's rules).
 
 
-########## START ITERATION NO.   1 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   1 ##########   Wed Aug  5 11:58:51 2020
 
 
 => Calculating sum of orbital energies
-It.    1    -47.79626066133      0.00D+00  0.00D+00  0.00D+00               0.00800000s   Scr. nuclei    Sun Aug  2
+It.    1    -47.79626066133      0.00D+00  0.00D+00  0.00D+00               0.00800000s   Scr. nuclei    Wed Aug  5
 
-########## START ITERATION NO.   2 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   2 ##########   Wed Aug  5 11:58:51 2020
 
 
 * GETGAB: label "GABAO1XX" not found; calling GABGEN.
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
 SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200000s
-SOfock:SL  1.00D-12    0.00%    3.24%    0.00%    0.00%   0.06800000s
+SOfock:SL  1.00D-12    0.00%    3.24%    0.00%    0.00%   0.07200000s
 >>> Total wall time: 0.00000000s
->>> Total CPU time : 0.10800000s
+>>> Total CPU time : 0.11200000s
 
-########## END ITERATION NO.   2 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   2 ##########   Wed Aug  5 11:58:51 2020
 
-It.    2    -99.96323065634      5.22D+01  2.12D+00  1.03D+00               0.10800000s   LL SL          Sun Aug  2
+It.    2    -99.96323065634      5.22D+01  2.12D+00  1.03D+00               0.11200000s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.   3 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   3 ##########   Wed Aug  5 11:58:51 2020
 
     3 *** Differential density matrix. DCOVLP     = 0.7853
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01600000s
-SOfock:SL  1.00D-12    0.00%    3.65%    0.00%    0.00%   0.06800000s
->>> Total wall time: 0.00000000s
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200001s
+SOfock:SL  1.00D-12    0.00%    3.65%    0.00%    0.00%   0.07200000s
+>>> Total wall time: 1.00000000s
 >>> Total CPU time : 0.08800000s
 
-########## END ITERATION NO.   3 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   3 ##########   Wed Aug  5 11:58:51 2020
 
-It.    3    -100.0691449175      1.06D-01 -7.69D-01  5.28D-01   DIIS   2    0.08800000s   LL SL          Sun Aug  2
+It.    3    -100.0691449175      1.06D-01 -7.69D-01  5.28D-01   DIIS   2    0.08800000s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.   4 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   4 ##########   Wed Aug  5 11:58:52 2020
 
     4 *** Differential density matrix. DCOVLP     = 1.0572
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200001s
-SOfock:SL  1.00D-12    0.00%    4.27%    0.00%    0.00%   0.06799999s
->>> Total wall time: 0.00000000s
->>> Total CPU time : 0.08400001s
-
-########## END ITERATION NO.   4 ##########   Sun Aug  2 16:54:24 2020
-
-It.    4    -100.1103721701      4.12D-02  2.89D-01  3.48D-02   DIIS   3    0.08400001s   LL SL          Sun Aug  2
-
-########## START ITERATION NO.   5 ##########   Sun Aug  2 16:54:24 2020
-
-    5 *** Differential density matrix. DCOVLP     = 0.9983
-SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
 SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01199999s
-SOfock:SL  1.00D-12    0.00%    5.31%    0.00%    0.00%   0.06799999s
+SOfock:SL  1.00D-12    0.00%    4.27%    0.00%    0.00%   0.06800002s
 >>> Total wall time: 0.00000000s
 >>> Total CPU time : 0.07999998s
 
-########## END ITERATION NO.   5 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   4 ##########   Wed Aug  5 11:58:52 2020
 
-It.    5    -100.1106289185      2.57D-04 -1.21D-02  3.14D-03   DIIS   4    0.07999998s   LL SL          Sun Aug  2
+It.    4    -100.1103721701      4.12D-02  2.89D-01  3.48D-02   DIIS   3    0.07999998s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.   6 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   5 ##########   Wed Aug  5 11:58:52 2020
+
+    5 *** Differential density matrix. DCOVLP     = 0.9983
+SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200002s
+SOfock:SL  1.00D-12    0.00%    5.31%    0.00%    0.00%   0.06799999s
+>>> Total wall time: 0.00000000s
+>>> Total CPU time : 0.08400002s
+
+########## END ITERATION NO.   5 ##########   Wed Aug  5 11:58:52 2020
+
+It.    5    -100.1106289185      2.57D-04 -1.21D-02  3.14D-03   DIIS   4    0.08400002s   LL SL          Wed Aug  5
+
+########## START ITERATION NO.   6 ##########   Wed Aug  5 11:58:52 2020
 
     6 *** Differential density matrix. DCOVLP     = 1.0003
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
 SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01600000s
-SOfock:SL  1.00D-12    0.00%    7.42%    0.00%    0.00%   0.06000000s
+SOfock:SL  1.00D-12    0.00%    7.42%    0.00%    0.00%   0.06799999s
 >>> Total wall time: 0.00000000s
->>> Total CPU time : 0.08000001s
+>>> Total CPU time : 0.08399999s
 
-########## END ITERATION NO.   6 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   6 ##########   Wed Aug  5 11:58:52 2020
 
-It.    6    -100.1106350884      6.17D-06  4.63D-04  9.24D-04   DIIS   5    0.08000001s   LL SL          Sun Aug  2
+It.    6    -100.1106350884      6.17D-06  4.63D-04  9.24D-04   DIIS   5    0.08399999s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.   7 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   7 ##########   Wed Aug  5 11:58:52 2020
 
     7 *** Differential density matrix. DCOVLP     = 1.0000
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01199999s
-SOfock:SL  1.00D-12    0.00%    8.87%    0.00%    0.00%   0.05199999s
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01600003s
+SOfock:SL  1.00D-12    0.00%    8.87%    0.00%    0.00%   0.06399995s
 >>> Total wall time: 0.00000000s
->>> Total CPU time : 0.06399998s
+>>> Total CPU time : 0.08000004s
 
-########## END ITERATION NO.   7 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   7 ##########   Wed Aug  5 11:58:52 2020
 
-It.    7    -100.1106355412      4.53D-07 -1.87D-04  1.05D-04   DIIS   6    0.06399998s   LL SL          Sun Aug  2
+It.    7    -100.1106355412      4.53D-07 -1.87D-04  1.05D-04   DIIS   6    0.08000004s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.   8 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   8 ##########   Wed Aug  5 11:58:52 2020
 
     8 *** Differential density matrix. DCOVLP     = 1.0000
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
 SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200002s
 SOfock:SL  1.00D-12    0.00%   10.42%    0.00%    0.00%   0.05199999s
 >>> Total wall time: 0.00000000s
->>> Total CPU time : 0.06400001s
+>>> Total CPU time : 0.06799996s
 
-########## END ITERATION NO.   8 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   8 ##########   Wed Aug  5 11:58:52 2020
 
-It.    8    -100.1106355451      3.88D-09 -2.12D-05  1.53D-05   DIIS   7    0.06400001s   LL SL          Sun Aug  2
+It.    8    -100.1106355451      3.88D-09 -2.12D-05  1.53D-05   DIIS   7    0.06799996s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.   9 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.   9 ##########   Wed Aug  5 11:58:52 2020
 
     9 *** Differential density matrix. DCOVLP     = 1.0000
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200002s
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.00800002s
 SOfock:SL  1.00D-12    0.00%   14.43%    0.00%    0.03%   0.05199999s
 >>> Total wall time: 0.00000000s
 >>> Total CPU time : 0.06400001s
 
-########## END ITERATION NO.   9 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.   9 ##########   Wed Aug  5 11:58:52 2020
 
-It.    9    -100.1106355452      1.00D-10 -1.61D-06  3.69D-06   DIIS   8    0.06400001s   LL SL          Sun Aug  2
+It.    9    -100.1106355452      1.00D-10 -1.61D-06  3.69D-06   DIIS   8    0.06400001s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.  10 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.  10 ##########   Wed Aug  5 11:58:52 2020
 
    10 *** Differential density matrix. DCOVLP     = 1.0000
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01200002s
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.00800002s
 SOfock:SL  1.00D-12    0.00%   18.29%    0.00%    1.22%   0.05199999s
 >>> Total wall time: 0.00000000s
->>> Total CPU time : 0.06399995s
+>>> Total CPU time : 0.06400001s
 
-########## END ITERATION NO.  10 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.  10 ##########   Wed Aug  5 11:58:52 2020
 
-It.   10    -100.1106355452      1.02D-11  5.41D-07  1.23D-06   DIIS   9    0.06399995s   LL SL          Sun Aug  2
+It.   10    -100.1106355452      1.02D-11  5.41D-07  1.23D-06   DIIS   9    0.06400001s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.  11 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.  11 ##########   Wed Aug  5 11:58:52 2020
 
    11 *** Differential density matrix. DCOVLP     = 1.0000
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01199996s
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.00799996s
 SOfock:SL  1.00D-12    0.00%   23.10%    0.00%    2.39%   0.05200005s
 >>> Total wall time: 0.00000000s
 >>> Total CPU time : 0.06400001s
 
-########## END ITERATION NO.  11 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.  11 ##########   Wed Aug  5 11:58:52 2020
 
-It.   11    -100.1106355452      8.24D-13 -3.16D-07  1.14D-07   DIIS   9    0.06400001s   LL SL          Sun Aug  2
+It.   11    -100.1106355452      8.24D-13 -3.16D-07  1.14D-07   DIIS   9    0.06400001s   LL SL          Wed Aug  5
 
-########## START ITERATION NO.  12 ##########   Sun Aug  2 16:54:24 2020
+########## START ITERATION NO.  12 ##########   Wed Aug  5 11:58:52 2020
 
    12 *** Differential density matrix. DCOVLP     = 1.0000
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.50%    0.00%    0.11%   0.01199996s
+SOfock:LL  1.00D-12    0.00%    0.50%    0.00%    0.11%   0.00799996s
 SOfock:SL  1.00D-12    0.00%   32.23%    0.00%    8.07%   0.05199999s
 >>> Total wall time: 0.00000000s
->>> Total CPU time : 0.06400001s
+>>> Total CPU time : 0.06000000s
 
-########## END ITERATION NO.  12 ##########   Sun Aug  2 16:54:24 2020
+########## END ITERATION NO.  12 ##########   Wed Aug  5 11:58:52 2020
 
-It.   12    -100.1106355452      5.40D-13 -2.33D-08  9.30D-09   DIIS   9    0.06400001s   LL SL          Sun Aug  2
+It.   12    -100.1106355452      5.40D-13 -2.33D-08  9.30D-09   DIIS   9    0.06000000s   LL SL          Wed Aug  5
 
 
                                    SCF - CYCLE
@@ -926,23 +926,23 @@ It.   12    -100.1106355452      5.40D-13 -2.33D-08  9.30D-09   DIIS   9    0.06
 --------------------------------------------------------------------------------------------------------------------------------
            Energy               ERGVAL    FCKVAL    EVCVAL      Conv.acc    CPU          Integrals   Time stamp
 --------------------------------------------------------------------------------------------------------------------------------
-It.    1    -47.79626066133      0.00D+00  0.00D+00  0.00D+00               0.00800000s   Scr. nuclei    Sun Aug  2
-It.    2    -99.96323065634      5.22D+01  2.12D+00  1.03D+00               0.10800000s   LL SL          Sun Aug  2
-It.    3    -100.0691449175      1.06D-01 -7.69D-01  5.28D-01   DIIS   2    0.08800000s   LL SL          Sun Aug  2
-It.    4    -100.1103721701      4.12D-02  2.89D-01  3.48D-02   DIIS   3    0.08400001s   LL SL          Sun Aug  2
-It.    5    -100.1106289185      2.57D-04 -1.21D-02  3.14D-03   DIIS   4    0.07999998s   LL SL          Sun Aug  2
-It.    6    -100.1106350884      6.17D-06  4.63D-04  9.24D-04   DIIS   5    0.08000001s   LL SL          Sun Aug  2
-It.    7    -100.1106355412      4.53D-07 -1.87D-04  1.05D-04   DIIS   6    0.06399998s   LL SL          Sun Aug  2
-It.    8    -100.1106355451      3.88D-09 -2.12D-05  1.53D-05   DIIS   7    0.06400001s   LL SL          Sun Aug  2
-It.    9    -100.1106355452      1.00D-10 -1.61D-06  3.69D-06   DIIS   8    0.06400001s   LL SL          Sun Aug  2
-It.   10    -100.1106355452      1.02D-11  5.41D-07  1.23D-06   DIIS   9    0.06399995s   LL SL          Sun Aug  2
-It.   11    -100.1106355452      8.24D-13 -3.16D-07  1.14D-07   DIIS   9    0.06400001s   LL SL          Sun Aug  2
-It.   12    -100.1106355452      5.40D-13 -2.33D-08  9.30D-09   DIIS   9    0.06400001s   LL SL          Sun Aug  2
+It.    1    -47.79626066133      0.00D+00  0.00D+00  0.00D+00               0.00800000s   Scr. nuclei    Wed Aug  5
+It.    2    -99.96323065634      5.22D+01  2.12D+00  1.03D+00               0.11200000s   LL SL          Wed Aug  5
+It.    3    -100.0691449175      1.06D-01 -7.69D-01  5.28D-01   DIIS   2    0.08800000s   LL SL          Wed Aug  5
+It.    4    -100.1103721701      4.12D-02  2.89D-01  3.48D-02   DIIS   3    0.07999998s   LL SL          Wed Aug  5
+It.    5    -100.1106289185      2.57D-04 -1.21D-02  3.14D-03   DIIS   4    0.08400002s   LL SL          Wed Aug  5
+It.    6    -100.1106350884      6.17D-06  4.63D-04  9.24D-04   DIIS   5    0.08399999s   LL SL          Wed Aug  5
+It.    7    -100.1106355412      4.53D-07 -1.87D-04  1.05D-04   DIIS   6    0.08000004s   LL SL          Wed Aug  5
+It.    8    -100.1106355451      3.88D-09 -2.12D-05  1.53D-05   DIIS   7    0.06799996s   LL SL          Wed Aug  5
+It.    9    -100.1106355452      1.00D-10 -1.61D-06  3.69D-06   DIIS   8    0.06400001s   LL SL          Wed Aug  5
+It.   10    -100.1106355452      1.02D-11  5.41D-07  1.23D-06   DIIS   9    0.06400001s   LL SL          Wed Aug  5
+It.   11    -100.1106355452      8.24D-13 -3.16D-07  1.14D-07   DIIS   9    0.06400001s   LL SL          Wed Aug  5
+It.   12    -100.1106355452      5.40D-13 -2.33D-08  9.30D-09   DIIS   9    0.06000000s   LL SL          Wed Aug  5
 --------------------------------------------------------------------------------------------------------------------------------
 * Convergence after   12 iterations.
 * Average elapsed time per iteration: 
       No 2-ints    :    0.00000000s
-      LL SL        :    0.00000000s
+      LL SL        :    0.09090909s
 
 
                                    TOTAL ENERGY
@@ -1048,8 +1048,30 @@ tot.num. of pos.erg shells:   13    5    1
 &&& Number of CI roots for this symmetry       1
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
+===========================================================================
+   Specification of GAS spaces in GASCIP calculation
+===========================================================================
+ * Inactive orbitals     :    1
+ * Active orbitals       :    9
+ * Active electrons      :    8
+ * GAS space setup for the   1 GAS space(s) :
+   - GAS space   1       :    9
+    (constraints: min/max active electrons after space :   8/  8)
 
- (RSETCI) Number of determinants:            1 (dimension            1)
+
+   Distribution of determinants wrt. MK
+      MK                   #dets    #A-str    #B-str
+   --------------------------------------------------------
+      -4                       9         1         9
+      -2                    3024        36        84
+       0                   15876       126       126
+       2                    3024        84        36
+       4                       9         9         1
+   --------------------------------------------------------
+     all                   21942       511       511
+===========================================================================
+
+ (RSETCI) Number of determinants:        21942 (dimension        21942)
 
  CPU (Wall) time for generation of determinants:  0.00000000s( 0.00000000s)
 
@@ -1072,39 +1094,209 @@ tot.num. of pos.erg shells:   13    5    1
    - Beginning task   4 of   5 after      0. seconds and      0. CPU-seconds
    - Beginning task   5 of   5 after      0. seconds and      0. CPU-seconds
  - Integral class 2 : (SS|??)
-   - Beginning task   6 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task   7 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task   8 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task   9 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task  10 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task  11 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task  12 of  13 after      1. seconds and      0. CPU-seconds
-   - Beginning task  13 of  13 after      1. seconds and      0. CPU-seconds
+   - Beginning task   6 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task   7 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task   8 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task   9 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task  10 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task  11 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task  12 of  13 after      0. seconds and      0. CPU-seconds
+   - Beginning task  13 of  13 after      0. seconds and      0. CPU-seconds
 
- - Starting symmetrization after           1.00 seconds
- - Finished symmetrization after           1.00 seconds
+ - Starting symmetrization after           0.00 seconds
+ - Finished symmetrization after           0.00 seconds
 
 
 ------ Timing report (in CPU seconds) of module  integral transformation      
 
- Time in  Computing+transform. integral       0.160 seconds
+ Time in  Computing+transform. integral       0.156 seconds
 
- (RTRACTL1) Total CPU (wall) time used :   00:00:00 (   00:00:01)
-            Transformation ended Sun Aug  2 16:54:25 2020
+ (RTRACTL1) Total CPU (wall) time used :   00:00:00 (   00:00:00)
+            Transformation ended Wed Aug  5 11:58:52 2020
 
 * REAFCK: Fock matrix read from file DFFCK1                                                      
-* Heading : FCIDUMP file tutorial                            Sun Aug  2 16:54:24 2020
+* Heading : FCIDUMP file tutorial                            Wed Aug  5 11:58:51 2020
 SCR        scr.thr.    Step1    Step2  Coulomb  Exchange    CPU-time
-SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.01199996s
-SOfock:SL  1.00D-12    0.00%    8.81%    0.00%    0.26%   0.04799998s
+SOfock:LL  1.00D-12    0.00%    0.00%    0.00%    0.00%   0.00800002s
+SOfock:SL  1.00D-12    0.00%    8.81%    0.00%    0.26%   0.05200005s
 
  Reading from file : 4INDINFO 
  Reading from file : 4IND1XXXX0
 
-CPU and WALL times for generating the FCIDUMP file:                0.14                0.00
+    7 start vectors based on lowest diagonal element of H_CI
+      3034         -100.110636
+      3035          -99.661564
+      3160          -99.661564
+      3040          -99.660008
+      3790          -99.660008
+      3055          -99.514735
+      5680          -99.514735
+
+
+ (GASCIP_RCISTD) CI microiteration no.   1
+ (GASCIP_RCISTD) Total energy       =       -100.11063555        -99.66156407        -99.66156407        -99.66001204
+                                             -99.66000624        -99.55026962        -99.47919759
+                 Lowering of energy =          0.00000000          0.00000000          0.00000000          0.00000406
+                                              -0.00000175          0.03553486         -0.03553717
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         5.61988D-01
+
+ (RCINORM) CI vector renormalized with factor       5.227523455156
+
+
+ (GASCIP_RCISTD) CI microiteration no.   2
+ (GASCIP_RCISTD) Total energy       =       -100.19115027
+                 Lowering of energy =          0.08051472
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         1.57438D-01
+
+ (RCINORM) CI vector renormalized with factor      25.240140525697
+
+
+ (GASCIP_RCISTD) CI microiteration no.   3
+ (GASCIP_RCISTD) Total energy       =       -100.19531848
+                 Lowering of energy =          0.00416821
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         4.38102D-02
+
+ (RCINORM) CI vector renormalized with factor      91.476670409474
+
+
+ (GASCIP_RCISTD) CI microiteration no.   4
+ (GASCIP_RCISTD) Total energy       =       -100.19567612
+                 Lowering of energy =          0.00035765
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         9.32937D-03
+
+ (RCINORM) CI vector renormalized with factor     415.997876463445
+
+
+ (GASCIP_RCISTD) CI microiteration no.   5
+ (GASCIP_RCISTD) Total energy       =       -100.19569181
+                 Lowering of energy =          0.00001569
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         3.01715D-03
+
+ (RCINORM) CI vector renormalized with factor    1596.773238619832
+
+
+ (GASCIP_RCISTD) CI microiteration no.   6
+ (GASCIP_RCISTD) Total energy       =       -100.19569317
+                 Lowering of energy =          0.00000136
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         7.06703D-04
+
+ (RCINORM) CI vector renormalized with factor    6593.359227114547
+
+
+ (GASCIP_RCISTD) CI microiteration no.   7
+ (GASCIP_RCISTD) Total energy       =       -100.19569325
+                 Lowering of energy =          0.00000008
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         1.63968D-04
+
+ (RCINORM) CI vector renormalized with factor       1.000000000000
+
+
+ (GASCIP_RCISTD) CI microiteration no.   8
+ (GASCIP_RCISTD) Total energy       =       -100.19569326
+                 Lowering of energy =          0.00000000
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         4.26420D-05
+
+ (RCINORM) CI vector renormalized with factor       1.000000000000
+
+
+ (GASCIP_RCISTD) CI microiteration no.   9
+ (GASCIP_RCISTD) Total energy       =       -100.19569326
+                 Lowering of energy =          0.00000000
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         1.02799D-05
+
+ (RCINORM) CI vector renormalized with factor       1.000000000000
+
+
+ (GASCIP_RCISTD) CI microiteration no.  10
+ (GASCIP_RCISTD) Total energy       =       -100.19569326
+                 Lowering of energy =          0.00000000
+
+ (GASCIP_RCISTD) Norm of CI residuals (thr = 1.00D-05)
+         1         2.81396D-06
+
+ *** All requested CI roots are converged. ***
+
+
+ (GASCIP_RCISTD) Micro iterations converged.
+
+ (GASCIP_RCISTD) Core energy        =         -71.43939812
+                 Active energies    =         -28.75629514
+ (GASCIP_RCISTD) Final CI energies  =        -100.19569326
+
+
+ ============================================
+ (GASCIP_RCISTD) CI solution vector  1 of   1
+ ============================================
+
+ (RCINORM) CI vector renormalized with factor       1.000000000000
+
+ Print of CI coefficients in range 1.0D-01 to 1.0D+00
+
+   Determinant no.     3034 coeff.     9.8766327908D-01; weight 0.97547875
+   P-string     :    1   2   3   4
+   P(bar)-string:    1   2   3   4
+
+ Print of CI coefficients in range 1.0D-02 to 1.0D-01
+
+   None
+
+
+ Print of CI coefficients in range 1.0D-03 to 1.0D-02
+
+   Determinant no.     3669 coeff.    -3.6702101477D-02; weight 0.00134704
+   P-string     :    1   2   3   9
+   P(bar)-string:    1   2   3   9
+   Determinant no.     3673 coeff.     3.8350341200D-02; weight 0.00147075
+   P-string     :    1   2   3   9
+   P(bar)-string:    1   2   4   8
+   Determinant no.     4173 coeff.     3.8350341200D-02; weight 0.00147075
+   P-string     :    1   2   4   8
+   P(bar)-string:    1   2   3   9
+   Determinant no.     4177 coeff.    -3.6203616858D-02; weight 0.00131070
+   P-string     :    1   2   4   8
+   P(bar)-string:    1   2   4   8
+   Determinant no.     5828 coeff.    -4.6103623165D-02; weight 0.00212554
+   P-string     :    1   3   4   6
+   P(bar)-string:    1   3   4   6
+
+
+ Distribution of determinants wrt. MK
+ ------------------------------------------------
+      MK                #dets    #non-zero
+ ------------------------------------------------
+      -4                  9              7
+      -2               3024           1333
+       0              15876           6508
+       2               3024           1333
+       4                  9              7
+ ------------------------------------------------
+     all              21942           9188
+ ------------------------------------------------
+
+ (GASCIP_RCISTD) Total CPU (Wall) time for routine:  5.00800002s ( 5.00000000s)
+
+ (RCIST) CI energy:       -100.19569326
  (ROPTST)  KR-CI calculation ended properly.
 
->>> TOTAL CPU (WALL) TIME IN KR-CI:  0.30800003s( 1.00000000s)
+>>> TOTAL CPU (WALL) TIME IN KR-CI:  5.16799998s( 5.00000000s)
 
 
 
@@ -1115,11 +1307,11 @@ CPU and WALL times for generating the FCIDUMP file:                0.14         
 
 
  
-     Date and time (Linux)  : Sun Aug  2 16:54:25 2020
+     Date and time (Linux)  : Wed Aug  5 11:58:57 2020
      Host name              : not found                               
 
->>>> Node 0, utime: 1, stime: 0, minflt: 7246, majflt: 0, nvcsw: 11, nivcsw: 2, maxrss: 17124
->>>> Total WALL time used in DIRAC: 1s
+>>>> Node 0, utime: 6, stime: 0, minflt: 9993, majflt: 0, nvcsw: 11, nivcsw: 9, maxrss: 22760
+>>>> Total WALL time used in DIRAC: 6s
   
   Dynamical Memory Usage Summary
   
@@ -1152,25 +1344,25 @@ CPU and WALL times for generating the FCIDUMP file:                0.14         
                kind                   :            4
                tot.dim. (<1 if array) :        16384
                was allocated at       : __allocator_track_if_MOD_allocator_registe                                                                                          
-               mem.addr. (as integer) :             199728912
+               mem.addr. (as integer) :             212406032
       >>> (de)allocated data details <<<
           var. name                   : adjoint_elm                                                                                                                         
                kind                   :            4
                tot.dim. (<1 if array) :          128
                was allocated at       : __allocator_track_if_MOD_allocator_registe                                                                                          
-               mem.addr. (as integer) :             199641424
+               mem.addr. (as integer) :             212318544
       >>> (de)allocated data details <<<
           var. name                   : inverse_elm                                                                                                                         
                kind                   :            4
                tot.dim. (<1 if array) :          128
                was allocated at       : __allocator_track_if_MOD_allocator_registe                                                                                          
-               mem.addr. (as integer) :             199642352
+               mem.addr. (as integer) :             212319472
       >>> (de)allocated data details <<<
           var. name                   : unnamed variable                                                                                                                    
                kind                   :            4
                tot.dim. (<1 if array) :          258
                was allocated at       : __allocator_track_if_MOD_allocator_registe                                                                                          
-               mem.addr. (as integer) :             199676080
+               mem.addr. (as integer) :             212353200
       >>> Done after           4  el.
   
   There were           35  allocations/            31  deallocations
