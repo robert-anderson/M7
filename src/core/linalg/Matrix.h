@@ -50,8 +50,8 @@ public:
     Matrix(size_t n) : Matrix(n, n) {}
 
     T &operator()(const size_t &irow, const size_t &icol) {
-        ASSERT(irow >= 0 && irow < m_nrow);
-        ASSERT(icol >= 0 && icol < m_ncol);
+        ASSERT(irow < m_nrow);
+        ASSERT(icol < m_ncol);
         return *data(irow, icol);
     }
 

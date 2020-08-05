@@ -49,6 +49,12 @@ public:
                    + utils::num_to_string(consts::imag(v), 0, fp_precision());
         else return utils::num_to_string(v, 0, fp_precision());
     }
+
+
+    std::string to_string(const defs::inds& nrows) const override {
+        ASSERT(0) //TODO
+        return "";
+    }
 };
 
 class StatsFile : public Table {
