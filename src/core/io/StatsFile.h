@@ -50,11 +50,6 @@ public:
         else return utils::num_to_string(v, 0, fp_precision());
     }
 
-
-    std::string to_string(const defs::inds& nrows) const override {
-        ASSERT(0) //TODO
-        return "";
-    }
 };
 
 class StatsFile : public Table {
@@ -105,6 +100,11 @@ public:
 
     std::string to_string() const override {
         return row_to_string(0, 0);
+    }
+
+    std::string to_string(const defs::inds& nrows) const override {
+        ASSERT(0) //TODO
+        return "";
     }
 
     ~StatsFile() {

@@ -114,7 +114,7 @@ public:
     }
 
 private:
-    static const size_t nelem(const size_t &norb) {
+    static inline size_t nelem(const size_t &norb) {
         static_assert(isym == 1 || isym == 2, "Invalid symmetry parameter specified.");
         if (isym == 1) {
             return norb * norb;

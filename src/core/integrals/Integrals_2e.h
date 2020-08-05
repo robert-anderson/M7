@@ -184,7 +184,7 @@ private:
         return ~0ul;
     }
 
-    static inline size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+    static inline size_t get_case(const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
         if (isym == 1) {
             return 0;
         } else if (isym == 2) {
