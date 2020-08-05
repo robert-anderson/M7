@@ -16,7 +16,7 @@ namespace hashing {
                       (sizeof(hash_T)==4 || sizeof(hash_T)==8), "Invalid hash type");
         switch (sizeof(hash_T)){
             case 4: return 16777619u;
-            case 8: return 1099511628211ul;
+            default: return 1099511628211ul;
         }
     }
 
@@ -26,7 +26,7 @@ namespace hashing {
                       (sizeof(hash_T)==4 || sizeof(hash_T)==8), "Invalid hash type");
         switch (sizeof(hash_T)){
             case 4: return 2166136261u;
-            case 8: return 14695981039346656037ul;
+            default: return 14695981039346656037ul;
         }
     }
 
