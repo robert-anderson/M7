@@ -42,7 +42,7 @@ public:
     }
      */
 
-    std::string to_string() override {
+    std::string to_string() const override {
         const T v = **this;
         if (consts::is_complex<T>())
             return utils::num_to_string(consts::real(v), 0, fp_precision()) + " "
@@ -97,7 +97,7 @@ public:
     }
 
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return row_to_string(0, 0);
     }
 

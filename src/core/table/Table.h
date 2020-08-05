@@ -69,11 +69,11 @@ public:
 
     bool is_allocated() const;
 
-    std::string row_to_string(size_t irow, size_t isegment);
+    std::string row_to_string(size_t irow, size_t isegment) const;
 
-    virtual std::string to_string();
+    virtual std::string to_string() const;
 
-    virtual std::string to_string(const defs::inds &nrows);
+    virtual std::string to_string(const defs::inds &nrows) const;
 
     void print_row(size_t irow, size_t isegment);
 

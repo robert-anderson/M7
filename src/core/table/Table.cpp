@@ -120,7 +120,7 @@ bool Table::compatible_with(const Table &other) const {
 
 bool Table::is_allocated() const { return m_data.data() != nullptr; }
 
-std::string Table::row_to_string(size_t irow, size_t isegment) {
+std::string Table::row_to_string(size_t irow, size_t isegment) const {
     std::string result;
     for (auto &field : m_fields) {
         for (size_t ielement = 0ul; ielement < field->m_nelement; ++ielement) {
@@ -130,7 +130,7 @@ std::string Table::row_to_string(size_t irow, size_t isegment) {
     return result;
 }
 
-std::string Table::to_string(const defs::inds &nrows) {
+std::string Table::to_string(const defs::inds &nrows) const {
     std::string result = "\nTABLE\n";
     result += "# fields: " + std::to_string(m_fields.size()) + "\n";
     for (size_t ifield = 0ul; ifield < m_fields.size(); ++ifield) {
@@ -146,7 +146,7 @@ std::string Table::to_string(const defs::inds &nrows) {
     return result;
 }
 
-std::string Table::to_string() {
+std::string Table::to_string() const {
     return to_string(defs::inds(m_nsegment, m_nrow_per_segment));
 }
 

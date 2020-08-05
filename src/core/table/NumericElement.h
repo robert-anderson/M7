@@ -77,7 +77,7 @@ public:
         return sizeof(T);
     }
 
-    virtual std::string to_string() override {
+    virtual std::string to_string() const override {
         return utils::num_to_string(**this);
     }
 };

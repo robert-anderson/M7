@@ -103,6 +103,11 @@ void List::expand(size_t delta_nrow) {
     if (m_recv) m_recv->expand(mpi::nrank()*delta_nrow);
 }
 
-std::string List::to_string() {
+std::string List::to_string() const {
+    return Table::to_string(m_high_water_mark);
+}
+
+std::string List::to_string(const defs::inds &nrows) const {
+    ASSERT(0); // TODO: clean up the to_string hierarchy
     return Table::to_string(m_high_water_mark);
 }

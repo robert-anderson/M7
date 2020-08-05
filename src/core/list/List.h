@@ -29,7 +29,9 @@ public:
 
     void zero() override;
 
-    std::string to_string();
+    virtual std::string to_string() const;
+
+    virtual std::string to_string(const defs::inds &nrows) const;
 
     void communicate();
 

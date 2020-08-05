@@ -45,7 +45,7 @@ bool BitsetElement::get(const size_t &ibit) const {
     return get({0, ibit});
 }
 
-std::string BitsetElement::to_string() {
+std::string BitsetElement::to_string() const {
     std::string result;
     for (size_t ibit = 0ul; ibit < nbit(); ++ibit) {
         result += get(ibit) ? "1" : "0";

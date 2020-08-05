@@ -94,7 +94,7 @@ Field *Element::field() const { return m_field; }
 
 bool Element::is_complex() const { return m_field->is_complex(); }
 
-std::string Element::to_string() {
+std::string Element::to_string() const {
     return std::string(begin(), size());
 }
 

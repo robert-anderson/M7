@@ -36,7 +36,7 @@ public:
 
     bool get(const size_t &ibit) const;
 
-    std::string to_string() override;
+    std::string to_string() const override;
 
     size_t nsetbit() const;
 
