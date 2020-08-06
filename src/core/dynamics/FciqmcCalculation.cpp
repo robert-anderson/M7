@@ -10,7 +10,8 @@
 
 FciqmcCalculation::FciqmcCalculation(const Options &input) :
         m_input(input), m_vary_shift("variable shift"), m_semi_stochastic("semi-stochastic"),
-        m_rank_allocator(input.nload_balance_block, input.load_balance_period, &m_vary_shift),
+        m_rank_allocator(input.nload_balance_block_per_rank*mpi::nrank(),
+            input.load_balance_period, &m_vary_shift),
         m_ham(std::unique_ptr<AbInitioHamiltonian>(
                 new AbInitioHamiltonian(input.fcidump_path, input.fcidump_spin_major))),
         m_reference(initial_reference(m_ham, input)),

@@ -31,7 +31,7 @@ TEST(FciqmcCalculation, StochasticPropagation){
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
     options.tau_initial = 0.05;
     options.nwalker_target = 150000;
-    options.nload_balance_block = 5;
+    options.nload_balance_block_per_rank = 5;
     options.ncycle = 4000;
     options.prng_seed = 12;
     FciqmcCalculation fciqmc_calculation(options);
@@ -52,7 +52,7 @@ TEST(FciqmcCalculation, StochasticPropagation4c){
     options.fcidump_path = defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP";
     options.tau_initial = 0.05;
     options.nwalker_target = 150000;
-    options.nload_balance_block = 5;
+    options.nload_balance_block_per_rank = 5;
     options.ncycle = 4000;
     options.prng_seed = 12;
     FciqmcCalculation fciqmc_calculation(options);
@@ -142,7 +142,7 @@ TEST(FciqmcCalculation, StochasticPropagation4cLarge){
     options.fcidump_path = defs::assets_root+"/DHF_Kr_CCPVDZ/FCIDUMP";
     options.tau_initial = 0.01;
     options.nwalker_target = 1000000;
-    options.nload_balance_block = 1000;
+    options.nload_balance_block_per_rank = 1000;
     options.ncycle = 4000;
     options.walker_factor_initial = 2.0;
     options.buffer_factor_initial = 3.0;

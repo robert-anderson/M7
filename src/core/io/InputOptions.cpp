@@ -61,7 +61,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-B,--buffer_factor_initial", buffer_factor_initial,
                "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
-    add_option("-K,--nload_balance_block", nload_balance_block,
+    add_option("-K,--nload_balance_block_per_rank", nload_balance_block_per_rank,
                "number of blocks per process to use for load balancing determinants among processes");
 
     add_option("-m,--min_spawn_mag", min_spawn_mag,
