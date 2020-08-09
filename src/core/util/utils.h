@@ -263,6 +263,21 @@ namespace string_utils {
     static std::string YN(bool t){
         return t ? "YES":"NO";
     }
+
+    static std::string memsize(size_t nbyte){
+        if (nbyte < 1024) {
+            return std::to_string(nbyte)+"B";
+        }
+        else if (nbyte < 1024*1024){
+            return std::to_string(nbyte/1024.0)+"KB";
+        }
+        else if (nbyte < 1024*1024*1024){
+            return std::to_string(nbyte/(1024.0*1024.0))+"MB";
+        }
+        else{
+            return std::to_string(nbyte/(1024.0*1024.0*1024.0))+"GB";
+        }
+    }
 }
 
 namespace prob_utils {

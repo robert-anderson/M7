@@ -19,6 +19,11 @@ char *Table::row_begin(const size_t &irow, const size_t isegment) {
 }
 
 void Table::expand(size_t delta_nrow) {
+    std::cout << "Attempting to expand table \"" << m_name << "\" by " << delta_nrow << " rows" << std::endl;
+    std::cout << "Current number of rows per segment: " << m_nrow_per_segment << std::endl;
+    std::cout << "Current size in memory:             " << string_utils::memsize(m_nrow_per_segment * m_nsegment * m_padded_row_dsize) << std::endl;
+    std::cout << "Additional memory being allocated:  " << string_utils::memsize(delta_nrow * m_nsegment * m_padded_row_dsize) << std::endl;
+    std::cout << "Final size in memory if successful: " << string_utils::memsize((m_nrow_per_segment + delta_nrow) * m_nsegment * m_padded_row_dsize) << std::endl;
     /*
      * add more rows to each segment
      */
@@ -37,6 +42,8 @@ void Table::expand(size_t delta_nrow) {
     for (size_t isegment = 1ul; isegment < m_nsegment; ++isegment) {
         m_segment_doffsets[isegment] = m_segment_doffsets[isegment - 1] + m_padded_row_dsize * m_nrow_per_segment;
     }
+    std::cout << "Successfully expanded table \"" << m_name << "\"" << std::endl;
+
 }
 
 void Table::resize(size_t nrow) {
