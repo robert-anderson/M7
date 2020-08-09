@@ -265,17 +265,17 @@ namespace string_utils {
     }
 
     static std::string memsize(size_t nbyte){
-        if (nbyte < 1024) {
+        if (nbyte < 1e3) {
             return std::to_string(nbyte)+"B";
         }
-        else if (nbyte < 1024*1024){
-            return std::to_string(nbyte/1024.0)+"KB";
+        else if (nbyte < 1e6){
+            return std::to_string(nbyte/1.0e3)+"KB";
         }
-        else if (nbyte < 1024*1024*1024){
-            return std::to_string(nbyte/(1024.0*1024.0))+"MB";
+        else if (nbyte < 1e9){
+            return std::to_string(nbyte/(1.0e6))+"MB";
         }
         else{
-            return std::to_string(nbyte/(1024.0*1024.0*1024.0))+"GB";
+            return std::to_string(nbyte/(1.0e9))+"GB";
         }
     }
 }
