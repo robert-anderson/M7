@@ -17,6 +17,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
         m_reference(initial_reference(m_ham, input)),
         m_wf(this) {
 
+    logger::write("Initializing FCIQMC Calculation...");
     if (mpi::i_am_root()) m_stats_file = std::unique_ptr<FciqmcStatsFile>(new FciqmcStatsFile(m_input));
     m_parallel_stats_file = std::unique_ptr<ParallelizationStatsFile>(new ParallelizationStatsFile(m_input));
 
@@ -27,7 +28,6 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
     }
     m_prop->m_shift += m_ham->get_energy(m_reference);
 
-    logger::write("Initializing FCIQMC Calculation...");
     logger::write("Distributed memory parallelization: " + std::to_string(mpi::nrank()) + " MPI ranks");
     logger::write("Reference determinant was detected to be: " + m_reference.to_string());
 }
