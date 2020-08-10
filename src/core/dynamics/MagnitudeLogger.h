@@ -32,7 +32,9 @@ public:
 
     MagnitudeLogger(const Options &input, size_t nsite, size_t nelec):
     MagnitudeLogger(input,1/(integer_utils::combinatorial(2*nsite-nelec, 2)/double(2*nsite-nelec)+1))
-    {}
+    {
+        std::cout << "Magnitude Logger initialized" << std::endl;
+    }
 
     void log(size_t nexcit, defs::ham_t helem, defs::prob_t prob);
 

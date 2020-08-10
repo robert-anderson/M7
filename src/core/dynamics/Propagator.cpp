@@ -15,6 +15,7 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
     m_semi_stochastic(fciqmc->m_semi_stochastic)
     {
     m_shift = m_input.shift_initial;
+    std::cout << "Propagator initialized with shift (relative to reference determinant energy): " << m_shift << std::endl;
 }
 
 void Propagator::update(const size_t& icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
