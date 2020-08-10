@@ -91,7 +91,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
     options.tau_initial = 0.24923054538193248;
     options.prng_seed = 13;
-    options.nwalker_target = 1000000;
+    options.nwalker_target = 100000;
     options.nwalker_initial = 100;
     options.ncycle = 10000;
     //options.exact_propagation = 1;

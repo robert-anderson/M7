@@ -23,8 +23,8 @@ HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng) :
                         ++ab;
                     }
                 }
-                m_pick_ab_given_ij[ij].update(weights);
-                ASSERT(!consts::float_is_zero(m_pick_ab_given_ij[ij].norm()))
+                m_pick_ab_given_ij.update(ij, weights);
+                ASSERT(!consts::float_is_zero(m_pick_ab_given_ij.norm(ij)))
                 ++ij;
             }
         }
@@ -34,8 +34,8 @@ HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng) :
     mpi::barrier();
 #ifndef NDEBUG
     for (ij = 0ul; ij < m_norb_pair; ++ij) {
-        ASSERT(m_pick_ab_given_ij[ij].nprob() == m_norb_pair)
-        ASSERT(!consts::float_is_zero(m_pick_ab_given_ij[ij].norm()))
+        ASSERT(m_pick_ab_given_ij.nprob() == m_norb_pair)
+        ASSERT(!consts::float_is_zero(m_pick_ab_given_ij.norm(ij)))
     }
 #endif
 }
@@ -106,7 +106,7 @@ bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, Determinan
     ASSERT(i < j);
 
     ij = integer_utils::strigmap(j, i); // i and j are orbital indices
-    size_t ab = m_pick_ab_given_ij[ij].draw(m_prng);
+    size_t ab = m_pick_ab_given_ij.draw(ij, m_prng);
     integer_utils::inv_strigmap(b, a, ab); // a and b are orbital indices
     //ASSERT(i!=a && i!=b && j!=a && j!=b)
 
@@ -119,7 +119,7 @@ bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, Determinan
     anticonn.add(i, j, a, b);
     anticonn.apply(src_det, dst_det);
     helem = m_h->get_element_2(anticonn);
-    prob = std::abs(helem) / (m_pick_ab_given_ij[ij].norm() * m_nelec_pair);
+    prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     ASSERT(prob <= 1)
     if (consts::float_nearly_zero(prob, 1e-14)) {
         return false;

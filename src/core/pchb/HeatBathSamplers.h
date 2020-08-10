@@ -14,7 +14,7 @@
  */
 
 class HeatBathSamplers : public ExcitationGenerator {
-    std::vector<Aliaser> m_pick_ab_given_ij;
+    Aliaser m_pick_ab_given_ij;
 
 public:
     HeatBathSamplers(const Hamiltonian *h, PRNG &prng);

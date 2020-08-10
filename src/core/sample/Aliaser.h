@@ -5,34 +5,43 @@
 #ifndef M7_ALIASER_H
 #define M7_ALIASER_H
 
-#include<vector>
+#include <vector>
 #include <src/core/util/defs.h>
 #include <stack>
 #include <iostream>
 #include <src/core/util/utils.h>
-#include <src/core/parallel/SharedArray.h>
+#include <src/core/parallel/SharedMatrix.h>
 #include "PRNG.h"
 
 class Aliaser {
-    const size_t m_nprob;
-    SharedArray<defs::prob_t> m_prob_table;
-    SharedArray<size_t> m_alias_table;
-    defs::prob_t m_norm;
+    const size_t m_nrow, m_nprob;
+    SharedMatrix<defs::prob_t> m_prob_table;
+    SharedMatrix<size_t> m_alias_table;
+    SharedArray<defs::prob_t> m_norm;
 
 public:
-    Aliaser(const size_t nprob) :
+    Aliaser(const size_t &nrow, const size_t &nprob) :
+        m_nrow(nrow),
         m_nprob(nprob),
-        m_prob_table(m_nprob),
-        m_alias_table(m_nprob){
+        m_prob_table(nrow, m_nprob),
+        m_alias_table(nrow, m_nprob),
+        m_norm(nrow) {}
+
+    Aliaser(const size_t &nprob) : Aliaser(1, nprob) {}
+
+    Aliaser(const std::vector<defs::prob_t> &probs) : Aliaser(1, probs.size()) {
+        update(0, probs);
     }
 
-    void update(const defs::prob_t *probs, const size_t nprob) {
-        m_norm = std::accumulate(probs, probs+nprob, 0.0);
+
+    void update(const size_t &irow, const defs::prob_t *probs, const size_t nprob) {
+        ASSERT(irow < m_nrow)
+        m_norm.set(irow, std::accumulate(probs, probs + nprob, 0.0));
         std::stack<size_t> smaller;
         std::stack<size_t> larger;
         for (size_t iprob = 0ul; iprob < m_nprob; ++iprob) {
-            m_prob_table.set(iprob, probs[iprob] * m_nprob);
-            if (m_prob_table[iprob] < m_norm) smaller.push(iprob);
+            m_prob_table.set(irow, iprob, probs[iprob] * m_nprob);
+            if (m_prob_table.get(irow, iprob) < m_norm.get(irow)) smaller.push(iprob);
             else larger.push(iprob);
         }
         size_t small, large;
@@ -41,49 +50,48 @@ public:
             smaller.pop();
             large = larger.top();
             larger.pop();
-            m_alias_table.set(small, large);
-            m_prob_table.set(large, m_prob_table[large] - (m_norm - m_prob_table[small]));
-            if (m_prob_table[large] < m_norm) smaller.push(large);
+            m_alias_table.set(irow, small, large);
+            m_prob_table.set(irow, large,
+                             m_prob_table.get(irow, large) - (m_norm.get(irow) - m_prob_table.get(irow, small)));
+            if (m_prob_table.get(irow, large) < m_norm.get(irow)) smaller.push(large);
             else larger.push(large);
         }
     }
 
+    void update(const size_t &irow, const std::vector<defs::prob_t> &probs) {
+        update(irow, probs.data(), probs.size());
+    }
+
     void update(const std::vector<defs::prob_t> &probs) {
-        update(probs.data(), probs.size());
+        ASSERT(m_nrow==1)
+        update(0, probs);
     }
 
-    Aliaser(const defs::prob_t *probs, const size_t nprob) :
-        Aliaser(nprob) {
-        update(probs, nprob);
-    }
-
-    Aliaser(const std::vector<defs::prob_t> &probs, const size_t nprob, PRNG &prng) :
-        Aliaser(probs.data(), nprob) {}
-
-    Aliaser(const std::vector<defs::prob_t> &probs) :
-        Aliaser(probs.data(), probs.size()) {}
-
-
-    size_t draw(PRNG& prng) const {
+    size_t draw(const size_t &irow, PRNG &prng) const {
+        ASSERT(irow < m_nrow)
         size_t iprob = std::floor(prng.draw_float() * m_nprob);
-        ASSERT(iprob < m_nprob);
-        if (prng.draw_float() * m_norm < m_prob_table[iprob]) return iprob;
-        else return m_alias_table[iprob];
+        ASSERT(iprob < m_nprob)
+        if (prng.draw_float() * m_norm.get(irow) < m_prob_table.get(irow, iprob)) return iprob;
+        else return m_alias_table.get(irow, iprob);
     }
 
-    const defs::prob_t& norm() const {
-        return m_norm;
+    size_t draw(PRNG &prng) const {
+        ASSERT(m_nrow==1)
+        return draw(0, prng);
     }
 
-    const size_t& nprob() const {
+    const defs::prob_t &norm(const size_t &irow) const {
+        ASSERT(irow < m_nrow)
+        return m_norm.get(irow);
+    }
+
+    const size_t &nprob() const {
         return m_nprob;
     }
 
-    defs::prob_t prob(const size_t &i) const {
-        return m_prob_table[i]/m_norm;
+    defs::prob_t prob(const size_t &irow, const size_t &iprob) const {
+        return m_prob_table.get(irow, iprob) / m_norm.get(irow);
     }
-
 };
-
 
 #endif //M7_ALIASER_H

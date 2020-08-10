@@ -14,9 +14,9 @@ class SharedArray {
 #ifdef HAVE_MPI
     MPI_Win m_win;
 #endif
-    T* m_data = nullptr;
+    T *m_data = nullptr;
 public:
-    SharedArray(size_t size):m_size(size) {
+    SharedArray(size_t size) : m_size(size) {
         /*
          * MPI_Aint window_size; double *window_data; MPI_Win node_window;
          * if (onnode_procid==0)
@@ -25,12 +25,12 @@ public:
          * MPI_Win_allocate_shared (window_size,sizeof(double),MPI_INFO_NULL, nodecomm, &window_data,&node_window)
          */
 #ifdef HAVE_MPI
-        if(mpi::on_node_i_am_root()){
-            auto ierr = MPI_Win_allocate_shared(size*sizeof(T), sizeof(T), MPI_INFO_NULL, g_node_comm, (void*)&m_data, &m_win);
+        if (mpi::on_node_i_am_root()) {
+            auto ierr = MPI_Win_allocate_shared(size * sizeof(T), sizeof(T), MPI_INFO_NULL, g_node_comm,
+                                                (void *) &m_data, &m_win);
             if (ierr) throw std::runtime_error("MPI Shared memory error");
-        }
-        else {
-            auto ierr = MPI_Win_allocate_shared(0, sizeof(T), MPI_INFO_NULL, g_node_comm, (void*)&m_data, &m_win);
+        } else {
+            auto ierr = MPI_Win_allocate_shared(0, sizeof(T), MPI_INFO_NULL, g_node_comm, (void *) &m_data, &m_win);
             if (ierr) throw std::runtime_error("MPI Shared memory error");
         }
         MPI_Win_lock_all(0, m_win);
@@ -42,19 +42,19 @@ public:
          * MPI_Aint window_size0; int window_unit; double *win0_addr;
          * MPI_Win_shared_query(node_window, 0, &window_size0, &window_unit, &win0_addr);
          */
-        auto ierr = MPI_Win_shared_query(m_win, 0, &alloc_size, &disp_unit, (void*)&m_data);
-        if(ierr!=MPI_SUCCESS) throw std::runtime_error("MPI Memory Window query failed");
-        ASSERT(disp_unit==sizeof(T))
-        ASSERT((size_t)alloc_size==size*sizeof(T))
+        auto ierr = MPI_Win_shared_query(m_win, 0, &alloc_size, &disp_unit, (void *) &m_data);
+        if (ierr != MPI_SUCCESS) throw std::runtime_error("MPI Memory Window query failed");
+        ASSERT(disp_unit == sizeof(T))
+        ASSERT((size_t) alloc_size == size * sizeof(T))
         MPI_Win_unlock_all(m_win);
-        if (mpi::on_node_i_am_root()) memset(m_data, 0, size*sizeof(T));
+        if (mpi::on_node_i_am_root()) memset(m_data, 0, size * sizeof(T));
         mpi::barrier_on_node();
 #else
         m_data = new T[](size);
 #endif
     }
 
-    SharedArray(SharedArray && rhs): m_size(rhs.m_size){
+    SharedArray(SharedArray &&rhs) : m_size(rhs.m_size) {
         m_data = rhs.m_data;
         m_win = rhs.m_win;
 #ifdef HAVE_MPI
@@ -68,32 +68,36 @@ public:
 #endif
     }
 
-    SharedArray(const SharedArray & rhs): SharedArray(rhs.m_size){}
+    SharedArray(const SharedArray &rhs) : SharedArray(rhs.m_size) {}
 
-    ~SharedArray(){
+    ~SharedArray() {
         ASSERT(m_data)
 #ifdef HAVE_MPI
-        if (m_win!=MPI_WIN_NULL) MPI_Win_free(&m_win);
+        if (m_win != MPI_WIN_NULL) MPI_Win_free(&m_win);
 #else
         if (m_data) delete m_data;
 #endif
     }
 
-    const size_t &size(){
+    const size_t &size() {
         return m_size;
     }
 
-    void set(const size_t &i, const T& v){
+    void set(const size_t &i, const T &v) {
         // element-modifying access should only take place on the root rank
-        if(mpi::on_node_i_am_root()) {
+        if (mpi::on_node_i_am_root()) {
             ASSERT(i < m_size)
             *(m_data + i) = v;
         }
     }
 
-    const T& operator[](const size_t &i) const{
-        ASSERT(i<m_size)
-        return *(m_data+i);
+    const T &get(const size_t &i) const {
+        ASSERT(i < m_size)
+        return *(m_data + i);
+    }
+
+    const T &operator[](const size_t &i) const {
+        return get(i);
     }
 };
 
