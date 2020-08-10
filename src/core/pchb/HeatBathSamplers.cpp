@@ -28,9 +28,9 @@ HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng) :
                 ++ij;
             }
         }
+        ASSERT(ij == m_norb_pair)
+        ASSERT(ab == m_norb_pair)
     }
-    ASSERT(ij == m_norb_pair)
-    ASSERT(ab == m_norb_pair)
     mpi::barrier();
 #ifndef NDEBUG
     for (ij = 0ul; ij < m_norb_pair; ++ij) {
