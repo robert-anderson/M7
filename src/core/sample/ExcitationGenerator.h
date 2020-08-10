@@ -25,7 +25,9 @@ public:
             m_nelec(m_h->nelec()),
             m_norb_pair(integer_utils::nspair(m_norb)),
             m_nelec_pair(integer_utils::nspair(m_nelec)),
-            m_spin_conserving(m_h->spin_conserving()) {}
+            m_spin_conserving(m_h->spin_conserving()) {
+        std::cout << "Excitation generator base initialized" << std::endl;
+    }
 
     virtual bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,

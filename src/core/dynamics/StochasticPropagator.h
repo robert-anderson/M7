@@ -21,11 +21,15 @@ public:
     StochasticPropagator(FciqmcCalculation *fciqmc) :
             Propagator(fciqmc), m_min_spawn_mag(m_input.min_spawn_mag),
             m_prng(m_input.prng_seed, m_input.prng_ngen) {
+        std::cout << "Initializing stochastic propagator" << std::endl;
         if (m_input.excit_gen=="pchb"){
             m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(m_ham.get(), m_prng));
         }
         else if (m_input.excit_gen=="uniform"){
             //m_exgen = std::unique_ptr<ExcitationGenerator>(new UniformSampler(m_ham.get(), m_prng));
+        }
+        else {
+            throw std::runtime_error("invalid excit_gen specified");
         }
 
     }
