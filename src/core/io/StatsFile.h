@@ -79,7 +79,7 @@ protected:
                 *m_file << "#  " << icol++ << ".  " << column->description() << " \n";
             }
         }
-        *m_file << std::endl;
+        *m_file << std::flush;
     }
 
 public:
