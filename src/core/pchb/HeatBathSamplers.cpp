@@ -9,21 +9,24 @@ HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng) :
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;
     size_t ab = 0ul;
-    for (size_t i = 0ul; i < m_norb; ++i) {
-        for (size_t j = 0ul; j < i; ++j) {
-            weights.assign(m_norb_pair, 0.0);
-            ab = 0ul;
-            for (size_t a = 0ul; a < m_norb; ++a) {
-                for (size_t b = 0ul; b < a; ++b) {
-                    //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
-                    weights[ab] = std::abs(m_h->get_element_2(i, j, a, b));
-                    //}
-                    ++ab;
+    std::cout << "Initializing pre-computed heat bath sampling weights for doubles..." << std::endl;
+    if (mpi::on_node_i_am_root()) {
+        for (size_t i = 0ul; i < m_norb; ++i) {
+            for (size_t j = 0ul; j < i; ++j) {
+                weights.assign(m_norb_pair, 0.0);
+                ab = 0ul;
+                for (size_t a = 0ul; a < m_norb; ++a) {
+                    for (size_t b = 0ul; b < a; ++b) {
+                        //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
+                        weights[ab] = std::abs(m_h->get_element_2(i, j, a, b));
+                        //}
+                        ++ab;
+                    }
                 }
+                m_pick_ab_given_ij[ij].update(weights);
+                ASSERT(!consts::float_is_zero(m_pick_ab_given_ij[ij].norm()))
+                ++ij;
             }
-            m_pick_ab_given_ij[ij].update(weights);
-            ASSERT(!consts::float_is_zero(m_pick_ab_given_ij[ij].norm()))
-            ++ij;
         }
     }
     ASSERT(ij == m_norb_pair)
