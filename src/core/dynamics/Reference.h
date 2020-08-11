@@ -98,6 +98,7 @@ public:
         if (in_redefinition_cycle()) m_redefinition_cycle = false;
         m_candidate_weight.mpi_maxloc();
         if (m_candidate_weight.reduced()/std::abs(weight()) > m_redefinition_thresh) {
+            //TODO: helpful output
             std::cout<< " wwwww     " << m_candidate_weight.reduced() << "         " << std::abs(weight()) << std::endl;
             std::cout<<m_candidate_weight.reduced()<< "  "<< m_candidate_weight.irank() << std::endl;
             if (mpi::i_am(m_candidate_weight.irank())){
