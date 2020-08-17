@@ -6,6 +6,7 @@
 #define M7_WAVEFUNCTION_H
 
 #include <src/core/io/ParallelizationStatsFile.h>
+#include <src/core/observables/KramersSectorOccupation.h>
 #include "src/core/fermion/Determinant.h"
 #include "src/core/io/Options.h"
 #include "src/core/util/Timer.h"
@@ -23,6 +24,7 @@ class Wavefunction {
     const Options &m_input;
     const std::unique_ptr<Propagator> &m_prop;
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
+    std::unique_ptr<KramersSectorOccupation> m_mk_sums = nullptr;
 
     WalkerList m_data;
     SpawnList m_send, m_recv;

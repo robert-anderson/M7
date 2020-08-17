@@ -39,6 +39,7 @@ struct Options {
     size_t ncycle = ~0ul;
     bool do_semistochastic = false;
     size_t ncycle_init_detsub = 1000;
+    bool calc_mk_walker_sums = false;
 
     bool validate() const;
 

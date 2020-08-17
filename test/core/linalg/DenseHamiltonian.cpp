@@ -71,3 +71,12 @@ TEST(DenseHamiltonian, h2o) {
 //    // compare the ground and first excited states to DIRAC's values
 //    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], ci_energy, 1e-7));
 }
+
+TEST(DenseHamiltonian, PyscfX2cCheck) {
+    AbInitioHamiltonian ham_src(defs::assets_root + "/H2O_X2C/FCIDUMP", false);
+    std::cout << ham_src.get_energy(ham_src.guess_reference(0))+76.075429077911 << std::endl;
+    DenseHamiltonian ham(ham_src);
+    auto solver = ham.diagonalize();
+    // compare the ground and first excited states to BAGEL's values
+    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -76.08150945314577, 1e-10));
+}

@@ -91,7 +91,6 @@ public:
         explicit AntiDatawordEnumerator(const DeterminantElement &data) : DatawordEnumerator(data){}
     };
 
-
     int spin() const {
         int spin = 0;
         size_t idataword = ~0ul;
@@ -101,10 +100,30 @@ public:
             while (work) {
                 size_t ibit = idataword*defs::nbit_data+bit_utils::next_setbit(work);
                 if (ibit < nsite()) ++spin;
+                else if (ibit >= 2*nsite()) return spin;
                 else --spin;
             }
         }
         return spin;
+    }
+
+    static size_t get_nspin_case(const size_t& nelec) {
+        /*
+         * number of possible spin values (nalpha-nbeta) when electron number is conserved
+         * 111000 3
+         * 110100 1
+         * 100110 -1
+         * 000111 -3
+         *
+         * 1100 2
+         * 1010 0
+         * 0011 -2
+         */
+        return (nelec-1)*2+!(nelec%2);
+    }
+
+    size_t nspin_case(const size_t& nelec) const {
+        return get_nspin_case(nsetbit());
     }
 
     int nalpha() const {

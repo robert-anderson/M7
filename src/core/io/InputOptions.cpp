@@ -96,4 +96,8 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
 
     add_option("--ncycle_init_detsub", ncycle_init_detsub,
                "number of cycles after start of variable shift epoch begin semistochastic epoch");
+
+    add_flag("--calc_mk_walker_sums", calc_mk_walker_sums,
+             "accumulate and output average walker occupations of Kramers sectors");
+
 }
