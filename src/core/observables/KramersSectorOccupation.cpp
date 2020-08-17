@@ -19,7 +19,7 @@ KramersSectorOccupation::~KramersSectorOccupation() {
     }
 }
 
-size_t KramersSectorOccupation::add(const DeterminantElement &det, const defs::wf_t &weight) {
+void KramersSectorOccupation::add(const DeterminantElement &det, const defs::wf_t &weight) {
     m_sum[det.nsetbit()+det.spin()]+=std::abs(weight);
 }
 

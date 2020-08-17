@@ -20,7 +20,7 @@ public:
 
     ~KramersSectorOccupation();
 
-    size_t add(const DeterminantElement& det, const defs::wf_t& weight);
+    void add(const DeterminantElement& det, const defs::wf_t& weight);
 
 };
 
