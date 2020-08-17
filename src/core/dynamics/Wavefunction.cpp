@@ -81,7 +81,7 @@ void Wavefunction::update(const size_t &icycle) {
             m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get(), 2);
             //m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
         }
-        m_mk_sums = std::unique_ptr<KramersSectorOccupation>(new KramersSectorOccupation(m_reference));
+        if (!m_mk_sums) m_mk_sums = std::unique_ptr<KramersSectorOccupation>(new KramersSectorOccupation(m_reference));
     }
 
     if (consts::float_is_zero(m_nwalker.reduced())) throw (std::runtime_error("All walkers died."));
