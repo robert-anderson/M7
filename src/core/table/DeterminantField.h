@@ -107,25 +107,6 @@ public:
         return spin;
     }
 
-    static size_t get_nspin_case(const size_t& nelec) {
-        /*
-         * number of possible spin values (nalpha-nbeta) when electron number is conserved
-         * 111000 3
-         * 110100 1
-         * 100110 -1
-         * 000111 -3
-         *
-         * 1100 2
-         * 1010 0
-         * 0011 -2
-         */
-        return (nelec-1)*2+!(nelec%2);
-    }
-
-    size_t nspin_case(const size_t& nelec) const {
-        return get_nspin_case(nsetbit());
-    }
-
     int nalpha() const {
         // number of electrons occupying spinors in the alpha spin channel
         int nalpha = 0;
