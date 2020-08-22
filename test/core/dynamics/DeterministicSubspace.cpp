@@ -97,7 +97,19 @@ TEST(DeterministicSubspace, BuildFromDeterminantConnections) {
 }
 
 TEST(DeterministicSubspace, BuildFromHighestWeighted) {
-    ASSERT_TRUE(0);
+    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
+    WalkerList walker_list("test walker list", ham.nsite(), 100);
+    auto ref = ham.guess_reference(0);
+    DeterministicSubspace detsub(walker_list);
+    detsub.build_from_det_connections(ref, &ham);
+
+    ASSERT_EQ(detsub.nrow_local(), walker_list.high_water_mark(0));
+    ASSERT_EQ(detsub.nrow_full(), mpi::nrank() * nconn_per_rank);
+
+    detsub.gather_and_project();
+    Reducible<defs::wf_comp_t> delta_nw;
+    detsub.update_weights(1.0, delta_nw);
 }
 
 TEST(DeterministicSubspace, SerializeToDisk) {

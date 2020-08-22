@@ -489,9 +489,10 @@ public:
     }
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, std::vector<T>& recv, const size_t &sendcount) {
-        std::vector<int> recvcounts(nrank());
-        std::vector<int> recvdispls(nrank());
+    static bool all_gatherv(const std::vector<T> &send, std::vector<T>& recv, const size_t &sendcount,
+        std::vector<int> recvcounts, std::vector<int> recvdispls()) {
+        recvcounts.resize(nrank());
+        recvdispls.resize(nrank());
         all_gather((int)sendcount, recvcounts);
         counts_to_displs_consec(recvcounts, recvdispls);
         const int nrecv = recvdispls.back()+recvcounts.back();

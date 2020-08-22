@@ -22,7 +22,7 @@ public:
     }
 
     const std::vector<T> &mpi_gather() {
-        mpi::all_gather(&m_local, 1, m_gathered.data(), 1);
+        mpi::all_gather(m_local, m_gathered);
         return m_gathered;
     }
 

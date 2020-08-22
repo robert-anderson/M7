@@ -126,3 +126,4 @@ TEST(MPIWrapper, MaxLocMinLoc){
     ASSERT_TRUE(mpi::all_minloc(local, mpi_min));
     ASSERT_EQ(min, mpi_min);
 }
+
