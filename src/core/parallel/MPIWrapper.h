@@ -186,6 +186,14 @@ struct mpi {
                MPI_Op op, int root, MPI_Comm comm)
  */
 
+    template<typename T>
+    static void counts_to_displs_consec(const std::vector<T>& sizes, std::vector<T>& displs){
+        ASSERT(sizes.size()==displs.size())
+        displs[0] = 0;
+        for (size_t i=1ul; i<sizes.size(); ++i) displs[i] = displs[i-1]+sizes[i-1];
+    }
+
+
 private:
     template<typename T>
     static bool reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1, size_t iroot = 0) {
@@ -473,6 +481,33 @@ public:
         return all_to_all(send, sendcount, recv, recvcount);
 #endif
     }
+
+    template<typename T>
+    static bool all_gather(const T& send, std::vector<T>& recv){
+        if (recv.size()<nrank()) recv.resize(nrank());
+        return all_gather(&send, 1, recv.data(), nrank());
+    }
+
+    template<typename T>
+    static bool all_gatherv(const std::vector<T> &send, std::vector<T>& recv, const size_t &sendcount) {
+        std::vector<int> recvcounts(nrank());
+        std::vector<int> recvdispls(nrank());
+        all_gather((int)sendcount, recvcounts);
+        counts_to_displs_consec(recvcounts, recvdispls);
+        const int nrecv = recvdispls.back()+recvcounts.back();
+        if (recv.size()<nrecv) recv.resize(nrecv);
+        return all_gatherv(send.data(), sendcount, recv.data(), recvcounts.data(), recvdispls.data());
+    }
+
+    template<typename T>
+    static bool all_gatherv(const std::vector<T> &send, std::vector<T>& recv) {
+        return all_gather(send, recv, send.size());
+    }
+
+
+
+
+
 
     static bool i_am(const size_t i);
 
