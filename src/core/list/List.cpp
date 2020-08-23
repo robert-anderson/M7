@@ -74,12 +74,8 @@ void List::communicate() {
 //        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
 //    }
 
-    auto tmp = mpi::all_to_allv(m_data.data(),
-                                utils::safe_narrow<defs::mpi_count>(sendcounts),
-                                utils::safe_narrow<defs::mpi_count>(senddispls),
-                                m_recv->m_data.data(),
-                                utils::safe_narrow<defs::mpi_count>(recvcounts),
-                                utils::safe_narrow<defs::mpi_count>(recvdispls));
+    auto tmp = mpi::all_to_allv(m_data.data(), sendcounts, senddispls,
+                                m_recv->m_data.data(), recvcounts, recvdispls);
 
     if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
@@ -97,8 +93,7 @@ void List::all_gather(List &local) {
     for (size_t i = 1ul; i < mpi::nrank(); ++i) displs[i] = displs[i - 1] + recvcounts[i - 1];
     size_t nrow = (displs.back() + recvcounts.back()) / m_padded_row_dsize;
     resize(nrow);
-    mpi::all_gatherv(local.m_data.data(), utils::safe_narrow<defs::mpi_count>(nsend),
-            m_data.data(), utils::safe_narrow<defs::mpi_count>(recvcounts), utils::safe_narrow<defs::mpi_count>(displs));
+    mpi::all_gatherv(local.m_data.data(), nsend, m_data.data(), recvcounts, displs);
     m_high_water_mark[0] = nrow;
 }
 

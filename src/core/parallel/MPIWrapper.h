@@ -18,6 +18,33 @@
 #include <src/core/util/defs.h>
 #include "src/core/util/utils.h"
 
+/**
+ * With MPI, we potentially have a typing issue. By default MPI libraries are typically
+ * compiled with the displacement and count types set to 32-bit signed ints. This is
+ * problematic whenever we want to communicate blocks of more than 2147483647 (2^32-1)
+ * words (over 17GB worth of doubles). M7 uses unsigned longs (size_t) throughout for
+ * integer offsets, indices, and sizes - a mismatch this wrapper must gracefully resolve.
+ *
+ * The utils::safe_narrow methods will raise a runtime exception if a narrowing conversion
+ * would result in a loss of information if the SAFE_NARROWING macro is defined. In normal
+ * usage, such an overflow is fairly unlikely. But we do not leave it to chance that such a
+ * large number of words will never be communicated in practice.
+ *
+ * defs::mpi_count and defs::mpi_counts are the scalar and vector typedefs for the MPI integer
+ *
+ * The cleanest way to acheive this aim is to expose only the overloads that use size_t and
+ * std::vector<size_t> (defs::inds) to define counts and displs. if sizeof(defs::mpi_count)
+ * is less than sizeof(size_t), a narrowing conversion is required, but since this is at the
+ * level of communication, and not inside a main loop, this minor overhead will more than
+ * pay for itself in code clarity. Hence, **defs::mpi_count and defs::mpi_counts should never
+ * be seen outside this module**.
+ *
+ * It is worth pointing out that the MPI shared memory windows employed in SharedArray.h and
+ * its dependents use the MPI_Aint type to store sizes in chars. This size is large enough
+ * to address any byte of memory, and so worries about narrowing in the MPI interface may be
+ * forgotten in this case.
+ */
+
 #ifdef HAVE_MPI
 
 template<typename T>
@@ -132,8 +159,6 @@ extern size_t g_nrank_on_node;
 
 struct mpi {
 
-
-
     static void setup_mpi_globals() {
 #ifdef HAVE_MPI
         int tmp;
@@ -185,12 +210,16 @@ struct mpi {
 
     static void barrier_on_node();
 
-/*
- * int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-               MPI_Op op, int root, MPI_Comm comm)
- */
+    static defs::mpi_count snrw(const size_t& i){
+        return utils::safe_narrow<defs::mpi_count>(i);
+    }
 
-    static void counts_to_displs_consec(const defs::mpi_counts &sizes, defs::mpi_counts &displs) {
+    static defs::mpi_counts snrw(const std::vector<size_t>& v){
+        return utils::safe_narrow<defs::mpi_count>(v);
+    }
+
+    template<typename T>
+    static void counts_to_displs_consec(const std::vector<T> &sizes, std::vector<T> &displs) {
         ASSERT(sizes.size() == displs.size())
         displs[0] = 0;
         for (size_t i = 1ul; i < sizes.size(); ++i) displs[i] = displs[i - 1] + sizes[i - 1];
@@ -199,9 +228,9 @@ struct mpi {
 
 private:
     template<typename T>
-    static bool reduce(const T *send, T *recv, MpiOp op, defs::mpi_count ndata = 1, size_t iroot = 0) {
+    static bool reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1, size_t iroot = 0) {
 #ifdef HAVE_MPI
-        return MPI_Reduce(send, recv, ndata, mpi_type<T>(), op_map[op], iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Reduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         std::memcpy(recv, send, sizeof(T)*ndata);
         return true;
@@ -209,9 +238,9 @@ private:
     }
 
     template<typename T>
-    static bool all_reduce(const T *send, T *recv, MpiOp op, defs::mpi_count ndata = 1) {
+    static bool all_reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1) {
 #ifdef HAVE_MPI
-        return MPI_Allreduce(send, recv, ndata, mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Allreduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         std::memcpy(recv, send, sizeof(T)*ndata);
         return true;
@@ -219,10 +248,15 @@ private:
     }
 
     template<typename T>
-    static bool all_reduce(const std::pair<T, defs::mpi_count> *send, std::pair<T, defs::mpi_count> *recv,
-                           MpiPairOp op, defs::mpi_count ndata = 1) {
+    static bool all_reduce(const std::pair<T, size_t> *send, std::pair<T, size_t> *recv,
+                           MpiPairOp op, size_t ndata = 1) {
 #ifdef HAVE_MPI
-        return MPI_Allreduce(send, recv, ndata, mpi_pair_type<T>(), pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+        const std::pair<T, defs::mpi_count> tmp_send{send->first, snrw(send->second)};
+        std::pair<T, defs::mpi_count> tmp_recv;
+        auto res = MPI_Allreduce(&tmp_send, &tmp_recv, ndata, mpi_pair_type<T>(), pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+        recv->first = tmp_recv.first;
+        recv->second = tmp_recv.second;
+        return res;
 #else
         std::memcpy(recv, send, sizeof(T)*ndata);
         return true;
@@ -234,12 +268,12 @@ public:
      * MAX REDUCE CONVENIENCE METHODS
      */
     template<typename T>
-    static bool max(const T *send, T *recv, defs::mpi_count ndata = 1, size_t iroot = 0) {
+    static bool max(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
         return reduce(send, recv, MpiMax, ndata, iroot);
     }
 
     template<typename T>
-    static bool all_max(const T *send, T *recv, defs::mpi_count ndata = 1) {
+    static bool all_max(const T *send, T *recv, size_t ndata = 1) {
         return all_reduce(send, recv, MpiMax, ndata);
     }
 
@@ -266,12 +300,12 @@ public:
      * MIN REDUCE CONVENIENCE METHODS
      */
     template<typename T>
-    static bool min(const T *send, T *recv, defs::mpi_count ndata = 1, size_t iroot = 0) {
+    static bool min(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
         return reduce(send, recv, MpiMin, ndata, iroot);
     }
 
     template<typename T>
-    static bool all_min(const T *send, T *recv, defs::mpi_count ndata = 1) {
+    static bool all_min(const T *send, T *recv, size_t ndata = 1) {
         return all_reduce(send, recv, MpiMin, ndata);
     }
 
@@ -298,12 +332,12 @@ public:
      * SUM REDUCE CONVENIENCE METHODS
      */
     template<typename T>
-    static bool sum(const T *send, T *recv, defs::mpi_count ndata = 1, size_t iroot = 0) {
+    static bool sum(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
         return reduce(send, recv, MpiSum, ndata, iroot);
     }
 
     template<typename T>
-    static bool all_sum(const T *send, T *recv, defs::mpi_count ndata = 1) {
+    static bool all_sum(const T *send, T *recv, size_t ndata = 1) {
         return all_reduce(send, recv, MpiSum, ndata);
     }
 
@@ -331,12 +365,12 @@ public:
      */
 
     template<typename T>
-    static bool land(const T *send, T *recv, defs::mpi_count ndata = 1, size_t iroot = 0) {
+    static bool land(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
         return reduce(send, recv, MpiLand, ndata, iroot);
     }
 
     template<typename T>
-    static bool all_land(const T *send, T *recv, defs::mpi_count ndata = 1) {
+    static bool all_land(const T *send, T *recv, size_t ndata = 1) {
         return all_reduce(send, recv, MpiLand, ndata);
     }
 
@@ -364,9 +398,9 @@ public:
      * BCAST
      */
     template<typename T>
-    static bool bcast(T *data, const defs::mpi_count ndata = 1, size_t iroot = 0) {
+    static bool bcast(T *data, size_t ndata = 1, size_t iroot = 0) {
 #ifdef HAVE_MPI
-        return MPI_Bcast((void *) data, ndata, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast((void *) data, snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return true;
 #endif
@@ -378,10 +412,10 @@ public:
     }
 
     template<typename T>
-    static bool bcast(std::vector<T> &data, defs::mpi_count ndata = 0, size_t iroot = 0) {
+    static bool bcast(std::vector<T> &data, size_t ndata = 0, size_t iroot = 0) {
 #ifdef HAVE_MPI
         if (!ndata) ndata = data.size();
-        return MPI_Bcast((void *) data.data(), ndata, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast((void *) data.data(), snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return true;
 #endif
@@ -393,8 +427,8 @@ public:
      */
 
     template<typename T>
-    static bool all_maxloc(const T &send, std::pair<T, defs::mpi_count> &recv) {
-        std::pair<T, int> tmp{send, irank()};
+    static bool all_maxloc(const T &send, std::pair<T, size_t> &recv) {
+        std::pair<T, size_t> tmp{send, irank()};
         return all_reduce(&tmp, &recv, MpiMaxLoc, 1);
     }
 
@@ -403,17 +437,17 @@ public:
      */
 
     template<typename T>
-    static bool all_minloc(const T &send, std::pair<T, defs::mpi_count> &recv) {
-        std::pair<T, int> tmp{send, irank()};
+    static bool all_minloc(const T &send, std::pair<T, size_t> &recv) {
+        std::pair<T, size_t> tmp{send, irank()};
         return all_reduce(&tmp, &recv, MpiMinLoc, 1);
     }
 
 
     template<typename T>
-    static bool all_to_all(const T *send, const defs::mpi_count nsend, T *recv, const defs::mpi_count nrecv) {
+    static bool all_to_all(const T *send, size_t nsend, T *recv, size_t nrecv) {
 #ifdef HAVE_MPI
-        return MPI_Alltoall((void *) send, nsend, mpi_type<T>(),
-                            (void *) recv, nrecv, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Alltoall((void *) send, snrw(nsend), mpi_type<T>(),
+                            (void *) recv, snrw(nrecv), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         ASSERT(nsend == nrecv);
         return all_reduce(send, recv, MpiMax, nsend);
@@ -422,13 +456,13 @@ public:
 
     template<typename T>
     static bool all_to_all(const std::vector<T> &send, std::vector<T> &recv) {
-        return all_to_all(send.data(), 1, recv.data(), 1);
+        return all_to_all(send.data(), 1ul, recv.data(), 1ul);
     }
 
 private:
     template<typename T>
     static bool all_to_allv(
-            const T *send, const int *sendcounts, const defs::mpi_count *senddispls,
+            const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
             T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
 #ifdef HAVE_MPI
         return MPI_Alltoallv(
@@ -455,24 +489,31 @@ private:
 public:
     template<typename T>
     static bool all_to_allv(
-            const T *send, const defs::mpi_counts &sendcounts, const defs::mpi_counts &senddispls,
-            T *recv, const defs::mpi_counts &recvcounts, const defs::mpi_counts &recvdispls) {
-        return all_to_allv(send, sendcounts.data(), senddispls.data(), recv, recvcounts.data(), recvdispls.data());
+            const T *send, const defs::inds &sendcounts, const defs::inds &senddispls,
+            T *recv, const defs::inds &recvcounts, const defs::inds &recvdispls) {
+        auto tmp_sendcounts = snrw(sendcounts);
+        auto tmp_senddispls = snrw(senddispls);
+        auto tmp_recvcounts = snrw(recvcounts);
+        auto tmp_recvdispls = snrw(recvdispls);
+        return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
+                           tmp_recvcounts.data(), tmp_recvdispls.data());
     }
 
     template<typename T>
     static bool all_gatherv(
-            const T *send, const defs::mpi_count &sendcount,
-            T *recv, const defs::mpi_counts &recvcounts, const defs::mpi_counts &recvdispls) {
-        return all_gatherv(send, sendcount, recv, recvcounts.data(), recvdispls.data());
+            const T *send, size_t sendcount,
+            T *recv, const defs::inds &recvcounts, const defs::inds &recvdispls) {
+        auto tmp_recvcounts = snrw(recvcounts);
+        auto tmp_recvdispls = snrw(recvdispls);
+        return all_gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data());
     }
 
     template<typename T>
     static bool all_gather(
-            const T *send, const defs::mpi_count sendcount, T *recv, const defs::mpi_count recvcount) {
+            const T *send, size_t sendcount, T *recv, size_t recvcount) {
 #ifdef HAVE_MPI
         return MPI_Allgather(
-                (void *) send, sendcount, mpi_type<T>(), recv, recvcount, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+                (void *) send, snrw(sendcount), mpi_type<T>(), recv, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return all_to_all(send, sendcount, recv, recvcount);
 #endif
@@ -481,32 +522,31 @@ public:
     template<typename T>
     static bool all_gather(const T &send, std::vector<T> &recv) {
         if (recv.size() < nrank()) recv.resize(nrank());
-        return all_gather(&send, 1, recv.data(), nrank());
+        return all_gather(&send, 1ul, recv.data(), nrank());
     }
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv, const defs::mpi_count &sendcount,
-                            defs::mpi_counts& recvcounts, defs::mpi_counts& recvdispls) {
+    static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv,
+                            defs::inds& recvcounts, defs::inds& recvdispls) {
         recvcounts.resize(nrank());
         recvdispls.resize(nrank());
-        all_gather((int) sendcount, recvcounts);
+        all_gather(sendcount, recvcounts);
         counts_to_displs_consec(recvcounts, recvdispls);
-        const int nrecv = recvdispls.back() + recvcounts.back();
+        const size_t nrecv = recvdispls.back() + recvcounts.back();
         if (recv.size() < nrecv) recv.resize(nrecv);
-        return all_gatherv(send.data(), sendcount, recv.data(), recvcounts.data(), recvdispls.data());
-    }
-
-    template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv, const defs::mpi_count &sendcount) {
-        defs::mpi_counts recvcounts, recvdispls;
         return all_gatherv(send.data(), sendcount, recv.data(), recvcounts, recvdispls);
     }
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv) {
-        return all_gatherv(send, recv, send.size());
+    static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv) {
+        defs::inds recvcounts, recvdispls;
+        return all_gatherv(send, sendcount, recv, recvcounts, recvdispls);
     }
 
+    template<typename T>
+    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv) {
+        return all_gatherv(send, send.size(), recv);
+    }
 
     static bool i_am(const size_t &i);
 

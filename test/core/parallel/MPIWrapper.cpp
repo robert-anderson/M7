@@ -54,8 +54,8 @@ TEST(MPIWrapper, Allgatherv){
     for (size_t i=0ul; i<n; ++i){
         send[i] = mpi::irank()+salt*(1+i);
     }
-    defs::mpi_counts recvcounts(mpi::nrank(), n);
-    defs::mpi_counts displs(mpi::nrank(), 0);
+    defs::inds recvcounts(mpi::nrank(), n);
+    defs::inds displs(mpi::nrank(), 0);
     for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+n;
 
     mpi::all_gatherv(send.data(), n, recv.data(), recvcounts, displs);
@@ -83,11 +83,11 @@ TEST(MPIWrapper, AllgathervRagged){
         ASSERT_EQ(recvcounts[i], ((i+1)*salt)%mod);
     }
 
-    defs::mpi_counts displs(mpi::nrank(), 0);
+    defs::inds displs(mpi::nrank(), 0);
     for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
 
     const size_t nrecv = displs.back()+recvcounts.back();
-    defs::mpi_counts recv(nrecv, 0ul);
+    defs::inds recv(nrecv, 0ul);
 
     mpi::all_gatherv(send.data(), nsend, recv.data(), recvcounts, displs);
 
@@ -103,21 +103,21 @@ TEST(MPIWrapper, AllgathervRagged){
 
 TEST(MPIWrapper, MaxLocMinLoc){
     typedef double T;
-    std::pair<T, int> reduced;
+    std::pair<T, size_t> reduced;
     auto to_T = [](size_t irank){
         return std::pow(1.13, (irank+7*3)%5+1);
     };
     T local = to_T(mpi::irank());
-    std::pair<T, int> max{std::numeric_limits<T>::min(), 0};
-    std::pair<T, int> min{std::numeric_limits<T>::max(), 0};
+    std::pair<T, size_t> max{std::numeric_limits<T>::min(), 0};
+    std::pair<T, size_t> min{std::numeric_limits<T>::max(), 0};
     for (size_t i=0ul; i<mpi::nrank(); ++i) {
         auto d = to_T(i);
         if (d>max.first) max = {d, i};
         if (d<min.first) min = {d, i};
     }
 
-    std::pair<T, int> mpi_max{std::numeric_limits<T>::min(), 0};
-    std::pair<T, int> mpi_min{std::numeric_limits<T>::max(), 0};
+    std::pair<T, size_t> mpi_max{std::numeric_limits<T>::min(), 0};
+    std::pair<T, size_t> mpi_min{std::numeric_limits<T>::max(), 0};
 
     ASSERT_EQ(MPI_DOUBLE_INT, mpi_pair_type<T>());
 

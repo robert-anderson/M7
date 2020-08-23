@@ -47,7 +47,7 @@ public:
     void report_top_weighted(){
         const size_t n = 15;
         std::cout << "Top weighted configurations:" << std::endl;
-        auto top = top_weighted(n);
+        auto top = highest_weighted_row_inds_local(n);
         size_t i = 0ul;
         for (auto iter=top.begin(); iter!=top.end(); iter++) {
             if (i++==n) break;
@@ -113,7 +113,14 @@ public:
         return ninitiator;
     }
 
-    std::list<size_t> top_weighted(size_t n) {
+    /**
+     * @param n
+     *      maximum number of rows to find
+     * @return
+     *      ordered list no longer than n elements of row indices with the
+     *      largest weight magnitudes
+     */
+    std::list<size_t> highest_weighted_row_inds_local(size_t n) {
         std::list<size_t> result;
         for (size_t irow = 0ul; irow < high_water_mark(0); ++irow) {
             const auto abs_weight = std::abs(*m_weight(irow));
@@ -127,6 +134,32 @@ public:
         }
         return result;
     }
+
+    /**
+     * @param row_inds
+     *      will contain indices of the walker list local to
+     * @param ndet_total
+     *      the number of determinants sought in total
+     * @param ndet_local
+     *      the number of determinants sought locally before gatherv-ing,
+     *      this is a memory-efficiency measure, since ndet_total may be
+     *      large. Setting ndet_local to ndet_total will succeed in one
+     *      call, but setting a small value of ndet_local may entail a
+     *      subsequent recursive call with a larger value
+     */
+    void highest_weighted_row_inds(defs::inds& row_inds, size_t ndet_total, size_t ndet_local){
+        auto local_irow_list = highest_weighted_row_inds_local(ndet_local);
+        std::vector<size_t> local_irows(local_irow_list.begin(), local_irow_list.end());
+        std::vector<defs::wf_comp_t> local_weights;
+        local_weights.reserve(local_irows.size());
+        for (auto & local_irow : local_irows){
+            local_weights.push_back(*m_weight(local_irow));
+        }
+        std::vector<size_t> global_irows;
+        mpi::all_gatherv(local_irows, global_irows);
+        mpi::all_gatherv(local_irows, global_irows);
+    }
+
 };
 
 

@@ -152,7 +152,7 @@ $(function() {
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    ~<a class="code" href="structWalkerList.html">WalkerList</a>() {</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">size_t</span> n = 15;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Top weighted configurations:&quot;</span> &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keyword">auto</span> top = top_weighted(n);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keyword">auto</span> top = highest_weighted_row_inds_local(n);</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordtype">size_t</span> i = 0ul;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">auto</span> iter=top.begin(); iter!=top.end(); iter++) {</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            <span class="keywordflow">if</span> (i++==n) <span class="keywordflow">break</span>;</div>
@@ -209,7 +209,7 @@ $(function() {
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keywordflow">return</span> ninitiator;</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    }</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    std::list&lt;size_t&gt; top_weighted(<span class="keywordtype">size_t</span> n) {</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    std::list&lt;size_t&gt; highest_weighted_row_inds_local(<span class="keywordtype">size_t</span> n) {</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        std::list&lt;size_t&gt; result;</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> irow = 0ul; irow &lt; high_water_mark(0); ++irow) {</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;            <span class="keyword">const</span> <span class="keyword">auto</span> abs_weight = std::abs(*m_weight(irow));</div>

@@ -11,8 +11,8 @@
 template<typename T>
 class Reducible : public Distributed<T> {
 protected:
-    std::pair<T, int> m_reduced {std::numeric_limits<T>::max(),
-                                 std::numeric_limits<int>::max()}; // cached result of last all_reduce operation
+    std::pair<T, size_t> m_reduced {std::numeric_limits<T>::max(),
+                                    std::numeric_limits<size_t>::max()}; // cached result of last all_reduce operation
 public:
     using Distributed<T>::m_local;
     using Distributed<T>::operator=;
@@ -23,7 +23,7 @@ public:
         return m_reduced.first;
     }
 
-    const int& irank() const {
+    const size_t& irank() const {
         return m_reduced.second;
     }
 
@@ -48,12 +48,12 @@ public:
         return m_reduced.first;
     }
 
-    const int& mpi_minloc(){
+    const size_t& mpi_minloc(){
         mpi::all_minloc(m_local, m_reduced);
         return m_reduced.second;
     }
 
-    const int& mpi_maxloc(){
+    const size_t& mpi_maxloc(){
         mpi::all_maxloc(m_local, m_reduced);
         return m_reduced.second;
     }
