@@ -21,7 +21,6 @@
 #endif
 #endif
 
-
 #ifdef NDEBUG
 #define	ASSERT(e) {}
 #else
@@ -49,6 +48,8 @@
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";
     typedef std::vector<size_t> inds;
+    typedef int mpi_count;
+    typedef std::vector<mpi_count> mpi_counts;
     /*
      * determinant decoding / sampling requires statically allocated arrays.
      * since the exact size of the determinant is not known at compile time,

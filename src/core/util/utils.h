@@ -16,6 +16,7 @@
 #include <climits>
 #include <iomanip>
 #include <cstring>
+#include <algorithm>
 
 namespace utils {
 
@@ -93,6 +94,23 @@ namespace utils {
         print<T>(v.cbegin(), v.cend());
     }
 
+    template<typename narrow_t, typename wide_t>
+    narrow_t safe_narrow(const wide_t &wide) {
+        static_assert(std::is_convertible<wide_t, narrow_t>::value, "incompatible types");
+        static_assert(sizeof(wide_t) >= sizeof(narrow_t), "wide type must be at least as long as narrow type");
+#ifdef SAFE_NARROWING
+        if (static_cast<wide_t>(static_cast<narrow_t>(wide)) != wide) throw std::runtime_error("narrowing loses information");
+#endif
+        return static_cast<narrow_t>(wide);
+    }
+
+    template<typename narrow_t, typename wide_t>
+    std::vector<narrow_t> safe_narrow(const std::vector<wide_t>& wides) {
+        std::vector<narrow_t> narrows;
+        narrows.reserve(wides.size());
+        for (auto& it : wides) narrows.push_back(utils::safe_narrow<defs::mpi_count>(it));
+        return narrows;
+    }
 }
 
 namespace integer_utils {
@@ -248,7 +266,7 @@ namespace string_utils {
         std::string mutable_copy = line;
         std::vector<std::string> result{};
         char *ptr;
-        ptr = strtok(const_cast<char*>(mutable_copy.c_str()), delimiters.c_str());
+        ptr = strtok(const_cast<char *>(mutable_copy.c_str()), delimiters.c_str());
         while (ptr != nullptr) {
             result.emplace_back(ptr);
             ptr = strtok(nullptr, delimiters.c_str());
@@ -256,26 +274,23 @@ namespace string_utils {
         return result;
     }
 
-    static std::string yn(bool t){
-        return t ? "yes":"no";
+    static std::string yn(bool t) {
+        return t ? "yes" : "no";
     }
 
-    static std::string YN(bool t){
-        return t ? "YES":"NO";
+    static std::string YN(bool t) {
+        return t ? "YES" : "NO";
     }
 
-    static std::string memsize(size_t nbyte){
+    static std::string memsize(size_t nbyte) {
         if (nbyte < 1e3) {
-            return std::to_string(nbyte)+"B";
-        }
-        else if (nbyte < 1e6){
-            return std::to_string(nbyte/1.0e3)+"KB";
-        }
-        else if (nbyte < 1e9){
-            return std::to_string(nbyte/(1.0e6))+"MB";
-        }
-        else{
-            return std::to_string(nbyte/(1.0e9))+"GB";
+            return std::to_string(nbyte) + "B";
+        } else if (nbyte < 1e6) {
+            return std::to_string(nbyte / 1.0e3) + "KB";
+        } else if (nbyte < 1e9) {
+            return std::to_string(nbyte / (1.0e6)) + "MB";
+        } else {
+            return std::to_string(nbyte / (1.0e9)) + "GB";
         }
     }
 }

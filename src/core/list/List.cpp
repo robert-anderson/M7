@@ -25,14 +25,14 @@ size_t List::push(const size_t &isegment, const size_t &nrow) {
     ASSERT(isegment < m_nsegment);
     auto tmp = m_high_water_mark[isegment] += nrow;
     if (tmp > m_nrow_per_segment) throw std::runtime_error("Reached capacity of List");
-    return tmp-nrow;
+    return tmp - nrow;
 }
 
 size_t List::expand_push(const size_t &isegment, const size_t &nrow, double factor) {
     // convenient but inefficient
-    ASSERT(factor>=1.0);
-    if (m_high_water_mark[isegment] + nrow > nrow_per_segment()){
-        resize(factor*double(m_high_water_mark[isegment] + nrow));
+    ASSERT(factor >= 1.0);
+    if (m_high_water_mark[isegment] + nrow > nrow_per_segment()) {
+        resize(factor * double(m_high_water_mark[isegment] + nrow));
     }
     return push(isegment, nrow);
 }
@@ -63,19 +63,23 @@ void List::communicate() {
 //    const auto ndword_recv_tot = recvdispls[mpi::nrank() - 1] + recvcounts[mpi::nrank() - 1];
 
 
-    logger::write("Send List usage fraction: "+
-                  std::to_string(sendcounts[mpi::irank()]/double(m_segment_dsize)), 0, logger::debug);
-    logger::write("Receive List usage fraction: "+
-    std::to_string(recvcounts[mpi::irank()]/double(m_segment_dsize)), 0, logger::debug);
+    logger::write("Send List usage fraction: " +
+                  std::to_string(sendcounts[mpi::irank()] / double(m_segment_dsize)), 0, logger::debug);
+    logger::write("Receive List usage fraction: " +
+                  std::to_string(recvcounts[mpi::irank()] / double(m_segment_dsize)), 0, logger::debug);
 
-    ASSERT(recvcounts[mpi::irank()]<m_recv->dsize())
+    ASSERT(recvcounts[mpi::irank()] < m_recv->dsize())
 //    if (ndword_recv_tot > m_recv->dsize()) {
 //        logger::write("Insufficient space for received data: reallocating recv list...");
 //        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
 //    }
 
-    auto tmp = mpi::all_to_allv(m_data.data(), sendcounts, senddispls,
-                                m_recv->m_data.data(), recvcounts, recvdispls);
+    auto tmp = mpi::all_to_allv(m_data.data(),
+                                utils::safe_narrow<defs::mpi_count>(sendcounts),
+                                utils::safe_narrow<defs::mpi_count>(senddispls),
+                                m_recv->m_data.data(),
+                                utils::safe_narrow<defs::mpi_count>(recvcounts),
+                                utils::safe_narrow<defs::mpi_count>(recvdispls));
 
     if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
@@ -84,23 +88,24 @@ void List::communicate() {
     zero();
 }
 
-void List::all_gather(List &local){
+void List::all_gather(List &local) {
     ASSERT(compatible_with(local));
     defs::inds recvcounts(mpi::nrank());
     defs::inds displs(mpi::nrank(), 0ul);
-    size_t nsend = local.high_water_mark(0)*m_padded_row_dsize;
+    size_t nsend = local.high_water_mark(0) * m_padded_row_dsize;
     mpi::all_gather(&nsend, 1, recvcounts.data(), 1);
-    for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
-    size_t nrow = (displs.back()+recvcounts.back())/m_padded_row_dsize;
+    for (size_t i = 1ul; i < mpi::nrank(); ++i) displs[i] = displs[i - 1] + recvcounts[i - 1];
+    size_t nrow = (displs.back() + recvcounts.back()) / m_padded_row_dsize;
     resize(nrow);
-    mpi::all_gatherv(local.m_data.data(), nsend, m_data.data(), recvcounts, displs);
+    mpi::all_gatherv(local.m_data.data(), utils::safe_narrow<defs::mpi_count>(nsend),
+            m_data.data(), utils::safe_narrow<defs::mpi_count>(recvcounts), utils::safe_narrow<defs::mpi_count>(displs));
     m_high_water_mark[0] = nrow;
 }
 
 
 void List::expand(size_t delta_nrow) {
     Table::expand(delta_nrow);
-    if (m_recv) m_recv->expand(mpi::nrank()*delta_nrow);
+    if (m_recv) m_recv->expand(mpi::nrank() * delta_nrow);
 }
 
 std::string List::to_string() const {

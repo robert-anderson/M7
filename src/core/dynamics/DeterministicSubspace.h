@@ -46,8 +46,8 @@ class DeterministicSubspace {
      */
     SparseMatrix<defs::ham_t> m_sparse_ham;
 
-    defs::inds m_recvcounts;
-    defs::inds m_displs;
+    defs::mpi_counts m_recvcounts;
+    defs::mpi_counts m_displs;
 
     void build_hamiltonian(const Hamiltonian *ham) {
         ASSERT(m_sparse_ham.empty());
@@ -69,10 +69,10 @@ class DeterministicSubspace {
         m_local_weights.resize(nrow_local(), 0.0);
         m_local_h_weights.resize(nrow_local(), 0.0);
         m_full_weights.resize(nrow_full(), 0.0);
-        size_t nrow = nrow_local();
-        mpi::all_gather(&nrow, 1, m_recvcounts.data(), 1);
+        defs::mpi_count nrow = nrow_local();
+        mpi::all_gather(nrow, m_recvcounts);
         for (size_t i = 1ul; i < mpi::nrank(); ++i) m_displs[i] = m_displs[i - 1] + m_recvcounts[i - 1];
-        ASSERT(m_displs.back() + m_recvcounts.back() == nrow_full());
+        ASSERT(m_displs.back() + m_recvcounts.back() == utils::safe_narrow<defs::mpi_count>(nrow_full()));
     }
 
 public:
@@ -90,7 +90,7 @@ public:
             m_local_weights[irow_local] = *m_walker_list.m_weight(irow_walker_list);
             ASSERT(m_local_weights[irow_local] == m_local_weights[irow_local])
         }
-        ASSERT(nrow_local() == m_recvcounts[mpi::irank()])
+        ASSERT(utils::safe_narrow<defs::mpi_count>(nrow_local()) == m_recvcounts[mpi::irank()])
         ASSERT(nrow_local() == m_local_weights.size())
         mpi::all_gatherv(m_local_weights.data(), nrow_local(), m_full_weights.data(), m_recvcounts, m_displs);
         m_local_h_weights.assign(m_local_h_weights.size(), 0);
@@ -154,6 +154,7 @@ public:
     }
 
     void build_from_highest_weighted(const WalkerList& list, size_t ndet_tot) {
+        /*
         defs::inds row_inds;
 
         Connection conn(ref);
@@ -164,6 +165,7 @@ public:
             if (conn.nexcit() <= nexcit_max) add_determinant(irow);
         }
         build_hamiltonian(ham);
+         */
     }
 
 };

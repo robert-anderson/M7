@@ -54,8 +54,8 @@ TEST(MPIWrapper, Allgatherv){
     for (size_t i=0ul; i<n; ++i){
         send[i] = mpi::irank()+salt*(1+i);
     }
-    defs::inds recvcounts(mpi::nrank(), n);
-    defs::inds displs(mpi::nrank(), 0);
+    defs::mpi_counts recvcounts(mpi::nrank(), n);
+    defs::mpi_counts displs(mpi::nrank(), 0);
     for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+n;
 
     mpi::all_gatherv(send.data(), n, recv.data(), recvcounts, displs);
@@ -83,11 +83,11 @@ TEST(MPIWrapper, AllgathervRagged){
         ASSERT_EQ(recvcounts[i], ((i+1)*salt)%mod);
     }
 
-    defs::inds displs(mpi::nrank(), 0);
+    defs::mpi_counts displs(mpi::nrank(), 0);
     for (size_t i=1ul; i<mpi::nrank(); ++i) displs[i] = displs[i-1]+recvcounts[i-1];
 
     const size_t nrecv = displs.back()+recvcounts.back();
-    defs::inds recv(nrecv, 0ul);
+    defs::mpi_counts recv(nrecv, 0ul);
 
     mpi::all_gatherv(send.data(), nsend, recv.data(), recvcounts, displs);
 

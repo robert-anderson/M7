@@ -50,7 +50,7 @@ void mpi::finalize() {
 #endif
 }
 
-bool mpi::i_am(const size_t i) {
+bool mpi::i_am(const size_t& i) {
     return irank() == i;
 }
 
@@ -58,7 +58,7 @@ bool mpi::i_am_root() {
     return i_am(0);
 }
 
-bool mpi::on_node_i_am(const size_t i) {
+bool mpi::on_node_i_am(const size_t& i) {
     return irank_on_node() == i;
 }
 
