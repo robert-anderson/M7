@@ -59,6 +59,8 @@ public:
 
     size_t add_field(Field *field);
 
+    bool owns_field(Field *field);
+
     void update_last_field();
 
     virtual void print();

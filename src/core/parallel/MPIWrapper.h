@@ -538,6 +538,12 @@ public:
     }
 
     template<typename T>
+    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv,
+                            defs::inds& recvcounts, defs::inds& recvdispls) {
+        return all_gatherv(send, send.size(), recv, recvcounts, recvdispls);
+    }
+
+    template<typename T>
     static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv) {
         defs::inds recvcounts, recvdispls;
         return all_gatherv(send, sendcount, recv, recvcounts, recvdispls);

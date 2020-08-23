@@ -103,7 +103,6 @@ TEST(MPIWrapper, AllgathervRagged){
 
 TEST(MPIWrapper, MaxLocMinLoc){
     typedef double T;
-    std::pair<T, size_t> reduced;
     auto to_T = [](size_t irank){
         return std::pow(1.13, (irank+7*3)%5+1);
     };
