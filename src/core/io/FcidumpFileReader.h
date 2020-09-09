@@ -105,29 +105,29 @@ public:
         return result;
     }
 
-    size_t nind(const defs::inds& inds){
+    static size_t nind(const defs::inds& inds){
         return std::count_if(inds.begin(), inds.end(), [](const size_t& a){return a!=~0ul;});
     }
 
-    const size_t& norb()const{
+    const size_t& norb() const{
         return m_norb;
     }
-    const size_t& nelec()const{
+    const size_t& nelec() const{
         return m_nelec;
     }
-    const size_t& nspatorb()const{
+    const size_t& nspatorb() const{
         return m_nspatorb;
     }
-    const bool& spin_resolved()const{
+    const bool& spin_resolved() const{
         return m_spin_resolved;
     }
-    bool spin_conserving_1e()const{
+    bool spin_conserving_1e() const{
         return m_spin_conserving_1e;
     }
-    bool spin_conserving_2e()const{
+    bool spin_conserving_2e() const{
         return m_spin_conserving_2e;
     }
-    bool spin_conserving()const{
+    bool spin_conserving() const{
         return m_spin_conserving_1e && m_spin_conserving_2e;
     }
     void inds_to_orbs(defs::inds& inds){
