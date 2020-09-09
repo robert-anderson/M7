@@ -52,6 +52,8 @@ class DeterministicSubspace {
     void build_hamiltonian(const Hamiltonian *ham) {
         ASSERT(m_sparse_ham.empty());
         m_full_subspace_list.all_gather(m_local_subspace_list);
+        std::cout << "Building semistochastic sparse hamiltonian with " << nrow_full() << " total rows and "
+            << nrow_local() << "local rows" << std::endl;
         m_sparse_ham.resize(nrow_local());
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             // loop over local subspace (H rows)

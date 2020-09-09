@@ -121,8 +121,8 @@ TEST(FciqmcCalculation, SemiStochasticPropagation4Fold){
     options.nwalker_initial = 100;
     options.ncycle = 50000;
     options.do_semistochastic = true;
-    options.walker_fraction_semistoch = 0.0;
-    options.ncycle_init_detsub = 3000;
+    options.walker_fraction_semistoch = 0.01;
+    options.ncycle_init_detsub = 1000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
     if (mpi::i_am_root()) {
