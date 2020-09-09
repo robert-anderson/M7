@@ -78,7 +78,12 @@ void Wavefunction::update(const size_t &icycle) {
                 m_input.do_semistochastic && (icycle > shift_epoch.start() + m_input.ncycle_init_detsub))){
             ASSERT(!m_detsub)
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_data));
-            m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get(), 2);
+            if (m_input.walker_fraction_semistoch<1.0){
+                m_detsub->build_from_nw_fraction(m_input.walker_fraction_semistoch, m_nwalker.reduced(), m_prop->m_ham.get());
+            }
+            else {
+                m_detsub->build_from_det_connections(m_reference, m_prop->m_ham.get(), 2);
+            }
             //m_detsub->build_from_whole_walker_list(m_prop->m_ham.get());
         }
         if (!m_mk_sums) m_mk_sums = std::unique_ptr<KramersSectorOccupation>(new KramersSectorOccupation(m_reference));

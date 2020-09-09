@@ -165,6 +165,6 @@ size_t Table::dsize() const {
     return m_segment_dsize * m_nsegment;
 }
 
-bool Table::owns_field(Field *field) {
+bool Table::owns_field(const Field *field) {
     return field->m_table==this;
 }

@@ -59,7 +59,7 @@ public:
 
     size_t add_field(Field *field);
 
-    bool owns_field(Field *field);
+    bool owns_field(const Field *field);
 
     void update_last_field();
 

@@ -36,7 +36,7 @@ void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
 }
 
 void MagnitudeLogger::synchronize(size_t icycle) {
-    if (m_input.dynamic_tau) {
+    if (!m_input.static_tau) {
         m_enough_singles_for_dynamic_tau.update(icycle, m_nsingle>m_input.nenough_spawns_for_dynamic_tau);
         m_enough_doubles_for_dynamic_tau.update(icycle, m_ndouble>m_input.nenough_spawns_for_dynamic_tau);
         if (m_enough_singles_for_dynamic_tau && m_enough_doubles_for_dynamic_tau) {
