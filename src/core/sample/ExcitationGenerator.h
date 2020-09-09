@@ -17,7 +17,7 @@ protected:
     const size_t m_nelec;
     const size_t m_norb_pair;
     const size_t m_nelec_pair;
-    const bool m_spin_conserving;
+    const bool m_spin_conserving_1e, m_spin_conserving_2e;
 public:
     ExcitationGenerator(const Hamiltonian *h, PRNG &prng) :
             m_h(h), m_prng(prng),
@@ -25,7 +25,8 @@ public:
             m_nelec(m_h->nelec()),
             m_norb_pair(integer_utils::nspair(m_norb)),
             m_nelec_pair(integer_utils::nspair(m_nelec)),
-            m_spin_conserving(m_h->spin_conserving()) {
+            m_spin_conserving_1e(m_h->spin_conserving_1e()),
+            m_spin_conserving_2e(m_h->spin_conserving_2e()) {
         std::cout << "Excitation generator base initialized" << std::endl;
     }
 

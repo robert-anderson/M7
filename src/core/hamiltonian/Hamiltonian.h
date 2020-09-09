@@ -21,11 +21,11 @@ class Hamiltonian {
 protected:
     const size_t m_nelec;
     const size_t m_nsite;
-    const bool m_spin_conserving;
+    const bool m_spin_conserving_1e, m_spin_conserving_2e;
     const bool m_complex_valued;
 
 public:
-    Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving, bool complex_valued);
+    Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e, bool complex_valued);
 
     consts::component_t<defs::ham_t>::type get_energy(const DeterminantElement &det) const {
         return consts::real(get_element_0(det));
@@ -87,8 +87,16 @@ public:
         return m_nsite;
     }
 
-    const bool& spin_conserving() const {
-        return m_spin_conserving;
+    bool spin_conserving_1e() const {
+        return m_spin_conserving_1e;
+    }
+
+    bool spin_conserving_2e() const {
+        return m_spin_conserving_2e;
+    }
+
+    bool spin_conserving() const {
+        return m_spin_conserving_1e && m_spin_conserving_2e;
     }
 
     const size_t& nelec() const {

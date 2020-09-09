@@ -85,16 +85,16 @@ void StochasticPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdia
         // the probability that each unit walker will die
         auto death_rate = (*hdiag - m_shift) * tau();
         if (death_rate < 0) {
-            // cloning
-            weight = m_prng.stochastic_round(*weight, 1.0) * (1 - death_rate);
+            // clone continuously
+            weight *= (1 - death_rate);
         }
         if (death_rate <= 1) {
-            //death
+            // kill stochastically
             weight = m_prng.stochastic_round(*weight, 1.0) * (1 - death_rate);
         } else {
-            // create anti-particles
+            // create anti-particles continuously
             //const auto birth_rate = death_rate - 1;
-            weight = m_prng.stochastic_round(*weight, 1.0) * (1 - death_rate);
+            weight *= (1 - death_rate);
         }
 #ifdef VERBOSE_DEBUGGING
         std::cout << consts::verb << consts::chevs << "STOCHASTIC DEATH" << std::endl;
