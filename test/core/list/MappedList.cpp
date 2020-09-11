@@ -24,3 +24,16 @@ TEST(MappedList, DataIntegrity) {
     ASSERT_NE(irow, ~0ul);
     ASSERT_EQ((size_t)list.value(irow), 27);
 }
+
+
+/*
+struct MultipleHashingColumnsList : public MappedList<NumericElement<size_t>> {
+    NumericField<size_t> key, value;
+    TestMappedList(size_t nbucket, size_t nsegment=1):
+            MappedList("test mapped list", key, nbucket), key(this), value(this) {}
+};
+
+TEST(MappedList, MultipleHashingColumns) {
+
+}
+*/

@@ -6,7 +6,7 @@
 #define M7_BITSETENUMERATOR_H
 
 #include <x86intrin.h>
-#include <src/core/table/DeterminantField.h>
+#include <src/core/basis/DeterminantField.h>
 #include "Enumerator.h"
 #include "src/core/table/BitsetField.h"
 #include "src/core/util/defs.h"

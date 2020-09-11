@@ -6,8 +6,8 @@
 #define M7_HAMILTONIANCONNECTIONENUMERATOR_H
 
 
-#include <src/core/fermion/Connection.h>
-#include <src/core/hamiltonian/Hamiltonian.h>
+#include "src/core/basis/Connection.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 #include "Enumerator.h"
 #include "CombinationEnumerator.h"
 

@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/core/fermion/DecodedDeterminant.h>
+#include "src/core/basis/DecodedDeterminant.h"
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 
 TEST(AbInitioHamiltonian, DhfEnergy) {

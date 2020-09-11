@@ -12,7 +12,7 @@
 #include "src/core/io/FciqmcStatsFile.h"
 #include "src/core/io/ParallelizationStatsFile.h"
 #include "src/core/io/Options.h"
-#include "src/core/fermion/DecodedDeterminant.h"
+#include "src/core/basis/DecodedDeterminant.h"
 #include "Propagator.h"
 #include "Wavefunction.h"
 

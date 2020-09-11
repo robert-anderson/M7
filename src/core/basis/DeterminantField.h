@@ -6,7 +6,7 @@
 #define SANDBOX2_DETERMINANTFIELD_H
 
 
-#include "BitsetField.h"
+#include "src/core/table/BitsetField.h"
 #include "src/core/enumerator/Enumerator.h"
 
 class DeterminantField;

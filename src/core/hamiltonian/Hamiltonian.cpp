@@ -2,9 +2,9 @@
 // Created by rja on 27/02/2020.
 //
 
-#include <src/core/enumerator/ContainerCombinationEnumerator.h>
-#include <src/core/fermion/DecodedDeterminant.h>
-#include <src/core/parallel/RankAllocator.h>
+#include "src/core/enumerator/ContainerCombinationEnumerator.h"
+#include "src/core/basis/DecodedDeterminant.h"
+#include "src/core/parallel/RankAllocator.h"
 #include "Hamiltonian.h"
 
 Hamiltonian::Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e,

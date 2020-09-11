@@ -6,11 +6,11 @@
 #define M7_REFERENCE_H
 
 
-#include <src/core/parallel/RankAllocator.h>
-#include <src/core/fermion/Determinant.h>
-#include <src/core/fermion/Connection.h>
-#include <src/core/parallel/Reducible.h>
-#include <src/core/hamiltonian/Hamiltonian.h>
+#include "src/core/parallel/RankAllocator.h"
+#include "src/core/basis/Determinant.h"
+#include "src/core/basis/Connection.h"
+#include "src/core/parallel/Reducible.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 #include "WalkerList.h"
 
 class Reference : public Determinant {

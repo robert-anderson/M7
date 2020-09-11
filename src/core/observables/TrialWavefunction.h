@@ -57,9 +57,9 @@
 #define M7_TRIALWAVEFUNCTION_H
 
 
-#include <src/core/dynamics/WalkerList.h>
-#include <src/core/fermion/DeterminantList.h>
-#include <src/core/fermion/MappedDeterminantList.h>
+#include "src/core/dynamics/WalkerList.h"
+#include "src/core/basis/DeterminantList.h"
+#include "src/core/basis/MappedDeterminantList.h"
 
 class TrialWavefunction {
 
@@ -81,8 +81,6 @@ public:
     void add_determinant(const size_t& irow){
 
     }
-
-
 
 };
 

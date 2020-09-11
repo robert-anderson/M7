@@ -4,8 +4,8 @@
 
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
-#include "src/core/fermion/Determinant.h"
-#include "src/core/fermion/Connection.h"
+#include "src/core/basis/Determinant.h"
+#include "src/core/basis/Connection.h"
 
 TEST(Determinant, Phase) {
 

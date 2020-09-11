@@ -7,7 +7,7 @@
 
 
 #include <src/core/list/List.h>
-#include <src/core/table/DeterminantField.h>
+#include <src/core/basis/DeterminantField.h>
 
 struct DeterminantList : public List {
     DeterminantField m_determinant;

@@ -23,6 +23,7 @@ size_t Element::dsize() const {
 }
 
 bool Element::compatible_with(const Element &rhs) const {
+    ASSERT(rhs.m_field)
     return m_field->compatible_with(*rhs.m_field);
 }
 

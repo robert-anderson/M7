@@ -2,9 +2,8 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
-#include <src/core/fermion/DecodedDeterminant.h>
-#include <src/core/fermion/Connection.h>
-#include <src/core/io/Logging.h>
+#include "src/core/basis/Connection.h"
+#include "src/core/io/Logging.h"
 #include "AbInitioHamiltonian.h"
 
 const AbInitioHamiltonian::ints1_t &AbInitioHamiltonian::int_1() const { return m_int_1; }

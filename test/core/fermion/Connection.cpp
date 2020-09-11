@@ -2,9 +2,9 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#include <src/core/fermion/Determinant.h>
-#include <src/core/fermion/Connection.h>
-#include <src/core/io/SparseArrayFileReader.h>
+#include "src/core/basis/Determinant.h"
+#include "src/core/basis/Connection.h"
+#include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
 
 TEST(Connection, ParticleNumberConserving){

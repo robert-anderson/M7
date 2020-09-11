@@ -6,7 +6,7 @@
 #define M7_SPAWNLIST_H
 
 #include <src/core/table/FlagField.h>
-#include <src/core/table/DeterminantField.h>
+#include <src/core/basis/DeterminantField.h>
 #include <src/core/table/NumericField.h>
 #include <src/core/list/List.h>
 

@@ -2,7 +2,8 @@
 // Created by Robert John Anderson on 2020-03-29.
 //
 
-#include <src/core/table/DeterminantField.h>
+#include "src/core/basis/DeterminantField.h"
+#include "src/core/basis/PermanentField.h"
 #include "gtest/gtest.h"
 #include "src/core/table/Table.h"
 #include "src/core/table/NumericField.h"
@@ -84,5 +85,33 @@ TEST(Table, DataIntegrityDeterminants) {
     std::vector<DeterminantElement> v;
     table.test_dets(0, 0, 0).set(defs::inds{1, 4, 6, 23});
     v.push_back(table.test_dets(0, 0, 0));
+    std::cout << v[0].to_string() <<std::endl;
+}
+
+
+struct TestTable3 : public Table {
+    DeterminantField test_dets;
+    PermanentField test_perms;
+
+    TestTable3(size_t nsegment, size_t nspatorb, size_t ndet, size_t nmode, size_t nboson_cutoff) :
+            Table("test table", nsegment),
+            test_dets(this, ndet, nspatorb),
+            test_perms(this, nmode, nboson_cutoff){}
+};
+
+TEST(Table, DataIntegrityPermanents) {
+    const size_t nsegment = 8;
+    const size_t nrow = 6;
+    const size_t nelement = 9;
+    const size_t nspatorb = 12;
+    const size_t nmode = 6;
+    const size_t nboson_cutoff = 12;
+
+    TestTable3 table(nsegment, nspatorb, nelement, nmode, nboson_cutoff);
+    table.expand(nrow);
+
+    std::vector<PermanentElement> v;
+    table.test_perms(0, 0, 0) = 123;
+    v.push_back(table.test_perms(0, 0, 0));
     std::cout << v[0].to_string() <<std::endl;
 }

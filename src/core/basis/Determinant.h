@@ -6,7 +6,7 @@
 #define M7_DETERMINANT_H
 
 #include "src/core/table/Table.h"
-#include "src/core/table/DeterminantField.h"
+#include "DeterminantField.h"
 
 class Determinant : public DeterminantElement {
     struct DeterminantTable : public Table {

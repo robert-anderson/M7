@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#include <src/core/fermion/Determinant.h>
-#include <src/core/fermion/DecodedDeterminant.h>
+#include "src/core/basis/Determinant.h"
+#include "src/core/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
 #include "src/core/enumerator/BitsetEnumerator.h"
 #include "src/core/table/Bitset.h"

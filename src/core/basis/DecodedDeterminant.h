@@ -5,7 +5,7 @@
 #ifndef M7_DECODEDDETERMINANT_H
 #define M7_DECODEDDETERMINANT_H
 
-#include "src/core/table/DeterminantField.h"
+#include "DeterminantField.h"
 
 struct DecodedDeterminant {
     const size_t m_nbit;
