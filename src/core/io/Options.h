@@ -24,6 +24,7 @@ struct Options {
     size_t prng_ngen = 10000;
     size_t ndet_semistoch = 0;
     double walker_fraction_semistoch = 1.0;
+    double nadd_thresh_semistoch = 0.0;
     size_t spin_restrict = 0;
     double walker_factor_initial = 1.0;
     double buffer_factor_initial = 10.0;

@@ -165,6 +165,16 @@ public:
         build_hamiltonian(ham);
     }
 
+    void build_from_nadd_thresh(double thresh, defs::wf_comp_t nadd, Hamiltonian *ham) {
+        std::cout << "Building deterministic subspace of all dets with weight > nadd * " << thresh << std::endl;
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
+            if (m_walker_list.row_empty(irow)) continue;
+            auto weight = m_walker_list.m_weight(irow);
+            if (std::abs(*weight) > thresh*nadd) add_determinant(irow);
+        }
+        build_hamiltonian(ham);
+    }
+
     void build_from_highest_weighted(const WalkerList& list, size_t ndet_tot) {
         /*
         defs::inds row_inds;

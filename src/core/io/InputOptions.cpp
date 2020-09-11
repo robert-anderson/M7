@@ -55,6 +55,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--walker_fraction_semistoch", walker_fraction_semistoch,
                "determinant walker occupation as a fraction of total N_W for inclusion in deterministic subspace");
 
+    add_option("--nadd_thresh_semistoch", nadd_thresh_semistoch,
+               "determinant walker occupation in units of nadd_initiator for inclusion in deterministic subspace");
+
     add_option("-z,--spin_restrict", spin_restrict,
                "difference in occupation of spin orbitals 0 and 1 in CI space for a spin-conserving hamiltonian");
 
