@@ -47,6 +47,10 @@ public:
     }
      */
 
+    const size_t& nelement() const {
+        return m_nelement;
+    }
+
     bool compatible_with(const Field &rhs) const;
 
     virtual size_t nbit() const;

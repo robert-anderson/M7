@@ -5,28 +5,25 @@
 #ifndef M7_PERMANENTFIELD_H
 #define M7_PERMANENTFIELD_H
 
-#include "src/core/table/NumericField.h"
+#include "src/core/table/NumericArrayField.h"
 
 class PermanentField;
 
-class PermanentElement : public NumericElement<char> {
+class PermanentElement : public NumericArrayElement<uint8_t> {
 public:
-    PermanentElement(NumericField<char> *field, char *begin);
-
-    NumericElement<char> &operator=(const char &v) override;
+    PermanentElement(PermanentField* field, const size_t &array_size, const size_t &irow, const size_t &isegment, const size_t &iarray);
 };
 
-class PermanentField : public NumericField<char> {
+class PermanentField : public NumericArrayField<uint8_t> {
     const size_t m_nboson_cutoff;
 public:
-    PermanentField(Table *table, size_t nelement, size_t nboson_cutoff, const std::string &description="");
+    PermanentField(Table *table, size_t nelement, size_t nmode, size_t nboson_cutoff, const std::string &description="");
 
     PermanentElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) {
-        return PermanentElement(this, element_begin(irow, isegment, ielement));
+        return PermanentElement(this, m_size, irow, isegment, ielement);
     }
 
     const PermanentElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) const;
-
 
 };
 
