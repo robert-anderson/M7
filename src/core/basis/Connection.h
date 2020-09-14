@@ -5,7 +5,7 @@
 #ifndef M7_CONNECTION_H
 #define M7_CONNECTION_H
 
-#include <src/core/fermion/Determinant.h>
+#include <src/core/basis/Determinant.h>
 #include <algorithm>
 
 /*
