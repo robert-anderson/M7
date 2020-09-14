@@ -522,7 +522,7 @@ public:
     template<typename T>
     static bool all_gather(const T &send, std::vector<T> &recv) {
         if (recv.size() < nrank()) recv.resize(nrank());
-        return all_gather(&send, 1ul, recv.data(), nrank());
+        return all_gather(&send, 1ul, recv.data(), 1ul);
     }
 
     template<typename T>
