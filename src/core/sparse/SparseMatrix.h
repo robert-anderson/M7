@@ -25,7 +25,7 @@ public:
     size_t nrow(){return m_data.size();}
 
     void resize(const size_t nrow){
-        ASSERT(nrow>m_data.size());
+        ASSERT(nrow>=m_data.size());
         m_data.resize(nrow);
     }
 
