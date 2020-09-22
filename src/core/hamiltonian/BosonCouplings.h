@@ -68,7 +68,31 @@ public:
 
     defs::ham_t get_element_0(const PermanentConnection &permconn) const {
         defs::ham_t res = 0;
-        for (size_t imode=0ul; imode<m_nmode; ++imode) res+= omega(imode)*permconn.com()[imode];
+        for (size_t imode=0ul; imode<m_nmode; ++imode)
+            res+= omega(imode)*permconn.com()[imode];
+        return res;
+    }
+
+    defs::ham_t get_element_1(const AntisymConnection &detconn, const PermanentConnection &permconn) const {
+        const auto n = permconn.changed_modes()[0];
+        // bosons don't couple to higher fermion excitations (yet?)
+        switch (detconn.nexcit()) {
+            case 0: {
+                defs::ham_t res = 0;
+                for (size_t iocc = 0ul; iocc < detconn.ncom(); ++iocc) {
+                    auto p = detconn.com()[iocc];
+                    res += v(p, p, n);
+                }
+                return res;
+            }
+            case 1:{
+                auto p = detconn.cre()[0];
+                auto q = detconn.ann()[0];
+                return v(p, q, n);
+            }
+            default:
+                return 0;
+        }
     }
 
     defs::ham_t get_element(const AntisymConnection &detconn,
@@ -77,24 +101,8 @@ public:
         switch (permconn.nchanged_mode()) {
             case 0:
                 return get_element_0(permconn);
-        }
-
-        switch (detconn.nexcit()) {
-            case 0:
-                // determinant diagonal
-                switch (permconn.nchanged_mode()) {
-                    case 0:
-                        //permanent diagonal
-                    case 1:
-                }
-
-
-                    return permconn(connection);
-            case 1: ASSERT(connection.ncom() + connection.nexcit() == nelec());
-                return get_element_1(connection);
-            case 2:
-                // no 2-electron boson couplings (yet?)
-                return 0;
+            case 1:
+                return get_element_1(detconn, permconn);
             default:
                 return 0;
         }
