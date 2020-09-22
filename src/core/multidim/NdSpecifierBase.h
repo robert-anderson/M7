@@ -1,28 +1,40 @@
-//
-// Created by RJA on 18/09/2020.
-//
+/**
+ * @file
+ * @author Robert John Anderson <robert.anderson@kcl.ac.uk>
+ *
+ * @section LICENSE
+ *
+ * @section DESCRIPTION
+ *
+ * A MultiDimensional
+ *
+ */
 
-#ifndef M7_ARRAYFORMATBASE_H
-#define M7_ARRAYFORMATBASE_H
+
+
+#ifndef M7_NDSPECIFIERBASE_H
+#define M7_NDSPECIFIERBASE_H
 
 #include "cstddef"
 #include "array"
 
-template<size_t nind>
-class ArrayFormatBase {
+template<typename selector_t, size_t nind>
+class NdSpecifierBase {
+    selector_t m_selector;
 protected:
     std::array<size_t, nind> m_shape{};
     std::array<size_t, nind> m_strides{};
 public:
 
     template<typename ...Args>
-    ArrayFormatBase(const size_t &first, Args ...shape) {
+    NdSpecifierBase(selector_t selector, const size_t &first, Args ...shape):
+            m_selector(selector) {
         static_assert(sizeof...(shape) + 1 == nind, "Invalid number of shape arguments.");
         set_shape(first, shape...);
         set_strides();
     }
 
-    ArrayFormatBase(const std::array<size_t, nind> &shape) {
+    NdSpecifierBase(const std::array<size_t, nind> &shape) {
         m_shape = shape;
         set_strides();
     }
@@ -66,8 +78,24 @@ private:
             m_strides[nind - i] = m_strides[nind - i + 1] * m_shape[nind - i + 1];
         }
     }
+
+public:
+    typename selector_t::accessor_t select(const size_t &flat) {
+        return m_selector(flat);
+    }
+
+    typename selector_t::const_accessor_t select(const size_t &flat) const {
+        return m_selector(flat);
+    }
+
+    std::string to_string() const {
+        std::string out;
+        for (size_t i = 0ul; i < nelement(); ++i) {
+            out += " " + select(i).to_string();
+        }
+        return out;
+    }
 };
 
 
-
-#endif //M7_ARRAYFORMATBASE_H
+#endif //M7_NDSPECIFIERBASE_H

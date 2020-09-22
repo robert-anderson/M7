@@ -1,80 +1,82 @@
 //
-// Created by Robert John Anderson on 2020-02-22.
+// Created by RJA on 21/09/2020.
 //
 
 #ifndef M7_NDARRAY_H
 #define M7_NDARRAY_H
 
-#include <cstddef>
-#include "Indexer.h"
+#include <string>
+#include <vector>
+#include "NdSpecifier.h"
+#include "src/core/util/defs.h"
 
 /*
- * NdArray is a fully and partially subscriptable multidimensional array
- * implementation. An instance may manage its own memory, or constitute a
- * view on another instance, typically as a sub-array, e.g. a particular
- * row of a matrix (NdArray<2>).
+ * efficient header-only multidimensional array implementation for array-like objects
+ * with a compile time-determined number of dimensions, but a constant, run
+ * time-determined shape.
  */
 
-template<typename T, size_t nind>
-class NdArray {
-protected:
-    const Indexer<nind> m_indexer;
-    std::vector<T> m_data_internal;
-    T* m_data = nullptr;
+namespace nd_array {
 
-public:
-    template<typename ...Args>
-    NdArray(const size_t &first, Args ...shape) : m_indexer(first, shape...),
-                             m_data_internal(nelement(), 0), m_data(m_data_internal.data()) {}
+    template<typename T>
+    struct Accessor {
+        T &m_data;
 
-    template<typename ...Args>
-    NdArray(T* data, const std::array<size_t, nind> &shape) : m_indexer(shape), m_data(data){}
+        Accessor(T &data) : m_data(data) {}
 
-    template<typename ...Args>
-    T *view(Args ...inds) const {
-        return m_data+m_indexer.get(inds...);
-    }
+        std::string to_string() const {
+            return std::to_string(m_data);
+        }
 
-    template<typename ...Args>
-    NdArray<T, nind-sizeof...(Args)> subarray(Args ...subs){
-        std::array<size_t, nind-sizeof...(subs)> shape;
-        std::copy(m_indexer.shape().begin()+sizeof...(subs),
-            m_indexer.shape().end(), shape.begin());
-        return NdArray<T, nind-sizeof...(subs)>(m_data+m_indexer.get_sub(subs...), shape);
-    }
+        operator T &() { return m_data; }
 
-    void operator=(NdArray &src) {
-        ASSERT(m_indexer.shape() == src.m_shape);
-        memcpy(m_data, src.m_data, nelement() * sizeof(T));
-    }
+        operator const T &() const { return m_data; }
 
-    void operator=(std::vector<T> &src) {
-        ASSERT(nelement() == src.size());
-        memcpy(m_data, src.data(), nelement() * sizeof(T));
-    }
+        T &operator=(const T &v) {
+            m_data = v;
+            return *this;
+        }
+    };
 
-    void operator*=(const T& factor){
-        for (auto i=m_data; i!=m_data+nelement(); ++i) *i*=factor;
-    }
+    template<typename T, size_t nind>
+    struct Selector {
+        typedef Accessor<T> accessor_t;
+        typedef Accessor<const T> const_accessor_t;
+        const NdSpecifier<Selector, nind> &m_format;
+        std::vector <T> &m_data;
 
-    void operator/=(const T& factor){
-        for (auto i=m_data; i!=m_data+nelement(); ++i) *i/=factor;
-    }
+        Selector(
+                const NdSpecifier<Selector, nind> &format,
+                std::vector <T> &data) : m_format(format), m_data(data) {}
 
-    const std::array<size_t, nind> &shape() const {
-        return m_indexer.shape();
-    }
+        accessor_t operator()(const size_t &flat) {
+            ASSERT(flat < m_format.nelement());
+            return accessor_t(m_data[flat]);
+        }
 
-    const std::array<size_t, nind> &strides() const {
-        return m_indexer.strides();
-    }
-
-    size_t nelement() const {
-        return m_indexer.nelement();
-    }
+        const_accessor_t operator()(const size_t &flat) const {
+            ASSERT(flat < m_format.nelement());
+            return const_accessor_t(m_data[flat]);
+        }
+    };
 
 
-};
+    template<typename T, size_t nind>
+    class Specifier : public NdSpecifier<Selector<T, nind>, nind> {
+        std::vector <T> m_data;
+        typedef NdSpecifier<Selector<T, nind>, nind> base_t;
+    public:
+
+        using base_t::nelement;
+
+        template<typename ...Args>
+        Specifier(const size_t &first, Args ...shape):
+                base_t(Selector<T, nind>(*this, m_data), first, shape...),
+                m_data(nelement(), 0) {}
+    };
+
+}
+
 
 
 #endif //M7_NDARRAY_H
