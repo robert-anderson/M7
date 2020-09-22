@@ -12,6 +12,9 @@ class PermanentField;
 class PermanentElement : public NumericArrayElement<uint8_t> {
 public:
     PermanentElement(PermanentField* field, const size_t &array_size, const size_t &irow, const size_t &isegment, const size_t &iarray);
+    PermanentField* field() const{
+        return reinterpret_cast<PermanentField *>(m_field);
+    }
 };
 
 class PermanentField : public NumericArrayField<uint8_t> {
