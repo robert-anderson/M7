@@ -66,6 +66,12 @@ public:
         return (*m_omega)(imode);
     }
 
+    const size_t& nocc_cutoff() const {
+        return m_nocc_cutoff;
+    }
+    const size_t& nmode() const {
+        return m_nmode;
+    }
     defs::ham_t get_element_0(const PermanentConnection &permconn) const {
         defs::ham_t res = 0;
         for (size_t imode=0ul; imode<m_nmode; ++imode)

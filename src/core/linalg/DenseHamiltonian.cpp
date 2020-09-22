@@ -3,6 +3,7 @@
 //
 
 #include <src/core/enumerator/CombinationEnumerator.h>
+#include <src/core/basis/Permanent.h>
 #include "DenseHamiltonian.h"
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
@@ -46,4 +47,13 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source, DeterminantList &d
             else ASSERT(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
         }
     }
+}
+
+DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source, const BosonCouplings &bc):
+        Matrix<defs::ham_t>(source.nci()){
+    Determinant dbra(source.nsite());
+    Determinant dket(source.nsite());
+    Permanent pbra(bc.nmode(), bc.nocc_cutoff());
+    Permanent pket(bc.nmode(), bc.nocc_cutoff());
+    // TODO James: generate all matrix elements
 }

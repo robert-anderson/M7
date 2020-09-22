@@ -80,3 +80,12 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
     // compare the ground and first excited states to BAGEL's values
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -76.08150945314577, 1e-10));
 }
+
+
+TEST(DenseHamiltonian, BosonCouplingCheck) {
+    // TODO James: Instantiate the DenseHamiltonian and diagonalise so we can check vs. our exact FCI and Charlie's
+    // AbInitioHamiltonian h
+    // BosonCouplings bc
+    // DenseHamiltonian dh (h, bc)
+    // dh.diagonalize()
+}

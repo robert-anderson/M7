@@ -5,6 +5,7 @@
 #ifndef M7_DENSEHAMILTONIAN_H
 #define M7_DENSEHAMILTONIAN_H
 
+#include <src/core/hamiltonian/BosonCouplings.h>
 #include "src/core/basis/DeterminantList.h"
 #include "src/core/util/defs.h"
 #include "Matrix.h"
@@ -13,6 +14,7 @@
 class DenseHamiltonian : public Matrix<defs::ham_t> {
 public:
     DenseHamiltonian(const Hamiltonian &source);
+    DenseHamiltonian(const Hamiltonian &source, const BosonCouplings& bc);
     DenseHamiltonian(const Hamiltonian &source, DeterminantList &detlist);
 };
 
