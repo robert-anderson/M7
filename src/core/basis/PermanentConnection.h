@@ -25,7 +25,8 @@ class PermanentConnection {
     PermanentDiff m_diff;
 
 public:
-    explicit PermanentConnection(const PermanentField* field): m_nmode(field->nelement()), m_diff(m_nmode) {
+    explicit PermanentConnection(const PermanentField* field):
+    m_nmode(field->nelement()), m_com(m_nmode), m_diff(m_nmode) {
     }
 
     const size_t & nchanged_mode() const {
@@ -53,6 +54,7 @@ public:
 
     void connect(const PermanentElement &ket, const PermanentElement &bra){
         m_diff.zero();
+        ASSERT(!m_com.empty())
         for(size_t imode=0ul; imode<m_nmode; ++imode){
             int nket = *ket(imode);
             int nbra = *bra(imode);

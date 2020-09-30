@@ -22,7 +22,7 @@ class Permanent : public PermanentElement {
     PermanentTable internal_table;
 public:
     Permanent(size_t nmode, size_t occ_cutoff) :
-    PermanentElement(field(), nmode, 0, 0, 0),
+    PermanentElement(nullptr, nmode, 0, 0, 0),
     internal_table(nmode, occ_cutoff) {
         m_field = &internal_table.field;
     }
