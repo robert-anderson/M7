@@ -19,10 +19,12 @@ struct Options {
     double nwalker_initial = 1.0;
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;
-    double max_bloom = 1.0;
+    double max_bloom = 3.0;
     size_t prng_seed = 12;
     size_t prng_ngen = 10000;
     size_t ndet_semistoch = 0;
+    double walker_fraction_semistoch = 1.0;
+    double nadd_thresh_semistoch = 0.0;
     size_t spin_restrict = 0;
     double walker_factor_initial = 1.0;
     double buffer_factor_initial = 10.0;
@@ -30,7 +32,7 @@ struct Options {
     size_t nload_balance_block_per_rank = 10;
     size_t load_balance_period = 10;
     double tau_initial = 0.05;
-    bool dynamic_tau = true;
+    bool static_tau = false;
     double min_excit_class_prob = 1e-3;
     size_t nenough_spawns_for_dynamic_tau = 1000;
     double shift_initial = 0.0;

@@ -45,7 +45,7 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
                                    defs::ham_t &helem, AntisymConnection &anticonn) {
     size_t i, a, ia;
     size_t ncases;
-    if (m_spin_conserving) {
+    if (m_spin_conserving_1e) {
         size_t nalpha = src_det.nalpha();
         size_t nbeta = m_nelec - nalpha;
         size_t nalpha_cases = nalpha * (m_h->nsite() - nalpha);
@@ -75,7 +75,7 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
     i = occ.m_inds[i];
     a = vac.m_inds[a];
 #ifndef NDEBUG
-    if (m_spin_conserving) {
+    if (m_spin_conserving_1e) {
         if (i < m_h->nsite()) ASSERT(a < m_h->nsite())
         else ASSERT(a >= m_h->nsite())
     }

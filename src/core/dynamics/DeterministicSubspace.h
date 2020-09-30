@@ -52,6 +52,8 @@ class DeterministicSubspace {
     void build_hamiltonian(const Hamiltonian *ham) {
         ASSERT(m_sparse_ham.empty());
         m_full_subspace_list.all_gather(m_local_subspace_list);
+        std::cout << "Building semistochastic sparse hamiltonian with " << nrow_full() << " total rows and "
+            << nrow_local() << " local rows" << std::endl;
         m_sparse_ham.resize(nrow_local());
         for (size_t irow_local = 0ul; irow_local < nrow_local(); ++irow_local) {
             // loop over local subspace (H rows)
@@ -142,12 +144,33 @@ public:
     }
 
     void build_from_det_connections(const DeterminantElement &ref, Hamiltonian *ham, size_t nexcit_max = 2) {
+        std::cout << "Building deterministic subspace from connections of " << ref.to_string() << std::endl;
         Connection conn(ref);
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
             auto det = m_walker_list.m_determinant(irow);
             conn.connect(ref, det);
             if (conn.nexcit() <= nexcit_max) add_determinant(irow);
+        }
+        build_hamiltonian(ham);
+    }
+
+    void build_from_nw_fraction(double fraction, defs::wf_comp_t nw, Hamiltonian *ham) {
+        std::cout << "Building deterministic subspace of all dets with weight > total walker number * " << fraction << std::endl;
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
+            if (m_walker_list.row_empty(irow)) continue;
+            auto weight = m_walker_list.m_weight(irow);
+            if (std::abs(*weight)/nw > fraction) add_determinant(irow);
+        }
+        build_hamiltonian(ham);
+    }
+
+    void build_from_nadd_thresh(double thresh, defs::wf_comp_t nadd, Hamiltonian *ham) {
+        std::cout << "Building deterministic subspace of all dets with weight > nadd * " << thresh << std::endl;
+        for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
+            if (m_walker_list.row_empty(irow)) continue;
+            auto weight = m_walker_list.m_weight(irow);
+            if (std::abs(*weight) > thresh*nadd) add_determinant(irow);
         }
         build_hamiltonian(ham);
     }

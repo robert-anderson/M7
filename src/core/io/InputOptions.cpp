@@ -52,6 +52,12 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-s,--ndet_semistoch", ndet_semistoch,
                "number of determinants selected to comprise the deterministic subspace");
 
+    add_option("--walker_fraction_semistoch", walker_fraction_semistoch,
+               "determinant walker occupation as a fraction of total N_W for inclusion in deterministic subspace");
+
+    add_option("--nadd_thresh_semistoch", nadd_thresh_semistoch,
+               "determinant walker occupation in units of nadd_initiator for inclusion in deterministic subspace");
+
     add_option("-z,--spin_restrict", spin_restrict,
                "difference in occupation of spin orbitals 0 and 1 in CI space for a spin-conserving hamiltonian");
 
@@ -70,8 +76,8 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-t,--tau_initial", tau_initial,
                "initial timestep");
 
-    add_flag("--dynamic_tau", dynamic_tau,
-             "update timestep dynamically");
+    add_flag("--static_tau", static_tau,
+             "disable dynamic timestep update");
 
     add_option("--min_excit_class_prob", min_excit_class_prob,
              "prevent the probability of drawing an excitatation class falling below this threshold");

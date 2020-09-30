@@ -47,7 +47,7 @@ public:
         ASSERT(disp_unit == sizeof(T))
         ASSERT((size_t) alloc_size == size * sizeof(T))
         MPI_Win_unlock_all(m_win);
-        if (mpi::on_node_i_am_root()) memset(m_data, 0, size * sizeof(T));
+        if (mpi::on_node_i_am_root()) memset((void*)m_data, 0, size * sizeof(T));
         mpi::barrier_on_node();
 #else
         m_data = new T[](size);

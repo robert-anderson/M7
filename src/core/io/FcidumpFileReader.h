@@ -42,7 +42,8 @@ class FcidumpFileReader : public SparseArrayFileReader<T> {
     const bool m_spin_resolved;
     const size_t m_nspatorb;
     std::function<void(defs::inds& inds)> m_inds_to_orbs;
-    bool m_spin_conserving = true;
+    bool m_spin_conserving_1e = true;
+    bool m_spin_conserving_2e = true;
 
     // spin major and spin restricted (non-resolved) cases
     static void decrement_inds(defs::inds& inds){
@@ -83,18 +84,17 @@ public:
                     if (((inds[0] < m_nspatorb) != (inds[1] < m_nspatorb)) ||
                         ((inds[2] < m_nspatorb) != (inds[3] < m_nspatorb))) {
                         // spin non-conserving example found
-                        m_spin_conserving = false;
-                        break;
+                        if (nind(inds)==2) m_spin_conserving_1e = false;
+                        else m_spin_conserving_2e = false;
                     }
                 }
             }
             SparseArrayFileReader<T>::reset(); // go back to beginning of entries
         }
-        if (m_spin_conserving) {
-            logger::write("FCIDUMP file conserves spin");
-        }else{
-            logger::write("FCIDUMP file does not conserve spin");
-        }
+        if (m_spin_conserving_1e) logger::write("FCIDUMP file conserves spin in 1 particle integrals");
+        else logger::write("FCIDUMP file does NOT conserve spin in 1 particle integrals");
+        if (m_spin_conserving_2e) logger::write("FCIDUMP file conserves spin in 2 particle integrals");
+        else logger::write("FCIDUMP file does NOT conserve spin in 2 particle integrals");
     }
 
     bool next(defs::inds &inds, T &v) const override {
@@ -105,20 +105,30 @@ public:
         return result;
     }
 
-    const size_t& norb()const{
+    static size_t nind(const defs::inds& inds){
+        return std::count_if(inds.begin(), inds.end(), [](const size_t& a){return a!=~0ul;});
+    }
+
+    const size_t& norb() const{
         return m_norb;
     }
-    const size_t& nelec()const{
+    const size_t& nelec() const{
         return m_nelec;
     }
-    const size_t& nspatorb()const{
+    const size_t& nspatorb() const{
         return m_nspatorb;
     }
-    const bool& spin_resolved()const{
+    const bool& spin_resolved() const{
         return m_spin_resolved;
     }
-    const bool& spin_conserving()const{
-        return m_spin_conserving;
+    bool spin_conserving_1e() const{
+        return m_spin_conserving_1e;
+    }
+    bool spin_conserving_2e() const{
+        return m_spin_conserving_2e;
+    }
+    bool spin_conserving() const{
+        return m_spin_conserving_1e && m_spin_conserving_2e;
     }
     void inds_to_orbs(defs::inds& inds){
         m_inds_to_orbs(inds);
