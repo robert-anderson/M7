@@ -11,7 +11,7 @@ template <typename T>
 class NumericArrayElement {
 protected:
     NumericField<T>* m_field;
-    const size_t& m_array_size;
+    const size_t m_array_size;
     const size_t m_irow, m_isegment, m_iarray;
 
 public:
