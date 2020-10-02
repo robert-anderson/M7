@@ -18,6 +18,8 @@ struct BufferWindow {
 
     BufferWindow(Buffer& buffer);
 
+    BufferWindow(Buffer &buffer, size_t doffset, size_t dsize);
+
     operator bool() const;
 };
 

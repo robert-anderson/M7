@@ -7,7 +7,6 @@
 
 #include <src/core/util/utils.h>
 #include "Field.h"
-#include "NumericField.h"
 
 template<typename T, size_t nind>
 struct NumericVectorField : public Field<nind> {

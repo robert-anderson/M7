@@ -72,7 +72,7 @@ namespace defs {
     const size_t isym_2e = 4;
 
     // width of the cache line in bytes
-    constexpr size_t ncacheline_data = 8;
-    constexpr size_t ncacheline_byte = ncacheline_data * sizeof(data_t);
+    constexpr size_t ndata_cacheline = 8;
+    constexpr size_t ncacheline_byte = ndata_cacheline * sizeof(data_t);
 }
 #endif //M7_DEFS_H

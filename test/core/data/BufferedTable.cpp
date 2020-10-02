@@ -4,6 +4,7 @@
 
 #include "src/core/data/BufferedTable.h"
 #include "src/core/data/NumericField.h"
+#include "src/core/data/NumericVectorField.h"
 #include "gtest/gtest.h"
 
 
@@ -40,3 +41,25 @@ TEST(BufferedTable, DataIntegrityNumeric){
     ASSERT_EQ(bt.m_nrow, nrow);
     ASSERT_EQ(bt.m_hwm, 0);
 }
+
+struct TestTable2 : public Table {
+    NumericField<double, 1> doubles;
+    NumericField<unsigned char, 1> chars;
+    NumericVectorField<float, 1> float_vectors;
+    TestTable2(size_t ndouble, size_t nchar, size_t nvector, size_t nvector_item):
+    doubles(this, ndouble),
+    chars(this, nchar),
+    float_vectors(this, nvector_item, nvector)
+    {}
+};
+
+//TEST(BufferedTable, DataIntegrityNumericVector) {
+//    BufferedTable<TestTable2> bt;
+//    bt.expand()
+//    const size_t nshort = 7;
+//    const size_t nfloat = 12;
+//    BufferedTable<TestTable1> bt(nshort, nfloat);
+//    const size_t nrow = 15;
+//    bt.expand(nrow);
+//    for (size_t irow = 0ul; irow<nrow; ++irow){
+//}

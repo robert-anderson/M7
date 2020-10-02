@@ -11,7 +11,7 @@ Buffer::Buffer(size_t dsize) : Buffer() {
 }
 
 Buffer::Buffer(size_t ncacheline, size_t nrow) : Buffer() {
-    resize(ncacheline * defs::ncacheline_data * nrow);
+    resize(ncacheline * defs::ndata_cacheline * nrow);
 }
 
 defs::data_t *Buffer::ptr() { return m_data.data(); }
@@ -29,5 +29,5 @@ void Buffer::resize(size_t dsize) {
 
 void Buffer::resize(size_t ncacheline, size_t nrow) {
     ASSERT(ncacheline);
-    resize((nrow * ncacheline) * defs::ncacheline_data);
+    resize((nrow * ncacheline) * defs::ndata_cacheline);
 }
