@@ -12,7 +12,7 @@
 #include "src/core/util/defs.h"
 
 class PRNG {
-    typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::cache_line_size>> U;
+    typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::ncacheline_byte>> U;
     U m_data;
     size_t m_i;
     const size_t m_seed;
