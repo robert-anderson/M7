@@ -49,7 +49,7 @@ public:
 
     template<typename ...Args>
     const T& operator()(const size_t& irow, Args... inds) const {
-        return ((T*)FieldBase::begin(irow))[m_format.flat(inds...)];
+        return flat_get(irow, m_format.flat(inds...));
     }
 };
 
