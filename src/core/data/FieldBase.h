@@ -18,7 +18,7 @@ protected:
     const size_t m_nelement;
     const size_t m_size;
     // identifier for the stored type
-    const std::type_index m_type_index;
+    const std::type_info& m_type_info;
     FieldBase(Table* table, size_t element_size, size_t nelement, const std::type_info& type_info);
 
     bool is_same_type_as(const FieldBase& other) const;

@@ -66,7 +66,8 @@ struct NumericField : public Field<nind> {
     }
 
     template<typename ...Args>
-    NumericField(Table* table, Args&& ...shape) : Field<nind>(table, sizeof(T), typeid(T), shape...){
+    NumericField(Table* table, Args&& ...shape) :
+    Field<nind>(table, sizeof(T), typeid(T), shape...){
         set_offsets();
     }
 
