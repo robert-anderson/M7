@@ -21,10 +21,19 @@ TEST(Table, CommonFieldOffset){
     ASSERT_EQ(t1.shorts.offset(), 0);
     ASSERT_EQ(t1.shorts.size(), 3*sizeof(short));
     /*
-     * check that the next field follows on gaplessly
+     * check that the next field follows on gaplessly...
      */
     ASSERT_EQ(t1.more_shorts.offset(), 3*sizeof(short));
     ASSERT_EQ(t1.more_shorts.size(), 4*sizeof(short));
+    /*
+     * but not in this case, where the first field takes up a whole
+     * number of datawords...
+     */
+    CommonFieldTypeTable t2(8, 5);
+    ASSERT_EQ(t2.shorts.offset(), 0);
+    ASSERT_EQ(t2.shorts.size(), 8*sizeof(short));
+    ASSERT_EQ(t2.more_shorts.offset(), 2*sizeof(defs::data_t));
+    ASSERT_EQ(t2.more_shorts.size(), 5*sizeof(short));
 }
 
 struct DifferentFieldTypeTable : public Table {

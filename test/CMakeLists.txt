@@ -10,7 +10,7 @@ file(GLOB CPP_HEADER_FILES ../src/*.h ../src/*/*.h ../src/*/*/*.h)
 
 file(GLOB CPP_TEST_SOURCE_FILES ./*.cpp ./*/*.cpp ./*/*/*.cpp)
 # adding the Google_Tests_run target
-add_executable(unittest ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} ${CPP_TEST_SOURCE_FILES} core/data/Table.cpp)
+add_executable(unittest ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} ${CPP_TEST_SOURCE_FILES})
 
 set(GTEST_INCLUDE_DIR, "${CMAKE_BINARY_DIR}/external/googletest/googletest/include")
 target_include_directories(unittest PUBLIC ${GTEST_INCLUDE_DIR})

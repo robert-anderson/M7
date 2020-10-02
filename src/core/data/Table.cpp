@@ -51,11 +51,6 @@ std::string Table::to_string(std::string delimiter) const {
     return res;
 }
 
-std::string Table::to_bit_string(std::string delimiter) const {
-    std::string res;
-    return res;
-}
-
 void Table::print() const {
     std::cout << to_string("|") << std::endl;
 }

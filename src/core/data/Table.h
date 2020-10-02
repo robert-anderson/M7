@@ -45,7 +45,6 @@ struct Table {
     void clear_row(const size_t& irow);
 
     virtual std::string to_string(std::string delimiter="") const;
-    virtual std::string to_bit_string(std::string delimiter="") const;
     void print() const;
 };
 

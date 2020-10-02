@@ -4,7 +4,7 @@ file(GLOB CPP_SOURCE_FILES ./*.cpp ./*/*.cpp ./*/*/*.cpp)
 file(GLOB CPP_HEADER_FILES ./*.h ./*/*.h ./*/*/*.h)
 
 add_executable(release main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
-add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES} core/data/Buffer.cpp core/data/Buffer.h core/data/BufferWindow.cpp core/data/BufferWindow.h core/data/Table.cpp core/data/Table.h core/data/FieldBase.cpp core/data/FieldBase.h core/data/Field.cpp core/data/Field.h core/nd/NdArrayFormat.h core/data/BitsetField.cpp core/data/BitsetField.h core/data/NumericField.h)
+add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
 add_executable(prof main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
 
 target_link_libraries (release CLI11::CLI11)

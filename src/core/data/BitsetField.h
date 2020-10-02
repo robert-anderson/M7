@@ -37,6 +37,7 @@ struct BitsetField : public Field<nind> {
             BitView& operator =(bool v){
                 if (v) m_view.set(m_ibit);
                 else m_view.clr(m_ibit);
+                return *this;
             }
             operator bool() {
                 return m_view.get(m_ibit);
@@ -87,26 +88,7 @@ struct BitsetField : public Field<nind> {
             for (size_t i=0ul; i<m_nbit; ++i) res.append(get(i)?"1":"0");
             return res;
         }
-
-        std::string to_bit_string() const {
-            std::string res;
-            return res;
-        }
     };
-
-    using FieldBase::m_table;
-    using FieldBase::m_offset;
-    using FieldBase::back_offset;
-    using FieldBase::is_same_type_as;
-    void set_offsets() {
-        if (!m_table->m_fields.empty()) {
-            const auto &last_field = *m_table->m_fields.back();
-            if (is_same_type_as(last_field)) m_offset = last_field.back_offset();
-            else m_offset = integer_utils::round_up(last_field.back_offset(), sizeof(defs::data_t));
-        }
-        m_table->m_tight_row_size = back_offset();
-        m_table->add_field(this);
-    }
 
     using FieldBase::m_nelement;
     std::string to_string(size_t irow) const override {
@@ -115,16 +97,11 @@ struct BitsetField : public Field<nind> {
         return res;
     }
 
-    std::string to_bit_string(size_t irow) const override {
-        std::string res;
-        return res;
-    }
-
     template<typename ...Args>
     BitsetField(Table* table, size_t nbit, Args&& ...shape) :
             Field<nind>(table, integer_utils::divceil(nbit, (size_t)CHAR_BIT), typeid(std::vector<bool>), shape...),
             m_nbit(nbit), m_dsize(integer_utils::divceil(nbit, defs::nbit_data)){
-        set_offsets();
+        FieldBase::set_offsets();
     }
 
     using Field<nind>::m_format;

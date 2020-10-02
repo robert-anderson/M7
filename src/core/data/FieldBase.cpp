@@ -15,3 +15,13 @@ bool FieldBase::is_same_type_as(const FieldBase &other) const {
 char *FieldBase::begin(const size_t &irow) const {
     return m_table->row_ptr(irow)+m_offset;
 }
+
+void FieldBase::set_offsets() {
+    if (!m_table->m_fields.empty()) {
+        const auto &last_field = *m_table->m_fields.back();
+        if (is_same_type_as(last_field)) m_offset = last_field.back_offset();
+        else m_offset = integer_utils::round_up(last_field.back_offset(), sizeof(defs::data_t));
+    }
+    m_table->m_tight_row_size = back_offset();
+    m_table->add_field(this);
+}

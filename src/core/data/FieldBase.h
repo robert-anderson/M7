@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <typeindex>
 #include <string>
+#include <src/core/util/utils.h>
 #include "Table.h"
 
 class FieldBase {
@@ -23,14 +24,14 @@ protected:
 
     bool is_same_type_as(const FieldBase& other) const;
 
-    char* begin(const size_t& irow) const;
+    void set_offsets();
 
 public:
+    char* begin(const size_t& irow) const;
     const size_t& offset() const {return m_offset;}
     const size_t& size() const {return m_size;}
     size_t back_offset() const {return m_offset+m_size;}
     virtual std::string to_string(size_t irow) const = 0;
-    virtual std::string to_bit_string(size_t irow) const = 0;
 };
 
 
