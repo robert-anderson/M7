@@ -29,6 +29,12 @@ private:
     /*
      * Flat accessors
      */
+    inline T& flat_ptr(const size_t& irow, size_t ielement){
+        return ((T*)FieldBase::begin(irow))[ielement];
+    }
+    inline const T& flat_ptr(const size_t& irow, size_t ielement) const{
+        return ((T*)FieldBase::begin(irow))[ielement];
+    }
     inline T& flat_get(const size_t& irow, size_t ielement){
         return ((T*)FieldBase::begin(irow))[ielement];
     }
@@ -46,10 +52,17 @@ public:
     T& operator()(const size_t& irow, Args... inds){
         return flat_get(irow, m_format.flat(inds...));
     }
-
     template<typename ...Args>
     const T& operator()(const size_t& irow, Args... inds) const {
         return flat_get(irow, m_format.flat(inds...));
+    }
+    template<typename ...Args>
+    char* byte_view(const size_t& irow, Args... inds){
+        return flat_ptr(irow, m_format.flat(inds...));
+    }
+    template<typename ...Args>
+    const char* byte_view(const size_t& irow, Args... inds) const{
+        return flat_ptr(irow, m_format.flat(inds...));
     }
 };
 
