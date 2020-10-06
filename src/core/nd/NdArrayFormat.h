@@ -6,6 +6,7 @@
 #define M7_NDARRAYFORMAT_H
 
 #include <array>
+#include <src/core/util/defs.h>
 
 template <size_t nind>
 class NdArrayFormat {
@@ -13,11 +14,18 @@ class NdArrayFormat {
     std::array<size_t, nind> m_strides;
 
 public:
+    NdArrayFormat(size_t extent){
+        m_shape.fill(extent);
+        set_strides();
+    }
+    NdArrayFormat(std::array<size_t, nind> shape):m_shape(std::move(shape)){
+        set_strides();
+    }
     template<typename ...Args>
-    NdArrayFormat(Args&&... shape){
-        static_assert(sizeof...(Args)>=nind, "not enough arguments to specify array shape");
-        static_assert(sizeof...(Args)<=nind, "too many arguments to specify array shape");
-        set_shape(std::forward<Args>(shape)...);
+    NdArrayFormat(const size_t& first, const size_t& second, Args&&... shape){
+        static_assert(2+sizeof...(Args)>=nind, "not enough arguments to specify array shape");
+        static_assert(2+sizeof...(Args)<=nind, "too many arguments to specify array shape");
+        set_shape(first, second, std::forward<Args>(shape)...);
         set_strides();
     }
 
@@ -34,6 +42,16 @@ public:
     size_t flat(Args... inds) const {
         static_assert(sizeof...(Args)==nind, "incorrect number of indices");
         return partial_offset<0>(inds...);
+    }
+
+    void decode_flat(const size_t& iflat, defs::inds& inds) const {
+        ASSERT(inds.size()>=nind);
+        size_t remainder = iflat;
+        for (size_t i=0ul; i<nind; ++i){
+            auto& ind = inds[i];
+            ind = remainder/m_strides[i];
+            remainder-=ind*m_strides[i];
+        }
     }
 
 private:
