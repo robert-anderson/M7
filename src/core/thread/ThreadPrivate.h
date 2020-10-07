@@ -13,12 +13,12 @@
 
 template<typename T>
 class ThreadPrivate {
-    struct alignas(defs::cache_line_size) aligned_T {
+    struct alignas(defs::ncacheline_byte) aligned_T {
         T v;
     };
-    //static_assert(alignof(aligned_T)%defs::cache_line_size==0, "non-cache-aligned type");
+    //static_assert(alignof(aligned_T)%defs::ncacheline_byte==0, "non-cache-aligned type");
     const size_t m_nthread;
-    std::vector<aligned_T, AlignedAllocator<aligned_T, defs::cache_line_size>> m_data;
+    std::vector<aligned_T, AlignedAllocator<aligned_T, defs::ncacheline_byte>> m_data;
 
     template< bool cond, typename U >
     using enable_if_t  = typename std::enable_if< cond, U >::type;
@@ -31,9 +31,9 @@ public:
             m_data.push_back(aligned_T{T(std::forward<Args>(construct_args)...)});
         }
         // check alignment of first element
-        ASSERT(((size_t)((void*)(m_data.data())))%defs::cache_line_size==0)
+        ASSERT(((size_t)((void*)(m_data.data())))%defs::ncacheline_byte == 0)
         // check that adjacent elements are properly spaced
-        ASSERT(((size_t)((void*)(m_data.data()))-(size_t)((void*)(m_data.data()+1)) )%defs::cache_line_size==0)
+        ASSERT(((size_t)((void*)(m_data.data()))-(size_t)((void*)(m_data.data()+1)) )%defs::ncacheline_byte == 0)
         // check that adjacent elements are sufficiently spaced to contain type
         ASSERT(((size_t)((void*)(m_data.data()))-(size_t)((void*)(m_data.data()+1)) )>=sizeof(T))
     }
