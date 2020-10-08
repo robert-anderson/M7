@@ -16,11 +16,11 @@ TEST(QuickSorter, Test){
     std::cout << std::endl;
 
 //    typedef size_t T;
-//    struct alignas(defs::cache_line_size) Aligned {
+//    struct alignas(defs::ncacheline_byte) Aligned {
 //        T v;
 //    };
 //
-//    std::vector<Aligned, AlignedAllocator<size_t, defs::cache_line_size>> v(n);
+//    std::vector<Aligned, AlignedAllocator<size_t, defs::ncacheline_byte>> v(n);
 //    PRNG prng(123, n);
 //    for (size_t i=0ul; i<n; ++i) v[i].v = prng.draw_uint()%100;
 //

@@ -121,6 +121,12 @@ namespace integer_utils {
         return num % denom ? num / denom + 1 : num / denom;
     }
 
+    template<typename T>
+    static typename std::enable_if<std::is_integral<T>::value, T>::type
+    round_up(const T &num, const T &modulo) {
+        return divceil(num, modulo)*modulo;
+    }
+
     size_t rectmap(const size_t &irow, const size_t &icol, const size_t &ncol);
 
     void inv_rectmap(size_t &irow, size_t &icol, const size_t &ncol, const size_t &flat);
@@ -144,17 +150,17 @@ namespace integer_utils {
 
 namespace bit_utils {
     template<typename T>
-    static inline void clr(T &x, size_t i) {
+    static inline void clr(T &x, const size_t& i) {
         x &= ~((T) 1ul << i);
     }
 
     template<typename T>
-    static inline void set(T &x, size_t i) {
+    static inline void set(T &x, const size_t& i) {
         x |= ((T) 1ul << i);
     }
 
     template<typename T>
-    static inline bool get(const T &x, size_t i) {
+    static inline bool get(const T &x, const size_t& i) {
         return (x >> i) & T(1ul);
     }
 
