@@ -7,12 +7,14 @@
 #include "src/core/util/utils.h"
 
 TEST(ProductEnumerator, Test){
+    const size_t nind = 4;
     const size_t extent = 5;
-    ProductEnumerator<4> enumerator(extent);
-    defs::inds inds(4);
+
+    ProductEnumerator enumerator(nind, extent);
+    defs::inds inds(nind);
     size_t iflat=0ul;
     while(enumerator.next(inds)){
         iflat++;
     }
-    ASSERT_EQ(iflat, std::pow(extent, 4));
+    ASSERT_EQ(iflat, std::pow(extent, nind));
 }
