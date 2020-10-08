@@ -27,7 +27,6 @@ struct Table {
      */
     size_t m_hwm = 0ul;
 
-
     Table(BufferWindow buffer);
 
     Table();
