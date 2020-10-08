@@ -3,10 +3,10 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/multidim/Indexer.h"
+#include "src/core/multidim/Indexer_old.h"
 
 TEST(Indexer, CorrectMapping) {
-    Indexer<3> indexer(2, 4, 3);
+    Indexer_old<3> indexer(2, 4, 3);
     auto shape = std::array<size_t, 3>{2, 4, 3};
     ASSERT_EQ(indexer.shape(), shape);
     auto strides = std::array<size_t, 3>{12, 3, 1};
@@ -41,7 +41,7 @@ TEST(Indexer, CorrectMapping) {
 
 
 TEST(Indexer, ReducedIndexSubscripting) {
-    Indexer<4> indexer(5, 2, 4, 3);
+    Indexer_old<4> indexer(5, 2, 4, 3);
     ASSERT_EQ(indexer.get_sub(), 0);
     ASSERT_EQ(indexer.get_sub(0), 0);
     ASSERT_EQ(indexer.get_sub(1), 1 * (2 * 4 * 3));

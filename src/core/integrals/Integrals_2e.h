@@ -9,7 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
-#include "src/core/multidim/Indexer.h"
+#include "src/core/multidim/Indexer_old.h"
 #include "src/core/util/consts.h"
 #include "src/core/util/defs.h"
 #include "src/core/io/FcidumpFileReader.h"
