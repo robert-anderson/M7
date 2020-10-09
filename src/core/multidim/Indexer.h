@@ -1,108 +1,110 @@
 //
-// Created by Robert John Anderson on 2020-01-10.
+// Created by RJA on 18/09/2020.
 //
 
 #ifndef M7_INDEXER_H
 #define M7_INDEXER_H
 
-#include <cstddef>
-#include <array>
-#include <iostream>
-#include "src/core/util/utils.h"
+#include "NdSpecifierBase.h"
 
-template<size_t nind>
-class Indexer {
-protected:
-    std::array<size_t, nind> m_shape{};
-    std::array<size_t, nind> m_strides{};
-public:
 
-    template<typename ...Args>
-    Indexer(const size_t &first, Args ...shape) {
-        static_assert(sizeof...(shape) + 1 == nind, "Invalid number of arguments.");
-        set_shape(first, shape...);
-        set_strides();
+template<typename selector_t, size_t nind, size_t nind_unspec>
+struct IndexerBase {
+
+    // the index of the shape array element being specermined in this object
+    static constexpr auto nind_spec = nind-nind_unspec;
+
+    const size_t m_offset;
+    NdSpecifierBase<selector_t, nind> &m_spec;
+
+    /*
+     * TODO: move this to special case partial template where nind_unspec == nind
+     */
+    IndexerBase(NdSpecifierBase<selector_t, nind> &spec, const size_t &i) :
+            m_offset(spec.strides()[0]*i), m_spec(spec) {
+        static_assert(nind_spec == 1ul, "This ctor should only be called by the NdSpecifier [] operator");
     }
 
-    Indexer(const std::array<size_t, nind> &shape) {
-        m_shape = shape;
-        set_strides();
-    }
-
-    const std::array<size_t, nind> &shape() const {
-        return m_shape;
-    }
-
-    const std::array<size_t, nind> &strides() const {
-        return m_strides;
+    IndexerBase(const IndexerBase<selector_t, nind, nind_unspec + 1> &parent, const size_t &i) :
+            m_offset(parent.m_offset + parent.m_spec.strides()[nind_spec] * i), m_spec(parent.m_spec) {
+        static_assert(nind_spec > 0ul, "number of specermined indices should always be nonzero when constructing from parent IndexerBase");
+        assert(i < parent.m_spec.shape()[nind_spec]);
     }
 
     size_t nelement() const {
-        return m_strides.front() * m_shape.front();
+        return m_spec.strides()[nind_spec] * m_spec.shape()[nind_spec];
     }
 
-private:
-    template<typename T>
-    void set_shape(const T &extent) {
-        static_assert(std::is_integral<T>::value, "Shape requires an integral extent.");
-        m_shape.fill(extent);
-    }
-
-    template<typename T, typename ...Args>
-    void set_shape(const T &first, Args ...args) {
-        static_assert(std::is_integral<T>::value, "Shape requires an integral extent.");
-        m_shape[nind - sizeof...(args) - 1] = first;
-        set_shape(args...);
-    }
-
-    template<typename T>
-    void set_shape(const T &first, T &second) {
-        static_assert(std::is_integral<T>::value, "Shape requires an integral extent.");
-        m_shape[nind - 2] = first;
-        m_shape[nind - 1] = second;
-    }
-
-    void set_strides() {
-        m_strides.back() = 1ul;
-        for (auto i = 2ul; i <= nind; i++) {
-            m_strides[nind - i] = m_strides[nind - i + 1] * m_shape[nind - i + 1];
-        }
-    }
-
-    template<size_t nind_get>
-    size_t partial_get() const {
-        return 0;
-    }
-
-    template<size_t nind_get>
-    size_t partial_get(const size_t &first) const {
-        return m_strides[nind_get - 1] * first;
-    }
-
-    template<size_t nind_get, typename ...Args>
-    size_t partial_get(const size_t &first, Args ...trailing) const {
-        ASSERT(first < m_shape[nind - sizeof...(trailing) - 1]);
-        constexpr size_t iind = nind_get - sizeof...(trailing) - 1;
-        if (iind < nind_get) {
-            return m_strides[iind] * first + partial_get<nind_get>(trailing...);
-        } else {
-            return m_strides[iind] * first;
-        }
-    }
-
-
-public:
-    template<typename ...Args>
-    size_t get_sub(Args...inds) const {
-        static_assert(sizeof...(inds) <= nind, "Invalid number of arguments.");
-        return partial_get<sizeof...(inds)>(inds...);
-    }
-
-    template<typename ...Args>
-    size_t get(Args ...inds) const {
-        static_assert(sizeof...(inds) == nind, "Invalid number of arguments.");
-        return get_sub(inds...);
+    const size_t& offset() const {
+        return m_offset;
     }
 };
+
+template<typename selector_t, size_t nind, size_t nind_unspec>
+struct Indexer : IndexerBase<selector_t, nind, nind_unspec> {
+    Indexer(NdSpecifierBase<selector_t, nind> &spec, const size_t &i) :
+    IndexerBase<selector_t, nind, nind_unspec>(spec, i) {}
+
+    Indexer(const Indexer<selector_t, nind, nind_unspec> &parent, const size_t &i) :
+    IndexerBase<selector_t, nind, nind_unspec>(parent, i) {}
+
+    using IndexerBase<selector_t, nind, nind_unspec>::nind_spec;
+    Indexer<selector_t, nind, nind_unspec - 1> operator[](const size_t& i) {
+        static_assert(nind_spec < nind, "depth of indexing may not exceed number of indices");
+        return Indexer<selector_t, nind, nind_unspec - 1>(*this, i);
+    }
+
+};
+
+template<typename selector_t, size_t nind>
+struct Indexer<selector_t, nind, 1ul> : IndexerBase<selector_t, nind, 1ul> {
+
+    typedef IndexerBase<selector_t, nind, 1ul> base_t;
+    Indexer(NdSpecifierBase<selector_t, nind> &spec, const size_t &i) :
+            base_t(spec, i) {}
+
+    Indexer(const Indexer<selector_t, nind, 2ul> &parent, const size_t &i) :
+            base_t(parent, i) {}
+
+    using base_t::nind_spec;
+            /*
+    Indexer<selector_t, nind, depth + 1> operator[](const size_t& i) {
+        static_assert(depth <= nind, "depth of indexing may not exceed number of indices");
+        return Indexer<selector_t, nind, depth + 1>(*this, i);
+    }*/
+
+    using base_t::m_offset;
+    using base_t::m_spec;
+    typename selector_t::accessor_t operator[](const size_t& i) {
+        return m_spec.select(m_offset+i);
+    }
+
+
+};
+
+//template<typename selector_t, size_t nind>
+//struct Indexer<selector_t, nind, nind> : IndexerBase<selector_t, nind, nind> {
+//    Indexer(const ArrayspecBase<selector_t, nind> &spec, const size_t &i) :
+//    IndexerBase<selector_t, nind, 1ul>(spec, i) {}
+//
+//    Indexer(const IndexerBase<selector_t, nind, nind - 1> &parent, const size_t &i) :
+//    IndexerBase<selector_t, nind, nind>(parent, i) {}
+//
+//    //operator size_t() const { return IndexerBase<nind, nind>::m_offset; }
+//
+//    using IndexerBase<selector_t, nind, nind>::m_offset;
+//    using IndexerBase<selector_t, nind, nind>::m_spec;
+//
+//    typename selector_t::accessor_t select(){
+//        return m_spec.select(m_offset);
+//    }
+//    /*
+//    typename selector_t::const_accessor_t select() const{
+//        return m_spec.select(m_offset);
+//    }
+//     */
+//};
+
+
 
 #endif //M7_INDEXER_H

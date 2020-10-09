@@ -34,7 +34,7 @@ TEST(Table, EncodeDecode) {
 
 /*
 TEST(Table, AllToAllV) {
-    Specification spec;
+    Specifier spec;
     const size_t nint = 4;
     spec.add<size_t>(nint);
     const size_t nrow_send = 10;
@@ -80,7 +80,7 @@ TEST(Table, AllToAllV) {
     /*
 
 TEST(Table, PrivateTempThreadSafety) {
-    Specification specification;
+    Specifier specification;
     specification.add<size_t>(3);
     size_t nrow = 3600;
     Table shared_table(specification, nrow);

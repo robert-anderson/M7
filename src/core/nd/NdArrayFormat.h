@@ -14,6 +14,10 @@ class NdArrayFormat {
     std::array<size_t, nind> m_strides;
 
 public:
+    NdArrayFormat(){
+        static_assert(!nind, "This ctor is only valid in the scalar case");
+    }
+
     NdArrayFormat(size_t extent){
         m_shape.fill(extent);
         set_strides();

@@ -9,20 +9,46 @@
 #include <src/core/nd/NdArrayFormat.h>
 #include "Enumerator.h"
 
-template<size_t n>
 class ProductEnumerator : public Enumerator<defs::inds> {
-    const NdArrayFormat<n> m_format;
-    size_t iflat = 0ul;
-public:
-    explicit ProductEnumerator(NdArrayFormat<n>&& format, Enumerator *subsequent = nullptr):
-            Enumerator<defs::inds>(subsequent), m_format(std::move(format)) {}
+    const defs::inds m_shape;
+    const size_t m_nind;
+    const defs::inds m_strides;
+    const size_t m_nelement;
+    size_t m_iflat = 0ul;
 
-    template<typename ...Args>
-    ProductEnumerator(Args... args): ProductEnumerator(NdArrayFormat<n>(args...)){}
+    defs::inds strides(){
+        defs::inds res;
+        if (!m_nind) return {};
+        res.resize(m_nind);
+        res.back() = 1ul;
+        for (auto i = 2ul; i <= m_nind; i++) {
+            res[m_nind - i] = res[m_nind - i + 1] * m_shape[m_nind - i + 1];
+        }
+        return res;
+    }
+
+    void decode_flat(const size_t& iflat, defs::inds& inds) const {
+        ASSERT(inds.size()>=m_nind);
+        size_t remainder = iflat;
+        for (size_t i=0ul; i<m_nind; ++i){
+            auto& ind = inds[i];
+            ind = remainder/m_strides[i];
+            remainder-=ind*m_strides[i];
+        }
+    }
+
+public:
+
+    explicit ProductEnumerator(defs::inds&& shape, Enumerator *subsequent = nullptr):
+            Enumerator<defs::inds>(subsequent), m_shape(std::move(shape)),
+            m_nind(m_shape.size()), m_strides(strides()), m_nelement(m_shape.front()*m_strides.front()){}
+
+    ProductEnumerator(size_t nind, size_t extent, Enumerator *subsequent = nullptr):
+    ProductEnumerator(defs::inds(nind, extent), subsequent){}
 
     virtual bool next_element(defs::inds &result){
-        m_format.decode_flat(iflat, result);
-        return iflat++<m_format.nelement();
+        decode_flat(m_iflat, result);
+        return m_iflat++<m_nelement;
     }
 };
 

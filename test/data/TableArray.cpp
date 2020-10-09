@@ -10,7 +10,7 @@
 #include "src/data/BitfieldNew.h"
 
 TEST(TableArray, SingleTableCase) {
-    Specification spec;
+    Specifier spec;
     const size_t nint = 4;
     const size_t nbit = 20;
     spec.add<size_t>(nint);
@@ -25,7 +25,7 @@ TEST(TableArray, SingleTableCase) {
 
 
 TEST(TableArray, EncodeDecode) {
-    Specification spec;
+    Specifier spec;
     const size_t nint = 4;
     const size_t nbit = 20;
     spec.add<size_t>(nint);

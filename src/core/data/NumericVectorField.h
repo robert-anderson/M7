@@ -13,13 +13,15 @@ struct NumericVectorField : public Field<nind> {
     // number of items in each element i.e. length of the vectors stored
     const size_t m_nitem;
 
-    struct View : Field<nind>::View {
+    class View : FieldBase::View {
         using Field<nind>::View::m_ptr;
-        const size_t& m_nitem;
-        View(const NumericVectorField<T, nind>& field, const size_t& irow, const size_t& ielement):
-                Field<nind>::View(field.begin(irow)+ielement*sizeof(T)), m_nitem(field.m_nitem){
+    public:
+        View(const NumericVectorField<T, nind>* field, const size_t& irow, const size_t& ielement):
+                Field<nind>::View(field, irow, ielement){
         }
-
+        inline const size_t& nitem() const{
+            return static_cast<const NumericVectorField<T, nind>*>(m_field)->m_nitem;
+        }
         T& operator[](const size_t& ientry){
             return ((T*)m_ptr)[ientry];
         }
@@ -34,8 +36,8 @@ struct NumericVectorField : public Field<nind> {
         }
 
         std::vector<T> to_vector() const {
-            std::vector<T> res(m_nitem);
-            std::copy(m_ptr, m_ptr+m_nitem*sizeof(T), (char*)res.data());
+            std::vector<T> res(nitem());
+            std::copy(m_ptr, m_ptr+nitem()*sizeof(T), (char*)res.data());
             return res;
         }
 
@@ -47,7 +49,7 @@ struct NumericVectorField : public Field<nind> {
     using FieldBase::m_nelement;
     std::string to_string(size_t irow) const override {
         std::string res;
-        for (size_t i=0ul; i<m_nelement; ++i) res+=View(*this, irow, i).to_string()+" ";
+        for (size_t i=0ul; i<m_nelement; ++i) res+=View(this, irow, i).to_string()+" ";
         return res;
     }
 
@@ -60,7 +62,7 @@ struct NumericVectorField : public Field<nind> {
     using Field<nind>::m_format;
     template<typename ...Args>
     View operator()(const size_t& irow, Args... inds){
-        return View(*this, irow, m_format.flat(inds...));
+        return View(this, irow, m_format.flat(inds...));
     }
 };
 

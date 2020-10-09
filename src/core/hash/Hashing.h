@@ -30,7 +30,7 @@ namespace hashing {
         }
     }
 
-    static defs::hash_t fnv_hash(char* begin, const size_t& size){
+    static defs::hash_t fnv_hash(const char* begin, const size_t& size){
         const auto prime = fnv_prime<defs::hash_t>();
         auto result = fnv_offset_basis<defs::hash_t>();
         for (size_t ibyte=0ul; ibyte<size; ++ibyte) {

@@ -6,7 +6,7 @@
 
 #if 0
 TEST(MappedList, DataIntegrity) {
-    Specification specification;
+    Specifier specification;
     specification.add<size_t>(2);
     size_t nrow = 36;
 
@@ -22,7 +22,7 @@ TEST(MappedList, DataIntegrity) {
 }
 
 TEST(MappedList, ThreadSafety) {
-    Specification specification;
+    Specifier specification;
     specification.add<size_t>(2);
     size_t nrow = 36;
 
