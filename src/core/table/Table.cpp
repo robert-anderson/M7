@@ -92,7 +92,7 @@ const size_t &Table::nrow_per_segment() const {
 
 void Table::update_row_size(size_t size) {
     m_row_size = size;
-    m_padded_row_size = defs::cache_line_size * integer_utils::divceil(size, defs::cache_line_size);
+    m_padded_row_size = defs::ncacheline_byte * integer_utils::divceil(size, defs::ncacheline_byte);
     ASSERT(m_padded_row_size % sizeof(defs::data_t) == 0);
     m_padded_row_dsize = m_padded_row_size / sizeof(defs::data_t);
 }

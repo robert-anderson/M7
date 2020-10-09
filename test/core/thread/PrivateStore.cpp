@@ -26,7 +26,7 @@ TEST(PrivateStore, AlignmentTest1) {
         /*
          * test whether every element is aligned to the cache line
          */
-        if ((size_t) &store.get() % defs::cache_line_size) passed = false;
+        if ((size_t) &store.get() % defs::ncacheline_byte) passed = false;
         as_atomic(all_passed) &= passed;
     }
     ASSERT_TRUE(all_passed);
@@ -55,7 +55,7 @@ TEST(PrivateStore, AlignmentTest2) {
         /*
          * test whether every element is aligned to the cache line
          */
-        if ((size_t) &store.get() % defs::cache_line_size) passed = false;
+        if ((size_t) &store.get() % defs::ncacheline_byte) passed = false;
         as_atomic(all_passed) &= passed;
     }
     ASSERT_TRUE(all_passed);
