@@ -84,8 +84,10 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
 
 TEST(DenseHamiltonian, BosonCouplingCheck) {
     // TODO James: Instantiate the DenseHamiltonian and diagonalise so we can check vs. our exact FCI and Charlie's
-    AbInitioHamiltonian h
-    // BosonCouplings bc
-    // DenseHamiltonian dh (h, bc)
-    // dh.diagonalize()
+    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_4_4/FCIDUMP", false);
+    ASSERT_EQ(h.nelec(), 4);
+    //BosonCouplings bc()
+    DenseHamiltonian dh (h);//, bc)
+    auto solver = dh.diagonalize();
+    std::cout << solver.m_evals[0] << std::endl;
 }
