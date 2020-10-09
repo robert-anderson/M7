@@ -75,12 +75,12 @@ public:
     defs::ham_t get_element_0(const PermanentConnection &permconn) const {
         defs::ham_t res = 0;
         for (size_t imode=0ul; imode<m_nmode; ++imode)
-            res+= omega(imode)*permconn.com()[imode];
+            res+= omega(imode)*permconn.com(imode);
         return res;
     }
 
     defs::ham_t get_element_1(const AntisymConnection &detconn, const PermanentConnection &permconn) const {
-        const auto n = permconn.changed_modes()[0];
+        const auto n = permconn.changed_modes(0);
         // bosons don't couple to higher fermion excitations (yet?)
         switch (detconn.nexcit()) {
             case 0: {

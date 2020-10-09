@@ -35,6 +35,25 @@ public:
         return tmp;
     }
 
+
+    NumericArrayElement& operator=(const std::vector<T>& v){
+        ASSERT(v.size() == m_array_size);
+        size_t i = 0;
+        for(auto el : v){
+            (*this)(i++) = el;
+        }
+        return *this;
+    }
+
+    NumericArrayElement& operator=(const NumericArrayElement<T>& rhs){
+        if(&rhs == this) return *this;
+        const auto this_begin = (*this)(0).m_begin;
+        const auto rhs_begin = rhs(0).m_begin;
+        const auto rhs_end = rhs_begin + sizeof(T)*std::min(rhs.m_array_size, m_array_size);
+        std::memcpy(this_begin, rhs_begin, rhs_end);
+        return *this;
+    }
+
     Field* field() const{
         return m_field;
     }

@@ -84,7 +84,7 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
 
 TEST(DenseHamiltonian, BosonCouplingCheck) {
     // TODO James: Instantiate the DenseHamiltonian and diagonalise so we can check vs. our exact FCI and Charlie's
-    // AbInitioHamiltonian h
+    AbInitioHamiltonian h
     // BosonCouplings bc
     // DenseHamiltonian dh (h, bc)
     // dh.diagonalize()
