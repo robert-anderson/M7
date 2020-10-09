@@ -32,15 +32,29 @@ public:
     const size_t & nchanged_mode() const {
         return m_diff.m_nchanged_mode;
     }
-    const defs::inds & changed_modes() const {
-        return m_diff.m_changed_modes;
+    const size_t & changed_modes(const size_t& ichange) const {
+        ASSERT(ichange < nchanged_mode());
+        return m_diff.m_changed_modes[ichange];
     }
-    const std::vector<int> & changes() const {
-        return m_diff.m_changes;
+    // todo: uncomment when current usage has been changed where appropriate.
+//    const std::vector<size_t>& changed_modes() const {
+//        return m_diff.m_changed_modes;
+//    }
+    const int & changes(const size_t& ichange) const {
+        ASSERT(ichange < nchanged_mode());
+        return m_diff.m_changes[ichange];
     }
-    const std::vector<int> & com() const {
-        return m_com;
+//    const std::vector<int>& changes() const {
+//        return m_diff.m_changes;
+//    }
+    const int & com(const size_t& icom) const {
+        ASSERT(icom < m_nmode - nchanged_mode());
+        return m_com[icom];
     }
+//    const std::vector<int>& com() const {
+//        ASSERT(icom < m_nmode - nchanged_mode());
+//        return m_com;
+//    }
 
     PermanentConnection(const PermanentElement &ket, const PermanentElement &bra):
             PermanentConnection(ket.field()){
@@ -60,8 +74,9 @@ public:
             int nbra = *bra(imode);
             m_com[imode] = std::min(nket, nbra);
             if (nket!=nbra){
-                m_diff.m_changed_modes[m_diff.m_nchanged_mode++] = imode;
-                m_diff.m_changes[imode] = nket-nbra;
+                m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;
+                m_diff.m_changes[m_diff.m_nchanged_mode] = nket-nbra;
+                ++m_diff.m_nchanged_mode;
             }
         }
     }

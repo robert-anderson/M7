@@ -11,6 +11,8 @@ class PermanentField;
 
 class PermanentElement : public NumericArrayElement<uint8_t> {
 public:
+    using NumericArrayElement<uint8_t>::operator=;
+
     PermanentElement(PermanentField* field, const size_t &array_size, const size_t &irow, const size_t &isegment, const size_t &iarray);
     PermanentField* field() const{
         return reinterpret_cast<PermanentField *>(m_field);
@@ -27,6 +29,7 @@ public:
     }
 
     const PermanentElement operator()(const size_t &irow, const size_t &isegment = 0, const size_t &ielement = 0) const;
+
 
 };
 

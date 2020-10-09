@@ -24,7 +24,7 @@ target_link_libraries (unittest ${MPI_LIBRARIES})
 
 target_compile_definitions(unittest PRIVATE DEBUG=1)
 #target_compile_definitions(unittest PRIVATE VERBOSE=1)
-target_compile_options(unittest PRIVATE -Og)
+target_compile_options(unittest PRIVATE -O0)
 
 include_directories($ENV{INCLUDE_PATH})
 SET(CMAKE_CXX_FLAGS "-fopenmp -march=native")
