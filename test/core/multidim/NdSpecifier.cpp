@@ -2,10 +2,6 @@
 // Created by RJA on 18/09/2020.
 //
 
-#include "gtest/gtest.h"
-#include "src/core/multidim/NdArray.h"
-#include "src/core/multidim/NdIndices.h"
-#include "src/core/util/defs.h"
 
 /*
 struct TrivialGetter {
@@ -15,7 +11,6 @@ struct TrivialGetter {
         return flat;
     }
 };
- */
 
 
 TEST(NdSpecifier, Indices2D) {
@@ -58,7 +53,6 @@ TEST(ArrayFormat, NdArray) {
     std::cout << array.to_string() << std::endl;
 }
 
-/*
 TEST(NdSpecifier, Sequence) {
     NdSpecifier<TrivialGetter, 3> af(TrivialGetter(), 4, 2, 3);
     size_t i = 0ul;

@@ -8,8 +8,8 @@
 #include "FieldBase.h"
 #include "src/core/nd/NdArrayFormat.h"
 
-template <size_t nind>
-class Field : public FieldBase{
+template<size_t nind>
+class Field : public FieldBase {
 protected:
     NdArrayFormat<nind> m_format;
 
@@ -19,16 +19,8 @@ protected:
     }
 
     template<typename ...Args>
-    Field(Table* table, size_t element_size, const std::type_info& type_info, Args&& ...shape) :
-            FieldBase(table, element_size, nelement(shape...), type_info), m_format(std::forward<Args>(shape)...){}
-
-    class View {
-    protected:
-        char* m_ptr;
-        View(char* ptr): m_ptr(ptr){
-            ASSERT(m_ptr);
-        }
-    };
+    Field(Table *table, size_t element_size, const std::type_info &type_info, Args &&...shape) :
+            FieldBase(table, element_size, nelement(shape...), type_info), m_format(std::forward<Args>(shape)...) {}
 };
 
 
