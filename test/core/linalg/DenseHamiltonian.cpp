@@ -78,16 +78,17 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values
+    std::cout << solver.m_evals[0] << std::endl;
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -76.08150945314577, 1e-10));
 }
 
 
 TEST(DenseHamiltonian, BosonCouplingCheck) {
     // TODO James: Instantiate the DenseHamiltonian and diagonalise so we can check vs. our exact FCI and Charlie's
-    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_4_4/FCIDUMP", false);
+    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_4_4/FCIDUMP", 1);
     ASSERT_EQ(h.nelec(), 4);
     //BosonCouplings bc()
     DenseHamiltonian dh (h);//, bc)
     auto solver = dh.diagonalize();
-    std::cout << solver.m_evals[0] << std::endl;
+    ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }

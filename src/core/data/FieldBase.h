@@ -47,6 +47,7 @@ public:
         char *m_ptr;
 
         inline void init(const FieldBase *field, const size_t &irow, const size_t &ielement) {
+            m_field = field;
             m_ptr = field->begin(irow, ielement);
         }
 

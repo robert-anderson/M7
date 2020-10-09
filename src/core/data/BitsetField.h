@@ -36,6 +36,7 @@ struct BitsetField : public Field<nind> {
         char* operator&() {return m_ptr;}
 
         inline const size_t& nbit() const{
+            ASSERT(m_field);
             return static_cast<const BitsetField<nind>*>(m_field)->m_nbit;
         }
         
@@ -58,6 +59,7 @@ struct BitsetField : public Field<nind> {
         }
 
         void set(const size_t& ibit){
+            ASSERT(m_field);
             ASSERT(ibit < nbit());
             const size_t iword = ibit/defs::nbit_data;
             ASSERT(iword<dsize());
@@ -65,6 +67,7 @@ struct BitsetField : public Field<nind> {
         }
 
         void clr(const size_t& ibit){
+            ASSERT(m_field);
             ASSERT(ibit < nbit());
             const size_t iword = ibit/defs::nbit_data;
             ASSERT(iword<dsize());
@@ -72,6 +75,7 @@ struct BitsetField : public Field<nind> {
         }
 
         bool get(const size_t& ibit) const{
+            ASSERT(m_field);
             ASSERT(ibit < nbit());
             const size_t iword = ibit/defs::nbit_data;
             ASSERT(iword<dsize());
@@ -79,6 +83,7 @@ struct BitsetField : public Field<nind> {
         }
 
         size_t nsetbit() const {
+            ASSERT(m_field);
             size_t result = 0;
             for (size_t idataword = 0ul; idataword<dsize(); ++idataword){
                 result+=bit_utils::nsetbit(dptr()[idataword]);
@@ -87,11 +92,13 @@ struct BitsetField : public Field<nind> {
         }
 
         View& operator =(const View& v){
+            ASSERT(m_field);
             ASSERT(v.nbit()==nbit());
             std::copy(v.m_ptr, v.m_ptr+v.m_size, m_ptr);
         }
 
         std::string to_string() const {
+            ASSERT(m_field);
             std::string res;
             res.reserve(nbit());
             for (size_t i=0ul; i<nbit(); ++i) res.append(get(i)?"1":"0");

@@ -27,7 +27,7 @@ public:
         Hamiltonian(file_reader.nelec(), file_reader.nspatorb(),
                     file_reader.spin_conserving_1e(),
                     file_reader.spin_conserving_2e(),
-                    file_reader.complex_valued()),
+                    file_reader.m_complex_valued),
         m_int_1(file_reader.norb(), file_reader.spin_resolved()),
         m_int_2(file_reader.norb(), file_reader.spin_resolved()){
         defs::inds inds(4);

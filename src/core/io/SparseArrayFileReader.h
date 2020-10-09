@@ -10,17 +10,22 @@
 #include <src/core/util/defs.h>
 #include <src/core/util/utils.h>
 #include <algorithm>
+#include <src/core/util/Ternary.h>
 #include "FileReader.h"
 
 template<typename T>
 class SparseArrayFileReader : public FileReader {
     const size_t m_nind;
-    bool m_indsfirst;
-    bool m_complex_valued;
 public:
-    SparseArrayFileReader(const std::string &fname, size_t nind) :
-    FileReader(fname), m_nind(nind) {
+    Tern m_indsfirst;
+    Tern m_complex_valued;
+
+    SparseArrayFileReader(const std::string &fname, size_t nind,
+                          Tern indsfirst = Tern(), Tern complex_valued = Tern()) :
+            FileReader(fname), m_nind(nind), m_indsfirst(indsfirst), m_complex_valued(complex_valued) {
         reset();
+        if (m_indsfirst) std::cout << "Reading sparse array from file with indices before values"<< std::endl;
+        else std::cout << "Reading sparse array from file with indices after values"<< std::endl;
         if (m_complex_valued && !consts::is_complex<T>())
             throw std::runtime_error("Trying to read complex-valued array entries into a real container");
         else if (consts::is_complex<T>() && !m_complex_valued)
@@ -31,6 +36,8 @@ public:
     void reset() {
         size_t iline = first_valid_line(m_fname, m_nind, m_indsfirst, m_complex_valued);
         if (iline == ~0ul) throw std::runtime_error("No valid entries found");
+        if(m_indsfirst==Tern::Neither) throw std::runtime_error("m_indsfirst is still unspecified");
+        if(m_complex_valued==Tern::Neither) throw std::runtime_error("m_complex_valued is still unspecified");
         FileReader::reset(iline);
     }
 
@@ -42,7 +49,7 @@ public:
         return true;
     }
 
-    size_t first_valid_line(const std::string &fname, const size_t &nind, bool &indsfirst, bool &complex_valued) {
+    size_t first_valid_line(const std::string &fname, const size_t &nind, Tern &indsfirst, Tern &complex_valued) {
         FileReader iterator(fname);
         std::string line;
         while (iterator.next(line)) {
@@ -51,12 +58,10 @@ public:
         return ~0ul; // no valid line found
     }
 
-    static bool validate(const std::string &line, const size_t &nind, bool &indsfirst, bool &complex_valued) {
+    static bool validate(const std::string &line, const size_t &nind, Tern &indsfirst, Tern &complex_valued) {
         // can only be complex valued if the real and imag parts are delimited by a comma
-        complex_valued = line.find(',')!=~0ul;
-        auto tokens = string_utils::split(line, "() ,");
-        if (tokens.size() > nind + 1 + complex_valued) return false;
         std::vector<double> doubles{};
+        auto tokens = string_utils::split(line, "() ,");
         for (auto token : tokens) {
             try {
                 doubles.push_back(std::stod(token));
@@ -65,20 +70,27 @@ public:
                 return false;
             }
         }
+
+        if (complex_valued == Tern::Neither) {
+            complex_valued = line.find(',') != ~0ul;
+            if (tokens.size() > nind + 1 + complex_valued) return false;
+        }
         using namespace float_utils;
-        if (!is_integral(doubles[0]) || (complex_valued && !is_integral(doubles[1]))) {
-            // float(s) come first
-            indsfirst = false;
-            auto begin = doubles.data() + (complex_valued ? 2 : 1);
-            auto end = begin + nind;
-            if (!std::all_of(begin, end, is_integral<double>)) return false;
-        } else if (!is_integral(doubles[doubles.size() - 1]) ||
-                   (complex_valued && !is_integral(doubles[doubles.size() - 2]))) {
-            // float(s) come last
-            indsfirst = true;
-            auto begin = doubles.data();
-            auto end = begin + nind;
-            if (!std::all_of(begin, end, is_integral<double>)) return false;
+        if (indsfirst == Tern::Neither) {
+            if (!is_integral(doubles[0]) || (complex_valued && !is_integral(doubles[1]))) {
+                // float(s) come first
+                indsfirst = false;
+                auto begin = doubles.data() + (complex_valued ? 2 : 1);
+                auto end = begin + nind;
+                return std::all_of(begin, end, is_integral<double>);
+            } else if (!is_integral(doubles[doubles.size() - 1]) ||
+                       (complex_valued && !is_integral(doubles[doubles.size() - 2]))) {
+                // float(s) come last
+                indsfirst = true;
+                auto begin = doubles.data();
+                auto end = begin + nind;
+                return std::all_of(begin, end, is_integral<double>);
+            }
         }
         return true;
     }
@@ -86,8 +98,8 @@ public:
     static void
     extract(const std::string &line, size_t nind, bool indsfirst, bool complex_valued, defs::inds &inds, T &value) {
         const char *p = line.begin().base();
-        auto f = [&p, &nind, &complex_valued, &inds, &value](bool indsfirst) {
-            if (indsfirst) {
+        auto f = [&p, &nind, &complex_valued, &inds, &value](bool indsnext) {
+            if (indsnext) {
                 for (size_t i = 0ul; i < nind; ++i) {
                     inds[i] = read_unsigned(p);
                 }
@@ -97,9 +109,10 @@ public:
                     complex_utils::set_imag_part(value, read_double(p));
             }
         };
-        f(indsfirst);
-        f(!indsfirst);
+        if(indsfirst){ f(1); f(0);}
+        else {f(0); f(1);}
     }
+
 
     static inline bool is_numeric(const char &c) {
         return '0' <= c && c <= '9';
@@ -158,12 +171,7 @@ public:
             return std::numeric_limits<size_t>::max();
         }
     }
-
-    const bool& complex_valued() const {
-        return m_complex_valued;
-    }
 };
-
 
 
 #endif //M7_SPARSEARRAYFILEREADER_H

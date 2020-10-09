@@ -55,8 +55,9 @@ class FcidumpFileReader : public SparseArrayFileReader<T> {
     }
 
 public:
-    using SparseArrayFileReader<T>::complex_valued;
-    FcidumpFileReader(const std::string &fname, bool spin_major) : SparseArrayFileReader<T>(fname, 4),
+    using SparseArrayFileReader<T>::m_complex_valued;
+    FcidumpFileReader(const std::string &fname, bool spin_major) :
+    SparseArrayFileReader<T>(fname, 4, Tern::False),
     m_spin_major(spin_major),
     m_norb(read_header_int(fname, "NORB")),
     m_isymm(m_norb>3?isymm(fname):1),

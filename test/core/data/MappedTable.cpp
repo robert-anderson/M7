@@ -15,9 +15,9 @@ struct TestTable : public MappedTable<1> {
 };
 
 TEST(MappedTable, SingleFieldInsert){
-    //BufferedTable<TestTable> bt;
-    //bt.expand(100);
+    BufferedTable<TestTable> bt;
+    bt.expand(100);
     Bitset<0> bitset(10);
     std::cout << bitset.to_string() << std::endl;
-    //bt.insert();
+    //bt.insert(bitset);
 }

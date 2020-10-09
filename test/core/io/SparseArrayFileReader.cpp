@@ -20,7 +20,7 @@ TEST(SparseArrayFileReader, IndexReading) {
 
 TEST(SparseArrayFileReader, EntryReadingComplexIndsLast) {
     SparseArrayFileReader<std::complex<double>> file_reader(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", 4);
-    ASSERT_TRUE(file_reader.complex_valued());
+    ASSERT_TRUE(file_reader.m_complex_valued);
     defs::inds inds(4);
     std::complex<double> v;
     file_reader.next(inds, v);
