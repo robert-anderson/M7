@@ -161,6 +161,60 @@ namespace consts {
     const std::string verb = "\t[VERBOSE]  ";
     const std::string chevs = " >>> ";
 
+    template<typename T>
+    static std::string type_name() { return typeid(T).name(); }
+
+    template<>
+    std::string type_name<char>() { return "char"; }
+
+    template<>
+    std::string type_name<short int>() { return "short int"; }
+
+    template<>
+    std::string type_name<int>() { return "int"; }
+
+    template<>
+    std::string type_name<long int>() { return "long int"; }
+
+    template<>
+    std::string type_name<long long int>() { return "long long int"; }
+
+    template<>
+    std::string type_name<unsigned char>() { return "unsigned char"; }
+
+    template<>
+    std::string type_name<unsigned short int>() { return "unsigned short int"; }
+
+    template<>
+    std::string type_name<unsigned int>() { return "unsigned short int"; }
+
+    template<>
+    std::string type_name<unsigned long int>() { return "unsigned long int"; }
+
+    template<>
+    std::string type_name<unsigned long long int>() { return "unsigned long long int"; }
+
+    template<>
+    std::string type_name<float>() { return "float"; }
+
+    template<>
+    std::string type_name<double>() { return "double"; }
+
+    template<>
+    std::string type_name<long double>() { return "long double"; }
+
+    template<>
+    std::string type_name<std::complex<float>>() { return "complex float"; }
+
+    template<>
+    std::string type_name<std::complex<double>>() { return "complex double"; }
+
+    template<>
+    std::string type_name<std::complex<long double>>() { return "complex long double"; }
+
+    template<>
+    std::string type_name<bool>() { return "bool"; }
+
 }
 
 

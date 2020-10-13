@@ -61,6 +61,17 @@ namespace utils {
         return tmp.str();
     }
 
+    static void pad_string(std::string &str, const size_t num, const char pad_char = ' ') {
+        if(num > str.size()) str.insert(0, num - str.size(), pad_char);
+    }
+
+    static std::string padded_string(const std::string &str, const size_t num, const char pad_char = ' ') {
+        auto tmp = str;
+        pad_string(tmp, num, pad_char);
+        return tmp;
+    }
+
+
     template<typename T>
     std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 6) {
         std::string result;

@@ -8,20 +8,25 @@
 #include <climits>
 #include <src/core/util/utils.h>
 #include "Field.h"
-#include "Table.h"
+#include "Table_NEW.h"
 
 template<typename T, size_t nind>
-struct NumericField : public Field<nind> {
+struct NumericField : public Field_NEW<nind> {
     using FieldBase::m_nelement;
-    std::string to_string(size_t irow) const override {
-        std::string res;
-        for (size_t i=0ul; i<m_nelement; ++i) res+=utils::num_to_string(flat_get(irow, i))+" ";
-        return res;
+    std::string element_to_string(size_t irow, size_t ielement) const override {
+        return utils::num_to_string(flat_get(irow, ielement));
+    }
+
+    std::map<std::string, std::string> details() const override {
+        auto map = Field_NEW<nind>::details();
+        map["field type"] = "Numeric";
+        map["encoded type"] = consts::type_name<T>();
+        return map;
     }
 
     template<typename ...Args>
-    NumericField(Table* table, Args&& ...shape) :
-    Field<nind>(table, sizeof(T), typeid(T), shape...){
+    NumericField(Table_NEW* table, std::string description, Args&& ...shape) :
+            Field_NEW<nind>(table, sizeof(T), typeid(T), description, shape...){
         FieldBase::set_offsets();
     }
 
@@ -42,7 +47,7 @@ private:
         return ((T*)FieldBase::begin(irow))[ielement];
     }
 
-    using Field<nind>::m_format;
+    using Field_NEW<nind>::m_format;
 
 public:
     /*

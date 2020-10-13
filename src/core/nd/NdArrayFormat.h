@@ -42,6 +42,10 @@ public:
         return m_shape[i];
     }
 
+    const std::array<size_t, nind>& shape() const {
+        return m_shape;
+    }
+
     template<typename ...Args>
     size_t flat(Args... inds) const {
         static_assert(sizeof...(Args)==nind, "incorrect number of indices");

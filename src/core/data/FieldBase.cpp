@@ -4,10 +4,11 @@
 
 #include "FieldBase.h"
 
-FieldBase::FieldBase(Table* table, size_t element_size, size_t nelement, const std::type_info& type_info) :
+FieldBase::FieldBase(Table_NEW *table, size_t element_size, size_t nelement, const std::type_info &type_info, std::string description):
         m_table(table), m_element_size(element_size),
         m_nelement(nelement), m_size(m_element_size*m_nelement),
-        m_dsize(integer_utils::divceil(m_size, sizeof(defs::data_t))), m_type_info(type_info){}
+        m_dsize(integer_utils::divceil(m_size, sizeof(defs::data_t))),
+        m_type_info(type_info), m_description(std::move(description)){}
 
 bool FieldBase::is_same_type_as(const FieldBase &other) const {
     return other.m_type_info == m_type_info;

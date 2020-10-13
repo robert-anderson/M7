@@ -9,25 +9,25 @@
 #include "Field.h"
 
 template<typename T, size_t nind>
-struct NumericVectorField : public Field<nind> {
+struct NumericVectorField : public Field_NEW<nind> {
     // number of items in each element i.e. length of the vectors stored
     const size_t m_nitem;
 
     class View : FieldBase::View {
-        using Field<nind>::View::m_ptr;
+        using Field_NEW<nind>::View::m_ptr;
     public:
         View(const NumericVectorField<T, nind>* field, const size_t& irow, const size_t& ielement):
-                Field<nind>::View(field, irow, ielement){
+                Field_NEW<nind>::View(field, irow, ielement){
         }
         inline const size_t& nitem() const{
             return static_cast<const NumericVectorField<T, nind>*>(m_field)->m_nitem;
         }
-        T& operator[](const size_t& ientry){
-            return ((T*)m_ptr)[ientry];
+        T& operator[](const size_t& iitem){
+            return ((T*)m_ptr)[iitem];
         }
 
-        const T& operator[](const size_t& ientry) const {
-            return ((T*)m_ptr)[ientry];
+        const T& operator[](const size_t& iitem) const {
+            return ((T*)m_ptr)[iitem];
         }
 
         View& operator =(const std::vector<T>& v){
@@ -46,20 +46,25 @@ struct NumericVectorField : public Field<nind> {
         }
     };
 
-    using FieldBase::m_nelement;
-    std::string to_string(size_t irow) const override {
-        std::string res;
-        for (size_t i=0ul; i<m_nelement; ++i) res+=View(this, irow, i).to_string()+" ";
-        return res;
+    std::string element_to_string(size_t irow, size_t ielement) const override {
+        return View(this, irow, ielement).to_string()+" ";
+    }
+
+    std::map<std::string, std::string> details() const override {
+        auto map = Field_NEW<nind>::details();
+        map["field type"] = "Numeric Vector";
+        map["encoded type"] = consts::type_name<T>();
+        map["vector length"] = std::to_string(m_nitem);
+        return map;
     }
 
     template<typename ...Args>
-    NumericVectorField(Table* table, size_t nitem, Args&& ...shape) :
-            Field<nind>(table, nitem*sizeof(T), typeid(T), shape...), m_nitem(nitem){
+    NumericVectorField(Table_NEW* table, size_t nitem, std::string description, Args&& ...shape) :
+            Field_NEW<nind>(table, nitem*sizeof(T), typeid(T), description, shape...), m_nitem(nitem){
         FieldBase::set_offsets();
     }
 
-    using Field<nind>::m_format;
+    using Field_NEW<nind>::m_format;
     template<typename ...Args>
     View operator()(const size_t& irow, Args... inds){
         return View(this, irow, m_format.flat(inds...));

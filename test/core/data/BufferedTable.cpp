@@ -8,12 +8,12 @@
 #include "gtest/gtest.h"
 
 
-struct TestTable1 : public Table {
+struct TestTable1 : public Table_NEW {
     NumericField<short, 1> shorts;
     NumericField<float, 1> floats;
     TestTable1(size_t n1, size_t n2):
-        shorts(this, n1),
-        floats(this, n2)
+        shorts(this, "some shorts", n1),
+        floats(this, "some floats", n2)
     {}
 };
 
@@ -42,14 +42,14 @@ TEST(BufferedTable, DataIntegrityNumeric){
     ASSERT_EQ(bt.m_hwm, 0);
 }
 
-struct TestTable2 : public Table {
+struct TestTable2 : public Table_NEW {
     NumericField<double, 1> doubles;
     NumericField<unsigned char, 1> chars;
     NumericVectorField<float, 1> float_vectors;
     TestTable2(size_t ndouble, size_t nchar, size_t nvector, size_t nvector_item):
-    doubles(this, ndouble),
-    chars(this, nchar),
-    float_vectors(this, nvector_item, nvector)
+    doubles(this, "some doubles", ndouble),
+    chars(this, "some chars", nchar),
+    float_vectors(this, nvector_item, "some vectors of floats", nvector)
     {}
 };
 

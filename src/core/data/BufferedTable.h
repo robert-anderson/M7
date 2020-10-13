@@ -5,8 +5,7 @@
 #ifndef M7_BUFFEREDTABLE_H
 #define M7_BUFFEREDTABLE_H
 
-#include "Buffer.h"
-#include "Table.h"
+#include "BufferWindow.h"
 
 template<typename table_t>
 class BufferedTable : public table_t {

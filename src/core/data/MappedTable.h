@@ -8,10 +8,10 @@
 #include <functional>
 #include <forward_list>
 #include <src/core/hash/Hashing.h>
-#include "Table.h"
+#include "Table_NEW.h"
 
 template<size_t nmapped_field>
-class MappedTable : public Table {
+class MappedTable : public Table_NEW {
     typedef std::function<defs::hash_t(const char* ptr, const size_t& size)> hash_function_t;
     typedef std::pair<FieldBase*, hash_function_t> mapping_pair_t;
     typedef std::array<mapping_pair_t, nmapped_field> mapping_pairs_t;
@@ -20,7 +20,7 @@ class MappedTable : public Table {
     std::vector<std::forward_list<size_t>> m_buckets;
 
     MappedTable(size_t nbucket, mapping_pairs_t&& mapping_fields):
-        Table(), m_mapping_pairs(std::move(mapping_fields)), m_buckets(nbucket){}
+        Table_NEW(), m_mapping_pairs(std::move(mapping_fields)), m_buckets(nbucket){}
 
 
     void set_mapping_pairs(typename mapping_pairs_t::iterator iterator) const {}
@@ -77,7 +77,7 @@ class MappedTable : public Table {
 
 public:
     template<typename ...Args>
-    MappedTable(size_t nbucket, Args... args): Table(),
+    MappedTable(size_t nbucket, Args... args): Table_NEW(),
     m_mapping_pairs(mapping_pairs(args...)),
     m_buckets(nbucket){}
 

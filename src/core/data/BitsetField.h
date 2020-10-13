@@ -8,7 +8,8 @@
 #include <climits>
 #include <src/core/util/utils.h>
 #include "Field.h"
-#include "Table.h"
+#include "Table_NEW.h"
+#include "BufferedTable.h"
 
 /*
  * forward declaration of the "buffered view" type for Bitsets
@@ -16,7 +17,7 @@
 template<size_t nind> class Bitset;
 
 template<size_t nind>
-struct BitsetField : public Field<nind> {
+struct BitsetField : public Field_NEW<nind> {
     const size_t m_nbit;
 
     class View : FieldBase::View {
@@ -91,13 +92,7 @@ struct BitsetField : public Field<nind> {
             return result;
         }
 
-        View& operator =(const View& v){
-            ASSERT(m_field);
-            ASSERT(v.nbit()==nbit());
-            std::copy(v.m_ptr, v.m_ptr+v.m_size, m_ptr);
-        }
-
-        std::string to_string() const {
+        std::string to_string() const override {
             ASSERT(m_field);
             std::string res;
             res.reserve(nbit());
@@ -106,21 +101,26 @@ struct BitsetField : public Field<nind> {
         }
     };
 
-    using FieldBase::m_nelement;
-    std::string to_string(size_t irow) const override {
-        std::string res;
-        for (size_t i=0ul; i<m_nelement; ++i) res+=View(this, irow, i).to_string()+" ";
-        return res;
+    std::string element_to_string(size_t irow, size_t ielement) const override {
+        return View(this, irow, ielement).to_string();
+    }
+
+    std::map<std::string, std::string> details() const override {
+        auto map = Field_NEW<nind>::details();
+        map["field type"] = "Bitset";
+        map["number of bits"] = std::to_string(m_nbit);
+        return map;
     }
 
     template<typename ...Args>
-    BitsetField(Table* table, size_t nbit, Args&& ...shape) :
-            Field<nind>(table, integer_utils::divceil(nbit, (size_t)CHAR_BIT), typeid(std::vector<bool>), shape...),
+    BitsetField(Table_NEW* table, size_t nbit, std::string description, Args&& ...shape) :
+            Field_NEW<nind>(table, integer_utils::divceil(nbit, (size_t)CHAR_BIT),
+                            typeid(std::vector<bool>), description, shape...),
             m_nbit(nbit){
         FieldBase::set_offsets();
     }
 
-    using Field<nind>::m_format;
+    using Field_NEW<nind>::m_format;
     template<typename ...Args>
     View operator()(const size_t& irow, Args... inds) {
         return View(this, irow, m_format.flat(inds...));
@@ -129,10 +129,10 @@ struct BitsetField : public Field<nind> {
 
 template<size_t nind>
 class Bitset : public BitsetField<nind>::View {
-    struct InternalTable : Table {
+    struct InternalTable : Table_NEW {
         BitsetField<nind> field;
         template<typename ...Args>
-        InternalTable(size_t nbit, Args... shape):Table(), field(this, nbit, shape...){}
+        InternalTable(size_t nbit, Args... shape):Table_NEW(), field(this, nbit, "", shape...){}
     };
     BufferedTable<InternalTable> m_table;
 public:
@@ -142,7 +142,7 @@ public:
     m_table(nbit, args...){
         m_table.expand(1);
         m_table.push_back();
-        Field<nind>::View::init(&m_table.field, 0, 0);
+        Field_NEW<nind>::View::init(&m_table.field, 0, 0);
     }
 };
 
