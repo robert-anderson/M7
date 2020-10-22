@@ -3,10 +3,10 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/nd/NdArrayFormat.h"
+#include "src/core/nd/NdFormat.h"
 
 TEST(NdArrayFormat, Test1D) {
-    NdArrayFormat<1> format(9);
+    NdFormat<1> format(9);
     size_t iflat = 0ul;
     defs::inds inds(1, 0ul);
     for (size_t i0 = 0ul; i0 < format.extent(0); ++i0) {
@@ -18,7 +18,7 @@ TEST(NdArrayFormat, Test1D) {
 }
 
 TEST(NdArrayFormat, Test2D) {
-    NdArrayFormat<2> format(4, 5);
+    NdFormat<2> format(4, 5);
     size_t iflat = 0ul;
     defs::inds inds(2, 0ul);
     for (size_t i0 = 0ul; i0 < format.extent(0); ++i0) {
@@ -34,7 +34,7 @@ TEST(NdArrayFormat, Test2D) {
 
 TEST(NdArrayFormat, Test2DEqualExtents) {
     const size_t n = 7;
-    NdArrayFormat<2> format(n);
+    NdFormat<2> format(n);
     size_t iflat = 0ul;
     defs::inds inds(2, 0ul);
     for (size_t i0 = 0ul; i0 < n; ++i0) {
@@ -49,7 +49,7 @@ TEST(NdArrayFormat, Test2DEqualExtents) {
 }
 
 TEST(NdArrayFormat, Test3D) {
-    NdArrayFormat<3> format(4, 5, 3);
+    NdFormat<3> format(4, 5, 3);
     size_t iflat = 0ul;
     defs::inds inds(3, 0ul);
     for (size_t i0 = 0ul; i0 < format.extent(0); ++i0) {
@@ -68,7 +68,7 @@ TEST(NdArrayFormat, Test3D) {
 
 TEST(NdArrayFormat, Test3DEqualExtents) {
     const size_t n = 7;
-    NdArrayFormat<3> format(n);
+    NdFormat<3> format(n);
     size_t iflat = 0ul;
     defs::inds inds(3, 0ul);
     for (size_t i0 = 0ul; i0 < n; ++i0) {
@@ -86,7 +86,7 @@ TEST(NdArrayFormat, Test3DEqualExtents) {
 }
 
 TEST(NdArrayFormat, Test4D) {
-    NdArrayFormat<4> format(4, 5, 3, 2);
+    NdFormat<4> format(4, 5, 3, 2);
     size_t iflat = 0ul;
     defs::inds inds(4, 0ul);
     for (size_t i0 = 0ul; i0 < format.extent(0); ++i0) {
@@ -108,7 +108,7 @@ TEST(NdArrayFormat, Test4D) {
 
 TEST(NdArrayFormat, Test4DEqualExtents) {
     const size_t n = 5;
-    NdArrayFormat<4> format(n);
+    NdFormat<4> format(n);
     size_t iflat = 0ul;
     defs::inds inds(4, 0ul);
     for (size_t i0 = 0ul; i0 < n; ++i0) {

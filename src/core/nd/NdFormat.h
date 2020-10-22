@@ -2,31 +2,32 @@
 // Created by rja on 02/10/2020.
 //
 
-#ifndef M7_NDARRAYFORMAT_H
-#define M7_NDARRAYFORMAT_H
+#ifndef M7_NDFORMAT_H
+#define M7_NDFORMAT_H
 
-#include <array>
-#include <src/core/util/defs.h>
+#include "src/core/util/defs.h"
+#include "array"
+#include "assert.h"
 
 template <size_t nind>
-class NdArrayFormat {
+class NdFormat {
     std::array<size_t, nind> m_shape;
     std::array<size_t, nind> m_strides;
 
 public:
-    NdArrayFormat(){
+    NdFormat(){
         static_assert(!nind, "This ctor is only valid in the scalar case");
     }
 
-    NdArrayFormat(size_t extent){
+    NdFormat(size_t extent){
         m_shape.fill(extent);
         set_strides();
     }
-    NdArrayFormat(std::array<size_t, nind> shape):m_shape(std::move(shape)){
+    NdFormat(std::array<size_t, nind> shape):m_shape(std::move(shape)){
         set_strides();
     }
     template<typename ...Args>
-    NdArrayFormat(const size_t& first, const size_t& second, Args&&... shape){
+    NdFormat(const size_t& first, const size_t& second, Args&&... shape){
         static_assert(2+sizeof...(Args)>=nind, "not enough arguments to specify array shape");
         static_assert(2+sizeof...(Args)<=nind, "too many arguments to specify array shape");
         set_shape(first, second, std::forward<Args>(shape)...);
@@ -62,6 +63,7 @@ public:
         }
     }
 
+
 private:
 
     void set_strides(){
@@ -79,13 +81,28 @@ private:
         set_shape(rest...);
     }
 
+
     template<size_t nind_unspec>
     size_t partial_offset() const {return 0;}
-    template<size_t nind_unspec, typename ...Args>
+public:
+
+
+    /*                  nind
+     *            |-------------|
+     *   shape:    X  X  X  X  X
+     *
+     *   inds:     X  X  /  /  /
+     *            |----|
+     *            nind spec
+     *
+     */
+    template<size_t nind_spec, typename ...Args>
     size_t partial_offset(size_t first, Args... rest) const{
-        return first*m_strides[nind-nind_unspec-1-sizeof...(Args)]+partial_offset<nind_unspec>(rest...);
+        static_assert(1+sizeof...(rest)+nind_spec<=nind, "Indices are over-specified");
+        assert(first<m_shape[nind_spec]);
+        return first*m_strides[nind_spec]+partial_offset<nind_spec+1>(rest...);
     }
 };
 
 
-#endif //M7_NDARRAYFORMAT_H
+#endif //M7_NDFORMAT_H

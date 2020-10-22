@@ -6,7 +6,7 @@
 #define M7_PRODUCTENUMERATOR_H
 
 #include <src/core/util/defs.h>
-#include <src/core/nd/NdArrayFormat.h>
+#include <src/core/nd/NdFormat.h>
 #include "Enumerator.h"
 
 class ProductEnumerator : public Enumerator<defs::inds> {
