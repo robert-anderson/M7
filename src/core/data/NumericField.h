@@ -7,14 +7,26 @@
 
 #include "NdField.h"
 
-template<typename T, size_t nind>
-struct NumericField : NdField<nind> {
-    NumericField(Table *table, std::array<size_t, nind> shape, std::string description) :
-            NdField<nind>(table, shape, sizeof(T), description) {}
+template<typename T>
+struct NumericField : FieldBaseX {
+    NumericField() : FieldBaseX(sizeof(T), typeid(NumericField<T>)) {}
 
-    template<typename ...Args>
-    T &operator()(const size_t &irow, Args... inds) {
-        return (T *) raw_ptr(irow, inds...);
+    typedef T& view_t;
+    typedef const T& const_view_t;
+
+    view_t operator()(char *ptr) const {
+        return *(T *) ptr;
+    }
+
+    std::string element_string(char *ptr) const override {
+        return utils::num_to_string((*this)(ptr));
+    }
+
+    std::map<std::string, std::string> details() const override {
+        auto map = FieldBaseX::details();
+        map["field type"] = "Numeric";
+        map["encoded type"] = consts::type_name<T>();
+        return map;
     }
 };
 

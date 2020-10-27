@@ -1,5 +1,5 @@
 //
-// Created by rja on 02/10/2020.
+// Created by RJA on 26/10/2020.
 //
 
 #ifndef M7_BUFFER_H
@@ -21,7 +21,7 @@ public:
 
     Buffer(size_t dsize);
 
-    Buffer(size_t ncacheline, size_t nrow);
+    Buffer(size_t ndword, size_t nrow);
 
     defs::data_t *ptr();
 
@@ -31,8 +31,9 @@ public:
 
     void resize(size_t dsize);
 
-    void resize(size_t ncacheline, size_t nrow);
+    void resize(size_t ndword, size_t nrow);
 };
+
 
 
 #endif //M7_BUFFER_H

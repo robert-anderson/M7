@@ -48,7 +48,7 @@ public:
     }
 
     template<typename ...Args>
-    size_t flat(Args... inds) const {
+    size_t flatten(Args... inds) const {
         static_assert(sizeof...(Args)==nind, "incorrect number of indices");
         return partial_offset<0>(inds...);
     }

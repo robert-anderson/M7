@@ -1,5 +1,5 @@
 //
-// Created by rja on 02/10/2020.
+// Created by RJA on 26/10/2020.
 //
 
 #include "Buffer.h"
@@ -10,8 +10,8 @@ Buffer::Buffer(size_t dsize) : Buffer() {
     resize(dsize);
 }
 
-Buffer::Buffer(size_t ncacheline, size_t nrow) : Buffer() {
-    resize(ncacheline * defs::ndata_cacheline * nrow);
+Buffer::Buffer(size_t ndword, size_t nrow) : Buffer() {
+    resize(ndword, nrow);
 }
 
 defs::data_t *Buffer::ptr() { return m_data.data(); }
@@ -27,7 +27,7 @@ void Buffer::resize(size_t dsize) {
     m_data.resize(dsize);
 }
 
-void Buffer::resize(size_t ncacheline, size_t nrow) {
-    ASSERT(ncacheline);
-    resize((nrow * ncacheline) * defs::ndata_cacheline);
+void Buffer::resize(size_t ndword, size_t nrow) {
+    ASSERT(ndword);
+    resize(nrow * ndword);
 }

@@ -8,52 +8,84 @@
 #include "NdField.h"
 #include "src/core/util/utils.h"
 
-template<size_t nind>
-struct BitsetFieldX : NdFieldX<nind> {
+struct BitsetFieldX : FieldBaseX {
     const size_t m_nbit;
-    BitsetFieldX(TableX *table, std::array<size_t, nind> shape, size_t nbit, std::string description) :
-            NdFieldX<nind>(table, shape, defs::nbyte_data*integer_utils::divceil(nbit, defs::nbit_data), description),
-            m_nbit(nbit){}
 
-    struct View : FieldX::View {
-        View(const BitsetFieldX& field, char* ptr): FieldX::View(field, ptr){}
+    BitsetFieldX(size_t nbit):
+    FieldBaseX(defs::nbyte_data * integer_utils::divceil(nbit, defs::nbit_data),
+               typeid(BitsetFieldX)), m_nbit(nbit){}
 
-        const size_t& nbit() const {
-            return static_cast<const BitsetFieldX<nind>&>(m_field).m_nbit;
+    struct View : FieldBaseX::View {
+        View(const BitsetFieldX &field, char* ptr) : FieldBaseX::View(field, ptr){}
+
+//        struct BitView {
+//            View m_view;
+//            const size_t m_ibit;
+//            BitView(const View& view, const size_t &ibit):
+//                    m_view(view), m_ibit(ibit){}
+//            BitView(const BitsetFieldX &field, const size_t &irow, const size_t &ibitset, const size_t &ibit):
+//                    m_view(field, irow, ibitset), m_ibit(ibit){}
+//            BitView& operator=(bool t){
+//                if (t) m_view.set(m_ibit);
+//                else m_view.clr(m_ibit);
+//            }
+//            operator bool() {
+//                return m_view.get(m_ibit);
+//            }
+//        };
+//
+//        BitView operator[](const size_t& ibit){
+//            return BitView(*this, ibit);
+//        }
+
+        const size_t &nbit() const {
+            return static_cast<const BitsetFieldX &>(m_field).m_nbit;
         }
 
-        bool get(const size_t& ibit) const {
-            ASSERT(ibit<nbit());
-            return bit_utils::get(*dptr(ibit/defs::nbit_data), ibit%defs::nbit_data);
+        bool get(const size_t &ibit) const {
+            ASSERT(ibit < nbit());
+            return bit_utils::get(*dptr(ibit / defs::nbit_data), ibit % defs::nbit_data);
         }
-        void set(const size_t& ibit) {
-            ASSERT(ibit<nbit());
-            bit_utils::set(*dptr(ibit/defs::nbit_data), ibit%defs::nbit_data);
+
+        void set(const size_t &ibit) {
+            ASSERT(ibit < nbit());
+            bit_utils::set(*dptr(ibit / defs::nbit_data), ibit % defs::nbit_data);
         }
-        void set(const defs::inds& setinds){
-            for (auto& i: setinds) set(i);
+
+        void set(const defs::inds &setinds) {
+            for (auto &i: setinds) set(i);
         }
-        void clr(const size_t& ibit) {
-            ASSERT(ibit<nbit());
-            bit_utils::clr(*dptr(ibit/defs::nbit_data), ibit%defs::nbit_data);
+
+        void clr(const size_t &ibit) {
+            ASSERT(ibit < nbit());
+            bit_utils::clr(*dptr(ibit / defs::nbit_data), ibit % defs::nbit_data);
         }
-        std::string to_string() const override{
+
+        std::string to_string() const override {
             std::string res;
             res.reserve(nbit());
-            for (size_t i=0ul; i<nbit(); ++i) res+=get(i)?"1":"0";
+            for (size_t i = 0ul; i < nbit(); ++i) res += get(i) ? "1" : "0";
             return res;
         }
     };
 
-    template<typename ...Args>
-    View operator()(const size_t& irow, Args...inds){
-        return View(*this, NdFieldX<nind>::raw_ptr(irow, inds...));
+    std::string element_string(char *ptr) const override {
+        return View(*this, ptr).to_string();
     }
 
-    std::string element_string(size_t irow, size_t ielement) const override {
-        return View(*this, FieldX::raw_ptr(irow, ielement)).to_string();
+    std::map<std::string, std::string> details() const override {
+        auto map = FieldBaseX::details();
+        map["field type"] = "Bitset";
+        map["number of bits"] = std::to_string(m_nbit);
+        return map;
     }
 
+    typedef View view_t;
+    typedef const View const_view_t;
+
+    View operator()(char *ptr) const {
+        return View(*this, ptr);
+    }
 };
 
 

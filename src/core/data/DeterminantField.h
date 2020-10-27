@@ -7,6 +7,8 @@
 
 #include "BitsetField.h"
 
+#if 0
+
 template <size_t nind>
 struct DeterminantFieldX : BitsetFieldX<nind>{
     const size_t m_nsite;
@@ -14,8 +16,8 @@ struct DeterminantFieldX : BitsetFieldX<nind>{
             BitsetFieldX<nind>(table, shape, 2*nsite, description), m_nsite(nsite){}
 
     struct View : BitsetFieldX<nind>::View {
-        View(const DeterminantFieldX& field, char* ptr):
-        BitsetFieldX<nind>::View(field, ptr){}
+        View(const DeterminantFieldX& field, const size_t& irow, const size_t& iflat):
+        BitsetFieldX<nind>::View(field, irow, iflat){}
 
         using BitsetFieldX<nind>::View::m_field;
         const size_t& nsite() const {
@@ -39,15 +41,23 @@ struct DeterminantFieldX : BitsetFieldX<nind>{
 
     template<typename ...Args>
     View operator()(const size_t& irow, Args...inds){
-        return View(*this, NdFieldX<nind>::raw_ptr(irow, inds...));
+        return View(*this, irow, BitsetFieldX<nind>::m_format.flatten(inds...));
     }
 
     std::string element_string(size_t irow, size_t ielement) const override {
-        return View(*this, FieldX::raw_ptr(irow, ielement)).to_string();
+        return View(*this, irow, ielement).to_string();
+    }
+
+    std::map<std::string, std::string> details() const override {
+        auto map = BitsetFieldX<nind>::details();
+        map["field type"] = "Determinant";
+        map["number of sites"] = std::to_string(m_nsite);
+        return map;
     }
 
 };
 
 
 
+#endif //M7_DETERMINANTFIELD_H
 #endif //M7_DETERMINANTFIELD_H

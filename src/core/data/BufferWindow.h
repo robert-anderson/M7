@@ -1,10 +1,9 @@
 //
-// Created by rja on 02/10/2020.
+// Created by RJA on 26/10/2020.
 //
 
 #ifndef M7_BUFFERWINDOW_H
 #define M7_BUFFERWINDOW_H
-
 
 #include "Buffer.h"
 
@@ -22,7 +21,6 @@ struct BufferWindow {
 
     operator bool() const;
 };
-
 
 
 #endif //M7_BUFFERWINDOW_H

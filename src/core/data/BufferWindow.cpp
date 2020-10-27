@@ -1,5 +1,5 @@
 //
-// Created by rja on 02/10/2020.
+// Created by RJA on 26/10/2020.
 //
 
 #include "BufferWindow.h"

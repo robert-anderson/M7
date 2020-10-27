@@ -1,12 +1,13 @@
 //
-// Created by rja on 02/10/2020.
+// Created by RJA on 26/10/2020.
 //
 
 #ifndef M7_BUFFEREDTABLEARRAY_H
 #define M7_BUFFEREDTABLEARRAY_H
 
-#include "Buffer.h"
-#include "BufferWindow.h"
+
+
+#include "Table.h"
 
 template<typename table_t>
 class BufferedTableArray {
@@ -14,8 +15,12 @@ class BufferedTableArray {
     std::vector<table_t> m_tables;
     size_t m_nrow_per_table = 0ul;
 
+    const size_t& row_dsize() const {
+        return static_cast<const TableX&>(m_tables[0]).m_row_dsize;
+    }
+
     void move_tables(Buffer& new_buffer, size_t nrow_per_table, bool expansion=true){
-        const auto dsize_per_table = nrow_per_table*defs::ndata_cacheline;
+        const auto dsize_per_table = nrow_per_table*row_dsize();
         for (size_t itable=0ul; itable<size(); ++itable){
             // move tables in reverse if expanding the buffer
             auto& table = expansion ? m_tables[size()-1-itable] : m_tables[itable];
@@ -32,7 +37,7 @@ public:
     size_t size() const {return m_tables.size();}
 
     void resize(size_t nrow_per_table) {
-        Buffer new_buffer(table_t::m_ncacheline, nrow_per_table*size());
+        Buffer new_buffer(row_dsize(), nrow_per_table);
         move_tables(new_buffer, nrow_per_table, nrow_per_table>m_nrow_per_table);
         m_nrow_per_table = nrow_per_table;
         m_buffer = std::move(new_buffer);
@@ -50,7 +55,6 @@ public:
         return m_tables[itable];
     }
 };
-
 
 
 #endif //M7_BUFFEREDTABLEARRAY_H

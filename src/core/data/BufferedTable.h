@@ -1,11 +1,12 @@
 //
-// Created by rja on 02/10/2020.
+// Created by RJA on 26/10/2020.
 //
 
 #ifndef M7_BUFFEREDTABLE_H
 #define M7_BUFFEREDTABLE_H
 
 #include "BufferWindow.h"
+#include "Table.h"
 
 template<typename table_t>
 class BufferedTable : public table_t {
@@ -17,7 +18,7 @@ public:
     }
 
     void resize(size_t nrow) {
-        Buffer new_buffer(table_t::m_ncacheline, nrow);
+        Buffer new_buffer(TableX::m_row_dsize, nrow);
         table_t::move(BufferWindow(new_buffer));
         m_buffer = std::move(new_buffer);
     }
@@ -26,7 +27,6 @@ public:
         resize(table_t::m_nrow+delta_nrow);
     }
 };
-
 
 
 #endif //M7_BUFFEREDTABLE_H
