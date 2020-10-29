@@ -7,6 +7,44 @@
 
 #include "BitsetField.h"
 
+
+struct DeterminantFieldX : BitsetFieldX {
+    const size_t m_nsite;
+
+    DeterminantFieldX(const size_t &nsite) : BitsetFieldX(2 * nsite), m_nsite(nsite) {
+        m_details["type"] = "Determinant";
+        m_details["number of sites"] = std::to_string(nsite);
+    }
+
+    struct View : BitsetFieldX::View {
+        View(const DeterminantFieldX &field, char *ptr) : BitsetFieldX::View(field, ptr) {}
+
+        std::string to_string() const override {
+            std::string res;
+            res += "(";
+            res.reserve(nbit() * 2 + 3);
+            size_t i = 0ul;
+            for (; i < nbit()/2; ++i) res += get(i) ? "1" : "0";
+            res+=","; // spin channel delimiter
+            for (; i < nbit(); ++i) res += get(i) ? "1" : "0";
+            res += ")";
+            return res;
+        }
+    };
+
+    std::string element_string(char *ptr) const override {
+        return View(*this, ptr).to_string();
+    }
+
+    typedef View view_t;
+    typedef const View const_view_t;
+
+    View operator()(char *ptr) const {
+        return View(*this, ptr);
+    }
+};
+
+
 #if 0
 
 template <size_t nind>

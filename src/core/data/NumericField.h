@@ -8,8 +8,11 @@
 #include "NdField.h"
 
 template<typename T>
-struct NumericField : FieldBaseX {
-    NumericField() : FieldBaseX(sizeof(T), typeid(NumericField<T>)) {}
+struct NumericFieldX : FieldBaseX {
+    NumericFieldX() : FieldBaseX(sizeof(T), typeid(NumericFieldX<T>)) {
+        m_details["type"] = "Numeric";
+        m_details["encoded type"] = consts::type_name<T>();
+    }
 
     typedef T& view_t;
     typedef const T& const_view_t;
@@ -20,13 +23,6 @@ struct NumericField : FieldBaseX {
 
     std::string element_string(char *ptr) const override {
         return utils::num_to_string((*this)(ptr));
-    }
-
-    std::map<std::string, std::string> details() const override {
-        auto map = FieldBaseX::details();
-        map["field type"] = "Numeric";
-        map["encoded type"] = consts::type_name<T>();
-        return map;
     }
 };
 

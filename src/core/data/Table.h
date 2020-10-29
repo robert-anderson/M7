@@ -45,8 +45,7 @@ struct TableX {
             }
         }
 
-        if(m_fields.empty()) m_tight_row_size = 0ul;
-        else m_tight_row_size = offset+field->m_size;
+        m_tight_row_size = offset+field->m_size;
         m_row_dsize = integer_utils::divceil(m_tight_row_size, defs::nbyte_data);
         m_row_size = m_row_dsize*defs::nbyte_data;
 
@@ -76,7 +75,7 @@ struct TableX {
             std::string desc;
             if (!m_fields[i]->m_description.empty()) desc = " (\""+m_fields[i]->m_description+"\")";
             res += "\nField " + std::to_string(i) + desc + ":\n";
-            for (auto pair: m_fields[i]->details())
+            for (auto pair:m_fields[i]->m_details)
                 res += "\t" + utils::padded_string(pair.first, width) + ": " + utils::padded_string(pair.second, width)+"\n";
         }
         return res;

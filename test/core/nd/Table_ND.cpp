@@ -5,36 +5,93 @@
 #include "gtest/gtest.h"
 #include "src/core/data/BufferedTable.h"
 #include "src/core/data/Table.h"
-#include "src/core/data/BitsetField.h"
-#include "src/core/data/DeterminantField.h"
-#include "src/core/data/BosonOnvField.h"
-#include "src/core/data/NumericArrayField.h"
-#include "src/core/data/NumericField.h"
+#include "src/core/data/Fields.h"
 
 
-struct TestTable : TableX {
-    //DeterminantFieldX<0> field;
-    NdFieldX<NumericField<int>, 1> ints;
-    NdFieldX<NumericField<float>, 1> ints2;
-    NdFieldX<BitsetFieldX, 1> bits;
+//template<size_t nind>
+//struct ConfigurationField : NdFieldBaseX {
+//    NdFieldX<DeterminantField, 1> det;
+//    NdFieldX<BosonOnvField, 1> perm;
+//    ConfigurationField(DeterminantField&& det_field, BosonOnvField&& boson_field)
+//};
 
-    TestTable() :
-            ints(this, NumericField<int>(), "asdasdsadas", 3),
-            ints2(this, NumericField<float>(), "asdasdsadas", 2),
-            bits(this, BitsetFieldX(8), "aeewas", 4) {}
+struct FlagBase;
+
+struct FlagField : BitsetFieldX {
+    TableX* m_table;
+    std::vector<FlagBase*> m_flags;
+    FlagField(TableX* table):BitsetFieldX(0), m_table(table){}
+    size_t add_flag(FlagBase* flag);
+};
+
+struct FlagBase {
+    FlagField* m_field;
+    const size_t m_nbit;
+    FlagBase(FlagField* field, size_t nbit):
+    m_field(field), m_nbit(nbit){}
+    BitsetFieldX::View::BitView operator()(const size_t& irow, const size_t& ibit){
+        ASSERT(ibit<m_nbit);
+        return BitsetFieldX::View::BitView(
+                BitsetFieldX::View(*m_field, m_field->m_table->begin(irow)), ibit);
+    }
+};
+
+size_t FlagBase::add_flag(FlagBase* flag){
+
+}
+
+//template<size_t nind>
+//struct Flag : FlagBase {
+//    Flag(FlagField* field):FlagBase(field){}
+//};
+
+
+struct MyFlags : FlagField {
+    //Flag<1> deterministic;
+    FlagBase deterministic;
+    MyFlags(TableX* table): FlagField(table),
+    deterministic(this, 3){}
 };
 
 
-void f(const BufferedTable<TestTable> &bt) {
-    std::cout << bt.bits(0, 0).to_string() << std::endl;
-}
+using namespace fields;
+struct TestTable : TableX {
+    //DeterminantFieldX<0> field;
+    Numbers<int, 1> ints;
+    Determinant dets;
+    NumberArray<double, 2> matrices;
 
-TEST(Table_ND, Test) {
+    TestTable() :
+            ints(this, "asdasdsadas", 3),
+            dets(this, {10}, "asdasdsadas"),
+            matrices(this, {10, 2}, "asdasdsadas")
+            {}
+};
+
+
+TEST(Table_ND, Packing) {
     BufferedTable<TestTable> bt;
+    //ASSERT_EQ(bt.m_row_dsize, 2);
     bt.print_field_details();
     bt.expand(10);
+    bt.dets(0)[0] = true;
+    bt.dets(0)[5] = true;
+    std::cout << bt.dets(0).to_string() << std::endl;
+}
+
+//void f(const BufferedTable<TestTable> &bt) {
+//    std::cout << bt.bits(0, 0).to_string() << std::endl;
+//}
+
+TEST(Table_ND, Test) {
+    //std::cout << typeid(fields::Numeric<int, 2>).name() << std::endl;
+   // std::cout << typeid(fields::Numeric<int>).name() << std::endl;
+
+//    BufferedTable<TestTable> bt;
+//    bt.print_field_details();
+//    bt.expand(10);
     //std::cout << bt.ints(0, 0) << std::endl;
-    f(bt);
+//    f(bt);
     //BitsetFieldX<0> field(&t, {}, 10, "asdasdsadas");
     //DeterminantFieldX<0> dets(&t, {}, 5, "asdasdsadas");
     //BosonOnvField<0> perms(&t, {}, 8, "zddsaas");

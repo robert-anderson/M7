@@ -6,7 +6,8 @@
 #include "Table.h"
 
 FieldBaseX::FieldBaseX(size_t element_size, const std::type_info &type_info) :
-        m_element_size(element_size), m_type_info(type_info) {}
+        m_element_size(element_size), m_type_info(type_info),
+        m_details({{"element size (bytes)", std::to_string(m_element_size)}}){}
 
 bool FieldBaseX::is_same_type_as(const FieldBaseX &other) const {
     return m_type_info == other.m_type_info;

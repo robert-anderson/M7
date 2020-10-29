@@ -5,7 +5,7 @@
 #ifndef M7_NDARRAYFIELD_H
 #define M7_NDARRAYFIELD_H
 
-#include "NdField.h"
+#include "Field.h"
 
 #if 0
 template<size_t nind, size_t nind_view>

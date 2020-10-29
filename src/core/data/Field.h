@@ -14,15 +14,13 @@
 struct FieldBaseX {
     const size_t m_element_size;
     const std::type_info &m_type_info;
+    std::map<std::string, std::string> m_details;
 
     struct View {
         const FieldBaseX &m_field;
         char *m_ptr;
 
         View(const FieldBaseX& field, char* ptr): m_field(field), m_ptr(ptr){}
-
-//        View(const FieldX &field, const size_t &irow, const size_t &iflat) :
-//                m_field(field), m_ptr(field.raw_ptr(irow, iflat)) {}
 
         defs::data_t *dptr() const { return (defs::data_t *) m_ptr; }
 
@@ -45,23 +43,12 @@ struct FieldBaseX {
         }
     };
 
-
     FieldBaseX(size_t element_size, const std::type_info &type_info);
 
     bool is_same_type_as(const FieldBaseX& other) const;
 
-    template<typename ...Args>
-    std::pair<const char *, size_t> raw_view(const size_t &irow, Args...inds) const {
-        return {raw_ptr(irow, inds...), m_element_size};
-    }
-
     virtual std::string element_string(char* ptr) const = 0;
 
-    virtual std::map<std::string, std::string> details() const {
-        return {
-            {"element size (bytes)", std::to_string(m_element_size)}
-        };
-    }
 };
 
 

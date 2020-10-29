@@ -5,83 +5,67 @@
 #ifndef M7_NUMERICARRAYFIELD_H
 #define M7_NUMERICARRAYFIELD_H
 
+#include <src/core/util/utils.h>
+#include "Field.h"
+#include "src/core/nd/NdFormat.h"
 
-#include "NdArrayField.h"
+template<typename T, size_t nind>
+struct NumericArrayField : FieldBaseX {
+    NdFormat<nind> m_format;
+    const size_t m_nelement;
+    template<typename ...Args>
+    NumericArrayField(Args... shape) :
+    FieldBaseX(NdFormat<nind>(shape...).nelement()*sizeof(T), typeid(NumericArrayField<T, nind>)),
+    m_format(shape...), m_nelement(m_format.nelement()){
+        m_details["type"] = "Numeric Array";
+        m_details["encoded type"] = consts::type_name<T>();
+        m_details["element dimensionality"] = std::to_string(nind);
+        m_details["element shape"] = utils::to_string(m_format.shape());
+    }
 
-#if 0
-template<typename T>
-struct NumericArrayFieldKind{};
+    struct View : FieldBaseX::View {
+        View(const NumericArrayField &field, char *ptr) : FieldBaseX::View(field, ptr) {}
 
-template<typename T, size_t nind, size_t nind_view>
-struct NumericArrayField : NdArrayField<nind, nind_view> {
-    NumericArrayField(TableX *table, std::array<size_t, nind> shape, std::array<size_t, nind_view> view_shape,
-                      std::string description) :
-            NdArrayField<nind, nind_view>(table, shape, view_shape, sizeof(T),
-                                          typeid(NumericArrayFieldKind<T>), description) {}
+        const size_t& nelement() const {
+            return static_cast<const NumericArrayField&>(m_field).m_nelement;
+        }
 
-    struct View : NdArrayField<nind, nind_view>::View {
+        T& operator[](const size_t& ind) {
+            ASSERT(ind<nelement());
+            return ((T*)m_ptr)[ind];
+        }
+        const T& operator[](const size_t& ind) const {
+            ASSERT(ind<nelement());
+            return ((T*)m_ptr)[ind];
+        }
         template<typename ...Args>
-        View(const NumericArrayField &field, const size_t &irow, const size_t& iflat):
-                NdArrayField<nind, nind_view>::View(field, irow, iflat) {}
-
-        using FieldX::View::m_field;
-        using FieldX::View::m_ptr;
-        size_t nelement() const {
-            return static_cast<const NumericArrayField &>(m_field).m_view_format.nelement();
+        T& operator()(Args... inds){
+            return ((T*)m_ptr)[static_cast<const NumericArrayField&>(m_field).m_format.flatten(inds...)];
         }
-
-        T &operator[](const size_t &iflat) {
-            return ((T *) m_ptr)[iflat];
-        }
-
-        const T &operator[](const size_t &iflat) const {
-            return ((T *) m_ptr)[iflat];
-        }
-
         template<typename ...Args>
-        T &operator()(Args... inds) {
-            auto i = static_cast<NumericArrayField &>(m_field).m_view_format.flat(inds...);
-            return (*this)[i];
+        const T& operator()(Args... inds) const {
+            return ((T*)m_ptr)[static_cast<const NumericArrayField&>(m_field).m_format.flatten(inds...)];
         }
 
-        template<typename ...Args>
-        const T &operator()(Args... inds) const {
-            auto i = static_cast<NumericArrayField &>(m_field).m_view_format.flat(inds...);
-            return (*this)[i];
-        }
-
-        View(const View &other) : NdArrayField<nind, nind_view>::View(other) {}
-
-        View &operator=(const View &other) {
-            FieldX::View::operator=(other);
-            return *this;
-        }
-
-        std::string to_string() const {
-            std::string res = "[";
-            for (size_t i = 0ul; i < nelement(); ++i) res += utils::num_to_string((*this)[i])+" ";
-            res += "]";
+        std::string to_string() const override {
+            std::string res;
+            res+="[";
+            for (size_t i=0ul; i<nelement(); ++i) res+=utils::num_to_string((*this)[i])+" ";
+            res+="]";
             return res;
         }
     };
 
-    template<typename ...Args>
-    View operator()(const size_t &irow, Args... inds) {
-        return View(*this, irow, NdArrayField<nind, nind_view>::m_format.flatten(inds...));
+    std::string element_string(char *ptr) const override {
+        return View(*this, ptr).to_string();
     }
 
-    std::string element_string(size_t irow, size_t ielement) const override {
-        return View(*this, irow, ielement).to_string();
-    }
+    typedef View view_t;
+    typedef const View const_view_t;
 
-    std::map<std::string, std::string> details() const override {
-        auto map = NdArrayField<nind, nind_view>::details();
-        map["field type"] = "Numeric Array";
-        map["encoded type"] = consts::type_name<T>();
-        return map;
+    View operator()(char *ptr) const {
+        return View(*this, ptr);
     }
 };
 
-
-#endif //M7_NUMERICARRAYFIELD_H
 #endif //M7_NUMERICARRAYFIELD_H
