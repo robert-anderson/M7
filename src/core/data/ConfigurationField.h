@@ -6,23 +6,68 @@
 #define M7_CONFIGURATIONFIELD_H
 
 #include "NdCompositeField.h"
-#include "Fields.h"
+#include "NdField.h"
+#include "DeterminantField.h"
+#include "BosonOnvField.h"
 
 template<size_t nind>
-struct FermionBosonField : NdCompositeField<nind> {
+struct FermionField : NdCompositeField<nind> {
 
-    fields::Determinants<nind> det;
-    fields::BosonOnvs<nind> perm;
+    NdFieldX<DeterminantFieldX, nind> m_det;
+
+    template<typename ...Args>
+    FermionField(TableX *table, size_t nsite, NdFormat<nind> format) :
+            NdCompositeField<nind>(table, format),
+            m_det(this, {nsite}, "Determinant") {}
+
+    struct View : CompositeField::View {
+        DeterminantFieldX::view_t m_det;
+
+        View(DeterminantFieldX::view_t &&det) :
+                m_det(std::move(det)) {}
+
+        std::string to_string() const override {
+            return m_det.to_string();
+        }
+    };
+
+    typedef DeterminantFieldX::view_t view_t;
+    typedef DeterminantFieldX::const_view_t const_view_t;
+
+    template<typename ...Args>
+    view_t operator()(const size_t &irow, Args... inds) {
+        return m_det(irow, inds...);
+    }
+
+    template<typename ...Args>
+    const_view_t operator()(const size_t &irow, Args... inds) const {
+        return m_det(irow, inds...);
+    }
+
+};
+
+template<size_t nind>
+struct FermionBosonField : FermionField<nind> {
+
+    using FermionField<nind>::m_det;
+    NdFieldX<BosonOnvField, nind> m_perm;
 
     template<typename ...Args>
     FermionBosonField(TableX *table, size_t nsite, size_t nmode, NdFormat<nind> format) :
-    NdCompositeField<nind>(table, format),
-    det(this, {nsite}, "Determinant"),
-    perm(this, {nmode}, "Boson ONV"){}
+            FermionField<nind>(table, nsite, format),
+            m_perm(this, {nmode}, "Boson ONV") {}
 
-    struct View {
-        DeterminantFieldX::view_t det;
-        BosonOnvField::view_t perm;
+    struct View : CompositeField::View {
+        DeterminantFieldX::view_t m_det;
+        BosonOnvField::view_t m_perm;
+
+        View(DeterminantFieldX::view_t &&det,
+             BosonOnvField::view_t &&perm) :
+                m_det(std::move(det)), m_perm(std::move(perm)) {}
+
+        std::string to_string() const override {
+            return m_det.to_string() + " " + m_perm.to_string();
+        }
     };
 
     typedef View view_t;
@@ -30,12 +75,12 @@ struct FermionBosonField : NdCompositeField<nind> {
 
     template<typename ...Args>
     view_t operator()(const size_t &irow, Args... inds) {
-        return {det(irow, inds...), perm(irow, inds...)};
+        return {m_det(irow, inds...), m_perm(irow, inds...)};
     }
 
     template<typename ...Args>
     const_view_t operator()(const size_t &irow, Args... inds) const {
-        return {det(irow, inds...), perm(irow, inds...)};
+        return {m_det(irow, inds...), m_perm(irow, inds...)};
     }
 
 };

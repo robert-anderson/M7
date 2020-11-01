@@ -13,7 +13,7 @@ class BufferedTable : public table_t {
     Buffer m_buffer;
 public:
     template<typename ...Args>
-    BufferedTable(Args... args): table_t(args...), m_buffer(){
+    BufferedTable(Args&&... args): table_t(args...), m_buffer(){
         table_t::move(BufferWindow(m_buffer));
     }
 

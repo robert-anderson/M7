@@ -15,6 +15,10 @@ struct FieldGroup {
         m_fields.push_back(field);
         return 0ul;
     }
+
+    size_t nfield() const{
+        return m_fields.size();
+    }
 };
 
 

@@ -6,6 +6,8 @@
 #include "src/core/data/BufferedTable.h"
 #include "src/core/data/Table.h"
 #include "src/core/data/Fields.h"
+#include "src/core/data/Elements.h"
+#include "src/core/data/BufferedField.h"
 
 
 #if 0
@@ -88,10 +90,23 @@ TEST(Table_ND, Packing) {
 #endif
 
 
+struct TestTable : TableX {
+    fields::Configuration config;
+    TestTable():config(this, 4, 5, {}){}
+};
 
 TEST(Table_ND, Test) {
 
+    //BufferedField<DeterminantFieldX, 0> work_det({6}, {});
+    elements::Configuration work_config_buffer(6ul, 5ul);
+    auto work_config = work_config_buffer();
+    std::cout << work_config.to_string() << std::endl;
 
+//    BufferedTable<TestTable> bt;
+//    bt.print_field_details();
+//    bt.expand(10);
+//    auto view = bt.config(0);
+//    std::cout << view.to_string() << std::endl;
 
 
     //std::cout << typeid(fields::Numeric<int, 2>).name() << std::endl;

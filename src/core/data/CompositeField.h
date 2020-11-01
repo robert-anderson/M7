@@ -10,28 +10,35 @@
 struct CompositeField: FieldGroup {
 
     TableX* m_table;
-    size_t m_element_size;
-    size_t m_offset = ~0ul;
     CompositeField(TableX *table): m_table(table) {}
 
     size_t add_field(const NdFieldBaseX *field) override {
         FieldGroup::add_field(field);
         auto offset = m_table->add_field(field);
-        if (m_fields.size()==1) {
-            m_element_size = field->m_element_size;
-            m_offset = offset;
-        }
-        else m_element_size = (offset-m_fields[0]->m_offset)+field->m_element_size;
         return offset;
     }
 
-    const char *raw_ptr(const size_t &irow, const size_t &ielement) const {
-        return m_table->begin(irow) + m_offset + ielement * m_element_size;
+    const char *raw_ptr(const size_t& icomponent, const size_t &irow, const size_t &ielement) const {
+        ASSERT(icomponent<nfield())
+        return m_fields[icomponent]->raw_ptr(irow, ielement);
     }
 
-    std::pair<const char *, size_t> raw_view(const size_t &irow, const size_t &ielement) const {
-        return {raw_ptr(irow, ielement), m_element_size};
+    std::pair<const char *, size_t> raw_view(const size_t& icomponent, const size_t &irow, const size_t &ielement) const {
+        ASSERT(icomponent<nfield())
+        return m_fields[icomponent]->raw_view(irow, ielement);
     }
+
+    const size_t& size(const size_t& icomponent=0) const {
+        return m_fields[icomponent]->m_size;
+    }
+
+    const size_t& offset(const size_t& icomponent=0) const {
+        return m_fields[icomponent]->m_offset;
+    }
+
+    struct View {
+        virtual std::string to_string() const = 0;
+    };
 };
 
 
