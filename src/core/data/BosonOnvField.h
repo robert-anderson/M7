@@ -8,6 +8,28 @@
 #include "NumericArrayField.h"
 #include <numeric>
 
+
+struct BosonOnvField : NumericArrayField<uint8_t, 1> {
+    template<typename ...Args>
+    BosonOnvField(size_t nmode):NumericArrayField(nmode) {
+        m_details["type"] = "Boson ONV";
+    }
+
+    const size_t& nmode() const {
+        return m_format.extent(0);
+    }
+
+    struct View : NumericArrayField<uint8_t, 1>::View {
+        View(const BosonOnvField &field, char *ptr) : NumericArrayField<uint8_t, 1>::View(field, ptr) {}
+
+        size_t nboson() const {
+            return std::accumulate(
+                    reinterpret_cast<uint8_t *>(m_ptr),
+                    reinterpret_cast<uint8_t *>(m_ptr) + nelement(), 0ul);
+        }
+    };
+};
+
 #if 0
 template<size_t nind>
 struct BosonOnvField : NumericArrayField<uint8_t, nind, 1> {

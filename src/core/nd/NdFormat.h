@@ -34,6 +34,8 @@ public:
         set_strides();
     }
 
+    NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape()){}
+
     size_t nelement() const {
         if (!nind) return 1;
         return m_shape.front()*m_strides.front();

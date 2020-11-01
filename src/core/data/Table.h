@@ -9,13 +9,13 @@
 #include "src/core/util/defs.h"
 #include "NdFieldBase.h"
 #include "BufferWindow.h"
+#include "FieldGroup.h"
 
-struct TableX {
+struct TableX : FieldGroup {
     BufferWindow m_bw;
     size_t m_row_size;
     size_t m_row_dsize;
     size_t m_tight_row_size = 0ul;
-    std::vector<const NdFieldBaseX *> m_fields;
     char *m_data;
     size_t m_nrow = 0ul;
     /*
@@ -34,7 +34,7 @@ struct TableX {
         return begin() + irow * m_row_size;
     }
 
-    size_t add_field(const NdFieldBaseX *field) {
+    size_t add_field(const NdFieldBaseX *field) override {
         // returns the offset in bytes for the field being added
         auto offset = 0ul;
         if(!m_fields.empty()){
@@ -49,7 +49,7 @@ struct TableX {
         m_row_dsize = integer_utils::divceil(m_tight_row_size, defs::nbyte_data);
         m_row_size = m_row_dsize*defs::nbyte_data;
 
-        m_fields.push_back(field);
+        FieldGroup::add_field(field);
         return offset;
     }
 

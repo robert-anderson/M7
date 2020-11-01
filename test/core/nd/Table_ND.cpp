@@ -8,6 +8,8 @@
 #include "src/core/data/Fields.h"
 
 
+#if 0
+
 //template<size_t nind>
 //struct ConfigurationField : NdFieldBaseX {
 //    NdFieldX<DeterminantField, 1> det;
@@ -83,7 +85,15 @@ TEST(Table_ND, Packing) {
 //    std::cout << bt.bits(0, 0).to_string() << std::endl;
 //}
 
+#endif
+
+
+
 TEST(Table_ND, Test) {
+
+
+
+
     //std::cout << typeid(fields::Numeric<int, 2>).name() << std::endl;
    // std::cout << typeid(fields::Numeric<int>).name() << std::endl;
 

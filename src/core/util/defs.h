@@ -71,6 +71,7 @@ namespace defs {
     constexpr size_t nbit_data = CHAR_BIT * nbyte_data;
     const size_t isym_1e = 2;
     const size_t isym_2e = 4;
+    const bool bosons = true;
 
     // width of the cache line in bytes
     constexpr size_t ndata_cacheline = 8;

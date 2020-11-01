@@ -7,6 +7,7 @@
 
 #include "NumericField.h"
 #include "NumericArrayField.h"
+#include "BosonOnvField.h"
 #include "BitsetField.h"
 #include "DeterminantField.h"
 
@@ -16,7 +17,7 @@
 
 namespace fields {
     template<typename T>
-    struct Number : NdFieldX<NumericFieldX<T>, 0> {
+    struct Number : NdFieldX<NumericFieldX<T>, 0ul> {
         Number(TableX* table, std::string description):
         NdFieldX<NumericFieldX<T>, 0>(table, {}, description){}
     };
@@ -29,25 +30,25 @@ namespace fields {
     };
 
     template<typename T, size_t nind_view>
-    using NumberArray = NdFieldX<NumericArrayField<T, nind_view>, 0>;
+    using NumberArray = NdFieldX<NumericArrayField<T, nind_view>, 0ul>;
 
     template<typename T, size_t nind_view, size_t nind_field>
     using NumberArrays = NdFieldX<NumericArrayField<T, nind_view>, nind_field>;
 
-    using Bitset = NdFieldX<BitsetFieldX, 0>;
+    using Bitset = NdFieldX<BitsetFieldX, 0ul>;
 
     template<size_t nind>
     using Bitsets = NdFieldX<BitsetFieldX, nind>;
 
-    using Determinant = NdFieldX<DeterminantFieldX, 0>;
+    using Determinant = NdFieldX<DeterminantFieldX, 0ul>;
 
     template<size_t nind>
     using Determinants = NdFieldX<DeterminantFieldX, nind>;
 
-//    using BosonOnv = NdFieldX<BosonOnvX, 0>;
+    using BosonOnv = NdFieldX<BosonOnvField, 0ul>;
 
-//    template<size_t nind>
-//    using BosonOnvs = NdFieldX<BosonOnvX, nind>;
+    template<size_t nind>
+    using BosonOnvs = NdFieldX<BosonOnvField, nind>;
 
 }
 
