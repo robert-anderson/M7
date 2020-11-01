@@ -16,9 +16,9 @@ struct FermionField : NdCompositeField<nind> {
     NdFieldX<DeterminantFieldX, nind> m_det;
 
     template<typename ...Args>
-    FermionField(TableX *table, size_t nsite, NdFormat<nind> format) :
+    FermionField(TableX *table, size_t nsite, std::string description, NdFormat<nind> format) :
             NdCompositeField<nind>(table, format),
-            m_det(this, {nsite}, "Determinant") {}
+            m_det(this, DeterminantFieldX(nsite), description + " (Determinant)") {}
 
     struct View : CompositeField::View {
         DeterminantFieldX::view_t m_det;
@@ -53,9 +53,9 @@ struct FermionBosonField : FermionField<nind> {
     NdFieldX<BosonOnvField, nind> m_perm;
 
     template<typename ...Args>
-    FermionBosonField(TableX *table, size_t nsite, size_t nmode, NdFormat<nind> format) :
-            FermionField<nind>(table, nsite, format),
-            m_perm(this, {nmode}, "Boson ONV") {}
+    FermionBosonField(TableX *table, size_t nsite, size_t nmode, std::string description, NdFormat<nind> format) :
+            FermionField<nind>(table, nsite, description, format),
+            m_perm(this, BosonOnvField(nmode), description + " (Boson ONV)") {}
 
     struct View : CompositeField::View {
         DeterminantFieldX::view_t m_det;
@@ -64,6 +64,14 @@ struct FermionBosonField : FermionField<nind> {
         View(DeterminantFieldX::view_t &&det,
              BosonOnvField::view_t &&perm) :
                 m_det(std::move(det)), m_perm(std::move(perm)) {}
+
+        bool operator==(const View &other) const {
+            return m_det==other.m_det && m_perm==other.m_perm;
+        }
+
+        bool operator!=(const View &other) const {
+            return !(*this==other);
+        }
 
         std::string to_string() const override {
             return m_det.to_string() + " " + m_perm.to_string();

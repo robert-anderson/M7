@@ -10,6 +10,7 @@
 #include <cstring>
 #include <src/core/util/defs.h>
 #include <map>
+#include <src/core/hash/Hashing.h>
 
 struct FieldBaseX {
     const size_t m_element_size;
@@ -29,6 +30,19 @@ struct FieldBaseX {
             return ((defs::data_t *) m_ptr) + i;
         }
 
+        int compare(const View& other) const {
+            ASSERT(m_field.m_element_size==other.m_field.m_element_size);
+            return std::memcmp(m_ptr, other.m_ptr, m_field.m_element_size);
+        }
+
+        bool operator==(const View& other) const {
+            return compare(other)==0;
+        }
+
+        bool operator!=(const View& other){
+            return !(*this==other);
+        }
+
         virtual std::string to_string() const = 0;
 
     protected:
@@ -42,6 +56,36 @@ struct FieldBaseX {
             return *this;
         }
     };
+
+    typedef std::pair<char*, size_t> raw_view_t;
+    typedef std::pair<const char*, const size_t> const_raw_view_t;
+
+    const_raw_view_t convert_to_raw(const View& v) const {
+        return {v.m_ptr, m_element_size};
+    }
+
+    raw_view_t convert_to_raw(const View& v) {
+        return {v.m_ptr, m_element_size};
+    }
+
+    bool comparable_with(const FieldBaseX& other) const {
+        return (m_type_info==other.m_type_info) && (m_element_size==other.m_element_size);
+    }
+
+    defs::hash_t hash() const {
+        return 0;
+    }
+
+    template<typename ...Args>
+    defs::hash_t hash(const_raw_view_t first, Args... rest) const {
+        return hashing::fnv_hash(first.first, first.second)^hash(rest...);
+    }
+
+    template<typename ...Args>
+    defs::hash_t hash(const View& first, Args... rest) const {
+        ASSERT(comparable_with(first.m_field));
+        return hash(convert_to_raw(first), rest...);
+    }
 
     FieldBaseX(size_t element_size, const std::type_info &type_info);
 

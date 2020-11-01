@@ -23,6 +23,10 @@ struct TableX : FieldGroup {
      */
     size_t m_hwm = 0ul;
 
+    size_t push_back(){
+        if (m_hwm>=m_nrow) throw std::runtime_error("Table capacity reached");
+        return m_hwm++;
+    }
 
     //TableX(BufferWindow bw): m_bw(bw){}
 
@@ -31,6 +35,7 @@ struct TableX : FieldGroup {
     }
 
     char *begin(const size_t &irow) {
+        ASSERT(irow<m_hwm)
         return begin() + irow * m_row_size;
     }
 

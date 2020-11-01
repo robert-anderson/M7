@@ -33,7 +33,7 @@ namespace fields {
     struct Numbers : NdCompositeFieldSingle<NumericFieldX<T>, nind> {
         template<typename...Args>
         Numbers(TableX *table, std::string description, Args...shape):
-                NdCompositeFieldSingle<NumericFieldX<T>, nind>(table, {}, description, {shape...}) {}
+                NdCompositeFieldSingle<NumericFieldX<T>, nind>(table, {}, description, NdFormat<nind>(shape...)) {}
     };
 
     template<typename T, size_t nind_view>
@@ -42,17 +42,34 @@ namespace fields {
     template<typename T, size_t nind_view, size_t nind_field>
     using NumberArrays = NdCompositeFieldSingle<NumericArrayField<T, nind_view>, nind_field>;
 
-    using Bitset = NdCompositeFieldSingle<BitsetFieldX, 0ul>;
+    struct Bitset : NdCompositeFieldSingle<BitsetFieldX, 0ul> {
+        Bitset(TableX *table, size_t nbit, std::string description) :
+                NdCompositeFieldSingle<BitsetFieldX, 0ul>(table, {nbit}, description, {}) {}
+    };
 
     template<size_t nind>
     using Bitsets = NdCompositeFieldSingle<BitsetFieldX, nind>;
 
-    using Determinant = NdCompositeFieldSingle<DeterminantFieldX, 0ul>;
+    struct Determinant : NdCompositeFieldSingle<DeterminantFieldX, 0ul> {
+        Determinant(TableX *table, size_t nsite, std::string description) :
+                NdCompositeFieldSingle<DeterminantFieldX, 0ul>(
+                        table, {nsite}, description, {}) {}
+
+        struct hash_fn {
+            defs::hash_t operator()(const Determinant &composite, const_view_t v) const {
+                return composite.m_field.hash(v);
+            }
+        };
+    };
 
     template<size_t nind>
     using Determinants = NdCompositeFieldSingle<DeterminantFieldX, nind>;
 
-    using BosonOnv = NdCompositeFieldSingle<BosonOnvField, 0ul>;
+    struct BosonOnv : NdCompositeFieldSingle<BosonOnvField, 0ul> {
+        BosonOnv(TableX *table, size_t nmode, std::string description) :
+                NdCompositeFieldSingle<BosonOnvField, 0ul>(
+                        table, {nmode}, description, {}) {}
+    };
 
     template<size_t nind>
     using BosonOnvs = NdCompositeFieldSingle<BosonOnvField, nind>;
@@ -68,15 +85,24 @@ namespace fields {
 
     template<size_t nind>
     struct ConfigurationSelector<nind, false> {
-        typedef FermionField <nind> type;
+        typedef FermionField<nind> type;
     };
 
     template<size_t nind>
     struct ConfigurationSelector<nind, true> {
-        typedef FermionBosonField <nind> type;
+        typedef FermionBosonField<nind> type;
     };
 
-    using Configuration = typename ConfigurationSelector<0ul, defs::bosons>::type;
+    struct Configuration : ConfigurationSelector<0ul, defs::bosons>::type {
+        Configuration(TableX *table, size_t nsite, size_t nmode, std::string description):
+        ConfigurationSelector<0ul, defs::bosons>::type(table, nsite, nmode, description, {}){}
+
+        struct hash_fn {
+            defs::hash_t operator()(const Configuration &composite, const_view_t v) const {
+                return composite.m_det.hash(v.m_det)^composite.m_perm.hash(v.m_perm);
+            }
+        };
+    };
 
     template<size_t nind>
     using Configurations = typename ConfigurationSelector<nind, defs::bosons>::type;

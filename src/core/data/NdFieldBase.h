@@ -29,25 +29,21 @@ struct NdFieldBaseX : FieldBaseX {
         return begin(irow) + ielement * m_element_size;
     }
 
-    typedef std::pair<const char *, size_t> raw_view_t;
+//    typedef std::pair<const char *, size_t> raw_view_t;
 
-    template<typename ...Args>
-    raw_view_t raw_view(const size_t &irow, Args...inds) const {
-        return {raw_ptr(irow, inds...), m_element_size};
-    }
 
-    struct equals_fn {
-        bool operator()(const raw_view_t& v1, const raw_view_t& v2){
-            ASSERT(v1.second==v2.second);
-            return !std::memcmp(v1.first, v2.first, v1.second);
-        }
-    };
+//    struct equals_fn {
+//        bool operator()(const raw_view_t& v1, const raw_view_t& v2){
+//            ASSERT(v1.second==v2.second);
+//            return !std::memcmp(v1.first, v2.first, v1.second);
+//        }
+//    };
 
-    struct default_hash_fn {
-        defs::hash_t operator()(const raw_view_t& v){
-            return hashing::fnv_hash(v.first, v.second);
-        }
-    };
+//    struct default_hash_fn {
+//        defs::hash_t operator()(const raw_view_t& v){
+//            return hashing::fnv_hash(v.first, v.second);
+//        }
+//    };
 
     std::string to_string(size_t irow) const {
         std::string res;

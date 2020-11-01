@@ -16,13 +16,14 @@ struct BufferedComposite {
     struct InternalTable : TableX {
         composite_t m_composite;
         template<typename ...Args>
-        InternalTable(Args... args):m_composite(this, args..., NdFormat<0ul>{}){}
+        InternalTable(Args... args): m_composite(this, args...){}
     };
     BufferedTable<InternalTable> m_table;
 
     template<typename ...Args>
     BufferedComposite(Args... args): m_table(args...) {
         m_table.expand(1);
+        m_table.push_back();
     }
 
     typename composite_t::view_t operator()(){

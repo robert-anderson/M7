@@ -66,15 +66,6 @@ namespace fieldsx {
 
 }
 
-struct Tt : TableX {
-    fieldsx::Number<float, 1> m_num;
-    Tt():m_num(this, {}, "ads", {4}){}
-};
-
-TEST(Table, TEST){
-    Tt t;
-}
-
 //struct FlagsTestTable : public TableX {
 //    FlagField<0> flag1;
 //    FlagField<0> flag2;

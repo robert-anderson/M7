@@ -23,10 +23,10 @@ struct CompositeField: FieldGroup {
         return m_fields[icomponent]->raw_ptr(irow, ielement);
     }
 
-    std::pair<const char *, size_t> raw_view(const size_t& icomponent, const size_t &irow, const size_t &ielement) const {
-        ASSERT(icomponent<nfield())
-        return m_fields[icomponent]->raw_view(irow, ielement);
-    }
+//    std::pair<const char *, size_t> raw_view(const size_t& icomponent, const size_t &irow, const size_t &ielement) const {
+//        ASSERT(icomponent<nfield())
+//        return m_fields[icomponent]->raw_view(irow, ielement);
+//    }
 
     const size_t& size(const size_t& icomponent=0) const {
         return m_fields[icomponent]->m_size;

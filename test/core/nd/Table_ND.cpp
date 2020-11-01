@@ -92,7 +92,7 @@ TEST(Table_ND, Packing) {
 
 struct TestTable : TableX {
     fields::Configuration config;
-    TestTable():config(this, 4, 5, {}){}
+    TestTable():config(this, 4, 5, "Configuration"){}
 };
 
 TEST(Table_ND, Test) {

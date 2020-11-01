@@ -2,12 +2,40 @@
 // Created by rja on 08/10/2020.
 //
 
+#include <src/core/data/Elements.h>
 #include "src/core/data/MappedTable.h"
+#include "src/core/data/Fields.h"
+#include "src/core/data/BufferedTable.h"
+#include "gtest/gtest.h"
+
+struct TestTable : MappedTable<fields::Configuration> {
+    fields::Configuration m_config;
+    TestTable(size_t nsite, size_t nmode):
+    MappedTable<fields::Configuration>(m_config, 100),
+            m_config(this, nsite, nmode, "configuration"){}
+};
+
+TEST(MappedTable, TEST){
+    const size_t nsite = 10;
+    const size_t nmode = 8;
+    BufferedTable<TestTable> bt(nsite, nmode);
+    bt.expand(10);
+    elements::Configuration config(nsite, nmode);
+    auto config_view = config();
+    config_view.m_det[2] = 1;
+    std::cout << config_view.to_string() << std::endl;
+    bt.insert(config_view);
+    bt.erase(bt[config_view]);
+    auto lookup = bt[config_view];
+    std::cout << bool(lookup) << std::endl;
+
+}
+
 //#include "src/core/data/BufferedTable.h"
 //#include "src/core/data/NumericField.h"
 //#include "src/core/data/NumericVectorField.h"
 //#include "src/core/data/BitsetField.h"
-//#include "gtest/gtest.h"
+//
 //
 
 //struct TestTable : public MappedTable<1> {
