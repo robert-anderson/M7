@@ -5,12 +5,6 @@
 #include "NdFieldBase.h"
 #include "Table.h"
 
-//NdFieldBaseX::NdFieldBaseX(TableX *table, size_t nelement, size_t element_size,
-//                           const std::type_info &type_info, std::string description) :
-//        FieldBaseX(element_size, type_info),
-//        m_table(table), m_description(description), m_nelement(nelement),
-//        m_size(nelement * element_size), m_offset(m_table->add_field(this)) {}
-
 
 NdFieldBaseX::NdFieldBaseX(TableX *table, FieldBaseX &&field,
                            size_t nelement, std::string description) :
