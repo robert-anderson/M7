@@ -18,11 +18,11 @@ struct NumericFieldX : FieldBaseX {
     typedef const T& const_view_t;
 
     const_raw_view_t convert_to_raw(const T& v) const {
-        return {(char*)&v, m_element_size};
+        return {(const char*)&v, m_element_size};
     }
 
     raw_view_t convert_to_raw(const T& v) {
-        return {(const char*)&v, m_element_size};
+        return {(char*)&v, m_element_size};
     }
 
     view_t operator()(char *ptr) const {
