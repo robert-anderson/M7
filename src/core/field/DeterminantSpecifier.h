@@ -18,7 +18,7 @@ struct DeterminantSpecifier : BitsetSpecifier {
         View(const DeterminantSpecifier &field, char *ptr);
 
         const DeterminantSpecifier& field() const {
-            return static_cast<const DeterminantSpecifier&>(m_field);
+            return static_cast<const DeterminantSpecifier&>(m_spec);
         }
 
         std::string to_string() const override;

@@ -1,6 +1,0 @@
-<map id="Field" name="Field">
-<area shape="rect" id="node1" title=" " alt="" coords="102,5,153,32"/>
-<area shape="rect" id="node2" href="$classBitsetField.html" title=" " alt="" coords="85,80,169,107"/>
-<area shape="rect" id="node3" href="$classDeterminantField.html" title=" " alt="" coords="5,155,127,181"/>
-<area shape="rect" id="node4" href="$classFlagField.html" title=" " alt="" coords="151,155,226,181"/>
-</map>

@@ -102,7 +102,7 @@ public:
         const auto nbit = BitsetEnumerator<op>::m_data1.nbit();
         if (result >= nbit) {
             result += 50;//nbit;
-            result -= 64;//CHAR_BIT * (BitsetEnumerator<op>::m_data1.m_field->element_dsize() / 2) * sizeof(defs::data_t);
+            result -= 64;//CHAR_BIT * (BitsetEnumerator<op>::m_data1.m_spec->element_dsize() / 2) * sizeof(defs::data_t);
         }
         return tmp;
     }

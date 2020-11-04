@@ -166,19 +166,19 @@ struct BitsetField : NdField<nind> {
 //        return View(*this, irow, NdField<nind>::m_format.flat(inds...));
 //    }
 //    struct NdView {
-//        const BitsetField& m_field;
+//        const BitsetField& m_spec;
 //        char* m_ptr;
 //        NdView(const BitsetField& field, const size_t &irow, const size_t &iflat):
-//                m_field(field), m_ptr(field.raw_ptr(irow, iflat)){}
+//                m_spec(field), m_ptr(field.raw_ptr(irow, iflat)){}
 //
 //        template<typename ...Args>
 //        View operator()(Args... inds){
-//            return View(m_ptr+m_field.m_view_format.flat(inds...)*m_field.m_element_size);
+//            return View(m_ptr+m_spec.m_view_format.flat(inds...)*m_spec.m_element_size);
 //        }
 //
 //        NdView& operator=(const NdView& other){
 //            if (&other!=this)
-//                std::memcpy(m_ptr, other.m_ptr, m_field.m_element_size);
+//                std::memcpy(m_ptr, other.m_ptr, m_spec.m_element_size);
 //            return *this;
 //        }
 //    };

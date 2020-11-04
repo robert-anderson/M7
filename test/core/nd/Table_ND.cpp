@@ -29,14 +29,14 @@ struct FlagField : BitsetSpecifier {
 };
 
 struct FlagBase {
-    FlagField* m_field;
+    FlagField* m_spec;
     const size_t m_nbit;
     FlagBase(FlagField* field, size_t nbit):
-    m_field(field), m_nbit(nbit){}
+    m_spec(field), m_nbit(nbit){}
     BitsetSpecifier::View::BitView operator()(const size_t& irow, const size_t& ibit){
         ASSERT(ibit<m_nbit);
         return BitsetSpecifier::View::BitView(
-                BitsetSpecifier::View(*m_field, m_field->m_table->begin(irow)), ibit);
+                BitsetSpecifier::View(*m_spec, m_spec->m_table->begin(irow)), ibit);
     }
 };
 

@@ -27,11 +27,11 @@ BitsetSpecifier::View::BitView BitsetSpecifier::View::operator[](const size_t &i
 }
 
 const size_t &BitsetSpecifier::View::nbit() const {
-    return static_cast<const BitsetSpecifier &>(m_field).m_nbit;
+    return static_cast<const BitsetSpecifier &>(m_spec).m_nbit;
 }
 
 const size_t &BitsetSpecifier::View::ndataword() const {
-    return static_cast<const BitsetSpecifier &>(m_field).m_ndataword;
+    return static_cast<const BitsetSpecifier &>(m_spec).m_ndataword;
 }
 
 bool BitsetSpecifier::View::get(const size_t &ibit) const {

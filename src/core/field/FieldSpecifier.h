@@ -30,18 +30,18 @@ struct FieldSpecifier {
 
     const std::vector<char> m_null_buffer;
     struct View {
-        const FieldSpecifier &m_field;
+        const FieldSpecifier &m_spec;
         char *m_ptr;
 
-        View(const FieldSpecifier& field, char* ptr): m_field(field), m_ptr(ptr){}
+        View(const FieldSpecifier& field, char* ptr): m_spec(field), m_ptr(ptr){}
 
         defs::data_t *dptr(const size_t &i) const {
-            ASSERT(i * defs::nbyte_data < m_field.element_size());
+            ASSERT(i * defs::nbyte_data < m_spec.element_size());
             return ((defs::data_t *) m_ptr) + i;
         }
 
         const size_t& element_size() const {
-            return m_field.element_size();
+            return m_spec.element_size();
         }
 
         void zero() {
@@ -62,7 +62,7 @@ struct FieldSpecifier {
         }
 
         bool is_zero() const {
-            return !std::memcmp(m_ptr, m_field.m_null_buffer.data(), element_size());
+            return !std::memcmp(m_ptr, m_spec.m_null_buffer.data(), element_size());
         }
 
         virtual std::string to_string() const = 0;
@@ -73,12 +73,12 @@ struct FieldSpecifier {
 
     protected:
 
-        View(const View &other) : m_field(other.m_field), m_ptr(other.m_ptr) {}
+        View(const View &other) : m_spec(other.m_spec), m_ptr(other.m_ptr) {}
 
         View &operator=(const View &other) {
-            ASSERT(m_field.element_size() == other.m_field.element_size());
+            ASSERT(m_spec.element_size() == other.m_spec.element_size());
             if (&other != this)
-                std::memcpy(m_ptr, other.m_ptr, m_field.element_size());
+                std::memcpy(m_ptr, other.m_ptr, m_spec.element_size());
             return *this;
         }
     };
@@ -109,7 +109,7 @@ struct FieldSpecifier {
 
     template<typename ...Args>
     defs::hash_t hash(const View& first, Args... rest) const {
-        ASSERT(comparable_with(first.m_field));
+        ASSERT(comparable_with(first.m_spec));
         return hash(convert_to_raw(first), rest...);
     }
 

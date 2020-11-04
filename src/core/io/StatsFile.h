@@ -23,22 +23,22 @@ class StatsField;
 
 template<typename T>
 class StatsElement : public NumericElement<T> {
-    using NumericElement<T>::m_field;
+    using NumericElement<T>::m_spec;
 public:
 
     StatsElement<T>(StatsField<T> *field, char *begin) : NumericElement<T>(field, begin) {}
 
     StatsElement<T> &operator=(const T &v) override {
-        if (!m_field->is_allocated()) m_field->expand_table(1);
+        if (!m_spec->is_allocated()) m_spec->expand_table(1);
         NumericElement<T>::operator=(v);
         return *this;
     }
 
-    const size_t &fp_precision() const { return dynamic_cast<StatsField<T> *>(m_field)->m_fp_precision; }
+    const size_t &fp_precision() const { return dynamic_cast<StatsField<T> *>(m_spec)->m_fp_precision; }
 
     /*
     StatsElement<T> &operator=(const NumericElement<T> &v) override {
-        if (!m_field->is_allocated()) m_field->expand_table(1);
+        if (!m_spec->is_allocated()) m_spec->expand_table(1);
         NumericElement<T>::operator=(v);
         return *this;
     }

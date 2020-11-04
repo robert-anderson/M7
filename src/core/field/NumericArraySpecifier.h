@@ -27,7 +27,7 @@ struct NumericArraySpecifier : FieldSpecifier {
         View(const NumericArraySpecifier &spec, char *ptr) : FieldSpecifier::View(spec, ptr) {}
 
         const size_t& nelement() const {
-            return static_cast<const NumericArraySpecifier&>(m_field).m_nelement;
+            return static_cast<const NumericArraySpecifier&>(m_spec).m_nelement;
         }
 
         T& operator[](const size_t& ind) {
@@ -40,11 +40,11 @@ struct NumericArraySpecifier : FieldSpecifier {
         }
         template<typename ...Args>
         T& operator()(Args... inds){
-            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_field).m_format.flatten(inds...)];
+            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_spec).m_format.flatten(inds...)];
         }
         template<typename ...Args>
         const T& operator()(Args... inds) const {
-            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_field).m_format.flatten(inds...)];
+            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_spec).m_format.flatten(inds...)];
         }
 
         std::string to_string() const override {

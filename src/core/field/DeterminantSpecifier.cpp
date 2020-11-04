@@ -32,7 +32,7 @@ std::string DeterminantSpecifier::View::to_string() const {
 }
 
 const size_t &DeterminantSpecifier::View::nsite() const {
-    return static_cast<const DeterminantSpecifier&>(m_field).m_nsite;
+    return static_cast<const DeterminantSpecifier&>(m_spec).m_nsite;
 }
 
 void DeterminantSpecifier::View::set(const size_t &ispin, const size_t &iorb) {

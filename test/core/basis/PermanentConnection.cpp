@@ -4,14 +4,14 @@
 
 #if 0
 #include "gtest/gtest.h"
-#include "src/core/basis/PermanentConnection.h"
+#include "src/core/basis/BosonicConnection.h"
 #include "src/core/basis/Permanent.h"
 
 // todo setup function
 
 
 
-TEST(PermanentConnection, NoChange) {
+TEST(BosonicConnection, NoChange) {
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
@@ -21,12 +21,12 @@ TEST(PermanentConnection, NoChange) {
     ket = {2,4,0,1};
     bra = {2,4,0,1};
 
-    PermanentConnection pc(ket, bra);
+    BosonicConnection pc(ket, bra);
 
     ASSERT_EQ(pc.nchanged_mode(), 0);
 }
 
-TEST(PermanentConnection, SingleChange){
+TEST(BosonicConnection, SingleChange){
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
@@ -35,7 +35,7 @@ TEST(PermanentConnection, SingleChange){
 
     for(size_t imode = 0; imode < nmode; ++imode){
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
-            PermanentConnection pc(ket, bra);
+            BosonicConnection pc(ket, bra);
 
             ket = {2,4,0,1};
             bra = {2,4,0,1};
@@ -51,7 +51,7 @@ TEST(PermanentConnection, SingleChange){
 }
 
 
-TEST(PermanentConnection, DoubleChange){
+TEST(BosonicConnection, DoubleChange){
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
@@ -68,7 +68,7 @@ TEST(PermanentConnection, DoubleChange){
         for(size_t imode2 = 0; imode2 < imode1; ++imode2){
             for (size_t idelta1 = 1; idelta1 < occ_cutoff; ++idelta1) {
                 for (size_t idelta2 = 1; idelta2 < occ_cutoff; ++idelta2) {
-                    PermanentConnection pc(ket, bra);
+                    BosonicConnection pc(ket, bra);
                     bra(imode1) += idelta1;
                     bra(imode2) += idelta2;
                     pc.connect(bra, ket);

@@ -6,7 +6,7 @@
 
 #include "src/core/hamiltonian/BosonCouplings.h"
 #include "gtest/gtest.h"
-#include "src/core/basis/PermanentConnection.h"
+#include "src/core/basis/BosonicConnection.h"
 #include "src/core/basis/Permanent.h"
 
 TEST(BosonCouplings, Element_b0){
@@ -17,7 +17,7 @@ TEST(BosonCouplings, Element_b0){
 
     Permanent ket(nmode, nocc_cutoff);
     Permanent bra(nmode, nocc_cutoff);
-    PermanentConnection pc(bra, ket);
+    BosonicConnection pc(bra, ket);
 
     auto el = simpleCoupling.get_element_0(pc);
     ASSERT_EQ(el, 0);
@@ -50,7 +50,7 @@ TEST(BosonCouplings, Element_f0_b1){
     pket = {2,4,0,1};
     pbra = {2,4,0,2};
 
-    PermanentConnection pc(pbra, pket);
+    BosonicConnection pc(pbra, pket);
 
     auto el = simpleCoupling.get_element_1(ac, pc);
     ASSERT_EQ(V*ac.ncom(), el);
@@ -76,7 +76,7 @@ TEST(BosonCouplings, Element_f1_b1){
     pket = {2,4,0,1};
     pbra = {2,4,0,2};
 
-    PermanentConnection pc(pbra, pket);
+    BosonicConnection pc(pbra, pket);
 
     auto el = simpleCoupling.get_element_1(ac, pc);
     ASSERT_EQ(V, el);

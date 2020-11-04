@@ -20,6 +20,10 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
     struct View : NumericArraySpecifier<uint8_t, 1>::View {
         View(const BosonOnvSpecifier &field, char *ptr);
 
+        const BosonOnvSpecifier& spec() const {
+            return static_cast<const BosonOnvSpecifier&>(m_spec);
+        }
+
         size_t nboson() const;
     };
 };
