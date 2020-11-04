@@ -58,19 +58,20 @@ TEST(Table, DifferentFieldOffset){
     ASSERT_EQ(t1.m_floats.m_field.m_size, 4*sizeof(float));
 }
 
-//struct FlagsTestTable : public TableX {
-//    FlagField<0> flag1;
-//    FlagField<0> flag2;
-//    FlagField<1> flags1;
-//    FlagField<1> flags2;
-//    FlagsTestTable():
-//    flag1(this, "first flag"),
-//    flag2(this, "second flag"),
-//    flags1(this, "first rank-1 flag set", 6),
-//    flags2(this, "second rank-1 flag set", 6)
-//    {}
-//};
-//
+struct FlagsTestTable : public TableX {
+    NdFlag<>
+    FlagField<0> flag1;
+    FlagField<0> flag2;
+    FlagField<1> flags1;
+    FlagField<1> flags2;
+    FlagsTestTable():
+    flag1(this, "first flag"),
+    flag2(this, "second flag"),
+    flags1(this, "first rank-1 flag set", 6),
+    flags2(this, "second rank-1 flag set", 6)
+    {}
+};
+
 //TEST(Table, Flag){
 //    FlagsTestTable t;
 //    t.print_field_details();

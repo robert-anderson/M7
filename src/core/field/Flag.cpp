@@ -3,7 +3,7 @@
 //
 
 #include "Flag.h"
-#include "Table.h"
+#include "src/core/table/Table.h"
 
 TableFlag::TableFlag(TableX *table, size_t nelement) :
         m_table(table),
