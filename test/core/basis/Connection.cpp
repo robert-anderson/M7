@@ -62,10 +62,10 @@ TEST(Connection, Phase) {
         bra.zero();
         ket.zero();
         for (auto i{0ul}; i < 8; ++i) {
-            if (!inds[i]) bra.set(i);
+            if (inds[i]) bra.set(i);
         }
         for (auto i{8ul}; i < 16; ++i) {
-            if (!inds[i]) ket.set(i - 8);
+            if (inds[i]) ket.set(i - 8);
         }
         if (bra.is_zero() || ket.is_zero()) continue;
         if (bra.nsetbit() != ket.nsetbit()) continue;
@@ -73,8 +73,6 @@ TEST(Connection, Phase) {
         ASSERT_EQ(connection.phase(), value < 0);
         connection.apply(ket, work_det);
         ASSERT_TRUE(bra==work_det);
-        std::cout << bra.to_string() << " " << ket.to_string() << std::endl;
-        std::cout << work_det.to_string() << std::endl;
         ASSERT_EQ(connection.phase(), value < 0);
     }
 }
