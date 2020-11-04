@@ -2,20 +2,17 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#if 0
-
-//#include "src/core/basis/Determinant.h"
+#include "gtest/gtest.h"
 #include "src/core/basis/Connection.h"
 #include "src/core/io/SparseArrayFileReader.h"
-#include "gtest/gtest.h"
+#include "src/core/field/Elements.h"
 
 TEST(Connection, ParticleNumberConserving){
     const size_t nsite = 20;
-    Determinant ket(nsite);
-    Determinant bra(nsite);
+    elements::Determinant ket(nsite);
+    elements::Determinant bra(nsite);
 
     defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 20, 38, 39};
-
     defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 37, 38};
     ket.set(ketoccorbs);
     bra.set(braoccorbs);
@@ -50,13 +47,15 @@ TEST(Connection, ParticleNumberConserving){
 
 TEST(Connection, Phase) {
 
-    SparseArrayFileReader<float> file_reader(defs::assets_root + "/parity_test/parity_8.txt", 16);
+    SparseArrayFileReader<float> file_reader(
+            defs::assets_root + "/parity_test/parity_8.txt",
+            16ul, false, false);
     defs::inds inds(16);
     float value;
 
-    Determinant bra(4);
-    Determinant ket(4);
-    Determinant work_det(4);
+    elements::Determinant bra(4);
+    elements::Determinant ket(4);
+    elements::Determinant work_det(4);
     AntisymConnection connection(ket);
 
     while (file_reader.next(inds, value)) {
@@ -73,9 +72,9 @@ TEST(Connection, Phase) {
         connection.connect(ket, bra);
         ASSERT_EQ(connection.phase(), value < 0);
         connection.apply(ket, work_det);
-        ASSERT_EQ(connection.phase(), value < 0);
         ASSERT_TRUE(bra==work_det);
+        std::cout << bra.to_string() << " " << ket.to_string() << std::endl;
+        std::cout << work_det.to_string() << std::endl;
+        ASSERT_EQ(connection.phase(), value < 0);
     }
 }
-
-#endif

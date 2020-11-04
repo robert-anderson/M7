@@ -62,7 +62,7 @@ struct FieldSpecifier {
         }
 
         bool is_zero() const {
-            return std::memcmp(m_ptr, m_field.m_null_buffer.data(), element_size());
+            return !std::memcmp(m_ptr, m_field.m_null_buffer.data(), element_size());
         }
 
         virtual std::string to_string() const = 0;

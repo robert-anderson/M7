@@ -29,7 +29,7 @@ void Connection::connect(const views::Determinant &ket, const views::Determinant
     defs::data_t ket_work, bra_work, work;
     for (size_t idataword = 0ul; idataword<ket.ndataword(); ++idataword){
         ket_work = ket.get_dataword(idataword);
-        bra_work = ket.get_dataword(idataword);
+        bra_work = bra.get_dataword(idataword);
         work = ket_work&~bra_work;
         while (work) m_ann[m_nann++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
         work = bra_work &~ ket_work;
@@ -81,7 +81,7 @@ void AntisymConnection::connect(const views::Determinant &ket, const views::Dete
     defs::data_t ket_work, bra_work, work;
     for (size_t idataword = 0ul; idataword<ket.ndataword(); ++idataword){
         ket_work = ket.get_dataword(idataword);
-        bra_work = ket.get_dataword(idataword);
+        bra_work = bra.get_dataword(idataword);
         work = ket_work & bra_work;
         while (work) {
             auto &com = m_com[m_ncom];
@@ -117,9 +117,8 @@ void AntisymConnection::apply(const views::Determinant &ket) {
     auto cre_iter = m_cre.begin();
     const auto cre_end = m_cre.begin() + m_ncre;
 
-    defs::data_t work;
     for(size_t idataword=0ul; idataword<ket.ndataword(); ++idataword){
-        work = ket.get_dataword(idataword);
+        auto work = ket.get_dataword(idataword);
         while (work) {
             auto &com = m_com[m_ncom];
             auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;

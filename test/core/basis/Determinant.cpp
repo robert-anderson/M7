@@ -9,8 +9,9 @@
 
 TEST(Determinant, Phase) {
 
-    SparseArrayFileReader<float> file_iterator(
-            defs::assets_root + "/parity_test/parity_8.txt", 16ul, true, false);
+    SparseArrayFileReader<float> file_reader(
+            defs::assets_root + "/parity_test/parity_8.txt",
+            16ul, false, false);
 
     defs::inds inds(16);
     float value;
@@ -20,7 +21,7 @@ TEST(Determinant, Phase) {
     elements::Determinant ket(nsite);
     AntisymConnection conn(bra);
 
-    while (file_iterator.next(inds, value)) {
+    while (file_reader.next(inds, value)) {
         conn.zero();
         bra.zero();
         ket.zero();
