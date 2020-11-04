@@ -2,13 +2,12 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#include "src/core/field/Views.h"
+#include "src/core/field/Elements.h"
 #include "src/core/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
 
-#if 0
 TEST(DecodedDeterminant, Occupation){
-    views::Determinant det_table(50);
+    elements::Determinant det(50);
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     det.set(occ);
     defs::inds vac;
@@ -24,4 +23,3 @@ TEST(DecodedDeterminant, Occupation){
     VacantOrbitals vacorbs(det);
     ASSERT_TRUE(std::equal(vac.begin(), vac.end(), vacorbs.m_inds.begin()));
 }
-#endif

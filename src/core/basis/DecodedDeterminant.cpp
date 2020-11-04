@@ -4,40 +4,34 @@
 
 #include "DecodedDeterminant.h"
 
-#if 0
-OccupiedOrbitals::OccupiedOrbitals(const DeterminantSpecifier &field) : DecodedDeterminant(field) {}
+OccupiedOrbitals::OccupiedOrbitals(const DeterminantSpecifier &spec) : DecodedDeterminant(spec) {}
 
-OccupiedOrbitals::OccupiedOrbitals(const DeterminantSpecifier::View &view) : DecodedDeterminant(view) {
+OccupiedOrbitals::OccupiedOrbitals(const views::Determinant &view) : DecodedDeterminant(view) {
     update(view);
 }
 
-void OccupiedOrbitals::update(const DeterminantSpecifier::View &view) {
+void OccupiedOrbitals::update(const views::Determinant &view) {
     ASSERT(view.nbit() == m_nbit);
     ASSERT(view.ndataword() == m_element_dsize);
     m_nind = 0ul;
-    size_t idataword = ~0ul;
-    defs::data_t work;
-    DeterminantSpecifier::View::DatawordEnumerator enumerator(view);
-    while (enumerator.next(work, idataword)) {
+    for (size_t idataword = 0ul; idataword < view.ndataword(); ++idataword) {
+        auto work = view.get_dataword(idataword);
         while (work) m_inds[m_nind++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
     }
 }
 
-VacantOrbitals::VacantOrbitals(const DeterminantSpecifier &field) : DecodedDeterminant(field) {}
+VacantOrbitals::VacantOrbitals(const DeterminantSpecifier &spec) : DecodedDeterminant(spec) {}
 
-VacantOrbitals::VacantOrbitals(const DeterminantSpecifier::View &view) : DecodedDeterminant(view) {
+VacantOrbitals::VacantOrbitals(const views::Determinant &view) : DecodedDeterminant(view) {
     update(view);
 }
 
-void VacantOrbitals::update(const DeterminantSpecifier::View &view) {
+void VacantOrbitals::update(const views::Determinant &view) {
     ASSERT(view.nbit() == m_nbit);
     ASSERT(view.ndataword() == m_element_dsize);
     m_nind = 0ul;
-    size_t idataword = ~0ul;
-    defs::data_t work;
-    DeterminantSpecifier::View::AntiDatawordEnumerator enumerator(view);
-    while (enumerator.next(work, idataword)) {
+    for (size_t idataword = 0ul; idataword < view.ndataword(); ++idataword) {
+        auto work = view.get_antidataword(idataword);
         while (work) m_inds[m_nind++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
     }
 }
-#endif

@@ -57,60 +57,6 @@ struct DeterminantSpecifier : BitsetSpecifier {
             clr(i); clr(j); set(k); set(l);
         }
 
-//        class DatawordEnumerator : public Enumerator<defs::data_t> {
-//        protected:
-//            size_t m_idataword = 0ul;
-//            const View &m_view;
-//
-//            virtual size_t get_dataword(const size_t &idataword);
-//
-//            virtual size_t get_dataword(const size_t &idataword, const size_t &nbit);
-//
-//            const size_t& ndataword() const;
-//
-//            const size_t& nbit() const;
-//
-//            bool next_element(defs::data_t &result) override;
-//
-//        public:
-//            explicit DatawordEnumerator(const View &view);
-//        };
-//
-//        class AntiDatawordEnumerator : public Enumerator<defs::data_t> {
-//        protected:
-//            size_t m_idataword = 0ul;
-//            const View &m_view;
-//
-//            virtual size_t get_dataword(const size_t &idataword) {
-//                return m_view.get_antidataword(idataword);
-//            }
-//
-//            virtual size_t get_dataword(const size_t &idataword, const size_t &nbit) {
-//                return m_view.get_antidataword(idataword, nbit);
-//            }
-//
-//            const size_t& ndataword() const {
-//                return m_view.field().m_ndataword;
-//            }
-//
-//            const size_t& nbit() const {
-//                return m_view.field().m_nbit;
-//            }
-//
-//            bool next_element(defs::data_t &result) override {
-//                if (m_idataword == ndataword()) return false;
-//                if (m_idataword + 1 == ndataword())
-//                    result = get_dataword(m_idataword, nbit() - defs::nbit_data * m_idataword);
-//                else result = get_dataword(m_idataword);
-//                m_idataword++;
-//                return true;
-//            }
-//
-//        public:
-//            explicit AntiDatawordEnumerator(const View &view) :
-//                    Enumerator<defs::data_t>(), m_view(view) {}
-//        };
-
         int spin() const;
 
         int nalpha() const;
@@ -127,57 +73,4 @@ struct DeterminantSpecifier : BitsetSpecifier {
 };
 
 
-#if 0
-
-template <size_t nind>
-struct DeterminantSpecifier : BitsetSpecifier<nind>{
-    const size_t m_nsite;
-    DeterminantSpecifier(TableX *table, std::array<size_t, nind> shape, size_t nsite, std::string description) :
-            BitsetSpecifier<nind>(table, shape, 2*nsite, description), m_nsite(nsite){}
-
-    struct View : BitsetSpecifier<nind>::View {
-        View(const DeterminantSpecifier& field, const size_t& irow, const size_t& iflat):
-        BitsetSpecifier<nind>::View(field, irow, iflat){}
-
-        using BitsetSpecifier<nind>::View::m_field;
-        const size_t& nsite() const {
-            return static_cast<const DeterminantSpecifier<nind>&>(m_field).m_nsite;
-        }
-
-        using BitsetSpecifier<nind>::View::nbit;
-        using BitsetSpecifier<nind>::View::get;
-        std::string to_string() const override {
-            std::string res;
-            res.reserve(nbit()+3);
-            res+="(";
-            for (size_t i=0ul; i<nbit(); ++i) {
-                if (i==nsite()) res+=",";
-                res+=get(i)?"1":"0";// spin channel delimiter
-            }
-            res+=")";
-            return res;
-        }
-    };
-
-    template<typename ...Args>
-    View operator()(const size_t& irow, Args...inds){
-        return View(*this, irow, BitsetSpecifier<nind>::m_format.flatten(inds...));
-    }
-
-    std::string element_string(size_t irow, size_t ielement) const override {
-        return View(*this, irow, ielement).to_string();
-    }
-
-    std::map<std::string, std::string> details() const override {
-        auto map = BitsetSpecifier<nind>::details();
-        map["field type"] = "Determinant";
-        map["number of sites"] = std::to_string(m_nsite);
-        return map;
-    }
-
-};
-
-
-
-#endif //M7_DETERMINANTSPECIFIER_H
 #endif //M7_DETERMINANTSPECIFIER_H
