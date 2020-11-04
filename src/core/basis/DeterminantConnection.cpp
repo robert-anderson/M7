@@ -2,21 +2,21 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#include "Connection.h"
+#include "DeterminantConnection.h"
 #include <algorithm>
 
-Connection::Connection(const DeterminantSpecifier& spec):
+DeterminantConnection::DeterminantConnection(const DeterminantSpecifier& spec):
     m_element_dsize(spec.m_ndataword), m_nbit(spec.m_nbit) {}
 
-Connection::Connection(const views::Determinant &ket, const views::Determinant &bra) : Connection(ket.spec()) {
+DeterminantConnection::DeterminantConnection(const views::Determinant &ket, const views::Determinant &bra) : DeterminantConnection(ket.spec()) {
     ASSERT(ket.nsite() == bra.nsite());
     connect(ket, bra);
 }
 
-Connection::Connection(const views::Determinant &ket) : Connection(ket, ket){}
+DeterminantConnection::DeterminantConnection(const views::Determinant &ket) : DeterminantConnection(ket, ket){}
 
 
-void Connection::connect(const views::Determinant &ket, const views::Determinant &bra) {
+void DeterminantConnection::connect(const views::Determinant &ket, const views::Determinant &bra) {
     ASSERT(!ket.is_zero());
     ASSERT(!bra.is_zero());
     ASSERT(ket.nbit() == m_nbit);
@@ -39,7 +39,7 @@ void Connection::connect(const views::Determinant &ket, const views::Determinant
     ASSERT(m_nann < m_ann.size());
 }
 
-void Connection::apply(const views::Determinant &ket, views::Determinant &bra){
+void DeterminantConnection::apply(const views::Determinant &ket, views::Determinant &bra){
     ASSERT(!ket.is_zero());
     ASSERT(m_ncre < m_cre.size());
     ASSERT(m_nann < m_ann.size());
@@ -53,23 +53,23 @@ void Connection::apply(const views::Determinant &ket, views::Determinant &bra){
     ASSERT(ket.nsetbit()==bra.nsetbit());
 }
 
-const size_t &Connection::nexcit() const {
+const size_t &DeterminantConnection::nexcit() const {
     ASSERT(m_ncre == m_nann);
     return m_ncre;
 }
 
 
-AntisymConnection::AntisymConnection(const DeterminantSpecifier &field): Connection(field) {}
+AntisymConnection::AntisymConnection(const DeterminantSpecifier &field): DeterminantConnection(field) {}
 
 AntisymConnection::AntisymConnection(const views::Determinant &ket, const views::Determinant &bra) :
-    Connection(ket, bra) {
+        DeterminantConnection(ket, bra) {
     connect(ket, bra);
 }
 
 AntisymConnection::AntisymConnection(const views::Determinant &ket) : AntisymConnection(ket.spec()) {}
 
 void AntisymConnection::connect(const views::Determinant &ket, const views::Determinant &bra) {
-    Connection::connect(ket, bra);
+    DeterminantConnection::connect(ket, bra);
     m_ncom = 0ul;
     size_t nperm = 0ul;
 
@@ -143,5 +143,5 @@ void AntisymConnection::apply(const views::Determinant &ket) {
 
 void AntisymConnection::apply(const views::Determinant &ket, views::Determinant &bra) {
     apply(ket);
-    Connection::apply(ket, bra);
+    DeterminantConnection::apply(ket, bra);
 }

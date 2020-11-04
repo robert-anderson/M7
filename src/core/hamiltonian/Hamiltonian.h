@@ -11,7 +11,7 @@
 #include "src/core/basis/Determinant.h"
 #include "src/core/list/MappedList.h"
 #include "src/core/dynamics/WalkerList.h"
-#include "src/core/basis/Connection.h"
+#include "src/core/basis/DeterminantConnection.h"
 #include "src/core/basis/DecodedDeterminant.h"
 #include "src/core/util/consts.h"
 #include "src/core/util/defs.h"
@@ -54,7 +54,7 @@ public:
 
     virtual defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const = 0;
 
-    defs::ham_t get_element_2(const Connection &connection) const {
+    defs::ham_t get_element_2(const DeterminantConnection &connection) const {
         return get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
     }
 

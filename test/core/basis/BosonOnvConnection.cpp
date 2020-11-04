@@ -3,11 +3,11 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/basis/BosonicConnection.h"
+#include "src/core/basis/BosonOnvConnection.h"
 #include "src/core/field/Elements.h"
 
 
-TEST(BosonicConnection, NoChange) {
+TEST(BosonOnvConnection, NoChange) {
     size_t nmode = 4ul;
 
     elements::BosonOnv ket(nmode);
@@ -16,41 +16,44 @@ TEST(BosonicConnection, NoChange) {
     ket = {2, 4, 0, 1};
     bra = {2, 4, 0, 1};
 
-    BosonicConnection pc(ket, bra);
+    BosonOnvConnection pc(ket, bra);
 
     ASSERT_EQ(pc.nchanged_mode(), 0);
 }
 
-TEST(BosonicConnection, SingleChange) {
+TEST(BosonOnvConnection, SingleChange) {
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
     elements::BosonOnv ket(nmode);
     elements::BosonOnv bra(nmode);
+    elements::BosonOnv work_bonv(nmode);
 
     for (size_t imode = 0; imode < nmode; ++imode) {
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
-            BosonicConnection pc(ket, bra);
+            BosonOnvConnection pc(ket, bra);
 
             ket = {2, 4, 0, 1};
             bra = {2, 4, 0, 1};
 
             bra(imode) += idelta;
             pc.connect(bra, ket);
-
             ASSERT_EQ(pc.nchanged_mode(), 1);
             ASSERT_EQ(pc.changed_mode(0), imode);
             ASSERT_EQ(pc.changes(0), idelta);
+            pc.apply(ket, work_bonv);
+            ASSERT_EQ(work_bonv, bra);
         }
     }
 }
 
-TEST(BosonicConnection, DoubleChange) {
+TEST(BosonOnvConnection, DoubleChange) {
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
     elements::BosonOnv ket(nmode);
     elements::BosonOnv bra(nmode);
+    elements::BosonOnv work_bonv(nmode);
 
     for (size_t imode1 = 0; imode1 < nmode; ++imode1) {
         for (size_t imode2 = imode1+1; imode2 < nmode; ++imode2) {
@@ -60,7 +63,7 @@ TEST(BosonicConnection, DoubleChange) {
                     ket = {2, 4, 0, 1};
                     bra = {2, 4, 0, 1};
 
-                    BosonicConnection pc(ket, bra);
+                    BosonOnvConnection pc(ket, bra);
                     bra(imode1) += idelta1;
                     bra(imode2) += idelta2;
                     pc.connect(bra, ket);
@@ -70,6 +73,8 @@ TEST(BosonicConnection, DoubleChange) {
                     ASSERT_EQ(pc.changed_mode(1), imode2);
                     ASSERT_EQ(pc.changes(0), idelta1);
                     ASSERT_EQ(pc.changes(1), idelta2);
+                    pc.apply(ket, work_bonv);
+                    ASSERT_EQ(work_bonv, bra);
                 }
             }
         }

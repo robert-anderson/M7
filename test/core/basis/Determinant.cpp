@@ -5,7 +5,7 @@
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
 #include "src/core/field/Elements.h"
-#include "src/core/basis/Connection.h"
+#include "src/core/basis/DeterminantConnection.h"
 
 TEST(Determinant, Phase) {
 

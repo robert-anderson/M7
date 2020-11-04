@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#ifndef M7_CONNECTION_H
-#define M7_CONNECTION_H
+#ifndef M7_DETERMINANTCONNECTION_H
+#define M7_DETERMINANTCONNECTION_H
 
 #include <src/core/field/DeterminantSpecifier.h>
 #include <algorithm>
@@ -29,7 +29,7 @@
  * add: append annihilation/creation index pair
  */
 
-class Connection {
+class DeterminantConnection {
     const size_t m_element_dsize;
 protected:
     const size_t m_nbit;
@@ -37,9 +37,9 @@ protected:
     size_t m_nann, m_ncre;
 
 public:
-    explicit Connection(const DeterminantSpecifier& field);
-    Connection(const views::Determinant &ket, const views::Determinant &bra);
-    explicit Connection(const views::Determinant &ket);
+    explicit DeterminantConnection(const DeterminantSpecifier& field);
+    DeterminantConnection(const views::Determinant &ket, const views::Determinant &bra);
+    explicit DeterminantConnection(const views::Determinant &ket);
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
@@ -78,7 +78,7 @@ public:
 /*
  * a connection in which the common indices and antisymmetric phase is computed
  */
-class AntisymConnection : public Connection {
+class AntisymConnection : public DeterminantConnection {
     defs::det_work m_com{};
     size_t m_ncom;
     bool m_phase;
@@ -106,4 +106,4 @@ struct MatrixElement {
     MatrixElement(const views::Determinant& det): aconn(AntisymConnection(det)) {}
 };
 
-#endif //M7_CONNECTION_H
+#endif //M7_DETERMINANTCONNECTION_H

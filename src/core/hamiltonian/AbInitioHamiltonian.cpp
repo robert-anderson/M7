@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
-#include "src/core/basis/Connection.h"
+#include "src/core/basis/DeterminantConnection.h"
 #include "src/core/io/Logging.h"
 #include "AbInitioHamiltonian.h"
 

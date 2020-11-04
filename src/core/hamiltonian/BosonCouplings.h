@@ -7,7 +7,7 @@
 
 #if 0
 
-#include <src/core/basis/BosonicConnection.h>
+#include <src/core/basis/BosonOnvConnection.h>
 #include "Hamiltonian.h"
 
 
@@ -73,14 +73,14 @@ public:
     const size_t& nmode() const {
         return m_nmode;
     }
-    defs::ham_t get_element_0(const BosonicConnection &permconn) const {
+    defs::ham_t get_element_0(const BosonOnvConnection &permconn) const {
         defs::ham_t res = 0;
         for (size_t imode=0ul; imode<m_nmode; ++imode)
             res+= omega(imode)*permconn.com(imode);
         return res;
     }
 
-    defs::ham_t get_element_1(const AntisymConnection &detconn, const BosonicConnection &permconn) const {
+    defs::ham_t get_element_1(const AntisymConnection &detconn, const BosonOnvConnection &permconn) const {
         const auto n = permconn.changed_modes(0);
         // bosons don't couple to higher fermion excitations (yet?)
         switch (detconn.nexcit()) {
@@ -103,7 +103,7 @@ public:
     }
 
     defs::ham_t get_element(const AntisymConnection &detconn,
-                            const BosonicConnection &permconn) const {
+                            const BosonOnvConnection &permconn) const {
 
         switch (permconn.nchanged_mode()) {
             case 0:

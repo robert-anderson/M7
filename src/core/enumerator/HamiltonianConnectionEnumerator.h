@@ -6,7 +6,7 @@
 #define M7_HAMILTONIANCONNECTIONENUMERATOR_H
 
 
-#include "src/core/basis/Connection.h"
+#include "src/core/basis/DeterminantConnection.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "Enumerator.h"
 #include "CombinationEnumerator.h"

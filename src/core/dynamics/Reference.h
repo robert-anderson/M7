@@ -8,7 +8,7 @@
 #if 0
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/basis/Determinant.h"
-#include "src/core/basis/Connection.h"
+#include "src/core/basis/DeterminantConnection.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "WalkerList.h"

@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/basis/Connection.h"
+#include "src/core/basis/DeterminantConnection.h"
 #include "src/core/io/SparseArrayFileReader.h"
 #include "src/core/field/Elements.h"
 
@@ -20,7 +20,7 @@ TEST(Connection, ParticleNumberConserving){
     ASSERT_EQ(ket.nsetbit(), 9);
     ASSERT_EQ(bra.nsetbit(), 9);
 
-    Connection conn(ket, bra);
+    DeterminantConnection conn(ket, bra);
 
     ASSERT_EQ(conn.nann(), 3);
     ASSERT_EQ(conn.ncre(), 3);
