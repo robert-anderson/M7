@@ -11,5 +11,6 @@ TableFlag::TableFlag(TableX *table, size_t nelement) :
         m_offset(table->add_flag(this)){}
 
 BitsetSpecifier::View::BitView TableFlag::operator()(const size_t &irow, const size_t &ielement) {
-    return (*m_table->m_flag_field)(irow)[ielement];
+    ASSERT(ielement<m_nelement);
+    return (*m_table->m_flag_field)(irow)[m_offset+ielement];
 }
