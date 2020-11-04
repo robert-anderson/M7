@@ -33,6 +33,8 @@ struct DeterminantSpecifier : BitsetSpecifier {
 
         void set(const defs::inds &ispinorbs);
 
+        void set(const defs::inds &alpha, const defs::inds &beta);
+
         void set(const std::string& s);
 
         void clr(const size_t &ispin, const size_t &iorb){

@@ -73,6 +73,7 @@ struct NdFieldBase : Field<spec_t> {
 template<size_t nind>
 struct NdFieldGroup {
     NdFormat<nind> m_format;
+
     template<typename ...Args>
     NdFieldGroup(Args... shape): m_format(shape...) {}
 };
@@ -84,6 +85,7 @@ struct NdField : NdFieldGroup<nind> {
     using NdFieldGroup<nind>::m_format;
     typedef typename spec_t::view_t view_t;
     typedef typename spec_t::const_view_t const_view_t;
+
     template<typename ...Args>
     NdField(TableX *table, spec_t spec, std::string description, Args... shape):
             NdFieldGroup<nind>(shape...), m_field(table, spec, description, m_format) {}
@@ -92,6 +94,12 @@ struct NdField : NdFieldGroup<nind> {
     typename spec_t::view_t operator()(const size_t &irow, Args... inds) {
         return m_field(irow, inds...);
     }
+
+    struct hash_fn {
+        defs::hash_t operator()(const view_t &view) const {
+            return spec_t::hash(view);
+        }
+    };
 };
 
 

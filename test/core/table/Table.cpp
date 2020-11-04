@@ -1,120 +1,86 @@
 //
-// Created by Robert John Anderson on 2020-03-29.
+// Created by rja on 02/10/2020.
 //
 
-#if 0
-#include "src/core/basis/DeterminantField.h"
-#include "src/core/basis/PermanentField.h"
+#include "src/core/table/BufferedTable.h"
+#include "src/core/field/Fields.h"
 #include "gtest/gtest.h"
-#include "src/core/table/Table.h"
-#include "src/core/table/NumericField.h"
 
-struct TestTable1 : public Table {
-    NumericField<size_t> test_longs;
-    NumericField<float> test_floats;
-    NumericField<char> test_chars;
-    NumericField<unsigned short> test_shorts;
-    //NumericField<std::complex<double>> test_complexes;
 
-    TestTable1(size_t nsegment, size_t nint, size_t nfloat, size_t nchar, size_t nshort, size_t ncomplex) :
-        Table("test table", nsegment),
-        test_longs(this, nint),
-        test_floats(this, nfloat),
-        test_chars(this, nchar),
-        test_shorts(this, nshort){}//,
-        //test_complexes(this, ncomplex) {}
+struct CommonFieldTypeTable : public TableX {
+    fields::Numbers<short, 1> m_shorts;
+    fields::Numbers<short, 1> m_more_shorts;
+
+    CommonFieldTypeTable(size_t n1, size_t n2) :
+            m_shorts(this, "some shorts", n1),
+            m_more_shorts(this, "some more shorts", n2) {}
 };
 
-TEST(Table, DataIntegrity) {
-    const size_t nsegment = 8;
-    const size_t nrow = 6;
-    const size_t nelement = 9;
-
-    TestTable1 table(nsegment, nelement, nelement, nelement, nelement, nelement);
-    table.expand(nrow);
-    size_t i = 0;
-    for (size_t isegment = 0ul; isegment < nsegment; ++isegment) {
-        for (size_t irow = 0ul; irow < nrow; ++irow) {
-            for (size_t ielement = 0ul; ielement < nelement; ++ielement) {
-                ASSERT_EQ(table.test_longs(irow, isegment, ielement), 0ul);
-                ASSERT_EQ(table.test_floats(irow, isegment, ielement), 0);
-                ASSERT_EQ(table.test_chars(irow, isegment, ielement), 0);
-                ASSERT_EQ(table.test_shorts(irow, isegment, ielement), 0);
-                //ASSERT_EQ(table.test_complexes(irow, isegment, ielement), 0);
-                table.test_longs(irow, isegment, ielement) = i;
-                table.test_floats(irow, isegment, ielement) = i;
-                table.test_chars(irow, isegment, ielement) = i; // will overflow
-                table.test_shorts(irow, isegment, ielement) = i;
-                //table.test_complexes(irow, isegment, ielement) = i;
-                ++i;
-            }
-        }
-    }
-
-    i = 0;
-    for (size_t isegment = 0ul; isegment < nsegment; ++isegment) {
-        for (size_t irow = 0ul; irow < nrow; ++irow) {
-            for (size_t ielement = 0ul; ielement < nelement; ++ielement) {
-                ASSERT_EQ(table.test_longs(irow, isegment, ielement), i);
-                ASSERT_EQ(table.test_floats(irow, isegment, ielement), i);
-                ASSERT_EQ(table.test_chars(irow, isegment, ielement), i); // will overflow
-                ASSERT_EQ(table.test_shorts(irow, isegment, ielement), i);
-                //ASSERT_EQ(table.test_complexes(irow, isegment, ielement), i);
-                ++i;
-            }
-        }
-    }
+TEST(Table, CommonFieldOffset) {
+    CommonFieldTypeTable t1(3, 4);
+    ASSERT_EQ(t1.m_shorts.m_field.m_offset, 0);
+    ASSERT_EQ(t1.m_shorts.m_field.m_size, 3 * sizeof(short));
+    /*
+     * check that the next field follows on gaplessly...
+     */
+    ASSERT_EQ(t1.m_more_shorts.m_field.m_offset, 3 * sizeof(short));
+    ASSERT_EQ(t1.m_more_shorts.m_field.m_size, 4 * sizeof(short));
+    /*
+     * but not in this case, where the first field takes up a whole
+     * number of datawords...
+     */
+    CommonFieldTypeTable t2(8, 5);
+    ASSERT_EQ(t2.m_shorts.m_field.m_offset, 0);
+    ASSERT_EQ(t2.m_shorts.m_field.m_size, 8 * sizeof(short));
+    ASSERT_EQ(t2.m_more_shorts.m_field.m_offset, 2 * sizeof(defs::data_t));
+    ASSERT_EQ(t2.m_more_shorts.m_field.m_size, 5 * sizeof(short));
 }
 
-struct TestTable2 : public Table {
-    DeterminantField test_dets;
-
-    TestTable2(size_t nsegment, size_t nspatorb, size_t ndet) :
-        Table("test table", nsegment),
-        test_dets(this, ndet, nspatorb) {}
+struct DifferentFieldTypeTable : public TableX {
+    fields::Numbers<short, 1> m_shorts;
+    fields::Numbers<float, 1> m_floats;
+    DifferentFieldTypeTable(size_t n1, size_t n2):
+            m_shorts(this, "some shorts", n1),
+            m_floats(this, "some floats", n2)
+    {}
 };
 
-TEST(Table, DataIntegrityDeterminants) {
-    const size_t nsegment = 8;
-    const size_t nrow = 6;
-    const size_t nelement = 9;
-    const size_t nspatorb = 12;
-
-    TestTable2 table(nsegment, nspatorb, nelement);
-    table.expand(nrow);
-
-    std::vector<DeterminantElement> v;
-    table.test_dets(0, 0, 0).set(defs::inds{1, 4, 6, 23});
-    v.push_back(table.test_dets(0, 0, 0));
-    std::cout << v[0].to_string() <<std::endl;
+TEST(Table, DifferentFieldOffset){
+    DifferentFieldTypeTable t1(3, 4);
+    ASSERT_EQ(t1.m_shorts.m_field.m_offset, 0);
+    ASSERT_EQ(t1.m_shorts.m_field.m_size, 3*sizeof(short));
+    /*
+     * check that the differently-typed second field is offset to the
+     * next whole dataword
+     */
+    ASSERT_EQ(t1.m_floats.m_field.m_offset, sizeof(defs::data_t));
+    ASSERT_EQ(t1.m_floats.m_field.m_size, 4*sizeof(float));
 }
 
-
-struct TestTable3 : public Table {
-    DeterminantField test_dets;
-    PermanentField test_perms;
-
-    TestTable3(size_t nsegment, size_t nspatorb, size_t ndet, size_t nperm, size_t nmode, size_t nboson_cutoff) :
-            Table("test table", nsegment),
-            test_dets(this, ndet, nspatorb),
-            test_perms(this, nperm, nmode, nboson_cutoff){}
+struct TestFlagSet : FlagSet {
+    Flag flag1;
+    Flag flag2;
+    Flags<1> flags1;
+    Flags<1> flags2;
+    TestFlagSet(fields::Bitset* bitset):
+    FlagSet(bitset),
+    flag1(this, "first flag"),
+    flag2(this, "second flag"),
+    flags1(this, "first rank-1 flag set", 6),
+    flags2(this, "second rank-1 flag set", 6){}
 };
 
-TEST(Table, DataIntegrityPermanents) {
-    const size_t nsegment = 8;
-    const size_t nrow = 6;
-    const size_t nelement = 9;
-    const size_t nspatorb = 12;
-    const size_t nmode = 6;
-    const size_t nboson_cutoff = 12;
+struct FlagsTestTable : public TableX {
+    fields::Flags<TestFlagSet> m_flags;
+    FlagsTestTable(): m_flags(this, "Flagset"){}
+};
 
-    TestTable3 table(nsegment, nspatorb, nelement, nelement, nmode, nboson_cutoff);
-    table.expand(nrow);
-
-    auto perm_element = table.test_perms(0, 0, 0);
-    perm_element(0) = 123;
-    perm_element(2) = 44;
-    std::cout << utils::to_string(perm_element.to_vector()) << std::endl;
+TEST(Table, Flag){
+    BufferedTable<FlagsTestTable> bt;
+    bt.expand(1);
+    bt.push_back();
+    bt.print_field_details();
+    bt.m_flags.flags1(0, 1) = 1;
+    std::cout << bt.m_flags(0).to_string() << std::endl;
 }
 
-#endif

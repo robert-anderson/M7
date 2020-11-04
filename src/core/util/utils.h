@@ -397,4 +397,30 @@ namespace complex_utils {
     }
 }
 
+namespace ci_utils {
+    static size_t nalpha(size_t nelec, int spin){
+        size_t spin_odd = std::abs(spin) % 2;
+        ASSERT(nelec % 2 == spin_odd)
+        size_t nalpha = nelec / 2 + (std::abs(spin))/2 + spin_odd;
+        return spin >= 0 ? nalpha : nelec - nalpha;
+    }
+
+    static size_t nbeta(size_t nelec, int spin){
+        return nelec - nalpha(nelec, spin);
+    }
+
+    static size_t fermion_dim(size_t nsite, size_t nelec){
+        return integer_utils::combinatorial(2*nsite, nelec);
+    }
+
+    static size_t fermion_dim(size_t nsite, size_t nelec, int spin){
+        ASSERT(static_cast<size_t>(spin) % 2 == nelec % 2)
+        return std::pow(integer_utils::combinatorial(nsite, nalpha(nelec, spin)),2);
+    }
+
+    static size_t boson_dim(size_t boson_nmode, size_t boson_cutoff){
+        return std::pow(boson_cutoff+1, boson_nmode);
+    }
+}
+
 #endif //M7_UTILS_H

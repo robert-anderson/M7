@@ -43,6 +43,11 @@ void DeterminantSpecifier::View::set(const defs::inds &ispinorbs) {
     for (const auto &ispinorb: ispinorbs) set(ispinorb);
 }
 
+void DeterminantSpecifier::View::set(const defs::inds &alpha, const defs::inds &beta) {
+    for (const auto &ispinorb: alpha) set(ispinorb);
+    for (const auto &ispinorb: beta) set(ispinorb+nsite());
+}
+
 void DeterminantSpecifier::View::set(const std::string &s) {
     zero();
     size_t i=0ul;

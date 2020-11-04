@@ -44,7 +44,7 @@ struct MappedTable : TableX {
 
 
     defs::hash_t hash (typename field_t::view_t key){
-        return hash_fn()(m_key_field, key);
+        return hash_fn()(key);
     }
 
     typename field_t::view_t get_key(const size_t& irow){
@@ -81,6 +81,20 @@ struct MappedTable : TableX {
         bucket.insert_after(bucket.before_begin(), irow);
         m_key_field(irow) = key;
         return irow;
+    }
+
+    void print_map() const {
+        size_t nkey = 0ul;
+        for (size_t ibucket=0ul; ibucket<nbucket(); ++ibucket){
+            auto bucket = m_buckets[ibucket];
+            if (bucket.empty()) continue;
+            std::cout << "Bucket " << std::to_string(ibucket) << std::endl;
+            for (auto irow: bucket){
+                std::cout << "\t" << m_key_field(irow).to_string() << " => " << irow << std::endl;
+                nkey++;
+            }
+        }
+        std::cout << "Number of keys: " << nkey << std::endl;
     }
 
 };

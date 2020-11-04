@@ -18,12 +18,8 @@ struct NumericSpecifier : FieldSpecifier {
     typedef T& view_t;
     typedef const T& const_view_t;
 
-    const_raw_view_t convert_to_raw(const T& v) const {
-        return {(const char*)&v, element_size()};
-    }
-
-    raw_view_t convert_to_raw(const T& v) {
-        return {(char*)&v, element_size()};
+    static defs::hash_t hash(const View& view) {
+        return hashing::fnv_hash((char*)&view, sizeof(T));
     }
 
     view_t operator()(char *ptr) const {

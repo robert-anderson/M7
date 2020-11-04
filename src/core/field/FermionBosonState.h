@@ -38,11 +38,12 @@ namespace fb_state {
         NdFieldBase<BosonOnvSpecifier, nind> m_perm;
 
         using NdFieldGroup<nind>::m_format;
+
         template<typename ...Args>
         Field(TableX *table, size_t nsite, size_t nmode, std::string description, Args... shape) :
-        NdFieldGroup<nind>(shape...),
-        m_det(table, {nsite}, description + " (Determinant)", m_format),
-        m_perm(table, {nmode}, description + " (Boson ONV)", m_format){}
+                NdFieldGroup<nind>(shape...),
+                m_det(table, {nsite}, description + " (Determinant)", m_format),
+                m_perm(table, {nmode}, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
         typedef const View const_view_t;
@@ -56,11 +57,15 @@ namespace fb_state {
         const_view_t operator()(const size_t &irow, Args... inds) const {
             return {m_det(irow, inds...), m_perm(irow, inds...)};
         }
+
+        struct hash_fn {
+            defs::hash_t operator()(const view_t &view) const {
+                return DeterminantSpecifier::hash(view.m_det) ^ BosonOnvSpecifier::hash(view.m_perm);
+            }
+        };
     };
 
 }
-
-
 
 
 #endif //M7_FERMIONBOSONSTATE_H

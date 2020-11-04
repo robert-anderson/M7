@@ -83,35 +83,25 @@ struct FieldSpecifier {
         }
     };
 
-    typedef std::pair<char*, size_t> raw_view_t;
-    typedef std::pair<const char*, const size_t> const_raw_view_t;
-
-    const_raw_view_t convert_to_raw(const View& v) const {
-        return {v.m_ptr, element_size()};
-    }
-
-    raw_view_t convert_to_raw(const View& v) {
-        return {v.m_ptr, element_size()};
+    static defs::hash_t hash(const View& view) {
+        return hashing::fnv_hash(view.m_ptr, view.element_size());
     }
 
     bool comparable_with(const FieldSpecifier& other) const {
         return (type_info()==other.type_info()) && (element_size()==other.element_size());
     }
 
-    defs::hash_t hash() const {
-        return 0;
-    }
 
-    template<typename ...Args>
-    defs::hash_t hash(const_raw_view_t first, Args... rest) const {
-        return hashing::fnv_hash(first.first, first.second)^hash(rest...);
-    }
-
-    template<typename ...Args>
-    defs::hash_t hash(const View& first, Args... rest) const {
-        ASSERT(comparable_with(first.m_spec));
-        return hash(convert_to_raw(first), rest...);
-    }
+//    template<typename ...Args>
+//    defs::hash_t hash(const_raw_view_t first, Args... rest) const {
+//        return hashing::fnv_hash(first.first, first.second)^hash(rest...);
+//    }
+//
+//    template<typename ...Args>
+//    defs::hash_t hash(const View& first, Args... rest) const {
+//        ASSERT(comparable_with(first.m_spec));
+//        return hash(convert_to_raw(first), rest...);
+//    }
 
     FieldSpecifier(size_t element_size, const std::type_info &type_info);
 
