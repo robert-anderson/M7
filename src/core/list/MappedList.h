@@ -5,6 +5,7 @@
 #ifndef M7_MAPPEDLIST_H
 #define M7_MAPPEDLIST_H
 
+#if 0
 #include <src/core/hash/ConcurrentHashMap.h>
 #include <src/core/table/NumericField.h>
 #include "src/core/list/List.h"
@@ -107,4 +108,5 @@ public:
 
 };
 
+#endif //M7_MAPPEDLIST_H
 #endif //M7_MAPPEDLIST_H

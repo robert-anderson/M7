@@ -2,6 +2,8 @@
 // Created by rja on 27/02/2020.
 //
 
+#if 0
+
 #include <src/core/enumerator/ContainerCombinationEnumerator.h>
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
@@ -68,3 +70,6 @@ void ExactPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdiag, Nu
     delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
     delta_nw += std::abs(*weight) - std::abs(tmp);
 }
+
+
+#endif

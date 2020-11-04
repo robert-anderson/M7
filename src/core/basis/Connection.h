@@ -5,8 +5,9 @@
 #ifndef M7_CONNECTION_H
 #define M7_CONNECTION_H
 
-#include <src/core/basis/Determinant.h>
+#include <src/core/field/DeterminantSpecifier.h>
 #include <algorithm>
+#include <src/core/field/Views.h>
 
 /*
  * <bra| ...cre... ...ann... |ket>
@@ -36,9 +37,9 @@ protected:
     size_t m_nann, m_ncre;
 
 public:
-    explicit Connection(const Field* field);
-    Connection(const DeterminantElement &ket, const DeterminantElement &bra);
-    explicit Connection(const DeterminantElement &ket);
+    explicit Connection(const DeterminantSpecifier& field);
+    Connection(const views::Determinant &ket, const views::Determinant &bra);
+    explicit Connection(const views::Determinant &ket);
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
@@ -48,8 +49,8 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     const size_t& ncre() const {return m_ncre;}
 
-    virtual void connect(const DeterminantElement &ket, const DeterminantElement &bra);
-    virtual void apply(const DeterminantElement &ket, DeterminantElement &bra);
+    virtual void connect(const views::Determinant &ket, const views::Determinant &bra);
+    virtual void apply(const views::Determinant &ket, views::Determinant &bra);
     void zero(){m_ncre=0; m_nann=0;}
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
@@ -83,13 +84,13 @@ class AntisymConnection : public Connection {
     bool m_phase;
 
 public:
-    explicit AntisymConnection(const Field* field);
-    AntisymConnection(const DeterminantElement &ket, const DeterminantElement &bra);
-    explicit AntisymConnection(const DeterminantElement &ket);
+    explicit AntisymConnection(const DeterminantSpecifier& field);
+    AntisymConnection(const views::Determinant &ket, const views::Determinant &bra);
+    explicit AntisymConnection(const views::Determinant &ket);
 
-    void connect(const DeterminantElement &ket, const DeterminantElement &bra) override;
-    void apply(const DeterminantElement &ket);
-    void apply(const DeterminantElement &ket, DeterminantElement &bra) override;
+    void connect(const views::Determinant &ket, const views::Determinant &bra) override;
+    void apply(const views::Determinant &ket);
+    void apply(const views::Determinant &ket, views::Determinant &bra) override;
 
     const defs::det_work& com() const {return m_com;}
     //void com(const defs::inds &v) {m_com.assign(v.begin(), v.end()); m_ncom=v.size();}
@@ -102,7 +103,7 @@ template<typename T>
 struct MatrixElement {
     AntisymConnection aconn;
     T element = 0;
-    MatrixElement(const DeterminantElement& det): aconn(AntisymConnection(det)) {}
+    MatrixElement(const views::Determinant& det): aconn(AntisymConnection(det)) {}
 };
 
 #endif //M7_CONNECTION_H

@@ -5,6 +5,8 @@
 #ifndef M7_STOCHASTICPROPAGATOR_H
 #define M7_STOCHASTICPROPAGATOR_H
 
+#if 0
+
 #include <src/core/sample/PRNG.h>
 #include <src/core/sample/UniformSampler.h>
 #include <src/core/pchb/HeatBathSamplers.h>
@@ -61,4 +63,5 @@ public:
                   defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) override;
 };
 
+#endif //M7_STOCHASTICPROPAGATOR_H
 #endif //M7_STOCHASTICPROPAGATOR_H

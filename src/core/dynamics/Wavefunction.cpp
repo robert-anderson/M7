@@ -6,7 +6,7 @@
 #include "Wavefunction.h"
 #include "FciqmcCalculation.h"
 
-
+#if 0
 Wavefunction::Wavefunction(FciqmcCalculation *fciqmc) :
         m_fciqmc(fciqmc), m_input(fciqmc->m_input),
         m_prop(fciqmc->m_prop),
@@ -448,3 +448,5 @@ void Wavefunction::write_iter_stats(FciqmcStatsFile *stats_file) {
 ParallelizationStatsFile *Wavefunction::parallel_stats_file() {
     return m_fciqmc->m_parallel_stats_file.get();
 }
+
+#endif

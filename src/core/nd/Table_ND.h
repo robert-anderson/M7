@@ -120,14 +120,14 @@ struct NumericField : NdField<nind> {
 };
 
 template<typename T, size_t nind, size_t nind_view>
-struct NumericArrayField : NdArrayField<nind, nind_view> {
-    NumericArrayField(Table *table, std::array<size_t, nind> shape, std::array<size_t, nind_view> view_shape, std::string description) :
+struct NumericArraySpecifier : NdArrayField<nind, nind_view> {
+    NumericArraySpecifier(Table *table, std::array<size_t, nind> shape, std::array<size_t, nind_view> view_shape, std::string description) :
             NdArrayField<nind, nind_view>(table, shape, view_shape, sizeof(T), description) {}
 
     struct NdView {
-        const NumericArrayField& m_field;
+        const NumericArraySpecifier& m_field;
         char* m_ptr;
-        NdView(const NumericArrayField& field, const size_t &irow, const size_t &iflat):
+        NdView(const NumericArraySpecifier& field, const size_t &irow, const size_t &iflat):
                 m_field(field), m_ptr(field.raw_ptr(irow, iflat)){}
 
         template<typename ...Args>

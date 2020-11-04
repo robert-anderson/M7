@@ -5,6 +5,7 @@
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
+#if 0
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {
@@ -20,4 +21,5 @@ public:
                   defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) override;
 };
 
+#endif //M7_EXACTPROPAGATOR_H
 #endif //M7_EXACTPROPAGATOR_H

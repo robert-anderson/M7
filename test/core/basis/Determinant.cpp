@@ -4,18 +4,20 @@
 
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
-#include "src/core/basis/Determinant.h"
+#include "src/core/field/Elements.h"
 #include "src/core/basis/Connection.h"
 
 TEST(Determinant, Phase) {
 
-    SparseArrayFileReader<float> file_iterator(defs::assets_root + "/parity_test/parity_8.txt", 16ul);
+    SparseArrayFileReader<float> file_iterator(
+            defs::assets_root + "/parity_test/parity_8.txt", 16ul, true, false);
 
     defs::inds inds(16);
     float value;
 
-    Determinant bra(4);
-    Determinant ket(4);
+    const size_t nsite = 4;
+    elements::Determinant bra(nsite);
+    elements::Determinant ket(nsite);
     AntisymConnection conn(bra);
 
     while (file_iterator.next(inds, value)) {
@@ -36,7 +38,7 @@ TEST(Determinant, Phase) {
 }
 
 TEST(Determinant, Spin) {
-    Determinant det(4);
+    elements::Determinant det(4);
     ASSERT_EQ(det.spin(), 0);
     det.set(defs::inds{0,1,2,3});
     ASSERT_EQ(det.spin(), 4);

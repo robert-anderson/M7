@@ -5,6 +5,8 @@
 #ifndef M7_STATSFILE_H
 #define M7_STATSFILE_H
 
+#if 0
+
 #include <fstream>
 #include <string>
 #include <memory>
@@ -165,4 +167,5 @@ public:
 
 };
 
+#endif //M7_STATSFILE_H
 #endif //M7_STATSFILE_H

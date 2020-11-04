@@ -3,28 +3,28 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/data/BufferedTable.h"
-#include "src/core/data/Table.h"
-#include "src/core/data/Fields.h"
-#include "src/core/data/Elements.h"
+#include "src/core/table/BufferedTable.h"
+#include "src/core/table/Table.h"
+#include "src/core/field/Fields.h"
+#include "src/core/field/Elements.h"
+#if 0
 #include "src/core/data/BufferedField.h"
 
 
-#if 0
 
 //template<size_t nind>
-//struct ConfigurationField : NdFieldBaseX {
+//struct ConfigurationField : Field {
 //    NdFieldX<DeterminantField, 1> det;
-//    NdFieldX<BosonOnvField, 1> perm;
-//    ConfigurationField(DeterminantField&& det_field, BosonOnvField&& boson_field)
+//    NdFieldX<BosonOnvSpecifier, 1> perm;
+//    ConfigurationField(DeterminantField&& det_field, BosonOnvSpecifier&& boson_field)
 //};
 
 struct FlagBase;
 
-struct FlagField : BitsetFieldX {
+struct FlagField : BitsetSpecifier {
     TableX* m_table;
     std::vector<FlagBase*> m_flags;
-    FlagField(TableX* table):BitsetFieldX(0), m_table(table){}
+    FlagField(TableX* table):BitsetSpecifier(0), m_table(table){}
     size_t add_flag(FlagBase* flag);
 };
 
@@ -33,10 +33,10 @@ struct FlagBase {
     const size_t m_nbit;
     FlagBase(FlagField* field, size_t nbit):
     m_field(field), m_nbit(nbit){}
-    BitsetFieldX::View::BitView operator()(const size_t& irow, const size_t& ibit){
+    BitsetSpecifier::View::BitView operator()(const size_t& irow, const size_t& ibit){
         ASSERT(ibit<m_nbit);
-        return BitsetFieldX::View::BitView(
-                BitsetFieldX::View(*m_field, m_field->m_table->begin(irow)), ibit);
+        return BitsetSpecifier::View::BitView(
+                BitsetSpecifier::View(*m_field, m_field->m_table->begin(irow)), ibit);
     }
 };
 
@@ -60,7 +60,7 @@ struct MyFlags : FlagField {
 
 using namespace fields;
 struct TestTable : TableX {
-    //DeterminantFieldX<0> field;
+    //DeterminantSpecifier<0> field;
     Numbers<int, 1> ints;
     Determinant dets;
     NumberArray<double, 2> matrices;
@@ -87,7 +87,6 @@ TEST(Table_ND, Packing) {
 //    std::cout << bt.bits(0, 0).to_string() << std::endl;
 //}
 
-#endif
 
 
 struct TestTable : TableX {
@@ -97,11 +96,13 @@ struct TestTable : TableX {
 
 TEST(Table_ND, Test) {
 
-    //BufferedField<DeterminantFieldX, 0> work_det({6}, {});
+    //BufferedField<DeterminantSpecifier, 0> work_det({6}, {});
     elements::Configuration work_config_buffer(6ul, 5ul);
     auto work_config = work_config_buffer();
     std::cout << work_config.to_string() << std::endl;
+    }
 
+#endif
 //    BufferedTable<TestTable> bt;
 //    bt.print_field_details();
 //    bt.expand(10);
@@ -117,9 +118,9 @@ TEST(Table_ND, Test) {
 //    bt.expand(10);
     //std::cout << bt.ints(0, 0) << std::endl;
 //    f(bt);
-    //BitsetFieldX<0> field(&t, {}, 10, "asdasdsadas");
-    //DeterminantFieldX<0> dets(&t, {}, 5, "asdasdsadas");
-    //BosonOnvField<0> perms(&t, {}, 8, "zddsaas");
+    //BitsetSpecifier<0> field(&t, {}, 10, "asdasdsadas");
+    //DeterminantSpecifier<0> dets(&t, {}, 5, "asdasdsadas");
+    //BosonOnvSpecifier<0> perms(&t, {}, 8, "zddsaas");
 //    perms(0)[1] = 12;
 //    perms(0)[4] = 11;
 //
@@ -136,7 +137,7 @@ TEST(Table_ND, Test) {
 //    Table t;
 //    std::vector<double> vec(50, 9.99);
 //    t.m_data = (char*)vec.data();
-//    NumericArrayField<double, 1, 2> matrices(&t, {6}, {2, 3}, "some matrices");
+//    NumericArraySpecifier<double, 1, 2> matrices(&t, {6}, {2, 3}, "some matrices");
 //    matrices(0, 0)(0, 0) = 0;
 //    matrices(0, 0)(0, 1) = 1;
 //    matrices(0, 0)(0, 2) = 2;
@@ -147,4 +148,4 @@ TEST(Table_ND, Test) {
 //    matrices.raw_view(0, 0).second;
 
     //for (auto item: vec) std::cout << item << std::endl;
-}
+

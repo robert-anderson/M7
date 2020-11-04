@@ -4,7 +4,7 @@
 
 #include "ParallelizationStatsFile.h"
 
-
+#if 0
 ParallelizationStatsFile::ParallelizationStatsFile(const Options &input) :
     StatsFile(input.parallel_stats_path + '.' + std::to_string(mpi::irank())),
     m_cycle_number(this, 1, "Cycle number"),
@@ -19,3 +19,5 @@ ParallelizationStatsFile::ParallelizationStatsFile(const Options &input) :
     m_irank_largest_nrow_sent(this, 1, "MPI_COMM_WORLD index of the rank to which the largest number of rows was sent"),
     m_nrow_recv(this, 1, "Total number of rows received"),
     m_recv_list_filled_fraction(this, 1, "Total number of rows received as a fraction of current capacity") {}
+
+#endif

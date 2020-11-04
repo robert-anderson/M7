@@ -8,6 +8,7 @@
 #include "gtest/gtest.h"
 #include "src/core/dynamics/FciqmcCalculation.h"
 
+#if 0
 TEST(FciqmcCalculation, ExactPropagation){
     Options options;
     options.fcidump_path = defs::assets_root+"/RHF_N2_6o6e/FCIDUMP";
@@ -152,3 +153,5 @@ TEST(FciqmcCalculation, StochasticPropagation4cLarge){
     fciqmc_calculation.execute();
 
 }
+
+#endif

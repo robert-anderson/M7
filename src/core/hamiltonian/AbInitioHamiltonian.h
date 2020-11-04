@@ -5,7 +5,7 @@
 #ifndef M7_ABINITIOHAMILTONIAN_H
 #define M7_ABINITIOHAMILTONIAN_H
 
-
+#if 0
 #include <cstddef>
 #include <string>
 #include <src/core/io/ProgressBar.h>
@@ -62,4 +62,5 @@ public:
 };
 
 
+#endif //M7_ABINITIOHAMILTONIAN_H
 #endif //M7_ABINITIOHAMILTONIAN_H

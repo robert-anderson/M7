@@ -5,6 +5,7 @@
 #ifndef M7_BOSONCOUPLINGS_H
 #define M7_BOSONCOUPLINGS_H
 
+#if 0
 
 #include <src/core/basis/PermanentConnection.h>
 #include "Hamiltonian.h"
@@ -117,4 +118,5 @@ public:
 };
 
 
+#endif //M7_BOSONCOUPLINGS_H
 #endif //M7_BOSONCOUPLINGS_H

@@ -2,32 +2,32 @@
 // Created by rja on 21/10/2020.
 //
 
-#ifndef M7_NUMERICARRAYFIELD_H
-#define M7_NUMERICARRAYFIELD_H
+#ifndef M7_NUMERICARRAYSPECIFIER_H
+#define M7_NUMERICARRAYSPECIFIER_H
 
 #include <src/core/util/utils.h>
-#include "Field.h"
+#include "FieldSpecifier.h"
 #include "src/core/nd/NdFormat.h"
 
 template<typename T, size_t nind>
-struct NumericArrayField : FieldBaseX {
+struct NumericArraySpecifier : FieldSpecifier {
     NdFormat<nind> m_format;
     const size_t m_nelement;
     template<typename ...Args>
-    NumericArrayField(Args... shape) :
-    FieldBaseX(NdFormat<nind>(shape...).nelement()*sizeof(T), typeid(NumericArrayField<T, nind>)),
+    NumericArraySpecifier(Args... shape) :
+    FieldSpecifier(NdFormat<nind>(shape...).nelement() * sizeof(T), typeid(NumericArraySpecifier<T, nind>)),
     m_format(shape...), m_nelement(m_format.nelement()){
-        m_details["type"] = "Numeric Array";
-        m_details["encoded type"] = consts::type_name<T>();
-        m_details["element dimensionality"] = std::to_string(nind);
-        m_details["element shape"] = utils::to_string(m_format.shape());
+        m_data.m_details["type"] = "Numeric Array";
+        m_data.m_details["encoded type"] = consts::type_name<T>();
+        m_data.m_details["element dimensionality"] = std::to_string(nind);
+        m_data.m_details["element shape"] = utils::to_string(m_format.shape());
     }
 
-    struct View : FieldBaseX::View {
-        View(const NumericArrayField &field, char *ptr) : FieldBaseX::View(field, ptr) {}
+    struct View : FieldSpecifier::View {
+        View(const NumericArraySpecifier &spec, char *ptr) : FieldSpecifier::View(spec, ptr) {}
 
         const size_t& nelement() const {
-            return static_cast<const NumericArrayField&>(m_field).m_nelement;
+            return static_cast<const NumericArraySpecifier&>(m_field).m_nelement;
         }
 
         T& operator[](const size_t& ind) {
@@ -40,11 +40,11 @@ struct NumericArrayField : FieldBaseX {
         }
         template<typename ...Args>
         T& operator()(Args... inds){
-            return ((T*)m_ptr)[static_cast<const NumericArrayField&>(m_field).m_format.flatten(inds...)];
+            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_field).m_format.flatten(inds...)];
         }
         template<typename ...Args>
         const T& operator()(Args... inds) const {
-            return ((T*)m_ptr)[static_cast<const NumericArrayField&>(m_field).m_format.flatten(inds...)];
+            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_field).m_format.flatten(inds...)];
         }
 
         std::string to_string() const override {
@@ -68,4 +68,4 @@ struct NumericArrayField : FieldBaseX {
     }
 };
 
-#endif //M7_NUMERICARRAYFIELD_H
+#endif //M7_NUMERICARRAYSPECIFIER_H

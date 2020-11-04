@@ -5,6 +5,7 @@
 #ifndef M7_SPAWNLIST_H
 #define M7_SPAWNLIST_H
 
+#if 0
 #include <src/core/table/FlagField.h>
 #include <src/core/basis/DeterminantField.h>
 #include <src/core/table/NumericField.h>
@@ -48,4 +49,5 @@ public:
 };
 
 
+#endif //M7_SPAWNLIST_H
 #endif //M7_SPAWNLIST_H

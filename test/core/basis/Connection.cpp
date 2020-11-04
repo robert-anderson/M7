@@ -2,7 +2,9 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#include "src/core/basis/Determinant.h"
+#if 0
+
+//#include "src/core/basis/Determinant.h"
 #include "src/core/basis/Connection.h"
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
@@ -75,3 +77,5 @@ TEST(Connection, Phase) {
         ASSERT_TRUE(bra==work_det);
     }
 }
+
+#endif

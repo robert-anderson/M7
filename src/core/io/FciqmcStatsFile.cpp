@@ -4,6 +4,7 @@
 
 #include "FciqmcStatsFile.h"
 
+#if 0
 FciqmcStatsFile::FciqmcStatsFile(const Options &input) :
         StatsFile(input.stats_path),
         m_cycle_number(this, 1, "Cycle number"),
@@ -29,3 +30,5 @@ FciqmcStatsFile::FciqmcStatsFile(const Options &input) :
         throw std::runtime_error(
                 "FciqmcStatsFiles must only be instantiated on the root process");
 }
+
+#endif

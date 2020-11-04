@@ -5,6 +5,8 @@
 #ifndef M7_KRAMERSSECTOROCCUPATION_H
 #define M7_KRAMERSSECTOROCCUPATION_H
 
+#if 0
+
 #include <src/core/parallel/Reducible.h>
 #include "src/core/util/defs.h"
 #include "src/core/basis/DeterminantField.h"
@@ -25,4 +27,5 @@ public:
 };
 
 
+#endif //M7_KRAMERSSECTOROCCUPATION_H
 #endif //M7_KRAMERSSECTOROCCUPATION_H

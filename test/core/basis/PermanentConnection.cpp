@@ -2,6 +2,7 @@
 // Created by RJA on 24/09/2020.
 //
 
+#if 0
 #include "gtest/gtest.h"
 #include "src/core/basis/PermanentConnection.h"
 #include "src/core/basis/Permanent.h"
@@ -82,3 +83,5 @@ TEST(PermanentConnection, DoubleChange){
     }
 }
 }
+
+#endif

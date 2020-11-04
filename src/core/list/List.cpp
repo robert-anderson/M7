@@ -2,6 +2,8 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
+
+#if 0
 #include <src/core/io/Logging.h>
 #include "List.h"
 #include "omp.h"
@@ -111,3 +113,5 @@ std::string List::to_string(const defs::inds &nrows) const {
     ASSERT(0); // TODO: clean up the to_string hierarchy
     return Table::to_string(m_high_water_mark);
 }
+
+#endif

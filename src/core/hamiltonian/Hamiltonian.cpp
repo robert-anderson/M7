@@ -7,6 +7,7 @@
 #include "src/core/parallel/RankAllocator.h"
 #include "Hamiltonian.h"
 
+#if 0
 Hamiltonian::Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e,
                          bool spin_conserving_2e, bool complex_valued): m_nelec(nelec), m_nsite(nsite),
 m_spin_conserving_1e(spin_conserving_1e),
@@ -106,3 +107,5 @@ Hamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElemen
     }
 #endif
 }
+
+#endif

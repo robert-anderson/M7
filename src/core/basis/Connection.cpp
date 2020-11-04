@@ -5,32 +5,32 @@
 #include "Connection.h"
 #include <algorithm>
 
-Connection::Connection(const Field* field):
-    m_element_dsize(field->element_dsize()), m_nbit(field->nbit()) {}
+Connection::Connection(const DeterminantSpecifier& field):
+    m_element_dsize(field.m_ndataword), m_nbit(field.m_nbit) {}
 
-Connection::Connection(const DeterminantElement &ket, const DeterminantElement &bra) : Connection(ket.field()) {
-    ASSERT(ket.compatible_with(bra));
+Connection::Connection(const views::Determinant &ket, const views::Determinant &bra) : Connection(ket.field()) {
+    ASSERT(ket.nsite() == bra.nsite());
     connect(ket, bra);
 }
 
-Connection::Connection(const DeterminantElement &ket) : Connection(ket, ket){}
+Connection::Connection(const views::Determinant &ket) : Connection(ket, ket){}
 
 
-void Connection::connect(const DeterminantElement &ket, const DeterminantElement &bra) {
+void Connection::connect(const views::Determinant &ket, const views::Determinant &bra) {
     ASSERT(!ket.is_zero());
     ASSERT(!bra.is_zero());
     ASSERT(ket.nbit() == m_nbit);
-    ASSERT(ket.dsize() == m_element_dsize);
-    ASSERT(ket.compatible_with(bra));
+    ASSERT(ket.ndataword() == m_element_dsize);
+    ASSERT(ket.ndataword() == bra.ndataword());
     m_nann = 0ul;
     m_ncre = 0ul;
 
-    DeterminantElement::DatawordEnumerator ket_enumerator(ket);
-    DeterminantElement::DatawordEnumerator bra_enumerator(bra);
+
     defs::data_t ket_work, bra_work, work;
-    size_t idataword = ~0ul;
-    while(ket_enumerator.next(ket_work, idataword) && bra_enumerator.next(bra_work)){
-        work = ket_work &~ bra_work;
+    for (size_t idataword = 0ul; idataword<ket.ndataword(); ++idataword){
+        ket_work = ket.get_dataword(idataword);
+        bra_work = ket.get_dataword(idataword);
+        work = ket_work&~bra_work;
         while (work) m_ann[m_nann++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
         work = bra_work &~ ket_work;
         while (work) m_cre[m_ncre++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
@@ -39,7 +39,7 @@ void Connection::connect(const DeterminantElement &ket, const DeterminantElement
     ASSERT(m_nann < m_ann.size());
 }
 
-void Connection::apply(const DeterminantElement &ket, DeterminantElement &bra){
+void Connection::apply(const views::Determinant &ket, views::Determinant &bra){
     ASSERT(!ket.is_zero());
     ASSERT(m_ncre < m_cre.size());
     ASSERT(m_nann < m_ann.size());
@@ -59,31 +59,29 @@ const size_t &Connection::nexcit() const {
 }
 
 
-AntisymConnection::AntisymConnection(const Field *field): Connection(field) {}
+AntisymConnection::AntisymConnection(const DeterminantSpecifier &field): Connection(field) {}
 
-AntisymConnection::AntisymConnection(const DeterminantElement &ket, const DeterminantElement &bra) :
+AntisymConnection::AntisymConnection(const views::Determinant &ket, const views::Determinant &bra) :
     Connection(ket, bra) {
     connect(ket, bra);
 }
 
-AntisymConnection::AntisymConnection(const DeterminantElement &ket) : AntisymConnection(ket.field()) {}
+AntisymConnection::AntisymConnection(const views::Determinant &ket) : AntisymConnection(ket.field()) {}
 
-void AntisymConnection::connect(const DeterminantElement &ket, const DeterminantElement &bra) {
+void AntisymConnection::connect(const views::Determinant &ket, const views::Determinant &bra) {
     Connection::connect(ket, bra);
     m_ncom = 0ul;
     size_t nperm = 0ul;
-
-    DeterminantElement::DatawordEnumerator ket_enumerator(ket);
-    DeterminantElement::DatawordEnumerator bra_enumerator(bra);
-    defs::data_t ket_work, bra_work, work;
-    size_t idataword = ~0ul;
 
     auto des_iter = m_ann.begin();
     const auto des_end = m_ann.begin() + m_nann;
     auto cre_iter = m_cre.begin();
     const auto cre_end = m_cre.begin() + m_ncre;
 
-    while (ket_enumerator.next(ket_work, idataword) && bra_enumerator.next(bra_work)) {
+    defs::data_t ket_work, bra_work, work;
+    for (size_t idataword = 0ul; idataword<ket.ndataword(); ++idataword){
+        ket_work = ket.get_dataword(idataword);
+        bra_work = ket.get_dataword(idataword);
         work = ket_work & bra_work;
         while (work) {
             auto &com = m_com[m_ncom];
@@ -106,7 +104,7 @@ void AntisymConnection::connect(const DeterminantElement &ket, const Determinant
     m_phase = nperm & 1ul;
 }
 
-void AntisymConnection::apply(const DeterminantElement &ket) {
+void AntisymConnection::apply(const views::Determinant &ket) {
     ASSERT(m_ncre < m_nbit);
     ASSERT(m_nann < m_nbit);
     ASSERT(std::is_sorted(m_cre.begin(), m_cre.begin() + m_ncre));
@@ -114,16 +112,14 @@ void AntisymConnection::apply(const DeterminantElement &ket) {
     m_ncom = 0ul;
     size_t nperm = 0ul;
 
-    DeterminantElement::DatawordEnumerator enumerator(ket);
-    defs::data_t work;
-    size_t idataword = ~0ul;
-
     auto des_iter = m_ann.begin();
     const auto des_end = m_ann.begin() + m_nann;
     auto cre_iter = m_cre.begin();
     const auto cre_end = m_cre.begin() + m_ncre;
 
-    while (enumerator.next(work, idataword)){
+    defs::data_t work;
+    for(size_t idataword=0ul; idataword<ket.ndataword(); ++idataword){
+        work = ket.get_dataword(idataword);
         while (work) {
             auto &com = m_com[m_ncom];
             auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
@@ -146,7 +142,7 @@ void AntisymConnection::apply(const DeterminantElement &ket) {
     m_phase = nperm & 1ul;
 }
 
-void AntisymConnection::apply(const DeterminantElement &ket, DeterminantElement &bra) {
+void AntisymConnection::apply(const views::Determinant &ket, views::Determinant &bra) {
     apply(ket);
     Connection::apply(ket, bra);
 }

@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include <src/core/list/PerforableMappedList.h>
 
+#if 0
 struct TestPerforableMappedList : public PerforableMappedList<NumericElement<size_t>> {
     NumericField<size_t> key, value;
 
@@ -75,3 +76,5 @@ TEST(PerforableMappedList, MultiRemovalAndReuse) {
     }
 }
  */
+
+#endif

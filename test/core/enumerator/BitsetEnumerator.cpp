@@ -2,6 +2,8 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
+#if 0
+
 #include "src/core/basis/Determinant.h"
 #include "src/core/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
@@ -109,3 +111,5 @@ TEST(BitsetEnumerator, DeterminantSet) {
     }
 
 }
+
+#endif

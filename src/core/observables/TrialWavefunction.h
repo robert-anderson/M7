@@ -56,7 +56,7 @@
 #ifndef M7_TRIALWAVEFUNCTION_H
 #define M7_TRIALWAVEFUNCTION_H
 
-
+#if 0
 #include "src/core/dynamics/WalkerList.h"
 #include "src/core/basis/DeterminantList.h"
 #include "src/core/basis/MappedDeterminantList.h"
@@ -85,4 +85,5 @@ public:
 };
 
 
+#endif //M7_TRIALWAVEFUNCTION_H
 #endif //M7_TRIALWAVEFUNCTION_H

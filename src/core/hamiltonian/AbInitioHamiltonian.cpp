@@ -6,6 +6,7 @@
 #include "src/core/io/Logging.h"
 #include "AbInitioHamiltonian.h"
 
+#if 0
 const AbInitioHamiltonian::ints1_t &AbInitioHamiltonian::int_1() const { return m_int_1; }
 
 const AbInitioHamiltonian::ints2_t &AbInitioHamiltonian::int_2() const { return m_int_2; }
@@ -39,3 +40,4 @@ defs::ham_t
 AbInitioHamiltonian::get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i,j,k,l);
 }
+#endif

@@ -11,6 +11,8 @@
 #include "Enumerator.h"
 #include "CombinationEnumerator.h"
 
+#if 0
+
 class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
     const Hamiltonian &m_h;
     const DeterminantElement &m_det;
@@ -158,4 +160,5 @@ while (occ_enumerator.next(occ_inds)) {
 }
 #endif
 
+#endif //M7_HAMILTONIANCONNECTIONENUMERATOR_H
 #endif //M7_HAMILTONIANCONNECTIONENUMERATOR_H

@@ -5,6 +5,7 @@
 #ifndef M7_UNIFORMSAMPLER_H
 #define M7_UNIFORMSAMPLER_H
 
+#if 0
 #include "ExcitationGenerator.h"
 
 class UniformSampler : public ExcitationGenerator {
@@ -22,4 +23,5 @@ public:
 };
 
 
+#endif //M7_UNIFORMSAMPLER_H
 #endif //M7_UNIFORMSAMPLER_H

@@ -5,6 +5,7 @@
 #ifndef M7_DENSEHAMILTONIAN_H
 #define M7_DENSEHAMILTONIAN_H
 
+#if 0
 #include <src/core/hamiltonian/BosonCouplings.h>
 #include "src/core/basis/DeterminantList.h"
 #include "src/core/util/defs.h"
@@ -18,4 +19,5 @@ public:
     DenseHamiltonian(const Hamiltonian &source, DeterminantList &detlist);
 };
 
+#endif //M7_DENSEHAMILTONIAN_H
 #endif //M7_DENSEHAMILTONIAN_H

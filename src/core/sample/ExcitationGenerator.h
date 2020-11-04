@@ -5,6 +5,7 @@
 #ifndef M7_EXCITATIONGENERATOR_H
 #define M7_EXCITATIONGENERATOR_H
 
+#if 0
 
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include "PRNG.h"
@@ -42,4 +43,5 @@ public:
 };
 
 
+#endif //M7_EXCITATIONGENERATOR_H
 #endif //M7_EXCITATIONGENERATOR_H

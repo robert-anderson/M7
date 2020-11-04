@@ -5,6 +5,9 @@
 #ifndef M7_WAVEFUNCTION_H
 #define M7_WAVEFUNCTION_H
 
+
+#if 0
+
 #include "src/core/io/ParallelizationStatsFile.h"
 #include "src/core/observables/KramersSectorOccupation.h"
 #include "src/core/basis/Determinant.h"
@@ -149,4 +152,5 @@ private:
 };
 
 
+#endif //M7_WAVEFUNCTION_H
 #endif //M7_WAVEFUNCTION_H

@@ -5,6 +5,7 @@
 #ifndef M7_FCIQMCCALCULATION_H
 #define M7_FCIQMCCALCULATION_H
 
+#if 0
 
 #include <omp.h>
 #include <src/core/util/Timer.h>
@@ -51,4 +52,5 @@ public:
 };
 
 
+#endif //M7_FCIQMCCALCULATION_H
 #endif //M7_FCIQMCCALCULATION_H

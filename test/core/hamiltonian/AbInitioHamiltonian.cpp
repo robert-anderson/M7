@@ -6,6 +6,7 @@
 #include "src/core/basis/DecodedDeterminant.h"
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 
+#if 0
 TEST(AbInitioHamiltonian, DhfEnergy) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     const auto benchmark = -14.354220448530139;
@@ -92,3 +93,4 @@ TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
         }
     }
 }
+#endif

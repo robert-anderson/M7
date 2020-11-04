@@ -5,6 +5,8 @@
 #ifndef M7_HEATBATHSAMPLERS_H
 #define M7_HEATBATHSAMPLERS_H
 
+#if 0
+
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/sample/ExcitationGenerator.h>
 #include "src/core/sample/Aliaser.h"
@@ -29,4 +31,5 @@ public:
 };
 
 
+#endif //M7_HEATBATHSAMPLERS_H
 #endif //M7_HEATBATHSAMPLERS_H

@@ -2,25 +2,25 @@
 // Created by rja on 22/10/2020.
 //
 
-#ifndef M7_BOSONONVFIELD_H
-#define M7_BOSONONVFIELD_H
+#ifndef M7_BOSONONVSPECIFIER_H
+#define M7_BOSONONVSPECIFIER_H
 
-#include "NumericArrayField.h"
+#include "NumericArraySpecifier.h"
 #include <numeric>
 
 
-struct BosonOnvField : NumericArrayField<uint8_t, 1> {
+struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
     template<typename ...Args>
-    BosonOnvField(size_t nmode):NumericArrayField(nmode) {
-        m_details["type"] = "Boson ONV";
+    BosonOnvSpecifier(size_t nmode):NumericArraySpecifier(nmode) {
+        m_data.m_details["type"] = "Boson ONV";
     }
 
     const size_t& nmode() const {
         return m_format.extent(0);
     }
 
-    struct View : NumericArrayField<uint8_t, 1>::View {
-        View(const BosonOnvField &field, char *ptr) : NumericArrayField<uint8_t, 1>::View(field, ptr) {}
+    struct View : NumericArraySpecifier<uint8_t, 1>::View {
+        View(const BosonOnvSpecifier &field, char *ptr) : NumericArraySpecifier<uint8_t, 1>::View(field, ptr) {}
 
         size_t nboson() const {
             return std::accumulate(
@@ -32,25 +32,25 @@ struct BosonOnvField : NumericArrayField<uint8_t, 1> {
 
 #if 0
 template<size_t nind>
-struct BosonOnvField : NumericArrayField<uint8_t, nind, 1> {
-    typedef NumericArrayField<uint8_t, nind, 1> base_t;
-    BosonOnvField(TableX *table, std::array<size_t, nind> shape, size_t nmode, std::string description) :
+struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, nind, 1> {
+    typedef NumericArraySpecifier<uint8_t, nind, 1> base_t;
+    BosonOnvSpecifier(TableX *table, std::array<size_t, nind> shape, size_t nmode, std::string description) :
             base_t(table, shape, {nmode}, description) {}
 
     size_t nmode() const {
-        return NumericArrayField<uint8_t, nind, 1>::m_view_format.extent(0);
+        return NumericArraySpecifier<uint8_t, nind, 1>::m_view_format.extent(0);
     }
 
     struct View : base_t::View {
         template<typename ...Args>
-        View(const BosonOnvField &field, const size_t &irow, const size_t& iflat):
+        View(const BosonOnvSpecifier &field, const size_t &irow, const size_t& iflat):
                 base_t::View(field, irow, iflat) {}
 
         using FieldX::View::m_ptr;
         using FieldX::View::m_field;
 
         size_t nmode() const {
-            return static_cast<const BosonOnvField<nind> &>(m_field).nmode();
+            return static_cast<const BosonOnvSpecifier<nind> &>(m_field).nmode();
         }
 
         size_t nboson() const {
@@ -65,7 +65,7 @@ struct BosonOnvField : NumericArrayField<uint8_t, nind, 1> {
     }
 
     std::map<std::string, std::string> details() const override {
-        auto map = NumericArrayField<uint8_t, nind, 1>::details();
+        auto map = NumericArraySpecifier<uint8_t, nind, 1>::details();
         map["field type"] = "Boson Occupation Number Vector";
         map["number of modes"] = std::to_string(nmode());
         return map;
@@ -73,16 +73,16 @@ struct BosonOnvField : NumericArrayField<uint8_t, nind, 1> {
 };
 
 //template<typename T, size_t nind, size_t nind_view>
-//struct NumericArrayField : NdArrayField<nind, nind_view> {
-//    NumericArrayField(TableX *table, std::array<size_t, nind> shape, std::array<size_t, nind_view> view_shape, std::string description) :
+//struct NumericArraySpecifier : NdArrayField<nind, nind_view> {
+//    NumericArraySpecifier(TableX *table, std::array<size_t, nind> shape, std::array<size_t, nind_view> view_shape, std::string description) :
 //            NdArrayField<nind, nind_view>(table, shape, view_shape, sizeof(T), description) {}
 //
 //    struct View : FieldX::View {
-//        View(const NumericArrayField& field, char* ptr): FieldX::View(field, ptr){}
+//        View(const NumericArraySpecifier& field, char* ptr): FieldX::View(field, ptr){}
 //
 //        template<typename ...Args>
 //        T& operator()(Args... inds){
-//            auto i = static_cast<NumericArrayField&>(m_field).m_view_format.flatten(inds...);
+//            auto i = static_cast<NumericArraySpecifier&>(m_field).m_view_format.flatten(inds...);
 //            return ((T*)m_ptr)[i];
 //        }
 //
@@ -99,5 +99,5 @@ struct BosonOnvField : NumericArrayField<uint8_t, nind, 1> {
 //};
 
 
-#endif //M7_BOSONONVFIELD_H
-#endif //M7_BOSONONVFIELD_H
+#endif //M7_BOSONONVSPECIFIER_H
+#endif //M7_BOSONONVSPECIFIER_H

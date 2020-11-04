@@ -29,7 +29,7 @@ struct LookupResult {
 template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 struct MappedTable : TableX {
 
-    static_assert(std::is_base_of<NdCompositeField<0ul>, field_t>::value, "Key field must be scalar");
+    static_assert(std::is_base_of<NdFieldGroup<0ul>, field_t>::value, "Key field must be scalar");
 
     field_t& m_key_field;
     std::vector<std::forward_list<size_t>> m_buckets;

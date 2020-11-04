@@ -5,6 +5,8 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
+#if 0
+
 #include "src/core/table/Element.h"
 #include "src/core/parallel/Gatherable.h"
 #include "MPIWrapper.h"
@@ -70,4 +72,5 @@ public:
     }
 };
 
+#endif //M7_RANKALLOCATOR_H
 #endif //M7_RANKALLOCATOR_H

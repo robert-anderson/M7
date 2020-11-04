@@ -5,6 +5,8 @@
 #ifndef M7_FCIQMCSTATSFILE_H
 #define M7_FCIQMCSTATSFILE_H
 
+#if 0
+
 #include "StatsFile.h"
 #include "Options.h"
 struct FciqmcStatsFile : public StatsFile {
@@ -32,4 +34,5 @@ public:
 };
 
 
+#endif //M7_FCIQMCSTATSFILE_H
 #endif //M7_FCIQMCSTATSFILE_H

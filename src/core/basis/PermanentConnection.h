@@ -5,7 +5,7 @@
 #ifndef M7_PERMANENTCONNECTION_H
 #define M7_PERMANENTCONNECTION_H
 
-
+#if 0
 #include "PermanentField.h"
 
 struct PermanentDiff {
@@ -83,4 +83,5 @@ public:
 };
 
 
+#endif //M7_PERMANENTCONNECTION_H
 #endif //M7_PERMANENTCONNECTION_H

@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "src/core/enumerator/HamiltonianConnectionEnumerator.h"
 
+#if 0
 class ConnectionList : public MappedList<DeterminantElement> {
 public:
     DeterminantField m_determinant;
@@ -101,3 +102,4 @@ TEST(HamiltonianConnectionEnumerator, ExcitedDet) {
     }
     ASSERT_EQ(count, 31);
 }
+#endif

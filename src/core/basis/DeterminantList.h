@@ -5,7 +5,7 @@
 #ifndef M7_DETERMINANTLIST_H
 #define M7_DETERMINANTLIST_H
 
-
+#if 0
 #include <src/core/list/List.h>
 #include <src/core/basis/DeterminantField.h>
 
@@ -15,4 +15,5 @@ struct DeterminantList : public List {
 };
 
 
+#endif //M7_DETERMINANTLIST_H
 #endif //M7_DETERMINANTLIST_H

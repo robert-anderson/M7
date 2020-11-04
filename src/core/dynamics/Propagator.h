@@ -5,7 +5,7 @@
 #ifndef M7_PROPAGATOR_H
 #define M7_PROPAGATOR_H
 
-
+#if 0
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "SpawnList.h"
@@ -88,4 +88,5 @@ public:
 };
 
 
+#endif //M7_PROPAGATOR_H
 #endif //M7_PROPAGATOR_H

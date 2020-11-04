@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "src/core/pchb/HeatBathSamplers.h"
 
+#if 0
 bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, size_t ndraw, size_t pc_freq_thresh) {
     /*
      * given:
@@ -196,3 +197,4 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
+#endif

@@ -5,6 +5,7 @@
 #ifndef M7_PERFORABLEMAPPEDLIST_H
 #define M7_PERFORABLEMAPPEDLIST_H
 
+#if 0
 #include <stack>
 #include <src/core/hash/ConcurrentStack.h>
 #include "MappedList.h"
@@ -101,4 +102,5 @@ public:
 };
 
 
+#endif //M7_PERFORABLEMAPPEDLIST_H
 #endif //M7_PERFORABLEMAPPEDLIST_H

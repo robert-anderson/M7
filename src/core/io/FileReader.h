@@ -16,7 +16,7 @@ protected:
 
 public:
     FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname) {
-        std::cout << "File \"" << fname << "\" opened for reading" << std::endl;
+        //std::cout << "File \"" << fname << "\" opened for reading" << std::endl;
         reset(iline);
     }
 

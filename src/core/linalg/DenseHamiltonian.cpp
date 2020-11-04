@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
+#if 0
 #include <src/core/enumerator/CombinationEnumerator.h>
-#include <src/core/basis/Permanent.h>
 #include "DenseHamiltonian.h"
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
@@ -57,3 +57,5 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source, const BosonCouplin
     Permanent pket(bc.nmode(), bc.nocc_cutoff());
     // TODO James: generate all matrix elements
 }
+
+#endif

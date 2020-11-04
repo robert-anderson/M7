@@ -2,12 +2,13 @@
 // Created by rja on 08/10/2020.
 //
 
-#include <src/core/data/Elements.h>
-#include "src/core/data/MappedTable.h"
-#include "src/core/data/Fields.h"
-#include "src/core/data/BufferedTable.h"
+#include <src/core/field/Elements.h>
+#include "src/core/table/MappedTable.h"
+#include "src/core/field/Fields.h"
+#include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 
+#if 0
 struct TestTable : MappedTable<fields::Configuration> {
     fields::Configuration m_config;
     TestTable(size_t nsite, size_t nmode):
@@ -30,6 +31,8 @@ TEST(MappedTable, TEST){
     std::cout << bool(lookup) << std::endl;
 
 }
+
+#endif
 
 //#include "src/core/data/BufferedTable.h"
 //#include "src/core/data/NumericField.h"

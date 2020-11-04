@@ -2,6 +2,8 @@
 // Created by jhalson on 30/09/2020.
 //
 
+#if 0
+
 #include "src/core/hamiltonian/BosonCouplings.h"
 #include "gtest/gtest.h"
 #include "src/core/basis/PermanentConnection.h"
@@ -79,3 +81,5 @@ TEST(BosonCouplings, Element_f1_b1){
     auto el = simpleCoupling.get_element_1(ac, pc);
     ASSERT_EQ(V, el);
 }
+
+#endif

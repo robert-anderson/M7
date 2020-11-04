@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-03-29.
 //
 
+#if 0
 #include "src/core/basis/DeterminantField.h"
 #include "src/core/basis/PermanentField.h"
 #include "gtest/gtest.h"
@@ -115,3 +116,5 @@ TEST(Table, DataIntegrityPermanents) {
     perm_element(2) = 44;
     std::cout << utils::to_string(perm_element.to_vector()) << std::endl;
 }
+
+#endif

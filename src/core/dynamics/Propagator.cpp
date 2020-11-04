@@ -2,6 +2,8 @@
 // Created by Robert John Anderson on 2020-02-11.
 //
 
+#if 0
+
 #include "Propagator.h"
 #include "FciqmcCalculation.h"
 
@@ -33,3 +35,4 @@ void Propagator::update(const size_t& icycle, defs::wf_comp_t nwalker, defs::wf_
     }
 }
 
+#endif

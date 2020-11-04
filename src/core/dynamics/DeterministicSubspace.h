@@ -5,6 +5,7 @@
 #ifndef M7_DETERMINISTICSUBSPACE_H
 #define M7_DETERMINISTICSUBSPACE_H
 
+#if 0
 
 #include "src/core/sparse/SparseMatrix.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
@@ -193,4 +194,5 @@ public:
 };
 
 
+#endif //M7_DETERMINISTICSUBSPACE_H
 #endif //M7_DETERMINISTICSUBSPACE_H

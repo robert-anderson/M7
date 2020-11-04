@@ -5,6 +5,8 @@
 #ifndef M7_PARALLELIZATIONSTATSFILE_H
 #define M7_PARALLELIZATIONSTATSFILE_H
 
+#if 0
+
 #include "StatsFile.h"
 #include "Options.h"
 
@@ -27,4 +29,5 @@ public:
 
 
 
+#endif //M7_PARALLELIZATIONSTATSFILE_H
 #endif //M7_PARALLELIZATIONSTATSFILE_H

@@ -5,6 +5,8 @@
 #ifndef M7_HAMILTONIAN_H
 #define M7_HAMILTONIAN_H
 
+#if 0
+
 #include <cstddef>
 #include "src/core/basis/Determinant.h"
 #include "src/core/list/MappedList.h"
@@ -125,4 +127,5 @@ public:
     }
 };
 
+#endif //M7_HAMILTONIAN_H
 #endif //M7_HAMILTONIAN_H

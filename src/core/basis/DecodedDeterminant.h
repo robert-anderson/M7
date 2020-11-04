@@ -5,7 +5,7 @@
 #ifndef M7_DECODEDDETERMINANT_H
 #define M7_DECODEDDETERMINANT_H
 
-#include "DeterminantField.h"
+#include "src/core/field/DeterminantSpecifier.h"
 
 struct DecodedDeterminant {
     const size_t m_nbit;
@@ -13,25 +13,25 @@ struct DecodedDeterminant {
     defs::det_work m_inds{};
     size_t m_nind = 0ul;
 
-    explicit DecodedDeterminant(const Field* field):
-    m_nbit(field->nbit()), m_element_dsize(field->element_dsize()) {}
+    explicit DecodedDeterminant(const DeterminantSpecifier& field):
+    m_nbit(field.m_nbit), m_element_dsize(field.m_ndataword) {}
 
-    explicit DecodedDeterminant(const DeterminantElement &det_elem):
-    DecodedDeterminant(det_elem.field()){}
+    explicit DecodedDeterminant(const DeterminantSpecifier::View &view):
+    DecodedDeterminant(view.field()){}
 
-    virtual void update(const DeterminantElement &det_elem) = 0;
+    virtual void update(const DeterminantSpecifier::View &det_elem) = 0;
 };
 
 struct OccupiedOrbitals : DecodedDeterminant {
-    OccupiedOrbitals(const Field* field);
-    OccupiedOrbitals(const DeterminantElement &det_elem);
-    void update(const DeterminantElement &det_elem) override;
+    OccupiedOrbitals(const DeterminantSpecifier& field);
+    OccupiedOrbitals(const DeterminantSpecifier::View &view);
+    void update(const DeterminantSpecifier::View &view) override;
 };
 
 struct VacantOrbitals : DecodedDeterminant {
-    VacantOrbitals(const Field* field);
-    VacantOrbitals(const DeterminantElement &det_elem);
-    void update(const DeterminantElement &det_elem) override;
+    VacantOrbitals(const DeterminantSpecifier& field);
+    VacantOrbitals(const DeterminantSpecifier::View &view);
+    void update(const DeterminantSpecifier::View &view) override;
 };
 
 #endif //M7_DECODEDDETERMINANT_H

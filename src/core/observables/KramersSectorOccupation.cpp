@@ -4,6 +4,7 @@
 
 #include "KramersSectorOccupation.h"
 
+#if 0
 KramersSectorOccupation::KramersSectorOccupation(size_t nelec) :
         m_nelec(nelec), m_sum(nelec+1){}
 
@@ -40,3 +41,5 @@ void KramersSectorOccupation::add(const DeterminantElement &det, const defs::wf_
 }
 
 KramersSectorOccupation::KramersSectorOccupation(const DeterminantElement &det) :KramersSectorOccupation(det.nsetbit()){}
+
+#endif

@@ -7,6 +7,7 @@
 #include "ExactPropagator.h"
 #include "StochasticPropagator.h"
 
+#if 0
 
 FciqmcCalculation::FciqmcCalculation(const Options &input) :
         m_input(input), m_vary_shift("variable shift"), m_semi_stochastic("semi-stochastic"),
@@ -68,3 +69,5 @@ void FciqmcCalculation::write_iter_stats(size_t icycle) {
     m_wf.write_iter_stats(m_stats_file.get());
     m_stats_file->flush();
 }
+
+#endif

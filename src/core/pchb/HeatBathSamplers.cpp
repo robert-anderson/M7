@@ -4,6 +4,7 @@
 
 #include "HeatBathSamplers.h"
 
+#if 0
 HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng) :
         ExcitationGenerator(h, prng), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
@@ -126,3 +127,5 @@ bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, Determinan
     }
     return true;
 }
+
+#endif

@@ -4,6 +4,7 @@
 
 #include "StochasticPropagator.h"
 
+#if 0
 void StochasticPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
                                         SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
     ASSERT(!consts::float_is_zero(*weight));
@@ -107,3 +108,5 @@ void StochasticPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdia
     delta_square_norm += std::pow(std::abs(*weight), 2);
     delta_nw += std::abs(*weight);
 }
+
+#endif

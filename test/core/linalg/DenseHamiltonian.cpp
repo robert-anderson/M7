@@ -7,6 +7,8 @@
 #include "src/core/hamiltonian/AbInitioHamiltonian.h"
 #include "src/core/linalg/DenseHamiltonian.h"
 
+#if 0
+
 TEST(DenseHamiltonian, FciEnergyCheck4c) {
     if (!consts::is_complex<defs::ham_comp_t>()) GTEST_SKIP();
     DenseHamiltonian ham(AbInitioHamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
@@ -92,3 +94,5 @@ TEST(DenseHamiltonian, BosonCouplingCheck) {
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
+
+#endif

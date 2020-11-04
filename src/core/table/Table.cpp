@@ -1,170 +1,70 @@
 //
-// Created by Robert John Anderson on 2020-03-26.
+// Created by rja on 21/10/2020.
 //
 
 #include "Table.h"
 
-#include <utility>
-
-Table::Table(std::string name, size_t nsegment) : m_name(std::move(name)), m_nsegment(nsegment), m_segment_doffsets(nsegment, 0ul) {}
-
-char *Table::field_begin(const Field *field, const size_t &irow, const size_t isegment) {
-    ASSERT(irow<nrow_per_segment());
-    ASSERT(is_allocated());
-    return ((char *) m_data.data()) + irow * m_padded_row_size + isegment * m_segment_size + field->m_offset;
+size_t TableX::push_back() {
+    if (m_hwm>=m_nrow) throw std::runtime_error("Table capacity reached");
+    return m_hwm++;
 }
 
-char *Table::row_begin(const size_t &irow, const size_t isegment) {
-    return ((char *) m_data.data()) + irow * m_padded_row_size + isegment * m_segment_size;
+char *TableX::begin() {
+    return (char *) m_bw.m_ptr;
 }
 
-void Table::expand(size_t delta_nrow) {
-    std::cout << "Attempting to expand table \"" << m_name << "\" by " << delta_nrow << " rows" << std::endl;
-    std::cout << "Current number of rows per segment: " << m_nrow_per_segment << std::endl;
-    std::cout << "Current size in memory:             " << string_utils::memsize(m_nrow_per_segment * m_nsegment * m_padded_row_size) << std::endl;
-    std::cout << "Additional memory being allocated:  " << string_utils::memsize(delta_nrow * m_nsegment * m_padded_row_size) << std::endl;
-    std::cout << "Final size in memory if successful: " << string_utils::memsize((m_nrow_per_segment + delta_nrow) * m_nsegment * m_padded_row_size) << std::endl;
-    /*
-     * add more rows to each segment
-     */
-    m_data.resize((m_nrow_per_segment + delta_nrow) * m_nsegment * m_padded_row_dsize, 0);
-    /*
-     * move segments backwards to help avoid overlap. std::move will handle overlap correctly if it occurs
-     */
-    for (size_t isegment = m_nsegment - 1; isegment > 0; --isegment) {
-        std::move(
-                m_data.begin() + isegment * m_segment_dsize,
-                m_data.begin() + (isegment + 1) * m_segment_dsize,
-                m_data.begin() + isegment * m_padded_row_dsize * (m_nrow_per_segment + delta_nrow)
-        );
+char *TableX::begin(const size_t &irow) {
+    ASSERT(irow<m_hwm)
+    return begin() + irow * m_row_size;
+}
+
+size_t TableX::add_field(const TableField *field) {
+    // returns the offset in bytes for the field being added
+    auto offset = 0ul;
+    if(!m_fields.empty()){
+        offset = m_fields.back()->m_offset+m_fields.back()->m_size;
+        if (!m_fields.back()->is_same_type_as(*field)){
+            // go to next whole dataword
+            offset = integer_utils::divceil(offset, defs::nbyte_data)*defs::nbyte_data;
+        }
     }
-    increment_nrow_per_segment(delta_nrow);
-    for (size_t isegment = 1ul; isegment < m_nsegment; ++isegment) {
-        m_segment_doffsets[isegment] = m_segment_doffsets[isegment - 1] + m_padded_row_dsize * m_nrow_per_segment;
-    }
-    std::cout << "Successfully expanded table \"" << m_name << "\"" << std::endl;
 
-}
+    m_tight_row_size = offset+field->m_size;
+    m_row_dsize = integer_utils::divceil(m_tight_row_size, defs::nbyte_data);
+    m_row_size = m_row_dsize*defs::nbyte_data;
 
-void Table::resize(size_t nrow) {
-    if (nrow > m_nrow_per_segment) expand(nrow - m_nrow_per_segment);
-}
-
-size_t Table::irow(const size_t &irow, const size_t &isegment) const {
-    return irow + isegment * m_nrow_per_segment;
-}
-
-void Table::zero() {
-    std::memset(m_data.data(), 0, m_nsegment * m_nrow_per_segment * m_padded_row_size);
-}
-
-void Table::zero_row(const size_t &irow, const size_t &isegment) {
-    std::memset(row_begin(irow, isegment), 0, m_padded_row_size);
-}
-
-size_t Table::add_field(Field *field) {
-    if (m_data.size())
-        throw std::runtime_error("Cannot add fields: table already in use");
-    if (!m_fields.empty() && m_fields.back()->m_type_index != field->m_type_index) {
-        // different to last added type, so advance to next
-        roundup_row_size();
-    }
-    size_t offset = m_row_size;
-    increment_row_size(field->m_element_size * field->m_nelement);
     m_fields.push_back(field);
     return offset;
 }
 
-void Table::update_last_field() {
-    auto last_field = m_fields.back();
-    m_fields.pop_back();
-    update_row_size(last_field->m_offset);
-    add_field(last_field);
+void TableX::move(BufferWindow new_bw) {
+    if (m_bw) std::memmove(m_bw.m_ptr, new_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
+    m_bw = new_bw;
+    if (!m_row_size) return;
+    m_nrow = (sizeof(defs::data_t) * m_bw.m_dsize) / m_row_size;
 }
 
-void Table::print() {
-    std::cout << to_string() << std::endl;
+void TableX::clear() {
+    std::memset((char *) (m_bw.m_ptr), 0, m_row_size * m_hwm);
+    m_hwm = 0ul;
 }
 
-const size_t &Table::nrow_per_segment() const {
-    return m_nrow_per_segment;
+void TableX::clear_row(const size_t &irow) {
+    std::memset(begin(irow), 0, m_tight_row_size);
 }
 
-void Table::update_row_size(size_t size) {
-    m_row_size = size;
-    m_padded_row_size = defs::ncacheline_byte * integer_utils::divceil(size, defs::ncacheline_byte);
-    ASSERT(m_padded_row_size % sizeof(defs::data_t) == 0);
-    m_padded_row_dsize = m_padded_row_size / sizeof(defs::data_t);
-}
-
-void Table::increment_row_size(size_t delta) {
-    update_row_size(m_row_size + delta);
-}
-
-void Table::roundup_row_size() {
-    update_row_size(integer_utils::divceil(m_row_size, sizeof(defs::data_t)) * sizeof(defs::data_t));
-}
-
-void Table::update_nrow_per_segment(size_t nrow) {
-    m_nrow_per_segment = nrow;
-    m_segment_dsize = m_nrow_per_segment * m_padded_row_dsize;
-    m_segment_size = m_segment_dsize * sizeof(defs::data_t);
-}
-
-void Table::increment_nrow_per_segment(size_t delta) {
-    update_nrow_per_segment(m_nrow_per_segment + delta);
-}
-
-bool Table::compatible_with(const Table &other) const {
-    if (m_fields.size() != other.m_fields.size()) return false;
-    for (size_t ifield = 0ul; ifield < m_fields.size(); ++ifield) {
-        if (!m_fields[ifield]->compatible_with(*other.m_fields[ifield])) return false;
+std::string TableX::field_details(size_t width) const {
+    std::string res;
+    for (size_t i = 0ul; i < m_fields.size(); ++i) {
+        std::string desc;
+        if (!m_fields[i]->m_description.empty()) desc = " (\""+m_fields[i]->m_description+"\")";
+        res += "\nField " + std::to_string(i) + desc + ":\n";
+        for (auto pair:m_fields[i]->m_data.m_details)
+            res += "\t" + utils::padded_string(pair.first, width) + ": " + utils::padded_string(pair.second, width)+"\n";
     }
-    return m_row_size == other.m_row_size &&
-           m_padded_row_size == other.m_padded_row_size &&
-           m_padded_row_dsize == other.m_padded_row_dsize;
+    return res;
 }
 
-bool Table::is_allocated() const { return m_data.data() != nullptr; }
-
-std::string Table::row_to_string(size_t irow, size_t isegment) const {
-    std::string result;
-    for (auto &field : m_fields) {
-        for (size_t ielement = 0ul; ielement < field->m_nelement; ++ielement) {
-            result += field->to_string(irow, isegment, ielement) + "  ";
-        }
-    }
-    return result;
-}
-
-std::string Table::to_string(const defs::inds &nrows) const {
-    std::string result = "\nTABLE\n";
-    result += "# fields: " + std::to_string(m_fields.size()) + "\n";
-    for (size_t ifield = 0ul; ifield < m_fields.size(); ++ifield) {
-        result += "  " + std::to_string(ifield) + ": " + m_fields[ifield]->description() + "\n";
-    }
-    for (size_t isegment = 0ul; isegment < m_nsegment; ++isegment) {
-        if (!m_nsegment) result += "SEGMENT " + std::to_string(isegment) + "\n";
-        result += "# rows: " + std::to_string(nrows[isegment]) + "\n";
-        for (size_t irow = 0ul; irow < nrows[isegment]; ++irow) {
-            result += utils::num_to_string(unsigned(irow)) + ":  " + row_to_string(irow, isegment) + "\n";
-        }
-    }
-    return result;
-}
-
-std::string Table::to_string() const {
-    return to_string(defs::inds(m_nsegment, m_nrow_per_segment));
-}
-
-void Table::print_row(size_t irow, size_t isegment) {
-    std::cout << row_to_string(irow, isegment) << std::endl;
-}
-
-size_t Table::dsize() const {
-    return m_segment_dsize * m_nsegment;
-}
-
-bool Table::owns_field(const Field *field) {
-    return field->m_table==this;
+void TableX::print_field_details(size_t width) const {
+    std::cout << field_details(width) << std::endl;
 }
