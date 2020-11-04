@@ -18,7 +18,7 @@ struct DecodedDeterminant {
     m_nbit(spec.m_nbit), m_element_dsize(spec.m_ndataword) {}
 
     explicit DecodedDeterminant(const views::Determinant &view):
-    DecodedDeterminant(view.field()){}
+    DecodedDeterminant(view.spec()){}
 
     virtual void update(const views::Determinant &det_elem) = 0;
 };

@@ -4,7 +4,7 @@
 
 #include "FermionBosonState.h"
 
-fb_state::View::View(DeterminantSpecifier::view_t &&det, NumericArraySpecifier<uint8_t, 1>::view_t &&perm) :
+fb_state::View::View(DeterminantSpecifier::view_t &&det, BosonOnvSpecifier::view_t &&perm) :
         m_det(std::move(det)), m_perm(std::move(perm)) {}
 
 bool fb_state::View::operator==(const fb_state::View &other) const {

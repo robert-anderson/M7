@@ -40,11 +40,13 @@ namespace elements {
     struct Determinant : Element<fields::Determinant> {
         Determinant(size_t nsite):
         Element<fields::Determinant>(DeterminantSpecifier(nsite), "Working determinant"){}
+        using specs::Determinant::view_t::operator=;
     };
 
     struct BosonOnv : Element<fields::BosonOnv> {
         BosonOnv(size_t nmode):
                 Element<fields::BosonOnv>(BosonOnvSpecifier(nmode), "Working boson ONV"){}
+        using specs::BosonOnv::view_t::operator=;
     };
 
     struct FermionBosonConfiguration : Element<fields::FermionBosonConfiguration> {

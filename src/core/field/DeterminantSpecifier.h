@@ -17,7 +17,7 @@ struct DeterminantSpecifier : BitsetSpecifier {
     struct View : BitsetSpecifier::View {
         View(const DeterminantSpecifier &field, char *ptr);
 
-        const DeterminantSpecifier& field() const {
+        const DeterminantSpecifier& spec() const {
             return static_cast<const DeterminantSpecifier&>(m_spec);
         }
 

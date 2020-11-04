@@ -5,10 +5,10 @@
 #include "Connection.h"
 #include <algorithm>
 
-Connection::Connection(const DeterminantSpecifier& field):
-    m_element_dsize(field.m_ndataword), m_nbit(field.m_nbit) {}
+Connection::Connection(const DeterminantSpecifier& spec):
+    m_element_dsize(spec.m_ndataword), m_nbit(spec.m_nbit) {}
 
-Connection::Connection(const views::Determinant &ket, const views::Determinant &bra) : Connection(ket.field()) {
+Connection::Connection(const views::Determinant &ket, const views::Determinant &bra) : Connection(ket.spec()) {
     ASSERT(ket.nsite() == bra.nsite());
     connect(ket, bra);
 }
@@ -66,7 +66,7 @@ AntisymConnection::AntisymConnection(const views::Determinant &ket, const views:
     connect(ket, bra);
 }
 
-AntisymConnection::AntisymConnection(const views::Determinant &ket) : AntisymConnection(ket.field()) {}
+AntisymConnection::AntisymConnection(const views::Determinant &ket) : AntisymConnection(ket.spec()) {}
 
 void AntisymConnection::connect(const views::Determinant &ket, const views::Determinant &bra) {
     Connection::connect(ket, bra);

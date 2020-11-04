@@ -47,21 +47,21 @@ public:
     }
 
     BosonicConnection(const views::BosonOnv &ket, const views::BosonOnv &bra):
-            BosonicConnection(ket.m_field){
+            BosonicConnection(ket.spec()){
         connect(ket, bra);
     }
 
-    explicit BosonicConnection(const PermanentElement &ket):
-            BosonicConnection(ket.field()){
+    explicit BosonicConnection(const views::BosonOnv &ket):
+            BosonicConnection(ket.spec()){
         connect(ket, ket);
     }
 
-    void connect(const PermanentElement &ket, const PermanentElement &bra){
+    void connect(const views::BosonOnv &ket, const views::BosonOnv &bra){
         m_diff.zero();
         ASSERT(!m_com.empty())
         for(size_t imode=0ul; imode<m_nmode; ++imode){
-            int nket = *ket(imode);
-            int nbra = *bra(imode);
+            int nket = ket(imode);
+            int nbra = bra(imode);
             m_com[imode] = std::min(nket, nbra);
             if (nket!=nbra){
                 m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;

@@ -5,11 +5,7 @@
 #ifndef M7_FIELDS_H
 #define M7_FIELDS_H
 
-#include "NumericSpecifier.h"
-#include "NumericArraySpecifier.h"
-#include "BitsetSpecifier.h"
-#include "DeterminantSpecifier.h"
-#include "BosonOnvSpecifier.h"
+#include "Specifiers.h"
 #include "FermionBosonState.h"
 #include "FlagField.h"
 
@@ -19,39 +15,34 @@
 
 namespace fields {
 
-//    template<size_t nind>
-//    using Flags = Flags<nind>;
-//
-//    using Flag = Flags<0ul>;
-
     template <typename spec_t>
     using Flags = FlagField<spec_t>;
 
     template<typename T, size_t nind>
-    struct Numbers: NdField<NumericSpecifier<T>, nind>{
+    struct Numbers: NdField<specs::Number<T>, nind>{
         template<typename ...Args>
         Numbers(TableX *table, std::string description, Args... shape) :
-            NdField<NumericSpecifier<T>, nind>(table, {}, description, shape...) {}
+            NdField<specs::Number<T>, nind>(table, {}, description, shape...) {}
     };
 
     template<typename T>
     using Number = Numbers<T, 0ul>;
 
     template<typename T, size_t nind, size_t nind_element>
-    using NumberArrays = NdField<NumericArraySpecifier<T, nind_element>, nind>;
+    using NumberArrays = NdField<specs::NumberArray<T, nind_element>, nind>;
 
     template<size_t nind>
-    using Bitsets = NdField<BitsetSpecifier, nind>;
+    using Bitsets = NdField<specs::Bitset, nind>;
 
     using Bitset = Bitsets<0ul>;
 
     template<size_t nind>
-    using Determinants = NdField<DeterminantSpecifier, nind>;
+    using Determinants = NdField<specs::Determinant, nind>;
 
     using Determinant = Determinants<0ul>;
 
     template<size_t nind>
-    using BosonOnvs = NdField<BosonOnvSpecifier, nind>;
+    using BosonOnvs = NdField<specs::BosonOnv, nind>;
 
     using BosonOnv = BosonOnvs<0ul>;
 

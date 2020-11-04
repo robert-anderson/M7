@@ -47,6 +47,19 @@ struct NumericArraySpecifier : FieldSpecifier {
             return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_spec).m_format.flatten(inds...)];
         }
 
+        template<typename U>
+        View& operator=(const std::vector<U> &v){
+            ASSERT(v.size()==nelement());
+            for (size_t i = 0ul; i < nelement(); ++i) (*this)(i) = v[i];
+            return *this;
+        }
+
+        View &operator=(const std::vector<T> &v) {
+            ASSERT(v.size() == nelement());
+            memcpy((void*)m_ptr, (void*)v.data(), nelement()*sizeof(T));
+            return *this;
+        }
+
         std::string to_string() const override {
             std::string res;
             res+="[";
