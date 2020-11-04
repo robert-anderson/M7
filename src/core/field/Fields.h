@@ -11,7 +11,7 @@
 #include "DeterminantSpecifier.h"
 #include "BosonOnvSpecifier.h"
 #include "FermionBosonState.h"
-#include "Flag.h"
+#include "FlagField.h"
 
 /*
  * some convenient wrappers for the field types
@@ -19,10 +19,13 @@
 
 namespace fields {
 
-    template<size_t nind>
-    using Flags = NdFlag<nind>;
+//    template<size_t nind>
+//    using Flags = Flags<nind>;
+//
+//    using Flag = Flags<0ul>;
 
-    using Flag = Flags<0ul>;
+    template <typename spec_t>
+    using Flags = FlagField<spec_t>;
 
     template<typename T, size_t nind>
     struct Numbers: NdField<NumericSpecifier<T>, nind>{

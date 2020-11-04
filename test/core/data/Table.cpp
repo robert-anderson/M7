@@ -2,9 +2,8 @@
 // Created by rja on 02/10/2020.
 //
 
-#include "src/core/table/Table.h"
+#include "src/core/table/BufferedTable.h"
 #include "src/core/field/Fields.h"
-//#include "src/core/data/.h"
 #include "gtest/gtest.h"
 
 
@@ -58,22 +57,30 @@ TEST(Table, DifferentFieldOffset){
     ASSERT_EQ(t1.m_floats.m_field.m_size, 4*sizeof(float));
 }
 
-struct FlagsTestTable : public TableX {
-    NdFlag<>
-    FlagField<0> flag1;
-    FlagField<0> flag2;
-    FlagField<1> flags1;
-    FlagField<1> flags2;
-    FlagsTestTable():
+struct TestFlagSet : FlagSet {
+    Flag flag1;
+    Flag flag2;
+    Flags<1> flags1;
+    Flags<1> flags2;
+    TestFlagSet(fields::Bitset* bitset):
+    FlagSet(bitset),
     flag1(this, "first flag"),
     flag2(this, "second flag"),
     flags1(this, "first rank-1 flag set", 6),
-    flags2(this, "second rank-1 flag set", 6)
-    {}
+    flags2(this, "second rank-1 flag set", 6){}
 };
 
-//TEST(Table, Flag){
-//    FlagsTestTable t;
-//    t.print_field_details();
-//}
+struct FlagsTestTable : public TableX {
+    fields::Flags<TestFlagSet> m_flags;
+    FlagsTestTable(): m_flags(this, "Flagset"){}
+};
+
+TEST(Table, Flag){
+    BufferedTable<FlagsTestTable> bt;
+    bt.expand(1);
+    bt.push_back();
+    bt.print_field_details();
+    bt.m_flags.flags1(0, 1) = 1;
+    std::cout << bt.m_flags(0).to_string() << std::endl;
+}
 

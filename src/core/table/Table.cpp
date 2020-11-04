@@ -5,7 +5,6 @@
 #include "Table.h"
 
 size_t TableX::push_back(size_t nrow) {
-    if (!m_hwm) init();
     if (m_hwm>=m_nrow) throw std::runtime_error("Table capacity reached");
     auto tmp = m_hwm;
     m_hwm+=nrow;
