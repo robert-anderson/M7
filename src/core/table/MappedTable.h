@@ -9,7 +9,7 @@
 #include <forward_list>
 #include <stack>
 #include "Table.h"
-#include "NdField.h"
+#include "src/core/field/TableField.h"
 
 struct LookupResult {
     std::forward_list<size_t>& m_bucket;

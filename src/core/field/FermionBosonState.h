@@ -19,24 +19,15 @@ namespace fb_state {
         BosonOnvSpecifier::view_t m_perm;
 
         View(DeterminantSpecifier::view_t &&det,
-             BosonOnvSpecifier::view_t &&perm) :
-                m_det(std::move(det)), m_perm(std::move(perm)) {}
+             BosonOnvSpecifier::view_t &&perm);
 
-        bool operator==(const View &other) const {
-            return m_det==other.m_det && m_perm==other.m_perm;
-        }
+        bool operator==(const View &other) const;
 
-        bool operator!=(const View &other) const {
-            return !(*this==other);
-        }
+        bool operator!=(const View &other) const;
 
-        std::string to_string() {
-            return m_det.to_string() + " " + m_perm.to_string();
-        }
+        std::string to_string();
 
-        void print() {
-            std::cout << to_string() << std::endl;
-        }
+        void print();
     };
 
 
