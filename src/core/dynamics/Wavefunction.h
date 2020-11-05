@@ -10,7 +10,7 @@
 
 #include "src/core/io/ParallelizationStatsFile.h"
 #include "src/core/observables/KramersSectorOccupation.h"
-#include "src/core/basis/Determinant.h"
+#include "src/core/basis/FermionOnv.h"
 #include "src/core/io/Options.h"
 #include "src/core/util/Timer.h"
 #include "WalkerList.h"

@@ -58,7 +58,7 @@ public:
     explicit Hamiltonian(const std::string& fname, bool spin_major):
             Hamiltonian(FcidumpFileReader<defs::ham_t>(fname, spin_major)){}
 
-    consts::component_t<defs::ham_t>::type get_energy(const views::Determinant &det) const {
+    consts::component_t<defs::ham_t>::type get_energy(const views::FermionOnv &det) const {
         return consts::real(get_element_0(det));
     }
 
@@ -79,7 +79,7 @@ public:
         return get_element_0(occs.m_inds, occs.m_nind);
     }
 
-    defs::ham_t get_element_0(const views::Determinant &det) const {
+    defs::ham_t get_element_0(const views::FermionOnv &det) const {
         OccupiedOrbitals occs(det);
         return get_element_0(occs.m_inds, occs.m_nind);
     }
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    defs::ham_t get_element(const views::Determinant &bra, const views::Determinant &ket) const {
+    defs::ham_t get_element(const views::FermionOnv &bra, const views::FermionOnv &ket) const {
         return get_element(AntisymConnection(ket, bra));
     }
 
@@ -158,11 +158,11 @@ public:
         return m_complex_valued;
     }
 
-//    elements::Determinant guess_reference(const int &spin_level) const;
+//    elements::FermionOnv guess_reference(const int &spin_level) const;
 //
-//    elements::Determinant refine_guess_reference(const views::Determinant &ref) const;
+//    elements::FermionOnv refine_guess_reference(const views::FermionOnv &ref) const;
 //
-//    elements::Determinant choose_reference(const int &spin_level) const;
+//    elements::FermionOnv choose_reference(const int &spin_level) const;
 //
 //    class DeterminantList : public MappedList<DeterminantElement> {
 //    public:

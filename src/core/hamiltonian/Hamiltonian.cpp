@@ -10,8 +10,8 @@
 
 
 #if 0
-Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
-    Determinant ref(m_nsite);
+FermionOnv Hamiltonian::guess_reference(const int &spin_restrict) const {
+    FermionOnv ref(m_nsite);
     ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
     size_t n_spin_1 = nelec() - n_spin_0;
@@ -21,7 +21,7 @@ Determinant Hamiltonian::guess_reference(const int &spin_restrict) const {
     return ref;
 }
 
-Determinant Hamiltonian::refine_guess_reference(const DeterminantElement &ref) const {
+FermionOnv Hamiltonian::refine_guess_reference(const DeterminantElement &ref) const {
 
     auto e_ref = get_energy(ref);
     /*
@@ -31,7 +31,7 @@ Determinant Hamiltonian::refine_guess_reference(const DeterminantElement &ref) c
     OccupiedOrbitals occs(ref);
     VacantOrbitals vacs(ref);
 
-    Determinant excited(m_nsite);
+    FermionOnv excited(m_nsite);
 
     for (auto occ : occs.m_inds) {
         for (auto vac : vacs.m_inds) {
@@ -58,7 +58,7 @@ Determinant Hamiltonian::refine_guess_reference(const DeterminantElement &ref) c
     return excited;
 }
 
-Determinant Hamiltonian::choose_reference(const int &spin_level) const {
+FermionOnv Hamiltonian::choose_reference(const int &spin_level) const {
     auto ref = guess_reference(spin_level);
     ref = refine_guess_reference(ref);
     return ref;
@@ -80,7 +80,7 @@ Hamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElemen
     defs::inds alpha_inds(nalpha);
     defs::inds beta_inds(nbeta);
 
-    Determinant work_det(nsite());
+    FermionOnv work_det(nsite());
     while (alpha_enumerator.next(alpha_inds)) {
         ContainerCombinationEnumerator<defs::inds> beta_enumerator(beta_sites, nsite(), nbeta);
         while (beta_enumerator.next(beta_inds)) {

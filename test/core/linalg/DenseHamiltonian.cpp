@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include <src/core/linalg/EigenSolver.h>
-#include "src/core/hamiltonian/AbInitioHamiltonian.h"
 #include "src/core/linalg/DenseHamiltonian.h"
 
 

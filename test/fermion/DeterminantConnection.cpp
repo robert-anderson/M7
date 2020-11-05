@@ -7,7 +7,7 @@
 
 /*
 TEST(DeterminantConnection, NSetBits) {
-    Determinant det(18);
+    FermionOnv det(18);
     EXPECT_EQ(det.nsetbits(), 0ul);
 
     det.zero();

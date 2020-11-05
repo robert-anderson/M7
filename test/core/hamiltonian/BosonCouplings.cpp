@@ -37,10 +37,10 @@ TEST(BosonCouplings, Element_f0_b1){
 
     BosonCouplings simpleCoupling(nocc_cutoff, nmode, V, omega);
 
-    Determinant dket(nmode);
+    FermionOnv dket(nmode);
 
     dket.set(defs::inds{1,2,3,4});
-    Determinant dbra = dket;
+    FermionOnv dbra = dket;
 
     AntisymConnection ac(dbra, dket);
 
@@ -62,8 +62,8 @@ TEST(BosonCouplings, Element_f1_b1){
 
     BosonCouplings simpleCoupling(nocc_cutoff, nmode, V, omega);
 
-    Determinant dket(nmode);
-    Determinant dbra(nmode);
+    FermionOnv dket(nmode);
+    FermionOnv dbra(nmode);
 
     dket.set(defs::inds{1,2,3,4});
     dbra.set(defs::inds{1,2,3,5});

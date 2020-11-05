@@ -37,10 +37,10 @@ struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
 };
 
 namespace elements {
-    struct Determinant : Element<fields::Determinant> {
+    struct Determinant : Element<fields::FermionOnv> {
         Determinant(size_t nsite):
-        Element<fields::Determinant>(DeterminantSpecifier(nsite), "Working determinant"){}
-        using specs::Determinant::view_t::operator=;
+        Element<fields::FermionOnv>(FermionOnvSpecifier(nsite), "Working determinant"){}
+        using specs::FermionOnv::view_t::operator=;
     };
 
     struct BosonOnv : Element<fields::BosonOnv> {
@@ -49,9 +49,9 @@ namespace elements {
         using specs::BosonOnv::view_t::operator=;
     };
 
-    struct FermionBosonConfiguration : Element<fields::FermionBosonConfiguration> {
+    struct FermionBosonConfiguration : Element<fields::FermiBosOnv> {
         FermionBosonConfiguration(size_t nsite, size_t nmode):
-        Element<fields::FermionBosonConfiguration>(nsite, nmode, "Working fermion-boson configuration"){}
+        Element<fields::FermiBosOnv>(nsite, nmode, "Working fermion-boson configuration"){}
     };
 
     template<size_t nind, bool bosons>
@@ -91,8 +91,8 @@ namespace elements {
                 nbit, "Working bitset") {}
     };
 
-    struct Determinant : BufferedComposite<fields::Determinant> {
-        Determinant(size_t nsite) : BufferedComposite<fields::Determinant>(
+    struct FermionOnv : BufferedComposite<fields::FermionOnv> {
+        FermionOnv(size_t nsite) : BufferedComposite<fields::FermionOnv>(
                 nsite, "Working determinant") {}
     };
 
@@ -101,8 +101,8 @@ namespace elements {
                 nmode, "Working Boson ONV") {}
     };
 
-    struct Configuration : BufferedComposite<fields::Configuration> {
-        Configuration(size_t nsite, size_t nmode) : BufferedComposite<fields::Configuration>(
+    struct Onv : BufferedComposite<fields::Onv> {
+        Onv(size_t nsite, size_t nmode) : BufferedComposite<fields::Onv>(
                 nsite, nmode, "Working configuration") {}
     };
 }

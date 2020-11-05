@@ -8,10 +8,10 @@
 #include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 
-struct TestTable : MappedTable<fields::Configuration> {
-    fields::Configuration m_config;
+struct TestTable : MappedTable<fields::Onv> {
+    fields::Onv m_config;
     TestTable(size_t nsite, size_t nmode):
-    MappedTable<fields::Configuration>(m_config, 10),
+    MappedTable<fields::Onv>(m_config, 10),
             m_config(this, nsite, nmode, "configuration"){}
 };
 
@@ -21,11 +21,11 @@ TEST(MappedTable, TEST){
     BufferedTable<TestTable> bt(nsite, nmode);
     bt.expand(10);
     elements::Configuration config(nsite, nmode);
-    config.m_det[2] = 1;
-    config.m_perm[2] = 5;
+    config.m_fonv[2] = 1;
+    config.m_bonv[2] = 5;
     std::cout << config.to_string() << std::endl;
     bt.insert(config);
-    config.m_perm[4] = 6;
+    config.m_bonv[4] = 6;
     bt.insert(config);
 //    bt.erase(bt[config]);
 //    auto lookup = bt[config];

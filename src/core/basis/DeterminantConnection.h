@@ -5,7 +5,7 @@
 #ifndef M7_DETERMINANTCONNECTION_H
 #define M7_DETERMINANTCONNECTION_H
 
-#include <src/core/field/DeterminantSpecifier.h>
+#include <src/core/field/FermionOnvSpecifier.h>
 #include <algorithm>
 #include <src/core/field/Views.h>
 
@@ -37,9 +37,9 @@ protected:
     size_t m_nann, m_ncre;
 
 public:
-    explicit DeterminantConnection(const DeterminantSpecifier& field);
-    DeterminantConnection(const views::Determinant &ket, const views::Determinant &bra);
-    explicit DeterminantConnection(const views::Determinant &ket);
+    explicit DeterminantConnection(const FermionOnvSpecifier& field);
+    DeterminantConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
+    explicit DeterminantConnection(const views::FermionOnv &ket);
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
@@ -49,8 +49,8 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     const size_t& ncre() const {return m_ncre;}
 
-    virtual void connect(const views::Determinant &ket, const views::Determinant &bra);
-    virtual void apply(const views::Determinant &ket, views::Determinant &bra);
+    virtual void connect(const views::FermionOnv &ket, const views::FermionOnv &bra);
+    virtual void apply(const views::FermionOnv &ket, views::FermionOnv &bra);
     void zero(){m_ncre=0; m_nann=0;}
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
@@ -84,13 +84,13 @@ class AntisymConnection : public DeterminantConnection {
     bool m_phase;
 
 public:
-    explicit AntisymConnection(const DeterminantSpecifier& field);
-    AntisymConnection(const views::Determinant &ket, const views::Determinant &bra);
-    explicit AntisymConnection(const views::Determinant &ket);
+    explicit AntisymConnection(const FermionOnvSpecifier& field);
+    AntisymConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
+    explicit AntisymConnection(const views::FermionOnv &ket);
 
-    void connect(const views::Determinant &ket, const views::Determinant &bra) override;
-    void apply(const views::Determinant &ket);
-    void apply(const views::Determinant &ket, views::Determinant &bra) override;
+    void connect(const views::FermionOnv &ket, const views::FermionOnv &bra) override;
+    void apply(const views::FermionOnv &ket);
+    void apply(const views::FermionOnv &ket, views::FermionOnv &bra) override;
 
     const defs::det_work& com() const {return m_com;}
     //void com(const defs::inds &v) {m_com.assign(v.begin(), v.end()); m_ncom=v.size();}
@@ -103,7 +103,7 @@ template<typename T>
 struct MatrixElement {
     AntisymConnection aconn;
     T element = 0;
-    MatrixElement(const views::Determinant& det): aconn(AntisymConnection(det)) {}
+    MatrixElement(const views::FermionOnv& det): aconn(AntisymConnection(det)) {}
 };
 
 #endif //M7_DETERMINANTCONNECTION_H

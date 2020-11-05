@@ -2,13 +2,12 @@
 // Created by rja on 09/05/2020.
 //
 
-#include <src/core/hamiltonian/AbInitioHamiltonian.h>
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/pchb/HeatBathSamplers.h"
 
 #if 0
-bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, size_t ndraw, size_t pc_freq_thresh) {
+bool excit_gen_tester(ExcitationGenerator &exgen, const FermionOnv &src_det, size_t ndraw, size_t pc_freq_thresh) {
     /*
      * given:
      *      ExcitationGenerator subclass instance
@@ -64,7 +63,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const Determinant &src_det, si
     OccupiedOrbitals occ(src_det);
     VacantOrbitals vac(src_det);
     AntisymConnection anticonn(src_det);
-    Determinant work_det(src_det);
+    FermionOnv work_det(src_det);
 
     auto loop = [&](size_t ielement) {
         defs::prob_t prob;
@@ -131,7 +130,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
     PRNG prng(18, 1e4);
     HeatBathSamplers pchb(&ham, prng);
 
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {0, 1, 4, 5};
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
@@ -144,7 +143,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     source_det.set(defs::inds{1, 4, 6, 7});
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
@@ -157,7 +156,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     source_det.set(defs::inds{1, 5, 6, 7});
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
@@ -168,7 +167,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17};
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
@@ -180,7 +179,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     PRNG prng(15, 10000);
     HeatBathSamplers pchb(&ham, prng);
 
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {1, 4, 5, 7, 8, 10, 12, 14, 15, 16, 20, 21};
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
@@ -192,7 +191,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     PRNG prng(15, 100000);
     HeatBathSamplers pchb(&ham, prng);
 
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {1, 4, 5, 7, 8, 9, 10, 14, 15, 16, 20, 21};
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));

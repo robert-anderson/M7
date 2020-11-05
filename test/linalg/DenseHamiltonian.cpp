@@ -3,7 +3,6 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/hamiltonian/AbInitioHamiltonian.h"
 
 #if 0
 TEST(DenseHamiltonian, FciEnergyCheck) {

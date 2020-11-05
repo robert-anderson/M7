@@ -15,7 +15,7 @@
 
 class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
     const Hamiltonian &m_h;
-    const DeterminantElement &m_det;
+    const DeterminantElement &m_fonv;
     OccupiedOrbitals m_occs;
     VacantOrbitals m_vacs;
 
@@ -24,7 +24,7 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
     defs::ham_comp_t m_eps;
 
     MatrixElement<defs::ham_t> default_result() {
-        return MatrixElement<defs::ham_t>(m_det);
+        return MatrixElement<defs::ham_t>(m_fonv);
     }
 
     bool next_element(MatrixElement<defs::ham_t> &result) override {
@@ -34,7 +34,7 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
                     m_occs.m_inds[m_occind],
                     m_vacs.m_inds[m_vacind]
             );
-            result.aconn.apply(m_det);
+            result.aconn.apply(m_fonv);
             result.element = m_h.get_element(result.aconn);
             if (consts::float_nearly_zero(result.element, m_eps)) {
                 return next_element(result);
@@ -54,14 +54,14 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
 public:
 
     HamiltonianSingleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
-            m_h(h), m_det(det), m_occs(det), m_vacs(det), m_eps(eps){
+            m_h(h), m_fonv(det), m_occs(det), m_vacs(det), m_eps(eps){
         m_occind++;
     }
 };
 
 class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
     const Hamiltonian &m_h;
-    const DeterminantElement &m_det;
+    const DeterminantElement &m_fonv;
     OccupiedOrbitals m_occs;
     VacantOrbitals m_vacs;
 
@@ -72,7 +72,7 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
     defs::ham_comp_t m_eps;
 
     MatrixElement<defs::ham_t> default_result() {
-        return MatrixElement<defs::ham_t>(m_det);
+        return MatrixElement<defs::ham_t>(m_fonv);
     }
 
     bool next_element(MatrixElement<defs::ham_t> &result) override {
@@ -101,7 +101,7 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
 public:
 
     HamiltonianDoubleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
-            m_h(h), m_det(det), m_occs(det), m_vacs(det),
+            m_h(h), m_fonv(det), m_occs(det), m_vacs(det),
             m_occ_enumerator(m_occs.m_nind, 2),
             m_vac_enumerator(m_occs.m_nind, 2),
             m_occinds(2, ~0ul), m_vacinds(2, ~0ul), m_eps(eps){
@@ -122,7 +122,7 @@ public:
 #if 0
 AntisymConnection connection(ref);
 
-Determinant excited(m_nsite);
+FermionOnv excited(m_nsite);
 for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
     const auto &occ = occs.m_inds[iocc];
     for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {

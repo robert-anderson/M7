@@ -5,12 +5,12 @@
 #ifndef M7_FERMIONBOSONENUMERATOR_H
 #define M7_FERMIONBOSONENUMERATOR_H
 
-#include "DeterminantEnumerator.h"
+#include "FermionOnvEnumerator.h"
 #include "BosonOnvEnumerator.h"
 #include "src/core/field/Elements.h"
 
-class FermionBosonEnumerator : public Enumerator<views::FermionBosonConfiguration> {
-    DeterminantEnumerator m_det_enum;
+class FermionBosonEnumerator : public Enumerator<views::FermiBosOnv> {
+    FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
     elements::Determinant m_det;
     elements::BosonOnv m_bonv;
@@ -24,14 +24,14 @@ public:
         m_det_enum.next_element(m_det);
     }
 
-    bool next_element(views::FermionBosonConfiguration &result) override {
+    bool next_element(views::FermiBosOnv &result) override {
         bool inner_allfound = !m_bonv_enum.next(m_bonv);
         if (inner_allfound) {
             m_bonv_enum.next(m_bonv);
             if (!m_det_enum.next(m_det)) return false;
         }
-        result.m_det = m_det;
-        result.m_perm = m_bonv;
+        result.m_fonv = m_det;
+        result.m_bonv = m_bonv;
         return true;
     }
 };

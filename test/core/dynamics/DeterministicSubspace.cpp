@@ -3,7 +3,6 @@
 //
 
 #include <src/core/dynamics/WalkerList.h>
-#include <src/core/hamiltonian/AbInitioHamiltonian.h>
 #include <src/core/dynamics/DeterministicSubspace.h>
 #include <src/core/util/Timer.h>
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>

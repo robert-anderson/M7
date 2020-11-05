@@ -8,7 +8,7 @@
 #include "NumericSpecifier.h"
 #include "NumericArraySpecifier.h"
 #include "BitsetSpecifier.h"
-#include "DeterminantSpecifier.h"
+#include "FermionOnvSpecifier.h"
 #include "BosonOnvSpecifier.h"
 
 namespace specs {
@@ -19,7 +19,7 @@ namespace specs {
     using NumberArray = NumericArraySpecifier<T, nind>;
 
     using Bitset = BitsetSpecifier;
-    using Determinant = DeterminantSpecifier;
+    using FermionOnv = FermionOnvSpecifier;
     using BosonOnv = BosonOnvSpecifier;
 }
 

@@ -4,7 +4,7 @@
 #if 0
 
 #include <src/data/TableNew.h>
-#include <src/data/Determinant.h>
+#include <src/data/FermionOnv.h>
 #include "gtest/gtest.h"
 
 TEST(FieldSet, Segments) {

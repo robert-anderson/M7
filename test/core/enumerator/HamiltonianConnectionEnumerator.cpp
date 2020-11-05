@@ -2,7 +2,6 @@
 // Created by rja on 06/07/2020.
 //
 
-#include <src/core/hamiltonian/AbInitioHamiltonian.h>
 #include <src/core/enumerator/ContainerCombinationEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/enumerator/HamiltonianConnectionEnumerator.h"
@@ -13,14 +12,14 @@ public:
     DeterminantField m_determinant;
     NumericField<defs::ham_t> m_helement;
 
-    ConnectionList(const Hamiltonian &h, const Determinant &ref, size_t nbucket, const defs::ham_comp_t eps) :
+    ConnectionList(const Hamiltonian &h, const FermionOnv &ref, size_t nbucket, const defs::ham_comp_t eps) :
             MappedList("test connection list", m_determinant, nbucket),
             m_determinant(this, 1, ref.nsite()), m_helement(this) {
         OccupiedOrbitals occs(ref);
         VacantOrbitals vacs(ref);
         AntisymConnection connection(ref);
 
-        Determinant excited(ref.nsite());
+        FermionOnv excited(ref.nsite());
         for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
             const auto &occ = occs.m_inds[iocc];
             for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {
@@ -85,7 +84,7 @@ TEST(HamiltonianConnectionEnumerator, ExcitedDet) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
 
-    Determinant det(ham.nsite());
+    FermionOnv det(ham.nsite());
     det.set(defs::inds{0, 1, 2, 6, 7, 9});
     HamiltonianConnectionEnumerator enumerator(ham, det);
 

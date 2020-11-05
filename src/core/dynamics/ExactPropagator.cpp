@@ -20,7 +20,7 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
     ASSERT(!consts::float_is_zero(*weight));
 
-    Determinant dst_det(src_det.nsite());
+    FermionOnv dst_det(src_det.nsite());
     for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
         auto occ = occs.m_inds[iocc];
 

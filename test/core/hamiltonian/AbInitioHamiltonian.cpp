@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include "src/core/basis/DecodedDeterminant.h"
-#include "src/core/hamiltonian/AbInitioHamiltonian.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 
 #if 0
 TEST(AbInitioHamiltonian, DhfEnergy) {
@@ -12,7 +12,7 @@ TEST(AbInitioHamiltonian, DhfEnergy) {
     const auto benchmark = -14.354220448530139;
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
-    Determinant hf_det(ham.nsite());
+    FermionOnv hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
     auto elem = ham.get_element_0(hf_det);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
@@ -24,14 +24,14 @@ TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
-    Determinant hf_det(ham.nsite());
+    FermionOnv hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
     //size_t removed, inserted;
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);
 
-    Determinant excited(ham.nsite());
+    FermionOnv excited(ham.nsite());
 
     AntisymConnection connection(hf_det);
 
@@ -59,7 +59,7 @@ TEST(AbInitioHamiltonian, RhfEnergy) {
     const auto benchmark = -108.65146156994338;
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    Determinant hf_det(ham.nsite());
+    FermionOnv hf_det(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){hf_det.set(0, i); hf_det.set(1, i);}
 
     auto elem = ham.get_element_0(hf_det);
@@ -72,13 +72,13 @@ TEST(AbInitioHamiltonian, RhfEnergy) {
 TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    Determinant hf_det(ham.nsite());
+    FermionOnv hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, 2,  6, 7, 8});
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);
 
-    Determinant excited(ham.nsite());
+    FermionOnv excited(ham.nsite());
 
     AntisymConnection connection(hf_det);
 

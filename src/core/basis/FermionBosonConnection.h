@@ -14,19 +14,19 @@ class FermionBosonConnection {
     BosonOnvConnection m_permconn;
 
     FermionBosonConnection(
-            const views::FermionBosonConfiguration& ket,
-            const views::FermionBosonConfiguration& bra
+            const views::FermiBosOnv& ket,
+            const views::FermiBosOnv& bra
             ):
-            m_detconn(ket.m_det, bra.m_det),
-            m_permconn(ket.m_perm, bra.m_perm){}
+            m_detconn(ket.m_fonv, bra.m_fonv),
+            m_permconn(ket.m_bonv, bra.m_bonv){}
 
-    void connect(const views::FermionBosonConfiguration &ket, const views::FermionBosonConfiguration &bra){
-        m_detconn.connect(ket.m_det, bra.m_det);
-        m_permconn.connect(ket.m_perm, bra.m_perm);
+    void connect(const views::FermiBosOnv &ket, const views::FermiBosOnv &bra){
+        m_detconn.connect(ket.m_fonv, bra.m_fonv);
+        m_permconn.connect(ket.m_bonv, bra.m_bonv);
     }
-    void apply(const views::FermionBosonConfiguration &ket, views::FermionBosonConfiguration &bra){
-        m_detconn.apply(ket.m_det, bra.m_det);
-        m_permconn.apply(ket.m_perm, bra.m_perm);
+    void apply(const views::FermiBosOnv &ket, views::FermiBosOnv &bra){
+        m_detconn.apply(ket.m_fonv, bra.m_fonv);
+        m_permconn.apply(ket.m_bonv, bra.m_bonv);
     }
 
 };

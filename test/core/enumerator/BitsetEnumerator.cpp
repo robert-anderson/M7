@@ -4,7 +4,7 @@
 
 #if 0
 
-#include "src/core/basis/Determinant.h"
+#include "src/core/basis/FermionOnv.h"
 #include "src/core/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
 #include "src/core/enumerator/BitsetEnumerator.h"
@@ -101,7 +101,7 @@ TEST(BitsetEnumerator, BitsetXor) {
 }
 
 TEST(BitsetEnumerator, DeterminantSet) {
-    Determinant det(50);
+    FermionOnv det(50);
     defs::inds spinorbs{1, 4, 7, 32, 50};//, 54, 60, 89};
     det.set(spinorbs);
 

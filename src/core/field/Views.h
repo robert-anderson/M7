@@ -5,11 +5,11 @@
 #ifndef M7_VIEWS_H
 #define M7_VIEWS_H
 
-#include "DeterminantSpecifier.h"
+#include "FermionOnvSpecifier.h"
 #include "NumericSpecifier.h"
 #include "NumericArraySpecifier.h"
 #include "BosonOnvSpecifier.h"
-#include "FermionBosonState.h"
+#include "FermionBosonOnv.h"
 
 namespace views {
     template <typename T>
@@ -17,22 +17,22 @@ namespace views {
     template <typename T, size_t nind>
     using NumberArray = typename NumericArraySpecifier<T, nind>::view_t;
     using Bitset = BitsetSpecifier::view_t;
-    using Determinant = DeterminantSpecifier::view_t;
+    using FermionOnv = FermionOnvSpecifier::view_t;
     using BosonOnv = BosonOnvSpecifier::view_t;
-    using FermionBosonConfiguration = fb_state::View;
+    using FermiBosOnv = fb_onv::View;
 
     template<bool bosons>
     struct ConfigurationSelector {};
 
     template<> struct ConfigurationSelector<false> {
-        typedef Determinant type;
+        typedef FermionOnv type;
     };
 
     template<> struct ConfigurationSelector<true> {
-        typedef FermionBosonConfiguration type;
+        typedef FermiBosOnv type;
     };
 
-    using Configuration = ConfigurationSelector<defs::bosons>::type;
+    using Onv = ConfigurationSelector<defs::bosons>::type;
 }
 
 #endif //M7_VIEWS_H

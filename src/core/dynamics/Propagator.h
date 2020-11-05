@@ -27,7 +27,7 @@ public:
     MagnitudeLogger m_magnitude_logger;
     defs::ham_comp_t m_shift;
 
-    mutable Determinant m_dst_det;
+    mutable FermionOnv m_dst_det;
     mutable AntisymConnection m_aconn;
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;

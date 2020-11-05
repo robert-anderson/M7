@@ -5,7 +5,7 @@
 #ifndef M7_DECODEDDETERMINANT_H
 #define M7_DECODEDDETERMINANT_H
 
-#include "src/core/field/DeterminantSpecifier.h"
+#include "src/core/field/FermionOnvSpecifier.h"
 #include "src/core/field/Views.h"
 
 struct DecodedDeterminant {
@@ -14,25 +14,25 @@ struct DecodedDeterminant {
     defs::det_work m_inds{};
     size_t m_nind = 0ul;
 
-    explicit DecodedDeterminant(const DeterminantSpecifier& spec):
+    explicit DecodedDeterminant(const FermionOnvSpecifier& spec):
     m_nbit(spec.m_nbit), m_element_dsize(spec.m_ndataword) {}
 
-    explicit DecodedDeterminant(const views::Determinant &view):
+    explicit DecodedDeterminant(const views::FermionOnv &view):
     DecodedDeterminant(view.spec()){}
 
-    virtual void update(const views::Determinant &det_elem) = 0;
+    virtual void update(const views::FermionOnv &det_elem) = 0;
 };
 
 struct OccupiedOrbitals : DecodedDeterminant {
-    OccupiedOrbitals(const DeterminantSpecifier& spec);
-    OccupiedOrbitals(const views::Determinant &view);
-    void update(const views::Determinant &view) override;
+    OccupiedOrbitals(const FermionOnvSpecifier& spec);
+    OccupiedOrbitals(const views::FermionOnv &view);
+    void update(const views::FermionOnv &view) override;
 };
 
 struct VacantOrbitals : DecodedDeterminant {
-    VacantOrbitals(const DeterminantSpecifier& spec);
-    VacantOrbitals(const views::Determinant &view);
-    void update(const views::Determinant &view) override;
+    VacantOrbitals(const FermionOnvSpecifier& spec);
+    VacantOrbitals(const views::FermionOnv &view);
+    void update(const views::FermionOnv &view) override;
 };
 
 #endif //M7_DECODEDDETERMINANT_H

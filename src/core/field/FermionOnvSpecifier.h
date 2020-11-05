@@ -2,23 +2,23 @@
 // Created by rja on 21/10/2020.
 //
 
-#ifndef M7_DETERMINANTSPECIFIER_H
-#define M7_DETERMINANTSPECIFIER_H
+#ifndef M7_FERMIONONVSPECIFIER_H
+#define M7_FERMIONONVSPECIFIER_H
 
 #include "BitsetSpecifier.h"
 #include "src/core/enumerator/Enumerator.h"
 
 
-struct DeterminantSpecifier : BitsetSpecifier {
+struct FermionOnvSpecifier : BitsetSpecifier {
     const size_t m_nsite;
 
-    DeterminantSpecifier(const size_t &nsite);
+    FermionOnvSpecifier(const size_t &nsite);
 
     struct View : BitsetSpecifier::View {
-        View(const DeterminantSpecifier &field, char *ptr);
+        View(const FermionOnvSpecifier &field, char *ptr);
 
-        const DeterminantSpecifier& spec() const {
-            return static_cast<const DeterminantSpecifier&>(m_spec);
+        const FermionOnvSpecifier& spec() const {
+            return static_cast<const FermionOnvSpecifier&>(m_spec);
         }
 
         std::string to_string() const override;
@@ -75,4 +75,4 @@ struct DeterminantSpecifier : BitsetSpecifier {
 };
 
 
-#endif //M7_DETERMINANTSPECIFIER_H
+#endif //M7_FERMIONONVSPECIFIER_H

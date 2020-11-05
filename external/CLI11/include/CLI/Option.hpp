@@ -273,7 +273,7 @@ class Option : public OptionBase<Option> {
     std::function<std::string()> default_function_{};
 
     ///@}
-    /// @name Configuration
+    /// @name Onv
     ///@{
 
     /// The number of arguments that make up one option. max is the nominal type size, min is the minimum number of

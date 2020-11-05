@@ -7,13 +7,13 @@
 
 #if 0
 #include "src/core/parallel/RankAllocator.h"
-#include "src/core/basis/Determinant.h"
+#include "src/core/basis/FermionOnv.h"
 #include "src/core/basis/DeterminantConnection.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "WalkerList.h"
 
-class Reference : public Determinant {
+class Reference : public FermionOnv {
 
     WalkerList &m_list;
     RankAllocator<DeterminantElement> &m_ra;
@@ -37,7 +37,7 @@ class Reference : public Determinant {
 public:
     Reference(WalkerList &list, RankAllocator<DeterminantElement> &ra,
             DeterminantElement &det, double redefinition_thresh) :
-            Determinant(det), m_list(list), m_ra(ra), m_aconn(det),
+            FermionOnv(det), m_list(list), m_ra(ra), m_aconn(det),
             m_redefinition_thresh(redefinition_thresh){
         if (m_list.nrow_per_segment() == 0) m_list.expand(1);
         m_irank = ra.get_rank(det);
@@ -51,7 +51,7 @@ public:
         change(m_irow, m_irank);
     }
 
-    using Determinant::operator=;
+    using FermionOnv::operator=;
     void change(const size_t& irow, const size_t& irank){
         ASSERT(irank<mpi::nrank())
         ASSERT(irow!=~0ul || !mpi::i_am(irank))

@@ -2,10 +2,10 @@
 // Created by RJA on 31/10/2020.
 //
 
-#ifndef M7_FERMIONBOSONSTATE_H
-#define M7_FERMIONBOSONSTATE_H
+#ifndef M7_FERMIONBOSONONV_H
+#define M7_FERMIONBOSONONV_H
 
-#include "DeterminantSpecifier.h"
+#include "FermionOnvSpecifier.h"
 #include "BosonOnvSpecifier.h"
 #include "TableField.h"
 
@@ -13,20 +13,20 @@
  * Fermion-boson product state
  */
 
-namespace fb_state {
+namespace fb_onv {
     struct View {
-        DeterminantSpecifier::view_t m_det;
-        BosonOnvSpecifier::view_t m_perm;
+        FermionOnvSpecifier::view_t m_fonv;
+        BosonOnvSpecifier::view_t m_bonv;
 
-        View(DeterminantSpecifier::view_t &&det,
-             BosonOnvSpecifier::view_t &&perm);
+        View(FermionOnvSpecifier::view_t &&fonv,
+             BosonOnvSpecifier::view_t &&bonv);
 
         bool operator==(const View &other) const;
 
         bool operator!=(const View &other) const;
 
         void zero() {
-            m_det.zero(); m_perm.zero();
+            m_fonv.zero(); m_bonv.zero();
         }
 
         std::string to_string();
@@ -38,33 +38,33 @@ namespace fb_state {
     template<size_t nind>
     struct Field : NdFieldGroup<nind> {
 
-        NdFieldBase<DeterminantSpecifier, nind> m_det;
-        NdFieldBase<BosonOnvSpecifier, nind> m_perm;
+        NdFieldBase<FermionOnvSpecifier, nind> m_fonv;
+        NdFieldBase<BosonOnvSpecifier, nind> m_bonv;
 
         using NdFieldGroup<nind>::m_format;
 
         template<typename ...Args>
         Field(TableX *table, size_t nsite, size_t nmode, std::string description, Args... shape) :
                 NdFieldGroup<nind>(shape...),
-                m_det(table, {nsite}, description + " (Determinant)", m_format),
-                m_perm(table, {nmode}, description + " (Boson ONV)", m_format) {}
+                m_fonv(table, {nsite}, description + " (FermionOnv)", m_format),
+                m_bonv(table, {nmode}, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
         typedef const View const_view_t;
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {
-            return {m_det(irow, inds...), m_perm(irow, inds...)};
+            return {m_fonv(irow, inds...), m_bonv(irow, inds...)};
         }
 
         template<typename ...Args>
         const_view_t operator()(const size_t &irow, Args... inds) const {
-            return {m_det(irow, inds...), m_perm(irow, inds...)};
+            return {m_fonv(irow, inds...), m_bonv(irow, inds...)};
         }
 
         struct hash_fn {
             defs::hash_t operator()(const view_t &view) const {
-                return DeterminantSpecifier::hash(view.m_det) ^ BosonOnvSpecifier::hash(view.m_perm);
+                return FermionOnvSpecifier::hash(view.m_fonv) ^ BosonOnvSpecifier::hash(view.m_bonv);
             }
         };
     };
@@ -72,4 +72,4 @@ namespace fb_state {
 }
 
 
-#endif //M7_FERMIONBOSONSTATE_H
+#endif //M7_FERMIONBOSONONV_H

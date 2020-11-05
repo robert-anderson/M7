@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include <src/core/util/defs.h>
-#include <src/core/hamiltonian/AbInitioHamiltonian.h>
 
 #if 0
 TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
@@ -12,7 +11,7 @@ TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
@@ -43,12 +42,12 @@ TEST(HeatBathSampler, AllExcitsGeneratedFromExcitedDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     /*
      * arbitrary choice of source determinant
      */
     source_det.set(defs::inds{1, 4, 6, 7});
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
@@ -86,7 +85,7 @@ TEST(HeatBathSampler, UnbiasedElecPairComplex4c) {
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
@@ -126,7 +125,7 @@ TEST(HeatBathSampler, UnbiasedElecPairAndFirstVirtualComplex4c) {
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
@@ -182,7 +181,7 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantComplex4c) {
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
@@ -216,12 +215,12 @@ TEST(HeatBathSampler, UnbiasedFromExcitedDeterminantComplex4c) {
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP");
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
-    Determinant source_det(ham.nsite());
+    FermionOnv source_det(ham.nsite());
     /*
      * arbitrary choice of source determinant
      */
     source_det.set(defs::inds{1, 4, 6, 7});
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 
@@ -255,7 +254,7 @@ TEST(HeatBathSampler, UnbiasedFromHartreeFockDeterminantRealSchroedinger) {
     PrivateStore<PRNG> prng(18, 1e4);
     HeatBathSampler heat_bath_sampler(&ham, prng);
     auto source_det = ham.guess_reference(0);
-    Determinant work_det(ham.nsite());
+    FermionOnv work_det(ham.nsite());
     auto &det_sampler = heat_bath_sampler.det_sampler->get();
     det_sampler.update(source_det);
 

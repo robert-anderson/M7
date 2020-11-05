@@ -89,9 +89,9 @@ typedef BitsetEnumerator<and_not_op> BitsetAndNotEnumerator;
 typedef BitsetEnumerator<xor_op> BitsetXorEnumerator;
 
 template<enum BitfieldOps op>
-class DeterminantEnumerator : public BitsetEnumerator<op> {
+class FermionOnvEnumerator : public BitsetEnumerator<op> {
 public:
-    DeterminantEnumerator(
+    FermionOnvEnumerator(
         const DeterminantElement &data1,
         const DeterminantElement &data2,
         Enumerator<size_t> *subsequent = nullptr, size_t offset = 0) :
@@ -108,21 +108,21 @@ public:
     }
 };
 
-class DeterminantSetEnumerator : public DeterminantEnumerator<null_op> {
+class DeterminantSetEnumerator : public FermionOnvEnumerator<null_op> {
 public:
     DeterminantSetEnumerator(const DeterminantElement &data1, Enumerator<size_t> *subsequent = nullptr,
-                             size_t offset = 0) : DeterminantEnumerator<null_op>(data1, data1, subsequent, offset) {}
+                             size_t offset = 0) : FermionOnvEnumerator<null_op>(data1, data1, subsequent, offset) {}
 };
 
-class DeterminantClrEnumerator : public DeterminantEnumerator<not_op> {
+class DeterminantClrEnumerator : public FermionOnvEnumerator<not_op> {
 public:
     DeterminantClrEnumerator(const DeterminantElement &data1, Enumerator<size_t> *subsequent = nullptr,
                              size_t offset = 0) :
-        DeterminantEnumerator<not_op>(data1, data1, subsequent, offset) {}
+            FermionOnvEnumerator<not_op>(data1, data1, subsequent, offset) {}
 };
 
-typedef DeterminantEnumerator<and_op> DeterminantAndEnumerator;
-typedef DeterminantEnumerator<and_not_op> DeterminantAndNotEnumerator;
-typedef DeterminantEnumerator<xor_op> DeterminantXorEnumerator;
+typedef FermionOnvEnumerator<and_op> DeterminantAndEnumerator;
+typedef FermionOnvEnumerator<and_not_op> DeterminantAndNotEnumerator;
+typedef FermionOnvEnumerator<xor_op> DeterminantXorEnumerator;
 
 #endif //M7_BITSETENUMERATOR_H

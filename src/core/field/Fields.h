@@ -6,7 +6,7 @@
 #define M7_FIELDS_H
 
 #include "Specifiers.h"
-#include "FermionBosonState.h"
+#include "FermionBosonOnv.h"
 #include "FlagField.h"
 
 /*
@@ -37,9 +37,9 @@ namespace fields {
     using Bitset = Bitsets<0ul>;
 
     template<size_t nind>
-    using Determinants = NdField<specs::Determinant, nind>;
+    using FermionOnvs = NdField<specs::FermionOnv, nind>;
 
-    using Determinant = Determinants<0ul>;
+    using FermionOnv = FermionOnvs<0ul>;
 
     template<size_t nind>
     using BosonOnvs = NdField<specs::BosonOnv, nind>;
@@ -47,27 +47,27 @@ namespace fields {
     using BosonOnv = BosonOnvs<0ul>;
 
     template<size_t nind>
-    using FermionBosonConfigurations = fb_state::Field<nind>;
+    using FermiBosOnvs = fb_onv::Field<nind>;
 
-    using FermionBosonConfiguration = FermionBosonConfigurations<0ul>;
+    using FermiBosOnv = FermiBosOnvs<0ul>;
 
     template<size_t nind, bool bosons>
     struct ConfigurationSelector {};
 
     template<size_t nind>
     struct ConfigurationSelector<nind, false> {
-        typedef Determinants<nind> type;
+        typedef FermionOnvs<nind> type;
     };
 
     template<size_t nind>
     struct ConfigurationSelector<nind, true> {
-        typedef FermionBosonConfigurations<nind> type;
+        typedef FermiBosOnvs<nind> type;
     };
 
     template<size_t nind>
-    using Configurations = typename ConfigurationSelector<nind, defs::bosons>::type;
+    using Onvs = typename ConfigurationSelector<nind, defs::bosons>::type;
 
-    using Configuration = Configurations<0ul>;
+    using Onv = Onvs<0ul>;
 }
 
 #endif //M7_FIELDS_H

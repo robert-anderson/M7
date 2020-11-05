@@ -60,9 +60,9 @@ struct MyFlags : FlagField {
 
 using namespace fields;
 struct TestTable : TableX {
-    //DeterminantSpecifier<0> field;
+    //FermionOnvSpecifier<0> field;
     Numbers<int, 1> ints;
-    Determinant dets;
+    FermionOnv dets;
     NumberArray<double, 2> matrices;
 
     TestTable() :
@@ -90,14 +90,14 @@ TEST(Table_ND, Packing) {
 
 
 struct TestTable : TableX {
-    fields::Configuration config;
-    TestTable():config(this, 4, 5, "Configuration"){}
+    fields::Onv config;
+    TestTable():config(this, 4, 5, "Onv"){}
 };
 
 TEST(Table_ND, Test) {
 
-    //BufferedField<DeterminantSpecifier, 0> work_det({6}, {});
-    elements::Configuration work_config_buffer(6ul, 5ul);
+    //BufferedField<FermionOnvSpecifier, 0> work_det({6}, {});
+    elements::Onv work_config_buffer(6ul, 5ul);
     auto work_config = work_config_buffer();
     std::cout << work_config.to_string() << std::endl;
     }
@@ -119,7 +119,7 @@ TEST(Table_ND, Test) {
     //std::cout << bt.ints(0, 0) << std::endl;
 //    f(bt);
     //BitsetSpecifier<0> field(&t, {}, 10, "asdasdsadas");
-    //DeterminantSpecifier<0> dets(&t, {}, 5, "asdasdsadas");
+    //FermionOnvSpecifier<0> dets(&t, {}, 5, "asdasdsadas");
     //BosonOnvSpecifier<0> perms(&t, {}, 8, "zddsaas");
 //    perms(0)[1] = 12;
 //    perms(0)[4] = 11;

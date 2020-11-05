@@ -2,10 +2,10 @@
 // Created by rja on 04/11/2020.
 //
 
-#include "SpinConDetEnumerator.h"
+#include "SpinConFonvEnumerator.h"
 
-SpinConDetEnumerator::SpinConDetEnumerator(size_t nsite, size_t nelec, int spin) :
-        Enumerator<views::Determinant>(),
+SpinConFonvEnumerator::SpinConFonvEnumerator(size_t nsite, size_t nelec, int spin) :
+        Enumerator<views::FermionOnv>(),
         m_alpha_comb(nsite, ci_utils::nalpha(nelec, spin)),
         m_beta_comb(nsite, ci_utils::nbeta(nelec, spin)),
         m_alpha_setinds(ci_utils::nalpha(nelec, spin)),
@@ -14,7 +14,7 @@ SpinConDetEnumerator::SpinConDetEnumerator(size_t nsite, size_t nelec, int spin)
     m_alpha_comb.next(m_alpha_setinds);
 }
 
-bool SpinConDetEnumerator::next_element(views::Determinant &result) {
+bool SpinConFonvEnumerator::next_element(views::FermionOnv &result) {
     bool inner_allfound = !m_beta_comb.next(m_beta_setinds);
     if (inner_allfound) {
         m_beta_comb.next(m_beta_setinds);
