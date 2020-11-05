@@ -23,11 +23,11 @@ public:
 
     bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,
-                     defs::prob_t &prob, defs::ham_t &helem, AntisymConnection &anticonn) override;
+                     defs::prob_t &prob, defs::ham_t &helem, AntisymFermionOnvConnection &anticonn) override;
 
     bool draw_double(const DeterminantElement &src_det, DeterminantElement &dst_det,
                      const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
-                     AntisymConnection &anticonn) override;
+                     AntisymFermionOnvConnection &anticonn) override;
 };
 
 

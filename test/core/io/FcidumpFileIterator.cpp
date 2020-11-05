@@ -6,13 +6,12 @@
 #include "src/core/io/FcidumpFileReader.h"
 
 TEST(FcidumpFileIterator, Real_6orb){
-    typedef double T;
-    FcidumpFileReader<T> file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
+    FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.spin_resolved());
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.nspatorb(), 6);
     defs::inds inds(4);
-    T v;
+    defs::ham_t v;
     file_reader.next(inds, v);
     defs::inds test_inds(4);
     // first entry
@@ -33,24 +32,26 @@ TEST(FcidumpFileIterator, Real_6orb){
 
 
 TEST(FcidumpFileIterator, Complex_10orb){
-    typedef std::complex<double> T;
-    FcidumpFileReader<T> file_reader(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
+    FcidumpFileReader file_reader(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_EQ(file_reader.nspatorb(), 5);
     defs::inds inds(4);
-    T v;
+    defs::ham_t v;
     file_reader.next(inds, v);
     defs::inds test_inds(4);
     // first entry
     test_inds = {0,0,0,0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(v, T(2.2752637995109302, 2.379e-17)));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), 2.2752637995109302));
+    ASSERT_TRUE(consts::floats_equal(consts::imag(v), 0.0));
     // scan to arbitrary element
     for (size_t i=0; i<20; ++i) file_reader.next(inds, v);
     // (-0.00851916802083687,-0.005287130898791)   5   3   7   1
     test_inds = {5,3,7,1};
     file_reader.inds_to_orbs(test_inds);
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(v, T(-0.00851916802083687,-0.005287130898791)));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), -0.00851916802083687));
+    ASSERT_TRUE(consts::floats_equal(consts::imag(v), -0.005287130898791));
     // scan to final element
     while(file_reader.next(inds, v)){}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};

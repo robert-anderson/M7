@@ -146,7 +146,7 @@ public:
 
     void build_from_det_connections(const DeterminantElement &ref, FermionHamiltonian *ham, size_t nexcit_max = 2) {
         std::cout << "Building deterministic subspace from connections of " << ref.to_string() << std::endl;
-        DeterminantConnection conn(ref);
+        FermionOnvConnection conn(ref);
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
             auto det = m_walker_list.m_determinant(irow);
@@ -180,7 +180,7 @@ public:
         /*
         defs::inds row_inds;
 
-        DeterminantConnection conn(ref);
+        FermionOnvConnection conn(ref);
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
             auto det = m_walker_list.m_determinant(irow);

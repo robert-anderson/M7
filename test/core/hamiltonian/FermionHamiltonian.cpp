@@ -31,7 +31,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
     elements::FermionOnv excited(ham.nsite());
 
-    AntisymConnection connection(hf_det);
+    AntisymFermionOnvConnection connection(hf_det);
 
     for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
         const auto &occ = occs.m_inds[iocc];
@@ -44,7 +44,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
             /*
             excited = hf_det;
             excited.excite(vac, occ);
-            AntisymConnection connection(hf_det, excited);
+            AntisymFermionOnvConnection connection(hf_det, excited);
             ASSERT_TRUE(consts::float_is_zero(ham.get_element(hf_det, connection)));
             connection.connect(excited, hf_det);
             ASSERT_TRUE(consts::float_is_zero(ham.get_element(excited, connection)));
@@ -77,7 +77,7 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
 
     elements::FermionOnv excited(ham.nsite());
 
-    AntisymConnection connection(fonv);
+    AntisymFermionOnvConnection connection(fonv);
 
     for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
         const auto &occ = occs.m_inds[iocc];

@@ -51,21 +51,8 @@ namespace fields {
 
     using FermiBosOnv = FermiBosOnvs<0ul>;
 
-    template<size_t nind, bool bosons>
-    struct ConfigurationSelector {};
-
     template<size_t nind>
-    struct ConfigurationSelector<nind, false> {
-        typedef FermionOnvs<nind> type;
-    };
-
-    template<size_t nind>
-    struct ConfigurationSelector<nind, true> {
-        typedef FermiBosOnvs<nind> type;
-    };
-
-    template<size_t nind>
-    using Onvs = typename ConfigurationSelector<nind, defs::bosons>::type;
+    using Onvs = typename std::conditional<defs::bosons, FermiBosOnvs<nind>, FermionOnvs<nind>>::type;
 
     using Onv = Onvs<0ul>;
 }

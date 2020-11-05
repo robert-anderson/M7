@@ -11,23 +11,23 @@ TEST(Integrals_2e, FourFoldCheck) {
      * check that all integrals are properly stored by retrieving all
      * values specified in the FCIDUMP and validating against stored values
      */
-    typedef std::complex<double> T;
+    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     std::string fname = defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP";
-    Integrals_2e<T, 4> ints(10, true);
+    Integrals_2e<defs::ham_t, 4> ints(10, true);
     defs::inds inds(4);
-    T value;
+    defs::ham_t value;
     if (mpi::on_node_i_am_root()) {
-        FcidumpFileReader<T> file_reader(fname, false);
+        FcidumpFileReader file_reader(fname, false);
         while (file_reader.next(inds, value)) {
-            if (Integrals_2e<T, 4>::valid_inds(inds)) {
+            if (Integrals_2e<defs::ham_t, 4>::valid_inds(inds)) {
                 ints.set(inds, value);
             }
         }
     }
     mpi::barrier_on_node();
-    FcidumpFileReader<T> file_reader(fname, false);
+    FcidumpFileReader file_reader(fname, false);
     while (file_reader.next(inds, value)) {
-        if (Integrals_2e<T, 4>::valid_inds(inds)){
+        if (Integrals_2e<defs::ham_t, 4>::valid_inds(inds)){
             auto memory_value = ints.element(inds[0], inds[1], inds[2], inds[3]);
             ASSERT_TRUE(consts::floats_equal(value, memory_value));
         }

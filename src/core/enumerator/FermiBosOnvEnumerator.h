@@ -2,25 +2,25 @@
 // Created by rja on 05/11/2020.
 //
 
-#ifndef M7_FERMIONBOSONENUMERATOR_H
-#define M7_FERMIONBOSONENUMERATOR_H
+#ifndef M7_FERMIBOSONVENUMERATOR_H
+#define M7_FERMIBOSONVENUMERATOR_H
 
 #include "FermionOnvEnumerator.h"
 #include "BosonOnvEnumerator.h"
 #include "src/core/field/Elements.h"
 
-class FermionBosonEnumerator : public Enumerator<views::FermiBosOnv> {
+class FermiBosOnvEnumerator : public Enumerator<views::FermiBosOnv> {
     FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
     elements::FermionOnv m_det;
     elements::BosonOnv m_bonv;
 public:
-    FermionBosonEnumerator(size_t nsite, size_t nelec, size_t nmode, size_t occ_cutoff):
-    m_det_enum(nsite, nelec), m_bonv_enum(nmode, occ_cutoff), m_det(nsite), m_bonv(nmode){
+    FermiBosOnvEnumerator(size_t nsite, size_t nelec, size_t nmode, size_t nboson_cutoff):
+    m_det_enum(nsite, nelec), m_bonv_enum(nmode, nboson_cutoff), m_det(nsite), m_bonv(nmode){
         m_det_enum.next(m_det);
     }
-    FermionBosonEnumerator(size_t nsite, size_t nelec, int spin, size_t nmode, size_t occ_cutoff):
-            m_det_enum(nsite, nelec, spin), m_bonv_enum(nmode, occ_cutoff), m_det(nsite), m_bonv(nmode){
+    FermiBosOnvEnumerator(size_t nsite, size_t nelec, int spin, size_t nmode, size_t nboson_cutoff):
+            m_det_enum(nsite, nelec, spin), m_bonv_enum(nmode, nboson_cutoff), m_det(nsite), m_bonv(nmode){
         m_det_enum.next_element(m_det);
     }
 
@@ -37,4 +37,4 @@ public:
 };
 
 
-#endif //M7_FERMIONBOSONENUMERATOR_H
+#endif //M7_FERMIBOSONVENUMERATOR_H

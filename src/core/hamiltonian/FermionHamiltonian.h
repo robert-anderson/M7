@@ -6,7 +6,7 @@
 #define M7_FERMIONHAMILTONIAN_H
 
 #include <cstddef>
-#include <src/core/basis/DeterminantConnection.h>
+#include <src/core/basis/FermionOnvConnection.h>
 #include <src/core/basis/DecodedDeterminant.h>
 #include <src/core/field/Elements.h>
 #include "src/core/integrals/Integrals_1e.h"
@@ -29,10 +29,10 @@ public:
     FermionHamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e,
                        bool complex_valued, bool spin_resolved);
 
-    FermionHamiltonian(const FcidumpFileReader<defs::ham_t> &file_reader);
+    FermionHamiltonian(const FcidumpFileReader &file_reader);
 
 
-    FermionHamiltonian(const std::string& fname, bool spin_major);
+    FermionHamiltonian(std::string fname, bool spin_major);
 
     consts::component_t<defs::ham_t>::type get_energy(const views::FermionOnv &det) const;
 
@@ -42,17 +42,17 @@ public:
 
     defs::ham_t get_element_0(const views::FermionOnv &det) const;
 
-    defs::ham_t get_element_0(const AntisymConnection &connection) const;
+    defs::ham_t get_element_0(const AntisymFermionOnvConnection &connection) const;
 
-    defs::ham_t get_element_1(const AntisymConnection &connection) const;
+    defs::ham_t get_element_1(const AntisymFermionOnvConnection &connection) const;
 
     defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
-    defs::ham_t get_element_2(const DeterminantConnection &connection) const;
+    defs::ham_t get_element_2(const FermionOnvConnection &connection) const;
 
-    defs::ham_t get_element_2(const AntisymConnection &connection) const;
+    defs::ham_t get_element_2(const AntisymFermionOnvConnection &connection) const;
 
-    defs::ham_t get_element(const AntisymConnection &connection) const;
+    defs::ham_t get_element(const AntisymFermionOnvConnection &connection) const;
 
     defs::ham_t get_element(const views::FermionOnv &bra, const views::FermionOnv &ket) const;
 
@@ -84,7 +84,7 @@ public:
         return m_complex_valued;
     }
 
-//    elements::FermionOnv guess_reference(const int &spin_level) const;
+    elements::FermionOnv guess_reference(const int &spin_level) const;
 //
 //    elements::FermionOnv refine_guess_reference(const views::FermionOnv &ref) const;
 //

@@ -8,7 +8,7 @@
 #if 0
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/basis/FermionOnv.h"
-#include "src/core/basis/DeterminantConnection.h"
+#include "src/core/basis/FermionOnvConnection.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "WalkerList.h"
@@ -20,7 +20,7 @@ class Reference : public FermionOnv {
     size_t m_irow;
     size_t m_irank;
 
-    mutable AntisymConnection m_aconn;
+    mutable AntisymFermionOnvConnection m_aconn;
     Reducible<defs::ham_t> m_proj_energy_num;
     Reducible<defs::wf_comp_t> m_nwalker_at_doubles;
     Reducible<defs::wf_t> m_weight;

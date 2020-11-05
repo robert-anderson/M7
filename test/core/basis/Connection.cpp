@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/basis/DeterminantConnection.h"
+#include "src/core/basis/FermionOnvConnection.h"
 #include "src/core/io/SparseArrayFileReader.h"
 #include "src/core/field/Elements.h"
 
@@ -20,7 +20,7 @@ TEST(Connection, ParticleNumberConserving){
     ASSERT_EQ(ket.nsetbit(), 9);
     ASSERT_EQ(bra.nsetbit(), 9);
 
-    DeterminantConnection conn(ket, bra);
+    FermionOnvConnection conn(ket, bra);
 
     ASSERT_EQ(conn.nann(), 3);
     ASSERT_EQ(conn.ncre(), 3);
@@ -33,7 +33,7 @@ TEST(Connection, ParticleNumberConserving){
     ASSERT_EQ(conn.cre(1), 9);
     ASSERT_EQ(conn.cre(2), 37);
 
-    AntisymConnection aconn(ket, bra);
+    AntisymFermionOnvConnection aconn(ket, bra);
     ASSERT_EQ(aconn.ncom(), 6);
     ASSERT_EQ(aconn.com(0), 1);
     ASSERT_EQ(aconn.com(1), 4);
@@ -56,7 +56,7 @@ TEST(Connection, Phase) {
     elements::FermionOnv bra(4);
     elements::FermionOnv ket(4);
     elements::FermionOnv work_det(4);
-    AntisymConnection connection(ket);
+    AntisymFermionOnvConnection connection(ket);
 
     while (file_reader.next(inds, value)) {
         bra.zero();

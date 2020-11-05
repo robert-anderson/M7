@@ -42,7 +42,7 @@ TEST(BosonCouplings, Element_f0_b1){
     dket.set(defs::inds{1,2,3,4});
     FermionOnv dbra = dket;
 
-    AntisymConnection ac(dbra, dket);
+    AntisymFermionOnvConnection ac(dbra, dket);
 
     Permanent pket(nmode, nocc_cutoff);
     Permanent pbra(nmode, nocc_cutoff);
@@ -68,7 +68,7 @@ TEST(BosonCouplings, Element_f1_b1){
     dket.set(defs::inds{1,2,3,4});
     dbra.set(defs::inds{1,2,3,5});
 
-    AntisymConnection ac(dbra, dket);
+    AntisymFermionOnvConnection ac(dbra, dket);
 
     Permanent pket(nmode, nocc_cutoff);
     Permanent pbra(nmode, nocc_cutoff);

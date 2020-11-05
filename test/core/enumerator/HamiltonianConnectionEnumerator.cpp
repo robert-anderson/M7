@@ -17,7 +17,7 @@ public:
             m_determinant(this, 1, ref.nsite()), m_helement(this) {
         OccupiedOrbitals occs(ref);
         VacantOrbitals vacs(ref);
-        AntisymConnection connection(ref);
+        AntisymFermionOnvConnection connection(ref);
 
         FermionOnv excited(ref.nsite());
         for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {

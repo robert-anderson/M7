@@ -6,7 +6,7 @@
 #define M7_HAMILTONIANCONNECTIONENUMERATOR_H
 
 
-#include "src/core/basis/DeterminantConnection.h"
+#include "src/core/basis/FermionOnvConnection.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "Enumerator.h"
 #include "CombinationEnumerator.h"
@@ -120,7 +120,7 @@ public:
 };
 
 #if 0
-AntisymConnection connection(ref);
+AntisymFermionOnvConnection connection(ref);
 
 FermionOnv excited(m_nsite);
 for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {

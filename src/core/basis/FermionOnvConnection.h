@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#ifndef M7_DETERMINANTCONNECTION_H
-#define M7_DETERMINANTCONNECTION_H
+#ifndef M7_FERMIONONVCONNECTION_H
+#define M7_FERMIONONVCONNECTION_H
 
 #include <src/core/field/FermionOnvSpecifier.h>
 #include <algorithm>
@@ -29,7 +29,7 @@
  * add: append annihilation/creation index pair
  */
 
-class DeterminantConnection {
+class FermionOnvConnection {
     const size_t m_element_dsize;
 protected:
     const size_t m_nbit;
@@ -37,9 +37,9 @@ protected:
     size_t m_nann, m_ncre;
 
 public:
-    explicit DeterminantConnection(const FermionOnvSpecifier& field);
-    DeterminantConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
-    explicit DeterminantConnection(const views::FermionOnv &ket);
+    explicit FermionOnvConnection(const FermionOnvSpecifier& field);
+    FermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
+    explicit FermionOnvConnection(const views::FermionOnv &ket);
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
@@ -78,15 +78,15 @@ public:
 /*
  * a connection in which the common indices and antisymmetric phase is computed
  */
-class AntisymConnection : public DeterminantConnection {
+class AntisymFermionOnvConnection : public FermionOnvConnection {
     defs::det_work m_com{};
     size_t m_ncom;
     bool m_phase;
 
 public:
-    explicit AntisymConnection(const FermionOnvSpecifier& field);
-    AntisymConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
-    explicit AntisymConnection(const views::FermionOnv &ket);
+    explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& field);
+    AntisymFermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
+    explicit AntisymFermionOnvConnection(const views::FermionOnv &ket);
 
     void connect(const views::FermionOnv &ket, const views::FermionOnv &bra) override;
     void apply(const views::FermionOnv &ket);
@@ -101,9 +101,9 @@ public:
 
 template<typename T>
 struct MatrixElement {
-    AntisymConnection aconn;
+    AntisymFermionOnvConnection aconn;
     T element = 0;
-    MatrixElement(const views::FermionOnv& det): aconn(AntisymConnection(det)) {}
+    MatrixElement(const views::FermionOnv& det): aconn(AntisymFermionOnvConnection(det)) {}
 };
 
-#endif //M7_DETERMINANTCONNECTION_H
+#endif //M7_FERMIONONVCONNECTION_H

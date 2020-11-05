@@ -2,21 +2,21 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#include "DeterminantConnection.h"
+#include "FermionOnvConnection.h"
 #include <algorithm>
 
-DeterminantConnection::DeterminantConnection(const FermionOnvSpecifier& spec):
+FermionOnvConnection::FermionOnvConnection(const FermionOnvSpecifier& spec):
     m_element_dsize(spec.m_ndataword), m_nbit(spec.m_nbit) {}
 
-DeterminantConnection::DeterminantConnection(const views::FermionOnv &ket, const views::FermionOnv &bra) : DeterminantConnection(ket.spec()) {
+FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra) : FermionOnvConnection(ket.spec()) {
     ASSERT(ket.nsite() == bra.nsite());
     connect(ket, bra);
 }
 
-DeterminantConnection::DeterminantConnection(const views::FermionOnv &ket) : DeterminantConnection(ket, ket){}
+FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &ket) : FermionOnvConnection(ket, ket){}
 
 
-void DeterminantConnection::connect(const views::FermionOnv &ket, const views::FermionOnv &bra) {
+void FermionOnvConnection::connect(const views::FermionOnv &ket, const views::FermionOnv &bra) {
     ASSERT(!ket.is_zero());
     ASSERT(!bra.is_zero());
     ASSERT(ket.nbit() == m_nbit);
@@ -39,7 +39,7 @@ void DeterminantConnection::connect(const views::FermionOnv &ket, const views::F
     ASSERT(m_nann < m_ann.size());
 }
 
-void DeterminantConnection::apply(const views::FermionOnv &ket, views::FermionOnv &bra){
+void FermionOnvConnection::apply(const views::FermionOnv &ket, views::FermionOnv &bra){
     ASSERT(!ket.is_zero());
     ASSERT(m_ncre < m_cre.size());
     ASSERT(m_nann < m_ann.size());
@@ -53,23 +53,23 @@ void DeterminantConnection::apply(const views::FermionOnv &ket, views::FermionOn
     ASSERT(ket.nsetbit()==bra.nsetbit());
 }
 
-const size_t &DeterminantConnection::nexcit() const {
+const size_t &FermionOnvConnection::nexcit() const {
     ASSERT(m_ncre == m_nann);
     return m_ncre;
 }
 
 
-AntisymConnection::AntisymConnection(const FermionOnvSpecifier &field): DeterminantConnection(field) {}
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const FermionOnvSpecifier &field): FermionOnvConnection(field) {}
 
-AntisymConnection::AntisymConnection(const views::FermionOnv &ket, const views::FermionOnv &bra) :
-        DeterminantConnection(ket, bra) {
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra) :
+        FermionOnvConnection(ket, bra) {
     connect(ket, bra);
 }
 
-AntisymConnection::AntisymConnection(const views::FermionOnv &ket) : AntisymConnection(ket.spec()) {}
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::FermionOnv &ket) : AntisymFermionOnvConnection(ket.spec()) {}
 
-void AntisymConnection::connect(const views::FermionOnv &ket, const views::FermionOnv &bra) {
-    DeterminantConnection::connect(ket, bra);
+void AntisymFermionOnvConnection::connect(const views::FermionOnv &ket, const views::FermionOnv &bra) {
+    FermionOnvConnection::connect(ket, bra);
     m_ncom = 0ul;
     size_t nperm = 0ul;
 
@@ -104,7 +104,7 @@ void AntisymConnection::connect(const views::FermionOnv &ket, const views::Fermi
     m_phase = nperm & 1ul;
 }
 
-void AntisymConnection::apply(const views::FermionOnv &ket) {
+void AntisymFermionOnvConnection::apply(const views::FermionOnv &ket) {
     ASSERT(m_ncre < m_nbit);
     ASSERT(m_nann < m_nbit);
     ASSERT(std::is_sorted(m_cre.begin(), m_cre.begin() + m_ncre));
@@ -141,7 +141,7 @@ void AntisymConnection::apply(const views::FermionOnv &ket) {
     m_phase = nperm & 1ul;
 }
 
-void AntisymConnection::apply(const views::FermionOnv &ket, views::FermionOnv &bra) {
+void AntisymFermionOnvConnection::apply(const views::FermionOnv &ket, views::FermionOnv &bra) {
     apply(ket);
-    DeterminantConnection::apply(ket, bra);
+    FermionOnvConnection::apply(ket, bra);
 }

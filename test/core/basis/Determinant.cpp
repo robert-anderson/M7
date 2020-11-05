@@ -5,7 +5,7 @@
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
 #include "src/core/field/Elements.h"
-#include "src/core/basis/DeterminantConnection.h"
+#include "src/core/basis/FermionOnvConnection.h"
 
 TEST(Determinant, Phase) {
 
@@ -19,7 +19,7 @@ TEST(Determinant, Phase) {
     const size_t nsite = 4;
     elements::FermionOnv bra(nsite);
     elements::FermionOnv ket(nsite);
-    AntisymConnection conn(bra);
+    AntisymFermionOnvConnection conn(bra);
 
     while (file_reader.next(inds, value)) {
         conn.zero();

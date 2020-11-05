@@ -28,7 +28,7 @@ public:
     defs::ham_comp_t m_shift;
 
     mutable FermionOnv m_dst_det;
-    mutable AntisymConnection m_aconn;
+    mutable AntisymFermionOnvConnection m_aconn;
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;
 

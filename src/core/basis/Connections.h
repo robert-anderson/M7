@@ -5,26 +5,18 @@
 #ifndef M7_CONNECTIONS_H
 #define M7_CONNECTIONS_H
 
-#include "DeterminantConnection.h"
+#include "FermionOnvConnection.h"
 #include "BosonOnvConnection.h"
-#include "FermionBosonConnection.h"
+#include "FermiBosConnection.h"
 
 namespace conn {
-    using Determinant = DeterminantConnection;
-    using Antisym = AntisymConnection;
+    using FermionOnv = FermionOnvConnection;
+    using AsFermionOnv = AntisymFermionOnvConnection;
     using BosonOnv = BosonOnvConnection;
-    using FermionBoson = FermionBosonConnection;
-    
-    template<bool bosons>
-    struct ConfigurationSelector {};
-    template<> struct ConfigurationSelector<false> {
-        typedef Determinant type;
-    };
-    template<> struct ConfigurationSelector<true> {
-        typedef FermionBosonConnection type;
-    };
-
-    using Configuration = ConfigurationSelector<defs::bosons>::type;
+    using FermiBosOnv = FermiBosConnection;
+    using AsFermiBosOnv = AntisymFermiBosConnection;
+    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
+    using AsOnv = std::conditional<defs::bosons, AsFermiBosOnv, AsFermionOnv>::type;
 }
 
 #endif //M7_CONNECTIONS_H

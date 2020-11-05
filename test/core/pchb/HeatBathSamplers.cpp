@@ -62,7 +62,7 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const FermionOnv &src_det, siz
 
     OccupiedOrbitals occ(src_det);
     VacantOrbitals vac(src_det);
-    AntisymConnection anticonn(src_det);
+    AntisymFermionOnvConnection anticonn(src_det);
     FermionOnv work_det(src_det);
 
     auto loop = [&](size_t ielement) {

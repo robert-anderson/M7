@@ -43,7 +43,7 @@ HeatBathSamplers::HeatBathSamplers(const FermionHamiltonian *h, PRNG &prng) :
 
 bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
                                    const OccupiedOrbitals &occ, const VacantOrbitals &vac, defs::prob_t &prob,
-                                   defs::ham_t &helem, AntisymConnection &anticonn) {
+                                   defs::ham_t &helem, AntisymFermionOnvConnection &anticonn) {
     size_t i, a, ia;
     size_t ncases;
     if (m_spin_conserving_1e) {
@@ -91,7 +91,7 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
 
 bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, DeterminantElement &dst_det,
                                    const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
-                                   AntisymConnection &anticonn) {
+                                   AntisymFermionOnvConnection &anticonn) {
     // just draw uniform ij TODO! int weighted ij
     // return false if invalid excitation generated, true otherwise
     size_t i, j, a, b;

@@ -54,20 +54,7 @@ namespace elements {
         Element<fields::FermiBosOnv>(nsite, nmode, "Working fermion-boson configuration"){}
     };
 
-    template<size_t nind, bool bosons>
-    struct ConfigurationSelector {};
-
-    template<size_t nind>
-    struct ConfigurationSelector<nind, false> {
-        typedef FermionOnv type;
-    };
-
-    template<size_t nind>
-    struct ConfigurationSelector<nind, true> {
-        typedef FermiBosOnv type;
-    };
-
-    using Onv = ConfigurationSelector<0ul, defs::bosons>::type;
+    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
 }
 
 #endif //M7_ELEMENTS_H

@@ -13,9 +13,9 @@ TEST(SparseArrayFileReader, IndexReading) {
     std::string line = "1 3 5 7";
     const char *p = line.begin().base();
     for (int i = 0; i < 4; ++i) {
-        ASSERT_EQ(FcidumpFileReader<float>::read_unsigned(p), 2 * i + 1);
+        ASSERT_EQ(FcidumpFileReader::read_unsigned(p), 2 * i + 1);
     }
-    ASSERT_EQ(FcidumpFileReader<float>::read_unsigned(p), ~0ul);
+    ASSERT_EQ(FcidumpFileReader::read_unsigned(p), ~0ul);
 }
 
 TEST(SparseArrayFileReader, EntryReadingComplexIndsLast) {
@@ -41,7 +41,7 @@ TEST(SparseArrayFileReader, EntryReadingComplexIndsLast) {
 }
 
 TEST(SparseArrayFileReader, EntryReadingRealIndsLastToComplexContainer) {
-    FcidumpFileReader<std::complex<double>> file_reader(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", 4);
+    SparseArrayFileReader<std::complex<double>> file_reader(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", 4);
     defs::inds inds(4);
     std::complex<double> v;
     file_reader.next(inds, v);
