@@ -12,11 +12,11 @@ HeatBathSamplers::HeatBathSamplers(const Hamiltonian *h, PRNG &prng) :
     size_t ab = 0ul;
     std::cout << "Initializing pre-computed heat bath sampling weights for doubles..." << std::endl;
     if (mpi::on_node_i_am_root()) {
-        for (size_t i = 0ul; i < m_norb; ++i) {
+        for (size_t i = 0ul; i < m_nintind; ++i) {
             for (size_t j = 0ul; j < i; ++j) {
                 weights.assign(m_norb_pair, 0.0);
                 ab = 0ul;
-                for (size_t a = 0ul; a < m_norb; ++a) {
+                for (size_t a = 0ul; a < m_nintind; ++a) {
                     for (size_t b = 0ul; b < a; ++b) {
                         //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
                         weights[ab] = std::abs(m_h->get_element_2(i, j, a, b));

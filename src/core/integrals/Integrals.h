@@ -11,18 +11,17 @@ constexpr size_t trig(size_t i, size_t j){
 
 class Integrals {
 public:
-    const size_t m_norb; // the extent of the stored integral indices
+    const size_t m_nsite; // the number of spatial orbitals
     const bool m_spin_resolved; // are we storing integrals with spin-resolved indices?
     const size_t m_nspinorb; // the number of spin orbitals
-    const size_t m_nspatorb; // the number of spatial orbitals
+    const size_t m_nintind; // the extent of the stored integral indices
 protected:
-    Integrals(size_t norb, bool spin_resolved) :
-    m_norb(norb), m_spin_resolved(spin_resolved),
-    m_nspinorb(spin_resolved?norb:2*norb),
-    m_nspatorb(spin_resolved?norb/2:norb){}
+    Integrals(size_t nsite, bool spin_resolved) :
+            m_nsite(nsite), m_spin_resolved(spin_resolved),
+            m_nspinorb(2*nsite), m_nintind(spin_resolved ? m_nspinorb : m_nsite){}
 
     size_t spinorb(const size_t &ispat, const size_t &ispin) const {
-        if (m_spin_resolved) return ispin*m_nspatorb+ispat;
+        if (m_spin_resolved) return ispin * m_nsite + ispat;
         return ispat;
     }
 };

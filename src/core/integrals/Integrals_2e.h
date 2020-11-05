@@ -28,27 +28,13 @@ template<typename T, size_t isym>
 class Integrals_2e : public Integrals {
     //            none       i          ih         ihr
     static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8, "Invalid symmetry parameter specified.");
-    const size_t m_norb2, m_norb3, m_nelem_8fold, m_nelem;
+    const size_t m_nintind2, m_nintind3, m_nelem_8fold, m_nelem;
     SharedArray<T> m_data;
 public:
-    Integrals_2e(const size_t &norb, bool spin_resolved) :
-            Integrals(norb, spin_resolved), m_norb2(m_norb * norb), m_norb3(m_norb2 * norb),
-            m_nelem_8fold(trig(0, trig(0, norb))), m_nelem(nelem(norb)), m_data(m_nelem){
+    Integrals_2e(const size_t &nsite, bool spin_resolved) :
+            Integrals(nsite, spin_resolved), m_nintind2(m_nintind * m_nintind), m_nintind3(m_nintind2 * m_nintind),
+            m_nelem_8fold(trig(0, trig(0, m_nintind))), m_nelem(nelem(m_nintind)), m_data(m_nelem){
     }
-
-    /*
-    Integrals_2e(std::string fname, bool spin_major = false) :
-            Integrals_2e(FcidumpFileReader<T>(fname).m_norb, FcidumpFileReader<T>(fname).m_spin_resolved) {
-        FcidumpFileReader<T> reader(fname);
-        defs::inds inds(4);
-        T value;
-        while (reader.next(inds, value)) {
-            if (valid_inds(inds)) {
-                set_from_fcidump(inds, value, spin_major);
-            }
-        }
-    }
-     */
 
     /*
     * given the indices and their identified case, return the flat indices
@@ -57,11 +43,11 @@ public:
                              const size_t &k, const size_t &l) const {
         switch (icase) {
             case 0:
-                return i + j * m_norb + k * m_norb2 + l * m_norb3;
+                return i + j * m_nintind + k * m_nintind2 + l * m_nintind3;
             case 1:
-                return trig(i + j * m_norb, k + l * m_norb);
+                return trig(i + j * m_nintind, k + l * m_nintind);
             case 2:
-                return trig(k + l * m_norb, i + j * m_norb);
+                return trig(k + l * m_nintind, i + j * m_nintind);
             case 3:
                 return trig(trig(i, j), trig(k, l));
             case 4:
@@ -108,7 +94,7 @@ public:
     }
 
     T get(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-        ASSERT(i < m_norb && j < m_norb && k < m_norb && l < m_norb);
+        ASSERT(i < m_nintind && j < m_nintind && k < m_nintind && l < m_nintind);
         auto icase = get_case(i, j, k, l);
         auto iflat = flat_index(icase, i, j, k, l);
         return case_to_tconj[icase] ? consts::conj(m_data[iflat]) : m_data[iflat];
@@ -121,8 +107,8 @@ public:
         if (m_spin_resolved) return get(i, j, k, l);
         else {
             // enforce spin symmetry
-            if (((i<m_norb)!=(j<m_norb)) || ((k<m_norb)!=(l<m_norb))) return 0.0;
-            return get(i%m_norb, j%m_norb, k%m_norb, l%m_norb);
+            if (((i < m_nintind) != (j < m_nintind)) || ((k < m_nintind) != (l < m_nintind))) return 0.0;
+            return get(i % m_nintind, j % m_nintind, k % m_nintind, l % m_nintind);
         }
     }
 
@@ -169,17 +155,17 @@ public:
     }
 
 private:
-    static inline size_t nelem(const size_t &norb) {
+    static inline size_t nelem(const size_t &nintind) {
         static_assert(isym == 1 || isym == 2 || isym == 4 || isym == 8, "Invalid symmetry parameter specified.");
         switch (isym) {
             case 1 :
-                return norb * norb * norb * norb;
+                return nintind * nintind * nintind * nintind;
             case 2 :
-                return trig(0, norb * norb);
+                return trig(0, nintind * nintind);
             case 4 :
-                return 2 * trig(0, trig(0, norb));
+                return 2 * trig(0, trig(0, nintind));
             case 8 :
-                return trig(0, trig(0, norb));
+                return trig(0, trig(0, nintind));
         }
         return ~0ul;
     }

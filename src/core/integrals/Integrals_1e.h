@@ -29,14 +29,14 @@ class Integrals_1e : public Integrals {
     std::vector<T> m_data;
 
 public:
-    Integrals_1e(const size_t &norb, bool spin_resolved) :
-            Integrals(norb, spin_resolved), m_nelem(nelem(norb)) {
+    Integrals_1e(const size_t &nsite, bool spin_resolved) :
+            Integrals(nsite, spin_resolved), m_nelem(nelem(m_nintind)) {
         m_data.resize(m_nelem, 0.0);
     }
 
     /*
     Integrals_1e(std::string fname) :
-            Integrals_1e(FcidumpFileReader<T>(fname).m_norb, FcidumpFileReader<T>(fname).m_spin_resolved) {
+            Integrals_1e(FcidumpFileReader<T>(fname).m_nintind, FcidumpFileReader<T>(fname).m_spin_resolved) {
         FcidumpFileReader<T> file_iterator(fname);
         defs::inds inds(4);
         T value;
@@ -49,7 +49,7 @@ public:
      */
 
     inline size_t flat_index(const size_t &i, const size_t &j) const {
-        if (isym == 1) return i + j * m_norb;
+        if (isym == 1) return i + j * m_nintind;
         else return i <= j ? trig(i, j) : trig(j, i);
     }
 
@@ -90,8 +90,8 @@ public:
         /*
          * return the one-body integral between the two SPINORS indexed by i and j
          */
-        if (!m_spin_resolved && ((i<m_norb)!=(j<m_norb))) return 0.0;
-        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i % m_norb, j % m_norb);
+        if (!m_spin_resolved && ((i < m_nintind) != (j < m_nintind))) return 0.0;
+        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i % m_nintind, j % m_nintind);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
 
@@ -105,8 +105,8 @@ public:
          * iterate through integrals looking for an example of a non-zero
          * spin non-conserving one-body integral
          */
-        for (size_t i = 0ul; i < m_norb; ++i) {
-            for (size_t j = 0ul; i < m_norb; ++i) {
+        for (size_t i = 0ul; i < m_nintind; ++i) {
+            for (size_t j = 0ul; i < m_nintind; ++i) {
                 if (!consts::float_is_zero(get(i, 0, j, 1))) return false;
             }
         }
@@ -114,12 +114,12 @@ public:
     }
 
 private:
-    static inline size_t nelem(const size_t &norb) {
+    static inline size_t nelem(const size_t &nintind) {
         static_assert(isym == 1 || isym == 2, "Invalid symmetry parameter specified.");
         if (isym == 1) {
-            return norb * norb;
+            return nintind * nintind;
         } else if (isym == 2) {
-            return trig(0, norb);
+            return trig(0, nintind);
         }
         return ~0ul;
     }

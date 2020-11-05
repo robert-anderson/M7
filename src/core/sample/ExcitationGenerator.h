@@ -14,7 +14,7 @@ class ExcitationGenerator {
 protected:
     const Hamiltonian *m_h;
     PRNG &m_prng;
-    const size_t m_norb;
+    const size_t m_nintind;
     const size_t m_nelec;
     const size_t m_norb_pair;
     const size_t m_nelec_pair;
@@ -22,9 +22,9 @@ protected:
 public:
     ExcitationGenerator(const Hamiltonian *h, PRNG &prng) :
             m_h(h), m_prng(prng),
-            m_norb(m_h->nsite() * 2),
+            m_nintind(m_h->nsite() * 2),
             m_nelec(m_h->nelec()),
-            m_norb_pair(integer_utils::nspair(m_norb)),
+            m_norb_pair(integer_utils::nspair(m_nintind)),
             m_nelec_pair(integer_utils::nspair(m_nelec)),
             m_spin_conserving_1e(m_h->spin_conserving_1e()),
             m_spin_conserving_2e(m_h->spin_conserving_2e()) {

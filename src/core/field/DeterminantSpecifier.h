@@ -29,11 +29,6 @@ struct DeterminantSpecifier : BitsetSpecifier {
         using BitsetSpecifier::View::get;
         using BitsetSpecifier::View::clr;
 
-        View& operator=(const View& other){
-            FieldSpecifier::View::operator=(other);
-            return *this;
-        }
-
         void set(const size_t &ispin, const size_t &iorb);
 
         void set(const defs::inds &ispinorbs);
