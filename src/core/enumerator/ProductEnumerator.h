@@ -48,7 +48,9 @@ public:
 
     virtual bool next_element(defs::inds &result){
         decode_flat(m_iflat, result);
-        return m_iflat++<m_nelement;
+        auto allfound = m_iflat++==m_nelement;
+        if (allfound) m_iflat = 0ul;
+        return !allfound;
     }
 };
 

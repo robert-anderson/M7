@@ -71,16 +71,17 @@ struct FieldSpecifier {
             std::cout << to_string() << std::endl;
         }
 
-    protected:
-
-        View(const View &other) : m_spec(other.m_spec), m_ptr(other.m_ptr) {}
-
         View &operator=(const View &other) {
             ASSERT(m_spec.element_size() == other.m_spec.element_size());
             if (&other != this)
                 std::memcpy(m_ptr, other.m_ptr, m_spec.element_size());
             return *this;
         }
+
+    protected:
+
+        View(const View &other) : m_spec(other.m_spec), m_ptr(other.m_ptr) {}
+
     };
 
     static defs::hash_t hash(const View& view) {

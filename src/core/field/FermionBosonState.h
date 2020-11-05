@@ -25,6 +25,10 @@ namespace fb_state {
 
         bool operator!=(const View &other) const;
 
+        void zero() {
+            m_det.zero(); m_perm.zero();
+        }
+
         std::string to_string();
 
         void print();

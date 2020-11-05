@@ -12,9 +12,7 @@ TEST(ProductEnumerator, Test){
 
     ProductEnumerator enumerator(nind, extent);
     defs::inds inds(nind);
-    size_t iflat=0ul;
-    while(enumerator.next(inds)){
-        iflat++;
-    }
-    ASSERT_EQ(iflat, std::pow(extent, nind));
+    size_t i=~0ul;
+    while(enumerator.next(inds, i)){}
+    ASSERT_EQ(i, std::pow(extent, nind));
 }
