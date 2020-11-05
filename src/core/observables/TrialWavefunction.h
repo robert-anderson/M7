@@ -5,7 +5,7 @@
  * @section LICENSE
  *
  * @section DESCRIPTION
- * Trial wavefunction is the standard procedure for extracting Hamiltonian
+ * Trial wavefunction is the standard procedure for extracting FermionHamiltonian
  * Rayleigh quotient numerator and denominator time series from an FCIQMC
  * walker distribution. Denoting the trial wavefunction \f$\ketTrial\f$, the
  * numerator is \f$\braTrialn\Hop\ketPsin\f$, and the denominator is the

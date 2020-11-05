@@ -4,34 +4,32 @@
 
 #include <gtest/gtest.h>
 #include "src/core/basis/DecodedDeterminant.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/FermionHamiltonian.h"
 
-#if 0
-TEST(AbInitioHamiltonian, DhfEnergy) {
+TEST(FermionHamiltonian, DhfEnergy) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     const auto benchmark = -14.354220448530139;
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
-    FermionOnv hf_det(ham.nsite());
-    hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
-    auto elem = ham.get_element_0(hf_det);
+    elements::FermionOnv fonv(ham.nsite());
+    fonv.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
+    auto elem = ham.get_element_0(fonv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
     ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
-    ASSERT_TRUE(consts::floats_equal(ham.get_energy(hf_det), benchmark));
+    ASSERT_TRUE(consts::floats_equal(ham.get_energy(fonv), benchmark));
 }
 
-TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
+TEST(FermionHamiltonian, DhfBrillouinTheorem) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
-    AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
+    FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
-    FermionOnv hf_det(ham.nsite());
+    elements::FermionOnv hf_det(ham.nsite());
     hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
-    //size_t removed, inserted;
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);
 
-    FermionOnv excited(ham.nsite());
+    elements::FermionOnv excited(ham.nsite());
 
     AntisymConnection connection(hf_det);
 
@@ -55,32 +53,31 @@ TEST(AbInitioHamiltonian, DhfBrillouinTheorem) {
     }
 }
 
-TEST(AbInitioHamiltonian, RhfEnergy) {
+TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.65146156994338;
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    FermionOnv hf_det(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){hf_det.set(0, i); hf_det.set(1, i);}
+    elements::FermionOnv fonv(ham.nsite());
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
 
-    auto elem = ham.get_element_0(hf_det);
+    auto elem = ham.get_element_0(fonv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
     ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
-    ASSERT_TRUE(consts::floats_equal(ham.get_energy(hf_det), benchmark));
+    ASSERT_TRUE(consts::floats_equal(ham.get_energy(fonv), benchmark));
 }
 
-
-TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
-    AbInitioHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+TEST(FermionHamiltonian, RhfBrillouinTheorem) {
+    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    FermionOnv hf_det(ham.nsite());
-    hf_det.set(defs::inds{0, 1, 2,  6, 7, 8});
+    elements::FermionOnv fonv(ham.nsite());
+    fonv.set(defs::inds{0, 1, 2,  6, 7, 8});
 
-    OccupiedOrbitals occs(hf_det);
-    VacantOrbitals vacs(hf_det);
+    OccupiedOrbitals occs(fonv);
+    VacantOrbitals vacs(fonv);
 
-    FermionOnv excited(ham.nsite());
+    elements::FermionOnv excited(ham.nsite());
 
-    AntisymConnection connection(hf_det);
+    AntisymConnection connection(fonv);
 
     for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
         const auto &occ = occs.m_inds[iocc];
@@ -88,9 +85,8 @@ TEST(AbInitioHamiltonian, RhfBrillouinTheorem) {
             const auto &vac = vacs.m_inds[iocc];
             connection.zero();
             connection.add(occ, vac);
-            connection.apply(hf_det);
+            connection.apply(fonv);
             ASSERT_TRUE(consts::float_is_zero(ham.get_element_1(connection)));
         }
     }
 }
-#endif

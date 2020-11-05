@@ -12,7 +12,7 @@
 class FermionBosonEnumerator : public Enumerator<views::FermiBosOnv> {
     FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
-    elements::Determinant m_det;
+    elements::FermionOnv m_det;
     elements::BosonOnv m_bonv;
 public:
     FermionBosonEnumerator(size_t nsite, size_t nelec, size_t nmode, size_t occ_cutoff):

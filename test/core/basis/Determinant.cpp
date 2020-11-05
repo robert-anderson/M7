@@ -17,8 +17,8 @@ TEST(Determinant, Phase) {
     float value;
 
     const size_t nsite = 4;
-    elements::Determinant bra(nsite);
-    elements::Determinant ket(nsite);
+    elements::FermionOnv bra(nsite);
+    elements::FermionOnv ket(nsite);
     AntisymConnection conn(bra);
 
     while (file_reader.next(inds, value)) {
@@ -39,7 +39,7 @@ TEST(Determinant, Phase) {
 }
 
 TEST(Determinant, Spin) {
-    elements::Determinant det(4);
+    elements::FermionOnv det(4);
     ASSERT_EQ(det.spin(), 0);
     det.set(defs::inds{0,1,2,3});
     ASSERT_EQ(det.spin(), 4);

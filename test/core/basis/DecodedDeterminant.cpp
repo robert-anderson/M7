@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 TEST(DecodedDeterminant, Occupation){
-    elements::Determinant det(50);
+    elements::FermionOnv det(50);
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     det.set(occ);
     defs::inds vac;

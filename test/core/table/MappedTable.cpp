@@ -20,7 +20,7 @@ TEST(MappedTable, TEST){
     const size_t nmode = 8;
     BufferedTable<TestTable> bt(nsite, nmode);
     bt.expand(10);
-    elements::Configuration config(nsite, nmode);
+    elements::Onv config(nsite, nmode);
     config.m_fonv[2] = 1;
     config.m_bonv[2] = 5;
     std::cout << config.to_string() << std::endl;

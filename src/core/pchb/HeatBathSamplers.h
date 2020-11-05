@@ -7,7 +7,7 @@
 
 #if 0
 
-#include <src/core/hamiltonian/Hamiltonian.h>
+#include <src/core/hamiltonian/FermionHamiltonian.h>
 #include <src/core/sample/ExcitationGenerator.h>
 #include "src/core/sample/Aliaser.h"
 
@@ -19,7 +19,7 @@ class HeatBathSamplers : public ExcitationGenerator {
     Aliaser m_pick_ab_given_ij;
 
 public:
-    HeatBathSamplers(const Hamiltonian *h, PRNG &prng);
+    HeatBathSamplers(const FermionHamiltonian *h, PRNG &prng);
 
     bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,

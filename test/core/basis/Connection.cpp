@@ -9,8 +9,8 @@
 
 TEST(Connection, ParticleNumberConserving){
     const size_t nsite = 20;
-    elements::Determinant ket(nsite);
-    elements::Determinant bra(nsite);
+    elements::FermionOnv ket(nsite);
+    elements::FermionOnv bra(nsite);
 
     defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 20, 38, 39};
     defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 37, 38};
@@ -53,9 +53,9 @@ TEST(Connection, Phase) {
     defs::inds inds(16);
     float value;
 
-    elements::Determinant bra(4);
-    elements::Determinant ket(4);
-    elements::Determinant work_det(4);
+    elements::FermionOnv bra(4);
+    elements::FermionOnv ket(4);
+    elements::FermionOnv work_det(4);
     AntisymConnection connection(ket);
 
     while (file_reader.next(inds, value)) {

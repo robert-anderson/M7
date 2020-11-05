@@ -42,7 +42,7 @@ public:
         /*
          * We want to make nattempt = ceil(|weight|) spawning attempts.
          * can't rely on std::abs to provide the right answer in the case of complex arithmetic with
-         * a real-valued Hamiltonian and an integral weight, since the sqrt function is not the exact
+         * a real-valued FermionHamiltonian and an integral weight, since the sqrt function is not the exact
          * inverse of squaring in finite precision arithmetic!
          */
         if (weight<0) return (-weight) < 1 ? 1 : std::round(-weight);

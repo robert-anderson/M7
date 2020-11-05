@@ -6,10 +6,10 @@
 #include <src/core/enumerator/FermionOnvEnumerator.h>
 #include "DenseHamiltonian.h"
 
-DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
+DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source) :
         Matrix<defs::ham_t>(source.nci()) {
-    elements::Determinant bra(source.nsite());
-    elements::Determinant ket(source.nsite());
+    elements::FermionOnv bra(source.nsite());
+    elements::FermionOnv ket(source.nsite());
 
     size_t ibra = ~0ul;
     FermionOnvEnumerator bra_enum(source.nsite(), source.nelec());
@@ -26,7 +26,7 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
     }
 }
 
-//DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source, DeterminantList &detlist):
+//DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source, DeterminantList &detlist):
 //    Matrix<defs::ham_t>(detlist.high_water_mark(0)) {
 //    for (size_t ibra=0ul; ibra<m_nrow; ++ibra) {
 //        auto bra = detlist.m_determinant(ibra);
@@ -39,7 +39,7 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) :
 //    }
 //}
 
-//DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source, const BosonCouplings &bc):
+//DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source, const BosonCouplings &bc):
 //        Matrix<defs::ham_t>(source.nci()){
 //    FermionOnv dbra(source.nsite());
 //    FermionOnv dket(source.nsite());

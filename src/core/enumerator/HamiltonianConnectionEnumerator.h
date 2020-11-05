@@ -7,14 +7,14 @@
 
 
 #include "src/core/basis/DeterminantConnection.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "Enumerator.h"
 #include "CombinationEnumerator.h"
 
 #if 0
 
 class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
-    const Hamiltonian &m_h;
+    const FermionHamiltonian &m_h;
     const DeterminantElement &m_fonv;
     OccupiedOrbitals m_occs;
     VacantOrbitals m_vacs;
@@ -53,14 +53,14 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
 
 public:
 
-    HamiltonianSingleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
+    HamiltonianSingleConnectionEnumerator(const FermionHamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
             m_h(h), m_fonv(det), m_occs(det), m_vacs(det), m_eps(eps){
         m_occind++;
     }
 };
 
 class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
-    const Hamiltonian &m_h;
+    const FermionHamiltonian &m_h;
     const DeterminantElement &m_fonv;
     OccupiedOrbitals m_occs;
     VacantOrbitals m_vacs;
@@ -100,7 +100,7 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
 
 public:
 
-    HamiltonianDoubleConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
+    HamiltonianDoubleConnectionEnumerator(const FermionHamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
             m_h(h), m_fonv(det), m_occs(det), m_vacs(det),
             m_occ_enumerator(m_occs.m_nind, 2),
             m_vac_enumerator(m_occs.m_nind, 2),
@@ -113,7 +113,7 @@ public:
 class HamiltonianConnectionEnumerator : public HamiltonianSingleConnectionEnumerator {
     HamiltonianDoubleConnectionEnumerator doubles_enumerator;
 public:
-    HamiltonianConnectionEnumerator(const Hamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
+    HamiltonianConnectionEnumerator(const FermionHamiltonian &h, const DeterminantElement &det, const defs::ham_comp_t &eps=1e-12) :
         HamiltonianSingleConnectionEnumerator(h, det), doubles_enumerator(h, det){
         m_subsequent = &doubles_enumerator;
     }

@@ -5,12 +5,12 @@
 #include "src/core/enumerator/ContainerCombinationEnumerator.h"
 #include "src/core/basis/DecodedDeterminant.h"
 #include "src/core/parallel/RankAllocator.h"
-#include "Hamiltonian.h"
+#include "FermionHamiltonian.h"
 
 
 
 #if 0
-FermionOnv Hamiltonian::guess_reference(const int &spin_restrict) const {
+FermionOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
     FermionOnv ref(m_nsite);
     ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
@@ -21,7 +21,7 @@ FermionOnv Hamiltonian::guess_reference(const int &spin_restrict) const {
     return ref;
 }
 
-FermionOnv Hamiltonian::refine_guess_reference(const DeterminantElement &ref) const {
+FermionOnv FermionHamiltonian::refine_guess_reference(const DeterminantElement &ref) const {
 
     auto e_ref = get_energy(ref);
     /*
@@ -58,14 +58,14 @@ FermionOnv Hamiltonian::refine_guess_reference(const DeterminantElement &ref) co
     return excited;
 }
 
-FermionOnv Hamiltonian::choose_reference(const int &spin_level) const {
+FermionOnv FermionHamiltonian::choose_reference(const int &spin_level) const {
     auto ref = guess_reference(spin_level);
     ref = refine_guess_reference(ref);
     return ref;
 }
 
 void
-Hamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElement> &ra, const int &spin_level) const {
+FermionHamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElement> &ra, const int &spin_level) const {
     size_t nalpha = nelec() / 2 + spin_level;
     size_t nbeta = nelec() / 2 - spin_level;
 

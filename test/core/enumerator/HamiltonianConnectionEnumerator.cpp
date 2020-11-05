@@ -12,7 +12,7 @@ public:
     DeterminantField m_determinant;
     NumericField<defs::ham_t> m_helement;
 
-    ConnectionList(const Hamiltonian &h, const FermionOnv &ref, size_t nbucket, const defs::ham_comp_t eps) :
+    ConnectionList(const FermionHamiltonian &h, const FermionOnv &ref, size_t nbucket, const defs::ham_comp_t eps) :
             MappedList("test connection list", m_determinant, nbucket),
             m_determinant(this, 1, ref.nsite()), m_helement(this) {
         OccupiedOrbitals occs(ref);

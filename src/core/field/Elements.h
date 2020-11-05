@@ -37,8 +37,8 @@ struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
 };
 
 namespace elements {
-    struct Determinant : Element<fields::FermionOnv> {
-        Determinant(size_t nsite):
+    struct FermionOnv : Element<fields::FermionOnv> {
+        FermionOnv(size_t nsite):
         Element<fields::FermionOnv>(FermionOnvSpecifier(nsite), "Working determinant"){}
         using specs::FermionOnv::view_t::operator=;
     };
@@ -49,8 +49,8 @@ namespace elements {
         using specs::BosonOnv::view_t::operator=;
     };
 
-    struct FermionBosonConfiguration : Element<fields::FermiBosOnv> {
-        FermionBosonConfiguration(size_t nsite, size_t nmode):
+    struct FermiBosOnv : Element<fields::FermiBosOnv> {
+        FermiBosOnv(size_t nsite, size_t nmode):
         Element<fields::FermiBosOnv>(nsite, nmode, "Working fermion-boson configuration"){}
     };
 
@@ -59,53 +59,15 @@ namespace elements {
 
     template<size_t nind>
     struct ConfigurationSelector<nind, false> {
-        typedef Determinant type;
+        typedef FermionOnv type;
     };
 
     template<size_t nind>
     struct ConfigurationSelector<nind, true> {
-        typedef FermionBosonConfiguration type;
+        typedef FermiBosOnv type;
     };
 
-    using Configuration = ConfigurationSelector<0ul, defs::bosons>::type;
-}
-#if 0
-#include "BufferedField.h"
-#include "BufferedComposite.h"
-#include "NumericField.h"
-#include "NumericArraySpecifier.h"
-#include "Fields.h"
-
-namespace elements {
-    template<typename T>
-    using Number = BufferedComposite<fields::Number<T>>;
-
-    template<typename T, size_t nind>
-    struct NumberArray : BufferedComposite<fields::NumberArray<T, nind>> {
-        NumberArray() : BufferedComposite<fields::NumberArray<T, nind>>(
-                "Working number array") {}
-    };
-
-    struct Bitset : BufferedComposite<fields::Bitset> {
-        Bitset(size_t nbit) : BufferedComposite<fields::Bitset>(
-                nbit, "Working bitset") {}
-    };
-
-    struct FermionOnv : BufferedComposite<fields::FermionOnv> {
-        FermionOnv(size_t nsite) : BufferedComposite<fields::FermionOnv>(
-                nsite, "Working determinant") {}
-    };
-
-    struct BosonOnv : BufferedComposite<fields::BosonOnv> {
-        BosonOnv(size_t nmode) : BufferedComposite<fields::BosonOnv>(
-                nmode, "Working Boson ONV") {}
-    };
-
-    struct Onv : BufferedComposite<fields::Onv> {
-        Onv(size_t nsite, size_t nmode) : BufferedComposite<fields::Onv>(
-                nsite, nmode, "Working configuration") {}
-    };
+    using Onv = ConfigurationSelector<0ul, defs::bosons>::type;
 }
 
-#endif //M7_ELEMENTS_H
 #endif //M7_ELEMENTS_H

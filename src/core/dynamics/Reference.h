@@ -128,7 +128,7 @@ public:
         return aconn.nexcit() < 3;
     }
 
-    void add_to_numerator(const Hamiltonian *ham, const DeterminantElement &det, const defs::wf_t &weight) {
+    void add_to_numerator(const FermionHamiltonian *ham, const DeterminantElement &det, const defs::wf_t &weight) {
         m_aconn.connect(*this, det);
         m_proj_energy_num += ham->get_element(m_aconn) * weight;
         m_nwalker_at_doubles += std::abs(weight);

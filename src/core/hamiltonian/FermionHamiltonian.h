@@ -2,8 +2,8 @@
 // Created by rja on 27/02/2020.
 //
 
-#ifndef M7_HAMILTONIAN_H
-#define M7_HAMILTONIAN_H
+#ifndef M7_FERMIONHAMILTONIAN_H
+#define M7_FERMIONHAMILTONIAN_H
 
 #include <cstddef>
 #include <src/core/basis/DeterminantConnection.h>
@@ -13,7 +13,7 @@
 #include "src/core/integrals/Integrals_2e.h"
 
 
-class Hamiltonian {
+class FermionHamiltonian {
 protected:
     const size_t m_nelec;
     const size_t m_nsite;
@@ -26,8 +26,8 @@ protected:
     ints2_t m_int_2;
 
 public:
-    Hamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e,
-                bool complex_valued, bool spin_resolved) :
+    FermionHamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e,
+                       bool complex_valued, bool spin_resolved) :
             m_nelec(nelec), m_nsite(nsite),
             m_spin_conserving_1e(spin_conserving_1e),
             m_spin_conserving_2e(spin_conserving_2e),
@@ -36,15 +36,15 @@ public:
             m_int_2(nsite, spin_resolved)
             {}
 
-    Hamiltonian(const FcidumpFileReader<defs::ham_t> &file_reader) :
-            Hamiltonian(file_reader.nelec(), file_reader.nspatorb(),
-                        file_reader.spin_conserving_1e(),
-                        file_reader.spin_conserving_2e(),
-                        file_reader.m_complex_valued, file_reader.spin_resolved()) {
+    FermionHamiltonian(const FcidumpFileReader<defs::ham_t> &file_reader) :
+            FermionHamiltonian(file_reader.nelec(), file_reader.nspatorb(),
+                               file_reader.spin_conserving_1e(),
+                               file_reader.spin_conserving_2e(),
+                               file_reader.m_complex_valued, file_reader.spin_resolved()) {
         defs::inds inds(4);
         defs::ham_t value;
 
-        logger::write("Loading ab-initio Hamiltonian from FCIDUMP...");
+        logger::write("Loading ab-initio FermionHamiltonian from FCIDUMP...");
         while (file_reader.next(inds, value)) {
             if (ints2_t::valid_inds(inds)) m_int_2.set(inds, value);
             else if (ints1_t::valid_inds(inds)) m_int_1.set(inds, value);
@@ -55,8 +55,8 @@ public:
     }
 
 
-    explicit Hamiltonian(const std::string& fname, bool spin_major):
-            Hamiltonian(FcidumpFileReader<defs::ham_t>(fname, spin_major)){}
+    explicit FermionHamiltonian(const std::string& fname, bool spin_major):
+            FermionHamiltonian(FcidumpFileReader<defs::ham_t>(fname, spin_major)){}
 
     consts::component_t<defs::ham_t>::type get_energy(const views::FermionOnv &det) const {
         return consts::real(get_element_0(det));
@@ -177,4 +177,4 @@ public:
 
 };
 
-#endif //M7_HAMILTONIAN_H
+#endif //M7_FERMIONHAMILTONIAN_H

@@ -8,7 +8,7 @@
 #if 0
 
 #include "src/core/sparse/SparseMatrix.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/basis/DeterminantList.h"
 #include "WalkerList.h"
@@ -50,7 +50,7 @@ class DeterministicSubspace {
     defs::inds m_recvcounts;
     defs::inds m_displs;
 
-    void build_hamiltonian(const Hamiltonian *ham) {
+    void build_hamiltonian(const FermionHamiltonian *ham) {
         ASSERT(m_sparse_ham.empty());
         m_full_subspace_list.all_gather(m_local_subspace_list);
         std::cout << "Building semistochastic sparse hamiltonian with " << nrow_full() << " total rows and "
@@ -137,14 +137,14 @@ public:
         return m_local_subspace_list.m_determinant(irow);
     }
 
-    void build_from_whole_walker_list(Hamiltonian *ham) {
+    void build_from_whole_walker_list(FermionHamiltonian *ham) {
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (!m_walker_list.row_empty(irow)) add_determinant(irow);
         }
         build_hamiltonian(ham);
     }
 
-    void build_from_det_connections(const DeterminantElement &ref, Hamiltonian *ham, size_t nexcit_max = 2) {
+    void build_from_det_connections(const DeterminantElement &ref, FermionHamiltonian *ham, size_t nexcit_max = 2) {
         std::cout << "Building deterministic subspace from connections of " << ref.to_string() << std::endl;
         DeterminantConnection conn(ref);
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
@@ -156,7 +156,7 @@ public:
         build_hamiltonian(ham);
     }
 
-    void build_from_nw_fraction(double fraction, defs::wf_comp_t nw, Hamiltonian *ham) {
+    void build_from_nw_fraction(double fraction, defs::wf_comp_t nw, FermionHamiltonian *ham) {
         std::cout << "Building deterministic subspace of all dets with weight > total walker number * " << fraction << std::endl;
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;
@@ -166,7 +166,7 @@ public:
         build_hamiltonian(ham);
     }
 
-    void build_from_nadd_thresh(double thresh, defs::wf_comp_t nadd, Hamiltonian *ham) {
+    void build_from_nadd_thresh(double thresh, defs::wf_comp_t nadd, FermionHamiltonian *ham) {
         std::cout << "Building deterministic subspace of all dets with weight > nadd * " << thresh << std::endl;
         for (size_t irow = 0ul; irow < m_walker_list.high_water_mark(0); ++irow) {
             if (m_walker_list.row_empty(irow)) continue;

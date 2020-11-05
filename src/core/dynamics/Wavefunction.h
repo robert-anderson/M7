@@ -102,7 +102,7 @@ public:
 private:
     void annihilate_row(const size_t &irow_recv);
 
-    defs::ham_comp_t projected_energy_check(Hamiltonian *ham, const DeterminantElement &ref) {
+    defs::ham_comp_t projected_energy_check(FermionHamiltonian *ham, const DeterminantElement &ref) {
         // debug only
         Reducible<defs::ham_t> e;
         Reducible<defs::wf_t> norm;

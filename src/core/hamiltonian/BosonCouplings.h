@@ -8,7 +8,7 @@
 #if 0
 
 #include <src/core/basis/BosonOnvConnection.h>
-#include "Hamiltonian.h"
+#include "FermionHamiltonian.h"
 
 
 struct FermionDensityCoupling {
@@ -49,7 +49,7 @@ class BosonCouplings {
 
     const size_t m_nocc_cutoff;
     const size_t m_nmode;
-    Hamiltonian *m_ham;
+    FermionHamiltonian *m_ham;
     std::unique_ptr<FermionDensityCoupling> m_v;
     std::unique_ptr<BosonModeFrequencies> m_omega;
 

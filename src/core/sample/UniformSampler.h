@@ -11,7 +11,7 @@
 class UniformSampler : public ExcitationGenerator {
 
 public:
-    UniformSampler(const Hamiltonian *h, PRNG &prng);
+    UniformSampler(const FermionHamiltonian *h, PRNG &prng);
 
     bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,

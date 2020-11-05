@@ -9,13 +9,13 @@
 #include "src/core/basis/DeterminantList.h"
 #include "src/core/util/defs.h"
 #include "Matrix.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/FermionHamiltonian.h"
 
 class DenseHamiltonian : public Matrix<defs::ham_t> {
 public:
-    DenseHamiltonian(const Hamiltonian &source);
-    //DenseHamiltonian(const Hamiltonian &source, const BosonCouplings& bc);
-    //DenseHamiltonian(const Hamiltonian &source, DeterminantList &detlist);
+    DenseHamiltonian(const FermionHamiltonian &source);
+    //DenseHamiltonian(const FermionHamiltonian &source, const BosonCouplings& bc);
+    //DenseHamiltonian(const FermionHamiltonian &source, DeterminantList &detlist);
 };
 
 #endif //M7_DENSEHAMILTONIAN_H

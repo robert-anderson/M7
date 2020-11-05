@@ -10,7 +10,7 @@
 TEST(SpinNonConDetEnumerator, SimpleConstruction){
     size_t nsite = 4, nelec = 4, idet=~0ul;
     FermionOnvEnumerator enumerator(nsite, nelec);
-    elements::Determinant det(nsite);
+    elements::FermionOnv det(nsite);
     while(enumerator.next(det, idet)){}
     ASSERT_EQ(idet, ci_utils::fermion_dim(nsite, nelec));
 }
@@ -19,7 +19,7 @@ TEST(SpinConDetEnumerator, EnumerateSpinZero){
     size_t nsite = 4, nelec = 4, idet=~0ul;
     int spin = 0;
     FermionOnvEnumerator enumerator(nsite, nelec, spin);
-    elements::Determinant det(nsite);
+    elements::FermionOnv det(nsite);
     while(enumerator.next(det, idet)){
         ASSERT_EQ(det.spin(), spin);
     }
@@ -32,7 +32,7 @@ TEST(SpinConDetEnumerator, EnumerateSpinOdd){
     for(auto spin : {-5, -3, -1, 1, 3, 5}){
         size_t idet=~0ul;
         FermionOnvEnumerator scde(nsite, nelec, spin);
-        elements::Determinant det(nsite);
+        elements::FermionOnv det(nsite);
         while(scde.next(det, idet)){
             ASSERT_EQ(det.spin(), spin);
         }
@@ -45,7 +45,7 @@ TEST(SpinConDetEnumerator, EnumerateSpinEven){
     for(auto spin : {-6, -4,-2, 0, 2, 4, 6}){
         size_t idet=~0ul;
         FermionOnvEnumerator scde(nsite, nelec, spin);
-        elements::Determinant det(nsite);
+        elements::FermionOnv det(nsite);
         while(scde.next(det, idet)){
             ASSERT_EQ(det.spin(), spin);
         }

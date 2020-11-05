@@ -26,7 +26,7 @@ public:
     std::unique_ptr<FciqmcStatsFile> m_stats_file = nullptr;
     std::unique_ptr<ParallelizationStatsFile> m_parallel_stats_file = nullptr;
 
-    std::unique_ptr<Hamiltonian> m_ham;
+    std::unique_ptr<FermionHamiltonian> m_ham;
     FermionOnv m_reference;
     std::unique_ptr<Propagator> m_prop;
     Wavefunction m_wf;
@@ -38,7 +38,7 @@ public:
 
     void write_iter_stats(size_t icycle);
 
-    FermionOnv initial_reference(const std::unique_ptr<Hamiltonian>& ham, const Options& input){
+    FermionOnv initial_reference(const std::unique_ptr<FermionHamiltonian>& ham, const Options& input){
         if(m_input.initial_reference_det.empty()) {
             return m_ham->guess_reference(input.spin_restrict);
         }

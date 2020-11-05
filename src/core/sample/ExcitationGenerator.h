@@ -7,12 +7,12 @@
 
 #if 0
 
-#include <src/core/hamiltonian/Hamiltonian.h>
+#include <src/core/hamiltonian/FermionHamiltonian.h>
 #include "PRNG.h"
 
 class ExcitationGenerator {
 protected:
-    const Hamiltonian *m_h;
+    const FermionHamiltonian *m_h;
     PRNG &m_prng;
     const size_t m_nintind;
     const size_t m_nelec;
@@ -20,7 +20,7 @@ protected:
     const size_t m_nelec_pair;
     const bool m_spin_conserving_1e, m_spin_conserving_2e;
 public:
-    ExcitationGenerator(const Hamiltonian *h, PRNG &prng) :
+    ExcitationGenerator(const FermionHamiltonian *h, PRNG &prng) :
             m_h(h), m_prng(prng),
             m_nintind(m_h->nsite() * 2),
             m_nelec(m_h->nelec()),
@@ -39,7 +39,7 @@ public:
                      const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
                      AntisymConnection &anticonn) = 0;
 
-    const Hamiltonian *ham(){return m_h;}
+    const FermionHamiltonian *ham(){return m_h;}
 };
 
 
