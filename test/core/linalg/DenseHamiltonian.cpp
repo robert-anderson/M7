@@ -40,50 +40,43 @@ TEST(DenseHamiltonian, HubbardCheck) {
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
-#if 0
 
 TEST(DenseHamiltonian, BosonCouplingNoBosonLimit) {
     if (!defs::bosons) GTEST_SKIP();
-    BosonCouplings h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1, 0, 0, 0);
-    ASSERT_EQ(h.nelec(), 4);
-    DenseHamiltonian dh(h);
+    FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 0, 0);
+    DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoField) {
     if (!defs::bosons) GTEST_SKIP();
-    BosonCouplings h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1, 2, 0, 0);
-    ASSERT_EQ(h.nelec(), 4);
-    DenseHamiltonian dh(h,0);
+    FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 0, 0);
+    DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
 TEST(DenseHamiltonian, BosonCouplingMaxOcc1) {
-    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
-    ASSERT_EQ(h.nelec(), 4);
-    BosonCouplings bc(1, h.nsite(), 1.4,0.3);
-    DenseHamiltonian dh(h, bc);
+    if (!defs::bosons) GTEST_SKIP();
+    FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
+    DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -6.9875779675355165);
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc2) {
-    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
-    ASSERT_EQ(h.nelec(), 4);
-    BosonCouplings bc(2, h.nsite(), 1.4,0.0);
-    DenseHamiltonian dh(h, bc);
+    if (!defs::bosons) GTEST_SKIP();
+    FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.0);
+    DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -11.652629830979253);
 }
 
 TEST(DenseHamiltonian, BosonCouplingMaxOcc2) {
-    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
-    ASSERT_EQ(h.nelec(), 4);
-    BosonCouplings bc(2, h.nsite(), 1.4,0.3);
-    DenseHamiltonian dh(h, bc);
+    if (!defs::bosons) GTEST_SKIP();
+    FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
+    DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -10.328242246088791);
 }
-#endif
