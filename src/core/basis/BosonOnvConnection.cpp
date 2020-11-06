@@ -4,9 +4,9 @@
 
 #include "BosonOnvConnection.h"
 
-PermanentDiff::PermanentDiff(size_t nmode) : m_changed_modes(nmode, 0ul), m_changes(nmode, 0){}
+BosonOnvConnection::Diff::Diff(size_t nmode) : m_changed_modes(nmode, 0ul), m_changes(nmode, 0){}
 
-void PermanentDiff::zero() {
+void BosonOnvConnection::Diff::zero() {
     m_nchanged_mode = 0ul;
 }
 
@@ -51,7 +51,7 @@ void BosonOnvConnection::connect(const views::BosonOnv &in, const views::BosonOn
         m_com[imode] = std::min(nin, nout);
         if (nin!=nout){
             m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;
-            m_diff.m_changes[m_diff.m_nchanged_mode] = nin-nout;
+            m_diff.m_changes[m_diff.m_nchanged_mode] = nout-nin;
             ++m_diff.m_nchanged_mode;
         }
     }
