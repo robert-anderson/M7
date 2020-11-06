@@ -12,18 +12,18 @@
 template<typename viewable_t>
 struct SingleFieldTable: TableX {
     static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
+    typedef typename viewable_t::params_t params_t;
     viewable_t m_field;
-    template<typename ...Args>
-    SingleFieldTable(Args... args):
+    SingleFieldTable(params_t p, std::string description):
     TableX(),
-    m_field(this, args...){}
+    m_field(this, p, description){}
 };
 
 template<typename viewable_t>
 struct BufferedSingleFieldTable: BufferedTable<SingleFieldTable<viewable_t>>{
     typedef BufferedTable<SingleFieldTable<viewable_t>> base_t;
-    template<typename ...Args>
-    BufferedSingleFieldTable(Args... args): base_t(args...){
+    typedef typename viewable_t::params_t params_t;
+    BufferedSingleFieldTable(params_t p, std::string description): base_t(p, description){
         base_t::expand(1ul);
         base_t::push_back();
     }
@@ -32,26 +32,28 @@ struct BufferedSingleFieldTable: BufferedTable<SingleFieldTable<viewable_t>>{
 template <typename viewable_t>
 struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
     typedef BufferedSingleFieldTable<viewable_t> base_t;
-    template<typename ...Args>
-    Element(Args... args): base_t(args...), viewable_t::view_t(base_t::m_field(0)){}
+    typedef typename viewable_t::params_t params_t;
+    Element(params_t p, std::string description):
+    base_t(p, description),
+    viewable_t::view_t(base_t::m_field(0)){}
 };
 
 namespace elements {
     struct FermionOnv : Element<fields::FermionOnv> {
         FermionOnv(size_t nsite):
-        Element<fields::FermionOnv>(FermionOnvSpecifier(nsite), "Working determinant"){}
+        Element<fields::FermionOnv>({nsite}, "Working determinant"){}
         using specs::FermionOnv::view_t::operator=;
     };
 
     struct BosonOnv : Element<fields::BosonOnv> {
         BosonOnv(size_t nmode):
-                Element<fields::BosonOnv>(BosonOnvSpecifier(nmode), "Working boson ONV"){}
+                Element<fields::BosonOnv>({nmode}, "Working boson ONV"){}
         using specs::BosonOnv::view_t::operator=;
     };
 
     struct FermiBosOnv : Element<fields::FermiBosOnv> {
         FermiBosOnv(size_t nsite, size_t nmode):
-        Element<fields::FermiBosOnv>(nsite, nmode, "Working fermion-boson configuration"){}
+        Element<fields::FermiBosOnv>({nsite, nmode}, "Working fermion-boson configuration"){}
         using fields::FermiBosOnv::view_t::operator=;
     };
 

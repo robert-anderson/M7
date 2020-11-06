@@ -13,6 +13,8 @@ struct BitsetSpecifier : FieldSpecifier {
     const size_t m_ndataword;
 
     BitsetSpecifier(size_t nbit);
+    struct params_t{size_t nbit;};
+    BitsetSpecifier(params_t p): BitsetSpecifier(p.nbit){}
 
     struct View : FieldSpecifier::View {
         View(const BitsetSpecifier &field, char* ptr);

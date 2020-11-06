@@ -2,16 +2,15 @@
 // Created by Robert John Anderson on 2020-04-02.
 //
 
-#ifndef M7_WALKERLIST_H
-#define M7_WALKERLIST_H
+#ifndef M7_WALKERTABLE_H
+#define M7_WALKERTABLE_H
 
-#if 0
 #include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
 #include <src/core/parallel/Reducible.h>
 #include <list>
 
-struct WalkerList : public MappedTable<fields::Onv> {
+struct WalkerTable : public MappedTable<fields::Onv> {
     fields::Onv m_onv;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
     fields::Number<defs::ham_comp_t> m_hdiag;
@@ -21,29 +20,23 @@ private:
         Flag m_reference_connection;
         Flag m_deterministic;
 
-        WalkerTableFlagSet(fields::Bitset *bitset, size_t nreplica, size_t nroot) :
+        WalkerTableFlagSet(fields::Bitset *bitset, size_t nroot, size_t nreplica) :
                 FlagSet(bitset),
-                m_initiator(this, "is initiator", nreplica, nroot),
+                m_initiator(this, "is initiator", nroot, nreplica),
                 m_reference_connection(this, "is connected to reference ONV"),
                 m_deterministic(this, "is in deterministic subspace") {}
     };
 public:
     fields::Flags<WalkerTableFlagSet> m_flags;
 
-    WalkerList(std::string name, size_t nsite, size_t nbucket, fields::) :
+    WalkerTable(std::string name, size_t nbucket, fields::Onv::params_t onv_params, size_t nroot, size_t nreplica) :
+            MappedTable<fields::Onv>(m_onv, nbucket),
+            m_onv(this, onv_params, "occupation number vectors"),
+            m_weight(this, "weights", nroot, nreplica),
+            m_hdiag(this, "hamiltonian diagonal element"),
+            m_flags(this, "flags", nroot, nreplica){}
 
-            PerforableMappedList<DeterminantElement>(name, m_determinant, nbucket),
-            m_determinant(this, 1, nsite, "Determinant"),
-            m_weight(this, 1, "Weight"),
-            m_hdiag(this, 1, "Diagonal Hamiltonian matrix element"),
-            m_flags(this, 1, "Flags") {
-        ASSERT(m_determinant.element_dsize() ==
-               integer_utils::divceil(2 * nsite, CHAR_BIT * sizeof(defs::data_t)))
-    }
-
-    ~WalkerList() {
-
-    }
+#if 0
 
     std::list<size_t> highest_weighted_row_inds_local(size_t n) {
         return List::top_row_inds_local(m_weight, n);
@@ -117,7 +110,8 @@ public:
         }
         return ninitiator;
     }
+#endif //M7_WALKERTABLE_H
+
 };
 
-#endif //M7_WALKERLIST_H
-#endif //M7_WALKERLIST_H
+#endif //M7_WALKERTABLE_H

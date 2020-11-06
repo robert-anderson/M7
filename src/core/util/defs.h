@@ -72,7 +72,7 @@ namespace defs {
     const size_t isym_1e = 2;
     const size_t isym_2e = 8;
     const bool bosons = true;
-    // nreplica, nroot
+    //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
 
     // width of the cache line in bytes

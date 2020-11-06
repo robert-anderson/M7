@@ -10,10 +10,15 @@
 
 
 struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
-    template<typename ...Args>
-    BosonOnvSpecifier(size_t nmode):NumericArraySpecifier(nmode) {
+    BosonOnvSpecifier(size_t nmode) : NumericArraySpecifier(nmode) {
         m_data.m_details["type"] = "Boson ONV";
     }
+
+    struct params_t {
+        size_t nmode;
+    };
+
+    BosonOnvSpecifier(params_t p) : BosonOnvSpecifier(p.nmode){}
 
     const size_t &nmode() const;
 

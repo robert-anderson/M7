@@ -12,7 +12,7 @@ struct TestTable : MappedTable<fields::Onv> {
     fields::Onv m_config;
     TestTable(size_t nsite, size_t nmode):
     MappedTable<fields::Onv>(m_config, 10),
-            m_config(this, nsite, nmode, "configuration"){}
+            m_config(this, {nsite, nmode}, "configuration"){}
 };
 
 TEST(MappedTable, TEST){

@@ -44,16 +44,20 @@ namespace fb_onv {
     template<size_t nind>
     struct Field : NdFieldGroup<nind> {
 
+        struct params_t {
+            size_t nsite, nmode;
+        };
+
         NdFieldBase<FermionOnvSpecifier, nind> m_fonv;
         NdFieldBase<BosonOnvSpecifier, nind> m_bonv;
 
         using NdFieldGroup<nind>::m_format;
 
         template<typename ...Args>
-        Field(TableX *table, size_t nsite, size_t nmode, std::string description, Args... shape) :
+        Field(TableX *table, params_t p, std::string description, Args... shape) :
                 NdFieldGroup<nind>(shape...),
-                m_fonv(table, {nsite}, description + " (FermionOnv)", m_format),
-                m_bonv(table, {nmode}, description + " (Boson ONV)", m_format) {}
+                m_fonv(table, {p.nsite}, description + " (FermionOnv)", m_format),
+                m_bonv(table, {p.nmode}, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
         typedef const View const_view_t;
