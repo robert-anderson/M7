@@ -2,73 +2,76 @@
 // Created by jhalson on 30/09/2020.
 //
 
-#if 0
-
-#include "src/core/hamiltonian/BosonCouplings.h"
 #include "gtest/gtest.h"
-#include "src/core/basis/BosonOnvConnection.h"
-#include "src/core/basis/Permanent.h"
+#include "src/core/hamiltonian/BosonCouplings.h"
+#include "src/core/field/Elements.h"
 
-TEST(BosonCouplings, Element_b0){
-    size_t nocc_cutoff=4, nmode=4;
-    defs::ham_t V=0.5, omega=0.025;
+TEST(BosonCouplings, Element_b0) {
+    size_t nboson_cutoff = 4, nmode = 4;
+    defs::ham_t v = 0.5, omega = 0.025;
 
-    BosonCouplings simpleCoupling(nocc_cutoff, nmode, V, omega);
+    BosonCouplings bc(nboson_cutoff, nmode, v, omega);
 
-    Permanent ket(nmode, nocc_cutoff);
-    Permanent bra(nmode, nocc_cutoff);
-    BosonOnvConnection pc(bra, ket);
+    elements::FermiBosOnv ket(nmode, nmode);
+    elements::FermiBosOnv bra(nmode, nmode);
 
-    auto el = simpleCoupling.get_element_0(pc);
+    ket = {{1, 2, 3, 4},
+           {0, 0, 0, 0}};
+    bra = {{1, 2, 3, 4},
+           {0, 0, 0, 0}};
+    conn::AsFermiBosOnv fbconn(ket, bra);
+
+    auto el = bc.get_element_0(fbconn);
     ASSERT_EQ(el, 0);
 
-    ket = {2,4,0,1};
-    bra = {2,4,0,1};
+    ket = {{1, 2, 3, 4},
+           {2, 4, 0, 1}};
+    bra = {{1, 2, 3, 4},
+           {2, 4, 0, 1}};
 
-    pc.connect(bra, ket);
+    fbconn.connect(bra, ket);
 
-    el = simpleCoupling.get_element_0(pc);
-    ASSERT_EQ(el, 7*omega);
+    el = bc.get_element_0(fbconn);
+    ASSERT_EQ(el, 7 * omega);
 }
 
 TEST(BosonCouplings, Element_f0_b1){
-    size_t nocc_cutoff=4, nmode=4;
-    defs::ham_t V=0.5, omega=0.025;
+    size_t nboson_cutoff = 4, nmode = 4;
+    defs::ham_t v = 0.5, omega = 0.025;
 
-    BosonCouplings simpleCoupling(nocc_cutoff, nmode, V, omega);
+    BosonCouplings bc(nboson_cutoff, nmode, v, omega);
 
-    FermionOnv dket(nmode);
+    elements::FermiBosOnv ket(nmode, nmode);
+    elements::FermiBosOnv bra(nmode, nmode);
 
-    dket.set(defs::inds{1,2,3,4});
-    FermionOnv dbra = dket;
+    ket = {{1, 2, 3, 4},
+           {2, 4, 0, 1}};
+    bra = {{1, 2, 3, 4},
+           {2, 4, 0, 2}};
+    conn::AsFermiBosOnv fbconn(ket, bra);
+    ASSERT_EQ(fbconn.m_bonvconn.nchanged_mode(), 1);
+    ASSERT_EQ(fbconn.m_bonvconn.changed_mode(0), 3);
+    ASSERT_EQ(fbconn.m_bonvconn.changes(0), 1);
 
-    AntisymFermionOnvConnection ac(dbra, dket);
-
-    Permanent pket(nmode, nocc_cutoff);
-    Permanent pbra(nmode, nocc_cutoff);
-
-    pket = {2,4,0,1};
-    pbra = {2,4,0,2};
-
-    BosonOnvConnection pc(pbra, pket);
-
-    auto el = simpleCoupling.get_element_1(ac, pc);
-    ASSERT_EQ(V*ac.ncom(), el);
+    auto el = bc.get_element_1(fbconn);
+    ASSERT_EQ(v, el);
 }
+
+#if 0
 
 TEST(BosonCouplings, Element_f1_b1){
     size_t nocc_cutoff=4, nmode=4;
-    defs::ham_t V=0.5, omega=0.025;
+    defs::ham_t v=0.5, omega=0.025;
 
-    BosonCouplings simpleCoupling(nocc_cutoff, nmode, V, omega);
+    BosonCouplings simpleCoupling(nocc_cutoff, nmode, v, omega);
 
-    FermionOnv dket(nmode);
-    FermionOnv dbra(nmode);
+    Determinant dket(nmode);
+    Determinant dbra(nmode);
 
     dket.set(defs::inds{1,2,3,4});
     dbra.set(defs::inds{1,2,3,5});
 
-    AntisymFermionOnvConnection ac(dbra, dket);
+    AntisymConnection ac(dbra, dket);
 
     Permanent pket(nmode, nocc_cutoff);
     Permanent pbra(nmode, nocc_cutoff);
@@ -76,10 +79,9 @@ TEST(BosonCouplings, Element_f1_b1){
     pket = {2,4,0,1};
     pbra = {2,4,0,2};
 
-    BosonOnvConnection pc(pbra, pket);
+    PermanentConnection pc(pbra, pket);
 
     auto el = simpleCoupling.get_element_1(ac, pc);
-    ASSERT_EQ(V, el);
+    ASSERT_EQ(0, el);
 }
-
 #endif

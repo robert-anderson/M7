@@ -12,7 +12,7 @@ class FermiBosHamiltonian : public FermionHamiltonian {
     BosonCouplings m_boson_couplings;
 public:
     FermiBosHamiltonian(std::string fname, bool spin_major, size_t nmode,
-                        size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega):
+                   size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega):
                         FermionHamiltonian(fname, spin_major),
                         m_boson_couplings(nmode, nboson_cutoff, v, omega){}
 
@@ -35,4 +35,4 @@ public:
 };
 
 
-#endif //M7_FERMIBOSHAMILTONIAN_H
+#endif //M7_BOSONCOUPLINGS_H
