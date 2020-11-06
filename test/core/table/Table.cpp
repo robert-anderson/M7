@@ -55,6 +55,11 @@ TEST(Table, DifferentFieldOffset){
      */
     ASSERT_EQ(t1.m_floats.m_field.m_offset, sizeof(defs::data_t));
     ASSERT_EQ(t1.m_floats.m_field.m_size, 4*sizeof(float));
+
+    ASSERT_EQ(t1.m_shorts.m_field.m_table, &t1);
+
+    auto t2 = t1;
+    ASSERT_EQ(t2.m_shorts.m_field.m_table, &t1);
 }
 
 struct TestFlagSet : FlagSet {
