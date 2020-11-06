@@ -8,19 +8,18 @@
 #include "src/core/field/Fields.h"
 #include "src/core/field/Views.h"
 
-struct PermanentDiff {
-    defs::inds m_changed_modes;
-    size_t m_nchanged_mode = 0ul;
-    std::vector<int> m_changes;
-    PermanentDiff(size_t nmode);
-
-    void zero();
-};
 
 class BosonOnvConnection {
+    struct Diff {
+        defs::inds m_changed_modes;
+        size_t m_nchanged_mode = 0ul;
+        std::vector<int> m_changes;
+        Diff(size_t nmode);
+        void zero();
+    };
     const size_t m_nmode;
     std::vector<int> m_com;
-    PermanentDiff m_diff;
+    Diff m_diff;
 
 public:
     explicit BosonOnvConnection(const BosonOnvSpecifier& spec);
@@ -32,13 +31,13 @@ public:
 
     const int & com(const size_t& icom) const;
 
-    BosonOnvConnection(const views::BosonOnv &ket, const views::BosonOnv &bra);
+    BosonOnvConnection(const views::BosonOnv &in, const views::BosonOnv &out);
 
-    explicit BosonOnvConnection(const views::BosonOnv &ket);
+    explicit BosonOnvConnection(const views::BosonOnv &in);
 
-    void connect(const views::BosonOnv &ket, const views::BosonOnv &bra);
+    void connect(const views::BosonOnv &in, const views::BosonOnv &out);
 
-    void apply(const views::BosonOnv &ket, views::BosonOnv& bra);
+    void apply(const views::BosonOnv &in, views::BosonOnv& out);
 };
 
 

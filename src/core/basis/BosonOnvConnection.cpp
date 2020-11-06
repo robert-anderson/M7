@@ -32,34 +32,34 @@ const int &BosonOnvConnection::com(const size_t &icom) const {
     return m_com[icom];
 }
 
-BosonOnvConnection::BosonOnvConnection(const views::BosonOnv &ket, const views::BosonOnv &bra) :
-        BosonOnvConnection(ket.spec()){
-    connect(ket, bra);
+BosonOnvConnection::BosonOnvConnection(const views::BosonOnv &in, const views::BosonOnv &out) :
+        BosonOnvConnection(in.spec()){
+    connect(in, out);
 }
 
-BosonOnvConnection::BosonOnvConnection(const views::BosonOnv &ket) :
-        BosonOnvConnection(ket.spec()){
-    connect(ket, ket);
+BosonOnvConnection::BosonOnvConnection(const views::BosonOnv &in) :
+        BosonOnvConnection(in.spec()){
+    connect(in, in);
 }
 
-void BosonOnvConnection::connect(const views::BosonOnv &ket, const views::BosonOnv &bra) {
+void BosonOnvConnection::connect(const views::BosonOnv &in, const views::BosonOnv &out) {
     m_diff.zero();
     ASSERT(!m_com.empty())
     for(size_t imode=0ul; imode<m_nmode; ++imode){
-        int nket = ket(imode);
-        int nbra = bra(imode);
-        m_com[imode] = std::min(nket, nbra);
-        if (nket!=nbra){
+        int nin = in(imode);
+        int nout = out(imode);
+        m_com[imode] = std::min(nin, nout);
+        if (nin!=nout){
             m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;
-            m_diff.m_changes[m_diff.m_nchanged_mode] = nket-nbra;
+            m_diff.m_changes[m_diff.m_nchanged_mode] = nin-nout;
             ++m_diff.m_nchanged_mode;
         }
     }
 }
 
-void BosonOnvConnection::apply(const views::BosonOnv &ket, views::BosonOnv &bra) {
-    bra = ket;
+void BosonOnvConnection::apply(const views::BosonOnv &in, views::BosonOnv &out) {
+    out = in;
     for (size_t ichange = 0ul; ichange<nchanged_mode(); ++ichange){
-        bra(changed_mode(ichange)) += changes(ichange);
+        out(changed_mode(ichange)) += changes(ichange);
     }
 }

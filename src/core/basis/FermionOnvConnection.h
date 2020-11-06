@@ -10,14 +10,14 @@
 #include <src/core/field/Views.h>
 
 /*
- * <bra| ...cre... ...ann... |ket>
- * the m_ann array contains the spin orbital indices in the ket but not the bra
- * the m_cre array contains the spin orbital indices in the bra but not the ket
+ * <out| ...cre... ...ann... |in>
+ * the m_ann array contains the spin orbital indices in "in" but not "out"
+ * the m_cre array contains the spin orbital indices in "out" but not "in"
  *
- * connect: given two determinants (ket, bra), compute the ann and cre arrays
- * which transforms ket into bra.
+ * connect: given two fermion ONVs ("in", "out"), compute the ann and cre arrays
+ * which transforms "in" into "out".
  *
- * excite: given a ket determinant, copy its value to a given bra determinant,
+ * excite: given a "in" fermion ONV, copy its value to a given "out" fermion ONV,
  * then apply the internal ann and cre arrays to it.
  *
  * zero: reset the counters
@@ -38,8 +38,8 @@ protected:
 
 public:
     explicit FermionOnvConnection(const FermionOnvSpecifier& field);
-    FermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
-    explicit FermionOnvConnection(const views::FermionOnv &ket);
+    FermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
+    explicit FermionOnvConnection(const views::FermionOnv &in);
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
@@ -49,8 +49,8 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     const size_t& ncre() const {return m_ncre;}
 
-    virtual void connect(const views::FermionOnv &ket, const views::FermionOnv &bra);
-    virtual void apply(const views::FermionOnv &ket, views::FermionOnv &bra);
+    virtual void connect(const views::FermionOnv &in, const views::FermionOnv &out);
+    virtual void apply(const views::FermionOnv &in, views::FermionOnv &out);
     void zero(){m_ncre=0; m_nann=0;}
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
@@ -85,15 +85,14 @@ class AntisymFermionOnvConnection : public FermionOnvConnection {
 
 public:
     explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& field);
-    AntisymFermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra);
-    explicit AntisymFermionOnvConnection(const views::FermionOnv &ket);
+    AntisymFermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
+    explicit AntisymFermionOnvConnection(const views::FermionOnv &in);
 
-    void connect(const views::FermionOnv &ket, const views::FermionOnv &bra) override;
-    void apply(const views::FermionOnv &ket);
-    void apply(const views::FermionOnv &ket, views::FermionOnv &bra) override;
+    void connect(const views::FermionOnv &in, const views::FermionOnv &out) override;
+    void apply(const views::FermionOnv &in);
+    void apply(const views::FermionOnv &in, views::FermionOnv &out) override;
 
     const defs::det_work& com() const {return m_com;}
-    //void com(const defs::inds &v) {m_com.assign(v.begin(), v.end()); m_ncom=v.size();}
     const size_t& com(const size_t& i) const {return m_com[i];}
     const size_t& ncom() const {return m_ncom;}
     const bool& phase() const {return m_phase;}

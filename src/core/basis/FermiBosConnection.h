@@ -14,19 +14,19 @@ struct FermiBosConnection {
     BosonOnvConnection m_bonvmconn;
 
     FermiBosConnection(
-            const views::FermiBosOnv &ket,
-            const views::FermiBosOnv &bra) :
-            m_fonvconn(ket.m_fonv, bra.m_fonv),
-            m_bonvmconn(ket.m_bonv, bra.m_bonv) {}
+            const views::FermiBosOnv &in,
+            const views::FermiBosOnv &out) :
+            m_fonvconn(in.m_fonv, out.m_fonv),
+            m_bonvmconn(in.m_bonv, out.m_bonv) {}
 
-    void connect(const views::FermiBosOnv &ket, const views::FermiBosOnv &bra) {
-        m_fonvconn.connect(ket.m_fonv, bra.m_fonv);
-        m_bonvmconn.connect(ket.m_bonv, bra.m_bonv);
+    void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
+        m_fonvconn.connect(in.m_fonv, out.m_fonv);
+        m_bonvmconn.connect(in.m_bonv, out.m_bonv);
     }
 
-    void apply(const views::FermiBosOnv &ket, views::FermiBosOnv &bra) {
-        m_fonvconn.apply(ket.m_fonv, bra.m_fonv);
-        m_bonvmconn.apply(ket.m_bonv, bra.m_bonv);
+    void apply(const views::FermiBosOnv &in, views::FermiBosOnv &out) {
+        m_fonvconn.apply(in.m_fonv, out.m_fonv);
+        m_bonvmconn.apply(in.m_bonv, out.m_bonv);
     }
 };
 
@@ -36,19 +36,19 @@ struct AntisymFermiBosConnection {
     BosonOnvConnection m_bonvconn;
 
     AntisymFermiBosConnection(
-            const views::FermiBosOnv &ket,
-            const views::FermiBosOnv &bra) :
-            m_aconn(ket.m_fonv, bra.m_fonv),
-            m_bonvconn(ket.m_bonv, bra.m_bonv) {}
+            const views::FermiBosOnv &in,
+            const views::FermiBosOnv &out) :
+            m_aconn(in.m_fonv, out.m_fonv),
+            m_bonvconn(in.m_bonv, out.m_bonv) {}
 
-    void connect(const views::FermiBosOnv &ket, const views::FermiBosOnv &bra) {
-        m_aconn.connect(ket.m_fonv, bra.m_fonv);
-        m_bonvconn.connect(ket.m_bonv, bra.m_bonv);
+    void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
+        m_aconn.connect(in.m_fonv, out.m_fonv);
+        m_bonvconn.connect(in.m_bonv, out.m_bonv);
     }
 
-    void apply(const views::FermiBosOnv &ket, views::FermiBosOnv &bra) {
-        m_aconn.apply(ket.m_fonv, bra.m_fonv);
-        m_bonvconn.apply(ket.m_bonv, bra.m_bonv);
+    void apply(const views::FermiBosOnv &in, views::FermiBosOnv &out) {
+        m_aconn.apply(in.m_fonv, out.m_fonv);
+        m_bonvconn.apply(in.m_bonv, out.m_bonv);
     }
 };
 

@@ -8,49 +8,49 @@
 FermionOnvConnection::FermionOnvConnection(const FermionOnvSpecifier& spec):
     m_element_dsize(spec.m_ndataword), m_nbit(spec.m_nbit) {}
 
-FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra) : FermionOnvConnection(ket.spec()) {
-    ASSERT(ket.nsite() == bra.nsite());
-    connect(ket, bra);
+FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out) : FermionOnvConnection(in.spec()) {
+    ASSERT(in.nsite() == out.nsite());
+    connect(in, out);
 }
 
-FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &ket) : FermionOnvConnection(ket, ket){}
+FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &in) : FermionOnvConnection(in, in){}
 
 
-void FermionOnvConnection::connect(const views::FermionOnv &ket, const views::FermionOnv &bra) {
-    ASSERT(!ket.is_zero());
-    ASSERT(!bra.is_zero());
-    ASSERT(ket.nbit() == m_nbit);
-    ASSERT(ket.ndataword() == m_element_dsize);
-    ASSERT(ket.ndataword() == bra.ndataword());
+void FermionOnvConnection::connect(const views::FermionOnv &in, const views::FermionOnv &out) {
+    ASSERT(!in.is_zero());
+    ASSERT(!out.is_zero());
+    ASSERT(in.nbit() == m_nbit);
+    ASSERT(in.ndataword() == m_element_dsize);
+    ASSERT(in.ndataword() == out.ndataword());
     m_nann = 0ul;
     m_ncre = 0ul;
 
 
-    defs::data_t ket_work, bra_work, work;
-    for (size_t idataword = 0ul; idataword<ket.ndataword(); ++idataword){
-        ket_work = ket.get_dataword(idataword);
-        bra_work = bra.get_dataword(idataword);
-        work = ket_work&~bra_work;
+    defs::data_t in_work, out_work, work;
+    for (size_t idataword = 0ul; idataword<in.ndataword(); ++idataword){
+        in_work = in.get_dataword(idataword);
+        out_work = out.get_dataword(idataword);
+        work = in_work&~out_work;
         while (work) m_ann[m_nann++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
-        work = bra_work &~ ket_work;
+        work = out_work &~ in_work;
         while (work) m_cre[m_ncre++] = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
     }
     ASSERT(m_ncre < m_cre.size());
     ASSERT(m_nann < m_ann.size());
 }
 
-void FermionOnvConnection::apply(const views::FermionOnv &ket, views::FermionOnv &bra){
-    ASSERT(!ket.is_zero());
+void FermionOnvConnection::apply(const views::FermionOnv &in, views::FermionOnv &out){
+    ASSERT(!in.is_zero());
     ASSERT(m_ncre < m_cre.size());
     ASSERT(m_nann < m_ann.size());
 #ifndef NDEBUG
-    for (size_t i=0ul; i<m_nann; ++i) ASSERT(ket.get(m_ann[i]));
-    for (size_t i=0ul; i<m_ncre; ++i) ASSERT(!ket.get(m_cre[i]));
+    for (size_t i=0ul; i<m_nann; ++i) ASSERT(in.get(m_ann[i]));
+    for (size_t i=0ul; i<m_ncre; ++i) ASSERT(!in.get(m_cre[i]));
 #endif
-    bra = ket;
-    for (size_t i=0ul; i<m_nann; ++i) bra.clr(m_ann[i]);
-    for (size_t i=0ul; i<m_ncre; ++i) bra.set(m_cre[i]);
-    ASSERT(ket.nsetbit()==bra.nsetbit());
+    out = in;
+    for (size_t i=0ul; i<m_nann; ++i) out.clr(m_ann[i]);
+    for (size_t i=0ul; i<m_ncre; ++i) out.set(m_cre[i]);
+    ASSERT(in.nsetbit()==out.nsetbit());
 }
 
 const size_t &FermionOnvConnection::nexcit() const {
@@ -61,15 +61,15 @@ const size_t &FermionOnvConnection::nexcit() const {
 
 AntisymFermionOnvConnection::AntisymFermionOnvConnection(const FermionOnvSpecifier &field): FermionOnvConnection(field) {}
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::FermionOnv &ket, const views::FermionOnv &bra) :
-        FermionOnvConnection(ket, bra) {
-    connect(ket, bra);
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out) :
+        FermionOnvConnection(in, out) {
+    connect(in, out);
 }
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::FermionOnv &ket) : AntisymFermionOnvConnection(ket.spec()) {}
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::FermionOnv &in) : AntisymFermionOnvConnection(in.spec()) {}
 
-void AntisymFermionOnvConnection::connect(const views::FermionOnv &ket, const views::FermionOnv &bra) {
-    FermionOnvConnection::connect(ket, bra);
+void AntisymFermionOnvConnection::connect(const views::FermionOnv &in, const views::FermionOnv &out) {
+    FermionOnvConnection::connect(in, out);
     m_ncom = 0ul;
     size_t nperm = 0ul;
 
@@ -78,11 +78,11 @@ void AntisymFermionOnvConnection::connect(const views::FermionOnv &ket, const vi
     auto cre_iter = m_cre.begin();
     const auto cre_end = m_cre.begin() + m_ncre;
 
-    defs::data_t ket_work, bra_work, work;
-    for (size_t idataword = 0ul; idataword<ket.ndataword(); ++idataword){
-        ket_work = ket.get_dataword(idataword);
-        bra_work = bra.get_dataword(idataword);
-        work = ket_work & bra_work;
+    defs::data_t in_work, out_work, work;
+    for (size_t idataword = 0ul; idataword<in.ndataword(); ++idataword){
+        in_work = in.get_dataword(idataword);
+        out_work = out.get_dataword(idataword);
+        work = in_work & out_work;
         while (work) {
             auto &com = m_com[m_ncom];
             com = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
@@ -104,7 +104,7 @@ void AntisymFermionOnvConnection::connect(const views::FermionOnv &ket, const vi
     m_phase = nperm & 1ul;
 }
 
-void AntisymFermionOnvConnection::apply(const views::FermionOnv &ket) {
+void AntisymFermionOnvConnection::apply(const views::FermionOnv &in) {
     ASSERT(m_ncre < m_nbit);
     ASSERT(m_nann < m_nbit);
     ASSERT(std::is_sorted(m_cre.begin(), m_cre.begin() + m_ncre));
@@ -117,8 +117,8 @@ void AntisymFermionOnvConnection::apply(const views::FermionOnv &ket) {
     auto cre_iter = m_cre.begin();
     const auto cre_end = m_cre.begin() + m_ncre;
 
-    for(size_t idataword=0ul; idataword<ket.ndataword(); ++idataword){
-        auto work = ket.get_dataword(idataword);
+    for(size_t idataword=0ul; idataword<in.ndataword(); ++idataword){
+        auto work = in.get_dataword(idataword);
         while (work) {
             auto &com = m_com[m_ncom];
             auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
@@ -141,7 +141,7 @@ void AntisymFermionOnvConnection::apply(const views::FermionOnv &ket) {
     m_phase = nperm & 1ul;
 }
 
-void AntisymFermionOnvConnection::apply(const views::FermionOnv &ket, views::FermionOnv &bra) {
-    apply(ket);
-    FermionOnvConnection::apply(ket, bra);
+void AntisymFermionOnvConnection::apply(const views::FermionOnv &in, views::FermionOnv &out) {
+    apply(in);
+    FermionOnvConnection::apply(in, out);
 }
