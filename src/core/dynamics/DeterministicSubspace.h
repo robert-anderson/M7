@@ -11,11 +11,11 @@
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/basis/DeterminantList.h"
-#include "WalkerList.h"
+#include "WalkerTable.h"
 
 class DeterministicSubspace {
 
-    WalkerList &m_walker_list;
+    WalkerTable &m_walker_list;
 
     /*
      * indices of the deterministic subspace determinants in the
@@ -79,7 +79,7 @@ class DeterministicSubspace {
 
 public:
 
-    DeterministicSubspace(WalkerList &walker_list) :
+    DeterministicSubspace(WalkerTable &walker_list) :
             m_walker_list(walker_list),
             m_local_subspace_list(SubspaceList("local deterministic subspace", walker_list.m_determinant.m_nsite)),
             m_full_subspace_list(SubspaceList("full deterministic subspace", walker_list.m_determinant.m_nsite)),
@@ -176,7 +176,7 @@ public:
         build_hamiltonian(ham);
     }
 
-    void build_from_highest_weighted(const WalkerList& list, size_t ndet_tot) {
+    void build_from_highest_weighted(const WalkerTable& list, size_t ndet_tot) {
         /*
         defs::inds row_inds;
 

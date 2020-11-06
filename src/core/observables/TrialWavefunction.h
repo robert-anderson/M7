@@ -57,13 +57,13 @@
 #define M7_TRIALWAVEFUNCTION_H
 
 #if 0
-#include "src/core/dynamics/WalkerList.h"
+#include "src/core/dynamics/WalkerTable.h"
 #include "src/core/basis/DeterminantList.h"
 #include "src/core/basis/MappedDeterminantList.h"
 
 class TrialWavefunction {
 
-    WalkerList *m_walker_list = nullptr;
+    WalkerTable *m_walker_list = nullptr;
     /*
     DeterminantList m_local_subspace;
     //DeterminantList m_full_subspace;
@@ -74,7 +74,7 @@ class TrialWavefunction {
 
 
 public:
-    TrialWavefunction(WalkerList *walker_list) : m_walker_list(walker_list){
+    TrialWavefunction(WalkerTable *walker_list) : m_walker_list(walker_list){
 
     }
 

@@ -11,11 +11,11 @@
 #include "src/core/basis/FermionOnvConnection.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
-#include "WalkerList.h"
+#include "WalkerTable.h"
 
 class Reference : public FermionOnv {
 
-    WalkerList &m_list;
+    WalkerTable &m_list;
     RankAllocator<DeterminantElement> &m_ra;
     size_t m_irow;
     size_t m_irank;
@@ -35,7 +35,7 @@ class Reference : public FermionOnv {
     bool m_redefinition_cycle;
 
 public:
-    Reference(WalkerList &list, RankAllocator<DeterminantElement> &ra,
+    Reference(WalkerTable &list, RankAllocator<DeterminantElement> &ra,
             DeterminantElement &det, double redefinition_thresh) :
             FermionOnv(det), m_list(list), m_ra(ra), m_aconn(det),
             m_redefinition_thresh(redefinition_thresh){

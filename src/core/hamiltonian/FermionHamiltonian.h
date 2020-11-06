@@ -99,7 +99,7 @@ public:
 //                determinant(this, 1, nsite){}
 //    };
 //
-//    void generate_ci_space(WalkerList* list, RankAllocator<DeterminantElement>& ra, const int &spin_level) const;
+//    void generate_ci_space(WalkerTable* list, RankAllocator<DeterminantElement>& ra, const int &spin_level) const;
 
 };
 

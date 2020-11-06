@@ -13,7 +13,7 @@
 #include "src/core/basis/FermionOnv.h"
 #include "src/core/io/Options.h"
 #include "src/core/util/Timer.h"
-#include "WalkerList.h"
+#include "WalkerTable.h"
 #include "SpawnList.h"
 #include "Propagator.h"
 #include "src/core/parallel/DistributedAccumulation.h"
@@ -29,7 +29,7 @@ class Wavefunction {
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
     std::unique_ptr<KramersSectorOccupation> m_mk_sums = nullptr;
 
-    WalkerList m_data;
+    WalkerTable m_data;
     SpawnList m_send, m_recv;
     Reference m_reference;
 

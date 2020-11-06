@@ -65,7 +65,7 @@ FermionOnv FermionHamiltonian::choose_reference(const int &spin_level) const {
 }
 
 void
-FermionHamiltonian::generate_ci_space(WalkerList *list, RankAllocator<DeterminantElement> &ra, const int &spin_level) const {
+FermionHamiltonian::generate_ci_space(WalkerTable *list, RankAllocator<DeterminantElement> &ra, const int &spin_level) const {
     size_t nalpha = nelec() / 2 + spin_level;
     size_t nbeta = nelec() / 2 - spin_level;
 
