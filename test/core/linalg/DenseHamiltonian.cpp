@@ -40,7 +40,6 @@ TEST(DenseHamiltonian, HubbardCheck) {
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
-
 TEST(DenseHamiltonian, BosonCouplingNoBosonLimit) {
     if (!defs::bosons) GTEST_SKIP();
     FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 0, 0);
