@@ -28,7 +28,7 @@ const int &BosonOnvConnection::changes(const size_t &ichange) const {
 }
 
 const int &BosonOnvConnection::com(const size_t &icom) const {
-    ASSERT(icom < m_nmode - nchanged_mode());
+    ASSERT(icom < m_nmode);
     return m_com[icom];
 }
 

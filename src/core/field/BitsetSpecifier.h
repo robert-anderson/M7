@@ -26,6 +26,12 @@ struct BitsetSpecifier : FieldSpecifier {
         };
         BitView operator[](const size_t& ibit);
 
+        View& operator=(const defs::inds& ibits){
+            zero();
+            for (auto& ibit : ibits) set(ibit);
+            return *this;
+        }
+
         const size_t &nbit() const;
 
         const size_t &ndataword() const;

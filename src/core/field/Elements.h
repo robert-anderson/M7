@@ -52,6 +52,7 @@ namespace elements {
     struct FermiBosOnv : Element<fields::FermiBosOnv> {
         FermiBosOnv(size_t nsite, size_t nmode):
         Element<fields::FermiBosOnv>(nsite, nmode, "Working fermion-boson configuration"){}
+        using fields::FermiBosOnv::view_t::operator=;
     };
 
     using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;

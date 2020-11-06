@@ -43,19 +43,19 @@ TEST(DenseHamiltonian, HubbardCheck) {
 #if 0
 
 TEST(DenseHamiltonian, BosonCouplingNoBosonLimit) {
-    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
+    if (!defs::bosons) GTEST_SKIP();
+    BosonCouplings h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1, 0, 0, 0);
     ASSERT_EQ(h.nelec(), 4);
-    BosonCouplings bc(0, h.nsite(), 0,0);
-    DenseHamiltonian dh(h, bc);
+    DenseHamiltonian dh(h);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoField) {
-    AbInitioHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
+    if (!defs::bosons) GTEST_SKIP();
+    BosonCouplings h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1, 2, 0, 0);
     ASSERT_EQ(h.nelec(), 4);
-    BosonCouplings bc(2, h.nsite(), 0,0);
-    DenseHamiltonian dh(h, bc);
+    DenseHamiltonian dh(h,0);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }

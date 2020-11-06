@@ -21,6 +21,12 @@ namespace fb_onv {
         View(FermionOnvSpecifier::view_t &&fonv,
              BosonOnvSpecifier::view_t &&bonv);
 
+        View& operator=(const std::pair<defs::inds, defs::inds>& pair) {
+            m_fonv = pair.first;
+            m_bonv = pair.second;
+            return *this;
+        }
+
         bool operator==(const View &other) const;
 
         bool operator!=(const View &other) const;

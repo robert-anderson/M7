@@ -13,7 +13,7 @@
 class DenseHamiltonian : public Matrix<defs::ham_t> {
 public:
     DenseHamiltonian(const FermionHamiltonian &source);
-    DenseHamiltonian(const FermiBosHamiltonian &source);
+    DenseHamiltonian(const FermiBosHamiltonian &source, int spin);
     //DenseHamiltonian(const FermionHamiltonian &source, const BosonCouplings& bc);
     //DenseHamiltonian(const FermionHamiltonian &source, DeterminantList &detlist);
 };

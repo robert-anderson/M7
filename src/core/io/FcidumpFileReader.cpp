@@ -13,7 +13,7 @@ void FcidumpFileReader::decrement_inds_and_transpose(defs::inds &inds, const siz
 }
 
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
-        base_t(fname, 4, Tern::False),
+        base_t(fname, 4, false),
         m_spin_major(spin_major),
         m_norb(read_header_int(fname, "NORB")),
         m_isymm(m_norb>3?isymm(fname):1),
@@ -139,7 +139,7 @@ size_t FcidumpFileReader::read_header_bool(const std::string &fname, const std::
 
 size_t FcidumpFileReader::isymm(const std::string &filename) {
     std::cout << "Determining permutational symmetry of integral file entries" << std::endl;
-    SparseArrayFileReader<defs::ham_t> reader(filename, 4);
+    SparseArrayFileReader<defs::ham_t> reader(filename, 4, false);
     defs::inds inds(4);
     defs::ham_t value;
     // this will eventually hold all orderings of the first example of an
@@ -170,7 +170,10 @@ size_t FcidumpFileReader::isymm(const std::string &filename) {
             }
         }
     }
-    ASSERT(isymm);
+    if (!isymm){
+        std::cout << "Permutational symmetry of integral file could not be determined" << std::endl;
+        return 1;
+    }
     std::cout << "Permutational symmetry of integral file found to be " << 8/isymm << std::endl;
     // 8->1; 4->2; 2->4; 1->8
     return 8 / isymm;

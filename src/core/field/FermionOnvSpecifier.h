@@ -63,6 +63,11 @@ struct FermionOnvSpecifier : BitsetSpecifier {
 
         int nalpha() const;
 
+        View& operator=(const defs::inds& ispinorbs){
+            BitsetSpecifier::View::operator=(ispinorbs);
+            return *this;
+        }
+
     };
 
 
