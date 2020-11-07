@@ -41,7 +41,8 @@ public:
 
     explicit ProductEnumerator(defs::inds&& shape, Enumerator *subsequent = nullptr):
             Enumerator<defs::inds>(subsequent), m_shape(std::move(shape)),
-            m_nind(m_shape.size()), m_strides(strides()), m_nelement(m_shape.front()*m_strides.front()){}
+            m_nind(m_shape.size()), m_strides(strides()),
+            m_nelement(m_shape.size()?m_shape.front()*m_strides.front():1){}
 
     ProductEnumerator(size_t nind, size_t extent, Enumerator *subsequent = nullptr):
     ProductEnumerator(defs::inds(nind, extent), subsequent){}

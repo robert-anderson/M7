@@ -5,136 +5,85 @@
 #ifndef M7_STATSFILE_H
 #define M7_STATSFILE_H
 
-#if 0
-
 #include <fstream>
-#include <string>
 #include <memory>
-#include <utility>
-#include <vector>
-#include <list>
-#include "src/core/util/defs.h"
-#include <src/core/table/Table.h>
-#include <src/core/table/NumericField.h>
-#include <src/core/parallel/MPIWrapper.h>
+#include "StatsColumn.h"
+#include "src/core/util/utils.h"
 
-template<typename T>
-class StatsField;
+struct StatsSpecifier {
+    std::vector<StatsColumnBase *> m_columns;
 
-template<typename T>
-class StatsElement : public NumericElement<T> {
-    using NumericElement<T>::m_spec;
-public:
-
-    StatsElement<T>(StatsField<T> *field, char *begin) : NumericElement<T>(field, begin) {}
-
-    StatsElement<T> &operator=(const T &v) override {
-        if (!m_spec->is_allocated()) m_spec->expand_table(1);
-        NumericElement<T>::operator=(v);
-        return *this;
+    void add_column(StatsColumnBase *column) {
+        m_columns.push_back(column);
     }
-
-    const size_t &fp_precision() const { return dynamic_cast<StatsField<T> *>(m_spec)->m_fp_precision; }
-
-    /*
-    StatsElement<T> &operator=(const NumericElement<T> &v) override {
-        if (!m_spec->is_allocated()) m_spec->expand_table(1);
-        NumericElement<T>::operator=(v);
-        return *this;
-    }
-     */
-
-    std::string to_string() const override {
-        const T v = **this;
-        if (consts::is_complex<T>())
-            return utils::num_to_string(consts::real(v), 0, fp_precision()) + " "
-                   + utils::num_to_string(consts::imag(v), 0, fp_precision());
-        else return utils::num_to_string(v, 0, fp_precision());
-    }
-
 };
 
-class StatsFile : public Table {
-protected:
+
+template<typename spec_t>
+struct StatsFile : spec_t {
+    static_assert(std::is_base_of<StatsSpecifier, spec_t>::value, "Template arg must be derived from StatsSpecifier");
     const std::string m_fname;
     std::unique_ptr<std::ofstream> m_file;
     size_t m_nflush = 0;
 
-protected:
+    template<typename ...Args>
+    StatsFile(std::string fname, Args... spec_args):
+            spec_t(spec_args...), m_fname(fname), m_file(new std::ofstream(fname)) {
+                write_header();
+            }
+
+    using spec_t::m_columns;
+
+    const std::vector<StatsColumnBase *> &columns() const {
+        return m_columns;
+    }
+
     void write_header() {
         size_t ncolumn = 0ul;
-        for (auto &column : m_fields) ncolumn += column->is_complex() ? 2 : 1;
+        for (const StatsColumnBase * column : columns())
+            ncolumn += column->m_nelement*column->m_nsubcolumn;
         *m_file <<
                 "################################\n"
                 "#    M7 FCIQMC Stats Output    #\n"
                 "################################\n"
                 "#\n"
                 "#\n"
-                "# Number of statistics output: " << m_fields.size() <<
+                "# Number of statistics output: " << columns().size() <<
                 "\n# Number of columns: " << ncolumn << "\n#\n";
         size_t icol = 1ul;
-        for (auto &column : m_fields) {
-            if (column->is_complex()) {
-                *m_file << "#  " << icol++ << ".  " << column->description() << " (real)\n";
-                *m_file << "#  " << icol++ << ".  " << column->description() << " (imag)\n";
-            } else {
-                *m_file << "#  " << icol++ << ".  " << column->description() << " \n";
+        for (const StatsColumnBase * column : columns()) {
+            auto format_enum = column->format_enum();
+            defs::inds inds(column->m_shape.size());
+            while (format_enum.next(inds)) {
+                auto shape_string = inds.empty() ? "" : utils::to_string(inds);
+                if (column->m_nsubcolumn == 2) {
+                    *m_file << "#  " << icol++ << ".  " << column->m_description <<
+                            " " << shape_string << " (real)\n";
+                    *m_file << "#  " << icol++ << ".  " << column->m_description <<
+                            " " << shape_string << " (imag)\n";
+                } else {
+                    *m_file << "#  " << icol++ << ".  " << column->m_description <<
+                            " " << shape_string<< "\n";
+                }
             }
         }
         *m_file << std::flush;
     }
 
-public:
-    StatsFile(const std::string &fname)
-            : Table("Stats File"), m_fname(fname), m_file(std::unique_ptr<std::ofstream>(new std::ofstream(fname))) {
+    std::string to_string() const {
+        std::string res;
+        for (const StatsColumnBase * column : columns()) res+=column->to_string();
+        return res;
     }
 
     void flush() {
-        if (!m_nflush) {
-            if (!is_allocated()) return; //nothing written
-            write_header();
-        }
         *m_file << to_string() << std::endl;
-        for (auto &column : m_fields) column->zero(0, 0);
+        for (StatsColumnBase *column : m_columns) column->zero();
         m_nflush++;
-    }
-
-
-    std::string to_string() const override {
-        return row_to_string(0, 0);
-    }
-
-    std::string to_string(const defs::inds& nrows) const override {
-        ASSERT(0) //TODO
-        return "";
-    }
-
-    ~StatsFile() {
-        m_file->close();
     }
 };
 
-template<typename T>
-class StatsField : public NumericField<T> {
-    StatsElement<T> operator()(const size_t &ielement = 0) {
-        ASSERT(ielement < m_nelement);
-        if (!m_table->is_allocated()) m_table->expand(1);
-        return StatsElement<T>(this, begin(0, 0) + ielement * m_element_size);
-    }
-
-public:
-    using NumericField<T>::m_table;
-    using NumericField<T>::m_nelement;
-    using NumericField<T>::m_element_size;
-    using NumericField<T>::begin;
-    const size_t m_fp_precision;
-    const bool m_retention;
-    std::vector<T> m_series;
-
-    StatsField(StatsFile *file, size_t nelement = 1, const std::string &description = "",
-               size_t fp_precision = 6, bool retention = false) :
-            NumericField<T>(file, nelement, description), m_fp_precision(fp_precision), m_retention(retention) {}
-
+#if 0
     std::pair<T,T> mean_std(size_t istart, size_t iend) const {
         ASSERT(iend>istart);
         auto cbegin = m_series.cbegin(); std::advance(cbegin, istart);
@@ -149,23 +98,6 @@ public:
     std::pair<T,T> mean_std() {
         return mean_std(0);
     }
-
-    void write(const T &v, size_t ielement = 0) {
-        if (m_retention) m_series.push_back(v);
-        (*this)(ielement) = v;
-    }
-
-    T get(size_t ielement = 0){
-        return *(*this)(ielement);
-    }
-
-    bool is_complex() const override { return consts::is_complex<T>(); }
-
-    std::string to_string(size_t irow, size_t isegment, size_t ielement) override {
-        return (*this)(ielement).to_string();
-    }
-
-};
 
 #endif //M7_STATSFILE_H
 #endif //M7_STATSFILE_H

@@ -2,6 +2,7 @@
 // Created by rja on 02/10/2020.
 //
 
+#include <src/core/io/StatsFile.h>
 #include "src/core/table/BufferedTable.h"
 #include "src/core/field/Fields.h"
 #include "gtest/gtest.h"
@@ -57,9 +58,6 @@ TEST(Table, DifferentFieldOffset){
     ASSERT_EQ(t1.m_floats.m_field.m_size, 4*sizeof(float));
 
     ASSERT_EQ(t1.m_shorts.m_field.m_table, &t1);
-
-    auto t2 = t1;
-    ASSERT_EQ(t2.m_shorts.m_field.m_table, &t1);
 }
 
 struct TestFlagSet : FlagSet {
