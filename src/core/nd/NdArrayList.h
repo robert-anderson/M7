@@ -21,9 +21,17 @@ struct NdArrayList {
         m_data.resize(m_size*m_format.nelement());
     }
 
+    void expand(size_t nelement=1){
+        resize(m_size+nelement);
+    }
+
     NdAccessor<T, nind> operator[](const size_t &ielement){
         ASSERT(ielement<m_size);
         return NdAccessor<T, nind>(m_data.data()+ielement*m_format.nelement(), m_format);
+    }
+
+    NdAccessor<T, nind> back(){
+        return (*this)[m_size-1];
     }
 };
 
