@@ -12,9 +12,20 @@ template<typename table_t>
 class BufferedTable : public table_t {
     Buffer m_buffer;
 public:
+
+    using TableX::m_row_dsize;
+
     template<typename ...Args>
     BufferedTable(Args&&... args): table_t(args...), m_buffer(){
         table_t::move(BufferWindow(m_buffer));
+    }
+
+    const defs::data_t* ptr() const {
+        return m_buffer.ptr();
+    }
+
+    defs::data_t* ptr() {
+        return m_buffer.ptr();
     }
 
     void resize(size_t nrow) {
