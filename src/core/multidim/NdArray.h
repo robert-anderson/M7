@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-02-22.
 //
 
-#ifndef M7_NDARRAY_H
+#ifndef M7_NDACCESSOR_H
 #define M7_NDARRAY_H
 
 #include <cstddef>
@@ -153,4 +153,4 @@ struct NumericArray : public Array<NumericArray<T, nind>, nind> {
 };
 
 
-#endif //M7_NDARRAY_H
+#endif //M7_NDACCESSOR_H

@@ -90,7 +90,7 @@ TEST(HeatBathSampler, UnbiasedElecPairComplex4c) {
     det_sampler.update(source_det);
 
     const size_t nattempt = 1e7;
-    NdArray<defs::prob_t, 2> weighted_frequencies(ham.nsite() * 2, ham.nsite() * 2);
+    NdAccessor<defs::prob_t, 2> weighted_frequencies(ham.nsite() * 2, ham.nsite() * 2);
 
     size_t iattempt;
     defs::prob_t tol = 2e-3;
@@ -131,7 +131,7 @@ TEST(HeatBathSampler, UnbiasedElecPairAndFirstVirtualComplex4c) {
 
     const size_t nattempt = 1e6;
     const auto nspinorb = ham.nsite() * 2;
-    NdArray<defs::prob_t, 3> weighted_frequencies(nspinorb, nspinorb, nspinorb);
+    NdAccessor<defs::prob_t, 3> weighted_frequencies(nspinorb, nspinorb, nspinorb);
 
     size_t iattempt;
     defs::prob_t tol = 5e-3;

@@ -6,7 +6,7 @@
 #define M7_STATSCOLUMN_H
 
 #include <src/core/enumerator/ProductEnumerator.h>
-#include "src/core/nd/NdArray.h"
+#include "src/core/nd/NdAccessor.h"
 
 struct StatsSpecifier;
 
@@ -28,17 +28,17 @@ struct StatsColumnBase {
 };
 
 template<typename T, size_t nind = 0>
-struct StatsColumn : NdArray<T, nind>, StatsColumnBase {
-    using NdArray<T, nind>::nelement;
-    using NdArray<T, nind>::m_data;
+struct StatsColumn : NdAccessor<T, nind>, StatsColumnBase {
+    using NdAccessor<T, nind>::nelement;
+    using NdAccessor<T, nind>::m_data;
 
     template<typename ...Args>
     StatsColumn(StatsSpecifier *spec, std::string description, Args... shape):
-            NdArray<T, nind>(shape...),
+            NdAccessor<T, nind>(shape...),
             StatsColumnBase(spec, nelement(),
                             defs::inds(
-                                    NdArray<T, nind>::m_format.shape().begin(),
-                                    NdArray<T, nind>::m_format.shape().end()
+                                    NdAccessor<T, nind>::m_format.shape().begin(),
+                                    NdAccessor<T, nind>::m_format.shape().end()
                             ),
                             consts::is_complex<T>() ? 2ul : 1ul, description) {}
 
@@ -53,7 +53,7 @@ struct StatsColumn : NdArray<T, nind>, StatsColumnBase {
     }
 
     void zero() override {
-        NdArray<T, nind>::zero();
+        NdAccessor<T, nind>::zero();
     }
 };
 

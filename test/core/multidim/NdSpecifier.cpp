@@ -45,7 +45,7 @@ TEST(NdSpecifier, Indices1D) {
     }
 }
 
-TEST(ArrayFormat, NdArray) {
+TEST(ArrayFormat, NdAccessor) {
     nd_array::Specifier<float, 2> array(3, 4);
     array[0][3] = 2;
     ASSERT_EQ(array.select(3), array[0][3]);
