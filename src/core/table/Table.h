@@ -39,7 +39,7 @@ struct TableX {
 
     void clear_row(const size_t &irow);
 
-    size_t buffer_dsize() const {
+    size_t bw_dsize() const {
         return m_bw.m_dsize;
     }
 

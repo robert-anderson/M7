@@ -22,14 +22,20 @@ class BufferedTableArray {
 
     void move_tables(Buffer& new_buffer, size_t nrow_per_table, bool expansion=true){
         m_nrow_per_table = nrow_per_table;
-        for (size_t itable=0ul; itable<size(); ++itable){
+        auto new_buffer_dsize = new_buffer.dsize();
+        auto new_bw_dsize = new_buffer_dsize/ntable();
+        for (size_t itable=0ul; itable<ntable(); ++itable){
             // move tables in reverse if expanding the buffer
-            auto& table = expansion ? m_tables[size()-1-itable] : m_tables[itable];
-            table.move(BufferWindow(new_buffer, buffer_dsize()*itable, buffer_dsize()));
+            auto& table = expansion ? m_tables[ntable()-1-itable] : m_tables[itable];
+            table.move(BufferWindow(new_buffer, new_bw_dsize*itable, new_buffer_dsize));
         }
     }
 
 public:
+
+    const size_t& nrow_per_table() const {
+        return m_nrow_per_table;
+    }
 
     defs::data_t* ptr() {
         return m_buffer.ptr();
@@ -39,20 +45,29 @@ public:
         return m_buffer.ptr();
     }
 
-    size_t buffer_dsize() {
-        return m_nrow_per_table*row_dsize();
+    size_t buffer_dsize() const {
+        return m_buffer.dsize();
+    }
+
+    size_t bw_dsize() const {
+        return (*this)[0].bw_dsize();
     }
 
     template<typename ...Args>
-    BufferedTableArray(size_t ntable, Args... args): table_t(args...), m_buffer(){
-        table_t::move(BufferWindow(m_buffer));
+    BufferedTableArray(size_t ntable, Args... args): m_buffer(){
+        m_tables.reserve(ntable);
+        for (size_t itable=0ul; itable<ntable; ++itable) {
+            m_tables.emplace_back(args...);
+            m_tables.back().move(BufferWindow(m_buffer, 0, 0));
+        }
     }
 
-    size_t size() const {return m_tables.size();}
+    size_t ntable() const {return m_tables.size();}
 
     void resize(size_t nrow_per_table) {
         Buffer new_buffer(row_dsize(), nrow_per_table);
         move_tables(new_buffer, nrow_per_table, nrow_per_table>m_nrow_per_table);
+        ASSERT(m_tables[0].m_nrow==nrow_per_table)
         m_nrow_per_table = nrow_per_table;
         m_buffer = std::move(new_buffer);
     }
@@ -70,14 +85,14 @@ public:
     }
 
     defs::inds hwms() const {
-        defs::inds res(size());
-        for (size_t i=0ul; i<size(); ++i) res[i] = (*this)[i].m_hwm;
+        defs::inds res(ntable());
+        for (size_t i=0ul; i<ntable(); ++i) res[i] = (*this)[i].m_hwm;
         return res;
     }
 
     defs::inds displs() const {
-        defs::inds res(size());
-        for (size_t i=0ul; i<size(); ++i) res[i] = buffer_dsize()*i;
+        defs::inds res(ntable());
+        for (size_t i=0ul; i<ntable(); ++i) res[i] = buffer_dsize()*i;
         return res;
     }
 

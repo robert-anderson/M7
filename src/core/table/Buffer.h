@@ -27,7 +27,7 @@ public:
 
     const defs::data_t *ptr() const;
 
-    size_t size() const;
+    size_t dsize() const;
 
     void resize(size_t dsize);
 

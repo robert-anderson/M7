@@ -18,7 +18,7 @@ defs::data_t *Buffer::ptr() { return m_data.data(); }
 
 const defs::data_t *Buffer::ptr() const { return m_data.data(); }
 
-size_t Buffer::size() const {
+size_t Buffer::dsize() const {
     return m_data.size();
 }
 

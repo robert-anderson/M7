@@ -28,10 +28,15 @@ public:
         return m_buffer.ptr();
     }
 
+    size_t buffer_dsize() const {
+        return m_buffer.dsize();
+    }
+
     void resize(size_t nrow) {
         Buffer new_buffer(TableX::m_row_dsize, nrow);
         table_t::move(BufferWindow(new_buffer));
         m_buffer = std::move(new_buffer);
+        ASSERT(buffer_dsize() == TableX::m_row_dsize*nrow)
     }
 
     void expand(size_t delta_nrow){

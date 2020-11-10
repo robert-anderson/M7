@@ -6,7 +6,7 @@
 
 BufferWindow::BufferWindow() : m_ptr(nullptr), m_dsize(0ul){}
 
-BufferWindow::BufferWindow(Buffer &buffer) : m_ptr(buffer.ptr()), m_dsize(buffer.size()){}
+BufferWindow::BufferWindow(Buffer &buffer) : m_ptr(buffer.ptr()), m_dsize(buffer.dsize()){}
 
 BufferWindow::BufferWindow(Buffer &buffer, size_t doffset, size_t dsize) : m_ptr(buffer.ptr()+doffset), m_dsize(dsize){}
 

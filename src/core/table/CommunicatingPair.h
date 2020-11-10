@@ -16,11 +16,45 @@ class CommunicatingPair {
     BufferedTableArray<table_t> m_send;
     BufferedTable<table_t> m_recv;
 
+public:
     template<typename ...Args>
     CommunicatingPair(Args... args): m_send(mpi::nrank(), args...), m_recv(args...){}
 
     size_t row_dsize() const {
         return static_cast<const TableX&>(m_recv).m_row_dsize;
+    }
+
+    BufferedTableArray<table_t>& send() {
+        return m_send;
+    }
+
+    const BufferedTableArray<table_t>& send() const {
+        return m_send;
+    }
+
+    table_t& send(const size_t& i) {
+        return static_cast<table_t&>(m_send[i]);
+    }
+
+    const table_t& send(const size_t& i) const {
+        return static_cast<const table_t&>(m_send[i]);
+    }
+
+    table_t& recv() {
+        return static_cast<table_t&>(m_recv);
+    }
+
+    const table_t& recv() const {
+        return static_cast<const table_t&>(m_recv);
+    }
+
+    void resize(size_t nrow) {
+        m_send.resize(nrow);
+        m_recv.resize(mpi::nrank()*nrow);
+    }
+
+    void expand(size_t nrow) {
+        resize(m_send.nrow_per_table()+nrow);
     }
 
     void communicate() {
@@ -44,11 +78,11 @@ class CommunicatingPair {
 
 
         logger::write("Send List usage fraction: " +
-                      std::to_string(sendcounts[mpi::irank()] / double(m_send[0].buffer_dsize())), 0, logger::debug);
+                      std::to_string(sendcounts[mpi::irank()] / double(m_send[0].bw_dsize())), 0, logger::debug);
         logger::write("Receive List usage fraction: " +
-                      std::to_string(recvcounts[mpi::irank()] / double(m_recv.buffer_dsize())), 0, logger::debug);
+                      std::to_string(recvcounts[mpi::irank()] / double(m_recv.bw_dsize())), 0, logger::debug);
 
-        ASSERT(recvcounts[mpi::irank()] < m_recv.dsize())
+        ASSERT(recvcounts[mpi::irank()] <= m_recv.bw_dsize())
 //    if (ndword_recv_tot > m_recv->dsize()) {
 //        logger::write("Insufficient space for received data: reallocating recv list...");
 //        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
@@ -59,10 +93,9 @@ class CommunicatingPair {
 
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
-        static_cast<TableX&>(m_recv).m_hwm = (recvdispls.back() + recvcounts.back()) / row_dsize();
-        std::cout << "Number of recvd elements " << m_recv->m_high_water_mark[0] << std::endl;
+        recv().m_hwm = (recvdispls.back() + recvcounts.back()) / row_dsize();
+        std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
         m_send.clear();
-        m_recv.clear();
     }
 };
 
