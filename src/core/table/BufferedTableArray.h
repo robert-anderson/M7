@@ -50,6 +50,10 @@ public:
         return m_buffer.dsize();
     }
 
+    size_t table_dsize() const {
+        return nrow_per_table()*row_dsize();
+    }
+
     size_t bw_dsize() const {
         return (*this)[0].bw_dsize();
     }
@@ -92,7 +96,7 @@ public:
 
     defs::inds displs() const {
         defs::inds res(ntable());
-        for (size_t i=0ul; i<ntable(); ++i) res[i] = buffer_dsize()*i;
+        for (size_t i=0ul; i<ntable(); ++i) res[i] = table_dsize()*i;
         return res;
     }
 

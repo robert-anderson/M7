@@ -41,9 +41,7 @@ struct TableX {
 
     void clear_row(const size_t &irow);
 
-    size_t bw_dsize() const {
-        return m_bw.m_dsize;
-    }
+    size_t bw_dsize() const;
 
     std::string field_details(size_t width=30) const;
 
