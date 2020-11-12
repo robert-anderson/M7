@@ -6,6 +6,104 @@
 #define M7_WAVEFUNCTION_H
 
 
+#include <src/core/io/Options.h>
+#include <src/core/hamiltonian/Hamiltonian.h>
+#include "src/core/table/CommunicatingPair.h"
+#include "src/core/dynamics/WalkerTable.h"
+#include "src/core/dynamics/SpawnTable.h"
+#include "src/core/parallel/RankAllocator.h"
+#include "src/core/field/Views.h"
+
+
+struct Wavefunction {
+    const Options &m_opts;
+    typedef BufferedTable<WalkerTable> table_t;
+    table_t m_walkers;
+    typedef CommunicatingPair<SpawnTable> spawn_t;
+    spawn_t m_spawn;
+    typedef RankAllocator<fields::Onv> rank_alloc_t;
+    rank_alloc_t m_ra;
+
+    Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
+            m_opts(opts),
+            m_walkers("walker table", 1000, onv_params, 1, 1),
+            m_spawn("spawning communicator", onv_params, 1, 1),
+            m_ra(100, 10) {
+    }
+
+    void expand(size_t nrow_walker, size_t nrow_spawn) {
+        m_walkers.expand(nrow_walker);
+        m_spawn.expand(nrow_spawn);
+    }
+
+    defs::wf_comp_t square_norm() const {
+        defs::wf_comp_t res = 0.0;
+        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
+            if (!m_walkers.m_onv(irow).is_zero()) {
+                res += std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+            }
+        }
+        return mpi::all_sum(res);
+    }
+
+    defs::wf_comp_t unnorm_energy(const Hamiltonian &ham) const {
+        defs::wf_comp_t res = 0.0;
+        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
+            if (m_walkers.m_onv(irow).is_zero()) continue;
+            defs::wf_t weighti = consts::conj(m_walkers.m_weight(irow, 0, 0));
+            for (size_t jrow = 0; jrow < m_walkers.m_hwm; ++jrow) {
+                if (m_walkers.m_onv(jrow).is_zero()) continue;
+                defs::wf_t weightj = m_walkers.m_weight(jrow, 0, 0);
+                res += weighti * ham.get_element(m_walkers.m_onv(irow), m_walkers.m_onv(jrow)) * weightj;
+            }
+        }
+        return mpi::all_sum(res);
+    }
+
+    defs::wf_comp_t energy(const Hamiltonian &ham) const {
+        return unnorm_energy(ham)/square_norm();
+    }
+
+    size_t add_walker(const views::Onv &onv, const defs::ham_t weight, const defs::ham_comp_t &hdiag,
+                      bool refconn, bool initiator) {
+        auto irow = m_walkers.insert(onv);
+        ASSERT(m_walkers.m_onv(irow) == onv)
+        m_walkers.m_weight(irow, 0, 0) = weight;
+        m_walkers.m_hdiag(irow) = hdiag;
+        m_walkers.m_flags.m_reference_connection(irow) = refconn;
+        m_walkers.m_flags.m_deterministic(irow) = false;
+        m_walkers.m_flags.m_initiator(irow, 0, 0) = initiator;
+        return irow;
+    }
+
+    // TODO: return a pair?
+    size_t add_spawn(const views::Onv &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic) {
+        auto irank = m_ra.get_rank(dst_onv);
+#ifdef VERBOSE_DEBUGGING
+        std::cout << consts::verb << consts::chevs << "SENDING SPAWNED WALKER" << std::endl;
+        std::cout << consts::verb << "generated determinant:   " << dst_onv.to_string() << std::endl;
+        std::cout << consts::verb << "destination rank:        " << irank << std::endl;
+        std::cout << consts::verb << "spawned weight:          " << delta << std::endl;
+        std::cout << consts::verb << "parent is initiator:     " << flag_initiator << std::endl;
+        std::cout << consts::verb << "parent is deterministic: " << flag_deterministic << std::endl;
+#endif
+        auto &dst_table = m_spawn.send(irank);
+        if (dst_table.m_hwm + 1 == dst_table.m_nrow) {
+            /*
+             * the table is full
+             */
+            std::cout << "Spawn send table is full, reallocating..." << std::endl;
+            m_spawn.send().expand(0.5 * dst_table.m_nrow);
+        }
+        auto irow = dst_table.push_back();
+        dst_table.m_dst_onv(irow) = dst_onv;
+        dst_table.m_delta_weight(irow, 0, 0) = delta;
+        dst_table.m_flags.m_src_initiator(irow, 0, 0) = initiator;
+        dst_table.m_flags.m_src_deterministic(irow) = deterministic;
+        return irow;
+    }
+};
+
 #if 0
 
 #include "src/core/io/ParallelizationStatsFile.h"

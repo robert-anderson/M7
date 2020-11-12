@@ -8,6 +8,7 @@
 #include "src/core/table/Table.h"
 #include "src/core/table/BufferedTable.h"
 #include "Fields.h"
+#include "Views.h"
 
 template<typename viewable_t>
 struct SingleFieldTable: TableX {
@@ -41,19 +42,32 @@ struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
 namespace elements {
     struct FermionOnv : Element<fields::FermionOnv> {
         FermionOnv(size_t nsite):
-        Element<fields::FermionOnv>({nsite}, "Working determinant"){}
+            Element<fields::FermionOnv>({nsite}, "Working determinant"){}
+        FermionOnv(fields::FermionOnv::params_t p): FermionOnv(p.m_nsite){}
+        FermionOnv(const views::FermionOnv& view): FermionOnv(view.nsite()){
+            *this = view;
+        }
         using specs::FermionOnv::view_t::operator=;
     };
 
     struct BosonOnv : Element<fields::BosonOnv> {
         BosonOnv(size_t nmode):
-                Element<fields::BosonOnv>({nmode}, "Working boson ONV"){}
+            Element<fields::BosonOnv>({nmode}, "Working boson ONV"){}
+        BosonOnv(fields::BosonOnv::params_t p): BosonOnv(p.m_nmode){}
+        BosonOnv(const views::BosonOnv& view): BosonOnv(view.nmode()){
+            *this = view;
+        }
         using specs::BosonOnv::view_t::operator=;
     };
 
     struct FermiBosOnv : Element<fields::FermiBosOnv> {
         FermiBosOnv(size_t nsite, size_t nmode):
-        Element<fields::FermiBosOnv>({nsite, nmode}, "Working fermion-boson configuration"){}
+            Element<fields::FermiBosOnv>({nsite, nmode}, "Working fermion-boson configuration"){}
+        FermiBosOnv(fields::FermiBosOnv::params_t p): FermiBosOnv(p.m_nsite, p.m_nmode){}
+        FermiBosOnv(const views::FermiBosOnv& view):
+        FermiBosOnv(view.m_fonv.nsite(), view.m_bonv.nmode()){
+            *this = view;
+        }
         using fields::FermiBosOnv::view_t::operator=;
     };
 

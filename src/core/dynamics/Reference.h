@@ -5,22 +5,19 @@
 #ifndef M7_REFERENCE_H
 #define M7_REFERENCE_H
 
-#if 0
 #include "src/core/parallel/RankAllocator.h"
-#include "src/core/basis/FermionOnv.h"
-#include "src/core/basis/FermionOnvConnection.h"
+#include "src/core/field/Fields.h"
 #include "src/core/parallel/Reducible.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "WalkerTable.h"
+#include "Wavefunction.h"
 
-class Reference : public FermionOnv {
-
-    WalkerTable &m_list;
-    RankAllocator<DeterminantElement> &m_ra;
+class Reference : public elements::Onv {
+    Wavefunction &m_wf;
     size_t m_irow;
     size_t m_irank;
 
-    mutable AntisymFermionOnvConnection m_aconn;
+    mutable conn::AsOnv m_aconn;
     Reducible<defs::ham_t> m_proj_energy_num;
     Reducible<defs::wf_comp_t> m_nwalker_at_doubles;
     Reducible<defs::wf_t> m_weight;
@@ -35,28 +32,14 @@ class Reference : public FermionOnv {
     bool m_redefinition_cycle;
 
 public:
-    Reference(WalkerTable &list, RankAllocator<DeterminantElement> &ra,
-            DeterminantElement &det, double redefinition_thresh) :
-            FermionOnv(det), m_list(list), m_ra(ra), m_aconn(det),
-            m_redefinition_thresh(redefinition_thresh){
-        if (m_list.nrow_per_segment() == 0) m_list.expand(1);
-        m_irank = ra.get_rank(det);
-        if (mpi::i_am(m_irank)) {
-            m_irow = m_list.push(det);
-            ASSERT(m_irow != ~0ul)
-            list.m_determinant(m_irow) = det;
-        } else {
-            m_irow = ~0ul;
-        }
-        change(m_irow, m_irank);
-    }
+    Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv, const Options &opts);
 
     using FermionOnv::operator=;
     void change(const size_t& irow, const size_t& irank){
         ASSERT(irank<mpi::nrank())
         ASSERT(irow!=~0ul || !mpi::i_am(irank))
         if (mpi::i_am(irank)){
-            *this = m_list.m_determinant(irow);
+            *this = m_wf.m_walkers.m_onv(irow);
         }
         /*
          * send this new reference definition to all MPI ranks
@@ -66,13 +49,13 @@ public:
          * check that the storage of the new reference is consistent with dynamic
          * rank allocation
          */
-        ASSERT(m_ra.get_rank(*this)==irank)
+        ASSERT(m_wf.m_ra.get_rank(*this)==irank)
         /*
          * the next cycle will re-evaluate the reference connection flag in the
          * Wavefunction object's m_walker_list member
          */
         m_redefinition_cycle = true;
-        std::cout << "Reference determinant " << to_string() << " stored on MPI rank " << irank << std::endl;
+        std::cout << "Reference ONV " << to_string() << " stored on MPI rank " << irank << std::endl;
         m_irank = irank;
         m_irow = irow;
     }
@@ -90,7 +73,7 @@ public:
         m_nwalker_at_doubles = 0.0;
         m_candidate_weight = 0.0;
         m_irow_candidate = ~0ul;
-        if (is_mine()) m_weight = *m_list.m_weight(m_irow);
+        if (is_mine()) m_weight = m_wf.m_walkers.m_weight(m_irow, 0, 0);
         m_weight.mpi_bcast(m_irank);
     }
 
@@ -99,10 +82,10 @@ public:
         m_candidate_weight.mpi_maxloc();
         if (m_candidate_weight.reduced()/std::abs(weight()) > m_redefinition_thresh) {
             //TODO: helpful output
-            std::cout<< " wwwww     " << m_candidate_weight.reduced() << "         " << std::abs(weight()) << std::endl;
-            std::cout<<m_candidate_weight.reduced()<< "  "<< m_candidate_weight.irank() << std::endl;
+//            std::cout<< " wwwww     " << m_candidate_weight.reduced() << "         " << std::abs(weight()) << std::endl;
+//            std::cout<<m_candidate_weight.reduced()<< "  "<< m_candidate_weight.irank() << std::endl;
             if (mpi::i_am(m_candidate_weight.irank())){
-                std::cout << m_list.m_determinant(m_irow_candidate).to_string() << std::endl;
+//                std::cout << m_walkers.m_onv(m_irow_candidate).to_string() << std::endl;
             }
             change(m_irow_candidate, m_candidate_weight.irank());
         }
@@ -122,15 +105,15 @@ public:
         return mpi::i_am(m_irank);
     }
 
-    bool is_connected(const DeterminantElement &det) const {
+    bool is_connected(const views::Onv &onv) const {
         auto &aconn = m_aconn;
-        aconn.connect(*this, det);
+        aconn.connect(*this, onv);
         return aconn.nexcit() < 3;
     }
 
-    void add_to_numerator(const FermionHamiltonian *ham, const DeterminantElement &det, const defs::wf_t &weight) {
-        m_aconn.connect(*this, det);
-        m_proj_energy_num += ham->get_element(m_aconn) * weight;
+    void add_to_numerator(const Hamiltonian &ham, const views::Onv &onv, const defs::wf_t &weight) {
+        m_aconn.connect(*this, onv);
+        m_proj_energy_num += ham.get_element(m_aconn) * weight;
         m_nwalker_at_doubles += std::abs(weight);
     }
 
@@ -153,6 +136,4 @@ public:
     }
 };
 
-
-#endif //M7_REFERENCE_H
 #endif //M7_REFERENCE_H

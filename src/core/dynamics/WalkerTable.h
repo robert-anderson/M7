@@ -7,8 +7,6 @@
 
 #include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
-#include <src/core/parallel/Reducible.h>
-#include <list>
 
 struct WalkerTable : public MappedTable<fields::Onv> {
     fields::Onv m_onv;

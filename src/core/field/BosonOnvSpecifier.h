@@ -15,10 +15,10 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
     }
 
     struct params_t {
-        size_t nmode;
+        size_t m_nmode;
     };
 
-    BosonOnvSpecifier(params_t p) : BosonOnvSpecifier(p.nmode){}
+    BosonOnvSpecifier(params_t p) : BosonOnvSpecifier(p.m_nmode){}
 
     const size_t &nmode() const;
 
@@ -30,6 +30,8 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
         }
 
         size_t nboson() const;
+
+        size_t nmode() const;
 
         using NumericArraySpecifier<uint8_t, 1>::View::operator=;
     };

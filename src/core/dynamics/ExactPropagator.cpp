@@ -2,25 +2,22 @@
 // Created by rja on 27/02/2020.
 //
 
-#if 0
-
-#include <src/core/enumerator/ContainerCombinationEnumerator.h>
+#include "src/core/enumerator/ContainerCombinationEnumerator.h"
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
-ExactPropagator::ExactPropagator(FciqmcCalculation *fciqmc) : Propagator(fciqmc) {}
 
-void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
-                                   SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) {
-
-    OccupiedOrbitals occs(src_det);
+void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
+    auto src_onv = m_wf.m_walkers.m_onv(irow);
+    const auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+    bool src_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
+    OccupiedOrbitals occs(src_onv);
     ASSERT(occs.m_nind > 0);
-    VacantOrbitals vacs(src_det);
+    VacantOrbitals vacs(src_onv);
     ASSERT(vacs.m_nind > 0);
 
-    ASSERT(!consts::float_is_zero(*weight));
+    ASSERT(!consts::float_is_zero(weight));
 
-    FermionOnv dst_det(src_det.nsite());
     for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
         auto occ = occs.m_inds[iocc];
 
@@ -29,13 +26,14 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
             m_aconn.zero();
             m_aconn.add(occ, vac);
-            m_aconn.apply(src_det, dst_det);
-            auto helement = m_ham->get_element_1(m_aconn);
+            m_dst_onv.clear();
+            m_aconn.apply(src_onv, m_dst_onv);
+            auto helement = m_ham.get_element_1(m_aconn);
             if (consts::float_is_zero(helement)) continue;
 
-            auto delta = -*weight * tau() * helement;
+            auto delta = -weight * tau() * helement;
             if (consts::float_is_zero(delta)) continue;
-            spawn(spawn_list, dst_det, delta, flag_initiator, flag_deterministic);
+            m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
         }
     }
 
@@ -50,26 +48,25 @@ void ExactPropagator::off_diagonal(const DeterminantElement &src_det, const Nume
 
                 m_aconn.zero();
                 m_aconn.add(occ_inds[0], occ_inds[1], vac_inds[0], vac_inds[1]);
-                m_aconn.apply(src_det, dst_det);
-                auto helement = m_ham->get_element_2(m_aconn);
+                m_dst_onv.clear();
+                m_aconn.apply(src_onv, m_dst_onv);
+                auto helement = m_ham.get_element_2(m_aconn);
                 if (consts::float_is_zero(helement)) continue;
 
-                auto delta = -*weight * tau() * helement;
+                auto delta = -weight * tau() * helement;
                 if (consts::float_is_zero(delta)) continue;
-                spawn(spawn_list, dst_det, delta, flag_initiator, flag_deterministic);
+                m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
             }
         }
     }
 }
 
-void ExactPropagator::diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
-                               bool flag_deterministic,
-                               defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) {
-    auto tmp = *weight;
-    weight *= (1.0 - (*hdiag - m_shift) * tau());
-    delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
-    delta_nw += std::abs(*weight) - std::abs(tmp);
+
+void ExactPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
+    //auto tmp = m_wf.m_walkers.m_weight(irow, 0, 0);
+    auto& weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+    auto& hdiag = m_wf.m_walkers.m_hdiag(irow);
+    weight *= (1.0 - (hdiag - m_shift) * tau());
+    //delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
+    //delta_nw += std::abs(*weight) - std::abs(tmp);
 }
-
-
-#endif

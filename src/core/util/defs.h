@@ -71,7 +71,7 @@ namespace defs {
     constexpr size_t nbit_data = CHAR_BIT * nbyte_data;
     const size_t isym_1e = 2;
     const size_t isym_2e = 8;
-    const bool bosons = true;
+    const bool bosons = false;
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
 

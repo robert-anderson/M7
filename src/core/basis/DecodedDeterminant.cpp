@@ -10,6 +10,8 @@ OccupiedOrbitals::OccupiedOrbitals(const views::FermionOnv &view) : DecodedDeter
     update(view);
 }
 
+OccupiedOrbitals::OccupiedOrbitals(const views::FermiBosOnv &view): OccupiedOrbitals(view.m_fonv){}
+
 void OccupiedOrbitals::update(const views::FermionOnv &view) {
     ASSERT(view.nbit() == m_nbit);
     ASSERT(view.ndataword() == m_element_dsize);
@@ -25,6 +27,8 @@ VacantOrbitals::VacantOrbitals(const FermionOnvSpecifier &spec) : DecodedDetermi
 VacantOrbitals::VacantOrbitals(const views::FermionOnv &view) : DecodedDeterminant(view) {
     update(view);
 }
+
+VacantOrbitals::VacantOrbitals(const views::FermiBosOnv &view) : VacantOrbitals(view.m_fonv){}
 
 void VacantOrbitals::update(const views::FermionOnv &view) {
     ASSERT(view.nbit() == m_nbit);

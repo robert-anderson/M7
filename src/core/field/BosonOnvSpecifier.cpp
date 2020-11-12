@@ -15,3 +15,7 @@ size_t BosonOnvSpecifier::View::nboson() const {
             reinterpret_cast<uint8_t *>(m_ptr),
             reinterpret_cast<uint8_t *>(m_ptr) + nelement(), 0ul);
 }
+
+size_t BosonOnvSpecifier::View::nmode() const {
+    return spec().nmode();
+}

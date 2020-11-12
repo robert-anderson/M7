@@ -52,7 +52,11 @@ struct Field : TableField {
     }
 
     typename spec_t::view_t operator()(const size_t &irow, const size_t &ielement) {
-        return typename spec_t::view_t(m_spec, raw_ptr(irow, ielement));
+        return m_spec(raw_ptr(irow, ielement));
+    }
+
+    typename spec_t::const_view_t operator()(const size_t &irow, const size_t &ielement) const {
+        return m_spec(raw_ptr(irow, ielement));
     }
 };
 
@@ -65,6 +69,11 @@ struct NdFieldBase : Field<spec_t> {
 
     template<typename ...Args>
     typename spec_t::view_t operator()(const size_t &irow, Args... inds) {
+        return Field<spec_t>::operator()(irow, m_format.flatten(inds...));
+    }
+
+    template<typename ...Args>
+    typename spec_t::const_view_t operator()(const size_t &irow, Args... inds) const {
         return Field<spec_t>::operator()(irow, m_format.flatten(inds...));
     }
 };
@@ -93,6 +102,11 @@ struct NdField : NdFieldGroup<nind> {
 
     template<typename ...Args>
     typename spec_t::view_t operator()(const size_t &irow, Args... inds) {
+        return m_field(irow, inds...);
+    }
+
+    template<typename ...Args>
+    typename spec_t::const_view_t operator()(const size_t &irow, Args... inds) const {
         return m_field(irow, inds...);
     }
 

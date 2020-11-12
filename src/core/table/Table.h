@@ -27,6 +27,8 @@ struct TableX {
 
     size_t push_back(size_t nrow=1);
 
+    defs::data_t* ptr();
+
     char *begin();
 
     char *begin(const size_t &irow);

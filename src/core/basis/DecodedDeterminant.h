@@ -26,12 +26,14 @@ struct DecodedDeterminant {
 struct OccupiedOrbitals : DecodedDeterminant {
     OccupiedOrbitals(const FermionOnvSpecifier& spec);
     OccupiedOrbitals(const views::FermionOnv &view);
+    OccupiedOrbitals(const views::FermiBosOnv &view);
     void update(const views::FermionOnv &view) override;
 };
 
 struct VacantOrbitals : DecodedDeterminant {
     VacantOrbitals(const FermionOnvSpecifier& spec);
     VacantOrbitals(const views::FermionOnv &view);
+    VacantOrbitals(const views::FermiBosOnv &view);
     void update(const views::FermionOnv &view) override;
 };
 

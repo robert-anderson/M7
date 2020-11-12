@@ -11,6 +11,7 @@
 #include <src/core/util/defs.h>
 #include <map>
 #include <src/core/hash/Hashing.h>
+#include <src/core/parallel/MPIWrapper.h>
 
 struct FieldData {
     const size_t m_element_size;
@@ -76,6 +77,10 @@ struct FieldSpecifier {
             if (&other != this)
                 std::memcpy(m_ptr, other.m_ptr, m_spec.element_size());
             return *this;
+        }
+
+        void mpi_bcast(size_t iroot) {
+            mpi::bcast(m_ptr, element_size(), iroot);
         }
 
     protected:

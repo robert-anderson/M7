@@ -26,8 +26,9 @@ class BufferedTableArray {
         auto new_bw_dsize = new_buffer_dsize/ntable();
         for (size_t itable=0ul; itable<ntable(); ++itable){
             // move tables in reverse if expanding the buffer
-            auto& table = expansion ? m_tables[ntable()-1-itable] : m_tables[itable];
-            table.move(BufferWindow(new_buffer, new_bw_dsize*itable, new_buffer_dsize));
+            size_t ind = expansion ? ntable()-1-itable : itable;
+            auto& table = m_tables[ind];
+            table.move(BufferWindow(new_buffer, new_bw_dsize*ind, new_bw_dsize));
         }
     }
 
@@ -65,15 +66,14 @@ public:
     size_t ntable() const {return m_tables.size();}
 
     void resize(size_t nrow_per_table) {
-        Buffer new_buffer(row_dsize(), nrow_per_table);
+        Buffer new_buffer(row_dsize(), nrow_per_table*ntable());
         move_tables(new_buffer, nrow_per_table, nrow_per_table>m_nrow_per_table);
         ASSERT(m_tables[0].m_nrow==nrow_per_table)
-        m_nrow_per_table = nrow_per_table;
         m_buffer = std::move(new_buffer);
     }
 
     void expand(size_t delta_nrow){
-        resize(table_t::m_nrow+delta_nrow);
+        resize(m_nrow_per_table+delta_nrow);
     }
 
     table_t& operator[](const size_t& itable){
@@ -98,9 +98,8 @@ public:
 
     void clear() {
         for (auto& table:m_tables) {
-            auto t = static_cast<TableX&>(table);
-            t.clear();
-            t.m_hwm = 0;
+            static_cast<TableX&>(table).clear();
+            static_cast<TableX&>(table).m_hwm = 0;
         }
     }
 };

@@ -10,27 +10,29 @@
 
 struct TestTable : MappedTable<fields::Onv> {
     fields::Onv m_config;
-    TestTable(size_t nsite, size_t nmode):
+    TestTable(fields::Onv::params_t params):
     MappedTable<fields::Onv>(m_config, 10),
-            m_config(this, {nsite, nmode}, "configuration"){}
+            m_config(this, params, "configuration"){}
 };
 
 TEST(MappedTable, TEST){
     const size_t nsite = 10;
     const size_t nmode = 8;
-    BufferedTable<TestTable> bt(nsite, nmode);
+
+    fields::FermiBosOnv::params_t onv_params{nsite, nmode};
+    BufferedTable<TestTable> bt(onv_params);
     bt.expand(10);
-    elements::Onv config(nsite, nmode);
-    config.m_fonv[2] = 1;
-    config.m_bonv[2] = 5;
-    std::cout << config.to_string() << std::endl;
-    bt.insert(config);
-    config.m_bonv[4] = 6;
-    bt.insert(config);
-//    bt.erase(bt[config]);
-//    auto lookup = bt[config];
-//    std::cout << bool(lookup) << std::endl;
-    bt.print_map();
+    elements::Onv config(onv_params);
+//    config.m_fonv[2] = 1;
+//    config.m_bonv[2] = 5;
+//    std::cout << config.to_string() << std::endl;
+//    bt.insert(config);
+//    config.m_bonv[4] = 6;
+//    bt.insert(config);
+////    bt.erase(bt[config]);
+////    auto lookup = bt[config];
+////    std::cout << bool(lookup) << std::endl;
+//    bt.print_map();
 
 }
 

@@ -5,21 +5,17 @@
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
-#if 0
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {
 
 public:
-    ExactPropagator(FciqmcCalculation *fciqmc);
+    ExactPropagator(const Hamiltonian &ham, const Options& opts):Propagator(ham, opts){}
 
-    void off_diagonal(const DeterminantElement &determinant, const NumericElement<defs::ham_t> &weight,
-                              SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override ;
+    void diagonal(Wavefunction &m_wf, const size_t &irow) override;
 
-    void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
-                  bool flag_deterministic,
-                  defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) override;
+    void off_diagonal(Wavefunction &m_wf, const size_t &irow) override;
+
 };
 
-#endif //M7_EXACTPROPAGATOR_H
 #endif //M7_EXACTPROPAGATOR_H

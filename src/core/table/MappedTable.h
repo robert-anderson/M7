@@ -19,8 +19,8 @@ struct LookupResult {
     operator bool() const {
         return m_prev!=m_bucket.end();
     }
-    const size_t& operator*() const {
-        if (!*this) throw std::runtime_error("Cannot return stored index, hashmap entry not found!");
+    size_t operator*() const {
+        if (!*this) return ~0ul;//throw std::runtime_error("Cannot return stored index, hashmap entry not found!");
         return *std::next(m_prev);
     }
 };

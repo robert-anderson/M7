@@ -5,18 +5,17 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
-#if 0
-
-#include "src/core/table/Element.h"
+#include "src/core/field/TableField.h"
 #include "src/core/parallel/Gatherable.h"
 #include "MPIWrapper.h"
 #include "Epoch.h"
 #include <forward_list>
 #include <algorithm>
 
-template<typename T>
+template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 class RankAllocator {
-    static_assert(std::is_base_of<Element, T>::value, "Rank allocation requires an Element-derived type");
+    //static_assert(std::is_base_of<TableField, field_t>::value, "Rank allocation requires a View-derived type");
+    typedef typename field_t::view_t view_t;
     Epoch *m_vary_shift = nullptr;
     const size_t m_nblock;
     const size_t m_period;
@@ -46,8 +45,6 @@ public:
         auto max = std::max_element(times.begin(), times.end());
         if (times.begin()+mpi::irank()==min){
             // this rank has done the least waiting, so it should send a block
-
-
         }
         else if (times.begin()+mpi::irank()==max){
             // this rank has done the most waiting, so it should receive a block
@@ -67,10 +64,9 @@ public:
         return true;
     }
 
-    size_t get_rank(const T& key) const{
-        return m_block_to_rank[key.hash()%m_nblock];
+    size_t get_rank(const view_t& key) const{
+        return m_block_to_rank[hash_fn()(key)%m_nblock];
     }
 };
 
-#endif //M7_RANKALLOCATOR_H
 #endif //M7_RANKALLOCATOR_H

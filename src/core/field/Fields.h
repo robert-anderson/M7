@@ -24,9 +24,10 @@ namespace fields {
         Numbers(TableX *table, std::string description, Args... shape) :
             NdField<specs::Number<T>, nind>(table, {}, description, shape...) {}
 
-        T& operator()(const size_t &irow, const size_t &ielement) {
-            return *((T*)NdField<specs::Number<T>, nind>::m_field.raw_ptr(irow, ielement));
-        }
+//        template<typename ...Args>
+//        T& operator()(const size_t &irow, Args... inds){
+//            return *((T*)NdField<specs::Number<T>, nind>::m_field.raw_ptr(irow, m_fielement));
+//        }
     };
 
     template<typename T>

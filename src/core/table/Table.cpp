@@ -11,6 +11,10 @@ size_t TableX::push_back(size_t nrow) {
     return tmp;
 }
 
+defs::data_t *TableX::ptr() {
+    return m_bw.m_ptr;
+}
+
 char *TableX::begin() {
     return (char *) m_bw.m_ptr;
 }
@@ -40,10 +44,10 @@ size_t TableX::add_field(const TableField *field) {
 }
 
 void TableX::move(BufferWindow new_bw) {
-    if (m_bw) std::memmove(m_bw.m_ptr, new_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
+    if (m_bw) std::memmove(new_bw.m_ptr, m_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
     m_bw = new_bw;
-    if (!m_row_size) return;
-    m_nrow = (sizeof(defs::data_t) * m_bw.m_dsize) / m_row_size;
+    if (!m_row_dsize) return;
+    m_nrow = m_bw.m_dsize / m_row_dsize;
 }
 
 void TableX::clear() {

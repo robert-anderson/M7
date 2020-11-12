@@ -44,8 +44,10 @@ namespace fb_onv {
     template<size_t nind>
     struct Field : NdFieldGroup<nind> {
 
-        struct params_t {
-            size_t nsite, nmode;
+        struct params_t : FermionOnvSpecifier::params_t, BosonOnvSpecifier::params_t {
+            params_t(size_t nsite, size_t nmode):
+                    FermionOnvSpecifier::params_t{nsite},
+                    BosonOnvSpecifier::params_t{nmode}{}
         };
 
         NdFieldBase<FermionOnvSpecifier, nind> m_fonv;
@@ -56,11 +58,15 @@ namespace fb_onv {
         template<typename ...Args>
         Field(TableX *table, params_t p, std::string description, Args... shape) :
                 NdFieldGroup<nind>(shape...),
-                m_fonv(table, {p.nsite}, description + " (FermionOnv)", m_format),
-                m_bonv(table, {p.nmode}, description + " (Boson ONV)", m_format) {}
+                m_fonv(table, {p.m_nsite}, description + " (FermionOnv)", m_format),
+                m_bonv(table, {p.m_nmode}, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
         typedef const View const_view_t;
+
+        bool is_zero() const {
+            return m_fonv.is_zero() && m_bonv.is_zero();
+        }
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {
