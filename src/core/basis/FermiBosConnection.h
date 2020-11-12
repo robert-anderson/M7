@@ -19,6 +19,8 @@ struct FermiBosConnection {
             m_fonvconn(in.m_fonv, out.m_fonv),
             m_bonvmconn(in.m_bonv, out.m_bonv) {}
 
+    explicit FermiBosConnection(const views::FermiBosOnv &in): FermiBosConnection(in, in){}
+
     void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
         m_fonvconn.connect(in.m_fonv, out.m_fonv);
         m_bonvmconn.connect(in.m_bonv, out.m_bonv);
@@ -40,6 +42,8 @@ struct AntisymFermiBosConnection {
             const views::FermiBosOnv &out) :
             m_aconn(in.m_fonv, out.m_fonv),
             m_bonvconn(in.m_bonv, out.m_bonv) {}
+
+    explicit AntisymFermiBosConnection(const views::FermiBosOnv &in): AntisymFermiBosConnection(in, in){}
 
     void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
         m_aconn.connect(in.m_fonv, out.m_fonv);

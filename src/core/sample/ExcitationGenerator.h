@@ -5,14 +5,13 @@
 #ifndef M7_EXCITATIONGENERATOR_H
 #define M7_EXCITATIONGENERATOR_H
 
-#if 0
-
-#include <src/core/hamiltonian/FermionHamiltonian.h>
+#include <src/core/hamiltonian/Hamiltonian.h>
+#include <src/core/basis/Connections.h>
 #include "PRNG.h"
 
 class ExcitationGenerator {
 protected:
-    const FermionHamiltonian *m_h;
+    const Hamiltonian *m_h;
     PRNG &m_prng;
     const size_t m_nintind;
     const size_t m_nelec;
@@ -31,17 +30,16 @@ public:
         std::cout << "Excitation generator base initialized" << std::endl;
     }
 
-    virtual bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
+    virtual bool draw_single(const views::Onv &src_det, views::Onv &dst_det,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,
-                     defs::prob_t &prob, defs::ham_t &helem, AntisymFermionOnvConnection &anticonn) = 0;
+                     defs::prob_t &prob, defs::ham_t &helem, conn::AsOnv &anticonn) = 0;
 
-    virtual bool draw_double(const DeterminantElement &src_det, DeterminantElement &dst_det,
+    virtual bool draw_double(const views::Onv &src_det, views::Onv &dst_det,
                      const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
-                     AntisymFermionOnvConnection &anticonn) = 0;
+                             conn::AsOnv &anticonn) = 0;
 
-    const FermionHamiltonian *ham(){return m_h;}
+    const Hamiltonian *ham(){return m_h;}
 };
 
 
-#endif //M7_EXCITATIONGENERATOR_H
 #endif //M7_EXCITATIONGENERATOR_H

@@ -4,7 +4,7 @@
 
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
-#include "src/core/pchb/HeatBathSamplers.h"
+#include "src/core/excitgen/HeatBathSamplers.h"
 
 #if 0
 bool excit_gen_tester(ExcitationGenerator &exgen, const FermionOnv &src_det, size_t ndraw, size_t pc_freq_thresh) {
