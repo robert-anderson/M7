@@ -49,10 +49,10 @@ TEST(CommunicatingPair, Communication) {
     ASSERT_EQ(comm_pair.recv().bw_dsize(), mpi::nrank()*nrow*comm_pair.row_dsize());
     ASSERT_EQ(comm_pair.send().buffer_dsize(), mpi::nrank()*nrow*comm_pair.row_dsize());
 
-    for (auto idst_rank{0ul}; idst_rank < mpi::nrank(); ++idst_rank) {
-        for (auto irow{0ul}; irow < nrow; ++irow) {
+    for (size_t idst_rank = 0ul; idst_rank < mpi::nrank(); ++idst_rank) {
+        for (size_t irow = 0ul; irow < nrow; ++irow) {
             ASSERT_EQ(comm_pair.send(idst_rank).push_back(), irow);
-            for (auto iint{0ul}; iint < nint; ++iint) {
+            for (size_t iint = 0ul; iint < nint; ++iint) {
                 comm_pair.send(idst_rank).m_counter(irow, iint) = flat_index(mpi::irank(), idst_rank, irow, iint);
             }
         }
@@ -64,9 +64,9 @@ TEST(CommunicatingPair, Communication) {
  * check that all entries came through as expected
  */
     size_t irow_tot = 0;
-    for (auto isend{0ul}; isend < mpi::nrank(); ++isend) {
-        for (auto irow{0ul}; irow < nrow; ++irow) {
-            for (auto iint{0ul}; iint < nint; ++iint) {
+    for (size_t isend = 0ul; isend < mpi::nrank(); ++isend) {
+        for (size_t irow = 0ul; irow < nrow; ++irow) {
+            for (size_t iint = 0ul; iint < nint; ++iint) {
                 std::cout <<
                           comm_pair.recv().m_counter(irow_tot, iint) << " "
                           << flat_index(isend, mpi::irank(), irow, iint) << " " <<

@@ -61,10 +61,10 @@ TEST(Connection, Phase) {
     while (file_reader.next(inds, value)) {
         bra.zero();
         ket.zero();
-        for (auto i{0ul}; i < 8; ++i) {
+        for (size_t i = 0ul; i < 8ul; ++i) {
             if (inds[i]) bra.set(i);
         }
-        for (auto i{8ul}; i < 16; ++i) {
+        for (size_t i = 8ul; i < 16ul; ++i) {
             if (inds[i]) ket.set(i - 8);
         }
         if (bra.is_zero() || ket.is_zero()) continue;

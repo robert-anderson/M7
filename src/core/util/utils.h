@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <cstring>
 #include <algorithm>
+#include <memory>
 
 namespace utils {
 
