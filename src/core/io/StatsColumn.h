@@ -6,7 +6,7 @@
 #define M7_STATSCOLUMN_H
 
 #include <src/core/enumerator/ProductEnumerator.h>
-#include "src/core/nd/NdAccessor.h"
+#include "src/core/nd/NdArray.h"
 
 struct StatsSpecifier;
 
@@ -28,19 +28,20 @@ struct StatsColumnBase {
 };
 
 template<typename T, size_t nind = 0>
-struct StatsColumn : NdAccessor<T, nind>, StatsColumnBase {
-    using NdAccessor<T, nind>::nelement;
-    using NdAccessor<T, nind>::m_data;
+struct StatsColumn : NdArray<T, nind>, StatsColumnBase {
+    using NdArray<T, nind>::nelement;
+    using NdArrayBase<T, nind>::m_data;
 
     template<typename ...Args>
     StatsColumn(StatsSpecifier *spec, std::string description, Args... shape):
-            NdAccessor<T, nind>(shape...),
+            NdArray<T, nind>(shape...),
             StatsColumnBase(spec, nelement(),
                             defs::inds(
                                     NdAccessor<T, nind>::m_format.shape().begin(),
                                     NdAccessor<T, nind>::m_format.shape().end()
                             ),
-                            consts::is_complex<T>() ? 2ul : 1ul, description) {}
+                            consts::is_complex<T>() ? 2ul : 1ul, description) {
+            }
 
     std::string to_string() const override {
         std::string res;

@@ -11,8 +11,10 @@
 #include "src/core/util/utils.h"
 
 struct StatsSpecifier {
+    std::string m_description;
     std::vector<StatsColumnBase *> m_columns;
 
+    StatsSpecifier(std::string description): m_description(description){}
     void add_column(StatsColumnBase *column) {
         m_columns.push_back(column);
     }
@@ -25,6 +27,7 @@ struct StatsFile : spec_t {
     const std::string m_fname;
     std::unique_ptr<std::ofstream> m_file;
     size_t m_nflush = 0;
+    typedef std::unique_ptr<StatsFile<spec_t>> ptr_t;
 
     template<typename ...Args>
     StatsFile(std::string fname, Args... spec_args):
@@ -38,16 +41,12 @@ struct StatsFile : spec_t {
         return m_columns;
     }
 
-    void write_header() {
+    void write_header() const {
         size_t ncolumn = 0ul;
         for (const StatsColumnBase * column : columns())
             ncolumn += column->m_nelement*column->m_nsubcolumn;
-        *m_file <<
-                "################################\n"
-                "#    M7 FCIQMC Stats Output    #\n"
-                "################################\n"
-                "#\n"
-                "#\n"
+        auto description = static_cast<const StatsSpecifier*>(this)->m_description;
+        *m_file << string_utils::boxed(description+" Stats File") <<
                 "# Number of statistics output: " << columns().size() <<
                 "\n# Number of columns: " << ncolumn << "\n#\n";
         size_t icol = 1ul;

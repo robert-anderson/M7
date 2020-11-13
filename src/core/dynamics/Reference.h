@@ -14,6 +14,7 @@
 
 class Reference : public elements::Onv {
     Wavefunction &m_wf;
+    const Hamiltonian &m_ham;
     size_t m_irow;
     size_t m_irank;
 
@@ -33,6 +34,14 @@ class Reference : public elements::Onv {
 
 public:
     Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv, const Options &opts);
+
+    void add_row(const size_t& irow){
+        auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+        if (m_wf.m_walkers.m_flags.m_reference_connection(irow)) {
+            add_to_numerator(m_wf.m_walkers.m_onv(irow), weight);
+        }
+        if (is_mine() && m_irow==irow) m_weight = weight;
+    }
 
     using FermionOnv::operator=;
     void change(const size_t& irow, const size_t& irank){
@@ -68,19 +77,18 @@ public:
         }
     }
 
-    void update() {
+    void reset() {
         m_proj_energy_num = 0.0;
         m_nwalker_at_doubles = 0.0;
         m_candidate_weight = 0.0;
         m_irow_candidate = ~0ul;
-        if (is_mine()) m_weight = m_wf.m_walkers.m_weight(m_irow, 0, 0);
-        m_weight.mpi_bcast(m_irank);
     }
 
-    void synchronize() {
+    void reduce() {
         if (in_redefinition_cycle()) m_redefinition_cycle = false;
         m_candidate_weight.mpi_maxloc();
-        if (m_candidate_weight.reduced()/std::abs(weight()) > m_redefinition_thresh) {
+        m_weight.mpi_bcast(m_irank);
+        if (m_candidate_weight.reduced()/std::abs(m_weight.reduced()) > m_redefinition_thresh) {
             //TODO: helpful output
 //            std::cout<< " wwwww     " << m_candidate_weight.reduced() << "         " << std::abs(weight()) << std::endl;
 //            std::cout<<m_candidate_weight.reduced()<< "  "<< m_candidate_weight.irank() << std::endl;
@@ -111,15 +119,12 @@ public:
         return aconn.nexcit() < 3;
     }
 
-    void add_to_numerator(const Hamiltonian &ham, const views::Onv &onv, const defs::wf_t &weight) {
+    void add_to_numerator(const views::Onv &onv, const defs::wf_t &weight) {
         m_aconn.connect(*this, onv);
-        m_proj_energy_num += ham.get_element(m_aconn) * weight;
+        m_proj_energy_num += m_ham.get_element(m_aconn) * weight;
         m_nwalker_at_doubles += std::abs(weight);
     }
 
-    Reducible<defs::ham_t> &proj_energy_num() {
-        return m_proj_energy_num;
-    }
     Reducible<defs::wf_comp_t> &nwalker_at_doubles() {
         return m_nwalker_at_doubles;
     }
@@ -127,12 +132,14 @@ public:
         return m_candidate_weight;
     }
 
-    const defs::wf_t &weight() {
+    defs::ham_t proj_energy_num() const {
+        return m_proj_energy_num.reduced();
+    }
+    defs::ham_comp_t weight() const {
         return m_weight.reduced();
     }
-
-    defs::ham_comp_t proj_energy() {
-        return consts::real(proj_energy_num().reduced() / weight());
+    defs::ham_comp_t proj_energy() const {
+        return consts::real(proj_energy_num()/weight());
     }
 };
 

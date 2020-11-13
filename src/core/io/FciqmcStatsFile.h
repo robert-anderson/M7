@@ -5,6 +5,30 @@
 #ifndef M7_FCIQMCSTATSFILE_H
 #define M7_FCIQMCSTATSFILE_H
 
+#include "StatsFile.h"
+
+struct FciqmcStatsSpecifier : StatsSpecifier {
+    StatsColumn<size_t> m_icycle;
+    StatsColumn<defs::ham_comp_t> m_tau;
+    StatsColumn<defs::ham_comp_t> m_shift;
+    StatsColumn<defs::wf_t> m_nwalker;
+    StatsColumn<defs::wf_t> m_delta_nwalker;
+    StatsColumn<defs::ham_t> m_ref_proj_energy_num;
+    StatsColumn<defs::wf_t> m_ref_weight;
+    StatsColumn<defs::ham_comp_t> m_ref_proj_energy;
+    FciqmcStatsSpecifier() :
+    StatsSpecifier("FCIQMC"),
+    m_icycle(this, "Cycle number"),
+    m_tau(this, "Timestep"),
+    m_shift(this, "Diagonal shift"),
+    m_nwalker(this, "Total number of walkers"),
+    m_delta_nwalker(this, "Walkers added this cycle"),
+    m_ref_proj_energy_num(this, "Numerator of reference-projected energy estimator"),
+    m_ref_weight(this, "Reference weight"),
+    m_ref_proj_energy(this, "Reference-projected energy")
+    {}
+};
+
 #if 0
 
 #include "StatsFile.h"

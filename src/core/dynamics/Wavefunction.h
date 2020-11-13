@@ -24,6 +24,11 @@ struct Wavefunction {
     typedef RankAllocator<fields::Onv> rank_alloc_t;
     rank_alloc_t m_ra;
 
+    Reducible<defs::wf_comp_t> m_nwalker;
+    Reducible<defs::wf_comp_t> m_l2_norm_square;
+    Reducible<defs::wf_comp_t> m_delta_nwalker;
+    Reducible<defs::wf_comp_t> m_delta_l2_norm_square;
+
     Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
             m_opts(opts),
             m_walkers("walker table", 1000, onv_params, 1, 1),
@@ -46,29 +51,32 @@ struct Wavefunction {
         return mpi::all_sum(res);
     }
 
-    defs::wf_comp_t unnorm_energy(const Hamiltonian &ham) const {
-        defs::wf_comp_t res = 0.0;
-        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
-            if (m_walkers.m_onv(irow).is_zero()) continue;
-            defs::wf_t weighti = consts::conj(m_walkers.m_weight(irow, 0, 0));
-            for (size_t jrow = 0; jrow < m_walkers.m_hwm; ++jrow) {
-                if (m_walkers.m_onv(jrow).is_zero()) continue;
-                defs::wf_t weightj = m_walkers.m_weight(jrow, 0, 0);
-                res += weighti * ham.get_element(m_walkers.m_onv(irow), m_walkers.m_onv(jrow)) * weightj;
-            }
-        }
-        return mpi::all_sum(res);
+    void set_weight(const size_t& irow, const defs::wf_t& new_weight) {
+        m_delta_nwalker += std::abs(new_weight);
+        m_delta_nwalker -= std::abs(m_walkers.m_weight(irow, 0, 0));
+
+        m_delta_l2_norm_square += std::pow(std::abs(new_weight), 2.0);
+        m_delta_l2_norm_square -= std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+        m_walkers.m_weight(irow, 0, 0) = new_weight;
     }
 
-    defs::wf_comp_t energy(const Hamiltonian &ham) const {
-        return unnorm_energy(ham)/square_norm();
+    void change_weight(const size_t& irow, const defs::wf_t& delta) {
+        set_weight(irow, m_walkers.m_weight(irow, 0, 0)+delta);
     }
 
-    size_t add_walker(const views::Onv &onv, const defs::ham_t weight, const defs::ham_comp_t &hdiag,
-                      bool refconn, bool initiator) {
+    void scale_weight(const size_t& irow, const double& factor) {
+        set_weight(irow, m_walkers.m_weight(irow, 0, 0)*factor);
+    }
+
+    void zero_weight(const size_t& irow) {
+        set_weight(irow, 0.0);
+    }
+
+    size_t create_walker(const views::Onv &onv, const defs::ham_t weight, const defs::ham_comp_t &hdiag,
+                         bool refconn, bool initiator) {
         auto irow = m_walkers.insert(onv);
         ASSERT(m_walkers.m_onv(irow) == onv)
-        m_walkers.m_weight(irow, 0, 0) = weight;
+        set_weight(irow, weight);
         m_walkers.m_hdiag(irow) = hdiag;
         m_walkers.m_flags.m_reference_connection(irow) = refconn;
         m_walkers.m_flags.m_deterministic(irow) = false;
@@ -92,6 +100,7 @@ struct Wavefunction {
             /*
              * the table is full
              */
+            ASSERT(0);
             std::cout << "Spawn send table is full, reallocating..." << std::endl;
             m_spawn.send().expand(0.5 * dst_table.m_nrow);
         }

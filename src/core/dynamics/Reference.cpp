@@ -7,7 +7,7 @@
 
 Reference::Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv,
                      const Options &m_opts) :
-        elements::Onv(onv), m_wf(wf), m_aconn(onv),
+        elements::Onv(onv), m_wf(wf), m_ham(ham), m_aconn(onv),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh){
 
     m_irank = m_wf.m_ra.get_rank(onv);
@@ -20,7 +20,7 @@ Reference::Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv,
         ASSERT(m_irank==mpi::irank());
     }
     else if (mpi::i_am(m_irank)) {
-        m_wf.add_walker(onv, m_opts.nwalker_initial, ham.get_energy(onv), true, true);
+        m_wf.create_walker(onv, m_opts.nwalker_initial, ham.get_energy(onv), true, true);
     }
     else {
         m_irow = ~0ul;

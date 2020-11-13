@@ -68,14 +68,11 @@ public:
         std::cout << "Receiving datawords " << utils::to_string(recvcounts) << std::endl;
 
         auto senddispls = m_send.displs();
+        std::cout << "Sending displacements " << utils::to_string(senddispls) << std::endl;
         defs::inds recvdispls(mpi::nrank(), 0ul);
         for (size_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
         std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
-
-//    const auto ndword_send_tot = senddispls[mpi::nrank() - 1] + sendcounts[mpi::nrank() - 1];
-//    const auto ndword_recv_tot = recvdispls[mpi::nrank() - 1] + recvcounts[mpi::nrank() - 1];
-
 
         logger::write("Send List usage fraction: " +
                       std::to_string(sendcounts[mpi::irank()] / double(m_send[0].bw_dsize())), 0, logger::debug);
@@ -87,23 +84,20 @@ public:
              * the recv table is full
              */
             std::cout << "Spawn recv table is full, reallocating..." << std::endl;
+            ASSERT(0);
             m_recv.expand(0.5 * m_recv.m_nrow);
         }
-//    if (ndword_recv_tot > m_recv->dsize()) {
-//        logger::write("Insufficient space for received data: reallocating recv list...");
-//        m_recv->expand(ndword_recv_tot/m_recv->m_padded_row_dsize);
-//    }
 
         auto tmp = mpi::all_to_allv(m_send.ptr(), sendcounts, senddispls,
                                     m_recv.ptr(), recvcounts, recvdispls);
 
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
+         */
         ASSERT(std::memcmp(
                (void*) (send(mpi::irank()).ptr()),
                (void*) (recv().ptr()+recvdispls[mpi::irank()]),
                recvcounts[mpi::irank()]*defs::nbyte_data)==0);
-         */
 
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
