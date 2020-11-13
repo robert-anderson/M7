@@ -84,6 +84,7 @@ public:
              * the recv table is full
              */
             std::cout << "Spawn recv table is full, reallocating..." << std::endl;
+            ASSERT(0);
             m_recv.expand(0.5 * m_recv.m_nrow);
         }
 

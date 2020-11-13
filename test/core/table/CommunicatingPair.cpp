@@ -7,7 +7,7 @@
 #include "src/core/table/CommunicatingPair.h"
 
 
-TEST(CommunicatingPair, Communication1) {
+TEST(CommunicatingPair, CommunicateSingleElement) {
     struct TestTable : public TableX {
         fields::Number<size_t> m_counter;
 
@@ -33,7 +33,7 @@ TEST(CommunicatingPair, Communication1) {
         ASSERT_EQ(comm_pair.recv().m_counter(isrc), 9900 + 10 * mpi::irank() + isrc);
 }
 
-TEST(CommunicatingPair, Communication) {
+TEST(CommunicatingPair, CommunicateVector) {
     struct TestTable : public TableX {
         fields::Numbers<int, 1> m_counter;
         TestTable(size_t nint) : m_counter(this, "counter", nint) {}

@@ -23,7 +23,7 @@ public:
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;
 
-//    Epoch& m_variable_shift;
+    Epoch m_variable_shift;
 //    Epoch& m_semi_stochastic;
 
     Propagator(const Hamiltonian &ham, const Options& opts):
@@ -34,7 +34,8 @@ public:
     m_dst_onv(ham.nsite()),
     m_aconn(m_dst_onv),
     m_occ(m_dst_onv),
-    m_vac(m_dst_onv)
+    m_vac(m_dst_onv),
+    m_variable_shift("variable shift mode")
     {}
 
 
@@ -62,7 +63,8 @@ public:
         return m_magnitude_logger.m_tau;
     }
 
-//    void update(const size_t& icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth);
+    void update(const size_t& icycle, const Wavefunction& wf);
+
 //
 //    void write_iter_stats(FciqmcStatsFile* stats_file) {
 //        if (!mpi::i_am_root()) return;

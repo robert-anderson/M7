@@ -352,7 +352,7 @@ void Wavefunction::synchronize() {
      * In general however, variables which describe the "current state" of the wavefunction
      * (principal variables) refer to the pre-propagation state. This is because the current
      * state is only determinable by a deterministic loop over occupied determinants, which
-     * only occurs once (propagate() method) in the whole algorithm.
+     * only occurs once (loop_over_occupied_onvs() method) in the whole algorithm.
      *
      * Members of this class are conceptually divided according to the following scheme
      *

@@ -34,19 +34,21 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
     std::cout << "Propagator base initialized with shift (relative to reference determinant energy): " << m_shift << std::endl;
 }
 
-void Propagator::update(const size_t& icycle, defs::wf_comp_t nwalker, defs::wf_comp_t nwalker_growth) {
+#endif
+
+void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
     m_magnitude_logger.synchronize(icycle);
-    if (icycle % m_input.shift_update_period) return;
-    if (m_variable_shift.update(icycle, nwalker >= m_input.nwalker_target)) {
-        /*
-         * "jump" the shift to the projected energy estimation at the onset of
-         * the variable shift epoch
-         */
-        m_shift = m_fciqmc->m_wf.ref_proj_energy();
-    }
+    m_variable_shift.update(icycle, wf.m_nwalker.reduced() >= m_opts.nwalker_target);
+    if (icycle % m_opts.shift_update_period) return;
+//    if (m_variable_shift.update(icycle, wf.m_nwalker.reduced() >= m_opts.nwalker_target)) {
+//        /*
+//         * "jump" the shift to the projected energy estimation at the onset of
+//         * the variable shift epoch
+//         */
+//        m_shift = wf.refref_proj_energy();
+//    }
     else if (m_variable_shift) {
-        m_shift -= m_input.shift_damp * consts::real_log(nwalker_growth) / tau();
+        auto rate = 1.0+wf.m_delta_nwalker.reduced()/wf.m_nwalker.reduced();
+        m_shift -= m_opts.shift_damp * consts::real_log(rate) / tau();
     }
 }
-
-#endif
