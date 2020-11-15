@@ -25,6 +25,10 @@ struct TableX {
      */
     size_t m_hwm = 0ul;
 
+    bool is_full() const {
+        return m_hwm==m_nrow;
+    }
+
     size_t push_back(size_t nrow=1);
 
     defs::data_t* ptr();

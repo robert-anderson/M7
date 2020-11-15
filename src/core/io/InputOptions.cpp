@@ -67,6 +67,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-B,--buffer_factor_initial", buffer_factor_initial,
                "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
+    add_option("-F,--buffer_expansion_factor", buffer_expansion_factor,
+               "number of rows to add to a full buffer as a fraction of current size");
+
     add_option("-K,--nload_balance_block_per_rank", nload_balance_block_per_rank,
                "number of blocks per process to use for load balancing determinants among processes");
 

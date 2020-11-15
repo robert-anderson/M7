@@ -42,6 +42,10 @@ public:
     void expand(size_t delta_nrow){
         resize(table_t::m_nrow+delta_nrow);
     }
+
+    void expand_by_factor(double factor){
+        expand(std::ceil(factor*table_t::m_nrow));
+    }
 };
 
 

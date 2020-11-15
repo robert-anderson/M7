@@ -28,6 +28,7 @@ struct Options {
     size_t spin_restrict = 0;
     double walker_factor_initial = 1.0;
     double buffer_factor_initial = 10.0;
+    double buffer_expansion_factor=0.5;
     double min_spawn_mag = 0.0;
     size_t nload_balance_block_per_rank = 10;
     size_t load_balance_period = 10;

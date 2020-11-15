@@ -50,11 +50,18 @@ public:
 
     void resize(size_t nrow) {
         m_send.resize(nrow);
-        m_recv.resize(mpi::nrank()*nrow);
+        /*
+         * recv buffer is dynamically resized during communication
+         */
+        //m_recv.resize(mpi::nrank()*nrow);
     }
 
     void expand(size_t nrow) {
         resize(m_send.nrow_per_table()+nrow);
+    }
+
+    void expand_by_factor(double factor){
+        expand(std::ceil(m_send.nrow_per_table()*factor));
     }
 
     void communicate() {

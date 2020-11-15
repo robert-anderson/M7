@@ -74,6 +74,7 @@ struct Wavefunction {
 
     size_t create_walker(const views::Onv &onv, const defs::ham_t weight, const defs::ham_comp_t &hdiag,
                          bool refconn, bool initiator) {
+        if (m_walkers.is_full()) m_walkers.expand_by_factor(m_opts.buffer_expansion_factor);
         auto irow = m_walkers.insert(onv);
         ASSERT(m_walkers.m_onv(irow) == onv)
         set_weight(irow, weight);
@@ -96,14 +97,8 @@ struct Wavefunction {
         std::cout << consts::verb << "parent is deterministic: " << flag_deterministic << std::endl;
 #endif
         auto &dst_table = m_spawn.send(irank);
-        if (dst_table.m_hwm + 1 == dst_table.m_nrow) {
-            /*
-             * the table is full
-             */
-            ASSERT(0);
-            std::cout << "Spawn send table is full, reallocating..." << std::endl;
-            m_spawn.send().expand(0.5 * dst_table.m_nrow);
-        }
+        if (dst_table.is_full()) m_spawn.expand_by_factor(m_opts.buffer_expansion_factor);
+
         auto irow = dst_table.push_back();
         dst_table.m_dst_onv(irow) = dst_onv;
         dst_table.m_delta_weight(irow, 0, 0) = delta;
