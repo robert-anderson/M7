@@ -4,7 +4,6 @@
 
 #include "HeatBathSamplers.h"
 
-#if 0
 HeatBathSamplers::HeatBathSamplers(const FermionHamiltonian *h, PRNG &prng) :
         ExcitationGenerator(h, prng), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
@@ -41,13 +40,13 @@ HeatBathSamplers::HeatBathSamplers(const FermionHamiltonian *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
-                                   const OccupiedOrbitals &occ, const VacantOrbitals &vac, defs::prob_t &prob,
-                                   defs::ham_t &helem, AntisymFermionOnvConnection &anticonn) {
+bool HeatBathSamplers::draw_single(const views::FermionOnv &src_fonv, views::Onv &dst_fonv,
+                                   const OccupiedOrbitals &occ, const VacantOrbitals &vac,
+                                   defs::prob_t &prob, defs::ham_t &helem, conn::AsFermionOnv &anticonn) {
     size_t i, a, ia;
     size_t ncases;
     if (m_spin_conserving_1e) {
-        size_t nalpha = src_det.nalpha();
+        size_t nalpha = src_fonv.nalpha();
         size_t nbeta = m_nelec - nalpha;
         size_t nalpha_cases = nalpha * (m_h->nsite() - nalpha);
         size_t nbeta_cases = nbeta * (m_h->nsite() - nbeta);
@@ -64,6 +63,7 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
             i += nalpha;
             // skip the unoccupied alphas
             a += m_h->nsite() - nalpha;
+            ASSERT(i >= nalpha);
             ASSERT(i < m_nelec);
             ASSERT(a >= m_h->nsite() - nalpha);
             ASSERT(a < 2 * m_h->nsite() - m_nelec);
@@ -83,15 +83,15 @@ bool HeatBathSamplers::draw_single(const DeterminantElement &src_det, Determinan
 #endif
     anticonn.zero();
     anticonn.add(i, a);
-    anticonn.apply(src_det, dst_det);
+    anticonn.apply(src_fonv, dst_fonv);
     prob = 1.0 / (defs::prob_t) (ncases);
     helem = m_h->get_element_1(anticonn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }
 
-bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, DeterminantElement &dst_det,
+bool HeatBathSamplers::draw_double(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv,
                                    const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
-                                   AntisymFermionOnvConnection &anticonn) {
+                                   conn::AsFermionOnv &anticonn) {
     // just draw uniform ij TODO! int weighted ij
     // return false if invalid excitation generated, true otherwise
     size_t i, j, a, b;
@@ -118,7 +118,7 @@ bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, Determinan
     }
     anticonn.zero();
     anticonn.add(i, j, a, b);
-    anticonn.apply(src_det, dst_det);
+    anticonn.apply(src_fonv, dst_fonv);
     helem = m_h->get_element_2(anticonn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     ASSERT(prob <= 1)
@@ -127,5 +127,3 @@ bool HeatBathSamplers::draw_double(const DeterminantElement &src_det, Determinan
     }
     return true;
 }
-
-#endif

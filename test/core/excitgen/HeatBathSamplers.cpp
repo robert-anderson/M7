@@ -5,8 +5,129 @@
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/excitgen/HeatBathSamplers.h"
+#include "src/core/table/MappedTable.h"
+#include "src/core/field/Fields.h"
+
+namespace heat_bath_samplers_test {
+    struct TestTableSpec : MappedTable<fields::FermionOnv> {
+        size_t m_nattempt;
+        fields::FermionOnv m_onv;
+        fields::Numbers<size_t, 1> m_frequency;
+        fields::Numbers<defs::prob_t, 1> m_weight;
+
+        TestTableSpec(const views::FermionOnv &src_fonv, size_t nattempt) :
+                MappedTable<fields::FermionOnv>(m_onv, 1000),
+                m_nattempt(nattempt),
+                m_onv(this, {src_fonv.nsite()}, "occupation number vector"),
+                m_frequency(this, "number of times the ONV was drawn", nattempt),
+                m_weight(this, "cumulative reciprocal probability", nattempt) {}
+    };
+
+    struct TestTable : BufferedTable<TestTableSpec> {
+        TestTable(const FermionHamiltonian &ham, const views::FermionOnv &src_fonv, size_t nattempt) :
+                BufferedTable<TestTableSpec>("Excitation generator testing mapped table", src_fonv, nattempt) {
+            /*
+             * table will expand dynamically
+             */
+            expand(10);
+            HamiltonianConnectionEnumerator enumerator(ham, src_fonv);
+            elements::FermionOnv dst_fonv(ham.nsite());
+            MatrixElement<defs::ham_t> matel(src_fonv);
+            while (enumerator.next(matel)) {
+                matel.aconn.apply(src_fonv, dst_fonv);
+                if (is_full()) expand_by_factor(1);
+                insert(dst_fonv);
+            }
+        }
+
+        bool all_have_at_least_one() const {
+            for (size_t irow = 0; irow < m_hwm; ++irow)
+                for (size_t iattempt = 0ul; iattempt < m_nattempt; ++iattempt)
+                    if (!m_frequency(irow, iattempt)) return false;
+            return true;
+        }
+
+        size_t errors_decreasing(size_t freq_cutoff, defs::inds ndraws) const {
+            /*
+             * returns row index of first counterexample
+             */
+            auto any_lt_cutoff = [&](size_t irow) {
+                for (size_t iattempt = 0ul; iattempt < m_nattempt; ++iattempt)
+                    if (m_frequency(irow, iattempt) < freq_cutoff) return true;
+                return false;
+            };
+
+            for (size_t irow = 0; irow < m_hwm; ++irow) {
+                // insufficient draws of this onv to be considered
+                if (any_lt_cutoff(irow)) continue;
+                for (size_t iattempt = 1ul; iattempt < m_nattempt; ++iattempt) {
+                    if (
+                            std::abs(1.0 - m_weight(irow, iattempt)/ndraws[iattempt]) >
+                            std::abs(1.0 - m_weight(irow, iattempt - 1)/ndraws[iattempt]))
+                        return irow;
+                }
+            }
+            return ~0ul;
+        }
+    };
+}
+
+
+TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
+    FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
+    PRNG prng(14, 1000000);
+    HeatBathSamplers pchb(&ham, prng);
+
+    elements::FermionOnv src_fonv(ham.nsite());
+    elements::FermionOnv dst_fonv(ham.nsite());
+    defs::inds occ_inds = {0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17};
+    src_fonv.set(occ_inds);
+
+    const size_t nattempt = 2;
+    heat_bath_samplers_test::TestTable table(ham, src_fonv, nattempt);
+
+    OccupiedOrbitals occ(src_fonv);
+    VacantOrbitals vac(src_fonv);
+    defs::prob_t prob;
+    defs::ham_t helem;
+    conn::AsFermionOnv aconn(src_fonv);
+
+    const defs::inds ndraws = {1ul << 23, 1ul << 27};
+    for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
+        const auto ndraw = ndraws[iattempt];
+        std::cout << "ndraw: " << ndraw << std::endl;
+        for (size_t idraw = 0ul; idraw < ndraw; ++idraw) {
+            if (pchb.draw_single(src_fonv, dst_fonv, occ, vac, prob, helem, aconn)) {
+                auto irow = *table[dst_fonv];
+                table.m_frequency(irow, iattempt)++;
+                table.m_weight(irow, iattempt) += (1.0 / prob);
+            }
+            if (pchb.draw_double(src_fonv, dst_fonv, occ, prob, helem, aconn)) {
+                auto irow = *table[dst_fonv];
+                table.m_frequency(irow, iattempt)++;
+                table.m_weight(irow, iattempt) += (1.0 / prob);
+            }
+        }
+    }
+
+    ASSERT_TRUE(table.all_have_at_least_one());
+    size_t irow = table.errors_decreasing(1e4, ndraws);
+    if (irow != ~0ul) {
+        std::cout << src_fonv.to_string() << std::endl;
+        std::cout << table.m_onv(irow).to_string() << std::endl;
+        std::cout << irow << " " <<
+                  std::abs(1.0 - table.m_weight(irow, 0)) << " " <<
+                  std::abs(1.0 - table.m_weight(irow, 1)) << std::endl;
+        std::cout << irow << " " <<
+                  table.m_frequency(irow, 0) << " " <<
+                  table.m_frequency(irow, 1) << std::endl;
+    }
+    ASSERT_TRUE(table.errors_decreasing(1e4, ndraws) == ~0ul);
+}
 
 #if 0
+
 bool excit_gen_tester(ExcitationGenerator &exgen, const FermionOnv &src_det, size_t ndraw, size_t pc_freq_thresh) {
     /*
      * given:

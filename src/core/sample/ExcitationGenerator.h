@@ -30,13 +30,13 @@ public:
         std::cout << "Excitation generator base initialized" << std::endl;
     }
 
-    virtual bool draw_single(const views::Onv &src_det, views::Onv &dst_det,
+    virtual bool draw_single(const views::FermionOnv &src_fonv, views::Onv &dst_fonv,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,
-                     defs::prob_t &prob, defs::ham_t &helem, conn::AsOnv &anticonn) = 0;
+                     defs::prob_t &prob, defs::ham_t &helem, conn::AsFermionOnv &anticonn) = 0;
 
-    virtual bool draw_double(const views::Onv &src_det, views::Onv &dst_det,
+    virtual bool draw_double(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv,
                      const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
-                             conn::AsOnv &anticonn) = 0;
+                             conn::AsFermionOnv &anticonn) = 0;
 
     const Hamiltonian *ham(){return m_h;}
 };

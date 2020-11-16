@@ -8,22 +8,24 @@
 #include "src/core/table/MappedTable.h"
 #include "src/core/excitgen/BosonCouplingSamplers.h"
 
-struct ExcitGenTestTable : MappedTable<fields::FermiBosOnv> {
-    fields::FermiBosOnv m_onv;
-    fields::Number<size_t> m_frequency;
-    fields::Number<defs::prob_t> m_weight;
-    ExcitGenTestTable(size_t nsite):
-    MappedTable<fields::FermiBosOnv>(m_onv, 1000),
-    m_onv(this, {nsite, nsite}, "occupation number vector"),
-    m_frequency(this, "number of times the ONV was drawn"),
-    m_weight(this, "cumulative reciprocal probability")
-    {}
-};
+namespace boson_coupling_samplers_test {
+    struct TestTable : MappedTable<fields::FermiBosOnv> {
+        fields::FermiBosOnv m_onv;
+        fields::Number<size_t> m_frequency;
+        fields::Number<defs::prob_t> m_weight;
+
+        TestTable(size_t nsite) :
+                MappedTable<fields::FermiBosOnv>(m_onv, 1000),
+                m_onv(this, {nsite, nsite}, "occupation number vector"),
+                m_frequency(this, "number of times the ONV was drawn"),
+                m_weight(this, "cumulative reciprocal probability") {}
+    };
+}
 
 TEST(BosonCouplingSamplers, SingleOnvTest){
     const size_t nsite = 6;
     const size_t nboson_max = 3;
-    BufferedTable<ExcitGenTestTable> bt("Excit gen tester", nsite);
+    BufferedTable<boson_coupling_samplers_test::TestTable> bt("Excit gen tester", nsite);
 
     const size_t ndraw = 10000;
 

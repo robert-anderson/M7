@@ -5,11 +5,10 @@
 #ifndef M7_HEATBATHSAMPLERS_H
 #define M7_HEATBATHSAMPLERS_H
 
-#if 0
-
 #include <src/core/hamiltonian/FermionHamiltonian.h>
 #include <src/core/sample/ExcitationGenerator.h>
 #include "src/core/sample/Aliaser.h"
+#include "src/core/field/Views.h"
 
 /*
  * precomputed sampler for doubles
@@ -21,15 +20,13 @@ class HeatBathSamplers : public ExcitationGenerator {
 public:
     HeatBathSamplers(const FermionHamiltonian *h, PRNG &prng);
 
-    bool draw_single(const DeterminantElement &src_det, DeterminantElement &dst_det,
+    bool draw_single(const views::FermionOnv &src_fonv, views::Onv &dst_fonv,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,
-                     defs::prob_t &prob, defs::ham_t &helem, AntisymFermionOnvConnection &anticonn) override;
+                     defs::prob_t &prob, defs::ham_t &helem, conn::AsFermionOnv &anticonn) override;
 
-    bool draw_double(const DeterminantElement &src_det, DeterminantElement &dst_det,
+    bool draw_double(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv,
                      const OccupiedOrbitals &occ, defs::prob_t &prob, defs::ham_t &helem,
-                     AntisymFermionOnvConnection &anticonn) override;
+                     conn::AsFermionOnv &anticonn) override;
 };
 
-
-#endif //M7_HEATBATHSAMPLERS_H
 #endif //M7_HEATBATHSAMPLERS_H
