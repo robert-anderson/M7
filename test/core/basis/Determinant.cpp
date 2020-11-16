@@ -40,6 +40,7 @@ TEST(Determinant, Phase) {
 
 TEST(Determinant, Spin) {
     elements::FermionOnv det(4);
+    ASSERT_TRUE(det.is_zero());
     ASSERT_EQ(det.spin(), 0);
     det.set(defs::inds{0,1,2,3});
     ASSERT_EQ(det.spin(), 4);

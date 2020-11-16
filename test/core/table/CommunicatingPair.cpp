@@ -14,7 +14,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
         TestTable() : m_counter(this, "counter") {}
     };
 
-    CommunicatingPair<TestTable> comm_pair;
+    CommunicatingPair<TestTable> comm_pair("Test pair", 0.5);
     comm_pair.expand(1);
     for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         comm_pair.send(irank).push_back();
@@ -42,7 +42,7 @@ TEST(CommunicatingPair, CommunicateVector) {
     const size_t nrow = 120;
     const size_t nint = 7;
 
-    CommunicatingPair<TestTable> comm_pair(nint);
+    CommunicatingPair<TestTable> comm_pair("Test pair", 0.5, nint);
 
     auto flat_index = [](const size_t isend, const size_t irecv, const size_t irow = 0,
                          const size_t ientry = 0, const size_t modular_divisor = ~0ul) {

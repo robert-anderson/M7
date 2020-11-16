@@ -15,10 +15,13 @@ class CommunicatingPair {
 
     BufferedTableArray<table_t> m_send;
     BufferedTable<table_t> m_recv;
+    double m_buffer_expansion_factor;
 
 public:
     template<typename ...Args>
-    CommunicatingPair(Args... args): m_send(mpi::nrank(), args...), m_recv(args...){}
+    CommunicatingPair(std::string name, double buffer_expansion_factor, Args... args):
+    m_send(name+" send", mpi::nrank(), args...), m_recv(name+" recv", args...),
+    m_buffer_expansion_factor(buffer_expansion_factor){}
 
     size_t row_dsize() const {
         return static_cast<const TableX&>(m_recv).m_row_dsize;
@@ -53,7 +56,6 @@ public:
         /*
          * recv buffer is dynamically resized during communication
          */
-        //m_recv.resize(mpi::nrank()*nrow);
     }
 
     void expand(size_t nrow) {
@@ -86,13 +88,13 @@ public:
         logger::write("Receive List usage fraction: " +
                       std::to_string(recvcounts[mpi::irank()] / double(m_recv.bw_dsize())), 0, logger::debug);
 
-        if (recvcounts[mpi::irank()] > m_recv.bw_dsize()){
+        auto recv_dsize = recvdispls.back() + recvcounts.back();
+        auto recv_nrow = recv_dsize / row_dsize();
+        if (recv_dsize > m_recv.bw_dsize()){
             /*
              * the recv table is full
              */
-            std::cout << "Spawn recv table is full, reallocating..." << std::endl;
-            ASSERT(0);
-            m_recv.expand(0.5 * m_recv.m_nrow);
+            m_recv.resize(std::ceil((1.0+m_buffer_expansion_factor)*recv_nrow));
         }
 
         auto tmp = mpi::all_to_allv(m_send.ptr(), sendcounts, senddispls,
@@ -108,7 +110,7 @@ public:
 
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
-        recv().m_hwm = (recvdispls.back() + recvcounts.back()) / row_dsize();
+        recv().m_hwm = recv_nrow;
         std::cout << "Number of recvd datawords " << (recvdispls.back() + recvcounts.back()) << std::endl;
         std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
         m_send.clear();

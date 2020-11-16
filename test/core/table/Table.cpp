@@ -79,7 +79,7 @@ struct FlagsTestTable : public TableX {
 };
 
 TEST(Table, Flag){
-    BufferedTable<FlagsTestTable> bt;
+    BufferedTable<FlagsTestTable> bt("Flags test");
     bt.expand(1);
     bt.push_back();
     bt.print_field_details();

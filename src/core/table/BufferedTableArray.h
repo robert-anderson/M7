@@ -59,7 +59,7 @@ public:
     }
 
     template<typename ...Args>
-    BufferedTableArray(size_t ntable, Args... args): m_buffer(){
+    BufferedTableArray(std::string name, size_t ntable, Args... args): m_buffer(name, 0, 0){
         m_tables.reserve(ntable);
         for (size_t itable=0ul; itable<ntable; ++itable) {
             m_tables.emplace_back(args...);
@@ -70,7 +70,7 @@ public:
     size_t ntable() const {return m_tables.size();}
 
     void resize(size_t nrow_per_table) {
-        Buffer new_buffer(row_dsize(), nrow_per_table*ntable());
+        Buffer new_buffer(m_buffer.m_name, row_dsize(), nrow_per_table*ntable());
         move_tables(new_buffer, nrow_per_table, nrow_per_table>m_nrow_per_table);
         ASSERT(m_tables[0].m_nrow==nrow_per_table)
         m_buffer = std::move(new_buffer);

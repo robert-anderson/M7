@@ -17,8 +17,8 @@
 
 struct Wavefunction {
     const Options &m_opts;
-    typedef BufferedTable<WalkerTable> table_t;
-    table_t m_walkers;
+    typedef BufferedTable<WalkerTable> walkers_t;
+    walkers_t m_walkers;
     typedef CommunicatingPair<SpawnTable> spawn_t;
     spawn_t m_spawn;
     typedef RankAllocator<fields::Onv> rank_alloc_t;
@@ -32,7 +32,7 @@ struct Wavefunction {
     Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
             m_opts(opts),
             m_walkers("walker table", 1000, onv_params, 1, 1),
-            m_spawn("spawning communicator", onv_params, 1, 1),
+            m_spawn("spawning communicator", 0.5, onv_params, 1, 1),
             m_ra(100, 10) {
     }
 

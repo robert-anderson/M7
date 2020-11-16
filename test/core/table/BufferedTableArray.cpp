@@ -13,7 +13,7 @@ struct TestTable : TableX {
 };
 
 TEST(BufferedTableArray, Resize){
-    BufferedTableArray<TestTable> bta(3, fields::FermionOnv::params_t{6});
+    BufferedTableArray<TestTable> bta("Test table", 3, fields::FermionOnv::params_t{6});
     bta.expand(4);
 
     bta[0].push_back(3);

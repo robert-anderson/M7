@@ -14,14 +14,23 @@ class Buffer {
     template<typename table_t> friend
     class BufferedTableArray;
 
-    std::vector <defs::data_t> m_data;
+    std::string m_name;
+    size_t m_row_dsize, m_nrow;
+    std::vector<defs::data_t> m_data;
 
 public:
-    Buffer();
 
-    Buffer(size_t dsize);
+    Buffer(std::string name, size_t row_dsize, size_t nrow);
 
-    Buffer(size_t ndword, size_t nrow);
+    ~Buffer();
+
+    Buffer(const Buffer &other);
+
+    Buffer(Buffer &&other);
+
+    Buffer &operator=(const Buffer &other);
+
+    Buffer &operator=(Buffer &&other);
 
     defs::data_t *ptr();
 
@@ -29,11 +38,12 @@ public:
 
     size_t dsize() const;
 
-    void resize(size_t dsize);
+    std::string freeing_string() const;
 
-    void resize(size_t ndword, size_t nrow);
+    std::string capacity_string() const;
+
+    void resize(size_t row_dsize, size_t nrow);
 };
-
 
 
 #endif //M7_BUFFER_H

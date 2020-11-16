@@ -211,9 +211,8 @@ void Solver::reset() {
 }
 
 void Solver::reduce() {
-    std::cout << m_chk_nwalker_local- m_wf.m_nwalker.local() << std::endl;
     auto chk_ratio = m_chk_nwalker_local/m_wf.m_nwalker.local();
-    if (m_chk_nwalker_local>0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0, 1e-12))
+    if (m_chk_nwalker_local>0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
         throw std::runtime_error("Unlogged walker population changes have occurred");
     m_wf.m_nwalker.mpi_sum();
     m_wf.m_delta_nwalker.mpi_sum();

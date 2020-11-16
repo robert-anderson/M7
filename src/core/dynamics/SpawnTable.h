@@ -25,7 +25,7 @@ private:
 public:
     fields::Flags<SpawnTableFlagSet> m_flags;
 
-    SpawnTable(std::string name, fields::Onv::params_t onv_params, size_t nroot, size_t nreplica) :
+    SpawnTable(fields::Onv::params_t onv_params, size_t nroot, size_t nreplica) :
             m_dst_onv(this, onv_params, "occupation number vectors"),
             m_delta_weight(this, "weights", nroot, nreplica),
             m_flags(this, "flags", nroot, nreplica) {}

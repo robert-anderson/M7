@@ -20,7 +20,7 @@ TEST(MappedTable, TEST){
     const size_t nmode = 8;
 
     fields::FermiBosOnv::params_t onv_params{nsite, nmode};
-    BufferedTable<TestTable> bt(onv_params);
+    BufferedTable<TestTable> bt("Mapped table test", onv_params);
     bt.expand(10);
     elements::Onv config(onv_params);
 //    config.m_fonv[2] = 1;

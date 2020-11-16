@@ -27,7 +27,7 @@ private:
 public:
     fields::Flags<WalkerTableFlagSet> m_flags;
 
-    WalkerTable(std::string name, size_t nbucket, fields::Onv::params_t onv_params, size_t nroot, size_t nreplica) :
+    WalkerTable(size_t nbucket, fields::Onv::params_t onv_params, size_t nroot, size_t nreplica) :
             MappedTable<fields::Onv>(m_onv, nbucket),
             m_onv(this, onv_params, "occupation number vectors"),
             m_weight(this, "weights", nroot, nreplica),

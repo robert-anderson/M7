@@ -23,7 +23,7 @@ struct ExcitGenTestTable : MappedTable<fields::FermiBosOnv> {
 TEST(BosonCouplingSamplers, SingleOnvTest){
     const size_t nsite = 6;
     const size_t nboson_max = 3;
-    BufferedTable<ExcitGenTestTable> bt(nsite);
+    BufferedTable<ExcitGenTestTable> bt("Excit gen tester", nsite);
 
     const size_t ndraw = 10000;
 
