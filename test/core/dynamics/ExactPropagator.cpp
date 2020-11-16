@@ -28,7 +28,7 @@ TEST(ExactPropagator, Test) {
     elements::FermionOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
     Wavefunction wf(opts, params);
-    wf.expand(10, 80);
+    wf.expand(10, 800);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(fonv);
     prop.m_shift = ref_energy;//benchmark;

@@ -5,6 +5,45 @@
 #ifndef M7_STOCHASTICPROPAGATOR_H
 #define M7_STOCHASTICPROPAGATOR_H
 
+#include <src/core/sample/PRNG.h>
+#include "Propagator.h"
+
+class StochasticPropagator : public Propagator {
+    PRNG m_prng;
+    //std::unique_ptr<ExcitationGenerator> m_exgen = nullptr;
+
+public:
+    StochasticPropagator(const Hamiltonian &ham, const Options& opts):
+    Propagator(ham, opts), m_prng(opts.prng_seed, opts.prng_ngen){}
+
+    void diagonal(Wavefunction &m_wf, const size_t &irow) override{
+        bool flag_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
+        auto hdiag = m_wf.m_walkers.m_hdiag(irow);
+        auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+        if (flag_deterministic) {
+            m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
+        }
+        else {
+            // the probability that each unit walker will die
+            auto death_rate = (hdiag - m_shift) * tau();
+            if (death_rate < 0.0 || death_rate > 1.0) {
+                // clone  / create antiparticles continuously
+                m_wf.scale_weight(irow, 1 - death_rate);
+            }
+            if (death_rate <= 1) {
+                // kill stochastically
+                m_wf.set_weight(irow, m_prng.stochastic_round(weight, 1.0) * (1 - death_rate));
+            }
+        }
+    }
+
+    void off_diagonal(Wavefunction &m_wf, const size_t &irow) override {
+
+    }
+
+};
+
+
 #if 0
 
 #include <src/core/sample/PRNG.h>

@@ -15,15 +15,13 @@ Reference::Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv,
      * check for onv in walker table first
      */
     auto irow = wf.m_walkers[onv];
+    m_irow = ~0ul;
     if (irow) {
         m_irow = *irow;
         ASSERT(m_irank==mpi::irank());
     }
     else if (mpi::i_am(m_irank)) {
-        m_wf.create_walker(onv, m_opts.nwalker_initial, ham.get_energy(onv), true, true);
-    }
-    else {
-        m_irow = ~0ul;
+        m_irow = m_wf.create_walker(onv, m_opts.nwalker_initial, ham.get_energy(onv), true, true);
     }
     change(m_irow, m_irank);
 }
