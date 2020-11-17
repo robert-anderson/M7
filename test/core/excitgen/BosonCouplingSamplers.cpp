@@ -29,11 +29,12 @@ TEST(BosonCouplingSamplers, SingleOnvTest){
 
     elements::FermiBosOnv src_onv(nsite, nsite);
     elements::FermiBosOnv dst_onv(nsite, nsite);
-    src_onv = {{0, 4, 6, 11}, {1, 0, 0, 1, 4, 2}};
+    src_onv = {{0, 4, 6, 11}, {1, 0, 0, 1, 2, 2}};
 
     std::cout << src_onv.to_string() << std::endl;
 
-    BosonCouplingSamplers sampler(nboson_max);
+    PRNG prng = PRNG(18, 1e4);
+    BosonCouplingSamplers sampler(nboson_max, prng);
     OccupiedOrbitals occ_orbs(src_onv.m_fonv);
     conn::AsFermiBosOnv aconn(src_onv);
     defs::prob_t prob;
