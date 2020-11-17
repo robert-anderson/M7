@@ -151,9 +151,9 @@ void Solver::propagate_row(const size_t &irow) {
     //const auto onv = m_wf.m_walkers.m_onv(irow);
     const auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
 
-    bool is_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
+//    bool is_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
     bool is_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
-    bool is_ref_connection = m_wf.m_walkers.m_flags.m_reference_connection(irow);
+//    bool is_ref_connection = m_wf.m_walkers.m_flags.m_reference_connection(irow);
 
 //    if (consts::float_is_zero(weight) && !is_deterministic) {
 //#ifdef VERBOSE_DEBUGGING
