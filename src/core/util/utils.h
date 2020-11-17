@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <cstring>
 #include <algorithm>
+#include <memory>
 
 namespace utils {
 
@@ -309,6 +310,14 @@ namespace string_utils {
         } else {
             return std::to_string(nbyte / (1.0e9)) + "GB";
         }
+    }
+
+    static std::string boxed(std::string s, size_t padding=4, char c='#') {
+        std::string res;
+        res+=std::string(s.size()+2*(padding+1), c)+'\n';
+        res+=c+std::string(padding, ' ')+s+std::string(padding, ' ')+c+"\n";
+        res+=std::string(s.size()+2*(padding+1), c)+'\n';
+        return res;
     }
 }
 

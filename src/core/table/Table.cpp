@@ -74,3 +74,7 @@ std::string TableX::field_details(size_t width) const {
 void TableX::print_field_details(size_t width) const {
     std::cout << field_details(width) << std::endl;
 }
+
+size_t TableX::bw_dsize() const {
+    return m_bw.m_dsize;
+}

@@ -63,10 +63,6 @@ void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
 
 
 void ExactPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
-    //auto tmp = m_wf.m_walkers.m_weight(irow, 0, 0);
-    auto& weight = m_wf.m_walkers.m_weight(irow, 0, 0);
-    auto& hdiag = m_wf.m_walkers.m_hdiag(irow);
-    weight *= (1.0 - (hdiag - m_shift) * tau());
-    //delta_square_norm += std::pow(std::abs(*weight), 2) - std::pow(std::abs(tmp), 2);
-    //delta_nw += std::abs(*weight) - std::abs(tmp);
+    auto hdiag = m_wf.m_walkers.m_hdiag(irow);
+    m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
 }

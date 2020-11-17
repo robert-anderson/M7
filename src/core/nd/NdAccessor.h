@@ -33,7 +33,7 @@ struct NdAccessor {
     }
 
     void zero() {
-        std::memset((void*)m_data, 0, sizeof(T)*(m_data+nelement()));
+        std::memset((void*)m_data, 0, sizeof(T)*nelement());
     }
 };
 

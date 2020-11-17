@@ -8,7 +8,6 @@
 using namespace integer_utils;
 
 TEST(utils, factorial){
-    ASSERT_DEATH(factorial(-1), R"(Assertion.*)");
     ASSERT_EQ(factorial(0), 1ul);
     ASSERT_EQ(factorial(1), 1ul);
     ASSERT_EQ(factorial(2), 2ul);
@@ -19,8 +18,8 @@ TEST(utils, factorial){
 }
 
 TEST(utils, combinatorial){
-    for (auto n{0ul}; n<20; ++n) {
-        for (auto r{0ul}; r <= n; ++r) {
+    for (size_t n = 0ul; n<20; ++n) {
+        for (size_t r = 0ul; r <= n; ++r) {
             ASSERT_EQ(combinatorial(n, r),
                       factorial(n) / (factorial(n - r) * factorial(r)));
         }
