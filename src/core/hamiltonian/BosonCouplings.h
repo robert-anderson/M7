@@ -75,6 +75,10 @@ public:
         return get_element_1(conn.m_aconn, conn.m_bonvconn);
     }
 
+    defs::ham_t get_element(const conn::AsFermiBosOnv &conn) const {
+        return get_element(conn.m_aconn, conn.m_bonvconn);
+    }
+
     defs::ham_t get_element(const conn::AsFermionOnv &aconn,
                             const conn::BosonOnv &bonvconn) const {
         switch (bonvconn.nchanged_mode()) {

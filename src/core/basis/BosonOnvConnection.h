@@ -38,6 +38,8 @@ public:
     void connect(const views::BosonOnv &in, const views::BosonOnv &out);
 
     void apply(const views::BosonOnv &in, views::BosonOnv& out);
+
+    void add(const size_t imode, const int change);
 };
 
 

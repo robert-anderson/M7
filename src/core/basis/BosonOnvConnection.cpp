@@ -63,3 +63,9 @@ void BosonOnvConnection::apply(const views::BosonOnv &in, views::BosonOnv &out) 
         out(changed_mode(ichange)) += changes(ichange);
     }
 }
+
+void BosonOnvConnection::add(const size_t imode, const int change) {
+    m_diff.m_changes[m_diff.m_nchanged_mode] = change;
+    m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;
+    ++m_diff.m_nchanged_mode;
+}
