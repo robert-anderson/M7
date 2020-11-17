@@ -25,15 +25,35 @@ struct Wavefunction {
     rank_alloc_t m_ra;
 
     Reducible<defs::wf_comp_t> m_nwalker;
-    Reducible<defs::wf_comp_t> m_l2_norm_square;
     Reducible<defs::wf_comp_t> m_delta_nwalker;
+    Reducible<defs::wf_comp_t> m_l2_norm_square;
     Reducible<defs::wf_comp_t> m_delta_l2_norm_square;
+    Reducible<size_t> m_ninitiator;
+    Reducible<int> m_delta_ninitiator;
 
     Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
             m_opts(opts),
             m_walkers("walker table", 1000, onv_params, 1, 1),
             m_spawn("spawning communicator", 0.5, onv_params, 1, 1),
             m_ra(100, 10) {
+    }
+
+    void reset() {
+        m_nwalker = 0;
+        m_delta_nwalker = 0;
+        m_l2_norm_square = 0;
+        m_delta_l2_norm_square = 0;
+        m_ninitiator = 0;
+        m_delta_ninitiator = 0;
+    }
+
+    void reduce() {
+        m_nwalker.mpi_sum();
+        m_delta_nwalker.mpi_sum();
+        m_l2_norm_square.mpi_sum();
+        m_delta_l2_norm_square.mpi_sum();
+        m_ninitiator.mpi_sum();
+        m_delta_ninitiator.mpi_sum();
     }
 
     void expand(size_t nrow_walker, size_t nrow_spawn) {

@@ -151,45 +151,47 @@ void Solver::propagate_row(const size_t &irow) {
     //const auto onv = m_wf.m_walkers.m_onv(irow);
     const auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
 
-    auto is_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
-    auto is_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
-    auto is_ref_connection = m_wf.m_walkers.m_flags.m_reference_connection(irow);
+    bool is_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
+    bool is_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
+    bool is_ref_connection = m_wf.m_walkers.m_flags.m_reference_connection(irow);
 
-    if (consts::float_is_zero(weight) && !is_deterministic) {
-#ifdef VERBOSE_DEBUGGING
-        std::cout << consts::verb << consts::chevs << "ZERO WEIGHT: REMOVING FROM LIST" << std::endl;
-                std::cout << consts::verb << "is initiator:     " << flag_initiator << std::endl;
-                std::cout << consts::verb << "weight:           " << *weight << std::endl;
-#endif
-        if (is_initiator) {
-#ifdef VERBOSE_DEBUGGING
-            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: DETERMINANT REMOVED" << std::endl;
-#endif
-            //m_ninitiator.m_delta--;
-        }
-        //m_nocc_det.m_delta--;
-        //m_data.remove(irow);
-        return;
-    }
+//    if (consts::float_is_zero(weight) && !is_deterministic) {
+//#ifdef VERBOSE_DEBUGGING
+//        std::cout << consts::verb << consts::chevs << "ZERO WEIGHT: REMOVING FROM LIST" << std::endl;
+//                std::cout << consts::verb << "is initiator:     " << flag_initiator << std::endl;
+//                std::cout << consts::verb << "weight:           " << *weight << std::endl;
+//#endif
+//        if (is_initiator) {
+//#ifdef VERBOSE_DEBUGGING
+//            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: DETERMINANT REMOVED" << std::endl;
+//#endif
+//            //m_ninitiator.m_delta--;
+//        }
+//        //m_nocc_det.m_delta--;
+//        //m_data.remove(irow);
+//        return;
+//    }
+//
+//
+//    if (!is_initiator && std::abs(weight) >= m_opts.nadd_initiator) {
+//#ifdef VERBOSE_DEBUGGING
+//        std::cout << consts::verb << consts::chevs << "INITIATOR STATUS GRANTED" << std::endl;
+//#endif
+//        is_initiator = true;
+//        //m_ninitiator.m_delta++;
+//    }
+//    /*
+//    else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
+//#ifdef VERBOSE_DEBUGGING
+//            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: WEIGHT FELL BELOW THRESHOLD MAGNITUDE" << std::endl;
+//#endif
+//        // initiator status revoked
+//        // flag_initiator = false;
+//        // delta_ninitiator--;
+//    }
+//     */
 
 
-    if (!is_initiator && std::abs(weight) >= m_opts.nadd_initiator) {
-#ifdef VERBOSE_DEBUGGING
-        std::cout << consts::verb << consts::chevs << "INITIATOR STATUS GRANTED" << std::endl;
-#endif
-        is_initiator = true;
-        //m_ninitiator.m_delta++;
-    }
-    /*
-    else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
-#ifdef VERBOSE_DEBUGGING
-            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: WEIGHT FELL BELOW THRESHOLD MAGNITUDE" << std::endl;
-#endif
-        // initiator status revoked
-        // flag_initiator = false;
-        // delta_ninitiator--;
-    }
-     */
     m_prop.off_diagonal(m_wf, irow);
     m_prop.diagonal(m_wf, irow);
 
@@ -205,8 +207,7 @@ void Solver::propagate_row(const size_t &irow) {
 
 void Solver::reset() {
     m_chk_nwalker_local = m_wf.m_nwalker.local()+m_wf.m_delta_nwalker.local();
-    m_wf.m_nwalker = 0;
-    m_wf.m_delta_nwalker = 0;
+    m_wf.reset();
     m_reference.reset();
 }
 
@@ -214,18 +215,28 @@ void Solver::reduce() {
     auto chk_ratio = m_chk_nwalker_local/m_wf.m_nwalker.local();
     if (m_chk_nwalker_local>0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
         throw std::runtime_error("Unlogged walker population changes have occurred");
-    m_wf.m_nwalker.mpi_sum();
-    m_wf.m_delta_nwalker.mpi_sum();
+    m_wf.reset();
     m_reference.reduce();
     m_prop.update(m_icycle, m_wf);
 }
 
 void Solver::output_stats() {
+
+//    StatsColumn<size_t> m_icycle;
+//    StatsColumn<defs::ham_comp_t> m_tau;
+//    StatsColumn<defs::ham_comp_t> m_shift;
+//    StatsColumn<defs::wf_t> m_nwalker;
+//    StatsColumn<defs::wf_t> m_delta_nwalker;
+//    StatsColumn<defs::ham_t> m_ref_proj_energy_num;
+//    StatsColumn<defs::wf_t> m_ref_weight;
+//    StatsColumn<defs::ham_comp_t> m_ref_proj_energy;
     if (mpi::i_am_root()) {
         m_stats->m_icycle() = m_icycle;
+        m_stats->m_tau() = m_prop.tau();
         m_stats->m_shift() = m_prop.m_shift;
         m_stats->m_nwalker() = m_wf.m_nwalker.reduced();
         m_stats->m_delta_nwalker() = m_wf.m_delta_nwalker.reduced();
+        m_stats->m_ref_proj_energy_num() = m_reference.proj_energy_num();
         m_stats->m_ref_weight() = m_reference.weight();
         m_stats->m_ref_proj_energy() = m_reference.proj_energy();
         m_stats->flush();
