@@ -22,7 +22,7 @@ TEST(ExactPropagator, Test) {
     opts.tau_initial = 0.05;
     opts.nwalker_target = 10000;
     fields::FermiBosOnv::params_t params{6, 6};
-    const auto benchmark = -108.81138657563143;
+    //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     elements::FermionOnv fonv(ham.nsite());

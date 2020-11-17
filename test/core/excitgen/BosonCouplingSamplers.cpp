@@ -29,12 +29,13 @@ TEST(BosonCouplingSamplers, SingleOnvTest){
 
     elements::FermiBosOnv src_onv(nsite, nsite);
     elements::FermiBosOnv dst_onv(nsite, nsite);
-    src_onv = {{0, 4, 6, 11}, {1, 0, 0, 1, 2, 2}};
+    src_onv = {{0, 4, 6, 11}, {1, 0, 0, 1, 3, 2}};
 
     std::cout << src_onv.to_string() << std::endl;
 
     PRNG prng = PRNG(18, 1e4);
-    BosonCouplingSamplers sampler(nboson_max, prng);
+    BosonCouplings bc(nsite, nboson_max, 1.0, 0.5);
+    BosonCouplingSamplers sampler(bc, nboson_max, prng);
     OccupiedOrbitals occ_orbs(src_onv.m_fonv);
     conn::AsFermiBosOnv aconn(src_onv);
     defs::prob_t prob;
@@ -58,4 +59,7 @@ TEST(BosonCouplingSamplers, SingleOnvTest){
      *  ASSERT that all expected excitations are generated at least once (by counting,
      *  i.e. check the m_hwm member of bt is correct)
      */
+    for(size_t irow = 0ul; irow < bt.m_hwm; ++irow){
+        std::cout << bt.m_weight(irow) << std::endl;
+    }
 }
