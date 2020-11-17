@@ -27,13 +27,14 @@ TEST(BosonCouplingSamplers, SingleOnvTest){
     const size_t nboson_max = 3;
     BufferedTable<boson_coupling_samplers_test::TestTable> bt("Excit gen tester", nsite);
 
-    const size_t ndraw = 10000;
+    const size_t ndraw = 100000;
 
     elements::FermiBosOnv src_onv(nsite, nsite);
     elements::FermiBosOnv dst_onv(nsite, nsite);
     src_onv = {{0, 4, 6, 11}, {1, 0, 0, 1, 3, 2}};
+    // 5
 
-    std::cout << src_onv.to_string() << std::endl;
+    //std::cout << src_onv.to_string() << std::endl;
 
     PRNG prng = PRNG(18, 1e4);
     BosonCouplings bc(nsite, nboson_max, 1.0, 0.5);
@@ -62,6 +63,6 @@ TEST(BosonCouplingSamplers, SingleOnvTest){
      *  i.e. check the m_hwm member of bt is correct)
      */
     for(size_t irow = 0ul; irow < bt.m_hwm; ++irow){
-        std::cout << bt.m_weight(irow) << std::endl;
+        std::cout << std::abs(1.0 - bt.m_weight(irow)/ndraw) << std::endl;
     }
 }

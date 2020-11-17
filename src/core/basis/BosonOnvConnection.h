@@ -40,6 +40,10 @@ public:
     void apply(const views::BosonOnv &in, views::BosonOnv& out);
 
     void add(const size_t imode, const int change);
+
+    void zero(){
+        m_diff.zero();
+    }
 };
 
 

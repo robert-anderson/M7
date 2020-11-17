@@ -145,3 +145,8 @@ void AntisymFermionOnvConnection::apply(const views::FermionOnv &in, views::Ferm
     apply(in);
     FermionOnvConnection::apply(in, out);
 }
+
+void AntisymFermionOnvConnection::zero() {
+    FermionOnvConnection::zero();
+    m_ncom = 0;
+}

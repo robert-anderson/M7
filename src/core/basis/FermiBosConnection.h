@@ -54,6 +54,11 @@ struct AntisymFermiBosConnection {
         m_aconn.apply(in.m_fonv, out.m_fonv);
         m_bonvconn.apply(in.m_bonv, out.m_bonv);
     }
+
+    void zero(){
+        m_aconn.zero();
+        m_bonvconn.zero();
+    }
 };
 
 #endif //M7_FERMIBOSCONNECTION_H

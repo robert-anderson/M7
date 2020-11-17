@@ -51,7 +51,7 @@ public:
 
     virtual void connect(const views::FermionOnv &in, const views::FermionOnv &out);
     virtual void apply(const views::FermionOnv &in, views::FermionOnv &out);
-    void zero(){m_ncre=0; m_nann=0;}
+    virtual void zero(){m_ncre=0; m_nann=0;}
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
     void add(const size_t &ann, const size_t &cre){
@@ -96,6 +96,8 @@ public:
     const size_t& com(const size_t& i) const {return m_com[i];}
     const size_t& ncom() const {return m_ncom;}
     const bool& phase() const {return m_phase;}
+
+    void zero() override;
 };
 
 template<typename T>

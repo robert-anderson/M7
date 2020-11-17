@@ -48,6 +48,7 @@ struct BosonCouplingSamplers {
             prob *= 0.5;
         }
 
+        anticonn.m_bonvconn.zero();
         anticonn.m_bonvconn.add(imode_excit, change);
         anticonn.apply(src_onv, dst_onv);
         helem = m_bc.get_element_1(anticonn);
