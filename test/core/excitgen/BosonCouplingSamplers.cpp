@@ -26,15 +26,7 @@ namespace boson_coupling_samplers_test {
             BufferedTable<boson_coupling_samplers_test::TestTable> bt("Excit gen tester", nsite);
 
             populate_table(bt, src_onv, ndraw, nboson_max);
-            /*
-             * TODO: James
-             *  ASSERT that the m_weights are approximately the same,
-             *  would be better to refactor the above into a function that can be called
-             *  multiple times with different ndraw values, and check that the variance
-             *  decreases as expected
-             *  ASSERT that all expected excitations are generated at least once (by counting,
-             *  i.e. check the m_hwm member of bt is correct)
-             */
+
             bool result = all_have_at_least_1(src_onv, nboson_max, bt.m_hwm);
             result &= errors_decreasing(src_onv, ndraw, nboson_max);
             result &= is_uniform(bt.m_frequency, ndraw);
