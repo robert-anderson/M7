@@ -8,6 +8,7 @@
 #include <cstring>
 #include <functional>
 #include "NdFormat.h"
+#include "src/core/parallel/MPIWrapper.h"
 
 template <typename T, size_t nind>
 struct NdAccessor {
@@ -28,6 +29,10 @@ struct NdAccessor {
         return m_data[m_format.flatten(inds...)];
     }
 
+    void bcast(size_t iroot=0ul) {
+        mpi::bcast(m_data, nelement(), iroot);
+    }
+
     size_t nelement() const {
         return m_format.nelement();
     }
@@ -37,5 +42,12 @@ struct NdAccessor {
     }
 };
 
+template <typename T, size_t nind>
+struct FormattedNdAccessor : private NdFormat<nind>, public NdAccessor<T, nind>{
+    template<typename ...Args>
+    FormattedNdAccessor(T* data, NdFormat<nind> format):
+    NdFormat<nind>(format.shape()),
+    NdAccessor<T, nind>(data, *this){}
+};
 
 #endif //M7_NDACCESSOR_H

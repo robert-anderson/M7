@@ -47,61 +47,37 @@
 
 #ifdef HAVE_MPI
 
+
+
+static const std::array<MPI_Datatype, 17> mpi_types =
+        {MPI_CHAR, MPI_SHORT, MPI_INT, MPI_LONG, MPI_LONG_LONG_INT,
+         MPI_UNSIGNED_CHAR, MPI_UNSIGNED_SHORT, MPI_UNSIGNED, MPI_UNSIGNED_LONG,
+         MPI_UNSIGNED_LONG_LONG, MPI_FLOAT, MPI_DOUBLE, MPI_LONG_DOUBLE,
+         MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX, MPI_CXX_BOOL};
+
 template<typename T>
-static MPI_Datatype mpi_type() { return MPI_Datatype(); }
+static size_t mpi_type_ind() { return ~0ul; }
 
-template<>
-MPI_Datatype mpi_type<char>() { return MPI_CHAR; }
+template<> size_t mpi_type_ind<char>() { return 0;}
+template<> size_t mpi_type_ind<short int>() { return 1;}
+template<> size_t mpi_type_ind<int>() { return 2; }
+template<> size_t mpi_type_ind<long int>() { return 3; }
+template<> size_t mpi_type_ind<long long int>() { return 4; }
+template<> size_t mpi_type_ind<unsigned char>() { return 5; }
+template<> size_t mpi_type_ind<unsigned short int>() { return 6; }
+template<> size_t mpi_type_ind<unsigned int>() { return 7; }
+template<> size_t mpi_type_ind<unsigned long int>() { return 8; }
+template<> size_t mpi_type_ind<unsigned long long int>() { return 9; }
+template<> size_t mpi_type_ind<float>() { return 10; }
+template<> size_t mpi_type_ind<double>() { return 11; }
+template<> size_t mpi_type_ind<long double>() { return 12; }
+template<> size_t mpi_type_ind<std::complex<float>>() { return 13; }
+template<> size_t mpi_type_ind<std::complex<double>>() { return 14; }
+template<> size_t mpi_type_ind<std::complex<long double>>() { return 15; }
+template<> size_t mpi_type_ind<bool>() { return 16; }
 
-template<>
-MPI_Datatype mpi_type<short int>() { return MPI_SHORT; }
-
-template<>
-MPI_Datatype mpi_type<int>() { return MPI_INT; }
-
-template<>
-MPI_Datatype mpi_type<long int>() { return MPI_LONG; }
-
-template<>
-MPI_Datatype mpi_type<long long int>() { return MPI_LONG_LONG_INT; }
-
-template<>
-MPI_Datatype mpi_type<unsigned char>() { return MPI_UNSIGNED_CHAR; }
-
-template<>
-MPI_Datatype mpi_type<unsigned short int>() { return MPI_UNSIGNED_SHORT; }
-
-template<>
-MPI_Datatype mpi_type<unsigned int>() { return MPI_UNSIGNED; }
-
-template<>
-MPI_Datatype mpi_type<unsigned long int>() { return MPI_UNSIGNED_LONG; }
-
-template<>
-MPI_Datatype mpi_type<unsigned long long int>() { return MPI_UNSIGNED_LONG_LONG; }
-
-template<>
-MPI_Datatype mpi_type<float>() { return MPI_FLOAT; }
-
-template<>
-MPI_Datatype mpi_type<double>() { return MPI_DOUBLE; }
-
-template<>
-MPI_Datatype mpi_type<long double>() { return MPI_LONG_DOUBLE; }
-
-template<>
-MPI_Datatype mpi_type<std::complex<float>>() { return MPI_COMPLEX; }
-
-template<>
-MPI_Datatype mpi_type<std::complex<double>>() { return MPI_DOUBLE_COMPLEX; }
-
-template<>
-MPI_Datatype mpi_type<std::complex<long double>>() { return MPI_CXX_LONG_DOUBLE_COMPLEX; }
-
-template<>
-MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
-
-
+template<typename T>
+static MPI_Datatype mpi_type() { return mpi_types[mpi_type_ind<T>()]; }
 /*
  * For use with minloc and maxloc
  * MPI_FLOAT_INT: struct { float, int }
@@ -115,24 +91,12 @@ MPI_Datatype mpi_type<bool>() { return MPI_CXX_BOOL; }
 template<typename T>
 static MPI_Datatype mpi_pair_type() { return MPI_Datatype(); }
 
-template<>
-MPI_Datatype mpi_pair_type<float>() { return MPI_FLOAT_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<long>() { return MPI_LONG_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<double>() { return MPI_DOUBLE_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<short>() { return MPI_SHORT_INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<int>() { return MPI_2INT; }
-
-template<>
-MPI_Datatype mpi_pair_type<long double>() { return MPI_LONG_DOUBLE_INT; }
-
+template<> MPI_Datatype mpi_pair_type<float>() { return MPI_FLOAT_INT; }
+template<> MPI_Datatype mpi_pair_type<long>() { return MPI_LONG_INT; }
+template<> MPI_Datatype mpi_pair_type<double>() { return MPI_DOUBLE_INT; }
+template<> MPI_Datatype mpi_pair_type<short>() { return MPI_SHORT_INT; }
+template<> MPI_Datatype mpi_pair_type<int>() { return MPI_2INT; }
+template<> MPI_Datatype mpi_pair_type<long double>() { return MPI_LONG_DOUBLE_INT; }
 
 const std::array<MPI_Op, 5> op_map{MPI_MAX, MPI_MIN, MPI_SUM, MPI_LAND, MPI_LOR};
 const std::array<MPI_Op, 2> pair_op_map{MPI_MAXLOC, MPI_MINLOC};
@@ -248,19 +212,34 @@ private:
     }
 
     template<typename T>
-    static bool all_reduce(const std::pair<T, size_t> *send, std::pair<T, size_t> *recv,
-                           MpiPairOp op, size_t ndata = 1) {
+    static bool all_reduce(const std::pair<T, size_t>* send,
+                           std::pair<T, size_t>* recv,
+                           MpiPairOp op, size_t ndata=1) {
 #ifdef HAVE_MPI
-        const std::pair<T, defs::mpi_count> tmp_send{send->first, snrw(send->second)};
-        std::pair<T, defs::mpi_count> tmp_recv;
-        auto res = MPI_Allreduce(&tmp_send, &tmp_recv, ndata, mpi_pair_type<T>(), pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
-        recv->first = tmp_recv.first;
-        recv->second = tmp_recv.second;
+        std::vector<std::pair<T, defs::mpi_count>> tmp_send;
+        tmp_send.reserve(ndata);
+        for (size_t idata=0ul; idata<ndata; ++idata)
+            tmp_send.push_back({send[idata].first, snrw(send[idata].second)});
+        std::vector<std::pair<T, defs::mpi_count>> tmp_recv;
+        tmp_recv.reserve(ndata);
+        auto res = MPI_Allreduce(tmp_send.data(), tmp_recv.data(), ndata, mpi_pair_type<T>(),
+                pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
+        for (size_t idata=0ul; idata<ndata; ++idata)
+            recv[idata] = std::pair<T, size_t>{tmp_recv[idata].first, tmp_recv[idata].second};
         return res;
 #else
-        std::memcpy(recv, send, sizeof(T)*ndata);
+        std::memcpy(recv.data(), send.data(), sizeof(std::pair<T, size_t>)*send.size());
         return true;
 #endif
+    }
+
+
+    template<typename T>
+    static bool all_reduce(const std::vector<std::pair<T, size_t>> &send,
+                           std::vector<std::pair<T, size_t>> &recv,
+                           MpiPairOp op) {
+        ASSERT(send.size() == recv.size());
+        all_reduce(send.data(), recv.data(), op, send.size());
     }
 
 public:
@@ -425,23 +404,46 @@ public:
     /*
      * MAXLOC CONVENIENCE FUNCTIONS
      */
+    template<typename T>
+    static bool all_maxloc(const T *send, std::pair<T, size_t>* recv, size_t ndata) {
+        std::vector<std::pair<T, size_t>> tmp;
+        tmp.reserve(ndata);
+        for (size_t idata=0ul; idata<ndata; ++idata) tmp.push_back({send[idata], irank()});
+        return all_reduce(tmp.data(), recv, MpiMaxLoc, ndata);
+    }
 
     template<typename T>
     static bool all_maxloc(const T &send, std::pair<T, size_t> &recv) {
-        std::pair<T, size_t> tmp{send, irank()};
-        return all_reduce(&tmp, &recv, MpiMaxLoc, 1);
+        return all_maxloc(&send, &recv, 1);
+    }
+
+    template<typename T>
+    static bool all_maxloc(const std::vector<T> &send, std::vector<std::pair<T, size_t>> &recv) {
+        ASSERT(send.size()==recv.size());
+        return all_maxloc(send.data(), recv.data(), send.size());
     }
 
     /*
      * MINLOC CONVENIENCE FUNCTIONS
      */
+    template<typename T>
+    static bool all_minloc(const T *send, std::pair<T, size_t>* recv, size_t ndata) {
+        std::vector<std::pair<T, size_t>> tmp;
+        tmp.reserve(ndata);
+        for (size_t idata=0ul; idata<ndata; ++idata) tmp.push_back({send[idata], irank()});
+        return all_reduce(tmp.data(), recv, MpiMinLoc, ndata);
+    }
 
     template<typename T>
     static bool all_minloc(const T &send, std::pair<T, size_t> &recv) {
-        std::pair<T, size_t> tmp{send, irank()};
-        return all_reduce(&tmp, &recv, MpiMinLoc, 1);
+        return all_minloc(&send, &recv, 1);
     }
 
+    template<typename T>
+    static bool all_minloc(const std::vector<T> &send, std::vector<std::pair<T, size_t>> &recv) {
+        ASSERT(send.size()==recv.size());
+        return all_minloc(send.data(), recv.data(), send.size());
+    }
 
     template<typename T>
     static bool all_to_all(const T *send, size_t nsend, T *recv, size_t nrecv) {

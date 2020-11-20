@@ -12,6 +12,7 @@
 #include "src/core/dynamics/WalkerTable.h"
 #include "src/core/dynamics/SpawnTable.h"
 #include "src/core/parallel/RankAllocator.h"
+#include "src/core/parallel/ReductionMember.h"
 #include "src/core/field/Views.h"
 
 
@@ -24,36 +25,34 @@ struct Wavefunction {
     typedef RankAllocator<fields::Onv> rank_alloc_t;
     rank_alloc_t m_ra;
 
-    Reducible<defs::wf_comp_t> m_nwalker;
-    Reducible<defs::wf_comp_t> m_delta_nwalker;
-    Reducible<defs::wf_comp_t> m_l2_norm_square;
-    Reducible<defs::wf_comp_t> m_delta_l2_norm_square;
-    Reducible<size_t> m_ninitiator;
-    Reducible<int> m_delta_ninitiator;
+    ReductionSyndicate m_summables;
+
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
+    ReductionMember<size_t, defs::ndim_wf> m_ninitiator;
+    ReductionMember<int, defs::ndim_wf> m_delta_ninitiator;
 
     Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
             m_opts(opts),
             m_walkers("walker table", 1000, onv_params, 1, 1),
             m_spawn("spawning communicator", 0.5, onv_params, 1, 1),
-            m_ra(100, 10) {
-    }
+            m_ra(100, 10),
+            m_nwalker(m_summables, {1, 1}),
+            m_delta_nwalker(m_summables, {1, 1}),
+            m_l2_norm_square(m_summables, {1, 1}),
+            m_delta_l2_norm_square(m_summables, {1, 1}),
+            m_ninitiator(m_summables, {1, 1}),
+            m_delta_ninitiator(m_summables, {1, 1})
+            {}
 
     void reset() {
-        m_nwalker = 0;
-        m_delta_nwalker = 0;
-        m_l2_norm_square = 0;
-        m_delta_l2_norm_square = 0;
-        m_ninitiator = 0;
-        m_delta_ninitiator = 0;
+        m_summables.zero();
     }
 
     void reduce() {
-        m_nwalker.mpi_sum();
-        m_delta_nwalker.mpi_sum();
-        m_l2_norm_square.mpi_sum();
-        m_delta_l2_norm_square.mpi_sum();
-        m_ninitiator.mpi_sum();
-        m_delta_ninitiator.mpi_sum();
+        m_summables.all_sum();
     }
 
     void expand(size_t nrow_walker, size_t nrow_spawn) {
@@ -72,11 +71,11 @@ struct Wavefunction {
     }
 
     void set_weight(const size_t& irow, const defs::wf_t& new_weight) {
-        m_delta_nwalker += std::abs(new_weight);
-        m_delta_nwalker -= std::abs(m_walkers.m_weight(irow, 0, 0));
+        m_delta_nwalker(0, 0) += std::abs(new_weight);
+        m_delta_nwalker(0, 0) -= std::abs(m_walkers.m_weight(irow, 0, 0));
 
-        m_delta_l2_norm_square += std::pow(std::abs(new_weight), 2.0);
-        m_delta_l2_norm_square -= std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+        m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
+        m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
         m_walkers.m_weight(irow, 0, 0) = new_weight;
     }
 

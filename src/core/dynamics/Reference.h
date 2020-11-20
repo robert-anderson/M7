@@ -7,8 +7,9 @@
 
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/field/Fields.h"
-#include "src/core/parallel/Reducible.h"
+#include "src/core/parallel/ReductionMember.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/nd/NdArray.h"
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
@@ -19,18 +20,20 @@ class Reference : public elements::Onv {
     size_t m_irank;
 
     mutable conn::AsOnv m_aconn;
-    Reducible<defs::ham_t> m_proj_energy_num;
-    Reducible<defs::wf_comp_t> m_nwalker_at_doubles;
-    Reducible<defs::wf_t> m_weight;
 
     /*
      * If a candidate for redefinition of the reference is found, then
      * its weight and row within m_list must be stored
      */
-    Reducible<defs::wf_comp_t> m_candidate_weight;
     size_t m_irow_candidate;
     const double m_redefinition_thresh;
     bool m_redefinition_cycle;
+
+    ReductionSyndicate m_summables;
+    ReductionMember<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
+    NdArray<defs::wf_t, defs::ndim_wf> m_weight;
+    SingleReducible<defs::wf_comp_t, defs::ndim_wf> m_candidate_weight;
 
 public:
     Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv, const Options &opts);
@@ -40,7 +43,7 @@ public:
         if (m_wf.m_walkers.m_flags.m_reference_connection(irow)) {
             add_to_numerator(m_wf.m_walkers.m_onv(irow), weight);
         }
-        if (is_mine() && m_irow==irow) m_weight = weight;
+        if (is_mine() && m_irow==irow) m_weight(0, 0) = weight;
     }
 
     using FermionOnv::operator=;
@@ -71,34 +74,30 @@ public:
 
     void log_candidate_weight(const size_t& irow, const defs::wf_comp_t& candidate_weight){
         if (irow==m_irow && mpi::i_am(m_irank)) return;
-        if (candidate_weight>m_candidate_weight.local()){
-            m_candidate_weight = candidate_weight;
+        if (candidate_weight>m_candidate_weight(0, 0)){
+            m_candidate_weight(0, 0) = candidate_weight;
             m_irow_candidate = irow;
         }
     }
 
     void reset() {
-        m_proj_energy_num = 0.0;
-        m_nwalker_at_doubles = 0.0;
-        m_candidate_weight = 0.0;
-        m_irow_candidate = ~0ul;
+        m_summables.zero();
     }
 
     void reduce() {
         if (in_redefinition_cycle()) m_redefinition_cycle = false;
-        m_candidate_weight.mpi_maxloc();
-        m_weight.mpi_bcast(m_irank);
-        if (m_candidate_weight.reduced()/std::abs(m_weight.reduced()) > m_redefinition_thresh) {
+        m_candidate_weight.all_maxloc();
+        m_weight.bcast(m_irank);
+        if (m_candidate_weight.reduced(0, 0)/std::abs(m_weight(0, 0)) > m_redefinition_thresh) {
             //TODO: helpful output
 //            std::cout<< " wwwww     " << m_candidate_weight.reduced() << "         " << std::abs(weight()) << std::endl;
 //            std::cout<<m_candidate_weight.reduced()<< "  "<< m_candidate_weight.irank() << std::endl;
-            if (mpi::i_am(m_candidate_weight.irank())){
+            if (mpi::i_am(m_candidate_weight.rank_index(0, 0))){
 //                std::cout << m_walkers.m_onv(m_irow_candidate).to_string() << std::endl;
             }
-            change(m_irow_candidate, m_candidate_weight.irank());
+            change(m_irow_candidate, m_candidate_weight.rank_index(0, 0));
         }
-        m_proj_energy_num.mpi_sum();
-        m_nwalker_at_doubles.mpi_sum(); // includes reference weight
+        m_summables.all_sum();
     }
 
     const size_t &irow() {
@@ -121,22 +120,23 @@ public:
 
     void add_to_numerator(const views::Onv &onv, const defs::wf_t &weight) {
         m_aconn.connect(*this, onv);
-        m_proj_energy_num += m_ham.get_element(m_aconn) * weight;
-        m_nwalker_at_doubles += std::abs(weight);
+        m_proj_energy_num(0, 0) += m_ham.get_element(m_aconn) * weight;
+        m_nwalker_at_doubles(0, 0) += std::abs(weight);
     }
 
-    Reducible<defs::wf_comp_t> &nwalker_at_doubles() {
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles() {
         return m_nwalker_at_doubles;
     }
-    Reducible<defs::wf_comp_t> &candidate_weight() {
+
+    ReductionMember<defs::wf_comp_t, defs::ndim_wf> &candidate_weight() {
         return m_candidate_weight;
     }
 
     defs::ham_t proj_energy_num() const {
-        return m_proj_energy_num.reduced();
+        return m_proj_energy_num.reduced(0, 0);
     }
     defs::ham_comp_t weight() const {
-        return m_weight.reduced();
+        return m_weight(0, 0);
     }
     defs::ham_comp_t proj_energy() const {
         return consts::real(proj_energy_num()/weight());
