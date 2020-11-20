@@ -25,7 +25,7 @@ Reference::Reference(Wavefunction &wf, const Hamiltonian &ham, views::Onv &onv,
         m_irow = *irow;
         ASSERT(m_irank == mpi::irank());
     } else if (mpi::i_am(m_irank)) {
-        m_irow = m_wf.create_walker(onv, m_opts.nwalker_initial, ham.get_energy(onv), true, true);
+        m_irow = m_wf.create_walker(onv, m_opts.nwalker_initial, ham.get_energy(onv), true);
     }
     change(m_irow, m_irank);
 }

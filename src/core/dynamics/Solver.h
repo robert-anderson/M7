@@ -25,6 +25,7 @@ class Solver {
      * Sanity checking variables
      */
     defs::wf_t m_chk_nwalker_local = 0.0;
+    size_t m_chk_ninitiator_local = 0ul;
 
 public:
     const Reference& reference() const;

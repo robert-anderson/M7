@@ -43,6 +43,7 @@ struct Options {
     bool do_semistochastic = false;
     size_t ncycle_init_detsub = 1000;
     bool calc_mk_walker_sums = false;
+    size_t nboson_max = 0ul;
 
     bool validate() const;
 

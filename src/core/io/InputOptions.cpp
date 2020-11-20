@@ -109,4 +109,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_flag("--calc_mk_walker_sums", calc_mk_walker_sums,
              "accumulate and output average walker occupations of Kramers sectors");
 
+    add_option("--nboson_max", nboson_max,
+             "maximum allowed occupation of bosonic modes");
+
 }

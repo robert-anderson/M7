@@ -7,16 +7,27 @@
 
 #include <src/core/sample/PRNG.h>
 #include <src/core/sample/ExcitationGenerator.h>
+#include <src/core/excitgen/HeatBathSamplers.h>
 #include "Propagator.h"
 
 class StochasticPropagator : public Propagator {
+
+protected:
     PRNG m_prng;
     std::unique_ptr<ExcitationGenerator> m_exgen = nullptr;
     const double &m_min_spawn_mag;
 
 public:
     StochasticPropagator(const Hamiltonian &ham, const Options& opts):
-    Propagator(ham, opts), m_prng(opts.prng_seed, opts.prng_ngen), m_min_spawn_mag(opts.min_spawn_mag){}
+    Propagator(ham, opts), m_prng(opts.prng_seed, opts.prng_ngen),
+    m_min_spawn_mag(opts.min_spawn_mag){
+        if (opts.excit_gen=="pchb"){
+            m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(&m_ham, m_prng));
+        }
+        else if (opts.excit_gen=="uniform"){
+            //m_exgen = std::unique_ptr<ExcitationGenerator>(new UniformSampler(m_ham.get(), m_prng));
+        }
+    }
 
     void diagonal(Wavefunction &m_wf, const size_t &irow) override{
         bool flag_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
@@ -129,46 +140,4 @@ public:
 
 };
 
-
-#if 0
-
-#include <src/core/sample/PRNG.h>
-#include <src/core/sample/UniformSampler.h>
-#include <src/core/pchb/HeatBathSamplers.h>
-#include "Propagator.h"
-#include "FciqmcCalculation.h"
-
-
-class StochasticPropagator : public Propagator {
-    const double &m_min_spawn_mag;
-public:
-    PRNG m_prng;
-    std::unique_ptr<ExcitationGenerator> m_exgen = nullptr;
-
-    StochasticPropagator(FciqmcCalculation *fciqmc) :
-            Propagator(fciqmc), m_min_spawn_mag(m_input.min_spawn_mag),
-            m_prng(m_input.prng_seed, m_input.prng_ngen) {
-        std::cout << "Initializing stochastic propagator" << std::endl;
-        if (m_input.excit_gen=="pchb"){
-            m_exgen = std::unique_ptr<ExcitationGenerator>(new HeatBathSamplers(m_ham.get(), m_prng));
-        }
-        else if (m_input.excit_gen=="uniform"){
-            //m_exgen = std::unique_ptr<ExcitationGenerator>(new UniformSampler(m_ham.get(), m_prng));
-        }
-        else {
-            throw std::runtime_error("invalid excit_gen specified");
-        }
-
-    }
-
-
-    void off_diagonal(const DeterminantElement &src_det, const NumericElement<defs::ham_t> &weight,
-                      SpawnList &spawn_list, bool flag_deterministic, bool flag_initiator) override;
-
-    void diagonal(const NumericElement<defs::ham_comp_t> &hdiag, NumericElement<defs::ham_t> &weight,
-                  bool flag_deterministic,
-                  defs::ham_comp_t &delta_square_norm, defs::ham_comp_t &delta_nw) override;
-};
-
-#endif //M7_STOCHASTICPROPAGATOR_H
 #endif //M7_STOCHASTICPROPAGATOR_H

@@ -27,24 +27,26 @@ struct Wavefunction {
 
     ReductionSyndicate m_summables;
 
+    ReductionMember<size_t, defs::ndim_wf> m_ninitiator;
+    ReductionMember<int, defs::ndim_wf> m_delta_ninitiator;
+    ReductionMember<size_t, defs::ndim_wf> m_nocc_onv;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
-    ReductionMember<size_t, defs::ndim_wf> m_ninitiator;
-    ReductionMember<int, defs::ndim_wf> m_delta_ninitiator;
 
     Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
             m_opts(opts),
             m_walkers("walker table", 1000, onv_params, 1, 1),
             m_spawn("spawning communicator", 0.5, onv_params, 1, 1),
             m_ra(100, 10),
+            m_ninitiator(m_summables, {1, 1}),
+            m_delta_ninitiator(m_summables, {1, 1}),
+            m_nocc_onv(m_summables, {1, 1}),
             m_nwalker(m_summables, {1, 1}),
             m_delta_nwalker(m_summables, {1, 1}),
             m_l2_norm_square(m_summables, {1, 1}),
-            m_delta_l2_norm_square(m_summables, {1, 1}),
-            m_ninitiator(m_summables, {1, 1}),
-            m_delta_ninitiator(m_summables, {1, 1})
+            m_delta_l2_norm_square(m_summables, {1, 1})
             {}
 
     void reset() {
@@ -70,13 +72,32 @@ struct Wavefunction {
         return mpi::all_sum(res);
     }
 
+    void grant_initiator_status(const size_t& irow) {
+        auto view = m_walkers.m_flags.m_initiator(irow, 0, 0);
+        if (!view) {
+            m_delta_ninitiator(0, 0)++;
+            view = true;
+        }
+    }
+
+    void revoke_initiator_status(const size_t& irow) {
+        auto view = m_walkers.m_flags.m_initiator(irow, 0, 0);
+        if (view) {
+            m_delta_ninitiator(0, 0)--;
+            view = false;
+        }
+    }
+
     void set_weight(const size_t& irow, const defs::wf_t& new_weight) {
         m_delta_nwalker(0, 0) += std::abs(new_weight);
         m_delta_nwalker(0, 0) -= std::abs(m_walkers.m_weight(irow, 0, 0));
-
         m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
         m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+        
         m_walkers.m_weight(irow, 0, 0) = new_weight;
+
+        if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(irow);
+        else revoke_initiator_status(irow);
     }
 
     void change_weight(const size_t& irow, const defs::wf_t& delta) {
@@ -91,8 +112,8 @@ struct Wavefunction {
         set_weight(irow, 0.0);
     }
 
-    size_t create_walker(const views::Onv &onv, const defs::ham_t weight, const defs::ham_comp_t &hdiag,
-                         bool refconn, bool initiator) {
+    size_t create_walker(const views::Onv &onv, const defs::ham_t weight,
+                         const defs::ham_comp_t &hdiag, bool refconn) {
         if (m_walkers.is_full()) m_walkers.expand_by_factor(m_opts.buffer_expansion_factor);
         auto irow = m_walkers.insert(onv);
         ASSERT(m_walkers.m_onv(irow) == onv)
@@ -100,7 +121,6 @@ struct Wavefunction {
         m_walkers.m_hdiag(irow) = hdiag;
         m_walkers.m_flags.m_reference_connection(irow) = refconn;
         m_walkers.m_flags.m_deterministic(irow) = false;
-        m_walkers.m_flags.m_initiator(irow, 0, 0) = initiator;
         return irow;
     }
 

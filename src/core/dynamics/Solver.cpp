@@ -23,10 +23,11 @@ void Solver::loop_over_occupied_onvs() {
         }
 
         const auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+        m_wf.m_nocc_onv(0, 0)++;
+        if (m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0))
+            m_wf.m_ninitiator(0, 0)++;
         m_wf.m_nwalker(0, 0) += std::abs(weight);
         m_wf.m_l2_norm_square(0, 0) += std::pow(std::abs(weight), 2.0);
-
-//        const auto onv = m_wf.m_walkers.m_onv(irow);
 
         m_reference.add_row(irow);
 
@@ -37,7 +38,7 @@ void Solver::loop_over_occupied_onvs() {
 void Solver::annihilate_row(const size_t &irow_recv) {
     auto &recv = m_wf.m_spawn.recv();
     auto dst_onv = recv.m_dst_onv(irow_recv);
-    if(dst_onv.is_zero()) exit(0);
+    if (dst_onv.is_zero()) exit(0);
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
@@ -71,11 +72,8 @@ void Solver::annihilate_row(const size_t &irow_recv) {
                 dst_onv,
                 delta_weight,
                 m_prop.m_ham.get_energy(dst_onv),
-                m_reference.is_connected(dst_onv),
-                delta_weight >= m_opts.nadd_initiator);
-        //m_nocc_det.m_delta++;
-    }
-    else {
+                m_reference.is_connected(dst_onv));
+    } else {
         m_wf.change_weight(irow_walkers, delta_weight);
     }
 
@@ -134,7 +132,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, views::Onv ref_onv) :
 }
 
 void Solver::execute(size_t niter) {
-    for(size_t i=0ul; i<niter; ++i){
+    for (size_t i = 0ul; i < niter; ++i) {
         reset();
         loop_over_occupied_onvs();
         m_wf.m_spawn.communicate();
@@ -207,15 +205,24 @@ void Solver::propagate_row(const size_t &irow) {
 }
 
 void Solver::reset() {
-    m_chk_nwalker_local = m_wf.m_nwalker(0, 0)+m_wf.m_delta_nwalker(0, 0);
+    m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
+    m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.reset();
     m_reference.reset();
 }
 
 void Solver::reduce() {
-    auto chk_ratio = m_chk_nwalker_local/m_wf.m_nwalker(0, 0);
-    if (m_chk_nwalker_local>0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
-        throw std::runtime_error("Unlogged walker population changes have occurred");
+    double chk_ratio;
+    if (!consts::float_is_zero(m_wf.m_nwalker(0, 0))) {
+        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
+        if (m_chk_nwalker_local > 0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
+            throw std::runtime_error("Unlogged walker population changes have occurred");
+    }
+
+    if (m_chk_ninitiator_local != m_wf.m_ninitiator(0, 0)) {
+        throw std::runtime_error("Unlogged creations of initiator ONVs have occurred");
+    }
+
     m_wf.reduce();
     m_reference.reduce();
     m_prop.update(m_icycle, m_wf);
@@ -233,6 +240,8 @@ void Solver::output_stats() {
         m_stats->m_ref_weight() = m_reference.weight();
         m_stats->m_ref_proj_energy() = m_reference.proj_energy();
         m_stats->m_l2_norm() = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
+        m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);
+        m_stats->m_nocc_onv() = m_wf.m_nocc_onv.reduced(0, 0);
         m_stats->flush();
     }
 }

@@ -17,6 +17,8 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<defs::wf_t> m_ref_weight;
     StatsColumn<defs::ham_comp_t> m_ref_proj_energy;
     StatsColumn<defs::ham_comp_t> m_l2_norm;
+    StatsColumn<size_t> m_ninitiator;
+    StatsColumn<size_t> m_nocc_onv;
     FciqmcStatsSpecifier() :
     StatsSpecifier("FCIQMC"),
     m_icycle(this, "Cycle number"),
@@ -27,7 +29,9 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     m_ref_proj_energy_num(this, "Numerator of reference-projected energy estimator"),
     m_ref_weight(this, "Reference weight"),
     m_ref_proj_energy(this, "Reference-projected energy"),
-    m_l2_norm(this, "L2 norm of the wavefunction")
+    m_l2_norm(this, "L2 norm of the wavefunction"),
+    m_ninitiator(this, "Initiator ONVs"),
+    m_nocc_onv(this, "Occupied ONVs")
     {}
 };
 
