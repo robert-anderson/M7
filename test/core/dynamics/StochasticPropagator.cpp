@@ -14,7 +14,6 @@ TEST(StochasticPropagator, Test) {
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 100000;
-    fields::FermiBosOnv::params_t params{6, 6};
 //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -23,7 +22,7 @@ TEST(StochasticPropagator, Test) {
         fonv.set(0, i);
         fonv.set(1, i);
     }
-    Wavefunction wf(opts, params);
+    Wavefunction wf(opts, ham.nsite());
     wf.expand(10, 800);
     StochasticPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(fonv);

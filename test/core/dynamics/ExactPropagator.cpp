@@ -21,13 +21,13 @@ TEST(ExactPropagator, Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 10000;
-    fields::FermiBosOnv::params_t params{6, 6};
+    const size_t nsite = 6;
     //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     elements::FermionOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
-    Wavefunction wf(opts, params);
+    Wavefunction wf(opts, nsite);
     wf.expand(10, 800);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(fonv);
@@ -51,11 +51,10 @@ TEST(ExactPropagator, Cr2Test) {
     opts.nwalker_target = 10000;
     //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
-    fields::FermiBosOnv::params_t params{ham.nsite(), ham.nsite()};
     ASSERT_TRUE(ham.spin_conserving());
     elements::FermionOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
-    Wavefunction wf(opts, params);
+    Wavefunction wf(opts, ham.nsite());
     wf.expand(1000000, 8000000);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(fonv);

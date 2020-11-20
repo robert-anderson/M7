@@ -35,6 +35,10 @@ namespace fb_onv {
             m_fonv.zero(); m_bonv.zero();
         }
 
+        bool is_zero() const {
+            return m_fonv.is_zero() && m_bonv.is_zero();
+        }
+
         std::string to_string();
 
         void print();
@@ -44,29 +48,19 @@ namespace fb_onv {
     template<size_t nind>
     struct Field : NdFieldGroup<nind> {
 
-        struct params_t : FermionOnvSpecifier::params_t, BosonOnvSpecifier::params_t {
-            params_t(size_t nsite, size_t nmode):
-                    FermionOnvSpecifier::params_t{nsite},
-                    BosonOnvSpecifier::params_t{nmode}{}
-        };
-
         NdFieldBase<FermionOnvSpecifier, nind> m_fonv;
         NdFieldBase<BosonOnvSpecifier, nind> m_bonv;
 
         using NdFieldGroup<nind>::m_format;
 
         template<typename ...Args>
-        Field(TableX *table, params_t p, std::string description, Args... shape) :
+        Field(TableX *table, size_t nsite, std::string description, Args... shape) :
                 NdFieldGroup<nind>(shape...),
-                m_fonv(table, {p.m_nsite}, description + " (FermionOnv)", m_format),
-                m_bonv(table, {p.m_nmode}, description + " (Boson ONV)", m_format) {}
+                m_fonv(table, nsite, description + " (FermionOnv)", m_format),
+                m_bonv(table, nsite, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
         typedef const View const_view_t;
-
-        bool is_zero() const {
-            return m_fonv.is_zero() && m_bonv.is_zero();
-        }
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {

@@ -31,8 +31,8 @@ DenseHamiltonian::DenseHamiltonian(const FermiBosHamiltonian &source, int spin) 
     const auto nelec = source.nelec();
     const auto nmode = source.nmode();
     const auto nboson_cutoff = source.nboson_cutoff();
-    elements::FermiBosOnv bra(nsite, nmode);
-    elements::FermiBosOnv ket(nsite, nmode);
+    elements::FermiBosOnv bra(nsite);
+    elements::FermiBosOnv ket(nsite);
 
     size_t ibra = ~0ul;
     enums::FermiBosOnv bra_enum(nsite, nelec, spin, nmode, nboson_cutoff);

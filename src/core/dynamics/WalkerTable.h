@@ -27,9 +27,9 @@ private:
 public:
     fields::Flags<WalkerTableFlagSet> m_flags;
 
-    WalkerTable(size_t nbucket, fields::Onv::params_t onv_params, size_t nroot, size_t nreplica) :
+    WalkerTable(size_t nbucket, size_t nsite, size_t nroot, size_t nreplica) :
             MappedTable<fields::Onv>(m_onv, nbucket),
-            m_onv(this, onv_params, "occupation number vectors"),
+            m_onv(this, nsite, "occupation number vectors"),
             m_weight(this, "weights", nroot, nreplica),
             m_hdiag(this, "hamiltonian diagonal element"),
             m_flags(this, "flags", nroot, nreplica){}

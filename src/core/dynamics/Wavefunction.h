@@ -35,10 +35,10 @@ struct Wavefunction {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
 
-    Wavefunction(const Options &opts, fields::Onv::params_t onv_params) :
+    Wavefunction(const Options &opts, size_t nsite):
             m_opts(opts),
-            m_walkers("walker table", 1000, onv_params, 1, 1),
-            m_spawn("spawning communicator", 0.5, onv_params, 1, 1),
+            m_walkers("walker table", 1000, nsite, 1, 1),
+            m_spawn("spawning communicator", 0.5, nsite, 1, 1),
             m_ra(100, 10),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),

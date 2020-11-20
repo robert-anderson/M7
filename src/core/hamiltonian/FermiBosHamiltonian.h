@@ -20,6 +20,14 @@ public:
         return m_boson_couplings;
     }
 
+    defs::ham_t get_element_1(const conn::AsFermiBosOnv &afbconn) const {
+        return FermionHamiltonian::get_element_1(afbconn.m_aconn);
+    }
+
+    defs::ham_t get_element_2(const conn::AsFermiBosOnv &afbconn) const {
+        return FermionHamiltonian::get_element_2(afbconn.m_aconn);
+    }
+
     defs::ham_t get_element(const conn::AsFermiBosOnv &afbconn) const {
         defs::ham_t res = m_boson_couplings.get_element(afbconn.m_aconn, afbconn.m_bonvconn);
         if (afbconn.m_bonvconn.nchanged_mode() == 0) res += FermionHamiltonian::get_element(afbconn.m_aconn);

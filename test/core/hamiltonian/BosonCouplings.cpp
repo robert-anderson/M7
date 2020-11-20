@@ -7,13 +7,13 @@
 #include "src/core/field/Elements.h"
 
 TEST(BosonCouplings, Element_b0) {
-    size_t nboson_cutoff = 4, nmode = 4;
+    size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
 
-    BosonCouplings bc(nboson_cutoff, nmode, v, omega);
+    BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    elements::FermiBosOnv ket(nmode, nmode);
-    elements::FermiBosOnv bra(nmode, nmode);
+    elements::FermiBosOnv ket(nsite);
+    elements::FermiBosOnv bra(v);
 
     ket = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
@@ -36,13 +36,13 @@ TEST(BosonCouplings, Element_b0) {
 }
 
 TEST(BosonCouplings, Element_f0_b1){
-    size_t nboson_cutoff = 4, nmode = 4;
+    size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
 
-    BosonCouplings bc(nboson_cutoff, nmode, v, omega);
+    BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    elements::FermiBosOnv ket(nmode, nmode);
-    elements::FermiBosOnv bra(nmode, nmode);
+    elements::FermiBosOnv ket(nsite);
+    elements::FermiBosOnv bra(nsite);
 
     ket = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
@@ -71,13 +71,13 @@ TEST(BosonCouplings, Element_f0_b1){
 }
 
 TEST(BosonCouplings, Element_f1_b1){
-    size_t nboson_cutoff = 4, nmode = 4;
+    size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
 
-    BosonCouplings bc(nboson_cutoff, nmode, v, omega);
+    BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    elements::FermiBosOnv ket(nmode, nmode);
-    elements::FermiBosOnv bra(nmode, nmode);
+    elements::FermiBosOnv ket(nsite);
+    elements::FermiBosOnv bra(nsite);
 
     ket = {{1, 2, 3, 4},
            {2, 4, 0, 1}};

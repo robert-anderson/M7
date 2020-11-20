@@ -13,8 +13,6 @@ struct FermionOnvSpecifier : BitsetSpecifier {
     const size_t m_nsite;
 
     FermionOnvSpecifier(const size_t &nsite);
-    struct params_t{size_t m_nsite;};
-    FermionOnvSpecifier(params_t p): FermionOnvSpecifier(p.m_nsite){}
 
     struct View : BitsetSpecifier::View {
         View(const FermionOnvSpecifier &field, char *ptr);

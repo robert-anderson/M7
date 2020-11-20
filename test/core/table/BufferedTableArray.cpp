@@ -8,12 +8,12 @@
 
 struct TestTable : TableX {
     fields::FermionOnv m_fonv;
-    TestTable(fields::FermionOnv::params_t params):
-            m_fonv(this, params, "configuration"){}
+    TestTable(size_t nsite):
+            m_fonv(this, nsite, "configuration"){}
 };
 
 TEST(BufferedTableArray, Resize){
-    BufferedTableArray<TestTable> bta("Test table", 3, fields::FermionOnv::params_t{6});
+    BufferedTableArray<TestTable> bta("Test table", 3, 6);
     bta.expand(4);
 
     bta[0].push_back(3);
@@ -31,7 +31,7 @@ TEST(BufferedTableArray, Resize){
     bta[2].m_fonv(1) = {7, 2, 4};
     bta[2].m_fonv(2) = {7, 2, 5};
 
-    elements::FermionOnv fonv(fields::FermionOnv::params_t{6});
+    elements::FermionOnv fonv(6);
     fonv = {1, 2, 3}; ASSERT_EQ(bta[0].m_fonv(0), fonv);
     fonv = {1, 2, 4}; ASSERT_EQ(bta[0].m_fonv(1), fonv);
     fonv = {1, 2, 5}; ASSERT_EQ(bta[0].m_fonv(2), fonv);

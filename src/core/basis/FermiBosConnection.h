@@ -19,7 +19,7 @@ struct FermiBosConnection {
             m_fonvconn(in.m_fonv, out.m_fonv),
             m_bonvmconn(in.m_bonv, out.m_bonv) {}
 
-    explicit FermiBosConnection(const views::FermiBosOnv &in): FermiBosConnection(in, in){}
+    explicit FermiBosConnection(const views::FermiBosOnv &in) : FermiBosConnection(in, in) {}
 
     void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
         m_fonvconn.connect(in.m_fonv, out.m_fonv);
@@ -43,7 +43,7 @@ struct AntisymFermiBosConnection {
             m_aconn(in.m_fonv, out.m_fonv),
             m_bonvconn(in.m_bonv, out.m_bonv) {}
 
-    explicit AntisymFermiBosConnection(const views::FermiBosOnv &in): AntisymFermiBosConnection(in, in){}
+    explicit AntisymFermiBosConnection(const views::FermiBosOnv &in) : AntisymFermiBosConnection(in, in) {}
 
     void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
         m_aconn.connect(in.m_fonv, out.m_fonv);
@@ -55,7 +55,15 @@ struct AntisymFermiBosConnection {
         m_bonvconn.apply(in.m_bonv, out.m_bonv);
     }
 
-    void zero(){
+    void add(const size_t &ann, const size_t &cre) {
+        m_aconn.add(ann, cre);
+    }
+
+    void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2) {
+        m_aconn.add(ann1, ann2, cre1, cre2);
+    }
+
+    void zero() {
         m_aconn.zero();
         m_bonvconn.zero();
     }

@@ -10,19 +10,17 @@
 
 struct TestTable : MappedTable<fields::Onv> {
     fields::Onv m_config;
-    TestTable(fields::Onv::params_t params):
+    TestTable(size_t nsite):
     MappedTable<fields::Onv>(m_config, 10),
-            m_config(this, params, "configuration"){}
+            m_config(this, nsite, "configuration"){}
 };
 
 TEST(MappedTable, TEST){
     const size_t nsite = 10;
-    const size_t nmode = 8;
 
-    fields::FermiBosOnv::params_t onv_params{nsite, nmode};
-    BufferedTable<TestTable> bt("Mapped table test", onv_params);
+    BufferedTable<TestTable> bt("Mapped table test", nsite);
     bt.expand(10);
-    elements::Onv config(onv_params);
+    elements::Onv config(nsite);
 //    config.m_fonv[2] = 1;
 //    config.m_bonv[2] = 5;
 //    std::cout << config.to_string() << std::endl;

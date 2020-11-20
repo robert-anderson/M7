@@ -16,7 +16,7 @@ namespace boson_coupling_samplers_test {
 
         TestTable(size_t nsite) :
                 MappedTable<fields::FermiBosOnv>(m_onv, 1000),
-                m_onv(this, {nsite, nsite}, "occupation number vector"),
+                m_onv(this, nsite, "occupation number vector"),
                 m_frequency(this, "number of times the ONV was drawn"),
                 m_weight(this, "cumulative reciprocal probability") {}
 
@@ -38,7 +38,7 @@ namespace boson_coupling_samplers_test {
                             size_t ndraw,
                             size_t nboson_max) {
             size_t nsite = src_onv.m_fonv.nsite();
-            elements::FermiBosOnv dst_onv(nsite, nsite);
+            elements::FermiBosOnv dst_onv(nsite);
             PRNG prng = PRNG(18, 1e4);
             BosonCouplings bc(nsite, nboson_max, 1.0, 0.5);
             BosonCouplingSamplers sampler(bc, nboson_max, prng);
@@ -106,16 +106,11 @@ TEST(BosonCouplingSamplers, SingleOnvTest){
     const size_t nboson_max = 3;
 
     const size_t ndraw = 100000;
-    elements::FermiBosOnv src_onv(nsite, nsite);
+    elements::FermiBosOnv src_onv(nsite);
     src_onv = {{0, 4, 6, 11}, {1, 0, 0, 1, 3, 2}};
 
     boson_coupling_samplers_test::TestTable tt(nsite);
 
     tt.test_boson_gen(src_onv, ndraw, nboson_max);
-
-
-
-
-
 
 }

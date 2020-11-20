@@ -94,7 +94,6 @@ struct NdField : NdFieldGroup<nind> {
     using NdFieldGroup<nind>::m_format;
     typedef typename spec_t::view_t view_t;
     typedef typename spec_t::const_view_t const_view_t;
-    typedef typename spec_t::params_t params_t;
 
     template<typename ...Args>
     NdField(TableX *table, spec_t spec, std::string description, Args... shape):

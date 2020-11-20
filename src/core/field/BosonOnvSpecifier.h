@@ -14,12 +14,6 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
         m_data.m_details["type"] = "Boson ONV";
     }
 
-    struct params_t {
-        size_t m_nmode;
-    };
-
-    BosonOnvSpecifier(params_t p) : BosonOnvSpecifier(p.m_nmode){}
-
     const size_t &nmode() const;
 
     struct View : NumericArraySpecifier<uint8_t, 1>::View {
