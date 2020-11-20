@@ -14,7 +14,7 @@ TEST(WeightedDrawer, Test) {
     defs::inds freqs(4, 0ul);
     const size_t ndraw = 100000000;
     for (size_t idraw=0ul; idraw<ndraw; ++idraw){
-        freqs[drawer()]++;
+        freqs[drawer.draw()]++;
     }
     ASSERT_TRUE(consts::floats_nearly_equal(0.2/(freqs[0]/(double)ndraw), 1.0, 1e-3));
     ASSERT_TRUE(consts::floats_nearly_equal(0.4/(freqs[1]/(double)ndraw), 1.0, 1e-3));

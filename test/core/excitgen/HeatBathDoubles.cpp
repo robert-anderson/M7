@@ -4,11 +4,11 @@
 
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
-#include "src/core/excitgen/HeatBathSamplers.h"
+#include "src/core/excitgen/HeatBathDoubles.h"
 #include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
 
-namespace heat_bath_samplers_test {
+namespace heat_bath_doubles_test {
     struct TestTableSpec : MappedTable<fields::FermionOnv> {
         size_t m_nattempt;
         fields::FermionOnv m_onv;
@@ -30,7 +30,7 @@ namespace heat_bath_samplers_test {
              * table will expand dynamically
              */
             expand(10);
-            HamiltonianConnectionEnumerator enumerator(ham, src_fonv);
+            HamiltonianDoubleConnectionEnumerator enumerator(ham, src_fonv);
             elements::FermionOnv dst_fonv(ham.nsite());
             MatrixElement<defs::ham_t> matel(src_fonv);
             while (enumerator.next(matel)) {
@@ -73,11 +73,11 @@ namespace heat_bath_samplers_test {
 }
 
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(14, 1000000);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     elements::FermionOnv src_fonv(ham.nsite());
     elements::FermionOnv dst_fonv(ham.nsite());
@@ -85,7 +85,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     src_fonv.set(occ_inds);
 
     const size_t nattempt = 2;
-    heat_bath_samplers_test::TestTable table(ham, src_fonv, nattempt);
+    heat_bath_doubles_test::TestTable table(ham, src_fonv, nattempt);
 
     OccupiedOrbitals occ(src_fonv);
     VacantOrbitals vac(src_fonv);
@@ -98,12 +98,7 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
         const auto ndraw = ndraws[iattempt];
         std::cout << "ndraw: " << ndraw << std::endl;
         for (size_t idraw = 0ul; idraw < ndraw; ++idraw) {
-            if (pchb.draw_single(src_fonv, dst_fonv, occ, vac, prob, helem, aconn)) {
-                auto irow = *table[dst_fonv];
-                table.m_frequency(irow, iattempt)++;
-                table.m_weight(irow, iattempt) += (1.0 / prob);
-            }
-            if (pchb.draw_double(src_fonv, dst_fonv, occ, prob, helem, aconn)) {
+            if (pchb.draw(src_fonv, dst_fonv, occ, vac, prob, helem, aconn)) {
                 auto irow = *table[dst_fonv];
                 table.m_frequency(irow, iattempt)++;
                 table.m_weight(irow, iattempt) += (1.0 / prob);
@@ -244,12 +239,12 @@ bool excit_gen_tester(ExcitationGenerator &exgen, const FermionOnv &src_det, siz
 }
 
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
     PRNG prng(18, 1e4);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {0, 1, 4, 5};
@@ -257,36 +252,36 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantComplex4c) {
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromExcitedDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
     PRNG prng(15, 10000);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     FermionOnv source_det(ham.nsite());
     source_det.set(defs::inds{1, 4, 6, 7});
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromSpinnedDeterminantComplex4c) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
 
     AbInitioHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
     PRNG prng(15, 10000);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     FermionOnv source_det(ham.nsite());
     source_det.set(defs::inds{1, 5, 6, 7});
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(15, 10000);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17};
@@ -294,11 +289,11 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(15, 10000);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {1, 4, 5, 7, 8, 10, 12, 14, 15, 16, 20, 21};
@@ -306,11 +301,11 @@ TEST(HeatBathSamplers, UnbiasedExcitsFromExcitedDeterminantRealSchroedinger) {
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
 
-TEST(HeatBathSamplers, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
+TEST(HeatBathDoubles, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     AbInitioHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(15, 100000);
-    HeatBathSamplers pchb(&ham, prng);
+    HeatBathDoubles pchb(&ham, prng);
 
     FermionOnv source_det(ham.nsite());
     defs::inds occ_inds = {1, 4, 5, 7, 8, 9, 10, 14, 15, 16, 20, 21};

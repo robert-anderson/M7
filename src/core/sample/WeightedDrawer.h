@@ -33,7 +33,7 @@ public:
         update_cumprobs();
     }
 
-    size_t operator()();
+    size_t draw();
 
     const defs::prob_t& prob(size_t iprob);
 

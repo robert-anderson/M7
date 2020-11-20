@@ -29,7 +29,7 @@ WeightedDrawer::WeightedDrawer(size_t nprob, PRNG &prng) : m_probs(nprob, 1.0/np
     update_cumprobs();
 }
 
-size_t WeightedDrawer::operator()() {
+size_t WeightedDrawer::draw() {
     auto tmp = m_prng.draw_float();
     for (size_t iprob=0ul; iprob<m_probs.size(); ++iprob) if (tmp<m_cumprobs[iprob]) return iprob;
     throw std::runtime_error("Probabilities unnormalized, or prng is out of [0.0, 1.0) range");

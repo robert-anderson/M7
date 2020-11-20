@@ -6,12 +6,12 @@
 #define M7_FERMIBOSSTOCHASTICPROPAGATOR_H
 
 #include "StochasticPropagator.h"
-#include "src/core/excitgen/BosonCouplingSamplers.h"
+#include "src/core/excitgen/BosonExcitationGenerator.h"
 
 #if 0
 struct FermiBosStochasticPropagator : public StochasticPropagator {
 
-    BosonCouplingSamplers m_boson_exgen;
+    BosonExcitationGenerator m_boson_exgen;
 
     FermiBosStochasticPropagator(const FermiBosHamiltonian& ham, Options& opts):
     StochasticPropagator(ham, opts),

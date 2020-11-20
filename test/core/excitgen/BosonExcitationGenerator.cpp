@@ -6,7 +6,7 @@
 #include <src/core/field/Elements.h>
 #include "gtest/gtest.h"
 #include "src/core/table/MappedTable.h"
-#include "src/core/excitgen/BosonCouplingSamplers.h"
+#include "src/core/excitgen/BosonExcitationGenerator.h"
 
 namespace boson_coupling_samplers_test {
     struct TestTable : MappedTable<fields::FermiBosOnv> {
@@ -40,14 +40,15 @@ namespace boson_coupling_samplers_test {
             size_t nsite = src_onv.m_fonv.nsite();
             elements::FermiBosOnv dst_onv(nsite);
             PRNG prng = PRNG(18, 1e4);
-            BosonCouplings bc(nsite, nboson_max, 1.0, 0.5);
-            BosonCouplingSamplers sampler(bc, nboson_max, prng);
+            FermiBosHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, nboson_max, 1.0, 0.5);
+            BosonExcitationGenerator exgen(&ham, prng, nboson_max);
             OccupiedOrbitals occ_orbs(src_onv.m_fonv);
+            VacantOrbitals vac_orbs(src_onv.m_fonv);
             conn::AsFermiBosOnv aconn(src_onv);
             defs::prob_t prob;
             defs::ham_t helem;
             for (size_t idraw = 0ul; idraw < ndraw; ++idraw) {
-                sampler.draw_single(src_onv, dst_onv, occ_orbs, prob, helem, aconn);
+                exgen.draw(src_onv, dst_onv, occ_orbs, vac_orbs, prob, helem, aconn);
                 auto irow = *bt[dst_onv];
                 if (irow == ~0ul) {
                     bt.expand(1);
@@ -101,7 +102,7 @@ namespace boson_coupling_samplers_test {
 
 
 
-TEST(BosonCouplingSamplers, SingleOnvTest){
+TEST(BosonExcitationGenerator, SingleOnvTest){
     const size_t nsite = 6;
     const size_t nboson_max = 3;
 
