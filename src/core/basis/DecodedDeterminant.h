@@ -14,27 +14,43 @@ struct DecodedDeterminant {
     defs::det_work m_inds{};
     size_t m_nind = 0ul;
 
-    explicit DecodedDeterminant(const FermionOnvSpecifier& spec):
-    m_nbit(spec.m_nbit), m_element_dsize(spec.m_ndataword) {}
+    explicit DecodedDeterminant(const FermionOnvSpecifier &spec) :
+            m_nbit(spec.m_nbit), m_element_dsize(spec.m_ndataword) {}
 
-    explicit DecodedDeterminant(const views::FermionOnv &view):
-    DecodedDeterminant(view.spec()){}
+    explicit DecodedDeterminant(const views::FermionOnv &view) :
+            DecodedDeterminant(view.spec()) {}
 
-    virtual void update(const views::FermionOnv &det_elem) = 0;
+    virtual void update(const views::FermionOnv &onv) = 0;
+
+    virtual void update(const views::FermiBosOnv &onv) = 0;
 };
 
 struct OccupiedOrbitals : DecodedDeterminant {
-    OccupiedOrbitals(const FermionOnvSpecifier& spec);
+    OccupiedOrbitals(const FermionOnvSpecifier &spec);
+
     OccupiedOrbitals(const views::FermionOnv &view);
+
     OccupiedOrbitals(const views::FermiBosOnv &view);
+
     void update(const views::FermionOnv &view) override;
+
+    void update(const views::FermiBosOnv &onv) override {
+        update(onv.m_fonv);
+    };
 };
 
 struct VacantOrbitals : DecodedDeterminant {
-    VacantOrbitals(const FermionOnvSpecifier& spec);
+    VacantOrbitals(const FermionOnvSpecifier &spec);
+
     VacantOrbitals(const views::FermionOnv &view);
+
     VacantOrbitals(const views::FermiBosOnv &view);
+
     void update(const views::FermionOnv &view) override;
+
+    void update(const views::FermiBosOnv &onv) override {
+        update(onv.m_fonv);
+    };
 };
 
 #endif //M7_DECODEDDETERMINANT_H

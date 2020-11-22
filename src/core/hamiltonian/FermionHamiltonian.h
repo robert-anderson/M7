@@ -34,7 +34,7 @@ public:
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
-    consts::component_t<defs::ham_t>::type get_energy(const views::FermionOnv &det) const;
+    defs::ham_comp_t get_energy(const views::FermionOnv &det) const;
 
     defs::ham_t get_element_0(const defs::det_work &occs, const size_t &nocc) const;
 

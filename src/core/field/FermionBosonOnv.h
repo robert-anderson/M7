@@ -15,13 +15,19 @@
 
 namespace fb_onv {
     struct View {
+
         FermionOnvSpecifier::view_t m_fonv;
         BosonOnvSpecifier::view_t m_bonv;
 
-        View(FermionOnvSpecifier::view_t &&fonv,
-             BosonOnvSpecifier::view_t &&bonv);
+        View(Field<FermionOnvSpecifier> &fonv_field, Field<BosonOnvSpecifier> &bonv_field, const size_t &irow, const size_t &iflat):
+                m_fonv(fonv_field(irow, iflat)), m_bonv(bonv_field(irow, iflat)) {}
 
-        View& operator=(const std::pair<defs::inds, defs::inds>& pair) {
+//        FermionOnvSpecifier::view_t m_fonv;
+//        FermionOnvSpecifier::const_view_t m_fonv const;
+//        BosonOnvSpecifier::view_t m_bonv;
+//        BosonOnvSpecifier::const_view_t m_bonv const;
+
+        View &operator=(const std::pair<defs::inds, defs::inds> &pair) {
             m_fonv = pair.first;
             m_bonv = pair.second;
             return *this;
@@ -32,16 +38,22 @@ namespace fb_onv {
         bool operator!=(const View &other) const;
 
         void zero() {
-            m_fonv.zero(); m_bonv.zero();
+            m_fonv.zero();
+            m_bonv.zero();
         }
 
         bool is_zero() const {
             return m_fonv.is_zero() && m_bonv.is_zero();
         }
 
-        std::string to_string();
+        void mpi_bcast(size_t iroot = 0) {
+            m_fonv.mpi_bcast(iroot);
+            m_bonv.mpi_bcast(iroot);
+        }
 
-        void print();
+        std::string to_string() const;
+
+        void print() const;
     };
 
 
@@ -64,12 +76,12 @@ namespace fb_onv {
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {
-            return {m_fonv(irow, inds...), m_bonv(irow, inds...)};
+            return view_t(m_fonv, m_bonv, irow, m_format.flatten(inds...));
         }
 
         template<typename ...Args>
         const_view_t operator()(const size_t &irow, Args... inds) const {
-            return {m_fonv(irow, inds...), m_bonv(irow, inds...)};
+            return const_view_t(m_fonv, m_bonv, irow, m_format.flatten(inds...));
         }
 
         struct hash_fn {

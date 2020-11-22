@@ -20,12 +20,28 @@ public:
         return m_boson_couplings;
     }
 
+    defs::ham_comp_t get_energy(const views::FermiBosOnv &onv) const {
+        return FermionHamiltonian::get_energy(onv.m_fonv) + m_boson_couplings.get_energy(onv.m_bonv);
+    }
+
+    defs::ham_t get_element_1(const conn::AsFermionOnv &afbconn) const {
+        return FermionHamiltonian::get_element_1(afbconn);
+    }
+
     defs::ham_t get_element_1(const conn::AsFermiBosOnv &afbconn) const {
         return FermionHamiltonian::get_element_1(afbconn.m_aconn);
     }
 
     defs::ham_t get_element_2(const conn::AsFermiBosOnv &afbconn) const {
         return FermionHamiltonian::get_element_2(afbconn.m_aconn);
+    }
+
+    defs::ham_t get_element_2(const conn::AsFermionOnv &aconn) const {
+        return FermionHamiltonian::get_element_2(aconn);
+    }
+
+    defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+        return FermionHamiltonian::get_element_2(i, j, k, l);
     }
 
     defs::ham_t get_element(const conn::AsFermiBosOnv &afbconn) const {

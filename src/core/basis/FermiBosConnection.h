@@ -67,6 +67,10 @@ struct AntisymFermiBosConnection {
         m_aconn.zero();
         m_bonvconn.zero();
     }
+
+    bool connected() const {
+        return m_aconn.connected() && m_bonvconn.nchanged_mode()<=1;
+    }
 };
 
 #endif //M7_FERMIBOSCONNECTION_H

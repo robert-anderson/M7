@@ -31,7 +31,7 @@ TEST(StochasticPropagator, Test) {
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i = 0ul; i < 1000; ++i) {
+    for (size_t i = 0ul; i < 10000; ++i) {
         solver.execute();
         std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }

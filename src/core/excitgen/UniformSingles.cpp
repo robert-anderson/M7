@@ -4,7 +4,7 @@
 
 #include "UniformSingles.h"
 
-UniformSingles::UniformSingles(const FermionHamiltonian *ham, PRNG &prng) :
+UniformSingles::UniformSingles(const Hamiltonian *ham, PRNG &prng) :
         FermionExcitationGenerator(ham, prng, 1) {}
 
 bool UniformSingles::draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv, const OccupiedOrbitals &occ,

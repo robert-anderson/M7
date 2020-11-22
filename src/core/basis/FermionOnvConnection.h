@@ -73,6 +73,10 @@ public:
 
     const size_t &nexcit() const;
 
+    bool connected() const {
+        return nexcit()<=2;
+    }
+
 };
 
 /*

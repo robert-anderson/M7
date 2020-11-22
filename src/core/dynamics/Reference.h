@@ -46,7 +46,8 @@ public:
         if (is_mine() && m_irow==irow) m_weight(0, 0) = weight;
     }
 
-    using FermionOnv::operator=;
+    using elements::Onv::operator=;
+    using elements::Onv::mpi_bcast;
     void change(const size_t& irow, const size_t& irank){
         ASSERT(irank<mpi::nrank())
         ASSERT(irow!=~0ul || !mpi::i_am(irank))
@@ -113,9 +114,8 @@ public:
     }
 
     bool is_connected(const views::Onv &onv) const {
-        auto &aconn = m_aconn;
-        aconn.connect(*this, onv);
-        return aconn.nexcit() < 3;
+        m_aconn.connect(*this, onv);
+        return m_aconn.connected();
     }
 
     void add_to_numerator(const views::Onv &onv, const defs::wf_t &weight) {

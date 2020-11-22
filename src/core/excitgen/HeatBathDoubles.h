@@ -18,7 +18,7 @@ class HeatBathDoubles : public FermionExcitationGenerator {
     Aliaser m_pick_ab_given_ij;
 
 public:
-    HeatBathDoubles(const FermionHamiltonian *h, PRNG &prng);
+    HeatBathDoubles(const Hamiltonian *h, PRNG &prng);
 
     bool draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv,
                      const OccupiedOrbitals &occ, const VacantOrbitals &vac,

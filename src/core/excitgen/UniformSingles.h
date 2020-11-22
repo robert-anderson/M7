@@ -10,7 +10,7 @@
 class UniformSingles : public FermionExcitationGenerator {
 
 public:
-    UniformSingles(const FermionHamiltonian* ham, PRNG& prng);
+    UniformSingles(const Hamiltonian* ham, PRNG& prng);
 
     bool draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv, const OccupiedOrbitals &occ,
                     const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,

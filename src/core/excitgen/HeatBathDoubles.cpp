@@ -4,7 +4,7 @@
 
 #include "HeatBathDoubles.h"
 
-HeatBathDoubles::HeatBathDoubles(const FermionHamiltonian *h, PRNG &prng) :
+HeatBathDoubles::HeatBathDoubles(const Hamiltonian *h, PRNG &prng) :
         FermionExcitationGenerator(h, prng, 2), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;

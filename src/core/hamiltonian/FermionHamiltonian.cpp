@@ -137,7 +137,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
         FermionHamiltonian(FcidumpFileReader(fname, spin_major)){}
 
-consts::component_t<defs::ham_t>::type FermionHamiltonian::get_energy(const views::FermionOnv &det) const {
+defs::ham_comp_t FermionHamiltonian::get_energy(const views::FermionOnv &det) const {
     return consts::real(get_element_0(det));
 }
 
@@ -159,6 +159,7 @@ defs::ham_t FermionHamiltonian::get_element_0(const OccupiedOrbitals &occs) cons
 }
 
 defs::ham_t FermionHamiltonian::get_element_0(const views::FermionOnv &det) const {
+    // TODO: make occs member data
     OccupiedOrbitals occs(det);
     return get_element_0(occs.m_inds, occs.m_nind);
 }

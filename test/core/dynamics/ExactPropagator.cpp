@@ -10,11 +10,12 @@
 
 void print(const Wavefunction& wf){
     for (size_t i=0ul; i<wf.m_walkers.m_hwm; ++i){
-        std::cout << wf.m_walkers.m_onv(i).to_string() << " ";
-        std::cout << wf.m_walkers.m_weight(i, 0, 0) << std::endl;
+//        std::cout << wf.m_walkers.m_onv(i).to_string() << " ";
+//        std::cout << wf.m_walkers.m_weight(i, 0, 0) << std::endl;
     }
 }
 
+#if 0
 TEST(ExactPropagator, Test) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -23,9 +24,9 @@ TEST(ExactPropagator, Test) {
     opts.nwalker_target = 10000;
     const size_t nsite = 6;
     //const auto benchmark = -108.81138657563143;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, 0, 0, 0);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::FermionOnv fonv(ham.nsite());
+    elements::Onv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
     Wavefunction wf(opts, nsite);
     wf.expand(10, 800);
@@ -68,3 +69,4 @@ TEST(ExactPropagator, Cr2Test) {
         std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
 }
+#endif
