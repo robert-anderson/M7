@@ -24,6 +24,10 @@ class BosonOnvConnection {
 public:
     explicit BosonOnvConnection(const BosonOnvSpecifier& spec);
 
+    operator bool() const {
+        return nchanged_mode();
+    }
+
     const size_t & nchanged_mode() const;
     const size_t & changed_mode(const size_t& ichange) const;
 
@@ -40,6 +44,14 @@ public:
     void apply(const views::BosonOnv &in, views::BosonOnv& out);
 
     void add(const size_t imode, const int change);
+
+    size_t nexcit() const {
+        size_t res = 0ul;
+        for (size_t ichange=0ul; ichange<nchanged_mode(); ++ichange){
+            res+=std::abs(changes(ichange));
+        }
+        return res;
+    }
 
     void zero(){
         m_diff.zero();

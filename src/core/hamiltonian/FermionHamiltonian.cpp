@@ -137,8 +137,8 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
         FermionHamiltonian(FcidumpFileReader(fname, spin_major)){}
 
-defs::ham_comp_t FermionHamiltonian::get_energy(const views::FermionOnv &det) const {
-    return consts::real(get_element_0(det));
+defs::ham_comp_t FermionHamiltonian::get_energy(const views::FermionOnv &fonv) const {
+    return consts::real(get_element_0(fonv));
 }
 
 defs::ham_t FermionHamiltonian::get_element_0(const defs::det_work &occs, const size_t &nocc) const {
@@ -158,17 +158,17 @@ defs::ham_t FermionHamiltonian::get_element_0(const OccupiedOrbitals &occs) cons
     return get_element_0(occs.m_inds, occs.m_nind);
 }
 
-defs::ham_t FermionHamiltonian::get_element_0(const views::FermionOnv &det) const {
+defs::ham_t FermionHamiltonian::get_element_0(const views::FermionOnv &fonv) const {
     // TODO: make occs member data
-    OccupiedOrbitals occs(det);
+    OccupiedOrbitals occs(fonv);
     return get_element_0(occs.m_inds, occs.m_nind);
 }
 
-defs::ham_t FermionHamiltonian::get_element_0(const AntisymFermionOnvConnection &connection) const {
+defs::ham_t FermionHamiltonian::get_element_0(const conn::AsFermionOnv &connection) const {
     return get_element_0(connection.com(), connection.ncom());
 }
 
-defs::ham_t FermionHamiltonian::get_element_1(const AntisymFermionOnvConnection &connection) const {
+defs::ham_t FermionHamiltonian::get_element_1(const conn::AsFermionOnv &connection) const {
     const auto &cre = connection.cre(0);
     const auto &ann = connection.ann(0);
     const auto &coms = connection.com();
@@ -184,16 +184,16 @@ defs::ham_t FermionHamiltonian::get_element_2(const size_t &i, const size_t &j, 
     return m_int_2.phys_antisym_element(i, j, k, l);
 }
 
-defs::ham_t FermionHamiltonian::get_element_2(const FermionOnvConnection &connection) const {
+defs::ham_t FermionHamiltonian::get_element_2(const conn::FermionOnv &connection) const {
     return get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
 }
 
-defs::ham_t FermionHamiltonian::get_element_2(const AntisymFermionOnvConnection &connection) const {
+defs::ham_t FermionHamiltonian::get_element_2(const conn::AsFermionOnv &connection) const {
     const auto element = get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
     return connection.phase() ? -element : element;
 }
 
-defs::ham_t FermionHamiltonian::get_element(const AntisymFermionOnvConnection &connection) const {
+defs::ham_t FermionHamiltonian::get_element(const conn::AsFermionOnv &connection) const {
     switch (connection.nexcit()) {
         case 0:
             return get_element_0(connection);

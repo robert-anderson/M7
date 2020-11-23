@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <src/core/basis/FermionOnvConnection.h>
 #include <src/core/basis/DecodedDeterminant.h>
+#include <src/core/basis/Connections.h>
 #include <src/core/field/Elements.h>
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
@@ -34,25 +35,29 @@ public:
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
-    defs::ham_comp_t get_energy(const views::FermionOnv &det) const;
+    FermionHamiltonian(std::string fname, bool spin_major,
+                       size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega):
+    FermionHamiltonian(fname, spin_major){}
+
+    defs::ham_comp_t get_energy(const views::FermionOnv &fonv) const;
 
     defs::ham_t get_element_0(const defs::det_work &occs, const size_t &nocc) const;
 
     defs::ham_t get_element_0(const OccupiedOrbitals &occs) const;
 
-    defs::ham_t get_element_0(const views::FermionOnv &det) const;
+    defs::ham_t get_element_0(const views::FermionOnv &fonv) const;
 
-    defs::ham_t get_element_0(const AntisymFermionOnvConnection &connection) const;
+    defs::ham_t get_element_0(const conn::AsFermionOnv &connection) const;
 
-    defs::ham_t get_element_1(const AntisymFermionOnvConnection &connection) const;
+    defs::ham_t get_element_1(const conn::AsFermionOnv &connection) const;
 
     defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
-    defs::ham_t get_element_2(const FermionOnvConnection &connection) const;
+    defs::ham_t get_element_2(const conn::FermionOnv &connection) const;
 
-    defs::ham_t get_element_2(const AntisymFermionOnvConnection &connection) const;
+    defs::ham_t get_element_2(const conn::AsFermionOnv &connection) const;
 
-    defs::ham_t get_element(const AntisymFermionOnvConnection &connection) const;
+    defs::ham_t get_element(const conn::AsFermionOnv &connection) const;
 
     defs::ham_t get_element(const views::FermionOnv &bra, const views::FermionOnv &ket) const;
 

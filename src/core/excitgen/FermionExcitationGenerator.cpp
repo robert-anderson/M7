@@ -17,5 +17,5 @@ bool FermionExcitationGenerator::draw(const views::FermionOnv &src_fonv, views::
 bool FermionExcitationGenerator::draw(const views::FermiBosOnv &src_fonv, views::FermiBosOnv &dst_fonv,
                                             const OccupiedOrbitals &occ, const VacantOrbitals &vac, defs::prob_t &prob,
                                             defs::ham_t &helem, conn::AsFermiBosOnv &anticonn) {
-    return draw(src_fonv.m_fonv, dst_fonv.m_fonv, occ, vac, prob, helem, anticonn.m_aconn);
+    return draw(src_fonv.m_fonv, dst_fonv.m_fonv, occ, vac, prob, helem, anticonn);
 }

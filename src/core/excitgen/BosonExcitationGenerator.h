@@ -52,10 +52,10 @@ public:
             prob *= 0.5;
         }
 
-        anticonn.m_bonvconn.zero();
+        anticonn.zero();
         anticonn.m_bonvconn.add(imode_excit, change);
         anticonn.apply(src_onv, dst_onv);
-        helem = static_cast<const FermiBosHamiltonian *>(m_h)->get_element(anticonn);
+        helem = m_h->get_element(anticonn);
         return true;
     }
 

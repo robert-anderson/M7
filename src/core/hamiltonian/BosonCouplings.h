@@ -5,7 +5,6 @@
 #ifndef M7_BOSONCOUPLINGS_H
 #define M7_BOSONCOUPLINGS_H
 
-#include "FermionHamiltonian.h"
 #include "src/core/basis/Connections.h"
 
 class BosonCouplings {
@@ -52,7 +51,7 @@ public:
     }
 
     defs::ham_t get_element_0(const conn::AsFermiBosOnv &conn) const {
-        return get_element_0(conn.m_aconn, conn.m_bonvconn);
+        return get_element_0(conn, conn.m_bonvconn);
     }
 
     defs::ham_t get_element_1(const conn::AsFermionOnv &aconn, const conn::BosonOnv &bonvconn) const {
@@ -83,11 +82,11 @@ public:
     }
 
     defs::ham_t get_element_1(const conn::AsFermiBosOnv &conn) const {
-        return get_element_1(conn.m_aconn, conn.m_bonvconn);
+        return get_element_1(conn, conn.m_bonvconn);
     }
 
     defs::ham_t get_element(const conn::AsFermiBosOnv &conn) const {
-        return get_element(conn.m_aconn, conn.m_bonvconn);
+        return get_element(conn, conn.m_bonvconn);
     }
 
     defs::ham_t get_element(const conn::AsFermionOnv &aconn,

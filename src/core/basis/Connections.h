@@ -13,9 +13,9 @@ namespace conn {
     using FermionOnv = FermionOnvConnection;
     using AsFermionOnv = AntisymFermionOnvConnection;
     using BosonOnv = BosonOnvConnection;
-    using FermiBosOnv = FermiBosConnection;
+    //using FermiBosOnv = FermiBosConnection;
     using AsFermiBosOnv = AntisymFermiBosConnection;
-    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
+    //using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
     using AsOnv = std::conditional<defs::bosons, AsFermiBosOnv, AsFermionOnv>::type;
 }
 

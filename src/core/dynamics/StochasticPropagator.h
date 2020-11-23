@@ -10,6 +10,7 @@
 #include <src/core/excitgen/UniformSingles.h>
 #include <src/core/excitgen/HeatBathDoubles.h>
 #include <src/core/sample/WeightedDrawer.h>
+#include <src/core/excitgen/BosonExcitationGenerator.h>
 #include "Propagator.h"
 
 class StochasticPropagator : public Propagator {
@@ -31,6 +32,9 @@ public:
             m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                     new HeatBathDoubles(&m_ham, m_prng)));
         }
+        if (defs::bosons)
+            m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+                new BosonExcitationGenerator(&m_ham, m_prng, ham.nboson_cutoff())));
 
         m_exgen_drawer = std::unique_ptr<WeightedDrawer>(new WeightedDrawer(m_exgens.size(), m_prng));
 

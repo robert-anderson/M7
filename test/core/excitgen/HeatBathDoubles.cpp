@@ -74,7 +74,7 @@ namespace heat_bath_doubles_test {
 
 
 TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
-    FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    Hamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false, 0, 0, 0);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(14, 1000000);
     HeatBathDoubles pchb(&ham, prng);

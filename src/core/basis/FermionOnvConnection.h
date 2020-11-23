@@ -40,6 +40,9 @@ public:
     explicit FermionOnvConnection(const FermionOnvSpecifier& field);
     FermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
     explicit FermionOnvConnection(const views::FermionOnv &in);
+    virtual operator bool() const {
+        return nexcit();
+    }
 
     const defs::det_work& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
@@ -49,9 +52,10 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     const size_t& ncre() const {return m_ncre;}
 
-    virtual void connect(const views::FermionOnv &in, const views::FermionOnv &out);
-    virtual void apply(const views::FermionOnv &in, views::FermionOnv &out);
+    void connect(const views::FermionOnv &in, const views::FermionOnv &out);
+    void apply(const views::FermionOnv &in, views::FermionOnv &out);
     virtual void zero(){m_ncre=0; m_nann=0;}
+
     void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
     void add_ann(const size_t &i){m_ann[m_nann++] = i;}
     void add(const size_t &ann, const size_t &cre){
@@ -92,9 +96,9 @@ public:
     AntisymFermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
     explicit AntisymFermionOnvConnection(const views::FermionOnv &in);
 
-    void connect(const views::FermionOnv &in, const views::FermionOnv &out) override;
+    void connect(const views::FermionOnv &in, const views::FermionOnv &out);
     void apply(const views::FermionOnv &in);
-    void apply(const views::FermionOnv &in, views::FermionOnv &out) override;
+    void apply(const views::FermionOnv &in, views::FermionOnv &out);
 
     const defs::det_work& com() const {return m_com;}
     const size_t& com(const size_t& i) const {return m_com[i];}

@@ -17,8 +17,6 @@ FermionOnvConnection::FermionOnvConnection(const views::FermionOnv &in) : Fermio
 
 
 void FermionOnvConnection::connect(const views::FermionOnv &in, const views::FermionOnv &out) {
-    ASSERT(!in.is_zero());
-    ASSERT(!out.is_zero());
     ASSERT(in.nbit() == m_nbit);
     ASSERT(in.ndataword() == m_element_dsize);
     ASSERT(in.ndataword() == out.ndataword());
