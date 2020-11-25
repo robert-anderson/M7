@@ -34,7 +34,7 @@ public:
         }
         if (defs::bosons)
             m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-                new BosonExcitationGenerator(&m_ham, m_prng, ham.nboson_cutoff())));
+                    new BosonExcitationGenerator(&m_ham, m_prng, ham.nboson_cutoff())));
 
         m_exgen_drawer = std::unique_ptr<WeightedDrawer>(new WeightedDrawer(m_exgens.size(), m_prng));
 
@@ -44,7 +44,8 @@ public:
         else if (m_exgens.size() == 3)
             m_exgen_drawer->set(m_magnitude_logger.m_psingle, 1.0 - m_magnitude_logger.m_psingle - prob_boson);
 
-        std::cout << "Excitation class probability breakdown " << utils::to_string(m_exgen_drawer->m_probs) << std::endl;
+        std::cout << "Excitation class probability breakdown " << utils::to_string(m_exgen_drawer->m_probs)
+                  << std::endl;
     }
 
     void diagonal(Wavefunction &m_wf, const size_t &irow) override {
@@ -103,10 +104,12 @@ public:
         defs::prob_t prob;
         defs::ham_t helem;
         for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
+            m_aconn.zero();
+            m_dst_onv = src_onv;
             size_t iexgen = m_exgen_drawer->draw();
             auto &exgen = m_exgens[iexgen];
             if (!exgen->draw(src_onv, m_dst_onv, m_occ, m_vac, prob, helem, m_aconn)) continue;
-            prob*=m_exgen_drawer->prob(iexgen);
+            prob *= m_exgen_drawer->prob(iexgen);
             auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;
             if (consts::float_is_zero(delta)) continue;
             m_wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic);
