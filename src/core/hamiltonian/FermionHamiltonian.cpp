@@ -107,11 +107,12 @@ FermionHamiltonian::generate_ci_space(WalkerTable *list, RankAllocator<Determina
 #endif
 
 FermionHamiltonian::FermionHamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e,
-                                       bool spin_conserving_2e, bool complex_valued, bool spin_resolved) :
+                                       bool spin_conserving_2e, bool complex_valued, bool spin_resolved, size_t int_2e_rank) :
         m_nelec(nelec), m_nsite(nsite),
         m_spin_conserving_1e(spin_conserving_1e),
         m_spin_conserving_2e(spin_conserving_2e),
         m_complex_valued(complex_valued),
+        m_int_2e_rank(int_2e_rank),
         m_int_1(nsite, spin_resolved),
         m_int_2(nsite, spin_resolved)
 {}
@@ -120,7 +121,9 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
         FermionHamiltonian(file_reader.nelec(), file_reader.nspatorb(),
                            file_reader.spin_conserving_1e(),
                            file_reader.spin_conserving_2e(),
-                           file_reader.m_complex_valued, file_reader.spin_resolved()) {
+                           file_reader.m_complex_valued,
+                           file_reader.spin_resolved(),
+                           file_reader.int_2e_rank()) {
     defs::inds inds(4);
     defs::ham_t value;
 

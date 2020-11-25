@@ -28,7 +28,7 @@ public:
 
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                 new UniformSingles(&m_ham, m_prng)));
-        if (opts.excit_gen == "pchb") {
+        if (ham.int_2e_rank() && opts.excit_gen == "pchb") {
             m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                     new HeatBathDoubles(&m_ham, m_prng)));
         }

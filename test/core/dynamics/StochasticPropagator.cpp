@@ -43,10 +43,11 @@ TEST(StochasticPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
     opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.05;
+    opts.tau_initial = 0.001;
     opts.nwalker_target = 100000;
 //const auto benchmark = -108.81138657563143;
-    Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, 2, 1.0, 0.5);
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
+
     ASSERT_TRUE(ham.spin_conserving());
     elements::Onv onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
@@ -62,7 +63,7 @@ TEST(StochasticPropagator, BosonTest) {
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i = 0ul; i < 1000; ++i) {
+    for (size_t i = 0ul; i < 10000; ++i) {
         solver.execute();
         std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }

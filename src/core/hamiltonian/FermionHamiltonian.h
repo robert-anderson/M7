@@ -20,6 +20,7 @@ protected:
     const size_t m_nsite;
     const bool m_spin_conserving_1e, m_spin_conserving_2e;
     const bool m_complex_valued;
+    const size_t m_int_2e_rank;
     defs::ham_t m_int_0;
     typedef Integrals_1e<defs::ham_t, defs::isym_1e> ints1_t;
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
@@ -28,10 +29,9 @@ protected:
 
 public:
     FermionHamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e,
-                       bool complex_valued, bool spin_resolved);
+                       bool complex_valued, bool spin_resolved, size_t int_2e_rank);
 
     FermionHamiltonian(const FcidumpFileReader &file_reader);
-
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
@@ -87,6 +87,10 @@ public:
 
     const bool &complex_valued() const {
         return m_complex_valued;
+    }
+
+    const size_t& int_2e_rank() const {
+        return m_int_2e_rank;
     }
 
     elements::FermionOnv guess_reference(const int &spin_level) const;

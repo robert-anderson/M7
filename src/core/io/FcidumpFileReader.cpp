@@ -16,12 +16,13 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         base_t(fname, 4, false),
         m_spin_major(spin_major),
         m_norb(read_header_int(fname, "NORB")),
-        m_isymm(m_norb>3?isymm(fname):1),
         m_nelec(read_header_int(fname, "NELEC")),
         m_orbsym(read_header_array(fname, "ORBSYM")),
         m_spin_resolved(read_header_bool(fname, "UHF") || read_header_bool(fname, "TREL")),
         m_nspatorb(m_spin_resolved?m_norb/2:m_norb)
 {
+    set_symm_and_rank(fname);
+
     if (m_spin_resolved&!m_spin_major){
         m_inds_to_orbs = [this](defs::inds& inds){
             decrement_inds_and_transpose(inds, m_nspatorb);
@@ -52,6 +53,7 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
     else logger::write("FCIDUMP file does NOT conserve spin in 1 particle integrals");
     if (m_spin_conserving_2e) logger::write("FCIDUMP file conserves spin in 2 particle integrals");
     else logger::write("FCIDUMP file does NOT conserve spin in 2 particle integrals");
+    logger::write("FCIDUMP file contains 2 particle integrals of maximum excitation rank "+std::to_string(m_int_2e_rank));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) const {
@@ -137,7 +139,19 @@ size_t FcidumpFileReader::read_header_bool(const std::string &fname, const std::
     return default_;
 }
 
-size_t FcidumpFileReader::isymm(const std::string &filename) {
+void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
+    m_int_2e_rank = 0;
+    auto get_rank = [](const defs::inds& inds){
+        // [ij|kl]
+        const size_t i=std::min(inds[0], inds[1]);
+        const size_t j=std::max(inds[0], inds[1]);
+        const size_t k=std::min(inds[2], inds[3]);
+        const size_t l=std::max(inds[2], inds[3]);
+        if (i==k && j==l) return 0ul;
+        else if (i!=k && j!=l) return 2ul;
+        else return 1ul;
+    };
+
     std::cout << "Determining permutational symmetry of integral file entries" << std::endl;
     SparseArrayFileReader<defs::ham_t> reader(filename, 4, false);
     defs::inds inds(4);
@@ -145,11 +159,16 @@ size_t FcidumpFileReader::isymm(const std::string &filename) {
     // this will eventually hold all orderings of the first example of an
     // integral with 4 distinct indices
     std::array<defs::inds, 8> inds_distinct{};
-    size_t isymm = 0ul;
+    m_isymm = 0ul;
     while (reader.next(inds, value)) {
         if (std::all_of(inds.begin(), inds.end(), [](size_t i){return i>0;})) {
             // we have a two body integral
-            if (!isymm) {
+            if (m_int_2e_rank<2) {
+                size_t rank = get_rank(inds);
+                if (rank > m_int_2e_rank) m_int_2e_rank = rank;
+            }
+
+            if (!m_isymm) {
                 inds_distinct[0].assign(inds.begin(), inds.end());
                 std::sort(inds.begin(), inds.end());
                 // still looking for an example of four distinct indices
@@ -158,23 +177,23 @@ size_t FcidumpFileReader::isymm(const std::string &filename) {
                         for (size_t j = 0ul; j < 4; ++j)
                             inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
                     }
-                    isymm++;
+                    m_isymm++;
                 }
             } else {
                 for (auto tmp : inds_distinct) {
                     if (std::equal(inds.begin(), inds.end(), tmp.begin())){
-                        isymm++;
+                        m_isymm++;
                         break;
                     }
                 }
             }
         }
     }
-    if (!isymm){
+    if (!m_isymm){
         std::cout << "Permutational symmetry of integral file could not be determined" << std::endl;
-        return 1;
+        m_isymm = 1;
+    } else {
+        std::cout << "Permutational symmetry of integral file found to be " << 8/m_isymm << std::endl;
+        m_isymm/=8;    // 8->1; 4->2; 2->4; 1->8
     }
-    std::cout << "Permutational symmetry of integral file found to be " << 8/isymm << std::endl;
-    // 8->1; 4->2; 2->4; 1->8
-    return 8 / isymm;
 }

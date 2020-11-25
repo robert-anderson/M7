@@ -36,7 +36,6 @@ class FcidumpFileReader : public SparseArrayFileReader<defs::ham_t> {
      */
     const bool m_spin_major;
     const size_t m_norb;
-    const size_t m_isymm;
     const size_t m_nelec;
     const defs::inds m_orbsym;
     const bool m_spin_resolved;
@@ -44,6 +43,7 @@ class FcidumpFileReader : public SparseArrayFileReader<defs::ham_t> {
     std::function<void(defs::inds& inds)> m_inds_to_orbs;
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
+    size_t m_isymm, m_int_2e_rank;
 
     // spin major and spin restricted (non-resolved) cases
     static void decrement_inds(defs::inds& inds);
@@ -73,7 +73,9 @@ public:
 
     static size_t read_header_bool(const std::string &fname, const std::string &label, size_t default_ = false);
 
-    static size_t isymm(const std::string &filename);
+    void set_symm_and_rank(const std::string &filename);
+
+    const size_t& int_2e_rank() const {return m_int_2e_rank;}
 };
 
 #endif //M7_FCIDUMPFILEREADER_H

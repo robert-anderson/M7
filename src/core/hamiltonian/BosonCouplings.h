@@ -54,22 +54,29 @@ public:
         return get_element_0(conn, conn.m_bonvconn);
     }
 
+    defs::ham_t get_element_1(const size_t& p, const size_t& imode, const size_t& com) const {
+        const auto occ_fac = std::sqrt(com + 1);
+        return v(p, p, imode) * occ_fac;
+    }
+
     defs::ham_t get_element_1(const conn::AsFermionOnv &aconn, const conn::BosonOnv &bonvconn) const {
         const auto imode = bonvconn.changed_mode(0);
         const auto change = bonvconn.changes(0);
-        const auto occ_fac = std::sqrt(bonvconn.com(imode) + 1);
-        if (std::abs(change) > 1) return 0.0;
+
         // bosons don't couple to higher fermion excitations (yet?)
+        if (std::abs(change) > 1) return 0.0;
+
         switch (aconn.nexcit()) {
             case 0: {
                 defs::ham_t res = 0;
                 for (size_t iocc = 0ul; iocc < aconn.ncom(); ++iocc) {
                     auto p = aconn.com()[iocc] % m_nmode;
-                    res += v(p, p, imode) * occ_fac;
+                    res += get_element_1(p, imode, bonvconn.com(imode));
                 }
                 return res;
             }
             case 1: {
+                ASSERT(0)
                 auto p = aconn.cre()[0] % m_nmode;
                 auto q = aconn.ann()[0] % m_nmode;
                 ASSERT(p != q) // spin conservation

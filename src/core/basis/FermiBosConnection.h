@@ -38,34 +38,19 @@ struct AntisymFermiBosConnection : public AntisymFermionOnvConnection {
 
     AntisymFermiBosConnection(
             const views::FermiBosOnv &in,
-            const views::FermiBosOnv &out) :
-            AntisymFermionOnvConnection(in.m_fonv, out.m_fonv),
-            m_bonvconn(in.m_bonv, out.m_bonv) {}
+            const views::FermiBosOnv &out);
 
-    explicit AntisymFermiBosConnection(const views::FermiBosOnv &in) : AntisymFermiBosConnection(in, in) {}
+    explicit AntisymFermiBosConnection(const views::FermiBosOnv &in);
 
-    operator bool() const override {
-        return nexcit() || m_bonvconn;
-    }
+    operator bool() const override;
 
-    void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
-        AntisymFermionOnvConnection::connect(in.m_fonv, out.m_fonv);
-        m_bonvconn.connect(in.m_bonv, out.m_bonv);
-    }
+    void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out);
 
-    void apply(const views::FermiBosOnv &in, views::FermiBosOnv &out) {
-        AntisymFermionOnvConnection::apply(in.m_fonv, out.m_fonv);
-        m_bonvconn.apply(in.m_bonv, out.m_bonv);
-    }
+    void apply(const views::FermiBosOnv &in, views::FermiBosOnv &out);
 
-    void zero() override {
-        AntisymFermionOnvConnection::zero();
-        m_bonvconn.zero();
-    }
+    void zero() override;
 
-    bool connected() const {
-        return AntisymFermionOnvConnection::connected() && m_bonvconn.nchanged_mode()<=1;
-    }
+    bool connected() const;
 };
 
 #endif //M7_FERMIBOSCONNECTION_H
