@@ -63,14 +63,13 @@ struct Wavefunction {
     }
 
     defs::wf_comp_t square_norm() const {
-        return 0.0;
-//        defs::wf_comp_t res = 0.0;
-//        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
-//            if (!m_walkers.m_onv(irow).is_zero()) {
-//                res += std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
-//            }
-//        }
-//        return mpi::all_sum(res);
+        defs::wf_comp_t res = 0.0;
+        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
+            if (!m_walkers.m_onv(irow).is_zero()) {
+                res += std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+            }
+        }
+        return mpi::all_sum(res);
     }
 
     void grant_initiator_status(const size_t& irow) {
