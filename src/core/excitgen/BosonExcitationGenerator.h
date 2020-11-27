@@ -23,8 +23,8 @@ public:
         return false;
     }
 
-    bool draw(const views::FermiBosOnv &src_onv, views::FermiBosOnv &dst_onv, const OccupiedOrbitals &occ,
-              const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,
+    bool draw(const views::FermiBosOnv &src_onv, views::FermiBosOnv &dst_onv, const OccupiedOrbitals &occs,
+              const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
               conn::AsFermiBosOnv &anticonn) override {
         if(m_nboson_max == 0) return false;
 
@@ -32,11 +32,11 @@ public:
         ASSERT(dst_onv.m_bonv.nmode() == nmode)
         ASSERT(nmode == src_onv.m_fonv.nsite() and nmode == dst_onv.m_fonv.nsite())
 
-        auto imode_excit = occ.m_inds[m_prng.draw_uint(occ.m_nind)] % src_onv.m_fonv.nsite();
+        auto imode_excit = occs[m_prng.draw_uint(occs.size())] % src_onv.m_fonv.nsite();
         int change;
         auto curr_occ = src_onv.m_bonv(imode_excit);
 
-        prob = 1.0/occ.m_nind;
+        prob = 1.0/occs.size();
         // there are two ways to generate such connections, and they should be twice as likely
 //        if(src_onv.m_fonv.get(0, imode_excit) and src_onv.m_fonv.get(1, imode_excit)){
 //            prob *= 1.0;

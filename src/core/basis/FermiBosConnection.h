@@ -48,7 +48,7 @@ struct AntisymFermiBosConnection : public AntisymFermionOnvConnection {
 
     void apply(const views::FermiBosOnv &in, views::FermiBosOnv &out);
 
-    void zero() override;
+    void zero();
 
     bool connected() const;
 };

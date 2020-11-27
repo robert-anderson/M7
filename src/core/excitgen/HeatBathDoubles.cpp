@@ -49,11 +49,11 @@ bool HeatBathDoubles::draw(const views::FermionOnv &src_fonv, views::FermionOnv 
     size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb inds:
-    i = occ.m_inds[i];
-    j = occ.m_inds[j];
-    ASSERT(std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin() + occ.m_nind,
+    i = occ[i];
+    j = occ[j];
+    ASSERT(std::any_of(occ.inds().cbegin(), occ.inds().cend(),
                        [&i](const size_t &k) { return k == i; }));
-    ASSERT(std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin() + occ.m_nind,
+    ASSERT(std::any_of(occ.inds().cbegin(), occ.inds().cend(),
                        [&j](const size_t &k) { return k == j; }));
     ASSERT(i < j);
 
@@ -64,7 +64,7 @@ bool HeatBathDoubles::draw(const views::FermionOnv &src_fonv, views::FermionOnv 
 
     auto either_vac_in_array = [&a, &b](const size_t &k) { return k == a || k == b; };
 
-    if (std::any_of(occ.m_inds.cbegin(), occ.m_inds.cbegin() + occ.m_nind, either_vac_in_array)) {
+    if (std::any_of(occ.inds().cbegin(), occ.inds().end(), either_vac_in_array)) {
         return 0;
     }
     anticonn.zero();

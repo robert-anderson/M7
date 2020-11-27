@@ -57,7 +57,6 @@ namespace defs {
      * of set/clear bit positions
      */
     constexpr size_t det_work_size = 512;
-    typedef std::array<size_t, det_work_size> det_work;
     typedef std::pair<size_t, size_t> pair;
     //typedef std::complex<double> ham_t;
     typedef double ham_t;

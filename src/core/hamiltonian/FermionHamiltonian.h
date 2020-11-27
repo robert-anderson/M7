@@ -41,7 +41,7 @@ public:
 
     defs::ham_comp_t get_energy(const views::FermionOnv &fonv) const;
 
-    defs::ham_t get_element_0(const defs::det_work &occs, const size_t &nocc) const;
+    defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 
     defs::ham_t get_element_0(const OccupiedOrbitals &occs) const;
 

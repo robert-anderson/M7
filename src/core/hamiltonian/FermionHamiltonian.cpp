@@ -144,7 +144,7 @@ defs::ham_comp_t FermionHamiltonian::get_energy(const views::FermionOnv &fonv) c
     return consts::real(get_element_0(fonv));
 }
 
-defs::ham_t FermionHamiltonian::get_element_0(const defs::det_work &occs, const size_t &nocc) const {
+defs::ham_t FermionHamiltonian::get_element_0(const defs::inds &occs, const size_t &nocc) const {
     defs::ham_t element = m_int_0;
     for (size_t i = 0ul; i < nocc; ++i) {
         auto const &occi = occs[i];
@@ -158,13 +158,13 @@ defs::ham_t FermionHamiltonian::get_element_0(const defs::det_work &occs, const 
 }
 
 defs::ham_t FermionHamiltonian::get_element_0(const OccupiedOrbitals &occs) const {
-    return get_element_0(occs.m_inds, occs.m_nind);
+    return get_element_0(occs.inds(), occs.size());
 }
 
 defs::ham_t FermionHamiltonian::get_element_0(const views::FermionOnv &fonv) const {
     // TODO: make occs member data
     OccupiedOrbitals occs(fonv);
-    return get_element_0(occs.m_inds, occs.m_nind);
+    return get_element_0(occs.inds(), occs.size());
 }
 
 defs::ham_t FermionHamiltonian::get_element_0(const conn::AsFermionOnv &connection) const {

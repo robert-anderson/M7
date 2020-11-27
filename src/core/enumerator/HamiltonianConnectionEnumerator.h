@@ -26,11 +26,11 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
     }
 
     bool next_element(MatrixElement<defs::ham_t> &result) override {
-        if (++m_vacind<m_vacs.m_nind) {
+        if (++m_vacind<m_vacs.size()) {
             result.aconn.zero();
             result.aconn.add(
-                    m_occs.m_inds[m_occind],
-                    m_vacs.m_inds[m_vacind]
+                    m_occs[m_occind],
+                    m_vacs[m_vacind]
             );
             result.aconn.apply(m_fonv);
             result.element = m_h.get_element(result.aconn);
@@ -39,7 +39,7 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
             }
         } else {
             m_vacind = ~0ul;
-            if (++m_occind<m_occs.m_nind){
+            if (++m_occind<m_occs.size()){
                 return next_element(result);
             } else {
                 m_occind = ~0ul;
@@ -77,10 +77,10 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
         if (m_vac_enumerator.next(m_vacinds)) {
             result.aconn.zero();
             result.aconn.add(
-                    m_occs.m_inds[m_occinds[0]],
-                    m_occs.m_inds[m_occinds[1]],
-                    m_vacs.m_inds[m_vacinds[0]],
-                    m_vacs.m_inds[m_vacinds[1]]
+                    m_occs[m_occinds[0]],
+                    m_occs[m_occinds[1]],
+                    m_vacs[m_vacinds[0]],
+                    m_vacs[m_vacinds[1]]
             );
             result.element = m_h.get_element(result.aconn);
             if (consts::float_nearly_zero(result.element, m_eps)) {
@@ -100,8 +100,8 @@ public:
 
     HamiltonianDoubleConnectionEnumerator(const FermionHamiltonian &h, const views::FermionOnv &onv, const defs::ham_comp_t &eps=1e-12) :
             m_h(h), m_fonv(onv), m_occs(onv), m_vacs(onv),
-            m_occ_enumerator(m_occs.m_nind, 2),
-            m_vac_enumerator(m_occs.m_nind, 2),
+            m_occ_enumerator(m_occs.size(), 2),
+            m_vac_enumerator(m_occs.size(), 2),
             m_occinds(2, ~0ul), m_vacinds(2, ~0ul), m_eps(eps){
         m_occ_enumerator.next(m_occinds);
     }

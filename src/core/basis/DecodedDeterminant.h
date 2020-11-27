@@ -8,49 +8,61 @@
 #include "src/core/field/FermionOnvSpecifier.h"
 #include "src/core/field/Views.h"
 
-struct DecodedDeterminant {
-    const size_t m_nbit;
-    const size_t m_element_dsize;
-    defs::det_work m_inds{};
-    size_t m_nind = 0ul;
+/*
+ * void updater_fn (const views::FermionOnv&, defs::inds&)
+ */
 
-    explicit DecodedDeterminant(const FermionOnvSpecifier &spec) :
-            m_nbit(spec.m_nbit), m_element_dsize(spec.m_ndataword) {}
+template<typename updater_fn>
+class DecodedDeterminant {
+    // spin orbital indices
+    defs::inds m_inds;
+
+public:
+    explicit DecodedDeterminant(const FermionOnvSpecifier &spec) {
+        m_inds.reserve(spec.m_nbit);
+    }
 
     explicit DecodedDeterminant(const views::FermionOnv &view) :
-            DecodedDeterminant(view.spec()) {}
+            DecodedDeterminant(view.spec()) {
+        update(view);
+    }
 
-    virtual void update(const views::FermionOnv &onv) = 0;
+    explicit DecodedDeterminant(const views::FermiBosOnv &view) :
+            DecodedDeterminant(view.m_fonv.spec()) {}
 
-    virtual void update(const views::FermiBosOnv &onv) = 0;
-};
+    size_t size() const {
+        return m_inds.size();
+    }
 
-struct OccupiedOrbitals : DecodedDeterminant {
-    OccupiedOrbitals(const FermionOnvSpecifier &spec);
+    const size_t& operator[](const size_t& i) const{
+        ASSERT(i<size());
+        return m_inds[i];
+    }
 
-    OccupiedOrbitals(const views::FermionOnv &view);
+    const defs::inds& inds() const{
+        return m_inds;
+    }
 
-    OccupiedOrbitals(const views::FermiBosOnv &view);
-
-    void update(const views::FermionOnv &view) override;
-
-    void update(const views::FermiBosOnv &onv) override {
-        update(onv.m_fonv);
+    void update(const views::FermionOnv &onv) {
+        updater_fn()(onv, m_inds);
     };
+
+    void update(const views::FermiBosOnv &onv) {
+        updater_fn()(onv.m_fonv, m_inds);
+    }
 };
 
-struct VacantOrbitals : DecodedDeterminant {
-    VacantOrbitals(const FermionOnvSpecifier &spec);
 
-    VacantOrbitals(const views::FermionOnv &view);
-
-    VacantOrbitals(const views::FermiBosOnv &view);
-
-    void update(const views::FermionOnv &view) override;
-
-    void update(const views::FermiBosOnv &onv) override {
-        update(onv.m_fonv);
-    };
+struct OccupiedUpdater {
+    void operator()(const views::FermionOnv &view, defs::inds &inds);
 };
+
+
+struct VacantUpdater {
+    void operator()(const views::FermionOnv &view, defs::inds &inds);
+};
+
+typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;
+typedef DecodedDeterminant<VacantUpdater> VacantOrbitals;
 
 #endif //M7_DECODEDDETERMINANT_H

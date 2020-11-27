@@ -40,8 +40,8 @@ bool UniformSingles::draw(const views::FermionOnv &src_fonv, views::FermionOnv &
         ia = m_prng.draw_uint(ncases);
         integer_utils::inv_rectmap(i, a, 2 * m_h->nsite() - m_nelec, ia);
     }
-    i = occ.m_inds[i];
-    a = vac.m_inds[a];
+    i = occ[i];
+    a = vac[a];
 #ifndef NDEBUG
     if (m_spin_conserving) {
         if (i < m_h->nsite()) ASSERT(a < m_h->nsite())
