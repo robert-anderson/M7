@@ -6,9 +6,9 @@
 #define M7_HAMILTONIAN_H
 
 #include <type_traits>
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include "FermiBosHamiltonian.h"
 
-using Hamiltonian = std::conditional<defs::bosons, FermiBosHamiltonian, FermionHamiltonian>::type;
+using Hamiltonian = std::conditional<defs::enable_bosons, FermiBosHamiltonian, FermionHamiltonian>::type;
 
 #endif //M7_HAMILTONIAN_H

@@ -5,7 +5,7 @@
 #ifndef M7_PRODUCTENUMERATOR_H
 #define M7_PRODUCTENUMERATOR_H
 
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include <src/core/nd/NdFormat.h>
 #include "Enumerator.h"
 

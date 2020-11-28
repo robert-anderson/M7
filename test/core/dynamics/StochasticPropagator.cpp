@@ -8,7 +8,7 @@
 #include "src/core/dynamics/StochasticPropagator.h"
 #include "src/core/dynamics/Solver.h"
 
-/*
+#ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -37,8 +37,9 @@ TEST(StochasticPropagator, Test) {
         std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
 }
- */
+#endif
 
+#ifdef ENABLE_BOSONS
 TEST(StochasticPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -77,3 +78,4 @@ TEST(StochasticPropagator, BosonTest) {
         << std::endl;
     }
 }
+#endif

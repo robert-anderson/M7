@@ -38,11 +38,9 @@ void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
         delta = -weight * tau()*off_diagonal_bosons(src_onv, occ, 1);
         if (!consts::float_is_zero(delta))
             m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
-//        if (!consts::float_is_zero(delta)) m_dst_onv.print();
         delta = -weight * tau()*off_diagonal_bosons(src_onv, occ, -1);
         if (!consts::float_is_zero(delta))
             m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
-//        if (!consts::float_is_zero(delta)) m_dst_onv.print();
     }
 
     if (m_ham.int_2e_rank()==2) {

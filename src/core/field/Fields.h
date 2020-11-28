@@ -60,7 +60,7 @@ namespace fields {
     using FermiBosOnv = FermiBosOnvs<0ul>;
 
     template<size_t nind>
-    using Onvs = typename std::conditional<defs::bosons, FermiBosOnvs<nind>, FermionOnvs<nind>>::type;
+    using Onvs = typename std::conditional<defs::enable_bosons, FermiBosOnvs<nind>, FermionOnvs<nind>>::type;
 
     using Onv = Onvs<0ul>;
 }

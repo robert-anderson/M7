@@ -69,7 +69,7 @@ namespace elements {
         using fields::FermiBosOnv::view_t::operator=;
     };
 
-    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
+    using Onv = std::conditional<defs::enable_bosons, FermiBosOnv, FermionOnv>::type;
 }
 
 #endif //M7_ELEMENTS_H

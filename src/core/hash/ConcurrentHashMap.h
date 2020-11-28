@@ -5,7 +5,7 @@
 #ifndef M7_CONCURRENTHASHMAP_H
 #define M7_CONCURRENTHASHMAP_H
 
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 #include "ConcurrentLinkedList.h"
 #include <vector>
 #include <functional>

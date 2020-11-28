@@ -7,7 +7,7 @@
 
 #include <src/core/util/consts.h>
 #include <iostream>
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include <src/core/util/utils.h>
 #include <algorithm>
 #include <src/core/util/Ternary.h>

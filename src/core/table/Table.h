@@ -7,7 +7,7 @@
 
 #include <src/core/util/utils.h>
 #include <src/core/field/Fields.h>
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 #include "src/core/field/TableField.h"
 #include "BufferWindow.h"
 #include "src/core/field/Flag.h"

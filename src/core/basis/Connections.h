@@ -15,8 +15,8 @@ namespace conn {
     using BosonOnv = BosonOnvConnection;
     //using FermiBosOnv = FermiBosConnection;
     using AsFermiBosOnv = AntisymFermiBosConnection;
-    //using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
-    using AsOnv = std::conditional<defs::bosons, AsFermiBosOnv, AsFermionOnv>::type;
+    //using Onv = std::conditional<defs::enable_bosons, FermiBosOnv, FermionOnv>::type;
+    using AsOnv = std::conditional<defs::enable_bosons, AsFermiBosOnv, AsFermionOnv>::type;
 }
 
 #endif //M7_CONNECTIONS_H

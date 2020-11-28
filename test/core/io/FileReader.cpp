@@ -2,7 +2,7 @@
 // Created by rja on 19/07/2020.
 //
 
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include <src/core/io/FileReader.h>
 #include "gtest/gtest.h"
 

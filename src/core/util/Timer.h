@@ -6,7 +6,7 @@
 #define M7_TIMER_H
 
 #include <chrono>
-#include "defs.h"
+#include "src/defs.h"
 
 class Timer {
     std::chrono::duration<double> m_start, m_lap, m_total;

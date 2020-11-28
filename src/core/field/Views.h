@@ -20,7 +20,7 @@ namespace views {
     using FermionOnv = FermionOnvSpecifier::view_t;
     using BosonOnv = BosonOnvSpecifier::view_t;
     using FermiBosOnv = fb_onv::View;
-    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
+    using Onv = std::conditional<defs::enable_bosons, FermiBosOnv, FermionOnv>::type;
 }
 
 #endif //M7_VIEWS_H

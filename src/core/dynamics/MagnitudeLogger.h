@@ -7,7 +7,7 @@
 
 
 #include<cstddef>
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include <src/core/parallel/Reducible.h>
 #include <src/core/io/Options.h>
 #include <src/core/parallel/Epoch.h>
