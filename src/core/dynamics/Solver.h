@@ -30,7 +30,7 @@ class Solver {
 public:
     const Reference& reference() const;
 
-    Solver(Propagator &prop, Wavefunction &wf, views::Onv ref_onv);
+    Solver(Propagator &prop, Wavefunction &wf, views::Onv<> ref_onv);
 
     void execute(size_t niter=1);
 

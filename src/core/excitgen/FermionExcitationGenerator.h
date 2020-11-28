@@ -13,15 +13,15 @@ protected:
     const bool m_spin_conserving;
 
 public:
-    FermionExcitationGenerator(const Hamiltonian *h, PRNG &prng, size_t nexcit);
+    FermionExcitationGenerator(const Hamiltonian<> *h, PRNG &prng, size_t nexcit);
 
-    bool draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv, const OccupiedOrbitals &occ,
-                    const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,
-                    conn::AsFermionOnv &anticonn) override;
+    bool draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
+              const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+              defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) override;
 
-    bool draw(const views::FermiBosOnv &src_fonv, views::FermiBosOnv &dst_fonv, const OccupiedOrbitals &occ,
-                    const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,
-                    conn::AsFermiBosOnv &anticonn) override;
+    bool draw(const views::Onv<1> &src_onv, views::Onv<1> &dst_onv,
+              const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+              defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<1> &anticonn) override;
 };
 
 

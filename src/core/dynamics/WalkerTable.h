@@ -8,8 +8,8 @@
 #include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
 
-struct WalkerTable : public MappedTable<fields::Onv> {
-    fields::Onv m_onv;
+struct WalkerTable : public MappedTable<fields::Onv<>> {
+    fields::Onv<> m_onv;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
     fields::Number<defs::ham_comp_t> m_hdiag;
 private:
@@ -28,7 +28,7 @@ public:
     fields::Flags<WalkerTableFlagSet> m_flags;
 
     WalkerTable(size_t nbucket, size_t nsite, size_t nroot, size_t nreplica) :
-            MappedTable<fields::Onv>(m_onv, nbucket),
+            MappedTable<fields::Onv<>>(m_onv, nbucket),
             m_onv(this, nsite, "occupation number vectors"),
             m_weight(this, "weights", nroot, nreplica),
             m_hdiag(this, "hamiltonian diagonal element"),

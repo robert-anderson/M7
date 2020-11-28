@@ -35,8 +35,8 @@ protected:
 
 public:
     explicit FermionOnvConnection(const FermionOnvSpecifier& field);
-    FermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
-    explicit FermionOnvConnection(const views::FermionOnv &in);
+    FermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
+    explicit FermionOnvConnection(const views::Onv<0> &in);
     virtual operator bool() const {
         return nexcit();
     }
@@ -49,8 +49,8 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     size_t ncre() const {return m_cre.size();}
 
-    void connect(const views::FermionOnv &in, const views::FermionOnv &out);
-    void apply(const views::FermionOnv &in, views::FermionOnv &out);
+    void connect(const views::Onv<0> &in, const views::Onv<0> &out);
+    void apply(const views::Onv<0> &in, views::Onv<0> &out);
     void zero(){
         m_cre.clear();
         m_ann.clear();
@@ -100,12 +100,12 @@ class AntisymFermionOnvConnection : public FermionOnvConnection {
 
 public:
     explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& spec);
-    AntisymFermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
-    explicit AntisymFermionOnvConnection(const views::FermionOnv &in);
+    AntisymFermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
+    explicit AntisymFermionOnvConnection(const views::Onv<0> &in);
 
-    void connect(const views::FermionOnv &in, const views::FermionOnv &out);
-    void apply(const views::FermionOnv &in);
-    void apply(const views::FermionOnv &in, views::FermionOnv &out);
+    void connect(const views::Onv<0> &in, const views::Onv<0> &out);
+    void apply(const views::Onv<0> &in);
+    void apply(const views::Onv<0> &in, views::Onv<0> &out);
 
     void zero();
     const defs::inds & com() const {return m_com;}
@@ -118,7 +118,7 @@ template<typename T>
 struct MatrixElement {
     AntisymFermionOnvConnection aconn;
     T element = 0;
-    MatrixElement(const views::FermionOnv& det): aconn(AntisymFermionOnvConnection(det)) {}
+    MatrixElement(const views::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
 };
 
 #endif //M7_FERMIONONVCONNECTION_H

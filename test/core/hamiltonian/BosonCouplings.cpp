@@ -19,7 +19,7 @@ TEST(BosonCouplings, Element_b0) {
            {0, 0, 0, 0}};
     bra = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
-    conn::AsFermiBosOnv fbconn(ket, bra);
+    conn::Antisym<1> fbconn(ket, bra);
 
     auto el = bc.get_element_0(fbconn);
     ASSERT_EQ(el, 0);
@@ -48,7 +48,7 @@ TEST(BosonCouplings, Element_f0_b1){
            {2, 4, 0, 1}};
     bra = {{1, 2, 3, 4},
            {2, 4, 0, 2}};
-    conn::AsFermiBosOnv fbconn(ket, bra);
+    conn::Antisym<1> fbconn(ket, bra);
     ASSERT_EQ(fbconn.m_bonvconn.nchanged_mode(), 1);
     ASSERT_EQ(fbconn.m_bonvconn.changed_mode(0), 3);
     ASSERT_EQ(fbconn.m_bonvconn.changes(0), 1);
@@ -83,7 +83,7 @@ TEST(BosonCouplings, Element_f1_b1){
            {2, 4, 0, 1}};
     bra = {{1, 2, 3, 5},
            {2, 4, 0, 2}};
-    conn::AsFermiBosOnv fbconn(ket, bra);
+    conn::Antisym<1> fbconn(ket, bra);
     auto el = bc.get_element_1(fbconn);
     ASSERT_EQ(0, el);
 }

@@ -9,6 +9,7 @@
 #include <src/defs.h>
 #include "FermiBosHamiltonian.h"
 
-using Hamiltonian = std::conditional<defs::enable_bosons, FermiBosHamiltonian, FermionHamiltonian>::type;
+template <bool enable_bosons = defs::enable_bosons>
+using Hamiltonian = typename std::conditional<enable_bosons, FermiBosHamiltonian, FermionHamiltonian>::type;
 
 #endif //M7_HAMILTONIAN_H

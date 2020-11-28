@@ -4,7 +4,7 @@
 
 #include "DecodedDeterminant.h"
 
-void OccupiedUpdater::operator()(const views::FermionOnv &view, defs::inds &inds) {
+void OccupiedUpdater::operator()(const views::Det &view, defs::inds &inds) {
     ASSERT(view.nbit() <= inds.capacity());
     inds.clear();
     for (size_t idataword = 0ul; idataword < view.ndataword(); ++idataword) {
@@ -13,7 +13,7 @@ void OccupiedUpdater::operator()(const views::FermionOnv &view, defs::inds &inds
     }
 }
 
-void VacantUpdater::operator()(const views::FermionOnv &view, defs::inds &inds) {
+void VacantUpdater::operator()(const views::Det &view, defs::inds &inds) {
     ASSERT(view.nbit() <= inds.capacity());
     inds.clear();
     for (size_t idataword = 0ul; idataword < view.ndataword(); ++idataword) {

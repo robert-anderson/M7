@@ -122,7 +122,7 @@ const Reference &Solver::reference() const {
     return m_reference;
 }
 
-Solver::Solver(Propagator &prop, Wavefunction &wf, views::Onv ref_onv) :
+Solver::Solver(Propagator &prop, Wavefunction &wf, views::Onv<> ref_onv) :
         m_prop(prop),
         m_opts(prop.m_opts),
         m_wf(wf),

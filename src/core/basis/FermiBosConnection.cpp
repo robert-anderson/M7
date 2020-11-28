@@ -4,22 +4,22 @@
 
 #include "FermiBosConnection.h"
 
-AntisymFermiBosConnection::AntisymFermiBosConnection(const views::FermiBosOnv &in, const views::FermiBosOnv &out) :
+AntisymFermiBosConnection::AntisymFermiBosConnection(const views::Onv<1> &in, const views::Onv<1> &out) :
         AntisymFermionOnvConnection(in.m_fonv, out.m_fonv),
         m_bonvconn(in.m_bonv, out.m_bonv) {}
 
-AntisymFermiBosConnection::AntisymFermiBosConnection(const views::FermiBosOnv &in) : AntisymFermiBosConnection(in, in) {}
+AntisymFermiBosConnection::AntisymFermiBosConnection(const views::Onv<1> &in) : AntisymFermiBosConnection(in, in) {}
 
 AntisymFermiBosConnection::operator bool() const {
     return nexcit() || m_bonvconn;
 }
 
-void AntisymFermiBosConnection::connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out) {
+void AntisymFermiBosConnection::connect(const views::Onv<1> &in, const views::Onv<1> &out) {
     AntisymFermionOnvConnection::connect(in.m_fonv, out.m_fonv);
     m_bonvconn.connect(in.m_bonv, out.m_bonv);
 }
 
-void AntisymFermiBosConnection::apply(const views::FermiBosOnv &in, views::FermiBosOnv &out) {
+void AntisymFermiBosConnection::apply(const views::Onv<1> &in, views::Onv<1> &out) {
     AntisymFermionOnvConnection::apply(in.m_fonv, out.m_fonv);
     m_bonvconn.apply(in.m_bonv, out.m_bonv);
 }

@@ -49,10 +49,10 @@ TEST(StochasticPropagator, BosonTest) {
     opts.shift_damp = 0.4;
 
     // -10.328242246088791
-    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
+    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
 
     ASSERT_TRUE(ham.spin_conserving());
-    elements::Onv onv(ham.nsite());
+    elements::Onv<> onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         onv.m_fonv.set(0, i);
         onv.m_fonv.set(1, i);

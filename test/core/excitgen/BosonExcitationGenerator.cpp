@@ -9,13 +9,13 @@
 #include "src/core/excitgen/BosonExcitationGenerator.h"
 
 namespace boson_coupling_samplers_test {
-    struct TestTable : MappedTable<fields::FermiBosOnv> {
-        fields::FermiBosOnv m_onv;
+    struct TestTable : MappedTable<fields::Onv<1>> {
+        fields::Onv<1> m_onv;
         fields::Number<size_t> m_frequency;
         fields::Number<defs::prob_t> m_weight;
 
         TestTable(size_t nsite) :
-                MappedTable<fields::FermiBosOnv>(m_onv, 1000),
+                MappedTable<fields::Onv<1>>(m_onv, 1000),
                 m_onv(this, nsite, "occupation number vector"),
                 m_frequency(this, "number of times the ONV was drawn"),
                 m_weight(this, "cumulative reciprocal probability") {}
@@ -44,7 +44,7 @@ namespace boson_coupling_samplers_test {
             BosonExcitationGenerator exgen(&ham, prng, nboson_max);
             OccupiedOrbitals occ_orbs(src_onv.m_fonv);
             VacantOrbitals vac_orbs(src_onv.m_fonv);
-            conn::AsFermiBosOnv aconn(src_onv);
+            conn::Antisym<1> aconn(src_onv);
             defs::prob_t prob;
             defs::ham_t helem;
             for (size_t idraw = 0ul; idraw < ndraw; ++idraw) {

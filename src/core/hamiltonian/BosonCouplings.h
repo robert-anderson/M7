@@ -42,7 +42,7 @@ public:
         return consts::real(get_element_0(onv));
     }
 
-    defs::ham_t get_element_0(const conn::AsFermionOnv &aconn, const conn::BosonOnv &bonvconn) const {
+    defs::ham_t get_element_0(const conn::Antisym<0> &aconn, const conn::Boson &bonvconn) const {
         defs::ham_t res = 0;
         if (aconn.nexcit()) return res;
         for (size_t imode = 0ul; imode < m_nmode; ++imode)
@@ -50,7 +50,7 @@ public:
         return res;
     }
 
-    defs::ham_t get_element_0(const conn::AsFermiBosOnv &conn) const {
+    defs::ham_t get_element_0(const conn::Antisym<1> &conn) const {
         return get_element_0(conn, conn.m_bonvconn);
     }
 
@@ -59,7 +59,7 @@ public:
         return v(p, p, imode) * occ_fac;
     }
 
-    defs::ham_t get_element_1(const conn::AsFermionOnv &aconn, const conn::BosonOnv &bonvconn) const {
+    defs::ham_t get_element_1(const conn::Antisym<0> &aconn, const conn::Boson &bonvconn) const {
         const auto imode = bonvconn.changed_mode(0);
         const auto change = bonvconn.changes(0);
 
@@ -88,16 +88,16 @@ public:
         }
     }
 
-    defs::ham_t get_element_1(const conn::AsFermiBosOnv &conn) const {
+    defs::ham_t get_element_1(const conn::Antisym<1> &conn) const {
         return get_element_1(conn, conn.m_bonvconn);
     }
 
-    defs::ham_t get_element(const conn::AsFermiBosOnv &conn) const {
+    defs::ham_t get_element(const conn::Antisym<1> &conn) const {
         return get_element(conn, conn.m_bonvconn);
     }
 
-    defs::ham_t get_element(const conn::AsFermionOnv &aconn,
-                            const conn::BosonOnv &bonvconn) const {
+    defs::ham_t get_element(const conn::Antisym<0> &aconn,
+                            const conn::Boson &bonvconn) const {
         switch (bonvconn.nchanged_mode()) {
             case 0:
                 return get_element_0(aconn, bonvconn);

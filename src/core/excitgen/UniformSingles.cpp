@@ -4,12 +4,12 @@
 
 #include "UniformSingles.h"
 
-UniformSingles::UniformSingles(const Hamiltonian *ham, PRNG &prng) :
+UniformSingles::UniformSingles(const Hamiltonian<> *ham, PRNG &prng) :
         FermionExcitationGenerator(ham, prng, 1) {}
 
-bool UniformSingles::draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv, const OccupiedOrbitals &occ,
-                           const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,
-                           conn::AsFermionOnv &anticonn) {
+bool UniformSingles::draw(const views::Onv<0> &src_fonv, views::Onv<0> &dst_fonv, const OccupiedOrbitals &occs,
+                           const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
+                           conn::Antisym<0> &anticonn) {
     size_t i, a, ia;
     size_t ncases;
     if (m_spin_conserving) {
@@ -40,8 +40,8 @@ bool UniformSingles::draw(const views::FermionOnv &src_fonv, views::FermionOnv &
         ia = m_prng.draw_uint(ncases);
         integer_utils::inv_rectmap(i, a, 2 * m_h->nsite() - m_nelec, ia);
     }
-    i = occ[i];
-    a = vac[a];
+    i = occs[i];
+    a = vacs[a];
 #ifndef NDEBUG
     if (m_spin_conserving) {
         if (i < m_h->nsite()) ASSERT(a < m_h->nsite())

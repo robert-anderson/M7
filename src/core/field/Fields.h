@@ -45,24 +45,36 @@ namespace fields {
     using Bitset = Bitsets<0ul>;
 
     template<size_t nind>
-    using FermionOnvs = NdField<specs::FermionOnv, nind>;
-
-    using FermionOnv = FermionOnvs<0ul>;
-
-    template<size_t nind>
     using BosonOnvs = NdField<specs::BosonOnv, nind>;
 
     using BosonOnv = BosonOnvs<0ul>;
 
+    /*
     template<size_t nind>
-    using FermiBosOnvs = fb_onv::Field<nind>;
+    using FermionOnvs = NdField<specs::FermionOnv, nind>;
 
-    using FermiBosOnv = FermiBosOnvs<0ul>;
+    using FermionOnv = FermionOnvs<0ul>;
+     */
+
+//    template<size_t nind>
+//    using FermiBosOnvs = fb_onv::Field<nind>;
+//
+//    using FermiBosOnv = FermiBosOnvs<0ul>;
+
+    template<size_t nind, bool enable_bosons=defs::enable_bosons>
+    using Onvs = typename std::conditional<
+            enable_bosons,
+            fb_onv::Field<nind>,
+            NdField<specs::FermionOnv, nind>>::type;
+
+    template<bool enable_bosons=defs::enable_bosons>
+    using Onv = Onvs<0ul, enable_bosons>;
 
     template<size_t nind>
-    using Onvs = typename std::conditional<defs::enable_bosons, FermiBosOnvs<nind>, FermionOnvs<nind>>::type;
+    using Dets = Onvs<nind, 0>;
 
-    using Onv = Onvs<0ul>;
+    using Det = Dets<0ul>;
+
 }
 
 #endif //M7_FIELDS_H

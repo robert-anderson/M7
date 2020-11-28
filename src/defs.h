@@ -44,7 +44,7 @@
 #define DBVAR(v) std::cout << "variable " << #v << " = " << v << " in " << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
 #endif
 
-//#define ENABLE_BOSONS
+#define ENABLE_BOSONS
 //#define ENABLE_COMPLEX
 
 namespace defs {

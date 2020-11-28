@@ -41,7 +41,7 @@ TEST(DenseHamiltonian, HubbardCheck) {
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoBosonLimit) {
-    if (!defs::bosons) GTEST_SKIP();
+    if (!defs::enable_bosons) GTEST_SKIP();
     FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 0, 0);
     DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
@@ -49,7 +49,7 @@ TEST(DenseHamiltonian, BosonCouplingNoBosonLimit) {
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoField) {
-    if (!defs::bosons) GTEST_SKIP();
+    if (!defs::enable_bosons) GTEST_SKIP();
     FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 0, 0);
     DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();
@@ -65,7 +65,7 @@ TEST(DenseHamiltonian, BosonCouplingMaxOcc1) {
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc2) {
-    if (!defs::bosons) GTEST_SKIP();
+    if (!defs::enable_bosons) GTEST_SKIP();
     FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.0);
     DenseHamiltonian dh(h, 0);
     auto solver = dh.diagonalize();

@@ -9,14 +9,14 @@
 #include "src/core/field/Fields.h"
 
 namespace heat_bath_doubles_test {
-    struct TestTableSpec : MappedTable<fields::FermionOnv> {
+    struct TestTableSpec : MappedTable<fields::Det> {
         size_t m_nattempt;
-        fields::FermionOnv m_onv;
+        fields::Det m_onv;
         fields::Numbers<size_t, 1> m_frequency;
         fields::Numbers<defs::prob_t, 1> m_weight;
 
-        TestTableSpec(const views::FermionOnv &src_fonv, size_t nattempt) :
-                MappedTable<fields::FermionOnv>(m_onv, 1000),
+        TestTableSpec(const views::Det &src_fonv, size_t nattempt) :
+                MappedTable<fields::Det>(m_onv, 1000),
                 m_nattempt(nattempt),
                 m_onv(this, {src_fonv.nsite()}, "occupation number vector"),
                 m_frequency(this, "number of times the ONV was drawn", nattempt),
@@ -24,7 +24,7 @@ namespace heat_bath_doubles_test {
     };
 
     struct TestTable : BufferedTable<TestTableSpec> {
-        TestTable(const FermionHamiltonian &ham, const views::FermionOnv &src_fonv, size_t nattempt) :
+        TestTable(const FermionHamiltonian &ham, const views::Det &src_fonv, size_t nattempt) :
                 BufferedTable<TestTableSpec>("Excitation generator testing mapped table", src_fonv, nattempt) {
             /*
              * table will expand dynamically
@@ -72,9 +72,9 @@ namespace heat_bath_doubles_test {
     };
 }
 
-
+#ifndef ENABLE_BOSONS
 TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
-    Hamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false, 0, 0, 0);
+    Hamiltonian<0> ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false, 0, 0, 0);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(14, 1000000);
     HeatBathDoubles pchb(&ham, prng);
@@ -91,7 +91,7 @@ TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     VacantOrbitals vac(src_fonv);
     defs::prob_t prob;
     defs::ham_t helem;
-    conn::AsFermionOnv aconn(src_fonv);
+    conn::Antisym<0> aconn(src_fonv);
 
     const defs::inds ndraws = {1ul << 23, 1ul << 27};
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
@@ -120,6 +120,7 @@ TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     }
     ASSERT_TRUE(table.errors_decreasing(1e4, ndraws) == ~0ul);
 }
+#endif
 
 #if 0
 

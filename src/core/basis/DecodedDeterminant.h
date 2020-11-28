@@ -22,12 +22,12 @@ public:
         m_inds.reserve(spec.m_nbit);
     }
 
-    explicit DecodedDeterminant(const views::FermionOnv &view) :
+    explicit DecodedDeterminant(const views::Det &view) :
             DecodedDeterminant(view.spec()) {
         update(view);
     }
 
-    explicit DecodedDeterminant(const views::FermiBosOnv &view) :
+    explicit DecodedDeterminant(const views::Onv<1> &view) :
             DecodedDeterminant(view.m_fonv.spec()) {}
 
     size_t size() const {
@@ -43,23 +43,23 @@ public:
         return m_inds;
     }
 
-    void update(const views::FermionOnv &onv) {
+    void update(const views::Det &onv) {
         updater_fn()(onv, m_inds);
     };
 
-    void update(const views::FermiBosOnv &onv) {
+    void update(const views::Onv<1> &onv) {
         updater_fn()(onv.m_fonv, m_inds);
     }
 };
 
 
 struct OccupiedUpdater {
-    void operator()(const views::FermionOnv &view, defs::inds &inds);
+    void operator()(const views::Det &view, defs::inds &inds);
 };
 
 
 struct VacantUpdater {
-    void operator()(const views::FermionOnv &view, defs::inds &inds);
+    void operator()(const views::Det &view, defs::inds &inds);
 };
 
 typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;

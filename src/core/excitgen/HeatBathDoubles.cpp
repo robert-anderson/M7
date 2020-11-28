@@ -4,7 +4,7 @@
 
 #include "HeatBathDoubles.h"
 
-HeatBathDoubles::HeatBathDoubles(const Hamiltonian *h, PRNG &prng) :
+HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
         FermionExcitationGenerator(h, prng, 2), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;
@@ -40,20 +40,20 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv,
-                                 const OccupiedOrbitals &occ, const VacantOrbitals &vac, defs::prob_t &prob,
-                                 defs::ham_t &helem, conn::AsFermionOnv &anticonn) {
+bool HeatBathDoubles::draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
+                           const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+                           defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) {
     // just draw uniform ij TODO! int weighted ij
     // return false if invalid excitation generated, true otherwise
     size_t i, j, a, b;
     size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb inds:
-    i = occ[i];
-    j = occ[j];
-    ASSERT(std::any_of(occ.inds().cbegin(), occ.inds().cend(),
+    i = occs[i];
+    j = occs[j];
+    ASSERT(std::any_of(occs.inds().cbegin(), occs.inds().cend(),
                        [&i](const size_t &k) { return k == i; }));
-    ASSERT(std::any_of(occ.inds().cbegin(), occ.inds().cend(),
+    ASSERT(std::any_of(occs.inds().cbegin(), occs.inds().cend(),
                        [&j](const size_t &k) { return k == j; }));
     ASSERT(i < j);
 
@@ -64,12 +64,12 @@ bool HeatBathDoubles::draw(const views::FermionOnv &src_fonv, views::FermionOnv 
 
     auto either_vac_in_array = [&a, &b](const size_t &k) { return k == a || k == b; };
 
-    if (std::any_of(occ.inds().cbegin(), occ.inds().end(), either_vac_in_array)) {
+    if (std::any_of(occs.inds().cbegin(), occs.inds().end(), either_vac_in_array)) {
         return 0;
     }
     anticonn.zero();
     anticonn.add(i, j, a, b);
-    anticonn.apply(src_fonv, dst_fonv);
+    anticonn.apply(src_onv, dst_onv);
     helem = m_h->get_element_2(anticonn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     ASSERT(prob <= 1)

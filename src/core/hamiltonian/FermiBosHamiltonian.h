@@ -41,37 +41,37 @@ public:
         return m_boson_couplings;
     }
 
-    defs::ham_t get_element_0(const conn::AsFermiBosOnv &afbconn) const {
+    defs::ham_t get_element_0(const conn::Antisym<1> &afbconn) const {
         ASSERT(!afbconn);
         return FermionHamiltonian::get_element_0(afbconn) + m_boson_couplings.get_element_0(afbconn);
     }
 
-    defs::ham_t get_element_0(const views::FermiBosOnv &onv) const {
+    defs::ham_t get_element_0(const views::FbOnv &onv) const {
         return FermionHamiltonian::get_element_0(onv.m_fonv) + m_boson_couplings.get_element_0(onv.m_bonv);
     }
 
     using FermionHamiltonian::get_element_1;
-    defs::ham_t get_element_1(const conn::AsFermiBosOnv &afbconn) const {
+    defs::ham_t get_element_1(const conn::Antisym<1> &afbconn) const {
         ASSERT(!afbconn.m_bonvconn);
         return FermionHamiltonian::get_element_1(afbconn);
     }
 
     using FermionHamiltonian::get_element_2;
-    defs::ham_t get_element_2(const conn::AsFermiBosOnv &afbconn) const {
+    defs::ham_t get_element_2(const conn::Antisym<1> &afbconn) const {
         ASSERT(!afbconn.m_bonvconn);
         return FermionHamiltonian::get_element_2(afbconn);
     }
 
-    defs::ham_t get_element_01(const conn::AsFermiBosOnv &afbconn) const {
+    defs::ham_t get_element_01(const conn::Antisym<1> &afbconn) const {
         ASSERT(!afbconn.nexcit());
         return m_boson_couplings.get_element_1(afbconn);
     }
 
-    defs::ham_comp_t get_energy(const views::FermiBosOnv &onv) const {
+    defs::ham_comp_t get_energy(const views::FbOnv &onv) const {
         return consts::real(get_element_0(onv));
     }
 
-    defs::ham_t get_element(const conn::AsFermiBosOnv &afbconn) const {
+    defs::ham_t get_element(const conn::Antisym<1> &afbconn) const {
         if (!afbconn) return get_element_0(afbconn);
         else if (!afbconn.m_bonvconn) {
             if (afbconn.nexcit() == 1)
@@ -86,8 +86,8 @@ public:
         return 0.0;
     }
 
-    defs::ham_t get_element(const views::FermiBosOnv &bra, const views::FermiBosOnv &ket) const {
-        return get_element(conn::AsFermiBosOnv(ket, bra));
+    defs::ham_t get_element(const views::FbOnv &bra, const views::FbOnv &ket) const {
+        return get_element(conn::Antisym<1>(ket, bra));
     }
 
 
