@@ -10,32 +10,6 @@
 #include "src/core/field/TableField.h"
 #include <functional>
 
-
-//struct Quicksorter {
-//
-//    defs::inds m_inds;
-//    typedef std::function<bool(const size_t &, const size_t &)> comp_t;
-//    comp_t m_comp_fn;
-//
-//    Quicksorter(comp_t comp_fn);
-//
-//    void sort(const size_t &hwm);
-//
-//    void sort(const TableX &table);
-//
-//    bool is_sorted(const size_t &hwm);
-//
-//    bool is_sorted(const TableX &table);
-//
-//private:
-//    void swap(size_t ii1, size_t ii2);
-//
-//    size_t partition(size_t iilo, size_t iihi);
-//
-//    void qs(size_t iilo, size_t iihi);
-//
-//};
-
 struct TableX;
 
 class ExtremalValues {
