@@ -78,3 +78,21 @@ void TableX::print_field_details(size_t width) const {
 size_t TableX::bw_dsize() const {
     return m_bw.m_dsize;
 }
+
+void TableX::print_contents(const defs::inds *ordering) const {
+    const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
+    for (size_t iirow=0ul; iirow<n; ++iirow){
+        auto irow = ordering ? (*ordering)[iirow] : iirow;
+        for (auto field: m_fields){
+            std::cout << irow << ". " << field->to_string(irow)+" ";
+        }
+        std::cout << "\n";
+    }
+}
+
+void TableX::print_contents(const ExtremalValues &xv) const {
+    defs::inds tmp;
+    tmp.reserve(xv.nfound());
+    for (size_t i=0ul; i<xv.nfound(); ++i) tmp.push_back(xv[i]);
+    print_contents(&tmp);
+}

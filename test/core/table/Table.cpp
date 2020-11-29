@@ -5,6 +5,7 @@
 #include <src/core/io/StatsFile.h>
 #include <src/core/sample/PRNG.h>
 #include <src/core/table/QuickSorter.h>
+#include <src/core/table/ExtremalValues.h>
 #include "src/core/table/BufferedTable.h"
 #include "src/core/field/Fields.h"
 #include "gtest/gtest.h"
@@ -108,8 +109,66 @@ TEST(Table, Sorting) {
         bt.m_values(i) = prng.draw_float();
     }
     auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)>=bt.m_values(i2);};
-    Quicksorter qs(comp_fn);
-    qs.sort(bt.m_hwm);
-    ASSERT_TRUE(qs.is_sorted(bt.m_hwm));
+    Quicksorter sorter(comp_fn);
+    sorter.sort(bt);
+    ASSERT_TRUE(sorter.is_sorted(bt));
 }
 
+
+TEST(Table, FieldBasedSorting) {
+    BufferedTable<SortingTestTable> bt("Sorting test");
+    const size_t size = 100;
+    PRNG prng(14, size);
+    bt.expand(size);
+    bt.push_back(size);
+    for (size_t i = 0ul; i < size; ++i) {
+        bt.m_values(i) = prng.draw_float();
+    }
+    auto getter_fn = [&bt](const size_t& i) -> const double& {return bt.m_values(i);};
+    TableFieldSorter<fields::Number<double>> sorter(getter_fn);
+    sorter.sort(bt);
+    ASSERT_TRUE(sorter.is_sorted(bt));
+}
+
+TEST(Table, ExtremalValues) {
+    BufferedTable<SortingTestTable> bt("Extremal values test");
+    const size_t size = 100;
+    PRNG prng(14, size);
+    bt.expand(size);
+    bt.push_back(size);
+    for (size_t i = 0ul; i < size; ++i) {
+        bt.m_values(i) = prng.draw_float();
+    }
+    auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)<=bt.m_values(i2);};
+    ExtremalValues xv(comp_fn);
+    xv.find(bt, 45);
+    Quicksorter sorter(comp_fn);
+    sorter.sort(bt);
+
+    for (size_t ifound=0ul; ifound<xv.nfound(); ++ifound){
+        ASSERT_EQ(xv[ifound], sorter[ifound]);
+    }
+}
+
+
+TEST(Table, FieldBasedExtremalValues) {
+    BufferedTable<SortingTestTable> bt("Extremal values test");
+    const size_t size = 100;
+    PRNG prng(14, size);
+    bt.expand(size);
+    bt.push_back(size);
+    for (size_t i = 0ul; i < size; ++i) {
+        bt.m_values(i) = prng.draw_float();
+    }
+    auto getter_fn = [&bt](const size_t& i) -> const double& {return bt.m_values(i);};
+    TableExtremalValues<fields::Number<double>> xv(getter_fn);
+    xv.find(bt, 45);
+    TableFieldSorter<fields::Number<double>> sorter(getter_fn);
+    sorter.sort(bt);
+
+    bt.print_contents(xv);
+
+    for (size_t ifound=0ul; ifound<xv.nfound(); ++ifound){
+        ASSERT_EQ(xv[ifound], sorter[ifound]);
+    }
+}
