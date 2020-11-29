@@ -29,7 +29,7 @@ public:
 
     WalkerTable(size_t nbucket, size_t nsite, size_t nroot, size_t nreplica) :
             MappedTable<fields::Onv<>>(m_onv, nbucket),
-            m_onv(this, nsite, "occupation number vectors"),
+            m_onv(this, nsite, "occsupation number vectors"),
             m_weight(this, "weights", nroot, nreplica),
             m_hdiag(this, "hamiltonian diagonal element"),
             m_flags(this, "flags", nroot, nreplica){}

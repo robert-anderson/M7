@@ -51,6 +51,18 @@ struct TableX {
 
     void print_field_details(size_t width=30) const;
 
+    void print_contents(const defs::inds* ordering=nullptr) const {
+        if (ordering && ordering->size()<m_hwm)
+            throw std::runtime_error("ordering array is too short.");
+        for (size_t iirow=0ul; iirow<m_hwm; ++iirow){
+            auto irow = ordering ? (*ordering)[iirow] : iirow;
+            for (auto field: m_fields){
+                std::cout << irow << ". " << field->to_string(irow)+" ";
+            }
+            std::cout << "\n";
+        }
+    }
+
 };
 
 
