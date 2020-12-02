@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <stdlib.h>
 #include <limits>
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 
 template<class T, size_t alignment>
 class AlignedAllocator {

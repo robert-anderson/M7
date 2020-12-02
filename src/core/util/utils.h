@@ -5,7 +5,7 @@
 #ifndef M7_UTILS_H
 #define M7_UTILS_H
 
-#include "defs.h"
+#include "src/defs.h"
 #include <vector>
 #include <complex>
 #include <iostream>
@@ -18,6 +18,7 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <functional>
 
 namespace utils {
 
@@ -63,7 +64,7 @@ namespace utils {
     }
 
     static void pad_string(std::string &str, const size_t num, const char pad_char = ' ') {
-        if(num > str.size()) str.insert(0, num - str.size(), pad_char);
+        if (num > str.size()) str.insert(0, num - str.size(), pad_char);
     }
 
     static std::string padded_string(const std::string &str, const size_t num, const char pad_char = ' ') {
@@ -117,10 +118,10 @@ namespace utils {
     }
 
     template<typename narrow_t, typename wide_t>
-    std::vector<narrow_t> safe_narrow(const std::vector<wide_t>& wides) {
+    std::vector<narrow_t> safe_narrow(const std::vector<wide_t> &wides) {
         std::vector<narrow_t> narrows;
         narrows.reserve(wides.size());
-        for (auto& it : wides) narrows.push_back(utils::safe_narrow<defs::mpi_count>(it));
+        for (auto &it : wides) narrows.push_back(utils::safe_narrow<defs::mpi_count>(it));
         return narrows;
     }
 }
@@ -136,7 +137,7 @@ namespace integer_utils {
     template<typename T>
     static typename std::enable_if<std::is_integral<T>::value, T>::type
     round_up(const T &num, const T &modulo) {
-        return divceil(num, modulo)*modulo;
+        return divceil(num, modulo) * modulo;
     }
 
     size_t rectmap(const size_t &irow, const size_t &icol, const size_t &ncol);
@@ -162,17 +163,17 @@ namespace integer_utils {
 
 namespace bit_utils {
     template<typename T>
-    static inline void clr(T &x, const size_t& i) {
+    static inline void clr(T &x, const size_t &i) {
         x &= ~((T) 1ul << i);
     }
 
     template<typename T>
-    static inline void set(T &x, const size_t& i) {
+    static inline void set(T &x, const size_t &i) {
         x |= ((T) 1ul << i);
     }
 
     template<typename T>
-    static inline bool get(const T &x, const size_t& i) {
+    static inline bool get(const T &x, const size_t &i) {
         return (x >> i) & T(1ul);
     }
 
@@ -312,11 +313,11 @@ namespace string_utils {
         }
     }
 
-    static std::string boxed(std::string s, size_t padding=4, char c='#') {
+    static std::string boxed(std::string s, size_t padding = 4, char c = '#') {
         std::string res;
-        res+=std::string(s.size()+2*(padding+1), c)+'\n';
-        res+=c+std::string(padding, ' ')+s+std::string(padding, ' ')+c+"\n";
-        res+=std::string(s.size()+2*(padding+1), c)+'\n';
+        res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
+        res += c + std::string(padding, ' ') + s + std::string(padding, ' ') + c + "\n";
+        res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
         return res;
     }
 }
@@ -407,37 +408,65 @@ namespace complex_utils {
 }
 
 namespace ci_utils {
-    static size_t nalpha(size_t nelec, int spin){
+    static size_t nalpha(size_t nelec, int spin) {
         size_t spin_odd = std::abs(spin) % 2;
         ASSERT(nelec % 2 == spin_odd)
-        size_t nalpha = nelec / 2 + (std::abs(spin))/2 + spin_odd;
+        size_t nalpha = nelec / 2 + (std::abs(spin)) / 2 + spin_odd;
         return spin >= 0 ? nalpha : nelec - nalpha;
     }
 
-    static size_t nbeta(size_t nelec, int spin){
+    static size_t nbeta(size_t nelec, int spin) {
         return nelec - nalpha(nelec, spin);
     }
 
-    static size_t fermion_dim(size_t nsite, size_t nelec){
-        return integer_utils::combinatorial(2*nsite, nelec);
+    static size_t fermion_dim(size_t nsite, size_t nelec) {
+        return integer_utils::combinatorial(2 * nsite, nelec);
     }
 
-    static size_t fermion_dim(size_t nsite, size_t nelec, int spin){
+    static size_t fermion_dim(size_t nsite, size_t nelec, int spin) {
         ASSERT(static_cast<size_t>(spin) % 2 == nelec % 2)
-        return std::pow(integer_utils::combinatorial(nsite, nalpha(nelec, spin)),2);
+        return std::pow(integer_utils::combinatorial(nsite, nalpha(nelec, spin)), 2);
     }
 
-    static size_t boson_dim(size_t boson_nmode, size_t boson_cutoff){
-        return std::pow(boson_cutoff+1, boson_nmode);
+    static size_t boson_dim(size_t boson_nmode, size_t boson_cutoff) {
+        return std::pow(boson_cutoff + 1, boson_nmode);
     }
 }
 
 namespace mem_utils {
 
     template<typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args&&... args)
-    {
+    std::unique_ptr<T> make_unique(Args &&... args) {
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+}
+
+namespace sort_utils {
+
+    template<typename viewable_t>
+    std::function<bool(const size_t &, const size_t &)>
+    make_compare_fn(std::function<typename viewable_t::const_view_t(const size_t &)> getter_fn, bool max,
+                    bool abs_val) {
+        if (max) {
+            if (abs_val)
+                return [getter_fn](const size_t &i1, const size_t &i2) {
+                    return std::abs(getter_fn(i1)) >= std::abs(getter_fn(i2));
+                };
+            else
+                return [getter_fn](const size_t &i1, const size_t &i2) {
+                    return getter_fn(i1) >= getter_fn(i2);
+                };
+        }
+        else {
+            if (abs_val)
+                return [getter_fn](const size_t &i1, const size_t &i2) {
+                    return std::abs(getter_fn(i1)) <= std::abs(getter_fn(i2));
+                };
+            else
+                return [getter_fn](const size_t &i1, const size_t &i2) {
+                    return getter_fn(i1) <= getter_fn(i2);
+                };
+        }
     }
 }
 

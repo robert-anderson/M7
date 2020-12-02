@@ -15,6 +15,12 @@
 
 class StochasticPropagator : public Propagator {
 
+    void add_boson_excitgen(const Hamiltonian<0> &ham){}
+    void add_boson_excitgen(const Hamiltonian<1> &ham){
+        m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+                new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
+    }
+
 protected:
     PRNG m_prng;
     std::vector<std::unique_ptr<ExcitationGenerator>> m_exgens;
@@ -22,7 +28,7 @@ protected:
     std::unique_ptr<WeightedDrawer> m_exgen_drawer;
 
 public:
-    StochasticPropagator(const Hamiltonian &ham, const Options &opts) :
+    StochasticPropagator(const Hamiltonian<> &ham, const Options &opts) :
             Propagator(ham, opts), m_prng(opts.prng_seed, opts.prng_ngen),
             m_min_spawn_mag(opts.min_spawn_mag) {
 
@@ -32,9 +38,7 @@ public:
             m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                     new HeatBathDoubles(&m_ham, m_prng)));
         }
-        if (defs::bosons)
-            m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-                    new BosonExcitationGenerator(&m_ham, m_prng, ham.nboson_cutoff())));
+        add_boson_excitgen(ham);
 
         m_exgen_drawer = std::unique_ptr<WeightedDrawer>(new WeightedDrawer(m_exgens.size(), m_prng));
 

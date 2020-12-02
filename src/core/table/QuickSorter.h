@@ -1,0 +1,51 @@
+//
+// Created by rja on 29/11/2020.
+//
+
+#ifndef M7_QUICKSORTER_H
+#define M7_QUICKSORTER_H
+
+#include <src/defs.h>
+#include <functional>
+#include "Table.h"
+
+struct Quicksorter {
+
+    defs::inds m_inds;
+    typedef std::function<bool(const size_t &, const size_t &)> comp_t;
+    comp_t m_comp_fn;
+
+    Quicksorter(comp_t comp_fn);
+
+    const size_t& operator[](const size_t& i) const;
+
+    void sort(const size_t &hwm);
+
+    void sort(const TableX &table);
+
+    bool is_sorted(const size_t &hwm);
+
+    bool is_sorted(const TableX &table);
+
+private:
+    void swap(size_t ii1, size_t ii2);
+
+    size_t partition(size_t iilo, size_t iihi);
+
+    void qs(size_t iilo, size_t iihi);
+
+};
+
+template <typename viewable_t>
+class TableFieldSorter : public Quicksorter {
+    static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
+    typedef typename viewable_t::const_view_t const_view_t;
+
+public:
+    TableFieldSorter(std::function<const_view_t(const size_t&)> getter_fn, bool max=true, bool abs_val=false):
+            Quicksorter(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)){}
+};
+
+
+
+#endif //M7_QUICKSORTER_H

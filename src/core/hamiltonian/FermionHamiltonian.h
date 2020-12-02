@@ -39,27 +39,27 @@ public:
                        size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega):
     FermionHamiltonian(fname, spin_major){}
 
-    defs::ham_comp_t get_energy(const views::FermionOnv &fonv) const;
+    defs::ham_comp_t get_energy(const views::Det &fonv) const;
 
-    defs::ham_t get_element_0(const defs::det_work &occs, const size_t &nocc) const;
+    defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 
     defs::ham_t get_element_0(const OccupiedOrbitals &occs) const;
 
-    defs::ham_t get_element_0(const views::FermionOnv &fonv) const;
+    defs::ham_t get_element_0(const views::Det &fonv) const;
 
-    defs::ham_t get_element_0(const conn::AsFermionOnv &connection) const;
+    defs::ham_t get_element_0(const conn::Antisym<0> &connection) const;
 
-    defs::ham_t get_element_1(const conn::AsFermionOnv &connection) const;
+    defs::ham_t get_element_1(const conn::Antisym<0> &connection) const;
 
     defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
-    defs::ham_t get_element_2(const conn::FermionOnv &connection) const;
+    defs::ham_t get_element_2(const conn::Basic<0> &connection) const;
 
-    defs::ham_t get_element_2(const conn::AsFermionOnv &connection) const;
+    defs::ham_t get_element_2(const conn::Antisym<0> &connection) const;
 
-    defs::ham_t get_element(const conn::AsFermionOnv &connection) const;
+    defs::ham_t get_element(const conn::Antisym<0> &connection) const;
 
-    defs::ham_t get_element(const views::FermionOnv &bra, const views::FermionOnv &ket) const;
+    defs::ham_t get_element(const views::Det &bra, const views::Det &ket) const;
 
     size_t nci() const {
         return ci_utils::fermion_dim(nsite(), nelec());

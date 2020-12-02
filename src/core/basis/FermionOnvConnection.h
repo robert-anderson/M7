@@ -30,52 +30,60 @@
  */
 
 class FermionOnvConnection {
-    const size_t m_element_dsize;
 protected:
-    const size_t m_nbit;
-    defs::det_work m_ann{}, m_cre{};
-    size_t m_nann, m_ncre;
+    defs::inds m_ann, m_cre;
 
 public:
     explicit FermionOnvConnection(const FermionOnvSpecifier& field);
-    FermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
-    explicit FermionOnvConnection(const views::FermionOnv &in);
+    FermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
+    explicit FermionOnvConnection(const views::Onv<0> &in);
     virtual operator bool() const {
         return nexcit();
     }
 
-    const defs::det_work& ann() const {return m_ann;}
+    const defs::inds& ann() const {return m_ann;}
     const size_t& ann(const size_t& i) const {return m_ann[i];}
-    const size_t& nann() const {return m_nann;}
+    size_t nann() const {return m_ann.size();}
 
-    const defs::det_work& cre() const {return m_cre;}
+    const defs::inds& cre() const {return m_cre;}
     const size_t& cre(const size_t& i) const {return m_cre[i];}
-    const size_t& ncre() const {return m_ncre;}
+    size_t ncre() const {return m_cre.size();}
 
-    void connect(const views::FermionOnv &in, const views::FermionOnv &out);
-    void apply(const views::FermionOnv &in, views::FermionOnv &out);
-    virtual void zero(){m_ncre=0; m_nann=0;}
-
-    void add_cre(const size_t &i){m_cre[m_ncre++] = i;}
-    void add_ann(const size_t &i){m_ann[m_nann++] = i;}
-    void add(const size_t &ann, const size_t &cre){
-        ASSERT(m_nann + 1 < m_nbit);
-        ASSERT(m_ncre + 1 < m_nbit);
-        m_ann[m_nann++] = ann; m_cre[m_ncre++] = cre;
+    void connect(const views::Onv<0> &in, const views::Onv<0> &out);
+    void apply(const views::Onv<0> &in, views::Onv<0> &out);
+    void zero(){
+        m_cre.clear();
+        m_ann.clear();
     }
+
+    void add_cre(const size_t &i){
+        ASSERT(m_cre.size()<m_cre.capacity());
+        m_cre.push_back(i);
+    }
+
+    void add_ann(const size_t &i){
+        ASSERT(m_ann.size()<m_ann.capacity());
+        m_ann.push_back(i);
+    }
+
+    void add(const size_t &ann, const size_t &cre){
+        add_ann(ann);
+        add_cre(cre);
+    }
+
     void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2){
-        ASSERT(m_nann + 2 < m_nbit);
-        ASSERT(m_ncre + 2 < m_nbit);
-        m_ann[m_nann++] = ann1; m_ann[m_nann++] = ann2;
-        m_cre[m_ncre++] = cre1; m_cre[m_ncre++] = cre2;
+        add_ann(ann1);
+        add_ann(ann2);
+        add_cre(cre1);
+        add_cre(cre2);
     }
 
     void sort(){
-        std::sort(m_cre.begin(), m_cre.begin()+m_ncre);
-        std::sort(m_ann.begin(), m_ann.begin()+m_nann);
+        std::sort(m_cre.begin(), m_cre.end());
+        std::sort(m_ann.begin(), m_ann.end());
     }
 
-    const size_t &nexcit() const;
+    size_t nexcit() const;
 
     bool connected() const {
         return nexcit()<=2;
@@ -87,32 +95,30 @@ public:
  * a connection in which the common indices and antisymmetric phase is computed
  */
 class AntisymFermionOnvConnection : public FermionOnvConnection {
-    defs::det_work m_com{};
-    size_t m_ncom;
+    defs::inds m_com;
     bool m_phase;
 
 public:
-    explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& field);
-    AntisymFermionOnvConnection(const views::FermionOnv &in, const views::FermionOnv &out);
-    explicit AntisymFermionOnvConnection(const views::FermionOnv &in);
+    explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& spec);
+    AntisymFermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
+    explicit AntisymFermionOnvConnection(const views::Onv<0> &in);
 
-    void connect(const views::FermionOnv &in, const views::FermionOnv &out);
-    void apply(const views::FermionOnv &in);
-    void apply(const views::FermionOnv &in, views::FermionOnv &out);
+    void connect(const views::Onv<0> &in, const views::Onv<0> &out);
+    void apply(const views::Onv<0> &in);
+    void apply(const views::Onv<0> &in, views::Onv<0> &out);
 
-    const defs::det_work& com() const {return m_com;}
+    void zero();
+    const defs::inds & com() const {return m_com;}
     const size_t& com(const size_t& i) const {return m_com[i];}
-    const size_t& ncom() const {return m_ncom;}
+    size_t ncom() const {return m_com.size();}
     const bool& phase() const {return m_phase;}
-
-    void zero() override;
 };
 
 template<typename T>
 struct MatrixElement {
     AntisymFermionOnvConnection aconn;
     T element = 0;
-    MatrixElement(const views::FermionOnv& det): aconn(AntisymFermionOnvConnection(det)) {}
+    MatrixElement(const views::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
 };
 
 #endif //M7_FERMIONONVCONNECTION_H

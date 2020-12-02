@@ -8,7 +8,7 @@
 #include "src/core/dynamics/StochasticPropagator.h"
 #include "src/core/dynamics/Solver.h"
 
-/*
+#ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -37,8 +37,9 @@ TEST(StochasticPropagator, Test) {
         std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
 }
- */
+#endif
 
+#ifdef ENABLE_BOSONS
 TEST(StochasticPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -50,11 +51,10 @@ TEST(StochasticPropagator, BosonTest) {
 
 
     // -10.328242246088791
-
-    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
+    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
 
     ASSERT_TRUE(ham.spin_conserving());
-    elements::Onv onv(ham.nsite());
+    elements::Onv<> onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         onv.m_fonv.set(0, i);
         onv.m_fonv.set(1, i);
@@ -80,3 +80,4 @@ TEST(StochasticPropagator, BosonTest) {
         << std::endl;
     }
 }
+#endif

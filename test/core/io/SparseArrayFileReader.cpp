@@ -2,7 +2,7 @@
 // Created by rja on 10/07/2020.
 //
 
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include "gtest/gtest.h"
 #include <fstream>
 #include <algorithm>

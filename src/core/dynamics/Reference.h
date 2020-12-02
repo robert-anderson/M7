@@ -13,13 +13,13 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public elements::Onv {
+class Reference : public elements::Onv<> {
     Wavefunction &m_wf;
-    const Hamiltonian &m_ham;
+    const Hamiltonian<> &m_ham;
     size_t m_irow;
     size_t m_irank;
 
-    mutable conn::AsOnv m_aconn;
+    mutable conn::Antisym<> m_aconn;
 
     /*
      * If a candidate for redefinition of the reference is found, then
@@ -36,12 +36,12 @@ class Reference : public elements::Onv {
     SingleReducible<defs::wf_comp_t, defs::ndim_wf> m_candidate_weight;
 
 public:
-    Reference(Wavefunction &wf, const Hamiltonian& ham, views::Onv &onv, const Options &opts);
+    Reference(Wavefunction &wf, const Hamiltonian<>& ham, views::Onv<> &onv, const Options &opts);
 
     void add_row(const size_t& irow);
 
-    using elements::Onv::operator=;
-    using elements::Onv::mpi_bcast;
+    using elements::Onv<>::operator=;
+    using elements::Onv<>::mpi_bcast;
     void change(const size_t& irow, const size_t& irank);
 
     void log_candidate_weight(const size_t& irow, const defs::wf_comp_t& candidate_weight);
@@ -56,9 +56,9 @@ public:
 
     bool is_mine() const;
 
-    bool is_connected(const views::Onv &onv) const;
+    bool is_connected(const views::Onv<> &onv) const;
 
-    void add_to_numerator(const views::Onv &onv, const defs::wf_t &weight);
+    void add_to_numerator(const views::Onv<> &onv, const defs::wf_t &weight);
 
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
 

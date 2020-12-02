@@ -9,7 +9,7 @@
 #include <src/core/basis/DeterminantField.h>
 #include "Enumerator.h"
 #include "src/core/table/BitsetField.h"
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 
 enum BitfieldOps {
     null_op, not_op, and_op, and_not_op, xor_op

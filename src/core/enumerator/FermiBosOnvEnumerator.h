@@ -9,7 +9,7 @@
 #include "BosonOnvEnumerator.h"
 #include "src/core/field/Elements.h"
 
-class FermiBosOnvEnumerator : public Enumerator<views::FermiBosOnv> {
+class FermiBosOnvEnumerator : public Enumerator<views::FbOnv> {
     FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
     elements::FermionOnv m_det;
@@ -24,7 +24,7 @@ public:
         m_det_enum.next_element(m_det);
     }
 
-    bool next_element(views::FermiBosOnv &result) override {
+    bool next_element(views::FbOnv &result) override {
         bool inner_allfound = !m_bonv_enum.next(m_bonv);
         if (inner_allfound) {
             m_bonv_enum.next(m_bonv);

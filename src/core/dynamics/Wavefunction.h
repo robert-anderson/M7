@@ -22,7 +22,7 @@ struct Wavefunction {
     walkers_t m_walkers;
     typedef CommunicatingPair<SpawnTable> spawn_t;
     spawn_t m_spawn;
-    typedef RankAllocator<fields::Onv> rank_alloc_t;
+    typedef RankAllocator<fields::Onv<>> rank_alloc_t;
     rank_alloc_t m_ra;
 
     ReductionSyndicate m_summables;
@@ -63,14 +63,13 @@ struct Wavefunction {
     }
 
     defs::wf_comp_t square_norm() const {
-        return 0.0;
-//        defs::wf_comp_t res = 0.0;
-//        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
-//            if (!m_walkers.m_onv(irow).is_zero()) {
-//                res += std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
-//            }
-//        }
-//        return mpi::all_sum(res);
+        defs::wf_comp_t res = 0.0;
+        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
+            if (!m_walkers.m_onv(irow).is_zero()) {
+                res += std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+            }
+        }
+        return mpi::all_sum(res);
     }
 
     void grant_initiator_status(const size_t& irow) {
@@ -113,7 +112,7 @@ struct Wavefunction {
         set_weight(irow, 0.0);
     }
 
-    size_t create_walker(const views::Onv &onv, const defs::ham_t weight,
+    size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
                          const defs::ham_comp_t &hdiag, bool refconn) {
         if (m_walkers.is_full()) m_walkers.expand_by_factor(m_opts.buffer_expansion_factor);
         auto irow = m_walkers.insert(onv);
@@ -126,7 +125,7 @@ struct Wavefunction {
     }
 
     // TODO: return a pair?
-    size_t add_spawn(const views::Onv &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic) {
+    size_t add_spawn(const views::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic) {
         auto irank = m_ra.get_rank(dst_onv);
 #ifdef VERBOSE_DEBUGGING
         std::cout << consts::verb << consts::chevs << "SENDING SPAWNED WALKER" << std::endl;

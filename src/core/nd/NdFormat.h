@@ -5,7 +5,7 @@
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 #include "array"
 #include "assert.h"
 

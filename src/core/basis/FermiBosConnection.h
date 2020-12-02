@@ -37,18 +37,18 @@ struct AntisymFermiBosConnection : public AntisymFermionOnvConnection {
     BosonOnvConnection m_bonvconn;
 
     AntisymFermiBosConnection(
-            const views::FermiBosOnv &in,
-            const views::FermiBosOnv &out);
+            const views::Onv<1> &in,
+            const views::Onv<1> &out);
 
-    explicit AntisymFermiBosConnection(const views::FermiBosOnv &in);
+    explicit AntisymFermiBosConnection(const views::Onv<1> &in);
 
     operator bool() const override;
 
-    void connect(const views::FermiBosOnv &in, const views::FermiBosOnv &out);
+    void connect(const views::Onv<1> &in, const views::Onv<1> &out);
 
-    void apply(const views::FermiBosOnv &in, views::FermiBosOnv &out);
+    void apply(const views::Onv<1> &in, views::Onv<1> &out);
 
-    void zero() override;
+    void zero();
 
     bool connected() const;
 };

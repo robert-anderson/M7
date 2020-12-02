@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <string>
 #include <cstring>
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 #include <map>
 #include <src/core/hash/Hashing.h>
 #include <src/core/parallel/MPIWrapper.h>

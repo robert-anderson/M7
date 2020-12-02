@@ -13,7 +13,7 @@
 #include <array>
 #include <climits>
 #include <cstdlib>
-#include "consts.h"
+#include "src/core/util/consts.h"
 
 #ifndef NDEBUG
 #ifdef VERBOSE
@@ -44,6 +44,8 @@
 #define DBVAR(v) std::cout << "variable " << #v << " = " << v << " in " << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
 #endif
 
+//#define ENABLE_BOSONS
+//#define ENABLE_COMPLEX
 
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";
@@ -56,14 +58,17 @@ namespace defs {
      * this constant should be set to ensure plenty of space for the storage
      * of set/clear bit positions
      */
-    constexpr size_t det_work_size = 512;
-    typedef std::array<size_t, det_work_size> det_work;
     typedef std::pair<size_t, size_t> pair;
-    //typedef std::complex<double> ham_t;
-    typedef double ham_t;
+#ifdef ENABLE_COMPLEX
+    constexpr bool enable_complex = true;
+#else
+    constexpr bool enable_complex = false;
+#endif
+
+    typedef double ham_comp_t;
+    typedef ham_comp_t wf_comp_t;
+    typedef std::conditional<enable_complex, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
     typedef ham_t wf_t;
-    typedef typename consts::component_t<ham_t>::type ham_comp_t;
-    typedef typename consts::component_t<wf_t>::type wf_comp_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef uint64_t data_t;
@@ -71,7 +76,11 @@ namespace defs {
     constexpr size_t nbit_data = CHAR_BIT * nbyte_data;
     const size_t isym_1e = 2;
     const size_t isym_2e = 8;
-    const bool bosons = true;
+#ifdef ENABLE_BOSONS
+    constexpr bool enable_bosons = true;
+#else
+    constexpr bool enable_bosons = false;
+#endif
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
 

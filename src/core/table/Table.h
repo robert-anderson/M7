@@ -7,10 +7,11 @@
 
 #include <src/core/util/utils.h>
 #include <src/core/field/Fields.h>
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 #include "src/core/field/TableField.h"
 #include "BufferWindow.h"
 #include "src/core/field/Flag.h"
+#include "ExtremalValues.h"
 
 struct TableX {
     std::vector<const TableField *> m_fields;
@@ -50,6 +51,10 @@ struct TableX {
     std::string field_details(size_t width=30) const;
 
     void print_field_details(size_t width=30) const;
+
+    void print_contents(const defs::inds* ordering=nullptr) const;
+
+    void print_contents(const ExtremalValues& xv) const;
 
 };
 

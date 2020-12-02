@@ -10,6 +10,15 @@
 
 class BosonExcitationGenerator : public ExcitationGenerator {
 
+    defs::ham_t get_helement(const Hamiltonian<0>* ham,
+            const size_t& p, const size_t& q, const size_t& imode){
+        return 0.0;
+    }
+    defs::ham_t get_helement(const Hamiltonian<1>* ham,
+            const size_t& p, const size_t& q, const size_t& imode){
+        return ham->bc().get_element_1(p, q, imode);
+    }
+
 protected:
     size_t m_nboson_max;
 public:
@@ -17,26 +26,26 @@ public:
     BosonExcitationGenerator(const FermiBosHamiltonian *ham, PRNG& prng, size_t nboson_max):
         ExcitationGenerator(ham, prng), m_nboson_max(nboson_max){}
 
-    bool draw(const views::FermionOnv &src_fonv, views::FermionOnv &dst_fonv, const OccupiedOrbitals &occ,
-              const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,
-              conn::AsFermionOnv &anticonn) override {
+    bool draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv, const OccupiedOrbitals &occs,
+              const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
+              conn::Antisym<0> &anticonn) override {
         return false;
     }
 
-    bool draw(const views::FermiBosOnv &src_onv, views::FermiBosOnv &dst_onv, const OccupiedOrbitals &occ,
-              const VacantOrbitals &vac, defs::prob_t &prob, defs::ham_t &helem,
-              conn::AsFermiBosOnv &anticonn) override {
+    bool draw(const views::Onv<1> &src_onv, views::Onv<1> &dst_onv, const OccupiedOrbitals &occs,
+              const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
+              conn::Antisym<1> &anticonn) override {
         if(m_nboson_max == 0) return false;
 
         auto nmode = src_onv.m_bonv.nmode();
         ASSERT(dst_onv.m_bonv.nmode() == nmode)
         ASSERT(nmode == src_onv.m_fonv.nsite() and nmode == dst_onv.m_fonv.nsite())
 
-        auto imode_excit = occ.m_inds[m_prng.draw_uint(occ.m_nind)] % src_onv.m_fonv.nsite();
+        auto imode_excit = occs[m_prng.draw_uint(occs.size())] % src_onv.m_fonv.nsite();
         int change;
         auto curr_occ = src_onv.m_bonv(imode_excit);
 
-        prob = 1.0/occ.m_nind;
+        prob = 1.0/occs.size();
         // there are two ways to generate such connections, and they should be twice as likely
 //        if(src_onv.m_fonv.get(0, imode_excit) and src_onv.m_fonv.get(1, imode_excit)){
 //            prob *= 1.0;
@@ -59,7 +68,7 @@ public:
 
         auto com = src_onv.m_bonv(imode_excit);
         if (change<0) com+=change;
-        helem = m_h->bc().get_element_1(imode_excit, imode_excit, com);
+        helem = get_helement(m_h, imode_excit, imode_excit, com);
         return true;
     }
 

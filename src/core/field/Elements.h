@@ -40,11 +40,11 @@ struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
 };
 
 namespace elements {
-    struct FermionOnv : Element<fields::FermionOnv> {
+    struct FermionOnv : Element<fields::Det> {
         FermionOnv(size_t nsite):
-            Element<fields::FermionOnv>({nsite}){
+            Element<fields::Det>({nsite}){
         }
-        FermionOnv(const views::FermionOnv& view): FermionOnv(view.nsite()){
+        FermionOnv(const views::Det & view): FermionOnv(view.nsite()){
             *this = view;
         }
         using specs::FermionOnv::view_t::operator=;
@@ -59,17 +59,18 @@ namespace elements {
         using specs::BosonOnv::view_t::operator=;
     };
 
-    struct FermiBosOnv : Element<fields::FermiBosOnv> {
+    struct FermiBosOnv : Element<fields::Onv<1>> {
         FermiBosOnv(size_t nsite):
-            Element<fields::FermiBosOnv>(nsite){}
-        FermiBosOnv(const views::FermiBosOnv& view):
+            Element<fields::Onv<1>>(nsite){}
+        FermiBosOnv(const views::Onv<1>& view):
         FermiBosOnv(view.m_fonv.nsite()){
             *this = view;
         }
-        using fields::FermiBosOnv::view_t::operator=;
+        using fields::Onv<1>::view_t::operator=;
     };
 
-    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
+    template<bool enable_bosons=defs::enable_bosons>
+    using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
 }
 
 #endif //M7_ELEMENTS_H

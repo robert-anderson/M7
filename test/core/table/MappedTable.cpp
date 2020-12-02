@@ -8,10 +8,10 @@
 #include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 
-struct TestTable : MappedTable<fields::Onv> {
-    fields::Onv m_config;
+struct TestTable : MappedTable<fields::Det> {
+    fields::Det m_config;
     TestTable(size_t nsite):
-    MappedTable<fields::Onv>(m_config, 10),
+    MappedTable<fields::Det>(m_config, 10),
             m_config(this, nsite, "configuration"){}
 };
 
@@ -20,7 +20,7 @@ TEST(MappedTable, TEST){
 
     BufferedTable<TestTable> bt("Mapped table test", nsite);
     bt.expand(10);
-    elements::Onv config(nsite);
+    elements::Onv<> config(nsite);
 //    config.m_fonv[2] = 1;
 //    config.m_bonv[2] = 5;
 //    std::cout << config.to_string() << std::endl;

@@ -11,22 +11,22 @@
 
 class Propagator {
 public:
-    const Hamiltonian &m_ham;
+    const Hamiltonian<> &m_ham;
     const Options &m_opts;
     MagnitudeLogger m_magnitude_logger;
     defs::ham_comp_t m_shift;
     /*
      * working objects
      */
-    mutable elements::Onv m_dst_onv;
-    mutable conn::AsOnv m_aconn;
+    mutable elements::Onv<> m_dst_onv;
+    mutable conn::Antisym<> m_aconn;
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;
 
     Epoch m_variable_shift;
 //    Epoch& m_semi_stochastic;
 
-    Propagator(const Hamiltonian &ham, const Options& opts):
+    Propagator(const Hamiltonian<> &ham, const Options& opts):
     m_ham(ham),
     m_opts(opts),
     m_magnitude_logger(opts, ham.nsite(), ham.nelec()),

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <complex>
 #include <src/core/thread/AlignedAllocator.h>
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 
 class PRNG {
     typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::ncacheline_byte>> U;

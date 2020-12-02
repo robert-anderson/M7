@@ -13,7 +13,7 @@ namespace enums {
     using FermionOnv = FermionOnvEnumerator;
     using BosonOnv = BosonOnvEnumerator;
     using FermiBosOnv = FermiBosOnvEnumerator;
-    using Onv = std::conditional<defs::bosons, FermiBosOnv, FermionOnv>::type;
+    using Onv = std::conditional<defs::enable_bosons, FermiBosOnv, FermionOnv>::type;
 }
 
 #endif //M7_ENUMERATORS_H

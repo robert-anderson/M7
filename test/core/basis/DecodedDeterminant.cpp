@@ -18,8 +18,8 @@ TEST(DecodedDeterminant, Occupation){
     }
 
     OccupiedOrbitals occorbs(det);
-    ASSERT_TRUE(std::equal(occ.begin(), occ.end(), occorbs.m_inds.begin()));
+    ASSERT_TRUE(std::equal(occ.begin(), occ.end(), occorbs.inds().begin()));
 
     VacantOrbitals vacorbs(det);
-    ASSERT_TRUE(std::equal(vac.begin(), vac.end(), vacorbs.m_inds.begin()));
+    ASSERT_TRUE(std::equal(vac.begin(), vac.end(), vacorbs.inds().begin()));
 }

@@ -5,7 +5,7 @@
 #ifndef M7_BUFFER_H
 #define M7_BUFFER_H
 
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 
 class Buffer {
     template<typename table_t> friend

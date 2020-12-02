@@ -7,7 +7,7 @@
 #include "src/core/table/BufferedTableArray.h"
 
 struct TestTable : TableX {
-    fields::FermionOnv m_fonv;
+    fields::Det m_fonv;
     TestTable(size_t nsite):
             m_fonv(this, nsite, "configuration"){}
 };

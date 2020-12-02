@@ -15,6 +15,7 @@ void print(const Wavefunction& wf){
     }
 }
 
+#ifdef ENABLE_BOSONS
 TEST(ExactPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -24,11 +25,11 @@ TEST(ExactPropagator, BosonTest) {
     opts.shift_damp = 0.4;
     // nboson_cutoff 1: -6.9875779675355165
     // nboson_cutoff 2: -10.328242246088791
-    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
+    Hamiltonian<1> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
 
 
     ASSERT_TRUE(ham.spin_conserving());
-    elements::Onv onv(ham.nsite());
+    elements::Onv<1> onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         onv.m_fonv.set(0, i);
         onv.m_fonv.set(1, i);
@@ -64,8 +65,9 @@ TEST(ExactPropagator, BosonTest) {
     }
     */
 }
+#endif
 
-#if 0
+#ifndef ENABLE_BOSONS
 TEST(ExactPropagator, Test) {
     Options opts;
     opts.nwalker_initial = 10;
@@ -74,9 +76,9 @@ TEST(ExactPropagator, Test) {
     opts.nwalker_target = 10000;
     const size_t nsite = 6;
     //const auto benchmark = -108.81138657563143;
-    Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, 0, 0, 0);
+    Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, 0, 0, 0);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::Onv fonv(ham.nsite());
+    elements::Onv<> fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
     Wavefunction wf(opts, nsite);
     wf.expand(10, 800);

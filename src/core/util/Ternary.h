@@ -6,7 +6,7 @@
 #define M7_TERNARY_H
 
 #include <stdexcept>
-#include "defs.h"
+#include "src/defs.h"
 
 /*
  * "Ternary" boolean type with a default unspecified state

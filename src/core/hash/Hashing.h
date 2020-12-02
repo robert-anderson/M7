@@ -6,7 +6,7 @@
 #define M7_HASHER_H
 
 
-#include "src/core/util/defs.h"
+#include "src/defs.h"
 
 namespace hashing {
 

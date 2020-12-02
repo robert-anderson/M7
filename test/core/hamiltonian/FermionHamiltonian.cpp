@@ -33,10 +33,10 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
     AntisymFermionOnvConnection connection(hf_det);
 
-    for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
-        const auto &occ = occs.m_inds[iocc];
-        for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {
-            const auto &vac = vacs.m_inds[iocc];
+    for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
+        const auto &occ = occs[iocc];
+        for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
+            const auto &vac = vacs[iocc];
             connection.zero();
             connection.add(occ, vac);
             connection.apply(hf_det);
@@ -79,10 +79,10 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
 
     AntisymFermionOnvConnection connection(fonv);
 
-    for (size_t iocc = 0ul; iocc < occs.m_nind; ++iocc) {
-        const auto &occ = occs.m_inds[iocc];
-        for (size_t ivac = 0ul; ivac < vacs.m_nind; ++ivac) {
-            const auto &vac = vacs.m_inds[iocc];
+    for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
+        const auto &occ = occs[iocc];
+        for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
+            const auto &vac = vacs[iocc];
             connection.zero();
             connection.add(occ, vac);
             connection.apply(fonv);

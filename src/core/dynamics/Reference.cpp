@@ -5,9 +5,9 @@
 #include "Reference.h"
 #include "Wavefunction.h"
 
-Reference::Reference(Wavefunction &wf, const Hamiltonian &ham, views::Onv &onv,
+Reference::Reference(Wavefunction &wf, const Hamiltonian<> &ham, views::Onv<> &onv,
                      const Options &m_opts) :
-        elements::Onv(onv), m_wf(wf), m_ham(ham), m_aconn(onv),
+        elements::Onv<>(onv), m_wf(wf), m_ham(ham), m_aconn(onv),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(m_summables, {1, 1}),
         m_nwalker_at_doubles(m_summables, {1, 1}),
@@ -106,12 +106,12 @@ bool Reference::is_mine() const {
     return mpi::i_am(m_irank);
 }
 
-bool Reference::is_connected(const views::Onv &onv) const {
+bool Reference::is_connected(const views::Onv<> &onv) const {
     m_aconn.connect(*this, onv);
     return m_aconn.connected();
 }
 
-void Reference::add_to_numerator(const views::Onv &onv, const defs::wf_t &weight) {
+void Reference::add_to_numerator(const views::Onv<> &onv, const defs::wf_t &weight) {
     m_aconn.connect(*this, onv);
     m_proj_energy_num(0, 0) += m_ham.get_element(m_aconn) * weight;
     m_nwalker_at_doubles(0, 0) += std::abs(weight);

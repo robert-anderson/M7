@@ -9,7 +9,7 @@
 #include "src/core/field/Fields.h"
 
 struct SpawnTable : public TableX {
-    fields::Onv m_dst_onv;
+    fields::Onv<> m_dst_onv;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_delta_weight;
 private:
     struct SpawnTableFlagSet : FlagSet {

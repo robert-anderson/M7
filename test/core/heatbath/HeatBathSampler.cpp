@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/core/util/defs.h>
+#include <src/defs.h>
 
 #if 0
 TEST(HeatBathSampler, AllExcitsGeneratedFromHartreeFockDeterminantComplex4c) {

@@ -9,7 +9,7 @@
 #include "CombinationEnumerator.h"
 #include "src/core/field/Views.h"
 
-class SpinConFonvEnumerator : public Enumerator<views::FermionOnv> {
+class SpinConFonvEnumerator : public Enumerator<views::Det> {
     CombinationEnumerator m_alpha_comb;
     CombinationEnumerator m_beta_comb;
     defs::inds m_alpha_setinds;
@@ -17,7 +17,7 @@ class SpinConFonvEnumerator : public Enumerator<views::FermionOnv> {
 public:
     SpinConFonvEnumerator(size_t nsite, size_t nelec, int spin);
 
-    bool next_element(views::FermionOnv &result) override;
+    bool next_element(views::Det &result) override;
 };
 
 

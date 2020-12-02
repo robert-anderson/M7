@@ -8,8 +8,8 @@
 #include "SpinConFonvEnumerator.h"
 #include "SpinNonConFonvEnumerator.h"
 
-class FermionOnvEnumerator : public Enumerator<views::FermionOnv> {
-    std::unique_ptr<Enumerator<views::FermionOnv>> m_internal_enum;
+class FermionOnvEnumerator : public Enumerator<views::Det> {
+    std::unique_ptr<Enumerator<views::Det>> m_internal_enum;
 
 public:
     FermionOnvEnumerator(size_t nsite, size_t nelec);
@@ -17,7 +17,7 @@ public:
     FermionOnvEnumerator(size_t nsite, size_t nelec, int spin) :
             m_internal_enum(new SpinConFonvEnumerator(nsite, nelec, spin)) {}
 
-    bool next_element(views::FermionOnv &result) override {
+    bool next_element(views::Det &result) override {
         return m_internal_enum->next(result);
     }
 };
