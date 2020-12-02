@@ -46,8 +46,11 @@ TEST(StochasticPropagator, BosonTest) {
     opts.tau_initial = 0.01;
     opts.nwalker_target = 10000;
     opts.shift_damp = 0.4;
+    opts.ncycle = 3000;
+
 
     // -10.328242246088791
+
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
 
     ASSERT_TRUE(ham.spin_conserving());
@@ -65,7 +68,7 @@ TEST(StochasticPropagator, BosonTest) {
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i = 0ul; i < 3000; ++i) {
+    for (size_t i = 0ul; i < opts.ncycle; ++i) {
         solver.execute();
         std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
