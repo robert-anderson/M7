@@ -141,7 +141,7 @@ TEST(Table, ExtremalValues) {
     }
     auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)<=bt.m_values(i2);};
     ExtremalValues xv(comp_fn);
-    xv.find(bt, 45);
+    xv.find(45);
     Quicksorter sorter(comp_fn);
     sorter.sort(bt);
 
@@ -162,7 +162,8 @@ TEST(Table, FieldBasedExtremalValues) {
     }
     auto getter_fn = [&bt](const size_t& i) -> const double& {return bt.m_values(i);};
     TableExtremalValues<fields::Number<double>> xv(getter_fn);
-    xv.find(bt, 45);
+    xv.reset(bt);
+    xv.find(45);
     TableFieldSorter<fields::Number<double>> sorter(getter_fn);
     sorter.sort(bt);
 

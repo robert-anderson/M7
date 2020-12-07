@@ -581,6 +581,16 @@ public:
 
     static void finalize();
 
+    static void stop_all(std::string message) {
+#ifdef HAVE_MPI
+        std::cout << "Stopping all MPI processes: \"" << message << "\""<< std::endl;
+        MPI_Abort(MPI_COMM_WORLD, 0);
+#else
+        std::cout << "Stopping: \"" << message << "\""<< std::endl;
+        exit(0);
+#endif
+    }
+
 };
 
 #endif //M7_MPIWRAPPER_H
