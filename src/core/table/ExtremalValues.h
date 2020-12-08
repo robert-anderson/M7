@@ -47,6 +47,15 @@ class TableExtremalValues : public ExtremalValues {
 public:
     TableExtremalValues(std::function<const_view_t(const size_t &)> getter_fn, bool max = true, bool abs_val = false) :
             ExtremalValues(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)) {}
+
+    TableExtremalValues(const viewable_t& viewable, bool max = true, bool abs_val = false) :
+            TableExtremalValues(
+                    std::function<const_view_t(const size_t &)>(
+                        [&](const size_t &irow) -> const_view_t {
+                            return viewable.get_view(irow, 0);
+                        }
+                    ),
+                    max, abs_val) {}
 };
 
 #endif //M7_EXTREMALVALUES_H

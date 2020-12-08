@@ -21,12 +21,12 @@ namespace fb_onv {
 
         View(Field<FermionOnvSpecifier> &fonv_field, Field<BosonOnvSpecifier> &bonv_field,
              const size_t &irow, const size_t &iflat):
-                m_fonv(fonv_field.flat_get(irow, iflat)), m_bonv(bonv_field.flat_get(irow, iflat)) {}
+                m_fonv(fonv_field.get_view(irow, iflat)), m_bonv(bonv_field.get_view(irow, iflat)) {}
 
 
         View(const Field<FermionOnvSpecifier> &fonv_field, const Field<BosonOnvSpecifier> &bonv_field,
              const size_t &irow, const size_t &iflat):
-                m_fonv(fonv_field.flat_get(irow, iflat)), m_bonv(bonv_field.flat_get(irow, iflat)) {}
+                m_fonv(fonv_field.get_view(irow, iflat)), m_bonv(bonv_field.get_view(irow, iflat)) {}
 
         View &operator=(const std::pair<defs::inds, defs::inds> &pair) {
             m_fonv = pair.first;

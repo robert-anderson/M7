@@ -160,11 +160,11 @@ TEST(Table, FieldBasedExtremalValues) {
     for (size_t i = 0ul; i < size; ++i) {
         bt.m_values(i) = prng.draw_float();
     }
-    auto getter_fn = [&bt](const size_t& i) -> const double& {return bt.m_values(i);};
-    TableExtremalValues<fields::Number<double>> xv(getter_fn);
+
+    TableExtremalValues<fields::Number<double>> xv(bt.m_values);
     xv.reset(bt);
     xv.find(45);
-    TableFieldSorter<fields::Number<double>> sorter(getter_fn);
+    TableFieldSorter<fields::Number<double>> sorter(bt.m_values);
     sorter.sort(bt);
 
     bt.print_contents(xv);

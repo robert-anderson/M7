@@ -44,6 +44,15 @@ class TableFieldSorter : public Quicksorter {
 public:
     TableFieldSorter(std::function<const_view_t(const size_t&)> getter_fn, bool max=true, bool abs_val=false):
             Quicksorter(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)){}
+
+    TableFieldSorter(const viewable_t& viewable, bool max=true, bool abs_val=false):
+            TableFieldSorter(
+            std::function<const_view_t(const size_t &)>(
+                    [&](const size_t &irow) -> const_view_t {
+                        return viewable.get_view(irow, 0);
+                    }
+            ),
+            max, abs_val) {}
 };
 
 
