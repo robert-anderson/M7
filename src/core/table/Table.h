@@ -11,7 +11,7 @@
 #include "src/core/field/TableField.h"
 #include "BufferWindow.h"
 #include "src/core/field/Flag.h"
-#include "ExtremalValues.h"
+#include "src/core/sort/ExtremalValues.h"
 
 struct TableX {
     std::vector<const TableField *> m_fields;

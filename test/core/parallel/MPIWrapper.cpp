@@ -78,7 +78,7 @@ TEST(MPIWrapper, AllgathervRagged){
     }
 
     defs::inds recvcounts(mpi::nrank(), 0);
-    mpi::all_gather(&nsend, 1, recvcounts.data(), 1);
+    mpi::all_gather(nsend, recvcounts);
     for (size_t i=0ul; i<mpi::nrank(); ++i){
         ASSERT_EQ(recvcounts[i], ((i+1)*salt)%mod);
     }

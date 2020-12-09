@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include "ExtremalValues.h"
-#include "Table.h"
+#include "src/core/table/Table.h"
 
 ExtremalValues::ExtremalValues(ExtremalValues::comp_t comp_fn) :
     // reverse arg order to match ordering of QuickSort implementation
@@ -12,6 +12,10 @@ ExtremalValues::ExtremalValues(ExtremalValues::comp_t comp_fn) :
 
 const size_t &ExtremalValues::nfound() const {
     return m_nfound;
+}
+
+const size_t *ExtremalValues::begin() const {
+    return m_inds.data()+(m_inds.size()-nfound());
 }
 
 const size_t &ExtremalValues::operator[](const size_t &ifound) const {
@@ -39,3 +43,7 @@ void ExtremalValues::reset(size_t hwm) {
 }
 
 void ExtremalValues::reset(const TableX &table) { reset(table.m_hwm); }
+
+const defs::inds &ExtremalValues::inds() const {
+    return m_inds;
+}

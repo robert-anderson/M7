@@ -4,8 +4,10 @@
 
 #include <src/core/io/StatsFile.h>
 #include <src/core/sample/PRNG.h>
-#include <src/core/table/QuickSorter.h>
-#include <src/core/table/ExtremalValues.h>
+#include <src/core/sort/ParallelExtremalValues.h>
+#include <src/core/sort/ExtremalValues.h>
+#include <src/core/sort/ParallelSorter.h>
+#include <src/core/sort/QuickSorter.h>
 #include "src/core/table/BufferedTable.h"
 #include "src/core/field/Fields.h"
 #include "gtest/gtest.h"

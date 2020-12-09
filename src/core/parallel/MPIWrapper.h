@@ -476,6 +476,42 @@ private:
     }
 
     template<typename T>
+    static bool gather(
+            const T *send, size_t sendcount, T *recv, size_t recvcount, const size_t& iroot) {
+#ifdef HAVE_MPI
+        return MPI_Gather((void *) send, snrw(sendcount), mpi_type<T>(), recv,
+                          snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcount);
+#endif
+    }
+    template<typename T>
+    static bool all_gather(
+            const T *send, size_t sendcount, T *recv, size_t recvcount) {
+#ifdef HAVE_MPI
+        return MPI_Allgather(
+                (void *) send, snrw(sendcount), mpi_type<T>(), recv, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcount);
+#endif
+    }
+
+
+
+    template<typename T>
+    static bool gatherv(
+            const T *send, const defs::mpi_count& sendcount,
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs, const size_t& iroot) {
+#ifdef HAVE_MPI
+        return MPI_Gatherv(
+                (void *) send, sendcount, mpi_type<T>(),
+                (void *) recv, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcounts[0]);
+#endif
+    }
+
+    template<typename T>
     static bool all_gatherv(
             const T *send, const defs::mpi_count& sendcount,
             T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs) {
@@ -487,6 +523,8 @@ private:
         return all_to_all(send, sendcount, recv, recvcounts[0]);
 #endif
     }
+
+
 
 public:
     template<typename T>
@@ -501,6 +539,16 @@ public:
                            tmp_recvcounts.data(), tmp_recvdispls.data());
     }
 
+
+
+
+    template<typename T>
+    static bool gatherv(const T *send, size_t sendcount, T *recv,
+                        const defs::inds &recvcounts, const defs::inds &recvdispls, const size_t& iroot) {
+        auto tmp_recvcounts = snrw(recvcounts);
+        auto tmp_recvdispls = snrw(recvdispls);
+        return gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data(), iroot);
+    }
     template<typename T>
     static bool all_gatherv(
             const T *send, size_t sendcount,
@@ -510,23 +558,32 @@ public:
         return all_gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data());
     }
 
-    template<typename T>
-    static bool all_gather(
-            const T *send, size_t sendcount, T *recv, size_t recvcount) {
-#ifdef HAVE_MPI
-        return MPI_Allgather(
-                (void *) send, snrw(sendcount), mpi_type<T>(), recv, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
-#else
-        return all_to_all(send, sendcount, recv, recvcount);
-#endif
-    }
 
+
+    template<typename T>
+    static bool gather(const T &send, std::vector<T> &recv, const size_t& iroot) {
+        if (recv.size() < nrank()) recv.resize(nrank());
+        return gather(&send, 1ul, recv.data(), 1ul, iroot);
+    }
     template<typename T>
     static bool all_gather(const T &send, std::vector<T> &recv) {
         if (recv.size() < nrank()) recv.resize(nrank());
         return all_gather(&send, 1ul, recv.data(), 1ul);
     }
 
+
+
+    template<typename T>
+    static bool gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv,
+                            defs::inds& recvcounts, defs::inds& recvdispls, const size_t& iroot) {
+        recvcounts.resize(nrank());
+        recvdispls.resize(nrank());
+        gather(sendcount, recvcounts, iroot);
+        counts_to_displs_consec(recvcounts, recvdispls);
+        const size_t nrecv = recvdispls.back() + recvcounts.back();
+        if (recv.size() < nrecv) recv.resize(nrecv);
+        return gatherv(send.data(), sendcount, recv.data(), recvcounts, recvdispls, iroot);
+    }
     template<typename T>
     static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv,
                             defs::inds& recvcounts, defs::inds& recvdispls) {
@@ -539,18 +596,39 @@ public:
         return all_gatherv(send.data(), sendcount, recv.data(), recvcounts, recvdispls);
     }
 
+
+
+
+    template<typename T>
+    static bool gatherv(const std::vector<T> &send, std::vector<T> &recv,
+                            defs::inds& recvcounts, defs::inds& recvdispls, const size_t& iroot) {
+        return gatherv(send, send.size(), recv, recvcounts, recvdispls, iroot);
+    }
     template<typename T>
     static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv,
                             defs::inds& recvcounts, defs::inds& recvdispls) {
         return all_gatherv(send, send.size(), recv, recvcounts, recvdispls);
     }
 
+
+
+    template<typename T>
+    static bool gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv, const size_t& iroot) {
+        defs::inds recvcounts, recvdispls;
+        return gatherv(send, sendcount, recv, recvcounts, recvdispls, iroot);
+    }
     template<typename T>
     static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv) {
         defs::inds recvcounts, recvdispls;
         return all_gatherv(send, sendcount, recv, recvcounts, recvdispls);
     }
 
+
+
+    template<typename T>
+    static bool gatherv(const std::vector<T> &send, std::vector<T> &recv, const size_t& iroot) {
+        return gatherv(send, send.size(), recv, iroot);
+    }
     template<typename T>
     static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv) {
         return all_gatherv(send, send.size(), recv);

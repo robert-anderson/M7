@@ -7,7 +7,7 @@
 #include "PRNG.h"
 
 PRNG::PRNG(const size_t &seed, const size_t &block_size) :
-        m_data(block_size, 0u), m_seed(seed) {
+        m_data(block_size, 0u), m_seed(seed+mpi::irank()) {
     ASSERT(block_size > 0);
     m_i = m_data.size();
 }

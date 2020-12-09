@@ -7,7 +7,7 @@
 
 #include <src/defs.h>
 #include <functional>
-#include "Table.h"
+#include "src/core/table/Table.h"
 
 struct Quicksorter {
 
