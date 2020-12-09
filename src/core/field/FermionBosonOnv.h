@@ -67,7 +67,7 @@ namespace fb_onv {
         using NdFieldGroup<nind>::m_format;
 
         template<typename ...Args>
-        Field(TableX *table, size_t nsite, std::string description, Args... shape) :
+        Field(Table *table, size_t nsite, std::string description, Args... shape) :
                 NdFieldGroup<nind>(shape...),
                 m_fonv(table, nsite, description + " (FermionOnv)", m_format),
                 m_bonv(table, nsite, description + " (Boson ONV)", m_format) {}

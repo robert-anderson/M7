@@ -4,27 +4,27 @@
 
 #include "Table.h"
 
-size_t TableX::push_back(size_t nrow) {
+size_t Table::push_back(size_t nrow) {
     if (m_hwm>=m_nrow) throw std::runtime_error("Table capacity reached");
     auto tmp = m_hwm;
     m_hwm+=nrow;
     return tmp;
 }
 
-defs::data_t *TableX::ptr() {
+defs::data_t *Table::ptr() {
     return m_bw.m_ptr;
 }
 
-char *TableX::begin() {
+char *Table::begin() {
     return (char *) m_bw.m_ptr;
 }
 
-char *TableX::begin(const size_t &irow) {
+char *Table::begin(const size_t &irow) {
     ASSERT(irow<m_hwm)
     return begin() + irow * m_row_size;
 }
 
-size_t TableX::add_field(const TableField *field) {
+size_t Table::add_field(const TableField *field) {
     // returns the offset in bytes for the field being added
     auto offset = 0ul;
     if(!m_fields.empty()){
@@ -43,23 +43,23 @@ size_t TableX::add_field(const TableField *field) {
     return offset;
 }
 
-void TableX::move(BufferWindow new_bw) {
+void Table::move(BufferWindow new_bw) {
     if (m_bw) std::memmove(new_bw.m_ptr, m_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
     m_bw = new_bw;
     if (!m_row_dsize) return;
     m_nrow = m_bw.m_dsize / m_row_dsize;
 }
 
-void TableX::clear() {
+void Table::clear() {
     std::memset((char *) (m_bw.m_ptr), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
 }
 
-void TableX::clear_row(const size_t &irow) {
+void Table::clear_row(const size_t &irow) {
     std::memset(begin(irow), 0, m_tight_row_size);
 }
 
-std::string TableX::field_details(size_t width) const {
+std::string Table::field_details(size_t width) const {
     std::string res;
     for (size_t i = 0ul; i < m_fields.size(); ++i) {
         std::string desc;
@@ -71,15 +71,15 @@ std::string TableX::field_details(size_t width) const {
     return res;
 }
 
-void TableX::print_field_details(size_t width) const {
+void Table::print_field_details(size_t width) const {
     std::cout << field_details(width) << std::endl;
 }
 
-size_t TableX::bw_dsize() const {
+size_t Table::bw_dsize() const {
     return m_bw.m_dsize;
 }
 
-void TableX::print_contents(const defs::inds *ordering) const {
+void Table::print_contents(const defs::inds *ordering) const {
     const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
     for (size_t iirow=0ul; iirow<n; ++iirow){
         auto irow = ordering ? (*ordering)[iirow] : iirow;
@@ -90,7 +90,7 @@ void TableX::print_contents(const defs::inds *ordering) const {
     }
 }
 
-void TableX::print_contents(const ExtremalValues &xv) const {
+void Table::print_contents(const ExtremalValues &xv) const {
     defs::inds tmp;
     tmp.reserve(xv.nfound());
     for (size_t i=0ul; i<xv.nfound(); ++i) tmp.push_back(xv[i]);

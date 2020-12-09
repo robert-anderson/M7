@@ -12,7 +12,7 @@ template<typename table_t>
 class BufferedTable : public table_t {
     Buffer m_buffer;
 public:
-    using TableX::m_row_dsize;
+    using Table::m_row_dsize;
 
     template<typename ...Args>
     BufferedTable(std::string name, Args&&... args): table_t(args...),
@@ -33,10 +33,10 @@ public:
     }
 
     void resize(size_t nrow) {
-        Buffer new_buffer(m_buffer.m_name, TableX::m_row_dsize, nrow);
+        Buffer new_buffer(m_buffer.m_name, Table::m_row_dsize, nrow);
         table_t::move(BufferWindow(new_buffer));
         m_buffer = std::move(new_buffer);
-        ASSERT(buffer_dsize() == TableX::m_row_dsize*nrow)
+        ASSERT(buffer_dsize() == Table::m_row_dsize*nrow)
     }
 
     void expand(size_t delta_nrow){

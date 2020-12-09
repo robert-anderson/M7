@@ -9,7 +9,7 @@
 #include "src/core/field/BitsetSpecifier.h"
 #include "src/core/field/TableField.h"
 
-struct TableX;
+struct Table;
 
 struct FlagBase;
 

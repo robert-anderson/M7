@@ -16,7 +16,7 @@ class BufferedTableArray {
     size_t m_nrow_per_table = 0ul;
 
     const size_t& row_dsize() const {
-        return static_cast<const TableX&>(m_tables[0]).m_row_dsize;
+        return static_cast<const Table&>(m_tables[0]).m_row_dsize;
     }
 
     void move_tables(Buffer& new_buffer, size_t nrow_per_table, bool expansion=true){
@@ -101,8 +101,8 @@ public:
 
     void clear() {
         for (auto& table:m_tables) {
-            static_cast<TableX&>(table).clear();
-            static_cast<TableX&>(table).m_hwm = 0;
+            static_cast<Table&>(table).clear();
+            static_cast<Table&>(table).m_hwm = 0;
         }
     }
 };

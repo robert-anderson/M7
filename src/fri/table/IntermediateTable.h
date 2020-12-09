@@ -7,7 +7,7 @@
 
 #include "src/core/table/Table.h"
 
-struct IntermediateTable : public TableX {
+struct IntermediateTable : public Table {
     fields::Number<size_t> m_irow_parent;
     fields::Number<unsigned short> m_iorb;
     fields::Number<unsigned short> m_jorb;

@@ -8,7 +8,7 @@
 #include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
 
-struct SpawnTable : public TableX {
+struct SpawnTable : public Table {
     fields::Onv<> m_dst_onv;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_delta_weight;
 private:

@@ -6,7 +6,7 @@
 #include "src/core/table/Table.h"
 
 
-TableField::TableField(TableX *table, FieldData field_data,
+TableField::TableField(Table *table, FieldData field_data,
              size_t nelement, std::string description) :
         m_table(table), m_data(field_data), m_description(description), m_nelement(nelement),
         m_size(nelement * m_data.m_element_size), m_offset(m_table->add_field(this)) {

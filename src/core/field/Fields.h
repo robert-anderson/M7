@@ -21,7 +21,7 @@ namespace fields {
     template<typename T, size_t nind>
     struct Numbers: NdField<specs::Number<T>, nind>{
         template<typename ...Args>
-        Numbers(TableX *table, std::string description, Args... shape) :
+        Numbers(Table *table, std::string description, Args... shape) :
             NdField<specs::Number<T>, nind>(table, {}, description, shape...) {}
 
         size_t extent(size_t i) const {

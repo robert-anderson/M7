@@ -21,11 +21,11 @@ struct Quicksorter {
 
     void sort(const size_t &hwm);
 
-    void sort(const TableX &table);
+    void sort(const Table &table);
 
     bool is_sorted(const size_t &hwm);
 
-    bool is_sorted(const TableX &table);
+    bool is_sorted(const Table &table);
 
 private:
     void swap(size_t ii1, size_t ii2);

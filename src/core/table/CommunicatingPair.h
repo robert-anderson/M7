@@ -24,7 +24,7 @@ public:
     m_buffer_expansion_factor(buffer_expansion_factor){}
 
     size_t row_dsize() const {
-        return static_cast<const TableX&>(m_recv).m_row_dsize;
+        return static_cast<const Table&>(m_recv).m_row_dsize;
     }
 
     BufferedTableArray<table_t>& send() {

@@ -38,7 +38,7 @@ public:
     ParallelExtremalValues(const viewable_t &viewable, bool max = true, bool abs_val = false) :
             m_local_xvs(viewable, max, abs_val), m_max(max), m_abs_val(abs_val) {}
 
-    void reset(const TableX& table) {
+    void reset(const Table& table) {
         m_local_xvs.reset(table.m_hwm);
     }
 
@@ -79,7 +79,7 @@ public:
 //
 //    void reset(size_t hwm);
 //
-//    void reset(const TableX &table);
+//    void reset(const Table &table);
 //
 //    void find(size_t nfind);
 

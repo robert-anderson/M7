@@ -13,7 +13,7 @@
 #include "src/core/field/Flag.h"
 #include "src/core/sort/ExtremalValues.h"
 
-struct TableX {
+struct Table {
     std::vector<const TableField *> m_fields;
     BufferWindow m_bw;
     size_t m_row_size;

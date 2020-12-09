@@ -19,7 +19,7 @@
 #include "src/core/hash/Hashing.h"
 #include "src/core/nd/NdFormat.h"
 
-struct TableX;
+struct Table;
 
 /**
  * Primitive field type, identifies the starting location of a
@@ -28,7 +28,7 @@ struct TableX;
  * byte string is defined in the templated subclasses
  */
 struct TableField {
-    TableX *m_table;
+    Table *m_table;
     FieldData m_data;
     const std::string m_description;
     const size_t m_nelement;
@@ -39,7 +39,7 @@ struct TableField {
 
     char *raw_ptr(const size_t &irow, const size_t &ielement) const;
 
-    TableField(TableX *table, FieldData field_data,
+    TableField(Table *table, FieldData field_data,
                size_t nelement, std::string description);
 
     bool is_same_type_as(const TableField &other) const;
@@ -62,7 +62,7 @@ struct Field : TableField {
     static_assert(std::is_base_of<FieldSpecifier, spec_t>::value, "Template arg must be derived from FieldSpecifier");
     const spec_t m_spec;
 
-    Field(TableX *table, spec_t spec, size_t nelement, std::string description) :
+    Field(Table *table, spec_t spec, size_t nelement, std::string description) :
             TableField(table, static_cast<const FieldSpecifier &>(spec).m_data, nelement, description), m_spec(spec) {}
 
     const FieldSpecifier &spec() const {
@@ -92,7 +92,7 @@ template<typename spec_t, size_t nind>
 struct NdFieldBase : Field<spec_t> {
     const NdFormat<nind> &m_format;
 
-    NdFieldBase(TableX *table, spec_t spec, std::string description, const NdFormat<nind> &format) :
+    NdFieldBase(Table *table, spec_t spec, std::string description, const NdFormat<nind> &format) :
             Field<spec_t>(table, spec, format.nelement(), description), m_format(format) {}
 
     using Field<spec_t>::get_view;
@@ -134,7 +134,7 @@ struct NdField : NdFieldGroup<nind> {
     typedef typename spec_t::const_view_t const_view_t;
 
     template<typename ...Args>
-    NdField(TableX *table, spec_t spec, std::string description, Args... shape):
+    NdField(Table *table, spec_t spec, std::string description, Args... shape):
             NdFieldGroup<nind>(shape...), m_field(table, spec, description, m_format) {}
 
 

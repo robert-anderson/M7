@@ -27,7 +27,7 @@ struct LookupResult {
 
 
 template<typename field_t, typename hash_fn=typename field_t::hash_fn>
-struct MappedTable : TableX {
+struct MappedTable : Table {
 
     static_assert(std::is_base_of<NdFieldGroup<0ul>, field_t>::value, "Key field must be scalar");
 
@@ -40,7 +40,7 @@ struct MappedTable : TableX {
     }
 
     MappedTable(field_t &key_field, size_t nbucket) :
-    TableX(), m_key_field(key_field), m_buckets(nbucket) {}
+    Table(), m_key_field(key_field), m_buckets(nbucket) {}
 
 
     defs::hash_t hash (typename field_t::view_t key){

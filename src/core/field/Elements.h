@@ -11,12 +11,12 @@
 #include "Views.h"
 
 template<typename viewable_t>
-struct SingleFieldTable: TableX {
+struct SingleFieldTable: Table {
     static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
     viewable_t m_field;
 	template <typename ...Args>
     SingleFieldTable(Args... args):
-    TableX(),
+    Table(),
     m_field(this, args..., "Working field"){}
 };
 

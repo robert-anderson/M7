@@ -11,7 +11,7 @@
 #include "src/core/field/Fields.h"
 #include <functional>
 
-struct TableX;
+struct Table;
 
 class ExtremalValues {
     /*
@@ -37,7 +37,7 @@ public:
 
     void reset(size_t hwm);
 
-    void reset(const TableX &table);
+    void reset(const Table &table);
 
     void find(size_t nfind);
 
