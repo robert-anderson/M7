@@ -45,7 +45,6 @@ int main(int argc, char **argv) {
 
     {
         FciqmcCalculation calc(input);
-        calc.execute();
     }
 
     if (!mpi::i_am_root()) {

@@ -132,8 +132,8 @@ struct Wavefunction {
         std::cout << consts::verb << "generated determinant:   " << dst_onv.to_string() << std::endl;
         std::cout << consts::verb << "destination rank:        " << irank << std::endl;
         std::cout << consts::verb << "spawned weight:          " << delta << std::endl;
-        std::cout << consts::verb << "parent is initiator:     " << flag_initiator << std::endl;
-        std::cout << consts::verb << "parent is deterministic: " << flag_deterministic << std::endl;
+        std::cout << consts::verb << "parent is initiator:     " << initiator << std::endl;
+        std::cout << consts::verb << "parent is deterministic: " << deterministic << std::endl;
 #endif
         auto &dst_table = m_spawn.send(irank);
         if (dst_table.is_full()) m_spawn.expand_by_factor(m_opts.buffer_expansion_factor);

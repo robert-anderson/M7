@@ -49,9 +49,9 @@ void Solver::annihilate_row(const size_t &irow_recv) {
     auto irow_walkers = *m_wf.m_walkers[dst_onv];
 
 #ifdef VERBOSE_DEBUGGING
-    std::cout << consts::verb << "bitstring:             " << det.to_string() << std::endl;
-        std::cout << consts::verb << "delta weight:          " << *delta_weight << std::endl;
-        std::cout << consts::verb << "found in walker list:  " << string_utils::yn(irow_main!=~0ul) << std::endl;
+    std::cout << consts::verb << "bitstring:             " << dst_onv.to_string() << std::endl;
+    std::cout << consts::verb << "delta weight:          " << delta_weight << std::endl;
+    std::cout << consts::verb << "found in walker list:  " << string_utils::yn(irow_walkers!=~0ul) << std::endl;
 #endif
 
     if (irow_walkers == ~0ul) {

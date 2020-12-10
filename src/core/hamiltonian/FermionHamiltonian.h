@@ -36,7 +36,9 @@ public:
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
-    FermionHamiltonian(const Options& opts): FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {}
+    FermionHamiltonian(const Options& opts): FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {
+        std::cout << opts.fcidump_path << std::endl;
+    }
 
     defs::ham_comp_t get_energy(const views::Det &fonv) const;
 

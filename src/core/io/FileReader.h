@@ -10,11 +10,11 @@
 
 class FileReader {
 protected:
-    const std::string m_fname;
     std::unique_ptr<std::ifstream> m_file = nullptr;
     mutable size_t m_iline = ~0ul; // the index of the last extracted line
 
 public:
+    const std::string m_fname;
     FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname) {
         //std::cout << "File \"" << fname << "\" opened for reading" << std::endl;
         reset(iline);
