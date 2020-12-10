@@ -95,6 +95,12 @@ public:
         return get_element(conn::Antisym<1>(ket, bra));
     }
 
+    elements::FermiBosOnv guess_reference(const int &spin_level) const {
+        elements::FermiBosOnv tmp(m_nsite);
+        tmp.m_fonv = FermionHamiltonian::guess_reference(spin_level);
+        return tmp;
+    }
+
 
 //
 //    defs::ham_t get_element_0(const conn::AsFermiBosOnv &afbconn) const {

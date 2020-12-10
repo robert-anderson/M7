@@ -49,8 +49,7 @@ class Options:
             
 
 class Instance:
-    def __init__(self, nthread=1, nmpirank=1, build_dir='build', fnameout='M7.out', fnameerr='M7.err', debug=False, opts=None):
-        self.nthread = nthread
+    def __init__(self, nmpirank=1, build_dir='build', fnameout='M7.out', fnameerr='M7.err', debug=False, opts=None):
         self.nmpirank = nmpirank
         self.fnameout = fnameout
         self.fnameerr = fnameerr
@@ -60,7 +59,7 @@ class Instance:
 
     def run(self):
         with open(self.fnameout, 'w') as fout, open(self.fnameerr, 'w') as ferr:
-            cmd = 'env OMP_NUM_THREADS={} mpirun -n {} {} {}'.format(self.nthread, self.nmpirank, self.exepath, self.opts.to_command_string())
+            cmd = 'mpirun -n {} {} {}'.format(self.nmpirank, self.exepath, self.opts.to_command_string())
             fout.write(cmd+'\n')
             Popen(cmd, shell=1, stdout=fout, stderr=ferr).wait()
 
