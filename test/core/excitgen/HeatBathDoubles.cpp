@@ -74,7 +74,7 @@ namespace heat_bath_doubles_test {
 
 #ifndef ENABLE_BOSONS
 TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
-    Hamiltonian<0> ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false, 0, 0, 0);
+    Hamiltonian<0> ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     PRNG prng(14, 1000000);
     HeatBathDoubles pchb(&ham, prng);

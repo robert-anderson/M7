@@ -76,7 +76,7 @@ TEST(ExactPropagator, Test) {
     opts.nwalker_target = 10000;
     const size_t nsite = 6;
     //const auto benchmark = -108.81138657563143;
-    Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, 0, 0, 0);
+    Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     elements::Onv<> fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}

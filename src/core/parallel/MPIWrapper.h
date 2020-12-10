@@ -49,32 +49,75 @@
 
 
 
-static const std::array<MPI_Datatype, 17> mpi_types =
+static const std::array<MPI_Datatype, 16> mpi_types =
         {MPI_CHAR, MPI_SHORT, MPI_INT, MPI_LONG, MPI_LONG_LONG_INT,
          MPI_UNSIGNED_CHAR, MPI_UNSIGNED_SHORT, MPI_UNSIGNED, MPI_UNSIGNED_LONG,
          MPI_UNSIGNED_LONG_LONG, MPI_FLOAT, MPI_DOUBLE, MPI_LONG_DOUBLE,
-         MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX, MPI_CXX_BOOL};
+         MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX};
 
 template<typename T>
-static size_t mpi_type_ind() { return ~0ul; }
+static constexpr size_t mpi_type_ind() { return ~0ul; }
 
-template<> size_t mpi_type_ind<char>() { return 0;}
-template<> size_t mpi_type_ind<short int>() { return 1;}
-template<> size_t mpi_type_ind<int>() { return 2; }
-template<> size_t mpi_type_ind<long int>() { return 3; }
-template<> size_t mpi_type_ind<long long int>() { return 4; }
-template<> size_t mpi_type_ind<unsigned char>() { return 5; }
-template<> size_t mpi_type_ind<unsigned short int>() { return 6; }
-template<> size_t mpi_type_ind<unsigned int>() { return 7; }
-template<> size_t mpi_type_ind<unsigned long int>() { return 8; }
-template<> size_t mpi_type_ind<unsigned long long int>() { return 9; }
-template<> size_t mpi_type_ind<float>() { return 10; }
-template<> size_t mpi_type_ind<double>() { return 11; }
-template<> size_t mpi_type_ind<long double>() { return 12; }
-template<> size_t mpi_type_ind<std::complex<float>>() { return 13; }
-template<> size_t mpi_type_ind<std::complex<double>>() { return 14; }
-template<> size_t mpi_type_ind<std::complex<long double>>() { return 15; }
-template<> size_t mpi_type_ind<bool>() { return 16; }
+template<> constexpr size_t mpi_type_ind<char>() { return 0;}
+template<> constexpr size_t mpi_type_ind<short int>() { return 1;}
+template<> constexpr size_t mpi_type_ind<int>() { return 2; }
+template<> constexpr size_t mpi_type_ind<long int>() { return 3; }
+template<> constexpr size_t mpi_type_ind<long long int>() { return 4; }
+template<> constexpr size_t mpi_type_ind<unsigned char>() { return 5; }
+template<> constexpr size_t mpi_type_ind<unsigned short int>() { return 6; }
+template<> constexpr size_t mpi_type_ind<unsigned int>() { return 7; }
+template<> constexpr size_t mpi_type_ind<unsigned long int>() { return 8; }
+template<> constexpr size_t mpi_type_ind<unsigned long long int>() { return 9; }
+template<> constexpr size_t mpi_type_ind<float>() { return 10; }
+template<> constexpr size_t mpi_type_ind<double>() { return 11; }
+template<> constexpr size_t mpi_type_ind<long double>() { return 12; }
+template<> constexpr size_t mpi_type_ind<std::complex<float>>() { return 13; }
+template<> constexpr size_t mpi_type_ind<std::complex<double>>() { return 14; }
+template<> constexpr size_t mpi_type_ind<std::complex<long double>>() { return 15; }
+
+
+template<typename T> constexpr bool mpi_supported() { return mpi_type_ind<T>()!=~0ul; }
+
+
+const std::array<size_t, 16> mpi_sizes {
+    sizeof(char),
+    sizeof(short int),
+    sizeof(int),
+    sizeof(long int),
+    sizeof(long long int),
+    sizeof(unsigned char),
+    sizeof(unsigned short int),
+    sizeof(unsigned int),
+    sizeof(unsigned long int),
+    sizeof(unsigned long long int),
+    sizeof(float),
+    sizeof(double),
+    sizeof(long double),
+    sizeof(std::complex<float>),
+    sizeof(std::complex<double>),
+    sizeof(std::complex<long double>)
+};
+
+
+const std::array<size_t, 16> mpi_dsizes {
+    integer_utils::divceil(sizeof(char), defs::nbyte_data),
+    integer_utils::divceil(sizeof(short int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(long int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(long long int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(unsigned char), defs::nbyte_data),
+    integer_utils::divceil(sizeof(unsigned short int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(unsigned int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(unsigned long int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(unsigned long long int), defs::nbyte_data),
+    integer_utils::divceil(sizeof(float), defs::nbyte_data),
+    integer_utils::divceil(sizeof(double), defs::nbyte_data),
+    integer_utils::divceil(sizeof(long double), defs::nbyte_data),
+    integer_utils::divceil(sizeof(std::complex<float>), defs::nbyte_data),
+    integer_utils::divceil(sizeof(std::complex<double>), defs::nbyte_data),
+    integer_utils::divceil(sizeof(std::complex<long double>), defs::nbyte_data)
+};
+
 
 template<typename T>
 static MPI_Datatype mpi_type() { return mpi_types[mpi_type_ind<T>()]; }

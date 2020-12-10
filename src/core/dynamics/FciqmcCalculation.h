@@ -5,6 +5,37 @@
 #ifndef M7_FCIQMCCALCULATION_H
 #define M7_FCIQMCCALCULATION_H
 
+
+#include <src/core/io/Options.h>
+#include "Wavefunction.h"
+#include "StochasticPropagator.h"
+
+//class FciqmcCalculation {
+//public:
+//    const Options m_opts;
+//    Hamiltonian<defs::enable_bosons> m_ham;
+//    Wavefunction m_wf;
+//    StochasticPropagator m_prop;
+//
+//    FciqmcCalculation(const Options& opts):m_opts(opts),
+//    m_ham(opts), m_wf(opts, m_ham.nsite()), m_prop(m_ham, opts){
+//        m_wf.expand(10, 800);
+//        auto ref_energy = m_ham.get_energy(fonv);
+//        prop.m_shift = ref_energy;//benchmark;
+//
+//    }
+//    Solver solver(prop, wf, fonv);
+//
+//    std::cout << "Reference Energy: " << ref_energy << std::endl;
+//
+//    for (size_t i = 0ul; i < 10000; ++i) {
+//        solver.execute();
+//        std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
+//    }
+//};
+
+
+
 #if 0
 
 #include <omp.h>
@@ -19,9 +50,9 @@
 
 class FciqmcCalculation {
 public:
-    const Options m_input;
     Epoch m_vary_shift;
     Epoch m_semi_stochastic;
+    const Options m_input;
     RankAllocator<DeterminantElement> m_rank_allocator;
     std::unique_ptr<FciqmcStatsFile> m_stats_file = nullptr;
     std::unique_ptr<ParallelizationStatsFile> m_parallel_stats_file = nullptr;

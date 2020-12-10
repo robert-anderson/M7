@@ -10,6 +10,7 @@
 #include <src/core/basis/DecodedDeterminant.h>
 #include <src/core/basis/Connections.h>
 #include <src/core/field/Elements.h>
+#include <src/core/io/Options.h>
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
 
@@ -35,9 +36,7 @@ public:
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
-    FermionHamiltonian(std::string fname, bool spin_major,
-                       size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega):
-    FermionHamiltonian(fname, spin_major){}
+    FermionHamiltonian(const Options& opts): FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {}
 
     defs::ham_comp_t get_energy(const views::Det &fonv) const;
 

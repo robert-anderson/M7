@@ -26,9 +26,7 @@ struct Table {
      */
     size_t m_hwm = 0ul;
 
-    bool is_full() const {
-        return m_hwm==m_nrow;
-    }
+    bool is_full() const;
 
     size_t push_back(size_t nrow=1);
 

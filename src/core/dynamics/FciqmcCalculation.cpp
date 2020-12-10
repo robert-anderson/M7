@@ -7,6 +7,10 @@
 #include "ExactPropagator.h"
 #include "StochasticPropagator.h"
 
+
+
+
+
 #if 0
 
 FciqmcCalculation::FciqmcCalculation(const Options &input) :

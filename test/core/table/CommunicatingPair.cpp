@@ -8,7 +8,7 @@
 
 
 TEST(CommunicatingPair, CommunicateSingleElement) {
-    struct TestTable : public TableX {
+    struct TestTable : public Table {
         fields::Number<size_t> m_counter;
 
         TestTable() : m_counter(this, "counter") {}
@@ -34,7 +34,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
 }
 
 TEST(CommunicatingPair, CommunicateVector) {
-    struct TestTable : public TableX {
+    struct TestTable : public Table {
         fields::Numbers<int, 1> m_counter;
         TestTable(size_t nint) : m_counter(this, "counter", nint) {}
     };

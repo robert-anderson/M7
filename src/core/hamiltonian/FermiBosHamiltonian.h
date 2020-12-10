@@ -37,6 +37,11 @@ public:
             FermionHamiltonian(fname, spin_major),
             m_boson_couplings(nsite(), nboson_cutoff, v, omega) {}
 
+
+    FermiBosHamiltonian(const Options &opts):
+    FermiBosHamiltonian(opts.fcidump_path, opts.fcidump_spin_major, opts.nboson_max,
+                        opts.boson_coupling, opts.boson_frequency){}
+
     const BosonCouplings &bc() const {
         return m_boson_couplings;
     }

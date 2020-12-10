@@ -13,7 +13,7 @@
 #include "gtest/gtest.h"
 
 
-struct CommonFieldTypeTable : public TableX {
+struct CommonFieldTypeTable : public Table {
     fields::Numbers<short, 1> m_shorts;
     fields::Numbers<short, 1> m_more_shorts;
 
@@ -42,7 +42,7 @@ TEST(Table, CommonFieldOffset) {
     ASSERT_EQ(t2.m_more_shorts.m_field.m_size, 5 * sizeof(short));
 }
 
-struct DifferentFieldTypeTable : public TableX {
+struct DifferentFieldTypeTable : public Table {
     fields::Numbers<short, 1> m_shorts;
     fields::Numbers<float, 1> m_floats;
 
@@ -79,7 +79,7 @@ struct TestFlagSet : FlagSet {
             flags2(this, "second rank-1 flag set", 6) {}
 };
 
-struct FlagsTestTable : public TableX {
+struct FlagsTestTable : public Table {
     fields::Flags<TestFlagSet> m_flags;
 
     FlagsTestTable() : m_flags(this, "Flagset") {}
@@ -95,7 +95,7 @@ TEST(Table, Flag) {
 }
 
 
-struct SortingTestTable : public TableX {
+struct SortingTestTable : public Table {
     fields::Number<double> m_values;
 
     SortingTestTable() : m_values(this, "sortable values") {}

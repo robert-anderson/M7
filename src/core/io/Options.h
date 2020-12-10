@@ -44,6 +44,8 @@ struct Options {
     size_t ncycle_init_detsub = 1000;
     bool calc_mk_walker_sums = false;
     size_t nboson_max = 0ul;
+    double boson_coupling = 0.0;
+    double boson_frequency = 0.0;
 
     bool validate() const;
 

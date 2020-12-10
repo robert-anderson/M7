@@ -39,6 +39,10 @@ namespace hashing {
         }
         return result;
     }
+
+    static defs::hash_t fnv_hash(defs::hash_t v){
+        return fnv_hash((char*)&v, sizeof(defs::hash_t));
+    }
 };
 
 

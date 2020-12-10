@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "src/core/table/BufferedTableArray.h"
 
-struct TestTable : TableX {
+struct TestTable : Table {
     fields::Det m_fonv;
     TestTable(size_t nsite):
             m_fonv(this, nsite, "configuration"){}

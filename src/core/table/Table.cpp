@@ -4,6 +4,10 @@
 
 #include "Table.h"
 
+bool Table::is_full() const {
+    return m_hwm==m_nrow;
+}
+
 size_t Table::push_back(size_t nrow) {
     if (m_hwm>=m_nrow) throw std::runtime_error("Table capacity reached");
     auto tmp = m_hwm;
