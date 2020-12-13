@@ -35,5 +35,23 @@ if(LAPACK_FOUND)
     target_link_libraries (prof ${LAPACK_LIBRARIES})
 endif()
 
+
+FIND_PACKAGE(HDF5 COMPONENTS CXX)
+if (HDF5_FOUND)
+    message(${HDF5_INCLUDE_DIR})
+    include_directories(${HDF5_INCLUDE_DIR})
+    link_directories(${HDF5_LIBRARY_DIRS})
+    target_link_libraries (release ${HDF5_CXX_LIBRARIES})
+    target_link_libraries (debug ${HDF5_CXX_LIBRARIES})
+    target_link_libraries (prof ${HDF5_CXX_LIBRARIES})
+    if (${HDF5_IS_PARALLEL})
+        target_compile_definitions(release PRIVATE HAVE_HDF5_PARALLEL)
+        target_compile_definitions(debug PRIVATE HAVE_HDF5_PARALLEL)
+        target_compile_definitions(prof PRIVATE HAVE_HDF5_PARALLEL)
+    endif ()
+endif ()
+
+
+
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories($ENV{INCLUDE_PATH})

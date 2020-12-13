@@ -79,46 +79,6 @@ template<> constexpr size_t mpi_type_ind<std::complex<long double>>() { return 1
 template<typename T> constexpr bool mpi_supported() { return mpi_type_ind<T>()!=~0ul; }
 
 
-const std::array<size_t, 16> mpi_sizes {
-    sizeof(char),
-    sizeof(short int),
-    sizeof(int),
-    sizeof(long int),
-    sizeof(long long int),
-    sizeof(unsigned char),
-    sizeof(unsigned short int),
-    sizeof(unsigned int),
-    sizeof(unsigned long int),
-    sizeof(unsigned long long int),
-    sizeof(float),
-    sizeof(double),
-    sizeof(long double),
-    sizeof(std::complex<float>),
-    sizeof(std::complex<double>),
-    sizeof(std::complex<long double>)
-};
-
-
-const std::array<size_t, 16> mpi_dsizes {
-    integer_utils::divceil(sizeof(char), defs::nbyte_data),
-    integer_utils::divceil(sizeof(short int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(long int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(long long int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(unsigned char), defs::nbyte_data),
-    integer_utils::divceil(sizeof(unsigned short int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(unsigned int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(unsigned long int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(unsigned long long int), defs::nbyte_data),
-    integer_utils::divceil(sizeof(float), defs::nbyte_data),
-    integer_utils::divceil(sizeof(double), defs::nbyte_data),
-    integer_utils::divceil(sizeof(long double), defs::nbyte_data),
-    integer_utils::divceil(sizeof(std::complex<float>), defs::nbyte_data),
-    integer_utils::divceil(sizeof(std::complex<double>), defs::nbyte_data),
-    integer_utils::divceil(sizeof(std::complex<long double>), defs::nbyte_data)
-};
-
-
 template<typename T>
 static MPI_Datatype mpi_type() { return mpi_types[mpi_type_ind<T>()]; }
 /*
