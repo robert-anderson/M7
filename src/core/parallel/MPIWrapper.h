@@ -242,7 +242,7 @@ private:
                            std::vector<std::pair<T, size_t>> &recv,
                            MpiPairOp op) {
         ASSERT(send.size() == recv.size());
-        all_reduce(send.data(), recv.data(), op, send.size());
+        return all_reduce(send.data(), recv.data(), op, send.size());
     }
 
 public:
