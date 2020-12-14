@@ -16,25 +16,18 @@ set(GTEST_INCLUDE_DIR, "${CMAKE_BINARY_DIR}/external/googletest/googletest/inclu
 target_include_directories(unittest PUBLIC ${GTEST_INCLUDE_DIR})
 target_link_libraries(unittest gtest gtest_main)
 
-find_package(LAPACK REQUIRED)
-if(LAPACK_FOUND)
-    target_link_libraries (unittest ${LAPACK_LIBRARIES})
-endif()
-target_link_libraries (unittest ${MPI_LIBRARIES})
+if (LAPACK_FOUND)
+    target_link_libraries(unittest ${LAPACK_LIBRARIES})
+endif ()
 
-FIND_PACKAGE(HDF5 COMPONENTS CXX)
-if (HDF5_FOUND)
-    message(${HDF5_INCLUDE_DIR})
-    include_directories(${HDF5_INCLUDE_DIR})
-    link_directories(${HDF5_LIBRARY_DIRS})
-    target_link_libraries (unittest ${HDF5_CXX_LIBRARIES})
-    if (${HDF5_IS_PARALLEL})
-        target_compile_definitions(unittest PRIVATE HAVE_HDF5_PARALLEL)
-    endif ()
+target_link_libraries(unittest ${MPI_LIBRARIES})
+
+
+if (ENABLE_HDF5)
+    target_link_libraries(unittest ${_HDF5_LIBS})
 endif ()
 
 target_compile_definitions(unittest PRIVATE DEBUG=1)
-#target_compile_definitions(unittest PRIVATE VERBOSE=1)
 target_compile_options(unittest PRIVATE -O0)
 
 include_directories($ENV{INCLUDE_PATH})

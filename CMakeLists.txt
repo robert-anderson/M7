@@ -20,17 +20,50 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/external/CLI11)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=core-avx2")
 
-FIND_PACKAGE(MPI)
-MESSAGE (STATUS "MPI_FOUND ${MPI_FOUND}")
+find_package(LAPACK REQUIRED)
+
+find_package(MPI)
+message(STATUS "MPI_FOUND ${MPI_FOUND}")
 if (MPI_FOUND)
     add_definitions(-DHAVE_MPI)
 else()
 endif()
 
+
+option(ENABLE_HDF5 "Enable HDF5 support" ON)
+if(ENABLE_HDF5)
+    find_package(HDF5)
+    if(HDF5_FOUND)
+        include_directories(${HDF5_INCLUDE_DIR})
+        set(_HDF5_LIBS hdf5)
+    else()
+        # we did not find it so we fetch it from the web, configure, compile, and link
+        include(ExternalProject)
+        set(_HDF5_VERSION "1.10.5")
+        file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
+        ExternalProject_Add(hdf5_local
+                URL http://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+                URL_MD5 e115eeb66e944fa7814482415dd21cc4
+                CMAKE_ARGS ${ExternalProjectCMakeArgs}
+                SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
+                BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
+                STAMP_DIR  ${PROJECT_BINARY_DIR}/hdf5_local/stamp
+                TMP_DIR    ${PROJECT_BINARY_DIR}/hdf5_local/tmp
+                INSTALL_COMMAND ""
+                )
+        include_directories(
+                ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+                ${PROJECT_BINARY_DIR}/hdf5_local/build
+        )
+        set(_HDF5_LIBS ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a -ldl)
+    endif()
+endif()
+
+
+
 include_directories(${MPI_INCLUDE_PATH})
 set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
-
 
 
 include_directories("${CMAKE_SOURCE_DIR}")

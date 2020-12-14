@@ -7,7 +7,6 @@
 
 #include <string>
 #include <memory>
-#include "hdf5/serial/H5Cpp.h"
 #include "src/core/parallel/MPIWrapper.h"
 #include "src/core/nd/NdFormat.h"
 
@@ -120,10 +119,6 @@ namespace hdf5 {
             load(tmp, name);
             return tmp;
         }
-    };
-
-    struct Array {
-
     };
 
 }
