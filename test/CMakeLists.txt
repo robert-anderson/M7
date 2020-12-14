@@ -24,7 +24,12 @@ target_link_libraries(unittest ${MPI_LIBRARIES})
 
 
 if (ENABLE_HDF5)
+    add_dependencies(unittest hdf5_local)
     target_link_libraries(unittest ${_HDF5_LIBS})
+    target_include_directories(unittest PUBLIC
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build
+    )
 endif ()
 
 target_compile_definitions(unittest PRIVATE DEBUG=1)

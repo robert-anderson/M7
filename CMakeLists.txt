@@ -22,27 +22,35 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=core-avx2")
 
 find_package(LAPACK REQUIRED)
 
-find_package(MPI)
+
+find_package(MPI REQUIRED COMPONENTS C CXX)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
 if (MPI_FOUND)
     add_definitions(-DHAVE_MPI)
 else()
 endif()
 
+set(ExternalProjectCMakeArgs
+        -DHDF5_ENABLE_PARALLEL=ON
+        -DHDF5_BUILD_CPP_LIB=OFF
+        -DHDF5_BUILD_JAVA=OFF
+        -DHDF5_ENABLE_THREADSAFE=OFF)
 
-option(ENABLE_HDF5 "Enable HDF5 support" ON)
+option(FORCE_HDF5_INSTALL "Force the download and installation of HDF5" 1)
+option(ENABLE_HDF5 "Enable HDF5 support" 1)
 if(ENABLE_HDF5)
-    find_package(HDF5)
-    if(HDF5_FOUND)
-        include_directories(${HDF5_INCLUDE_DIR})
-        set(_HDF5_LIBS hdf5)
-    else()
+    #find_package(HDF5)
+    #if(HDF5_FOUND)
+    #    include_directories(${HDF5_INCLUDE_DIR})
+    #    set(_HDF5_LIBS hdf5)
+    #else()
         # we did not find it so we fetch it from the web, configure, compile, and link
         include(ExternalProject)
         set(_HDF5_VERSION "1.10.5")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
         ExternalProject_Add(hdf5_local
-                URL http://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+                #URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+                URL /home/rja/Downloads/hdf5-${_HDF5_VERSION}.tar.gz
                 URL_MD5 e115eeb66e944fa7814482415dd21cc4
                 CMAKE_ARGS ${ExternalProjectCMakeArgs}
                 SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
@@ -56,7 +64,7 @@ if(ENABLE_HDF5)
                 ${PROJECT_BINARY_DIR}/hdf5_local/build
         )
         set(_HDF5_LIBS ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a -ldl)
-    endif()
+    #endif()
 endif()
 
 
