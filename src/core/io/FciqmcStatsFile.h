@@ -19,6 +19,7 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<defs::ham_comp_t> m_l2_norm;
     StatsColumn<size_t> m_ninitiator;
     StatsColumn<size_t> m_nocc_onv;
+    StatsColumn<defs::prob_t> m_psingle;
     FciqmcStatsSpecifier() :
     StatsSpecifier("FCIQMC"),
     m_icycle(this, "Cycle number"),
@@ -31,7 +32,8 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     m_ref_proj_energy(this, "Reference-projected energy"),
     m_l2_norm(this, "L2 norm of the wavefunction"),
     m_ninitiator(this, "Initiator ONVs"),
-    m_nocc_onv(this, "Occupied ONVs")
+    m_nocc_onv(this, "Occupied ONVs"),
+    m_psingle(this, "Probability of attempting to draw a single excitation")
     {}
 };
 

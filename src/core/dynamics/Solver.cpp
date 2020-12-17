@@ -242,6 +242,7 @@ void Solver::output_stats() {
         m_stats->m_l2_norm() = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
         m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);
         m_stats->m_nocc_onv() = m_wf.m_nocc_onv.reduced(0, 0);
+        m_stats->m_psingle() = m_prop.m_magnitude_logger.m_psingle;
         m_stats->flush();
     }
 }

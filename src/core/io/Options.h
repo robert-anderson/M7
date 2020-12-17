@@ -6,6 +6,7 @@
 #define M7_OPTIONS_H
 
 #include <string>
+#include <src/defs.h>
 
 struct Options {
     std::string fcidump_path = "FCIDUMP";
@@ -46,6 +47,7 @@ struct Options {
     size_t nboson_max = 0ul;
     double boson_coupling = 0.0;
     double boson_frequency = 0.0;
+    defs::prob_t psingle_initial = 0.0;
 
     bool validate() const;
 

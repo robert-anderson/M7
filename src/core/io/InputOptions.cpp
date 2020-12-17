@@ -110,6 +110,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
              "accumulate and output average walker occupations of Kramers sectors");
 
     add_option("--nboson_max", nboson_max,
-             "maximum allowed occupation of bosonic modes");
+               "maximum allowed occupation of bosonic modes");
+
+    add_option("--psingle_initial", psingle_initial,
+               "initial probability with which to attempt to draw single excitations")
 
 }

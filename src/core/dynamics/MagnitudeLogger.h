@@ -23,6 +23,10 @@ class MagnitudeLogger {
     Epoch m_enough_singles_for_dynamic_tau;
     Epoch m_enough_doubles_for_dynamic_tau;
 
+    defs::prob_t psingle_guess(size_t nsite, size_t nelec){
+        return 1.0/(integer_utils::combinatorial(2*nsite-nelec, 2)/double(2*nsite-nelec)+1);
+    }
+
 public:
     // the recommended timestep based on the hi_mag and the maximum acceptable bloom
     defs::prob_t m_psingle;
@@ -30,11 +34,7 @@ public:
 
     MagnitudeLogger(const Options &input, defs::prob_t m_psingle);
 
-    MagnitudeLogger(const Options &input, size_t nsite, size_t nelec):
-    MagnitudeLogger(input,1/(integer_utils::combinatorial(2*nsite-nelec, 2)/double(2*nsite-nelec)+1))
-    {
-        std::cout << "Magnitude Logger initialized" << std::endl;
-    }
+    MagnitudeLogger(const Options &input, size_t nsite, size_t nelec);
 
     void log(size_t nexcit, defs::ham_t helem, defs::prob_t prob);
 
