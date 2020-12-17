@@ -232,6 +232,9 @@ namespace hdf5 {
 
     };
 
+<<<<<<< HEAD
 }
 
+=======
+>>>>>>> 8671daf82cb55c8df673a381df6d143241f9405f
 #endif //M7_HDF5WRAPPER_H
