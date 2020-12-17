@@ -27,13 +27,9 @@ public:
         std::cout << "Excitation generator base initialized" << std::endl;
     }
 
-    virtual bool draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
+    virtual bool draw(const views::Onv<> &src_onv, views::Onv<> &dst_onv,
                       const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-                      defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) = 0;
-
-    virtual bool draw(const views::Onv<1> &src_onv, views::Onv<1> &dst_onv,
-                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-                      defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<1> &anticonn) = 0;
+                      defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<> &anticonn) = 0;
 
     const Hamiltonian<> *ham(){return m_h;}
 };
