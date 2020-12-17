@@ -26,8 +26,8 @@ Parallel HDF5 is a non-prerequisite dependency which is downloaded, compiled, an
 If using the Intel C++ compiler, make sure the compilevars.sh has been sourced to correctly configure the library path environment variables prior to invoking CMake.
 Otherwise, HDF5 may fail to find Intel symbols such as `_intel_fast_memcpy` at link time.
 
-Also, the HDF5 build script may quit reporting that MPI_C_FOUND is not set, meaning that CMake's FIND_PACKAGE feature could not determine the path of the MPI library.
-Ensuring that the MPI library root is included in the PATH environment variable should be sufficient to overcome this.
+Also, the HDF5 build script may quit, reporting that `MPI_C_FOUND` is not set, meaning that CMake's `FIND_PACKAGE` feature could not determine the path of the MPI library.
+Ensuring that the MPI library root is included in the `PATH` environment variable should be sufficient to overcome this.
 This issue may arise in IDEs where the MPI compiler executable has been configured as the default compiler, which allows the M7 CMakeLists.txt file to find the MPI path, but fails for the HDF5 external project.
 In such cases, set the PATH variable within the IDE's toolchain dialogue to contain the MPI library root.
 
