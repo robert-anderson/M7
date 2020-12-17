@@ -37,9 +37,9 @@ struct Wavefunction {
 
     Wavefunction(const Options &opts, size_t nsite):
             m_opts(opts),
-            m_walkers("walker table", 1000, nsite, 1, 1),
+            m_walkers("walker table", opts.nwalker_target/mpi::nrank(), nsite, 1, 1),
             m_spawn("spawning communicator", 0.5, nsite, 1, 1),
-            m_ra(100, 10),
+            m_ra(opts.nload_balance_block_per_rank*mpi::nrank(), 10),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),
             m_nocc_onv(m_summables, {1, 1}),
