@@ -72,21 +72,21 @@ public:
         for (auto& it: sendcounts) it*=row_dsize();
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
-        std::cout << "Sending datawords " << utils::to_string(sendcounts) << std::endl;
+        //std::cout << "Sending datawords " << utils::to_string(sendcounts) << std::endl;
         mpi::all_to_all(sendcounts, recvcounts);
-        std::cout << "Receiving datawords " << utils::to_string(recvcounts) << std::endl;
+        //std::cout << "Receiving datawords " << utils::to_string(recvcounts) << std::endl;
 
         auto senddispls = m_send.displs();
-        std::cout << "Sending displacements " << utils::to_string(senddispls) << std::endl;
+        //std::cout << "Sending displacements " << utils::to_string(senddispls) << std::endl;
         defs::inds recvdispls(mpi::nrank(), 0ul);
         for (size_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-        std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
+        //std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
 
-        logger::write("Send List usage fraction: " +
-                      std::to_string(sendcounts[mpi::irank()] / double(m_send[0].bw_dsize())), 0, logger::debug);
-        logger::write("Receive List usage fraction: " +
-                      std::to_string(recvcounts[mpi::irank()] / double(m_recv.bw_dsize())), 0, logger::debug);
+//        logger::write("Send List usage fraction: " +
+//                      std::to_string(sendcounts[mpi::irank()] / double(m_send[0].bw_dsize())), 0, logger::debug);
+//        logger::write("Receive List usage fraction: " +
+//                      std::to_string(recvcounts[mpi::irank()] / double(m_recv.bw_dsize())), 0, logger::debug);
 
         auto recv_dsize = recvdispls.back() + recvcounts.back();
         auto recv_nrow = recv_dsize / row_dsize();
@@ -111,8 +111,8 @@ public:
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
         recv().m_hwm = recv_nrow;
-        std::cout << "Number of recvd datawords " << (recvdispls.back() + recvcounts.back()) << std::endl;
-        std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
+//        std::cout << "Number of recvd datawords " << (recvdispls.back() + recvcounts.back()) << std::endl;
+//        std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
         m_send.clear();
     }
 };
