@@ -113,6 +113,6 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "maximum allowed occupation of bosonic modes");
 
     add_option("--psingle_initial", psingle_initial,
-               "initial probability with which to attempt to draw single excitations")
+               "initial probability with which to attempt to draw single excitations");
 
 }
