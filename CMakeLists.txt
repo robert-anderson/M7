@@ -49,8 +49,8 @@ if(ENABLE_HDF5)
         set(_HDF5_VERSION "1.10.5")
         file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
         ExternalProject_Add(hdf5_local
-                #URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
-                URL /home/rja/Downloads/hdf5-${_HDF5_VERSION}.tar.gz
+                URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+                #URL /home/rja/Downloads/hdf5-${_HDF5_VERSION}.tar.gz
                 URL_MD5 e115eeb66e944fa7814482415dd21cc4
                 CMAKE_ARGS ${ExternalProjectCMakeArgs}
                 SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}

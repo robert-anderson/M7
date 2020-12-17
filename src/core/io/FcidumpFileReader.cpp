@@ -158,7 +158,7 @@ void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
     defs::ham_t value;
     // this will eventually hold all orderings of the first example of an
     // integral with 4 distinct indices
-    std::array<defs::inds, 8> inds_distinct{};
+    std::array<defs::inds, 8> inds_distinct;
     m_isymm = 0ul;
     while (reader.next(inds, value)) {
         if (std::all_of(inds.begin(), inds.end(), [](size_t i){return i>0;})) {

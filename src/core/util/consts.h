@@ -2,11 +2,12 @@
 // Created by Robert John Anderson on 2020-01-17.
 //
 
-#include <complex>
-#include <limits>
-
 #ifndef M7_CONSTS_H
 #define M7_CONSTS_H
+
+#include <complex>
+#include <limits>
+#include <typeinfo>
 
 namespace consts {
 
