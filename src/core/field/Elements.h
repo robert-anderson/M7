@@ -71,6 +71,8 @@ namespace elements {
 
     template<bool enable_bosons=defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
+
+    using Det = Onv<0>;
 }
 
 #endif //M7_ELEMENTS_H

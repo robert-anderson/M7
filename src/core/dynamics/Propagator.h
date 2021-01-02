@@ -24,7 +24,6 @@ public:
     mutable VacantOrbitals m_vac;
 
     Epoch m_variable_shift;
-//    Epoch& m_semi_stochastic;
 
     Propagator(const Hamiltonian<> &ham, const Options& opts):
     m_ham(ham),
@@ -38,11 +37,6 @@ public:
     m_variable_shift("variable shift mode")
     {}
 
-
-    //Propagator(FciqmcCalculation *fciqmc);
-
-    //virtual ~Propagator()= default;
-
     virtual void diagonal(Wavefunction& m_wf, const size_t& irow) = 0;
 
     virtual void off_diagonal(Wavefunction& m_wf, const size_t& irow) = 0;
@@ -51,27 +45,12 @@ public:
         return weight;
     }
 
-//    Epoch &variable_shift() {
-//        return m_variable_shift;
-//    }
-//
-//    Epoch &semi_stochastic() {
-//        return m_semi_stochastic;
-//    }
-
     const double& tau() const {
         return m_magnitude_logger.m_tau;
     }
 
     void update(const size_t& icycle, const Wavefunction& wf);
 
-//
-//    void write_iter_stats(FciqmcStatsFile* stats_file) {
-//        if (!mpi::i_am_root()) return;
-//        stats_file->m_timestep.write(tau());
-//        stats_file->m_diagonal_shift.write(m_shift);
-//        stats_file->m_psingle.write(m_magnitude_logger.m_psingle);
-//    }
 };
 
 #endif //M7_PROPAGATOR_H

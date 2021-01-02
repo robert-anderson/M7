@@ -8,19 +8,29 @@
 #include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 
-struct TestTable : MappedTable<fields::Det> {
-    fields::Det m_config;
-    TestTable(size_t nsite):
-    MappedTable<fields::Det>(m_config, 10),
-            m_config(this, nsite, "configuration"){}
-};
+namespace mapped_table_test {
+    struct FloatTable : MappedTable<fields::Det> {
+        fields::Number<float> m_f;
+        FloatTable():
+    };
 
-TEST(MappedTable, TEST){
+    struct DetTable : MappedTable<fields::Det> {
+        fields::Det m_config;
+        DetTable(size_t nsite) :
+                MappedTable<fields::Det>(m_config, 10),
+                m_config(this, nsite, "configuration") {}
+    };
+}
+
+TEST(MappedTable, TEST) {
     const size_t nsite = 10;
+    typedef BufferedTable<mapped_table_test::DetTable> table_t;
 
-    BufferedTable<TestTable> bt("Mapped table test", nsite);
+    table_t bt("Mapped table test", nsite);
     bt.expand(10);
-    elements::Onv<> config(nsite);
+    elements::Det config(nsite);
+
+
 //    config.m_fonv[2] = 1;
 //    config.m_bonv[2] = 5;
 //    std::cout << config.to_string() << std::endl;
