@@ -9,10 +9,10 @@
 #include "gtest/gtest.h"
 
 namespace mapped_table_test {
-    struct FloatTable : MappedTable<fields::Det> {
-        fields::Number<float> m_f;
-        FloatTable():
-    };
+//    struct FloatTable : MappedTable<fields::Det> {
+//        fields::Number<float> m_f;
+//        FloatTable():
+//    };
 
     struct DetTable : MappedTable<fields::Det> {
         fields::Det m_config;

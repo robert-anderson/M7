@@ -8,6 +8,7 @@
 #include "src/core/table/MappedTable.h"
 #include "src/core/excitgen/BosonExcitationGenerator.h"
 
+#ifdef ENABLE_BOSONS
 namespace boson_coupling_samplers_test {
     struct TestTable : MappedTable<fields::Onv<1>> {
         fields::Onv<1> m_onv;
@@ -115,3 +116,4 @@ TEST(BosonExcitationGenerator, SingleOnvTest){
     tt.test_boson_gen(src_onv, ndraw, nboson_max);
 
 }
+#endif //ENABLE_BOSONS
