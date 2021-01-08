@@ -40,8 +40,8 @@ size_t Table::add_field(const TableField *field) {
         }
     }
 
-    m_tight_row_size = offset+field->m_size;
-    m_row_dsize = integer_utils::divceil(m_tight_row_size, defs::nbyte_data);
+    m_current_byte_offset = offset + field->m_size;
+    m_row_dsize = integer_utils::divceil(m_current_byte_offset, defs::nbyte_data);
     m_row_size = m_row_dsize*defs::nbyte_data;
 
     m_fields.push_back(field);
@@ -61,7 +61,7 @@ void Table::clear() {
 }
 
 void Table::clear_row(const size_t &irow) {
-    std::memset(begin(irow), 0, m_tight_row_size);
+    std::memset(begin(irow), 0, m_current_byte_offset);
 }
 
 std::string Table::field_details(size_t width) const {

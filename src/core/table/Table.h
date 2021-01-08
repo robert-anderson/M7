@@ -19,7 +19,7 @@ struct Table {
     BufferWindow m_bw;
     size_t m_row_size;
     size_t m_row_dsize;
-    size_t m_tight_row_size = 0ul;
+    size_t m_current_byte_offset = 0ul;
     char *m_data;
     size_t m_nrow = 0ul;
     /*
