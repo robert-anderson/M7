@@ -6,10 +6,12 @@
 #define M7_SOLVER_H
 
 #include <src/core/hamiltonian/Hamiltonian.h>
+#include <src/core/util/Timer.h>
 #include "Reference.h"
 #include "src/core/table/CommunicatingPair.h"
 #include "src/core/field/Fields.h"
 #include "src/core/io/FciqmcStatsFile.h"
+#include "src/core/io/ParallelStatsFile.h"
 #include "Propagator.h"
 
 class Solver {
@@ -19,7 +21,17 @@ class Solver {
     const Options &m_opts;
     Wavefunction &m_wf;
     Reference m_reference;
+
     StatsFile<FciqmcStatsSpecifier>::ptr_t m_stats;
+    StatsFile<ParallelStatsSpecifier>::ptr_t m_parallel_stats;
+
+    /*
+     * Timers for the main parts of the solver
+     */
+    Timer m_propagate_timer;
+    Timer m_synchronization_timer;
+    Timer m_communicate_timer;
+    Timer m_annihilate_timer;
 
     /*
      * Sanity checking variables

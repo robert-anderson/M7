@@ -2,7 +2,7 @@
 // Created by rja on 02/07/2020.
 //
 
-#include "ParallelizationStatsFile.h"
+#include "ParallelStatsFile.h"
 
 #if 0
 ParallelizationStatsFile::ParallelizationStatsFile(const Options &input) :

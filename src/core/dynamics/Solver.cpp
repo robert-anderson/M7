@@ -33,6 +33,10 @@ void Solver::loop_over_occupied_onvs() {
 
         propagate_row(irow);
     }
+    m_synchronization_timer.reset();
+    m_synchronization_timer.unpause();
+    mpi::barrier();
+    m_synchronization_timer.pause();
 }
 
 void Solver::annihilate_row(const size_t &irow_recv) {
@@ -129,14 +133,26 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, views::Onv<> ref_onv) :
         m_reference(m_wf, m_prop.m_ham, ref_onv, m_opts) {
     if (mpi::i_am_root())
         m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
+    m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(
+            "rank_"+std::to_string(mpi::irank())+".stats");
 }
 
 void Solver::execute(size_t niter) {
     for (size_t i = 0ul; i < niter; ++i) {
         reset();
+
+        m_propagate_timer.unpause();
         loop_over_occupied_onvs();
+        m_propagate_timer.pause();
+
+        m_communicate_timer.unpause();
         m_wf.m_spawn.communicate();
+        m_communicate_timer.pause();
+
+        m_annihilate_timer.unpause();
         loop_over_spawned();
+        m_annihilate_timer.pause();
+
         reduce();
         output_stats();
         ++m_icycle;
@@ -245,4 +261,18 @@ void Solver::output_stats() {
         m_stats->m_psingle() = m_prop.m_magnitude_logger.m_psingle;
         m_stats->flush();
     }
+
+
+    m_parallel_stats->m_icycle() = m_icycle;
+    m_parallel_stats->m_synchronization_wait_time() = m_synchronization_timer.total();
+//    m_parallel_stats->m_nrow_free_walker_list() = m_wf.m_walkers.
+//    StatsColumn<size_t> m_walker_list_high_water_mark;
+//    StatsColumn<double> m_walker_list_high_water_mark_fraction;
+//    StatsColumn<size_t> m_nrow_sent;
+//    StatsColumn<size_t> m_largest_nrow_sent;
+//    StatsColumn<double> m_largest_send_list_filled_fraction;
+//    StatsColumn<size_t> m_irank_largest_nrow_sent;
+//    StatsColumn<size_t> m_nrow_recv;
+//    StatsColumn<double> m_recv_list_filled_fraction;
+    m_parallel_stats->flush();
 }
