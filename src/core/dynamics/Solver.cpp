@@ -6,23 +6,32 @@
 
 void Solver::loop_over_occupied_onvs() {
     /*
-     * Loop over all rows in the m_data list and if the row is not empty:
+     * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
      *      ascertain the initiator status of the ONV
      *      if not initiator and weight > initiator threshold, then grant initiator status
      *      if initiator and weight < initiator threshold, then revoke initiator status
      *      perform all the off-diagonal propagation (fill send table)
      *      update local weight in the diagonal cloning/death step
+     * else if all elements of the m_weight field are zero, the row should be removed
      */
     for (size_t irow = 0ul; irow < m_wf.m_walkers.m_hwm; ++irow) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
          */
-        if (m_wf.m_walkers.m_onv(irow).is_zero()) {
+
+        if (m_wf.m_walkers.is_cleared(irow)) {
             // row is empty
-            return;
+            continue;
         }
 
         const auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+
+        if (consts::float_nearly_zero(weight, 1e-12)){
+            // ONV has become unoccupied and must be removed from mapped list
+            m_wf.remove_walker(irow);
+            continue;
+        }
+
         m_wf.m_nocc_onv(0, 0)++;
         if (m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0))
             m_wf.m_ninitiator(0, 0)++;

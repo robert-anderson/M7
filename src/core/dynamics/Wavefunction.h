@@ -112,6 +112,13 @@ struct Wavefunction {
         set_weight(irow, 0.0);
     }
 
+    void remove_walker(const size_t& irow){
+        const auto onv = m_walkers.m_onv(irow);
+        auto lookup = m_walkers[onv];
+        zero_weight(irow);
+        m_walkers.erase(lookup);
+    }
+
     size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
                          const defs::ham_comp_t &hdiag, bool refconn) {
         if (m_walkers.is_full()) m_walkers.expand_by_factor(m_opts.buffer_expansion_factor);

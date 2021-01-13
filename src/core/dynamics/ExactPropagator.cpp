@@ -24,7 +24,7 @@ void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
 
             m_aconn.zero();
             m_aconn.add(occ, vac);
-            m_dst_onv.clear();
+            m_dst_onv.zero();
             m_aconn.apply(src_onv, m_dst_onv);
             auto helement = m_ham.get_element_1(m_aconn);
             if (consts::float_is_zero(helement)) continue;

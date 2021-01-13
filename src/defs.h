@@ -47,6 +47,7 @@
 
 //#define ENABLE_BOSONS
 //#define ENABLE_COMPLEX
+//#define ENABLE_CEILING_SPAWN_ATTEMPTS
 
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";

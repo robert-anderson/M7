@@ -67,6 +67,7 @@ public:
     }
 
     void communicate() {
+
         auto hwms = m_send.hwms();
         defs::inds sendcounts(hwms);
         for (auto& it: sendcounts) it*=row_dsize();
@@ -97,15 +98,15 @@ public:
             m_recv.resize(std::ceil((1.0+m_buffer_expansion_factor)*recv_nrow));
         }
 
-        auto tmp = mpi::all_to_allv(m_send.ptr(), sendcounts, senddispls,
-                                    m_recv.ptr(), recvcounts, recvdispls);
+        auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
+                                    m_recv.dbegin(), recvcounts, recvdispls);
 
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
          */
-        ASSERT(std::memcmp(
-               (void*) (send(mpi::irank()).ptr()),
-               (void*) (recv().ptr()+recvdispls[mpi::irank()]),
+        ASSERT(mpi::nrank()> 0 or std::memcmp(
+               (void*) (send(mpi::irank()).begin()),
+               (void*) (recv().begin()+recvdispls[mpi::irank()]),
                recvcounts[mpi::irank()]*defs::nbyte_data)==0);
 
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
@@ -113,6 +114,7 @@ public:
         recv().m_hwm = recv_nrow;
 //        std::cout << "Number of recvd datawords " << (recvdispls.back() + recvcounts.back()) << std::endl;
 //        std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
+
         m_send.clear();
     }
 };

@@ -63,7 +63,7 @@ struct MappedTable : Table {
     }
 
     void erase(LookupResult result){
-        clear_row(*result);
+        clear(*result);
         m_free_rows.push(*result);
         result.m_bucket.erase_after(result.m_prev);
         // put into "not found" state:

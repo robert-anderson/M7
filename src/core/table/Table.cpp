@@ -16,17 +16,38 @@ size_t Table::push_back(size_t nrow) {
     return tmp;
 }
 
-defs::data_t *Table::ptr() {
+defs::data_t *Table::dbegin() {
+    return m_bw.m_ptr;
+}
+
+const defs::data_t *Table::dbegin() const {
     return m_bw.m_ptr;
 }
 
 char *Table::begin() {
-    return (char *) m_bw.m_ptr;
+    return (char*) m_bw.m_ptr;
+}
+
+const char *Table::begin() const {
+    return (const char*)m_bw.m_ptr;
+}
+
+defs::data_t *Table::dbegin(const size_t &irow) {
+    ASSERT(irow<m_hwm)
+    return m_bw.m_ptr + irow * m_row_dsize;
+}
+
+const defs::data_t *Table::dbegin(const size_t &irow) const {
+    ASSERT(irow<m_hwm)
+    return m_bw.m_ptr + irow * m_row_dsize;
 }
 
 char *Table::begin(const size_t &irow) {
-    ASSERT(irow<m_hwm)
-    return begin() + irow * m_row_size;
+    return (char*)dbegin(irow);
+}
+
+const char *Table::begin(const size_t &irow) const {
+    return (const char*)dbegin(irow);
 }
 
 size_t Table::add_field(const TableField *field) {
@@ -56,12 +77,20 @@ void Table::move(BufferWindow new_bw) {
 }
 
 void Table::clear() {
-    std::memset((char *) (m_bw.m_ptr), 0, m_row_size * m_hwm);
+    std::memset(begin(), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
 }
 
-void Table::clear_row(const size_t &irow) {
-    std::memset(begin(irow), 0, m_current_byte_offset);
+void Table::clear(const size_t &irow) {
+    std::memset(begin(irow), 0, m_row_size);
+}
+
+bool Table::is_cleared() const {
+    return std::all_of(dbegin(), dbegin()+m_row_dsize*m_nrow, [](const defs::data_t& i){return i==0;});
+}
+
+bool Table::is_cleared(const size_t &irow) const {
+    return std::all_of(dbegin(irow), dbegin(irow)+m_row_dsize, [](const defs::data_t& i){return i==0;});
 }
 
 std::string Table::field_details(size_t width) const {
@@ -88,11 +117,13 @@ void Table::print_contents(const defs::inds *ordering) const {
     const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
     for (size_t iirow=0ul; iirow<n; ++iirow){
         auto irow = ordering ? (*ordering)[iirow] : iirow;
+        std::cout << irow << ". ";
         for (auto field: m_fields){
-            std::cout << irow << ". " << field->to_string(irow)+" ";
+            std::cout << field->to_string(irow)+" ";
         }
         std::cout << "\n";
     }
+    std::cout << std::endl;
 }
 
 void Table::print_contents(const ExtremalValues &xv) const {

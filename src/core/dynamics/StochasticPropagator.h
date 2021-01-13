@@ -75,6 +75,10 @@ public:
     template<typename T>
     size_t get_nattempt(const T &weight) {
         static_assert(std::is_floating_point<T>::value, "template arg must be floating point");
+
+#ifndef ENABLE_CEILING_SPAWN_ATTEMPTS
+        return m_prng.stochastic_round(std::abs(weight), 1.0);
+#else
         /*
          * We want to make nattempt = ceil(|weight|) spawning attempts.
          * can't rely on std::abs to provide the right answer in the case of complex arithmetic with
@@ -83,6 +87,7 @@ public:
          */
         if (weight < 0) return (-weight) < 1 ? 1 : std::round(-weight);
         else return (weight) < 1 ? 1 : std::round(weight);
+#endif
     }
 
     template<typename T>

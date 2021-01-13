@@ -37,11 +37,11 @@ public:
         return m_nrow_per_table;
     }
 
-    defs::data_t* ptr() {
+    defs::data_t* dbegin() {
         return m_buffer.ptr();
     }
 
-    const defs::data_t* ptr() const {
+    const defs::data_t* dbegin() const {
         return m_buffer.ptr();
     }
 

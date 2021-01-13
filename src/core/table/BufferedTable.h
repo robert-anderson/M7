@@ -20,14 +20,6 @@ public:
         table_t::move(BufferWindow(m_buffer));
     }
 
-    const defs::data_t* ptr() const {
-        return m_buffer.ptr();
-    }
-
-    defs::data_t* ptr() {
-        return m_buffer.ptr();
-    }
-
     size_t buffer_dsize() const {
         return m_buffer.dsize();
     }

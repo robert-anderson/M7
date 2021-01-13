@@ -31,11 +31,25 @@ struct Table {
 
     size_t push_back(size_t nrow=1);
 
-    defs::data_t* ptr();
+
+
+    defs::data_t* dbegin();
+
+    const defs::data_t* dbegin() const;
 
     char *begin();
 
+    const char *begin() const;
+
+
+
+    defs::data_t* dbegin(const size_t &irow);
+
+    const defs::data_t* dbegin(const size_t &irow) const;
+
     char *begin(const size_t &irow);
+
+    const char *begin(const size_t &irow) const;
 
     size_t add_field(const TableField *field);
 
@@ -43,7 +57,7 @@ struct Table {
 
     void clear();
 
-    void clear_row(const size_t &irow);
+    void clear(const size_t &irow);
 
     size_t bw_dsize() const;
 
@@ -54,6 +68,10 @@ struct Table {
     void print_contents(const defs::inds* ordering=nullptr) const;
 
     void print_contents(const ExtremalValues& xv) const;
+
+    bool is_cleared() const;
+
+    bool is_cleared(const size_t &irow) const;
 
 };
 

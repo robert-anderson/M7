@@ -22,10 +22,10 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     }
 
     for (size_t idst = 1ul; idst < mpi::nrank(); ++idst)
-        ASSERT_EQ(std::distance(comm_pair.send(idst-1).ptr(), comm_pair.send(idst).ptr()), 1);
+        ASSERT_EQ(std::distance(comm_pair.send(idst-1).dbegin(), comm_pair.send(idst).dbegin()), 1);
 
     for (size_t idst = 0ul; idst < mpi::nrank(); ++idst)
-        ASSERT_EQ(comm_pair.send().ptr()[idst], 9900 + 10 * idst + mpi::irank());
+        ASSERT_EQ(comm_pair.send().dbegin()[idst], 9900 + 10 * idst + mpi::irank());
 
     comm_pair.communicate();
 
