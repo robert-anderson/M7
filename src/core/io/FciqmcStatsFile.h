@@ -11,8 +11,8 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<size_t> m_icycle;
     StatsColumn<defs::ham_comp_t> m_tau;
     StatsColumn<defs::ham_comp_t> m_shift;
-    StatsColumn<defs::wf_t> m_nwalker;
-    StatsColumn<defs::wf_t> m_delta_nwalker;
+    StatsColumn<defs::wf_comp_t> m_nwalker;
+    StatsColumn<defs::wf_comp_t> m_delta_nwalker;
     StatsColumn<defs::ham_t> m_ref_proj_energy_num;
     StatsColumn<defs::wf_t> m_ref_weight;
     StatsColumn<defs::ham_comp_t> m_ref_proj_energy;
@@ -25,7 +25,7 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     m_icycle(this, "Cycle number"),
     m_tau(this, "Timestep"),
     m_shift(this, "Diagonal shift"),
-    m_nwalker(this, "Total number of walkers"),
+    m_nwalker(this, "WF L1 norm (number of walkers)"),
     m_delta_nwalker(this, "Walkers added this cycle"),
     m_ref_proj_energy_num(this, "Numerator of reference-projected energy estimator"),
     m_ref_weight(this, "Reference weight"),

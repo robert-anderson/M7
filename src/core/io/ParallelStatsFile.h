@@ -11,6 +11,7 @@
 struct ParallelStatsSpecifier : StatsSpecifier {
     StatsColumn<size_t> m_icycle;
     StatsColumn<double> m_synchronization_wait_time;
+    StatsColumn<defs::wf_comp_t> m_nwalker;
     StatsColumn<size_t> m_nrow_free_walker_list;
     StatsColumn<size_t> m_walker_list_high_water_mark;
     StatsColumn<double> m_walker_list_high_water_mark_fraction;
@@ -25,6 +26,7 @@ struct ParallelStatsSpecifier : StatsSpecifier {
             StatsSpecifier("Parallelization"),
             m_icycle(this, "Cycle number"),
             m_synchronization_wait_time(this, "Time waited at barrier"),
+            m_nwalker(this, "WF L1 norm (number of walkers)"),
             m_nrow_free_walker_list(this, "Free rows in the walker table"),
             m_walker_list_high_water_mark(this, "High water mark of walker table"),
             m_walker_list_high_water_mark_fraction(

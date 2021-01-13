@@ -274,6 +274,7 @@ void Solver::output_stats() {
 
     m_parallel_stats->m_icycle() = m_icycle;
     m_parallel_stats->m_synchronization_wait_time() = m_synchronization_timer.total();
+    m_parallel_stats->m_nwalker() = m_wf.m_nwalker(0, 0);
 //    m_parallel_stats->m_nrow_free_walker_list() = m_wf.m_walkers.
 //    StatsColumn<size_t> m_walker_list_high_water_mark;
 //    StatsColumn<double> m_walker_list_high_water_mark_fraction;
