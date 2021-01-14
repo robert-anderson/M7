@@ -13,6 +13,8 @@ Buffer::Window::Window(Buffer *buffer) {
 }
 
 size_t Buffer::Window::dsize() const {
+    ASSERT(m_dbegin);
+    ASSERT(m_dend);
     return std::distance(m_dbegin, m_dend);
 }
 
@@ -102,13 +104,18 @@ void Buffer::resize(size_t dsize) {
     auto new_window_dsize = dsize / m_nwindow_max;
     for (size_t iwindow = 0ul; iwindow < m_nwindow_max; ++iwindow) {
         // work backwards for enlargement
-        auto window = m_windows[m_windows.size() - iwindow - 1];
+        auto jwindow = m_windows.size() - iwindow - 1;
+        auto window = m_windows[jwindow];
         ASSERT(window->m_buffer)
         ASSERT(window->m_buffer==this)
-        auto new_dbegin = tmp.data() + iwindow * new_window_dsize;
+        auto new_dbegin = tmp.data() + jwindow * new_window_dsize;
         window->move(new_dbegin, new_dbegin + new_window_dsize);
     }
     m_data = std::move(tmp);
+    if (!m_name.empty()) {
+        std::cout << "New " << capacity_string()+"\n";
+    }
+    ASSERT(dbegin()==m_windows[0]->dbegin());
 }
 
 void Buffer::expand() {

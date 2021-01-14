@@ -21,7 +21,12 @@ public:
     template<typename ...Args>
     CommunicatingPair(std::string name, double buffer_expansion_factor, Args... args):
     m_send(name+" send", mpi::nrank(), args...), m_recv(name+" recv", args...),
-    m_buffer_expansion_factor(buffer_expansion_factor){}
+    m_buffer_expansion_factor(buffer_expansion_factor){
+        m_send.set_expansion_factor(m_buffer_expansion_factor);
+        m_recv.set_expansion_factor(m_buffer_expansion_factor);
+        m_send.expand(1);
+        m_recv.expand(1);
+    }
 
     size_t row_dsize() const {
         return static_cast<const Table&>(m_recv).m_row_dsize;
@@ -67,7 +72,6 @@ public:
     }
 
     void communicate() {
-
         auto hwms = m_send.hwms();
         defs::inds sendcounts(hwms);
         for (auto& it: sendcounts) it*=row_dsize();
@@ -91,30 +95,34 @@ public:
 
         auto recv_dsize = recvdispls.back() + recvcounts.back();
         auto recv_nrow = recv_dsize / row_dsize();
-        if (recv_dsize > m_recv.bw_dsize()){
+
+        if (recv_dsize > static_cast<const Table&>(recv()).bw_dsize()){
             /*
              * the recv table is full
+             * this expansion by a factor is done explicitly here, because we
+             * want to expand relative to size of the incoming data, not the
+             * current size of the buffer
              */
             m_recv.resize(std::ceil((1.0+m_buffer_expansion_factor)*recv_nrow));
+
         }
+
+        if (!m_send.dbegin()) mpi::stop_all("Send buffer is not allocated!");
+        if (!m_recv.dbegin()) mpi::stop_all("Recv buffer is not allocated!");
 
         auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
                                     m_recv.dbegin(), recvcounts, recvdispls);
-
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
          */
-        ASSERT(mpi::nrank()> 0 or std::memcmp(
-               (void*) (send(mpi::irank()).begin()),
-               (void*) (recv().begin()+recvdispls[mpi::irank()]),
+        ASSERT(!send(mpi::irank()).dbegin() or std::memcmp(
+               (void*) (send(mpi::irank()).dbegin()),
+               (void*) (recv().dbegin()+recvdispls[mpi::irank()]),
                recvcounts[mpi::irank()]*defs::nbyte_data)==0);
 
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
         recv().m_hwm = recv_nrow;
-//        std::cout << "Number of recvd datawords " << (recvdispls.back() + recvcounts.back()) << std::endl;
-//        std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
-
         m_send.clear();
     }
 

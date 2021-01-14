@@ -36,19 +36,17 @@ class BufferedTableArray {
 public:
 
     defs::data_t* dbegin() {
+        ASSERT(m_buffer.dbegin()==m_tables[0].dbegin());
         return m_buffer.dbegin();
     }
 
     const defs::data_t* dbegin() const {
+        ASSERT(m_buffer.dbegin()==m_tables[0].dbegin());
         return m_buffer.dbegin();
     }
 
     size_t buffer_dsize() const {
         return m_buffer.dsize();
-    }
-
-    size_t table_dsize() const {
-        return nrow_per_table()*row_dsize();
     }
 
     size_t bw_dsize() const {
@@ -97,7 +95,7 @@ public:
 
     defs::inds displs() const {
         defs::inds res(ntable());
-        for (size_t i=0ul; i<ntable(); ++i) res[i] = table_dsize()*i;
+        for (size_t i=0ul; i<ntable(); ++i) res[i] = bw_dsize()*i;
         return res;
     }
 
@@ -110,6 +108,14 @@ public:
 
     void set_expansion_factor(double f){
         m_buffer.m_expansion_factor = f;
+    }
+
+    void print_contents() {
+        for (size_t itable=0ul; itable<ntable(); ++itable){
+            std::cout << "Table array element " << std::to_string(itable) << ":\n";
+            static_cast<const Table&>(m_tables[itable]).print_contents();
+            std::cout << std::endl;
+        }
     }
 };
 

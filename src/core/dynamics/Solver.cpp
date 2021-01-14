@@ -51,7 +51,6 @@ void Solver::loop_over_occupied_onvs() {
 void Solver::annihilate_row(const size_t &irow_recv) {
     auto &recv = m_wf.m_spawn.recv();
     auto dst_onv = recv.m_dst_onv(irow_recv);
-    if (dst_onv.is_zero()) exit(0);
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())

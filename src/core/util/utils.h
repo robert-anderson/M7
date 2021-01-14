@@ -436,8 +436,15 @@ namespace ci_utils {
 namespace mem_utils {
 
     template<typename T, typename... Args>
-    std::unique_ptr<T> make_unique(Args &&... args) {
+    static std::unique_ptr<T> make_unique(Args &&... args) {
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+
+    static void print_cmp(char* c1, char* c2, size_t n){
+        for (size_t i=0; i<n; ++i){
+            std::cout << int(c1[i]) << " " << int(c2[i]) << std::endl;
+        }
+        std::cout << std::endl;
     }
 }
 
@@ -445,7 +452,7 @@ namespace sort_utils {
 
     template<typename viewable_t>
     std::function<bool(const size_t &, const size_t &)>
-    make_compare_fn(std::function<typename viewable_t::const_view_t(const size_t &)> getter_fn, bool max,
+    static make_compare_fn(std::function<typename viewable_t::const_view_t(const size_t &)> getter_fn, bool max,
                     bool abs_val) {
         if (max) {
             if (abs_val)

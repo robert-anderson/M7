@@ -34,11 +34,13 @@ const char *Table::begin() const {
 
 defs::data_t *Table::dbegin(const size_t &irow) {
     ASSERT(irow<m_hwm)
+    ASSERT(m_bw.dbegin())
     return m_bw.dbegin() + irow * m_row_dsize;
 }
 
 const defs::data_t *Table::dbegin(const size_t &irow) const {
     ASSERT(irow<m_hwm)
+    ASSERT(m_bw.dbegin())
     return m_bw.dbegin() + irow * m_row_dsize;
 }
 
