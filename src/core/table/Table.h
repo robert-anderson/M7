@@ -101,7 +101,8 @@ struct Table {
     virtual void insert_rows(const Buffer& recv){
         const auto nrow = recv.dsize()/m_row_dsize;
         for (size_t irow = 0; irow<nrow; ++irow){
-
+            auto iinsert = push_back();
+            std::memcpy(dbegin(iinsert), recv.dbegin()+irow*m_row_dsize, m_row_size);
         }
     }
 

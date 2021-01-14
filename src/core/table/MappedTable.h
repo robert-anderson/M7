@@ -62,11 +62,20 @@ struct MappedTable : Table {
         return res;
     }
 
-    virtual void erase_rows(const defs::inds& irows) {
-//        for (auto irow : irows) {
-//            auto lookup = (*this)[m_key_field(irow)];
-//            clear(irow);
-//        }
+    void erase_rows(const defs::inds& irows) override {
+        for (auto irow : irows) {
+            auto lookup = (*this)[m_key_field(irow)];
+            erase(lookup);
+        }
+    }
+
+    void insert_rows(const Buffer &recv) override {
+        const auto nrow = recv.dsize()/m_row_dsize;
+        for (size_t irow = 0; irow<nrow; ++irow){
+            auto iinsert = get_free_row();
+            std::memcpy(dbegin(iinsert), recv.dbegin()+irow*m_row_dsize, m_row_size);
+            post_insert(iinsert);
+        }
     }
 
     void erase(LookupResult result){
@@ -77,17 +86,30 @@ struct MappedTable : Table {
         result.m_prev = result.m_bucket.end();
     }
 
+    size_t get_free_row(){
+        if (m_free_rows.empty()) return push_back();
+        auto irow = m_free_rows.top();
+        m_free_rows.pop();
+        return irow;
+    }
+
     size_t insert(const typename field_t::view_t key) {
         ASSERT(!(this->operator[](key)))
-        size_t irow;
-        if (m_free_rows.empty()) irow=push_back();
-        else {
-            irow = m_free_rows.top(); m_free_rows.pop();
-        }
+        auto irow = get_free_row();
         auto& bucket = m_buckets[hash(key) % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
         m_key_field(irow) = key;
         return irow;
+    }
+
+    // for situations in which the row has already been copied-to
+    void post_insert(const size_t& irow) {
+        ASSERT(!Table::is_cleared(irow))
+        auto key = m_key_field(irow);
+        // row mustn't have already been added
+        ASSERT(!(*this)[key]);
+        auto& bucket = m_buckets[hash(key) % nbucket()];
+        bucket.insert_after(bucket.before_begin(), irow);
     }
 
     void print_map() const {
