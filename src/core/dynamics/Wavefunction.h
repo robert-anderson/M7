@@ -123,7 +123,7 @@ struct Wavefunction {
 
     size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
                          const defs::ham_comp_t &hdiag, bool refconn) {
-        if (m_walkers.is_full()) m_walkers.expand();
+        if (m_walkers.is_full()) m_walkers.expand(1);
         auto irow = m_walkers.insert(onv);
         ASSERT(m_walkers.m_onv(irow) == onv)
         set_weight(irow, weight);

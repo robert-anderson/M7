@@ -10,7 +10,7 @@ bool Table::is_full() const {
 }
 
 size_t Table::push_back(size_t nrow) {
-    if (m_hwm>=m_nrow) expand();
+    if (m_hwm+nrow>m_nrow) expand(nrow);
     auto tmp = m_hwm;
     m_hwm+=nrow;
     return tmp;

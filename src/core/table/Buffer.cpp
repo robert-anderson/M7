@@ -13,7 +13,7 @@ Buffer::Window::Window(Buffer *buffer) {
 }
 
 size_t Buffer::Window::dsize() const {
-    ASSERT(m_dbegin);
+    if (!m_dbegin) return 0;
     ASSERT(m_dend);
     return std::distance(m_dbegin, m_dend);
 }
@@ -39,11 +39,6 @@ const defs::data_t *Buffer::Window::dbegin() const {
 void Buffer::Window::resize(size_t dsize) {
     ASSERT(m_buffer)
     m_buffer->resize(dsize * m_buffer->m_nwindow_max);
-}
-
-void Buffer::Window::expand() {
-    ASSERT(m_buffer)
-    m_buffer->expand();
 }
 
 void Buffer::Window::expand(size_t delta_dsize) {
@@ -118,12 +113,8 @@ void Buffer::resize(size_t dsize) {
     ASSERT(dbegin()==m_windows[0]->dbegin());
 }
 
-void Buffer::expand() {
-    expand(size_t(dsize()*m_expansion_factor));
-}
-
 void Buffer::expand(size_t delta_dsize) {
-    resize(dsize() + delta_dsize);
+    resize((dsize() + delta_dsize)*(1+m_expansion_factor));
 }
 
 std::string Buffer::capacity_string() const {

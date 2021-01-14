@@ -380,7 +380,7 @@ public:
      */
 
     template<typename T>
-    static bool send(T *data, size_t ndata, size_t irank_dst, int tag = 0) {
+    static bool send(const T *data, size_t ndata, size_t irank_dst, int tag = 0) {
 #ifdef HAVE_MPI
         return MPI_Send((void*) data, snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag, MPI_COMM_WORLD);
 #endif

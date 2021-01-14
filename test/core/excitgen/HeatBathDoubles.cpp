@@ -35,7 +35,6 @@ namespace heat_bath_doubles_test {
             MatrixElement<defs::ham_t> matel(src_fonv);
             while (enumerator.next(matel)) {
                 matel.aconn.apply(src_fonv, dst_fonv);
-                if (is_full()) expand();
                 insert(dst_fonv);
             }
         }

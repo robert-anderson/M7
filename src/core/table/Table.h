@@ -83,15 +83,9 @@ struct Table {
         m_nrow = nrow;
     }
 
-    void expand(){
-        m_bw.expand();
-        m_nrow = m_bw.dsize()/m_row_dsize;
-    }
-
     void expand(size_t nrow){
-        assert(nrow>m_nrow);
         m_bw.expand(nrow*m_row_dsize);
-        m_nrow +=nrow;
+        m_nrow = m_bw.dsize()/m_row_dsize;
     }
 
     virtual void erase_rows(const defs::inds& irows) {
@@ -100,33 +94,32 @@ struct Table {
 
     virtual void insert_rows(const Buffer& recv){
         const auto nrow = recv.dsize()/m_row_dsize;
-        for (size_t irow = 0; irow<nrow; ++irow){
-            auto iinsert = push_back();
-            std::memcpy(dbegin(iinsert), recv.dbegin()+irow*m_row_dsize, m_row_size);
-        }
+        auto irow_first = push_back(nrow);
+        std::memcpy(dbegin(irow_first), recv.dbegin(), nrow*m_row_size);
     }
 
     void transfer_rows(const defs::inds& irows, size_t irank_src, size_t irank_dst){
         size_t nrow;
         if (mpi::i_am(irank_src)) {
             nrow = irows.size();
+            std::cout << "Transferring " << nrow << " rows outward to rank " << irank_dst << std::endl;
             // make rows to be sent contiguous in memory
-            Buffer tmp("Outward transfer buffer", m_row_dsize, nrow);
+            Buffer send("Outward transfer buffer", 1, m_row_dsize*nrow);
             for (auto iirow = 0ul; iirow < nrow; ++iirow) {
                 const auto &irow = irows[iirow];
-                std::memcpy(tmp.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+                std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
             }
+
             mpi::send(&nrow, 1, irank_dst,0);
+            mpi::send(send.dbegin(), m_row_dsize * nrow, irank_dst,1);
         }
         if (mpi::i_am(irank_dst)) {
-            mpi::recv(&nrow, 1, irank_dst, 0);
-            Buffer tmp("Inward transfer buffer", m_row_dsize, nrow);
-            mpi::recv(tmp.dbegin(), m_row_dsize * nrow, irank_dst, 1);
+            mpi::recv(&nrow, 1, irank_src, 0);
+            std::cout << "Transferring " << nrow << " rows inward from rank " << irank_src << std::endl;
+            Buffer recv("Inward transfer buffer", 1, m_row_dsize*nrow);
+            mpi::recv(recv.dbegin(), m_row_dsize * nrow, irank_src, 1);
             // now emplace received rows in table buffer window
-            for (auto iirow = 0ul; iirow < nrow; ++iirow) {
-                const auto &irow = irows[iirow];
-                std::memcpy(dbegin(irow), tmp.dbegin() + iirow * m_row_dsize, m_row_size);
-            }
+            insert_rows(recv);
         }
         // sent rows can now be removed
         if (mpi::i_am(irank_src)) {

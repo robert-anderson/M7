@@ -6,7 +6,6 @@
 #include <src/core/sample/PRNG.h>
 #include <src/core/sort/ParallelExtremalValues.h>
 #include <src/core/sort/ExtremalValues.h>
-#include <src/core/sort/ParallelSorter.h>
 #include <src/core/sort/QuickSorter.h>
 #include "src/core/table/BufferedTable.h"
 #include "src/core/field/Fields.h"
@@ -174,4 +173,24 @@ TEST(Table, FieldBasedExtremalValues) {
     for (size_t ifound=0ul; ifound<xv.nfound(); ++ifound){
         ASSERT_EQ(xv[ifound], sorter[ifound]);
     }
+}
+
+
+TEST(Table, PointToPointTransfer) {
+    if (mpi::nrank()==1) GTEST_SKIP();
+    BufferedTable<DifferentFieldTypeTable> bt("Test", 3, 4);
+    const size_t ngen = 5;
+    bt.push_back(ngen);
+    for (size_t i=0ul; i<ngen; ++i) bt.m_shorts(i, 0) = 55*(i+1)+mpi::irank();
+    bt.print_contents();
+    defs::inds send;
+    if (mpi::i_am(0)){
+        send = {1, 2, 4};
+    }
+    bt.transfer_rows(send, 0, 1);
+    if (mpi::i_am(1)){
+        ASSERT_EQ(bt.m_hwm, 8);
+    }
+    std::cout << std::endl;
+    bt.print_contents();
 }
