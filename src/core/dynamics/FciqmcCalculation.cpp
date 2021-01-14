@@ -8,11 +8,10 @@
 #include "StochasticPropagator.h"
 
 
-
-FciqmcCalculation::FciqmcCalculation(const Options &opts) :m_opts(opts),
-                                                           m_ham(opts), m_wf(opts, m_ham.nsite()), m_prop(m_ham, opts){
-    m_wf.expand(size_t(opts.walker_factor_initial*opts.nwalker_target),
-                size_t(opts.buffer_factor_initial*opts.nwalker_target));
+FciqmcCalculation::FciqmcCalculation(const Options &opts) :
+        m_opts(opts), m_ham(opts), m_prop(m_ham, opts), m_wf(opts, m_ham.nsite(), &m_prop.m_variable_shift) {
+    m_wf.expand(size_t(opts.walker_factor_initial * opts.nwalker_target),
+                size_t(opts.buffer_factor_initial * opts.nwalker_target));
     auto ref_det = m_ham.guess_reference(opts.spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_det);
     m_prop.m_shift = ref_energy;//benchmark;
@@ -21,7 +20,6 @@ FciqmcCalculation::FciqmcCalculation(const Options &opts) :m_opts(opts),
         solver.execute();
     }
 }
-
 
 
 #if 0

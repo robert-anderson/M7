@@ -6,6 +6,7 @@
 #define M7_RANKALLOCATOR_H
 
 #include "src/core/field/TableField.h"
+#include "src/core/table/Table.h"
 #include "src/core/parallel/Gatherable.h"
 #include "MPIWrapper.h"
 #include "Epoch.h"
@@ -14,7 +15,6 @@
 
 template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 class RankAllocator {
-    //static_assert(std::is_base_of<TableField, field_t>::value, "Rank allocation requires a View-derived type");
     typedef typename field_t::view_t view_t;
     Epoch *m_vary_shift = nullptr;
     const size_t m_nblock;
@@ -35,20 +35,38 @@ public:
         }
     }
 
-    void update(const size_t& icycle, const double& wait_time){
+    void update(const size_t& icycle, const double& wait_time, Table& table, field_t& field){
         if (!m_vary_shift || !*m_vary_shift) return;
         m_mean_wait_times+=wait_time;
         if (icycle%m_period) return;
         // else, this is a preparatory iteration
         auto times = m_mean_wait_times.mpi_gather();
-        auto min = std::min_element(times.begin(), times.end());
-        auto max = std::max_element(times.begin(), times.end());
-        if (times.begin()+mpi::irank()==min){
-            // this rank has done the least waiting, so it should send a block
+        // this rank has done the least waiting, so it should send a block
+        size_t sender = std::distance(times.begin(), std::min_element(times.begin(), times.end()));
+        // this rank has done the most waiting, so it should receive a block
+        size_t recver = std::distance(times.begin(), std::max_element(times.begin(), times.end()));
+        if (sender==recver) return;
+
+        if (m_rank_to_blocks[sender].empty()) mpi::stop_all("Sending rank has no blocks to send!");
+        /*
+         * sender will send all rows in the front block, which will become the front
+         * block of the recver so all ranks must update in response to this
+         */
+        auto iblock_send = m_rank_to_blocks[sender].front();
+        m_rank_to_blocks[sender].pop_front();
+        m_rank_to_blocks[recver].push_front(iblock_send);
+
+        // prepare vector of row indices to send
+        defs::inds irows_send;
+        if (mpi::i_am(sender)){
+            for (size_t irow = 0; irow<table.m_hwm; ++irow){
+                if (table.is_cleared(irow)) continue;
+                auto key = field(irow);
+                ASSERT(get_rank(key)==sender);
+                if (get_block(key)==iblock_send) irows_send.push_back(irow);
+            }
         }
-        else if (times.begin()+mpi::irank()==max){
-            // this rank has done the most waiting, so it should receive a block
-        }
+        table.transfer_rows(irows_send, sender, recver);
     }
 
     /**
@@ -64,8 +82,12 @@ public:
         return true;
     }
 
-    size_t get_rank(const view_t& key) const{
-        return m_block_to_rank[hash_fn()(key)%m_nblock];
+    inline size_t get_block(const view_t& key) const{
+        return hash_fn()(key)%m_nblock;
+    }
+
+    inline size_t get_rank(const view_t& key) const{
+        return m_block_to_rank[get_block(key)];
     }
 };
 

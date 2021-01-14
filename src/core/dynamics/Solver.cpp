@@ -236,20 +236,21 @@ void Solver::reset() {
 }
 
 void Solver::reduce() {
-    double chk_ratio;
+    //double chk_ratio;
     if (!consts::float_is_zero(m_wf.m_nwalker(0, 0))) {
-        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
-        if (m_chk_nwalker_local > 0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
-            throw std::runtime_error("Unlogged walker population changes have occurred");
+        //chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
+        //if (m_chk_nwalker_local > 0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
+        //    throw std::runtime_error("Unlogged walker population changes have occurred");
     }
 
     if (m_chk_ninitiator_local != m_wf.m_ninitiator(0, 0)) {
-        throw std::runtime_error("Unlogged creations of initiator ONVs have occurred");
+        //throw std::runtime_error("Unlogged creations of initiator ONVs have occurred");
     }
 
     m_wf.reduce();
     m_reference.reduce();
     m_prop.update(m_icycle, m_wf);
+    m_wf.update(m_icycle, m_synchronization_timer.total());
 }
 
 void Solver::output_stats() {

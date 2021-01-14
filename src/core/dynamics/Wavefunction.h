@@ -35,11 +35,11 @@ struct Wavefunction {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
 
-    Wavefunction(const Options &opts, size_t nsite) :
+    Wavefunction(const Options &opts, size_t nsite, Epoch* vary_shift= nullptr) :
             m_opts(opts),
             m_walkers("walker table", opts.nwalker_target / mpi::nrank(), nsite, 1, 1),
             m_spawn("spawning communicator", 0.5, nsite, 1, 1),
-            m_ra(opts.nload_balance_block_per_rank * mpi::nrank(), 10),
+            m_ra(opts.nload_balance_block_per_rank * mpi::nrank(), 10, vary_shift),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),
             m_nocc_onv(m_summables, {1, 1}),
@@ -57,6 +57,10 @@ struct Wavefunction {
 
     void reduce() {
         m_summables.all_sum();
+    }
+
+    void update(size_t icycle, double wait_time) {
+        m_ra.update(icycle, wait_time, m_walkers, m_walkers.m_key_field);
     }
 
     void expand(size_t nrow_walker, size_t nrow_spawn) {
