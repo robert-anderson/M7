@@ -10,7 +10,7 @@ bool Table::is_full() const {
 }
 
 size_t Table::push_back(size_t nrow) {
-    if (m_hwm>=m_nrow) mpi::stop_all("Table capacity reached");
+    if (m_hwm>=m_nrow) expand();
     auto tmp = m_hwm;
     m_hwm+=nrow;
     return tmp;

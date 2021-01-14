@@ -145,7 +145,6 @@ struct Wavefunction {
         std::cout << consts::verb << "parent is deterministic: " << deterministic << std::endl;
 #endif
         auto &dst_table = m_spawn.send(irank);
-        if (dst_table.is_full()) m_spawn.expand();
 
         auto irow = dst_table.push_back();
         dst_table.m_dst_onv(irow) = dst_onv;

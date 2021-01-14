@@ -77,10 +77,6 @@ struct Table {
 
     bool is_cleared(const size_t &irow) const;
 
-    virtual void erase_rows(const defs::inds& irows) {
-        for (auto irow : irows) clear(irow);
-    }
-
     void resize(size_t nrow){
         assert(nrow>m_nrow);
         m_bw.resize(nrow*m_row_dsize);
@@ -98,7 +94,10 @@ struct Table {
         m_nrow +=nrow;
     }
 
-#if 0
+    virtual void erase_rows(const defs::inds& irows) {
+        for (auto irow : irows) clear(irow);
+    }
+
     virtual void insert_rows(const Buffer& recv){
         const auto nrow = recv.dsize()/m_row_dsize;
         for (size_t irow = 0; irow<nrow; ++irow){
@@ -110,22 +109,22 @@ struct Table {
         size_t nrow;
         if (mpi::i_am(irank_src)) {
             nrow = irows.size();
-            // make all rows to be sent contiguous in memory
+            // make rows to be sent contiguous in memory
             Buffer tmp("Outward transfer buffer", m_row_dsize, nrow);
             for (auto iirow = 0ul; iirow < nrow; ++iirow) {
                 const auto &irow = irows[iirow];
-                std::memcpy(tmp.ptr() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+                std::memcpy(tmp.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
             }
             mpi::send(&nrow, 1, irank_dst,0);
         }
         if (mpi::i_am(irank_dst)) {
             mpi::recv(&nrow, 1, irank_dst, 0);
             Buffer tmp("Inward transfer buffer", m_row_dsize, nrow);
-            mpi::recv(tmp.ptr(), m_row_dsize * nrow, irank_dst, 1);
+            mpi::recv(tmp.dbegin(), m_row_dsize * nrow, irank_dst, 1);
             // now emplace received rows in table buffer window
             for (auto iirow = 0ul; iirow < nrow; ++iirow) {
                 const auto &irow = irows[iirow];
-                std::memcpy(dbegin(irow), tmp.ptr() + iirow * m_row_dsize, m_row_size);
+                std::memcpy(dbegin(irow), tmp.dbegin() + iirow * m_row_dsize, m_row_size);
             }
         }
         // sent rows can now be removed
@@ -133,7 +132,6 @@ struct Table {
             erase_rows(irows);
         }
     }
-#endif
 };
 
 
