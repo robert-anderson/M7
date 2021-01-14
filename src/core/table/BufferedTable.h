@@ -5,39 +5,25 @@
 #ifndef M7_BUFFEREDTABLE_H
 #define M7_BUFFEREDTABLE_H
 
-#include "BufferWindow.h"
 #include "Table.h"
 
 template<typename table_t>
 class BufferedTable : public table_t {
+    static_assert(std::is_base_of<Table, table_t>::value, "Template arg must be derived from Table");
     Buffer m_buffer;
 public:
     using Table::m_row_dsize;
 
     template<typename ...Args>
     BufferedTable(std::string name, Args&&... args): table_t(args...),
-    m_buffer(name, 0, 0){
-        table_t::move(BufferWindow(m_buffer));
+    m_buffer(name, 1, 0){
+        Table::set_buffer(&m_buffer);
     }
 
-    size_t buffer_dsize() const {
-        return m_buffer.dsize();
+    void set_expansion_factor(double f){
+        m_buffer.m_expansion_factor = f;
     }
 
-    void resize(size_t nrow) {
-        Buffer new_buffer(m_buffer.m_name, Table::m_row_dsize, nrow);
-        table_t::move(BufferWindow(new_buffer));
-        m_buffer = std::move(new_buffer);
-        ASSERT(buffer_dsize() == Table::m_row_dsize*nrow)
-    }
-
-    void expand(size_t delta_nrow){
-        resize(table_t::m_nrow+delta_nrow);
-    }
-
-    void expand_by_factor(double factor){
-        expand(std::ceil(factor*table_t::m_nrow));
-    }
 };
 
 

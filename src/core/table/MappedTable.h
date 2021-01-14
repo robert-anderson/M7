@@ -62,6 +62,13 @@ struct MappedTable : Table {
         return res;
     }
 
+    virtual void erase_rows(const defs::inds& irows) {
+//        for (auto irow : irows) {
+//            auto lookup = (*this)[m_key_field(irow)];
+//            clear(irow);
+//        }
+    }
+
     void erase(LookupResult result){
         clear(*result);
         m_free_rows.push(*result);

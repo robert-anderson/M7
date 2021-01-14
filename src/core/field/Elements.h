@@ -24,9 +24,8 @@ template<typename viewable_t>
 struct BufferedSingleFieldTable: BufferedTable<SingleFieldTable<viewable_t>>{
     typedef BufferedTable<SingleFieldTable<viewable_t>> base_t;
 	template <typename ...Args>
-    BufferedSingleFieldTable(Args... args):
-        base_t("", args...){
-        base_t::expand(1ul);
+    BufferedSingleFieldTable(Args... args): base_t("", args...){
+        base_t::resize(1ul);
         base_t::push_back();
     }
 };

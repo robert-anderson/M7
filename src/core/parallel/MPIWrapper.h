@@ -375,6 +375,24 @@ public:
         return all_land(&send);
     }
 
+    /*
+     * P2P send / recv
+     */
+
+    template<typename T>
+    static bool send(T *data, size_t ndata, size_t irank_dst, int tag = 0) {
+#ifdef HAVE_MPI
+        return MPI_Send((void*) data, snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag, MPI_COMM_WORLD);
+#endif
+    }
+
+    template<typename T>
+    static bool recv(T *data, size_t ndata, size_t irank_src, int tag = 0) {
+#ifdef HAVE_MPI
+        return MPI_Recv((void*) data, snrw(ndata), mpi_type<T>(), snrw(irank_src), tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+#endif
+    }
+
 
     /*
      * BCAST
@@ -665,6 +683,8 @@ public:
     static void stop_all(std::string message) {
 #ifdef HAVE_MPI
         std::cout << "Stopping all MPI processes: \"" << message << "\""<< std::endl;
+        // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
+        if (mpi::nrank()==1) abort();
         MPI_Abort(MPI_COMM_WORLD, 0);
 #else
         std::cout << "Stopping: \"" << message << "\""<< std::endl;

@@ -5,45 +5,78 @@
 #ifndef M7_BUFFER_H
 #define M7_BUFFER_H
 
+#include <list>
 #include "src/defs.h"
+#include "src/core/parallel/MPIWrapper.h"
+
 
 class Buffer {
-    template<typename table_t> friend
-    class BufferedTable;
-
-    template<typename table_t> friend
-    class BufferedTableArray;
-
-    std::string m_name;
-    size_t m_row_dsize, m_nrow;
-    std::vector<defs::data_t> m_data;
 
 public:
+    class Window {
+        friend class Buffer;
 
-    Buffer(std::string name, size_t row_dsize, size_t nrow);
+        Buffer *m_buffer = nullptr;
+        defs::data_t *m_dbegin = nullptr;
+        defs::data_t *m_dend = nullptr;
 
-    ~Buffer();
+    public:
+        Window() {}
 
-    Buffer(const Buffer &other);
+        explicit Window(Buffer *buffer);
 
-    Buffer(Buffer &&other);
+        size_t dsize() const;
 
-    Buffer &operator=(const Buffer &other);
+        size_t size() const;
 
-    Buffer &operator=(Buffer &&other);
+        void move(defs::data_t *dbegin, defs::data_t *dend);
 
-    defs::data_t *ptr();
+        defs::data_t *dbegin();
 
-    const defs::data_t *ptr() const;
+        const defs::data_t *dbegin() const;
+
+        void resize(size_t dsize);
+
+        void expand();
+
+        void expand(size_t delta_dsize);
+
+    };
+
+    double m_expansion_factor = 0.5;
+    const std::string m_name;
+private:
+    const size_t m_nwindow_max;
+    std::vector<defs::data_t> m_data;
+    std::vector<Window *> m_windows;
+
+public:
+    Buffer(std::string name, size_t nwindow_max);
+
+    Buffer(std::string name, size_t nwindow_max, size_t dsize);
 
     size_t dsize() const;
 
-    std::string freeing_string() const;
+    size_t window_dsize() const;
+
+    defs::data_t *dbegin();
+
+    const defs::data_t *dbegin() const;
+
+    defs::data_t *dbegin(const size_t &iwindow);
+
+    const defs::data_t *dbegin(const size_t &iwindow) const;
+
+    void append_window(Window *window);
+
+    void resize(size_t dsize);
+
+    void expand();
+
+    void expand(size_t delta_dsize);;
 
     std::string capacity_string() const;
 
-    void resize(size_t row_dsize, size_t nrow);
 };
-
 
 #endif //M7_BUFFER_H

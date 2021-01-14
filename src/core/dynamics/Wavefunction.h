@@ -35,19 +35,21 @@ struct Wavefunction {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
 
-    Wavefunction(const Options &opts, size_t nsite):
+    Wavefunction(const Options &opts, size_t nsite) :
             m_opts(opts),
-            m_walkers("walker table", opts.nwalker_target/mpi::nrank(), nsite, 1, 1),
+            m_walkers("walker table", opts.nwalker_target / mpi::nrank(), nsite, 1, 1),
             m_spawn("spawning communicator", 0.5, nsite, 1, 1),
-            m_ra(opts.nload_balance_block_per_rank*mpi::nrank(), 10),
+            m_ra(opts.nload_balance_block_per_rank * mpi::nrank(), 10),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),
             m_nocc_onv(m_summables, {1, 1}),
             m_nwalker(m_summables, {1, 1}),
             m_delta_nwalker(m_summables, {1, 1}),
             m_l2_norm_square(m_summables, {1, 1}),
-            m_delta_l2_norm_square(m_summables, {1, 1})
-            {}
+            m_delta_l2_norm_square(m_summables, {1, 1}) {
+        m_walkers.set_expansion_factor(m_opts.buffer_expansion_factor);
+        m_spawn.set_expansion_factor(m_opts.buffer_expansion_factor);
+    }
 
     void reset() {
         m_summables.zero();
@@ -72,7 +74,7 @@ struct Wavefunction {
         return mpi::all_sum(res);
     }
 
-    void grant_initiator_status(const size_t& irow) {
+    void grant_initiator_status(const size_t &irow) {
         auto view = m_walkers.m_flags.m_initiator(irow, 0, 0);
         if (!view) {
             m_delta_ninitiator(0, 0)++;
@@ -80,7 +82,7 @@ struct Wavefunction {
         }
     }
 
-    void revoke_initiator_status(const size_t& irow) {
+    void revoke_initiator_status(const size_t &irow) {
         auto view = m_walkers.m_flags.m_initiator(irow, 0, 0);
         if (view) {
             m_delta_ninitiator(0, 0)--;
@@ -88,31 +90,31 @@ struct Wavefunction {
         }
     }
 
-    void set_weight(const size_t& irow, const defs::wf_t& new_weight) {
+    void set_weight(const size_t &irow, const defs::wf_t &new_weight) {
         m_delta_nwalker(0, 0) += std::abs(new_weight);
         m_delta_nwalker(0, 0) -= std::abs(m_walkers.m_weight(irow, 0, 0));
         m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
         m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
-        
+
         m_walkers.m_weight(irow, 0, 0) = new_weight;
 
         if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(irow);
         else revoke_initiator_status(irow);
     }
 
-    void change_weight(const size_t& irow, const defs::wf_t& delta) {
-        set_weight(irow, m_walkers.m_weight(irow, 0, 0)+delta);
+    void change_weight(const size_t &irow, const defs::wf_t &delta) {
+        set_weight(irow, m_walkers.m_weight(irow, 0, 0) + delta);
     }
 
-    void scale_weight(const size_t& irow, const double& factor) {
-        set_weight(irow, m_walkers.m_weight(irow, 0, 0)*factor);
+    void scale_weight(const size_t &irow, const double &factor) {
+        set_weight(irow, m_walkers.m_weight(irow, 0, 0) * factor);
     }
 
-    void zero_weight(const size_t& irow) {
+    void zero_weight(const size_t &irow) {
         set_weight(irow, 0.0);
     }
 
-    void remove_walker(const size_t& irow){
+    void remove_walker(const size_t &irow) {
         const auto onv = m_walkers.m_onv(irow);
         auto lookup = m_walkers[onv];
         zero_weight(irow);
@@ -121,7 +123,7 @@ struct Wavefunction {
 
     size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
                          const defs::ham_comp_t &hdiag, bool refconn) {
-        if (m_walkers.is_full()) m_walkers.expand_by_factor(m_opts.buffer_expansion_factor);
+        if (m_walkers.is_full()) m_walkers.expand();
         auto irow = m_walkers.insert(onv);
         ASSERT(m_walkers.m_onv(irow) == onv)
         set_weight(irow, weight);
@@ -143,7 +145,7 @@ struct Wavefunction {
         std::cout << consts::verb << "parent is deterministic: " << deterministic << std::endl;
 #endif
         auto &dst_table = m_spawn.send(irank);
-        if (dst_table.is_full()) m_spawn.expand_by_factor(m_opts.buffer_expansion_factor);
+        if (dst_table.is_full()) m_spawn.expand();
 
         auto irow = dst_table.push_back();
         dst_table.m_dst_onv(irow) = dst_onv;

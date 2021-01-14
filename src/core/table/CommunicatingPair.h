@@ -59,11 +59,11 @@ public:
     }
 
     void expand(size_t nrow) {
-        resize(m_send.nrow_per_table()+nrow);
+        m_send.expand(nrow);
     }
 
-    void expand_by_factor(double factor){
-        expand(std::ceil(m_send.nrow_per_table()*factor));
+    void expand(){
+        m_send.expand();
     }
 
     void communicate() {
@@ -116,6 +116,11 @@ public:
 //        std::cout << "Number of recvd elements " << recv().m_hwm << std::endl;
 
         m_send.clear();
+    }
+
+    void set_expansion_factor(double f){
+        m_send.set_expansion_factor(f);
+        m_recv.set_expansion_factor(f);
     }
 };
 

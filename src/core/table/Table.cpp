@@ -10,36 +10,36 @@ bool Table::is_full() const {
 }
 
 size_t Table::push_back(size_t nrow) {
-    if (m_hwm>=m_nrow) throw std::runtime_error("Table capacity reached");
+    if (m_hwm>=m_nrow) mpi::stop_all("Table capacity reached");
     auto tmp = m_hwm;
     m_hwm+=nrow;
     return tmp;
 }
 
 defs::data_t *Table::dbegin() {
-    return m_bw.m_ptr;
+    return m_bw.dbegin();
 }
 
 const defs::data_t *Table::dbegin() const {
-    return m_bw.m_ptr;
+    return m_bw.dbegin();
 }
 
 char *Table::begin() {
-    return (char*) m_bw.m_ptr;
+    return (char*) m_bw.dbegin();
 }
 
 const char *Table::begin() const {
-    return (const char*)m_bw.m_ptr;
+    return (const char*)m_bw.dbegin();
 }
 
 defs::data_t *Table::dbegin(const size_t &irow) {
     ASSERT(irow<m_hwm)
-    return m_bw.m_ptr + irow * m_row_dsize;
+    return m_bw.dbegin() + irow * m_row_dsize;
 }
 
 const defs::data_t *Table::dbegin(const size_t &irow) const {
     ASSERT(irow<m_hwm)
-    return m_bw.m_ptr + irow * m_row_dsize;
+    return m_bw.dbegin() + irow * m_row_dsize;
 }
 
 char *Table::begin(const size_t &irow) {
@@ -69,12 +69,12 @@ size_t Table::add_field(const TableField *field) {
     return offset;
 }
 
-void Table::move(BufferWindow new_bw) {
-    if (m_bw) std::memmove(new_bw.m_ptr, m_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
-    m_bw = new_bw;
-    if (!m_row_dsize) return;
-    m_nrow = m_bw.m_dsize / m_row_dsize;
-}
+//void Table::move(BufferWindow new_bw) {
+//    if (m_bw) std::memmove(new_bw.m_ptr, m_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
+//    m_bw = new_bw;
+//    if (!m_row_dsize) return;
+//    m_nrow = m_bw.m_dsize / m_row_dsize;
+//}
 
 void Table::clear() {
     std::memset(begin(), 0, m_row_size * m_hwm);
@@ -110,7 +110,7 @@ void Table::print_field_details(size_t width) const {
 }
 
 size_t Table::bw_dsize() const {
-    return m_bw.m_dsize;
+    return m_bw.dsize();
 }
 
 void Table::print_contents(const defs::inds *ordering) const {
