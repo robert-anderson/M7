@@ -7,6 +7,7 @@
 
 #include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
+#include "src/core/parallel/RankAllocator.h"
 
 struct WalkerTable : public MappedTable<fields::Onv<>> {
     fields::Onv<> m_onv;
@@ -32,7 +33,10 @@ public:
             m_onv(this, nsite, "occupation number vectors"),
             m_weight(this, "weights", nroot, nreplica),
             m_hdiag(this, "hamiltonian diagonal element"),
-            m_flags(this, "flags", nroot, nreplica){}
+            m_flags(this, "flags", nroot, nreplica),{}
+
+    WalkerTable(const Options &opts, size_t nsite, ra_t& ra):
+    WalkerTable(nbucket_guess(opts.nwalker_target, 4), nsite, opts.nroot, opts.nreplica, ra){}
 
 #if 0
 

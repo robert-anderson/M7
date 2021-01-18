@@ -41,6 +41,8 @@ public:
 
         void expand(size_t delta_dsize);
 
+        double expansion_factor() const;
+
     };
 
     double m_expansion_factor = 0.5;

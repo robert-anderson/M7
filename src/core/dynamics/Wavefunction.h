@@ -16,12 +16,10 @@
 #include "src/core/field/Views.h"
 
 
-struct Wavefunction : RankAllocator<fields::Onv<>>::Dependent {
+struct Wavefunction : RankAllocator<fields::Onv<>>::Dynamic {
     const Options &m_opts;
     typedef BufferedTable<WalkerTable> walkers_t;
     walkers_t m_walkers;
-    typedef CommunicatingPair<SpawnTable> spawn_t;
-    spawn_t m_spawn;
 
     ReductionSyndicate m_summables;
 
@@ -34,10 +32,9 @@ struct Wavefunction : RankAllocator<fields::Onv<>>::Dependent {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
 
     Wavefunction(const Options &opts, size_t nsite, RankAllocator<fields::Onv<>> ra, Epoch* vary_shift= nullptr) :
-            RankAllocator<fields::Onv<>>::Dependent(ra),
+            RankAllocator<fields::Onv<>>::Dynamic(ra),
             m_opts(opts),
             m_walkers("walker table", opts.nwalker_target / mpi::nrank(), nsite, 1, 1),
-            m_spawn("spawning communicator", 0.5, nsite, 1, 1),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),
             m_nocc_onv(m_summables, {1, 1}),
@@ -45,8 +42,8 @@ struct Wavefunction : RankAllocator<fields::Onv<>>::Dependent {
             m_delta_nwalker(m_summables, {1, 1}),
             m_l2_norm_square(m_summables, {1, 1}),
             m_delta_l2_norm_square(m_summables, {1, 1}) {
-        m_walkers.set_expansion_factor(m_opts.buffer_expansion_factor);
-        m_spawn.set_expansion_factor(m_opts.buffer_expansion_factor);
+        m_walkers.set_expansion_factor(m_opts.spawn_buffer_expansion_factor);
+        m_spawn.set_expansion_factor(m_opts.spawn_buffer_expansion_factor);
     }
 
     void on_outward_block_transfer(size_t iblock) override {

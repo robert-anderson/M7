@@ -24,21 +24,21 @@ class RankAllocator {
     Gatherable<double> m_mean_wait_times;
 
 public:
-    struct Dependent {
+    struct Dynamic {
         typedef RankAllocator<field_t, hash_fn> ra_t;
         ra_t& m_ra;
-        typename std::list<Dependent*>::iterator m_it;
-        Dependent(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
-        ~Dependent() {m_ra.m_dependents.erase(m_it);}
+        typename std::list<Dynamic*>::iterator m_it;
+        Dynamic(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
+        ~Dynamic() {m_ra.m_dependents.erase(m_it);}
 
         virtual void on_outward_block_transfer(size_t iblock) = 0;
         virtual void on_inward_block_transfer(size_t iblock) = 0;
     };
 
 private:
-    std::list<Dependent*> m_dependents;
+    std::list<Dynamic*> m_dependents;
 
-    typename std::list<Dependent*>::iterator add_dependent(Dependent* dependent){
+    typename std::list<Dynamic*>::iterator add_dependent(Dynamic* dependent){
         m_dependents.push_back(dependent);
         auto it = m_dependents.end();
         return --it;

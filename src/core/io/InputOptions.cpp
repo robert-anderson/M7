@@ -43,6 +43,12 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-b,--max_bloom", max_bloom,
                "largest acceptable spawning bloom");
 
+    add_option("--nroot", nroot,
+               "number of lowest-lying eigenfunctions to estimate expectation values for");
+
+    add_option("--nreplica", nreplica,
+               "number of statistically-independent replicas to evolve per root");
+
     add_option("-R,--prng_seed", prng_seed,
                "seed value for the mt19937 PRNG");
 
@@ -61,14 +67,17 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-z,--spin_restrict", spin_restrict,
                "difference in occupation of spin orbitals 0 and 1 in CI space for a spin-conserving hamiltonian");
 
-    add_option("-W,--walker_factor_initial", walker_factor_initial,
+    add_option("-W,--walker_buffer_size_factor_initial", walker_buffer_size_factor_initial,
                "number of rows initially allocated in the wavefunction store table as a multiple of the target walker number");
 
-    add_option("-B,--buffer_factor_initial", buffer_factor_initial,
+    add_option("--walker_buffer_expansion_factor", walker_buffer_expansion_factor,
+               "number of rows to add to a full walker buffer as a fraction of current size");
+
+    add_option("-B,--spawn_buffer_size_factor_initial", spawn_buffer_size_factor_initial,
                "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
-    add_option("-F,--buffer_expansion_factor", buffer_expansion_factor,
-               "number of rows to add to a full buffer as a fraction of current size");
+    add_option("--spawn_buffer_expansion_factor", spawn_buffer_expansion_factor,
+               "number of rows to add to a full spawn buffer as a fraction of current size");
 
     add_option("-K,--nload_balance_block_per_rank", nload_balance_block_per_rank,
                "number of blocks per process to use for load balancing determinants among processes");

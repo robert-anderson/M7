@@ -46,6 +46,10 @@ void Buffer::Window::expand(size_t delta_dsize) {
     m_buffer->expand(delta_dsize * m_buffer->m_nwindow_max);
 }
 
+double Buffer::Window::expansion_factor() const {
+    return m_buffer->m_expansion_factor;
+}
+
 Buffer::Buffer(std::string name, size_t nwindow_max) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max) {
     if (!nwindow_max) mpi::stop_all("A buffer must allow at least one window");
