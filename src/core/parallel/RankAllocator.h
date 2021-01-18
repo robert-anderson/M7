@@ -22,6 +22,28 @@ class RankAllocator {
     defs::inds m_block_to_rank;
     std::vector<std::forward_list<size_t>> m_rank_to_blocks;
     Gatherable<double> m_mean_wait_times;
+
+public:
+    struct Dependent {
+        typedef RankAllocator<field_t, hash_fn> ra_t;
+        ra_t& m_ra;
+        typename std::list<Dependent*>::iterator m_it;
+        Dependent(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
+        ~Dependent() {m_ra.m_dependents.erase(m_it);}
+
+        virtual void on_outward_block_transfer(size_t iblock) = 0;
+        virtual void on_inward_block_transfer(size_t iblock) = 0;
+    };
+
+private:
+    std::list<Dependent*> m_dependents;
+
+    typename std::list<Dependent*>::iterator add_dependent(Dependent* dependent){
+        m_dependents.push_back(dependent);
+        auto it = m_dependents.end();
+        return --it;
+    }
+
 public:
     RankAllocator(const size_t& nblock, const size_t& period, Epoch *m_vary_shift= nullptr) :
     m_vary_shift(m_vary_shift), m_nblock(nblock), m_period(period),
@@ -66,6 +88,10 @@ public:
                 if (get_block(key)==iblock_send) irows_send.push_back(irow);
             }
         }
+        if (mpi::i_am(sender)){
+            for (auto ptr : m_dependents) ptr->on_outward_block_transfer(iblock_send);
+            for (auto ptr : m_dependents) ptr->on_inward_block_transfer(iblock_send);
+        }
         table.transfer_rows(irows_send, sender, recver);
     }
 
@@ -89,6 +115,8 @@ public:
     inline size_t get_rank(const view_t& key) const{
         return m_block_to_rank[get_block(key)];
     }
+
 };
+
 
 #endif //M7_RANKALLOCATOR_H

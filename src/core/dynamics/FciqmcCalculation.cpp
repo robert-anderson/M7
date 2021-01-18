@@ -9,7 +9,8 @@
 
 
 FciqmcCalculation::FciqmcCalculation(const Options &opts) :
-        m_opts(opts), m_ham(opts), m_prop(m_ham, opts), m_wf(opts, m_ham.nsite(), &m_prop.m_variable_shift) {
+        m_opts(opts), m_ra(opts.nload_balance_block_per_rank * mpi::nrank(), 10, vary_shift),
+        m_ham(opts), m_prop(m_ham, opts), m_wf(opts, m_ham.nsite(), &m_prop.m_variable_shift) {
     m_wf.expand(size_t(opts.walker_factor_initial * opts.nwalker_target),
                 size_t(opts.buffer_factor_initial * opts.nwalker_target));
     auto ref_det = m_ham.guess_reference(opts.spin_restrict);
