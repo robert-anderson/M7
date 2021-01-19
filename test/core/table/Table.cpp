@@ -194,3 +194,53 @@ TEST(Table, PointToPointTransfer) {
     std::cout << std::endl;
     bt.print_contents();
 }
+
+TEST(Table, Copy){
+    const size_t nshorts=4, nfloats=3;
+    DifferentFieldTypeTable t(nshorts, nfloats);
+    ASSERT_EQ(t.m_shorts.m_format.nelement(), nshorts);
+    ASSERT_EQ(t.m_floats.m_format.nelement(), nfloats);
+    auto tcopy = t;
+    ASSERT_EQ(tcopy.m_last_copied, nullptr);
+    ASSERT_EQ(t.m_last_copied, &tcopy);
+    ASSERT_EQ(tcopy.m_row_size, t.m_row_size);
+    ASSERT_EQ(tcopy.m_row_dsize, t.m_row_dsize);
+    ASSERT_EQ(tcopy.m_shorts.m_format.nelement(), nshorts);
+    ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
+    ASSERT_EQ(tcopy.m_shorts.m_field.m_table, &tcopy);
+    ASSERT_EQ(tcopy.m_floats.m_field.m_table, &tcopy);
+}
+
+TEST(Table, CopyBuffered){
+    const size_t nshorts=4, nfloats=3;
+    BufferedTable<DifferentFieldTypeTable> t("Copy test table", nshorts, nfloats);
+    ASSERT_EQ(t.m_shorts.m_format.nelement(), nshorts);
+    ASSERT_EQ(t.m_floats.m_format.nelement(), nfloats);
+
+    t.push_back(4);
+    t.m_shorts(0, 1) = 1023;
+    t.m_floats(0, 0) = 10.23;
+    t.m_shorts(1, 1) = 1123;
+    t.m_floats(1, 0) = 11.23;
+    t.m_shorts(2, 1) = 1223;
+    t.m_floats(2, 0) = 12.23;
+    t.m_shorts(3, 1) = 1323;
+    t.m_floats(3, 0) = 13.23;
+
+    auto tcopy = t;
+    ASSERT_EQ(tcopy.m_last_copied, nullptr);
+    ASSERT_EQ(t.m_last_copied, &tcopy);
+    ASSERT_EQ(tcopy.m_row_size, t.m_row_size);
+    ASSERT_EQ(tcopy.m_row_dsize, t.m_row_dsize);
+    ASSERT_EQ(tcopy.m_shorts.m_format.nelement(), nshorts);
+    ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
+    ASSERT_EQ(tcopy.m_shorts.m_field.m_table, &tcopy);
+    ASSERT_EQ(tcopy.m_floats.m_field.m_table, &tcopy);
+
+    ASSERT_EQ(t.m_hwm, 4);
+    ASSERT_EQ(t.m_nrow, (size_t)(4*(1+t.m_bw.expansion_factor())));
+
+    // copied buffer should be empty
+    ASSERT_EQ(tcopy.m_hwm, 0);
+    ASSERT_EQ(tcopy.m_nrow, 0);
+}

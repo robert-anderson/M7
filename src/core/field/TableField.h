@@ -42,6 +42,8 @@ struct TableField {
     TableField(Table *table, FieldData field_data,
                size_t nelement, std::string description);
 
+    TableField(const TableField& other);
+
     bool is_same_type_as(const TableField &other) const;
 
     virtual std::string to_string(size_t irow) const = 0;

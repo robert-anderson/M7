@@ -24,7 +24,8 @@ TEST(StochasticPropagator, Test) {
         fonv.set(1, i);
     }
     StochasticPropagator prop(ham, opts);
-    Wavefunction wf(opts, ham.nsite(), &prop.m_variable_shift);
+    ra::Onv ra(100, 10);
+    Wavefunction wf(opts, ham.nsite(), ra);
     wf.expand(10, 800);
     auto ref_energy = ham.get_energy(fonv);
     prop.m_shift = ref_energy;//benchmark;

@@ -29,7 +29,7 @@ protected:
 
 public:
     StochasticPropagator(const Hamiltonian<> &ham, const Options &opts) :
-            Propagator(ham, opts), m_prng(opts.prng_seed, opts.prng_ngen),
+            Propagator(opts, ham), m_prng(opts.prng_seed, opts.prng_ngen),
             m_min_spawn_mag(opts.min_spawn_mag) {
 
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(

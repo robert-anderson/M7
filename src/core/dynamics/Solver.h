@@ -40,7 +40,6 @@ class Solver {
     size_t m_chk_ninitiator_local = 0ul;
 
 public:
-    const Reference& reference() const;
 
     Solver(Propagator &prop, Wavefunction &wf, views::Onv<> ref_onv);
 

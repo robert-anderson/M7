@@ -38,7 +38,8 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
 
 void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
     //m_magnitude_logger.synchronize(icycle);
-    m_variable_shift.update(icycle, wf.m_nwalker.reduced(0, 0) >= m_opts.nwalker_target);
+    if (m_variable_shift)
+        m_variable_shift.update(icycle, wf.m_nwalker.reduced(0, 0) >= m_opts.nwalker_target);
     if (icycle % m_opts.shift_update_period) return;
 //    if (m_variable_shift.update(icycle, wf.m_nwalker.reduced() >= m_opts.nwalker_target)) {
 //        /*

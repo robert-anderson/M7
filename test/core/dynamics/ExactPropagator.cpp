@@ -80,7 +80,8 @@ TEST(ExactPropagator, Test) {
     ASSERT_TRUE(ham.spin_conserving());
     elements::Onv<> fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
-    Wavefunction wf(opts, nsite);
+    ra::Onv ra(100, 10);
+    Wavefunction wf(opts, nsite, ra);
     wf.expand(10, 800);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(fonv);
@@ -107,7 +108,8 @@ TEST(ExactPropagator, Cr2Test) {
     ASSERT_TRUE(ham.spin_conserving());
     elements::FermionOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
-    Wavefunction wf(opts, ham.nsite());
+    ra::Onv ra(100, 10);
+    Wavefunction wf(opts, ham.nsite(), ra);
     wf.expand(1000000, 8000000);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(fonv);

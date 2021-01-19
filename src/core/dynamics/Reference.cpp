@@ -3,11 +3,10 @@
 //
 
 #include "Reference.h"
-#include "Wavefunction.h"
 
-Reference::Reference(Wavefunction &wf, const Hamiltonian<> &ham, views::Onv<> &onv,
-                     const Options &m_opts) :
-        elements::Onv<>(onv), m_wf(wf), m_ham(ham), m_aconn(onv),
+Reference::Reference(const Options &m_opts, Wavefunction &wf, const Hamiltonian<> &ham, views::Onv<> &onv) :
+        elements::Onv<>(onv), ra::Onv::Dynamic(wf.m_ra),
+        m_wf(wf), m_ham(ham), m_aconn(onv),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(m_summables, {1, 1}),
         m_nwalker_at_doubles(m_summables, {1, 1}),
@@ -135,4 +134,11 @@ defs::ham_comp_t Reference::weight() const {
 
 defs::ham_comp_t Reference::proj_energy() const {
     return consts::real(proj_energy_num()/weight());
+}
+
+void Reference::on_outward_block_transfer_(size_t iblock) {
+}
+
+void Reference::on_inward_block_transfer_(size_t iblock) {
+
 }

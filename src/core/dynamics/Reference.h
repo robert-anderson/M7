@@ -13,7 +13,7 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public elements::Onv<> {
+class Reference : public elements::Onv<>, ra::Onv::Dynamic {
     Wavefunction &m_wf;
     const Hamiltonian<> &m_ham;
     size_t m_irow;
@@ -36,7 +36,7 @@ class Reference : public elements::Onv<> {
     SingleReducible<defs::wf_comp_t, defs::ndim_wf> m_candidate_weight;
 
 public:
-    Reference(Wavefunction &wf, const Hamiltonian<>& ham, views::Onv<> &onv, const Options &opts);
+    Reference(const Options &m_opts, Wavefunction &wf, const Hamiltonian<> &ham, views::Onv<> &onv);
 
     void add_row(const size_t& irow);
 
@@ -67,6 +67,12 @@ public:
     defs::ham_t proj_energy_num() const;
     defs::ham_comp_t weight() const;
     defs::ham_comp_t proj_energy() const;
+
+private:
+    void on_outward_block_transfer_(size_t iblock) override;
+
+    void on_inward_block_transfer_(size_t iblock) override;
+
 };
 
 #endif //M7_REFERENCE_H

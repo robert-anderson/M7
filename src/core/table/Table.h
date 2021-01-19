@@ -20,12 +20,25 @@ struct Table {
     size_t m_row_size;
     size_t m_row_dsize;
     size_t m_current_byte_offset = 0ul;
-    char *m_data;
     size_t m_nrow = 0ul;
     /*
      * "high water mark" is result of the next call to push_back
      */
     size_t m_hwm = 0ul;
+    /*
+     * when copying the Table, the fields being copied need to know
+     * the correct m_table pointer, so we retain a pointer to the last
+     * copied Table
+     */
+    mutable Table* m_last_copied = nullptr;
+
+    Table(){}
+
+    Table(const Table& other):
+        m_row_size(other.m_row_size), m_row_dsize(other.m_row_dsize),
+        m_current_byte_offset(other.m_current_byte_offset){
+        other.m_last_copied = this;
+    }
 
     void set_buffer(Buffer* buffer){
         ASSERT(buffer);
@@ -36,8 +49,6 @@ struct Table {
     bool is_full() const;
 
     size_t push_back(size_t nrow=1);
-
-
 
     defs::data_t* dbegin();
 

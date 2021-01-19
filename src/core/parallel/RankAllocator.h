@@ -16,7 +16,6 @@
 template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 class RankAllocator {
     typedef typename field_t::view_t view_t;
-    Epoch *m_vary_shift = nullptr;
     const size_t m_nblock;
     const size_t m_period;
     defs::inds m_block_to_rank;
@@ -31,8 +30,8 @@ public:
         Dynamic(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
         ~Dynamic() {m_ra.m_dependents.erase(m_it);}
 
-        virtual void on_outward_block_transfer(size_t iblock) = 0;
-        virtual void on_inward_block_transfer(size_t iblock) = 0;
+        virtual void on_outward_block_transfer_(size_t iblock) = 0;
+        virtual void on_inward_block_transfer_(size_t iblock) = 0;
     };
 
 private:
@@ -45,8 +44,9 @@ private:
     }
 
 public:
-    RankAllocator(const size_t& nblock, const size_t& period, Epoch *m_vary_shift= nullptr) :
-    m_vary_shift(m_vary_shift), m_nblock(nblock), m_period(period),
+    Epoch *m_vary_shift = nullptr;
+    RankAllocator(const size_t& nblock, const size_t& period) :
+    m_nblock(nblock), m_period(period),
     m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank())
     {
         size_t iblock = 0ul;
@@ -89,10 +89,12 @@ public:
             }
         }
         if (mpi::i_am(sender)){
-            for (auto ptr : m_dependents) ptr->on_outward_block_transfer(iblock_send);
-            for (auto ptr : m_dependents) ptr->on_inward_block_transfer(iblock_send);
+            for (auto ptr : m_dependents) ptr->on_outward_block_transfer_(iblock_send);
         }
         table.transfer_rows(irows_send, sender, recver);
+        if (mpi::i_am(recver)){
+            for (auto ptr : m_dependents) ptr->on_inward_block_transfer_(iblock_send);
+        }
     }
 
     /**
@@ -115,8 +117,11 @@ public:
     inline size_t get_rank(const view_t& key) const{
         return m_block_to_rank[get_block(key)];
     }
-
 };
+
+namespace ra {
+    using Onv = RankAllocator<fields::Onv<>>;
+}
 
 
 #endif //M7_RANKALLOCATOR_H
