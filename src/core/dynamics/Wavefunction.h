@@ -18,7 +18,7 @@
 
 struct Wavefunction : ra::Onv::Dynamic {
     const Options &m_opts;
-    typedef BufferedTable<WalkerTable> walkers_t;
+    typedef BufferedTable<WalkerMappedTable> walkers_t;
     walkers_t m_walkers;
     typedef CommunicatingPair<SpawnTable> spawn_t;
     spawn_t m_spawn;

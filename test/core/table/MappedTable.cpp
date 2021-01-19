@@ -14,17 +14,21 @@ namespace mapped_table_test {
 //        FloatTable():
 //    };
 
-    struct DetTable : MappedTable<fields::Det> {
+    struct DetTable : Table {
         fields::Det m_config;
         DetTable(size_t nsite) :
-                MappedTable<fields::Det>(m_config, 10),
                 m_config(this, nsite, "configuration") {}
+    };
+
+    struct DetMappedTable : MappedTable<DetTable, fields::Det> {
+        DetMappedTable(size_t nsite):
+        MappedTable<DetTable, fields::Det>(m_config, 10){}
     };
 }
 
 TEST(MappedTable, TEST) {
     const size_t nsite = 10;
-    typedef BufferedTable<mapped_table_test::DetTable> table_t;
+    typedef BufferedTable<mapped_table_test::DetMappedTable> table_t;
 
     table_t bt("Mapped table test", nsite);
     bt.expand(10);

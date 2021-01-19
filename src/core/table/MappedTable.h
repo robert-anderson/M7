@@ -26,53 +26,21 @@ struct LookupResult {
     }
 };
 
+template<typename table_t, typename field_t, typename hash_fn=typename field_t::hash_fn>
+struct MappedTable : table_t {
+    static_assert(std::is_base_of<Table, table_t>::value, "Template arg must be derived from Table");
 
-template<typename field_t, typename hash_fn=typename field_t::hash_fn>
-struct MappedTable : Table {
-
-    /**
-     * Rows of a MappedTable may be transferred to other MPI ranks under the action of a
-     * RankAllocator. In many situations, it is desirable to maintain a record of the position
-     * of a row of interest in the Table. This class ensures continuity of the integrity of
-     * that record under RankAllocator block transfers.
-     */
-    typedef RankAllocator<field_t> ra_t;
-    class RowTracker : ra_t::Dynamic {
-        typedef MappedTable<field_t, hash_fn> table_t;
-        const table_t& m_t;
-        size_t m_irow = ~0ul;
-        size_t m_irank = ~0ul;
-        /*
-         * block index is redundant, since it can be retrieved from row and rank index info,
-         * but we store here to elide hashing the key.
-         */
-        size_t m_iblock = ~0ul;
-
-    public:
-        RowTracker(const table_t &t, const ra_t &ra):
-        ra_t::Dynamic(ra), m_t(t){
-
-        }
-
-        void set(size_t irank, size_t irow){
-        }
-
-        void on_outward_block_transfer_(size_t iblock) override {
-
-        }
-
-        void on_inward_block_transfer_(size_t iblock) override {
-
-        }
-
-    };
-
+    using Table::push_back;
+    using Table::m_row_size;
+    using Table::m_row_dsize;
+    using Table::m_bw;
+    using Table::clear;
+    using Table::dbegin;
 
     static constexpr double c_default_remap_ratio = 2.0;
     static constexpr size_t c_default_remap_nlookup = 2.0;
     static constexpr size_t c_nbucket_min = 100;
     static_assert(std::is_base_of<NdFieldGroup<0ul>, field_t>::value, "Key field must be scalar");
-
 
     field_t& m_key_field;
     std::vector<std::forward_list<size_t>> m_buckets;
@@ -86,12 +54,13 @@ struct MappedTable : Table {
     double m_remap_ratio = c_default_remap_ratio;
     size_t m_remap_nlookup = c_default_remap_nlookup;
 
-    MappedTable(field_t &key_field) :
-            Table(), m_key_field(key_field), m_buckets(c_nbucket_min) {}
+    template<typename ...Args>
+    MappedTable(field_t &key_field, Args... args) :
+            table_t(args...), m_key_field(key_field), m_buckets(c_nbucket_min) {}
 
-    MappedTable(field_t &key_field, size_t nbucket) :
-            Table(), m_key_field(key_field), m_buckets(nbucket) {}
-
+    template<typename ...Args>
+    MappedTable(size_t nbucket, field_t &key_field, Args... args) :
+            table_t(args...), m_key_field(key_field), m_buckets(nbucket) {}
 
     defs::hash_t hash (typename field_t::view_t key){
         return hash_fn()(key);

@@ -9,23 +9,29 @@
 #include "src/core/field/Fields.h"
 
 namespace heat_bath_doubles_test {
-    struct TestTableSpec : MappedTable<fields::Det> {
+    struct TestTable : Table {
         size_t m_nattempt;
         fields::Det m_onv;
         fields::Numbers<size_t, 1> m_frequency;
         fields::Numbers<defs::prob_t, 1> m_weight;
 
-        TestTableSpec(const views::Det &src_fonv, size_t nattempt) :
-                MappedTable<fields::Det>(m_onv, 1000),
+        TestTable(size_t nsite, size_t nattempt) :
                 m_nattempt(nattempt),
-                m_onv(this, {src_fonv.nsite()}, "occupation number vector"),
+                m_onv(this, nsite, "occupation number vector"),
                 m_frequency(this, "number of times the ONV was drawn", nattempt),
                 m_weight(this, "cumulative reciprocal probability", nattempt) {}
     };
 
-    struct TestTable : BufferedTable<TestTableSpec> {
-        TestTable(const FermionHamiltonian &ham, const views::Det &src_fonv, size_t nattempt) :
-                BufferedTable<TestTableSpec>("Excitation generator testing mapped table", src_fonv, nattempt) {
+    struct TestMappedTable : MappedTable<TestTable, fields::Det>{
+        TestMappedTable(size_t nsite, size_t nattempt):
+        MappedTable<TestTable, fields::Det>(1000, m_onv, nsite, nattempt){}
+    };
+
+
+
+    struct BufferedTestTable : BufferedTable<TestMappedTable> {
+        BufferedTestTable(const FermionHamiltonian &ham, const views::Det &src_fonv, size_t nattempt) :
+                BufferedTable<TestMappedTable>("Excitation generator testing mapped table", src_fonv.nsite(), nattempt) {
             /*
              * table will expand dynamically
              */
@@ -84,7 +90,7 @@ TEST(HeatBathDoubles, UnbiasedExcitsFromHFDeterminantRealSchroedinger) {
     src_fonv.set(occ_inds);
 
     const size_t nattempt = 2;
-    heat_bath_doubles_test::TestTable table(ham, src_fonv, nattempt);
+    heat_bath_doubles_test::BufferedTestTable table(ham, src_fonv, nattempt);
 
     OccupiedOrbitals occ(src_fonv);
     VacantOrbitals vac(src_fonv);
