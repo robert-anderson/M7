@@ -38,4 +38,8 @@ TEST(DynamicRowSet, Test) {
     auto drs = bt.dynamic_row_set(ra);
 
     drs.add(0);
+
+    drs.populate_local();
+
+    drs.m_local.print_contents();
 }

@@ -90,7 +90,7 @@ struct Table {
 
     bool has_compatible_format(const Table &other);
 
-    void copy_row(const Table &src, size_t irow_src, size_t irow_dst);
+    void copy_row_in(const Table &src, size_t irow_src, size_t irow_dst);
 
 };
 

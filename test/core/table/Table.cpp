@@ -209,6 +209,9 @@ TEST(Table, Copy){
     ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
     ASSERT_EQ(tcopy.m_shorts.m_field.m_table, &tcopy);
     ASSERT_EQ(tcopy.m_floats.m_field.m_table, &tcopy);
+
+    ASSERT_EQ(t.m_fields.size(), 2);
+    ASSERT_EQ(tcopy.m_fields.size(), 2);
 }
 
 TEST(Table, CopyBuffered){
@@ -236,6 +239,9 @@ TEST(Table, CopyBuffered){
     ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
     ASSERT_EQ(tcopy.m_shorts.m_field.m_table, &tcopy);
     ASSERT_EQ(tcopy.m_floats.m_field.m_table, &tcopy);
+
+    ASSERT_EQ(t.m_fields.size(), 2);
+    ASSERT_EQ(tcopy.m_fields.size(), 2);
 
     ASSERT_EQ(t.m_hwm, 4);
     ASSERT_EQ(t.m_nrow, (size_t)(4*(1+t.m_bw.expansion_factor())));

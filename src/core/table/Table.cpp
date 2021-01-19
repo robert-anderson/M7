@@ -193,6 +193,7 @@ void Table::transfer_rows(const defs::inds &irows, size_t irank_src, size_t iran
 
 bool Table::has_compatible_format(const Table &other) {
     if (other.m_row_size != m_row_size) return false;
+    std::cout << other.m_fields.size() << " " << m_fields.size() << std::endl;
     if (other.m_fields.size() != m_fields.size()) return false;
     if (other.m_current_byte_offset != m_current_byte_offset) return false;
     for (size_t ifield=0ul; ifield<m_fields.size(); ++ifield){
@@ -206,8 +207,8 @@ bool Table::has_compatible_format(const Table &other) {
     return true;
 }
 
-void Table::copy_row(const Table &src, size_t irow_src, size_t irow_dst) {
-    ASSERT(irow_dst<m_hwm);
+void Table::copy_row_in(const Table &src, size_t irow_src, size_t irow_dst) {
+    ASSERT(irow_dst<=m_hwm);
     ASSERT(has_compatible_format(src));
     std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
 }

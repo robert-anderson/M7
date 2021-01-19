@@ -14,13 +14,16 @@
 #include "src/core/table/BufferedTable.h"
 
 struct LookupResult {
-    std::forward_list<size_t>& m_bucket;
+    std::forward_list<size_t> &m_bucket;
     std::forward_list<size_t>::iterator m_prev;
-    LookupResult(std::forward_list<size_t>& bucket):
-    m_bucket(bucket), m_prev(bucket.before_begin()){}
+
+    LookupResult(std::forward_list<size_t> &bucket) :
+            m_bucket(bucket), m_prev(bucket.before_begin()) {}
+
     operator bool() const {
-        return m_prev!=m_bucket.end();
+        return m_prev != m_bucket.end();
     }
+
     size_t operator*() const {
         if (!*this) return ~0ul;//throw std::runtime_error("Cannot return stored index, hashmap entry not found!");
         return *std::next(m_prev);
@@ -43,7 +46,7 @@ struct MappedTable : table_t {
     static constexpr size_t c_nbucket_min = 100;
     static_assert(std::is_base_of<NdFieldGroup<0ul>, field_t>::value, "Key field must be scalar");
 
-    field_t& m_key_field;
+    field_t &m_key_field;
     std::vector<std::forward_list<size_t>> m_buckets;
     std::stack<size_t> m_free_rows;
 
@@ -63,11 +66,11 @@ struct MappedTable : table_t {
     MappedTable(size_t nbucket, field_t &key_field, Args... args) :
             table_t(args...), m_key_field(key_field), m_buckets(nbucket) {}
 
-    defs::hash_t hash (typename field_t::view_t key){
+    defs::hash_t hash(typename field_t::view_t key) {
         return hash_fn()(key);
     }
 
-    typename field_t::view_t get_key(const size_t& irow){
+    typename field_t::view_t get_key(const size_t &irow) {
         return m_key_field(irow);
     }
 
@@ -75,8 +78,8 @@ struct MappedTable : table_t {
         m_total_lookups++;
         LookupResult res(m_buckets[hash(key) % m_buckets.size()]);
         auto current = res.m_bucket.before_begin();
-        for (auto next = std::next(current); next!= res.m_bucket.end(); next++){
-            if (get_key(*next)==key) return res;
+        for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
+            if (get_key(*next) == key) return res;
             res.m_prev++;
             m_total_skips++;
         }
@@ -84,7 +87,7 @@ struct MappedTable : table_t {
         return res;
     }
 
-    void erase_rows(const defs::inds& irows) override {
+    void erase_rows(const defs::inds &irows) override {
         for (auto irow : irows) {
             auto lookup = (*this)[m_key_field(irow)];
             erase(lookup);
@@ -92,15 +95,15 @@ struct MappedTable : table_t {
     }
 
     void insert_rows(const Buffer &recv) override {
-        const auto nrow = recv.dsize()/m_row_dsize;
-        for (size_t irow = 0; irow<nrow; ++irow){
+        const auto nrow = recv.dsize() / m_row_dsize;
+        for (size_t irow = 0; irow < nrow; ++irow) {
             auto iinsert = get_free_row();
-            std::memcpy(dbegin(iinsert), recv.dbegin()+irow*m_row_dsize, m_row_size);
+            std::memcpy(dbegin(iinsert), recv.dbegin() + irow * m_row_dsize, m_row_size);
             post_insert(iinsert);
         }
     }
 
-    void erase(LookupResult result){
+    void erase(LookupResult result) {
         clear(*result);
         m_free_rows.push(*result);
         result.m_bucket.erase_after(result.m_prev);
@@ -108,7 +111,7 @@ struct MappedTable : table_t {
         result.m_prev = result.m_bucket.end();
     }
 
-    size_t get_free_row(){
+    size_t get_free_row() {
         if (m_free_rows.empty()) return push_back();
         auto irow = m_free_rows.top();
         m_free_rows.pop();
@@ -118,33 +121,33 @@ struct MappedTable : table_t {
     size_t insert(const typename field_t::view_t key) {
         ASSERT(!(this->operator[](key)))
         auto irow = get_free_row();
-        auto& bucket = m_buckets[hash(key) % m_buckets.size()];
+        auto &bucket = m_buckets[hash(key) % m_buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
         m_key_field(irow) = key;
         return irow;
     }
 
     // for situations in which the row has already been copied-to
-    void post_insert(const size_t& irow, std::vector<std::forward_list<size_t>>& buckets) {
+    void post_insert(const size_t &irow, std::vector<std::forward_list<size_t>> &buckets) {
         ASSERT(!Table::is_cleared(irow))
         auto key = m_key_field(irow);
         // row mustn't have already been added
         ASSERT(!(*this)[key]);
-        auto& bucket = buckets[hash(key) % buckets.size()];
+        auto &bucket = buckets[hash(key) % buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
     }
 
-    void post_insert(const size_t& irow) {
+    void post_insert(const size_t &irow) {
         post_insert(irow, m_buckets);
     }
 
     void print_map() const {
         size_t nkey = 0ul;
-        for (size_t ibucket=0ul; ibucket<m_buckets.size(); ++ibucket){
+        for (size_t ibucket = 0ul; ibucket < m_buckets.size(); ++ibucket) {
             auto bucket = m_buckets[ibucket];
             if (bucket.empty()) continue;
             std::cout << "Bucket " << std::to_string(ibucket) << std::endl;
-            for (auto irow: bucket){
+            for (auto irow: bucket) {
                 std::cout << "\t" << m_key_field(irow).to_string() << " => " << irow << std::endl;
                 nkey++;
             }
@@ -153,13 +156,13 @@ struct MappedTable : table_t {
     }
 
     void remap_if_required() {
-        if (m_total_lookups<m_remap_nlookup) return;
-        if (double(m_total_skips)/double(m_total_lookups)>m_remap_ratio) return;
+        if (m_total_lookups < m_remap_nlookup) return;
+        if (double(m_total_skips) / double(m_total_lookups) > m_remap_ratio) return;
         // use the same expansion factor as for the Table buffer
-        const size_t nbucket_new = m_buckets.size()*m_bw.expansion_factor();
+        const size_t nbucket_new = m_buckets.size() * m_bw.expansion_factor();
         std::vector<std::forward_list<size_t>> new_buckets(nbucket_new);
-        for (const auto& old_bucket : m_buckets) {
-            for (const auto irow : old_bucket){
+        for (const auto &old_bucket : m_buckets) {
+            for (const auto irow : old_bucket) {
                 post_insert(irow, new_buckets);
             }
         }
@@ -178,10 +181,10 @@ struct MappedTable : table_t {
      */
     static size_t nbucket_guess(size_t nrow_max, size_t mean_skips_per_bucket) {
         // number of skips is on average half the average number of rows per bin.
-        return std::max(c_nbucket_min, size_t(nrow_max/double(2*mean_skips_per_bucket)));
+        return std::max(c_nbucket_min, size_t(nrow_max / double(2 * mean_skips_per_bucket)));
     }
 
-    class DynamicRowSet : RankAllocator<field_t>::Dynamic {
+    struct DynamicRowSet : RankAllocator<field_t>::Dynamic {
 
         static_assert(std::is_base_of<Table, table_t>::value, "Template arg must be derived from Table");
         typedef RankAllocator<field_t> ra_t;
@@ -212,8 +215,6 @@ struct MappedTable : table_t {
          * table_t. Better to use the stl-provided map to point into a table of the same format.
          */
         std::map<size_t, size_t> m_map;
-        // number of source rows added so far
-        size_t m_nrow = 0ul;
 
     public:
         DynamicRowSet(ra_t &ra, mt_t &mt) :
@@ -222,12 +223,23 @@ struct MappedTable : table_t {
                 m_local("Rank-local dynamic row set rows", static_cast<const table_t &>(mt)),
                 m_all("All dynamic row set rows", static_cast<const table_t &>(mt)) {}
 
-        void add(size_t irow) {
-            m_map[irow] = m_nrow++;
+        size_t nrow() const {
+            return m_map.size();
         }
 
-        void populate_local(){
-            static_cast<Table&>(m_local).clear();
+        void add(size_t irow) {
+            m_map[irow] = nrow();
+        }
+
+        void populate_local() {
+            static_cast<Table &>(m_local).clear();
+            std::cout << nrow() << std::endl;
+            std::cout << m_local.m_hwm << std::endl;
+            m_local.push_back(nrow());
+            std::cout << m_local.m_hwm << std::endl;
+            for (auto pair : m_map) {
+                static_cast<Table &>(m_local).copy_row_in(m_source, pair.first, pair.second);
+            }
         }
 
         void on_outward_block_transfer_(size_t iblock) override {
@@ -240,7 +252,7 @@ struct MappedTable : table_t {
 
     };
 
-    DynamicRowSet dynamic_row_set(RankAllocator<field_t>& ra){
+    DynamicRowSet dynamic_row_set(RankAllocator<field_t> &ra) {
         return DynamicRowSet(ra, *this);
     }
 
