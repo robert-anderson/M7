@@ -22,92 +22,47 @@ struct FieldData {
 struct FieldSpecifier {
     FieldData m_data;
 
-    const size_t& element_size() const {
-        return m_data.m_element_size;
-    };
-    const std::type_info& type_info() const {
-        return m_data.m_type_info;
-    };
+    const size_t& element_size() const;
+
+    const std::type_info& type_info() const;
 
     const std::vector<char> m_null_buffer;
+
     struct View {
         const FieldSpecifier &m_spec;
         char *m_ptr;
 
-        View(const FieldSpecifier& field, char* ptr): m_spec(field), m_ptr(ptr){}
+        View(const FieldSpecifier& field, char* ptr);
 
-        defs::data_t *dptr(const size_t &i) const {
-            ASSERT(i * defs::nbyte_data < m_spec.element_size());
-            return ((defs::data_t *) m_ptr) + i;
-        }
+        View(const View &other);
 
-        const size_t& element_size() const {
-            return m_spec.element_size();
-        }
+        defs::data_t *dptr(const size_t &i) const;
 
-        void zero() {
-            std::memset(m_ptr, 0, element_size());
-        }
+        const size_t& element_size() const;
 
-        int compare(const View& other) const {
-            ASSERT(element_size()==other.element_size());
-            return std::memcmp(m_ptr, other.m_ptr, element_size());
-        }
+        void zero();
 
-        bool operator==(const View& other) const {
-            return compare(other)==0;
-        }
+        int compare(const View& other) const;
 
-        bool operator!=(const View& other){
-            return !(*this==other);
-        }
+        bool operator==(const View& other) const;
 
-        bool is_zero() const {
-            return !std::memcmp(m_ptr, m_spec.m_null_buffer.data(), element_size());
-        }
+        bool operator!=(const View& other);
+
+        bool is_zero() const;
 
         virtual std::string to_string() const = 0;
 
-        void print() const {
-            std::cout << to_string() << std::endl;
-        }
+        void print() const;
 
-        View &operator=(const View &other) {
-            ASSERT(m_spec.element_size() == other.m_spec.element_size());
-            if (&other != this)
-                std::memcpy(m_ptr, other.m_ptr, m_spec.element_size());
-            return *this;
-        }
+        View &operator=(const View &other);
 
-        void mpi_bcast(size_t iroot) {
-            mpi::bcast(m_ptr, element_size(), iroot);
-        }
-
-    protected:
-
-        View(const View &other) : m_spec(other.m_spec), m_ptr(other.m_ptr) {}
+        void mpi_bcast(size_t iroot);
 
     };
 
-    static defs::hash_t hash(const View& view) {
-        return hashing::fnv_hash(view.m_ptr, view.element_size());
-    }
+    static defs::hash_t hash(const View& view);
 
-    bool comparable_with(const FieldSpecifier& other) const {
-        return (type_info()==other.type_info()) && (element_size()==other.element_size());
-    }
-
-
-//    template<typename ...Args>
-//    defs::hash_t hash(const_raw_view_t first, Args... rest) const {
-//        return hashing::fnv_hash(first.first, first.second)^hash(rest...);
-//    }
-//
-//    template<typename ...Args>
-//    defs::hash_t hash(const View& first, Args... rest) const {
-//        ASSERT(comparable_with(first.m_spec));
-//        return hash(convert_to_raw(first), rest...);
-//    }
+    bool comparable_with(const FieldSpecifier& other) const;
 
     FieldSpecifier(size_t element_size, const std::type_info &type_info);
 

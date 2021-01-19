@@ -7,32 +7,16 @@
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
-
-namespace mapped_table_test {
-//    struct FloatTable : MappedTable<fields::Det> {
-//        fields::Number<float> m_f;
-//        FloatTable():
-//    };
-
-    struct DetTable : Table {
-        fields::Det m_config;
-        DetTable(size_t nsite) :
-                m_config(this, nsite, "configuration") {}
-    };
-
-    struct DetMappedTable : MappedTable<DetTable, fields::Det> {
-        DetMappedTable(size_t nsite):
-        MappedTable<DetTable, fields::Det>(m_config, 10){}
-    };
-}
+#include "TableTest.h"
 
 TEST(MappedTable, TEST) {
     const size_t nsite = 10;
-    typedef BufferedTable<mapped_table_test::DetMappedTable> table_t;
+    typedef BufferedTable<table_test::DetMappedTable> table_t;
 
     table_t bt("Mapped table test", nsite);
     bt.expand(10);
     elements::Det config(nsite);
+
 
 
 //    config.m_fonv[2] = 1;

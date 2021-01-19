@@ -17,6 +17,10 @@ struct BitsetSpecifier : FieldSpecifier {
     struct View : FieldSpecifier::View {
         View(const BitsetSpecifier &field, char* ptr);
 
+        View(const View& other):FieldSpecifier::View(other){
+            ASSERT(other.nbit()==nbit());
+        }
+
         struct BitView {
             std::unique_ptr<View> m_view;
             const size_t m_ibit;
@@ -29,6 +33,12 @@ struct BitsetSpecifier : FieldSpecifier {
         View& operator=(const defs::inds& ibits){
             zero();
             for (auto& ibit : ibits) set(ibit);
+            return *this;
+        }
+
+        View& operator=(const View& other){
+            ASSERT(other.nbit()==nbit())
+            FieldSpecifier::View::operator=(other);
             return *this;
         }
 

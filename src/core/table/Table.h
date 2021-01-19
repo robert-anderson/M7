@@ -30,39 +30,29 @@ struct Table {
      * the correct m_table pointer, so we retain a pointer to the last
      * copied Table
      */
-    mutable Table* m_last_copied = nullptr;
+    mutable Table *m_last_copied = nullptr;
 
-    Table(){}
+    Table();
 
-    Table(const Table& other):
-        m_row_size(other.m_row_size), m_row_dsize(other.m_row_dsize),
-        m_current_byte_offset(other.m_current_byte_offset){
-        other.m_last_copied = this;
-    }
+    Table(const Table &other);
 
-    void set_buffer(Buffer* buffer){
-        ASSERT(buffer);
-        ASSERT(!m_bw.dbegin())
-        buffer->append_window(&m_bw);
-    }
+    void set_buffer(Buffer *buffer);
 
     bool is_full() const;
 
-    size_t push_back(size_t nrow=1);
+    size_t push_back(size_t nrow = 1);
 
-    defs::data_t* dbegin();
+    defs::data_t *dbegin();
 
-    const defs::data_t* dbegin() const;
+    const defs::data_t *dbegin() const;
 
     char *begin();
 
     const char *begin() const;
 
+    defs::data_t *dbegin(const size_t &irow);
 
-
-    defs::data_t* dbegin(const size_t &irow);
-
-    const defs::data_t* dbegin(const size_t &irow) const;
+    const defs::data_t *dbegin(const size_t &irow) const;
 
     char *begin(const size_t &irow);
 
@@ -76,67 +66,32 @@ struct Table {
 
     size_t bw_dsize() const;
 
-    std::string field_details(size_t width=30) const;
+    std::string field_details(size_t width = 30) const;
 
-    void print_field_details(size_t width=30) const;
+    void print_field_details(size_t width = 30) const;
 
-    void print_contents(const defs::inds* ordering=nullptr) const;
+    void print_contents(const defs::inds *ordering = nullptr) const;
 
-    void print_contents(const ExtremalValues& xv) const;
+    void print_contents(const ExtremalValues &xv) const;
 
     bool is_cleared() const;
 
     bool is_cleared(const size_t &irow) const;
 
-    void resize(size_t nrow){
-        assert(nrow>m_nrow);
-        m_bw.resize(nrow*m_row_dsize);
-        m_nrow = nrow;
-    }
+    void resize(size_t nrow);
 
-    void expand(size_t nrow){
-        m_bw.expand(nrow*m_row_dsize);
-        m_nrow = m_bw.dsize()/m_row_dsize;
-    }
+    void expand(size_t nrow);
 
-    virtual void erase_rows(const defs::inds& irows) {
-        for (auto irow : irows) clear(irow);
-    }
+    virtual void erase_rows(const defs::inds &irows);
 
-    virtual void insert_rows(const Buffer& recv){
-        const auto nrow = recv.dsize()/m_row_dsize;
-        auto irow_first = push_back(nrow);
-        std::memcpy(dbegin(irow_first), recv.dbegin(), nrow*m_row_size);
-    }
+    virtual void insert_rows(const Buffer &recv);
 
-    void transfer_rows(const defs::inds& irows, size_t irank_src, size_t irank_dst){
-        size_t nrow;
-        if (mpi::i_am(irank_src)) {
-            nrow = irows.size();
-            std::cout << "Transferring " << nrow << " rows outward to rank " << irank_dst << std::endl;
-            // make rows to be sent contiguous in memory
-            Buffer send("Outward transfer buffer", 1, m_row_dsize*nrow);
-            for (auto iirow = 0ul; iirow < nrow; ++iirow) {
-                const auto &irow = irows[iirow];
-                std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
-            }
+    void transfer_rows(const defs::inds &irows, size_t irank_src, size_t irank_dst);
 
-            mpi::send(&nrow, 1, irank_dst,0);
-            mpi::send(send.dbegin(), m_row_dsize * nrow, irank_dst,1);
-        }
-        if (mpi::i_am(irank_dst)) {
-            mpi::recv(&nrow, 1, irank_src, 0);
-            std::cout << "Transferring " << nrow << " rows inward from rank " << irank_src << std::endl;
-            Buffer recv("Inward transfer buffer", 1, m_row_dsize*nrow);
-            mpi::recv(recv.dbegin(), m_row_dsize * nrow, irank_src, 1);
-            // now emplace received rows in table buffer window
-            insert_rows(recv);
-        }
-        // sent rows can now be removed
-        if (mpi::i_am(irank_src)) {
-            erase_rows(irows);
-        }
-    }
+    bool has_compatible_format(const Table &other);
+
+    void copy_row(const Table &src, size_t irow_src, size_t irow_dst);
+
 };
 
 

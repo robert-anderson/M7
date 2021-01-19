@@ -11,6 +11,7 @@
 #include <src/core/parallel/RankAllocator.h>
 #include "Table.h"
 #include "src/core/field/TableField.h"
+#include "src/core/table/BufferedTable.h"
 
 struct LookupResult {
     std::forward_list<size_t>& m_bucket;
@@ -178,6 +179,69 @@ struct MappedTable : table_t {
     static size_t nbucket_guess(size_t nrow_max, size_t mean_skips_per_bucket) {
         // number of skips is on average half the average number of rows per bin.
         return std::max(c_nbucket_min, size_t(nrow_max/double(2*mean_skips_per_bucket)));
+    }
+
+    class DynamicRowSet : RankAllocator<field_t>::Dynamic {
+
+        static_assert(std::is_base_of<Table, table_t>::value, "Template arg must be derived from Table");
+        typedef RankAllocator<field_t> ra_t;
+        typedef MappedTable<table_t, field_t, hash_fn> mt_t;
+        /*
+         * the mapped table which stores the definitive row values
+         */
+        mt_t &m_source;
+        /*
+         * the unmapped table which loads copies of rows between m_source (arbitrary order, non-
+         * contiguous) and m_all (contiguous).
+         */
+        BufferedTable<table_t> m_local;
+        /*
+         * the unmapped table which holds copies of all mapped rows. these copies are refreshed
+         * with a call to refresh method. This table is intended for reading rows from all MPI ranks,
+         * as such there is no machanism for committing changes to m_source from m_all. It is
+         * to be treated as a read-only copy.
+         */
+        BufferedTable<table_t> m_all;
+        /*
+         * map row index in source -> row index in m_local.
+         *
+         * We could have achieved this mapping by extending the table_t type with an additional
+         * field of type fields::Number<size_t>, then extending MappedTable with the resultant
+         * type as a template argument. This has the downside that rows cannot be copied wholesale
+         * from m_source into/out of such a table, since the rows would be longer in the extended
+         * table_t. Better to use the stl-provided map to point into a table of the same format.
+         */
+        std::map<size_t, size_t> m_map;
+        // number of source rows added so far
+        size_t m_nrow = 0ul;
+
+    public:
+        DynamicRowSet(ra_t &ra, mt_t &mt) :
+                ra_t::Dynamic(ra),
+                m_source(mt),
+                m_local("Rank-local dynamic row set rows", static_cast<const table_t &>(mt)),
+                m_all("All dynamic row set rows", static_cast<const table_t &>(mt)) {}
+
+        void add(size_t irow) {
+            m_map[irow] = m_nrow++;
+        }
+
+        void populate_local(){
+            static_cast<Table&>(m_local).clear();
+        }
+
+        void on_outward_block_transfer_(size_t iblock) override {
+
+        }
+
+        void on_inward_block_transfer_(size_t iblock) override {
+
+        }
+
+    };
+
+    DynamicRowSet dynamic_row_set(RankAllocator<field_t>& ra){
+        return DynamicRowSet(ra, *this);
     }
 
 };

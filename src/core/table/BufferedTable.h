@@ -20,11 +20,13 @@ public:
         Table::set_buffer(&m_buffer);
     }
 
-    BufferedTable(const BufferedTable<table_t>& other):
-    table_t(static_cast<const table_t&>(other)),
-    m_buffer(other.m_buffer.m_name, 1, 0){
+    BufferedTable(std::string name, const table_t& other):
+            table_t(other), m_buffer(name, 1, 0){
         Table::set_buffer(&m_buffer);
     }
+
+    BufferedTable(const BufferedTable<table_t>& other):
+            BufferedTable(other.m_buffer.m_name, static_cast<const table_t&>(other)){}
 
     void set_expansion_factor(double f){
         m_buffer.m_expansion_factor = f;
