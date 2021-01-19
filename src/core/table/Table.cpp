@@ -84,13 +84,6 @@ size_t Table::add_field(const TableField *field) {
     return offset;
 }
 
-//void Table::move(BufferWindow new_bw) {
-//    if (m_bw) std::memmove(new_bw.m_ptr, m_bw.m_ptr, sizeof(defs::data_t) * std::min(m_bw.m_dsize, new_bw.m_dsize));
-//    m_bw = new_bw;
-//    if (!m_row_dsize) return;
-//    m_nrow = m_bw.m_dsize / m_row_dsize;
-//}
-
 void Table::clear() {
     std::memset(begin(), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
