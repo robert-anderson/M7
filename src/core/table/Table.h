@@ -7,6 +7,7 @@
 
 #include <src/core/util/utils.h>
 #include <src/core/field/Fields.h>
+#include <stack>
 #include "src/defs.h"
 #include "src/core/field/TableField.h"
 #include "Buffer.h"
@@ -26,6 +27,11 @@ struct Table {
      */
     size_t m_hwm = 0ul;
     /*
+     * indices of vacated rows below the high water mark should be pushed
+     * into this stack to allow reuse
+     */
+    std::stack<size_t> m_free_rows;
+    /*
      * when copying the Table, the fields being copied need to know
      * the correct m_table pointer, so we retain a pointer to the last
      * copied Table
@@ -41,6 +47,8 @@ struct Table {
     bool is_full() const;
 
     size_t push_back(size_t nrow = 1);
+
+    size_t get_free_row();
 
     defs::data_t *dbegin();
 
@@ -82,11 +90,15 @@ struct Table {
 
     void expand(size_t nrow);
 
-    virtual void erase_rows(const defs::inds &irows);
+    typedef std::list<std::function<void(const size_t&)>> cb_list_t;
 
-    virtual void insert_rows(const Buffer &recv);
+    virtual void erase_rows(const defs::inds &irows, const cb_list_t& callbacks);
 
-    void transfer_rows(const defs::inds &irows, size_t irank_src, size_t irank_dst);
+    virtual void insert_rows(const Buffer &recv, const cb_list_t& callbacks);
+
+    void send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t& callbacks={});
+
+    void recv_rows(const size_t irank_src, const cb_list_t& callbacks={});
 
     bool has_compatible_format(const Table &other);
 

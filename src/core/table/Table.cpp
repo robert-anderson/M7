@@ -29,6 +29,13 @@ size_t Table::push_back(size_t nrow) {
     return tmp;
 }
 
+size_t Table::get_free_row() {
+    if (m_free_rows.empty()) return push_back();
+    auto irow = m_free_rows.top();
+    m_free_rows.pop();
+    return irow;
+}
+
 defs::data_t *Table::dbegin() {
     return m_bw.dbegin();
 }
@@ -87,10 +94,12 @@ size_t Table::add_field(const TableField *field) {
 void Table::clear() {
     std::memset(begin(), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
+    while (!m_free_rows.empty()) m_free_rows.pop();
 }
 
 void Table::clear(const size_t &irow) {
     std::memset(begin(irow), 0, m_row_size);
+    m_free_rows.push(irow);
 }
 
 bool Table::is_cleared() const {
@@ -152,43 +161,51 @@ void Table::expand(size_t nrow) {
     m_nrow = m_bw.dsize()/m_row_dsize;
 }
 
-void Table::erase_rows(const defs::inds &irows) {
-    for (auto irow : irows) clear(irow);
+void Table::erase_rows(const defs::inds &irows, const cb_list_t& callbacks) {
+    for (auto irow : irows) {
+        for (auto f: callbacks) f(irow);
+        clear(irow);
+    }
 }
 
-void Table::insert_rows(const Buffer &recv) {
+void Table::insert_rows(const Buffer &recv, const cb_list_t& callbacks) {
     const auto nrow = recv.dsize()/m_row_dsize;
     auto irow_first = push_back(nrow);
     std::memcpy(dbegin(irow_first), recv.dbegin(), nrow*m_row_size);
+    for (size_t irow = irow_first; irow<irow_first+nrow; ++irow){
+        for (auto f: callbacks) f(irow);
+    }
 }
 
-void Table::transfer_rows(const defs::inds &irows, size_t irank_src, size_t irank_dst) {
+void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t& callbacks) {
     size_t nrow;
-    if (mpi::i_am(irank_src)) {
-        nrow = irows.size();
-        std::cout << "Transferring " << nrow << " rows outward to rank " << irank_dst << std::endl;
-        // make rows to be sent contiguous in memory
-        Buffer send("Outward transfer buffer", 1, m_row_dsize*nrow);
-        for (auto iirow = 0ul; iirow < nrow; ++iirow) {
-            const auto &irow = irows[iirow];
-            std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
-        }
+    nrow = irows.size();
+    std::cout << "Transferring " << nrow << " rows outward to rank " << irank_dst << std::endl;
+    // make rows to be sent contiguous in memory
+    Buffer send("Outward transfer buffer", 1, m_row_dsize * nrow);
+    for (auto iirow = 0ul; iirow < nrow; ++iirow) {
+        const auto &irow = irows[iirow];
+        std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+    }
 
-        mpi::send(&nrow, 1, irank_dst,0);
-        mpi::send(send.dbegin(), m_row_dsize * nrow, irank_dst,1);
-    }
-    if (mpi::i_am(irank_dst)) {
-        mpi::recv(&nrow, 1, irank_src, 0);
-        std::cout << "Transferring " << nrow << " rows inward from rank " << irank_src << std::endl;
-        Buffer recv("Inward transfer buffer", 1, m_row_dsize*nrow);
-        mpi::recv(recv.dbegin(), m_row_dsize * nrow, irank_src, 1);
-        // now emplace received rows in table buffer window
-        insert_rows(recv);
-    }
-    // sent rows can now be removed
-    if (mpi::i_am(irank_src)) {
-        erase_rows(irows);
-    }
+    mpi::send(&nrow, 1, irank_dst, 0);
+    mpi::send(send.dbegin(), m_row_dsize * nrow, irank_dst, 1);
+    /*
+     * sent rows can now be erased, after all callbacks are called
+     */
+    erase_rows(irows, callbacks);
+}
+
+void Table::recv_rows(size_t irank_src, const cb_list_t& callbacks){
+    size_t nrow;
+    mpi::recv(&nrow, 1, irank_src, 0);
+    std::cout << "Transferring " << nrow << " rows inward from rank " << irank_src << std::endl;
+    Buffer recv("Inward transfer buffer", 1, m_row_dsize*nrow);
+    mpi::recv(recv.dbegin(), m_row_dsize * nrow, irank_src, 1);
+    /*
+     * now emplace received rows in table buffer window, and call all callbacks for each
+     */
+    insert_rows(recv, callbacks);
 }
 
 bool Table::has_compatible_format(const Table &other) {
@@ -208,7 +225,7 @@ bool Table::has_compatible_format(const Table &other) {
 }
 
 void Table::copy_row_in(const Table &src, size_t irow_src, size_t irow_dst) {
-    ASSERT(irow_dst<=m_hwm);
+    ASSERT(irow_dst<m_hwm);
     ASSERT(has_compatible_format(src));
     std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
 }

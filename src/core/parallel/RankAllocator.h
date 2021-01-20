@@ -28,18 +28,37 @@ public:
         ra_t& m_ra;
         typename std::list<Dynamic*>::iterator m_it;
         Dynamic(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
-        ~Dynamic() {m_ra.m_dependents.erase(m_it);}
+        ~Dynamic() {
+            m_ra.m_dependents.erase(m_it);
+        }
 
-        virtual void on_outward_block_transfer_(size_t iblock) = 0;
-        virtual void on_inward_block_transfer_(size_t iblock) = 0;
+        // called before send
+        virtual void on_row_send_(size_t irow) = 0;
+        // called after recv
+        virtual void on_row_recv_(size_t irow) = 0;
     };
 
 private:
     std::list<Dynamic*> m_dependents;
 
+    /*
+     * for each dependent, append a lambda to a list which is then passed to the Table's
+     * send and recv methods
+     */
+    Table::cb_list_t m_send_callbacks;
+    Table::cb_list_t m_recv_callbacks;
+
     typename std::list<Dynamic*>::iterator add_dependent(Dynamic* dependent){
         m_dependents.push_back(dependent);
         auto it = m_dependents.end();
+
+        // refresh callback lists
+        m_send_callbacks.clear();
+        m_recv_callbacks.clear();
+        for (auto ptr : m_dependents) {
+            m_send_callbacks.push_back([ptr](const size_t &irow) { ptr->on_row_send_(irow); });
+            m_recv_callbacks.push_back([ptr](const size_t &irow) { ptr->on_row_recv_(irow); });
+        }
         return --it;
     }
 
@@ -88,13 +107,9 @@ public:
                 if (get_block(key)==iblock_send) irows_send.push_back(irow);
             }
         }
-        if (mpi::i_am(sender)){
-            for (auto ptr : m_dependents) ptr->on_outward_block_transfer_(iblock_send);
-        }
-        table.transfer_rows(irows_send, sender, recver);
-        if (mpi::i_am(recver)){
-            for (auto ptr : m_dependents) ptr->on_inward_block_transfer_(iblock_send);
-        }
+
+        if (mpi::i_am(sender)) table.send_rows(irows_send, recver, m_send_callbacks);
+        if (mpi::i_am(recver)) table.recv_rows(sender, m_recv_callbacks);
     }
 
     /**

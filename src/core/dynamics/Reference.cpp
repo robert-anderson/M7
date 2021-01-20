@@ -136,9 +136,10 @@ defs::ham_comp_t Reference::proj_energy() const {
     return consts::real(proj_energy_num()/weight());
 }
 
-void Reference::on_outward_block_transfer_(size_t iblock) {
+void Reference::on_row_send_(size_t irow) {
+
 }
 
-void Reference::on_inward_block_transfer_(size_t iblock) {
+void Reference::on_row_recv_(size_t irow) {
 
 }

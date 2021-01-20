@@ -48,11 +48,11 @@ struct Wavefunction : ra::Onv::Dynamic {
         m_walkers.set_expansion_factor(m_opts.spawn_buffer_expansion_factor);
     }
 
-    void on_outward_block_transfer_(size_t iblock) override {
+    void on_row_send_(size_t irow) override {
 
     }
 
-    void on_inward_block_transfer_(size_t iblock) override {
+    void on_row_recv_(size_t irow) override {
 
     }
 

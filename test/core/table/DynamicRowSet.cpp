@@ -39,7 +39,5 @@ TEST(DynamicRowSet, Test) {
 
     drs.add(0);
 
-    drs.populate_local();
-
-    drs.m_local.print_contents();
+    drs.update();
 }

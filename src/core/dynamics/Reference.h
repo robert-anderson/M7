@@ -69,10 +69,11 @@ public:
     defs::ham_comp_t proj_energy() const;
 
 private:
-    void on_outward_block_transfer_(size_t iblock) override;
 
-    void on_inward_block_transfer_(size_t iblock) override;
 
+    void on_row_send_(size_t irow) override;
+
+    void on_row_recv_(size_t irow) override;
 };
 
 #endif //M7_REFERENCE_H

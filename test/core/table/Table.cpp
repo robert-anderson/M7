@@ -186,9 +186,10 @@ TEST(Table, PointToPointTransfer) {
     defs::inds send;
     if (mpi::i_am(0)){
         send = {1, 2, 4};
+        bt.send_rows(send, 1);
     }
-    bt.transfer_rows(send, 0, 1);
     if (mpi::i_am(1)){
+        bt.recv_rows(0);
         ASSERT_EQ(bt.m_hwm, 8);
     }
     std::cout << std::endl;
