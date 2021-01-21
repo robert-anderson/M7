@@ -130,11 +130,11 @@ void Solver::loop_over_spawned() {
 #endif
 }
 
-Solver::Solver(Propagator &prop, Wavefunction &wf, views::Onv<> ref_onv) :
+Solver::Solver(Propagator &prop, Wavefunction &wf, Table::Loc ref_loc) :
         m_prop(prop),
         m_opts(prop.m_opts),
         m_wf(wf),
-        m_reference(m_opts, m_wf, m_prop.m_ham, ref_onv){
+        m_reference(m_opts, m_prop.m_ham, m_wf, ref_loc) {
     if (mpi::i_am_root())
         m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
     m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(

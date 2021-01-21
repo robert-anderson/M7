@@ -26,7 +26,7 @@ struct BitsetSpecifier : FieldSpecifier {
             const size_t m_ibit;
             BitView(const View& view, const size_t &ibit);
             BitView& operator=(bool t);
-            operator bool();
+            operator bool() const;
         };
         BitView operator[](const size_t& ibit);
 

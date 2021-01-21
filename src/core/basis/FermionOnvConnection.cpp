@@ -5,10 +5,13 @@
 #include "FermionOnvConnection.h"
 #include <algorithm>
 
-FermionOnvConnection::FermionOnvConnection(const FermionOnvSpecifier& spec){
-    m_ann.reserve(spec.m_nbit);
-    m_cre.reserve(spec.m_nbit);
+FermionOnvConnection::FermionOnvConnection(size_t nsite){
+    m_ann.reserve(2*nsite);
+    m_cre.reserve(2*nsite);
 }
+
+FermionOnvConnection::FermionOnvConnection(const FermionOnvSpecifier& spec):
+        FermionOnvConnection(spec.m_nsite){}
 
 FermionOnvConnection::FermionOnvConnection(const views::Det &in, const views::Det &out) : FermionOnvConnection(in.spec()) {
     ASSERT(in.nsite() == out.nsite());
@@ -51,12 +54,16 @@ size_t FermionOnvConnection::nexcit() const {
 }
 
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const FermionOnvSpecifier &spec): FermionOnvConnection(spec) {
-    m_ann.reserve(spec.m_nbit);
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(size_t nsite):
+FermionOnvConnection(nsite) {
+    m_com.reserve(2*nsite);
 }
 
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const FermionOnvSpecifier &spec):
+        AntisymFermionOnvConnection(spec.m_nsite) {}
+
 AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::Det &in, const views::Det &out) :
-        FermionOnvConnection(in, out) {
+        AntisymFermionOnvConnection(in) {
     connect(in, out);
 }
 

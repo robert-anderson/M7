@@ -104,6 +104,14 @@ struct Table {
 
     void copy_row_in(const Table &src, size_t irow_src, size_t irow_dst);
 
+    struct Loc {
+        const size_t m_irank, m_irow;
+        Loc(size_t irank, size_t irow): m_irank(irank), m_irow(irow){}
+        bool is_mine() const {
+            return mpi::i_am(m_irank);
+        }
+    };
+
 };
 
 

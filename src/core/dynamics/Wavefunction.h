@@ -132,6 +132,7 @@ struct Wavefunction : ra::Onv::Dynamic {
 
     size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
                          const defs::ham_comp_t &hdiag, bool refconn) {
+        ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_walkers.is_full()) m_walkers.expand(1);
         auto irow = m_walkers.insert(onv);
         ASSERT(m_walkers.m_onv(irow) == onv)

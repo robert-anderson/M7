@@ -34,6 +34,7 @@ protected:
     defs::inds m_ann, m_cre;
 
 public:
+    explicit FermionOnvConnection(size_t nsite);
     explicit FermionOnvConnection(const FermionOnvSpecifier& field);
     FermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
     explicit FermionOnvConnection(const views::Onv<0> &in);
@@ -99,6 +100,7 @@ class AntisymFermionOnvConnection : public FermionOnvConnection {
     bool m_phase;
 
 public:
+    explicit AntisymFermionOnvConnection(size_t nsite);
     explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& spec);
     AntisymFermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
     explicit AntisymFermionOnvConnection(const views::Onv<0> &in);

@@ -41,7 +41,7 @@ class Solver {
 
 public:
 
-    Solver(Propagator &prop, Wavefunction &wf, views::Onv<> ref_onv);
+    Solver(Propagator &prop, Wavefunction &wf, Table::Loc ref_loc);
 
     void execute(size_t niter=1);
 

@@ -30,6 +30,8 @@ struct FlagBase {
     FlagBase(FlagSet *flagset, size_t nelement, std::string description);
 
     BitsetSpecifier::View::BitView operator()(const size_t& irow, const size_t& ielement);
+
+    const BitsetSpecifier::View::BitView operator() (const size_t& irow, const size_t& ielement) const;
 };
 
 template <size_t nind>
@@ -42,6 +44,11 @@ struct NdFlag : FlagBase {
 
     template<typename ...Args>
     BitsetSpecifier::View::BitView operator()(const size_t& irow, Args... shape){
+        return FlagBase::operator()(irow, m_format.flatten(shape...));
+    }
+
+    template<typename ...Args>
+    const BitsetSpecifier::View::BitView operator()(const size_t& irow, Args... shape) const {
         return FlagBase::operator()(irow, m_format.flatten(shape...));
     }
 };

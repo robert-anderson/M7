@@ -26,3 +26,8 @@ BitsetSpecifier::View::BitView FlagBase::operator()(const size_t &irow, const si
     ASSERT(ielement<m_nelement);
     return (*m_flagset->m_bitset_field)(irow) [m_offset+ielement];
 }
+
+const BitsetSpecifier::View::BitView FlagBase::operator()(const size_t &irow, const size_t &ielement) const {
+    ASSERT(ielement<m_nelement);
+    return (*m_flagset->m_bitset_field)(irow) [m_offset+ielement];
+}

@@ -88,14 +88,15 @@ struct MappedTable : table_t {
     }
 
     using typename Table::cb_list_t;
-    void erase_rows(const defs::inds &irows, const cb_list_t& callbacks) override {
+
+    void erase_rows(const defs::inds &irows, const cb_list_t &callbacks) override {
         for (auto irow : irows) {
             auto lookup = (*this)[m_key_field(irow)];
             erase(lookup);
         }
     }
 
-    void insert_rows(const Buffer &recv, const cb_list_t& callbacks) override {
+    void insert_rows(const Buffer &recv, const cb_list_t &callbacks) override {
         const auto nrow = recv.dsize() / m_row_dsize;
         for (size_t irow = 0; irow < nrow; ++irow) {
             auto iinsert = get_free_row();
@@ -185,7 +186,7 @@ struct MappedTable : table_t {
         /*
          * the mapped table which stores the definitive row values
          */
-        mt_t &m_source;
+        const mt_t &m_source;
         /*
          * the unmapped table which loads copies of rows between m_source (arbitrary order, non-
          * contiguous) and m_all (contiguous). lc = "local, contiguous"
@@ -215,16 +216,22 @@ struct MappedTable : table_t {
          */
         defs::inds m_counts;
         defs::inds m_displs;
+        /*
+         * keep track of which ranks have any rows
+         */
+        bool m_have_any_rows;
+        defs::inds m_ranks_with_any_rows;
 
     public:
-        DynamicRowSet(ra_t &ra, mt_t &mt) :
+        DynamicRowSet(const ra_t &ra, const mt_t &mt) :
                 ra_t::Dynamic(ra),
                 m_source(mt),
                 m_lc("Rank-local dynamic row set rows", static_cast<const table_t &>(mt)),
                 m_ac("All dynamic row set rows", static_cast<const table_t &>(mt)),
                 m_counts(mpi::nrank(), 0ul),
-                m_displs(mpi::nrank(), 0ul)
-                {}
+                m_displs(mpi::nrank(), 0ul) {
+            m_ranks_with_any_rows.reserve(mpi::nrank());
+        }
 
         size_t nrow() const {
             return m_map.size();
@@ -242,7 +249,7 @@ struct MappedTable : table_t {
              * local row indices must be updated in case we sent a block
              */
             size_t irow_local = 0ul;
-            for (auto& pair : m_map) {
+            for (auto &pair : m_map) {
                 pair.second = irow_local++;
                 static_cast<Table &>(m_lc).copy_row_in(m_source, pair.first, pair.second);
             }
@@ -257,14 +264,19 @@ struct MappedTable : table_t {
             /*
              * convert from units of rows to datawords...
              */
-            for (auto& i : m_counts) i*=m_source.m_row_dsize;
-            for (auto& i : m_displs) i*=m_source.m_row_dsize;
+            for (auto &i : m_counts) i *= m_source.m_row_dsize;
+            for (auto &i : m_displs) i *= m_source.m_row_dsize;
             mpi::all_gatherv(m_lc.dbegin(), m_counts[mpi::irank()], m_ac.dbegin(), m_counts, m_displs);
             /*
              * ... and back again
              */
-            for (auto& i : m_counts) i/=m_source.m_row_dsize;
-            for (auto& i : m_displs) i/=m_source.m_row_dsize;
+            for (auto &i : m_counts) i /= m_source.m_row_dsize;
+            for (auto &i : m_displs) i /= m_source.m_row_dsize;
+            m_have_any_rows = m_counts[mpi::irank()];
+            m_ranks_with_any_rows.clear();
+            for (auto &i : m_counts) {
+                if (i) m_ranks_with_any_rows.push_back(mpi::irank());
+            }
         }
 
     public:
@@ -278,7 +290,7 @@ struct MappedTable : table_t {
         }
 
         void on_row_recv_(size_t irow) override {
-            ASSERT(m_map.find(irow)==m_map.end());
+            ASSERT(m_map.find(irow) == m_map.end());
             m_map[irow] = nrow();
         }
 
@@ -289,15 +301,37 @@ struct MappedTable : table_t {
     }
 
 
-    struct DynamicRow : private DynamicRowSet {
+    struct DynamicRow : public DynamicRowSet {
         using typename DynamicRowSet::ra_t;
         using typename DynamicRowSet::mt_t;
-        DynamicRow(ra_t &ra, mt_t &mt, size_t irank, size_t irow):
-        DynamicRowSet(ra, mt){
-            if (mpi::i_am(irank)) DynamicRowSet::add(irow);
+        using ra_t::Dynamic::m_ra;
+        using DynamicRowSet::m_source;
+        using DynamicRowSet::m_map;
+        using DynamicRowSet::add;
+        using DynamicRowSet::nrow;
+        using DynamicRowSet::update;
+        using DynamicRowSet::m_have_any_rows;
+        using DynamicRowSet::m_ranks_with_any_rows;
+
+        DynamicRow(const ra_t &ra, const mt_t &mt, Table::Loc loc) :
+                DynamicRowSet(ra, mt) {
+            if (loc.is_mine()) add(loc.m_irow);
+            update();
+            if (m_ranks_with_any_rows.size()!=1) mpi::stop_all("Only one rank should have a row");
+        }
+
+        void change(Table::Loc loc) {
+            if (loc.is_mine()) {
+                ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow))==mpi::irank());
+                m_map.clear();
+                m_map = {loc.m_irow, 0ul};
+            }
+            update();
         }
 
         bool is_mine() const {
+            ASSERT(m_have_any_rows);
+            ASSERT(m_ranks_with_any_rows.size()==1);
             return DynamicRowSet::nrow();
         }
     };

@@ -95,6 +95,6 @@ BitsetSpecifier::View::BitView &BitsetSpecifier::View::BitView::operator=(bool t
     return *this;
 }
 
-BitsetSpecifier::View::BitView::operator bool() {
+BitsetSpecifier::View::BitView::operator bool() const {
     return m_view->get(m_ibit);
 }
