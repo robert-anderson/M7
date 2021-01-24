@@ -3,6 +3,8 @@
 //
 
 #include "Flag.h"
+
+#include <utility>
 #include "src/core/table/Table.h"
 
 
@@ -20,7 +22,7 @@ FlagBase::FlagBase(FlagSet *flagset, size_t nelement, std::string description) :
         m_flagset(flagset),
         m_nelement(nelement),
         m_offset(flagset->add_flag(this)),
-        m_description(description){}
+        m_description(std::move(description)){}
 
 BitsetSpecifier::View::BitView FlagBase::operator()(const size_t &irow, const size_t &ielement) {
     ASSERT(ielement<m_nelement);

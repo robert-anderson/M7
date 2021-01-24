@@ -223,7 +223,7 @@ struct MappedTable : table_t {
         defs::inds m_ranks_with_any_rows;
 
     public:
-        DynamicRowSet(const ra_t &ra, const mt_t &mt) :
+        DynamicRowSet(ra_t &ra, const mt_t &mt) :
                 ra_t::Dynamic(ra),
                 m_source(mt),
                 m_lc("Rank-local dynamic row set rows", static_cast<const table_t &>(mt)),
@@ -280,9 +280,11 @@ struct MappedTable : table_t {
         }
 
     public:
+        virtual void post_update() {}
         void update() {
             populate_local();
             gatherv();
+            post_update();
         }
 
         void on_row_send_(size_t irow) override {
@@ -313,7 +315,7 @@ struct MappedTable : table_t {
         using DynamicRowSet::m_have_any_rows;
         using DynamicRowSet::m_ranks_with_any_rows;
 
-        DynamicRow(const ra_t &ra, const mt_t &mt, Table::Loc loc) :
+        DynamicRow(ra_t &ra, const mt_t &mt, Table::Loc loc) :
                 DynamicRowSet(ra, mt) {
             if (loc.is_mine()) add(loc.m_irow);
             update();

@@ -27,10 +27,6 @@ namespace fields {
         size_t extent(size_t i) const {
             return static_cast<const NdFieldGroup<nind>*>(this)->m_format.extent(i);
         }
-//        template<typename ...Args>
-//        T& operator()(const size_t &irow, Args... inds){
-//            return *((T*)NdField<specs::Number<T>, nind>::m_field.raw_ptr(irow, m_fielement));
-//        }
     };
 
     template<typename T>

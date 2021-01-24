@@ -109,5 +109,5 @@ defs::ham_t Reference::proj_energy_num() const {
 }
 
 defs::ham_comp_t Reference::proj_energy() const {
-    return consts::real(proj_energy_num()/weight());
+    return consts::real(proj_energy_num()/get_weight(0, 0));
 }

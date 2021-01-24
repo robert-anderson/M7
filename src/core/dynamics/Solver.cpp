@@ -258,7 +258,7 @@ void Solver::output_stats() {
         m_stats->m_nwalker() = m_wf.m_nwalker.reduced(0, 0);
         m_stats->m_delta_nwalker() = m_wf.m_delta_nwalker.reduced(0, 0);
         m_stats->m_ref_proj_energy_num() = m_reference.proj_energy_num();
-        m_stats->m_ref_weight() = m_reference.weight();
+        m_stats->m_ref_weight() = m_reference.get_weight(0, 0);
         m_stats->m_ref_proj_energy() = m_reference.proj_energy();
         m_stats->m_l2_norm() = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
         m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);

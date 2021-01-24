@@ -8,6 +8,7 @@
 #include <src/core/util/utils.h>
 #include "FieldSpecifier.h"
 #include "src/core/nd/NdFormat.h"
+#include "src/core/nd/NdAccessor.h"
 
 template<typename T, size_t nind>
 struct NumericArraySpecifier : FieldSpecifier {
@@ -23,42 +24,13 @@ struct NumericArraySpecifier : FieldSpecifier {
         m_data.m_details["element shape"] = utils::to_string(m_format.shape());
     }
 
-    struct View : FieldSpecifier::View {
-        View(const NumericArraySpecifier &spec, char *ptr) : FieldSpecifier::View(spec, ptr) {}
+    struct View : FieldSpecifier::View, NdAccessor<T, nind> {
+        View(const NumericArraySpecifier &spec, char *ptr) :
+        FieldSpecifier::View(spec, ptr),
+        NdAccessor<T, nind>((T*)ptr, spec.m_format){}
 
-        const size_t& nelement() const {
-            return static_cast<const NumericArraySpecifier&>(m_spec).m_nelement;
-        }
-
-        T& operator[](const size_t& ind) {
-            ASSERT(ind<nelement());
-            return ((T*)m_ptr)[ind];
-        }
-        const T& operator[](const size_t& ind) const {
-            ASSERT(ind<nelement());
-            return ((T*)m_ptr)[ind];
-        }
-        template<typename ...Args>
-        T& operator()(Args... inds){
-            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_spec).m_format.flatten(inds...)];
-        }
-        template<typename ...Args>
-        const T& operator()(Args... inds) const {
-            return ((T*)m_ptr)[static_cast<const NumericArraySpecifier&>(m_spec).m_format.flatten(inds...)];
-        }
-
-        template<typename U>
-        View& operator=(const std::vector<U> &v){
-            ASSERT(v.size()==nelement());
-            for (size_t i = 0ul; i < nelement(); ++i) (*this)(i) = v[i];
-            return *this;
-        }
-
-        View &operator=(const std::vector<T> &v) {
-            ASSERT(v.size() == nelement());
-            memcpy((void*)m_ptr, (void*)v.data(), nelement()*sizeof(T));
-            return *this;
-        }
+        using NdAccessor<T, nind>::nelement;
+        using NdAccessor<T, nind>::operator=;
 
         std::string to_string() const override {
             std::string res;

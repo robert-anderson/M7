@@ -65,7 +65,6 @@ public:
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
 
     defs::ham_t proj_energy_num() const;
-    defs::ham_comp_t weight() const;
     defs::ham_comp_t proj_energy() const;
 
 };
