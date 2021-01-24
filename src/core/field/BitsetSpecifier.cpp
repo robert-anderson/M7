@@ -130,7 +130,7 @@ std::string BitsetSpecifier::element_string(char *ptr) const {
     return View(*this, ptr).to_string();
 }
 
-BitsetSpecifier::const_view_t BitsetSpecifier::operator()(char *ptr) const {
+const BitsetSpecifier::view_t BitsetSpecifier::operator()(char *ptr) const {
     return View(*this, ptr);
 }
 

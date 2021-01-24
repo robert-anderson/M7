@@ -16,7 +16,6 @@ struct NumericSpecifier : FieldSpecifier {
     }
 
     typedef T& view_t;
-    typedef const T& const_view_t;
 
     static defs::hash_t hash(const View& view) {
         return hashing::fnv_hash((char*)&view, sizeof(T));

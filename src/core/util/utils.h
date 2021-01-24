@@ -452,7 +452,7 @@ namespace sort_utils {
 
     template<typename viewable_t>
     std::function<bool(const size_t &, const size_t &)>
-    static make_compare_fn(std::function<typename viewable_t::const_view_t(const size_t &)> getter_fn, bool max,
+    static make_compare_fn(std::function<const typename viewable_t::view_t(const size_t &)> getter_fn, bool max,
                     bool abs_val) {
         if (max) {
             if (abs_val)

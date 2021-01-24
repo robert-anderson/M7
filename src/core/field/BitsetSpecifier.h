@@ -68,7 +68,6 @@ struct BitsetSpecifier : FieldSpecifier {
     };
 
     typedef View view_t;
-    typedef const View const_view_t;
 
     BitsetSpecifier(size_t nbit);
 

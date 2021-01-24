@@ -46,7 +46,6 @@ struct NumericArraySpecifier : FieldSpecifier {
     }
 
     typedef View view_t;
-    typedef const View const_view_t;
 
     View operator()(char *ptr) const {
         return View(*this, ptr);

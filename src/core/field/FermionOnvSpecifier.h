@@ -74,7 +74,6 @@ struct FermionOnvSpecifier : BitsetSpecifier {
     std::string element_string(char *ptr) const override;
 
     typedef View view_t;
-    typedef const View const_view_t;
 
     View operator()(char *ptr) const;
 };

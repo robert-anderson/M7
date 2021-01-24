@@ -73,7 +73,6 @@ namespace fb_onv {
                 m_bonv(table, nsite, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
-        typedef const View const_view_t;
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {
@@ -81,8 +80,8 @@ namespace fb_onv {
         }
 
         template<typename ...Args>
-        const_view_t operator()(const size_t &irow, Args... inds) const {
-            return const_view_t(m_fonv, m_bonv, irow, m_format.flatten(inds...));
+        const view_t operator()(const size_t &irow, Args... inds) const {
+            return view_t(m_fonv, m_bonv, irow, m_format.flatten(inds...));
         }
 
         struct hash_fn {
