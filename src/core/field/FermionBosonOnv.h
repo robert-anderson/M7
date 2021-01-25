@@ -73,6 +73,7 @@ namespace fb_onv {
                 m_bonv(table, nsite, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
+        typedef const View cview_t;
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {

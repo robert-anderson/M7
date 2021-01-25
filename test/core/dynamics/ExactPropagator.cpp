@@ -78,22 +78,21 @@ TEST(ExactPropagator, Test) {
     //const auto benchmark = -108.81138657563143;
     Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::Onv<> fonv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
+    elements::Onv<> ref_onv(ham.nsite());
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
     ra::Onv ra(100, 10);
     Wavefunction wf(opts, nsite, ra);
     wf.expand(10, 800);
     ExactPropagator prop(ham, opts);
-    auto ref_energy = ham.get_energy(fonv);
+    auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
-    Solver solver(prop, wf, fonv);
 
-    std::cout << "Reference Energy: " << ref_energy << std::endl;
-
-    for (size_t i=0ul; i<1000; ++i){
+    Table::Loc ref_loc = {ra.get_rank(ref_onv), 0ul};
+    if (ref_loc.is_mine()) wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    prop.m_shift = ref_energy;
+    Solver solver(prop, wf, ref_loc);
+    for (size_t i = 0ul; i < opts.ncycle; ++i) {
         solver.execute();
-        std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
-        //std::cout << solver.reference().proj_energy()-benchmark << std::endl;
     }
 }
 
@@ -106,21 +105,22 @@ TEST(ExactPropagator, Cr2Test) {
     //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::FermionOnv fonv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
+    elements::FermionOnv ref_onv(ham.nsite());
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
     ra::Onv ra(100, 10);
     Wavefunction wf(opts, ham.nsite(), ra);
     wf.expand(1000000, 8000000);
     ExactPropagator prop(ham, opts);
-    auto ref_energy = ham.get_energy(fonv);
-    prop.m_shift = ref_energy;//benchmark;
-    Solver solver(prop, wf, fonv);
+    auto ref_energy = ham.get_energy(ref_onv);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i=0ul; i<1000; ++i){
+    Table::Loc ref_loc = {ra.get_rank(ref_onv), 0ul};
+    if (ref_loc.is_mine()) wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    prop.m_shift = ref_energy;
+    Solver solver(prop, wf, ref_loc);
+    for (size_t i = 0ul; i < opts.ncycle; ++i) {
         solver.execute();
-        std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
 }
 #endif

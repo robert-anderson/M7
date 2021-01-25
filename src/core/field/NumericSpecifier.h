@@ -16,6 +16,7 @@ struct NumericSpecifier : ColumnSpecifier {
     }
 
     typedef T& view_t;
+    typedef const T& cview_t;
 
     static defs::hash_t hash(const View& view) {
         return hashing::fnv_hash((char*)&view, sizeof(T));

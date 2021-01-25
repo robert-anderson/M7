@@ -23,22 +23,22 @@ struct CommonFieldTypeTable : public Table {
 
 TEST(Table, CommonFieldOffset) {
     CommonFieldTypeTable t1(3, 4);
-    ASSERT_EQ(t1.m_shorts.m_field.m_offset, 0);
-    ASSERT_EQ(t1.m_shorts.m_field.m_size, 3 * sizeof(short));
+    ASSERT_EQ(t1.m_shorts.m_column.m_offset, 0);
+    ASSERT_EQ(t1.m_shorts.m_column.m_size, 3 * sizeof(short));
     /*
      * check that the next field follows on gaplessly...
      */
-    ASSERT_EQ(t1.m_more_shorts.m_field.m_offset, 3 * sizeof(short));
-    ASSERT_EQ(t1.m_more_shorts.m_field.m_size, 4 * sizeof(short));
+    ASSERT_EQ(t1.m_more_shorts.m_column.m_offset, 3 * sizeof(short));
+    ASSERT_EQ(t1.m_more_shorts.m_column.m_size, 4 * sizeof(short));
     /*
      * but not in this case, where the first field takes up a whole
      * number of datawords...
      */
     CommonFieldTypeTable t2(8, 5);
-    ASSERT_EQ(t2.m_shorts.m_field.m_offset, 0);
-    ASSERT_EQ(t2.m_shorts.m_field.m_size, 8 * sizeof(short));
-    ASSERT_EQ(t2.m_more_shorts.m_field.m_offset, 2 * sizeof(defs::data_t));
-    ASSERT_EQ(t2.m_more_shorts.m_field.m_size, 5 * sizeof(short));
+    ASSERT_EQ(t2.m_shorts.m_column.m_offset, 0);
+    ASSERT_EQ(t2.m_shorts.m_column.m_size, 8 * sizeof(short));
+    ASSERT_EQ(t2.m_more_shorts.m_column.m_offset, 2 * sizeof(defs::data_t));
+    ASSERT_EQ(t2.m_more_shorts.m_column.m_size, 5 * sizeof(short));
 }
 
 struct DifferentFieldTypeTable : public Table {
@@ -52,16 +52,16 @@ struct DifferentFieldTypeTable : public Table {
 
 TEST(Table, DifferentFieldOffset) {
     DifferentFieldTypeTable t1(3, 4);
-    ASSERT_EQ(t1.m_shorts.m_field.m_offset, 0);
-    ASSERT_EQ(t1.m_shorts.m_field.m_size, 3 * sizeof(short));
+    ASSERT_EQ(t1.m_shorts.m_column.m_offset, 0);
+    ASSERT_EQ(t1.m_shorts.m_column.m_size, 3 * sizeof(short));
     /*
      * check that the differently-typed second field is offset to the
      * next whole dataword
      */
-    ASSERT_EQ(t1.m_floats.m_field.m_offset, sizeof(defs::data_t));
-    ASSERT_EQ(t1.m_floats.m_field.m_size, 4 * sizeof(float));
+    ASSERT_EQ(t1.m_floats.m_column.m_offset, sizeof(defs::data_t));
+    ASSERT_EQ(t1.m_floats.m_column.m_size, 4 * sizeof(float));
 
-    ASSERT_EQ(t1.m_shorts.m_field.m_table, &t1);
+    ASSERT_EQ(t1.m_shorts.m_column.m_table, &t1);
 }
 
 struct TestFlagSet : FlagSet {
@@ -208,11 +208,11 @@ TEST(Table, Copy){
     ASSERT_EQ(tcopy.m_row_dsize, t.m_row_dsize);
     ASSERT_EQ(tcopy.m_shorts.m_format.nelement(), nshorts);
     ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
-    ASSERT_EQ(tcopy.m_shorts.m_field.m_table, &tcopy);
-    ASSERT_EQ(tcopy.m_floats.m_field.m_table, &tcopy);
+    ASSERT_EQ(tcopy.m_shorts.m_column.m_table, &tcopy);
+    ASSERT_EQ(tcopy.m_floats.m_column.m_table, &tcopy);
 
-    ASSERT_EQ(t.m_fields.size(), 2);
-    ASSERT_EQ(tcopy.m_fields.size(), 2);
+    ASSERT_EQ(t.m_columns.size(), 2);
+    ASSERT_EQ(tcopy.m_columns.size(), 2);
 }
 
 TEST(Table, CopyBuffered){
@@ -238,11 +238,11 @@ TEST(Table, CopyBuffered){
     ASSERT_EQ(tcopy.m_row_dsize, t.m_row_dsize);
     ASSERT_EQ(tcopy.m_shorts.m_format.nelement(), nshorts);
     ASSERT_EQ(tcopy.m_floats.m_format.nelement(), nfloats);
-    ASSERT_EQ(tcopy.m_shorts.m_field.m_table, &tcopy);
-    ASSERT_EQ(tcopy.m_floats.m_field.m_table, &tcopy);
+    ASSERT_EQ(tcopy.m_shorts.m_column.m_table, &tcopy);
+    ASSERT_EQ(tcopy.m_floats.m_column.m_table, &tcopy);
 
-    ASSERT_EQ(t.m_fields.size(), 2);
-    ASSERT_EQ(tcopy.m_fields.size(), 2);
+    ASSERT_EQ(t.m_columns.size(), 2);
+    ASSERT_EQ(tcopy.m_columns.size(), 2);
 
     ASSERT_EQ(t.m_hwm, 4);
     ASSERT_EQ(t.m_nrow, (size_t)(4*(1+t.m_bw.expansion_factor())));

@@ -55,6 +55,7 @@ template<typename spec_t>
 struct Column : ColumnBase {
     static_assert(std::is_base_of<ColumnSpecifier, spec_t>::value, "Template arg must be derived from ColumnSpecifier");
     typedef typename spec_t::view_t view_t;
+    typedef typename spec_t::cview_t cview_t;
     const spec_t m_spec;
 
     Column(Table *table, spec_t spec, size_t nelement, std::string description) :
@@ -75,7 +76,7 @@ struct Column : ColumnBase {
         return m_spec(raw_ptr(irow, ielement));
     }
 
-    const view_t get_view(const size_t &irow, const size_t &ielement) const {
+    cview_t get_view(const size_t &irow, const size_t &ielement) const {
         return m_spec(raw_ptr(irow, ielement));
     }
 
@@ -83,7 +84,7 @@ struct Column : ColumnBase {
         return m_spec(ptr);
     }
 
-    const view_t get_view(const char* ptr) const{
+    cview_t get_view(const char* ptr) const{
         return m_spec(ptr);
     }
 };
@@ -96,6 +97,7 @@ struct Column : ColumnBase {
 template<typename spec_t, size_t nind>
 struct NdColumn : Column<spec_t> {
     typedef typename spec_t::view_t view_t;
+    typedef typename spec_t::cview_t cview_t;
     const NdFormat<nind> &m_format;
 
     NdColumn(Table *table, spec_t spec, std::string description, const NdFormat<nind> &format) :
@@ -109,7 +111,7 @@ struct NdColumn : Column<spec_t> {
     }
 
     template<typename ...Args>
-    const view_t operator()(const size_t &irow, Args... inds) const {
+    cview_t operator()(const size_t &irow, Args... inds) const {
         return get_view(irow, m_format.flatten(inds...));
     }
 
@@ -127,16 +129,19 @@ struct NdColumn : Column<spec_t> {
         }
 
         template<typename ...Args>
-        const view_t operator()(Args... inds) const {
+        cview_t operator()(Args... inds) const {
             return get_view(m_ptr+m_column.m_format.flatten(inds...)*m_column.m_data.m_element_size);
         }
     };
 
-    RowView operator[](const size_t &irow) {
+    typedef RowView rview_t;
+    typedef const RowView crview_t;
+
+    rview_t operator[](const size_t &irow) {
         return RowView(*this, irow);
     }
 
-    const RowView operator[](const size_t &irow) const {
+    crview_t operator[](const size_t &irow) const {
         return RowView(*this, irow);
     }
 };

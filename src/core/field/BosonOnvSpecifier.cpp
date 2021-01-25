@@ -8,6 +8,10 @@ const size_t &BosonOnvSpecifier::nmode() const {
     return m_format.extent(0);
 }
 
+BosonOnvSpecifier::View BosonOnvSpecifier::operator()(char *ptr) const {
+    return View(*this, ptr);
+}
+
 BosonOnvSpecifier::View::View(const BosonOnvSpecifier &field, char *ptr) : NumericArraySpecifier<uint8_t, 1>::View(field, ptr) {}
 
 size_t BosonOnvSpecifier::View::nboson() const {

@@ -68,6 +68,7 @@ struct BitsetSpecifier : ColumnSpecifier {
     };
 
     typedef View view_t;
+    typedef const View cview_t;
 
     BitsetSpecifier(size_t nbit);
 

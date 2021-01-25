@@ -13,8 +13,8 @@ std::string FermionOnvSpecifier::element_string(char *ptr) const {
     return View(*this, ptr).to_string();
 }
 
-FermionOnvSpecifier::View FermionOnvSpecifier::operator()(char *ptr) const {
-    return View(*this, ptr);
+FermionOnvSpecifier::view_t FermionOnvSpecifier::operator()(char *ptr) const{
+    return {*this, ptr};
 }
 
 FermionOnvSpecifier::View::View(const FermionOnvSpecifier &spec, char *ptr) : BitsetSpecifier::View(spec, ptr) {}
