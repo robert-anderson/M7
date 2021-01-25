@@ -46,19 +46,11 @@ struct NdField : NdFieldGroup<nind> {
     NdColumn<spec_t, nind> m_column;
     using NdFieldGroup<nind>::m_format;
     typedef typename spec_t::view_t view_t;
+    typedef typename NdColumn<spec_t, nind>::RowView row_view_t;
 
     template<typename ...Args>
     NdField(Table *table, spec_t spec, std::string description, Args... shape):
             NdFieldGroup<nind>(shape...), m_column(table, spec, description, m_format) {}
-
-
-    view_t get_view(const size_t &irow, const size_t &ielement) {
-        return m_column.get_view(irow, ielement);
-    }
-
-    const view_t get_view(const size_t &irow, const size_t &ielement) const {
-        return m_column.get_view(irow, ielement);
-    }
 
     template<typename ...Args>
     view_t operator()(const size_t &irow, Args... inds) {
@@ -68,6 +60,16 @@ struct NdField : NdFieldGroup<nind> {
     template<typename ...Args>
     const view_t operator()(const size_t &irow, Args... inds) const {
         return m_column(irow, inds...);
+    }
+
+    template<typename ...Args>
+    row_view_t operator[](const size_t &irow) {
+        return m_column[irow];
+    }
+
+    template<typename ...Args>
+    const row_view_t operator[](const size_t &irow) const {
+        return m_column[irow];
     }
 
     struct hash_fn {

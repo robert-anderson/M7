@@ -32,7 +32,7 @@ struct ColumnBase {
     ColumnBase(Table *table, ColumnData column_data,
                size_t nelement, std::string description);
 
-    ColumnBase(const ColumnBase& other);
+    ColumnBase(const ColumnBase &other);
 
     bool is_same_type_as(const ColumnBase &other) const;
 
@@ -78,6 +78,14 @@ struct Column : ColumnBase {
     const view_t get_view(const size_t &irow, const size_t &ielement) const {
         return m_spec(raw_ptr(irow, ielement));
     }
+
+    view_t get_view(char* ptr){
+        return m_spec(ptr);
+    }
+
+    const view_t get_view(const char* ptr) const{
+        return m_spec(ptr);
+    }
 };
 
 
@@ -94,6 +102,7 @@ struct NdColumn : Column<spec_t> {
             Column<spec_t>(table, spec, format.nelement(), description), m_format(format) {}
 
     using Column<spec_t>::get_view;
+
     template<typename ...Args>
     view_t operator()(const size_t &irow, Args... inds) {
         return get_view(irow, m_format.flatten(inds...));
@@ -102,6 +111,33 @@ struct NdColumn : Column<spec_t> {
     template<typename ...Args>
     const view_t operator()(const size_t &irow, Args... inds) const {
         return get_view(irow, m_format.flatten(inds...));
+    }
+
+    struct RowView {
+        NdColumn &m_column;
+        // pointer to beginning of column in
+        char *m_ptr;
+
+        RowView(NdColumn &column, const size_t &irow) :
+                m_column(column), m_ptr(m_spec(column.begin(irow))) {}
+
+        template<typename ...Args>
+        view_t operator()(Args... inds) {
+            return get_view(m_ptr+m_column.m_format.flatten(inds...)*m_column.m_data.m_element_size);
+        }
+
+        template<typename ...Args>
+        const view_t operator()(Args... inds) const {
+            return get_view(m_ptr+m_column.m_format.flatten(inds...)*m_column.m_data.m_element_size);
+        }
+    };
+
+    RowView operator[](const size_t &irow) {
+        return RowView(*this, irow);
+    }
+
+    const RowView operator[](const size_t &irow) const {
+        return RowView(*this, irow);
     }
 };
 
