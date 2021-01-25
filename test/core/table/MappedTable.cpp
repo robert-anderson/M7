@@ -60,6 +60,6 @@ TEST(MappedTable, TEST) {
 //    bt.push_back();
 //    bt.bitset(0);// = bitset;
 //    std::cout << bt.bitset(0).to_string() << std::endl;
-//    std::cout << bt.field_details() << std::endl;
+//    std::cout << bt.column_details() << std::endl;
 //    //bt.insert(bitset);
 //}

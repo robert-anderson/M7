@@ -5,14 +5,14 @@
 #ifndef M7_BITSETSPECIFIER_H
 #define M7_BITSETSPECIFIER_H
 
-#include "FieldSpecifier.h"
+#include "ColumnSpecifier.h"
 #include "src/core/util/utils.h"
 
-struct BitsetSpecifier : FieldSpecifier {
+struct BitsetSpecifier : ColumnSpecifier {
     const size_t m_nbit;
     const size_t m_ndataword;
 
-    struct View : FieldSpecifier::View {
+    struct View : ColumnSpecifier::View {
 
         struct BitView {
             /*

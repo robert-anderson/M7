@@ -7,7 +7,7 @@
 
 #include <cstddef>
 #include "src/core/field/BitsetSpecifier.h"
-#include "src/core/field/TableField.h"
+#include "src/core/field/Field.h"
 
 struct Table;
 

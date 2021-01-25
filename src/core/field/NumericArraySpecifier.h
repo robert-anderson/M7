@@ -6,17 +6,17 @@
 #define M7_NUMERICARRAYSPECIFIER_H
 
 #include <src/core/util/utils.h>
-#include "FieldSpecifier.h"
+#include "ColumnSpecifier.h"
 #include "src/core/nd/NdFormat.h"
 #include "src/core/nd/NdAccessor.h"
 
 template<typename T, size_t nind>
-struct NumericArraySpecifier : FieldSpecifier {
+struct NumericArraySpecifier : ColumnSpecifier {
     NdFormat<nind> m_format;
     const size_t m_nelement;
     template<typename ...Args>
     NumericArraySpecifier(Args... shape) :
-    FieldSpecifier(NdFormat<nind>(shape...).nelement() * sizeof(T), typeid(NumericArraySpecifier<T, nind>)),
+    ColumnSpecifier(NdFormat<nind>(shape...).nelement() * sizeof(T), typeid(NumericArraySpecifier<T, nind>)),
     m_format(shape...), m_nelement(m_format.nelement()){
         m_data.m_details["type"] = "Numeric Array";
         m_data.m_details["encoded type"] = consts::type_name<T>();
@@ -24,10 +24,10 @@ struct NumericArraySpecifier : FieldSpecifier {
         m_data.m_details["element shape"] = utils::to_string(m_format.shape());
     }
 
-    struct View : FieldSpecifier::View, NdAccessor<T, nind> {
+    struct View : ColumnSpecifier::View, NdAccessor<T, nind> {
         View(const NumericArraySpecifier &spec, char *ptr) :
-        FieldSpecifier::View(spec, ptr),
-        NdAccessor<T, nind>((T*)ptr, spec.m_format){}
+                ColumnSpecifier::View(spec, ptr),
+                NdAccessor<T, nind>((T*)ptr, spec.m_format){}
 
         using NdAccessor<T, nind>::nelement;
         using NdAccessor<T, nind>::operator=;

@@ -17,7 +17,7 @@ FermionOnvSpecifier::View FermionOnvSpecifier::operator()(char *ptr) const {
     return View(*this, ptr);
 }
 
-FermionOnvSpecifier::View::View(const FermionOnvSpecifier &field, char *ptr) : BitsetSpecifier::View(field, ptr) {}
+FermionOnvSpecifier::View::View(const FermionOnvSpecifier &spec, char *ptr) : BitsetSpecifier::View(spec, ptr) {}
 
 std::string FermionOnvSpecifier::View::to_string() const {
     std::string res;

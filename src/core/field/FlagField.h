@@ -15,8 +15,8 @@ struct FlagField : NdField<BitsetSpecifier, 0ul>, set_t {
     FlagField(Table* table, std::string description, Args... set_args):
             NdField<BitsetSpecifier, 0ul>(table, BitsetSpecifier(set_t(this, set_args...).nbit()), description),
     set_t(this, set_args...){
-        m_field.m_data.m_details["type"] = "Flagset";
-        m_field.m_data.m_details["number of flags"] = std::to_string(static_cast<const FlagSet*>(this)->m_flags.size());
+        m_column.m_data.m_details["type"] = "Flagset";
+        m_column.m_data.m_details["number of flags"] = std::to_string(static_cast<const FlagSet*>(this)->m_flags.size());
     }
 };
 

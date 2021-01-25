@@ -6,17 +6,16 @@
 #define M7_TABLE_H
 
 #include <src/core/util/utils.h>
-#include <src/core/field/Fields.h>
 #include <stack>
 #include "src/defs.h"
-#include "src/core/field/TableField.h"
 #include "Buffer.h"
+#include "src/core/field/Column.h"
 #include "src/core/field/Flag.h"
 #include "src/core/sort/ExtremalValues.h"
 
 
 struct Table {
-    std::vector<const TableField *> m_fields;
+    std::vector<const ColumnBase *> m_columns;
     Buffer::Window m_bw;
     size_t m_row_size;
     size_t m_row_dsize;
@@ -32,7 +31,7 @@ struct Table {
      */
     std::stack<size_t> m_free_rows;
     /*
-     * when copying the Table, the fields being copied need to know
+     * when copying the Table, the columns being copied need to know
      * the correct m_table pointer, so we retain a pointer to the last
      * copied Table
      */
@@ -66,7 +65,7 @@ struct Table {
 
     const char *begin(const size_t &irow) const;
 
-    size_t add_field(const TableField *field);
+    size_t add_column(const ColumnBase *column);
 
     void clear();
 
@@ -74,9 +73,9 @@ struct Table {
 
     size_t bw_dsize() const;
 
-    std::string field_details(size_t width = 30) const;
+    std::string column_details(size_t width = 30) const;
 
-    void print_field_details(size_t width = 30) const;
+    void print_column_details(size_t width = 30) const;
 
     void print_contents(const defs::inds *ordering = nullptr) const;
 

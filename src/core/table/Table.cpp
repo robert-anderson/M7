@@ -72,22 +72,22 @@ const char *Table::begin(const size_t &irow) const {
     return (const char*)dbegin(irow);
 }
 
-size_t Table::add_field(const TableField *field) {
-    // returns the offset in bytes for the field being added
+size_t Table::add_column(const ColumnBase *column) {
+    // returns the offset in bytes for the column being added
     auto offset = 0ul;
-    if(!m_fields.empty()){
-        offset = m_fields.back()->m_offset+m_fields.back()->m_size;
-        if (!m_fields.back()->is_same_type_as(*field)){
+    if(!m_columns.empty()){
+        offset = m_columns.back()->m_offset+m_columns.back()->m_size;
+        if (!m_columns.back()->is_same_type_as(*column)){
             // go to next whole dataword
             offset = integer_utils::divceil(offset, defs::nbyte_data)*defs::nbyte_data;
         }
     }
 
-    m_current_byte_offset = offset + field->m_size;
+    m_current_byte_offset = offset + column->m_size;
     m_row_dsize = integer_utils::divceil(m_current_byte_offset, defs::nbyte_data);
     m_row_size = m_row_dsize*defs::nbyte_data;
 
-    m_fields.push_back(field);
+    m_columns.push_back(column);
     return offset;
 }
 
@@ -110,20 +110,20 @@ bool Table::is_cleared(const size_t &irow) const {
     return std::all_of(dbegin(irow), dbegin(irow)+m_row_dsize, [](const defs::data_t& i){return i==0;});
 }
 
-std::string Table::field_details(size_t width) const {
+std::string Table::column_details(size_t width) const {
     std::string res;
-    for (size_t i = 0ul; i < m_fields.size(); ++i) {
+    for (size_t i = 0ul; i < m_columns.size(); ++i) {
         std::string desc;
-        if (!m_fields[i]->m_description.empty()) desc = " (\""+m_fields[i]->m_description+"\")";
+        if (!m_columns[i]->m_description.empty()) desc = " (\""+m_columns[i]->m_description+"\")";
         res += "\nField " + std::to_string(i) + desc + ":\n";
-        for (auto pair:m_fields[i]->m_data.m_details)
+        for (auto pair:m_columns[i]->m_data.m_details)
             res += "\t" + utils::padded_string(pair.first, width) + ": " + utils::padded_string(pair.second, width)+"\n";
     }
     return res;
 }
 
-void Table::print_field_details(size_t width) const {
-    std::cout << field_details(width) << std::endl;
+void Table::print_column_details(size_t width) const {
+    std::cout << column_details(width) << std::endl;
 }
 
 size_t Table::bw_dsize() const {
@@ -135,8 +135,8 @@ void Table::print_contents(const defs::inds *ordering) const {
     for (size_t iirow=0ul; iirow<n; ++iirow){
         auto irow = ordering ? (*ordering)[iirow] : iirow;
         std::cout << irow << ". ";
-        for (auto field: m_fields){
-            std::cout << field->to_string(irow)+" ";
+        for (auto column: m_columns){
+            std::cout << column->to_string(irow)+" ";
         }
         std::cout << "\n";
     }
@@ -210,12 +210,12 @@ void Table::recv_rows(size_t irank_src, const cb_list_t& callbacks){
 
 bool Table::has_compatible_format(const Table &other) {
     if (other.m_row_size != m_row_size) return false;
-    std::cout << other.m_fields.size() << " " << m_fields.size() << std::endl;
-    if (other.m_fields.size() != m_fields.size()) return false;
+    std::cout << other.m_columns.size() << " " << m_columns.size() << std::endl;
+    if (other.m_columns.size() != m_columns.size()) return false;
     if (other.m_current_byte_offset != m_current_byte_offset) return false;
-    for (size_t ifield=0ul; ifield<m_fields.size(); ++ifield){
-        auto this_field = m_fields[ifield];
-        auto other_field = m_fields[ifield];
+    for (size_t ifield=0ul; ifield<m_columns.size(); ++ifield){
+        auto this_field = m_columns[ifield];
+        auto other_field = m_columns[ifield];
         if (!other_field->is_same_type_as(*this_field)) return false;
         if (other_field->m_nelement != this_field->m_nelement) return false;
         if (other_field->m_size != this_field->m_size) return false;

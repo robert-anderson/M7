@@ -10,7 +10,7 @@
 #include <stack>
 #include <src/core/parallel/RankAllocator.h>
 #include "Table.h"
-#include "src/core/field/TableField.h"
+#include "src/core/field/Field.h"
 #include "src/core/table/BufferedTable.h"
 
 struct LookupResult {

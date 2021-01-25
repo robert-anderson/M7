@@ -76,7 +76,7 @@ struct TestTable : TableX {
 TEST(Table_ND, Packing) {
     BufferedTable<TestTable> bt;
     //ASSERT_EQ(bt.m_row_dsize, 2);
-    bt.print_field_details();
+    bt.print_column_details();
     bt.expand(10);
     bt.dets(0)[0] = true;
     bt.dets(0)[5] = true;
@@ -104,7 +104,7 @@ TEST(Table_ND, Test) {
 
 #endif
 //    BufferedTable<TestTable> bt;
-//    bt.print_field_details();
+//    bt.print_column_details();
 //    bt.expand(10);
 //    auto view = bt.config(0);
 //    std::cout << view.to_string() << std::endl;
@@ -114,7 +114,7 @@ TEST(Table_ND, Test) {
    // std::cout << typeid(fields::Numeric<int>).name() << std::endl;
 
 //    BufferedTable<TestTable> bt;
-//    bt.print_field_details();
+//    bt.print_column_details();
 //    bt.expand(10);
     //std::cout << bt.ints(0, 0) << std::endl;
 //    f(bt);

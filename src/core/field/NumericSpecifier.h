@@ -5,12 +5,12 @@
 #ifndef M7_NUMERICSPECIFIER_H
 #define M7_NUMERICSPECIFIER_H
 
-#include "FieldSpecifier.h"
+#include "ColumnSpecifier.h"
 #include "src/core/util/utils.h"
 
 template<typename T>
-struct NumericSpecifier : FieldSpecifier {
-    NumericSpecifier() : FieldSpecifier(sizeof(T), typeid(NumericSpecifier<T>)) {
+struct NumericSpecifier : ColumnSpecifier {
+    NumericSpecifier() : ColumnSpecifier(sizeof(T), typeid(NumericSpecifier<T>)) {
         m_data.m_details["type"] = "Numeric";
         m_data.m_details["encoded type"] = consts::type_name<T>();
     }

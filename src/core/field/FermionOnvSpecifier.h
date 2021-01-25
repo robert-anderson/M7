@@ -15,7 +15,7 @@ struct FermionOnvSpecifier : BitsetSpecifier {
     FermionOnvSpecifier(const size_t &nsite);
 
     struct View : BitsetSpecifier::View {
-        View(const FermionOnvSpecifier &field, char *ptr);
+        View(const FermionOnvSpecifier &spec, char *ptr);
 
         const FermionOnvSpecifier& spec() const {
             return static_cast<const FermionOnvSpecifier&>(m_spec);

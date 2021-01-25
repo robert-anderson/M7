@@ -88,7 +88,7 @@ TEST(Table, Flag) {
     BufferedTable<FlagsTestTable> bt("Flags test");
     bt.expand(1);
     bt.push_back();
-    bt.print_field_details();
+    bt.print_column_details();
     bt.m_flags.flags1(0, 1) = 1;
     std::cout << bt.m_flags(0).to_string() << std::endl;
 }

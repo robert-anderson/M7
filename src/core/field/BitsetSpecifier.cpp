@@ -28,9 +28,9 @@ BitsetSpecifier::View::BitView::operator bool() const {
 /*
  * View
  */
-BitsetSpecifier::View::View(const BitsetSpecifier &field, char *ptr) : FieldSpecifier::View(field, ptr){}
+BitsetSpecifier::View::View(const BitsetSpecifier &field, char *ptr) : ColumnSpecifier::View(field, ptr){}
 
-BitsetSpecifier::View::View(const BitsetSpecifier::View &other) :FieldSpecifier::View(other){
+BitsetSpecifier::View::View(const BitsetSpecifier::View &other) : ColumnSpecifier::View(other){
     ASSERT(other.nbit()==nbit());
 }
 
@@ -110,7 +110,7 @@ BitsetSpecifier::View &BitsetSpecifier::View::operator=(const defs::inds &ibits)
 
 BitsetSpecifier::View &BitsetSpecifier::View::operator=(const BitsetSpecifier::View &other) {
     ASSERT(other.nbit()==nbit())
-    FieldSpecifier::View::operator=(other);
+    ColumnSpecifier::View::operator=(other);
     return *this;
 }
 
@@ -119,8 +119,8 @@ BitsetSpecifier::View &BitsetSpecifier::View::operator=(const BitsetSpecifier::V
  * BitsetSpecifier
  */
 BitsetSpecifier::BitsetSpecifier(size_t nbit) :
-        FieldSpecifier(defs::nbyte_data * integer_utils::divceil(nbit, defs::nbit_data),
-                       typeid(BitsetSpecifier)), m_nbit(nbit),
+        ColumnSpecifier(defs::nbyte_data * integer_utils::divceil(nbit, defs::nbit_data),
+                        typeid(BitsetSpecifier)), m_nbit(nbit),
         m_ndataword(integer_utils::divceil(nbit, defs::nbit_data)){
     m_data.m_details["type"] = "Bitset";
     m_data.m_details["number of bits"] = std::to_string(m_nbit);
