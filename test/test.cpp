@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <memory>
+#include <src/core/io/Logging.h>
 #include "src/core/parallel/MPIWrapper.h"
 
 int main(int argc, char **argv) {
@@ -12,7 +13,7 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
 
     mpi::initialize(&argc, &argv);
-
+    logging::initialize();
 
     std::streambuf *original_stdout_buffer = nullptr;
     std::streambuf *original_stderr_buffer = nullptr;
