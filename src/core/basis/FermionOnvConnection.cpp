@@ -22,6 +22,7 @@ FermionOnvConnection::FermionOnvConnection(const views::Det &in) : FermionOnvCon
 
 
 void FermionOnvConnection::connect(const views::Det &in, const views::Det &out) {
+    ASSERT(!in.is_zero())
     ASSERT(in.ndataword() == out.ndataword());
     zero();
 

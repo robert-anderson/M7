@@ -31,7 +31,9 @@ TEST(StochasticPropagator, Test) {
     prop.m_shift = ref_energy;//benchmark;
 
     Table::Loc ref_loc = {ra.get_rank(ref_onv), 0ul};
-    if (ref_loc.is_mine()) wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    if (ref_loc.is_mine()) {
+        wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    }
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {

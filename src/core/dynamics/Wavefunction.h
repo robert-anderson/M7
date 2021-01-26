@@ -36,7 +36,9 @@ struct Wavefunction : ra::Onv::Dynamic {
     Wavefunction(const Options &opts, size_t nsite, ra::Onv& ra) :
             ra::Onv::Dynamic(ra),
             m_opts(opts),
-            m_walkers("walker table", opts.nwalker_target / mpi::nrank(), nsite, 1, 1),
+            // size_t nsite, size_t nroot, size_t nreplica, size_t nbucket
+            m_walkers("walker table" , nsite, 1, 1, opts.nwalker_target / mpi::nrank()),
+            // size_t nsite, size_t nroot, size_t nreplica
             m_spawn("spawning communicator", opts.spawn_buffer_expansion_factor, nsite, 1, 1),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),

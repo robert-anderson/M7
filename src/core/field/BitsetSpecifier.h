@@ -25,7 +25,7 @@ struct BitsetSpecifier : ColumnSpecifier {
             BitView(const View& view, const size_t &ibit);
 
             /*
-             * This smart ptr is not trivially copyable, so we need to explicitly implement
+             * The smart ptr is not trivially copyable, so we need to explicitly implement
              * the copy ctor
              */
             BitView(const BitView& bv);
