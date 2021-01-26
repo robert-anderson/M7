@@ -36,6 +36,10 @@ struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
 	template <typename ...Args>
     Element(Args... args):
     base_t(args...), viewable_t::view_t(base_t::m_field(0)){}
+
+private:
+    //"zero" method should be used instead since it just memsets to 0, doesn't rest m_hwm
+    using BufferedSingleFieldTable<viewable_t>::clear;
 };
 
 namespace elements {
