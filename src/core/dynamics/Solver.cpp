@@ -143,7 +143,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, Table::Loc ref_loc) :
 
 void Solver::execute(size_t niter) {
     for (size_t i = 0ul; i < niter; ++i) {
-        reset();
+        begin_cycle();
 
         m_propagate_timer.unpause();
         loop_over_occupied_onvs();
@@ -157,7 +157,7 @@ void Solver::execute(size_t niter) {
         loop_over_spawned();
         m_annihilate_timer.pause();
 
-        reduce();
+        end_cycle();
         output_stats();
         ++m_icycle;
     }
@@ -224,14 +224,14 @@ void Solver::propagate_row(const size_t &irow) {
     }
 }
 
-void Solver::reset() {
+void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
-    m_wf.reset();
-    m_reference.reset();
+    m_wf.begin_cycle();
+    m_reference.begin_cycle();
 }
 
-void Solver::reduce() {
+void Solver::end_cycle() {
     //double chk_ratio;
     if (!consts::float_is_zero(m_wf.m_nwalker(0, 0))) {
         //chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
@@ -243,8 +243,8 @@ void Solver::reduce() {
         //throw std::runtime_error("Unlogged creations of initiator ONVs have occurred");
     }
 
-    m_wf.reduce();
-    m_reference.reduce();
+    m_wf.end_cycle();
+    m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
     m_wf.update(m_icycle, m_synchronization_timer.total());
 }

@@ -15,6 +15,7 @@ TEST(StochasticPropagator, Test) {
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 100000;
+    opts.shift_damp = 0.5;
 //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -37,6 +38,7 @@ TEST(StochasticPropagator, Test) {
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
+        std::cout << i << std::endl;
         solver.execute();
     }
 }

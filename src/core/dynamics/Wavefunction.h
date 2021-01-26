@@ -58,11 +58,11 @@ struct Wavefunction : ra::Onv::Dynamic {
 
     }
 
-    void reset() {
+    void begin_cycle() {
         m_summables.zero();
     }
 
-    void reduce() {
+    void end_cycle() {
         m_summables.all_sum();
     }
 

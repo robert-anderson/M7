@@ -45,7 +45,24 @@ public:
 
     void execute(size_t niter=1);
 
+    void begin_cycle();
+
     void propagate_row(const size_t& irow);
+
+    void loop_over_occupied_onvs();
+
+    void annihilate_row(const size_t &irow_recv);
+
+    void loop_over_spawned();
+
+    void end_cycle();
+
+    void output_stats();
+};
+
+
+
+
 //    mpi::barrier();
 //    //m_propagation_timer.pause();
 //
@@ -88,19 +105,5 @@ public:
 //
 //
 //}
-
-    void loop_over_occupied_onvs();
-
-    void annihilate_row(const size_t &irow_recv);
-
-    void loop_over_spawned();
-
-    void reset();
-
-    void reduce();
-
-    void output_stats();
-};
-
 
 #endif //M7_SOLVER_H

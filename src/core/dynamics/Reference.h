@@ -50,9 +50,9 @@ public:
 
     //void log_candidate_weight(const size_t& irow, const defs::wf_comp_t& candidate_weight);
 
-    void reset();
+    void begin_cycle();
 
-    void reduce();
+    void end_cycle();
 
     //const bool &in_redefinition_cycle();
 

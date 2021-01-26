@@ -62,11 +62,12 @@ void Reference::log_candidate_weight(const size_t &irow, const defs::wf_comp_t &
 }
 #endif
 
-void Reference::reset() {
+void Reference::begin_cycle() {
     m_summables.zero();
+    update();
 }
 
-void Reference::reduce() {
+void Reference::end_cycle() {
 #if 0
     if (in_redefinition_cycle()) m_redefinition_cycle = false;
     m_candidate_weight.all_maxloc();

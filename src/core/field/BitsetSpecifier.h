@@ -74,7 +74,7 @@ struct BitsetSpecifier : ColumnSpecifier {
 
     std::string element_string(char *ptr) const override;
 
-    const View operator()(char *ptr) const;
+    cview_t operator()(char *ptr) const;
     View operator()(char *ptr);
 };
 

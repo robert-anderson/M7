@@ -210,7 +210,6 @@ void Table::recv_rows(size_t irank_src, const cb_list_t& callbacks){
 
 bool Table::has_compatible_format(const Table &other) {
     if (other.m_row_size != m_row_size) return false;
-    std::cout << other.m_columns.size() << " " << m_columns.size() << std::endl;
     if (other.m_columns.size() != m_columns.size()) return false;
     if (other.m_current_byte_offset != m_current_byte_offset) return false;
     for (size_t ifield=0ul; ifield<m_columns.size(); ++ifield){
