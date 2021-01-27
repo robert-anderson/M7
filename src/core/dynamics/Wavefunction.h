@@ -8,7 +8,7 @@
 
 #include <src/core/io/Options.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
-#include "src/core/table/CommunicatingPair.h"
+#include "src/core/table/Communicator.h"
 #include "src/core/dynamics/WalkerTable.h"
 #include "src/core/dynamics/SpawnTable.h"
 #include "src/core/parallel/RankAllocator.h"
@@ -16,12 +16,9 @@
 #include "src/core/field/Views.h"
 
 
-struct Wavefunction : ra::Onv::Dynamic {
+struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
+
     const Options &m_opts;
-    typedef BufferedTable<WalkerMappedTable> walkers_t;
-    walkers_t m_walkers;
-    typedef CommunicatingPair<SpawnTable> spawn_t;
-    spawn_t m_spawn;
 
     ReductionSyndicate m_summables;
 
@@ -33,13 +30,16 @@ struct Wavefunction : ra::Onv::Dynamic {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
 
-    Wavefunction(const Options &opts, size_t nsite, ra::Onv& ra) :
-            ra::Onv::Dynamic(ra),
+    Wavefunction(const Options &opts, size_t nsite) :
+            Communicator<WalkerMappedTable, SpawnTable>(
+                    "walker",
+                    opts.walker_buffer_expansion_factor,
+                    opts.nload_balance_block_per_rank*mpi::nrank(),
+                    opts.load_balance_period,
+                    WalkerMappedTable(nsite, 1, 1, opts.nwalker_target / mpi::nrank()),
+                    SpawnTable(nsite, 1, 1)
+            ),
             m_opts(opts),
-            // size_t nsite, size_t nroot, size_t nreplica, size_t nbucket
-            m_walkers("walker table" , nsite, 1, 1, opts.nwalker_target / mpi::nrank()),
-            // size_t nsite, size_t nroot, size_t nreplica
-            m_spawn("spawning communicator", opts.spawn_buffer_expansion_factor, nsite, 1, 1),
             m_ninitiator(m_summables, {1, 1}),
             m_delta_ninitiator(m_summables, {1, 1}),
             m_nocc_onv(m_summables, {1, 1}),
@@ -47,16 +47,15 @@ struct Wavefunction : ra::Onv::Dynamic {
             m_delta_nwalker(m_summables, {1, 1}),
             m_l2_norm_square(m_summables, {1, 1}),
             m_delta_l2_norm_square(m_summables, {1, 1}) {
-        m_walkers.set_expansion_factor(m_opts.spawn_buffer_expansion_factor);
     }
 
-    void on_row_send_(size_t irow) override {
-
-    }
-
-    void on_row_recv_(size_t irow) override {
-
-    }
+//    void on_row_send_(size_t irow) override {
+//
+//    }
+//
+//    void on_row_recv_(size_t irow) override {
+//
+//    }
 
     void begin_cycle() {
         m_summables.zero();
@@ -66,27 +65,23 @@ struct Wavefunction : ra::Onv::Dynamic {
         m_summables.all_sum();
     }
 
-    void update(size_t icycle, double wait_time) {
-        m_ra.update(icycle, wait_time, m_walkers, m_walkers.m_key_field);
-    }
+//    void update(size_t icycle, double work_time) {
+//        m_ra.update(icycle, work_time, m_walkers, m_walkers.m_key_field);
+//    }
 
-    void expand(size_t nrow_walker, size_t nrow_spawn) {
-        m_walkers.expand(nrow_walker);
-        m_spawn.expand(nrow_spawn);
-    }
 
     defs::wf_comp_t square_norm() const {
         defs::wf_comp_t res = 0.0;
-        for (size_t irow = 0; irow < m_walkers.m_hwm; ++irow) {
-            if (!m_walkers.m_onv(irow).is_zero()) {
-                res += std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+        for (size_t irow = 0; irow < m_store.m_hwm; ++irow) {
+            if (!m_store.m_onv(irow).is_zero()) {
+                res += std::pow(std::abs(m_store.m_weight(irow, 0, 0)), 2.0);
             }
         }
         return mpi::all_sum(res);
     }
 
     void grant_initiator_status(const size_t &irow) {
-        auto view = m_walkers.m_flags.m_initiator(irow, 0, 0);
+        auto view = m_store.m_flags.m_initiator(irow, 0, 0);
         if (!view) {
             m_delta_ninitiator(0, 0)++;
             view = true;
@@ -94,7 +89,7 @@ struct Wavefunction : ra::Onv::Dynamic {
     }
 
     void revoke_initiator_status(const size_t &irow) {
-        auto view = m_walkers.m_flags.m_initiator(irow, 0, 0);
+        auto view = m_store.m_flags.m_initiator(irow, 0, 0);
         if (view) {
             m_delta_ninitiator(0, 0)--;
             view = false;
@@ -103,22 +98,22 @@ struct Wavefunction : ra::Onv::Dynamic {
 
     void set_weight(const size_t &irow, const defs::wf_t &new_weight) {
         m_delta_nwalker(0, 0) += std::abs(new_weight);
-        m_delta_nwalker(0, 0) -= std::abs(m_walkers.m_weight(irow, 0, 0));
+        m_delta_nwalker(0, 0) -= std::abs(m_store.m_weight(irow, 0, 0));
         m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
-        m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(m_walkers.m_weight(irow, 0, 0)), 2.0);
+        m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(m_store.m_weight(irow, 0, 0)), 2.0);
 
-        m_walkers.m_weight(irow, 0, 0) = new_weight;
+        m_store.m_weight(irow, 0, 0) = new_weight;
 
         if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(irow);
         else revoke_initiator_status(irow);
     }
 
     void change_weight(const size_t &irow, const defs::wf_t &delta) {
-        set_weight(irow, m_walkers.m_weight(irow, 0, 0) + delta);
+        set_weight(irow, m_store.m_weight(irow, 0, 0) + delta);
     }
 
     void scale_weight(const size_t &irow, const double &factor) {
-        set_weight(irow, m_walkers.m_weight(irow, 0, 0) * factor);
+        set_weight(irow, m_store.m_weight(irow, 0, 0) * factor);
     }
 
     void zero_weight(const size_t &irow) {
@@ -126,22 +121,22 @@ struct Wavefunction : ra::Onv::Dynamic {
     }
 
     void remove_walker(const size_t &irow) {
-        const auto onv = m_walkers.m_onv(irow);
-        auto lookup = m_walkers[onv];
+        const auto onv = m_store.m_onv(irow);
+        auto lookup = m_store[onv];
         zero_weight(irow);
-        m_walkers.erase(lookup);
+        m_store.erase(lookup);
     }
 
     size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
                          const defs::ham_comp_t &hdiag, bool refconn) {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
-        if (m_walkers.is_full()) m_walkers.expand(1);
-        auto irow = m_walkers.insert(onv);
-        ASSERT(m_walkers.m_onv(irow) == onv)
+        if (m_store.is_full()) m_store.expand(1);
+        auto irow = m_store.insert(onv);
+        ASSERT(m_store.m_onv(irow) == onv)
         set_weight(irow, weight);
-        m_walkers.m_hdiag(irow) = hdiag;
-        m_walkers.m_flags.m_reference_connection(irow) = refconn;
-        m_walkers.m_flags.m_deterministic(irow) = false;
+        m_store.m_hdiag(irow) = hdiag;
+        m_store.m_flags.m_reference_connection(irow) = refconn;
+        m_store.m_flags.m_deterministic(irow) = false;
         return irow;
     }
 
@@ -156,7 +151,7 @@ struct Wavefunction : ra::Onv::Dynamic {
         std::cout << consts::verb << "parent is initiator:     " << initiator << std::endl;
         std::cout << consts::verb << "parent is deterministic: " << deterministic << std::endl;
 #endif
-        auto &dst_table = m_spawn.send(irank);
+        auto &dst_table = send(irank);
 
         auto irow = dst_table.push_back();
         dst_table.m_dst_onv(irow) = dst_onv;

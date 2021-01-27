@@ -109,6 +109,12 @@ struct Table {
         bool is_mine() const {
             return mpi::i_am(m_irank);
         }
+        bool operator==(const Loc& other){
+            return m_irank==other.m_irank and m_irow==other.m_irow;
+        }
+        bool operator!=(const Loc& other){
+            return !(m_irank==other.m_irank);
+        }
     };
 
 };

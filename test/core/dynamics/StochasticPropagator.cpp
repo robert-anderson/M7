@@ -26,7 +26,7 @@ TEST(StochasticPropagator, Test) {
     }
     StochasticPropagator prop(ham, opts);
     ra::Onv ra(100, 10);
-    Wavefunction wf(opts, ham.nsite(), ra);
+    Wavefunction wf(opts, ham.nsite());
     wf.expand(10, 800);
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
@@ -38,7 +38,6 @@ TEST(StochasticPropagator, Test) {
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
-        std::cout << i << std::endl;
         solver.execute();
     }
 }

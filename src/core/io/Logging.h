@@ -29,10 +29,10 @@ struct log {
             throw std::runtime_error("Logging requires that the MPIWrapper is initialized");
         if (mpi::i_am_root()) {
             g_reduced_stdout_logger = spdlog::stdout_color_st("stdout");
-            g_reduced_file_logger = spdlog::basic_logger_st("fileout", "M7.log");
+            g_reduced_file_logger = spdlog::basic_logger_st("fileout", "M7.log", true);
         }
 #ifdef ENABLE_LOCAL_LOGGING
-        g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()));
+        g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()), true);
 #endif
         spdlog::set_pattern("[%E] %^[%l]%$ %v");
         spdlog::flush_every(std::chrono::seconds(3));

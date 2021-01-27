@@ -34,10 +34,4 @@ TEST(DynamicRowSet, Test) {
         det.clr(ibit);
     }
     bt.print_contents();
-
-    auto drs = bt.dynamic_row_set(ra);
-
-    drs.add(0);
-
-    drs.update();
 }

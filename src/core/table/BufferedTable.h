@@ -14,24 +14,21 @@ class BufferedTable : public table_t {
 public:
     using Table::m_row_dsize;
 
+    BufferedTable(std::string name, const table_t &table) :
+            table_t(table), m_buffer(name, 1, 0) {
+        Table::set_buffer(&m_buffer);
+    }
+
     template<typename ...Args>
-    BufferedTable(std::string name, Args&&... args): table_t(args...),
-    m_buffer(name, 1, 0){
-        Table::set_buffer(&m_buffer);
-    }
+    BufferedTable(std::string name, Args... args):
+            BufferedTable(name, table_t(args...)) {}
 
-    BufferedTable(std::string name, const table_t& other):
-            table_t(other), m_buffer(name, 1, 0){
-        Table::set_buffer(&m_buffer);
-    }
+    BufferedTable(const BufferedTable<table_t> &other) :
+            BufferedTable(other.m_buffer.m_name, static_cast<const table_t &>(other)) {}
 
-    BufferedTable(const BufferedTable<table_t>& other):
-            BufferedTable(other.m_buffer.m_name, static_cast<const table_t&>(other)){}
-
-    void set_expansion_factor(double f){
+    void set_expansion_factor(double f) {
         m_buffer.m_expansion_factor = f;
     }
-
 };
 
 

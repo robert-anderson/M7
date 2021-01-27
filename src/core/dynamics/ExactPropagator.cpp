@@ -7,9 +7,9 @@
 #include "FciqmcCalculation.h"
 
 void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
-    auto src_onv = m_wf.m_walkers.m_onv(irow);
-    const auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
-    bool src_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
+    auto src_onv = m_wf.m_store.m_onv(irow);
+    const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+    bool src_initiator = m_wf.m_store.m_flags.m_initiator(irow, 0, 0);
     OccupiedOrbitals occs(src_onv);
     ASSERT(occs.size() > 0);
     VacantOrbitals vacs(src_onv);
@@ -69,7 +69,7 @@ void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
 }
 
 void ExactPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
-    auto hdiag = m_wf.m_walkers.m_hdiag(irow);
-    ASSERT(hdiag==m_ham.get_energy(m_wf.m_walkers.m_onv(irow)));
+    auto hdiag = m_wf.m_store.m_hdiag(irow);
+    ASSERT(hdiag==m_ham.get_energy(m_wf.m_store.m_onv(irow)));
     m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
 }

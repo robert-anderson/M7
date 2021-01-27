@@ -14,7 +14,6 @@
 class FciqmcCalculation {
 public:
     const Options m_opts;
-    ra::Onv m_ra;
     Hamiltonian<defs::enable_bosons> m_ham;
     StochasticPropagator m_prop;
     Wavefunction m_wf;

@@ -53,8 +53,8 @@ public:
     }
 
     void diagonal(Wavefunction &m_wf, const size_t &irow) override {
-        bool flag_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
-        auto hdiag = m_wf.m_walkers.m_hdiag(irow);
+        bool flag_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
+        auto hdiag = m_wf.m_store.m_hdiag(irow);
         if (flag_deterministic) {
             m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
         } else {
@@ -64,7 +64,7 @@ public:
                 // clone  / create antiparticles continuously
                 m_wf.scale_weight(irow, 1 - death_rate);
             } else {
-                auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+                auto weight = m_wf.m_store.m_weight(irow, 0, 0);
                 // kill stochastically
                 m_wf.set_weight(irow, m_prng.stochastic_round(weight, 1.0) * (1 - death_rate));
             }
@@ -97,12 +97,12 @@ public:
     }
 
     void off_diagonal(Wavefunction &m_wf, const size_t &irow) override {
-        auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+        auto weight = m_wf.m_store.m_weight(irow, 0, 0);
         ASSERT(!consts::float_is_zero(weight));
         ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
-        auto src_onv = m_wf.m_walkers.m_onv(irow);
-        bool flag_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
-        bool flag_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
+        auto src_onv = m_wf.m_store.m_onv(irow);
+        bool flag_initiator = m_wf.m_store.m_flags.m_initiator(irow, 0, 0);
+        bool flag_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
 
         m_occ.update(src_onv);
         m_vac.update(src_onv);

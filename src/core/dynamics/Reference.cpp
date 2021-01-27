@@ -7,7 +7,7 @@
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
                      const Wavefunction& wf, Table::Loc loc):
-        WalkerMappedTable::DynamicRow(wf.m_ra, wf.m_walkers, loc),
+        Wavefunction::DynamicRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(m_summables, {1, 1}),
@@ -18,12 +18,12 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
 }
 
 void Reference::add_row(const size_t &irow) {
-    if (m_wf.m_walkers.m_flags.m_reference_connection(irow)) {
-        auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
-        add_to_numerator(m_wf.m_walkers.m_onv(irow), weight);
+    if (m_wf.m_store.m_flags.m_reference_connection(irow)) {
+        auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+        add_to_numerator(m_wf.m_store.m_onv(irow), weight);
     }
     else {
-        ASSERT(consts::float_is_zero(m_ham.get_element(get_onv(), m_wf.m_walkers.m_onv(irow))));
+        ASSERT(consts::float_is_zero(m_ham.get_element(get_onv(), m_wf.m_store.m_onv(irow))));
     }
 }
 

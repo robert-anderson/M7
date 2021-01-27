@@ -8,6 +8,7 @@
 #include "src/core/field/Field.h"
 #include "src/core/table/Table.h"
 #include "src/core/parallel/Gatherable.h"
+#include "src/core/io/Logging.h"
 #include "MPIWrapper.h"
 #include "Epoch.h"
 #include <forward_list>
@@ -15,12 +16,18 @@
 
 template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 class RankAllocator {
+    static constexpr double c_default_thresh_ratio = 0.9;
     typedef typename field_t::view_t view_t;
     const size_t m_nblock;
     const size_t m_period;
     defs::inds m_block_to_rank;
     std::vector<std::forward_list<size_t>> m_rank_to_blocks;
-    Gatherable<double> m_mean_wait_times;
+    Gatherable<double> m_mean_work_times;
+    /*
+     * if the least productive rank is working for this proportion of the
+     * time worked by the most productive rank, then move a block
+     */
+    double m_threshold_ratio = c_default_thresh_ratio;
 
 public:
     struct Dynamic {
@@ -63,7 +70,6 @@ private:
     }
 
 public:
-    Epoch *m_vary_shift = nullptr;
     RankAllocator(const size_t& nblock, const size_t& period) :
     m_nblock(nblock), m_period(period),
     m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank())
@@ -76,40 +82,42 @@ public:
         }
     }
 
-    void update(const size_t& icycle, const double& wait_time, Table& table, field_t& field){
-        if (!m_vary_shift || !*m_vary_shift) return;
-        m_mean_wait_times+=wait_time;
+    void update(const size_t& icycle, const double& work_time, Table& table, field_t& field){
+        m_mean_work_times+=work_time;
         if (icycle%m_period) return;
         // else, this is a preparatory iteration
-        auto times = m_mean_wait_times.mpi_gather();
-        // this rank has done the least waiting, so it should send a block
-        size_t sender = std::distance(times.begin(), std::min_element(times.begin(), times.end()));
-        // this rank has done the most waiting, so it should receive a block
-        size_t recver = std::distance(times.begin(), std::max_element(times.begin(), times.end()));
-        if (sender==recver) return;
-
-        if (m_rank_to_blocks[sender].empty()) mpi::stop_all("Sending rank has no blocks to send!");
+        auto times = m_mean_work_times.mpi_gather();
+        utils::print(times);
+        // this rank has done the most work, so it should send a block
+        size_t irank_send = std::distance(times.begin(), std::max_element(times.begin(), times.end()));
+        // this rank has done the least work, so it should receive a block
+        size_t irank_recv = std::distance(times.begin(), std::min_element(times.begin(), times.end()));
+        if (irank_send==irank_recv) return;
+        if (times[irank_recv] > m_threshold_ratio*times[irank_send]) return;
+        if (m_rank_to_blocks[irank_send].empty()) mpi::stop_all("Sending rank has no blocks to send!");
         /*
          * sender will send all rows in the front block, which will become the front
          * block of the recver so all ranks must update in response to this
          */
-        auto iblock_send = m_rank_to_blocks[sender].front();
-        m_rank_to_blocks[sender].pop_front();
-        m_rank_to_blocks[recver].push_front(iblock_send);
+        auto iblock_transfer = m_rank_to_blocks[irank_send].front();
+        log::info("Sending block {} from rank {} to rank {}", iblock_transfer, irank_send, irank_recv);
+        m_rank_to_blocks[irank_send].pop_front();
+        m_rank_to_blocks[irank_recv].push_front(iblock_transfer);
 
         // prepare vector of row indices to send
         defs::inds irows_send;
-        if (mpi::i_am(sender)){
+        if (mpi::i_am(irank_send)){
             for (size_t irow = 0; irow<table.m_hwm; ++irow){
                 if (table.is_cleared(irow)) continue;
                 auto key = field(irow);
-                ASSERT(get_rank(key)==sender);
-                if (get_block(key)==iblock_send) irows_send.push_back(irow);
+                ASSERT(get_rank(key)==irank_send);
+                if (get_block(key) == iblock_transfer) irows_send.push_back(irow);
             }
         }
 
-        if (mpi::i_am(sender)) table.send_rows(irows_send, recver, m_send_callbacks);
-        if (mpi::i_am(recver)) table.recv_rows(sender, m_recv_callbacks);
+        if (mpi::i_am(irank_send)) table.send_rows(irows_send, irank_recv, m_send_callbacks);
+        if (mpi::i_am(irank_recv)) table.recv_rows(irank_send, m_recv_callbacks);
+        m_mean_work_times = 0.0;
     }
 
     /**

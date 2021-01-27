@@ -9,7 +9,7 @@
 
 
 void print(const Wavefunction& wf){
-    for (size_t i=0ul; i<wf.m_walkers.m_hwm; ++i){
+    for (size_t i=0ul; i<wf.m_store.m_hwm; ++i){
 //        std::cout << wf.m_walkers.m_onv(i).to_string() << " ";
 //        std::cout << wf.m_walkers.m_weight(i, 0, 0) << std::endl;
     }
@@ -81,7 +81,7 @@ TEST(ExactPropagator, Test) {
     elements::Onv<> ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
     ra::Onv ra(100, 10);
-    Wavefunction wf(opts, nsite, ra);
+    Wavefunction wf(opts, nsite);
     wf.expand(10, 800);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(ref_onv);
@@ -108,7 +108,7 @@ TEST(ExactPropagator, Cr2Test) {
     elements::FermionOnv ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
     ra::Onv ra(100, 10);
-    Wavefunction wf(opts, ham.nsite(), ra);
+    Wavefunction wf(opts, ham.nsite());
     wf.expand(1000000, 8000000);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(ref_onv);

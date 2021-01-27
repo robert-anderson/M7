@@ -52,11 +52,10 @@ public:
         return (*this)[0].bw_dsize();
     }
 
-    template<typename ...Args>
-    BufferedTableArray(std::string name, size_t ntable, Args... args): m_buffer(name, ntable, 0) {
+    BufferedTableArray(std::string name, size_t ntable, const table_t& table): m_buffer(name, ntable, 0) {
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {
-            m_tables.emplace_back(args...);
+            m_tables.emplace_back(table);
             static_cast<Table &>(m_tables.back()).set_buffer(&m_buffer);
         }
     }
