@@ -63,9 +63,8 @@ void FermionOnvSpecifier::View::set(const std::string &s) {
             if (i!=nsite()) throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
         }
     }
-    std::cout << i << " " << 2*nsite() << std::endl;
-    if (i<2*nsite()) throw std::runtime_error("FermionOnv-defining string not long enough");
-    if (i>2*nsite()) throw std::runtime_error("FermionOnv-defining string too long");
+    if (i<2*nsite()) mpi::stop_all("FermionOnv-defining string not long enough");
+    if (i>2*nsite()) mpi::stop_all("FermionOnv-defining string too long");
 }
 
 int FermionOnvSpecifier::View::spin() const {

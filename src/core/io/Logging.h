@@ -13,7 +13,7 @@
 
 
 /*
- * Two different kinds of logging:
+ * Two different kinds of log:
  *   1. Reduced: only output by the root MPI rank to stdout, and a non-color copy to M7.log
  *   2. Local: output by all ranks (including the root) to M7.log.<irank>
  */
@@ -22,7 +22,7 @@ extern std::shared_ptr<spdlog::logger> g_reduced_stdout_logger;
 extern std::shared_ptr<spdlog::logger> g_reduced_file_logger;
 extern std::shared_ptr<spdlog::logger> g_local_file_logger;
 
-struct logging {
+struct log {
 
     static void initialize(){
         if (!mpi::initialized())
@@ -34,7 +34,7 @@ struct logging {
 #ifdef ENABLE_LOCAL_LOGGING
         g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()));
 #endif
-        spdlog::set_pattern("%^[%E (+ %O)] [%l]%$ %v");
+        spdlog::set_pattern("[%E] %^[%l]%$ %v");
         spdlog::flush_every(std::chrono::seconds(3));
     }
 

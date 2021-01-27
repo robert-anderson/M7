@@ -663,15 +663,6 @@ public:
 
     static bool on_node_i_am_root();
 
-    static void rank_print(const std::string s, size_t irank) {
-        if (i_am(irank)) std::cout << "rank " << irank << ": " << s << std::endl;
-        barrier();
-    }
-
-    static void root_print(const std::string s) {
-        rank_print(s, 0);
-    }
-
     static bool initialized();
 
     static bool finalized();

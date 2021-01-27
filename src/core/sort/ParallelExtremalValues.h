@@ -48,9 +48,6 @@ public:
     void find(size_t nfind) {
         auto nfind_local = std::max(nfind / mpi::nrank(), 1ul);
         m_local_xvs.find(nfind_local);
-        std::cout << "rank " << mpi::irank() << " ";
-        for (size_t i=0ul; i<m_local_xvs.nfound(); ++i) std::cout << " " << m_local_xvs[i];
-        std::cout << std::endl;
         defs::inds counts, displs;
 
         if (mpi::i_am_root()) {

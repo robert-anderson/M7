@@ -49,11 +49,11 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         }
         SparseArrayFileReader<defs::ham_t>::reset(); // go back to beginning of entries
     }
-    if (m_spin_conserving_1e) logging::info("FCIDUMP file conserves spin in 1 particle integrals");
-    else logging::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
-    if (m_spin_conserving_2e) logging::info("FCIDUMP file conserves spin in 2 particle integrals");
-    else logging::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
-    logging::info("FCIDUMP file contains 2 particle integrals of maximum excitation rank "+std::to_string(m_int_2e_rank));
+    if (m_spin_conserving_1e) log::info("FCIDUMP file conserves spin in 1 particle integrals");
+    else log::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
+    if (m_spin_conserving_2e) log::info("FCIDUMP file conserves spin in 2 particle integrals");
+    else log::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
+    log::info("FCIDUMP file contains 2 particle integrals of maximum excitation rank " + std::to_string(m_int_2e_rank));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) const {

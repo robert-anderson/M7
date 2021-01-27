@@ -3,7 +3,7 @@
 //
 
 #include "Buffer.h"
-
+#include "src/core/io/Logging.h"
 
 Buffer::Window::Window(Buffer *buffer) {
     ASSERT(buffer);
@@ -97,7 +97,7 @@ void Buffer::append_window(Buffer::Window *window) {
 
 void Buffer::resize(size_t dsize) {
     if (!m_name.empty()) {
-        std::cout << "Reallocating buffer \"" << m_name << "\". " << capacity_string()+"\n";
+        log::info("Reallocating buffer \"" + m_name + "\". " + capacity_string());
     }
     std::vector<defs::data_t> tmp(dsize, 0ul);
     auto new_window_dsize = dsize / m_nwindow_max;
@@ -112,7 +112,7 @@ void Buffer::resize(size_t dsize) {
     }
     m_data = std::move(tmp);
     if (!m_name.empty()) {
-        std::cout << "New " << capacity_string()+"\n";
+        log::info("New " + capacity_string());
     }
     ASSERT(dbegin()==m_windows[0]->dbegin());
 }

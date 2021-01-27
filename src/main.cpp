@@ -8,7 +8,7 @@
 int main(int argc, char **argv) {
 
     mpi::initialize(&argc, &argv);
-    logging::initialize();
+    log::initialize();
     /*
      * Setup and read-in runtime options from the command line
      */
