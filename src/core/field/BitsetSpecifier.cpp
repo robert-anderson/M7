@@ -107,7 +107,6 @@ BitsetSpecifier::View &BitsetSpecifier::View::operator=(const defs::inds &ibits)
     for (auto& ibit : ibits) set(ibit);
     return *this;
 }
-
 BitsetSpecifier::View &BitsetSpecifier::View::operator=(const BitsetSpecifier::View &other) {
     ASSERT(other.nbit()==nbit())
     ColumnSpecifier::View::operator=(other);

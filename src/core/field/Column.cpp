@@ -25,12 +25,8 @@ ColumnBase::ColumnBase(const ColumnBase &other):
     if (offset!=m_offset) mpi::stop_all("Offset should match that of copied field");
 }
 
-char *ColumnBase::begin(const size_t &irow) const {
-    return m_table->begin(irow) + m_offset;
-}
-
-char *ColumnBase::raw_ptr(const size_t &irow, const size_t &ielement) const {
-    return begin(irow) + ielement * m_data.m_element_size;
+char *ColumnBase::raw_view(const size_t &irow, const size_t &ielement) const {
+    return (char*)m_table->dbegin(irow) + m_offset + ielement * m_data.m_element_size;
 }
 
 bool ColumnBase::is_same_type_as(const ColumnBase &other) const {

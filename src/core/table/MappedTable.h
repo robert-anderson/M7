@@ -45,7 +45,7 @@ struct MappedTableBase {
     double m_remap_ratio = c_default_remap_ratio;
     size_t m_remap_nlookup = c_default_remap_nlookup;
 
-    MappedTableBase(size_t nbucket): m_buckets(nbucket){}
+    MappedTableBase(size_t nbucket) : m_buckets(nbucket) {}
 
     /**
  * @param nrow_max
@@ -73,18 +73,45 @@ struct MappedTable : MappedTableBase, table_t {
     using Table::m_bw;
     using Table::clear;
     using Table::dbegin;
+    using Table::m_nrow;
+    using Table::m_hwm;
 
     static_assert(std::is_base_of<NdFieldGroup<0ul>, field_t>::value, "Key field must be scalar");
 
     key_field_t &m_key_field;
 
+private:
+    /*
+     * key field validation:
+     * we assert that m_key_field is a ref to a member of table, i.e. the
+     * memory offset between the table and the field is less than the size
+     * of table_t
+     */
+    size_t key_field_offset() const {
+        auto kf_offset = std::distance((const char *) this, (const char*)&m_key_field);
+        if (kf_offset<0 || (size_t)kf_offset>=sizeof(table_t)){
+            mpi::stop_all("Field chosen as the key field must be a member of the table");
+        }
+        return kf_offset;
+    }
+
+    key_field_t& get_key_field_from_offset(size_t nbyte) const {
+        return *(key_field_t*)((char*)(this)+nbyte);
+    }
+
+public:
     template<typename ...Args>
-    MappedTable(key_field_t &key_field, Args... args) :
-            MappedTableBase(c_nbucket_min), table_t(args...), m_key_field(key_field){}
+    MappedTable(size_t nbucket, key_field_t &key_field, const table_t &table) :
+            MappedTableBase(nbucket), table_t(table), m_key_field(key_field) {
+        key_field_offset();
+    }
 
     template<typename ...Args>
-    MappedTable(size_t nbucket, key_field_t &key_field, Args... args) :
-            MappedTableBase(nbucket), table_t(args...), m_key_field(key_field){}
+    MappedTable(key_field_t &key_field, const table_t &table) :
+            MappedTable(c_nbucket_min, key_field, table) {}
+
+    MappedTable(const MappedTable &other) :
+    MappedTable(get_key_field_from_offset(other.key_field_offset()), other) {}
 
     defs::hash_t hash(typename key_field_t::view_t key) {
         return hash_fn()(key);

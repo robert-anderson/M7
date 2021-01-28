@@ -53,17 +53,9 @@ struct Table {
 
     const defs::data_t *dbegin() const;
 
-    char *begin();
-
-    const char *begin() const;
-
     defs::data_t *dbegin(const size_t &irow);
 
     const defs::data_t *dbegin(const size_t &irow) const;
-
-    char *begin(const size_t &irow);
-
-    const char *begin(const size_t &irow) const;
 
     size_t add_column(const ColumnBase *column);
 
@@ -86,6 +78,8 @@ struct Table {
     bool is_cleared(const size_t &irow) const;
 
     void resize(size_t nrow);
+
+    void expand(size_t nrow, double expansion_factor);
 
     void expand(size_t nrow);
 

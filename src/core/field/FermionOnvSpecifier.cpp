@@ -39,10 +39,6 @@ void FermionOnvSpecifier::View::set(const size_t &ispin, const size_t &iorb) {
     BitsetSpecifier::View::set(ispin * nsite() + iorb);
 }
 
-void FermionOnvSpecifier::View::set(const defs::inds &ispinorbs) {
-    for (const auto &ispinorb: ispinorbs) set(ispinorb);
-}
-
 void FermionOnvSpecifier::View::set(const defs::inds &alpha, const defs::inds &beta) {
     for (const auto &ispinorb: alpha) set(ispinorb);
     for (const auto &ispinorb: beta) set(ispinorb+nsite());

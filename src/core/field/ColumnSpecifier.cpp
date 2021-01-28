@@ -8,7 +8,7 @@
 /*
  * View
  */
-ColumnSpecifier::View::View(const ColumnSpecifier &field, char *ptr) : m_spec(field), m_ptr(ptr){}
+ColumnSpecifier::View::View(const ColumnSpecifier& spec, char *ptr) : m_spec(spec), m_ptr(ptr){}
 
 ColumnSpecifier::View::View(const ColumnSpecifier::View &other) : m_spec(other.m_spec), m_ptr(other.m_ptr){}
 

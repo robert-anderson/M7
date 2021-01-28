@@ -18,6 +18,16 @@ size_t FlagSet::nbit() const {
     return m_flags.empty() ? 0ul : m_flags.back()->m_offset+m_flags.back()->m_nelement;
 }
 
+FlagSet::FlagSet(const FlagSet &other) {
+    if (other.m_bitset_field){
+        // Owning Table was copied
+        auto src_table = other.m_bitset_field->m_column.m_table;
+        auto cpy_table = src_table->m_last_copied;
+        m_bitset_field = (field_t*)((const char*)cpy_table + other.m_bitset_field->symbol_offset(src_table));
+    }
+    other.m_last_copied = this;
+}
+
 FlagBase::FlagBase(FlagSet *flagset, size_t nelement, std::string description) :
         m_flagset(flagset),
         m_nelement(nelement),

@@ -25,9 +25,7 @@ struct ColumnBase {
     const size_t m_size;
     const size_t m_offset;
 
-    char *begin(const size_t &irow) const;
-
-    char *raw_ptr(const size_t &irow, const size_t &ielement) const;
+    char *raw_view(const size_t &irow, const size_t &ielement) const;
 
     ColumnBase(Table *table, ColumnData column_data,
                size_t nelement, std::string description);
@@ -68,16 +66,16 @@ struct Column : ColumnBase {
     std::string to_string(size_t irow) const override {
         std::string res;
         for (size_t ielement = 0ul; ielement < m_nelement; ++ielement)
-            res += spec().element_string(raw_ptr(irow, ielement)) + " ";
+            res += spec().element_string(raw_view(irow, ielement)) + " ";
         return res;
     }
 
     view_t get_view(const size_t &irow, const size_t &ielement) {
-        return m_spec(raw_ptr(irow, ielement));
+        return m_spec(raw_view(irow, ielement));
     }
 
     cview_t get_view(const size_t &irow, const size_t &ielement) const {
-        return m_spec(raw_ptr(irow, ielement));
+        return m_spec(raw_view(irow, ielement));
     }
 
     view_t get_view(char* ptr){

@@ -28,6 +28,11 @@ TEST(StochasticPropagator, Test) {
     ra::Onv ra(100, 10);
     Wavefunction wf(opts, ham.nsite());
     wf.expand(10, 800);
+    ASSERT_EQ(&wf.m_store.m_onv, &wf.m_store.m_key_field);
+    ASSERT_EQ(wf.m_store.m_flags.m_initiator.m_flagset->m_bitset_field, &wf.m_store.m_flags);
+    ASSERT_EQ(wf.m_store.m_nrow, 15);
+    ASSERT_EQ(wf.m_comm.send().nrow_per_table(), 1200);
+
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 

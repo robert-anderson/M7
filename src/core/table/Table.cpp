@@ -3,6 +3,7 @@
 //
 
 #include "Table.h"
+#include "src/core/io/Logging.h"
 
 Table::Table() {}
 
@@ -14,7 +15,7 @@ Table::Table(const Table &other) :
 
 void Table::set_buffer(Buffer *buffer) {
     ASSERT(buffer);
-    ASSERT(!m_bw.dbegin())
+    ASSERT(!m_bw.allocated())
     buffer->append_window(&m_bw);
 }
 
@@ -44,14 +45,6 @@ const defs::data_t *Table::dbegin() const {
     return m_bw.dbegin();
 }
 
-char *Table::begin() {
-    return (char*) m_bw.dbegin();
-}
-
-const char *Table::begin() const {
-    return (const char*)m_bw.dbegin();
-}
-
 defs::data_t *Table::dbegin(const size_t &irow) {
     ASSERT(irow<m_hwm)
     ASSERT(m_bw.dbegin())
@@ -62,14 +55,6 @@ const defs::data_t *Table::dbegin(const size_t &irow) const {
     ASSERT(irow<m_hwm)
     ASSERT(m_bw.dbegin())
     return m_bw.dbegin() + irow * m_row_dsize;
-}
-
-char *Table::begin(const size_t &irow) {
-    return (char*)dbegin(irow);
-}
-
-const char *Table::begin(const size_t &irow) const {
-    return (const char*)dbegin(irow);
 }
 
 size_t Table::add_column(const ColumnBase *column) {
@@ -92,13 +77,14 @@ size_t Table::add_column(const ColumnBase *column) {
 }
 
 void Table::clear() {
-    std::memset(begin(), 0, m_row_size * m_hwm);
+    if (!m_bw.allocated()) return;
+    std::memset(dbegin(), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
     while (!m_free_rows.empty()) m_free_rows.pop();
 }
 
 void Table::clear(const size_t &irow) {
-    std::memset(begin(irow), 0, m_row_size);
+    std::memset(dbegin(irow), 0, m_row_size);
     m_free_rows.push(irow);
 }
 
@@ -152,13 +138,18 @@ void Table::print_contents(const ExtremalValues &xv) const {
 
 void Table::resize(size_t nrow) {
     assert(nrow>m_nrow);
-    m_bw.resize(nrow*m_row_dsize);
+    m_bw.resize(nrow);
     m_nrow = nrow;
 }
 
+void Table::expand(size_t nrow, double expansion_factor) {
+    m_bw.expand(nrow, expansion_factor);
+    m_nrow = m_bw.nrow();
+}
+
 void Table::expand(size_t nrow) {
-    m_bw.expand(nrow*m_row_dsize);
-    m_nrow = m_bw.dsize()/m_row_dsize;
+    m_bw.expand(nrow);
+    m_nrow = m_bw.nrow();
 }
 
 void Table::erase_rows(const defs::inds &irows, const cb_list_t& callbacks) {
@@ -180,9 +171,10 @@ void Table::insert_rows(const Buffer &recv, const cb_list_t& callbacks) {
 void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t& callbacks) {
     size_t nrow;
     nrow = irows.size();
-    std::cout << "Transferring " << nrow << " rows outward to rank " << irank_dst << std::endl;
+    log::info_("Transferring {} rows outward to rank {}", nrow, irank_dst);
     // make rows to be sent contiguous in memory
-    Buffer send("Outward transfer buffer", 1, m_row_dsize * nrow);
+    Buffer send("Outward transfer buffer", 1, m_row_dsize);
+    send.resize(nrow);
     for (auto iirow = 0ul; iirow < nrow; ++iirow) {
         const auto &irow = irows[iirow];
         std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
@@ -199,7 +191,7 @@ void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t
 void Table::recv_rows(size_t irank_src, const cb_list_t& callbacks){
     size_t nrow;
     mpi::recv(&nrow, 1, irank_src, 0);
-    std::cout << "Transferring " << nrow << " rows inward from rank " << irank_src << std::endl;
+    log::info_("Transferring {} rows inward from rank {}", nrow, irank_src);
     Buffer recv("Inward transfer buffer", 1, m_row_dsize*nrow);
     mpi::recv(recv.dbegin(), m_row_dsize * nrow, irank_src, 1);
     /*

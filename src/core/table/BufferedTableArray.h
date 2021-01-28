@@ -21,9 +21,6 @@ class BufferedTableArray {
         return static_cast<const Table &>(m_tables[0]).m_bw.dsize();
     }
 
-    const size_t &nrow_per_table() const {
-        return static_cast<const Table &>(m_tables[0]).m_nrow;
-    }
 
     void update_nrow() {
         auto nrow = window_dsize() / row_dsize();
@@ -33,6 +30,10 @@ class BufferedTableArray {
     }
 
 public:
+
+    const size_t &nrow_per_table() const {
+        return static_cast<const Table &>(m_tables[0]).m_nrow;
+    }
 
     defs::data_t *dbegin() {
         ASSERT(m_buffer.dbegin() == m_tables[0].dbegin());
@@ -52,7 +53,8 @@ public:
         return (*this)[0].bw_dsize();
     }
 
-    BufferedTableArray(std::string name, size_t ntable, const table_t& table): m_buffer(name, ntable, 0) {
+    BufferedTableArray(std::string name, size_t ntable, const table_t& table):
+        m_buffer(name, ntable, static_cast<const Table&>(table).m_row_dsize) {
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {
             m_tables.emplace_back(table);
@@ -72,17 +74,17 @@ public:
     size_t ntable() const { return m_tables.size(); }
 
     void resize(size_t nrow_per_table) {
-        m_buffer.resize(ntable() * nrow_per_table * row_dsize());
+        m_buffer.resize(ntable() * nrow_per_table);
         update_nrow();
     }
 
-    void expand(size_t delta_nrow) {
-        m_buffer.expand(ntable() * delta_nrow * row_dsize());
+    void expand(size_t delta_nrow_per_table) {
+        m_buffer.expand(ntable() * delta_nrow_per_table);
         update_nrow();
     }
 
-    void expand() {
-        m_buffer.expand();
+    void expand(size_t delta_nrow_per_table, double expansion_factor) {
+        m_buffer.expand(ntable() * delta_nrow_per_table, expansion_factor);
         update_nrow();
     }
 

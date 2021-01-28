@@ -26,8 +26,6 @@ public:
             m_buffer_expansion_factor(buffer_expansion_factor){
         m_send.set_expansion_factor(m_buffer_expansion_factor);
         m_recv.set_expansion_factor(m_buffer_expansion_factor);
-        m_send.expand(1);
-        m_recv.expand(1);
     }
 
     size_t row_dsize() const {

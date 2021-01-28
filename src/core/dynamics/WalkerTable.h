@@ -19,8 +19,7 @@ private:
         Flag m_reference_connection;
         Flag m_deterministic;
 
-        WalkerTableFlagSet(fields::Bitset *bitset, size_t nroot, size_t nreplica) :
-                FlagSet(bitset),
+        WalkerTableFlagSet(size_t nroot, size_t nreplica) :
                 m_initiator(this, "is initiator", nroot, nreplica),
                 m_reference_connection(this, "is connected to reference ONV"),
                 m_deterministic(this, "is in deterministic subspace") {}
@@ -32,7 +31,7 @@ public:
             m_onv(this, nsite, "occupation number vectors"),
             m_weight(this, "weights", nroot, nreplica),
             m_hdiag(this, "hamiltonian diagonal element"),
-            m_flags(this, "flags", nroot, nreplica){}
+            m_flags(this, "flags", {nroot, nreplica}){}
 
     WalkerTable(const Options &opts, size_t nsite):
     WalkerTable(nsite, opts.nroot, opts.nreplica){}
@@ -40,7 +39,7 @@ public:
 
 struct WalkerMappedTable : public MappedTable<WalkerTable, fields::Onv<>> {
     WalkerMappedTable(size_t nsite, size_t nroot, size_t nreplica, size_t nbucket):
-            MappedTable<WalkerTable, fields::Onv<>>(nbucket, m_onv, nsite, nroot, nreplica)
+            MappedTable<WalkerTable, fields::Onv<>>(nbucket, m_onv, {nsite, nroot, nreplica})
     {}
 };
 

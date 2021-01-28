@@ -25,9 +25,12 @@ public:
 
         explicit Window(Buffer *buffer);
 
+        bool allocated() const;
         size_t dsize() const;
 
         size_t size() const;
+
+        size_t nrow() const;
 
         void move(defs::data_t *dbegin, defs::data_t *dend);
 
@@ -35,11 +38,11 @@ public:
 
         const defs::data_t *dbegin() const;
 
-        void resize(size_t dsize);
+        void resize(size_t nrow);
 
-        void expand();
+        void expand(size_t delta_nrow, double expansion_factor);
 
-        void expand(size_t delta_dsize);
+        void expand(size_t delta_nrow);
 
         double expansion_factor() const;
 
@@ -49,17 +52,21 @@ public:
     const std::string m_name;
 private:
     const size_t m_nwindow_max;
+    const size_t m_row_dsize;
     std::vector<defs::data_t> m_data;
     std::vector<Window *> m_windows;
 
-public:
-    Buffer(std::string name, size_t nwindow_max);
 
-    Buffer(std::string name, size_t nwindow_max, size_t dsize);
+public:
+    Buffer(std::string name, size_t nwindow_max, size_t row_dsize);
 
     size_t dsize() const;
 
+    size_t nrow() const;
+
     size_t window_dsize() const;
+
+    size_t window_nrow() const;
 
     defs::data_t *dbegin();
 
@@ -71,11 +78,20 @@ public:
 
     void append_window(Window *window);
 
-    void resize(size_t dsize);
+    void resize(size_t nrow);
 
-    void expand();
+    /**
+     *
+     * @param delta_nrow
+     * number of rows to add to the buffer
+     * @param expansion_factor
+     * must be non-negative. If zero, the buffer is expanded
+     * by delta_nrow rows exactly. Any other value indicates the proportion of
+     * additional rows to add relative to the new total number of rows.
+     */
+    void expand(size_t delta_nrow, double expansion_factor);
 
-    void expand(size_t delta_dsize);;
+    void expand(size_t delta_nrow);
 
     std::string capacity_string() const;
 

@@ -25,7 +25,7 @@ struct ColumnSpecifier {
     struct View {
         const ColumnSpecifier &m_spec;
         char *m_ptr;
-        View(const ColumnSpecifier& field, char* ptr);
+        View(const ColumnSpecifier& spec, char* ptr);
         View(const View &other);
         const size_t& element_size() const;
         int compare(const View& other) const;

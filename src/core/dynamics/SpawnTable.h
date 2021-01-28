@@ -16,8 +16,7 @@ private:
         Flags<defs::ndim_wf> m_src_initiator;
         Flag m_src_deterministic;
 
-        SpawnTableFlagSet(fields::Bitset *bitset, size_t nroot, size_t nreplica) :
-                FlagSet(bitset),
+        SpawnTableFlagSet(size_t nroot, size_t nreplica) :
                 m_src_initiator(this, "parent is initiator", nroot, nreplica),
                 m_src_deterministic(this, "parent is in deterministic subspace") {}
     };
@@ -28,7 +27,7 @@ public:
     SpawnTable(size_t nsite, size_t nroot, size_t nreplica) :
             m_dst_onv(this, nsite, "occupation number vectors"),
             m_delta_weight(this, "weights", nroot, nreplica),
-            m_flags(this, "flags", nroot, nreplica) {}
+            m_flags(this, "flags", {nroot, nreplica}) {}
 };
 
 #endif //M7_SPAWNTABLE_H

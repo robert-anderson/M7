@@ -28,10 +28,9 @@ struct FermionOnvSpecifier : BitsetSpecifier {
         using BitsetSpecifier::View::set;
         using BitsetSpecifier::View::get;
         using BitsetSpecifier::View::clr;
+        using BitsetSpecifier::View::operator=;
 
         void set(const size_t &ispin, const size_t &iorb);
-
-        void set(const defs::inds &ispinorbs);
 
         void set(const defs::inds &alpha, const defs::inds &beta);
 
@@ -63,13 +62,14 @@ struct FermionOnvSpecifier : BitsetSpecifier {
 
         int nalpha() const;
 
-        View& operator=(const defs::inds& ispinorbs){
-            BitsetSpecifier::View::operator=(ispinorbs);
+        View& operator=(const View& other){
+            BitsetSpecifier::View::operator=(other);
             return *this;
         }
 
-    };
+        View(const View& other):View(other.spec(), other.m_ptr){}
 
+    };
 
     std::string element_string(char *ptr) const override;
 

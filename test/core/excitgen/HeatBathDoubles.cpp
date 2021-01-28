@@ -24,7 +24,7 @@ namespace heat_bath_doubles_test {
 
     struct TestMappedTable : MappedTable<TestTable, fields::Det>{
         TestMappedTable(size_t nsite, size_t nattempt):
-        MappedTable<TestTable, fields::Det>(1000, m_onv, nsite, nattempt){}
+        MappedTable<TestTable, fields::Det>(1000, m_onv, {nsite, nattempt}){}
     };
 
 

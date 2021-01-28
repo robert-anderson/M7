@@ -70,8 +70,7 @@ struct TestFlagSet : FlagSet {
     Flags<1> flags1;
     Flags<1> flags2;
 
-    TestFlagSet(fields::Bitset *bitset) :
-            FlagSet(bitset),
+    TestFlagSet() :
             flag1(this, "first flag"),
             flag2(this, "second flag"),
             flags1(this, "first rank-1 flag set", 6),
@@ -81,7 +80,7 @@ struct TestFlagSet : FlagSet {
 struct FlagsTestTable : public Table {
     fields::Flags<TestFlagSet> m_flags;
 
-    FlagsTestTable() : m_flags(this, "Flagset") {}
+    FlagsTestTable() : m_flags(this, "Flagset", {}) {}
 };
 
 TEST(Table, Flag) {

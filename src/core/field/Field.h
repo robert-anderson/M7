@@ -32,6 +32,16 @@ template<size_t nind>
 struct NdFieldGroup {
     NdFormat<nind> m_format;
 
+    /**
+     * @return
+     * The offset in bytes between the address of a table and this Field
+     */
+    size_t symbol_offset(Table* table) const {
+        auto tmp = std::distance((const char*)table, (const char *)this);
+        if (tmp<=0) mpi::stop_all("Invalid Table pointer");
+        return tmp;
+    }
+
     template<typename ...Args>
     NdFieldGroup(Args... shape): m_format(shape...) {}
 
