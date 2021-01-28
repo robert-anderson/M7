@@ -48,8 +48,7 @@ public:
         else if (m_exgens.size() == 3)
             m_exgen_drawer->set(m_magnitude_logger.m_psingle, 1.0 - m_magnitude_logger.m_psingle - prob_boson);
 
-        std::cout << "Excitation class probability breakdown " << utils::to_string(m_exgen_drawer->m_probs)
-                  << std::endl;
+        log::info("Excitation class probability breakdown {}", utils::to_string(m_exgen_drawer->m_probs));
     }
 
     void diagonal(Wavefunction &m_wf, const size_t &irow) override {

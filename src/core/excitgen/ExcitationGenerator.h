@@ -24,7 +24,7 @@ public:
             m_nelec(m_h->nelec()),
             m_norb_pair(integer_utils::nspair(m_nintind)),
             m_nelec_pair(integer_utils::nspair(m_nelec)) {
-        std::cout << "Excitation generator base initialized" << std::endl;
+        log::info("Excitation generator base initialized");
     }
 
     virtual bool draw(const views::Onv<> &src_onv, views::Onv<> &dst_onv,
