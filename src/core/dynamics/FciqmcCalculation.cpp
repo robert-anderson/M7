@@ -10,8 +10,6 @@
 
 FciqmcCalculation::FciqmcCalculation(const Options &opts) :
         m_opts(opts), m_ham(opts), m_prop(m_ham, opts), m_wf(opts, m_ham.nsite()) {
-    m_wf.expand(size_t(opts.walker_buffer_size_factor_initial * opts.nwalker_target),
-                size_t(opts.spawn_buffer_size_factor_initial * opts.nwalker_target));
     auto ref_onv = m_ham.guess_reference(opts.spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_onv);
     Table::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};

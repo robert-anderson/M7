@@ -58,18 +58,19 @@ public:
 
     void resize(size_t nrow) {
         m_send.resize(nrow);
-        /*
-         * recv buffer is dynamically resized during communication
-         */
+        m_recv.resize(nrow*mpi::nrank());
+    }
+
+    void expand(size_t nrow, double expansion_factor) {
+        m_send.expand(nrow, expansion_factor);
+        m_recv.expand(nrow*mpi::nrank(), expansion_factor);
     }
 
     void expand(size_t nrow) {
         m_send.expand(nrow);
+        m_recv.expand(nrow*mpi::nrank());
     }
 
-    void expand(){
-        m_send.expand();
-    }
 
     void communicate() {
         auto hwms = m_send.hwms();
@@ -148,7 +149,6 @@ struct Communicator {
     BufferedTable<store_t> m_store;
     CommunicatingPair<comm_t> m_comm;
     double m_buffer_expansion_factor;
-
 
     struct DynamicRowSet : RankAllocator<key_field_t>::Dynamic {
         typedef RankAllocator<key_field_t> ra_t;
@@ -290,6 +290,7 @@ struct Communicator {
         }
 
         Table::Loc location() const {
+            if (m_ranks_with_any_rows.empty()) return {~0ul, ~0ul};
             return {m_ranks_with_any_rows[0], m_map.begin()->first};
         }
 
@@ -297,7 +298,9 @@ struct Communicator {
             auto initial_loc = location();
             DynamicRowSet::update();
             auto final_loc = location();
-            if (initial_loc != final_loc) log::info("Row \"{}\" moved from rank {} to rank {}",
+            if (!initial_loc) log::info("Dynamic row \"{}\" is initially stored on rank {}",
+                                        m_name, final_loc.m_irank);
+            else if (initial_loc != final_loc) log::info("Dynamic row \"{}\" moved from rank {} to rank {}",
                                                     m_name, initial_loc.m_irank, final_loc.m_irank);
         }
 
@@ -333,14 +336,6 @@ struct Communicator {
         return m_ra.get_rank(key);
     }
 
-    store_t &store() {
-        return static_cast<store_t &>(m_store);
-    }
-
-    const store_t &store() const {
-        return static_cast<const store_t &>(m_store);
-    }
-
     BufferedTableArray<comm_t> &send() {
         return m_comm.send();
     }
@@ -363,11 +358,6 @@ struct Communicator {
 
     const comm_t &recv() const {
         return static_cast<const comm_t &>(m_comm.recv());
-    }
-
-    void expand(size_t nrow_store, size_t nrow_comm) {
-        m_store.expand(nrow_store);
-        m_comm.expand(nrow_comm);
     }
 
     void communicate() {

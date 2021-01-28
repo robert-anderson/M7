@@ -16,6 +16,7 @@ TEST(StochasticPropagator, Test) {
     opts.tau_initial = 0.05;
     opts.nwalker_target = 100000;
     opts.shift_damp = 0.5;
+    opts.ncycle = 100;
 //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -27,11 +28,12 @@ TEST(StochasticPropagator, Test) {
     StochasticPropagator prop(ham, opts);
     ra::Onv ra(100, 10);
     Wavefunction wf(opts, ham.nsite());
-    wf.expand(10, 800);
     ASSERT_EQ(&wf.m_store.m_onv, &wf.m_store.m_key_field);
     ASSERT_EQ(wf.m_store.m_flags.m_initiator.m_flagset->m_bitset_field, &wf.m_store.m_flags);
-    ASSERT_EQ(wf.m_store.m_nrow, 15);
-    ASSERT_EQ(wf.m_comm.send().nrow_per_table(), 1200);
+    const size_t store_nrow = (opts.walker_buffer_size_factor_initial*opts.nwalker_target)/mpi::nrank();
+    ASSERT_EQ(wf.m_store.m_nrow, store_nrow);
+    const size_t send_nrow = (opts.spawn_buffer_size_factor_initial*opts.nwalker_target)/mpi::nrank();
+    ASSERT_EQ(wf.m_comm.send().nrow_per_table(), send_nrow);
     ASSERT_EQ(wf.m_store.m_weight.m_column.m_format.extent(0), 1);
     ASSERT_EQ(wf.m_store.m_weight.m_column.m_format.extent(1), 1);
 

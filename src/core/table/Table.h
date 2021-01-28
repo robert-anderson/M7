@@ -100,6 +100,10 @@ struct Table {
     struct Loc {
         const size_t m_irank, m_irow;
         Loc(size_t irank, size_t irow): m_irank(irank), m_irow(irow){}
+
+        operator bool() const {
+            return m_irank!=~0ul;
+        }
         bool is_mine() const {
             return mpi::i_am(m_irank);
         }

@@ -47,6 +47,8 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
             m_delta_nwalker(m_summables, {1, 1}),
             m_l2_norm_square(m_summables, {1, 1}),
             m_delta_l2_norm_square(m_summables, {1, 1}) {
+        m_store.resize((m_opts.walker_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
+        m_comm.resize((m_opts.spawn_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
     }
 
 //    void on_row_send_(size_t irow) override {

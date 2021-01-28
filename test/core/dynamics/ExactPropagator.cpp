@@ -82,7 +82,8 @@ TEST(ExactPropagator, Test) {
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
     ra::Onv ra(100, 10);
     Wavefunction wf(opts, nsite);
-    wf.expand(10, 800);
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
@@ -109,7 +110,6 @@ TEST(ExactPropagator, Cr2Test) {
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
     ra::Onv ra(100, 10);
     Wavefunction wf(opts, ham.nsite());
-    wf.expand(1000000, 8000000);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(ref_onv);
 
