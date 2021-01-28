@@ -118,7 +118,8 @@ void Buffer::append_window(Buffer::Window *window) {
 
 void Buffer::resize(size_t nrow) {
     if (!m_name.empty()) {
-        log::info("Reallocating buffer \"" + m_name + "\". " + capacity_string());
+        log::info("Reallocating buffer \"" + m_name + "\"  " +
+        capacity_string()+" -> "+capacity_string(nrow*m_row_dsize));
     }
     std::vector<defs::data_t> tmp(nrow*m_row_dsize, 0ul);
     auto new_window_dsize = tmp.size() / m_nwindow_max;
@@ -132,9 +133,6 @@ void Buffer::resize(size_t nrow) {
         window->move(new_dbegin, new_dbegin + new_window_dsize);
     }
     m_data = std::move(tmp);
-    if (!m_name.empty()) {
-        log::info("New " + capacity_string());
-    }
     ASSERT(dbegin()==m_windows[0]->dbegin());
 }
 
@@ -147,12 +145,16 @@ void Buffer::expand(size_t delta_nrow) {
     expand(delta_nrow, m_expansion_factor);
 }
 
-std::string Buffer::capacity_string() const {
+std::string Buffer::capacity_string(size_t dsize) const {
     const auto ntable = "x "+std::to_string(m_windows.size())+" tables";
-    const auto per_table = std::to_string(dsize()/(m_row_dsize*m_windows.size()));
-    const auto total = std::to_string(dsize()/m_row_dsize);
+    const auto per_table = std::to_string(dsize/(m_row_dsize*m_windows.size()));
+    const auto total = std::to_string(dsize/m_row_dsize);
     if (m_windows.size()==1)
-        return "Capacity is: " + per_table +" rows (" + string_utils::memsize(dsize()*defs::nbyte_data) + ")";
+        return "[" + per_table +" rows (" + string_utils::memsize(dsize*defs::nbyte_data) + ")]";
     else
-        return "Capacity is: " + per_table +" rows "+ntable+" = " + total + " total (" + string_utils::memsize(dsize()*defs::nbyte_data) + ")";
+        return "[" + per_table +" rows "+ntable+" = " + total + " total (" + string_utils::memsize(dsize*defs::nbyte_data) + ")]";
+}
+
+std::string Buffer::capacity_string() const {
+    return capacity_string(dsize());
 }

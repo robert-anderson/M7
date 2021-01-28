@@ -96,7 +96,7 @@ template<typename spec_t, size_t nind>
 struct NdColumn : Column<spec_t> {
     typedef typename spec_t::view_t view_t;
     typedef typename spec_t::cview_t cview_t;
-    const NdFormat<nind> &m_format;
+    NdFormat<nind> m_format;
 
     NdColumn(Table *table, spec_t spec, std::string description, const NdFormat<nind> &format) :
             Column<spec_t>(table, spec, format.nelement(), description), m_format(format) {}

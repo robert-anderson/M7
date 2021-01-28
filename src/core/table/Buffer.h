@@ -93,6 +93,8 @@ public:
 
     void expand(size_t delta_nrow);
 
+    std::string capacity_string(size_t dsize) const;
+
     std::string capacity_string() const;
 
 };

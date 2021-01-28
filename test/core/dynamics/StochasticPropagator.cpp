@@ -32,6 +32,8 @@ TEST(StochasticPropagator, Test) {
     ASSERT_EQ(wf.m_store.m_flags.m_initiator.m_flagset->m_bitset_field, &wf.m_store.m_flags);
     ASSERT_EQ(wf.m_store.m_nrow, 15);
     ASSERT_EQ(wf.m_comm.send().nrow_per_table(), 1200);
+    ASSERT_EQ(wf.m_store.m_weight.m_column.m_format.extent(0), 1);
+    ASSERT_EQ(wf.m_store.m_weight.m_column.m_format.extent(1), 1);
 
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
