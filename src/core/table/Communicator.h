@@ -133,8 +133,6 @@ public:
     }
 };
 
-
-
 template<typename store_t, typename comm_t>
 struct Communicator {
     static_assert(std::is_base_of<MappedTableBase, store_t>::value,
@@ -148,6 +146,7 @@ struct Communicator {
     mutable RankAllocator<key_field_t> m_ra;
     BufferedTable<store_t> m_store;
     CommunicatingPair<comm_t> m_comm;
+    std::string m_name;
     double m_buffer_expansion_factor;
 
     struct DynamicRowSet : RankAllocator<key_field_t>::Dynamic {
@@ -185,6 +184,7 @@ struct Communicator {
          */
         defs::inds m_counts;
         defs::inds m_displs;
+        std::string m_name;
         /*
          * keep track of which ranks have any rows
          */
@@ -192,12 +192,14 @@ struct Communicator {
         defs::inds m_ranks_with_any_rows;
 
     public:
-        DynamicRowSet(const Communicator &comm) : ra_t::Dynamic(comm.m_ra),
+        DynamicRowSet(const Communicator &comm, std::string name) : ra_t::Dynamic(comm.m_ra),
                 m_source(comm.m_store),
-                m_lc("Rank-local dynamic row set rows", static_cast<const table_t &>(comm.m_store)),
-                m_ac("All dynamic row set rows", static_cast<const table_t &>(comm.m_store)),
+                m_lc("Dynamic row set \""+name+"\" (local)", static_cast<const table_t &>(comm.m_store)),
+                m_ac("Dynamic row set \""+name+"\" (all)", static_cast<const table_t &>(comm.m_store)),
                 m_counts(mpi::nrank(), 0ul),
-                m_displs(mpi::nrank(), 0ul) {
+                m_displs(mpi::nrank(), 0ul), m_name(name) {
+            m_lc.resize(1);
+            m_ac.resize(1);
             m_ranks_with_any_rows.reserve(mpi::nrank());
         }
 
@@ -277,13 +279,12 @@ struct Communicator {
         using DynamicRowSet::add;
         using DynamicRowSet::nrow;
         using DynamicRowSet::update;
+        using DynamicRowSet::m_name;
         using DynamicRowSet::m_have_any_rows;
         using DynamicRowSet::m_ranks_with_any_rows;
 
-        std::string m_name;
-
         DynamicRow(const Communicator &comm, Table::Loc loc, std::string name) :
-                DynamicRowSet(comm), m_name(std::move(name)) {
+                DynamicRowSet(comm, name) {
             if (loc.is_mine()) add(loc.m_irow);
             update();
             if (m_ranks_with_any_rows.size()!=1) mpi::stop_all("Only one rank should have a row");
@@ -329,6 +330,7 @@ struct Communicator {
             m_ra(nblock_ra, period_ra),
             m_store(name + " store", store),
             m_comm(name, buffer_expansion_factor, comm),
+            m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }
 
