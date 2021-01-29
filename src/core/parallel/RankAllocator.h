@@ -18,6 +18,8 @@ template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 class RankAllocator {
     static constexpr double c_default_thresh_ratio = 0.9;
     typedef typename field_t::view_t view_t;
+    Table& m_table;
+    field_t& m_field;
     const size_t m_nblock;
     const size_t m_period;
     defs::inds m_block_to_rank;
@@ -70,8 +72,8 @@ private:
     }
 
 public:
-    RankAllocator(const size_t& nblock, const size_t& period) :
-    m_nblock(nblock), m_period(period),
+    RankAllocator(Table& table, field_t& field, const size_t& nblock, const size_t& period) :
+    m_table(table), m_field(field), m_nblock(nblock), m_period(period),
     m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank())
     {
         size_t iblock = 0ul;
@@ -82,19 +84,19 @@ public:
         }
     }
 
-    void update(const size_t& icycle, const double& work_time, Table& table, field_t& field){
+    void update(const size_t& icycle, const double& work_time){
+        log::info_("work time: {}", work_time);
         m_mean_work_times+=work_time;
-        if (icycle%m_period) return;
+        if (!icycle || icycle%m_period) return;
         // else, this is a preparatory iteration
         auto times = m_mean_work_times.mpi_gather();
-        utils::print(times);
         // this rank has done the most work, so it should send a block
         size_t irank_send = std::distance(times.begin(), std::max_element(times.begin(), times.end()));
         // this rank has done the least work, so it should receive a block
         size_t irank_recv = std::distance(times.begin(), std::min_element(times.begin(), times.end()));
         if (irank_send==irank_recv) return;
         if (times[irank_recv] > m_threshold_ratio*times[irank_send]) return;
-        if (m_rank_to_blocks[irank_send].empty()) mpi::stop_all("Sending rank has no blocks to send!");
+        MPI_REQUIRE_ALL(!m_rank_to_blocks[irank_send].empty(), "Sending rank has no blocks to send!");
         /*
          * sender will send all rows in the front block, which will become the front
          * block of the recver so all ranks must update in response to this
@@ -107,16 +109,16 @@ public:
         // prepare vector of row indices to send
         defs::inds irows_send;
         if (mpi::i_am(irank_send)){
-            for (size_t irow = 0; irow<table.m_hwm; ++irow){
-                if (table.is_cleared(irow)) continue;
-                auto key = field(irow);
+            for (size_t irow = 0; irow<m_table.m_hwm; ++irow){
+                if (m_table.is_cleared(irow)) continue;
+                auto key = m_field(irow);
                 ASSERT(get_rank(key)==irank_send);
                 if (get_block(key) == iblock_transfer) irows_send.push_back(irow);
             }
         }
 
-        if (mpi::i_am(irank_send)) table.send_rows(irows_send, irank_recv, m_send_callbacks);
-        if (mpi::i_am(irank_recv)) table.recv_rows(irank_send, m_recv_callbacks);
+        if (mpi::i_am(irank_send)) m_table.send_rows(irows_send, irank_recv, m_send_callbacks);
+        if (mpi::i_am(irank_recv)) m_table.recv_rows(irank_send, m_recv_callbacks);
         m_mean_work_times = 0.0;
     }
 

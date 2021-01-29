@@ -108,8 +108,8 @@ public:
 
         }
 
-        if (!m_send.dbegin()) mpi::stop_all("Send buffer is not allocated!");
-        if (!m_recv.dbegin()) mpi::stop_all("Recv buffer is not allocated!");
+        MPI_REQUIRE_ALL(m_send.dbegin(), "Send buffer is not allocated!");
+        MPI_REQUIRE_ALL(m_recv.dbegin(), "Recv buffer is not allocated!");
 
         auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
                                     m_recv.dbegin(), recvcounts, recvdispls);
@@ -140,12 +140,12 @@ struct Communicator {
     static_assert(std::is_base_of<Table, comm_t>::value,
                   "Template arg must be derived from Table");
 
-    typedef typename store_t::base_table_t table_t;
+    typedef typename store_t::table_t table_t;
     typedef typename store_t::key_field_t key_field_t;
     typedef typename key_field_t::view_t view_t;
-    mutable RankAllocator<key_field_t> m_ra;
     BufferedTable<store_t> m_store;
     CommunicatingPair<comm_t> m_comm;
+    mutable RankAllocator<key_field_t> m_ra;
     std::string m_name;
     double m_buffer_expansion_factor;
 
@@ -287,7 +287,7 @@ struct Communicator {
                 DynamicRowSet(comm, name) {
             if (loc.is_mine()) add(loc.m_irow);
             update();
-            if (m_ranks_with_any_rows.size()!=1) mpi::stop_all("Only one rank should have a row");
+            MPI_REQUIRE_ALL(m_ranks_with_any_rows.size()==1, "Only one rank should have a row");
         }
 
         Table::Loc location() const {
@@ -327,9 +327,9 @@ struct Communicator {
     Communicator(std::string name, double buffer_expansion_factor,
                  size_t nblock_ra, size_t period_ra,
                  const store_t &store, const comm_t &comm):
-            m_ra(nblock_ra, period_ra),
             m_store(name + " store", store),
             m_comm(name, buffer_expansion_factor, comm),
+            m_ra(m_store, m_store.m_key_field, nblock_ra, period_ra),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }

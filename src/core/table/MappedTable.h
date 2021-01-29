@@ -45,8 +45,10 @@ struct MappedTableBase {
     double m_remap_ratio = c_default_remap_ratio;
     size_t m_remap_nlookup = c_default_remap_nlookup;
 
+protected:
     MappedTableBase(size_t nbucket) : m_buckets(nbucket) {}
 
+public:
     /**
  * @param nrow_max
  * expected maximum number of rows
@@ -60,12 +62,13 @@ struct MappedTableBase {
     }
 };
 
-template<typename table_t, typename field_t, typename hash_fn=typename field_t::hash_fn>
-struct MappedTable : MappedTableBase, table_t {
-    static_assert(std::is_base_of<Table, table_t>::value, "Template arg must be derived from Table");
+template<typename table_tt, typename key_field_tt, typename hash_fnt=typename key_field_tt::hash_fn>
+struct MappedTable : MappedTableBase, table_tt {
+    static_assert(std::is_base_of<Table, table_tt>::value, "Template arg must be derived from Table");
 
-    typedef table_t base_table_t;
-    typedef field_t key_field_t;
+    typedef table_tt table_t;
+    typedef key_field_tt key_field_t;
+    typedef hash_fnt hash_fn;
     using Table::push_back;
     using Table::get_free_row;
     using Table::m_row_size;
@@ -76,7 +79,7 @@ struct MappedTable : MappedTableBase, table_t {
     using Table::m_nrow;
     using Table::m_hwm;
 
-    static_assert(std::is_base_of<NdFieldGroup<0ul>, field_t>::value, "Key field must be scalar");
+    static_assert(std::is_base_of<NdFieldGroup<0ul>, key_field_t>::value, "Key field must be scalar");
 
     key_field_t &m_key_field;
 
@@ -89,14 +92,12 @@ private:
      */
     size_t key_field_offset() const {
         auto kf_offset = std::distance((const char *) this, (const char*)&m_key_field);
-        if (kf_offset<0 || (size_t)kf_offset>=sizeof(table_t)){
-            mpi::stop_all("Field chosen as the key field must be a member of the table");
-        }
+        MPI_REQUIRE_ALL(kf_offset>0 && (size_t)kf_offset<=sizeof(table_t), "Field chosen as the key field must be a member of the table");
         return kf_offset;
     }
 
     key_field_t& get_key_field_from_offset(size_t nbyte) const {
-        return *(key_field_t*)((char*)(this)+nbyte);
+        return *(key_field_t*)((char*)(this) + nbyte);
     }
 
 public:

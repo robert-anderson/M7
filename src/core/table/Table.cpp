@@ -174,12 +174,13 @@ void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t
     log::info_("Transferring {} rows outward to rank {}", nrow, irank_dst);
     // make rows to be sent contiguous in memory
     Buffer send("Outward transfer buffer", 1, m_row_dsize);
+    MPI_ABORT("sjdaigdfjagkdf");
+
     send.resize(nrow);
     for (auto iirow = 0ul; iirow < nrow; ++iirow) {
         const auto &irow = irows[iirow];
         std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
     }
-
     mpi::send(&nrow, 1, irank_dst, 0);
     mpi::send(send.dbegin(), m_row_dsize * nrow, irank_dst, 1);
     /*

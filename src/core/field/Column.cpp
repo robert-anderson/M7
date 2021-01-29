@@ -22,7 +22,7 @@ ColumnBase::ColumnBase(const ColumnBase &other):
         m_size(other.m_size),
         m_offset(other.m_offset){
     auto offset = m_table->add_column(this);
-    if (offset!=m_offset) mpi::stop_all("Offset should match that of copied field");
+    MPI_REQUIRE_ALL(offset==m_offset, "Offset should match that of copied field");
 }
 
 char *ColumnBase::raw_view(const size_t &irow, const size_t &ielement) const {

@@ -35,7 +35,30 @@ struct log {
         g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()), true);
 #endif
         spdlog::set_pattern("[%E] %^[%l]%$ %v");
-        spdlog::flush_every(std::chrono::seconds(3));
+        g_local_file_logger->flush_on(spdlog::level::n_levels);
+    }
+
+    static void flush(){
+        if (!mpi::i_am_root()) return;
+        g_reduced_stdout_logger->flush();
+        g_reduced_file_logger->flush();
+    }
+
+    static void flush_(){
+#ifdef ENABLE_LOCAL_LOGGING
+        g_local_file_logger->flush();
+#endif
+    }
+
+    static void flush_all(){
+        flush();
+        flush_();
+    }
+
+    static void finalize(){
+        // spdlog::shutdown() doesn't seem to flush all streams in synchronous mode
+        flush_all();
+        spdlog::shutdown();
     }
 
     template<typename ...Args>

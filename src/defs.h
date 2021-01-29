@@ -32,7 +32,7 @@
         fputs(#e, stderr); \
         fprintf(stderr, "\nin file \"%s\", line %d\n\n", __FILE__, __LINE__); \
         fflush(stderr); \
-        abort(); \
+        std::abort(); \
     } \
 }
 #endif

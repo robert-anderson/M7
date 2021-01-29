@@ -3,6 +3,7 @@
 //
 
 #include "FermionOnvSpecifier.h"
+#include "src/core/parallel/MPIAssert.h"
 
 FermionOnvSpecifier::FermionOnvSpecifier(const size_t &nsite) : BitsetSpecifier(2 * nsite), m_nsite(nsite) {
     m_data.m_details["type"] = "FermionOnv";
@@ -59,8 +60,8 @@ void FermionOnvSpecifier::View::set(const std::string &s) {
             if (i!=nsite()) throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
         }
     }
-    if (i<2*nsite()) mpi::stop_all("FermionOnv-defining string not long enough");
-    if (i>2*nsite()) mpi::stop_all("FermionOnv-defining string too long");
+    MPI_REQUIRE(i>2*nsite(), "FermionOnv-defining string not long enough");
+    MPI_REQUIRE(i<2*nsite(), "FermionOnv-defining string too long");
 }
 
 int FermionOnvSpecifier::View::spin() const {

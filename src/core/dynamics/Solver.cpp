@@ -14,6 +14,7 @@ void Solver::loop_over_occupied_onvs() {
      *      update local weight in the diagonal cloning/death step
      * else if all elements of the m_weight field are zero, the row should be removed
      */
+    m_propagate_timer.unpause();
     for (size_t irow = 0ul; irow < m_wf.m_store.m_hwm; ++irow) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
@@ -42,6 +43,7 @@ void Solver::loop_over_occupied_onvs() {
 
         propagate_row(irow);
     }
+    m_propagate_timer.pause();
     m_synchronization_timer.reset();
     m_synchronization_timer.unpause();
     mpi::barrier();
@@ -80,7 +82,7 @@ void Solver::annihilate_row(const size_t &irow_recv) {
             return;
         }
 
-        m_wf.create_walker(
+        m_wf.create_walker_(
                 dst_onv,
                 delta_weight,
                 m_prop.m_ham.get_energy(dst_onv),
@@ -145,9 +147,7 @@ void Solver::execute(size_t niter) {
     for (size_t i = 0ul; i < niter; ++i) {
         begin_cycle();
 
-        m_propagate_timer.unpause();
         loop_over_occupied_onvs();
-        m_propagate_timer.pause();
 
         m_communicate_timer.unpause();
         m_wf.communicate();
@@ -246,7 +246,7 @@ void Solver::end_cycle() {
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
-    //m_wf.update(m_icycle, m_propagate_timer.total());
+    m_wf.m_ra.update(m_icycle, m_propagate_timer.total());
 }
 
 void Solver::output_stats() {

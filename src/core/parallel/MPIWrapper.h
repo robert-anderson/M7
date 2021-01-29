@@ -44,16 +44,14 @@
  * to address any byte of memory, and so worries about narrowing in the MPI interface may be
  * forgotten in this case.
  */
-
 #ifdef HAVE_MPI
 
 
-
-static const std::array<MPI_Datatype, 16> mpi_types =
+static const std::array<MPI_Datatype, 17> mpi_types =
         {MPI_CHAR, MPI_SHORT, MPI_INT, MPI_LONG, MPI_LONG_LONG_INT,
          MPI_UNSIGNED_CHAR, MPI_UNSIGNED_SHORT, MPI_UNSIGNED, MPI_UNSIGNED_LONG,
          MPI_UNSIGNED_LONG_LONG, MPI_FLOAT, MPI_DOUBLE, MPI_LONG_DOUBLE,
-         MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX};
+         MPI_COMPLEX, MPI_DOUBLE_COMPLEX, MPI_CXX_LONG_DOUBLE_COMPLEX, MPI_CXX_BOOL};
 
 template<typename T>
 static constexpr size_t mpi_type_ind() { return ~0ul; }
@@ -74,6 +72,7 @@ template<> constexpr size_t mpi_type_ind<long double>() { return 12; }
 template<> constexpr size_t mpi_type_ind<std::complex<float>>() { return 13; }
 template<> constexpr size_t mpi_type_ind<std::complex<double>>() { return 14; }
 template<> constexpr size_t mpi_type_ind<std::complex<long double>>() { return 15; }
+template<> constexpr size_t mpi_type_ind<bool>() { return 16; }
 
 
 template<typename T> constexpr bool mpi_supported() { return mpi_type_ind<T>()!=~0ul; }
@@ -126,24 +125,7 @@ extern size_t g_nrank_on_node;
 
 struct mpi {
 
-    static void setup_mpi_globals() {
-#ifdef HAVE_MPI
-        int tmp;
-        MPI_Comm_size(MPI_COMM_WORLD, &tmp);
-        g_nrank = tmp;
-        ASSERT(g_nrank > 0)
-        MPI_Comm_rank(MPI_COMM_WORLD, &tmp);
-        g_irank = tmp;
-        char processor_name[MPI_MAX_PROCESSOR_NAME];
-        MPI_Get_processor_name(processor_name, &tmp);
-        g_processor_name = std::string(processor_name, tmp);
-        MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
-        MPI_Comm_size(g_node_comm, &tmp);
-        g_nrank_on_node = tmp;
-        MPI_Comm_rank(g_node_comm, &tmp);
-        g_irank_on_node = tmp;
-#endif
-    }
+    static void setup_mpi_globals();
 
     static const size_t &nrank() {
         return g_nrank;
@@ -207,6 +189,7 @@ private:
     template<typename T>
     static bool all_reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1) {
 #ifdef HAVE_MPI
+        ASSERT(mpi_type_ind<T>()!=~0ul);
         return MPI_Allreduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         std::memcpy(recv, send, sizeof(T)*ndata);
@@ -219,6 +202,7 @@ private:
                            std::pair<T, size_t>* recv,
                            MpiPairOp op, size_t ndata=1) {
 #ifdef HAVE_MPI
+        ASSERT(mpi_type_ind<T>()!=~0ul);
         std::vector<std::pair<T, defs::mpi_count>> tmp_send;
         tmp_send.reserve(ndata);
         for (size_t idata=0ul; idata<ndata; ++idata)
@@ -371,9 +355,48 @@ public:
     }
 
     template<typename T>
-    static T all_land(const T &send) {
-        return all_land(&send);
+    static T all_land(T send) {
+        T res;
+        T cpy = send;
+        all_land(&cpy, &res);
+        return res;
     }
+
+    /*
+     * LOGICAL-OR REDUCE CONVENIENCE FUNCTIONS
+     */
+
+    template<typename T>
+    static bool lor(const T *send, T *recv, size_t ndata = 1, size_t iroot = 0) {
+        return reduce(send, recv, MpiLor, ndata, iroot);
+    }
+
+    template<typename T>
+    static bool all_lor(const T *send, T *recv, size_t ndata = 1) {
+        return all_reduce(send, recv, MpiLor, ndata);
+    }
+
+    template<typename T>
+    static T lor(const T *send, size_t iroot = 0) {
+        T recv;
+        lor(send, &recv, 1, iroot);
+        return recv;
+    }
+
+    template<typename T>
+    static T all_lor(const T *send) {
+        T recv;
+        all_lor(send, &recv, 1);
+        return recv;
+    }
+
+    template<typename T>
+    static T all_lor(T send) {
+        T res;
+        all_lor(&send, &res);
+        return res;
+    }
+
 
     /*
      * P2P send / recv
@@ -644,8 +667,6 @@ public:
         return all_gatherv(send, sendcount, recv, recvcounts, recvdispls);
     }
 
-
-
     template<typename T>
     static bool gatherv(const std::vector<T> &send, std::vector<T> &recv, const size_t& iroot) {
         return gatherv(send, send.size(), recv, iroot);
@@ -671,17 +692,17 @@ public:
 
     static void finalize();
 
-    static void stop_all(std::string message) {
-#ifdef HAVE_MPI
-        std::cout << "Stopping all MPI processes: \"" << message << "\""<< std::endl;
-        // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
-        if (mpi::nrank()==1) abort();
-        MPI_Abort(MPI_COMM_WORLD, 0);
-#else
-        std::cout << "Stopping: \"" << message << "\""<< std::endl;
-        exit(0);
-#endif
-    }
+    /**
+     * call on any rank to terminate the entire communicator
+     * @param message
+     */
+    static void abort_(std::string message);
+
+    /**
+     * call on all ranks to terminate the entire communicator
+     * @param message
+     */
+    static void abort(std::string message, float f);
 
 };
 

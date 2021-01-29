@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include "src/core/parallel/MPIWrapper.h"
+#include "src/core/parallel/MPIAssert.h"
 #include "src/core/nd/NdFormat.h"
 #include "hdf5.h"
 
@@ -51,17 +52,17 @@ namespace hdf5 {
         File(std::string name, bool writemode): m_writemode(writemode){
             if (writemode) {
                 m_handle = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-                if (m_handle<0) mpi::stop_all("HDF5 file could not be opened for writing. It may be locked by another program");
+                MPI_REQUIRE_ALL(m_handle>=0, "HDF5 file could not be opened for writing. It may be locked by another program");
             }
             else {
-                if(!H5Fis_hdf5(name.c_str())) mpi::stop_all("Specified file is not HDF5 format");
+                MPI_REQUIRE_ALL(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
                 m_handle = H5Fopen(name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
             }
         }
 
         ~File() {
             auto status = H5Fclose(m_handle);
-            if (status) mpi::stop_all("HDF5 Error on closing file");
+            MPI_REQUIRE_ALL(!status, "HDF5 Error on closing file");
         }
 
         Group subgroup(std::string name);
@@ -92,13 +93,13 @@ namespace hdf5 {
 
         ~Group(){
             auto status = H5Gclose(m_handle);
-            if (status) mpi::stop_all("HDF5 Error on closing group");
+            MPI_REQUIRE_ALL(!status, "HDF5 Error on closing group");
         }
 
         template<typename T>
         typename std::enable_if<type_ind<T>()!=~0ul, void>::type
         save(const T& item, std::string name) {
-            if (!m_writemode) mpi::stop_all("File is open for reading - save not permitted.");
+            MPI_REQUIRE_ALL(m_writemode, "File is open for reading - save not permitted.");
             hsize_t shape = 1;
             auto dspace_handle = H5Screate_simple(1, &shape, NULL);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
@@ -107,13 +108,13 @@ namespace hdf5 {
             auto status = H5Dwrite (dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void*)&item);
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
-            if (status) mpi::stop_all("HDF5 Error on primitive type save");
+            MPI_REQUIRE_ALL(!status, "HDF5 Error on primitive type save");
         }
 
         template<typename T>
         typename std::enable_if<type_ind<T>()!=~0ul, void>::type
         save(const std::complex<T>& item, std::string name) {
-            if (!m_writemode) mpi::stop_all("File is open for reading - save not permitted.");
+            MPI_REQUIRE_ALL(m_writemode, "File is open for reading - save not permitted.");
             hsize_t shape = 2;
             auto dspace_handle = H5Screate_simple(1, &shape, NULL);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
@@ -122,13 +123,13 @@ namespace hdf5 {
             auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void*)&item);
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
-            if (status) mpi::stop_all("HDF5 Error on complex type save");
+            MPI_REQUIRE_ALL(!status, "HDF5 Error on complex type save");
         }
 
 //        template<typename T, size_t ndim>
 //        typename std::enable_if<type_ind<T>()!=~0ul, void>::type
 //        save(const Array<T, ndim>& item, std::string name) {
-//            if (!m_writemode) mpi::stop_all("File is open for reading - save not permitted.");
+//            if (!m_writemode) mpi::abort("File is open for reading - save not permitted.");
 //            hsize_t shape = 1;
 //            H5::DataSpace dataspace(1, &shape);
 //            auto dataset = m_group.createDataSet(name, type<T>(), dataspace);
@@ -140,19 +141,19 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>()!=~0ul, void>::type
         load(T& item, std::string name) {
-            if (m_writemode) mpi::stop_all("File is open for writing - load not permitted.");
+            MPI_REQUIRE_ALL(!m_writemode, "File is open for writing - load not permitted.");
             auto dset_handle = H5Dopen2(m_handle, name.c_str(), H5P_DEFAULT);
             auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void*)&item);
-            if (status) mpi::stop_all("HDF5 Error on complex type load");
+            MPI_REQUIRE_ALL(!status, "HDF5 Error on complex type load");
         }
 
         template<typename T>
         typename std::enable_if<type_ind<T>()!=~0ul, void>::type
         load(const std::complex<T>& item, std::string name) const {
-            if (m_writemode) mpi::stop_all("File is open for writing - load not permitted.");
+            MPI_REQUIRE_ALL(!m_writemode, "File is open for writing - load not permitted.");
             auto dset_handle = H5Dopen2(m_handle, name.c_str(), H5P_DEFAULT);
             auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void*)&item);
-            if (status) mpi::stop_all("HDF5 Error on primitive type load");
+            MPI_REQUIRE_ALL(!status, "HDF5 Error on primitive type load");
         }
 
         template<typename T>
@@ -199,7 +200,7 @@ namespace hdf5 {
             const hsize_t count = (ichunk_global<m_nchunk) ? m_nblock_chunk : (m_nblock - m_nblock_chunk*ichunk_global);
             ASSERT(count<=m_nblock_chunk);
             auto status = H5Sselect_hyperslab(m_chunk_space, H5S_SELECT_SET, &start, &stride, &count, &m_block_size);
-            if(status<0) mpi::stop_all("HDF5 Error: could not select next hyperslab");
+            MPI_REQUIRE_ALL(status>=0, "HDF5 Error: could not select next hyperslab");
         }
 
         VectorWriter(hid_t parent, std::string name, size_t nblock, size_t block_size, size_t nblock_chunk):
@@ -211,7 +212,7 @@ namespace hdf5 {
 
             m_plist = H5Pcreate(H5P_DATASET_XFER);
             auto status = H5Pset_dxpl_mpio(m_plist, H5FD_MPIO_INDEPENDENT);
-            if(status<0) mpi::stop_all("HDF5 Error: could not set data transfer mode to independent");
+            MPI_REQUIRE_ALL(status>=0, "HDF5 Error: could not set data transfer mode to independent");
 
             m_dataset = H5Dcreate(parent, name.c_str(), type<T>(), m_dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -227,7 +228,7 @@ namespace hdf5 {
 
         void write(const T* src, size_t nblock_write){
             auto status = H5Dwrite(m_dataset, type<T>(), m_chunk_space, m_dataspace, m_plist, src);
-            if(status<0) mpi::stop_all("HDF5 Error: vector write failed");
+            MPI_REQUIRE_ALL(status<0, "HDF5 Error: vector write failed");
         }
 
     };

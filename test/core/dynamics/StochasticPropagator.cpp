@@ -26,7 +26,6 @@ TEST(StochasticPropagator, Test) {
         ref_onv.set(1, i);
     }
     StochasticPropagator prop(ham, opts);
-    ra::Onv ra(100, 10);
     Wavefunction wf(opts, ham.nsite());
     ASSERT_EQ(&wf.m_store.m_onv, &wf.m_store.m_key_field);
     ASSERT_EQ(wf.m_store.m_flags.m_initiator.m_flagset->m_bitset_field, &wf.m_store.m_flags);
@@ -40,10 +39,7 @@ TEST(StochasticPropagator, Test) {
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    Table::Loc ref_loc = {ra.get_rank(ref_onv), 0ul};
-    if (ref_loc.is_mine()) {
-        wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
-    }
+    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {

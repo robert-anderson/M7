@@ -4,6 +4,7 @@
 
 #include "Buffer.h"
 #include "src/core/io/Logging.h"
+#include "src/core/parallel/MPIAssert.h"
 
 Buffer::Window::Window(Buffer *buffer) {
     ASSERT(buffer);
@@ -69,8 +70,8 @@ double Buffer::Window::expansion_factor() const {
 
 Buffer::Buffer(std::string name, size_t nwindow_max, size_t row_dsize) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max), m_row_dsize(row_dsize) {
-    if (!nwindow_max) mpi::stop_all("A buffer must allow at least one window");
-    if (!row_dsize) mpi::stop_all("The row must consist of a non-zero number datawords");
+    MPI_REQUIRE_ALL(nwindow_max,"A buffer must allow at least one window");
+    MPI_REQUIRE_ALL(row_dsize, "The row must consist of a non-zero number datawords");
     m_windows.reserve(m_nwindow_max);
 }
 
@@ -107,7 +108,7 @@ const defs::data_t *Buffer::dbegin(const size_t &iwindow) const {
 }
 
 void Buffer::append_window(Buffer::Window *window) {
-    if (m_windows.size() >= m_nwindow_max) mpi::stop_all("Buffer is over-subscribed");
+    MPI_REQUIRE_ALL(m_windows.size() < m_nwindow_max, "Buffer is over-subscribed");
     if (dsize()) {
         window->m_dbegin = dbegin(m_windows.size());
         window->m_dend = window->m_dbegin + window_dsize();
@@ -137,7 +138,7 @@ void Buffer::resize(size_t nrow) {
 }
 
 void Buffer::expand(size_t delta_nrow, double expansion_factor) {
-    if (expansion_factor<0.0) mpi::stop_all("invalid expansion factor");
+    MPI_REQUIRE(expansion_factor>0.0, "invalid expansion factor");
     resize((nrow() + delta_nrow)*(1+expansion_factor));
 }
 

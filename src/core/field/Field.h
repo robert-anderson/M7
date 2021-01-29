@@ -18,6 +18,7 @@
 #include "Column.h"
 #include "src/core/hash/Hashing.h"
 #include "src/core/nd/NdFormat.h"
+#include "src/core/parallel/MPIAssert.h"
 
 struct Table;
 
@@ -38,7 +39,7 @@ struct NdFieldGroup {
      */
     size_t symbol_offset(Table* table) const {
         auto tmp = std::distance((const char*)table, (const char *)this);
-        if (tmp<=0) mpi::stop_all("Invalid Table pointer");
+        MPI_REQUIRE_ALL(tmp>0, "Invalid Table pointer");
         return tmp;
     }
 

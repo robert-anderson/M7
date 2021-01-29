@@ -129,8 +129,8 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
         m_store.erase(lookup);
     }
 
-    size_t create_walker(const views::Onv<> &onv, const defs::ham_t weight,
-                         const defs::ham_comp_t &hdiag, bool refconn) {
+    size_t create_walker_(const views::Onv<> &onv, const defs::ham_t weight,
+                          const defs::ham_comp_t &hdiag, bool refconn) {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1,0.0);
         auto irow = m_store.insert(onv);
@@ -140,6 +140,16 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
         m_store.m_flags.m_reference_connection(irow) = refconn;
         m_store.m_flags.m_deterministic(irow) = false;
         return irow;
+    }
+
+
+    Table::Loc create_walker(const views::Onv<> &onv, const defs::ham_t weight,
+                          const defs::ham_comp_t &hdiag, bool refconn) {
+        size_t irank = m_ra.get_rank(onv);
+        size_t irow;
+        if (mpi::i_am(irank)) irow = create_walker_(onv, weight, hdiag, refconn);
+        mpi::bcast(irow, irank);
+        return {irank, irow};
     }
 
     // TODO: return a pair?

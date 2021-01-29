@@ -13,7 +13,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &opts) :
     auto ref_onv = m_ham.guess_reference(opts.spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_onv);
     Table::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};
-    if (ref_loc.is_mine()) m_wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    if (ref_loc.is_mine()) m_wf.create_walker_(ref_onv, opts.nwalker_initial, ref_energy, 1);
     m_prop.m_shift = ref_energy;
     Solver solver(m_prop, m_wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {

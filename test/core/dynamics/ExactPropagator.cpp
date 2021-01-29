@@ -80,7 +80,6 @@ TEST(ExactPropagator, Test) {
     ASSERT_TRUE(ham.spin_conserving());
     elements::Onv<> ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
-    ra::Onv ra(100, 10);
     Wavefunction wf(opts, nsite);
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
@@ -88,8 +87,7 @@ TEST(ExactPropagator, Test) {
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    Table::Loc ref_loc = {ra.get_rank(ref_onv), 0ul};
-    if (ref_loc.is_mine()) wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
@@ -108,15 +106,13 @@ TEST(ExactPropagator, Cr2Test) {
     ASSERT_TRUE(ham.spin_conserving());
     elements::FermionOnv ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
-    ra::Onv ra(100, 10);
     Wavefunction wf(opts, ham.nsite());
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(ref_onv);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    Table::Loc ref_loc = {ra.get_rank(ref_onv), 0ul};
-    if (ref_loc.is_mine()) wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
