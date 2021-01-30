@@ -54,6 +54,11 @@ void Buffer::Window::resize(size_t nrow) {
     m_buffer->resize(nrow * m_buffer->m_nwindow_max);
 }
 
+void Buffer::Window::make_room(size_t nrow) {
+    ASSERT(m_buffer)
+    m_buffer->make_room(nrow * m_buffer->m_nwindow_max);
+}
+
 void Buffer::Window::expand(size_t delta_nrow) {
     ASSERT(m_buffer)
     m_buffer->expand(delta_nrow * m_buffer->m_nwindow_max);
@@ -70,8 +75,9 @@ double Buffer::Window::expansion_factor() const {
 
 Buffer::Buffer(std::string name, size_t nwindow_max, size_t row_dsize) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max), m_row_dsize(row_dsize) {
-    MPI_REQUIRE_ALL(nwindow_max,"A buffer must allow at least one window");
-    MPI_REQUIRE_ALL(row_dsize, "The row must consist of a non-zero number datawords");
+    if (!name.empty()) log::info_("Creating \"{}\" buffer", name);
+    MPI_REQUIRE(nwindow_max,"A buffer must allow at least one window");
+    MPI_REQUIRE(row_dsize, "The row must consist of a non-zero number datawords");
     m_windows.reserve(m_nwindow_max);
 }
 
@@ -91,26 +97,11 @@ size_t Buffer::window_nrow() const {
     return nrow() / m_nwindow_max;
 }
 
-defs::data_t *Buffer::dbegin() {
-    return m_data.data();
-}
-
-const defs::data_t *Buffer::dbegin() const {
-    return m_data.data();
-}
-
-defs::data_t *Buffer::dbegin(const size_t &iwindow) {
-    return m_data.data() + window_dsize() * iwindow;
-}
-
-const defs::data_t *Buffer::dbegin(const size_t &iwindow) const {
-    return m_data.data() + window_dsize() * iwindow;
-}
 
 void Buffer::append_window(Buffer::Window *window) {
     MPI_REQUIRE_ALL(m_windows.size() < m_nwindow_max, "Buffer is over-subscribed");
     if (dsize()) {
-        window->m_dbegin = dbegin(m_windows.size());
+        window->m_dbegin = m_data.data()+window_dsize() * m_windows.size();
         window->m_dend = window->m_dbegin + window_dsize();
     }
     window->m_buffer = this;
@@ -119,12 +110,13 @@ void Buffer::append_window(Buffer::Window *window) {
 
 void Buffer::resize(size_t nrow) {
     if (!m_name.empty()) {
-        log::info("Reallocating buffer \"" + m_name + "\"  " +
-        capacity_string()+" -> "+capacity_string(nrow*m_row_dsize));
+        log::info_("Reallocating buffer \"{}\" {} -> {}",
+        m_name, capacity_string(), capacity_string(nrow*m_row_dsize));
     }
     std::vector<defs::data_t> tmp(nrow*m_row_dsize, 0ul);
     auto new_window_dsize = tmp.size() / m_nwindow_max;
-    for (size_t iwindow = 0ul; iwindow < m_nwindow_max; ++iwindow) {
+
+    for (size_t iwindow = 0ul; iwindow < m_windows.size(); ++iwindow) {
         // work backwards for enlargement
         auto jwindow = m_windows.size() - iwindow - 1;
         auto window = m_windows[jwindow];
@@ -134,7 +126,11 @@ void Buffer::resize(size_t nrow) {
         window->move(new_dbegin, new_dbegin + new_window_dsize);
     }
     m_data = std::move(tmp);
-    ASSERT(dbegin()==m_windows[0]->dbegin());
+    ASSERT(m_data.data() ==m_windows[0]->dbegin());
+}
+
+void Buffer::make_room(size_t nrow) {
+    if (dsize()<m_row_dsize*nrow) resize(nrow);
 }
 
 void Buffer::expand(size_t delta_nrow, double expansion_factor) {
@@ -148,7 +144,7 @@ void Buffer::expand(size_t delta_nrow) {
 
 std::string Buffer::capacity_string(size_t dsize) const {
     const auto ntable = "x "+std::to_string(m_windows.size())+" tables";
-    const auto per_table = std::to_string(dsize/(m_row_dsize*m_windows.size()));
+    const auto per_table = std::to_string(dsize/(m_row_dsize*m_nwindow_max));
     const auto total = std::to_string(dsize/m_row_dsize);
     if (m_windows.size()==1)
         return "[" + per_table +" rows (" + string_utils::memsize(dsize*defs::nbyte_data) + ")]";

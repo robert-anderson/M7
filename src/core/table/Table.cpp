@@ -5,11 +5,18 @@
 #include "Table.h"
 #include "src/core/io/Logging.h"
 
-Table::Table() {}
+Table::Table() :
+        m_send_buffer("Outward transfer buffer", 1, 1),
+        m_recv_buffer("Inward transfer buffer", 1, 1) {
+    m_send_buffer.append_window(&m_send_bw);
+    m_recv_buffer.append_window(&m_recv_bw);
+}
 
 Table::Table(const Table &other) :
-        m_row_size(other.m_row_size), m_row_dsize(other.m_row_dsize),
-        m_current_byte_offset(other.m_current_byte_offset){
+        Table() {
+    m_row_size = other.m_row_size;
+    m_row_dsize = other.m_row_dsize;
+    m_current_byte_offset = other.m_current_byte_offset;
     other.m_last_copied = this;
 }
 
@@ -20,13 +27,13 @@ void Table::set_buffer(Buffer *buffer) {
 }
 
 bool Table::is_full() const {
-    return m_hwm==m_nrow;
+    return m_hwm == m_nrow;
 }
 
 size_t Table::push_back(size_t nrow) {
-    if (m_hwm+nrow>m_nrow) expand(nrow);
+    if (m_hwm + nrow > m_nrow) expand(nrow);
     auto tmp = m_hwm;
-    m_hwm+=nrow;
+    m_hwm += nrow;
     return tmp;
 }
 
@@ -46,13 +53,13 @@ const defs::data_t *Table::dbegin() const {
 }
 
 defs::data_t *Table::dbegin(const size_t &irow) {
-    ASSERT(irow<m_hwm)
+    ASSERT(irow < m_hwm)
     ASSERT(m_bw.dbegin())
     return m_bw.dbegin() + irow * m_row_dsize;
 }
 
 const defs::data_t *Table::dbegin(const size_t &irow) const {
-    ASSERT(irow<m_hwm)
+    ASSERT(irow < m_hwm)
     ASSERT(m_bw.dbegin())
     return m_bw.dbegin() + irow * m_row_dsize;
 }
@@ -60,17 +67,17 @@ const defs::data_t *Table::dbegin(const size_t &irow) const {
 size_t Table::add_column(const ColumnBase *column) {
     // returns the offset in bytes for the column being added
     auto offset = 0ul;
-    if(!m_columns.empty()){
-        offset = m_columns.back()->m_offset+m_columns.back()->m_size;
-        if (!m_columns.back()->is_same_type_as(*column)){
+    if (!m_columns.empty()) {
+        offset = m_columns.back()->m_offset + m_columns.back()->m_size;
+        if (!m_columns.back()->is_same_type_as(*column)) {
             // go to next whole dataword
-            offset = integer_utils::divceil(offset, defs::nbyte_data)*defs::nbyte_data;
+            offset = integer_utils::divceil(offset, defs::nbyte_data) * defs::nbyte_data;
         }
     }
 
     m_current_byte_offset = offset + column->m_size;
     m_row_dsize = integer_utils::divceil(m_current_byte_offset, defs::nbyte_data);
-    m_row_size = m_row_dsize*defs::nbyte_data;
+    m_row_size = m_row_dsize * defs::nbyte_data;
 
     m_columns.push_back(column);
     return offset;
@@ -89,21 +96,22 @@ void Table::clear(const size_t &irow) {
 }
 
 bool Table::is_cleared() const {
-    return std::all_of(dbegin(), dbegin()+m_row_dsize*m_nrow, [](const defs::data_t& i){return i==0;});
+    return std::all_of(dbegin(), dbegin() + m_row_dsize * m_nrow, [](const defs::data_t &i) { return i == 0; });
 }
 
 bool Table::is_cleared(const size_t &irow) const {
-    return std::all_of(dbegin(irow), dbegin(irow)+m_row_dsize, [](const defs::data_t& i){return i==0;});
+    return std::all_of(dbegin(irow), dbegin(irow) + m_row_dsize, [](const defs::data_t &i) { return i == 0; });
 }
 
 std::string Table::column_details(size_t width) const {
     std::string res;
     for (size_t i = 0ul; i < m_columns.size(); ++i) {
         std::string desc;
-        if (!m_columns[i]->m_description.empty()) desc = " (\""+m_columns[i]->m_description+"\")";
+        if (!m_columns[i]->m_description.empty()) desc = " (\"" + m_columns[i]->m_description + "\")";
         res += "\nField " + std::to_string(i) + desc + ":\n";
         for (auto pair:m_columns[i]->m_data.m_details)
-            res += "\t" + utils::padded_string(pair.first, width) + ": " + utils::padded_string(pair.second, width)+"\n";
+            res += "\t" + utils::padded_string(pair.first, width) + ": " + utils::padded_string(pair.second, width) +
+                   "\n";
     }
     return res;
 }
@@ -118,11 +126,11 @@ size_t Table::bw_dsize() const {
 
 void Table::print_contents(const defs::inds *ordering) const {
     const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
-    for (size_t iirow=0ul; iirow<n; ++iirow){
+    for (size_t iirow = 0ul; iirow < n; ++iirow) {
         auto irow = ordering ? (*ordering)[iirow] : iirow;
         std::cout << irow << ". ";
-        for (auto column: m_columns){
-            std::cout << column->to_string(irow)+" ";
+        for (auto column: m_columns) {
+            std::cout << column->to_string(irow) + " ";
         }
         std::cout << "\n";
     }
@@ -132,12 +140,12 @@ void Table::print_contents(const defs::inds *ordering) const {
 void Table::print_contents(const ExtremalValues &xv) const {
     defs::inds tmp;
     tmp.reserve(xv.nfound());
-    for (size_t i=0ul; i<xv.nfound(); ++i) tmp.push_back(xv[i]);
+    for (size_t i = 0ul; i < xv.nfound(); ++i) tmp.push_back(xv[i]);
     print_contents(&tmp);
 }
 
 void Table::resize(size_t nrow) {
-    assert(nrow>m_nrow);
+    assert(nrow > m_nrow);
     m_bw.resize(nrow);
     m_nrow = nrow;
 }
@@ -152,60 +160,58 @@ void Table::expand(size_t nrow) {
     m_nrow = m_bw.nrow();
 }
 
-void Table::erase_rows(const defs::inds &irows, const cb_list_t& callbacks) {
+void Table::erase_rows(const defs::inds &irows, const cb_list_t &callbacks) {
     for (auto irow : irows) {
         for (auto f: callbacks) f(irow);
         clear(irow);
     }
 }
 
-void Table::insert_rows(const Buffer &recv, const cb_list_t& callbacks) {
-    const auto nrow = recv.dsize()/m_row_dsize;
-    auto irow_first = push_back(nrow);
-    std::memcpy(dbegin(irow_first), recv.dbegin(), nrow*m_row_size);
-    for (size_t irow = irow_first; irow<irow_first+nrow; ++irow){
-        for (auto f: callbacks) f(irow);
+void Table::post_insert(const size_t& iinsert) {}
+
+void Table::insert_rows(const Buffer::Window &recv, size_t nrow, const cb_list_t &callbacks) {
+    for (size_t irow = 0; irow < nrow; ++irow) {
+        auto iinsert = get_free_row();
+        std::memcpy(dbegin(iinsert), recv.dbegin() + irow * m_row_dsize, m_row_size);
+        post_insert(iinsert);
     }
 }
 
-void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t& callbacks) {
+void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t &callbacks) {
     size_t nrow;
     nrow = irows.size();
     log::info_("Transferring {} rows outward to rank {}", nrow, irank_dst);
-    // make rows to be sent contiguous in memory
-    Buffer send("Outward transfer buffer", 1, m_row_dsize);
-    MPI_ABORT("sjdaigdfjagkdf");
 
-    send.resize(nrow);
+    m_send_bw.make_room(nrow * m_row_dsize);
     for (auto iirow = 0ul; iirow < nrow; ++iirow) {
         const auto &irow = irows[iirow];
-        std::memcpy(send.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+        std::memcpy(m_send_bw.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
     }
     mpi::send(&nrow, 1, irank_dst, 0);
-    mpi::send(send.dbegin(), m_row_dsize * nrow, irank_dst, 1);
+    mpi::send(m_send_bw.dbegin(), m_row_dsize * nrow, irank_dst, 1);
     /*
      * sent rows can now be erased, after all callbacks are called
      */
     erase_rows(irows, callbacks);
 }
 
-void Table::recv_rows(size_t irank_src, const cb_list_t& callbacks){
+void Table::recv_rows(size_t irank_src, const cb_list_t &callbacks) {
     size_t nrow;
     mpi::recv(&nrow, 1, irank_src, 0);
+    m_recv_bw.make_room(nrow * m_row_dsize);
     log::info_("Transferring {} rows inward from rank {}", nrow, irank_src);
-    Buffer recv("Inward transfer buffer", 1, m_row_dsize*nrow);
-    mpi::recv(recv.dbegin(), m_row_dsize * nrow, irank_src, 1);
+    mpi::recv(m_recv_bw.dbegin(), m_row_dsize * nrow, irank_src, 1);
     /*
      * now emplace received rows in table buffer window, and call all callbacks for each
      */
-    insert_rows(recv, callbacks);
+    insert_rows(m_recv_bw, nrow, callbacks);
 }
 
 bool Table::has_compatible_format(const Table &other) {
     if (other.m_row_size != m_row_size) return false;
     if (other.m_columns.size() != m_columns.size()) return false;
     if (other.m_current_byte_offset != m_current_byte_offset) return false;
-    for (size_t ifield=0ul; ifield<m_columns.size(); ++ifield){
+    for (size_t ifield = 0ul; ifield < m_columns.size(); ++ifield) {
         auto this_field = m_columns[ifield];
         auto other_field = m_columns[ifield];
         if (!other_field->is_same_type_as(*this_field)) return false;
@@ -217,7 +223,7 @@ bool Table::has_compatible_format(const Table &other) {
 }
 
 void Table::copy_row_in(const Table &src, size_t irow_src, size_t irow_dst) {
-    ASSERT(irow_dst<m_hwm);
+    ASSERT(irow_dst < m_hwm);
     ASSERT(has_compatible_format(src));
     std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
 }

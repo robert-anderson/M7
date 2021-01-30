@@ -37,6 +37,10 @@ struct Table {
      */
     mutable Table *m_last_copied = nullptr;
 
+    // make rows to be sent contiguous in memory
+    Buffer m_send_buffer, m_recv_buffer;
+    Buffer::Window m_send_bw, m_recv_bw;
+
     Table();
 
     Table(const Table &other);
@@ -87,7 +91,9 @@ struct Table {
 
     virtual void erase_rows(const defs::inds &irows, const cb_list_t& callbacks);
 
-    virtual void insert_rows(const Buffer &recv, const cb_list_t& callbacks);
+    virtual void post_insert(const size_t& iinsert);
+
+    virtual void insert_rows(const Buffer::Window &recv, size_t nrow, const cb_list_t& callbacks);
 
     void send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t& callbacks={});
 

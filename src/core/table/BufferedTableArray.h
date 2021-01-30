@@ -36,13 +36,11 @@ public:
     }
 
     defs::data_t *dbegin() {
-        ASSERT(m_buffer.dbegin() == m_tables[0].dbegin());
-        return m_buffer.dbegin();
+        return m_tables[0].dbegin();
     }
 
     const defs::data_t *dbegin() const {
-        ASSERT(m_buffer.dbegin() == m_tables[0].dbegin());
-        return m_buffer.dbegin();
+        return m_tables[0].dbegin();
     }
 
     size_t buffer_dsize() const {

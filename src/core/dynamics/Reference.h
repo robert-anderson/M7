@@ -37,6 +37,7 @@ public:
               const Wavefunction &wf, Table::Loc loc);
 
     const views::Onv<> get_onv() const {
+        MPI_ASSERT(!m_ac.m_onv(0).is_zero(), "Reference ONV must be non-zero");
         return m_ac.m_onv(0);
     }
 

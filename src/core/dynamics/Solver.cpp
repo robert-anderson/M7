@@ -25,6 +25,8 @@ void Solver::loop_over_occupied_onvs() {
             continue;
         }
 
+        MPI_ASSERT(!m_wf.m_store.m_onv(irow).is_zero(), "Stored ONV should not be zeroed");
+
         const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
 
         if (consts::float_nearly_zero(weight, 1e-12)){

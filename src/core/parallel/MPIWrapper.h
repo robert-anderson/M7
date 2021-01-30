@@ -702,7 +702,7 @@ public:
      * call on all ranks to terminate the entire communicator
      * @param message
      */
-    static void abort(std::string message, float f);
+    static void abort(std::string message);
 
 };
 

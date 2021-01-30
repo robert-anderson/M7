@@ -20,8 +20,10 @@ class RankAllocator {
     typedef typename field_t::view_t view_t;
     Table& m_table;
     field_t& m_field;
+public:
     const size_t m_nblock;
     const size_t m_period;
+private:
     defs::inds m_block_to_rank;
     std::vector<std::forward_list<size_t>> m_rank_to_blocks;
     Gatherable<double> m_mean_work_times;

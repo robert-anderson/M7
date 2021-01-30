@@ -144,15 +144,6 @@ public:
         }
     }
 
-    void insert_rows(const Buffer &recv, const cb_list_t &callbacks) override {
-        const auto nrow = recv.dsize() / m_row_dsize;
-        for (size_t irow = 0; irow < nrow; ++irow) {
-            auto iinsert = get_free_row();
-            std::memcpy(dbegin(iinsert), recv.dbegin() + irow * m_row_dsize, m_row_size);
-            post_insert(iinsert);
-        }
-    }
-
     void erase(LookupResult result) {
         clear(*result);
         result.m_bucket.erase_after(result.m_prev);
@@ -171,7 +162,7 @@ public:
     }
 
     // for situations in which the row has already been copied-to
-    void post_insert(const size_t &irow, std::vector<std::forward_list<size_t>> &buckets) {
+    void post_insert_buckets(const size_t &irow, std::vector<std::forward_list<size_t>> &buckets) {
         ASSERT(!Table::is_cleared(irow))
         auto key = m_key_field(irow);
         // row mustn't have already been added
@@ -180,8 +171,8 @@ public:
         bucket.insert_after(bucket.before_begin(), irow);
     }
 
-    void post_insert(const size_t &irow) {
-        post_insert(irow, m_buckets);
+    void post_insert(const size_t &irow) override {
+        post_insert_buckets(irow, m_buckets);
     }
 
     void print_map() const {

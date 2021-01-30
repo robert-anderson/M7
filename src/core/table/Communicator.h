@@ -73,18 +73,27 @@ public:
 
 
     void communicate() {
+        log::info_("{}:{}", __LINE__, __FILE__);
         auto hwms = m_send.hwms();
+        log::info_("{}:{}", __LINE__, __FILE__);
         defs::inds sendcounts(hwms);
+        log::info_("{}:{}", __LINE__, __FILE__);
         for (auto& it: sendcounts) it*=row_dsize();
+        log::info_("{}:{}", __LINE__, __FILE__);
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         //std::cout << "Sending datawords " << utils::to_string(sendcounts) << std::endl;
+        log::info_("{}:{}", __LINE__, __FILE__);
         mpi::all_to_all(sendcounts, recvcounts);
         //std::cout << "Receiving datawords " << utils::to_string(recvcounts) << std::endl;
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         auto senddispls = m_send.displs();
+        log::info_("{}:{}", __LINE__, __FILE__);
         //std::cout << "Sending displacements " << utils::to_string(senddispls) << std::endl;
         defs::inds recvdispls(mpi::nrank(), 0ul);
+        log::info_("{}:{}", __LINE__, __FILE__);
         for (size_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
         //std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
@@ -94,9 +103,12 @@ public:
 //        logger::write("Receive List usage fraction: " +
 //                      std::to_string(recvcounts[mpi::irank()] / double(m_recv.bw_dsize())), 0, logger::debug);
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         auto recv_dsize = recvdispls.back() + recvcounts.back();
+        log::info_("{}:{}", __LINE__, __FILE__);
         auto recv_nrow = recv_dsize / row_dsize();
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         if (recv_dsize > static_cast<const Table&>(recv()).bw_dsize()){
             /*
              * the recv table is full
@@ -105,26 +117,39 @@ public:
              * current size of the buffer
              */
             m_recv.resize(std::ceil((1.0+m_buffer_expansion_factor)*recv_nrow));
+            log::info_("{}:{}", __LINE__, __FILE__);
 
         }
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         MPI_REQUIRE_ALL(m_send.dbegin(), "Send buffer is not allocated!");
         MPI_REQUIRE_ALL(m_recv.dbegin(), "Recv buffer is not allocated!");
 
+        log::info_("{}:{}", __LINE__, __FILE__);
+        log::info_(utils::to_string(sendcounts));
+        log::info_(utils::to_string(senddispls));
+        log::info_(utils::to_string(recvcounts));
+        log::info_(utils::to_string(recvdispls));
         auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
                                     m_recv.dbegin(), recvcounts, recvdispls);
+        log::info_("{}:{}", __LINE__, __FILE__);
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
          */
+        log::info_("{}:{}", __LINE__, __FILE__);
         ASSERT(!send(mpi::irank()).dbegin() or std::memcmp(
                 (void*) (send(mpi::irank()).dbegin()),
                 (void*) (recv().dbegin()+recvdispls[mpi::irank()]),
                 recvcounts[mpi::irank()]*defs::nbyte_data)==0);
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
+        log::info_("{}:{}", __LINE__, __FILE__);
         recv().m_hwm = recv_nrow;
+        log::info_("{}:{}", __LINE__, __FILE__);
         m_send.clear();
+        log::info_("{}:{}", __LINE__, __FILE__);
     }
 
     void set_expansion_factor(double f){
@@ -283,9 +308,15 @@ struct Communicator {
         using DynamicRowSet::m_have_any_rows;
         using DynamicRowSet::m_ranks_with_any_rows;
 
+        size_t m_iblock;
+
         DynamicRow(const Communicator &comm, Table::Loc loc, std::string name) :
                 DynamicRowSet(comm, name) {
-            if (loc.is_mine()) add(loc.m_irow);
+            if (loc.is_mine()){
+                add(loc.m_irow);
+                m_iblock = m_ra.get_block(m_source.m_key_field(loc.m_irow));
+            }
+            mpi::bcast(m_iblock, loc.m_irank);
             update();
             MPI_REQUIRE_ALL(m_ranks_with_any_rows.size()==1, "Only one rank should have a row");
         }
@@ -299,8 +330,8 @@ struct Communicator {
             auto initial_loc = location();
             DynamicRowSet::update();
             auto final_loc = location();
-            if (!initial_loc) log::info("Dynamic row \"{}\" is initially stored on rank {}",
-                                        m_name, final_loc.m_irank);
+            if (!initial_loc) log::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
+                                        m_name, m_iblock, m_ra.m_nblock, final_loc.m_irank);
             else if (initial_loc != final_loc) log::info("Dynamic row \"{}\" moved from rank {} to rank {}",
                                                     m_name, initial_loc.m_irank, final_loc.m_irank);
         }

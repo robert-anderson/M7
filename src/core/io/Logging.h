@@ -35,7 +35,7 @@ struct log {
         g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()), true);
 #endif
         spdlog::set_pattern("[%E] %^[%l]%$ %v");
-        g_local_file_logger->flush_on(spdlog::level::n_levels);
+        g_local_file_logger->flush_on(spdlog::level::trace);
     }
 
     static void flush(){

@@ -26,6 +26,7 @@ public:
         explicit Window(Buffer *buffer);
 
         bool allocated() const;
+
         size_t dsize() const;
 
         size_t size() const;
@@ -39,6 +40,8 @@ public:
         const defs::data_t *dbegin() const;
 
         void resize(size_t nrow);
+
+        void make_room(size_t nrow);
 
         void expand(size_t delta_nrow, double expansion_factor);
 
@@ -68,17 +71,12 @@ public:
 
     size_t window_nrow() const;
 
-    defs::data_t *dbegin();
-
-    const defs::data_t *dbegin() const;
-
-    defs::data_t *dbegin(const size_t &iwindow);
-
-    const defs::data_t *dbegin(const size_t &iwindow) const;
-
     void append_window(Window *window);
 
     void resize(size_t nrow);
+
+    // resize if smaller
+    void make_room(size_t nrow);
 
     /**
      *

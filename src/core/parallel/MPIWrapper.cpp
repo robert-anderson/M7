@@ -70,7 +70,7 @@ bool mpi::on_node_i_am_root() {
 
 void mpi::abort_(std::string message) {
 #ifdef HAVE_MPI
-    log::error_("Aborting all MPI processes: \"{}\"", message);
+    log::error_("Forcing MPI_Abort from this rank: \"{}\"", message);
     log::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
     if (mpi::nrank()==1) std::abort();
@@ -81,7 +81,7 @@ void mpi::abort_(std::string message) {
 #endif
 }
 
-void mpi::abort(std::string message, float f){
+void mpi::abort(std::string message){
 #ifdef HAVE_MPI
     log::error_("Aborting all MPI processes: \"{}\"", message);
     log::finalize();
