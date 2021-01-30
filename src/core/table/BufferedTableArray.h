@@ -52,7 +52,7 @@ public:
     }
 
     BufferedTableArray(std::string name, size_t ntable, const table_t& table):
-        m_buffer(name, ntable, static_cast<const Table&>(table).m_row_dsize) {
+        m_buffer(name, ntable) {
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {
             m_tables.emplace_back(table);
@@ -72,17 +72,17 @@ public:
     size_t ntable() const { return m_tables.size(); }
 
     void resize(size_t nrow_per_table) {
-        m_buffer.resize(ntable() * nrow_per_table);
+        m_buffer.resize(ntable() * nrow_per_table * row_dsize());
         update_nrow();
     }
 
     void expand(size_t delta_nrow_per_table) {
-        m_buffer.expand(ntable() * delta_nrow_per_table);
+        m_buffer.expand(ntable() * delta_nrow_per_table * row_dsize());
         update_nrow();
     }
 
     void expand(size_t delta_nrow_per_table, double expansion_factor) {
-        m_buffer.expand(ntable() * delta_nrow_per_table, expansion_factor);
+        m_buffer.expand(ntable() * delta_nrow_per_table * row_dsize(), expansion_factor);
         update_nrow();
     }
 

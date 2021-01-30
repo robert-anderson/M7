@@ -15,7 +15,7 @@ public:
     using Table::m_row_dsize;
 
     BufferedTable(std::string name, const table_t &table) :
-            table_t(table), m_buffer(name, 1, m_row_dsize) {
+            table_t(table), m_buffer(name, 1) {
         Table::set_buffer(&m_buffer);
     }
 

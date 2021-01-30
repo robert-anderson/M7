@@ -29,23 +29,19 @@ public:
 
         size_t dsize() const;
 
-        size_t size() const;
-
-        size_t nrow() const;
-
         void move(defs::data_t *dbegin, defs::data_t *dend);
 
         defs::data_t *dbegin();
 
         const defs::data_t *dbegin() const;
 
-        void resize(size_t nrow);
+        void resize(size_t dsize);
 
-        void make_room(size_t nrow);
+        void make_room(size_t dsize);
 
-        void expand(size_t delta_nrow, double expansion_factor);
+        void expand(size_t delta_dsize, double expansion_factor);
 
-        void expand(size_t delta_nrow);
+        void expand(size_t delta_dsize);
 
         double expansion_factor() const;
 
@@ -55,21 +51,16 @@ public:
     const std::string m_name;
 private:
     const size_t m_nwindow_max;
-    const size_t m_row_dsize;
     std::vector<defs::data_t> m_data;
     std::vector<Window *> m_windows;
 
 
 public:
-    Buffer(std::string name, size_t nwindow_max, size_t row_dsize);
+    Buffer(std::string name, size_t nwindow_max);
 
     size_t dsize() const;
 
-    size_t nrow() const;
-
     size_t window_dsize() const;
-
-    size_t window_nrow() const;
 
     void append_window(Window *window);
 

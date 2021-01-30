@@ -6,8 +6,8 @@
 #include "src/core/io/Logging.h"
 
 Table::Table() :
-        m_send_buffer("Outward transfer buffer", 1, 1),
-        m_recv_buffer("Inward transfer buffer", 1, 1) {
+        m_send_buffer("Outward transfer buffer", 1),
+        m_recv_buffer("Inward transfer buffer", 1) {
     m_send_buffer.append_window(&m_send_bw);
     m_recv_buffer.append_window(&m_recv_bw);
 }
@@ -146,18 +146,18 @@ void Table::print_contents(const ExtremalValues &xv) const {
 
 void Table::resize(size_t nrow) {
     assert(nrow > m_nrow);
-    m_bw.resize(nrow);
+    m_bw.resize(nrow * m_row_dsize);
     m_nrow = nrow;
 }
 
 void Table::expand(size_t nrow, double expansion_factor) {
-    m_bw.expand(nrow, expansion_factor);
-    m_nrow = m_bw.nrow();
+    m_bw.expand(nrow * m_row_dsize, expansion_factor);
+    m_nrow = m_bw.dsize()/m_row_dsize;
 }
 
 void Table::expand(size_t nrow) {
-    m_bw.expand(nrow);
-    m_nrow = m_bw.nrow();
+    m_bw.expand(nrow * m_row_dsize);
+    m_nrow = m_bw.dsize()/m_row_dsize;
 }
 
 void Table::erase_rows(const defs::inds &irows, const cb_list_t &callbacks) {

@@ -50,12 +50,12 @@ protected:
 
 public:
     /**
- * @param nrow_max
- * expected maximum number of rows
- * @param mean_skips_per_bucket
- * the maximum acceptable value for the average number
- * @return
- */
+     * @param nrow_max
+     * expected maximum number of rows
+     * @param mean_skips_per_bucket
+     * the maximum acceptable value for the average number
+     * @return
+     */
     static size_t nbucket_guess(size_t nrow_max, size_t mean_skips_per_bucket) {
         // number of skips is on average half the average number of rows per bin.
         return std::max(c_nbucket_min, size_t(nrow_max / double(2 * mean_skips_per_bucket)));
@@ -65,7 +65,6 @@ public:
 template<typename table_tt, typename key_field_tt, typename hash_fnt=typename key_field_tt::hash_fn>
 struct MappedTable : MappedTableBase, table_tt {
     static_assert(std::is_base_of<Table, table_tt>::value, "Template arg must be derived from Table");
-
     typedef table_tt table_t;
     typedef key_field_tt key_field_t;
     typedef hash_fnt hash_fn;
@@ -91,13 +90,14 @@ private:
      * of table_t
      */
     size_t key_field_offset() const {
-        auto kf_offset = std::distance((const char *) this, (const char*)&m_key_field);
-        MPI_REQUIRE_ALL(kf_offset>0 && (size_t)kf_offset<=sizeof(table_t), "Field chosen as the key field must be a member of the table");
+        auto kf_offset = std::distance((const char *) this, (const char *) &m_key_field);
+        MPI_REQUIRE_ALL(kf_offset > 0 && (size_t) kf_offset <= sizeof(table_t),
+                        "Field chosen as the key field must be a member of the table");
         return kf_offset;
     }
 
-    key_field_t& get_key_field_from_offset(size_t nbyte) const {
-        return *(key_field_t*)((char*)(this) + nbyte);
+    key_field_t &get_key_field_from_offset(size_t nbyte) const {
+        return *(key_field_t *) ((char *) (this) + nbyte);
     }
 
 public:
@@ -112,7 +112,7 @@ public:
             MappedTable(c_nbucket_min, key_field, table) {}
 
     MappedTable(const MappedTable &other) :
-    MappedTable(get_key_field_from_offset(other.key_field_offset()), other) {}
+            MappedTable(get_key_field_from_offset(other.key_field_offset()), other) {}
 
     defs::hash_t hash(typename key_field_t::view_t key) {
         return hash_fn()(key);
