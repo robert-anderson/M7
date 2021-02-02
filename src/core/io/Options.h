@@ -33,8 +33,9 @@ struct Options {
     double walker_buffer_expansion_factor = 0.5;
     double spawn_buffer_size_factor_initial = 10.0;
     double min_spawn_mag = 0.0;
-    size_t nload_balance_block_per_rank = 100;
+    size_t nload_balance_block_per_rank = 20;
     size_t load_balance_period = 10;
+    double acceptable_load_imbalance = 0.05;
     double tau_initial = 0.05;
     bool static_tau = false;
     double min_excit_class_prob = 1e-3;

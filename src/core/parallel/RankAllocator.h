@@ -34,7 +34,6 @@ struct RankAllocatorBase {
         virtual void after_block_transfer() = 0;
     };
 
-    static constexpr double c_default_acceptable_imbalance = 0.02;
     static constexpr size_t c_nnull_updates_deactivate = 20;
 
     Table& m_table;
@@ -63,7 +62,7 @@ struct RankAllocatorBase {
      * if the least productive rank is working for this proportion of the
      * time worked by the most productive rank, then move a block
      */
-    double m_acceptable_imbalance = c_default_acceptable_imbalance;
+    const double m_acceptable_imbalance;
     /*
      * If the load balancing algorithm is stable, a situation should be reached in which
      * the update method finds no reason to reallocate blocks. If this happens for a
@@ -86,7 +85,7 @@ private:
     void erase_dependent(Dynamic* dependent);
 
 public:
-    RankAllocatorBase(Table& table, size_t nblock, size_t period);
+    RankAllocatorBase(Table& table, size_t nblock, size_t period, double acceptable_imbalance);
 
     virtual size_t get_block_irow(const size_t& irow) = 0;
 
@@ -119,8 +118,8 @@ class RankAllocator : public RankAllocatorBase {
     field_t& m_field;
 
 public:
-    RankAllocator(Table& table, field_t& field, size_t nblock, size_t period) :
-    RankAllocatorBase(table, nblock, period), m_field(field)
+    RankAllocator(Table& table, field_t& field, size_t nblock, size_t period, double acceptable_imbalance) :
+    RankAllocatorBase(table, nblock, period, acceptable_imbalance), m_field(field)
     {}
 
 private:

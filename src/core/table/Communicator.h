@@ -415,10 +415,10 @@ struct Communicator {
     template<typename ...Args>
     Communicator(std::string name, double buffer_expansion_factor,
                  size_t nblock_ra, size_t period_ra,
-                 const store_t &store, const comm_t &comm):
+                 const store_t &store, const comm_t &comm, double acceptable_imbalance):
             m_store(name + " store", store),
             m_comm(name, buffer_expansion_factor, comm),
-            m_ra(m_store, m_store.m_key_field, nblock_ra, period_ra),
+            m_ra(m_store, m_store.m_key_field, nblock_ra, period_ra, acceptable_imbalance),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }

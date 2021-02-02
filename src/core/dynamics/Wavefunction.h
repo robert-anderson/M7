@@ -37,7 +37,8 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
                     opts.nload_balance_block_per_rank*mpi::nrank(),
                     opts.load_balance_period,
                     WalkerMappedTable(nsite, 1, 1, opts.nwalker_target / mpi::nrank()),
-                    SpawnTable(nsite, 1, 1)
+                    SpawnTable(nsite, 1, 1),
+                    opts.acceptable_load_imbalance
             ),
             m_opts(opts),
             m_ninitiator(m_summables, {1, 1}),

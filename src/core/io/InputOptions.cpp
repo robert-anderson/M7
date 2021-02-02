@@ -79,6 +79,12 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-K,--nload_balance_block_per_rank", nload_balance_block_per_rank,
                "number of blocks per process to use for load balancing determinants among processes");
 
+    add_option("--load_balance_period", load_balance_period,
+               "number of cycles between rank allocation updates");
+
+    add_option("--acceptable_load_imbalance", acceptable_load_imbalance,
+               "acceptable fractional difference in work time between most and least idle ranks");
+
     add_option("-m,--min_spawn_mag", min_spawn_mag,
                "minimum spawn magnitude (stochastic threshold spawned weights about value)");
 

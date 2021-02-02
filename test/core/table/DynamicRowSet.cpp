@@ -12,7 +12,7 @@ TEST(DynamicRowSet, Test) {
     const size_t nsite = 12;
     const size_t nrow_per_rank = 4;
     BufferedTable<table_test::DetMappedTable> bt("Test table", nsite);
-    RankAllocator<fields::Det> ra(bt, bt.m_key_field, 100, 10);
+    RankAllocator<fields::Det> ra(bt, bt.m_key_field, 100, 10, 0.05);
 
     /*
      * arbitrary choice for testing purposes, but let's make the "determinants"
