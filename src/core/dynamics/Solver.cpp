@@ -46,7 +46,15 @@ void Solver::loop_over_occupied_onvs() {
 
         m_reference.add_row(irow);
 
+        if (m_wf.m_ra.m_active) {
+            m_spawning_timer.reset();
+            m_spawning_timer.unpause();
+        }
         propagate_row(irow);
+        if (m_wf.m_ra.m_active) {
+            m_spawning_timer.pause();
+            m_wf.m_ra.record_work_time(irow, m_spawning_timer);
+        }
     }
     m_propagate_timer.pause();
     m_synchronization_timer.reset();
@@ -233,7 +241,7 @@ void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.begin_cycle();
-    m_wf.m_ra.update(m_icycle, m_propagate_timer.total());
+    m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     m_reference.begin_cycle();
 }
@@ -257,6 +265,7 @@ void Solver::end_cycle() {
 
 void Solver::output_stats() {
 
+    auto sync_overhead = mpi::all_sum((double)m_synchronization_timer);
     if (mpi::i_am_root()) {
         m_stats->m_icycle() = m_icycle;
         m_stats->m_tau() = m_prop.tau();
@@ -270,12 +279,13 @@ void Solver::output_stats() {
         m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);
         m_stats->m_nocc_onv() = m_wf.m_nocc_onv.reduced(0, 0);
         m_stats->m_psingle() = m_prop.m_magnitude_logger.m_psingle;
+        m_stats->m_total_synchronization_overhead() = sync_overhead;
         m_stats->flush();
     }
 
 
     m_parallel_stats->m_icycle() = m_icycle;
-    m_parallel_stats->m_synchronization_wait_time() = m_synchronization_timer.total();
+    m_parallel_stats->m_synchronization_overhead() = m_synchronization_timer;
     m_parallel_stats->m_nwalker() = m_wf.m_nwalker(0, 0);
 //    m_parallel_stats->m_nrow_free_walker_list() = m_wf.m_walkers.
 //    StatsColumn<size_t> m_walker_list_high_water_mark;

@@ -75,7 +75,7 @@ void FciqmcCalculation::execute() {
 
 void FciqmcCalculation::write_iter_stats(size_t icycle) {
     m_parallel_stats_file->m_cycle_number.write(icycle);
-    m_parallel_stats_file->m_synchronization_wait_time.write(0.0);
+    m_parallel_stats_file->m_synchronization_overhead.write(0.0);
     m_parallel_stats_file->flush();
     if (!mpi::i_am_root()) return;
     m_stats_file->m_cycle_number.write(icycle);

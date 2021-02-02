@@ -8,7 +8,7 @@
 ParallelizationStatsFile::ParallelizationStatsFile(const Options &input) :
     StatsFile(input.parallel_stats_path + '.' + std::to_string(mpi::irank())),
     m_cycle_number(this, 1, "Cycle number"),
-    m_synchronization_wait_time(this, 1, "Seconds of idle time due to process sychronization"),
+    m_synchronization_overhead(this, 1, "Seconds of idle time due to process sychronization"),
     m_nrow_free_walker_list(this, 1, "Number of free rows in walker list below high water mark"),
     m_walker_list_high_water_mark(this, 1, "High water mark of walker list"),
     m_walker_list_high_water_mark_fraction(this, 1, "High water mark of walker list as a fraction of current capacity"),

@@ -13,15 +13,28 @@
 #include "Epoch.h"
 #include <forward_list>
 #include <algorithm>
+#include <src/core/util/Timer.h>
 
 template<typename field_t, typename hash_fn=typename field_t::hash_fn>
 class RankAllocator {
-    static constexpr double c_default_thresh_ratio = 0.95;
+    static constexpr double c_default_acceptable_imbalance = 0.01;
+    static constexpr size_t c_nnull_updates_deactivate = 20;
     typedef typename field_t::view_t view_t;
     Table& m_table;
     field_t& m_field;
 public:
+    /*
+     * we should be able to deactivate the load balancing once certain externally
+     * specified conditions are met
+     */
+    bool m_active = true;
+    /*
+     * total number of blocks across all ranks
+     */
     const size_t m_nblock;
+    /*
+     * number of cycles between reallocation attempts
+     */
     const size_t m_period;
 private:
     defs::inds m_block_to_rank;
@@ -29,13 +42,29 @@ private:
      * push inward-transferred blocks indices to front
      * pop outward-transferred block indices to back
      */
-    std::vector<std::deque<size_t>> m_rank_to_blocks;
-    Gatherable<double> m_mean_work_times;
+    std::vector<std::list<size_t>> m_rank_to_blocks;
+    std::vector<double> m_mean_work_times;
+    std::vector<double> m_gathered_times;
     /*
      * if the least productive rank is working for this proportion of the
      * time worked by the most productive rank, then move a block
      */
-    double m_threshold_ratio = c_default_thresh_ratio;
+    double m_acceptable_imbalance = c_default_acceptable_imbalance;
+    /*
+     * If the load balancing algorithm is stable, a situation should be reached in which
+     * the update method finds no reason to reallocate blocks. If this happens for a
+     * certain m_nnull_updates_deactivate periods, m_active is automatically set to false.
+     */
+    size_t m_nnull_updates_deactivate = c_nnull_updates_deactivate;
+    size_t m_nnull_updates = 0ul;
+    /*
+     * moving blocks with a large overhead is often counterproductive to achieving good
+     * load balance, so if a block has a mean_work_time above the
+     * m_freeze_ratio * local_work_time, it is not to be moved.
+     *
+     * The default value is twice the expected time if all blocks were equally expensive
+     */
+    double m_freeze_ratio = 2.0/m_nblock;
 
 public:
     struct Dynamic {
@@ -84,8 +113,11 @@ private:
 public:
     RankAllocator(Table& table, field_t& field, const size_t& nblock, const size_t& period) :
     m_table(table), m_field(field), m_nblock(nblock), m_period(period),
-    m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank())
+    m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
+    m_mean_work_times(nblock, 0.0), m_gathered_times(mpi::nrank(), 0.0)
     {
+        MPI_REQUIRE_ALL(m_acceptable_imbalance>=0.0, "Acceptable imbalance fraction must be non-negative");
+        MPI_REQUIRE_ALL(m_acceptable_imbalance<=1.0, "Acceptable imbalance fraction must not exceed 100%");
         size_t iblock = 0ul;
         for (auto &rank:m_block_to_rank) {
             rank = iblock%mpi::nrank();
@@ -94,32 +126,88 @@ public:
         }
     }
 
-    void update(const size_t& icycle, const double& work_time){
-        m_mean_work_times+=work_time;
+    void record_work_time(const size_t& irow, const Timer& work_time){
+        m_mean_work_times[get_block(m_field(irow))]+=work_time;
+    }
+
+    size_t get_nskip_(const size_t total_local_time) const {
+        /*
+         * When selecting a block to transfer, we need to skip over all frozen blocks.
+         *
+         * only called on the sending rank since the block-wise work times are not
+         * shared with all ranks.
+         *
+         * The selected block is the first unfrozen block from the front of the list
+         */
+        const auto& list = m_rank_to_blocks[mpi::irank()];
+        size_t nskip=0ul;
+        for (auto it=list.cbegin(); it!=list.cend(); ++it){
+            if (m_mean_work_times[*it] < m_freeze_ratio*total_local_time) return nskip;
+            ++nskip;
+        }
+        log::warn_("All blocks on sending rank are frozen! Sending expensive block, may upset load balance");
+        /*
+         * If we reach here, all blocks are frozen, and so we have no choice but to send one of them,
+         * choose the least expensive one.
+         */
+        double least = std::numeric_limits<double>::max();
+        nskip = 0ul;
+        for (auto it=list.cbegin(); it!=list.cend(); ++it){
+            if (m_mean_work_times[*it] < least) nskip = std::distance(list.cbegin(), it);
+        }
+        return nskip;
+    }
+
+    void update(const size_t& icycle){
+        if (!m_active) return;
         if (!icycle || icycle%m_period) return;
         // else, this is a preparatory iteration
-        auto times = m_mean_work_times.mpi_gather();
+        auto local_time = std::accumulate(m_mean_work_times.begin(), m_mean_work_times.end(), 0.0);
+        mpi::all_gather(local_time, m_gathered_times);
 
-
-        size_t irank_lazy = std::distance(times.begin(), std::min_element(times.begin(), times.end()));
-        size_t irank_busy = std::distance(times.begin(), std::max_element(times.begin(), times.end()));
+        auto it_lazy = std::min_element(m_gathered_times.begin(), m_gathered_times.end());
+        auto it_busy = std::max_element(m_gathered_times.begin(), m_gathered_times.end());
+        MPI_REQUIRE_ALL(*it_lazy>0.0 && *it_busy>0.0,
+                        "One or more ranks appear to have done no work. record_work_time must be called by application");
 
         // this rank has done the least work, so it should receive a block
-        size_t irank_recv = irank_lazy;
+        size_t irank_recv = std::distance(m_gathered_times.begin(), it_lazy);
         // this rank has done the most work, so it should send a block
-        size_t irank_send = (irank_recv+1)%mpi::nrank();//std::distance(times.begin(), std::max_element(times.begin(), times.end()));
-        // this rank has done the least work, so it should receive a block
-        //size_t irank_recv = (irank_send+1)%mpi::nrank();//std::distance(times.begin(), std::min_element(times.begin(), times.end()));
+        size_t irank_send = std::distance(m_gathered_times.begin(), it_busy);
+
         if (irank_send==irank_recv) return;
-        if (times[irank_lazy] > m_threshold_ratio*times[irank_busy]) return;
+        auto realloc_ratio = 1-m_acceptable_imbalance;
+        if (m_gathered_times[irank_recv] > realloc_ratio * m_gathered_times[irank_send]) {
+            ++m_nnull_updates;
+            if(m_nnull_updates>=m_nnull_updates_deactivate) {
+                log::info(
+                        "Load imbalance has been below {}% for over {} periods of {} cycles. "
+                        "Deactivating dynamic rank allocation.",
+                        m_acceptable_imbalance * 100, m_nnull_updates, m_period);
+                m_active = false;
+                // rezero the counter in case of later reactivation
+                m_nnull_updates = 0ul;
+            }
+            return;
+        }
+        else {
+            // not a null update: rezero the counter
+            m_nnull_updates = 0ul;
+        }
         MPI_REQUIRE_ALL(!m_rank_to_blocks[irank_send].empty(),
                         "Sending rank has no blocks to send! Specified work_time value may be erroneous");
         /*
-         * sender will send all rows in the front block, which will become the front
-         * block of the recver so all ranks must update in response to this
+         * sender will send all rows in the selected block, which will become the front
+         * block of the recver.
          */
-        auto iblock_transfer = m_rank_to_blocks[irank_send].back();
-        log::info("Sending block {} from rank {} to {} on cycle {}", iblock_transfer, irank_send, irank_recv, icycle);
+        size_t nskip;
+        if (mpi::i_am(irank_send)) nskip = get_nskip_(local_time);
+        mpi::bcast(nskip, irank_send);
+        MPI_ASSERT(nskip<m_rank_to_blocks[irank_send].size(), "Too many skips");
+        auto it_block_transfer = m_rank_to_blocks[irank_send].begin();
+        for (size_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
+
+        log::info("Sending block {} from rank {} to {} on cycle {}", *it_block_transfer, irank_send, irank_recv, icycle);
 
         // prepare vector of row indices to send
         defs::inds irows_send;
@@ -128,32 +216,22 @@ public:
                 if (m_table.is_cleared(irow)) continue;
                 auto key = m_field(irow);
                 ASSERT(get_rank(key)==irank_send);
-                if (get_block(key) == iblock_transfer) irows_send.push_back(irow);
+                if (get_block(key) == *it_block_transfer) irows_send.push_back(irow);
             }
         }
 
         /*
          * Let the rank->block and block->rank mappings reflect this reallocation
          */
-        m_rank_to_blocks[irank_send].pop_back();
-        m_rank_to_blocks[irank_recv].push_front(iblock_transfer);
-        m_block_to_rank[iblock_transfer] = irank_recv;
+        m_rank_to_blocks[irank_send].erase(it_block_transfer);
+        m_rank_to_blocks[irank_recv].push_front(*it_block_transfer);
+        m_block_to_rank[*it_block_transfer] = irank_recv;
 
-        /*
-        for (size_t irank=0ul; irank<mpi::nrank(); ++irank){
-            mpi::barrier();
-            if (mpi::i_am(irank)) {
-                std::cout << ">>>>> " << irank << std::endl;
-                m_table.print_contents();
-            }
-            mpi::barrier();
-        }
-         */
         for (auto dep : m_dependents) dep->before_block_transfer(irows_send, irank_send, irank_recv);
         m_table.transfer_rows(irows_send, irank_send, irank_recv, m_recv_callbacks);
         for (auto dep : m_dependents) dep->after_block_transfer();
-        MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block");
-        m_mean_work_times = 0.0;
+        MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block map");
+        m_mean_work_times.assign(m_nblock, 0.0);
     }
 
     /**

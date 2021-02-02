@@ -190,7 +190,7 @@ private:
     template<typename T>
     static bool all_reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1) {
 #ifdef HAVE_MPI
-        ASSERT(mpi_type_ind<T>()!=~0ul);
+        static_assert(mpi_type_ind<T>() != ~0ul, "Not a valid MPI type");
         return MPI_Allreduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         std::memcpy(recv, send, sizeof(T)*ndata);
@@ -203,7 +203,7 @@ private:
                            std::pair<T, size_t>* recv,
                            MpiPairOp op, size_t ndata=1) {
 #ifdef HAVE_MPI
-        ASSERT(mpi_type_ind<T>()!=~0ul);
+        static_assert(mpi_type_ind<T>() != ~0ul, "Not a valid MPI type");
         std::vector<std::pair<T, defs::mpi_count>> tmp_send;
         tmp_send.reserve(ndata);
         for (size_t idata=0ul; idata<ndata; ++idata)

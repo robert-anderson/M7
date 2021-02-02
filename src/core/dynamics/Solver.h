@@ -28,9 +28,15 @@ class Solver {
     /*
      * Timers for the main parts of the solver
      */
+    // whole loop over occupied rows
     Timer m_propagate_timer;
+    // individual iterations over an occupied row
+    Timer m_spawning_timer;
+    // time waited at MPI_Barrier
     Timer m_synchronization_timer;
+    // time taken to complete communication of spawned walkers
     Timer m_communicate_timer;
+    // time taken to complete whole annihilation loop
     Timer m_annihilate_timer;
 
     /*
