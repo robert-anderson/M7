@@ -55,7 +55,7 @@ TEST(CommunicatingPair, CommunicateVector) {
 
     comm_pair.resize(nrow);
 
-    //ASSERT_EQ(comm_pair.recv().bw_dsize(), mpi::nrank() * nrow * comm_pair.row_dsize());
+    //ASSERT_EQ(comm_pair.recv().bw_dsize(), mpi::nrank() * nrow_ * comm_pair.row_dsize());
     ASSERT_EQ(comm_pair.send().buffer_dsize(), mpi::nrank() * nrow * comm_pair.row_dsize());
 
     for (size_t idst_rank = 0ul; idst_rank < mpi::nrank(); ++idst_rank) {

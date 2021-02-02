@@ -33,6 +33,7 @@ void Buffer::Window::move(defs::data_t *dbegin, defs::data_t *dend) {
 
 defs::data_t *Buffer::Window::dbegin() {
     ASSERT(m_buffer);
+    ASSERT(m_buffer->dsize());
     ASSERT(allocated());
     return m_dbegin;
 }
@@ -91,6 +92,7 @@ void Buffer::append_window(Buffer::Window *window) {
 }
 
 void Buffer::resize(size_t dsize) {
+    MPI_ASSERT(dsize, "New size must be non-zero");
     if (!m_name.empty()) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",
         m_name, capacity_string(), capacity_string(dsize));
@@ -108,6 +110,7 @@ void Buffer::resize(size_t dsize) {
         window->move(new_dbegin, new_dbegin + new_window_dsize);
     }
     m_data = std::move(tmp);
+    ASSERT(m_data.size() == this->dsize());
     ASSERT(m_data.data() ==m_windows[0]->dbegin());
 }
 

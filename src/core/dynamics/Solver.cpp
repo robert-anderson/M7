@@ -25,7 +25,10 @@ void Solver::loop_over_occupied_onvs() {
             continue;
         }
 
-        MPI_ASSERT(!m_wf.m_store.m_onv(irow).is_zero(), "Stored ONV should not be zeroed");
+        MPI_ASSERT(!m_wf.m_store.m_onv(irow).is_zero(),
+                   "Stored ONV should not be zeroed");
+        MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_onv(irow))),
+                   "Stored ONV should be on its allocated rank");
 
         const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
 
@@ -230,6 +233,8 @@ void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.begin_cycle();
+    m_wf.m_ra.update(m_icycle, m_propagate_timer.total());
+    m_propagate_timer.reset();
     m_reference.begin_cycle();
 }
 
@@ -248,7 +253,6 @@ void Solver::end_cycle() {
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
-    m_wf.m_ra.update(m_icycle, m_propagate_timer.total());
 }
 
 void Solver::output_stats() {

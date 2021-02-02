@@ -183,12 +183,9 @@ TEST(Table, PointToPointTransfer) {
     for (size_t i=0ul; i<ngen; ++i) bt.m_shorts(i, 0) = 55*(i+1)+mpi::irank();
     bt.print_contents();
     defs::inds send;
-    if (mpi::i_am(0)){
-        send = {1, 2, 4};
-        bt.send_rows(send, 1);
-    }
-    if (mpi::i_am(1)){
-        bt.recv_rows(0);
+    if (mpi::i_am(0)) send = {1, 2, 4};
+    bt.transfer_rows(send, 0, 1);
+    if (mpi::i_am(1)) {
         ASSERT_EQ(bt.m_hwm, 8);
     }
     std::cout << std::endl;

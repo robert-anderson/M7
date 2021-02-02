@@ -135,9 +135,7 @@ public:
         return res;
     }
 
-    using typename Table::cb_list_t;
-
-    void erase_rows(const defs::inds &irows, const cb_list_t &callbacks) override {
+    void erase_rows(const defs::inds &irows) override {
         for (auto irow : irows) {
             auto lookup = (*this)[m_key_field(irow)];
             erase(lookup);

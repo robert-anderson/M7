@@ -122,6 +122,7 @@ extern MPI_Comm g_node_comm;
 #endif
 extern size_t g_irank_on_node;
 extern size_t g_nrank_on_node;
+extern int g_p2p_tag;
 
 struct mpi {
 
@@ -400,17 +401,21 @@ public:
 
     /*
      * P2P send / recv
+     * We require a globally-unique tag for each P2P send/recv pair in the whole program.
      */
+    static int new_p2p_tag() {
+        return g_p2p_tag++;
+    }
 
     template<typename T>
-    static bool send(const T *data, size_t ndata, size_t irank_dst, int tag = 0) {
+    static bool send(const T *data, size_t ndata, size_t irank_dst, int tag) {
 #ifdef HAVE_MPI
         return MPI_Send((void*) data, snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag, MPI_COMM_WORLD);
 #endif
     }
 
     template<typename T>
-    static bool recv(T *data, size_t ndata, size_t irank_src, int tag = 0) {
+    static bool recv(T *data, size_t ndata, size_t irank_src, int tag) {
 #ifdef HAVE_MPI
         return MPI_Recv((void*) data, snrw(ndata), mpi_type<T>(), snrw(irank_src), tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 #endif

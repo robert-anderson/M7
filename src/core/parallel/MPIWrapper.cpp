@@ -124,3 +124,4 @@ MPI_Comm g_node_comm;
 #endif
 size_t g_irank_on_node = 0;
 size_t g_nrank_on_node = 1;
+int g_p2p_tag = 0;

@@ -14,6 +14,23 @@
 #include "src/core/sort/ExtremalValues.h"
 
 
+struct RowTransfer {
+    // make rows to be sent contiguous in memory
+    Buffer m_send_buffer, m_recv_buffer;
+    Buffer::Window m_send_bw, m_recv_bw;
+    const int m_nrow_p2p_tag = mpi::new_p2p_tag();
+    const int m_irows_p2p_tag = mpi::new_p2p_tag();
+    RowTransfer(std::string name):
+    m_send_buffer("Outward transfer buffer", 1),
+    m_recv_buffer("Inward transfer buffer", 1) {
+        log::info("Initializing row send/recv buffers for table \"{}\"", name);
+        log::debug("P2P tag for number of row indices to transfer for \"{}\": {}", name, m_nrow_p2p_tag);
+        log::debug("P2P tag for array of row indices to transfer for \"{}\": {}", name, m_irows_p2p_tag);
+        m_send_buffer.append_window(&m_send_bw);
+        m_recv_buffer.append_window(&m_recv_bw);
+    }
+};
+
 struct Table {
     std::vector<const ColumnBase *> m_columns;
     Buffer::Window m_bw;
@@ -36,10 +53,8 @@ struct Table {
      * copied Table
      */
     mutable Table *m_last_copied = nullptr;
-
-    // make rows to be sent contiguous in memory
-    Buffer m_send_buffer, m_recv_buffer;
-    Buffer::Window m_send_bw, m_recv_bw;
+    // instantiate on first transfer if required
+    std::unique_ptr<RowTransfer> m_transfer = nullptr;
 
     Table();
 
@@ -87,17 +102,16 @@ struct Table {
 
     void expand(size_t nrow);
 
-    typedef std::list<std::function<void(const size_t&)>> cb_list_t;
-
-    virtual void erase_rows(const defs::inds &irows, const cb_list_t& callbacks);
+    virtual void erase_rows(const defs::inds &irows);
 
     virtual void post_insert(const size_t& iinsert);
 
-    virtual void insert_rows(const Buffer::Window &recv, size_t nrow, const cb_list_t& callbacks);
+    typedef std::function<void(const defs::inds&, size_t, size_t)> transfer_cb_t;
+    typedef std::function<void(size_t)> recv_cb_t;
 
-    void send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t& callbacks={});
+    virtual void insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks);
 
-    void recv_rows(const size_t irank_src, const cb_list_t& callbacks={});
+    void transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t> & callbacks= {});
 
     bool has_compatible_format(const Table &other);
 
@@ -105,20 +119,11 @@ struct Table {
 
     struct Loc {
         const size_t m_irank, m_irow;
-        Loc(size_t irank, size_t irow): m_irank(irank), m_irow(irow){}
-
-        operator bool() const {
-            return m_irank!=~0ul;
-        }
-        bool is_mine() const {
-            return mpi::i_am(m_irank);
-        }
-        bool operator==(const Loc& other){
-            return m_irank==other.m_irank and m_irow==other.m_irow;
-        }
-        bool operator!=(const Loc& other){
-            return !(m_irank==other.m_irank);
-        }
+        Loc(size_t irank, size_t irow);
+        operator bool() const;
+        bool is_mine() const;
+        bool operator==(const Loc& other);
+        bool operator!=(const Loc& other);
     };
 
 };

@@ -45,6 +45,10 @@ public:
 
         double expansion_factor() const;
 
+        std::string name() const {
+            return m_buffer->m_name;
+        }
+
     };
 
     double m_expansion_factor = 0.5;

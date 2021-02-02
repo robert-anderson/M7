@@ -5,12 +5,7 @@
 #include "Table.h"
 #include "src/core/io/Logging.h"
 
-Table::Table() :
-        m_send_buffer("Outward transfer buffer", 1),
-        m_recv_buffer("Inward transfer buffer", 1) {
-    m_send_buffer.append_window(&m_send_bw);
-    m_recv_buffer.append_window(&m_recv_bw);
-}
+Table::Table(){}
 
 Table::Table(const Table &other) :
         Table() {
@@ -160,51 +155,62 @@ void Table::expand(size_t nrow) {
     m_nrow = m_bw.dsize()/m_row_dsize;
 }
 
-void Table::erase_rows(const defs::inds &irows, const cb_list_t &callbacks) {
+void Table::erase_rows(const defs::inds &irows) {
     for (auto irow : irows) {
-        for (auto f: callbacks) f(irow);
         clear(irow);
     }
 }
 
 void Table::post_insert(const size_t& iinsert) {}
 
-void Table::insert_rows(const Buffer::Window &recv, size_t nrow, const cb_list_t &callbacks) {
-    for (size_t irow = 0; irow < nrow; ++irow) {
-        auto iinsert = get_free_row();
-        std::memcpy(dbegin(iinsert), recv.dbegin() + irow * m_row_dsize, m_row_size);
-        post_insert(iinsert);
+void Table::insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks) {
+    for (size_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
+        auto irow_table = get_free_row();
+        std::memcpy(dbegin(irow_table), recv.dbegin() + irow_recv * m_row_dsize, m_row_size);
+        post_insert(irow_table);
+        for (auto f: callbacks) f(irow_table);
     }
 }
+void Table::transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){
+    MPI_ASSERT_ALL(irank_recv!=irank_send, "sending and recving ranks should never be the same");
+    if (!m_transfer) m_transfer = std::unique_ptr<RowTransfer>(new RowTransfer(m_bw.name()));
+    size_t nrow = 0;
+    if (mpi::i_am(irank_send)){
+        auto& send_bw = m_transfer->m_send_bw;
+        nrow = irows.size();
+        mpi::send(&nrow, 1, irank_recv, m_transfer->m_nrow_p2p_tag);
+        if (!nrow){
+            log::debug_("Sending rank notifying recving rank that no rows are transferred");
+            return;
+        }
+        log::info_("Transferring {} rows outward to rank {}", nrow, irank_recv);
 
-void Table::send_rows(const defs::inds &irows, size_t irank_dst, const cb_list_t &callbacks) {
-    size_t nrow;
-    nrow = irows.size();
-    log::info_("Transferring {} rows outward to rank {}", nrow, irank_dst);
-
-    m_send_bw.make_room(nrow * m_row_dsize);
-    for (auto iirow = 0ul; iirow < nrow; ++iirow) {
-        const auto &irow = irows[iirow];
-        std::memcpy(m_send_bw.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+        send_bw.make_room(nrow * m_row_dsize);
+        for (auto iirow = 0ul; iirow < nrow; ++iirow) {
+            const auto &irow = irows[iirow];
+            std::memcpy(send_bw.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+        }
+        mpi::send(send_bw.dbegin(), m_row_dsize * nrow, irank_recv, m_transfer->m_irows_p2p_tag);
+        /*
+         * sent rows can now be erased
+         */
+        erase_rows(irows);
     }
-    mpi::send(&nrow, 1, irank_dst, 0);
-    mpi::send(m_send_bw.dbegin(), m_row_dsize * nrow, irank_dst, 1);
-    /*
-     * sent rows can now be erased, after all callbacks are called
-     */
-    erase_rows(irows, callbacks);
-}
-
-void Table::recv_rows(size_t irank_src, const cb_list_t &callbacks) {
-    size_t nrow;
-    mpi::recv(&nrow, 1, irank_src, 0);
-    m_recv_bw.make_room(nrow * m_row_dsize);
-    log::info_("Transferring {} rows inward from rank {}", nrow, irank_src);
-    mpi::recv(m_recv_bw.dbegin(), m_row_dsize * nrow, irank_src, 1);
-    /*
-     * now emplace received rows in table buffer window, and call all callbacks for each
-     */
-    insert_rows(m_recv_bw, nrow, callbacks);
+    if (mpi::i_am(irank_recv)){
+        auto& recv_bw = m_transfer->m_send_bw;
+        mpi::recv(&nrow, 1, irank_send, m_transfer->m_nrow_p2p_tag);
+        if (!nrow){
+            log::debug_("Recving rank notified by sending rank that no rows are transferred");
+            return;
+        }
+        recv_bw.make_room(nrow * m_row_dsize);
+        log::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
+        mpi::recv(recv_bw.dbegin(), m_row_dsize * nrow, irank_send, m_transfer->m_irows_p2p_tag);
+        /*
+         * now emplace received rows in table buffer window, and call all callbacks for each
+         */
+        insert_rows(recv_bw, nrow, callbacks);
+    }
 }
 
 bool Table::has_compatible_format(const Table &other) {
@@ -226,4 +232,29 @@ void Table::copy_row_in(const Table &src, size_t irow_src, size_t irow_dst) {
     ASSERT(irow_dst < m_hwm);
     ASSERT(has_compatible_format(src));
     std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
+}
+
+Table::Loc::Loc(size_t irank, size_t irow) : m_irank(irank), m_irow(irow){
+#ifndef DNDEBUG
+    mpi::bcast(irank);
+    mpi::bcast(irow);
+    MPI_ASSERT_ALL(m_irank==irank, "rank index in Table::Loc should be consistent across all ranks");
+    MPI_ASSERT_ALL(m_irow==irow, "row index in Table::Loc should be consistent across all ranks");
+#endif
+}
+
+Table::Loc::operator bool() const {
+    return m_irank!=~0ul;
+}
+
+bool Table::Loc::is_mine() const {
+    return mpi::i_am(m_irank);
+}
+
+bool Table::Loc::operator==(const Table::Loc &other) {
+    return m_irank==other.m_irank and m_irow==other.m_irow;
+}
+
+bool Table::Loc::operator!=(const Table::Loc &other) {
+    return !(*this==other);
 }

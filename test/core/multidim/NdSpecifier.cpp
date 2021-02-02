@@ -18,7 +18,7 @@ TEST(NdSpecifier, Indices2D) {
     const size_t ncol = 7;
     nd_indices::Specifier<2> nd(nrow, ncol);
     size_t iflat = 0ul;
-    for (size_t irow = 0ul; irow < nrow; ++irow) {
+    for (size_t irow = 0ul; irow < nrow_; ++irow) {
         for (size_t icol = 0ul; icol < ncol; ++icol) {
             ASSERT_EQ(nd[irow][icol], iflat);
             ++iflat;
