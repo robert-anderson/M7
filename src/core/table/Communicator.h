@@ -153,53 +153,8 @@ struct Communicator {
     std::string m_name;
     double m_buffer_expansion_factor;
 
-    /**
-     * The behaviour of this class is intricate.
-     *
-     * The base RankAllocator<key_field_t>::Dynamic has three pure virtual methods:
-     *
-     * 1. void on_row_send_(size_t irow)
-     * 2. void before_block_transfer(size_t iblock, size_t irank_send, size_t irank_recv)
-     * 3. void on_row_recv_(size_t irow)
-     *
-     * As indicated by the trailing _, functions 1 and 3 are called only on the affected
-     * ranks, function 2 on the other hand is called on all ranks.
-     *
-     * std::function instances which wrap these are termed "callbacks". This is done so
-     * that lists containing calls to these three methods in the
-     * RankAllocator<key_field_t>::Dynamic can be called in succession within any given
-     * context for all elements of RankAllocator<key_field_t>::m_dependents.
-     *
-     * m_dependents is a list of pointers to RankAllocator<key_field_t>::Dynamic, since
-     * there may in general be many objects which must be dynamic with respect to
-     * key block transfers.
-     * E.g. Reference determinant (single row derived class "DynamicRow"),
-     *      Trial wavefunction connected space
-     *
-     * //////////////////////////////////////////////////////////////////////////////////
-     *
-     * As the source MappedTable is scanned for keys belonging to the outgoing block index
-     * in RankAllocator<key_field_t>::update, each time an affected row is found, its index
-     * is appended to a vector.
-     *
-     * The Table class contains methods to send and recv rows in a way that is completely
-     * unaware of keyfields and rank allocation. All that is required is a list of rows to
-     * send and the indices of the sending and recving ranks. Appropriate overrides are in
-     * place to accommodate the additional structure of the MappedTable. Both of these P2P
-     * communication handlers accept an optional argument, a list of callbacks which
-     * determine how other objects react to this transfer
-     *
-     * In Table::send_rows_, each callback is invoked just before each row is freed.
-     *
-     * each instance of
-     * RankAllocator<key_field_t>::Dynamic attached to the RankAllocator<key_field_t> has
-     * its on_row_send_ virtual method called, in the case
-     * of the DynamicRowSet, this method looks
-     *
-     *
-     *
-     */
-    struct DynamicRowSet : RankAllocator<key_field_t>::Dynamic {
+
+    struct DynamicRowSet : RankAllocatorBase::Dynamic {
         typedef RankAllocator<key_field_t> ra_t;
         /*
          * the mapped table which stores the definitive row values
@@ -398,8 +353,8 @@ struct Communicator {
     };
 
     struct DynamicRow : public DynamicRowSet {
-        using typename DynamicRowSet::ra_t;
-        using ra_t::Dynamic::m_ra;
+        using DynamicRowSet::ra_t;
+        using RankAllocatorBase::Dynamic::m_ra;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
         using DynamicRowSet::add_;
@@ -415,7 +370,7 @@ struct Communicator {
                 DynamicRowSet(comm, name) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
-                m_iblock = m_ra.get_block(m_source.m_key_field(loc.m_irow));
+                m_iblock = m_ra.get_block_irow(loc.m_irow);
             }
             mpi::bcast(m_iblock, loc.m_irank);
             update();
