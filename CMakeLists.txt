@@ -24,7 +24,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=core-avx2")
 find_package(LAPACK REQUIRED)
 
 
-find_package(MPI REQUIRED COMPONENTS C CXX)
+find_package(MPI REQUIRED COMPONENTS C)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
 if (MPI_FOUND)
     add_definitions(-DHAVE_MPI)

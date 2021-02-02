@@ -354,7 +354,6 @@ struct Communicator {
 
     struct DynamicRow : public DynamicRowSet {
         using DynamicRowSet::ra_t;
-        using RankAllocatorBase::Dynamic::m_ra;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
         using DynamicRowSet::add_;
@@ -370,7 +369,7 @@ struct Communicator {
                 DynamicRowSet(comm, name) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
-                m_iblock = m_ra.get_block_irow(loc.m_irow);
+                m_iblock = this->m_ra.get_block_irow(loc.m_irow);
             }
             mpi::bcast(m_iblock, loc.m_irank);
             update();
@@ -389,7 +388,7 @@ struct Communicator {
             auto irank_final = irank();
             if (irank_initial == ~0ul)
                 log::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
-                          m_name, m_iblock, m_ra.m_nblock, irank_final);
+                          m_name, m_iblock, this->m_ra.m_nblock, irank_final);
             else if (irank_initial != irank_final)
                 log::info("Dynamic row \"{}\" moved from rank {} to rank {}",
                           m_name, irank_initial, irank_final);
