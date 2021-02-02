@@ -23,6 +23,10 @@ public:
 
     void pause();
 
+    /**
+     * @return
+     * The total duration between last reset and last pause in seconds.
+     */
     operator double() const;
 
 

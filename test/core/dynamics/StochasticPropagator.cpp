@@ -14,9 +14,9 @@ TEST(StochasticPropagator, Test) {
     opts.nwalker_initial = 10;
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.05;
-    opts.load_balance_period = 20;
+    opts.load_balance_period = 5;
     opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 100000;
+    opts.nwalker_target = 500000;
     opts.shift_damp = 0.5;
     opts.ncycle = 10000;
 //const auto benchmark = -108.81138657563143;

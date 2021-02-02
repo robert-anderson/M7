@@ -46,12 +46,12 @@ void Solver::loop_over_occupied_onvs() {
 
         m_reference.add_row(irow);
 
-        if (m_wf.m_ra.m_active) {
+        if (m_wf.m_ra.is_active()) {
             m_spawning_timer.reset();
             m_spawning_timer.unpause();
         }
         propagate_row(irow);
-        if (m_wf.m_ra.m_active) {
+        if (m_wf.m_ra.is_active()) {
             m_spawning_timer.pause();
             m_wf.m_ra.record_work_time(irow, m_spawning_timer);
         }
@@ -241,6 +241,8 @@ void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.begin_cycle();
+    if (m_prop.m_variable_shift.started_last_cycle(m_icycle))
+        m_wf.m_ra.activate(m_icycle);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     m_reference.begin_cycle();
@@ -286,6 +288,7 @@ void Solver::output_stats() {
 
     m_parallel_stats->m_icycle() = m_icycle;
     m_parallel_stats->m_synchronization_overhead() = m_synchronization_timer;
+    m_parallel_stats->m_nblock_wf_ra() = m_wf.m_ra.nblock_();
     m_parallel_stats->m_nwalker() = m_wf.m_nwalker(0, 0);
 //    m_parallel_stats->m_nrow_free_walker_list() = m_wf.m_walkers.
 //    StatsColumn<size_t> m_walker_list_high_water_mark;

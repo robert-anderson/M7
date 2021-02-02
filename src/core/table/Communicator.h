@@ -252,7 +252,6 @@ struct Communicator {
                      static_cast<const table_t &>(comm.m_store)),
                 m_counts(mpi::nrank(), 0ul),
                 m_displs(mpi::nrank(), 0ul),
-                m_ranks_with_any_rows(mpi::nrank(), 0ul),
                 m_name(name),
                 m_ntrow_to_track_p2p_tag(mpi::new_p2p_tag()),
                 m_itrows_to_track_p2p_tag(mpi::new_p2p_tag()) {
@@ -262,6 +261,7 @@ struct Communicator {
                        m_itrows_to_track_p2p_tag);
             m_lc.resize(1);
             m_ac.resize(1);
+            m_ranks_with_any_rows.reserve(mpi::nrank());
         }
 
         size_t nrow_() const {
@@ -426,8 +426,8 @@ struct Communicator {
         }
 
         void update() override {
-            DynamicRowSet::update_counts();
             auto irank_initial = irank();
+            DynamicRowSet::update_counts();
             DynamicRowSet::update_data();
             MPI_ASSERT(nrow() == 1, "Total number of rows across all ranks should be 1.");
             MPI_REQUIRE_ALL(m_ranks_with_any_rows.size() == 1, "Only one rank should have a row");

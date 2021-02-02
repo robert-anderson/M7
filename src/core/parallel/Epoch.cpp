@@ -28,3 +28,12 @@ Epoch::operator bool() const {
 const size_t &Epoch::start() const {
     return m_icycle_start.reduced();
 }
+
+bool Epoch::started_last_cycle(size_t icycle) const {
+    return (m_icycle_start.reduced()!=~0ul && m_icycle_start.reduced()+1==icycle);
+}
+
+bool Epoch::started_this_cycle(size_t icycle) const {
+    return (m_icycle_start.reduced()!=~0ul && m_icycle_start.reduced()==icycle);
+}
+
