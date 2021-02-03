@@ -4,6 +4,7 @@
 
 #include "Column.h"
 #include "src/core/table/Table.h"
+#include "src/core/parallel/MPIAssert.h"
 
 ColumnBase::ColumnBase(Table *table, ColumnData column_data,
                        size_t nelement, std::string description) :
@@ -23,10 +24,6 @@ ColumnBase::ColumnBase(const ColumnBase &other):
         m_offset(other.m_offset){
     auto offset = m_table->add_column(this);
     MPI_REQUIRE_ALL(offset==m_offset, "Offset should match that of copied field");
-}
-
-char *ColumnBase::raw_view(const size_t &irow, const size_t &ielement) const {
-    return (char*)m_table->dbegin(irow) + m_offset + ielement * m_data.m_element_size;
 }
 
 bool ColumnBase::is_same_type_as(const ColumnBase &other) const {

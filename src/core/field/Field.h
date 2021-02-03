@@ -20,9 +20,6 @@
 #include "src/core/nd/NdFormat.h"
 #include "src/core/parallel/MPIAssert.h"
 
-struct Table;
-
-
 /**
  * FieldGroups can be composited from ColumnBase subclasses, e.g. FermiBosOnv,
  * which contains a

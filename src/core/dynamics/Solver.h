@@ -28,6 +28,8 @@ class Solver {
     /*
      * Timers for the main parts of the solver
      */
+    // whole cycle
+    Timer m_cycle_timer;
     // whole loop over occupied rows
     Timer m_propagate_timer;
     // individual iterations over an occupied row

@@ -3,7 +3,10 @@
 //
 
 #include "Table.h"
+#include "src/core/field/Column.h"
 #include "src/core/io/Logging.h"
+#include "src/core/parallel/MPIAssert.h"
+#include "src/core/sort/ExtremalValues.h"
 
 Table::Table(){}
 
@@ -40,23 +43,11 @@ size_t Table::get_free_row() {
 }
 
 defs::data_t *Table::dbegin() {
-    return m_bw.dbegin();
+    return m_bw.m_dbegin;
 }
 
 const defs::data_t *Table::dbegin() const {
-    return m_bw.dbegin();
-}
-
-defs::data_t *Table::dbegin(const size_t &irow) {
-    ASSERT(irow < m_hwm)
-    ASSERT(m_bw.dbegin())
-    return m_bw.dbegin() + irow * m_row_dsize;
-}
-
-const defs::data_t *Table::dbegin(const size_t &irow) const {
-    ASSERT(irow < m_hwm)
-    ASSERT(m_bw.dbegin())
-    return m_bw.dbegin() + irow * m_row_dsize;
+    return m_bw.m_dbegin;
 }
 
 size_t Table::add_column(const ColumnBase *column) {
@@ -166,7 +157,7 @@ void Table::post_insert(const size_t& iinsert) {}
 void Table::insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks) {
     for (size_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
         auto irow_table = get_free_row();
-        std::memcpy(dbegin(irow_table), recv.dbegin() + irow_recv * m_row_dsize, m_row_size);
+        std::memcpy(dbegin(irow_table), recv.m_dbegin + irow_recv * m_row_dsize, m_row_size);
         post_insert(irow_table);
         for (auto f: callbacks) f(irow_table);
     }
@@ -188,9 +179,9 @@ void Table::transfer_rows(const defs::inds &irows, size_t irank_send, size_t ira
         send_bw.make_room(nrow * m_row_dsize);
         for (auto iirow = 0ul; iirow < nrow; ++iirow) {
             const auto &irow = irows[iirow];
-            std::memcpy(send_bw.dbegin() + iirow * m_row_dsize, dbegin(irow), m_row_size);
+            std::memcpy(send_bw.m_dbegin + iirow * m_row_dsize, dbegin(irow), m_row_size);
         }
-        mpi::send(send_bw.dbegin(), m_row_dsize * nrow, irank_recv, m_transfer->m_irows_p2p_tag);
+        mpi::send(send_bw.m_dbegin, m_row_dsize * nrow, irank_recv, m_transfer->m_irows_p2p_tag);
         /*
          * sent rows can now be erased
          */
@@ -205,7 +196,7 @@ void Table::transfer_rows(const defs::inds &irows, size_t irank_send, size_t ira
         }
         recv_bw.make_room(nrow * m_row_dsize);
         log::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
-        mpi::recv(recv_bw.dbegin(), m_row_dsize * nrow, irank_send, m_transfer->m_irows_p2p_tag);
+        mpi::recv(recv_bw.m_dbegin, m_row_dsize * nrow, irank_send, m_transfer->m_irows_p2p_tag);
         /*
          * now emplace received rows in table buffer window, and call all callbacks for each
          */

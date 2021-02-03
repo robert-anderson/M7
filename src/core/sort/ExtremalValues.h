@@ -7,11 +7,8 @@
 
 
 #include "src/defs.h"
-#include "src/core/field/Field.h"
-#include "src/core/field/Fields.h"
 #include <functional>
-
-struct Table;
+#include "src/core/table/Table.h"
 
 class ExtremalValues {
     /*

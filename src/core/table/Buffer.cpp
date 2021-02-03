@@ -31,17 +31,6 @@ void Buffer::Window::move(defs::data_t *dbegin, defs::data_t *dend) {
     m_dend = dend;
 }
 
-defs::data_t *Buffer::Window::dbegin() {
-    ASSERT(m_buffer);
-    ASSERT(m_buffer->dsize());
-    ASSERT(allocated());
-    return m_dbegin;
-}
-
-const defs::data_t *Buffer::Window::dbegin() const {
-    return m_dbegin;
-}
-
 void Buffer::Window::resize(size_t dsize) {
     ASSERT(m_buffer)
     m_buffer->resize(dsize * m_buffer->m_nwindow_max);

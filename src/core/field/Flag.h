@@ -9,8 +9,6 @@
 #include "src/core/field/BitsetSpecifier.h"
 #include "src/core/field/Field.h"
 
-struct Table;
-
 struct FlagBase;
 
 /*

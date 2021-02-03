@@ -9,10 +9,7 @@
 #include <stack>
 #include "src/defs.h"
 #include "Buffer.h"
-#include "src/core/field/Column.h"
-#include "src/core/field/Flag.h"
-#include "src/core/sort/ExtremalValues.h"
-
+#include "src/core/io/Logging.h"
 
 struct RowTransfer {
     // make rows to be sent contiguous in memory
@@ -30,6 +27,9 @@ struct RowTransfer {
         m_recv_buffer.append_window(&m_recv_bw);
     }
 };
+
+struct ColumnBase;
+struct ExtremalValues;
 
 struct Table {
     std::vector<const ColumnBase *> m_columns;
@@ -72,9 +72,17 @@ struct Table {
 
     const defs::data_t *dbegin() const;
 
-    defs::data_t *dbegin(const size_t &irow);
+    inline defs::data_t *dbegin(const size_t &irow) {
+        ASSERT(irow < m_hwm)
+        ASSERT(m_bw.dbegin())
+        return m_bw.m_dbegin + irow * m_row_dsize;
+    }
 
-    const defs::data_t *dbegin(const size_t &irow) const;
+    inline const defs::data_t *dbegin(const size_t &irow) const {
+        ASSERT(irow < m_hwm)
+        ASSERT(m_bw.dbegin())
+        return m_bw.m_dbegin + irow * m_row_dsize;
+    }
 
     size_t add_column(const ColumnBase *column);
 

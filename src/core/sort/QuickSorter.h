@@ -8,6 +8,7 @@
 #include <src/defs.h>
 #include <functional>
 #include "src/core/table/Table.h"
+#include "src/core/field/Field.h"
 
 struct Quicksorter {
 

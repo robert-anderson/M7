@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include "ExtremalValues.h"
-#include "src/core/table/Table.h"
+#include "src/core/parallel/MPIAssert.h"
 
 ExtremalValues::ExtremalValues(ExtremalValues::comp_t comp_fn) :
     // reverse arg order to match ordering of QuickSort implementation

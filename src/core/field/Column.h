@@ -7,8 +7,7 @@
 
 #include "ColumnSpecifier.h"
 #include "src/core/nd/NdFormat.h"
-
-struct Table;
+#include "src/core/table/Table.h"
 
 /**
  * Describes the memory formatting of a table buffer in terms of the primitive
@@ -25,7 +24,9 @@ struct ColumnBase {
     const size_t m_size;
     const size_t m_offset;
 
-    char *raw_view(const size_t &irow, const size_t &ielement) const;
+    inline char *raw_view(const size_t &irow, const size_t &ielement) const {
+        return (char*)m_table->dbegin(irow) + m_offset + ielement * m_data.m_element_size;
+    }
 
     ColumnBase(Table *table, ColumnData column_data,
                size_t nelement, std::string description);

@@ -6,6 +6,7 @@
 #define M7_TABLEEXTREMALVALUES_H
 
 #include "ExtremalValues.h"
+#include "src/core/field/Field.h"
 
 template<typename viewable_t>
 class TableExtremalValues : public ExtremalValues {

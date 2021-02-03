@@ -14,7 +14,6 @@ void Solver::loop_over_occupied_onvs() {
      *      update local weight in the diagonal cloning/death step
      * else if all elements of the m_weight field are zero, the row should be removed
      */
-    m_propagate_timer.unpause();
     for (size_t irow = 0ul; irow < m_wf.m_store.m_hwm; ++irow) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
@@ -56,7 +55,6 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.m_ra.record_work_time(irow, m_spawning_timer);
         }
     }
-    m_propagate_timer.pause();
     m_synchronization_timer.reset();
     m_synchronization_timer.unpause();
     mpi::barrier();
@@ -127,22 +125,35 @@ void Solver::annihilate_row(const size_t &irow_recv) {
 
 void Solver::loop_over_spawned() {
     mpi::barrier();
-    //m_annihilation_timer.unpause();
-    //if (m_prop->semi_stochastic()) m_detsub->update_weights(m_prop->tau(), m_nwalker.m_delta);
-    //m_aborted_weight = 0;
+    auto &recv = m_wf.recv();
     for (size_t irow_recv = 0ul; irow_recv < m_wf.recv().m_hwm; ++irow_recv) {
-#ifdef VERBOSE_DEBUGGING
-        std::cout << consts::verb << consts::chevs << "RECEIVED DETERMINANT" << std::endl;
-            std::cout << consts::verb << "row in recv buffer:    " << irow_recv << std::endl;
-#endif
-        annihilate_row(irow_recv);
+        auto dst_onv = recv.m_dst_onv(irow_recv);
+        ASSERT(!dst_onv.is_zero());
+        // check that the received determinant has come to the right place
+        ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
+        auto delta_weight = recv.m_delta_weight(irow_recv, 0, 0);
+        // zero magnitude weights should not have been communicated
+        ASSERT(!consts::float_is_zero(delta_weight));
+
+        auto irow_walkers = *m_wf.m_store[dst_onv];
+
+        if (irow_walkers == ~0ul) {
+            /*
+             * the destination determinant is not currently occupied, so initiator rules
+             * must be applied
+             */
+            if (!recv.m_flags.m_src_initiator(irow_recv, 0, 0)) continue;
+
+            m_wf.create_walker_(
+                    dst_onv,
+                    delta_weight,
+                    m_prop.m_ham.get_energy(dst_onv),
+                    m_reference.is_connected(dst_onv));
+        } else {
+            m_wf.change_weight(irow_walkers, delta_weight);
+        }
     }
     m_wf.recv().clear();
-    //mpi::barrier();
-    //m_annihilation_timer.pause();
-#if 0
-    m_data.clear_tombstones();
-#endif
 }
 
 Solver::Solver(Propagator &prop, Wavefunction &wf, Table::Loc ref_loc) :
@@ -158,19 +169,27 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, Table::Loc ref_loc) :
 
 void Solver::execute(size_t niter) {
     for (size_t i = 0ul; i < niter; ++i) {
+        m_cycle_timer.reset();
+        m_cycle_timer.unpause();
         begin_cycle();
 
+        m_propagate_timer.reset();
+        m_propagate_timer.unpause();
         loop_over_occupied_onvs();
+        m_propagate_timer.pause();
 
+        m_communicate_timer.reset();
         m_communicate_timer.unpause();
         m_wf.communicate();
         m_communicate_timer.pause();
 
+        m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
         loop_over_spawned();
         m_annihilate_timer.pause();
 
         end_cycle();
+        m_cycle_timer.pause();
         output_stats();
         ++m_icycle;
     }
@@ -282,6 +301,10 @@ void Solver::output_stats() {
         m_stats->m_nocc_onv() = m_wf.m_nocc_onv.reduced(0, 0);
         m_stats->m_psingle() = m_prop.m_magnitude_logger.m_psingle;
         m_stats->m_total_synchronization_overhead() = sync_overhead;
+        m_stats->m_propagate_loop_time() = m_propagate_timer;
+        m_stats->m_communication_time() = m_communicate_timer;
+        m_stats->m_annihilation_loop_time() = m_annihilate_timer;
+        m_stats->m_total_cycle_time() = m_cycle_timer;
         m_stats->flush();
     }
 

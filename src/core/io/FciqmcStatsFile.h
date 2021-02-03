@@ -21,6 +21,10 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<size_t> m_nocc_onv;
     StatsColumn<defs::prob_t> m_psingle;
     StatsColumn<double> m_total_synchronization_overhead;
+    StatsColumn<double> m_propagate_loop_time;
+    StatsColumn<double> m_communication_time;
+    StatsColumn<double> m_annihilation_loop_time;
+    StatsColumn<double> m_total_cycle_time;
     FciqmcStatsSpecifier() :
     StatsSpecifier("FCIQMC"),
     m_icycle(this, "Cycle number"),
@@ -35,7 +39,11 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     m_ninitiator(this, "Initiator ONVs"),
     m_nocc_onv(this, "Occupied ONVs"),
     m_psingle(this, "Probability of attempting to draw a single excitation"),
-    m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier")
+    m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier"),
+    m_propagate_loop_time(this, "Time spent in loop over occupied ONVs"),
+    m_communication_time(this, "Time spent in communicating spawns"),
+    m_annihilation_loop_time(this, "Time spent in annihilation loop"),
+    m_total_cycle_time(this, "Total cycle time")
     {}
 };
 

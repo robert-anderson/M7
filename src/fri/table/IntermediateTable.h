@@ -6,6 +6,7 @@
 #define M7_INTERMEDIATETABLE_H
 
 #include "src/core/table/Table.h"
+#include "src/core/field/Fields.h"
 
 struct IntermediateTable : public Table {
     fields::Number<size_t> m_irow_parent;

@@ -17,10 +17,11 @@ public:
         friend class Buffer;
 
         Buffer *m_buffer = nullptr;
+
+    public:
         defs::data_t *m_dbegin = nullptr;
         defs::data_t *m_dend = nullptr;
 
-    public:
         Window() {}
 
         explicit Window(Buffer *buffer);
@@ -30,10 +31,6 @@ public:
         size_t dsize() const;
 
         void move(defs::data_t *dbegin, defs::data_t *dend);
-
-        defs::data_t *dbegin();
-
-        const defs::data_t *dbegin() const;
 
         void resize(size_t dsize);
 
