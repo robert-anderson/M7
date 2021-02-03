@@ -100,7 +100,7 @@ void Buffer::resize(size_t dsize) {
     }
     m_data = std::move(tmp);
     ASSERT(m_data.size() == this->dsize());
-    ASSERT(m_data.data() ==m_windows[0]->dbegin());
+    ASSERT(m_data.data() ==m_windows[0]->m_dbegin);
 }
 
 void Buffer::make_room(size_t dsize) {

@@ -74,13 +74,13 @@ struct Table {
 
     inline defs::data_t *dbegin(const size_t &irow) {
         ASSERT(irow < m_hwm)
-        ASSERT(m_bw.dbegin())
+        ASSERT(m_bw.m_dbegin)
         return m_bw.m_dbegin + irow * m_row_dsize;
     }
 
     inline const defs::data_t *dbegin(const size_t &irow) const {
         ASSERT(irow < m_hwm)
-        ASSERT(m_bw.dbegin())
+        ASSERT(m_bw.m_dbegin)
         return m_bw.m_dbegin + irow * m_row_dsize;
     }
 

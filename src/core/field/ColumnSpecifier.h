@@ -29,6 +29,18 @@ struct ColumnSpecifier {
         View(const View &other);
         const size_t& element_size() const;
         int compare(const View& other) const;
+        bool operator>(const View& other) const{
+            return compare(other)>0;
+        }
+        bool operator<(const View& other) const{
+            return compare(other)<0;
+        }
+        bool operator<=(const View& other) const{
+            return !(*this>other);
+        }
+        bool operator>=(const View& other) const{
+            return !(*this<other);
+        }
         bool operator==(const View& other) const;
         bool operator!=(const View& other);
         bool is_zero() const;
