@@ -28,7 +28,7 @@ BitsetSpecifier::View::BitView::operator bool() const {
 /*
  * View
  */
-BitsetSpecifier::View::View(const BitsetSpecifier &field, char *ptr) : ColumnSpecifier::View(field, ptr){}
+BitsetSpecifier::View::View(const BitsetSpecifier &spec, char *ptr) : ColumnSpecifier::View(spec, ptr){}
 
 BitsetSpecifier::View::View(const BitsetSpecifier::View &other) : ColumnSpecifier::View(other){
     ASSERT(other.nbit()==nbit());

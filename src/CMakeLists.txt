@@ -24,7 +24,6 @@ target_compile_options(release PRIVATE -O3)
 target_compile_definitions(debug PRIVATE VERBOSE=1)
 
 target_compile_definitions(prof PRIVATE NDEBUG=1)
-target_compile_options(prof PRIVATE -O3)
 target_compile_options(prof PRIVATE -pg)
 target_link_options(prof PRIVATE -pg)
 

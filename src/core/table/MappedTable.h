@@ -121,7 +121,7 @@ public:
         return m_key_field(irow);
     }
 
-    LookupResult operator[](const typename key_field_t::view_t key) {
+    LookupResult operator[](const typename key_field_t::view_t& key) {
         m_total_lookups++;
         LookupResult res(m_buckets[hash(key) % m_buckets.size()]);
         auto current = res.m_bucket.before_begin();

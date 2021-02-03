@@ -35,7 +35,7 @@ struct BitsetSpecifier : ColumnSpecifier {
         typedef BitView bitview_t;
         typedef const BitView const_bitview_t;
 
-        View(const BitsetSpecifier &field, char* ptr);
+        View(const BitsetSpecifier &spec, char* ptr);
 
         View(const View& other);
 
