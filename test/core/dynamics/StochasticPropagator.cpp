@@ -19,6 +19,7 @@ TEST(StochasticPropagator, Test) {
     opts.nwalker_target = 500000;
     opts.shift_damp = 0.5;
     opts.ncycle = 10000;
+    opts.init();
 //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());

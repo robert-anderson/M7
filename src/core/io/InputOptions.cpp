@@ -88,6 +88,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-m,--min_spawn_mag", min_spawn_mag,
                "minimum spawn magnitude (stochastic threshold spawned weights about value)");
 
+    add_option("--min_death_mag", min_death_mag,
+               "minimum death magnitude (stochastic threshold post-death weights about value)");
+
     add_option("-t,--tau_initial", tau_initial,
                "initial timestep");
 

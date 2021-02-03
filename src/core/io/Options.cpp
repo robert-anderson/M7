@@ -4,6 +4,7 @@
 
 #include "Options.h"
 
-bool Options::validate() const {
+bool Options::init() {
+    if (consts::float_is_zero(min_death_mag)) min_death_mag = min_spawn_mag;
     return true;
 }

@@ -111,10 +111,6 @@ public:
         MPI_REQUIRE_ALL(m_send.dbegin(), "Send buffer is not allocated!");
         MPI_REQUIRE_ALL(m_recv.dbegin(), "Recv buffer is not allocated!");
 
-        log::info_(utils::to_string(sendcounts));
-        log::info_(utils::to_string(senddispls));
-        log::info_(utils::to_string(recvcounts));
-        log::info_(utils::to_string(recvdispls));
         auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
                                     m_recv.dbegin(), recvcounts, recvdispls);
         /*
@@ -252,6 +248,7 @@ struct Communicator {
              */
             MPI_ASSERT_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
             size_t irow_local = 0ul;
+            m_lc.clear();
             m_lc.push_back(nrow_());
             for (auto &irow : m_irows) static_cast<Table &>(m_lc).copy_row_in(m_source, irow, irow_local++);
             ASSERT(irow_local==nrow_());

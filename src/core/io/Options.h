@@ -32,7 +32,8 @@ struct Options {
     double walker_buffer_size_factor_initial = 1.0;
     double walker_buffer_expansion_factor = 0.5;
     double spawn_buffer_size_factor_initial = 10.0;
-    double min_spawn_mag = 0.0;
+    double min_spawn_mag = 0.4;
+    double min_death_mag = 0.0;
     size_t nload_balance_block_per_rank = 20;
     size_t load_balance_period = 10;
     double acceptable_load_imbalance = 0.05;
@@ -52,7 +53,7 @@ struct Options {
     double boson_frequency = 0.0;
     defs::prob_t psingle_initial = 0.0;
 
-    bool validate() const;
+    bool init();
 
 };
 

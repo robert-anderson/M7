@@ -65,7 +65,7 @@ public:
             } else {
                 auto weight = m_wf.m_store.m_weight(irow, 0, 0);
                 // kill stochastically
-                m_wf.set_weight(irow, m_prng.stochastic_round(weight, 1.0) * (1 - death_rate));
+                m_wf.set_weight(irow, m_prng.stochastic_round(weight * (1 - death_rate), m_opts.min_death_mag));
             }
         }
     }
@@ -119,6 +119,8 @@ public:
             if (!exgen->draw(src_onv, m_dst_onv, m_occ, m_vac, prob, helem, m_aconn)) continue;
             prob *= m_exgen_drawer->prob(iexgen);
             auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;
+            if (consts::float_is_zero(delta)) continue;
+            delta = m_prng.stochastic_threshold(delta, m_opts.min_spawn_mag);
             if (consts::float_is_zero(delta)) continue;
             m_wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic);
         }

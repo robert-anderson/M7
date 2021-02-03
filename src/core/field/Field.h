@@ -51,6 +51,7 @@ struct NdFieldGroup {
  */
 template<typename spec_t, size_t nind>
 struct NdField : NdFieldGroup<nind> {
+    static_assert(std::is_base_of<ColumnSpecifier, spec_t>::value, "Template arg should be derived from ColumnSpecifier");
     NdColumn<spec_t, nind> m_column;
     using NdFieldGroup<nind>::m_format;
     typedef typename spec_t::view_t view_t;
@@ -62,6 +63,15 @@ struct NdField : NdFieldGroup<nind> {
     template<typename ...Args>
     NdField(Table *table, spec_t spec, std::string description, Args... shape):
             NdFieldGroup<nind>(shape...), m_column(table, spec, description, m_format) {}
+
+    bool next(cview_t& view) const {
+        auto tmp = static_cast<ColumnSpecifier::View&>(view).m_ptr + m_column.m_data.m_row_size;
+        if (tmp < (char*)static_cast<const Table&>(m_column.m_table).m_bw.m_dend){
+            static_cast<ColumnSpecifier::View&>(view).m_ptr = tmp;
+            return true;
+        }
+        return false;
+    }
 
     view_t get_view(const size_t &irow, const size_t &ielement){
         return m_column.get_view(irow, ielement);
