@@ -40,7 +40,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::draw_(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
+bool HeatBathDoubles::_draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
                            const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                            defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) {
     // just draw uniform ij TODO! int weighted ij

@@ -11,15 +11,15 @@ void RankAllocatorBase::refresh_callback_list() {
     }
 }
 
-std::list<RankAllocatorBase::Dynamic *>::iterator
-RankAllocatorBase::add_dependent(RankAllocatorBase::Dynamic *dependent) {
+std::list<RankAllocatorBase::Dependent *>::iterator
+RankAllocatorBase::add_dependent(RankAllocatorBase::Dependent *dependent) {
     m_dependents.push_back(dependent);
     auto it = m_dependents.end();
     refresh_callback_list();
     return --it;
 }
 
-void RankAllocatorBase::erase_dependent(RankAllocatorBase::Dynamic *dependent) {
+void RankAllocatorBase::erase_dependent(RankAllocatorBase::Dependent *dependent) {
     m_dependents.erase(dependent->m_it);
     refresh_callback_list();
 }

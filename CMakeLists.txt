@@ -68,6 +68,28 @@ if(ENABLE_HDF5)
     #endif()
 endif()
 
+#
+# Command line args for M7
+#
+option(ENABLE_BOSONS "ENABLE_BOSONS" 0)
+if (ENABLE_BOSONS)
+    add_compile_definitions(ENABLE_BOSONS)
+endif()
+
+option(ENABLE_COMPLEX "ENABLE_COMPLEX" 0)
+if (ENABLE_COMPLEX)
+    add_compile_definitions(ENABLE_COMPLEX)
+endif()
+
+option(ENABLE_ROUNDING_SPAWN_ATTEMPTS "ENABLE_ROUNDING_SPAWN_ATTEMPTS" 0)
+if (ENABLE_ROUNDING_SPAWN_ATTEMPTS)
+    add_compile_definitions(ENABLE_ROUNDING_SPAWN_ATTEMPTS)
+endif()
+
+option(ENABLE_LOCAL_LOGGING "ENABLE_LOCAL_LOGGING" 0)
+if (ENABLE_LOCAL_LOGGING)
+    add_compile_definitions(ENABLE_LOCAL_LOGGING)
+endif()
 
 
 include_directories(${MPI_INCLUDE_PATH})

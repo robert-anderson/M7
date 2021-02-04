@@ -76,6 +76,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-B,--spawn_buffer_size_factor_initial", spawn_buffer_size_factor_initial,
                "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
+    add_option("-F,--buffer_expansion_factor", walker_buffer_expansion_factor,
+               "number of rows to add to a full buffer as a fraction of current size");
+
     add_option("-K,--nload_balance_block_per_rank", nload_balance_block_per_rank,
                "number of blocks per process to use for load balancing determinants among processes");
 
@@ -128,10 +131,10 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "maximum allowed occupation of bosonic modes");
 
     add_option("--boson_coupling", boson_coupling,
-             "coupling of onsite bosons for Hubbard-Holstein model");
+               "coupling of onsite boson modes for Hubbard-Holstein model");
 
     add_option("--boson_frequency", boson_frequency,
-            "frequency of onsite boson modes for Hubbard-Holstein model");
+               "frequency of onsite boson modes for Hubbard-Holstein model");
 
     add_option("--psingle_initial", psingle_initial,
                "initial probability with which to attempt to draw single excitations");

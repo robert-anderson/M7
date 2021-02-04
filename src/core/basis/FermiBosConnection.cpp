@@ -4,6 +4,9 @@
 
 #include "FermiBosConnection.h"
 
+AntisymFermiBosConnection::AntisymFermiBosConnection(size_t nsite) :
+        AntisymFermionOnvConnection(nsite), m_bonvconn(nsite) {}
+
 AntisymFermiBosConnection::AntisymFermiBosConnection(const views::Onv<1> &in, const views::Onv<1> &out) :
         AntisymFermionOnvConnection(in.m_fonv, out.m_fonv),
         m_bonvconn(in.m_bonv, out.m_bonv) {}
