@@ -26,8 +26,12 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
             return *this;
         }
 
-        template<typename U>
-        View& operator=(const std::vector<U> &v){
+        View& operator=(const std::vector<uint8_t> &v){
+            NdAccessor<uint8_t, 1>::operator=(v);
+            return *this;
+        }
+
+        View& operator=(const std::vector<size_t> &v){
             NdAccessor<uint8_t, 1>::operator=(v);
             return *this;
         }
