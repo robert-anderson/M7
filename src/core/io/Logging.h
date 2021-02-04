@@ -41,7 +41,9 @@ struct log {
 #else
         spdlog::set_level(spdlog::level::info);
 #endif
+#ifdef ENABLE_LOCAL_LOGGING
         g_local_file_logger->flush_on(spdlog::level::debug);
+#endif
     }
 
     static void flush(){
