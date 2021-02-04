@@ -29,8 +29,11 @@ struct NumericArraySpecifier : ColumnSpecifier {
                 ColumnSpecifier::View(spec, ptr),
                 NdAccessor<T, nind>((T*)ptr, spec.m_format){}
 
+        View(const View& other):ColumnSpecifier::View(other), NdAccessor<T, nind>(other){}
+
         using NdAccessor<T, nind>::nelement;
         using NdAccessor<T, nind>::operator=;
+        using ColumnSpecifier::View::operator=;
 
         std::string to_string() const override {
             std::string res;
@@ -39,6 +42,18 @@ struct NumericArraySpecifier : ColumnSpecifier {
             res+="]";
             return res;
         }
+
+        View& operator=(const View& other){
+            ColumnSpecifier::View::operator=(other);
+            return *this;
+        }
+
+        template<typename U>
+        View& operator=(const std::vector<U> &v){
+            NdAccessor<T, nind>::operator=(v);
+            return *this;
+        }
+
     };
 
     std::string element_string(char *ptr) const override {
