@@ -18,12 +18,12 @@
 
 
 struct RankAllocatorBase {
-    struct Dynamic {
+    struct Dependent {
         typedef RankAllocatorBase ra_t;
         ra_t& m_ra;
-        typename std::list<Dynamic*>::iterator m_it;
-        Dynamic(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
-        ~Dynamic() {
+        typename std::list<Dependent*>::iterator m_it;
+        Dependent(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
+        ~Dependent() {
             m_ra.erase_dependent(this);
         }
 
@@ -73,7 +73,7 @@ struct RankAllocatorBase {
     size_t m_nnull_updates = 0ul;
 
 private:
-    std::list<Dynamic*> m_dependents;
+    std::list<Dependent*> m_dependents;
     /*
      * for each dependent, append a lambda to a list which is then called in the update method
      */
@@ -81,9 +81,9 @@ private:
 
     void refresh_callback_list();
 
-    typename std::list<Dynamic*>::iterator add_dependent(Dynamic* dependent);
+    typename std::list<Dependent*>::iterator add_dependent(Dependent* dependent);
 
-    void erase_dependent(Dynamic* dependent);
+    void erase_dependent(Dependent* dependent);
 
 public:
     RankAllocatorBase(Table& table, size_t nblock, size_t period, double acceptable_imbalance);

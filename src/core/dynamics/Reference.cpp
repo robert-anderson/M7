@@ -3,6 +3,7 @@
 //
 
 #include "Reference.h"
+#include "src/core/table/DynamicRowSet.h"
 
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,

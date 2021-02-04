@@ -22,11 +22,13 @@ class BosonOnvConnection {
     Diff m_diff;
 
 public:
-    explicit BosonOnvConnection(const BosonOnvSpecifier& spec);
 
-    operator bool() const {
-        return nchanged_mode();
-    }
+    explicit BosonOnvConnection(const size_t nmode);
+    explicit BosonOnvConnection(const BosonOnvSpecifier& spec);
+    BosonOnvConnection(const views::BosonOnv &in, const views::BosonOnv &out);
+    explicit BosonOnvConnection(const views::BosonOnv &in);
+
+    operator bool() const {return nchanged_mode();}
 
     const size_t & nchanged_mode() const;
     const size_t & changed_mode(const size_t& ichange) const;
@@ -34,10 +36,6 @@ public:
     const int & changes(const size_t& ichange) const;
 
     const int & com(const size_t& icom) const;
-
-    BosonOnvConnection(const views::BosonOnv &in, const views::BosonOnv &out);
-
-    explicit BosonOnvConnection(const views::BosonOnv &in);
 
     void connect(const views::BosonOnv &in, const views::BosonOnv &out);
 

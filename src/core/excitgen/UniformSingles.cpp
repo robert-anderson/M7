@@ -7,7 +7,7 @@
 UniformSingles::UniformSingles(const Hamiltonian<> *ham, PRNG &prng) :
         FermionExcitationGenerator(ham, prng, 1) {}
 
-bool UniformSingles::draw_(const views::Onv<0> &src_fonv, views::Onv<0> &dst_fonv, const OccupiedOrbitals &occs,
+bool UniformSingles::_draw(const views::Onv<0> &src_fonv, views::Onv<0> &dst_fonv, const OccupiedOrbitals &occs,
                            const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
                            conn::Antisym<0> &anticonn) {
     size_t i, a, ia;

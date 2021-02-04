@@ -150,7 +150,7 @@ struct Communicator {
     double m_buffer_expansion_factor;
 
 
-    struct DynamicRowSet : RankAllocatorBase::Dynamic {
+    struct DynamicRowSet : RankAllocatorBase::Dependent {
         typedef RankAllocator<key_field_t> ra_t;
         /*
          * the mapped table which stores the definitive row values
@@ -195,7 +195,7 @@ struct Communicator {
 
     public:
         DynamicRowSet(const Communicator &comm, std::string name) :
-                ra_t::Dynamic(comm.m_ra),
+                ra_t::Dependent(comm.m_ra),
                 m_source(comm.m_store),
                 m_lc("Dynamic row set \"" + name + "\" (local)",
                      static_cast<const table_t &>(comm.m_store)),

@@ -36,9 +36,9 @@
 struct AntisymFermiBosConnection : public AntisymFermionOnvConnection {
     BosonOnvConnection m_bonvconn;
 
-    AntisymFermiBosConnection(
-            const views::Onv<1> &in,
-            const views::Onv<1> &out);
+    explicit AntisymFermiBosConnection(size_t nsite);
+
+    AntisymFermiBosConnection(const views::Onv<1> &in, const views::Onv<1> &out);
 
     explicit AntisymFermiBosConnection(const views::Onv<1> &in);
 

@@ -76,7 +76,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-B,--spawn_buffer_size_factor_initial", spawn_buffer_size_factor_initial,
                "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
-    add_option("-F,--buffer_expansion_factor", buffer_expansion_factor,
+    add_option("-F,--buffer_expansion_factor", walker_buffer_expansion_factor,
                "number of rows to add to a full buffer as a fraction of current size");
 
     add_option("-K,--nload_balance_block_per_rank", nload_balance_block_per_rank,
