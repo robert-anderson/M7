@@ -12,7 +12,7 @@ BosonOnvSpecifier::View BosonOnvSpecifier::operator()(char *ptr) const {
     return View(*this, ptr);
 }
 
-BosonOnvSpecifier::View::View(const BosonOnvSpecifier &field, char *ptr) : NumericArraySpecifier<uint8_t, 1>::View(field, ptr) {}
+BosonOnvSpecifier::View::View(const BosonOnvSpecifier &spec, char *ptr) : NumericArraySpecifier<uint8_t, 1>::View(spec, ptr) {}
 
 size_t BosonOnvSpecifier::View::nboson() const {
     return std::accumulate(

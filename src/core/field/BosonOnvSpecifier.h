@@ -17,7 +17,20 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
     const size_t &nmode() const;
 
     struct View : NumericArraySpecifier<uint8_t, 1>::View {
-        View(const BosonOnvSpecifier &field, char *ptr);
+        View(const BosonOnvSpecifier &spec, char *ptr);
+
+        View(const View& other): NumericArraySpecifier<uint8_t, 1>::View(other){}
+
+        View& operator=(const View& other){
+            NumericArraySpecifier<uint8_t, 1>::View::operator=(other);
+            return *this;
+        }
+
+        template<typename U>
+        View& operator=(const std::vector<U> &v){
+            NdAccessor<uint8_t, 1>::operator=(v);
+            return *this;
+        }
 
         const BosonOnvSpecifier &spec() const {
             return static_cast<const BosonOnvSpecifier &>(m_spec);
@@ -27,7 +40,6 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
 
         size_t nmode() const;
 
-        using NumericArraySpecifier<uint8_t, 1>::View::operator=;
     };
 
     typedef View view_t;
