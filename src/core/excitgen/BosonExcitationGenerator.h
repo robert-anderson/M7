@@ -37,9 +37,8 @@ public:
               conn::Antisym<1> &anticonn) override {
         if(m_nboson_max == 0) return false;
 
-        //auto nmode = src_onv.m_bonv.nmode();
-        ASSERT(dst_onv.m_bonv.nmode() == nmode)
-        ASSERT(nmode == src_onv.m_fonv.nsite() and nmode == dst_onv.m_fonv.nsite())
+        ASSERT(dst_onv.m_bonv.nmode() == src_onv.m_bonv.nmode())
+        ASSERT(src_onv.m_bonv.nmode() == src_onv.m_fonv.nsite() and nmode == dst_onv.m_fonv.nsite())
 
         auto imode_excit = occs[m_prng.draw_uint(occs.size())] % src_onv.m_fonv.nsite();
         int change;
