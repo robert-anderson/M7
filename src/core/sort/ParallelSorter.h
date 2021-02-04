@@ -24,10 +24,10 @@
 //class ParallelSorter {
 //    static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
 //    BufferedSingleFieldTable<viewable_t> m_table;
-//    typedef typename viewable_t::const_view_t const_view_t;
-//    std::function<const_view_t(const size_t&)> m_getter_fn;
+//    typedef typename viewable_t::view_t view_t;
+//    std::function<const view_t(const size_t&)> m_getter_fn;
 //
-//    ParallelSorter(std::function<const_view_t(const size_t&)> getter_fn): m_getter_fn(getter_fn){}
+//    ParallelSorter(std::function<const view_t(const size_t&)> getter_fn): m_getter_fn(getter_fn){}
 //};
 
 

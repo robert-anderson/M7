@@ -14,14 +14,7 @@ protected:
 
 public:
     FermionExcitationGenerator(const Hamiltonian<> *h, PRNG &prng, size_t nexcit);
-
-    bool draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
-              const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) override;
-
-    bool draw(const views::Onv<1> &src_onv, views::Onv<1> &dst_onv,
-              const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<1> &anticonn) override;
+    
 };
 
 

@@ -13,11 +13,9 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public elements::Onv<> {
-    Wavefunction &m_wf;
+class Reference : public Wavefunction::DynamicRow {
     const Hamiltonian<> &m_ham;
-    size_t m_irow;
-    size_t m_irank;
+    const Wavefunction &m_wf;
 
     mutable conn::Antisym<> m_aconn;
 
@@ -32,29 +30,32 @@ class Reference : public elements::Onv<> {
     ReductionSyndicate m_summables;
     ReductionMember<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
-    NdArray<defs::wf_t, defs::ndim_wf> m_weight;
     SingleReducible<defs::wf_comp_t, defs::ndim_wf> m_candidate_weight;
 
 public:
-    Reference(Wavefunction &wf, const Hamiltonian<>& ham, views::Onv<> &onv, const Options &opts);
+    Reference(const Options &m_opts, const Hamiltonian<> &ham,
+              const Wavefunction &wf, Table::Loc loc);
+
+    const views::Onv<> get_onv() const {
+        MPI_ASSERT(!m_ac.m_onv(0).is_zero(), "Reference ONV must be non-zero");
+        return m_ac.m_onv(0);
+    }
+
+    const defs::wf_t& get_weight(const size_t& iroot, const size_t& ireplica) const {
+        return m_ac.m_weight(0, iroot, ireplica);
+    }
 
     void add_row(const size_t& irow);
 
-    using elements::Onv<>::operator=;
-    using elements::Onv<>::mpi_bcast;
-    void change(const size_t& irow, const size_t& irank);
+    //void change(const size_t& irow, const size_t& irank);
 
-    void log_candidate_weight(const size_t& irow, const defs::wf_comp_t& candidate_weight);
+    //void log_candidate_weight(const size_t& irow, const defs::wf_comp_t& candidate_weight);
 
-    void reset();
+    void begin_cycle();
 
-    void reduce();
+    void end_cycle();
 
-    const size_t &irow();
-
-    const bool &in_redefinition_cycle();
-
-    bool is_mine() const;
+    //const bool &in_redefinition_cycle();
 
     bool is_connected(const views::Onv<> &onv) const;
 
@@ -65,8 +66,8 @@ public:
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
 
     defs::ham_t proj_energy_num() const;
-    defs::ham_comp_t weight() const;
     defs::ham_comp_t proj_energy() const;
+
 };
 
 #endif //M7_REFERENCE_H

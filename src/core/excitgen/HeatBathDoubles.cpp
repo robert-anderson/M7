@@ -9,7 +9,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;
     size_t ab = 0ul;
-    std::cout << "Initializing pre-computed heat bath sampling weights for doubles..." << std::endl;
+    log::info("Initializing pre-computed heat bath sampling weights for doubles...");
     if (mpi::on_node_i_am_root()) {
         for (size_t i = 0ul; i < m_nintind; ++i) {
             for (size_t j = 0ul; j < i; ++j) {
@@ -40,7 +40,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::draw(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
+bool HeatBathDoubles::draw_(const views::Onv<0> &src_onv, views::Onv<0> &dst_onv,
                            const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                            defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) {
     // just draw uniform ij TODO! int weighted ij

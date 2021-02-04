@@ -145,8 +145,8 @@ TEST(FciqmcCalculation, StochasticPropagation4cLarge){
     options.nwalker_target = 1000000;
     options.nload_balance_block_per_rank = 1000;
     options.ncycle = 4000;
-    options.walker_factor_initial = 2.0;
-    options.buffer_factor_initial = 3.0;
+    options.walker_buffer_size_factor_initial = 2.0;
+    options.spawn_buffer_size_factor_initial = 3.0;
     options.do_semistochastic = true;
     options.ncycle_init_detsub = 3000;
     FciqmcCalculation fciqmc_calculation(options);

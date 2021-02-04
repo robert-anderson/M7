@@ -37,7 +37,7 @@ class ExactPropagator : public Propagator {
 
 
 public:
-    ExactPropagator(const Hamiltonian<> &ham, const Options &opts) : Propagator(ham, opts) {}
+    ExactPropagator(const Hamiltonian<> &ham, const Options &opts) : Propagator(opts, ham) {}
 
     void diagonal(Wavefunction &m_wf, const size_t &irow) override;
 

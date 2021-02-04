@@ -51,8 +51,11 @@ public:
     /**
      * @return the MPI-synchronized state of the Epoch
      */
-
     operator bool() const;
+
+    bool started_last_cycle(size_t icycle) const;
+
+    bool started_this_cycle(size_t icycle) const;
 
 };
 

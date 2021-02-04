@@ -7,7 +7,7 @@
 
 #include "FermionOnvSpecifier.h"
 #include "BosonOnvSpecifier.h"
-#include "TableField.h"
+#include "Field.h"
 
 /*
  * Fermion-boson product state
@@ -19,12 +19,12 @@ namespace fb_onv {
         FermionOnvSpecifier::view_t m_fonv;
         BosonOnvSpecifier::view_t m_bonv;
 
-        View(Field<FermionOnvSpecifier> &fonv_field, Field<BosonOnvSpecifier> &bonv_field,
+        View(Column<FermionOnvSpecifier> &fonv_column, Column<BosonOnvSpecifier> &bonv_column,
              const size_t &irow, const size_t &iflat):
-                m_fonv(fonv_field.get_view(irow, iflat)), m_bonv(bonv_field.get_view(irow, iflat)) {}
+                m_fonv(fonv_column.get_view(irow, iflat)), m_bonv(bonv_column.get_view(irow, iflat)) {}
 
 
-        View(const Field<FermionOnvSpecifier> &fonv_field, const Field<BosonOnvSpecifier> &bonv_field,
+        View(const Column<FermionOnvSpecifier> &fonv_field, const Column<BosonOnvSpecifier> &bonv_field,
              const size_t &irow, const size_t &iflat):
                 m_fonv(fonv_field.get_view(irow, iflat)), m_bonv(bonv_field.get_view(irow, iflat)) {}
 
@@ -61,8 +61,8 @@ namespace fb_onv {
     template<size_t nind>
     struct Field : NdFieldGroup<nind> {
 
-        NdFieldBase<FermionOnvSpecifier, nind> m_fonv;
-        NdFieldBase<BosonOnvSpecifier, nind> m_bonv;
+        NdColumn<FermionOnvSpecifier, nind> m_fonv;
+        NdColumn<BosonOnvSpecifier, nind> m_bonv;
 
         using NdFieldGroup<nind>::m_format;
 
@@ -73,7 +73,7 @@ namespace fb_onv {
                 m_bonv(table, nsite, description + " (Boson ONV)", m_format) {}
 
         typedef View view_t;
-        typedef const View const_view_t;
+        typedef const View cview_t;
 
         template<typename ...Args>
         view_t operator()(const size_t &irow, Args... inds) {
@@ -81,8 +81,8 @@ namespace fb_onv {
         }
 
         template<typename ...Args>
-        const_view_t operator()(const size_t &irow, Args... inds) const {
-            return const_view_t(m_fonv, m_bonv, irow, m_format.flatten(inds...));
+        const view_t operator()(const size_t &irow, Args... inds) const {
+            return view_t(m_fonv, m_bonv, irow, m_format.flatten(inds...));
         }
 
         struct hash_fn {

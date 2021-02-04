@@ -37,7 +37,7 @@ class BufferedTableVector {
 
     void gatherv(const table_t& local){
         if (m_bts.size()!=mpi::nrank())
-            mpi::stop_all("attempting to gather to a BufferedTableVector of incorrect size");
+            mpi::abort("attempting to gather to a BufferedTableVector of incorrect size");
         mpi::gatherv()
     }
 };

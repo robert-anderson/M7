@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "src/core/table/Table.h"
-#include "src/core/table/CommunicatingPair.h"
+#include "src/core/table/Communicator.h"
 
 
 TEST(CommunicatingPair, CommunicateSingleElement) {
@@ -14,18 +14,21 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
         TestTable() : m_counter(this, "counter") {}
     };
 
-    CommunicatingPair<TestTable> comm_pair("Test pair", 0.5);
-    comm_pair.expand(1);
+    double expansion_factor = 0.5;
+    CommunicatingPair<TestTable> comm_pair("Test pair", expansion_factor, {});
+    // after resize:
+    const size_t ndword_bw = comm_pair.row_dsize()*mpi::nrank();
+
+    comm_pair.resize(mpi::nrank());
     for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         comm_pair.send(irank).push_back();
         comm_pair.send(irank).m_counter(0) = 9900 + 10 * irank + mpi::irank();
     }
 
-    for (size_t idst = 1ul; idst < mpi::nrank(); ++idst)
-        ASSERT_EQ(std::distance(comm_pair.send(idst-1).ptr(), comm_pair.send(idst).ptr()), 1);
-
-    for (size_t idst = 0ul; idst < mpi::nrank(); ++idst)
-        ASSERT_EQ(comm_pair.send().ptr()[idst], 9900 + 10 * idst + mpi::irank());
+    for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
+        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).dbegin(), comm_pair.send(idst).dbegin()), ndword_bw);
+        ASSERT_EQ(comm_pair.send().dbegin()[idst*ndword_bw], 9900 + 10 * idst + mpi::irank());
+    }
 
     comm_pair.communicate();
 
@@ -42,7 +45,7 @@ TEST(CommunicatingPair, CommunicateVector) {
     const size_t nrow = 120;
     const size_t nint = 7;
 
-    CommunicatingPair<TestTable> comm_pair("Test pair", 0.5, nint);
+    CommunicatingPair<TestTable> comm_pair("Test pair", 0.5, {nint});
 
     auto flat_index = [](const size_t isend, const size_t irecv, const size_t irow = 0,
                          const size_t ientry = 0, const size_t modular_divisor = ~0ul) {
@@ -50,9 +53,9 @@ TEST(CommunicatingPair, CommunicateVector) {
         return (((isend * nrow + irecv) * nrow + irow * nrow) + ientry) % modular_divisor;
     };
 
-    comm_pair.expand(nrow);
+    comm_pair.resize(nrow);
 
-    ASSERT_EQ(comm_pair.recv().bw_dsize(), mpi::nrank() * nrow * comm_pair.row_dsize());
+    //ASSERT_EQ(comm_pair.recv().bw_dsize(), mpi::nrank() * nrow_ * comm_pair.row_dsize());
     ASSERT_EQ(comm_pair.send().buffer_dsize(), mpi::nrank() * nrow * comm_pair.row_dsize());
 
     for (size_t idst_rank = 0ul; idst_rank < mpi::nrank(); ++idst_rank) {

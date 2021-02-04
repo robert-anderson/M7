@@ -3,7 +3,7 @@
 //
 
 #include "MPIWrapper.h"
-
+#include "src/core/io/Logging.h"
 
 void mpi::barrier() {
 #if HAVE_MPI
@@ -46,7 +46,9 @@ void mpi::initialize(int *argc, char ***argv) {
 
 void mpi::finalize() {
 #if HAVE_MPI
-    if (initialized() && !finalized()) MPI_Finalize();
+    if (initialized() && !finalized()) {
+        MPI_Finalize();
+    }
 #endif
 }
 
@@ -66,6 +68,54 @@ bool mpi::on_node_i_am_root() {
     return on_node_i_am(0);
 }
 
+void mpi::abort_(std::string message) {
+#ifdef HAVE_MPI
+    log::error_("Forcing MPI_Abort from this rank: \"{}\"", message);
+    log::finalize();
+    // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
+    if (mpi::nrank()==1) std::abort();
+    MPI_Abort(MPI_COMM_WORLD, -1);
+#else
+    std::cout << "Aborting: \"" << message << "\""<< std::endl;
+        exit(0);
+#endif
+}
+
+void mpi::abort(std::string message){
+#ifdef HAVE_MPI
+    log::error_("Aborting all MPI processes: \"{}\"", message);
+    log::finalize();
+    MPI_Barrier(MPI_COMM_WORLD);
+    // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
+    if (mpi::nrank()==1) std::abort();
+    MPI_Abort(MPI_COMM_WORLD, -1);
+#else
+    std::cout << "Aborting: \"" << message << "\""<< std::endl;
+        exit(0);
+#endif
+}
+
+
+void mpi::setup_mpi_globals() {
+#ifdef HAVE_MPI
+    int tmp;
+    MPI_Comm_size(MPI_COMM_WORLD, &tmp);
+    g_nrank = tmp;
+    ASSERT(g_nrank > 0)
+    MPI_Comm_rank(MPI_COMM_WORLD, &tmp);
+    g_irank = tmp;
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    MPI_Get_processor_name(processor_name, &tmp);
+    g_processor_name = std::string(processor_name, tmp);
+    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, irank(), MPI_INFO_NULL, &g_node_comm);
+    MPI_Comm_size(g_node_comm, &tmp);
+    g_nrank_on_node = tmp;
+    MPI_Comm_rank(g_node_comm, &tmp);
+    g_irank_on_node = tmp;
+#endif
+}
+
+
 size_t g_irank = 0;
 size_t g_nrank = 1;
 std::string g_processor_name = "";
@@ -74,3 +124,4 @@ MPI_Comm g_node_comm;
 #endif
 size_t g_irank_on_node = 0;
 size_t g_nrank_on_node = 1;
+int g_p2p_tag = 0;

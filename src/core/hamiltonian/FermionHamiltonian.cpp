@@ -127,15 +127,15 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
     defs::inds inds(4);
     defs::ham_t value;
 
-    logger::write("Reading fermion Hamiltonian from FCIDUMP file \""+ file_reader.m_fname +"\"...");
-    logger::write("Loading fermion Hamiltonian from FCIDUMP...");
+    log::info("Reading fermion Hamiltonian from FCIDUMP file \"" + file_reader.m_fname + "\"...");
+    log::info("Loading fermion Hamiltonian from FCIDUMP...");
     while (file_reader.next(inds, value)) {
         if (ints2_t::valid_inds(inds)) m_int_2.set(inds, value);
         else if (ints1_t::valid_inds(inds)) m_int_1.set(inds, value);
         else if (inds[0] == ~0ul) m_int_0 = value;
     }
     mpi::barrier();
-    logger::write("FCIDUMP loading complete.");
+    log::info("FCIDUMP loading complete.");
 }
 
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :

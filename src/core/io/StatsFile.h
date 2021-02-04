@@ -82,21 +82,4 @@ struct StatsFile : spec_t {
     }
 };
 
-#if 0
-    std::pair<T,T> mean_std(size_t istart, size_t iend) const {
-        ASSERT(iend>istart);
-        auto cbegin = m_series.cbegin(); std::advance(cbegin, istart);
-        auto cend = m_series.cbegin(); std::advance(cend, iend);
-        return stat_utils::mean_std<T>(cbegin, cend);
-    }
-
-    std::pair<T,T> mean_std(size_t istart) {
-        return mean_std(istart, m_series.size());
-    }
-
-    std::pair<T,T> mean_std() {
-        return mean_std(0);
-    }
-
-#endif //M7_STATSFILE_H
 #endif //M7_STATSFILE_H

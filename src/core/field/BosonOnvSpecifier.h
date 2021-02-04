@@ -31,11 +31,9 @@ struct BosonOnvSpecifier : NumericArraySpecifier<uint8_t, 1> {
     };
 
     typedef View view_t;
-    typedef const View const_view_t;
+    typedef const View cview_t;
 
-    View operator()(char *ptr) const {
-        return View(*this, ptr);
-    }
+    View operator()(char *ptr) const;
 };
 
 #endif //M7_BOSONONVSPECIFIER_H

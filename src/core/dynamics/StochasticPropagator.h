@@ -29,7 +29,7 @@ protected:
 
 public:
     StochasticPropagator(const Hamiltonian<> &ham, const Options &opts) :
-            Propagator(ham, opts), m_prng(opts.prng_seed, opts.prng_ngen),
+            Propagator(opts, ham), m_prng(opts.prng_seed, opts.prng_ngen),
             m_min_spawn_mag(opts.min_spawn_mag) {
 
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
@@ -48,13 +48,12 @@ public:
         else if (m_exgens.size() == 3)
             m_exgen_drawer->set(m_magnitude_logger.m_psingle, 1.0 - m_magnitude_logger.m_psingle - prob_boson);
 
-        std::cout << "Excitation class probability breakdown " << utils::to_string(m_exgen_drawer->m_probs)
-                  << std::endl;
+        log::info("Excitation class probability breakdown {}", utils::to_string(m_exgen_drawer->m_probs));
     }
 
     void diagonal(Wavefunction &m_wf, const size_t &irow) override {
-        bool flag_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
-        auto hdiag = m_wf.m_walkers.m_hdiag(irow);
+        bool flag_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
+        auto hdiag = m_wf.m_store.m_hdiag(irow);
         if (flag_deterministic) {
             m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
         } else {
@@ -64,9 +63,9 @@ public:
                 // clone  / create antiparticles continuously
                 m_wf.scale_weight(irow, 1 - death_rate);
             } else {
-                auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+                auto weight = m_wf.m_store.m_weight(irow, 0, 0);
                 // kill stochastically
-                m_wf.set_weight(irow, m_prng.stochastic_round(weight, 1.0) * (1 - death_rate));
+                m_wf.set_weight(irow, m_prng.stochastic_round(weight * (1 - death_rate), m_opts.min_death_mag));
             }
         }
     }
@@ -75,6 +74,10 @@ public:
     template<typename T>
     size_t get_nattempt(const T &weight) {
         static_assert(std::is_floating_point<T>::value, "template arg must be floating point");
+
+#ifndef ENABLE_CEILING_SPAWN_ATTEMPTS
+        return m_prng.stochastic_round(std::abs(weight), 1.0);
+#else
         /*
          * We want to make nattempt = ceil(|weight|) spawning attempts.
          * can't rely on std::abs to provide the right answer in the case of complex arithmetic with
@@ -83,6 +86,7 @@ public:
          */
         if (weight < 0) return (-weight) < 1 ? 1 : std::round(-weight);
         else return (weight) < 1 ? 1 : std::round(weight);
+#endif
     }
 
     template<typename T>
@@ -92,12 +96,12 @@ public:
     }
 
     void off_diagonal(Wavefunction &m_wf, const size_t &irow) override {
-        auto weight = m_wf.m_walkers.m_weight(irow, 0, 0);
+        auto weight = m_wf.m_store.m_weight(irow, 0, 0);
         ASSERT(!consts::float_is_zero(weight));
         ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
-        auto src_onv = m_wf.m_walkers.m_onv(irow);
-        bool flag_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
-        bool flag_deterministic = m_wf.m_walkers.m_flags.m_deterministic(irow);
+        auto src_onv = m_wf.m_store.m_onv(irow);
+        bool flag_initiator = m_wf.m_store.m_flags.m_initiator(irow, 0, 0);
+        bool flag_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
 
         m_occ.update(src_onv);
         m_vac.update(src_onv);
@@ -115,6 +119,8 @@ public:
             if (!exgen->draw(src_onv, m_dst_onv, m_occ, m_vac, prob, helem, m_aconn)) continue;
             prob *= m_exgen_drawer->prob(iexgen);
             auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;
+            if (consts::float_is_zero(delta)) continue;
+            delta = m_prng.stochastic_threshold(delta, m_opts.min_spawn_mag);
             if (consts::float_is_zero(delta)) continue;
             m_wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic);
         }

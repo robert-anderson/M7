@@ -54,7 +54,7 @@ struct StatsColumn : NdArray<T, nind>, StatsColumnBase {
     }
 
     void zero() override {
-        NdAccessor<T, nind>::zero();
+        NdAccessor<T, nind>::clear();
     }
 };
 

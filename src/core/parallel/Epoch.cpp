@@ -3,7 +3,7 @@
 //
 
 #include "Epoch.h"
-
+#include "src/core/io/Logging.h"
 
 Epoch::Epoch(std::string name) :m_name(std::move(name)) {
     m_icycle_start = ~0ul;
@@ -16,7 +16,7 @@ bool Epoch::update(size_t icycle, bool condition) {
     m_icycle_start = condition?icycle:~0ul;
     m_icycle_start.mpi_min();
     if (*this) {
-        std::cout << "Entering \"" << m_name << "\" epoch on MC cycle " << icycle << std::endl;
+        log::info("Entering \"{}\" epoch on cycle {} ", m_name, icycle);
         return true;
     }
     return false;
@@ -28,3 +28,12 @@ Epoch::operator bool() const {
 const size_t &Epoch::start() const {
     return m_icycle_start.reduced();
 }
+
+bool Epoch::started_last_cycle(size_t icycle) const {
+    return (m_icycle_start.reduced()!=~0ul && m_icycle_start.reduced()+1==icycle);
+}
+
+bool Epoch::started_this_cycle(size_t icycle) const {
+    return (m_icycle_start.reduced()!=~0ul && m_icycle_start.reduced()==icycle);
+}
+

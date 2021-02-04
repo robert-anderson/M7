@@ -8,11 +8,10 @@
 #include <random>
 #include <algorithm>
 #include <complex>
-#include <src/core/thread/AlignedAllocator.h>
 #include "src/defs.h"
 
 class PRNG {
-    typedef std::vector<uint32_t, AlignedAllocator<uint32_t, defs::ncacheline_byte>> U;
+    typedef std::vector<uint32_t> U;
     U m_data;
     size_t m_i;
     const size_t m_seed;

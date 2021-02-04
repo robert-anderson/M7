@@ -24,7 +24,6 @@ target_compile_options(release PRIVATE -O3)
 target_compile_definitions(debug PRIVATE VERBOSE=1)
 
 target_compile_definitions(prof PRIVATE NDEBUG=1)
-target_compile_options(prof PRIVATE -O2)
 target_compile_options(prof PRIVATE -pg)
 target_link_options(prof PRIVATE -pg)
 
@@ -34,6 +33,35 @@ if(LAPACK_FOUND)
     target_link_libraries (debug ${LAPACK_LIBRARIES})
     target_link_libraries (prof ${LAPACK_LIBRARIES})
 endif()
+
+
+if (ENABLE_HDF5)
+    target_link_libraries(release ${_HDF5_LIBS})
+    target_link_libraries(debug ${_HDF5_LIBS})
+    target_link_libraries(prof ${_HDF5_LIBS})
+endif ()
+
+
+if (ENABLE_HDF5)
+    add_dependencies(release hdf5_local)
+    add_dependencies(debug hdf5_local)
+    add_dependencies(prof hdf5_local)
+    target_link_libraries(release ${_HDF5_LIBS})
+    target_link_libraries(debug ${_HDF5_LIBS})
+    target_link_libraries(prof ${_HDF5_LIBS})
+    target_include_directories(release PUBLIC
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build
+            )
+    target_include_directories(debug PUBLIC
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build
+            )
+    target_include_directories(prof PUBLIC
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build
+            )
+endif ()
 
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories($ENV{INCLUDE_PATH})

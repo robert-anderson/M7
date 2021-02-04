@@ -36,6 +36,13 @@ public:
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape()){}
 
+    bool operator==(const NdFormat<nind> &other) const{
+        for (size_t iind=0ul; iind<nind; ++iind){
+            if (other.extent(iind)!=extent(iind)) return false;
+        }
+        return true;
+    }
+
     size_t nelement() const {
         if (!nind) return 1;
         return m_shape.front()*m_strides.front();

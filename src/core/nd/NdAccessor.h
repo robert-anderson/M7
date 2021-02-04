@@ -19,6 +19,40 @@ struct NdAccessor {
     NdAccessor(T* data, const NdFormat<nind>& format):
     m_data{data}, m_format(format){}
 
+    NdAccessor(const NdAccessor &other): m_data(other.m_data), m_format(other.m_format){}
+
+    NdAccessor& operator=(const NdAccessor &other){
+        if (&other!=this){
+            ASSERT(other.m_format==m_format);
+            ASSERT(other.nelement()==nelement());
+            std::memcpy(m_data, other.m_data, nelement()*sizeof(T));
+        }
+        return *this;
+    }
+
+    template<typename U>
+    NdAccessor& operator=(const std::vector<U> &v){
+        ASSERT(v.size()==nelement());
+        for (size_t i = 0ul; i < nelement(); ++i) (*this)(i) = v[i];
+        return *this;
+    }
+
+    NdAccessor &operator=(const std::vector<T> &v) {
+        ASSERT(v.size() == nelement());
+        memcpy((void*)m_data, (void*)v.data(), nelement()*sizeof(T));
+        return *this;
+    }
+
+    T& operator[](const size_t& ielement){
+        ASSERT(ielement<m_format.nelement());
+        return m_data[ielement];
+    }
+
+    const T& operator[](const size_t& ielement) const {
+        ASSERT(ielement<m_format.nelement());
+        return m_data[ielement];
+    }
+
     template<typename ...Args>
     T& operator()(Args... inds){
         return m_data[m_format.flatten(inds...)];
@@ -37,11 +71,14 @@ struct NdAccessor {
         return m_format.nelement();
     }
 
-    void zero() {
+    void clear() {
         std::memset((void*)m_data, 0, sizeof(T)*nelement());
     }
 };
 
+/*
+ * An NdAccessor that owns its own NdFormat, rather than referencing it from outside
+ */
 template <typename T, size_t nind>
 struct FormattedNdAccessor : private NdFormat<nind>, public NdAccessor<T, nind>{
     template<typename ...Args>

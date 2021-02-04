@@ -12,6 +12,9 @@
 #include <algorithm>
 #include <src/core/util/Ternary.h>
 #include "FileReader.h"
+#include "Logging.h"
+#include "src/core/parallel/MPIAssert.h"
+
 
 template<typename T>
 class SparseArrayFileReader : public FileReader {
@@ -24,20 +27,18 @@ public:
                           Tern indsfirst = Tern(), Tern complex_valued = Tern()) :
             FileReader(fname), m_nind(nind), m_indsfirst(indsfirst), m_complex_valued(complex_valued) {
         reset();
-        if (m_indsfirst) std::cout << "Reading sparse array from file with indices before values"<< std::endl;
-        else std::cout << "Reading sparse array from file with indices after values"<< std::endl;
-        if (m_complex_valued && !consts::is_complex<T>())
-            throw std::runtime_error("Trying to read complex-valued array entries into a real container");
-        else if (consts::is_complex<T>() && !m_complex_valued)
-            std::cout << "Reading real-valued array into complex container, consider recompiling with real arithmetic"
-                      << std::endl;
+        if (m_indsfirst) log::info("Reading sparse array from file with indices before values");
+        else log::info("Reading sparse array from file with indices after values");
+        MPI_REQUIRE_ALL(m_complex_valued == consts::is_complex<T>(), "Trying to read complex-valued array entries into a real container");
+        if (consts::is_complex<T>() && !m_complex_valued)
+            log::info("Reading real-valued array into complex container, consider recompiling with real arithmetic");
     }
 
     void reset() {
         size_t iline = first_valid_line(m_fname, m_nind, m_indsfirst, m_complex_valued);
-        if (iline == ~0ul) throw std::runtime_error("No valid entries found");
-        if(m_indsfirst==Tern::Neither) throw std::runtime_error("m_indsfirst is still unspecified");
-        if(m_complex_valued==Tern::Neither) throw std::runtime_error("m_complex_valued is still unspecified");
+        MPI_REQUIRE_ALL(iline != ~0ul, "No valid entries found");
+        MPI_REQUIRE_ALL(m_indsfirst!=Tern::Neither, "m_indsfirst is still unspecified");
+        MPI_REQUIRE_ALL(m_complex_valued!=Tern::Neither, "m_complex_valued is still unspecified");
         FileReader::reset(iline);
     }
 

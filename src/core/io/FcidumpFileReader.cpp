@@ -49,11 +49,11 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         }
         SparseArrayFileReader<defs::ham_t>::reset(); // go back to beginning of entries
     }
-    if (m_spin_conserving_1e) logger::write("FCIDUMP file conserves spin in 1 particle integrals");
-    else logger::write("FCIDUMP file does NOT conserve spin in 1 particle integrals");
-    if (m_spin_conserving_2e) logger::write("FCIDUMP file conserves spin in 2 particle integrals");
-    else logger::write("FCIDUMP file does NOT conserve spin in 2 particle integrals");
-    logger::write("FCIDUMP file contains 2 particle integrals of maximum excitation rank "+std::to_string(m_int_2e_rank));
+    if (m_spin_conserving_1e) log::info("FCIDUMP file conserves spin in 1 particle integrals");
+    else log::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
+    if (m_spin_conserving_2e) log::info("FCIDUMP file conserves spin in 2 particle integrals");
+    else log::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
+    log::info("FCIDUMP file contains 2 particle integrals of maximum excitation rank " + std::to_string(m_int_2e_rank));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) const {
@@ -152,13 +152,13 @@ void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
         else return 1ul;
     };
 
-    std::cout << "Determining permutational symmetry of integral file entries" << std::endl;
+    log::info("Determining permutational symmetry of integral file entries");
     SparseArrayFileReader<defs::ham_t> reader(filename, 4, false);
     defs::inds inds(4);
     defs::ham_t value;
     // this will eventually hold all orderings of the first example of an
     // integral with 4 distinct indices
-    std::array<defs::inds, 8> inds_distinct{};
+    std::array<defs::inds, 8> inds_distinct;
     m_isymm = 0ul;
     while (reader.next(inds, value)) {
         if (std::all_of(inds.begin(), inds.end(), [](size_t i){return i>0;})) {
@@ -190,10 +190,10 @@ void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
         }
     }
     if (!m_isymm){
-        std::cout << "Permutational symmetry of integral file could not be determined" << std::endl;
+        log::info("Permutational symmetry of integral file could not be determined");
         m_isymm = 1;
     } else {
-        std::cout << "Permutational symmetry of integral file found to be " << 8/m_isymm << std::endl;
+        log::info("Permutational symmetry of integral file found to be {}", 8/m_isymm);
         m_isymm/=8;    // 8->1; 4->2; 2->4; 1->8
     }
 }

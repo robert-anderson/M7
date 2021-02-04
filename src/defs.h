@@ -32,7 +32,7 @@
         fputs(#e, stderr); \
         fprintf(stderr, "\nin file \"%s\", line %d\n\n", __FILE__, __LINE__); \
         fflush(stderr); \
-        abort(); \
+        std::abort(); \
     } \
 }
 #endif
@@ -47,6 +47,8 @@
 
 #define ENABLE_BOSONS
 //#define ENABLE_COMPLEX
+//#define ENABLE_CEILING_SPAWN_ATTEMPTS
+#define ENABLE_LOCAL_LOGGING
 
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";

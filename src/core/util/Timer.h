@@ -7,12 +7,15 @@
 
 #include <chrono>
 #include "src/defs.h"
+#include "src/core/parallel/MPIAssert.h"
 
 class Timer {
-    std::chrono::duration<double> m_start, m_lap, m_total;
+    std::chrono::duration<double> m_start, m_total;
 public:
 
     Timer():m_start{std::chrono::duration<double>::max()} {}
+
+    bool paused() const;
 
     void reset();
 
@@ -20,8 +23,12 @@ public:
 
     void pause();
 
-    double total();
-    double lap();
+    /**
+     * @return
+     * The total duration between last reset and last pause in seconds.
+     */
+    operator double() const;
+
 
 };
 

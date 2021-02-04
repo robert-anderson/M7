@@ -14,27 +14,39 @@ TEST(StochasticPropagator, Test) {
     opts.nwalker_initial = 10;
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.05;
-    opts.nwalker_target = 100000;
+    opts.load_balance_period = 5;
+    opts.nload_balance_block_per_rank = 40;
+    opts.nwalker_target = 500000;
+    opts.shift_damp = 0.5;
+    opts.ncycle = 10000;
+    opts.init();
 //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::FermionOnv fonv(ham.nsite());
+    elements::FermionOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        fonv.set(0, i);
-        fonv.set(1, i);
+        ref_onv.set(0, i);
+        ref_onv.set(1, i);
     }
-    Wavefunction wf(opts, ham.nsite());
-    wf.expand(10, 800);
     StochasticPropagator prop(ham, opts);
-    auto ref_energy = ham.get_energy(fonv);
+    Wavefunction wf(opts, ham.nsite());
+    ASSERT_EQ(&wf.m_store.m_onv, &wf.m_store.m_key_field);
+    ASSERT_EQ(wf.m_store.m_flags.m_initiator.m_flagset->m_bitset_field, &wf.m_store.m_flags);
+    const size_t store_nrow = (opts.walker_buffer_size_factor_initial*opts.nwalker_target)/mpi::nrank();
+    ASSERT_EQ(wf.m_store.m_nrow, store_nrow);
+    const size_t send_nrow = (opts.spawn_buffer_size_factor_initial*opts.nwalker_target)/mpi::nrank();
+    ASSERT_EQ(wf.m_comm.send().nrow_per_table(), send_nrow);
+    ASSERT_EQ(wf.m_store.m_weight.m_column.m_format.extent(0), 1);
+    ASSERT_EQ(wf.m_store.m_weight.m_column.m_format.extent(1), 1);
+
+    auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
-    Solver solver(prop, wf, fonv);
 
-    std::cout << "Reference Energy: " << ref_energy << std::endl;
-
-    for (size_t i = 0ul; i < 10000; ++i) {
+    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    prop.m_shift = ref_energy;
+    Solver solver(prop, wf, ref_loc);
+    for (size_t i = 0ul; i < opts.ncycle; ++i) {
         solver.execute();
-        std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
 }
 #endif

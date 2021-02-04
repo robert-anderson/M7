@@ -3,6 +3,7 @@
 //
 
 #include "FermionOnvSpecifier.h"
+#include "src/core/parallel/MPIAssert.h"
 
 FermionOnvSpecifier::FermionOnvSpecifier(const size_t &nsite) : BitsetSpecifier(2 * nsite), m_nsite(nsite) {
     m_data.m_details["type"] = "FermionOnv";
@@ -13,11 +14,11 @@ std::string FermionOnvSpecifier::element_string(char *ptr) const {
     return View(*this, ptr).to_string();
 }
 
-FermionOnvSpecifier::View FermionOnvSpecifier::operator()(char *ptr) const {
-    return View(*this, ptr);
+FermionOnvSpecifier::view_t FermionOnvSpecifier::operator()(char *ptr) const{
+    return {*this, ptr};
 }
 
-FermionOnvSpecifier::View::View(const FermionOnvSpecifier &field, char *ptr) : BitsetSpecifier::View(field, ptr) {}
+FermionOnvSpecifier::View::View(const FermionOnvSpecifier &spec, char *ptr) : BitsetSpecifier::View(spec, ptr) {}
 
 std::string FermionOnvSpecifier::View::to_string() const {
     std::string res;
@@ -37,10 +38,6 @@ const size_t &FermionOnvSpecifier::View::nsite() const {
 
 void FermionOnvSpecifier::View::set(const size_t &ispin, const size_t &iorb) {
     BitsetSpecifier::View::set(ispin * nsite() + iorb);
-}
-
-void FermionOnvSpecifier::View::set(const defs::inds &ispinorbs) {
-    for (const auto &ispinorb: ispinorbs) set(ispinorb);
 }
 
 void FermionOnvSpecifier::View::set(const defs::inds &alpha, const defs::inds &beta) {
@@ -63,9 +60,8 @@ void FermionOnvSpecifier::View::set(const std::string &s) {
             if (i!=nsite()) throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
         }
     }
-    std::cout << i << " " << 2*nsite() << std::endl;
-    if (i<2*nsite()) throw std::runtime_error("FermionOnv-defining string not long enough");
-    if (i>2*nsite()) throw std::runtime_error("FermionOnv-defining string too long");
+    MPI_REQUIRE(i>2*nsite(), "FermionOnv-defining string not long enough");
+    MPI_REQUIRE(i<2*nsite(), "FermionOnv-defining string too long");
 }
 
 int FermionOnvSpecifier::View::spin() const {

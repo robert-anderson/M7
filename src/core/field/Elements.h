@@ -24,9 +24,8 @@ template<typename viewable_t>
 struct BufferedSingleFieldTable: BufferedTable<SingleFieldTable<viewable_t>>{
     typedef BufferedTable<SingleFieldTable<viewable_t>> base_t;
 	template <typename ...Args>
-    BufferedSingleFieldTable(Args... args):
-        base_t("", args...){
-        base_t::expand(1ul);
+    BufferedSingleFieldTable(Args... args): base_t("", SingleFieldTable<viewable_t>(args...)){
+        base_t::resize(1ul);
         base_t::push_back();
     }
 };
@@ -37,6 +36,10 @@ struct Element : BufferedSingleFieldTable<viewable_t>, viewable_t::view_t {
 	template <typename ...Args>
     Element(Args... args):
     base_t(args...), viewable_t::view_t(base_t::m_field(0)){}
+
+private:
+    //"zero" method should be used instead since it just memsets to 0, doesn't rest m_hwm
+    using BufferedSingleFieldTable<viewable_t>::clear;
 };
 
 namespace elements {
@@ -71,6 +74,8 @@ namespace elements {
 
     template<bool enable_bosons=defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
+
+    using Det = Onv<0>;
 }
 
 #endif //M7_ELEMENTS_H
