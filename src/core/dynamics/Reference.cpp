@@ -11,15 +11,18 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
         m_ham(ham), m_wf(wf), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(m_summables, {1, 1}),
-        m_nwalker_at_doubles(m_summables, {1, 1}),
-        m_candidate_weight({1, 1})
+        m_nwalker_at_doubles(m_summables, {1, 1})
         {
             update();
 }
 
 void Reference::add_row(const size_t &irow) {
+    auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+    if (std::abs(weight) > m_candidate_abs_weight){
+        m_candidate_abs_weight = std::abs(weight);
+        m_irow_candidate = irow;
+    }
     if (m_wf.m_store.m_flags.m_reference_connection(irow)) {
-        auto weight = m_wf.m_store.m_weight(irow, 0, 0);
         add_to_numerator(m_wf.m_store.m_onv(irow), weight);
     }
     else {
@@ -55,8 +58,8 @@ void Reference::change(const size_t &irow, const size_t &irank) {
 
 void Reference::log_candidate_weight(const size_t &irow, const defs::wf_comp_t &candidate_weight) {
     if (irow==m_irow && mpi::i_am(m_irank)) return;
-    if (candidate_weight>m_candidate_weight(0, 0)){
-        m_candidate_weight(0, 0) = candidate_weight;
+    if (candidate_weight>m_candidate_abs_weight(0, 0)){
+        m_candidate_abs_weight(0, 0) = candidate_weight;
         m_irow_candidate = irow;
     }
 }
@@ -70,12 +73,12 @@ void Reference::begin_cycle() {
 void Reference::end_cycle() {
 #if 0
     if (in_redefinition_cycle()) m_redefinition_cycle = false;
-    m_candidate_weight.all_maxloc();
+    m_candidate_abs_weight.all_maxloc();
     m_weight.bcast(m_irank);
-    if (m_candidate_weight.reduced(0, 0)/std::abs(m_weight(0, 0)) > m_redefinition_thresh) {
-        if (mpi::i_am(m_candidate_weight.rank_index(0, 0))){
+    if (m_candidate_abs_weight.reduced(0, 0)/std::abs(m_weight(0, 0)) > m_redefinition_thresh) {
+        if (mpi::i_am(m_candidate_abs_weight.rank_index(0, 0))){
         }
-        change(m_irow_candidate, m_candidate_weight.rank_index(0, 0));
+        change(m_irow_candidate, m_candidate_abs_weight.rank_index(0, 0));
     }
 #endif
     m_summables.all_sum();
@@ -101,14 +104,15 @@ ReductionMember<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles()
     return m_nwalker_at_doubles;
 }
 
-ReductionMember<defs::wf_comp_t, defs::ndim_wf> &Reference::candidate_weight() {
-    return m_candidate_weight;
-}
-
 defs::ham_t Reference::proj_energy_num() const {
     return m_proj_energy_num.reduced(0, 0);
 }
 
 defs::ham_comp_t Reference::proj_energy() const {
     return consts::real(proj_energy_num()/get_weight(0, 0));
+}
+
+void Reference::update() {
+    accept_candidate(m_redefinition_thresh);
+    DynamicRow::update();
 }

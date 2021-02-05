@@ -27,6 +27,7 @@ struct RankAllocatorBase {
             m_ra.erase_dependent(this);
         }
 
+        virtual bool has_row(size_t irow) = 0;
         // called before block transfer is performed
         virtual void before_block_transfer(const defs::inds& irows_send, size_t irank_send, size_t irank_recv) = 0;
         // called after row is inserted into the MappedTable on the recving rank
@@ -87,6 +88,13 @@ private:
 
 public:
     RankAllocatorBase(Table& table, size_t nblock, size_t period, double acceptable_imbalance);
+
+    bool row_mapped_by_dependent(size_t irow){
+        for (const auto dep : m_dependents) {
+            if (dep->has_row(irow)) return true;
+        }
+        return false;
+    }
 
     virtual size_t get_block_irow(const size_t& irow) = 0;
 

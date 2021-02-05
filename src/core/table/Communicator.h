@@ -249,15 +249,14 @@ struct Communicator {
             MPI_ASSERT_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
             size_t irow_local = 0ul;
             m_lc.clear();
-            m_lc.push_back(nrow_());
-            for (auto &irow : m_irows) static_cast<Table &>(m_lc).copy_row_in(m_source, irow, irow_local++);
-            ASSERT(irow_local==nrow_());
+            auto nrow = m_displs.back() + m_counts.back();
+            m_lc.push_back(m_counts[mpi::irank()]);
+            for (auto &irow : m_irows) {
+                static_cast<Table &>(m_lc).copy_row_in(m_source, irow, irow_local++);
+            }
+            ASSERT(irow_local==m_counts[mpi::irank()]);
 
             m_ac.clear();
-            mpi::all_gather(nrow_(), m_counts);
-            mpi::counts_to_displs_consec(m_counts, m_displs);
-            auto nrow = m_displs.back() + m_counts.back();
-            ASSERT(nrow==this->nrow());
             m_ac.push_back(nrow);
             /*
              * convert from units of rows to datawords...
@@ -277,6 +276,10 @@ struct Communicator {
         virtual void update() {
             update_counts();
             update_data();
+        }
+
+        bool has_row(size_t irow) override {
+            return m_irows.find(irow)!=m_irows.end();
         }
 
         void before_block_transfer(const defs::inds &irows_send, size_t irank_send, size_t irank_recv) override {
@@ -392,12 +395,12 @@ struct Communicator {
         }
 
         void change(Table::Loc loc) {
+            m_irows.clear();
             if (loc.is_mine()) {
                 ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow)) == mpi::irank());
-                m_irows.clear();
                 m_irows = {loc.m_irow};
             }
-            update();
+            DynamicRow::update();
         }
 
         bool is_mine() const {

@@ -11,7 +11,7 @@
 struct Options {
     std::string fcidump_path = "FCIDUMP";
     std::string initial_reference_det;
-    double reference_redefinition_thresh = 2.0;
+    double reference_redefinition_thresh = 10.0;
     bool fcidump_spin_major = false;
     std::string stats_path = "M7.stats";
     std::string parallel_stats_path = "M7.rank";

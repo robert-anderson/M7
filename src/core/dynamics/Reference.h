@@ -24,13 +24,13 @@ class Reference : public Wavefunction::DynamicRow {
      * its weight and row within m_list must be stored
      */
     size_t m_irow_candidate;
+    defs::wf_t m_candidate_abs_weight = 0.0;
     const double m_redefinition_thresh;
     bool m_redefinition_cycle;
 
     ReductionSyndicate m_summables;
     ReductionMember<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
-    SingleReducible<defs::wf_comp_t, defs::ndim_wf> m_candidate_weight;
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
@@ -44,6 +44,23 @@ public:
     const defs::wf_t& get_weight(const size_t& iroot, const size_t& ireplica) const {
         return m_ac.m_weight(0, iroot, ireplica);
     }
+
+    void accept_candidate(double redefinition_thresh = 0.0) {
+        std::vector<defs::wf_t> gather(mpi::nrank());
+        mpi::all_gather(m_candidate_abs_weight, gather);
+        MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
+        size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
+        mpi::bcast(m_irow_candidate, irank);
+        if (gather[irank] > std::abs(get_weight(0, 0)*redefinition_thresh)){
+            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", get_weight(0, 0), gather[irank]);
+            change({irank, m_irow_candidate});
+            //MPI_ASSERT(std::abs(m_wf.m_store.m_weight(m_irow_candidate, 0, 0))==m_candidate_abs_weight, "");
+        }
+        ASSERT(std::abs(get_weight(0, 0))==m_candidate_abs_weight);
+        m_candidate_abs_weight = 0.0;
+    }
+
+    void update() override;
 
     void add_row(const size_t& irow);
 

@@ -124,6 +124,7 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
     }
 
     void remove_walker(const size_t &irow) {
+        if (m_ra.row_mapped_by_dependent(irow)) return;
         const auto onv = m_store.m_onv(irow);
         auto lookup = m_store[onv];
         zero_weight(irow);
