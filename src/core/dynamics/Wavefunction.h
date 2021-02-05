@@ -133,7 +133,7 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
     size_t create_walker_(const views::Onv<> &onv, const defs::ham_t weight,
                           const defs::ham_comp_t &hdiag, bool refconn) {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
-        if (m_store.is_full()) m_store.expand(1,0.0);
+        if (m_store.is_full()) m_store.expand(1);
         auto irow = m_store.insert(onv);
         ASSERT(m_store.m_onv(irow) == onv)
         set_weight(irow, weight);
