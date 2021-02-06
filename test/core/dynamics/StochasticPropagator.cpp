@@ -51,7 +51,7 @@ TEST(StochasticPropagator, Test) {
 }
 #endif
 
-#ifdef ENABLE_BOSONS
+#if 0
 TEST(StochasticPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;

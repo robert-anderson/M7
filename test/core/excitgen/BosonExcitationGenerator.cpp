@@ -8,7 +8,7 @@
 #include "src/core/table/MappedTable.h"
 #include "src/core/excitgen/BosonExcitationGenerator.h"
 
-#ifdef ENABLE_BOSONS
+#if 0
 namespace boson_coupling_samplers_test {
     struct TestTable : MappedTable<fields::Onv<1>> {
         fields::Onv<1> m_onv;

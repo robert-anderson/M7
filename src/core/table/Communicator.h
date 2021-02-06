@@ -397,7 +397,7 @@ struct Communicator {
         void change(Table::Loc loc) {
             m_irows.clear();
             if (loc.is_mine()) {
-                ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow)) == mpi::irank());
+                //ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow)) == mpi::irank());
                 m_irows = {loc.m_irow};
             }
             DynamicRow::update();

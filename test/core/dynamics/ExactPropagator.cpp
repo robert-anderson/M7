@@ -15,7 +15,8 @@ void print(const Wavefunction& wf){
     }
 }
 
-#ifdef ENABLE_BOSONS
+
+#if 0 
 TEST(ExactPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
