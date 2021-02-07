@@ -22,9 +22,9 @@
 struct FlagBase;
 
 struct FlagField : BitsetSpecifier {
-    TableX* m_table;
+    TableBaseX* m_table;
     std::vector<FlagBase*> m_flags;
-    FlagField(TableX* table):BitsetSpecifier(0), m_table(table){}
+    FlagField(TableBaseX* table):BitsetSpecifier(0), m_table(table){}
     size_t add_flag(FlagBase* flag);
 };
 
@@ -53,13 +53,13 @@ size_t FlagBase::add_flag(FlagBase* flag){
 struct MyFlags : FlagField {
     //Flag<1> deterministic;
     FlagBase deterministic;
-    MyFlags(TableX* table): FlagField(table),
+    MyFlags(TableBaseX* table): FlagField(table),
     deterministic(this, 3){}
 };
 
 
 using namespace fields;
-struct TestTable : TableX {
+struct TestTable : TableBaseX {
     //FermionOnvSpecifier<0> field;
     Numbers<int, 1> ints;
     FermionOnv dets;
@@ -89,7 +89,7 @@ TEST(Table_ND, Packing) {
 
 
 
-struct TestTable : TableX {
+struct TestTable : TableBaseX {
     fields::Onv config;
     TestTable():config(this, 4, 5, "Onv"){}
 };

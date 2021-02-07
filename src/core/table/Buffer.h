@@ -65,10 +65,10 @@ public:
 
     void append_window(Window *window);
 
-    void resize(size_t nrow);
+    void resize(size_t dsize);
 
     // resize if smaller
-    void make_room(size_t nrow);
+    void make_room(size_t dsize);
 
     /**
      *
@@ -79,9 +79,9 @@ public:
      * by delta_nrow rows exactly. Any other value indicates the proportion of
      * additional rows to add relative to the new total number of rows.
      */
-    void expand(size_t delta_nrow, double expansion_factor);
+    void expand(size_t delta_dsize, double expansion_factor);
 
-    void expand(size_t delta_nrow);
+    void expand(size_t delta_dsize);
 
     std::string capacity_string(size_t dsize) const;
 

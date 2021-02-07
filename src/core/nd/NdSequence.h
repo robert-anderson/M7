@@ -12,11 +12,11 @@
 
 template<size_t nind>
 struct NdSequence {
-    const NdFormat<nind>& m_format;
+    NdFormat<nind> m_format;
     typedef std::array<size_t, nind> inds_t;
     const std::vector<inds_t> m_inds_vector;
-    NdSequence(const NdFormat<nind>& format): m_format(format),
-    m_inds_vector(make_inds_vector(format)){}
+    NdSequence(std::array<size_t, nind> shape): m_format(shape),
+    m_inds_vector(make_inds_vector(m_format)){}
 
     struct Cursor {
         const NdSequence<nind>& m_sequence;

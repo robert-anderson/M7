@@ -112,8 +112,8 @@ void Buffer::expand(size_t delta_dsize, double expansion_factor) {
     resize((dsize() + delta_dsize)*(1+expansion_factor));
 }
 
-void Buffer::expand(size_t delta_nrow) {
-    expand(delta_nrow, m_expansion_factor);
+void Buffer::expand(size_t delta_dsize) {
+    expand(delta_dsize, m_expansion_factor);
 }
 
 std::string Buffer::capacity_string(size_t dsize) const {
