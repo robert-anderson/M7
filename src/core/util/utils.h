@@ -231,6 +231,13 @@ namespace bit_utils {
         return (v << nbit) >> nbit;
     }
 
+    template<typename T>
+    std::string to_string(const T &v){
+        std::string tmp;
+        for (size_t i=0ul; i<sizeof (T)*CHAR_BIT; ++i) tmp+=get(v, i)?'1':'0';
+        return tmp;
+    }
+
 }
 
 
@@ -474,6 +481,61 @@ namespace sort_utils {
                     return getter_fn(i1) <= getter_fn(i2);
                 };
         }
+    }
+}
+
+namespace tuple_utils {
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), void>::type
+    for_each(std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
+    { }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I < sizeof...(Tp), void>::type
+    for_each(std::tuple<Tp...>& t, FuncT& f)
+    {
+        f(std::get<I>(t));
+        for_each<I + 1, FuncT, Tp...>(t, f);
+    }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), void>::type
+    for_each(const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
+    { }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I < sizeof...(Tp), void>::type
+    for_each(const std::tuple<Tp...>& t, FuncT& f)
+    {
+        f(std::get<I>(t));
+        for_each<I + 1, FuncT, Tp...>(t, f);
+    }
+
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), void>::type
+    for_each_pair(std::tuple<Tp...> &, std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
+    { }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I < sizeof...(Tp), void>::type
+    for_each_pair(std::tuple<Tp...>& t1, std::tuple<Tp...>& t2, FuncT& f)
+    {
+        f(std::get<I>(t1), std::get<I>(t2));
+        for_each<I + 1, FuncT, Tp...>(t1, t2, f);
+    }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), void>::type
+    for_each_pair(const std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
+    { }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I < sizeof...(Tp), void>::type
+    for_each_pair(const std::tuple<Tp...>& t1, const std::tuple<Tp...>& t2, FuncT& f)
+    {
+        f(std::get<I>(t1), std::get<I>(t2));
+        for_each<I + 1, FuncT, Tp...>(t1, t2, f);
     }
 }
 

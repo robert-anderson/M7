@@ -25,10 +25,14 @@ const char *FieldBaseX::begin() const {
 }
 
 char *FieldBaseX::raw_view() {
+    ASSERT(m_row->m_dbegin);
+    ASSERT(m_element_offset<m_size);
     return (char*)(m_row->m_dbegin)+m_offset+m_element_offset;
 }
 
 const char *FieldBaseX::raw_view() const {
+    ASSERT(m_row->m_dbegin);
+    ASSERT(m_element_offset<m_size);
     return (const char*)(m_row->m_dbegin)+m_offset+m_element_offset;
 }
 
@@ -45,22 +49,30 @@ RowX::RowX(const RowX &other) : m_table(other.m_table),
     other.m_last_copied = this;
 }
 
-const RowX &RowX::select_first() const {
+bool RowX::select_first() const {
     ASSERT(m_table);
     m_dbegin = m_table->dbegin();
-    return *this;
+    return true;
 }
 
-const RowX &RowX::select_next() const {
+bool RowX::select_next() const {
     ASSERT(m_table);
     m_dbegin += m_dsize;
-    MPI_ASSERT(m_dbegin<m_table->m_bw.m_dend, "Row accesses Table out of bounds");
-    return *this;
+    if(m_dbegin>=m_table->m_bw.m_dend) {
+        // Row accesses Table out of bounds
+        select_first();
+        return false;
+    }
+    return true;
 }
 
-const RowX &RowX::select(const size_t &irow) const {
+bool RowX::select(const size_t &irow) const {
     ASSERT(m_table);
     m_dbegin = m_table->dbegin()+irow*m_dsize;
-    MPI_ASSERT(m_dbegin<m_table->m_bw.m_dend, "Row accesses Table out of bounds");
-    return *this;
+    if(m_dbegin>=m_table->m_bw.m_dend) {
+        // Row accesses Table out of bounds
+        select_first();
+        return false;
+    }
+    return true;
 }

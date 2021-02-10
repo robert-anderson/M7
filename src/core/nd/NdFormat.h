@@ -13,6 +13,12 @@ template <size_t nind>
 class NdFormat {
     std::array<size_t, nind> m_shape;
     std::array<size_t, nind> m_strides;
+    size_t m_nelement = ~0ul;
+
+    void set_nelement() {
+        if (!nind) m_nelement = 1;
+        else m_nelement = m_shape.front()*m_strides.front();
+    }
 
 public:
     NdFormat(){
@@ -22,9 +28,11 @@ public:
     NdFormat(size_t extent){
         m_shape.fill(extent);
         set_strides();
+        set_nelement();
     }
     NdFormat(std::array<size_t, nind> shape):m_shape(std::move(shape)){
         set_strides();
+        set_nelement();
     }
     template<typename ...Args>
     NdFormat(const size_t& first, const size_t& second, Args&&... shape){
@@ -32,6 +40,7 @@ public:
         static_assert(2+sizeof...(Args)<=nind, "too many arguments to specify array shape");
         set_shape(first, second, std::forward<Args>(shape)...);
         set_strides();
+        set_nelement();
     }
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape()){}
@@ -43,9 +52,8 @@ public:
         return true;
     }
 
-    size_t nelement() const {
-        if (!nind) return 1;
-        return m_shape.front()*m_strides.front();
+    const size_t& nelement() const {
+        return m_nelement;
     }
 
     const size_t& extent(const size_t& i) const {

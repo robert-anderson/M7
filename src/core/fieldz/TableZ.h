@@ -1,26 +1,22 @@
 //
-// Created by rja on 21/10/2020.
+// Created by rja on 09/02/2021.
 //
 
-#ifndef M7_TABLEBASEX_H
-#define M7_TABLEBASEX_H
+#ifndef M7_TABLEZ_H
+#define M7_TABLEZ_H
 
-#include <src/core/util/utils.h>
 #include <stack>
-#include <src/core/field/FieldX.h>
-#include <src/core/sort/ExtremalValues.h>
-#include "src/defs.h"
-#include "Buffer.h"
+#include "src/core/table/Buffer.h"
 #include "src/core/io/Logging.h"
+#include "RowZ.h"
 
-#if 0
-struct RowTransfer {
+struct RowTransferZ {
     // make rows to be sent contiguous in memory
     Buffer m_send_buffer, m_recv_buffer;
     Buffer::Window m_send_bw, m_recv_bw;
     const int m_nrow_p2p_tag = mpi::new_p2p_tag();
     const int m_irows_p2p_tag = mpi::new_p2p_tag();
-    RowTransfer(std::string name):
+    RowTransferZ(std::string name):
             m_send_buffer("Outward transfer buffer", 1),
             m_recv_buffer("Inward transfer buffer", 1) {
         log::info("Initializing row send/recv buffers for table \"{}\"", name);
@@ -30,10 +26,8 @@ struct RowTransfer {
         m_recv_buffer.append_window(&m_recv_bw);
     }
 };
-#endif
 
-struct TableBaseX {
-    const defs::inds m_field_format;
+struct TableBaseZ {
     const size_t m_row_dsize;
     const size_t m_row_size;
     Buffer::Window m_bw;
@@ -48,11 +42,11 @@ struct TableBaseX {
      */
     std::stack<size_t> m_free_rows;
     // instantiate on first transfer if required
-    std::unique_ptr<RowTransfer> m_transfer = nullptr;
+    std::unique_ptr<RowTransferZ> m_transfer = nullptr;
 
-    TableBaseX(defs::inds field_format, size_t row_dsize);
+    TableBaseZ(size_t row_dsize);
 
-    TableBaseX(const TableBaseX &other);
+    TableBaseZ(const TableBaseZ &other);
 
     defs::data_t *dbegin() {
         return m_bw.m_dbegin;
@@ -69,7 +63,6 @@ struct TableBaseX {
     const defs::data_t *dbegin(const size_t &irow) const {
         return m_bw.m_dbegin + irow * m_row_dsize;
     }
-
 
     void set_buffer(Buffer *buffer);
 
@@ -107,9 +100,7 @@ struct TableBaseX {
     void transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv,
                        const std::list<recv_cb_t> &callbacks = {});
 
-    bool has_compatible_format(const TableBaseX &other);
-
-    void copy_row_in(const TableBaseX &src, size_t irow_src, size_t irow_dst);
+    //void copy_row_in(const TableBaseZ &src, size_t irow_src, size_t irow_dst);
 
     struct Loc {
         const size_t m_irank, m_irow;
@@ -127,41 +118,43 @@ struct TableBaseX {
 };
 
 template<typename row_t>
-struct TableX : TableBaseX {
-    static_assert(std::is_base_of<RowX, row_t>::value, "Template arg must be derived from Row");
+struct TableZ : TableBaseZ {
+    static_assert(std::is_base_of<RowZ, row_t>::value, "Template arg must be derived from Row");
     row_t m_row;
 
-    TableX(row_t row) :
-            TableBaseX(static_cast<const RowX &>(row).field_format(),
-                       static_cast<const RowX &>(row).m_dsize), m_row(row) {
-        m_row.set_table(this);
+    TableZ(const row_t& row) :
+            TableBaseZ(static_cast<const RowZ &>(row).m_dsize), m_row(row) {
+        static_cast<RowZ &>(m_row).m_table_bw = &m_bw;
+        static_cast<RowZ &>(m_row).m_table_hwm = &m_hwm;
     }
 
 
     std::string to_string(const defs::inds *ordering= nullptr) const {
         std::string tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
-        m_row.select_first();
+        m_row.restart();
         for (size_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;
+            m_row.jump(irow);
             tmp+=std::to_string(irow) + ". " + m_row.to_string() + "\n";
-            m_row.select_next();
         }
         return tmp;
     }
-
+/*
     std::string to_string(const ExtremalValues &xv) const {
         defs::inds tmp;
         tmp.reserve(xv.nfound());
         for (size_t i = 0ul; i < xv.nfound(); ++i) tmp.push_back(xv[i]);
         return to_string(&tmp);
     }
+    */
 
 private:
-    RowX & base_row() {
-        return static_cast<RowX &>(m_row);
+    RowZ & base_row() {
+        return static_cast<RowZ &>(m_row);
     }
 };
 
 
-#endif //M7_TableX_H
+
+#endif //M7_TABLEZ_H

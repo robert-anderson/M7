@@ -30,20 +30,28 @@ struct FieldBaseX {
 
 private:
 
-    FieldBaseX &select_first() {
+    bool select_first() const {
         m_element_offset = 0;
-        return *this;
+        return true;
     }
 
-    FieldBaseX &select_next() {
+    bool select_next() const {
         m_element_offset += m_element_size;
-        return *this;
+        if (m_element_offset>=m_size){
+            select_first();
+            return false;
+        }
+        return true;
     }
 
     template<typename ...Args>
-    FieldBaseX &select(const size_t iflat) {
+    bool select(const size_t iflat) const {
         m_element_offset = m_element_size * iflat;
-        return *this;
+        if (m_element_offset>=m_size){
+            select_first();
+            return false;
+        }
+        return true;
     }
 
 public:
@@ -74,8 +82,8 @@ public:
 
     void zero_all();
 
-    bool equals(const FieldBaseX& other) const{
-        return std::memcmp(raw_view(), other.raw_view(), m_size)==0;
+    bool equals(const FieldBaseX &other) const {
+        return std::memcmp(raw_view(), other.raw_view(), m_size) == 0;
     }
 
     bool is_same_type_as(const FieldBaseX &other) const {
@@ -86,9 +94,8 @@ public:
 
     std::string to_string_all() const {
         std::string tmp;
-        for (m_element_offset = 0ul; m_element_offset < m_size; m_element_offset += m_element_size) {
-            tmp += to_string() + " ";
-        }
+        select_first();
+        do { tmp += to_string() + " "; } while (select_next());
         return tmp;
     }
 
@@ -100,11 +107,11 @@ struct NumberFieldX : FieldBaseX {
     NumberFieldX(RowX *row, bool is_key, size_t nelement) :
             FieldBaseX(row, is_key, nelement, typeid(T), sizeof(T)) {}
 
-    const T & operator()() const {
+    const T &operator()() const {
         return *(T *) raw_view();
     }
 
-    T & operator()() {
+    T &operator()() {
         return *(T *) raw_view();
     }
 
@@ -197,6 +204,7 @@ public:
     }
 
     void set(const defs::inds &setinds) {
+        zero();
         for (auto ibit: setinds) set(ibit);
     }
 
@@ -271,7 +279,7 @@ struct FermionOnvFieldX : BitsetFieldX {
         for (auto i: beta) set(1, i);
     }
 
-    void set(const std::string &s) {
+    void set_from_string(const std::string &s) {
         zero();
         size_t i = 0ul;
         for (auto c: s) {
@@ -346,6 +354,18 @@ struct FermionOnvFieldX : BitsetFieldX {
         }
         return nalpha;
     }
+
+    std::string to_string() const override {
+        std::string res;
+        res += "(";
+        res.reserve(nbit() * 2 + 3);
+        size_t i = 0ul;
+        for (; i < nbit() / 2; ++i) res += get(i) ? "1" : "0";
+        res += ","; // spin channel delimiter
+        for (; i < nbit(); ++i) res += get(i) ? "1" : "0";
+        res += ")";
+        return res;
+    }
 };
 
 struct BosonOnvFieldX : NumberArrayFieldX<uint8_t, 1> {
@@ -385,25 +405,34 @@ struct NdFieldX : field_t, NdFieldBaseX<nind> {
     NdFieldX(RowX *row, bool is_key, std::array<size_t, nind> shape, Args... args) :
             field_t(row, is_key, NdFormat<nind>(shape).nelement(), args...),
             NdFieldBaseX<nind>(shape) {
-            }
-
-    NdFieldX &select_first() {
-        m_inds.to_front();
-        m_element_offset = 0;
-        return *this;
     }
 
-    NdFieldX &select_next() {
+    bool select_first() {
+        m_inds.to_front();
+        m_element_offset = 0;
+        return true;
+    }
+
+    bool select_next() {
         m_inds++;
         m_element_offset += m_element_size;
-        return *this;
+        if (m_element_offset >= m_size) {
+            ASSERT(0)
+            select_first();
+            return false;
+        }
+        return true;
     }
 
     template<typename ...Args>
-    NdFieldX &select(Args... inds) {
+    bool select(Args... inds) {
         m_inds.to(inds...);
         m_element_offset = m_element_size * m_inds.ielement();
-        return *this;
+        if (m_element_offset >= m_size) {
+            select_first();
+            return false;
+        }
+        return true;
     }
 };
 
@@ -459,26 +488,30 @@ struct RowX {
     size_t m_current_offset = 0ul;
     mutable RowX *m_last_copied = nullptr;
 
-    void set_table(TableBaseX* table){
+    void set_table(TableBaseX *table) {
         m_table = table;
         select_first();
     }
 
-    const RowX& select_first() const;
-    const RowX& select_next() const;
-    const RowX& select(const size_t& irow) const;
+    bool select_first() const;
+
+    bool select_next() const;
+
+    bool select(const size_t &irow) const;
 
     defs::inds field_format() const {
         defs::inds tmp;
         tmp.reserve(m_fields.size());
-        for (auto field: m_fields) tmp.push_back(field->m_size*(size_t)&field->m_type_info);
+        for (auto field: m_fields) tmp.push_back(field->m_size * (size_t) &field->m_type_info);
         return tmp;
     }
 
-    RowX(){}
-    RowX(TableBaseX* table){
+    RowX() {}
+
+    RowX(TableBaseX *table) {
         set_table(table);
     }
+
     RowX(const RowX &other);
 
     std::string to_string() const {
@@ -507,25 +540,25 @@ struct RowX {
         return offset;
     }
 
-    void copy_keys(const RowX& other){
-        ASSERT(other.m_key_field_inds.size()==m_key_field_inds.size());
-        for (const auto& ifield : m_key_field_inds) {
+    void copy_keys(const RowX &other) {
+        ASSERT(other.m_key_field_inds.size() == m_key_field_inds.size());
+        for (const auto &ifield : m_key_field_inds) {
             m_fields[ifield]->copy(*other.m_fields[ifield]);
         }
     }
 
     defs::hash_t hash_keys() const {
         defs::hash_t tmp = 0ul;
-        for (const auto& ifield: m_key_field_inds) {
+        for (const auto &ifield: m_key_field_inds) {
             const auto field = m_fields[ifield];
-            tmp^=hashing::fnv_hash(field->begin(), field->m_size);
+            tmp ^= hashing::fnv_hash(field->begin(), field->m_size);
         }
         return tmp;
     }
 
-    bool equal_keys(const RowX& other) const {
-        ASSERT(other.m_key_field_inds.size()==m_key_field_inds.size());
-        for (const auto& ifield : m_key_field_inds) {
+    bool equal_keys(const RowX &other) const {
+        ASSERT(other.m_key_field_inds.size() == m_key_field_inds.size());
+        for (const auto &ifield : m_key_field_inds) {
             if (!m_fields[ifield]->equals(*other.m_fields[ifield])) return false;
         }
         return true;
@@ -537,57 +570,58 @@ namespace fieldxs {
 
     template<typename T, size_t nind>
     struct Numbers : NdFieldX<NumberFieldX<T>, nind> {
-        Numbers(RowX *row, std::array<size_t, nind> shape, bool is_key=false) :
-        NdFieldX<NumberFieldX<T>, nind>(row, is_key, shape) {}
+        Numbers(RowX *row, std::array<size_t, nind> shape, bool is_key = false) :
+                NdFieldX<NumberFieldX<T>, nind>(row, is_key, shape) {}
     };
 
     template<typename T>
     struct Number : Numbers<T, 0> {
-        Number(RowX *row, bool is_key=false) : Numbers<T, 0>(row, is_key, {}) {}
+        Number(RowX *row, bool is_key = false) : Numbers<T, 0>(row, is_key, {}) {}
     };
 
     template<typename T, size_t nind, size_t nind_element>
     struct NumberArrays : NdFieldX<NumberArrayFieldX<T, nind_element>, nind> {
-        NumberArrays(RowX *row, std::array<size_t, nind> shape, const NdFormat<nind_element> &element_format, bool is_key=false) :
+        NumberArrays(RowX *row, std::array<size_t, nind> shape, const NdFormat<nind_element> &element_format,
+                     bool is_key = false) :
                 NdFieldX<NumberArrayFieldX<T, nind_element>, nind>(row, is_key, shape, element_format) {}
     };
 
     template<typename T, size_t nind_element>
     struct NumberArray : NumberArrays<T, 0, nind_element> {
-        NumberArray(RowX *row, const NdFormat<nind_element> &element_format, bool is_key=false) :
+        NumberArray(RowX *row, const NdFormat<nind_element> &element_format, bool is_key = false) :
                 NumberArrays<T, 0, nind_element>(row, is_key, {}, element_format) {}
     };
 
     template<size_t nind>
     struct Bitsets : NdFieldX<BitsetFieldX, nind> {
-        Bitsets(RowX *row, std::array<size_t, nind> shape, size_t nbit, bool is_key=false) :
+        Bitsets(RowX *row, std::array<size_t, nind> shape, size_t nbit, bool is_key = false) :
                 NdFieldX<BitsetFieldX, nind>(row, is_key, shape, nbit) {}
     };
 
     struct Bitset : Bitsets<0> {
-        Bitset(RowX *row, size_t nbit, bool is_key=false) : Bitsets<0>(row, {}, nbit, is_key) {}
+        Bitset(RowX *row, size_t nbit, bool is_key = false) : Bitsets<0>(row, {}, nbit, is_key) {}
     };
 
 
     template<size_t nind>
     struct FermionOnvs : NdFieldX<FermionOnvFieldX, nind> {
-        FermionOnvs(RowX *row, std::array<size_t, nind> shape, size_t nsite, bool is_key=false) :
+        FermionOnvs(RowX *row, std::array<size_t, nind> shape, size_t nsite, bool is_key = false) :
                 NdFieldX<FermionOnvFieldX, nind>(row, is_key, shape, nsite) {}
     };
 
     struct FermionOnv : FermionOnvs<0> {
-        FermionOnv(RowX *row, size_t nsite, bool is_key=false) : FermionOnvs<0>(row, {}, nsite, is_key) {}
+        FermionOnv(RowX *row, size_t nsite, bool is_key = false) : FermionOnvs<0>(row, {}, nsite, is_key) {}
     };
 
     template<size_t nind>
     struct BosonOnvs : NumberArrays<uint8_t, nind, 1> {
-        BosonOnvs(RowX *row, std::array<size_t, nind> shape, size_t nmode, bool is_key=false):
-        NumberArrays<uint8_t, nind, 1>(row, shape, {nmode}, is_key){}
+        BosonOnvs(RowX *row, std::array<size_t, nind> shape, size_t nmode, bool is_key = false) :
+                NumberArrays<uint8_t, nind, 1>(row, shape, {nmode}, is_key) {}
     };
 
-    struct BosonOnv : BosonOnvs<0>{
-        BosonOnv(RowX *row, size_t nmode, bool is_key=false):
-        BosonOnvs<0>(row, {}, nmode, is_key){}
+    struct BosonOnv : BosonOnvs<0> {
+        BosonOnv(RowX *row, size_t nmode, bool is_key = false) :
+                BosonOnvs<0>(row, {}, nmode, is_key) {}
     };
 
 

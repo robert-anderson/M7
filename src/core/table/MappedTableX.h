@@ -45,7 +45,7 @@ struct MappedTableX : TableX<row_t> {
     std::vector<std::forward_list<size_t>> m_buckets;
 
     MappedTableX(row_t row, size_t nbucket):
-            TableX<row_t>(row){
+            TableX<row_t>(row), m_buckets(nbucket){
         MPI_ASSERT(m_row.m_key_field_inds.size(), "A Table can't be mapped without key fields");
     }
 
