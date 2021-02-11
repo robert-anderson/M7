@@ -13,7 +13,6 @@
 struct FieldBaseZ {
     const size_t m_element_size;
     const std::type_info &m_type_info;
-    const bool m_is_key;
     /*
      * set after instantiation when incorporated into
      * NdField and Row
@@ -29,13 +28,13 @@ struct FieldBaseZ {
      */
     mutable size_t m_view_offset = ~0ul;
 
-    FieldBaseZ(size_t element_size, const std::type_info &type_info, bool is_key);
+    FieldBaseZ(size_t element_size, const std::type_info &type_info);
 
     FieldBaseZ(const FieldBaseZ &other);
 
     bool is_added_to_row() const;
 
-    template<size_t nind, typename ...Args> friend struct NdMultiFieldY;
+    template<size_t nind, typename ...Args> friend struct NdMultiFieldZ;
 private:
 
     bool oob() const {

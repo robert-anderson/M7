@@ -16,11 +16,10 @@ struct RowZ {
     size_t *m_table_hwm = nullptr;
     mutable defs::data_t *m_dbegin = nullptr;
     std::vector<FieldBaseZ *> m_fields;
-    defs::inds m_key_field_inds;
     size_t m_size;
     size_t m_dsize;
     size_t m_current_offset = 0ul;
-    mutable RowZ* m_last_copied = nullptr;
+    mutable RowZ* m_child = nullptr;
 
 //    void set_table(TableBaseX *table) {
 //        m_table = table;
@@ -112,11 +111,10 @@ struct RowZ {
         m_table_bw = other.m_table_bw;
         m_table_hwm = other.m_table_hwm;
         m_dbegin = other.m_dbegin;
-        m_key_field_inds = other.m_key_field_inds;
         //m_size = other.m_size;
         //m_dsize = other.m_dsize;
         //m_current_offset = other.m_current_offset;
-        other.m_last_copied = this;
+        other.m_child = this;
         ASSERT(m_fields.empty())
     }
 

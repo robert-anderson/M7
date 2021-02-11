@@ -26,7 +26,6 @@ size_t RowZ::add_field(FieldBaseZ *field) {
     m_dsize = integer_utils::divceil(m_current_offset, defs::nbyte_data);
     m_size = m_dsize * defs::nbyte_data;
 
-    if (field->m_is_key) m_key_field_inds.push_back(m_fields.size());
     m_fields.push_back(field);
     return offset;
 }

@@ -19,10 +19,10 @@ struct BitsetFieldBaseZ : FieldBaseZ {
     const size_t m_element_dsize;
 
 public:
-    BitsetFieldBaseZ(const NdFormat<nind> &format, bool is_key=false) :
-            FieldBaseZ(integer_utils::divceil(format.nelement(), nbit_word()) * nbyte_word(),
-                       typeid(BitsetFieldBaseZ), is_key),
-            m_format(format), m_nbit(m_format.nelement()), m_element_dsize(m_element_size * nbyte_word()) {}
+    BitsetFieldBaseZ(std::array<size_t, nind> shape) :
+            FieldBaseZ(integer_utils::divceil(NdFormat<nind>(shape).nelement(), nbit_word()) * nbyte_word(),
+                       typeid(BitsetFieldBaseZ)),
+            m_format(shape), m_nbit(m_format.nelement()), m_element_dsize(m_element_size * nbyte_word()) {}
 
     const size_t &nbit() const {
         return m_format.nelement();
@@ -97,8 +97,8 @@ public:
 
 
 struct FermionOnvFieldZ : BitsetFieldBaseZ<defs::data_t, 2> {
-    FermionOnvFieldZ(size_t nsite, bool is_key=false):
-            BitsetFieldBaseZ<defs::data_t, 2>({2, nsite}, is_key){}
+    FermionOnvFieldZ(size_t nsite):
+            BitsetFieldBaseZ<defs::data_t, 2>({2, nsite}){}
 
     const size_t& nsite() const {
         return m_format.extent(1);
@@ -217,7 +217,7 @@ struct FermionOnvFieldZ : BitsetFieldBaseZ<defs::data_t, 2> {
 
 template<size_t nind>
 struct FlagFieldZ : BitsetFieldBaseZ<char, nind> {
-    FlagFieldZ(const NdFormat<nind> &format) : BitsetFieldBaseZ<char, nind>(format, false){}
+    FlagFieldZ(std::array<size_t, nind> shape) : BitsetFieldBaseZ<char, nind>(shape){}
 };
 
 

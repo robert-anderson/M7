@@ -5,28 +5,10 @@
 #include "FieldBaseZ.h"
 #include "src/core/parallel/MPIAssert.h"
 
-FieldBaseZ::FieldBaseZ(size_t element_size, const std::type_info &type_info, bool is_key) :
-        m_element_size(element_size), m_type_info(type_info), m_is_key(is_key) {
-}
+FieldBaseZ::FieldBaseZ(size_t element_size, const std::type_info &type_info) :
+        m_element_size(element_size), m_type_info(type_info) {}
 
-FieldBaseZ::FieldBaseZ(const FieldBaseZ &other) : FieldBaseZ(other.m_element_size, other.m_type_info, other.m_is_key) {
-    m_nelement = other.m_nelement;
-    m_size = other.m_size;
-    m_max_view_offset = other.m_max_view_offset;
-    m_row_offset = other.m_row_offset;
-    if (other.m_row){
-        /*
-         * we're copying a field which is bound to a row, in this case we assume the field is being
-         * copied as part of a row copy. If the field is to be copied without reference to a row,
-         * it should not already be bound to a Row.
-         */
-        m_row = other.m_row->m_last_copied;
-        ASSERT(m_row);
-        auto chk_offset = m_row->add_field(this);
-        ASSERT(m_row_offset==chk_offset);
-        restart();
-    }
-}
+FieldBaseZ::FieldBaseZ(const FieldBaseZ &other) : FieldBaseZ(other.m_element_size, other.m_type_info) {}
 
 bool FieldBaseZ::is_added_to_row() const {
     return (m_nelement != ~0ul) && (m_size != ~0ul) && (m_row_offset != ~0ul) && m_row;
@@ -125,9 +107,7 @@ defs::hash_t FieldBaseZ::hash() const {
 
 std::string FieldBaseZ::to_string_all() const {
     std::string tmp;
-    log::info(">>>>  {}", m_view_offset);
     bool loop = try_restart();
-    log::info(">>>>  {}", m_view_offset);
     while (loop) {
         tmp += to_string() + " ";
         loop = try_step();

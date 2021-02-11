@@ -12,8 +12,8 @@ template<typename T, size_t nind>
 struct NumberFieldZ : FieldBaseZ {
     NdFormat<nind> m_format;
 
-    NumberFieldZ(std::array<size_t, nind> shape, bool is_key=false) :
-            FieldBaseZ(sizeof(T) * NdFormat<nind>(shape).nelement(), typeid(NumberFieldZ<T, nind>), is_key),
+    NumberFieldZ(std::array<size_t, nind> shape) :
+            FieldBaseZ(sizeof(T) * NdFormat<nind>(shape).nelement(), typeid(NumberFieldZ<T, nind>)),
             m_format(shape) {}
 
     NumberFieldZ &operator=(const T &v) {
@@ -48,6 +48,7 @@ struct NumberFieldZ : FieldBaseZ {
     }
 
     std::string to_string() const override {
+        ASSERT(m_view_offset!=~0ul)
         std::string tmp = "[";
         const auto nelement = m_format.nelement();
         for (size_t i = 0ul; i < nelement; ++i)
@@ -60,8 +61,8 @@ struct NumberFieldZ : FieldBaseZ {
 struct BosonOnvFieldZ : NumberFieldZ<uint8_t, 1> {
     size_t m_nmode;
 
-    BosonOnvFieldZ(size_t nmode, bool is_key= false) :
-            NumberFieldZ<uint8_t, 1>({nmode}, is_key), m_nmode(nmode) {}
+    BosonOnvFieldZ(size_t nmode) :
+            NumberFieldZ<uint8_t, 1>({nmode}), m_nmode(nmode) {}
 };
 
 
