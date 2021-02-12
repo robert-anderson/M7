@@ -59,6 +59,8 @@ bool FieldBaseZ::try_jump(const size_t& iflat) const {
 }
 
 FieldBaseZ &FieldBaseZ::copy(const FieldBaseZ &other) {
+    MPI_REQUIRE(m_element_size==other.m_element_size &&
+                m_type_info==other.m_type_info, "incompatible formats");
     std::memcpy(raw_view(), other.raw_view(), m_element_size);
     return *this;
 }
@@ -68,10 +70,10 @@ FieldBaseZ &FieldBaseZ::copy_all(const FieldBaseZ &other) {
     return *this;
 }
 
-FieldBaseZ &FieldBaseZ::operator=(const FieldBaseZ &other) {
-    copy(other);
-    return *this;
-}
+//FieldBaseZ &FieldBaseZ::operator=(const FieldBaseZ &other) {
+//    copy(other);
+//    return *this;
+//}
 
 char *FieldBaseZ::begin() const {
     MPI_ASSERT(is_added_to_row(), "Field is not associated with row");

@@ -47,12 +47,12 @@ public:
         init();
     }
 
-    NdMultiFieldZ& operator=(const NdMultiFieldZ& other) {
-        MPI_ASSERT(other.m_sequence.m_format==m_sequence.m_format, "Shapes are incompatible");
-        m_row = other.m_row;
-        m_subfields = other.m_subfields;
-        return *this;
-    }
+//    NdMultiFieldZ& operator=(const NdMultiFieldZ& other) {
+//        MPI_ASSERT(other.m_sequence.m_format==m_sequence.m_format, "Shapes are incompatible");
+//        m_row = other.m_row;
+//        m_subfields = other.m_subfields;
+//        return *this;
+//    }
 
     void init() {
         if (!m_row) return;
@@ -129,7 +129,7 @@ public:
     }
 
     template<typename ...Inds>
-    bool select(Inds... inds) {
+    bool jump(Inds... inds) const {
         m_inds.to(inds...);
         struct fn_t {
             size_t m_ielement;

@@ -8,6 +8,14 @@
 #include "NdMultiFieldZ.h"
 #include "BufferedTableZ.h"
 
+
+
+//template<typename row_t>
+//struct RowWrapperZ {
+//    row_t m_wrapped_row;
+//
+//};
+
 /*
 template<size_t nind, typename ...Args>
 struct SingleFieldRowZ : RowZ {
@@ -28,5 +36,35 @@ struct ElementZ : nd_field_t, BufferedTableZ<row_t> {
     ElementZ(Args... args): NdFieldZ<0ul, row_t>()
 };
 */
+
+struct WrappedRowZ {
+    RowZ m_wrapped_row;
+};
+
+template<typename ...Args>
+struct ElementZ : WrappedRowZ, NdMultiFieldZ<0ul, Args...> {
+    Buffer m_buffer;
+    TableBaseZ m_table;
+    ElementZ(Args &&... subfields) :
+            NdMultiFieldZ<0ul, Args...>(&m_wrapped_row, {}, std::move(subfields)...),
+            m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
+        m_table.set_buffer(&m_buffer);
+        m_wrapped_row.m_table_bw = &m_table.m_bw;
+        m_wrapped_row.m_table_hwm = &m_table.m_hwm;
+        m_table.push_back();
+        m_wrapped_row.restart();
+        NdMultiFieldZ<0ul, Args...>::restart();
+    }
+};
+
+namespace elementsz {
+    template<typename T, size_t nind>
+    using number_array = ElementZ<NumberFieldZ<T, nind>>;
+
+    struct FermionOnv : ElementZ<FermionOnvFieldZ> {
+        FermionOnv(size_t nsite): ElementZ<FermionOnvFieldZ>(FermionOnvFieldZ(nsite)){}
+    };
+}
+
 
 #endif //M7_ELEMENTSZ_H

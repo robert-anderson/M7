@@ -32,6 +32,23 @@ struct FieldBaseZ {
 
     FieldBaseZ(const FieldBaseZ &other);
 
+    FieldBaseZ& operator=(const FieldBaseZ& other){
+        copy(other);
+        return *this;
+    }
+
+    /*
+    FieldBaseZ& operator=(const FieldBaseZ& other){
+        MPI_REQUIRE(m_element_size==other.m_element_size &&
+        m_type_info==other.m_type_info, "incompatible formats");
+        m_row = other.m_row;
+        m_nelement = other.m_nelement;
+        m_size = other.m_size;
+        m_max_view_offset = other.m_max_view_offset;
+        m_row_offset = other.m_row_offset;
+    }
+     */
+
     bool is_added_to_row() const;
 
     template<size_t nind, typename ...Args> friend struct NdMultiFieldZ;
@@ -57,8 +74,6 @@ public:
     FieldBaseZ &copy(const FieldBaseZ &other);
 
     FieldBaseZ &copy_all(const FieldBaseZ &other);
-
-    FieldBaseZ &operator=(const FieldBaseZ &other);
 
     char *begin() const;
 
