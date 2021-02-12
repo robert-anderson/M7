@@ -64,6 +64,11 @@ namespace elementsz {
     struct FermionOnv : ElementZ<FermionOnvFieldZ> {
         FermionOnv(size_t nsite): ElementZ<FermionOnvFieldZ>(FermionOnvFieldZ(nsite)){}
     };
+
+    struct FermiBosOnv : ElementZ<FermionOnvFieldZ, BosonOnvFieldZ> {
+        FermiBosOnv(size_t nsite):
+                ElementZ<FermionOnvFieldZ, BosonOnvFieldZ>(FermionOnvFieldZ(nsite), BosonOnvFieldZ(nsite)){}
+    };
 }
 
 

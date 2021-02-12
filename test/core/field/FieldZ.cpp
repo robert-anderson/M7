@@ -74,7 +74,7 @@ TEST(FieldZ, Test) {
 
 
     //elementsz::NumberArray<double, 1> det(NumberFieldZ<double, 1>({3}));
-    elementsz::FermionOnv det(5);
+    elementsz::FermiBosOnv det(5);
     std::cout << det.to_string() << std::endl;
 
 }
