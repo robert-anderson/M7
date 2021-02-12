@@ -9,6 +9,7 @@
 
 template<typename row_t>
 class BufferedTableArrayZ {
+    typedef TableZ<row_t> table_t;
     Buffer m_buffer;
     std::vector<table_t> m_tables;
 
@@ -58,7 +59,7 @@ public:
         }
     }
 
-    BufferedTableArrayZ(const BufferedTableArray<table_t> &other) :
+    BufferedTableArrayZ(const BufferedTableArrayZ<table_t> &other) :
             m_buffer(other.m_buffer.m_name, other.ntable(), 0) {
         m_tables.reserve(other.ntable());
         for (size_t itable = 0ul; itable < other.ntable(); ++itable) {

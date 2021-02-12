@@ -2,8 +2,8 @@
 // Created by rja on 10/02/2021.
 //
 
-#ifndef M7_MAPPEDTABLE_H
-#define M7_MAPPEDTABLE_H
+#ifndef M7_MAPPEDTABLEZ_H
+#define M7_MAPPEDTABLEZ_H
 
 #include <forward_list>
 #include "TableZ.h"
@@ -51,6 +51,10 @@ struct MappedTableZ : TableZ<row_t> {
 
     MappedTableZ(const row_t& row, size_t nbucket) : TableZ<row_t>(row), m_buckets(nbucket){}
 
+    size_t nbucket() const {
+        return nbucket();
+    }
+
     /**
      * @param nrow_max
      * expected maximum number of rows
@@ -65,7 +69,7 @@ struct MappedTableZ : TableZ<row_t> {
 
     LookupResultZ operator[](const key_field_t& key) {
         m_total_lookups++;
-        LookupResultZ res(m_buckets[key.hash() % m_buckets.size()]);
+        LookupResultZ res(m_buckets[key.hash() % nbucket()]);
         auto current = res.m_bucket.before_begin();
         for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
             m_row.jump(*next);
@@ -96,7 +100,7 @@ struct MappedTableZ : TableZ<row_t> {
     size_t insert(const key_field_t& key) {
         ASSERT(!(this->operator[](key)));
         auto irow = TableBaseZ::get_free_row();
-        auto &bucket = m_buckets[key.hash() % m_buckets.size()];
+        auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
         m_row.select(irow);
         m_row.m_key_field = key;
@@ -121,7 +125,7 @@ struct MappedTableZ : TableZ<row_t> {
         if (m_total_lookups < m_remap_nlookup) return;
         if (double(m_total_skips) / double(m_total_lookups) > m_remap_ratio) return;
         // use the same expansion factor as for the Table buffer
-        const size_t nbucket_new = m_buckets.size() * TableBaseZ::m_bw.expansion_factor();
+        const size_t nbucket_new = nbucket() * TableBaseZ::m_bw.expansion_factor();
         std::vector<std::forward_list<size_t>> new_buckets(nbucket_new);
         for (const auto &old_bucket : m_buckets) {
             for (const auto irow : old_bucket) {
@@ -137,4 +141,4 @@ struct MappedTableZ : TableZ<row_t> {
 };
 
 
-#endif //M7_MAPPEDTABLE_H
+#endif //M7_MAPPEDTABLEZ_H

@@ -5,25 +5,26 @@
 #ifndef M7_COMMUNICATOR_H
 #define M7_COMMUNICATOR_H
 
-#include "BufferedTableArray.h"
-#include "BufferedTable.h"
+#include "src/core/fieldz/BufferedTableZ.h"
+#include "src/core/fieldz/BufferedTableArrayZ.h"
 #include "src/core/parallel/MPIWrapper.h"
 #include "src/core/io/Logging.h"
 #include "MappedTable.h"
 #include <set>
 
 
-template<typename table_t>
+template<typename row_t>
 class CommunicatingPair {
 
-    BufferedTableArray<table_t> m_send;
-    BufferedTable<table_t> m_recv;
+    BufferedTableArrayZ<row_t> m_send;
+    BufferedTableZ<row_t> m_recv;
     double m_buffer_expansion_factor;
 
 public:
     template<typename ...Args>
-    CommunicatingPair(std::string name, double buffer_expansion_factor, const table_t &table):
-            m_send(name + " send", mpi::nrank(), table), m_recv(name + " recv", table),
+    CommunicatingPair(std::string name, double buffer_expansion_factor, const row_t &row):
+            m_send(name + " send", mpi::nrank(), row),
+            m_recv(name + " recv", row),
             m_buffer_expansion_factor(buffer_expansion_factor) {
         m_send.set_expansion_factor(m_buffer_expansion_factor);
         m_recv.set_expansion_factor(m_buffer_expansion_factor);
@@ -33,28 +34,28 @@ public:
         return static_cast<const Table &>(m_recv).m_row_dsize;
     }
 
-    BufferedTableArray<table_t> &send() {
+    BufferedTableArrayZ<row_t> &send() {
         return m_send;
     }
 
-    const BufferedTableArray<table_t> &send() const {
+    const BufferedTableArrayZ<row_t> &send() const {
         return m_send;
     }
 
-    table_t &send(const size_t &i) {
-        return static_cast<table_t &>(m_send[i]);
+    TableZ<row_t> &send(const size_t &i) {
+        return m_send[i];
     }
 
-    const table_t &send(const size_t &i) const {
-        return static_cast<const table_t &>(m_send[i]);
+    const TableZ<row_t> &send(const size_t &i) const {
+        return m_send[i];
     }
 
-    table_t &recv() {
-        return static_cast<table_t &>(m_recv);
+    TableZ<row_t> &recv() {
+        return m_recv;
     }
 
-    const table_t &recv() const {
-        return static_cast<const table_t &>(m_recv);
+    const TableZ<row_t> &recv() const {
+        return m_recv;
     }
 
     void resize(size_t nrow) {
@@ -133,18 +134,15 @@ public:
     }
 };
 
-template<typename store_t, typename comm_t>
+template<typename store_row_t, typename comm_row_t>
 struct Communicator {
-    static_assert(std::is_base_of<MappedTableBase, store_t>::value,
-                  "Template arg must be derived from MappedTableBase");
-    static_assert(std::is_base_of<Table, comm_t>::value,
-                  "Template arg must be derived from Table");
+    typedef BufferedMappedTableZ<store_row_t> store_t;
 
     typedef typename store_t::table_t table_t;
     typedef typename store_t::key_field_t key_field_t;
     typedef typename key_field_t::view_t view_t;
-    BufferedTable<store_t> m_store;
-    CommunicatingPair<comm_t> m_comm;
+    BufferedMappedTableZ<store_row_t> m_store;
+    CommunicatingPair<comm_row_t> m_comm;
     mutable RankAllocator<key_field_t> m_ra;
     std::string m_name;
     double m_buffer_expansion_factor;
@@ -414,9 +412,10 @@ struct Communicator {
     template<typename ...Args>
     Communicator(std::string name, double buffer_expansion_factor,
                  size_t nblock_ra, size_t period_ra,
-                 const store_t &store, const comm_t &comm, double acceptable_imbalance):
-            m_store(name + " store", store),
-            m_comm(name, buffer_expansion_factor, comm),
+                 const store_row_t &store_row, const comm_row_t &comm_row,
+                 double acceptable_imbalance):
+            m_store(name + " store", store_row, ),
+            m_comm(name, buffer_expansion_factor, comm_row),
             m_ra(m_store, m_store.m_key_field, nblock_ra, period_ra, acceptable_imbalance),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
@@ -426,11 +425,11 @@ struct Communicator {
         return m_ra.get_rank(key);
     }
 
-    BufferedTableArray<comm_t> &send() {
+    BufferedTableArrayZ<comm_row_t> &send() {
         return m_comm.send();
     }
 
-    const BufferedTableArray<comm_t> &send() const {
+    const BufferedTableArrayZ<comm_row_t> &send() const {
         return m_comm.send();
     }
 
