@@ -136,14 +136,11 @@ public:
 
 template<typename store_row_t, typename comm_row_t>
 struct Communicator {
-    typedef BufferedMappedTableZ<store_row_t> store_t;
 
-    typedef typename store_t::table_t table_t;
-    typedef typename store_t::key_field_t key_field_t;
-    typedef typename key_field_t::view_t view_t;
+    typedef std::remove_reference<decltype(store_row_t::m_key_field)> key_field_t;
     BufferedMappedTableZ<store_row_t> m_store;
     CommunicatingPair<comm_row_t> m_comm;
-    mutable RankAllocator<key_field_t> m_ra;
+    mutable RankAllocator<store_row_t> m_ra;
     std::string m_name;
     double m_buffer_expansion_factor;
 
@@ -153,19 +150,19 @@ struct Communicator {
         /*
          * the mapped table which stores the definitive row values
          */
-        const store_t &m_source;
+        const MappedTableZ<store_row_t> &m_source;
         /*
          * the unmapped table which loads copies of rows between m_source (arbitrary order, non-
          * contiguous) and m_all (contiguous). lc = "local, contiguous"
          */
-        BufferedTable<table_t> m_lc;
+        BufferedTableZ<store_row_t> m_lc;
         /*
          * the unmapped table which holds copies of all mapped rows. these copies are refreshed
          * with a call to refresh method. This table is intended for reading rows from all MPI ranks,
          * as such there is no machanism for committing changes to m_source from m_all. It is
          * to be treated as a read-only copy. ac = "all, contiguous"
          */
-        BufferedTable<table_t> m_ac;
+        BufferedTableZ<store_row_t> m_ac;
         /*
          * set of dynamic row indices stored on this rank
          */
@@ -195,10 +192,8 @@ struct Communicator {
         DynamicRowSet(const Communicator &comm, std::string name) :
                 ra_t::Dependent(comm.m_ra),
                 m_source(comm.m_store),
-                m_lc("Dynamic row set \"" + name + "\" (local)",
-                     static_cast<const table_t &>(comm.m_store)),
-                m_ac("Dynamic row set \"" + name + "\" (all)",
-                     static_cast<const table_t &>(comm.m_store)),
+                m_lc("Dynamic row set \"" + name + "\" (local)", comm.m_store.m_row),
+                m_ac("Dynamic row set \"" + name + "\" (all)", comm.m_store.m_row),
                 m_counts(mpi::nrank(), 0ul),
                 m_displs(mpi::nrank(), 0ul),
                 m_name(name),
@@ -409,19 +404,18 @@ struct Communicator {
     };
 
 
-    template<typename ...Args>
     Communicator(std::string name, double buffer_expansion_factor,
                  size_t nblock_ra, size_t period_ra,
                  const store_row_t &store_row, const comm_row_t &comm_row,
-                 double acceptable_imbalance):
-            m_store(name + " store", store_row, ),
+                 size_t nbucket, double acceptable_imbalance):
+            m_store(name + " store", store_row, nbucket),
             m_comm(name, buffer_expansion_factor, comm_row),
             m_ra(m_store, m_store.m_key_field, nblock_ra, period_ra, acceptable_imbalance),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }
 
-    size_t get_rank(const view_t &key) const {
+    size_t get_rank(const key_field_t &key) const {
         return m_ra.get_rank(key);
     }
 
@@ -433,20 +427,20 @@ struct Communicator {
         return m_comm.send();
     }
 
-    comm_t &send(const size_t &i) {
-        return static_cast<comm_t &>(m_comm.send(i));
+    TableZ<comm_row_t> &send(const size_t &i) {
+        return m_comm.send(i);
     }
 
-    const comm_t &send(const size_t &i) const {
-        return static_cast<const comm_t &>(m_comm.send(i));
+    const TableZ<comm_row_t> &send(const size_t &i) const {
+        return m_comm.send(i);
     }
 
-    comm_t &recv() {
-        return static_cast<comm_t &>(m_comm.recv());
+    TableZ<comm_row_t> &recv() {
+        return m_comm.recv();
     }
 
-    const comm_t &recv() const {
-        return static_cast<const comm_t &>(m_comm.recv());
+    const TableZ<comm_row_t> &recv() const {
+        return m_comm.recv();
     }
 
     void communicate() {

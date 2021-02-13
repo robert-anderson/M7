@@ -95,6 +95,10 @@ void FieldBaseZ::zero_all() {
     std::memset(begin(), 0, m_size);
 }
 
+bool FieldBaseZ::is_zero() const {
+    return std::memcmp(raw_view(), m_null_element_string.data(), m_element_size) == 0;
+}
+
 bool FieldBaseZ::equals(const FieldBaseZ &other) const {
     return std::memcmp(raw_view(), other.raw_view(), m_size) == 0;
 }

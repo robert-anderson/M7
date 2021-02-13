@@ -28,6 +28,8 @@ struct FieldBaseZ {
      */
     mutable size_t m_view_offset = ~0ul;
 
+    std::vector<char> m_null_element_string;
+
     FieldBaseZ(size_t element_size, const std::type_info &type_info);
 
     FieldBaseZ(const FieldBaseZ &other);
@@ -82,6 +84,8 @@ public:
     void zero();
 
     void zero_all();
+
+    bool is_zero() const;
 
     bool equals(const FieldBaseZ &other) const;
 

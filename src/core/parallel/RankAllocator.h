@@ -5,9 +5,8 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
-#include "src/core/field/Field.h"
-#include "src/core/field/Fields.h"
-#include "src/core/table/Table.h"
+#include "src/core/fieldz/FieldBaseZ.h"
+#include "src/core/fieldz/MappedTableZ.h"
 #include "src/core/parallel/Gatherable.h"
 #include "src/core/io/Logging.h"
 #include "MPIWrapper.h"
@@ -38,7 +37,6 @@ struct RankAllocatorBase {
 
     static constexpr size_t c_nnull_updates_deactivate = 20;
 
-    Table& m_table;
     /*
      * we should be able to deactivate the load balancing once certain externally
      * specified conditions are met
@@ -78,7 +76,7 @@ private:
     /*
      * for each dependent, append a lambda to a list which is then called in the update method
      */
-    std::list<Table::recv_cb_t> m_recv_callbacks;
+    std::list<TableBaseZ::recv_cb_t> m_recv_callbacks;
 
     void refresh_callback_list();
 
@@ -87,7 +85,7 @@ private:
     void erase_dependent(Dependent* dependent);
 
 public:
-    RankAllocatorBase(Table& table, size_t nblock, size_t period, double acceptable_imbalance);
+    RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance);
 
     bool row_mapped_by_dependent(size_t irow){
         for (const auto dep : m_dependents) {
@@ -96,11 +94,9 @@ public:
         return false;
     }
 
-    virtual size_t get_block_irow(const size_t& irow) = 0;
+    virtual TableBaseZ table() = 0;
 
     size_t nblock_() const;
-
-    void record_work_time(const size_t& irow, const Timer& work_time);
 
     size_t get_nskip_() const;
 
@@ -121,35 +117,39 @@ public:
 };
 
 
-template<typename field_t, typename hash_fn=typename field_t::hash_fn>
+template<typename row_t>
 class RankAllocator : public RankAllocatorBase {
-    typedef typename field_t::view_t view_t;
-    field_t& m_field;
+    MappedTableZ<row_t>& m_table;
+    typedef std::remove_reference<decltype(row_t::m_key_field)> key_field_t;
 
 public:
-    RankAllocator(Table& table, field_t& field, size_t nblock, size_t period, double acceptable_imbalance) :
-    RankAllocatorBase(table, nblock, period, acceptable_imbalance), m_field(field)
-    {}
+    RankAllocator(MappedTableZ<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :
+    RankAllocatorBase(nblock, period, acceptable_imbalance), m_table(table) {}
 
-private:
-    size_t get_block_irow(const size_t &irow) override {
-        return get_block(m_field(irow));
+    TableBaseZ table() override {
+        return TableBaseZ(0);
     }
 
-public:
-
-    inline size_t get_block(const view_t& key) const{
-        return hash_fn()(key)%m_nblock;
+    void record_work_time(const row_t& row, const Timer& work_time) {
+        m_mean_work_times[get_block(row)]+=work_time;
     }
 
-    inline size_t get_rank(const view_t& key) const{
+    inline size_t get_block(const key_field_t& key) const{
+        return static_cast<const FieldBaseZ&>(key).hash()%m_nblock;
+    }
+
+    inline size_t get_block(const row_t& row) const{
+        return get_block(row.m_key_field);
+    }
+
+    inline size_t get_rank(const key_field_t& key) const{
         return m_block_to_rank[get_block(key)];
     }
-};
 
-namespace ra {
-    using Onv = RankAllocator<fields::Onv<>>;
-}
+    inline size_t get_rank(const row_t& row) const{
+        return get_rank(row.m_key_field);
+    }
+};
 
 
 #endif //M7_RANKALLOCATOR_H

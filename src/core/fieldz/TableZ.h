@@ -128,7 +128,6 @@ struct TableZ : TableBaseZ {
         static_cast<RowZ &>(m_row).m_table_hwm = &m_hwm;
     }
 
-
     std::string to_string(const defs::inds *ordering= nullptr) const {
         std::string tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;

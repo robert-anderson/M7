@@ -18,6 +18,7 @@ struct NdMultiFieldZ : NdFieldBaseZ {
     NdSequence<nind> m_sequence;
     mutable typename NdSequence<nind>::Cursor m_inds;
     std::tuple<Args...> m_subfields;
+    std::vector<char> m_null_field_string;
 
 private:
     bool oob() const {
@@ -25,13 +26,11 @@ private:
     }
 public:
 
-    NdMultiFieldZ(std::array<size_t, nind> shape, Args&&... subfields) :
-            NdFieldBaseZ(nullptr), m_sequence(shape), m_inds(m_sequence.cursor()), m_subfields(std::move(subfields)...) {
-    }
 
     NdMultiFieldZ(RowZ *row, std::array<size_t, nind> shape, Args&&... subfields) :
             NdFieldBaseZ(row), m_sequence(shape), m_inds(m_sequence.cursor()), m_subfields(std::move(subfields)...) {
         init();
+        m_null_field_string.assign(max_size(), 0);
     }
 
     /*
@@ -80,6 +79,40 @@ public:
         };
         fn_t fn;
         tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
+        return fn.m_and;
+    }
+
+
+    bool max_size() const {
+        struct fn_t {
+            size_t m_max = 0ul;
+            void operator()(const FieldBaseZ &f) { if (f.m_size>m_max) m_max = f.m_size; }
+        };
+        fn_t fn;
+        tuple_utils::for_each(m_subfields, fn);
+        return fn.m_max;
+    }
+
+    bool is_zero() const {
+        struct fn_t {
+            bool m_and = true;
+            void operator()(const FieldBaseZ &f) { m_and &= f.is_zero(); }
+        };
+        fn_t fn;
+        tuple_utils::for_each(m_subfields, fn);
+        return fn.m_and;
+    }
+
+    bool is_zero_all() const {
+        struct fn_t {
+            const std::vector<char>& m_null_string;
+            bool m_and = true;
+            void operator()(const FieldBaseZ &f) {
+                m_and &= (std::memcmp(f.begin(), m_null_string.data(), f.m_size)==0);
+            }
+        };
+        fn_t fn{m_null_field_string};
+        tuple_utils::for_each(m_subfields, fn);
         return fn.m_and;
     }
 

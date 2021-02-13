@@ -26,15 +26,7 @@ struct LookupResultZ {
 };
 
 
-template<typename row_t>
-struct MappedTableZ : TableZ<row_t> {
-    /*
-     * won't compile unless the row defines a key_field_t;
-     */
-    typedef decltype(row_t::m_key_field) key_field_t;
-
-    using TableZ<row_t>::m_row;
-
+struct MappedTableBaseZ {
     static constexpr double c_default_remap_ratio = 2.0;
     static constexpr size_t c_default_remap_nlookup = 2.0;
     static constexpr size_t c_nbucket_min = 100;
@@ -48,13 +40,7 @@ struct MappedTableZ : TableZ<row_t> {
 
     std::vector<std::forward_list<size_t>> m_buckets;
 
-
-    MappedTableZ(const row_t& row, size_t nbucket) : TableZ<row_t>(row), m_buckets(nbucket){}
-
-    size_t nbucket() const {
-        return nbucket();
-    }
-
+    MappedTableBaseZ(size_t nbucket) : m_buckets(nbucket){}
     /**
      * @param nrow_max
      * expected maximum number of rows
@@ -66,6 +52,24 @@ struct MappedTableZ : TableZ<row_t> {
         // number of skips is on average half the average number of rows per bin.
         return std::max(c_nbucket_min, size_t(nrow_max / double(2 * mean_skips_per_bucket)));
     }
+
+    size_t nbucket() const {
+        return m_buckets.size();
+    }
+
+};
+
+
+template<typename row_t>
+struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
+    /*
+     * won't compile unless the row defines a key_field_t;
+     */
+    typedef decltype(row_t::m_key_field) key_field_t;
+
+    using TableZ<row_t>::m_row;
+
+    MappedTableZ(const row_t& row, size_t nbucket) : TableZ<row_t>(row), MappedTableBaseZ(nbucket){}
 
     LookupResultZ operator[](const key_field_t& key) {
         m_total_lookups++;

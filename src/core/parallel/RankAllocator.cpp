@@ -24,8 +24,8 @@ void RankAllocatorBase::erase_dependent(RankAllocatorBase::Dependent *dependent)
     refresh_callback_list();
 }
 
-RankAllocatorBase::RankAllocatorBase(Table &table, size_t nblock, size_t period, double acceptable_imbalance) :
-        m_table(table), m_nblock(nblock), m_period(period),
+RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance) :
+        m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
         m_mean_work_times(nblock, 0.0), m_gathered_times(mpi::nrank(), 0.0),
         m_acceptable_imbalance(acceptable_imbalance)
@@ -42,10 +42,6 @@ RankAllocatorBase::RankAllocatorBase(Table &table, size_t nblock, size_t period,
 
 size_t RankAllocatorBase::nblock_() const {
     return m_rank_to_blocks[mpi::irank()].size();
-}
-
-void RankAllocatorBase::record_work_time(const size_t &irow, const Timer &work_time) {
-    m_mean_work_times[get_block_irow(irow)]+=work_time;
 }
 
 size_t RankAllocatorBase::get_nskip_() const {
@@ -173,8 +169,8 @@ void RankAllocatorBase::update(size_t icycle) {
     // prepare vector of row indices to send
     defs::inds irows_send;
     if (mpi::i_am(irank_send)){
-        for (size_t irow = 0; irow<m_table.m_hwm; ++irow){
-            if (m_table.is_cleared(irow)) continue;
+        for (size_t irow = 0; irow<table().m_hwm; ++irow){
+            if (table().is_cleared(irow)) continue;
             if (get_block_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
         }
     }
@@ -189,7 +185,7 @@ void RankAllocatorBase::update(size_t icycle) {
     MPI_ASSERT_ALL(!m_rank_to_blocks[irank_send].empty(), "All blocks removed from rank");
 
     for (auto dep : m_dependents) dep->before_block_transfer(irows_send, irank_send, irank_recv);
-    m_table.transfer_rows(irows_send, irank_send, irank_recv, m_recv_callbacks);
+    table().transfer_rows(irows_send, irank_send, irank_recv, m_recv_callbacks);
     for (auto dep : m_dependents) dep->after_block_transfer();
     MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block map");
 }

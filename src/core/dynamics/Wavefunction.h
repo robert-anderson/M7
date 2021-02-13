@@ -16,7 +16,7 @@
 #include "src/core/field/Views.h"
 
 
-struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
+struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     const Options &m_opts;
 
@@ -31,13 +31,13 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
 
     Wavefunction(const Options &opts, size_t nsite) :
-            Communicator<WalkerMappedTable, SpawnTable>(
+            Communicator<WalkerTableRow, SpawnTableRow>(
                     "walker",
                     opts.walker_buffer_expansion_factor,
                     opts.nload_balance_block_per_rank*mpi::nrank(),
                     opts.load_balance_period,
-                    WalkerMappedTable(nsite, 1, 1, opts.nwalker_target / mpi::nrank()),
-                    SpawnTable(nsite, 1, 1),
+                    WalkerTableRow(nsite, 1, 1), SpawnTableRow(nsite),
+                    MappedTableBaseZ::nbucket_guess(opts.nwalker_target/mpi::nrank(), 3),
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),
@@ -75,10 +75,15 @@ struct Wavefunction : Communicator<WalkerMappedTable, SpawnTable> {
 
     defs::wf_comp_t square_norm() const {
         defs::wf_comp_t res = 0.0;
-        for (size_t irow = 0; irow < m_store.m_hwm; ++irow) {
-            if (!m_store.m_onv(irow).is_zero()) {
-                res += std::pow(std::abs(m_store.m_weight(irow, 0, 0)), 2.0);
+        auto& row = m_store.m_row;
+        row.restart();
+        for (size_t irow = 0; irow < m_store.m_hwm; ++irow, row.step()) {
+            if (row.m_onv.is_zero()) continue;
+
+                row.m_weight.
+                res += std::pow(std::abs(row.m_weight()), 2.0);
             }
+            m_store.m_row.
         }
         return mpi::all_sum(res);
     }
