@@ -99,6 +99,10 @@ void Solver::annihilate_row(const size_t &irow_recv) {
                 m_prop.m_ham.get_energy(dst_onv),
                 m_reference.is_connected(dst_onv));
     } else {
+        defs::wf_t weight_before = m_wf.m_store.m_weight(irow_walkers, 0, 0);
+        auto weight_after = weight_before+delta_weight;
+        if ((weight_before>0)!=(weight_after>0))
+            m_wf.m_nannihilated(0, 0) += std::abs(std::abs(weight_before)-std::abs(weight_after));
         m_wf.change_weight(irow_walkers, delta_weight);
     }
 
@@ -293,6 +297,7 @@ void Solver::output_stats() {
         m_stats->m_shift() = m_prop.m_shift;
         m_stats->m_nwalker() = m_wf.m_nwalker.reduced(0, 0);
         m_stats->m_delta_nwalker() = m_wf.m_delta_nwalker.reduced(0, 0);
+        m_stats->m_nwalker_annihilated() = m_wf.m_nannihilated.reduced(0, 0);
         m_stats->m_ref_proj_energy_num() = m_reference.proj_energy_num();
         m_stats->m_ref_weight() = m_reference.get_weight(0, 0);
         m_stats->m_ref_proj_energy() = m_reference.proj_energy();

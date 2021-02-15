@@ -72,24 +72,19 @@ TEST(StochasticPropagator, BosonTest) {
         onv.m_fonv.set(1, i);
     }
     Wavefunction wf(opts, ham.nsite());
-    wf.expand(10, 800);
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
     StochasticPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(onv);
     prop.m_shift = ref_energy;//benchmark;
-    Solver solver(prop, wf, onv);
+
+    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
+    Solver solver(prop, wf, ref_loc);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i = 0ul; i < opts.ncycle; ++i) {
+    for (size_t i = 0ul; i < 20000; ++i) {
         solver.execute();
-        std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
-    }
-
-    for (size_t i = 0ul; i < wf.m_walkers.m_hwm; ++i) {
-        std::cout
-        << wf.m_walkers.m_onv(i).to_string() << " "
-        << wf.m_walkers.m_weight(i, 0, 0)
-        << std::endl;
     }
 }
 #endif
