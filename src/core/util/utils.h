@@ -512,6 +512,9 @@ namespace tuple_utils {
     }
 
 
+    /*
+     * modifiable / modifiable
+     */
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
     for_each_pair(std::tuple<Tp...> &, std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
@@ -525,6 +528,26 @@ namespace tuple_utils {
         for_each_pair<I + 1, FuncT, Tp...>(t1, t2, f);
     }
 
+
+    /*
+     * modifiable / const
+     */
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), void>::type
+    for_each_pair(std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
+    { }
+
+    template<std::size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if<I < sizeof...(Tp), void>::type
+    for_each_pair(std::tuple<Tp...>& t1, const std::tuple<Tp...>& t2, FuncT& f)
+    {
+        f(std::get<I>(t1), std::get<I>(t2));
+        for_each_pair<I + 1, FuncT, Tp...>(t1, t2, f);
+    }
+
+    /*
+     * const / const
+     */
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
     for_each_pair(const std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.

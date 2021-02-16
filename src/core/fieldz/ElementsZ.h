@@ -12,7 +12,7 @@
 
 //template<typename row_t>
 //struct RowWrapperZ {
-//    row_t m_wrapped_row;
+//    row_t m_row;
 //
 //};
 
@@ -57,7 +57,29 @@ struct ElementZ : WrappedRowZ, NdMultiFieldZ<0ul, Args...> {
     }
 };
 
-namespace elementsz {
+
+
+template<typename field_t>
+struct NdItemZ : WrappedRowZ, NdFieldZ<0ul, field_t> {
+    Buffer m_buffer;
+    TableBaseZ m_table;
+    NdItemZ(field_t&& field) : NdFieldZ<0ul, field_t>(&m_wrapped_row, {}, std::move(field)),
+    m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
+        m_table.set_buffer(&m_buffer);
+        m_wrapped_row.m_table_bw = &m_table.m_bw;
+        m_wrapped_row.m_table_hwm = &m_table.m_hwm;
+        m_table.push_back();
+        m_wrapped_row.restart();
+    }
+};
+
+
+namespace itemsz {
+
+
+    using FermionOnv = NdItemZ<FermionOnvFieldZ<0ul>>;
+
+#if 0
     template<typename T, size_t nind>
     using number_array = ElementZ<NumberFieldZ<T, nind>>;
 
@@ -69,6 +91,7 @@ namespace elementsz {
         FermiBosOnv(size_t nsite):
                 ElementZ<FermionOnvFieldZ, BosonOnvFieldZ>(FermionOnvFieldZ(nsite), BosonOnvFieldZ(nsite)){}
     };
+#endif
 }
 
 

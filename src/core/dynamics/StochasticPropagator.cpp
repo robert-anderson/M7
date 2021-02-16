@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
+#if 0
 #include "StochasticPropagator.h"
 
 void StochasticPropagator::add_boson_excitgen(const Hamiltonian<0> &ham) {}
@@ -85,3 +86,4 @@ void StochasticPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
         }
     }
 }
+#endif

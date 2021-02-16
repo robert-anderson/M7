@@ -9,6 +9,7 @@
 #include "Wavefunction.h"
 #include "MagnitudeLogger.h"
 
+#if 0
 class Propagator {
 public:
     const Hamiltonian<> &m_ham;
@@ -52,4 +53,5 @@ public:
 
 };
 
+#endif //M7_PROPAGATOR_H
 #endif //M7_PROPAGATOR_H

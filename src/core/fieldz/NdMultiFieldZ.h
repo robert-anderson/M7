@@ -11,6 +11,8 @@
 struct RowFieldBaseZ {
     RowZ *m_row;
     RowFieldBaseZ(RowZ* row): m_row(row){}
+
+    RowFieldBaseZ(const RowFieldBaseZ& other): m_row(other.m_row ? other.m_row->m_child : nullptr){}
 };
 
 template<size_t nind_item, typename ...Args>
@@ -37,12 +39,16 @@ struct NdMultiFieldZ : RowFieldBaseZ {
         init();
     }
 
-//    NdMultiFieldZ& operator=(const NdMultiFieldZ& other) {
-//        MPI_ASSERT(other.m_sequence.m_format==m_sequence.m_format, "Shapes are incompatible");
-//        m_row = other.m_row;
-//        m_subfields = other.m_subfields;
-//        return *this;
-//    }
+    NdMultiFieldZ& operator=(const NdMultiFieldZ& other) {
+        MPI_ASSERT(is_comparable(other), "Shapes are incompatible");
+        struct fn_t {
+            const NdMultiFieldZ& other;
+            void operator()(FieldBaseZ &f1, const FieldBaseZ &f2) { f1=f2; }
+        };
+        fn_t fn;
+        tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
+        return *this;
+    }
 
     void init() {
         if (!m_row) return;
@@ -71,6 +77,18 @@ struct NdMultiFieldZ : RowFieldBaseZ {
         tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
         return fn.m_and;
     }
+
+    bool is_comparable(const NdMultiFieldZ &other) const {
+        struct fn_t {
+            bool m_and = true;
+            void operator()(const FieldBaseZ &f1, const FieldBaseZ &f2) { m_and &= f1.is_comparable(f2); }
+        };
+        fn_t fn;
+        tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
+        return fn.m_and;
+    }
+
+
 
 protected:
     bool max_size() const {
@@ -128,15 +146,28 @@ protected:
 
 template<size_t nind_item, typename field_t>
 struct NdFieldZ : RowFieldBaseZ, field_t {
+    using RowFieldBaseZ::m_row;
+    using field_t::operator=;
     NdFormat<nind_item> m_format;
     NdFieldZ(RowZ *row, std::array<size_t, nind_item> item_shape, field_t&& field) :
             RowFieldBaseZ(row), field_t(field), m_format(item_shape){
         static_cast<ItemFormattedFieldBaseZ<nind_item>&>(*this).m_item_format = &m_format;
-        FieldBaseZ::m_nitem = m_format->nelement();
+        FieldBaseZ::m_nitem = m_format.nelement();
         FieldBaseZ::m_size = this->m_item_size*this->m_nitem;
         FieldBaseZ::m_row_offset = m_row->add_field(this);
         FieldBaseZ::m_row = m_row;
     }
+
+    NdFieldZ(const NdFieldZ& other):
+            RowFieldBaseZ(other.m_row->m_child), field_t(other), m_format(other.m_format.shape()){
+        static_cast<ItemFormattedFieldBaseZ<nind_item>&>(*this).m_item_format = &m_format;
+        FieldBaseZ::m_nitem = m_format.nelement();
+        FieldBaseZ::m_size = this->m_item_size*this->m_nitem;
+        ASSERT(m_row);
+        FieldBaseZ::m_row_offset = m_row->add_field(this);
+        FieldBaseZ::m_row = m_row;
+    }
+
 };
 
 

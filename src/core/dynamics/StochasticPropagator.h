@@ -13,6 +13,7 @@
 #include <src/core/excitgen/BosonExcitationGenerator.h>
 #include "Propagator.h"
 
+#if 0
 class StochasticPropagator : public Propagator {
 
     void add_boson_excitgen(const Hamiltonian<0> &ham);
@@ -56,4 +57,5 @@ public:
     void off_diagonal(Wavefunction &m_wf, const size_t &irow) override;
 };
 
+#endif //M7_STOCHASTICPROPAGATOR_H
 #endif //M7_STOCHASTICPROPAGATOR_H

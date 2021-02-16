@@ -39,6 +39,7 @@ namespace fieldsz {
     struct Number : NdFieldZ<0ul, NumberFieldZ<T, 0ul, 0ul>> {
         typedef NumberFieldZ<T, 0ul, 0ul> field_t;
         typedef NdFieldZ<0ul, field_t> base_t;
+        using NumberFieldBaseZ<T, 0ul, 0ul>::operator=;
         Number(RowZ* row) : base_t(row, {}, {}){}
     };
 

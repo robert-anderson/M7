@@ -36,6 +36,7 @@ Propagator::Propagator(FciqmcCalculation *fciqmc) :
 
 #endif
 
+#if 0
 void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
     //m_magnitude_logger.synchronize(icycle);
     m_variable_shift.update(icycle, wf.m_nwalker.reduced(0, 0) >= m_opts.nwalker_target);
@@ -52,3 +53,4 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
         m_shift -= m_opts.shift_damp * consts::real_log(rate) / tau();
     }
 }
+#endif

@@ -7,6 +7,7 @@
 
 #include "Propagator.h"
 
+#if 0
 class ExactPropagator : public Propagator {
 
     defs::ham_t off_diagonal_bosons(const Hamiltonian<0> &ham, conn::Antisym<0> &conn,
@@ -45,4 +46,5 @@ public:
 
 };
 
+#endif //M7_EXACTPROPAGATOR_H
 #endif //M7_EXACTPROPAGATOR_H

@@ -7,7 +7,7 @@
 
 std::string RowZ::to_string() const {
     std::string tmp;
-    for (auto field: m_fields) tmp += " " + field->to_string_all();
+    for (auto field: m_fields) tmp += " " + field->to_string();
     return tmp;
 }
 
@@ -16,7 +16,7 @@ size_t RowZ::add_field(FieldBaseZ *field) {
     auto offset = 0ul;
     if (!m_fields.empty()) {
         offset = m_fields.back()->m_row_offset + m_fields.back()->m_size;
-        if (!m_fields.back()->is_same_type_as(*field)) {
+        if (!(m_fields.back()->m_type_info == field->m_type_info)) {
             // go to next whole dataword
             offset = integer_utils::divceil(offset, defs::nbyte_data) * defs::nbyte_data;
         }

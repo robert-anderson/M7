@@ -65,7 +65,7 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
     /*
      * won't compile unless the row defines a key_field_t;
      */
-    typedef decltype(row_t::m_key_field) key_field_t;
+    typedef typename std::remove_reference<decltype(row_t::m_key_field)>::type key_field_t;
 
     using TableZ<row_t>::m_row;
 

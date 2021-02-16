@@ -7,6 +7,7 @@
 
 #include "TableZ.h"
 
+#if 0
 template<typename row_t>
 class BufferedTableArrayZ {
     typedef TableZ<row_t> table_t;
@@ -137,4 +138,5 @@ public:
 
 
 
+#endif //M7_BUFFEREDTABLEARRAYZ_H
 #endif //M7_BUFFEREDTABLEARRAYZ_H

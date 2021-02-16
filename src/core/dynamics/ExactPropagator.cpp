@@ -6,6 +6,7 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
+#if 0
 void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
     auto src_onv = m_wf.m_store.m_onv(irow);
     const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
@@ -73,3 +74,4 @@ void ExactPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
     ASSERT(hdiag==m_ham.get_energy(m_wf.m_store.m_onv(irow)));
     m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
 }
+#endif

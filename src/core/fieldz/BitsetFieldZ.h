@@ -12,8 +12,8 @@
 template<typename T, size_t nind_item, size_t nind_element>
 struct BitsetFieldBaseZ : FullyFormattedFieldBaseZ<T, nind_item, nind_element> {
     static_assert(std::is_integral<T>::value, "Basis for bitset field must be an integral type");
-    static constexpr size_t nbyte_word() {return sizeof(T);}
-    static constexpr size_t nbit_word() {return sizeof(T)*CHAR_BIT;}
+    static constexpr size_t nbyte_dword() {return sizeof(T);}
+    static constexpr size_t nbit_dword() {return sizeof(T) * CHAR_BIT;}
 
     // total number of bits stored in one element
     const size_t m_nbit;
@@ -34,24 +34,24 @@ struct BitsetFieldBaseZ : FullyFormattedFieldBaseZ<T, nind_item, nind_element> {
 
 public:
     BitsetFieldBaseZ(std::array<size_t, nind_element> shape) :
-            base_t(integer_utils::divceil(m_nbit, sizeof(T)*CHAR_BIT)*sizeof(T), shape),
+            base_t(integer_utils::divceil(NdFormat<nind_element>(shape).nelement(), nbit_dword()) * sizeof(T), shape),
             m_nbit(m_element_format.nelement()), m_item_dsize(m_item_size/sizeof(T)),
-            m_nbit_spare(m_item_dsize*nbit_word() - m_nbit){
+            m_nbit_spare(m_item_dsize * nbit_dword() - m_nbit){
     }
 
     bool flat_get(const size_t &iitem, const size_t &ibit) const {
         ASSERT(ibit < m_nbit);
-        return bit_utils::get(begin(iitem)[iitem * ibit / nbit_word()], ibit % nbit_word());
+        return bit_utils::get(begin(iitem)[iitem * ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void flat_set(const size_t &iitem, const size_t &ibit) {
         ASSERT(ibit < m_nbit);
-        bit_utils::set(begin(iitem)[ibit / nbit_word()], ibit % nbit_word());
+        bit_utils::set(begin(iitem)[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void flat_clr(const size_t &iitem, const size_t &ibit) {
         ASSERT(ibit < m_nbit);
-        bit_utils::clr(begin(iitem)[ibit / nbit_word()], ibit % nbit_word());
+        bit_utils::clr(begin(iitem)[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void flat_set(const size_t &iitem, const defs::inds &setinds) {
@@ -173,7 +173,7 @@ struct FermionOnvFieldZ : BitsetFieldBaseZ<defs::data_t, nind_item, 2> {
         for (size_t idataword = iitem; idataword < m_item_dsize; ++idataword) {
             work = get_dataword(idataword+iitem*m_item_dsize);
             while (work) {
-                size_t ibit = idataword * base_t::nbit_word() + bit_utils::next_setbit(work);
+                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
                 if (ibit < nsite()) ++spin;
                 else if (ibit >= 2 * nsite()) return spin;
                 else --spin;
@@ -190,7 +190,7 @@ struct FermionOnvFieldZ : BitsetFieldBaseZ<defs::data_t, nind_item, 2> {
         for (size_t idataword = 0ul; idataword < m_item_dsize; ++idataword) {
             work = get_dataword(idataword+iitem*m_item_dsize);
             while (work) {
-                size_t ibit = idataword * base_t::nbit_word() + bit_utils::next_setbit(work);
+                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
                 if (ibit >= m_item_dsize) return nalpha;
                 nalpha++;
             }
@@ -201,7 +201,7 @@ struct FermionOnvFieldZ : BitsetFieldBaseZ<defs::data_t, nind_item, 2> {
     std::string to_string_element(const size_t& iitem) const override {
         std::string res;
         res += "(";
-        res.reserve(m_nbit() * 2 + 3);
+        res.reserve(m_nbit * 2 + 3);
         size_t i = 0ul;
         for (; i < nsite(); ++i)
             res += base_t::flat_get(iitem, i) ? "1" : "0";
@@ -222,23 +222,27 @@ template<typename dummy_t, size_t nind_element>
 struct FlagFieldZ : BitsetFieldBaseZ<uint8_t, 0ul, nind_element> {
     typedef BitsetFieldBaseZ<uint8_t, 0ul, nind_element> base_t;
     using base_t::m_element_format;
-    using base_t::nbit_word;
+    using base_t::nbit_dword;
     using base_t::begin;
     FlagFieldZ(std::array<size_t, nind_element> shape) : base_t(shape){}
 
     bool get(const std::array<size_t, nind_element>& einds) const {
         auto const& ibit = m_element_format.flatten(einds);
-        return bit_utils::get(((uint8_t*)begin())[ibit / nbit_word()], ibit % nbit_word());
+        return bit_utils::get(((uint8_t*)begin())[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void set(const std::array<size_t, nind_element>& einds) const {
         auto const& ibit = m_element_format.flatten(einds);
-        bit_utils::set(((uint8_t*)begin())[ibit / nbit_word()], ibit % nbit_word());
+        bit_utils::set(((uint8_t*)begin())[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void clr(const std::array<size_t, nind_element>& einds) const {
         auto const& ibit = m_element_format.flatten(einds);
-        bit_utils::clr(((uint8_t*)begin())[ibit / nbit_word()], ibit % nbit_word());
+        bit_utils::clr(((uint8_t*)begin())[ibit / nbit_dword()], ibit % nbit_dword());
+    }
+
+    void put(const std::array<size_t, nind_element>& einds, bool v) const {
+        v ? set(einds) : clr(einds);
     }
 };
 
@@ -246,7 +250,7 @@ template<typename dummy_t>
 struct FlagFieldZ<dummy_t, 0ul> : BitsetFieldBaseZ<uint8_t, 0ul, 0ul> {
     typedef BitsetFieldBaseZ<uint8_t, 0ul, 0ul> base_t;
     using base_t::m_element_format;
-    using base_t::nbit_word;
+    using base_t::nbit_dword;
     using base_t::begin;
     FlagFieldZ() : base_t({}){}
 
@@ -260,6 +264,10 @@ struct FlagFieldZ<dummy_t, 0ul> : BitsetFieldBaseZ<uint8_t, 0ul, 0ul> {
 
     void clr() const {
         bit_utils::clr(((uint8_t*)begin())[0], 0);
+    }
+
+    void put(bool v) const {
+        v ? set() : clr();
     }
 };
 

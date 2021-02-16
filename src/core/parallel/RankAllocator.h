@@ -120,7 +120,7 @@ public:
 template<typename row_t>
 class RankAllocator : public RankAllocatorBase {
     MappedTableZ<row_t>& m_table;
-    typedef std::remove_reference<decltype(row_t::m_key_field)> key_field_t;
+    typedef typename std::remove_reference<decltype(row_t::m_key_field)>::type key_field_t;
 
 public:
     RankAllocator(MappedTableZ<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :

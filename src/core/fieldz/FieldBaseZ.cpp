@@ -47,6 +47,6 @@ defs::hash_t FieldBaseZ::hash() const {
 
 std::string FieldBaseZ::to_string() const {
     std::string tmp;
-    for (char* ptr=begin(); ptr!=begin()+m_size; ptr+=m_item_size) tmp+=to_string_element(ptr);
+    for (size_t i=0ul; i<m_nitem; ++i) tmp+=to_string_element(i);
     return tmp;
 }

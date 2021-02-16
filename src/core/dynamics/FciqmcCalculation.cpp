@@ -7,7 +7,7 @@
 #include "ExactPropagator.h"
 #include "StochasticPropagator.h"
 
-
+#if 0
 FciqmcCalculation::FciqmcCalculation(const Options &opts) :
         m_opts(opts), m_ham(opts), m_prop(m_ham, opts), m_wf(opts, m_ham.nsite()) {
     auto ref_onv = m_ham.guess_reference(opts.spin_restrict);
@@ -20,7 +20,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &opts) :
         solver.execute();
     }
 }
-
+#endif
 
 #if 0
 

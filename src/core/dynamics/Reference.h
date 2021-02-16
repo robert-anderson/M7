@@ -5,6 +5,8 @@
 #ifndef M7_REFERENCE_H
 #define M7_REFERENCE_H
 
+#if 0
+
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/field/Fields.h"
 #include "src/core/parallel/ReductionMember.h"
@@ -87,4 +89,5 @@ public:
 
 };
 
+#endif //M7_REFERENCE_H
 #endif //M7_REFERENCE_H

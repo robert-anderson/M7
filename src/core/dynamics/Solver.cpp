@@ -4,6 +4,7 @@
 
 #include "Solver.h"
 
+#if 0
 void Solver::loop_over_occupied_onvs() {
     /*
      * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
@@ -324,3 +325,4 @@ void Solver::output_stats() {
 //    StatsColumn<double> m_recv_list_filled_fraction;
     m_parallel_stats->flush();
 }
+#endif

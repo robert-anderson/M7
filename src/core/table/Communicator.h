@@ -12,7 +12,7 @@
 #include "MappedTable.h"
 #include <set>
 
-
+#if 0
 template<typename row_t>
 class CommunicatingPair {
 
@@ -136,8 +136,7 @@ public:
 
 template<typename store_row_t, typename comm_row_t>
 struct Communicator {
-
-    typedef std::remove_reference<decltype(store_row_t::m_key_field)> key_field_t;
+    typedef typename std::remove_reference<decltype(store_row_t::m_key_field)>::type key_field_t;
     BufferedMappedTableZ<store_row_t> m_store;
     CommunicatingPair<comm_row_t> m_comm;
     mutable RankAllocator<store_row_t> m_ra;
@@ -455,4 +454,5 @@ struct Communicator {
 };
 
 
+#endif //M7_COMMUNICATOR_H
 #endif //M7_COMMUNICATOR_H

@@ -79,8 +79,7 @@ public:
         return partial_offset<0>(inds...);
     }
 
-    void decode_flat(const size_t& iflat, defs::inds& inds) const {
-        ASSERT(inds.size()>=nind);
+    void decode_flat(const size_t& iflat, std::array<size_t, nind>& inds) const {
         size_t remainder = iflat;
         for (size_t i=0ul; i<nind; ++i){
             auto& ind = inds[i];
@@ -125,7 +124,7 @@ public:
     template<size_t nind_spec, typename ...Args>
     size_t partial_offset(size_t first, Args... rest) const{
         static_assert(1+sizeof...(rest)+nind_spec<=nind, "Indices are over-specified");
-        assert(first<m_shape[nind_spec]);
+        ASSERT(first<m_shape[nind_spec]);
         return first*m_strides[nind_spec]+partial_offset<nind_spec+1>(rest...);
     }
 };

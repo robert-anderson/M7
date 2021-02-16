@@ -64,6 +64,7 @@ struct NumberFieldZ : NumberFieldBaseZ<T, nind_item, nind_element> {
     typedef NumberFieldBaseZ<T, nind_item, nind_element> base_t;
     using base_t::m_item_format;
     using base_t::m_element_format;
+    using base_t::operator=;
     NumberFieldZ(std::array<size_t, nind_element> shape) : NumberFieldBaseZ<T, nind_item, nind_element>(shape){}
 
     T &operator()(const std::array<size_t, nind_item>& inds, const std::array<size_t, nind_element>& einds) {
@@ -121,7 +122,6 @@ struct NumberFieldZ<T, 0ul, 0ul> : NumberFieldBaseZ<T, 0ul, 0ul> {
     const T &operator()() const {
         return (const T *) begin();
     }
-
 };
 
 template <size_t nind_item>

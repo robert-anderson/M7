@@ -4,6 +4,7 @@
 
 #include "RankAllocator.h"
 
+#if 0
 void RankAllocatorBase::refresh_callback_list() {
     m_recv_callbacks.clear();
     for (auto ptr : m_dependents) {
@@ -189,3 +190,4 @@ void RankAllocatorBase::update(size_t icycle) {
     for (auto dep : m_dependents) dep->after_block_transfer();
     MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block map");
 }
+#endif

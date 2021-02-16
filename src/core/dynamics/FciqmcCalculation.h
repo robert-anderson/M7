@@ -11,6 +11,7 @@
 #include "StochasticPropagator.h"
 #include "Solver.h"
 
+#if 0
 class FciqmcCalculation {
 public:
     const Options m_opts;
@@ -21,6 +22,7 @@ public:
     explicit FciqmcCalculation(const Options& opts);
 };
 
+#endif
 
 
 #if 0

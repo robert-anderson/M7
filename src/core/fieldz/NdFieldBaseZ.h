@@ -22,7 +22,8 @@ struct FullyFormattedFieldBaseZ : ItemFormattedFieldBaseZ<nind_item> {
     using ItemFormattedFieldBaseZ<nind_item>::m_item_format;
     NdFormat<nind_element> m_element_format;
     FullyFormattedFieldBaseZ(size_t item_size, std::array<size_t, nind_element> element_shape):
-            ItemFormattedFieldBaseZ<nind_item>(item_size, typeid(T)), m_element_format(element_shape){}
+            ItemFormattedFieldBaseZ<nind_item>(item_size, typeid(T)), m_element_format(element_shape){
+    }
 
     size_t nelement_all() const {
         return m_item_format->nelement()*m_element_format.nelement();

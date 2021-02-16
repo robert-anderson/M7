@@ -5,6 +5,7 @@
 #ifndef M7_SOLVER_H
 #define M7_SOLVER_H
 
+#if 0
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/util/Timer.h>
 #include "Reference.h"
@@ -114,4 +115,5 @@ public:
 //
 //}
 
+#endif //M7_SOLVER_H
 #endif //M7_SOLVER_H
