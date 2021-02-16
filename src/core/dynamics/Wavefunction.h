@@ -73,66 +73,60 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 //    }
 
 
-    defs::wf_comp_t square_norm() const {
+    defs::wf_comp_t square_norm(const defs::wf_inds& inds) const {
         defs::wf_comp_t res = 0.0;
         auto& row = m_store.m_row;
-        row.restart();
-        for (size_t irow = 0; irow < m_store.m_hwm; ++irow, row.step()) {
-            if (row.m_onv.is_zero()) continue;
-
-                row.m_weight.
-                res += std::pow(std::abs(row.m_weight()), 2.0);
-            }
-            m_store.m_row.
+        const defs::wf_t& weight = row.m_weight(inds);
+        for (row.restart(); row.in_range(); row.step()) {
+            res += std::pow(weight, 2.0);
         }
         return mpi::all_sum(res);
     }
 
-    void grant_initiator_status(const size_t &irow) {
-        auto view = m_store.m_flags.m_initiator(irow, 0, 0);
-        if (!view) {
-            m_delta_ninitiator(0, 0)++;
-            view = true;
-        }
+    void grant_initiator_status(const defs::wf_inds& inds) {
+        auto& row = m_store.m_row;
+        MPI_ASSERT(!row.m_initiator.get(inds), "row is already initiator");
+        row.m_initiator.set(inds);
+        m_delta_ninitiator(inds)++;
     }
 
-    void revoke_initiator_status(const size_t &irow) {
-        auto view = m_store.m_flags.m_initiator(irow, 0, 0);
-        if (view) {
-            m_delta_ninitiator(0, 0)--;
-            view = false;
-        }
+    void revoke_initiator_status(const defs::wf_inds& inds) {
+        auto& row = m_store.m_row;
+        MPI_ASSERT(!row.m_initiator.get(inds), "row is not initiator");
+        row.m_initiator.clr(inds);
+        m_delta_ninitiator(inds)--;
     }
 
-    void set_weight(const size_t &irow, const defs::wf_t &new_weight) {
+    void set_weight(const defs::wf_t &new_weight, const defs::wf_inds& inds) {
+        auto& row = m_store.m_row;
+        defs::wf_t& weight = row.m_weight(inds);
         m_delta_nwalker(0, 0) += std::abs(new_weight);
-        m_delta_nwalker(0, 0) -= std::abs(m_store.m_weight(irow, 0, 0));
+        m_delta_nwalker(0, 0) -= std::abs(weight);
         m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
-        m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(m_store.m_weight(irow, 0, 0)), 2.0);
+        m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(weight), 2.0);
+        weight = new_weight;
 
-        m_store.m_weight(irow, 0, 0) = new_weight;
-
-        if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(irow);
-        else revoke_initiator_status(irow);
+        if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(inds);
+        else revoke_initiator_status(inds);
     }
 
-    void change_weight(const size_t &irow, const defs::wf_t &delta) {
-        set_weight(irow, m_store.m_weight(irow, 0, 0) + delta);
+    void change_weight(const defs::wf_t &delta, const defs::wf_inds& inds) {
+        set_weight(m_store.m_row.m_weight(inds) + delta, inds);
     }
 
-    void scale_weight(const size_t &irow, const double &factor) {
-        set_weight(irow, m_store.m_weight(irow, 0, 0) * factor);
+    void scale_weight(const double &factor, const defs::wf_inds& inds) {
+        m_store.m_row.m_weight(inds);
+        set_weight(factor, inds);
     }
 
-    void zero_weight(const size_t &irow) {
-        set_weight(irow, 0.0);
+    void zero_weight(const defs::wf_inds& inds) {
+        set_weight(0.0, inds);
     }
 
-    void remove_walker(const size_t &irow) {
-        if (m_ra.row_mapped_by_dependent(irow)) return;
-        const auto onv = m_store.m_onv(irow);
-        auto lookup = m_store[onv];
-        zero_weight(irow);
+    void remove_walker(const defs::wf_inds& inds) {
+        if (m_ra.row_mapped_by_dependent(m_store.m_row.m_i)) return;
+        auto lookup = m_store[m_store.m_row.m_onv];
+        zero_weight(inds);
         m_store.erase(lookup);
     }
 

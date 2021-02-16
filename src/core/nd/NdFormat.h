@@ -7,7 +7,6 @@
 
 #include "src/defs.h"
 #include "array"
-#include "assert.h"
 
 template <size_t nind>
 class NdFormat {
@@ -60,8 +59,18 @@ public:
         return m_shape[i];
     }
 
+    const size_t& stride(const size_t& i) const {
+        return m_strides[i];
+    }
+
     const std::array<size_t, nind>& shape() const {
         return m_shape;
+    }
+
+    size_t flatten(std::array<size_t, nind> inds) const {
+        size_t iflat = 0ul;
+        for (size_t i=0ul; i < nind; ++i) iflat+= inds[i] * m_strides[i];
+        return iflat;
     }
 
     template<typename ...Args>

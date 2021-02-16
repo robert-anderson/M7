@@ -6,29 +6,21 @@
 #define M7_NDMULTIFIELDZ_H
 
 #include "RowZ.h"
-#include "src/core/nd/NdSequence.h"
+#include "src/core/nd/NdSelector.h"
 
-struct NdFieldBaseZ {
+struct RowFieldBaseZ {
     RowZ *m_row;
-    NdFieldBaseZ(RowZ* row): m_row(row){}
+    RowFieldBaseZ(RowZ* row): m_row(row){}
 };
 
-template<size_t nind, typename ...Args>
-struct NdMultiFieldZ : NdFieldBaseZ {
-    NdSequence<nind> m_sequence;
-    mutable typename NdSequence<nind>::Cursor m_inds;
+template<size_t nind_item, typename ...Args>
+struct NdMultiFieldZ : RowFieldBaseZ {
+    NdFormat<nind_item> m_format;
     std::tuple<Args...> m_subfields;
     std::vector<char> m_null_field_string;
 
-private:
-    bool oob() const {
-        return static_cast<const FieldBaseZ &>(get<0>()).oob();
-    }
-public:
-
-
-    NdMultiFieldZ(RowZ *row, std::array<size_t, nind> shape, Args&&... subfields) :
-            NdFieldBaseZ(row), m_sequence(shape), m_inds(m_sequence.cursor()), m_subfields(std::move(subfields)...) {
+    NdMultiFieldZ(RowZ *row, std::array<size_t, nind_item> shape, Args&&... subfields) :
+            RowFieldBaseZ(row), m_format(shape), m_subfields(subfields...) {
         init();
         m_null_field_string.assign(max_size(), 0);
     }
@@ -39,9 +31,8 @@ public:
      * legitimately copied without reference to a row.
      */
     NdMultiFieldZ(const NdMultiFieldZ& other) :
-            NdFieldBaseZ(other.m_row->m_child),
-            m_sequence(other.m_sequence),
-            m_inds(other.m_inds),
+            RowFieldBaseZ(other.m_row->m_child),
+            m_format(other.m_format),
             m_subfields(other.m_subfields){
         init();
     }
@@ -57,32 +48,31 @@ public:
         if (!m_row) return;
         struct fn_t {
             RowZ* m_row;
-            size_t m_nelement;
-            void operator()(FieldBaseZ &f) {
-                f.m_nelement = m_nelement;
-                f.m_size = f.m_nelement * f.m_element_size;
+            NdFormat<nind_item>* m_format;
+            void operator()(ItemFormattedFieldBaseZ<nind_item> &f) {
+                f.m_item_format = m_format;
+                f.m_nitem = m_format->nelement();
+                f.m_size = f.m_item_size*f.m_nitem;
                 f.m_row_offset = m_row->add_field(&f);
                 f.m_row = m_row;
-                f.m_max_view_offset = f.m_row_offset + f.m_size;
             }
         };
-        fn_t fn {m_row, m_sequence.m_format.nelement()};
+        fn_t fn {m_row, &m_format};
         tuple_utils::for_each(m_subfields, fn);
-        restart();
     }
 
-    bool equals(const NdMultiFieldZ &other) const {
+    bool operator==(const NdMultiFieldZ &other) const {
         struct fn_t {
             bool m_and = true;
 
-            void operator()(const FieldBaseZ &f1, const FieldBaseZ &f2) { m_and &= f1.equals(f2); }
+            void operator()(const FieldBaseZ &f1, const FieldBaseZ &f2) { m_and &= f1==f2; }
         };
         fn_t fn;
         tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
         return fn.m_and;
     }
 
-
+protected:
     bool max_size() const {
         struct fn_t {
             size_t m_max = 0ul;
@@ -99,19 +89,6 @@ public:
             void operator()(const FieldBaseZ &f) { m_and &= f.is_zero(); }
         };
         fn_t fn;
-        tuple_utils::for_each(m_subfields, fn);
-        return fn.m_and;
-    }
-
-    bool is_zero_all() const {
-        struct fn_t {
-            const std::vector<char>& m_null_string;
-            bool m_and = true;
-            void operator()(const FieldBaseZ &f) {
-                m_and &= (std::memcmp(f.begin(), m_null_string.data(), f.m_size)==0);
-            }
-        };
-        fn_t fn{m_null_field_string};
         tuple_utils::for_each(m_subfields, fn);
         return fn.m_and;
     }
@@ -137,47 +114,6 @@ public:
         return fn.m_str;
     }
 
-    bool restart() const {
-        m_inds.to_front();
-        struct fn_t {
-            void operator()(const FieldBaseZ &f) { f.m_view_offset = f.m_row_offset; }
-        };
-        fn_t fn;
-        tuple_utils::for_each(m_subfields, fn);
-        return get<0>().oob();
-    }
-
-    bool step() const {
-        m_inds++;
-        struct fn_t {
-            void operator()(const FieldBaseZ &f) { f.m_view_offset += f.m_element_size; }
-        };
-        fn_t fn;
-        tuple_utils::for_each(m_subfields, fn);
-        if (get<0>().m_view_offset >= get<0>().m_max_view_offset) {
-            restart();
-            return false;
-        }
-        return true;
-    }
-
-    template<typename ...Inds>
-    bool jump(Inds... inds) const {
-        m_inds.to(inds...);
-        struct fn_t {
-            size_t m_ielement;
-
-            void operator()(const FieldBaseZ &f) { f.m_view_offset = f.m_row_offset + f.m_element_size * m_ielement; }
-        };
-        fn_t fn;
-        tuple_utils::for_each(m_subfields, fn);
-        if (get<0>().m_view_offset >= get<0>().m_max_view_offset) {
-            restart();
-            return false;
-        }
-        return true;
-    }
-
     template<size_t ifield>
     const typename std::tuple_element<ifield, std::tuple<Args...>>::type &get() const {
         return std::get<ifield>(m_subfields);
@@ -190,18 +126,18 @@ public:
 };
 
 
-template<size_t nind, typename fieldbase_t>
-struct NdFieldZ :  NdMultiFieldZ<nind, fieldbase_t>{
-    NdFieldZ(RowZ *row, std::array<size_t, nind> shape, fieldbase_t&& subfield):
-            NdMultiFieldZ<nind, fieldbase_t>(row, shape, std::move(subfield)){}
-
-    const fieldbase_t &operator()() const {
-        return NdMultiFieldZ<nind, fieldbase_t>::template get<0>();
-    }
-
-    fieldbase_t &operator()() {
-        return NdMultiFieldZ<nind, fieldbase_t>::template get<0>();
+template<size_t nind_item, typename field_t>
+struct NdFieldZ : RowFieldBaseZ, field_t {
+    NdFormat<nind_item> m_format;
+    NdFieldZ(RowZ *row, std::array<size_t, nind_item> item_shape, field_t&& field) :
+            RowFieldBaseZ(row), field_t(field), m_format(item_shape){
+        static_cast<ItemFormattedFieldBaseZ<nind_item>&>(*this).m_item_format = &m_format;
+        FieldBaseZ::m_nitem = m_format->nelement();
+        FieldBaseZ::m_size = this->m_item_size*this->m_nitem;
+        FieldBaseZ::m_row_offset = m_row->add_field(this);
+        FieldBaseZ::m_row = m_row;
     }
 };
+
 
 #endif //M7_NDMULTIFIELDZ_H

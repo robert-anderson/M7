@@ -15,6 +15,7 @@ struct RowZ {
     Buffer::Window *m_table_bw = nullptr;
     size_t *m_table_hwm = nullptr;
     mutable defs::data_t *m_dbegin = nullptr;
+    mutable size_t m_i = 0ul;
     std::vector<FieldBaseZ *> m_fields;
     size_t m_size;
     size_t m_dsize;
@@ -26,9 +27,10 @@ struct RowZ {
 //        select_first();
 //    }
 
-    bool oob() const {
-        return m_dbegin >= m_table_bw->m_dbegin+(*m_table_hwm*m_dsize);
+    bool in_range() const {
+        return m_i < *m_table_hwm;
     }
+
     /*
      * the 3 "cursor" methods
      */
@@ -37,8 +39,8 @@ struct RowZ {
         MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
         MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
+        MPI_ASSERT(in_range(), "Row is out of table bounds");
         m_dbegin = m_table_bw->m_dbegin;
-        MPI_ASSERT(!oob(), "Row has jumped out of bounds because the table is empty");
     }
 
     void step() const {
@@ -46,53 +48,21 @@ struct RowZ {
         MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
         MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
+        MPI_ASSERT(in_range(), "Row is out of table bounds");
         m_dbegin += m_dsize;
-        MPI_ASSERT(!oob(), "Row has stepped out of bounds");
+        m_i++;
     }
 
-    void jump(const size_t& irow) const {
+    void jump(const size_t& i) const {
         MPI_ASSERT(m_table_bw, "Row must be assigned to a Table");
         MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
         MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
-        m_dbegin = m_table_bw->m_dbegin+m_dsize*irow;
-        MPI_ASSERT(!oob(), "Row has jumped out of bounds");
+        MPI_ASSERT(in_range(), "Row is out of table bounds");
+        m_dbegin = m_table_bw->m_dbegin+m_dsize*i;
+        m_i = i;
     }
 
-    bool try_restart() const {
-        MPI_ASSERT(m_table_bw, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
-        MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
-        m_dbegin = m_table_bw->m_dbegin;
-        return !oob();
-    }
-
-    bool try_step() const {
-        MPI_ASSERT(m_table_bw, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
-        MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
-        m_dbegin += m_dsize;
-        if (oob()){
-            restart();
-            return false;
-        }
-        return true;
-    }
-
-    bool try_jump(const size_t &irow) const {
-        MPI_ASSERT(m_table_bw, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
-        MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
-        m_dbegin = m_table_bw->m_dbegin+m_dsize*irow;
-        if (oob()){
-            restart();
-            return false;
-        }
-        return true;
-    }
 
 //    defs::inds field_format() const {
 //        defs::inds tmp;

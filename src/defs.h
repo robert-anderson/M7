@@ -81,6 +81,7 @@ namespace defs {
 #endif
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
+    typedef std::array<size_t, ndim_wf> wf_inds;
 
     // width of the cache line in bytes
     constexpr size_t ndata_cacheline = 8;
