@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include "src/core/fieldz/FieldsZ.h"
 #include "src/core/fieldz/TableZ.h"
-#include "src/core/fieldz/ElementsZ.h"
+#include "src/core/fieldz/Itemsz.h"
 
 TEST(FieldZ, Copying) {
     struct TestRow : RowZ {

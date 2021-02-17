@@ -2,14 +2,13 @@
 // Created by rja on 03/07/2020.
 //
 
-#if 0
 #include "Reference.h"
 
-
+#if 0
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
-                     const Wavefunction& wf, Table::Loc loc):
+                     const Wavefunction& wf, defs::wf_iarr_t wf_iarr_t, Table::Loc loc):
         Wavefunction::DynamicRow(wf, loc, "reference"),
-        m_ham(ham), m_wf(wf), m_aconn(ham.nsite()),
+        m_ham(ham), m_wf(wf), m_wf_inds(wf_iarr_t), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(m_summables, {1, 1}),
         m_nwalker_at_doubles(m_summables, {1, 1})
@@ -17,17 +16,15 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
             update();
 }
 
-void Reference::add_row(const size_t &irow) {
-    auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+void Reference::add_row() {
+    auto& row = m_wf.m_store.m_row;
+    auto weight = row.m_weight(m_wf_inds);
     if (std::abs(weight) > m_candidate_abs_weight){
         m_candidate_abs_weight = std::abs(weight);
-        m_irow_candidate = irow;
+        m_irow_candidate = row.m_i;
     }
-    if (m_wf.m_store.m_flags.m_reference_connection(irow)) {
-        add_to_numerator(m_wf.m_store.m_onv(irow), weight);
-    }
-    else {
-        ASSERT(consts::float_is_zero(m_ham.get_element(get_onv(), m_wf.m_store.m_onv(irow))));
+    if (row.m_reference_connection.get(m_wf_inds)) {
+        add_to_numerator(row.m_onv, weight);
     }
 }
 
@@ -90,13 +87,13 @@ const bool &Reference::in_redefinition_cycle() {
     return m_redefinition_cycle;
 }*/
 
-bool Reference::is_connected(const views::Onv<> &onv) const {
+bool Reference::is_connected() const {
     m_aconn.connect(get_onv(), onv);
     return m_aconn.connected();
 }
 
-void Reference::add_to_numerator(const views::Onv<> &onv, const defs::wf_t &weight) {
-    m_aconn.connect(get_onv(), onv);
+void Reference::add_to_numerator(const fieldsz::Onv<> &onv, const defs::wf_t &weight) {
+    m_aconn.connect(m_onv, onv);
     m_proj_energy_num(0, 0) += m_ham.get_element(m_aconn) * weight;
     m_nwalker_at_doubles(0, 0) += std::abs(weight);
 }

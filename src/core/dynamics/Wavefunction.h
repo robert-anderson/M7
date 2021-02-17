@@ -55,13 +55,13 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         m_comm.resize((m_opts.spawn_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
     }
 
-    defs::wf_inds flat_to_inds(const size_t& iflat){
-        defs::wf_inds out;
+    defs::wf_iarr_t flat_to_inds(const size_t& iflat){
+        defs::wf_iarr_t out;
         m_format.decode_flat(iflat, out);
         return out;
     }
 
-    size_t inds_to_flat(const defs::wf_inds& inds){
+    size_t inds_to_flat(const defs::wf_iarr_t& inds){
         return m_format.flatten(inds);
     }
 
@@ -87,7 +87,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 //    }
 
 
-    defs::wf_comp_t square_norm(const defs::wf_inds& inds) const {
+    defs::wf_comp_t square_norm(const defs::wf_iarr_t& inds) const {
         defs::wf_comp_t res = 0.0;
         auto& row = m_store.m_row;
         const defs::wf_t& weight = row.m_weight(inds);
@@ -97,21 +97,21 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         return mpi::all_sum(res);
     }
 
-    void grant_initiator_status(const defs::wf_inds& inds) {
+    void grant_initiator_status(const defs::wf_iarr_t& inds) {
         auto& row = m_store.m_row;
         MPI_ASSERT(!row.m_initiator.get(inds), "row is already initiator");
         row.m_initiator.set(inds);
         m_delta_ninitiator(inds)++;
     }
 
-    void revoke_initiator_status(const defs::wf_inds& inds) {
+    void revoke_initiator_status(const defs::wf_iarr_t& inds) {
         auto& row = m_store.m_row;
         MPI_ASSERT(!row.m_initiator.get(inds), "row is not initiator");
         row.m_initiator.clr(inds);
         m_delta_ninitiator(inds)--;
     }
 
-    void set_weight(const defs::wf_t &new_weight, const defs::wf_inds& inds) {
+    void set_weight(const defs::wf_t &new_weight, const defs::wf_iarr_t& inds) {
         auto& row = m_store.m_row;
         defs::wf_t& weight = row.m_weight(inds);
         m_delta_nwalker(0, 0) += std::abs(new_weight);
@@ -124,20 +124,20 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         else revoke_initiator_status(inds);
     }
 
-    void change_weight(const defs::wf_t &delta, const defs::wf_inds& inds) {
+    void change_weight(const defs::wf_t &delta, const defs::wf_iarr_t& inds) {
         set_weight(m_store.m_row.m_weight(inds) + delta, inds);
     }
 
-    void scale_weight(const double &factor, const defs::wf_inds& inds) {
+    void scale_weight(const double &factor, const defs::wf_iarr_t& inds) {
         m_store.m_row.m_weight(inds);
         set_weight(factor, inds);
     }
 
-    void zero_weight(const defs::wf_inds& inds) {
+    void zero_weight(const defs::wf_iarr_t& inds) {
         set_weight(0.0, inds);
     }
 
-    void remove_walker(const defs::wf_inds& inds) {
+    void remove_walker(const defs::wf_iarr_t& inds) {
         if (m_ra.row_mapped_by_dependent(m_store.m_row.m_i)) return;
         auto lookup = m_store[m_store.m_row.m_onv];
         zero_weight(inds);
@@ -145,7 +145,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
     size_t create_walker_(const fieldsz::Onv<> &onv, const defs::ham_t weight,
-                          const defs::ham_comp_t &hdiag, bool refconn, const defs::wf_inds& inds) {
+                          const defs::ham_comp_t &hdiag, bool refconn, const defs::wf_iarr_t& inds) {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1);
         auto irow = m_store.insert(onv);
@@ -160,7 +160,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
 
     Table::Loc create_walker(const fieldsz::Onv<> &onv, const defs::ham_t weight,
-                          const defs::ham_comp_t &hdiag, bool refconn, const defs::wf_inds& inds) {
+                          const defs::ham_comp_t &hdiag, bool refconn, const defs::wf_iarr_t& inds) {
         size_t irank = m_ra.get_rank(onv);
         size_t irow;
         if (mpi::i_am(irank)) irow = create_walker_(onv, weight, hdiag, refconn, inds);
@@ -170,7 +170,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     // TODO: return a pair?
     size_t add_spawn(const fieldsz::Onv<> &dst_onv, const defs::wf_t &delta,
-                     bool initiator, bool deterministic, const defs::wf_inds& inds) {
+                     bool initiator, bool deterministic, const defs::wf_iarr_t& inds) {
         auto irank = m_ra.get_rank(dst_onv);
 #ifdef VERBOSE_DEBUGGING
         std::cout << consts::verb << consts::chevs << "SENDING SPAWNED WALKER" << std::endl;

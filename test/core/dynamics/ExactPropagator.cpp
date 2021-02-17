@@ -8,13 +8,6 @@
 #include "src/core/dynamics/Solver.h"
 
 
-void print(const Wavefunction& wf){
-    for (size_t i=0ul; i<wf.m_store.m_hwm; ++i){
-//        std::cout << wf.m_walkers.m_onv(i).to_string() << " ";
-//        std::cout << wf.m_walkers.m_weight(i, 0, 0) << std::endl;
-    }
-}
-
 
 #if 0 
 TEST(ExactPropagator, BosonTest) {

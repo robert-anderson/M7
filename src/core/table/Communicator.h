@@ -12,6 +12,7 @@
 #include "MappedTable.h"
 #include <set>
 
+
 #if 0
 template<typename row_t>
 class CommunicatingPair {
@@ -344,8 +345,9 @@ struct Communicator {
 
     };
 
-    struct DynamicRow : public DynamicRowSet {
+    struct DynamicRow : public DynamicRowSet, store_row_t {
         using DynamicRowSet::ra_t;
+        using DynamicRowSet::m_ac;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
         using DynamicRowSet::add_;
@@ -358,7 +360,7 @@ struct Communicator {
         size_t m_iblock;
 
         DynamicRow(const Communicator &comm, Table::Loc loc, std::string name) :
-                DynamicRowSet(comm, name) {
+                DynamicRowSet(comm, name), store_row_t(m_ac.m_row) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
                 m_iblock = this->m_ra.get_block_irow(loc.m_irow);

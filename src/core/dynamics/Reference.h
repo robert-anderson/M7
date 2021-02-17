@@ -5,8 +5,6 @@
 #ifndef M7_REFERENCE_H
 #define M7_REFERENCE_H
 
-#if 0
-
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/field/Fields.h"
 #include "src/core/parallel/ReductionMember.h"
@@ -15,9 +13,11 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
+#if 0
 class Reference : public Wavefunction::DynamicRow {
     const Hamiltonian<> &m_ham;
     const Wavefunction &m_wf;
+    const defs::wf_iarr_t m_wf_inds;
 
     mutable conn::Antisym<> m_aconn;
 
@@ -36,16 +36,7 @@ class Reference : public Wavefunction::DynamicRow {
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
-              const Wavefunction &wf, Table::Loc loc);
-
-    const views::Onv<> get_onv() const {
-        MPI_ASSERT(!m_ac.m_onv(0).is_zero(), "Reference ONV must be non-zero");
-        return m_ac.m_onv(0);
-    }
-
-    const defs::wf_t& get_weight(const size_t& iroot, const size_t& ireplica) const {
-        return m_ac.m_weight(0, iroot, ireplica);
-    }
+              const Wavefunction &wf, defs::wf_iarr_t wf_iarr_t, Table::Loc loc);
 
     void accept_candidate(double redefinition_thresh = 0.0) {
         std::vector<defs::wf_t> gather(mpi::nrank());
@@ -53,18 +44,21 @@ public:
         MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
         size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
         mpi::bcast(m_irow_candidate, irank);
-        if (gather[irank] > std::abs(get_weight(0, 0)*redefinition_thresh)){
-            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", get_weight(0, 0), gather[irank]);
+        if (gather[irank] > std::abs(m_weight(m_wf_inds)*redefinition_thresh)){
+            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", m_weight(m_wf_inds), gather[irank]);
             change({irank, m_irow_candidate});
             //MPI_ASSERT(std::abs(m_wf.m_store.m_weight(m_irow_candidate, 0, 0))==m_candidate_abs_weight, "");
         }
-        ASSERT(std::abs(get_weight(0, 0))==m_candidate_abs_weight);
+        ASSERT(std::abs(m_weight(m_wf_inds))==m_candidate_abs_weight);
         m_candidate_abs_weight = 0.0;
     }
 
     void update() override;
 
-    void add_row(const size_t& irow);
+    /**
+     * add contributions from the current row of Wavefunction::m_store
+     */
+    void add_row();
 
     //void change(const size_t& irow, const size_t& irank);
 
@@ -76,9 +70,9 @@ public:
 
     //const bool &in_redefinition_cycle();
 
-    bool is_connected(const views::Onv<> &onv) const;
+    bool is_connected() const;
 
-    void add_to_numerator(const views::Onv<> &onv, const defs::wf_t &weight);
+    void add_to_numerator(const fieldsz::Onv<> &onv, const defs::wf_t &weight);
 
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
 

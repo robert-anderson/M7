@@ -48,6 +48,10 @@
 namespace defs {
     const std::string assets_root = PROJECT_ROOT"/assets";
     typedef std::vector<size_t> inds;
+
+    template<size_t nind>
+    using iarr_t = std::array<size_t, nind>;
+
     typedef int mpi_count;
     typedef std::vector<mpi_count> mpi_counts;
     /*
@@ -81,7 +85,7 @@ namespace defs {
 #endif
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
-    typedef std::array<size_t, ndim_wf> wf_inds;
+    typedef iarr_t<ndim_wf> wf_iarr_t;
 
     // width of the cache line in bytes
     constexpr size_t ndata_cacheline = 8;

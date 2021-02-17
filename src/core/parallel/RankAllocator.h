@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <src/core/util/Timer.h>
 
-
+#if 0
 struct RankAllocatorBase {
     struct Dependent {
         typedef RankAllocatorBase ra_t;
@@ -152,4 +152,5 @@ public:
 };
 
 
+#endif //M7_RANKALLOCATOR_H
 #endif //M7_RANKALLOCATOR_H

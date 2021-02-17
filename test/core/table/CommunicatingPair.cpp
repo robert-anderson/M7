@@ -6,7 +6,7 @@
 #include "src/core/table/Table.h"
 #include "src/core/table/Communicator.h"
 
-
+#if 0
 TEST(CommunicatingPair, CommunicateSingleElement) {
     struct TestTable : public Table {
         fields::Number<size_t> m_counter;
@@ -85,3 +85,4 @@ TEST(CommunicatingPair, CommunicateVector) {
         }
     }
 }
+#endif

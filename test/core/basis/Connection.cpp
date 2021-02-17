@@ -5,12 +5,12 @@
 #include "gtest/gtest.h"
 #include "src/core/basis/FermionOnvConnection.h"
 #include "src/core/io/SparseArrayFileReader.h"
-#include "src/core/field/Elements.h"
+#include "src/core/fieldz/Itemsz.h"
 
 TEST(Connection, ParticleNumberConserving){
     const size_t nsite = 20;
-    elements::FermionOnv ket(nsite);
-    elements::FermionOnv bra(nsite);
+    itemsz::FermionOnv ket(nsite);
+    itemsz::FermionOnv bra(nsite);
 
     defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 20, 38, 39};
     defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 37, 38};

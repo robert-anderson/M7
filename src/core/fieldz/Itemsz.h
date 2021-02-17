@@ -2,12 +2,12 @@
 // Created by rja on 10/02/2021.
 //
 
-#ifndef M7_ELEMENTSZ_H
-#define M7_ELEMENTSZ_H
+#ifndef M7_ITEMSZ_H
+#define M7_ITEMSZ_H
 
 #include "NdMultiFieldZ.h"
 #include "BufferedTableZ.h"
-
+#include "FieldsZ.h"
 
 
 //template<typename row_t>
@@ -95,4 +95,4 @@ namespace itemsz {
 }
 
 
-#endif //M7_ELEMENTSZ_H
+#endif //M7_ITEMSZ_H

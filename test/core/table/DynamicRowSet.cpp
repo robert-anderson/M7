@@ -7,7 +7,7 @@
 #include "src/core/parallel/RankAllocator.h"
 #include "TableTest.h"
 
-
+#if 0
 TEST(DynamicRowSet, Test) {
     const size_t nsite = 12;
     const size_t nrow_per_rank = 4;
@@ -35,3 +35,4 @@ TEST(DynamicRowSet, Test) {
     }
     bt.print_contents();
 }
+#endif

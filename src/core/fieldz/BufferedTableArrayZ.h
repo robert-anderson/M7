@@ -7,7 +7,6 @@
 
 #include "TableZ.h"
 
-#if 0
 template<typename row_t>
 class BufferedTableArrayZ {
     typedef TableZ<row_t> table_t;
@@ -15,24 +14,24 @@ class BufferedTableArrayZ {
     std::vector<table_t> m_tables;
 
     const size_t &row_dsize() const {
-        return static_cast<const Table &>(m_tables[0]).m_row_dsize;
+        return static_cast<const TableBaseZ &>(m_tables[0]).m_row_dsize;
     }
 
     size_t window_dsize() const {
-        return static_cast<const Table &>(m_tables[0]).m_bw.dsize();
+        return static_cast<const TableBaseZ &>(m_tables[0]).m_bw.dsize();
     }
 
     void update_nrow() {
         auto nrow = window_dsize() / row_dsize();
         for (size_t i = 0ul; i < ntable(); ++i) {
-            static_cast<Table &>(m_tables[i]).m_nrow = nrow;
+            static_cast<TableBaseZ &>(m_tables[i]).m_nrow = nrow;
         }
     }
 
 public:
 
     const size_t &nrow_per_table() const {
-        return static_cast<const Table &>(m_tables[0]).m_nrow;
+        return static_cast<const TableBaseZ &>(m_tables[0]).m_nrow;
     }
 
     defs::data_t *dbegin() {
@@ -56,7 +55,7 @@ public:
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {
             m_tables.emplace_back({row});
-            static_cast<Table &>(m_tables.back()).set_buffer(&m_buffer);
+            static_cast<TableBaseZ &>(m_tables.back()).set_buffer(&m_buffer);
         }
     }
 
@@ -65,7 +64,7 @@ public:
         m_tables.reserve(other.ntable());
         for (size_t itable = 0ul; itable < other.ntable(); ++itable) {
             m_tables.emplace_back(other.m_tables[itable]);
-            static_cast<Table &>(m_tables.back()).set_buffer(&m_buffer);
+            static_cast<TableBaseZ &>(m_tables.back()).set_buffer(&m_buffer);
         }
     }
 
@@ -108,8 +107,8 @@ public:
 
     void clear() {
         for (auto &table:m_tables) {
-            static_cast<Table &>(table).clear();
-            static_cast<Table &>(table).m_hwm = 0;
+            static_cast<TableBaseZ &>(table).clear();
+            static_cast<TableBaseZ &>(table).m_hwm = 0;
         }
     }
 
@@ -117,26 +116,14 @@ public:
         m_buffer.m_expansion_factor = f;
     }
 
-    void print_contents() {
+    std::string to_string() {
+        std::string tmp;
         for (size_t itable = 0ul; itable < ntable(); ++itable) {
-            std::cout << "Table array element " << std::to_string(itable) << ":\n";
-            static_cast<const Table &>(m_tables[itable]).print_contents();
-            std::cout << std::endl;
+            tmp+="Table array element " + std::to_string(itable) + ":\n";
+            tmp+=static_cast<const TableZ<row_t> &>(m_tables[itable]).to_string()+"\n";
         }
+        return tmp;
     }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-#endif //M7_BUFFEREDTABLEARRAYZ_H
 #endif //M7_BUFFEREDTABLEARRAYZ_H
