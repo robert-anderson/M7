@@ -6,6 +6,7 @@
 #define M7_NDMULTIFIELDZ_H
 
 #include "RowZ.h"
+#include "FieldBaseZ.h"
 #include "src/core/nd/NdSelector.h"
 
 struct RowFieldBaseZ {
@@ -15,14 +16,12 @@ struct RowFieldBaseZ {
     RowFieldBaseZ(const RowFieldBaseZ& other): m_row(other.m_row ? other.m_row->m_child : nullptr){}
 };
 
-template<size_t nind_item, typename ...Args>
-struct NdMultiFieldZ : RowFieldBaseZ {
-    NdFormat<nind_item> m_format;
+template<typename ...Args>
+struct MultiFieldZ : RowFieldBaseZ {
     std::tuple<Args...> m_subfields;
     std::vector<char> m_null_field_string;
 
-    NdMultiFieldZ(RowZ *row, std::array<size_t, nind_item> shape, Args&&... subfields) :
-            RowFieldBaseZ(row), m_format(shape), m_subfields(subfields...) {
+    MultiFieldZ(RowZ *row, Args&&... subfields): RowFieldBaseZ(row), m_subfields(subfields...) {
         init();
         m_null_field_string.assign(max_size(), 0);
     }
@@ -32,17 +31,16 @@ struct NdMultiFieldZ : RowFieldBaseZ {
      * part of a row copy. This is in contrast to the FieldBase class, which may be
      * legitimately copied without reference to a row.
      */
-    NdMultiFieldZ(const NdMultiFieldZ& other) :
+    MultiFieldZ(const MultiFieldZ& other) :
             RowFieldBaseZ(other.m_row->m_child),
-            m_format(other.m_format),
             m_subfields(other.m_subfields){
         init();
     }
 
-    NdMultiFieldZ& operator=(const NdMultiFieldZ& other) {
+    MultiFieldZ& operator=(const MultiFieldZ& other) {
         MPI_ASSERT(is_comparable(other), "Shapes are incompatible");
         struct fn_t {
-            const NdMultiFieldZ& other;
+            const MultiFieldZ& other;
             void operator()(FieldBaseZ &f1, const FieldBaseZ &f2) { f1=f2; }
         };
         fn_t fn;
@@ -54,23 +52,18 @@ struct NdMultiFieldZ : RowFieldBaseZ {
         if (!m_row) return;
         struct fn_t {
             RowZ* m_row;
-            NdFormat<nind_item>* m_format;
-            void operator()(ItemFormattedFieldBaseZ<nind_item> &f) {
-                f.m_item_format = m_format;
-                f.m_nitem = m_format->nelement();
-                f.m_size = f.m_item_size*f.m_nitem;
+            void operator()(FieldBaseZ &f) {
                 f.m_row_offset = m_row->add_field(&f);
                 f.m_row = m_row;
             }
         };
-        fn_t fn {m_row, &m_format};
+        fn_t fn {m_row};
         tuple_utils::for_each(m_subfields, fn);
     }
 
-    bool operator==(const NdMultiFieldZ &other) const {
+    bool operator==(const MultiFieldZ &other) const {
         struct fn_t {
             bool m_and = true;
-
             void operator()(const FieldBaseZ &f1, const FieldBaseZ &f2) { m_and &= f1==f2; }
         };
         fn_t fn;
@@ -78,7 +71,7 @@ struct NdMultiFieldZ : RowFieldBaseZ {
         return fn.m_and;
     }
 
-    bool is_comparable(const NdMultiFieldZ &other) const {
+    bool is_comparable(const MultiFieldZ &other) const {
         struct fn_t {
             bool m_and = true;
             void operator()(const FieldBaseZ &f1, const FieldBaseZ &f2) { m_and &= f1.is_comparable(f2); }
@@ -87,7 +80,6 @@ struct NdMultiFieldZ : RowFieldBaseZ {
         tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
         return fn.m_and;
     }
-
 
 
 protected:
@@ -144,30 +136,26 @@ protected:
 };
 
 
-template<size_t nind_item, typename field_t>
-struct NdFieldZ : RowFieldBaseZ, field_t {
+template<typename field_t>
+struct FieldZ : RowFieldBaseZ, field_t {
     using RowFieldBaseZ::m_row;
     using field_t::operator=;
-    NdFormat<nind_item> m_format;
-    NdFieldZ(RowZ *row, std::array<size_t, nind_item> item_shape, field_t&& field) :
-            RowFieldBaseZ(row), field_t(field), m_format(item_shape){
-        static_cast<ItemFormattedFieldBaseZ<nind_item>&>(*this).m_item_format = &m_format;
-        FieldBaseZ::m_nitem = m_format.nelement();
-        FieldBaseZ::m_size = this->m_item_size*this->m_nitem;
+    FieldZ(RowZ *row, field_t&& field) :
+            RowFieldBaseZ(row), field_t(field){
         FieldBaseZ::m_row_offset = m_row->add_field(this);
         FieldBaseZ::m_row = m_row;
     }
 
-    NdFieldZ(const NdFieldZ& other):
-            RowFieldBaseZ(other.m_row->m_child), field_t(other), m_format(other.m_format.shape()){
-        static_cast<ItemFormattedFieldBaseZ<nind_item>&>(*this).m_item_format = &m_format;
-        FieldBaseZ::m_nitem = m_format.nelement();
-        FieldBaseZ::m_size = this->m_item_size*this->m_nitem;
-        ASSERT(m_row);
+    FieldZ(const FieldZ& other):
+            RowFieldBaseZ(other.m_row->m_child), field_t(other){
         FieldBaseZ::m_row_offset = m_row->add_field(this);
         FieldBaseZ::m_row = m_row;
     }
 
+    FieldZ& operator=(const FieldZ& other) {
+        *this = other;
+        return *this;
+    }
 };
 
 

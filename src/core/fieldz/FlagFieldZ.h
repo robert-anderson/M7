@@ -7,61 +7,46 @@
 
 #include "BitsetFieldZ.h"
 
-/*
- * two specializations for pretty access syntax, need dummy template arg to make
- * use of partial template specialization
- */
+struct FlagsFieldZ : BitsetFieldBaseZ<uint8_t> {
+    typedef BitsetFieldBaseZ<uint8_t> base_t;
+    FlagsFieldZ(size_t nflag) : base_t(1, nflag) {}
 
-template<typename dummy_t, size_t nind_element>
-struct FlagFieldZ : BitsetFieldBaseZ<uint8_t, 0ul, nind_element> {
-    typedef BitsetFieldBaseZ<uint8_t, 0ul, nind_element> base_t;
-    using base_t::m_element_format;
-    using base_t::nbit_dword;
-    using base_t::begin;
-    FlagFieldZ(std::array<size_t, nind_element> shape) : base_t(shape){}
-
-    bool get(const std::array<size_t, nind_element>& einds) const {
-        auto const& ibit = m_element_format.flatten(einds);
-        return bit_utils::get(((uint8_t*)begin())[ibit / nbit_dword()], ibit % nbit_dword());
+    bool get(const size_t& iflag) const {
+        return base_t::base_get(iflag);
     }
 
-    void set(const std::array<size_t, nind_element>& einds) const {
-        auto const& ibit = m_element_format.flatten(einds);
-        bit_utils::set(((uint8_t*)begin())[ibit / nbit_dword()], ibit % nbit_dword());
+    void set(const size_t& iflag) {
+        base_t::base_set(iflag);
     }
 
-    void clr(const std::array<size_t, nind_element>& einds) const {
-        auto const& ibit = m_element_format.flatten(einds);
-        bit_utils::clr(((uint8_t*)begin())[ibit / nbit_dword()], ibit % nbit_dword());
+    void clr(const size_t& iflag) {
+        base_t::base_clr(iflag);
     }
 
-    void put(const std::array<size_t, nind_element>& einds, bool v) const {
-        v ? set(einds) : clr(einds);
+    void put(const size_t& iflag, bool v) {
+        base_t::base_put(iflag, v);
     }
 };
 
-template<typename dummy_t>
-struct FlagFieldZ<dummy_t, 0ul> : BitsetFieldBaseZ<uint8_t, 0ul, 0ul> {
-    typedef BitsetFieldBaseZ<uint8_t, 0ul, 0ul> base_t;
-    using base_t::m_element_format;
-    using base_t::nbit_dword;
-    using base_t::begin;
-    FlagFieldZ() : base_t({}){}
+
+struct FlagFieldZ : BitsetFieldBaseZ<uint8_t> {
+    typedef BitsetFieldBaseZ<uint8_t> base_t;
+    FlagFieldZ() : base_t(1, 1) {}
 
     bool get() const {
-        return bit_utils::get(((uint8_t*)begin())[0], 0);
+        return base_t::base_get(0);
     }
 
-    void set() const {
-        bit_utils::set(((uint8_t*)begin())[0], 0);
+    void set() {
+        base_t::base_set(0);
     }
 
-    void clr() const {
-        bit_utils::clr(((uint8_t*)begin())[0], 0);
+    void clr() {
+        base_t::base_clr(0);
     }
 
-    void put(bool v) const {
-        v ? set() : clr();
+    void put(bool v) {
+        base_t::base_put(0, v);
     }
 };
 

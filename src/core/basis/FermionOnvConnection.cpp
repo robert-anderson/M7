@@ -10,24 +10,18 @@ FermionOnvConnection::FermionOnvConnection(size_t nsite){
     m_cre.reserve(2*nsite);
 }
 
-FermionOnvConnection::FermionOnvConnection(const FermionOnvSpecifier& spec):
-        FermionOnvConnection(spec.m_nsite){}
-
-FermionOnvConnection::FermionOnvConnection(const views::Det &in, const views::Det &out) : FermionOnvConnection(in.spec()) {
-    ASSERT(in.nsite() == out.nsite());
+FermionOnvConnection::FermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out):
+FermionOnvConnection(in.m_nsite) {
+    ASSERT(in.m_nsite == out.m_nsite);
     connect(in, out);
 }
 
-FermionOnvConnection::FermionOnvConnection(const views::Det &in) : FermionOnvConnection(in, in){}
-
-
-void FermionOnvConnection::connect(const views::Det &in, const views::Det &out) {
+void FermionOnvConnection::connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) {
     ASSERT(!in.is_zero())
-    ASSERT(in.ndataword() == out.ndataword());
     zero();
 
     defs::data_t in_work, out_work, work;
-    for (size_t idataword = 0ul; idataword<in.ndataword(); ++idataword){
+    for (size_t idataword = 0ul; idataword<in.m_item_dsize; ++idataword){
         in_work = in.get_dataword(idataword);
         out_work = out.get_dataword(idataword);
         work = in_work&~out_work;
@@ -37,7 +31,7 @@ void FermionOnvConnection::connect(const views::Det &in, const views::Det &out) 
     }
 }
 
-void FermionOnvConnection::apply(const views::Det &in, views::Det &out){
+void FermionOnvConnection::apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out){
     ASSERT(!in.is_zero());
 #ifndef NDEBUG
     for (size_t i=0ul; i<nann(); ++i) ASSERT(in.get(ann(i)));
@@ -60,17 +54,14 @@ FermionOnvConnection(nsite) {
     m_com.reserve(2*nsite);
 }
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const FermionOnvSpecifier &spec):
-        AntisymFermionOnvConnection(spec.m_nsite) {}
-
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::Det &in, const views::Det &out) :
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) :
         AntisymFermionOnvConnection(in) {
     connect(in, out);
 }
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const views::Det &in) : AntisymFermionOnvConnection(in.spec()) {}
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const fieldsz::Onv<0> &in) : AntisymFermionOnvConnection(in.m_nsite) {}
 
-void AntisymFermionOnvConnection::connect(const views::Det &in, const views::Det &out) {
+void AntisymFermionOnvConnection::connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) {
     FermionOnvConnection::connect(in, out);
     m_com.clear();
     size_t nperm = 0ul;
@@ -79,7 +70,7 @@ void AntisymFermionOnvConnection::connect(const views::Det &in, const views::Det
     auto cre_iter = m_cre.begin();
 
     defs::data_t in_work, out_work, work;
-    for (size_t idataword = 0ul; idataword<in.ndataword(); ++idataword){
+    for (size_t idataword = 0ul; idataword<in.m_item_dsize; ++idataword){
         in_work = in.get_dataword(idataword);
         out_work = out.get_dataword(idataword);
         work = in_work & out_work;
@@ -103,7 +94,7 @@ void AntisymFermionOnvConnection::connect(const views::Det &in, const views::Det
     m_phase = nperm & 1ul;
 }
 
-void AntisymFermionOnvConnection::apply(const views::Det &in) {
+void AntisymFermionOnvConnection::apply(const fieldsz::Onv<0> &in) {
     ASSERT(std::is_sorted(m_cre.begin(), m_cre.end()));
     ASSERT(std::is_sorted(m_ann.begin(), m_ann.end()));
     m_com.clear();
@@ -112,7 +103,7 @@ void AntisymFermionOnvConnection::apply(const views::Det &in) {
     auto ann_iter = m_ann.begin();
     auto cre_iter = m_cre.begin();
 
-    for(size_t idataword=0ul; idataword<in.ndataword(); ++idataword){
+    for(size_t idataword=0ul; idataword<in.m_item_dsize; ++idataword){
         auto work = in.get_dataword(idataword);
         while (work) {
             auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
@@ -137,7 +128,7 @@ void AntisymFermionOnvConnection::apply(const views::Det &in) {
     m_phase = nperm & 1ul;
 }
 
-void AntisymFermionOnvConnection::apply(const views::Det &in, views::Det &out) {
+void AntisymFermionOnvConnection::apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out) {
     apply(in);
     FermionOnvConnection::apply(in, out);
 }

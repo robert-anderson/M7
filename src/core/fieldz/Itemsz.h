@@ -42,28 +42,26 @@ struct WrappedRowZ {
 };
 
 template<typename ...Args>
-struct ElementZ : WrappedRowZ, NdMultiFieldZ<0ul, Args...> {
+struct ElementZ : WrappedRowZ, MultiFieldZ<Args...> {
     Buffer m_buffer;
     TableBaseZ m_table;
     ElementZ(Args &&... subfields) :
-            NdMultiFieldZ<0ul, Args...>(&m_wrapped_row, {}, std::move(subfields)...),
+            MultiFieldZ<Args...>(&m_wrapped_row, {}, std::move(subfields)...),
             m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;
         m_table.push_back();
         m_wrapped_row.restart();
-        NdMultiFieldZ<0ul, Args...>::restart();
+        MultiFieldZ<Args...>::restart();
     }
 };
 
-
-
 template<typename field_t>
-struct NdItemZ : WrappedRowZ, NdFieldZ<0ul, field_t> {
+struct NdItemZ : WrappedRowZ, FieldZ<field_t> {
     Buffer m_buffer;
     TableBaseZ m_table;
-    NdItemZ(field_t&& field) : NdFieldZ<0ul, field_t>(&m_wrapped_row, {}, std::move(field)),
+    NdItemZ(field_t&& field) : FieldZ<field_t>(&m_wrapped_row, {}, std::move(field)),
     m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
@@ -77,7 +75,7 @@ struct NdItemZ : WrappedRowZ, NdFieldZ<0ul, field_t> {
 namespace itemsz {
 
 
-    using FermionOnv = NdItemZ<FermionOnvFieldZ<0ul>>;
+    using FermionOnv = NdItemZ<FermionOnvFieldZ>;
 
 #if 0
     template<typename T, size_t nind>

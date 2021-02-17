@@ -6,11 +6,11 @@
 #include "src/core/parallel/MPIAssert.h"
 
 
-FieldBaseZ::FieldBaseZ(size_t item_size, const std::type_info &type_info) :
-        m_item_size(item_size), m_type_info(type_info){}
+FieldBaseZ::FieldBaseZ(size_t item_size, size_t nitem, const std::type_info &type_info) :
+        m_item_size(item_size), m_type_info(type_info), m_nitem(nitem), m_size(m_item_size*m_nitem){}
 
 FieldBaseZ::FieldBaseZ(const FieldBaseZ &other) :
-FieldBaseZ(other.m_item_size, other.m_type_info) {}
+    FieldBaseZ(other.m_item_size, other.m_nitem, other.m_type_info) {}
 
 bool FieldBaseZ::is_added_to_row() const {
     return (m_nitem != ~0ul) && (m_size != ~0ul) && (m_row_offset != ~0ul) && m_row;

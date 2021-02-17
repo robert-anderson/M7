@@ -14,13 +14,13 @@ struct FieldBaseZ {
     RowZ *m_row = nullptr;
     const size_t m_item_size;
     const std::type_info &m_type_info;
-    size_t m_nitem = ~0ul;
-    size_t m_size = ~0ul;
+    const size_t m_nitem;
+    const size_t m_size;
     size_t m_row_offset = ~0ul;
 
     std::vector<char> m_null_item_string;
 
-    FieldBaseZ(size_t item_size, const std::type_info &type_info);
+    FieldBaseZ(size_t item_size, size_t nitem, const std::type_info &type_info);
 
     FieldBaseZ(const FieldBaseZ &other);
 

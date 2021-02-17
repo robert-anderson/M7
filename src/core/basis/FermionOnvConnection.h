@@ -8,6 +8,7 @@
 #include <src/core/field/FermionOnvSpecifier.h>
 #include <algorithm>
 #include <src/core/field/Views.h>
+#include <src/core/fieldz/FieldsZ.h>
 
 /*
  * <out| ...cre... ...ann... |in>
@@ -35,9 +36,8 @@ protected:
 
 public:
     explicit FermionOnvConnection(size_t nsite);
-    explicit FermionOnvConnection(const FermionOnvSpecifier& field);
-    FermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
-    explicit FermionOnvConnection(const views::Onv<0> &in);
+    FermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
+    explicit FermionOnvConnection(const fieldsz::Onv<0> &in);
     virtual operator bool() const {
         return nexcit();
     }
@@ -50,8 +50,8 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     size_t ncre() const {return m_cre.size();}
 
-    void connect(const views::Onv<0> &in, const views::Onv<0> &out);
-    void apply(const views::Onv<0> &in, views::Onv<0> &out);
+    void connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
+    void apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out);
     void zero(){
         m_cre.clear();
         m_ann.clear();
@@ -101,13 +101,12 @@ class AntisymFermionOnvConnection : public FermionOnvConnection {
 
 public:
     explicit AntisymFermionOnvConnection(size_t nsite);
-    explicit AntisymFermionOnvConnection(const FermionOnvSpecifier& spec);
-    AntisymFermionOnvConnection(const views::Onv<0> &in, const views::Onv<0> &out);
-    explicit AntisymFermionOnvConnection(const views::Onv<0> &in);
+    AntisymFermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
+    explicit AntisymFermionOnvConnection(const fieldsz::Onv<0> &in);
 
-    void connect(const views::Onv<0> &in, const views::Onv<0> &out);
-    void apply(const views::Onv<0> &in);
-    void apply(const views::Onv<0> &in, views::Onv<0> &out);
+    void connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
+    void apply(const fieldsz::Onv<0> &in);
+    void apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out);
 
     void zero();
     const defs::inds & com() const {return m_com;}
@@ -120,7 +119,7 @@ template<typename T>
 struct MatrixElement {
     AntisymFermionOnvConnection aconn;
     T element = 0;
-    MatrixElement(const views::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
+    MatrixElement(const fieldsz::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
 };
 
 #endif //M7_FERMIONONVCONNECTION_H
