@@ -9,10 +9,10 @@
 #include <src/core/basis/FermionOnvConnection.h>
 #include <src/core/basis/DecodedDeterminant.h>
 #include <src/core/basis/Connections.h>
-#include <src/core/field/Elements.h>
 #include <src/core/io/Options.h>
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
+#include "src/core/fieldz/BufferedFields.h"
 
 
 class FermionHamiltonian {
@@ -94,7 +94,7 @@ public:
         return m_int_2e_rank;
     }
 
-    elements::FermionOnv guess_reference(const int &spin_level) const;
+    buffered::FermionOnv guess_reference(const int &spin_level) const;
 //
 //    elements::FermionOnv refine_guess_reference(const views::FermionOnv &ref) const;
 //

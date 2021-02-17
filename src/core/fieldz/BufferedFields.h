@@ -2,8 +2,8 @@
 // Created by rja on 10/02/2021.
 //
 
-#ifndef M7_ITEMSZ_H
-#define M7_ITEMSZ_H
+#ifndef M7_BUFFEREDFIELDS_H
+#define M7_BUFFEREDFIELDS_H
 
 #include "NdMultiFieldZ.h"
 #include "BufferedTableZ.h"
@@ -41,28 +41,29 @@ struct WrappedRowZ {
     RowZ m_wrapped_row;
 };
 
-template<typename ...Args>
-struct ElementZ : WrappedRowZ, MultiFieldZ<Args...> {
+template<typename multi_field_t>
+struct BufferedMultiFieldz : WrappedRowZ, multi_field_t {
     Buffer m_buffer;
     TableBaseZ m_table;
-    ElementZ(Args &&... subfields) :
-            MultiFieldZ<Args...>(&m_wrapped_row, {}, std::move(subfields)...),
+    BufferedMultiFieldz(multi_field_t&& multi_field) :
+            multi_field_t(std::move(multi_field)),
             m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;
         m_table.push_back();
         m_wrapped_row.restart();
-        MultiFieldZ<Args...>::restart();
     }
 };
 
 template<typename field_t>
-struct NdItemZ : WrappedRowZ, FieldZ<field_t> {
+struct BufferedFieldZ : WrappedRowZ, field_t {
+    static_assert(std::is_base_of<FieldBaseZ, field_t>::value, "Template arg must be derived from FieldBase");
     Buffer m_buffer;
     TableBaseZ m_table;
-    NdItemZ(field_t&& field) : FieldZ<field_t>(&m_wrapped_row, {}, std::move(field)),
-    m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
+    BufferedFieldZ(field_t&& field) : field_t(std::move(field)),
+        m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
+        MPI_ASSERT(!FieldBaseZ::m_row, "");
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;
@@ -72,25 +73,28 @@ struct NdItemZ : WrappedRowZ, FieldZ<field_t> {
 };
 
 
-namespace itemsz {
+namespace buffered {
 
 
-    using FermionOnv = NdItemZ<FermionOnvFieldZ>;
+    using FermionOnv = BufferedFieldZ<fieldsz::FermionOnv>;
+    using FermionOnvs = BufferedFieldZ<fieldsz::FermionOnvs>;
 
-#if 0
-    template<typename T, size_t nind>
-    using number_array = ElementZ<NumberFieldZ<T, nind>>;
+    using BosonOnv = BufferedFieldZ<fieldsz::BosonOnv>;
+    using BosonOnvs = BufferedFieldZ<fieldsz::BosonOnvs>;
 
-    struct FermionOnv : ElementZ<FermionOnvFieldZ> {
-        FermionOnv(size_t nsite): ElementZ<FermionOnvFieldZ>(FermionOnvFieldZ(nsite)){}
-    };
-
-    struct FermiBosOnv : ElementZ<FermionOnvFieldZ, BosonOnvFieldZ> {
+    struct FermiBosOnv : BufferedMultiFieldz<fieldsz::FermiBosOnv> {
         FermiBosOnv(size_t nsite):
-                ElementZ<FermionOnvFieldZ, BosonOnvFieldZ>(FermionOnvFieldZ(nsite), BosonOnvFieldZ(nsite)){}
+        BufferedMultiFieldz<fieldsz::FermiBosOnv>(fieldsz::FermiBosOnv{nullptr, nsite}){}
     };
-#endif
+    using FermiBosOnvs = BufferedMultiFieldz<fieldsz::FermiBosOnvs>;
+
+    template<bool enable_bosons=defs::enable_bosons>
+    using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
+
+    template<bool enable_bosons=defs::enable_bosons>
+    using Onvs = typename std::conditional<enable_bosons, FermiBosOnvs, FermionOnvs>::type;
+
 }
 
 
-#endif //M7_ITEMSZ_H
+#endif //M7_BUFFEREDFIELDS_H

@@ -9,7 +9,7 @@
 
 struct FlagsFieldZ : BitsetFieldBaseZ<uint8_t> {
     typedef BitsetFieldBaseZ<uint8_t> base_t;
-    FlagsFieldZ(size_t nflag) : base_t(1, nflag) {}
+    FlagsFieldZ(RowZ* row, size_t nflag) : base_t(row, 1, nflag) {}
 
     bool get(const size_t& iflag) const {
         return base_t::base_get(iflag);
@@ -31,7 +31,7 @@ struct FlagsFieldZ : BitsetFieldBaseZ<uint8_t> {
 
 struct FlagFieldZ : BitsetFieldBaseZ<uint8_t> {
     typedef BitsetFieldBaseZ<uint8_t> base_t;
-    FlagFieldZ() : base_t(1, 1) {}
+    FlagFieldZ(RowZ* row) : base_t(row, 1, 1) {}
 
     bool get() const {
         return base_t::base_get(0);

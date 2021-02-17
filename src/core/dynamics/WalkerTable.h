@@ -16,7 +16,7 @@
 struct WalkerTableRow : public RowZ {
     const size_t m_npart;
     fieldsz::Onv<> m_onv;
-    fieldsz::Numbers<defs::wf_t> m_weight;
+    fieldsz::Vector<defs::wf_t> m_weight;
     fieldsz::Number<defs::ham_comp_t> m_hdiag;
     fieldsz::Flags m_initiator;
     fieldsz::Flags m_reference_connection;

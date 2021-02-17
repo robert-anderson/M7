@@ -25,6 +25,7 @@
 #ifndef M7_FERMIBOSHAMILTONIAN_H
 #define M7_FERMIBOSHAMILTONIAN_H
 
+#include <src/core/fieldz/BufferedFields.h>
 #include "FermionHamiltonian.h"
 #include "BosonCouplings.h"
 
@@ -91,12 +92,12 @@ public:
         return 0.0;
     }
 
-    defs::ham_t get_element(const views::FbOnv &bra, const views::FbOnv &ket) const {
+    defs::ham_t get_element(const fieldsz::Onv<1> &bra, const fieldsz::Onv<1> &ket) const {
         return get_element(conn::Antisym<1>(ket, bra));
     }
 
-    elements::FermiBosOnv guess_reference(const int &spin_level) const {
-        elements::FermiBosOnv tmp(m_nsite);
+    buffered::FermiBosOnv guess_reference(const int &spin_level) const {
+        buffered::FermiBosOnv tmp(m_nsite);
         tmp.m_fonv = FermionHamiltonian::guess_reference(spin_level);
         return tmp;
     }

@@ -29,8 +29,8 @@ struct BitsetFieldBaseZ : FieldBaseZ {
     using FieldBaseZ::zero;
 
 public:
-    BitsetFieldBaseZ(size_t nitem, size_t nbit) :
-            FieldBaseZ(integer_utils::divceil(nbit, nbit_dword())*sizeof(T), nitem, typeid(T)),
+    BitsetFieldBaseZ(RowZ* row, size_t nitem, size_t nbit) :
+            FieldBaseZ(row, integer_utils::divceil(nbit, nbit_dword())*sizeof(T), nitem, typeid(T)),
             m_nbit(nbit), m_item_dsize(m_item_size/sizeof(T)),
             m_nbit_spare(m_item_dsize * nbit_dword() - m_nbit){
     }

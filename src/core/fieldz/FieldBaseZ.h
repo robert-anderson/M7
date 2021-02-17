@@ -11,7 +11,7 @@
 #include "RowZ.h"
 
 struct FieldBaseZ {
-    RowZ *m_row = nullptr;
+    RowZ *m_row;
     const size_t m_item_size;
     const std::type_info &m_type_info;
     const size_t m_nitem;
@@ -20,7 +20,7 @@ struct FieldBaseZ {
 
     std::vector<char> m_null_item_string;
 
-    FieldBaseZ(size_t item_size, size_t nitem, const std::type_info &type_info);
+    FieldBaseZ(RowZ* row, size_t item_size, size_t nitem, const std::type_info &type_info);
 
     FieldBaseZ(const FieldBaseZ &other);
 

@@ -17,16 +17,13 @@ void BosonOnvConnection::Diff::zero() {
 BosonOnvConnection::BosonOnvConnection(const size_t nmode) :
         m_nmode(nmode), m_com(nmode), m_diff(nmode) {}
 
-BosonOnvConnection::BosonOnvConnection(const BosonOnvSpecifier &spec) :
-        BosonOnvConnection(spec.nmode()){}
-
-BosonOnvConnection::BosonOnvConnection(const views::BosonOnv &in, const views::BosonOnv &out) :
-        BosonOnvConnection(in.spec()) {
+BosonOnvConnection::BosonOnvConnection(const fieldsz::BosonOnv &in, const fieldsz::BosonOnv &out) :
+        BosonOnvConnection(in.m_nelement) {
     connect(in, out);
 }
 
-BosonOnvConnection::BosonOnvConnection(const views::BosonOnv &in) :
-        BosonOnvConnection(in.spec()) {
+BosonOnvConnection::BosonOnvConnection(const fieldsz::BosonOnv &in) :
+        BosonOnvConnection(in.m_nelement) {
     connect(in, in);
 }
 
@@ -49,7 +46,7 @@ const int &BosonOnvConnection::com(const size_t &icom) const {
     return m_com[icom];
 }
 
-void BosonOnvConnection::connect(const views::BosonOnv &in, const views::BosonOnv &out) {
+void BosonOnvConnection::connect(const fieldsz::BosonOnv &in, const fieldsz::BosonOnv &out) {
     m_diff.zero();
     ASSERT(!m_com.empty())
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {
@@ -64,7 +61,7 @@ void BosonOnvConnection::connect(const views::BosonOnv &in, const views::BosonOn
     }
 }
 
-void BosonOnvConnection::apply(const views::BosonOnv &in, views::BosonOnv &out) {
+void BosonOnvConnection::apply(const fieldsz::BosonOnv &in, fieldsz::BosonOnv &out) {
     out = in;
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {
         m_com[imode] = in(imode);

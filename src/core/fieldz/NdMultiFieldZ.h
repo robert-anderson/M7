@@ -9,19 +9,14 @@
 #include "FieldBaseZ.h"
 #include "src/core/nd/NdSelector.h"
 
-struct RowFieldBaseZ {
-    RowZ *m_row;
-    RowFieldBaseZ(RowZ* row): m_row(row){}
-
-    RowFieldBaseZ(const RowFieldBaseZ& other): m_row(other.m_row ? other.m_row->m_child : nullptr){}
-};
 
 template<typename ...Args>
-struct MultiFieldZ : RowFieldBaseZ {
+struct MultiFieldZ {
+    RowZ *m_row;
     std::tuple<Args...> m_subfields;
     std::vector<char> m_null_field_string;
 
-    MultiFieldZ(RowZ *row, Args&&... subfields): RowFieldBaseZ(row), m_subfields(subfields...) {
+    MultiFieldZ(RowZ *row, Args&&... subfields): m_row(row), m_subfields(subfields...) {
         init();
         m_null_field_string.assign(max_size(), 0);
     }
@@ -32,7 +27,7 @@ struct MultiFieldZ : RowFieldBaseZ {
      * legitimately copied without reference to a row.
      */
     MultiFieldZ(const MultiFieldZ& other) :
-            RowFieldBaseZ(other.m_row->m_child),
+            m_row(other.m_row ? other.m_row->m_child : nullptr),
             m_subfields(other.m_subfields){
         init();
     }
@@ -53,6 +48,7 @@ struct MultiFieldZ : RowFieldBaseZ {
         struct fn_t {
             RowZ* m_row;
             void operator()(FieldBaseZ &f) {
+                MPI_REQUIRE(!f.m_row, "Field mustn't already be attached to a Row");
                 f.m_row_offset = m_row->add_field(&f);
                 f.m_row = m_row;
             }
@@ -136,27 +132,6 @@ protected:
 };
 
 
-template<typename field_t>
-struct FieldZ : RowFieldBaseZ, field_t {
-    using RowFieldBaseZ::m_row;
-    using field_t::operator=;
-    FieldZ(RowZ *row, field_t&& field) :
-            RowFieldBaseZ(row), field_t(field){
-        FieldBaseZ::m_row_offset = m_row->add_field(this);
-        FieldBaseZ::m_row = m_row;
-    }
-
-    FieldZ(const FieldZ& other):
-            RowFieldBaseZ(other.m_row->m_child), field_t(other){
-        FieldBaseZ::m_row_offset = m_row->add_field(this);
-        FieldBaseZ::m_row = m_row;
-    }
-
-    FieldZ& operator=(const FieldZ& other) {
-        *this = other;
-        return *this;
-    }
-};
 
 
 #endif //M7_NDMULTIFIELDZ_H

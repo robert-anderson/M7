@@ -9,7 +9,7 @@
 
 
 
-elements::FermionOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
+buffered::FermionOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
     elements::FermionOnv ref(m_nsite);
     ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;

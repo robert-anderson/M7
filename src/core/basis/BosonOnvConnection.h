@@ -5,9 +5,7 @@
 #ifndef M7_BOSONONVCONNECTION_H
 #define M7_BOSONONVCONNECTION_H
 
-#include "src/core/field/Fields.h"
-#include "src/core/field/Views.h"
-
+#include "src/core/fieldz/FieldsZ.h"
 
 class BosonOnvConnection {
     struct Diff {
@@ -24,9 +22,8 @@ class BosonOnvConnection {
 public:
 
     explicit BosonOnvConnection(const size_t nmode);
-    explicit BosonOnvConnection(const BosonOnvSpecifier& spec);
-    BosonOnvConnection(const views::BosonOnv &in, const views::BosonOnv &out);
-    explicit BosonOnvConnection(const views::BosonOnv &in);
+    BosonOnvConnection(const fieldsz::BosonOnv &in, const fieldsz::BosonOnv &out);
+    explicit BosonOnvConnection(const fieldsz::BosonOnv &in);
 
     operator bool() const {return nchanged_mode();}
 
@@ -37,9 +34,9 @@ public:
 
     const int & com(const size_t& icom) const;
 
-    void connect(const views::BosonOnv &in, const views::BosonOnv &out);
+    void connect(const fieldsz::BosonOnv &in, const fieldsz::BosonOnv &out);
 
-    void apply(const views::BosonOnv &in, views::BosonOnv& out);
+    void apply(const fieldsz::BosonOnv &in, fieldsz::BosonOnv& out);
 
     void add(const size_t imode, const int change);
 

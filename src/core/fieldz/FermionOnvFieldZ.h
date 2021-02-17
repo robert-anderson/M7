@@ -16,7 +16,7 @@ struct FermionOnvsFieldZ : BitsetFieldBaseZ<defs::data_t> {
 
     const size_t m_nsite;
 
-    FermionOnvsFieldZ(size_t nitem, size_t nsite): base_t(nitem, 2*nsite), m_nsite(nsite){}
+    FermionOnvsFieldZ(RowZ* row, size_t nitem, size_t nsite): base_t(row, nitem, 2*nsite), m_nsite(nsite){}
 
     void set(const size_t &iitem, const size_t &ibit) {
         base_t::base_set(iitem, ibit);
@@ -128,7 +128,12 @@ struct FermionOnvsFieldZ : BitsetFieldBaseZ<defs::data_t> {
 
 struct FermionOnvFieldZ : FermionOnvsFieldZ {
 
-    FermionOnvFieldZ(size_t nsite) : FermionOnvsFieldZ(1, nsite){}
+    FermionOnvFieldZ(RowZ* row, size_t nsite) : FermionOnvsFieldZ(row, 1, nsite){}
+
+    FermionOnvFieldZ& operator=(const FermionOnvFieldZ& other){
+        FermionOnvsFieldZ::operator==(other);
+        return *this;
+    }
 
     void set(const size_t &ibit) {
         base_t::base_set(ibit);

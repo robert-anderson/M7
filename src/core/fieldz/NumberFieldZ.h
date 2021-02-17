@@ -11,8 +11,8 @@ template<typename T>
 struct NumberFieldBaseZ : FieldBaseZ {
     const size_t m_nelement;
 
-    NumberFieldBaseZ(size_t nitem, size_t nelement):
-    FieldBaseZ(sizeof(T)*nelement, nitem, typeid(T)), m_nelement(nelement){}
+    NumberFieldBaseZ(RowZ* row, size_t nitem, size_t nelement):
+    FieldBaseZ(row, sizeof(T)*nelement, nitem, typeid(T)), m_nelement(nelement){}
 
     NumberFieldBaseZ &operator=(const T &v) {
         std::fill((T*)begin(), (T*)end(), v);
@@ -22,6 +22,11 @@ struct NumberFieldBaseZ : FieldBaseZ {
     NumberFieldBaseZ &operator=(const std::vector<T> &v) {
         ASSERT(v.size() == m_nitem*m_nelement);
         std::memcpy(begin(), v.data(), m_size);
+        return *this;
+    }
+
+    NumberFieldBaseZ &operator=(const NumberFieldBaseZ &v) {
+        static_cast<FieldBaseZ&>(*this) = v;
         return *this;
     }
 
@@ -46,7 +51,7 @@ struct NumberFieldBaseZ : FieldBaseZ {
 
 template<typename T>
 struct NumberFieldZ : NumberFieldBaseZ<T> {
-    NumberFieldZ(): NumberFieldBaseZ<T>(1, 1){}
+    NumberFieldZ(RowZ* row): NumberFieldBaseZ<T>(1, 1, row){}
 
     operator T&() {
         return (T *) FieldBaseZ::begin();
@@ -60,7 +65,7 @@ struct NumberFieldZ : NumberFieldBaseZ<T> {
 
 template<typename T>
 struct VectorFieldZ : NumberFieldBaseZ<T> {
-    VectorFieldZ(size_t nelement): NumberFieldBaseZ<T>(1, nelement){}
+    VectorFieldZ(RowZ* row, size_t nelement): NumberFieldBaseZ<T>(row, 1, nelement){}
 
     T& operator()(const size_t& ielement) {
         return ((T *) FieldBaseZ::begin())[ielement];
@@ -74,7 +79,7 @@ struct VectorFieldZ : NumberFieldBaseZ<T> {
 
 template<typename T>
 struct VectorsFieldZ : NumberFieldBaseZ<T> {
-    VectorsFieldZ(size_t nitem, size_t nelement): NumberFieldBaseZ<T>(nitem, nelement){}
+    VectorsFieldZ(RowZ* row, size_t nitem, size_t nelement): NumberFieldBaseZ<T>(row, nitem, nelement){}
 
     T& operator()(const size_t& iitem, const size_t& ielement) {
         return ((T *) FieldBaseZ::begin(iitem))[ielement];
