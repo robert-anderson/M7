@@ -5,12 +5,10 @@
 #ifndef M7_SOLVER_H
 #define M7_SOLVER_H
 
-#if 0
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/util/Timer.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
-#include "src/core/field/Fields.h"
 #include "src/core/io/FciqmcStatsFile.h"
 #include "src/core/io/ParallelStatsFile.h"
 #include "Propagator.h"
@@ -56,11 +54,11 @@ public:
 
     void begin_cycle();
 
-    void propagate_row(const size_t& irow);
+    void propagate_row();
 
     void loop_over_occupied_onvs();
 
-    void annihilate_row(const size_t &irow_recv);
+    void annihilate_row();
 
     void loop_over_spawned();
 
@@ -115,5 +113,4 @@ public:
 //
 //}
 
-#endif //M7_SOLVER_H
 #endif //M7_SOLVER_H

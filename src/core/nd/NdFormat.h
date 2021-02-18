@@ -29,17 +29,10 @@ public:
         set_strides();
         set_nelement();
     }
-    NdFormat(std::array<size_t, nind> shape):m_shape(std::move(shape)){
+    NdFormat(std::array<size_t, nind> shape): m_shape(std::move(shape)){
         set_strides();
         set_nelement();
-    }
-    template<typename ...Args>
-    NdFormat(const size_t& first, const size_t& second, Args&&... shape){
-        static_assert(2+sizeof...(Args)>=nind, "not enough arguments to specify array shape");
-        static_assert(2+sizeof...(Args)<=nind, "too many arguments to specify array shape");
-        set_shape(first, second, std::forward<Args>(shape)...);
-        set_strides();
-        set_nelement();
+        ASSERT(m_nelement!=~0ul);
     }
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape()){}

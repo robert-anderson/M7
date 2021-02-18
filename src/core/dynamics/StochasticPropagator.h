@@ -13,7 +13,6 @@
 #include <src/core/excitgen/BosonExcitationGenerator.h>
 #include "Propagator.h"
 
-#if 0
 class StochasticPropagator : public Propagator {
 
     void add_boson_excitgen(const Hamiltonian<0> &ham);
@@ -28,7 +27,7 @@ protected:
 public:
     StochasticPropagator(const Hamiltonian<> &ham, const Options &opts);
 
-    void diagonal(Wavefunction &m_wf, const size_t &irow) override;
+    void diagonal(Wavefunction &m_wf) override;
 
     template<typename T>
     size_t get_nattempt(const T &weight) {
@@ -54,8 +53,7 @@ public:
         else return get_nattempt(consts::real(weight));
     }
 
-    void off_diagonal(Wavefunction &m_wf, const size_t &irow) override;
+    void off_diagonal(Wavefunction &wf) override;
 };
 
-#endif //M7_STOCHASTICPROPAGATOR_H
 #endif //M7_STOCHASTICPROPAGATOR_H

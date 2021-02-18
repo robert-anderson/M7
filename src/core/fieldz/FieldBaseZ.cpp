@@ -14,9 +14,7 @@ FieldBaseZ::FieldBaseZ(RowZ* row, size_t item_size, size_t nitem, const std::typ
 }
 
 FieldBaseZ::FieldBaseZ(const FieldBaseZ &other) :
-    FieldBaseZ(other.m_row? other.m_row->m_child : nullptr, other.m_item_size, other.m_nitem, other.m_type_info) {
-    ASSERT(0)
-}
+    FieldBaseZ(other.m_row? other.m_row->m_child : nullptr, other.m_item_size, other.m_nitem, other.m_type_info) {}
 
 bool FieldBaseZ::is_comparable(const FieldBaseZ &other) const {
     return m_item_size==other.m_item_size &&

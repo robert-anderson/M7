@@ -164,11 +164,10 @@ void TableBaseZ::transfer_rows(const defs::inds &irows, size_t irank_send, size_
     }
 }
 
-//void TableBaseZ::copy_row_in(const TableBaseZ &src, size_t irow_src, size_t irow_dst) {
-//    ASSERT(irow_dst < m_hwm);
-//    ASSERT(has_compatible_format(src));
-//    std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
-//}
+void TableBaseZ::copy_row_in(const TableBaseZ &src, size_t irow_src, size_t irow_dst) {
+    ASSERT(irow_dst < m_hwm);
+    std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
+}
 
 
 TableBaseZ::Loc::Loc(size_t irank, size_t irow) : m_irank(irank), m_irow(irow){

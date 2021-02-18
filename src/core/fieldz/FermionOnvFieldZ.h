@@ -69,7 +69,7 @@ struct FermionOnvsFieldBaseZ : BitsetFieldBaseZ<defs::data_t> {
             work = get_dataword(idataword + iitem * m_item_dsize);
             while (work) {
                 size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                if (ibit >= m_nbit) return nalpha;
+                if (ibit >= m_nsite) return nalpha;
                 nalpha++;
             }
         }

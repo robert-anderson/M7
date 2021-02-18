@@ -12,11 +12,13 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-#if 0
 class Reference : public Wavefunction::DynamicRow {
     const Hamiltonian<> &m_ham;
     const Wavefunction &m_wf;
-    const defs::wf_iarr_t m_wf_inds;
+    /*
+     * index to the "part" of the wavefunction for which this object tracks the reference row
+     */
+    const size_t m_ipart;
 
     mutable conn::Antisym<> m_aconn;
 
@@ -35,7 +37,7 @@ class Reference : public Wavefunction::DynamicRow {
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
-              const Wavefunction &wf, defs::wf_iarr_t wf_iarr_t, Table::Loc loc);
+              const Wavefunction &wf, size_t ipart, Table::Loc loc);
 
     void accept_candidate(double redefinition_thresh = 0.0) {
         std::vector<defs::wf_t> gather(mpi::nrank());
@@ -43,12 +45,12 @@ public:
         MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
         size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
         mpi::bcast(m_irow_candidate, irank);
-        if (gather[irank] > std::abs(m_weight(m_wf_inds)*redefinition_thresh)){
-            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", m_weight(m_wf_inds), gather[irank]);
+        if (gather[irank] > std::abs(m_weight(m_ipart)*redefinition_thresh)){
+            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", m_weight(m_ipart), gather[irank]);
             change({irank, m_irow_candidate});
             //MPI_ASSERT(std::abs(m_wf.m_store.m_weight(m_irow_candidate, 0, 0))==m_candidate_abs_weight, "");
         }
-        ASSERT(std::abs(m_weight(m_wf_inds))==m_candidate_abs_weight);
+        ASSERT(std::abs(m_weight(m_ipart))==m_candidate_abs_weight);
         m_candidate_abs_weight = 0.0;
     }
 
@@ -69,7 +71,7 @@ public:
 
     //const bool &in_redefinition_cycle();
 
-    bool is_connected() const;
+    bool is_connected(const fieldsz::Onv<> &onv) const;
 
     void add_to_numerator(const fieldsz::Onv<> &onv, const defs::wf_t &weight);
 
@@ -82,5 +84,4 @@ public:
 
 };
 
-#endif //M7_REFERENCE_H
 #endif //M7_REFERENCE_H

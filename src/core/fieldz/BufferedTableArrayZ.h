@@ -50,7 +50,7 @@ public:
         return (*this)[0].bw_dsize();
     }
 
-    BufferedTableArrayZ(std::string name, size_t ntable, row_t&& row):
+    BufferedTableArrayZ(std::string name, size_t ntable, const row_t& row):
             m_buffer(name, ntable) {
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {

@@ -13,7 +13,7 @@ class BufferedTableZ : public TableZ<row_t> {
 public:
     using TableBaseZ::m_row_dsize;
 
-    BufferedTableZ(std::string name, row_t&& row):
+    BufferedTableZ(std::string name, const row_t& row):
     TableZ<row_t>(row), m_buffer(name, 1) {
         TableBaseZ::set_buffer(&m_buffer);
     }
@@ -32,7 +32,7 @@ class BufferedMappedTableZ : public MappedTableZ<row_t> {
 public:
     using TableBaseZ::m_row_dsize;
 
-    BufferedMappedTableZ(std::string name, row_t&& row, size_t nbucket):
+    BufferedMappedTableZ(std::string name, const row_t& row, size_t nbucket):
             MappedTableZ<row_t>(row, nbucket), m_buffer(name, 1) {
         TableBaseZ::set_buffer(&m_buffer);
     }

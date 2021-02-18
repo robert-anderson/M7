@@ -4,26 +4,25 @@
 
 #include "Reference.h"
 
-#if 0
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
-                     const Wavefunction& wf, defs::wf_iarr_t wf_iarr_t, Table::Loc loc):
+                     const Wavefunction& wf, size_t ipart, Table::Loc loc):
         Wavefunction::DynamicRow(wf, loc, "reference"),
-        m_ham(ham), m_wf(wf), m_wf_inds(wf_iarr_t), m_aconn(ham.nsite()),
+        m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
-        m_proj_energy_num(m_summables, {1, 1}),
-        m_nwalker_at_doubles(m_summables, {1, 1})
+        m_proj_energy_num(m_summables, wf.m_format),
+        m_nwalker_at_doubles(m_summables, wf.m_format)
         {
             update();
 }
 
 void Reference::add_row() {
     auto& row = m_wf.m_store.m_row;
-    auto weight = row.m_weight(m_wf_inds);
+    auto weight = row.m_weight(m_ipart);
     if (std::abs(weight) > m_candidate_abs_weight){
         m_candidate_abs_weight = std::abs(weight);
         m_irow_candidate = row.m_i;
     }
-    if (row.m_reference_connection.get(m_wf_inds)) {
+    if (row.m_reference_connection.get(m_ipart)) {
         add_to_numerator(row.m_onv, weight);
     }
 }
@@ -87,8 +86,8 @@ const bool &Reference::in_redefinition_cycle() {
     return m_redefinition_cycle;
 }*/
 
-bool Reference::is_connected() const {
-    m_aconn.connect(get_onv(), onv);
+bool Reference::is_connected(const fieldsz::Onv<> &onv) const {
+    m_aconn.connect(m_onv, onv);
     return m_aconn.connected();
 }
 
@@ -107,11 +106,10 @@ defs::ham_t Reference::proj_energy_num() const {
 }
 
 defs::ham_comp_t Reference::proj_energy() const {
-    return consts::real(proj_energy_num()/get_weight(0, 0));
+    return consts::real(proj_energy_num()/m_weight(m_ipart));
 }
 
 void Reference::update() {
-    accept_candidate(m_redefinition_thresh);
-    DynamicRow::update();
+    //accept_candidate(m_redefinition_thresh);
+    Wavefunction::DynamicRow::update();
 }
-#endif

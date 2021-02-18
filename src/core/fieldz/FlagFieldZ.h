@@ -33,6 +33,10 @@ struct FlagFieldZ : BitsetFieldBaseZ<uint8_t> {
     typedef BitsetFieldBaseZ<uint8_t> base_t;
     FlagFieldZ(RowZ* row) : base_t(row, 1, 1) {}
 
+    operator bool() const {
+        return get();
+    }
+
     bool get() const {
         return base_t::base_get(0);
     }

@@ -16,27 +16,23 @@
 //    m_shift = m_input.shift_initial;
 //    std::cout << "Propagator base initialized with shift (relative to reference determinant energy): " << m_shift << std::endl;
 //}
-#if 0
 
 #include "Propagator.h"
 #include "FciqmcCalculation.h"
 
-Propagator::Propagator(FciqmcCalculation *fciqmc) :
-    m_fciqmc(fciqmc), m_input(fciqmc->m_input),
-    m_ham(fciqmc->m_ham), m_rank_allocator(fciqmc->m_rank_allocator),
-    m_magnitude_logger(m_input, m_ham->nsite(), m_ham->nelec()),
-    m_dst_det(m_ham->nsite()),
-    m_aconn(m_dst_det), m_occ(m_dst_det), m_vac(m_dst_det),
-    m_variable_shift(fciqmc->m_vary_shift),
-    m_semi_stochastic(fciqmc->m_semi_stochastic)
-    {
-    m_shift = m_input.shift_initial;
-    std::cout << "Propagator base initialized with shift (relative to reference determinant energy): " << m_shift << std::endl;
-}
+//Propagator::Propagator(FciqmcCalculation *fciqmc) :
+//    m_fciqmc(fciqmc), m_input(fciqmc->m_input),
+//    m_ham(fciqmc->m_ham), m_rank_allocator(fciqmc->m_rank_allocator),
+//    m_magnitude_logger(m_input, m_ham->nsite(), m_ham->nelec()),
+//    m_dst_det(m_ham->nsite()),
+//    m_aconn(m_dst_det), m_occ(m_dst_det), m_vac(m_dst_det),
+//    m_variable_shift(fciqmc->m_vary_shift),
+//    m_semi_stochastic(fciqmc->m_semi_stochastic)
+//    {
+//    m_shift = m_input.shift_initial;
+//    std::cout << "Propagator base initialized with shift (relative to reference determinant energy): " << m_shift << std::endl;
+//}
 
-#endif
-
-#if 0
 void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
     //m_magnitude_logger.synchronize(icycle);
     m_variable_shift.update(icycle, wf.m_nwalker.reduced(0, 0) >= m_opts.nwalker_target);
@@ -53,4 +49,3 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
         m_shift -= m_opts.shift_damp * consts::real_log(rate) / tau();
     }
 }
-#endif

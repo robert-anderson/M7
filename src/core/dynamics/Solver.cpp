@@ -4,7 +4,6 @@
 
 #include "Solver.h"
 
-#if 0
 void Solver::loop_over_occupied_onvs() {
     /*
      * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
@@ -15,45 +14,46 @@ void Solver::loop_over_occupied_onvs() {
      *      update local weight in the diagonal cloning/death step
      * else if all elements of the m_weight field are zero, the row should be removed
      */
-    for (size_t irow = 0ul; irow < m_wf.m_store.m_hwm; ++irow) {
+    auto& row = m_wf.m_store.m_row;
+    for (row.restart(); row.in_range(); row.step()){
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
          */
 
-        if (m_wf.m_store.is_cleared(irow)) {
+        if (row.is_cleared()) {
             // row is empty
             continue;
         }
 
-        MPI_ASSERT(!m_wf.m_store.m_onv(irow).is_zero(),
+        MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
                    "Stored ONV should not be zeroed");
-        MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_onv(irow))),
+        MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
                    "Stored ONV should be on its allocated rank");
 
-        const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+        const auto weight = row.m_weight(m_wf.m_ipart);
 
         if (consts::float_nearly_zero(weight, 1e-12)){
             // ONV has become unoccupied and must be removed from mapped list
-            m_wf.remove_walker(irow);
+            m_wf.remove_walker();
             continue;
         }
 
         m_wf.m_nocc_onv(0, 0)++;
-        if (m_wf.m_store.m_flags.m_initiator(irow, 0, 0))
+        if (row.m_initiator.get(m_wf.m_ipart))
             m_wf.m_ninitiator(0, 0)++;
         m_wf.m_nwalker(0, 0) += std::abs(weight);
         m_wf.m_l2_norm_square(0, 0) += std::pow(std::abs(weight), 2.0);
 
-        m_reference.add_row(irow);
+        m_reference.add_row();
 
         if (m_wf.m_ra.is_active()) {
             m_spawning_timer.reset();
             m_spawning_timer.unpause();
         }
-        propagate_row(irow);
+        propagate_row();
         if (m_wf.m_ra.is_active()) {
             m_spawning_timer.pause();
-            m_wf.m_ra.record_work_time(irow, m_spawning_timer);
+            m_wf.m_ra.record_work_time(row, m_spawning_timer);
         }
     }
     m_synchronization_timer.reset();
@@ -62,13 +62,13 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.pause();
 }
 
-void Solver::annihilate_row(const size_t &irow_recv) {
-    auto &recv = m_wf.recv();
-    auto dst_onv = recv.m_dst_onv(irow_recv);
+void Solver::annihilate_row() {
+    const auto& row = m_wf.recv().m_row;
+    const auto& dst_onv = row.m_dst_onv;
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
-    auto delta_weight = recv.m_delta_weight(irow_recv, 0, 0);
+    const defs::wf_t& delta_weight = row.m_delta_weight;
     // zero magnitude weights should not have been communicated
     ASSERT(!consts::float_is_zero(delta_weight));
 
@@ -85,7 +85,7 @@ void Solver::annihilate_row(const size_t &irow_recv) {
          * the destination determinant is not currently occupied, so initiator rules
          * must be applied
          */
-        if (!recv.m_flags.m_src_initiator(irow_recv, 0, 0)) {
+        if (!row.m_src_initiator) {
             //m_aborted_weight += std::abs(*delta_weight);
 #ifdef VERBOSE_DEBUGGING
             std::cout << consts::verb << consts::chevs <<
@@ -100,7 +100,8 @@ void Solver::annihilate_row(const size_t &irow_recv) {
                 m_prop.m_ham.get_energy(dst_onv),
                 m_reference.is_connected(dst_onv));
     } else {
-        m_wf.change_weight(irow_walkers, delta_weight);
+        m_wf.m_store.m_row.jump(irow_walkers);
+        m_wf.change_weight(delta_weight);
     }
 
 //#ifdef VERBOSE_DEBUGGING
@@ -126,33 +127,9 @@ void Solver::annihilate_row(const size_t &irow_recv) {
 
 void Solver::loop_over_spawned() {
     mpi::barrier();
-    auto &recv = m_wf.recv();
-    for (size_t irow_recv = 0ul; irow_recv < m_wf.recv().m_hwm; ++irow_recv) {
-        auto dst_onv = recv.m_dst_onv(irow_recv);
-        ASSERT(!dst_onv.is_zero());
-        // check that the received determinant has come to the right place
-        ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
-        auto delta_weight = recv.m_delta_weight(irow_recv, 0, 0);
-        // zero magnitude weights should not have been communicated
-        ASSERT(!consts::float_is_zero(delta_weight));
-
-        auto irow_walkers = *m_wf.m_store[dst_onv];
-
-        if (irow_walkers == ~0ul) {
-            /*
-             * the destination determinant is not currently occupied, so initiator rules
-             * must be applied
-             */
-            if (!recv.m_flags.m_src_initiator(irow_recv, 0, 0)) continue;
-
-            m_wf.create_walker_(
-                    dst_onv,
-                    delta_weight,
-                    m_prop.m_ham.get_energy(dst_onv),
-                    m_reference.is_connected(dst_onv));
-        } else {
-            m_wf.change_weight(irow_walkers, delta_weight);
-        }
+    const auto &row = m_wf.recv().m_row;
+    for (row.restart(); row.in_range(); row.step()){
+        annihilate_row();
     }
     m_wf.recv().clear();
 }
@@ -161,7 +138,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, Table::Loc ref_loc) :
         m_prop(prop),
         m_opts(prop.m_opts),
         m_wf(wf),
-        m_reference(m_opts, m_prop.m_ham, m_wf, ref_loc) {
+        m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc) {
     if (mpi::i_am_root())
         m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
     m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(
@@ -196,15 +173,18 @@ void Solver::execute(size_t niter) {
     }
 }
 
-void Solver::propagate_row(const size_t &irow) {
-    if (m_wf.m_store.m_onv(irow).is_zero()) return;
+void Solver::propagate_row() {
+    auto& row = m_wf.m_store.m_row;
+    const auto& ipart = m_wf.m_ipart;
+
+    if (row.is_cleared()) return;
 
     //const auto onv = m_wf.m_walkers.m_onv(irow);
-    const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+    const auto weight = row.m_weight(ipart);
     if (consts::float_is_zero(weight)) return;
 
 //    bool is_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
-    bool is_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
+    bool is_deterministic = row.m_deterministic.get(ipart);
 //    bool is_ref_connection = m_wf.m_walkers.m_flags.m_reference_connection(irow);
 
 //    if (consts::float_is_zero(weight) && !is_deterministic) {
@@ -244,8 +224,8 @@ void Solver::propagate_row(const size_t &irow) {
 //     */
 
 
-    m_prop.off_diagonal(m_wf, irow);
-    m_prop.diagonal(m_wf, irow);
+    m_prop.off_diagonal(m_wf);
+    m_prop.diagonal(m_wf);
 
     if (!is_deterministic && consts::float_is_zero(weight)) {
 #ifdef VERBOSE_DEBUGGING
@@ -295,7 +275,7 @@ void Solver::output_stats() {
         m_stats->m_nwalker() = m_wf.m_nwalker.reduced(0, 0);
         m_stats->m_delta_nwalker() = m_wf.m_delta_nwalker.reduced(0, 0);
         m_stats->m_ref_proj_energy_num() = m_reference.proj_energy_num();
-        m_stats->m_ref_weight() = m_reference.get_weight(0, 0);
+        m_stats->m_ref_weight() = m_reference.m_weight(0);
         m_stats->m_ref_proj_energy() = m_reference.proj_energy();
         m_stats->m_l2_norm() = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
         m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);
@@ -325,4 +305,3 @@ void Solver::output_stats() {
 //    StatsColumn<double> m_recv_list_filled_fraction;
     m_parallel_stats->flush();
 }
-#endif

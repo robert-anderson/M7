@@ -29,3 +29,11 @@ size_t RowZ::add_field(FieldBaseZ *field) {
     m_fields.push_back(field);
     return offset;
 }
+
+void RowZ::clear() {
+    std::fill(m_dbegin, m_dbegin+m_dsize, 0);
+}
+
+bool RowZ::is_cleared() const {
+    return std::all_of(m_dbegin, m_dbegin+m_dsize, [](const defs::data_t& d){return d==0;});
+}

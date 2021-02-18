@@ -4,7 +4,6 @@
 
 #include "RankAllocator.h"
 
-#if 0
 void RankAllocatorBase::refresh_callback_list() {
     m_recv_callbacks.clear();
     for (auto ptr : m_dependents) {
@@ -172,7 +171,10 @@ void RankAllocatorBase::update(size_t icycle) {
     if (mpi::i_am(irank_send)){
         for (size_t irow = 0; irow<table().m_hwm; ++irow){
             if (table().is_cleared(irow)) continue;
-            if (get_block_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
+            /*
+             * TODO:
+             */
+            //if (get_block_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
         }
     }
     m_mean_work_times.assign(m_nblock, 0.0);
@@ -190,4 +192,3 @@ void RankAllocatorBase::update(size_t icycle) {
     for (auto dep : m_dependents) dep->after_block_transfer();
     MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block map");
 }
-#endif

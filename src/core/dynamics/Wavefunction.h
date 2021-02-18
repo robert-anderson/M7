@@ -15,12 +15,13 @@
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/fieldz/FieldsZ.h"
 
-#if 0
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     const Options &m_opts;
 
     NdFormat<defs::ndim_wf> m_format;
+    // current "part" i.e. the flat element of the format
+    size_t m_ipart = 0ul;
 
     ReductionSyndicate m_summables;
 
@@ -43,7 +44,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),
-            m_format(opts.nroot, opts.nreplica),
+            m_format({opts.nroot, opts.nreplica}),
             m_ninitiator(m_summables, m_format),
             m_delta_ninitiator(m_summables, m_format),
             m_nocc_onv(m_summables, m_format),
@@ -53,18 +54,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             m_delta_l2_norm_square(m_summables, m_format) {
         m_store.resize((m_opts.walker_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
         m_comm.resize((m_opts.spawn_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
+        ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
     }
-
-    defs::wf_iarr_t flat_to_inds(const size_t& iflat){
-        defs::wf_iarr_t out;
-        m_format.decode_flat(iflat, out);
-        return out;
-    }
-
-    size_t inds_to_flat(const defs::wf_iarr_t& inds){
-        return m_format.flatten(inds);
-    }
-
 
 //    void on_row_send_(size_t irow) override {
 //
@@ -87,90 +78,91 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 //    }
 
 
-    defs::wf_comp_t square_norm(const defs::wf_iarr_t& inds) const {
+    defs::wf_comp_t square_norm() const {
         defs::wf_comp_t res = 0.0;
         auto& row = m_store.m_row;
-        const defs::wf_t& weight = row.m_weight(inds);
+        const defs::wf_t& weight = row.m_weight(m_ipart);
         for (row.restart(); row.in_range(); row.step()) {
             res += std::pow(weight, 2.0);
         }
         return mpi::all_sum(res);
     }
 
-    void grant_initiator_status(const defs::wf_iarr_t& inds) {
+    void grant_initiator_status() {
         auto& row = m_store.m_row;
-        MPI_ASSERT(!row.m_initiator.get(inds), "row is already initiator");
-        row.m_initiator.set(inds);
-        m_delta_ninitiator(inds)++;
+        //MPI_ASSERT(!row.m_initiator.get(m_ipart), "row is already initiator");
+        if (row.m_initiator.get(m_ipart)) return;
+        row.m_initiator.set(m_ipart);
+        m_delta_ninitiator(0, 0)++;
     }
 
-    void revoke_initiator_status(const defs::wf_iarr_t& inds) {
+    void revoke_initiator_status() {
         auto& row = m_store.m_row;
-        MPI_ASSERT(!row.m_initiator.get(inds), "row is not initiator");
-        row.m_initiator.clr(inds);
-        m_delta_ninitiator(inds)--;
+        //MPI_ASSERT(!row.m_initiator.get(m_ipart), "row is not initiator");
+        if (!row.m_initiator.get(m_ipart)) return;
+        row.m_initiator.clr(m_ipart);
+        m_delta_ninitiator(0, 0)--;
     }
 
-    void set_weight(const defs::wf_t &new_weight, const defs::wf_iarr_t& inds) {
+    void set_weight(const defs::wf_t &new_weight) {
         auto& row = m_store.m_row;
-        defs::wf_t& weight = row.m_weight(inds);
+        defs::wf_t& weight = row.m_weight(m_ipart);
         m_delta_nwalker(0, 0) += std::abs(new_weight);
         m_delta_nwalker(0, 0) -= std::abs(weight);
         m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
         m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(weight), 2.0);
         weight = new_weight;
 
-        if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(inds);
-        else revoke_initiator_status(inds);
+        if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status();
+        else revoke_initiator_status();
     }
 
-    void change_weight(const defs::wf_t &delta, const defs::wf_iarr_t& inds) {
-        set_weight(m_store.m_row.m_weight(inds) + delta, inds);
+    void change_weight(const defs::wf_t &delta) {
+        set_weight(m_store.m_row.m_weight(m_ipart) + delta);
     }
 
-    void scale_weight(const double &factor, const defs::wf_iarr_t& inds) {
-        m_store.m_row.m_weight(inds);
-        set_weight(factor, inds);
+    void scale_weight(const double &factor) {
+        set_weight(factor*m_store.m_row.m_weight(m_ipart));
     }
 
-    void zero_weight(const defs::wf_iarr_t& inds) {
-        set_weight(0.0, inds);
+    void zero_weight() {
+        set_weight(0.0);
     }
 
-    void remove_walker(const defs::wf_iarr_t& inds) {
+    void remove_walker() {
         if (m_ra.row_mapped_by_dependent(m_store.m_row.m_i)) return;
         auto lookup = m_store[m_store.m_row.m_onv];
-        zero_weight(inds);
+        zero_weight();
         m_store.erase(lookup);
     }
 
     size_t create_walker_(const fieldsz::Onv<> &onv, const defs::ham_t weight,
-                          const defs::ham_comp_t &hdiag, bool refconn, const defs::wf_iarr_t& inds) {
+                          const defs::ham_comp_t &hdiag, bool refconn) {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1);
         auto irow = m_store.insert(onv);
         m_store.m_row.jump(irow);
         ASSERT(m_store.m_row.m_onv == onv)
-        set_weight(weight, inds);
-        m_store.m_row.m_hdiag() = hdiag;
-        m_store.m_row.m_reference_connection.put(inds, refconn);
-        m_store.m_row.m_deterministic.clr(inds);
+        set_weight(weight);
+        m_store.m_row.m_hdiag = hdiag;
+        m_store.m_row.m_reference_connection.put(m_ipart, refconn);
+        m_store.m_row.m_deterministic.clr(m_ipart);
         return irow;
     }
 
 
     Table::Loc create_walker(const fieldsz::Onv<> &onv, const defs::ham_t weight,
-                          const defs::ham_comp_t &hdiag, bool refconn, const defs::wf_iarr_t& inds) {
+                          const defs::ham_comp_t &hdiag, bool refconn) {
         size_t irank = m_ra.get_rank(onv);
         size_t irow;
-        if (mpi::i_am(irank)) irow = create_walker_(onv, weight, hdiag, refconn, inds);
+        if (mpi::i_am(irank)) irow = create_walker_(onv, weight, hdiag, refconn);
         mpi::bcast(irow, irank);
         return {irank, irow};
     }
 
     // TODO: return a pair?
     size_t add_spawn(const fieldsz::Onv<> &dst_onv, const defs::wf_t &delta,
-                     bool initiator, bool deterministic, const defs::wf_iarr_t& inds) {
+                     bool initiator, bool deterministic, size_t dst_ipart) {
         auto irank = m_ra.get_rank(dst_onv);
 #ifdef VERBOSE_DEBUGGING
         std::cout << consts::verb << consts::chevs << "SENDING SPAWNED WALKER" << std::endl;
@@ -190,6 +182,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         row.m_delta_weight = delta;
         row.m_src_initiator.put(initiator);
         row.m_src_deterministic.put(deterministic);
+        row.m_dst_ipart = dst_ipart;
         return irow;
     }
 };
@@ -340,6 +333,5 @@ private:
 };
 
 
-#endif //M7_WAVEFUNCTION_H
 #endif //M7_WAVEFUNCTION_H
 #endif //M7_WAVEFUNCTION_H

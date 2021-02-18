@@ -36,7 +36,6 @@ struct RowZ {
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
         m_dbegin = m_table_bw->m_dbegin;
         m_i = 0ul;
-        MPI_ASSERT(in_range(), "Row is out of table bounds");
     }
 
     void step() const {
@@ -73,6 +72,18 @@ struct RowZ {
 
     size_t add_field(FieldBaseZ *field);
 
+    void clear();
+
+    bool is_cleared() const;
+
+};
+
+template<typename row_t>
+struct KeyField {
+    static_assert(std::is_base_of<RowZ, row_t>::value, "Template arg must be derived from Row");
+    typedef typename std::remove_reference<typename std::result_of<decltype(&row_t::key_field)(row_t)>::type>::type type;
+    static type& get(row_t& row){return row.key_field();}
+    static const type& get(const row_t& row) {return const_cast<row_t&>(row).key_field();}
 };
 
 

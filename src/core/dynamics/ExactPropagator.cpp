@@ -6,11 +6,12 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
-#if 0
-void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
-    auto src_onv = m_wf.m_store.m_onv(irow);
-    const auto weight = m_wf.m_store.m_weight(irow, 0, 0);
-    bool src_initiator = m_wf.m_store.m_flags.m_initiator(irow, 0, 0);
+void ExactPropagator::off_diagonal(Wavefunction &wf) {
+    const auto& row = wf.m_store.m_row;
+    const auto& ipart = wf.m_ipart;
+    const auto& src_onv = row.m_onv;
+    const defs::wf_t& weight = row.m_weight(ipart);
+    bool src_initiator = row.m_initiator.get(ipart);
     OccupiedOrbitals occs(src_onv);
     ASSERT(occs.size() > 0);
     VacantOrbitals vacs(src_onv);
@@ -32,15 +33,15 @@ void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
 
             auto delta = -weight * tau() * helement;
             if (consts::float_is_zero(delta)) continue;
-            m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
+            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
         }
         defs::ham_t delta;
         delta = -weight * tau()* off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, 1);
         if (!consts::float_is_zero(delta))
-            m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
+            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
         delta = -weight * tau()* off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, -1);
         if (!consts::float_is_zero(delta))
-            m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
+            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
     }
 
     if (m_ham.int_2e_rank()==2) {
@@ -62,16 +63,16 @@ void ExactPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
 
                     auto delta = -weight * tau() * helement;
                     if (consts::float_is_zero(delta)) continue;
-                    m_wf.add_spawn(m_dst_onv, delta, src_initiator, false);
+                    wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
                 }
             }
         }
     }
 }
 
-void ExactPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
-    auto hdiag = m_wf.m_store.m_hdiag(irow);
-    ASSERT(hdiag==m_ham.get_energy(m_wf.m_store.m_onv(irow)));
-    m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
+void ExactPropagator::diagonal(Wavefunction &wf) {
+    auto& row = wf.m_store.m_row;
+    const defs::ham_comp_t& hdiag = row.m_hdiag;
+    ASSERT(hdiag==m_ham.get_energy(row.m_onv));
+    wf.scale_weight(1 - (hdiag - m_shift) * tau());
 }
-#endif

@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <src/core/util/Timer.h>
 
-#if 0
 struct RankAllocatorBase {
     struct Dependent {
         typedef RankAllocatorBase ra_t;
@@ -119,8 +118,9 @@ public:
 
 template<typename row_t>
 class RankAllocator : public RankAllocatorBase {
+    static_assert(std::is_base_of<RowZ, row_t>::value, "Template arg must be derived from Row");
     MappedTableZ<row_t>& m_table;
-    typedef typename std::remove_reference<decltype(row_t::m_key_field)>::type key_field_t;
+    typedef typename KeyField<row_t>::type key_field_t;
 
 public:
     RankAllocator(MappedTableZ<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :
@@ -135,11 +135,11 @@ public:
     }
 
     inline size_t get_block(const key_field_t& key) const{
-        return static_cast<const FieldBaseZ&>(key).hash()%m_nblock;
+        return key.hash()%m_nblock;
     }
 
     inline size_t get_block(const row_t& row) const{
-        return get_block(row.m_key_field);
+        return get_block(KeyField<row_t>::get(row));
     }
 
     inline size_t get_rank(const key_field_t& key) const{
@@ -152,5 +152,4 @@ public:
 };
 
 
-#endif //M7_RANKALLOCATOR_H
 #endif //M7_RANKALLOCATOR_H

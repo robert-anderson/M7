@@ -100,7 +100,7 @@ struct TableBaseZ {
     void transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv,
                        const std::list<recv_cb_t> &callbacks = {});
 
-    //void copy_row_in(const TableBaseZ &src, size_t irow_src, size_t irow_dst);
+    void copy_row_in(const TableBaseZ &src, size_t irow_src, size_t irow_dst);
 
     struct Loc {
         const size_t m_irank, m_irow;

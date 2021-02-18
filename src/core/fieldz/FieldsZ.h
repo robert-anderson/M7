@@ -71,6 +71,12 @@ namespace fieldsz {
 
         FermiBosOnv(const FermiBosOnv& other): FermiBosOnv(other.m_fonv.row_of_copy(), other.m_fonv.m_nsite){}
 
+        FermiBosOnv &operator=(const FermiBosOnv& other) {
+            m_fonv = other.m_fonv;
+            m_bonv = other.m_bonv;
+            return *this;
+        }
+
         FermiBosOnv &operator=(const std::pair<defs::inds, defs::inds>& inds) {
             m_fonv = inds.first;
             m_bonv = inds.second;

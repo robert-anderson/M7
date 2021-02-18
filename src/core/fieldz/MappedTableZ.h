@@ -40,7 +40,7 @@ struct MappedTableBaseZ {
 
     std::vector<std::forward_list<size_t>> m_buckets;
 
-    MappedTableBaseZ(size_t nbucket) : m_buckets(nbucket){}
+    MappedTableBaseZ(size_t nbucket);
     /**
      * @param nrow_max
      * expected maximum number of rows
@@ -48,14 +48,9 @@ struct MappedTableBaseZ {
      * the maximum acceptable value for the average number
      * @return
      */
-    static size_t nbucket_guess(size_t nrow_max, size_t mean_skips_per_bucket) {
-        // number of skips is on average half the average number of rows per bin.
-        return std::max(c_nbucket_min, size_t(nrow_max / double(2 * mean_skips_per_bucket)));
-    }
+    static size_t nbucket_guess(size_t nrow_max, size_t mean_skips_per_bucket);
 
-    size_t nbucket() const {
-        return m_buckets.size();
-    }
+    size_t nbucket() const;
 
 };
 
@@ -65,7 +60,7 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
     /*
      * won't compile unless the row defines a key_field_t;
      */
-    typedef typename std::remove_reference<decltype(row_t::m_key_field)>::type key_field_t;
+    typedef typename KeyField<row_t>::type key_field_t;
 
     using TableZ<row_t>::m_row;
 
@@ -77,7 +72,7 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
         auto current = res.m_bucket.before_begin();
         for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
             m_row.jump(*next);
-            if (m_row.m_key_field.equals(key)) return res;
+            if (m_row.key_field() == key) return res;
             res.m_prev++;
             m_total_skips++;
         }
@@ -88,7 +83,7 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
     void erase_rows(const defs::inds &irows) override {
         for (auto irow : irows) {
             m_row.jump(irow);
-            auto lookup = (*this)[m_row.m_key_field];
+            auto lookup = (*this)[KeyField<row_t>::get(m_row)];
             erase(lookup);
         }
     }
@@ -106,8 +101,8 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
         auto irow = TableBaseZ::get_free_row();
         auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
-        m_row.select(irow);
-        m_row.m_key_field = key;
+        m_row.jump(irow);
+        m_row.key_field() = key;
         return irow;
     }
 
@@ -116,8 +111,8 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
         ASSERT(!TableBaseZ::is_cleared(irow))
         m_row.jump(irow);
         // row mustn't have already been added
-        ASSERT(!(*this)[m_row.m_key_field]);
-        auto &bucket = buckets[m_row.m_key_field.hash() % buckets.size()];
+        ASSERT(!(*this)[KeyField<row_t>::get(m_row)]);
+        auto &bucket = buckets[KeyField<row_t>::get(m_row).hash() % buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
     }
 

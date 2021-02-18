@@ -32,9 +32,8 @@ struct StatsColumn : NdArray<T, nind>, StatsColumnBase {
     using NdArray<T, nind>::nelement;
     using NdArrayBase<T, nind>::m_data;
 
-    template<typename ...Args>
-    StatsColumn(StatsSpecifier *spec, std::string description, Args... shape):
-            NdArray<T, nind>(shape...),
+    StatsColumn(StatsSpecifier *spec, std::string description, std::array<size_t, nind> shape):
+            NdArray<T, nind>(shape),
             StatsColumnBase(spec, nelement(),
                             defs::inds(
                                     NdAccessor<T, nind>::m_format.shape().begin(),

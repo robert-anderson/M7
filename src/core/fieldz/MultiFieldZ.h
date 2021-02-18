@@ -77,8 +77,6 @@ struct MultiFieldZ {
         return fn.m_and;
     }
 
-
-protected:
     bool max_size() const {
         struct fn_t {
             size_t m_max = 0ul;
@@ -87,6 +85,14 @@ protected:
         fn_t fn;
         tuple_utils::for_each(m_subfields, fn);
         return fn.m_max;
+    }
+
+    void zero() {
+        struct fn_t {
+            void operator()(FieldBaseZ &f) { f.zero(); }
+        };
+        fn_t fn;
+        tuple_utils::for_each(m_subfields, fn);
     }
 
     bool is_zero() const {

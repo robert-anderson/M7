@@ -27,23 +27,23 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<double> m_total_cycle_time;
     FciqmcStatsSpecifier() :
     StatsSpecifier("FCIQMC"),
-    m_icycle(this, "Cycle number"),
-    m_tau(this, "Timestep"),
-    m_shift(this, "Diagonal shift"),
-    m_nwalker(this, "WF L1 norm (number of walkers)"),
-    m_delta_nwalker(this, "Walkers added this cycle"),
-    m_ref_proj_energy_num(this, "Numerator of reference-projected energy estimator"),
-    m_ref_weight(this, "Reference weight"),
-    m_ref_proj_energy(this, "Reference-projected energy"),
-    m_l2_norm(this, "L2 norm of the wavefunction"),
-    m_ninitiator(this, "Initiator ONVs"),
-    m_nocc_onv(this, "Occupied ONVs"),
-    m_psingle(this, "Probability of attempting to draw a single excitation"),
-    m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier"),
-    m_propagate_loop_time(this, "Time spent in loop over occupied ONVs"),
-    m_communication_time(this, "Time spent in communicating spawns"),
-    m_annihilation_loop_time(this, "Time spent in annihilation loop"),
-    m_total_cycle_time(this, "Total cycle time")
+    m_icycle(this, "Cycle number", {}),
+    m_tau(this, "Timestep", {}),
+    m_shift(this, "Diagonal shift", {}),
+    m_nwalker(this, "WF L1 norm (number of walkers)", {}),
+    m_delta_nwalker(this, "Walkers added this cycle", {}),
+    m_ref_proj_energy_num(this, "Numerator of reference-projected energy estimator", {}),
+    m_ref_weight(this, "Reference weight", {}),
+    m_ref_proj_energy(this, "Reference-projected energy", {}),
+    m_l2_norm(this, "L2 norm of the wavefunction", {}),
+    m_ninitiator(this, "Initiator ONVs", {}),
+    m_nocc_onv(this, "Occupied ONVs", {}),
+    m_psingle(this, "Probability of attempting to draw a single excitation", {}),
+    m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier", {}),
+    m_propagate_loop_time(this, "Time spent in loop over occupied ONVs", {}),
+    m_communication_time(this, "Time spent in communicating spawns", {}),
+    m_annihilation_loop_time(this, "Time spent in annihilation loop", {}),
+    m_total_cycle_time(this, "Total cycle time", {})
     {}
 };
 

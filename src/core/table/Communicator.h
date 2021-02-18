@@ -13,7 +13,6 @@
 #include <set>
 
 
-#if 0
 template<typename row_t>
 class CommunicatingPair {
 
@@ -32,7 +31,7 @@ public:
     }
 
     size_t row_dsize() const {
-        return static_cast<const Table &>(m_recv).m_row_dsize;
+        return static_cast<const TableBaseZ &>(m_recv).m_row_dsize;
     }
 
     BufferedTableArrayZ<row_t> &send() {
@@ -100,7 +99,7 @@ public:
         auto recv_dsize = recvdispls.back() + recvcounts.back();
         auto recv_nrow = recv_dsize / row_dsize();
 
-        if (recv_dsize > static_cast<const Table &>(recv()).bw_dsize()) {
+        if (recv_dsize > static_cast<const TableBaseZ &>(recv()).bw_dsize()) {
             /*
              * the recv table is full
              * this expansion by a factor is done explicitly here, because we
@@ -137,7 +136,10 @@ public:
 
 template<typename store_row_t, typename comm_row_t>
 struct Communicator {
-    typedef typename std::remove_reference<decltype(store_row_t::m_key_field)>::type key_field_t;
+    static_assert(std::is_base_of<RowZ, store_row_t>::value, "Template arg must be derived from Row");
+    static_assert(std::is_base_of<RowZ, comm_row_t>::value, "Template arg must be derived from Row");
+
+    typedef typename KeyField<store_row_t>::type key_field_t;
     BufferedMappedTableZ<store_row_t> m_store;
     CommunicatingPair<comm_row_t> m_comm;
     mutable RankAllocator<store_row_t> m_ra;
@@ -146,7 +148,7 @@ struct Communicator {
 
 
     struct DynamicRowSet : RankAllocatorBase::Dependent {
-        typedef RankAllocator<key_field_t> ra_t;
+        typedef RankAllocator<store_row_t> ra_t;
         /*
          * the mapped table which stores the definitive row values
          */
@@ -203,8 +205,8 @@ struct Communicator {
                        m_ntrow_to_track_p2p_tag);
             log::debug("P2P tag for array of dynamic row indices to transfer for \"{}\": {}", m_name,
                        m_itrows_to_track_p2p_tag);
-            m_lc.resize(1);
-            m_ac.resize(1);
+            m_lc.push_back(1);
+            m_ac.push_back(1);
             m_ranks_with_any_rows.reserve(mpi::nrank());
         }
 
@@ -245,7 +247,7 @@ struct Communicator {
             auto nrow = m_displs.back() + m_counts.back();
             m_lc.push_back(m_counts[mpi::irank()]);
             for (auto &irow : m_irows) {
-                static_cast<Table &>(m_lc).copy_row_in(m_source, irow, irow_local++);
+                static_cast<TableBaseZ &>(m_lc).copy_row_in(m_source, irow, irow_local++);
             }
             ASSERT(irow_local==m_counts[mpi::irank()]);
 
@@ -356,6 +358,7 @@ struct Communicator {
         using DynamicRowSet::update;
         using DynamicRowSet::m_name;
         using DynamicRowSet::m_ranks_with_any_rows;
+        using RowZ::jump;
 
         size_t m_iblock;
 
@@ -363,7 +366,9 @@ struct Communicator {
                 DynamicRowSet(comm, name), store_row_t(m_ac.m_row) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
-                m_iblock = this->m_ra.get_block_irow(loc.m_irow);
+                ASSERT(m_ac.m_hwm);
+                jump(loc.m_irow);
+                m_iblock = comm.m_ra.get_block(*this);
             }
             mpi::bcast(m_iblock, loc.m_irank);
             update();
@@ -411,7 +416,7 @@ struct Communicator {
                  size_t nbucket, double acceptable_imbalance):
             m_store(name + " store", store_row, nbucket),
             m_comm(name, buffer_expansion_factor, comm_row),
-            m_ra(m_store, m_store.m_key_field, nblock_ra, period_ra, acceptable_imbalance),
+            m_ra(m_store, nblock_ra, period_ra, acceptable_imbalance),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }
@@ -455,6 +460,4 @@ struct Communicator {
 
 };
 
-
-#endif //M7_COMMUNICATOR_H
 #endif //M7_COMMUNICATOR_H

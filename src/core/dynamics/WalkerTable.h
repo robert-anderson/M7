@@ -20,7 +20,10 @@ struct WalkerTableRow : public RowZ {
     fieldsz::Flags m_initiator;
     fieldsz::Flags m_reference_connection;
     fieldsz::Flags m_deterministic;
-    fieldsz::Onv<> &m_key_field = m_onv;
+
+    fieldsz::Onv<> &key_field() {
+        return m_onv;
+    };
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica):
     m_npart(nroot*nreplica),

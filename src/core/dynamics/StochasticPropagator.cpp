@@ -2,7 +2,6 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
-#if 0
 #include "StochasticPropagator.h"
 
 void StochasticPropagator::add_boson_excitgen(const Hamiltonian<0> &ham) {}
@@ -37,13 +36,15 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
 }
 
 
-void StochasticPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) {
-    auto weight = m_wf.m_store.m_weight(irow, 0, 0);
+void StochasticPropagator::off_diagonal(Wavefunction &wf) {
+    const auto& row = wf.m_store.m_row;
+    const auto& ipart = wf.m_ipart;
+    const defs::wf_t& weight = row.m_weight(ipart);
     ASSERT(!consts::float_is_zero(weight));
     ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
-    auto src_onv = m_wf.m_store.m_onv(irow);
-    bool flag_initiator = m_wf.m_store.m_flags.m_initiator(irow, 0, 0);
-    bool flag_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
+    const auto& src_onv = row.m_onv;
+    bool flag_initiator = row.m_initiator.get(ipart);
+    bool flag_deterministic = row.m_deterministic.get(ipart);
 
     m_occ.update(src_onv);
     m_vac.update(src_onv);
@@ -64,26 +65,26 @@ void StochasticPropagator::off_diagonal(Wavefunction &m_wf, const size_t &irow) 
         if (consts::float_is_zero(delta)) continue;
         delta = m_prng.stochastic_threshold(delta, m_opts.min_spawn_mag);
         if (consts::float_is_zero(delta)) continue;
-        m_wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic);
+        wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic, ipart);
     }
 }
 
-void StochasticPropagator::diagonal(Wavefunction &m_wf, const size_t &irow) {
-    bool flag_deterministic = m_wf.m_store.m_flags.m_deterministic(irow);
-    auto hdiag = m_wf.m_store.m_hdiag(irow);
+void StochasticPropagator::diagonal(Wavefunction &wf) {
+    auto& row = wf.m_store.m_row;
+    const auto& ipart = wf.m_ipart;
+    bool flag_deterministic = row.m_deterministic.get(ipart);
+    const defs::ham_comp_t& hdiag = row.m_hdiag;
     if (flag_deterministic) {
-        m_wf.scale_weight(irow, 1 - (hdiag - m_shift) * tau());
+        wf.scale_weight(1 - (hdiag - m_shift) * tau());
     } else {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift) * tau();
         if (death_rate < 0.0 || death_rate > 1.0) {
             // clone  / create antiparticles continuously
-            m_wf.scale_weight(irow, 1 - death_rate);
+            wf.scale_weight(1 - death_rate);
         } else {
-            auto weight = m_wf.m_store.m_weight(irow, 0, 0);
             // kill stochastically
-            m_wf.set_weight(irow, m_prng.stochastic_round(weight * (1 - death_rate), m_opts.min_death_mag));
+            wf.set_weight(m_prng.stochastic_round(row.m_weight(ipart) * (1 - death_rate), m_opts.min_death_mag));
         }
     }
 }
-#endif
