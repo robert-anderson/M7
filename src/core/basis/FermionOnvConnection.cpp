@@ -11,10 +11,13 @@ FermionOnvConnection::FermionOnvConnection(size_t nsite){
 }
 
 FermionOnvConnection::FermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out):
-FermionOnvConnection(in.m_nsite) {
+        FermionOnvConnection(in.m_nsite) {
     ASSERT(in.m_nsite == out.m_nsite);
     connect(in, out);
 }
+
+FermionOnvConnection::FermionOnvConnection(const fieldsz::Onv<0> &in):
+        FermionOnvConnection(in, in){}
 
 void FermionOnvConnection::connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) {
     ASSERT(!in.is_zero())

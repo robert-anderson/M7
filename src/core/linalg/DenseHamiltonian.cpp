@@ -7,8 +7,8 @@
 
 DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source) :
         Matrix<defs::ham_t>(source.nci()) {
-    elements::FermionOnv bra(source.nsite());
-    elements::FermionOnv ket(source.nsite());
+    buffered::FermionOnv bra(source.nsite());
+    buffered::FermionOnv ket(source.nsite());
 
     size_t ibra = ~0ul;
     enums::FermionOnv bra_enum(source.nsite(), source.nelec());
@@ -31,8 +31,8 @@ DenseHamiltonian::DenseHamiltonian(const FermiBosHamiltonian &source, int spin) 
     const auto nelec = source.nelec();
     const auto nmode = source.nmode();
     const auto nboson_cutoff = source.nboson_cutoff();
-    elements::FermiBosOnv bra(nsite);
-    elements::FermiBosOnv ket(nsite);
+    buffered::FermiBosOnv bra(nsite);
+    buffered::FermiBosOnv ket(nsite);
 
     size_t ibra = ~0ul;
     enums::FermiBosOnv bra_enum(nsite, nelec, spin, nmode, nboson_cutoff);

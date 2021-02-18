@@ -2,20 +2,17 @@
 // Created by rja on 08/10/2020.
 //
 
-#include <src/core/field/Elements.h>
-#include "src/core/table/MappedTable.h"
-#include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 #include "TableTest.h"
 
 TEST(MappedTable, TEST) {
-    const size_t nsite = 10;
-    typedef BufferedTable<table_test::DetMappedTable> table_t;
-
-    table_t bt("Mapped table test", nsite);
-    bt.expand(10);
-    elements::Det config(nsite);
+//    const size_t nsite = 10;
+//    typedef BufferedTable<table_test::DetMappedTable> table_t;
+//
+//    table_t bt("Mapped table test", nsite);
+//    bt.expand(10);
+//    elements::Det config(nsite);
 
 
 

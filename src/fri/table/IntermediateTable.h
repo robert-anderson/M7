@@ -5,6 +5,7 @@
 #ifndef M7_INTERMEDIATETABLE_H
 #define M7_INTERMEDIATETABLE_H
 
+#if 0
 #include "src/core/table/Table.h"
 #include "src/core/field/Fields.h"
 
@@ -29,4 +30,5 @@ struct IntermediateTable : public Table {
 };
 
 
+#endif //M7_INTERMEDIATETABLE_H
 #endif //M7_INTERMEDIATETABLE_H

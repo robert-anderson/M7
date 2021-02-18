@@ -14,6 +14,9 @@ struct NumberFieldBaseZ : FieldBaseZ {
     NumberFieldBaseZ(RowZ* row, size_t nitem, size_t nelement):
     FieldBaseZ(row, sizeof(T)*nelement, nitem, typeid(T)), m_nelement(nelement){}
 
+    NumberFieldBaseZ(const NumberFieldBaseZ& other):
+    NumberFieldBaseZ(other.m_row ? other.m_row->m_child : other.m_row, other.m_nitem, other.m_nelement){}
+
     NumberFieldBaseZ &operator=(const T &v) {
         std::fill((T*)begin(), (T*)end(), v);
         return *this;
@@ -42,7 +45,7 @@ struct NumberFieldBaseZ : FieldBaseZ {
         std::string tmp;
         if (m_nelement>1) tmp += "[";
         for (size_t ielement = 0ul; ielement<m_nelement; ++ielement)
-            tmp+=std::to_string((*this)[iitem, ielement]) + " ";
+            tmp+=std::to_string(this->get(iitem, ielement)) + " ";
         if (m_nelement>1) tmp += "]";
         return tmp;
     }
@@ -51,14 +54,16 @@ struct NumberFieldBaseZ : FieldBaseZ {
 
 template<typename T>
 struct NumberFieldZ : NumberFieldBaseZ<T> {
-    NumberFieldZ(RowZ* row): NumberFieldBaseZ<T>(1, 1, row){}
+    using NumberFieldBaseZ<T>::operator=;
+
+    NumberFieldZ(RowZ* row): NumberFieldBaseZ<T>(row, 1, 1){}
 
     operator T&() {
-        return (T *) FieldBaseZ::begin();
+        return *(T *) FieldBaseZ::begin();
     }
 
     operator const T&() const {
-        return (const T *) FieldBaseZ::begin();
+        return *(const T *) FieldBaseZ::begin();
     }
 };
 

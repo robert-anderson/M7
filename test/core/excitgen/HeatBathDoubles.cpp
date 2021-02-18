@@ -6,20 +6,21 @@
 #include "gtest/gtest.h"
 #include "src/core/excitgen/HeatBathDoubles.h"
 #include "src/core/table/MappedTable.h"
-#include "src/core/field/Fields.h"
+#include "src/core/fieldz/FieldsZ.h"
 
+#if 0
 namespace heat_bath_doubles_test {
     struct TestTable : Table {
         size_t m_nattempt;
-        fields::Det m_onv;
-        fields::Numbers<size_t, 1> m_frequency;
-        fields::Numbers<defs::prob_t, 1> m_weight;
+        fieldsz::Onv<0> m_onv;
+        fieldsz::Vector<size_t> m_frequency;
+        fieldsz::Vector<size_t> m_weight;
 
         TestTable(size_t nsite, size_t nattempt) :
                 m_nattempt(nattempt),
-                m_onv(this, nsite, "occupation number vector"),
-                m_frequency(this, "number of times the ONV was drawn", nattempt),
-                m_weight(this, "cumulative reciprocal probability", nattempt) {}
+                m_onv(this, nsite),
+                m_frequency(this, nattempt),
+                m_weight(this, nattempt) {}
     };
 
     struct TestMappedTable : MappedTable<TestTable, fields::Det>{
@@ -318,4 +319,5 @@ TEST(HeatBathDoubles, UnbiasedExcitsFromSpinnedDeterminantRealSchroedinger) {
     source_det.set(occ_inds);
     ASSERT_TRUE(excit_gen_tester(pchb, source_det, 1e8, 1e6));
 }
+#endif
 #endif

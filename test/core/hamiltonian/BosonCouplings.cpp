@@ -2,9 +2,9 @@
 // Created by jhalson on 30/09/2020.
 //
 
+#include <src/core/fieldz/BufferedFields.h>
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/BosonCouplings.h"
-#include "src/core/field/Elements.h"
 
 TEST(BosonCouplings, Element_b0) {
     size_t nboson_cutoff = 4, nsite = 4;
@@ -12,8 +12,8 @@ TEST(BosonCouplings, Element_b0) {
 
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    elements::FermiBosOnv ket(nsite);
-    elements::FermiBosOnv bra(v);
+    buffered::FermiBosOnv ket(nsite);
+    buffered::FermiBosOnv bra(v);
 
     ket = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
@@ -41,8 +41,8 @@ TEST(BosonCouplings, Element_f0_b1){
 
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    elements::FermiBosOnv ket(nsite);
-    elements::FermiBosOnv bra(nsite);
+    buffered::FermiBosOnv ket(nsite);
+    buffered::FermiBosOnv bra(nsite);
 
     ket = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
@@ -76,8 +76,8 @@ TEST(BosonCouplings, Element_f1_b1){
 
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    elements::FermiBosOnv ket(nsite);
-    elements::FermiBosOnv bra(nsite);
+    buffered::FermiBosOnv ket(nsite);
+    buffered::FermiBosOnv bra(nsite);
 
     ket = {{1, 2, 3, 4},
            {2, 4, 0, 1}};

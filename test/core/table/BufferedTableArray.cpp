@@ -2,59 +2,88 @@
 // Created by rja on 11/11/2020.
 //
 
-#include <src/core/field/Elements.h>
+#include <src/core/fieldz/RowZ.h>
+#include <src/core/fieldz/FieldsZ.h>
+#include <src/core/fieldz/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/table/BufferedTableArray.h"
-
-struct TestTable : Table {
-    fields::Det m_fonv;
-    TestTable(size_t nsite):
-            m_fonv(this, nsite, "configuration"){}
-};
+#include "src/core/fieldz/BufferedTableArrayZ.h"
 
 TEST(BufferedTableArray, Resize){
-    BufferedTableArray<TestTable> bta("Test table", 3, 6);
+    struct TestRow : RowZ {
+        fieldsz::Onv<0> m_fonv;
+        TestRow(size_t nsite): m_fonv(this, nsite){}
+    };
+    BufferedTableArrayZ<TestRow> bta("Test table", 3, 6);
     bta.expand(4);
 
     bta[0].push_back(3);
-    bta[0].m_fonv(0) = {1, 2, 3};
-    bta[0].m_fonv(1) = {1, 2, 4};
-    bta[0].m_fonv(2) = {1, 2, 5};
+    bta[0].m_row.restart();
+    bta[0].m_row.m_fonv = {1, 2, 3};
+    bta[0].m_row.step();
+    bta[0].m_row.m_fonv = {1, 2, 4};
+    bta[0].m_row.step();
+    bta[0].m_row.m_fonv = {1, 2, 5};
 
     bta[1].push_back(3);
-    bta[1].m_fonv(0) = {6, 2, 3};
-    bta[1].m_fonv(1) = {6, 2, 4};
-    bta[1].m_fonv(2) = {6, 2, 5};
+    bta[1].m_row.restart();
+    bta[1].m_row.m_fonv = {6, 2, 3};
+    bta[1].m_row.step();
+    bta[1].m_row.m_fonv = {6, 2, 4};
+    bta[1].m_row.step();
+    bta[1].m_row.m_fonv = {6, 2, 5};
 
     bta[2].push_back(3);
-    bta[2].m_fonv(0) = {7, 2, 3};
-    bta[2].m_fonv(1) = {7, 2, 4};
-    bta[2].m_fonv(2) = {7, 2, 5};
+    bta[2].m_row.restart();
+    bta[2].m_row.m_fonv = {7, 2, 3};
+    bta[2].m_row.step();
+    bta[2].m_row.m_fonv = {7, 2, 4};
+    bta[2].m_row.step();
+    bta[2].m_row.m_fonv = {7, 2, 5};
 
-    elements::FermionOnv fonv(6);
-    fonv = {1, 2, 3}; ASSERT_EQ(bta[0].m_fonv(0), fonv);
-    fonv = {1, 2, 4}; ASSERT_EQ(bta[0].m_fonv(1), fonv);
-    fonv = {1, 2, 5}; ASSERT_EQ(bta[0].m_fonv(2), fonv);
 
-    fonv = {6, 2, 3}; ASSERT_EQ(bta[1].m_fonv(0), fonv);
-    fonv = {6, 2, 4}; ASSERT_EQ(bta[1].m_fonv(1), fonv);
-    fonv = {6, 2, 5}; ASSERT_EQ(bta[1].m_fonv(2), fonv);
+    buffered::FermionOnv fonv(6);
+    bta[0].m_row.restart();
+    fonv = {1, 2, 3}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
+    bta[0].m_row.step();
+    fonv = {1, 2, 4}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
+    bta[0].m_row.step();
+    fonv = {1, 2, 5}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
 
-    fonv = {7, 2, 3}; ASSERT_EQ(bta[2].m_fonv(0), fonv);
-    fonv = {7, 2, 4}; ASSERT_EQ(bta[2].m_fonv(1), fonv);
-    fonv = {7, 2, 5}; ASSERT_EQ(bta[2].m_fonv(2), fonv);
+    bta[1].m_row.restart();
+    fonv = {6, 2, 3}; ASSERT_EQ(bta[1].m_row.m_fonv, fonv);
+    bta[1].m_row.step();
+    fonv = {6, 2, 4}; ASSERT_EQ(bta[1].m_row.m_fonv, fonv);
+    bta[1].m_row.step();
+    fonv = {6, 2, 5}; ASSERT_EQ(bta[1].m_row.m_fonv, fonv);
+
+    bta[2].m_row.restart();
+    fonv = {7, 2, 3}; ASSERT_EQ(bta[2].m_row.m_fonv, fonv);
+    bta[2].m_row.step();
+    fonv = {7, 2, 4}; ASSERT_EQ(bta[2].m_row.m_fonv, fonv);
+    bta[2].m_row.step();
+    fonv = {7, 2, 5}; ASSERT_EQ(bta[2].m_row.m_fonv, fonv);
 
 
     bta.expand(5);
-    fonv = {1, 2, 3}; ASSERT_EQ(bta[0].m_fonv(0), fonv);
-    fonv = {1, 2, 4}; ASSERT_EQ(bta[0].m_fonv(1), fonv);
-    fonv = {1, 2, 5}; ASSERT_EQ(bta[0].m_fonv(2), fonv);
+    bta[0].m_row.restart();
+    fonv = {1, 2, 3}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
+    bta[0].m_row.step();
+    fonv = {1, 2, 4}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
+    bta[0].m_row.step();
+    fonv = {1, 2, 5}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
 
-    fonv = {6, 2, 3}; ASSERT_EQ(bta[1].m_fonv(0), fonv);
-    fonv = {6, 2, 4}; ASSERT_EQ(bta[1].m_fonv(1), fonv);
-    fonv = {6, 2, 5}; ASSERT_EQ(bta[1].m_fonv(2), fonv);
+    bta[1].m_row.restart();
+    fonv = {6, 2, 3}; ASSERT_EQ(bta[1].m_row.m_fonv, fonv);
+    bta[1].m_row.step();
+    fonv = {6, 2, 4}; ASSERT_EQ(bta[1].m_row.m_fonv, fonv);
+    bta[1].m_row.step();
+    fonv = {6, 2, 5}; ASSERT_EQ(bta[1].m_row.m_fonv, fonv);
 
-    fonv = {7, 2, 3}; ASSERT_EQ(bta[2].m_fonv(0), fonv);
-    fonv = {7, 2, 4}; ASSERT_EQ(bta[2].m_fonv(1), fonv);
-    fonv = {7, 2, 5}; ASSERT_EQ(bta[2].m_fonv(2), fonv);
+    bta[2].m_row.restart();
+    fonv = {7, 2, 3}; ASSERT_EQ(bta[2].m_row.m_fonv, fonv);
+    bta[2].m_row.step();
+    fonv = {7, 2, 4}; ASSERT_EQ(bta[2].m_row.m_fonv, fonv);
+    bta[2].m_row.step();
+    fonv = {7, 2, 5}; ASSERT_EQ(bta[2].m_row.m_fonv, fonv);
+
 }

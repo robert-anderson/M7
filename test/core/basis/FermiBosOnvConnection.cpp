@@ -2,10 +2,10 @@
 // Created by RJA on 21/11/2020.
 //
 
+#include <src/core/fieldz/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/field/Elements.h"
 
 TEST(FermiBosConnection, Test){
-    const elements::FermiBosOnv fonv(4);
-    fonv.print();
+    const buffered::FermiBosOnv fonv(4);
+    std::cout << fonv.to_string() << std::endl;
 }

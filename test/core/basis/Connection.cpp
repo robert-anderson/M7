@@ -9,13 +9,13 @@
 
 TEST(Connection, ParticleNumberConserving){
     const size_t nsite = 20;
-    itemsz::FermionOnv ket(nsite);
-    itemsz::FermionOnv bra(nsite);
+    buffered::FermionOnv ket(nsite);
+    buffered::FermionOnv bra(nsite);
 
     defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 20, 38, 39};
     defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 37, 38};
-    ket.set(ketoccorbs);
-    bra.set(braoccorbs);
+    ket = ketoccorbs;
+    bra = braoccorbs;
 
     ASSERT_EQ(ket.nsetbit(), 9);
     ASSERT_EQ(bra.nsetbit(), 9);
@@ -53,9 +53,9 @@ TEST(Connection, Phase) {
     defs::inds inds(16);
     float value;
 
-    elements::FermionOnv bra(4);
-    elements::FermionOnv ket(4);
-    elements::FermionOnv work_det(4);
+    buffered::FermionOnv bra(4);
+    buffered::FermionOnv ket(4);
+    buffered::FermionOnv work_det(4);
     AntisymFermionOnvConnection connection(ket);
 
     while (file_reader.next(inds, value)) {

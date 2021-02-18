@@ -109,6 +109,7 @@ protected:
         return fn.m_hash;
     }
 
+public:
     std::string to_string() const {
         struct fn_t {
             std::string m_str;

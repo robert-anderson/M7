@@ -5,8 +5,6 @@
 #include "gtest/gtest.h"
 #include "src/core/table/BufferedTable.h"
 #include "src/core/table/Table.h"
-#include "src/core/field/Fields.h"
-#include "src/core/field/Elements.h"
 #if 0
 #include "src/core/data/BufferedField.h"
 

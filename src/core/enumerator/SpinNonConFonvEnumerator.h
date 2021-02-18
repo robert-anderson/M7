@@ -6,15 +6,15 @@
 #define M7_SPINNONCONFONVENUMERATOR_H
 
 #include "CombinationEnumerator.h"
-#include "src/core/field/Views.h"
+#include "src/core/fieldz/FieldsZ.h"
 
-class SpinNonConFonvEnumerator : public Enumerator<views::Det> {
+class SpinNonConFonvEnumerator : public Enumerator<fieldsz::Onv<0>> {
     CombinationEnumerator m_combs;
     defs::inds m_setinds;
 public:
     SpinNonConFonvEnumerator(size_t nsite, size_t nelec);
 
-    bool next_element(views::Det &result) override;
+    bool next_element(fieldsz::Onv<0> &result) override;
 };
 
 

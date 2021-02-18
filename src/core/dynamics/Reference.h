@@ -6,7 +6,6 @@
 #define M7_REFERENCE_H
 
 #include "src/core/parallel/RankAllocator.h"
-#include "src/core/field/Fields.h"
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/nd/NdArray.h"

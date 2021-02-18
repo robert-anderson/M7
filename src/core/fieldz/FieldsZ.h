@@ -44,29 +44,48 @@ namespace fieldsz {
     using Flag = FlagFieldZ;
     using Flags = FlagsFieldZ;
 
-    using BosonOnv = VectorFieldZ<uint8_t>;
+    struct BosonOnv : VectorFieldZ<uint8_t> {
+        BosonOnv(RowZ *row, size_t nmode) : VectorFieldZ<uint8_t>(row, nmode) {}
+
+        BosonOnv(const BosonOnv &other) : BosonOnv(other.m_row ? other.m_row->m_child : nullptr, m_nelement) {}
+
+        BosonOnv &operator=(const defs::inds &inds) {
+            MPI_ASSERT(inds.size() == m_nelement, "Vector is not the correct size");
+            for (size_t i = 0ul; i < inds.size(); ++i) this->operator()(i) = inds[i];
+            return *this;
+        }
+    };
+
     using BosonOnvs = VectorsFieldZ<uint8_t>;
 
     struct FermiBosOnv : MultiFieldZ<FermionOnv, BosonOnv> {
-        FermionOnv& m_fonv;
-        BosonOnv& m_bonv;
-        FermiBosOnv(RowZ* row, size_t nsite) :
+        FermionOnv &m_fonv;
+        BosonOnv &m_bonv;
+
+        FermiBosOnv(RowZ *row, size_t nsite) :
                 MultiFieldZ<FermionOnv, BosonOnv>(row, {nullptr, nsite}, {nullptr, nsite}),
-                m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)){}
+                m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)) {}
+
+        FermiBosOnv &operator=(const std::pair<defs::inds, defs::inds>& inds) {
+            m_fonv = inds.first;
+            m_bonv = inds.second;
+            return *this;
+        }
     };
 
     struct FermiBosOnvs : MultiFieldZ<FermionOnvs, BosonOnvs> {
-        FermionOnvs& m_fonv;
-        BosonOnvs& m_bonv;
-        FermiBosOnvs(RowZ* row, size_t nitem, size_t nsite) :
+        FermionOnvs &m_fonv;
+        BosonOnvs &m_bonv;
+
+        FermiBosOnvs(RowZ *row, size_t nitem, size_t nsite) :
                 MultiFieldZ<FermionOnvs, BosonOnvs>(row, {nullptr, nitem, nsite}, {nullptr, nitem, nsite}),
-                m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)){}
+                m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)) {}
     };
 
-    template<bool enable_bosons=defs::enable_bosons>
+    template<bool enable_bosons = defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
 
-    template<bool enable_bosons=defs::enable_bosons>
+    template<bool enable_bosons = defs::enable_bosons>
     using Onvs = typename std::conditional<enable_bosons, FermiBosOnvs, FermionOnvs>::type;
 
 }

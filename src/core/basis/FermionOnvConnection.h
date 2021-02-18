@@ -7,7 +7,6 @@
 
 #include <src/core/field/FermionOnvSpecifier.h>
 #include <algorithm>
-#include <src/core/field/Views.h>
 #include <src/core/fieldz/FieldsZ.h>
 
 /*

@@ -3,7 +3,6 @@
 //
 
 #include <src/core/table/BufferedTable.h>
-#include <src/core/field/Elements.h>
 #include "gtest/gtest.h"
 #include "src/core/table/MappedTable.h"
 #include "src/core/excitgen/BosonExcitationGenerator.h"

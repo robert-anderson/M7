@@ -8,10 +8,9 @@
 #include <src/core/sort/ExtremalValues.h>
 #include <src/core/sort/QuickSorter.h>
 #include "src/core/table/BufferedTable.h"
-#include "src/core/field/Fields.h"
 #include "gtest/gtest.h"
 
-
+#if 0
 struct CommonFieldTypeTable : public Table {
     fields::Numbers<short, 1> m_shorts;
     fields::Numbers<short, 1> m_more_shorts;
@@ -247,3 +246,4 @@ TEST(Table, CopyBuffered){
     ASSERT_EQ(tcopy.m_hwm, 0);
     ASSERT_EQ(tcopy.m_nrow, 0);
 }
+#endif

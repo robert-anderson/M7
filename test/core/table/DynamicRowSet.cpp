@@ -3,7 +3,6 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/field/Elements.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "TableTest.h"
 

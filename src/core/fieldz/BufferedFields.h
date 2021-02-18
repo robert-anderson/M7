@@ -76,15 +76,28 @@ struct BufferedFieldZ : WrappedRowZ, field_t {
 namespace buffered {
 
 
-    using FermionOnv = BufferedFieldZ<fieldsz::FermionOnv>;
-    using FermionOnvs = BufferedFieldZ<fieldsz::FermionOnvs>;
+    struct FermionOnv : BufferedFieldZ<fieldsz::FermionOnv> {
+        using fieldsz::FermionOnv::operator=;
+        FermionOnv(size_t nsite) : BufferedFieldZ<fieldsz::FermionOnv>({nullptr, nsite}){}
+    };
 
-    using BosonOnv = BufferedFieldZ<fieldsz::BosonOnv>;
-    using BosonOnvs = BufferedFieldZ<fieldsz::BosonOnvs>;
+    struct FermionOnvs : BufferedFieldZ<fieldsz::FermionOnvs> {
+        FermionOnvs(size_t nitem, size_t nsite) : BufferedFieldZ<fieldsz::FermionOnvs>({nullptr, nitem, nsite}){}
+    };
+
+    struct BosonOnv : BufferedFieldZ<fieldsz::BosonOnv> {
+        using fieldsz::BosonOnv::operator=;
+        BosonOnv(size_t nsite) : BufferedFieldZ<fieldsz::BosonOnv>({nullptr, nsite}){}
+    };
+
+    struct BosonOnvs : BufferedFieldZ<fieldsz::BosonOnvs> {
+        BosonOnvs(size_t nitem, size_t nsite) : BufferedFieldZ<fieldsz::BosonOnvs>({nullptr, nitem, nsite}){}
+    };
 
     struct FermiBosOnv : BufferedMultiFieldz<fieldsz::FermiBosOnv> {
+        using fieldsz::FermiBosOnv::operator=;
         FermiBosOnv(size_t nsite):
-        BufferedMultiFieldz<fieldsz::FermiBosOnv>(fieldsz::FermiBosOnv{nullptr, nsite}){}
+        BufferedMultiFieldz<fieldsz::FermiBosOnv>({nullptr, nsite}){}
     };
     using FermiBosOnvs = BufferedMultiFieldz<fieldsz::FermiBosOnvs>;
 

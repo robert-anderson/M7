@@ -31,14 +31,14 @@ public:
         return ci_utils::boson_dim(m_nmode, m_nboson_cutoff);
     }
 
-    defs::ham_t get_element_0(const views::BosonOnv &onv) const {
+    defs::ham_t get_element_0(const fieldsz::BosonOnv &onv) const {
         defs::ham_t res = 0;
         for (size_t imode = 0ul; imode < m_nmode; ++imode)
             res += m_omega * onv(imode);
         return res;
     }
 
-    defs::ham_comp_t get_energy(const views::BosonOnv &onv) const {
+    defs::ham_comp_t get_energy(const fieldsz::BosonOnv &onv) const {
         return consts::real(get_element_0(onv));
     }
 

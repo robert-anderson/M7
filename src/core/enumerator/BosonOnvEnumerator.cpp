@@ -5,9 +5,9 @@
 #include "BosonOnvEnumerator.h"
 
 BosonOnvEnumerator::BosonOnvEnumerator(size_t nmode, size_t occ_cutoff) :
-        Enumerator<views::BosonOnv>(), m_prod(nmode, occ_cutoff+1), m_setoccs(nmode){}
+        Enumerator<fieldsz::BosonOnv>(), m_prod(nmode, occ_cutoff+1), m_setoccs(nmode){}
 
-bool BosonOnvEnumerator::next_element(views::BosonOnv &result) {
+bool BosonOnvEnumerator::next_element(fieldsz::BosonOnv &result) {
     auto allfound = m_prod.next_element(m_setoccs);
     if(!allfound) return false;
     result = m_setoccs;

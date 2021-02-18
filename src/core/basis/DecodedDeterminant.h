@@ -6,7 +6,7 @@
 #define M7_DECODEDDETERMINANT_H
 
 #include "src/core/field/FermionOnvSpecifier.h"
-#include "src/core/field/Views.h"
+#include "src/core/fieldz/FieldsZ.h"
 
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)
@@ -18,17 +18,17 @@ class DecodedDeterminant {
     defs::inds m_inds;
 
 public:
-    explicit DecodedDeterminant(const FermionOnvSpecifier &spec) {
-        m_inds.reserve(spec.m_nbit);
+    explicit DecodedDeterminant(size_t nsite) {
+        m_inds.reserve(2*nsite);
     }
 
-    explicit DecodedDeterminant(const views::Det &view) :
-            DecodedDeterminant(view.spec()) {
-        update(view);
+    explicit DecodedDeterminant(const fieldsz::Onv<0> &onv) :
+            DecodedDeterminant(onv.m_nsite) {
+        update(onv);
     }
 
-    explicit DecodedDeterminant(const views::Onv<1> &view) :
-            DecodedDeterminant(view.m_fonv.spec()) {}
+    explicit DecodedDeterminant(const fieldsz::Onv<1> &onv) :
+            DecodedDeterminant(onv.m_fonv.m_nsite) {}
 
     size_t size() const {
         return m_inds.size();
@@ -43,23 +43,23 @@ public:
         return m_inds;
     }
 
-    void update(const views::Det &onv) {
+    void update(const fieldsz::Onv<0> &onv) {
         updater_fn()(onv, m_inds);
     };
 
-    void update(const views::Onv<1> &onv) {
+    void update(const fieldsz::Onv<1> &onv) {
         updater_fn()(onv.m_fonv, m_inds);
     }
 };
 
 
 struct OccupiedUpdater {
-    void operator()(const views::Det &view, defs::inds &inds);
+    void operator()(const fieldsz::Onv<0> &view, defs::inds &inds);
 };
 
 
 struct VacantUpdater {
-    void operator()(const views::Det &view, defs::inds &inds);
+    void operator()(const fieldsz::Onv<0> &view, defs::inds &inds);
 };
 
 typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;

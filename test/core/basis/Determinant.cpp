@@ -4,7 +4,7 @@
 
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
-#include "src/core/field/Elements.h"
+#include "src/core/fieldz/BufferedFields.h"
 #include "src/core/basis/FermionOnvConnection.h"
 
 TEST(Determinant, Phase) {
@@ -17,8 +17,8 @@ TEST(Determinant, Phase) {
     float value;
 
     const size_t nsite = 4;
-    elements::FermionOnv bra(nsite);
-    elements::FermionOnv ket(nsite);
+    buffered::FermionOnv bra(nsite);
+    buffered::FermionOnv ket(nsite);
     AntisymFermionOnvConnection conn(bra);
 
     while (file_reader.next(inds, value)) {
@@ -39,26 +39,21 @@ TEST(Determinant, Phase) {
 }
 
 TEST(Determinant, Spin) {
-    elements::FermionOnv det(4);
+    buffered::FermionOnv det(4);
     ASSERT_TRUE(det.is_zero());
     ASSERT_EQ(det.spin(), 0);
-    det.set(defs::inds{0,1,2,3});
+    det = {0,1,2,3};
     ASSERT_EQ(det.spin(), 4);
-    det.set(defs::inds{4,5,6,7});
+    det = {4,5,6,7};
     ASSERT_EQ(det.spin(), 0);
-    det.zero();
-    det.set(defs::inds{4,5,6,7});
+    det = {4,5,6,7};
     ASSERT_EQ(det.spin(), -4);
-    det.zero();
-    det.set(defs::inds{0,1,4,5,6,7});
+    det = {0,1,4,5,6,7};
     ASSERT_EQ(det.spin(), -2);
-    det.zero();
-    det.set(defs::inds{0,1,2,4,5,6,7});
+    det = {0,1,2,4,5,6,7};
     ASSERT_EQ(det.spin(), -1);
-    det.zero();
-    det.set(defs::inds{0,1,2,3,4,5,6,7});
+    det = {0,1,2,3,4,5,6,7};
     ASSERT_EQ(det.spin(), 0);
-    det.zero();
-    det.set(defs::inds{0,1,2,3,4,5,6});
+    det = {0,1,2,3,4,5,6};
     ASSERT_EQ(det.spin(), 1);
 }

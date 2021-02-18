@@ -11,38 +11,37 @@
 
 TEST(FieldZ, Copying) {
     struct TestRow : RowZ {
-        fieldsz::NumberArrays<float, 1, 2> m_array;
-        fieldsz::NumberArrays<float, 1, 2> m_array2;
+        fieldsz::Vector<float> m_vector;
+        fieldsz::Vectors<float> m_vectors;
 
-        TestRow() : m_array(this, {1}, {2, 3}),
-                    m_array2(this, {1}, {2, 3}) {}
+        TestRow() : m_vector(this, 9), m_vectors(this, 4, 5){}
     };
 
     TestRow row;
-    ASSERT_EQ(&row.m_array, row.m_fields[0]);
-    ASSERT_EQ(row.m_array.m_row_offset, 0ul);
+    ASSERT_EQ(&row.m_vector, row.m_fields[0]);
+    ASSERT_EQ(row.m_vector.m_row_offset, 0ul);
     ASSERT_EQ(row.m_fields.size(), 2ul);
     TestRow rowcopy(row);
     ASSERT_FALSE(rowcopy.m_fields.empty());
     /*
      * check that all pointers have been updated correctly
      */
-    ASSERT_EQ(&rowcopy.m_array, rowcopy.m_fields[0]);
-    ASSERT_EQ(rowcopy.m_array.m_row, &rowcopy);
+    ASSERT_EQ(&rowcopy.m_vector, rowcopy.m_fields[0]);
+    ASSERT_EQ(rowcopy.m_vector.m_row, &rowcopy);
     ASSERT_EQ(rowcopy.m_fields.size(), 2ul);
-    ASSERT_EQ(rowcopy.m_array.m_row_offset, 0ul);
+    ASSERT_EQ(rowcopy.m_vector.m_row_offset, 0ul);
 }
 
 TEST(FieldZ, Test) {
     struct TestRow : RowZ {
-        fieldsz::NumberArrays<float, 1, 2> m_array;
+        fieldsz::Vectors<float> m_array;
         fieldsz::FermiBosOnv m_fbonv;
-        fieldsz::Flags<2> m_flags;
+        fieldsz::Flags m_flags;
 
         TestRow() :
-                m_array(this, {1}, {2, 3}),
+                m_array(this, 3, 14),
                 m_fbonv(this, 12),
-                m_flags(this, {4, 7}) {}
+                m_flags(this, 7) {}
 
         fieldsz::FermiBosOnv &m_key_field = m_fbonv;
     };

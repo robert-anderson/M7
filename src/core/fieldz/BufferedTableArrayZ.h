@@ -54,7 +54,7 @@ public:
             m_buffer(name, ntable) {
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {
-            m_tables.emplace_back({row});
+            m_tables.emplace_back(row);
             static_cast<TableBaseZ &>(m_tables.back()).set_buffer(&m_buffer);
         }
     }

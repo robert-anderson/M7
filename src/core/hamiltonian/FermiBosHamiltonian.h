@@ -52,7 +52,7 @@ public:
         return FermionHamiltonian::get_element_0(afbconn) + m_boson_couplings.get_element_0(afbconn);
     }
 
-    defs::ham_t get_element_0(const views::FbOnv &onv) const {
+    defs::ham_t get_element_0(const fieldsz::Onv<1> &onv) const {
         return FermionHamiltonian::get_element_0(onv.m_fonv) + m_boson_couplings.get_element_0(onv.m_bonv);
     }
 
@@ -73,7 +73,7 @@ public:
         return m_boson_couplings.get_element_1(afbconn);
     }
 
-    defs::ham_comp_t get_energy(const views::FbOnv &onv) const {
+    defs::ham_comp_t get_energy(const fieldsz::Onv<1> &onv) const {
         return consts::real(get_element_0(onv));
     }
 

@@ -11,8 +11,8 @@ TEST(FermionHamiltonian, DhfEnergy) {
     const auto benchmark = -14.354220448530139;
     FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
-    elements::FermionOnv fonv(ham.nsite());
-    fonv.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
+    buffered::FermionOnv fonv(ham.nsite());
+    fonv = {0, 1, ham.nsite(), ham.nsite() + 1};
     auto elem = ham.get_element_0(fonv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
     ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
@@ -23,13 +23,13 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
     if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
-    elements::FermionOnv hf_det(ham.nsite());
-    hf_det.set(defs::inds{0, 1, ham.nsite(), ham.nsite() + 1});
+    buffered::FermionOnv hf_det(ham.nsite());
+    hf_det = {0, 1, ham.nsite(), ham.nsite() + 1};
 
     OccupiedOrbitals occs(hf_det);
     VacantOrbitals vacs(hf_det);
 
-    elements::FermionOnv excited(ham.nsite());
+    buffered::FermionOnv excited(ham.nsite());
 
     AntisymFermionOnvConnection connection(hf_det);
 
@@ -57,7 +57,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.65146156994338;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::FermionOnv fonv(ham.nsite());
+    buffered::FermionOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
 
     auto elem = ham.get_element_0(fonv);
@@ -69,13 +69,13 @@ TEST(FermionHamiltonian, RhfEnergy) {
 TEST(FermionHamiltonian, RhfBrillouinTheorem) {
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    elements::FermionOnv fonv(ham.nsite());
-    fonv.set(defs::inds{0, 1, 2,  6, 7, 8});
+    buffered::FermionOnv fonv(ham.nsite());
+    fonv = {0, 1, 2,  6, 7, 8};
 
     OccupiedOrbitals occs(fonv);
     VacantOrbitals vacs(fonv);
 
-    elements::FermionOnv excited(ham.nsite());
+    buffered::FermionOnv excited(ham.nsite());
 
     AntisymFermionOnvConnection connection(fonv);
 

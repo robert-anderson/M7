@@ -2,8 +2,8 @@
 // Created by rja on 26/01/2021.
 //
 
-#include <src/core/field/Elements.h>
 #include <src/core/sample/PRNG.h>
+#include <src/core/fieldz/BufferedFields.h>
 #include "gtest/gtest.h"
 
 TEST(Fields, HashUniformityTrueRandom){
@@ -15,12 +15,11 @@ TEST(Fields, HashUniformityTrueRandom){
     defs::inds freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
-    elements::FermionOnv fonv(nsite);
-    ASSERT_EQ(fonv.m_hwm, 1);
+    buffered::FermionOnv fonv(nsite);
 
     for (size_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();
-        for (auto ispin: {0, 1}) {
+        for (auto ispin: {0ul, 1ul}) {
             size_t nset = 0ul;
             while (nset < nelec/2) {
                 size_t isite = prng.draw_uint(nsite);
@@ -29,7 +28,7 @@ TEST(Fields, HashUniformityTrueRandom){
                 ++nset;
             }
         }
-        auto ibucket = fields::Onv<0>::hash_fn()(fonv)%nbucket;
+        auto ibucket = fonv.hash()%nbucket;
         freqs[ibucket]++;
     }
     auto tot = std::accumulate(freqs.begin(), freqs.end(), 0);
@@ -51,9 +50,7 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
     defs::inds freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
-    elements::FermionOnv fonv(nsite);
-    ASSERT_EQ(fonv.m_hwm, 1);
-
+    buffered::FermionOnv fonv(nsite);
 
     for (size_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();
@@ -71,7 +68,7 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
                 isite%=nsite;
             }
         }
-        auto ibucket = fields::Onv<0>::hash_fn()(fonv)%nbucket;
+        auto ibucket = fonv.hash()%nbucket;
         freqs[ibucket]++;
     }
     auto tot = std::accumulate(freqs.begin(), freqs.end(), 0);

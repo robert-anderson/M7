@@ -5,11 +5,6 @@
 #ifndef M7_SPAWNTABLE_H
 #define M7_SPAWNTABLE_H
 
-#include "src/core/table/Table.h"
-#include "src/core/field/Fields.h"
-
-
-
 struct SpawnTableRow : public RowZ {
     fieldsz::Onv<> m_dst_onv;
     fieldsz::Number<defs::wf_t> m_delta_weight;

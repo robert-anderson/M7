@@ -6,11 +6,10 @@
 #define M7_WALKERTABLE_H
 
 #include "src/core/table/MappedTable.h"
-#include "src/core/field/Fields.h"
 #include "src/core/io/Options.h"
 #include "src/core/fieldz/RowZ.h"
-#include "src/core/fieldz/FieldsZ.h"
 #include "src/core/fieldz/MappedTableZ.h"
+#include "src/core/fieldz/FieldsZ.h"
 
 
 struct WalkerTableRow : public RowZ {
