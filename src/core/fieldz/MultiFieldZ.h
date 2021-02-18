@@ -12,12 +12,12 @@
 
 template<typename ...Args>
 struct MultiFieldZ {
-    RowZ *m_row;
+    RowZ *m_row = nullptr;
     std::tuple<Args...> m_subfields;
     std::vector<char> m_null_field_string;
 
-    MultiFieldZ(RowZ *row, Args&&... subfields): m_row(row), m_subfields(subfields...) {
-        add_to_row(m_row);
+    MultiFieldZ(RowZ *row, Args&&... subfields): m_subfields(subfields...) {
+        add_to_row(row);
         m_null_field_string.assign(max_size(), 0);
     }
 
@@ -52,6 +52,7 @@ struct MultiFieldZ {
                 f.add_to_row(m_row);
             }
         };
+        m_row = row;
         fn_t fn {m_row};
         tuple_utils::for_each(m_subfields, fn);
     }

@@ -76,7 +76,6 @@ public:
                 return res;
             }
             case 1: {
-                ASSERT(0)
                 auto p = aconn.cre()[0] % m_nmode;
                 auto q = aconn.ann()[0] % m_nmode;
                 ASSERT(p != q) // spin conservation

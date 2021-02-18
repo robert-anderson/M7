@@ -6,8 +6,8 @@
 #include "src/core/basis/DecodedDeterminant.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 
+#ifdef ENABLE_COMPLEX
 TEST(FermionHamiltonian, DhfEnergy) {
-    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     const auto benchmark = -14.354220448530139;
     FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
@@ -20,7 +20,6 @@ TEST(FermionHamiltonian, DhfEnergy) {
 }
 
 TEST(FermionHamiltonian, DhfBrillouinTheorem) {
-    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_FALSE(ham.spin_conserving());
     buffered::FermionOnv hf_det(ham.nsite());
@@ -52,6 +51,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
         }
     }
 }
+#endif
 
 TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.65146156994338;

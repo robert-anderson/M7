@@ -66,7 +66,10 @@ namespace fieldsz {
 
         FermiBosOnv(RowZ *row, size_t nsite) :
                 MultiFieldZ<FermionOnv, BosonOnv>(row, {nullptr, nsite}, {nullptr, nsite}),
-                m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)) {}
+                m_fonv(get<0>()), m_bonv(get<1>()) {
+        }
+
+        FermiBosOnv(const FermiBosOnv& other): FermiBosOnv(other.m_fonv.row_of_copy(), other.m_fonv.m_nsite){}
 
         FermiBosOnv &operator=(const std::pair<defs::inds, defs::inds>& inds) {
             m_fonv = inds.first;

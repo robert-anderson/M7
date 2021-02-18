@@ -13,7 +13,15 @@ TEST(BosonCouplings, Element_b0) {
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
     buffered::FermiBosOnv ket(nsite);
-    buffered::FermiBosOnv bra(v);
+    ASSERT_TRUE(ket.m_row);
+    ASSERT_TRUE(ket.m_fonv.is_added_to_row());
+    ASSERT_TRUE(ket.m_fonv.m_row);
+    ASSERT_TRUE(ket.m_bonv.is_added_to_row());
+    ASSERT_TRUE(ket.m_bonv.m_row);
+    ASSERT_EQ(ket.m_row, ket.m_fonv.m_row);
+    ASSERT_EQ(ket.m_row, ket.m_bonv.m_row);
+    buffered::FermiBosOnv bra(nsite);
+
 
     ket = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
