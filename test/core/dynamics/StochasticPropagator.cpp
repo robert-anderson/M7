@@ -16,7 +16,7 @@ TEST(StochasticPropagator, Test) {
     opts.tau_initial = 0.05;
     opts.load_balance_period = 5;
     opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 500000;
+    opts.nwalker_target = 1000000;
     opts.shift_damp = 0.5;
     opts.ncycle = 10000;
     opts.init();
