@@ -2,8 +2,8 @@
 // Created by rja on 09/02/2021.
 //
 
-#ifndef M7_NDMULTIFIELDZ_H
-#define M7_NDMULTIFIELDZ_H
+#ifndef M7_MULTIFIELDZ_H
+#define M7_MULTIFIELDZ_H
 
 #include "RowZ.h"
 #include "FieldBaseZ.h"
@@ -17,7 +17,7 @@ struct MultiFieldZ {
     std::vector<char> m_null_field_string;
 
     MultiFieldZ(RowZ *row, Args&&... subfields): m_row(row), m_subfields(subfields...) {
-        init();
+        add_to_row(m_row);
         m_null_field_string.assign(max_size(), 0);
     }
 
@@ -29,7 +29,7 @@ struct MultiFieldZ {
     MultiFieldZ(const MultiFieldZ& other) :
             m_row(other.m_row ? other.m_row->m_child : nullptr),
             m_subfields(other.m_subfields){
-        init();
+        add_to_row(m_row);
     }
 
     MultiFieldZ& operator=(const MultiFieldZ& other) {
@@ -43,14 +43,13 @@ struct MultiFieldZ {
         return *this;
     }
 
-    void init() {
-        if (!m_row) return;
+    void add_to_row(RowZ* row) {
+        if (!row) return;
+        MPI_REQUIRE(!m_row, "MultiField must not be already associated with a row");
         struct fn_t {
             RowZ* m_row;
             void operator()(FieldBaseZ &f) {
-                MPI_REQUIRE(!f.m_row, "Field mustn't already be attached to a Row");
-                f.m_row_offset = m_row->add_field(&f);
-                f.m_row = m_row;
+                f.add_to_row(m_row);
             }
         };
         fn_t fn {m_row};
@@ -135,4 +134,4 @@ public:
 
 
 
-#endif //M7_NDMULTIFIELDZ_H
+#endif //M7_MULTIFIELDZ_H

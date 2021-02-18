@@ -18,7 +18,7 @@ FieldBaseZ::FieldBaseZ(const FieldBaseZ &other) :
 }
 
 bool FieldBaseZ::is_added_to_row() const {
-    return (m_nitem != ~0ul) && (m_size != ~0ul) && (m_row_offset != ~0ul) && m_row;
+    return (m_row_offset != ~0ul) && m_row;
 }
 
 char *FieldBaseZ::begin() const {

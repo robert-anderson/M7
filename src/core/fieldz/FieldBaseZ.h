@@ -33,8 +33,15 @@ struct FieldBaseZ {
     }
 
     bool is_comparable(const FieldBaseZ& other) const {
-        return m_item_size==other.m_nitem &&
+        return m_item_size==other.m_item_size &&
                m_type_info==other.m_type_info && m_size==other.m_size;
+    }
+
+    void add_to_row(RowZ* row) {
+        if (!row) return;
+        MPI_REQUIRE(!is_added_to_row(), "Field must not be already associated with a row");
+        m_row_offset = row->add_field(this);
+        m_row = row;
     }
 
     bool is_added_to_row() const;

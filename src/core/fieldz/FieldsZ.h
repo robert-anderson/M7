@@ -8,7 +8,7 @@
 #include "NumberFieldZ.h"
 #include "FermionOnvFieldZ.h"
 #include "FlagFieldZ.h"
-#include "NdMultiFieldZ.h"
+#include "MultiFieldZ.h"
 
 
 /*

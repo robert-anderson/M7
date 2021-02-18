@@ -5,7 +5,7 @@
 #ifndef M7_BUFFEREDFIELDS_H
 #define M7_BUFFEREDFIELDS_H
 
-#include "NdMultiFieldZ.h"
+#include "MultiFieldZ.h"
 #include "BufferedTableZ.h"
 #include "FieldsZ.h"
 
@@ -48,6 +48,8 @@ struct BufferedMultiFieldz : WrappedRowZ, multi_field_t {
     BufferedMultiFieldz(multi_field_t&& multi_field) :
             multi_field_t(std::move(multi_field)),
             m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
+        MPI_ASSERT(!multi_field_t::m_row, "MultiField must not be already associated with a row");
+        multi_field_t::add_to_row(&m_wrapped_row);
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;
@@ -63,7 +65,8 @@ struct BufferedFieldZ : WrappedRowZ, field_t {
     TableBaseZ m_table;
     BufferedFieldZ(field_t&& field) : field_t(std::move(field)),
         m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
-        MPI_ASSERT(!FieldBaseZ::m_row, "");
+        MPI_ASSERT(!FieldBaseZ::m_row, "Field must not be already associated with a row");
+        FieldBaseZ::add_to_row(&m_wrapped_row);
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;

@@ -42,6 +42,9 @@ TEST(BufferedTableArray, Resize){
 
 
     buffered::FermionOnv fonv(6);
+    ASSERT_TRUE(fonv.m_row);
+    ASSERT_EQ(fonv.m_table.m_hwm, 1);
+
     bta[0].m_row.restart();
     fonv = {1, 2, 3}; ASSERT_EQ(bta[0].m_row.m_fonv, fonv);
     bta[0].m_row.step();
