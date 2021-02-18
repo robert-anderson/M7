@@ -17,8 +17,8 @@ struct RowZ {
     mutable defs::data_t *m_dbegin = nullptr;
     mutable size_t m_i = 0ul;
     std::vector<FieldBaseZ *> m_fields;
-    size_t m_size;
-    size_t m_dsize;
+    size_t m_size = 0ul;
+    size_t m_dsize = 0ul;
     size_t m_current_offset = 0ul;
     mutable RowZ* m_child = nullptr;
 

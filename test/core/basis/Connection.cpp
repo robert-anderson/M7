@@ -8,12 +8,15 @@
 #include "src/core/fieldz/BufferedFields.h"
 
 TEST(Connection, ParticleNumberConserving){
-    const size_t nsite = 20;
+    const size_t nsite = 70;
     buffered::FermionOnv ket(nsite);
     buffered::FermionOnv bra(nsite);
 
-    defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 20, 38, 39};
-    defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 37, 38};
+    defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 120, 138, 139};
+    defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 137, 138};
+    ASSERT_EQ(ket.m_size, 3*defs::nbyte_data);
+    ASSERT_EQ(ket.m_item_dsize, 3);
+    ASSERT_EQ(ket.m_nbit_in_last_dword, nsite*2 - 2*64);
     ket = ketoccorbs;
     bra = braoccorbs;
 
@@ -26,12 +29,12 @@ TEST(Connection, ParticleNumberConserving){
     ASSERT_EQ(conn.ncre(), 3);
 
     ASSERT_EQ(conn.ann(0), 8);
-    ASSERT_EQ(conn.ann(1), 20);
-    ASSERT_EQ(conn.ann(2), 39);
+    ASSERT_EQ(conn.ann(1), 120);
+    ASSERT_EQ(conn.ann(2), 139);
 
     ASSERT_EQ(conn.cre(0), 5);
     ASSERT_EQ(conn.cre(1), 9);
-    ASSERT_EQ(conn.cre(2), 37);
+    ASSERT_EQ(conn.cre(2), 137);
 
     AntisymFermionOnvConnection aconn(ket, bra);
     ASSERT_EQ(aconn.ncom(), 6);
@@ -40,7 +43,7 @@ TEST(Connection, ParticleNumberConserving){
     ASSERT_EQ(aconn.com(2), 6);
     ASSERT_EQ(aconn.com(3), 11);
     ASSERT_EQ(aconn.com(4), 19);
-    ASSERT_EQ(aconn.com(5), 38);
+    ASSERT_EQ(aconn.com(5), 138);
 
     ASSERT_FALSE(aconn.phase());
 }

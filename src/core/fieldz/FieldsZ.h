@@ -45,9 +45,11 @@ namespace fieldsz {
     using Flags = FlagsFieldZ;
 
     struct BosonOnv : VectorFieldZ<uint8_t> {
-        BosonOnv(RowZ *row, size_t nmode) : VectorFieldZ<uint8_t>(row, nmode) {}
+        BosonOnv(RowZ *row, size_t nmode) : VectorFieldZ<uint8_t>(row, nmode) {
+            ASSERT(m_nelement==nmode);
+        }
 
-        BosonOnv(const BosonOnv &other) : BosonOnv(other.m_row ? other.m_row->m_child : nullptr, m_nelement) {}
+        BosonOnv(const BosonOnv &other) : BosonOnv(other.m_row ? other.m_row->m_child : nullptr, other.m_nelement) {}
 
         BosonOnv &operator=(const defs::inds &inds) {
             MPI_ASSERT(inds.size() == m_nelement, "Vector is not the correct size");

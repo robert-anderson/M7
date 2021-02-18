@@ -18,35 +18,19 @@ struct FieldBaseZ {
     const size_t m_size;
     size_t m_row_offset = ~0ul;
 
-    std::vector<char> m_null_item_string;
+    std::vector<char> m_null_string;
 
     FieldBaseZ(RowZ* row, size_t item_size, size_t nitem, const std::type_info &type_info);
 
     FieldBaseZ(const FieldBaseZ &other);
 
-    FieldBaseZ& operator=(const FieldBaseZ& other){
-        if (&other==this) return *this;
-        MPI_ASSERT(is_comparable(other),
-                   "can't copy from a field which is either incompatible or has a different selection length")
-        std::memcpy(begin(), other.begin(), m_size);
-        return *this;
-    }
+    FieldBaseZ& operator=(const FieldBaseZ& other);
 
-    bool is_comparable(const FieldBaseZ& other) const {
-        return m_item_size==other.m_item_size &&
-               m_type_info==other.m_type_info && m_size==other.m_size;
-    }
+    bool is_comparable(const FieldBaseZ& other) const;
 
-    void add_to_row(RowZ* row) {
-        if (!row) return;
-        MPI_REQUIRE(!is_added_to_row(), "Field must not be already associated with a row");
-        m_row_offset = row->add_field(this);
-        m_row = row;
-    }
+    void add_to_row(RowZ* row);
 
     bool is_added_to_row() const;
-
-    //template<size_t nind, typename ...Args> friend struct NdMultiFieldZ;
 
     char *begin() const;
 
@@ -56,15 +40,13 @@ struct FieldBaseZ {
 
     char *end(const size_t& ielement) const;
 
+    RowZ* row_of_copy() const;
+
     void zero();
 
     bool is_zero() const;
 
-    bool operator==(const FieldBaseZ &other) const {
-        MPI_ASSERT(is_comparable(other),
-                   "can't copy from a field which is either incompatible or has a different selection length")
-        return std::memcmp(begin(), other.begin(), m_size) == 0;
-    }
+    bool operator==(const FieldBaseZ &other) const;
 
     /**
      * Hashes whole field in row, not the currently viewed element

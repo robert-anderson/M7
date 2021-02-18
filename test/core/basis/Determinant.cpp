@@ -44,7 +44,7 @@ TEST(Determinant, Spin) {
     ASSERT_EQ(det.spin(), 0);
     det = {0,1,2,3};
     ASSERT_EQ(det.spin(), 4);
-    det = {4,5,6,7};
+    det = {0,1,4,5};
     ASSERT_EQ(det.spin(), 0);
     det = {4,5,6,7};
     ASSERT_EQ(det.spin(), -4);

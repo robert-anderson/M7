@@ -45,11 +45,10 @@ template<typename multi_field_t>
 struct BufferedMultiFieldz : WrappedRowZ, multi_field_t {
     Buffer m_buffer;
     TableBaseZ m_table;
-    BufferedMultiFieldz(multi_field_t&& multi_field) :
-            multi_field_t(std::move(multi_field)),
-            m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
-        MPI_ASSERT(!multi_field_t::m_row, "MultiField must not be already associated with a row");
-        multi_field_t::add_to_row(&m_wrapped_row);
+    BufferedMultiFieldz(multi_field_t multi_field) :
+            multi_field_t(multi_field),
+            m_buffer("", 1),
+            m_table((multi_field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;
@@ -63,10 +62,9 @@ struct BufferedFieldZ : WrappedRowZ, field_t {
     static_assert(std::is_base_of<FieldBaseZ, field_t>::value, "Template arg must be derived from FieldBase");
     Buffer m_buffer;
     TableBaseZ m_table;
-    BufferedFieldZ(field_t&& field) : field_t(std::move(field)),
-        m_buffer("", 1), m_table(m_wrapped_row.m_dsize) {
-        MPI_ASSERT(!FieldBaseZ::m_row, "Field must not be already associated with a row");
-        FieldBaseZ::add_to_row(&m_wrapped_row);
+    BufferedFieldZ(field_t field) : field_t(field),
+        m_buffer("", 1),
+        m_table((field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table_bw = &m_table.m_bw;
         m_wrapped_row.m_table_hwm = &m_table.m_hwm;

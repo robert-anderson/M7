@@ -20,7 +20,7 @@ struct BitsetFieldBaseZ : FieldBaseZ {
     // total number of data words of type T required to store each item
     const size_t m_item_dsize;
     // number of bits unused in last dataword of an item
-    const size_t m_nbit_spare;
+    const size_t m_nbit_in_last_dword;
 
     using FieldBaseZ::m_item_size;
     using FieldBaseZ::m_size;
@@ -32,38 +32,47 @@ public:
     BitsetFieldBaseZ(RowZ* row, size_t nitem, size_t nbit) :
             FieldBaseZ(row, integer_utils::divceil(nbit, nbit_dword())*sizeof(T), nitem, typeid(T)),
             m_nbit(nbit), m_item_dsize(m_item_size/sizeof(T)),
-            m_nbit_spare(m_item_dsize * nbit_dword() - m_nbit){
+            m_nbit_in_last_dword(m_nbit - (m_item_dsize-1) * nbit_dword()){
     }
 
 protected:
+
+    T* dbegin() const {
+        return (T*)begin();
+    }
+
+    T* dbegin(const size_t& iitem) const {
+        return (T*)begin(iitem);
+    }
+
     bool base_get(const size_t &iitem, const size_t &ibit) const {
         ASSERT(ibit < m_nbit);
-        return bit_utils::get(((const T*)begin(iitem))[iitem * ibit / nbit_dword()], ibit % nbit_dword());
+        return bit_utils::get(dbegin(iitem)[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     bool base_get(const size_t &ibit) const {
         ASSERT(ibit < m_nbit);
-        return bit_utils::get(*(const T*)begin(), ibit % nbit_dword());
+        return bit_utils::get(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void base_set(const size_t &iitem, const size_t &ibit) {
         ASSERT(ibit < m_nbit);
-        bit_utils::set(((T*)begin(iitem))[ibit / nbit_dword()], ibit % nbit_dword());
+        bit_utils::set(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void base_set(const size_t &ibit) {
         ASSERT(ibit < m_nbit);
-        bit_utils::set(*(T*)begin(), ibit % nbit_dword());
+        bit_utils::set(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void base_clr(const size_t &iitem, const size_t &ibit) {
         ASSERT(ibit < m_nbit);
-        bit_utils::clr(((T*)begin(iitem))[ibit / nbit_dword()], ibit % nbit_dword());
+        bit_utils::clr(dbegin(iitem)[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void base_clr(const size_t &ibit) {
         ASSERT(ibit < m_nbit);
-        bit_utils::clr(*(T*)begin(), ibit % nbit_dword());
+        bit_utils::clr(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void base_put(const size_t &iitem, const size_t &ibit, bool v) {
@@ -88,7 +97,8 @@ public:
     T get_dataword(const size_t &idataword) const {
         auto tmp = ((T *) begin())[idataword];
         if ((idataword + 1)%m_item_dsize==0) {
-            tmp = bit_utils::truncate(tmp, m_nbit_spare);
+            MPI_ASSERT(tmp==bit_utils::truncate(tmp, m_nbit_in_last_dword), "trailing bits were not clear: possible corruption");
+            tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
@@ -96,7 +106,7 @@ public:
     T get_antidataword(const size_t &idataword) const {
         auto tmp = ~(((T *) begin())[idataword]);
         if ((idataword + 1)%m_item_dsize==0) {
-            tmp = bit_utils::truncate(tmp, m_nbit_spare);
+            tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
