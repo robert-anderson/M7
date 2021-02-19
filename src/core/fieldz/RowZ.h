@@ -55,7 +55,7 @@ struct RowZ {
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
         m_dbegin = m_table_bw->m_dbegin+m_dsize*i;
         m_i = i;
-        MPI_ASSERT(in_range(), "Row is out of table bounds");
+        //MPI_ASSERT(in_range(), "Row is out of table bounds");
     }
 
     RowZ() {}

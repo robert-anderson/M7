@@ -61,18 +61,21 @@ struct MappedTableZ : TableZ<row_t>, MappedTableBaseZ {
      * won't compile unless the row defines a key_field_t;
      */
     typedef typename KeyField<row_t>::type key_field_t;
+    row_t m_lookup_row;
 
     using TableZ<row_t>::m_row;
 
-    MappedTableZ(const row_t& row, size_t nbucket) : TableZ<row_t>(row), MappedTableBaseZ(nbucket){}
+    MappedTableZ(const row_t& row, size_t nbucket) : TableZ<row_t>(row), MappedTableBaseZ(nbucket), m_lookup_row(m_row){
+        ASSERT(static_cast<const RowZ&>(m_lookup_row).m_table_bw);
+    }
 
     LookupResultZ operator[](const key_field_t& key) {
         m_total_lookups++;
         LookupResultZ res(m_buckets[key.hash() % nbucket()]);
         auto current = res.m_bucket.before_begin();
         for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
-            m_row.jump(*next);
-            if (m_row.key_field() == key) return res;
+            m_lookup_row.jump(*next);
+            if (m_lookup_row.key_field() == key) return res;
             res.m_prev++;
             m_total_skips++;
         }

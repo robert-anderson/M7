@@ -22,6 +22,13 @@ endif ()
 
 target_link_libraries(unittest ${MPI_LIBRARIES})
 
+option(ENABLE_PROFILING "ENABLE_PROFILING" 0)
+if (ENABLE_PROFILING)
+    target_compile_options(unittest PRIVATE -pg)
+    target_link_options(unittest PRIVATE -pg)
+endif()
+
+
 
 if (ENABLE_HDF5)
     add_dependencies(unittest hdf5_local)
@@ -32,8 +39,8 @@ if (ENABLE_HDF5)
     )
 endif ()
 
-target_compile_definitions(unittest PRIVATE DEBUG=1)
-target_compile_options(unittest PRIVATE -O0)
+#target_compile_definitions(unittest PRIVATE DEBUG=1)
+#target_compile_options(unittest PRIVATE -O0)
 
 include_directories($ENV{INCLUDE_PATH})
 SET(CMAKE_CXX_FLAGS "-fopenmp -march=native")

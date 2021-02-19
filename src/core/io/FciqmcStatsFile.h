@@ -19,6 +19,7 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<defs::ham_comp_t> m_l2_norm;
     StatsColumn<size_t> m_ninitiator;
     StatsColumn<size_t> m_nocc_onv;
+    StatsColumn<int> m_delta_nocc_onv;
     StatsColumn<defs::prob_t> m_psingle;
     StatsColumn<double> m_total_synchronization_overhead;
     StatsColumn<double> m_propagate_loop_time;
@@ -38,6 +39,7 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     m_l2_norm(this, "L2 norm of the wavefunction", {}),
     m_ninitiator(this, "Initiator ONVs", {}),
     m_nocc_onv(this, "Occupied ONVs", {}),
+    m_delta_nocc_onv(this, "Change in number of occupied ONVs", {}),
     m_psingle(this, "Probability of attempting to draw a single excitation", {}),
     m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier", {}),
     m_propagate_loop_time(this, "Time spent in loop over occupied ONVs", {}),

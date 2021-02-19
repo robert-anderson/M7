@@ -80,6 +80,8 @@ public:
         for (auto &it: sendcounts) it *= row_dsize();
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
+        log::debug_("Sending {} rows", utils::to_string(hwms));
+
         //std::cout << "Sending datawords " << utils::to_string(sendcounts) << std::endl;
         mpi::all_to_all(sendcounts, recvcounts);
         //std::cout << "Receiving datawords " << utils::to_string(recvcounts) << std::endl;

@@ -20,19 +20,16 @@ void Solver::loop_over_occupied_onvs() {
          * stats always refer to the state of the wavefunction in the previous iteration
          */
 
-        if (row.is_cleared()) {
-            // row is empty
-            continue;
-        }
+        if (row.is_cleared()) continue;
 
         MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
                    "Stored ONV should not be zeroed");
         MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
                    "Stored ONV should be on its allocated rank");
 
-        const auto weight = row.m_weight(m_wf.m_ipart);
+        const auto &weight = row.m_weight(m_wf.m_ipart);
 
-        if (consts::float_nearly_zero(weight, 1e-12)){
+        if (consts::float_is_zero(weight)){
             // ONV has become unoccupied and must be removed from mapped list
             m_wf.remove_walker();
             continue;
@@ -74,12 +71,6 @@ void Solver::annihilate_row() {
 
     auto irow_walkers = *m_wf.m_store[dst_onv];
 
-#ifdef VERBOSE_DEBUGGING
-    std::cout << consts::verb << "bitstring:             " << dst_onv.to_string() << std::endl;
-    std::cout << consts::verb << "delta weight:          " << delta_weight << std::endl;
-    std::cout << consts::verb << "found in walker list:  " << string_utils::yn(irow_walkers!=~0ul) << std::endl;
-#endif
-
     if (irow_walkers == ~0ul) {
         /*
          * the destination determinant is not currently occupied, so initiator rules
@@ -87,10 +78,6 @@ void Solver::annihilate_row() {
          */
         if (!row.m_src_initiator) {
             //m_aborted_weight += std::abs(*delta_weight);
-#ifdef VERBOSE_DEBUGGING
-            std::cout << consts::verb << consts::chevs <<
-                "ABORTED SPAWN TO UNOCCUPIED DETERMINANT: PARENT NON-INITIATOR" << std::endl;
-#endif
             return;
         }
 
@@ -103,26 +90,6 @@ void Solver::annihilate_row() {
         m_wf.m_store.m_row.jump(irow_walkers);
         m_wf.change_weight(delta_weight);
     }
-
-//#ifdef VERBOSE_DEBUGGING
-//    std::cout << consts::verb << "row in walker list:    " << irow_main << std::endl;
-//#endif
-//    /*
-//     * if we have stochastically generated a connection between determinants in a deterministic
-//     * subspace, so we must reject this connection.
-//     */
-//    if (recv.m_flags.m_src_deterministic(irow_recv) && m_wf.m_walkers.m_flags.m_deterministic(irow_walkers)) {
-//#ifdef VERBOSE_DEBUGGING
-//        std::cout << consts::verb << consts::chevs <<
-//                  "ABORTED SPAWN: STOCHASTICALLY GENERATED A DETERMINISTIC CONNECTION" << std::endl;
-//#endif
-//        return;
-//    }
-//    auto weight = m_wf.m_walkers.m_weight(irow_walkers, 0, 0);
-//    //m_square_norm.m_delta += std::pow(std::abs(*weight + *delta_weight), 2) - std::pow(std::abs(*weight), 2);
-//    //m_nwalker.m_delta -= std::abs(*weight);
-//    weight += delta_weight;
-//    //m_nwalker.m_delta += std::abs(*weight);
 }
 
 void Solver::loop_over_spawned() {
@@ -179,68 +146,19 @@ void Solver::propagate_row() {
 
     if (row.is_cleared()) return;
 
-    //const auto onv = m_wf.m_walkers.m_onv(irow);
-    const auto weight = row.m_weight(ipart);
-    if (consts::float_is_zero(weight)) return;
+    if (consts::float_is_zero(row.m_weight(ipart))) return;
 
-//    bool is_initiator = m_wf.m_walkers.m_flags.m_initiator(irow, 0, 0);
-    bool is_deterministic = row.m_deterministic.get(ipart);
-//    bool is_ref_connection = m_wf.m_walkers.m_flags.m_reference_connection(irow);
-
-//    if (consts::float_is_zero(weight) && !is_deterministic) {
-//#ifdef VERBOSE_DEBUGGING
-//        std::cout << consts::verb << consts::chevs << "ZERO WEIGHT: REMOVING FROM LIST" << std::endl;
-//                std::cout << consts::verb << "is initiator:     " << flag_initiator << std::endl;
-//                std::cout << consts::verb << "weight:           " << *weight << std::endl;
-//#endif
-//        if (is_initiator) {
-//#ifdef VERBOSE_DEBUGGING
-//            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: DETERMINANT REMOVED" << std::endl;
-//#endif
-//            //m_ninitiator.m_delta--;
-//        }
-//        //m_nocc_det.m_delta--;
-//        //m_data.remove(irow);
-//        return;
-//    }
-//
-//
-//    if (!is_initiator && std::abs(weight) >= m_opts.nadd_initiator) {
-//#ifdef VERBOSE_DEBUGGING
-//        std::cout << consts::verb << consts::chevs << "INITIATOR STATUS GRANTED" << std::endl;
-//#endif
-//        is_initiator = true;
-//        //m_ninitiator.m_delta++;
-//    }
-//    /*
-//    else if (flag_initiator && std::abs(*weight) < m_input.nadd_initiator) {
-//#ifdef VERBOSE_DEBUGGING
-//            std::cout << consts::verb << consts::chevs << "INITIATOR STATUS REVOKED: WEIGHT FELL BELOW THRESHOLD MAGNITUDE" << std::endl;
-//#endif
-//        // initiator status revoked
-//        // flag_initiator = false;
-//        // delta_ninitiator--;
-//    }
-//     */
-
+    //bool is_deterministic = row.m_deterministic.get(ipart);
 
     m_prop.off_diagonal(m_wf);
     m_prop.diagonal(m_wf);
-
-    if (!is_deterministic && consts::float_is_zero(weight)) {
-#ifdef VERBOSE_DEBUGGING
-        std::cout << consts::verb << consts::chevs << "ALL WALKERS DIED: REMOVING DETERMINANT FROM LIST" << std::endl;
-#endif
-//                if (flag_initiator) m_ninitiator.m_delta--;
-//                m_nocc_det.m_delta--;
-//                m_data.remove(irow);
-    }
 }
 
 void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.begin_cycle();
+    ASSERT(m_wf.m_nwalker(0,0)==0);
     if (m_prop.m_variable_shift.started_last_cycle(m_icycle))
         m_wf.m_ra.activate(m_icycle);
     m_wf.m_ra.update(m_icycle);
@@ -249,16 +167,16 @@ void Solver::begin_cycle() {
 }
 
 void Solver::end_cycle() {
-    //double chk_ratio;
+    double chk_ratio;
     if (!consts::float_is_zero(m_wf.m_nwalker(0, 0))) {
-        //chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
-        //if (m_chk_nwalker_local > 0.0 && !consts::floats_nearly_equal(chk_ratio, 1.0))
-        //    throw std::runtime_error("Unlogged walker population changes have occurred");
+        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
+        bool chk = m_chk_nwalker_local == 0.0 || consts::floats_nearly_equal(chk_ratio, 1.0);
+        if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
+        MPI_REQUIRE(chk,"Unlogged walker population changes have occurred");
     }
 
-    if (m_chk_ninitiator_local != m_wf.m_ninitiator(0, 0)) {
-        //throw std::runtime_error("Unlogged creations of initiator ONVs have occurred");
-    }
+    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
+                "Unlogged creations of initiator ONVs have occurred");
 
     m_wf.end_cycle();
     m_reference.end_cycle();
@@ -280,6 +198,7 @@ void Solver::output_stats() {
         m_stats->m_l2_norm() = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
         m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);
         m_stats->m_nocc_onv() = m_wf.m_nocc_onv.reduced(0, 0);
+        m_stats->m_delta_nocc_onv() = m_wf.m_delta_nocc_onv.reduced(0, 0);
         m_stats->m_psingle() = m_prop.m_magnitude_logger.m_psingle;
         m_stats->m_total_synchronization_overhead() = sync_overhead;
         m_stats->m_propagate_loop_time() = m_propagate_timer;

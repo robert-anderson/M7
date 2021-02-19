@@ -28,6 +28,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     ReductionMember<size_t, defs::ndim_wf> m_ninitiator;
     ReductionMember<int, defs::ndim_wf> m_delta_ninitiator;
     ReductionMember<size_t, defs::ndim_wf> m_nocc_onv;
+    ReductionMember<int, defs::ndim_wf> m_delta_nocc_onv;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
@@ -48,6 +49,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             m_ninitiator(m_summables, m_format),
             m_delta_ninitiator(m_summables, m_format),
             m_nocc_onv(m_summables, m_format),
+            m_delta_nocc_onv(m_summables, m_format),
             m_nwalker(m_summables, m_format),
             m_delta_nwalker(m_summables, m_format),
             m_l2_norm_square(m_summables, m_format),
@@ -81,10 +83,21 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     defs::wf_comp_t square_norm() const {
         defs::wf_comp_t res = 0.0;
         auto& row = m_store.m_row;
-        const defs::wf_t& weight = row.m_weight(m_ipart);
         for (row.restart(); row.in_range(); row.step()) {
+            const defs::wf_t& weight = row.m_weight(m_ipart);
             res += std::pow(weight, 2.0);
         }
+        return mpi::all_sum(res);
+    }
+
+    defs::wf_comp_t l1_norm() const {
+        defs::wf_comp_t res = 0.0;
+        auto& row = m_store.m_row;
+        for (row.restart(); row.in_range(); row.step()) {
+            const defs::wf_t& weight = row.m_weight(m_ipart);
+            res += std::abs(weight);
+        }
+        return res;
         return mpi::all_sum(res);
     }
 
@@ -132,8 +145,10 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void remove_walker() {
         if (m_ra.row_mapped_by_dependent(m_store.m_row.m_i)) return;
         auto lookup = m_store[m_store.m_row.m_onv];
+        ASSERT(lookup);
         zero_weight();
         m_store.erase(lookup);
+        m_delta_nocc_onv(0, 0)--;
     }
 
     size_t create_walker_(const fieldsz::Onv<> &onv, const defs::ham_t weight,
@@ -141,6 +156,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1);
         auto irow = m_store.insert(onv);
+        m_delta_nocc_onv(0, 0)++;
         m_store.m_row.jump(irow);
         ASSERT(m_store.m_row.m_onv == onv)
         set_weight(weight);

@@ -95,6 +95,7 @@ TEST(ExactPropagator, Cr2Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.01;
     opts.nwalker_target = 10000;
+    opts.ncycle = 50;
     //const auto benchmark = -108.81138657563143;
     FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -109,8 +110,14 @@ TEST(ExactPropagator, Cr2Test) {
     auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
+
+    std::cout <<
+        wf.m_store.nbucket()
+    << std::endl;
+
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
         solver.execute();
+        std::cout << wf.m_store.m_hwm << " " << wf.m_store.m_nrow << std::endl;
     }
 }
 #endif

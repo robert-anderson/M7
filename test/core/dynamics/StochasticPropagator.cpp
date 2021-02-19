@@ -11,17 +11,18 @@
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
-    opts.nwalker_initial = 10;
+    opts.nwalker_initial = 10.0;
     opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.05;
+    opts.tau_initial = 0.01;
     opts.load_balance_period = 5;
     opts.nload_balance_block_per_rank = 40;
     opts.nwalker_target = 1000000;
     opts.shift_damp = 0.5;
-    opts.ncycle = 10000;
+    opts.shift_initial = 0.0;
+    opts.ncycle = 500000;
     opts.init();
 //const auto benchmark = -108.81138657563143;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
@@ -39,15 +40,13 @@ TEST(StochasticPropagator, Test) {
     //ASSERT_EQ(wf.m_comm.send().nrow_per_table(), send_nrow);
 
     auto ref_energy = ham.get_energy(ref_onv);
-    prop.m_shift = ref_energy;//benchmark;
 
     auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
-    prop.m_shift = ref_energy;
+    prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
-    for (size_t i = 0ul; i < opts.ncycle; ++i) {
-        solver.execute();
-    }
+    solver.execute(opts.ncycle);
 }
+
 
 #else
 
