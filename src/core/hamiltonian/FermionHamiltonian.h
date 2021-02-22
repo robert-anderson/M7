@@ -12,7 +12,7 @@
 #include <src/core/io/Options.h>
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
-#include "src/core/field/BufferedFields.h"
+#include "src/core/table/BufferedFields.h"
 
 
 class FermionHamiltonian {

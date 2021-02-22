@@ -6,7 +6,7 @@
 #define M7_RANKALLOCATOR_H
 
 #include "src/core/field/FieldBase.h"
-#include "src/core/field/MappedTable.h"
+#include "src/core/table/MappedTable.h"
 #include "src/core/parallel/Gatherable.h"
 #include "src/core/io/Logging.h"
 #include "MPIWrapper.h"

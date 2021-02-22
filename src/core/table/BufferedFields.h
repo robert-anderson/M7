@@ -5,9 +5,9 @@
 #ifndef M7_BUFFEREDFIELDS_H
 #define M7_BUFFEREDFIELDS_H
 
-#include "MultiField.h"
+#include "src/core/field/MultiField.h"
 #include "BufferedTable.h"
-#include "Fields.h"
+#include "src/core/field/Fields.h"
 
 
 //template<typename row_t>

@@ -4,9 +4,9 @@
 
 #include <src/core/field/Row.h>
 #include <src/core/field/Fields.h>
-#include <src/core/field/BufferedFields.h>
+#include <src/core/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/field/BufferedTableArray.h"
+#include "src/core/table/BufferedTableArray.h"
 
 TEST(BufferedTableArray, Resize){
     struct TestRow : Row {

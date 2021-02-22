@@ -8,7 +8,7 @@
 #include <stack>
 #include "src/core/table/Buffer.h"
 #include "src/core/io/Logging.h"
-#include "Row.h"
+#include "src/core/field/Row.h"
 
 struct RowTransfer {
     // make rows to be sent contiguous in memory

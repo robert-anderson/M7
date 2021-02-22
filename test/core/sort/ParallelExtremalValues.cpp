@@ -3,7 +3,7 @@
 //
 
 #include <src/core/field/Fields.h>
-#include <src/core/field/BufferedTable.h>
+#include <src/core/table/BufferedTable.h>
 #include "gtest/gtest.h"
 #include "src/core/sort/ParallelExtremalValues.h"
 #include "src/core/sample/PRNG.h"

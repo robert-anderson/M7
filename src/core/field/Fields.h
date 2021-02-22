@@ -27,7 +27,7 @@
  * FermiBosOnvs  | many      many
  */
 
-namespace field {
+namespace fields {
 
     template<typename T>
     using Number = NumberField<T>;

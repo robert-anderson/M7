@@ -25,7 +25,7 @@
 #ifndef M7_FERMIBOSHAMILTONIAN_H
 #define M7_FERMIBOSHAMILTONIAN_H
 
-#include <src/core/field/BufferedFields.h>
+#include <src/core/table/BufferedFields.h>
 #include "FermionHamiltonian.h"
 #include "BosonCouplings.h"
 

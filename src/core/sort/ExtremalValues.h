@@ -8,7 +8,7 @@
 
 #include "src/defs.h"
 #include <functional>
-#include "src/core/field/Table.h"
+#include "src/core/table/Table.h"
 
 class ExtremalValues {
     /*

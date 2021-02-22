@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#include <src/core/field/BufferedFields.h>
+#include <src/core/table/BufferedFields.h>
 #include "src/core/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
 

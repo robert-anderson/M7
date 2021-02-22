@@ -5,8 +5,8 @@
 #ifndef M7_COMMUNICATOR_H
 #define M7_COMMUNICATOR_H
 
-#include "src/core/field/BufferedTable.h"
-#include "src/core/field/BufferedTableArray.h"
+#include "BufferedTable.h"
+#include "BufferedTableArray.h"
 #include "src/core/parallel/MPIWrapper.h"
 #include "src/core/io/Logging.h"
 #include <set>

@@ -2,12 +2,12 @@
 // Created by rja on 09/02/2021.
 //
 
-#include <src/core/field/MappedTable.h>
-#include <src/core/field/BufferedTable.h>
+#include <src/core/table/MappedTable.h>
+#include <src/core/table/BufferedTable.h>
 #include "gtest/gtest.h"
 #include "src/core/field/Fields.h"
-#include "src/core/field/Table.h"
-#include "src/core/field/BufferedFields.h"
+#include "src/core/table/Table.h"
+#include "src/core/table/BufferedFields.h"
 
 TEST(FieldZ, Copying) {
     struct TestRow : Row {

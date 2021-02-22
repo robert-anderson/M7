@@ -6,7 +6,7 @@
 #define M7_PARALLELEXTREMALVALUES_H
 
 #include "TableExtremalValues.h"
-#include "src/core/field/BufferedTableArray.h"
+#include "src/core/table/BufferedTableArray.h"
 
 /**
  * Finds the extremal values over all processes, using distributed instances

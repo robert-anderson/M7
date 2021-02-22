@@ -7,7 +7,7 @@
 
 #include "src/core/io/Options.h"
 #include "src/core/field/Row.h"
-#include "src/core/field/MappedTable.h"
+#include "src/core/table/MappedTable.h"
 #include "src/core/field/Fields.h"
 
 
