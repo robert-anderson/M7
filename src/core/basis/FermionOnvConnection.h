@@ -6,7 +6,7 @@
 #define M7_FERMIONONVCONNECTION_H
 
 #include <algorithm>
-#include <src/core/fieldz/FieldsZ.h>
+#include <src/core/fieldz/Fields.h>
 
 /*
  * <out| ...cre... ...ann... |in>
@@ -34,8 +34,8 @@ protected:
 
 public:
     explicit FermionOnvConnection(size_t nsite);
-    FermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
-    explicit FermionOnvConnection(const fieldsz::Onv<0> &in);
+    FermionOnvConnection(const fields::Onv<0> &in, const fields::Onv<0> &out);
+    explicit FermionOnvConnection(const fields::Onv<0> &in);
     virtual operator bool() const {
         return nexcit();
     }
@@ -48,8 +48,8 @@ public:
     const size_t& cre(const size_t& i) const {return m_cre[i];}
     size_t ncre() const {return m_cre.size();}
 
-    void connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
-    void apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out);
+    void connect(const fields::Onv<0> &in, const fields::Onv<0> &out);
+    void apply(const fields::Onv<0> &in, fields::Onv<0> &out);
     void zero(){
         m_cre.clear();
         m_ann.clear();
@@ -99,12 +99,12 @@ class AntisymFermionOnvConnection : public FermionOnvConnection {
 
 public:
     explicit AntisymFermionOnvConnection(size_t nsite);
-    AntisymFermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
-    explicit AntisymFermionOnvConnection(const fieldsz::Onv<0> &in);
+    AntisymFermionOnvConnection(const fields::Onv<0> &in, const fields::Onv<0> &out);
+    explicit AntisymFermionOnvConnection(const fields::Onv<0> &in);
 
-    void connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out);
-    void apply(const fieldsz::Onv<0> &in);
-    void apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out);
+    void connect(const fields::Onv<0> &in, const fields::Onv<0> &out);
+    void apply(const fields::Onv<0> &in);
+    void apply(const fields::Onv<0> &in, fields::Onv<0> &out);
 
     void zero();
     const defs::inds & com() const {return m_com;}
@@ -117,7 +117,7 @@ template<typename T>
 struct MatrixElement {
     AntisymFermionOnvConnection aconn;
     T element = 0;
-    MatrixElement(const fieldsz::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
+    MatrixElement(const fields::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
 };
 
 #endif //M7_FERMIONONVCONNECTION_H

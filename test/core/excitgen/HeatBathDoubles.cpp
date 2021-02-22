@@ -5,15 +5,15 @@
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/excitgen/HeatBathDoubles.h"
-#include "src/core/fieldz/FieldsZ.h"
+#include "src/core/fieldz/Fields.h"
 
 #if 0
 namespace heat_bath_doubles_test {
     struct TestTable : Table {
         size_t m_nattempt;
-        fieldsz::Onv<0> m_onv;
-        fieldsz::Vector<size_t> m_frequency;
-        fieldsz::Vector<size_t> m_weight;
+        fields::Onv<0> m_onv;
+        fields::Vector<size_t> m_frequency;
+        fields::Vector<size_t> m_weight;
 
         TestTable(size_t nsite, size_t nattempt) :
                 m_nattempt(nattempt),

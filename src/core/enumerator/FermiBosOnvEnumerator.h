@@ -7,10 +7,10 @@
 
 #include "FermionOnvEnumerator.h"
 #include "BosonOnvEnumerator.h"
-#include "src/core/fieldz/FieldsZ.h"
+#include "src/core/fieldz/Fields.h"
 #include "src/core/fieldz/BufferedFields.h"
 
-class FermiBosOnvEnumerator : public Enumerator<fieldsz::Onv<1>> {
+class FermiBosOnvEnumerator : public Enumerator<fields::Onv<1>> {
     FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
     buffered::FermionOnv m_fonv;
@@ -25,7 +25,7 @@ public:
         m_det_enum.next_element(m_fonv);
     }
 
-    bool next_element(fieldsz::Onv<1> &result) override {
+    bool next_element(fields::Onv<1> &result) override {
         bool inner_allfound = !m_bonv_enum.next(m_bonv);
         if (inner_allfound) {
             m_bonv_enum.next(m_bonv);

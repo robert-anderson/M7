@@ -48,7 +48,7 @@ class Solver {
 
 public:
 
-    Solver(Propagator &prop, Wavefunction &wf, TableBaseZ::Loc ref_loc);
+    Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
 
     void execute(size_t niter=1);
 

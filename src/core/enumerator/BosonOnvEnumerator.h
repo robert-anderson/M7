@@ -6,14 +6,14 @@
 #define M7_BOSONONVENUMERATOR_H
 
 #include "ProductEnumerator.h"
-#include "src/core/fieldz/FieldsZ.h"
+#include "src/core/fieldz/Fields.h"
 
-class BosonOnvEnumerator : public Enumerator<fieldsz::BosonOnv> {
+class BosonOnvEnumerator : public Enumerator<fields::BosonOnv> {
     ProductEnumerator m_prod;
     defs::inds m_setoccs;
 public:
     BosonOnvEnumerator(size_t nmode, size_t occ_cutoff);
-    bool next_element(fieldsz::BosonOnv& result) override;
+    bool next_element(fields::BosonOnv& result) override;
 };
 
 #endif //M7_BOSONONVENUMERATOR_H

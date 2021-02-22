@@ -7,22 +7,22 @@
 AntisymFermiBosConnection::AntisymFermiBosConnection(size_t nsite) :
         AntisymFermionOnvConnection(nsite), m_bonvconn(nsite) {}
 
-AntisymFermiBosConnection::AntisymFermiBosConnection(const fieldsz::Onv<1> &in, const fieldsz::Onv<1> &out) :
+AntisymFermiBosConnection::AntisymFermiBosConnection(const fields::Onv<1> &in, const fields::Onv<1> &out) :
         AntisymFermionOnvConnection(in.m_fonv, out.m_fonv),
         m_bonvconn(in.m_bonv, out.m_bonv) {}
 
-AntisymFermiBosConnection::AntisymFermiBosConnection(const fieldsz::Onv<1> &in) : AntisymFermiBosConnection(in, in) {}
+AntisymFermiBosConnection::AntisymFermiBosConnection(const fields::Onv<1> &in) : AntisymFermiBosConnection(in, in) {}
 
 AntisymFermiBosConnection::operator bool() const {
     return nexcit() || m_bonvconn;
 }
 
-void AntisymFermiBosConnection::connect(const fieldsz::Onv<1> &in, const fieldsz::Onv<1> &out) {
+void AntisymFermiBosConnection::connect(const fields::Onv<1> &in, const fields::Onv<1> &out) {
     AntisymFermionOnvConnection::connect(in.m_fonv, out.m_fonv);
     m_bonvconn.connect(in.m_bonv, out.m_bonv);
 }
 
-void AntisymFermiBosConnection::apply(const fieldsz::Onv<1> &in, fieldsz::Onv<1> &out) {
+void AntisymFermiBosConnection::apply(const fields::Onv<1> &in, fields::Onv<1> &out) {
     AntisymFermionOnvConnection::apply(in.m_fonv, out.m_fonv);
     m_bonvconn.apply(in.m_bonv, out.m_bonv);
 }

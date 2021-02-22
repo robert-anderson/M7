@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-08-02.
 //
 
-#include <src/core/fieldz/FieldsZ.h>
-#include <src/core/fieldz/BufferedTableZ.h>
+#include <src/core/fieldz/Fields.h>
+#include <src/core/fieldz/BufferedTable.h>
 #include "gtest/gtest.h"
 #include "src/core/sort/ParallelExtremalValues.h"
 #include "src/core/sample/PRNG.h"
@@ -11,12 +11,12 @@
 
 TEST(ParallelExtremalValues, Test) {
 
-    typedef fieldsz::Number<double> field_t;
-    struct TestRow: RowZ {
+    typedef fields::Number<double> field_t;
+    struct TestRow: Row {
         field_t m_field;
         TestRow() : m_field(this){}
     };
-    BufferedTableZ<TestRow> m_table("Test", {});
+    BufferedTable<TestRow> m_table("Test", {});
     PRNG prng(14, 1000);
 
     const size_t nrow_per_rank = 100;

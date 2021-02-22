@@ -13,7 +13,7 @@
 
 class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
     const FermionHamiltonian &m_h;
-    const fieldsz::Onv<0> &m_fonv;
+    const fields::Onv<0> &m_fonv;
     OccupiedOrbitals m_occs;
     VacantOrbitals m_vacs;
 
@@ -51,7 +51,7 @@ class HamiltonianSingleConnectionEnumerator : public Enumerator<MatrixElement<de
 
 public:
 
-    HamiltonianSingleConnectionEnumerator(const FermionHamiltonian &h, const fieldsz::Onv<0> &onv, const defs::ham_comp_t &eps=1e-12) :
+    HamiltonianSingleConnectionEnumerator(const FermionHamiltonian &h, const fields::Onv<0> &onv, const defs::ham_comp_t &eps=1e-12) :
             m_h(h), m_fonv(onv), m_occs(onv), m_vacs(onv), m_eps(eps){
         m_occind++;
     }
@@ -59,7 +59,7 @@ public:
 
 class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<defs::ham_t>> {
     const FermionHamiltonian &m_h;
-    const fieldsz::Onv<0> &m_fonv;
+    const fields::Onv<0> &m_fonv;
     OccupiedOrbitals m_occs;
     VacantOrbitals m_vacs;
 
@@ -98,7 +98,7 @@ class HamiltonianDoubleConnectionEnumerator : public Enumerator<MatrixElement<de
 
 public:
 
-    HamiltonianDoubleConnectionEnumerator(const FermionHamiltonian &h, const fieldsz::Onv<0> &onv, const defs::ham_comp_t &eps=1e-12) :
+    HamiltonianDoubleConnectionEnumerator(const FermionHamiltonian &h, const fields::Onv<0> &onv, const defs::ham_comp_t &eps=1e-12) :
             m_h(h), m_fonv(onv), m_occs(onv), m_vacs(onv),
             m_occ_enumerator(m_occs.size(), 2),
             m_vac_enumerator(m_occs.size(), 2),

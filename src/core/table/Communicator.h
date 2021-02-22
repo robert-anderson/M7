@@ -5,8 +5,8 @@
 #ifndef M7_COMMUNICATOR_H
 #define M7_COMMUNICATOR_H
 
-#include "src/core/fieldz/BufferedTableZ.h"
-#include "src/core/fieldz/BufferedTableArrayZ.h"
+#include "src/core/fieldz/BufferedTable.h"
+#include "src/core/fieldz/BufferedTableArray.h"
 #include "src/core/parallel/MPIWrapper.h"
 #include "src/core/io/Logging.h"
 #include <set>
@@ -16,8 +16,8 @@
 template<typename row_t>
 class CommunicatingPair {
 
-    BufferedTableArrayZ<row_t> m_send;
-    BufferedTableZ<row_t> m_recv;
+    BufferedTableArray<row_t> m_send;
+    BufferedTable<row_t> m_recv;
     double m_buffer_expansion_factor;
 
 public:
@@ -31,30 +31,30 @@ public:
     }
 
     size_t row_dsize() const {
-        return static_cast<const TableBaseZ &>(m_recv).m_row_dsize;
+        return static_cast<const TableBase &>(m_recv).m_row_dsize;
     }
 
-    BufferedTableArrayZ<row_t> &send() {
+    BufferedTableArray<row_t> &send() {
         return m_send;
     }
 
-    const BufferedTableArrayZ<row_t> &send() const {
+    const BufferedTableArray<row_t> &send() const {
         return m_send;
     }
 
-    TableZ<row_t> &send(const size_t &i) {
+    Table<row_t> &send(const size_t &i) {
         return m_send[i];
     }
 
-    const TableZ<row_t> &send(const size_t &i) const {
+    const Table<row_t> &send(const size_t &i) const {
         return m_send[i];
     }
 
-    TableZ<row_t> &recv() {
+    Table<row_t> &recv() {
         return m_recv;
     }
 
-    const TableZ<row_t> &recv() const {
+    const Table<row_t> &recv() const {
         return m_recv;
     }
 
@@ -101,7 +101,7 @@ public:
         auto recv_dsize = recvdispls.back() + recvcounts.back();
         auto recv_nrow = recv_dsize / row_dsize();
 
-        if (recv_dsize > static_cast<const TableBaseZ &>(recv()).bw_dsize()) {
+        if (recv_dsize > static_cast<const TableBase &>(recv()).bw_dsize()) {
             /*
              * the recv table is full
              * this expansion by a factor is done explicitly here, because we
@@ -138,8 +138,8 @@ public:
 
 template<typename store_row_t, typename comm_row_t>
 struct Communicator {
-    static_assert(std::is_base_of<RowZ, store_row_t>::value, "Template arg must be derived from Row");
-    static_assert(std::is_base_of<RowZ, comm_row_t>::value, "Template arg must be derived from Row");
+    static_assert(std::is_base_of<Row, store_row_t>::value, "Template arg must be derived from Row");
+    static_assert(std::is_base_of<Row, comm_row_t>::value, "Template arg must be derived from Row");
 
     typedef typename KeyField<store_row_t>::type key_field_t;
     BufferedMappedTableZ<store_row_t> m_store;
@@ -154,19 +154,19 @@ struct Communicator {
         /*
          * the mapped table which stores the definitive row values
          */
-        const MappedTableZ<store_row_t> &m_source;
+        const MappedTable<store_row_t> &m_source;
         /*
          * the unmapped table which loads copies of rows between m_source (arbitrary order, non-
          * contiguous) and m_all (contiguous). lc = "local, contiguous"
          */
-        BufferedTableZ<store_row_t> m_lc;
+        BufferedTable<store_row_t> m_lc;
         /*
          * the unmapped table which holds copies of all mapped rows. these copies are refreshed
          * with a call to refresh method. This table is intended for reading rows from all MPI ranks,
          * as such there is no machanism for committing changes to m_source from m_all. It is
          * to be treated as a read-only copy. ac = "all, contiguous"
          */
-        BufferedTableZ<store_row_t> m_ac;
+        BufferedTable<store_row_t> m_ac;
         /*
          * set of dynamic row indices stored on this rank
          */
@@ -249,7 +249,7 @@ struct Communicator {
             auto nrow = m_displs.back() + m_counts.back();
             m_lc.push_back(m_counts[mpi::irank()]);
             for (auto &irow : m_irows) {
-                static_cast<TableBaseZ &>(m_lc).copy_row_in(m_source, irow, irow_local++);
+                static_cast<TableBase &>(m_lc).copy_row_in(m_source, irow, irow_local++);
             }
             ASSERT(irow_local==m_counts[mpi::irank()]);
 
@@ -360,11 +360,11 @@ struct Communicator {
         using DynamicRowSet::update;
         using DynamicRowSet::m_name;
         using DynamicRowSet::m_ranks_with_any_rows;
-        using RowZ::jump;
+        using Row::jump;
 
         size_t m_iblock;
 
-        DynamicRow(const Communicator &comm, TableBaseZ::Loc loc, std::string name) :
+        DynamicRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
                 DynamicRowSet(comm, name), store_row_t(m_ac.m_row) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
@@ -395,7 +395,7 @@ struct Communicator {
                           m_name, irank_initial, irank_final);
         }
 
-        void change(TableBaseZ::Loc loc) {
+        void change(TableBase::Loc loc) {
             m_irows.clear();
             if (loc.is_mine()) {
                 //ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow)) == mpi::irank());
@@ -427,27 +427,27 @@ struct Communicator {
         return m_ra.get_rank(key);
     }
 
-    BufferedTableArrayZ<comm_row_t> &send() {
+    BufferedTableArray<comm_row_t> &send() {
         return m_comm.send();
     }
 
-    const BufferedTableArrayZ<comm_row_t> &send() const {
+    const BufferedTableArray<comm_row_t> &send() const {
         return m_comm.send();
     }
 
-    TableZ<comm_row_t> &send(const size_t &i) {
+    Table<comm_row_t> &send(const size_t &i) {
         return m_comm.send(i);
     }
 
-    const TableZ<comm_row_t> &send(const size_t &i) const {
+    const Table<comm_row_t> &send(const size_t &i) const {
         return m_comm.send(i);
     }
 
-    TableZ<comm_row_t> &recv() {
+    Table<comm_row_t> &recv() {
         return m_comm.recv();
     }
 
-    const TableZ<comm_row_t> &recv() const {
+    const Table<comm_row_t> &recv() const {
         return m_comm.recv();
     }
 

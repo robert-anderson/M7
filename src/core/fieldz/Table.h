@@ -2,21 +2,21 @@
 // Created by rja on 09/02/2021.
 //
 
-#ifndef M7_TABLEZ_H
-#define M7_TABLEZ_H
+#ifndef M7_TABLE_H
+#define M7_TABLE_H
 
 #include <stack>
 #include "src/core/table/Buffer.h"
 #include "src/core/io/Logging.h"
-#include "RowZ.h"
+#include "Row.h"
 
-struct RowTransferZ {
+struct RowTransfer {
     // make rows to be sent contiguous in memory
     Buffer m_send_buffer, m_recv_buffer;
     Buffer::Window m_send_bw, m_recv_bw;
     const int m_nrow_p2p_tag = mpi::new_p2p_tag();
     const int m_irows_p2p_tag = mpi::new_p2p_tag();
-    RowTransferZ(std::string name):
+    RowTransfer(std::string name):
             m_send_buffer("Outward transfer buffer", 1),
             m_recv_buffer("Inward transfer buffer", 1) {
         log::info("Initializing row send/recv buffers for table \"{}\"", name);
@@ -27,7 +27,7 @@ struct RowTransferZ {
     }
 };
 
-struct TableBaseZ {
+struct TableBase {
     const size_t m_row_dsize;
     const size_t m_row_size;
     Buffer::Window m_bw;
@@ -42,11 +42,11 @@ struct TableBaseZ {
      */
     std::stack<size_t> m_free_rows;
     // instantiate on first transfer if required
-    std::unique_ptr<RowTransferZ> m_transfer = nullptr;
+    std::unique_ptr<RowTransfer> m_transfer = nullptr;
 
-    TableBaseZ(size_t row_dsize);
+    TableBase(size_t row_dsize);
 
-    TableBaseZ(const TableBaseZ &other);
+    TableBase(const TableBase &other);
 
     defs::data_t *dbegin() {
         return m_bw.m_dbegin;
@@ -100,7 +100,7 @@ struct TableBaseZ {
     void transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv,
                        const std::list<recv_cb_t> &callbacks = {});
 
-    void copy_row_in(const TableBaseZ &src, size_t irow_src, size_t irow_dst);
+    void copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst);
 
     struct Loc {
         const size_t m_irank, m_irow;
@@ -118,14 +118,14 @@ struct TableBaseZ {
 };
 
 template<typename row_t>
-struct TableZ : TableBaseZ {
-    static_assert(std::is_base_of<RowZ, row_t>::value, "Template arg must be derived from Row");
+struct Table : TableBase {
+    static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     row_t m_row;
 
-    TableZ(const row_t& row) :
-            TableBaseZ(static_cast<const RowZ &>(row).m_dsize), m_row(row) {
-        static_cast<RowZ &>(m_row).m_table_bw = &m_bw;
-        static_cast<RowZ &>(m_row).m_table_hwm = &m_hwm;
+    Table(const row_t& row) :
+            TableBase(static_cast<const Row &>(row).m_dsize), m_row(row) {
+        static_cast<Row &>(m_row).m_table_bw = &m_bw;
+        static_cast<Row &>(m_row).m_table_hwm = &m_hwm;
     }
 
     std::string to_string(const defs::inds *ordering= nullptr) const {
@@ -149,10 +149,10 @@ struct TableZ : TableBaseZ {
     */
 
 private:
-    RowZ & base_row() {
-        return static_cast<RowZ &>(m_row);
+    Row & base_row() {
+        return static_cast<Row &>(m_row);
     }
 };
 
 
-#endif //M7_TABLEZ_H
+#endif //M7_TABLE_H

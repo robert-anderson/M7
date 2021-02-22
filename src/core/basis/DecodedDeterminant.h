@@ -5,7 +5,7 @@
 #ifndef M7_DECODEDDETERMINANT_H
 #define M7_DECODEDDETERMINANT_H
 
-#include "src/core/fieldz/FieldsZ.h"
+#include "src/core/fieldz/Fields.h"
 
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)
@@ -21,12 +21,12 @@ public:
         m_inds.reserve(2*nsite);
     }
 
-    explicit DecodedDeterminant(const fieldsz::Onv<0> &onv) :
+    explicit DecodedDeterminant(const fields::Onv<0> &onv) :
             DecodedDeterminant(onv.m_nsite) {
         update(onv);
     }
 
-    explicit DecodedDeterminant(const fieldsz::Onv<1> &onv) :
+    explicit DecodedDeterminant(const fields::Onv<1> &onv) :
             DecodedDeterminant(onv.m_fonv.m_nsite) {}
 
     size_t size() const {
@@ -42,23 +42,23 @@ public:
         return m_inds;
     }
 
-    void update(const fieldsz::Onv<0> &onv) {
+    void update(const fields::Onv<0> &onv) {
         updater_fn()(onv, m_inds);
     };
 
-    void update(const fieldsz::Onv<1> &onv) {
+    void update(const fields::Onv<1> &onv) {
         updater_fn()(onv.m_fonv, m_inds);
     }
 };
 
 
 struct OccupiedUpdater {
-    void operator()(const fieldsz::Onv<0> &view, defs::inds &inds);
+    void operator()(const fields::Onv<0> &view, defs::inds &inds);
 };
 
 
 struct VacantUpdater {
-    void operator()(const fieldsz::Onv<0> &view, defs::inds &inds);
+    void operator()(const fields::Onv<0> &view, defs::inds &inds);
 };
 
 typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;

@@ -2,13 +2,13 @@
 // Created by rja on 09/02/2021.
 //
 
-#ifndef M7_FIELDSZ_H
-#define M7_FIELDSZ_H
+#ifndef M7_FIELDS_H
+#define M7_FIELDS_H
 
-#include "NumberFieldZ.h"
-#include "FermionOnvFieldZ.h"
-#include "FlagFieldZ.h"
-#include "MultiFieldZ.h"
+#include "NumberField.h"
+#include "FermionOnvField.h"
+#include "FlagField.h"
+#include "MultiField.h"
 
 
 /*
@@ -27,25 +27,25 @@
  * FermiBosOnvs  | many      many
  */
 
-namespace fieldsz {
+namespace field {
 
     template<typename T>
-    using Number = NumberFieldZ<T>;
+    using Number = NumberField<T>;
 
     template<typename T>
-    using Vector = VectorFieldZ<T>;
+    using Vector = VectorField<T>;
 
     template<typename T>
-    using Vectors = VectorsFieldZ<T>;
+    using Vectors = VectorsField<T>;
 
-    using FermionOnv = FermionOnvFieldZ;
-    using FermionOnvs = FermionOnvsFieldZ;
+    using FermionOnv = FermionOnvField;
+    using FermionOnvs = FermionOnvsField;
 
-    using Flag = FlagFieldZ;
-    using Flags = FlagsFieldZ;
+    using Flag = FlagField;
+    using Flags = FlagsField;
 
-    struct BosonOnv : VectorFieldZ<uint8_t> {
-        BosonOnv(RowZ *row, size_t nmode) : VectorFieldZ<uint8_t>(row, nmode) {
+    struct BosonOnv : VectorField<uint8_t> {
+        BosonOnv(Row *row, size_t nmode) : VectorField<uint8_t>(row, nmode) {
             ASSERT(m_nelement==nmode);
         }
 
@@ -58,14 +58,14 @@ namespace fieldsz {
         }
     };
 
-    using BosonOnvs = VectorsFieldZ<uint8_t>;
+    using BosonOnvs = VectorsField<uint8_t>;
 
-    struct FermiBosOnv : MultiFieldZ<FermionOnv, BosonOnv> {
+    struct FermiBosOnv : MultiField<FermionOnv, BosonOnv> {
         FermionOnv &m_fonv;
         BosonOnv &m_bonv;
 
-        FermiBosOnv(RowZ *row, size_t nsite) :
-                MultiFieldZ<FermionOnv, BosonOnv>(row, {nullptr, nsite}, {nullptr, nsite}),
+        FermiBosOnv(Row *row, size_t nsite) :
+                MultiField<FermionOnv, BosonOnv>(row, {nullptr, nsite}, {nullptr, nsite}),
                 m_fonv(get<0>()), m_bonv(get<1>()) {
         }
 
@@ -84,12 +84,12 @@ namespace fieldsz {
         }
     };
 
-    struct FermiBosOnvs : MultiFieldZ<FermionOnvs, BosonOnvs> {
+    struct FermiBosOnvs : MultiField<FermionOnvs, BosonOnvs> {
         FermionOnvs &m_fonv;
         BosonOnvs &m_bonv;
 
-        FermiBosOnvs(RowZ *row, size_t nitem, size_t nsite) :
-                MultiFieldZ<FermionOnvs, BosonOnvs>(row, {nullptr, nitem, nsite}, {nullptr, nitem, nsite}),
+        FermiBosOnvs(Row *row, size_t nitem, size_t nsite) :
+                MultiField<FermionOnvs, BosonOnvs>(row, {nullptr, nitem, nsite}, {nullptr, nitem, nsite}),
                 m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)) {}
     };
 
@@ -102,4 +102,4 @@ namespace fieldsz {
 }
 
 
-#endif //M7_FIELDSZ_H
+#endif //M7_FIELDS_H

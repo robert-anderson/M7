@@ -6,21 +6,21 @@
 #define M7_WALKERTABLE_H
 
 #include "src/core/io/Options.h"
-#include "src/core/fieldz/RowZ.h"
-#include "src/core/fieldz/MappedTableZ.h"
-#include "src/core/fieldz/FieldsZ.h"
+#include "src/core/fieldz/Row.h"
+#include "src/core/fieldz/MappedTable.h"
+#include "src/core/fieldz/Fields.h"
 
 
-struct WalkerTableRow : public RowZ {
+struct WalkerTableRow : public Row {
     const size_t m_npart;
-    fieldsz::Onv<> m_onv;
-    fieldsz::Vector<defs::wf_t> m_weight;
-    fieldsz::Number<defs::ham_comp_t> m_hdiag;
-    fieldsz::Flags m_initiator;
-    fieldsz::Flags m_reference_connection;
-    fieldsz::Flags m_deterministic;
+    fields::Onv<> m_onv;
+    fields::Vector<defs::wf_t> m_weight;
+    fields::Number<defs::ham_comp_t> m_hdiag;
+    fields::Flags m_initiator;
+    fields::Flags m_reference_connection;
+    fields::Flags m_deterministic;
 
-    fieldsz::Onv<> &key_field() {
+    fields::Onv<> &key_field() {
         return m_onv;
     };
 
@@ -37,6 +37,6 @@ struct WalkerTableRow : public RowZ {
             WalkerTableRow(nsite, opts.nroot, opts.nreplica){}
 };
 
-typedef MappedTableZ<WalkerTableRow> WalkerTable;
+typedef MappedTable<WalkerTableRow> WalkerTable;
 
 #endif //M7_WALKERTABLE_H

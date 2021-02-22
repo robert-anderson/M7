@@ -13,15 +13,15 @@ struct AntisymFermiBosConnection : public AntisymFermionOnvConnection {
 
     explicit AntisymFermiBosConnection(size_t nsite);
 
-    AntisymFermiBosConnection(const fieldsz::Onv<1> &in, const fieldsz::Onv<1> &out);
+    AntisymFermiBosConnection(const fields::Onv<1> &in, const fields::Onv<1> &out);
 
-    explicit AntisymFermiBosConnection(const fieldsz::Onv<1> &in);
+    explicit AntisymFermiBosConnection(const fields::Onv<1> &in);
 
     operator bool() const override;
 
-    void connect(const fieldsz::Onv<1> &in, const fieldsz::Onv<1> &out);
+    void connect(const fields::Onv<1> &in, const fields::Onv<1> &out);
 
-    void apply(const fieldsz::Onv<1> &in, fieldsz::Onv<1> &out);
+    void apply(const fields::Onv<1> &in, fields::Onv<1> &out);
 
     void zero();
 

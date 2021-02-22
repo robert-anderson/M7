@@ -5,9 +5,9 @@
 #include "SpinNonConFonvEnumerator.h"
 
 SpinNonConFonvEnumerator::SpinNonConFonvEnumerator(size_t nsite, size_t nelec) :
-        Enumerator<fieldsz::Onv<0>>(), m_combs(2 * nsite, nelec), m_setinds(nelec, 0ul){}
+        Enumerator<fields::Onv<0>>(), m_combs(2 * nsite, nelec), m_setinds(nelec, 0ul){}
 
-bool SpinNonConFonvEnumerator::next_element(fieldsz::Onv<0> &result) {
+bool SpinNonConFonvEnumerator::next_element(fields::Onv<0> &result) {
     auto allfound = m_combs.next_element(m_setinds);
     if (!allfound) return false;
     result.zero();

@@ -37,7 +37,7 @@ class Reference : public Wavefunction::DynamicRow {
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
-              const Wavefunction &wf, size_t ipart, TableBaseZ::Loc loc);
+              const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
     void accept_candidate(double redefinition_thresh = 0.0) {
         std::vector<defs::wf_t> gather(mpi::nrank());
@@ -71,9 +71,9 @@ public:
 
     //const bool &in_redefinition_cycle();
 
-    bool is_connected(const fieldsz::Onv<> &onv) const;
+    bool is_connected(const fields::Onv<> &onv) const;
 
-    void add_to_numerator(const fieldsz::Onv<> &onv, const defs::wf_t &weight);
+    void add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight);
 
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
 

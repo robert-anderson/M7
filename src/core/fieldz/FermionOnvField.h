@@ -2,27 +2,27 @@
 // Created by rja on 17/02/2021.
 //
 
-#ifndef M7_FERMIONONVFIELDZ_H
-#define M7_FERMIONONVFIELDZ_H
+#ifndef M7_FERMIONONVFIELD_H
+#define M7_FERMIONONVFIELD_H
 
-#include "BitsetFieldZ.h"
+#include "BitsetField.h"
 
-struct FermionOnvsFieldBaseZ : BitsetFieldBaseZ<defs::data_t> {
-    typedef BitsetFieldBaseZ<defs::data_t> base_t;
+struct FermionOnvsFieldBase : BitsetFieldBase<defs::data_t> {
+    typedef BitsetFieldBase<defs::data_t> base_t;
     using base_t::m_item_dsize;
     using base_t::get_dataword;
     using base_t::m_nbit;
-    using FieldBaseZ::zero;
+    using FieldBase::zero;
 
     const size_t m_nsite;
 
-    FermionOnvsFieldBaseZ(RowZ *row, size_t nitem, size_t nsite) : base_t(row, nitem, 2 * nsite), m_nsite(nsite) {}
+    FermionOnvsFieldBase(Row *row, size_t nitem, size_t nsite) : base_t(row, nitem, 2 * nsite), m_nsite(nsite) {}
 
-    FermionOnvsFieldBaseZ(const FermionOnvsFieldBaseZ &other) :
-            FermionOnvsFieldBaseZ(other.m_row ? other.m_row->m_child : nullptr, other.m_nitem, other.m_nsite) {}
+    FermionOnvsFieldBase(const FermionOnvsFieldBase &other) :
+            FermionOnvsFieldBase(other.m_row ? other.m_row->m_child : nullptr, other.m_nitem, other.m_nsite) {}
 
-    FermionOnvsFieldBaseZ &operator=(const FermionOnvsFieldBaseZ &other) {
-        FieldBaseZ::operator=(other);
+    FermionOnvsFieldBase &operator=(const FermionOnvsFieldBase &other) {
+        FieldBase::operator=(other);
         return *this;
     }
 
@@ -92,9 +92,9 @@ struct FermionOnvsFieldBaseZ : BitsetFieldBaseZ<defs::data_t> {
 };
 
 
-struct FermionOnvsFieldZ : FermionOnvsFieldBaseZ {
+struct FermionOnvsField : FermionOnvsFieldBase {
 
-    FermionOnvsFieldZ(RowZ *row, size_t nitem, size_t nsite) : FermionOnvsFieldBaseZ(row, nitem, nsite) {}
+    FermionOnvsField(Row *row, size_t nitem, size_t nsite) : FermionOnvsFieldBase(row, nitem, nsite) {}
 
     void set(const size_t &iitem, const size_t &ibit) {
         base_t::base_set(iitem, ibit);
@@ -145,11 +145,11 @@ struct FermionOnvsFieldZ : FermionOnvsFieldBaseZ {
 };
 
 
-struct FermionOnvFieldZ : FermionOnvsFieldBaseZ {
+struct FermionOnvField : FermionOnvsFieldBase {
 
-    FermionOnvFieldZ(RowZ *row, size_t nsite) : FermionOnvsFieldBaseZ(row, 1, nsite) {}
+    FermionOnvField(Row *row, size_t nsite) : FermionOnvsFieldBase(row, 1, nsite) {}
 
-    FermionOnvFieldZ operator=(const defs::inds& inds) {
+    FermionOnvField operator=(const defs::inds& inds) {
         zero();
         for (auto ind: inds) base_t::base_set(ind);
         return *this;
@@ -211,13 +211,13 @@ struct FermionOnvFieldZ : FermionOnvsFieldBaseZ {
     }
 
     int spin() const {
-        return FermionOnvsFieldBaseZ::spin(0);
+        return FermionOnvsFieldBase::spin(0);
     }
 
     int nalpha() const {
-        return FermionOnvsFieldBaseZ::nalpha(0);
+        return FermionOnvsFieldBase::nalpha(0);
     }
 };
 
 
-#endif //M7_FERMIONONVFIELDZ_H
+#endif //M7_FERMIONONVFIELD_H

@@ -2,16 +2,16 @@
 // Created by rja on 09/02/2021.
 //
 
-#include "RowZ.h"
-#include "FieldBaseZ.h"
+#include "Row.h"
+#include "FieldBase.h"
 
-std::string RowZ::to_string() const {
+std::string Row::to_string() const {
     std::string tmp;
     for (auto field: m_fields) tmp += " " + field->to_string();
     return tmp;
 }
 
-size_t RowZ::add_field(FieldBaseZ *field) {
+size_t Row::add_field(FieldBase *field) {
     // returns the offset in bytes for the column being added
     auto offset = 0ul;
     if (!m_fields.empty()) {
@@ -30,10 +30,10 @@ size_t RowZ::add_field(FieldBaseZ *field) {
     return offset;
 }
 
-void RowZ::clear() {
+void Row::clear() {
     std::fill(m_dbegin, m_dbegin+m_dsize, 0);
 }
 
-bool RowZ::is_cleared() const {
+bool Row::is_cleared() const {
     return std::all_of(m_dbegin, m_dbegin+m_dsize, [](const defs::data_t& d){return d==0;});
 }

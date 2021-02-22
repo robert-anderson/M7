@@ -5,7 +5,7 @@
 #include "Reference.h"
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
-                     const Wavefunction& wf, size_t ipart, TableBaseZ::Loc loc):
+                     const Wavefunction& wf, size_t ipart, TableBase::Loc loc):
         Wavefunction::DynamicRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
@@ -86,12 +86,12 @@ const bool &Reference::in_redefinition_cycle() {
     return m_redefinition_cycle;
 }*/
 
-bool Reference::is_connected(const fieldsz::Onv<> &onv) const {
+bool Reference::is_connected(const fields::Onv<> &onv) const {
     m_aconn.connect(m_onv, onv);
     return m_aconn.connected();
 }
 
-void Reference::add_to_numerator(const fieldsz::Onv<> &onv, const defs::wf_t &weight) {
+void Reference::add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight) {
     m_aconn.connect(m_onv, onv);
     m_proj_energy_num(0, 0) += m_ham.get_element(m_aconn) * weight;
     m_nwalker_at_doubles(0, 0) += std::abs(weight);

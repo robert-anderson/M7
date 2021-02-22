@@ -141,7 +141,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
         FermionHamiltonian(FcidumpFileReader(fname, spin_major)){}
 
-defs::ham_comp_t FermionHamiltonian::get_energy(const fieldsz::Onv<0> &det) const {
+defs::ham_comp_t FermionHamiltonian::get_energy(const fields::Onv<0> &det) const {
     return consts::real(get_element_0(det));
 }
 
@@ -162,7 +162,7 @@ defs::ham_t FermionHamiltonian::get_element_0(const OccupiedOrbitals &occs) cons
     return get_element_0(occs.inds(), occs.size());
 }
 
-defs::ham_t FermionHamiltonian::get_element_0(const fieldsz::Onv<0> &fonv) const {
+defs::ham_t FermionHamiltonian::get_element_0(const fields::Onv<0> &fonv) const {
     // TODO: make occs member data
     OccupiedOrbitals occs(fonv);
     return get_element_0(occs.inds(), occs.size());
@@ -210,6 +210,6 @@ defs::ham_t FermionHamiltonian::get_element(const conn::Antisym<0> &connection) 
     }
 }
 
-defs::ham_t FermionHamiltonian::get_element(const fieldsz::Onv<0> &bra, const fieldsz::Onv<0> &ket) const {
+defs::ham_t FermionHamiltonian::get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const {
     return get_element(AntisymFermionOnvConnection(ket, bra));
 }

@@ -2,16 +2,15 @@
 // Created by rja on 09/02/2021.
 //
 
-#ifndef M7_BITSETFIELDZ_H
-#define M7_BITSETFIELDZ_H
+#ifndef M7_BITSETFIELD_H
+#define M7_BITSETFIELD_H
 
-#include "FieldBaseZ.h"
+#include "FieldBase.h"
 #include "src/core/util/utils.h"
 #include "src/core/parallel/MPIAssert.h"
-#include "NdFieldBaseZ.h"
 
 template<typename T>
-struct BitsetFieldBaseZ : FieldBaseZ {
+struct BitsetFieldBase : FieldBase {
     static_assert(std::is_integral<T>::value, "Basis for bitset field must be an integral type");
     static constexpr size_t nbit_dword() {return sizeof(T) * CHAR_BIT;}
 
@@ -22,15 +21,15 @@ struct BitsetFieldBaseZ : FieldBaseZ {
     // number of bits unused in last dataword of an item
     const size_t m_nbit_in_last_dword;
 
-    using FieldBaseZ::m_item_size;
-    using FieldBaseZ::m_size;
-    using FieldBaseZ::begin;
-    using FieldBaseZ::end;
-    using FieldBaseZ::zero;
+    using FieldBase::m_item_size;
+    using FieldBase::m_size;
+    using FieldBase::begin;
+    using FieldBase::end;
+    using FieldBase::zero;
 
 public:
-    BitsetFieldBaseZ(RowZ* row, size_t nitem, size_t nbit) :
-            FieldBaseZ(row, integer_utils::divceil(nbit, nbit_dword())*sizeof(T), nitem, typeid(T)),
+    BitsetFieldBase(Row* row, size_t nitem, size_t nbit) :
+            FieldBase(row, integer_utils::divceil(nbit, nbit_dword()) * sizeof(T), nitem, typeid(T)),
             m_nbit(nbit), m_item_dsize(m_item_size/sizeof(T)),
             m_nbit_in_last_dword(m_nbit - (m_item_dsize-1) * nbit_dword()){
     }
@@ -128,4 +127,4 @@ public:
     }
 };
 
-#endif //M7_BITSETFIELDZ_H
+#endif //M7_BITSETFIELD_H

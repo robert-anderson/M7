@@ -10,12 +10,12 @@
 class ExactPropagator : public Propagator {
 
     defs::ham_t off_diagonal_bosons(const Hamiltonian<0> &ham, conn::Antisym<0> &conn,
-                                    const fieldsz::Onv<0> &src_onv, fieldsz::Onv<0> &dst_onv, const size_t &occ, int change){
+                                    const fields::Onv<0> &src_onv, fields::Onv<0> &dst_onv, const size_t &occ, int change){
         return 0;
     }
 
     defs::ham_t off_diagonal_bosons(const Hamiltonian<1> &ham, conn::Antisym<1> &conn,
-                                       const fieldsz::Onv<1> &src_onv, fieldsz::Onv<1> &dst_onv, const size_t &occ, int change){
+                                    const fields::Onv<1> &src_onv, fields::Onv<1> &dst_onv, const size_t &occ, int change){
         const size_t imode = occ < ham.nsite() ? occ : occ-ham.nsite();
         if (src_onv.m_bonv(imode)==0 && (change<0)) return 0.0;
         else if (src_onv.m_bonv(imode)==ham.nboson_cutoff() && (change>0)) return 0.0;

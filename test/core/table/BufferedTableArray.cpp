@@ -2,18 +2,18 @@
 // Created by rja on 11/11/2020.
 //
 
-#include <src/core/fieldz/RowZ.h>
-#include <src/core/fieldz/FieldsZ.h>
+#include <src/core/fieldz/Row.h>
+#include <src/core/fieldz/Fields.h>
 #include <src/core/fieldz/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/fieldz/BufferedTableArrayZ.h"
+#include "src/core/fieldz/BufferedTableArray.h"
 
 TEST(BufferedTableArray, Resize){
-    struct TestRow : RowZ {
-        fieldsz::Onv<0> m_fonv;
+    struct TestRow : Row {
+        fields::Onv<0> m_fonv;
         TestRow(size_t nsite): m_fonv(this, nsite){}
     };
-    BufferedTableArrayZ<TestRow> bta("Test table", 3, 6);
+    BufferedTableArray<TestRow> bta("Test table", 3, 6);
     bta.expand(4);
 
     bta[0].push_back(3);

@@ -101,7 +101,7 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-Solver::Solver(Propagator &prop, Wavefunction &wf, TableBaseZ::Loc ref_loc) :
+Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_prop(prop),
         m_opts(prop.m_opts),
         m_wf(wf),

@@ -4,7 +4,7 @@
 
 #include "DecodedDeterminant.h"
 
-void OccupiedUpdater::operator()(const fieldsz::Onv<0> &view, defs::inds &inds) {
+void OccupiedUpdater::operator()(const fields::Onv<0> &view, defs::inds &inds) {
     ASSERT(view.m_nbit <= inds.capacity());
     inds.clear();
     for (size_t idataword = 0ul; idataword < view.m_item_dsize; ++idataword) {
@@ -13,7 +13,7 @@ void OccupiedUpdater::operator()(const fieldsz::Onv<0> &view, defs::inds &inds) 
     }
 }
 
-void VacantUpdater::operator()(const fieldsz::Onv<0> &view, defs::inds &inds) {
+void VacantUpdater::operator()(const fields::Onv<0> &view, defs::inds &inds) {
     ASSERT(view.m_nbit <= inds.capacity());
     inds.clear();
     for (size_t idataword = 0ul; idataword < view.m_item_dsize; ++idataword) {

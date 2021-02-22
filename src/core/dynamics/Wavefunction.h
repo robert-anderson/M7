@@ -13,7 +13,7 @@
 #include "src/core/dynamics/SpawnTable.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
-#include "src/core/fieldz/FieldsZ.h"
+#include "src/core/fieldz/Fields.h"
 
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
@@ -41,7 +41,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
                     opts.nload_balance_block_per_rank*mpi::nrank(),
                     opts.load_balance_period,
                     WalkerTableRow(nsite, opts.nroot, opts.nreplica), SpawnTableRow(nsite),
-                    MappedTableBaseZ::nbucket_guess(opts.nwalker_target/mpi::nrank(), 3),
+                    MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3),
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),
@@ -151,7 +151,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         m_delta_nocc_onv(0, 0)--;
     }
 
-    size_t create_walker_(const fieldsz::Onv<> &onv, const defs::ham_t weight,
+    size_t create_walker_(const fields::Onv<> &onv, const defs::ham_t weight,
                           const defs::ham_comp_t &hdiag, bool refconn) {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1);
@@ -167,8 +167,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
 
-    TableBaseZ::Loc create_walker(const fieldsz::Onv<> &onv, const defs::ham_t weight,
-                          const defs::ham_comp_t &hdiag, bool refconn) {
+    TableBase::Loc create_walker(const fields::Onv<> &onv, const defs::ham_t weight,
+                                 const defs::ham_comp_t &hdiag, bool refconn) {
         size_t irank = m_ra.get_rank(onv);
         size_t irow;
         if (mpi::i_am(irank)) irow = create_walker_(onv, weight, hdiag, refconn);
@@ -177,7 +177,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
     // TODO: return a pair?
-    size_t add_spawn(const fieldsz::Onv<> &dst_onv, const defs::wf_t &delta,
+    size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart) {
         auto irank = m_ra.get_rank(dst_onv);
 #ifdef VERBOSE_DEBUGGING

@@ -2,17 +2,17 @@
 // Created by rja on 09/02/2021.
 //
 
-#include <src/core/fieldz/MappedTableZ.h>
-#include <src/core/fieldz/BufferedTableZ.h>
+#include <src/core/fieldz/MappedTable.h>
+#include <src/core/fieldz/BufferedTable.h>
 #include "gtest/gtest.h"
-#include "src/core/fieldz/FieldsZ.h"
-#include "src/core/fieldz/TableZ.h"
+#include "src/core/fieldz/Fields.h"
+#include "src/core/fieldz/Table.h"
 #include "src/core/fieldz/BufferedFields.h"
 
 TEST(FieldZ, Copying) {
-    struct TestRow : RowZ {
-        fieldsz::Vector<float> m_vector;
-        fieldsz::Vectors<float> m_vectors;
+    struct TestRow : Row {
+        fields::Vector<float> m_vector;
+        fields::Vectors<float> m_vectors;
 
         TestRow() : m_vector(this, 9), m_vectors(this, 4, 5){}
     };
@@ -33,20 +33,20 @@ TEST(FieldZ, Copying) {
 }
 
 TEST(FieldZ, Test) {
-    struct TestRow : RowZ {
-        fieldsz::Vectors<float> m_array;
-        fieldsz::FermiBosOnv m_fbonv;
-        fieldsz::Flags m_flags;
+    struct TestRow : Row {
+        fields::Vectors<float> m_array;
+        fields::FermiBosOnv m_fbonv;
+        fields::Flags m_flags;
 
         TestRow() :
                 m_array(this, 3, 14),
                 m_fbonv(this, 12),
                 m_flags(this, 7) {}
 
-        fieldsz::FermiBosOnv &m_key_field = m_fbonv;
+        fields::FermiBosOnv &m_key_field = m_fbonv;
     };
 
-    BufferedTableZ<TestRow> table("Test", {});
+    BufferedTable<TestRow> table("Test", {});
 
     ASSERT_EQ(&table.m_row, table.m_row.m_array.m_row);
     ASSERT_EQ(table.m_row.m_array.m_row_offset, 0ul);

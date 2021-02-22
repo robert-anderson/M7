@@ -27,7 +27,7 @@ public:
         log::info("Excitation generator base initialized");
     }
 
-    virtual bool draw(const fieldsz::Onv<> &src_onv, fieldsz::Onv<> &dst_onv,
+    virtual bool draw(const fields::Onv<> &src_onv, fields::Onv<> &dst_onv,
                       const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<> &anticonn) = 0;
 

@@ -26,15 +26,15 @@ public:
     BosonExcitationGenerator(const FermiBosHamiltonian *ham, PRNG& prng, size_t nboson_max):
         ExcitationGenerator(ham, prng), m_nboson_max(nboson_max){}
 
-    bool draw_(const fieldsz::Onv<0> &src_onv, fieldsz::Onv<0> &dst_onv, const OccupiedOrbitals &occs,
-              const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
-              conn::Antisym<0> &anticonn) {
+    bool draw_(const fields::Onv<0> &src_onv, fields::Onv<0> &dst_onv, const OccupiedOrbitals &occs,
+               const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
+               conn::Antisym<0> &anticonn) {
         return false;
     }
 
-    bool draw_(const fieldsz::Onv<1> &src_onv, fieldsz::Onv<1> &dst_onv, const OccupiedOrbitals &occs,
-              const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
-              conn::Antisym<1> &anticonn) {
+    bool draw_(const fields::Onv<1> &src_onv, fields::Onv<1> &dst_onv, const OccupiedOrbitals &occs,
+               const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
+               conn::Antisym<1> &anticonn) {
         if(m_nboson_max == 0) return false;
 
 #ifndef NDEBUG
@@ -73,9 +73,9 @@ public:
         return true;
     }
 
-    bool draw(const fieldsz::Onv<> &src_onv, fieldsz::Onv<> &dst_onv, const OccupiedOrbitals &occs,
-               const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
-               conn::Antisym<> &anticonn) override {
+    bool draw(const fields::Onv<> &src_onv, fields::Onv<> &dst_onv, const OccupiedOrbitals &occs,
+              const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
+              conn::Antisym<> &anticonn) override {
         return draw_(src_onv, dst_onv, occs, vacs, prob, helem, anticonn);
     }
 

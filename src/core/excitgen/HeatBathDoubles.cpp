@@ -40,9 +40,9 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::_draw(const fieldsz::Onv<0> &src_onv, fieldsz::Onv<0> &dst_onv,
-                           const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-                           defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) {
+bool HeatBathDoubles::_draw(const fields::Onv<0> &src_onv, fields::Onv<0> &dst_onv,
+                            const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+                            defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) {
     // just draw uniform ij TODO! int weighted ij
     // return false if invalid excitation generated, true otherwise
     size_t i, j, a, b;

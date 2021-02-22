@@ -2,16 +2,16 @@
 // Created by rja on 09/02/2021.
 //
 
-#ifndef M7_FIELDBASEZ_H
-#define M7_FIELDBASEZ_H
+#ifndef M7_FIELDBASE_H
+#define M7_FIELDBASE_H
 
 #include <src/defs.h>
 #include <cstring>
 #include <src/core/hash/Hashing.h>
-#include "RowZ.h"
+#include "Row.h"
 
-struct FieldBaseZ {
-    RowZ *m_row;
+struct FieldBase {
+    Row *m_row;
     const size_t m_item_size;
     const std::type_info &m_type_info;
     const size_t m_nitem;
@@ -20,15 +20,15 @@ struct FieldBaseZ {
 
     std::vector<char> m_null_string;
 
-    FieldBaseZ(RowZ* row, size_t item_size, size_t nitem, const std::type_info &type_info);
+    FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info);
 
-    FieldBaseZ(const FieldBaseZ &other);
+    FieldBase(const FieldBase &other);
 
-    FieldBaseZ& operator=(const FieldBaseZ& other);
+    FieldBase& operator=(const FieldBase& other);
 
-    bool is_comparable(const FieldBaseZ& other) const;
+    bool is_comparable(const FieldBase& other) const;
 
-    void add_to_row(RowZ* row);
+    void add_to_row(Row* row);
 
     bool is_added_to_row() const;
 
@@ -40,13 +40,13 @@ struct FieldBaseZ {
 
     char *end(const size_t& ielement) const;
 
-    RowZ* row_of_copy() const;
+    Row* row_of_copy() const;
 
     void zero();
 
     bool is_zero() const;
 
-    bool operator==(const FieldBaseZ &other) const;
+    bool operator==(const FieldBase &other) const;
 
     /**
      * Hashes whole field in row, not the currently viewed element
@@ -60,4 +60,4 @@ struct FieldBaseZ {
 };
 
 
-#endif //M7_FIELDBASEZ_H
+#endif //M7_FIELDBASE_H

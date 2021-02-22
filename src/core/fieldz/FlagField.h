@@ -2,14 +2,14 @@
 // Created by rja on 17/02/2021.
 //
 
-#ifndef M7_FLAGFIELDZ_H
-#define M7_FLAGFIELDZ_H
+#ifndef M7_FLAGFIELD_H
+#define M7_FLAGFIELD_H
 
-#include "BitsetFieldZ.h"
+#include "BitsetField.h"
 
-struct FlagsFieldZ : BitsetFieldBaseZ<uint8_t> {
-    typedef BitsetFieldBaseZ<uint8_t> base_t;
-    FlagsFieldZ(RowZ* row, size_t nflag) : base_t(row, 1, nflag) {}
+struct FlagsField : BitsetFieldBase<uint8_t> {
+    typedef BitsetFieldBase<uint8_t> base_t;
+    FlagsField(Row* row, size_t nflag) : base_t(row, 1, nflag) {}
 
     bool get(const size_t& iflag) const {
         return base_t::base_get(iflag);
@@ -29,9 +29,9 @@ struct FlagsFieldZ : BitsetFieldBaseZ<uint8_t> {
 };
 
 
-struct FlagFieldZ : BitsetFieldBaseZ<uint8_t> {
-    typedef BitsetFieldBaseZ<uint8_t> base_t;
-    FlagFieldZ(RowZ* row) : base_t(row, 1, 1) {}
+struct FlagField : BitsetFieldBase<uint8_t> {
+    typedef BitsetFieldBase<uint8_t> base_t;
+    FlagField(Row* row) : base_t(row, 1, 1) {}
 
     operator bool() const {
         return get();
@@ -55,4 +55,4 @@ struct FlagFieldZ : BitsetFieldBaseZ<uint8_t> {
 };
 
 
-#endif //M7_FLAGFIELDZ_H
+#endif //M7_FLAGFIELD_H

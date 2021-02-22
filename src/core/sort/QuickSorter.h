@@ -7,7 +7,7 @@
 
 #include <src/defs.h>
 #include <functional>
-#include "src/core/fieldz/TableZ.h"
+#include "src/core/fieldz/Table.h"
 
 struct Quicksorter {
 
@@ -21,11 +21,11 @@ struct Quicksorter {
 
     void sort(const size_t &hwm);
 
-    void sort(const TableBaseZ &table);
+    void sort(const TableBase &table);
 
     bool is_sorted(const size_t &hwm);
 
-    bool is_sorted(const TableBaseZ &table);
+    bool is_sorted(const TableBase &table);
 
 private:
     void swap(size_t ii1, size_t ii2);

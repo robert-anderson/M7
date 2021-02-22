@@ -10,16 +10,16 @@ FermionOnvConnection::FermionOnvConnection(size_t nsite){
     m_cre.reserve(2*nsite);
 }
 
-FermionOnvConnection::FermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out):
+FermionOnvConnection::FermionOnvConnection(const fields::Onv<0> &in, const fields::Onv<0> &out):
         FermionOnvConnection(in.m_nsite) {
     ASSERT(in.m_nsite == out.m_nsite);
     connect(in, out);
 }
 
-FermionOnvConnection::FermionOnvConnection(const fieldsz::Onv<0> &in):
+FermionOnvConnection::FermionOnvConnection(const fields::Onv<0> &in):
         FermionOnvConnection(in, in){}
 
-void FermionOnvConnection::connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) {
+void FermionOnvConnection::connect(const fields::Onv<0> &in, const fields::Onv<0> &out) {
     ASSERT(!in.is_zero())
     zero();
 
@@ -34,7 +34,7 @@ void FermionOnvConnection::connect(const fieldsz::Onv<0> &in, const fieldsz::Onv
     }
 }
 
-void FermionOnvConnection::apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out){
+void FermionOnvConnection::apply(const fields::Onv<0> &in, fields::Onv<0> &out){
     ASSERT(!in.is_zero());
 #ifndef NDEBUG
     for (size_t i=0ul; i<nann(); ++i) ASSERT(in.get(ann(i)));
@@ -57,14 +57,14 @@ FermionOnvConnection(nsite) {
     m_com.reserve(2*nsite);
 }
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) :
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const fields::Onv<0> &in, const fields::Onv<0> &out) :
         AntisymFermionOnvConnection(in) {
     connect(in, out);
 }
 
-AntisymFermionOnvConnection::AntisymFermionOnvConnection(const fieldsz::Onv<0> &in) : AntisymFermionOnvConnection(in.m_nsite) {}
+AntisymFermionOnvConnection::AntisymFermionOnvConnection(const fields::Onv<0> &in) : AntisymFermionOnvConnection(in.m_nsite) {}
 
-void AntisymFermionOnvConnection::connect(const fieldsz::Onv<0> &in, const fieldsz::Onv<0> &out) {
+void AntisymFermionOnvConnection::connect(const fields::Onv<0> &in, const fields::Onv<0> &out) {
     FermionOnvConnection::connect(in, out);
     m_com.clear();
     size_t nperm = 0ul;
@@ -97,7 +97,7 @@ void AntisymFermionOnvConnection::connect(const fieldsz::Onv<0> &in, const field
     m_phase = nperm & 1ul;
 }
 
-void AntisymFermionOnvConnection::apply(const fieldsz::Onv<0> &in) {
+void AntisymFermionOnvConnection::apply(const fields::Onv<0> &in) {
     ASSERT(std::is_sorted(m_cre.begin(), m_cre.end()));
     ASSERT(std::is_sorted(m_ann.begin(), m_ann.end()));
     m_com.clear();
@@ -131,7 +131,7 @@ void AntisymFermionOnvConnection::apply(const fieldsz::Onv<0> &in) {
     m_phase = nperm & 1ul;
 }
 
-void AntisymFermionOnvConnection::apply(const fieldsz::Onv<0> &in, fieldsz::Onv<0> &out) {
+void AntisymFermionOnvConnection::apply(const fields::Onv<0> &in, fields::Onv<0> &out) {
     apply(in);
     FermionOnvConnection::apply(in, out);
 }

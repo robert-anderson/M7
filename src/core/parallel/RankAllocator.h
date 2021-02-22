@@ -5,8 +5,8 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
-#include "src/core/fieldz/FieldBaseZ.h"
-#include "src/core/fieldz/MappedTableZ.h"
+#include "src/core/fieldz/FieldBase.h"
+#include "src/core/fieldz/MappedTable.h"
 #include "src/core/parallel/Gatherable.h"
 #include "src/core/io/Logging.h"
 #include "MPIWrapper.h"
@@ -75,7 +75,7 @@ private:
     /*
      * for each dependent, append a lambda to a list which is then called in the update method
      */
-    std::list<TableBaseZ::recv_cb_t> m_recv_callbacks;
+    std::list<TableBase::recv_cb_t> m_recv_callbacks;
 
     void refresh_callback_list();
 
@@ -93,7 +93,7 @@ public:
         return false;
     }
 
-    virtual TableBaseZ table() = 0;
+    virtual TableBase table() = 0;
 
     size_t nblock_() const;
 
@@ -118,16 +118,16 @@ public:
 
 template<typename row_t>
 class RankAllocator : public RankAllocatorBase {
-    static_assert(std::is_base_of<RowZ, row_t>::value, "Template arg must be derived from Row");
-    MappedTableZ<row_t>& m_table;
+    static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
+    MappedTable<row_t>& m_table;
     typedef typename KeyField<row_t>::type key_field_t;
 
 public:
-    RankAllocator(MappedTableZ<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :
+    RankAllocator(MappedTable<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :
     RankAllocatorBase(nblock, period, acceptable_imbalance), m_table(table) {}
 
-    TableBaseZ table() override {
-        return TableBaseZ(0);
+    TableBase table() override {
+        return TableBase(0);
     }
 
     void record_work_time(const row_t& row, const Timer& work_time) {

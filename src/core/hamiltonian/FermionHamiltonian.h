@@ -40,13 +40,13 @@ public:
         std::cout << opts.fcidump_path << std::endl;
     }
 
-    defs::ham_comp_t get_energy(const fieldsz::Onv<0> &fonv) const;
+    defs::ham_comp_t get_energy(const fields::Onv<0> &fonv) const;
 
     defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 
     defs::ham_t get_element_0(const OccupiedOrbitals &occs) const;
 
-    defs::ham_t get_element_0(const fieldsz::Onv<0> &fonv) const;
+    defs::ham_t get_element_0(const fields::Onv<0> &fonv) const;
 
     defs::ham_t get_element_0(const conn::Antisym<0> &connection) const;
 
@@ -60,7 +60,7 @@ public:
 
     defs::ham_t get_element(const conn::Antisym<0> &connection) const;
 
-    defs::ham_t get_element(const fieldsz::Onv<0> &bra, const fieldsz::Onv<0> &ket) const;
+    defs::ham_t get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const;
 
     size_t nci() const {
         return ci_utils::fermion_dim(nsite(), nelec());
