@@ -8,7 +8,7 @@
 #include <src/core/hamiltonian/FermionHamiltonian.h>
 #include <src/core/excitgen/FermionExcitationGenerator.h>
 #include "src/core/sample/Aliaser.h"
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 /*
  * precomputed sampler for doubles

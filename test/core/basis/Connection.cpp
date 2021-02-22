@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "src/core/basis/FermionOnvConnection.h"
 #include "src/core/io/SparseArrayFileReader.h"
-#include "src/core/fieldz/BufferedFields.h"
+#include "src/core/field/BufferedFields.h"
 
 TEST(Connection, ParticleNumberConserving){
     const size_t nsite = 70;

@@ -5,7 +5,7 @@
 #ifndef M7_TABLE_TEST_H
 #define M7_TABLE_TEST_H
 
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 namespace table_test {
     struct DetRow : Row {

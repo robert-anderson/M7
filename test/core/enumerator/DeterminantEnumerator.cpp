@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include "src/core/enumerator/FermionOnvEnumerator.h"
-#include "src/core/fieldz/BufferedFields.h"
+#include "src/core/field/BufferedFields.h"
 
 
 TEST(SpinNonConDetEnumerator, SimpleConstruction){

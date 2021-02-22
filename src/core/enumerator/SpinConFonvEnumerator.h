@@ -7,7 +7,7 @@
 
 
 #include "CombinationEnumerator.h"
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 class SpinConFonvEnumerator : public Enumerator<fields::Onv<0>> {
     CombinationEnumerator m_alpha_comb;

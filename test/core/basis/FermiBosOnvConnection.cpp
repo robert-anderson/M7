@@ -2,7 +2,7 @@
 // Created by RJA on 21/11/2020.
 //
 
-#include <src/core/fieldz/BufferedFields.h>
+#include <src/core/field/BufferedFields.h>
 #include "gtest/gtest.h"
 
 TEST(FermiBosConnection, Test){

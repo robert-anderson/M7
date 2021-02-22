@@ -7,8 +7,8 @@
 
 #include "FermionOnvEnumerator.h"
 #include "BosonOnvEnumerator.h"
-#include "src/core/fieldz/Fields.h"
-#include "src/core/fieldz/BufferedFields.h"
+#include "src/core/field/Fields.h"
+#include "src/core/field/BufferedFields.h"
 
 class FermiBosOnvEnumerator : public Enumerator<fields::Onv<1>> {
     FermionOnvEnumerator m_det_enum;

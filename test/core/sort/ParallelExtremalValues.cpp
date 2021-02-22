@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-08-02.
 //
 
-#include <src/core/fieldz/Fields.h>
-#include <src/core/fieldz/BufferedTable.h>
+#include <src/core/field/Fields.h>
+#include <src/core/field/BufferedTable.h>
 #include "gtest/gtest.h"
 #include "src/core/sort/ParallelExtremalValues.h"
 #include "src/core/sample/PRNG.h"

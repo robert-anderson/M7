@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "src/core/basis/BosonOnvConnection.h"
-#include "src/core/fieldz/BufferedFields.h"
+#include "src/core/field/BufferedFields.h"
 
 
 TEST(BosonOnvConnection, NoChange) {

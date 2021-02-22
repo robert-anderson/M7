@@ -5,7 +5,7 @@
 #ifndef M7_BOSONONVCONNECTION_H
 #define M7_BOSONONVCONNECTION_H
 
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 class BosonOnvConnection {
     struct Diff {

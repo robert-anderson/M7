@@ -6,7 +6,7 @@
 #define M7_FERMIONONVCONNECTION_H
 
 #include <algorithm>
-#include <src/core/fieldz/Fields.h>
+#include <src/core/field/Fields.h>
 
 /*
  * <out| ...cre... ...ann... |in>

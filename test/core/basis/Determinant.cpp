@@ -4,7 +4,7 @@
 
 #include "src/core/io/SparseArrayFileReader.h"
 #include "gtest/gtest.h"
-#include "src/core/fieldz/BufferedFields.h"
+#include "src/core/field/BufferedFields.h"
 #include "src/core/basis/FermionOnvConnection.h"
 
 TEST(Determinant, Phase) {

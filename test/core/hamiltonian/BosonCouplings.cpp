@@ -2,7 +2,7 @@
 // Created by jhalson on 30/09/2020.
 //
 
-#include <src/core/fieldz/BufferedFields.h>
+#include <src/core/field/BufferedFields.h>
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/BosonCouplings.h"
 

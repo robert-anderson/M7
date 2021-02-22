@@ -3,7 +3,7 @@
 //
 
 #include <src/core/sample/PRNG.h>
-#include <src/core/fieldz/BufferedFields.h>
+#include <src/core/field/BufferedFields.h>
 #include "gtest/gtest.h"
 
 TEST(Fields, HashUniformityTrueRandom){

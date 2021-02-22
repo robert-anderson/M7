@@ -5,7 +5,7 @@
 #ifndef M7_DECODEDDETERMINANT_H
 #define M7_DECODEDDETERMINANT_H
 
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)

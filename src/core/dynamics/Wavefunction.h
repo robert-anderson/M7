@@ -13,7 +13,7 @@
 #include "src/core/dynamics/SpawnTable.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 

@@ -5,7 +5,7 @@
 #include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/excitgen/HeatBathDoubles.h"
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 #if 0
 namespace heat_bath_doubles_test {

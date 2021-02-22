@@ -6,7 +6,7 @@
 #define M7_BOSONONVENUMERATOR_H
 
 #include "ProductEnumerator.h"
-#include "src/core/fieldz/Fields.h"
+#include "src/core/field/Fields.h"
 
 class BosonOnvEnumerator : public Enumerator<fields::BosonOnv> {
     ProductEnumerator m_prod;
