@@ -6,12 +6,11 @@
 #define M7_TABLEEXTREMALVALUES_H
 
 #include "ExtremalValues.h"
-#include "src/core/field/Field.h"
 
 template<typename viewable_t>
 class TableExtremalValues : public ExtremalValues {
 
-    static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
+    //static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
     typedef typename viewable_t::view_t view_t;
     typedef typename viewable_t::cview_t cview_t;
 

@@ -42,7 +42,7 @@ void ExtremalValues::reset(size_t hwm) {
     std::make_heap(m_inds.begin(), m_inds.end(), m_comp_fn);
 }
 
-void ExtremalValues::reset(const Table &table) { reset(table.m_hwm); }
+void ExtremalValues::reset(const TableBaseZ &table) { reset(table.m_hwm); }
 
 const defs::inds &ExtremalValues::inds() const {
     return m_inds;

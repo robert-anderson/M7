@@ -37,7 +37,7 @@ class Reference : public Wavefunction::DynamicRow {
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
-              const Wavefunction &wf, size_t ipart, Table::Loc loc);
+              const Wavefunction &wf, size_t ipart, TableBaseZ::Loc loc);
 
     void accept_candidate(double redefinition_thresh = 0.0) {
         std::vector<defs::wf_t> gather(mpi::nrank());

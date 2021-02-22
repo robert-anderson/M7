@@ -3,7 +3,6 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/table/Table.h"
 #include "src/core/table/Communicator.h"
 
 #if 0

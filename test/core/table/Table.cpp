@@ -7,7 +7,6 @@
 #include <src/core/sort/ParallelExtremalValues.h>
 #include <src/core/sort/ExtremalValues.h>
 #include <src/core/sort/QuickSorter.h>
-#include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 
 #if 0

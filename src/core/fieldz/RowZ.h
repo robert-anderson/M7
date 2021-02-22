@@ -55,7 +55,7 @@ struct RowZ {
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
         m_dbegin = m_table_bw->m_dbegin+m_dsize*i;
         m_i = i;
-        //MPI_ASSERT(in_range(), "Row is out of table bounds");
+        MPI_ASSERT(in_range(), "Row is out of table bounds");
     }
 
     RowZ() {}
@@ -85,6 +85,16 @@ struct KeyField {
     static type& get(row_t& row){return row.key_field();}
     static const type& get(const row_t& row) {return const_cast<row_t&>(row).key_field();}
 };
+
+namespace accessor {
+    template<typename row_t>
+    struct Sequential : row_t{
+        Sequential(const row_t& row): row_t(row){}
+    };
+
+    struct Direct {};
+
+}
 
 
 #endif //M7_ROWZ_H

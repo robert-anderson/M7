@@ -8,7 +8,6 @@
 //
 
 #include "TableZ.h"
-#include "src/core/field/Column.h"
 #include "src/core/io/Logging.h"
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/sort/ExtremalValues.h"

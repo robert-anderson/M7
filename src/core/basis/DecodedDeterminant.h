@@ -5,7 +5,6 @@
 #ifndef M7_DECODEDDETERMINANT_H
 #define M7_DECODEDDETERMINANT_H
 
-#include "src/core/field/FermionOnvSpecifier.h"
 #include "src/core/fieldz/FieldsZ.h"
 
 /*

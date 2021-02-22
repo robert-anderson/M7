@@ -5,7 +5,6 @@
 #ifndef M7_TABLE_TEST_H
 #define M7_TABLE_TEST_H
 
-#include "src/core/table/MappedTable.h"
 #include "src/core/fieldz/FieldsZ.h"
 
 namespace table_test {

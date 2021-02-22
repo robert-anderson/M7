@@ -3,8 +3,6 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/table/BufferedTable.h"
-#include "src/core/table/Table.h"
 #if 0
 #include "src/core/data/BufferedField.h"
 

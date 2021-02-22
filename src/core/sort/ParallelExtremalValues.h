@@ -6,7 +6,7 @@
 #define M7_PARALLELEXTREMALVALUES_H
 
 #include "TableExtremalValues.h"
-#include "src/core/table/BufferedTableArray.h"
+#include "src/core/fieldz/BufferedTableArrayZ.h"
 
 /**
  * Finds the extremal values over all processes, using distributed instances
@@ -38,7 +38,7 @@ public:
     ParallelExtremalValues(const viewable_t &viewable, bool max = true, bool abs_val = false) :
             m_local_xvs(viewable, max, abs_val), m_max(max), m_abs_val(abs_val) {}
 
-    void reset(const Table& table) {
+    void reset(const TableBaseZ& table) {
         m_local_xvs.reset(table.m_hwm);
     }
 

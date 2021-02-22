@@ -5,7 +5,6 @@
 #ifndef M7_WALKERTABLE_H
 #define M7_WALKERTABLE_H
 
-#include "src/core/table/MappedTable.h"
 #include "src/core/io/Options.h"
 #include "src/core/fieldz/RowZ.h"
 #include "src/core/fieldz/MappedTableZ.h"

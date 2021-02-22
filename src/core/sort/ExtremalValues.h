@@ -8,7 +8,7 @@
 
 #include "src/defs.h"
 #include <functional>
-#include "src/core/table/Table.h"
+#include "src/core/fieldz/TableZ.h"
 
 class ExtremalValues {
     /*
@@ -34,7 +34,7 @@ public:
 
     void reset(size_t hwm);
 
-    void reset(const Table &table);
+    void reset(const TableBaseZ &table);
 
     void find(size_t nfind);
 

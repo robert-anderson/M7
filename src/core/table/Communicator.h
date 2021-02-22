@@ -9,8 +9,8 @@
 #include "src/core/fieldz/BufferedTableArrayZ.h"
 #include "src/core/parallel/MPIWrapper.h"
 #include "src/core/io/Logging.h"
-#include "MappedTable.h"
 #include <set>
+#include <src/core/parallel/RankAllocator.h>
 
 
 template<typename row_t>
@@ -364,7 +364,7 @@ struct Communicator {
 
         size_t m_iblock;
 
-        DynamicRow(const Communicator &comm, Table::Loc loc, std::string name) :
+        DynamicRow(const Communicator &comm, TableBaseZ::Loc loc, std::string name) :
                 DynamicRowSet(comm, name), store_row_t(m_ac.m_row) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
@@ -395,7 +395,7 @@ struct Communicator {
                           m_name, irank_initial, irank_final);
         }
 
-        void change(Table::Loc loc) {
+        void change(TableBaseZ::Loc loc) {
             m_irows.clear();
             if (loc.is_mine()) {
                 //ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow)) == mpi::irank());

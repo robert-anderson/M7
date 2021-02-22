@@ -5,7 +5,6 @@
 #ifndef M7_FERMIONONVCONNECTION_H
 #define M7_FERMIONONVCONNECTION_H
 
-#include <src/core/field/FermionOnvSpecifier.h>
 #include <algorithm>
 #include <src/core/fieldz/FieldsZ.h>
 

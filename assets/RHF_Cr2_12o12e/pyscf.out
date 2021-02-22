@@ -1,0 +1,164 @@
+#INFO: **** input file is /work/robert/mr_systems_pyscf/cr2.py ****
+from pyscf import M, mrpt, mcscf, scf, fci, symm, fciqmcscf
+import sys, os
+sys.path.append(os.path.abspath('.'))
+import numpy as np
+
+d = {
+        'doi': 'https://doi.org/10.1021/acs.jctc.6b00034',
+        'mol_kwargs': {
+            'atom':
+            '''
+            Cr 0.000000 0.000000 0.000000
+            Cr 0.000000 0.000000 1.678800
+            ''',
+            'basis': {'Cr': 'aug-cc-pvtz'},
+            'symmetry': True,
+            'symmetry_subgroup': 'D2h',
+            'verbose': 4,
+            'charge': 0,
+            'spin': 0
+        }
+    }
+
+nelecas = 12
+ncas = 12
+
+mol = M(**d['mol_kwargs'])
+nelecb = (nelecas-mol.spin)//2
+neleca = nelecas - nelecb
+
+myhf = scf.ROHF(mol)
+myhf.kernel()
+
+'''
+do CASSCF+NEVPT2 on neutral molecule
+'''
+mc = mcscf.CASCI(myhf, ncas, nelecas)
+mc.kernel()
+
+mc = mcscf.CASCI(myhf, ncas, nelecas)
+mc.fcisolver = fciqmcscf.fciqmc.FCIQMCCI(mol)
+mc.kernel()
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'zombie', '4.4.0-190-generic', '#220-Ubuntu SMP Fri Aug 28 23:02:15 UTC 2020', 'x86_64', 'x86_64')  Threads 72
+Python 2.7.12 (default, Dec  4 2017, 14:50:18) 
+[GCC 5.4.0 20160609]
+numpy 1.15.1  scipy 1.1.0
+Date: Fri Feb 19 14:03:19 2021
+PySCF version 1.7.1
+PySCF path  /apps/pyscf/1.7.1/pyscf
+GIT HEAD      d11041db344dbf798445e574a6cfe72e16f3549d
+
+[ENV] PYSCFHOME /apps/pyscf/1.7.1
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 48
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry True subgroup D2h
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 Cr     0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr
+[INPUT]  2 Cr     0.000000000000   0.000000000000   1.678800000000 AA    0.000000000000   0.000000000000   3.172472217920 Bohr
+
+nuclear repulsion = 181.561873653753
+point group symmetry = Dooh, use subgroup D2h
+num. orbitals of irrep Ag = 37
+num. orbitals of irrep B1g = 12
+num. orbitals of irrep B2g = 22
+num. orbitals of irrep B3g = 22
+num. orbitals of irrep Au = 12
+num. orbitals of irrep B1u = 37
+num. orbitals of irrep B2u = 22
+num. orbitals of irrep B3u = 22
+number of shells = 28
+number of NR pGTOs = 312
+number of NR cGTOs = 186
+basis = {'Cr': 'aug-cc-pvtz'}
+ecp = {}
+CPU time:         1.23
+
+
+******** <class 'pyscf.scf.hf_symm.SymAdaptedROHF'> ********
+method = SymAdaptedROHF-ROHF-RHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /work/robert/mr_systems_pyscf/tmp6VbxEl
+max_memory 4000 MB (current use 70 MB)
+num. doubly occ = 24  num. singly occ = 0
+Freeze 0 electrons in irreps []
+    48 free electrons in irreps Ag B1g B2g B3g Au B1u B2u B3u
+Set gradient conv threshold to 3.16228e-05
+init E= -2085.72405293455
+HOMO (Ag) = -0.320367824787009  LUMO (Au) = -0.224273527355698
+cycle= 1 E= -2085.76036099376  delta_E= -0.0363  |g|= 0.944  |ddm|=    5
+HOMO (B1g) = -0.0761995259866203  LUMO (B1u) = 0.0112114871301842
+cycle= 2 E= -2085.75150980283  delta_E= 0.00885  |g|= 1.15  |ddm|= 2.39
+HOMO (Ag) = -0.216891723023601  LUMO (B1u) = -0.000207920886908595
+cycle= 3 E= -2085.92812723685  delta_E= -0.177  |g|= 0.0664  |ddm|= 1.95
+HOMO (Ag) = -0.221767822609264  LUMO (B1u) = -0.00156736648499463
+cycle= 4 E= -2085.92926472845  delta_E= -0.00114  |g|= 0.0293  |ddm|= 0.197
+HOMO (Ag) = -0.222517567101688  LUMO (B1u) = -0.00317849473947596
+cycle= 5 E= -2085.92950603317  delta_E= -0.000241  |g|= 0.00631  |ddm|= 0.07
+HOMO (Ag) = -0.222422990323828  LUMO (B1u) = -0.00393037996700068
+cycle= 6 E= -2085.92954782315  delta_E= -4.18e-05  |g|= 0.00128  |ddm|= 0.0294
+HOMO (Ag) = -0.222307345653694  LUMO (B1u) = -0.00393928256081338
+cycle= 7 E= -2085.92954997827  delta_E= -2.16e-06  |g|= 0.000373  |ddm|= 0.00419
+HOMO (Ag) = -0.222350000648489  LUMO (B1u) = -0.00395826977148472
+cycle= 8 E= -2085.9295501318  delta_E= -1.54e-07  |g|= 9e-05  |ddm|= 0.00114
+HOMO (Ag) = -0.222345006587197  LUMO (B1u) = -0.00395235712928992
+cycle= 9 E= -2085.9295501425  delta_E= -1.07e-08  |g|= 2.8e-05  |ddm|= 0.000358
+HOMO (Ag) = -0.222346557520499  LUMO (B1u) = -0.00395088636498302
+cycle= 10 E= -2085.92955014316  delta_E= -6.63e-10  |g|= 4.58e-06  |ddm|= 0.000105
+HOMO (Ag) = -0.222346738764565  LUMO (B1u) = -0.00395092916932227
+Extra cycle  E= -2085.92955014317  delta_E= -1.36e-11  |g|= 1.92e-06  |ddm|= 1.21e-05
+converged SCF energy = -2085.92955014317
+Active space CI wfn symmetry = Ag
+
+******** CASCI flags ********
+CAS (6e+6e, 12o), ncore = 18, nvir = 156
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 (MB)
+******** <class 'pyscf.fci.direct_spin1_symm.FCISolver'> ********
+max. cycles = 200
+conv_tol = 1e-08
+davidson only = True
+linear dependence = 1e-10
+level shift = 0.001
+max iter space = 12
+max_memory 4000 MB
+nroots = 1
+pspace_size = 0
+spin = None
+Input CI wfn symmetry = Ag
+Density matrix diagonal elements [1.99995533e+00 1.99990945e+00 1.99857881e+00 1.99947578e+00
+ 1.99947566e+00 1.93217154e+00 5.27196130e-02 3.68212344e-03
+ 3.68804696e-03 2.92047393e-04 1.00046175e-02 4.69818825e-05]
+CASCI converged
+CASCI E = -2085.9384092802  E(CI) = -30.5824746103199  S^2 = 0.0000000
+Active space CI wfn symmetry = Ag
+
+******** CASCI flags ********
+CAS (6e+6e, 12o), ncore = 18, nvir = 156
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 (MB)
+******** FCIQMC options ********
+Number of walkers = 10000
+Maximum number of iterations = -1
+FCIQMC output file: neci.out_1

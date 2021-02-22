@@ -5,7 +5,7 @@
 #include "Reference.h"
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
-                     const Wavefunction& wf, size_t ipart, Table::Loc loc):
+                     const Wavefunction& wf, size_t ipart, TableBaseZ::Loc loc):
         Wavefunction::DynamicRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),

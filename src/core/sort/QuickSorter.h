@@ -7,8 +7,7 @@
 
 #include <src/defs.h>
 #include <functional>
-#include "src/core/table/Table.h"
-#include "src/core/field/Field.h"
+#include "src/core/fieldz/TableZ.h"
 
 struct Quicksorter {
 
@@ -22,11 +21,11 @@ struct Quicksorter {
 
     void sort(const size_t &hwm);
 
-    void sort(const Table &table);
+    void sort(const TableBaseZ &table);
 
     bool is_sorted(const size_t &hwm);
 
-    bool is_sorted(const Table &table);
+    bool is_sorted(const TableBaseZ &table);
 
 private:
     void swap(size_t ii1, size_t ii2);
@@ -39,7 +38,7 @@ private:
 
 template <typename viewable_t>
 class TableFieldSorter : public Quicksorter {
-    static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
+    //static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
     typedef typename viewable_t::cview_t cview_t;
 
 public:

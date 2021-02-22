@@ -2,9 +2,7 @@
 // Created by rja on 12/11/2020.
 //
 
-#include <src/core/table/BufferedTable.h>
 #include "gtest/gtest.h"
-#include "src/core/table/MappedTable.h"
 #include "src/core/excitgen/BosonExcitationGenerator.h"
 
 #if 0

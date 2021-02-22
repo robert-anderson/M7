@@ -20,7 +20,7 @@ void Quicksorter::sort(const size_t &hwm) {
     ASSERT(is_sorted(hwm));
 }
 
-void Quicksorter::sort(const Table &table) {
+void Quicksorter::sort(const TableBaseZ &table) {
     sort(table.m_hwm);
 }
 
@@ -31,7 +31,7 @@ bool Quicksorter::is_sorted(const size_t &hwm) {
     return true;
 }
 
-bool Quicksorter::is_sorted(const Table &table) {
+bool Quicksorter::is_sorted(const TableBaseZ &table) {
     return is_sorted(table.m_hwm);
 }
 

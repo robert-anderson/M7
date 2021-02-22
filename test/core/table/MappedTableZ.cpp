@@ -2,7 +2,6 @@
 // Created by rja on 08/10/2020.
 //
 
-#include "src/core/table/BufferedTable.h"
 #include "gtest/gtest.h"
 #include "TableTest.h"
 
