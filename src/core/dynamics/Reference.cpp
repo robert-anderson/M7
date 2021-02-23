@@ -87,12 +87,12 @@ const bool &Reference::in_redefinition_cycle() {
 }*/
 
 bool Reference::is_connected(const fields::Onv<> &onv) const {
-    m_aconn.connect(m_onv, onv);
+    m_aconn.connect(get_onv(), onv);
     return m_aconn.connected();
 }
 
 void Reference::add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight) {
-    m_aconn.connect(m_onv, onv);
+    m_aconn.connect(get_onv(), onv);
     m_proj_energy_num(0, 0) += m_ham.get_element(m_aconn) * weight;
     m_nwalker_at_doubles(0, 0) += std::abs(weight);
 }
@@ -106,7 +106,7 @@ defs::ham_t Reference::proj_energy_num() const {
 }
 
 defs::ham_comp_t Reference::proj_energy() const {
-    return consts::real(proj_energy_num()/m_weight(m_ipart));
+    return consts::real(proj_energy_num()/get_weight());
 }
 
 void Reference::update() {

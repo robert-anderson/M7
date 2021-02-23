@@ -17,14 +17,14 @@
 
 struct RankAllocatorBase {
     struct Dependent {
-        typedef RankAllocatorBase ra_t;
-        ra_t& m_ra;
+        RankAllocatorBase& m_ra;
         typename std::list<Dependent*>::iterator m_it;
-        Dependent(ra_t& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
+        Dependent(RankAllocatorBase& ra): m_ra(ra), m_it(m_ra.add_dependent(this)) {}
         ~Dependent() {
             m_ra.erase_dependent(this);
         }
 
+        // returns true if the irow-th row in source mapped table is mapped by this Dependent
         virtual bool has_row(size_t irow) = 0;
         // called before block transfer is performed
         virtual void before_block_transfer(const defs::inds& irows_send, size_t irank_send, size_t irank_recv) = 0;
@@ -113,6 +113,8 @@ public:
 
     void update(size_t icycle);
 
+    virtual size_t get_rank_by_irow(const size_t& irow) const = 0;
+
 };
 
 
@@ -120,11 +122,12 @@ template<typename row_t>
 class RankAllocator : public RankAllocatorBase {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     MappedTable<row_t>& m_table;
+    row_t m_row;
     typedef typename KeyField<row_t>::type key_field_t;
 
 public:
     RankAllocator(MappedTable<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :
-    RankAllocatorBase(nblock, period, acceptable_imbalance), m_table(table) {}
+    RankAllocatorBase(nblock, period, acceptable_imbalance), m_table(table), m_row(table.m_row) {}
 
     TableBase table() override {
         return TableBase(0);
@@ -147,7 +150,12 @@ public:
     }
 
     inline size_t get_rank(const row_t& row) const{
-        return get_rank(row.m_key_field);
+        return get_rank(KeyField<row_t>::get(row));
+    }
+
+    size_t get_rank_by_irow(const size_t& irow) const override {
+        m_row.jump(irow);
+        return get_rank(m_row);
     }
 };
 

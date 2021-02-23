@@ -69,6 +69,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     void begin_cycle() {
         m_summables.zero();
+        m_store.remap_if_required();
     }
 
     void end_cycle() {
@@ -97,7 +98,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             const defs::wf_t& weight = row.m_weight(m_ipart);
             res += std::abs(weight);
         }
-        return res;
         return mpi::all_sum(res);
     }
 

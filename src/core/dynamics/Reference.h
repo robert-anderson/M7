@@ -39,18 +39,26 @@ public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
+    const defs::wf_t& get_weight() const {
+        return m_ac.m_row.m_weight(m_ipart);
+    }
+
+    const fields::Onv<>& get_onv() const {
+        return m_ac.m_row.m_onv;
+    }
+
     void accept_candidate(double redefinition_thresh = 0.0) {
         std::vector<defs::wf_t> gather(mpi::nrank());
         mpi::all_gather(m_candidate_abs_weight, gather);
         MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
         size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
         mpi::bcast(m_irow_candidate, irank);
-        if (gather[irank] > std::abs(m_weight(m_ipart)*redefinition_thresh)){
-            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", m_weight(m_ipart), gather[irank]);
+        if (gather[irank] > std::abs(get_weight()*redefinition_thresh)){
+            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", get_weight(), gather[irank]);
             change({irank, m_irow_candidate});
             //MPI_ASSERT(std::abs(m_wf.m_store.m_weight(m_irow_candidate, 0, 0))==m_candidate_abs_weight, "");
         }
-        ASSERT(std::abs(m_weight(m_ipart))==m_candidate_abs_weight);
+        ASSERT(std::abs(get_weight())==m_candidate_abs_weight);
         m_candidate_abs_weight = 0.0;
     }
 

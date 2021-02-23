@@ -21,6 +21,12 @@ class CommunicatingPair {
     double m_buffer_expansion_factor;
 
 public:
+    /*
+     * number of rows sent and recvd in the last call to communicate()
+     * retained for stats reasons
+     */
+    defs::inds m_last_send_counts;
+    size_t m_last_recv_count = 0ul;
     template<typename ...Args>
     CommunicatingPair(std::string name, double buffer_expansion_factor, const row_t &row):
             m_send(name + " send", mpi::nrank(), row),
@@ -75,31 +81,21 @@ public:
 
 
     void communicate() {
-        auto hwms = m_send.hwms();
-        defs::inds sendcounts(hwms);
+        m_last_send_counts = m_send.hwms();
+        defs::inds sendcounts(m_last_send_counts);
         for (auto &it: sendcounts) it *= row_dsize();
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
-        log::debug_("Sending {} rows", utils::to_string(hwms));
+        log::debug_("Sending {} rows", utils::to_string(m_last_send_counts));
 
-        //std::cout << "Sending datawords " << utils::to_string(sendcounts) << std::endl;
         mpi::all_to_all(sendcounts, recvcounts);
-        //std::cout << "Receiving datawords " << utils::to_string(recvcounts) << std::endl;
 
         auto senddispls = m_send.displs();
-        //std::cout << "Sending displacements " << utils::to_string(senddispls) << std::endl;
         defs::inds recvdispls(mpi::nrank(), 0ul);
         for (size_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-        //std::cout << "Receiving displacements " << utils::to_string(recvdispls) << std::endl;
-
-//        logger::write("Send List usage fraction: " +
-//                      std::to_string(sendcounts[mpi::irank()] / double(m_send[0].bw_dsize())), 0, logger::debug);
-//        logger::write("Receive List usage fraction: " +
-//                      std::to_string(recvcounts[mpi::irank()] / double(m_recv.bw_dsize())), 0, logger::debug);
-
         auto recv_dsize = recvdispls.back() + recvcounts.back();
-        auto recv_nrow = recv_dsize / row_dsize();
+        m_last_recv_count = recv_dsize / row_dsize();
 
         if (recv_dsize > static_cast<const TableBase &>(recv()).bw_dsize()) {
             /*
@@ -108,7 +104,7 @@ public:
              * want to expand relative to size of the incoming data, not the
              * current size of the buffer
              */
-            m_recv.resize(std::ceil((1.0 + m_buffer_expansion_factor) * recv_nrow));
+            m_recv.resize(std::ceil((1.0 + m_buffer_expansion_factor) * m_last_recv_count));
         }
 
         MPI_REQUIRE_ALL(m_send.dbegin(), "Send buffer is not allocated!");
@@ -126,7 +122,7 @@ public:
 
         if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
 
-        recv().m_hwm = recv_nrow;
+        recv().m_hwm = m_last_recv_count;
         m_send.clear();
     }
 
@@ -349,8 +345,8 @@ struct Communicator {
 
     };
 
-    struct DynamicRow : public DynamicRowSet, store_row_t {
-        using DynamicRowSet::ra_t;
+    struct DynamicRow : public DynamicRowSet {
+        using DynamicRowSet::m_ra;
         using DynamicRowSet::m_ac;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
@@ -360,17 +356,15 @@ struct Communicator {
         using DynamicRowSet::update;
         using DynamicRowSet::m_name;
         using DynamicRowSet::m_ranks_with_any_rows;
-        using Row::jump;
 
         size_t m_iblock;
 
         DynamicRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
-                DynamicRowSet(comm, name), store_row_t(m_ac.m_row) {
+                DynamicRowSet(comm, name) {
             if (loc.is_mine()) {
                 add_(loc.m_irow);
                 ASSERT(m_ac.m_hwm);
-                jump(loc.m_irow);
-                m_iblock = comm.m_ra.get_block(*this);
+                m_iblock = comm.m_ra.get_block(m_ac.m_row.m_onv);
             }
             mpi::bcast(m_iblock, loc.m_irank);
             update();
@@ -398,7 +392,7 @@ struct Communicator {
         void change(TableBase::Loc loc) {
             m_irows.clear();
             if (loc.is_mine()) {
-                //ASSERT(m_ra.get_rank(m_source.m_key_field(loc.m_irow)) == mpi::irank());
+                ASSERT(m_ra.get_rank_by_irow(loc.m_irow) == mpi::irank());
                 m_irows = {loc.m_irow};
             }
             DynamicRow::update();

@@ -13,6 +13,8 @@ struct ParallelStatsSpecifier : StatsSpecifier {
     StatsColumn<double> m_synchronization_overhead;
     StatsColumn<size_t> m_nblock_wf_ra;
     StatsColumn<defs::wf_comp_t> m_nwalker;
+    StatsColumn<size_t> m_nwalker_lookup_skip;
+    StatsColumn<size_t> m_nwalker_lookup;
     StatsColumn<size_t> m_nrow_free_walker_list;
     StatsColumn<size_t> m_walker_list_high_water_mark;
     StatsColumn<double> m_walker_list_high_water_mark_fraction;
@@ -29,6 +31,8 @@ struct ParallelStatsSpecifier : StatsSpecifier {
             m_synchronization_overhead(this, "Time waited at MPI_Barrier", {}),
             m_nblock_wf_ra(this, "Number of blocks of the WF rank allocator stored here", {}),
             m_nwalker(this, "WF L1 norm (number of walkers)", {}),
+            m_nwalker_lookup_skip(this, "Number of skips required by walker hashtable lookups", {}),
+            m_nwalker_lookup(this, "Number of walker hashtable lookups", {}),
             m_nrow_free_walker_list(this, "Free rows in the walker table", {}),
             m_walker_list_high_water_mark(this, "High water mark of walker table", {}),
             m_walker_list_high_water_mark_fraction(

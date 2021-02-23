@@ -28,19 +28,20 @@ struct LookupResult {
 
 struct MappedTableBase {
     static constexpr double c_default_remap_ratio = 2.0;
-    static constexpr size_t c_default_remap_nlookup = 2.0;
+    static constexpr size_t c_default_remap_nlookup = 500;
     static constexpr size_t c_nbucket_min = 100;
     /*
      * skips are counted to avoid having to loop over all buckets to count entries
      */
-    size_t m_total_skips = 0.0;
-    size_t m_total_lookups = 0.0;
+    size_t m_ntotal_skip = 0.0;
+    size_t m_ntotal_lookup = 0.0;
     double m_remap_ratio = c_default_remap_ratio;
     size_t m_remap_nlookup = c_default_remap_nlookup;
 
     std::vector<std::forward_list<size_t>> m_buckets;
 
     MappedTableBase(size_t nbucket);
+
     /**
      * @param nrow_max
      * expected maximum number of rows
@@ -65,19 +66,19 @@ struct MappedTable : Table<row_t>, MappedTableBase {
 
     using Table<row_t>::m_row;
 
-    MappedTable(const row_t& row, size_t nbucket) : Table<row_t>(row), MappedTableBase(nbucket), m_lookup_row(m_row){
-        ASSERT(static_cast<const Row&>(m_lookup_row).m_table_bw);
+    MappedTable(const row_t &row, size_t nbucket) : Table<row_t>(row), MappedTableBase(nbucket), m_lookup_row(m_row) {
+        ASSERT(static_cast<const Row &>(m_lookup_row).m_table_bw);
     }
 
-    LookupResult operator[](const key_field_t& key) {
-        m_total_lookups++;
+    LookupResult operator[](const key_field_t &key) {
+        m_ntotal_lookup++;
         LookupResult res(m_buckets[key.hash() % nbucket()]);
         auto current = res.m_bucket.before_begin();
         for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
             m_lookup_row.jump(*next);
             if (m_lookup_row.key_field() == key) return res;
             res.m_prev++;
-            m_total_skips++;
+            m_ntotal_skip++;
         }
         res.m_prev = res.m_bucket.end();
         return res;
@@ -91,7 +92,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         }
     }
 
-    void erase(LookupResult& result) {
+    void erase(LookupResult &result) {
         TableBase::clear(*result);
         result.m_bucket.erase_after(result.m_prev);
         // put into "not found" state:
@@ -99,7 +100,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     }
 
 
-    size_t insert(const key_field_t& key) {
+    size_t insert(const key_field_t &key) {
         ASSERT(!(this->operator[](key)));
         auto irow = TableBase::get_free_row();
         auto &bucket = m_buckets[key.hash() % nbucket()];
@@ -112,10 +113,10 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     // for situations in which the row has already been copied-to
     void post_insert_buckets(const size_t &irow, std::vector<std::forward_list<size_t>> &buckets) {
         ASSERT(!TableBase::is_cleared(irow))
-        m_row.jump(irow);
+        m_lookup_row.jump(irow);
         // row mustn't have already been added
-        ASSERT(!(*this)[KeyField<row_t>::get(m_row)]);
-        auto &bucket = buckets[KeyField<row_t>::get(m_row).hash() % buckets.size()];
+        ASSERT(!(*this)[KeyField<row_t>::get(m_lookup_row)]);
+        auto &bucket = buckets[KeyField<row_t>::get(m_lookup_row).hash() % buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
     }
 
@@ -124,20 +125,20 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     }
 
     void remap_if_required() {
-        if (m_total_lookups < m_remap_nlookup) return;
-        if (double(m_total_skips) / double(m_total_lookups) > m_remap_ratio) return;
-        // use the same expansion factor as for the Table buffer
-        const size_t nbucket_new = nbucket() * TableBase::m_bw.expansion_factor();
-        std::vector<std::forward_list<size_t>> new_buckets(nbucket_new);
-        for (const auto &old_bucket : m_buckets) {
-            for (const auto irow : old_bucket) {
-                post_insert(irow, new_buckets);
+        if (m_ntotal_lookup > m_remap_nlookup && double(m_ntotal_skip) / double(m_ntotal_lookup) > m_remap_ratio) {
+            // use the same expansion factor as for the Table buffer
+            const size_t nbucket_new = nbucket() * TableBase::m_bw.expansion_factor();
+            std::vector<std::forward_list<size_t>> new_buckets(nbucket_new);
+            for (const auto &old_bucket : m_buckets) {
+                for (const auto irow : old_bucket) {
+                    post_insert_buckets(irow, new_buckets);
+                }
             }
+            m_buckets = std::move(new_buckets);
         }
-        m_buckets = std::move(new_buckets);
         // reset counters
-        m_total_skips = 0ul;
-        m_total_lookups = 0ul;
+        m_ntotal_skip = 0ul;
+        m_ntotal_lookup = 0ul;
     }
 
 };
