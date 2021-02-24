@@ -29,25 +29,20 @@ TEST(ExactPropagator, BosonTest) {
         onv.m_fonv.set(1, i);
     }
     Wavefunction wf(opts, ham.nsite());
-    wf.expand(10, 800);
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
     ExactPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(onv);
-    prop.m_shift = ref_energy;//benchmark;
-    Solver solver(prop, wf, onv);
+
+
+    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
+    prop.m_shift = ref_energy;
+    Solver solver(prop, wf, ref_loc);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
     for (size_t i = 0ul; i < 20000; ++i) {
         solver.execute();
-        std::cout << i << " " << wf.m_walkers.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
-        for (size_t irow = 0ul; irow < wf.m_walkers.m_hwm; ++irow) {
-//            std::cout
-//                    << wf.m_walkers.m_onv(irow).to_string() << " "
-//                    << wf.m_walkers.m_weight(irow, 0, 0) << " "
-//                    << wf.m_walkers.m_flags.m_reference_connection(irow)
-//                    << std::endl;
-        }
-//        std::cout << "\n";
     }
 /*
     for (size_t i = 0ul; i < wf.m_walkers.m_hwm; ++i) {

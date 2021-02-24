@@ -74,14 +74,14 @@ TEST(StochasticPropagator, BosonTest) {
     StochasticPropagator prop(ham, opts);
     auto ref_energy = ham.get_energy(onv);
     prop.m_shift = ref_energy;//benchmark;
+
     auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
     Solver solver(prop, wf, ref_loc);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i = 0ul; i < opts.ncycle; ++i) {
+    for (size_t i = 0ul; i < 20000; ++i) {
         solver.execute();
-        std::cout << i << " " << wf.m_store.m_hwm << " " << std::sqrt(wf.square_norm()) << std::endl;
     }
 }
 #endif
