@@ -3,11 +3,6 @@
 //
 
 #include "Table.h"
-//
-// Created by rja on 06/02/2021.
-//
-
-#include "Table.h"
 #include "src/core/io/Logging.h"
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/sort/ExtremalValues.h"

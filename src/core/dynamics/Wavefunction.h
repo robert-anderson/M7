@@ -147,6 +147,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         auto lookup = m_store[m_store.m_row.m_onv];
         ASSERT(lookup);
         zero_weight();
+        // in the case that nadd==0.0, the set_weight method won't revoke:
+        revoke_initiator_status();
         m_store.erase(lookup);
         m_delta_nocc_onv(0, 0)--;
     }

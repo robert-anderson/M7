@@ -361,6 +361,7 @@ struct Communicator {
 
         DynamicRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
                 DynamicRowSet(comm, name) {
+            m_ac.m_row.restart();
             if (loc.is_mine()) {
                 add_(loc.m_irow);
                 ASSERT(m_ac.m_hwm);

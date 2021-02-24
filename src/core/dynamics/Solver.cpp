@@ -29,15 +29,16 @@ void Solver::loop_over_occupied_onvs() {
 
         const auto &weight = row.m_weight(m_wf.m_ipart);
 
+        m_wf.m_nocc_onv(0, 0)++;
+        if (row.m_initiator.get(m_wf.m_ipart))
+            m_wf.m_ninitiator(0, 0)++;
+
         if (consts::float_is_zero(weight)){
             // ONV has become unoccupied and must be removed from mapped list
             m_wf.remove_walker();
             continue;
         }
 
-        m_wf.m_nocc_onv(0, 0)++;
-        if (row.m_initiator.get(m_wf.m_ipart))
-            m_wf.m_ninitiator(0, 0)++;
         m_wf.m_nwalker(0, 0) += std::abs(weight);
         m_wf.m_l2_norm_square(0, 0) += std::pow(std::abs(weight), 2.0);
 
@@ -114,6 +115,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
 
 void Solver::execute(size_t niter) {
     for (size_t i = 0ul; i < niter; ++i) {
+
         m_cycle_timer.reset();
         m_cycle_timer.unpause();
         begin_cycle();
@@ -174,7 +176,6 @@ void Solver::end_cycle() {
         if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
         MPI_REQUIRE(chk,"Unlogged walker population changes have occurred");
     }
-
     MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
                 "Unlogged creations of initiator ONVs have occurred");
 

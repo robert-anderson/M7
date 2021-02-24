@@ -26,6 +26,19 @@ struct Row {
         return m_i < *m_table_hwm;
     }
 
+    bool ptr_in_range() const {
+        return m_dbegin && (m_dbegin >= m_table_bw->m_dbegin) && (m_dbegin < m_table_bw->m_dbegin+*m_table_hwm*m_dsize);
+    }
+
+    defs::data_t* dbegin() {
+        MPI_ASSERT(ptr_in_range(), "the row is not pointing to a valid buffer");
+        return m_dbegin;
+    }
+
+    const defs::data_t* dbegin() const {
+        return m_dbegin;
+    }
+
     /*
      * the 3 "cursor" methods
      */

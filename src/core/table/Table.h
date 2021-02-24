@@ -126,6 +126,7 @@ struct Table : TableBase {
             TableBase(static_cast<const Row &>(row).m_dsize), m_row(row) {
         static_cast<Row &>(m_row).m_table_bw = &m_bw;
         static_cast<Row &>(m_row).m_table_hwm = &m_hwm;
+        static_cast<Row &>(m_row).m_dbegin = nullptr;
     }
 
     std::string to_string(const defs::inds *ordering= nullptr) const {

@@ -43,8 +43,7 @@ bool FieldBase::is_added_to_row() const {
 
 char *FieldBase::begin() const {
     MPI_ASSERT(is_added_to_row(), "Field is not associated with row");
-    MPI_ASSERT(m_row->m_dbegin, "Associated row is not pointing to table buffer");
-    return (char *) (m_row->m_dbegin) + m_row_offset;
+    return (char *) (m_row->dbegin()) + m_row_offset;
 }
 
 char *FieldBase::begin(const size_t &iitem) const {

@@ -11,9 +11,7 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(m_summables, wf.m_format),
         m_nwalker_at_doubles(m_summables, wf.m_format)
-        {
-            update();
-}
+        {}
 
 void Reference::add_row() {
     auto& row = m_wf.m_store.m_row;
