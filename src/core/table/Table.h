@@ -115,6 +115,10 @@ struct TableBase {
 
         bool operator!=(const Loc &other);
     };
+
+    virtual std::string to_string(const defs::inds *ordering= nullptr) const {
+        return "";
+    }
 };
 
 template<typename row_t>
@@ -129,7 +133,7 @@ struct Table : TableBase {
         static_cast<Row &>(m_row).m_dbegin = nullptr;
     }
 
-    std::string to_string(const defs::inds *ordering= nullptr) const {
+    std::string to_string(const defs::inds *ordering= nullptr) const override {
         std::string tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
         m_row.restart();

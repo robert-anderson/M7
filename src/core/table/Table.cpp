@@ -110,10 +110,10 @@ void TableBase::post_insert(const size_t& iinsert) {}
 
 void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks) {
     for (size_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
-        auto irow_TableX = get_free_row();
-        std::memcpy(dbegin(irow_TableX), recv.m_dbegin + irow_recv * m_row_dsize, m_row_size);
-        post_insert(irow_TableX);
-        for (auto f: callbacks) f(irow_TableX);
+        auto irow = get_free_row();
+        std::memcpy(dbegin(irow), recv.m_dbegin + irow_recv * m_row_dsize, m_row_size);
+        post_insert(irow);
+        for (auto f: callbacks) f(irow);
     }
 }
 void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){

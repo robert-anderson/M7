@@ -93,7 +93,9 @@ public:
         return false;
     }
 
-    virtual TableBase table() = 0;
+    virtual TableBase& table() = 0;
+
+    virtual const TableBase& table() const = 0;
 
     size_t nblock_() const;
 
@@ -115,6 +117,8 @@ public:
 
     virtual size_t get_rank_by_irow(const size_t& irow) const = 0;
 
+    virtual size_t get_block_by_irow(const size_t& irow) const = 0;
+
 };
 
 
@@ -129,8 +133,12 @@ public:
     RankAllocator(MappedTable<row_t>& table, size_t nblock, size_t period, double acceptable_imbalance) :
     RankAllocatorBase(nblock, period, acceptable_imbalance), m_table(table), m_row(table.m_row) {}
 
-    TableBase table() override {
-        return TableBase(0);
+    const TableBase& table() const override {
+        return m_table;
+    }
+
+    TableBase& table() override {
+        return m_table;
     }
 
     void record_work_time(const row_t& row, const Timer& work_time) {
@@ -157,6 +165,12 @@ public:
         m_row.jump(irow);
         return get_rank(m_row);
     }
+
+    size_t get_block_by_irow(const size_t &irow) const override {
+        m_row.jump(irow);
+        return get_block(m_row);
+    }
+
 };
 
 

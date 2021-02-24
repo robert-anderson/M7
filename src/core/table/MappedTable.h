@@ -63,10 +63,13 @@ struct MappedTable : Table<row_t>, MappedTableBase {
      */
     typedef typename KeyField<row_t>::type key_field_t;
     row_t m_lookup_row;
+    row_t m_insert_row;
 
     using Table<row_t>::m_row;
+    using Table<row_t>::to_string;
 
-    MappedTable(const row_t &row, size_t nbucket) : Table<row_t>(row), MappedTableBase(nbucket), m_lookup_row(m_row) {
+    MappedTable(const row_t &row, size_t nbucket) : Table<row_t>(row), MappedTableBase(nbucket),
+        m_lookup_row(m_row), m_insert_row(m_row) {
         ASSERT(static_cast<const Row &>(m_lookup_row).m_table_bw);
     }
 
@@ -113,10 +116,10 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     // for situations in which the row has already been copied-to
     void post_insert_buckets(const size_t &irow, std::vector<std::forward_list<size_t>> &buckets) {
         ASSERT(!TableBase::is_cleared(irow))
-        m_lookup_row.jump(irow);
+        m_insert_row.jump(irow);
         // row mustn't have already been added
-        ASSERT(!(*this)[KeyField<row_t>::get(m_lookup_row)]);
-        auto &bucket = buckets[KeyField<row_t>::get(m_lookup_row).hash() % buckets.size()];
+        ASSERT(!(*this)[KeyField<row_t>::get(m_insert_row)]);
+        auto &bucket = buckets[KeyField<row_t>::get(m_insert_row).hash() % buckets.size()];
         bucket.insert_after(bucket.before_begin(), irow);
     }
 

@@ -169,15 +169,18 @@ void Solver::begin_cycle() {
 }
 
 void Solver::end_cycle() {
-    double chk_ratio;
+    /*
+     * TODO: make these checks compatible with dynamic rank allocation
+     */
+//    double chk_ratio;
     if (!consts::float_is_zero(m_wf.m_nwalker(0, 0))) {
-        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
-        bool chk = m_chk_nwalker_local == 0.0 || consts::floats_nearly_equal(chk_ratio, 1.0);
-        if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
-        MPI_REQUIRE(chk,"Unlogged walker population changes have occurred");
+//        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
+//        bool chk = m_chk_nwalker_local == 0.0 || consts::floats_nearly_equal(chk_ratio, 1.0);
+//        if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
+//        MPI_REQUIRE(chk,"Unlogged walker population changes have occurred");
     }
-    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
-                "Unlogged creations of initiator ONVs have occurred");
+//    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
+//                "Unlogged creations of initiator ONVs have occurred");
 
     m_wf.end_cycle();
     m_reference.end_cycle();

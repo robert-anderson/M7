@@ -7,6 +7,7 @@
 
 #include "src/defs.h"
 #include <vector>
+#include <stack>
 #include <complex>
 #include <iostream>
 #include <cmath>
@@ -19,6 +20,7 @@
 #include <algorithm>
 #include <memory>
 #include <functional>
+#include <list>
 
 namespace utils {
 
@@ -41,9 +43,9 @@ namespace utils {
     }
 
     template<typename T>
-    std::string to_string(T v, size_t n) {
+    std::string to_string(const std::vector<T>& v) {
         std::string string("[");
-        for (size_t i = 0ul; i < n; ++i) {
+        for (size_t i = 0ul; i < v.size(); ++i) {
             string += std::to_string(v[i]) + " ";
         }
         string += "]";
@@ -51,8 +53,22 @@ namespace utils {
     }
 
     template<typename T>
-    std::string to_string(T v) {
-        return to_string(v, v.size());
+    std::string to_string(const std::stack<T>& v) {
+        auto cpy = v;
+        std::vector<T> tmp;
+        while (!v.empty()){
+            tmp.push_back(cpy.top());
+            cpy.pop();
+        }
+        return to_string(tmp);
+    }
+
+    template<typename T>
+    std::string to_string(const std::list<T>& v) {
+        auto cpy = v;
+        std::vector<T> tmp;
+        for (const auto& i: v) tmp.push_back(i);
+        return to_string(tmp);
     }
 
     template<typename T>

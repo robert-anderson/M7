@@ -165,16 +165,12 @@ void RankAllocatorBase::update(size_t icycle) {
     for (size_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
 
     log::info("Sending block {} from rank {} to {} on cycle {}", *it_block_transfer, irank_send, irank_recv, icycle);
-
     // prepare vector of row indices to send
     defs::inds irows_send;
     if (mpi::i_am(irank_send)){
         for (size_t irow = 0; irow<table().m_hwm; ++irow){
             if (table().is_cleared(irow)) continue;
-            /*
-             * TODO:
-             */
-            //if (get_block_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
+            if (get_block_by_irow(irow) == *it_block_transfer) irows_send.push_back(irow);
         }
     }
     m_mean_work_times.assign(m_nblock, 0.0);
