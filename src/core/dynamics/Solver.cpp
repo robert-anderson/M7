@@ -115,6 +115,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
     m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(
             "M7.stats."+std::to_string(mpi::irank()));
+    m_wf.m_ra.activate(m_icycle);
 }
 
 void Solver::execute(size_t niter) {
@@ -165,8 +166,6 @@ void Solver::begin_cycle() {
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.begin_cycle();
     ASSERT(m_wf.m_nwalker(0,0)==0);
-    if (m_prop.m_variable_shift.started_last_cycle(m_icycle))
-        m_wf.m_ra.activate(m_icycle);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     m_reference.begin_cycle();
