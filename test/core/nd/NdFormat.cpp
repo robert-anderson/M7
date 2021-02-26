@@ -5,6 +5,12 @@
 #include "gtest/gtest.h"
 #include "src/core/nd/NdFormat.h"
 
+TEST(NdArrayFormat, NamedDimensions) {
+    NdFormat<3> format({3, 4, 2},
+                       {"first", "second", "third"});
+    ASSERT_EQ(format.to_string(), "first (3) second (4) third (2) ");
+}
+
 TEST(NdArrayFormat, Test1D) {
     NdFormat<1> format(9);
     size_t iflat = 0ul;

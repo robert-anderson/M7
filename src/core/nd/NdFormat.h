@@ -7,11 +7,17 @@
 
 #include "src/defs.h"
 #include "array"
+#include "algorithm"
+
+struct NdFormatBase{
+    virtual std::string to_string() const = 0;
+};
 
 template <size_t nind>
-class NdFormat {
+class NdFormat : NdFormatBase{
     std::array<size_t, nind> m_shape;
     std::array<size_t, nind> m_strides;
+    std::array<std::string, nind> m_dim_names;
     size_t m_nelement = ~0ul;
 
     void set_nelement() {
@@ -29,13 +35,15 @@ public:
         set_strides();
         set_nelement();
     }
-    NdFormat(std::array<size_t, nind> shape): m_shape(std::move(shape)){
+
+    NdFormat(std::array<size_t, nind> shape, std::array<std::string, nind> dim_names={}):
+        m_shape(std::move(shape)), m_dim_names(std::move(dim_names)){
         set_strides();
         set_nelement();
         ASSERT(m_nelement!=~0ul);
     }
 
-    NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape()){}
+    NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape(), other.m_dim_names){}
 
     bool operator==(const NdFormat<nind> &other) const{
         for (size_t iind=0ul; iind<nind; ++iind){
@@ -79,6 +87,21 @@ public:
             ind = remainder/m_strides[i];
             remainder-=ind*m_strides[i];
         }
+    }
+
+    std::string to_string() const override {
+        std::string tmp;
+        if (m_dim_names==std::array<std::string, nind>{}){
+            for (size_t i=0ul; i<nind; ++i) {
+                tmp+=" "+m_shape[i];
+            }
+        }
+        else {
+            for (size_t i=0ul; i<nind; ++i) {
+                tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
+            }
+        }
+        return tmp;
     }
 
 
