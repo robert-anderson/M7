@@ -10,11 +10,7 @@ void BosonOnvConnection::Diff::zero() {
     m_nchanged_mode = 0ul;
 }
 
-
-
-
-
-BosonOnvConnection::BosonOnvConnection(const size_t nmode) :
+BosonOnvConnection::BosonOnvConnection(const size_t& nmode) :
         m_nmode(nmode), m_com(nmode), m_diff(nmode) {}
 
 BosonOnvConnection::BosonOnvConnection(const fields::BosonOnv &in, const fields::BosonOnv &out) :
@@ -74,7 +70,7 @@ void BosonOnvConnection::apply(const fields::BosonOnv &in, fields::BosonOnv &out
     }
 }
 
-void BosonOnvConnection::add(const size_t imode, const int change) {
+void BosonOnvConnection::add(const size_t& imode, const int& change) {
     m_diff.m_changes[m_diff.m_nchanged_mode] = change;
     m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;
     ++m_diff.m_nchanged_mode;

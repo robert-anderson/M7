@@ -21,7 +21,7 @@ class BosonOnvConnection {
 
 public:
 
-    explicit BosonOnvConnection(const size_t nmode);
+    explicit BosonOnvConnection(const size_t& nmode);
     BosonOnvConnection(const fields::BosonOnv &in, const fields::BosonOnv &out);
     explicit BosonOnvConnection(const fields::BosonOnv &in);
 
@@ -38,7 +38,7 @@ public:
 
     void apply(const fields::BosonOnv &in, fields::BosonOnv& out);
 
-    void add(const size_t imode, const int change);
+    void add(const size_t& imode, const int& change);
 
     size_t nexcit() const {
         size_t res = 0ul;

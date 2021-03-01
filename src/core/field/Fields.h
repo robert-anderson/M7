@@ -51,6 +51,11 @@ namespace fields {
 
         BosonOnv(const BosonOnv &other) : BosonOnv(other.m_row ? other.m_row->m_child : nullptr, other.m_nelement) {}
 
+        BosonOnv &operator=(const BosonOnv &other) {
+            VectorField<uint8_t>::operator=(other);
+            return *this;
+        }
+
         BosonOnv &operator=(const defs::inds &inds) {
             MPI_ASSERT(inds.size() == m_nelement, "Vector is not the correct size");
             for (size_t i = 0ul; i < inds.size(); ++i) this->operator()(i) = inds[i];
