@@ -71,9 +71,27 @@ bool FieldBase::is_zero() const {
 }
 
 bool FieldBase::operator==(const FieldBase &other) const {
-    MPI_ASSERT(is_comparable(other),
-               "can't copy from a field which is either incompatible or has a different selection length")
-    return std::memcmp(begin(), other.begin(), m_size) == 0;
+    return cmp(other)==0;
+}
+
+bool FieldBase::operator!=(const FieldBase &other) const {
+    return cmp(other)!=0;
+}
+
+bool FieldBase::operator>(const FieldBase &other) const {
+    return cmp(other)>0;
+}
+
+bool FieldBase::operator<(const FieldBase &other) const {
+    return cmp(other)<0;
+}
+
+bool FieldBase::operator>=(const FieldBase &other) const {
+    return cmp(other)>=0;
+}
+
+bool FieldBase::operator<=(const FieldBase &other) const {
+    return cmp(other)<=0;
 }
 
 defs::hash_t FieldBase::hash() const {
@@ -84,4 +102,9 @@ std::string FieldBase::to_string() const {
     std::string tmp;
     for (size_t i=0ul; i<m_nitem; ++i) tmp+=to_string_element(i);
     return tmp;
+}
+
+int FieldBase::cmp(const FieldBase &other) const {
+    MPI_ASSERT(is_comparable(other),"can't compare to incompatible field")
+    return std::memcmp(begin(), other.begin(), m_size);
 }

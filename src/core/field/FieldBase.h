@@ -48,6 +48,16 @@ struct FieldBase {
 
     bool operator==(const FieldBase &other) const;
 
+    bool operator!=(const FieldBase &other) const;
+
+    bool operator<(const FieldBase &other) const;
+
+    bool operator>(const FieldBase &other) const;
+
+    bool operator>=(const FieldBase &other) const;
+
+    bool operator<=(const FieldBase &other) const;
+
     /**
      * Hashes whole field in row, not the currently viewed element
      * @return
@@ -57,6 +67,9 @@ struct FieldBase {
     virtual std::string to_string_element(const size_t& iitem) const = 0;
 
     std::string to_string() const;
+
+private:
+    int cmp(const FieldBase &other) const;
 };
 
 

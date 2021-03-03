@@ -133,14 +133,19 @@ struct Table : TableBase {
         static_cast<Row &>(m_row).m_dbegin = nullptr;
     }
 
+    Table(const Table<row_t>& other) : Table(other.m_row){
+        ASSERT(static_cast<Row &>(m_row).m_table_bw==&m_bw);
+    }
+
     std::string to_string(const defs::inds *ordering= nullptr) const override {
         std::string tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
-        m_row.restart();
+        auto row = m_row;
+        row.restart();
         for (size_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;
-            m_row.jump(irow);
-            tmp+=std::to_string(irow) + ". " + m_row.to_string() + "\n";
+            row.jump(irow);
+            tmp+=std::to_string(irow) + ". " + row.to_string() + "\n";
         }
         return tmp;
     }

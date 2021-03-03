@@ -36,9 +36,10 @@ private:
 
 };
 
-template <typename viewable_t>
+/*
+template <typename row_t, typename field_t>
 class TableFieldSorter : public Quicksorter {
-    //static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
+    static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from ");
     typedef typename viewable_t::cview_t cview_t;
 
 public:
@@ -54,7 +55,7 @@ public:
 //            ),
 //            max, abs_val) {}
 };
-
+*/
 
 
 #endif //M7_QUICKSORTER_H

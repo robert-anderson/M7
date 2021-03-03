@@ -27,11 +27,12 @@ struct Row {
     }
 
     bool ptr_in_range() const {
-        return m_dbegin && (m_dbegin >= m_table_bw->m_dbegin) && (m_dbegin < m_table_bw->m_dbegin+*m_table_hwm*m_dsize);
+        return (m_dbegin >= m_table_bw->m_dbegin) && (m_dbegin < m_table_bw->m_dbegin+*m_table_hwm*m_dsize);
     }
 
     defs::data_t* dbegin() {
-        MPI_ASSERT(ptr_in_range(), "the row is not pointing to a valid buffer");
+        MPI_ASSERT(m_dbegin, "the row pointer is not set")
+        MPI_ASSERT(ptr_in_range(), "the row is not pointing memory in the permitted range");
         return m_dbegin;
     }
 

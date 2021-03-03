@@ -2,8 +2,8 @@
 // Created by rja on 29/11/2020.
 //
 
-#ifndef M7_PARALLELSORTER_H
-#define M7_PARALLELSORTER_H
+#ifndef M7_QUICKSORTER_H
+#define M7_QUICKSORTER_H
 
 #include <functional>
 #include "src/core/field/Elements.h"
@@ -31,4 +31,4 @@
 //};
 
 
-#endif //M7_PARALLELSORTER_H
+#endif //M7_QUICKSORTER_H
