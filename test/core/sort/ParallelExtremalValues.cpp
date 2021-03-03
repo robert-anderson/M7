@@ -16,7 +16,7 @@ TEST(ParallelExtremalValues, Test) {
         field_t m_field;
         TestRow() : m_field(this){}
     };
-    BufferedTable<TestRow> m_table("Test", {});
+    BufferedTable<TestRow> m_table("Test", {{}});
     PRNG prng(14, 1000);
 
     const size_t nrow_per_rank = 100;

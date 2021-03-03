@@ -46,7 +46,7 @@ TEST(FieldZ, Test) {
         fields::FermiBosOnv &m_key_field = m_fbonv;
     };
 
-    BufferedTable<TestRow> table("Test", {});
+    BufferedTable<TestRow> table("Test", {{}});
 
     ASSERT_EQ(&table.m_row, table.m_row.m_array.m_row);
     ASSERT_EQ(table.m_row.m_array.m_row_offset, 0ul);

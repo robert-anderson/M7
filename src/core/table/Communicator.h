@@ -13,11 +13,16 @@
 #include <src/core/parallel/RankAllocator.h>
 
 
-template<typename row_t>
+template<typename row_t, bool mapped=false>
 class CommunicatingPair {
-
-    BufferedTableArray<row_t> m_send;
-    BufferedTable<row_t> m_recv;
+public:
+    typedef BufferedTableArray<row_t, mapped> send_t;
+    typedef BufferedTable<row_t> recv_t;
+    typedef typename send_t::table_t send_table_t;
+    typedef typename recv_t::table_t recv_table_t;
+private:
+    send_t m_send;
+    recv_t m_recv;
     double m_buffer_expansion_factor;
 
 public:
@@ -28,9 +33,9 @@ public:
     defs::inds m_last_send_counts;
     size_t m_last_recv_count = 0ul;
     template<typename ...Args>
-    CommunicatingPair(std::string name, double buffer_expansion_factor, const row_t &row):
-            m_send(name + " send", mpi::nrank(), row),
-            m_recv(name + " recv", row),
+    CommunicatingPair(std::string name, double buffer_expansion_factor, const send_table_t &send):
+            m_send(name + " send", mpi::nrank(), send),
+            m_recv(name + " recv", recv_table_t(send.m_row)),
             m_buffer_expansion_factor(buffer_expansion_factor) {
         m_send.set_expansion_factor(m_buffer_expansion_factor);
         m_recv.set_expansion_factor(m_buffer_expansion_factor);
@@ -132,14 +137,19 @@ public:
     }
 };
 
-template<typename store_row_t, typename comm_row_t>
+template<typename store_row_t, typename comm_row_t, bool mapped_comm=false>
 struct Communicator {
     static_assert(std::is_base_of<Row, store_row_t>::value, "Template arg must be derived from Row");
     static_assert(std::is_base_of<Row, comm_row_t>::value, "Template arg must be derived from Row");
 
     typedef typename KeyField<store_row_t>::type key_field_t;
-    BufferedMappedTableZ<store_row_t> m_store;
-    CommunicatingPair<comm_row_t> m_comm;
+    typedef BufferedTable<store_row_t, true> store_t;
+    typedef CommunicatingPair<comm_row_t, mapped_comm> comm_t;
+    typedef typename store_t::table_t store_table_t;
+    typedef typename comm_t::send_t::table_t send_table_t;
+
+    store_t m_store;
+    comm_t m_comm;
     mutable RankAllocator<store_row_t> m_ra;
     std::string m_name;
     double m_buffer_expansion_factor;
@@ -409,10 +419,10 @@ struct Communicator {
 
     Communicator(std::string name, double buffer_expansion_factor,
                  size_t nblock_ra, size_t period_ra,
-                 const store_row_t &store_row, const comm_row_t &comm_row,
-                 size_t nbucket, double acceptable_imbalance):
-            m_store(name + " store", store_row, nbucket),
-            m_comm(name, buffer_expansion_factor, comm_row),
+                 const store_table_t &store, const send_table_t &send,
+                 double acceptable_imbalance):
+            m_store(name + " store", store),
+            m_comm(name, buffer_expansion_factor, send),
             m_ra(m_store, nblock_ra, period_ra, acceptable_imbalance),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {

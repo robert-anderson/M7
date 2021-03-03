@@ -13,7 +13,7 @@ TEST(BufferedTableArray, Resize){
         fields::Onv<0> m_fonv;
         TestRow(size_t nsite): m_fonv(this, nsite){}
     };
-    BufferedTableArray<TestRow> bta("Test table", 3, 6);
+    BufferedTableArray<TestRow> bta("Test table", 3, {{6}});
     bta.expand(4);
 
     bta[0].push_back(3);

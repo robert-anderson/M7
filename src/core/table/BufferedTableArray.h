@@ -5,11 +5,13 @@
 #ifndef M7_BUFFEREDTABLEARRAY_H
 #define M7_BUFFEREDTABLEARRAY_H
 
-#include "Table.h"
+#include "MappedTable.h"
 
-template<typename row_t>
+template<typename row_t, bool mapped=0>
 class BufferedTableArray {
-    typedef Table<row_t> table_t;
+public:
+    typedef typename std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type table_t;
+private:
     Buffer m_buffer;
     std::vector<table_t> m_tables;
 
@@ -50,11 +52,11 @@ public:
         return (*this)[0].bw_dsize();
     }
 
-    BufferedTableArray(std::string name, size_t ntable, const row_t& row):
+    BufferedTableArray(std::string name, size_t ntable, const table_t& table):
             m_buffer(name, ntable) {
         m_tables.reserve(ntable);
         for (size_t itable = 0ul; itable < ntable; ++itable) {
-            m_tables.emplace_back(row);
+            m_tables.emplace_back(table);
             static_cast<TableBase &>(m_tables.back()).set_buffer(&m_buffer);
         }
     }

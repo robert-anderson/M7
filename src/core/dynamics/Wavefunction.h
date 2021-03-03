@@ -36,13 +36,16 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
     Wavefunction(const Options &opts, size_t nsite) :
-            Communicator<WalkerTableRow, SpawnTableRow>(
+            Communicator<WalkerTableRow, SpawnTableRow, false>(
                     "walker",
                     opts.walker_buffer_expansion_factor,
                     opts.nload_balance_block_per_rank*mpi::nrank(),
                     opts.load_balance_period,
-                    WalkerTableRow(nsite, opts.nroot, opts.nreplica), SpawnTableRow(nsite),
-                    MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3),
+                    {
+                        WalkerTableRow(nsite, opts.nroot, opts.nreplica),
+                        MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
+                    },
+                    {SpawnTableRow(nsite)},
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),

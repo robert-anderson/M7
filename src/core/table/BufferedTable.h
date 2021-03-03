@@ -7,37 +7,19 @@
 
 #include "MappedTable.h"
 
-template<typename row_t>
-class BufferedTable : public Table<row_t> {
+template<typename row_t, bool mapped=false>
+class BufferedTable : public std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type {
     Buffer m_buffer;
 public:
+    typedef typename std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type table_t;
     using TableBase::m_row_dsize;
 
-    BufferedTable(std::string name, const row_t& row):
-            Table<row_t>(row), m_buffer(name, 1) {
+    BufferedTable(std::string name, const table_t& table):
+            table_t(table), m_buffer(name, 1) {
         TableBase::set_buffer(&m_buffer);
     }
     BufferedTable(const BufferedTable<row_t> &other) :
-            BufferedTable(other.m_buffer.m_name, other.m_row){}
-
-    void set_expansion_factor(double f) {
-        m_buffer.m_expansion_factor = f;
-    }
-};
-
-
-template<typename row_t>
-class BufferedMappedTableZ : public MappedTable<row_t> {
-    Buffer m_buffer;
-public:
-    using TableBase::m_row_dsize;
-
-    BufferedMappedTableZ(std::string name, const row_t& row, size_t nbucket):
-            MappedTable<row_t>(row, nbucket), m_buffer(name, 1) {
-        TableBase::set_buffer(&m_buffer);
-    }
-    BufferedMappedTableZ(const MappedTable<row_t> &other) :
-            BufferedMappedTableZ(other.m_buffer.m_name, other.nbucket(), other.m_row){}
+            BufferedTable(other.m_buffer.m_name, other){}
 
     void set_expansion_factor(double f) {
         m_buffer.m_expansion_factor = f;
