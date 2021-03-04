@@ -71,6 +71,7 @@ namespace defs {
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef uint64_t data_t;
+    typedef unsigned char mev_ind_t;
     constexpr size_t nbyte_data = sizeof(data_t);
     constexpr size_t nbit_data = CHAR_BIT * nbyte_data;
     const size_t isym_1e = 2;

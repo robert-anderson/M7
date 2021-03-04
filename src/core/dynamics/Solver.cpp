@@ -74,7 +74,7 @@ void Solver::annihilate_row() {
 
     if (irow_walkers == ~0ul) {
         /*
-         * the destination determinant is not currently occupied, so initiator rules
+         * the destination ONV is not currently occupied, so initiator rules
          * must be applied
          */
         if (!row.m_src_initiator) {

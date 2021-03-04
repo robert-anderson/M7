@@ -67,11 +67,13 @@ struct MappedTable : Table<row_t>, MappedTableBase {
 
     using Table<row_t>::m_row;
     using Table<row_t>::to_string;
+    using TableBase::m_hwm;
+    using TableBase::m_bw;
 
     MappedTable(const row_t &row, size_t nbucket) : Table<row_t>(row), MappedTableBase(nbucket),
-        m_lookup_row(m_row), m_insert_row(m_row) {
-        ASSERT(static_cast<const Row &>(m_lookup_row).m_table_bw);
-    }
+        m_lookup_row(m_row), m_insert_row(m_row) {}
+
+    MappedTable(const MappedTable<row_t>& other): MappedTable(other.m_row, other.m_buckets.size()){}
 
     LookupResult operator[](const key_field_t &key) {
         m_ntotal_lookup++;
@@ -79,7 +81,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         auto current = res.m_bucket.before_begin();
         for (auto next = std::next(current); next != res.m_bucket.end(); next++) {
             m_lookup_row.jump(*next);
-            if (m_lookup_row.key_field() == key) return res;
+            if (KeyField<row_t>::get(m_lookup_row) == key) return res;
             res.m_prev++;
             m_ntotal_skip++;
         }
