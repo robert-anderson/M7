@@ -7,6 +7,7 @@
 
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/util/Timer.h>
+#include <src/core/observables/AverageCoefficients.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStatsFile.h"
@@ -46,7 +47,10 @@ class Solver {
     defs::wf_t m_chk_nwalker_local = 0.0;
     size_t m_chk_ninitiator_local = 0ul;
 
+    conn::Basic<> m_connection;
+
 public:
+    AverageCoefficients m_average_coeffs;
 
     Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
 

@@ -16,13 +16,13 @@ TEST(StochasticPropagator, Test) {
     opts.tau_initial = 0.01;
     opts.load_balance_period = 5;
     opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 100000;
+    opts.nwalker_target = 50000;
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
-    opts.ncycle = 500000;
+    opts.ncycle = 50000;
     opts.init();
 //const auto benchmark = -108.81138657563143;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
@@ -45,6 +45,12 @@ TEST(StochasticPropagator, Test) {
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
+    std::cout <<
+              solver.m_average_coeffs.m_ref_coeff
+    << std::endl;
+    std::cout <<
+              solver.m_average_coeffs.to_string()
+            << std::endl;
 }
 
 

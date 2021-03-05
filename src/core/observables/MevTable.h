@@ -34,7 +34,11 @@ public:
 
     MevRow(defs::inds ninds, size_t nvalue):
     m_ninds(ninds), m_offsets(get_offsets(ninds)),
-    m_inds(this, m_offsets.back()+m_ninds.back()), m_values(this, nvalue){}
+    m_inds(this, nelement()), m_values(this, nvalue){}
+
+    size_t nelement() const {
+        return m_offsets.back()+m_ninds.back();
+    }
 
     void set(const size_t& iind, const defs::inds& inds){
         ASSERT(iind<m_ninds.size());

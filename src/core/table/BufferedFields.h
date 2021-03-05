@@ -76,6 +76,10 @@ struct BufferedFieldZ : WrappedRowZ, field_t {
 
 namespace buffered {
 
+    template<typename T>
+    struct Vector : BufferedFieldZ<fields::Vector<T>> {
+        Vector(size_t nelement) : BufferedFieldZ<fields::Vector<T>>({nullptr, nelement}){}
+    };
 
     struct FermionOnv : BufferedFieldZ<fields::FermionOnv> {
         using fields::FermionOnv::operator=;

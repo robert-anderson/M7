@@ -88,6 +88,11 @@ public:
         return nexcit()<=2;
     }
 
+    bool is_exlevel(const defs::inds& exlevel) const {
+        if (exlevel.size()!=2) return false;
+        return m_cre.size()==exlevel[0] && m_ann.size()==exlevel[1];
+    }
+
 };
 
 /*
