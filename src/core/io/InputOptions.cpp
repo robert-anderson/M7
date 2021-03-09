@@ -25,6 +25,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-O,--stats_path", stats_path,
                "path to the file to which MC cycle statistics will be output");
 
+    add_flag("--parallel_stats", parallel_stats,
+               "output additional stats from each MPI rank");
+
     add_flag("-E,--exact_propagation", exact_propagation,
              "perform fully deterministic projector FCI");
 

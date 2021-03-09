@@ -46,6 +46,6 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
 //    }
     else if (m_variable_shift) {
         auto rate = 1.0+wf.m_delta_nwalker.reduced(0, 0)/wf.m_nwalker.reduced(0, 0);
-        m_shift -= m_opts.shift_damp * consts::real_log(rate) / tau();
+        m_shift -= m_opts.shift_damp * consts::real_log(rate) / (tau()*m_opts.shift_update_period);
     }
 }
