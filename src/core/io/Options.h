@@ -14,7 +14,7 @@ struct Options {
     double reference_redefinition_thresh = 10.0;
     bool fcidump_spin_major = false;
     std::string stats_path = "M7.stats";
-    std::string parallel_stats_path = "M7.rank";
+    bool parallel_stats = false;
     bool exact_propagation = false;
     std::string excit_gen = "pchb";
     double nwalker_initial = 1.0;

@@ -113,7 +113,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc) {
     if (mpi::i_am_root())
         m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
-    m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(
+    if (m_opts.parallel_stats)
+        m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(
             "M7.stats."+std::to_string(mpi::irank()));
     m_wf.m_ra.activate(m_icycle);
 }
@@ -216,13 +217,13 @@ void Solver::output_stats() {
         m_stats->flush();
     }
 
-
-    m_parallel_stats->m_icycle() = m_icycle;
-    m_parallel_stats->m_synchronization_overhead() = m_synchronization_timer;
-    m_parallel_stats->m_nblock_wf_ra() = m_wf.m_ra.nblock_();
-    m_parallel_stats->m_nwalker() = m_wf.m_nwalker(0, 0);
-    m_parallel_stats->m_nwalker_lookup_skip() = m_wf.m_store.m_ntotal_skip;
-    m_parallel_stats->m_nwalker_lookup() = m_wf.m_store.m_ntotal_lookup;
+    if (m_opts.parallel_stats){
+        m_parallel_stats->m_icycle() = m_icycle;
+        m_parallel_stats->m_synchronization_overhead() = m_synchronization_timer;
+        m_parallel_stats->m_nblock_wf_ra() = m_wf.m_ra.nblock_();
+        m_parallel_stats->m_nwalker() = m_wf.m_nwalker(0, 0);
+        m_parallel_stats->m_nwalker_lookup_skip() = m_wf.m_store.m_ntotal_skip;
+        m_parallel_stats->m_nwalker_lookup() = m_wf.m_store.m_ntotal_lookup;
 //    m_parallel_stats->m_nrow_free_walker_list() = m_wf.m_walkers.
 //    StatsColumn<size_t> m_walker_list_high_water_mark;
 //    StatsColumn<double> m_walker_list_high_water_mark_fraction;
@@ -232,5 +233,6 @@ void Solver::output_stats() {
 //    StatsColumn<size_t> m_irank_largest_nrow_sent;
     m_parallel_stats->m_nrow_recv() = m_wf.m_comm.m_last_recv_count;
 //    StatsColumn<double> m_recv_list_filled_fraction;
-    m_parallel_stats->flush();
+        m_parallel_stats->flush();
+    }
 }
