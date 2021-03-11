@@ -50,6 +50,8 @@ namespace hdf5 {
         bool m_writemode;
         hid_t m_handle;
         File(std::string name, bool writemode): m_writemode(writemode){
+            auto plist_id = H5Pcreate(H5P_FILE_ACCESS);
+            H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPI_INFO_NULL);
             if (writemode) {
                 m_handle = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
                 MPI_REQUIRE_ALL(m_handle>=0, "HDF5 file could not be opened for writing. It may be locked by another program");
@@ -58,6 +60,7 @@ namespace hdf5 {
                 MPI_REQUIRE_ALL(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
                 m_handle = H5Fopen(name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
             }
+            H5Pclose(plist_id);
         }
 
         ~File() {
@@ -232,6 +235,119 @@ namespace hdf5 {
         }
 
     };
+
+    template<typename T>
+    class ListWriter {
+        /*
+         * parent HDF5 element (Group or File)
+         */
+        const hid_t m_parent;
+        /*
+         * dimensionality of an "item" e.g. if we are storing a list of matrices, this is 2
+         */
+        const hsize_t m_item_ndim;
+        /*
+         * shape of items
+         */
+        const std::vector<hsize_t> m_item_shape;
+        /*
+         * dimensionality of the list structure, e.g. if we are storing a list of matrices, this is 3
+         */
+        const hsize_t m_list_ndim;
+        /*
+         * 0th element is local number of rows
+         */
+        const std::vector<hsize_t> m_list_shape;
+        /*
+         * 0th element is total number of rows across all MPI ranks
+         */
+        const std::vector<hsize_t> m_list_shape_global;
+        /*
+         * each process has a hyperslab defining the location within the HDF5 file
+         * counts: the number of T-values to be written / read
+         * offsets: the position of the hyperslab (only the 0th value changes, rest are 0)
+         */
+        const std::vector<hsize_t> m_item_hyperslab_counts;
+        std::vector<hsize_t> m_item_hyperslab_offsets;
+
+        hid_t m_collective_write_plist_id;
+        hid_t m_dataset_id;
+        hid_t m_item_dataspace_id;
+        hid_t m_filespace_id;
+
+        std::vector<hsize_t> make_item_shape(const defs::inds& item_shape) {
+            std::vector<hsize_t> out;
+            out.reserve(item_shape.size());
+            for (const auto &x: item_shape) out.push_back(x);
+            return out;
+        }
+
+        std::vector<hsize_t> make_list_shape() {
+            auto out = m_item_shape;
+            out.insert(out.begin(), m_list_ndim);
+            return out;
+        }
+
+        std::vector<hsize_t> make_list_shape_global() {
+            auto out = m_item_shape;
+            out.insert(out.begin(), mpi::all_sum(m_list_ndim));
+            return out;
+        }
+
+        std::vector<hsize_t> make_item_hyperslab_counts() {
+            std::vector<hsize_t> out;
+            out.reserve(m_list_ndim);
+            out.push_back(1);
+            out.insert(++out.cbegin(), m_item_shape.cbegin(), m_item_shape.cend());
+            return out;
+        }
+
+    public:
+
+        ListWriter(hid_t parent, std::string name, defs::inds item_shape):
+                m_parent(parent),
+                m_item_ndim(item_shape.size()), m_item_shape(make_item_shape(item_shape)),
+                m_list_ndim(m_item_ndim+1), m_list_shape(make_list_shape()),
+                m_list_shape_global(make_list_shape_global()),
+                m_item_hyperslab_counts(make_item_hyperslab_counts()),
+                m_item_hyperslab_offsets(m_list_ndim, 0ul){
+            /*
+             * Create the dataspace for the dataset.
+             */
+            auto filespace = H5Screate_simple(m_list_ndim, m_list_shape_global.data(), NULL);
+            /*
+             * Create the dataset with default properties and close filespace.
+             */
+            m_dataset_id = H5Dcreate(m_parent, name.c_str(), type<T>(), filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5Sclose(filespace);
+
+            utils::print(m_item_hyperslab_counts);
+
+            m_item_dataspace_id = H5Screate_simple(m_list_ndim, m_item_hyperslab_counts.data(), NULL);
+            m_filespace_id = H5Dget_space(m_dataset_id);
+
+            m_collective_write_plist_id = H5Pcreate(H5P_DATASET_XFER);
+            H5Pset_dxpl_mpio(m_collective_write_plist_id, H5FD_MPIO_COLLECTIVE);
+        }
+
+        //ListWriter(const ListWriter<T>& other): ListWriter(other.m_parent){}
+
+        ~ListWriter(){
+            H5Dclose(m_dataset_id);
+            H5Sclose(m_filespace_id);
+            H5Sclose(m_item_dataspace_id);
+            H5Pclose(m_collective_write_plist_id);
+        }
+
+        void write_item(const T* item){
+            auto status = H5Dwrite(m_dataset_id, type<T>(), m_item_dataspace_id,
+                              m_filespace_id, m_collective_write_plist_id, item);
+            ASSERT(!status)
+            ++m_item_hyperslab_offsets[0];
+        }
+
+    };
+
 }
 
 #endif //M7_HDF5WRAPPER_H
