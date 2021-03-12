@@ -91,13 +91,14 @@ public:
 
     std::string to_string() const override {
         std::string tmp;
+        auto size = nind;
         if (m_dim_names==std::array<std::string, nind>{}){
-            for (size_t i=0ul; i<nind; ++i) {
+            for (size_t i=0ul; i<size; ++i) {
                 tmp+=" "+m_shape[i];
             }
         }
         else {
-            for (size_t i=0ul; i<nind; ++i) {
+            for (size_t i=0ul; i<size; ++i) {
                 tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
             }
         }
