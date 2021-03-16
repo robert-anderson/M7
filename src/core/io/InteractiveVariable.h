@@ -28,7 +28,8 @@ private:
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, bool>::type
     read_line(const std::string &line, T &v) {
-        int64_t tmp = string_utils::read_signed(line.c_str());
+        auto ptr = line.c_str();
+        int64_t tmp = string_utils::read_signed(ptr);
         v = static_cast<T>(tmp);
         return static_cast<const int64_t &>(v) == tmp;
     }
@@ -37,7 +38,8 @@ private:
     typename std::enable_if<std::is_integral<T>::value && !std::is_signed<T>::value, bool>::type
     read_line(const std::string &line, T &v) {
         if (line[0] == '-') return false;
-        size_t tmp = string_utils::read_unsigned(line.c_str());
+        auto ptr = line.c_str();
+        size_t tmp = string_utils::read_unsigned(ptr);
         v = static_cast<T>(tmp);
         return static_cast<const size_t &>(v) == tmp;
     }
@@ -46,7 +48,8 @@ private:
     template<typename T>
     typename std::enable_if<std::is_floating_point<T>::value, bool>::type
     read_line(const std::string &line, T &v) {
-        auto tmp = string_utils::read_double(line.c_str());
+        auto ptr = line.c_str();
+        auto tmp = string_utils::read_double(ptr);
         if (tmp==std::numeric_limits<double>::max()) return false;
         v = tmp;
         return true;

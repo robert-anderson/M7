@@ -366,7 +366,7 @@ namespace string_utils {
         return c == ' ' || c == ',' || c == ')';
     }
 
-    static double read_double(const char *ptr) {
+    static double read_double(const char *&ptr) {
         const char *begin = nullptr;
         ASSERT(ptr != nullptr)
         for (; *ptr != 0; ptr++) {
@@ -387,7 +387,7 @@ namespace string_utils {
         }
     }
 
-    static size_t read_unsigned(const char *ptr) {
+    static size_t read_unsigned(const char *&ptr) {
         const char *begin = nullptr;
         ASSERT(ptr != nullptr)
         for (; *ptr != 0; ptr++) {
@@ -408,7 +408,7 @@ namespace string_utils {
         }
     }
 
-    static int64_t read_signed(const char *ptr) {
+    static int64_t read_signed(const char *&ptr) {
         bool pos = true;
         if (*ptr=='-') {
             pos = false;
