@@ -124,7 +124,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_opts(prop.m_opts),
         m_wf(wf),
         m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
-        m_connection(prop.m_ham.nsite())
+        m_connection(prop.m_ham.nsite()),
+        m_exit("exit")
         //m_average_coeffs("average coeffs", {2, 2}, 1)
         {
     if (mpi::i_am_root())
@@ -162,6 +163,8 @@ void Solver::execute(size_t niter) {
         m_cycle_timer.pause();
         output_stats();
         ++m_icycle;
+
+        if (m_exit.read() && m_exit.m_v) return;
     }
 }
 

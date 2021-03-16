@@ -43,6 +43,11 @@ namespace utils {
     }
 
     template<typename T>
+    std::string to_string(const T& v) {
+        return std::to_string(v);
+    }
+
+    template<typename T>
     std::string to_string(const std::vector<T>& v) {
         std::string string("[");
         for (size_t i = 0ul; i < v.size(); ++i) {
@@ -343,7 +348,78 @@ namespace string_utils {
         res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
         return res;
     }
+
+
+    static inline bool is_numeric(const char &c) {
+        return '0' <= c && c <= '9';
+    }
+
+    static inline bool is_partial_standard_float(const char &c) {
+        return is_numeric(c) || c == '.' || c == '-';
+    }
+
+    static inline bool is_partial_scientific(const char &c) {
+        return is_partial_standard_float(c) || c == 'e' || c == 'E' || c == 'd' || c == 'D' || c == '+';
+    }
+
+    static inline bool is_divider(const char &c) {
+        return c == ' ' || c == ',' || c == ')';
+    }
+
+    static double read_double(const char *ptr) {
+        const char *begin = nullptr;
+        ASSERT(ptr != nullptr)
+        for (; *ptr != 0; ptr++) {
+            if (!begin) {
+                if (is_partial_standard_float(*ptr)) begin = ptr;
+            } else {
+                if (is_divider(*ptr) && is_numeric(ptr[-1])) {
+                    return std::strtod(begin, const_cast<char **>(&ptr));
+                } else if (!is_partial_scientific(*ptr)) {
+                    begin = nullptr;
+                }
+            }
+        }
+        if (begin && is_numeric(ptr[-1])) {
+            return std::strtod(begin, const_cast<char **>(&ptr)); // this will decrement the pointer!
+        } else {
+            return std::numeric_limits<double>::max();
+        }
+    }
+
+    static size_t read_unsigned(const char *ptr) {
+        const char *begin = nullptr;
+        ASSERT(ptr != nullptr)
+        for (; *ptr != 0; ptr++) {
+            if (!begin) {
+                if (is_numeric(*ptr)) begin = ptr;
+            } else {
+                if (is_divider(*ptr)) {
+                    return std::strtoul(begin, const_cast<char **>(&ptr), 10);
+                } else if (!is_numeric(*ptr)) {
+                    begin = nullptr;
+                }
+            }
+        }
+        if (begin && is_numeric(ptr[-1])) {
+            return std::strtoul(begin, const_cast<char **>(&ptr), 10); // this will decrement the pointer!
+        } else {
+            return std::numeric_limits<size_t>::max();
+        }
+    }
+
+    static int64_t read_signed(const char *ptr) {
+        bool pos = true;
+        if (*ptr=='-') {
+            pos = false;
+            ptr++;
+        }
+        auto tmp = read_unsigned(ptr);
+        if (tmp==std::numeric_limits<size_t>::max()) return std::numeric_limits<int64_t>::max();
+        return pos ? tmp : -tmp;
+    }
 }
+
 
 namespace prob_utils {
     template<typename T>

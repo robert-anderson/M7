@@ -49,6 +49,8 @@ class Solver {
 
     conn::Basic<> m_connection;
 
+    InteractiveVariable<bool> m_exit;
+
 public:
     //AverageCoefficients m_average_coeffs;
 

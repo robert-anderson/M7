@@ -102,75 +102,16 @@ public:
         auto f = [&p, &nind, &complex_valued, &inds, &value](bool indsnext) {
             if (indsnext) {
                 for (size_t i = 0ul; i < nind; ++i) {
-                    inds[i] = read_unsigned(p);
+                    inds[i] = string_utils::read_unsigned(p);
                 }
             } else {
-                value = read_double(p);
+                value = string_utils::read_double(p);
                 if (consts::is_complex<T>() && complex_valued)
-                    complex_utils::set_imag_part(value, read_double(p));
+                    complex_utils::set_imag_part(value, string_utils::read_double(p));
             }
         };
         if(indsfirst){ f(1); f(0);}
         else {f(0); f(1);}
-    }
-
-
-    static inline bool is_numeric(const char &c) {
-        return '0' <= c && c <= '9';
-    }
-
-    static inline bool is_partial_standard_float(const char &c) {
-        return is_numeric(c) || c == '.' || c == '-';
-    }
-
-    static inline bool is_partial_scientific(const char &c) {
-        return is_partial_standard_float(c) || c == 'e' || c == 'E' || c == 'd' || c == 'D' || c == '+';
-    }
-
-    static inline bool is_divider(const char &c) {
-        return c == ' ' || c == ',' || c == ')';
-    }
-
-    static double read_double(const char *&ptr) {
-        const char *begin = nullptr;
-        ASSERT(ptr != nullptr)
-        for (; *ptr != 0; ptr++) {
-            if (!begin) {
-                if (is_partial_standard_float(*ptr)) begin = ptr;
-            } else {
-                if (is_divider(*ptr) && is_numeric(ptr[-1])) {
-                    return std::strtod(begin, const_cast<char **>(&ptr));
-                } else if (!is_partial_scientific(*ptr)) {
-                    begin = nullptr;
-                }
-            }
-        }
-        if (begin && is_numeric(ptr[-1])) {
-            return std::strtod(begin, const_cast<char **>(&ptr)); // this will decrement the pointer!
-        } else {
-            return std::numeric_limits<double>::max();
-        }
-    }
-
-    static size_t read_unsigned(const char *&ptr) {
-        const char *begin = nullptr;
-        ASSERT(ptr != nullptr)
-        for (; *ptr != 0; ptr++) {
-            if (!begin) {
-                if (is_numeric(*ptr)) begin = ptr;
-            } else {
-                if (is_divider(*ptr)) {
-                    return std::strtoul(begin, const_cast<char **>(&ptr), 10);
-                } else if (!is_numeric(*ptr)) {
-                    begin = nullptr;
-                }
-            }
-        }
-        if (begin && is_numeric(ptr[-1])) {
-            return std::strtoul(begin, const_cast<char **>(&ptr), 10); // this will decrement the pointer!
-        } else {
-            return std::numeric_limits<size_t>::max();
-        }
     }
 };
 

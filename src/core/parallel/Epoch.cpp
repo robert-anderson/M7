@@ -12,7 +12,7 @@ Epoch::Epoch(std::string name) :m_name(std::move(name)) {
 
 bool Epoch::update(size_t icycle, bool condition) {
     if (*this) return false;
-    ASSERT(start() == ~0ul)
+    ASSERT(icycle_start() == ~0ul)
     m_icycle_start = condition?icycle:~0ul;
     m_icycle_start.mpi_min();
     if (*this) {
@@ -22,10 +22,19 @@ bool Epoch::update(size_t icycle, bool condition) {
     return false;
 }
 
-Epoch::operator bool() const {
-    return start() != ~0ul; }
+void Epoch::terminate(size_t icycle) {
+    if (!*this) return;
+    ASSERT(icycle_start() != ~0ul)
+    log::info("Terminating \"{}\" epoch on cycle {} ", m_name, icycle);
+    m_icycle_start = ~0ul;
+    m_icycle_start.mpi_bcast(0);
+}
 
-const size_t &Epoch::start() const {
+Epoch::operator bool() const {
+    return icycle_start() != ~0ul;
+}
+
+const size_t &Epoch::icycle_start() const {
     return m_icycle_start.reduced();
 }
 

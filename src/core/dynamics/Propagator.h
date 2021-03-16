@@ -5,6 +5,7 @@
 #ifndef M7_PROPAGATOR_H
 #define M7_PROPAGATOR_H
 
+#include <src/core/io/InteractiveVariable.h>
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "Wavefunction.h"
 #include "MagnitudeLogger.h"
@@ -25,6 +26,8 @@ public:
 
     Epoch m_variable_shift;
 
+    InteractiveVariable<defs::wf_comp_t> m_nwalker_target;
+
     Propagator(const Options &opts, const Hamiltonian<> &ham) :
     m_ham(ham),
     m_opts(opts),
@@ -34,7 +37,8 @@ public:
     m_aconn(m_dst_onv),
     m_occ(m_dst_onv),
     m_vac(m_dst_onv),
-    m_variable_shift("variable shift mode"){}
+    m_variable_shift("variable shift mode"),
+    m_nwalker_target("nwalker_target", m_opts.nwalker_target){}
 
     virtual void diagonal(Wavefunction& wf) = 0;
 

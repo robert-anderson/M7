@@ -13,9 +13,9 @@ TEST(SparseArrayFileReader, IndexReading) {
     std::string line = "1 3 5 7";
     const char *p = line.begin().base();
     for (int i = 0; i < 4; ++i) {
-        ASSERT_EQ(FcidumpFileReader::read_unsigned(p), 2 * i + 1);
+        ASSERT_EQ(string_utils::read_unsigned(p), 2 * i + 1);
     }
-    ASSERT_EQ(FcidumpFileReader::read_unsigned(p), ~0ul);
+    ASSERT_EQ(string_utils::read_unsigned(p), ~0ul);
 }
 
 TEST(SparseArrayFileReader, EntryReadingComplexIndsLast) {

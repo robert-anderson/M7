@@ -43,10 +43,12 @@ public:
      */
     bool update(size_t icycle, bool condition);
 
+    void terminate(size_t icycle);
+
     /**
      * @return the MPI-synchronized cycle number on which the Epoch began
      */
-    const size_t& start() const;
+    const size_t& icycle_start() const;
 
     /**
      * @return the MPI-synchronized state of the Epoch
