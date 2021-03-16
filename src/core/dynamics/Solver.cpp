@@ -44,6 +44,7 @@ void Solver::loop_over_occupied_onvs() {
 
         m_reference.add_row();
 
+        /*
         if (m_prop.m_variable_shift){
             m_connection.connect(m_reference.get_onv(), row.m_onv);
             if (m_connection.nexcit()==0) m_average_coeffs.m_ref_coeff += weight;
@@ -54,6 +55,7 @@ void Solver::loop_over_occupied_onvs() {
                 m_average_coeffs.m_row.m_values(0)+=weight;
             }
         }
+         */
 
         if (m_wf.m_ra.is_active()) {
             m_spawning_timer.reset();
@@ -122,8 +124,9 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_opts(prop.m_opts),
         m_wf(wf),
         m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
-        m_connection(prop.m_ham.nsite()),
-        m_average_coeffs("average coeffs", {2, 2}, 1){
+        m_connection(prop.m_ham.nsite())
+        //m_average_coeffs("average coeffs", {2, 2}, 1)
+        {
     if (mpi::i_am_root())
         m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
     if (m_opts.parallel_stats)
@@ -151,6 +154,7 @@ void Solver::execute(size_t niter) {
 
         m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
+        //consolidate_spawned();
         loop_over_spawned();
         m_annihilate_timer.pause();
 

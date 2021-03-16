@@ -45,12 +45,6 @@ TEST(StochasticPropagator, Test) {
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
-    std::cout <<
-              solver.m_average_coeffs.m_ref_coeff
-    << std::endl;
-    std::cout <<
-              solver.m_average_coeffs.to_string()
-            << std::endl;
 }
 
 

@@ -14,6 +14,7 @@
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/field/Fields.h"
+#include "src/core/sort/QuickSorter.h"
 
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
@@ -34,6 +35,9 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
     ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
+
+    MappedTable<UniqueOnvRow> m_unique_recvd_onvs;
+    MappedTable<OnvRow> m_parent_recvd_onvs;
 
     Wavefunction(const Options &opts, size_t nsite) :
             Communicator<WalkerTableRow, SpawnTableRow, false>(
@@ -58,7 +62,9 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             m_delta_nwalker(m_summables, m_format),
             m_l2_norm_square(m_summables, m_format),
             m_delta_l2_norm_square(m_summables, m_format),
-            m_nannihilated(m_summables, m_format) {
+            m_nannihilated(m_summables, m_format),
+            m_unique_recvd_onvs({}, 100),
+            m_parent_recvd_onvs({nsite}, 100){
         m_store.resize((m_opts.walker_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
         m_comm.resize((m_opts.spawn_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
         ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
@@ -207,6 +213,27 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         row.m_src_deterministic.put(deterministic);
         row.m_dst_ipart = dst_ipart;
         return irow;
+    }
+
+    void consolidate_spawned(){
+//        auto row1 = recv().m_row;
+//        auto row2 = recv().m_row;
+//        auto comp_fn = [&](const size_t &irow1, const size_t &irow2){
+//            row1.jump(irow1);
+//            row2.jump(irow2);
+//            return row1.m_dst_onv <= row2.m_dst_onv;
+//        };
+//        /*
+//         * sorting in ascending lexical order
+//         */
+//        QuickSorter qs(comp_fn);
+//        qs.sort(recv());
+//
+//        auto& parent_row = m_parent_recvd_onvs.m_row;
+//        const auto &row = recv().m_row;
+//        for (row.restart(); row.in_range(); row.step()){
+//
+//        }
     }
 };
 

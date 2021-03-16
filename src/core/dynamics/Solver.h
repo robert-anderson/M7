@@ -50,7 +50,7 @@ class Solver {
     conn::Basic<> m_connection;
 
 public:
-    AverageCoefficients m_average_coeffs;
+    //AverageCoefficients m_average_coeffs;
 
     Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
 

@@ -107,7 +107,7 @@ TEST(Table, Sorting) {
         bt.m_values(i) = prng.draw_float();
     }
     auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)>=bt.m_values(i2);};
-    Quicksorter sorter(comp_fn);
+    QuickSorter sorter(comp_fn);
     sorter.sort(bt);
     ASSERT_TRUE(sorter.is_sorted(bt));
 }
@@ -140,7 +140,7 @@ TEST(Table, ExtremalValues) {
     auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)<=bt.m_values(i2);};
     ExtremalValues xv(comp_fn);
     xv.find(45);
-    Quicksorter sorter(comp_fn);
+    QuickSorter sorter(comp_fn);
     sorter.sort(bt);
 
     for (size_t ifound=0ul; ifound<xv.nfound(); ++ifound){

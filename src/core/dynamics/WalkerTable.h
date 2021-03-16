@@ -37,6 +37,30 @@ struct WalkerTableRow : public Row {
             WalkerTableRow(nsite, opts.nroot, opts.nreplica){}
 };
 
+struct UniqueOnvRow : public Row {
+    fields::Number<size_t> m_ind;
+    fields::Number<size_t> m_nparent;
+
+    fields::Number<size_t> &key_field() {
+        return m_ind;
+    };
+
+    UniqueOnvRow(): m_ind(this), m_nparent(this){}
+};
+
+struct OnvRow : public Row {
+    fields::Onv<> m_onv;
+    fields::Number<size_t> m_nparent;
+
+    fields::Onv<> &key_field() {
+        return m_onv;
+    };
+
+    OnvRow(size_t nsite): m_onv(this, nsite), m_nparent(this){}
+};
+
+
+
 typedef MappedTable<WalkerTableRow> WalkerTable;
 
 #endif //M7_WALKERTABLE_H

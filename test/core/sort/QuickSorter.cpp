@@ -50,7 +50,6 @@ TEST(QuickSorter, Test){
     << std::endl;
 
 
-    //std::function<bool(const size_t &, const size_t &)> f = ;
     auto row1 = table.m_row;
     auto row2 = table.m_row;
     auto comp_fn = [&](const size_t &irow1, const size_t &irow2){
@@ -62,7 +61,7 @@ TEST(QuickSorter, Test){
     /*
      * sorting in ascending lexical order
      */
-    Quicksorter qs(comp_fn);
+    QuickSorter qs(comp_fn);
     qs.sort(table);
 
     /*

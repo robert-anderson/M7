@@ -9,13 +9,13 @@
 #include <functional>
 #include "src/core/table/Table.h"
 
-struct Quicksorter {
+struct QuickSorter {
 
     defs::inds m_inds;
     typedef std::function<bool(const size_t &, const size_t &)> comp_t;
     comp_t m_comp_fn;
 
-    Quicksorter(comp_t comp_fn);
+    QuickSorter(comp_t comp_fn);
 
     const size_t& operator[](const size_t& i) const;
 
@@ -38,13 +38,13 @@ private:
 
 /*
 template <typename row_t, typename field_t>
-class TableFieldSorter : public Quicksorter {
+class TableFieldSorter : public QuickSorter {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from ");
     typedef typename viewable_t::cview_t cview_t;
 
 public:
     TableFieldSorter(std::function<cview_t(const size_t&)> getter_fn, bool max=true, bool abs_val=false):
-            Quicksorter(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)){}
+            QuickSorter(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)){}
 
 //    TableFieldSorter(const viewable_t& viewable, bool max=true, bool abs_val=false):
 //            TableFieldSorter(

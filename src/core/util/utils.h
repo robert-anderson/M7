@@ -578,4 +578,13 @@ namespace tuple_utils {
     }
 }
 
+namespace nd_utils {
+    template<typename T>
+    T nelement(const std::vector<T>& v){
+        T out = 1;
+        for (const auto& i: v) out*=i;
+        return out;
+    };
+}
+
 #endif //M7_UTILS_H
