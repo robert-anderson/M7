@@ -8,6 +8,8 @@
 #include <src/defs.h>
 #include <cstring>
 #include <src/core/hash/Hashing.h>
+#include <src/core/nd/NdArrayList.h>
+#include "src/core/io/HDF5Wrapper.h"
 #include "Row.h"
 
 struct FieldBase {
@@ -19,8 +21,9 @@ struct FieldBase {
     size_t m_row_offset = ~0ul;
 
     std::vector<char> m_null_string;
+    hid_t m_h5type;
 
-    FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info);
+    FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info, hid_t h5type);
 
     FieldBase(const FieldBase &other);
 
@@ -67,6 +70,14 @@ struct FieldBase {
     virtual std::string to_string_element(const size_t& iitem) const = 0;
 
     std::string to_string() const;
+
+    virtual void h5_write(hdf5::NdListWriterBase& h5list, const size_t& iitem){
+        h5list.write_h5item_bytes(iitem, begin());
+    }
+
+    virtual void h5_read(hdf5::NdListReaderBase& h5list, const size_t& iitem){
+        h5list.read_h5item_bytes(iitem, begin());
+    }
 
 private:
     int cmp(const FieldBase &other) const;

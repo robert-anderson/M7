@@ -6,6 +6,7 @@
 #define M7_ROW_H
 
 #include "src/core/util/utils.h"
+#include "src/core/io/HDF5Wrapper.h"
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/table/Buffer.h"
 
@@ -99,16 +100,6 @@ struct KeyField {
     static type& get(row_t& row){return row.key_field();}
     static const type& get(const row_t& row) {return const_cast<row_t&>(row).key_field();}
 };
-
-namespace accessor {
-    template<typename row_t>
-    struct Sequential : row_t{
-        Sequential(const row_t& row): row_t(row){}
-    };
-
-    struct Direct {};
-
-}
 
 
 #endif //M7_ROW_H

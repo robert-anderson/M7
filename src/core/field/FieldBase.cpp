@@ -6,15 +6,16 @@
 #include "src/core/parallel/MPIAssert.h"
 
 
-FieldBase::FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info) :
+FieldBase::FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info, hid_t h5type) :
         m_item_size(item_size), m_type_info(type_info), m_nitem(nitem),
-        m_size(m_item_size*m_nitem), m_null_string(m_size, 0){
+        m_size(m_item_size*m_nitem), m_null_string(m_size, 0), m_h5type(h5type){
     m_row = row;
     if (m_row) m_row_offset = m_row->add_field(this);
 }
 
 FieldBase::FieldBase(const FieldBase &other) :
-        FieldBase(other.m_row ? other.m_row->m_child : nullptr, other.m_item_size, other.m_nitem, other.m_type_info) {}
+        FieldBase(other.m_row ? other.m_row->m_child : nullptr, other.m_item_size,
+                  other.m_nitem, other.m_type_info, other.m_h5type) {}
 
 bool FieldBase::is_comparable(const FieldBase &other) const {
     return m_item_size==other.m_item_size &&

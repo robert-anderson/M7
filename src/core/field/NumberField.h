@@ -12,7 +12,7 @@ struct NumberFieldBase : FieldBase {
     const size_t m_nelement;
 
     NumberFieldBase(Row* row, size_t nitem, size_t nelement):
-            FieldBase(row, sizeof(T) * nelement, nitem, typeid(T)), m_nelement(nelement){}
+            FieldBase(row, sizeof(T) * nelement, nitem, typeid(T), hdf5::type<T>()), m_nelement(nelement){}
 
     NumberFieldBase(const NumberFieldBase& other):
             NumberFieldBase(other.m_row ? other.m_row->m_child : other.m_row, other.m_nitem, other.m_nelement){}

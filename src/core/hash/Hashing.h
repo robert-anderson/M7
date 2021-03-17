@@ -43,6 +43,13 @@ namespace hashing {
     static defs::hash_t fnv_hash(defs::hash_t v){
         return fnv_hash((char*)&v, sizeof(defs::hash_t));
     }
+
+    static defs::hash_t in_range(defs::hash_t v, const defs::hash_t& lo, const defs::hash_t& hi){
+        ASSERT(hi>lo);
+        v = fnv_hash(v);
+        v%=hi-lo;
+        return v+lo;
+    }
 };
 
 

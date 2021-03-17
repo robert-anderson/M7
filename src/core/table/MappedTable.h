@@ -6,6 +6,7 @@
 #define M7_MAPPEDTABLE_H
 
 #include <forward_list>
+#include <src/core/io/HDF5Wrapper.h>
 #include "Table.h"
 #include "src/core/field/Fields.h"
 
@@ -146,6 +147,10 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         // reset counters
         m_ntotal_skip = 0ul;
         m_ntotal_lookup = 0ul;
+    }
+
+    void save(hdf5::Group& parent, std::string name) {
+        //hdf5::NdListWriter<>
     }
 
 };

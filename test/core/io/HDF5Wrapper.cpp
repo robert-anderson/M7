@@ -2,21 +2,45 @@
 // Created by rja on 13/12/2020.
 //
 
+#include <src/core/hash/Hashing.h>
+#include <src/core/field/Row.h>
+#include <src/core/field/Fields.h>
+#include <src/core/table/Table.h>
+#include <src/core/table/BufferedTable.h>
 #include "gtest/gtest.h"
 #include "src/core/io/HDF5Wrapper.h"
 
 
-TEST(HDF5Wrapper, ListWriter) {
-    hdf5::File f("test.h5", 1);
-    auto grp = f.subgroup("container");
-    hdf5::ListWriter<float> lw(grp.m_handle, "LIST", {});
-    float v = 123.456;
-    lw.write_item(&v);
+TEST(HDF5Wrapper, Table) {
+
+    struct MyRow : Row {
+        fields::Number<int> m_ints;
+        fields::Number<double> m_doubles;
+
+        MyRow():
+        m_ints(this), m_doubles(this){}
+    };
+
+    BufferedTable<MyRow> table("Test", {{}});
+    table.push_back(3);
+    table.m_row.restart();
+    table.m_row.m_doubles = 1.23;
+    table.m_row.step();
+    table.m_row.m_doubles = 3.55;
+
+    hdf5::FileWriter fw("table_test.h5");
+    hdf5::GroupWriter gw("container", fw);
+    table.write(gw, "table");
+
 }
+
 
 TEST(HDF5Wrapper, Basic) {
 #define H5FILE_NAME     "SDS_row.h5"
 #define DATASETNAME    "IntArray"
+
+
+#if 0
 
     /*
      * HDF5 APIs definitions
@@ -33,6 +57,32 @@ TEST(HDF5Wrapper, Basic) {
 //        for (auto &i: v) out *= i;
 //        return out;
 //    };
+
+
+    typedef int T;
+    std::vector<T> data = {9, 9, 9, 9};
+    hdf5::FileReader fr(H5FILE_NAME);
+    /*
+
+    const size_t nrow = 4;
+    defs::inds item_dims_ = {2, 2};
+
+    hdf5::NdListWriter<T> lw(fw, "nd_list_test", item_dims_, nrow);
+
+    std::vector<T> data = {1, 3, 4, 5};
+
+    lw.write_row(2, data.data());
+    lw.write_row(0, data.data());
+     */
+    hdf5::NdListReader<T> lr(fr, "nd_list_test");
+
+    utils::print(data);
+    lr.read_row(1, data.data());
+    utils::print(data);
+
+    //lw.write(data.data());
+
+
 
     const hsize_t nrow_local = 4;
     const hsize_t nrow_global = nrow_local * mpi::nrank();
@@ -53,119 +103,6 @@ TEST(HDF5Wrapper, Basic) {
     std::vector<hsize_t> hypslab_offsets(ndim_list, 0ul);
 
 
-    typedef int T;
-    struct ListX {
-        const std::vector<hsize_t> m_item_dims;
-        const hsize_t m_ndim_item;
-        const hsize_t m_ndim_list;
-        const hsize_t m_nrow_local;
-        const hsize_t m_nrow_global;
-        const std::vector<hsize_t> m_list_dims_local;
-        const std::vector<hsize_t> m_list_dims_global;
-        const hsize_t m_row_offset;
-
-        std::vector<hsize_t> m_hyperslab_counts;
-        std::vector<hsize_t> m_hyperslab_offsets;
-        hid_t m_filespace_handle;
-        hid_t m_dataset_handle;
-        hid_t m_memspace_handle;
-
-        std::vector<hsize_t> get_item_dims(const defs::inds &item_dims) {
-            std::vector<hsize_t> out;
-            out.reserve(item_dims.size());
-            for (auto &i: item_dims) out.push_back(i);
-            return out;
-        }
-
-        std::vector<hsize_t> get_list_dims_local() {
-            std::vector<hsize_t> out;
-            out.reserve(m_ndim_list);
-            out.push_back(m_nrow_local);
-            out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-            return out;
-        }
-
-        std::vector<hsize_t> get_list_dims_global() {
-            std::vector<hsize_t> out;
-            out.reserve(m_ndim_list);
-            out.push_back(m_nrow_global);
-            out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-            return out;
-        }
-
-        hsize_t get_row_offset() {
-            std::vector<hsize_t> tmp(mpi::nrank());
-            mpi::all_gather(m_nrow_local, tmp);
-            hsize_t out = 0ul;
-            for (size_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
-            return out;
-        }
-
-        ListX(hid_t parent, std::string name, bool writemode,
-              const defs::inds &item_dims, const size_t &nrow) :
-                m_item_dims(get_item_dims(item_dims)),
-                m_ndim_item(item_dims.size()),
-                m_ndim_list(item_dims.size() + 1),
-                m_nrow_local(nrow),
-                m_nrow_global(mpi::all_sum(m_nrow_local)),
-                m_list_dims_local(get_list_dims_local()),
-                m_list_dims_global(get_list_dims_global()),
-                m_row_offset(get_row_offset()),
-                m_hyperslab_counts(m_ndim_list, 0ul),
-                m_hyperslab_offsets(m_ndim_list, 0ul) {
-            m_filespace_handle = H5Screate_simple(m_ndim_list, m_list_dims_global.data(), NULL);
-
-            /*
-             * Create the dataset with default properties and close filespace.
-             */
-            m_dataset_handle = H5Dcreate(parent, name.c_str(), hdf5::type<T>(), m_filespace_handle,
-                                         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            H5Sclose(m_filespace_handle);
-
-            /*
-             * Each process defines dataset in memory and writes it to the hyperslab
-             * in the file.
-             */
-            m_hyperslab_offsets[0] = m_row_offset;
-            m_hyperslab_counts = m_list_dims_local;
-            m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), NULL);
-
-
-            m_filespace_handle = H5Dget_space(m_dataset_handle);
-            H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
-                                NULL, m_hyperslab_counts.data(), NULL);
-        }
-
-
-        ~ListX() {
-            H5Sclose(m_filespace_handle);
-            H5Dclose(m_dataset_handle);
-            H5Sclose(m_memspace_handle);
-        }
-
-        void write(const T *data) {
-            auto plist_id = H5Pcreate(H5P_DATASET_XFER);
-            H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
-
-            auto status = H5Dwrite(m_dataset_handle, hdf5::type<T>(), m_memspace_handle,
-                                   m_filespace_handle, plist_id, data);
-            ASSERT(!status)
-            H5Pclose(plist_id);
-        }
-
-        void read(T *data) {
-            auto plist_id = H5Pcreate(H5P_DATASET_XFER);
-            H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
-
-            auto status = H5Dread(m_dataset_handle, hdf5::type<T>(), m_memspace_handle,
-                                  m_filespace_handle, plist_id, data);
-            ASSERT(!status)
-            H5Pclose(plist_id);
-        }
-
-    };
-
-
 
     /*
      * Create a new file collectively and release property list identifier.
@@ -173,11 +110,11 @@ TEST(HDF5Wrapper, Basic) {
 
     hdf5::FileReader fr(H5FILE_NAME);
 
-    hdf5::NdListReader<T> lr (fr, "nd_list_test");
+    hdf5::NdListReader<int> lr (fr, "nd_list_test");
     utils::print(lr.m_list_dims_local);
     utils::print(lr.m_item_dims);
 
-    std::vector<T> data;
+    std::vector<int> data;
     for (size_t i=0; i < nd_utils::nelement(lr.m_list_dims_local); i++) {
         data.push_back((mpi::irank()+1) * 100 + i);
     }
@@ -189,7 +126,6 @@ TEST(HDF5Wrapper, Basic) {
     ASSERT_EQ(data, read_data);
 
 
-#if 0
     hdf5::FileWriter fw(H5FILE_NAME);
 
     const size_t nrow = 4;
@@ -284,13 +220,4 @@ TEST(HDF5Wrapper, Complex) {
         ASSERT_FLOAT_EQ(tmp.real(), chk.real());
         ASSERT_FLOAT_EQ(tmp.imag(), chk.imag());
     }
-}
-
-
-TEST(HDF5Wrapper, Vector) {
-    hdf5::File f("test.h5", 1);
-    auto grp = f.subgroup("container");
-    hdf5::VectorWriter<float> vw(grp.m_handle, "my_vector", 10, 1, 10);
-    std::vector<float> v = {5, 1, 4, 54, 13524, 3, 2134, 43.12, 123.1243, 456};
-    vw.write(v.data(), 1);
 }

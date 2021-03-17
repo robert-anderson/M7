@@ -182,17 +182,19 @@ namespace hdf5 {
         const std::vector<hsize_t> m_item_dims;
         const hsize_t m_ndim_item;
         const hsize_t m_ndim_list;
-        const hsize_t m_nrow_local;
-        const hsize_t m_nrow_global;
+        const hsize_t m_nitem_local;
+        const hsize_t m_nitem_global;
         const std::vector<hsize_t> m_list_dims_local;
         const std::vector<hsize_t> m_list_dims_global;
-        const hsize_t m_row_offset;
+        const hsize_t m_item_offset;
 
         std::vector<hsize_t> m_hyperslab_counts;
         std::vector<hsize_t> m_hyperslab_offsets;
         hid_t m_filespace_handle;
         hid_t m_dataset_handle;
         hid_t m_memspace_handle;
+        hid_t m_h5type;
+        CollectivePList m_coll_plist;
 
         std::vector<hsize_t> get_item_dims(const defs::inds &item_dims) {
             std::vector<hsize_t> out;
@@ -204,7 +206,7 @@ namespace hdf5 {
         std::vector<hsize_t> get_list_dims_local() {
             std::vector<hsize_t> out;
             out.reserve(m_ndim_list);
-            out.push_back(m_nrow_local);
+            out.push_back(m_nitem_local);
             out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
             return out;
         }
@@ -212,55 +214,57 @@ namespace hdf5 {
         std::vector<hsize_t> get_list_dims_global() {
             std::vector<hsize_t> out;
             out.reserve(m_ndim_list);
-            out.push_back(m_nrow_global);
+            out.push_back(m_nitem_global);
             out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
             return out;
         }
 
-        hsize_t get_row_offset() {
+        hsize_t get_item_offset() {
             std::vector<hsize_t> tmp(mpi::nrank());
-            mpi::all_gather(m_nrow_local, tmp);
+            mpi::all_gather(m_nitem_local, tmp);
             hsize_t out = 0ul;
             for (size_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
             return out;
         }
 
-        NdListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nrow,
+        NdListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
                    bool writemode, hid_t h5type) :
                 m_parent_handle(parent_handle),
                 m_item_dims(get_item_dims(item_dims)),
                 m_ndim_item(item_dims.size()),
                 m_ndim_list(item_dims.size() + 1),
-                m_nrow_local(nrow),
-                m_nrow_global(mpi::all_sum(m_nrow_local)),
+                m_nitem_local(nitem),
+                m_nitem_global(mpi::all_sum(m_nitem_local)),
                 m_list_dims_local(get_list_dims_local()),
                 m_list_dims_global(get_list_dims_global()),
-                m_row_offset(get_row_offset()),
+                m_item_offset(get_item_offset()),
                 m_hyperslab_counts(m_ndim_list, 0ul),
-                m_hyperslab_offsets(m_ndim_list, 0ul) {
+                m_hyperslab_offsets(m_ndim_list, 0ul),
+                m_h5type(h5type){
             m_filespace_handle = H5Screate_simple(m_ndim_list, m_list_dims_global.data(), nullptr);
 
             /*
              * Create the dataset with default properties and close filespace.
              */
             if (writemode)
-                m_dataset_handle = H5Dcreate(m_parent_handle, name.c_str(), h5type, m_filespace_handle,
+                m_dataset_handle = H5Dcreate(m_parent_handle, name.c_str(), m_h5type, m_filespace_handle,
                                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             else
                 m_dataset_handle = H5Dopen1(m_parent_handle, name.c_str());
 
             H5Sclose(m_filespace_handle);
 
-            /*
-             * Each process defines dataset in memory and writes it to the hyperslab
-             * in the file.
-             */
-            m_hyperslab_offsets[0] = m_row_offset;
-            m_hyperslab_counts = m_list_dims_local;
-            m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), nullptr);
-
-
             m_filespace_handle = H5Dget_space(m_dataset_handle);
+
+            m_hyperslab_counts = m_list_dims_local;
+            // select one item at a time
+            m_hyperslab_counts[0] = 1;
+            m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), nullptr);
+        }
+
+        void select_hyperslab(const size_t& iitem){
+            ASSERT(iitem < m_nitem_local);
+            m_hyperslab_offsets[0] = m_item_offset + iitem;
             H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
                                 nullptr, m_hyperslab_counts.data(), nullptr);
         }
@@ -274,29 +278,41 @@ namespace hdf5 {
     };
 
 
-    template<typename T>
-    struct NdListWriter : public NdListBase {
+    struct NdListWriterBase : public NdListBase {
     private:
-        NdListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nrow) :
-                NdListBase(parent_handle, name, item_dims, nrow, true, type_ind<T>()) {}
+        NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
+                NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {}
 
     public:
-        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nrow) :
-                NdListWriter<T>(parent.m_handle, name, item_dims, nrow) {}
+        NdListWriterBase(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
+                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type) {}
 
-        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nrow) :
-                NdListWriter<T>(parent.m_handle, name, item_dims, nrow) {}
+        NdListWriterBase(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
+                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type) {}
 
-        void write(const T *data) {
-            auto status = H5Dwrite(m_dataset_handle, hdf5::type<T>(), m_memspace_handle,
-                                   m_filespace_handle, CollectivePList(), data);
-            ASSERT(!status)
+        void write_h5item_bytes(const size_t& iitem, const void *data) {
+            select_hyperslab(iitem);
+            auto status = H5Dwrite(m_dataset_handle, m_h5type, m_memspace_handle,
+                                   m_filespace_handle, m_coll_plist, data);
+            ASSERT(!status);
+        }
+    };
+
+    template<typename T>
+    struct NdListWriter : public NdListWriterBase {
+        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem) :
+                NdListWriterBase(parent.m_handle, name, item_dims, nitem, type<T>()) {}
+
+        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem) :
+                NdListWriterBase(parent.m_handle, name, item_dims, nitem, type<T>()) {}
+
+        void write_h5item(const size_t& iitem, const T *data) {
+            write_h5item_bytes(iitem, data);
         }
     };
 
 
-    template<typename T>
-    struct NdListReader : NdListBase {
+    struct NdListReaderBase : NdListBase {
 
         static size_t extract_list_rank(hid_t parent_handle, std::string name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
@@ -331,28 +347,55 @@ namespace hdf5 {
             return out;
         }
 
-        static size_t extract_nelement(hid_t parent_handle, std::string name) {
+        static size_t extract_nitem(hid_t parent_handle, std::string name) {
             return extract_list_dims(parent_handle, name)[0];
         }
 
+        /*
+         * share the elements out over the MPI ranks
+         */
+        static size_t rank_nitem(hid_t parent_handle, std::string name) {
+            auto nitem_tot = extract_nitem(parent_handle, name);
+            auto nitem_share = nitem_tot/mpi::nrank();
+            // give the remainder to the root rank
+            if (mpi::i_am_root()) return nitem_share + nitem_tot%mpi::nrank();
+            else return nitem_share;
+        }
+
     private:
-        NdListReader(hid_t parent_handle, std::string name) :
+        NdListReaderBase(hid_t parent_handle, std::string name, hid_t h5_type) :
                 NdListBase(parent_handle, name, extract_item_dims(parent_handle, name),
-                           extract_nelement(parent_handle, name), false, type_ind<T>()) {}
+                           rank_nitem(parent_handle, name), false, h5_type) {}
 
     public:
-        NdListReader(FileReader &parent, std::string name) :
-                NdListReader<T>(parent.m_handle, name) {}
+        NdListReaderBase(FileReader &parent, std::string name, hid_t h5_type) :
+                NdListReaderBase(parent.m_handle, name, h5_type) {}
 
-        NdListReader(GroupWriter &parent, std::string name) :
-                NdListReader<T>(parent.m_handle, name) {}
+        NdListReaderBase(GroupReader &parent, std::string name, hid_t h5_type) :
+                NdListReaderBase(parent.m_handle, name, h5_type) {}
 
-        void read(T *data) {
-            auto status = H5Dread(m_dataset_handle, hdf5::type<T>(), m_memspace_handle,
-                                  m_filespace_handle, CollectivePList(), data);
+        void read_h5item_bytes(const size_t& iitem, void *data) {
+            select_hyperslab(iitem);
+            auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
+                                  m_filespace_handle, m_coll_plist, data);
             ASSERT(!status)
         }
     };
+
+
+    template<typename T>
+    struct NdListReader : public NdListReaderBase {
+        NdListReader(FileWriter &parent, std::string name) :
+                NdListReaderBase(parent.m_handle, name, type<T>()) {}
+
+        NdListReader(GroupWriter &parent, std::string name) :
+                NdListReaderBase(parent.m_handle, name, type<T>()) {}
+
+        void read_h5item(const size_t& iitem, T *data) {
+            read_h5item_bytes(iitem, data);
+        }
+    };
+
 
     template<typename T, size_t ndim>
     struct Array {
@@ -452,193 +495,6 @@ namespace hdf5 {
         }
     };
 
-    template<typename T>
-    struct VectorWriter {
-
-        const hid_t m_parent;
-        const std::string m_name;
-        const hsize_t m_nblock;
-        const hsize_t m_block_size;
-        const hsize_t m_nblock_chunk;
-        const hsize_t m_size;
-        const hsize_t m_chunk_size;
-        const hsize_t m_nchunk;
-        hid_t m_plist;
-        hid_t m_dataspace;
-        hid_t m_dataset;
-        hid_t m_chunk_space;
-
-        size_t m_iblock = 0;
-        size_t m_ichunk = 0;
-
-
-        bool m_done = false;
-
-        /**
-         * move the chunk space window to the next position
-         */
-        void next_chunk() {
-            const hsize_t ichunk_global = (m_ichunk++) * mpi::nrank() + mpi::irank();
-            if (ichunk_global >= m_nchunk) m_done = true;
-            if (m_done) return;
-
-            const hsize_t start = ichunk_global * m_nblock_chunk;
-            const hsize_t stride = 1;
-            const hsize_t count = (ichunk_global < m_nchunk) ? m_nblock_chunk : (m_nblock -
-                                                                                 m_nblock_chunk * ichunk_global);
-            ASSERT(count <= m_nblock_chunk);
-            auto status = H5Sselect_hyperslab(m_chunk_space, H5S_SELECT_SET, &start, &stride, &count, &m_block_size);
-            MPI_REQUIRE_ALL(status >= 0, "HDF5 Error: could not select next hyperslab");
-        }
-
-        VectorWriter(hid_t parent, std::string name, size_t nblock, size_t block_size, size_t nblock_chunk) :
-                m_parent(parent), m_name(name), m_nblock(nblock), m_block_size(block_size),
-                m_nblock_chunk(nblock_chunk), m_size(m_block_size * m_nblock),
-                m_chunk_size(m_block_size * m_nblock_chunk), m_nchunk(integer_utils::divceil(m_size, m_chunk_size)) {
-
-            m_dataspace = H5Screate_simple(1, &m_chunk_size, nullptr);
-
-            m_plist = H5Pcreate(H5P_DATASET_XFER);
-            auto status = H5Pset_dxpl_mpio(m_plist, H5FD_MPIO_INDEPENDENT);
-            MPI_REQUIRE_ALL(status >= 0, "HDF5 Error: could not set data transfer mode to independent");
-
-            m_dataset = H5Dcreate(parent, name.c_str(), type<T>(), m_dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-            m_chunk_space = H5Screate_simple(1, &m_chunk_size, nullptr);
-            next_chunk();
-        }
-
-        ~VectorWriter() {
-            H5Sclose(m_chunk_space);
-            H5Dclose(m_dataset);
-            H5Sclose(m_dataspace);
-        }
-
-        void write(const T *src, size_t nblock_write) {
-            auto status = H5Dwrite(m_dataset, type<T>(), m_chunk_space, m_dataspace, m_plist, src);
-            MPI_REQUIRE_ALL(status < 0, "HDF5 Error: vector write failed");
-        }
-
-    };
-
-
-    template<typename T>
-    class ListWriter {
-        /*
-         * parent HDF5 element (Group or File)
-         */
-        const hid_t m_parent;
-        /*
-         * dimensionality of an "item" e.g. if we are storing a list of matrices, this is 2
-         */
-        const hsize_t m_item_ndim;
-        /*
-         * shape of items
-         */
-        const std::vector<hsize_t> m_item_shape;
-        /*
-         * dimensionality of the list structure, e.g. if we are storing a list of matrices, this is 3
-         */
-        const hsize_t m_list_ndim;
-        /*
-         * 0th element is local number of rows
-         */
-        const std::vector<hsize_t> m_list_shape;
-        /*
-         * 0th element is total number of rows across all MPI ranks
-         */
-        const std::vector<hsize_t> m_list_shape_global;
-        /*
-         * each process has a hyperslab defining the location within the HDF5 file
-         * counts: the number of T-values to be written / read
-         * offsets: the position of the hyperslab (only the 0th value changes, rest are 0)
-         */
-        const std::vector<hsize_t> m_item_hyperslab_counts;
-        std::vector<hsize_t> m_item_hyperslab_offsets;
-
-        hid_t m_collective_write_plist_id;
-        hid_t m_dataset_id;
-        hid_t m_item_dataspace_id;
-        hid_t m_filespace_id;
-
-        std::vector<hsize_t> make_item_shape(const defs::inds &item_shape) {
-            std::vector<hsize_t> out;
-            out.reserve(item_shape.size());
-            for (const auto &x: item_shape) out.push_back(x);
-            return out;
-        }
-
-        std::vector<hsize_t> make_list_shape() {
-            auto out = m_item_shape;
-            out.insert(out.begin(), m_list_ndim);
-            return out;
-        }
-
-        std::vector<hsize_t> make_list_shape_global() {
-            auto out = m_item_shape;
-            out.insert(out.begin(), mpi::all_sum(m_list_ndim));
-            return out;
-        }
-
-        std::vector<hsize_t> make_item_hyperslab_counts() {
-            std::vector<hsize_t> out;
-            out.reserve(m_list_ndim);
-            out.push_back(1);
-            out.insert(++out.cbegin(), m_item_shape.cbegin(), m_item_shape.cend());
-            return out;
-        }
-
-    public:
-
-        ListWriter(hid_t parent, std::string name, defs::inds item_shape) :
-                m_parent(parent),
-                m_item_ndim(item_shape.size()), m_item_shape(make_item_shape(item_shape)),
-                m_list_ndim(m_item_ndim + 1), m_list_shape(make_list_shape()),
-                m_list_shape_global(make_list_shape_global()),
-                m_item_hyperslab_counts(make_item_hyperslab_counts()),
-                m_item_hyperslab_offsets(m_list_ndim, 0ul) {
-            /*
-             * Create the dataspace for the dataset.
-             */
-            auto filespace = H5Screate_simple(m_list_ndim, m_list_shape_global.data(), nullptr);
-            /*
-             * Create the dataset with default properties and close filespace.
-             */
-            m_dataset_id = H5Dcreate(m_parent, name.c_str(), type<T>(), filespace, H5P_DEFAULT, H5P_DEFAULT,
-                                     H5P_DEFAULT);
-            H5Sclose(filespace);
-
-            utils::print(m_item_hyperslab_counts);
-
-            m_item_dataspace_id = H5Screate_simple(m_list_ndim, m_item_hyperslab_counts.data(), nullptr);
-            m_filespace_id = H5Dget_space(m_dataset_id);
-
-            m_collective_write_plist_id = H5Pcreate(H5P_DATASET_XFER);
-            H5Pset_dxpl_mpio(m_collective_write_plist_id, H5FD_MPIO_COLLECTIVE);
-
-            H5Sselect_hyperslab(m_filespace_id, H5S_SELECT_SET, m_item_hyperslab_offsets.data(),
-                                nullptr, m_item_hyperslab_counts.data(), nullptr);
-
-
-        }
-
-        //ListWriter(const ListWriter<T>& other): ListWriter(other.m_parent){}
-
-        ~ListWriter() {
-            H5Dclose(m_dataset_id);
-            H5Sclose(m_filespace_id);
-            H5Sclose(m_item_dataspace_id);
-            H5Pclose(m_collective_write_plist_id);
-        }
-
-        void write_item(const T *item) {
-            auto status = H5Dwrite(m_dataset_id, type<T>(), m_item_dataspace_id,
-                                   m_filespace_id, m_collective_write_plist_id, item);
-            ASSERT(!status)
-            ++m_item_hyperslab_offsets[0];
-        }
-
-    };
 
 }
 

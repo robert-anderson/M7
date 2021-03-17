@@ -29,7 +29,7 @@ struct BitsetFieldBase : FieldBase {
 
 public:
     BitsetFieldBase(Row* row, size_t nitem, size_t nbit) :
-            FieldBase(row, integer_utils::divceil(nbit, nbit_dword()) * sizeof(T), nitem, typeid(T)),
+            FieldBase(row, integer_utils::divceil(nbit, nbit_dword()) * sizeof(T), nitem, typeid(T), hdf5::type<T>()),
             m_nbit(nbit), m_item_dsize(m_item_size/sizeof(T)),
             m_nbit_in_last_dword(m_nbit - (m_item_dsize-1) * nbit_dword()){
     }
