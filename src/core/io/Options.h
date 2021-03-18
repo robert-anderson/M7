@@ -17,6 +17,7 @@ struct Options {
     bool parallel_stats = false;
     bool exact_propagation = false;
     std::string excit_gen = "pchb";
+    bool spf_uniform_twf = false;
     double nwalker_initial = 1.0;
     double nwalker_target = 0.0;
     double nadd_initiator = 3.0;

@@ -8,6 +8,7 @@
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/util/Timer.h>
 #include <src/core/observables/AverageCoefficients.h>
+#include <src/core/observables/UniformTwf.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStatsFile.h"
@@ -50,6 +51,7 @@ class Solver {
     conn::Basic<> m_connection;
 
     InteractiveVariable<bool> m_exit;
+    std::unique_ptr<UniformTwf> m_uniform_twf;
 
 public:
     //AverageCoefficients m_average_coeffs;

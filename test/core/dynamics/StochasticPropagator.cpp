@@ -58,6 +58,8 @@ TEST(StochasticPropagator, BosonTest) {
     opts.nwalker_target = 10000;
     opts.shift_damp = 0.4;
     opts.ncycle = 3000;
+    opts.spf_uniform_twf = true;
+    opts.init();
 
     // -10.328242246088791
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);

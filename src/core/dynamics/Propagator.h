@@ -34,9 +34,9 @@ public:
     m_magnitude_logger(opts, ham.nsite(), ham.nelec()),
     m_shift(m_opts.shift_initial),
     m_dst_onv(ham.nsite()),
-    m_aconn(m_dst_onv),
-    m_occ(m_dst_onv),
-    m_vac(m_dst_onv),
+    m_aconn(ham.nsite()),
+    m_occ(ham.nsite()),
+    m_vac(ham.nsite()),
     m_variable_shift("variable shift mode"),
     m_nwalker_target("nwalker_target", m_opts.nwalker_target){}
 

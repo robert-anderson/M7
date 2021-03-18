@@ -27,6 +27,7 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     StatsColumn<double> m_communication_time;
     StatsColumn<double> m_annihilation_loop_time;
     StatsColumn<double> m_total_cycle_time;
+    StatsColumn<defs::ham_t> m_uniform_twf_num;
     FciqmcStatsSpecifier() :
     StatsSpecifier("FCIQMC"),
     m_icycle(this, "Cycle number", {{}}),
@@ -47,7 +48,8 @@ struct FciqmcStatsSpecifier : StatsSpecifier {
     m_propagate_loop_time(this, "Time spent in loop over occupied ONVs", {{}}),
     m_communication_time(this, "Time spent in communicating spawns", {{}}),
     m_annihilation_loop_time(this, "Time spent in annihilation loop", {{}}),
-    m_total_cycle_time(this, "Total cycle time", {{}})
+    m_total_cycle_time(this, "Total cycle time", {{}}),
+    m_uniform_twf_num(this, "Numerator of uniform TWF-projected energy estimator", {{}})
     {}
 };
 

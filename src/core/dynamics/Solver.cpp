@@ -43,6 +43,7 @@ void Solver::loop_over_occupied_onvs() {
         m_wf.m_l2_norm_square(0, 0) += std::pow(std::abs(weight), 2.0);
 
         m_reference.add_row();
+        if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
 
         /*
         if (m_prop.m_variable_shift){
@@ -125,7 +126,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_wf(wf),
         m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
         m_connection(prop.m_ham.nsite()),
-        m_exit("exit")
+        m_exit("exit"),
+        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.m_format.nelement(), prop.m_ham.nsite()) : nullptr)
         //m_average_coeffs("average coeffs", {2, 2}, 1)
         {
     if (mpi::i_am_root())
@@ -209,6 +211,7 @@ void Solver::end_cycle() {
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
+    if (m_uniform_twf) m_uniform_twf->reduce();
 }
 
 void Solver::output_stats() {
@@ -234,6 +237,7 @@ void Solver::output_stats() {
         m_stats->m_communication_time() = m_communicate_timer;
         m_stats->m_annihilation_loop_time() = m_annihilate_timer;
         m_stats->m_total_cycle_time() = m_cycle_timer;
+        if (m_uniform_twf) m_stats->m_uniform_twf_num() = m_uniform_twf->m_numerator_total[0];
         m_stats->flush();
     }
 

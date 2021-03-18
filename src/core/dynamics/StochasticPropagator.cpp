@@ -79,7 +79,7 @@ void StochasticPropagator::diagonal(Wavefunction &wf) {
     } else {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift) * tau();
-        if (death_rate < 0.0 || death_rate > 1.0) {
+        if (death_rate <= 0.0 || death_rate > 1.0) {
             // clone  / create antiparticles continuously
             wf.scale_weight(1 - death_rate);
         } else {
