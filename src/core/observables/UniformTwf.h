@@ -74,7 +74,9 @@ struct UniformTwf {
                 conn.apply(onv, work_onv);
                 helem_sum += ham.get_element(conn);
                 for (auto &jocc: occ.inds()) {
+                    if (jocc <= iocc) continue;
                     for (auto &jvac: vac.inds()) {
+                        if (jvac<=ivac) continue;
                         conn.zero();
                         conn.add(iocc, jocc, ivac, jvac);
                         conn.apply(onv, work_onv);
@@ -143,6 +145,7 @@ struct UniformTwf {
 
     void reduce() {
         mpi::all_sum(m_numerator.data(), m_numerator_total.data(), m_numerator.size());
+        m_numerator.assign(m_numerator.size(), 0.0);
     }
 
 

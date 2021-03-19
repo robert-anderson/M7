@@ -47,6 +47,42 @@ TEST(StochasticPropagator, Test) {
     solver.execute(opts.ncycle);
 }
 
+TEST(StochasticPropagator, Hubbard) {
+    Options opts;
+    opts.nwalker_initial = 10;
+    opts.nadd_initiator = 3.0;
+    opts.tau_initial = 0.01;
+    opts.nwalker_target = 10000;
+    opts.shift_damp = 0.4;
+    opts.ncycle = 3000;
+    opts.spf_uniform_twf = true;
+    opts.init();
+
+    // -10.328242246088791
+    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0);
+
+    ASSERT_TRUE(ham.spin_conserving());
+    buffered::Onv<> onv(ham.nsite());
+    for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
+        onv.set(0, i);
+        onv.set(1, i);
+    }
+    Wavefunction wf(opts, ham.nsite());
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
+    StochasticPropagator prop(ham, opts);
+    auto ref_energy = ham.get_energy(onv);
+    prop.m_shift = ref_energy;//benchmark;
+
+    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
+    Solver solver(prop, wf, ref_loc);
+
+    std::cout << "Reference Energy: " << ref_energy << std::endl;
+
+    for (size_t i = 0ul; i < 20000; ++i) {
+        solver.execute();
+    }
+}
 
 #else
 
