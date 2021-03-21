@@ -6,6 +6,10 @@
 #define M7_ENUMERATOR_H
 
 #include <vector>
+#include <algorithm>
+#include "src/defs.h"
+#include "src/core/util/utils.h"
+#include "src/core/parallel/MPIAssert.h"
 
 template <typename result_t>
 class Enumerator {
@@ -75,5 +79,85 @@ public:
 private:
     virtual bool next_element(result_t &result) = 0;
 };
+
+
+namespace enums {
+    struct Enumerator {
+        const size_t m_n;
+        const size_t m_r;
+        const size_t m_nv;
+        defs::inds m_v;
+
+        Enumerator(size_t n, size_t r, size_t nv);
+
+        virtual bool next() = 0;
+
+        const size_t &operator[](const size_t &i) const;
+    };
+
+    /*
+     * Enumerators are supposed to be as efficient as possible, but all overhead involved in
+     * generation of their terms can be eliminated at the point of use by caching terms, this
+     * is the role of this class.
+     */
+    template<typename enum_T>
+    struct Cache {
+        static constexpr size_t c_limit = 1ul<<20;
+        const size_t m_n, m_r;
+        const defs::inds m_v;
+        const size_t m_nv;
+        size_t m_iv = ~0ul;
+    private:
+        std::vector<size_t> make() const {
+            enum_T e(m_n, m_r);
+            /*
+             * check whether this is a situation in which the programmer should be encouraged to use
+             * the enum_T to compute each term on the fly. This class is only to be used in situations
+             * where the number of terms is small, and the number of iterations is expected to be large
+             */
+            if (e.m_nv>c_limit)
+                log::warn("Attempting to create a Cache of over {} terms", c_limit);
+            defs::inds out;
+            while (e.next()) out.insert(out.end(), e.m_v.cbegin(), e.m_v.cend());
+            return out;
+        }
+
+    public:
+        Cache(size_t n, size_t r) : m_n(n), m_r(r), m_v(make()), m_nv(m_v.size() / m_r) {
+            MPI_REQUIRE(m_nv==enum_T(m_n, m_r).m_nv, "Number of terms generated does not meet expectation");
+        }
+
+        bool next() {
+            ++m_iv;
+            return m_iv < m_nv;
+        }
+
+        const size_t &operator[](const size_t &i) const {
+            ASSERT(i < m_r);
+            return m_v[m_iv * m_r + i];
+        }
+    };
+
+    struct CombinationsWithRepetition : Enumerator {
+        CombinationsWithRepetition(size_t n, size_t r);
+
+        bool next() override;
+    };
+
+    struct CombinationsDistinct : Enumerator {
+        std::string m_starting_bitmask, m_bitmask;
+        bool m_allfound = false;
+        CombinationsDistinct(size_t n, size_t r);
+
+        bool next() override;
+    };
+
+    struct PermutationsWithRepetition : Enumerator {
+        PermutationsWithRepetition(size_t n, size_t r);
+
+        bool next() override;
+    };
+}
+
 
 #endif //M7_ENUMERATOR_H

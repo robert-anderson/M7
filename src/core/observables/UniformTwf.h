@@ -101,7 +101,7 @@ struct UniformTwf {
         vac.update(onv);
 
         conn.connect(onv, onv);
-        helem_sum += ham.get_element(conn);
+        helem_sum += std::abs(ham.get_element(conn));
         for (auto &iocc: occ.inds()) {
 
             for (int change = -1; change <= 1; change += 2) {
@@ -115,7 +115,7 @@ struct UniformTwf {
                     conn.apply(onv, work_onv);
                     auto com = work_onv.m_bonv(imode);
                     if (change < 0) com += change;
-                    helem_sum += ham.bc().get_element_1(imode, imode, com);
+                    helem_sum += std::abs(ham.bc().get_element_1(imode, imode, com));
                 }
             }
 
@@ -123,23 +123,23 @@ struct UniformTwf {
                 conn.zero();
                 conn.add(iocc, ivac);
                 conn.apply(onv, work_onv);
-                helem_sum += ham.get_element(conn);
-                for (auto &jocc: occ.inds()) {
-                    if (jocc <= iocc) continue;
-                    for (auto &jvac: vac.inds()) {
-                        if (jvac<=ivac) continue;
-                        conn.zero();
-                        conn.add(iocc, jocc, ivac, jvac);
-                        ASSERT(conn.ncre()==2 && conn.nann()==2)
-                        work_onv = onv;
-                        conn.apply(onv, work_onv);
-                        helem_sum += ham.get_element(conn);
-                    }
-                }
+                helem_sum += std::abs(ham.get_element(conn));
+//                for (auto &jocc: occ.inds()) {
+//                    if (jocc <= iocc) continue;
+//                    for (auto &jvac: vac.inds()) {
+//                        if (jvac<=ivac) continue;
+//                        conn.zero();
+//                        conn.add(iocc, jocc, ivac, jvac);
+//                        ASSERT(conn.ncre()==2 && conn.nann()==2)
+//                        work_onv = onv;
+//                        conn.apply(onv, work_onv);
+//                        helem_sum += std::abs(ham.get_element(conn));
+//                    }
+//                }
             }
         }
         for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
-            m_numerator[ipart] += weight(ipart) * helem_sum;
+            m_numerator[ipart] -= std::abs(weight(ipart)) * helem_sum;
         }
     }
 

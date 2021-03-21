@@ -79,3 +79,26 @@ TEST(Connection, Phase) {
         ASSERT_EQ(connection.phase(), value < 0);
     }
 }
+
+
+TEST(Connection, New){
+
+    struct FermionConnection {
+
+    };
+
+    struct ConnectionGeneral {
+    };
+
+    struct Promoter {
+
+    };
+
+    struct PromoterSet {
+        ConnectionGeneral m_promoted_conn;
+        std::vector<Promoter> m_proms_f;
+        PromoterSet(size_t max_ncom_f, size_t max_ncom_b){
+
+        }
+    };
+}
