@@ -89,9 +89,9 @@ TEST(StochasticPropagator, Hubbard) {
 TEST(StochasticPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
-    opts.nadd_initiator = 3.0;
+    opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.01;
-    opts.nwalker_target = 10000;
+    opts.nwalker_target = 100000;
     opts.shift_damp = 0.4;
     opts.ncycle = 3000;
     opts.spf_uniform_twf = true;
