@@ -238,13 +238,31 @@ TEST(Connection, New){
 //        }
 //    };
 
+    // choose a large enough nsite so that multiple 64bit datawords are required
     const size_t nsite = 100;
     buffered::FermionOnv bra(nsite);
     buffered::FermionOnv ket(nsite);
     FermionConnection connection(nsite);
     bra = {{3, 4, 8, 13, 89}, {13, 78, 95, 98, 99}};
     ket = bra;
-    std::cout << bra.to_string() << std::endl;
+    connection.connect(bra, ket);
+    ASSERT_FALSE(connection.m_phase);
+    //                              78 -> 3 (-1)         (-1)
+    ket = {{3, 4, 8, 13, 89}, {3, 13, 95, 98, 99}};
+    connection.connect(bra, ket);
+    ASSERT_TRUE(connection.m_phase);
+    //                              98 -> 3 (-1)         (-1)
+    bra = {{3, 4, 8, 13, 89}, {3, 13, 78, 95, 99}};
+    connection.connect(bra, ket);
+    ASSERT_TRUE(connection.m_phase);
+    //     4 -> 99 (-1)             98 -> 3 (-1)         (+1)
+    bra = {{3, 8, 13, 89, 99}, {3, 13, 78, 95, 99}};
+    connection.connect(bra, ket);
+    ASSERT_FALSE(connection.m_phase);
+    //     4 -> 99 (-1)             98 -> 14 (+1)        (-1)
+    bra = {{3, 8, 13, 89, 99}, {13, 14, 78, 95, 99}};
+    connection.connect(bra, ket);
+    ASSERT_TRUE(connection.m_phase);
 
 #if 0
     SparseArrayFileReader<float> file_reader(

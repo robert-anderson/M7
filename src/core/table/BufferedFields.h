@@ -84,6 +84,10 @@ namespace buffered {
     struct FermionOnv : BufferedFieldZ<fields::FermionOnv> {
         using fields::FermionOnv::operator=;
         FermionOnv(size_t nsite) : BufferedFieldZ<fields::FermionOnv>({nullptr, nsite}){}
+        FermionOnv& operator=(const FermionOnv& other){
+            fields::FermionOnv::operator=(other);
+            return *this;
+        }
     };
 
     struct FermionOnvs : BufferedFieldZ<fields::FermionOnvs> {
