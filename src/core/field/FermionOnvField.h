@@ -149,9 +149,32 @@ struct FermionOnvField : FermionOnvsFieldBase {
 
     FermionOnvField(Row *row, size_t nsite) : FermionOnvsFieldBase(row, 1, nsite) {}
 
+    FermionOnvField(const FermionOnvField &other) :
+            FermionOnvField(other.m_row ? other.m_row->m_child : nullptr, other.m_nsite) {}
+
+    FermionOnvField &operator=(const FermionOnvField &other) {
+        FermionOnvsFieldBase::operator=(other);
+        return *this;
+    }
+
     FermionOnvField operator=(const defs::inds& inds) {
         zero();
         for (auto ind: inds) base_t::base_set(ind);
+        return *this;
+    }
+
+    FermionOnvField operator=(const std::pair<defs::inds, defs::inds>& inds) {
+        zero();
+        // alpha site indices
+        for (auto& ind: inds.first) {
+            ASSERT(ind<m_nsite);
+            base_t::base_set(ind);
+        }
+        // beta site indices
+        for (auto& ind: inds.second) {
+            ASSERT(ind<m_nsite);
+            base_t::base_set(ind+m_nsite);
+        }
         return *this;
     }
 

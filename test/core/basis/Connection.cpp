@@ -189,8 +189,8 @@ TEST(Connection, New){
 
 
             size_t nperm = 0ul;
-            auto ann_iter = m_ann.begin();
-            auto cre_iter = m_cre.begin();
+            auto nann_found = 0ul;
+            auto ncre_found = 0ul;
 
             for (size_t idataword = 0ul; idataword<in.m_item_dsize; ++idataword){
                 in_work = in.get_dataword(idataword);
@@ -198,21 +198,21 @@ TEST(Connection, New){
                 work = in_work & out_work;
                 while (work) {
                     auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
-                    while (ann_iter != m_ann.end() && *ann_iter < setbit) {
+                    while (nann_found != nann() && m_ann[nann_found] < setbit) {
                         // an annihilation operator has been passed in the iteration over common indices
-                        ann_iter++;
+                        ++nann_found;
                         nperm += ncom();
                     }
-                    while (cre_iter != m_cre.end() && *cre_iter < setbit) {
+                    while (ncre_found != ncre() && m_cre[ncre_found] < setbit) {
                         // a creation operator has been passed in the iteration over common indices
-                        cre_iter++;
+                        ++ncre_found;
                         nperm += ncom();
                     }
                     m_com.push_back(setbit);
                 }
             }
-            while (ann_iter != m_ann.end()) {ann_iter++; nperm += ncom();}
-            while (cre_iter != m_cre.end()) {cre_iter++; nperm += ncom();}
+            while (nann_found < nann()) {++nann_found; nperm += ncom();}
+            while (ncre_found < ncre()) {++ncre_found; nperm += ncom();}
             m_phase = nperm & 1ul;
         }
     };
@@ -238,8 +238,15 @@ TEST(Connection, New){
 //        }
 //    };
 
+    const size_t nsite = 100;
+    buffered::FermionOnv bra(nsite);
+    buffered::FermionOnv ket(nsite);
+    FermionConnection connection(nsite);
+    bra = {{3, 4, 8, 13, 89}, {13, 78, 95, 98, 99}};
+    ket = bra;
+    std::cout << bra.to_string() << std::endl;
 
-
+#if 0
     SparseArrayFileReader<float> file_reader(
             defs::assets_root + "/parity_test/parity_8.txt",
             16ul, false, false);
@@ -268,4 +275,5 @@ TEST(Connection, New){
 //        ASSERT_TRUE(bra==work_det);
 //        ASSERT_EQ(connection.phase(), value < 0);
     }
+#endif
 }
