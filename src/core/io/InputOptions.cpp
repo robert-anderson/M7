@@ -145,4 +145,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--psingle_initial", psingle_initial,
                "initial probability with which to attempt to draw single excitations");
 
+    add_option("--rdm_rank", rdm_rank,
+               "Rank of fermion RDM to accumulate");
+
 }

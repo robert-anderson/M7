@@ -106,5 +106,43 @@ namespace fields {
 
 }
 
+#if 0
+namespace fieldsx{
+    using namespace fields;
+    struct Onv : MultiField<FermionOnv, BosonOnv> {
+        FermionOnv &m_fonv;
+        BosonOnv &m_bonv;
 
+        Onv(Row *row, size_t nsite) :
+                MultiField<FermionOnv, BosonOnv>(row, {nullptr, nsite}, {nullptr, nsite}),
+                m_fonv(get<0>()), m_bonv(get<1>()) {
+        }
+
+        Onv(const Onv &other) : Onv(other.m_fonv.row_of_copy(), other.m_fonv.m_nsite) {}
+
+        Onv &operator=(const Onv &other) {
+            m_fonv = other.m_fonv;
+            m_bonv = other.m_bonv;
+            return *this;
+        }
+
+        Onv &operator=(const std::pair<defs::inds, defs::inds> &inds) {
+            m_fonv = inds.first;
+            m_bonv = inds.second;
+            return *this;
+        }
+    };
+
+    struct Onvs : MultiField<FermionOnvs, BosonOnvs> {
+        FermionOnvs &m_fonv;
+        BosonOnvs &m_bonv;
+
+        Onvs(Row *row, size_t nitem, size_t nsite) :
+                MultiField<FermionOnvs, BosonOnvs>(row, {nullptr, nitem, nsite}, {nullptr, nitem, nsite}),
+                m_fonv(std::get<0>(m_subfields)), m_bonv(std::get<1>(m_subfields)) {}
+    };
+
+}
+
+#endif //M7_FIELDS_H
 #endif //M7_FIELDS_H

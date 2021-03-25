@@ -9,7 +9,8 @@
 
 
 TableBase::TableBase(size_t row_dsize) :
-        m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){}
+        m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){
+}
 
 TableBase::TableBase(const TableBase &other) :
         TableBase(other.m_row_dsize){}
@@ -161,6 +162,16 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
 void TableBase::copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst) {
     ASSERT(irow_dst < m_hwm);
     std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
+}
+
+void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
+    if (irow==jrow) return;
+    auto iptr = dbegin(irow);
+    auto jptr = dbegin(jrow);
+    for (size_t idword=0ul; idword<m_row_dsize; ++idword){
+        std::swap(*iptr, *jptr);
+        ++iptr; ++jptr;
+    }
 }
 
 

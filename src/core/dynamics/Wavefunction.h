@@ -49,7 +49,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
                         WalkerTableRow(nsite, opts.nroot, opts.nreplica),
                         MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
                     },
-                    {SpawnTableRow(nsite)},
+                    {SpawnTableRow(nsite, opts.rdm_rank>0)},
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),
@@ -189,7 +189,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         return {irank, irow};
     }
 
-    // TODO: return a pair?
     size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart) {
         auto irank = m_ra.get_rank(dst_onv);
@@ -212,6 +211,20 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         row.m_src_initiator.put(initiator);
         row.m_src_deterministic.put(deterministic);
         row.m_dst_ipart = dst_ipart;
+        return irow;
+    }
+
+    size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
+                     bool initiator, bool deterministic, size_t dst_ipart,
+                     const fields::Onv<> &src_onv, const defs::wf_t &src_weight) {
+        auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
+        auto irank = m_ra.get_rank(dst_onv);
+        auto& row = send(irank).m_row;
+        row.jump(irow);
+        if (row.m_send_parents){
+            row.m_src_onv = src_onv;
+            row.m_src_weight = src_weight;
+        }
         return irow;
     }
 

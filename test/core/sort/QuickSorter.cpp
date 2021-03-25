@@ -14,7 +14,7 @@ TEST(QuickSorter, Test){
     const size_t nsite = 5;
     const size_t nrow = 10;
 
-    BufferedTable<SpawnTableRow> table("test", {{nsite}});
+    BufferedTable<SpawnTableRow> table("test", {{nsite, false}});
     table.push_back(nrow);
     auto row = table.m_row;
 
@@ -62,7 +62,7 @@ TEST(QuickSorter, Test){
      * sorting in ascending lexical order
      */
     QuickSorter qs(comp_fn);
-    qs.sort(table);
+    qs.preserve_sort(table);
 
     /*
      * check that table is sorted into proper blocks

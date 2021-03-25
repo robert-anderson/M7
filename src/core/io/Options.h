@@ -53,6 +53,7 @@ struct Options {
     double boson_coupling = 0.0;
     double boson_frequency = 0.0;
     defs::prob_t psingle_initial = 0.0;
+    size_t rdm_rank = 1;
 
     bool init();
 

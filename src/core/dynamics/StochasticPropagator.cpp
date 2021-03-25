@@ -65,7 +65,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf) {
         if (consts::float_is_zero(delta)) continue;
         delta = m_prng.stochastic_threshold(delta, m_opts.min_spawn_mag);
         if (consts::float_is_zero(delta)) continue;
-        wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic, ipart);
+        wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic, ipart, src_onv, weight);
     }
 }
 

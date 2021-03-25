@@ -113,7 +113,54 @@ void Solver::annihilate_row() {
 
 void Solver::loop_over_spawned() {
     mpi::barrier();
+
     const auto &row = m_wf.recv().m_row;
+    if (m_opts.rdm_rank>0) {
+        auto row1 = m_wf.recv().m_row;
+        auto row2 = m_wf.recv().m_row;
+        auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
+            row1.jump(irow1);
+            row2.jump(irow2);
+            // major sort criterion: dst ONV
+            // minor sort criterion: src ONV
+            if (row1.m_dst_onv == row2.m_dst_onv) return row1.m_src_onv <= row2.m_src_onv;
+            return row1.m_dst_onv <= row2.m_dst_onv;
+        };
+
+        /*
+         * sorting in ascending lexical order
+         */
+        QuickSorter qs(comp_fn);
+        qs.reorder_sort(m_wf.recv());
+
+        std::cout <<
+                  m_wf.recv().to_string()
+                  << std::endl;
+
+#if 0
+        auto block_start_it = qs.m_inds.cbegin();
+        auto current_it = qs.m_inds.cbegin();
+        /*
+         * algorithm:
+         * increment current_it until the dst onv does not match that at block_start_it
+         *      at each increment, accumulate the delta weight
+         *
+         */
+        row2.restart(); // "start of block"
+        row1.restart(); // "current" row
+        row2.step();
+        defs::wf_t delta
+        for (const auto& i: qs.m_inds){
+
+            row1.step();
+            row2.step();
+        }
+#endif
+
+        std::cout << " " << std::endl;
+    }
+
+
     for (row.restart(); row.in_range(); row.step()){
         annihilate_row();
     }
@@ -157,7 +204,6 @@ void Solver::execute(size_t niter) {
 
         m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
-        //consolidate_spawned();
         loop_over_spawned();
         m_annihilate_timer.pause();
 

@@ -103,6 +103,8 @@ struct TableBase {
 
     void copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst);
 
+    void swap_rows(const size_t& irow, const size_t& jrow);
+
     struct Loc {
         const size_t m_irank, m_irow;
 

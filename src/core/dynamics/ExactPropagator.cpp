@@ -33,15 +33,15 @@ void ExactPropagator::off_diagonal(Wavefunction &wf) {
 
             auto delta = -weight * tau() * helement;
             if (consts::float_is_zero(delta)) continue;
-            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
+            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
         }
         defs::ham_t delta;
         delta = -weight * tau()* off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, 1);
         if (!consts::float_is_zero(delta))
-            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
+            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
         delta = -weight * tau()* off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, -1);
         if (!consts::float_is_zero(delta))
-            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
+            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
     }
 
     if (m_ham.int_2e_rank()==2) {
@@ -63,7 +63,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf) {
 
                     auto delta = -weight * tau() * helement;
                     if (consts::float_is_zero(delta)) continue;
-                    wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart);
+                    wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
                 }
             }
         }
