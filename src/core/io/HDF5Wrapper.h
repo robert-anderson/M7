@@ -263,7 +263,7 @@ namespace hdf5 {
         }
 
         void select_hyperslab(const size_t& iitem){
-            ASSERT(iitem < m_nitem_local);
+            MPI_ASSERT(iitem < m_nitem_local, "iitem exceeds local limit");
             m_hyperslab_offsets[0] = m_item_offset + iitem;
             H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
                                 nullptr, m_hyperslab_counts.data(), nullptr);
@@ -294,7 +294,7 @@ namespace hdf5 {
             select_hyperslab(iitem);
             auto status = H5Dwrite(m_dataset_handle, m_h5type, m_memspace_handle,
                                    m_filespace_handle, m_coll_plist, data);
-            ASSERT(!status);
+            MPI_ASSERT(!status, "HDF5 write failed");
         }
     };
 
@@ -378,7 +378,7 @@ namespace hdf5 {
             select_hyperslab(iitem);
             auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
                                   m_filespace_handle, m_coll_plist, data);
-            ASSERT(!status)
+            MPI_ASSERT(!status, "HDF5 read failed");
         }
     };
 
