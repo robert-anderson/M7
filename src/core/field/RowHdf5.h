@@ -8,6 +8,7 @@
 #include "Row.h"
 #include "FieldBase.h"
 
+#if 0
 template<typename row_t>
 struct RowHdf5Writer : row_t {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
@@ -58,5 +59,5 @@ struct RowHdf5Reader : row_t {
 };
 
 
-
+#endif //M7_ROWHDF5_H
 #endif //M7_ROWHDF5_H

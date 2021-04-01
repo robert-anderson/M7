@@ -63,6 +63,7 @@ TEST(ExactPropagator, Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 10000;
+    opts.rdm_rank = 1;
     const size_t nsite = 6;
     //const auto benchmark = -108.81138657563143;
     Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);

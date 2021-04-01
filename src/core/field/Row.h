@@ -21,23 +21,23 @@ struct Row {
     size_t m_size = 0ul;
     size_t m_dsize = 0ul;
     size_t m_current_offset = 0ul;
-    mutable Row* m_child = nullptr;
+    mutable Row *m_child = nullptr;
 
     bool in_range() const {
         return m_i < *m_table_hwm;
     }
 
     bool ptr_in_range() const {
-        return (m_dbegin >= m_table_bw->m_dbegin) && (m_dbegin < m_table_bw->m_dbegin+*m_table_hwm*m_dsize);
+        return (m_dbegin >= m_table_bw->m_dbegin) && (m_dbegin < m_table_bw->m_dbegin + *m_table_hwm * m_dsize);
     }
 
-    defs::data_t* dbegin() {
+    defs::data_t *dbegin() {
         MPI_ASSERT(m_dbegin, "the row pointer is not set")
         MPI_ASSERT(ptr_in_range(), "the row is not pointing memory in the permitted range");
         return m_dbegin;
     }
 
-    const defs::data_t* dbegin() const {
+    const defs::data_t *dbegin() const {
         return m_dbegin;
     }
 
@@ -63,15 +63,20 @@ struct Row {
         m_i++;
     }
 
-    void jump(const size_t& i) const {
+    void jump(const size_t &i) const {
         MPI_ASSERT(m_table_bw, "Row must be assigned to a Table");
         MPI_ASSERT(m_table_hwm, "Row must be assigned to a Table");
         MPI_ASSERT(m_table_bw->m_dbegin, "Row is assigned to Table buffer window without a beginning");
         MPI_ASSERT(m_table_bw->m_dend, "Row is assigned to Table buffer window without an end");
-        m_dbegin = m_table_bw->m_dbegin+m_dsize*i;
+        m_dbegin = m_table_bw->m_dbegin + m_dsize * i;
         m_i = i;
         MPI_ASSERT(in_range(), "Row is out of table bounds");
     }
+
+    void jump(const Row &other) const {
+        jump(other.m_i);
+    }
+
 
     Row() {}
 
@@ -81,6 +86,10 @@ struct Row {
         m_dbegin = other.m_dbegin;
         other.m_child = this;
         ASSERT(m_fields.empty())
+    }
+
+    Row &operator=(const Row &other) {
+        return *this;
     }
 
     std::string to_string() const;
@@ -96,9 +105,12 @@ struct Row {
 template<typename row_t>
 struct KeyField {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
-    typedef typename std::remove_reference<typename std::result_of<decltype(&row_t::key_field)(row_t)>::type>::type type;
-    static type& get(row_t& row){return row.key_field();}
-    static const type& get(const row_t& row) {return const_cast<row_t&>(row).key_field();}
+    typedef typename std::remove_reference<typename std::result_of<decltype(&row_t::key_field)(
+            row_t)>::type>::type type;
+
+    static type &get(row_t &row) { return row.key_field(); }
+
+    static const type &get(const row_t &row) { return const_cast<row_t &>(row).key_field(); }
 };
 
 

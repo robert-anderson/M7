@@ -74,24 +74,20 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.pause();
 }
 
-void Solver::annihilate_row() {
-    const auto& row = m_wf.recv().m_row;
-    const auto& dst_onv = row.m_dst_onv;
+void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store) {
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
-    const defs::wf_t& delta_weight = row.m_delta_weight;
     // zero magnitude weights should not have been communicated
+    if(consts::float_is_zero(delta_weight)) return;
     ASSERT(!consts::float_is_zero(delta_weight));
 
-    auto irow_walkers = *m_wf.m_store[dst_onv];
-
-    if (irow_walkers == ~0ul) {
+    if (irow_store == ~0ul) {
         /*
          * the destination ONV is not currently occupied, so initiator rules
          * must be applied
          */
-        if (!row.m_src_initiator) {
+        if (!allow_initiation) {
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
@@ -102,7 +98,7 @@ void Solver::annihilate_row() {
                 m_prop.m_ham.get_energy(dst_onv),
                 m_reference.is_connected(dst_onv));
     } else {
-        m_wf.m_store.m_row.jump(irow_walkers);
+        m_wf.m_store.m_row.jump(irow_store);
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight(0);
         auto weight_after = weight_before+delta_weight;
         if ((weight_before>0)!=(weight_after>0))
@@ -114,7 +110,6 @@ void Solver::annihilate_row() {
 void Solver::loop_over_spawned() {
     mpi::barrier();
 
-    const auto &row = m_wf.recv().m_row;
     if (m_opts.rdm_rank>0) {
         auto row1 = m_wf.recv().m_row;
         auto row2 = m_wf.recv().m_row;
@@ -133,36 +128,98 @@ void Solver::loop_over_spawned() {
         QuickSorter qs(comp_fn);
         qs.reorder_sort(m_wf.recv());
 
-        std::cout <<
-                  m_wf.recv().to_string()
-                  << std::endl;
-
-#if 0
-        auto block_start_it = qs.m_inds.cbegin();
-        auto current_it = qs.m_inds.cbegin();
         /*
-         * algorithm:
-         * increment current_it until the dst onv does not match that at block_start_it
-         *      at each increment, accumulate the delta weight
+         * now that the recv list is reordered according to dst ONV, we must process its
+         * contents in dst ONV *blocks*.
+         *
+         * e.g.
+         * irow  dst   src
+         * 0     A     P
+         * 1     A     P
+         * 2     A     Q
+         * 3     A     Q
+         * 4     A     Q
+         * 5     B     P
+         * 6     B     R
+         * 7     B     R
+         * 8     C     Q
+         * 9     C     Q
+         * 10    C     R
+         *
+         * the algorithm uses two row indices:
+         *      irow_block_start
+         *      irow_current
+         *
+         * initially, both are 0.
+         *
+         * irow_current is iteratively incremented until its dst ONV does not equal that of
+         * irow_block_start. at each iteration, the delta_weight is accumulated into a total.
+         *
+         * once this condition is met (at row 5 in the example), irow_block_start is iterated
+         * to the row before irow_current,
+         *
+         * We also need to be careful of the walker weights
+         * if Csrc is taken from the wavefunction at cycle i,
+         * Cdst is at an intermediate value equal to the wavefunction at cycle i with the diagonal
+         * part of the propagator already applied.
+         *
+         * We don't want to introduce a second post-annihilation loop over occupied ONVs to apply
+         * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
+         * value of the walker weight before the diagonal death/cloning.
+         *
+         * In the exact propagator, the death step does:
+         * Ci -> Ci*(1 - tau (Hii-shift)).
+         *
+         * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
          *
          */
-        row2.restart(); // "start of block"
-        row1.restart(); // "current" row
-        row2.step();
-        defs::wf_t delta
-        for (const auto& i: qs.m_inds){
+        auto row_block_start = m_wf.recv().m_row;
+        auto row_current = m_wf.recv().m_row;
+        auto row_block_start_src_blocks = m_wf.recv().m_row;
 
-            row1.step();
-            row2.step();
+        auto get_nrow_in_block = [&]() { return row_current.m_i - row_block_start.m_i; };
+        auto get_allow_initiation = [&]() {
+            // row_block_start is now at last row in last block
+            bool allow = get_nrow_in_block() > 1;
+            if (!allow) {
+                // only one src_onv for this dst_onv. If the parent is an initiator,
+                // contributions to unoccupied ONVs are allowed
+                allow = row_block_start.m_src_initiator;
+            }
+            return allow;
+        };
+
+        row_block_start.restart();
+        defs::wf_t total_delta = 0.0;
+        for (row_current.restart(); row_current.in_range(); row_current.step()) {
+            if (row_current.m_dst_onv == row_block_start.m_dst_onv) {
+                // still in block
+                total_delta += row_current.m_delta_weight;
+            } else {
+                // row_current is in first row of next block
+                ASSERT(get_nrow_in_block()>0);
+                // get the row index (if any) of the dst_onv
+                auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
+                make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
+                                                       row_current.m_i - 1, irow_store);
+                ASSERT(row_block_start.m_i == row_current.m_i - 1)
+                annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
+                // put block start to start of next block
+                row_block_start.step();
+                ASSERT(row_block_start.m_i == row_current.m_i)
+                total_delta = row_current.m_delta_weight;
+            }
         }
-#endif
-
-        std::cout << " " << std::endl;
+        // finish off last block
+        auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
+        make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks, m_wf.recv().m_hwm - 1, irow_store);
+        annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
     }
-
-
-    for (row.restart(); row.in_range(); row.step()){
-        annihilate_row();
+    else {
+        auto& row = m_wf.recv().m_row;
+        for (row.restart(); row.in_range(); row.step()){
+            annihilate_row(row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
+        }
     }
     m_wf.recv().clear();
 }
