@@ -173,6 +173,7 @@ void Solver::loop_over_spawned() {
          * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
          *
          */
+
         auto row_block_start = m_wf.recv().m_row;
         auto row_current = m_wf.recv().m_row;
         auto row_block_start_src_blocks = m_wf.recv().m_row;
@@ -211,9 +212,12 @@ void Solver::loop_over_spawned() {
             }
         }
         // finish off last block
-        auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
-        make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks, m_wf.recv().m_hwm - 1, irow_store);
-        annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
+        if (row_block_start.in_range()) {
+            auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
+            make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks, m_wf.recv().m_hwm - 1,
+                                                   irow_store);
+            annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
+        }
     }
     else {
         auto& row = m_wf.recv().m_row;
