@@ -9,6 +9,7 @@
 #include <src/core/util/Timer.h>
 #include <src/core/observables/AverageCoefficients.h>
 #include <src/core/observables/UniformTwf.h>
+#include <src/core/observables/MevGroup.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStatsFile.h"
@@ -52,6 +53,7 @@ class Solver {
 
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
+    BilinearMevGroup m_mevs;
 
 public:
     //AverageCoefficients m_average_coeffs;
@@ -73,8 +75,9 @@ public:
     }
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight){
-        // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst_onv
-
+        // m_wf.m_store.m_row is assumed to have been moved to the store row of the
+        m_mevs.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight(0));
+        //std::cout << src_onv.to_string() << " " << m_wf.m_store.m_row.m_onv.to_string() << std::endl;
     }
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,

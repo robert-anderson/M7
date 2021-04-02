@@ -45,6 +45,8 @@ void Solver::loop_over_occupied_onvs() {
         m_reference.add_row();
         if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
 
+        if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight(0), row.m_onv, row.m_weight(0));
+
         /*
         if (m_prop.m_variable_shift){
             m_connection.connect(m_reference.get_onv(), row.m_onv);
@@ -72,6 +74,8 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.unpause();
     mpi::barrier();
     m_synchronization_timer.pause();
+
+    std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
 void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store) {
@@ -235,7 +239,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
         m_connection(prop.m_ham.nsite()),
         m_exit("exit"),
-        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.m_format.nelement(), prop.m_ham.nsite()) : nullptr)
+        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.m_format.nelement(), prop.m_ham.nsite()) : nullptr),
+        m_mevs(prop.m_ham.nsite(), m_opts.rdm_rank)
         //m_average_coeffs("average coeffs", {2, 2}, 1)
         {
     if (mpi::i_am_root())

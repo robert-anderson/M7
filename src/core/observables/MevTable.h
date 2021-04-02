@@ -45,7 +45,9 @@ public:
         ASSERT(inds.size()==m_ninds[iind]);
         const auto offset = m_offsets[iind];
         // implicitly convert to storage type defs::mev_ind_t
-        for (size_t i = 0ul; i<inds.size(); ++i) m_values(offset+i) = inds[i];
+        for (size_t i = 0ul; i<inds.size(); ++i) {
+            m_values(offset+i) = inds[i];
+        }
     }
 
     void get(const size_t& iind, defs::inds& inds) const{
