@@ -96,7 +96,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         defs::wf_comp_t res = 0.0;
         auto& row = m_store.m_row;
         for (row.restart(); row.in_range(); row.step()) {
-            const defs::wf_t& weight = row.m_weight(m_ipart);
+            const defs::wf_t& weight = row.m_weight[m_ipart];
             res += std::pow(weight, 2.0);
         }
         return mpi::all_sum(res);
@@ -106,7 +106,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         defs::wf_comp_t res = 0.0;
         auto& row = m_store.m_row;
         for (row.restart(); row.in_range(); row.step()) {
-            const defs::wf_t& weight = row.m_weight(m_ipart);
+            const defs::wf_t& weight = row.m_weight[m_ipart];
             res += std::abs(weight);
         }
         return mpi::all_sum(res);
@@ -130,7 +130,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     void set_weight(const defs::wf_t &new_weight) {
         auto& row = m_store.m_row;
-        defs::wf_t& weight = row.m_weight(m_ipart);
+        defs::wf_t& weight = row.m_weight[m_ipart];
         m_delta_nwalker(0, 0) += std::abs(new_weight);
         m_delta_nwalker(0, 0) -= std::abs(weight);
         m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
@@ -142,11 +142,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
     void change_weight(const defs::wf_t &delta) {
-        set_weight(m_store.m_row.m_weight(m_ipart) + delta);
+        set_weight(m_store.m_row.m_weight[m_ipart] + delta);
     }
 
     void scale_weight(const double &factor) {
-        set_weight(factor*m_store.m_row.m_weight(m_ipart));
+        set_weight(factor*m_store.m_row.m_weight[m_ipart]);
     }
 
     void zero_weight() {
@@ -208,8 +208,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
         row.m_dst_onv = dst_onv;
         row.m_delta_weight = delta;
-        row.m_src_initiator.put(initiator);
-        row.m_src_deterministic.put(deterministic);
+        row.m_src_initiator = initiator;
+        row.m_src_deterministic = deterministic;
         row.m_dst_ipart = dst_ipart;
         return irow;
     }

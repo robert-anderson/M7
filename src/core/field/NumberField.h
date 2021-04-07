@@ -7,92 +7,78 @@
 
 #include "FieldBase.h"
 
-template<typename T>
-struct NumberFieldBase : FieldBase {
-    const size_t m_nelement;
+template<typename T, size_t nind>
+struct NdNumberField : FieldBase {
+    typedef const std::array<size_t, nind>& inds_t;
+    const NdFormat<nind> m_format;
 
-    NumberFieldBase(Row* row, size_t nitem, size_t nelement):
-            FieldBase(row, sizeof(T) * nelement, nitem, typeid(T), hdf5::type<T>()), m_nelement(nelement){}
+    const size_t& nelement() const {
+        return m_format.nelement();
+    }
 
-    NumberFieldBase(const NumberFieldBase& other):
-            NumberFieldBase(other.m_row ? other.m_row->m_child : other.m_row, other.m_nitem, other.m_nelement){}
+    NdNumberField(Row* row, inds_t shape):
+            FieldBase(row, sizeof(T) * NdFormat<nind>(shape).nelement(), typeid(T), hdf5::type<T>()), m_format(shape){}
 
-    NumberFieldBase &operator=(const T &v) {
+    NdNumberField(const NdNumberField& other):
+            NdNumberField(other.row_of_copy(), other.m_format.shape()){}
+
+    NdNumberField &operator=(const T &v) {
         std::fill((T*)begin(), (T*)end(), v);
         return *this;
     }
 
-    NumberFieldBase &operator=(const std::vector<T> &v) {
-        ASSERT(v.size() == m_nitem*m_nelement);
+    NdNumberField &operator=(const std::vector<T> &v) {
+        ASSERT(v.size()==nelement());
         std::memcpy(begin(), v.data(), m_size);
         return *this;
     }
 
-    NumberFieldBase &operator=(const NumberFieldBase &v) {
+    NdNumberField &operator=(const NdNumberField &v) {
         static_cast<FieldBase&>(*this) = v;
         return *this;
     }
 
-    T& get(const size_t& iitem, const size_t& ielement){
-        return ((T *) begin(iitem))[ielement];
+    T& operator[](const size_t& ielement) {
+        return ((T *) begin())[ielement];
     }
 
-    const T& get(const size_t& iitem, const size_t& ielement) const{
-        return ((T *) begin(iitem))[ielement];
+    const T& operator[](const size_t& ielement) const {
+        return ((const T *) begin())[ielement];
     }
 
-    std::string to_string_element(const size_t& iitem) const override {
+    T& operator[](inds_t inds) {
+        return ((T *) begin())[m_format.flatten(inds)];
+    }
+
+    const T& operator[](inds_t inds) const {
+        return ((const T *) begin())[m_format.flatten(inds)];
+    }
+
+    std::string to_string() const override {
         std::string tmp;
-        if (m_nelement>1) tmp += "[";
-        for (size_t ielement = 0ul; ielement<m_nelement; ++ielement)
-            tmp+=std::to_string(this->get(iitem, ielement)) + " ";
-        if (m_nelement>1) tmp += "]";
+        if (nind>0) tmp += "[";
+        for (size_t ielement = 0ul; ielement<nelement(); ++ielement)
+            tmp+=std::to_string((*this)[ielement]) + " ";
+        if (nind>0) tmp += "]";
         return tmp;
     }
 };
 
-
 template<typename T>
-struct NumberField : NumberFieldBase<T> {
-    using NumberFieldBase<T>::operator=;
+struct NumberField : NdNumberField<T, 0ul> {
+    typedef NdNumberField<T, 0ul> base_t;
+    using base_t::operator=;
 
-    NumberField(Row* row): NumberFieldBase<T>(row, 1, 1){}
+    NumberField(Row* row): base_t(row, {}){}
 
     operator T&() {
-        return *(T *) FieldBase::begin();
+        return *(T*)FieldBase::begin();
     }
 
     operator const T&() const {
-        return *(const T *) FieldBase::begin();
+        return *(const T*)FieldBase::begin();
     }
 };
 
-
-template<typename T>
-struct VectorField : NumberFieldBase<T> {
-    VectorField(Row* row, size_t nelement): NumberFieldBase<T>(row, 1, nelement){}
-
-    T& operator()(const size_t& ielement) {
-        return ((T *) FieldBase::begin())[ielement];
-    }
-
-    const T& operator()(const size_t& ielement) const {
-        return ((const T *) FieldBase::begin())[ielement];
-    }
-};
-
-
-template<typename T>
-struct VectorsField : NumberFieldBase<T> {
-    VectorsField(Row* row, size_t nitem, size_t nelement): NumberFieldBase<T>(row, nitem, nelement){}
-
-    T& operator()(const size_t& iitem, const size_t& ielement) {
-        return ((T *) FieldBase::begin(iitem))[ielement];
-    }
-
-    const T& operator()(const size_t& iitem, const size_t& ielement) const {
-        return ((const T *) FieldBase::begin(iitem))[ielement];
-    }
-};
 
 #endif //M7_NUMBERFIELD_H

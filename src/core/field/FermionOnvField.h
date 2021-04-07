@@ -1,5 +1,5 @@
 //
-// Created by rja on 17/02/2021.
+// Created by rja on 07/04/2021.
 //
 
 #ifndef M7_FERMIONONVFIELD_H
@@ -7,26 +7,62 @@
 
 #include "BitsetField.h"
 
-struct FermionOnvsFieldBase : BitsetFieldBase<defs::data_t> {
-    typedef BitsetFieldBase<defs::data_t> base_t;
-    using base_t::m_item_dsize;
-    using base_t::get_dataword;
-    using base_t::m_nbit;
-    using FieldBase::zero;
+struct FermionOnvField : BitsetField<defs::data_t, 2> {
+    typedef BitsetField<defs::data_t, 2> base_t;
+    using base_t::get;
+    using base_t::set;
+    using base_t::clr;
+    using base_t::put;
+    using base_t::operator=;
+    using base_t::inds_t;
 
     const size_t m_nsite;
 
-    FermionOnvsFieldBase(Row *row, size_t nitem, size_t nsite) : base_t(row, nitem, 2 * nsite), m_nsite(nsite) {}
+    FermionOnvField(Row* row, size_t nsite):
+        base_t(row, {2, nsite}), m_nsite(nsite){}
 
-    FermionOnvsFieldBase(const FermionOnvsFieldBase &other) :
-            FermionOnvsFieldBase(other.m_row ? other.m_row->m_child : nullptr, other.m_nitem, other.m_nsite) {}
 
-    FermionOnvsFieldBase &operator=(const FermionOnvsFieldBase &other) {
+    FermionOnvField(const FermionOnvField& other):
+            FermionOnvField(other.row_of_copy(), other.m_format.extent(1)){}
+
+    FermionOnvField& operator=(const FermionOnvField& other) {
         FieldBase::operator=(other);
         return *this;
     }
 
-    void set_from_string(const size_t &iitem, const std::string &s) {
+    void set(const defs::inds& setbits_alpha, const defs::inds& setbits_beta) {
+        for(auto& i: setbits_alpha) set({0, i});
+        for(auto& i: setbits_beta) set({1, i});
+    }
+
+
+    void excite(const size_t &i, const size_t &j) {
+        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        clr(dptr, i);
+        set(dptr, j);
+    }
+    void excite(inds_t ann, inds_t cre){
+        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        clr(dptr, ann);
+        set(dptr, cre);
+    }
+
+    void excite(const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
+        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        clr(dptr, i);
+        clr(dptr, j);
+        set(dptr, k);
+        set(dptr, l);
+    }
+    void excite(inds_t ann1, inds_t ann2, inds_t cre1, inds_t cre2) {
+        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        clr(dptr, ann1);
+        clr(dptr, ann1);
+        set(dptr, cre1);
+        set(dptr, cre2);
+    }
+
+    void set_from_string(const std::string &s) {
         zero();
         size_t i = 0ul;
         for (auto c: s) {
@@ -35,38 +71,38 @@ struct FermionOnvsFieldBase : BitsetFieldBase<defs::data_t> {
                 if (c != '0' && c != '1')
                     throw std::runtime_error(
                             R"(FermionOnv-defining string must contain only "0", "1", or ",")");
-                if (c == '1') base_set(iitem, i);
+                if (c == '1') set(i);
                 ++i;
             } else {
                 if (i != m_nsite)
                     throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
             }
         }
-        MPI_REQUIRE(i > m_nbit, "FermionOnv-defining string not long enough");
-        MPI_REQUIRE(i < m_nbit, "FermionOnv-defining string too long");
+        MPI_REQUIRE(i > nbit(), "FermionOnv-defining string not long enough");
+        MPI_REQUIRE(i < nbit(), "FermionOnv-defining string too long");
     }
 
-    int spin(const size_t &iitem) const {
+    int spin() const {
         int spin = 0;
         defs::data_t work;
-        for (size_t idataword = iitem; idataword < m_item_dsize; ++idataword) {
-            work = get_dataword(idataword + iitem * m_item_dsize);
+        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
+            work = get_dataword(idataword);
             while (work) {
                 size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
                 if (ibit < m_nsite) ++spin;
-                else if (ibit >= m_nbit) return spin;
+                else if (ibit >= nbit()) return spin;
                 else --spin;
             }
         }
         return spin;
     }
 
-    int nalpha(const size_t &iitem) const {
+    int nalpha() const {
         // number of electrons occupying spinors in the alpha spin channel
         int nalpha = 0;
         defs::data_t work;
-        for (size_t idataword = 0ul; idataword < m_item_dsize; ++idataword) {
-            work = get_dataword(idataword + iitem * m_item_dsize);
+        for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
+            work = get_dataword(idataword);
             while (work) {
                 size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
                 if (ibit >= m_nsite) return nalpha;
@@ -76,170 +112,20 @@ struct FermionOnvsFieldBase : BitsetFieldBase<defs::data_t> {
         return nalpha;
     }
 
-    std::string to_string_element(const size_t &iitem) const override {
+    std::string to_string() const override {
         std::string res;
         res += "(";
-        res.reserve(m_nbit * 2 + 3);
+        res.reserve(nbit() + 3);
         size_t i = 0ul;
         for (; i < m_nsite; ++i)
-            res += base_get(iitem, i) ? "1" : "0";
+            res += get(i) ? "1" : "0";
         res += ","; // spin channel delimiter
-        for (; i < m_nbit; ++i)
-            res += base_get(iitem, i) ? "1" : "0";
+        for (; i < nbit(); ++i)
+            res += get(i) ? "1" : "0";
         res += ")";
         return res;
     }
-};
 
-
-struct FermionOnvsField : FermionOnvsFieldBase {
-
-    FermionOnvsField(Row *row, size_t nitem, size_t nsite) : FermionOnvsFieldBase(row, nitem, nsite) {}
-
-    void set(const size_t &iitem, const size_t &ibit) {
-        base_t::base_set(iitem, ibit);
-    }
-
-    void set(const size_t &iitem, const size_t &ispin, const size_t &isite) {
-        base_t::base_set(iitem, ispin * m_nsite + isite);
-    }
-
-    void set(const size_t &iitem, const defs::inds &ibits) {
-        for (auto i: ibits) base_t::base_set(iitem, i);
-    }
-
-    void set(const size_t &iitem, const defs::inds &alpha, const defs::inds &beta) {
-        for (auto i: alpha) base_t::base_set(iitem, i);
-        for (auto i: beta) base_t::base_set(iitem, i + m_nsite);
-    }
-
-    void clr(const size_t &iitem, const size_t &ibit) {
-        base_t::base_clr(iitem, ibit);
-    }
-
-    void put(const size_t &iitem, const size_t &ibit, bool v) {
-        base_t::base_put(iitem, ibit, v);
-    }
-
-    bool get(const size_t &iitem, const size_t &ibit) const {
-        return base_t::base_get(iitem, ibit);
-    }
-
-    void excite(const size_t &iitem, const size_t &i, const size_t &j) {
-        /*
-         * single excitation i->j
-         */
-        base_t::base_clr(iitem, i);
-        base_t::base_set(iitem, j);
-    }
-
-    void excite(const size_t &iitem, const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
-        /*
-         * double excitation i,j->k,l
-         */
-        base_t::base_clr(iitem, i);
-        base_t::base_clr(iitem, j);
-        base_t::base_set(iitem, k);
-        base_t::base_set(iitem, l);
-    }
-};
-
-
-struct FermionOnvField : FermionOnvsFieldBase {
-
-    FermionOnvField(Row *row, size_t nsite) : FermionOnvsFieldBase(row, 1, nsite) {}
-
-    FermionOnvField(const FermionOnvField &other) :
-            FermionOnvField(other.m_row ? other.m_row->m_child : nullptr, other.m_nsite) {}
-
-    FermionOnvField &operator=(const FermionOnvField &other) {
-        FermionOnvsFieldBase::operator=(other);
-        return *this;
-    }
-
-    FermionOnvField operator=(const defs::inds& inds) {
-        zero();
-        for (auto ind: inds) base_t::base_set(ind);
-        return *this;
-    }
-
-    FermionOnvField operator=(const std::pair<defs::inds, defs::inds>& inds) {
-        zero();
-        // alpha site indices
-        for (auto& ind: inds.first) {
-            ASSERT(ind<m_nsite);
-            base_t::base_set(ind);
-        }
-        // beta site indices
-        for (auto& ind: inds.second) {
-            ASSERT(ind<m_nsite);
-            base_t::base_set(ind+m_nsite);
-        }
-        return *this;
-    }
-
-    void set(const size_t &ibit) {
-        base_t::base_set(ibit);
-    }
-
-    void set(const size_t &ispin, const size_t &isite) {
-        base_t::base_set(ispin * m_nsite + isite);
-    }
-
-    void set(const defs::inds &alpha, const defs::inds &beta) {
-        for (auto i: alpha) base_t::base_set(i);
-        for (auto i: beta) base_t::base_set(i + m_nsite);
-    }
-
-    void clr(const size_t &ibit) {
-        base_t::base_clr(ibit);
-    }
-
-    void clr(const size_t &ispin, const size_t &isite) {
-        base_t::base_clr(ispin * m_nsite + isite);
-    }
-
-    void put(const size_t &ibit, bool v) {
-        base_t::base_put(ibit, v);
-    }
-
-    void put(const size_t &ispin, const size_t &isite, bool v) {
-        base_t::base_put(ispin * m_nsite + isite, v);
-    }
-
-    bool get(const size_t &ibit) const {
-        return base_t::base_get(ibit);
-    }
-
-    bool get(const size_t &ispin, const size_t &isite) const {
-        return base_t::base_get(ispin * m_nsite + isite);
-    }
-
-    void excite(const size_t &i, const size_t &j) {
-        /*
-         * single excitation i->j
-         */
-        base_t::base_clr(i);
-        base_t::base_set(j);
-    }
-
-    void excite(const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
-        /*
-         * double excitation i,j->k,l
-         */
-        base_t::base_clr(i);
-        base_t::base_clr(j);
-        base_t::base_set(k);
-        base_t::base_set(l);
-    }
-
-    int spin() const {
-        return FermionOnvsFieldBase::spin(0);
-    }
-
-    int nalpha() const {
-        return FermionOnvsFieldBase::nalpha(0);
-    }
 };
 
 

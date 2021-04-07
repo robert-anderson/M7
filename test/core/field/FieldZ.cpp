@@ -9,10 +9,11 @@
 #include "src/core/table/Table.h"
 #include "src/core/table/BufferedFields.h"
 
+#if 0
 TEST(FieldZ, Copying) {
     struct TestRow : Row {
-        fields::Vector<float> m_vector;
-        fields::Vectors<float> m_vectors;
+        fields::Numbers<float, 1ul> m_vector;
+        fields::Numbers<float> m_vectors;
 
         TestRow() : m_vector(this, 9), m_vectors(this, 4, 5){}
     };
@@ -50,7 +51,7 @@ TEST(FieldZ, Test) {
 
     ASSERT_EQ(&table.m_row, table.m_row.m_array.m_row);
     ASSERT_EQ(table.m_row.m_array.m_row_offset, 0ul);
-    ASSERT_EQ(table.m_row.m_flags.m_item_size, 4);
+    ASSERT_EQ(table.m_row.m_flags.m_element_size, 4);
     ASSERT_EQ(table.m_row.m_flags.m_size, 4);
 
     const size_t nrow = 30;
@@ -61,3 +62,4 @@ TEST(FieldZ, Test) {
 
     ASSERT_EQ(irow, nrow);
 }
+#endif

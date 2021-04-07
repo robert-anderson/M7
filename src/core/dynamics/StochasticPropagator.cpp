@@ -39,7 +39,7 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
 void StochasticPropagator::off_diagonal(Wavefunction &wf) {
     const auto& row = wf.m_store.m_row;
     const auto& ipart = wf.m_ipart;
-    const defs::wf_t& weight = row.m_weight(ipart);
+    const defs::wf_t& weight = row.m_weight[ipart];
     ASSERT(!consts::float_is_zero(weight));
     ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
     const auto& src_onv = row.m_onv;
@@ -84,7 +84,7 @@ void StochasticPropagator::diagonal(Wavefunction &wf) {
             wf.scale_weight(1 - death_rate);
         } else {
             // kill stochastically
-            wf.set_weight(m_prng.stochastic_round(row.m_weight(ipart) * (1 - death_rate), m_opts.min_death_mag));
+            wf.set_weight(m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_opts.min_death_mag));
         }
     }
 }

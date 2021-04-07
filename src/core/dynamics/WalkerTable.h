@@ -12,29 +12,29 @@
 
 
 struct WalkerTableRow : public Row {
-    const size_t m_npart;
+    const std::array<size_t, defs::ndim_wf> m_part_shape;
     fields::Onv<> m_onv;
-    fields::Vector<defs::wf_t> m_weight;
+    fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
     fields::Number<defs::ham_comp_t> m_hdiag;
-    fields::Flags m_initiator;
-    fields::Flags m_reference_connection;
-    fields::Flags m_deterministic;
+    fields::Flags<defs::ndim_wf> m_initiator;
+    fields::Flags<defs::ndim_wf> m_reference_connection;
+    fields::Flags<defs::ndim_wf> m_deterministic;
 
     fields::Onv<> &key_field() {
         return m_onv;
     };
 
-    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica):
-    m_npart(nroot*nreplica),
-    m_onv(this, nsite),
-    m_weight(this, m_npart),
-    m_hdiag(this),
-    m_initiator(this, m_npart),
-    m_reference_connection(this, m_npart),
-    m_deterministic(this, m_npart){}
+    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica) :
+            m_part_shape({nroot, nreplica}),
+            m_onv(this, nsite),
+            m_weight(this, m_part_shape),
+            m_hdiag(this),
+            m_initiator(this, m_part_shape),
+            m_reference_connection(this, m_part_shape),
+            m_deterministic(this, m_part_shape) {}
 
-    WalkerTableRow(const Options &opts, size_t nsite):
-            WalkerTableRow(nsite, opts.nroot, opts.nreplica){}
+    WalkerTableRow(const Options &opts, size_t nsite) :
+            WalkerTableRow(nsite, opts.nroot, opts.nreplica) {}
 };
 
 struct UniqueOnvRow : public Row {
@@ -45,7 +45,7 @@ struct UniqueOnvRow : public Row {
         return m_ind;
     };
 
-    UniqueOnvRow(): m_ind(this), m_nparent(this){}
+    UniqueOnvRow() : m_ind(this), m_nparent(this) {}
 };
 
 struct OnvRow : public Row {
@@ -56,9 +56,8 @@ struct OnvRow : public Row {
         return m_onv;
     };
 
-    OnvRow(size_t nsite): m_onv(this, nsite), m_nparent(this){}
+    OnvRow(size_t nsite) : m_onv(this, nsite), m_nparent(this) {}
 };
-
 
 
 typedef MappedTable<WalkerTableRow> WalkerTable;

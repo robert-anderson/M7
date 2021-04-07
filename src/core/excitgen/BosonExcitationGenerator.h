@@ -38,13 +38,13 @@ public:
         if(m_nboson_max == 0) return false;
 
 #ifndef NDEBUG
-        auto nmode = src_onv.m_bonv.m_nelement;
+        auto nmode = src_onv.m_bonv.nelement();
         ASSERT(nmode == src_onv.m_fonv.m_nsite and nmode == dst_onv.m_fonv.m_nsite)
 #endif
 
         auto imode_excit = occs[m_prng.draw_uint(occs.size())] % src_onv.m_fonv.m_nsite;
         int change;
-        auto curr_occ = src_onv.m_bonv(imode_excit);
+        auto curr_occ = src_onv.m_bonv[imode_excit];
 
         prob = 1.0/occs.size();
         // there are two ways to generate such connections, and they should be twice as likely
@@ -67,7 +67,7 @@ public:
         anticonn.m_bonvconn.add(imode_excit, change);
         anticonn.apply(src_onv, dst_onv);
 
-        auto com = src_onv.m_bonv(imode_excit);
+        auto com = src_onv.m_bonv[imode_excit];
         if (change<0) com+=change;
         helem = get_helement(m_h, imode_excit, imode_excit, com);
         return true;

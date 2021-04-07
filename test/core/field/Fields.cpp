@@ -23,8 +23,8 @@ TEST(Fields, HashUniformityTrueRandom){
             size_t nset = 0ul;
             while (nset < nelec/2) {
                 size_t isite = prng.draw_uint(nsite);
-                if (fonv.get(ispin, isite)) continue;
-                fonv.set(ispin, isite);
+                if (fonv.get({ispin, isite})) continue;
+                fonv.set({ispin, isite});
                 ++nset;
             }
         }
@@ -54,13 +54,13 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
 
     for (size_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();
-        for (auto ispin: {0, 1}) {
+        for (auto ispin: {0ul, 1ul}) {
             size_t nset = 0ul;
             size_t isite = 0ul;
             while (nset<nelec/2){
-                if (!fonv.get(ispin, isite)) {
+                if (!fonv.get({ispin, isite})) {
                     if (prng.draw_float() < prob) {
-                        fonv.set(ispin, isite);
+                        fonv.set({ispin, isite});
                         ++nset;
                     }
                 }

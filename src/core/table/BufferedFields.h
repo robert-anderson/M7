@@ -48,9 +48,11 @@ struct BufferedField : WrappedRow, field_t {
 
 namespace buffered {
 
-    template<typename T>
-    struct Vector : BufferedField<fields::Vector<T>> {
-        Vector(size_t nelement) : BufferedField<fields::Vector<T>>({nullptr, nelement}){}
+    template<typename T, size_t nind>
+    struct Numbers : BufferedField<fields::Numbers<T, nind>> {
+        typedef BufferedField<fields::Numbers<T, nind>> base_t;
+        typedef typename fields::Numbers<T, nind>::inds_t inds_t;
+        Numbers(inds_t shape) : base_t({nullptr, shape}){}
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {
@@ -62,32 +64,20 @@ namespace buffered {
         }
     };
 
-    struct FermionOnvs : BufferedField<fields::FermionOnvs> {
-        FermionOnvs(size_t nitem, size_t nsite) : BufferedField<fields::FermionOnvs>({nullptr, nitem, nsite}){}
-    };
-
     struct BosonOnv : BufferedField<fields::BosonOnv> {
         using fields::BosonOnv::operator=;
         BosonOnv(size_t nsite) : BufferedField<fields::BosonOnv>({nullptr, nsite}){}
     };
 
-    struct BosonOnvs : BufferedField<fields::BosonOnvs> {
-        BosonOnvs(size_t nitem, size_t nsite) : BufferedField<fields::BosonOnvs>({nullptr, nitem, nsite}){}
-    };
 
     struct FermiBosOnv : BufferedMultiField<fields::FermiBosOnv> {
         using fields::FermiBosOnv::operator=;
         FermiBosOnv(size_t nsite):
                 BufferedMultiField<fields::FermiBosOnv>({nullptr, nsite}){}
     };
-    using FermiBosOnvs = BufferedMultiField<fields::FermiBosOnvs>;
 
     template<bool enable_bosons=defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
-
-    template<bool enable_bosons=defs::enable_bosons>
-    using Onvs = typename std::conditional<enable_bosons, FermiBosOnvs, FermionOnvs>::type;
-
 }
 
 

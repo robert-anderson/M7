@@ -70,7 +70,10 @@ public:
 
     size_t flatten(std::array<size_t, nind> inds) const {
         size_t iflat = 0ul;
-        for (size_t i=0ul; i < nind; ++i) iflat+= inds[i] * m_strides[i];
+        for (size_t i=0ul; i < nind; ++i) {
+            ASSERT(inds[i]<m_shape[i]);
+            iflat+= inds[i] * m_strides[i];
+        }
         return iflat;
     }
 
@@ -143,6 +146,17 @@ public:
         static_assert(1+sizeof...(rest)+nind_spec<=nind, "Indices are over-specified");
         ASSERT(first<m_shape[nind_spec]);
         return first*m_strides[nind_spec]+partial_offset<nind_spec+1>(rest...);
+    }
+
+    template<size_t nind_spec>
+    size_t partial_offset(std::array<size_t, nind_spec> inds) const {
+        static_assert(nind_spec<=nind, "Too many indices specified");
+        size_t iflat = 0ul;
+        for (size_t i=0ul; i < nind_spec; ++i) {
+            ASSERT(inds[i]<m_shape[i]);
+            iflat+= inds[i] * m_strides[i];
+        }
+        return iflat;
     }
 };
 

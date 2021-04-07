@@ -40,7 +40,7 @@ public:
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
     const defs::wf_t& get_weight() const {
-        return m_ac.m_row.m_weight(m_ipart);
+        return m_ac.m_row.m_weight[m_ipart];
     }
 
     const fields::Onv<>& get_onv() const {

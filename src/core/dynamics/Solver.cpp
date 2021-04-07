@@ -27,7 +27,7 @@ void Solver::loop_over_occupied_onvs() {
         MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
                    "Stored ONV should be on its allocated rank");
 
-        const auto &weight = row.m_weight(m_wf.m_ipart);
+        const auto &weight = row.m_weight[m_wf.m_ipart];
 
         m_wf.m_nocc_onv(0, 0)++;
         if (row.m_initiator.get(m_wf.m_ipart))
@@ -45,7 +45,7 @@ void Solver::loop_over_occupied_onvs() {
         m_reference.add_row();
         if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
 
-        if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight(0), row.m_onv, row.m_weight(0));
+        if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
 
         /*
         if (m_prop.m_variable_shift){
@@ -74,8 +74,6 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.unpause();
     mpi::barrier();
     m_synchronization_timer.pause();
-
-    std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
 void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store) {
@@ -103,7 +101,7 @@ void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delt
                 m_reference.is_connected(dst_onv));
     } else {
         m_wf.m_store.m_row.jump(irow_store);
-        defs::wf_t weight_before = m_wf.m_store.m_row.m_weight(0);
+        defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[0];
         auto weight_after = weight_before+delta_weight;
         if ((weight_before>0)!=(weight_after>0))
             m_wf.m_nannihilated(0, 0) += std::abs(std::abs(weight_before)-std::abs(weight_after));
@@ -288,7 +286,7 @@ void Solver::propagate_row() {
 
     if (row.is_cleared()) return;
 
-    if (consts::float_is_zero(row.m_weight(ipart))) return;
+    if (consts::float_is_zero(row.m_weight[ipart])) return;
 
     //bool is_deterministic = row.m_deterministic.get(ipart);
 

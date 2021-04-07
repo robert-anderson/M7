@@ -14,12 +14,12 @@ BosonOnvConnection::BosonOnvConnection(const size_t& nmode) :
         m_nmode(nmode), m_com(nmode), m_diff(nmode) {}
 
 BosonOnvConnection::BosonOnvConnection(const fields::BosonOnv &in, const fields::BosonOnv &out) :
-        BosonOnvConnection(in.m_nelement) {
+        BosonOnvConnection(in.nelement()) {
     connect(in, out);
 }
 
 BosonOnvConnection::BosonOnvConnection(const fields::BosonOnv &in) :
-        BosonOnvConnection(in.m_nelement) {
+        BosonOnvConnection(in.nelement()) {
     connect(in, in);
 }
 
@@ -46,8 +46,8 @@ void BosonOnvConnection::connect(const fields::BosonOnv &in, const fields::Boson
     m_diff.zero();
     ASSERT(!m_com.empty())
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {
-        int nin = in(imode);
-        int nout = out(imode);
+        int nin = in[imode];
+        int nout = out[imode];
         m_com[imode] = std::min(nin, nout);
         if (nin != nout) {
             m_diff.m_changed_modes[m_diff.m_nchanged_mode] = imode;
@@ -60,12 +60,12 @@ void BosonOnvConnection::connect(const fields::BosonOnv &in, const fields::Boson
 void BosonOnvConnection::apply(const fields::BosonOnv &in, fields::BosonOnv &out) {
     out = in;
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {
-        m_com[imode] = in(imode);
+        m_com[imode] = in[imode];
     }
     for (size_t ichange = 0ul; ichange < nchanged_mode(); ++ichange) {
         const auto imode = changed_mode(ichange);
         const auto change = changes(ichange);
-        out(imode) += changes(ichange);
+        out[imode] += changes(ichange);
         if (change<0) m_com[imode] += change;
     }
 }

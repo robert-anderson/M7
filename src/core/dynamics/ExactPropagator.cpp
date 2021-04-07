@@ -10,7 +10,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf) {
     const auto& row = wf.m_store.m_row;
     const auto& ipart = wf.m_ipart;
     const auto& src_onv = row.m_onv;
-    const defs::wf_t& weight = row.m_weight(ipart);
+    const defs::wf_t& weight = row.m_weight[ipart];
     bool src_initiator = row.m_initiator.get(ipart);
     OccupiedOrbitals occs(src_onv);
     ASSERT(occs.size() > 0);

@@ -21,23 +21,20 @@ TEST(StochasticPropagator, Test) {
     opts.shift_initial = 0.0;
     opts.ncycle = 50000;
     opts.init();
-//const auto benchmark = -108.81138657563143;
+    //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        ref_onv.set(0, i);
-        ref_onv.set(1, i);
+        ref_onv.set({0, i});
+        ref_onv.set({1, i});
     }
+
     StochasticPropagator prop(ham, opts);
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
-    //const size_t store_nrow = (opts.walker_buffer_size_factor_initial*opts.nwalker_target)/mpi::nrank();
-    //ASSERT_EQ(wf.m_store.m_nrow, store_nrow);
-    //const size_t send_nrow = (opts.spawn_buffer_size_factor_initial*opts.nwalker_target)/mpi::nrank();
-    //ASSERT_EQ(wf.m_comm.send().nrow_per_table(), send_nrow);
 
     auto ref_energy = ham.get_energy(ref_onv);
 
@@ -64,8 +61,8 @@ TEST(StochasticPropagator, Hubbard) {
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.set(0, i);
-        onv.set(1, i);
+        onv.set({0, i});
+        onv.set({1, i});
     }
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);

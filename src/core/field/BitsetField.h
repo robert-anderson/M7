@@ -1,110 +1,173 @@
 //
-// Created by rja on 09/02/2021.
+// Created by rja on 06/04/2021.
 //
 
 #ifndef M7_BITSETFIELD_H
 #define M7_BITSETFIELD_H
 
 #include "FieldBase.h"
-#include "src/core/util/utils.h"
-#include "src/core/parallel/MPIAssert.h"
 
-template<typename T>
-struct BitsetFieldBase : FieldBase {
+template<typename T, size_t nind>
+struct BitsetField : FieldBase {
     static_assert(std::is_integral<T>::value, "Basis for bitset field must be an integral type");
-    static constexpr size_t nbit_dword() {return sizeof(T) * CHAR_BIT;}
 
-    // total number of bits stored in one element
-    const size_t m_nbit;
-    // total number of data words of type T required to store each item
-    const size_t m_item_dsize;
-    // number of bits unused in last dataword of an item
+    typedef const std::array<size_t, nind> &inds_t;
+
+    struct BitView {
+        BitsetField &m_field;
+        const size_t m_ibit = 0;
+
+        operator bool() const {
+            return m_field.get(m_ibit);
+        }
+
+        BitView &operator=(bool v) {
+            m_field.put(m_ibit, v);
+        }
+    };
+
+
+    static constexpr size_t nbit_dword() { return sizeof(T) * CHAR_BIT; }
+
+    const NdFormat<nind> m_format;
+    // total number of data words of type T required
+    const size_t m_dsize;
+    // number of bits unused in last dataword
     const size_t m_nbit_in_last_dword;
 
-    using FieldBase::m_item_size;
-    using FieldBase::m_size;
-    using FieldBase::begin;
-    using FieldBase::end;
     using FieldBase::zero;
+    using FieldBase::begin;
 
-public:
-    BitsetFieldBase(Row* row, size_t nitem, size_t nbit) :
-            FieldBase(row, integer_utils::divceil(nbit, nbit_dword()) * sizeof(T), nitem, typeid(T), hdf5::type<T>()),
-            m_nbit(nbit), m_item_dsize(m_item_size/sizeof(T)),
-            m_nbit_in_last_dword(m_nbit - (m_item_dsize-1) * nbit_dword()){
+    BitsetField(Row *row, inds_t shape) :
+            FieldBase(row, integer_utils::divceil(
+                    NdFormat<nind>(shape).nelement(), nbit_dword()) * sizeof(T),
+                      typeid(T), hdf5::type<T>()),
+            m_format(shape),
+            m_dsize(m_size / sizeof(T)),
+            m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {
     }
 
-protected:
+    BitsetField(const BitsetField &other) : BitsetField(other.row_of_copy(), other.m_format.shape()) {}
 
-    T* dbegin() const {
-        return (T*)begin();
+    BitsetField &operator=(const BitsetField &other) {
+        FieldBase::operator=(other);
+        return *this;
     }
 
-    T* dbegin(const size_t& iitem) const {
-        return (T*)begin(iitem);
-    }
-
-    bool base_get(const size_t &iitem, const size_t &ibit) const {
-        ASSERT(ibit < m_nbit);
-        return bit_utils::get(dbegin(iitem)[ibit / nbit_dword()], ibit % nbit_dword());
-    }
-
-    bool base_get(const size_t &ibit) const {
-        ASSERT(ibit < m_nbit);
-        return bit_utils::get(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
-    }
-
-    void base_set(const size_t &iitem, const size_t &ibit) {
-        ASSERT(ibit < m_nbit);
-        bit_utils::set(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
-    }
-
-    void base_set(const size_t &ibit) {
-        ASSERT(ibit < m_nbit);
-        bit_utils::set(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
-    }
-
-    void base_clr(const size_t &iitem, const size_t &ibit) {
-        ASSERT(ibit < m_nbit);
-        bit_utils::clr(dbegin(iitem)[ibit / nbit_dword()], ibit % nbit_dword());
-    }
-
-    void base_clr(const size_t &ibit) {
-        ASSERT(ibit < m_nbit);
-        bit_utils::clr(dbegin()[ibit / nbit_dword()], ibit % nbit_dword());
-    }
-
-    void base_put(const size_t &iitem, const size_t &ibit, bool v) {
-        v ? base_set(iitem, ibit) : base_clr(iitem, ibit);
-    }
-
-    void base_put(const size_t &ibit, bool v) {
-        v ? base_set(ibit) : base_clr(ibit);
-    }
-
-    void base_set(const size_t &iitem, const defs::inds &setinds) {
+    BitsetField &operator=(const defs::inds &setbits) {
+        // prezero the element
         zero();
-        for (auto ibit: setinds) base_set(iitem, ibit);
+        for (const auto &ind: setbits) set(ind);
+        return *this;
     }
 
-    void base_set(const defs::inds &setinds) {
-        zero();
-        for (auto ibit: setinds) base_set(ibit);
+    const size_t &nbit() const {
+        return m_format.nelement();
     }
 
-public:
+    T *dbegin() const {
+        return (T *) begin();
+    }
+
+    BitView operator[](const size_t &ibit) {
+        return {*this, ibit};
+    }
+
+    const BitView operator[](const size_t &ibit) const {
+        return {*this, ibit};
+    }
+
+    BitView operator[](inds_t inds) {
+        return {*this, m_format.flatten(inds)};
+    }
+
+    const BitView operator[](inds_t inds) const {
+        return {*this, m_format.flatten(inds)};
+    }
+
+    bool get(const T *dptr, const size_t &ibit) const {
+        ASSERT(ibit < nbit());
+        return bit_utils::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+    }
+
+    bool get(const size_t &ibit) const {
+        return get(reinterpret_cast<T *>(begin()), ibit);
+    }
+
+    bool get(const T *dptr, inds_t inds) const {
+        return get(dptr, m_format.flatten(inds));
+    }
+
+    bool get(inds_t inds) const {
+        return get(m_format.flatten(inds));
+    }
+
+    void set(T *dptr, const size_t &ibit) {
+        ASSERT(ibit < nbit());
+        bit_utils::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+    }
+
+    void set(const size_t &ibit) {
+        set(reinterpret_cast<T *>(begin()), ibit);
+    }
+
+    void set(T *dptr, inds_t inds) {
+        set(dptr, m_format.flatten(inds));
+    }
+
+    void set(inds_t inds) {
+        set(m_format.flatten(inds));
+    }
+
+
+    void clr(T *dptr, const size_t &ibit) {
+        ASSERT(ibit < nbit());
+        bit_utils::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+    }
+
+    void clr(const size_t &ibit) {
+        clr(reinterpret_cast<T *>(begin()), ibit);
+    }
+
+    void clr(T *dptr, inds_t inds) {
+        clr(dptr, m_format.flatten(inds));
+    }
+
+    void clr(inds_t inds) const {
+        clr(m_format.flatten(inds));
+    }
+
+    void put(T *dptr, const size_t &ibit, bool v) {
+        v ? set(dptr, ibit) : clr(dptr, ibit);
+    }
+
+    void put(const size_t &ibit, bool v) {
+        v ? set(ibit) : clr(ibit);
+    }
+
+    void put(T *dptr, inds_t inds, bool v) {
+        put(dptr, m_format.flatten(inds), v);
+    }
+
+    void put(inds_t inds, bool v) {
+        put(m_format.flatten(inds), v);
+    }
+
     T get_dataword(const size_t &idataword) const {
-        auto tmp = ((T *) begin())[idataword];
-        if ((idataword + 1)%m_item_dsize==0) {
-            MPI_ASSERT(tmp==bit_utils::truncate(tmp, m_nbit_in_last_dword), "trailing bits were not clear: possible corruption");
+        T *dptr = reinterpret_cast<T *>(begin());
+        auto tmp = dptr[idataword];
+        if (idataword + 1 == m_dsize) {
+            MPI_ASSERT(tmp == bit_utils::truncate(tmp, m_nbit_in_last_dword),
+                       "trailing bits were not clear: possible corruption");
             tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
 
     T get_antidataword(const size_t &idataword) const {
-        auto tmp = ~(((T *) begin())[idataword]);
-        if ((idataword + 1)%m_item_dsize==0) {
+        T *dptr = reinterpret_cast<T *>(begin());
+        auto tmp = ~dptr[idataword];
+        if ((idataword + 1) == m_dsize) {
             tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
@@ -112,18 +175,34 @@ public:
 
     size_t nsetbit() const {
         size_t result = 0;
-        for (size_t idataword = 0ul; idataword<m_item_dsize; ++idataword){
-            result+=bit_utils::nsetbit(get_dataword(idataword));
+        for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
+            result += bit_utils::nsetbit(get_dataword(idataword));
         }
         return result;
     }
 
-    std::string to_string_element(const size_t& iitem) const override {
+    std::string to_string() const override {
         std::string res;
-        res.reserve(m_nbit);
-        for (size_t i = 0ul; i < m_nbit; ++i)
-            res += base_get(iitem, i) ? "1" : "0";
+        res.reserve(nbit());
+        for (size_t i = 0ul; i < nbit(); ++i)
+            res += get(i) ? "1" : "0";
         return res;
+    }
+};
+
+template<typename T>
+struct BitField : BitsetField<T, 0> {
+    typedef BitsetField<T, 0> base_t;
+
+    BitField(Row *row) : base_t(row, {}) {}
+
+    BitField &operator=(bool v) {
+        base_t::put(0, v);
+        return *this;
+    }
+
+    operator bool() const {
+        return base_t::get(0);
     }
 };
 

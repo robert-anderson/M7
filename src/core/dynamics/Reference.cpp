@@ -15,7 +15,7 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
 
 void Reference::add_row() {
     auto& row = m_wf.m_store.m_row;
-    auto weight = row.m_weight(m_ipart);
+    auto weight = row.m_weight[m_ipart];
     if (std::abs(weight) > m_candidate_abs_weight){
         m_candidate_abs_weight = std::abs(weight);
         m_irow_candidate = row.m_i;

@@ -8,7 +8,6 @@
 #include <random>
 #include <algorithm>
 #include <complex>
-#include <src/core/field/NumberField.h>
 #include "src/defs.h"
 
 class PRNG {

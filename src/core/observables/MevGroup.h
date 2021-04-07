@@ -50,13 +50,13 @@ struct BilinearMevGroup {
                 for (const auto &com: m_conn.com()) {
                     //m_lookup.m_row.set(0, {com});
                     //m_lookup.m_row.set(1, {com});
-                    m_lookup.m_row.m_inds(0) = com;
-                    m_lookup.m_row.m_inds(1) = com;
+                    m_lookup.m_row.m_inds[0] = com;
+                    m_lookup.m_row.m_inds[1] = com;
 
                     size_t irow = *m_rdms[rank]->operator[](m_lookup.m_row.m_inds);
                     if (irow==~0ul) irow = m_rdms[rank]->insert(m_lookup.m_row.m_inds);
                     rdm.m_row.jump(irow);
-                    rdm.m_row.m_values(0)+=src_weight*dst_weight;
+                    rdm.m_row.m_values[0]+=src_weight*dst_weight;
                 }
             }
         }
