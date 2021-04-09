@@ -14,24 +14,27 @@
 TEST(HDF5Wrapper, Table) {
 
     struct MyRow : Row {
-        fields::Number<int> m_ints;
-        fields::Number<double> m_doubles;
+        fields::Number<int> m_int;
+        fields::Numbers<double, 3> m_double;
 
         MyRow():
-        m_ints(this), m_doubles(this){}
+        m_int(this), m_double(this, {{2, 4, 3}, {"A", "bbob", "cfs"}}){}
     };
 
     BufferedTable<MyRow> table("Test", {{}});
     table.push_back(3);
     table.m_row.restart();
-    table.m_row.m_doubles = 1.23;
+    table.m_row.m_double = 1.23;
+    table.m_row.m_double[2] = 9.09;
     table.m_row.step();
-    table.m_row.m_doubles = 3.55;
+    table.m_row.m_double = 3.55;
 
     hdf5::FileWriter fw("table_test.h5");
     hdf5::GroupWriter gw("container", fw);
+    std::vector<int> tmp = {4, 34, 67};
+    gw.write_attr( "rjas_", tmp);
+    gw.write_attr( "mystrings", std::vector<std::string>{"sda", "sagt", "sdgjisaowa", "sdggf"});
     table.write(gw, "table");
-
 }
 
 

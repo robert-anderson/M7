@@ -20,7 +20,7 @@ struct RowHdf5Writer : row_t {
         for (auto& field: Row::m_fields) {
             std::string field_name = field->m_name;
             if (field_name.empty()) field_name = "untitled_" + std::to_string(iuntitled++);
-            m_writers.emplace_back(m_group, field_name, field->h5_shape(), nitem, field->m_h5type, field->h5_dim_names());
+            m_writers.emplace_back(m_group, field_name, field->h5_shape(), nitem, field->h5_type(), field->h5_dim_names());
         }
     }
     void write(const size_t& iitem){
@@ -48,7 +48,7 @@ struct RowHdf5Reader : row_t {
         //TODO: give fields names
         size_t ifield = 0ul;
         for (auto& field: Row::m_fields)
-            m_readers.emplace_back(m_group, "field_"+std::to_string(ifield++), field->m_h5type);
+            m_readers.emplace_back(m_group, "field_"+std::to_string(ifield++), field->h5_type());
     }
     void read(const size_t& iitem){
         for (size_t ifield=0ul; ifield<Row::m_fields.size(); ++ifield){

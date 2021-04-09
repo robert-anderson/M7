@@ -41,7 +41,7 @@ struct BitsetField : FieldBase {
     BitsetField(Row *row, inds_t shape) :
             FieldBase(row, integer_utils::divceil(
                     NdFormat<nind>(shape).nelement(), nbit_dword()) * sizeof(T),
-                      typeid(T), hdf5::type<T>()),
+                      typeid(T)),
             m_format(shape),
             m_dsize(m_size / sizeof(T)),
             m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {
@@ -187,6 +187,22 @@ struct BitsetField : FieldBase {
         for (size_t i = 0ul; i < nbit(); ++i)
             res += get(i) ? "1" : "0";
         return res;
+    }
+
+    defs::inds h5_shape() const override {
+        /*
+         * bitsets are stored flat
+         */
+        return {m_dsize};
+    }
+
+    std::vector<std::string> h5_dim_names() const override {
+        if (!nind) return {};
+        return {};
+    }
+
+    hid_t h5_type() const override {
+        return hdf5::type<T>();
     }
 };
 

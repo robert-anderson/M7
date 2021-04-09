@@ -20,9 +20,8 @@ struct FieldBase {
     size_t m_row_offset = ~0ul;
 
     std::vector<char> m_null_string;
-    hid_t m_h5type;
 
-    FieldBase(Row *row, size_t size, const std::type_info &type_info, hid_t h5type);
+    FieldBase(Row *row, size_t size, const std::type_info &type_info);
 
     FieldBase(const FieldBase &other);
 
@@ -74,6 +73,10 @@ struct FieldBase {
 
     virtual std::vector<std::string> h5_dim_names() const {
         return {};
+    }
+
+    virtual hid_t h5_type() const {
+        return 0;
     }
 
 
