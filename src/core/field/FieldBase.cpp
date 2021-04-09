@@ -6,9 +6,10 @@
 #include "src/core/parallel/MPIAssert.h"
 
 
-FieldBase::FieldBase(Row* row, size_t size, const std::type_info &type_info, hid_t h5type) :
-        m_type_info(type_info), m_size(size), m_null_string(m_size, 0),
-        m_h5type(h5type){
+FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, hid_t h5type) :
+        m_type_info(type_info), m_size(size),
+        m_null_string(m_size, 0),
+        m_h5type(h5type) {
     m_row = row;
     if (m_row) m_row_offset = m_row->add_field(this);
 }
@@ -18,7 +19,7 @@ FieldBase::FieldBase(const FieldBase &other) :
                   other.m_type_info, other.m_h5type) {}
 
 bool FieldBase::is_comparable(const FieldBase &other) const {
-    return m_type_info==other.m_type_info && m_size==other.m_size;
+    return m_type_info == other.m_type_info && m_size == other.m_size;
 }
 
 void FieldBase::add_to_row(Row *row) {
@@ -39,7 +40,7 @@ char *FieldBase::begin() const {
 }
 
 char *FieldBase::end() const {
-    return begin()+m_size;
+    return begin() + m_size;
 }
 
 Row *FieldBase::row_of_copy() const {
@@ -60,27 +61,27 @@ int FieldBase::cmp(const FieldBase &other) const {
 }
 
 bool FieldBase::operator==(const FieldBase &other) const {
-    return cmp(other)==0;
+    return cmp(other) == 0;
 }
 
 bool FieldBase::operator!=(const FieldBase &other) const {
-    return cmp(other)!=0;
+    return cmp(other) != 0;
 }
 
 bool FieldBase::operator<(const FieldBase &other) const {
-    return cmp(other)<0;
+    return cmp(other) < 0;
 }
 
 bool FieldBase::operator>(const FieldBase &other) const {
-    return cmp(other)>0;
+    return cmp(other) > 0;
 }
 
 bool FieldBase::operator<=(const FieldBase &other) const {
-    return cmp(other)<=0;
+    return cmp(other) <= 0;
 }
 
 bool FieldBase::operator>=(const FieldBase &other) const {
-    return cmp(other)>=0;
+    return cmp(other) >= 0;
 }
 
 defs::hash_t FieldBase::hash() const {

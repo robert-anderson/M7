@@ -16,6 +16,7 @@ struct FieldBase {
     Row *m_row;
     const std::type_info &m_type_info;
     const size_t m_size;
+    const std::string m_name = "";
     size_t m_row_offset = ~0ul;
 
     std::vector<char> m_null_string;
@@ -66,6 +67,15 @@ struct FieldBase {
     virtual void h5_read(hdf5::NdListReaderBase &h5list, const size_t &iitem) {
         h5list.read_h5item_bytes(iitem, begin());
     }
+
+    virtual defs::inds h5_shape() const {
+        return {};
+    }
+
+    virtual std::vector<std::string> h5_dim_names() const {
+        return {};
+    }
+
 
 private:
 

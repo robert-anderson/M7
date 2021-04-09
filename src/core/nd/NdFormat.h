@@ -28,6 +28,7 @@ class NdFormat : NdFormatBase{
 public:
     NdFormat(){
         static_assert(!nind, "This ctor is only valid in the scalar case");
+        m_nelement = 1ul;
     }
 
     NdFormat(size_t extent){
@@ -36,14 +37,14 @@ public:
         set_nelement();
     }
 
-    NdFormat(std::array<size_t, nind> shape, std::array<std::string, nind> dim_names={}):
-        m_shape(std::move(shape)), m_dim_names(std::move(dim_names)){
+    NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names={}):
+        m_shape(shape), m_dim_names(dim_names){
         set_strides();
         set_nelement();
         ASSERT(m_nelement!=~0ul);
     }
 
-    NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape(), other.m_dim_names){}
+    NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
     bool operator==(const NdFormat<nind> &other) const{
         for (size_t iind=0ul; iind<nind; ++iind){
@@ -66,6 +67,10 @@ public:
 
     const std::array<size_t, nind>& shape() const {
         return m_shape;
+    }
+
+    const std::array<std::string, nind>& dim_names() const {
+        return m_dim_names;
     }
 
     size_t flatten(std::array<size_t, nind> inds) const {
@@ -97,7 +102,7 @@ public:
         auto size = nind;
         if (m_dim_names==std::array<std::string, nind>{}){
             for (size_t i=0ul; i<size; ++i) {
-                tmp+=" "+m_shape[i];
+                tmp+=" "+std::to_string(m_shape[i]);
             }
         }
         else {

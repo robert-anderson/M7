@@ -11,6 +11,7 @@
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/nd/NdFormat.h"
 #include "hdf5.h"
+#include "hdf5_hl.h"
 
 namespace hdf5 {
 
@@ -280,15 +281,24 @@ namespace hdf5 {
 
     struct NdListWriterBase : public NdListBase {
     private:
-        NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
-                NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {}
+        NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims,
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string>& dim_labels={}) :
+                NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {
+            if (!dim_labels.empty()){
+                MPI_ASSERT(dim_labels.size()==item_dims.size(), "Number of dim labels does not match number of dims");
+                for (size_t idim=0ul; idim<item_dims.size(); ++idim)
+                    H5DSset_label(m_dataset_handle, idim, dim_labels[idim].c_str());
+            }
+        }
 
     public:
-        NdListWriterBase(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type) {}
+        NdListWriterBase(FileWriter &parent, std::string name, const defs::inds &item_dims,
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string>& dim_labels={}) :
+                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        NdListWriterBase(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type) {}
+        NdListWriterBase(GroupWriter &parent, std::string name, const defs::inds &item_dims,
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string>& dim_labels={}) :
+                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
         void write_h5item_bytes(const size_t& iitem, const void *data) {
             select_hyperslab(iitem);

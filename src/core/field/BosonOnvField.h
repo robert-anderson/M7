@@ -8,7 +8,7 @@
 #include "NumberField.h"
 
 struct BosonOnvField : NdNumberField<uint8_t, 1> {
-    BosonOnvField(Row *row, size_t nmode) : NdNumberField<uint8_t, 1>(row, {nmode}) {}
+    BosonOnvField(Row *row, size_t nmode) : NdNumberField<uint8_t, 1>(row, {{nmode}, {"boson mode occupations"}}) {}
 
     BosonOnvField(const BosonOnvField &other): BosonOnvField(other.m_row, other.m_format.extent(0)){}
 

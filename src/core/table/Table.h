@@ -154,13 +154,11 @@ struct Table : TableBase {
     }
 
     virtual void write(hdf5::GroupWriter& parent, std::string name) const {
-        /*
         RowHdf5Writer<row_t> row_writer(m_row, parent, name, m_hwm);
         size_t iitem = 0ul;
         for (row_writer.restart(); row_writer.in_range(); row_writer.step()){
             row_writer.write(iitem++);
         }
-         */
     }
 
     virtual void read(hdf5::GroupReader& parent, std::string name){

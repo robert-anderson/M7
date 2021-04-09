@@ -16,11 +16,11 @@ struct NdNumberField : FieldBase {
         return m_format.nelement();
     }
 
-    NdNumberField(Row* row, inds_t shape):
-            FieldBase(row, sizeof(T) * NdFormat<nind>(shape).nelement(), typeid(T), hdf5::type<T>()), m_format(shape){}
+    NdNumberField(Row* row, NdFormat<nind> format):
+            FieldBase(row, sizeof(T) * format.nelement(), typeid(T), hdf5::type<T>()), m_format(format){}
 
     NdNumberField(const NdNumberField& other):
-            NdNumberField(other.row_of_copy(), other.m_format.shape()){}
+            NdNumberField(other.row_of_copy(), other.m_format){}
 
     NdNumberField &operator=(const T &v) {
         std::fill((T*)begin(), (T*)end(), v);
@@ -61,6 +61,15 @@ struct NdNumberField : FieldBase {
             tmp+=std::to_string((*this)[ielement]) + " ";
         if (nind>0) tmp += "]";
         return tmp;
+    }
+
+    defs::inds h5_shape() const override {
+        return {m_format.shape().begin(), m_format.shape().end()};
+    }
+
+    std::vector<std::string> h5_dim_names() const override {
+        if (!nind) return {};
+        return {m_format.dim_names().begin(), m_format.dim_names().end()};
     }
 };
 
