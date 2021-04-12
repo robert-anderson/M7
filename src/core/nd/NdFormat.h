@@ -69,8 +69,19 @@ public:
         return m_shape;
     }
 
+    defs::inds shape_vector() const {
+        defs::inds tmp;
+        tmp.assign(m_shape.cbegin(), m_shape.cend());
+        return tmp;
+    }
+
     const std::array<std::string, nind>& dim_names() const {
         return m_dim_names;
+    }
+    std::vector<std::string> dim_names_vector() const {
+        std::vector<std::string> tmp;
+        tmp.assign(m_dim_names.cbegin(), m_dim_names.cend());
+        return tmp;
     }
 
     size_t flatten(std::array<size_t, nind> inds) const {

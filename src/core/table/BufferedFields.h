@@ -80,5 +80,12 @@ namespace buffered {
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
 }
 
+template<typename field_t>
+struct SingletRow : Row {
+    field_t m_field;
+    template<typename ...Args>
+    SingletRow(Args... args): Row(), m_field(this, args...){}
+};
+
 
 #endif //M7_BUFFEREDFIELDS_H

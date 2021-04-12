@@ -59,6 +59,10 @@ struct FieldBase {
 
     virtual std::string to_string() const = 0;
 
+    virtual void h5_write_attrs(hid_t parent_handle) {
+
+    }
+
     virtual void h5_write(hdf5::NdListWriterBase &h5list, const size_t &iitem) {
         h5list.write_h5item_bytes(iitem, begin());
     }

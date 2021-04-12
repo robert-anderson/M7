@@ -19,7 +19,7 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
     const size_t m_nsite;
 
     FermionOnvField(Row* row, size_t nsite):
-        base_t(row, {2, nsite}), m_nsite(nsite){}
+        base_t(row, {{2, nsite}, {"spin channel", "site"}}), m_nsite(nsite){}
 
 
     FermionOnvField(const FermionOnvField& other):

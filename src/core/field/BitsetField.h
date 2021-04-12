@@ -38,11 +38,9 @@ struct BitsetField : FieldBase {
     using FieldBase::zero;
     using FieldBase::begin;
 
-    BitsetField(Row *row, inds_t shape) :
-            FieldBase(row, integer_utils::divceil(
-                    NdFormat<nind>(shape).nelement(), nbit_dword()) * sizeof(T),
-                      typeid(T)),
-            m_format(shape),
+    BitsetField(Row *row, NdFormat<nind> format) :
+            FieldBase(row, integer_utils::divceil(format.nelement(), nbit_dword()) * sizeof(T),
+                      typeid(T)), m_format(format),
             m_dsize(m_size / sizeof(T)),
             m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {
     }
@@ -187,6 +185,15 @@ struct BitsetField : FieldBase {
         for (size_t i = 0ul; i < nbit(); ++i)
             res += get(i) ? "1" : "0";
         return res;
+    }
+
+    void h5_write_attrs(hid_t parent_handle) override {
+        hdf5::AttributeWriterBase::write(parent_handle, "bitset shape", m_format.shape_vector());
+        hdf5::AttributeWriterBase::write(parent_handle, "bitset dim names", m_format.dim_names_vector());
+    }
+
+    void h5_write(hdf5::NdListWriterBase &h5list, const size_t &iitem) override {
+        FieldBase::h5_write(h5list, iitem);
     }
 
     defs::inds h5_shape() const override {

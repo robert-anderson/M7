@@ -259,6 +259,7 @@ namespace hdf5 {
         const hsize_t m_ndim_list;
         const hsize_t m_nitem_local;
         const hsize_t m_nitem_global;
+        const hsize_t m_nitem_global_max;
         const std::vector<hsize_t> m_list_dims_local;
         const std::vector<hsize_t> m_list_dims_global;
         const hsize_t m_item_offset;
@@ -268,95 +269,29 @@ namespace hdf5 {
         hid_t m_filespace_handle;
         hid_t m_dataset_handle;
         hid_t m_memspace_handle;
+        hid_t m_none_memspace_handle;
         hid_t m_h5type;
         CollectivePList m_coll_plist;
 
-        std::vector<hsize_t> get_list_dims_local() {
-            std::vector<hsize_t> out;
-            out.reserve(m_ndim_list);
-            out.push_back(m_nitem_local);
-            out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-            return out;
-        }
+        std::vector<hsize_t> get_list_dims_local();
 
-        std::vector<hsize_t> get_list_dims_global() {
-            std::vector<hsize_t> out;
-            out.reserve(m_ndim_list);
-            out.push_back(m_nitem_global);
-            out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-            return out;
-        }
+        std::vector<hsize_t> get_list_dims_global();
 
-        hsize_t get_item_offset() {
-            std::vector<hsize_t> tmp(mpi::nrank());
-            mpi::all_gather(m_nitem_local, tmp);
-            hsize_t out = 0ul;
-            for (size_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
-            return out;
-        }
+        hsize_t get_item_offset();
 
         NdListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
-                   bool writemode, hid_t h5type) :
-                m_parent_handle(parent_handle),
-                m_item_dims(convert_dims(item_dims)),
-                m_ndim_item(item_dims.size()),
-                m_ndim_list(item_dims.size() + 1),
-                m_nitem_local(nitem),
-                m_nitem_global(mpi::all_sum(m_nitem_local)),
-                m_list_dims_local(get_list_dims_local()),
-                m_list_dims_global(get_list_dims_global()),
-                m_item_offset(get_item_offset()),
-                m_hyperslab_counts(m_ndim_list, 0ul),
-                m_hyperslab_offsets(m_ndim_list, 0ul),
-                m_h5type(h5type) {
-            MPI_REQUIRE(H5Tget_size(m_h5type), "Invalid HDF5 type specified");
-            m_filespace_handle = H5Screate_simple(m_ndim_list, m_list_dims_global.data(), nullptr);
+                   bool writemode, hid_t h5type);
 
-            /*
-             * Create the dataset with default properties and close filespace.
-             */
-            if (writemode)
-                m_dataset_handle = H5Dcreate(m_parent_handle, name.c_str(), m_h5type, m_filespace_handle,
-                                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            else
-                m_dataset_handle = H5Dopen1(m_parent_handle, name.c_str());
+        void select_hyperslab(const size_t &iitem);
 
-            H5Sclose(m_filespace_handle);
-
-            m_filespace_handle = H5Dget_space(m_dataset_handle);
-
-            m_hyperslab_counts = m_list_dims_local;
-            // select one item at a time
-            m_hyperslab_counts[0] = 1;
-            m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), nullptr);
-        }
-
-        void select_hyperslab(const size_t &iitem) {
-            MPI_ASSERT(iitem < m_nitem_local, "iitem exceeds local limit");
-            m_hyperslab_offsets[0] = m_item_offset + iitem;
-            H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
-                                nullptr, m_hyperslab_counts.data(), nullptr);
-        }
-
-        ~NdListBase() {
-            H5Sclose(m_filespace_handle);
-            H5Dclose(m_dataset_handle);
-            H5Sclose(m_memspace_handle);
-        }
+        ~NdListBase();
     };
 
 
     struct NdListWriterBase : public NdListBase {
     private:
         NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
-                NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {
-            if (!dim_labels.empty()) {
-                MPI_ASSERT(dim_labels.size() == item_dims.size(), "Number of dim labels does not match number of dims");
-                for (size_t idim = 0ul; idim < item_dims.size(); ++idim)
-                    H5DSset_label(m_dataset_handle, idim, dim_labels[idim].c_str());
-            }
-        }
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
 
     public:
         NdListWriterBase(FileWriter &parent, std::string name, const defs::inds &item_dims,
@@ -367,12 +302,7 @@ namespace hdf5 {
                          const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
                 NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        void write_h5item_bytes(const size_t &iitem, const void *data) {
-            select_hyperslab(iitem);
-            auto status = H5Dwrite(m_dataset_handle, m_h5type, m_memspace_handle,
-                                   m_filespace_handle, m_coll_plist, data);
-            MPI_ASSERT(!status, "HDF5 write failed");
-        }
+        void write_h5item_bytes(const size_t &iitem, const void *data);
 
         template<typename T>
         void write_attr(std::string name, const T &obj) {

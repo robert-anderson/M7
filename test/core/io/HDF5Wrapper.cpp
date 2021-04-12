@@ -7,18 +7,39 @@
 #include <src/core/field/Fields.h>
 #include <src/core/table/Table.h>
 #include <src/core/table/BufferedTable.h>
+#include <src/core/table/BufferedFields.h>
 #include "gtest/gtest.h"
 #include "src/core/io/HDF5Wrapper.h"
 
+
+namespace hdf5_wrapper_test {
+
+}
+
+TEST(HDF5Wrapper, Number) {
+    BufferedTable<SingletRow<fields::Number<int>>> table("test int table", {{}});
+    const auto nrow = hashing::in_range(mpi::irank()+1, 10, 20);
+    table.push_back(nrow);
+    auto row = table.m_row;
+    for (row.restart(); row.in_range(); row.step()){
+        row.m_field = hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123);
+        log::debug_("writing value: {}", (int)row.m_field);
+    }
+    hdf5::FileWriter fw("table_test.h5");
+    hdf5::GroupWriter gw("container", fw);
+    table.write(gw, "table");
+}
 
 TEST(HDF5Wrapper, Table) {
 
     struct MyRow : Row {
         fields::Number<int> m_int;
         fields::Numbers<double, 3> m_double;
+        fields::FermionOnv m_det;
 
         MyRow():
-        m_int(this), m_double(this, {{2, 4, 3}, {"A", "bbob", "cfs"}}){}
+        m_int(this), m_double(this, {{2, 4, 3}, {"A", "bbob", "cfs"}}),
+        m_det(this, 9){}
     };
 
     BufferedTable<MyRow> table("Test", {{}});
@@ -31,9 +52,6 @@ TEST(HDF5Wrapper, Table) {
 
     hdf5::FileWriter fw("table_test.h5");
     hdf5::GroupWriter gw("container", fw);
-    std::vector<int> tmp = {4, 34, 67};
-    gw.write_attr( "rjas_", tmp);
-    gw.write_attr( "mystrings", std::vector<std::string>{"sda", "sagt", "sdgjisaowa", "sdggf"});
     table.write(gw, "table");
 }
 
