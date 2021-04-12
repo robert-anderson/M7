@@ -16,11 +16,11 @@ struct NdNumberField : FieldBase {
         return m_format.nelement();
     }
 
-    NdNumberField(Row* row, NdFormat<nind> format):
-            FieldBase(row, sizeof(T) * format.nelement(), typeid(T)), m_format(format){}
+    NdNumberField(Row* row, NdFormat<nind> format, std::string name=""):
+            FieldBase(row, sizeof(T) * format.nelement(), typeid(T), name), m_format(format){}
 
     NdNumberField(const NdNumberField& other):
-            NdNumberField(other.row_of_copy(), other.m_format){}
+            NdNumberField(other.row_of_copy(), other.m_format, other.m_name){}
 
     NdNumberField &operator=(const T &v) {
         std::fill((T*)begin(), (T*)end(), v);
@@ -82,7 +82,7 @@ struct NumberField : NdNumberField<T, 0ul> {
     typedef NdNumberField<T, 0ul> base_t;
     using base_t::operator=;
 
-    NumberField(Row* row): base_t(row, {}){}
+    NumberField(Row* row, std::string name=""): base_t(row, {}, name){}
 
     operator T&() {
         return *(T*)FieldBase::begin();

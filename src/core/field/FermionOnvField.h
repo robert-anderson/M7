@@ -18,12 +18,12 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
 
     const size_t m_nsite;
 
-    FermionOnvField(Row* row, size_t nsite):
-        base_t(row, {{2, nsite}, {"spin channel", "site"}}), m_nsite(nsite){}
+    FermionOnvField(Row* row, size_t nsite, std::string name=""):
+        base_t(row, {{2, nsite}, {"spin channel", "site"}}, name), m_nsite(nsite){}
 
 
     FermionOnvField(const FermionOnvField& other):
-            FermionOnvField(other.row_of_copy(), other.m_format.extent(1)){}
+            FermionOnvField(other.row_of_copy(), other.m_format.extent(1), other.m_name){}
 
     FermionOnvField& operator=(const FermionOnvField& other) {
         FieldBase::operator=(other);

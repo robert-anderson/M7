@@ -26,15 +26,18 @@ namespace fields {
     using BosonOnv = BosonOnvField;
 
     struct FermiBosOnv : MultiField<FermionOnv, BosonOnv> {
+        const std::string m_name;
         FermionOnv &m_fonv;
         BosonOnv &m_bonv;
 
-        FermiBosOnv(Row *row, size_t nsite) :
-                MultiField<FermionOnv, BosonOnv>(row, {nullptr, nsite}, {nullptr, nsite}),
-                m_fonv(get<0>()), m_bonv(get<1>()) {
+        FermiBosOnv(Row *row, size_t nsite, std::string name="") :
+                MultiField<FermionOnv, BosonOnv>(row,
+                                                 {nullptr, nsite, name.empty() ? "" : name+" (fermion)"},
+                                                 {nullptr, nsite, name.empty() ? "" : name+" (boson)"}),
+                m_name(name), m_fonv(get<0>()), m_bonv(get<1>()) {
         }
 
-        FermiBosOnv(const FermiBosOnv& other): FermiBosOnv(other.m_fonv.row_of_copy(), other.m_fonv.m_nsite){}
+        FermiBosOnv(const FermiBosOnv& other): FermiBosOnv(other.m_fonv.row_of_copy(), other.m_fonv.m_nsite, other.m_name){}
 
         FermiBosOnv &operator=(const FermiBosOnv& other) {
             m_fonv = other.m_fonv;

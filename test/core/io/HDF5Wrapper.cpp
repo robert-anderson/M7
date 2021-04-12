@@ -17,17 +17,30 @@ namespace hdf5_wrapper_test {
 }
 
 TEST(HDF5Wrapper, Number) {
-    BufferedTable<SingletRow<fields::Number<int>>> table("test int table", {{}});
+    BufferedTable<SingletRow<fields::Number<int>>> write_table("test int table", {{"integer_field"}});
+    auto read_table = write_table;
     const auto nrow = hashing::in_range(mpi::irank()+1, 10, 20);
-    table.push_back(nrow);
-    auto row = table.m_row;
+    write_table.push_back(nrow);
+    auto row = write_table.m_row;
     for (row.restart(); row.in_range(); row.step()){
         row.m_field = hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123);
         log::debug_("writing value: {}", (int)row.m_field);
     }
-    hdf5::FileWriter fw("table_test.h5");
-    hdf5::GroupWriter gw("container", fw);
-    table.write(gw, "table");
+    {
+        hdf5::FileWriter fw("table_test.h5");
+        hdf5::GroupWriter gw("container", fw);
+        write_table.write(gw, "table");
+    }
+
+    {
+        hdf5::FileReader fr("table_test.h5");
+        hdf5::GroupReader gr("container", fr);
+        read_table.read(gr, "table");
+    }
+    for (row.restart(); row.in_range(); row.step()){
+        ASSERT_EQ(row.m_field, hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123));
+    }
+
 }
 
 TEST(HDF5Wrapper, Table) {

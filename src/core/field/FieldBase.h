@@ -16,12 +16,12 @@ struct FieldBase {
     Row *m_row;
     const std::type_info &m_type_info;
     const size_t m_size;
-    const std::string m_name = "";
+    const std::string m_name;
     size_t m_row_offset = ~0ul;
 
     std::vector<char> m_null_string;
 
-    FieldBase(Row *row, size_t size, const std::type_info &type_info);
+    FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name);
 
     FieldBase(const FieldBase &other);
 
@@ -63,11 +63,11 @@ struct FieldBase {
 
     }
 
-    virtual void h5_write(hdf5::NdListWriterBase &h5list, const size_t &iitem) {
+    virtual void h5_write(hdf5::NdListWriter &h5list, const size_t &iitem) {
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void h5_read(hdf5::NdListReaderBase &h5list, const size_t &iitem) {
+    virtual void h5_read(hdf5::NdListReader &h5list, const size_t &iitem) {
         h5list.read_h5item_bytes(iitem, begin());
     }
 

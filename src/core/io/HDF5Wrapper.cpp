@@ -56,7 +56,7 @@ void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std:
     MPI_ASSERT(!status, "HDF5 string type release failed");
 }
 
-void hdf5::NdListWriterBase::write_h5item_bytes(const size_t &iitem, const void *data) {
+void hdf5::NdListWriter::write_h5item_bytes(const size_t &iitem, const void *data) {
     MPI_ASSERT(((bool) data) == (iitem < m_nitem_local),
                "data is null and items remain, or this is a runoff write op and data is not null");
     select_hyperslab(iitem);
@@ -77,8 +77,8 @@ void hdf5::NdListWriterBase::write_h5item_bytes(const size_t &iitem, const void 
     log::debug_("data written");
 }
 
-hdf5::NdListWriterBase::NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims,
-                                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
+hdf5::NdListWriter::NdListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
+                                 const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
         :
         NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {
     if (!dim_labels.empty()) {

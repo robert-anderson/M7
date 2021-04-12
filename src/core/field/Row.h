@@ -100,6 +100,8 @@ struct Row {
 
     bool is_cleared() const;
 
+    virtual bool is_h5_write_exempt() const;
+
 };
 
 template<typename row_t>

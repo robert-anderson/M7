@@ -288,19 +288,19 @@ namespace hdf5 {
     };
 
 
-    struct NdListWriterBase : public NdListBase {
+    struct NdListWriter : public NdListBase {
     private:
-        NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
+        NdListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
+                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
 
     public:
-        NdListWriterBase(FileWriter &parent, std::string name, const defs::inds &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
+        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims,
+                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                NdListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        NdListWriterBase(GroupWriter &parent, std::string name, const defs::inds &item_dims,
-                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
+        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims,
+                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                NdListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
         void write_h5item_bytes(const size_t &iitem, const void *data);
 
@@ -310,21 +310,7 @@ namespace hdf5 {
         }
     };
 
-    template<typename T>
-    struct NdListWriter : public NdListWriterBase {
-        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, type<T>()) {}
-
-        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, type<T>()) {}
-
-        void write_h5item(const size_t &iitem, const T *data) {
-            write_h5item_bytes(iitem, data);
-        }
-    };
-
-
-    struct NdListReaderBase : NdListBase {
+    struct NdListReader : NdListBase {
 
         static size_t extract_list_rank(hid_t parent_handle, std::string name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
@@ -375,36 +361,22 @@ namespace hdf5 {
         }
 
     private:
-        NdListReaderBase(hid_t parent_handle, std::string name, hid_t h5_type) :
+        NdListReader(hid_t parent_handle, std::string name, hid_t h5_type) :
                 NdListBase(parent_handle, name, extract_item_dims(parent_handle, name),
                            rank_nitem(parent_handle, name), false, h5_type) {}
 
     public:
-        NdListReaderBase(FileReader &parent, std::string name, hid_t h5_type) :
-                NdListReaderBase(parent.m_handle, name, h5_type) {}
+        NdListReader(FileReader &parent, std::string name, hid_t h5_type) :
+                NdListReader(parent.m_handle, name, h5_type) {}
 
-        NdListReaderBase(GroupReader &parent, std::string name, hid_t h5_type) :
-                NdListReaderBase(parent.m_handle, name, h5_type) {}
+        NdListReader(GroupReader &parent, std::string name, hid_t h5_type) :
+                NdListReader(parent.m_handle, name, h5_type) {}
 
         void read_h5item_bytes(const size_t &iitem, void *data) {
             select_hyperslab(iitem);
             auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
                                   m_filespace_handle, m_coll_plist, data);
             MPI_ASSERT(!status, "HDF5 read failed");
-        }
-    };
-
-
-    template<typename T>
-    struct NdListReader : public NdListReaderBase {
-        NdListReader(FileWriter &parent, std::string name) :
-                NdListReaderBase(parent.m_handle, name, type<T>()) {}
-
-        NdListReader(GroupWriter &parent, std::string name) :
-                NdListReaderBase(parent.m_handle, name, type<T>()) {}
-
-        void read_h5item(const size_t &iitem, T *data) {
-            read_h5item_bytes(iitem, data);
         }
     };
 

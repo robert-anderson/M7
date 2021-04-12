@@ -154,12 +154,21 @@ struct Table : TableBase {
         return tmp;
     }
 
-    virtual void write(hdf5::GroupWriter &parent, std::string name) const {
-        RowHdf5Writer<row_t> row_writer(m_row, parent, name, m_hwm);
+private:
+    size_t nrow_to_write() const {
+        auto row = m_row;
+        size_t n = 0ul;
+        for (row.restart(); row.in_range(); row.step()) {
+            n += !static_cast<const Row&>(row).is_h5_write_exempt();
+        }
+        return n;
+    }
+
+    virtual void write_rows(RowHdf5Writer<row_t>& row_writer) const {
         size_t iitem = 0ul;
         log::debug_("beginning HDF5 write loop over rows");
         for (row_writer.restart(); row_writer.in_range(); row_writer.step()) {
-            row_writer.write(iitem++);
+            if (!row_writer.is_h5_write_exempt()) row_writer.write(iitem++);
         }
         while (iitem<row_writer.m_nitem_max)
             row_writer.write(iitem++);
@@ -167,16 +176,24 @@ struct Table : TableBase {
         log::debug_("ending HDF5 write loop over rows");
     }
 
+public:
+
+    void write(hdf5::GroupWriter &parent, std::string name, std::vector<std::string> field_names) const {
+        RowHdf5Writer<row_t> row_writer(m_row, parent, name, nrow_to_write(), field_names);
+    }
+
+    void write(hdf5::GroupWriter &parent, std::string name) const {
+        RowHdf5Writer<row_t> row_writer(m_row, parent, name, nrow_to_write());
+    }
+
     virtual void read(hdf5::GroupReader &parent, std::string name) {
-        /*
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
         size_t iitem = 0ul;
         clear();
-        push_back(row_reader.nitem());
+        push_back(row_reader.m_nitem);
         for (row_reader.restart(); row_reader.in_range(); row_reader.step()){
             row_reader.read(iitem++);
         }
-         */
     }
 /*
     std::string to_string(const ExtremalValues &xv) const {
