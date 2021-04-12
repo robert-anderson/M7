@@ -55,6 +55,10 @@ struct MappedTableBase {
 
     size_t nbucket() const;
 
+    void clear_map() {
+        for (auto& bucket: m_buckets) bucket.clear();
+    }
+
 };
 
 
@@ -89,6 +93,11 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         }
         res.m_prev = res.m_bucket.end();
         return res;
+    }
+
+    void clear() override {
+        TableBase::clear();
+        clear_map();
     }
 
     void erase_rows(const defs::inds &irows) override {
@@ -152,8 +161,8 @@ struct MappedTable : Table<row_t>, MappedTableBase {
     void read(hdf5::GroupReader &parent, std::string name) override {
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
         size_t iitem = 0ul;
-        TableBase::clear();
-        push_back(row_reader.m_nitem);
+        clear();
+        TableBase::push_back(row_reader.m_nitem);
         for (row_reader.restart(); row_reader.in_range(); row_reader.step()) {
             row_reader.read(iitem++);
             post_insert(row_reader.m_i);

@@ -11,17 +11,19 @@
 struct RowHdf5Base {
     const size_t m_nitem, m_nitem_max, m_nitem_total;
     std::vector<std::string> m_field_names;
-    std::vector<FieldBase *> m_selected_fields;
+    defs::inds m_selected_field_inds;
 
     RowHdf5Base(const Row &row, size_t nitem, std::vector<std::string> field_names) :
             m_nitem(nitem), m_nitem_max(mpi::all_max(m_nitem)),
             m_nitem_total(mpi::all_sum(m_nitem)), m_field_names(field_names) {
-        m_selected_fields.reserve(m_field_names.size());
+        m_selected_field_inds.reserve(m_field_names.size());
         for (const auto &field_name: m_field_names) {
             MPI_REQUIRE(!field_name.empty(), "Selected field name must be non-zero in length");
             bool match_found = false;
+            size_t i =0ul;
             for (FieldBase *field_ptr : row.m_fields) {
-                if (field_ptr->m_name == field_name) match_found = true, m_selected_fields.emplace_back(field_ptr);
+                if (field_ptr->m_name == field_name) match_found = true, m_selected_field_inds.emplace_back(i);
+                ++i;
             }
             MPI_REQUIRE(match_found, "Invalid field name \"" + field_name + "\"");
         }
@@ -48,8 +50,9 @@ struct RowHdf5Writer : RowHdf5Base, row_t {
     RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, size_t nitem,
                   std::vector<std::string> field_names) :
             RowHdf5Base(row, nitem, field_names), row_t(row), m_group(name, parent) {
-        m_writers.reserve(m_selected_fields.size());
-        for (auto &field: m_selected_fields) {
+        m_writers.reserve(m_selected_field_inds.size());
+        for (auto &ifield: m_selected_field_inds) {
+            auto field = Row::m_fields[ifield];
             std::string field_name = field->m_name;
             m_writers.emplace_back(m_group, field_name, field->h5_shape(), nitem, field->h5_type(),
                                    field->h5_dim_names());
@@ -68,9 +71,9 @@ public:
             RowHdf5Writer(row, parent, name, nitem, get_all_field_names(row)) {}
 
     virtual void write(const size_t &iitem) {
-        for (size_t ifield = 0ul; ifield < Row::m_fields.size(); ++ifield) {
+        for (size_t ifield = 0ul; ifield < m_selected_field_inds.size(); ++ifield) {
             auto &writer = m_writers[ifield];
-            auto &field = Row::m_fields[ifield];
+            auto field = Row::m_fields[ifield];
             if (iitem < m_nitem) field->h5_write(writer, iitem);
             else {
                 // runoff write operation for collective I/O
@@ -101,8 +104,9 @@ public:
 
     RowHdf5Reader(const row_t &row, hdf5::GroupReader &parent, std::string name, std::vector<std::string> field_names) :
             RowHdf5Base(row, get_nitem(row, parent, name), field_names), row_t(row), m_group(name, parent) {
-        m_readers.reserve(m_selected_fields.size());
-        for (auto &field: m_selected_fields) {
+        m_readers.reserve(m_selected_field_inds.size());
+        for (auto &ifield: m_selected_field_inds) {
+            auto &field = Row::m_fields[ifield];
             std::string field_name = field->m_name;
             m_readers.emplace_back(m_group, field_name, field->h5_type());
             // TODO: read attrs

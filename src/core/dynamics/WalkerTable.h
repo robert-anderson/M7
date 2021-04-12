@@ -26,8 +26,8 @@ struct WalkerTableRow : public Row {
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica) :
             m_part_shape({nroot, nreplica}),
-            m_onv(this, nsite),
-            m_weight(this, m_part_shape),
+            m_onv(this, nsite, "onv"),
+            m_weight(this, m_part_shape, "weight"),
             m_hdiag(this),
             m_initiator(this, m_part_shape),
             m_reference_connection(this, m_part_shape),

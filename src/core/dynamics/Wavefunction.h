@@ -19,6 +19,7 @@
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     const Options &m_opts;
+    const size_t m_nsite;
 
     NdFormat<defs::ndim_wf> m_format;
     // current "part" i.e. the flat element of the format
@@ -53,6 +54,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),
+            m_nsite(nsite),
             m_format({opts.nroot, opts.nreplica}),
             m_ninitiator(m_summables, m_format),
             m_delta_ninitiator(m_summables, m_format),
@@ -70,13 +72,25 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
     }
 
-//    void on_row_send_(size_t irow) override {
-//
-//    }
-//
-//    void on_row_recv_(size_t irow) override {
-//
-//    }
+    void h5_write(hdf5::GroupWriter& parent, std::string name="wavefunction") {
+        m_store.write(parent, name, {"onv", "weight"});
+    }
+
+    void h5_read(hdf5::GroupReader& parent, const Hamiltonian<>& ham, const fields::Onv<>& ref, std::string name="wavefunction") {
+        m_store.clear();
+        BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, m_opts.nroot, m_opts.nreplica}});
+        m_buffer.push_back();
+        RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, {"onv", "weight"});
+        conn::Antisym<> conn(m_nsite);
+
+        row_reader.restart();
+        for (size_t iitem = 0ul; iitem<row_reader.m_nitem; ++iitem){
+            row_reader.read(iitem);
+            conn.connect(ref, row_reader.m_onv);
+            create_walker_(row_reader.m_onv, row_reader.m_weight[0], ham.get_element(conn), conn.connected());
+        }
+    }
+
 
     void begin_cycle() {
         m_summables.zero();

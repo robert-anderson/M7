@@ -250,6 +250,16 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
 }
 
 void Solver::execute(size_t niter) {
+
+    if (!m_opts.read_hdf5_fname.empty()) {
+        hdf5::FileReader fr(m_opts.read_hdf5_fname);
+        hdf5::GroupReader gr("solver", fr);
+        m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
+        loop_over_spawned();
+    }
+    std::cout << m_wf.m_store.to_string() << std::endl;
+
+
     for (size_t i = 0ul; i < niter; ++i) {
 
         m_cycle_timer.reset();
@@ -276,7 +286,12 @@ void Solver::execute(size_t niter) {
         output_stats();
         ++m_icycle;
 
-        if (m_exit.read() && m_exit.m_v) return;
+        if (m_exit.read() && m_exit.m_v) break;
+    }
+    if (!m_opts.write_hdf5_fname.empty()) {
+        hdf5::FileWriter fw(m_opts.write_hdf5_fname);
+        hdf5::GroupWriter gw("solver", fw);
+        m_wf.h5_write(gw);
     }
 }
 

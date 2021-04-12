@@ -74,9 +74,9 @@ struct TableBase {
 
     size_t get_free_row();
 
-    void clear();
+    virtual void clear();
 
-    void clear(const size_t &irow);
+    virtual void clear(const size_t &irow);
 
     size_t bw_dsize() const;
 
@@ -180,10 +180,12 @@ public:
 
     void write(hdf5::GroupWriter &parent, std::string name, std::vector<std::string> field_names) const {
         RowHdf5Writer<row_t> row_writer(m_row, parent, name, nrow_to_write(), field_names);
+        write_rows(row_writer);
     }
 
     void write(hdf5::GroupWriter &parent, std::string name) const {
         RowHdf5Writer<row_t> row_writer(m_row, parent, name, nrow_to_write());
+        write_rows(row_writer);
     }
 
     virtual void read(hdf5::GroupReader &parent, std::string name) {

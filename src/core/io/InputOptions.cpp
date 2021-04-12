@@ -148,4 +148,11 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--rdm_rank", rdm_rank,
                "Rank of fermion RDM to accumulate");
 
+    add_option("--write_hdf5_fname", write_hdf5_fname,
+               "Name of HDF5 file to write objects to");
+
+    add_option("--read_hdf5_fname", read_hdf5_fname,
+               "Name of HDF5 file to read objects from");
+
+
 }
