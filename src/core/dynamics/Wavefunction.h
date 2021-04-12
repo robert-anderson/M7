@@ -72,22 +72,31 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
     }
 
+    std::vector<std::string> h5_field_names() {
+        if (!defs::enable_bosons)
+            return {"onv", "weight"};
+        else
+            return {"onv (fermion)", "onv (boson)", "weight"};
+    }
+
     void h5_write(hdf5::GroupWriter& parent, std::string name="wavefunction") {
-        m_store.write(parent, name, {"onv", "weight"});
+        m_store.write(parent, name, h5_field_names());
     }
 
     void h5_read(hdf5::GroupReader& parent, const Hamiltonian<>& ham, const fields::Onv<>& ref, std::string name="wavefunction") {
         m_store.clear();
         BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, m_opts.nroot, m_opts.nreplica}});
         m_buffer.push_back();
-        RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, {"onv", "weight"});
+        RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
         conn::Antisym<> conn(m_nsite);
 
         row_reader.restart();
         for (size_t iitem = 0ul; iitem<row_reader.m_nitem; ++iitem){
             row_reader.read(iitem);
             conn.connect(ref, row_reader.m_onv);
-            create_walker_(row_reader.m_onv, row_reader.m_weight[0], ham.get_element(conn), conn.connected());
+            bool ref_conn = conn.connected();
+            conn.connect(row_reader.m_onv, row_reader.m_onv);
+            create_walker_(row_reader.m_onv, row_reader.m_weight[0], ham.get_element(conn), ref_conn);
         }
     }
 

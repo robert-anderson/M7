@@ -67,6 +67,46 @@ struct MultiField {
         return fn.m_and;
     }
 
+    bool operator!=(const MultiField &other) const {
+        return !(*this==other);
+    }
+
+    bool operator<(const MultiField &other) const {
+        struct fn_t {
+            bool m_gt_found_first = false;
+            bool m_lt_found_first = false;
+            void operator()(const FieldBase &f1, const FieldBase &f2) {
+                if (f1 < f2) m_lt_found_first = m_gt_found_first ? false : true;
+                else if (f1 > f2) m_gt_found_first = m_lt_found_first ? false : true;
+            }
+        };
+        fn_t fn;
+        tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
+        return fn.m_lt_found_first;
+    }
+
+    bool operator<=(const MultiField &other) const {
+        struct fn_t {
+            bool m_gt_found_first = false;
+            bool m_lt_found_first = false;
+            void operator()(const FieldBase &f1, const FieldBase &f2) {
+                if (f1 < f2) m_lt_found_first = m_gt_found_first ? false : true;
+                else if (f1 > f2) m_gt_found_first = m_lt_found_first ? false : true;
+            }
+        };
+        fn_t fn;
+        tuple_utils::for_each_pair(m_subfields, other.m_subfields, fn);
+        return fn.m_lt_found_first || (!fn.m_lt_found_first && !fn.m_gt_found_first);
+    }
+
+    bool operator>(const MultiField &other) const {
+        return !(*this<=other);
+    }
+
+    bool operator>=(const MultiField &other) const {
+        return !(*this<other);
+    }
+
     bool is_comparable(const MultiField &other) const {
         struct fn_t {
             bool m_and = true;

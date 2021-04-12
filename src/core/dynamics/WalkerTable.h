@@ -35,6 +35,10 @@ struct WalkerTableRow : public Row {
 
     WalkerTableRow(const Options &opts, size_t nsite) :
             WalkerTableRow(nsite, opts.nroot, opts.nreplica) {}
+
+    bool is_h5_write_exempt() const override {
+        return m_onv.is_zero();
+    }
 };
 
 struct UniqueOnvRow : public Row {

@@ -257,8 +257,8 @@ void Solver::execute(size_t niter) {
         m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
         loop_over_spawned();
     }
-    std::cout << m_wf.m_store.to_string() << std::endl;
 
+    std::cout << m_wf.m_store.to_string() << std::endl;
 
     for (size_t i = 0ul; i < niter; ++i) {
 
