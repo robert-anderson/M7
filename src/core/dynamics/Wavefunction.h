@@ -8,6 +8,7 @@
 
 #include <src/core/io/Options.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
+#include <src/core/parallel/Reduction.h>
 #include "src/core/table/Communicator.h"
 #include "src/core/dynamics/WalkerTable.h"
 #include "src/core/dynamics/SpawnTable.h"
@@ -27,15 +28,15 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     ReductionSyndicate m_summables;
 
-    ReductionMember<size_t, defs::ndim_wf> m_ninitiator;
-    ReductionMember<int, defs::ndim_wf> m_delta_ninitiator;
-    ReductionMember<size_t, defs::ndim_wf> m_nocc_onv;
-    ReductionMember<int, defs::ndim_wf> m_delta_nocc_onv;
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
+    Reduction<size_t, defs::ndim_wf> m_ninitiator;
+    Reduction<int, defs::ndim_wf> m_delta_ninitiator;
+    Reduction<size_t, defs::ndim_wf> m_nocc_onv;
+    Reduction<int, defs::ndim_wf> m_delta_nocc_onv;
+    Reduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
+    Reduction<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    Reduction<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
+    Reduction<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
+    Reduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
     MappedTable<UniqueOnvRow> m_unique_recvd_onvs;
     MappedTable<OnvRow> m_parent_recvd_onvs;
@@ -56,15 +57,15 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             m_opts(opts),
             m_nsite(nsite),
             m_format({opts.nroot, opts.nreplica}, {"nroot", "nreplica"}),
-            m_ninitiator(m_summables, m_format),
-            m_delta_ninitiator(m_summables, m_format),
-            m_nocc_onv(m_summables, m_format),
-            m_delta_nocc_onv(m_summables, m_format),
-            m_nwalker(m_summables, m_format),
-            m_delta_nwalker(m_summables, m_format),
-            m_l2_norm_square(m_summables, m_format),
-            m_delta_l2_norm_square(m_summables, m_format),
-            m_nannihilated(m_summables, m_format),
+            m_ninitiator(m_format),
+            m_delta_ninitiator(m_format),
+            m_nocc_onv(m_format),
+            m_delta_nocc_onv(m_format),
+            m_nwalker(m_format),
+            m_delta_nwalker(m_format),
+            m_l2_norm_square(m_format),
+            m_delta_l2_norm_square(m_format),
+            m_nannihilated(m_format),
             m_unique_recvd_onvs({}, 100),
             m_parent_recvd_onvs({nsite}, 100){
         m_store.resize((m_opts.walker_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
@@ -102,7 +103,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
 
     void begin_cycle() {
-        m_summables.zero();
+        m_summables.zero_all_local();
         m_store.remap_if_required();
     }
 
@@ -140,7 +141,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         //MPI_ASSERT(!row.m_initiator.get(m_ipart), "row is already initiator");
         if (row.m_initiator.get(m_ipart)) return;
         row.m_initiator.set(m_ipart);
-        m_delta_ninitiator(0, 0)++;
+        m_delta_ninitiator.m_local[{0, 0}]++;
     }
 
     void revoke_initiator_status() {
@@ -148,16 +149,16 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         //MPI_ASSERT(!row.m_initiator.get(m_ipart), "row is not initiator");
         if (!row.m_initiator.get(m_ipart)) return;
         row.m_initiator.clr(m_ipart);
-        m_delta_ninitiator(0, 0)--;
+        m_delta_ninitiator.m_local[{0, 0}]--;
     }
 
     void set_weight(const defs::wf_t &new_weight) {
         auto& row = m_store.m_row;
         defs::wf_t& weight = row.m_weight[m_ipart];
-        m_delta_nwalker(0, 0) += std::abs(new_weight);
-        m_delta_nwalker(0, 0) -= std::abs(weight);
-        m_delta_l2_norm_square(0, 0) += std::pow(std::abs(new_weight), 2.0);
-        m_delta_l2_norm_square(0, 0) -= std::pow(std::abs(weight), 2.0);
+        m_delta_nwalker.m_local[{0, 0}] += std::abs(new_weight);
+        m_delta_nwalker.m_local[{0, 0}] -= std::abs(weight);
+        m_delta_l2_norm_square.m_local[{0, 0}] += std::pow(std::abs(new_weight), 2.0);
+        m_delta_l2_norm_square.m_local[{0, 0}] -= std::pow(std::abs(weight), 2.0);
         weight = new_weight;
 
         if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status();
@@ -184,7 +185,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         // in the case that nadd==0.0, the set_weight method won't revoke:
         revoke_initiator_status();
         m_store.erase(lookup);
-        m_delta_nocc_onv(0, 0)--;
+        m_delta_nocc_onv.m_local[{0, 0}]--;
     }
 
     size_t create_walker_(const fields::Onv<> &onv, const defs::ham_t weight,
@@ -192,7 +193,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1);
         auto irow = m_store.insert(onv);
-        m_delta_nocc_onv(0, 0)++;
+        m_delta_nocc_onv.m_local[{0, 0}]++;
         m_store.m_row.jump(irow);
         ASSERT(m_store.m_row.m_onv == onv)
         set_weight(weight);

@@ -7,6 +7,7 @@
 
 #include "FieldBase.h"
 
+
 struct NumberFieldBase : FieldBase {
     const size_t m_element_size, m_nelement;
     const bool m_is_complex;
@@ -30,6 +31,46 @@ struct NumberFieldBase : FieldBase {
         return utils::num_to_string(v.real())+" "+utils::num_to_string(v.imag());
     }
 };
+
+
+namespace field_math {
+
+    struct OperationBase {
+    };
+
+    struct Sqrt : OperationBase {
+        template<typename T>
+        T operator()(const T& v) const {
+            return std::sqrt(v);
+        }
+    };
+
+    struct Pow : OperationBase {
+        const double m_exp;
+        Pow(const double &exp) : m_exp(exp) {}
+        template<typename T>
+        T operator()(const T& v) const {
+            return std::pow(v, m_exp);
+        }
+    };
+
+    template<typename op_t, typename field_t>
+    struct OpFieldPair {
+        static_assert(std::is_base_of<OperationBase, op_t>::value, "Template arg must be derived from OperationBase");
+        static_assert(std::is_base_of<NumberFieldBase, field_t>::value, "Template arg must be derived from NumberFieldBase");
+        const field_t &m_rhs;
+        const op_t m_op;
+
+        template<typename ...Args>
+        OpFieldPair(const field_t &rhs, Args &&... op_args): m_rhs(rhs), m_op(std::forward<Args>(op_args)...) {}
+
+        template<typename T>
+        T get(const size_t& ielement) const {
+            return m_op(((const T*)(static_cast<const FieldBase&>(m_rhs).begin()))[ielement]);
+        }
+    };
+}
+
 
 template<typename T, size_t nind>
 struct NdNumberField : NumberFieldBase {
@@ -61,6 +102,29 @@ struct NdNumberField : NumberFieldBase {
     NdNumberField &operator=(const NdNumberField &v) {
         static_cast<FieldBase&>(*this) = v;
         return *this;
+    }
+
+
+    field_math::OpFieldPair<field_math::Sqrt, NdNumberField> sqrt() {
+        return {*this};
+    }
+
+    template<typename field_t>
+    field_math::OpFieldPair<field_math::Pow, field_t> pow(double exp) {
+        return {*this, exp};
+    }
+
+    template<typename op_t>
+    NdNumberField &operator=(const field_math::OpFieldPair<op_t, NdNumberField>& op_field_pair) {
+        for (size_t ielement = 0ul; ielement<m_nelement; ++ielement)
+            (*this)[ielement] = op_field_pair.template get<T>(ielement);
+        return *this;
+    }
+
+    T sum() const {
+        T tmp = 0;
+        for (size_t ielement=0ul; ielement<m_nelement; ++ielement) tmp+=(*this)[ielement];
+        return tmp;
     }
 
     T& operator[](const size_t& ielement) {

@@ -29,9 +29,9 @@ void Solver::loop_over_occupied_onvs() {
 
         const auto &weight = row.m_weight[m_wf.m_ipart];
 
-        m_wf.m_nocc_onv(0, 0)++;
+        m_wf.m_nocc_onv.m_local[{0, 0}]++;
         if (row.m_initiator.get(m_wf.m_ipart))
-            m_wf.m_ninitiator(0, 0)++;
+            m_wf.m_ninitiator.m_local[{0, 0}]++;
 
         if (consts::float_is_zero(weight)) {
             // ONV has become unoccupied and must be removed from mapped list
@@ -39,8 +39,8 @@ void Solver::loop_over_occupied_onvs() {
             continue;
         }
 
-        m_wf.m_nwalker(0, 0) += std::abs(weight);
-        m_wf.m_l2_norm_square(0, 0) += std::pow(std::abs(weight), 2.0);
+        m_wf.m_nwalker.m_local[{0, 0}] += std::abs(weight);
+        m_wf.m_l2_norm_square.m_local[{0, 0}] += std::pow(std::abs(weight), 2.0);
 
         m_reference.add_row();
         if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
@@ -105,7 +105,7 @@ void Solver::annihilate_row(const fields::Onv<> &dst_onv, const defs::wf_t &delt
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[0];
         auto weight_after = weight_before + delta_weight;
         if ((weight_before > 0) != (weight_after > 0))
-            m_wf.m_nannihilated(0, 0) += std::abs(std::abs(weight_before) - std::abs(weight_after));
+            m_wf.m_nannihilated.m_local[{0, 0}] += std::abs(std::abs(weight_before) - std::abs(weight_after));
         m_wf.change_weight(delta_weight);
     }
 }
@@ -308,10 +308,10 @@ void Solver::propagate_row() {
 }
 
 void Solver::begin_cycle() {
-    m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
-    m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
+    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
+    m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{(0, 0)}];
     m_wf.begin_cycle();
-    ASSERT(m_wf.m_nwalker(0, 0) == 0);
+    ASSERT(m_wf.m_nwalker.m_local[0] == 0);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     m_reference.begin_cycle();
@@ -322,7 +322,7 @@ void Solver::end_cycle() {
      * TODO: make these checks compatible with dynamic rank allocation
      */
 //    double chk_ratio;
-    if (!consts::float_is_zero(m_wf.m_nwalker(0, 0))) {
+    if (!consts::float_is_zero(m_wf.m_nwalker.m_local[{0, 0}])) {
 //        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
 //        bool chk = m_chk_nwalker_local == 0.0 || consts::floats_nearly_equal(chk_ratio, 1.0);
 //        if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
@@ -345,16 +345,16 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_tau = m_prop.tau();
         stats.m_shift = m_prop.m_shift;
-        stats.m_nwalker = m_wf.m_nwalker.reduced(0, 0);
-        stats.m_delta_nwalker = m_wf.m_delta_nwalker.reduced(0, 0);
-        stats.m_nwalker_annihilated = m_wf.m_nannihilated.reduced(0, 0);
+        stats.m_nwalker = m_wf.m_nwalker.m_reduced;
+        stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
+        stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_reference.proj_energy_num();
         stats.m_ref_weight = m_reference.get_weight();
         stats.m_ref_proj_energy = m_reference.proj_energy();
-        stats.m_l2_norm = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
-        stats.m_ninitiator = m_wf.m_ninitiator.reduced(0, 0);
-        stats.m_nocc_onv = m_wf.m_nocc_onv.reduced(0, 0);
-        stats.m_delta_nocc_onv = m_wf.m_delta_nocc_onv.reduced(0, 0);
+        stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced.sqrt();
+        stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
+        stats.m_nocc_onv = m_wf.m_nocc_onv.m_reduced;
+        stats.m_delta_nocc_onv = m_wf.m_delta_nocc_onv.m_reduced;
         stats.m_psingle = m_prop.m_magnitude_logger.m_psingle;
         stats.m_total_synchronization_overhead = sync_overhead;
         stats.m_propagate_loop_time = m_propagate_timer;
@@ -370,7 +370,7 @@ void Solver::output_stats() {
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
         stats.m_nblock_wf_ra = m_wf.m_ra.nblock_();
-        stats.m_nwalker_total = m_wf.m_nwalker(0, 0);
+        stats.m_nwalker_total = m_wf.m_nwalker.m_reduced.sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_ntotal_skip;
         stats.m_nwalker_lookup = m_wf.m_store.m_ntotal_lookup;
         stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;

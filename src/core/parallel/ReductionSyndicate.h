@@ -5,6 +5,7 @@
 #ifndef M7_REDUCTIONSYNDICATE_H
 #define M7_REDUCTIONSYNDICATE_H
 
+#if 0
 #include "MPIWrapper.h"
 #include "ReductionMemberBase.h"
 
@@ -119,4 +120,5 @@ public:
 };
 
 
+#endif //M7_REDUCTIONSYNDICATE_H
 #endif //M7_REDUCTIONSYNDICATE_H

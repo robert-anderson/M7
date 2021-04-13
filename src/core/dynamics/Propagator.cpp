@@ -36,7 +36,7 @@
 void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
     //m_magnitude_logger.synchronize(icycle);
     if (m_nwalker_target.read()) m_variable_shift.terminate(icycle);
-    m_variable_shift.update(icycle, wf.m_nwalker.reduced(0, 0) >= m_nwalker_target);
+    m_variable_shift.update(icycle, wf.m_nwalker.m_reduced[{0, 0}] >= m_nwalker_target);
     if (icycle % m_opts.shift_update_period) return;
 //    if (m_variable_shift.update(icycle, wf.m_nwalker.reduced() >= m_opts.nwalker_target)) {
 //        /*
@@ -46,7 +46,7 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
 //        m_shift = wf.refref_proj_energy();
 //    }
     else if (m_variable_shift) {
-        auto rate = 1.0+wf.m_delta_nwalker.reduced(0, 0)/wf.m_nwalker.reduced(0, 0);
+        auto rate = 1.0+wf.m_delta_nwalker.m_reduced[{0, 0}]/wf.m_nwalker.m_reduced[{0, 0}];
         m_shift -= m_opts.shift_damp * consts::real_log(rate) / (tau()*m_opts.shift_update_period);
     }
 }
