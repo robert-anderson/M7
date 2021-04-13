@@ -45,13 +45,13 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             Communicator<WalkerTableRow, SpawnTableRow, false>(
                     "walker",
                     opts.walker_buffer_expansion_factor,
-                    opts.nload_balance_block_per_rank*mpi::nrank(),
+                    opts.nload_balance_block_per_rank * mpi::nrank(),
                     opts.load_balance_period,
                     {
-                        WalkerTableRow(nsite, opts.nroot, opts.nreplica),
-                        MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
+                            WalkerTableRow(nsite, opts.nroot, opts.nreplica),
+                            MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
                     },
-                    {SpawnTableRow(nsite, opts.rdm_rank>0)},
+                    {SpawnTableRow(nsite, opts.rdm_rank > 0)},
                     opts.acceptable_load_imbalance
             ),
             m_opts(opts),
@@ -67,10 +67,14 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             m_delta_l2_norm_square(m_format),
             m_nannihilated(m_format),
             m_unique_recvd_onvs({}, 100),
-            m_parent_recvd_onvs({nsite}, 100){
-        m_store.resize((m_opts.walker_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
-        m_comm.resize((m_opts.spawn_buffer_size_factor_initial*m_opts.nwalker_target)/mpi::nrank());
+            m_parent_recvd_onvs({nsite}, 100) {
+        m_store.resize((m_opts.walker_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
+        m_comm.resize((m_opts.spawn_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
         ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
+        m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
+                                m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
+                                m_nannihilated);
+
     }
 
     std::vector<std::string> h5_field_names() {
@@ -80,11 +84,12 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             return {"onv (fermion)", "onv (boson)", "weight"};
     }
 
-    void h5_write(hdf5::GroupWriter& parent, std::string name="wavefunction") {
+    void h5_write(hdf5::GroupWriter &parent, std::string name = "wavefunction") {
         m_store.write(parent, name, h5_field_names());
     }
 
-    void h5_read(hdf5::GroupReader& parent, const Hamiltonian<>& ham, const fields::Onv<>& ref, std::string name="wavefunction") {
+    void h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
+                 std::string name = "wavefunction") {
         m_store.clear();
         BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, m_opts.nroot, m_opts.nreplica}});
         m_buffer.push_back();
@@ -92,7 +97,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         conn::Antisym<> conn(m_nsite);
 
         row_reader.restart();
-        for (size_t iitem = 0ul; iitem<row_reader.m_nitem; ++iitem){
+        for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
             row_reader.read(iitem);
             conn.connect(ref, row_reader.m_onv);
             bool ref_conn = conn.connected();
@@ -118,9 +123,9 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     defs::wf_comp_t square_norm() const {
         defs::wf_comp_t res = 0.0;
-        auto& row = m_store.m_row;
+        auto &row = m_store.m_row;
         for (row.restart(); row.in_range(); row.step()) {
-            const defs::wf_t& weight = row.m_weight[m_ipart];
+            const defs::wf_t &weight = row.m_weight[m_ipart];
             res += std::pow(weight, 2.0);
         }
         return mpi::all_sum(res);
@@ -128,16 +133,16 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     defs::wf_comp_t l1_norm() const {
         defs::wf_comp_t res = 0.0;
-        auto& row = m_store.m_row;
+        auto &row = m_store.m_row;
         for (row.restart(); row.in_range(); row.step()) {
-            const defs::wf_t& weight = row.m_weight[m_ipart];
+            const defs::wf_t &weight = row.m_weight[m_ipart];
             res += std::abs(weight);
         }
         return mpi::all_sum(res);
     }
 
     void grant_initiator_status() {
-        auto& row = m_store.m_row;
+        auto &row = m_store.m_row;
         //MPI_ASSERT(!row.m_initiator.get(m_ipart), "row is already initiator");
         if (row.m_initiator.get(m_ipart)) return;
         row.m_initiator.set(m_ipart);
@@ -145,7 +150,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
     void revoke_initiator_status() {
-        auto& row = m_store.m_row;
+        auto &row = m_store.m_row;
         //MPI_ASSERT(!row.m_initiator.get(m_ipart), "row is not initiator");
         if (!row.m_initiator.get(m_ipart)) return;
         row.m_initiator.clr(m_ipart);
@@ -153,8 +158,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
     void set_weight(const defs::wf_t &new_weight) {
-        auto& row = m_store.m_row;
-        defs::wf_t& weight = row.m_weight[m_ipart];
+        auto &row = m_store.m_row;
+        defs::wf_t &weight = row.m_weight[m_ipart];
         m_delta_nwalker.m_local[{0, 0}] += std::abs(new_weight);
         m_delta_nwalker.m_local[{0, 0}] -= std::abs(weight);
         m_delta_l2_norm_square.m_local[{0, 0}] += std::pow(std::abs(new_weight), 2.0);
@@ -170,7 +175,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     }
 
     void scale_weight(const double &factor) {
-        set_weight(factor*m_store.m_row.m_weight[m_ipart]);
+        set_weight(factor * m_store.m_row.m_weight[m_ipart]);
     }
 
     void zero_weight() {
@@ -227,7 +232,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         auto &dst_table = send(irank);
 
         auto irow = dst_table.push_back();
-        auto& row = dst_table.m_row;
+        auto &row = dst_table.m_row;
         row.jump(irow);
 
         row.m_dst_onv = dst_onv;
@@ -243,16 +248,16 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
                      const fields::Onv<> &src_onv, const defs::wf_t &src_weight) {
         auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
         auto irank = m_ra.get_rank(dst_onv);
-        auto& row = send(irank).m_row;
+        auto &row = send(irank).m_row;
         row.jump(irow);
-        if (row.m_send_parents){
+        if (row.m_send_parents) {
             row.m_src_onv = src_onv;
             row.m_src_weight = src_weight;
         }
         return irow;
     }
 
-    void consolidate_spawned(){
+    void consolidate_spawned() {
 //        auto row1 = recv().m_row;
 //        auto row2 = recv().m_row;
 //        auto comp_fn = [&](const size_t &irow1, const size_t &irow2){

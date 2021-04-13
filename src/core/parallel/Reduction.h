@@ -8,8 +8,10 @@
 template<typename T>
 struct ReductionBase {
     const size_t m_nelement;
-    T *m_local_ptr;
-    T *m_reduced_ptr;
+    T *m_local_ptr = nullptr;
+    T *m_reduced_ptr = nullptr;
+
+    ReductionBase(size_t nelement) : m_nelement(nelement) {}
 };
 
 template<typename T, size_t nind>
@@ -20,13 +22,12 @@ struct Reduction : ReductionBase<T> {
     using ReductionBase<T>::m_reduced_ptr;
     using ReductionBase<T>::m_nelement;
 
-    Reduction(const std::array<size_t, nind> &shape) : ReductionBase<T>{
-            static_cast<const fields::Numbers<T, nind> &>(m_local).nelement(),
-            (T *) static_cast<const FieldBase &>(m_local).begin(),
-            (T *) static_cast<const FieldBase &>(m_reduced).begin()
-    }, m_local(shape), m_reduced(shape) {}
 
-    Reduction(const NdFormat<nind> &format): Reduction(format.shape()){}
+    Reduction(const NdFormat<nind> &format) :
+            ReductionBase<T>(format.nelement()), m_local(format.shape()), m_reduced(format.shape()) {
+        m_local_ptr = reinterpret_cast<T *>(m_local.begin());
+        m_reduced_ptr = reinterpret_cast<T *>(m_reduced.begin());
+    }
 
     void all_sum() {
         mpi::all_sum(m_local_ptr, m_reduced_ptr, m_nelement);
@@ -35,8 +36,11 @@ struct Reduction : ReductionBase<T> {
 
 struct ReductionSyndicateGroupBase {
     virtual void zero_all_local() = 0;
+
     virtual void zero_all_reduced() = 0;
+
     virtual void zero_all() = 0;
+
     virtual void all_sum() = 0;
 };
 
@@ -56,12 +60,12 @@ struct ReductionSyndicateGroup : ReductionSyndicateGroupBase {
 
     void zero_all_local() override {
         for (ReductionBase<T> *member: m_members)
-            std::memset(member->m_local_ptr, 0, member->m_nelement*sizeof(T));
+            std::memset(member->m_local_ptr, 0, member->m_nelement * sizeof(T));
     }
 
     void zero_all_reduced() override {
         for (ReductionBase<T> *member: m_members)
-            std::memset(member->m_reduced_ptr, 0, member->m_nelement*sizeof(T));
+            std::memset(member->m_reduced_ptr, 0, member->m_nelement * sizeof(T));
     }
 
     void zero_all() override {
@@ -104,18 +108,26 @@ struct ReductionSyndicate {
         auto igroup = mpi_type_ind<T>();
         if (!m_groups[igroup])
             m_groups[igroup] = std::unique_ptr<ReductionSyndicateGroup<T>>(new ReductionSyndicateGroup<T>());
-        dynamic_cast<ReductionSyndicateGroup<T> *>(m_groups[igroup])->add_member(member);
+        dynamic_cast<ReductionSyndicateGroup<T> *>(m_groups[igroup].get())->add_member(member);
     }
 
-    void zero_all_local(){
+    void add_members() {}
+
+    template<typename T, typename ...Args>
+    void add_members(ReductionBase<T> &first, Args &... rest) {
+        add_member(first);
+        add_members(std::forward<Args &>(rest)...);
+    }
+
+    void zero_all_local() {
         for (auto &group: m_groups) if (group) group->zero_all_local();
     }
 
-    void zero_all_reduced(){
+    void zero_all_reduced() {
         for (auto &group: m_groups) if (group) group->zero_all_reduced();
     }
 
-    void zero_all(){
+    void zero_all() {
         for (auto &group: m_groups) if (group) group->zero_all();
     }
 

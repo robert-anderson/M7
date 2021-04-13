@@ -42,9 +42,7 @@ TEST(StochasticPropagator, Test) {
     auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
-    log::debug_("{}, {}", __FILE__, __LINE__);
     solver.execute(opts.ncycle);
-    log::debug_("{}, {}", __FILE__, __LINE__);
 }
 
 TEST(StochasticPropagator, Hdf5) {

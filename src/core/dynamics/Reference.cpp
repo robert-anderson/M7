@@ -5,18 +5,19 @@
 #include "Reference.h"
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
-                     const Wavefunction& wf, size_t ipart, TableBase::Loc loc):
+                     const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
         Wavefunction::DynamicRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(wf.m_format),
-        m_nwalker_at_doubles(wf.m_format)
-        {}
+        m_nwalker_at_doubles(wf.m_format) {
+    m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
+}
 
 void Reference::add_row() {
-    auto& row = m_wf.m_store.m_row;
+    auto &row = m_wf.m_store.m_row;
     auto weight = row.m_weight[m_ipart];
-    if (std::abs(weight) > m_candidate_abs_weight){
+    if (std::abs(weight) > m_candidate_abs_weight) {
         m_candidate_abs_weight = std::abs(weight);
         m_irow_candidate = row.m_i;
     }
@@ -104,7 +105,7 @@ defs::ham_t Reference::proj_energy_num() const {
 }
 
 defs::ham_comp_t Reference::proj_energy() const {
-    return consts::real(proj_energy_num()/get_weight());
+    return consts::real(proj_energy_num() / get_weight());
 }
 
 void Reference::update() {
