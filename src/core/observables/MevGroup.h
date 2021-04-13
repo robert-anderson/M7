@@ -18,7 +18,6 @@ struct BilinearMevGroup {
     conn::Antisym<> m_conn;
     mev_lookup_t m_lookup;
 
-
     BilinearMevGroup(size_t nsite, size_t max_rank):
         m_nsite(nsite), m_max_rank(max_rank), m_conn(nsite), m_lookup("", {{{1, 1}, 1}}){
         m_lookup.push_back(1);

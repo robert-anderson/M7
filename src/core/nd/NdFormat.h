@@ -109,6 +109,7 @@ public:
     }
 
     std::string to_string() const override {
+        if (!nind) return "scalar";
         std::string tmp;
         auto size = nind;
         if (m_dim_names==std::array<std::string, nind>{}){

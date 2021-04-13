@@ -7,8 +7,32 @@
 
 #include "FieldBase.h"
 
+struct NumberFieldBase : FieldBase {
+    const size_t m_element_size, m_nelement;
+    const bool m_is_complex;
+
+    NumberFieldBase(Row* row, size_t element_size, size_t nelement, bool is_complex,
+                    const std::type_info& type_info, std::string name=""):
+    FieldBase(row, element_size * nelement, type_info, name),
+    m_element_size(element_size), m_nelement(nelement), m_is_complex(is_complex){}
+
+    virtual std::string stats_string() const = 0;
+
+    virtual std::string format_string() const = 0;
+
+    template<typename T>
+    static std::string stats_string_element(const T& v){
+        return utils::num_to_string(v);
+    }
+
+    template<typename T>
+    static std::string stats_string_element(const std::complex<T>& v){
+        return utils::num_to_string(v.real())+" "+utils::num_to_string(v.imag());
+    }
+};
+
 template<typename T, size_t nind>
-struct NdNumberField : FieldBase {
+struct NdNumberField : NumberFieldBase {
     typedef const std::array<size_t, nind>& inds_t;
     const NdFormat<nind> m_format;
 
@@ -17,7 +41,8 @@ struct NdNumberField : FieldBase {
     }
 
     NdNumberField(Row* row, NdFormat<nind> format, std::string name=""):
-            FieldBase(row, sizeof(T) * format.nelement(), typeid(T), name), m_format(format){}
+            NumberFieldBase(row, sizeof(T), format.nelement(),
+                            consts::is_complex<T>(), typeid(T), name), m_format(format){}
 
     NdNumberField(const NdNumberField& other):
             NdNumberField(other.row_of_copy(), other.m_format, other.m_name){}
@@ -58,9 +83,22 @@ struct NdNumberField : FieldBase {
         std::string tmp;
         if (nind>0) tmp += "[";
         for (size_t ielement = 0ul; ielement<nelement(); ++ielement)
-            tmp+=std::to_string((*this)[ielement]) + " ";
+            tmp+=utils::num_to_string((*this)[ielement]) + " ";
         if (nind>0) tmp += "]";
         return tmp;
+    }
+
+    std::string stats_string() const override {
+        std::string tmp;
+        for (size_t ielement = 0ul; ielement<nelement(); ++ielement)
+            tmp+= stats_string_element((*this)[ielement]);
+        return tmp;
+    }
+
+    std::string format_string() const override {
+        const std::string complex_dim_string = "real/imag (2)";
+        if (!nind && m_is_complex) return complex_dim_string;
+        return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
     }
 
     defs::inds h5_shape() const override {
@@ -75,6 +113,8 @@ struct NdNumberField : FieldBase {
     hid_t h5_type() const override {
         return hdf5::type<T>();
     }
+
+
 };
 
 template<typename T>

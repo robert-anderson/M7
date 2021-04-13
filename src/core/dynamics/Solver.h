@@ -10,10 +10,11 @@
 #include <src/core/observables/AverageCoefficients.h>
 #include <src/core/observables/UniformTwf.h>
 #include <src/core/observables/MevGroup.h>
+#include <src/core/io/FciqmcStats.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
-#include "src/core/io/FciqmcStatsFile.h"
-#include "src/core/io/ParallelStatsFile.h"
+#include "src/core/io/FciqmcStats.h"
+#include "src/core/io/ParallelStats.h"
 #include "Propagator.h"
 
 class Solver {
@@ -24,8 +25,8 @@ class Solver {
     Wavefunction &m_wf;
     Reference m_reference;
 
-    StatsFile<FciqmcStatsSpecifier>::ptr_t m_stats;
-    StatsFile<ParallelStatsSpecifier>::ptr_t m_parallel_stats;
+    std::unique_ptr<FciqmcStats> m_stats;
+    std::unique_ptr<ParallelStats> m_parallel_stats;
 
     /*
      * Timers for the main parts of the solver

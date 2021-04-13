@@ -242,10 +242,10 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         //m_average_coeffs("average coeffs", {2, 2}, 1)
         {
     if (mpi::i_am_root())
-        m_stats = mem_utils::make_unique<StatsFile<FciqmcStatsSpecifier>>("M7.stats");
+        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
     if (m_opts.parallel_stats)
-        m_parallel_stats = mem_utils::make_unique<StatsFile<ParallelStatsSpecifier>>(
-            "M7.stats."+std::to_string(mpi::irank()));
+        m_parallel_stats = std::unique_ptr<ParallelStats>(
+                new ParallelStats("M7.stats."+std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
     m_wf.m_ra.activate(m_icycle);
 }
 
@@ -343,45 +343,39 @@ void Solver::output_stats() {
 
     auto sync_overhead = mpi::all_sum((double)m_synchronization_timer);
     if (mpi::i_am_root()) {
-        m_stats->m_icycle() = m_icycle;
-        m_stats->m_tau() = m_prop.tau();
-        m_stats->m_shift() = m_prop.m_shift;
-        m_stats->m_nwalker() = m_wf.m_nwalker.reduced(0, 0);
-        m_stats->m_delta_nwalker() = m_wf.m_delta_nwalker.reduced(0, 0);
-        m_stats->m_nwalker_annihilated() = m_wf.m_nannihilated.reduced(0, 0);
-        m_stats->m_ref_proj_energy_num() = m_reference.proj_energy_num();
-        m_stats->m_ref_weight() = m_reference.get_weight();
-        m_stats->m_ref_proj_energy() = m_reference.proj_energy();
-        m_stats->m_l2_norm() = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
-        m_stats->m_ninitiator() = m_wf.m_ninitiator.reduced(0, 0);
-        m_stats->m_nocc_onv() = m_wf.m_nocc_onv.reduced(0, 0);
-        m_stats->m_delta_nocc_onv() = m_wf.m_delta_nocc_onv.reduced(0, 0);
-        m_stats->m_psingle() = m_prop.m_magnitude_logger.m_psingle;
-        m_stats->m_total_synchronization_overhead() = sync_overhead;
-        m_stats->m_propagate_loop_time() = m_propagate_timer;
-        m_stats->m_communication_time() = m_communicate_timer;
-        m_stats->m_annihilation_loop_time() = m_annihilate_timer;
-        m_stats->m_total_cycle_time() = m_cycle_timer;
-        if (m_uniform_twf) m_stats->m_uniform_twf_num() = m_uniform_twf->m_numerator_total[0];
+        auto& stats = m_stats->m_row;
+        stats.m_icycle = m_icycle;
+        stats.m_tau = m_prop.tau();
+        stats.m_shift = m_prop.m_shift;
+        stats.m_nwalker = m_wf.m_nwalker.reduced(0, 0);
+        stats.m_delta_nwalker = m_wf.m_delta_nwalker.reduced(0, 0);
+        stats.m_nwalker_annihilated = m_wf.m_nannihilated.reduced(0, 0);
+        stats.m_ref_proj_energy_num = m_reference.proj_energy_num();
+        stats.m_ref_weight = m_reference.get_weight();
+        stats.m_ref_proj_energy = m_reference.proj_energy();
+        stats.m_l2_norm = std::sqrt(m_wf.m_l2_norm_square.reduced(0, 0));
+        stats.m_ninitiator = m_wf.m_ninitiator.reduced(0, 0);
+        stats.m_nocc_onv = m_wf.m_nocc_onv.reduced(0, 0);
+        stats.m_delta_nocc_onv = m_wf.m_delta_nocc_onv.reduced(0, 0);
+        stats.m_psingle = m_prop.m_magnitude_logger.m_psingle;
+        stats.m_total_synchronization_overhead = sync_overhead;
+        stats.m_propagate_loop_time = m_propagate_timer;
+        stats.m_communication_time = m_communicate_timer;
+        stats.m_annihilation_loop_time = m_annihilate_timer;
+        stats.m_total_cycle_time = m_cycle_timer;
+        if (m_uniform_twf) stats.m_uniform_twf_num = m_uniform_twf->m_numerator_total[0];
         m_stats->flush();
     }
 
     if (m_opts.parallel_stats){
-        m_parallel_stats->m_icycle() = m_icycle;
-        m_parallel_stats->m_synchronization_overhead() = m_synchronization_timer;
-        m_parallel_stats->m_nblock_wf_ra() = m_wf.m_ra.nblock_();
-        m_parallel_stats->m_nwalker() = m_wf.m_nwalker(0, 0);
-        m_parallel_stats->m_nwalker_lookup_skip() = m_wf.m_store.m_ntotal_skip;
-        m_parallel_stats->m_nwalker_lookup() = m_wf.m_store.m_ntotal_lookup;
-//    m_parallel_stats->m_nrow_free_walker_list() = m_wf.m_walkers.
-//    StatsColumn<size_t> m_walker_list_high_water_mark;
-//    StatsColumn<double> m_walker_list_high_water_mark_fraction;
-//    StatsColumn<size_t> m_nrow_sent;
-//    StatsColumn<size_t> m_largest_nrow_sent;
-//    StatsColumn<double> m_largest_send_list_filled_fraction;
-//    StatsColumn<size_t> m_irank_largest_nrow_sent;
-    m_parallel_stats->m_nrow_recv() = m_wf.m_comm.m_last_recv_count;
-//    StatsColumn<double> m_recv_list_filled_fraction;
+        auto& stats = m_parallel_stats->m_row;
+        stats.m_icycle = m_icycle;
+        stats.m_synchronization_overhead = m_synchronization_timer;
+        stats.m_nblock_wf_ra = m_wf.m_ra.nblock_();
+        stats.m_nwalker_total = m_wf.m_nwalker(0, 0);
+        stats.m_nwalker_lookup_skip = m_wf.m_store.m_ntotal_skip;
+        stats.m_nwalker_lookup = m_wf.m_store.m_ntotal_lookup;
+        stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
         m_parallel_stats->flush();
     }
 }

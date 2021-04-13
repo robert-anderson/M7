@@ -2,7 +2,6 @@
 // Created by rja on 02/10/2020.
 //
 
-#include <src/core/io/StatsFile.h>
 #include <src/core/sample/PRNG.h>
 #include <src/core/sort/ParallelExtremalValues.h>
 #include <src/core/sort/ExtremalValues.h>
