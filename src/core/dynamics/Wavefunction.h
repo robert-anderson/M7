@@ -55,7 +55,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
             ),
             m_opts(opts),
             m_nsite(nsite),
-            m_format({opts.nroot, opts.nreplica}),
+            m_format({opts.nroot, opts.nreplica}, {"nroot", "nreplica"}),
             m_ninitiator(m_summables, m_format),
             m_delta_ninitiator(m_summables, m_format),
             m_nocc_onv(m_summables, m_format),

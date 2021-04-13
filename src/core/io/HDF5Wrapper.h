@@ -187,9 +187,7 @@ namespace hdf5 {
 
 
     struct FileBase {
-        static void check_is_hdf5(const std::string &name) {
-            MPI_REQUIRE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
-        }
+        static void check_is_hdf5(const std::string &name);
 
         const hid_t m_handle;
     protected:
@@ -201,17 +199,11 @@ namespace hdf5 {
     };
 
     struct FileWriter : FileBase {
-        FileWriter(std::string name) : FileBase(H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, AccessPList())) {
-            MPI_REQUIRE_ALL(m_handle >= 0,
-                            "HDF5 file could not be opened for writing. It may be locked by another program");
-        }
+        FileWriter(std::string name);
     };
 
     struct FileReader : FileBase {
-        FileReader(std::string name) : FileBase(
-                (check_is_hdf5(name), H5Fopen(name.c_str(), H5F_ACC_RDONLY, AccessPList()))) {
-            MPI_REQUIRE_ALL(m_handle >= 0, "HDF5 file could not be opened for reading.");
-        }
+        FileReader(std::string name);
     };
 
     struct GroupBase {
@@ -374,9 +366,18 @@ namespace hdf5 {
 
         void read_h5item_bytes(const size_t &iitem, void *data) {
             select_hyperslab(iitem);
-            auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
-                                  m_filespace_handle, m_coll_plist, data);
-            MPI_ASSERT(!status, "HDF5 read failed");
+            log::debug_("reading data...");
+            if (data) {
+                auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
+                                      m_filespace_handle, m_coll_plist, data);
+                MPI_ASSERT(!status, "HDF5 read failed");
+            }
+            else {
+                auto status = H5Dread(m_dataset_handle, m_h5type, m_none_memspace_handle,
+                                      m_filespace_handle, m_coll_plist, data);
+                MPI_ASSERT(!status, "HDF5 read failed");
+            }
+            log::debug_("data read");
         }
     };
 

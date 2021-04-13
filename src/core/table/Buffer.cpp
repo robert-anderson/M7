@@ -71,7 +71,7 @@ size_t Buffer::window_dsize() const {
 }
 
 void Buffer::append_window(Buffer::Window *window) {
-    MPI_REQUIRE_ALL(m_windows.size() < m_nwindow_max, "Buffer is over-subscribed");
+    MPI_REQUIRE(m_windows.size() < m_nwindow_max, "Buffer is over-subscribed");
     if (dsize()) {
         window->m_dbegin = m_data.data()+window_dsize() * m_windows.size();
         window->m_dend = window->m_dbegin + window_dsize();

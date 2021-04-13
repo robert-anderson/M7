@@ -21,6 +21,7 @@ TEST(StochasticPropagator, Test) {
     opts.shift_initial = 0.0;
     opts.ncycle = 50000;
     opts.init();
+
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -41,7 +42,9 @@ TEST(StochasticPropagator, Test) {
     auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
+    log::debug_("{}, {}", __FILE__, __LINE__);
     solver.execute(opts.ncycle);
+    log::debug_("{}, {}", __FILE__, __LINE__);
 }
 
 TEST(StochasticPropagator, Hdf5) {

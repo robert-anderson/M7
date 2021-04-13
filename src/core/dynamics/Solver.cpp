@@ -14,8 +14,8 @@ void Solver::loop_over_occupied_onvs() {
      *      update local weight in the diagonal cloning/death step
      * else if all elements of the m_weight field are zero, the row should be removed
      */
-    auto& row = m_wf.m_store.m_row;
-    for (row.restart(); row.in_range(); row.step()){
+    auto &row = m_wf.m_store.m_row;
+    for (row.restart(); row.in_range(); row.step()) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
          */
@@ -33,7 +33,7 @@ void Solver::loop_over_occupied_onvs() {
         if (row.m_initiator.get(m_wf.m_ipart))
             m_wf.m_ninitiator(0, 0)++;
 
-        if (consts::float_is_zero(weight)){
+        if (consts::float_is_zero(weight)) {
             // ONV has become unoccupied and must be removed from mapped list
             m_wf.remove_walker();
             continue;
@@ -76,12 +76,13 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.pause();
 }
 
-void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store) {
+void Solver::annihilate_row(const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight, bool allow_initiation,
+                            const size_t &irow_store) {
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
     // zero magnitude weights should not have been communicated
-    if(consts::float_is_zero(delta_weight)) return;
+    if (consts::float_is_zero(delta_weight)) return;
     ASSERT(!consts::float_is_zero(delta_weight));
 
     if (irow_store == ~0ul) {
@@ -102,9 +103,9 @@ void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delt
     } else {
         m_wf.m_store.m_row.jump(irow_store);
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[0];
-        auto weight_after = weight_before+delta_weight;
-        if ((weight_before>0)!=(weight_after>0))
-            m_wf.m_nannihilated(0, 0) += std::abs(std::abs(weight_before)-std::abs(weight_after));
+        auto weight_after = weight_before + delta_weight;
+        if ((weight_before > 0) != (weight_after > 0))
+            m_wf.m_nannihilated(0, 0) += std::abs(std::abs(weight_before) - std::abs(weight_after));
         m_wf.change_weight(delta_weight);
     }
 }
@@ -112,7 +113,7 @@ void Solver::annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delt
 void Solver::loop_over_spawned() {
     mpi::barrier();
 
-    if (m_opts.rdm_rank>0) {
+    if (m_opts.rdm_rank > 0) {
         auto row1 = m_wf.recv().m_row;
         auto row2 = m_wf.recv().m_row;
         auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
@@ -200,7 +201,7 @@ void Solver::loop_over_spawned() {
                 total_delta += row_current.m_delta_weight;
             } else {
                 // row_current is in first row of next block
-                ASSERT(get_nrow_in_block()>0);
+                ASSERT(get_nrow_in_block() > 0);
                 // get the row index (if any) of the dst_onv
                 auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
                 make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
@@ -220,10 +221,9 @@ void Solver::loop_over_spawned() {
                                                    irow_store);
             annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
         }
-    }
-    else {
-        auto& row = m_wf.recv().m_row;
-        for (row.restart(); row.in_range(); row.step()){
+    } else {
+        auto &row = m_wf.recv().m_row;
+        for (row.restart(); row.in_range(); row.step()) {
             annihilate_row(row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
         }
     }
@@ -240,12 +240,12 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.m_format.nelement(), prop.m_ham.nsite()) : nullptr),
         m_mevs(prop.m_ham.nsite(), m_opts.rdm_rank)
         //m_average_coeffs("average coeffs", {2, 2}, 1)
-        {
+    {
     if (mpi::i_am_root())
         m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
     if (m_opts.parallel_stats)
         m_parallel_stats = std::unique_ptr<ParallelStats>(
-                new ParallelStats("M7.stats."+std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
+                new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
     m_wf.m_ra.activate(m_icycle);
 }
 
@@ -257,8 +257,6 @@ void Solver::execute(size_t niter) {
         m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
         loop_over_spawned();
     }
-
-    std::cout << m_wf.m_store.to_string() << std::endl;
 
     for (size_t i = 0ul; i < niter; ++i) {
 
@@ -296,8 +294,8 @@ void Solver::execute(size_t niter) {
 }
 
 void Solver::propagate_row() {
-    auto& row = m_wf.m_store.m_row;
-    const auto& ipart = m_wf.m_ipart;
+    auto &row = m_wf.m_store.m_row;
+    const auto &ipart = m_wf.m_ipart;
 
     if (row.is_cleared()) return;
 
@@ -313,7 +311,7 @@ void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker(0, 0) + m_wf.m_delta_nwalker(0, 0);
     m_chk_ninitiator_local = m_wf.m_ninitiator(0, 0) + m_wf.m_delta_ninitiator(0, 0);
     m_wf.begin_cycle();
-    ASSERT(m_wf.m_nwalker(0,0)==0);
+    ASSERT(m_wf.m_nwalker(0, 0) == 0);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     m_reference.begin_cycle();
@@ -341,9 +339,9 @@ void Solver::end_cycle() {
 
 void Solver::output_stats() {
 
-    auto sync_overhead = mpi::all_sum((double)m_synchronization_timer);
+    auto sync_overhead = mpi::all_sum((double) m_synchronization_timer);
     if (mpi::i_am_root()) {
-        auto& stats = m_stats->m_row;
+        auto &stats = m_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_tau = m_prop.tau();
         stats.m_shift = m_prop.m_shift;
@@ -367,8 +365,8 @@ void Solver::output_stats() {
         m_stats->flush();
     }
 
-    if (m_opts.parallel_stats){
-        auto& stats = m_parallel_stats->m_row;
+    if (m_opts.parallel_stats) {
+        auto &stats = m_parallel_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
         stats.m_nblock_wf_ra = m_wf.m_ra.nblock_();

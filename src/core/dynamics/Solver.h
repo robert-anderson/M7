@@ -25,8 +25,8 @@ class Solver {
     Wavefunction &m_wf;
     Reference m_reference;
 
-    std::unique_ptr<FciqmcStats> m_stats;
-    std::unique_ptr<ParallelStats> m_parallel_stats;
+    std::unique_ptr<FciqmcStats> m_stats = nullptr;
+    std::unique_ptr<ParallelStats> m_parallel_stats = nullptr;
 
     /*
      * Timers for the main parts of the solver

@@ -178,3 +178,17 @@ hdf5::NdListBase::~NdListBase() {
     H5Dclose(m_dataset_handle);
     H5Sclose(m_memspace_handle);
 }
+
+void hdf5::FileBase::check_is_hdf5(const std::string &name) {
+    MPI_REQUIRE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
+}
+
+hdf5::FileWriter::FileWriter(std::string name) : FileBase(H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, AccessPList())) {
+    MPI_REQUIRE_ALL(m_handle >= 0,
+                    "HDF5 file could not be opened for writing. It may be locked by another program");
+}
+
+hdf5::FileReader::FileReader(std::string name) : FileBase(
+        (check_is_hdf5(name), H5Fopen(name.c_str(), H5F_ACC_RDONLY, AccessPList()))) {
+    MPI_REQUIRE_ALL(m_handle >= 0, "HDF5 file could not be opened for reading.");
+}
