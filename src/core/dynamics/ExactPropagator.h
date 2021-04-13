@@ -17,15 +17,15 @@ class ExactPropagator : public Propagator {
     defs::ham_t off_diagonal_bosons(const Hamiltonian<1> &ham, conn::Antisym<1> &conn,
                                     const fields::Onv<1> &src_onv, fields::Onv<1> &dst_onv, const size_t &occ, int change){
         const size_t imode = occ < ham.nsite() ? occ : occ-ham.nsite();
-        if (src_onv.m_bonv[imode]==0 && (change<0)) return 0.0;
-        else if (src_onv.m_bonv[imode]==ham.nboson_cutoff() && (change>0)) return 0.0;
+        if (src_onv.m_bos[imode] == 0 && (change < 0)) return 0.0;
+        else if (src_onv.m_bos[imode] == ham.nboson_cutoff() && (change > 0)) return 0.0;
 
         conn.zero();
         conn.m_bonvconn.add(imode, change);
         dst_onv.zero();
         conn.apply(src_onv, dst_onv);
-        ASSERT(src_onv.m_fonv==dst_onv.m_fonv);
-        auto com = dst_onv.m_bonv[imode];
+        ASSERT(src_onv.m_frm == dst_onv.m_frm);
+        auto com = dst_onv.m_bos[imode];
         if (change<0) com+=change;
         auto helem = ham.bc().get_element_1(imode, imode, com);
 

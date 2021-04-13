@@ -262,11 +262,11 @@ struct ConnectionGeneral {
     }
 
     void connect(const fieldsx::Onv &in, const fieldsx::Onv &out) {
-        m_fermion.connect(in.m_fonv, out.m_fonv);
+        m_fermion.connect(in.m_frm, out.m_frm);
     }
 
     void apply(const fieldsx::Onv &in, fieldsx::Onv &out) {
-        m_fermion.apply(in.m_fonv, out.m_fonv);
+        m_fermion.apply(in.m_frm, out.m_frm);
     }
 
     bool phase() const {

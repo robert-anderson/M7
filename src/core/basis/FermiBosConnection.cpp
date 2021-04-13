@@ -8,8 +8,8 @@ AntisymFermiBosConnection::AntisymFermiBosConnection(size_t nsite) :
         AntisymFermionOnvConnection(nsite), m_bonvconn(nsite) {}
 
 AntisymFermiBosConnection::AntisymFermiBosConnection(const fields::Onv<1> &in, const fields::Onv<1> &out) :
-        AntisymFermionOnvConnection(in.m_fonv, out.m_fonv),
-        m_bonvconn(in.m_bonv, out.m_bonv) {}
+        AntisymFermionOnvConnection(in.m_frm, out.m_frm),
+        m_bonvconn(in.m_bos, out.m_bos) {}
 
 AntisymFermiBosConnection::AntisymFermiBosConnection(const fields::Onv<1> &in) : AntisymFermiBosConnection(in, in) {}
 
@@ -18,13 +18,13 @@ AntisymFermiBosConnection::operator bool() const {
 }
 
 void AntisymFermiBosConnection::connect(const fields::Onv<1> &in, const fields::Onv<1> &out) {
-    AntisymFermionOnvConnection::connect(in.m_fonv, out.m_fonv);
-    m_bonvconn.connect(in.m_bonv, out.m_bonv);
+    AntisymFermionOnvConnection::connect(in.m_frm, out.m_frm);
+    m_bonvconn.connect(in.m_bos, out.m_bos);
 }
 
 void AntisymFermiBosConnection::apply(const fields::Onv<1> &in, fields::Onv<1> &out) {
-    AntisymFermionOnvConnection::apply(in.m_fonv, out.m_fonv);
-    m_bonvconn.apply(in.m_bonv, out.m_bonv);
+    AntisymFermionOnvConnection::apply(in.m_frm, out.m_frm);
+    m_bonvconn.apply(in.m_bos, out.m_bos);
 }
 
 void AntisymFermiBosConnection::zero() {

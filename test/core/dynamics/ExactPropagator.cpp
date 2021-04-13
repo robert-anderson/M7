@@ -25,8 +25,8 @@ TEST(ExactPropagator, BosonTest) {
     ASSERT_TRUE(ham.spin_conserving());
     elements::Onv<1> onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.m_fonv.set(0, i);
-        onv.m_fonv.set(1, i);
+        onv.m_frm.set(0, i);
+        onv.m_frm.set(1, i);
     }
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);

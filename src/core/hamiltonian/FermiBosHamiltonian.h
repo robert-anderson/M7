@@ -53,7 +53,7 @@ public:
     }
 
     defs::ham_t get_element_0(const fields::Onv<1> &onv) const {
-        return FermionHamiltonian::get_element_0(onv.m_fonv) + m_boson_couplings.get_element_0(onv.m_bonv);
+        return FermionHamiltonian::get_element_0(onv.m_frm) + m_boson_couplings.get_element_0(onv.m_bos);
     }
 
     using FermionHamiltonian::get_element_1;
@@ -98,7 +98,7 @@ public:
 
     buffered::FermiBosOnv guess_reference(const int &spin_level) const {
         buffered::FermiBosOnv tmp(m_nsite);
-        tmp.m_fonv = FermionHamiltonian::guess_reference(spin_level);
+        tmp.m_frm = FermionHamiltonian::guess_reference(spin_level);
         return tmp;
     }
 

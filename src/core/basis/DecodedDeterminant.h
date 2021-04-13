@@ -27,7 +27,7 @@ public:
     }
 
     explicit DecodedDeterminant(const fields::Onv<1> &onv) :
-            DecodedDeterminant(onv.m_fonv.m_nsite) {}
+            DecodedDeterminant(onv.m_frm.m_nsite) {}
 
     size_t size() const {
         return m_inds.size();
@@ -47,7 +47,7 @@ public:
     };
 
     void update(const fields::Onv<1> &onv) {
-        updater_fn()(onv.m_fonv, m_inds);
+        updater_fn()(onv.m_frm, m_inds);
     }
 };
 

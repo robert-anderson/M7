@@ -71,10 +71,10 @@ void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t
     for (auto &iocc: occ.inds()) {
         const size_t imode = iocc < ham.nsite() ? iocc : iocc - ham.nsite();
         for (int change = -1; change <= 1; change += 2) {
-            auto vacd_minus = (onv.m_bonv[imode] == 0) && (change < 0);
-            auto occd_plus = (onv.m_bonv[imode] == ham.nboson_cutoff()) && (change > 0);
+            auto vacd_minus = (onv.m_bos[imode] == 0) && (change < 0);
+            auto occd_plus = (onv.m_bos[imode] == ham.nboson_cutoff()) && (change > 0);
             if (!vacd_minus && !occd_plus){
-                auto com = onv.m_bonv[imode];
+                auto com = onv.m_bos[imode];
                 if (change<0) com+=change;
                 helem = ham.bc().get_element_1(imode, imode, com);
                 helem_sum-=std::abs(helem);

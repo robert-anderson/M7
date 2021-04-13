@@ -24,8 +24,8 @@ struct ConnectionEnumerator {
 
 
     void execute(const fields::Onv<1> &onv) {
-        m_occ.update(onv.m_fonv);
-        m_vac.update(onv.m_fonv);
+        m_occ.update(onv.m_frm);
+        m_vac.update(onv.m_frm);
         fn_t fn;
         for (auto &iocc: m_occ.inds()) {
             for (auto &ivac: m_vac.inds()) {

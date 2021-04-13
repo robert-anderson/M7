@@ -27,27 +27,27 @@ namespace fields {
 
     struct FermiBosOnv : MultiField<FermionOnv, BosonOnv> {
         const std::string m_name;
-        FermionOnv &m_fonv;
-        BosonOnv &m_bonv;
+        FermionOnv &m_frm;
+        BosonOnv &m_bos;
 
         FermiBosOnv(Row *row, size_t nsite, std::string name="") :
                 MultiField<FermionOnv, BosonOnv>(row,
                                                  {nullptr, nsite, name.empty() ? "" : name+" (fermion)"},
                                                  {nullptr, nsite, name.empty() ? "" : name+" (boson)"}),
-                m_name(name), m_fonv(get<0>()), m_bonv(get<1>()) {
+                m_name(name), m_frm(get<0>()), m_bos(get<1>()) {
         }
 
-        FermiBosOnv(const FermiBosOnv& other): FermiBosOnv(other.m_fonv.row_of_copy(), other.m_fonv.m_nsite, other.m_name){}
+        FermiBosOnv(const FermiBosOnv& other): FermiBosOnv(other.m_frm.row_of_copy(), other.m_frm.m_nsite, other.m_name){}
 
         FermiBosOnv &operator=(const FermiBosOnv& other) {
-            m_fonv = other.m_fonv;
-            m_bonv = other.m_bonv;
+            m_frm = other.m_frm;
+            m_bos = other.m_bos;
             return *this;
         }
 
         FermiBosOnv &operator=(const std::pair<defs::inds, defs::inds>& inds) {
-            m_fonv = inds.first;
-            m_bonv = inds.second;
+            m_frm = inds.first;
+            m_bos = inds.second;
             return *this;
         }
     };
