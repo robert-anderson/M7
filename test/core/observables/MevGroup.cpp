@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "src/core/table/BufferedFields.h"
 
+/*
 TEST(MevGroup, Test){
     const size_t nsite = 6;
     buffered::FermionOnv bra(nsite);
@@ -32,3 +33,4 @@ TEST(MevGroup, Test){
 
     ASSERT_TRUE(conn.phase());
 }
+ */
