@@ -89,8 +89,9 @@ TEST(StochasticPropagator, Hubbard) {
     opts.tau_initial = 0.01;
     opts.nwalker_target = 10000;
     opts.shift_damp = 0.4;
-    opts.ncycle = 3000;
+    opts.ncycle = 30000;
     opts.spf_uniform_twf = true;
+    opts.rdm_rank = 1;
     opts.init();
 
     // -10.328242246088791
@@ -114,9 +115,7 @@ TEST(StochasticPropagator, Hubbard) {
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    for (size_t i = 0ul; i < 20000; ++i) {
-        solver.execute();
-    }
+    solver.execute(opts.ncycle);
 }
 
 #else

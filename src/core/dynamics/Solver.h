@@ -76,7 +76,7 @@ public:
     }
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight){
-        // m_wf.m_store.m_row is assumed to have been moved to the store row of the
+        // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
         m_mevs.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[0]);
         //std::cout << src_onv.to_string() << " " << m_wf.m_store.m_row.m_onv.to_string() << std::endl;
     }

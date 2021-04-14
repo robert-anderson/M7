@@ -45,7 +45,8 @@ void Solver::loop_over_occupied_onvs() {
         m_reference.add_row();
         if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
 
-        if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
+        if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
+        //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
 
         /*
         if (m_prop.m_variable_shift){
@@ -74,6 +75,8 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.unpause();
     mpi::barrier();
     m_synchronization_timer.pause();
+
+    std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
 void Solver::annihilate_row(const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight, bool allow_initiation,
@@ -113,7 +116,8 @@ void Solver::annihilate_row(const fields::Onv<> &dst_onv, const defs::wf_t &delt
 void Solver::loop_over_spawned() {
     mpi::barrier();
 
-    if (m_opts.rdm_rank > 0) {
+    if (0) {
+    //if (m_opts.rdm_rank > 0) {
         auto row1 = m_wf.recv().m_row;
         auto row2 = m_wf.recv().m_row;
         auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
