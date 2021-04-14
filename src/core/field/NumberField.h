@@ -60,8 +60,61 @@ struct NdNumberField : NumberFieldBase {
         return *this;
     }
 
-    NdNumberField &operator=(const NdNumberField &v) {
-        static_cast<FieldBase&>(*this) = v;
+    NdNumberField &operator=(const NdNumberField &other) {
+        static_cast<FieldBase&>(*this) = other;
+        return *this;
+    }
+
+    /*
+     * math ops
+     */
+    NdNumberField &operator+=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]+= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator+=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] += v;
+        return *this;
+    }
+
+    NdNumberField &operator-=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]-= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator-=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] -= v;
+        return *this;
+    }
+
+    NdNumberField &operator*=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]*= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator*=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] *= v;
+        return *this;
+    }
+
+    NdNumberField &operator/=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]/= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator/=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] /= v;
+        return *this;
+    }
+
+    NdNumberField &operator%=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]%= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator%=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] %= v;
         return *this;
     }
 
@@ -77,6 +130,9 @@ struct NdNumberField : NumberFieldBase {
         return tmp;
     }
 
+    /*
+     * access methods
+     */
     T& operator[](const size_t& ielement) {
         return ((T *) begin())[ielement];
     }
@@ -115,6 +171,9 @@ struct NdNumberField : NumberFieldBase {
         return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
     }
 
+    /*
+     * HDF5 related
+     */
     defs::inds h5_shape() const override {
         return {m_format.shape().begin(), m_format.shape().end()};
     }

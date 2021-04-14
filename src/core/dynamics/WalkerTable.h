@@ -19,19 +19,24 @@ struct WalkerTableRow : public Row {
     fields::Flags<defs::ndim_wf> m_initiator;
     fields::Flags<defs::ndim_wf> m_reference_connection;
     fields::Flags<defs::ndim_wf> m_deterministic;
+    fields::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
+    fields::Numbers<size_t, defs::ndim_wf> m_icycle_occ;
 
     fields::Onv<> &key_field() {
         return m_onv;
     };
 
-    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica) :
+    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool mev_average_weights=false) :
             m_part_shape({nroot, nreplica}),
             m_onv(this, nsite, "onv"),
             m_weight(this, m_part_shape, "weight"),
             m_hdiag(this),
             m_initiator(this, m_part_shape),
             m_reference_connection(this, m_part_shape),
-            m_deterministic(this, m_part_shape) {}
+            m_deterministic(this, m_part_shape),
+            m_average_weight(mev_average_weights ? this : nullptr, m_part_shape),
+            m_icycle_occ(mev_average_weights ? this : nullptr, m_part_shape)
+            {}
 
     WalkerTableRow(const Options &opts, size_t nsite) :
             WalkerTableRow(nsite, opts.nroot, opts.nreplica) {}
