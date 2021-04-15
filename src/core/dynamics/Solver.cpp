@@ -22,53 +22,57 @@ void Solver::loop_over_occupied_onvs() {
 
         if (row.is_cleared()) continue;
 
-        MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
-                   "Stored ONV should not be zeroed");
-        MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
-                   "Stored ONV should be on its allocated rank");
 
-        const auto &weight = row.m_weight[m_wf.m_ipart];
-
-        m_wf.m_nocc_onv.m_local[{0, 0}]++;
-        if (row.m_initiator.get(m_wf.m_ipart))
-            m_wf.m_ninitiator.m_local[{0, 0}]++;
-
-        if (consts::float_is_zero(weight)) {
-            // ONV has become unoccupied and must be removed from mapped list
-            m_wf.remove_walker();
+        if (row.m_weight.is_zero()) {
+            // ONV has become unoccupied in all parts and must be removed from mapped list
+            m_wf.remove_row();
             continue;
         }
 
-        m_wf.m_nwalker.m_local[{0, 0}] += std::abs(weight);
-        m_wf.m_l2_norm_square.m_local[{0, 0}] += std::pow(std::abs(weight), 2.0);
+        for (size_t ipart = 0ul; ipart < m_wf.m_part_inds.nelement(); ++ipart) {
 
-        m_reference.add_row();
-        if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+            MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
+                       "Stored ONV should not be zeroed");
+            MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
+                       "Stored ONV should be on its allocated rank");
 
-        //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
-        //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
+            const auto &weight = row.m_weight[ipart];
 
-        /*
-        if (m_prop.m_variable_shift){
-            m_connection.connect(m_reference.get_onv(), row.m_onv);
-            if (m_connection.nexcit()==0) m_average_coeffs.m_ref_coeff += weight;
-            if (m_connection.nexcit()==2) {
-                auto irow = *m_average_coeffs[m_connection];
-                if (irow==~0ul) irow = m_average_coeffs.insert(m_connection);
-                m_average_coeffs.m_row.jump(irow);
-                m_average_coeffs.m_row.m_values(0)+=weight;
+            m_wf.m_nocc_onv.m_local[ipart]++;
+            if (row.m_initiator.get(ipart))
+                m_wf.m_ninitiator.m_local[ipart]++;
+
+            m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
+            m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
+
+            m_reference.add_row();
+            if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+
+            //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
+            //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
+
+            /*
+            if (m_prop.m_variable_shift){
+                m_connection.connect(m_reference.get_onv(), row.m_onv);
+                if (m_connection.nexcit()==0) m_average_coeffs.m_ref_coeff += weight;
+                if (m_connection.nexcit()==2) {
+                    auto irow = *m_average_coeffs[m_connection];
+                    if (irow==~0ul) irow = m_average_coeffs.insert(m_connection);
+                    m_average_coeffs.m_row.jump(irow);
+                    m_average_coeffs.m_row.m_values(0)+=weight;
+                }
             }
-        }
-         */
+             */
 
-        if (m_wf.m_ra.is_active()) {
-            m_spawning_timer.reset();
-            m_spawning_timer.unpause();
-        }
-        propagate_row();
-        if (m_wf.m_ra.is_active()) {
-            m_spawning_timer.pause();
-            m_wf.m_ra.record_work_time(row, m_spawning_timer);
+            if (m_wf.m_ra.is_active()) {
+                m_spawning_timer.reset();
+                m_spawning_timer.unpause();
+            }
+            propagate_row(ipart);
+            if (m_wf.m_ra.is_active()) {
+                m_spawning_timer.pause();
+                m_wf.m_ra.record_work_time(row, m_spawning_timer);
+            }
         }
     }
     m_synchronization_timer.reset();
@@ -79,8 +83,8 @@ void Solver::loop_over_occupied_onvs() {
     //std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
-void Solver::annihilate_row(const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight, bool allow_initiation,
-                            const size_t &irow_store) {
+void Solver::annihilate_row(const size_t dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+                            bool allow_initiation, const size_t &irow_store) {
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
@@ -99,18 +103,20 @@ void Solver::annihilate_row(const fields::Onv<> &dst_onv, const defs::wf_t &delt
         }
 
         m_wf.create_walker_(
+                m_icycle,
+                dst_ipart,
                 dst_onv,
                 delta_weight,
                 m_prop.m_ham.get_energy(dst_onv),
                 m_reference.is_connected(dst_onv));
     } else {
         m_wf.m_store.m_row.jump(irow_store);
-        defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[0];
+        defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[dst_ipart];
         auto weight_after = weight_before + delta_weight;
         if (!consts::float_is_zero(weight_before) && !consts::float_is_zero(weight_after)
             && ((weight_before > 0) != (weight_after > 0)))
-            m_wf.m_nannihilated.m_local[{0, 0}] += std::abs(std::abs(weight_before) - std::abs(weight_after));
-        m_wf.change_weight(delta_weight);
+            m_wf.m_nannihilated.m_local[dst_ipart] += std::abs(std::abs(weight_before) - std::abs(weight_after));
+        m_wf.change_weight(dst_ipart, delta_weight);
     }
 }
 
@@ -118,7 +124,7 @@ void Solver::loop_over_spawned() {
     mpi::barrier();
 
     if (0) {
-    //if (m_opts.rdm_rank > 0) {
+        //if (m_opts.rdm_rank > 0) {
         auto row1 = m_wf.recv().m_row;
         auto row2 = m_wf.recv().m_row;
         auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
@@ -201,6 +207,7 @@ void Solver::loop_over_spawned() {
         row_block_start.restart();
         defs::wf_t total_delta = 0.0;
         for (row_current.restart(); row_current.in_range(); row_current.step()) {
+            size_t dst_ipart = row_current.m_dst_ipart;
             if (row_current.m_dst_onv == row_block_start.m_dst_onv) {
                 // still in block
                 total_delta += row_current.m_delta_weight;
@@ -212,7 +219,7 @@ void Solver::loop_over_spawned() {
                 make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
                                                        row_current.m_i - 1, irow_store);
                 ASSERT(row_block_start.m_i == row_current.m_i - 1)
-                annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
+                annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
                 // put block start to start of next block
                 row_block_start.step();
                 ASSERT(row_block_start.m_i == row_current.m_i)
@@ -221,15 +228,17 @@ void Solver::loop_over_spawned() {
         }
         // finish off last block
         if (row_block_start.in_range()) {
+            size_t dst_ipart = row_current.m_dst_ipart;
             auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
             make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks, m_wf.recv().m_hwm - 1,
                                                    irow_store);
-            annihilate_row(row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
+            annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
         }
     } else {
         auto &row = m_wf.recv().m_row;
         for (row.restart(); row.in_range(); row.step()) {
-            annihilate_row(row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
+            size_t dst_ipart = row.m_dst_ipart;
+            annihilate_row(dst_ipart, row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
         }
     }
     m_wf.recv().clear();
@@ -242,12 +251,12 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
         m_connection(prop.m_ham.nsite()),
         m_exit("exit"),
-        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.m_format.nelement(), prop.m_ham.nsite()) : nullptr),
+        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_mevs(prop.m_ham.nsite(), m_opts.rdm_rank)
-        //m_average_coeffs("average coeffs", {2, 2}, 1)
-    {
+//m_average_coeffs("average coeffs", {2, 2}, 1)
+{
     if (mpi::i_am_root())
-        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
+        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_part_inds}));
     if (m_opts.parallel_stats)
         m_parallel_stats = std::unique_ptr<ParallelStats>(
                 new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
@@ -298,9 +307,8 @@ void Solver::execute(size_t niter) {
     }
 }
 
-void Solver::propagate_row() {
+void Solver::propagate_row(const size_t &ipart) {
     auto &row = m_wf.m_store.m_row;
-    const auto &ipart = m_wf.m_ipart;
 
     if (row.is_cleared()) return;
 
@@ -308,8 +316,8 @@ void Solver::propagate_row() {
 
     //bool is_deterministic = row.m_deterministic.get(ipart);
 
-    m_prop.off_diagonal(m_wf);
-    m_prop.diagonal(m_wf);
+    m_prop.off_diagonal(m_wf, ipart);
+    m_prop.diagonal(m_wf, ipart);
 }
 
 void Solver::begin_cycle() {

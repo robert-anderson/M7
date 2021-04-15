@@ -12,8 +12,8 @@ void StochasticPropagator::add_boson_excitgen(const Hamiltonian<1> &ham) {
             new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
 }
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Options &opts) :
-        Propagator(opts, ham), m_prng(opts.prng_seed, opts.prng_ngen),
+StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, size_t npart) :
+        Propagator(opts, ham, npart), m_prng(opts.prng_seed, opts.prng_ngen),
         m_min_spawn_mag(opts.min_spawn_mag) {
 
     m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
@@ -36,13 +36,12 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
 }
 
 
-void StochasticPropagator::off_diagonal(Wavefunction &wf) {
-    const auto& row = wf.m_store.m_row;
-    const auto& ipart = wf.m_ipart;
-    const defs::wf_t& weight = row.m_weight[ipart];
+void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
+    const auto &row = wf.m_store.m_row;
+    const defs::wf_t &weight = row.m_weight[ipart];
     ASSERT(!consts::float_is_zero(weight));
     ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
-    const auto& src_onv = row.m_onv;
+    const auto &src_onv = row.m_onv;
     bool flag_initiator = row.m_initiator.get(ipart);
     bool flag_deterministic = row.m_deterministic.get(ipart);
 
@@ -69,22 +68,21 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf) {
     }
 }
 
-void StochasticPropagator::diagonal(Wavefunction &wf) {
-    auto& row = wf.m_store.m_row;
-    const auto& ipart = wf.m_ipart;
+void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
+    auto &row = wf.m_store.m_row;
     bool flag_deterministic = row.m_deterministic.get(ipart);
-    const defs::ham_comp_t& hdiag = row.m_hdiag;
+    const defs::ham_comp_t &hdiag = row.m_hdiag;
     if (flag_deterministic) {
-        wf.scale_weight(1 - (hdiag - m_shift) * tau());
+        wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
     } else {
         // the probability that each unit walker will die
-        auto death_rate = (hdiag - m_shift) * tau();
+        auto death_rate = (hdiag - m_shift[ipart]) * tau();
         if (death_rate <= 0.0 || death_rate > 1.0) {
             // clone  / create antiparticles continuously
-            wf.scale_weight(1 - death_rate);
+            wf.scale_weight(ipart, 1 - death_rate);
         } else {
             // kill stochastically
-            wf.set_weight(m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_opts.min_death_mag));
+            wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_opts.min_death_mag));
         }
     }
 }

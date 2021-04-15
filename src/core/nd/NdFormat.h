@@ -5,6 +5,7 @@
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
+#include <src/core/enumerator/Enumerator.h>
 #include "src/defs.h"
 #include "array"
 #include "algorithm"
@@ -175,6 +176,39 @@ public:
         }
         return iflat;
     }
+};
+
+template <size_t nind>
+struct NdEnumeration {
+    const NdFormat<nind> m_format;
+    const std::vector<std::array<size_t, nind>> m_inds;
+
+    static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
+        std::vector<std::array<size_t, nind>> out(format.nelement());
+        enums::PermutationsWithRepetition e(format.shape_vector());
+        size_t iinds = 0ul;
+        while (e.next()){
+            for (size_t i=0; i<nind; ++i) out[iinds][i] = e[i];
+            ++iinds;
+        }
+        ASSERT(iinds==format.nelement());
+        return out;
+    }
+
+    NdEnumeration(const NdFormat<nind>& format): m_format(format), m_inds(make_inds(format)){}
+
+    const size_t& nelement() const {
+        return m_format.nelement();
+    }
+
+    const std::array<size_t, nind>& operator[](const size_t& i){
+        return m_inds[i];
+    }
+
+    operator const NdFormat<nind>&() const {
+        return m_format;
+    }
+
 };
 
 

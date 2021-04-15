@@ -6,11 +6,10 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
-void ExactPropagator::off_diagonal(Wavefunction &wf) {
-    const auto& row = wf.m_store.m_row;
-    const auto& ipart = wf.m_ipart;
-    const auto& src_onv = row.m_onv;
-    const defs::wf_t& weight = row.m_weight[ipart];
+void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
+    const auto &row = wf.m_store.m_row;
+    const auto &src_onv = row.m_onv;
+    const defs::wf_t &weight = row.m_weight[ipart];
     bool src_initiator = row.m_initiator.get(ipart);
     OccupiedOrbitals occs(src_onv);
     ASSERT(occs.size() > 0);
@@ -36,15 +35,15 @@ void ExactPropagator::off_diagonal(Wavefunction &wf) {
             wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
         }
         defs::ham_t delta;
-        delta = -weight * tau()* off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, 1);
+        delta = -weight * tau() * off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, 1);
         if (!consts::float_is_zero(delta))
             wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
-        delta = -weight * tau()* off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, -1);
+        delta = -weight * tau() * off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, -1);
         if (!consts::float_is_zero(delta))
             wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
     }
 
-    if (m_ham.int_2e_rank()==2) {
+    if (m_ham.int_2e_rank() == 2) {
         ContainerCombinationEnumerator<defs::inds> occ_enumerator(occs.inds(), occs.size(), 2);
         defs::inds occ_inds(2);
 
@@ -70,9 +69,9 @@ void ExactPropagator::off_diagonal(Wavefunction &wf) {
     }
 }
 
-void ExactPropagator::diagonal(Wavefunction &wf) {
-    auto& row = wf.m_store.m_row;
-    const defs::ham_comp_t& hdiag = row.m_hdiag;
-    ASSERT(hdiag==m_ham.get_energy(row.m_onv));
-    wf.scale_weight(1 - (hdiag - m_shift) * tau());
+void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
+    auto &row = wf.m_store.m_row;
+    const defs::ham_comp_t &hdiag = row.m_hdiag;
+    ASSERT(hdiag == m_ham.get_energy(row.m_onv));
+    wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }

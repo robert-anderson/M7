@@ -81,8 +81,14 @@ namespace defs {
 #else
     constexpr bool enable_bosons = false;
 #endif
+#ifdef ENABLE_MEVS
+    constexpr bool enable_mevs = true;
+#else
+    constexpr bool enable_mevs = false;
+#endif
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
+    typedef std::array<size_t, ndim_wf> wf_inds_t;
 
     // width of the cache line in bytes
     constexpr size_t ndata_cacheline = 8;

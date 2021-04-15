@@ -153,7 +153,16 @@ namespace enums {
     };
 
     struct PermutationsWithRepetition : Enumerator {
+        const defs::inds m_shape;
+
+        static defs::inds make_shape(size_t n, size_t r) {
+            defs::inds shape;
+            shape.reserve(r);
+            shape.assign(r, n);
+            return shape;
+        }
         PermutationsWithRepetition(size_t n, size_t r);
+        PermutationsWithRepetition(const defs::inds& shape);
 
         bool next() override;
     };

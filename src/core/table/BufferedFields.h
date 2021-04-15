@@ -52,7 +52,11 @@ namespace buffered {
     struct Numbers : BufferedField<fields::Numbers<T, nind>> {
         typedef BufferedField<fields::Numbers<T, nind>> base_t;
         typedef typename fields::Numbers<T, nind>::inds_t inds_t;
+        using fields::Numbers<T, nind>::operator=;
         Numbers(inds_t shape) : base_t({nullptr, shape}){}
+        Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
+            *this = init_value;
+        }
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {
@@ -62,6 +66,7 @@ namespace buffered {
             fields::FermionOnv::operator=(other);
             return *this;
         }
+        FermionOnv(const FermionOnv& other): FermionOnv(other.m_nsite){}
     };
 
     struct BosonOnv : BufferedField<fields::BosonOnv> {

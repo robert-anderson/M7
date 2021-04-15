@@ -31,15 +31,15 @@ TEST(StochasticPropagator, Test) {
         ref_onv.set({1, i});
     }
 
-    StochasticPropagator prop(ham, opts);
     Wavefunction wf(opts, ham.nsite());
+    StochasticPropagator prop(ham, opts, wf.npart());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
 
     auto ref_energy = ham.get_energy(ref_onv);
 
-    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
@@ -68,15 +68,15 @@ TEST(StochasticPropagator, Hdf5) {
         ref_onv.set({1, i});
     }
 
-    StochasticPropagator prop(ham, opts);
     Wavefunction wf(opts, ham.nsite());
+    StochasticPropagator prop(ham, opts, wf.npart());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
 
     auto ref_energy = ham.get_energy(ref_onv);
 
-    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
@@ -106,11 +106,11 @@ TEST(StochasticPropagator, Hubbard) {
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    StochasticPropagator prop(ham, opts);
+    StochasticPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(onv);
-    prop.m_shift = ref_energy;//benchmark;
+    prop.m_shift = ref_energy;
 
-    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, onv, opts.nwalker_initial, ref_energy, 1);
     Solver solver(prop, wf, ref_loc);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;

@@ -26,7 +26,7 @@ struct WalkerTableRow : public Row {
         return m_onv;
     };
 
-    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool mev_average_weights=false) :
+    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool mev_average_weights=defs::enable_mevs) :
             m_part_shape({nroot, nreplica}),
             m_onv(this, nsite, "onv"),
             m_weight(this, m_part_shape, "weight"),

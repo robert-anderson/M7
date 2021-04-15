@@ -73,11 +73,11 @@ TEST(ExactPropagator, Test) {
     Wavefunction wf(opts, nsite);
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    ExactPropagator prop(ham, opts);
+    ExactPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
@@ -108,11 +108,11 @@ TEST(ExactPropagator, Hubbard) {
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    ExactPropagator prop(ham, opts);
+    ExactPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, onv, opts.nwalker_initial, ref_energy, 1);
     Solver solver(prop, wf, ref_loc);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
@@ -135,12 +135,12 @@ TEST(ExactPropagator, Cr2Test) {
     buffered::FermionOnv ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set({1, i});}
     Wavefunction wf(opts, ham.nsite());
-    ExactPropagator prop(ham, opts);
+    ExactPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(ref_onv);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
 

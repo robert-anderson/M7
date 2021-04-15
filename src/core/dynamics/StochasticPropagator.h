@@ -25,9 +25,9 @@ protected:
     std::unique_ptr<WeightedDrawer> m_exgen_drawer;
 
 public:
-    StochasticPropagator(const Hamiltonian<> &ham, const Options &opts);
+    StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, size_t npart);
 
-    void diagonal(Wavefunction &m_wf) override;
+    void diagonal(Wavefunction &m_wf, const size_t& ipart) override;
 
     template<typename T>
     size_t get_nattempt(const T &weight) {
@@ -53,7 +53,7 @@ public:
         else return get_nattempt(consts::real(weight));
     }
 
-    void off_diagonal(Wavefunction &wf) override;
+    void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
 };
 
 #endif //M7_STOCHASTICPROPAGATOR_H

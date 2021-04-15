@@ -61,5 +61,30 @@ public:
 
 };
 
+class Epochs {
+    std::vector<Epoch> m_epochs;
+public:
+    Epochs(std::string name, size_t n, std::string element_identifier="element"){
+        m_epochs.reserve(n);
+        for (size_t i=0ul; i<n; ++i) m_epochs.emplace_back(name+" (" +element_identifier + " " + std::to_string(i) + ")");
+    }
+
+    size_t nelement() const {
+        return m_epochs.size();
+    }
+
+    Epoch& operator[](const size_t i){
+        return m_epochs[i];
+    }
+
+    const Epoch& operator[](const size_t i) const{
+        return m_epochs[i];
+    }
+
+    void terminate(const size_t& icycle){
+        for (auto& epoch:m_epochs) epoch.terminate(icycle);
+    }
+};
+
 
 #endif //M7_EPOCH_H
