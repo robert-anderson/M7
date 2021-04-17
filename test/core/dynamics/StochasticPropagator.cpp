@@ -20,6 +20,7 @@ TEST(StochasticPropagator, Test) {
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
     opts.ncycle = 50000;
+    opts.replicate = true;
     opts.init();
 
     //const auto benchmark = -108.916561245585;

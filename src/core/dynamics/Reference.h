@@ -32,8 +32,8 @@ class Reference : public Wavefunction::DynamicRow {
     bool m_redefinition_cycle;
 
     ReductionSyndicate m_summables;
-    Reduction<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
-    Reduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
+    NdReduction<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
@@ -83,9 +83,9 @@ public:
 
     void add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight);
 
-    Reduction<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
 
-    Reduction<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
 
     defs::ham_t proj_energy_num() const;
     defs::ham_comp_t proj_energy() const;

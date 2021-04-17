@@ -15,18 +15,33 @@ struct ReductionBase {
 };
 
 template<typename T, size_t nind>
-struct Reduction : ReductionBase<T> {
-    buffered::Numbers<T, nind> m_local;
-    buffered::Numbers<T, nind> m_reduced;
+struct NdReduction : ReductionBase<T> {
+    typedef typename std::conditional<nind, buffered::Numbers<T, nind>, T>::type store_t;
+    store_t m_local;
+    store_t m_reduced;
     using ReductionBase<T>::m_local_ptr;
     using ReductionBase<T>::m_reduced_ptr;
     using ReductionBase<T>::m_nelement;
 
+private:
+    NdReduction(const NdFormat<nind> &format, dispatch_utils::BoolTag<1>) :
+            ReductionBase<T>(1) {
+        m_local_ptr = &m_local;
+        m_reduced_ptr = &m_reduced;
+    }
 
-    Reduction(const NdFormat<nind> &format) :
+    NdReduction(const NdFormat<nind> &format, dispatch_utils::BoolTag<0>) :
             ReductionBase<T>(format.nelement()), m_local(format.shape()), m_reduced(format.shape()) {
         m_local_ptr = reinterpret_cast<T *>(m_local.begin());
         m_reduced_ptr = reinterpret_cast<T *>(m_reduced.begin());
+    }
+
+public:
+    NdReduction(const NdFormat<nind> &format) :
+            NdReduction(format, dispatch_utils::BoolTag<nind==0>()){}
+
+    NdReduction() : NdReduction({}, dispatch_utils::BoolTag<nind==0>()){
+        static_assert(!nind, "This ctor is only valid in the scalar case");
     }
 
     void all_sum() {
@@ -34,7 +49,14 @@ struct Reduction : ReductionBase<T> {
     }
 };
 
+template<typename T>
+using Reduction = NdReduction<T, 0>;
+
+
 struct ReductionSyndicateGroupBase {
+
+    virtual ~ReductionSyndicateGroupBase(){}
+
     virtual void zero_all_local() = 0;
 
     virtual void zero_all_reduced() = 0;

@@ -96,7 +96,7 @@ void Reference::add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &wei
     m_nwalker_at_doubles.m_local[{0, 0}] += std::abs(weight);
 }
 
-Reduction<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
+NdReduction<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
     return m_nwalker_at_doubles;
 }
 

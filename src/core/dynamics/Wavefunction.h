@@ -26,15 +26,15 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     ReductionSyndicate m_summables;
 
-    Reduction<size_t, defs::ndim_wf> m_ninitiator;
-    Reduction<int, defs::ndim_wf> m_delta_ninitiator;
-    Reduction<size_t, defs::ndim_wf> m_nocc_onv;
-    Reduction<int, defs::ndim_wf> m_delta_nocc_onv;
-    Reduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
-    Reduction<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
-    Reduction<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
-    Reduction<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
-    Reduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
+    NdReduction<size_t, defs::ndim_wf> m_ninitiator;
+    NdReduction<int, defs::ndim_wf> m_delta_ninitiator;
+    Reduction<size_t> m_nocc_onv;
+    Reduction<int> m_delta_nocc_onv;
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
     MappedTable<UniqueOnvRow> m_unique_recvd_onvs;
     MappedTable<OnvRow> m_parent_recvd_onvs;
@@ -73,6 +73,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void scale_weight(const size_t &ipart, const double &factor);
 
     void zero_weight(const size_t &ipart);
+
+    size_t create_row(const fields::Onv<> &onv, const defs::ham_comp_t &hdiag);
 
     void remove_row();
 
