@@ -32,6 +32,8 @@ struct FciqmcStatsRow : Row {
     fields::Number<double> m_annihilation_loop_time;
     fields::Number<double> m_total_cycle_time;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
+    fields::Numbers<defs::ham_t, defs::ndim_wf> m_hubbard_twf_num;
+    fields::Numbers<defs::ham_t, defs::ndim_wf> m_hubbard_twf_denom;
 
     FciqmcStatsRow(NdFormat<2> format) :
     m_wf_format(format),
@@ -54,7 +56,9 @@ struct FciqmcStatsRow : Row {
     m_communication_time(this, "Time spent in communicating spawns"),
     m_annihilation_loop_time(this, "Time spent in annihilation loop"),
     m_total_cycle_time(this, "Total cycle time"),
-    m_uniform_twf_num(this, m_wf_format, "Numerator of uniform TWF-projected energy estimator")
+    m_uniform_twf_num(this, m_wf_format, "Numerator of uniform TWF-projected energy estimator"),
+    m_hubbard_twf_num(this, m_wf_format, "Numerator of Hubbard-Holstein-like TWF-projected energy estimator"),
+    m_hubbard_twf_denom(this, m_wf_format, "Denominator of Hubbard-Holstein-like TWF-projected energy estimator")
     {}
 
     FciqmcStatsRow(size_t nroot, size_t nreplica) :
