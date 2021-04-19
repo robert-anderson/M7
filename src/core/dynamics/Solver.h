@@ -10,10 +10,11 @@
 #include <src/core/observables/AverageCoefficients.h>
 #include <src/core/observables/UniformTwf.h>
 #include <src/core/observables/MevGroup.h>
+#include <src/core/io/FciqmcStats.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
-#include "src/core/io/FciqmcStatsFile.h"
-#include "src/core/io/ParallelStatsFile.h"
+#include "src/core/io/FciqmcStats.h"
+#include "src/core/io/ParallelStats.h"
 #include "Propagator.h"
 
 class Solver {
@@ -24,8 +25,8 @@ class Solver {
     Wavefunction &m_wf;
     Reference m_reference;
 
-    StatsFile<FciqmcStatsSpecifier>::ptr_t m_stats;
-    StatsFile<ParallelStatsSpecifier>::ptr_t m_parallel_stats;
+    std::unique_ptr<FciqmcStats> m_stats = nullptr;
+    std::unique_ptr<ParallelStats> m_parallel_stats = nullptr;
 
     /*
      * Timers for the main parts of the solver
@@ -56,7 +57,6 @@ class Solver {
     BilinearMevGroup m_mevs;
 
 public:
-    //AverageCoefficients m_average_coeffs;
 
     Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
 
@@ -64,19 +64,19 @@ public:
 
     void begin_cycle();
 
-    void propagate_row();
+    void propagate_row(const size_t& ipart);
 
     void loop_over_occupied_onvs();
 
-    void annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
+    void annihilate_row(const size_t dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
 
-    void annihilate_row(const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
-        annihilate_row(dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
+    void annihilate_row(const size_t dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
+        annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
     }
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight){
-        // m_wf.m_store.m_row is assumed to have been moved to the store row of the
-        m_mevs.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight(0));
+        // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
+        m_mevs.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[0]);
         //std::cout << src_onv.to_string() << " " << m_wf.m_store.m_row.m_onv.to_string() << std::endl;
     }
 

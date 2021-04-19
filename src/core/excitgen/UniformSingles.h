@@ -20,7 +20,7 @@ private:
     bool _draw(const fields::Onv<1> &src_onv, fields::Onv<1> &dst_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<1> &anticonn) {
-        return _draw(src_onv.m_fonv, dst_onv.m_fonv, occs, vacs, prob, helem, anticonn);
+        return _draw(src_onv.m_frm, dst_onv.m_frm, occs, vacs, prob, helem, anticonn);
     }
 
 public:

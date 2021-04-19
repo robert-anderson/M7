@@ -20,7 +20,7 @@ namespace boson_coupling_samplers_test {
 
 
         bool test_boson_gen(elements::FermiBosOnv &src_onv, size_t ndraw, size_t nboson_max) {
-            size_t nsite = src_onv.m_fonv.nsite();
+            size_t nsite = src_onv.m_frm.nsite();
             BufferedTable<boson_coupling_samplers_test::TestTable> bt("Excit gen tester", nsite);
 
             populate_table(bt, src_onv, ndraw, nboson_max);
@@ -35,13 +35,13 @@ namespace boson_coupling_samplers_test {
                             elements::FermiBosOnv &src_onv,
                             size_t ndraw,
                             size_t nboson_max) {
-            size_t nsite = src_onv.m_fonv.nsite();
+            size_t nsite = src_onv.m_frm.nsite();
             elements::FermiBosOnv dst_onv(nsite);
             PRNG prng = PRNG(18, 1e4);
             FermiBosHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false, nboson_max, 1.0, 0.5);
             BosonExcitationGenerator exgen(&ham, prng, nboson_max);
-            OccupiedOrbitals occ_orbs(src_onv.m_fonv);
-            VacantOrbitals vac_orbs(src_onv.m_fonv);
+            OccupiedOrbitals occ_orbs(src_onv.m_frm);
+            VacantOrbitals vac_orbs(src_onv.m_frm);
             conn::Antisym<1> aconn(src_onv);
             defs::prob_t prob;
             defs::ham_t helem;
@@ -60,10 +60,10 @@ namespace boson_coupling_samplers_test {
         bool all_have_at_least_1(elements::FermiBosOnv &src_onv, size_t nboson_max, size_t num_generated) {
             // check correct no. of excitations is generated.
             size_t num_expected = 0;
-            for (size_t imode = 0; imode < src_onv.m_bonv.nmode(); ++imode) {
-                if(src_onv.m_fonv.get(0, imode) or src_onv.m_fonv.get(1, imode)){
+            for (size_t imode = 0; imode < src_onv.m_bos.nmode(); ++imode) {
+                if(src_onv.m_frm.get(0, imode) or src_onv.m_frm.get(1, imode)){
                     num_expected++;
-                    num_expected += (src_onv.m_bonv(imode) != 0 and src_onv.m_bonv(imode) != nboson_max);
+                    num_expected += (src_onv.m_bos(imode) != 0 and src_onv.m_bos(imode) != nboson_max);
                 }
             }
             return num_expected == num_generated;
@@ -71,8 +71,8 @@ namespace boson_coupling_samplers_test {
 
         bool
         errors_decreasing(elements::FermiBosOnv &src_onv, size_t ndraw_init, size_t nboson_max, size_t ntries = 3) {
-            BufferedTable<boson_coupling_samplers_test::TestTable> bt("Error tester", src_onv.m_fonv.nsite());
-            std::vector<defs::prob_t> vars(2 * src_onv.m_bonv.nmode(), 1000);
+            BufferedTable<boson_coupling_samplers_test::TestTable> bt("Error tester", src_onv.m_frm.nsite());
+            std::vector<defs::prob_t> vars(2 * src_onv.m_bos.nmode(), 1000);
             for (size_t itry = 0; itry < ntries; ++itry) {
                 size_t ndraw = (size_t) ndraw_init * std::pow(100, itry);
                 populate_table(bt, src_onv, ndraw, nboson_max);

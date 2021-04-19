@@ -37,3 +37,7 @@ void Row::clear() {
 bool Row::is_cleared() const {
     return std::all_of(m_dbegin, m_dbegin+m_dsize, [](const defs::data_t& d){return d==0;});
 }
+
+bool Row::is_h5_write_exempt() const {
+    return false;
+}

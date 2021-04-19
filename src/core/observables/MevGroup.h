@@ -18,7 +18,6 @@ struct BilinearMevGroup {
     conn::Antisym<> m_conn;
     mev_lookup_t m_lookup;
 
-
     BilinearMevGroup(size_t nsite, size_t max_rank):
         m_nsite(nsite), m_max_rank(max_rank), m_conn(nsite), m_lookup("", {{{1, 1}, 1}}){
         m_lookup.push_back(1);
@@ -30,6 +29,23 @@ struct BilinearMevGroup {
 
     operator bool() const {
         return m_max_rank;
+    }
+
+    void make_contribs_spf_ket(const fields::Onv<>& src_onv, const defs::wf_t& src_weight,
+                               const fields::Onv<>& dst_onv) {
+        m_conn.connect(src_onv, src_onv);
+        const size_t rank = 1;
+        auto& rdm = *m_rdms[1];
+        for (const auto &com: m_conn.com()) {
+
+            m_lookup.m_row.m_inds[0] = com;
+            m_lookup.m_row.m_inds[1] = com;
+
+            size_t irow = *m_rdms[rank]->operator[](m_lookup.m_row.m_inds);
+            if (irow==~0ul) irow = m_rdms[rank]->insert(m_lookup.m_row.m_inds);
+            rdm.m_row.jump(irow);
+            rdm.m_row.m_values[0]+=std::abs(src_weight);
+        }
     }
 
     void make_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight,
@@ -44,19 +60,19 @@ struct BilinearMevGroup {
 //        utils::print(m_conn.com());
 
         for (size_t rank=1ul; rank<=m_max_rank; ++rank) {
-            auto& rdm = *m_rdms[rank];
+            auto &rdm = *m_rdms[rank].get();
             if (exlvl == 0) {
                 ASSERT(m_conn.ncom()==m_nsite);
                 for (const auto &com: m_conn.com()) {
                     //m_lookup.m_row.set(0, {com});
                     //m_lookup.m_row.set(1, {com});
-                    m_lookup.m_row.m_inds(0) = com;
-                    m_lookup.m_row.m_inds(1) = com;
+                    m_lookup.m_row.m_inds[0] = com;
+                    m_lookup.m_row.m_inds[1] = com;
 
                     size_t irow = *m_rdms[rank]->operator[](m_lookup.m_row.m_inds);
                     if (irow==~0ul) irow = m_rdms[rank]->insert(m_lookup.m_row.m_inds);
                     rdm.m_row.jump(irow);
-                    rdm.m_row.m_values(0)+=src_weight*dst_weight;
+                    rdm.m_row.m_values[0]+=src_weight*dst_weight;
                 }
             }
         }

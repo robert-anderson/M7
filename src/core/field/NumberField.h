@@ -7,92 +7,204 @@
 
 #include "FieldBase.h"
 
-template<typename T>
+
 struct NumberFieldBase : FieldBase {
-    const size_t m_nelement;
+    const size_t m_element_size, m_nelement;
+    const bool m_is_complex;
 
-    NumberFieldBase(Row* row, size_t nitem, size_t nelement):
-            FieldBase(row, sizeof(T) * nelement, nitem, typeid(T), hdf5::type<T>()), m_nelement(nelement){}
+    NumberFieldBase(Row* row, size_t element_size, size_t nelement, bool is_complex,
+                    const std::type_info& type_info, std::string name=""):
+    FieldBase(row, element_size * nelement, type_info, name),
+    m_element_size(element_size), m_nelement(nelement), m_is_complex(is_complex){}
 
-    NumberFieldBase(const NumberFieldBase& other):
-            NumberFieldBase(other.m_row ? other.m_row->m_child : other.m_row, other.m_nitem, other.m_nelement){}
+    virtual std::string stats_string() const = 0;
 
-    NumberFieldBase &operator=(const T &v) {
+    virtual std::string format_string() const = 0;
+
+    template<typename T>
+    static std::string stats_string_element(const T& v){
+        return utils::num_to_string(v);
+    }
+
+    template<typename T>
+    static std::string stats_string_element(const std::complex<T>& v){
+        return utils::num_to_string(v.real())+" "+utils::num_to_string(v.imag());
+    }
+};
+
+
+template<typename T, size_t nind>
+struct NdNumberField : NumberFieldBase {
+    typedef const std::array<size_t, nind>& inds_t;
+    const NdFormat<nind> m_format;
+
+    const size_t& nelement() const {
+        return m_format.nelement();
+    }
+
+    NdNumberField(Row* row, NdFormat<nind> format, std::string name=""):
+            NumberFieldBase(row, sizeof(T), format.nelement(),
+                            consts::is_complex<T>(), typeid(T), name), m_format(format){}
+
+    NdNumberField(const NdNumberField& other):
+            NdNumberField(other.row_of_copy(), other.m_format, other.m_name){}
+
+    NdNumberField &operator=(const T &v) {
         std::fill((T*)begin(), (T*)end(), v);
         return *this;
     }
 
-    NumberFieldBase &operator=(const std::vector<T> &v) {
-        ASSERT(v.size() == m_nitem*m_nelement);
+    NdNumberField &operator=(const std::vector<T> &v) {
+        ASSERT(v.size()==nelement());
         std::memcpy(begin(), v.data(), m_size);
         return *this;
     }
 
-    NumberFieldBase &operator=(const NumberFieldBase &v) {
-        static_cast<FieldBase&>(*this) = v;
+    NdNumberField &operator=(const NdNumberField &other) {
+        static_cast<FieldBase&>(*this) = other;
         return *this;
     }
 
-    T& get(const size_t& iitem, const size_t& ielement){
-        return ((T *) begin(iitem))[ielement];
+    /*
+     * math ops
+     */
+    NdNumberField &operator+=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]+= other[i];
+        return *this;
     }
 
-    const T& get(const size_t& iitem, const size_t& ielement) const{
-        return ((T *) begin(iitem))[ielement];
+    NdNumberField &operator+=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] += v;
+        return *this;
     }
 
-    std::string to_string_element(const size_t& iitem) const override {
-        std::string tmp;
-        if (m_nelement>1) tmp += "[";
+    NdNumberField &operator-=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]-= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator-=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] -= v;
+        return *this;
+    }
+
+    NdNumberField &operator*=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]*= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator*=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] *= v;
+        return *this;
+    }
+
+    NdNumberField &operator/=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]/= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator/=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] /= v;
+        return *this;
+    }
+
+    NdNumberField &operator%=(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]%= other[i];
+        return *this;
+    }
+
+    NdNumberField &operator%=(const T &v) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] %= v;
+        return *this;
+    }
+
+    NdNumberField &to_sqrt() {
         for (size_t ielement = 0ul; ielement<m_nelement; ++ielement)
-            tmp+=std::to_string(this->get(iitem, ielement)) + " ";
-        if (m_nelement>1) tmp += "]";
+            (*this)[ielement] = std::sqrt((*this)[ielement]);
+        return *this;
+    }
+
+    T sum() const {
+        T tmp = 0;
+        for (size_t ielement=0ul; ielement<m_nelement; ++ielement) tmp+=(*this)[ielement];
         return tmp;
     }
+
+    /*
+     * access methods
+     */
+    T& operator[](const size_t& ielement) {
+        return ((T *) begin())[ielement];
+    }
+
+    const T& operator[](const size_t& ielement) const {
+        return ((const T *) begin())[ielement];
+    }
+
+    T& operator[](inds_t inds) {
+        return ((T *) begin())[m_format.flatten(inds)];
+    }
+
+    const T& operator[](inds_t inds) const {
+        return ((const T *) begin())[m_format.flatten(inds)];
+    }
+
+    std::string to_string() const override {
+        std::string tmp;
+        if (nind>0) tmp += "[";
+        for (size_t ielement = 0ul; ielement<nelement(); ++ielement)
+            tmp+=utils::num_to_string((*this)[ielement]) + " ";
+        if (nind>0) tmp += "]";
+        return tmp;
+    }
+
+    std::string stats_string() const override {
+        std::string tmp;
+        for (size_t ielement = 0ul; ielement<nelement(); ++ielement)
+            tmp+= stats_string_element((*this)[ielement]);
+        return tmp;
+    }
+
+    std::string format_string() const override {
+        const std::string complex_dim_string = "real/imag (2)";
+        if (!nind && m_is_complex) return complex_dim_string;
+        return m_format.to_string() + (m_is_complex ? complex_dim_string : "");
+    }
+
+    /*
+     * HDF5 related
+     */
+    defs::inds h5_shape() const override {
+        return {m_format.shape().begin(), m_format.shape().end()};
+    }
+
+    std::vector<std::string> h5_dim_names() const override {
+        if (!nind) return {};
+        return {m_format.dim_names().begin(), m_format.dim_names().end()};
+    }
+
+    hid_t h5_type() const override {
+        return hdf5::type<T>();
+    }
+
+
 };
 
-
 template<typename T>
-struct NumberField : NumberFieldBase<T> {
-    using NumberFieldBase<T>::operator=;
+struct NumberField : NdNumberField<T, 0ul> {
+    typedef NdNumberField<T, 0ul> base_t;
+    using base_t::operator=;
 
-    NumberField(Row* row): NumberFieldBase<T>(row, 1, 1){}
+    NumberField(Row* row, std::string name=""): base_t(row, {}, name){}
 
     operator T&() {
-        return *(T *) FieldBase::begin();
+        return *(T*)FieldBase::begin();
     }
 
     operator const T&() const {
-        return *(const T *) FieldBase::begin();
+        return *(const T*)FieldBase::begin();
     }
 };
 
-
-template<typename T>
-struct VectorField : NumberFieldBase<T> {
-    VectorField(Row* row, size_t nelement): NumberFieldBase<T>(row, 1, nelement){}
-
-    T& operator()(const size_t& ielement) {
-        return ((T *) FieldBase::begin())[ielement];
-    }
-
-    const T& operator()(const size_t& ielement) const {
-        return ((const T *) FieldBase::begin())[ielement];
-    }
-};
-
-
-template<typename T>
-struct VectorsField : NumberFieldBase<T> {
-    VectorsField(Row* row, size_t nitem, size_t nelement): NumberFieldBase<T>(row, nitem, nelement){}
-
-    T& operator()(const size_t& iitem, const size_t& ielement) {
-        return ((T *) FieldBase::begin(iitem))[ielement];
-    }
-
-    const T& operator()(const size_t& iitem, const size_t& ielement) const {
-        return ((const T *) FieldBase::begin(iitem))[ielement];
-    }
-};
 
 #endif //M7_NUMBERFIELD_H

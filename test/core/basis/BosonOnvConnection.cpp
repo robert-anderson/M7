@@ -36,7 +36,7 @@ TEST(BosonOnvConnection, SingleChange) {
             ket = {2, 4, 0, 1};
             bra = {2, 4, 0, 1};
 
-            bra(imode) += idelta;
+            bra[imode] += idelta;
             pc.connect(ket, bra);
             ASSERT_EQ(pc.nchanged_mode(), 1);
             ASSERT_EQ(pc.changed_mode(0), imode);
@@ -64,8 +64,8 @@ TEST(BosonOnvConnection, DoubleChange) {
                     bra = {2, 4, 0, 1};
 
                     BosonOnvConnection pc(ket, bra);
-                    bra(imode1) += idelta1;
-                    bra(imode2) += idelta2;
+                    bra[imode1] += idelta1;
+                    bra[imode2] += idelta2;
                     pc.connect(ket, bra);
 
                     ASSERT_EQ(pc.nchanged_mode(), 2);

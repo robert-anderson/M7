@@ -24,8 +24,8 @@ struct ConnectionEnumerator {
 
 
     void execute(const fields::Onv<1> &onv) {
-        m_occ.update(onv.m_fonv);
-        m_vac.update(onv.m_fonv);
+        m_occ.update(onv.m_frm);
+        m_vac.update(onv.m_frm);
         fn_t fn;
         for (auto &iocc: m_occ.inds()) {
             for (auto &ivac: m_vac.inds()) {
@@ -54,9 +54,9 @@ struct UniformTwf {
 
     UniformTwf(size_t npart, size_t nsite);
 
-    void add(const Hamiltonian<0> &ham, const fields::Vector<defs::wf_t> &weight, const fields::Onv<0> &onv);
+    void add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, const fields::Onv<0> &onv);
 
-    void add(const Hamiltonian<1> &ham, const fields::Vector<defs::wf_t> &weight, const fields::Onv<1> &onv);
+    void add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, const fields::Onv<1> &onv);
 
     void reduce();
 

@@ -6,28 +6,18 @@
 #include "src/core/parallel/MPIAssert.h"
 
 
-FieldBase::FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info, hid_t h5type) :
-        m_item_size(item_size), m_type_info(type_info), m_nitem(nitem),
-        m_size(m_item_size*m_nitem), m_null_string(m_size, 0), m_h5type(h5type){
+FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :
+        m_type_info(type_info), m_size(size),
+        m_name(name), m_null_string(m_size, 0) {
     m_row = row;
     if (m_row) m_row_offset = m_row->add_field(this);
 }
 
 FieldBase::FieldBase(const FieldBase &other) :
-        FieldBase(other.m_row ? other.m_row->m_child : nullptr, other.m_item_size,
-                  other.m_nitem, other.m_type_info, other.m_h5type) {}
+        FieldBase(row_of_copy(), other.m_size, other.m_type_info, other.m_name) {}
 
 bool FieldBase::is_comparable(const FieldBase &other) const {
-    return m_item_size==other.m_item_size &&
-           m_type_info==other.m_type_info && m_size==other.m_size;
-}
-
-FieldBase &FieldBase::operator=(const FieldBase &other) {
-    if (&other == this) return *this;
-    MPI_ASSERT(is_comparable(other),
-               "can't copy from a field which is either incompatible or has a different selection length")
-    std::memcpy(begin(), other.begin(), m_size);
-    return *this;
+    return m_type_info == other.m_type_info && m_size == other.m_size;
 }
 
 void FieldBase::add_to_row(Row *row) {
@@ -47,19 +37,12 @@ char *FieldBase::begin() const {
     return (char *) (m_row->dbegin()) + m_row_offset;
 }
 
-char *FieldBase::begin(const size_t &iitem) const {
-    return begin()+iitem*m_item_size;
-}
-
 char *FieldBase::end() const {
-    return begin()+m_size;
-}
-char *FieldBase::end(const size_t &iitem) const {
-    return end() + iitem * m_item_size;
+    return begin() + m_size;
 }
 
 Row *FieldBase::row_of_copy() const {
-    return m_row? m_row->m_child : nullptr;
+    return m_row ? m_row->m_child : nullptr;
 }
 
 void FieldBase::zero() {
@@ -71,41 +54,41 @@ bool FieldBase::is_zero() const {
     return std::memcmp(begin(), m_null_string.data(), m_size) == 0;
 }
 
+int FieldBase::cmp(const FieldBase &other) const {
+    return std::memcmp(begin(), other.begin(), m_size);
+}
+
 bool FieldBase::operator==(const FieldBase &other) const {
-    return cmp(other)==0;
+    return cmp(other) == 0;
 }
 
 bool FieldBase::operator!=(const FieldBase &other) const {
-    return cmp(other)!=0;
-}
-
-bool FieldBase::operator>(const FieldBase &other) const {
-    return cmp(other)>0;
+    return cmp(other) != 0;
 }
 
 bool FieldBase::operator<(const FieldBase &other) const {
-    return cmp(other)<0;
+    return cmp(other) < 0;
 }
 
-bool FieldBase::operator>=(const FieldBase &other) const {
-    return cmp(other)>=0;
+bool FieldBase::operator>(const FieldBase &other) const {
+    return cmp(other) > 0;
 }
 
 bool FieldBase::operator<=(const FieldBase &other) const {
-    return cmp(other)<=0;
+    return cmp(other) <= 0;
+}
+
+bool FieldBase::operator>=(const FieldBase &other) const {
+    return cmp(other) >= 0;
 }
 
 defs::hash_t FieldBase::hash() const {
     return hashing::fnv_hash(begin(), m_size);
 }
 
-std::string FieldBase::to_string() const {
-    std::string tmp;
-    for (size_t i=0ul; i<m_nitem; ++i) tmp+=to_string_element(i);
-    return tmp;
-}
-
-int FieldBase::cmp(const FieldBase &other) const {
-    MPI_ASSERT(is_comparable(other),"can't compare to incompatible field")
-    return std::memcmp(begin(), other.begin(), m_size);
+FieldBase &FieldBase::operator=(const FieldBase &other) {
+    if (&other == this) return *this;
+    MPI_ASSERT(is_comparable(other), "can't compare to incompatible field");
+    std::memcpy(begin(), other.begin(), m_size);
+    return *this;
 }

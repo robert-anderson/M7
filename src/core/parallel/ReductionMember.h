@@ -5,6 +5,7 @@
 #ifndef M7_REDUCTIONMEMBER_H
 #define M7_REDUCTIONMEMBER_H
 
+#if 0
 #include "src/core/nd/NdAccessor.h"
 #include "ReductionSyndicate.h"
 
@@ -44,4 +45,5 @@ struct SingleReducible : ReductionSyndicate, ReductionMember<T, nind> {
 };
 
 
+#endif //M7_REDUCTIONMEMBER_H
 #endif //M7_REDUCTIONMEMBER_H

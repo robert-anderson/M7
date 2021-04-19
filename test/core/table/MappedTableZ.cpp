@@ -15,11 +15,11 @@ TEST(MappedTable, TEST) {
 
 
 
-//    config.m_fonv[2] = 1;
-//    config.m_bonv[2] = 5;
+//    config.m_frm[2] = 1;
+//    config.m_bos[2] = 5;
 //    std::cout << config.to_string() << std::endl;
 //    bt.insert(config);
-//    config.m_bonv[4] = 6;
+//    config.m_bos[4] = 6;
 //    bt.insert(config);
 ////    bt.erase(bt[config]);
 ////    auto lookup = bt[config];

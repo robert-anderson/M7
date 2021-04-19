@@ -12,7 +12,7 @@ TEST(DecodedDeterminant, Occupation){
     det = occ;
     defs::inds vac;
     auto iter = occ.begin();
-    for (size_t i=0ul; i<det.m_nbit; ++i){
+    for (size_t i=0ul; i<det.nbit(); ++i){
         if (iter!=occ.end() && i==*iter) iter++;
         else vac.push_back(i);
     }

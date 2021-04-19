@@ -14,74 +14,79 @@
 
 struct FieldBase {
     Row *m_row;
-    const size_t m_item_size;
     const std::type_info &m_type_info;
-    const size_t m_nitem;
     const size_t m_size;
+    const std::string m_name;
     size_t m_row_offset = ~0ul;
 
     std::vector<char> m_null_string;
-    hid_t m_h5type;
 
-    FieldBase(Row* row, size_t item_size, size_t nitem, const std::type_info &type_info, hid_t h5type);
+    FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name);
 
     FieldBase(const FieldBase &other);
 
-    FieldBase& operator=(const FieldBase& other);
+    FieldBase &operator=(const FieldBase &other);
 
-    bool is_comparable(const FieldBase& other) const;
+    bool is_comparable(const FieldBase &other) const;
 
-    void add_to_row(Row* row);
+    void add_to_row(Row *row);
 
     bool is_added_to_row() const;
 
     char *begin() const;
 
-    char *begin(const size_t& ielement) const;
-
     char *end() const;
 
-    char *end(const size_t& ielement) const;
-
-    Row* row_of_copy() const;
+    Row *row_of_copy() const;
 
     void zero();
 
     bool is_zero() const;
 
     bool operator==(const FieldBase &other) const;
-
+    
     bool operator!=(const FieldBase &other) const;
 
     bool operator<(const FieldBase &other) const;
 
     bool operator>(const FieldBase &other) const;
 
-    bool operator>=(const FieldBase &other) const;
-
     bool operator<=(const FieldBase &other) const;
 
-    /**
-     * Hashes whole field in row, not the currently viewed element
-     * @return
-     */
+    bool operator>=(const FieldBase &other) const;
+
     defs::hash_t hash() const;
 
-    virtual std::string to_string_element(const size_t& iitem) const = 0;
+    virtual std::string to_string() const = 0;
 
-    std::string to_string() const;
+    virtual void h5_write_attrs(hid_t parent_handle) {
 
-    virtual void h5_write(hdf5::NdListWriterBase& h5list, const size_t& iitem){
+    }
+
+    virtual void h5_write(hdf5::NdListWriter &h5list, const size_t &iitem) {
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void h5_read(hdf5::NdListReaderBase& h5list, const size_t& iitem){
+    virtual void h5_read(hdf5::NdListReader &h5list, const size_t &iitem) {
         h5list.read_h5item_bytes(iitem, begin());
     }
 
+    virtual defs::inds h5_shape() const {
+        return {};
+    }
+
+    virtual std::vector<std::string> h5_dim_names() const {
+        return {};
+    }
+
+    virtual hid_t h5_type() const {
+        return 0;
+    }
+
+
 private:
+
     int cmp(const FieldBase &other) const;
 };
-
 
 #endif //M7_FIELDBASE_H

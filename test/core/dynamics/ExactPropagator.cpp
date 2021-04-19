@@ -25,8 +25,8 @@ TEST(ExactPropagator, BosonTest) {
     ASSERT_TRUE(ham.spin_conserving());
     elements::Onv<1> onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.m_fonv.set(0, i);
-        onv.m_fonv.set(1, i);
+        onv.m_frm.set(0, i);
+        onv.m_frm.set(1, i);
     }
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
@@ -63,24 +63,61 @@ TEST(ExactPropagator, Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 10000;
-    opts.rdm_rank = 1;
+    opts.rdm_rank = 0;
     const size_t nsite = 6;
     //const auto benchmark = -108.916561245585
     Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set({0, i}); ref_onv.set({1, i});}
     Wavefunction wf(opts, nsite);
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    ExactPropagator prop(ham, opts);
+    ExactPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
+        solver.execute();
+    }
+}
+
+TEST(ExactPropagator, Hubbard) {
+    Options opts;
+    opts.nwalker_initial = 10;
+    opts.nadd_initiator = 3.0;
+    opts.tau_initial = 0.01;
+    opts.nwalker_target = 10000;
+    opts.shift_damp = 0.4;
+    opts.ncycle = 3000;
+    opts.spf_uniform_twf = true;
+    opts.rdm_rank = 1;
+    opts.init();
+
+    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0);
+
+    ASSERT_TRUE(ham.spin_conserving());
+    buffered::Onv<> onv(ham.nsite());
+    for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
+        onv.set({0, i});
+        onv.set({1, i});
+    }
+    Wavefunction wf(opts, ham.nsite());
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
+    ExactPropagator prop(ham, opts, wf.npart());
+    auto ref_energy = ham.get_energy(onv);
+    prop.m_shift = ref_energy;//benchmark;
+
+    auto ref_loc = wf.create_walker(0, onv, opts.nwalker_initial, ref_energy, 1);
+    Solver solver(prop, wf, ref_loc);
+
+    std::cout << "Reference Energy: " << ref_energy << std::endl;
+
+    for (size_t i = 0ul; i < 20000; ++i) {
         solver.execute();
     }
 }
@@ -92,18 +129,18 @@ TEST(ExactPropagator, Cr2Test) {
     opts.tau_initial = 0.01;
     opts.nwalker_target = 10000;
     opts.ncycle = 50;
-    //const auto benchmark = -108.81138657563143;
+    //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set(1, i);}
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set({1, i});}
     Wavefunction wf(opts, ham.nsite());
-    ExactPropagator prop(ham, opts);
+    ExactPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(ref_onv);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    auto ref_loc = wf.create_walker(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
 

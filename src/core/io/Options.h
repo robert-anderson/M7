@@ -54,6 +54,8 @@ struct Options {
     double boson_frequency = 0.0;
     defs::prob_t psingle_initial = 0.0;
     size_t rdm_rank = 1;
+    std::string write_hdf5_fname = "";
+    std::string read_hdf5_fname = "";
 
     bool init();
 

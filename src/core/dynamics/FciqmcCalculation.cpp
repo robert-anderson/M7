@@ -8,11 +8,14 @@
 #include "StochasticPropagator.h"
 
 FciqmcCalculation::FciqmcCalculation(const Options &opts) :
-        m_opts(opts), m_ham(opts), m_prop(m_ham, opts), m_wf(opts, m_ham.nsite()) {
+        m_opts(opts), m_ham(opts), m_wf(opts, m_ham.nsite()), m_prop(m_ham, opts, m_wf.npart())  {
     auto ref_onv = m_ham.guess_reference(opts.spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_onv);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};
-    if (ref_loc.is_mine()) m_wf.create_walker_(ref_onv, opts.nwalker_initial, ref_energy, 1);
+    if (ref_loc.is_mine()) {
+        for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
+            m_wf.create_walker_(0, ipart, ref_onv, opts.nwalker_initial, ref_energy, 1);
+    }
     m_prop.m_shift = ref_energy;
     Solver solver(m_prop, m_wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {

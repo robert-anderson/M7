@@ -27,15 +27,4 @@ struct SpawnTableRow : public Row {
             m_src_initiator(this), m_src_deterministic(this), m_dst_ipart(this){}
 };
 
-struct ConsolidatedSpawnRow : public Row {
-    fields::Onv<> m_dst_onv;
-    fields::Number<defs::wf_t> m_delta_weight;
-    fields::Flag m_allow_spawn_to_unoccd;
-    fields::Number<uint8_t> m_dst_ipart;
-
-    ConsolidatedSpawnRow(size_t nsite, bool send_parents) :
-            m_dst_onv(this, nsite), m_delta_weight(this),
-            m_allow_spawn_to_unoccd(this), m_dst_ipart(this){}
-};
-
 #endif //M7_SPAWNTABLE_H

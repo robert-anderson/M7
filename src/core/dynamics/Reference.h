@@ -32,15 +32,15 @@ class Reference : public Wavefunction::DynamicRow {
     bool m_redefinition_cycle;
 
     ReductionSyndicate m_summables;
-    ReductionMember<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
+    Reduction<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
+    Reduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
     const defs::wf_t& get_weight() const {
-        return m_ac.m_row.m_weight(m_ipart);
+        return m_ac.m_row.m_weight[m_ipart];
     }
 
     const fields::Onv<>& get_onv() const {
@@ -83,9 +83,9 @@ public:
 
     void add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight);
 
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
+    Reduction<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
 
-    ReductionMember<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
+    Reduction<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
 
     defs::ham_t proj_energy_num() const;
     defs::ham_comp_t proj_energy() const;

@@ -7,31 +7,65 @@
 #include <src/core/field/Fields.h>
 #include <src/core/table/Table.h>
 #include <src/core/table/BufferedTable.h>
+#include <src/core/table/BufferedFields.h>
 #include "gtest/gtest.h"
 #include "src/core/io/HDF5Wrapper.h"
 
 
+namespace hdf5_wrapper_test {
+
+}
+
+TEST(HDF5Wrapper, Number) {
+    BufferedTable<SingletRow<fields::Number<int>>> write_table("test int table", {{"integer_field"}});
+    auto read_table = write_table;
+    const auto nrow = hashing::in_range(mpi::irank()+1, 10, 20);
+    write_table.push_back(nrow);
+    auto row = write_table.m_row;
+    for (row.restart(); row.in_range(); row.step()){
+        row.m_field = hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123);
+        log::debug_("writing value: {}", (int)row.m_field);
+    }
+    {
+        hdf5::FileWriter fw("table_test.h5");
+        hdf5::GroupWriter gw("container", fw);
+        write_table.write(gw, "table");
+    }
+
+    {
+        hdf5::FileReader fr("table_test.h5");
+        hdf5::GroupReader gr("container", fr);
+        read_table.read(gr, "table");
+    }
+    for (row.restart(); row.in_range(); row.step()){
+        ASSERT_EQ(row.m_field, hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123));
+    }
+
+}
+
 TEST(HDF5Wrapper, Table) {
 
     struct MyRow : Row {
-        fields::Number<int> m_ints;
-        fields::Number<double> m_doubles;
+        fields::Number<int> m_int;
+        fields::Numbers<double, 3> m_double;
+        fields::FermionOnv m_det;
 
         MyRow():
-        m_ints(this), m_doubles(this){}
+        m_int(this), m_double(this, {{2, 4, 3}, {"A", "bbob", "cfs"}}),
+        m_det(this, 9){}
     };
 
     BufferedTable<MyRow> table("Test", {{}});
     table.push_back(3);
     table.m_row.restart();
-    table.m_row.m_doubles = 1.23;
+    table.m_row.m_double = 1.23;
+    table.m_row.m_double[2] = 9.09;
     table.m_row.step();
-    table.m_row.m_doubles = 3.55;
+    table.m_row.m_double = 3.55;
 
     hdf5::FileWriter fw("table_test.h5");
     hdf5::GroupWriter gw("container", fw);
     table.write(gw, "table");
-
 }
 
 

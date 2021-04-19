@@ -11,8 +11,16 @@
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/nd/NdFormat.h"
 #include "hdf5.h"
+#include "hdf5_hl.h"
 
 namespace hdf5 {
+
+    static std::vector<hsize_t> convert_dims(const defs::inds &item_dims) {
+        std::vector<hsize_t> out;
+        out.reserve(item_dims.size());
+        for (auto &i: item_dims) out.push_back(i);
+        return out;
+    }
 
 #ifdef H5_HAVE_PARALLEL
     constexpr bool have_parallel = true;
@@ -116,10 +124,70 @@ namespace hdf5 {
         }
     };
 
-    struct FileBase {
-        static void check_is_hdf5(const std::string &name) {
-            MPI_REQUIRE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
+    struct AttributeWriterBase {
+        const hid_t m_parent_handle, m_h5type;
+        const defs::inds m_shape;
+        const size_t m_nelement;
+        hid_t m_memspace_handle;
+        hid_t m_handle;
+
+        AttributeWriterBase(hid_t parent_handle, std::string name, const defs::inds &shape, hid_t h5type);
+
+        ~AttributeWriterBase();
+
+    private:
+        void write_bytes(const char *src);
+
+    public:
+        template<typename T>
+        static void write(hid_t parent, std::string name, const std::vector<T> &src) {
+            AttributeWriterBase(parent, name, {src.size()}, type<T>()).write_bytes((const char *) src.data());
         }
+
+        static void write(hid_t parent, std::string name, const std::string &src);
+
+        static void write(hid_t parent, std::string name, const std::vector<std::string> &src);
+    };
+
+
+    struct AttributeReaderBase {
+        const hid_t m_parent_handle, m_h5type;
+        const defs::inds m_shape;
+        const size_t m_nelement;
+        hid_t m_handle;
+
+        AttributeReaderBase(hid_t parent_handle, std::string name, const defs::inds &shape, hid_t h5type) :
+                m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
+                m_nelement(nd_utils::nelement(shape)) {
+            m_handle = H5Aopen_name(m_parent_handle, name.c_str());
+        }
+
+        ~AttributeReaderBase() {
+            H5Aclose(m_handle);
+        }
+    };
+
+    template<typename T>
+    struct AttributeReader : AttributeReaderBase {
+        AttributeReader(hid_t parent_handle, std::string name, const defs::inds &shape) :
+                AttributeReaderBase(parent_handle, name, shape, type<T>()) {}
+
+    private:
+        void read(char *dst) {
+            auto status = H5Aread(m_handle, m_h5type, dst);
+            MPI_ASSERT(!status, "HDF5 attribute read failed");
+        }
+
+    public:
+        void read(std::vector<T> &dst) {
+            MPI_REQUIRE(dst.size() == m_nelement, "Destination length is incompatible with specified shape");
+            read((char *) dst.data());
+        }
+    };
+
+
+    struct FileBase {
+        static void check_is_hdf5(const std::string &name);
 
         const hid_t m_handle;
     protected:
@@ -131,17 +199,11 @@ namespace hdf5 {
     };
 
     struct FileWriter : FileBase {
-        FileWriter(std::string name) : FileBase(H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, AccessPList())) {
-            MPI_REQUIRE_ALL(m_handle >= 0,
-                            "HDF5 file could not be opened for writing. It may be locked by another program");
-        }
+        FileWriter(std::string name);
     };
 
     struct FileReader : FileBase {
-        FileReader(std::string name) : FileBase(
-                (check_is_hdf5(name), H5Fopen(name.c_str(), H5F_ACC_RDONLY, AccessPList()))) {
-            MPI_REQUIRE_ALL(m_handle >= 0, "HDF5 file could not be opened for reading.");
-        }
+        FileReader(std::string name);
     };
 
     struct GroupBase {
@@ -165,6 +227,11 @@ namespace hdf5 {
         GroupWriter(std::string name, const GroupWriter &parent) :
                 GroupBase(parent.m_handle,
                           H5Gcreate(parent.m_handle, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
+
+        template<typename T>
+        void write_attr(std::string name, const T &obj) {
+            AttributeWriterBase::write(m_handle, name, obj);
+        }
     };
 
     struct GroupReader : GroupBase {
@@ -184,6 +251,7 @@ namespace hdf5 {
         const hsize_t m_ndim_list;
         const hsize_t m_nitem_local;
         const hsize_t m_nitem_global;
+        const hsize_t m_nitem_global_max;
         const std::vector<hsize_t> m_list_dims_local;
         const std::vector<hsize_t> m_list_dims_global;
         const hsize_t m_item_offset;
@@ -193,126 +261,48 @@ namespace hdf5 {
         hid_t m_filespace_handle;
         hid_t m_dataset_handle;
         hid_t m_memspace_handle;
+        hid_t m_none_memspace_handle;
         hid_t m_h5type;
         CollectivePList m_coll_plist;
 
-        std::vector<hsize_t> get_item_dims(const defs::inds &item_dims) {
-            std::vector<hsize_t> out;
-            out.reserve(item_dims.size());
-            for (auto &i: item_dims) out.push_back(i);
-            return out;
-        }
+        std::vector<hsize_t> get_list_dims_local();
 
-        std::vector<hsize_t> get_list_dims_local() {
-            std::vector<hsize_t> out;
-            out.reserve(m_ndim_list);
-            out.push_back(m_nitem_local);
-            out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-            return out;
-        }
+        std::vector<hsize_t> get_list_dims_global();
 
-        std::vector<hsize_t> get_list_dims_global() {
-            std::vector<hsize_t> out;
-            out.reserve(m_ndim_list);
-            out.push_back(m_nitem_global);
-            out.insert(++out.begin(), m_item_dims.cbegin(), m_item_dims.cend());
-            return out;
-        }
-
-        hsize_t get_item_offset() {
-            std::vector<hsize_t> tmp(mpi::nrank());
-            mpi::all_gather(m_nitem_local, tmp);
-            hsize_t out = 0ul;
-            for (size_t irank = 0ul; irank < mpi::irank(); ++irank) out += tmp[irank];
-            return out;
-        }
+        hsize_t get_item_offset();
 
         NdListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
-                   bool writemode, hid_t h5type) :
-                m_parent_handle(parent_handle),
-                m_item_dims(get_item_dims(item_dims)),
-                m_ndim_item(item_dims.size()),
-                m_ndim_list(item_dims.size() + 1),
-                m_nitem_local(nitem),
-                m_nitem_global(mpi::all_sum(m_nitem_local)),
-                m_list_dims_local(get_list_dims_local()),
-                m_list_dims_global(get_list_dims_global()),
-                m_item_offset(get_item_offset()),
-                m_hyperslab_counts(m_ndim_list, 0ul),
-                m_hyperslab_offsets(m_ndim_list, 0ul),
-                m_h5type(h5type){
-            m_filespace_handle = H5Screate_simple(m_ndim_list, m_list_dims_global.data(), nullptr);
+                   bool writemode, hid_t h5type);
 
-            /*
-             * Create the dataset with default properties and close filespace.
-             */
-            if (writemode)
-                m_dataset_handle = H5Dcreate(m_parent_handle, name.c_str(), m_h5type, m_filespace_handle,
-                                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            else
-                m_dataset_handle = H5Dopen1(m_parent_handle, name.c_str());
+        void select_hyperslab(const size_t &iitem);
 
-            H5Sclose(m_filespace_handle);
-
-            m_filespace_handle = H5Dget_space(m_dataset_handle);
-
-            m_hyperslab_counts = m_list_dims_local;
-            // select one item at a time
-            m_hyperslab_counts[0] = 1;
-            m_memspace_handle = H5Screate_simple(m_ndim_list, m_hyperslab_counts.data(), nullptr);
-        }
-
-        void select_hyperslab(const size_t& iitem){
-            MPI_ASSERT(iitem < m_nitem_local, "iitem exceeds local limit");
-            m_hyperslab_offsets[0] = m_item_offset + iitem;
-            H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
-                                nullptr, m_hyperslab_counts.data(), nullptr);
-        }
-
-        ~NdListBase() {
-            H5Sclose(m_filespace_handle);
-            H5Dclose(m_dataset_handle);
-            H5Sclose(m_memspace_handle);
-        }
-
+        ~NdListBase();
     };
 
 
-    struct NdListWriterBase : public NdListBase {
+    struct NdListWriter : public NdListBase {
     private:
-        NdListWriterBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
-                NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {}
+        NdListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
+                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
 
     public:
-        NdListWriterBase(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type) {}
+        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims,
+                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                NdListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        NdListWriterBase(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem, hid_t h5type) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, h5type) {}
+        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims,
+                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                NdListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        void write_h5item_bytes(const size_t& iitem, const void *data) {
-            select_hyperslab(iitem);
-            auto status = H5Dwrite(m_dataset_handle, m_h5type, m_memspace_handle,
-                                   m_filespace_handle, m_coll_plist, data);
-            MPI_ASSERT(!status, "HDF5 write failed");
+        void write_h5item_bytes(const size_t &iitem, const void *data);
+
+        template<typename T>
+        void write_attr(std::string name, const T &obj) {
+            AttributeWriterBase::write(m_dataset_handle, name, obj);
         }
     };
 
-    template<typename T>
-    struct NdListWriter : public NdListWriterBase {
-        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, type<T>()) {}
-
-        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims, const size_t &nitem) :
-                NdListWriterBase(parent.m_handle, name, item_dims, nitem, type<T>()) {}
-
-        void write_h5item(const size_t& iitem, const T *data) {
-            write_h5item_bytes(iitem, data);
-        }
-    };
-
-
-    struct NdListReaderBase : NdListBase {
+    struct NdListReader : NdListBase {
 
         static size_t extract_list_rank(hid_t parent_handle, std::string name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
@@ -356,43 +346,38 @@ namespace hdf5 {
          */
         static size_t rank_nitem(hid_t parent_handle, std::string name) {
             auto nitem_tot = extract_nitem(parent_handle, name);
-            auto nitem_share = nitem_tot/mpi::nrank();
+            auto nitem_share = nitem_tot / mpi::nrank();
             // give the remainder to the root rank
-            if (mpi::i_am_root()) return nitem_share + nitem_tot%mpi::nrank();
+            if (mpi::i_am_root()) return nitem_share + nitem_tot % mpi::nrank();
             else return nitem_share;
         }
 
     private:
-        NdListReaderBase(hid_t parent_handle, std::string name, hid_t h5_type) :
+        NdListReader(hid_t parent_handle, std::string name, hid_t h5_type) :
                 NdListBase(parent_handle, name, extract_item_dims(parent_handle, name),
                            rank_nitem(parent_handle, name), false, h5_type) {}
 
     public:
-        NdListReaderBase(FileReader &parent, std::string name, hid_t h5_type) :
-                NdListReaderBase(parent.m_handle, name, h5_type) {}
+        NdListReader(FileReader &parent, std::string name, hid_t h5_type) :
+                NdListReader(parent.m_handle, name, h5_type) {}
 
-        NdListReaderBase(GroupReader &parent, std::string name, hid_t h5_type) :
-                NdListReaderBase(parent.m_handle, name, h5_type) {}
+        NdListReader(GroupReader &parent, std::string name, hid_t h5_type) :
+                NdListReader(parent.m_handle, name, h5_type) {}
 
-        void read_h5item_bytes(const size_t& iitem, void *data) {
+        void read_h5item_bytes(const size_t &iitem, void *data) {
             select_hyperslab(iitem);
-            auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
-                                  m_filespace_handle, m_coll_plist, data);
-            MPI_ASSERT(!status, "HDF5 read failed");
-        }
-    };
-
-
-    template<typename T>
-    struct NdListReader : public NdListReaderBase {
-        NdListReader(FileWriter &parent, std::string name) :
-                NdListReaderBase(parent.m_handle, name, type<T>()) {}
-
-        NdListReader(GroupWriter &parent, std::string name) :
-                NdListReaderBase(parent.m_handle, name, type<T>()) {}
-
-        void read_h5item(const size_t& iitem, T *data) {
-            read_h5item_bytes(iitem, data);
+            log::debug_("reading data...");
+            if (data) {
+                auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
+                                      m_filespace_handle, m_coll_plist, data);
+                MPI_ASSERT(!status, "HDF5 read failed");
+            }
+            else {
+                auto status = H5Dread(m_dataset_handle, m_h5type, m_none_memspace_handle,
+                                      m_filespace_handle, m_coll_plist, data);
+                MPI_ASSERT(!status, "HDF5 read failed");
+            }
+            log::debug_("data read");
         }
     };
 

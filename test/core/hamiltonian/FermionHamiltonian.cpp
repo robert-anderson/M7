@@ -58,7 +58,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv fonv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set(0, i); fonv.set(1, i);}
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set({0, i}); fonv.set({1, i});}
 
     auto elem = ham.get_element_0(fonv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));

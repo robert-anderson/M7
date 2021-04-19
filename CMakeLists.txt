@@ -62,9 +62,10 @@ if(ENABLE_HDF5)
                 )
         include_directories(
                 ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+                ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
                 ${PROJECT_BINARY_DIR}/hdf5_local/build
         )
-        set(_HDF5_LIBS ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a -ldl)
+        set(_HDF5_LIBS ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a -ldl)
     #endif()
 endif()
 

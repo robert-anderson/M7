@@ -5,18 +5,19 @@
 #include "Reference.h"
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
-                     const Wavefunction& wf, size_t ipart, TableBase::Loc loc):
+                     const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
         Wavefunction::DynamicRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
-        m_proj_energy_num(m_summables, wf.m_format),
-        m_nwalker_at_doubles(m_summables, wf.m_format)
-        {}
+        m_proj_energy_num(wf.m_part_inds),
+        m_nwalker_at_doubles(wf.m_part_inds) {
+    m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
+}
 
 void Reference::add_row() {
-    auto& row = m_wf.m_store.m_row;
-    auto weight = row.m_weight(m_ipart);
-    if (std::abs(weight) > m_candidate_abs_weight){
+    auto &row = m_wf.m_store.m_row;
+    auto weight = row.m_weight[m_ipart];
+    if (std::abs(weight) > m_candidate_abs_weight) {
         m_candidate_abs_weight = std::abs(weight);
         m_irow_candidate = row.m_i;
     }
@@ -61,7 +62,7 @@ void Reference::log_candidate_weight(const size_t &irow, const defs::wf_comp_t &
 #endif
 
 void Reference::begin_cycle() {
-    m_summables.zero();
+    m_summables.zero_all_local();
     update();
 }
 
@@ -91,20 +92,20 @@ bool Reference::is_connected(const fields::Onv<> &onv) const {
 
 void Reference::add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight) {
     m_aconn.connect(get_onv(), onv);
-    m_proj_energy_num(0, 0) += m_ham.get_element(m_aconn) * weight;
-    m_nwalker_at_doubles(0, 0) += std::abs(weight);
+    m_proj_energy_num.m_local[{0, 0}] += m_ham.get_element(m_aconn) * weight;
+    m_nwalker_at_doubles.m_local[{0, 0}] += std::abs(weight);
 }
 
-ReductionMember<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
+Reduction<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
     return m_nwalker_at_doubles;
 }
 
 defs::ham_t Reference::proj_energy_num() const {
-    return m_proj_energy_num.reduced(0, 0);
+    return m_proj_energy_num.m_reduced[{0, 0}];
 }
 
 defs::ham_comp_t Reference::proj_energy() const {
-    return consts::real(proj_energy_num()/get_weight());
+    return consts::real(proj_energy_num() / get_weight());
 }
 
 void Reference::update() {

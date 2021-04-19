@@ -31,8 +31,8 @@ public:
             m_bonv_enum.next(m_bonv);
             if (!m_det_enum.next(m_fonv)) return false;
         }
-        result.m_fonv = m_fonv;
-        result.m_bonv = m_bonv;
+        result.m_frm = m_fonv;
+        result.m_bos = m_bonv;
         return true;
     }
 };

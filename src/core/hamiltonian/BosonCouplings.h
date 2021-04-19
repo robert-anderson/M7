@@ -34,7 +34,7 @@ public:
     defs::ham_t get_element_0(const fields::BosonOnv &onv) const {
         defs::ham_t res = 0;
         for (size_t imode = 0ul; imode < m_nmode; ++imode)
-            res += m_omega * onv(imode);
+            res += m_omega * onv[imode];
         return res;
     }
 

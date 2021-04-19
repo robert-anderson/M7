@@ -24,7 +24,7 @@ void FermionOnvConnection::connect(const fields::Onv<0> &in, const fields::Onv<0
     zero();
 
     defs::data_t in_work, out_work, work;
-    for (size_t idataword = 0ul; idataword<in.m_item_dsize; ++idataword){
+    for (size_t idataword = 0ul; idataword<in.m_dsize; ++idataword){
         in_work = in.get_dataword(idataword);
         out_work = out.get_dataword(idataword);
         work = in_work&~out_work;
@@ -73,7 +73,7 @@ void AntisymFermionOnvConnection::connect(const fields::Onv<0> &in, const fields
     auto cre_iter = m_cre.begin();
 
     defs::data_t in_work, out_work, work;
-    for (size_t idataword = 0ul; idataword<in.m_item_dsize; ++idataword){
+    for (size_t idataword = 0ul; idataword<in.m_dsize; ++idataword){
         in_work = in.get_dataword(idataword);
         out_work = out.get_dataword(idataword);
         work = in_work & out_work;
@@ -106,7 +106,7 @@ void AntisymFermionOnvConnection::apply(const fields::Onv<0> &in) {
     auto ann_iter = m_ann.begin();
     auto cre_iter = m_cre.begin();
 
-    for(size_t idataword=0ul; idataword<in.m_item_dsize; ++idataword){
+    for(size_t idataword=0ul; idataword<in.m_dsize; ++idataword){
         auto work = in.get_dataword(idataword);
         while (work) {
             auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;

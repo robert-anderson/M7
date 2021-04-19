@@ -62,14 +62,18 @@ bool enums::CombinationsDistinct::next() {
     return true;
 }
 
-enums::PermutationsWithRepetition::PermutationsWithRepetition(size_t n, size_t r) : Enumerator(n, r, std::pow(n, r)) {
+enums::PermutationsWithRepetition::PermutationsWithRepetition(const defs::inds& shape) : Enumerator(~0ul, shape.size(), ~0ul),
+    m_shape(shape){
     m_v.back() = ~0ul;
 }
+
+enums::PermutationsWithRepetition::PermutationsWithRepetition(size_t n, size_t r) :
+        PermutationsWithRepetition(make_shape(n, r)){}
 
 bool enums::PermutationsWithRepetition::next() {
     // find index to increment;
     for (size_t i = m_r - 1; i != ~0ul; --i) {
-        if (m_v[i] + 1 < m_n) {
+        if (m_v[i] + 1 < m_shape[i]) {
             m_v[i]++;
             // reset higher positions
             std::fill(m_v.begin() + i +1, m_v.end(), 0ul);

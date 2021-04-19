@@ -5,6 +5,7 @@
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
+#include <src/core/enumerator/Enumerator.h>
 #include "src/defs.h"
 #include "array"
 #include "algorithm"
@@ -28,6 +29,7 @@ class NdFormat : NdFormatBase{
 public:
     NdFormat(){
         static_assert(!nind, "This ctor is only valid in the scalar case");
+        m_nelement = 1ul;
     }
 
     NdFormat(size_t extent){
@@ -36,14 +38,14 @@ public:
         set_nelement();
     }
 
-    NdFormat(std::array<size_t, nind> shape, std::array<std::string, nind> dim_names={}):
-        m_shape(std::move(shape)), m_dim_names(std::move(dim_names)){
+    NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names={}):
+        m_shape(shape), m_dim_names(dim_names){
         set_strides();
         set_nelement();
         ASSERT(m_nelement!=~0ul);
     }
 
-    NdFormat(const NdFormat<nind>& other) : NdFormat(other.shape(), other.m_dim_names){}
+    NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
     bool operator==(const NdFormat<nind> &other) const{
         for (size_t iind=0ul; iind<nind; ++iind){
@@ -68,9 +70,27 @@ public:
         return m_shape;
     }
 
+    defs::inds shape_vector() const {
+        defs::inds tmp;
+        tmp.assign(m_shape.cbegin(), m_shape.cend());
+        return tmp;
+    }
+
+    const std::array<std::string, nind>& dim_names() const {
+        return m_dim_names;
+    }
+    std::vector<std::string> dim_names_vector() const {
+        std::vector<std::string> tmp;
+        tmp.assign(m_dim_names.cbegin(), m_dim_names.cend());
+        return tmp;
+    }
+
     size_t flatten(std::array<size_t, nind> inds) const {
         size_t iflat = 0ul;
-        for (size_t i=0ul; i < nind; ++i) iflat+= inds[i] * m_strides[i];
+        for (size_t i=0ul; i < nind; ++i) {
+            ASSERT(inds[i]<m_shape[i]);
+            iflat+= inds[i] * m_strides[i];
+        }
         return iflat;
     }
 
@@ -90,11 +110,12 @@ public:
     }
 
     std::string to_string() const override {
+        if (!nind) return "scalar";
         std::string tmp;
         auto size = nind;
         if (m_dim_names==std::array<std::string, nind>{}){
             for (size_t i=0ul; i<size; ++i) {
-                tmp+=" "+m_shape[i];
+                tmp+=" "+std::to_string(m_shape[i]);
             }
         }
         else {
@@ -144,6 +165,50 @@ public:
         ASSERT(first<m_shape[nind_spec]);
         return first*m_strides[nind_spec]+partial_offset<nind_spec+1>(rest...);
     }
+
+    template<size_t nind_spec>
+    size_t partial_offset(std::array<size_t, nind_spec> inds) const {
+        static_assert(nind_spec<=nind, "Too many indices specified");
+        size_t iflat = 0ul;
+        for (size_t i=0ul; i < nind_spec; ++i) {
+            ASSERT(inds[i]<m_shape[i]);
+            iflat+= inds[i] * m_strides[i];
+        }
+        return iflat;
+    }
+};
+
+template <size_t nind>
+struct NdEnumeration {
+    const NdFormat<nind> m_format;
+    const std::vector<std::array<size_t, nind>> m_inds;
+
+    static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
+        std::vector<std::array<size_t, nind>> out(format.nelement());
+        enums::PermutationsWithRepetition e(format.shape_vector());
+        size_t iinds = 0ul;
+        while (e.next()){
+            for (size_t i=0; i<nind; ++i) out[iinds][i] = e[i];
+            ++iinds;
+        }
+        ASSERT(iinds==format.nelement());
+        return out;
+    }
+
+    NdEnumeration(const NdFormat<nind>& format): m_format(format), m_inds(make_inds(format)){}
+
+    const size_t& nelement() const {
+        return m_format.nelement();
+    }
+
+    const std::array<size_t, nind>& operator[](const size_t& i){
+        return m_inds[i];
+    }
+
+    operator const NdFormat<nind>&() const {
+        return m_format;
+    }
+
 };
 
 

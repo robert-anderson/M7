@@ -14,12 +14,12 @@ TEST(BosonCouplings, Element_b0) {
 
     buffered::FermiBosOnv ket(nsite);
     ASSERT_TRUE(ket.m_row);
-    ASSERT_TRUE(ket.m_fonv.is_added_to_row());
-    ASSERT_TRUE(ket.m_fonv.m_row);
-    ASSERT_TRUE(ket.m_bonv.is_added_to_row());
-    ASSERT_TRUE(ket.m_bonv.m_row);
-    ASSERT_EQ(ket.m_row, ket.m_fonv.m_row);
-    ASSERT_EQ(ket.m_row, ket.m_bonv.m_row);
+    ASSERT_TRUE(ket.m_frm.is_added_to_row());
+    ASSERT_TRUE(ket.m_frm.m_row);
+    ASSERT_TRUE(ket.m_bos.is_added_to_row());
+    ASSERT_TRUE(ket.m_bos.m_row);
+    ASSERT_EQ(ket.m_row, ket.m_frm.m_row);
+    ASSERT_EQ(ket.m_row, ket.m_bos.m_row);
     buffered::FermiBosOnv bra(nsite);
 
 

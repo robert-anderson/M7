@@ -48,9 +48,15 @@ struct BufferedField : WrappedRow, field_t {
 
 namespace buffered {
 
-    template<typename T>
-    struct Vector : BufferedField<fields::Vector<T>> {
-        Vector(size_t nelement) : BufferedField<fields::Vector<T>>({nullptr, nelement}){}
+    template<typename T, size_t nind>
+    struct Numbers : BufferedField<fields::Numbers<T, nind>> {
+        typedef BufferedField<fields::Numbers<T, nind>> base_t;
+        typedef typename fields::Numbers<T, nind>::inds_t inds_t;
+        using fields::Numbers<T, nind>::operator=;
+        Numbers(inds_t shape) : base_t({nullptr, shape}){}
+        Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
+            *this = init_value;
+        }
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {
@@ -60,10 +66,7 @@ namespace buffered {
             fields::FermionOnv::operator=(other);
             return *this;
         }
-    };
-
-    struct FermionOnvs : BufferedField<fields::FermionOnvs> {
-        FermionOnvs(size_t nitem, size_t nsite) : BufferedField<fields::FermionOnvs>({nullptr, nitem, nsite}){}
+        FermionOnv(const FermionOnv& other): FermionOnv(other.m_nsite){}
     };
 
     struct BosonOnv : BufferedField<fields::BosonOnv> {
@@ -71,24 +74,23 @@ namespace buffered {
         BosonOnv(size_t nsite) : BufferedField<fields::BosonOnv>({nullptr, nsite}){}
     };
 
-    struct BosonOnvs : BufferedField<fields::BosonOnvs> {
-        BosonOnvs(size_t nitem, size_t nsite) : BufferedField<fields::BosonOnvs>({nullptr, nitem, nsite}){}
-    };
 
     struct FermiBosOnv : BufferedMultiField<fields::FermiBosOnv> {
         using fields::FermiBosOnv::operator=;
         FermiBosOnv(size_t nsite):
                 BufferedMultiField<fields::FermiBosOnv>({nullptr, nsite}){}
     };
-    using FermiBosOnvs = BufferedMultiField<fields::FermiBosOnvs>;
 
     template<bool enable_bosons=defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
-
-    template<bool enable_bosons=defs::enable_bosons>
-    using Onvs = typename std::conditional<enable_bosons, FermiBosOnvs, FermionOnvs>::type;
-
 }
+
+template<typename field_t>
+struct SingletRow : Row {
+    field_t m_field;
+    template<typename ...Args>
+    SingletRow(Args... args): Row(), m_field(this, args...){}
+};
 
 
 #endif //M7_BUFFEREDFIELDS_H
