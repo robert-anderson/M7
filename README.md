@@ -46,13 +46,13 @@ If the user chooses, the python/ directory contains a simple and convenient wrap
 ## Symbol conventions
 
 Unless for temporary and simple loop dummy indices, all symbols are to be descriptive.
-Many mature IDEs are available for C++11 which have symbol completion and other productivity enhancing features, and it is assumed (though not strictly required) that any contributor will be make use one of these systems.
+Many mature IDEs are available for C++11 which have symbol completion and other productivity enhancing features, and it is assumed (though not strictly required) that contributors will be make use one of these programs.
 
 CamelCase is the convention for classes, and snake_case for methods and members.
 Struct/class member symbols are always prefixed with `m_`, and constant expressions with `c_`.
 Type definitions are suffixed with `_t`, but a single uppercase character is commonly used for template arguments.
 
-Global data of any kind is strongly discouraged, but in the rare circumstances that global symbols are warranted (e.g. coupling to an external dependency), the prefix `_g` is used.
+Global data of any kind is strongly discouraged, but in the rare circumstances that global symbols are warranted (e.g. coupling to an external dependency), the prefix `g_` is used.
 
 The private/protected members + getters and setters style of member access leads to clutter and is discouraged, and const correctness is instead emphasised (i.e. a read-only member should be public and const, constructed by a "make" method if required).
 Declaring methods within private/protected blocks on the other hand, increases code readability by clarifying intent in most cases, and is certainly encouraged.
@@ -73,7 +73,7 @@ With regard to parallelization, there are three kinds of method:
 If a method is MPI selective, its symbol is to be suffixed with an underscore.
   <!---TODO parallelization in concert with validation macros -->
   
-Although this project makes heavy use of template metaprogramming, wherever possible templating should be avoid in situations where function overloading could obtain the same result.
+Although this project makes heavy use of template metaprogramming, wherever possible templating should be avoided in situations where function overloading could obtain the same result.
 Untemplated method bodies in untemplated classes should be specified in the implementation file, except for any that are very frequently called - the compiler cannot inline methods when only the prototype is available in the header. 
 
 Templated classes require the explicit declaration of specializations in order for the method definitions to be relocated from the `.h` header file to the `.cpp` implementation file, and this is not a practice followed in this project. 
@@ -85,5 +85,3 @@ The low-level "datasystem" modules have avoided virtual methods, which should be
 C preprocessing directive blocks should never appear outside of `src/defs.h` and the few other places where macros are defined.
 However, when introducing a new piece of optional functionality, it is encouraged that a corresponding `ENABLE_` macro be introduced, along with a `constexpr` boolean variable which is to be used in other parts of the code to effect compile-time branching.
 Otherwise, new modules cause unnecessary run-time branching, potentially having an adverse effect on performance.
-
-The dual use of Row types both as data layout-defining objects and as a stateful "cursor" pointing to specific data, could potentially lead to confusion. Furthermore, a const Row can be pointed at a different data location for read-only access, changing the state of the Row object but not affecting the buffer.
