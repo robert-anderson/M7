@@ -77,7 +77,9 @@ TEST(ExactPropagator, Test) {
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
@@ -100,19 +102,21 @@ TEST(ExactPropagator, Hubbard) {
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0);
 
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> onv(ham.nsite());
+    buffered::Onv<> ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.set({0, i});
-        onv.set({1, i});
+        ref_onv.set({0, i});
+        ref_onv.set({1, i});
     }
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     ExactPropagator prop(ham, opts, wf.npart());
-    auto ref_energy = ham.get_energy(onv);
+    auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    auto ref_loc = wf.create_walker(0, onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
     Solver solver(prop, wf, ref_loc);
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
@@ -140,7 +144,9 @@ TEST(ExactPropagator, Cr2Test) {
 
     std::cout << "Reference Energy: " << ref_energy << std::endl;
 
-    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
     prop.m_shift = ref_energy;
     Solver solver(prop, wf, ref_loc);
 

@@ -17,27 +17,67 @@
 #include "src/core/field/Fields.h"
 #include "src/core/sort/QuickSorter.h"
 
+/**
+ * A communicator whose m_store is the list of occupation number vectors currently
+ * with a non-zero value in at least one of the elements of the NdNumberField m_weight.
+ *
+ * The wavefunction row WalkerTableRow contains multidimensional fields whose elements
+ * are referred to as "parts".
+ *
+ * This m_store is often called the "main walker list", and the CommunicatingPair tables
+ * are the called the "spawning lists"
+ */
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     const Options &m_opts;
     const size_t m_nsite;
 
+    /**
+     * all multidimensional array indices of the multidimensional fields of the m_store row
+     */
     NdEnumeration<defs::ndim_wf> m_part_inds;
 
+    /**
+     * collection of all reductions which are summed at the end of every cycle
+     */
     ReductionSyndicate m_summables;
 
+    /**
+     * number of initiator ONVs in each part of the WF
+     */
     NdReduction<size_t, defs::ndim_wf> m_ninitiator;
+    /**
+     * change over the last cycle in the number of initiator ONVs
+     */
     NdReduction<int, defs::ndim_wf> m_delta_ninitiator;
+    /**
+     * number of ONVs with any associated weight in any part
+     */
     Reduction<size_t> m_nocc_onv;
+    /**
+     * change in the number of occupied ONVs
+     */
     Reduction<int> m_delta_nocc_onv;
+    /**
+     * L1 norm of each part of the WF
+     */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
+    /**
+     * change in the L1 norm
+     */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    /**
+     * square of the L2 norm of each part of the WF
+     */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_l2_norm_square;
+    /**
+     * change in the L2 norm
+     */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
+    /**
+     * number of walkers annihilated in the loop_over_spawned method for each part
+     */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
-
-    MappedTable<UniqueOnvRow> m_unique_recvd_onvs;
-    MappedTable<OnvRow> m_parent_recvd_onvs;
 
     Wavefunction(const Options &opts, size_t nsite);
 
@@ -62,32 +102,111 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     defs::wf_comp_t l1_norm(const size_t& ipart) const;
 
+    /**
+     * allow the current ONV in m_store.m_row to change the weight on ONVs to which it generates
+     * spawned contributions, and update initiator statistics accordingly
+     * @param ipart
+     *  flat index of the initiator flag to be set in the selected row
+     */
     void grant_initiator_status(const size_t &ipart);
 
+    /**
+     * prohibit the current ONV in m_store.m_row to change the weight on ONVs to which it generates
+     * spawned contributions, and update initiator statistics accordingly
+     * @param ipart
+     *  flat index of the initiator flag to be cleared in the selected row
+     */
     void revoke_initiator_status(const size_t &ipart);
 
+    /**
+     * all changes in the m_weight member of any row associated with m_store should occur through
+     * this function so that changes can be properly recorded
+     * @param ipart
+     *  part index of the WF to update
+     * @param new_weight
+     *  value to which this part weight is to be set
+     */
     void set_weight(const size_t &ipart, const defs::wf_t &new_weight);
 
+    void set_weight(const fields::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
+        for (size_t i=0ul; i<m_part_inds.nelement(); ++i) set_weight(i, new_weight[i]);
+    }
+
+    /**
+     * convenience method to set_weight based on a difference relative to the current weight of
+     * the part
+     * @param ipart
+     *  part index
+     * @param delta
+     *  change in the weight
+     */
     void change_weight(const size_t &ipart, const defs::wf_t &delta);
 
+    /**
+     * convenience method to set_weight based on a scalar factor relative to current weight
+     * @param ipart
+     *  part index
+     * @param factor
+     *  fractional change in the weight
+     */
     void scale_weight(const size_t &ipart, const double &factor);
 
+    /**
+     * convenience method to set the weight of a part of the WF to zero on the currently
+     * selected row
+     * @param ipart
+     *  part index
+     */
     void zero_weight(const size_t &ipart);
-
-    size_t create_row(const fields::Onv<> &onv, const defs::ham_comp_t &hdiag);
 
     void remove_row();
 
-    size_t create_walker_(const size_t& icycle, const size_t& ipart, const fields::Onv<> &onv, const defs::ham_t weight,
-                          const defs::ham_comp_t &hdiag, bool refconn);
+private:
+    /**
+     * Only called on the rank assigned to the ONV by the RankAllocator
+     * @param icycle
+     *  MC cycle index on which ONV is being added
+     * @param onv
+     *  ONV of row to be added
+     * @param hdiag
+     *  diagonal matrix element is cached here
+     * @return
+     *  index of created row
+     * @param refconn
+     *  element true if reference ONV of corresponding WF part is connected
+     *  i.e. the connection to the reference has a non-zero H matrix element
+     * @return
+     */
+    size_t create_row_(const size_t &icycle, const fields::Onv<> &onv,
+                       const defs::ham_comp_t &hdiag, bool refconn) {
+        ASSERT(mpi::i_am(m_ra.get_rank(onv)));
+        if (m_store.is_full()) m_store.expand(1);
+        auto irow = m_store.insert(onv);
+        m_delta_nocc_onv.m_local++;
+        m_store.m_row.jump(irow);
+        m_store.m_row.clear();
+        ASSERT(m_store.m_row.m_onv == onv)
+        m_store.m_row.m_hdiag = hdiag;
+        // TODO multidimensional reference
+        m_store.m_row.m_reference_connection.put(0, refconn);
+        if (defs::enable_mevs) {
+            m_store.m_row.m_icycle_occ = icycle;
+            m_store.m_row.m_average_weight = 0;
+        }
+        return irow;
+    }
 
-
-    TableBase::Loc create_walker(const size_t &icycle, const size_t &ipart, const fields::Onv<> &onv,
-                                 const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn);
-
-    // create on all parts
-    TableBase::Loc create_walker(const size_t &icycle, const fields::Onv<> &onv,
-                                 const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn);
+public:
+    /**
+     * Called on all ranks, dispatching create_row_ on the assigned rank only
+     */
+    TableBase::Loc create_row(const size_t& icycle, const fields::Onv<> &onv, const defs::ham_comp_t &hdiag, bool refconn) {
+        size_t irank = m_ra.get_rank(onv);
+        size_t irow;
+        if (mpi::i_am(irank)) irow = create_row_(icycle, onv, hdiag, refconn);
+        mpi::bcast(irow, irank);
+        return {irank, irow};
+    }
 
     size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart);

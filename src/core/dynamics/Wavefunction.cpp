@@ -26,9 +26,7 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
         m_delta_nwalker(m_part_inds),
         m_l2_norm_square(m_part_inds),
         m_delta_l2_norm_square(m_part_inds),
-        m_nannihilated(m_part_inds),
-        m_unique_recvd_onvs({}, 100),
-        m_parent_recvd_onvs({nsite}, 100) {
+        m_nannihilated(m_part_inds){
     m_store.resize((m_opts.walker_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
     m_comm.resize((m_opts.spawn_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
     ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
@@ -64,8 +62,8 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
         bool ref_conn = conn.connected();
         conn.connect(row_reader.m_onv, row_reader.m_onv);
         ASSERT(row_reader.m_weight.nelement()==m_part_inds.nelement());
-        for (size_t ipart = 0ul; ipart<row_reader.m_weight.nelement(); ++ipart)
-            create_walker_(0ul, ipart, row_reader.m_onv, row_reader.m_weight[0], ham.get_element(conn), ref_conn);
+        create_row(0ul, row_reader.m_onv, ham.get_element(conn), ref_conn);
+        set_weight(row_reader.m_weight);
     }
 }
 
@@ -137,16 +135,6 @@ void Wavefunction::zero_weight(const size_t &ipart) {
     set_weight(ipart, 0.0);
 }
 
-
-size_t Wavefunction::create_row(const fields::Onv<> &onv, const defs::ham_comp_t &hdiag) {
-    ASSERT(mpi::i_am(m_ra.get_rank(onv)));
-    if (m_store.is_full()) m_store.expand(1);
-    auto irow = m_store.insert(onv);
-    m_delta_nocc_onv.m_local++;
-    m_store.m_row.jump(irow);
-    ASSERT(m_store.m_row.m_onv == onv)
-}
-
 void Wavefunction::remove_row() {
     if (m_ra.row_mapped_by_dependent(m_store.m_row.m_i)) return;
     auto lookup = m_store[m_store.m_row.m_onv];
@@ -160,16 +148,13 @@ void Wavefunction::remove_row() {
     m_store.erase(lookup);
 }
 
+/*
 size_t Wavefunction::create_walker_(const size_t &icycle, const size_t &ipart, const fields::Onv<> &onv,
                                     const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn) {
     set_weight(ipart, weight);
     m_store.m_row.m_hdiag = hdiag;
     m_store.m_row.m_reference_connection.put(ipart, refconn);
     m_store.m_row.m_deterministic.clr(ipart);
-    if (defs::enable_mevs) {
-        m_store.m_row.m_icycle_occ = icycle;
-        m_store.m_row.m_average_weight = 0;
-    }
     return irow;
 }
 
@@ -191,6 +176,7 @@ TableBase::Loc Wavefunction::create_walker(const size_t &icycle, const fields::O
     }
     return out;
 }
+*/
 
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {
