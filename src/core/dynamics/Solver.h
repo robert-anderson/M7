@@ -9,6 +9,7 @@
 #include <src/core/util/Timer.h>
 #include <src/core/observables/AverageCoefficients.h>
 #include <src/core/observables/UniformTwf.h>
+#include <src/core/observables/StaticTwf.h>
 #include <src/core/observables/MevGroup.h>
 #include <src/core/io/FciqmcStats.h>
 #include "Reference.h"
@@ -54,6 +55,7 @@ class Solver {
 
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
+    std::unique_ptr<StaticTwf> m_hubbard_twf;
     BilinearMevGroup m_mevs;
 
 public:

@@ -1,15 +1,17 @@
 //
-// Created by rja on 18/03/2021.
+// Created by jhalson on 06/04/2021.
 //
 
-#include "UniformTwf.h"
+#include "StaticTwf.h"
 
-UniformTwf::UniformTwf(size_t npart, size_t nsite) :
+StaticTwf::StaticTwf(size_t npart, size_t nsite, double_t fermion_factor, double_t boson_factor) :
         m_numerator(npart, 0.0), m_numerator_total(npart, 0.0),
+        m_denominator(npart, 0.0), m_denominator_total(npart, 0.0),
+        m_fermion_double_occ_penalty_factor(fermion_factor),
+        m_boson_occ_penalty_factor(boson_factor),
         m_nsite(nsite){}
 
-void UniformTwf::add(const Hamiltonian<0> &ham,
-                     const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+void StaticTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<0> &onv) {
     conn::Antisym<0> conn(m_nsite);
     buffered::Onv<0> work_onv(m_nsite);
@@ -20,41 +22,57 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
     occ.update(onv);
     vac.update(onv);
 
-    // diagonal
     conn.connect(onv, onv);
-    helem_sum += ham.get_element(conn);
+    auto this_twf = evaluate_static_twf(onv);
+    helem_sum += this_twf*ham.get_element(conn);
     for (auto &iocc: occ.inds()) {
         for (auto &ivac: vac.inds()) {
-            // singles
             conn.zero();
             conn.add(iocc, ivac);
             conn.apply(onv, work_onv);
-            helem_sum += ham.get_element(conn);
+            helem_sum += evaluate_static_twf(work_onv)*ham.get_element(conn);
             for (auto &jocc: occ.inds()) {
-                // doubles
                 if (jocc <= iocc) continue;
                 for (auto &jvac: vac.inds()) {
                     if (jvac<=ivac) continue;
                     conn.zero();
                     conn.add(iocc, jocc, ivac, jvac);
                     conn.apply(onv, work_onv);
-                    helem_sum += ham.get_element(conn);
+                    helem_sum += evaluate_static_twf(work_onv)*ham.get_element(conn);
                 }
             }
         }
     }
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
         m_numerator[ipart] += weight[ipart] * helem_sum;
+        m_denominator[ipart] += weight[ipart] * this_twf;
     }
 }
 
-void UniformTwf::reduce() {
+void StaticTwf::reduce() {
     mpi::all_sum(m_numerator.data(), m_numerator_total.data(), m_numerator.size());
+    mpi::all_sum(m_denominator.data(), m_denominator_total.data(), m_denominator.size());
     m_numerator.assign(m_numerator.size(), 0.0);
+    m_denominator.assign(m_denominator.size(), 0.0);
 }
 
+defs::ham_t StaticTwf::evaluate_static_twf(const fields::Onv<0> &onv) const{
+    size_t num_double_occ_sites = 0;
+    for(size_t isite=0; isite < m_nsite; isite++) {
+        num_double_occ_sites += (onv.get({0, isite}) and onv.get({1, isite}));
+    }
+    return std::exp(-m_fermion_double_occ_penalty_factor*num_double_occ_sites);
+}
 
-void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+defs::ham_t StaticTwf::evaluate_static_twf(const fields::Onv<1> &onv) const{
+    size_t total_boson_occ = 0;
+    for(size_t isite=0; isite < m_nsite; isite++) {
+        total_boson_occ += onv.m_bos[isite];
+    }
+    return std::exp(-m_boson_occ_penalty_factor*total_boson_occ) + evaluate_static_twf(onv.m_frm);
+}
+
+void StaticTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<1> &onv) {
     conn::Antisym<1> conn(m_nsite);
     buffered::Onv<1> work_onv(m_nsite);
@@ -69,7 +87,9 @@ void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t
     conn.connect(onv, onv);
 
     helem = ham.get_element_0(conn);
-    helem_sum += helem;
+    auto this_twf = evaluate_static_twf(onv);
+    helem_sum += this_twf * helem;
+
 
     for (auto &iocc: occ.inds()) {
         const size_t imode = iocc < ham.nsite() ? iocc : iocc - ham.nsite();
@@ -79,8 +99,14 @@ void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t
             if (!vacd_minus && !occd_plus){
                 auto com = onv.m_bos[imode];
                 if (change<0) com+=change;
+
+                work_onv.zero();
+                conn.zero();
+                conn.m_bonvconn.add(imode, change);
+                conn.apply(onv, work_onv);
+
                 helem = ham.bc().get_element_1(imode, imode, com);
-                helem_sum-=std::abs(helem);
+                helem_sum-=std::abs(helem)*evaluate_static_twf(work_onv);
             }
         }
 
@@ -90,10 +116,11 @@ void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t
             work_onv.zero();
             conn.apply(onv, work_onv);
             helem = ham.get_element_1(conn);
-            helem_sum -= std::abs(helem);
+            helem_sum -= std::abs(helem)*evaluate_static_twf(work_onv);
         }
     }
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
         m_numerator[ipart] += std::abs(weight[ipart]) * helem_sum;
+        m_denominator[ipart] += this_twf * std::abs(weight[ipart]);
     }
 }
