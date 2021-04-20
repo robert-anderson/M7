@@ -46,13 +46,13 @@ If the user chooses, the python/ directory contains a simple and convenient wrap
 ## Symbol conventions
 
 Unless for temporary and simple loop dummy indices, all symbols are to be descriptive.
-Many mature IDEs are available for C++11 which have symbol completion and other productivity enhancing features, and it is assumed (though not strictly required) that any contributor will be make use one of these systems.
+Many mature IDEs are available for C++11 which have symbol completion and other productivity enhancing features, and it is assumed (though not strictly required) that contributors will be make use one of these programs.
 
 CamelCase is the convention for classes, and snake_case for methods and members.
 Struct/class member symbols are always prefixed with `m_`, and constant expressions with `c_`.
 Type definitions are suffixed with `_t`, but a single uppercase character is commonly used for template arguments.
 
-Global data of any kind is strongly discouraged, but in the rare circumstances that global symbols are warranted (e.g. coupling to an external dependency), the prefix `_g` is used.
+Global data of any kind is strongly discouraged, but in the rare circumstances that global symbols are warranted (e.g. coupling to an external dependency), the prefix `g_` is used.
 
 The private/protected members + getters and setters style of member access leads to clutter and is discouraged, and const correctness is instead emphasised (i.e. a read-only member should be public and const, constructed by a "make" method if required).
 Declaring methods within private/protected blocks on the other hand, increases code readability by clarifying intent in most cases, and is certainly encouraged.
