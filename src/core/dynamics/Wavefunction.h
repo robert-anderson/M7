@@ -184,7 +184,6 @@ private:
         auto irow = m_store.insert(onv);
         m_delta_nocc_onv.m_local++;
         m_store.m_row.jump(irow);
-        m_store.m_row.clear();
         ASSERT(m_store.m_row.m_onv == onv)
         m_store.m_row.m_hdiag = hdiag;
         // TODO multidimensional reference

@@ -3,6 +3,8 @@
 //
 
 #include "MPIWrapper.h"
+
+#include <utility>
 #include "src/core/io/Logging.h"
 
 void mpi::barrier() {
@@ -70,7 +72,7 @@ bool mpi::on_node_i_am_root() {
 
 void mpi::abort_(std::string message) {
 #ifdef HAVE_MPI
-    log::error_("Forcing MPI_Abort from this rank: \"{}\"", message);
+    log::error_("Forcing MPI_Abort from this rank: \"{}\"", std::move(message));
     log::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
     if (mpi::nrank()==1) std::abort();
@@ -83,7 +85,7 @@ void mpi::abort_(std::string message) {
 
 void mpi::abort(std::string message){
 #ifdef HAVE_MPI
-    log::error_("Aborting all MPI processes: \"{}\"", message);
+    log::error_("Aborting all MPI processes: \"{}\"", std::move(message));
     log::finalize();
     MPI_Barrier(MPI_COMM_WORLD);
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case

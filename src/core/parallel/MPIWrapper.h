@@ -700,12 +700,14 @@ public:
     /**
      * call on any rank to terminate the entire communicator
      * @param message
+     *  string to output to error log
      */
     static void abort_(std::string message);
 
     /**
      * call on all ranks to terminate the entire communicator
      * @param message
+     *  string to output to error log
      */
     static void abort(std::string message);
 

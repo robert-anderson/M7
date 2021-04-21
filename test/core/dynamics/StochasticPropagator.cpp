@@ -8,6 +8,7 @@
 #include "src/core/dynamics/StochasticPropagator.h"
 #include "src/core/dynamics/Solver.h"
 
+
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
@@ -20,8 +21,12 @@ TEST(StochasticPropagator, Test) {
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
     opts.ncycle = 50000;
-    opts.replicate = true;
+    opts.replicate = false;
     opts.init();
+
+    float f = 123.5;
+    float g = 125.5;
+    MPI_ASSERT_TRUE(f==g-1);
 
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);

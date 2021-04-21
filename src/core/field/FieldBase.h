@@ -89,4 +89,9 @@ private:
     int cmp(const FieldBase &other) const;
 };
 
+static std::ostream &operator<<(std::ostream &os, const FieldBase &v) {
+    os << v.to_string();
+    return os;
+}
+
 #endif //M7_FIELDBASE_H
