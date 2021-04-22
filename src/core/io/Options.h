@@ -47,6 +47,8 @@ struct Options {
     double shift_damp = 0.05;
     size_t shift_update_period = 1;
     size_t ncycle = ~0ul;
+    size_t ncycle_wait_mevs = 0ul;
+    size_t ncycle_accumulate_mevs = ~0ul;
     bool do_semistochastic = false;
     size_t ncycle_init_detsub = 1000;
     bool calc_mk_walker_sums = false;

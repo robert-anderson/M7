@@ -127,6 +127,15 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-N,--ncycle", ncycle,
                "number of cycles to execute before exit");
 
+    add_option("--ncycle_wait_mevs", ncycle_wait_mevs,
+               "number of cycles to wait after variable shift epoch begins before accumulating MEVs");
+
+    add_option("--ncycle_accumulate_mevs", ncycle_accumulate_mevs,
+               "number of cycles to accumulate MEVs before terminating the solver main loop");
+
+    add_option("-N,--ncycle", ncycle,
+               "number of cycles to execute before exit");
+
     add_flag("-S,--semistochastic", do_semistochastic,
              "enable semistochastic adaptation");
 

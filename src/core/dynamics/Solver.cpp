@@ -29,9 +29,14 @@ void Solver::loop_over_occupied_onvs() {
             continue;
         }
         make_diagonal_mev_contribs();
+        /*
+         * if the accumulation of MEVs has just started, treat the row as though it just became
+         * occupied on this MC cycle
+         */
+        if (defs::enable_mevs && m_mev_accumulation.started_this_cycle(m_icycle))
+            row.m_icycle_occ = m_icycle;
 
-        if (defs::enable_mevs)
-            row.m_average_weight+=row.m_weight;
+        if (defs::enable_mevs && m_mev_accumulation) row.m_average_weight+=row.m_weight;
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 
@@ -264,7 +269,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_hubbard_twf(m_opts.spf_hubbard_twf ?
         new StaticTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
-        m_rdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()){
+        m_rdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()),
+        m_mev_accumulation("MEV accumulation"){
     if (defs::enable_mevs && m_opts.rdm_rank>0){
         if(!m_opts.replicate && !m_prop.is_exact())
             log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
@@ -291,7 +297,7 @@ void Solver::execute(size_t niter) {
         //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
         //loop_over_spawned();
         hdf5::GroupReader gr2("rdm", gr);
-        m_rdm.h5_read();
+        m_rdm.h5_read(gr);
         m_rdm.end_cycle();
     }
 
@@ -352,6 +358,17 @@ void Solver::begin_cycle() {
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
     m_reference.begin_cycle();
+
+    auto update_mev_epoch = [&](){
+        if(m_prop.m_variable_shift[0] && m_prop.m_variable_shift[1]){
+            auto max_start = std::max(
+                    m_prop.m_variable_shift[0].icycle_start(),
+                    m_prop.m_variable_shift[1].icycle_start());
+            if (m_icycle > max_start+m_opts.ncycle_wait_mevs) return true;
+        }
+        return false;
+    };
+    m_mev_accumulation.update(m_icycle, update_mev_epoch());
 }
 
 void Solver::end_cycle() {

@@ -20,9 +20,10 @@ TEST(StochasticPropagator, Test) {
     opts.nwalker_target = 50000;
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
-    opts.ncycle = 50000;
+    opts.ncycle = 2000;
     opts.rdm_rank = 1;
     opts.replicate = true;
+    opts.write_hdf5_fname = "test_rdm_save.h5";
     opts.init();
 
     //const auto benchmark = -108.916561245585;

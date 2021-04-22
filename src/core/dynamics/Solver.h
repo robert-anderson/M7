@@ -58,6 +58,7 @@ class Solver {
     std::unique_ptr<StaticTwf> m_hubbard_twf;
     //BilinearMevGroup m_mevs;
     FermionRdm m_rdm;
+    Epoch m_mev_accumulation;
 
 public:
 
@@ -78,6 +79,7 @@ public:
     }
 
     void make_diagonal_mev_contribs(){
+        if (!m_mev_accumulation) return;
         auto& row = m_wf.m_store.m_row;
         ASSERT(row.occupied_ncycle(m_icycle));
         m_rdm.make_contribs(row.m_onv, row.m_average_weight[0],
@@ -93,6 +95,7 @@ public:
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,
                                                 const size_t& irow_block_end, const size_t& irow_store){
+        if (!m_mev_accumulation) return;
         // if the dst onv is not stored, it cannot give contributions to any MEVs
         if (irow_store==~0ul) {
             row_current.jump(irow_block_end);
