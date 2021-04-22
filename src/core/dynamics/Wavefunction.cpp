@@ -186,6 +186,7 @@ TableBase::Loc Wavefunction::create_walker(const size_t &icycle, const fields::O
     for (size_t ipart =1ul; ipart<npart(); ++ipart) {
         auto tmp = create_walker(icycle, ipart, onv, weight, hdiag, refconn);
         ASSERT(tmp==out);
+        (void)(tmp); // prevents tmp being unused if NDEBUG is set
     }
     return out;
 }

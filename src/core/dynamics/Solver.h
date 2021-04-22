@@ -95,14 +95,16 @@ public:
          * of contributions from the same source ONV. src_weights emitted by a stochastic propagator are
          * appropriately scaled by the probability that at least one excitation to dst_onv was drawn.
          */
-        auto get_nrow_in_block = [&]() { return row_current.m_i - row_block_start.m_i; };
+
+        SETDBVAR(get_nrow_in_block,[&]() { return row_current.m_i - row_block_start.m_i; })
+
         row_block_start.jump(row_current);
 
         for (; row_current.m_i < irow_block_end; row_current.step()) {
             ASSERT(m_wf.m_store.m_row.m_onv == row_current.m_dst_onv);
             // seek to next "parent" ONV
             if (row_current.m_src_onv != row_block_start.m_src_onv) {
-                ASSERT(get_nrow_in_block()>0);
+                ASSERT(get_nrow_in_block()>0)
                 // row_current is pointing to the first row of the next src_onv block
                 // row_block_start can be used to access the src ONV data
                 make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight);

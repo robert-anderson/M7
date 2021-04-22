@@ -36,7 +36,7 @@ struct log {
 #endif
         spdlog::set_pattern("[%E] %^[%l]%$ %v");
 
-#ifndef DNDEBUG
+#ifndef NDEBUG
         spdlog::set_level(spdlog::level::debug);
 #else
         spdlog::set_level(spdlog::level::info);
@@ -127,7 +127,7 @@ struct log {
 
     template<typename ...Args>
     static void debug(const std::string& fmt_string, Args... args){
-#ifndef DNDEBUG
+#ifndef NDEBUG
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->debug(fmt_string, args...);
         g_reduced_file_logger->debug(fmt_string, args...);
@@ -136,7 +136,7 @@ struct log {
 
     template<typename ...Args>
     static void debug_(const std::string& fmt_string, Args... args){
-#ifndef DNDEBUG
+#ifndef NDEBUG
 #ifdef ENABLE_LOCAL_LOGGING
         g_local_file_logger->debug(fmt_string, args...);
 #endif

@@ -96,7 +96,7 @@ FermionHamiltonian::generate_ci_space(WalkerTable *list, RankAllocator<Determina
             h_diag = get_energy(det);
         }
     }
-#ifndef DNDEBUG
+#ifndef NDEBUG
     if (mpi::nrank()==1) {
         ASSERT(list->high_water_mark(0) ==
                integer_utils::combinatorial(nsite(), nalpha) * integer_utils::combinatorial(nsite(), nbeta))
