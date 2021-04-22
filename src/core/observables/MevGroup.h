@@ -84,83 +84,44 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
      * all promoters required for an RDM of this rank. Index refers to the number of SQ ops
      * being inserted
      */
-     std::vector<FermionPromoter> m_promoters;
+    std::vector<FermionPromoter> m_promoters;
 
-     const size_t& nop() const {
-         return m_ncre;
-     }
+    conn::Antisym<> m_conn;
 
-    static size_t nrow_guess(size_t nann, size_t ncre, size_t nsite) {
-        double nrow = 1.0;
-        nrow *= integer_utils::combinatorial(2 * nsite, nann);
-        nrow *= integer_utils::combinatorial(2 * nsite, ncre);
-        nrow /= integer_utils::factorial(nann + ncre);
-        return nrow;
+    const size_t& nop() const;
+
+    static size_t nrow_guess(size_t nann, size_t ncre, size_t nsite);
+
+    FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nelec);
+
+    void make_contribs(const conn::Antisym<> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
+
+    void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
+                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight){
+        m_conn.connect(src_onv, dst_onv);
+        make_contribs(m_conn, src_weight, dst_weight);
     }
 
-    FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nelec) :
-            base_t(
-                    log::format("{}-body RDM", nop),
-                    opts.mev_buffer_expansion_factor,
-                    opts.nload_balance_block_per_rank * mpi::nrank(),
-                    opts.load_balance_period,
-                    {
-                            {nop, 1},
-                            MappedTableBase::nbucket_guess(
-                                    nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
-                    },
-                    {
-                            {nop, 1},
-                            MappedTableBase::nbucket_guess(
-                                    nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
-                    },
-                    opts.acceptable_load_imbalance),
-            m_nann(nop), m_ncre(nop), m_nelec(nelec), m_lookup_inds(nop) {
-        m_promoters.reserve(nop+1);
-        for (size_t nins=0ul; nins<=nop; ++nins) m_promoters.emplace_back(nelec+nins-nop, nins);
+    void make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight);
+
+    void make_contribs_spf_ket(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
+                       const fields::FermionOnv &dst_onv){
+        m_conn.connect(src_onv, dst_onv);
+        make_contribs_spf_ket(m_conn, src_weight);
     }
 
-#if 0
-    void make_contribs_spf_ket(const fields::Onv<> &src_onv, const defs::wf_t &src_weight,
-                               const fields::Onv<> &dst_onv) {
-        m_conn.connect(src_onv, src_onv);
-        const size_t rank = 1;
-        auto &rdm = *m_rdms[1];
-        for (const auto &com: m_conn.com()) {
-
-            m_lookup.m_row.m_inds[0] = com;
-            m_lookup.m_row.m_inds[1] = com;
-
-            size_t irow = *m_rdms[rank]->operator[](m_lookup.m_row.m_inds);
-            if (irow == ~0ul) irow = m_rdms[rank]->insert(m_lookup.m_row.m_inds);
-            rdm.m_row.jump(irow);
-            rdm.m_row.m_values[0] += std::abs(src_weight);
+    void end_cycle() {
+        if (!send().buffer_dsize()) return;
+        communicate();
+        auto& row = m_comm.recv().m_row;
+        for (row.restart(); row.in_range(); row.step()) {
+            auto irow_store = *m_store[row.m_inds];
+            if (irow_store==~0ul) irow_store = m_store.insert(row.m_inds);
+            m_store.m_row.jump(irow_store);
+            m_store.m_row.m_values += row.m_values;
         }
+        m_comm.recv().clear();
     }
-#endif
-
-    void make_contribs(const conn::Antisym<> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight) {
-        const auto exlvl = conn.nexcit();
-        if (conn.nann() > m_nann && conn.ncre() > m_ncre) return;
-        const auto nins = exlvl-nop();
-        ASSERT(nins<=exlvl);
-
-        const auto& promoter = m_promoters[nins];
-        for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
-            auto phase = promoter.apply(icomb, conn, m_lookup_inds);
-            auto& send = m_comm.send(m_ra.get_rank(m_lookup_inds));
-            size_t irow = send[m_lookup_inds];
-            if (irow == ~0ul) irow = send.insert(m_lookup_inds);
-            send.m_row.jump(irow);
-            auto contrib = src_weight * dst_weight;
-            if (!phase) contrib = -contrib;
-            send.m_row.m_values[0] += contrib;
-        }
-    }
-
-    void make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight){
-        make_contribs(conn, std::abs(src_weight), 1);
-     }
 };
 
 struct BilinearMevGroup {

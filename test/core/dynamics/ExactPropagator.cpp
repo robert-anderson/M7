@@ -63,7 +63,7 @@ TEST(ExactPropagator, Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 10000;
-    opts.rdm_rank = 1;
+    opts.rdm_rank = 2;
     opts.replicate = false;
     const size_t nsite = 6;
     //const auto benchmark = -108.916561245585

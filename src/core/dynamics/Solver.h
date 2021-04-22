@@ -56,7 +56,8 @@ class Solver {
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<StaticTwf> m_hubbard_twf;
-    BilinearMevGroup m_mevs;
+    //BilinearMevGroup m_mevs;
+    FermionRdm m_rdm;
 
 public:
 
@@ -70,21 +71,21 @@ public:
 
     void loop_over_occupied_onvs();
 
-    void annihilate_row(const size_t dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
+    void annihilate_row(const size_t& dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
 
-    void annihilate_row(const size_t dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
+    void annihilate_row(const size_t& dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
         annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
     }
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight){
         // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
-        //m_mevs.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[0]);
+        m_rdm.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[0]);
         //std::cout << src_onv.to_string() << " " << m_wf.m_store.m_row.m_onv.to_string() << std::endl;
     }
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,
                                                 const size_t& irow_block_end, const size_t& irow_store){
-        // if the dst onv is not stored, it cannot give contibutions to any MEVs
+        // if the dst onv is not stored, it cannot give contributions to any MEVs
         if (irow_store==~0ul) {
             row_current.jump(irow_block_end);
             return;

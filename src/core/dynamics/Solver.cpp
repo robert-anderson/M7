@@ -85,7 +85,7 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.pause();
 }
 
-void Solver::annihilate_row(const size_t dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+void Solver::annihilate_row(const size_t& dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
                             bool allow_initiation, const size_t &irow_store) {
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
@@ -258,7 +258,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_hubbard_twf(m_opts.spf_hubbard_twf ?
         new StaticTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
-        m_mevs()//prop.m_ham.nsite(), m_opts.rdm_rank)
+        m_rdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec())
+        //m_mevs()//prop.m_ham.nsite(), m_opts.rdm_rank)
 //m_average_coeffs("average coeffs", {2, 2}, 1)
 {
     if (defs::enable_mevs && m_opts.rdm_rank>0){
@@ -361,6 +362,7 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator ONVs have occurred");
 
+    m_rdm.end_cycle();
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);

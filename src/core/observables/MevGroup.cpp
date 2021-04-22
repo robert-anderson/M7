@@ -60,3 +60,66 @@ bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<> &conn, fi
     }
     return phase;
 }
+
+const size_t &FermionRdm::nop() const {
+    return m_ncre;
+}
+
+size_t FermionRdm::nrow_guess(size_t nann, size_t ncre, size_t nsite) {
+    double nrow = 1.0;
+    nrow *= integer_utils::combinatorial(2 * nsite, nann);
+    nrow *= integer_utils::combinatorial(2 * nsite, ncre);
+    nrow /= integer_utils::factorial(nann + ncre);
+    return nrow;
+}
+
+FermionRdm::FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nelec) :
+        base_t(
+                log::format("{}-body RDM", nop),
+                opts.mev_buffer_expansion_factor,
+                opts.nload_balance_block_per_rank * mpi::nrank(),
+                opts.load_balance_period,
+                {
+                        {nop, 1},
+                        MappedTableBase::nbucket_guess(
+                                nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
+                },
+                {
+                        {nop, 1},
+                        MappedTableBase::nbucket_guess(
+                                nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
+                },
+                opts.acceptable_load_imbalance),
+        m_nann(nop), m_ncre(nop), m_nelec(nelec), m_lookup_inds(nop), m_conn(nsite) {
+    m_store.resize(100);
+    m_comm.resize(100);
+    m_promoters.reserve(nop+1);
+    for (size_t nins=0ul; nins<=nop; ++nins) m_promoters.emplace_back(nelec+nins-nop, nins);
+}
+
+void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &src_weight,
+                               const defs::wf_t &dst_weight) {
+    const auto exlvl = conn.nexcit();
+    if (conn.nann() > m_nann && conn.ncre() > m_ncre) return;
+    const auto nins = exlvl-nop();
+    ASSERT(nins<=exlvl);
+
+    const auto& promoter = m_promoters[nins];
+    for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
+        auto phase = promoter.apply(icomb, conn, m_lookup_inds);
+        auto irank_send = m_ra.get_rank(m_lookup_inds);
+        auto& send_table = send(irank_send);
+        size_t irow = *send_table[m_lookup_inds];
+        if (irow == ~0ul) {
+            irow = send_table.insert(m_lookup_inds);
+        }
+        send_table.m_row.jump(irow);
+        auto contrib = src_weight * dst_weight;
+        if (!phase) contrib = -contrib;
+        send_table.m_row.m_values[0] += contrib;
+    }
+}
+
+void FermionRdm::make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight) {
+    make_contribs(conn, std::abs(src_weight), 1.0);
+}

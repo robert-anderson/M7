@@ -39,9 +39,12 @@ TEST(MevGroup, Promoter) {
     auto phase = fp.apply(2, conn, inds);
     std::cout << inds << std::endl;
     std::cout << phase << std::endl;
-
-
 }
+
+TEST(MevGroup, FermionRdm){
+    //FermionRdm
+}
+
 
 /*
 TEST(MevGroup, Test){

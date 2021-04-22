@@ -453,19 +453,19 @@ struct Communicator {
         return m_ra.get_rank(key);
     }
 
-    BufferedTableArray<comm_row_t> &send() {
+    typename comm_t::send_t &send() {
         return m_comm.send();
     }
 
-    const BufferedTableArray<comm_row_t> &send() const {
+    const typename comm_t::send_t &send() const {
         return m_comm.send();
     }
 
-    Table<comm_row_t> &send(const size_t &i) {
+    send_table_t &send(const size_t &i) {
         return m_comm.send(i);
     }
 
-    const Table<comm_row_t> &send(const size_t &i) const {
+    const send_table_t &send(const size_t &i) const {
         return m_comm.send(i);
     }
 
