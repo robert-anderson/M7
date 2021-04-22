@@ -12,7 +12,7 @@
 
 
 struct WalkerTableRow : public Row {
-    const std::array<size_t, defs::ndim_wf> m_part_shape;
+    const NdFormat<defs::ndim_wf> m_format;
     fields::Onv<> m_onv;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
     fields::Number<defs::ham_comp_t> m_hdiag;
@@ -27,19 +27,19 @@ struct WalkerTableRow : public Row {
     };
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool mev_average_weights=defs::enable_mevs) :
-            m_part_shape({nroot, nreplica}),
+            m_format({nroot, nreplica}, {"nroot", "nreplica"}),
             m_onv(this, nsite, "onv"),
-            m_weight(this, m_part_shape, "weight"),
+            m_weight(this, m_format, "weight"),
             m_hdiag(this),
-            m_initiator(this, m_part_shape),
-            m_reference_connection(this, m_part_shape),
-            m_deterministic(this, m_part_shape),
-            m_average_weight(mev_average_weights ? this : nullptr, m_part_shape),
-            m_icycle_occ(mev_average_weights ? this : nullptr, m_part_shape)
+            m_initiator(this, m_format),
+            m_reference_connection(this, m_format),
+            m_deterministic(this, m_format),
+            m_average_weight(mev_average_weights ? this : nullptr, m_format),
+            m_icycle_occ(mev_average_weights ? this : nullptr, m_format)
             {}
 
     WalkerTableRow(const Options &opts, size_t nsite) :
-            WalkerTableRow(nsite, opts.nroot, opts.nreplica) {}
+            WalkerTableRow(nsite, opts.nroot, opts.replicate ? 2:1) {}
 
     bool is_h5_write_exempt() const override {
         return m_onv.is_zero();

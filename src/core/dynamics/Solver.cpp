@@ -38,7 +38,7 @@ void Solver::loop_over_occupied_onvs() {
 
             const auto &weight = row.m_weight[ipart];
 
-            m_wf.m_nocc_onv.m_local[ipart]++;
+            m_wf.m_nocc_onv.m_local++;
             if (row.m_initiator.get(ipart))
                 m_wf.m_ninitiator.m_local[ipart]++;
 
@@ -103,13 +103,13 @@ void Solver::annihilate_row(const size_t dst_ipart, const fields::Onv<> &dst_onv
             return;
         }
 
-        m_wf.create_walker_(
+        m_wf.create_row(
                 m_icycle,
-                dst_ipart,
                 dst_onv,
-                delta_weight,
                 m_prop.m_ham.get_energy(dst_onv),
                 m_reference.is_connected(dst_onv));
+        m_wf.set_weight(dst_ipart, delta_weight);
+
     } else {
         m_wf.m_store.m_row.jump(irow_store);
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[dst_ipart];
@@ -391,7 +391,7 @@ void Solver::output_stats() {
         auto &stats = m_parallel_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
-        stats.m_nblock_wf_ra = m_wf.m_ra.nblock_();
+        stats.m_nblock_wf_ra = m_wf.m_ra.nblock_local();
         stats.m_nwalker_total = m_wf.m_nwalker.m_reduced.sum();
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_ntotal_skip;
         stats.m_nwalker_lookup = m_wf.m_store.m_ntotal_lookup;

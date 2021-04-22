@@ -23,6 +23,6 @@ TEST(ReductionSyndicate, Test){
 
 
 TEST(ReductionSyndicate, New){
-    //Reduction<int, 2> red({2, 3});
+    //NdReduction<int, 2> red({2, 3});
 
 }

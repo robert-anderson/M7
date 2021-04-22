@@ -11,7 +11,7 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
                 opts.nload_balance_block_per_rank * mpi::nrank(),
                 opts.load_balance_period,
                 {
-                        WalkerTableRow(nsite, opts.nroot, opts.nreplica),
+                        WalkerTableRow(nsite, opts.nroot, opts.replicate?2:1),
                         MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
                 },
                 {SpawnTableRow(nsite, opts.rdm_rank > 0)},
@@ -19,18 +19,14 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
         ),
         m_opts(opts),
         m_nsite(nsite),
-        m_part_inds({{opts.nroot, opts.nreplica}, {"nroot", "nreplica"}}),
+        m_part_inds(m_store.m_row.m_weight.m_format),
         m_ninitiator(m_part_inds),
         m_delta_ninitiator(m_part_inds),
-        m_nocc_onv(m_part_inds),
-        m_delta_nocc_onv(m_part_inds),
         m_nwalker(m_part_inds),
         m_delta_nwalker(m_part_inds),
         m_l2_norm_square(m_part_inds),
         m_delta_l2_norm_square(m_part_inds),
-        m_nannihilated(m_part_inds),
-        m_unique_recvd_onvs({}, 100),
-        m_parent_recvd_onvs({nsite}, 100) {
+        m_nannihilated(m_part_inds){
     m_store.resize((m_opts.walker_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
     m_comm.resize((m_opts.spawn_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
     ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
@@ -54,7 +50,7 @@ void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
 void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
                            std::string name) {
     m_store.clear();
-    BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, m_opts.nroot, m_opts.nreplica}});
+    BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, m_opts.nroot, m_opts.replicate ? 2ul:1ul}});
     m_buffer.push_back();
     RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
     conn::Antisym<> conn(m_nsite);
@@ -66,8 +62,8 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
         bool ref_conn = conn.connected();
         conn.connect(row_reader.m_onv, row_reader.m_onv);
         ASSERT(row_reader.m_weight.nelement()==m_part_inds.nelement());
-        for (size_t ipart = 0ul; ipart<row_reader.m_weight.nelement(); ++ipart)
-            create_walker_(0ul, ipart, row_reader.m_onv, row_reader.m_weight[0], ham.get_element(conn), ref_conn);
+        create_row(0ul, row_reader.m_onv, ham.get_element(conn), ref_conn);
+        set_weight(row_reader.m_weight);
     }
 }
 
@@ -147,27 +143,18 @@ void Wavefunction::remove_row() {
         zero_weight(ipart);
         // in the case that nadd==0.0, the set_weight method won't revoke:
         revoke_initiator_status(ipart);
-        m_delta_nocc_onv.m_local[ipart]--;
+        m_delta_nocc_onv.m_local--;
     }
     m_store.erase(lookup);
 }
 
+/*
 size_t Wavefunction::create_walker_(const size_t &icycle, const size_t &ipart, const fields::Onv<> &onv,
                                     const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn) {
-    ASSERT(mpi::i_am(m_ra.get_rank(onv)));
-    if (m_store.is_full()) m_store.expand(1);
-    auto irow = m_store.insert(onv);
-    m_delta_nocc_onv.m_local[{0, 0}]++;
-    m_store.m_row.jump(irow);
-    ASSERT(m_store.m_row.m_onv == onv)
     set_weight(ipart, weight);
     m_store.m_row.m_hdiag = hdiag;
     m_store.m_row.m_reference_connection.put(ipart, refconn);
     m_store.m_row.m_deterministic.clr(ipart);
-    if (defs::enable_mevs) {
-        m_store.m_row.m_icycle_occ = icycle;
-        m_store.m_row.m_average_weight = 0;
-    }
     return irow;
 }
 
@@ -190,6 +177,7 @@ TableBase::Loc Wavefunction::create_walker(const size_t &icycle, const fields::O
     }
     return out;
 }
+*/
 
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {

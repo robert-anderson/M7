@@ -10,6 +10,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/fmt/ostr.h"
 
 
 /*
@@ -68,6 +69,17 @@ struct log {
         flush_all();
         spdlog::shutdown();
     }
+
+
+    template<typename ...Args>
+    static std::string format(const std::string& fmt_string, Args... args){
+        fmt::basic_memory_buffer<char, 250> buf;
+        fmt::format_to(buf, fmt_string, std::forward<Args>(args)...);
+        std::string tmp;
+        tmp.assign(buf.data(), buf.size());
+        return tmp;
+    }
+
 
     template<typename ...Args>
     static void info(const std::string& fmt_string, Args... args){

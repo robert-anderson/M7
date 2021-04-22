@@ -8,6 +8,7 @@
 #include "src/core/dynamics/StochasticPropagator.h"
 #include "src/core/dynamics/Solver.h"
 
+
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
@@ -20,7 +21,12 @@ TEST(StochasticPropagator, Test) {
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
     opts.ncycle = 50000;
+    opts.replicate = false;
     opts.init();
+
+    float f = 123.5;
+    float g = 125.5;
+    MPI_ASSERT_TRUE(f==g-1);
 
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
@@ -39,7 +45,9 @@ TEST(StochasticPropagator, Test) {
 
     auto ref_energy = ham.get_energy(ref_onv);
 
-    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
@@ -76,7 +84,9 @@ TEST(StochasticPropagator, Hdf5) {
 
     auto ref_energy = ham.get_energy(ref_onv);
 
-    auto ref_loc = wf.create_walker(0, ref_onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
@@ -98,23 +108,23 @@ TEST(StochasticPropagator, Hubbard) {
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0);
 
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> onv(ham.nsite());
+    buffered::Onv<> ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.set({0, i});
-        onv.set({1, i});
+        ref_onv.set({0, i});
+        ref_onv.set({1, i});
     }
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     StochasticPropagator prop(ham, opts, wf.npart());
-    auto ref_energy = ham.get_energy(onv);
+    auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;
 
-    auto ref_loc = wf.create_walker(0, onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
     Solver solver(prop, wf, ref_loc);
-
     std::cout << "Reference Energy: " << ref_energy << std::endl;
-
     solver.execute(opts.ncycle);
 }
 
@@ -138,19 +148,20 @@ TEST(StochasticPropagator, BosonTest) {
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
 
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> onv(ham.nsite());
+    buffered::Onv<> ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.m_frm.set({0, i});
-        onv.m_frm.set({1, i});
+        ref_onv.m_frm.set({0, i});
+        ref_onv.m_frm.set({1, i});
     }
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    StochasticPropagator prop(ham, opts);
-    auto ref_energy = ham.get_energy(onv);
+    StochasticPropagator prop(ham, opts, wf.npart());
+    auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift = ref_energy;//benchmark;
 
-    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
     Solver solver(prop, wf, ref_loc);
 
     solver.execute(opts.ncycle);

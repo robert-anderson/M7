@@ -4,6 +4,12 @@
 
 #include "RankAllocator.h"
 
+Dependent::Dependent(RankAllocatorBase &ra) : m_ra(ra), m_it(m_ra.add_dependent(this)) {}
+
+Dependent::~Dependent() {
+    m_ra.erase_dependent(this);
+}
+
 void RankAllocatorBase::refresh_callback_list() {
     m_recv_callbacks.clear();
     for (auto ptr : m_dependents) {
@@ -11,15 +17,14 @@ void RankAllocatorBase::refresh_callback_list() {
     }
 }
 
-std::list<RankAllocatorBase::Dependent *>::iterator
-RankAllocatorBase::add_dependent(RankAllocatorBase::Dependent *dependent) {
+std::list<Dependent *>::iterator RankAllocatorBase::add_dependent(Dependent *dependent) {
     m_dependents.push_back(dependent);
     auto it = m_dependents.end();
     refresh_callback_list();
     return --it;
 }
 
-void RankAllocatorBase::erase_dependent(RankAllocatorBase::Dependent *dependent) {
+void RankAllocatorBase::erase_dependent(Dependent *dependent) {
     m_dependents.erase(dependent->m_it);
     refresh_callback_list();
 }
@@ -27,7 +32,7 @@ void RankAllocatorBase::erase_dependent(RankAllocatorBase::Dependent *dependent)
 RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance) :
         m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
-        m_mean_work_times(nblock, 0.0), m_gathered_times(mpi::nrank(), 0.0),
+        m_mean_work_times(nblock, 0.0), m_gathered_total_times(mpi::nrank(), 0.0),
         m_acceptable_imbalance(acceptable_imbalance)
 {
     MPI_REQUIRE_ALL(m_acceptable_imbalance>=0.0, "Acceptable imbalance fraction must be non-negative");
@@ -40,22 +45,18 @@ RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double accept
     }
 }
 
-size_t RankAllocatorBase::nblock_() const {
+bool RankAllocatorBase::row_mapped_by_dependent(size_t irow) {
+    for (const auto dep : m_dependents) {
+        if (dep->has_row(irow)) return true;
+    }
+    return false;
+}
+
+size_t RankAllocatorBase::nblock_local() const {
     return m_rank_to_blocks[mpi::irank()].size();
 }
 
 size_t RankAllocatorBase::get_nskip_() const {
-    /*
-     * only called on the sending rank since the block-wise work times are not
-     * shared with all ranks.
-     *
-     * When selecting a block to transfer, we don't want to send an expensive block
-     * as this has the potential to be counterproductive.
-     *
-     * Thus, send the first block found by iterating from the front of the list with
-     * mean_work_time less than the average over all blocks on this MPI rank.
-     */
-
     const auto& times = m_mean_work_times;
     const auto& list = m_rank_to_blocks[mpi::irank()];
 
@@ -64,6 +65,7 @@ size_t RankAllocatorBase::get_nskip_() const {
     mean/=list.size();
     size_t nskip=0ul;
     for (auto it=list.cbegin(); it!=list.cend(); ++it){
+        // look for first block with less than the mean associated work time
         if (times[*it] < mean) return nskip;
         ++nskip;
     }
@@ -106,21 +108,21 @@ void RankAllocatorBase::update(size_t icycle) {
     if (!ncycle_active || ncycle_active%m_period) return;
     // else, this is a preparatory iteration
     auto local_time = std::accumulate(m_mean_work_times.begin(), m_mean_work_times.end(), 0.0);
-    mpi::all_gather(local_time, m_gathered_times);
+    mpi::all_gather(local_time, m_gathered_total_times);
 
-    auto it_lazy = std::min_element(m_gathered_times.begin(), m_gathered_times.end());
-    auto it_busy = std::max_element(m_gathered_times.begin(), m_gathered_times.end());
+    auto it_lazy = std::min_element(m_gathered_total_times.begin(), m_gathered_total_times.end());
+    auto it_busy = std::max_element(m_gathered_total_times.begin(), m_gathered_total_times.end());
     if (*it_lazy==0.0) {
         log::warn("The most idle rank appears to have done no work at all");
-        log::debug("Gathered times: {}", utils::to_string(m_gathered_times));
+        log::debug("Gathered times: {}", utils::to_string(m_gathered_total_times));
     }
     MPI_REQUIRE_ALL(*it_busy>0.0, "The busiest rank appears to have done no work. "
                                   "record_work_time must be called by application");
 
     // this rank has done the least work, so it should receive a block
-    size_t irank_recv = std::distance(m_gathered_times.begin(), it_lazy);
+    size_t irank_recv = std::distance(m_gathered_total_times.begin(), it_lazy);
     // this rank has done the most work, so it should send a block
-    size_t irank_send = std::distance(m_gathered_times.begin(), it_busy);
+    size_t irank_send = std::distance(m_gathered_total_times.begin(), it_busy);
     if (m_rank_to_blocks[irank_send].size()==1){
         log::warn("Busiest rank has only one (very expensive) block remaining ({})",
                   m_rank_to_blocks[irank_send].front());
@@ -136,7 +138,7 @@ void RankAllocatorBase::update(size_t icycle) {
 
     if (irank_send==irank_recv) return;
     auto realloc_ratio = 1-m_acceptable_imbalance;
-    if (m_gathered_times[irank_recv] > realloc_ratio * m_gathered_times[irank_send]) {
+    if (m_gathered_total_times[irank_recv] > realloc_ratio * m_gathered_total_times[irank_send]) {
         ++m_nnull_updates;
         if(m_nnull_updates>=m_nnull_updates_deactivate) {
             log::info(

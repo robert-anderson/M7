@@ -12,7 +12,17 @@
 #include <set>
 #include <src/core/parallel/RankAllocator.h>
 
-
+/**
+ * A container for the send table array and recv table. Each element of the
+ * send array corresponds to the "destination" rank of the MPI AllToAllV
+ * communication invoked in the communicate method.
+ * @tparam row_t
+ *  Derived type of Row defining the data layout of both send and recv tables
+ * @tparam mapped
+ *  The send table is optionally mapped allowing rows with the same value in the
+ *  mapped field to be accumulated together instead of occupying separate rows.
+ *  This is a trade-off at the expense of more costly access (via hash tables)
+ */
 template<typename row_t, bool mapped=false>
 class CommunicatingPair {
 public:
@@ -137,6 +147,15 @@ public:
     }
 };
 
+/**
+ * Combines the CommunicatingPair with a persistent storage table and a RankAllocator
+ * @tparam store_row_t
+ *  The Row class-derived data layout of the storage table
+ * @tparam comm_row_t
+ *  The Row class-derived data layout of the tables within the CommunicatingPair
+ * @tparam mapped_comm
+ *  optional mapping of CommunicatingPair
+ */
 template<typename store_row_t, typename comm_row_t, bool mapped_comm=false>
 struct Communicator {
     static_assert(std::is_base_of<Row, store_row_t>::value, "Template arg must be derived from Row");
@@ -155,7 +174,7 @@ struct Communicator {
     double m_buffer_expansion_factor;
 
 
-    struct DynamicRowSet : RankAllocatorBase::Dependent {
+    struct DynamicRowSet : Dependent {
         typedef RankAllocator<store_row_t> ra_t;
         /*
          * the mapped table which stores the definitive row values
@@ -200,7 +219,7 @@ struct Communicator {
 
     public:
         DynamicRowSet(const Communicator &comm, std::string name) :
-                ra_t::Dependent(comm.m_ra),
+                Dependent(comm.m_ra),
                 m_source(comm.m_store),
                 m_lc("Dynamic row set \"" + name + "\" (local)", comm.m_store.m_row),
                 m_ac("Dynamic row set \"" + name + "\" (all)", comm.m_store.m_row),

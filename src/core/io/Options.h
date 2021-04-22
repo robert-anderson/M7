@@ -24,7 +24,6 @@ struct Options {
     double nadd_initiator = 3.0;
     double max_bloom = 3.0;
     size_t nroot = 1;
-    size_t nreplica = 1;
     size_t prng_seed = 12;
     size_t prng_ngen = 10000;
     size_t ndet_semistoch = 0;
@@ -57,6 +56,7 @@ struct Options {
     size_t rdm_rank = 1;
     std::string write_hdf5_fname = "";
     std::string read_hdf5_fname = "";
+    bool replicate = defs::enable_mevs;
 
     bool init();
 

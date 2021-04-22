@@ -55,9 +55,6 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--nroot", nroot,
                "number of lowest-lying eigenfunctions to estimate expectation values for");
 
-    add_option("--nreplica", nreplica,
-               "number of statistically-independent replicas to evolve per root");
-
     add_option("-R,--prng_seed", prng_seed,
                "seed value for the mt19937 PRNG");
 
@@ -157,5 +154,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--read_hdf5_fname", read_hdf5_fname,
                "Name of HDF5 file to read objects from");
 
+    add_option("--replicate", replicate,
+               "Evolve a second, statistically independent replica for each root WF");
 
 }

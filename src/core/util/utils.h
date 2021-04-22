@@ -663,4 +663,15 @@ namespace nd_utils {
     };
 }
 
+namespace dispatch_utils {
+    template<typename T>
+    struct TypeTag{};
+
+    template<size_t ind>
+    struct IndTag{};
+
+    template<bool t>
+    struct BoolTag{};
+}
+
 #endif //M7_UTILS_H
