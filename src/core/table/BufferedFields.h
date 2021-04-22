@@ -83,6 +83,14 @@ namespace buffered {
 
     template<bool enable_bosons=defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
+
+    struct FermionMevInds : BufferedMultiField<fields::FermionMevInds> {
+        using fields::FermionMevInds::operator=;
+        FermionMevInds(size_t nann, size_t ncre):
+                BufferedMultiField<fields::FermionMevInds>({nullptr, nann, ncre}){}
+
+        FermionMevInds(size_t nop): FermionMevInds(nop, nop){}
+    };
 }
 
 template<typename field_t>

@@ -141,7 +141,10 @@ struct Table : TableBase {
         ASSERT(static_cast<Row &>(m_row).m_table_bw == &m_bw);
     }
 
+    virtual ~Table(){}
+
     std::string to_string(const defs::inds *ordering = nullptr) const override {
+        if (!m_hwm) return "";
         std::string tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
         auto row = m_row;

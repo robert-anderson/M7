@@ -82,6 +82,11 @@ if (ENABLE_COMPLEX)
     add_compile_definitions(ENABLE_COMPLEX)
 endif()
 
+option(ENABLE_MEVS "ENABLE_MEVS" 0)
+if (ENABLE_MEVS)
+    add_compile_definitions(ENABLE_MEVS)
+endif()
+
 option(ENABLE_ROUNDING_SPAWN_ATTEMPTS "ENABLE_ROUNDING_SPAWN_ATTEMPTS" 0)
 if (ENABLE_ROUNDING_SPAWN_ATTEMPTS)
     add_compile_definitions(ENABLE_ROUNDING_SPAWN_ATTEMPTS)

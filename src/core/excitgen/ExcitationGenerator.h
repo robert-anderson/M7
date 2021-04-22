@@ -32,6 +32,8 @@ public:
                       defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<> &anticonn) = 0;
 
     const Hamiltonian<> *ham(){return m_h;}
+
+    virtual ~ExcitationGenerator(){}
 };
 
 

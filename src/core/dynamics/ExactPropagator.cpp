@@ -75,3 +75,10 @@ void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     ASSERT(hdiag == m_ham.get_energy(row.m_onv));
     wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
+
+bool ExactPropagator::is_exact() const {
+    return true;
+}
+
+ExactPropagator::ExactPropagator(const Hamiltonian<> &ham, const Options &opts,
+                                 const NdFormat<defs::ndim_wf> wf_fmt) : Propagator(opts, ham, wf_fmt) {}

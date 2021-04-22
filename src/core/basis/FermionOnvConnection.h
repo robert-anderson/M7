@@ -41,11 +41,17 @@ public:
     }
 
     const defs::inds& ann() const {return m_ann;}
-    const size_t& ann(const size_t& i) const {return m_ann[i];}
+    const size_t& ann(const size_t& i) const {
+        ASSERT(i<nann());
+        return m_ann[i];
+    }
     size_t nann() const {return m_ann.size();}
 
     const defs::inds& cre() const {return m_cre;}
-    const size_t& cre(const size_t& i) const {return m_cre[i];}
+    const size_t& cre(const size_t& i) const {
+        ASSERT(i<ncre());
+        return m_cre[i];
+    }
     size_t ncre() const {return m_cre.size();}
 
     void connect(const fields::Onv<0> &in, const fields::Onv<0> &out);

@@ -24,10 +24,6 @@ TEST(StochasticPropagator, Test) {
     opts.replicate = false;
     opts.init();
 
-    float f = 123.5;
-    float g = 125.5;
-    MPI_ASSERT_TRUE(f==g-1);
-
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());

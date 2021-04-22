@@ -56,6 +56,8 @@ public:
 
     void update(const size_t &icycle, const Wavefunction &wf);
 
+    virtual bool is_exact() const = 0;
+
 };
 
 #endif //M7_PROPAGATOR_H

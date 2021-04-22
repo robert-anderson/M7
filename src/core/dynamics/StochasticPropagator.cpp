@@ -12,8 +12,8 @@ void StochasticPropagator::add_boson_excitgen(const Hamiltonian<1> &ham) {
             new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
 }
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, size_t npart) :
-        Propagator(opts, ham, npart), m_prng(opts.prng_seed, opts.prng_ngen),
+StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf> wf_fmt) :
+        Propagator(opts, ham, wf_fmt), m_prng(opts.prng_seed, opts.prng_ngen),
         m_min_spawn_mag(opts.min_spawn_mag) {
 
     m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
@@ -85,4 +85,8 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
             wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_opts.min_death_mag));
         }
     }
+}
+
+bool StochasticPropagator::is_exact() const {
+    return true;
 }

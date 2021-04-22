@@ -61,6 +61,7 @@ struct NdNumberField : NumberFieldBase {
     }
 
     NdNumberField &operator=(const NdNumberField &other) {
+        MPI_ASSERT_EQ(nelement(), other.nelement());
         static_cast<FieldBase&>(*this) = other;
         return *this;
     }
@@ -134,10 +135,12 @@ struct NdNumberField : NumberFieldBase {
      * access methods
      */
     T& operator[](const size_t& ielement) {
+        ASSERT(ielement<m_nelement);
         return ((T *) begin())[ielement];
     }
 
     const T& operator[](const size_t& ielement) const {
+        ASSERT(ielement<m_nelement);
         return ((const T *) begin())[ielement];
     }
 

@@ -35,7 +35,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     /**
      * all multidimensional array indices of the multidimensional fields of the m_store row
      */
-    NdEnumeration<defs::ndim_wf> m_part_inds;
+    NdEnumeration<defs::ndim_wf> m_format;
 
     /**
      * collection of all reductions which are summed at the end of every cycle
@@ -97,6 +97,12 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 //        m_ra.update(icycle, work_time, m_walkers, m_walkers.m_key_field);
 //    }
 
+    const size_t& nreplica() const {
+        return m_format.extent(1);
+    }
+    size_t ipart_replica(const size_t& ipart) const {
+        return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
+    }
 
     defs::wf_comp_t square_norm(const size_t& ipart) const;
 
@@ -129,7 +135,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void set_weight(const size_t &ipart, const defs::wf_t &new_weight);
 
     void set_weight(const fields::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
-        for (size_t i=0ul; i<m_part_inds.nelement(); ++i) set_weight(i, new_weight[i]);
+        for (size_t i=0ul; i < m_format.nelement(); ++i) set_weight(i, new_weight[i]);
     }
 
     /**
@@ -215,7 +221,7 @@ public:
                      const fields::Onv<> &src_onv, const defs::wf_t &src_weight);
 
     const size_t& npart(){
-        return m_part_inds.nelement();
+        return m_format.nelement();
     }
 
 };

@@ -55,19 +55,19 @@ public:
         return static_cast<const TableBase &>(m_recv).m_row_dsize;
     }
 
-    BufferedTableArray<row_t> &send() {
+    send_t &send() {
         return m_send;
     }
 
-    const BufferedTableArray<row_t> &send() const {
+    const send_t &send() const {
         return m_send;
     }
 
-    Table<row_t> &send(const size_t &i) {
+    typename send_t::table_t &send(const size_t &i) {
         return m_send[i];
     }
 
-    const Table<row_t> &send(const size_t &i) const {
+    const typename send_t::table_t &send(const size_t &i) const {
         return m_send[i];
     }
 
@@ -446,6 +446,8 @@ struct Communicator {
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }
+
+    virtual ~Communicator(){}
 
     size_t get_rank(const key_field_t &key) const {
         return m_ra.get_rank(key);

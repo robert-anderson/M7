@@ -9,8 +9,8 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
         Wavefunction::DynamicRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
-        m_proj_energy_num(wf.m_part_inds),
-        m_nwalker_at_doubles(wf.m_part_inds) {
+        m_proj_energy_num(wf.m_format),
+        m_nwalker_at_doubles(wf.m_format) {
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
 }
 

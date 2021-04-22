@@ -96,18 +96,15 @@ namespace utils {
 
 
     template<typename T>
-    std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 6) {
+    std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 9) {
         std::string result;
         if (std::is_floating_point<T>::value) result = fp_to_string(entry, fp_precision);
         else if (std::is_integral<T>::value) result = std::to_string(entry);
-        //auto decimal_length = std::numeric_limits<T>::digits10;
-        //assert(result.size()<=decimal_length);
-        //result.insert(result.begin(), padding + decimal_length - result.size(), ' ');
         return result;
     }
 
     template<typename T>
-    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision = 6) {
+    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision = 9) {
         auto tmp_string = fp_to_string(entry.real(), fp_precision) +
                           (entry.imag() < 0 ? "" : "+") + fp_to_string(entry.imag(), fp_precision) + "i";
         tmp_string.insert(tmp_string.begin(), padding, ' ');

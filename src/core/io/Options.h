@@ -32,6 +32,7 @@ struct Options {
     size_t spin_restrict = 0;
     double walker_buffer_size_factor_initial = 1.0;
     double walker_buffer_expansion_factor = 0.5;
+    double mev_buffer_expansion_factor = 0.5;
     double spawn_buffer_size_factor_initial = 10.0;
     double min_spawn_mag = 0.4;
     double min_death_mag = 0.0;

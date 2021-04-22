@@ -188,7 +188,10 @@ public:
     }
 };
 
-
-
+template<typename ...Args>
+static std::ostream &operator<<(std::ostream &os, const MultiField<Args...> &v) {
+    os << v.to_string();
+    return os;
+}
 
 #endif //M7_MULTIFIELD_H
