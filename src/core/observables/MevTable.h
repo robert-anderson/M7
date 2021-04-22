@@ -13,7 +13,6 @@
 
 template <typename T>
 struct MevRow : public Row {
-
     fields::FermionMevInds m_inds;
     fields::Numbers<T, 1> m_values;
 

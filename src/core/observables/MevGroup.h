@@ -123,6 +123,32 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         m_comm.recv().clear();
         std::cout << m_store.to_string() << std::endl;
     }
+
+    void h5_read(hdf5::GroupReader &parent){
+        m_store.clear();
+        BufferedTable<MevRow<defs::wf_t>> m_buffer("", {{m_nann, m_ncre}});
+        m_buffer.push_back();
+        RowHdf5Reader<MevRow<defs::wf_t>> row_reader(m_buffer.m_row, parent, std::to_string(nop()), h5_field_names());
+
+        row_reader.restart();
+        for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
+            row_reader.read(iitem);
+            auto& send_table = send(m_ra.get_rank(row_reader.m_inds));
+            // should never read in the same inds twice
+            ASSERT(!send_table[row_reader.m_inds]);
+            auto irow = send_table.insert(row_reader.m_inds);
+            send_table.m_row.jump(irow);
+            send_table.m_row.m_values = row_reader.m_values;
+        }
+    }
+
+    void h5_write(hdf5::GroupWriter &parent) {
+        m_store.write(parent, std::to_string(nop()), h5_field_names());
+    }
+
+    std::vector<std::string> h5_field_names(){
+        return {m_store.m_row.m_inds.m_name, m_store.m_row.m_values.m_name};
+    }
 };
 
 struct BilinearMevGroup {

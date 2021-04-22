@@ -288,8 +288,11 @@ void Solver::execute(size_t niter) {
     if (!m_opts.read_hdf5_fname.empty()) {
         hdf5::FileReader fr(m_opts.read_hdf5_fname);
         hdf5::GroupReader gr("solver", fr);
-        m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
-        loop_over_spawned();
+        //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
+        //loop_over_spawned();
+        hdf5::GroupReader gr2("rdm", gr);
+        m_rdm.h5_read();
+        m_rdm.end_cycle();
     }
 
     for (size_t i = 0ul; i < niter; ++i) {
@@ -321,8 +324,10 @@ void Solver::execute(size_t niter) {
     }
     if (!m_opts.write_hdf5_fname.empty()) {
         hdf5::FileWriter fw(m_opts.write_hdf5_fname);
+        //m_wf.h5_write(gw);
         hdf5::GroupWriter gw("solver", fw);
-        m_wf.h5_write(gw);
+        hdf5::GroupWriter gw2("rdm", gw);
+        m_rdm.h5_write(gw2);
     }
 }
 
