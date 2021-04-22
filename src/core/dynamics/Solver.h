@@ -77,10 +77,18 @@ public:
         annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
     }
 
-    void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight){
+    void make_diagonal_mev_contribs(){
+        auto& row = m_wf.m_store.m_row;
+        ASSERT(row.occupied_ncycle(m_icycle));
+        m_rdm.make_contribs(row.m_onv, row.m_average_weight[0],
+                            row.m_onv, row.m_average_weight[1]/row.occupied_ncycle(m_icycle));
+        row.m_average_weight = 0;
+        row.m_icycle_occ = m_icycle;
+    }
+
+    void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight, const size_t& dst_ipart){
         // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
-        m_rdm.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[0]);
-        //std::cout << src_onv.to_string() << " " << m_wf.m_store.m_row.m_onv.to_string() << std::endl;
+        m_rdm.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[dst_ipart]);
     }
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,
@@ -106,12 +114,12 @@ public:
                 ASSERT(get_nrow_in_block()>0);
                 // row_current is pointing to the first row of the next src_onv block
                 // row_block_start can be used to access the src ONV data
-                make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight);
+                make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
                 row_block_start.jump(row_current);
             }
         }
         // finish off last block
-        make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight);
+        make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
     }
 
     void loop_over_spawned();

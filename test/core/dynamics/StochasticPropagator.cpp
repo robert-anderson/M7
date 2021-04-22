@@ -12,7 +12,7 @@
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
-    opts.nwalker_initial = 10.0;
+    opts.nwalker_initial = 300.0;
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.01;
     opts.load_balance_period = 5;
@@ -21,7 +21,8 @@ TEST(StochasticPropagator, Test) {
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
     opts.ncycle = 50000;
-    opts.replicate = false;
+    opts.rdm_rank = 1;
+    opts.replicate = true;
     opts.init();
 
     //const auto benchmark = -108.916561245585;
@@ -34,7 +35,8 @@ TEST(StochasticPropagator, Test) {
     }
 
     Wavefunction wf(opts, ham.nsite());
-    StochasticPropagator prop(ham, opts, wf.npart());
+    ASSERT_EQ(wf.npart(), 2);
+    StochasticPropagator prop(ham, opts, wf.m_format);
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
@@ -42,7 +44,8 @@ TEST(StochasticPropagator, Test) {
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, ref_energy);
+    wf.set_weight(0, opts.nwalker_initial);
+    wf.set_weight(1, opts.nwalker_initial);
 
     prop.m_shift = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);

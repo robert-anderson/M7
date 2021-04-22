@@ -121,6 +121,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
             m_store.m_row.m_values += row.m_values;
         }
         m_comm.recv().clear();
+        std::cout << m_store.to_string() << std::endl;
     }
 };
 

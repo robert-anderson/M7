@@ -164,7 +164,7 @@ struct NdNumberField : NumberFieldBase {
     std::string stats_string() const override {
         std::string tmp;
         for (size_t ielement = 0ul; ielement<nelement(); ++ielement)
-            tmp+= stats_string_element((*this)[ielement]);
+            tmp+=stats_string_element((*this)[ielement])+" ";
         return tmp;
     }
 

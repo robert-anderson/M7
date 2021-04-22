@@ -22,12 +22,16 @@ void Solver::loop_over_occupied_onvs() {
 
         if (row.is_cleared()) continue;
 
-
         if (row.m_weight.is_zero()) {
             // ONV has become unoccupied in all parts and must be removed from mapped list
+            make_diagonal_mev_contribs();
             m_wf.remove_row();
             continue;
         }
+        make_diagonal_mev_contribs();
+
+        if (defs::enable_mevs)
+            row.m_average_weight+=row.m_weight;
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 
@@ -45,9 +49,11 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
-            m_reference.add_row();
-            if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
-            if (m_opts.spf_hubbard_twf) m_hubbard_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+            if (ipart==0) {
+                m_reference.add_row();
+                if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+                if (m_opts.spf_hubbard_twf) m_hubbard_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+            }
 
             /*
             auto both_reps_ready = m_prop.m_variable_shift[ipart] && m_prop.m_variable_shift[m_wf.ipart_replica(ipart)];
@@ -258,10 +264,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_hubbard_twf(m_opts.spf_hubbard_twf ?
         new StaticTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
-        m_rdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec())
-        //m_mevs()//prop.m_ham.nsite(), m_opts.rdm_rank)
-//m_average_coeffs("average coeffs", {2, 2}, 1)
-{
+        m_rdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()){
     if (defs::enable_mevs && m_opts.rdm_rank>0){
         if(!m_opts.replicate && !m_prop.is_exact())
             log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
@@ -290,7 +293,6 @@ void Solver::execute(size_t niter) {
     }
 
     for (size_t i = 0ul; i < niter; ++i) {
-
         m_cycle_timer.reset();
         m_cycle_timer.unpause();
         begin_cycle();
@@ -315,7 +317,6 @@ void Solver::execute(size_t niter) {
         output_stats();
         ++m_icycle;
 
-        //std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
         if (m_exit.read() && m_exit.m_v) break;
     }
     if (!m_opts.write_hdf5_fname.empty()) {

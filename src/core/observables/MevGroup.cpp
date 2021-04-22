@@ -101,8 +101,8 @@ void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &sr
                                const defs::wf_t &dst_weight) {
     const auto exlvl = conn.nexcit();
     if (conn.nann() > m_nann && conn.ncre() > m_ncre) return;
-    const auto nins = exlvl-nop();
-    ASSERT(nins<=exlvl);
+    const auto nins = nop()-exlvl;
+    ASSERT(nins<=nop());
 
     const auto& promoter = m_promoters[nins];
     for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
