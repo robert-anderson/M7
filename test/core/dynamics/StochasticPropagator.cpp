@@ -17,10 +17,11 @@ TEST(StochasticPropagator, Test) {
     opts.tau_initial = 0.01;
     opts.load_balance_period = 5;
     opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 50000;
+    opts.nwalker_target = 200000;
     opts.shift_damp = 0.5;
     opts.shift_initial = 0.0;
-    opts.ncycle = 2000;
+    opts.ncycle_wait_mevs = 200;
+    opts.ncycle_accumulate_mevs = 1000;
     opts.rdm_rank = 1;
     opts.replicate = true;
     opts.write_hdf5_fname = "test_rdm_save.h5";

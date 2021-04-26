@@ -327,6 +327,9 @@ void Solver::execute(size_t niter) {
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) break;
+        if (defs::enable_mevs && m_mev_accumulation){
+            if (i==m_mev_accumulation.icycle_start()+m_opts.ncycle_accumulate_mevs) break;
+        }
     }
     if (!m_opts.write_hdf5_fname.empty()) {
         hdf5::FileWriter fw(m_opts.write_hdf5_fname);

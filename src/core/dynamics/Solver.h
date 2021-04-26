@@ -90,12 +90,12 @@ public:
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight, const size_t& dst_ipart){
         // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
+        if (!m_mev_accumulation) return;
         m_rdm.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[dst_ipart]);
     }
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,
                                                 const size_t& irow_block_end, const size_t& irow_store){
-        if (!m_mev_accumulation) return;
         // if the dst onv is not stored, it cannot give contributions to any MEVs
         if (irow_store==~0ul) {
             row_current.jump(irow_block_end);
