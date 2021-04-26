@@ -133,6 +133,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
         if (ints2_t::valid_inds(inds)) m_int_2.set(inds, value);
         else if (ints1_t::valid_inds(inds)) m_int_1.set(inds, value);
         else if (inds[0] == ~0ul) m_int_0 = value;
+        else MPI_ABORT("File reader error");
     }
     mpi::barrier();
     log::info("FCIDUMP loading complete.");

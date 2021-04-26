@@ -363,7 +363,7 @@ namespace string_utils {
     }
 
     static inline bool is_divider(const char &c) {
-        return c == ' ' || c == ',' || c == ')';
+        return c == ' ' || c == ',' || c == ')' || c=='\r';
     }
 
     static double read_double(const char *&ptr) {

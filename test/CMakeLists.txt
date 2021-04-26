@@ -35,6 +35,7 @@ if (ENABLE_HDF5)
     target_link_libraries(unittest ${_HDF5_LIBS})
     target_include_directories(unittest PUBLIC
             ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
             ${PROJECT_BINARY_DIR}/hdf5_local/build
     )
 endif ()

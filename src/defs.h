@@ -21,12 +21,6 @@
 #endif
 #endif
 
-#ifdef NDEBUG
-#define SETDBVAR(n, e) {}
-#else
-#define SETDBVAR(n, e) \
-{auto n = e;}
-#endif
 
 #ifdef NDEBUG
 #define	ASSERT(e) {}

@@ -11,7 +11,7 @@
 template<typename T>
 class SharedArray {
     const size_t m_size;
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
     MPI_Win m_win;
 #endif
     T *m_data = nullptr;
@@ -24,7 +24,7 @@ public:
          * else window_size = 0;
          * MPI_Win_allocate_shared (window_size,sizeof(double),MPI_INFO_NULL, nodecomm, &window_data,&node_window)
          */
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
         if (mpi::on_node_i_am_root()) {
             auto ierr = MPI_Win_allocate_shared(size * sizeof(T), sizeof(T), MPI_INFO_NULL, g_node_comm,
                                                 (void *) &m_data, &m_win);
@@ -47,17 +47,18 @@ public:
         ASSERT(disp_unit == sizeof(T))
         ASSERT((size_t) alloc_size == size * sizeof(T))
         MPI_Win_unlock_all(m_win);
-        if (mpi::on_node_i_am_root()) memset((void*)m_data, 0, size * sizeof(T));
+        if (mpi::on_node_i_am_root()) std::memset((void*)m_data, 0, size * sizeof(T));
         mpi::barrier_on_node();
 #else
-        m_data = new T[](size);
+        m_data = new T[m_size];
+        std::memset((void*)m_data, 0, m_size * sizeof(T));
 #endif
     }
 
     SharedArray(SharedArray &&rhs) : m_size(rhs.m_size) {
         m_data = rhs.m_data;
+#ifdef ENABLE_MPI
         m_win = rhs.m_win;
-#ifdef HAVE_MPI
         /*
          * nullify memory window handle in rhs so that the destructor does not
          * free memory still in use here
@@ -72,7 +73,7 @@ public:
 
     ~SharedArray() {
         ASSERT(m_data)
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
         if (m_win != MPI_WIN_NULL) MPI_Win_free(&m_win);
 #else
         if (m_data) delete m_data;
@@ -87,13 +88,13 @@ public:
         // element-modifying access should only take place on the root rank
         if (mpi::on_node_i_am_root()) {
             ASSERT(i < m_size)
-            *(m_data + i) = v;
+            m_data[i] = v;
         }
     }
 
     const T &get(const size_t &i) const {
         ASSERT(i < m_size)
-        return *(m_data + i);
+        return m_data[i];
     }
 
     const T &operator[](const size_t &i) const {

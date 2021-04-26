@@ -24,10 +24,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=core-avx2")
 find_package(LAPACK REQUIRED)
 
 
-find_package(MPI REQUIRED COMPONENTS C CXX)
+find_package(MPI REQUIRED COMPONENTS C)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
 if (MPI_FOUND)
-    add_definitions(-DHAVE_MPI)
+    add_compile_definitions(ENABLE_MPI)
 else()
 endif()
 
@@ -65,7 +65,9 @@ if(ENABLE_HDF5)
                 ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
                 ${PROJECT_BINARY_DIR}/hdf5_local/build
         )
-        set(_HDF5_LIBS ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a -ldl)
+        set(_HDF5_LIBS
+                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.so
+                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.so -ldl)
     #endif()
 endif()
 
