@@ -8,19 +8,19 @@
 #include "src/core/io/Logging.h"
 
 void mpi::barrier() {
-#if HAVE_MPI
+#if ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
 }
 
 void mpi::barrier_on_node() {
-#if HAVE_MPI
+#if ENABLE_MPI
     MPI_Barrier(g_node_comm);
 #endif
 }
 
 bool mpi::initialized() {
-#if HAVE_MPI
+#if ENABLE_MPI
     int tmp;
     MPI_Initialized(&tmp);
     return tmp;
@@ -29,7 +29,7 @@ bool mpi::initialized() {
 }
 
 bool mpi::finalized() {
-#if HAVE_MPI
+#if ENABLE_MPI
     int tmp;
     MPI_Finalized(&tmp);
     return tmp;
@@ -38,7 +38,7 @@ bool mpi::finalized() {
 }
 
 void mpi::initialize(int *argc, char ***argv) {
-#if HAVE_MPI
+#if ENABLE_MPI
     if (!initialized()) {
         MPI_Init(argc, argv);
         setup_mpi_globals();
@@ -47,7 +47,7 @@ void mpi::initialize(int *argc, char ***argv) {
 }
 
 void mpi::finalize() {
-#if HAVE_MPI
+#if ENABLE_MPI
     if (initialized() && !finalized()) {
         MPI_Finalize();
     }
@@ -71,7 +71,7 @@ bool mpi::on_node_i_am_root() {
 }
 
 void mpi::abort_(std::string message) {
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
     log::error_("Forcing MPI_Abort from this rank: \"{}\"", std::move(message));
     log::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
@@ -84,7 +84,7 @@ void mpi::abort_(std::string message) {
 }
 
 void mpi::abort(std::string message){
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
     log::error_("Aborting all MPI processes: \"{}\"", std::move(message));
     log::finalize();
     MPI_Barrier(MPI_COMM_WORLD);
@@ -99,7 +99,7 @@ void mpi::abort(std::string message){
 
 
 void mpi::setup_mpi_globals() {
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
     int tmp;
     MPI_Comm_size(MPI_COMM_WORLD, &tmp);
     g_nrank = tmp;
@@ -121,7 +121,7 @@ void mpi::setup_mpi_globals() {
 size_t g_irank = 0;
 size_t g_nrank = 1;
 std::string g_processor_name = "";
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPI
 MPI_Comm g_node_comm;
 #endif
 size_t g_irank_on_node = 0;
