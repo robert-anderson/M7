@@ -14,7 +14,52 @@
 #include "src/core/integrals/Integrals_2e.h"
 #include "src/core/table/BufferedFields.h"
 
-
+/**
+ * All interactions between the fermionic parts of ONVs are described in this class.
+ *
+ * The rank of a normal-ordered fermion operator product is denoted by two integers as (nc, na) where nc is the number
+ * of creation operators in the product (which must be distinct by PEP) and na is the number of annihilation operators
+ * in the product with the same restriction.
+ *
+ * The standard quantum-chemical Hamiltonian has terms of three (fermion number conserving) ranks
+ * (0, 0), (1, 1), (2, 2)
+ *
+ * However, higher values of nc and na are conceivably of interest in model studies, and although they are not included
+ * in the current implementation, they can be easily incorporated with the definition of new methods following the
+ * naming convention set out here.
+ *
+ * On the other hand, fermion number non-conserving interactions are implemented, which have ranks denoted by
+ * (0, 1), (1, 2), (0, 2),  (1, 0), (2, 1), (2, 0)
+ * effecting particle number sector changes (from ket to bra) +1, +1, +2, -1, -1, -2 respectively.
+ *
+ * Terms of a given rank are subdivided into multiple excitation levels, and each ONV connection is identified with one
+ * of these. The notation here is similar to that of the H terms:
+ *
+ * Excitation level of connection  |  May require H element contributions from terms of rank:
+ * -----------------------------------------------------------------------------
+ *      (0, 0)                     |  (0, 0), (1, 1), (2, 2)
+ *      (1, 1)                     |  (1, 1), (2, 2)
+ *      (2, 2)                     |  (2, 2)
+ *      (0, 1)                     |  (0, 1), (1, 2)
+ *      (1, 2)                     |  (1, 2)
+ *      (0, 2)                     |  (0, 2)
+ *      (1, 0)                     |  (1, 0), (2, 1)
+ *      (2, 1)                     |  (2, 1)
+ * ------------------------------------------------------------------------------
+ *
+ * Clearly, only four of the presently handled excitation levels require contributions from higher-rank terms in the
+ * Hamiltonian. Some models may possess symmetry properties which eliminate any or all of the contributions from an
+ * excitation level
+ * e.g. N-dimensional Hubbard model has
+ *  * no rank (1, 1) contribution to exlvl (0, 0) - (no "hopping" to same spin orbital)
+ *  * no rank (2, 2) contribution to exlvl (1, 1) - (two-body interaction is diagonal)
+ *  * no exlvl (2, 2) contributions at all - (two-body interaction is diagonal)
+ *
+ *
+ *
+ * Scalars associated with terms are called coefficients, and those associated with connections are called elements.
+ *
+ */
 class FermionHamiltonian {
 protected:
     const size_t m_nelec;
