@@ -28,7 +28,7 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.remove_row();
             continue;
         }
-        make_diagonal_mev_contribs();
+        //make_diagonal_mev_contribs();
         /*
          * if the accumulation of MEVs has just started, treat the row as though it just became
          * occupied on this MC cycle

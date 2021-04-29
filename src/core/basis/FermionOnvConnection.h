@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <src/core/field/Fields.h>
+#include <src/core/hamiltonian/HamiltonianData.h>
 
 /*
  * <out| ...cre... ...ann... |in>
@@ -94,9 +95,8 @@ public:
         return nexcit()<=2;
     }
 
-    bool is_exlevel(const defs::inds& exlevel) const {
-        if (exlevel.size()!=2) return false;
-        return m_cre.size()==exlevel[0] && m_ann.size()==exlevel[1];
+    size_t rank_label() const {
+        return ham_data::encode_rank_label(ncre(), nann());
     }
 
 };

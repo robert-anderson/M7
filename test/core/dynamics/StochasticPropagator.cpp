@@ -102,7 +102,7 @@ TEST(StochasticPropagator, Hubbard) {
     opts.shift_damp = 0.4;
     opts.ncycle = 30000;
     opts.spf_uniform_twf = true;
-    opts.rdm_rank = 1;
+    //opts.rdm_rank = 1;
     opts.init();
 
     // -10.328242246088791

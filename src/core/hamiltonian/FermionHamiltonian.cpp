@@ -8,7 +8,6 @@
 #include "FermionHamiltonian.h"
 
 
-
 buffered::FermionOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
     buffered::FermionOnv ref(m_nsite);
     ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
@@ -114,7 +113,8 @@ FermionHamiltonian::FermionHamiltonian(const size_t &nelec, const size_t &nsite,
         m_complex_valued(complex_valued),
         m_int_2e_rank(int_2e_rank),
         m_int_1(nsite, spin_resolved),
-        m_int_2(nsite, spin_resolved)
+        m_int_2(nsite, spin_resolved),
+        m_terms(new Terms(*this))
 {}
 
 FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
@@ -124,19 +124,54 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
                            file_reader.m_complex_valued,
                            file_reader.spin_resolved(),
                            file_reader.int_2e_rank()) {
+
+    using namespace ham_data;
     defs::inds inds(4);
     defs::ham_t value;
 
-    log::info("Reading fermion Hamiltonian from FCIDUMP file \"" + file_reader.m_fname + "\"...");
-    log::info("Loading fermion Hamiltonian from FCIDUMP...");
+    // assume no contribution cases to be nonzero unless a counterexample is found
+    m_nonzero_contribs.fill(false);
+
+    log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
-        if (ints2_t::valid_inds(inds)) m_int_2.set(inds, value);
-        else if (ints1_t::valid_inds(inds)) m_int_1.set(inds, value);
-        else if (inds[0] == ~0ul) m_int_0 = value;
+        auto contrib_case = ham_data::get_coupling_contrib_case(inds);
+        auto rank = c_contrib_inds[contrib_case].m_term.m_nann;
+        // all integrals are particle number conserving (for now)
+        ASSERT(rank == c_contrib_inds[contrib_case].m_term.m_ncre);
+        m_nonzero_contribs[contrib_case] = true;
+        if (rank==2) {
+            if (m_on_site_only_0022 && !on_site(inds[0], inds[1], inds[2], inds[3]))
+                m_on_site_only_0022 = false;
+            m_int_2.set(inds, value);
+        }
+        else if (rank==1) {
+            if (m_nn_only_1111 && !nearest_neighbors(inds[0], inds[1], false)) m_nn_only_1111 = false;
+            if (m_nnp_only_1111 && !nearest_neighbors(inds[0], inds[1], true)) m_nnp_only_1111 = false;
+            m_int_1.set(inds, value);
+        }
+        else if (rank==0) m_int_0 = value;
         else MPI_ABORT("File reader error");
     }
     mpi::barrier();
     log::info("FCIDUMP loading complete.");
+
+    // some useful output to identify the kind of H detected
+    if (!m_nonzero_contribs[contrib_0011])
+        log::info("1-electron term in Hamiltonian has no diagonal contributions");
+    if (!m_nonzero_contribs[contrib_1111])
+        log::info("1-electron term in Hamiltonian has no single-excitation contributions");
+    if (!m_nonzero_contribs[contrib_0022])
+        log::info("2-electron term in Hamiltonian has no diagonal contributions");
+    if (!m_nonzero_contribs[contrib_1122])
+        log::info("2-electron term in Hamiltonian has no single-excitation contributions");
+    if (!m_nonzero_contribs[contrib_2222])
+        log::info("2-electron term in Hamiltonian has no double-excitation contributions");
+    if (m_nn_only_1111)
+        log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");
+    else if (m_nnp_only_1111)
+        log::info("single-excitation contributions to 1-electron term are periodic nearest-neighbor only");
+    if (m_on_site_only_0022)
+        log::info("2-electron term diagonal contributions are on-site only");
 }
 
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
@@ -213,4 +248,88 @@ defs::ham_t FermionHamiltonian::get_element(const conn::Antisym<0> &connection) 
 
 defs::ham_t FermionHamiltonian::get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const {
     return get_element(AntisymFermionOnvConnection(ket, bra));
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_00(const defs::inds &occs, const size_t &nocc) const {
+    defs::ham_t element = m_ham.m_int_0;
+    for (size_t i = 0ul; i < nocc; ++i) {
+        auto const &occi = occs[i];
+        element += m_ham.m_int_1(occi, occi);
+        for (size_t j = 0ul; j < i; ++j) {
+            auto const &occj = occs[j];
+            element += m_ham.m_int_2.phys_antisym_element(occi, occj, occi, occj);
+        }
+    }
+    return element;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_11(const conn::Antisym<0> &conn) const {
+    ASSERT(conn.rank_label() == ham_data::encode_rank_label(1, 1));
+    const auto &cre = conn.cre(0);
+    const auto &ann = conn.ann(0);
+    const auto &coms = conn.com();
+    const auto &ncom = conn.ncom();
+
+    defs::ham_t element = m_ham.m_int_1(cre, ann);
+    for (size_t icom = 0ul; icom < ncom; ++icom)
+        element += m_ham.m_int_2.phys_antisym_element(cre, coms[icom], ann, coms[icom]);
+    return conn.phase() ? -element : element;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_22(const conn::Antisym<0> &conn) const {
+    ASSERT(conn.rank_label() == ham_data::encode_rank_label(2, 2));
+    const auto element = m_ham.m_int_2.phys_antisym_element(
+            conn.cre(0), conn.cre(1), conn.ann(0), conn.ann(1));
+    return conn.phase() ? -element : element;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_01(const conn::Antisym<0> &conn) const {
+    return 0.0;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_12(const conn::Antisym<0> &conn) const {
+    return 0.0;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_02(const conn::Antisym<0> &conn) const {
+    return 0.0;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_10(const conn::Antisym<0> &conn) const {
+    return 0.0;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_21(const conn::Antisym<0> &conn) const {
+    return 0.0;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element_20(const conn::Antisym<0> &conn) const {
+    return 0.0;
+}
+
+defs::ham_t FermionHamiltonian::Terms::get_element(const conn::Antisym<0> &conn) const {
+    auto rank_label = conn.rank_label();
+    // should compile to jump table
+    switch (rank_label) {
+        case ham_data::encode_rank_label(0, 0):
+            return get_element_00(conn.com(), conn.ncom());
+        case ham_data::encode_rank_label(1, 1):
+            return get_element_11(conn);
+        case ham_data::encode_rank_label(2, 2):
+            return get_element_22(conn);
+        case ham_data::encode_rank_label(0, 1):
+            return get_element_01(conn);
+        case ham_data::encode_rank_label(1, 2):
+            return get_element_12(conn);
+        case ham_data::encode_rank_label(0, 2):
+            return get_element_02(conn);
+        case ham_data::encode_rank_label(1, 0):
+            return get_element_10(conn);
+        case ham_data::encode_rank_label(2, 1):
+            return get_element_21(conn);
+        case ham_data::encode_rank_label(2, 0):
+            return get_element_20(conn);
+        default:
+            return 0.0;
+    }
 }

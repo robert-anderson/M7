@@ -18,55 +18,13 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     ASSERT(!consts::float_is_zero(weight));
 
-    for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
-        const auto occ = occs[iocc];
-        for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
-            auto vac = vacs[ivac];
+    auto body = [&](const conn::Antisym<0> &conn, const fields::FermionOnv& dst_onv, const defs::ham_t &helement){
+        auto delta = -weight * tau() * helement;
+        if (consts::float_is_zero(delta)) return;
+        wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
+    };
 
-            m_aconn.zero();
-            m_aconn.add(occ, vac);
-            m_dst_onv.zero();
-            m_aconn.apply(src_onv, m_dst_onv);
-            auto helement = m_ham.get_element_1(m_aconn);
-            if (consts::float_is_zero(helement)) continue;
-
-            auto delta = -weight * tau() * helement;
-            if (consts::float_is_zero(delta)) continue;
-            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
-        }
-        defs::ham_t delta;
-        delta = -weight * tau() * off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, 1);
-        if (!consts::float_is_zero(delta))
-            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
-        delta = -weight * tau() * off_diagonal_bosons(m_ham, m_aconn, src_onv, m_dst_onv, occ, -1);
-        if (!consts::float_is_zero(delta))
-            wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
-    }
-
-    if (m_ham.int_2e_rank() == 2) {
-        ContainerCombinationEnumerator<defs::inds> occ_enumerator(occs.inds(), occs.size(), 2);
-        defs::inds occ_inds(2);
-
-        while (occ_enumerator.next(occ_inds)) {
-            {
-                ContainerCombinationEnumerator<defs::inds> vac_enumerator(vacs.inds(), vacs.size(), 2);
-                defs::inds vac_inds(2);
-                while (vac_enumerator.next(vac_inds)) {
-
-                    m_aconn.zero();
-                    m_aconn.add(occ_inds[0], occ_inds[1], vac_inds[0], vac_inds[1]);
-                    m_dst_onv.zero();
-                    m_aconn.apply(src_onv, m_dst_onv);
-                    auto helement = m_ham.get_element_2(m_aconn);
-                    if (consts::float_is_zero(helement)) continue;
-
-                    auto delta = -weight * tau() * helement;
-                    if (consts::float_is_zero(delta)) continue;
-                    wf.add_spawn(m_dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
-                }
-            }
-        }
-    }
+    m_ham.foreach_connection(src_onv, body, true, true);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
