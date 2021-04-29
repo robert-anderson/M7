@@ -10,6 +10,7 @@
 #include <src/core/parallel/Reducible.h>
 #include "src/core/dynamics/WalkerTable.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/observables/SignProblemFreeTwf.h"
 
 template<typename fn_t, bool enable_bosons = defs::enable_bosons>
 struct ConnectionEnumerator {
@@ -47,20 +48,20 @@ struct ConnectionEnumerator {
 
 };
 
-struct UniformTwf {
-    std::vector<defs::ham_t> m_numerator;
-    std::vector<defs::ham_t> m_numerator_total;
-    size_t m_nsite;
-
+class UniformTwf : public SpfTwfBase {
+public:
     UniformTwf(size_t npart, size_t nsite);
 
-    void add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, const fields::Onv<0> &onv);
+    void add(const Hamiltonian<0> &ham,
+             const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+             const fields::Onv<0> &onv) override;
 
-    void add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, const fields::Onv<1> &onv);
+    void add(const Hamiltonian<1> &ham,
+             const fields::Numbers<defs::wf_t,
+             defs::ndim_wf> &weight,
+             const fields::Onv<1> &onv) override;
 
-    void reduce();
-
-
+    void reduce() override;
 };
 
 

@@ -22,6 +22,7 @@ void Solver::loop_over_occupied_onvs() {
 
         if (row.is_cleared()) continue;
 
+
         if (row.m_weight.is_zero()) {
             // ONV has become unoccupied in all parts and must be removed from mapped list
             make_diagonal_mev_contribs();
@@ -57,14 +58,11 @@ void Solver::loop_over_occupied_onvs() {
             if (ipart==0) {
                 m_reference.add_row();
                 if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
-                if (m_opts.spf_hubbard_twf) m_hubbard_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+                if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
 
-            /*
-            auto both_reps_ready = m_prop.m_variable_shift[ipart] && m_prop.m_variable_shift[m_wf.ipart_replica(ipart)];
-            if (m_mevs && both_reps_ready)
-                m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
-                */
+            //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
+            //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
 
             /*
             if (m_prop.m_variable_shift){
@@ -94,6 +92,8 @@ void Solver::loop_over_occupied_onvs() {
     m_synchronization_timer.unpause();
     mpi::barrier();
     m_synchronization_timer.pause();
+
+    //std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
 void Solver::annihilate_row(const size_t& dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
@@ -187,6 +187,19 @@ void Solver::loop_over_spawned() {
          * once this condition is met (at row 5 in the example), irow_block_start is iterated
          * to the row before irow_current,
          *
+         * We also need to be careful of the walker weights
+         * if Csrc is taken from the wavefunction at cycle i,
+         * Cdst is at an intermediate value equal to the wavefunction at cycle i with the diagonal
+         * part of the propagator already applied.
+         *
+         * We don't want to introduce a second post-annihilation loop over occupied ONVs to apply
+         * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
+         * value of the walker weight before the diagonal death/cloning.
+         *
+         * In the exact propagator, the death step does:
+         * Ci -> Ci*(1 - tau (Hii-shift)).
+         *
+         * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
          *
          */
 
@@ -258,10 +271,15 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_connection(prop.m_ham.nsite()),
         m_exit("exit"),
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
-        m_hubbard_twf(m_opts.spf_hubbard_twf ?
-        new StaticTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
+        m_weighted_twf(m_opts.spf_weighted_twf ?
+                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
+                                       m_opts.spf_twf_fermion_factor,
+                                       m_opts.spf_twf_boson_factor) :
+                       nullptr),
         m_rdm(m_opts.rdm_rank ? new FermionRdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()) : nullptr),
+//m_average_coeffs("average coeffs", {2, 2}, 1),
         m_mev_accumulation("MEV accumulation"){
+
     if (defs::enable_mevs && m_opts.rdm_rank>0){
         if(!m_opts.replicate && !m_prop.is_exact())
             log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
@@ -388,7 +406,7 @@ void Solver::end_cycle() {
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
     if (m_uniform_twf) m_uniform_twf->reduce();
-    if (m_hubbard_twf) m_hubbard_twf->reduce();
+    if (m_weighted_twf) m_weighted_twf->reduce();
 }
 
 void Solver::output_stats() {
@@ -417,9 +435,9 @@ void Solver::output_stats() {
         stats.m_annihilation_loop_time = m_annihilate_timer;
         stats.m_total_cycle_time = m_cycle_timer;
         if (m_uniform_twf) stats.m_uniform_twf_num = m_uniform_twf->m_numerator_total[0];
-        if (m_hubbard_twf) {
-            stats.m_hubbard_twf_num = m_hubbard_twf->m_numerator_total[0];
-            stats.m_hubbard_twf_denom = m_hubbard_twf->m_denominator_total[0];
+        if (m_weighted_twf) {
+            stats.m_weighted_twf_num = m_weighted_twf->m_numerator_total[0];
+            stats.m_weighted_twf_denom = m_weighted_twf->m_denominator_total[0];
         }
         m_stats->flush();
     }
