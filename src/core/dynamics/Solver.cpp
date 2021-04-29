@@ -47,7 +47,7 @@ void Solver::loop_over_occupied_onvs() {
 
             m_reference.add_row();
             if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
-            if (m_opts.spf_hubbard_twf) m_hubbard_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+            if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
 
             //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
             //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
@@ -253,8 +253,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_connection(prop.m_ham.nsite()),
         m_exit("exit"),
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
-        m_hubbard_twf(m_opts.spf_hubbard_twf ?
-        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
+        m_weighted_twf(m_opts.spf_weighted_twf ?
+                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
         m_mevs(prop.m_ham.nsite(), m_opts.rdm_rank)
 //m_average_coeffs("average coeffs", {2, 2}, 1)
 {
@@ -351,7 +351,7 @@ void Solver::end_cycle() {
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
     if (m_uniform_twf) m_uniform_twf->reduce();
-    if (m_hubbard_twf) m_hubbard_twf->reduce();
+    if (m_weighted_twf) m_weighted_twf->reduce();
 }
 
 void Solver::output_stats() {
@@ -380,9 +380,9 @@ void Solver::output_stats() {
         stats.m_annihilation_loop_time = m_annihilate_timer;
         stats.m_total_cycle_time = m_cycle_timer;
         if (m_uniform_twf) stats.m_uniform_twf_num = m_uniform_twf->m_numerator_total[0];
-        if (m_hubbard_twf) {
-            stats.m_hubbard_twf_num = m_hubbard_twf->m_numerator_total[0];
-            stats.m_hubbard_twf_denom = m_hubbard_twf->m_denominator_total[0];
+        if (m_weighted_twf) {
+            stats.m_weighted_twf_num = m_weighted_twf->m_numerator_total[0];
+            stats.m_weighted_twf_denom = m_weighted_twf->m_denominator_total[0];
         }
         m_stats->flush();
     }

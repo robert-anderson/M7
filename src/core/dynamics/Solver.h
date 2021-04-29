@@ -55,7 +55,7 @@ class Solver {
 
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
-    std::unique_ptr<WeightedTwf> m_hubbard_twf;
+    std::unique_ptr<WeightedTwf> m_weighted_twf;
     BilinearMevGroup m_mevs;
 
 public:

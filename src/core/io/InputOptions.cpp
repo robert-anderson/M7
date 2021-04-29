@@ -37,7 +37,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_flag("--spf_uniform_twf", spf_uniform_twf,
              "calculate uniform TWF for SPF systems");
 
-    add_flag("--spf_hubbard_twf", spf_hubbard_twf,
+    add_flag("--spf_weighted_twf", spf_weighted_twf,
              "calculate non-interacting Hubbard-Holstein-like TWF for SPF systems");
 
     add_option("-i,--nwalker_initial", nwalker_initial,
