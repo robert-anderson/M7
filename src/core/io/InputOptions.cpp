@@ -157,4 +157,12 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--replicate", replicate,
                "Evolve a second, statistically independent replica for each root WF");
 
+    add_option("--spf_twf_fermion_factor", spf_twf_fermion_factor,
+               "Exponential constant penalising fermion double-occupancy in "
+               "weighted twf");
+
+    add_option("--spf_twf_boson_factor", spf_twf_boson_factor,
+               "Exponential constant penalising boson total occupancy in "
+               "weighted twf");
+
 }

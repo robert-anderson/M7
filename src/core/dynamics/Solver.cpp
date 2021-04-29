@@ -254,7 +254,10 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_exit("exit"),
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_weighted_twf(m_opts.spf_weighted_twf ?
-                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
+                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
+                                       m_opts.spf_twf_fermion_factor,
+                                       m_opts.spf_twf_boson_factor) :
+                       nullptr),
         m_mevs(prop.m_ham.nsite(), m_opts.rdm_rank)
 //m_average_coeffs("average coeffs", {2, 2}, 1)
 {
