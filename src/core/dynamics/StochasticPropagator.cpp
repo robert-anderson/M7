@@ -38,7 +38,9 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
 
 void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const auto &row = wf.m_store.m_row;
-    const defs::wf_t &weight = row.m_weight[ipart];
+    const defs::wf_t& weight = row.m_weight[ipart];
+    double rdm_unbias_factor = 1.0;
+
     ASSERT(!consts::float_is_zero(weight));
     ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
     const auto &src_onv = row.m_onv;
@@ -64,8 +66,13 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         if (consts::float_is_zero(delta)) continue;
         delta = m_prng.stochastic_threshold(delta, m_opts.min_spawn_mag);
         if (consts::float_is_zero(delta)) continue;
+
+        if (wf.recv().m_row.m_send_parents){
+            // reweight by probability that this connection was sampled a non-zero number of times
+            rdm_unbias_factor = 1.0 / (1.0-std::pow(1-prob, nattempt));
+        }
         wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic,
-                     ipart, src_onv, weight);
+                     ipart, src_onv, rdm_unbias_factor*weight);
     }
 }
 

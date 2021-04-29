@@ -49,11 +49,11 @@ void Reference::change(const size_t &irow, const size_t &irank) {
     m_redefinition_cycle = true;
     std::cout << "Reference ONV " << to_string() << " stored on MPI rank " << irank << std::endl;
     m_irank = irank;
-    m_irow = irow;
+    m_irow_wf = irow;
 }
 
 void Reference::log_candidate_weight(const size_t &irow, const defs::wf_comp_t &candidate_weight) {
-    if (irow==m_irow && mpi::i_am(m_irank)) return;
+    if (irow==m_irow_wf && mpi::i_am(m_irank)) return;
     if (candidate_weight>m_candidate_abs_weight(0, 0)){
         m_candidate_abs_weight(0, 0) = candidate_weight;
         m_irow_candidate = irow;

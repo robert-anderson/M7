@@ -123,6 +123,20 @@ struct TableBase {
     virtual std::string to_string(const defs::inds *ordering = nullptr) const {
         return "";
     }
+
+    virtual void all_gatherv(const TableBase& src) {
+        defs::inds nrows(mpi::nrank());
+        defs::inds counts(mpi::nrank());
+        defs::inds displs(mpi::nrank());
+        ASSERT(src.m_row_dsize==m_row_dsize);
+        mpi::all_gather(src.m_hwm, nrows);
+        counts = nrows;
+        for (auto& v: counts) v*=m_row_dsize;
+        mpi::counts_to_displs_consec(counts, displs);
+        auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
+        resize(nrow_total);
+        mpi::all_gatherv(src.dbegin(), m_hwm*m_row_dsize, dbegin(), counts, displs);
+    }
 };
 
 template<typename row_t>

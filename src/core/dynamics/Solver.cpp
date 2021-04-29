@@ -141,12 +141,12 @@ void Solver::loop_over_spawned() {
         auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
             row1.jump(irow1);
             row2.jump(irow2);
-            // sort criteria from major to minor: dst ONV, src ONV, dst_ipart
+            // sort criteria from major to minor: dst ONV, dst_ipart, src ONV,
             if (row1.m_dst_onv == row2.m_dst_onv) {
-                if (row1.m_src_onv == row2.m_src_onv) {
-                    return row1.m_dst_ipart <= row2.m_dst_ipart;
+                if (row1.m_dst_ipart == row2.m_dst_ipart) {
+                    return row1.m_src_onv <= row2.m_src_onv;
                 }
-                return row1.m_src_onv <= row2.m_src_onv;
+                return row1.m_dst_ipart <= row2.m_dst_ipart;
             }
             return row1.m_dst_onv <= row2.m_dst_onv;
         };
@@ -187,19 +187,6 @@ void Solver::loop_over_spawned() {
          * once this condition is met (at row 5 in the example), irow_block_start is iterated
          * to the row before irow_current,
          *
-         * We also need to be careful of the walker weights
-         * if Csrc is taken from the wavefunction at cycle i,
-         * Cdst is at an intermediate value equal to the wavefunction at cycle i with the diagonal
-         * part of the propagator already applied.
-         *
-         * We don't want to introduce a second post-annihilation loop over occupied ONVs to apply
-         * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
-         * value of the walker weight before the diagonal death/cloning.
-         *
-         * In the exact propagator, the death step does:
-         * Ci -> Ci*(1 - tau (Hii-shift)).
-         *
-         * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
          *
          */
 
@@ -219,12 +206,16 @@ void Solver::loop_over_spawned() {
             return allow;
         };
 
+        auto still_in_block = [&](){
+            return row_current.m_dst_onv == row_block_start.m_dst_onv &&
+            row_current.m_dst_ipart == row_block_start.m_dst_ipart;
+        };
+
         row_block_start.restart();
         defs::wf_t total_delta = 0.0;
         for (row_current.restart(); row_current.in_range(); row_current.step()) {
-            size_t dst_ipart = row_current.m_dst_ipart;
-            if (row_current.m_dst_onv == row_block_start.m_dst_onv) {
-                // still in block
+            size_t dst_ipart = row_block_start.m_dst_ipart;
+            if (still_in_block()) {
                 total_delta += row_current.m_delta_weight;
             } else {
                 // row_current is in first row of next block
@@ -269,7 +260,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_hubbard_twf(m_opts.spf_hubbard_twf ?
         new StaticTwf(m_wf.npart(), prop.m_ham.nsite(), 1.0, 1.0) : nullptr),
-        m_rdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()),
+        m_rdm(m_opts.rdm_rank ? new FermionRdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()) : nullptr),
         m_mev_accumulation("MEV accumulation"){
     if (defs::enable_mevs && m_opts.rdm_rank>0){
         if(!m_opts.replicate && !m_prop.is_exact())
@@ -296,9 +287,11 @@ void Solver::execute(size_t niter) {
         hdf5::GroupReader gr("solver", fr);
         //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
         //loop_over_spawned();
-        hdf5::GroupReader gr2("rdm", gr);
-        m_rdm.h5_read(gr);
-        m_rdm.end_cycle();
+        if(m_rdm) {
+            hdf5::GroupReader gr2("rdm", gr);
+            m_rdm->h5_read(gr);
+            m_rdm->end_cycle();
+        }
     }
 
     for (size_t i = 0ul; i < niter; ++i) {
@@ -335,8 +328,10 @@ void Solver::execute(size_t niter) {
         hdf5::FileWriter fw(m_opts.write_hdf5_fname);
         //m_wf.h5_write(gw);
         hdf5::GroupWriter gw("solver", fw);
-        hdf5::GroupWriter gw2("rdm", gw);
-        m_rdm.h5_write(gw2);
+        if (m_rdm) {
+            hdf5::GroupWriter gw2("rdm", gw);
+            m_rdm->h5_write(gw2);
+        }
     }
 }
 
@@ -388,7 +383,7 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator ONVs have occurred");
 
-    m_rdm.end_cycle();
+    if (m_rdm) m_rdm->end_cycle();
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);

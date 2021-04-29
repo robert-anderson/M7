@@ -10,6 +10,8 @@
 
 TableBase::TableBase(size_t row_dsize) :
         m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){
+    // row must have non-zero size
+    ASSERT(row_dsize);
 }
 
 TableBase::TableBase(const TableBase &other) :

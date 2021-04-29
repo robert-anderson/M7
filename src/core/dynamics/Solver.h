@@ -57,7 +57,7 @@ class Solver {
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<StaticTwf> m_hubbard_twf;
     //BilinearMevGroup m_mevs;
-    FermionRdm m_rdm;
+    std::unique_ptr<FermionRdm> m_rdm;
     Epoch m_mev_accumulation;
 
 public:
@@ -82,16 +82,33 @@ public:
         if (!m_mev_accumulation) return;
         auto& row = m_wf.m_store.m_row;
         ASSERT(row.occupied_ncycle(m_icycle));
-        m_rdm.make_contribs(row.m_onv, row.m_average_weight[0],
+        m_rdm->make_contribs(row.m_onv, row.m_average_weight[0],
                             row.m_onv, row.m_average_weight[1]/row.occupied_ncycle(m_icycle));
         row.m_average_weight = 0;
         row.m_icycle_occ = m_icycle;
     }
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight, const size_t& dst_ipart){
-        // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
+        // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
         if (!m_mev_accumulation) return;
-        m_rdm.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[dst_ipart]);
+        if (m_rdm) {
+            /*
+             * We need to be careful of the walker weights
+             * if src_weight is taken from the wavefunction at cycle i,
+             * dst_weight is at an intermediate value equal to the wavefunction at cycle i with the diagonal
+             * part of the propagator already applied.
+             * We don't want to introduce a second post-annihilation loop over occupied ONVs to apply
+             * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
+             * value of the walker weight before the diagonal death/cloning.
+             *
+             * In the exact propagator, the death step does:
+             * Ci -> Ci*(1 - tau (Hii-shift)).
+             * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
+             */
+            auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart];
+            dst_weight_before_death /= 1 - m_prop.tau()*(m_wf.m_store.m_row.m_hdiag-m_prop.m_shift[dst_ipart]);
+            m_rdm->make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
+        }
     }
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,

@@ -22,7 +22,6 @@ bool FieldBase::is_comparable(const FieldBase &other) const {
 
 void FieldBase::add_to_row(Row *row) {
     if (!row) return;
-    MPI_ASSERT(m_size, "Can't add a field of zero size to a row.");
     MPI_REQUIRE(!is_added_to_row(), "Field must not be already associated with a row");
     m_row_offset = row->add_field(this);
     m_row = row;
