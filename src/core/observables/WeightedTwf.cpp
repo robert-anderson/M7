@@ -2,16 +2,15 @@
 // Created by jhalson on 06/04/2021.
 //
 
-#include "StaticTwf.h"
+#include "WeightedTwf.h"
 
-StaticTwf::StaticTwf(size_t npart, size_t nsite, double_t fermion_factor, double_t boson_factor) :
-        m_numerator(npart, 0.0), m_numerator_total(npart, 0.0),
-        m_denominator(npart, 0.0), m_denominator_total(npart, 0.0),
+WeightedTwf::WeightedTwf(size_t npart, size_t nsite, double_t fermion_factor, double_t boson_factor) :
+        SpfTwfBase(npart, nsite),
         m_fermion_double_occ_penalty_factor(fermion_factor),
-        m_boson_occ_penalty_factor(boson_factor),
-        m_nsite(nsite){}
+        m_boson_occ_penalty_factor(boson_factor)
+        {}
 
-void StaticTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+void WeightedTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<0> &onv) {
     conn::Antisym<0> conn(m_nsite);
     buffered::Onv<0> work_onv(m_nsite);
@@ -49,14 +48,7 @@ void StaticTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t,
     }
 }
 
-void StaticTwf::reduce() {
-    mpi::all_sum(m_numerator.data(), m_numerator_total.data(), m_numerator.size());
-    mpi::all_sum(m_denominator.data(), m_denominator_total.data(), m_denominator.size());
-    m_numerator.assign(m_numerator.size(), 0.0);
-    m_denominator.assign(m_denominator.size(), 0.0);
-}
-
-defs::ham_t StaticTwf::evaluate_static_twf(const fields::Onv<0> &onv) const{
+defs::ham_t WeightedTwf::evaluate_static_twf(const fields::Onv<0> &onv) const{
     size_t num_double_occ_sites = 0;
     for(size_t isite=0; isite < m_nsite; isite++) {
         num_double_occ_sites += (onv.get({0, isite}) and onv.get({1, isite}));
@@ -64,7 +56,7 @@ defs::ham_t StaticTwf::evaluate_static_twf(const fields::Onv<0> &onv) const{
     return std::exp(-m_fermion_double_occ_penalty_factor*num_double_occ_sites);
 }
 
-defs::ham_t StaticTwf::evaluate_static_twf(const fields::Onv<1> &onv) const{
+defs::ham_t WeightedTwf::evaluate_static_twf(const fields::Onv<1> &onv) const{
     size_t total_boson_occ = 0;
     for(size_t isite=0; isite < m_nsite; isite++) {
         total_boson_occ += onv.m_bos[isite];
@@ -72,7 +64,7 @@ defs::ham_t StaticTwf::evaluate_static_twf(const fields::Onv<1> &onv) const{
     return std::exp(-m_boson_occ_penalty_factor*total_boson_occ) + evaluate_static_twf(onv.m_frm);
 }
 
-void StaticTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+void WeightedTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<1> &onv) {
     conn::Antisym<1> conn(m_nsite);
     buffered::Onv<1> work_onv(m_nsite);

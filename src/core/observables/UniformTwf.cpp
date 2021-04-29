@@ -5,8 +5,8 @@
 #include "UniformTwf.h"
 
 UniformTwf::UniformTwf(size_t npart, size_t nsite) :
-        m_numerator(npart, 0.0), m_numerator_total(npart, 0.0),
-        m_nsite(nsite){}
+        SpfTwfBase(npart, nsite)
+        {}
 
 void UniformTwf::add(const Hamiltonian<0> &ham,
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
