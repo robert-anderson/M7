@@ -333,3 +333,196 @@ defs::ham_t FermionHamiltonian::Terms::get_element(const conn::Antisym<0> &conn)
             return 0.0;
     }
 }
+
+bool FermionHamiltonian::Terms::update_helement(bool get_h, bool h_nonzero_only) const {
+    if (get_h || h_nonzero_only) m_helement_work = get_element(m_conn_work);
+    else m_helement_work = 0.0;
+    if (h_nonzero_only) return !consts::float_is_zero(m_helement_work);
+    return true;
+}
+
+void FermionHamiltonian::Terms::perform_single(const fields::FermionOnv &src_onv, const size_t &occ, const size_t &vac,
+                                               const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                               bool h_nonzero_only) const {
+    m_conn_work.zero();
+    m_conn_work.add(occ, vac);
+    m_conn_work.apply(src_onv, m_onv_work);
+    if (update_helement(get_h, h_nonzero_only)) body(m_conn_work, m_onv_work, m_helement_work);
+}
+
+void
+FermionHamiltonian::Terms::perform_double(const fields::FermionOnv &src_onv, const size_t &occ1, const size_t &occ2,
+                                          const size_t &vac1, const size_t &vac2,
+                                          const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                          bool h_nonzero_only) const {
+    m_conn_work.zero();
+    m_conn_work.add(occ1, occ2, vac1, vac2);
+    m_conn_work.apply(src_onv, m_onv_work);
+    if (update_helement(get_h, h_nonzero_only)) body(m_conn_work, m_onv_work, m_helement_work);
+}
+
+void FermionHamiltonian::Terms::foreach_connection_singles(const fields::FermionOnv &src_onv, const defs::inds &occs,
+                                                           const defs::inds &vacs,
+                                                           const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                                           bool h_nonzero_only) const {
+    for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
+        auto &occ = occs[iocc];
+        for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
+            auto &vac = vacs[ivac];
+            perform_single(src_onv, occ, vac, body, get_h, h_nonzero_only);
+        }
+    }
+}
+
+void
+FermionHamiltonian::Terms::foreach_connection_subset_doubles(const fields::FermionOnv &src_onv, const defs::inds &occs1,
+                                                             const defs::inds &occs2, const defs::inds &vacs1,
+                                                             const defs::inds &vacs2,
+                                                             const FermionHamiltonian::Terms::body_fn_t &body,
+                                                             bool get_h, bool h_nonzero_only) const {
+    for (size_t iocc1 = 0ul; iocc1 < occs1.size(); ++iocc1) {
+        auto &occ1 = occs1[iocc1];
+        for (size_t ivac1 = 0ul; ivac1 < vacs1.size(); ++ivac1) {
+            auto &vac1 = vacs1[ivac1];
+            size_t iocc2_start = (&occs1==&occs2) ? iocc1+1 : 0ul;
+            for (size_t iocc2 = iocc2_start; iocc2 < occs2.size(); ++iocc2) {
+                auto &occ2 = occs2[iocc2];
+                size_t ivac2_start = (&vacs1==&vacs2) ? ivac1+1 : 0ul;
+                for (size_t ivac2 = ivac2_start; ivac2 < vacs2.size(); ++ivac2) {
+                    auto &vac2 = vacs2[ivac2];
+                    perform_double(src_onv, occ1, occ2, vac1, vac2, body, get_h, h_nonzero_only);
+                }
+            }
+        }
+    }
+}
+
+void
+FermionHamiltonian::Terms::foreach_connection_subset_doubles(const fields::FermionOnv &src_onv, const defs::inds &occs,
+                                                             const defs::inds &vacs,
+                                                             const FermionHamiltonian::Terms::body_fn_t &body,
+                                                             bool get_h, bool h_nonzero_only) const {
+    foreach_connection_subset_doubles(src_onv, occs, vacs, occs, vacs, body, get_h, h_nonzero_only);
+}
+
+void FermionHamiltonian::Terms::foreach_connection_subset(const fields::FermionOnv &src_onv, const defs::inds &occs1,
+                                                          const defs::inds &occs2, const defs::inds &vacs1,
+                                                          const defs::inds &vacs2,
+                                                          const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                                          bool h_nonzero_only) const {
+    for (size_t iocc1 = 0ul; iocc1 < occs1.size(); ++iocc1) {
+        auto &occ1 = occs1[iocc1];
+        for (size_t ivac1 = 0ul; ivac1 < vacs1.size(); ++ivac1) {
+            auto &vac1 = vacs1[ivac1];
+            perform_single(src_onv, occ1, vac1, body, get_h, h_nonzero_only);
+            size_t iocc2_start = (&occs1==&occs2) ? iocc1+1 : 0ul;
+            for (size_t iocc2 = iocc2_start; iocc2 < occs2.size(); ++iocc2) {
+                auto &occ2 = occs2[iocc2];
+                size_t ivac2_start = (&vacs1==&vacs2) ? ivac1+1 : 0ul;
+                for (size_t ivac2 = ivac2_start; ivac2 < vacs2.size(); ++ivac2) {
+                    auto &vac2 = vacs2[ivac2];
+                    perform_double(src_onv, occ1, occ2, vac1, vac2, body, get_h, h_nonzero_only);
+                }
+            }
+        }
+    }
+}
+
+void FermionHamiltonian::Terms::foreach_connection_subset(const fields::FermionOnv &src_onv, const defs::inds &occs,
+                                                          const defs::inds &vacs,
+                                                          const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                                          bool h_nonzero_only) const {
+    foreach_connection_subset(src_onv, occs, occs, vacs, vacs, body, get_h, h_nonzero_only);
+}
+
+void FermionHamiltonian::Terms::foreach_connection(const fields::FermionOnv &src_onv,
+                                                   const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                                   bool h_nonzero_only) const {
+    m_helement_work = 0.0;
+    m_occ_work.update(src_onv);
+    m_vac_work.update(src_onv);
+    foreach_connection_subset(src_onv, m_occ_work.inds(), m_vac_work.inds(), body, get_h, h_nonzero_only);
+}
+
+FermionHamiltonian::SpinTerms::SpinTerms(const FermionHamiltonian &ham) : Terms(ham),
+                                                                          m_spin_occ_work(ham.nsite()), m_spin_vac_work(ham.nsite()){
+}
+
+void FermionHamiltonian::SpinTerms::foreach_connection(const fields::FermionOnv &src_onv,
+                                                       const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                                       bool h_nonzero_only) const {
+    m_helement_work = 0.0;
+    m_spin_occ_work.update(src_onv);
+    m_spin_vac_work.update(src_onv);
+    // spin a->a, aa->aa
+    foreach_connection_subset(src_onv, m_spin_occ_work[0], m_spin_vac_work[0], body, get_h, h_nonzero_only);
+    // spin b->b, bb->bb
+    foreach_connection_subset(src_onv, m_spin_occ_work[1], m_spin_vac_work[1], body, get_h, h_nonzero_only);
+    // spin ab->ab
+    foreach_connection_subset_doubles(src_onv, m_spin_occ_work[0], m_spin_occ_work[1],
+                                      m_spin_vac_work[0], m_spin_vac_work[1], body, get_h, h_nonzero_only);
+}
+
+FermionHamiltonian::Hubbard1DTerms::Hubbard1DTerms(const FermionHamiltonian &ham) : SpinTerms(ham){}
+
+void FermionHamiltonian::Hubbard1DTerms::foreach_connection(const fields::FermionOnv &src_onv,
+                                                            const FermionHamiltonian::Terms::body_fn_t &body,
+                                                            bool get_h, bool h_nonzero_only) const {
+    m_helement_work = 0.0;
+    m_spin_occ_work.update(src_onv);
+    // spin a
+    for (auto& occ: m_spin_occ_work[0]) {
+        // to the left
+        if (occ > 0 && !src_onv.get(occ - 1))
+            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
+        // to the right
+        if (occ+1<src_onv.m_nsite && !src_onv.get(occ+1))
+            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
+    }
+    // spin b
+    for (auto& occ: m_spin_occ_work[1]) {
+        // to the left
+        if (occ > src_onv.m_nsite && !src_onv.get(occ - 1))
+            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
+        // to the right
+        if (occ+1<src_onv.nbit() && !src_onv.get(occ+1))
+            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
+    }
+}
+
+void FermionHamiltonian::Hubbard1DPbcTerms::foreach_connection(const fields::FermionOnv &src_onv,
+                                                               const FermionHamiltonian::Terms::body_fn_t &body,
+                                                               bool get_h, bool h_nonzero_only) const {
+    m_helement_work = 0.0;
+    m_spin_occ_work.update(src_onv);
+    // spin a
+    for (auto& occ: m_spin_occ_work[0]) {
+        // to the left
+        if (occ > 0 && !src_onv.get(occ - 1))
+            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
+            // to the left (wrap-around)
+        else if (occ == 0 && !src_onv.get(src_onv.m_nsite))
+            perform_single(src_onv, occ, src_onv.m_nsite-1, body, get_h, h_nonzero_only);
+        // to the right
+        if (occ+1<src_onv.m_nsite && !src_onv.get(occ+1))
+            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
+            // to the right (wrap-around)
+        else if (occ+1 == src_onv.m_nsite && !src_onv.get(0))
+            perform_single(src_onv, occ, 0, body, get_h, h_nonzero_only);
+    }
+    // spin b
+    for (auto& occ: m_spin_occ_work[1]) {
+        // to the left
+        if (occ > src_onv.m_nsite && !src_onv.get(occ - 1))
+            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
+            // to the left (wrap-around)
+        else if (occ == src_onv.m_nsite && !src_onv.get(src_onv.nbit()-1))
+            perform_single(src_onv, occ, src_onv.nbit()-1, body, get_h, h_nonzero_only);
+        // to the right
+        if (occ+1<src_onv.nbit() && !src_onv.get(occ+1))
+            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
+            // to the right (wrap-around)
+        else if (occ+1 == src_onv.nbit() && !src_onv.get(src_onv.m_nsite-1))
+            perform_single(src_onv, occ, src_onv.m_nsite-1, body, get_h, h_nonzero_only);
+    }
+}

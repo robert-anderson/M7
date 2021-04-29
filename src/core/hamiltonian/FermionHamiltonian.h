@@ -119,99 +119,39 @@ struct FermionHamiltonian {
          * @return
          *  true if the loop body should be called
          */
-        bool update_helement(bool get_h, bool h_nonzero_only) const {
-            if (get_h || h_nonzero_only) m_helement_work = get_element(m_conn_work);
-            else m_helement_work = 0.0;
-            if (h_nonzero_only) return !consts::float_is_zero(m_helement_work);
-            return true;
-        }
+        bool update_helement(bool get_h, bool h_nonzero_only) const;
 
     protected:
 
         void perform_single(const fields::FermionOnv &src_onv, const size_t& occ, const size_t& vac,
-                    const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            m_conn_work.zero();
-            m_conn_work.add(occ, vac);
-            m_conn_work.apply(src_onv, m_onv_work);
-            if (update_helement(get_h, h_nonzero_only)) body(m_conn_work, m_onv_work, m_helement_work);
-        }
+                    const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         void perform_double(const fields::FermionOnv &src_onv,
                     const size_t& occ1, const size_t& occ2,
                     const size_t& vac1, const size_t& vac2,
-                    const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            m_conn_work.zero();
-            m_conn_work.add(occ1, occ2, vac1, vac2);
-            m_conn_work.apply(src_onv, m_onv_work);
-            if (update_helement(get_h, h_nonzero_only)) body(m_conn_work, m_onv_work, m_helement_work);
-        }
+                    const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         void foreach_connection_singles(const fields::FermionOnv &src_onv,
                                        const defs::inds &occs, const defs::inds &vacs,
-                                       const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
-                auto &occ = occs[iocc];
-                for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
-                    auto &vac = vacs[ivac];
-                    perform_single(src_onv, occ, vac, body, get_h, h_nonzero_only);
-                }
-            }
-        }
+                                       const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         void foreach_connection_subset_doubles(const fields::FermionOnv &src_onv,
                                        const defs::inds &occs1, const defs::inds &occs2,
                                        const defs::inds &vacs1, const defs::inds &vacs2,
-                                       const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            for (size_t iocc1 = 0ul; iocc1 < occs1.size(); ++iocc1) {
-                auto &occ1 = occs1[iocc1];
-                for (size_t ivac1 = 0ul; ivac1 < vacs1.size(); ++ivac1) {
-                    auto &vac1 = vacs1[ivac1];
-                    size_t iocc2_start = (&occs1==&occs2) ? iocc1+1 : 0ul;
-                    for (size_t iocc2 = iocc2_start; iocc2 < occs2.size(); ++iocc2) {
-                        auto &occ2 = occs2[iocc2];
-                        size_t ivac2_start = (&vacs1==&vacs2) ? ivac1+1 : 0ul;
-                        for (size_t ivac2 = ivac2_start; ivac2 < vacs2.size(); ++ivac2) {
-                            auto &vac2 = vacs2[ivac2];
-                            perform_double(src_onv, occ1, occ2, vac1, vac2, body, get_h, h_nonzero_only);
-                        }
-                    }
-                }
-            }
-        }
+                                       const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         virtual void foreach_connection_subset_doubles(const fields::FermionOnv &src_onv,
                                                const defs::inds &occs, const defs::inds &vacs,
-                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            foreach_connection_subset_doubles(src_onv, occs, vacs, occs, vacs, body, get_h, h_nonzero_only);
-        }
+                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         void foreach_connection_subset(const fields::FermionOnv &src_onv,
                                                const defs::inds &occs1, const defs::inds &occs2,
                                                const defs::inds &vacs1, const defs::inds &vacs2,
-                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            for (size_t iocc1 = 0ul; iocc1 < occs1.size(); ++iocc1) {
-                auto &occ1 = occs1[iocc1];
-                for (size_t ivac1 = 0ul; ivac1 < vacs1.size(); ++ivac1) {
-                    auto &vac1 = vacs1[ivac1];
-                    perform_single(src_onv, occ1, vac1, body, get_h, h_nonzero_only);
-                    size_t iocc2_start = (&occs1==&occs2) ? iocc1+1 : 0ul;
-                    for (size_t iocc2 = iocc2_start; iocc2 < occs2.size(); ++iocc2) {
-                        auto &occ2 = occs2[iocc2];
-                        size_t ivac2_start = (&vacs1==&vacs2) ? ivac1+1 : 0ul;
-                        for (size_t ivac2 = ivac2_start; ivac2 < vacs2.size(); ++ivac2) {
-                            auto &vac2 = vacs2[ivac2];
-                            perform_double(src_onv, occ1, occ2, vac1, vac2, body, get_h, h_nonzero_only);
-                        }
-                    }
-                }
-            }
-        }
+                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         virtual void foreach_connection_subset(const fields::FermionOnv &src_onv,
                                                const defs::inds &occs, const defs::inds &vacs,
-                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const {
-            foreach_connection_subset(src_onv, occs, occs, vacs, vacs, body, get_h, h_nonzero_only);
-        }
+                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
     public:
         /**
@@ -222,50 +162,32 @@ struct FermionHamiltonian {
          * @param h_nonzero_only
          */
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const {
-            m_helement_work = 0.0;
-            m_occ_work.update(src_onv);
-            m_vac_work.update(src_onv);
-            foreach_connection_subset(src_onv, m_occ_work.inds(), m_vac_work.inds(), body, get_h, h_nonzero_only);
-        }
+                                        bool get_h, bool h_nonzero_only) const;
     };
 
     struct SpinTerms : Terms {
         mutable SpinOccupiedOrbitals m_spin_occ_work;
         mutable SpinVacantOrbitals m_spin_vac_work;
 
-        SpinTerms(const FermionHamiltonian &ham) : Terms(ham),
-            m_spin_occ_work(ham.nsite()), m_spin_vac_work(ham.nsite()){
-        }
+        SpinTerms(const FermionHamiltonian &ham);
 
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const {
-            m_helement_work = 0.0;
-            m_spin_occ_work.update(src_onv);
-            m_spin_vac_work.update(src_onv);
-            // spin a->a, aa->aa
-            foreach_connection_subset(src_onv, m_spin_occ_work[0], m_spin_vac_work[0], body, get_h, h_nonzero_only);
-            // spin b->b, bb->bb
-            foreach_connection_subset(src_onv, m_spin_occ_work[1], m_spin_vac_work[1], body, get_h, h_nonzero_only);
-            // spin ab->ab
-            foreach_connection_subset_doubles(src_onv, m_spin_occ_work[0], m_spin_occ_work[1],
-                                              m_spin_vac_work[0], m_spin_vac_work[1], body, get_h, h_nonzero_only);
-        }
+                                        bool get_h, bool h_nonzero_only) const;
     };
 
 
-    struct Hubbard1DTerms : Terms {
+    struct Hubbard1DTerms : SpinTerms {
+
+        Hubbard1DTerms(const FermionHamiltonian &ham);
 
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const {
-        }
+                                        bool get_h, bool h_nonzero_only) const;
     };
 
-    struct Hubbard1DPbcTerms : Terms {
+    struct Hubbard1DPbcTerms : SpinTerms {
 
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const {
-        }
+                                        bool get_h, bool h_nonzero_only) const;
     };
 
 protected:
