@@ -87,6 +87,37 @@ TEST(ExactPropagator, Test) {
     solver.execute(opts.ncycle);
 }
 
+TEST(ExactPropagator, RdmTest) {
+    Options opts;
+    opts.nwalker_initial = 10;
+    opts.nadd_initiator = 0.0;
+    opts.tau_initial = 0.05;
+    opts.nwalker_target = 10000;
+    //opts.rdm_rank = 2;
+    opts.replicate = false;
+    //const auto benchmark = -99.9421389039331
+    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
+    buffered::Onv<> ref_onv(ham.nsite());
+    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set({0, i}); ref_onv.set({1, i});}
+    Wavefunction wf(opts, ham.nsite());
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
+    ExactPropagator prop(ham, opts, wf.m_format);
+    auto ref_energy = ham.get_energy(ref_onv);
+    prop.m_shift = ref_energy;//benchmark;
+
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
+    prop.m_shift = ref_energy;
+
+    Solver solver(prop, wf, ref_loc);
+    solver.execute(opts.ncycle);
+}
+
+
+
 TEST(ExactPropagator, Hubbard) {
     Options opts;
     opts.nwalker_initial = 10;
