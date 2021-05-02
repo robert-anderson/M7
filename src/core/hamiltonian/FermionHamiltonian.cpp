@@ -166,10 +166,10 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
         log::info("2-electron term in Hamiltonian has no single-excitation contributions");
     if (!m_nonzero_contribs[contrib_2222])
         log::info("2-electron term in Hamiltonian has no double-excitation contributions");
-    if (m_nn_only_1111)
-        log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");
-    else if (m_nnp_only_1111)
+    if (m_nnp_only_1111)
         log::info("single-excitation contributions to 1-electron term are periodic nearest-neighbor only");
+    else if (m_nn_only_1111)
+        log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");
     if (m_on_site_only_0022)
         log::info("2-electron term diagonal contributions are on-site only");
 }

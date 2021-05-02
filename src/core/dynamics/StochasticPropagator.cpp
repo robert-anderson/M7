@@ -18,9 +18,9 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
         m_min_spawn_mag(opts.min_spawn_mag) {
 
 
-    if (ham.is_hubbard()){
+    if (ham.is_hubbard() || ham.is_hubbard_pbc()){
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-                new HubbardSingles(&m_ham, m_prng)));
+                new HubbardSingles(&m_ham, m_prng, ham.is_hubbard_pbc())));
     }
     else {
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(

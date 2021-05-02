@@ -8,8 +8,10 @@
 #include "UniformSingles.h"
 
 struct HubbardSingles : public UniformSingles {
+    const bool m_pbc;
 
-    HubbardSingles(const Hamiltonian<>* h, PRNG& prng): UniformSingles(h, prng){}
+    HubbardSingles(const Hamiltonian<>* h, PRNG& prng, bool pbc):
+        UniformSingles(h, prng), m_pbc(pbc){}
 
     bool _draw(const fields::Onv<0> &src_onv, fields::Onv<0> &dst_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,

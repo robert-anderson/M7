@@ -249,7 +249,7 @@ public:
         auto jsite = iorb_to_isite(jorb);
         if (isite + 1 == jsite || jsite + 1 == isite) return true;
         if (periodic) {
-            return (isite == 0 && jsite == m_nsite) || (isite == m_nsite && jsite == 0);
+            return (isite == 0 && jsite == m_nsite-1) || (isite == m_nsite-1 && jsite == 0);
         }
         return false;
     }
@@ -299,6 +299,10 @@ public:
 
     bool is_hubbard() const {
         return m_on_site_only_0022 && m_nn_only_1111;
+    }
+
+    bool is_hubbard_pbc() const {
+        return m_on_site_only_0022 && m_nnp_only_1111;
     }
 
     size_t nci() const {
