@@ -25,7 +25,7 @@ void Solver::loop_over_occupied_onvs() {
 
         if (row.m_weight.is_zero()) {
             // ONV has become unoccupied in all parts and must be removed from mapped list
-            make_diagonal_mev_contribs();
+            //make_diagonal_mev_contribs();
             m_wf.remove_row();
             continue;
         }
@@ -376,10 +376,10 @@ void Solver::begin_cycle() {
     m_reference.begin_cycle();
 
     auto update_mev_epoch = [&](){
-        if(m_prop.m_variable_shift[0] && m_prop.m_variable_shift[1]){
+        if(m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]){
             auto max_start = std::max(
-                    m_prop.m_variable_shift[0].icycle_start(),
-                    m_prop.m_variable_shift[1].icycle_start());
+                    m_prop.m_shift.m_variable_mode[0].icycle_start(),
+                    m_prop.m_shift.m_variable_mode[1].icycle_start());
             if (m_icycle > max_start+m_opts.ncycle_wait_mevs) return true;
         }
         return false;
@@ -416,7 +416,7 @@ void Solver::output_stats() {
         auto &stats = m_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_tau = m_prop.tau();
-        stats.m_shift = m_prop.m_shift;
+        stats.m_shift = m_prop.m_shift.m_values;
         stats.m_nwalker = m_wf.m_nwalker.m_reduced;
         stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;

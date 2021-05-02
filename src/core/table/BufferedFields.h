@@ -43,6 +43,18 @@ struct BufferedField : WrappedRow, field_t {
         m_table.push_back();
         m_wrapped_row.restart();
     }
+
+    BufferedField(const BufferedField& other): BufferedField(*this){}
+
+    BufferedField& operator=(const field_t& other){
+        field_t::operator=(other);
+        return *this;
+    }
+
+    BufferedField& operator=(const BufferedField& other){
+        field_t::operator=(other);
+        return *this;
+    }
 };
 
 
@@ -57,6 +69,9 @@ namespace buffered {
         Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
             *this = init_value;
         }
+//        ///Numbers& operator=(const Numbers& other){
+//         //   return *this;
+//       // }
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {
