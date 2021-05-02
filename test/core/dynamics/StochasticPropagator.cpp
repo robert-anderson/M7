@@ -143,10 +143,11 @@ TEST(StochasticPropagator, Hubbard) {
     opts.nwalker_initial = 1;
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.001;
-    opts.nwalker_target = 1200;
+    opts.nwalker_target = 1000;
+    opts.min_spawn_mag = 0.001;
     opts.shift_damp = 0.5;
     opts.shift_update_period = 1;
-    opts.ncycle = 100000;
+    opts.ncycle = 2000000;
     opts.spf_uniform_twf = 0;
     opts.rdm_rank = 0;
     opts.init();

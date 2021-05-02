@@ -671,4 +671,25 @@ namespace dispatch_utils {
     struct BoolTag{};
 }
 
+namespace conn_utils {
+    static size_t left(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==0 || ispinorb==nsite) return ~0ul;
+        return ispinorb-1;
+    }
+    static size_t left_pbc(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==0) return nsite-1;
+        else if (ispinorb==nsite) return 2*nsite-1;
+        return ispinorb-1;
+    }
+    static size_t right(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==nsite-1 || ispinorb==2*nsite-1) return ~0ul;
+        return ispinorb+1;
+    }
+    static size_t right_pbc(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==nsite-1) return 0;
+        else if (ispinorb==2*nsite-1) return nsite;
+        return ispinorb+1;
+    }
+}
+
 #endif //M7_UTILS_H

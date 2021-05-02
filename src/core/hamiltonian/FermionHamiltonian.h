@@ -271,17 +271,11 @@ public:
 
     FermionHamiltonian(const FcidumpFileReader &file_reader);
 
-    FermionHamiltonian(std::string
-                       fname,
-                       bool spin_major
-    );
+    FermionHamiltonian(std::string fname, bool spin_major);
 
-    FermionHamiltonian(const Options &opts) : FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {
-        std::cout << opts.fcidump_path << std::endl;
-    }
+    FermionHamiltonian(const Options &opts) : FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {}
 
     defs::ham_comp_t get_energy(const fields::Onv<0> &fonv) const;
-
 
     defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 
@@ -302,6 +296,10 @@ public:
     defs::ham_t get_element(const conn::Antisym<0> &connection) const;
 
     defs::ham_t get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const;
+
+    bool is_hubbard() const {
+        return m_on_site_only_0022 && m_nn_only_1111;
+    }
 
     size_t nci() const {
         return ci_utils::fermion_dim(nsite(), nelec());

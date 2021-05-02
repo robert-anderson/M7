@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
+#include <src/core/excitgen/HubbardSingles.h>
 #include "StochasticPropagator.h"
 
 void StochasticPropagator::add_boson_excitgen(const Hamiltonian<0> &ham) {}
@@ -16,8 +17,15 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
         Propagator(opts, ham, wf_fmt), m_prng(opts.prng_seed, opts.prng_ngen),
         m_min_spawn_mag(opts.min_spawn_mag) {
 
-    m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-            new UniformSingles(&m_ham, m_prng)));
+
+    if (ham.is_hubbard()){
+        m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+                new HubbardSingles(&m_ham, m_prng)));
+    }
+    else {
+        m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+                new UniformSingles(&m_ham, m_prng)));
+    }
     if (ham.int_2e_rank() && opts.excit_gen == "pchb") {
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                 new HeatBathDoubles(&m_ham, m_prng)));
@@ -85,8 +93,9 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     } else {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift[ipart]) * tau();
-        if (death_rate <= 0.0 || death_rate > 1.0) {
-            // clone  / create antiparticles continuously
+        if (death_rate==0.0) return;
+        if (death_rate < 0.0 || death_rate > 1.0) {
+            // clone / create antiwalkers continuously
             wf.scale_weight(ipart, 1 - death_rate);
         } else {
             // kill stochastically
