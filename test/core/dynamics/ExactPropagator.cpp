@@ -119,7 +119,7 @@ TEST(ExactPropagator, RdmTest) {
 TEST(ExactPropagator, Hubbard) {
     Options opts;
     opts.nwalker_initial = 10;
-    opts.nadd_initiator = 3.0;
+    opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.01;
     opts.nwalker_target = 10000;
     opts.shift_damp = 0.4;
@@ -128,7 +128,7 @@ TEST(ExactPropagator, Hubbard) {
     opts.rdm_rank = 0;
     opts.init();
 
-    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_8site/FCIDUMP", 0);
+    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
@@ -141,7 +141,7 @@ TEST(ExactPropagator, Hubbard) {
     wf.m_comm.expand(800);
     ExactPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(ref_onv);
-    prop.m_shift.m_values = ref_energy;//benchmark;
+    prop.m_shift.m_values = ref_energy;
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
     wf.set_weight(0, ref_energy);

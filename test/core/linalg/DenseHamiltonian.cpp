@@ -40,6 +40,15 @@ TEST(DenseHamiltonian, HubbardCheck) {
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
+TEST(DenseHamiltonian, HubbardCheck6Site) {
+    FermionHamiltonian h(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 1);
+    ASSERT_EQ(h.nelec(), 6);
+    DenseHamiltonian dh(h);
+    auto solver = dh.diagonalize();
+    std::cout << solver.m_evals[0] << std::endl;
+    ASSERT_FLOAT_EQ(solver.m_evals[0], -3.0925653194551845);
+}
+
 TEST(DenseHamiltonian, BosonCouplingNoBosonLimit) {
     if (!defs::enable_bosons) GTEST_SKIP();
     FermiBosHamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 0, 0);
