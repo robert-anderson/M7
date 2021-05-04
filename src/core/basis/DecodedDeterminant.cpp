@@ -21,3 +21,26 @@ void VacantUpdater::operator()(const fields::Onv<0> &view, defs::inds &inds) {
         while (work) inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_data);
     }
 }
+
+
+void NdOccupiedUpdater::operator()(const fields::Onv<0> &view, const defs::inds& map, std::vector<defs::inds> &inds) {
+    for (auto& v :inds) v.clear();
+    for (size_t idataword = 0ul; idataword < view.m_dsize; ++idataword) {
+        auto work = view.get_dataword(idataword);
+        while (work) {
+            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
+            inds[map[ibit]].push_back(ibit);
+        }
+    }
+}
+
+void NdVacantUpdater::operator()(const fields::Onv<0> &view, const defs::inds& map, std::vector<defs::inds> &inds){
+    for (auto& v :inds) v.clear();
+    for (size_t idataword = 0ul; idataword < view.m_dsize; ++idataword) {
+        auto work = view.get_antidataword(idataword);
+        while (work) {
+            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
+            inds[map[ibit]].push_back(ibit);
+        }
+    }
+}

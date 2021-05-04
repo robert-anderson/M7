@@ -12,51 +12,19 @@
  */
 
 template <typename T>
-class MevRow : public Row {
-    defs::inds get_offsets(const defs::inds& ninds){
-        defs::inds tmp;
-        tmp.reserve(ninds.size());
-        tmp.emplace_back(0);
-        for (size_t i=1ul; i < ninds.size(); ++i) tmp.push_back(tmp[i - 1] + ninds[i]);
-        return tmp;
-    }
-
-public:
-
-    defs::inds m_ninds;
-    defs::inds m_offsets;
-    fields::Numbers<defs::mev_ind_t, 1> m_inds;
+struct MevRow : public Row {
+    fields::FermionMevInds m_inds;
     fields::Numbers<T, 1> m_values;
 
-    fields::Numbers<defs::mev_ind_t, 1> &key_field() {
+    fields::FermionMevInds &key_field() {
         return m_inds;
     };
 
-    MevRow(defs::inds ninds, size_t nvalue):
-    m_ninds(ninds), m_offsets(get_offsets(ninds)),
-    m_inds(this, {nelement()}), m_values(this, {nvalue}){}
+    MevRow(size_t nann, size_t ncre, size_t nvalue):
+    m_inds(this, nann, ncre, "SQ operator indices"), m_values(this, {nvalue}, "element value"){}
 
-    size_t nelement() const {
-        return m_offsets.back()+m_ninds.back();
-    }
 
-    void set(const size_t& iind, const defs::inds& inds){
-        ASSERT(iind<m_ninds.size());
-        ASSERT(inds.size()==m_ninds[iind]);
-        const auto offset = m_offsets[iind];
-        // implicitly convert to storage type defs::mev_ind_t
-        for (size_t i = 0ul; i<inds.size(); ++i) {
-            m_values(offset+i) = inds[i];
-        }
-    }
-
-    void get(const size_t& iind, defs::inds& inds) const{
-        ASSERT(iind<m_ninds.size());
-        ASSERT(inds.size()==m_ninds[iind]);
-        const auto offset = m_offsets[iind];
-        // implicitly convert to storage type defs::mev_ind_t
-        for (size_t i = 0ul; i<inds.size(); ++i) inds[i] = m_values(offset+i);
-    }
+    MevRow(size_t nop, size_t nvalue): MevRow(nop, nop, nvalue){}
 };
 
 

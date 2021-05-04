@@ -32,6 +32,7 @@ struct Options {
     size_t spin_restrict = 0;
     double walker_buffer_size_factor_initial = 1.0;
     double walker_buffer_expansion_factor = 0.5;
+    double mev_buffer_expansion_factor = 0.5;
     double spawn_buffer_size_factor_initial = 10.0;
     double min_spawn_mag = 0.4;
     double min_death_mag = 0.0;
@@ -46,6 +47,8 @@ struct Options {
     double shift_damp = 0.05;
     size_t shift_update_period = 1;
     size_t ncycle = ~0ul;
+    size_t ncycle_wait_mevs = 0ul;
+    size_t ncycle_accumulate_mevs = ~0ul;
     bool do_semistochastic = false;
     size_t ncycle_init_detsub = 1000;
     bool calc_mk_walker_sums = false;

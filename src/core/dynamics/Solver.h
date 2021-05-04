@@ -56,7 +56,8 @@ class Solver {
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;
-    BilinearMevGroup m_mevs;
+    std::unique_ptr<FermionRdm> m_rdm;
+    Epoch m_mev_accumulation;
 
 public:
 
@@ -70,21 +71,48 @@ public:
 
     void loop_over_occupied_onvs();
 
-    void annihilate_row(const size_t dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
+    void annihilate_row(const size_t& dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
 
-    void annihilate_row(const size_t dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
+    void annihilate_row(const size_t& dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
         annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
     }
 
-    void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight){
-        // m_wf.m_store.m_row is assumed to have been moved to the store row of the dst ONV
-        m_mevs.make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, m_wf.m_store.m_row.m_weight[0]);
-        //std::cout << src_onv.to_string() << " " << m_wf.m_store.m_row.m_onv.to_string() << std::endl;
+    void make_diagonal_mev_contribs(){
+        if (!m_mev_accumulation) return;
+        auto& row = m_wf.m_store.m_row;
+        ASSERT(row.occupied_ncycle(m_icycle));
+        m_rdm->make_contribs(row.m_onv, row.m_average_weight[0],
+                            row.m_onv, row.m_average_weight[1]/row.occupied_ncycle(m_icycle));
+        row.m_average_weight = 0;
+        row.m_icycle_occ = m_icycle;
+    }
+
+    void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight, const size_t& dst_ipart){
+        // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
+        if (!m_mev_accumulation) return;
+        if (m_rdm) {
+            /*
+             * We need to be careful of the walker weights
+             * if src_weight is taken from the wavefunction at cycle i,
+             * dst_weight is at an intermediate value equal to the wavefunction at cycle i with the diagonal
+             * part of the propagator already applied.
+             * We don't want to introduce a second post-annihilation loop over occupied ONVs to apply
+             * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
+             * value of the walker weight before the diagonal death/cloning.
+             *
+             * In the exact propagator, the death step does:
+             * Ci -> Ci*(1 - tau (Hii-shift)).
+             * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
+             */
+            auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart];
+            dst_weight_before_death /= 1 - m_prop.tau()*(m_wf.m_store.m_row.m_hdiag-m_prop.m_shift[dst_ipart]);
+            m_rdm->make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
+        }
     }
 
     void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,
                                                 const size_t& irow_block_end, const size_t& irow_store){
-        // if the dst onv is not stored, it cannot give contibutions to any MEVs
+        // if the dst onv is not stored, it cannot give contributions to any MEVs
         if (irow_store==~0ul) {
             row_current.jump(irow_block_end);
             return;
@@ -105,12 +133,12 @@ public:
                 ASSERT(row_current.m_i - row_block_start.m_i>0);
                 // row_current is pointing to the first row of the next src_onv block
                 // row_block_start can be used to access the src ONV data
-                make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight);
+                make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
                 row_block_start.jump(row_current);
             }
         }
         // finish off last block
-        make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight);
+        make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
     }
 
     void loop_over_spawned();

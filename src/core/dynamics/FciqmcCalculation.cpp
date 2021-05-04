@@ -16,7 +16,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &opts) :
         m_wf.create_row(0, ref_onv, ref_energy, 1);
         m_wf.set_weight(0, ref_energy);
     }
-    m_prop.m_shift = ref_energy;
+    m_prop.m_shift.m_values = ref_energy;
     Solver solver(m_prop, m_wf, ref_loc);
     for (size_t i = 0ul; i < opts.ncycle; ++i) {
         solver.execute();
@@ -43,7 +43,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &input) :
     } else {
         m_prop = std::unique_ptr<StochasticPropagator>(new StochasticPropagator(this));
     }
-    m_prop->m_shift += m_ham->get_energy(m_reference);
+    m_prop->m_values += m_ham->get_energy(m_reference);
 
     logger::write("Distributed memory parallelization: " + std::to_string(mpi::nrank()) + " MPI ranks");
     logger::write("Reference determinant was detected to be: " + m_reference.to_string());

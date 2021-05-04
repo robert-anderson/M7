@@ -96,18 +96,15 @@ namespace utils {
 
 
     template<typename T>
-    std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 6) {
+    std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 9) {
         std::string result;
         if (std::is_floating_point<T>::value) result = fp_to_string(entry, fp_precision);
         else if (std::is_integral<T>::value) result = std::to_string(entry);
-        //auto decimal_length = std::numeric_limits<T>::digits10;
-        //assert(result.size()<=decimal_length);
-        //result.insert(result.begin(), padding + decimal_length - result.size(), ' ');
         return result;
     }
 
     template<typename T>
-    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision = 6) {
+    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision = 9) {
         auto tmp_string = fp_to_string(entry.real(), fp_precision) +
                           (entry.imag() < 0 ? "" : "+") + fp_to_string(entry.imag(), fp_precision) + "i";
         tmp_string.insert(tmp_string.begin(), padding, ' ');
@@ -672,6 +669,27 @@ namespace dispatch_utils {
 
     template<bool t>
     struct BoolTag{};
+}
+
+namespace conn_utils {
+    static size_t left(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==0 || ispinorb==nsite) return ~0ul;
+        return ispinorb-1;
+    }
+    static size_t left_pbc(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==0) return nsite-1;
+        else if (ispinorb==nsite) return 2*nsite-1;
+        return ispinorb-1;
+    }
+    static size_t right(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==nsite-1 || ispinorb==2*nsite-1) return ~0ul;
+        return ispinorb+1;
+    }
+    static size_t right_pbc(const size_t& ispinorb, const size_t& nsite) {
+        if (ispinorb==nsite-1) return 0;
+        else if (ispinorb==2*nsite-1) return nsite;
+        return ispinorb+1;
+    }
 }
 
 #endif //M7_UTILS_H

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <src/core/field/Fields.h>
+#include <src/core/hamiltonian/HamiltonianData.h>
 
 /*
  * <out| ...cre... ...ann... |in>
@@ -41,11 +42,17 @@ public:
     }
 
     const defs::inds& ann() const {return m_ann;}
-    const size_t& ann(const size_t& i) const {return m_ann[i];}
+    const size_t& ann(const size_t& i) const {
+        ASSERT(i<nann());
+        return m_ann[i];
+    }
     size_t nann() const {return m_ann.size();}
 
     const defs::inds& cre() const {return m_cre;}
-    const size_t& cre(const size_t& i) const {return m_cre[i];}
+    const size_t& cre(const size_t& i) const {
+        ASSERT(i<ncre());
+        return m_cre[i];
+    }
     size_t ncre() const {return m_cre.size();}
 
     void connect(const fields::Onv<0> &in, const fields::Onv<0> &out);
@@ -88,9 +95,8 @@ public:
         return nexcit()<=2;
     }
 
-    bool is_exlevel(const defs::inds& exlevel) const {
-        if (exlevel.size()!=2) return false;
-        return m_cre.size()==exlevel[0] && m_ann.size()==exlevel[1];
+    size_t rank_label() const {
+        return ham_data::encode_rank_label(ncre(), nann());
     }
 
 };

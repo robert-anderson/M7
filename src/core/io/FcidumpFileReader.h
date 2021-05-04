@@ -41,6 +41,7 @@ class FcidumpFileReader : public SparseArrayFileReader<defs::ham_t> {
     const bool m_spin_resolved;
     const size_t m_nspatorb;
     std::function<void(defs::inds& inds)> m_inds_to_orbs;
+
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
     size_t m_isymm, m_int_2e_rank;

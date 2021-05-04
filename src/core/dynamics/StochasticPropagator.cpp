@@ -2,6 +2,7 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
+#include <src/core/excitgen/HubbardSingles.h>
 #include "StochasticPropagator.h"
 
 void StochasticPropagator::add_boson_excitgen(const Hamiltonian<0> &ham) {}
@@ -12,12 +13,19 @@ void StochasticPropagator::add_boson_excitgen(const Hamiltonian<1> &ham) {
             new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
 }
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, size_t npart) :
-        Propagator(opts, ham, npart), m_prng(opts.prng_seed, opts.prng_ngen),
+StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf> wf_fmt) :
+        Propagator(opts, ham, wf_fmt), m_prng(opts.prng_seed, opts.prng_ngen),
         m_min_spawn_mag(opts.min_spawn_mag) {
 
-    m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-            new UniformSingles(&m_ham, m_prng)));
+
+    if (ham.is_hubbard() || ham.is_hubbard_pbc()){
+        m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+                new HubbardSingles(&m_ham, m_prng, ham.is_hubbard_pbc())));
+    }
+    else {
+        m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+                new UniformSingles(&m_ham, m_prng)));
+    }
     if (ham.int_2e_rank() && opts.excit_gen == "pchb") {
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                 new HeatBathDoubles(&m_ham, m_prng)));
@@ -38,7 +46,9 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const Optio
 
 void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const auto &row = wf.m_store.m_row;
-    const defs::wf_t &weight = row.m_weight[ipart];
+    const defs::wf_t& weight = row.m_weight[ipart];
+    double rdm_unbias_factor = 1.0;
+
     ASSERT(!consts::float_is_zero(weight));
     ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
     const auto &src_onv = row.m_onv;
@@ -64,7 +74,13 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         if (consts::float_is_zero(delta)) continue;
         delta = m_prng.stochastic_threshold(delta, m_opts.min_spawn_mag);
         if (consts::float_is_zero(delta)) continue;
-        wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic, ipart, src_onv, weight);
+
+        if (wf.recv().m_row.m_send_parents){
+            // reweight by probability that this connection was sampled a non-zero number of times
+            rdm_unbias_factor = 1.0 / (1.0-std::pow(1-prob, nattempt));
+        }
+        wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic,
+                     ipart, src_onv, rdm_unbias_factor*weight);
     }
 }
 
@@ -77,12 +93,17 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     } else {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift[ipart]) * tau();
-        if (death_rate <= 0.0 || death_rate > 1.0) {
-            // clone  / create antiparticles continuously
+        if (death_rate==0.0) return;
+        if (death_rate < 0.0 || death_rate > 1.0) {
+            // clone / create antiwalkers continuously
             wf.scale_weight(ipart, 1 - death_rate);
         } else {
             // kill stochastically
             wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_opts.min_death_mag));
         }
     }
+}
+
+bool StochasticPropagator::is_exact() const {
+    return false;
 }

@@ -16,7 +16,7 @@ struct ReductionBase {
 
 template<typename T, size_t nind>
 struct NdReduction : ReductionBase<T> {
-    typedef typename std::conditional<nind, buffered::Numbers<T, nind>, T>::type store_t;
+    typedef typename std::conditional<nind==0, T, buffered::Numbers<T, nind>>::type store_t;
     store_t m_local;
     store_t m_reduced;
     using ReductionBase<T>::m_local_ptr;

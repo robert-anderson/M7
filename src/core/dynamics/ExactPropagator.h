@@ -37,11 +37,13 @@ class ExactPropagator : public Propagator {
 
 
 public:
-    ExactPropagator(const Hamiltonian<> &ham, const Options &opts, size_t npart) : Propagator(opts, ham, npart) {}
+    ExactPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf> wf_fmt);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;
 
     void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
+
+    bool is_exact() const override;
 
 };
 

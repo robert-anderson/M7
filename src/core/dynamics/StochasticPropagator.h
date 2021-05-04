@@ -25,7 +25,7 @@ protected:
     std::unique_ptr<WeightedDrawer> m_exgen_drawer;
 
 public:
-    StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, size_t npart);
+    StochasticPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf> wf_fmt);
 
     void diagonal(Wavefunction &m_wf, const size_t& ipart) override;
 
@@ -54,6 +54,8 @@ public:
     }
 
     void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
+
+    bool is_exact() const override;
 };
 
 #endif //M7_STOCHASTICPROPAGATOR_H

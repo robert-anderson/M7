@@ -20,7 +20,7 @@ struct WalkerTableRow : public Row {
     fields::Flags<defs::ndim_wf> m_reference_connection;
     fields::Flags<defs::ndim_wf> m_deterministic;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
-    fields::Numbers<size_t, defs::ndim_wf> m_icycle_occ;
+    fields::Number<size_t> m_icycle_occ;
 
     fields::Onv<> &key_field() {
         return m_onv;
@@ -35,7 +35,7 @@ struct WalkerTableRow : public Row {
             m_reference_connection(this, m_format),
             m_deterministic(this, m_format),
             m_average_weight(mev_average_weights ? this : nullptr, m_format),
-            m_icycle_occ(mev_average_weights ? this : nullptr, m_format)
+            m_icycle_occ(mev_average_weights ? this : nullptr)
             {}
 
     WalkerTableRow(const Options &opts, size_t nsite) :
@@ -43,6 +43,10 @@ struct WalkerTableRow : public Row {
 
     bool is_h5_write_exempt() const override {
         return m_onv.is_zero();
+    }
+
+    size_t occupied_ncycle(const size_t& icycle_current) const {
+        return icycle_current-m_icycle_occ+1;
     }
 };
 

@@ -79,6 +79,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--walker_buffer_expansion_factor", walker_buffer_expansion_factor,
                "number of rows to add to a full walker store/send/recv buffer as a fraction of current size");
 
+    add_option("--mev_buffer_expansion_factor", mev_buffer_expansion_factor,
+               "number of rows to add to a full walker multidimensional expectation value buffer as a fraction of current size");
+
     add_option("-B,--spawn_buffer_size_factor_initial", spawn_buffer_size_factor_initial,
                "number of rows initially allocated in each segment of the wavefunction communicate buffer table as a multiple of the target walker number");
 
@@ -123,6 +126,12 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
 
     add_option("-N,--ncycle", ncycle,
                "number of cycles to execute before exit");
+
+    add_option("--ncycle_wait_mevs", ncycle_wait_mevs,
+               "number of cycles to wait after variable shift epoch begins before accumulating MEVs");
+
+    add_option("--ncycle_accumulate_mevs", ncycle_accumulate_mevs,
+               "number of cycles to accumulate MEVs before terminating the solver main loop");
 
     add_flag("-S,--semistochastic", do_semistochastic,
              "enable semistochastic adaptation");
