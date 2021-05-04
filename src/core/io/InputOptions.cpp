@@ -132,16 +132,16 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
 
     add_flag("--calc_mk_walker_sums", calc_mk_walker_sums,
              "accumulate and output average walker occupations of Kramers sectors");
+    if (defs::enable_bosons) {
+        add_option("--nboson_max", nboson_max,
+                   "maximum allowed occupation of bosonic modes");
 
-    add_option("--nboson_max", nboson_max,
-               "maximum allowed occupation of bosonic modes");
+        add_option("--boson_coupling", boson_coupling,
+                   "coupling of onsite boson modes for Hubbard-Holstein model");
 
-    add_option("--boson_coupling", boson_coupling,
-               "coupling of onsite boson modes for Hubbard-Holstein model");
-
-    add_option("--boson_frequency", boson_frequency,
-               "frequency of onsite boson modes for Hubbard-Holstein model");
-
+        add_option("--boson_frequency", boson_frequency,
+                   "frequency of onsite boson modes for Hubbard-Holstein model");
+    }
     add_option("--psingle_initial", psingle_initial,
                "initial probability with which to attempt to draw single excitations");
 
