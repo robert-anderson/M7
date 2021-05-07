@@ -6,9 +6,19 @@
 #define M7_PROPAGATOR_H
 
 #include <src/core/io/InteractiveVariable.h>
+#include <queue>
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "Wavefunction.h"
 #include "MagnitudeLogger.h"
+
+class Reweighter {
+    const buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_const_shifts;
+    std::vector<std::queue<defs::ham_t>> m_xc_queues;
+
+    Reweighter(const fields::Numbers<defs::ham_comp_t, defs::ndim_wf>& const_shifts):
+            m_const_shifts(const_shifts){}
+
+};
 
 
 struct Shift {

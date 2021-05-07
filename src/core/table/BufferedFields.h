@@ -34,7 +34,7 @@ struct BufferedField : WrappedRow, field_t {
     static_assert(std::is_base_of<FieldBase, field_t>::value, "Template arg must be derived from FieldBase");
     Buffer m_buffer;
     TableBase m_table;
-    BufferedField(field_t field) : field_t(field),
+    BufferedField(const field_t& field) : field_t(field),
                                    m_buffer("", 1),
                                    m_table((field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
         m_table.set_buffer(&m_buffer);
@@ -69,9 +69,7 @@ namespace buffered {
         Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
             *this = init_value;
         }
-//        ///Numbers& operator=(const Numbers& other){
-//         //   return *this;
-//       // }
+        Numbers(const fields::Numbers<T, nind>& field):BufferedField<fields::Numbers<T, nind>>(field){}
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {
