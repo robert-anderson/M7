@@ -9,7 +9,6 @@
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/field/Fields.h"
 #include "src/core/parallel/Reducible.h"
-#include "src/core/basis/DeterminantList.h"
 #include "WalkerTable.h"
 
 class DeterministicSubspace {

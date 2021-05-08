@@ -22,17 +22,21 @@ bool FieldBase::is_comparable(const FieldBase &other) const {
 
 void FieldBase::add_to_row(Row *row) {
     if (!row) return;
-    MPI_REQUIRE(!is_added_to_row(), "Field must not be already associated with a row");
+    MPI_REQUIRE(!belongs_to_row(), "Field must not be already associated with a row");
     m_row_offset = row->add_field(this);
     m_row = row;
 }
 
-bool FieldBase::is_added_to_row() const {
+bool FieldBase::belongs_to_row() const {
     return (m_row_offset != ~0ul) && m_row;
 }
 
+bool FieldBase::belongs_to_row(const Row* row) const {
+    return m_row==row;
+}
+
 char *FieldBase::begin() const {
-    MPI_ASSERT(is_added_to_row(), "Field is not associated with row");
+    MPI_ASSERT(belongs_to_row(), "Field is not associated with row");
     return (char *) (m_row->dbegin()) + m_row_offset;
 }
 

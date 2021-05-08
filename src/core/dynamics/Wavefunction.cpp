@@ -29,7 +29,7 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
         m_nannihilated(m_format){
     m_store.resize((m_opts.walker_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
     m_comm.resize((m_opts.spawn_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
-    ASSERT(m_comm.recv().m_row.m_dst_onv.is_added_to_row());
+    ASSERT(m_comm.recv().m_row.m_dst_onv.belongs_to_row());
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nannihilated);

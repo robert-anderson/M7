@@ -148,7 +148,7 @@ struct MultiField {
     bool is_added_to_row() const {
         struct fn_t {
             bool m_and = true;
-            void operator()(const FieldBase &f) { m_and &= f.is_added_to_row(); }
+            void operator()(const FieldBase &f) { m_and &= f.belongs_to_row(); }
         };
         fn_t fn;
         tuple_utils::for_each(m_subfields, fn);

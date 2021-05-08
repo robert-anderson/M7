@@ -22,8 +22,7 @@ struct BufferedMultiField : WrappedRow, multi_field_t {
             m_buffer("", 1),
             m_table((multi_field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
         m_table.set_buffer(&m_buffer);
-        m_wrapped_row.m_table_bw = &m_table.m_bw;
-        m_wrapped_row.m_table_hwm = &m_table.m_hwm;
+        m_wrapped_row.m_table = &m_table;
         m_table.push_back();
         m_wrapped_row.restart();
     }
@@ -38,8 +37,7 @@ struct BufferedField : WrappedRow, field_t {
                                    m_buffer("", 1),
                                    m_table((field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
         m_table.set_buffer(&m_buffer);
-        m_wrapped_row.m_table_bw = &m_table.m_bw;
-        m_wrapped_row.m_table_hwm = &m_table.m_hwm;
+        m_wrapped_row.m_table = &m_table;
         m_table.push_back();
         m_wrapped_row.restart();
     }
@@ -107,10 +105,10 @@ namespace buffered {
 }
 
 template<typename field_t>
-struct SingletRow : Row {
+struct SingleFieldRow : Row {
     field_t m_field;
     template<typename ...Args>
-    SingletRow(Args... args): Row(), m_field(this, args...){}
+    SingleFieldRow(Args... args): Row(), m_field(this, args...){}
 
     field_t &key_field() {
         return m_field;

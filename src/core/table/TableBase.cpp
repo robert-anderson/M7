@@ -1,12 +1,11 @@
 //
-// Created by rja on 09/02/2021.
+// Created by rja on 08/05/2021.
 //
 
-#include "Table.h"
+#include "TableBase.h"
 #include "src/core/io/Logging.h"
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/sort/ExtremalValues.h"
-
 
 TableBase::TableBase(size_t row_dsize) :
         m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){

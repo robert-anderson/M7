@@ -31,7 +31,9 @@ struct FieldBase {
 
     void add_to_row(Row *row);
 
-    bool is_added_to_row() const;
+    bool belongs_to_row() const;
+
+    bool belongs_to_row(const Row* row) const;
 
     char *begin() const;
 

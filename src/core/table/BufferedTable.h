@@ -17,7 +17,7 @@ public:
     BufferedTable(std::string name, const table_t& table):
             table_t(table), m_buffer(name, 1) {
         TableBase::set_buffer(&m_buffer);
-        ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table_bw);
+        ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
     BufferedTable(const BufferedTable<row_t> &other) :
