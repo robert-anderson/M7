@@ -24,7 +24,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
     };
 
-    m_ham.foreach_connection(src_onv, body, true, true);
+    m_ham.foreach_connection(src_onv, body, true, true, false);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

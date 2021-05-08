@@ -123,8 +123,11 @@ struct FermionHamiltonian {
 
     protected:
 
+        void perform_diagonal(const fields::FermionOnv &src_onv,
+                            const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
+
         void perform_single(const fields::FermionOnv &src_onv, const size_t& occ, const size_t& vac,
-                    const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
+                            const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
         void perform_double(const fields::FermionOnv &src_onv,
                     const size_t& occ1, const size_t& occ2,
@@ -162,7 +165,7 @@ struct FermionHamiltonian {
          * @param h_nonzero_only
          */
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const;
+                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
     };
 
     struct SpinTerms : Terms {
@@ -172,7 +175,7 @@ struct FermionHamiltonian {
         SpinTerms(const FermionHamiltonian &ham);
 
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const;
+                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
     };
 
 
@@ -181,13 +184,13 @@ struct FermionHamiltonian {
         Hubbard1DTerms(const FermionHamiltonian &ham);
 
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const;
+                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
     };
 
     struct Hubbard1DPbcTerms : SpinTerms {
 
         virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only) const;
+                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
     };
 
 protected:
@@ -341,8 +344,8 @@ public:
 
 
     void foreach_connection(const fields::FermionOnv &src_onv, const Terms::body_fn_t &body,
-                            bool get_h, bool h_nonzero_only) const {
-        m_terms->foreach_connection(src_onv, body, get_h, h_nonzero_only);
+                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
+        m_terms->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
     }
 
 //

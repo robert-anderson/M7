@@ -9,11 +9,11 @@ TEST(SparseMatrix, RealMultiplication){
     typedef double T;
     const size_t n=3;
     std::vector<T> v(n, 0);
-    SparseMatrix<T> matrix;
+    sparse::Matrix<T> matrix;
     for(size_t i=0; i<n; ++i) {
         v[i] = i+1;
         for(size_t j=0; j<n; ++j) {
-            matrix(j, i) = i*3.0-j*2.0+1;
+            matrix.add(j, i, i*3.0-j*2.0+1);
         }
     }
     std::vector<T> res(n, 0);
@@ -27,11 +27,11 @@ TEST(SparseMatrix, ComplexMultiplication){
     typedef std::complex<double> T;
     const size_t n=3;
     std::vector<T> v(n, 0);
-    SparseMatrix<T> matrix;
+    sparse::Matrix<T> matrix;
     for(size_t i=0; i<n; ++i) {
         v[i] = T{double(i+1), 2};
         for(size_t j=0; j<n; ++j) {
-            matrix(j, i) = T{i*3.0-j*2.0+1, double(i+j)};
+            matrix.add(j, i, T{i*3.0-j*2.0+1, double(i+j)});
         }
     }
     std::vector<T> res(n, 0);

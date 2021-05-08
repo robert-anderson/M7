@@ -31,6 +31,7 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
     }
 
     void set(const defs::inds& setbits_alpha, const defs::inds& setbits_beta) {
+        zero();
         for(auto& i: setbits_alpha) set({0, i});
         for(auto& i: setbits_beta) set({1, i});
     }

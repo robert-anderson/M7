@@ -134,6 +134,9 @@ namespace consts {
     };
 
     template<typename T>
+    using real_t = typename component_t<T>::type;
+
+    template<typename T>
     static constexpr bool float_nearly_zero(T v, typename component_t<T>::type eps){
         return std::abs(v)<eps;
     }

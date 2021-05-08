@@ -50,8 +50,8 @@ public:
         if (mpi::on_node_i_am_root()) std::memset((void*)m_data, 0, size * sizeof(T));
         mpi::barrier_on_node();
 #else
-        m_data = new T[m_size];
-        std::memset((void*)m_data, 0, m_size * sizeof(T));
+        m_rows = new T[m_size];
+        std::memset((void*)m_rows, 0, m_size * sizeof(T));
 #endif
     }
 
@@ -65,7 +65,7 @@ public:
          */
         rhs.m_win = MPI_WIN_NULL;
 #else
-        rhs.m_data = nullptr;
+        rhs.m_rows = nullptr;
 #endif
     }
 
@@ -76,7 +76,7 @@ public:
 #ifdef ENABLE_MPI
         if (m_win != MPI_WIN_NULL) MPI_Win_free(&m_win);
 #else
-        if (m_data) delete m_data;
+        if (m_rows) delete m_rows;
 #endif
     }
 

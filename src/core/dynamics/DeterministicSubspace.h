@@ -57,7 +57,7 @@ class DeterministicSubspace {
     /*
      * sparse representation of H projected into the deterministic space
      */
-    SparseMatrix<defs::ham_t> m_sparse_ham;
+    sparse::Matrix<defs::ham_t> m_sparse_ham;
 
     defs::inds m_recvcounts;
     defs::inds m_displs;
@@ -81,7 +81,7 @@ class DeterministicSubspace {
                 // only add to sparse H if dets are connected
                 if (row_local.m_onv == row_global.m_onv) continue;
                 auto helem = ham.get_element(row_local.m_onv, row_global.m_onv);
-                if (!consts::float_is_zero(helem)) m_sparse_ham(row_local.m_i, row_global.m_i) = helem;
+                if (!consts::float_is_zero(helem)) m_sparse_ham.add(row_local.m_i, row_global.m_i, helem);
             }
         }
 

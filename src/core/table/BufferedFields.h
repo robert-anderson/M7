@@ -111,6 +111,11 @@ struct SingletRow : Row {
     field_t m_field;
     template<typename ...Args>
     SingletRow(Args... args): Row(), m_field(this, args...){}
+
+    field_t &key_field() {
+        return m_field;
+    };
+
 };
 
 

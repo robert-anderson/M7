@@ -341,6 +341,14 @@ bool FermionHamiltonian::Terms::update_helement(bool get_h, bool h_nonzero_only)
     return true;
 }
 
+void FermionHamiltonian::Terms::perform_diagonal(const fields::FermionOnv &src_onv,
+                                               const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
+                                               bool h_nonzero_only) const {
+    m_conn_work.zero();
+    m_conn_work.apply(src_onv, m_onv_work);
+    if (update_helement(get_h, h_nonzero_only)) body(m_conn_work, m_onv_work, m_helement_work);
+}
+
 void FermionHamiltonian::Terms::perform_single(const fields::FermionOnv &src_onv, const size_t &occ, const size_t &vac,
                                                const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
                                                bool h_nonzero_only) const {
@@ -437,10 +445,11 @@ void FermionHamiltonian::Terms::foreach_connection_subset(const fields::FermionO
 
 void FermionHamiltonian::Terms::foreach_connection(const fields::FermionOnv &src_onv,
                                                    const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
-                                                   bool h_nonzero_only) const {
+                                                   bool h_nonzero_only, bool include_diagonal) const {
     m_helement_work = 0.0;
     m_occ_work.update(src_onv);
     m_vac_work.update(src_onv);
+    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
     foreach_connection_subset(src_onv, m_occ_work.inds(), m_vac_work.inds(), body, get_h, h_nonzero_only);
 }
 
@@ -450,10 +459,11 @@ FermionHamiltonian::SpinTerms::SpinTerms(const FermionHamiltonian &ham) : Terms(
 
 void FermionHamiltonian::SpinTerms::foreach_connection(const fields::FermionOnv &src_onv,
                                                        const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
-                                                       bool h_nonzero_only) const {
+                                                       bool h_nonzero_only, bool include_diagonal) const {
     m_helement_work = 0.0;
     m_spin_occ_work.update(src_onv);
     m_spin_vac_work.update(src_onv);
+    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
     // spin a->a, aa->aa
     foreach_connection_subset(src_onv, m_spin_occ_work[0], m_spin_vac_work[0], body, get_h, h_nonzero_only);
     // spin b->b, bb->bb
@@ -467,9 +477,10 @@ FermionHamiltonian::Hubbard1DTerms::Hubbard1DTerms(const FermionHamiltonian &ham
 
 void FermionHamiltonian::Hubbard1DTerms::foreach_connection(const fields::FermionOnv &src_onv,
                                                             const FermionHamiltonian::Terms::body_fn_t &body,
-                                                            bool get_h, bool h_nonzero_only) const {
+                                                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
     m_helement_work = 0.0;
     m_spin_occ_work.update(src_onv);
+    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
     // spin a
     for (auto& occ: m_spin_occ_work[0]) {
         // to the left
@@ -492,7 +503,8 @@ void FermionHamiltonian::Hubbard1DTerms::foreach_connection(const fields::Fermio
 
 void FermionHamiltonian::Hubbard1DPbcTerms::foreach_connection(const fields::FermionOnv &src_onv,
                                                                const FermionHamiltonian::Terms::body_fn_t &body,
-                                                               bool get_h, bool h_nonzero_only) const {
+                                                               bool get_h, bool h_nonzero_only, bool include_diagonal) const {
+    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
     m_helement_work = 0.0;
     m_spin_occ_work.update(src_onv);
     // spin a
