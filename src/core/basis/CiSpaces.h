@@ -38,8 +38,8 @@ namespace ci_gen {
         foreach::rtnd::Ordered<> m_foreach_beta;
         SpinSym(size_t nsite, size_t nelec, int spin) :
                 Base(nsite, nelec),
-                m_foreach_alpha(nsite, nelec/2+spin),
-                m_foreach_beta(nsite, nelec/2-spin){}
+                m_foreach_alpha(nsite, ci_utils::nalpha(nelec, spin)),
+                m_foreach_beta(nsite, ci_utils::nbeta(nelec, spin)){}
 
         void operator()(Row& row, fields::FermionOnv& onv) {
             ASSERT(onv.belongs_to_row(&row));
