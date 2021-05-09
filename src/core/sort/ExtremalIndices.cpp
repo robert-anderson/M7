@@ -6,7 +6,7 @@
 #include "ExtremalIndices.h"
 #include "src/core/parallel/MPIAssert.h"
 
-ExtremalIndices::ExtremalIndices(ExtremalIndices::cmp_t cmp_fn) :
+ExtremalIndices::ExtremalIndices(ExtremalIndices::cmp_fn_t cmp_fn) :
     // reverse arg order to match ordering of QuickSort implementation
     m_cmp_fn([cmp_fn](const size_t& i2, const size_t& i1){return cmp_fn(i1, i2);}){}
 

@@ -8,6 +8,7 @@
 #include <stack>
 #include <src/core/field/RowHdf5.h>
 #include <src/core/field/Fields.h>
+#include <src/core/sort/ExtremalIndices.h>
 #include "src/core/field/Row.h"
 #include "TableBase.h"
 
@@ -85,23 +86,12 @@ public:
             row_reader.read(iitem++);
         }
     }
-/*
-    std::string to_string(const ExtremalIndices &xv) const {
-        defs::inds tmp;
-        tmp.reserve(xv.nfound());
-        for (size_t i = 0ul; i < xv.nfound(); ++i) tmp.push_back(xv[i]);
-        return to_string(&tmp);
-    }
-    */
-    template<typename T, size_t nind>
-    struct LocalExtremalValues {
-        LocalExtremalValues(const row_t& row, const fields::Numbers<T, nind>& field, bool largest, bool absval){}
-    };
 
 private:
     Row &base_row() {
         return static_cast<Row &>(m_row);
     }
 };
+
 
 #endif //M7_TABLE_H

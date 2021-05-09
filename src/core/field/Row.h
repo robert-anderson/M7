@@ -38,7 +38,7 @@ struct Row {
 
     defs::data_t *dbegin() {
         MPI_ASSERT(m_dbegin, "the row pointer is not set")
-        MPI_ASSERT(ptr_in_range(), "the row is not pointing memory in the permitted range");
+        MPI_ASSERT(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_dbegin;
     }
 

@@ -8,7 +8,7 @@
 
 #include "src/defs.h"
 #include <functional>
-#include "src/core/table/Table.h"
+#include "src/core/table/TableBase.h"
 
 class ExtremalIndices {
     /*
@@ -17,14 +17,16 @@ class ExtremalIndices {
      */
     size_t m_hwm = ~0ul;
     defs::inds m_inds;
-    typedef std::function<bool(const size_t &, const size_t &)> cmp_t;
+public:
+    typedef std::function<bool(const size_t &, const size_t &)> cmp_fn_t;
 
-    cmp_t m_cmp_fn;
+private:
+    cmp_fn_t m_cmp_fn;
     size_t m_nfound;
 
 public:
 
-    ExtremalIndices(cmp_t cmp_fn);
+    ExtremalIndices(cmp_fn_t cmp_fn);
 
     const size_t &nfound() const;
 

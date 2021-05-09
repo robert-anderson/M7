@@ -5,6 +5,7 @@
 #include <src/core/field/Fields.h>
 #include <src/core/table/BufferedTable.h>
 #include <src/core/table/BufferedFields.h>
+#include <src/core/sort/LocalExtremalValues.h>
 #include "gtest/gtest.h"
 #include "src/core/sort/ParallelExtremalValues.h"
 #include "src/core/sample/PRNG.h"
@@ -26,6 +27,15 @@ TEST(ParallelExtremalValues, Test) {
         row.m_field = get_value(mpi::irank(), row.m_i);
     ASSERT_EQ(table.m_hwm, nrow_per_rank);
 
+    const size_t nfind = 10;
+    LocalExtremalValues<row_t, size_t, 0ul> lxv(table.m_row, table.m_row.m_field, 1, 1);
+    lxv.find(nfind);
+    for (size_t i=0ul; i<lxv.m_xinds.nfound(); ++i) {
+        row.jump(lxv.m_xinds[i]);
+        std::cout << row.m_field << std::endl;
+    }
+
+    /*
     auto row_cmp = row;
     auto cmp_fn = [&](const size_t& irow, const size_t& irow_cmp){
         row.jump(irow);
@@ -42,6 +52,7 @@ TEST(ParallelExtremalValues, Test) {
         row.jump(xv[i]);
         std::cout << row.m_field << std::endl;
     }
+    */
 std::cout << "" << std::endl;
     if (mpi::i_am_root()){
         defs::inds all_values;
@@ -51,9 +62,8 @@ std::cout << "" << std::endl;
                 all_values.emplace_back(get_value(irank, ielement));
         std::sort(all_values.begin(), all_values.end());
 
-        for (size_t i=0ul; i<xv.nfound(); ++i){
+        for (size_t i=0ul; i<nfind; ++i)
             std::cout << all_values[i] << std::endl;
-        }
     }
 
     /*
