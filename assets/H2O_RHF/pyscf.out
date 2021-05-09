@@ -1,0 +1,19 @@
+converged SCF energy = -75.5793059622025
+davidson 0 1  |r|= 0.769  e= [-84.12323558]  max|de|= -84.1  lindep= 0.00564
+davidson 1 2  |r|= 0.26  e= [-84.24895391]  max|de|= -0.126  lindep= 0.997
+davidson 2 3  |r|= 0.0784  e= [-84.25998278]  max|de|= -0.011  lindep= 0.781
+davidson 3 4  |r|= 0.0246  e= [-84.26101821]  max|de|= -0.00104  lindep= 0.857
+davidson 4 5  |r|= 0.00852  e= [-84.26111879]  max|de|= -0.000101  lindep= 0.898
+davidson 5 6  |r|= 0.00296  e= [-84.26113055]  max|de|= -1.18e-05  lindep= 0.836
+davidson 6 7  |r|= 0.00111  e= [-84.26113213]  max|de|= -1.58e-06  lindep= 0.926
+davidson 7 8  |r|= 0.000443  e= [-84.26113237]  max|de|= -2.35e-07  lindep= 0.757
+davidson 8 9  |r|= 0.000145  e= [-84.2611324]  max|de|= -3.21e-08  lindep= 0.87
+davidson 9 10  |r|= 5.01e-05  e= [-84.2611324]  max|de|= -3.17e-09  lindep= 0.868
+davidson 10 11  |r|= 1.39e-05  e= [-84.2611324]  max|de|= -3.4e-10  lindep= 0.874
+root 0 converged  |r|= 4.52e-06  e= -84.261132401595  max|de|= -2.93e-11
+converged 11 12  |r|= 4.52e-06  e= [-84.2611324]  max|de|= -2.93e-11
+FCI energy: -75.71720277856586
+rhf orbitals detected
+******** FCIQMC options ********
+Number of walkers = 10000
+Maximum number of iterations = -1
