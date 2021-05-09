@@ -22,6 +22,12 @@ struct Row {
     size_t m_current_offset = 0ul;
     mutable Row *m_child = nullptr;
 
+
+    bool in_range(const size_t& irow_end) const {
+        ASSERT(irow_end<=m_table->m_hwm)
+        return m_i < irow_end;
+    }
+
     bool in_range() const {
         return m_i < m_table->m_hwm;
     }
@@ -43,11 +49,16 @@ struct Row {
     /*
      * the 3 "cursor" methods
      */
-    void restart() const {
+    void restart(const size_t& irow_begin) const {
+        MPI_ASSERT(irow_begin<m_table->m_hwm, "Cannot restart to an out-of-range row index");
         MPI_ASSERT(m_table, "Row must be assigned to a Table");
         MPI_ASSERT(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
-        m_dbegin = m_table->dbegin();
-        m_i = 0ul;
+        m_dbegin = m_table->dbegin(irow_begin);
+        m_i = irow_begin;
+    }
+
+    void restart() const {
+        restart(0);
     }
 
     void step() const {

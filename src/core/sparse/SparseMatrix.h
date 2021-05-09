@@ -19,6 +19,26 @@ namespace sparse {
     };
 
     template<typename T>
+    struct ParallelVector {
+        const size_t m_local_size;
+        const defs::inds m_counts, m_displs;
+        const size_t m_global_size;
+        std::vector<T> m_local;
+        std::vector<T> m_global;
+
+        ParallelVector(size_t local_size) :
+        m_local_size(local_size),
+        m_counts(mpi::all_gathered(m_local_size)), m_displs(mpi::counts_to_displs_consec(m_counts)),
+        m_global_size(m_displs.back()+m_counts.back()), m_local(m_local_size, 0){
+            m_global.resize(m_global_size, 0);
+        }
+
+        void all_gatherv() {
+            mpi::all_gatherv(m_local.data(), m_local_size, m_global.data(), m_counts, m_displs);
+        }
+    };
+
+    template<typename T>
     class Matrix {
         bool m_resized_by_add = false;
         std::vector<std::forward_list<Entry<T>>> m_rows;
@@ -67,7 +87,14 @@ namespace sparse {
                 }
             }
         }
+
+        void multiply(ParallelVector<T>& v){
+            multiply(v.m_global, v.m_local);
+            v.all_gatherv();
+        }
     };
+
+
 };
 
 #endif //M7_SPARSEMATRIX_H

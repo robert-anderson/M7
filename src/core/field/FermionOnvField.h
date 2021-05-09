@@ -30,12 +30,29 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
         return *this;
     }
 
+    void set(const size_t& bit_offset, const defs::inds& setbits) {
+        for(auto& i: setbits) set(bit_offset+i);
+    }
+
+    void set(const size_t& site_offset, const defs::inds& setbits_alpha, const defs::inds& setbits_beta) {
+        for(auto& i: setbits_alpha) set({0, site_offset+i});
+        for(auto& i: setbits_beta) set({1, site_offset+i});
+    }
+
     void set(const defs::inds& setbits_alpha, const defs::inds& setbits_beta) {
         zero();
         for(auto& i: setbits_alpha) set({0, i});
         for(auto& i: setbits_beta) set({1, i});
     }
 
+    void clr(const size_t& bit_offset, const defs::inds& clrbits) {
+        for(auto& i: clrbits) clr(bit_offset+i);
+    }
+
+    void clr(const size_t& site_offset, const defs::inds& clrbits_alpha, const defs::inds& clrbits_beta) {
+        for(auto& i: clrbits_alpha) clr({0, site_offset+i});
+        for(auto& i: clrbits_beta) clr({1, site_offset+i});
+    }
 
     void excite(const size_t &i, const size_t &j) {
         auto* dptr = reinterpret_cast<defs::data_t *>(begin());

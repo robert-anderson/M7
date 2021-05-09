@@ -131,7 +131,7 @@ struct BitsetField : FieldBase {
         clr(dptr, m_format.flatten(inds));
     }
 
-    void clr(inds_t inds) const {
+    void clr(inds_t inds) {
         clr(m_format.flatten(inds));
     }
 

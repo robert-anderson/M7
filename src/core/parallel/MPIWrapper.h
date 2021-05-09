@@ -168,11 +168,23 @@ struct mpi {
         return utils::safe_narrow<defs::mpi_count>(v);
     }
 
+    static size_t share_evenly(size_t nitem_global) {
+        auto remainder = nitem_global%nrank();
+        return nitem_global/nrank() + (irank()<remainder);
+    }
+
     template<typename T>
-    static void counts_to_displs_consec(const std::vector<T> &sizes, std::vector<T> &displs) {
-        ASSERT(sizes.size() == displs.size())
+    static void counts_to_displs_consec(const std::vector<T> &counts, std::vector<T> &displs) {
+        ASSERT(counts.size() == displs.size())
         displs[0] = 0;
-        for (size_t i = 1ul; i < sizes.size(); ++i) displs[i] = displs[i - 1] + sizes[i - 1];
+        for (size_t i = 1ul; i < counts.size(); ++i) displs[i] = displs[i - 1] + counts[i - 1];
+    }
+
+    template<typename T>
+    static std::vector<T> counts_to_displs_consec(const std::vector<T> &counts) {
+        auto displs = counts;
+        counts_to_displs_consec(counts, displs);
+        return displs;
     }
 
 
@@ -620,6 +632,12 @@ public:
         return all_gather(&send, 1ul, recv.data(), 1ul);
     }
 
+    template<typename T>
+    static std::vector<T> all_gathered(const T& send){
+        std::vector<T> out(mpi::nrank());
+        all_gather(send, out);
+        return out;
+    }
 
 
     template<typename T>
