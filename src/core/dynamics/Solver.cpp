@@ -421,8 +421,9 @@ void Solver::output_stats() {
         stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_reference.proj_energy_num();
-        stats.m_ref_weight = m_reference.get_weight();
-        stats.m_ref_proj_energy = m_reference.proj_energy();
+        stats.m_ref_weight = m_reference.weight();
+        stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
+        stats.m_ref_proj_energy /= stats.m_ref_weight;
         stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced;
         stats.m_l2_norm.to_sqrt();
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;

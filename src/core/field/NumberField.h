@@ -69,6 +69,19 @@ struct NdNumberField : NumberFieldBase {
     /*
      * math ops
      */
+
+
+    template<typename U>
+    NdNumberField &add_scaled(const U& factor, const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]+= other[i]*factor;
+        return *this;
+    }
+
+    NdNumberField &add_abs(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]+= std::abs(other[i]);
+        return *this;
+    }
+
     NdNumberField &operator+=(const NdNumberField &other) {
         for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]+= other[i];
         return *this;
@@ -76,6 +89,17 @@ struct NdNumberField : NumberFieldBase {
 
     NdNumberField &operator+=(const T &v) {
         for(size_t i=0ul; i < m_nelement; ++i) (*this)[i] += v;
+        return *this;
+    }
+
+    NdNumberField &sub_abs(const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]-= std::abs(other[i]);
+        return *this;
+    }
+
+    template<typename U>
+    NdNumberField &sub_scaled(const U& factor, const NdNumberField &other) {
+        for(size_t i=0ul; i < m_nelement; ++i) (*this)[i]-= other[i]*factor;
         return *this;
     }
 

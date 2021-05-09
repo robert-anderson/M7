@@ -134,6 +134,10 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
      */
     void set_weight(const size_t &ipart, const defs::wf_t &new_weight);
 
+    void set_weight(const defs::wf_t &new_weight) {
+        for (size_t ipart=0ul; ipart<m_format.nelement(); ++ipart) set_weight(ipart, new_weight);
+    }
+
     void set_weight(const fields::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
         for (size_t i=0ul; i < m_format.nelement(); ++i) set_weight(i, new_weight[i]);
     }

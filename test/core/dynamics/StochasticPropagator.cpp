@@ -22,14 +22,16 @@ TEST(StochasticPropagator, Test) {
     opts.shift_initial = 0.0;
     opts.shift_update_period = 5;
     opts.ncycle_wait_mevs = 200;
+    opts.prng_seed = 133;
     opts.ncycle_accumulate_mevs = 1000;
     opts.rdm_rank = 0;
-    opts.replicate = 0;
+    opts.replicate = 1;
     opts.write_hdf5_fname = "test_rdm_save.h5";
     opts.init();
 
     //const auto benchmark = -108.916561245585;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    // -75.71720277856586
+    FermionHamiltonian ham(defs::assets_root + "/H2O_RHF/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
@@ -38,17 +40,12 @@ TEST(StochasticPropagator, Test) {
     }
 
     Wavefunction wf(opts, ham.nsite());
-    //ASSERT_EQ(wf.npart(), 2);
     StochasticPropagator prop(ham, opts, wf.m_format);
-    wf.m_store.expand(10);
-    wf.m_comm.expand(800);
     ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
 
     auto ref_energy = ham.get_energy(ref_onv);
-
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, opts.nwalker_initial);
-    //wf.set_weight(1, opts.nwalker_initial);
+    wf.set_weight(opts.nwalker_initial);
 
     prop.m_shift.m_values = ref_energy+opts.shift_initial;
     Solver solver(prop, wf, ref_loc);

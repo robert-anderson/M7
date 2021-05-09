@@ -39,10 +39,6 @@ public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
-    const defs::wf_t& get_weight() const {
-        return m_ac.m_row.m_weight[m_ipart];
-    }
-
     const fields::Onv<>& get_onv() const {
         return m_ac.m_row.m_onv;
     }
@@ -53,12 +49,12 @@ public:
         MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
         size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
         mpi::bcast(m_irow_candidate, irank);
-        if (gather[irank] > std::abs(get_weight()*redefinition_thresh)){
-            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", get_weight(), gather[irank]);
+        if (gather[irank] > std::abs(weight()[irank]*redefinition_thresh)){
+            log::debug("Changing the reference ONV. current weight: {}, candidate: {}", weight()[irank], gather[irank]);
             change({irank, m_irow_candidate});
             //MPI_ASSERT(std::abs(m_wf.m_store.m_weight(m_irow_candidate, 0, 0))==m_candidate_abs_weight, "");
         }
-        ASSERT(std::abs(get_weight())==m_candidate_abs_weight);
+        ASSERT(std::abs(weight()[irank])==m_candidate_abs_weight);
         m_candidate_abs_weight = 0.0;
     }
 
@@ -81,14 +77,15 @@ public:
 
     bool is_connected(const fields::Onv<> &onv) const;
 
-    void add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight);
+    void add_to_numerator(const fields::Onv<> &onv, const fields::Numbers<defs::ham_t, defs::ndim_wf> &weights);
 
     NdReduction<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
 
     NdReduction<defs::wf_comp_t, defs::ndim_wf> &candidate_weight();
 
-    defs::ham_t proj_energy_num() const;
-    defs::ham_comp_t proj_energy() const;
+    const fields::Numbers<defs::ham_t, defs::ndim_wf>& proj_energy_num() const;
+
+    const fields::Numbers<defs::ham_t, defs::ndim_wf>& weight() const;
 
 };
 

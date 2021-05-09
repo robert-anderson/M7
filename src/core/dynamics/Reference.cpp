@@ -22,7 +22,7 @@ void Reference::add_row() {
         m_irow_candidate = row.m_i;
     }
     if (row.m_reference_connection.get(m_ipart)) {
-        add_to_numerator(row.m_onv, weight);
+        add_to_numerator(row.m_onv, row.m_weight);
     }
 }
 
@@ -90,25 +90,26 @@ bool Reference::is_connected(const fields::Onv<> &onv) const {
     return m_aconn.connected();
 }
 
-void Reference::add_to_numerator(const fields::Onv<> &onv, const defs::wf_t &weight) {
+void Reference::add_to_numerator(const fields::Onv<> &onv, const fields::Numbers<defs::ham_t, defs::ndim_wf>& weights) {
     m_aconn.connect(get_onv(), onv);
-    m_proj_energy_num.m_local[{0, 0}] += m_ham.get_element(m_aconn) * weight;
-    m_nwalker_at_doubles.m_local[{0, 0}] += std::abs(weight);
+    m_proj_energy_num.m_local.add_scaled(m_ham.get_element(m_aconn), weights);
+    m_nwalker_at_doubles.m_local.add_abs(weights);
 }
 
 NdReduction<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
     return m_nwalker_at_doubles;
 }
 
-defs::ham_t Reference::proj_energy_num() const {
-    return m_proj_energy_num.m_reduced[{0, 0}];
-}
-
-defs::ham_comp_t Reference::proj_energy() const {
-    return consts::real(proj_energy_num() / get_weight());
-}
-
 void Reference::update() {
     //accept_candidate(m_redefinition_thresh);
     Wavefunction::DynamicRow::update();
+}
+
+const fields::Numbers<defs::ham_t, defs::ndim_wf>& Reference::proj_energy_num() const {
+    return m_proj_energy_num.m_reduced;
+}
+
+
+const fields::Numbers<defs::ham_t, defs::ndim_wf> &Reference::weight() const {
+    return m_ac.m_row.m_weight;
 }
