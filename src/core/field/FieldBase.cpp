@@ -35,6 +35,10 @@ bool FieldBase::belongs_to_row(const Row* row) const {
     return m_row==row;
 }
 
+bool FieldBase::belongs_to_row(const Row& row) const {
+    return belongs_to_row(&row);
+}
+
 char *FieldBase::begin() const {
     MPI_ASSERT(belongs_to_row(), "Field is not associated with row");
     return (char *) (m_row->dbegin()) + m_row_offset;

@@ -10,7 +10,7 @@
 
 /**
  * Finds the extremal values over all processes, using distributed instances
- * of the binary heap-based ExtremalValues class. The strategy for finding N
+ * of the binary heap-based ExtremalIndices class. The strategy for finding N
  * extremal-valued row indices is to find N/nrank on
  * each rank. This assumes a roughly equal distribution of extremal values
  * among MPI ranks.

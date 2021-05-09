@@ -5,7 +5,7 @@
 #include "TableBase.h"
 #include "src/core/io/Logging.h"
 #include "src/core/parallel/MPIAssert.h"
-#include "src/core/sort/ExtremalValues.h"
+#include "src/core/sort/ExtremalIndices.h"
 
 TableBase::TableBase(size_t row_dsize) :
         m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){
@@ -78,7 +78,7 @@ void TableBase::print_contents(const defs::inds *ordering) const {
     std::cout << std::endl;
 }
 
-void TableBase::print_contents(const ExtremalValues &xv) const {
+void TableBase::print_contents(const ExtremalIndices &xv) const {
     defs::inds tmp;
     tmp.reserve(xv.nfound());
     for (size_t i = 0ul; i < xv.nfound(); ++i) tmp.push_back(xv[i]);

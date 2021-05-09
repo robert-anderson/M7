@@ -75,3 +75,14 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
     // check that the hash is uniform within 1%
     for (const auto& freq: freqs) ASSERT_LT(std::abs(1.0-nbucket*freq/double(tot)), 0.01);
 }
+
+TEST(Fields, Indentification){
+    typedef SingleFieldRow<fields::Number<double>> row_t;
+    Table<row_t> table({});
+    ASSERT_TRUE(table.m_row.m_field.belongs_to_row(table.m_row));
+    auto row_copy = table.m_row;
+    ASSERT_FALSE(row_copy.m_field.belongs_to_row(table.m_row));
+    ASSERT_FALSE(table.m_row.m_field.belongs_to_row(row_copy));
+    auto field_of_copy = fields::identify(row_copy, table.m_row, table.m_row.m_field);
+    ASSERT_TRUE(row_copy.m_field.belongs_to_row(row_copy));
+}

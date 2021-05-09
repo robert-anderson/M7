@@ -859,9 +859,12 @@ namespace foreach {
                 level_loop(body, 1);
             }
         };
-
-
     }
 }
 
+template<typename T>
+static std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
+    os << utils::to_string(v);
+    return os;
+}
 #endif //M7_UTILS_H

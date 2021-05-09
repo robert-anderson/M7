@@ -5,10 +5,10 @@
 #ifndef M7_TABLEEXTREMALVALUES_H
 #define M7_TABLEEXTREMALVALUES_H
 
-#include "ExtremalValues.h"
+#include "ExtremalIndices.h"
 
 template<typename viewable_t>
-class TableExtremalValues : public ExtremalValues {
+class TableExtremalValues : public ExtremalIndices {
 
     //static_assert(std::is_base_of<NdFieldGroup<0ul>, viewable_t>::value, "Template arg must be a scalar NdFieldGroup");
     typedef typename viewable_t::view_t view_t;
@@ -16,7 +16,7 @@ class TableExtremalValues : public ExtremalValues {
 
 public:
     TableExtremalValues(std::function<cview_t(const size_t &)> getter_fn, bool max = true, bool abs_val = false) :
-            ExtremalValues(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)) {}
+            ExtremalIndices(sort_utils::make_compare_fn<viewable_t>(getter_fn, max, abs_val)) {}
 
     TableExtremalValues(const viewable_t &viewable, bool max = true, bool abs_val = false) :
             TableExtremalValues(

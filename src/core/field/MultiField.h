@@ -145,12 +145,23 @@ struct MultiField {
         return fn.m_and;
     }
 
-    bool is_added_to_row() const {
+    bool belongs_to_row() const {
         struct fn_t {
             bool m_and = true;
             void operator()(const FieldBase &f) { m_and &= f.belongs_to_row(); }
         };
         fn_t fn;
+        tuple_utils::for_each(m_subfields, fn);
+        return fn.m_and;
+    }
+
+    bool belongs_to_row(Row* row) const {
+        struct fn_t {
+            const Row* m_row;
+            bool m_and = true;
+            void operator()(const FieldBase &f) { m_and &= f.belongs_to_row(m_row); }
+        };
+        fn_t fn{row};
         tuple_utils::for_each(m_subfields, fn);
         return fn.m_and;
     }

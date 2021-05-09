@@ -35,6 +35,8 @@ struct FieldBase {
 
     bool belongs_to_row(const Row* row) const;
 
+    bool belongs_to_row(const Row& row) const;
+
     char *begin() const;
 
     char *end() const;

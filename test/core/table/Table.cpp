@@ -4,7 +4,7 @@
 
 #include <src/core/sample/PRNG.h>
 #include <src/core/sort/ParallelExtremalValues.h>
-#include <src/core/sort/ExtremalValues.h>
+#include <src/core/sort/ExtremalIndices.h>
 #include <src/core/sort/QuickSorter.h>
 #include "gtest/gtest.h"
 
@@ -127,7 +127,7 @@ TEST(Table, FieldBasedSorting) {
     ASSERT_TRUE(sorter.is_sorted(bt));
 }
 
-TEST(Table, ExtremalValues) {
+TEST(Table, ExtremalIndices) {
     BufferedTable<SortingTestTable> bt("Extremal values test");
     const size_t size = 100;
     PRNG prng(14, size);
@@ -137,7 +137,7 @@ TEST(Table, ExtremalValues) {
         bt.m_values(i) = prng.draw_float();
     }
     auto comp_fn = [&bt](const size_t& i1, const size_t i2){return bt.m_values(i1)<=bt.m_values(i2);};
-    ExtremalValues xv(comp_fn);
+    ExtremalIndices xv(comp_fn);
     xv.find(45);
     QuickSorter sorter(comp_fn);
     sorter.sort(bt);

@@ -2,29 +2,29 @@
 // Created by rja on 29/11/2020.
 //
 
-#ifndef M7_EXTREMALVALUES_H
-#define M7_EXTREMALVALUES_H
+#ifndef M7_EXTREMALINDICES_H
+#define M7_EXTREMALINDICES_H
 
 
 #include "src/defs.h"
 #include <functional>
 #include "src/core/table/Table.h"
 
-class ExtremalValues {
+class ExtremalIndices {
     /*
      * inds will be used as a heap, with popped elements being accumulated in
      * order from the back of the vector
      */
     size_t m_hwm = ~0ul;
     defs::inds m_inds;
-    typedef std::function<bool(const size_t &, const size_t &)> comp_t;
+    typedef std::function<bool(const size_t &, const size_t &)> cmp_t;
 
-    comp_t m_comp_fn;
+    cmp_t m_cmp_fn;
     size_t m_nfound;
 
 public:
 
-    ExtremalValues(comp_t comp_fn);
+    ExtremalIndices(cmp_t cmp_fn);
 
     const size_t &nfound() const;
 
@@ -38,8 +38,6 @@ public:
 
     void find(size_t nfind);
 
-    const defs::inds& inds() const;
-
 };
 
-#endif //M7_EXTREMALVALUES_H
+#endif //M7_EXTREMALINDICES_H
