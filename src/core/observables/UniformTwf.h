@@ -52,6 +52,8 @@ class UniformTwf : public SpfTwfBase {
 public:
     UniformTwf(size_t npart, size_t nsite);
 
+    virtual ~UniformTwf(){}
+
     void add(const Hamiltonian<0> &ham,
              const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::Onv<0> &onv) override;

@@ -20,6 +20,8 @@ protected:
 public:
     WeightedTwf(size_t npart, size_t nsite, double_t fermion_factor=0.0, double_t boson_factor=0.0);
 
+    virtual ~WeightedTwf(){}
+
     void add(const Hamiltonian<0> &ham,
              const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::Onv<0> &onv) override;

@@ -63,17 +63,14 @@ TEST(ExactPropagator, Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 10000;
-    opts.rdm_rank = 2;
+    opts.rdm_rank = 1;
     opts.replicate = false;
-    const size_t nsite = 6;
     //const auto benchmark = -108.916561245585
-    Hamiltonian<> ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set({0, i}); ref_onv.set({1, i});}
-    Wavefunction wf(opts, nsite);
-    wf.m_store.expand(10);
-    wf.m_comm.expand(800);
+    ham.set_hf_onv(ref_onv, 0);
+    Wavefunction wf(opts, ham.nsite());
     ExactPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
 

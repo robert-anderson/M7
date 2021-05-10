@@ -34,10 +34,10 @@ void Solver::loop_over_occupied_onvs() {
          * if the accumulation of MEVs has just started, treat the row as though it just became
          * occupied on this MC cycle
          */
-        if (defs::enable_mevs && m_mev_accumulation.started_this_cycle(m_icycle))
+        if (defs::enable_mevs && m_mevs.m_accum_epoch.started_this_cycle(m_icycle))
             row.m_icycle_occ = m_icycle;
 
-        if (defs::enable_mevs && m_mev_accumulation) row.m_average_weight+=row.m_weight;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch) row.m_average_weight+=row.m_weight;
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 
@@ -276,9 +276,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
                                        m_opts.spf_twf_fermion_factor,
                                        m_opts.spf_twf_boson_factor) :
                        nullptr),
-        m_rdm(m_opts.rdm_rank ? new FermionRdm(m_opts, m_opts.rdm_rank, prop.m_ham.nsite(), prop.m_ham.nelec()) : nullptr),
-//m_average_coeffs("average coeffs", {2, 2}, 1),
-        m_mev_accumulation("MEV accumulation"){
+        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()){
 
     if (defs::enable_mevs && m_opts.rdm_rank>0){
         if(!m_opts.replicate && !m_prop.is_exact())
@@ -305,10 +303,10 @@ void Solver::execute(size_t niter) {
         hdf5::GroupReader gr("solver", fr);
         //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
         //loop_over_spawned();
-        if(m_rdm) {
+        if(m_mevs.m_fermion_rdm) {
             hdf5::GroupReader gr2("rdm", gr);
-            m_rdm->h5_read(gr);
-            m_rdm->end_cycle();
+            m_mevs.m_fermion_rdm->h5_read(gr);
+            m_mevs.m_fermion_rdm->end_cycle();
         }
     }
 
@@ -338,17 +336,17 @@ void Solver::execute(size_t niter) {
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) break;
-        if (defs::enable_mevs && m_mev_accumulation){
-            if (i==m_mev_accumulation.icycle_start()+m_opts.ncycle_accumulate_mevs) break;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch){
+            if (i== m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
         }
     }
     if (!m_opts.write_hdf5_fname.empty()) {
         hdf5::FileWriter fw(m_opts.write_hdf5_fname);
         //m_wf.h5_write(gw);
         hdf5::GroupWriter gw("solver", fw);
-        if (m_rdm) {
+        if (m_mevs.m_fermion_rdm) {
             hdf5::GroupWriter gw2("rdm", gw);
-            m_rdm->h5_write(gw2);
+            m_mevs.m_fermion_rdm->h5_write(gw2);
         }
     }
 }
@@ -384,7 +382,7 @@ void Solver::begin_cycle() {
         }
         return false;
     };
-    m_mev_accumulation.update(m_icycle, update_mev_epoch());
+    m_mevs.m_accum_epoch.update(m_icycle, update_mev_epoch());
 }
 
 void Solver::end_cycle() {
@@ -401,7 +399,7 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator ONVs have occurred");
 
-    if (m_rdm) m_rdm->end_cycle();
+    //if (m_rdm) m_rdm->end_cycle();
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);

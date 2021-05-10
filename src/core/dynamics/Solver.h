@@ -56,8 +56,7 @@ class Solver {
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;
-    std::unique_ptr<FermionRdm> m_rdm;
-    Epoch m_mev_accumulation;
+    MevGroup m_mevs;
 
 public:
 
@@ -78,10 +77,10 @@ public:
     }
 
     void make_diagonal_mev_contribs(){
-        if (!m_mev_accumulation) return;
+        if (!m_mevs.m_accum_epoch) return;
         auto& row = m_wf.m_store.m_row;
         ASSERT(row.occupied_ncycle(m_icycle));
-        m_rdm->make_contribs(row.m_onv, row.m_average_weight[0],
+        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, row.m_average_weight[0],
                             row.m_onv, row.m_average_weight[1]/row.occupied_ncycle(m_icycle));
         row.m_average_weight = 0;
         row.m_icycle_occ = m_icycle;
@@ -89,8 +88,8 @@ public:
 
     void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight, const size_t& dst_ipart){
         // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
-        if (!m_mev_accumulation) return;
-        if (m_rdm) {
+        if (!m_mevs.m_accum_epoch) return;
+        if (m_mevs.m_fermion_rdm) {
             /*
              * We need to be careful of the walker weights
              * if src_weight is taken from the wavefunction at cycle i,
@@ -106,7 +105,7 @@ public:
              */
             auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart];
             dst_weight_before_death /= 1 - m_prop.tau()*(m_wf.m_store.m_row.m_hdiag-m_prop.m_shift[dst_ipart]);
-            m_rdm->make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
+            m_mevs.m_fermion_rdm->make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
         }
     }
 

@@ -348,22 +348,21 @@ public:
         m_terms->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
     }
 
-//
-//    elements::FermionOnv refine_guess_reference(const views::FermionOnv &ref) const;
-//
-//    elements::FermionOnv choose_reference(const int &spin_level) const;
-//
-//    class DeterminantList : public MappedList<DeterminantElement> {
-//    public:
-//        DeterminantField determinant;
-//
-//        DeterminantList(std::string name, size_t nsite, size_t nbucket) :
-//                MappedList(name, determinant, nbucket),
-//                determinant(this, 1, nsite){}
-//    };
-//
-//    void generate_ci_space(WalkerTable* list, RankAllocator<DeterminantElement>& ra, const int &spin_level) const;
-
+    /**
+     * set the referenced ONV object to the assumed Hartree--Fock determinant within the given spin sector
+     * @param onv
+     *  target onv object
+     * @param spin
+     *  spin (MS) number
+     */
+    void set_hf_onv(fields::FermionOnv& onv, int spin) const {
+        auto nalpha = ci_utils::nalpha(nelec(), spin);
+        auto nbeta = ci_utils::nbeta(nelec(), spin);
+        MPI_ASSERT(nalpha+nbeta==nelec(), "inconsistent na, nb, nelec");
+        onv.zero();
+        for (size_t i=0ul; i<nalpha; ++i) onv.set({0, i});
+        for (size_t i=0ul; i<nbeta; ++i) onv.set({1, i});
+    }
 
 };
 

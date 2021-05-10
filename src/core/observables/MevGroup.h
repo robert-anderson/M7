@@ -152,8 +152,12 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     }
 };
 
-struct BilinearMevGroup {
-
+struct MevGroup {
+    Epoch m_accum_epoch;
+    std::unique_ptr<FermionRdm> m_fermion_rdm;
+    MevGroup(const Options& opts, size_t nsite, size_t nelec):
+            m_accum_epoch("MEV accumulation"),
+            m_fermion_rdm(opts.rdm_rank ? new FermionRdm(opts, opts.rdm_rank, nsite, nelec): nullptr){}
 };
 
 #if 0
