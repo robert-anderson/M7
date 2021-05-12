@@ -74,10 +74,12 @@ public:
     }
 
     Epoch& operator[](const size_t i){
+        ASSERT(i<m_epochs.size());
         return m_epochs[i];
     }
 
     const Epoch& operator[](const size_t i) const{
+        ASSERT(i<m_epochs.size());
         return m_epochs[i];
     }
 

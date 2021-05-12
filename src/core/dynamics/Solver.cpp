@@ -29,7 +29,7 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.remove_row();
             continue;
         }
-        //make_diagonal_mev_contribs();
+        make_diagonal_mev_contribs();
         /*
          * if the accumulation of MEVs has just started, treat the row as though it just became
          * occupied on this MC cycle
@@ -37,7 +37,7 @@ void Solver::loop_over_occupied_onvs() {
         if (defs::enable_mevs && m_mevs.m_accum_epoch.started_this_cycle(m_icycle))
             row.m_icycle_occ = m_icycle;
 
-        if (defs::enable_mevs && m_mevs.m_accum_epoch) row.m_average_weight+=row.m_weight;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch) row.m_average_weight += row.m_weight;
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 
@@ -55,11 +55,22 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
-            if (ipart==0) {
+            if (ipart == 0) {
                 m_reference.add_row();
                 if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
+
+            auto refconn = row.m_reference_connection.get(ipart);
+            if (refconn && m_mevs.m_fermion_rdm && m_mevs.m_accum_epoch) {
+                m_mevs.m_fermion_rdm->make_contribs(
+                        row.m_onv, row.m_weight[0],
+                        m_reference.get_onv(), m_reference.weight()[0], 1);
+                m_mevs.m_fermion_rdm->make_contribs(
+                        m_reference.get_onv(), m_reference.weight()[0],
+                        row.m_onv, row.m_weight[0], 1);
+            }
+
 
             //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
             //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
@@ -96,8 +107,9 @@ void Solver::loop_over_occupied_onvs() {
     //std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
-void Solver::annihilate_row(const size_t& dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
                             bool allow_initiation, const size_t &irow_store) {
+    if (m_opts.nadd_initiator==0.0) ASSERT(allow_initiation);
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
@@ -105,6 +117,7 @@ void Solver::annihilate_row(const size_t& dst_ipart, const fields::Onv<> &dst_on
     if (consts::float_is_zero(delta_weight)) return;
     ASSERT(!consts::float_is_zero(delta_weight));
 
+    m_wf.m_nspawned.m_local[dst_ipart] += delta_weight;
     if (irow_store == ~0ul) {
         /*
          * the destination ONV is not currently occupied, so initiator rules
@@ -134,6 +147,7 @@ void Solver::annihilate_row(const size_t& dst_ipart, const fields::Onv<> &dst_on
 }
 
 void Solver::loop_over_spawned() {
+    if (!m_wf.recv().m_hwm) return;
     mpi::barrier();
     if (m_opts.rdm_rank > 0) {
         auto row1 = m_wf.recv().m_row;
@@ -219,9 +233,9 @@ void Solver::loop_over_spawned() {
             return allow;
         };
 
-        auto still_in_block = [&](){
+        auto still_in_block = [&]() {
             return row_current.m_dst_onv == row_block_start.m_dst_onv &&
-            row_current.m_dst_ipart == row_block_start.m_dst_ipart;
+                   row_current.m_dst_ipart == row_block_start.m_dst_ipart;
         };
 
         row_block_start.restart();
@@ -249,8 +263,8 @@ void Solver::loop_over_spawned() {
         if (row_block_start.in_range()) {
             size_t dst_ipart = row_block_start.m_dst_ipart;
             auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
-            make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks, m_wf.recv().m_hwm - 1,
-                                                   irow_store);
+            make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
+                                                   m_wf.recv().m_hwm - 1, irow_store);
             annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
         }
     } else {
@@ -276,15 +290,16 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
                                        m_opts.spf_twf_fermion_factor,
                                        m_opts.spf_twf_boson_factor) :
                        nullptr),
-        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()){
+        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()) {
 
-    if (defs::enable_mevs && m_opts.rdm_rank>0){
-        if(!m_opts.replicate && !m_prop.is_exact())
+    if (defs::enable_mevs && m_opts.rdm_rank > 0) {
+        if (!m_opts.replicate && !m_prop.is_exact())
             log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
-        if(m_opts.replicate && m_prop.is_exact())
-            log::warn("Attempting an exact-propagation estimation of MEVs with replication, the replica population is redundant");
+        if (m_opts.replicate && m_prop.is_exact())
+            log::warn(
+                    "Attempting an exact-propagation estimation of MEVs with replication, the replica population is redundant");
     }
-    if (defs::enable_mevs && m_opts.rdm_rank>0 && !m_opts.replicate && !m_prop.is_exact()){
+    if (defs::enable_mevs && m_opts.rdm_rank > 0 && !m_opts.replicate && !m_prop.is_exact()) {
         log::warn("Attemping a stochastic estimation of MEVs without replication, this is biased");
     }
 
@@ -303,7 +318,7 @@ void Solver::execute(size_t niter) {
         hdf5::GroupReader gr("solver", fr);
         //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
         //loop_over_spawned();
-        if(m_mevs.m_fermion_rdm) {
+        if (m_mevs.m_fermion_rdm) {
             hdf5::GroupReader gr2("rdm", gr);
             m_mevs.m_fermion_rdm->h5_read(gr);
             m_mevs.m_fermion_rdm->end_cycle();
@@ -336,8 +351,8 @@ void Solver::execute(size_t niter) {
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) break;
-        if (defs::enable_mevs && m_mevs.m_accum_epoch){
-            if (i== m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
         }
     }
     if (!m_opts.write_hdf5_fname.empty()) {
@@ -373,16 +388,25 @@ void Solver::begin_cycle() {
     m_propagate_timer.reset();
     m_reference.begin_cycle();
 
-    auto update_mev_epoch = [&](){
-        if(m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]){
-            auto max_start = std::max(
-                    m_prop.m_shift.m_variable_mode[0].icycle_start(),
-                    m_prop.m_shift.m_variable_mode[1].icycle_start());
-            if (m_icycle > max_start+m_opts.ncycle_wait_mevs) return true;
-        }
-        return false;
-    };
-    m_mevs.m_accum_epoch.update(m_icycle, update_mev_epoch());
+    if (defs::enable_mevs) {
+        auto update_mev_epoch = [&]() {
+            if (m_opts.replicate) {
+                if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
+                    auto max_start = std::max(
+                            m_prop.m_shift.m_variable_mode[0].icycle_start(),
+                            m_prop.m_shift.m_variable_mode[1].icycle_start());
+                    if (m_icycle > max_start + m_opts.ncycle_wait_mevs) return true;
+                }
+            } else {
+                if (m_prop.m_shift.m_variable_mode[0]) {
+                    auto start = m_prop.m_shift.m_variable_mode[0].icycle_start();
+                    if (m_icycle > start + m_opts.ncycle_wait_mevs) return true;
+                }
+            }
+            return false;
+        };
+        m_mevs.m_accum_epoch.update(m_icycle, update_mev_epoch());
+    }
 }
 
 void Solver::end_cycle() {
@@ -399,7 +423,7 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator ONVs have occurred");
 
-    //if (m_rdm) m_rdm->end_cycle();
+    if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();
     m_reference.end_cycle();
     m_prop.update(m_icycle, m_wf);
@@ -417,6 +441,7 @@ void Solver::output_stats() {
         stats.m_shift = m_prop.m_shift.m_values;
         stats.m_nwalker = m_wf.m_nwalker.m_reduced;
         stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
+        stats.m_nwalker_spawned = m_wf.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
         stats.m_ref_proj_energy_num = m_reference.proj_energy_num();
         stats.m_ref_weight = m_reference.weight();

@@ -75,6 +75,10 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
      */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_delta_l2_norm_square;
     /**
+     * number of walkers received in spawning process
+     */
+    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nspawned;
+    /**
      * number of walkers annihilated in the loop_over_spawned method for each part
      */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;

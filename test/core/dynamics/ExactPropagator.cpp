@@ -65,6 +65,8 @@ TEST(ExactPropagator, Test) {
     opts.nwalker_target = 10000;
     opts.rdm_rank = 1;
     opts.replicate = false;
+    opts.write_hdf5_fname = "rdm.h5";
+    opts.ncycle = 10000;
     //const auto benchmark = -108.916561245585
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -95,7 +97,7 @@ TEST(ExactPropagator, RdmTest) {
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
-    for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set({0, i}); ref_onv.set({1, i});}
+    ham.set_hf_onv(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);

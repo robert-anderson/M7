@@ -102,6 +102,13 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         make_contribs(m_conn, src_weight, dst_weight);
     }
 
+    void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
+                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight, const size_t& nop_conn){
+        m_conn.connect(src_onv, dst_onv);
+        if (m_conn.nexcit()!=nop_conn) return;
+        make_contribs(m_conn, src_weight, dst_weight);
+    }
+
     void make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight);
 
     void make_contribs_spf_ket(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
@@ -114,6 +121,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         if (!send().buffer_dsize()) return;
         communicate();
         auto& row = m_comm.recv().m_row;
+        if (!m_comm.recv().m_hwm) return;
         for (row.restart(); row.in_range(); row.step()) {
             auto irow_store = *m_store[row.m_inds];
             if (irow_store==~0ul) irow_store = m_store.insert(row.m_inds);

@@ -17,6 +17,7 @@ struct FciqmcStatsRow : Row {
     fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_shift;
     fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
     fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_spawned;
     fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_annihilated;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy_num;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_ref_weight;
@@ -42,6 +43,7 @@ struct FciqmcStatsRow : Row {
             m_shift(this, m_wf_format, "Diagonal shift"),
             m_nwalker(this, m_wf_format, "WF L1 norm (number of walkers)"),
             m_delta_nwalker(this, m_wf_format, "Walkers added this cycle"),
+            m_nwalker_spawned(this, m_wf_format, "Walkers spawned this cycle"),
             m_nwalker_annihilated(this, m_wf_format, "Walkers annihilated this cycle"),
             m_ref_proj_energy_num(this, m_wf_format, "Numerator of reference-projected energy estimator"),
             m_ref_weight(this, m_wf_format, "Reference weight"),

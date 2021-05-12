@@ -17,33 +17,27 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
     VacantOrbitals vac(m_nsite);
 
     defs::ham_t helem_sum = 0.0;
+    defs::ham_t helem = 0.0;
     occ.update(onv);
     vac.update(onv);
+    ASSERT(weight[0]>0.0);
 
     // diagonal
     conn.connect(onv, onv);
-    helem_sum += ham.get_element(conn);
+    helem_sum = ham.get_element(conn);
     for (auto &iocc: occ.inds()) {
         for (auto &ivac: vac.inds()) {
             // singles
             conn.zero();
             conn.add(iocc, ivac);
             conn.apply(onv, work_onv);
-            helem_sum += ham.get_element(conn);
-            for (auto &jocc: occ.inds()) {
-                // doubles
-                if (jocc <= iocc) continue;
-                for (auto &jvac: vac.inds()) {
-                    if (jvac<=ivac) continue;
-                    conn.zero();
-                    conn.add(iocc, jocc, ivac, jvac);
-                    conn.apply(onv, work_onv);
-                    helem_sum += ham.get_element(conn);
-                }
-            }
+            helem = ham.get_element_1(conn);
+            MPI_ASSERT(helem<=0.0, "Not sign problem free!");
+            helem_sum += helem;
         }
     }
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
+        ASSERT(weight[ipart]>0)
         m_numerator[ipart] += weight[ipart] * helem_sum;
     }
 }

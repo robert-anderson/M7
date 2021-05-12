@@ -46,7 +46,7 @@ bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<> &conn, fi
         inds.m_cre[cre_passed + iins] = ins;
     }
     auto phase = (ann_passed + cre_passed) & 1ul;
-    phase = phase==conn.phase();
+    //phase = phase==conn.phase();
 
     // the rest of the promoted connection is the same as the connection
     // TODO: this with memcpy
@@ -106,7 +106,8 @@ void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &sr
 
     const auto& promoter = m_promoters[nins];
     for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
-        auto phase = promoter.apply(icomb, conn, m_lookup_inds);
+        //auto phase = promoter.apply(icomb, conn, m_lookup_inds);
+        promoter.apply(icomb, conn, m_lookup_inds);
         auto irank_send = m_ra.get_rank(m_lookup_inds);
         auto& send_table = send(irank_send);
         size_t irow = *send_table[m_lookup_inds];
@@ -115,7 +116,7 @@ void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &sr
         }
         send_table.m_row.jump(irow);
         auto contrib = src_weight * dst_weight;
-        if (!phase) contrib = -contrib;
+        //if (!phase) contrib = -contrib;
         send_table.m_row.m_values[0] += contrib;
     }
 }

@@ -80,8 +80,13 @@ public:
         if (!m_mevs.m_accum_epoch) return;
         auto& row = m_wf.m_store.m_row;
         ASSERT(row.occupied_ncycle(m_icycle));
-        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, row.m_average_weight[0],
-                            row.m_onv, row.m_average_weight[1]/row.occupied_ncycle(m_icycle));
+
+        auto ipart = 0ul;
+        auto ipart_replica = m_wf.ipart_replica(ipart);
+//        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, row.m_average_weight[ipart],
+//                                            row.m_onv, row.m_average_weight[ipart_replica] / row.occupied_ncycle(m_icycle));
+        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, row.m_weight[ipart],
+                                            row.m_onv, row.m_weight[ipart_replica]);
         row.m_average_weight = 0;
         row.m_icycle_occ = m_icycle;
     }
@@ -99,9 +104,11 @@ public:
              * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
              * value of the walker weight before the diagonal death/cloning.
              *
-             * In the exact propagator, the death step does:
+             * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
              * Ci -> Ci*(1 - tau (Hii-shift)).
-             * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
+             * By the time MEV contributions are being made, the death step has already been applied, and so the
+             * pre-death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death
+             * value of Cdst is just Cdst/(1 - tau (Hii-shift))
              */
             auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart];
             dst_weight_before_death /= 1 - m_prop.tau()*(m_wf.m_store.m_row.m_hdiag-m_prop.m_shift[dst_ipart]);
@@ -125,7 +132,7 @@ public:
 
         row_block_start.jump(row_current);
 
-        for (; row_current.m_i < irow_block_end; row_current.step()) {
+        for (; row_current.in_range(irow_block_end); row_current.step()) {
             ASSERT(m_wf.m_store.m_row.m_onv == row_current.m_dst_onv);
             // seek to next "parent" ONV
             if (row_current.m_src_onv != row_block_start.m_src_onv) {
