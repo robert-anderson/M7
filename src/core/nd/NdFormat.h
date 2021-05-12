@@ -54,6 +54,26 @@ public:
         return true;
     }
 
+    template <size_t ndiff = 1ul>
+    typename std::enable_if<(nind-ndiff>=0), NdFormat<nind-ndiff>>::type
+    major_dims() const {
+        std::array<size_t, nind-ndiff> shape;
+        std::copy(m_shape.cbegin(), m_shape.cend()-ndiff, shape.begin());
+        std::array<std::string, nind-ndiff> dim_names;
+        std::copy(m_dim_names.cbegin(), m_dim_names.cend()-ndiff, dim_names.begin());
+        return {shape, dim_names};
+    }
+
+    template <size_t ndiff = 1ul>
+    typename std::enable_if<(nind-ndiff>=0), NdFormat<nind-ndiff>>::type
+    minor_dims() const {
+        std::array<size_t, nind-ndiff> shape;
+        std::copy(m_shape.cbegin()+ndiff, m_shape.cend(), shape.begin());
+        std::array<std::string, nind-ndiff> dim_names;
+        std::copy(m_dim_names.cbegin()+ndiff, m_dim_names.cend(), dim_names.begin());
+        return {shape, dim_names};
+    }
+
     const size_t& nelement() const {
         return m_nelement;
     }
@@ -92,6 +112,27 @@ public:
             iflat+= inds[i] * m_strides[i];
         }
         return iflat;
+    }
+
+    template<size_t nminor>
+    size_t flatten(std::array<size_t, nind - nminor> major, std::array<size_t, nminor> minor) const {
+        size_t iflat = 0ul;
+        for (size_t i = 0ul; i < nind - nminor; ++i) {
+            ASSERT(major[i]<m_shape[i]);
+            iflat+= major[i] * m_strides[i];
+        }
+        for (size_t i = 0ul; i < nminor; ++i) {
+            const auto j = i + nind - nminor;
+            ASSERT(minor[i]<m_shape[j]);
+            iflat+= minor[i] * m_strides[j];
+        }
+        return iflat;
+    }
+
+    template<size_t nminor>
+    typename std::enable_if<nminor!=0, size_t>::type
+    flatten(const size_t& iflat_major, const size_t& iflat_minor) const {
+        return iflat_major*m_strides[nind-nminor-1]+iflat_minor;
     }
 
     template<typename ...Args>

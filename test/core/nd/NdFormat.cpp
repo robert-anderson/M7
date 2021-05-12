@@ -5,13 +5,45 @@
 #include "gtest/gtest.h"
 #include "src/core/nd/NdFormat.h"
 
-TEST(NdArrayFormat, NamedDimensions) {
+TEST(NdFormat, SubFormats) {
+    NdFormat<4> format({3, 4, 2, 6});
+    ASSERT_EQ(format.nelement(), 3*4*2*6);
+    ASSERT_EQ(format.major_dims().nelement(), 3 * 4 * 2);
+    ASSERT_EQ(format.major_dims().major_dims().nelement(), 3 * 4);
+    ASSERT_EQ(format.major_dims().major_dims().major_dims().nelement(), 3);
+    ASSERT_EQ(format.major_dims().major_dims().major_dims().major_dims().nelement(), 1);
+    ASSERT_EQ(format.minor_dims().nelement(), 4 * 2 * 6);
+    ASSERT_EQ(format.minor_dims().minor_dims().nelement(), 2 * 6);
+    ASSERT_EQ(format.minor_dims().minor_dims().minor_dims().nelement(), 6);
+    ASSERT_EQ(format.minor_dims().minor_dims().minor_dims().minor_dims().nelement(), 1);
+
+    ASSERT_EQ(format.major_dims<1>().nelement(), 3 * 4 * 2);
+    ASSERT_EQ(format.major_dims<2>().nelement(), 3 * 4);
+    ASSERT_EQ(format.major_dims<3>().nelement(), 3);
+    ASSERT_EQ(format.major_dims<4>().nelement(), 1);
+    ASSERT_EQ(format.minor_dims<1>().nelement(), 4 * 2 * 6);
+    ASSERT_EQ(format.minor_dims<2>().nelement(), 2 * 6);
+    ASSERT_EQ(format.minor_dims<3>().nelement(), 6);
+    ASSERT_EQ(format.minor_dims<4>().nelement(), 1);
+
+    auto major = format.major_dims<2>();
+    auto minor = format.minor_dims<2>();
+
+    size_t iflat = 0ul;
+    for (size_t imajor_flat = 0ul; imajor_flat<major.nelement(); ++imajor_flat){
+        for (size_t iminor_flat = 0ul; iminor_flat<minor.nelement(); ++iminor_flat){
+            ASSERT_EQ(iflat++, format.flatten<2>(imajor_flat, iminor_flat));
+        }
+    }
+}
+
+TEST(NdFormat, NamedDimensions) {
     NdFormat<3> format({3, 4, 2},
                        {"first", "second", "third"});
     ASSERT_EQ(format.to_string(), "first (3) second (4) third (2) ");
 }
 
-TEST(NdArrayFormat, Test1D) {
+TEST(NdFormat, Test1D) {
     NdFormat<1> format(9);
     size_t iflat = 0ul;
     std::array<size_t, 1> iarr;
@@ -23,7 +55,7 @@ TEST(NdArrayFormat, Test1D) {
     }
 }
 
-TEST(NdArrayFormat, Test2D) {
+TEST(NdFormat, Test2D) {
     NdFormat<2> format({4, 5});
     size_t iflat = 0ul;
     std::array<size_t, 2> iarr;
@@ -38,7 +70,7 @@ TEST(NdArrayFormat, Test2D) {
     }
 }
 
-TEST(NdArrayFormat, Test2DEqualExtents) {
+TEST(NdFormat, Test2DEqualExtents) {
     const size_t n = 7;
     NdFormat<2> format(n);
     size_t iflat = 0ul;
@@ -54,7 +86,7 @@ TEST(NdArrayFormat, Test2DEqualExtents) {
     }
 }
 
-TEST(NdArrayFormat, Test3D) {
+TEST(NdFormat, Test3D) {
     NdFormat<3> format({4, 5, 3});
     size_t iflat = 0ul;
     std::array<size_t, 3> iarr;
@@ -72,7 +104,7 @@ TEST(NdArrayFormat, Test3D) {
     }
 }
 
-TEST(NdArrayFormat, Test3DEqualExtents) {
+TEST(NdFormat, Test3DEqualExtents) {
     const size_t n = 7;
     NdFormat<3> format(n);
     size_t iflat = 0ul;
@@ -91,7 +123,7 @@ TEST(NdArrayFormat, Test3DEqualExtents) {
     }
 }
 
-TEST(NdArrayFormat, Test4D) {
+TEST(NdFormat, Test4D) {
     NdFormat<4> format({4, 5, 3, 2});
     size_t iflat = 0ul;
     std::array<size_t, 4> iarr;
@@ -112,7 +144,7 @@ TEST(NdArrayFormat, Test4D) {
     }
 }
 
-TEST(NdArrayFormat, Test4DEqualExtents) {
+TEST(NdFormat, Test4DEqualExtents) {
     const size_t n = 5;
     NdFormat<4> format(n);
     size_t iflat = 0ul;

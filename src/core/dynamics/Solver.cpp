@@ -4,7 +4,7 @@
 
 #include "Solver.h"
 
-void Solver::loop_over_occupied_onvs() {
+void Solver::loop_over_occupied_onvs(bool final) {
     /*
      * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
      *      ascertain the initiator status of the ONV
@@ -20,16 +20,25 @@ void Solver::loop_over_occupied_onvs() {
          * stats always refer to the state of the wavefunction in the previous iteration
          */
 
+        /*
+         * this is a free row, caused by an earlier call to m_wf.remove_row()
+         */
         if (row.is_cleared()) continue;
 
 
         if (row.m_weight.is_zero()) {
-            // ONV has become unoccupied in all parts and must be removed from mapped list
-            //make_diagonal_mev_contribs();
+            /*
+             * ONV has become unoccupied in all parts and must be removed from mapped list
+             * it must first make all associated averaged contributions to MEVs
+             */
+            make_average_weight_mev_contribs();
             m_wf.remove_row();
             continue;
         }
-        make_diagonal_mev_contribs();
+        if (m_mevs.is_period_cycle(m_icycle) || (m_mevs.m_accum_epoch && final)) {
+            make_average_weight_mev_contribs();
+        }
+
         /*
          * if the accumulation of MEVs has just started, treat the row as though it just became
          * occupied on this MC cycle
@@ -37,7 +46,9 @@ void Solver::loop_over_occupied_onvs() {
         if (defs::enable_mevs && m_mevs.m_accum_epoch.started_this_cycle(m_icycle))
             row.m_icycle_occ = m_icycle;
 
-        if (defs::enable_mevs && m_mevs.m_accum_epoch) row.m_average_weight += row.m_weight;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+            row.m_average_weight += row.m_weight;
+        }
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 
@@ -61,15 +72,15 @@ void Solver::loop_over_occupied_onvs() {
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
 
-            auto refconn = row.m_reference_connection.get(ipart);
-            if (refconn && m_mevs.m_fermion_rdm && m_mevs.m_accum_epoch) {
-                m_mevs.m_fermion_rdm->make_contribs(
-                        row.m_onv, row.m_weight[0],
-                        m_reference.get_onv(), m_reference.weight()[0], 1);
-                m_mevs.m_fermion_rdm->make_contribs(
-                        m_reference.get_onv(), m_reference.weight()[0],
-                        row.m_onv, row.m_weight[0], 1);
-            }
+//            auto refconn = row.m_reference_connection.get(ipart);
+//            if (refconn && m_mevs.m_fermion_rdm && m_mevs.m_accum_epoch) {
+//                m_mevs.m_fermion_rdm->make_contribs(
+//                        row.m_onv, row.m_weight[0],
+//                        m_reference.get_onv(), m_reference.weight()[0], 1);
+//                m_mevs.m_fermion_rdm->make_contribs(
+//                        m_reference.get_onv(), m_reference.weight()[0],
+//                        row.m_onv, row.m_weight[0], 1);
+//            }
 
 
             //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
@@ -92,7 +103,7 @@ void Solver::loop_over_occupied_onvs() {
                 m_spawning_timer.reset();
                 m_spawning_timer.unpause();
             }
-            propagate_row(ipart);
+            if (!final) propagate_row(ipart);
             if (m_wf.m_ra.is_active()) {
                 m_spawning_timer.pause();
                 m_wf.m_ra.record_work_time(row, m_spawning_timer);
@@ -355,6 +366,8 @@ void Solver::execute(size_t niter) {
             if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
         }
     }
+    loop_over_occupied_onvs(true);
+
     if (!m_opts.write_hdf5_fname.empty()) {
         hdf5::FileWriter fw(m_opts.write_hdf5_fname);
         //m_wf.h5_write(gw);

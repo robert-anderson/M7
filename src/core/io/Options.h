@@ -49,6 +49,7 @@ struct Options {
     size_t ncycle = ~0ul;
     size_t ncycle_wait_mevs = 0ul;
     size_t ncycle_accumulate_mevs = ~0ul;
+    size_t ncycle_mev_period = 50ul;
     bool do_semistochastic = false;
     size_t ncycle_init_detsub = 1000;
     bool calc_mk_walker_sums = false;
