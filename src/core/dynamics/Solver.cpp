@@ -160,7 +160,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
 void Solver::loop_over_spawned() {
     if (!m_wf.recv().m_hwm) return;
     mpi::barrier();
-    if (m_opts.rdm_rank > 0) {
+    if (m_opts.consolidate_spawns) {
         auto row1 = m_wf.recv().m_row;
         auto row2 = m_wf.recv().m_row;
         auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
@@ -280,9 +280,22 @@ void Solver::loop_over_spawned() {
         }
     } else {
         auto &row = m_wf.recv().m_row;
+        if (m_opts.rdm_rank > 0) {
+            /*
+             * an additional loop over recvd spawns is required in this case, in order to make the necessary
+             * MEV contributions before the new spawns are added to the instantaneous populations
+             */
+            for (row.restart(); row.in_range(); row.step()) {
+                auto irow_store = *m_wf.m_store[row.m_dst_onv];
+                if (irow_store!=~0ul) {
+                    m_wf.m_store.m_row.jump(irow_store);
+                    make_instant_mev_contribs(row.m_src_onv, row.m_src_weight, row.m_dst_ipart);
+                }
+            }
+        }
+
         for (row.restart(); row.in_range(); row.step()) {
-            size_t dst_ipart = row.m_dst_ipart;
-            annihilate_row(dst_ipart, row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
+            annihilate_row(row.m_dst_ipart, row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
         }
     }
     m_wf.recv().clear();

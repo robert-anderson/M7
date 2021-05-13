@@ -62,22 +62,24 @@ public:
 
     Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
 
-    void execute(size_t niter=1);
+    void execute(size_t niter = 1);
 
     void begin_cycle();
 
-    void propagate_row(const size_t& ipart);
+    void propagate_row(const size_t &ipart);
 
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero ONV field
      * @param final
      *  if true, this call to the method does not call the propagator methods
      */
-    void loop_over_occupied_onvs(bool final=false);
+    void loop_over_occupied_onvs(bool final = false);
 
-    void annihilate_row(const size_t& dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation, const size_t& irow_store);
+    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+                        bool allow_initiation, const size_t &irow_store);
 
-    void annihilate_row(const size_t& dst_ipart, const fields::Onv<>& dst_onv, const defs::wf_t& delta_weight, bool allow_initiation) {
+    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+                        bool allow_initiation) {
         annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
     }
 
@@ -87,31 +89,55 @@ public:
      * Explicit contributions from connections to the Hartree-Fock ONV are also optionally included
      * here - in that case the single excitations are never generated due to the Brillouin theorem
      */
-    void make_average_weight_mev_contribs(){
+    void make_average_weight_mev_contribs() {
         if (!m_mevs.m_accum_epoch) return;
-        auto& row = m_wf.m_store.m_row;
+        auto &row = m_wf.m_store.m_row;
         ASSERT(row.occupied_ncycle(m_icycle));
 
-        for (size_t ipart = 0ul; ipart<m_wf.m_format.nelement(); ++ipart) {
+        for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
             auto ipart_replica = m_wf.ipart_replica(ipart);
+//            m_mevs.m_fermion_rdm->make_contribs(
+//                    row.m_onv, row.m_average_weight[ipart],
+//                    row.m_onv, row.m_average_weight[ipart_replica] / row.occupied_ncycle(m_icycle));
             m_mevs.m_fermion_rdm->make_contribs(
-                    row.m_onv, row.m_average_weight[ipart],
-                    row.m_onv, row.m_average_weight[ipart_replica] / row.occupied_ncycle(m_icycle));
-//            m_mevs.m_fermion_rdm->make_contribs(row.m_onv, row.m_weight[ipart],
-//                                                row.m_onv, row.m_weight[ipart_replica]);
+                    row.m_onv, row.m_weight[ipart],
+                    row.m_onv, row.m_weight[ipart_replica]);
+            if (m_mevs.m_explicit_hf_conns) {
+                if (row.m_reference_connection.get(ipart) && (m_reference.get_onv() != row.m_onv)) {
+                    m_mevs.m_fermion_rdm->make_contribs(
+                            m_reference.get_onv(), m_reference.weight()[ipart_replica],
+                            row.m_onv, row.m_weight[ipart]);
 
-//            if (row.m_reference_connection.get(ipart))
-//                m_mevs.m_fermion_rdm->make_contribs(row.m_onv, row.m_weight[ipart],
-//                                                    row.m_onv, row.m_weight[ipart_replica]);
+                    m_mevs.m_fermion_rdm->make_contribs(
+                            row.m_onv, row.m_weight[ipart],
+                            m_reference.get_onv(), m_reference.weight()[ipart_replica]);
+                }
+            }
+
+            /*
+            if (row.m_reference_connection.get(ipart) && (m_reference.get_onv()!=row.m_onv)) {
+                m_mevs.m_fermion_rdm->make_contribs(
+                        m_reference.get_onv(), m_reference.average_weight()[ipart_replica],
+                        row.m_onv, row.m_average_weight[ipart] / row.occupied_ncycle(m_icycle));
+                m_mevs.m_fermion_rdm->make_contribs(
+                        row.m_onv, row.m_average_weight[ipart],
+                        m_reference.get_onv(),
+                        m_reference.average_weight()[ipart_replica] / m_reference.row().occupied_ncycle(m_icycle));
+            }
+             */
 
         }
         row.m_average_weight = 0;
         row.m_icycle_occ = m_icycle;
     }
 
-    void make_mev_contribs(const fields::Onv<>& src_onv, const defs::wf_t& src_weight, const size_t& dst_ipart){
+    void
+    make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs::wf_t &src_weight, const size_t &dst_ipart) {
         // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
         if (!m_mevs.m_accum_epoch) return;
+        if (m_mevs.m_explicit_hf_conns) {
+            if (src_onv == m_reference.get_onv() || m_wf.m_store.m_row.m_onv == m_reference.get_onv()) return;
+        }
         if (m_mevs.m_fermion_rdm) {
             /*
              * We need to be careful of the walker weights
@@ -129,15 +155,15 @@ public:
              * value of Cdst is just Cdst/(1 - tau (Hii-shift))
              */
             auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart];
-            dst_weight_before_death /= 1 - m_prop.tau()*(m_wf.m_store.m_row.m_hdiag-m_prop.m_shift[dst_ipart]);
+            dst_weight_before_death /= 1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart]);
             m_mevs.m_fermion_rdm->make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
         }
     }
 
-    void make_mev_contribs_from_unique_src_onvs(SpawnTableRow& row_current, SpawnTableRow& row_block_start,
-                                                const size_t& irow_block_end, const size_t& irow_store){
+    void make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
+                                                const size_t &irow_block_end, const size_t &irow_store) {
         // if the dst onv is not stored, it cannot give contributions to any MEVs
-        if (irow_store==~0ul) {
+        if (irow_store == ~0ul) {
             row_current.jump(irow_block_end);
             return;
         }
@@ -154,15 +180,16 @@ public:
             ASSERT(m_wf.m_store.m_row.m_onv == row_current.m_dst_onv);
             // seek to next "parent" ONV
             if (row_current.m_src_onv != row_block_start.m_src_onv) {
-                ASSERT(row_current.m_i - row_block_start.m_i>0);
+                ASSERT(row_current.m_i - row_block_start.m_i > 0);
                 // row_current is pointing to the first row of the next src_onv block
                 // row_block_start can be used to access the src ONV data
-                make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
+                make_instant_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight,
+                                          row_block_start.m_dst_ipart);
                 row_block_start.jump(row_current);
             }
         }
         // finish off last block
-        make_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
+        make_instant_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
     }
 
     void loop_over_spawned();

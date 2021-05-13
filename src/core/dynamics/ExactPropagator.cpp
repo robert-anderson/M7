@@ -23,7 +23,6 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         if (consts::float_is_zero(delta)) return;
         wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
     };
-
     m_ham.foreach_connection(src_onv, body, true, true, false);
 }
 

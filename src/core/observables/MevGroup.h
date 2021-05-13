@@ -164,11 +164,12 @@ struct MevGroup {
     Epoch m_accum_epoch;
     std::unique_ptr<FermionRdm> m_fermion_rdm;
     const size_t m_period;
+    const bool m_explicit_hf_conns;
     size_t m_icycle_period_start = ~0ul;
     MevGroup(const Options& opts, size_t nsite, size_t nelec):
             m_accum_epoch("MEV accumulation"),
             m_fermion_rdm(opts.rdm_rank ? new FermionRdm(opts, opts.rdm_rank, nsite, nelec): nullptr),
-            m_period(opts.ncycle_mev_period){}
+            m_period(opts.ncycle_mev_period), m_explicit_hf_conns(opts.explicit_hf_conn_mevs){}
 
     bool is_period_cycle(size_t icycle){
         if(!m_accum_epoch) return false;

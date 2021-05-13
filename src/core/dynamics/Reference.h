@@ -87,6 +87,12 @@ public:
 
     const fields::Numbers<defs::ham_t, defs::ndim_wf>& weight() const;
 
+    const fields::Numbers<defs::ham_t, defs::ndim_wf>& average_weight() const;
+
+    const WalkerTableRow& row() const {
+        return m_ac.m_row;
+    }
+
 };
 
 #endif //M7_REFERENCE_H

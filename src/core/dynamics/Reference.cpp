@@ -113,3 +113,7 @@ const fields::Numbers<defs::ham_t, defs::ndim_wf>& Reference::proj_energy_num() 
 const fields::Numbers<defs::ham_t, defs::ndim_wf> &Reference::weight() const {
     return m_ac.m_row.m_weight;
 }
+
+const fields::Numbers<defs::ham_t, defs::ndim_wf> &Reference::average_weight() const {
+    return m_ac.m_row.m_average_weight;
+}
