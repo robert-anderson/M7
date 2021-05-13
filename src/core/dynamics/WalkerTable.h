@@ -46,7 +46,7 @@ struct WalkerTableRow : public Row {
     }
 
     size_t occupied_ncycle(const size_t& icycle_current) const {
-        return icycle_current-m_icycle_occ+1;
+        return icycle_current-m_icycle_occ;
     }
 };
 

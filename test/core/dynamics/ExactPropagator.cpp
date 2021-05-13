@@ -67,7 +67,7 @@ TEST(ExactPropagator, Test) {
     opts.replicate = false;
     opts.write_hdf5_fname = "rdm.h5";
     opts.ncycle_accumulate_mevs = 1500;
-    opts.ncycle_mev_period = 1;
+    opts.ncycle_mev_period = 3;
     opts.consolidate_spawns = false;
     opts.explicit_hf_conn_mevs = true;
     opts.init();

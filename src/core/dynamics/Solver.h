@@ -84,33 +84,30 @@ public:
     }
 
     /**
-     * Make all contributions to MEVs from the current occupied ONV row.
-     * These contributions always include the diagonals, where the bra and ket ONVs are the same
-     * Explicit contributions from connections to the Hartree-Fock ONV are also optionally included
-     * here - in that case the single excitations are never generated due to the Brillouin theorem
+     * Make all contributions to MEVs from the current occupied ONV row. These contributions always include the
+     * diagonals, where the bra and ket ONVs are the same. Explicit contributions from connections to the Hartree-Fock
+     * ONV are also optionally included here - in that case it is taken to be true that the single excitations are never
+     * generated due to the Brillouin theorem
      */
     void make_average_weight_mev_contribs() {
         if (!m_mevs.m_accum_epoch) return;
         auto &row = m_wf.m_store.m_row;
-        ASSERT(row.occupied_ncycle(m_icycle));
+        auto ncycle_occ = row.occupied_ncycle(m_icycle);
+        ASSERT(ncycle_occ);
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
             auto ipart_replica = m_wf.ipart_replica(ipart);
-//            m_mevs.m_fermion_rdm->make_contribs(
-//                    row.m_onv, row.m_average_weight[ipart],
-//                    row.m_onv, row.m_average_weight[ipart_replica] / row.occupied_ncycle(m_icycle));
             m_mevs.m_fermion_rdm->make_contribs(
-                    row.m_onv, row.m_weight[ipart],
-                    row.m_onv, row.m_weight[ipart_replica]);
+                    row.m_onv, row.m_average_weight[ipart],
+                    row.m_onv, row.m_average_weight[ipart_replica] / ncycle_occ);
             if (m_mevs.m_explicit_hf_conns) {
                 if (row.m_reference_connection.get(ipart) && (m_reference.get_onv() != row.m_onv)) {
                     m_mevs.m_fermion_rdm->make_contribs(
-                            m_reference.get_onv(), m_reference.weight()[ipart_replica],
-                            row.m_onv, row.m_weight[ipart]);
-
+                            m_reference.get_onv(), m_reference.average_weight()[ipart_replica],
+                            row.m_onv, row.m_average_weight[ipart] / ncycle_occ);
                     m_mevs.m_fermion_rdm->make_contribs(
-                            row.m_onv, row.m_weight[ipart],
-                            m_reference.get_onv(), m_reference.weight()[ipart_replica]);
+                            row.m_onv, row.m_average_weight[ipart] / ncycle_occ,
+                            m_reference.get_onv(), m_reference.average_weight()[ipart_replica]);
                 }
             }
 

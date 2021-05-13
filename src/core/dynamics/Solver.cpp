@@ -25,7 +25,6 @@ void Solver::loop_over_occupied_onvs(bool final) {
          */
         if (row.is_cleared()) continue;
 
-
         if (row.m_weight.is_zero()) {
             /*
              * ONV has become unoccupied in all parts and must be removed from mapped list
@@ -49,6 +48,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
         if (defs::enable_mevs && m_mevs.m_accum_epoch) {
             row.m_average_weight += row.m_weight;
         }
+
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 
