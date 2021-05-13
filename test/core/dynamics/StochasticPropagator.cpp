@@ -11,25 +11,22 @@
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
     Options opts;
-    opts.nwalker_initial = 300.0;
+    opts.nwalker_initial = 100;
     opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.01;
-    opts.load_balance_period = 5;
-    opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 20000;
-    opts.shift_damp = 0.5;
-    opts.shift_initial = 0.0;
-    opts.shift_update_period = 5;
-    opts.ncycle_wait_mevs = 200;
-    opts.prng_seed = 133;
-    opts.ncycle_accumulate_mevs = 1000;
+    opts.tau_initial = 0.05;
+    opts.nwalker_target = 1000000;
     opts.rdm_rank = 1;
-    opts.replicate = 1;
+    opts.replicate = true;
     opts.write_hdf5_fname = "rdm.h5";
+    opts.ncycle_accumulate_mevs = 6000;
+    opts.ncycle_mev_period = 10;
+    opts.min_spawn_mag = 0.0;
+    opts.min_death_mag = 0.2;
+    opts.consolidate_spawns = false;
+    opts.explicit_hf_conn_mevs = true;
+    opts.output_mevs_periodically = true;
     opts.init();
 
-    //const auto benchmark = -108.916561245585;
-    // -75.71720277856586
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
@@ -65,6 +62,7 @@ TEST(StochasticPropagator, RdmTest) {
     opts.ncycle_accumulate_mevs = 1000;
     opts.rdm_rank = 1;
     opts.replicate = true;
+    opts.consolidate_spawns = true;
     opts.write_hdf5_fname = "test_rdm_save.h5";
     opts.init();
 

@@ -76,8 +76,14 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         if (consts::float_is_zero(delta)) continue;
 
         if (wf.recv().m_row.m_send_parents){
-            // reweight by probability that this connection was sampled a non-zero number of times
-            rdm_unbias_factor = 1.0 / (1.0-std::pow(1-prob, nattempt));
+            if (m_opts.consolidate_spawns) {
+                // reweight by probability that this connection was sampled a non-zero number of times
+                rdm_unbias_factor = 1.0 / (1.0 - std::pow(1 - prob, nattempt));
+            }
+            else {
+                // reweight for expected number of draws of this connection
+                rdm_unbias_factor = 1.0 / (prob*nattempt);
+            }
         }
         wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic,
                      ipart, src_onv, rdm_unbias_factor*weight);

@@ -67,9 +67,10 @@ TEST(ExactPropagator, Test) {
     opts.replicate = false;
     opts.write_hdf5_fname = "rdm.h5";
     opts.ncycle_accumulate_mevs = 1500;
-    opts.ncycle_mev_period = 3;
+    opts.ncycle_mev_period = 10;
     opts.consolidate_spawns = false;
     opts.explicit_hf_conn_mevs = true;
+    opts.output_mevs_periodically = true;
     opts.init();
     //const auto benchmark = -108.916561245585
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);

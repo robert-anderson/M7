@@ -47,6 +47,7 @@ struct FermionPromoter {
      * enumeration of all possible combinations
      */
     std::vector<defs::mev_ind_t> m_all_combs;
+
     FermionPromoter(size_t ncom, size_t nop_insert);
 
 private:
@@ -56,7 +57,7 @@ private:
      * @return
      *  const pointer to beginning of combination in m_all_combs
      */
-    const defs::mev_ind_t* begin(const size_t& icomb) const;
+    const defs::mev_ind_t *begin(const size_t &icomb) const;
 
 public:
     /**
@@ -70,7 +71,7 @@ public:
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
-    bool apply(const size_t& icomb, const conn::Antisym<>& conn, fields::FermionMevInds& inds) const;
+    bool apply(const size_t &icomb, const conn::Antisym<> &conn, fields::FermionMevInds &inds) const;
 };
 
 struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
@@ -88,7 +89,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 
     conn::Antisym<> m_conn;
 
-    const size_t& nop() const;
+    const size_t &nop() const;
 
     static size_t nrow_guess(size_t nann, size_t ncre, size_t nsite);
 
@@ -97,22 +98,22 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     void make_contribs(const conn::Antisym<> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
 
     void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight){
+                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight) {
         m_conn.connect(src_onv, dst_onv);
         make_contribs(m_conn, src_weight, dst_weight);
     }
 
     void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight, const size_t& nop_conn){
+                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight, const size_t &nop_conn) {
         m_conn.connect(src_onv, dst_onv);
-        if (m_conn.nexcit()!=nop_conn) return;
+        if (m_conn.nexcit() != nop_conn) return;
         make_contribs(m_conn, src_weight, dst_weight);
     }
 
     void make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight);
 
     void make_contribs_spf_ket(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FermionOnv &dst_onv){
+                               const fields::FermionOnv &dst_onv) {
         m_conn.connect(src_onv, dst_onv);
         make_contribs_spf_ket(m_conn, src_weight);
     }
@@ -120,18 +121,18 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     void end_cycle() {
         if (!send().buffer_dsize()) return;
         communicate();
-        auto& row = m_comm.recv().m_row;
+        auto &row = m_comm.recv().m_row;
         if (!m_comm.recv().m_hwm) return;
         for (row.restart(); row.in_range(); row.step()) {
             auto irow_store = *m_store[row.m_inds];
-            if (irow_store==~0ul) irow_store = m_store.insert(row.m_inds);
+            if (irow_store == ~0ul) irow_store = m_store.insert(row.m_inds);
             m_store.m_row.jump(irow_store);
             m_store.m_row.m_values += row.m_values;
         }
         m_comm.recv().clear();
     }
 
-    void h5_read(hdf5::GroupReader &parent){
+    void h5_read(hdf5::GroupReader &parent) {
         m_store.clear();
         BufferedTable<MevRow<defs::wf_t>> m_buffer("", {{m_nann, m_ncre}});
         m_buffer.push_back();
@@ -140,7 +141,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         row_reader.restart();
         for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
             row_reader.read(iitem);
-            auto& send_table = send(m_ra.get_rank(row_reader.m_inds));
+            auto &send_table = send(m_ra.get_rank(row_reader.m_inds));
             // should never read in the same inds twice
             ASSERT(!send_table[row_reader.m_inds]);
             auto irow = send_table.insert(row_reader.m_inds);
@@ -153,7 +154,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         m_store.write(parent, std::to_string(nop()), h5_field_names());
     }
 
-    std::vector<std::string> h5_field_names(){
+    std::vector<std::string> h5_field_names() {
         return {m_store.m_row.m_inds.m_ann.m_name,
                 m_store.m_row.m_inds.m_cre.m_name,
                 m_store.m_row.m_values.m_name};
@@ -164,20 +165,28 @@ struct MevGroup {
     Epoch m_accum_epoch;
     std::unique_ptr<FermionRdm> m_fermion_rdm;
     const size_t m_period;
-    const bool m_explicit_hf_conns;
+    const bool m_explicit_hf_conns, m_output_periodically;
     size_t m_icycle_period_start = ~0ul;
-    MevGroup(const Options& opts, size_t nsite, size_t nelec):
-            m_accum_epoch("MEV accumulation"),
-            m_fermion_rdm(opts.rdm_rank ? new FermionRdm(opts, opts.rdm_rank, nsite, nelec): nullptr),
-            m_period(opts.ncycle_mev_period), m_explicit_hf_conns(opts.explicit_hf_conn_mevs){}
 
-    bool is_period_cycle(size_t icycle){
-        if(!m_accum_epoch) return false;
-        if (m_icycle_period_start==~0ul || m_icycle_period_start==icycle) {
-            m_icycle_period_start=icycle;
+    MevGroup(const Options &opts, size_t nsite, size_t nelec) :
+            m_accum_epoch("MEV accumulation"),
+            m_fermion_rdm(opts.rdm_rank ? new FermionRdm(opts, opts.rdm_rank, nsite, nelec) : nullptr),
+            m_period(opts.ncycle_mev_period), m_explicit_hf_conns(opts.explicit_hf_conn_mevs),
+            m_output_periodically(opts.output_mevs_periodically) {}
+
+
+    size_t iperiod(size_t icycle) {
+        if (!m_accum_epoch || m_icycle_period_start == ~0ul) return ~0ul;
+        return (icycle-m_icycle_period_start)/m_period;
+    }
+
+    bool is_period_cycle(size_t icycle) {
+        if (!m_accum_epoch) return false;
+        if (m_icycle_period_start == ~0ul || m_icycle_period_start == icycle) {
+            m_icycle_period_start = icycle;
             return false;
         }
-        return !((icycle-m_icycle_period_start)%m_period);
+        return !((icycle - m_icycle_period_start) % m_period);
     }
 };
 

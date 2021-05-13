@@ -72,32 +72,8 @@ void Solver::loop_over_occupied_onvs(bool final) {
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
 
-//            auto refconn = row.m_reference_connection.get(ipart);
-//            if (refconn && m_mevs.m_fermion_rdm && m_mevs.m_accum_epoch) {
-//                m_mevs.m_fermion_rdm->make_contribs(
-//                        row.m_onv, row.m_weight[0],
-//                        m_reference.get_onv(), m_reference.weight()[0], 1);
-//                m_mevs.m_fermion_rdm->make_contribs(
-//                        m_reference.get_onv(), m_reference.weight()[0],
-//                        row.m_onv, row.m_weight[0], 1);
-//            }
-
-
             //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
             //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
-
-            /*
-            if (m_prop.m_variable_shift){
-                m_connection.connect(m_reference.get_onv(), row.m_onv);
-                if (m_connection.nexcit()==0) m_average_coeffs.m_ref_coeff += weight;
-                if (m_connection.nexcit()==2) {
-                    auto irow = *m_average_coeffs[m_connection];
-                    if (irow==~0ul) irow = m_average_coeffs.insert(m_connection);
-                    m_average_coeffs.m_row.jump(irow);
-                    m_average_coeffs.m_row.m_values(0)+=weight;
-                }
-            }
-             */
 
             if (m_wf.m_ra.is_active()) {
                 m_spawning_timer.reset();
@@ -114,8 +90,6 @@ void Solver::loop_over_occupied_onvs(bool final) {
     m_synchronization_timer.unpause();
     mpi::barrier();
     m_synchronization_timer.pause();
-
-    //std::cout << m_mevs.m_rdms[1]->to_string() << std::endl;
 }
 
 void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
@@ -372,6 +346,7 @@ void Solver::execute(size_t niter) {
         end_cycle();
         m_cycle_timer.pause();
         output_stats();
+        output_mevs();
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) break;

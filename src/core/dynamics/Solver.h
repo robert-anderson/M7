@@ -97,32 +97,20 @@ public:
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
             auto ipart_replica = m_wf.ipart_replica(ipart);
+            double duplication_fac = (ipart_replica==ipart) ? 1.0 : 0.5;
             m_mevs.m_fermion_rdm->make_contribs(
-                    row.m_onv, row.m_average_weight[ipart],
+                    row.m_onv, duplication_fac*row.m_average_weight[ipart],
                     row.m_onv, row.m_average_weight[ipart_replica] / ncycle_occ);
             if (m_mevs.m_explicit_hf_conns) {
                 if (row.m_reference_connection.get(ipart) && (m_reference.get_onv() != row.m_onv)) {
                     m_mevs.m_fermion_rdm->make_contribs(
-                            m_reference.get_onv(), m_reference.average_weight()[ipart_replica],
-                            row.m_onv, row.m_average_weight[ipart] / ncycle_occ);
+                            m_reference.get_onv(), m_reference.average_weight()[ipart],
+                            row.m_onv, row.m_average_weight[ipart_replica] / ncycle_occ);
                     m_mevs.m_fermion_rdm->make_contribs(
                             row.m_onv, row.m_average_weight[ipart] / ncycle_occ,
                             m_reference.get_onv(), m_reference.average_weight()[ipart_replica]);
                 }
             }
-
-            /*
-            if (row.m_reference_connection.get(ipart) && (m_reference.get_onv()!=row.m_onv)) {
-                m_mevs.m_fermion_rdm->make_contribs(
-                        m_reference.get_onv(), m_reference.average_weight()[ipart_replica],
-                        row.m_onv, row.m_average_weight[ipart] / row.occupied_ncycle(m_icycle));
-                m_mevs.m_fermion_rdm->make_contribs(
-                        row.m_onv, row.m_average_weight[ipart],
-                        m_reference.get_onv(),
-                        m_reference.average_weight()[ipart_replica] / m_reference.row().occupied_ncycle(m_icycle));
-            }
-             */
-
         }
         row.m_average_weight = 0;
         row.m_icycle_occ = m_icycle;
@@ -135,6 +123,8 @@ public:
         if (m_mevs.m_explicit_hf_conns) {
             if (src_onv == m_reference.get_onv() || m_wf.m_store.m_row.m_onv == m_reference.get_onv()) return;
         }
+        auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
+        double duplication_fac = (dst_ipart_replica==dst_ipart) ? 1.0 : 0.5;
         if (m_mevs.m_fermion_rdm) {
             /*
              * We need to be careful of the walker weights
@@ -151,9 +141,9 @@ public:
              * pre-death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death
              * value of Cdst is just Cdst/(1 - tau (Hii-shift))
              */
-            auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart];
-            dst_weight_before_death /= 1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart]);
-            m_mevs.m_fermion_rdm->make_contribs(src_onv, src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
+            auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart_replica];
+            dst_weight_before_death /= 1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
+            m_mevs.m_fermion_rdm->make_contribs(src_onv, duplication_fac*src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
         }
     }
 
@@ -192,6 +182,16 @@ public:
     void loop_over_spawned();
 
     void end_cycle();
+
+    void output_mevs(){
+        if (!(defs::enable_mevs && m_mevs.is_period_cycle(m_icycle))) return;
+        hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle))+"."+m_opts.write_hdf5_fname);
+        hdf5::GroupWriter gw("solver", fw);
+        if (m_mevs.m_fermion_rdm) {
+            hdf5::GroupWriter gw2("rdm", gw);
+            m_mevs.m_fermion_rdm->h5_write(gw2);
+        }
+    }
 
     void output_stats();
 };
