@@ -2,86 +2,117 @@
 // Created by rja on 10/11/2020.
 //
 
-#include "gtest/gtest.h"
+#include <src/core/table/BufferedFields.h>
 #include "src/core/table/Communicator.h"
+#include "gtest/gtest.h"
 
-#if 0
 TEST(CommunicatingPair, CommunicateSingleElement) {
-    struct TestTable : public Table {
-        fields::Number<size_t> m_counter;
-
-        TestTable() : m_counter(this, "counter") {}
-    };
-
-    double expansion_factor = 0.5;
-    CommunicatingPair<TestTable> comm_pair("Test pair", expansion_factor, {});
+    typedef SingleFieldRow<fields::Number<size_t>> row_t;
+    const double expansion_factor = 0.5;
+    CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{}});
     // after resize:
     const size_t ndword_bw = comm_pair.row_dsize()*mpi::nrank();
+    const size_t hash_lo = 123, hash_hi = 789;
 
     comm_pair.resize(mpi::nrank());
     for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
-        comm_pair.send(irank).push_back();
-        comm_pair.send(irank).m_counter(0) = 9900 + 10 * irank + mpi::irank();
+        auto& row = comm_pair.send(irank).m_row;
+        row.push_back_jump();
+        row.m_field = hashing::in_range({irank, mpi::irank()}, hash_lo, hash_hi);
     }
 
     for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
+        // check pointer distance between adjacent send tables
         ASSERT_EQ(std::distance(comm_pair.send(idst - 1).dbegin(), comm_pair.send(idst).dbegin()), ndword_bw);
-        ASSERT_EQ(comm_pair.send().dbegin()[idst*ndword_bw], 9900 + 10 * idst + mpi::irank());
+        // check send values by pointer dereference relative to entire send table array
+        ASSERT_EQ(comm_pair.send().dbegin()[idst*ndword_bw], hashing::in_range({idst, mpi::irank()}, hash_lo, hash_hi));
     }
 
     comm_pair.communicate();
 
-    for (size_t isrc = 0ul; isrc < mpi::nrank(); ++isrc)
-        ASSERT_EQ(comm_pair.recv().m_counter(isrc), 9900 + 10 * mpi::irank() + isrc);
+    auto& row = comm_pair.recv().m_row;
+    for (row.restart(); row.in_range(); row.step()) {
+        auto irank_src = row.m_i;
+        ASSERT_EQ(row.m_field, hashing::in_range({mpi::irank(), irank_src}, hash_lo, hash_hi));
+    }
 }
 
-TEST(CommunicatingPair, CommunicateVector) {
-    struct TestTable : public Table {
-        fields::Numbers<int, 1> m_counter;
-        TestTable(size_t nint) : m_counter(this, "counter", nint) {}
-    };
+TEST(CommunicatingPair, CommunicateVectors){
+    typedef SingleFieldRow<fields::Numbers<size_t, 1>> row_t;
+    const double expansion_factor = 0.5;
+    const size_t nelement_vector = 13;
+    CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{nelement_vector}});
+    // after resize:
+    const size_t ndword_bw = comm_pair.row_dsize()*mpi::nrank();
+    const size_t hash_lo = 123, hash_hi = 789;
 
-    const size_t nrow = 120;
-    const size_t nint = 7;
+    comm_pair.resize(mpi::nrank());
+    for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+        auto& row = comm_pair.send(irank).m_row;
+        row.push_back_jump();
+        for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
+            row.m_field[ielement] = hashing::in_range({irank, mpi::irank(), ielement}, hash_lo, hash_hi);
+    }
 
-    CommunicatingPair<TestTable> comm_pair("Test pair", 0.5, {nint});
+    for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
+        // check pointer distance between adjacent send tables
+        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).dbegin(), comm_pair.send(idst).dbegin()), ndword_bw);
+        for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
+            // check send values by pointer dereference relative to entire send table array
+            ASSERT_EQ(comm_pair.send().dbegin()[idst*ndword_bw+ielement],
+                      hashing::in_range({idst, mpi::irank(), ielement}, hash_lo, hash_hi));
+    }
 
-    auto flat_index = [](const size_t isend, const size_t irecv, const size_t irow = 0,
-                         const size_t ientry = 0, const size_t modular_divisor = ~0ul) {
-        if (!modular_divisor) return 0ul;
-        return (((isend * nrow + irecv) * nrow + irow * nrow) + ientry) % modular_divisor;
-    };
+    comm_pair.communicate();
 
-    comm_pair.resize(nrow);
+    auto& row = comm_pair.recv().m_row;
+    for (row.restart(); row.in_range(); row.step()) {
+        auto irank_src = row.m_i;
+        for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
+            ASSERT_EQ(row.m_field[ielement],
+                      hashing::in_range({mpi::irank(), irank_src, ielement}, hash_lo, hash_hi));
+    }
+}
 
-    //ASSERT_EQ(comm_pair.recv().bw_dsize(), mpi::nrank() * nrow_ * comm_pair.row_dsize());
-    ASSERT_EQ(comm_pair.send().buffer_dsize(), mpi::nrank() * nrow * comm_pair.row_dsize());
+TEST(CommunicatingPair, CommunicateMultipleVectors){
+    typedef SingleFieldRow<fields::Numbers<size_t, 1>> row_t;
+    const double expansion_factor = 0.5;
+    const size_t nelement_vector = 5;
+    const size_t nrow_rank_lo = 6, nrow_rank_hi = 15;
+    const size_t nrow_this_rank = hashing::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
+    CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{nelement_vector}});
+    const size_t hash_lo = 123, hash_hi = 789;
 
-    for (size_t idst_rank = 0ul; idst_rank < mpi::nrank(); ++idst_rank) {
-        for (size_t irow = 0ul; irow < nrow; ++irow) {
-            ASSERT_EQ(comm_pair.send(idst_rank).push_back(), irow);
-            for (size_t iint = 0ul; iint < nint; ++iint) {
-                comm_pair.send(idst_rank).m_counter(irow, iint) = flat_index(mpi::irank(), idst_rank, irow, iint);
-            }
+    auto nrow_max = mpi::all_max(nrow_this_rank);
+
+    std::vector<size_t> nrows_expect;
+    nrows_expect.reserve(mpi::nrank());
+    for (auto irank=0ul; irank<mpi::nrank(); ++irank)
+        nrows_expect.push_back(hashing::in_range(irank, nrow_rank_lo, nrow_rank_hi));
+    ASSERT_EQ(*std::max_element(nrows_expect.cbegin(), nrows_expect.cend()), nrow_max);
+    auto nrow_displs_expect = mpi::counts_to_displs_consec(nrows_expect);
+
+    comm_pair.resize(nrow_max);
+    for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+        auto &row = comm_pair.send(irank).m_row;
+        for (size_t irow_send = 0ul; irow_send < nrow_this_rank; ++irow_send) {
+            row.push_back_jump();
+            for (size_t ielement = 0ul; ielement < nelement_vector; ++ielement)
+                row.m_field[ielement] = hashing::in_range({irank, mpi::irank(), irow_send, ielement}, hash_lo, hash_hi);
         }
     }
 
     comm_pair.communicate();
 
-/*
- * check that all entries came through as expected
- */
-    size_t irow_tot = 0;
-    for (size_t isend = 0ul; isend < mpi::nrank(); ++isend) {
-        for (size_t irow = 0ul; irow < nrow; ++irow) {
-            for (size_t iint = 0ul; iint < nint; ++iint) {
-                ASSERT_EQ(
-                        comm_pair.recv().m_counter(irow_tot, iint),
-                        flat_index(isend, mpi::irank(), irow, iint)
-                );
-            }
-            irow_tot++;
+    auto& row = comm_pair.recv().m_row;
+    auto irank_src = 0ul;
+    for (row.restart(); row.in_range(); row.step()) {
+        if (irank_src+1<mpi::nrank()){
+            if (row.m_i==nrow_displs_expect[irank_src+1]) ++irank_src;
         }
+        auto irow_send = row.m_i-nrow_displs_expect[irank_src];
+        for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
+            ASSERT_EQ(row.m_field[ielement],
+                      hashing::in_range({mpi::irank(), irank_src, irow_send, ielement}, hash_lo, hash_hi));
     }
 }
-#endif

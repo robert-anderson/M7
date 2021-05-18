@@ -44,11 +44,29 @@ namespace hashing {
         return fnv_hash((char*)&v, sizeof(defs::hash_t));
     }
 
+    /**
+     * deterministically generates integers in a range for the purpose of generating hashed test data
+     * @param v
+     *  value to be hashed
+     * @param lo
+     *  inclusive minimum returnable value
+     * @param hi
+     *  exclusive maximum returnable value
+     * @return
+     *  hash value
+     */
     static defs::hash_t in_range(defs::hash_t v, const defs::hash_t& lo, const defs::hash_t& hi){
         ASSERT(hi>lo);
-        v = fnv_hash(v);
+        v = fnv_hash(v+312194ul);
         v%=hi-lo;
         return v+lo;
+    }
+
+    static defs::hash_t in_range(const std::vector<defs::hash_t>& v, const defs::hash_t& lo, const defs::hash_t& hi){
+        ASSERT(!v.empty());
+        auto out = in_range(v[0], lo, hi);
+        for (size_t i=1ul; i<v.size(); ++i) out = in_range(out+4321*v[i], lo, hi);
+        return out;
     }
 };
 
