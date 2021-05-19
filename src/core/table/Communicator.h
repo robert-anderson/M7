@@ -332,32 +332,38 @@ struct Communicator {
     };
 
     /**
-     * A set of dynamic rows which can be locally gathered into a contiguous local table and communicated to a
-     * contiguous global table.
+     * A set of dynamic rows from which a subset of fields can be loaded into a contiguous local table and communicated to a
+     * contiguous global table. That is to say: only partially shared
      */
-    struct SharedRowSet : public DynamicRowSet {
+    template<typename contig_row_t>
+    struct PartSharedRowSet : public DynamicRowSet {
         using DynamicRowSet::m_source;
         using DynamicRowSet::nrow;
         using DynamicRowSet::m_displs;
         using DynamicRowSet::m_counts;
         using DynamicRowSet::m_irows;
-        /*
-         * the (mapped) table which loads copies of rows between m_source (arbitrary order, non-
-         * contiguous) and m_all (contiguous).
+        /**
+         * the (mapped) table which loads data from rows of m_source (arbitrary order, non-contiguous) into m_global
+         * (contiguous).
          */
-        BufferedTable<store_row_t> m_local;
-        /*
-         * the unmapped table which holds copies of all mapped rows. these copies are refreshed
-         * with a call to refresh method. This table is intended for reading rows from all MPI ranks,
-         * as such there is no mechanism for committing changes to m_source from m_all. It is
-         * to be treated as a read-only copy.
+        BufferedTable<contig_row_t> m_local;
+        /**
+         * the table which holds data extracted from all tracked rows in the dynamic set. these rows copies are refreshed
+         * with a call to update method. This table is intended for reading data from all MPI ranks, as such there is no
+         * mechanism for committing changes to m_source from m_global. It is to be treated as a read-only view of data
+         * stored across all ranks.
          */
-        BufferedTable<store_row_t> m_global;
+        BufferedTable<contig_row_t> m_global;
+        store_row_t m_source_row;
 
-        SharedRowSet(const Communicator &comm, std::string name) :
+        typedef std::function<void(const store_row_t&, contig_row_t&)> loading_fn_t;
+        const loading_fn_t m_loading_fn;
+
+        PartSharedRowSet(const Communicator &comm, std::string name, contig_row_t contig_row, loading_fn_t loading_fn) :
                 DynamicRowSet(comm, name),
-                m_local("Dynamic shared row set \"" + name + "\" (local)", comm.m_store.m_row),
-                m_global("Dynamic shared set \"" + name + "\" (global)", comm.m_store.m_row){
+                m_local("Dynamic shared row set \"" + name + "\" (local)", contig_row),
+                m_global("Dynamic shared set \"" + name + "\" (global)", contig_row),
+                m_source_row(comm.m_store.m_row), m_loading_fn(loading_fn){
             m_local.push_back(1);
             m_global.push_back(1);
         }
@@ -376,8 +382,12 @@ struct Communicator {
             m_local.clear();
             auto nrow = m_displs.back() + m_counts.back();
             m_local.push_back(m_counts[mpi::irank()]);
-            for (auto &irow : m_irows) {
-                static_cast<TableBase &>(m_local).copy_row_in(m_source, irow, irow_local++);
+            auto& local_row = m_local.m_row;
+            local_row.restart();
+            for (auto &irow : m_irows){
+                m_source_row.jump(irow);
+                m_loading_fn(m_source_row, local_row);
+                local_row.step();
             }
             ASSERT(irow_local==m_counts[mpi::irank()]);
 
@@ -386,15 +396,29 @@ struct Communicator {
             /*
              * convert from units of rows to datawords...
              */
-            for (auto &i : m_counts) i *= m_source.m_row_dsize;
-            for (auto &i : m_displs) i *= m_source.m_row_dsize;
+            for (auto &i : m_counts) i *= m_local.m_row_dsize;
+            for (auto &i : m_displs) i *= m_local.m_row_dsize;
             mpi::all_gatherv(m_local.dbegin(), m_counts[mpi::irank()], m_global.dbegin(), m_counts, m_displs);
             /*
              * ... and back again
              */
-            for (auto &i : m_counts) i /= m_source.m_row_dsize;
-            for (auto &i : m_displs) i /= m_source.m_row_dsize;
+            for (auto &i : m_counts) i /= m_local.m_row_dsize;
+            for (auto &i : m_displs) i /= m_local.m_row_dsize;
         }
+    };
+
+    /**
+     * A special case of PartSharedRowSet where all row data is copied, not just a subset
+     */
+    struct SharedRowSet : public PartSharedRowSet<store_row_t> {
+
+        typedef typename PartSharedRowSet<store_row_t>::loading_fn_t loading_fn_t;
+        static loading_fn_t make_copy_row_fn() {
+            return [](const store_row_t& source, store_row_t& local){local.copy_in(source);};
+        }
+
+        SharedRowSet(const Communicator &comm, std::string name):
+                PartSharedRowSet<store_row_t>(comm, name, comm.m_store.m_row, make_copy_row_fn()){}
     };
 
     struct SharedRow : public SharedRowSet {

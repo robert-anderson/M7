@@ -92,6 +92,11 @@ struct Row {
         jump(m_i);
     }
 
+    void copy_in(const Row& other){
+        ASSERT(other.m_dsize==m_dsize);
+        std::copy(other.dbegin(), other.dbegin()+m_dsize, dbegin());
+    }
+
     Row() {}
 
     Row(const Row &other) {
@@ -102,6 +107,7 @@ struct Row {
     }
 
     Row &operator=(const Row &other) {
+        copy_in(other);
         return *this;
     }
 
