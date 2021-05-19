@@ -412,7 +412,7 @@ struct Communicator {
         size_t m_iblock;
 
         SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
-                SharedRowSet<false>(comm, name) {
+                SharedRowSet(comm, name) {
             m_global.m_row.restart();
             if (loc.is_mine()) {
                 add_(loc.m_irow);
@@ -429,7 +429,7 @@ struct Communicator {
 
         void update() override {
             auto irank_initial = irank();
-            SharedRowSet<false>::update();
+            SharedRowSet::update();
             MPI_ASSERT(nrow() == 1, "Total number of rows across all ranks should be 1.");
             MPI_REQUIRE_ALL(m_ranks_with_any_rows.size() == 1, "Only one rank should have a row");
             auto irank_final = irank();

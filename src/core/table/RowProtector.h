@@ -66,25 +66,5 @@ struct RowProtector {
     bool is_protected() const;
 };
 
-struct DynamicRowProtector : public RowProtector, RankDynamic {
-    DynamicRowProtector(TableBase& table, RankAllocatorBase& ra):
-            RowProtector(table), RankDynamic(ra){}
-
-    bool has_row(size_t irow) override {
-        return false;
-    }
-
-    void before_block_transfer(const defs::inds &irows_send, size_t irank_send, size_t irank_recv) override {
-
-    }
-
-    void on_row_recv_(size_t irow) override {
-
-    }
-
-    void after_block_transfer() override {
-
-    }
-};
 
 #endif //M7_ROWPROTECTOR_H
