@@ -40,7 +40,7 @@ public:
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
     const fields::Onv<>& get_onv() const {
-        return m_ac.m_row.m_onv;
+        return m_global.m_row.m_onv;
     }
 
     void accept_candidate(double redefinition_thresh = 0.0) {
@@ -90,7 +90,7 @@ public:
     const fields::Numbers<defs::ham_t, defs::ndim_wf>& average_weight() const;
 
     const WalkerTableRow& row() const {
-        return m_ac.m_row;
+        return m_global.m_row;
     }
 
 };

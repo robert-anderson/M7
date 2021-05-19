@@ -37,26 +37,26 @@
 #include <algorithm>
 #include <src/core/util/Timer.h>
 
-// forward decl since a ref is required by Dependent class
+// forward decl since a ref is required by RankDynamic class
 struct RankAllocatorBase;
 
 /**
  * Base class for objects which track rows of a MappedTable whose rows are managed by a
  * RankAllocator
  */
-struct Dependent {
+struct RankDynamic {
     RankAllocatorBase &m_ra;
-    typename std::list<Dependent *>::iterator m_it;
+    typename std::list<RankDynamic *>::iterator m_it;
 
-    Dependent(RankAllocatorBase &ra);
+    RankDynamic(RankAllocatorBase &ra);
 
-    ~Dependent();
+    ~RankDynamic();
 
     /**
      * @param irow
      *  row index whose depended-upon status is being determined
      * @return
-     *  returns true if the irow-th row in source mapped table is mapped by this Dependent
+     *  returns true if the irow-th row in source mapped table is mapped by this RankDynamic
      */
     virtual bool has_row(size_t irow) = 0;
 
@@ -88,7 +88,7 @@ struct Dependent {
  * Here we abstract the behavior of the RankAllocator which does not depend on the mapped Field.
  * Objects which reference rows in the mapped table need to be notified if a referenced row is
  * being transferred to another rank, or if they are being given responsibility for tracking a
- * row which is incoming from another rank. Such objects are referred to as Dependents, and they
+ * row which is incoming from another rank. Such objects are referred to as RankDynamic, and they
  * are linked to the RankAllocatorBase by a list of addresses.
  */
 struct RankAllocatorBase {
@@ -148,44 +148,44 @@ private:
     /**
      * list of addresses of dependent objects which are affected by RankAllocator updates
      */
-    std::list<Dependent *> m_dependents;
+    std::list<RankDynamic *> m_rank_dynamic_objects;
 
     /**
-     * for each dependent, append a lambda to a list which is then called in the update method
+     * for each rank-dynamic object, append a lambda to a list which is then called in the update method
      */
     std::list<TableBase::recv_cb_t> m_recv_callbacks;
 
     /**
-     * when dependents are added by the add_dependent method, or removed by the dtor of a
-     * dependent objects via the erase_dependent method, the above list of callbacks must be updated
+     * when rank-dynamic objects are added by the add_dependent method, or removed by the dtor of a
+     * rank-dynamic object via the erase_dependent method, the above list of callbacks must be updated
      */
     void refresh_callback_list();
 
 public:
     /**
-     * adds a dependent object to the RankAllocator
+     * adds a rank-dynamic object to the RankAllocator
      * @param dependent
-     *  address of dependent object to be added to the RankAllocator
+     *  address of rank-dynamic object to be added to the RankAllocator
      * @return
-     *  iterator within list which points to the added dependent, this does not change after
-     *  calls to erase_dependent for other dependents since the list container is doubly linked.
+     *  iterator within list which points to the added rank-dynamic object, this does not change after
+     *  calls to erase_dependent for other rank-dynamic objects since the list container is doubly linked.
      */
-    typename std::list<Dependent *>::iterator add_dependent(Dependent *dependent);
+    typename std::list<RankDynamic *>::iterator add_dependent(RankDynamic *dependent);
 
     /**
-     * removes a dependent from the RankAllocator
+     * removes a rank-dynamic object from the RankAllocator
      * @param dependent
-     *  address of dependent to be unlinked from this RankAllocator
+     *  address of rank-dynamic object to be unlinked from this RankAllocator
      */
-    void erase_dependent(Dependent *dependent);
+    void erase_dependent(RankDynamic *dependent);
 
     RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance);
 
     /**
      * @param irow
-     *  index of row whose status as mapped by any added dependent object is to be determined
+     *  index of row whose status as mapped by any added rank-dynamic object is to be determined
      * @return
-     *  true if the row is mapped by any dependent
+     *  true if the row is mapped by any rank-dynamic object
      */
     bool row_mapped_by_dependent(size_t irow);
 

@@ -11,7 +11,6 @@
 #include "src/core/io/Logging.h"
 #include <set>
 #include <src/core/parallel/RankAllocator.h>
-#include <src/core/util/Bitset.h>
 #include "RowProtector.h"
 
 /**
@@ -175,8 +174,10 @@ struct Communicator {
     std::string m_name;
     double m_buffer_expansion_factor;
 
-
-    struct DynamicRowSet : Dependent, RowProtector {
+    /**
+     * A set of rows which responds correctly to rank reallocation and is protected from erasure
+     */
+    struct DynamicRowSet : RankDynamic, RowProtector {
         typedef RankAllocator<store_row_t> ra_t;
         /**
          * the mapped table which stores the definitive row values
@@ -214,7 +215,7 @@ struct Communicator {
          * @param name
          */
         DynamicRowSet(const Communicator &comm, std::string name) :
-                Dependent(comm.m_ra),
+                RankDynamic(comm.m_ra),
                 RowProtector(comm.m_store),
                 m_source(comm.m_store),
                 m_counts(mpi::nrank(), 0ul),
@@ -333,10 +334,7 @@ struct Communicator {
     /**
      * A set of dynamic rows which can be locally gathered into a contiguous local table and communicated to a
      * contiguous global table.
-     * @tparam mapped
-     *  the local and global contiguous tables are optionally mapped
      */
-    template<bool mapped=false>
     struct SharedRowSet : public DynamicRowSet {
         using DynamicRowSet::m_source;
         using DynamicRowSet::nrow;
@@ -399,7 +397,7 @@ struct Communicator {
         }
     };
 
-    struct SharedRow : public SharedRowSet<false> {
+    struct SharedRow : public SharedRowSet {
         using DynamicRowSet::m_ra;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
@@ -409,12 +407,12 @@ struct Communicator {
         using DynamicRowSet::update;
         using DynamicRowSet::m_name;
         using DynamicRowSet::m_ranks_with_any_rows;
-        using SharedRowSet<false>::m_global;
+        using SharedRowSet::m_global;
 
         size_t m_iblock;
 
         SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
-                DynamicRowSet(comm, name) {
+                SharedRowSet<false>(comm, name) {
             m_global.m_row.restart();
             if (loc.is_mine()) {
                 add_(loc.m_irow);
@@ -431,8 +429,7 @@ struct Communicator {
 
         void update() override {
             auto irank_initial = irank();
-            DynamicRowSet::update_counts();
-            DynamicRowSet::update_data();
+            SharedRowSet<false>::update();
             MPI_ASSERT(nrow() == 1, "Total number of rows across all ranks should be 1.");
             MPI_REQUIRE_ALL(m_ranks_with_any_rows.size() == 1, "Only one rank should have a row");
             auto irank_final = irank();

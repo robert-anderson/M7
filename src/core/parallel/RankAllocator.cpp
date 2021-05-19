@@ -4,28 +4,28 @@
 
 #include "RankAllocator.h"
 
-Dependent::Dependent(RankAllocatorBase &ra) : m_ra(ra), m_it(m_ra.add_dependent(this)) {}
+RankDynamic::RankDynamic(RankAllocatorBase &ra) : m_ra(ra), m_it(m_ra.add_dependent(this)) {}
 
-Dependent::~Dependent() {
+RankDynamic::~RankDynamic() {
     m_ra.erase_dependent(this);
 }
 
 void RankAllocatorBase::refresh_callback_list() {
     m_recv_callbacks.clear();
-    for (auto ptr : m_dependents) {
+    for (auto ptr : m_rank_dynamic_objects) {
         m_recv_callbacks.emplace_back([ptr](size_t irow) { ptr->on_row_recv_(irow); });
     }
 }
 
-std::list<Dependent *>::iterator RankAllocatorBase::add_dependent(Dependent *dependent) {
-    m_dependents.push_back(dependent);
-    auto it = m_dependents.end();
+std::list<RankDynamic *>::iterator RankAllocatorBase::add_dependent(RankDynamic *dependent) {
+    m_rank_dynamic_objects.push_back(dependent);
+    auto it = m_rank_dynamic_objects.end();
     refresh_callback_list();
     return --it;
 }
 
-void RankAllocatorBase::erase_dependent(Dependent *dependent) {
-    m_dependents.erase(dependent->m_it);
+void RankAllocatorBase::erase_dependent(RankDynamic *dependent) {
+    m_rank_dynamic_objects.erase(dependent->m_it);
     refresh_callback_list();
 }
 
@@ -46,7 +46,7 @@ RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double accept
 }
 
 bool RankAllocatorBase::row_mapped_by_dependent(size_t irow) {
-    for (const auto dep : m_dependents) {
+    for (const auto dep : m_rank_dynamic_objects) {
         if (dep->has_row(irow)) return true;
     }
     return false;
@@ -185,8 +185,8 @@ void RankAllocatorBase::update(size_t icycle) {
     m_block_to_rank[*it_block_transfer] = irank_recv;
     MPI_ASSERT_ALL(!m_rank_to_blocks[irank_send].empty(), "All blocks removed from rank");
 
-    for (auto dep : m_dependents) dep->before_block_transfer(irows_send, irank_send, irank_recv);
+    for (auto dep : m_rank_dynamic_objects) dep->before_block_transfer(irows_send, irank_send, irank_recv);
     table().transfer_rows(irows_send, irank_send, irank_recv, m_recv_callbacks);
-    for (auto dep : m_dependents) dep->after_block_transfer();
+    for (auto dep : m_rank_dynamic_objects) dep->after_block_transfer();
     MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block map");
 }

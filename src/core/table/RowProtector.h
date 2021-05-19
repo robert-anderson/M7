@@ -14,7 +14,7 @@ struct RowProtector {
     /**
      * Table containing rows which can be protected by this object
      */
-    TableBase& m_table;
+    const TableBase& m_table;
     /**
      * stores protected status of every row in m_table. should be implemented as a bitmap
      */
@@ -28,7 +28,7 @@ struct RowProtector {
      */
     typename std::list<RowProtector *>::iterator m_it;
 
-    RowProtector(TableBase& table): m_table(table){
+    RowProtector(const TableBase& table): m_table(table){
         on_resize(table.m_nrow);
     }
 
@@ -66,9 +66,9 @@ struct RowProtector {
     bool is_protected() const;
 };
 
-struct DynamicRowProtector : public RowProtector, Dependent {
+struct DynamicRowProtector : public RowProtector, RankDynamic {
     DynamicRowProtector(TableBase& table, RankAllocatorBase& ra):
-            RowProtector(table), Dependent(ra){}
+            RowProtector(table), RankDynamic(ra){}
 
     bool has_row(size_t irow) override {
         return false;

@@ -76,7 +76,7 @@ struct TableBase {
     /**
      * list of "row protectors". If any of these is protecting a row it should not be cleared
      */
-    std::list<RowProtector *> m_row_protectors;
+    mutable std::list<RowProtector *> m_row_protectors;
 
     TableBase(size_t row_dsize);
 
@@ -306,7 +306,7 @@ struct TableBase {
      * @param rp
      *  address of object being removed by its stored std::list iterator
      */
-    void erase_protector(RowProtector *rp);
+    void erase_protector(RowProtector *rp) const;
     /**
      * @return
      *  true if any of the associated RowProtectors are protecting any rows of this table
