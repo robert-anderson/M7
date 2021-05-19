@@ -41,3 +41,7 @@ bool Row::is_cleared() const {
 bool Row::is_h5_write_exempt() const {
     return false;
 }
+
+bool Row::is_protected() const {
+    return m_table->is_protected(m_i);
+}

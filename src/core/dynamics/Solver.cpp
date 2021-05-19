@@ -4,6 +4,128 @@
 
 #include "Solver.h"
 
+Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
+        m_prop(prop),
+        m_opts(prop.m_opts),
+        m_wf(wf),
+        m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
+        m_connection(prop.m_ham.nsite()),
+        m_exit("exit"),
+        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
+        m_weighted_twf(m_opts.spf_weighted_twf ?
+                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
+                                       m_opts.spf_twf_fermion_factor,
+                                       m_opts.spf_twf_boson_factor) :
+                       nullptr),
+        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()) {
+
+    if (defs::enable_mevs && m_opts.rdm_rank > 0) {
+        if (!m_opts.replicate && !m_prop.is_exact())
+            log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
+        if (m_opts.replicate && m_prop.is_exact())
+            log::warn(
+                    "Attempting an exact-propagation estimation of MEVs with replication, the replica population is redundant");
+    }
+    if (defs::enable_mevs && m_opts.rdm_rank > 0 && !m_opts.replicate && !m_prop.is_exact()) {
+        log::warn("Attemping a stochastic estimation of MEVs without replication, this is biased");
+    }
+
+    if (mpi::i_am_root())
+        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
+    if (m_opts.parallel_stats)
+        m_parallel_stats = std::unique_ptr<ParallelStats>(
+                new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
+    m_wf.m_ra.activate(m_icycle);
+}
+
+void Solver::execute(size_t niter) {
+
+    if (!m_opts.read_hdf5_fname.empty()) {
+        hdf5::FileReader fr(m_opts.read_hdf5_fname);
+        hdf5::GroupReader gr("solver", fr);
+        //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
+        //loop_over_spawned();
+        if (m_mevs.m_fermion_rdm) {
+            hdf5::GroupReader gr2("rdm", gr);
+            m_mevs.m_fermion_rdm->h5_read(gr);
+            m_mevs.m_fermion_rdm->end_cycle();
+        }
+    }
+
+    for (size_t i = 0ul; i < niter; ++i) {
+        m_cycle_timer.reset();
+        m_cycle_timer.unpause();
+        begin_cycle();
+
+        m_propagate_timer.reset();
+        m_propagate_timer.unpause();
+        loop_over_occupied_onvs();
+        m_propagate_timer.pause();
+
+        m_communicate_timer.reset();
+        m_communicate_timer.unpause();
+        m_wf.communicate();
+        m_communicate_timer.pause();
+
+        m_annihilate_timer.reset();
+        m_annihilate_timer.unpause();
+        loop_over_spawned();
+        m_annihilate_timer.pause();
+
+        end_cycle();
+        m_cycle_timer.pause();
+        output_stats();
+        output_mevs();
+        ++m_icycle;
+
+        if (m_exit.read() && m_exit.m_v) break;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
+        }
+    }
+    loop_over_occupied_onvs(true);
+
+    if (!m_opts.write_hdf5_fname.empty()) {
+        hdf5::FileWriter fw(m_opts.write_hdf5_fname);
+        //m_wf.h5_write(gw);
+        hdf5::GroupWriter gw("solver", fw);
+        if (m_mevs.m_fermion_rdm) {
+            hdf5::GroupWriter gw2("rdm", gw);
+            m_mevs.m_fermion_rdm->h5_write(gw2);
+        }
+    }
+}
+
+void Solver::begin_cycle() {
+    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
+    m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{(0, 0)}];
+    m_wf.begin_cycle();
+    ASSERT(m_wf.m_nwalker.m_local[0] == 0);
+    m_wf.m_ra.update(m_icycle);
+    m_propagate_timer.reset();
+    m_reference.begin_cycle();
+
+    if (defs::enable_mevs) {
+        auto update_mev_epoch = [&]() {
+            if (m_opts.replicate) {
+                if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
+                    auto max_start = std::max(
+                            m_prop.m_shift.m_variable_mode[0].icycle_start(),
+                            m_prop.m_shift.m_variable_mode[1].icycle_start());
+                    if (m_icycle > max_start + m_opts.ncycle_wait_mevs) return true;
+                }
+            } else {
+                if (m_prop.m_shift.m_variable_mode[0]) {
+                    auto start = m_prop.m_shift.m_variable_mode[0].icycle_start();
+                    if (m_icycle > start + m_opts.ncycle_wait_mevs) return true;
+                }
+            }
+            return false;
+        };
+        m_mevs.m_accum_epoch.update(m_icycle, update_mev_epoch());
+    }
+}
+
 void Solver::loop_over_occupied_onvs(bool final) {
     /*
      * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
@@ -25,7 +147,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
          */
         if (row.is_cleared()) continue;
 
-        if (row.m_weight.is_zero()) {
+        if (row.m_weight.is_zero() && !row.is_protected()) {
             /*
              * ONV has become unoccupied in all parts and must be removed from mapped list
              * it must first make all associated averaged contributions to MEVs
@@ -275,98 +397,6 @@ void Solver::loop_over_spawned() {
     m_wf.recv().clear();
 }
 
-Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
-        m_prop(prop),
-        m_opts(prop.m_opts),
-        m_wf(wf),
-        m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
-        m_connection(prop.m_ham.nsite()),
-        m_exit("exit"),
-        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
-        m_weighted_twf(m_opts.spf_weighted_twf ?
-                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
-                                       m_opts.spf_twf_fermion_factor,
-                                       m_opts.spf_twf_boson_factor) :
-                       nullptr),
-        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()) {
-
-    if (defs::enable_mevs && m_opts.rdm_rank > 0) {
-        if (!m_opts.replicate && !m_prop.is_exact())
-            log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
-        if (m_opts.replicate && m_prop.is_exact())
-            log::warn(
-                    "Attempting an exact-propagation estimation of MEVs with replication, the replica population is redundant");
-    }
-    if (defs::enable_mevs && m_opts.rdm_rank > 0 && !m_opts.replicate && !m_prop.is_exact()) {
-        log::warn("Attemping a stochastic estimation of MEVs without replication, this is biased");
-    }
-
-    if (mpi::i_am_root())
-        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
-    if (m_opts.parallel_stats)
-        m_parallel_stats = std::unique_ptr<ParallelStats>(
-                new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
-    m_wf.m_ra.activate(m_icycle);
-}
-
-void Solver::execute(size_t niter) {
-
-    if (!m_opts.read_hdf5_fname.empty()) {
-        hdf5::FileReader fr(m_opts.read_hdf5_fname);
-        hdf5::GroupReader gr("solver", fr);
-        //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
-        //loop_over_spawned();
-        if (m_mevs.m_fermion_rdm) {
-            hdf5::GroupReader gr2("rdm", gr);
-            m_mevs.m_fermion_rdm->h5_read(gr);
-            m_mevs.m_fermion_rdm->end_cycle();
-        }
-    }
-
-    for (size_t i = 0ul; i < niter; ++i) {
-        m_cycle_timer.reset();
-        m_cycle_timer.unpause();
-        begin_cycle();
-
-        m_propagate_timer.reset();
-        m_propagate_timer.unpause();
-        loop_over_occupied_onvs();
-        m_propagate_timer.pause();
-
-        m_communicate_timer.reset();
-        m_communicate_timer.unpause();
-        m_wf.communicate();
-        m_communicate_timer.pause();
-
-        m_annihilate_timer.reset();
-        m_annihilate_timer.unpause();
-        loop_over_spawned();
-        m_annihilate_timer.pause();
-
-        end_cycle();
-        m_cycle_timer.pause();
-        output_stats();
-        output_mevs();
-        ++m_icycle;
-
-        if (m_exit.read() && m_exit.m_v) break;
-        if (defs::enable_mevs && m_mevs.m_accum_epoch) {
-            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
-        }
-    }
-    loop_over_occupied_onvs(true);
-
-    if (!m_opts.write_hdf5_fname.empty()) {
-        hdf5::FileWriter fw(m_opts.write_hdf5_fname);
-        //m_wf.h5_write(gw);
-        hdf5::GroupWriter gw("solver", fw);
-        if (m_mevs.m_fermion_rdm) {
-            hdf5::GroupWriter gw2("rdm", gw);
-            m_mevs.m_fermion_rdm->h5_write(gw2);
-        }
-    }
-}
-
 void Solver::propagate_row(const size_t &ipart) {
     auto &row = m_wf.m_store.m_row;
 
@@ -378,36 +408,6 @@ void Solver::propagate_row(const size_t &ipart) {
 
     m_prop.off_diagonal(m_wf, ipart);
     m_prop.diagonal(m_wf, ipart);
-}
-
-void Solver::begin_cycle() {
-    m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
-    m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{(0, 0)}];
-    m_wf.begin_cycle();
-    ASSERT(m_wf.m_nwalker.m_local[0] == 0);
-    m_wf.m_ra.update(m_icycle);
-    m_propagate_timer.reset();
-    m_reference.begin_cycle();
-
-    if (defs::enable_mevs) {
-        auto update_mev_epoch = [&]() {
-            if (m_opts.replicate) {
-                if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
-                    auto max_start = std::max(
-                            m_prop.m_shift.m_variable_mode[0].icycle_start(),
-                            m_prop.m_shift.m_variable_mode[1].icycle_start());
-                    if (m_icycle > max_start + m_opts.ncycle_wait_mevs) return true;
-                }
-            } else {
-                if (m_prop.m_shift.m_variable_mode[0]) {
-                    auto start = m_prop.m_shift.m_variable_mode[0].icycle_start();
-                    if (m_icycle > start + m_opts.ncycle_wait_mevs) return true;
-                }
-            }
-            return false;
-        };
-        m_mevs.m_accum_epoch.update(m_icycle, update_mev_epoch());
-    }
 }
 
 void Solver::end_cycle() {

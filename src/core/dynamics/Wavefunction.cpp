@@ -137,7 +137,6 @@ void Wavefunction::zero_weight(const size_t &ipart) {
 }
 
 void Wavefunction::remove_row() {
-    if (m_ra.row_mapped_by_dependent(m_store.m_row.m_i)) return;
     auto lookup = m_store[m_store.m_row.m_onv];
     ASSERT(lookup);
     for (size_t ipart = 0ul; ipart<m_format.nelement(); ++ipart) {
@@ -148,37 +147,6 @@ void Wavefunction::remove_row() {
     }
     m_store.erase(lookup);
 }
-
-/*
-size_t Wavefunction::create_walker_(const size_t &icycle, const size_t &ipart, const fields::Onv<> &onv,
-                                    const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn) {
-    set_weight(ipart, weight);
-    m_store.m_row.m_hdiag = hdiag;
-    m_store.m_row.m_reference_connection.put(ipart, refconn);
-    m_store.m_row.m_deterministic.clr(ipart);
-    return irow;
-}
-
-TableBase::Loc Wavefunction::create_walker(const size_t &icycle, const size_t &ipart, const fields::Onv<> &onv,
-                                           const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn) {
-    size_t irank = m_ra.get_rank(onv);
-    size_t irow;
-    if (mpi::i_am(irank)) irow = create_walker_(icycle, ipart, onv, weight, hdiag, refconn);
-    mpi::bcast(irow, irank);
-    return {irank, irow};
-}
-
-TableBase::Loc Wavefunction::create_walker(const size_t &icycle, const fields::Onv<> &onv,
-                                           const defs::ham_t weight, const defs::ham_comp_t &hdiag, bool refconn) {
-    TableBase::Loc out = create_walker(icycle, 0, onv, weight, hdiag, refconn);
-    for (size_t ipart =1ul; ipart<npart(); ++ipart) {
-        auto tmp = create_walker(icycle, ipart, onv, weight, hdiag, refconn);
-        ASSERT(tmp==out);
-        (void)(tmp); // prevents tmp being unused if NDEBUG is set
-    }
-    return out;
-}
-*/
 
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {

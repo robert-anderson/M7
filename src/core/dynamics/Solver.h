@@ -62,12 +62,22 @@ public:
 
     Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
 
+    /**
+     * Perform niter iterations of the solver
+     * @param niter
+     */
     void execute(size_t niter = 1);
-
+    /**
+     * reset variables and those of member objects for a new solver iteration
+     */
     void begin_cycle();
-
+    /**
+     * Perform diagonal and off-diagonal propagation via m_prop for a valid row of m_wf.m_store. The row being
+     * propagated from is the one currently pointed to by m_wf.m_store.m_row
+     * @param ipart
+     *  flat index of m_wf.m_format being propagated
+     */
     void propagate_row(const size_t &ipart);
-
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero ONV field
      * @param final

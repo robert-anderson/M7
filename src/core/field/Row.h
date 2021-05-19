@@ -115,6 +115,8 @@ struct Row {
 
     virtual bool is_h5_write_exempt() const;
 
+    bool is_protected() const;
+
 };
 
 template<typename row_t>
