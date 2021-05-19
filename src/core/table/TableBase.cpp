@@ -6,6 +6,7 @@
 #include "src/core/io/Logging.h"
 #include "src/core/parallel/MPIAssert.h"
 #include "src/core/sort/ExtremalIndices.h"
+#include "RowProtector.h"
 
 TableBase::TableBase(size_t row_dsize) :
         m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){
@@ -229,27 +230,4 @@ bool TableBase::Loc::operator==(const TableBase::Loc &other) {
 
 bool TableBase::Loc::operator!=(const TableBase::Loc &other) {
     return !(*this==other);
-}
-
-void RowProtector::protect(const size_t &irow) {
-    if (!m_flags[irow]) ++m_nprotected;
-    m_flags[irow] = true;
-}
-
-void RowProtector::release(const size_t &irow) {
-    if (m_flags[irow]) --m_nprotected;
-    m_flags[irow] = false;
-}
-
-void RowProtector::on_resize(size_t nrow) {
-    m_flags.resize(nrow);
-}
-
-bool RowProtector::is_protected(const size_t &irow) const {
-    ASSERT(irow < m_flags.size());
-    return m_flags[irow];
-}
-
-bool RowProtector::is_protected() const {
-    return m_nprotected;
 }

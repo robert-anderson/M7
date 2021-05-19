@@ -13,7 +13,7 @@
  *  data layout of the mapped table whose keys are to be tracked
  */
 template<typename row_t>
-struct ProtectedKeySet {
+struct ProtectedKeySet : RowProtector {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     typedef typename KeyField<row_t>::type key_field_t;
     struct KeyRow : Row {
@@ -30,7 +30,11 @@ struct ProtectedKeySet {
     BufferedTable<KeyRow, true> m_local;
     BufferedTable<KeyRow, true> m_global;
 
-    void add_(row_t& row)
+    void add_(row_t& row){
+        protect(row.m_i);
+    }
+
+    ProtectedKeySet(MappedTable<row_t>& table): RowProtector(table){}
 };
 
 

@@ -59,6 +59,26 @@ struct BufferedField : WrappedRow, field_t {
 namespace buffered {
 
     template<typename T, size_t nind>
+    struct Bitsets : BufferedField<fields::Bitsets<T, nind>> {
+        typedef BufferedField<fields::Bitsets<T, nind>> base_t;
+        typedef typename fields::Bitsets<T, nind>::inds_t inds_t;
+        using fields::Bitsets<T, nind>::operator=;
+        Bitsets(inds_t shape) : BufferedField<fields::Bitsets<T, nind>>({nullptr, shape}){}
+        Bitsets& operator=(const Bitsets& other){
+            base_t::operator=(other);
+            return *this;
+        }
+        Bitsets(const Bitsets& other): Bitsets(other.m_format.shape()){}
+    };
+
+
+    template<typename T>
+    struct Bitset : Bitsets<T, 1ul> {
+        Bitset(size_t nbit): Bitsets<T, 1ul>({nbit}){}
+    };
+
+
+    template<typename T, size_t nind>
     struct Numbers : BufferedField<fields::Numbers<T, nind>> {
         typedef BufferedField<fields::Numbers<T, nind>> base_t;
         typedef typename fields::Numbers<T, nind>::inds_t inds_t;

@@ -17,6 +17,11 @@ namespace fields {
     template<typename T>
     using Number = NumberField<T>;
 
+    template<typename T, size_t nind>
+    using Bitsets = BitsetField<T, nind>;
+    template<typename T>
+    using Bitset = Bitsets<T, 1ul>;
+
     template<size_t nind>
     using Flags = BitsetField<uint8_t, nind>;
     using Flag = BitField<uint8_t>;

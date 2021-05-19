@@ -6,7 +6,7 @@
 
 Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
                      const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
-        Wavefunction::DynamicRow(wf, loc, "reference"),
+        Wavefunction::SharedRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(m_opts.reference_redefinition_thresh),
         m_proj_energy_num(wf.m_format),
@@ -102,7 +102,7 @@ NdReduction<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
 
 void Reference::update() {
     //accept_candidate(m_redefinition_thresh);
-    Wavefunction::DynamicRow::update();
+    Wavefunction::SharedRow::update();
 }
 
 const fields::Numbers<defs::ham_t, defs::ndim_wf>& Reference::proj_energy_num() const {

@@ -11,6 +11,8 @@
 #include "src/core/io/Logging.h"
 #include <set>
 #include <src/core/parallel/RankAllocator.h>
+#include <src/core/util/Bitset.h>
+#include "RowProtector.h"
 
 /**
  * A container for the send table array and recv table. Each element of the
@@ -174,32 +176,19 @@ struct Communicator {
     double m_buffer_expansion_factor;
 
 
-    struct DynamicRowSet : Dependent {
+    struct DynamicRowSet : Dependent, RowProtector {
         typedef RankAllocator<store_row_t> ra_t;
-        /*
+        /**
          * the mapped table which stores the definitive row values
          */
         const MappedTable<store_row_t> &m_source;
-        /*
-         * the unmapped table which loads copies of rows between m_source (arbitrary order, non-
-         * contiguous) and m_all (contiguous). lc = "local, contiguous"
-         */
-        BufferedTable<store_row_t> m_lc;
-        /*
-         * the unmapped table which holds copies of all mapped rows. these copies are refreshed
-         * with a call to refresh method. This table is intended for reading rows from all MPI ranks,
-         * as such there is no machanism for committing changes to m_source from m_all. It is
-         * to be treated as a read-only copy. ac = "all, contiguous"
-         */
-        BufferedTable<store_row_t> m_ac;
-        /*
+        /**
          * set of dynamic row indices stored on this rank
          */
         std::set<size_t> m_irows;
-        /*
-         * once gathered, the major ordering of m_all will be MPI rank index ascending. m_counts stores
-         * the number of rows tracked on each rank and m_displs stores the row index of m_all where
-         * each rank's rows begin.
+        /**
+         * the counts and displs determine a global index for a local dynamic row. The ith element of m_irows on MPI
+         * rank j has global index m_displs[j]+i
          */
         defs::inds m_counts;
         defs::inds m_displs;
@@ -226,9 +215,8 @@ struct Communicator {
          */
         DynamicRowSet(const Communicator &comm, std::string name) :
                 Dependent(comm.m_ra),
+                RowProtector(comm.m_store),
                 m_source(comm.m_store),
-                m_lc("Dynamic row set \"" + name + "\" (local)", comm.m_store.m_row),
-                m_ac("Dynamic row set \"" + name + "\" (all)", comm.m_store.m_row),
                 m_counts(mpi::nrank(), 0ul),
                 m_displs(mpi::nrank(), 0ul),
                 m_name(name),
@@ -238,8 +226,6 @@ struct Communicator {
                        m_ntrow_to_track_p2p_tag);
             log::debug("P2P tag for array of dynamic row indices to transfer for \"{}\": {}", m_name,
                        m_itrows_to_track_p2p_tag);
-            m_lc.push_back(1);
-            m_ac.push_back(1);
             m_ranks_with_any_rows.reserve(mpi::nrank());
         }
 
@@ -252,6 +238,7 @@ struct Communicator {
         }
 
         void add_(size_t irow) {
+            protect(irow);
             m_irows.insert(irow);
         }
 
@@ -259,55 +246,14 @@ struct Communicator {
             add_(row.m_i);
         }
 
-
-    protected:
-        void update_counts() {
+    public:
+        virtual void update() {
             mpi::all_gather(nrow_(), m_counts);
             mpi::counts_to_displs_consec(m_counts, m_displs);
             m_ranks_with_any_rows.clear();
             for (size_t irank=0; irank<mpi::nrank(); ++irank){
                 if (m_counts[irank]) m_ranks_with_any_rows.push_back(irank);
             }
-        }
-
-        void update_data() {
-            /*
-             * It is expected that m_counts and m_displs have already been filled.
-             *
-             * The elements of m_irows determine the indices of the dynamic rows stored on this rank.
-             * First, we use these indices to randomly access the source MappedTable, and copy rows
-             * into the local contiguous table (m_lc)
-             */
-            MPI_ASSERT_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
-            size_t irow_local = 0ul;
-            m_lc.clear();
-            auto nrow = m_displs.back() + m_counts.back();
-            m_lc.push_back(m_counts[mpi::irank()]);
-            for (auto &irow : m_irows) {
-                static_cast<TableBase &>(m_lc).copy_row_in(m_source, irow, irow_local++);
-            }
-            ASSERT(irow_local==m_counts[mpi::irank()]);
-
-            m_ac.clear();
-            m_ac.push_back(nrow);
-            /*
-             * convert from units of rows to datawords...
-             */
-            for (auto &i : m_counts) i *= m_source.m_row_dsize;
-            for (auto &i : m_displs) i *= m_source.m_row_dsize;
-            mpi::all_gatherv(m_lc.dbegin(), m_counts[mpi::irank()], m_ac.dbegin(), m_counts, m_displs);
-            /*
-             * ... and back again
-             */
-            for (auto &i : m_counts) i /= m_source.m_row_dsize;
-            for (auto &i : m_displs) i /= m_source.m_row_dsize;
-        }
-
-
-    public:
-        virtual void update() {
-            update_counts();
-            update_data();
         }
 
         bool has_row(size_t irow) override {
@@ -327,6 +273,7 @@ struct Communicator {
                          * which of the incoming transferred rows it is now responsible for tracking!
                          */
                         m_idrows.push_back(itrow);
+                        if (is_protected(irow)) release(irow);
                         m_irows.erase(irow);
                     }
                     ++itrow;
@@ -358,7 +305,6 @@ struct Communicator {
                 log::debug_("Recving {} dynamic rows for \"{}\" to rank {} from {}",
                             nrow_transfer, m_name, irank_recv, irank_send);
                 m_idrows.resize(nrow_transfer, ~0ul);
-                mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
                 log::debug_("idrows: {}", utils::to_string(m_idrows));
             }
         }
@@ -372,6 +318,7 @@ struct Communicator {
                     // this transferred row is dynamic
                     MPI_ASSERT(m_irows.find(irow) == m_irows.end(), "Transferred dynamic row shouldn't already be here!");
                     m_irows.insert(irow);
+                    protect(irow);
                     ++m_ndrow_found;
                 }
             }
@@ -381,12 +328,79 @@ struct Communicator {
         void after_block_transfer() override {
             update();
         }
-
     };
 
-    struct DynamicRow : public DynamicRowSet {
+    /**
+     * A set of dynamic rows which can be locally gathered into a contiguous local table and communicated to a
+     * contiguous global table.
+     * @tparam mapped
+     *  the local and global contiguous tables are optionally mapped
+     */
+    template<bool mapped=false>
+    struct SharedRowSet : public DynamicRowSet {
+        using DynamicRowSet::m_source;
+        using DynamicRowSet::nrow;
+        using DynamicRowSet::m_displs;
+        using DynamicRowSet::m_counts;
+        using DynamicRowSet::m_irows;
+        /*
+         * the (mapped) table which loads copies of rows between m_source (arbitrary order, non-
+         * contiguous) and m_all (contiguous).
+         */
+        BufferedTable<store_row_t> m_local;
+        /*
+         * the unmapped table which holds copies of all mapped rows. these copies are refreshed
+         * with a call to refresh method. This table is intended for reading rows from all MPI ranks,
+         * as such there is no mechanism for committing changes to m_source from m_all. It is
+         * to be treated as a read-only copy.
+         */
+        BufferedTable<store_row_t> m_global;
+
+        SharedRowSet(const Communicator &comm, std::string name) :
+                DynamicRowSet(comm, name),
+                m_local("Dynamic shared row set \"" + name + "\" (local)", comm.m_store.m_row),
+                m_global("Dynamic shared set \"" + name + "\" (global)", comm.m_store.m_row){
+            m_local.push_back(1);
+            m_global.push_back(1);
+        }
+
+        void update() override {
+            DynamicRowSet::update();
+            /*
+             * m_counts and m_displs have now been filled.
+             *
+             * The elements of m_irows determine the indices of the dynamic rows stored on this rank.
+             * First, we use these indices to randomly access the source MappedTable, and copy rows
+             * into the local contiguous table (m_local)
+             */
+            MPI_ASSERT_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
+            size_t irow_local = 0ul;
+            m_local.clear();
+            auto nrow = m_displs.back() + m_counts.back();
+            m_local.push_back(m_counts[mpi::irank()]);
+            for (auto &irow : m_irows) {
+                static_cast<TableBase &>(m_local).copy_row_in(m_source, irow, irow_local++);
+            }
+            ASSERT(irow_local==m_counts[mpi::irank()]);
+
+            m_global.clear();
+            m_global.push_back(nrow);
+            /*
+             * convert from units of rows to datawords...
+             */
+            for (auto &i : m_counts) i *= m_source.m_row_dsize;
+            for (auto &i : m_displs) i *= m_source.m_row_dsize;
+            mpi::all_gatherv(m_local.dbegin(), m_counts[mpi::irank()], m_global.dbegin(), m_counts, m_displs);
+            /*
+             * ... and back again
+             */
+            for (auto &i : m_counts) i /= m_source.m_row_dsize;
+            for (auto &i : m_displs) i /= m_source.m_row_dsize;
+        }
+    };
+
+    struct SharedRow : public SharedRowSet<false> {
         using DynamicRowSet::m_ra;
-        using DynamicRowSet::m_ac;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
         using DynamicRowSet::add_;
@@ -395,16 +409,17 @@ struct Communicator {
         using DynamicRowSet::update;
         using DynamicRowSet::m_name;
         using DynamicRowSet::m_ranks_with_any_rows;
+        using SharedRowSet<false>::m_global;
 
         size_t m_iblock;
 
-        DynamicRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
+        SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
                 DynamicRowSet(comm, name) {
-            m_ac.m_row.restart();
+            m_global.m_row.restart();
             if (loc.is_mine()) {
                 add_(loc.m_irow);
-                ASSERT(m_ac.m_hwm);
-                m_iblock = comm.m_ra.get_block(m_ac.m_row.m_onv);
+                ASSERT(m_global.m_hwm);
+                m_iblock = comm.m_ra.get_block(m_global.m_row.m_onv);
             }
             mpi::bcast(m_iblock, loc.m_irank);
             update();
@@ -435,7 +450,7 @@ struct Communicator {
                 ASSERT(m_ra.get_rank_by_irow(loc.m_irow) == mpi::irank());
                 m_irows = {loc.m_irow};
             }
-            DynamicRow::update();
+            SharedRow::update();
         }
 
         bool is_mine() const {

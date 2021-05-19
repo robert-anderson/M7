@@ -12,7 +12,7 @@
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 
-class Reference : public Wavefunction::DynamicRow {
+class Reference : public Wavefunction::SharedRow {
     const Hamiltonian<> &m_ham;
     const Wavefunction &m_wf;
     /*
