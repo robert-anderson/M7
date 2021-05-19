@@ -101,9 +101,14 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 //        m_ra.update(icycle, work_time, m_walkers, m_walkers.m_key_field);
 //    }
 
+    const size_t& nroot() const {
+        return m_format.extent(0);
+    }
+
     const size_t& nreplica() const {
         return m_format.extent(1);
     }
+
     size_t ipart_replica(const size_t& ipart) const {
         return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
     }

@@ -16,6 +16,22 @@ TableBase::TableBase(size_t row_dsize) :
 TableBase::TableBase(const TableBase &other) :
         TableBase(other.m_row_dsize){}
 
+defs::data_t *TableBase::dbegin() {
+    return m_bw.m_dbegin;
+}
+
+const defs::data_t *TableBase::dbegin() const {
+    return m_bw.m_dbegin;
+}
+
+defs::data_t *TableBase::dbegin(const size_t &irow) {
+    return m_bw.m_dbegin + irow * m_row_dsize;
+}
+
+const defs::data_t *TableBase::dbegin(const size_t &irow) const {
+    return m_bw.m_dbegin + irow * m_row_dsize;
+}
+
 void TableBase::set_buffer(Buffer *buffer) {
     ASSERT(buffer);
     ASSERT(!m_bw.allocated())
@@ -41,6 +57,7 @@ size_t TableBase::get_free_row() {
 }
 
 void TableBase::clear() {
+    ASSERT(!is_protected());
     if (!m_bw.allocated()) return;
     std::memset(dbegin(), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
@@ -48,6 +65,7 @@ void TableBase::clear() {
 }
 
 void TableBase::clear(const size_t &irow) {
+    ASSERT(!is_protected(irow));
     std::memset(dbegin(irow), 0, m_row_size);
     m_free_rows.push(irow);
 }
@@ -64,41 +82,19 @@ size_t TableBase::bw_dsize() const {
     return m_bw.dsize();
 }
 
-/*
-void TableBase::print_contents(const defs::inds *ordering) const {
-    const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
-    for (size_t iirow = 0ul; iirow < n; ++iirow) {
-        auto irow = ordering ? (*ordering)[iirow] : iirow;
-        std::cout << irow << ". ";
-        for (auto column: m_columns) {
-            std::cout << column->to_string(irow) + " ";
-        }
-        std::cout << "\n";
-    }
-    std::cout << std::endl;
-}
-
-void TableBase::print_contents(const ExtremalIndices &xv) const {
-    defs::inds tmp;
-    tmp.reserve(xv.nfound());
-    for (size_t i = 0ul; i < xv.nfound(); ++i) tmp.push_back(xv[i]);
-    print_contents(&tmp);
-}
-*/
-
 void TableBase::resize(size_t nrow) {
     assert(nrow > m_nrow);
     m_bw.resize(nrow * m_row_dsize);
     m_nrow = nrow;
 }
 
-void TableBase::expand(size_t nrow, double expansion_factor) {
-    m_bw.expand(nrow * m_row_dsize, expansion_factor);
+void TableBase::expand(size_t nrow) {
+    m_bw.expand(nrow * m_row_dsize);
     m_nrow = m_bw.dsize()/m_row_dsize;
 }
 
-void TableBase::expand(size_t nrow) {
-    m_bw.expand(nrow * m_row_dsize);
+void TableBase::expand(size_t nrow, double expansion_factor) {
+    m_bw.expand(nrow * m_row_dsize, expansion_factor);
     m_nrow = m_bw.dsize()/m_row_dsize;
 }
 
@@ -166,15 +162,49 @@ void TableBase::copy_row_in(const TableBase &src, size_t irow_src, size_t irow_d
 }
 
 void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
-    if (irow==jrow) return;
+    if (irow == jrow) return;
     auto iptr = dbegin(irow);
     auto jptr = dbegin(jrow);
-    for (size_t idword=0ul; idword<m_row_dsize; ++idword){
+    for (size_t idword = 0ul; idword < m_row_dsize; ++idword) {
         std::swap(*iptr, *jptr);
-        ++iptr; ++jptr;
+        ++iptr;
+        ++jptr;
     }
 }
 
+std::string TableBase::to_string(const defs::inds *ordering) const {
+    return "";
+}
+
+void TableBase::all_gatherv(const TableBase &src) {
+    clear();
+    defs::inds nrows(mpi::nrank());
+    defs::inds counts(mpi::nrank());
+    defs::inds displs(mpi::nrank());
+    ASSERT(src.m_row_dsize == m_row_dsize);
+    mpi::all_gather(src.m_hwm, nrows);
+    counts = nrows;
+    for (auto &v: counts) v *= m_row_dsize;
+    mpi::counts_to_displs_consec(counts, displs);
+    auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
+    push_back(nrow_total);
+    mpi::all_gatherv(src.dbegin(), m_hwm * m_row_dsize, dbegin(), counts, displs);
+    post_insert_range(0, nrow_total);
+}
+
+void TableBase::erase_protector(RowProtector *rp) {
+    m_row_protectors.erase(rp->m_it);
+}
+
+bool TableBase::is_protected() const {
+    return std::any_of(m_row_protectors.cbegin(), m_row_protectors.end(),
+                       [](const RowProtector* rp){return rp->is_protected();});
+}
+
+bool TableBase::is_protected(const size_t& irow) const {
+    return std::any_of(m_row_protectors.cbegin(), m_row_protectors.end(),
+                       [&](const RowProtector* rp){return rp->is_protected(irow);});
+}
 
 TableBase::Loc::Loc(size_t irank, size_t irow) : m_irank(irank), m_irow(irow){
 #ifndef DNDEBUG
@@ -199,4 +229,27 @@ bool TableBase::Loc::operator==(const TableBase::Loc &other) {
 
 bool TableBase::Loc::operator!=(const TableBase::Loc &other) {
     return !(*this==other);
+}
+
+void RowProtector::protect(const size_t &irow) {
+    if (!m_flags[irow]) ++m_nprotected;
+    m_flags[irow] = true;
+}
+
+void RowProtector::release(const size_t &irow) {
+    if (m_flags[irow]) --m_nprotected;
+    m_flags[irow] = false;
+}
+
+void RowProtector::on_resize(size_t nrow) {
+    m_flags.resize(nrow);
+}
+
+bool RowProtector::is_protected(const size_t &irow) const {
+    ASSERT(irow < m_flags.size());
+    return m_flags[irow];
+}
+
+bool RowProtector::is_protected() const {
+    return m_nprotected;
 }

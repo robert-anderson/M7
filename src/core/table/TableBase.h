@@ -9,9 +9,14 @@
 #include "src/core/io/Logging.h"
 
 struct RowTransfer {
-    // make rows to be sent contiguous in memory
+    /**
+     * make rows to be sent contiguous in memory
+     */
     Buffer m_send_buffer, m_recv_buffer;
     Buffer::Window m_send_bw, m_recv_bw;
+    /**
+     * need to get a unique pair of P2P tags from global variables
+     */
     const int m_nrow_p2p_tag = mpi::new_p2p_tag();
     const int m_irows_p2p_tag = mpi::new_p2p_tag();
 
@@ -26,95 +31,254 @@ struct RowTransfer {
     }
 };
 
+struct RowProtector;
+
+/**
+ * Base class for all row-contiguous data in the program.
+ */
 struct TableBase {
+    /**
+     * The data layout of a Table is defined by a class derived from Row, but this templated dependence is not included
+     * in this base class. While the fine detail of field offsets etc is not needed here, we need to know the basics,
+     * i.e. what amount of memory does a single row require. This is always padded to a whole number of data words.
+     * This number of defs::data_t words is called the "dsize"
+     */
     const size_t m_row_dsize;
+    /**
+     * Size of the row in bytes i.e. sizeof(defs::data_t)*m_row_dsize
+     */
     const size_t m_row_size;
+    /**
+     * The contents of the Table are ultimately stored in a Buffer, which is just a wrapper for a dynamically
+     * allocated array of defs::data_t elements. Buffers can be shared by many Tables though, so a table is instead
+     * given access to a "window" of that Buffer. All tables which have windows on the same buffer have the ability
+     * to resize, and in response to this, the Buffer will ensure that table row data is moved to new positions
+     * in the resized buffer, and that each of the other windows are pointed to the beginning of that data.
+     */
     Buffer::Window m_bw;
+    /**
+     * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
+     */
     size_t m_nrow = 0ul;
-    /*
-     * "high water mark" is result of the next call to push_back
+    /**
+     * "high water mark" is result of the next call to push_back. Think of this as the Table's size by analogy to
+     * std::vector
      */
     size_t m_hwm = 0ul;
-    /*
-     * indices of vacated rows below the high water mark should be pushed
-     * into this stack to allow reuse
+    /**
+     * indices of vacated rows below the high water mark should be pushed into this stack to allow reuse
      */
     std::stack<size_t> m_free_rows;
-    // instantiate on first transfer if required
+    /**
+     * buffered space for communication in the event of rank reallocation, instantiate on first transfer if required
+     */
     std::unique_ptr<RowTransfer> m_transfer = nullptr;
+    /**
+     * list of "row protectors". If any of these is protecting a row it should not be cleared
+     */
+    std::list<RowProtector *> m_row_protectors;
 
     TableBase(size_t row_dsize);
 
     TableBase(const TableBase &other);
-
-    defs::data_t *dbegin() {
-        return m_bw.m_dbegin;
-    }
-
-    const defs::data_t *dbegin() const {
-        return m_bw.m_dbegin;
-    }
-
-    defs::data_t *dbegin(const size_t &irow) {
-        return m_bw.m_dbegin + irow * m_row_dsize;
-    }
-
-    const defs::data_t *dbegin(const size_t &irow) const {
-        return m_bw.m_dbegin + irow * m_row_dsize;
-    }
-
+    /**
+     * @return
+     *  pointer to the first data word of the BufferWindow
+     */
+    defs::data_t *dbegin();
+    /**
+     * @return
+     * const pointer to the first data word of the BufferWindow
+     */
+    const defs::data_t *dbegin() const;
+    /**
+     * @param irow
+     *  row index
+     * @return
+     *  pointer to the first data word of the indexed row in the BufferWindow
+     */
+    defs::data_t *dbegin(const size_t &irow);
+    /**
+     * @param irow
+     *  row index
+     * @return
+     *  const pointer to the first data word of the indexed row in the BufferWindow
+     */
+    const defs::data_t *dbegin(const size_t &irow) const;
+    /**
+     * Associate the table with a buffer by assigning the table an available BufferWindow
+     * @param buffer
+     *  pointer to buffer
+     */
     void set_buffer(Buffer *buffer);
-
+    /**
+     * @return
+     *  true if the high water mark can't be increased without first increasing the number of rows
+     */
     bool is_full() const;
-
+    /**
+     * increase the high water mark, expand first if necessary
+     * @param nrow
+     *  number of rows to make accessible
+     * @return
+     *  row index of the first newly-accessible row
+     */
     size_t push_back(size_t nrow = 1);
-
+    /**
+     * If there are free rows on the stack: pop one and use it, else: push_back
+     * @return
+     *  index of unused row
+     */
     size_t get_free_row();
-
+    /**
+     * clear the entire table only if it contains no protected rows, else fatal error
+     */
     virtual void clear();
-
+    /**
+     * clear the indexed row only if it is not protected, else fatal error
+     * @param irow
+     *  row index to clear
+     */
     virtual void clear(const size_t &irow);
-
+    /**
+     * @return
+     *  size of the buffer window in data words
+     */
     size_t bw_dsize() const;
-
+    /**
+     * @return
+     *  true if entire buffer window is zero (even above m_hwm)
+     */
     bool is_cleared() const;
-
+    /**
+     * @param irow
+     *  row index to check
+     * @return
+     *  true if entire row is zero
+     */
     bool is_cleared(const size_t &irow) const;
-
+    /**
+     * call the resize method on the buffer window and reflect the reallocation in m_nrow
+     * @param nrow
+     *  new number of rows
+     */
     void resize(size_t nrow);
-
-    void expand(size_t nrow, double expansion_factor);
-
+    /**
+     * convenient wrapper for resize in which the argument is the additional number of rows rather than the total
+     * @param nrow
+     *  number of new rows to be added
+     */
     void expand(size_t nrow);
-
+    /**
+     * in some situations it may be performant to reduce the number of reallocations, and this can be done by
+     * allocating some rounded-up fraction more than we need.
+     * @param nrow
+     *  number of new rows needed
+     * @param expansion_factor
+     *  fraction of nrow to be added as "extra"
+     */
+    void expand(size_t nrow, double expansion_factor);
+    /**
+     * erasure of rows changes meaning depending on the derived class, and so this is a virtual method. Here, we
+     * simply call clear on each indexed row
+     * @param irows
+     *  all row indices marked for erasure
+     */
     virtual void erase_rows(const defs::inds &irows);
-
+    /**
+     * in some derived classes, there is more to adding new rows than simply copying their contents into the hwm. In
+     * these cases we need to call a method after the copy in order to maintain the integrity of those data structures
+     * see MappedTable.h for more details
+     * @param iinsert
+     *  row index of the already-inserted data
+     */
     virtual void post_insert(const size_t &iinsert);
-
-    void post_insert_range(size_t ibegin=0ul, size_t iend=~0ul){
-        if (iend==~0ul) iend = m_hwm;
-        for (size_t i=ibegin; i<iend; ++i) post_insert(i);
+    /**
+     * If we have copied a block of rows contiguously into a table with non-trivial post-insert obligations, we need to
+     * call post_insert for each copied row
+     * @param ibegin
+     *  row index of beginning of the already-inserted data
+     * @param iend
+     *  row index of end of the already-inserted data
+     */
+    void post_insert_range(size_t ibegin = 0ul, size_t iend = ~0ul) {
+        if (iend == ~0ul) iend = m_hwm;
+        for (size_t i = ibegin; i < iend; ++i) post_insert(i);
     }
-
+    /**
+     * function pointer type for the callback associated with row transfers.
+     * see RankAllocator.h
+     */
     typedef std::function<void(const defs::inds &, size_t, size_t)> transfer_cb_t;
+    /**
+     * function pointer type for the callback associated with receipt of a single row in a transfer operation
+     * see RankAllocator.h
+     */
     typedef std::function<void(size_t)> recv_cb_t;
-
+    /**
+     * insert all rows held in the buffer window into this Table, then call all callbacks if any.
+     * @param recv
+     *  recieved buffer containing transferred rows contiguously, and densely - no zeroed rows.
+     * @param nrow
+     *  number of rows being inserted
+     * @param callbacks
+     *  functions to call each time a received row is processed
+     */
     virtual void insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks);
-
+    /**
+     * By P2P MPI communication, send the rows identified in the first arg from irank_send to irank_recv.
+     * Called on all ranks, but the first arg is only respected on the irank_send rank.
+     * @param irows
+     *  row indices on irank_send to be found, copied to contiguous buffer and transferred
+     * @param irank_send
+     *  MPI rank index from which the rows are being transferred
+     * @param irank_recv
+     *  MPI rank index to which the rows are being transferred
+     * @param callbacks
+     *  functions to call on irank_recv each time a received row is processed
+     */
     void transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv,
                        const std::list<recv_cb_t> &callbacks = {});
-
+    /**
+     * copy a single row from another "source" table
+     * @param src
+     *  source table which must have the same row length. should also have the same overall data layout but this is not
+     *  verified at this level
+     * @param irow_src
+     *  row in the source table to be copied
+     * @param irow_dst
+     *  row in this table to which the source row is copied bytewise
+     */
     void copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst);
-
+    /**
+     * swap row contents dword-for-dword via std::swap
+     * @param irow
+     *  row index to be swapped
+     * @param jrow
+     *  row index to be swapped
+     */
     void swap_rows(const size_t &irow, const size_t &jrow);
 
+    /**
+     * "Location" class which describes the location of a row in a distributed table i.e. by a row index and a rank index
+     */
     struct Loc {
+        /**
+         * rank and row indices
+         */
         const size_t m_irank, m_irow;
 
         Loc(size_t irank, size_t irow);
 
+        /**
+         * @return
+         *  true if the location is anywhere i.e. has a valid rank index
+         */
         operator bool() const;
-
+        /**
+         * @return
+         *  true if MPI rank index matches bcast-shared rank of identified row
+         */
         bool is_mine() const;
 
         bool operator==(const Loc &other);
@@ -122,23 +286,98 @@ struct TableBase {
         bool operator!=(const Loc &other);
     };
 
-    virtual std::string to_string(const defs::inds *ordering = nullptr) const {
-        return "";
+    /**
+     * When Field-based data structure is introduced in the derived classes, this method is capable of displaying
+     * human-readable columns. here though, we don't know the data layout, so return empty string
+     * @param ordering
+     *  optional indices to reorder table on the fly as it is printed, without the need to physically reorder rows
+     * @return
+     *  string representing table's contents
+     */
+    virtual std::string to_string(const defs::inds *ordering = nullptr) const;
+    /**
+     * gather contents of another table over all MPI ranks into this table all ranks
+     * @param src
+     *  table whose rows are to be gathered.
+     */
+    virtual void all_gatherv(const TableBase &src);
+    /**
+     * remove RowProtector from list
+     * @param rp
+     *  address of object being removed by its stored std::list iterator
+     */
+    void erase_protector(RowProtector *rp);
+    /**
+     * @return
+     *  true if any of the associated RowProtectors are protecting any rows of this table
+     */
+    bool is_protected() const;
+    /**
+     * @param irow
+     *  row index
+     * @return
+     *  true if any of the associated RowProtectors are protecting irow
+     */
+    bool is_protected(const size_t& irow) const;
+};
+
+/**
+ * keeps track of rows which must not be erased
+ */
+struct RowProtector {
+    /**
+     * Table containing rows which can be protected by this object
+     */
+    TableBase& m_table;
+    /**
+     * stores protected status of every row in m_table. should be implemented as a bitmap
+     */
+    std::vector<bool> m_flags;
+    /**
+     * number of true values in m_flags
+     */
+    size_t m_nprotected = 0ul;
+    /**
+     * iterator in m_table::m_row_protectors associated with this object
+     */
+    typename std::list<RowProtector *>::iterator m_it;
+
+    RowProtector(TableBase& table): m_table(table){
+        on_resize(table.m_nrow);
     }
 
-    virtual void all_gatherv(const TableBase& src) {
-        defs::inds nrows(mpi::nrank());
-        defs::inds counts(mpi::nrank());
-        defs::inds displs(mpi::nrank());
-        ASSERT(src.m_row_dsize==m_row_dsize);
-        mpi::all_gather(src.m_hwm, nrows);
-        counts = nrows;
-        for (auto& v: counts) v*=m_row_dsize;
-        mpi::counts_to_displs_consec(counts, displs);
-        auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
-        resize(nrow_total);
-        mpi::all_gatherv(src.dbegin(), m_hwm*m_row_dsize, dbegin(), counts, displs);
+    ~RowProtector(){
+        m_table.erase_protector(this);
     }
+    /**
+     * mark row as protected
+     * @param irow
+     *  row index to protect
+     */
+    void protect(const size_t &irow);
+    /**
+     * cease treating row as protected
+     * @param irow
+     *  row index to release
+     */
+    void release(const size_t &irow);
+    /**
+     * called when the associated m_table is resized
+     * @param nrow
+     */
+    void on_resize(size_t nrow);
+    /**
+     * @param irow
+     *  row index
+     * @return
+     *  true if indexed row is protected
+     */
+    bool is_protected(const size_t &irow) const;
+    /**
+     * @return
+     *  true if this object protects any rows
+     */
+    bool is_protected() const;
 };
 
 

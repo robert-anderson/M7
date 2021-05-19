@@ -51,7 +51,7 @@ void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
 void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
                            std::string name) {
     m_store.clear();
-    BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, m_opts.nroot, m_opts.replicate ? 2ul:1ul}});
+    BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, nroot(), nreplica()}});
     m_buffer.push_back();
     RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
     conn::Antisym<> conn(m_nsite);

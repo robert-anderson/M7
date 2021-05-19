@@ -218,6 +218,12 @@ struct Communicator {
         size_t m_ndrow_found;
 
     public:
+        /**
+         * A collection of rows which need to be readable across all MPI ranks, not just the local row of m_source
+         * where their definitive values are stored.
+         * @param comm
+         * @param name
+         */
         DynamicRowSet(const Communicator &comm, std::string name) :
                 Dependent(comm.m_ra),
                 m_source(comm.m_store),
@@ -247,6 +253,10 @@ struct Communicator {
 
         void add_(size_t irow) {
             m_irows.insert(irow);
+        }
+
+        void add_(const store_row_t& row) {
+            add_(row.m_i);
         }
 
 

@@ -379,6 +379,21 @@ public:
         return get_block(m_row);
     }
 
+    /**
+     * check that all non-zero key fields in the mapped table are on their allocated rank
+     * @return
+     *  true if verification passes
+     */
+    bool verify() const {
+        auto row = m_table.m_row;
+        const auto& key_field = static_cast<const FieldBase&>(KeyField<row_t>::get(row));
+        for(row.restart(); row.in_range(); row.step()){
+            if (key_field.is_zero()) continue;
+            if (!mpi::i_am(get_rank(row))) return false;
+        }
+        return true;
+    }
+
 };
 
 
