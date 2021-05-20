@@ -14,7 +14,7 @@ TEST(StochasticPropagator, Test) {
     opts.nwalker_initial = 100;
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.05;
-    opts.nwalker_target = 1000000;
+    opts.nwalker_target = 100000;
     opts.rdm_rank = 1;
     opts.replicate = true;
     opts.write_hdf5_fname = "rdm.h5";
@@ -25,6 +25,9 @@ TEST(StochasticPropagator, Test) {
     opts.consolidate_spawns = false;
     opts.explicit_hf_conn_mevs = true;
     opts.output_mevs_periodically = true;
+    opts.do_semistochastic = true;
+    opts.ncycle_wait_mevs = 200;
+    opts.ncycle_wait_detsub = 1000;
     opts.init();
 
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);

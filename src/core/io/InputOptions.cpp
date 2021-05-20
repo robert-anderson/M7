@@ -136,7 +136,7 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_flag("-S,--semistochastic", do_semistochastic,
              "enable semistochastic adaptation");
 
-    add_option("--ncycle_init_detsub", ncycle_init_detsub,
+    add_option("--ncycle_wait_detsub", ncycle_wait_detsub,
                "number of cycles after start of variable shift epoch begin semistochastic epoch");
 
     add_flag("--calc_mk_walker_sums", calc_mk_walker_sums,

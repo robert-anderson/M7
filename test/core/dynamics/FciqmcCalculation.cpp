@@ -97,7 +97,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation){
     options.ncycle = 10000;
     //options.exact_propagation = 1;
     options.do_semistochastic = true;
-    options.ncycle_init_detsub = 1000;
+    options.ncycle_wait_detsub = 1000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
 //    if (mpi::i_am_root()) {
@@ -124,7 +124,7 @@ TEST(FciqmcCalculation, SemiStochasticPropagation4Fold){
     options.ncycle = 50000;
     options.do_semistochastic = true;
     options.nadd_thresh_semistoch = 1;
-    options.ncycle_init_detsub = 1000;
+    options.ncycle_wait_detsub = 1000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
     if (mpi::i_am_root()) {
@@ -148,7 +148,7 @@ TEST(FciqmcCalculation, StochasticPropagation4cLarge){
     options.walker_buffer_size_factor_initial = 2.0;
     options.spawn_buffer_size_factor_initial = 3.0;
     options.do_semistochastic = true;
-    options.ncycle_init_detsub = 3000;
+    options.ncycle_wait_detsub = 3000;
     FciqmcCalculation fciqmc_calculation(options);
     fciqmc_calculation.execute();
 

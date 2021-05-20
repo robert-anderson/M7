@@ -47,14 +47,14 @@ struct Options {
     double shift_damp = 0.05;
     size_t shift_update_period = 1;
     size_t ncycle = ~0ul;
-    size_t ncycle_wait_mevs = 0ul;
+    size_t ncycle_wait_mevs = 1000ul;
     size_t ncycle_accumulate_mevs = ~0ul;
     size_t ncycle_mev_period = 50ul;
     bool output_mevs_periodically = false;
     bool consolidate_spawns = false;
     bool explicit_hf_conn_mevs = true;
     bool do_semistochastic = false;
-    size_t ncycle_init_detsub = 1000;
+    size_t ncycle_wait_detsub = 100;
     bool calc_mk_walker_sums = false;
     size_t nboson_max = 0ul;
     double boson_coupling = 0.0;

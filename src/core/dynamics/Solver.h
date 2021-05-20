@@ -17,6 +17,7 @@
 #include "src/core/io/FciqmcStats.h"
 #include "src/core/io/ParallelStats.h"
 #include "Propagator.h"
+#include "DeterministicSubspace.h"
 
 class Solver {
 
@@ -58,6 +59,8 @@ class Solver {
     std::unique_ptr<WeightedTwf> m_weighted_twf;
     MevGroup m_mevs;
 
+    DeterministicSubspace2 m_detsub;
+
 public:
 
     Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
@@ -67,10 +70,12 @@ public:
      * @param niter
      */
     void execute(size_t niter = 1);
+
     /**
      * reset variables and those of member objects for a new solver iteration
      */
     void begin_cycle();
+
     /**
      * Perform diagonal and off-diagonal propagation via m_prop for a valid row of m_wf.m_store. The row being
      * propagated from is the one currently pointed to by m_wf.m_store.m_row
@@ -78,6 +83,7 @@ public:
      *  flat index of m_wf.m_format being propagated
      */
     void propagate_row(const size_t &ipart);
+
     /**
      * Loop over all rows in m_wf.m_store which have a non-zero ONV field
      * @param final
@@ -85,12 +91,36 @@ public:
      */
     void loop_over_occupied_onvs(bool final = false);
 
-    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
-                        bool allow_initiation, const size_t &irow_store);
+//    void loop_over_deterministic_connections() {
+//        if (!m_opts.do_semistochastic || !m_detsub.m_epoch) return;
+//        auto &wf_row = m_wf.m_store.m_row;
+//        auto &local_row = m_detsub.m_local.m_row;
+//        auto &global_row = m_detsub.m_global.m_row;
+//        conn::Antisym<0> conn(m_wf.m_nsite);
+//        for (local_row.restart(); local_row.in_range(); local_row.step()) {
+//            auto lookup = *m_wf.m_store[local_row.m_onv];
+//            ASSERT(lookup != ~0ul);
+//            wf_row.jump(lookup);
+//            const auto &global_inds = m_detsub.m_conns.row(local_row.m_i);
+//            for (auto global_ind: global_inds) {
+//                global_row.jump(global_ind);
+//                conn.connect(local_row.m_onv, global_row.m_onv);
+//                ASSERT(conn.nexcit() > 0 && conn.nexcit() < 3);
+//                defs::wf_t helem = m_prop.m_ham.get_element(conn);
+//                for (size_t ipart = 0ul; ipart < m_wf.npart(); ++ipart) {
+//                    defs::wf_t delta = -helem * m_prop.tau() * wf_row.m_weight[ipart];
+//                    m_wf.add_spawn(global_row.m_onv, delta, wf_row.m_initiator.get(ipart), true, ipart);
+//                }
+//            }
+//        }
+//    }
 
     void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
-                        bool allow_initiation) {
-        annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, *m_wf.m_store[dst_onv]);
+                        bool allow_initiation, bool src_deterministic, const size_t &irow_store);
+
+    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+                        bool allow_initiation, bool src_deterministic) {
+        annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, src_deterministic, *m_wf.m_store[dst_onv]);
     }
 
     /**
@@ -107,9 +137,9 @@ public:
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
             auto ipart_replica = m_wf.ipart_replica(ipart);
-            double duplication_fac = (ipart_replica==ipart) ? 1.0 : 0.5;
+            double duplication_fac = (ipart_replica == ipart) ? 1.0 : 0.5;
             m_mevs.m_fermion_rdm->make_contribs(
-                    row.m_onv, duplication_fac*row.m_average_weight[ipart],
+                    row.m_onv, duplication_fac * row.m_average_weight[ipart],
                     row.m_onv, row.m_average_weight[ipart_replica] / ncycle_occ);
             if (m_mevs.m_explicit_hf_conns) {
                 if (row.m_reference_connection.get(ipart) && (m_reference.get_onv() != row.m_onv)) {
@@ -134,7 +164,7 @@ public:
             if (src_onv == m_reference.get_onv() || m_wf.m_store.m_row.m_onv == m_reference.get_onv()) return;
         }
         auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
-        double duplication_fac = (dst_ipart_replica==dst_ipart) ? 1.0 : 0.5;
+        double duplication_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;
         if (m_mevs.m_fermion_rdm) {
             /*
              * We need to be careful of the walker weights
@@ -152,8 +182,10 @@ public:
              * value of Cdst is just Cdst/(1 - tau (Hii-shift))
              */
             auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart_replica];
-            dst_weight_before_death /= 1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
-            m_mevs.m_fermion_rdm->make_contribs(src_onv, duplication_fac*src_weight, m_wf.m_store.m_row.m_onv, dst_weight_before_death);
+            dst_weight_before_death /=
+                    1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
+            m_mevs.m_fermion_rdm->make_contribs(src_onv, duplication_fac * src_weight, m_wf.m_store.m_row.m_onv,
+                                                dst_weight_before_death);
         }
     }
 
@@ -193,9 +225,9 @@ public:
 
     void end_cycle();
 
-    void output_mevs(){
+    void output_mevs() {
         if (!(defs::enable_mevs && m_mevs.is_period_cycle(m_icycle))) return;
-        hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle))+"."+m_opts.write_hdf5_fname);
+        hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
         hdf5::GroupWriter gw("solver", fw);
         if (m_mevs.m_fermion_rdm) {
             hdf5::GroupWriter gw2("rdm", gw);

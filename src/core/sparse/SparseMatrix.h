@@ -92,6 +92,11 @@ namespace sparse {
             multiply(v.m_global, v.m_local);
             v.all_gatherv();
         }
+
+        const std::forward_list<Entry<T>> row(const size_t& irow) {
+            ASSERT(irow<nrow());
+            return m_rows[irow];
+        }
     };
 
 

@@ -208,12 +208,6 @@ struct Communicator {
         size_t m_ndrow_found;
 
     public:
-        /**
-         * A collection of rows which need to be readable across all MPI ranks, not just the local row of m_source
-         * where their definitive values are stored.
-         * @param comm
-         * @param name
-         */
         DynamicRowSet(const Communicator &comm, std::string name) :
                 RankDynamic(comm.m_ra),
                 RowProtector(comm.m_store),
@@ -368,17 +362,15 @@ struct Communicator {
             m_global.push_back(1);
         }
 
-        void update() override {
-            DynamicRowSet::update();
+        void update_data() {
             /*
-             * m_counts and m_displs have now been filled.
+             * assumes that m_counts and m_displs have already been filled.
              *
              * The elements of m_irows determine the indices of the dynamic rows stored on this rank.
              * First, we use these indices to randomly access the source MappedTable, and copy rows
              * into the local contiguous table (m_local)
              */
             MPI_ASSERT_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
-            size_t irow_local = 0ul;
             m_local.clear();
             auto nrow = m_displs.back() + m_counts.back();
             m_local.push_back(m_counts[mpi::irank()]);
@@ -389,7 +381,7 @@ struct Communicator {
                 m_loading_fn(m_source_row, local_row);
                 local_row.step();
             }
-            ASSERT(irow_local==m_counts[mpi::irank()]);
+            ASSERT(local_row.m_i==m_counts[mpi::irank()]);
 
             m_global.clear();
             m_global.push_back(nrow);
@@ -404,6 +396,11 @@ struct Communicator {
              */
             for (auto &i : m_counts) i /= m_local.m_row_dsize;
             for (auto &i : m_displs) i /= m_local.m_row_dsize;
+        }
+
+        void update() override {
+            DynamicRowSet::update();
+            update_data();
         }
     };
 

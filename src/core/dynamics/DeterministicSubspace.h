@@ -5,11 +5,167 @@
 #ifndef M7_DETERMINISTICSUBSPACE_H
 #define M7_DETERMINISTICSUBSPACE_H
 
+#include <src/core/observables/MevGroup.h>
 #include "src/core/sparse/SparseMatrix.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/field/Fields.h"
 #include "src/core/parallel/Reducible.h"
 #include "WalkerTable.h"
+#include "Wavefunction.h"
+
+/**
+ * captures only the data from WalkerTableRow relevant to semistochastic propagation
+ */
+struct DeterministicDataRow : Row {
+    fields::Onv<> m_onv;
+    fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
+
+    fields::Onv<> &key_field() {
+        return m_onv;
+    };
+
+    DeterministicDataRow(const Wavefunction& wf) :
+        m_onv(this, wf.m_store.m_row.m_onv.m_nsite, "onv"),
+        m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight"){}
+
+    static void load_fn(const WalkerTableRow& source, DeterministicDataRow& local){
+        local.m_onv = source.m_onv;
+        local.m_weight = source.m_weight;
+    }
+};
+
+
+class PureConnections {
+    bool m_resized_by_add = false;
+    std::vector<std::forward_list<size_t>> m_rows{};
+
+public:
+    void resize(const size_t nrow) {
+        ASSERT(nrow >= m_rows.size());
+        m_rows.resize(nrow);
+    }
+
+    void expand(const size_t delta_nrow) {
+        resize(m_rows.size() + delta_nrow);
+    }
+
+    size_t nrow() const {
+        return m_rows.size();
+    }
+
+    void add(const size_t &irow, const size_t &icol) {
+        if (irow >= m_rows.size()) {
+            if (!m_resized_by_add) {
+                log::warn("Resizing SparseMatrix by adding a row (this entails reallocation which is inefficient)");
+                log::warn("Call resize before filling if number of rows is known in advance");
+                m_resized_by_add = true;
+            }
+            resize(irow + 1);
+        }
+        m_rows[irow].push_front(icol);
+    }
+
+    bool empty() { return m_rows.empty(); }
+
+    const std::forward_list<size_t>& row(const size_t &irow) const {
+        return m_rows[irow];
+    }
+};
+
+
+
+struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicDataRow>{
+    Wavefunction& m_wf;
+    sparse::Matrix<defs::ham_t> m_sparse_ham;
+    Epoch m_epoch;
+
+    DeterministicSubspace2(Wavefunction& wf):
+    Wavefunction::PartSharedRowSet<DeterministicDataRow>(wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
+    m_wf(wf), m_epoch("semistochastic"){}
+
+    void build_connections(const FermionHamiltonian &ham) {
+        update();
+        log::debug("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
+        conn::Antisym<0> conn_work(m_wf.m_nsite);
+        auto& row_local = m_local.m_row;
+        for (row_local.restart(); row_local.in_range(); row_local.step()){
+            // loop over local subspace (H rows)
+            auto& row_global = m_global.m_row;
+            for (row_global.restart(); row_global.in_range(); row_global.step()){
+                // loop over full subspace (H columns)
+                // only add to sparse H if dets are connected
+                conn_work.connect(row_local.m_onv, row_global.m_onv);
+                auto helem = ham.get_element(conn_work);
+                if (conn_work.nexcit() > 0 && conn_work.nexcit() < 3)
+                    m_sparse_ham.add(row_local.m_i, row_global.m_i, helem);
+            }
+        }
+    }
+
+    void build_from_all_occupied(const FermionHamiltonian &ham) {
+        auto row = m_wf.m_store.m_row;
+        for (row.restart(); row.in_range(); row.step()){
+            if (!row.is_cleared()) add_(row.m_i);
+            for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
+                row.m_deterministic.set(ipart);
+        }
+        build_connections(ham);
+    }
+
+    void build_from_occupied_connections(const FermionHamiltonian &ham, const fields::FermionOnv& onv) {
+        conn::Antisym<0> conn_work(m_wf.m_nsite);
+        auto row = m_wf.m_store.m_row;
+        for (row.restart(); row.in_range(); row.step()){
+            conn_work.connect(onv, row.m_onv);
+            if (row.is_cleared() || conn_work.nexcit()>3) continue;
+            add_(row.m_i);
+            for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
+                row.m_deterministic.set(ipart);
+        }
+        build_connections(ham);
+    }
+
+    void gather(){
+        if (!m_epoch) return;
+        update_data();
+    }
+
+    void make_mev_contribs(MevGroup& mevs, const fields::FermionOnv& ref) {
+        if (!m_epoch) return;
+        auto& row_local = m_local.m_row;
+        auto& row_global = m_global.m_row;
+        for (row_local.restart(); row_local.in_range(); row_local.step()) {
+            if (row_local.m_onv==ref) continue;
+            for (const auto& entry: m_sparse_ham.row(row_local.m_i)) {
+                row_global.jump(entry.icol);
+                if (row_global.m_onv==ref) continue;
+                mevs.m_fermion_rdm->make_contribs(row_local.m_onv, 0.5*row_local.m_weight[0], row_global.m_onv, row_global.m_weight[1]);
+                mevs.m_fermion_rdm->make_contribs(row_local.m_onv, 0.5*row_local.m_weight[1], row_global.m_onv, row_global.m_weight[0]);
+            }
+        }
+    }
+
+    /**
+      * for every deterministically-propagated row on this MPI rank, update its value.
+      * @param tau
+      *  timestep
+      */
+    void project(double tau){
+        if (!m_epoch) return;
+        auto& row_local = m_local.m_row;
+        auto& row_global = m_global.m_row;
+        auto row_wf = m_wf.m_store.m_row;
+        auto irow_wf_it = m_irows.cbegin();
+        for (row_local.restart(); row_local.in_range(); row_local.step()) {
+            row_wf.jump(*irow_wf_it);
+            for (const auto& entry: m_sparse_ham.row(row_local.m_i)) {
+                row_global.jump(entry.icol);
+                row_wf.m_weight.sub_scaled(tau * entry.element, row_global.m_weight);
+            }
+            ++irow_wf_it;
+        }
+    }
+};
 
 class DeterministicSubspace {
 

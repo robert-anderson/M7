@@ -17,7 +17,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
                                        m_opts.spf_twf_fermion_factor,
                                        m_opts.spf_twf_boson_factor) :
                        nullptr),
-        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()) {
+        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()), m_detsub(m_wf) {
 
     if (defs::enable_mevs && m_opts.rdm_rank > 0) {
         if (!m_opts.replicate && !m_prop.is_exact())
@@ -59,6 +59,7 @@ void Solver::execute(size_t niter) {
 
         m_propagate_timer.reset();
         m_propagate_timer.unpause();
+        m_detsub.gather();
         loop_over_occupied_onvs();
         m_propagate_timer.pause();
 
@@ -70,6 +71,8 @@ void Solver::execute(size_t niter) {
         m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
         loop_over_spawned();
+        m_detsub.make_mev_contribs(m_mevs, m_reference.get_onv());
+        m_detsub.project(m_prop.tau());
         m_annihilate_timer.pause();
 
         end_cycle();
@@ -105,24 +108,34 @@ void Solver::begin_cycle() {
     m_propagate_timer.reset();
     m_reference.begin_cycle();
 
-    if (defs::enable_mevs) {
-        auto update_mev_epoch = [&]() {
-            if (m_opts.replicate) {
-                if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
-                    auto max_start = std::max(
-                            m_prop.m_shift.m_variable_mode[0].icycle_start(),
-                            m_prop.m_shift.m_variable_mode[1].icycle_start());
-                    if (m_icycle > max_start + m_opts.ncycle_wait_mevs) return true;
-                }
-            } else {
-                if (m_prop.m_shift.m_variable_mode[0]) {
-                    auto start = m_prop.m_shift.m_variable_mode[0].icycle_start();
-                    if (m_icycle > start + m_opts.ncycle_wait_mevs) return true;
-                }
+    auto update_epoch = [&](const size_t& ncycle_wait) {
+        if (m_opts.replicate) {
+            if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
+                auto max_start = std::max(
+                        m_prop.m_shift.m_variable_mode[0].icycle_start(),
+                        m_prop.m_shift.m_variable_mode[1].icycle_start());
+                if (m_icycle > max_start + ncycle_wait) return true;
             }
-            return false;
-        };
-        m_mevs.m_accum_epoch.update(m_icycle, update_mev_epoch());
+        } else {
+            if (m_prop.m_shift.m_variable_mode[0]) {
+                auto start = m_prop.m_shift.m_variable_mode[0].icycle_start();
+                if (m_icycle > start + ncycle_wait) return true;
+            }
+        }
+        return false;
+    };
+
+    if (defs::enable_mevs) {
+        m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs));
+    }
+
+    if (m_opts.do_semistochastic && !m_detsub.m_epoch){
+        auto init = m_detsub.m_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_detsub));
+        if (init) {
+            m_detsub.build_from_all_occupied(m_prop.m_ham);
+            std::cout << m_wf.m_store.to_string() << std::endl;
+            log::debug("initialized deterministic subspace");
+        }
     }
 }
 
@@ -145,7 +158,8 @@ void Solver::loop_over_occupied_onvs(bool final) {
         /*
          * this is a free row, caused by an earlier call to m_wf.remove_row()
          */
-        if (row.is_cleared()) continue;
+        //if (row.is_cleared()) continue;
+        if (row.m_onv.is_zero()) continue;
 
         if (row.m_weight.is_zero() && !row.is_protected()) {
             /*
@@ -215,7 +229,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
 }
 
 void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
-                            bool allow_initiation, const size_t &irow_store) {
+                            bool allow_initiation, bool src_deterministic, const size_t &irow_store) {
     if (m_opts.nadd_initiator==0.0) ASSERT(allow_initiation);
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
@@ -244,6 +258,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
 
     } else {
         m_wf.m_store.m_row.jump(irow_store);
+        if (src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) return;
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[dst_ipart];
         auto weight_after = weight_before + delta_weight;
         if (!consts::float_is_zero(weight_before) && !consts::float_is_zero(weight_after)
@@ -372,7 +387,8 @@ void Solver::loop_over_spawned() {
             auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
             make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
                                                    m_wf.recv().m_hwm - 1, irow_store);
-            annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
+            annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta,
+                           get_allow_initiation(), row_block_start.m_src_deterministic, irow_store);
         }
     } else {
         auto &row = m_wf.recv().m_row;
@@ -385,13 +401,15 @@ void Solver::loop_over_spawned() {
                 auto irow_store = *m_wf.m_store[row.m_dst_onv];
                 if (irow_store!=~0ul) {
                     m_wf.m_store.m_row.jump(irow_store);
+                    if (row.m_src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) continue;
                     make_instant_mev_contribs(row.m_src_onv, row.m_src_weight, row.m_dst_ipart);
                 }
             }
         }
 
         for (row.restart(); row.in_range(); row.step()) {
-            annihilate_row(row.m_dst_ipart, row.m_dst_onv, row.m_delta_weight, row.m_src_initiator);
+            annihilate_row(row.m_dst_ipart, row.m_dst_onv, row.m_delta_weight, row.m_src_initiator,
+                           row.m_src_deterministic);
         }
     }
     m_wf.recv().clear();
@@ -403,8 +421,6 @@ void Solver::propagate_row(const size_t &ipart) {
     if (row.is_cleared()) return;
 
     if (consts::float_is_zero(row.m_weight[ipart])) return;
-
-    //bool is_deterministic = row.m_deterministic.get(ipart);
 
     m_prop.off_diagonal(m_wf, ipart);
     m_prop.diagonal(m_wf, ipart);
