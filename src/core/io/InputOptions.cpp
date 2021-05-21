@@ -124,6 +124,13 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-A,--shift_update_period", shift_update_period,
                "number of cycles between shift updates");
 
+    add_option("--reweight_lookback_iters", ncycle_reweight_lookback,
+               "Number of MC cycles for which to accumulate reweighting statistics for population control unbiasing");
+
+    add_option("--reweight_static_shift_iters", ncycle_wait_reweight,
+               "number of cycles after variable shift to snapshot fixed-shift "
+               "to use to compute reweighting factors");
+
     add_option("-N,--ncycle", ncycle,
                "number of cycles to execute before exit");
 

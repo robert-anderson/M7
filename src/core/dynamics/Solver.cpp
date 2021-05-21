@@ -439,6 +439,7 @@ void Solver::output_stats() {
             stats.m_weighted_twf_num = m_weighted_twf->m_numerator_total[0];
             stats.m_weighted_twf_denom = m_weighted_twf->m_denominator_total[0];
         }
+        stats.m_reweighting_factor = m_prop.m_shift.m_total_reweighting;
         m_stats->flush();
     }
 

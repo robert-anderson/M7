@@ -15,7 +15,12 @@ struct Shift {
     const Options &m_opts;
     buffered::Numbers<defs::wf_t, defs::ndim_wf> m_nwalker_last_update;
     buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_values;
+    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_avg_values; // un-normalised average (i.e. sum)
+    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_const_shift;
     Epochs m_variable_mode;
+    Epochs m_reweighting_active;
+    std::vector<std::queue<defs::ham_comp_t>> m_reweighting_factors;
+    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_total_reweighting;
     InteractiveVariable<defs::wf_comp_t> m_nwalker_target;
 
     Shift(const Options &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
@@ -23,6 +28,9 @@ struct Shift {
     const defs::ham_comp_t & operator[](const size_t& ipart);
 
     void update(const Wavefunction& wf, const size_t& icycle, const double& tau);
+
+    void evaluate_reweighting(const size_t& npart, const size_t &icycle,
+                                  const double& tau);
 };
 
 

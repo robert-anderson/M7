@@ -9,6 +9,7 @@
 #include <complex>
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <exception>
 #include <array>
 #include <climits>

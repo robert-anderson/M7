@@ -22,14 +22,14 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
 
     // diagonal
     conn.connect(onv, onv);
-    helem_sum += ham.get_element(conn);
+    helem_sum += ham.get_element(conn); // no abs
     for (auto &iocc: occ.inds()) {
         for (auto &ivac: vac.inds()) {
             // singles
             conn.zero();
             conn.add(iocc, ivac);
             conn.apply(onv, work_onv);
-            helem_sum += ham.get_element(conn);
+            helem_sum += ham.get_element(conn); // no abs
             for (auto &jocc: occ.inds()) {
                 // doubles
                 if (jocc <= iocc) continue;
@@ -38,13 +38,15 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
                     conn.zero();
                     conn.add(iocc, jocc, ivac, jvac);
                     conn.apply(onv, work_onv);
-                    helem_sum += ham.get_element(conn);
+                    helem_sum += ham.get_element(conn); // no abs
                 }
             }
         }
     }
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
-        m_numerator[ipart] += weight[ipart] * helem_sum;
+        ASSERT(weight[ipart] > 0)
+        ASSERT(helem_sum > 0)
+        m_numerator[ipart] += weight[ipart] * helem_sum; // no abs
     }
 }
 
