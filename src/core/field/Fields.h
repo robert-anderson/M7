@@ -89,6 +89,10 @@ namespace fields {
             for (size_t i = 0ul; i < inds.second.size(); ++i) m_cre[i] = inds.second[i];
             return *this;
         }
+
+        bool is_ordered() const {
+            return m_ann.is_ordered(false, true) && m_cre.is_ordered(false, true);
+        }
     };
 
     /**

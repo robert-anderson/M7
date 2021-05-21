@@ -106,9 +106,10 @@ void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &sr
 
     const auto& promoter = m_promoters[nins];
     for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
-        //auto phase = promoter.apply(icomb, conn, m_lookup_inds);
-        promoter.apply(icomb, conn, m_lookup_inds);
+        auto phase = promoter.apply(icomb, conn, m_lookup_inds);
+        //promoter.apply(icomb, conn, m_lookup_inds);
         auto irank_send = m_ra.get_rank(m_lookup_inds);
+        ASSERT(m_lookup_inds.is_ordered());
         auto& send_table = send(irank_send);
         size_t irow = *send_table[m_lookup_inds];
         if (irow == ~0ul) {
@@ -116,7 +117,7 @@ void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &sr
         }
         send_table.m_row.jump(irow);
         auto contrib = src_weight * dst_weight;
-        //if (!phase) contrib = -contrib;
+        if (!phase) contrib = -contrib;
         send_table.m_row.m_values[0] += contrib;
     }
 }
