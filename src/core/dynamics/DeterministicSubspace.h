@@ -6,6 +6,7 @@
 #define M7_DETERMINISTICSUBSPACE_H
 
 #include <src/core/observables/MevGroup.h>
+#include <src/core/field/Onv.h>
 #include "src/core/sparse/SparseMatrix.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/field/Fields.h"
@@ -25,7 +26,7 @@ struct DeterministicDataRow : Row {
     };
 
     DeterministicDataRow(const Wavefunction& wf) :
-        m_onv(this, wf.m_store.m_row.m_onv.m_nsite, "onv"),
+        m_onv(this, onv::nsite(wf.m_store.m_row.m_onv), "onv"),
         m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight"){}
 
     static void load_fn(const WalkerTableRow& source, DeterministicDataRow& local){
@@ -86,7 +87,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
     void build_connections(const FermionHamiltonian &ham) {
         update();
         log::debug("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
-        conn::Antisym<0> conn_work(m_wf.m_nsite);
+        conn::Antisym<> conn_work(m_wf.m_nsite);
         auto& row_local = m_local.m_row;
         for (row_local.restart(); row_local.in_range(); row_local.step()){
             // loop over local subspace (H rows)
@@ -112,8 +113,8 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
         build_connections(ham);
     }
 
-    void build_from_occupied_connections(const FermionHamiltonian &ham, const fields::FermionOnv& onv) {
-        conn::Antisym<0> conn_work(m_wf.m_nsite);
+    void build_from_occupied_connections(const FermionHamiltonian &ham, const fields::Onv<>& onv) {
+        conn::Antisym<> conn_work(m_wf.m_nsite);
         auto row = m_wf.m_store.m_row;
         for (row.restart(); row.in_range(); row.step()){
             conn_work.connect(onv, row.m_onv);
@@ -130,7 +131,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
         update_data();
     }
 
-    void make_mev_contribs(MevGroup& mevs, const fields::FermionOnv& ref) {
+    void make_mev_contribs(MevGroup& mevs, const fields::Onv<>& ref) {
         if (!m_epoch) return;
         auto& row_local = m_local.m_row;
         auto& row_global = m_global.m_row;
@@ -167,6 +168,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
     }
 };
 
+#if 0
 class DeterministicSubspace {
 
     WalkerTable &m_walker_list;
@@ -252,8 +254,8 @@ public:
 
     DeterministicSubspace(WalkerTable &walker_list, defs::inds subject_iparts) :
             m_walker_list(walker_list), m_subject_iparts(subject_iparts),
-            m_local_subspace_list(SubspaceRow(walker_list.m_row.m_onv.m_nsite)),
-            m_global_subspace_list(SubspaceRow(walker_list.m_row.m_onv.m_nsite)),
+            m_local_subspace_list(SubspaceRow(onv::nsite(walker_list.m_row.m_onv))),
+            m_global_subspace_list(SubspaceRow(onv::nsite(walker_list.m_row.m_onv))),
             m_local_weights(nsubject()), m_local_h_weights(nsubject()), m_global_weights(nsubject()),
             m_recvcounts(mpi::nrank(), 0), m_displs(mpi::nrank(), 0) {}
 
@@ -384,4 +386,5 @@ public:
 
 };
 
+#endif
 #endif //M7_DETERMINISTICSUBSPACE_H

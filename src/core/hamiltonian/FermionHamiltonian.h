@@ -75,8 +75,9 @@ struct FermionHamiltonian {
      * Base class virtual methods take no symmetry into account and is fermion number conserving
      */
     struct Terms {
-        typedef std::function<void(const conn::Antisym<0> &, const fields::FermionOnv &,
+        typedef std::function<void(const conn::Antisym<> &, const fields::Onv<> &,
                                    const defs::ham_t &)> body_fn_t;
+
         const FermionHamiltonian &m_ham;
 
         mutable defs::ham_t m_helement_work;
@@ -343,9 +344,14 @@ public:
     buffered::FermionOnv guess_reference(const int &spin_level) const;
 
 
-    void foreach_connection(const fields::FermionOnv &src_onv, const Terms::body_fn_t &body,
+    void foreach_connection(const fields::Onv<0> &src_onv, const Terms::body_fn_t &body,
                             bool get_h, bool h_nonzero_only, bool include_diagonal) const {
         m_terms->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
+    }
+
+    void foreach_connection(const fields::Onv<1> &src_onv, const Terms::body_fn_t &body,
+                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
+        m_terms->foreach_connection(src_onv.m_frm, body, get_h, h_nonzero_only, include_diagonal);
     }
 
     /**

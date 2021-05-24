@@ -76,6 +76,8 @@ namespace defs {
     constexpr size_t nbit_data = CHAR_BIT * nbyte_data;
     const size_t isym_1e = 2;
     const size_t isym_2e = 8;
+
+    // TODO: bool-> size_t to make way for additional many-body basis function types
 #ifdef ENABLE_BOSONS
     constexpr bool enable_bosons = true;
 #else

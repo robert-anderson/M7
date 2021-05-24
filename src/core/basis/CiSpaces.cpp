@@ -6,13 +6,14 @@
 
 #include <utility>
 
+#if 0
 ci_gen::Base::Base(size_t nsite, size_t nelec, include_fn_t include_fn) :
     m_nsite(nsite), m_nelec(nelec), m_onv_work(nsite), m_include_fn(std::move(include_fn)){}
 
 ci_gen::NoSym::NoSym(size_t nsite, size_t nelec, const include_fn_t& include_fn) :
         Base(nsite, nelec, include_fn), m_foreach(2*nsite, nelec) {}
 
-void ci_gen::NoSym::operator()(Row &row, fields::FermionOnv &onv) {
+void ci_gen::NoSym::operator()(Row &row, fields::Onv<> &onv) {
     ASSERT(onv.belongs_to_row(&row));
     row.m_table->clear();
     auto body = [&](const defs::inds& inds){
@@ -41,3 +42,4 @@ void ci_gen::SpinSym::operator()(Row &row, fields::FermionOnv &onv) {
     };
     m_foreach_alpha(alpha_body);
 }
+#endif

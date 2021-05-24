@@ -71,7 +71,7 @@ public:
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
-    bool apply(const size_t &icomb, const conn::Antisym<> &conn, fields::FermionMevInds &inds) const;
+    bool apply(const size_t &icomb, const conn::Antisym<0> &conn, fields::FermionMevInds &inds) const;
 };
 
 struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
@@ -87,7 +87,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
      */
     std::vector<FermionPromoter> m_promoters;
 
-    conn::Antisym<> m_conn;
+    conn::Antisym<0> m_conn;
 
     const size_t &nop() const;
 
@@ -95,12 +95,17 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 
     FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nelec);
 
-    void make_contribs(const conn::Antisym<> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
+    void make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
 
     void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
                        const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight) {
         m_conn.connect(src_onv, dst_onv);
         make_contribs(m_conn, src_weight, dst_weight);
+    }
+
+    void make_contribs(const fields::Onv<1> &src_onv, const defs::wf_t &src_weight,
+                       const fields::Onv<1> &dst_onv, const defs::wf_t &dst_weight) {
+        make_contribs(src_onv.m_frm, src_weight, dst_onv.m_frm, dst_weight);
     }
 
     void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
@@ -110,7 +115,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         make_contribs(m_conn, src_weight, dst_weight);
     }
 
-    void make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight);
+    void make_contribs_spf_ket(const conn::Antisym<0> &conn, const defs::wf_t &src_weight);
 
     void make_contribs_spf_ket(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
                                const fields::FermionOnv &dst_onv) {

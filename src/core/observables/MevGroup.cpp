@@ -26,7 +26,7 @@ const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
     return m_all_combs.data() + icomb * m_nop_insert;
 }
 
-bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<> &conn, fields::FermionMevInds &inds) const {
+bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<0> &conn, fields::FermionMevInds &inds) const {
     auto comb_begin = begin(icomb);
     inds.zero();
     size_t ann_passed = 0ul;
@@ -97,7 +97,7 @@ FermionRdm::FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nel
     for (size_t nins=0ul; nins<=nop; ++nins) m_promoters.emplace_back(nelec+nins-nop, nins);
 }
 
-void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &src_weight,
+void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight,
                                const defs::wf_t &dst_weight) {
     const auto exlvl = conn.nexcit();
     if (conn.nann() > m_nann && conn.ncre() > m_ncre) return;
@@ -122,6 +122,6 @@ void FermionRdm::make_contribs(const conn::Antisym<> &conn, const defs::wf_t &sr
     }
 }
 
-void FermionRdm::make_contribs_spf_ket(const conn::Antisym<> &conn, const defs::wf_t &src_weight) {
+void FermionRdm::make_contribs_spf_ket(const conn::Antisym<0> &conn, const defs::wf_t &src_weight) {
     make_contribs(conn, std::abs(src_weight), 1.0);
 }

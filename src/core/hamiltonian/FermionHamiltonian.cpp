@@ -341,7 +341,7 @@ bool FermionHamiltonian::Terms::update_helement(bool get_h, bool h_nonzero_only)
     return true;
 }
 
-void FermionHamiltonian::Terms::perform_diagonal(const fields::FermionOnv &src_onv,
+void FermionHamiltonian::Terms::perform_diagonal(const fields::Onv<> &src_onv,
                                                const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
                                                bool h_nonzero_only) const {
     m_conn_work.zero();

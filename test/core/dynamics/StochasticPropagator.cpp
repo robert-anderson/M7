@@ -193,7 +193,7 @@ TEST(StochasticPropagator, BosonTest) {
     opts.rdm_rank = 0;
     //opts.spf_uniform_twf = true;
     //opts.write_hdf5_fname = "test_wf_save.h5";
-    opts.read_hdf5_fname = "test_wf_save.h5";
+    //opts.read_hdf5_fname = "test_wf_save.h5";
     opts.init();
 
     // -10.328242246088791
@@ -210,7 +210,7 @@ TEST(StochasticPropagator, BosonTest) {
     wf.m_comm.expand(800);
     StochasticPropagator prop(ham, opts, wf.npart());
     auto ref_energy = ham.get_energy(ref_onv);
-    prop.m_values = ref_energy;//benchmark;
+    prop.m_shift.m_values = ref_energy;
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
     wf.set_weight(0, ref_energy);

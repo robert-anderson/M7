@@ -8,7 +8,7 @@
 
 void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const auto &row = wf.m_store.m_row;
-    const auto &src_onv = row.m_onv;
+    auto src_onv = row.m_onv;
     const defs::wf_t &weight = row.m_weight[ipart];
     bool src_initiator = row.m_initiator.get(ipart);
     OccupiedOrbitals occs(src_onv);
@@ -18,7 +18,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     ASSERT(!consts::float_is_zero(weight));
 
-    auto body = [&](const conn::Antisym<0> &conn, const fields::FermionOnv& dst_onv, const defs::ham_t &helement){
+    auto body = [&](const conn::Antisym<0> &conn, const fields::Onv<>& dst_onv, const defs::ham_t &helement){
         auto delta = -weight * tau() * helement;
         if (consts::float_is_zero(delta)) return;
         wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
