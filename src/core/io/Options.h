@@ -46,6 +46,8 @@ struct Options {
     double shift_initial = 0.0;
     double shift_damp = 0.05;
     size_t shift_update_period = 1;
+    size_t ncycle_reweight_lookback = 0;
+    size_t ncycle_wait_reweight = 0;
     size_t ncycle = ~0ul;
     size_t ncycle_wait_mevs = 1000ul;
     size_t ncycle_accumulate_mevs = ~0ul;

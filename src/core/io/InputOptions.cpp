@@ -124,6 +124,13 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("-A,--shift_update_period", shift_update_period,
                "number of cycles between shift updates");
 
+    add_option("--reweight_lookback_iters", ncycle_reweight_lookback,
+               "Number of MC cycles for which to accumulate reweighting statistics for population control unbiasing");
+
+    add_option("--reweight_static_shift_iters", ncycle_wait_reweight,
+               "number of cycles after variable shift to snapshot fixed-shift "
+               "to use to compute reweighting factors");
+
     add_option("-N,--ncycle", ncycle,
                "number of cycles to execute before exit");
 
@@ -141,16 +148,16 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
 
     add_flag("--calc_mk_walker_sums", calc_mk_walker_sums,
              "accumulate and output average walker occupations of Kramers sectors");
+    if (defs::enable_bosons) {
+        add_option("--nboson_max", nboson_max,
+                   "maximum allowed occupation of bosonic modes");
 
-    add_option("--nboson_max", nboson_max,
-               "maximum allowed occupation of bosonic modes");
+        add_option("--boson_coupling", boson_coupling,
+                   "coupling of onsite boson modes for Hubbard-Holstein model");
 
-    add_option("--boson_coupling", boson_coupling,
-               "coupling of onsite boson modes for Hubbard-Holstein model");
-
-    add_option("--boson_frequency", boson_frequency,
-               "frequency of onsite boson modes for Hubbard-Holstein model");
-
+        add_option("--boson_frequency", boson_frequency,
+                   "frequency of onsite boson modes for Hubbard-Holstein model");
+    }
     add_option("--psingle_initial", psingle_initial,
                "initial probability with which to attempt to draw single excitations");
 

@@ -35,6 +35,7 @@ struct FciqmcStatsRow : Row {
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_denom;
+    fields::Numbers<defs::ham_t, defs::ndim_wf> m_reweighting_factor;
 
     FciqmcStatsRow(NdFormat<2> format) :
             m_wf_format(format),
@@ -60,7 +61,9 @@ struct FciqmcStatsRow : Row {
             m_total_cycle_time(this, "Total cycle time"),
             m_uniform_twf_num(this, m_wf_format, "Numerator of uniform TWF-projected energy estimator"),
             m_weighted_twf_num(this, m_wf_format, "Numerator of weighted TWF-projected energy estimator"),
-            m_weighted_twf_denom(this, m_wf_format, "Denominator of weighted TWF-projected energy estimator")
+            m_weighted_twf_denom(this, m_wf_format, "Denominator of weighted TWF-projected energy estimator"),
+            m_reweighting_factor(this, m_wf_format, "Reweighting factor for population "
+                                                                             "control unbiasing")
     {}
 
     FciqmcStatsRow(size_t nroot, size_t nreplica) :
