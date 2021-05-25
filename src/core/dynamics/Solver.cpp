@@ -150,6 +150,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
      * else if all elements of the m_weight field are zero, the row should be removed
      */
     auto &row = m_wf.m_store.m_row;
+
     for (row.restart(); row.in_range(); row.step()) {
         /*
          * stats always refer to the state of the wavefunction in the previous iteration
@@ -158,7 +159,6 @@ void Solver::loop_over_occupied_onvs(bool final) {
         /*
          * this is a free row, caused by an earlier call to m_wf.remove_row()
          */
-        //if (row.is_cleared()) continue;
         if (row.m_onv.is_zero()) continue;
 
         if (row.m_weight.is_zero() && !row.is_protected()) {

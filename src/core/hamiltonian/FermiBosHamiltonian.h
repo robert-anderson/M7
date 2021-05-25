@@ -30,109 +30,68 @@
 #include "BosonCouplings.h"
 
 
-class FermiBosHamiltonian : public FermionHamiltonian {
+struct FermiBosHamiltonian : public FermionHamiltonian {
     BosonCouplings m_boson_couplings;
+    const std::unique_ptr<ham_sym_helpers::FermiBos> m_bc_sym_helper;
 public:
     FermiBosHamiltonian(std::string fname, bool spin_major,
-                        size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega) :
-            FermionHamiltonian(fname, spin_major),
-            m_boson_couplings(nsite(), nboson_cutoff, v, omega) {}
+                        size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega);
 
 
-    FermiBosHamiltonian(const Options &opts):
-    FermiBosHamiltonian(opts.fcidump_path, opts.fcidump_spin_major, opts.nboson_max,
-                        opts.boson_coupling, opts.boson_frequency){}
+    FermiBosHamiltonian(const Options &opts);
 
-    const BosonCouplings &bc() const {
-        return m_boson_couplings;
-    }
+    const BosonCouplings &bc() const;
 
-    defs::ham_t get_element_0(const conn::Antisym<1> &afbconn) const {
-        ASSERT(!afbconn);
-        return FermionHamiltonian::get_element_0(afbconn) + m_boson_couplings.get_element_0(afbconn);
-    }
+    defs::ham_t get_element_0(const conn::Antisym<1> &afbconn) const;
 
-    defs::ham_t get_element_0(const fields::Onv<1> &onv) const {
-        return FermionHamiltonian::get_element_0(onv.m_frm) + m_boson_couplings.get_element_0(onv.m_bos);
-    }
+    defs::ham_t get_element_0(const fields::Onv<1> &onv) const;
 
     using FermionHamiltonian::get_element_1;
-    defs::ham_t get_element_1(const conn::Antisym<1> &afbconn) const {
-        ASSERT(!afbconn.m_bonvconn);
-        return FermionHamiltonian::get_element_1(afbconn);
-    }
+    defs::ham_t get_element_1(const conn::Antisym<1> &afbconn) const;
 
     using FermionHamiltonian::get_element_2;
-    defs::ham_t get_element_2(const conn::Antisym<1> &afbconn) const {
-        ASSERT(!afbconn.m_bonvconn);
-        return FermionHamiltonian::get_element_2(afbconn);
-    }
+    defs::ham_t get_element_2(const conn::Antisym<1> &afbconn) const;
 
-    defs::ham_t get_element_01(const conn::Antisym<1> &afbconn) const {
-        ASSERT(!afbconn.nexcit());
-        return m_boson_couplings.get_element_1(afbconn);
-    }
+    defs::ham_t get_element_01(const conn::Antisym<1> &afbconn) const;
 
-    defs::ham_comp_t get_energy(const fields::Onv<1> &onv) const {
-        return consts::real(get_element_0(onv));
-    }
+    defs::ham_t get_element(const fields::Onv<1> &bra, const fields::Onv<1> &ket) const;
 
-    defs::ham_t get_element(const conn::Antisym<1> &afbconn) const {
-        if (!afbconn) return get_element_0(afbconn);
-        else if (!afbconn.m_bonvconn) {
-            if (afbconn.nexcit() == 1)
-                return FermionHamiltonian::get_element_1(afbconn);
-            else if (afbconn.nexcit() == 2)
-                return FermionHamiltonian::get_element_2(afbconn);
+private:
+    defs::ham_t get_element_tag(const conn::Antisym<1> &aconn, dispatch_utils::BoolTag<false> sym_opts) const {
+        if (!aconn) return get_element_0(aconn);
+        else if (!aconn.m_bonvconn) {
+            if (aconn.nexcit() == 1)
+                return FermionHamiltonian::get_element_1(aconn);
+            else if (aconn.nexcit() == 2)
+                return FermionHamiltonian::get_element_2(aconn);
         }
-        else if (!afbconn.nexcit()) {
-            if (afbconn.m_bonvconn.nexcit()==1)
-                return get_element_01(afbconn);
+        else if (!aconn.nexcit()) {
+            if (aconn.m_bonvconn.nexcit()==1)
+                return get_element_01(aconn);
         }
         return 0.0;
     }
 
-    defs::ham_t get_element(const fields::Onv<1> &bra, const fields::Onv<1> &ket) const {
-        return get_element(conn::Antisym<1>(ket, bra));
+    defs::ham_t get_element_tag(const conn::Antisym<1> &aconn, dispatch_utils::BoolTag<true> sym_opts) const {
+        return m_bc_sym_helper->get_element(aconn);
     }
 
-    buffered::FermiBosOnv guess_reference(const int &spin_level) const {
-        buffered::FermiBosOnv tmp(m_nsite);
-        tmp.m_frm = FermionHamiltonian::guess_reference(spin_level);
-        return tmp;
+    defs::ham_comp_t get_energy_tag(const fields::Onv<1> &onv, dispatch_utils::BoolTag<false> sym_opts) const {
+        return consts::real(get_element_0(onv));
+    }
+    defs::ham_comp_t get_energy_tag(const fields::Onv<1> &onv, dispatch_utils::BoolTag<true> sym_opts) const {
+        return m_bc_sym_helper->get_energy(onv);
     }
 
+public:
 
-//
-//    defs::ham_t get_element_0(const conn::AsFermiBosOnv &afbconn) const {
-//        return FermionHamiltonian::get_element_1(afbconn.m_aconn);
-//    }
-//
-//    defs::ham_t get_element_1(const conn::AsFermiBosOnv &afbconn) const {
-//        return FermionHamiltonian::get_element_1(afbconn.m_aconn);
-//    }
-//
-//    defs::ham_t get_element_2(const conn::AsFermiBosOnv &afbconn) const {
-//        return FermionHamiltonian::get_element_2(afbconn.m_aconn);
-//    }
-//
-//    defs::ham_t get_element_2(const conn::AsFermionOnv &aconn) const {
-//        return FermionHamiltonian::get_element_2(aconn);
-//    }
-//
-//    defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-//        return FermionHamiltonian::get_element_2(i, j, k, l);
-//    }
-//
-//    defs::ham_t get_element(const conn::AsFermiBosOnv &afbconn) const {
-//        defs::ham_t res = m_boson_couplings.get_element(afbconn.m_aconn, afbconn.m_bonvconn);
-//        if (afbconn.m_bonvconn.nchanged_mode() == 0) res += FermionHamiltonian::get_element(afbconn.m_aconn);
-//        return res;
-//    }
-//
-//    defs::ham_t get_element(const views::FermiBosOnv &bra, const views::FermiBosOnv &ket) const {
-//        return get_element(conn::AsFermiBosOnv(ket, bra));
-//    }
+    defs::ham_t get_element(const conn::Antisym<1> &aconn) const {
+        return get_element_tag(aconn, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
+    }
+
+    defs::ham_comp_t get_energy(const fields::Onv<1> &onv) const{
+        return get_energy_tag(onv, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
+    }
 
     size_t nci() const {
         return FermionHamiltonian::nci() * m_boson_couplings.nci();

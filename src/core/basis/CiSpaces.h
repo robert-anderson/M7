@@ -12,7 +12,6 @@
 #include <src/core/dynamics/WalkerTable.h>
 #include <src/core/dynamics/Wavefunction.h>
 
-#if 0
 namespace ci_gen {
 
     typedef std::function<bool(const fields::Onv<>&)> include_fn_t;
@@ -62,5 +61,4 @@ namespace ci_gen {
 };
 
 
-#endif //M7_CISPACES_H
 #endif //M7_CISPACES_H

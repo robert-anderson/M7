@@ -47,10 +47,6 @@ public:
         auto curr_occ = src_onv.m_bos[imode_excit];
 
         prob = 1.0/occs.size();
-        // there are two ways to generate such connections, and they should be twice as likely
-//        if(src_onv.m_frm.get(0, imode_excit) and src_onv.m_frm.get(1, imode_excit)){
-//            prob *= 1.0;
-//        }
 
         if(curr_occ == m_nboson_max){
             change = -1;

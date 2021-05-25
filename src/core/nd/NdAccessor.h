@@ -48,9 +48,12 @@ struct NdAccessor {
         return m_data[ielement];
     }
 
-    const T& operator[](const size_t& ielement) const {
-        ASSERT(ielement<m_format.nelement());
-        return m_data[ielement];
+    const T& operator[](const std::array<size_t, nind>& inds) const {
+        return m_data[m_format.flatten(inds)];
+    }
+
+    T& operator[](const std::array<size_t, nind>& inds) {
+        return m_data[m_format.flatten(inds)];
     }
 
     template<typename ...Args>

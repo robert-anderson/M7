@@ -9,7 +9,8 @@
 
 FciqmcCalculation::FciqmcCalculation(const Options &opts) :
         m_opts(opts), m_ham(opts), m_wf(opts, m_ham.nsite()), m_prop(m_ham, opts, m_wf.npart())  {
-    auto ref_onv = m_ham.guess_reference(opts.spin_restrict);
+    buffered::Onv<> ref_onv(m_ham.nsite());
+    m_ham.set_hf_onv(ref_onv, opts.spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_onv);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};
     if (ref_loc.is_mine()) {

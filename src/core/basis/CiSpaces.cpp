@@ -6,7 +6,6 @@
 
 #include <utility>
 
-#if 0
 ci_gen::Base::Base(size_t nsite, size_t nelec, include_fn_t include_fn) :
     m_nsite(nsite), m_nelec(nelec), m_onv_work(nsite), m_include_fn(std::move(include_fn)){}
 
@@ -42,4 +41,3 @@ void ci_gen::SpinSym::operator()(Row &row, fields::FermionOnv &onv) {
     };
     m_foreach_alpha(alpha_body);
 }
-#endif

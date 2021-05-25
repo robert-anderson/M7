@@ -30,7 +30,7 @@ class FcidumpFileReader : public SparseArrayFileReader<defs::ham_t> {
     typedef SparseArrayFileReader<defs::ham_t> base_t;
     /**
      * spin-resolved FCIDUMPs index in spinorbs, which may not may not be spin-major,
-     * depending on the program they were generated for. E.g. NECI uses spatial-major
+     * depending on the program they were generated for. E.g. NECI uses spin-minor
      * ordering throughout, so if the FCIDUMP supplied was intended for use with NECI,
      * spin_major should be passed in as false.
      */

@@ -14,6 +14,7 @@
 #include "src/core/integrals/Integrals_2e.h"
 #include "src/core/table/BufferedFields.h"
 #include "HamiltonianData.h"
+#include "SymmetryHelpers.h"
 
 
 /**
@@ -71,129 +72,6 @@
  */
 struct FermionHamiltonian {
 
-    /**
-     * Base class virtual methods take no symmetry into account and is fermion number conserving
-     */
-    struct Terms {
-        typedef std::function<void(const conn::Antisym<> &, const fields::Onv<> &,
-                                   const defs::ham_t &)> body_fn_t;
-
-        const FermionHamiltonian &m_ham;
-
-        mutable defs::ham_t m_helement_work;
-        mutable conn::Antisym<0> m_conn_work;
-        mutable OccupiedOrbitals m_occ_work;
-        mutable VacantOrbitals m_vac_work;
-        mutable buffered::FermionOnv m_onv_work;
-
-        Terms(const FermionHamiltonian &ham) : m_ham(ham), m_conn_work(ham.nsite()),
-                                               m_occ_work(ham.nsite()), m_vac_work(ham.nsite()),
-                                               m_onv_work(ham.nsite()) {}
-
-        virtual defs::ham_t get_element_00(const defs::inds &occs, const size_t &nocc) const;
-
-        virtual defs::ham_t get_element_11(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_22(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_01(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_12(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_02(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_10(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_21(const conn::Antisym<0> &conn) const;
-
-        virtual defs::ham_t get_element_20(const conn::Antisym<0> &conn) const;
-
-        defs::ham_t get_element(const conn::Antisym<0> &conn) const;
-
-    private:
-        /**
-         * decide whether we need to compute full H element, and if so, whether the should the loop body be called
-         * @param get_h
-         *  if true, the calling scope wants access to the H matrix element
-         * @param h_nonzero_only
-         *  if true, the calling scope only wants the loop body to be called when the matrix element is nonzero
-         * @return
-         *  true if the loop body should be called
-         */
-        bool update_helement(bool get_h, bool h_nonzero_only) const;
-
-    protected:
-
-        void perform_diagonal(const fields::FermionOnv &src_onv,
-                            const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        void perform_single(const fields::FermionOnv &src_onv, const size_t& occ, const size_t& vac,
-                            const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        void perform_double(const fields::FermionOnv &src_onv,
-                    const size_t& occ1, const size_t& occ2,
-                    const size_t& vac1, const size_t& vac2,
-                    const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        void foreach_connection_singles(const fields::FermionOnv &src_onv,
-                                       const defs::inds &occs, const defs::inds &vacs,
-                                       const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        void foreach_connection_subset_doubles(const fields::FermionOnv &src_onv,
-                                       const defs::inds &occs1, const defs::inds &occs2,
-                                       const defs::inds &vacs1, const defs::inds &vacs2,
-                                       const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        virtual void foreach_connection_subset_doubles(const fields::FermionOnv &src_onv,
-                                               const defs::inds &occs, const defs::inds &vacs,
-                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        void foreach_connection_subset(const fields::FermionOnv &src_onv,
-                                               const defs::inds &occs1, const defs::inds &occs2,
-                                               const defs::inds &vacs1, const defs::inds &vacs2,
-                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-        virtual void foreach_connection_subset(const fields::FermionOnv &src_onv,
-                                               const defs::inds &occs, const defs::inds &vacs,
-                                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
-
-    public:
-        /**
-         * A loop over ONVs connected to src_onv
-         * @param src_onv
-         * @param body
-         * @param get_h
-         * @param h_nonzero_only
-         */
-        virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
-    };
-
-    struct SpinTerms : Terms {
-        mutable SpinOccupiedOrbitals m_spin_occ_work;
-        mutable SpinVacantOrbitals m_spin_vac_work;
-
-        SpinTerms(const FermionHamiltonian &ham);
-
-        virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
-    };
-
-
-    struct Hubbard1DTerms : SpinTerms {
-
-        Hubbard1DTerms(const FermionHamiltonian &ham);
-
-        virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
-    };
-
-    struct Hubbard1DPbcTerms : SpinTerms {
-
-        virtual void foreach_connection(const fields::FermionOnv &src_onv, const body_fn_t &body,
-                                        bool get_h, bool h_nonzero_only, bool include_diagonal) const;
-    };
-
 protected:
     const size_t m_nelec;
     const size_t m_nsite;
@@ -207,7 +85,7 @@ public:
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
     ints1_t m_int_1;
     ints2_t m_int_2;
-    const std::unique_ptr<Terms> m_terms;
+    const std::unique_ptr<ham_sym_helpers::Fermion> m_sym_helper;
 
     /**
      * stores whether connected elements are nonzero based on contrib case
@@ -266,10 +144,6 @@ public:
         return isite == jsite && jsite == ksite && ksite == lsite;
     }
 
-//    FermionHamiltonianTerms decide_terms() const {
-//        return FermionHamiltonianTerms(*this);
-//    }
-
     FermionHamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e,
                        bool complex_valued, bool spin_resolved, size_t int_2e_rank);
 
@@ -278,8 +152,6 @@ public:
     FermionHamiltonian(std::string fname, bool spin_major);
 
     FermionHamiltonian(const Options &opts) : FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {}
-
-    defs::ham_comp_t get_energy(const fields::Onv<0> &fonv) const;
 
     defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 
@@ -297,9 +169,40 @@ public:
 
     defs::ham_t get_element_2(const conn::Antisym<0> &connection) const;
 
-    defs::ham_t get_element(const conn::Antisym<0> &connection) const;
-
     defs::ham_t get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const;
+
+private:
+    defs::ham_t get_element_tag(const conn::Antisym<0> &conn, dispatch_utils::BoolTag<false> sym_opts) const {
+        switch (conn.nexcit()) {
+            case 0:
+                return get_element_0(conn);
+            case 1: ASSERT(conn.ncom() + conn.nexcit() == nelec());
+                return get_element_1(conn);
+            case 2:
+                return get_element_2(conn);
+            default:
+                return 0;
+        }
+    }
+    defs::ham_t get_element_tag(const conn::Antisym<0> &conn, dispatch_utils::BoolTag<true> sym_opts) const {
+        return m_sym_helper->get_element(conn);
+    }
+
+    defs::ham_comp_t get_energy_tag(const fields::Onv<0> &onv, dispatch_utils::BoolTag<false> sym_opts) const {
+        return consts::real(get_element_0(onv));
+    }
+    defs::ham_comp_t get_energy_tag(const fields::Onv<0> &onv, dispatch_utils::BoolTag<true> sym_opts) const {
+        return m_sym_helper->get_energy(onv);
+    }
+
+public:
+    defs::ham_t get_element(const conn::Antisym<0> &conn) const {
+        return get_element_tag(conn, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
+    }
+
+    defs::ham_comp_t get_energy(const fields::Onv<0> &onv) const {
+        return get_energy_tag(onv, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
+    }
 
     bool is_hubbard() const {
         return m_on_site_only_0022 && m_nn_only_1111;
@@ -344,14 +247,9 @@ public:
     buffered::FermionOnv guess_reference(const int &spin_level) const;
 
 
-    void foreach_connection(const fields::Onv<0> &src_onv, const Terms::body_fn_t &body,
+    void foreach_connection(const fields::Onv<0> &src_onv, const ham_sym_helpers::Fermion::body_fn_t &body,
                             bool get_h, bool h_nonzero_only, bool include_diagonal) const {
-        m_terms->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
-    }
-
-    void foreach_connection(const fields::Onv<1> &src_onv, const Terms::body_fn_t &body,
-                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
-        m_terms->foreach_connection(src_onv.m_frm, body, get_h, h_nonzero_only, include_diagonal);
+        m_sym_helper->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
     }
 
     /**

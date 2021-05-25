@@ -9,9 +9,14 @@
 #include <src/defs.h>
 #include "FermiBosHamiltonian.h"
 #include "src/core/nd/NdArray.h"
+#include "HamiltonianParts.h"
+#include "SymmetryHelpers.h"
 
-template<bool enable_bosons = defs::enable_bosons>
-using Hamiltonian = typename std::conditional<enable_bosons, FermiBosHamiltonian, FermionHamiltonian>::type;
+
+typedef std::tuple<FermionHamiltonian, FermiBosHamiltonian> ham_tup_t;
+
+template<bool enable_bosons=defs::enable_bosons>
+using Hamiltonian = typename std::tuple_element<enable_bosons, ham_tup_t>::type;
 
 #if 0
 

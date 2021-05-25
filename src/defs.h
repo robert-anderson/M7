@@ -88,6 +88,13 @@ namespace defs {
 #else
     constexpr bool enable_mevs = false;
 #endif
+
+#ifdef ENABLE_OPTIM_FOR_LATTICE_HAM
+    constexpr bool enable_optim_for_lattice_ham = true;
+#else
+    constexpr bool enable_optim_for_lattice_ham = false;
+#endif
+
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
     typedef std::array<size_t, ndim_wf> wf_inds_t;
