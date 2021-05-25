@@ -158,6 +158,7 @@ struct MultiField {
     bool belongs_to_row(Row* row) const {
         struct fn_t {
             const Row* m_row;
+            fn_t(const Row* row):m_row(row){}
             bool m_and = true;
             void operator()(const FieldBase &f) { m_and &= f.belongs_to_row(m_row); }
         };

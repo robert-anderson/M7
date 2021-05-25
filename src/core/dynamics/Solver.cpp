@@ -161,7 +161,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
          */
         if (row.m_onv.is_zero()) continue;
 
-        if (row.m_weight.is_zero() && !row.is_protected()) {
+        if (row.m_weight.is_zero() && !row.is_protected() && row.m_onv!=m_reference.get_onv()) {
             /*
              * ONV has become unoccupied in all parts and must be removed from mapped list
              * it must first make all associated averaged contributions to MEVs

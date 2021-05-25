@@ -259,7 +259,7 @@ public:
      * @param spin
      *  spin (MS) number
      */
-    void set_hf_onv(fields::FermionOnv& onv, int spin) const {
+    void set_hf_onv(fields::Onv<0>& onv, int spin) const {
         auto nalpha = ci_utils::nalpha(nelec(), spin);
         auto nbeta = ci_utils::nbeta(nelec(), spin);
         MPI_ASSERT(nalpha+nbeta==nelec(), "inconsistent na, nb, nelec");

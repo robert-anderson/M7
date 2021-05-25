@@ -14,16 +14,17 @@
 
 namespace ci_gen {
 
-    typedef std::function<bool(const fields::Onv<>&)> include_fn_t;
+    typedef std::function<bool(const fields::Onv<> &)> include_fn_t;
+
     static include_fn_t default_include_fn() {
-        return [](const fields::Onv<>&){return true;};
+        return [](const fields::Onv<> &) { return true; };
     }
 
-    static include_fn_t default_include_fn(const RankAllocator<WalkerTableRow>& ra) {
-        return [&ra](const fields::Onv<>& onv){return mpi::i_am(ra.get_rank(onv));};
+    static include_fn_t default_include_fn(const RankAllocator<WalkerTableRow> &ra) {
+        return [&ra](const fields::Onv<> &onv) { return mpi::i_am(ra.get_rank(onv)); };
     }
 
-    static include_fn_t default_include_fn(const Wavefunction& wf){
+    static include_fn_t default_include_fn(const Wavefunction &wf) {
         return default_include_fn(wf.m_ra);
     }
 
@@ -33,31 +34,58 @@ namespace ci_gen {
         const include_fn_t m_include_fn;
 
 
-        Base(size_t nsite, size_t nelec, include_fn_t include_fn=default_include_fn());
+        Base(size_t nsite, size_t nelec, include_fn_t include_fn = default_include_fn());
 
-        void add_if_included(Row& row, fields::Onv<>& onv){
+        void add_if_included(Row &row, fields::Onv<> &onv) {
             if (m_include_fn(m_onv_work)) {
                 row.push_back_jump();
                 onv = m_onv_work;
                 row.m_table->post_insert(row.m_i);
             }
         }
+
+    protected:
+        static void set_from_inds(fields::Onv<0>& onv, const defs::inds& inds){
+            onv = inds;
+        }
+        static void set_from_inds(fields::Onv<1>& onv, const defs::inds& inds){
+            onv.m_frm = inds;
+        }
+        static void set_from_inds(fields::Onv<0>& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
+            onv.set(alpha_inds, beta_inds);
+        }
+        static void set_from_inds(fields::Onv<1>& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
+            onv.m_frm.set(alpha_inds, beta_inds);
+        }
     };
 
     struct NoSym : Base {
         foreach::rtnd::Ordered<> m_foreach;
-        NoSym(size_t nsite, size_t nelec, const include_fn_t& include_fn=default_include_fn());
 
-        void operator()(Row& row, fields::Onv<>& onv);
+        NoSym(size_t nsite, size_t nelec, const include_fn_t &include_fn = default_include_fn());
+
+    public:
+
+        void operator()(Row &row, fields::Onv<> &onv){
+            ASSERT(onv.belongs_to_row(&row));
+            row.m_table->clear();
+            auto body = [&](const defs::inds& inds){
+                set_from_inds(m_onv_work, inds);
+                add_if_included(row, onv);
+            };
+            m_foreach(body);
+        }
     };
 
     struct SpinSym : Base {
         foreach::rtnd::Ordered<> m_foreach_alpha;
         foreach::rtnd::Ordered<> m_foreach_beta;
-        SpinSym(size_t nsite, size_t nelec, int spin, const include_fn_t& include_fn=default_include_fn());
 
-        void operator()(Row& row, fields::Onv<>& onv);
+        SpinSym(size_t nsite, size_t nelec, int spin, const include_fn_t &include_fn = default_include_fn());
+
+        void operator()(Row &row, fields::Onv<> &onv);
     };
+
 };
 
 

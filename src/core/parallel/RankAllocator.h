@@ -386,7 +386,7 @@ public:
      */
     bool verify() const {
         auto row = m_table.m_row;
-        const auto& key_field = static_cast<const FieldBase&>(KeyField<row_t>::get(row));
+        const auto& key_field = KeyField<row_t>::get(row);
         for(row.restart(); row.in_range(); row.step()){
             if (key_field.is_zero()) continue;
             if (!mpi::i_am(get_rank(row))) return false;

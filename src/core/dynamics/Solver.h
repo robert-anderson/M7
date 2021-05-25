@@ -130,6 +130,7 @@ public:
      * generated due to the Brillouin theorem
      */
     void make_average_weight_mev_contribs() {
+        if (!defs::enable_mevs) return;
         if (!m_mevs.m_accum_epoch) return;
         auto &row = m_wf.m_store.m_row;
         auto ncycle_occ = row.occupied_ncycle(m_icycle);

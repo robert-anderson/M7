@@ -170,9 +170,9 @@ void ham_sym_helpers::FermiBos::foreach_connection(
 
     m_conn_work.m_bonvconn.zero();
     m_onv_work.m_bos = src_onv.m_bos;
-    auto frm_body = [&](const conn::Antisym<0> &, const fields::Onv<0> &, const defs::ham_t &){
-        body(m_conn_work, m_onv_work, m_helement_work);
-    };
+//    auto frm_body = [&](const conn::Antisym<0> &, const fields::Onv<0> &, const defs::ham_t &){
+//        body(m_conn_work, m_onv_work, m_helement_work);
+//    };
     // do all purely fermionic connections:
-    m_ham.foreach_connection(src_onv.m_frm, frm_body, get_h, h_nonzero_only, include_diagonal);
+    //m_ham.foreach_connection(src_onv.m_frm, frm_body, get_h, h_nonzero_only, include_diagonal);
 }

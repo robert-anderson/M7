@@ -191,6 +191,7 @@ TEST(StochasticPropagator, BosonTest) {
     opts.shift_damp = 0.4;
     opts.ncycle = 5000;
     opts.rdm_rank = 0;
+    opts.replicate = false;
     //opts.spf_uniform_twf = true;
     //opts.write_hdf5_fname = "test_wf_save.h5";
     //opts.read_hdf5_fname = "test_wf_save.h5";
@@ -201,14 +202,11 @@ TEST(StochasticPropagator, BosonTest) {
 
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
-    for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        ref_onv.m_frm.set({0, i});
-        ref_onv.m_frm.set({1, i});
-    }
+    ham.set_hf_onv(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    StochasticPropagator prop(ham, opts, wf.npart());
+    StochasticPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift.m_values = ref_energy;
 

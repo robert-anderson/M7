@@ -104,6 +104,15 @@ public:
     const size_t &nboson_cutoff() const {
         return m_boson_couplings.nboson_cutoff();
     }
+
+    void foreach_connection(const fields::Onv<1> &src_onv, const ham_sym_helpers::FermiBos::body_fn_t &body,
+                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
+        m_bc_sym_helper->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
+    }
+
+    void set_hf_onv(fields::Onv<1>& onv, int spin) const {
+        FermionHamiltonian::set_hf_onv(onv.m_frm, spin);
+    }
 };
 
 
