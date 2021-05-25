@@ -28,13 +28,9 @@ struct RowProtector {
      */
     typename std::list<RowProtector *>::iterator m_it;
 
-    RowProtector(const TableBase& table): m_table(table){
-        on_resize(table.m_nrow);
-    }
+    RowProtector(const TableBase& table);
 
-    ~RowProtector(){
-        m_table.erase_protector(this);
-    }
+    ~RowProtector();
     /**
      * mark row as protected
      * @param irow

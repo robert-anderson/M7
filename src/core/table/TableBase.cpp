@@ -198,8 +198,9 @@ void TableBase::erase_protector(RowProtector *rp) const {
 }
 
 bool TableBase::is_protected() const {
-    return std::any_of(m_row_protectors.cbegin(), m_row_protectors.cend(),
+    size_t protected_here = std::any_of(m_row_protectors.cbegin(), m_row_protectors.cend(),
                        [](const RowProtector* rp){return rp->is_protected();});
+    return mpi::all_lor(protected_here);
 }
 
 bool TableBase::is_protected(const size_t& irow) const {

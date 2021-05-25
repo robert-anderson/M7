@@ -12,9 +12,10 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
         m_proj_energy_num(wf.m_format),
         m_nwalker_at_doubles(wf.m_format) {
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
+    ASSERT(wf.m_store.is_protected());
 }
 
-void Reference::add_row() {
+void Reference::contrib_row() {
     auto &row = m_wf.m_store.m_row;
     auto weight = row.m_weight[m_ipart];
     if (std::abs(weight) > m_candidate_abs_weight) {

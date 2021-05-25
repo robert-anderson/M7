@@ -4,6 +4,14 @@
 
 #include "RowProtector.h"
 
+RowProtector::RowProtector(const TableBase &table) : m_table(table), m_it(m_table.add_protector(this)){
+    on_resize(table.m_nrow);
+}
+
+RowProtector::~RowProtector() {
+    m_table.erase_protector(this);
+}
+
 void RowProtector::protect(const size_t &irow) {
     if (!m_flags[irow]) ++m_nprotected;
     m_flags[irow] = true;

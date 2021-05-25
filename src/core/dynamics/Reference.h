@@ -63,7 +63,7 @@ public:
     /**
      * add contributions from the current row of Wavefunction::m_store
      */
-    void add_row();
+    void contrib_row();
 
     //void change(const size_t& irow, const size_t& irank);
 

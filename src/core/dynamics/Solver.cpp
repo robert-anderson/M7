@@ -161,7 +161,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
          */
         if (row.m_onv.is_zero()) continue;
 
-        if (row.m_weight.is_zero() && !row.is_protected() && row.m_onv!=m_reference.get_onv()) {
+        if (row.m_weight.is_zero() && !row.is_protected()) {
             /*
              * ONV has become unoccupied in all parts and must be removed from mapped list
              * it must first make all associated averaged contributions to MEVs
@@ -203,7 +203,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                m_reference.add_row();
+                m_reference.contrib_row();
                 if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }

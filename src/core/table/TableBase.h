@@ -81,16 +81,19 @@ struct TableBase {
     TableBase(size_t row_dsize);
 
     TableBase(const TableBase &other);
+
     /**
      * @return
      *  pointer to the first data word of the BufferWindow
      */
     defs::data_t *dbegin();
+
     /**
      * @return
      * const pointer to the first data word of the BufferWindow
      */
     const defs::data_t *dbegin() const;
+
     /**
      * @param irow
      *  row index
@@ -98,6 +101,7 @@ struct TableBase {
      *  pointer to the first data word of the indexed row in the BufferWindow
      */
     defs::data_t *dbegin(const size_t &irow);
+
     /**
      * @param irow
      *  row index
@@ -105,17 +109,20 @@ struct TableBase {
      *  const pointer to the first data word of the indexed row in the BufferWindow
      */
     const defs::data_t *dbegin(const size_t &irow) const;
+
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
      * @param buffer
      *  pointer to buffer
      */
     void set_buffer(Buffer *buffer);
+
     /**
      * @return
      *  true if the high water mark can't be increased without first increasing the number of rows
      */
     bool is_full() const;
+
     /**
      * increase the high water mark, expand first if necessary
      * @param nrow
@@ -124,32 +131,38 @@ struct TableBase {
      *  row index of the first newly-accessible row
      */
     size_t push_back(size_t nrow = 1);
+
     /**
      * If there are free rows on the stack: pop one and use it, else: push_back
      * @return
      *  index of unused row
      */
     size_t get_free_row();
+
     /**
      * clear the entire table only if it contains no protected rows, else fatal error
      */
     virtual void clear();
+
     /**
      * clear the indexed row only if it is not protected, else fatal error
      * @param irow
      *  row index to clear
      */
     virtual void clear(const size_t &irow);
+
     /**
      * @return
      *  size of the buffer window in data words
      */
     size_t bw_dsize() const;
+
     /**
      * @return
      *  true if entire buffer window is zero (even above m_hwm)
      */
     bool is_cleared() const;
+
     /**
      * @param irow
      *  row index to check
@@ -157,18 +170,21 @@ struct TableBase {
      *  true if entire row is zero
      */
     bool is_cleared(const size_t &irow) const;
+
     /**
      * call the resize method on the buffer window and reflect the reallocation in m_nrow
      * @param nrow
      *  new number of rows
      */
     void resize(size_t nrow);
+
     /**
      * convenient wrapper for resize in which the argument is the additional number of rows rather than the total
      * @param nrow
      *  number of new rows to be added
      */
     void expand(size_t nrow);
+
     /**
      * in some situations it may be performant to reduce the number of reallocations, and this can be done by
      * allocating some rounded-up fraction more than we need.
@@ -178,6 +194,7 @@ struct TableBase {
      *  fraction of nrow to be added as "extra"
      */
     void expand(size_t nrow, double expansion_factor);
+
     /**
      * erasure of rows changes meaning depending on the derived class, and so this is a virtual method. Here, we
      * simply call clear on each indexed row
@@ -185,6 +202,7 @@ struct TableBase {
      *  all row indices marked for erasure
      */
     virtual void erase_rows(const defs::inds &irows);
+
     /**
      * in some derived classes, there is more to adding new rows than simply copying their contents into the hwm. In
      * these cases we need to call a method after the copy in order to maintain the integrity of those data structures
@@ -193,6 +211,7 @@ struct TableBase {
      *  row index of the already-inserted data
      */
     virtual void post_insert(const size_t &iinsert);
+
     /**
      * If we have copied a block of rows contiguously into a table with non-trivial post-insert obligations, we need to
      * call post_insert for each copied row
@@ -205,6 +224,7 @@ struct TableBase {
         if (iend == ~0ul) iend = m_hwm;
         for (size_t i = ibegin; i < iend; ++i) post_insert(i);
     }
+
     /**
      * function pointer type for the callback associated with row transfers.
      * see RankAllocator.h
@@ -215,6 +235,7 @@ struct TableBase {
      * see RankAllocator.h
      */
     typedef std::function<void(size_t)> recv_cb_t;
+
     /**
      * insert all rows held in the buffer window into this Table, then call all callbacks if any.
      * @param recv
@@ -225,6 +246,7 @@ struct TableBase {
      *  functions to call each time a received row is processed
      */
     virtual void insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks);
+
     /**
      * By P2P MPI communication, send the rows identified in the first arg from irank_send to irank_recv.
      * Called on all ranks, but the first arg is only respected on the irank_send rank.
@@ -239,6 +261,7 @@ struct TableBase {
      */
     void transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv,
                        const std::list<recv_cb_t> &callbacks = {});
+
     /**
      * copy a single row from another "source" table
      * @param src
@@ -250,6 +273,7 @@ struct TableBase {
      *  row in this table to which the source row is copied bytewise
      */
     void copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst);
+
     /**
      * swap row contents dword-for-dword via std::swap
      * @param irow
@@ -275,6 +299,7 @@ struct TableBase {
          *  true if the location is anywhere i.e. has a valid rank index
          */
         operator bool() const;
+
         /**
          * @return
          *  true if MPI rank index matches bcast-shared rank of identified row
@@ -295,30 +320,47 @@ struct TableBase {
      *  string representing table's contents
      */
     virtual std::string to_string(const defs::inds *ordering = nullptr) const;
+
     /**
      * gather contents of another table over all MPI ranks into this table all ranks
      * @param src
      *  table whose rows are to be gathered.
      */
     virtual void all_gatherv(const TableBase &src);
+
+    /**
+     * adds a rank-dynamic object to the RankAllocator
+     * @param rp
+     *  address of object being added to the std::list of RowProtectors
+     * @return
+     *  iterator within list which points to the added RowProtector
+     */
+    typename std::list<RowProtector *>::iterator add_protector(RowProtector *rp) const {
+        m_row_protectors.push_back(rp);
+        auto it = m_row_protectors.end();
+        return --it;
+    }
+
     /**
      * remove RowProtector from list
      * @param rp
      *  address of object being removed by its stored std::list iterator
      */
     void erase_protector(RowProtector *rp) const;
+
     /**
      * @return
      *  true if any of the associated RowProtectors are protecting any rows of this table
      */
     bool is_protected() const;
+
     /**
      * @param irow
      *  row index
      * @return
      *  true if any of the associated RowProtectors are protecting irow
      */
-    bool is_protected(const size_t& irow) const;
+    bool is_protected(const size_t &irow) const;
 };
 
 

@@ -45,13 +45,6 @@ RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double accept
     }
 }
 
-bool RankAllocatorBase::row_mapped_by_dependent(size_t irow) {
-    for (const auto dep : m_rank_dynamic_objects) {
-        if (dep->has_row(irow)) return true;
-    }
-    return false;
-}
-
 size_t RankAllocatorBase::nblock_local() const {
     return m_rank_to_blocks[mpi::irank()].size();
 }

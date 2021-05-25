@@ -182,14 +182,6 @@ public:
     RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance);
 
     /**
-     * @param irow
-     *  index of row whose status as mapped by any added rank-dynamic object is to be determined
-     * @return
-     *  true if the row is mapped by any rank-dynamic object
-     */
-    bool row_mapped_by_dependent(size_t irow);
-
-    /**
      * @return
      *  reference to table object in derived class. The RankAllocatorBase makes no reference to
      *  the MappedTable since that would require a template parameter
