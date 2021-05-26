@@ -42,7 +42,7 @@ struct BufferedField : WrappedRow, field_t {
         m_wrapped_row.restart();
     }
 
-    BufferedField(const BufferedField& other): BufferedField(*this){}
+    BufferedField(const BufferedField& other): BufferedField(static_cast<const field_t&>(*this)){}
 
     BufferedField& operator=(const field_t& other){
         field_t::operator=(other);

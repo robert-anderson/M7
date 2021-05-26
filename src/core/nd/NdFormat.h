@@ -14,13 +14,35 @@ struct NdFormatBase{
     virtual std::string to_string() const = 0;
 };
 
+/**
+ * Represents a multidimensional indexing scheme where the number of dimensions is known at compile time
+ * @tparam nind
+ *  number of dimensions.
+ */
 template <size_t nind>
 class NdFormat : NdFormatBase{
+    /**
+     * the extents of each dimension
+     */
     std::array<size_t, nind> m_shape;
+    /**
+     * elements of the stride are computed as products of elements of the shape. this allows for the conversion of an
+     * array containing multidimensional indices to a single integer ("flat" index) via a scalar product
+     */
     std::array<size_t, nind> m_strides;
+    /**
+     * label each dimension
+     */
     std::array<std::string, nind> m_dim_names;
+    /**
+     * the number of elements in the indexing scheme. the largest value a flat index can take in this scheme is one less
+     * than m_nelement
+     */
     size_t m_nelement = ~0ul;
 
+    /**
+     * helper function to store the number of elements
+     */
     void set_nelement() {
         if (!nind) m_nelement = 1;
         else m_nelement = m_shape.front()*m_strides.front();
@@ -32,6 +54,11 @@ public:
         m_nelement = 1ul;
     }
 
+    /**
+     * construct a scheme where all extents are the same
+     * @param extent
+     *  value to copy to all elements of the shape
+     */
     NdFormat(size_t extent){
         m_shape.fill(extent);
         set_strides();
@@ -54,6 +81,14 @@ public:
         return true;
     }
 
+    /**
+     * get another NdFormat where the ndiff most minor indices have been discarded. Individual elements of the result
+     * index ndiff-dimensional subarrays of this object
+     * @tparam ndiff
+     *  number of minor (left-most) indices to discard
+     * @return
+     *  new NdFormat object where the major part of the shape is retained
+     */
     template <size_t ndiff = 1ul>
     typename std::enable_if<(nind-ndiff>=0), NdFormat<nind-ndiff>>::type
     major_dims() const {
@@ -63,7 +98,13 @@ public:
         std::copy(m_dim_names.cbegin(), m_dim_names.cend()-ndiff, dim_names.begin());
         return {shape, dim_names};
     }
-
+    /**
+     * same as major_dims except the discarded indices are major
+     * @tparam ndiff
+     *  number of major (right-most) indices to discard
+     * @return
+     *  new NdFormat object where the minor part of the shape is retained
+     */
     template <size_t ndiff = 1ul>
     typename std::enable_if<(nind-ndiff>=0), NdFormat<nind-ndiff>>::type
     minor_dims() const {
@@ -90,6 +131,10 @@ public:
         return m_shape;
     }
 
+    /**
+     * @return
+     *  the shape array converted to a vector instance
+     */
     defs::inds shape_vector() const {
         defs::inds tmp;
         tmp.assign(m_shape.cbegin(), m_shape.cend());
@@ -99,20 +144,43 @@ public:
     const std::array<std::string, nind>& dim_names() const {
         return m_dim_names;
     }
+    /**
+     * @return
+     *  the dim_names array converted to a vector instance
+     */
     std::vector<std::string> dim_names_vector() const {
         std::vector<std::string> tmp;
         tmp.assign(m_dim_names.cbegin(), m_dim_names.cend());
         return tmp;
     }
 
+    /**
+     * NdFormat maps multidimensional indices to a single, contiguous integer index
+     * @param inds
+     *  array of multidimensional indices
+     * @return
+     *  flat index
+     */
     size_t flatten(std::array<size_t, nind> inds) const {
-        size_t iflat = 0ul;
-        for (size_t i=0ul; i < nind; ++i) {
-            ASSERT(inds[i]<m_shape[i]);
-            iflat+= inds[i] * m_strides[i];
-        }
-        return iflat;
+        size_t i = 0ul;
+        for (size_t iind=0ul; iind<nind; ++iind) i+=inds[iind]*m_strides[iind];
+        return i;
     }
+
+    /*
+     * in addition to flattening a single array specifying the element completely, it is possible to flatten
+     * multidimensional indices hierarchically. this is useful when the NdFormat is interpreted as the composition
+     * of multiple multidimensional structures.
+     *
+     * suppose we have a 3-dimensional format which actually represents a 1-dimensional array of matrix indices. we may
+     * want in this case to identify elements first by the matrix containing them, then by the pair of indices within
+     * the identified matrix.
+     *
+     * This amounts to splitting up the inner product defining the flattening map into two parts
+     */
+    // TODO hierarchical flattening
+
+
 
     template<size_t nminor>
     size_t flatten(std::array<size_t, nind - nminor> major, std::array<size_t, nminor> minor) const {
@@ -170,6 +238,9 @@ public:
 
 private:
 
+    /**
+     * helper function to store the strides assuming the m_shape member has already been set
+     */
     void set_strides(){
         if (!nind) return;
         m_strides.back() = 1ul;

@@ -4,11 +4,11 @@
 
 #include "Solver.h"
 
-Solver::Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc) :
+Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs) :
         m_prop(prop),
         m_opts(prop.m_opts),
         m_wf(wf),
-        m_reference(m_opts, m_prop.m_ham, m_wf, 0, ref_loc),
+        m_refs(m_opts, m_prop.m_ham, m_wf, ref_locs),
         m_connection(prop.m_ham.nsite()),
         m_exit("exit"),
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
@@ -71,7 +71,7 @@ void Solver::execute(size_t niter) {
         m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
         loop_over_spawned();
-        m_detsub.make_mev_contribs(m_mevs, m_reference.get_onv());
+        m_detsub.make_mev_contribs(m_mevs, m_refs[0].get_onv());
         m_detsub.project(m_prop.tau());
         m_annihilate_timer.pause();
 
@@ -106,7 +106,7 @@ void Solver::begin_cycle() {
     ASSERT(m_wf.m_nwalker.m_local[0] == 0);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
-    m_reference.begin_cycle();
+    m_refs.begin_cycle();
 
     auto update_epoch = [&](const size_t& ncycle_wait) {
         if (m_opts.replicate) {
@@ -203,7 +203,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                m_reference.contrib_row();
+                m_refs.contrib_row();
                 if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
@@ -253,7 +253,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
                 m_icycle,
                 dst_onv,
                 m_prop.m_ham.get_energy(dst_onv),
-                m_reference.is_connected(dst_onv));
+                m_refs[dst_ipart].is_connected(dst_onv));
         m_wf.set_weight(dst_ipart, delta_weight);
 
     } else {
@@ -442,7 +442,7 @@ void Solver::end_cycle() {
 
     if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();
-    m_reference.end_cycle();
+    m_refs.end_cycle();
     m_prop.update(m_icycle, m_wf);
     if (m_uniform_twf) m_uniform_twf->reduce();
     if (m_weighted_twf) m_weighted_twf->reduce();
@@ -460,8 +460,8 @@ void Solver::output_stats() {
         stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
         stats.m_nwalker_spawned = m_wf.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
-        stats.m_ref_proj_energy_num = m_reference.proj_energy_num();
-        stats.m_ref_weight = m_reference.weight();
+        stats.m_ref_proj_energy_num = m_refs[0].proj_energy_num();
+        stats.m_ref_weight = m_refs[0].weight();
         stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
         stats.m_ref_proj_energy /= stats.m_ref_weight;
         stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced;

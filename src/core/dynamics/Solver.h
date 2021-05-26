@@ -25,7 +25,7 @@ class Solver {
     Propagator &m_prop;
     const Options &m_opts;
     Wavefunction &m_wf;
-    Reference m_reference;
+    References m_refs;
 
     std::unique_ptr<FciqmcStats> m_stats = nullptr;
     std::unique_ptr<ParallelStats> m_parallel_stats = nullptr;
@@ -63,7 +63,9 @@ class Solver {
 
 public:
 
-    Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc);
+    Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs);
+
+    Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc): Solver(prop, wf, std::vector<TableBase::Loc>(wf.npart(), ref_loc)){}
 
     /**
      * Perform niter iterations of the solver
@@ -91,30 +93,6 @@ public:
      */
     void loop_over_occupied_onvs(bool final = false);
 
-//    void loop_over_deterministic_connections() {
-//        if (!m_opts.do_semistochastic || !m_detsub.m_epoch) return;
-//        auto &wf_row = m_wf.m_store.m_row;
-//        auto &local_row = m_detsub.m_local.m_row;
-//        auto &global_row = m_detsub.m_global.m_row;
-//        conn::Antisym<0> conn(m_wf.m_nsite);
-//        for (local_row.restart(); local_row.in_range(); local_row.step()) {
-//            auto lookup = *m_wf.m_store[local_row.m_onv];
-//            ASSERT(lookup != ~0ul);
-//            wf_row.jump(lookup);
-//            const auto &global_inds = m_detsub.m_conns.row(local_row.m_i);
-//            for (auto global_ind: global_inds) {
-//                global_row.jump(global_ind);
-//                conn.connect(local_row.m_onv, global_row.m_onv);
-//                ASSERT(conn.nexcit() > 0 && conn.nexcit() < 3);
-//                defs::wf_t helem = m_prop.m_ham.get_element(conn);
-//                for (size_t ipart = 0ul; ipart < m_wf.npart(); ++ipart) {
-//                    defs::wf_t delta = -helem * m_prop.tau() * wf_row.m_weight[ipart];
-//                    m_wf.add_spawn(global_row.m_onv, delta, wf_row.m_initiator.get(ipart), true, ipart);
-//                }
-//            }
-//        }
-//    }
-
     void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
                         bool allow_initiation, bool src_deterministic, const size_t &irow_store);
 
@@ -137,19 +115,21 @@ public:
         ASSERT(ncycle_occ);
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
+            auto& ref = m_refs[ipart];
+            auto& ref_onv = ref.get_onv();
             auto ipart_replica = m_wf.ipart_replica(ipart);
             double duplication_fac = (ipart_replica == ipart) ? 1.0 : 0.5;
             m_mevs.m_fermion_rdm->make_contribs(
                     row.m_onv, duplication_fac * row.m_average_weight[ipart],
                     row.m_onv, row.m_average_weight[ipart_replica] / ncycle_occ);
             if (m_mevs.m_explicit_hf_conns) {
-                if (row.m_reference_connection.get(ipart) && (m_reference.get_onv() != row.m_onv)) {
+                if (row.m_reference_connection.get(ipart) && (ref.get_onv() != row.m_onv)) {
                     m_mevs.m_fermion_rdm->make_contribs(
-                            m_reference.get_onv(), m_reference.average_weight()[ipart],
+                            ref_onv, ref.average_weight()[ipart],
                             row.m_onv, row.m_average_weight[ipart_replica] / ncycle_occ);
                     m_mevs.m_fermion_rdm->make_contribs(
                             row.m_onv, row.m_average_weight[ipart] / ncycle_occ,
-                            m_reference.get_onv(), m_reference.average_weight()[ipart_replica]);
+                            ref_onv, ref.average_weight()[ipart_replica]);
                 }
             }
         }
@@ -162,7 +142,7 @@ public:
         // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
         if (!m_mevs.m_accum_epoch) return;
         if (m_mevs.m_explicit_hf_conns) {
-            if (src_onv == m_reference.get_onv() || m_wf.m_store.m_row.m_onv == m_reference.get_onv()) return;
+            if (src_onv == m_refs[dst_ipart].get_onv() || m_wf.m_store.m_row.m_onv == m_refs[dst_ipart].get_onv()) return;
         }
         auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
         double duplication_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;

@@ -180,9 +180,9 @@ struct Communicator {
     struct DynamicRowSet : RankDynamic, RowProtector {
         typedef RankAllocator<store_row_t> ra_t;
         /**
-         * the mapped table which stores the definitive row values
+         * the communicator whose m_store member stores the definitive row values
          */
-        const MappedTable<store_row_t> &m_source;
+        const Communicator &m_source;
         /**
          * set of dynamic row indices stored on this rank
          */
@@ -211,7 +211,7 @@ struct Communicator {
         DynamicRowSet(const Communicator &comm, std::string name) :
                 RankDynamic(comm.m_ra),
                 RowProtector(comm.m_store),
-                m_source(comm.m_store),
+                m_source(comm),
                 m_counts(mpi::nrank(), 0ul),
                 m_displs(mpi::nrank(), 0ul),
                 m_name(name),
@@ -232,8 +232,13 @@ struct Communicator {
             return mpi::all_sum(nrow_());
         }
 
+        void clear() {
+            for (const auto& irow: m_irows) RowProtector::release(irow);
+            m_irows.clear();
+        }
+
         void add_(size_t irow) {
-            protect(irow);
+            RowProtector::protect(irow);
             m_irows.insert(irow);
         }
 
@@ -337,14 +342,14 @@ struct Communicator {
         using DynamicRowSet::m_counts;
         using DynamicRowSet::m_irows;
         /**
-         * the (mapped) table which loads data from rows of m_source (arbitrary order, non-contiguous) into m_global
+         * the (mapped) table which loads data from rows of m_source.m_store (arbitrary order, non-contiguous) into m_global
          * (contiguous).
          */
         BufferedTable<contig_row_t> m_local;
         /**
          * the table which holds data extracted from all tracked rows in the dynamic set. these rows copies are refreshed
          * with a call to update method. This table is intended for reading data from all MPI ranks, as such there is no
-         * mechanism for committing changes to m_source from m_global. It is to be treated as a read-only view of data
+         * mechanism for committing changes to m_source.m_store from m_global. It is to be treated as a read-only view of data
          * stored across all ranks.
          */
         BufferedTable<contig_row_t> m_global;
@@ -422,6 +427,7 @@ struct Communicator {
         using DynamicRowSet::m_ra;
         using DynamicRowSet::m_source;
         using DynamicRowSet::m_irows;
+        using DynamicRowSet::clear;
         using DynamicRowSet::add_;
         using DynamicRowSet::nrow_;
         using DynamicRowSet::nrow;
@@ -430,17 +436,22 @@ struct Communicator {
         using DynamicRowSet::m_ranks_with_any_rows;
         using SharedRowSet::m_global;
 
-        size_t m_iblock;
+        size_t m_iblock_ra;
 
         SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
                 SharedRowSet(comm, name) {
+            redefine(loc);
+        }
+
+        void redefine(TableBase::Loc newloc) {
+            clear();
             m_global.m_row.restart();
-            if (loc.is_mine()) {
-                add_(loc.m_irow);
+            if (newloc.is_mine()) {
+                add_(newloc.m_irow);
                 ASSERT(m_global.m_hwm);
-                m_iblock = comm.m_ra.get_block(m_global.m_row.m_onv);
+                m_iblock_ra = m_source.m_ra.get_block(m_global.m_row.m_onv);
             }
-            mpi::bcast(m_iblock, loc.m_irank);
+            mpi::bcast(m_iblock_ra, newloc.m_irank);
             update();
         }
 
@@ -456,19 +467,10 @@ struct Communicator {
             auto irank_final = irank();
             if (irank_initial == ~0ul)
                 log::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
-                          m_name, m_iblock, this->m_ra.m_nblock, irank_final);
+                          m_name, m_iblock_ra, this->m_ra.m_nblock, irank_final);
             else if (irank_initial != irank_final)
                 log::info("Dynamic row \"{}\" moved from rank {} to rank {}",
                           m_name, irank_initial, irank_final);
-        }
-
-        void change(TableBase::Loc loc) {
-            m_irows.clear();
-            if (loc.is_mine()) {
-                ASSERT(m_ra.get_rank_by_irow(loc.m_irow) == mpi::irank());
-                m_irows = {loc.m_irow};
-            }
-            SharedRow::update();
         }
 
         bool is_mine() const {

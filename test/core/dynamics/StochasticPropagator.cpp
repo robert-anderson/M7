@@ -192,6 +192,7 @@ TEST(StochasticPropagator, BosonTest) {
     opts.ncycle = 5000;
     opts.rdm_rank = 0;
     opts.replicate = false;
+    opts.reference_redefinition_thresh = 2.0;
     //opts.spf_uniform_twf = true;
     //opts.write_hdf5_fname = "test_wf_save.h5";
     //opts.read_hdf5_fname = "test_wf_save.h5";

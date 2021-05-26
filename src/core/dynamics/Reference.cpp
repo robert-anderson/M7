@@ -15,6 +15,34 @@ Reference::Reference(const Options &m_opts, const Hamiltonian<> &ham,
     ASSERT(wf.m_store.is_protected());
 }
 
+const fields::Onv<> &Reference::get_onv() const {
+    return m_global.m_row.m_onv;
+}
+
+void Reference::update_ref_conn_flags() {
+    auto row = m_wf.m_store.m_row;
+    for (row.restart(); row.in_range(); row.step()){
+        if (row.m_onv.is_zero()) continue;
+        row.m_reference_connection.put(m_ipart, is_connected(row.m_onv));
+    }
+}
+
+void Reference::accept_candidate(double redefinition_thresh) {
+    std::vector<defs::wf_t> gather(mpi::nrank());
+    mpi::all_gather(m_candidate_abs_weight, gather);
+    MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
+    size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
+    mpi::bcast(m_irow_candidate, irank);
+    auto current_weight = weight()[m_ipart];
+    if (gather[irank] > std::abs(current_weight*redefinition_thresh)){
+        log::debug("Changing the reference ONV to {} for WF part {}. current weight: {}, "
+                   "candidate weight: {}", get_onv().to_string(), m_ipart, current_weight, gather[irank]);
+        redefine({irank, m_irow_candidate});
+        m_candidate_abs_weight = 0.0;
+        update_ref_conn_flags();
+    }
+}
+
 void Reference::contrib_row() {
     auto &row = m_wf.m_store.m_row;
     auto weight = row.m_weight[m_ipart];
@@ -23,44 +51,9 @@ void Reference::contrib_row() {
         m_irow_candidate = row.m_i;
     }
     if (row.m_reference_connection.get(m_ipart)) {
-        add_to_numerator(row.m_onv, row.m_weight);
+        make_numerator_contribs(row.m_onv, row.m_weight);
     }
 }
-
-#if 0
-void Reference::change(const size_t &irow, const size_t &irank) {
-    ASSERT(irank<mpi::nrank())
-    ASSERT(irow!=~0ul || !mpi::i_am(irank))
-    if (mpi::i_am(irank)){
-        *this = m_wf.m_walkers.m_onv(irow);
-    }
-    /*
-     * send this new reference definition to all MPI ranks
-     */
-    mpi_bcast(irank);
-    /*
-     * check that the storage of the new reference is consistent with dynamic
-     * rank allocation
-     */
-    ASSERT(m_wf.m_ra.get_rank(*this)==irank)
-    /*
-     * the next cycle will re-evaluate the reference connection flag in the
-     * Wavefunction object's m_walker_list member
-     */
-    m_redefinition_cycle = true;
-    std::cout << "Reference ONV " << to_string() << " stored on MPI rank " << irank << std::endl;
-    m_irank = irank;
-    m_irow_wf = irow;
-}
-
-void Reference::log_candidate_weight(const size_t &irow, const defs::wf_comp_t &candidate_weight) {
-    if (irow==m_irow_wf && mpi::i_am(m_irank)) return;
-    if (candidate_weight>m_candidate_abs_weight(0, 0)){
-        m_candidate_abs_weight(0, 0) = candidate_weight;
-        m_irow_candidate = irow;
-    }
-}
-#endif
 
 void Reference::begin_cycle() {
     m_summables.zero_all_local();
@@ -68,30 +61,16 @@ void Reference::begin_cycle() {
 }
 
 void Reference::end_cycle() {
-#if 0
-    if (in_redefinition_cycle()) m_redefinition_cycle = false;
-    m_candidate_abs_weight.all_maxloc();
-    m_weight.bcast(m_irank);
-    if (m_candidate_abs_weight.reduced(0, 0)/std::abs(m_weight(0, 0)) > m_redefinition_thresh) {
-        if (mpi::i_am(m_candidate_abs_weight.rank_index(0, 0))){
-        }
-        change(m_irow_candidate, m_candidate_abs_weight.rank_index(0, 0));
-    }
-#endif
+    accept_candidate(m_redefinition_thresh);
     m_summables.all_sum();
 }
 
-/*
-const bool &Reference::in_redefinition_cycle() {
-    return m_redefinition_cycle;
-}*/
-
 bool Reference::is_connected(const fields::Onv<> &onv) const {
     m_aconn.connect(get_onv(), onv);
-    return m_aconn.connected();
+    return !consts::float_is_zero(m_ham.get_element(m_aconn));
 }
 
-void Reference::add_to_numerator(const fields::Onv<> &onv, const fields::Numbers<defs::ham_t, defs::ndim_wf>& weights) {
+void Reference::make_numerator_contribs(const fields::Onv<> &onv, const fields::Numbers<defs::ham_t, defs::ndim_wf>& weights) {
     m_aconn.connect(get_onv(), onv);
     m_proj_energy_num.m_local.add_scaled(m_ham.get_element(m_aconn), weights);
     m_nwalker_at_doubles.m_local.add_abs(weights);
@@ -99,11 +78,6 @@ void Reference::add_to_numerator(const fields::Onv<> &onv, const fields::Numbers
 
 NdReduction<defs::wf_comp_t, defs::ndim_wf> &Reference::nwalker_at_doubles() {
     return m_nwalker_at_doubles;
-}
-
-void Reference::update() {
-    //accept_candidate(m_redefinition_thresh);
-    Wavefunction::SharedRow::update();
 }
 
 const fields::Numbers<defs::ham_t, defs::ndim_wf>& Reference::proj_energy_num() const {
