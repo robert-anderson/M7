@@ -166,13 +166,19 @@ void Solver::loop_over_occupied_onvs(bool final) {
              * ONV has become unoccupied in all parts and must be removed from mapped list
              * it must first make all associated averaged contributions to MEVs
              */
-            make_average_weight_mev_contribs();
+            //make_average_weight_mev_contribs();
             m_wf.remove_row();
             continue;
         }
-        if (m_mevs.is_period_cycle(m_icycle) || (m_mevs.m_accum_epoch && final)) {
-            make_average_weight_mev_contribs();
-        }
+
+        if (m_mevs.m_accum_epoch)
+            m_mevs.m_fermion_rdm->make_contribs(
+                row.m_onv, row.m_weight[0],
+                row.m_onv, row.m_weight[0]);
+
+//        if (m_mevs.is_period_cycle(m_icycle) || (m_mevs.m_accum_epoch && final)) {
+//            make_average_weight_mev_contribs();
+//        }
 
         /*
          * if the accumulation of MEVs has just started, treat the row as though it just became
@@ -184,7 +190,6 @@ void Solver::loop_over_occupied_onvs(bool final) {
         if (defs::enable_mevs && m_mevs.m_accum_epoch) {
             row.m_average_weight += row.m_weight;
         }
-
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
 

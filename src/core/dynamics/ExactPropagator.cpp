@@ -6,9 +6,13 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
+ExactPropagator::ExactPropagator(const Hamiltonian<> &ham, const Options &opts,
+                                 const NdFormat<defs::ndim_wf>& wf_fmt, bool only_nonzero_h_spawns) :
+                                 Propagator(opts, ham, wf_fmt), m_only_nonzero_h_spawns(only_nonzero_h_spawns) {}
+
 void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const auto &row = wf.m_store.m_row;
-    auto src_onv = row.m_onv;
+    auto& src_onv = row.m_onv;
     const defs::wf_t &weight = row.m_weight[ipart];
     bool src_initiator = row.m_initiator.get(ipart);
     OccupiedOrbitals occs(src_onv);
@@ -19,11 +23,10 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     ASSERT(!consts::float_is_zero(weight));
 
     auto body = [&](const conn::Antisym<0> &conn, const fields::Onv<>& dst_onv, const defs::ham_t &helement){
-        auto delta = -weight * tau() * helement;
-        if (consts::float_is_zero(delta)) return;
+        const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
     };
-    m_ham.foreach_connection(src_onv, body, true, true, false);
+    m_ham.foreach_connection(src_onv, body, true, m_only_nonzero_h_spawns, false);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
@@ -36,6 +39,3 @@ void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
 bool ExactPropagator::is_exact() const {
     return true;
 }
-
-ExactPropagator::ExactPropagator(const Hamiltonian<> &ham, const Options &opts,
-                                 const NdFormat<defs::ndim_wf> wf_fmt) : Propagator(opts, ham, wf_fmt) {}

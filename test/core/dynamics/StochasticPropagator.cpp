@@ -14,7 +14,7 @@ TEST(StochasticPropagator, Test) {
     opts.nwalker_initial = 100;
     opts.nadd_initiator = 3.0;
     opts.tau_initial = 0.05;
-    opts.nwalker_target = 10000;
+    opts.nwalker_target = 50000;
     opts.rdm_rank = 2;
     opts.replicate = true;
     opts.write_hdf5_fname = "rdm.h5";
@@ -26,17 +26,14 @@ TEST(StochasticPropagator, Test) {
     opts.explicit_hf_conn_mevs = true;
     opts.output_mevs_periodically = true;
     opts.do_semistochastic = true;
-    opts.ncycle_wait_mevs = 2200;
-    opts.ncycle_wait_detsub = 2400;
+    opts.ncycle_wait_mevs = 100;
+    opts.ncycle_wait_detsub = 10;
     opts.init();
 
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
-    for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        ref_onv.set({0, i});
-        ref_onv.set({1, i});
-    }
+    ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
     StochasticPropagator prop(ham, opts, wf.m_format);
@@ -73,10 +70,7 @@ TEST(StochasticPropagator, RdmTest) {
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FermionOnv ref_onv(ham.nsite());
-    for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        ref_onv.set({0, i});
-        ref_onv.set({1, i});
-    }
+    ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
     ASSERT_EQ(wf.npart(), 2);

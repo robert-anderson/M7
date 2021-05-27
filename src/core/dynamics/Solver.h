@@ -137,8 +137,7 @@ public:
         row.m_icycle_occ = m_icycle;
     }
 
-    void
-    make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs::wf_t &src_weight, const size_t &dst_ipart) {
+    void make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs::wf_t &src_weight, const size_t &dst_ipart) {
         // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
         if (!m_mevs.m_accum_epoch) return;
         if (m_mevs.m_explicit_hf_conns) {
@@ -213,6 +212,7 @@ public:
         if (m_mevs.m_fermion_rdm) {
             hdf5::GroupWriter gw2("rdm", gw);
             m_mevs.m_fermion_rdm->h5_write(gw2);
+            std::cout << m_mevs.m_fermion_rdm->get_energy(m_prop.m_ham) - m_prop.m_shift.m_values[0] << std::endl;
         }
     }
 

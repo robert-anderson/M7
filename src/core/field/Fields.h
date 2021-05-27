@@ -90,8 +90,53 @@ namespace fields {
             return *this;
         }
 
+        /**
+         * The RDM entry keys represent the ascending-ordered sector of the normal-ordered pure expectation values,
+         * the full spin-resolved RDM can be constructed from this via permutations of the indices.
+         * @return
+         *  true if the SQ creation and annihilation operator index vectors are properly ordered
+         */
         bool is_ordered() const {
             return m_ann.is_ordered(false, true) && m_cre.is_ordered(false, true);
+        }
+
+        /**
+         * all elements of the RDM have the same rank, but not the same excitation level. If the number of indices in
+         * common between the creation and annihilation operators is zero, the excitation level is the same as the rank
+         * @return
+         *  number of indices in common between ascending ordered creation and annihilation spin orbital operator strings
+         */
+        size_t ncommon_sq_op_ind() const {
+            size_t ncommon = 0ul;
+            size_t icre = 0ul;
+            size_t iann = 0ul;
+            ASSERT(is_ordered());
+            while(icre<m_cre.nelement() && iann<m_ann.nelement()){
+                if (m_cre[icre]>m_ann[iann]) ++icre;
+                else if (m_cre[icre]<m_ann[iann]) ++iann;
+                else {
+                    // common element found
+                    ++ncommon;
+                    ++icre; ++iann;
+                }
+            }
+            return ncommon;
+        }
+
+        void common_sq_op_inds(defs::inds& common) const {
+            common.clear();
+            size_t icre = 0ul;
+            size_t iann = 0ul;
+            ASSERT(is_ordered());
+            while(icre<m_cre.nelement() && iann<m_ann.nelement()){
+                if (m_cre[icre]>m_ann[iann]) ++icre;
+                else if (m_cre[icre]<m_ann[iann]) ++iann;
+                else {
+                    // common element found
+                    common.push_back(m_cre[icre]);
+                    ++icre; ++iann;
+                }
+            }
         }
     };
 

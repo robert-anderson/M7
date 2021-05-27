@@ -5,6 +5,7 @@
 #include <src/core/table/BufferedFields.h>
 #include <src/core/hamiltonian/FermionHamiltonian.h>
 #include <src/core/basis/CiSpaces.h>
+#include <src/core/util/ProgressMonitor.h>
 #include "gtest/gtest.h"
 #include "src/core/sparse/LanczosSolver.h"
 

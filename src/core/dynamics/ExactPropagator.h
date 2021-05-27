@@ -8,6 +8,11 @@
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {
+    /**
+     * sends the generated excitations even if the corresponding hamiltonian matrix element is zero. Useful for testing
+     * rank-2 RDMs since these spawns will make the exact contributions.
+     */
+    const bool m_only_nonzero_h_spawns;
 
     defs::ham_t off_diagonal_bosons(const Hamiltonian<0> &ham, conn::Antisym<0> &conn,
                                     const fields::Onv<0> &src_onv, fields::Onv<0> &dst_onv, const size_t &occ, int change){
@@ -37,7 +42,8 @@ class ExactPropagator : public Propagator {
 
 
 public:
-    ExactPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf> wf_fmt);
+    ExactPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
+                    bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;
 

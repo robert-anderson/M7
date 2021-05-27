@@ -63,27 +63,29 @@ TEST(ExactPropagator, Test) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 100;
-    opts.rdm_rank = 1;
-    opts.replicate = false;
     opts.write_hdf5_fname = "rdm.h5";
-    opts.ncycle_accumulate_mevs = 1500;
+    opts.ncycle_wait_mevs = 4000;
+    opts.ncycle_accumulate_mevs = 8000;
     opts.ncycle_mev_period = 10;
     opts.consolidate_spawns = false;
-    opts.explicit_hf_conn_mevs = true;
+    opts.explicit_hf_conn_mevs = false;
     opts.output_mevs_periodically = true;
+    opts.rdm_rank = 2;
+    opts.replicate = false;
     opts.init();
-    //const auto benchmark = -108.916561245585
+    // -99.9421389039332
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
     ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
-    ExactPropagator prop(ham, opts, wf.m_format);
+    if (!opts.replicate && opts.nroot==1){ASSERT_EQ(wf.npart(), 1);}
+    ExactPropagator prop(ham, opts, wf.m_format, false);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, opts.nwalker_initial);
+    for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.nwalker_initial);
 
     prop.m_shift.m_values = ref_energy;
 

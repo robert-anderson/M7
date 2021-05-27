@@ -173,8 +173,7 @@ size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &d
     return irow;
 }
 
-size_t
-Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic,
+size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic,
                         size_t dst_ipart, const fields::Onv<> &src_onv, const defs::wf_t &src_weight) {
     auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
     auto irank = m_ra.get_rank(dst_onv);

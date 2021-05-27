@@ -34,12 +34,12 @@ struct Table : TableBase {
         std::string tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;
         auto row = m_row;
-        row.restart();
         for (size_t iirow = 0ul; iirow < n; ++iirow) {
             auto irow = ordering ? (*ordering)[iirow] : iirow;
             row.jump(irow);
             tmp += std::to_string(irow) + ". " + row.to_string() + "\n";
         }
+        ASSERT(m_row.in_range());
         return tmp;
     }
 

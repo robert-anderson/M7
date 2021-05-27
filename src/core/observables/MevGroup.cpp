@@ -9,16 +9,18 @@ FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
         m_ncomb(integer_utils::combinatorial(ncom, nop_insert)),
         m_all_combs(nop_insert * m_ncomb) {
     if (!nop_insert) return;
-    CombinationEnumerator ce(ncom, nop_insert);
-    defs::inds comb(nop_insert);
-    size_t icomb = ~0ul;
-    while (ce.next(comb, icomb)) {
+
+    foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
+    size_t icomb = 0ul;
+    auto fn = [&](const defs::inds& inds){
         for (size_t i = 0ul; i < nop_insert; ++i) {
             auto j = icomb * nop_insert + i;
             ASSERT(j < m_all_combs.size());
-            m_all_combs[j] = comb[i];
+            m_all_combs[j] = inds[i];
         }
-    }
+        ++icomb;
+    };
+    foreach_comb(fn);
 }
 
 const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
@@ -46,10 +48,8 @@ bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<0> &conn, f
         inds.m_cre[cre_passed + iins] = ins;
     }
     auto phase = (ann_passed + cre_passed) & 1ul;
-    //phase = phase==conn.phase();
 
     // the rest of the promoted connection is the same as the connection
-    // TODO: this with memcpy
     while (ann_passed < conn.nann()) {
         inds.m_ann[ann_passed + m_nop_insert] = conn.ann(ann_passed);
         ++ann_passed;
@@ -107,17 +107,14 @@ void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &s
     const auto& promoter = m_promoters[nins];
     for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
         auto phase = promoter.apply(icomb, conn, m_lookup_inds);
-        //promoter.apply(icomb, conn, m_lookup_inds);
         auto irank_send = m_ra.get_rank(m_lookup_inds);
         ASSERT(m_lookup_inds.is_ordered());
         auto& send_table = send(irank_send);
         size_t irow = *send_table[m_lookup_inds];
-        if (irow == ~0ul) {
-            irow = send_table.insert(m_lookup_inds);
-        }
+        if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
+
         send_table.m_row.jump(irow);
-        auto contrib = src_weight * dst_weight;
-        if (!phase) contrib = -contrib;
+        auto contrib = (phase ? -1.0 : 1.0) * src_weight * dst_weight;
         send_table.m_row.m_values[0] += contrib;
     }
 }

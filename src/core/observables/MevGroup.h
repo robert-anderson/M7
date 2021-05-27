@@ -7,6 +7,7 @@
 
 #include <src/core/io/Options.h>
 #include <src/core/enumerator/CombinationEnumerator.h>
+#include <src/core/hamiltonian/FermionHamiltonian.h>
 #include "src/core/table/Communicator.h"
 #include "AverageCoefficients.h"
 
@@ -14,14 +15,20 @@
 /**
  * given a Connection, iterate over common operators
  *
- * Fermionic and bosonic promotion require sorting of indices,
- * fermionic additionally requires the number of swaps involved in the sort to be
- * recorded in order to compute the phase of the promotion
+ * Fermionic and bosonic promotion require sorting of indices, fermionic additionally requires the number of swaps
+ * involved in the sort to be recorded in order to compute the phase of the promotion
+ *
+ * for a fermion connection of excitation level N contributing to a fermion RDM of rank R (> N), a contribution to the
+ * RDM is due for each of the (N_site-N) choose (R-N) occupied indices in common between the contributing bra and ket.
+ *
+ * elements of the m_cre and m_ann members of both fields::FermionMevInds conn::Antisym<0> alike must be stored in
+ * ascending order. However, whereas the connection arrays must not have any elements in common, the MEV inds in general
+ * do have elements in common, this is brought about by promotion.
  *
  * e.g.
  *     01234 56789
- *    (01101,01011)
- *    (00111,11001)
+ *    (01101,01011)   <- ket determinant
+ *    (00111,11001)   <- bra determinant
  *    ( x   ,   x )
  *    ann: [1, 8]
  *    (   x ,x    )
@@ -33,6 +40,7 @@
  *    promotion to 3-body RDM element:
  *    enumerate common indices i and count number of set indices between i and the beginning of
  *    the string.
+ *
  */
 struct FermionPromoter {
     /**
@@ -163,6 +171,40 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         return {m_store.m_row.m_inds.m_ann.m_name,
                 m_store.m_row.m_inds.m_cre.m_name,
                 m_store.m_row.m_values.m_name};
+    }
+
+    /**
+     * compute the 2-RDM energy
+     * @return
+     *  MPI-reduced sum of 0, 1, and 2 body parts of the RDM energy
+     */
+    defs::ham_comp_t get_energy(const FermionHamiltonian& ham) const {
+        ASSERT(m_ncre==2 && m_nann==2);
+        defs::ham_comp_t e1 = 0.0;
+        defs::ham_comp_t e2 = 0.0;
+        defs::wf_comp_t trace = 0.0;
+        auto row = m_store.m_row;
+        for (row.restart(); row.in_range(); row.step()){
+            const size_t i=row.m_inds.m_cre[0];
+            const size_t j=row.m_inds.m_cre[1];
+            const size_t k=row.m_inds.m_ann[0];
+            const size_t l=row.m_inds.m_ann[1];
+            const auto rdm_element = row.m_values[0];
+            e2 += rdm_element*ham.get_element_2(i, j, k, l);
+            if (i == k) e1 += rdm_element*ham.m_int_1.get(j,l);
+            if (j == l) e1 += rdm_element*ham.m_int_1.get(i,k);
+            if (i == l) e1 -= rdm_element*ham.m_int_1.get(j,k);
+            if (j == k) e1 -= rdm_element*ham.m_int_1.get(i,l);
+            if ((i==k) && (j==l)) {
+                trace+=rdm_element;
+            }
+        }
+        // scale the one-body contribution by the ratio of traces of the one- and two-body RDMs
+        e1 *= 2.0/(ham.nelec()-1);
+        e1 = mpi::all_sum(e1);
+        e2 = mpi::all_sum(e2);
+        auto npair = integer_utils::combinatorial(ham.nelec(), 2);
+        return npair * (e1+e2) / trace + ham.m_int_0;
     }
 };
 
