@@ -174,14 +174,14 @@ size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &d
 }
 
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic,
-                        size_t dst_ipart, const fields::Onv<> &src_onv, const defs::wf_t &src_weight) {
+                        size_t dst_ipart, const fields::Onv<> &src_onv, const defs::wf_t &src_weight, bool phase) {
     auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
     auto irank = m_ra.get_rank(dst_onv);
     auto &row = send(irank).m_row;
     row.jump(irow);
     if (row.m_send_parents) {
         row.m_src_onv = src_onv;
-        row.m_src_weight = src_weight;
+        row.m_src_weight = (phase ? -1.0 : 1.0) * src_weight;
     }
     return irow;
 }

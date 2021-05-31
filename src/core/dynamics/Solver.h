@@ -213,6 +213,8 @@ public:
             hdf5::GroupWriter gw2("rdm", gw);
             m_mevs.m_fermion_rdm->h5_write(gw2);
             std::cout << m_mevs.m_fermion_rdm->get_energy(m_prop.m_ham) - m_prop.m_shift.m_values[0] << std::endl;
+//            std::cout << m_prop.m_shift.m_values[0]+99.9421389039332 << std::endl;
+            //std::cout << m_mevs.m_fermion_rdm->get_energy(m_prop.m_ham) - m_prop.m_shift.m_values[0] << std::endl;
         }
     }
 

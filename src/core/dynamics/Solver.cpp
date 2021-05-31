@@ -126,7 +126,9 @@ void Solver::begin_cycle() {
     };
 
     if (defs::enable_mevs) {
-        m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs));
+        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs))){
+            ASSERT(m_mevs.m_fermion_rdm->m_store.m_hwm == 0);
+        }
     }
 
     if (m_opts.do_semistochastic && !m_detsub.m_epoch){
@@ -397,7 +399,7 @@ void Solver::loop_over_spawned() {
         }
     } else {
         auto &row = m_wf.recv().m_row;
-        if (m_opts.rdm_rank > 0) {
+        if (m_opts.rdm_rank > 0 && m_mevs.m_accum_epoch) {
             /*
              * an additional loop over recvd spawns is required in this case, in order to make the necessary
              * MEV contributions before the new spawns are added to the instantaneous populations
@@ -406,7 +408,9 @@ void Solver::loop_over_spawned() {
                 auto irow_store = *m_wf.m_store[row.m_dst_onv];
                 if (irow_store!=~0ul) {
                     m_wf.m_store.m_row.jump(irow_store);
-                    if (row.m_src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) continue;
+                    if (row.m_src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) {
+                        continue;
+                    }
                     make_instant_mev_contribs(row.m_src_onv, row.m_src_weight, row.m_dst_ipart);
                 }
             }

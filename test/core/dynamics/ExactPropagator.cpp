@@ -61,12 +61,12 @@ TEST(ExactPropagator, Test) {
     Options opts;
     opts.nwalker_initial = 10;
     opts.nadd_initiator = 0.0;
-    opts.tau_initial = 0.05;
-    opts.nwalker_target = 100;
+    opts.tau_initial = 0.01;
+    opts.nwalker_target = 50;
     opts.write_hdf5_fname = "rdm.h5";
     opts.ncycle_wait_mevs = 4000;
-    opts.ncycle_accumulate_mevs = 8000;
-    opts.ncycle_mev_period = 10;
+    opts.ncycle_accumulate_mevs = 1;
+    opts.ncycle_mev_period = 1;
     opts.consolidate_spawns = false;
     opts.explicit_hf_conn_mevs = false;
     opts.output_mevs_periodically = true;
@@ -81,7 +81,7 @@ TEST(ExactPropagator, Test) {
 
     Wavefunction wf(opts, ham.nsite());
     if (!opts.replicate && opts.nroot==1){ASSERT_EQ(wf.npart(), 1);}
-    ExactPropagator prop(ham, opts, wf.m_format, false);
+    ExactPropagator prop(ham, opts, wf.m_format, true);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);

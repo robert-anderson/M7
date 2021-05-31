@@ -86,7 +86,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
             }
         }
         wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic,
-                     ipart, src_onv, rdm_unbias_factor*weight);
+                     ipart, src_onv, rdm_unbias_factor*weight, m_aconn.phase());
     }
 }
 

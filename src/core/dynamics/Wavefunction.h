@@ -231,7 +231,7 @@ public:
 
     size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart,
-                     const fields::Onv<> &src_onv, const defs::wf_t &src_weight);
+                     const fields::Onv<> &src_onv, const defs::wf_t &src_weight, bool phase);
 
     const size_t& npart(){
         return m_format.nelement();

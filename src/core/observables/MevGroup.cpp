@@ -107,6 +107,13 @@ void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &s
     const auto& promoter = m_promoters[nins];
     for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
         auto phase = promoter.apply(icomb, conn, m_lookup_inds);
+        if (!exlvl || !nins) {ASSERT(!phase);}
+        else {
+            if (m_lookup_inds.m_ann[0]==m_lookup_inds.m_cre[0]) ASSERT(!phase);
+            if (m_lookup_inds.m_ann[0]==m_lookup_inds.m_cre[1]) ASSERT(phase);
+            if (m_lookup_inds.m_ann[1]==m_lookup_inds.m_cre[0]) ASSERT(phase);
+            if (m_lookup_inds.m_ann[1]==m_lookup_inds.m_cre[1]) ASSERT(!phase);
+        }
         auto irank_send = m_ra.get_rank(m_lookup_inds);
         ASSERT(m_lookup_inds.is_ordered());
         auto& send_table = send(irank_send);

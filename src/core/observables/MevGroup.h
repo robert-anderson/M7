@@ -177,6 +177,10 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
      * compute the 2-RDM energy
      * @return
      *  MPI-reduced sum of 0, 1, and 2 body parts of the RDM energy
+     *
+     *  E_RDM = h0 + h1[i,j] * rdm1[i,j] + <ij|kl> * rdm2[i,j,k,l]
+     *
+     *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
     defs::ham_comp_t get_energy(const FermionHamiltonian& ham) const {
         ASSERT(m_ncre==2 && m_nann==2);
@@ -184,27 +188,33 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         defs::ham_comp_t e2 = 0.0;
         defs::wf_comp_t trace = 0.0;
         auto row = m_store.m_row;
+
         for (row.restart(); row.in_range(); row.step()){
             const size_t i=row.m_inds.m_cre[0];
             const size_t j=row.m_inds.m_cre[1];
+            ASSERT(i<j);
             const size_t k=row.m_inds.m_ann[0];
             const size_t l=row.m_inds.m_ann[1];
+            ASSERT(k<l);
             const auto rdm_element = row.m_values[0];
             e2 += rdm_element*ham.get_element_2(i, j, k, l);
-            if (i == k) e1 += rdm_element*ham.m_int_1.get(j,l);
-            if (j == l) e1 += rdm_element*ham.m_int_1.get(i,k);
-            if (i == l) e1 -= rdm_element*ham.m_int_1.get(j,k);
-            if (j == k) e1 -= rdm_element*ham.m_int_1.get(i,l);
-            if ((i==k) && (j==l)) {
-                trace+=rdm_element;
-            }
+            /*
+             * signs of the following contributions come from the Fermi phase of bringing the like-valued creation and
+             * annihilation operators together to act on the ket, leading to a factor of (nelec - 1), accounted for
+             * after the loop.
+             */
+            if (i == k) e1 += rdm_element*ham.m_int_1(j,l);
+            if (j == l) e1 += rdm_element*ham.m_int_1(i,k);
+            if (i == l) e1 -= rdm_element*ham.m_int_1(j,k);
+            if (j == k) e1 -= rdm_element*ham.m_int_1(i,l);
+            if ((i==k) && (j==l)) trace+=rdm_element;
         }
-        // scale the one-body contribution by the ratio of traces of the one- and two-body RDMs
-        e1 *= 2.0/(ham.nelec()-1);
+        // scale the one-body contribution by the number of two-body contributions
+        e1 /= ham.nelec()-1;
         e1 = mpi::all_sum(e1);
         e2 = mpi::all_sum(e2);
-        auto npair = integer_utils::combinatorial(ham.nelec(), 2);
-        return npair * (e1+e2) / trace + ham.m_int_0;
+        const auto norm = trace / integer_utils::combinatorial(ham.nelec(), 2);
+        return ham.m_int_0 + (e1 + e2)/norm;
     }
 };
 
