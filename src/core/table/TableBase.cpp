@@ -86,17 +86,16 @@ size_t TableBase::bw_dsize() const {
 void TableBase::resize(size_t nrow) {
     assert(nrow > m_nrow);
     m_bw.resize(nrow * m_row_dsize);
+    for(const auto &rp : m_row_protectors) rp->on_resize(nrow);
     m_nrow = nrow;
 }
 
 void TableBase::expand(size_t nrow) {
-    m_bw.expand(nrow * m_row_dsize);
-    m_nrow = m_bw.dsize()/m_row_dsize;
+    resize(m_nrow + nrow);
 }
 
 void TableBase::expand(size_t nrow, double expansion_factor) {
-    m_bw.expand(nrow * m_row_dsize, expansion_factor);
-    m_nrow = m_bw.dsize()/m_row_dsize;
+    resize((m_nrow + nrow)*(1+expansion_factor));
 }
 
 void TableBase::erase_rows(const defs::inds &irows) {
