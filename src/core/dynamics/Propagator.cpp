@@ -21,6 +21,7 @@ const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
     return m_values[ipart];
 }
 
+
 void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
 
@@ -61,17 +62,16 @@ void Shift::evaluate_reweighting(const size_t& ipart, const size_t
     if (!m_reweighting_active[ipart]) return;
     ASSERT(m_variable_mode[ipart] && m_reweighting_active[ipart])
 
-    // TODO: make const_shift general (i.e. not = shift_initial)
-    auto this_factor = std::exp(tau * (m_opts.shift_initial - m_values[ipart]));
+    auto this_factor = std::exp(tau * (m_const_shift[ipart] - m_values[ipart]));
     m_reweighting_factors[ipart].push(this_factor);
+    m_total_reweighting[ipart] *= this_factor;
 
     if(m_reweighting_factors.size() == m_opts.ncycle_reweight_lookback){
-        m_total_reweighting[ipart] *= this_factor;
         auto oldest_factor = m_reweighting_factors[ipart].front();
         m_total_reweighting[ipart] /= oldest_factor;
         m_reweighting_factors[ipart].pop();
     }
-    // else we're still filling. Leave the total weight at 1.0
+    // else we're still filling.
     ASSERT(m_reweighting_factors.size() <= m_opts.ncycle_reweight_lookback)
 }
 

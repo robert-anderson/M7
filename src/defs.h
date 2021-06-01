@@ -17,7 +17,7 @@
 #include "src/core/util/consts.h"
 
 #ifndef NDEBUG
-#ifdef VERBOSE
+#ifdef M7_VERBOSE
 #define VERBOSE_DEBUGGING
 #endif
 #endif
