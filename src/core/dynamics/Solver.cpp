@@ -27,7 +27,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
                     "Attempting an exact-propagation estimation of MEVs with replication, the replica population is redundant");
     }
     if (defs::enable_mevs && m_opts.rdm_rank > 0 && !m_opts.replicate && !m_prop.is_exact()) {
-        log::warn("Attemping a stochastic estimation of MEVs without replication, this is biased");
+        log::warn("Attempting a stochastic estimation of MEVs without replication, this is biased");
     }
 
     if (mpi::i_am_root())
@@ -38,7 +38,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
     m_wf.m_ra.activate(m_icycle);
 }
 
-void Solver::execute(size_t niter) {
+void Solver::execute(size_t ncycle) {
 
     if (!m_opts.read_hdf5_fname.empty()) {
         hdf5::FileReader fr(m_opts.read_hdf5_fname);
@@ -52,7 +52,7 @@ void Solver::execute(size_t niter) {
         }
     }
 
-    for (size_t i = 0ul; i < niter; ++i) {
+    for (size_t i = 0ul; i < ncycle; ++i) {
         m_cycle_timer.reset();
         m_cycle_timer.unpause();
         begin_cycle();
@@ -86,7 +86,12 @@ void Solver::execute(size_t niter) {
             if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
         }
     }
-    loop_over_occupied_onvs(true);
+
+    if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+        // repeat the last cycle but do not perform any propagation
+        --m_icycle;
+        finalizing_loop_over_occupied_onvs();;
+    }
 
     if (!m_opts.write_hdf5_fname.empty()) {
         hdf5::FileWriter fw(m_opts.write_hdf5_fname);
@@ -108,7 +113,7 @@ void Solver::begin_cycle() {
     m_propagate_timer.reset();
     m_refs.begin_cycle();
 
-    auto update_epoch = [&](const size_t& ncycle_wait) {
+    auto update_epoch = [&](const size_t &ncycle_wait) {
         if (m_opts.replicate) {
             if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
                 auto max_start = std::max(
@@ -126,12 +131,12 @@ void Solver::begin_cycle() {
     };
 
     if (defs::enable_mevs) {
-        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs))){
+        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs))) {
             ASSERT(m_mevs.m_fermion_rdm->m_store.m_hwm == 0);
         }
     }
 
-    if (m_opts.do_semistochastic && !m_detsub.m_epoch){
+    if (m_opts.do_semistochastic && !m_detsub.m_epoch) {
         auto init = m_detsub.m_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_detsub));
         if (init) {
             m_detsub.build_from_all_occupied(m_prop.m_ham);
@@ -141,7 +146,7 @@ void Solver::begin_cycle() {
     }
 }
 
-void Solver::loop_over_occupied_onvs(bool final) {
+void Solver::loop_over_occupied_onvs() {
     /*
      * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
      *      ascertain the initiator status of the ONV
@@ -158,39 +163,43 @@ void Solver::loop_over_occupied_onvs(bool final) {
          * stats always refer to the state of the wavefunction in the previous iteration
          */
 
-        /*
-         * this is a free row, caused by an earlier call to m_wf.remove_row()
-         */
-        if (row.m_onv.is_zero()) continue;
+        if (row.m_onv.is_zero())
+            /*
+             * this is a free row, caused by an earlier call to m_wf.remove_row()
+             */
+            continue;
+
 
         if (row.m_weight.is_zero() && !row.is_protected()) {
             /*
-             * ONV has become unoccupied in all parts and must be removed from mapped list
-             * it must first make all associated averaged contributions to MEVs
+             * ONV has become unoccupied in all parts and must be removed from mapped list, but it must first make all
+             * associated averaged contributions to MEVs
              */
-            //make_average_weight_mev_contribs();
+            make_average_weight_mev_contribs(m_icycle);
             m_wf.remove_row();
             continue;
         }
 
-        if (m_mevs.m_accum_epoch)
-            m_mevs.m_fermion_rdm->make_contribs(
-                row.m_onv, row.m_weight[0],
-                row.m_onv, row.m_weight[0]);
-
-//        if (m_mevs.is_period_cycle(m_icycle) || (m_mevs.m_accum_epoch && final)) {
-//            make_average_weight_mev_contribs();
-//        }
-
         /*
-         * if the accumulation of MEVs has just started, treat the row as though it just became
-         * occupied on this MC cycle
+         * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
+         * loop of the last MC cycle.
          */
-        if (defs::enable_mevs && m_mevs.m_accum_epoch.started_this_cycle(m_icycle))
-            row.m_icycle_occ = m_icycle;
+        if (defs::enable_mevs && m_mevs.m_accum_epoch.started_this_cycle(m_icycle)) {
+            ASSERT(m_mevs.m_accum_epoch);
+            row.m_icycle_occ = m_icycle-1;
+            row.m_average_weight = 0;
+        }
 
         if (defs::enable_mevs && m_mevs.m_accum_epoch) {
             row.m_average_weight += row.m_weight;
+        }
+
+        if (m_mevs.is_period_cycle(m_icycle)) {
+            /*
+             * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
+             * which need to be included in the average
+             */
+            make_average_weight_mev_contribs(m_icycle);
         }
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
@@ -222,7 +231,7 @@ void Solver::loop_over_occupied_onvs(bool final) {
                 m_spawning_timer.reset();
                 m_spawning_timer.unpause();
             }
-            if (!final) propagate_row(ipart);
+            propagate_row(ipart);
             if (m_wf.m_ra.is_active()) {
                 m_spawning_timer.pause();
                 m_wf.m_ra.record_work_time(row, m_spawning_timer);
@@ -235,9 +244,18 @@ void Solver::loop_over_occupied_onvs(bool final) {
     m_synchronization_timer.pause();
 }
 
+void Solver::finalizing_loop_over_occupied_onvs() {
+    if (!m_mevs.m_accum_epoch) return;
+    auto &row = m_wf.m_store.m_row;
+    for (row.restart(); row.in_range(); row.step()) {
+        if (!row.m_onv.is_zero()) make_average_weight_mev_contribs(m_icycle);
+    }
+    if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
+}
+
 void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
                             bool allow_initiation, bool src_deterministic, const size_t &irow_store) {
-    if (m_opts.nadd_initiator==0.0) ASSERT(allow_initiation);
+    if (m_opts.nadd_initiator == 0.0) ASSERT(allow_initiation);
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
@@ -256,11 +274,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
             return;
         }
 
-        m_wf.create_row(
-                m_icycle,
-                dst_onv,
-                m_prop.m_ham.get_energy(dst_onv),
-                m_refs[dst_ipart].is_connected(dst_onv));
+        m_wf.create_row(m_icycle, dst_onv,m_prop.m_ham.get_energy(dst_onv), m_refs.is_connected(dst_onv));
         m_wf.set_weight(dst_ipart, delta_weight);
 
     } else {
@@ -272,6 +286,84 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
             && ((weight_before > 0) != (weight_after > 0)))
             m_wf.m_nannihilated.m_local[dst_ipart] += std::abs(std::abs(weight_before) - std::abs(weight_after));
         m_wf.change_weight(dst_ipart, delta_weight);
+    }
+}
+
+void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
+    if (!defs::enable_mevs) return;
+    if (!m_mevs.m_accum_epoch) return;
+    auto &row = m_wf.m_store.m_row;
+    // the current cycle should be included in the denominator
+    auto ncycle_occ = row.occupied_ncycle(icycle);
+    if (!ncycle_occ) {
+        ASSERT(row.m_average_weight.is_zero());
+        return;
+    }
+    for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
+        auto& ref = m_refs[ipart];
+        auto& ref_onv = ref.get_onv();
+        auto ipart_replica = m_wf.ipart_replica(ipart);
+        /*
+         * if contributions are coming from two replicas, we should take the mean
+         */
+        double dupl_fac = (ipart_replica == ipart) ? 1.0 : 0.5;
+        /*
+         * the "average" weights actually refer to the unnormalized average. The averages are obtained by dividing
+         * each by the number of cycles for which the row is occupied.
+         */
+        const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
+        const auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;
+        /*
+         * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
+         * single averaged contribution (ncycle_occ)
+         */
+        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac*ncycle_occ*av_weight, row.m_onv, av_weight_rep);
+        if (m_mevs.m_explicit_hf_conns) {
+            //ASSERT(row.m_reference_connection.get(0) == row.m_reference_connection.get(1));
+            if (row.m_reference_connection.get(0) && !ref.is_same(row)) {
+                const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
+                const auto av_weight_ref_rep = ref.norm_average_weight(icycle, ipart_replica);
+                m_mevs.m_fermion_rdm->make_contribs(ref_onv, dupl_fac*ncycle_occ*av_weight_ref,
+                                                    row.m_onv, av_weight_rep);
+                m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac*ncycle_occ*av_weight,
+                                                    ref_onv, av_weight_ref_rep);
+            }
+        }
+    }
+    row.m_average_weight = 0;
+    row.m_icycle_occ = icycle;
+}
+
+
+void Solver::make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs::wf_t &src_weight,
+                                       const size_t &dst_ipart) {
+    // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
+    if (!m_mevs.m_accum_epoch) return;
+    if (m_mevs.m_explicit_hf_conns) {
+        if (src_onv == m_refs[dst_ipart].get_onv() || m_wf.m_store.m_row.m_onv == m_refs[dst_ipart].get_onv()) return;
+    }
+    auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
+    double dupl_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;
+    if (m_mevs.m_fermion_rdm) {
+        /*
+         * We need to be careful of the intermediate state of the walker weights.
+         * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
+         * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to
+         * introduce a second post-annihilation loop over occupied ONVs to apply the diagonal part of the
+         * propagator, so for MEVs, the solution is to reconstitute the value of the walker weight before the
+         * diagonal death/cloning.
+         *
+         * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
+         * Ci -> Ci*(1 - tau (Hii-shift)).
+         * By the time MEV contributions are being made, the death step has already been applied, and so the pre-
+         * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
+         * is just Cdst/(1 - tau (Hii-shift))
+         */
+        auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart_replica];
+        dst_weight_before_death /=
+                1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
+        m_mevs.m_fermion_rdm->make_contribs(src_onv, dupl_fac * src_weight, m_wf.m_store.m_row.m_onv,
+                                            dst_weight_before_death);
     }
 }
 
@@ -406,7 +498,7 @@ void Solver::loop_over_spawned() {
              */
             for (row.restart(); row.in_range(); row.step()) {
                 auto irow_store = *m_wf.m_store[row.m_dst_onv];
-                if (irow_store!=~0ul) {
+                if (irow_store != ~0ul) {
                     m_wf.m_store.m_row.jump(irow_store);
                     if (row.m_src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) {
                         continue;

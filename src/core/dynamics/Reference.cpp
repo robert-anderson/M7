@@ -70,6 +70,11 @@ bool Reference::is_connected(const fields::Onv<> &onv) const {
     return !consts::float_is_zero(m_ham.get_element(m_aconn));
 }
 
+bool Reference::connection_phase(const fields::Onv<> &onv) const {
+    m_aconn.connect(get_onv(), onv);
+    return m_aconn.phase();
+}
+
 void Reference::make_numerator_contribs(const fields::Onv<> &onv, const fields::Numbers<defs::ham_t, defs::ndim_wf>& weights) {
     m_aconn.connect(get_onv(), onv);
     m_proj_energy_num.m_local.add_scaled(m_ham.get_element(m_aconn), weights);
@@ -89,6 +94,6 @@ const fields::Numbers<defs::ham_t, defs::ndim_wf> &Reference::weight() const {
     return m_global.m_row.m_weight;
 }
 
-const fields::Numbers<defs::ham_t, defs::ndim_wf> &Reference::average_weight() const {
-    return m_global.m_row.m_average_weight;
+defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ipart) const {
+    return (m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart])/(m_global.m_row.occupied_ncycle(icycle));
 }

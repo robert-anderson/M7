@@ -121,6 +121,10 @@ void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &s
         if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
 
         send_table.m_row.jump(irow);
+        /*
+         * include the Fermi phase of the excitation
+         */
+        phase = phase==conn.phase();
         auto contrib = (phase ? -1.0 : 1.0) * src_weight * dst_weight;
         send_table.m_row.m_values[0] += contrib;
     }

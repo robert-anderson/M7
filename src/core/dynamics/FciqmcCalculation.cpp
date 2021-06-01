@@ -14,7 +14,7 @@ FciqmcCalculation::FciqmcCalculation(const Options &opts) :
     auto ref_energy = m_ham.get_energy(ref_onv);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};
     if (ref_loc.is_mine()) {
-        m_wf.create_row(0, ref_onv, ref_energy, 1);
+        m_wf.create_row(0, ref_onv, ref_energy, std::vector<bool>(m_wf.npart(), true));
         m_wf.set_weight(0, ref_energy);
     }
     m_prop.m_shift.m_values = ref_energy;

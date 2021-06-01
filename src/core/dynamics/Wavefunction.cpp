@@ -60,10 +60,10 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
     for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
         row_reader.read(iitem);
         conn.connect(ref, row_reader.m_onv);
-        bool ref_conn = conn.connected();
+        bool ref_conn = !consts::float_is_zero(ham.get_element(conn));
         conn.connect(row_reader.m_onv, row_reader.m_onv);
         ASSERT(row_reader.m_weight.nelement()==m_format.nelement());
-        create_row(0ul, row_reader.m_onv, ham.get_element(conn), ref_conn);
+        create_row(0ul, row_reader.m_onv, ham.get_element(conn), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }
 }
@@ -174,14 +174,14 @@ size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &d
 }
 
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic,
-                        size_t dst_ipart, const fields::Onv<> &src_onv, const defs::wf_t &src_weight, bool phase) {
+                        size_t dst_ipart, const fields::Onv<> &src_onv, const defs::wf_t &src_weight) {
     auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
     auto irank = m_ra.get_rank(dst_onv);
     auto &row = send(irank).m_row;
     row.jump(irow);
     if (row.m_send_parents) {
         row.m_src_onv = src_onv;
-        row.m_src_weight = (phase ? -1.0 : 1.0) * src_weight;
+        row.m_src_weight = src_weight;
     }
     return irow;
 }

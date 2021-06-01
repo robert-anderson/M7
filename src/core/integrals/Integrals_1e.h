@@ -74,6 +74,7 @@ public:
         set(inds[0], inds[1], value);
     }
 
+private:
     T get(const size_t &i, const size_t &j) const {
         //auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
         auto iflat = flat_index(i, j);
@@ -85,7 +86,7 @@ public:
         return get(spinorb(ispat, ispin), spinorb(jspat, jspin));
     }
 
-
+public:
     T operator()(const size_t &i, const size_t &j) const {
         /*
          * return the one-body integral between the two SPINORS indexed by i and j

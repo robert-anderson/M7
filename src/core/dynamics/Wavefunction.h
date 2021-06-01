@@ -197,7 +197,8 @@ private:
      * @return
      */
     size_t create_row_(const size_t &icycle, const fields::Onv<> &onv,
-                       const defs::ham_comp_t &hdiag, bool refconn) {
+                       const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
+        ASSERT(refconns.size()==npart());
         ASSERT(mpi::i_am(m_ra.get_rank(onv)));
         if (m_store.is_full()) m_store.expand(1);
         auto irow = m_store.insert(onv);
@@ -205,8 +206,8 @@ private:
         m_store.m_row.jump(irow);
         ASSERT(m_store.m_row.m_onv == onv)
         m_store.m_row.m_hdiag = hdiag;
-        // TODO multidimensional reference
-        m_store.m_row.m_reference_connection.put(0, refconn);
+        for (size_t ipart=0ul; ipart<npart(); ++ipart)
+            m_store.m_row.m_reference_connection.put(ipart, refconns[ipart]);
         if (defs::enable_mevs) {
             m_store.m_row.m_icycle_occ = icycle;
             m_store.m_row.m_average_weight = 0;
@@ -214,16 +215,29 @@ private:
         return irow;
     }
 
+
+    size_t create_row_(const size_t &icycle, const fields::Onv<> &onv,
+                       const defs::ham_comp_t &hdiag, bool refconn) {
+        return create_row_(icycle, onv, hdiag, std::vector<bool>(npart(), refconn));
+    }
+
 public:
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
-    TableBase::Loc create_row(const size_t& icycle, const fields::Onv<> &onv, const defs::ham_comp_t &hdiag, bool refconn) {
+    TableBase::Loc create_row(const size_t& icycle, const fields::Onv<> &onv,
+                              const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
         size_t irank = m_ra.get_rank(onv);
         size_t irow;
-        if (mpi::i_am(irank)) irow = create_row_(icycle, onv, hdiag, refconn);
+        if (mpi::i_am(irank)) irow = create_row_(icycle, onv, hdiag, refconns);
         mpi::bcast(irow, irank);
         return {irank, irow};
+    }
+
+
+    TableBase::Loc create_row(const size_t& icycle, const fields::Onv<> &onv,
+                              const defs::ham_comp_t &hdiag, bool refconn) {
+        return create_row(icycle, onv, hdiag, std::vector<bool>(npart(), refconn));
     }
 
     size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
@@ -231,9 +245,9 @@ public:
 
     size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart,
-                     const fields::Onv<> &src_onv, const defs::wf_t &src_weight, bool phase);
+                     const fields::Onv<> &src_onv, const defs::wf_t &src_weight);
 
-    const size_t& npart(){
+    const size_t& npart() const {
         return m_format.nelement();
     }
 

@@ -65,8 +65,8 @@ TEST(ExactPropagator, Test) {
     opts.nwalker_target = 50;
     opts.write_hdf5_fname = "rdm.h5";
     opts.ncycle_wait_mevs = 4000;
-    opts.ncycle_accumulate_mevs = 1;
-    opts.ncycle_mev_period = 1;
+    opts.ncycle_accumulate_mevs = 200;
+    opts.ncycle_mev_period = 13;
     opts.consolidate_spawns = false;
     opts.explicit_hf_conn_mevs = false;
     opts.output_mevs_periodically = true;
@@ -81,7 +81,7 @@ TEST(ExactPropagator, Test) {
 
     Wavefunction wf(opts, ham.nsite());
     if (!opts.replicate && opts.nroot==1){ASSERT_EQ(wf.npart(), 1);}
-    ExactPropagator prop(ham, opts, wf.m_format, true);
+    ExactPropagator prop(ham, opts, wf.m_format, opts.explicit_hf_conn_mevs);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
@@ -91,6 +91,7 @@ TEST(ExactPropagator, Test) {
 
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
+    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham)-prop.m_shift.m_values[0]<< std::endl;
 }
 
 TEST(ExactPropagator, RdmTest) {

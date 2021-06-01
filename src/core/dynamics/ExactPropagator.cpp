@@ -24,7 +24,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     auto body = [&](const conn::Antisym<0> &conn, const fields::Onv<>& dst_onv, const defs::ham_t &helement){
         const auto delta = -weight * tau() * helement;
-        wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight, conn.phase());
+        wf.add_spawn(dst_onv, delta, src_initiator, false, ipart, src_onv, weight);
     };
     m_ham.foreach_connection(src_onv, body, true, m_only_nonzero_h_spawns, false);
 }

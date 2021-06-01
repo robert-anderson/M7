@@ -213,6 +213,8 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         e1 /= ham.nelec()-1;
         e1 = mpi::all_sum(e1);
         e2 = mpi::all_sum(e2);
+        trace = mpi::all_sum(trace);
+        ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
         const auto norm = trace / integer_utils::combinatorial(ham.nelec(), 2);
         return ham.m_int_0 + (e1 + e2)/norm;
     }

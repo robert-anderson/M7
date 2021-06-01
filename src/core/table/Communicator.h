@@ -478,6 +478,10 @@ struct Communicator {
             ASSERT(m_ranks_with_any_rows[0]==mpi::irank());
             return DynamicRowSet::nrow_();
         }
+
+        bool is_same(const store_row_t& row) const {
+            return is_mine() ? row.m_i == *m_irows.cbegin() : false;
+        }
     };
 
 

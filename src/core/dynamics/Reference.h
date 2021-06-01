@@ -46,6 +46,10 @@ public:
 
     const fields::Onv<>& get_onv() const;
 
+    size_t occupied_ncycle(const size_t& icycle) const {
+        return m_global.m_row.occupied_ncycle(icycle);
+    }
+
     /**
      * Perform a special loop over stored rows of the WF, updating the reference connection flags of each non-zero row.
      */
@@ -83,6 +87,8 @@ public:
      */
     bool is_connected(const fields::Onv<> &onv) const;
 
+    bool connection_phase(const fields::Onv<> &onv) const;
+
     /**
      * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>
      * @param onv
@@ -96,7 +102,16 @@ public:
 
     const fields::Numbers<defs::ham_t, defs::ndim_wf>& weight() const;
 
-    const fields::Numbers<defs::ham_t, defs::ndim_wf>& average_weight() const;
+    /**
+     * this method includes the current weight in the average, bringing the normalized average up to date.
+     * @param icycle
+     *  cycle on which average is being used
+     * @param ipart
+     *  wf part index
+     * @return
+     *  normalized average weight
+     */
+    defs::wf_t norm_average_weight(const size_t& icycle, const size_t& ipart) const;
 
     const WalkerTableRow& row() const {
         return m_global.m_row;
@@ -113,6 +128,7 @@ struct References {
         ASSERT(locs.size()==wf.m_format.nelement());
         m_refs.reserve(wf.m_format.nelement());
         for (size_t ipart=0ul; ipart<wf.m_format.nelement(); ++ipart) m_refs.emplace_back(m_opts, ham, wf, ipart, locs[ipart]);
+        ASSERT(m_refs.size()==wf.npart());
     }
 
     const Reference& operator[](const size_t& ipart) const {
@@ -129,6 +145,14 @@ struct References {
 
     void contrib_row() {
         for (auto& ref: m_refs) ref.contrib_row();
+    }
+
+    std::vector<bool> is_connected(const fields::Onv<>& onv) const {
+        std::vector<bool> out;
+        out.reserve(m_refs.size());
+        for (size_t ipart=0ul; ipart<m_refs.size(); ++ipart)
+            out.push_back(m_refs[ipart].is_connected(onv));
+        return out;
     }
 };
 
