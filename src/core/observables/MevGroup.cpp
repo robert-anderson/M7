@@ -90,7 +90,8 @@ FermionRdm::FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nel
                                 nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
                 },
                 opts.acceptable_load_imbalance),
-        m_nann(nop), m_ncre(nop), m_nelec(nelec), m_lookup_inds(nop), m_conn(nsite) {
+        m_nann(nop), m_ncre(nop), m_nelec(nelec), m_lookup_inds(nop),
+        m_conn(nsite), m_mixed_estimator(opts.mev_mixed_estimator) {
     m_store.resize(100);
     m_comm.resize(100);
     m_promoters.reserve(nop+1);
@@ -128,8 +129,4 @@ void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &s
         auto contrib = (phase ? -1.0 : 1.0) * src_weight * dst_weight;
         send_table.m_row.m_values[0] += contrib;
     }
-}
-
-void FermionRdm::make_contribs_spf_ket(const conn::Antisym<0> &conn, const defs::wf_t &src_weight) {
-    make_contribs(conn, std::abs(src_weight), 1.0);
 }

@@ -53,6 +53,7 @@ struct Options {
     size_t ncycle_accumulate_mevs = ~0ul;
     size_t ncycle_mev_period = 50ul;
     bool output_mevs_periodically = false;
+    bool mev_mixed_estimator = false;
     bool consolidate_spawns = false;
     bool explicit_hf_conn_mevs = true;
     bool do_semistochastic = false;

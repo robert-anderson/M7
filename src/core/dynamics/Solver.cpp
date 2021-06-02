@@ -20,14 +20,21 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
         m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()), m_detsub(m_wf) {
 
     if (defs::enable_mevs && m_opts.rdm_rank > 0) {
-        if (!m_opts.replicate && !m_prop.is_exact())
-            log::warn("Attempting a stochastic propagation estimation of MEVs without replication, this is biased");
+
+        if (!m_opts.replicate && !m_prop.is_exact() && !m_opts.mev_mixed_estimator)
+            log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
+                      "this is biased");
+
         if (m_opts.replicate && m_prop.is_exact())
-            log::warn(
-                    "Attempting an exact-propagation estimation of MEVs with replication, the replica population is redundant");
-    }
-    if (defs::enable_mevs && m_opts.rdm_rank > 0 && !m_opts.replicate && !m_prop.is_exact()) {
-        log::warn("Attempting a stochastic estimation of MEVs without replication, this is biased");
+            log::warn("Attempting an exact-propagation estimation of MEVs with replication, "
+                                          "the replica population is redundant");
+
+        if (!m_opts.replicate && !m_prop.is_exact() && !m_opts.mev_mixed_estimator)
+            log::warn("Attempting a stochastic estimation of MEVs without replication, this is biased");
+
+        if (m_opts.replicate && !m_opts.mev_mixed_estimator)
+            log::warn("Attempting a mixed estimation of MEVs with replication, "
+                      "the replica population is redundant");
     }
 
     if (mpi::i_am_root())
@@ -224,9 +231,6 @@ void Solver::loop_over_occupied_onvs() {
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
 
-            //if (m_mevs) m_mevs.make_contribs_spf_ket(row.m_onv, row.m_weight[0]);
-            //if (m_mevs) m_mevs.make_contribs(row.m_onv, row.m_weight[0], row.m_onv, row.m_weight[0]);
-
             if (m_wf.m_ra.is_active()) {
                 m_spawning_timer.reset();
                 m_spawning_timer.unpause();
@@ -299,6 +303,7 @@ void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
         ASSERT(row.m_average_weight.is_zero());
         return;
     }
+
     for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
         auto& ref = m_refs[ipart];
         auto& ref_onv = ref.get_onv();
@@ -312,17 +317,16 @@ void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
          * each by the number of cycles for which the row is occupied.
          */
         const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
-        const auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;
+        auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);
         /*
          * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
          * single averaged contribution (ncycle_occ)
          */
         m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac*ncycle_occ*av_weight, row.m_onv, av_weight_rep);
         if (m_mevs.m_explicit_hf_conns) {
-            //ASSERT(row.m_reference_connection.get(0) == row.m_reference_connection.get(1));
             if (row.m_reference_connection.get(0) && !ref.is_same(row)) {
                 const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
-                const auto av_weight_ref_rep = ref.norm_average_weight(icycle, ipart_replica);
+                const auto av_weight_ref_rep = m_mevs.get_ket_weight(ref.norm_average_weight(icycle, ipart_replica));
                 m_mevs.m_fermion_rdm->make_contribs(ref_onv, dupl_fac*ncycle_occ*av_weight_ref,
                                                     row.m_onv, av_weight_rep);
                 m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac*ncycle_occ*av_weight,

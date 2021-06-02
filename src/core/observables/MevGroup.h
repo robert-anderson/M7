@@ -96,6 +96,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     std::vector<FermionPromoter> m_promoters;
 
     conn::Antisym<0> m_conn;
+    const bool m_mixed_estimator;
 
     const size_t &nop() const;
 
@@ -121,14 +122,6 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         m_conn.connect(src_onv, dst_onv);
         if (m_conn.nexcit() != nop_conn) return;
         make_contribs(m_conn, src_weight, dst_weight);
-    }
-
-    void make_contribs_spf_ket(const conn::Antisym<0> &conn, const defs::wf_t &src_weight);
-
-    void make_contribs_spf_ket(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
-                               const fields::FermionOnv &dst_onv) {
-        m_conn.connect(src_onv, dst_onv);
-        make_contribs_spf_ket(m_conn, src_weight);
     }
 
     void end_cycle() {
@@ -247,6 +240,19 @@ struct MevGroup {
         }
         return !((icycle - m_icycle_period_start) % m_period);
     }
+
+    /**
+     * If we are using mixed estimator, then set the ket weight to the trial WF expectation
+     * @param weight
+     *  average or instantaneous ONV weight
+     * @return
+     *  weight unchanged if not using the mixed estimator, else signed unit
+     */
+    defs::wf_t get_ket_weight(const defs::wf_t& weight) const {
+        if (m_fermion_rdm->m_mixed_estimator)
+            return consts::real(weight) > 0.0 ? 1.0 : -1.0;
+        return weight;
+    };
 };
 
 #if 0

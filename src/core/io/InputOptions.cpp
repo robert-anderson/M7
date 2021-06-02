@@ -137,6 +137,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--ncycle_wait_mevs", ncycle_wait_mevs,
                "number of cycles to wait after variable shift epoch begins before accumulating MEVs");
 
+    add_flag("--mev_mixed_estimator", mev_mixed_estimator,
+               "enable approximation of MEVs <Psi|O|Psi> by <TWF|O|Psi>");
+
     add_option("--ncycle_accumulate_mevs", ncycle_accumulate_mevs,
                "number of cycles to accumulate MEVs before terminating the solver main loop");
 
