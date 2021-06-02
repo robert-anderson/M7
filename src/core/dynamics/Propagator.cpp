@@ -65,8 +65,7 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
             // compute average shift from variable shift epoch up to now
             m_avg_values[ipart] += m_values[ipart];
             if(reweighting_active.update(icycle, begin_reweighting)){
-                //m_const_shift[ipart] = m_avg_values[ipart] / (m_opts.ncycle_wait_reweight + 1);
-                m_const_shift[ipart] = -2.9925653194551863;
+                m_const_shift[ipart] = m_avg_values[ipart] / (m_opts.ncycle_wait_reweight + 1);
                 log::info("setting constant shift for reweighting on WF part {} to current average variable "
                           "shift from last {} cycles: C[{}] = {}", ipart, m_opts.ncycle_wait_reweight + 1,  ipart,
                           m_const_shift[ipart]);
