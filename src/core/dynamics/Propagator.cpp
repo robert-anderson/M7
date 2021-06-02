@@ -22,6 +22,26 @@ const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
 }
 
 
+void Shift::evaluate_reweighting(const size_t& ipart, const size_t
+&icycle, const double& tau) {
+    if (m_opts.ncycle_reweight_lookback == 0) return;
+    if (!m_reweighting_active[ipart]) return;
+    ASSERT(m_variable_mode[ipart] && m_reweighting_active[ipart])
+
+    auto this_factor = std::exp(tau * (m_const_shift[ipart] - m_values[ipart]));
+    m_reweighting_factors[ipart].push(this_factor);
+    m_total_reweighting[ipart] *= this_factor;
+
+    if(m_reweighting_factors.size() == m_opts.ncycle_reweight_lookback){
+        auto oldest_factor = m_reweighting_factors[ipart].front();
+        m_total_reweighting[ipart] /= oldest_factor;
+        m_reweighting_factors[ipart].pop();
+    }
+    // else we're still filling.
+    ASSERT(consts::floats_nearly_equal(m_total_reweighting[ipart], product_reweighting_queue(ipart)))
+    ASSERT(m_reweighting_factors.size() <= m_opts.ncycle_reweight_lookback)
+}
+
 void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
 
@@ -45,9 +65,11 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
             // compute average shift from variable shift epoch up to now
             m_avg_values[ipart] += m_values[ipart];
             if(reweighting_active.update(icycle, begin_reweighting)){
-                m_const_shift[ipart] = m_avg_values[ipart] / (m_opts.ncycle_wait_reweight + 1);
+                //m_const_shift[ipart] = m_avg_values[ipart] / (m_opts.ncycle_wait_reweight + 1);
+                m_const_shift[ipart] = -2.9925653194551863;
                 log::info("setting constant shift for reweighting on WF part {} to current average variable "
-                          "shift: C[{}] = {}", ipart, ipart, m_const_shift[ipart]);
+                          "shift from last {} cycles: C[{}] = {}", ipart, m_opts.ncycle_wait_reweight + 1,  ipart,
+                          m_const_shift[ipart]);
             }
             evaluate_reweighting(ipart, icycle, tau);
         }
@@ -56,23 +78,14 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
 }
 
 
-void Shift::evaluate_reweighting(const size_t& ipart, const size_t
-&icycle, const double& tau) {
-    if (m_opts.ncycle_reweight_lookback == 0) return;
-    if (!m_reweighting_active[ipart]) return;
-    ASSERT(m_variable_mode[ipart] && m_reweighting_active[ipart])
-
-    auto this_factor = std::exp(tau * (m_const_shift[ipart] - m_values[ipart]));
-    m_reweighting_factors[ipart].push(this_factor);
-    m_total_reweighting[ipart] *= this_factor;
-
-    if(m_reweighting_factors.size() == m_opts.ncycle_reweight_lookback){
-        auto oldest_factor = m_reweighting_factors[ipart].front();
-        m_total_reweighting[ipart] /= oldest_factor;
-        m_reweighting_factors[ipart].pop();
+defs::ham_comp_t Shift::product_reweighting_queue(const size_t ipart) {
+    defs::ham_comp_t total = 1.0;
+    auto factors_copy = m_reweighting_factors[ipart];
+    while(!factors_copy.empty()){
+        total *= factors_copy.front();
+        factors_copy.pop();
     }
-    // else we're still filling.
-    ASSERT(m_reweighting_factors.size() <= m_opts.ncycle_reweight_lookback)
+    return total;
 }
 
 

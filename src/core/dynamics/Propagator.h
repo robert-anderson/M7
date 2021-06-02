@@ -41,6 +41,9 @@ struct Shift {
 
     void evaluate_reweighting(const size_t& npart, const size_t &icycle,
                                   const double& tau);
+private:
+
+    defs::ham_comp_t product_reweighting_queue(const size_t ipart);
 };
 
 
