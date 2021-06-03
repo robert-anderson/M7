@@ -128,8 +128,11 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
                "Number of MC cycles for which to accumulate reweighting statistics for population control unbiasing");
 
     add_option("--ncycle_wait_reweight", ncycle_wait_reweight,
-               "number of cycles after variable shift to snapshot fixed-shift "
-               "to use to compute reweighting factors");
+               "number of cycles after variable shift before beginning to fill queue for reweighting");
+
+    add_option("--ncycle_shift_average_period", ncycle_shift_average_period,
+               "number of cycles before reweighting queue begins filling for which to average the shift"
+               "to use to compute reweighting factors. Should be no larger than ncycle_wait_reweight");
 
     add_option("-N,--ncycle", ncycle,
                "number of cycles to execute before exit");
