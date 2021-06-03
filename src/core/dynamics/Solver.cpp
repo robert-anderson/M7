@@ -601,3 +601,57 @@ void Solver::output_stats() {
         m_parallel_stats->flush();
     }
 }
+
+void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+                            bool allow_initiation, bool src_deterministic) {
+    annihilate_row(dst_ipart, dst_onv, delta_weight, allow_initiation, src_deterministic, *m_wf.m_store[dst_onv]);
+}
+
+void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
+                                                    const size_t &irow_block_end, const size_t &irow_store) {
+    // if the dst onv is not stored, it cannot give contributions to any MEVs
+    if (irow_store == ~0ul) {
+        row_current.jump(irow_block_end);
+        return;
+    }
+    m_wf.m_store.m_row.jump(irow_store);
+    /*
+     * similar approach to loop_over_spawned, except the "blocks" in this instance refer to groups
+     * of contributions from the same source ONV. src_weights emitted by a stochastic propagator are
+     * appropriately scaled by the probability that at least one excitation to dst_onv was drawn.
+     */
+
+    row_block_start.jump(row_current);
+
+    for (; row_current.in_range(irow_block_end); row_current.step()) {
+        ASSERT(m_wf.m_store.m_row.m_onv == row_current.m_dst_onv);
+        // seek to next "parent" ONV
+        if (row_current.m_src_onv != row_block_start.m_src_onv) {
+            ASSERT(row_current.m_i - row_block_start.m_i > 0);
+            // row_current is pointing to the first row of the next src_onv block
+            // row_block_start can be used to access the src ONV data
+            make_instant_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight,
+                                      row_block_start.m_dst_ipart);
+            row_block_start.jump(row_current);
+        }
+    }
+    // finish off last block
+    make_instant_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
+}
+
+void Solver::output_mevs() {
+    if (!(defs::enable_mevs && m_mevs.is_period_cycle(m_icycle))) return;
+    hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
+    hdf5::GroupWriter gw("solver", fw);
+    if (m_mevs.m_fermion_rdm) {
+        hdf5::GroupWriter gw2("rdm", gw);
+        m_mevs.m_fermion_rdm->h5_write(gw2);
+        const auto b = -99.9421389039331;
+        std::cout << m_mevs.m_fermion_rdm->get_energy(m_prop.m_ham)-b << " "
+                  << m_prop.m_shift.m_values[0]-b << " " << m_refs[0].proj_energy_num()[0]/m_refs[0].weight()[0]-b << std::endl;
+    }
+}
+
+const MevGroup &Solver::mevs() const {
+    return m_mevs;
+}
