@@ -82,36 +82,38 @@ public:
     }
 
     /**
-     * get another NdFormat where the ndiff most minor indices have been discarded. Individual elements of the result
-     * index ndiff-dimensional subarrays of this object
-     * @tparam ndiff
-     *  number of minor (left-most) indices to discard
+     * get another NdFormat where the nind-nind_remain most minor indices have been discarded. Individual elements of
+     * the result index subarrays of this object
+     * @tparam nind_remain
+     *  number of major (right-most) indices to keep
      * @return
      *  new NdFormat object where the major part of the shape is retained
      */
-    template <size_t ndiff = 1ul>
-    typename std::enable_if<(nind-ndiff>=0), NdFormat<nind-ndiff>>::type
+    template <size_t nind_remain = nind-1>
+    typename std::enable_if<(nind_remain<nind), NdFormat<nind_remain>>::type
     major_dims() const {
-        std::array<size_t, nind-ndiff> shape;
-        std::copy(m_shape.cbegin(), m_shape.cend()-ndiff, shape.begin());
-        std::array<std::string, nind-ndiff> dim_names;
-        std::copy(m_dim_names.cbegin(), m_dim_names.cend()-ndiff, dim_names.begin());
+        constexpr auto nind_diff = nind-nind_remain;
+        std::array<size_t, nind_remain> shape;
+        std::copy(m_shape.cbegin(), m_shape.cend()-nind_diff, shape.begin());
+        std::array<std::string, nind_remain> dim_names;
+        std::copy(m_dim_names.cbegin(), m_dim_names.cend()-nind_diff, dim_names.begin());
         return {shape, dim_names};
     }
     /**
      * same as major_dims except the discarded indices are major
-     * @tparam ndiff
-     *  number of major (right-most) indices to discard
+     * @tparam nind_remain
+     *  number of minor (left-most) indices to keep
      * @return
      *  new NdFormat object where the minor part of the shape is retained
      */
-    template <size_t ndiff = 1ul>
-    typename std::enable_if<(nind-ndiff>=0), NdFormat<nind-ndiff>>::type
+    template <size_t nind_remain = nind-1>
+    typename std::enable_if<(nind_remain<nind), NdFormat<nind_remain>>::type
     minor_dims() const {
-        std::array<size_t, nind-ndiff> shape;
-        std::copy(m_shape.cbegin()+ndiff, m_shape.cend(), shape.begin());
-        std::array<std::string, nind-ndiff> dim_names;
-        std::copy(m_dim_names.cbegin()+ndiff, m_dim_names.cend(), dim_names.begin());
+        constexpr auto nind_diff = nind-nind_remain;
+        std::array<size_t, nind_remain> shape;
+        std::copy(m_shape.cbegin()+nind_diff, m_shape.cend(), shape.begin());
+        std::array<std::string, nind-nind_diff> dim_names;
+        std::copy(m_dim_names.cbegin()+nind_diff, m_dim_names.cend(), dim_names.begin());
         return {shape, dim_names};
     }
 
@@ -180,7 +182,14 @@ public:
      */
     // TODO hierarchical flattening
 
-
+    template<size_t nmajor>
+    size_t combine(const size_t& iflat_major, const size_t& iflat_minor){
+        static_assert(nmajor>0, "major flat index must correspond to non-zero number of dimensions");
+        ASSERT(iflat_major < major_dims<nmajor>().nelement());
+        auto stride = m_strides[nmajor-1];
+        ASSERT(iflat_minor < stride);
+        return iflat_major*stride+iflat_minor;
+    }
 
     template<size_t nminor>
     size_t flatten(std::array<size_t, nind - nminor> major, std::array<size_t, nminor> minor) const {

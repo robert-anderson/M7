@@ -17,14 +17,14 @@ TEST(NdFormat, SubFormats) {
     ASSERT_EQ(format.minor_dims().minor_dims().minor_dims().nelement(), 6);
     ASSERT_EQ(format.minor_dims().minor_dims().minor_dims().minor_dims().nelement(), 1);
 
-    ASSERT_EQ(format.major_dims<1>().nelement(), 3 * 4 * 2);
+    ASSERT_EQ(format.major_dims<3>().nelement(), 3 * 4 * 2);
     ASSERT_EQ(format.major_dims<2>().nelement(), 3 * 4);
-    ASSERT_EQ(format.major_dims<3>().nelement(), 3);
-    ASSERT_EQ(format.major_dims<4>().nelement(), 1);
-    ASSERT_EQ(format.minor_dims<1>().nelement(), 4 * 2 * 6);
+    ASSERT_EQ(format.major_dims<1>().nelement(), 3);
+    ASSERT_EQ(format.major_dims<0>().nelement(), 1);
+    ASSERT_EQ(format.minor_dims<3>().nelement(), 4 * 2 * 6);
     ASSERT_EQ(format.minor_dims<2>().nelement(), 2 * 6);
-    ASSERT_EQ(format.minor_dims<3>().nelement(), 6);
-    ASSERT_EQ(format.minor_dims<4>().nelement(), 1);
+    ASSERT_EQ(format.minor_dims<1>().nelement(), 6);
+    ASSERT_EQ(format.minor_dims<0>().nelement(), 1);
 
     auto major = format.major_dims<2>();
     auto minor = format.minor_dims<2>();
@@ -164,4 +164,38 @@ TEST(NdFormat, Test4DEqualExtents) {
             }
         }
     }
+}
+
+TEST(NdFormat, CombineIndsFromSubformat31) {
+    NdFormat<4> format({3, 4, 2, 6});
+    auto major = format.major_dims<3>();
+    auto minor = format.minor_dims<1>();
+    ASSERT_EQ(major.nelement(), 3*4*2);
+    ASSERT_EQ(minor.nelement(), 6);
+
+    size_t i = 0ul;
+    for (size_t imajor = 0ul; imajor<major.nelement(); ++imajor){
+        for (size_t iminor = 0ul; iminor<minor.nelement(); ++iminor) {
+            ASSERT_EQ(format.combine<3>(imajor, iminor), i);
+            ++i;
+        }
+    }
+    ASSERT_EQ(i, format.nelement());
+}
+
+TEST(NdFormat, CombineIndsFromSubformat22) {
+    NdFormat<4> format({3, 4, 2, 6});
+    auto major = format.major_dims<2>();
+    auto minor = format.minor_dims<2>();
+    ASSERT_EQ(major.nelement(), 3*4);
+    ASSERT_EQ(minor.nelement(), 2*6);
+
+    size_t i = 0ul;
+    for (size_t imajor = 0ul; imajor<major.nelement(); ++imajor){
+        for (size_t iminor = 0ul; iminor<minor.nelement(); ++iminor) {
+            ASSERT_EQ(format.combine<2>(imajor, iminor), i);
+            ++i;
+        }
+    }
+    ASSERT_EQ(i, format.nelement());
 }
