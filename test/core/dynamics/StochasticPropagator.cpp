@@ -139,10 +139,11 @@ TEST(StochasticPropagator, Hubbard) {
     opts.min_death_mag = 0.0;
     opts.shift_damp = 0.1;
     opts.shift_update_period = 1;
+    opts.ncycle_shift_average_period = 5000;
     opts.ncycle = 2000000;
     opts.spf_uniform_twf = 0;
-    opts.ncycle_reweight_lookback = 10000;
-    opts.ncycle_wait_reweight = 10000;
+    opts.ncycle_reweight_lookback = 200;
+    opts.ncycle_wait_reweight = 20000;
     opts.rdm_rank = 0;
     opts.replicate = false;
     opts.init();
