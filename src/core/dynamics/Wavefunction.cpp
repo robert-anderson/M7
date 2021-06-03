@@ -62,7 +62,7 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
         conn.connect(ref, row_reader.m_onv);
         bool ref_conn = !consts::float_is_zero(ham.get_element(conn));
         conn.connect(row_reader.m_onv, row_reader.m_onv);
-        ASSERT(row_reader.m_weight.nelement()==m_format.nelement());
+        ASSERT(row_reader.m_weight.nelement()==m_format.m_nelement);
         create_row(0ul, row_reader.m_onv, ham.get_element(conn), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }
@@ -139,7 +139,7 @@ void Wavefunction::zero_weight(const size_t &ipart) {
 void Wavefunction::remove_row() {
     auto lookup = m_store[m_store.m_row.m_onv];
     ASSERT(lookup);
-    for (size_t ipart = 0ul; ipart<m_format.nelement(); ++ipart) {
+    for (size_t ipart = 0ul; ipart<m_format.m_nelement; ++ipart) {
         zero_weight(ipart);
         // in the case that nadd==0.0, the set_weight method won't revoke:
         revoke_initiator_status(ipart);

@@ -20,38 +20,50 @@ struct NdFormatBase{
  *  number of dimensions.
  */
 template <size_t nind>
-class NdFormat : NdFormatBase{
+struct NdFormat : NdFormatBase {
     /**
      * the extents of each dimension
      */
-    std::array<size_t, nind> m_shape;
+    const std::array<size_t, nind> m_shape;
     /**
      * elements of the stride are computed as products of elements of the shape. this allows for the conversion of an
      * array containing multidimensional indices to a single integer ("flat" index) via a scalar product
      */
-    std::array<size_t, nind> m_strides;
+    const std::array<size_t, nind> m_strides;
     /**
      * label each dimension
      */
-    std::array<std::string, nind> m_dim_names;
+    const std::array<std::string, nind> m_dim_names;
     /**
      * the number of elements in the indexing scheme. the largest value a flat index can take in this scheme is one less
      * than m_nelement
      */
-    size_t m_nelement = ~0ul;
+    const size_t m_nelement;
 
     /**
-     * helper function to store the number of elements
+     * helper function to compute the strides assuming the m_shape member has already been set
      */
-    void set_nelement() {
-        if (!nind) m_nelement = 1;
-        else m_nelement = m_shape.front()*m_strides.front();
+    std::array<size_t, nind> make_strides() const {
+        std::array<size_t, nind> tmp{};
+        if (!nind) return {};
+        tmp.back() = 1ul;
+        for (auto i = 2ul; i <= nind; i++) {
+            tmp[nind - i] = tmp[nind - i + 1] * m_shape[nind - i + 1];
+        }
+        return tmp;
     }
 
+    /**
+     * helper function to decide the number of elements assuming the m_shape and m_stride members have already been set
+     */
+    size_t make_nelement() const {
+        return nind ? m_shape.front()*m_strides.front() : 1ul;
+    }
+
+
 public:
-    NdFormat(){
+    NdFormat(): m_shape(), m_strides(), m_dim_names(), m_nelement(make_nelement()){
         static_assert(!nind, "This ctor is only valid in the scalar case");
-        m_nelement = 1ul;
     }
 
     /**
@@ -59,16 +71,12 @@ public:
      * @param extent
      *  value to copy to all elements of the shape
      */
-    NdFormat(size_t extent){
-        m_shape.fill(extent);
-        set_strides();
-        set_nelement();
-    }
+    NdFormat(size_t extent):
+        m_shape(array_utils::filled<size_t, nind>(extent)),
+        m_strides(make_strides()), m_nelement(make_nelement()){}
 
     NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names={}):
-        m_shape(shape), m_dim_names(dim_names){
-        set_strides();
-        set_nelement();
+        m_shape(shape), m_strides(make_strides()), m_dim_names(dim_names), m_nelement(make_nelement()){
         ASSERT(m_nelement!=~0ul);
     }
 
@@ -76,7 +84,7 @@ public:
 
     bool operator==(const NdFormat<nind> &other) const{
         for (size_t iind=0ul; iind<nind; ++iind){
-            if (other.extent(iind)!=extent(iind)) return false;
+            if (other.m_shape[iind]!=m_shape[iind]) return false;
         }
         return true;
     }
@@ -117,43 +125,20 @@ public:
         return {shape, dim_names};
     }
 
-    const size_t& nelement() const {
-        return m_nelement;
-    }
-
-    const size_t& extent(const size_t& i) const {
-        return m_shape[i];
-    }
-
-    const size_t& stride(const size_t& i) const {
-        return m_strides[i];
-    }
-
-    const std::array<size_t, nind>& shape() const {
-        return m_shape;
-    }
-
     /**
      * @return
      *  the shape array converted to a vector instance
      */
     defs::inds shape_vector() const {
-        defs::inds tmp;
-        tmp.assign(m_shape.cbegin(), m_shape.cend());
-        return tmp;
+        return array_utils::to_vector(m_shape);
     }
 
-    const std::array<std::string, nind>& dim_names() const {
-        return m_dim_names;
-    }
     /**
      * @return
      *  the dim_names array converted to a vector instance
      */
     std::vector<std::string> dim_names_vector() const {
-        std::vector<std::string> tmp;
-        tmp.assign(m_dim_names.cbegin(), m_dim_names.cend());
-        return tmp;
+        return array_utils::to_vector(m_dim_names);
     }
 
     /**
@@ -185,7 +170,7 @@ public:
     template<size_t nmajor>
     size_t combine(const size_t& iflat_major, const size_t& iflat_minor){
         static_assert(nmajor>0, "major flat index must correspond to non-zero number of dimensions");
-        ASSERT(iflat_major < major_dims<nmajor>().nelement());
+        ASSERT(iflat_major < major_dims<nmajor>().m_nelement);
         auto stride = m_strides[nmajor-1];
         ASSERT(iflat_minor < stride);
         return iflat_major*stride+iflat_minor;
@@ -247,25 +232,6 @@ public:
 
 private:
 
-    /**
-     * helper function to store the strides assuming the m_shape member has already been set
-     */
-    void set_strides(){
-        if (!nind) return;
-        m_strides.back() = 1ul;
-        for (auto i = 2ul; i <= nind; i++) {
-            m_strides[nind - i] = m_strides[nind - i + 1] * m_shape[nind - i + 1];
-        }
-    }
-
-    void set_shape(){}
-    template<typename ...Args>
-    void set_shape(size_t first, Args... rest){
-        m_shape[nind-sizeof...(rest)-1] = first;
-        set_shape(rest...);
-    }
-
-
     template<size_t nind_unspec>
     size_t partial_offset() const {return 0;}
 public:
@@ -304,14 +270,14 @@ struct NdEnumeration : NdFormat<nind>{
     const std::vector<std::array<size_t, nind>> m_inds;
 
     static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
-        std::vector<std::array<size_t, nind>> out(format.nelement());
+        std::vector<std::array<size_t, nind>> out(format.m_nelement);
         enums::PermutationsWithRepetition e(format.shape_vector());
         size_t iinds = 0ul;
         while (e.next()){
             for (size_t i=0; i<nind; ++i) out[iinds][i] = e[i];
             ++iinds;
         }
-        ASSERT(iinds==format.nelement());
+        ASSERT(iinds==format.m_nelement);
         return out;
     }
 

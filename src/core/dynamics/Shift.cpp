@@ -6,10 +6,10 @@
 
 Reweighter::Reweighter(const Options &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
-        m_const_shift(wf_fmt.shape(), opts.shift_initial),
-        m_active("accumulating reweighting statistics", wf_fmt.nelement(), "WF part"),
-        m_histories(wf_fmt.nelement(), std::queue<defs::ham_comp_t>()),
-        m_total(wf_fmt.shape(), 1.0) {
+        m_const_shift(wf_fmt.m_shape, opts.shift_initial),
+        m_active("accumulating reweighting statistics", wf_fmt.m_nelement, "WF part"),
+        m_histories(wf_fmt.m_nelement, std::queue<defs::ham_comp_t>()),
+        m_total(wf_fmt.m_shape, 1.0) {
 }
 
 void Reweighter::update(size_t icycle, size_t ipart, bool begin_cond, defs::ham_comp_t av_shift) {
@@ -58,11 +58,11 @@ bool Reweighter::product_chk() const {
 
 Shift::Shift(const Options &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
-        m_nwalker_last_update(wf_fmt.shape(), std::numeric_limits<defs::wf_t>::max()),
-        m_values(wf_fmt.shape(), opts.shift_initial),
-        m_avg_value_histories(wf_fmt.nelement(), std::queue<defs::ham_comp_t>()),
-        m_avg_values(wf_fmt.shape(), opts.shift_initial),
-        m_variable_mode("variable shift mode", wf_fmt.nelement(), "WF part"),
+        m_nwalker_last_update(wf_fmt.m_shape, std::numeric_limits<defs::wf_t>::max()),
+        m_values(wf_fmt.m_shape, opts.shift_initial),
+        m_avg_value_histories(wf_fmt.m_nelement, std::queue<defs::ham_comp_t>()),
+        m_avg_values(wf_fmt.m_shape, opts.shift_initial),
+        m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_nwalker_target("nwalker_target", opts.nwalker_target),
         m_reweighter(opts, wf_fmt){}
 

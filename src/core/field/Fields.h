@@ -75,8 +75,8 @@ namespace fields {
 
         FermionMevInds(const FermionMevInds &other) :
                 FermionMevInds(other.m_ann.row_of_copy(),
-                               other.m_ann.m_format.nelement(),
-                               other.m_cre.m_format.nelement(), other.m_name) {}
+                               other.m_ann.m_format.m_nelement,
+                               other.m_cre.m_format.m_nelement, other.m_name) {}
 
         FermionMevInds &operator=(const FermionMevInds &other) {
             m_ann = other.m_ann;

@@ -39,13 +39,13 @@ struct BitsetField : FieldBase {
     using FieldBase::begin;
 
     BitsetField(Row *row, NdFormat<nind> format, std::string name="") :
-            FieldBase(row, integer_utils::divceil(format.nelement(), nbit_dword()) * sizeof(T),
+            FieldBase(row, integer_utils::divceil(format.m_nelement, nbit_dword()) * sizeof(T),
                       typeid(T), name), m_format(format),
             m_dsize(m_size / sizeof(T)),
             m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {
     }
 
-    BitsetField(const BitsetField &other) : BitsetField(other.row_of_copy(), other.m_format.shape()) {}
+    BitsetField(const BitsetField &other) : BitsetField(other.row_of_copy(), other.m_format.m_shape) {}
 
     BitsetField &operator=(const BitsetField &other) {
         FieldBase::operator=(other);
@@ -60,7 +60,7 @@ struct BitsetField : FieldBase {
     }
 
     const size_t &nbit() const {
-        return m_format.nelement();
+        return m_format.m_nelement;
     }
 
     T *dbegin() const {

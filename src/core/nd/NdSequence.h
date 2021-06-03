@@ -69,16 +69,16 @@ struct NdSequence {
 
     static std::vector<std::array<size_t, nind>> make_inds_vector(const NdFormat<nind>& format) {
         const size_t limit = 2<<10;
-        if (format.nelement() > limit){
+        if (format.m_nelement > limit){
             log::warn("Attempting to cache {} (> {}) Nd index arrays, this class is intended for small products of Nd extents",
-                      format.nelement(), limit);
+                      format.m_nelement, limit);
         }
-        MPI_REQUIRE(format.nelement() <= limit, "shape product is too large, highly likely NdSequence is misapplied");
+        MPI_REQUIRE(format.m_nelement <= limit, "shape product is too large, highly likely NdSequence is misapplied");
         std::vector<std::array<size_t, nind>> tmp;
         defs::inds shape(nind);
-        std::copy_n(format.shape().begin(), nind, shape.begin());
+        std::copy_n(format.m_shape.cbegin(), nind, shape.begin());
         ProductEnumerator enumerator(std::move(shape));
-        tmp.resize(format.nelement());
+        tmp.resize(format.m_nelement);
         defs::inds inds(nind);
         size_t iflat = ~0ul;
         while (enumerator.next(inds, iflat)) std::copy_n(inds.begin(), nind, tmp[iflat].begin());

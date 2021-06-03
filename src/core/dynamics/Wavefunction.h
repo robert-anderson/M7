@@ -102,11 +102,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 //    }
 
     const size_t& nroot() const {
-        return m_format.extent(0);
+        return m_format.m_shape[0];
     }
 
     const size_t& nreplica() const {
-        return m_format.extent(1);
+        return m_format.m_shape[1];
     }
 
     size_t ipart_replica(const size_t& ipart) const {
@@ -144,11 +144,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void set_weight(const size_t &ipart, const defs::wf_t &new_weight);
 
     void set_weight(const defs::wf_t &new_weight) {
-        for (size_t ipart=0ul; ipart<m_format.nelement(); ++ipart) set_weight(ipart, new_weight);
+        for (size_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
     }
 
     void set_weight(const fields::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
-        for (size_t i=0ul; i < m_format.nelement(); ++i) set_weight(i, new_weight[i]);
+        for (size_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
     }
 
     /**
@@ -248,7 +248,7 @@ public:
                      const fields::Onv<> &src_onv, const defs::wf_t &src_weight);
 
     const size_t& npart() const {
-        return m_format.nelement();
+        return m_format.m_nelement;
     }
 
 };

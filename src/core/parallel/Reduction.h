@@ -31,7 +31,7 @@ private:
     }
 
     NdReduction(const NdFormat<nind> &format, dispatch_utils::BoolTag<0>) :
-            ReductionBase<T>(format.nelement()), m_local(format.shape()), m_reduced(format.shape()) {
+            ReductionBase<T>(format.m_nelement), m_local(format.m_shape), m_reduced(format.m_shape) {
         m_local_ptr = reinterpret_cast<T *>(m_local.begin());
         m_reduced_ptr = reinterpret_cast<T *>(m_reduced.begin());
     }

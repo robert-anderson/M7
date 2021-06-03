@@ -39,11 +39,11 @@ struct NdNumberField : NumberFieldBase {
     const NdFormat<nind> m_format;
 
     const size_t &nelement() const {
-        return m_format.nelement();
+        return m_format.m_nelement;
     }
 
     NdNumberField(Row *row, NdFormat<nind> format, std::string name = "") :
-            NumberFieldBase(row, sizeof(T), format.nelement(),
+            NumberFieldBase(row, sizeof(T), format.m_nelement,
                             consts::is_complex<T>(), typeid(T), name), m_format(format) {}
 
     NdNumberField(const NdNumberField &other) :
@@ -225,12 +225,12 @@ struct NdNumberField : NumberFieldBase {
      * HDF5 related
      */
     defs::inds h5_shape() const override {
-        return {m_format.shape().begin(), m_format.shape().end()};
+        return {m_format.m_shape.cbegin(), m_format.m_shape.cend()};
     }
 
     std::vector<std::string> h5_dim_names() const override {
         if (!nind) return {};
-        return {m_format.dim_names().begin(), m_format.dim_names().end()};
+        return {m_format.m_dim_names.cbegin(), m_format.m_dim_names.cend()};
     }
 
     hid_t h5_type() const override {

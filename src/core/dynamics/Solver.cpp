@@ -209,7 +209,7 @@ void Solver::loop_over_occupied_onvs() {
             make_average_weight_mev_contribs(m_icycle);
         }
 
-        for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
+        for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
             MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
                        "Stored ONV should not be zeroed");
@@ -304,7 +304,7 @@ void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
         return;
     }
 
-    for (size_t ipart = 0ul; ipart < m_wf.m_format.nelement(); ++ipart) {
+    for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
         auto& ref = m_refs[ipart];
         auto& ref_onv = ref.get_onv();
         auto ipart_replica = m_wf.ipart_replica(ipart);

@@ -11,7 +11,7 @@ struct BosonOnvField : NdNumberField<uint8_t, 1> {
     BosonOnvField(Row *row, size_t nmode, std::string name="") :
     NdNumberField<uint8_t, 1>(row, {{nmode}, {"boson mode occupations"}}, name) {}
 
-    BosonOnvField(const BosonOnvField &other): BosonOnvField(other.m_row, other.m_format.extent(0), other.m_name){}
+    BosonOnvField(const BosonOnvField &other): BosonOnvField(other.m_row, other.m_format.m_shape[0], other.m_name){}
 
     BosonOnvField &operator=(const BosonOnvField &other) {
         NdNumberField<uint8_t, 1>::operator=(other);

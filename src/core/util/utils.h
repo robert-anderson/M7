@@ -671,6 +671,22 @@ namespace dispatch_utils {
     struct BoolTag{};
 }
 
+namespace array_utils {
+    template<typename T, size_t nind>
+    static std::array<T, nind> filled(const T& v){
+        std::array<T, nind> tmp;
+        tmp.fill(v);
+        return tmp;
+    }
+
+    template<typename T, size_t nind>
+    static std::vector<T> to_vector(const std::array<T, nind>& array) {
+        std::vector<T> tmp;
+        tmp.assign(array.cbegin(), array.cend());
+        return tmp;
+    }
+}
+
 namespace conn_utils {
     static size_t left(const size_t& ispinorb, const size_t& nsite) {
         if (ispinorb==0 || ispinorb==nsite) return ~0ul;

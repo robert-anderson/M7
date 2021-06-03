@@ -23,7 +23,7 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
 
 
     FermionOnvField(const FermionOnvField& other):
-            FermionOnvField(other.row_of_copy(), other.m_format.extent(1), other.m_name){}
+            FermionOnvField(other.row_of_copy(), other.m_format.m_shape[1], other.m_name){}
 
     FermionOnvField& operator=(const FermionOnvField& other) {
         FieldBase::operator=(other);

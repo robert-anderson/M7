@@ -125,9 +125,9 @@ public:
 struct References {
     std::vector<Reference> m_refs;
     References(const Options &m_opts, const Hamiltonian<> &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs) {
-        ASSERT(locs.size()==wf.m_format.nelement());
-        m_refs.reserve(wf.m_format.nelement());
-        for (size_t ipart=0ul; ipart<wf.m_format.nelement(); ++ipart) m_refs.emplace_back(m_opts, ham, wf, ipart, locs[ipart]);
+        ASSERT(locs.size()==wf.m_format.m_nelement);
+        m_refs.reserve(wf.m_format.m_nelement);
+        for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(m_opts, ham, wf, ipart, locs[ipart]);
         ASSERT(m_refs.size()==wf.npart());
     }
 
