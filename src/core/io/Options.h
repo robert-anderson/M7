@@ -52,6 +52,7 @@ struct Options {
     size_t ncycle_wait_mevs = 1000ul;
     size_t ncycle_accumulate_mevs = ~0ul;
     size_t ncycle_mev_period = 50ul;
+    size_t ncycle_shift_average_period = 1000ul;
     bool output_mevs_periodically = false;
     bool mev_mixed_estimator = false;
     bool consolidate_spawns = false;

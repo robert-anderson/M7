@@ -9,11 +9,12 @@ Shift::Shift(const Options &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
         m_nwalker_last_update(wf_fmt.shape(), std::numeric_limits<defs::wf_t>::max()),
         m_values(wf_fmt.shape(), opts.shift_initial),
-        m_avg_values(wf_fmt.shape(), 0.0),
+        m_avg_value_histories(wf_fmt.nelement(), std::queue<defs::ham_comp_t>()),
+        m_avg_values(wf_fmt.shape(), opts.shift_initial),
         m_const_shift(wf_fmt.shape(), opts.shift_initial),
         m_variable_mode("variable shift mode", wf_fmt.nelement(), "WF part"),
         m_reweighting_active("accumulating reweighting statistics", wf_fmt.nelement(), "WF part"),
-        m_reweighting_factors(wf_fmt.nelement(), std::queue<defs::ham_t>()),
+        m_reweighting_histories(wf_fmt.nelement(), std::queue<defs::ham_comp_t>()),
         m_total_reweighting(wf_fmt.shape(), 1.0),
         m_nwalker_target("nwalker_target", opts.nwalker_target){}
 
@@ -22,24 +23,23 @@ const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
 }
 
 
-void Shift::evaluate_reweighting(const size_t& ipart, const size_t
-&icycle, const double& tau) {
+void Shift::evaluate_reweighting(const size_t& ipart, const size_t&icycle, const double& tau) {
     if (m_opts.ncycle_reweight_lookback == 0) return;
     if (!m_reweighting_active[ipart]) return;
     ASSERT(m_variable_mode[ipart] && m_reweighting_active[ipart])
+    auto& history = m_reweighting_histories[ipart];
 
     auto this_factor = std::exp(tau * (m_const_shift[ipart] - m_values[ipart]));
-    m_reweighting_factors[ipart].push(this_factor);
+    history.push(this_factor);
     m_total_reweighting[ipart] *= this_factor;
-
-    if(m_reweighting_factors.size() == m_opts.ncycle_reweight_lookback){
-        auto oldest_factor = m_reweighting_factors[ipart].front();
+    if(history.size() == m_opts.ncycle_reweight_lookback){
+        auto oldest_factor = history.front();
         m_total_reweighting[ipart] /= oldest_factor;
-        m_reweighting_factors[ipart].pop();
+        history.pop();
     }
     // else we're still filling.
-    ASSERT(consts::floats_nearly_equal(m_total_reweighting[ipart], product_reweighting_queue(ipart)))
-    ASSERT(m_reweighting_factors.size() <= m_opts.ncycle_reweight_lookback)
+    ASSERT(consts::floats_nearly_equal(m_total_reweighting[ipart]/product_reweighting_queue(ipart), 1.0, 1e-12));
+    ASSERT(history.size() <= m_opts.ncycle_reweight_lookback);
 }
 
 void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &tau) {
@@ -56,33 +56,31 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
         auto& variable_mode = m_variable_mode[ipart];
         variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target);
         if (variable_mode) {
-
             auto rate = wf.m_nwalker.m_reduced[ipart] / m_nwalker_last_update[ipart];
             m_values[ipart] -= m_opts.shift_damp * consts::real_log(rate) / (tau * m_opts.shift_update_period);
             auto& reweighting_active = m_reweighting_active[ipart];
             bool begin_reweighting = m_opts.ncycle_reweight_lookback > 0;
             begin_reweighting &= (icycle >= variable_mode.icycle_start() + m_opts.ncycle_wait_reweight);
             // compute average shift from variable shift epoch up to now
-            m_avg_values[ipart] += m_values[ipart];
             if(reweighting_active.update(icycle, begin_reweighting)){
-                m_const_shift[ipart] = m_avg_values[ipart] / (m_opts.ncycle_wait_reweight + 1);
-                log::info("setting constant shift for reweighting on WF part {} to current average variable "
-                          "shift from last {} cycles: C[{}] = {}", ipart, m_opts.ncycle_wait_reweight + 1,  ipart,
-                          m_const_shift[ipart]);
+                m_const_shift[ipart] = get_average(ipart);
+                log::info("setting constant shift for reweighting on WF part {} to current average shift {}",
+                          ipart, m_const_shift[ipart]);
             }
             evaluate_reweighting(ipart, icycle, tau);
         }
+        add_to_average();
     }
     m_nwalker_last_update = wf.m_nwalker.m_reduced;
 }
 
 
-defs::ham_comp_t Shift::product_reweighting_queue(const size_t ipart) {
+defs::ham_comp_t Shift::product_reweighting_queue(const size_t& ipart) {
     defs::ham_comp_t total = 1.0;
-    auto factors_copy = m_reweighting_factors[ipart];
-    while(!factors_copy.empty()){
-        total *= factors_copy.front();
-        factors_copy.pop();
+    auto histories_copy = m_reweighting_histories[ipart];
+    while(!histories_copy.empty()){
+        total *= histories_copy.front();
+        histories_copy.pop();
     }
     return total;
 }

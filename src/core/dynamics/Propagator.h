@@ -11,25 +11,16 @@
 #include "Wavefunction.h"
 #include "MagnitudeLogger.h"
 
-class Reweighter {
-    const buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_const_shifts;
-    std::vector<std::queue<defs::ham_t>> m_xc_queues;
-
-    Reweighter(const fields::Numbers<defs::ham_comp_t, defs::ndim_wf>& const_shifts):
-            m_const_shifts(const_shifts){}
-
-};
-
-
 struct Shift {
     const Options &m_opts;
     buffered::Numbers<defs::wf_t, defs::ndim_wf> m_nwalker_last_update;
     buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_values;
-    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_avg_values; // un-normalised average (i.e. sum)
+    std::vector<std::queue<defs::ham_comp_t>> m_avg_value_histories;
+    buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_avg_values;
     buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_const_shift;
     Epochs m_variable_mode;
     Epochs m_reweighting_active;
-    std::vector<std::queue<defs::ham_comp_t>> m_reweighting_factors;
+    std::vector<std::queue<defs::ham_comp_t>> m_reweighting_histories;
     buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_total_reweighting;
     InteractiveVariable<defs::wf_comp_t> m_nwalker_target;
 
@@ -43,7 +34,24 @@ struct Shift {
                                   const double& tau);
 private:
 
-    defs::ham_comp_t product_reweighting_queue(const size_t ipart);
+    void add_to_average(){
+        for (size_t ipart=0ul; ipart<m_values.nelement(); ++ipart) {
+            m_avg_value_histories[ipart].push(m_values[ipart]);
+            if (m_avg_value_histories[ipart].size() > m_opts.ncycle_shift_average_period) {
+                m_avg_values[ipart] -= m_avg_value_histories[ipart].front();
+                m_avg_value_histories[ipart].pop();
+            }
+            ASSERT(m_avg_value_histories[ipart].size() <= m_opts.ncycle_shift_average_period)
+            m_avg_values[ipart] += m_values[ipart];
+        }
+    }
+
+    defs::ham_comp_t get_average(const size_t& ipart) const {
+        return m_avg_values[ipart]/m_avg_value_histories[ipart].size();
+    }
+
+
+    defs::ham_comp_t product_reweighting_queue(const size_t& ipart);
 };
 
 

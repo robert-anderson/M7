@@ -132,37 +132,31 @@ TEST(StochasticPropagator, Hdf5) {
 TEST(StochasticPropagator, Hubbard) {
     Options opts;
     opts.nadd_initiator = 0.0;
-    opts.tau_initial = 0.001;
-    opts.nwalker_target = 20;
+    opts.tau_initial = 0.01;
+    opts.nwalker_target = 100;
     opts.nwalker_initial = 1;
     opts.min_spawn_mag = 0.0;
     opts.min_death_mag = 0.0;
-    opts.shift_damp = 1;
-    opts.shift_update_period = 10;
+    opts.shift_damp = 0.1;
+    opts.shift_update_period = 1;
     opts.ncycle = 2000000;
-    opts.spf_uniform_twf = 1;
+    opts.spf_uniform_twf = 0;
+    opts.ncycle_reweight_lookback = 10000;
+    opts.ncycle_wait_reweight = 10000;
     opts.rdm_rank = 0;
+    opts.replicate = false;
     opts.init();
 
-    // -4.22963352
-    // -1.953145309
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
-    bool spin = false;
-    //for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-    for (size_t i = 0ul; i < ham.nelec(); ++i) {
-//        ref_onv.set({0, i});
-//        ref_onv.set({1, i});
-        ref_onv.set({spin, i});
-        spin=!spin;
-    }
+    ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    StochasticPropagator prop(ham, opts, wf.npart());
+    StochasticPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
     prop.m_shift.m_values = ref_energy;
 
