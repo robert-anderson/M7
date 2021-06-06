@@ -118,6 +118,9 @@ void Solver::begin_cycle() {
     ASSERT(m_wf.m_nwalker.m_local[0] == 0);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
+    if (m_wf.nroot()>1 && m_prop.m_shift.m_variable_mode) {
+        m_wf.orthogonalize();
+    }
     m_refs.begin_cycle();
 
     auto update_epoch = [&](const size_t &ncycle_wait) {
@@ -154,15 +157,6 @@ void Solver::begin_cycle() {
 }
 
 void Solver::loop_over_occupied_onvs() {
-    /*
-     * Loop over all rows in the m_wf.m_walkers table and if the row is not empty:
-     *      ascertain the initiator status of the ONV
-     *      if not initiator and weight > initiator threshold, then grant initiator status
-     *      if initiator and weight < initiator threshold, then revoke initiator status
-     *      perform all the off-diagonal propagation (fill send table)
-     *      update local weight in the diagonal cloning/death step
-     * else if all elements of the m_weight field are zero, the row should be removed
-     */
     auto &row = m_wf.m_store.m_row;
 
     for (row.restart(); row.in_range(); row.step()) {
@@ -209,6 +203,8 @@ void Solver::loop_over_occupied_onvs() {
             make_average_weight_mev_contribs(m_icycle);
         }
 
+        m_refs.contrib_row();
+
         for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
             MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
@@ -226,7 +222,6 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                m_refs.contrib_row();
                 if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
                 if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
@@ -545,9 +540,9 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator ONVs have occurred");
 
+    m_refs.end_cycle();
     if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();
-    m_refs.end_cycle();
     m_prop.update(m_icycle, m_wf);
     if (m_uniform_twf) m_uniform_twf->reduce();
     if (m_weighted_twf) m_weighted_twf->reduce();
@@ -565,8 +560,8 @@ void Solver::output_stats() {
         stats.m_delta_nwalker = m_wf.m_delta_nwalker.m_reduced;
         stats.m_nwalker_spawned = m_wf.m_nspawned.m_reduced;
         stats.m_nwalker_annihilated = m_wf.m_nannihilated.m_reduced;
-        stats.m_ref_proj_energy_num = m_refs[0].proj_energy_num();
-        stats.m_ref_weight = m_refs[0].weight();
+        stats.m_ref_proj_energy_num = m_refs.proj_energy_nums();
+        stats.m_ref_weight = m_refs.weights();
         stats.m_ref_proj_energy = stats.m_ref_proj_energy_num;
         stats.m_ref_proj_energy /= stats.m_ref_weight;
         stats.m_l2_norm = m_wf.m_l2_norm_square.m_reduced;
@@ -648,7 +643,7 @@ void Solver::output_mevs() {
         m_mevs.m_fermion_rdm->h5_write(gw2);
         const auto b = -99.9421389039331;
         std::cout << m_mevs.m_fermion_rdm->get_energy(m_prop.m_ham)-b << " "
-                  << m_prop.m_shift.m_values[0]-b << " " << m_refs[0].proj_energy_num()[0]/m_refs[0].weight()[0]-b << std::endl;
+                  << m_prop.m_shift.m_values[0]-b << " " << m_refs[0].proj_energy_num()/m_refs[0].weight()-b << std::endl;
     }
 }
 

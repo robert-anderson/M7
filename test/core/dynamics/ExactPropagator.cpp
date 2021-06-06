@@ -59,6 +59,7 @@ TEST(ExactPropagator, BosonTest) {
 #ifndef ENABLE_BOSONS
 TEST(ExactPropagator, Test) {
     Options opts;
+    opts.nroot = 3;
     opts.nwalker_initial = 10;
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.01;
@@ -70,7 +71,7 @@ TEST(ExactPropagator, Test) {
     opts.consolidate_spawns = false;
     opts.explicit_hf_conn_mevs = false;
     opts.output_mevs_periodically = true;
-    opts.rdm_rank = 2;
+    opts.rdm_rank = 0;
     opts.replicate = false;
     opts.init();
     // -99.9421389039332
@@ -80,6 +81,7 @@ TEST(ExactPropagator, Test) {
     ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
+
     if (!opts.replicate && opts.nroot==1){ASSERT_EQ(wf.npart(), 1);}
     ExactPropagator prop(ham, opts, wf.m_format, opts.explicit_hf_conn_mevs);
     auto ref_energy = ham.get_energy(ref_onv);
@@ -87,6 +89,24 @@ TEST(ExactPropagator, Test) {
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
     for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.nwalker_initial);
 
+
+    buffered::Onv<> excit_onv(ham.nsite());
+    excit_onv = ref_onv;
+    excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
+    wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
+    ASSERT(wf.m_store.m_row.m_i==1);
+    wf.set_weight(1, opts.nwalker_initial);
+
+
+    excit_onv = ref_onv;
+    excit_onv.excite(ham.nsite()+ham.nelec()/2-1, ham.nsite()+ham.nelec()/2);
+    wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
+    ASSERT(wf.m_store.m_row.m_i==2);
+    wf.set_weight(2, opts.nwalker_initial);
+
+    std::cout <<
+              wf.m_store.to_string()
+    << std::endl;
     prop.m_shift.m_values = ref_energy;
 
     Solver solver(prop, wf, ref_loc);
@@ -166,6 +186,7 @@ TEST(ExactPropagator, Hubbard) {
 TEST(ExactPropagator, Cr2Test) {
     Options opts;
     opts.nwalker_initial = 10;
+    opts.reference_redefinition_thresh = 2.0;
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.01;
     opts.nwalker_target = 10000;

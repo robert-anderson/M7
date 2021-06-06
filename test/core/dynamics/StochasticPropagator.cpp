@@ -169,6 +169,64 @@ TEST(StochasticPropagator, Hubbard) {
     solver.execute(opts.ncycle);
 }
 
+TEST(StochasticPropagator, ExcitedStates) {
+    Options opts;
+    opts.nroot = 3;
+    opts.nwalker_initial = 10;
+    opts.nadd_initiator = 3.0;
+    opts.tau_initial = 0.01;
+    opts.nwalker_target = 10000;
+    opts.write_hdf5_fname = "rdm.h5";
+    opts.ncycle_wait_mevs = 4000;
+    opts.ncycle_accumulate_mevs = 200;
+    opts.ncycle_mev_period = 13;
+    opts.consolidate_spawns = false;
+    opts.explicit_hf_conn_mevs = false;
+    opts.output_mevs_periodically = true;
+    opts.rdm_rank = 0;
+    opts.replicate = false;
+    opts.init();
+    // -99.9421389039332
+    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
+    buffered::Onv<> ref_onv(ham.nsite());
+    ham.set_hf_onv(ref_onv, 0);
+
+    Wavefunction wf(opts, ham.nsite());
+
+    if (!opts.replicate && opts.nroot==1){ASSERT_EQ(wf.npart(), 1);}
+    StochasticPropagator prop(ham, opts, wf.m_format);
+    auto ref_energy = ham.get_energy(ref_onv);
+
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.nwalker_initial);
+
+
+    buffered::Onv<> excit_onv(ham.nsite());
+    excit_onv = ref_onv;
+    excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
+    wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
+    ASSERT(wf.m_store.m_row.m_i==1);
+    wf.set_weight(1, opts.nwalker_initial);
+
+
+    excit_onv = ref_onv;
+    excit_onv.excite(ham.nsite()+ham.nelec()/2-1, ham.nsite()+ham.nelec()/2);
+    wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
+    ASSERT(wf.m_store.m_row.m_i==2);
+    wf.set_weight(2, opts.nwalker_initial);
+
+    std::cout <<
+              wf.m_store.to_string()
+              << std::endl;
+    prop.m_shift.m_values = ref_energy;
+
+    Solver solver(prop, wf, ref_loc);
+    solver.execute(opts.ncycle);
+    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham)-prop.m_shift.m_values[0]<< std::endl;
+}
+
+
 #else
 
 TEST(StochasticPropagator, BosonTest) {

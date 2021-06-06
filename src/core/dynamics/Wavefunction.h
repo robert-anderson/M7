@@ -5,7 +5,6 @@
 #ifndef M7_WAVEFUNCTION_H
 #define M7_WAVEFUNCTION_H
 
-
 #include <src/core/io/Options.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/parallel/Reduction.h>
@@ -251,6 +250,68 @@ public:
         return m_format.m_nelement;
     }
 
+private:
+
+    void orthogonalize(NdReduction<defs::wf_t, 3>& overlaps,
+                       const size_t& iroot, const size_t& jroot, const size_t& ireplica) {
+        ASSERT(iroot<=jroot);
+        auto& row = m_store.m_row;
+        const auto ipart_src = m_format.flatten({iroot, ireplica});
+        const auto ipart_dst = m_format.flatten({jroot, ireplica});
+        overlaps.m_local[{iroot, jroot, ireplica}] +=
+                consts::conj(row.m_weight[ipart_src])*row.m_weight[ipart_dst];
+        if (jroot+1<nroot()) {
+            // there is another part to project onto
+            const auto ipart_next = m_format.flatten({jroot+1, ireplica});
+            overlaps.m_local[{iroot, jroot + 1, ireplica}] +=
+                    consts::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_next];
+        }
+        if (iroot<jroot){
+            const auto& overlap = overlaps.m_reduced[{iroot, jroot, ireplica}];
+            const auto& norm = overlaps.m_reduced[{iroot, iroot, ireplica}];
+            ASSERT(std::abs(norm)>1e-12);
+            const auto gs_coeff = overlap / norm;
+            change_weight(ipart_dst, -gs_coeff*row.m_weight[ipart_src]);
+        }
+    }
+public:
+
+    /**
+     * using the Gram-Schmidt method, orthogonalize each (replicated) population with respect to all lower-lying states
+     * by projecting their orthogonal complements.
+     * the GS process transforms a non-orthogonal set {v} into an orthogonal set {u} by the algorithm:
+     *  u0 = v0
+     *  u1 = v1 - p(u0, v1)
+     *  u2 = v2 - p(u0, v2) - p(u1, v2)
+     *  .
+     *  .
+     *  .
+     *  uk = vk - sum_{i=0}^{k-1} p(ui, vk)
+     *
+     *  where p(u, k) is the projection (<u, k>/<u, u> u)
+     *
+     * when calling this function, it is assumed that the value of m_l2_norm_square corresponds to the current walker
+     * list.
+     *
+     * for i in [0, nroot)
+     *  project psi_0 out of all higher states
+     *
+     */
+    void orthogonalize() {
+        // bra root, ket root, replica
+        NdReduction<defs::wf_t, 3> overlaps({{nroot(), nroot(), nreplica()}});
+        auto& row = m_store.m_row;
+        for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
+            for (size_t jroot = iroot; jroot < nroot(); ++jroot) {
+                for (size_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
+                    for (row.restart(); row.in_range(); row.step()) {
+                        if (!row.m_onv.is_zero()) orthogonalize(overlaps, iroot, jroot, ireplica);
+                    }
+                    overlaps.all_sum();
+                }
+            }
+        }
+    }
 };
 
 #endif //M7_WAVEFUNCTION_H

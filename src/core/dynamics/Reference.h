@@ -37,8 +37,8 @@ class Reference : public Wavefunction::SharedRow {
     const double m_redefinition_thresh;
 
     ReductionSyndicate m_summables;
-    NdReduction<defs::ham_t, defs::ndim_wf> m_proj_energy_num;
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nwalker_at_doubles;
+    Reduction<defs::ham_t> m_proj_energy_num;
+    Reduction<defs::wf_comp_t> m_nwalker_at_doubles;
 
 public:
     Reference(const Options &m_opts, const Hamiltonian<> &ham,
@@ -94,13 +94,13 @@ public:
      * @param onv
      * @param weights
      */
-    void make_numerator_contribs(const fields::Onv<> &onv, const fields::Numbers<defs::ham_t, defs::ndim_wf> &weights);
+    void make_numerator_contribs(const fields::Onv<> &onv, const defs::wf_t& weight);
 
-    NdReduction<defs::wf_comp_t, defs::ndim_wf> &nwalker_at_doubles();
+    const defs::wf_comp_t &nwalker_at_doubles();
 
-    const fields::Numbers<defs::ham_t, defs::ndim_wf>& proj_energy_num() const;
+    const defs::ham_t& proj_energy_num() const;
 
-    const fields::Numbers<defs::ham_t, defs::ndim_wf>& weight() const;
+    const defs::wf_t& weight() const;
 
     /**
      * this method includes the current weight in the average, bringing the normalized average up to date.
@@ -124,7 +124,11 @@ public:
  */
 struct References {
     std::vector<Reference> m_refs;
-    References(const Options &m_opts, const Hamiltonian<> &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs) {
+    buffered::Numbers<defs::ham_t, defs::ndim_wf> m_proj_energy_nums;
+    buffered::Numbers<defs::wf_t, defs::ndim_wf> m_weights;
+
+    References(const Options &m_opts, const Hamiltonian<> &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs):
+            m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
         ASSERT(locs.size()==wf.m_format.m_nelement);
         m_refs.reserve(wf.m_format.m_nelement);
         for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(m_opts, ham, wf, ipart, locs[ipart]);
@@ -154,6 +158,19 @@ struct References {
             out.push_back(m_refs[ipart].is_connected(onv));
         return out;
     }
+
+    const fields::Numbers<defs::ham_t, defs::ndim_wf>& proj_energy_nums() {
+        size_t ipart = 0ul;
+        for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
+        return m_proj_energy_nums;
+    }
+
+    const fields::Numbers<defs::wf_t, defs::ndim_wf>& weights() {
+        size_t ipart = 0ul;
+        for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
+        return m_weights;
+    }
+
 };
 
 #endif //M7_REFERENCE_H

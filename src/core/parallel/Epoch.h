@@ -86,6 +86,15 @@ public:
     void terminate(const size_t& icycle){
         for (auto& epoch:m_epochs) epoch.terminate(icycle);
     }
+
+    /**
+     * @return
+     *  true only if all epochs have begun
+     */
+    operator bool() const {
+        for (const auto& epoch : m_epochs) if (!epoch) return false;
+        return true;
+    }
 };
 
 
