@@ -70,6 +70,19 @@ public:
         }
     }
 
+
+    BufferedTableArray& operator=(const BufferedTableArray<row_t, mapped> &other) {
+        m_buffer.resize(other.m_buffer.dsize());
+        for (size_t itable = 0ul; itable < other.ntable(); ++itable) {
+            auto& this_table = m_tables[itable];
+            auto& other_table = other.m_tables[itable];
+            this_table.clear();
+            this_table.push_back(other_table.m_nrow);
+            this_table.m_bw = other_table.m_bw;
+        }
+        return *this;
+    }
+
     size_t ntable() const { return m_tables.size(); }
 
     void resize(size_t nrow_per_table) {

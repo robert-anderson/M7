@@ -20,8 +20,20 @@ public:
         ASSERT(static_cast<const Row&>(Table<row_t>::m_row).m_table);
     }
 
-    BufferedTable(const BufferedTable<row_t> &other) :
-            BufferedTable(other.m_buffer.m_name, other){}
+    BufferedTable& operator=(const BufferedTable<row_t, mapped> &other) {
+        m_buffer.resize(other.m_buffer.dsize());
+        Table<row_t>::clear();
+        Table<row_t>::push_back(other.m_nrow);
+        Table<row_t>::m_bw = other.m_bw;
+        return *this;
+    }
+
+    BufferedTable(const BufferedTable<row_t, mapped> &other) :
+            BufferedTable(other.m_buffer.m_name, other){
+        m_buffer.resize(other.m_buffer.dsize());
+        *this = other;
+    }
+
 
     void set_expansion_factor(double f) {
         m_buffer.m_expansion_factor = f;
