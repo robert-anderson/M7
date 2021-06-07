@@ -4,6 +4,7 @@
 
 #include <src/core/basis/Connections.h>
 #include <src/core/observables/MevGroup.h>
+#include <src/core/util/Foreach.h>
 #include "gtest/gtest.h"
 #include "src/core/table/BufferedFields.h"
 
