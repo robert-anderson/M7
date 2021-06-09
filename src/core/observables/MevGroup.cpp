@@ -13,11 +13,11 @@ FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
 
     foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
     size_t icomb = 0ul;
-    auto fn = [&](const defs::inds& inds){
+    auto fn = [&](){
         for (size_t i = 0ul; i < nop_insert; ++i) {
             auto j = icomb * nop_insert + i;
             ASSERT(j < m_all_combs.size());
-            m_all_combs[j] = inds[i];
+            m_all_combs[j] = foreach_comb[i];
         }
         ++icomb;
     };

@@ -70,8 +70,8 @@ namespace ci_gen {
         void operator()(Row &row, fields::Onv<> &onv){
             ASSERT(onv.belongs_to_row(&row));
             row.m_table->clear();
-            auto body = [&](const defs::inds& inds){
-                set_from_inds(m_onv_work, inds);
+            auto body = [&](){
+                set_from_inds(m_onv_work, m_foreach.inds());
                 add_if_included(row, onv);
             };
             m_foreach(body);

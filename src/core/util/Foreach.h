@@ -14,22 +14,43 @@ namespace foreach {
     namespace ctnd {
         template<size_t nind>
         using inds_t = std::array<size_t, nind>;
-        template<size_t nind>
-        using body_fn_t = std::function<void(const inds_t<nind> &)>;
-        template<size_t nind>
-        using cr_body_fn_t = const body_fn_t<nind> &;
+        using body_fn_t = std::function<void()>;
+        using cr_body_fn_t = const body_fn_t &;
 
         template<size_t nind>
         struct Base {
             const size_t m_nterm;
             inds_t<nind> m_inds;
+            const inds_t<nind>& inds() const {return m_inds;}
+            const size_t& operator[](const size_t& i){
+                ASSERT(i<nind);
+                return m_inds[i];
+            }
+            size_t sum() const {
+                return std::accumulate(m_inds.cbegin(), m_inds.cend(), 0);
+            }
+            virtual void operator()(cr_body_fn_t body) = 0;
+
+            template<typename ...Args>
+            void operator()(cr_body_fn_t body, Base& next, Args&... rest) {
+                auto this_body = [&](){
+                    next(body, rest...);
+                };
+                (*this)(this_body);
+            }
 
             Base(size_t nterm) : m_nterm(nterm) {}
         };
 
+        template<size_t nind, typename ...Args>
+        static void chain(cr_body_fn_t body, Base<nind>& first, Args&... rest) {
+            first(body, rest...);
+        }
+
         template<size_t nind>
         struct Unrestricted : Base<nind> {
             const inds_t<nind> m_shape;
+            using Base<nind>::operator();
         private:
             static size_t nterm(const inds_t<nind> &shape) {
                 if (!nind) return 0;
@@ -40,29 +61,30 @@ namespace foreach {
 
         public:
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(nterm(shape)), m_shape(shape) {}
+            Unrestricted(const size_t& extent) : Unrestricted(array_utils::filled<size_t, nind>(extent)){}
 
             template<size_t ilevel>
-            void level_loop(cr_body_fn_t<nind> body, dispatch_utils::IndTag<ilevel>) {
+            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<ilevel>) {
                 constexpr size_t iind = ilevel - 1;
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) level_loop(body, dispatch_utils::IndTag<ilevel + 1>());
             }
 
-            void level_loop(cr_body_fn_t<nind> body, dispatch_utils::IndTag<nind>) {
+            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<nind>) {
                 constexpr size_t iind = nind - 1;
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto &extent = m_shape[iind];
-                for (ind = 0ul; ind < extent; ++ind) body(Base<nind>::m_inds);
+                for (ind = 0ul; ind < extent; ++ind) body();
             }
 
-            void loop(cr_body_fn_t<nind> body, dispatch_utils::BoolTag<true>) {}
+            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<true>) {}
 
-            void loop(cr_body_fn_t<nind> body, dispatch_utils::BoolTag<false>) {
+            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<false>) {
                 level_loop(body, dispatch_utils::IndTag<1>());
             }
 
-            void operator()(cr_body_fn_t<nind> body) {
+            void operator()(cr_body_fn_t body) override {
                 loop(body, dispatch_utils::BoolTag<nind == 0>());
             }
         };
@@ -70,6 +92,7 @@ namespace foreach {
         template<size_t nind, bool strict = true, bool ascending = true>
         struct Ordered : Base<nind> {
             using Base<nind>::m_inds;
+            using Base<nind>::operator();
             using inds_t = std::array<size_t, nind>;
             const size_t m_n;
 
@@ -83,7 +106,7 @@ namespace foreach {
                     Base<nind>(nterm(n)), m_n(n) {}
 
             template<size_t ilevel>
-            void level_loop(cr_body_fn_t<nind> body, dispatch_utils::IndTag<ilevel>) {
+            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<ilevel>) {
                 constexpr size_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_inds[iind];
@@ -91,21 +114,21 @@ namespace foreach {
                 for (ind = 0ul; ind < extent; ++ind) level_loop(body, dispatch_utils::IndTag<ilevel + 1>());
             }
 
-            void level_loop(cr_body_fn_t<nind> body, dispatch_utils::IndTag<nind>) {
+            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<nind>) {
                 constexpr size_t iind = ascending ? 0 : nind - 1;
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_inds[ascending ? iind + 1 : iind - 1] + !strict;
-                for (ind = 0ul; ind < extent; ++ind) body(m_inds);
+                for (ind = 0ul; ind < extent; ++ind) body();
             }
 
-            void loop(cr_body_fn_t<nind> body, dispatch_utils::BoolTag<true>) {}
+            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<true>) {}
 
-            void loop(cr_body_fn_t<nind> body, dispatch_utils::BoolTag<false>) {
+            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<false>) {
                 level_loop(body, dispatch_utils::IndTag<1>());
             }
 
-            void operator()(cr_body_fn_t<nind> body) {
+            void operator()(cr_body_fn_t body) override {
                 loop(body, dispatch_utils::BoolTag<nind == 0>());
             }
         };
@@ -116,7 +139,7 @@ namespace foreach {
      */
     namespace rtnd {
         using inds_t = std::vector<size_t>;
-        using body_fn_t = std::function<void(const inds_t &)>;
+        using body_fn_t = std::function<void()>;
         using cr_body_fn_t = const body_fn_t &;
 
         struct Base {
@@ -124,12 +147,40 @@ namespace foreach {
             const size_t m_nterm;
             inds_t m_inds;
 
+            const inds_t& inds() const {return m_inds;}
+
+            const size_t& operator[](const size_t& i){
+                ASSERT(i<m_nind);
+                return m_inds[i];
+            }
+
+            size_t ind_sum() const {
+                return std::accumulate(m_inds.cbegin(), m_inds.cend(), 0);
+            }
+
+            virtual void operator()(cr_body_fn_t body) = 0;
+
+            template<typename ...Args>
+            void operator()(cr_body_fn_t body, Base& next, Args&... rest) {
+                auto this_body = [&](){
+                    next(body, rest...);
+                };
+                (*this)(this_body);
+            }
+
             Base(size_t nind, size_t nterm) : m_nind(nind),
                                               m_nterm(nterm), m_inds(m_nind, 0) {}
+
         };
+
+        template<typename ...Args>
+        static void chain(cr_body_fn_t body, Base& first, Args&... rest) {
+            first(body, rest...);
+        }
 
         struct Unrestricted : Base {
             const inds_t m_shape;
+            using Base::operator();
         private:
             static size_t nterm(const inds_t &shape) {
                 if (shape.empty()) return 0;
@@ -140,6 +191,7 @@ namespace foreach {
 
         public:
             Unrestricted(const inds_t &shape) : Base(shape.size(), nterm(shape)), m_shape(shape) {}
+            Unrestricted(const size_t& nind, const size_t& extent) : Unrestricted(std::vector<size_t>(nind, extent)){}
 
             void level_loop(cr_body_fn_t body, size_t ilevel) {
                 const auto &iind = ilevel - 1;
@@ -148,10 +200,10 @@ namespace foreach {
                 if (ilevel < m_nind)
                     for (ind = 0ul; ind < extent; ++ind) level_loop(body, ilevel + 1);
                 else
-                    for (ind = 0ul; ind < extent; ++ind) body(m_inds);
+                    for (ind = 0ul; ind < extent; ++ind) body();
             }
 
-            void operator()(cr_body_fn_t body) {
+            void operator()(cr_body_fn_t body) override {
                 if (m_nind == 0) return;
                 level_loop(body, 1);
             }
@@ -160,6 +212,7 @@ namespace foreach {
         template<bool strict = true, bool ascending = true>
         struct Ordered : Base {
             const size_t m_n;
+            using Base::operator();
 
             static size_t nterm(size_t n, size_t r) {
                 if (!r) return 0ul;
@@ -178,10 +231,10 @@ namespace foreach {
                 if (ilevel < m_nind)
                     for (ind = 0ul; ind < extent; ++ind) level_loop(body, ilevel + 1);
                 else
-                    for (ind = 0ul; ind < extent; ++ind) body(m_inds);
+                    for (ind = 0ul; ind < extent; ++ind) body();
             }
 
-            void operator()(cr_body_fn_t body) {
+            void operator()(cr_body_fn_t body) override {
                 if (m_nind == 0) return;
                 level_loop(body, 1);
             }

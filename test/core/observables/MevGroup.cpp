@@ -58,12 +58,12 @@ TEST(MevGroup, Promoter2BodyDiagonal) {
      */
     foreach::rtnd::Ordered<> foreach_comb(conn.ncom(), nop_insert);
     size_t icomb = 0ul;
-    auto fn = [&](const defs::inds& comb) {
+    auto fn = [&]() {
         auto phase = fp.apply(icomb, conn, inds);
         ASSERT_FALSE(phase);
         for (size_t iop = 0ul; iop < rank; ++iop) {
-            ASSERT_EQ(inds.m_ann[iop], conn.com(comb[iop]));
-            ASSERT_EQ(inds.m_cre[iop], conn.com(comb[iop]));
+            ASSERT_EQ(inds.m_ann[iop], conn.com(foreach_comb[iop]));
+            ASSERT_EQ(inds.m_cre[iop], conn.com(foreach_comb[iop]));
         }
         ++icomb;
     };

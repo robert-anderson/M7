@@ -9,54 +9,47 @@
 
 
 
-#if 0 
+#ifdef ENABLE_BOSONS
 TEST(ExactPropagator, BosonTest) {
     Options opts;
     opts.nwalker_initial = 10;
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.01;
-    opts.nwalker_target = 100000;
-    opts.shift_damp = 0.4;
+    opts.nwalker_target = 50;
+    opts.write_hdf5_fname = "rdm.h5";
+    opts.ncycle_wait_mevs = 4000;
+    opts.ncycle_accumulate_mevs = 200;
+    opts.ncycle_mev_period = 13;
+    opts.consolidate_spawns = false;
+    opts.explicit_hf_conn_mevs = false;
+    opts.output_mevs_periodically = true;
+    opts.rdm_rank = 2;
+    opts.replicate = false;
+    opts.init();
     // nboson_cutoff 1: -6.9875779675355165
     // nboson_cutoff 2: -10.328242246088791
     Hamiltonian<1> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
-
-
     ASSERT_TRUE(ham.spin_conserving());
-    elements::Onv<1> onv(ham.nsite());
-    for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
-        onv.m_frm.set(0, i);
-        onv.m_frm.set(1, i);
-    }
+    buffered::Onv<> ref_onv(ham.nsite());
+    ham.set_hf_onv(ref_onv, 0);
+
     Wavefunction wf(opts, ham.nsite());
-    wf.m_store.expand(10);
-    wf.m_comm.expand(800);
-    ExactPropagator prop(ham, opts);
-    auto ref_energy = ham.get_energy(onv);
+    if (!opts.replicate && opts.nroot == 1) { ASSERT_EQ(wf.npart(), 1); }
+    ExactPropagator prop(ham, opts, wf.m_format, opts.explicit_hf_conn_mevs);
+    auto ref_energy = ham.get_energy(ref_onv);
 
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart) wf.set_weight(ipart, opts.nwalker_initial);
 
-    auto ref_loc = wf.create_walker(onv, opts.nwalker_initial, ref_energy, 1);
-    prop.m_values = ref_energy;
+    prop.m_shift.m_values = ref_energy;
+
     Solver solver(prop, wf, ref_loc);
-
-    std::cout << "Reference Energy: " << ref_energy << std::endl;
-
-    for (size_t i = 0ul; i < 20000; ++i) {
-        solver.execute();
-    }
-/*
-    for (size_t i = 0ul; i < wf.m_walkers.m_hwm; ++i) {
-        std::cout
-                << wf.m_walkers.m_onv(i).to_string() << " "
-                << wf.m_walkers.m_weight(i, 0, 0) << " "
-                << wf.m_walkers.m_flags.m_reference_connection(i)
-                << std::endl;
-    }
-    */
+    solver.execute(opts.ncycle);
+    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham) - prop.m_shift.m_values[0] << std::endl;
 }
-#endif
 
-#ifndef ENABLE_BOSONS
+#else
+
 TEST(ExactPropagator, Test) {
     Options opts;
     opts.nroot = 3;

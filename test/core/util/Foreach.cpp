@@ -16,9 +16,7 @@ TEST(Foreach, CtndUnrestricted0) {
     const std::array<size_t, 0> shape = {};
     foreach::ctnd::Unrestricted<0> foreach(shape);
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 0> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0);
     ASSERT_EQ(foreach.m_nterm, 0);
@@ -54,9 +52,7 @@ TEST(Foreach, CtndUnrestricted3) {
     };
     foreach::ctnd::Unrestricted<3> foreach(shape);
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 3> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -65,9 +61,7 @@ TEST(Foreach, CtndOrderedStrictAsc0) {
     const size_t n = 5;
     foreach::ctnd::Ordered<0, true, true> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 0> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -89,9 +83,7 @@ TEST(Foreach, CtndOrderedStrictAsc3) {
             {2, 3, 4}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 3> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -100,9 +92,7 @@ TEST(Foreach, CtndOrderedStrictDesc0) {
     const size_t n = 5;
     foreach::ctnd::Ordered<0, true, false> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 0> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -124,9 +114,7 @@ TEST(Foreach, CtndOrderedStrictDesc3) {
             {4, 3, 2}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 3> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -135,9 +123,7 @@ TEST(Foreach, CtndOrderedAsc0) {
     const size_t n = 5;
     foreach::ctnd::Ordered<0, false, true> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 0> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -159,9 +145,7 @@ TEST(Foreach, CtndOrderedAsc3) {
             {2, 2, 2}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 3> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -170,9 +154,7 @@ TEST(Foreach, CtndOrderedDesc0) {
     const size_t n = 5;
     foreach::ctnd::Ordered<0, false, false> foreach(n);
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 0> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -194,9 +176,7 @@ TEST(Foreach, CtndOrderedDesc3) {
              {2, 2, 2}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::array<size_t, 3> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -214,9 +194,7 @@ TEST(Foreach, RtndUnrestricted0) {
     const std::vector<size_t> shape = {};
     foreach::rtnd::Unrestricted foreach(shape);
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0);
     ASSERT_EQ(foreach.m_nterm, 0);
@@ -252,9 +230,7 @@ TEST(Foreach, RtndUnrestricted3) {
     };
     foreach::rtnd::Unrestricted foreach(shape);
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -263,9 +239,7 @@ TEST(Foreach, RtndOrderedStrictAsc0) {
     const size_t n = 5;
     foreach::rtnd::Ordered<true, true> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -287,9 +261,7 @@ TEST(Foreach, RtndOrderedStrictAsc3) {
             {2, 3, 4}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -298,9 +270,7 @@ TEST(Foreach, RtndOrderedStrictDesc0) {
     const size_t n = 5;
     foreach::rtnd::Ordered<true, false> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -322,9 +292,7 @@ TEST(Foreach, RtndOrderedStrictDesc3) {
             {4, 3, 2}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -333,9 +301,7 @@ TEST(Foreach, RtndOrderedAsc0) {
     const size_t n = 5;
     foreach::rtnd::Ordered<false, true> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -357,9 +323,7 @@ TEST(Foreach, RtndOrderedAsc3) {
             {2, 2, 2}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }
@@ -368,9 +332,7 @@ TEST(Foreach, RtndOrderedDesc0) {
     const size_t n = 5;
     foreach::rtnd::Ordered<false, false> foreach(n, 0);
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ++i;
-    };
+    auto fn = [&]() {++i;};
     foreach(fn);
     ASSERT_EQ(i, 0ul);
     ASSERT_EQ(foreach.m_nterm, 0ul);
@@ -392,9 +354,7 @@ TEST(Foreach, RtndOrderedDesc3) {
             {2, 2, 2}
     };
     size_t i = 0ul;
-    auto fn = [&](const std::vector<size_t> &inds) {
-        ASSERT_EQ(inds, chk_inds[i++]);
-    };
+    auto fn = [&]() {ASSERT_EQ(foreach.inds(), chk_inds[i++]);};
     foreach(fn);
     ASSERT_EQ(i, foreach.m_nterm);
 }

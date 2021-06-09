@@ -6,6 +6,7 @@
 #define M7_DECODEDDETERMINANT_H
 
 #include "src/core/field/Fields.h"
+#include "AbelianGroup.h"
 
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)
@@ -74,10 +75,10 @@ class NdDecodedDeterminant {
 
 public:
     NdDecodedDeterminant(std::array<size_t, nind> shape, size_t nsite, const defs::inds& map):
-        m_format(shape), m_inds(m_format.nelement()), m_map(map){
+        m_format(shape), m_inds(m_format.m_nelement), m_map(map){
         for (auto& v: m_inds) v.reserve(2*nsite);
         ASSERT(m_map.size()==2*nsite);
-        ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.nelement());
+        ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.m_nelement);
     }
 
     NdDecodedDeterminant(std::array<size_t, nind> shape, const fields::Onv<0> &onv, const defs::inds& map) :
@@ -145,5 +146,26 @@ public:
 
 typedef SpinDecodedDeterminant<NdOccupiedUpdater> SpinOccupiedOrbitals;
 typedef SpinDecodedDeterminant<NdVacantUpdater> SpinVacantOrbitals;
+
+template<typename updater_fn>
+class SymmDecodedDeterminant : public NdDecodedDeterminant<updater_fn, 2> {
+
+    defs::inds make_map(const AbelianGroupMap& grp_map) {
+        defs::inds out(2*grp_map.m_nsite, 0);
+        std::copy(grp_map.m_site_irreps.cbegin(), grp_map.m_site_irreps.cend(), out.begin());
+        std::copy(grp_map.m_site_irreps.cbegin(), grp_map.m_site_irreps.cend(), out.begin()+grp_map.m_nsite);
+        for (size_t i=grp_map.m_nsite; i<grp_map.m_nsite*2; ++i) out[i]+=grp_map.m_grp.nirrep();
+        return out;
+    }
+
+public:
+    explicit SymmDecodedDeterminant(const AbelianGroupMap& grp_map) :
+            NdDecodedDeterminant<updater_fn, 2>({2, grp_map.m_grp.nirrep()}, grp_map.m_nsite, make_map(grp_map)){
+    }
+};
+
+typedef SymmDecodedDeterminant<NdOccupiedUpdater> SymmOccupiedOrbitals;
+typedef SymmDecodedDeterminant<NdVacantUpdater> SymmVacantOrbitals;
+
 
 #endif //M7_DECODEDDETERMINANT_H

@@ -30,6 +30,14 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
         return *this;
     }
 
+    FermionOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
+        // prezero the element
+        zero();
+        for (const auto &ind: setbits.first) set(ind);
+        for (const auto &ind: setbits.second) set(ind+m_nsite);
+        return *this;
+    }
+
     void set(const size_t& bit_offset, const defs::inds& setbits) {
         for(auto& i: setbits) set(bit_offset+i);
     }

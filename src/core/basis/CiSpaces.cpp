@@ -21,13 +21,10 @@ void ci_gen::SpinSym::operator()(Row &row, fields::Onv<> &onv) {
     ASSERT(onv.belongs_to_row(&row));
     row.m_table->clear();
 
-    auto alpha_body = [&](const defs::inds& alpha_inds){
-        auto beta_body = [&](const defs::inds& beta_inds){
-            m_onv_work.zero();
-            set_from_inds(m_onv_work, alpha_inds, beta_inds);
-            add_if_included(row, onv);
-        };
-        m_foreach_beta(beta_body);
+    auto body = [&](){
+        m_onv_work.zero();
+        set_from_inds(m_onv_work, m_foreach_alpha.inds(), m_foreach_beta.inds());
+        add_if_included(row, onv);
     };
-    m_foreach_alpha(alpha_body);
+    m_foreach_alpha(body, m_foreach_beta);
 }

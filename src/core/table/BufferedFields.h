@@ -42,7 +42,10 @@ struct BufferedField : WrappedRow, field_t {
         m_wrapped_row.restart();
     }
 
-    BufferedField(const BufferedField& other): BufferedField(static_cast<const field_t&>(*this)){}
+    BufferedField(const BufferedField& other): BufferedField(static_cast<const field_t&>(other)){
+        // copy data
+        *this = other;
+    }
 
     BufferedField& operator=(const field_t& other){
         field_t::operator=(other);
@@ -59,22 +62,18 @@ struct BufferedField : WrappedRow, field_t {
 namespace buffered {
 
     template<typename T, size_t nind>
-    struct Bitsets : BufferedField<fields::Bitsets<T, nind>> {
-        typedef BufferedField<fields::Bitsets<T, nind>> base_t;
-        typedef typename fields::Bitsets<T, nind>::inds_t inds_t;
-        using fields::Bitsets<T, nind>::operator=;
-        Bitsets(inds_t shape) : BufferedField<fields::Bitsets<T, nind>>({nullptr, shape}){}
-        Bitsets& operator=(const Bitsets& other){
-            base_t::operator=(other);
-            return *this;
-        }
-        Bitsets(const Bitsets& other): Bitsets(other.m_format.shape()){}
+    struct NdBitset : BufferedField<fields::NdBitset<T, nind>> {
+        typedef BufferedField<fields::NdBitset<T, nind>> base_t;
+        typedef typename fields::NdBitset<T, nind>::inds_t inds_t;
+        using fields::NdBitset<T, nind>::operator=;
+        NdBitset(inds_t shape) : BufferedField<fields::NdBitset<T, nind>>({nullptr, shape}){}
+        NdBitset(const fields::NdBitset<T, nind>& field): BufferedField<fields::NdBitset<T, nind>>(field){}
     };
 
 
     template<typename T>
-    struct Bitset : Bitsets<T, 1ul> {
-        Bitset(size_t nbit): Bitsets<T, 1ul>({nbit}){}
+    struct Bitset : NdBitset<T, 1ul> {
+        Bitset(size_t nbit): NdBitset<T, 1ul>({nbit}){}
     };
 
 
@@ -87,7 +86,7 @@ namespace buffered {
         Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
             *this = init_value;
         }
-        Numbers(const fields::Numbers<T, nind>& field):BufferedField<fields::Numbers<T, nind>>(field){}
+        Numbers(const fields::Numbers<T, nind>& field): BufferedField<fields::Numbers<T, nind>>(field){}
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {

@@ -30,7 +30,7 @@ namespace utils {
      * have been successful in debug build
      */
     template<typename T>
-    bool is_zero(const T *v) {
+    static bool is_zero(const T *v) {
         for (size_t ichar = 0ul; ichar < sizeof(T); ++ichar) {
             if (*((char *) v + ichar) != 0) return false;
         }
@@ -38,27 +38,32 @@ namespace utils {
     }
 
     template<typename T>
-    bool is_zero(const T &v) {
+    static bool is_zero(const T &v) {
         return is_zero(&v);
     }
 
     template<typename T>
-    std::string to_string(const T& v) {
+    static std::string to_string(const T& v) {
         return std::to_string(v);
     }
 
-    template<typename T>
-    std::string to_string(const std::vector<T>& v) {
+    static std::string to_string(const std::vector<std::string>& v) {
         std::string string("[");
-        for (size_t i = 0ul; i < v.size(); ++i) {
-            string += std::to_string(v[i]) + " ";
-        }
+        for (const auto& str: v) string += str + " ";
         string += "]";
         return string;
     }
 
     template<typename T>
-    std::string to_string(const std::stack<T>& v) {
+    static std::string to_string(const std::vector<T>& v) {
+        std::string string("[");
+        for (const auto& i: v) string += std::to_string(i) + " ";
+        string += "]";
+        return string;
+    }
+
+    template<typename T>
+    static std::string to_string(const std::stack<T>& v) {
         auto cpy = v;
         std::vector<T> tmp;
         while (!v.empty()){
@@ -69,7 +74,7 @@ namespace utils {
     }
 
     template<typename T>
-    std::string to_string(const std::list<T>& v) {
+    static std::string to_string(const std::list<T>& v) {
         auto cpy = v;
         std::vector<T> tmp;
         for (const auto& i: v) tmp.push_back(i);
@@ -77,7 +82,7 @@ namespace utils {
     }
 
     template<typename T>
-    std::string fp_to_string(const T &v, size_t fp_precision = 6) {
+    static std::string fp_to_string(const T &v, size_t fp_precision = 6) {
         ASSERT(std::is_floating_point<T>::value);
         std::stringstream tmp;
         tmp << std::scientific << std::setprecision(fp_precision) << v;
@@ -96,7 +101,7 @@ namespace utils {
 
 
     template<typename T>
-    std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 11) {
+    static std::string num_to_string(const T &entry, size_t padding = 0, size_t fp_precision = 11) {
         std::string result;
         if (std::is_floating_point<T>::value) result = fp_to_string(entry, fp_precision);
         else if (std::is_integral<T>::value) result = std::to_string(entry);
@@ -104,7 +109,7 @@ namespace utils {
     }
 
     template<typename T>
-    std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision = 11) {
+    static std::string num_to_string(const std::complex<T> &entry, size_t padding = 0, size_t fp_precision = 11) {
         auto tmp_string = fp_to_string(entry.real(), fp_precision) +
                           (entry.imag() < 0 ? "" : "+") + fp_to_string(entry.imag(), fp_precision) + "i";
         tmp_string.insert(tmp_string.begin(), padding, ' ');
@@ -113,7 +118,7 @@ namespace utils {
 
 
     template<typename T>
-    void print(typename std::vector<T>::const_iterator begin, typename std::vector<T>::const_iterator end) {
+    static void print(typename std::vector<T>::const_iterator begin, typename std::vector<T>::const_iterator end) {
         for (auto iter = begin; iter != end; iter++) {
             std::cout << *iter << " ";
         }
@@ -121,12 +126,12 @@ namespace utils {
     }
 
     template<typename T>
-    void print(const std::vector<T> &v) {
+    static void print(const std::vector<T> &v) {
         print<T>(v.cbegin(), v.cend());
     }
 
     template<typename narrow_t, typename wide_t>
-    narrow_t safe_narrow(const wide_t &wide) {
+    static narrow_t safe_narrow(const wide_t &wide) {
         static_assert(std::is_convertible<wide_t, narrow_t>::value, "incompatible types");
         static_assert(sizeof(wide_t) >= sizeof(narrow_t), "wide type must be at least as long as narrow type");
 #ifdef SAFE_NARROWING
@@ -136,7 +141,7 @@ namespace utils {
     }
 
     template<typename narrow_t, typename wide_t>
-    std::vector<narrow_t> safe_narrow(const std::vector<wide_t> &wides) {
+    static std::vector<narrow_t> safe_narrow(const std::vector<wide_t> &wides) {
         std::vector<narrow_t> narrows;
         narrows.reserve(wides.size());
         for (auto &it : wides) narrows.push_back(utils::safe_narrow<defs::mpi_count>(it));

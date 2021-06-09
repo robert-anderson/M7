@@ -170,6 +170,8 @@ void ham_sym_helpers::FermiBos::foreach_connection(
 
     m_conn_work.m_bonvconn.zero();
     m_onv_work.m_bos = src_onv.m_bos;
+
+    //static_cast<const FermionHamiltonian&>(m_ham).foreach_connection()
 //    auto frm_body = [&](const conn::Antisym<0> &, const fields::Onv<0> &, const defs::ham_t &){
 //        body(m_conn_work, m_onv_work, m_helement_work);
 //    };
