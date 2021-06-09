@@ -50,6 +50,36 @@ TEST(ExactPropagator, BosonTest) {
 
 #else
 
+TEST(ExactPropagator, DeterministicSubspace) {
+    Options opts;
+    opts.nwalker_initial = 10;
+    opts.nadd_initiator = 0.0;
+    opts.tau_initial = 0.05;
+    opts.nwalker_target = 1000;
+    opts.do_semistochastic = true;
+    opts.consolidate_spawns = false;
+    opts.replicate = false;
+    //const auto benchmark = -99.9421389039331
+    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.spin_conserving());
+    buffered::Onv<> ref_onv(ham.nsite());
+    ham.set_hf_onv(ref_onv, 0);
+    Wavefunction wf(opts, ham.nsite());
+    wf.m_store.expand(10);
+    wf.m_comm.expand(800);
+    ExactPropagator prop(ham, opts, wf.m_format);
+    auto ref_energy = ham.get_energy(ref_onv);
+
+    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    wf.set_weight(0, ref_energy);
+
+    prop.m_shift.m_values = ref_energy;
+
+    Solver solver(prop, wf, ref_loc);
+    solver.execute(opts.ncycle);
+}
+
+
 TEST(ExactPropagator, Test) {
     Options opts;
     opts.nroot = 3;

@@ -91,7 +91,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
                  std::string name = "wavefunction");
 
-
     void begin_cycle();
 
     void end_cycle();
@@ -178,6 +177,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void zero_weight(const size_t &ipart);
 
     void remove_row();
+
+    void sort_recv();
 
 private:
     /**

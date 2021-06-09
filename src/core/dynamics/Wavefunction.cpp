@@ -148,6 +148,30 @@ void Wavefunction::remove_row() {
     m_store.erase(lookup);
 }
 
+void Wavefunction::sort_recv() {
+    auto row1 = recv().m_row;
+    auto row2 = recv().m_row;
+    auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
+        row1.jump(irow1);
+        row2.jump(irow2);
+        // sort criteria from major to minor: dst ONV, dst_ipart, src ONV,
+        if (row1.m_dst_onv == row2.m_dst_onv) {
+            if (row1.m_dst_ipart == row2.m_dst_ipart) {
+                return row1.m_src_onv <= row2.m_src_onv;
+            }
+            return row1.m_dst_ipart <= row2.m_dst_ipart;
+        }
+        return row1.m_dst_onv <= row2.m_dst_onv;
+    };
+
+    /*
+     * sorting in ascending lexical order
+     */
+    QuickSorter qs(comp_fn);
+    qs.reorder_sort(recv());
+}
+
+
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {
     auto irank = m_ra.get_rank(dst_onv);

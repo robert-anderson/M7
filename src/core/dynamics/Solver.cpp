@@ -150,7 +150,6 @@ void Solver::begin_cycle() {
         auto init = m_detsub.m_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_detsub));
         if (init) {
             m_detsub.build_from_all_occupied(m_prop.m_ham);
-            std::cout << m_wf.m_store.to_string() << std::endl;
             log::debug("initialized deterministic subspace");
         }
     }
@@ -370,27 +369,7 @@ void Solver::loop_over_spawned() {
     if (!m_wf.recv().m_hwm) return;
     mpi::barrier();
     if (m_opts.consolidate_spawns) {
-        auto row1 = m_wf.recv().m_row;
-        auto row2 = m_wf.recv().m_row;
-        auto comp_fn = [&](const size_t &irow1, const size_t &irow2) {
-            row1.jump(irow1);
-            row2.jump(irow2);
-            // sort criteria from major to minor: dst ONV, dst_ipart, src ONV,
-            if (row1.m_dst_onv == row2.m_dst_onv) {
-                if (row1.m_dst_ipart == row2.m_dst_ipart) {
-                    return row1.m_src_onv <= row2.m_src_onv;
-                }
-                return row1.m_dst_ipart <= row2.m_dst_ipart;
-            }
-            return row1.m_dst_onv <= row2.m_dst_onv;
-        };
-
-        /*
-         * sorting in ascending lexical order
-         */
-        QuickSorter qs(comp_fn);
-        qs.reorder_sort(m_wf.recv());
-
+        m_wf.sort_recv();
         /*
          * now that the recv list is reordered according to dst ONV, we must process its
          * contents in dst ONV *blocks*.

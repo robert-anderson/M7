@@ -13,7 +13,7 @@
 struct FieldBase;
 
 struct Row {
-    TableBase* m_table;
+    TableBase *m_table;
     mutable defs::data_t *m_dbegin = nullptr;
     mutable size_t m_i = 0ul;
     std::vector<FieldBase *> m_fields;
@@ -23,8 +23,8 @@ struct Row {
     mutable Row *m_child = nullptr;
 
 
-    bool in_range(const size_t& irow_end) const {
-        ASSERT(irow_end<=m_table->m_hwm)
+    bool in_range(const size_t &irow_end) const {
+        ASSERT(irow_end <= m_table->m_hwm)
         return m_i < irow_end;
     }
 
@@ -49,8 +49,8 @@ struct Row {
     /*
      * the 3 "cursor" methods
      */
-    void restart(const size_t& irow_begin) const {
-        MPI_ASSERT(irow_begin<m_table->m_hwm, "Cannot restart to an out-of-range row index");
+    void restart(const size_t &irow_begin) const {
+        MPI_ASSERT(irow_begin < m_table->m_hwm, "Cannot restart to an out-of-range row index");
         MPI_ASSERT(m_table, "Row must be assigned to a Table");
         MPI_ASSERT(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
         m_dbegin = m_table->dbegin(irow_begin);
@@ -92,9 +92,9 @@ struct Row {
         jump(m_i);
     }
 
-    void copy_in(const Row& other){
-        ASSERT(other.m_dsize==m_dsize);
-        std::copy(other.dbegin(), other.dbegin()+m_dsize, dbegin());
+    void copy_in(const Row &other) {
+        ASSERT(other.m_dsize == m_dsize);
+        std::copy(other.dbegin(), other.dbegin() + m_dsize, dbegin());
     }
 
     Row() {}
@@ -110,6 +110,8 @@ struct Row {
         copy_in(other);
         return *this;
     }
+
+    std::string field_names_string() const;
 
     std::string to_string() const;
 

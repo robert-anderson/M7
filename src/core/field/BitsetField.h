@@ -45,7 +45,7 @@ struct BitsetField : FieldBase {
             m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {
     }
 
-    BitsetField(const BitsetField &other) : BitsetField(other.row_of_copy(), other.m_format.m_shape) {}
+    BitsetField(const BitsetField &other) : BitsetField(other.row_of_copy(), other.m_format, other.m_name) {}
 
     BitsetField &operator=(const BitsetField &other) {
         FieldBase::operator=(other);

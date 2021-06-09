@@ -5,6 +5,15 @@
 #include "Row.h"
 #include "FieldBase.h"
 
+
+std::string Row::field_names_string() const {
+    std::string tmp;
+    size_t i = 0ul;
+    for (const FieldBase* field : m_fields)
+        tmp+="field "+std::to_string(i++)+": " + field->m_name + "\n";
+    return tmp;
+}
+
 std::string Row::to_string() const {
     std::string tmp;
     for (auto field: m_fields) tmp += " " + field->to_string();

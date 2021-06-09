@@ -30,12 +30,12 @@ struct WalkerTableRow : public Row {
             m_format({nroot, nreplica}, {"nroot", "nreplica"}),
             m_onv(this, nsite, "onv"),
             m_weight(this, m_format, "weight"),
-            m_hdiag(this),
-            m_initiator(this, m_format),
-            m_reference_connection(this, m_format),
-            m_deterministic(this, m_format),
-            m_average_weight(mev_average_weights ? this : nullptr, m_format),
-            m_icycle_occ(mev_average_weights ? this : nullptr)
+            m_hdiag(this, "diagonal H element"),
+            m_initiator(this, m_format, "initiator status flag"),
+            m_reference_connection(this, m_format, "reference connection flag"),
+            m_deterministic(this, m_format, "deterministic subspace flag"),
+            m_average_weight(mev_average_weights ? this : nullptr, m_format, "unnormalized average weight"),
+            m_icycle_occ(mev_average_weights ? this : nullptr, "cycle index at row creation")
             {}
 
     WalkerTableRow(const Options &opts, size_t nsite) :

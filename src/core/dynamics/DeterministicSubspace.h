@@ -133,6 +133,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
 
     void make_mev_contribs(MevGroup& mevs, const fields::Onv<>& ref) {
         if (!m_epoch) return;
+        if (!mevs.m_accum_epoch) return;
         auto& row_local = m_local.m_row;
         auto& row_global = m_global.m_row;
         for (row_local.restart(); row_local.in_range(); row_local.step()) {
