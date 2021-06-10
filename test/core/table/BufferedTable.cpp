@@ -2,10 +2,19 @@
 // Created by rja on 02/10/2020.
 //
 
-//#include "src/core/data/BufferedTable.h"
-//#include "src/core/data/NumericField.h"
-//#include "src/core/data/NumericVectorField.h"
-//#include "gtest/gtest.h"
+#include <src/core/table/BufferedFields.h>
+#include "src/core/table//BufferedTable.h"
+#include "gtest/gtest.h"
+
+TEST(BufferedTable, Empty) {
+    typedef SingleFieldRow<fields::Number<double>> row_t;
+    BufferedTable<row_t> table("", {{}});
+    ASSERT_EQ(table.m_nrow, 0);
+    ASSERT_EQ(table.m_hwm, 0);
+    auto& row = table.m_row;
+    for (row.restart(); row.in_range(); row.step()){}
+}
+
 //
 //
 //struct TestTable1 : public Table_NEW {

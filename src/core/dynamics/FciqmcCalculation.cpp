@@ -6,9 +6,11 @@
 #include "src/core/io/Logging.h"
 #include "ExactPropagator.h"
 #include "StochasticPropagator.h"
+#include "Propagators.h"
 
 FciqmcCalculation::FciqmcCalculation(const Options &opts) :
-        m_opts(opts), m_ham(opts), m_wf(opts, m_ham.nsite()), m_prop(m_ham, opts, m_wf.npart())  {
+        m_opts(opts), m_ham(opts), m_wf(opts, m_ham.nsite()),
+        m_prop(props::get(m_ham, opts, m_wf.m_format))  {
     buffered::Onv<> ref_onv(m_ham.nsite());
     m_ham.set_hf_onv(ref_onv, opts.spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_onv);
@@ -17,11 +19,9 @@ FciqmcCalculation::FciqmcCalculation(const Options &opts) :
         m_wf.create_row(0, ref_onv, ref_energy, std::vector<bool>(m_wf.npart(), true));
         m_wf.set_weight(0, ref_energy);
     }
-    m_prop.m_shift.m_values = ref_energy;
-    Solver solver(m_prop, m_wf, ref_loc);
-    for (size_t i = 0ul; i < opts.ncycle; ++i) {
-        solver.execute();
-    }
+    m_prop->m_shift.m_values = ref_energy;
+    Solver solver(*m_prop, m_wf, ref_loc);
+    solver.execute(opts.ncycle);
 }
 
 #if 0

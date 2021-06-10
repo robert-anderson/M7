@@ -71,10 +71,10 @@ TEST(ExactPropagator, DeterministicSubspace) {
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, ref_energy);
+    if (ref_loc.is_mine())
+        wf.set_weight(0, ref_energy);
 
     prop.m_shift.m_values = ref_energy;
-
     Solver solver(prop, wf, ref_loc);
     solver.execute(opts.ncycle);
 }

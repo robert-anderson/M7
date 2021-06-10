@@ -33,6 +33,8 @@ public:
             m_occ(ham.nsite()),
             m_vac(ham.nsite()) {}
 
+    ~Propagator() {}
+
     virtual void diagonal(Wavefunction &wf, const size_t &ipart) = 0;
 
     virtual void off_diagonal(Wavefunction &wf, const size_t &ipart) = 0;
