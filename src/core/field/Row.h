@@ -12,26 +12,83 @@
 
 struct FieldBase;
 
+/**
+ * Classes derived from Row define the data layout of Tables. Row-derived classes declare members derived from FieldBase
+ * which give numerical meaning to the raw data stored in the buffer window assigned to a Table. Rows have a dual
+ * purpose:
+ *  1. assign offsets to the FieldBase-derived members
+ *  2. act as a cursor pointing to a specific row in a buffer window
+ *
+ * The latter usage requires care. There are some potential ways this usage could have been avoided, but they are
+ * problematic.
+ *  1. have a table be represented by a vector of row objects, with each storing their own index: this would incur the
+ *     cost in memory of at least an additional reference per table row, also the cost of extending table buffers would
+ *     increase noticeably
+ *  2. have a RowDefinition class and a RowCursor class, where RowDefinition does not store positional information, and
+ *     RowCursor only requires a reference to the definition and a row index, so it can be constructed cheaply. The
+ *     problem is that there is no way for the field objects stored in the RowDefinition to access this positional
+ *     information.
+ *
+ * Overall, the statefulness of Rows is not a problem provided the programmer is aware which rows are in use in which
+ * contexts. More often than not, the row object will be used at the beginning of a long loop, in which case the cost of
+ * copying the row is negligible in comparison.
+ */
 struct Row {
+    /**
+     * the row needs access to the buffer window and high water mark of the table with which it is asscociated
+     */
     TableBase *m_table;
+    /**
+     * these fields define the position of the currently selected row. when set to these initial "null" values, the
+     * row is not pointing to anything and field dereferences / calls to step should fail asserts in the debug builds.
+     * no checks are enforced in the release build.
+     * TODO: investigate whether dbegin needs to be cached with regard to performance
+     */
     mutable defs::data_t *m_dbegin = nullptr;
-    mutable size_t m_i = 0ul;
+    mutable size_t m_i = ~0ul;
+    /**
+     * vector of the associated fields. These are polymorphic pointers to the symbols defined in the subclasses
+     */
     std::vector<FieldBase *> m_fields;
+    /**
+     * total size of a single row in bytes
+     */
     size_t m_size = 0ul;
+    /**
+     * total size of a single row in data words (defs::data_t)
+     */
     size_t m_dsize = 0ul;
+    /**
+     * number of bytes already allocated to added fields
+     */
     size_t m_current_offset = 0ul;
+    /**
+     * required only when copying
+     */
     mutable Row *m_child = nullptr;
 
-
+    /**
+     * @param irow_end
+     *  exclusive maximum value for the stored row index
+     * @return
+     *  true if stored row index is within the range [0, irow_end)
+     */
     bool in_range(const size_t &irow_end) const {
-        ASSERT(irow_end <= m_table->m_hwm)
         return m_i < irow_end;
     }
 
+    /**
+     * @return
+     *  true if the stored row index is within the range [0, m_table->m_hwm)
+     */
     bool in_range() const {
         return m_i < m_table->m_hwm;
     }
 
+    /**
+     * @return
+     *  true if the m_dbegin pointer is valid with respect to the table object
+     */
     bool ptr_in_range() const {
         return (m_dbegin >= m_table->dbegin()) && (m_dbegin < m_table->dbegin() + m_table->m_hwm * m_dsize);
     }
@@ -43,6 +100,8 @@ struct Row {
     }
 
     const defs::data_t *dbegin() const {
+        MPI_ASSERT(m_dbegin, "the row pointer is not set")
+        MPI_ASSERT(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_dbegin;
     }
 

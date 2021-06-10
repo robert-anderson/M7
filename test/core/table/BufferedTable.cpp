@@ -11,6 +11,8 @@ TEST(BufferedTable, Empty) {
     BufferedTable<row_t> table("", {{}});
     ASSERT_EQ(table.m_nrow, 0);
     ASSERT_EQ(table.m_hwm, 0);
+    ASSERT_EQ(table.m_bw.dsize(), 0);
+    ASSERT_EQ(table.m_bw.m_dbegin, nullptr);
     auto& row = table.m_row;
     for (row.restart(); row.in_range(); row.step()){}
 }
