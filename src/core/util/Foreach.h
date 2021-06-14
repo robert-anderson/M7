@@ -55,7 +55,7 @@ namespace foreach {
             static size_t nterm(const inds_t<nind> &shape) {
                 if (!nind) return 0;
                 size_t n = 1;
-                for (size_t i = 0ul; i < nind; ++i) n *= shape[i];
+                for (size_t i = 0ul; i != nind; ++i) n *= shape[i];
                 return n;
             }
 

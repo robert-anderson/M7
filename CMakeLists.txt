@@ -40,6 +40,7 @@ set(ExternalProjectCMakeArgs
 option(FORCE_HDF5_INSTALL "Force the download and installation of HDF5" 1)
 option(ENABLE_HDF5 "Enable HDF5 support" 1)
 if(ENABLE_HDF5)
+    set(HDF5_USE_STATIC_LIBRARIES 1)
     #find_package(HDF5)
     #if(HDF5_FOUND)
     #    include_directories(${HDF5_INCLUDE_DIR})
@@ -66,8 +67,8 @@ if(ENABLE_HDF5)
                 ${PROJECT_BINARY_DIR}/hdf5_local/build
         )
         set(_HDF5_LIBS
-                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.so
-                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.so -ldl)
+                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
+                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a -ldl)
     #endif()
 endif()
 

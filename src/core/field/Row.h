@@ -16,7 +16,7 @@ struct FieldBase;
  * Classes derived from Row define the data layout of Tables. Row-derived classes declare members derived from FieldBase
  * which give numerical meaning to the raw data stored in the buffer window assigned to a Table. Rows have a dual
  * purpose:
- *  1. assign offsets to the FieldBase-derived members
+ *  1. assign byte offsets to the FieldBase-derived members
  *  2. act as a cursor pointing to a specific row in a buffer window
  *
  * The latter usage requires care. There are some potential ways this usage could have been avoided, but they are
@@ -29,9 +29,9 @@ struct FieldBase;
  *     problem is that there is no way for the field objects stored in the RowDefinition to access this positional
  *     information.
  *
- * Overall, the statefulness of Rows is not a problem provided the programmer is aware which rows are in use in which
- * contexts. More often than not, the row object will be used at the beginning of a long loop, in which case the cost of
- * copying the row is negligible in comparison.
+ * Overall, the statefulness of Rows is not a problem provided the programmer is aware which Row instances are in use in
+ * which contexts. More often than not, the row object will be used at the beginning of a long loop, in which case the
+ * cost of copying the row is negligible in comparison.
  */
 struct Row {
     /**

@@ -7,6 +7,8 @@
 #include <src/core/basis/CiSpaces.h>
 #include <src/core/util/ProgressMonitor.h>
 #include "gtest/gtest.h"
+
+#if 0
 #include "src/core/sparse/LanczosSolver.h"
 
 
@@ -45,4 +47,5 @@ TEST(LanczosSolver, Test) {
     solver.solve(sparse_mat, 40);
     std::cout << solver.m_evals[0] << std::endl;
 }
+#endif
 #endif

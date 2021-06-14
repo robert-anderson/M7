@@ -87,13 +87,18 @@ namespace buffered {
             *this = init_value;
         }
         Numbers(const fields::Numbers<T, nind>& field): BufferedField<fields::Numbers<T, nind>>(field){}
+        Numbers(const Numbers& field): BufferedField<fields::Numbers<T, nind>>(field){}
+        Numbers& operator=(const Numbers& field){
+            base_t::operator=(field);
+            return *this;
+        }
     };
 
     struct FermionOnv : BufferedField<fields::FermionOnv> {
         using fields::FermionOnv::operator=;
         FermionOnv(size_t nsite) : BufferedField<fields::FermionOnv>({nullptr, nsite}){}
         FermionOnv& operator=(const FermionOnv& other){
-            fields::FermionOnv::operator=(other);
+            base_t::operator=(other);
             return *this;
         }
         FermionOnv(const FermionOnv& other): FermionOnv(other.m_nsite){}
