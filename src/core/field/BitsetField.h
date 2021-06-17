@@ -155,7 +155,7 @@ struct BitsetField : FieldBase {
         T *dptr = reinterpret_cast<T *>(begin());
         auto tmp = dptr[idataword];
         if (idataword + 1 == m_dsize) {
-            MPI_ASSERT(tmp == bit_utils::truncate(tmp, m_nbit_in_last_dword),
+            DEBUG_ASSERT_EQ(tmp, bit_utils::truncate(tmp, m_nbit_in_last_dword),
                        "trailing bits were not clear: possible corruption");
             tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
         }

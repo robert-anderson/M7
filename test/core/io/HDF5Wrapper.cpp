@@ -23,7 +23,7 @@ TEST(HDF5Wrapper, Number) {
     write_table.push_back(nrow);
     auto row = write_table.m_row;
     for (row.restart(); row.in_range(); row.step()){
-        row.m_field = hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123);
+        row.m_field = hashing::in_range((row.index()+1)*(mpi::irank()+1), 4, 123);
         log::debug_("writing value: {}", (int)row.m_field);
     }
     {
@@ -38,7 +38,7 @@ TEST(HDF5Wrapper, Number) {
         read_table.read(gr, "table");
     }
     for (row.restart(); row.in_range(); row.step()){
-        ASSERT_EQ(row.m_field, hashing::in_range((row.m_i+1)*(mpi::irank()+1), 4, 123));
+        ASSERT_EQ(row.m_field, hashing::in_range((row.index()+1)*(mpi::irank()+1), 4, 123));
     }
 
 }

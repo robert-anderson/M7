@@ -98,7 +98,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
                 conn_work.connect(row_local.m_onv, row_global.m_onv);
                 auto helem = ham.get_element(conn_work);
                 if (conn_work.nexcit() > 0 && conn_work.nexcit() < 3)
-                    m_sparse_ham.add(row_local.m_i, row_global.m_i, helem);
+                    m_sparse_ham.add(row_local.index(), row_global.index(), helem);
             }
         }
     }
@@ -106,7 +106,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
     void build_from_all_occupied(const FermionHamiltonian &ham) {
         auto row = m_wf.m_store.m_row;
         for (row.restart(); row.in_range(); row.step()){
-            if (!row.is_cleared()) add_(row.m_i);
+            if (!row.is_cleared()) add_(row.index());
             for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
                 row.m_deterministic.set(ipart);
         }
@@ -119,7 +119,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
         for (row.restart(); row.in_range(); row.step()){
             conn_work.connect(onv, row.m_onv);
             if (row.is_cleared() || conn_work.nexcit()>3) continue;
-            add_(row.m_i);
+            add_(row.index());
             for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
                 row.m_deterministic.set(ipart);
         }
@@ -138,7 +138,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
         auto& row_global = m_global.m_row;
         for (row_local.restart(); row_local.in_range(); row_local.step()) {
             if (row_local.m_onv==ref) continue;
-            for (const auto& entry: m_sparse_ham.row(row_local.m_i)) {
+            for (const auto& entry: m_sparse_ham.row(row_local.index())) {
                 row_global.jump(entry.icol);
                 if (row_global.m_onv==ref) continue;
                 mevs.m_fermion_rdm->make_contribs(row_local.m_onv, 0.5*row_local.m_weight[0], row_global.m_onv, row_global.m_weight[1]);
@@ -160,7 +160,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
         auto irow_wf_it = m_irows.cbegin();
         for (row_local.restart(); row_local.in_range(); row_local.step()) {
             row_wf.jump(*irow_wf_it);
-            for (const auto& entry: m_sparse_ham.row(row_local.m_i)) {
+            for (const auto& entry: m_sparse_ham.row(row_local.index())) {
                 row_global.jump(entry.icol);
                 row_wf.m_weight.sub_scaled(tau * entry.element, row_global.m_weight);
             }

@@ -39,17 +39,20 @@ struct Row {
      */
     TableBase *m_table;
     /**
+     * vector of the associated fields. These are polymorphic pointers to the symbols defined in the subclasses
+     */
+    std::vector<FieldBase *> m_fields;
+private:
+    /**
      * these fields define the position of the currently selected row. when set to these initial "null" values, the
-     * row is not pointing to anything and field dereferences / calls to step should fail asserts in the debug builds.
-     * no checks are enforced in the release build.
+     * row is not pointing to anything and field dereferences / calls to step should cause ASSERTs to fail in the debug
+     * builds. no checks are enforced in the release build.
      * TODO: investigate whether dbegin needs to be cached with regard to performance
      */
     mutable defs::data_t *m_dbegin = nullptr;
     mutable size_t m_i = ~0ul;
-    /**
-     * vector of the associated fields. These are polymorphic pointers to the symbols defined in the subclasses
-     */
-    std::vector<FieldBase *> m_fields;
+
+public:
     /**
      * total size of a single row in bytes
      */
@@ -94,24 +97,29 @@ struct Row {
     }
 
     defs::data_t *dbegin() {
-        MPI_ASSERT(m_dbegin, "the row pointer is not set")
-        MPI_ASSERT(ptr_in_range(), "the row is not pointing to memory in the permitted range");
+        DEBUG_ASSERT_TRUE(m_dbegin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_dbegin;
     }
 
     const defs::data_t *dbegin() const {
-        MPI_ASSERT(m_dbegin, "the row pointer is not set")
-        MPI_ASSERT(ptr_in_range(), "the row is not pointing to memory in the permitted range");
+        DEBUG_ASSERT_TRUE(m_dbegin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_dbegin;
+    }
+
+    const size_t& index() const {
+        DEBUG_ASSERT_LT(m_i, m_table->m_hwm, "the row index is not in the permitted range");
+        return m_i;
     }
 
     /*
      * the 3 "cursor" methods
      */
     void restart(const size_t &irow_begin) const {
-        MPI_ASSERT(irow_begin < m_table->m_hwm, "Cannot restart to an out-of-range row index");
-        MPI_ASSERT(m_table, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
+        DEBUG_ASSERT_LT(irow_begin, m_table->m_hwm, "Cannot restart to an out-of-range row index");
+        DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
+        DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
         m_dbegin = m_table->dbegin(irow_begin);
         m_i = irow_begin;
     }
@@ -121,19 +129,19 @@ struct Row {
     }
 
     void step() const {
-        MPI_ASSERT(m_table, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
-        MPI_ASSERT(in_range(), "Row is out of table bounds");
+        DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
+        DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
+        DEBUG_ASSERT_TRUE(in_range(), "Row is out of table bounds");
         m_dbegin += m_dsize;
         m_i++;
     }
 
     void jump(const size_t &i) const {
-        MPI_ASSERT(m_table, "Row must be assigned to a Table");
-        MPI_ASSERT(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
+        DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
+        DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
         m_dbegin = m_table->dbegin() + m_dsize * i;
         m_i = i;
-        MPI_ASSERT(in_range(), "Row is out of table bounds");
+        DEBUG_ASSERT_TRUE(in_range(), "Row is out of table bounds");
     }
 
     void jump(const Row &other) const {
@@ -142,6 +150,16 @@ struct Row {
 
     void push_back_jump() {
         jump(m_table->push_back());
+    }
+
+    void select_null() const {
+        m_i = ~0ul;
+        m_dbegin = nullptr;
+    }
+
+    bool null_selected() const {
+        DEBUG_ASSERT_EQ(m_i==~0ul, m_dbegin==nullptr, "Row in inconsistent state");
+        return m_dbegin;
     }
 
     /**

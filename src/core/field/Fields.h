@@ -170,7 +170,7 @@ namespace fields {
         auto source_ptr = reinterpret_cast<char*>(&source);
         auto field_ptr = reinterpret_cast<char*>(&field);
         long byte_offset = field_ptr - source_ptr;
-        MPI_ASSERT(byte_offset>0, "field pointer is not positively offset from row!");
+        DEBUG_ASSERT_GT(byte_offset, 0ul, "field pointer is not positively offset from row!");
         auto ptr = reinterpret_cast<field_t*>(target_ptr + byte_offset);
         MPI_ASSERT(ptr->belongs_to_row(target), "field identification failed");
         return *ptr;
@@ -199,7 +199,7 @@ namespace fields {
         auto source_ptr = reinterpret_cast<char*>(&source);
         auto field_ptr = reinterpret_cast<char*>(&multifield);
         long byte_offset = field_ptr - source_ptr;
-        MPI_ASSERT(byte_offset>0, "field pointer is not positively offset from row!");
+        DEBUG_ASSERT_GT(byte_offset, 0, "field pointer is not positively offset from row!");
         auto ptr = reinterpret_cast<MultiField<Args...>*>(target_ptr + byte_offset);
         MPI_ASSERT(ptr->belongs_to_row(target), "multifield identification failed");
         return *ptr;

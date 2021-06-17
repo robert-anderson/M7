@@ -20,7 +20,7 @@ struct Table : TableBase {
     Table(const row_t &row) :
             TableBase(static_cast<const Row &>(row).m_dsize), m_row(row) {
         static_cast<Row &>(m_row).m_table = this;
-        static_cast<Row &>(m_row).m_dbegin = nullptr;
+        static_cast<Row &>(m_row).select_null();
     }
 
     Table(const Table<row_t> &other) : Table(other.m_row) {

@@ -34,7 +34,7 @@ TEST(Wavefunction, DynamicRowSet){
      * and add them to the local subspace
      */
     auto row = table.m_row;
-    for (row.restart(); row.m_i<nrow_this_rank; row.step()){
+    for (row.restart(); row.in_range(nrow_this_rank); row.step()){
         rowset.add_(row);
     }
 }

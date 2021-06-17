@@ -123,8 +123,8 @@ public:
             m_recv.resize(std::ceil((1.0 + m_buffer_expansion_factor) * m_last_recv_count));
         }
 
-        MPI_REQUIRE_ALL(m_send.dbegin(), "Send buffer is not allocated!");
-        MPI_REQUIRE_ALL(m_recv.dbegin(), "Recv buffer is not allocated!");
+        REQUIRE_TRUE_ALL(m_send.dbegin(), "Send buffer is not allocated on all ranks!");
+        REQUIRE_TRUE_ALL(m_recv.dbegin(), "Recv buffer is not allocated on all ranks!");
 
         auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
                                     m_recv.dbegin(), recvcounts, recvdispls);
@@ -243,7 +243,7 @@ struct Communicator {
         }
 
         void add_(const store_row_t& row) {
-            add_(row.m_i);
+            add_(row.index());
         }
 
     public:
@@ -316,7 +316,7 @@ struct Communicator {
                 const auto next_itrow = m_idrows[m_ndrow_found];
                 if (m_itrow == next_itrow) {
                     // this transferred row is dynamic
-                    MPI_ASSERT(m_irows.find(irow) == m_irows.end(), "Transferred dynamic row shouldn't already be here!");
+                    DEBUG_ASSERT_TRUE(m_irows.find(irow)==m_irows.end(), "Transferred dynamic row shouldn't already be here!");
                     m_irows.insert(irow);
                     protect(irow);
                     ++m_ndrow_found;
@@ -375,7 +375,7 @@ struct Communicator {
              * First, we use these indices to randomly access the source MappedTable, and copy rows
              * into the local contiguous table (m_local)
              */
-            MPI_ASSERT_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
+            DEBUG_ASSERT_TRUE_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
             m_local.clear();
             auto nrow = m_displs.back() + m_counts.back();
             m_local.push_back(m_counts[mpi::irank()]);
@@ -386,7 +386,7 @@ struct Communicator {
                 m_loading_fn(m_source_row, local_row);
                 local_row.step();
             }
-            ASSERT(local_row.m_i==m_counts[mpi::irank()]);
+            ASSERT(local_row.index()==m_counts[mpi::irank()]);
 
             m_global.clear();
             m_global.push_back(nrow);
@@ -462,8 +462,8 @@ struct Communicator {
         void update() override {
             auto irank_initial = irank();
             SharedRowSet::update();
-            MPI_ASSERT(nrow() == 1, "Total number of rows across all ranks should be 1.");
-            MPI_REQUIRE_ALL(m_ranks_with_any_rows.size() == 1, "Only one rank should have a row");
+            DEBUG_ASSERT_EQ(nrow(), 1ul, "Total number of rows across all ranks should be 1.");
+            REQUIRE_EQ_ALL(m_ranks_with_any_rows.size(), 1ul, "Only one rank should have a row");
             auto irank_final = irank();
             if (irank_initial == ~0ul)
                 log::info("Dynamic row \"{}\" is in block {} of {}, which is initially stored on rank {}",
@@ -480,7 +480,7 @@ struct Communicator {
         }
 
         bool is_same(const store_row_t& row) const {
-            return is_mine() ? row.m_i == *m_irows.cbegin() : false;
+            return is_mine() ? row.index() == *m_irows.cbegin() : false;
         }
     };
 

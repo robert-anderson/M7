@@ -165,7 +165,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         TableBase::push_back(row_reader.m_nitem);
         for (row_reader.restart(); row_reader.in_range(); row_reader.step()) {
             row_reader.read(iitem++);
-            post_insert(row_reader.m_i);
+            post_insert(row_reader.index());
         }
     }
 

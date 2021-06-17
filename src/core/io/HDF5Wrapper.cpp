@@ -24,16 +24,18 @@ hdf5::AttributeWriterBase::~AttributeWriterBase() {
 
 void hdf5::AttributeWriterBase::write_bytes(const char *src) {
     auto status = H5Awrite(m_handle, m_h5type, src);
-    MPI_ASSERT(!status, "HDF5 attribute write failed");
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 attribute write failed");
 }
 
 void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std::string &src) {
     auto type = H5Tcopy(H5T_C_S1);
     auto status = H5Tset_size(type, src.size() + 1); // include space for null terminator
-    MPI_ASSERT(!status, "HDF5 string type resizing failed");
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 string type resizing failed");
     AttributeWriterBase(parent, name, {1}, type).write_bytes((const char *) src.c_str());
     status = H5Tclose(type);
-    MPI_ASSERT(!status, "HDF5 string type release failed");
+    DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
 }
 
 void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std::vector<std::string> &src) {
@@ -50,14 +52,15 @@ void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std:
     // now build the type
     auto type = H5Tcopy(H5T_C_S1);
     auto status = H5Tset_size(type, max_size);
-    MPI_ASSERT(!status, "HDF5 string type resizing failed");
+    DEBUG_ONLY(status);
+    DEBUG_ASSERT_FALSE(status, "HDF5 string type resizing failed");
     AttributeWriterBase(parent, name, {src.size()}, type).write_bytes((const char *) tmp.c_str());
     status = H5Tclose(type);
-    MPI_ASSERT(!status, "HDF5 string type release failed");
+    DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
 }
 
 void hdf5::NdListWriter::write_h5item_bytes(const size_t &iitem, const void *data) {
-    MPI_ASSERT(((bool) data) == (iitem < m_nitem_local),
+    DEBUG_ASSERT_EQ(bool(data), iitem < m_nitem_local,
                "data is null and items remain, or this is a runoff write op and data is not null");
     select_hyperslab(iitem);
     log::debug_("writing data...");
@@ -66,13 +69,13 @@ void hdf5::NdListWriter::write_h5item_bytes(const size_t &iitem, const void *dat
         auto status = H5Dwrite(m_dataset_handle, m_h5type, m_memspace_handle,
                                m_filespace_handle, m_coll_plist, data);
 
-        MPI_ASSERT(!status, "HDF5 write failed");
+        DEBUG_ASSERT_FALSE(status, "HDF5 write failed");
     }
     else {
         auto status = H5Dwrite(m_dataset_handle, m_h5type, m_none_memspace_handle,
                                m_filespace_handle, m_coll_plist, data);
 
-        MPI_ASSERT(!status, "HDF5 write failed");
+        DEBUG_ASSERT_FALSE(status, "HDF5 write failed");
     }
     log::debug_("data written");
 }
@@ -82,7 +85,8 @@ hdf5::NdListWriter::NdListWriter(hid_t parent_handle, std::string name, const de
         :
         NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {
     if (!dim_labels.empty()) {
-        MPI_ASSERT(dim_labels.size() == item_dims.size(), "Number of dim labels does not match number of dims");
+        DEBUG_ASSERT_EQ(dim_labels.size(), item_dims.size(),
+                        "Number of dim labels does not match number of dims");
         for (size_t idim = 0ul; idim < item_dims.size(); ++idim)
             H5DSset_label(m_dataset_handle, idim, dim_labels[idim].c_str());
     }
@@ -127,7 +131,7 @@ hdf5::NdListBase::NdListBase(hid_t parent_handle, std::string name, const defs::
         m_hyperslab_counts(m_ndim_list, 0ul),
         m_hyperslab_offsets(m_ndim_list, 0ul),
         m_h5type(h5type) {
-    MPI_REQUIRE(H5Tget_size(m_h5type), "Invalid HDF5 type specified");
+    REQUIRE_TRUE(H5Tget_size(m_h5type), "Invalid HDF5 type specified");
     m_filespace_handle = H5Screate_simple(m_ndim_list, m_list_dims_global.data(), nullptr);
 
     /*
@@ -159,7 +163,7 @@ void hdf5::NdListBase::select_hyperslab(const size_t &iitem) {
         log::debug_("selecting hyperslab with offsets: {}", utils::to_string(m_hyperslab_offsets));
         auto status = H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
                                           nullptr, m_hyperslab_counts.data(), nullptr);
-        MPI_ASSERT(!status, "HDF5 hyperslab selection failed");
+        DEBUG_ASSERT_FALSE(status, "HDF5 hyperslab selection failed");
         log::debug_("hyperslab selected");
     } else {
         /*
@@ -167,9 +171,9 @@ void hdf5::NdListBase::select_hyperslab(const size_t &iitem) {
          * of a hyperslab selection
          */
         log::debug_("making null selection");
-        MPI_ASSERT(iitem < m_nitem_global_max, "Item index exceeds global maximum");
+        DEBUG_ASSERT_LT(iitem, m_nitem_global_max, "Item index exceeds global maximum");
         auto status = H5Sselect_none(m_filespace_handle);
-        MPI_ASSERT(!status, "HDF5 null selection failed");
+        DEBUG_ASSERT_FALSE(status, "HDF5 null selection failed");
     }
 }
 
@@ -180,15 +184,15 @@ hdf5::NdListBase::~NdListBase() {
 }
 
 void hdf5::FileBase::check_is_hdf5(const std::string &name) {
-    MPI_REQUIRE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
+    REQUIRE_TRUE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
 }
 
 hdf5::FileWriter::FileWriter(std::string name) : FileBase(H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, AccessPList())) {
-    MPI_REQUIRE_ALL(m_handle >= 0,
+    REQUIRE_GE(m_handle, 0,
                     "HDF5 file could not be opened for writing. It may be locked by another program");
 }
 
 hdf5::FileReader::FileReader(std::string name) : FileBase(
         (check_is_hdf5(name), H5Fopen(name.c_str(), H5F_ACC_RDONLY, AccessPList()))) {
-    MPI_REQUIRE_ALL(m_handle >= 0, "HDF5 file could not be opened for reading.");
+    REQUIRE_GE(m_handle, 0, "HDF5 file could not be opened for reading.");
 }

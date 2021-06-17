@@ -55,13 +55,14 @@ struct NdNumberField : NumberFieldBase {
     }
 
     NdNumberField &operator=(const std::vector<T> &v) {
-        ASSERT(v.size() == nelement());
+        DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
         std::memcpy(begin(), v.data(), m_size);
         return *this;
     }
 
     NdNumberField &operator=(const NdNumberField &other) {
-        MPI_ASSERT_EQ(nelement(), other.nelement());
+        DEBUG_ASSERT_EQ(nelement(), other.nelement(),
+                              "Can't assign from incompatible instance");
         static_cast<FieldBase &>(*this) = other;
         return *this;
     }
@@ -182,12 +183,12 @@ struct NdNumberField : NumberFieldBase {
      * access methods
      */
     T &operator[](const size_t &ielement) {
-        ASSERT(ielement < m_nelement);
+        DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
         return ((T *) begin())[ielement];
     }
 
     const T &operator[](const size_t &ielement) const {
-        ASSERT(ielement < m_nelement);
+        DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
         return ((const T *) begin())[ielement];
     }
 

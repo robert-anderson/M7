@@ -18,14 +18,14 @@ struct RowHdf5Base {
             m_nitem_total(mpi::all_sum(m_nitem)), m_field_names(field_names) {
         m_selected_field_inds.reserve(m_field_names.size());
         for (const auto &field_name: m_field_names) {
-            MPI_REQUIRE(!field_name.empty(), "Selected field name must be non-zero in length");
+            REQUIRE_TRUE(!field_name.empty(), "Selected field name must be non-zero in length");
             bool match_found = false;
             size_t i =0ul;
             for (FieldBase *field_ptr : row.m_fields) {
                 if (field_ptr->m_name == field_name) match_found = true, m_selected_field_inds.emplace_back(i);
                 ++i;
             }
-            MPI_REQUIRE(match_found, "Invalid field name \"" + field_name + "\"");
+            REQUIRE_TRUE(match_found, "Invalid field name \"" + field_name + "\"");
         }
     }
 
@@ -34,7 +34,7 @@ protected:
         std::vector<std::string> out;
         out.reserve(row.m_fields.size());
         for (FieldBase *field_ptr: row.m_fields) {
-            MPI_REQUIRE(!field_ptr->m_name.empty(), "All fields selected for HDF5 write must be named");
+            REQUIRE_FALSE(field_ptr->m_name.empty(), "All fields selected for HDF5 write must be named");
             out.emplace_back(field_ptr->m_name);
         }
         return out;

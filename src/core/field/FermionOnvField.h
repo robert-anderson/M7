@@ -104,8 +104,8 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
                     throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
             }
         }
-        MPI_REQUIRE(i > nbit(), "FermionOnv-defining string not long enough");
-        MPI_REQUIRE(i < nbit(), "FermionOnv-defining string too long");
+        REQUIRE_GT(i, nbit(), "FermionOnv-defining string not long enough");
+        REQUIRE_LT(i, nbit(), "FermionOnv-defining string too long");
     }
 
     int spin() const {

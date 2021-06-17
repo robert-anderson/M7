@@ -206,14 +206,14 @@ TEST(StochasticPropagator, ExcitedStates) {
     excit_onv = ref_onv;
     excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
-    ASSERT(wf.m_store.m_row.m_i==1);
+    ASSERT(wf.m_store.m_row.index()==1ul);
     wf.set_weight(1, opts.nwalker_initial);
 
 
     excit_onv = ref_onv;
     excit_onv.excite(ham.nsite()+ham.nelec()/2-1, ham.nsite()+ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
-    ASSERT(wf.m_store.m_row.m_i==2);
+    ASSERT(wf.m_store.m_row.index()==2ul);
     wf.set_weight(2, opts.nwalker_initial);
 
     std::cout <<

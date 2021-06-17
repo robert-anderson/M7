@@ -41,7 +41,7 @@ namespace ci_gen {
             if (m_include_fn(m_onv_work)) {
                 row.push_back_jump();
                 onv = m_onv_work;
-                row.m_table->post_insert(row.m_i);
+                row.m_table->post_insert(row.index());
             }
         }
 
