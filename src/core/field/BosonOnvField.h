@@ -19,7 +19,7 @@ struct BosonOnvField : NdNumberField<uint8_t, 1> {
     }
 
     BosonOnvField &operator=(const defs::inds &inds) {
-        MPI_ASSERT(inds.size() == nelement(), "Vector is not the correct size");
+        DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");
         for (size_t i = 0ul; i < inds.size(); ++i) this->operator[](i) = inds[i];
         return *this;
     }

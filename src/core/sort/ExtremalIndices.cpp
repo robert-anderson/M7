@@ -27,7 +27,7 @@ const size_t &ExtremalIndices::operator[](const size_t &ifound) const {
 }
 
 void ExtremalIndices::find(size_t nfind) {
-    MPI_REQUIRE(m_hwm!=~0ul, "reset method must be called to initialise high water mark");
+    REQUIRE_NE(m_hwm, ~0ul, "reset method must be called to initialise high water mark");
     nfind+=m_nfound;
     for (; m_nfound<std::min(m_hwm, nfind); ++m_nfound)
         std::pop_heap(m_inds.begin(), m_inds.end()-m_nfound, m_cmp_fn);

@@ -29,16 +29,16 @@ public:
         reset();
         if (m_indsfirst) log::info("Reading sparse array from file with indices before values");
         else log::info("Reading sparse array from file with indices after values");
-        MPI_REQUIRE_ALL(m_complex_valued == consts::is_complex<T>(), "Trying to read complex-valued array entries into a real container");
+        REQUIRE_EQ_ALL(m_complex_valued, consts::is_complex<T>(), "Trying to read complex-valued array entries into a real container");
         if (consts::is_complex<T>() && !m_complex_valued)
             log::info("Reading real-valued array into complex container, consider recompiling with real arithmetic");
     }
 
     void reset() {
         size_t iline = first_valid_line(m_fname, m_nind, m_indsfirst, m_complex_valued);
-        MPI_REQUIRE_ALL(iline != ~0ul, "No valid entries found");
-        MPI_REQUIRE_ALL(m_indsfirst!=Tern::Neither, "m_indsfirst is still unspecified");
-        MPI_REQUIRE_ALL(m_complex_valued!=Tern::Neither, "m_complex_valued is still unspecified");
+        REQUIRE_NE_ALL(iline, ~0ul, "No valid entries found");
+        REQUIRE_NE_ALL(m_indsfirst, Tern::Neither, "m_indsfirst is still unspecified");
+        REQUIRE_NE_ALL(m_complex_valued, Tern::Neither, "m_complex_valued is still unspecified");
         FileReader::reset(iline);
     }
 
@@ -63,7 +63,7 @@ public:
         // can only be complex valued if the real and imag parts are delimited by a comma
         std::vector<double> doubles{};
         auto tokens = string_utils::split(line, "() ,");
-        for (auto token : tokens) {
+        for (const auto& token : tokens) {
             try {
                 doubles.push_back(std::stod(token));
             }

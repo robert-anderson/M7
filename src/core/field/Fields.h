@@ -165,14 +165,14 @@ namespace fields {
     static field_t& identify(row_t& target, row_t& source, field_t& field){
         static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
         static_assert(std::is_base_of<FieldBase, field_t>::value, "Template arg must be derived from FieldBase");
-        MPI_REQUIRE(static_cast<FieldBase&>(field).belongs_to_row(source), "field arg must belong to source arg");
+        REQUIRE_TRUE(static_cast<FieldBase&>(field).belongs_to_row(source), "field arg must belong to source arg");
         auto target_ptr = reinterpret_cast<char*>(&target);
         auto source_ptr = reinterpret_cast<char*>(&source);
         auto field_ptr = reinterpret_cast<char*>(&field);
         long byte_offset = field_ptr - source_ptr;
-        MPI_ASSERT(byte_offset>0, "field pointer is not positively offset from row!");
+        DEBUG_ASSERT_GT(byte_offset, 0l, "field pointer is not positively offset from row!");
         auto ptr = reinterpret_cast<field_t*>(target_ptr + byte_offset);
-        MPI_ASSERT(ptr->belongs_to_row(target), "field identification failed");
+        DEBUG_ASSERT_TRUE(ptr->belongs_to_row(target), "field identification failed");
         return *ptr;
     }
 
@@ -194,14 +194,14 @@ namespace fields {
     template<typename row_t, typename ...Args>
     static MultiField<Args...>& identify(row_t& target, row_t& source, MultiField<Args...>& multifield){
         static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
-        MPI_REQUIRE(multifield.belongs_to_row(source), "multifield arg must belong to source arg");
+        REQUIRE_TRUE(multifield.belongs_to_row(source), "multifield arg must belong to source arg");
         auto target_ptr = reinterpret_cast<char*>(&target);
         auto source_ptr = reinterpret_cast<char*>(&source);
         auto field_ptr = reinterpret_cast<char*>(&multifield);
         long byte_offset = field_ptr - source_ptr;
-        MPI_ASSERT(byte_offset>0, "field pointer is not positively offset from row!");
+        DEBUG_ASSERT_GT(byte_offset, 0, "field pointer is not positively offset from row!");
         auto ptr = reinterpret_cast<MultiField<Args...>*>(target_ptr + byte_offset);
-        MPI_ASSERT(ptr->belongs_to_row(target), "multifield identification failed");
+        DEBUG_ASSERT_TRUE(ptr->belongs_to_row(target), "multifield identification failed");
         return *ptr;
     }
 

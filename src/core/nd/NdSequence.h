@@ -73,7 +73,7 @@ struct NdSequence {
             log::warn("Attempting to cache {} (> {}) Nd index arrays, this class is intended for small products of Nd extents",
                       format.m_nelement, limit);
         }
-        MPI_REQUIRE(format.m_nelement <= limit, "shape product is too large, highly likely NdSequence is misapplied");
+        REQUIRE_LE(format.m_nelement, limit, "shape product is too large, highly likely NdSequence is misapplied");
         std::vector<std::array<size_t, nind>> tmp;
         defs::inds shape(nind);
         std::copy_n(format.m_shape.cbegin(), nind, shape.begin());

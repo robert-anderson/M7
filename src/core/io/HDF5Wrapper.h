@@ -83,10 +83,10 @@ namespace hdf5 {
 
             if (writemode) {
                 m_handle = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-                MPI_REQUIRE_ALL(m_handle >= 0,
+                REQUIRE_NE(m_handle, 0,
                                 "HDF5 file could not be opened for writing. It may be locked by another program");
             } else {
-                MPI_REQUIRE_ALL(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
+                REQUIRE_TRUE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
                 m_handle = H5Fopen(name.c_str(), H5F_ACC_RDONLY, plist_id);
             }
             H5Pclose(plist_id);
@@ -94,7 +94,7 @@ namespace hdf5 {
 
         ~File() {
             auto status = H5Fclose(m_handle);
-            MPI_REQUIRE_ALL(!status, "HDF5 Error on closing file");
+            REQUIRE_TRUE(!status, "HDF5 Error on closing file");
         }
 
         Group subgroup(std::string name);
@@ -175,7 +175,7 @@ namespace hdf5 {
     private:
         void read(char *dst) {
             auto status = H5Aread(m_handle, m_h5type, dst);
-            MPI_ASSERT(!status, "HDF5 attribute read failed");
+            DEBUG_ASSERT_TRUE(!status, "HDF5 attribute read failed");
         }
 
     public:
@@ -215,7 +215,7 @@ namespace hdf5 {
 
         ~GroupBase() {
             auto status = H5Gclose(m_handle);
-            MPI_REQUIRE_ALL(!status, "HDF5 Error on closing group");
+            REQUIRE_TRUE(!status, "HDF5 Error on closing group");
         }
     };
 
@@ -306,7 +306,7 @@ namespace hdf5 {
 
         static size_t extract_list_rank(hid_t parent_handle, std::string name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
-            MPI_REQUIRE(!status, "Dataset \"" + name + "\" does not exist");
+            REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
             auto dataset = H5Dopen1(parent_handle, name.c_str());
             auto dataspace = H5Dget_space(dataset);
             auto rank = H5Sget_simple_extent_ndims(dataspace);
@@ -370,12 +370,14 @@ namespace hdf5 {
             if (data) {
                 auto status = H5Dread(m_dataset_handle, m_h5type, m_memspace_handle,
                                       m_filespace_handle, m_coll_plist, data);
-                MPI_ASSERT(!status, "HDF5 read failed");
+                DEBUG_ONLY(status);
+                DEBUG_ASSERT_TRUE(!status, "HDF5 read failed");
             }
             else {
                 auto status = H5Dread(m_dataset_handle, m_h5type, m_none_memspace_handle,
                                       m_filespace_handle, m_coll_plist, data);
-                MPI_ASSERT(!status, "HDF5 read failed");
+                DEBUG_ONLY(status);
+                DEBUG_ASSERT_TRUE(!status, "HDF5 read failed");
             }
             log::debug_("data read");
         }
@@ -408,13 +410,13 @@ namespace hdf5 {
 
         ~Group() {
             auto status = H5Gclose(m_handle);
-            MPI_REQUIRE_ALL(!status, "HDF5 Error on closing group");
+            REQUIRE_TRUE(!status, "HDF5 Error on closing group");
         }
 
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(const T &item, std::string name) {
-            MPI_REQUIRE_ALL(m_writemode, "File is open for reading - save not permitted.");
+            REQUIRE_TRUE(m_writemode, "File is open for reading - save not permitted.");
             hsize_t shape = 1;
             auto dspace_handle = H5Screate_simple(1, &shape, nullptr);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
@@ -423,22 +425,23 @@ namespace hdf5 {
             auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void *) &item);
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
-            MPI_REQUIRE_ALL(!status, "HDF5 Error on primitive type save");
+            REQUIRE_FALSE(status, "HDF5 Error on primitive type save");
         }
 
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(const std::complex<T> &item, std::string name) {
-            MPI_REQUIRE_ALL(m_writemode, "File is open for reading - save not permitted.");
+            REQUIRE_TRUE(m_writemode, "File is open for reading - save not permitted.");
             hsize_t shape = 2;
             auto dspace_handle = H5Screate_simple(1, &shape, nullptr);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
 
             auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void *) &item);
+            DEBUG_ONLY(status);
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
-            MPI_REQUIRE_ALL(!status, "HDF5 Error on complex type save");
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on complex type save");
         }
 
 //        template<typename T, size_t ndim>
@@ -456,7 +459,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(T &item, std::string name) {
-            MPI_REQUIRE_ALL(!m_writemode, "File is open for writing - load not permitted.");
+            REQUIRE_TRUE(!m_writemode, "File is open for writing - load not permitted.");
             auto dset_handle = H5Dopen2(m_handle, name.c_str(), H5P_DEFAULT);
             auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *) &item);
             MPI_REQUIRE_ALL(!status, "HDF5 Error on complex type load");
@@ -465,10 +468,10 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(const std::complex<T> &item, std::string name) const {
-            MPI_REQUIRE_ALL(!m_writemode, "File is open for writing - load not permitted.");
+            REQUIRE_TRUE(!m_writemode, "File is open for writing - load not permitted.");
             auto dset_handle = H5Dopen2(m_handle, name.c_str(), H5P_DEFAULT);
             auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *) &item);
-            MPI_REQUIRE_ALL(!status, "HDF5 Error on primitive type load");
+            REQUIRE_FALSE(status, "HDF5 Error on primitive type load");
         }
 
         template<typename T>

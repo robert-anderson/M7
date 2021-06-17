@@ -206,9 +206,9 @@ void Solver::loop_over_occupied_onvs() {
 
         for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
-            MPI_ASSERT(!m_wf.m_store.m_row.m_onv.is_zero(),
+            DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_onv.is_zero(),
                        "Stored ONV should not be zeroed");
-            MPI_ASSERT(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
+            DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
                        "Stored ONV should be on its allocated rank");
 
             const auto &weight = row.m_weight[ipart];
@@ -420,7 +420,7 @@ void Solver::loop_over_spawned() {
         auto row_current = m_wf.recv().m_row;
         auto row_block_start_src_blocks = m_wf.recv().m_row;
 
-        auto get_nrow_in_block = [&]() { return row_current.m_i - row_block_start.m_i; };
+        auto get_nrow_in_block = [&]() { return row_current.index() - row_block_start.index(); };
         auto get_allow_initiation = [&]() {
             // row_block_start is now at last row in last block
             bool allow = get_nrow_in_block() > 1;
@@ -449,12 +449,12 @@ void Solver::loop_over_spawned() {
                 // get the row index (if any) of the dst_onv
                 auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
                 make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
-                                                       row_current.m_i - 1, irow_store);
-                ASSERT(row_block_start.m_i == row_current.m_i - 1)
+                                                       row_current.index() - 1, irow_store);
+                ASSERT(row_block_start.index() == row_current.index() - 1)
                 annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
                 // put block start to start of next block
                 row_block_start.step();
-                ASSERT(row_block_start.m_i == row_current.m_i)
+                ASSERT(row_block_start.index() == row_current.index())
                 total_delta = row_current.m_delta_weight;
             }
         }
@@ -601,7 +601,7 @@ void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, 
         ASSERT(m_wf.m_store.m_row.m_onv == row_current.m_dst_onv);
         // seek to next "parent" ONV
         if (row_current.m_src_onv != row_block_start.m_src_onv) {
-            ASSERT(row_current.m_i - row_block_start.m_i > 0);
+            ASSERT(row_current.index() > row_block_start.index());
             // row_current is pointing to the first row of the next src_onv block
             // row_block_start can be used to access the src ONV data
             make_instant_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight,

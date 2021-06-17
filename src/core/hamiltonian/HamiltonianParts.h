@@ -179,7 +179,7 @@ namespace ham_parts {
         void set_hf_onv(fields::FermionOnv& onv, int spin) const {
             auto nalpha = ci_utils::nalpha(nelec(), spin);
             auto nbeta = ci_utils::nbeta(nelec(), spin);
-            MPI_ASSERT(nalpha+nbeta==nelec(), "inconsistent na, nb, nelec");
+            DEBUG_ASSERT_EQ(nalpha+nbeta, nelec(), "inconsistent na, nb, nelec");
             onv.zero();
             for (size_t i=0ul; i<nalpha; ++i) onv.set({0, i});
             for (size_t i=0ul; i<nbeta; ++i) onv.set({1, i});

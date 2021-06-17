@@ -34,9 +34,7 @@ class ExactPropagator : public Propagator {
         if (change<0) com+=change;
         auto helem = ham.bc().get_element_1(imode, imode, com);
 
-#ifndef DNDEBUG
         ASSERT(consts::floats_equal(helem, ham.bc().v(imode, imode, imode)*std::sqrt(com+1)))
-#endif
         return helem;
     }
 

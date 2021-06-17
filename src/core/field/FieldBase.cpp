@@ -22,7 +22,7 @@ bool FieldBase::is_comparable(const FieldBase &other) const {
 
 void FieldBase::add_to_row(Row *row) {
     if (!row) return;
-    MPI_REQUIRE(!belongs_to_row(), "Field must not be already associated with a row");
+    REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
     m_row_offset = row->add_field(this);
     m_row = row;
 }
@@ -40,7 +40,7 @@ bool FieldBase::belongs_to_row(const Row& row) const {
 }
 
 char *FieldBase::begin() const {
-    MPI_ASSERT(belongs_to_row(), "Field is not associated with row");
+    DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
     return (char *) (m_row->dbegin()) + m_row_offset;
 }
 
@@ -95,7 +95,7 @@ defs::hash_t FieldBase::hash() const {
 
 FieldBase &FieldBase::operator=(const FieldBase &other) {
     if (&other == this) return *this;
-    MPI_ASSERT(is_comparable(other), "can't compare to incompatible field");
+    DEBUG_ASSERT_TRUE(is_comparable(other), "can't compare to incompatible field");
     std::memcpy(begin(), other.begin(), m_size);
     return *this;
 }

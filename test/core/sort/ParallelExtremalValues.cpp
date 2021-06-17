@@ -24,7 +24,7 @@ TEST(ParallelExtremalValues, Test) {
     table.push_back(nrow_per_rank);
     auto row = table.m_row;
     for (row.restart(); row.in_range(); row.step())
-        row.m_field = get_value(mpi::irank(), row.m_i);
+        row.m_field = get_value(mpi::irank(), row.index());
     ASSERT_EQ(table.m_hwm, nrow_per_rank);
 
     const size_t nfind = 10;

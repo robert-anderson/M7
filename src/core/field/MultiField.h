@@ -45,7 +45,7 @@ struct MultiField {
 
     void add_to_row(Row* row) {
         if (!row) return;
-        MPI_REQUIRE(!m_row, "MultiField must not be already associated with a row");
+        REQUIRE_TRUE(!m_row, "MultiField must not be already associated with a row");
         struct fn_t {
             Row* m_row;
             void operator()(FieldBase &f) {

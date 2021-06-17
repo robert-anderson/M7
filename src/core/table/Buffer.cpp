@@ -58,7 +58,7 @@ double Buffer::Window::expansion_factor() const {
 Buffer::Buffer(std::string name, size_t nwindow_max) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max){
     if (!name.empty()) log::info_("Creating \"{}\" buffer", name);
-    MPI_REQUIRE(nwindow_max,"A buffer must allow at least one window");
+    REQUIRE_TRUE(nwindow_max,"A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
 
@@ -71,7 +71,7 @@ size_t Buffer::window_dsize() const {
 }
 
 void Buffer::append_window(Buffer::Window *window) {
-    MPI_REQUIRE(m_windows.size() < m_nwindow_max, "Buffer is over-subscribed");
+    REQUIRE_LT(m_windows.size(), m_nwindow_max, "Buffer is over-subscribed");
     if (dsize()) {
         window->m_dbegin = m_data.data()+window_dsize() * m_windows.size();
         window->m_dend = window->m_dbegin + window_dsize();
@@ -81,7 +81,7 @@ void Buffer::append_window(Buffer::Window *window) {
 }
 
 void Buffer::resize(size_t dsize) {
-    MPI_ASSERT(dsize, "New size must be non-zero");
+    DEBUG_ASSERT_TRUE(dsize, "New size must be non-zero");
     if (!m_name.empty()) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",
         m_name, capacity_string(), capacity_string(dsize));
@@ -108,7 +108,7 @@ void Buffer::make_room(size_t dsize) {
 }
 
 void Buffer::expand(size_t delta_dsize, double expansion_factor) {
-    MPI_REQUIRE(expansion_factor>0.0, "invalid expansion factor");
+    REQUIRE_GT(expansion_factor, 0.0, "invalid expansion factor");
     resize((dsize() + delta_dsize)*(1+expansion_factor));
 }
 

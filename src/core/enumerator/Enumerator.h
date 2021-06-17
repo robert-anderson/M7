@@ -124,7 +124,7 @@ namespace enums {
 
     public:
         Cache(size_t n, size_t r) : m_n(n), m_r(r), m_v(make()), m_nv(m_v.size() / m_r) {
-            MPI_REQUIRE(m_nv==enum_T(m_n, m_r).m_nv, "Number of terms generated does not meet expectation");
+            REQUIRE_EQ(m_nv, enum_T(m_n, m_r).m_nv, "Number of terms generated does not meet expectation");
         }
 
         bool next() {

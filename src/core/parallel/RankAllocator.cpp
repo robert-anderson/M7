@@ -35,8 +35,8 @@ RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double accept
         m_mean_work_times(nblock, 0.0), m_gathered_total_times(mpi::nrank(), 0.0),
         m_acceptable_imbalance(acceptable_imbalance)
 {
-    MPI_REQUIRE_ALL(m_acceptable_imbalance>=0.0, "Acceptable imbalance fraction must be non-negative");
-    MPI_REQUIRE_ALL(m_acceptable_imbalance<=1.0, "Acceptable imbalance fraction must not exceed 100%");
+    REQUIRE_GE_ALL(m_acceptable_imbalance, 0.0, "Acceptable imbalance fraction must be non-negative");
+    REQUIRE_LE_ALL(m_acceptable_imbalance, 1.0, "Acceptable imbalance fraction must not exceed 100%");
     size_t iblock = 0ul;
     for (auto &rank:m_block_to_rank) {
         rank = iblock%mpi::nrank();
@@ -109,7 +109,7 @@ void RankAllocatorBase::update(size_t icycle) {
         log::warn("The most idle rank appears to have done no work at all");
         log::debug("Gathered times: {}", utils::to_string(m_gathered_total_times));
     }
-    MPI_REQUIRE_ALL(*it_busy>0.0, "The busiest rank appears to have done no work. "
+    REQUIRE_GT_ALL(*it_busy, 0.0, "The busiest rank appears to have done no work. "
                                   "record_work_time must be called by application");
 
     // this rank has done the least work, so it should receive a block
@@ -146,7 +146,7 @@ void RankAllocatorBase::update(size_t icycle) {
         // not a null update: rezero the counter
         m_nnull_updates = 0ul;
     }
-    MPI_REQUIRE_ALL(!m_rank_to_blocks[irank_send].empty(),
+    REQUIRE_FALSE_ALL(m_rank_to_blocks[irank_send].empty(),
                     "Sending rank has no blocks to send! Specified work_time value may be erroneous");
     /*
      * sender will send all rows in the selected block, which will become the front
@@ -155,7 +155,7 @@ void RankAllocatorBase::update(size_t icycle) {
     size_t nskip;
     if (mpi::i_am(irank_send)) nskip = get_nskip_();
     mpi::bcast(nskip, irank_send);
-    MPI_ASSERT(nskip<m_rank_to_blocks[irank_send].size(), "Too many skips");
+    DEBUG_ASSERT_LT(nskip, m_rank_to_blocks[irank_send].size(), "Too many skips");
     auto it_block_transfer = m_rank_to_blocks[irank_send].begin();
     for (size_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
 
@@ -176,10 +176,10 @@ void RankAllocatorBase::update(size_t icycle) {
     m_rank_to_blocks[irank_send].erase(it_block_transfer);
     m_rank_to_blocks[irank_recv].push_back(*it_block_transfer);
     m_block_to_rank[*it_block_transfer] = irank_recv;
-    MPI_ASSERT_ALL(!m_rank_to_blocks[irank_send].empty(), "All blocks removed from rank");
+    DEBUG_ASSERT_FALSE(m_rank_to_blocks[irank_send].empty(), "All blocks removed from rank");
 
     for (auto dep : m_rank_dynamic_objects) dep->before_block_transfer(irows_send, irank_send, irank_recv);
     table().transfer_rows(irows_send, irank_send, irank_recv, m_recv_callbacks);
     for (auto dep : m_rank_dynamic_objects) dep->after_block_transfer();
-    MPI_ASSERT_ALL(consistent(), "block->rank map should be consistent with rank->block map");
+    DEBUG_ASSERT_TRUE_ALL(consistent(), "block->rank map should be consistent with rank->block map");
 }

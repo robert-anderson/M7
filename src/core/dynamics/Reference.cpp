@@ -29,7 +29,7 @@ void Reference::update_ref_conn_flags() {
 void Reference::accept_candidate(double redefinition_thresh) {
     std::vector<defs::wf_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_abs_weight, gather);
-    MPI_ASSERT(m_candidate_abs_weight==gather[mpi::irank()], "Gather error");
+    DEBUG_ASSERT_EQ(m_candidate_abs_weight, gather[mpi::irank()], "Gather error");
     size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
     mpi::bcast(m_irow_candidate, irank);
     auto current_weight = weight();
@@ -49,7 +49,7 @@ void Reference::contrib_row() {
     auto weight = row.m_weight[m_ipart];
     if (std::abs(weight) > m_candidate_abs_weight) {
         m_candidate_abs_weight = std::abs(weight);
-        m_irow_candidate = row.m_i;
+        m_irow_candidate = row.index();
     }
     if (row.m_reference_connection.get(m_ipart)) {
         make_numerator_contribs(row.m_onv, row.m_weight[m_ipart]);

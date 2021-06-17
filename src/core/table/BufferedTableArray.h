@@ -101,12 +101,12 @@ public:
     }
 
     table_t &operator[](const size_t &itable) {
-        MPI_ASSERT_LT_(itable, ntable());
+        DEBUG_ASSERT_LT(itable, ntable(), "Table array access OOB");
         return m_tables[itable];
     }
 
     const table_t &operator[](const size_t &itable) const {
-        MPI_ASSERT_LT_(itable, ntable());
+        DEBUG_ASSERT_LT(itable, ntable(), "Table array access OOB");
         return m_tables[itable];
     }
 

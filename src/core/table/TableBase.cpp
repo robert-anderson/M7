@@ -115,7 +115,7 @@ void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::
     }
 }
 void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){
-    MPI_ASSERT_ALL(irank_recv!=irank_send, "sending and recving ranks should never be the same");
+    DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
     if (!m_transfer) m_transfer = std::unique_ptr<RowTransfer>(new RowTransfer(m_bw.name()));
     size_t nrow = 0;
     if (mpi::i_am(irank_send)){
@@ -208,11 +208,11 @@ bool TableBase::is_protected(const size_t& irow) const {
 }
 
 TableBase::Loc::Loc(size_t irank, size_t irow) : m_irank(irank), m_irow(irow){
-#ifndef DNDEBUG
+#ifndef NDEBUG
     mpi::bcast(irank);
     mpi::bcast(irow);
-    MPI_ASSERT_ALL(m_irank==irank, "rank index in TableBase::Loc should be consistent across all ranks");
-    MPI_ASSERT_ALL(m_irow==irow, "row index in TableBase::Loc should be consistent across all ranks");
+    DEBUG_ASSERT_EQ(m_irank, irank, "rank index in TableBase::Loc should be consistent across all ranks");
+    DEBUG_ASSERT_EQ(m_irow, irow, "row index in TableBase::Loc should be consistent across all ranks");
 #endif
 }
 
