@@ -6,6 +6,16 @@
 #include "src/core/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
 
+TEST(DecodedDeterminant, CopyAndMove){
+    const size_t n = 6;
+    OccupiedOrbitals occorbs(n);
+    ASSERT_EQ(occorbs.inds().capacity(), 2*n);
+    auto occorbs_cpy = occorbs;
+    ASSERT_EQ(occorbs_cpy.inds().capacity(), 2*n);
+    auto occorbs_mov = std::move(occorbs);
+    ASSERT_EQ(occorbs_mov.inds().capacity(), 2*n);
+}
+
 TEST(DecodedDeterminant, Occupation){
     buffered::Onv<0> onv(50);
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};

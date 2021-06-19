@@ -57,6 +57,17 @@ void BosonOnvConnection::connect(const fields::BosonOnv &in, const fields::Boson
     }
 }
 
+void BosonOnvConnection::apply(const fields::BosonOnv &in) {
+    for (size_t imode = 0ul; imode < m_nmode; ++imode) {
+        m_com[imode] = in[imode];
+    }
+    for (size_t ichange = 0ul; ichange < nchanged_mode(); ++ichange) {
+        const auto imode = changed_mode(ichange);
+        const auto change = changes(ichange);
+        if (change<0) m_com[imode] += change;
+    }
+}
+
 void BosonOnvConnection::apply(const fields::BosonOnv &in, fields::BosonOnv &out) {
     out = in;
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {

@@ -30,6 +30,17 @@ public:
     explicit DecodedDeterminant(const fields::Onv<1> &onv) :
             DecodedDeterminant(onv.m_frm.m_nsite) {}
 
+    DecodedDeterminant(const DecodedDeterminant& other): DecodedDeterminant(other.m_inds.capacity()/2){}
+    DecodedDeterminant(DecodedDeterminant&& other): DecodedDeterminant(other.m_inds.capacity()/2){}
+    DecodedDeterminant& operator=(const DecodedDeterminant& other){
+        m_inds = other.m_inds;
+        return *this;
+    }
+    DecodedDeterminant& operator=(DecodedDeterminant&& other){
+        m_inds = std::move(other.m_inds);
+        return *this;
+    }
+
     size_t size() const {
         return m_inds.size();
     }
@@ -54,12 +65,12 @@ public:
 
 
 struct OccupiedUpdater {
-    void operator()(const fields::Onv<0> &view, defs::inds &inds);
+    void operator()(const fields::Onv<0> &onv, defs::inds &inds);
 };
 
 
 struct VacantUpdater {
-    void operator()(const fields::Onv<0> &view, defs::inds &inds);
+    void operator()(const fields::Onv<0> &onv, defs::inds &inds);
 };
 
 typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;
@@ -89,6 +100,20 @@ public:
     NdDecodedDeterminant(std::array<size_t, nind> shape, const fields::Onv<1> &onv, const defs::inds& map) :
             NdDecodedDeterminant(shape, onv.m_frm.m_nsite, map) {}
 
+
+    NdDecodedDeterminant(const NdDecodedDeterminant& other):
+        NdDecodedDeterminant(other.m_format.m_shape, other.m_inds.capacity()/2, other.m_map){}
+    NdDecodedDeterminant(NdDecodedDeterminant&& other):
+            NdDecodedDeterminant(other.m_format.m_shape, other.m_inds.capacity()/2, other.m_map){}
+    NdDecodedDeterminant& operator=(const NdDecodedDeterminant& other){
+        m_inds = other.m_inds;
+        return *this;
+    }
+    NdDecodedDeterminant& operator=(NdDecodedDeterminant&& other){
+        m_inds = std::move(other.m_inds);
+        return *this;
+    }
+
     size_t size(const size_t& ielement) const {
         return m_inds[ielement].size();
     }
@@ -117,12 +142,12 @@ public:
 
 
 struct NdOccupiedUpdater {
-    void operator()(const fields::Onv<0> &view, const defs::inds& map, std::vector<defs::inds> &inds);
+    void operator()(const fields::Onv<0> &onv, const defs::inds& map, std::vector<defs::inds> &inds);
 };
 
 
 struct NdVacantUpdater {
-    void operator()(const fields::Onv<0> &view, const defs::inds& map, std::vector<defs::inds> &inds);
+    void operator()(const fields::Onv<0> &onv, const defs::inds& map, std::vector<defs::inds> &inds);
 };
 
 template<size_t nind>

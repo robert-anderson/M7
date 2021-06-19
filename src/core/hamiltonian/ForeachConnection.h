@@ -34,7 +34,9 @@ namespace foreach_conn {
         Fermion(const Hamiltonian<0> &ham, conn::Antisym<0> &conn,
                 std::function<void(defs::ham_t)> body_fn, bool get_h = true, bool nonzero_h_only = true) :
                 Base(body_fn, get_h, nonzero_h_only),
-                m_ham(ham), m_conn(conn), m_nsite(ham.nsite()), m_occ(m_nsite), m_vac(m_nsite) {}
+                m_ham(ham), m_conn(conn), m_nsite(ham.nsite()), m_occ(m_nsite), m_vac(m_nsite) {
+
+        }
 
     protected:
         bool update_helem() {
@@ -70,6 +72,88 @@ namespace foreach_conn {
                             body_fn();
                         }
                     }
+                }
+            }
+        }
+    };
+
+    struct Hubbard1D : Fermion {
+        const bool m_pbc;
+        Hubbard1D(const Hamiltonian<0> &ham, conn::Antisym<0> &conn,
+                std::function<void(defs::ham_t)> body_fn, bool pbc) :
+                Fermion(ham, conn, body_fn, true, true), m_pbc(pbc){}
+
+        void operator()(const fields::Onv<0> &src_onv) override {
+            ASSERT(!src_onv.is_zero());
+            m_occ.update(src_onv);
+            for (auto &iocc: m_occ.inds()) {
+                auto neighbor = conn_utils::left(iocc, m_ham.nsite(), m_pbc);
+                if (neighbor!=~0ul && !src_onv.get(neighbor)) {
+                    // there is an orbital to the left, and it is unoccupied
+                    m_conn.zero();
+                    m_conn.add(iocc, neighbor);
+                    m_conn.apply(src_onv);
+                    body_fn();
+                }
+                neighbor = conn_utils::right(iocc, m_ham.nsite(), m_pbc);
+                if (neighbor!=~0ul && !src_onv.get(neighbor)) {
+                    // there is an orbital to the right, and it is unoccupied
+                    m_conn.zero();
+                    m_conn.add(iocc, neighbor);
+                    m_conn.apply(src_onv);
+                    body_fn();
+                }
+            }
+        }
+    };
+
+
+    /**
+     * currently implements single changes in boson occupation for occupied fermion sites
+     * e.g. Hubbard--Holstein
+     */
+    struct FermiBos : Base {
+        const Hamiltonian<1> &m_ham;
+        conn::Antisym<1> &m_conn;
+        const size_t m_nsite;
+        Fermion m_frm;
+
+        FermiBos(const Hamiltonian<1> &ham, conn::Antisym<1> &conn, Fermion &&frm,
+                 std::function<void(defs::ham_t)> body_fn, bool get_h = true, bool nonzero_h_only = true) :
+                Base(std::move(body_fn), get_h, nonzero_h_only),
+                m_ham(ham), m_conn(conn), m_nsite(ham.nsite()), m_frm(frm) {}
+
+    protected:
+        bool update_helem() {
+            if (m_get_h) m_helem = m_ham.get_element(m_conn);
+            return !m_nonzero_h_only || !consts::float_is_zero(m_helem);
+        }
+
+        void body_fn() {
+            if (update_helem()) m_body_fn(m_helem);
+        }
+
+    public:
+        void operator()(const fields::Onv<1> &src_onv) {
+            m_conn.m_bonvconn.zero();
+            m_frm(src_onv.m_frm);
+            static_cast<FermionOnvConnection&>(m_conn).connect(src_onv.m_frm, src_onv.m_frm);
+            // m_occ has already been updated by the loop over fermionic sites
+            for (auto &iocc: m_frm.m_occ.inds()) {
+                auto isite = iocc < m_nsite ? iocc : iocc-m_nsite;
+                if (src_onv.m_bos[isite]>0) {
+                    // we have a boson-annihilating coupling to the electron density
+                    m_conn.m_bonvconn.zero();
+                    m_conn.m_bonvconn.add(isite, -1);
+                    m_conn.apply(src_onv);
+                    body_fn();
+                }
+                if (src_onv.m_bos[isite]<m_ham.nboson_cutoff()) {
+                    // we have a boson-creating coupling to the electron density
+                    m_conn.m_bonvconn.zero();
+                    m_conn.m_bonvconn.add(isite, 1);
+                    m_conn.apply(src_onv);
+                    body_fn();
                 }
             }
         }
@@ -144,32 +228,6 @@ namespace foreach_conn {
     };
 
 
-    struct FermiBos : Base {
-        const Hamiltonian<1> &m_ham;
-        conn::Antisym<1> &m_conn;
-        const size_t m_nsite;
-        Fermion m_frm;
-
-        FermiBos(const Hamiltonian<1> &ham, conn::Antisym<1> &conn, Fermion &&frm,
-                 std::function<void(defs::ham_t)> body_fn, bool get_h = true, bool nonzero_h_only = true) :
-                Base(std::move(body_fn), get_h, nonzero_h_only),
-                m_ham(ham), m_conn(conn), m_nsite(ham.nsite()), m_frm(frm) {}
-
-    protected:
-        bool update_helem() {
-            if (m_get_h) m_helem = m_ham.get_element(m_conn);
-            return !m_nonzero_h_only || !consts::float_is_zero(m_helem);
-        }
-
-        void body_fn() {
-            if (update_helem()) m_body_fn(m_helem);
-        }
-
-    public:
-        void operator()(const fields::Onv<1> &src_onv) {
-            m_conn.m_bonvconn.zero();
-        }
-    };
 }
 
 #endif

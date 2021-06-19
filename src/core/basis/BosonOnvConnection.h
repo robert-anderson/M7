@@ -38,6 +38,8 @@ public:
 
     void apply(const fields::BosonOnv &in, fields::BosonOnv& out);
 
+    void apply(const fields::BosonOnv &in);
+
     void add(const size_t& imode, const int& change);
 
     size_t nexcit() const {

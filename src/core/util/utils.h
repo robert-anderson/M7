@@ -693,7 +693,7 @@ namespace array_utils {
 }
 
 namespace conn_utils {
-    static size_t left(const size_t& ispinorb, const size_t& nsite) {
+    static size_t left_obc(const size_t& ispinorb, const size_t& nsite) {
         if (ispinorb==0 || ispinorb==nsite) return ~0ul;
         return ispinorb-1;
     }
@@ -702,7 +702,7 @@ namespace conn_utils {
         else if (ispinorb==nsite) return 2*nsite-1;
         return ispinorb-1;
     }
-    static size_t right(const size_t& ispinorb, const size_t& nsite) {
+    static size_t right_obc(const size_t& ispinorb, const size_t& nsite) {
         if (ispinorb==nsite-1 || ispinorb==2*nsite-1) return ~0ul;
         return ispinorb+1;
     }
@@ -710,6 +710,12 @@ namespace conn_utils {
         if (ispinorb==nsite-1) return 0;
         else if (ispinorb==2*nsite-1) return nsite;
         return ispinorb+1;
+    }
+    static size_t left(const size_t& ispinorb, const size_t& nsite, bool pbc=false) {
+        return pbc ? left_obc(ispinorb, nsite) : left_pbc(ispinorb, nsite);
+    }
+    static size_t right(const size_t& ispinorb, const size_t& nsite, bool pbc=false) {
+        return pbc ? right_obc(ispinorb, nsite) : right_pbc(ispinorb, nsite);
     }
 }
 

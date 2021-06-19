@@ -21,6 +21,8 @@ struct AntisymFermiBosConnection : public AntisymFermionOnvConnection {
 
     void connect(const fields::Onv<1> &in, const fields::Onv<1> &out);
 
+    void apply(const fields::Onv<1> &in);
+
     void apply(const fields::Onv<1> &in, fields::Onv<1> &out);
 
     void zero();

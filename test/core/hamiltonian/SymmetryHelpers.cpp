@@ -43,7 +43,6 @@ TEST(SymmetryHelpers, Test) {
         table.m_row.m_field = dst_onv;
     };
     sym_helper.foreach_connection(src_onv, body_fn, false, false, false);
-    std::cout << table.to_string() << std::endl;
 }
 
 
@@ -57,7 +56,6 @@ TEST(SymmetryHelpers, Test2) {
     buffered::Onv<0> dst_onv(ham.nsite());
     auto body_fn = [&](defs::ham_t helement) {
         conn.apply(src_onv, dst_onv);
-        std::cout << dst_onv << std::endl;
     };
     foreach_conn::Fermion(ham, conn, body_fn, true, false)(src_onv);
 

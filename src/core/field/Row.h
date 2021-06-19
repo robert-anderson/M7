@@ -108,8 +108,14 @@ public:
         return m_dbegin;
     }
 
+    /**
+     * m_i == m_table->m_hwm is not valid for access, but is the state in which the row position data are left at the
+     * loop when the in_range() loop termination condition becomes false, so the assert doesn't fail in this case
+     * @return
+     *  row position within Table
+     */
     const size_t& index() const {
-        DEBUG_ASSERT_LT(m_i, m_table->m_hwm, "the row index is not in the permitted range");
+        DEBUG_ASSERT_LE(m_i, m_table->m_hwm, "the row index is not in the permitted range");
         return m_i;
     }
 

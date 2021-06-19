@@ -27,6 +27,11 @@ void AntisymFermiBosConnection::apply(const fields::Onv<1> &in, fields::Onv<1> &
     m_bonvconn.apply(in.m_bos, out.m_bos);
 }
 
+void AntisymFermiBosConnection::apply(const fields::Onv<1> &in) {
+    AntisymFermionOnvConnection::apply(in.m_frm);
+    m_bonvconn.apply(in.m_bos);
+}
+
 void AntisymFermiBosConnection::zero() {
     AntisymFermionOnvConnection::zero();
     m_bonvconn.zero();
