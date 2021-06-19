@@ -380,9 +380,7 @@ struct Communicator {
             auto nrow = m_displs.back() + m_counts.back();
             m_local.push_back(m_counts[mpi::irank()]);
             auto& local_row = m_local.m_row;
-            if (mpi::i_am(1)) HERE();
             local_row.restart();
-            if (mpi::i_am(1)) HERE();
             for (auto &irow : m_irows){
                 m_source_row.jump(irow);
                 m_loading_fn(m_source_row, local_row);

@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <execinfo.h>
+#include <cxxabi.h>
 #include "src/core/parallel/MPIWrapper.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -26,51 +27,15 @@ extern std::shared_ptr<spdlog::logger> g_local_file_logger;
 
 struct log {
 
-    static void initialize(){
-        if (!mpi::initialized())
-            throw std::runtime_error("Logging requires that the MPIWrapper is initialized");
-        if (mpi::i_am_root()) {
-            g_reduced_stdout_logger = spdlog::stdout_color_st("stdout");
-            g_reduced_file_logger = spdlog::basic_logger_st("fileout", "M7.log", true);
-        }
-#ifdef ENABLE_LOCAL_LOGGING
-        g_local_file_logger = spdlog::basic_logger_st("fileout_", "M7.log."+std::to_string(mpi::irank()), true);
-#endif
-        spdlog::set_pattern("[%E] %^[%l]%$ %v");
+    static void initialize();
 
-#ifndef NDEBUG
-        spdlog::set_level(spdlog::level::debug);
-#else
-        spdlog::set_level(spdlog::level::info);
-#endif
-#ifdef ENABLE_LOCAL_LOGGING
-        g_local_file_logger->flush_on(spdlog::level::debug);
-#endif
-    }
+    static void flush();
 
-    static void flush(){
-        if (!mpi::i_am_root()) return;
-        g_reduced_stdout_logger->flush();
-        g_reduced_file_logger->flush();
-    }
+    static void flush_();
 
-    static void flush_(){
-#ifdef ENABLE_LOCAL_LOGGING
-        g_local_file_logger->flush();
-#endif
-    }
+    static void flush_all();
 
-    static void flush_all(){
-        flush();
-        flush_();
-    }
-
-    static void finalize(){
-        // spdlog::shutdown() doesn't seem to flush all streams in synchronous mode
-        flush_all();
-        spdlog::shutdown();
-    }
-
+    static void finalize();
 
     template<typename ...Args>
     static std::string format(const std::string& fmt_string, Args... args){
@@ -81,15 +46,9 @@ struct log {
         return tmp;
     }
 
-    static std::vector<std::string> get_backtrace(size_t depth){
-        std::vector<void*> entries(depth);
-        size_t size;
-        size = backtrace(entries.data(), depth);
-        auto symbols = backtrace_symbols(entries.data(), size);
-        std::vector<std::string> tmp;
-        for (size_t i=0ul; i<size; ++i) tmp.emplace_back(symbols[i]);
-        return tmp;
-    }
+    static std::string get_demangled_prototype(const char* line);
+
+    static std::vector<std::string> get_backtrace(size_t depth);
 
     template<typename ...Args>
     static void info(const std::string& fmt_string, Args... args){
@@ -133,12 +92,7 @@ struct log {
 #endif
     }
 
-    static void error_backtrace_(size_t depth=10){
-        auto tmp = get_backtrace(depth);
-        std::string str;
-        error_("backtrace:");
-        for (const auto& line: tmp) error_(line);
-    }
+    static void error_backtrace_(size_t depth=20);
 
     template<typename ...Args>
     static void critical(const std::string& fmt_string, Args... args){

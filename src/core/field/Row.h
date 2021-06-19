@@ -123,6 +123,11 @@ public:
      * the 3 "cursor" methods
      */
     void restart(const size_t &irow_begin) const {
+        if (irow_begin==0 && m_table->m_hwm==0) {
+            m_dbegin = nullptr;
+            m_i = ~0ul;
+            return;
+        }
         DEBUG_ASSERT_LT(irow_begin, m_table->m_hwm, "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
