@@ -9,14 +9,12 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
         m_opts(prop.m_opts),
         m_wf(wf),
         m_refs(m_opts, m_prop.m_ham, m_wf, ref_locs),
-        m_connection(prop.m_ham.nsite()),
         m_exit("exit"),
         m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_weighted_twf(m_opts.spf_weighted_twf ?
                        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.spf_twf_fermion_factor,
-                                       m_opts.spf_twf_boson_factor) :
-                       nullptr),
+                                       m_opts.spf_twf_boson_factor) : nullptr),
         m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()), m_detsub(m_wf) {
 
     if (defs::enable_mevs && m_opts.rdm_rank > 0) {
@@ -42,6 +40,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
     if (m_opts.parallel_stats)
         m_parallel_stats = std::unique_ptr<ParallelStats>(
                 new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
+
     m_wf.m_ra.activate(m_icycle);
 }
 

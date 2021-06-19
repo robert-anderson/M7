@@ -329,6 +329,12 @@ public:
         return get_block(KeyField<row_t>::get(row));
     }
 
+    template<typename T>
+    inline typename std::enable_if<std::is_same<key_field_t, fields::Number<T>>::value, size_t>::type
+    get_block(const T& key) {
+        return hashing::fnv_hash((char*)&key, sizeof(T)) % m_nblock;
+    }
+
     /**
      * @param key
      *  mapped field instance
@@ -347,6 +353,12 @@ public:
      */
     inline size_t get_rank(const row_t &row) const {
         return get_rank(KeyField<row_t>::get(row));
+    }
+
+    template<typename T>
+    inline typename std::enable_if<std::is_same<key_field_t, fields::Number<T>>::value, size_t>::type
+    get_rank(const T& key) {
+        return m_block_to_rank[get_block(key)];
     }
 
     /**

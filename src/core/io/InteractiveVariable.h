@@ -165,7 +165,9 @@ struct InteractiveVariable {
     InteractiveVariableFile m_ivf;
     T m_v;
     InteractiveVariable(std::string name): m_ivf(name){}
-    InteractiveVariable(std::string name, const T& v): m_ivf(name), m_v(v){}
+    InteractiveVariable(std::string name, const T& v): InteractiveVariable(name){
+        m_v = v;
+    }
 
     operator T&() {
         return m_v;

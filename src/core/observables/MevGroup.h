@@ -224,7 +224,8 @@ struct MevGroup {
             m_accum_epoch("MEV accumulation"),
             m_fermion_rdm(opts.rdm_rank ? new FermionRdm(opts, opts.rdm_rank, nsite, nelec) : nullptr),
             m_period(opts.ncycle_mev_period), m_explicit_hf_conns(opts.explicit_hf_conn_mevs),
-            m_output_periodically(opts.output_mevs_periodically) {}
+            m_output_periodically(opts.output_mevs_periodically) {
+    }
 
 
     size_t iperiod(size_t icycle) {

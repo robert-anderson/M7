@@ -6,6 +6,7 @@
 #define M7_LOGGING_H
 
 #include <iostream>
+#include <execinfo.h>
 #include "src/core/parallel/MPIWrapper.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -80,6 +81,15 @@ struct log {
         return tmp;
     }
 
+    static std::vector<std::string> get_backtrace(size_t depth){
+        std::vector<void*> entries(depth);
+        size_t size;
+        size = backtrace(entries.data(), depth);
+        auto symbols = backtrace_symbols(entries.data(), size);
+        std::vector<std::string> tmp;
+        for (size_t i=0ul; i<size; ++i) tmp.emplace_back(symbols[i]);
+        return tmp;
+    }
 
     template<typename ...Args>
     static void info(const std::string& fmt_string, Args... args){
@@ -121,6 +131,13 @@ struct log {
 #ifdef ENABLE_LOCAL_LOGGING
         g_local_file_logger->error(fmt_string, args...);
 #endif
+    }
+
+    static void error_backtrace_(size_t depth=10){
+        auto tmp = get_backtrace(depth);
+        std::string str;
+        error_("backtrace:");
+        for (const auto& line: tmp) error_(line);
     }
 
     template<typename ...Args>

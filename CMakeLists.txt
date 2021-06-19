@@ -8,18 +8,10 @@ if (APPLE)
     set(CMAKE_MACOSX_RPATH 1)
 endif()
 
-#SET( EIGEN3_INCLUDE_DIR "$ENV{EIGEN3_INCLUDE_DIR}" )
-#IF( NOT EIGEN3_INCLUDE_DIR )
-#    MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
-#ENDIF()
-#INCLUDE_DIRECTORIES ( "${EIGEN3_INCLUDE_DIR}" )
-
-#INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/external/eigen")
-
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/CLI11)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -march=core-avx2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -march=native")
 
 find_package(LAPACK REQUIRED)
 

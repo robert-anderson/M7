@@ -34,7 +34,7 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
-
+    HERE();
 }
 
 std::vector<std::string> Wavefunction::h5_field_names() {

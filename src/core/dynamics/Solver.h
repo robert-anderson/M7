@@ -52,8 +52,6 @@ class Solver {
     defs::wf_t m_chk_nwalker_local = 0.0;
     size_t m_chk_ninitiator_local = 0ul;
 
-    conn::Basic<> m_connection;
-
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;

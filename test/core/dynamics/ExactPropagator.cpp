@@ -59,6 +59,7 @@ TEST(ExactPropagator, DeterministicSubspace) {
     opts.do_semistochastic = true;
     opts.consolidate_spawns = false;
     opts.replicate = false;
+    opts.rdm_rank = 0;
     //const auto benchmark = -99.9421389039331
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());

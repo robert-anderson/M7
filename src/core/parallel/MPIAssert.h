@@ -43,11 +43,11 @@ namespace asserts {
             }
         } else {
             if (!outcome) {
-                log::error("{} {} failed", kind, op);
-                log::error("{} value is: {}", lhs_sym, lhs);
-                log::error("{} value is: {}", rhs_sym, rhs);
-                if (!reason.empty()) log::error("Reason: \"{}\"", reason);
-                mpi::abort(log::format("{} {} failure", kind, op));
+                log::error_("{} {} failed in file {} at line {}", kind, op, file, line);
+                log::error_("{} value is: {}", lhs_sym, lhs);
+                log::error_("{} value is: {}", rhs_sym, rhs);
+                if (!reason.empty()) log::error_("Reason: \"{}\"", reason);
+                mpi::abort_(log::format("{} {} failure", kind, op));
             }
         }
     }
@@ -69,10 +69,10 @@ namespace asserts {
         } else {
             if (!truth) outcome = !outcome;
             if (!outcome) {
-                log::error("{} {} failed in file {} at line {}", kind, right, file, line);
-                log::error("{} value is {}", sym, wrong);
-                if (!reason.empty()) log::error("Reason: \"{}\"", reason);
-                mpi::abort(log::format("{} failure", kind));
+                log::error_("{} {} failed in file {} at line {}", kind, right, file, line);
+                log::error_("{} value is {}", sym, wrong);
+                if (!reason.empty()) log::error_("Reason: \"{}\"", reason);
+                mpi::abort_(log::format("{} failure", kind));
             }
         }
     }

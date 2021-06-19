@@ -44,4 +44,3 @@ endif ()
 #target_compile_options(unittest PRIVATE -O0)
 
 include_directories($ENV{INCLUDE_PATH})
-SET(CMAKE_CXX_FLAGS "-fopenmp -march=native")
