@@ -14,7 +14,9 @@ TEST(BufferedTable, Empty) {
     ASSERT_EQ(table.m_bw.dsize(), 0);
     ASSERT_EQ(table.m_bw.m_dbegin, nullptr);
     auto& row = table.m_row;
-    for (row.restart(); row.in_range(); row.step()){}
+    row.restart();
+    ASSERT_FALSE(row.in_range());
+    ASSERT_FALSE(row.ptr_in_range());
 }
 
 //
