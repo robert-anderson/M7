@@ -149,7 +149,7 @@ void Solver::begin_cycle() {
 
     if (m_opts.do_semistochastic && !m_detsub) {
         if (update_epoch(m_opts.ncycle_wait_detsub)) {
-            m_detsub = std::unique_ptr<DeterministicSubspace2>(new DeterministicSubspace2(m_wf, m_icycle));
+            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_wf, m_icycle));
             m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("Initialized deterministic subspace");
         }
