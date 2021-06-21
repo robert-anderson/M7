@@ -80,9 +80,11 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
     sparse::Matrix<defs::ham_t> m_sparse_ham;
     Epoch m_epoch;
 
-    DeterministicSubspace2(Wavefunction& wf):
+    DeterministicSubspace2(Wavefunction& wf, size_t icycle):
     Wavefunction::PartSharedRowSet<DeterministicDataRow>(wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
-    m_wf(wf), m_epoch("semistochastic"){}
+    m_wf(wf), m_epoch("semistochastic"){
+        m_epoch.update(icycle, true);
+    }
 
     void build_connections(const FermionHamiltonian &ham) {
         update();
@@ -126,13 +128,7 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
         build_connections(ham);
     }
 
-    void gather(){
-        if (!m_epoch) return;
-        update_data();
-    }
-
     void make_mev_contribs(MevGroup& mevs, const fields::Onv<>& ref) {
-        if (!m_epoch) return;
         if (!mevs.m_accum_epoch) return;
         auto& row_local = m_local.m_row;
         auto& row_global = m_global.m_row;
@@ -153,7 +149,6 @@ struct DeterministicSubspace2 : Wavefunction::PartSharedRowSet<DeterministicData
       *  timestep
       */
     void project(double tau){
-        if (!m_epoch) return;
         auto& row_local = m_local.m_row;
         auto& row_global = m_global.m_row;
         auto row_wf = m_wf.m_store.m_row;

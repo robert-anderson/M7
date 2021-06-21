@@ -56,7 +56,7 @@ TEST(ExactPropagator, DeterministicSubspace) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 1000;
-    //opts.do_semistochastic = true;
+    opts.do_semistochastic = true;
     opts.consolidate_spawns = false;
     opts.replicate = false;
     opts.rdm_rank = 0;
