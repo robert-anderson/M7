@@ -75,7 +75,7 @@ void RankAllocatorBase::deactivate() {
 
 void RankAllocatorBase::activate(size_t icycle) {
     if (mpi::nrank()==1) return;
-    log::info("Activating dynamic load balancing.");
+    log::info("Activating dynamic load balancing on cycle {}.", icycle);
     m_icycle_active = icycle;
     // rezero the counter in case of later reactivation
     m_nnull_updates = 0ul;
@@ -86,7 +86,7 @@ bool RankAllocatorBase::is_active() const {
     return m_icycle_active!=~0ul;
 }
 
-bool RankAllocatorBase::consistent() {
+bool RankAllocatorBase::is_consistent() {
     for (size_t irank=0ul; irank<mpi::nrank(); ++irank){
         for (auto& iblock: m_rank_to_blocks[irank]){
             if (m_block_to_rank[iblock]!=irank) return false;
@@ -97,7 +97,7 @@ bool RankAllocatorBase::consistent() {
 
 void RankAllocatorBase::update(size_t icycle) {
     if (!is_active()) return;
-    size_t ncycle_active = m_icycle_active-icycle;
+    size_t ncycle_active = icycle-m_icycle_active;
     if (!ncycle_active || ncycle_active%m_period) return;
     // else, this is a preparatory iteration
     auto local_time = std::accumulate(m_mean_work_times.begin(), m_mean_work_times.end(), 0.0);
@@ -176,10 +176,11 @@ void RankAllocatorBase::update(size_t icycle) {
     m_rank_to_blocks[irank_send].erase(it_block_transfer);
     m_rank_to_blocks[irank_recv].push_back(*it_block_transfer);
     m_block_to_rank[*it_block_transfer] = irank_recv;
-    DEBUG_ASSERT_FALSE(m_rank_to_blocks[irank_send].empty(), "All blocks removed from rank");
+    DEBUG_ASSERT_FALSE_ALL(m_rank_to_blocks[irank_send].empty(), "All blocks removed from rank");
+    DEBUG_ASSERT_TRUE_ALL(is_consistent(), "rank-to-blocks map is not consistent with blocks-to-rank")
 
     for (auto dep : m_rank_dynamic_objects) dep->before_block_transfer(irows_send, irank_send, irank_recv);
     table().transfer_rows(irows_send, irank_send, irank_recv, m_recv_callbacks);
     for (auto dep : m_rank_dynamic_objects) dep->after_block_transfer();
-    DEBUG_ASSERT_TRUE_ALL(consistent(), "block->rank map should be consistent with rank->block map");
+    DEBUG_ASSERT_TRUE_ALL(is_consistent(), "block->rank map should be consistent with rank->block map");
 }

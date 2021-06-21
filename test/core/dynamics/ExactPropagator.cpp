@@ -56,10 +56,12 @@ TEST(ExactPropagator, DeterministicSubspace) {
     opts.nadd_initiator = 0.0;
     opts.tau_initial = 0.05;
     opts.nwalker_target = 1000;
-    opts.do_semistochastic = true;
+    //opts.do_semistochastic = true;
     opts.consolidate_spawns = false;
     opts.replicate = false;
     opts.rdm_rank = 0;
+    opts.load_balance_period = 1;
+    opts.nload_balance_block_per_rank = 5;
     //const auto benchmark = -99.9421389039331
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());

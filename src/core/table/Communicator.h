@@ -305,6 +305,7 @@ struct Communicator {
                 log::debug_("Recving {} dynamic rows for \"{}\" to rank {} from {}",
                             nrow_transfer, m_name, irank_recv, irank_send);
                 m_idrows.resize(nrow_transfer, ~0ul);
+                mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
                 log::debug_("idrows: {}", utils::to_string(m_idrows));
             }
         }
@@ -341,6 +342,7 @@ struct Communicator {
         using DynamicRowSet::m_displs;
         using DynamicRowSet::m_counts;
         using DynamicRowSet::m_irows;
+        using DynamicRowSet::m_name;
         /**
          * the (mapped) table which loads data from rows of m_source.m_store (arbitrary order, non-contiguous) into m_global
          * (contiguous).
@@ -375,7 +377,7 @@ struct Communicator {
              * First, we use these indices to randomly access the source MappedTable, and copy rows
              * into the local contiguous table (m_local)
              */
-            DEBUG_ASSERT_TRUE_ALL(nrow(), "Total number of rows across all ranks should be non-zero.");
+            DEBUG_ASSERT_TRUE_ALL(nrow(), log::format("Total number of rows across all ranks should be non-zero (\"{}\").", m_name));
             m_local.clear();
             auto nrow = m_displs.back() + m_counts.back();
             m_local.push_back(m_counts[mpi::irank()]);
@@ -446,13 +448,15 @@ struct Communicator {
         void redefine(TableBase::Loc newloc) {
             clear();
             m_global.m_row.restart();
+            auto row = m_source.m_store.m_row;
             if (newloc.is_mine()) {
                 add_(newloc.m_irow);
-                ASSERT(m_global.m_hwm);
-                m_iblock_ra = m_source.m_ra.get_block(m_global.m_row);
+                row.jump(newloc.m_irow);
+                m_iblock_ra = m_source.m_ra.get_block(row);
             }
             mpi::bcast(m_iblock_ra, newloc.m_irank);
             update();
+            log::debug("Shared row \"{}\" is now in block {} on rank {}", m_name, m_iblock_ra, newloc.m_irank);
         }
 
         size_t irank() const {

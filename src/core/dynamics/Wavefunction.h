@@ -180,7 +180,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
     void sort_recv();
 
-private:
     /**
      * Only called on the rank assigned to the ONV by the RankAllocator
      * @param icycle
@@ -221,7 +220,6 @@ private:
         return create_row_(icycle, onv, hdiag, std::vector<bool>(npart(), refconn));
     }
 
-public:
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
@@ -229,7 +227,9 @@ public:
                               const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
         size_t irank = m_ra.get_rank(onv);
         size_t irow;
-        if (mpi::i_am(irank)) irow = create_row_(icycle, onv, hdiag, refconns);
+        if (mpi::i_am(irank)) {
+            irow = create_row_(icycle, onv, hdiag, refconns);
+        }
         mpi::bcast(irow, irank);
         return {irank, irow};
     }

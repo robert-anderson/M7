@@ -15,7 +15,8 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
                        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.spf_twf_fermion_factor,
                                        m_opts.spf_twf_boson_factor) : nullptr),
-        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()), m_detsub(m_wf) {
+        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()),
+        m_detsub(m_opts.do_semistochastic ? new DeterministicSubspace2(m_wf) : nullptr) {
 
     if (defs::enable_mevs && m_opts.rdm_rank > 0) {
 
@@ -65,7 +66,7 @@ void Solver::execute(size_t ncycle) {
 
         m_propagate_timer.reset();
         m_propagate_timer.unpause();
-        m_detsub.gather();
+        if (m_detsub) m_detsub->gather();
         loop_over_occupied_onvs();
         m_propagate_timer.pause();
 
@@ -77,8 +78,10 @@ void Solver::execute(size_t ncycle) {
         m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
         loop_over_spawned();
-        m_detsub.make_mev_contribs(m_mevs, m_refs[0].get_onv());
-        m_detsub.project(m_prop.tau());
+        if (m_detsub) {
+            m_detsub->make_mev_contribs(m_mevs, m_refs[0].get_onv());
+            m_detsub->project(m_prop.tau());
+        }
         m_annihilate_timer.pause();
 
         end_cycle();
@@ -145,10 +148,10 @@ void Solver::begin_cycle() {
         }
     }
 
-    if (m_opts.do_semistochastic && !m_detsub.m_epoch) {
-        auto init = m_detsub.m_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_detsub));
+    if (m_detsub && !m_detsub->m_epoch) {
+        auto init = m_detsub->m_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_detsub));
         if (init) {
-            m_detsub.build_from_all_occupied(m_prop.m_ham);
+            m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("initialized deterministic subspace");
         }
     }
@@ -271,7 +274,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
             return;
         }
 
-        m_wf.create_row(m_icycle, dst_onv,m_prop.m_ham.get_energy(dst_onv), m_refs.is_connected(dst_onv));
+        m_wf.create_row_(m_icycle, dst_onv,m_prop.m_ham.get_energy(dst_onv), m_refs.is_connected(dst_onv));
         m_wf.set_weight(dst_ipart, delta_weight);
 
     } else {

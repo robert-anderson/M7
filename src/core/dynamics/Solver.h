@@ -57,7 +57,7 @@ class Solver {
     std::unique_ptr<WeightedTwf> m_weighted_twf;
     MevGroup m_mevs;
 
-    DeterministicSubspace2 m_detsub;
+    std::unique_ptr<DeterministicSubspace2> m_detsub;
 
 public:
 

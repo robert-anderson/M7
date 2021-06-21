@@ -233,7 +233,7 @@ public:
      * @return
      *  true if maps are consistent
      */
-    bool consistent();
+    bool is_consistent();
 
     /**
      * The update method:
