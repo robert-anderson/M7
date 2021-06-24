@@ -81,6 +81,10 @@ namespace utils {
         return to_string(tmp);
     }
 
+    static std::string to_string(const std::string& str) {
+        return str;
+    }
+
     template<typename T>
     static std::string fp_to_string(const T &v, size_t fp_precision = 6) {
         ASSERT(std::is_floating_point<T>::value);

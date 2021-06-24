@@ -10,6 +10,7 @@ namespace parameters_test {
 
     struct Section1 : config::Section {
         config::Param<std::vector<size_t>> m_some_numbers;
+        config::Param<std::vector<size_t>> m_some_unspecified_numbers;
         config::Param<std::string> m_a_string;
         struct SubSection1 : config::Section {
             config::Param<size_t> m_a_number;
@@ -32,7 +33,10 @@ namespace parameters_test {
 
         Section1(config::Group *parent) :
                 config::Section(parent, "heading1", "parameter nodes relating to heading1"),
-                m_some_numbers(this, "some_numbers", "blah blah numbers", {3, 4, 6, 9}, config::check::size_eq<>()),
+                m_some_numbers(this, "some_numbers", "blah blah numbers", {3, 4, 6, 9}),
+                m_some_unspecified_numbers(this, "some_unspecified_numbers",
+                               "these numbers are not in the YAML file, and so the default value should be assigned",
+                               {3, 4, 6}),
                 m_a_string(this, "a_string", "blah blah a string"),
                 m_subsection1(this), m_subsection2(this){}
     };
@@ -54,7 +58,7 @@ namespace parameters_test {
         Section3 m_section3;
 
         TestDocument(const yaml::File *yf) :
-                config::Document(yf, "parameter document", "options describing the behavior of something"),
+                config::Document(yf, "FCIQMC options", "options describing the behavior of something"),
                 m_section1(this), m_section2(this), m_section3(this) {}
     };
 }
@@ -78,7 +82,9 @@ TEST(Parameters, ParsingYaml) {
 TEST(Parameters, DefaultValues) {
     using namespace parameters_test;
     TestDocument doc(nullptr);
-    ASSERT_EQ(doc.m_section1.m_some_numbers.get(), defs::inds({3, 4, 6}));
+    ASSERT_EQ(doc.m_section1.m_some_unspecified_numbers.get(), defs::inds({3, 4, 6}));
+    auto str = doc.help_string();
+    std::cout << str << std::endl;
 }
 
 TEST(Parameters, ParameterGroups) {

@@ -46,6 +46,8 @@ struct log {
         return tmp;
     }
 
+    static std::string get_demangled_symbol(const std::string& symbol);
+
     static std::string get_demangled_prototype(const char* line);
 
     static std::vector<std::string> get_backtrace(size_t depth);

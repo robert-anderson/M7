@@ -43,6 +43,10 @@ namespace yaml {
             tmp.m_path.pop_back();
             return tmp;
         }
+
+        size_t depth() const {
+            return m_path.size();
+        }
     };
 
     struct File {
@@ -135,14 +139,16 @@ namespace config {
         const yaml::Path m_path;
         const std::string m_description;
         std::list<const Node *> m_children;
+        const std::string m_indent;
 
         Node(Node *parent, std::string name, std::string description) :
-                m_parent(parent), m_path(parent->m_path + name), m_description(description) {
+                m_parent(parent), m_path(parent->m_path + name),
+                m_description(description), m_indent(2*(m_path.depth()-1), ' ') {
         }
 
         // only for ParamRoot
-        Node(std::string name, std::string description) :
-                m_parent(nullptr), m_path(""), m_description() {}
+        Node(std::string description) :
+                m_parent(nullptr), m_path(""), m_description(description), m_indent() {}
 
 
         virtual std::string help_string() const {
@@ -156,6 +162,10 @@ namespace config {
 
         virtual std::string invalid_file_key() const {
             return "";
+        }
+
+        const std::string& name() const {
+            return m_path.m_path.back();
         }
     };
 
@@ -174,7 +184,7 @@ namespace config {
         std::set<std::string> make_child_keys() const {
             std::set<std::string> child_keys;
             for (auto child: m_children) {
-                auto child_key = child->m_path.m_path.back();
+                auto child_key = child->name();
                 REQUIRE_FALSE(child_keys.count(child_key), "Shouldn't have two child Nodes with the same name");
                 child_keys.insert(child_key);
             }
@@ -188,8 +198,7 @@ namespace config {
             parent->add_child(this);
         }
 
-        Group(std::string name, std::string description) :
-                Node(name, description) {}
+        Group(std::string description) : Node(description) {}
 
         void add_child(const Node *child) {
             m_children.push_back(child);
@@ -227,74 +236,106 @@ namespace config {
         operator bool() const {
             return m_is_specified;
         }
+
+        std::string help_string() const override {
+            std::string str;
+            str.append(log::format("{}Section:     {}\n", m_indent, m_path.to_string()));
+            str.append(log::format("{}Description: {}\n\n", m_indent, m_description));
+            for (auto child: m_children) str.append(child->help_string()+"\n");
+            return str;
+        }
     };
 
     struct Document : Group {
+        const std::string m_name;
         const yaml::File *m_file;
 
         Document(const yaml::File *file, std::string name, std::string description) :
-                Group(name, description), m_file(file) {}
+                Group(description), m_name(name), m_file(file) {}
 
         const yaml::File *get_file() const override {
             return m_file;
+        }
+
+        std::string help_string() const override {
+            REQUIRE_FALSE(m_file, "Help string should only be generated when it has not been filled by a YAML file");
+            std::string str = string_utils::boxed(log::format("Configuration document \"{}\"", m_name));
+            str.append(log::format("Description: {}\n\n", m_description));
+            for (auto child: m_children) str.append(child->help_string());
+            return str;
         }
     };
 
     struct ParamBase : Node {
         const std::string m_v_default_str;
+        const std::string m_dim_str;
+        const std::string m_type_str;
 
-        ParamBase(Group *parent, std::string name, std::string description, std::string v_default_str) :
-                Node(parent, name, description), m_v_default_str(v_default_str) {
+        ParamBase(Group *parent, std::string name, std::string description, std::string v_default_str,
+                  std::string dim_str, std::string type_str) :
+                Node(parent, name, description), m_v_default_str(v_default_str),
+                m_dim_str(dim_str), m_type_str(type_str) {
             REQUIRE_TRUE(m_parent, "Non-root config::Nodes must have a parent");
             parent->add_child(this);
         }
 
-        virtual std::string to_string() const {
-            return {};
-//        std::cout << "Param:     " << m_path.to_string() << std::endl;
-//        std::cout << "Type:          " << "integer" << std::endl;
-//        std::cout << "Default value: " << m_v_default_str << std::endl;
-//        std::cout << "Description:   " << m_description << std::endl;
-        }
-    };
-
-
-    namespace check {
-        template<typename T>
-        using fn_t = std::function<std::string(const yaml::File &, const T &v)>;
-
-        template<typename T>
-        fn_t<T> none() {
-            return [](const yaml::File &, const T &v) { return ""; };
-        }
-
-        template<typename T>
-        fn_t<std::vector<T>> size_eq(const std::vector<T> & v, size_t size) {
-            return [&v, size](const yaml::File &) {
-                if (v.size() != size) return log::format("vector size is not equal to {}", size);
-                else return "";
-            };
-        }
-    }
-
-    namespace rule {
-        template<typename T>
-        using fn_t = std::function<std::string(const yaml::File &, T &v)>;
-
-        template<typename T>
-        fn_t<T> none() {
-            return [](const yaml::File &, T &v) { return ""; };
+        std::string help_string() const override {
+            std::string str;
+            str.append(log::format("{}Parameter:     {}\n", m_indent, name()));
+            str.append(log::format("{}Type:          {} {}\n", m_indent, m_dim_str, m_type_str));
+            str.append(log::format("{}Default value: {}\n", m_indent, m_v_default_str));
+            str.append(log::format("{}Description:   {}\n", m_indent, m_description));
+            return str;
         }
     };
 
     template<typename T>
+    static std::string type_str(const T&){
+        ABORT(log::format("Unsupported type for a configuration parameter: {}",
+                          log::get_demangled_symbol(typeid(T).name())));
+        return "";
+    }
+
+    static std::string type_str(const size_t& v){
+        return "integer";
+    }
+
+    static std::string type_str(const double& v){
+        return "float";
+    }
+
+    static std::string type_str(const std::string& v){
+        return "string";
+    }
+
+    template<typename T>
+    static std::pair<std::string, std::string> dim_str(const T&){
+        return "scalar";
+    }
+
+    template<typename T>
+    static std::string dim_str(const std::vector<T>&){
+        return "1D";
+    }
+
+    template<typename T>
+    static std::string dim_str(const std::vector<std::vector<T>>&){
+        return "2D";
+    }
+
+    template<typename T>
+    static std::string dim_str(const std::vector<std::vector<std::vector<T>>>&){
+        return "3D";
+    }
+
+    template<typename T>
     class Param : ParamBase {
         T m_v;
+
     public:
-        Param(Group *parent, std::string name, std::string description,
-              const T &v_default = {},
-              const check::fn_t<T> &check_fn = check::none<T>(),
-              const rule::fn_t<T> &rule_fn = rule::none<T>()) : ParamBase(parent, name, description, "0") {
+        Param(Group *parent, std::string name, std::string description, const T &v_default = {}):
+                ParamBase(parent, name, description, utils::to_string(v_default),
+                          dim_str(v_default), type_str(v_default)){
             auto file = parent->get_file();
             if (file) {
                 try {
@@ -304,15 +345,6 @@ namespace config {
                     ABORT(log::format("failed reading value {} from line {} of YAML config file",
                                       m_path.to_string(), ex.mark.line));
                 }
-
-                auto v_pre_rule = m_v;
-                auto rule_res = rule_fn(*file, m_v);
-                if (v_pre_rule != m_v) {
-                    if (rule_res.empty()) {}//warning
-                    std::cout << "Param" << m_path.to_string() << "was changed according to the rule \""
-                              << m_description << "\"" << std::endl;
-                }
-                auto check_res = check_fn(*file, m_v);
             } else {
                 m_v = v_default;
             }

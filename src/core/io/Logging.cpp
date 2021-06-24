@@ -53,6 +53,18 @@ void log::finalize() {
     spdlog::shutdown();
 }
 
+std::string log::get_demangled_symbol(const std::string &symbol) {
+    int status;
+    auto demangled = abi::__cxa_demangle(symbol.data(), nullptr, nullptr, &status);
+    if (status!=0) {
+        free(demangled);
+        return "";
+    }
+    std::string tmp(demangled);
+    free(demangled);
+    return tmp;
+}
+
 std::string log::get_demangled_prototype(const char *line) {
     // parse till first "(", then till "+"
     const char* begin_ptr = nullptr;
@@ -66,15 +78,7 @@ std::string log::get_demangled_prototype(const char *line) {
     }
     size_t length = std::distance(begin_ptr, end_ptr);
     std::string symbol(begin_ptr, length);
-    int status;
-    auto demangled = abi::__cxa_demangle(symbol.data(), nullptr, nullptr, &status);
-    if (status!=0) {
-        free(demangled);
-        return "";
-    }
-    std::string tmp(demangled);
-    free(demangled);
-    return tmp;
+    return get_demangled_symbol(symbol);
 }
 
 std::vector<std::string> log::get_backtrace(size_t depth) {
