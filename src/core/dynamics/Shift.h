@@ -117,6 +117,27 @@ struct Shift {
 
     /**
      * compute the change in all parts of the shift value based on the current values of wf.m_nwalkers
+     *
+     * The number of walkers available at the end of a propagation loop i is the number of walkers before the ith cycle.
+     * if we use this statistic to update the shift with update period 1, the following incorrect update cycle is defined:
+     *
+     *     S(0)
+     * N(0) -> N(1)
+     *
+     *     S(0)
+     * N(1) -> N(2)
+     *
+     *     S(1)
+     * N(2) -> N(3)
+     * ....
+     *
+     * one possible solution is to compute the number of walkers in cycle i+1 with another loop over occupied rows, but
+     * this entails additional cost.
+     *
+     * The most efficient way is to accumulate all changes to walkers into a "delta" variable, such that the number of
+     * walkers at the start of the next cycle can be known in advance.
+     *
+     *
      * @param wf
      *  wavefunction whose population growth defines the change in shift
      * @param icycle

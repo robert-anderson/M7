@@ -75,6 +75,20 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
 
     if (icycle % m_opts.shift_update_period) return;
 
+    /**
+     * we are computing S(icycle), but have the walker number at icycle-1 Nw(icycle-1)
+     * to compute S(icycle), we need Nw(icycle)
+     *
+     * this is constructed by Nw(icycle-1)+deltaNw(icycle-1)
+     *
+     * the ratio between Nw(icycle) and Nw(icycle - period) is taken to determine the new shift value
+     *
+     * Nw(icycle) is stored in m_nwalker_last_update
+     *
+     */
+     /**
+      * on the 0-th cycle this makes no difference, since Nw(-period) is taken to be zero
+      */
     if (m_nwalker_last_update[0]==std::numeric_limits<defs::wf_t>::max()){
         m_nwalker_last_update = wf.m_nwalker.m_reduced;
         return;
@@ -84,7 +98,8 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
         auto& variable_mode = m_variable_mode[ipart];
         variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target);
         if (variable_mode) {
-            auto rate = wf.m_nwalker.m_reduced[ipart] / m_nwalker_last_update[ipart];
+            auto next_nw = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
+            auto rate = next_nw / m_nwalker_last_update[ipart];
             m_values[ipart] -= m_opts.shift_damp * consts::real_log(rate) / (tau * m_opts.shift_update_period);
             bool reweight_begin_cond = icycle >= variable_mode.icycle_start() + m_opts.ncycle_wait_reweight;
             m_reweighter.update(icycle, ipart, reweight_begin_cond, get_average(ipart));
@@ -92,8 +107,8 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
 
         }
         add_to_average();
+        m_nwalker_last_update[ipart] = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
     }
-    m_nwalker_last_update = wf.m_nwalker.m_reduced;
 }
 
 void Shift::add_to_average() {
