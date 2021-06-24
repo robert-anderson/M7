@@ -28,26 +28,34 @@
 
 namespace asserts {
 
+    static void abort(const char *file, int line, bool collective, const std::string &reason) {
+        if (collective || mpi::nrank() == 1) {
+            log::error("Aborting in file {} at line {}", file, line);
+            mpi::abort(reason);
+        } else {
+            log::error_("Aborting in file {} at line {}", file, line);
+            mpi::abort_(reason);
+        }
+    }
+
     template<typename lhs_t, typename rhs_t>
     static void compare_abort(const char *kind, const char *op, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym,
                               const char *rhs_sym,
                               const char *file, int line, bool collective, bool outcome, const std::string &reason) {
-        if (collective) {
+        if (collective || mpi::nrank() == 1) {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
-                log::error("{} {} failed in file {} at line {}", kind, op, file, line);
+                log::error("{} {} failed", kind, op);
                 log::error("LHS \"{}\" value is: {}", lhs_sym, lhs);
                 log::error("RHS \"{}\" value is: {}", rhs_sym, rhs);
-                if (!reason.empty()) log::error("Reason: \"{}\"", reason);
-                mpi::abort(log::format("{} {} failure", kind, op));
+                abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
-                log::error_("{} {} failed in file {} at line {}", kind, op, file, line);
+                log::error_("{} {} failed", kind, op);
                 log::error_("{} value is: {}", lhs_sym, lhs);
                 log::error_("{} value is: {}", rhs_sym, rhs);
-                if (!reason.empty()) log::error_("Reason: \"{}\"", reason);
-                mpi::abort_(log::format("{} {} failure", kind, op));
+                abort(file, line, collective, reason);
             }
         }
     }
@@ -56,23 +64,21 @@ namespace asserts {
                            bool outcome, bool truth, const std::string &reason) {
         auto right = truth ? "true" : "false";
         auto wrong = truth ? "false" : "true";
-        if (collective) {
+        if (collective || mpi::nrank() == 1) {
             if (!truth) outcome = !outcome;
             outcome = mpi::all_land(outcome); // true only if all input outcomes across all ranks are false
 
             if (!outcome) {
-                log::error("{} {} failed in file {} at line {}", kind, right, file, line);
+                log::error("{} {} failed", kind, right);
                 log::error("{} value is {}", sym, wrong);
-                if (!reason.empty()) log::error("Reason: \"{}\"", reason);
-                mpi::abort(log::format("{} failure", kind));
+                abort(file, line, collective, reason);
             }
         } else {
             if (!truth) outcome = !outcome;
             if (!outcome) {
-                log::error_("{} {} failed in file {} at line {}", kind, right, file, line);
+                log::error_("{} {} failed", kind, right);
                 log::error_("{} value is {}", sym, wrong);
-                if (!reason.empty()) log::error_("Reason: \"{}\"", reason);
-                mpi::abort_(log::format("{} failure", kind));
+                abort(file, line, collective, reason);
             }
         }
     }
@@ -116,12 +122,12 @@ namespace asserts {
     }
 
     static void is_true(const char *kind, bool v, const char *sym, const char *file, int line,
-                      bool collective, const std::string &reason) {
+                        bool collective, const std::string &reason) {
         bool_abort(kind, sym, file, line, collective, v, true, reason);
     }
 
     static void is_false(const char *kind, bool v, const char *sym, const char *file, int line,
-                          bool collective, const std::string &reason) {
+                         bool collective, const std::string &reason) {
         bool_abort(kind, sym, file, line, collective, v, false, reason);
     }
 }
@@ -140,6 +146,7 @@ namespace asserts {
 #define MPI_GE_BASE(kind, lhs, rhs, collective, reason) asserts::ge(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
 #define MPI_TRUE_BASE(kind, v, collective, reason) asserts::is_true(kind, v, #v, __FILE__, __LINE__, collective, reason);
 #define MPI_FALSE_BASE(kind, v, collective, reason) asserts::is_false(kind, v, #v, __FILE__, __LINE__, collective, reason);
+#define MPI_ABORT_BASE(collective, reason) asserts::abort(__FILE__, __LINE__, collective, reason);
 
 #ifndef NDEBUG
 #define DEBUG_ASSERT_EQ_ALL(lhs, rhs, reason) MPI_EQ_BASE("ASSERT", lhs, rhs, true, reason)
@@ -214,5 +221,8 @@ namespace asserts {
 
 #define REQUIRE_FALSE_ALL(v, reason) MPI_FALSE_BASE("REQUIRE", v, true, reason)
 #define REQUIRE_FALSE(v, reason) MPI_FALSE_BASE("REQUIRE", v, false, reason)
+
+#define ABORT_ALL(reason) MPI_ABORT_BASE(true, reason)
+#define ABORT(reason) MPI_ABORT_BASE(false, reason)
 
 #endif //M7_MPIASSERT_H

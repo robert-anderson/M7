@@ -42,7 +42,6 @@ public:
         return nline;
     }
 
-
     bool next(std::string &line) const {
         m_iline++;
         getline(*m_file, line);
@@ -56,6 +55,17 @@ public:
 
     void skip(size_t nline) {
         for (size_t i = 0ul; i < nline; ++i) next();
+    }
+
+    static std::string to_string(const std::string& fname){
+        std::string all;
+        std::string line;
+        FileReader reader(fname);
+        while (reader.next(line)) {
+            all.append("\n"+line);
+            line.clear();
+        }
+        return all;
     }
 
 };

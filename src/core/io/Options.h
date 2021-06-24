@@ -53,6 +53,7 @@ struct Options {
     size_t ncycle_accumulate_mevs = ~0ul;
     size_t ncycle_mev_period = 50ul;
     size_t ncycle_shift_average_period = 1000ul;
+    size_t max_rank_average_coeff = 0;
     bool output_mevs_periodically = false;
     bool mev_mixed_estimator = false;
     bool consolidate_spawns = false;
@@ -69,7 +70,7 @@ struct Options {
     size_t rdm_rank = 0;
     std::string write_hdf5_fname = "";
     std::string read_hdf5_fname = "";
-    bool replicate = defs::enable_mevs;
+    bool replicate = false;
 
     bool init();
 

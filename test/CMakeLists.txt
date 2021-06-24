@@ -20,7 +20,9 @@ if (LAPACK_FOUND)
     target_link_libraries(unittest ${LAPACK_LIBRARIES})
 endif ()
 
+
 target_link_libraries(unittest ${MPI_LIBRARIES})
+target_link_libraries(unittest yaml-cpp)
 
 option(ENABLE_PROFILING "ENABLE_PROFILING" 0)
 if (ENABLE_PROFILING)

@@ -84,11 +84,6 @@ namespace defs {
 #else
     constexpr bool enable_bosons = false;
 #endif
-#ifdef ENABLE_MEVS
-    constexpr bool enable_mevs = true;
-#else
-    constexpr bool enable_mevs = false;
-#endif
 
 #ifdef ENABLE_OPTIM_FOR_LATTICE_HAM
     constexpr bool enable_optim_for_lattice_ham = true;

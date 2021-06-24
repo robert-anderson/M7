@@ -146,6 +146,9 @@ InputOptions::InputOptions(CLI::App &app) : m_app(app) {
     add_option("--ncycle_accumulate_mevs", ncycle_accumulate_mevs,
                "number of cycles to accumulate MEVs before terminating the solver main loop");
 
+    add_option("--max_rank_average_coeff", max_rank_average_coeff,
+               "maximum rank of excitation from reference to accumulate averaged coefficients for");
+
     add_flag("-S,--semistochastic", do_semistochastic,
              "enable semistochastic adaptation");
 

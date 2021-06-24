@@ -207,7 +207,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         m_store.m_row.m_hdiag = hdiag;
         for (size_t ipart=0ul; ipart<npart(); ++ipart)
             m_store.m_row.m_reference_connection.put(ipart, refconns[ipart]);
-        if (defs::enable_mevs) {
+        if (m_opts.max_rank_average_coeff) {
             m_store.m_row.m_icycle_occ = icycle;
             m_store.m_row.m_average_weight = 0;
         }

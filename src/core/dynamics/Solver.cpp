@@ -15,9 +15,9 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
                        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.spf_twf_fermion_factor,
                                        m_opts.spf_twf_boson_factor) : nullptr),
-        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()){
+        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()) {
 
-    if (defs::enable_mevs && m_opts.rdm_rank > 0) {
+    if (m_opts.max_rank_average_coeff && m_opts.rdm_rank > 0) {
 
         if (!m_opts.replicate && !m_prop.is_exact() && !m_opts.mev_mixed_estimator)
             log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
@@ -25,7 +25,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
 
         if (m_opts.replicate && m_prop.is_exact())
             log::warn("Attempting an exact-propagation estimation of MEVs with replication, "
-                                          "the replica population is redundant");
+                      "the replica population is redundant");
 
         if (!m_opts.replicate && !m_prop.is_exact() && !m_opts.mev_mixed_estimator)
             log::warn("Attempting a stochastic estimation of MEVs without replication, this is biased");
@@ -90,12 +90,12 @@ void Solver::execute(size_t ncycle) {
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) break;
-        if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+        if (m_mevs.m_accum_epoch) {
             if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
         }
     }
 
-    if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+    if (m_mevs.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         --m_icycle;
         finalizing_loop_over_occupied_onvs();;
@@ -119,7 +119,7 @@ void Solver::begin_cycle() {
     ASSERT(m_wf.m_nwalker.m_local[0] == 0);
     m_wf.m_ra.update(m_icycle);
     m_propagate_timer.reset();
-    if (m_wf.nroot()>1 && m_prop.m_shift.m_variable_mode) {
+    if (m_wf.nroot() > 1 && m_prop.m_shift.m_variable_mode) {
         m_wf.orthogonalize();
     }
     m_refs.begin_cycle();
@@ -141,10 +141,8 @@ void Solver::begin_cycle() {
         return false;
     };
 
-    if (defs::enable_mevs) {
-        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs))) {
-            ASSERT(m_mevs.m_fermion_rdm->m_store.m_hwm == 0);
-        }
+    if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs))) {
+        ASSERT(m_mevs.m_fermion_rdm->m_store.m_hwm == 0);
     }
 
     if (m_opts.do_semistochastic && !m_detsub) {
@@ -185,13 +183,13 @@ void Solver::loop_over_occupied_onvs() {
          * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
          */
-        if (defs::enable_mevs && m_mevs.m_accum_epoch.started_this_cycle(m_icycle)) {
+        if (m_mevs.m_accum_epoch.started_this_cycle(m_icycle)) {
             ASSERT(m_mevs.m_accum_epoch);
-            row.m_icycle_occ = m_icycle-1;
+            row.m_icycle_occ = m_icycle - 1;
             row.m_average_weight = 0;
         }
 
-        if (defs::enable_mevs && m_mevs.m_accum_epoch) {
+        if (m_mevs.m_accum_epoch) {
             row.m_average_weight += row.m_weight;
         }
 
@@ -208,9 +206,9 @@ void Solver::loop_over_occupied_onvs() {
         for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
 
             DEBUG_ASSERT_TRUE(!m_wf.m_store.m_row.m_onv.is_zero(),
-                       "Stored ONV should not be zeroed");
+                              "Stored ONV should not be zeroed");
             DEBUG_ASSERT_TRUE(mpi::i_am(m_wf.get_rank(m_wf.m_store.m_row.m_onv)),
-                       "Stored ONV should be on its allocated rank");
+                              "Stored ONV should be on its allocated rank");
 
             const auto &weight = row.m_weight[ipart];
 
@@ -273,7 +271,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
             return;
         }
 
-        m_wf.create_row_(m_icycle, dst_onv,m_prop.m_ham.get_energy(dst_onv), m_refs.is_connected(dst_onv));
+        m_wf.create_row_(m_icycle, dst_onv, m_prop.m_ham.get_energy(dst_onv), m_refs.is_connected(dst_onv));
         m_wf.set_weight(dst_ipart, delta_weight);
 
     } else {
@@ -288,8 +286,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
     }
 }
 
-void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
-    if (!defs::enable_mevs) return;
+void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
     if (!m_mevs.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     // the current cycle should be included in the denominator
@@ -300,8 +297,8 @@ void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
     }
 
     for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
-        auto& ref = m_refs[ipart];
-        auto& ref_onv = ref.get_onv();
+        auto &ref = m_refs[ipart];
+        auto &ref_onv = ref.get_onv();
         auto ipart_replica = m_wf.ipart_replica(ipart);
         /*
          * if contributions are coming from two replicas, we should take the mean
@@ -317,14 +314,14 @@ void Solver::make_average_weight_mev_contribs(const size_t& icycle) {
          * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
          * single averaged contribution (ncycle_occ)
          */
-        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac*ncycle_occ*av_weight, row.m_onv, av_weight_rep);
+        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac * ncycle_occ * av_weight, row.m_onv, av_weight_rep);
         if (m_mevs.m_explicit_hf_conns) {
             if (row.m_reference_connection.get(0) && !ref.is_same(row)) {
                 const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
                 const auto av_weight_ref_rep = m_mevs.get_ket_weight(ref.norm_average_weight(icycle, ipart_replica));
-                m_mevs.m_fermion_rdm->make_contribs(ref_onv, dupl_fac*ncycle_occ*av_weight_ref,
+                m_mevs.m_fermion_rdm->make_contribs(ref_onv, dupl_fac * ncycle_occ * av_weight_ref,
                                                     row.m_onv, av_weight_rep);
-                m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac*ncycle_occ*av_weight,
+                m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac * ncycle_occ * av_weight,
                                                     ref_onv, av_weight_ref_rep);
             }
         }
@@ -615,15 +612,12 @@ void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, 
 }
 
 void Solver::output_mevs() {
-    if (!(defs::enable_mevs && m_mevs.is_period_cycle(m_icycle))) return;
+    if (!m_mevs.is_period_cycle(m_icycle)) return;
     hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
     hdf5::GroupWriter gw("solver", fw);
     if (m_mevs.m_fermion_rdm) {
         hdf5::GroupWriter gw2("rdm", gw);
         m_mevs.m_fermion_rdm->h5_write(gw2);
-        const auto b = -99.9421389039331;
-        std::cout << m_mevs.m_fermion_rdm->get_energy(m_prop.m_ham)-b << " "
-                  << m_prop.m_shift.m_values[0]-b << " " << m_refs[0].proj_energy_num()/m_refs[0].weight()-b << std::endl;
     }
 }
 

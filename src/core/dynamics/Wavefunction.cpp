@@ -11,7 +11,7 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
                 opts.nload_balance_block_per_rank * mpi::nrank(),
                 opts.load_balance_period,
                 {
-                        {nsite, opts.nroot, opts.replicate?2ul:1ul},
+                        {nsite, opts.nroot, opts.replicate?2ul:1ul, true},
                         MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
                 },
                 {SpawnTableRow(nsite, opts.rdm_rank > 0)},
@@ -50,7 +50,7 @@ void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
 void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
                            std::string name) {
     m_store.clear();
-    BufferedTable<WalkerTableRow> m_buffer("", {{m_nsite, nroot(), nreplica()}});
+    BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
     RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
     conn::Antisym<> conn(m_nsite);

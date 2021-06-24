@@ -8,10 +8,13 @@ add_executable(debug main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
 add_executable(prof main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
 
 target_link_libraries (release CLI11::CLI11)
+target_link_libraries (release yaml-cpp)
 target_link_libraries (release ${MPI_LIBRARIES})
 target_link_libraries (debug CLI11::CLI11)
+target_link_libraries (debug yaml-cpp)
 target_link_libraries (debug ${MPI_LIBRARIES})
 target_link_libraries (prof CLI11::CLI11)
+target_link_libraries (prof yaml-cpp)
 target_link_libraries (prof ${MPI_LIBRARIES})
 
 target_include_directories(release PRIVATE ${CMAKE_SOURCE_DIR}/external/CLI11/include)

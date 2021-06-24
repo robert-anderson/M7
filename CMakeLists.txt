@@ -102,6 +102,7 @@ include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external/CLI11/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/spdlog-1.x/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/lambda-lanczos/include")
+add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 add_definitions(-Wall -Wextra -Werror)

@@ -1,0 +1,13 @@
+---
+heading1:
+  some_numbers: [2, 3, 5, 1]
+  a_string: "this is just a string"
+  subheading1:
+    a_number: 78
+    a_float: 4.5
+    another_number: 213
+  subheading2:
+    a_number: 45
+heading2:
+heading3:
+  some_numbers: [4.3, 7.8]

@@ -86,7 +86,10 @@ void mpi::abort_(std::string message) {
 
 void mpi::abort(std::string message){
 #ifdef ENABLE_MPI
-    log::error_("Aborting all MPI processes: \"{}\"", std::move(message));
+    if (mpi::nrank()==1)
+        log::error("Aborting: \"{}\"", std::move(message));
+    else
+        log::error_("Aborting: \"{}\"", std::move(message));
     log::error_backtrace_();
     log::finalize();
     MPI_Barrier(MPI_COMM_WORLD);
