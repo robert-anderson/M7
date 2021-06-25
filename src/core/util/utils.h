@@ -82,7 +82,11 @@ namespace utils {
     }
 
     static std::string to_string(const std::string& str) {
-        return str;
+        return "\""+str+"\"";
+    }
+
+    static std::string to_string(bool v) {
+        return v ? "true" : "false";
     }
 
     template<typename T>
