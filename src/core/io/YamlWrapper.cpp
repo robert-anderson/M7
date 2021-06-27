@@ -46,7 +46,7 @@ yaml::File::File(const std::string &fname) : m_fname(fname) {
     try {
         m_root = YAML::Load(contents);
     }
-    catch (YAML::ParserException ex) {
+    catch (const YAML::ParserException& ex) {
         ABORT(log::format("YAML syntax error in file {}", m_fname));
     }
 }

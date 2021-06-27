@@ -144,7 +144,7 @@ namespace config {
                     if (file->exists(m_path)) m_v = file->get_as<T>(m_path);
                     else m_v = v_default;
                 }
-                catch (YAML::BadConversion ex) {
+                catch (const YAML::BadConversion& ex) {
                     ABORT(log::format("failed reading value {} from line {} of YAML config file",
                                       m_path.to_string(), ex.mark.line));
                 }
