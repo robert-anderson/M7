@@ -15,23 +15,22 @@ namespace fciqmc_config {
         config::Param<double> m_store_exp_fac;
         config::Param<double> m_comm_fac_init;
         config::Param<double> m_comm_exp_fac;
-        Buffers(config::Group* parent);
+
+        explicit Buffers(config::Group *parent);
     };
 
     struct Serialization : config::Section {
         config::Param<std::string> m_save_path;
         config::Param<std::string> m_load_path;
-        Serialization(config::Group* parent) :
-        config::Section(parent, "serialization", "options relating to filesystem save and load of structures in an M7 calculation"),
-        m_save_path(this, "save_path", {}, "path to which the HDF5 file containing the structure should be saved"),
-        m_load_path(this, "load_path", {}, "path from which the HDF5 file containing the structure should be loaded")
-        {}
+
+        explicit Serialization(config::Group *parent);
     };
 
     struct Prng : config::Section {
         config::Param<size_t> m_seed;
         config::Param<size_t> m_ngen_block;
-        Prng(config::Group* parent);
+
+        explicit Prng(config::Group *parent);
     };
 
     struct LoadBalancing : config::Section {
@@ -39,7 +38,15 @@ namespace fciqmc_config {
         config::Param<size_t> m_period;
         config::Param<double> m_acceptable_imbalance;
         config::Param<size_t> m_nnull_updates_deactivate;
-        LoadBalancing(config::Group* parent);
+
+        explicit LoadBalancing(config::Group *parent);
+    };
+
+    struct Reference : config::Section {
+        config::Param<std::vector<std::string>> m_init_onv;
+        config::Param<double> m_redef_thresh;
+
+        explicit Reference(config::Group *parent);
     };
 
     struct Wavefunction : config::Section {
@@ -47,16 +54,18 @@ namespace fciqmc_config {
         config::Param<size_t> m_nroot;
         config::Param<bool> m_replicate;
         config::Param<long> m_spin_restrict;
-        config::Param<std::vector<std::string>> m_init_reference_onv;
         Serialization m_serialization;
         LoadBalancing m_load_balancing;
-        Wavefunction(config::Group* parent);
+        Reference m_reference;
+
+        explicit Wavefunction(config::Group *parent);
     };
 
     struct Reweight : config::Section {
         config::Param<size_t> m_ncycle;
         config::Param<size_t> m_delay;
-        Reweight(config::Group* parent);
+
+        explicit Reweight(config::Group *parent);
     };
 
     struct Shift : config::Section {
@@ -66,7 +75,8 @@ namespace fciqmc_config {
         config::Param<size_t> m_ncycle_av;
         config::Param<bool> m_jump;
         Reweight m_reweight;
-        Shift(config::Group* parent);
+
+        explicit Shift(config::Group *parent);
 
     };
 
@@ -81,11 +91,13 @@ namespace fciqmc_config {
         config::Param<double> m_min_death_mag;
         config::Param<bool> m_consolidate_spawns;
 
-        Propagator(config::Group* parent);
+        explicit Propagator(config::Group *parent);
     };
 
     struct Semistochastic : config::Section {
+        config::Param<size_t> m_size;
 
+        explicit Semistochastic(config::Group *parent);
     };
 
     struct Document : config::Document {
@@ -93,7 +105,8 @@ namespace fciqmc_config {
         Wavefunction m_wavefunction;
         Shift m_shift;
         Propagator m_propagator;
-        Document(const yaml::File* file);
+
+        explicit Document(const yaml::File *file);
     };
 }
 

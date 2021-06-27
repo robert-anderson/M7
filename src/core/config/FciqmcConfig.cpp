@@ -23,6 +23,12 @@ fciqmc_config::Buffers::Buffers(config::Group *parent) :
         m_comm_exp_fac(this, "comm_expand_fac", 2.0,
                        "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
 
+fciqmc_config::Serialization::Serialization(config::Group *parent) :
+        config::Section(parent, "serialization",
+                        "options relating to filesystem save and load of structures in an M7 calculation"),
+        m_save_path(this, "save_path", {}, "path to which the HDF5 file containing the structure should be saved"),
+        m_load_path(this, "load_path", {}, "path from which the HDF5 file containing the structure should be loaded") {}
+
 fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
         config::Section(parent, "load_balancing",
                         "options relating to the allocation of records among MPI ranks so as to share the workload more equally"),
@@ -33,6 +39,13 @@ fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
         m_nnull_updates_deactivate(this, "nnull_updates_deactivate", 20ul,
                                    "number of consecutive attempted updates which do not exceed the maximum acceptable imbalance required to meet the deactivation criterion") {}
 
+fciqmc_config::Reference::Reference(config::Group *parent) :
+        config::Section(parent, "reference", "options relating to the reference ONV"),
+        m_init_onv(this, "init_reference_onv", {},
+                   "string representations of the ONVs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
+        m_redef_thresh(this, "redef_thresh", 10.0,
+                       "when the highest-weighted non-reference ONV (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
+
 fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         config::Section(parent, "wavefunction",
                         "options relating to the storage and update of a distributed many-body wavefunction"),
@@ -41,9 +54,7 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         m_replicate(this, "replicate", false, "evolve a statistically-independent replica of each walker population"),
         m_spin_restrict(this, "spin_restrict", 0ul,
                         "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves magnetic spin numbers"),
-        m_init_reference_onv(this, "init_reference_onv", {},
-                             "string representations of the ONVs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
-        m_serialization(this), m_load_balancing(this) {}
+        m_serialization(this), m_load_balancing(this), m_reference(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
         config::Section(parent, "reweight", "options relating to the on-the-fly correction of population control bias"),
@@ -82,3 +93,7 @@ fciqmc_config::Document::Document(const yaml::File *file) :
         config::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
         m_prng(this), m_wavefunction(this), m_shift(this), m_propagator(this) {}
+
+fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
+        config::Section(parent, "semistochastic", "options related to semi-stochastic propagation"),
+        m_size(this, "size", 0ul, "number of ONVs selected to comprise the semi-stochastic space"){}
