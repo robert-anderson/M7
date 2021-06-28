@@ -3,6 +3,8 @@
 #include <src/core/parallel/MPIWrapper.h>
 #include <src/core/dynamics/FciqmcCalculation.h>
 #include <src/core/io/InputOptions.h>
+#include <src/core/io/YamlWrapper.h>
+#include <src/core/config/FciqmcConfig.h>
 #include "CLI/CLI.hpp"
 
 int main(int argc, char **argv) {
@@ -15,6 +17,14 @@ int main(int argc, char **argv) {
     CLI::App cli_app{InputOptions::program_description};
     InputOptions input(cli_app);
 
+    if (argc == 1){
+        // input file not provided, print out help string
+        std::cout << fciqmc_config::Document(nullptr).help_string() << std::endl;
+        return 0;
+    }
+
+    auto yf = yaml::File(std::string(argv[0]));
+    fciqmc_config::Document opts(&yf);
 
     std::streambuf *original_stdout_buffer = nullptr;
     std::streambuf *original_stderr_buffer = nullptr;
