@@ -7,7 +7,7 @@
 fciqmc_config::Prng::Prng(config::Group *parent) :
         config::Section(parent, "prng",
                         "options relating to the random number generator used in stochastic calculations"),
-        m_seed(this, "seed", 123ul, "value with which to seed the PRNG"),
+        m_seed(this, "seed", 123ul, "value with which to seed the mt19937 PRNG"),
         m_ngen_block(this, "ngen_block", 10000ul,
                      "size of the block of PRNGs generated each time the buffer is depleted") {}
 
@@ -54,7 +54,7 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         m_replicate(this, "replicate", false, "evolve a statistically-independent replica of each walker population"),
         m_spin_restrict(this, "spin_restrict", 0ul,
                         "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves magnetic spin numbers"),
-        m_serialization(this), m_load_balancing(this), m_reference(this) {}
+        m_buffers(this), m_serialization(this), m_load_balancing(this), m_reference(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
         config::Section(parent, "reweight", "options relating to the on-the-fly correction of population control bias"),
@@ -73,10 +73,43 @@ fciqmc_config::Shift::Shift(config::Group *parent) :
                "ignore growth data in the shift update, and instead use a projected energy estimator"),
         m_reweight(this) {}
 
+fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
+        config::Section(parent, "semistochastic", "options related to semi-stochastic propagation"),
+        m_size(this, "size", 0ul, "number of ONVs selected to comprise the semi-stochastic space") {}
+
+fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
+        config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
+        m_path(this, "path", "FCIDUMP", "path to file defining fermionic Hamiltonian"),
+        m_spin_major(this, "spin_major", false,
+                     "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.") {}
+
+fciqmc_config::Stats::Stats(config::Group *parent) :
+        config::Section(parent, "stats",
+                        "options relating to the recording of time series statistics about the calculation"),
+        m_path(this, "path", "M7.stats",
+               "path to the file to which MC cycle statistics will be output"),
+        m_parallel(this, "parallel", false,
+                   "output additional stats from each MPI rank") {}
+
+fciqmc_config::SpfWeightedTwf::SpfWeightedTwf(config::Group *parent) :
+        config::Section(parent, "spf_weighted_twf",
+                        "options related to the weighted trial wavefunction defined for Hamiltonians in which the sign structure of the FCI wavefunction is known"),
+        m_fermion_fac(this, "fermion_fac", 0.0,
+                      "Exponential constant penalising fermion double-occupancy in weighted TWF"),
+        m_boson_fac(this, "boson_fac", 0.0, "Exponential constant penalising boson occupancy in weighted TWF") {}
+
+fciqmc_config::Observables::Observables(config::Group *parent) :
+        config::Section(parent, "observables",
+                        "options related to observables extracted from the many-body wavefunction(s)"),
+        m_spf_uniform_twf(this, "spf_uniform_twf", false,
+                          "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
+        m_spf_weighted_twf(this), m_av_coeffs(this) {}
+
 fciqmc_config::Propagator::Propagator(config::Group *parent) :
         config::Section(parent, "propagator",
                         "options relating to the propagation of the wavefunction from one MC cycle to the next"),
         m_exact(this, "exact", false, "perform exact projective FCI (only practical for debugging in small systems)"),
+        m_excit_gen(this, "excit_gen", "pchb", "excitation generation algorithm to use"),
         m_nw_target(this, "nw_target", 0ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),
@@ -87,13 +120,11 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
                         "spawn magnitude threshold - smaller spawns are stochastically rounded about this value"),
         m_min_death_mag(this, "min_death_mag", 0.0, "death magnitude threshold"),
         m_consolidate_spawns(this, "consolidate_spawns", false,
-                             "sort and consolidate received spawns so that there is at most one update to any ONV weight in an annihilation loop") {}
+                             "sort and consolidate received spawns so that there is at most one update to any ONV weight in an annihilation loop"),
+        m_semistochastic(this) {}
 
 fciqmc_config::Document::Document(const yaml::File *file) :
         config::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
-        m_prng(this), m_wavefunction(this), m_shift(this), m_propagator(this) {}
-
-fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
-        config::Section(parent, "semistochastic", "options related to semi-stochastic propagation"),
-        m_size(this, "size", 0ul, "number of ONVs selected to comprise the semi-stochastic space"){}
+        m_prng(this), m_wavefunction(this), m_shift(this), m_propagator(this),
+        m_fcidump(this), m_stats(this), m_observables(this){}

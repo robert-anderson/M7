@@ -23,12 +23,12 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    auto yf = yaml::File(std::string(argv[0]));
+    auto yf = yaml::File(std::string(argv[1]));
     fciqmc_config::Document opts(&yf);
+    opts.log_value();
 
     std::streambuf *original_stdout_buffer = nullptr;
     std::streambuf *original_stderr_buffer = nullptr;
-    //std::unique_ptr<std::ofstream> ofstdout, ofstderr;
     if (!mpi::i_am_root()) {
         /*
          * only allow standard output and error from the root MPI rank

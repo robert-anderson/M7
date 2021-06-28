@@ -25,7 +25,9 @@ namespace config {
 
         virtual std::string help_string() const;
 
-        virtual void verify(){}
+        virtual void log_value() const {}
+
+        virtual void verify() {}
 
         virtual const yaml::File *get_file() const;
 
@@ -63,6 +65,11 @@ namespace config {
 
         std::string help_string() const override;
 
+        void log_value() const override {
+            if (!*this) log::info("section {} unspecified, using defaults", m_path.to_string());
+            for (auto child: m_children) child->log_value();
+        }
+
         void verify() override {
             for (auto child: m_children) child->verify();
         }
@@ -77,6 +84,11 @@ namespace config {
         const yaml::File *get_file() const override;
 
         std::string help_string() const override;
+
+        void log_value() const override {
+            log::info("Specified values for \"{}\"", m_name);
+            for (auto child: m_children) child->log_value();
+        }
     };
 
     struct ParamBase : Node {
@@ -144,7 +156,7 @@ namespace config {
                     if (file->exists(m_path)) m_v = file->get_as<T>(m_path);
                     else m_v = v_default;
                 }
-                catch (const YAML::BadConversion& ex) {
+                catch (const YAML::BadConversion &ex) {
                     ABORT(log::format("failed reading value {} from line {} of YAML config file",
                                       m_path.to_string(), ex.mark.line));
                 }
@@ -159,6 +171,10 @@ namespace config {
 
         operator const T &() const {
             return m_v;
+        }
+
+        void log_value() const override {
+            log::info("{}: {}", m_path.to_string(), utils::to_string(m_v));
         }
     };
 }

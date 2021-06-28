@@ -30,12 +30,12 @@ namespace hdf5 {
 
     static_assert(have_parallel, "HDF5 must be compiled with parallel functionality");
 
-    static const std::array<hid_t, 10> types =
+    static const std::array<hid_t, 11> types =
             {H5T_NATIVE_CHAR, H5T_NATIVE_SHORT, H5T_NATIVE_INT32, H5T_NATIVE_LONG,
              H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT, H5T_NATIVE_UINT32, H5T_NATIVE_ULONG,
-             H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
+             H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
 
-    template<typename T>
+    template<typename T=void>
     static constexpr size_t type_ind() { return ~0ul; }
 
     template<>
@@ -63,10 +63,13 @@ namespace hdf5 {
     constexpr size_t type_ind<unsigned long int>() { return 7; }
 
     template<>
-    constexpr size_t type_ind<float>() { return 8; }
+    constexpr size_t type_ind<unsigned long long int>() { return 8; }
 
     template<>
-    constexpr size_t type_ind<double>() { return 9; }
+    constexpr size_t type_ind<float>() { return 9; }
+
+    template<>
+    constexpr size_t type_ind<double>() { return 10; }
 
     template<typename T>
     const hid_t &type() { return types[type_ind<T>()]; }
