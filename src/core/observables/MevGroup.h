@@ -102,7 +102,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 
     static size_t nrow_guess(size_t nann, size_t ncre, size_t nsite);
 
-    FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nelec);
+    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec);
 
     void make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
 
@@ -216,15 +216,16 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 struct MevGroup {
     Epoch m_accum_epoch;
     std::unique_ptr<FermionRdm> m_fermion_rdm;
+    std::unique_ptr<AverageCoefficients> m_av_coeffs;
     const size_t m_period;
-    const bool m_explicit_hf_conns, m_output_periodically;
+    const bool m_explicit_hf_conns;
     size_t m_icycle_period_start = ~0ul;
 
-    MevGroup(const Options &opts, size_t nsite, size_t nelec) :
+    MevGroup(const fciqmc_config::Observables &opts, size_t nsite, size_t nelec, bool explicit_hf_conns=true) :
             m_accum_epoch("MEV accumulation"),
-            m_fermion_rdm(opts.rdm_rank ? new FermionRdm(opts, opts.rdm_rank, nsite, nelec) : nullptr),
-            m_period(opts.ncycle_mev_period), m_explicit_hf_conns(opts.explicit_hf_conn_mevs),
-            m_output_periodically(opts.output_mevs_periodically) {
+            m_fermion_rdm(opts.m_fermion_rdm.m_rank ? new FermionRdm(opts.m_fermion_rdm, nsite, nelec) : nullptr),
+            m_av_coeffs(opts.m_av_coeffs.m_max_exlvl ? new AverageCoefficients(opts) : nullptr),
+            m_period(opts.m_output_period), m_explicit_hf_conns(explicit_hf_conns) {
     }
 
 
@@ -235,6 +236,7 @@ struct MevGroup {
 
     bool is_period_cycle(size_t icycle) {
         if (!m_accum_epoch) return false;
+        if (!m_period) return false;
         if (m_icycle_period_start == ~0ul || m_icycle_period_start == icycle) {
             m_icycle_period_start = icycle;
             return false;
@@ -254,6 +256,23 @@ struct MevGroup {
             return consts::real(weight) > 0.0 ? 1.0 : -1.0;
         return weight;
     };
+
+    operator bool() const {
+        return m_fermion_rdm || m_av_coeffs;
+    }
+
+    bool is_bilinear() const {
+        return (*this) && !m_fermion_rdm->m_mixed_estimator;
+    }
+
+
+    void save() const {
+        if (m_av_coeffs) m_av_coeffs->save();
+    }
+
+    void save(size_t icycle) const {
+        if (m_av_coeffs) m_av_coeffs->save(icycle);
+    }
 };
 
 #if 0

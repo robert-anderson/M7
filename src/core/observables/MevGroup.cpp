@@ -74,29 +74,29 @@ size_t FermionRdm::nrow_guess(size_t nann, size_t ncre, size_t nsite) {
     return nrow;
 }
 
-FermionRdm::FermionRdm(const Options &opts, size_t nop, size_t nsite, size_t nelec) :
+FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec) :
         base_t(
-                log::format("{}-body RDM", nop),
-                opts.mev_buffer_expansion_factor,
-                opts.nload_balance_block_per_rank * mpi::nrank(),
-                opts.load_balance_period,
+                log::format("{}-body RDM", opts.m_rank),
+                opts.m_buffers.m_store_exp_fac,
+                opts.m_load_balancing.m_nblock_per_rank * mpi::nrank(),
+                opts.m_load_balancing.m_period,
                 {
-                        {nop, 1},
+                        {opts.m_rank, 1},
                         MappedTableBase::nbucket_guess(
-                                nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
+                                nrow_guess(opts.m_rank, opts.m_rank, nsite) / mpi::nrank(), 3)
                 },
                 {
-                        {nop, 1},
+                        {opts.m_rank, 1},
                         MappedTableBase::nbucket_guess(
-                                nrow_guess(nop, nop, nsite) / mpi::nrank(), 3)
+                                nrow_guess(opts.m_rank, opts.m_rank, nsite) / mpi::nrank(), 3)
                 },
-                opts.acceptable_load_imbalance),
-        m_nann(nop), m_ncre(nop), m_nelec(nelec), m_lookup_inds(nop),
-        m_conn(nsite), m_mixed_estimator(opts.mev_mixed_estimator) {
+                opts.m_load_balancing.m_acceptable_imbalance),
+        m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
+        m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator) {
     m_store.resize(100);
     m_comm.resize(100);
-    m_promoters.reserve(nop+1);
-    for (size_t nins=0ul; nins<=nop; ++nins) m_promoters.emplace_back(nelec+nins-nop, nins);
+    m_promoters.reserve(opts.m_rank+1);
+    for (size_t nins=0ul; nins<=opts.m_rank; ++nins) m_promoters.emplace_back(nelec+nins-opts.m_rank, nins);
 }
 
 void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight,

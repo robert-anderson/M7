@@ -5,6 +5,7 @@
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
+#include <src/core/config/FciqmcConfig.h>
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {
@@ -40,7 +41,7 @@ class ExactPropagator : public Propagator {
 
 
 public:
-    ExactPropagator(const Hamiltonian<> &ham, const Options &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
+    ExactPropagator(const Hamiltonian<> &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
                     bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;

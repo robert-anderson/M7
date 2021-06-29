@@ -44,6 +44,7 @@ namespace utils {
 
     template<typename T>
     static std::string to_string(const T& v) {
+        if (v==std::numeric_limits<T>::max()) return "inf";
         return std::to_string(v);
     }
 

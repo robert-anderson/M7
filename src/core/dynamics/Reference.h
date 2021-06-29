@@ -41,7 +41,7 @@ class Reference : public Wavefunction::SharedRow {
     Reduction<defs::wf_comp_t> m_nwalker_at_doubles;
 
 public:
-    Reference(const Options &m_opts, const Hamiltonian<> &ham,
+    Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
     const fields::Onv<>& get_onv() const;
@@ -127,11 +127,11 @@ struct References {
     buffered::Numbers<defs::ham_t, defs::ndim_wf> m_proj_energy_nums;
     buffered::Numbers<defs::wf_t, defs::ndim_wf> m_weights;
 
-    References(const Options &m_opts, const Hamiltonian<> &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs):
+    References(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs):
             m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
         ASSERT(locs.size()==wf.m_format.m_nelement);
         m_refs.reserve(wf.m_format.m_nelement);
-        for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(m_opts, ham, wf, ipart, locs[ipart]);
+        for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
         ASSERT(m_refs.size()==wf.npart());
     }
 

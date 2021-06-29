@@ -10,6 +10,7 @@
 #include <src/core/basis/DecodedDeterminant.h>
 #include <src/core/basis/Connections.h>
 #include <src/core/io/Options.h>
+#include <src/core/config/FciqmcConfig.h>
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
 #include "src/core/table/BufferedFields.h"
@@ -151,7 +152,8 @@ public:
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
-    FermionHamiltonian(const Options &opts) : FermionHamiltonian(opts.fcidump_path, opts.fcidump_spin_major) {}
+    FermionHamiltonian(const fciqmc_config::Document &opts) :
+        FermionHamiltonian(opts.m_hamiltonian.m_fcidump.m_path, opts.m_hamiltonian.m_fcidump.m_spin_major) {}
 
     defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 

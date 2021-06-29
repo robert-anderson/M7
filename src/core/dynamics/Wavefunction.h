@@ -28,7 +28,7 @@
  */
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
 
-    const Options &m_opts;
+    const fciqmc_config::Document &m_opts;
     const size_t m_nsite;
 
     /**
@@ -82,7 +82,20 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
      */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
-    Wavefunction(const Options &opts, size_t nsite);
+    Wavefunction(const fciqmc_config::Document &opts, size_t nsite);
+
+    static bool need_send_parents(const fciqmc_config::Document &opts) {
+        return opts.m_observables.m_fermion_rdm.m_rank > 0;
+    }
+
+    static bool need_av_weights(const fciqmc_config::Document &opts) {
+        if (opts.m_observables.m_fermion_rdm.m_rank > 0) return true;
+        return opts.m_observables.m_av_coeffs.m_max_exlvl > 0;
+    }
+
+    bool storing_av_weights() const {
+        return m_store.m_row.m_average_weight.belongs_to_row();
+    }
 
     std::vector<std::string> h5_field_names();
 
@@ -207,7 +220,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         m_store.m_row.m_hdiag = hdiag;
         for (size_t ipart=0ul; ipart<npart(); ++ipart)
             m_store.m_row.m_reference_connection.put(ipart, refconns[ipart]);
-        if (m_opts.max_rank_average_coeff) {
+        if (storing_av_weights()) {
             m_store.m_row.m_icycle_occ = icycle;
             m_store.m_row.m_average_weight = 0;
         }

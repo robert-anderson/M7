@@ -4,40 +4,37 @@
 
 #include "Solver.h"
 
-Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs) :
+Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefunction &wf,
+               std::vector<TableBase::Loc> ref_locs) :
         m_prop(prop),
         m_opts(prop.m_opts),
         m_wf(wf),
-        m_refs(m_opts, m_prop.m_ham, m_wf, ref_locs),
+        m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),
-        m_uniform_twf(m_opts.spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
-        m_weighted_twf(m_opts.spf_weighted_twf ?
+        m_uniform_twf(
+                m_opts.m_observables.m_spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
+        m_weighted_twf(m_opts.m_observables.m_spf_weighted_twf ?
                        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
-                                       m_opts.spf_twf_fermion_factor,
-                                       m_opts.spf_twf_boson_factor) : nullptr),
-        m_mevs(m_opts, prop.m_ham.nsite(), prop.m_ham.nelec()) {
+                                       m_opts.m_observables.m_spf_weighted_twf.m_fermion_fac,
+                                       m_opts.m_observables.m_spf_weighted_twf.m_boson_fac) : nullptr),
+        m_mevs(m_opts.m_observables, prop.m_ham.nsite(), prop.m_ham.nelec(), true) {
 
-    if (m_opts.max_rank_average_coeff && m_opts.rdm_rank > 0) {
 
-        if (!m_opts.replicate && !m_prop.is_exact() && !m_opts.mev_mixed_estimator)
+    if (m_wf.nreplica() > 1 && m_prop.is_exact())
+        log::warn("Attempting an exact-propagation estimation of MEVs with replication, "
+                  "the replica population is redundant");
+
+    if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && !m_prop.is_exact())
             log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
                       "this is biased");
 
-        if (m_opts.replicate && m_prop.is_exact())
-            log::warn("Attempting an exact-propagation estimation of MEVs with replication, "
-                      "the replica population is redundant");
-
-        if (!m_opts.replicate && !m_prop.is_exact() && !m_opts.mev_mixed_estimator)
-            log::warn("Attempting a stochastic estimation of MEVs without replication, this is biased");
-
-        if (m_opts.replicate && !m_opts.mev_mixed_estimator)
-            log::warn("Attempting a mixed estimation of MEVs with replication, "
-                      "the replica population is redundant");
-    }
+    if (m_mevs && !m_mevs.is_bilinear() && m_wf.nreplica() > 1)
+        log::warn("Attempting a mixed estimation of MEVs with replication, "
+                  "the replica population is redundant");
 
     if (mpi::i_am_root())
         m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
-    if (m_opts.parallel_stats)
+    if (m_opts.m_stats.m_parallel)
         m_parallel_stats = std::unique_ptr<ParallelStats>(
                 new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
 
@@ -46,6 +43,7 @@ Solver::Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> r
 
 void Solver::execute(size_t ncycle) {
 
+    /*
     if (!m_opts.read_hdf5_fname.empty()) {
         hdf5::FileReader fr(m_opts.read_hdf5_fname);
         hdf5::GroupReader gr("solver", fr);
@@ -56,7 +54,7 @@ void Solver::execute(size_t ncycle) {
             m_mevs.m_fermion_rdm->h5_read(gr);
             m_mevs.m_fermion_rdm->end_cycle();
         }
-    }
+    */
 
     for (size_t i = 0ul; i < ncycle; ++i) {
         m_cycle_timer.reset();
@@ -91,7 +89,7 @@ void Solver::execute(size_t ncycle) {
 
         if (m_exit.read() && m_exit.m_v) break;
         if (m_mevs.m_accum_epoch) {
-            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.ncycle_accumulate_mevs) break;
+            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_observables.m_ncycle) break;
         }
     }
 
@@ -101,15 +99,8 @@ void Solver::execute(size_t ncycle) {
         finalizing_loop_over_occupied_onvs();;
     }
 
-    if (!m_opts.write_hdf5_fname.empty()) {
-        hdf5::FileWriter fw(m_opts.write_hdf5_fname);
-        //m_wf.h5_write(gw);
-        hdf5::GroupWriter gw("solver", fw);
-        if (m_mevs.m_fermion_rdm) {
-            hdf5::GroupWriter gw2("rdm", gw);
-            m_mevs.m_fermion_rdm->h5_write(gw2);
-        }
-    }
+    m_mevs.save();
+
 }
 
 void Solver::begin_cycle() {
@@ -125,7 +116,7 @@ void Solver::begin_cycle() {
     m_refs.begin_cycle();
 
     auto update_epoch = [&](const size_t &ncycle_wait) {
-        if (m_opts.replicate) {
+        if (m_wf.nreplica()==2) {
             if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
                 auto max_start = std::max(
                         m_prop.m_shift.m_variable_mode[0].icycle_start(),
@@ -141,12 +132,12 @@ void Solver::begin_cycle() {
         return false;
     };
 
-    if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.ncycle_wait_mevs))) {
+    if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_observables.m_delay))) {
         ASSERT(m_mevs.m_fermion_rdm->m_store.m_hwm == 0);
     }
 
-    if (m_opts.do_semistochastic && !m_detsub) {
-        if (update_epoch(m_opts.ncycle_wait_detsub)) {
+    if (m_opts.m_propagator.m_semistochastic && !m_detsub) {
+        if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_wf, m_icycle));
             m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("Initialized deterministic subspace");
@@ -220,8 +211,8 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                if (m_opts.spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
-                if (m_opts.spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+                if (m_opts.m_observables.m_spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+                if (m_opts.m_observables.m_spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
 
             if (m_wf.m_ra.is_active()) {
@@ -252,7 +243,7 @@ void Solver::finalizing_loop_over_occupied_onvs() {
 
 void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
                             bool allow_initiation, bool src_deterministic, const size_t &irow_store) {
-    if (m_opts.nadd_initiator == 0.0) ASSERT(allow_initiation);
+    if (m_opts.m_propagator.m_nadd == 0.0) ASSERT(allow_initiation);
     ASSERT(!dst_onv.is_zero());
     // check that the received determinant has come to the right place
     ASSERT(m_wf.m_ra.get_rank(dst_onv) == mpi::irank())
@@ -366,7 +357,7 @@ void Solver::make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs:
 void Solver::loop_over_spawned() {
     if (!m_wf.recv().m_hwm) return;
     mpi::barrier();
-    if (m_opts.consolidate_spawns) {
+    if (m_opts.m_propagator.m_consolidate_spawns) {
         m_wf.sort_recv();
         /*
          * now that the recv list is reordered according to dst ONV, we must process its
@@ -467,7 +458,7 @@ void Solver::loop_over_spawned() {
         }
     } else {
         auto &row = m_wf.recv().m_row;
-        if (m_opts.rdm_rank > 0 && m_mevs.m_accum_epoch) {
+        if (m_opts.m_observables.m_fermion_rdm.m_rank > 0 && m_mevs.m_accum_epoch) {
             /*
              * an additional loop over recvd spawns is required in this case, in order to make the necessary
              * MEV contributions before the new spawns are added to the instantaneous populations
@@ -561,7 +552,7 @@ void Solver::output_stats() {
         m_stats->flush();
     }
 
-    if (m_opts.parallel_stats) {
+    if (m_opts.m_stats.m_parallel) {
         auto &stats = m_parallel_stats->m_row;
         stats.m_icycle = m_icycle;
         stats.m_synchronization_overhead = m_synchronization_timer;
@@ -613,12 +604,13 @@ void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, 
 
 void Solver::output_mevs() {
     if (!m_mevs.is_period_cycle(m_icycle)) return;
-    hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
-    hdf5::GroupWriter gw("solver", fw);
-    if (m_mevs.m_fermion_rdm) {
-        hdf5::GroupWriter gw2("rdm", gw);
-        m_mevs.m_fermion_rdm->h5_write(gw2);
-    }
+    m_mevs.save(m_icycle);
+//    hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
+//    hdf5::GroupWriter gw("solver", fw);
+//    if (m_mevs.m_fermion_rdm) {
+//        hdf5::GroupWriter gw2("rdm", gw);
+//        m_mevs.m_fermion_rdm->h5_write(gw2);
+//    }
 }
 
 const MevGroup &Solver::mevs() const {

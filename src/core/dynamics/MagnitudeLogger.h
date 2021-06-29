@@ -6,14 +6,14 @@
 #define M7_MAGNITUDELOGGER_H
 
 
-#include<cstddef>
+#include <cstddef>
 #include <src/defs.h>
 #include <src/core/parallel/Reducible.h>
-#include <src/core/io/Options.h>
 #include <src/core/parallel/Epoch.h>
+#include "src/core/config/FciqmcConfig.h"
 
 class MagnitudeLogger {
-    const Options &m_input;
+    const fciqmc_config::Propagator &m_opts;
     size_t m_nsingle = 0;
     size_t m_ndouble = 0;
     // highest magnitudes
@@ -32,9 +32,9 @@ public:
     defs::prob_t m_psingle;
     double m_tau;
 
-    MagnitudeLogger(const Options &input, defs::prob_t m_psingle);
+    MagnitudeLogger(const fciqmc_config::Propagator &opts, defs::prob_t m_psingle);
 
-    MagnitudeLogger(const Options &input, size_t nsite, size_t nelec);
+    MagnitudeLogger(const fciqmc_config::Propagator &opts, size_t nsite, size_t nelec);
 
     void log(size_t nexcit, defs::ham_t helem, defs::prob_t prob);
 

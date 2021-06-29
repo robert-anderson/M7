@@ -4,11 +4,11 @@
 
 #include "MagnitudeLogger.h"
 
-MagnitudeLogger::MagnitudeLogger(const Options &input, defs::prob_t psingle) :
-        m_input(input),
+MagnitudeLogger::MagnitudeLogger(const fciqmc_config::Propagator &opts, defs::prob_t psingle) :
+        m_opts(opts),
         m_enough_singles_for_dynamic_tau("use singles ratio for dynamic tau"),
         m_enough_doubles_for_dynamic_tau("use doubles ratio for dynamic tau"),
-        m_psingle(psingle), m_tau(m_input.tau_initial) {}
+        m_psingle(psingle), m_tau(m_opts.m_tau_init) {}
 
 void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
     defs::ham_comp_t tmp_hi_mag;
@@ -36,9 +36,9 @@ void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
 }
 
 void MagnitudeLogger::synchronize(size_t icycle) {
-    if (!m_input.static_tau) {
-        m_enough_singles_for_dynamic_tau.update(icycle, m_nsingle>m_input.nenough_spawns_for_dynamic_tau);
-        m_enough_doubles_for_dynamic_tau.update(icycle, m_nsingle>m_input.nenough_spawns_for_dynamic_tau);
+    if (!m_opts.m_static_tau) {
+        m_enough_singles_for_dynamic_tau.update(icycle, m_nsingle>m_opts.m_nenough_spawns_for_dynamic_tau);
+        m_enough_doubles_for_dynamic_tau.update(icycle, m_nsingle>m_opts.m_nenough_spawns_for_dynamic_tau);
         if (m_enough_singles_for_dynamic_tau && m_enough_doubles_for_dynamic_tau) {
             m_hi_mag_single.mpi_max();
             m_hi_mag_double.mpi_max();
@@ -48,15 +48,15 @@ void MagnitudeLogger::synchronize(size_t icycle) {
              * highest transferred weight ~ tau x max(helem/prob)
              * i.e. recommended tau = max bloom / max(helem/prob)
              */
-            m_tau = m_input.max_bloom / hi_mag_sum;
+            m_tau = m_opts.m_max_bloom / hi_mag_sum;
             // go halfway to predicted value
             m_psingle = (m_psingle+m_hi_mag_single / hi_mag_sum)/2;
-            m_psingle = std::max(m_psingle, m_input.min_excit_class_prob);
+            m_psingle = std::max(m_psingle, m_opts.m_min_excit_class_prob.get());
             m_hi_mag_single = std::numeric_limits<defs::ham_comp_t>::min();
             m_hi_mag_double = std::numeric_limits<defs::ham_comp_t>::min();
         }
     }
 }
 
-MagnitudeLogger::MagnitudeLogger(const Options &input, size_t nsite, size_t nelec) :
-        MagnitudeLogger(input, input.psingle_initial ? input.psingle_initial : psingle_guess(nsite, nelec)){}
+MagnitudeLogger::MagnitudeLogger(const fciqmc_config::Propagator &opts, size_t nsite, size_t nelec) :
+        MagnitudeLogger(opts, opts.m_psingle_init ? opts.m_psingle_init : psingle_guess(nsite, nelec)){}

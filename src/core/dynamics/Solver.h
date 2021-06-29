@@ -23,7 +23,7 @@ class Solver {
 
     size_t m_icycle = 0ul;
     Propagator &m_prop;
-    const Options &m_opts;
+    const fciqmc_config::Document &m_opts;
     Wavefunction &m_wf;
     References m_refs;
 
@@ -61,9 +61,10 @@ class Solver {
 
 public:
 
-    Solver(Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs);
+    Solver(const fciqmc_config::Document& opts, Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs);
 
-    Solver(Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc): Solver(prop, wf, std::vector<TableBase::Loc>(wf.npart(), ref_loc)){}
+    Solver(const fciqmc_config::Document& opts, Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc):
+        Solver(opts, prop, wf, std::vector<TableBase::Loc>(wf.npart(), ref_loc)){}
 
     /**
      * Perform ncycle iterations of the solver.

@@ -4,18 +4,22 @@
 
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
+Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "walker",
-                opts.walker_buffer_expansion_factor,
-                opts.nload_balance_block_per_rank * mpi::nrank(),
-                opts.load_balance_period,
+                opts.m_wavefunction.m_buffers.m_store_exp_fac,
+                opts.m_wavefunction.m_load_balancing.m_nblock_per_rank * mpi::nrank(),
+                opts.m_wavefunction.m_load_balancing.m_period,
                 {
-                        {nsite, opts.nroot, opts.replicate?2ul:1ul, true},
-                        MappedTableBase::nbucket_guess(opts.nwalker_target / mpi::nrank(), 3)
+                        {
+                                nsite, opts.m_wavefunction.m_nroot,
+                                opts.m_wavefunction.m_replicate ? 2ul:1ul,
+                                need_av_weights(opts)
+                            },
+                            MappedTableBase::nbucket_guess(opts.m_propagator.m_nw_target / mpi::nrank(), 3)
                 },
-                {SpawnTableRow(nsite, opts.rdm_rank > 0)},
-                opts.acceptable_load_imbalance
+                {{ nsite, need_send_parents(opts)}},
+                opts.m_wavefunction.m_load_balancing.m_acceptable_imbalance
         ),
         m_opts(opts),
         m_nsite(nsite),
@@ -28,8 +32,8 @@ Wavefunction::Wavefunction(const Options &opts, size_t nsite) :
         m_delta_l2_norm_square(m_format),
         m_nspawned(m_format),
         m_nannihilated(m_format){
-    m_store.resize((m_opts.walker_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
-    m_comm.resize((m_opts.spawn_buffer_size_factor_initial * m_opts.nwalker_target) / mpi::nrank());
+    m_store.resize((m_opts.m_wavefunction.m_buffers.m_store_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
+    m_store.resize((m_opts.m_wavefunction.m_buffers.m_comm_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
     ASSERT(m_comm.recv().m_row.m_dst_onv.belongs_to_row());
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
@@ -119,7 +123,7 @@ void Wavefunction::set_weight(const size_t &ipart, const defs::wf_t &new_weight)
     m_delta_l2_norm_square.m_local[ipart] -= std::pow(std::abs(weight), 2.0);
     weight = new_weight;
 
-    if (std::abs(new_weight) >= m_opts.nadd_initiator) grant_initiator_status(ipart);
+    if (std::abs(new_weight) >= m_opts.m_propagator.m_nadd) grant_initiator_status(ipart);
     else revoke_initiator_status(ipart);
 }
 

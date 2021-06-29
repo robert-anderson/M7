@@ -5,13 +5,14 @@
 #ifndef M7_PROPAGATOR_H
 #define M7_PROPAGATOR_H
 
+#include <src/core/config/FciqmcConfig.h>
 #include "Shift.h"
 
 class Propagator {
 public:
     const NdFormat<defs::ndim_wf> &m_wf_fmt;
     const Hamiltonian<> &m_ham;
-    const Options &m_opts;
+    const fciqmc_config::Document &m_opts;
     MagnitudeLogger m_magnitude_logger;
     Shift m_shift;
     /*
@@ -22,18 +23,18 @@ public:
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;
 
-    Propagator(const Options &opts, const Hamiltonian<> &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
+    Propagator(const fciqmc_config::Document &opts, const Hamiltonian<> &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
             m_wf_fmt(wf_fmt),
             m_ham(ham),
             m_opts(opts),
-            m_magnitude_logger(opts, ham.nsite(), ham.nelec()),
+            m_magnitude_logger(opts.m_propagator, ham.nsite(), ham.nelec()),
             m_shift(opts, wf_fmt),
             m_dst_onv(ham.nsite()),
             m_aconn(ham.nsite()),
             m_occ(ham.nsite()),
             m_vac(ham.nsite()) {}
 
-    ~Propagator() {}
+    virtual ~Propagator() {}
 
     virtual void diagonal(Wavefunction &wf, const size_t &ipart) = 0;
 

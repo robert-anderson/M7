@@ -23,7 +23,7 @@ namespace fciqmc_config {
         config::Param<std::string> m_save_path;
         config::Param<std::string> m_load_path;
 
-        explicit Serialization(config::Group *parent);
+        explicit Serialization(config::Group *parent, std::string path_default="");
     };
 
     struct Prng : config::Section {
@@ -57,7 +57,6 @@ namespace fciqmc_config {
         Buffers m_buffers;
         Serialization m_serialization;
         LoadBalancing m_load_balancing;
-        Reference m_reference;
 
         explicit Wavefunction(config::Group *parent);
     };
@@ -83,6 +82,7 @@ namespace fciqmc_config {
 
     struct Semistochastic : config::Section {
         config::Param<size_t> m_size;
+        config::Param<size_t> m_delay;
 
         explicit Semistochastic(config::Group *parent);
     };
@@ -111,21 +111,41 @@ namespace fciqmc_config {
     };
 
     struct AvCoeffs : config::Section {
-        config::Param<size_t> m_max_level;
+        config::Param<size_t> m_max_exlvl;
         Buffers m_buffers;
 
         explicit AvCoeffs(config::Group *parent) :
                 config::Section(parent, "av_coeffs",
                                 "options relating to the average coefficients of excitations of the reference"),
-                m_max_level(this, "max_level", 0ul,
+                m_max_exlvl(this, "max_exlvl", 0ul,
                             "maximum excitation level from the reference for which to accumulate average coefficients"),
                 m_buffers(this) {}
     };
 
+    struct FermionRdm : config::Section {
+        config::Param<size_t> m_rank;
+        config::Param<bool> m_mixed_estimator;
+        Buffers m_buffers;
+        Serialization m_serialization;
+        LoadBalancing m_load_balancing;
+
+        explicit FermionRdm(config::Group *parent) :
+                config::Section(parent, "fermion_rdm",
+                                "options relating to the accumulation and sampling of fermion RDM elements"),
+                m_rank(this, "rank", 0ul, "Rank of fermion RDM to accumulate"),
+                m_mixed_estimator(this, "mixed_estimator", false, "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
+                m_buffers(this), m_serialization(this), m_load_balancing(this)
+                {}
+    };
+
     struct Observables : config::Section {
+        config::Param<size_t> m_output_period;
+        config::Param<size_t> m_delay;
+        config::Param<size_t> m_ncycle;
         config::Param<bool> m_spf_uniform_twf;
         SpfWeightedTwf m_spf_weighted_twf;
         AvCoeffs m_av_coeffs;
+        FermionRdm m_fermion_rdm;
 
         explicit Observables(config::Group *parent);
     };
@@ -135,6 +155,7 @@ namespace fciqmc_config {
         config::Param<defs::ham_t> m_boson_frequency;
         config::Param<defs::ham_t> m_boson_coupling;
         config::Param<defs::ham_t> m_nboson_max;
+
         Hamiltonian(config::Group *parent) :
                 config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),
                 m_fcidump(this),
@@ -142,12 +163,13 @@ namespace fciqmc_config {
                                   "frequency of onsite boson modes for Hubbard-Holstein model"),
                 m_boson_coupling(this, "boson_coupling", 0.0,
                                  "coupling of onsite boson modes for Hubbard-Holstein model"),
-                m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes"){}
+                m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes") {}
 
         void verify() override;
     };
 
     struct Propagator : config::Section {
+        config::Param<size_t> m_ncycle;
         config::Param<bool> m_exact;
         config::Param<std::string> m_excit_gen;
         config::Param<double> m_nw_target;
@@ -157,6 +179,9 @@ namespace fciqmc_config {
         config::Param<bool> m_static_tau;
         config::Param<double> m_min_spawn_mag;
         config::Param<double> m_min_death_mag;
+        config::Param<double> m_min_excit_class_prob;
+        config::Param<double> m_psingle_init;
+        config::Param<size_t> m_nenough_spawns_for_dynamic_tau;
         config::Param<bool> m_consolidate_spawns;
         Semistochastic m_semistochastic;
 
@@ -166,6 +191,7 @@ namespace fciqmc_config {
     struct Document : config::Document {
         Prng m_prng;
         Wavefunction m_wavefunction;
+        Reference m_reference;
         Shift m_shift;
         Propagator m_propagator;
         Hamiltonian m_hamiltonian;

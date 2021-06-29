@@ -6,19 +6,19 @@
 #define M7_FCIQMCCALCULATION_H
 
 
-#include <src/core/io/Options.h>
+#include <src/core/config/FciqmcConfig.h>
 #include "Wavefunction.h"
 #include "StochasticPropagator.h"
 #include "Solver.h"
 
 class FciqmcCalculation {
 public:
-    const Options m_opts;
+    const fciqmc_config::Document& m_opts;
     Hamiltonian<defs::enable_bosons> m_ham;
     Wavefunction m_wf;
     std::unique_ptr<Propagator> m_prop;
 
-    explicit FciqmcCalculation(const Options& opts);
+    explicit FciqmcCalculation(const fciqmc_config::Document& opts);
 };
 
 

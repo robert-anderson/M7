@@ -121,6 +121,8 @@ namespace buffered {
 
     struct FermionMevInds : BufferedMultiField<fields::FermionMevInds> {
         using fields::FermionMevInds::operator=;
+        using fields::FermionMevInds::m_ann;
+        using fields::FermionMevInds::m_cre;
         FermionMevInds(size_t nann, size_t ncre):
                 BufferedMultiField<fields::FermionMevInds>({nullptr, nann, ncre}){}
 
