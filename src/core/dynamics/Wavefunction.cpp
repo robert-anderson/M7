@@ -32,8 +32,8 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         m_delta_l2_norm_square(m_format),
         m_nspawned(m_format),
         m_nannihilated(m_format){
-    m_store.resize((m_opts.m_wavefunction.m_buffers.m_store_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
-    m_store.resize((m_opts.m_wavefunction.m_buffers.m_comm_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
+    m_store.expand((m_opts.m_wavefunction.m_buffers.m_store_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
+    m_store.expand((m_opts.m_wavefunction.m_buffers.m_comm_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
     ASSERT(m_comm.recv().m_row.m_dst_onv.belongs_to_row());
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
