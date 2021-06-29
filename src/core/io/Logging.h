@@ -46,6 +46,11 @@ struct log {
         return tmp;
     }
 
+    template<typename ...Args>
+    static std::string bold_format(const std::string& fmt_string, Args... args){
+        return format("\033[1m{}\033[0m", format(fmt_string, args...));
+    }
+
     static std::string get_demangled_symbol(const std::string& symbol);
 
     static std::string get_demangled_prototype(const char* line);

@@ -90,7 +90,7 @@ config::Section::operator bool() const {
 
 std::string config::Section::help_string() const {
     std::string str;
-    str.append(log::format("{}Section:       {}\n", m_indent, m_path.to_string()));
+    str.append(log::format("{}Section:       {}\n", m_indent, log::bold_format(m_path.to_string())));
     str.append(log::format("{}Description:   {}\n\n", m_indent, m_description));
     for (auto child: m_children) str.append(child->help_string() + "\n");
     return str;
@@ -127,7 +127,7 @@ config::ParamBase::ParamBase(config::Group *parent, std::string name, std::strin
 
 std::string config::ParamBase::help_string() const {
     std::string str;
-    str.append(log::format("{}Parameter:       {}\n", m_indent, name()));
+    str.append(log::format("{}Parameter:       {}\n", m_indent, log::bold_format(name())));
     str.append(log::format("{}Type:            {}\n", m_indent, m_dim_type_str));
     str.append(log::format("{}Default value:   {}\n", m_indent, m_v_default_str));
     str.append(log::format("{}Description:     {}\n", m_indent, m_description));

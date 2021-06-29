@@ -108,9 +108,9 @@ void fciqmc_config::SpfWeightedTwf::verify() {
 fciqmc_config::Observables::Observables(config::Group *parent) :
         config::Section(parent, "observables",
                         "options related to observables extracted from the many-body wavefunction(s)"),
-        m_output_period(parent, "output_period", 0ul, "number of MC cycles between dumps to disk"),
-        m_delay(parent, "delay", 0ul, "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
-        m_ncycle(parent, "ncycle", ~0ul, "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
+        m_output_period(this, "output_period", 0ul, "number of MC cycles between dumps to disk"),
+        m_delay(this, "delay", 0ul, "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
+        m_ncycle(this, "ncycle", ~0ul, "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
         m_spf_uniform_twf(this, "spf_uniform_twf", false,
                           "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
         m_spf_weighted_twf(this), m_av_coeffs(this), m_fermion_rdm(this) {}
