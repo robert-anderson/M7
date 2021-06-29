@@ -9,7 +9,6 @@
 #include <forward_list>
 #include "src/core/linalg/Matrix.h"
 #include "src/core/io/Logging.h"
-#include "omp.h"
 
 namespace sparse {
     template<typename T>

@@ -10,7 +10,7 @@ endif()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 find_package(LAPACK REQUIRED)
 
@@ -26,7 +26,8 @@ set(ExternalProjectCMakeArgs
         -DHDF5_ENABLE_PARALLEL=ON
         -DHDF5_BUILD_CPP_LIB=OFF
         -DHDF5_BUILD_JAVA=OFF
-        -DHDF5_ENABLE_THREADSAFE=OFF)
+        -DHDF5_ENABLE_THREADSAFE=OFF
+        -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration")
 
 option(FORCE_HDF5_INSTALL "Force the download and installation of HDF5" 1)
 option(ENABLE_HDF5 "Enable HDF5 support" 1)
