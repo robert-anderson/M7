@@ -167,6 +167,8 @@ namespace config {
             }
         }
 
+        Param(const Param& other): Param(other.m_parent, other.name(), other.m_v, other.m_description){}
+
         const T &get() const {
             return m_v;
         }
