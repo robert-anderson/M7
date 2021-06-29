@@ -146,7 +146,7 @@ namespace config {
     }
 
     template<typename T>
-    class Param : ParamBase {
+    class Param : public ParamBase {
         T m_v;
 
     public:
@@ -177,6 +177,11 @@ namespace config {
 
         void log_value() const override {
             log::info("{}: {}", m_path.to_string(), utils::to_string(m_v));
+        }
+
+        Param& operator=(const Param& other){
+            m_v = other.m_v;
+            return *this;
         }
     };
 }

@@ -8,6 +8,7 @@
 #include <string>
 #include <src/defs.h>
 
+#if 0
 struct Options {
     std::string fcidump_path = "FCIDUMP";
     std::string initial_reference_det;
@@ -75,6 +76,7 @@ struct Options {
     bool init();
 
 };
+#endif
 
 
 #endif //M7_OPTIONS_H

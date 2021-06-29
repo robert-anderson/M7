@@ -38,7 +38,7 @@ public:
                         size_t nboson_cutoff, defs::ham_t v, defs::ham_t omega);
 
 
-    FermiBosHamiltonian(const Options &opts);
+    FermiBosHamiltonian(const fciqmc_config::Hamiltonian &opts);
 
     const BosonCouplings &bc() const;
 

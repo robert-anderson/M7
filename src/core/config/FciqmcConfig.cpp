@@ -137,6 +137,14 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
                              "sort and consolidate received spawns so that there is at most one update to any ONV weight in an annihilation loop"),
         m_semistochastic(this) {}
 
+void fciqmc_config::Propagator::verify() {
+    if (consts::float_is_zero(m_min_death_mag.get())) {
+        m_min_death_mag = m_min_spawn_mag;
+        log::warn("{} was zero, defaulting to the specified value of {}",
+                  m_min_death_mag.m_path.to_string(), m_min_spawn_mag.m_path.to_string());
+    }
+}
+
 fciqmc_config::Document::Document(const yaml::File *file) :
         config::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
@@ -154,3 +162,13 @@ void fciqmc_config::Hamiltonian::verify() {
                        "Maximum boson number per mode is non-zero but bosons are compile time disabled");
     }
 }
+
+
+/*
+ *     if (consts::float_is_zero(min_death_mag)) min_death_mag = min_spawn_mag;
+
+    if (ncycle_wait_reweight < ncycle_shift_average_period) {
+        log::warn("ncycle_wait_reweight cannot be less than ncycle_shift_average_period. Setting them equal.");
+        ncycle_wait_reweight = ncycle_shift_average_period;
+    }
+ */

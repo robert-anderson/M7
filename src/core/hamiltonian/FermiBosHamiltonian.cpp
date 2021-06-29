@@ -9,9 +9,9 @@ FermiBosHamiltonian::FermiBosHamiltonian(std::string fname, bool spin_major, siz
         FermionHamiltonian(fname, spin_major),
         m_boson_couplings(nsite(), nboson_cutoff, v, omega) {}
 
-FermiBosHamiltonian::FermiBosHamiltonian(const Options &opts) :
-        FermiBosHamiltonian(opts.fcidump_path, opts.fcidump_spin_major, opts.nboson_max,
-                            opts.boson_coupling, opts.boson_frequency){}
+FermiBosHamiltonian::FermiBosHamiltonian(const fciqmc_config::Hamiltonian &opts):
+    FermiBosHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_nboson_max,
+                            opts.m_boson_coupling, opts.m_boson_frequency){}
 
 const BosonCouplings &FermiBosHamiltonian::bc() const {
     return m_boson_couplings;

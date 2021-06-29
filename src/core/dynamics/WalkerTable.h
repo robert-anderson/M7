@@ -38,9 +38,6 @@ struct WalkerTableRow : public Row {
             m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
             {}
 
-    WalkerTableRow(const Options &opts, size_t nsite) :
-            WalkerTableRow(nsite, opts.nroot, opts.replicate ? 2:1, opts.max_rank_average_coeff) {}
-
     bool is_h5_write_exempt() const override {
         return m_onv.is_zero();
     }

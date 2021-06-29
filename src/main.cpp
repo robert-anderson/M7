@@ -2,10 +2,8 @@
 #include <iomanip>
 #include <src/core/parallel/MPIWrapper.h>
 #include <src/core/dynamics/FciqmcCalculation.h>
-#include <src/core/io/InputOptions.h>
 #include <src/core/io/YamlWrapper.h>
 #include <src/core/config/FciqmcConfig.h>
-#include "CLI/CLI.hpp"
 
 int main(int argc, char **argv) {
 

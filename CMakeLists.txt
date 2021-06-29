@@ -8,7 +8,6 @@ if (APPLE)
     set(CMAKE_MACOSX_RPATH 1)
 endif()
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/CLI11)
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -march=native")
@@ -99,7 +98,6 @@ set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 
 
 include_directories("${CMAKE_SOURCE_DIR}")
-include_directories("${CMAKE_SOURCE_DIR}/external/CLI11/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/spdlog-1.x/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/lambda-lanczos/include")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)

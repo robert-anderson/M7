@@ -186,6 +186,8 @@ namespace fciqmc_config {
         Semistochastic m_semistochastic;
 
         explicit Propagator(config::Group *parent);
+
+        void verify();
     };
 
     struct Document : config::Document {

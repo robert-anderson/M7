@@ -9,6 +9,7 @@
 #include <src/core/io/Options.h>
 #include "src/core/integrals/Integrals_1e.h"
 #include "src/core/integrals/Integrals_2e.h"
+#include "Hamiltonian.h"
 
 namespace ham_parts {
 
@@ -90,7 +91,7 @@ namespace ham_parts {
 
         Fermion(std::string fname, bool spin_major);
 
-        Fermion(const Options &opts) : Fermion(opts.fcidump_path, opts.fcidump_spin_major) {}
+        Fermion(const fciqmc_config::Hamiltonian &opts) : Fermion(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
 
         defs::ham_comp_t get_energy(const fields::Onv<0> &fonv) const;
 
