@@ -10,25 +10,22 @@
 
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
-    Options opts;
-    opts.nwalker_initial = 100;
-    opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.01;
-    opts.nwalker_target = 100000;
-    opts.rdm_rank = 2;
-    opts.replicate = true;
-    opts.write_hdf5_fname = "rdm.h5";
-    opts.ncycle_accumulate_mevs = 2000;
-    opts.ncycle_mev_period = 10;
-    opts.min_spawn_mag = 0.0;
-    opts.min_death_mag = 0.2;
-    opts.consolidate_spawns = false;
-    opts.explicit_hf_conn_mevs = true;
-    opts.output_mevs_periodically = true;
-    //opts.do_semistochastic = true;
-    opts.ncycle_wait_mevs = 1000;
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nw_init = 100;
+    opts.m_propagator.m_nadd = 3.0;
+    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_propagator.m_nw_target = 100000;
+    opts.m_observables.m_fermion_rdm.m_rank = 2;
+    opts.m_wavefunction.m_replicate = true;
+    opts.m_observables.m_fermion_rdm.m_serialization.m_save_path = "rdm.h5";
+    opts.m_observables.m_ncycle = 2000;
+    opts.m_observables.m_output_period = 10;
+    opts.m_propagator.m_min_spawn_mag = 0.2;
+    opts.m_propagator.m_min_death_mag = 0.2;
+    opts.m_propagator.m_consolidate_spawns = false;
+    opts.m_observables.m_delay = 1000;
     //opts.ncycle_wait_detsub = 10;
-    opts.init();
+    opts.verify();
 
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -41,30 +38,29 @@ TEST(StochasticPropagator, Test) {
 
     auto ref_energy = ham.get_energy(ref_onv);
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(opts.nwalker_initial);
+    wf.set_weight(opts.m_wavefunction.m_nw_init);
 
-    prop.m_shift.m_values = ref_energy+opts.shift_initial;
-    Solver solver(prop, wf, ref_loc);
-    solver.execute(opts.ncycle);
+    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init;
+    Solver solver(opts, prop, wf, ref_loc);
+    solver.execute(opts.m_propagator.m_ncycle);
 }
 
 TEST(StochasticPropagator, RdmTest) {
-    Options opts;
-    opts.nwalker_initial = 300.0;
-    opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.01;
-    opts.load_balance_period = 5;
-    opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 200000;
-    opts.shift_damp = 0.5;
-    opts.shift_initial = 0.0;
-    opts.ncycle_wait_mevs = 200;
-    opts.ncycle_accumulate_mevs = 1000;
-    opts.rdm_rank = 1;
-    opts.replicate = true;
-    opts.consolidate_spawns = true;
-    opts.write_hdf5_fname = "test_rdm_save.h5";
-    opts.init();
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nw_init = 300.0;
+    opts.m_propagator.m_nadd = 3.0;
+    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_wavefunction.m_load_balancing.m_period = 5;
+    opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 40;
+    opts.m_propagator.m_nw_target = 200000;
+    opts.m_shift.m_damp = 0.5;
+    opts.m_observables.m_delay = 200;
+    opts.m_observables.m_ncycle = 1000;
+    opts.m_observables.m_fermion_rdm.m_rank = 1;
+    opts.m_wavefunction.m_replicate = true;
+    opts.m_propagator.m_consolidate_spawns = true;
+    opts.m_observables.m_fermion_rdm.m_serialization.m_save_path = "test_rdm_save.h5";
+    opts.verify();
 
     //const auto benchmark = -99.9421389039331
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
@@ -82,28 +78,28 @@ TEST(StochasticPropagator, RdmTest) {
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, opts.nwalker_initial);
-    wf.set_weight(1, opts.nwalker_initial);
+    wf.set_weight(0, opts.m_wavefunction.m_nw_init);
+    wf.set_weight(1, opts.m_wavefunction.m_nw_init);
 
-    prop.m_shift.m_values = ref_energy+opts.shift_initial;
-    Solver solver(prop, wf, ref_loc);
-    solver.execute(opts.ncycle);
+    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init;
+    Solver solver(opts, prop, wf, ref_loc);
+    solver.execute(opts.m_propagator.m_ncycle);
 }
 
 TEST(StochasticPropagator, Hdf5) {
-    Options opts;
-    opts.nwalker_initial = 10.0;
-    opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.01;
-    opts.load_balance_period = 5;
-    opts.nload_balance_block_per_rank = 40;
-    opts.nwalker_target = 50000;
-    opts.shift_damp = 0.5;
-    opts.shift_initial = 0.0;
-    opts.ncycle = 50000;
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nw_init = 10.0;
+    opts.m_propagator.m_nadd = 3.0;
+    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_wavefunction.m_load_balancing.m_period = 5;
+    opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 40;
+    opts.m_propagator.m_nw_target = 50000;
+    opts.m_shift.m_damp = 0.5;
+    opts.m_shift.m_init = 0.0;
+    opts.m_propagator.m_ncycle = 50000;
     //opts.write_hdf5_fname = "test_wf_save.h5";
-    opts.read_hdf5_fname = "test_wf_save.h5";
-    opts.init();
+    opts.m_wavefunction.m_serialization.m_save_path = "test_wf_save.h5";
+    opts.verify();
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -124,29 +120,29 @@ TEST(StochasticPropagator, Hdf5) {
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
     wf.set_weight(0, ref_energy);
 
-    prop.m_shift.m_values = ref_energy+opts.shift_initial;
-    Solver solver(prop, wf, ref_loc);
-    solver.execute(opts.ncycle);
+    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init;
+    Solver solver(opts, prop, wf, ref_loc);
+    solver.execute(opts.m_propagator.m_ncycle);
 }
 
 TEST(StochasticPropagator, Hubbard) {
-    Options opts;
-    opts.nadd_initiator = 0.0;
-    opts.tau_initial = 0.01;
-    opts.nwalker_target = 100;
-    opts.nwalker_initial = 1;
-    opts.min_spawn_mag = 0.0;
-    opts.min_death_mag = 0.0;
-    opts.shift_damp = 0.1;
-    opts.shift_update_period = 1;
-    opts.ncycle_shift_average_period = 5000;
-    opts.ncycle = 2000000;
-    opts.spf_uniform_twf = 0;
-    opts.ncycle_reweight_lookback = 200;
-    opts.ncycle_wait_reweight = 20000;
-    opts.rdm_rank = 0;
-    opts.replicate = false;
-    opts.init();
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nw_init = 1;
+    opts.m_propagator.m_nadd = 0.0;
+    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_propagator.m_nw_target = 100;
+    opts.m_propagator.m_min_spawn_mag = 0.0;
+    opts.m_propagator.m_min_death_mag = 0.0;
+    opts.m_shift.m_damp = 0.1;
+    opts.m_shift.m_period = 1;
+    opts.m_shift.m_ncycle_av = 5000;
+    opts.m_propagator.m_ncycle = 2000000;
+    opts.m_observables.m_spf_uniform_twf = false;
+    opts.m_shift.m_reweight.m_ncycle = 200;
+    opts.m_shift.m_reweight.m_delay = 20000;
+    opts.m_observables.m_fermion_rdm.m_rank = 0;
+    opts.m_wavefunction.m_replicate = false;
+    opts.verify();
 
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
@@ -162,30 +158,23 @@ TEST(StochasticPropagator, Hubbard) {
     prop.m_shift.m_values = ref_energy;
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, opts.nwalker_initial);
+    wf.set_weight(0, opts.m_wavefunction.m_nw_init);
 
-    Solver solver(prop, wf, ref_loc);
+    Solver solver(opts, prop, wf, ref_loc);
     std::cout << "Reference Energy: " << ref_energy << std::endl;
-    solver.execute(opts.ncycle);
+    solver.execute(opts.m_propagator.m_ncycle);
 }
 
 TEST(StochasticPropagator, ExcitedStates) {
-    Options opts;
-    opts.nroot = 3;
-    opts.nwalker_initial = 10;
-    opts.nadd_initiator = 3.0;
-    opts.tau_initial = 0.01;
-    opts.nwalker_target = 10000;
-    opts.write_hdf5_fname = "rdm.h5";
-    opts.ncycle_wait_mevs = 4000;
-    opts.ncycle_accumulate_mevs = 200;
-    opts.ncycle_mev_period = 13;
-    opts.consolidate_spawns = false;
-    opts.explicit_hf_conn_mevs = false;
-    opts.output_mevs_periodically = true;
-    opts.rdm_rank = 0;
-    opts.replicate = false;
-    opts.init();
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nroot = 3;
+    opts.m_wavefunction.m_nw_init = 10;
+    opts.m_propagator.m_nadd = 3.0;
+    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_propagator.m_nw_target = 10000;
+    opts.m_propagator.m_consolidate_spawns = false;
+    opts.m_wavefunction.m_replicate = false;
+    opts.verify();
     // -99.9421389039332
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
@@ -194,12 +183,12 @@ TEST(StochasticPropagator, ExcitedStates) {
 
     Wavefunction wf(opts, ham.nsite());
 
-    if (!opts.replicate && opts.nroot==1){ASSERT_EQ(wf.npart(), 1);}
+    if (!opts.m_wavefunction.m_replicate && opts.m_wavefunction.m_nroot==1){ASSERT_EQ(wf.npart(), 1);}
     StochasticPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.nwalker_initial);
+    for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
 
 
     buffered::Onv<> excit_onv(ham.nsite());
@@ -207,22 +196,22 @@ TEST(StochasticPropagator, ExcitedStates) {
     excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
     ASSERT(wf.m_store.m_row.index()==1ul);
-    wf.set_weight(1, opts.nwalker_initial);
+    wf.set_weight(1, opts.m_wavefunction.m_nw_init);
 
 
     excit_onv = ref_onv;
     excit_onv.excite(ham.nsite()+ham.nelec()/2-1, ham.nsite()+ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
     ASSERT(wf.m_store.m_row.index()==2ul);
-    wf.set_weight(2, opts.nwalker_initial);
+    wf.set_weight(2, opts.m_wavefunction.m_nw_init);
 
     std::cout <<
               wf.m_store.to_string()
               << std::endl;
     prop.m_shift.m_values = ref_energy;
 
-    Solver solver(prop, wf, ref_loc);
-    solver.execute(opts.ncycle);
+    Solver solver(opts, prop, wf, ref_loc);
+    solver.execute(opts.m_propagator.m_ncycle);
     std::cout << solver.mevs().m_fermion_rdm->get_energy(ham)-prop.m_shift.m_values[0]<< std::endl;
 }
 

@@ -200,7 +200,7 @@ namespace fciqmc_config {
         Stats m_stats;
         Observables m_observables;
 
-        explicit Document(const yaml::File *file);
+        explicit Document(const yaml::File *file= nullptr);
     };
 }
 

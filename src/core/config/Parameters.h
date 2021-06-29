@@ -183,6 +183,11 @@ namespace config {
             m_v = other.m_v;
             return *this;
         }
+
+        Param& operator=(const T& v){
+            m_v = v;
+            return *this;
+        }
     };
 }
 

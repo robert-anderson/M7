@@ -7,10 +7,10 @@
 #include "gtest/gtest.h"
 
 TEST(Wavefunction, DynamicRowSet){
-    Options opts;
-    opts.nwalker_target = 1000;
-    opts.init();
-    opts.nload_balance_block_per_rank = 3;
+    fciqmc_config::Document opts;
+    opts.m_propagator.m_nw_target = 1000;
+    opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 3;
+    opts.verify();
     const size_t nsite = 6;
     const size_t nelec = 6;
     Wavefunction wf(opts, nsite);
