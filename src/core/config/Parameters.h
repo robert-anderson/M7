@@ -167,8 +167,6 @@ namespace config {
             }
         }
 
-        Param(const Param& other): Param(other.m_parent, other.name(), other.m_v, other.m_description){}
-
         const T &get() const {
             return m_v;
         }
@@ -179,11 +177,6 @@ namespace config {
 
         void log_value() const override {
             log::info("{}: {}", m_path.to_string(), utils::to_string(m_v));
-        }
-
-        Param& operator=(const Param& other){
-            m_v = other.m_v;
-            return *this;
         }
 
         Param& operator=(const T& v){

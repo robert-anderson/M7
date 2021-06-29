@@ -152,8 +152,8 @@ public:
 
     FermionHamiltonian(std::string fname, bool spin_major);
 
-    FermionHamiltonian(const fciqmc_config::Document &opts) :
-        FermionHamiltonian(opts.m_hamiltonian.m_fcidump.m_path, opts.m_hamiltonian.m_fcidump.m_spin_major) {}
+    FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
+        FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
 
     defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
 

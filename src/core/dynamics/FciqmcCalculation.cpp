@@ -9,7 +9,7 @@
 #include "Propagators.h"
 
 FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document& opts) :
-        m_opts(opts), m_ham(opts), m_wf(opts, m_ham.nsite()),
+        m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.nsite()),
         m_prop(props::get(m_ham, opts, m_wf.m_format))  {
     buffered::Onv<> ref_onv(m_ham.nsite());
     m_ham.set_hf_onv(ref_onv, opts.m_wavefunction.m_spin_restrict);
