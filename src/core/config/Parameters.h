@@ -89,6 +89,8 @@ namespace config {
             log::info("Specified values for \"{}\"", m_name);
             for (auto child: m_children) child->log_value();
         }
+
+        void verify() override;
     };
 
     struct ParamBase : Node {

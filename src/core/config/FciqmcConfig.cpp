@@ -98,6 +98,12 @@ fciqmc_config::SpfWeightedTwf::SpfWeightedTwf(config::Group *parent) :
                       "Exponential constant penalising fermion double-occupancy in weighted TWF"),
         m_boson_fac(this, "boson_fac", 0.0, "Exponential constant penalising boson occupancy in weighted TWF") {}
 
+void fciqmc_config::SpfWeightedTwf::verify() {
+    Section::verify();
+    if (!defs::enable_bosons)
+        REQUIRE_EQ_ALL(m_boson_fac, 0.0,"Boson exponential parameter is non-zero but bosons are compile time disabled");
+}
+
 fciqmc_config::Observables::Observables(config::Group *parent) :
         config::Section(parent, "observables",
                         "options related to observables extracted from the many-body wavefunction(s)"),
@@ -127,4 +133,16 @@ fciqmc_config::Document::Document(const yaml::File *file) :
         config::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
         m_prng(this), m_wavefunction(this), m_shift(this), m_propagator(this),
-        m_fcidump(this), m_stats(this), m_observables(this){}
+        m_hamiltonian(this), m_stats(this), m_observables(this) {}
+
+void fciqmc_config::Hamiltonian::verify() {
+    Section::verify();
+    if (!defs::enable_bosons) {
+        REQUIRE_EQ_ALL(m_boson_coupling, 0.0,
+                       "Boson coupling parameter is non-zero but bosons are compile time disabled");
+        REQUIRE_EQ_ALL(m_boson_frequency, 0.0,
+                       "Boson frequency parameter is non-zero but bosons are compile time disabled");
+        REQUIRE_EQ_ALL(m_nboson_max, 0ul,
+                       "Maximum boson number per mode is non-zero but bosons are compile time disabled");
+    }
+}

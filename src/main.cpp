@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 
     auto yf = yaml::File(std::string(argv[1]));
     fciqmc_config::Document opts(&yf);
+    opts.verify();
     opts.log_value();
 
     std::streambuf *original_stdout_buffer = nullptr;

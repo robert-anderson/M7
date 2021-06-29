@@ -106,16 +106,20 @@ namespace fciqmc_config {
         config::Param<double> m_boson_fac;
 
         explicit SpfWeightedTwf(config::Group *parent);
+
+        void verify() override;
     };
 
     struct AvCoeffs : config::Section {
         config::Param<size_t> m_max_level;
         Buffers m_buffers;
-        explicit AvCoeffs(config::Group* parent):
-        config::Section(parent, "av_coeffs", "options relating to the average coefficients of excitations of the reference"),
-        m_max_level(this, "max_level", 0ul,
+
+        explicit AvCoeffs(config::Group *parent) :
+                config::Section(parent, "av_coeffs",
+                                "options relating to the average coefficients of excitations of the reference"),
+                m_max_level(this, "max_level", 0ul,
                             "maximum excitation level from the reference for which to accumulate average coefficients"),
-                            m_buffers(this){}
+                m_buffers(this) {}
     };
 
     struct Observables : config::Section {
@@ -124,6 +128,23 @@ namespace fciqmc_config {
         AvCoeffs m_av_coeffs;
 
         explicit Observables(config::Group *parent);
+    };
+
+    struct Hamiltonian : config::Section {
+        Fcidump m_fcidump;
+        config::Param<defs::ham_t> m_boson_frequency;
+        config::Param<defs::ham_t> m_boson_coupling;
+        config::Param<defs::ham_t> m_nboson_max;
+        Hamiltonian(config::Group *parent) :
+                config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),
+                m_fcidump(this),
+                m_boson_frequency(this, "boson_frequency", 0.0,
+                                  "frequency of onsite boson modes for Hubbard-Holstein model"),
+                m_boson_coupling(this, "boson_coupling", 0.0,
+                                 "coupling of onsite boson modes for Hubbard-Holstein model"),
+                m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes"){}
+
+        void verify() override;
     };
 
     struct Propagator : config::Section {
@@ -147,7 +168,7 @@ namespace fciqmc_config {
         Wavefunction m_wavefunction;
         Shift m_shift;
         Propagator m_propagator;
-        Fcidump m_fcidump;
+        Hamiltonian m_hamiltonian;
         Stats m_stats;
         Observables m_observables;
 

@@ -111,6 +111,12 @@ std::string config::Document::help_string() const {
     return str;
 }
 
+void config::Document::verify() {
+    Node::verify();
+    auto invalid = invalid_file_key();
+    REQUIRE_TRUE(invalid.empty(), log::format("YAML file \"{}\" contains invalid key \"{}\"", m_file->m_fname, invalid));
+}
+
 config::ParamBase::ParamBase(config::Group *parent, std::string name, std::string description,
                              std::string v_default_str, std::string dim_type_str) :
         Node(parent, name, description), m_v_default_str(v_default_str),
