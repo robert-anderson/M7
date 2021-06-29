@@ -23,11 +23,13 @@ fciqmc_config::Buffers::Buffers(config::Group *parent) :
         m_comm_exp_fac(this, "comm_expand_fac", 2.0,
                        "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
 
-fciqmc_config::Serialization::Serialization(config::Group *parent, std::string path_default):
+fciqmc_config::Serialization::Serialization(config::Group *parent, std::string path_default) :
         config::Section(parent, "serialization",
                         "options relating to filesystem save and load of structures in an M7 calculation"),
-        m_save_path(this, "save_path", path_default, "path to which the HDF5 file containing the structure should be saved"),
-        m_load_path(this, "load_path", path_default, "path from which the HDF5 file containing the structure should be loaded") {}
+        m_save_path(this, "save_path", path_default,
+                    "path to which the HDF5 file containing the structure should be saved"),
+        m_load_path(this, "load_path", path_default,
+                    "path from which the HDF5 file containing the structure should be loaded") {}
 
 fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
         config::Section(parent, "load_balancing",
@@ -76,7 +78,8 @@ fciqmc_config::Shift::Shift(config::Group *parent) :
 fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
         config::Section(parent, "semistochastic", "options related to semi-stochastic propagation"),
         m_size(this, "size", 0ul, "number of ONVs selected to comprise the semi-stochastic space"),
-        m_delay(this, "delay", 0ul, "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space"){}
+        m_delay(this, "delay", 0ul,
+                "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
 fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
         config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
@@ -102,15 +105,18 @@ fciqmc_config::SpfWeightedTwf::SpfWeightedTwf(config::Group *parent) :
 void fciqmc_config::SpfWeightedTwf::verify() {
     Section::verify();
     if (!defs::enable_bosons)
-        REQUIRE_EQ_ALL(m_boson_fac, 0.0,"Boson exponential parameter is non-zero but bosons are compile time disabled");
+        REQUIRE_EQ_ALL(m_boson_fac, 0.0,
+                       "Boson exponential parameter is non-zero but bosons are compile time disabled");
 }
 
 fciqmc_config::Observables::Observables(config::Group *parent) :
         config::Section(parent, "observables",
                         "options related to observables extracted from the many-body wavefunction(s)"),
         m_output_period(this, "output_period", 0ul, "number of MC cycles between dumps to disk"),
-        m_delay(this, "delay", 0ul, "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
-        m_ncycle(this, "ncycle", ~0ul, "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
+        m_delay(this, "delay", 0ul,
+                "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
+        m_ncycle(this, "ncycle", ~0ul,
+                 "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
         m_spf_uniform_twf(this, "spf_uniform_twf", false,
                           "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
         m_spf_weighted_twf(this), m_av_coeffs(this), m_fermion_rdm(this) {}
@@ -130,9 +136,12 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         m_min_spawn_mag(this, "min_spawn_mag", 0.4,
                         "spawn magnitude threshold - smaller spawns are stochastically rounded about this value"),
         m_min_death_mag(this, "min_death_mag", 0.0, "death magnitude threshold"),
-        m_min_excit_class_prob(this, "min_excit_class_prob", 1e-3, "prevent the probability of drawing an excitatation class falling below this threshold"),
-        m_psingle_init(this, "psingle_init", 0.0, "initial probability with which to attempt to draw single excitations"),
-        m_nenough_spawns_for_dynamic_tau(this, "nenough_spawns_for_dynamic_tau", 1000ul, "number of spawns logged for excitation type magnitudes to be used in tau update"),
+        m_min_excit_class_prob(this, "min_excit_class_prob", 1e-3,
+                               "prevent the probability of drawing an excitatation class falling below this threshold"),
+        m_psingle_init(this, "psingle_init", 0.0,
+                       "initial probability with which to attempt to draw single excitations"),
+        m_nenough_spawns_for_dynamic_tau(this, "nenough_spawns_for_dynamic_tau", 1000ul,
+                                         "number of spawns logged for excitation type magnitudes to be used in tau update"),
         m_consolidate_spawns(this, "consolidate_spawns", false,
                              "sort and consolidate received spawns so that there is at most one update to any ONV weight in an annihilation loop"),
         m_semistochastic(this) {}
@@ -151,6 +160,12 @@ fciqmc_config::Document::Document(const yaml::File *file) :
         m_prng(this), m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
         m_hamiltonian(this), m_stats(this), m_observables(this) {}
 
+void fciqmc_config::Document::verify() {
+    config::Document::verify();
+    REQUIRE_LT_ALL(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
+                   "initial number of walkers must not exceed the target population");
+}
+
 void fciqmc_config::Hamiltonian::verify() {
     Section::verify();
     if (!defs::enable_bosons) {
@@ -162,13 +177,3 @@ void fciqmc_config::Hamiltonian::verify() {
                        "Maximum boson number per mode is non-zero but bosons are compile time disabled");
     }
 }
-
-
-/*
- *     if (consts::float_is_zero(min_death_mag)) min_death_mag = min_spawn_mag;
-
-    if (ncycle_wait_reweight < ncycle_shift_average_period) {
-        log::warn("ncycle_wait_reweight cannot be less than ncycle_shift_average_period. Setting them equal.");
-        ncycle_wait_reweight = ncycle_shift_average_period;
-    }
- */

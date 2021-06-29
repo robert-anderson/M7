@@ -25,8 +25,8 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                   "the replica population is redundant");
 
     if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && !m_prop.is_exact())
-            log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
-                      "this is biased");
+        log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
+                  "this is biased");
 
     if (m_mevs && !m_mevs.is_bilinear() && m_wf.nreplica() > 1)
         log::warn("Attempting a mixed estimation of MEVs with replication, "
@@ -96,7 +96,7 @@ void Solver::execute(size_t ncycle) {
     if (m_mevs.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         --m_icycle;
-        finalizing_loop_over_occupied_onvs();;
+        finalizing_loop_over_occupied_onvs();
     }
 
     m_mevs.save();
@@ -116,7 +116,7 @@ void Solver::begin_cycle() {
     m_refs.begin_cycle();
 
     auto update_epoch = [&](const size_t &ncycle_wait) {
-        if (m_wf.nreplica()==2) {
+        if (m_wf.nreplica() == 2) {
             if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
                 auto max_start = std::max(
                         m_prop.m_shift.m_variable_mode[0].icycle_start(),
@@ -132,8 +132,15 @@ void Solver::begin_cycle() {
         return false;
     };
 
-    if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_observables.m_delay))) {
-        ASSERT(m_mevs.m_fermion_rdm->m_store.m_hwm == 0);
+    if (m_mevs) {
+        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_observables.m_delay))) {
+            if (m_mevs.m_fermion_rdm)
+                REQUIRE_EQ_ALL(m_mevs.m_fermion_rdm->m_store.m_hwm, 0ul,
+                               "Fermion RDM is only beginning to be accumulated, but its store table is not empty!");
+            if (m_mevs.m_av_coeffs)
+                REQUIRE_TRUE_ALL(m_mevs.m_av_coeffs->all_stores_empty(),
+                               "Average coefficients are only beginning to be accumulated, but not all store tables are empty!");
+        }
     }
 
     if (m_opts.m_propagator.m_semistochastic && !m_detsub) {

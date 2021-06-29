@@ -201,6 +201,8 @@ namespace fciqmc_config {
         Observables m_observables;
 
         explicit Document(const yaml::File *file= nullptr);
+
+        void verify();
     };
 }
 

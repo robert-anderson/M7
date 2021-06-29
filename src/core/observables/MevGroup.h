@@ -262,7 +262,8 @@ struct MevGroup {
     }
 
     bool is_bilinear() const {
-        return (*this) && !m_fermion_rdm->m_mixed_estimator;
+        if (m_fermion_rdm) return (*this) && !m_fermion_rdm->m_mixed_estimator;
+        return (*this);
     }
 
 
