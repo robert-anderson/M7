@@ -30,9 +30,9 @@ TEST(Propagators, RdmTest) {
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, ref_energy);
+    wf.set_weight(0, opts.m_wavefunction.m_nw_init);
 
-    prop->m_shift.m_values = opts.m_wavefunction.m_nw_init;
+    prop->m_shift.m_values = ref_energy;
 
     Solver solver(opts, *prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);

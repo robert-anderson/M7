@@ -95,7 +95,6 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
 
     for (size_t ipart=0ul; ipart < m_variable_mode.nelement(); ++ipart){
         auto& variable_mode = m_variable_mode[ipart];
-        std::cout << wf.m_nwalker.m_reduced[ipart] << " " << m_nwalker_target << std::endl;
         variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target);
         if (variable_mode) {
             auto next_nw = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
