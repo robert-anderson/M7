@@ -24,6 +24,8 @@ protected:
 
 public:
 
+    virtual ~Enumerator(){}
+
     virtual bool next(result_t &result) {
         auto tmp = m_current->next_element(result);
         if (!tmp){

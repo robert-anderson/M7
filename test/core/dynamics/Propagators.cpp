@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "src/core/dynamics/Propagators.h"
 
-TEST(Propagators, RdmTest) {
+TEST(Propagators, AvCoeffTest) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_exact = true;

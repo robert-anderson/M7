@@ -8,12 +8,11 @@
 #include "src/core/dynamics/Solver.h"
 
 
-
 #ifdef ENABLE_BOSONS
 TEST(ExactPropagator, BosonTest) {
-    Options opts;
-    opts.nwalker_initial = 10;
-    opts.nadd_initiator = 0.0;
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nw_init = 10;
+    opts.m_propagator.m_nadd = 0.0;
     opts.tau_initial = 0.01;
     opts.nwalker_target = 50;
     opts.write_hdf5_fname = "rdm.h5";

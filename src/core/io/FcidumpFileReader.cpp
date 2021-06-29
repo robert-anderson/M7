@@ -24,12 +24,12 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
     set_symm_and_rank(fname);
 
     if (m_spin_resolved&!m_spin_major){
-        m_inds_to_orbs = [this](defs::inds& inds){
+        m_inds_to_orbs = [&](defs::inds& inds){
             decrement_inds_and_transpose(inds, m_nspatorb);
         };
     }
     else {
-        m_inds_to_orbs = [this](defs::inds& inds){
+        m_inds_to_orbs = [&](defs::inds& inds){
             decrement_inds(inds);
         };
     }

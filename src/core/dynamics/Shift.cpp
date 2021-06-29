@@ -63,7 +63,9 @@ Shift::Shift(const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf> 
         m_avg_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target),
-        m_reweighter(opts.m_shift, wf_fmt){}
+        m_reweighter(opts.m_shift, wf_fmt){
+    DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
+}
 
 const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
     return m_values[ipart];

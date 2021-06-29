@@ -224,6 +224,8 @@ struct Communicator {
             m_ranks_with_any_rows.reserve(mpi::nrank());
         }
 
+        virtual ~DynamicRowSet(){}
+
         size_t nrow_() const {
             return m_irows.size();
         }

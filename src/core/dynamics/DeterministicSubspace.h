@@ -67,13 +67,14 @@ public:
 };
 
 
-
 struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataRow>{
     Wavefunction& m_wf;
     sparse::Matrix<defs::ham_t> m_sparse_ham;
     Epoch m_epoch;
 
     DeterministicSubspace(Wavefunction& wf, size_t icycle);
+
+    virtual ~DeterministicSubspace(){}
 
     void build_connections(const FermionHamiltonian &ham);
 
