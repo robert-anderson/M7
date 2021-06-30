@@ -11,6 +11,7 @@
 #include <iostream>
 #include <src/core/util/utils.h>
 #include <src/core/parallel/SharedMatrix.h>
+#include <src/core/parallel/MPIAssert.h>
 #include "PRNG.h"
 
 class Aliaser {
@@ -25,7 +26,9 @@ public:
         m_nprob(nprob),
         m_prob_table(nrow, m_nprob),
         m_alias_table(nrow, m_nprob),
-        m_norm(nrow) {}
+        m_norm(nrow) {
+        DEBUG_ONLY(m_nrow);
+    }
 
     Aliaser(const size_t &nprob) : Aliaser(1, nprob) {}
 
