@@ -227,7 +227,7 @@ fciqmc_config::Document::Document(const yaml::File *file) :
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 
 void fciqmc_config::Document::verify() {
-    config::Group::verify();
+    config::Document::verify();
     REQUIRE_LT_ALL(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
                    "initial number of walkers must not exceed the target population");
 }

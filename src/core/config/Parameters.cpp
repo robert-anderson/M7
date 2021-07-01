@@ -112,7 +112,7 @@ std::string config::Document::help_string() const {
 }
 
 void config::Document::verify() {
-    Node::verify();
+    Group::verify();
     if (m_file) {
         auto invalid = invalid_file_key();
         REQUIRE_TRUE(invalid.empty(),
