@@ -68,8 +68,8 @@ namespace fields {
         Numbers<defs::mev_ind_t, 1> &m_cre;
 
         FermionMevInds(Row *row, size_t nann, size_t ncre, std::string name = "") :
-                base_t(row, {nullptr, {nann}, name.empty() ? "" : name + " (annihilation)"},
-                       {nullptr, {ncre}, name.empty() ? "" : name + " (creation)"}),
+                base_t(row, {nullptr, {nann}, name.empty() ? "" : name + "_ann"},
+                       {nullptr, {ncre}, name.empty() ? "" : name + "_cre"}),
                 m_name(name), m_ann(get<0>()), m_cre(get<1>()) {
         }
 

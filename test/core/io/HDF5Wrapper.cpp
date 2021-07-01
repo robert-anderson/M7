@@ -20,6 +20,7 @@ TEST(HDF5Wrapper, Number) {
     BufferedTable<SingleFieldRow<fields::Number<int>>> write_table("test int table", {{"integer_field"}});
     auto read_table = write_table;
     const auto nrow = hashing::in_range(mpi::irank()+1, 10, 20);
+    log::debug_("number of local rows {}", nrow);
     write_table.push_back(nrow);
     auto row = write_table.m_row;
     for (row.restart(); row.in_range(); row.step()){
@@ -31,7 +32,7 @@ TEST(HDF5Wrapper, Number) {
         hdf5::GroupWriter gw("container", fw);
         write_table.write(gw, "table");
     }
-
+    mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
         hdf5::GroupReader gr("container", fr);

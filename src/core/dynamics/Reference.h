@@ -5,6 +5,7 @@
 #ifndef M7_REFERENCE_H
 #define M7_REFERENCE_H
 
+#include <src/core/observables/RefExcits.h>
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/hamiltonian/Hamiltonian.h"

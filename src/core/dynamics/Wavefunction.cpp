@@ -18,7 +18,7 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
                             },
                             MappedTableBase::nbucket_guess(opts.m_propagator.m_nw_target / mpi::nrank(), 3)
                 },
-                {{ nsite, need_send_parents(opts)}},
+                {{nsite, need_send_parents(opts)}},
                 opts.m_wavefunction.m_load_balancing.m_acceptable_imbalance
         ),
         m_opts(opts),

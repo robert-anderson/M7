@@ -85,12 +85,12 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     Wavefunction(const fciqmc_config::Document &opts, size_t nsite);
 
     static bool need_send_parents(const fciqmc_config::Document &opts) {
-        return opts.m_observables.m_fermion_rdm.m_rank > 0;
+        return opts.m_av_ests.m_fermion_rdm.m_rank > 0;
     }
 
     static bool need_av_weights(const fciqmc_config::Document &opts) {
-        if (opts.m_observables.m_fermion_rdm.m_rank > 0) return true;
-        return opts.m_observables.m_av_coeffs.m_max_exlvl > 0;
+        if (opts.m_av_ests.m_fermion_rdm.m_rank > 0) return true;
+        return opts.m_av_ests.m_ref_excits.m_max_exlvl > 0;
     }
 
     bool storing_av_weights() const {
@@ -107,10 +107,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
     void begin_cycle();
 
     void end_cycle();
-
-//    void update(size_t icycle, double work_time) {
-//        m_ra.update(icycle, work_time, m_walkers, m_walkers.m_key_field);
-//    }
 
     const size_t& nroot() const {
         return m_format.m_shape[0];
@@ -219,7 +215,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
         ASSERT(m_store.m_row.m_onv == onv)
         m_store.m_row.m_hdiag = hdiag;
         for (size_t ipart=0ul; ipart<npart(); ++ipart)
-            m_store.m_row.m_reference_connection.put(ipart, refconns[ipart]);
+            m_store.m_row.m_ref_conn.put(ipart, refconns[ipart]);
         if (storing_av_weights()) {
             m_store.m_row.m_icycle_occ = icycle;
             m_store.m_row.m_average_weight = 0;

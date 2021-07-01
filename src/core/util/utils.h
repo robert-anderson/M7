@@ -143,9 +143,7 @@ namespace utils {
     static narrow_t safe_narrow(const wide_t &wide) {
         static_assert(std::is_convertible<wide_t, narrow_t>::value, "incompatible types");
         static_assert(sizeof(wide_t) >= sizeof(narrow_t), "wide type must be at least as long as narrow type");
-#ifdef SAFE_NARROWING
-        if (static_cast<wide_t>(static_cast<narrow_t>(wide)) != wide) throw std::runtime_error("narrowing loses information");
-#endif
+        ASSERT(static_cast<wide_t>(static_cast<narrow_t>(wide))==wide); // narrowing loses information
         return static_cast<narrow_t>(wide);
     }
 

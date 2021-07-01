@@ -59,10 +59,22 @@ private:
         for (row_writer.restart(); row_writer.in_range(); row_writer.step()) {
             if (!row_writer.is_h5_write_exempt()) row_writer.write(iitem++);
         }
-        while (iitem<row_writer.m_nitem_max)
-            row_writer.write(iitem++);
+        while (iitem<row_writer.m_nitem_max) row_writer.write(iitem++);
         mpi::barrier();
         log::debug_("ending HDF5 write loop over rows");
+    }
+
+    virtual void read_rows(RowHdf5Reader<row_t>& row_reader) {
+        size_t iitem = 0ul;
+        TableBase::clear();
+        log::debug_("beginning HDF5 read loop over rows");
+        push_back(row_reader.m_nitem);
+        for (row_reader.restart(); row_reader.in_range(); row_reader.step()){
+            row_reader.read(iitem++);
+        }
+        while (iitem<row_reader.m_nitem_max) row_reader.read(iitem++);
+        mpi::barrier();
+        log::debug_("ending HDF5 read loop over rows");
     }
 
 public:
@@ -79,12 +91,7 @@ public:
 
     virtual void read(hdf5::GroupReader &parent, std::string name) {
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
-        size_t iitem = 0ul;
-        clear();
-        push_back(row_reader.m_nitem);
-        for (row_reader.restart(); row_reader.in_range(); row_reader.step()){
-            row_reader.read(iitem++);
-        }
+        read_rows(row_reader);
     }
 
 private:

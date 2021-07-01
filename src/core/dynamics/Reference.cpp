@@ -22,7 +22,7 @@ void Reference::update_ref_conn_flags() {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()){
         if (row.m_onv.is_zero()) continue;
-        row.m_reference_connection.put(m_ipart, is_connected(row.m_onv));
+        row.m_ref_conn.put(m_ipart, is_connected(row.m_onv));
     }
 }
 
@@ -51,7 +51,7 @@ void Reference::contrib_row() {
         m_candidate_abs_weight = std::abs(weight);
         m_irow_candidate = row.index();
     }
-    if (row.m_reference_connection.get(m_ipart)) {
+    if (row.m_ref_conn.get(m_ipart)) {
         make_numerator_contribs(row.m_onv, row.m_weight[m_ipart]);
     }
 }

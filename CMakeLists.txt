@@ -27,7 +27,7 @@ set(ExternalProjectCMakeArgs
         -DHDF5_BUILD_CPP_LIB=OFF
         -DHDF5_BUILD_JAVA=OFF
         -DHDF5_ENABLE_THREADSAFE=OFF
-        -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration")
+        -DCMAKE_C_FLAGS="-w") # we don't need to see compiler warnings from external dependencies
 
 option(FORCE_HDF5_INSTALL "Force the download and installation of HDF5" 1)
 option(ENABLE_HDF5 "Enable HDF5 support" 1)
@@ -104,7 +104,7 @@ include_directories("${CMAKE_SOURCE_DIR}/external/lambda-lanczos/include")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
-add_definitions(-Wall -Wextra -Werror)
+add_definitions(-Wall -Wextra -Werror -Wl,--export-dynamic)
 add_definitions(-Wno-unused-function -Wno-unused-parameter -Wno-unused-value)
 
 add_subdirectory(src)

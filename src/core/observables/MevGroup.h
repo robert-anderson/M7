@@ -9,7 +9,7 @@
 #include <src/core/enumerator/CombinationEnumerator.h>
 #include <src/core/hamiltonian/FermionHamiltonian.h>
 #include "src/core/table/Communicator.h"
-#include "AverageCoefficients.h"
+#include "RefExcits.h"
 
 
 /**
@@ -214,18 +214,22 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 };
 
 struct MevGroup {
+    const fciqmc_config::AvEsts &m_opts;
     Epoch m_accum_epoch;
     std::unique_ptr<FermionRdm> m_fermion_rdm;
-    std::unique_ptr<AverageCoefficients> m_av_coeffs;
+    /**
+     * optionally accumulate averaged walker occupations of excitations of the reference
+     */
+    std::unique_ptr<RefExcits> m_ref_excits;
     const size_t m_period;
     const bool m_explicit_hf_conns;
     size_t m_icycle_period_start = ~0ul;
 
-    MevGroup(const fciqmc_config::Observables &opts, size_t nsite, size_t nelec, bool explicit_hf_conns=true) :
-            m_accum_epoch("MEV accumulation"),
+    MevGroup(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, bool explicit_hf_conns=true) :
+            m_opts(opts), m_accum_epoch("MEV accumulation"),
             m_fermion_rdm(opts.m_fermion_rdm.m_rank ? new FermionRdm(opts.m_fermion_rdm, nsite, nelec) : nullptr),
-            m_av_coeffs(opts.m_av_coeffs.m_max_exlvl ? new AverageCoefficients(opts) : nullptr),
-            m_period(opts.m_output_period), m_explicit_hf_conns(explicit_hf_conns) {
+            m_ref_excits(opts.m_ref_excits.m_max_exlvl ? new RefExcits(opts.m_ref_excits, nsite) : nullptr),
+            m_period(opts.m_periodic_output.m_period), m_explicit_hf_conns(explicit_hf_conns) {
     }
 
 
@@ -258,7 +262,7 @@ struct MevGroup {
     };
 
     operator bool() const {
-        return m_fermion_rdm || m_av_coeffs;
+        return m_fermion_rdm || m_ref_excits;
     }
 
     bool is_bilinear() const {
@@ -266,15 +270,31 @@ struct MevGroup {
         return (*this);
     }
 
+    void save(size_t icycle){
+        auto fname = log::format(m_opts.m_periodic_output.m_path, iperiod(icycle));
+        hdf5::FileWriter fw(fname);
+        auto c0 = mpi::all_sum(m_ref_excits->m_av_ref[0]);
+        log::info("average reference weight at period {}: {}", iperiod(icycle), c0);
+        //if (m_fermion_rdm) m_fermion_rdm->save(fw);
+        if (m_ref_excits) m_ref_excits->save(fw);
+    }
 
     void save() const {
-        if (m_av_coeffs) m_av_coeffs->save();
-    }
-
-    void save(size_t icycle) const {
-        if (m_av_coeffs) m_av_coeffs->save(icycle);
+        hdf5::FileWriter fw(m_opts.m_io.m_save_path);
+        //if (m_fermion_rdm) m_fermion_rdm->save(fw);
+        if (m_ref_excits) m_ref_excits->save(fw);
     }
 };
+
+/*
+ *
+//    hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
+//    hdf5::GroupWriter gw("solver", fw);
+//    if (m_mevs.m_fermion_rdm) {
+//        hdf5::GroupWriter gw2("rdm", gw);
+//        m_mevs.m_fermion_rdm->h5_write(gw2);
+//    }
+ */
 
 #if 0
 struct BilinearMevGroup {

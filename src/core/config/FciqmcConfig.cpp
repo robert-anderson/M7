@@ -4,13 +4,6 @@
 
 #include "FciqmcConfig.h"
 
-fciqmc_config::Prng::Prng(config::Group *parent) :
-        config::Section(parent, "prng",
-                        "options relating to the random number generator used in stochastic calculations"),
-        m_seed(this, "seed", 123ul, "value with which to seed the mt19937 PRNG"),
-        m_ngen_block(this, "ngen_block", 10000ul,
-                     "size of the block of PRNGs generated each time the buffer is depleted") {}
-
 fciqmc_config::Buffers::Buffers(config::Group *parent) :
         config::Section(parent, "buffers",
                         "options relating to the allocation and reallocation behavior of a Communicator"),
@@ -23,13 +16,20 @@ fciqmc_config::Buffers::Buffers(config::Group *parent) :
         m_comm_exp_fac(this, "comm_expand_fac", 2.0,
                        "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
 
-fciqmc_config::Serialization::Serialization(config::Group *parent, std::string path_default) :
-        config::Section(parent, "serialization",
+fciqmc_config::Io::Io(config::Group *parent, std::string path_default) :
+        config::Section(parent, "io",
                         "options relating to filesystem save and load of structures in an M7 calculation"),
         m_save_path(this, "save_path", path_default,
                     "path to which the HDF5 file containing the structure should be saved"),
         m_load_path(this, "load_path", path_default,
                     "path from which the HDF5 file containing the structure should be loaded") {}
+
+fciqmc_config::Prng::Prng(config::Group *parent) :
+        config::Section(parent, "prng",
+                        "options relating to the random number generator used in stochastic calculations"),
+        m_seed(this, "seed", 123ul, "value with which to seed the mt19937 PRNG"),
+        m_ngen_block(this, "ngen_block", 10000ul,
+                     "size of the block of PRNGs generated each time the buffer is depleted") {}
 
 fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
         config::Section(parent, "load_balancing",
@@ -56,7 +56,7 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         m_replicate(this, "replicate", false, "evolve a statistically-independent replica of each walker population"),
         m_spin_restrict(this, "spin_restrict", 0ul,
                         "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves magnetic spin numbers"),
-        m_buffers(this), m_serialization(this), m_load_balancing(this) {}
+        m_buffers(this), m_io(this), m_load_balancing(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
         config::Section(parent, "reweight", "options relating to the on-the-fly correction of population control bias"),
@@ -109,17 +109,83 @@ void fciqmc_config::SpfWeightedTwf::verify() {
                        "Boson exponential parameter is non-zero but bosons are compile time disabled");
 }
 
-fciqmc_config::Observables::Observables(config::Group *parent) :
-        config::Section(parent, "observables",
-                        "options related to observables extracted from the many-body wavefunction(s)"),
-        m_output_period(this, "output_period", 0ul, "number of MC cycles between dumps to disk"),
+fciqmc_config::FermionRdm::FermionRdm(config::Group *parent) :
+        config::Section(parent, "fermion_rdm",
+                        "options relating to the accumulation and sampling of fermion RDM elements"),
+        m_rank(this, "rank", 0ul, "Rank of fermion RDM to accumulate"),
+        m_mixed_estimator(this, "mixed_estimator", false,
+                          "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
+        m_buffers(this), m_load_balancing(this) {}
+
+fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
+        config::Section(parent, "inst_ests",
+                        "options relating to instantaneous (MC cycle-resolved) estimators"),
+
+        m_spf_uniform_twf(this, "spf_uniform_twf", false,
+                          "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
+        m_spf_weighted_twf(this) {}
+
+fciqmc_config::RefExcits::RefExcits(config::Group *parent) :
+        config::Section(parent, "ref_excits",
+                        "options relating to averaged amplitudes of reference-connected ONVs"),
+        m_max_exlvl(this, "max_exlvl", 0ul,
+                    "maximum excitation level from the reference for which to accumulate average amplitudes"),
+        m_buffers(this) {}
+
+
+fciqmc_config::PeriodicOutput::PeriodicOutput(config::Group *parent) :
+        config::Section(parent, "periodic_output", "options relating to structures which are output periodically to disk"),
+        m_period(this, "period", 0ul, "number of MC cycles between outputs"),
+        m_path(this, "path", "", "path to which the structure is output - requires {} token when not clobbering"),
+        m_clobber(this, "clobber", false, "overwrite the same file with subsequent data"){}
+
+void fciqmc_config::PeriodicOutput::verify() {
+    const auto &str = m_path.get();
+    if (str.empty()){
+        REQUIRE_EQ_ALL(m_period, 0ul, "non-zero period assigned but no path specified for output");
+    }
+    else {
+        auto token_count = std::count(str.cbegin(), str.cend(), '{');
+        REQUIRE_EQ_ALL(token_count, !m_clobber, "if clobbering, no token required, else one token is required");
+        if (token_count) {
+            auto it_open = std::find(str.cbegin(), str.cend(), '{');
+            auto it_close = std::find(str.cbegin(), str.cend(), '}');
+            REQUIRE_EQ_ALL(std::distance(it_open, it_close), 1l,
+                           "path for periodic output should contain only one {} formatting point");
+        }
+    }
+}
+
+fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
+        config::Section(parent, "av_ests",
+                        "options related to quantities estimated from the many-body wavefunction(s) and averaged on-the-fly over a number of MC cycles"),
         m_delay(this, "delay", 0ul,
                 "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
         m_ncycle(this, "ncycle", ~0ul,
                  "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
-        m_spf_uniform_twf(this, "spf_uniform_twf", false,
-                          "switch on estimation of energy by uniform TWF (applicable only in sign problem-free systems)"),
-        m_spf_weighted_twf(this), m_av_coeffs(this), m_fermion_rdm(this) {}
+        m_fermion_rdm(this), m_ref_excits(this), m_io(this, "av_ests.h5"),
+        m_periodic_output(this){}
+
+fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
+        config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),
+        m_fcidump(this),
+        m_boson_frequency(this, "boson_frequency", 0.0,
+                          "frequency of onsite boson modes for Hubbard-Holstein model"),
+        m_boson_coupling(this, "boson_coupling", 0.0,
+                         "coupling of onsite boson modes for Hubbard-Holstein model"),
+        m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes") {}
+
+void fciqmc_config::Hamiltonian::verify() {
+    Section::verify();
+    if (!defs::enable_bosons) {
+        REQUIRE_EQ_ALL(m_boson_coupling, 0.0,
+                       "Boson coupling parameter is non-zero but bosons are compile time disabled");
+        REQUIRE_EQ_ALL(m_boson_frequency, 0.0,
+                       "Boson frequency parameter is non-zero but bosons are compile time disabled");
+        REQUIRE_EQ_ALL(m_nboson_max, 0ul,
+                       "Maximum boson number per mode is non-zero but bosons are compile time disabled");
+    }
+}
 
 fciqmc_config::Propagator::Propagator(config::Group *parent) :
         config::Section(parent, "propagator",
@@ -158,22 +224,10 @@ fciqmc_config::Document::Document(const yaml::File *file) :
         config::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
         m_prng(this), m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
-        m_hamiltonian(this), m_stats(this), m_observables(this) {}
+        m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 
 void fciqmc_config::Document::verify() {
-    config::Document::verify();
+    config::Group::verify();
     REQUIRE_LT_ALL(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
                    "initial number of walkers must not exceed the target population");
-}
-
-void fciqmc_config::Hamiltonian::verify() {
-    Section::verify();
-    if (!defs::enable_bosons) {
-        REQUIRE_EQ_ALL(m_boson_coupling, 0.0,
-                       "Boson coupling parameter is non-zero but bosons are compile time disabled");
-        REQUIRE_EQ_ALL(m_boson_frequency, 0.0,
-                       "Boson frequency parameter is non-zero but bosons are compile time disabled");
-        REQUIRE_EQ_ALL(m_nboson_max, 0ul,
-                       "Maximum boson number per mode is non-zero but bosons are compile time disabled");
-    }
 }

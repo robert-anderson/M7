@@ -12,13 +12,12 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),
         m_uniform_twf(
-                m_opts.m_observables.m_spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
-        m_weighted_twf(m_opts.m_observables.m_spf_weighted_twf ?
+                m_opts.m_inst_ests.m_spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
+        m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf ?
                        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
-                                       m_opts.m_observables.m_spf_weighted_twf.m_fermion_fac,
-                                       m_opts.m_observables.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_mevs(m_opts.m_observables, prop.m_ham.nsite(), prop.m_ham.nelec(), true) {
-
+                                       m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
+                                       m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
+        m_mevs(m_opts.m_av_ests, prop.m_ham.nsite(), prop.m_ham.nelec(), true) {
 
     if (m_wf.nreplica() > 1 && m_prop.is_exact())
         log::warn("Attempting an exact-propagation estimation of MEVs with replication, "
@@ -84,12 +83,12 @@ void Solver::execute(size_t ncycle) {
         end_cycle();
         m_cycle_timer.pause();
         output_stats();
-        output_mevs();
+        output_mevs(m_icycle);
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) break;
         if (m_mevs.m_accum_epoch) {
-            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_observables.m_ncycle) break;
+            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) break;
         }
     }
 
@@ -98,8 +97,6 @@ void Solver::execute(size_t ncycle) {
         --m_icycle;
         finalizing_loop_over_occupied_onvs();
     }
-
-    m_mevs.save();
 
 }
 
@@ -133,13 +130,10 @@ void Solver::begin_cycle() {
     };
 
     if (m_mevs) {
-        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_observables.m_delay))) {
+        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
             if (m_mevs.m_fermion_rdm)
                 REQUIRE_EQ_ALL(m_mevs.m_fermion_rdm->m_store.m_hwm, 0ul,
                                "Fermion RDM is only beginning to be accumulated, but its store table is not empty!");
-            if (m_mevs.m_av_coeffs)
-                REQUIRE_TRUE_ALL(m_mevs.m_av_coeffs->all_stores_empty(),
-                               "Average coefficients are only beginning to be accumulated, but not all store tables are empty!");
         }
     }
 
@@ -218,8 +212,8 @@ void Solver::loop_over_occupied_onvs() {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                if (m_opts.m_observables.m_spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
-                if (m_opts.m_observables.m_spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+                if (m_opts.m_inst_ests.m_spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
+                if (m_opts.m_inst_ests.m_spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_onv);
             }
 
             if (m_wf.m_ra.is_active()) {
@@ -307,20 +301,31 @@ void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
          * each by the number of cycles for which the row is occupied.
          */
         const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
-        auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);
+
         /*
-         * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
-         * single averaged contribution (ncycle_occ)
+         * accumulate contributions to reference excitations if required
          */
-        m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac * ncycle_occ * av_weight, row.m_onv, av_weight_rep);
-        if (m_mevs.m_explicit_hf_conns) {
-            if (row.m_reference_connection.get(0) && !ref.is_same(row)) {
-                const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
-                const auto av_weight_ref_rep = m_mevs.get_ket_weight(ref.norm_average_weight(icycle, ipart_replica));
-                m_mevs.m_fermion_rdm->make_contribs(ref_onv, dupl_fac * ncycle_occ * av_weight_ref,
-                                                    row.m_onv, av_weight_rep);
-                m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac * ncycle_occ * av_weight,
-                                                    ref_onv, av_weight_ref_rep);
+        if (m_mevs.m_ref_excits)
+            m_mevs.m_ref_excits->make_contribs(row.m_onv, m_refs[ipart].get_onv(),
+                                               dupl_fac * ncycle_occ * av_weight, ipart);
+
+        if (m_mevs.m_fermion_rdm) {
+            auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);
+            /*
+             * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
+             * single averaged contribution (ncycle_occ)
+             */
+            m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac * ncycle_occ * av_weight, row.m_onv, av_weight_rep);
+            if (m_mevs.m_explicit_hf_conns) {
+                if (row.m_ref_conn.get(0) && !ref.is_same(row)) {
+                    const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
+                    const auto av_weight_ref_rep = m_mevs.get_ket_weight(
+                            ref.norm_average_weight(icycle, ipart_replica));
+                    m_mevs.m_fermion_rdm->make_contribs(ref_onv, dupl_fac * ncycle_occ * av_weight_ref,
+                                                        row.m_onv, av_weight_rep);
+                    m_mevs.m_fermion_rdm->make_contribs(row.m_onv, dupl_fac * ncycle_occ * av_weight,
+                                                        ref_onv, av_weight_ref_rep);
+                }
             }
         }
     }
@@ -465,7 +470,7 @@ void Solver::loop_over_spawned() {
         }
     } else {
         auto &row = m_wf.recv().m_row;
-        if (m_opts.m_observables.m_fermion_rdm.m_rank > 0 && m_mevs.m_accum_epoch) {
+        if (m_opts.m_av_ests.m_fermion_rdm.m_rank > 0 && m_mevs.m_accum_epoch) {
             /*
              * an additional loop over recvd spawns is required in this case, in order to make the necessary
              * MEV contributions before the new spawns are added to the instantaneous populations
@@ -609,15 +614,13 @@ void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, 
     make_instant_mev_contribs(row_block_start.m_src_onv, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
 }
 
+void Solver::output_mevs(size_t icycle) {
+    if (!m_mevs.is_period_cycle(icycle)) return;
+    m_mevs.save(icycle);
+}
+
 void Solver::output_mevs() {
-    if (!m_mevs.is_period_cycle(m_icycle)) return;
-    m_mevs.save(m_icycle);
-//    hdf5::FileWriter fw(std::to_string(m_mevs.iperiod(m_icycle)) + "." + m_opts.write_hdf5_fname);
-//    hdf5::GroupWriter gw("solver", fw);
-//    if (m_mevs.m_fermion_rdm) {
-//        hdf5::GroupWriter gw2("rdm", gw);
-//        m_mevs.m_fermion_rdm->h5_write(gw2);
-//    }
+    m_mevs.save();
 }
 
 const MevGroup &Solver::mevs() const {

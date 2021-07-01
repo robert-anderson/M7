@@ -50,6 +50,10 @@ namespace config {
         void add_child(Node *child);
 
         std::string invalid_file_key() const override;
+
+        void verify() override {
+            for (auto child: m_children) child->verify();
+        }
     };
 
 
@@ -68,10 +72,6 @@ namespace config {
         void log_value() const override {
             if (!*this) log::info("section {} unspecified, using defaults", m_path.to_string());
             for (auto child: m_children) child->log_value();
-        }
-
-        void verify() override {
-            for (auto child: m_children) child->verify();
         }
     };
 

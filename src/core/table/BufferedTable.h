@@ -21,16 +21,17 @@ public:
     }
 
     BufferedTable& operator=(const BufferedTable<row_t, mapped> &other) {
-        m_buffer.resize(other.m_buffer.dsize());
-        Table<row_t>::clear();
-        Table<row_t>::push_back(other.m_nrow);
-        Table<row_t>::m_bw = other.m_bw;
+        if (other.m_buffer.dsize()) {
+            m_buffer.resize(other.m_buffer.dsize());
+            Table<row_t>::clear();
+            Table<row_t>::push_back(other.m_nrow);
+            Table<row_t>::m_bw = other.m_bw;
+        }
         return *this;
     }
 
     BufferedTable(const BufferedTable<row_t, mapped> &other) :
             BufferedTable(other.m_buffer.m_name, other){
-        m_buffer.resize(other.m_buffer.dsize());
         *this = other;
     }
 

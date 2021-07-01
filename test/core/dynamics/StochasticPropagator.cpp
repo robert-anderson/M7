@@ -15,15 +15,14 @@ TEST(StochasticPropagator, Test) {
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 100000;
-    opts.m_observables.m_fermion_rdm.m_rank = 2;
+    opts.m_av_ests.m_fermion_rdm.m_rank = 2;
     opts.m_wavefunction.m_replicate = true;
-    opts.m_observables.m_fermion_rdm.m_serialization.m_save_path = "rdm.h5";
-    opts.m_observables.m_ncycle = 2000;
-    opts.m_observables.m_output_period = 10;
+    opts.m_av_ests.m_ncycle = 2000;
+    opts.m_av_ests.m_periodic_output.m_period = 10;
     opts.m_propagator.m_min_spawn_mag = 0.2;
     opts.m_propagator.m_min_death_mag = 0.2;
     opts.m_propagator.m_consolidate_spawns = false;
-    opts.m_observables.m_delay = 1000;
+    opts.m_av_ests.m_delay = 1000;
     //opts.ncycle_wait_detsub = 10;
     opts.verify();
 
@@ -54,12 +53,11 @@ TEST(StochasticPropagator, RdmTest) {
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 40;
     opts.m_propagator.m_nw_target = 200000;
     opts.m_shift.m_damp = 0.5;
-    opts.m_observables.m_delay = 200;
-    opts.m_observables.m_ncycle = 1000;
-    opts.m_observables.m_fermion_rdm.m_rank = 1;
+    opts.m_av_ests.m_delay = 200;
+    opts.m_av_ests.m_ncycle = 1000;
+    opts.m_av_ests.m_fermion_rdm.m_rank = 1;
     opts.m_wavefunction.m_replicate = true;
     opts.m_propagator.m_consolidate_spawns = true;
-    opts.m_observables.m_fermion_rdm.m_serialization.m_save_path = "test_rdm_save.h5";
     opts.verify();
 
     //const auto benchmark = -99.9421389039331
@@ -98,7 +96,6 @@ TEST(StochasticPropagator, Hdf5) {
     opts.m_shift.m_init = 0.0;
     opts.m_propagator.m_ncycle = 50000;
     //opts.write_hdf5_fname = "test_wf_save.h5";
-    opts.m_wavefunction.m_serialization.m_save_path = "test_wf_save.h5";
     opts.verify();
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
@@ -137,10 +134,10 @@ TEST(StochasticPropagator, Hubbard) {
     opts.m_shift.m_period = 1;
     opts.m_shift.m_ncycle_av = 5000;
     opts.m_propagator.m_ncycle = 2000000;
-    opts.m_observables.m_spf_uniform_twf = false;
+    opts.m_inst_ests.m_spf_uniform_twf = false;
     opts.m_shift.m_reweight.m_ncycle = 200;
     opts.m_shift.m_reweight.m_delay = 20000;
-    opts.m_observables.m_fermion_rdm.m_rank = 0;
+    opts.m_av_ests.m_fermion_rdm.m_rank = 0;
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
 

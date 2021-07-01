@@ -21,7 +21,7 @@ struct MevRow : public Row {
     };
 
     MevRow(size_t nann, size_t ncre, size_t nvalue):
-    m_inds(this, nann, ncre, "SQ operator indices"), m_values(this, {nvalue}, "element value"){}
+    m_inds(this, nann, ncre, "spin_orbs"), m_values(this, {nvalue}, "values"){}
 
 
     MevRow(size_t nop, size_t nvalue): MevRow(nop, nop, nvalue){}

@@ -22,7 +22,9 @@
 #endif
 #endif
 
-
+/**
+ * basic debugging macro for verification of low-level functionality, in general prefer the macros MpiAssert.h defines
+ */
 #ifdef NDEBUG
 #define	ASSERT(e) {}
 #else
@@ -69,6 +71,7 @@ namespace defs {
     typedef ham_comp_t wf_comp_t;
     typedef std::conditional<enable_complex, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
     typedef ham_t wf_t;
+    typedef unsigned char exlvl_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef uint64_t data_t;
@@ -93,6 +96,8 @@ namespace defs {
 
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;
+    //  nroot
+    constexpr size_t ndim_root = 1;
     typedef std::array<size_t, ndim_wf> wf_inds_t;
 
     // width of the cache line in bytes

@@ -87,8 +87,9 @@ std::vector<std::string> log::get_backtrace(size_t depth) {
     size = backtrace(entries.data(), depth);
     auto symbols = backtrace_symbols(entries.data(), size);
     std::vector<std::string> tmp;
-    for (size_t i=0ul; i<size; ++i)
+    for (size_t i=0ul; i<size; ++i) {
         tmp.emplace_back(get_demangled_prototype(symbols[i]));
+    }
     free(symbols);
     return tmp;
 }

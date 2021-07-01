@@ -5,6 +5,7 @@
 #ifndef M7_WALKERTABLE_H
 #define M7_WALKERTABLE_H
 
+#include <src/core/basis/Connections.h>
 #include "src/core/io/Options.h"
 #include "src/core/field/Row.h"
 #include "src/core/table/MappedTable.h"
@@ -12,13 +13,14 @@
 
 
 struct WalkerTableRow : public Row {
-    const NdFormat<defs::ndim_wf> m_format;
+    const NdFormat<defs::ndim_wf> m_wf_format;
+    const NdFormat<defs::ndim_root> m_root_format;
     fields::Onv<> m_onv;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
     fields::Number<defs::ham_comp_t> m_hdiag;
     fields::Flags<defs::ndim_wf> m_initiator;
-    fields::Flags<defs::ndim_wf> m_reference_connection;
-    fields::Flags<defs::ndim_wf> m_deterministic;
+    fields::Flags<defs::ndim_root> m_deterministic;
+    fields::Flags<defs::ndim_root> m_ref_conn;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
     fields::Number<size_t> m_icycle_occ;
 
@@ -27,14 +29,15 @@ struct WalkerTableRow : public Row {
     };
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights) :
-            m_format({nroot, nreplica}, {"nroot", "nreplica"}),
+            m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
+            m_root_format({nroot}, {"nroot"}),
             m_onv(this, nsite, "onv"),
-            m_weight(this, m_format, "weight"),
+            m_weight(this, m_wf_format, "weight"),
             m_hdiag(this, "diagonal H element"),
-            m_initiator(this, m_format, "initiator status flag"),
-            m_reference_connection(this, m_format, "reference connection flag"),
-            m_deterministic(this, m_format, "deterministic subspace flag"),
-            m_average_weight(average_weights ? this : nullptr, m_format, "unnormalized average weight"),
+            m_initiator(this, m_wf_format, "initiator status flag"),
+            m_deterministic(this, m_root_format, "deterministic subspace flag"),
+            m_ref_conn(this, m_root_format, "reference connection flag"),
+            m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
             m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
             {}
 

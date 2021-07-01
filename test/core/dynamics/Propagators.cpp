@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "src/core/dynamics/Propagators.h"
 
-TEST(Propagators, AvCoeffTest) {
+TEST(Propagators, RefExcitTest) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_exact = true;
@@ -14,9 +14,11 @@ TEST(Propagators, AvCoeffTest) {
     opts.m_propagator.m_tau_init = 0.05;
     opts.m_propagator.m_nw_target = 100;
     opts.m_wavefunction.m_replicate = false;
-    opts.m_observables.m_av_coeffs.m_max_exlvl = 2;
-    opts.m_observables.m_delay = 100;
-    opts.m_observables.m_ncycle = 100;
+//    opts.m_av_ests.m_periodic_output.m_period = 10;
+//    opts.m_av_ests.m_periodic_output.m_path = "test.{}.h5";
+//    opts.m_av_ests.m_ref_excits.m_max_exlvl = 2;
+    opts.m_av_ests.m_delay = 100;
+    opts.m_av_ests.m_ncycle = 100;
     opts.verify();
     //const auto benchmark = -99.9421389039331
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);

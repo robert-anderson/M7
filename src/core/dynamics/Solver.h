@@ -7,7 +7,7 @@
 
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/util/Timer.h>
-#include <src/core/observables/AverageCoefficients.h>
+#include <src/core/observables/RefExcits.h>
 #include <src/core/observables/UniformTwf.h>
 #include <src/core/observables/WeightedTwf.h>
 #include <src/core/observables/MevGroup.h>
@@ -199,6 +199,8 @@ public:
     void loop_over_spawned();
 
     void end_cycle();
+
+    void output_mevs(size_t icycle);
 
     void output_mevs();
 
