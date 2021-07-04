@@ -14,9 +14,9 @@ TEST(Propagators, RefExcitTest) {
     opts.m_propagator.m_tau_init = 0.05;
     opts.m_propagator.m_nw_target = 100;
     opts.m_wavefunction.m_replicate = false;
-//    opts.m_av_ests.m_periodic_output.m_period = 10;
-//    opts.m_av_ests.m_periodic_output.m_path = "test.{}.h5";
-//    opts.m_av_ests.m_ref_excits.m_max_exlvl = 2;
+    opts.m_av_ests.m_periodic_output.m_period = 10;
+    opts.m_av_ests.m_periodic_output.m_path = "test.{}.h5";
+    opts.m_av_ests.m_ref_excits.m_max_exlvl = 2;
     opts.m_av_ests.m_delay = 100;
     opts.m_av_ests.m_ncycle = 100;
     opts.verify();

@@ -136,8 +136,7 @@ fciqmc_config::RefExcits::RefExcits(config::Group *parent) :
 fciqmc_config::PeriodicOutput::PeriodicOutput(config::Group *parent) :
         config::Section(parent, "periodic_output", "options relating to structures which are output periodically to disk"),
         m_period(this, "period", 0ul, "number of MC cycles between outputs"),
-        m_path(this, "path", "", "path to which the structure is output - requires {} token when not clobbering"),
-        m_clobber(this, "clobber", false, "overwrite the same file with subsequent data"){}
+        m_path(this, "path", "", "path to which the structure is output. if {} token appears, output data will be clobbered by subsequent output operations"){}
 
 void fciqmc_config::PeriodicOutput::verify() {
     const auto &str = m_path.get();
@@ -145,8 +144,8 @@ void fciqmc_config::PeriodicOutput::verify() {
         REQUIRE_EQ_ALL(m_period, 0ul, "non-zero period assigned but no path specified for output");
     }
     else {
-        auto token_count = std::count(str.cbegin(), str.cend(), '{');
-        REQUIRE_EQ_ALL(token_count, !m_clobber, "if clobbering, no token required, else one token is required");
+        size_t token_count = std::count(str.cbegin(), str.cend(), '{');
+        REQUIRE_LE_ALL(token_count, 1ul, "paths can have at most one {} token");
         if (token_count) {
             auto it_open = std::find(str.cbegin(), str.cend(), '{');
             auto it_close = std::find(str.cbegin(), str.cend(), '}');
@@ -230,4 +229,6 @@ void fciqmc_config::Document::verify() {
     config::Document::verify();
     REQUIRE_LT_ALL(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
                    "initial number of walkers must not exceed the target population");
+    REQUIRE_GE_ALL(m_wavefunction.m_nw_init, m_propagator.m_nadd,
+                   "initial number of walkers must be at least the initiator cutoff");
 }

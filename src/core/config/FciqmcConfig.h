@@ -136,7 +136,6 @@ namespace fciqmc_config {
     struct PeriodicOutput : config::Section {
         config::Param<size_t> m_period;
         config::Param<std::string> m_path;
-        config::Param<bool> m_clobber;
         explicit PeriodicOutput(config::Group *parent);
 
         void verify() override;
