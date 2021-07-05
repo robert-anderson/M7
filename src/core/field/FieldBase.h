@@ -67,11 +67,11 @@ struct FieldBase {
 
     }
 
-    virtual void h5_write(hdf5::NdListWriter &h5list, const size_t &iitem) {
+    virtual void h5_write(hdf5::NdDistListWriter &h5list, const size_t &iitem) {
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void h5_read(hdf5::NdListReader &h5list, const size_t &iitem) {
+    virtual void h5_read(hdf5::NdDistListReader &h5list, const size_t &iitem) {
         h5list.read_h5item_bytes(iitem, begin());
     }
 

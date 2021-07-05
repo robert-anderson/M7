@@ -45,7 +45,7 @@ template<typename row_t>
 struct RowHdf5Writer : RowHdf5Base, row_t {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     hdf5::GroupWriter m_group;
-    std::vector<hdf5::NdListWriter> m_writers;
+    std::vector<hdf5::NdDistListWriter> m_writers;
 
     RowHdf5Writer(const row_t &row, hdf5::GroupWriter &parent, std::string name, size_t nitem,
                   std::vector<std::string> field_names) :
@@ -88,7 +88,7 @@ template<typename row_t>
 struct RowHdf5Reader : RowHdf5Base, row_t {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     hdf5::GroupReader m_group;
-    std::vector<hdf5::NdListReader> m_readers;
+    std::vector<hdf5::NdDistListReader> m_readers;
 
 private:
 
@@ -96,7 +96,7 @@ private:
         if (row.m_fields.empty()) return 0ul;
         hdf5::GroupReader group(name, parent);
         FieldBase *field = row.m_fields[0];
-        hdf5::NdListReader reader(group, field->m_name, field->h5_type());
+        hdf5::NdDistListReader reader(group, field->m_name, field->h5_type());
         return reader.m_nitem_local;
     }
 
@@ -135,7 +135,7 @@ template<typename row_t>
 struct RowHdf5Reader : row_t {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     hdf5::GroupReader m_group;
-    std::vector<hdf5::NdListReader> m_readers;
+    std::vector<hdf5::NdDistListReader> m_readers;
 
     size_t nitem() const {
         return m_readers[0].m_nitem_local;

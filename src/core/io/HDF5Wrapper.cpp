@@ -59,7 +59,7 @@ void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std:
     DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
 }
 
-void hdf5::NdListWriter::write_h5item_bytes(const size_t &iitem, const void *data) {
+void hdf5::NdDistListWriter::write_h5item_bytes(const size_t &iitem, const void *data) {
     DEBUG_ASSERT_EQ(bool(data), iitem < m_nitem_local,
                "data is null and items remain, or this is a runoff write op and data is not null");
     select_hyperslab(iitem);
@@ -80,10 +80,9 @@ void hdf5::NdListWriter::write_h5item_bytes(const size_t &iitem, const void *dat
     log::debug_("data written");
 }
 
-hdf5::NdListWriter::NdListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
-                                 const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
-        :
-        NdListBase(parent_handle, name, item_dims, nitem, true, h5type) {
+hdf5::NdDistListWriter::NdDistListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
+                                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels)
+        :NdDistListBase(parent_handle, name, item_dims, nitem, true, h5type) {
     if (!dim_labels.empty()) {
         DEBUG_ASSERT_EQ(dim_labels.size(), item_dims.size(),
                         "Number of dim labels does not match number of dims");
@@ -92,7 +91,7 @@ hdf5::NdListWriter::NdListWriter(hid_t parent_handle, std::string name, const de
     }
 }
 
-std::vector<hsize_t> hdf5::NdListBase::get_list_dims_local() {
+std::vector<hsize_t> hdf5::NdDistListBase::get_list_dims_local() {
     std::vector<hsize_t> out;
     out.reserve(m_ndim_list);
     out.push_back(m_nitem_local);
@@ -100,7 +99,7 @@ std::vector<hsize_t> hdf5::NdListBase::get_list_dims_local() {
     return out;
 }
 
-std::vector<hsize_t> hdf5::NdListBase::get_list_dims_global() {
+std::vector<hsize_t> hdf5::NdDistListBase::get_list_dims_global() {
     std::vector<hsize_t> out;
     out.reserve(m_ndim_list);
     out.push_back(m_nitem_global);
@@ -108,7 +107,7 @@ std::vector<hsize_t> hdf5::NdListBase::get_list_dims_global() {
     return out;
 }
 
-hsize_t hdf5::NdListBase::get_item_offset() {
+hsize_t hdf5::NdDistListBase::get_item_offset() {
     std::vector<hsize_t> tmp(mpi::nrank());
     mpi::all_gather(m_nitem_local, tmp);
     hsize_t out = 0ul;
@@ -116,15 +115,15 @@ hsize_t hdf5::NdListBase::get_item_offset() {
     return out;
 }
 
-hdf5::NdListBase::NdListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
-                             bool writemode, hid_t h5type) :
+hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
+                                     bool writemode, hid_t h5type) :
         m_parent_handle(parent_handle),
         m_item_dims(convert_dims(item_dims)),
         m_ndim_item(item_dims.size()),
         m_ndim_list(item_dims.size() + 1),
         m_nitem_local(nitem),
         m_nitem_global(mpi::all_sum(m_nitem_local)),
-        m_nitem_global_max(mpi::all_max(m_nitem_local)),
+        m_nitem_local_max(mpi::all_max(m_nitem_local)),
         m_list_dims_local(get_list_dims_local()),
         m_list_dims_global(get_list_dims_global()),
         m_item_offset(get_item_offset()),
@@ -157,7 +156,7 @@ hdf5::NdListBase::NdListBase(hid_t parent_handle, std::string name, const defs::
     log::debug_("Opened HDF5 NdList with {} local items", m_nitem_local);
 }
 
-void hdf5::NdListBase::select_hyperslab(const size_t &iitem) {
+void hdf5::NdDistListBase::select_hyperslab(const size_t &iitem) {
     if (iitem < m_nitem_local) {
         m_hyperslab_offsets[0] = m_item_offset + iitem;
         log::debug_("selecting hyperslab with offsets: {}", utils::to_string(m_hyperslab_offsets));
@@ -172,14 +171,14 @@ void hdf5::NdListBase::select_hyperslab(const size_t &iitem) {
          * of a hyperslab selection
          */
         log::debug_("making null selection");
-        DEBUG_ASSERT_LT(iitem, m_nitem_global_max, "Item index exceeds global maximum");
+        DEBUG_ASSERT_LT(iitem, m_nitem_local_max, "Item index exceeds global maximum");
         auto status = H5Sselect_none(m_filespace_handle);
         DEBUG_ONLY(status);
         DEBUG_ASSERT_FALSE(status, "HDF5 null selection failed");
     }
 }
 
-hdf5::NdListBase::~NdListBase() {
+hdf5::NdDistListBase::~NdDistListBase() {
     H5Sclose(m_filespace_handle);
     H5Dclose(m_dataset_handle);
     H5Sclose(m_memspace_handle);

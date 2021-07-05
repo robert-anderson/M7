@@ -235,6 +235,117 @@ namespace hdf5 {
         void write_attr(std::string name, const T &obj) {
             AttributeWriterBase::write(m_handle, name, obj);
         }
+
+        /**
+         * commit a single value of a primitive type (HDF5 scalar dataset) to disk
+         * @tparam T
+         *  primitive type (any type for which type_ind<T>() is not ~0ul)
+         * @param name
+         *  key in the HDF5 Group in which the value is to be stored
+         * @param v
+         *  value to store
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v (other ranks write to null dataspace)
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const T &v, size_t irank=0ul) {
+            auto dspace_handle = H5Screate(H5S_SCALAR);
+            /**
+             * make a null selection if this is not the rank we want to output the value of
+             */
+            if (!mpi::i_am(irank)) H5Sselect_none(dspace_handle);
+            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
+                                          H5P_DEFAULT, H5P_DEFAULT);
+
+            auto status = H5Dwrite(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<const void *>(&v));
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type save");
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+        }
+
+        /**
+         * commit a multidimensional array (HDF5 simple dataset) of a primitive type to disk
+         * @tparam T
+         *  primitive type of the elements of the array
+         * @param name
+         *  key in the HDF5 Group in which the value is to be stored
+         * @param v
+         *  pointer to the beginning of the array data
+         * @param shape
+         *  vector of dimensional extents
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const T* v, const defs::inds& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul) {
+            auto dims = convert_dims(shape);
+            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
+            /**
+             * make a null selection if this is not the rank we want to output the value of
+             */
+            if (!mpi::i_am(irank)) H5Sselect_none(dspace_handle);
+            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
+                                          H5P_DEFAULT, H5P_DEFAULT);
+
+            auto status = H5Dwrite(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<const void*>(v));
+            REQUIRE_FALSE(status, "HDF5 Error on multidimensional save");
+            if (!dim_labels.empty()) {
+                DEBUG_ASSERT_EQ(dim_labels.size(), dims.size(),
+                                "Number of dim labels does not match number of dims");
+                for (size_t idim = 0ul; idim < dims.size(); ++idim) {
+                    H5DSset_label(dset_handle, idim, dim_labels[idim].c_str());
+                    REQUIRE_FALSE(status, "HDF5 Error on dimension label assignment");
+                }
+            }
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+        }
+
+
+        /**
+         * commit a single value of a complex type (HDF5 simple dataset) to disk by writing a vector of size 2
+         * @tparam T
+         *  primitive type of the components of the complex number
+         * @param name
+         *  key in the HDF5 Group in which the value is to be stored
+         * @param v
+         *  value to store
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const std::complex<T> &v, size_t irank=0ul) {
+            defs::inds shape = {2};
+            save(name, reinterpret_cast<T*>(&v), shape, {"real_imag"}, irank);
+        }
+
+        /**
+         * save a multidimensional array of a complex type (HDF5 simple dataset) to disk by adding a new minor index of
+         * extent 2
+         * @tparam T
+         *  primitive type of the complex components of elements of the array
+         * @param name
+         *  key in the HDF5 Group in which the value is to be stored
+         * @param v
+         *  pointer to the beginning of the array data
+         * @param shape
+         *  vector of dimensional extents
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v
+         * @return
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const std::complex<T>* v, const defs::inds& shape,
+             std::vector<std::string> dim_labels={}, size_t irank=0ul) {
+            dim_labels.push_back("real_imag");
+            auto dims = shape;
+            dims.push_back(2ul);
+            save(name, reinterpret_cast<const T*>(v), dims, dim_labels, irank);
+        }
     };
 
     struct GroupReader : GroupBase {
@@ -243,60 +354,219 @@ namespace hdf5 {
 
         GroupReader(std::string name, const GroupReader &parent) :
                 GroupBase(parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
+
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, T& v) {
+            auto dspace_handle = H5Screate(H5S_SCALAR);
+            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
+                                          H5P_DEFAULT, H5P_DEFAULT);
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void *>(&v));
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type load");
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+        }
+
+    private:
+        size_t get_dataset_ndim(std::string name) {
+            auto status = H5Gget_objinfo(m_handle, name.c_str(), 0, nullptr);
+            REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
+            auto dataset = H5Dopen1(m_handle, name.c_str());
+            auto dataspace = H5Dget_space(dataset);
+            auto rank = H5Sget_simple_extent_ndims(dataspace);
+            H5Sclose(dataspace);
+            H5Dclose(dataset);
+            return rank;
+        }
+
+        defs::inds get_dataset_shape(std::string name) {
+            auto ndim = get_dataset_ndim(name);
+            auto dataset = H5Dopen1(m_handle, name.c_str());
+            REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
+            auto dataspace = H5Dget_space(dataset);
+            std::vector<hsize_t> dims(ndim, 0ul);
+            H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
+            H5Sclose(dataspace);
+            H5Dclose(dataset);
+            defs::inds out;
+            out.reserve(dims.size());
+            for (const auto &i: dims) out.push_back(i);
+            return out;
+        }
+
+    public:
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::complex<T> &v, size_t irank=0ul) {
+            load(name, reinterpret_cast<std::array<T, 2>&>(v)[0], irank);
+            load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
+        }
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, T* v, const defs::inds& shape){
+            auto file_shape = get_dataset_shape(name);
+            REQUIRE_EQ_ALL(shape, file_shape, "expected a container of a different shape");
+            auto dims = convert_dims(shape);
+            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
+            auto dset_handle = H5Dopen1(m_handle, name.c_str());
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
+        }
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::complex<T>* v, const defs::inds& shape){
+            auto complex_shape = shape;
+            complex_shape.push_back(2ul);
+            auto file_shape = get_dataset_shape(name);
+            REQUIRE_EQ_ALL(complex_shape, file_shape, "expected a container of a different shape");
+            auto dims = convert_dims(complex_shape);
+            auto dspace_handle = H5Screate_simple(dims.size(), dims.data(), nullptr);
+            auto dset_handle = H5Dopen1(m_handle, name.c_str());
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void*>(v));
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
+        }
     };
 
-
-    struct NdListBase {
+    /**
+     * Base class for the serialization of a distributed list of N-dimensional data.
+     * Each rank handles (reads or writes) a number of items, and each item has a dimensionality which is constant
+     * across all ranks. The list item dimension increases the overall dimensionality of the dataset by 1.
+     */
+    struct NdDistListBase {
+        /**
+         * HDF5 handle for the parent structure
+         */
         const hid_t m_parent_handle;
 
+        /**
+         * shape of the list items
+         */
         const std::vector<hsize_t> m_item_dims;
+        /**
+         * length of the item shape
+         */
         const hsize_t m_ndim_item;
+        /**
+         * length of the list shape
+         */
         const hsize_t m_ndim_list;
+        /**
+         * number of items the local rank is responsible for handling (reading / writing)
+         */
         const hsize_t m_nitem_local;
+        /**
+         * total number of items handled over all ranks by this object
+         */
         const hsize_t m_nitem_global;
-        const hsize_t m_nitem_global_max;
+        /**
+         * largest number of items across all MPI ranks
+         */
+        const hsize_t m_nitem_local_max;
+        /**
+         * local shape of the list
+         */
         const std::vector<hsize_t> m_list_dims_local;
+        /**
+         * global shape of the list
+         */
         const std::vector<hsize_t> m_list_dims_global;
+        /**
+         * sum of m_nitem_local for all MPI ranks with index less than this rank
+         */
         const hsize_t m_item_offset;
 
+        /**
+         * extent of the currently selected hyperslab in the HDF5 dataset
+         */
         std::vector<hsize_t> m_hyperslab_counts;
+        /**
+         * multidimensional offset for the currently selected hyperslab
+         */
         std::vector<hsize_t> m_hyperslab_offsets;
+        /**
+         * HDF5 handles
+         */
         hid_t m_filespace_handle;
         hid_t m_dataset_handle;
         hid_t m_memspace_handle;
+        /**
+         * We use collective i/o mode, so when a rank has no reading or writing to do, we must point to a dummy memspace
+         */
         hid_t m_none_memspace_handle;
+        /**
+         * datatype as an integer
+         */
         hid_t m_h5type;
+        /**
+         * instance of object wrapping an HDF5 property list
+         */
         CollectivePList m_coll_plist;
 
+        /**
+         * stick the local number of items onto the front of the item shape
+         * @return
+         *  list dims aka the overall shape of the local dataset
+         */
         std::vector<hsize_t> get_list_dims_local();
 
+        /**
+         * stick the global number of items onto the front of the item shape
+         * @return
+         *  list dims aka the overall shape of the global dataset
+         */
         std::vector<hsize_t> get_list_dims_global();
 
+        /**
+         * @return
+         *  flat offset to the first item handled by this rank
+         */
         hsize_t get_item_offset();
 
-        NdListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
-                   bool writemode, hid_t h5type);
+        NdDistListBase(hid_t parent_handle, std::string name, const defs::inds &item_dims, const size_t &nitem,
+                       bool writemode, hid_t h5type);
 
+        /**
+         * sets the internal state to select the iitem-th item on this rank
+         * @param iitem
+         *  item index for selection
+         */
         void select_hyperslab(const size_t &iitem);
 
-        ~NdListBase();
+        ~NdDistListBase();
     };
 
-
-    struct NdListWriter : public NdListBase {
+    /**
+     * The writing case for a distributed N-dimensional list
+     */
+    struct NdDistListWriter : public NdDistListBase {
     private:
-        NdListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
-                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
+        NdDistListWriter(hid_t parent_handle, std::string name, const defs::inds &item_dims,
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {});
 
     public:
-        NdListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims,
-                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
-                NdListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
+        NdDistListWriter(FileWriter &parent, std::string name, const defs::inds &item_dims,
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
-        NdListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims,
-                     const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
-                NdListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
+        NdDistListWriter(GroupWriter &parent, std::string name, const defs::inds &item_dims,
+                         const size_t &nitem, hid_t h5type, const std::vector<std::string> &dim_labels = {}) :
+                NdDistListWriter(parent.m_handle, name, item_dims, nitem, h5type, dim_labels) {}
 
+        /**
+         * write the item stored at data to the iitem position within this rank
+         * @param iitem
+         *  item index determining the position on the HDF5 file buffer into which the data is copied
+         * @param data
+         *  pointer to data of any type. the counts in the hyperslab selection determine the number of elements n of the
+         *  native type T corresponding to m_h5type are to be written. Thus the sizeof(T)*n bytes after data are copied
+         */
         void write_h5item_bytes(const size_t &iitem, const void *data);
 
         template<typename T>
@@ -305,9 +575,21 @@ namespace hdf5 {
         }
     };
 
-    struct NdListReader : NdListBase {
-
-        static size_t extract_list_rank(hid_t parent_handle, std::string name) {
+    /**
+     * The reading case for a distributed N-dimensional list, splitting the reading load equally among all ranks, with
+     * redistribution of items to be handled separately and subsquently
+     */
+    struct NdDistListReader : NdDistListBase {
+        /**
+         * interrogate the named dataset's object info for the number of shape elements
+         * @param parent_handle
+         *  HDF5 handle for group containing this dataset
+         * @param name
+         *  name of this dataset in group
+         * @return
+         *  length of the overall list shape
+         */
+        static size_t extract_list_ndim(hid_t parent_handle, std::string name) {
             auto status = H5Gget_objinfo(parent_handle, name.c_str(), 0, nullptr);
             REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
             auto dataset = H5Dopen1(parent_handle, name.c_str());
@@ -317,9 +599,17 @@ namespace hdf5 {
             H5Dclose(dataset);
             return rank;
         }
-
+        /**
+         * interrogate the named dataset's object info for the shape itself
+         * @param parent_handle
+         *  HDF5 handle for group containing this dataset
+         * @param name
+         *  name of this dataset in group
+         * @return
+         *  global list shape
+         */
         static defs::inds extract_list_dims(hid_t parent_handle, std::string name) {
-            auto rank = extract_list_rank(parent_handle, name);
+            auto rank = extract_list_ndim(parent_handle, name);
             auto dataset = H5Dopen1(parent_handle, name.c_str());
             auto dataspace = H5Dget_space(dataset);
             std::vector<hsize_t> dims(rank, 0ul);
@@ -332,6 +622,14 @@ namespace hdf5 {
             return out;
         }
 
+        /**
+         * @param parent_handle
+         *  HDF5 handle for group containing this dataset
+         * @param name
+         *  name of this dataset in group
+         * @return
+         *  shape of the list items themselves
+         */
         static defs::inds extract_item_dims(hid_t parent_handle, std::string name) {
             auto list_dims = extract_list_dims(parent_handle, name);
             defs::inds out;
@@ -340,14 +638,28 @@ namespace hdf5 {
             return out;
         }
 
+        /**
+         * @param parent_handle
+         *  HDF5 handle for group containing this dataset
+         * @param name
+         *  name of this dataset in group
+         * @return
+         *  just the global number of items
+         */
         static size_t extract_nitem(hid_t parent_handle, std::string name) {
             return extract_list_dims(parent_handle, name)[0];
         }
 
-        /*
+        /**
          * share the elements out over the MPI ranks
+         * @param parent_handle
+         *  HDF5 handle for group containing this dataset
+         * @param name
+         *  name of this dataset in group
+         * @return
+         *  number of items this rank is responsible for reading int
          */
-        static size_t rank_nitem(hid_t parent_handle, std::string name) {
+        static size_t local_nitem(hid_t parent_handle, std::string name) {
             auto nitem_tot = extract_nitem(parent_handle, name);
             auto nitem_share = nitem_tot / mpi::nrank();
             // give the remainder to the root rank
@@ -356,17 +668,25 @@ namespace hdf5 {
         }
 
     private:
-        NdListReader(hid_t parent_handle, std::string name, hid_t h5_type) :
-                NdListBase(parent_handle, name, extract_item_dims(parent_handle, name),
-                           rank_nitem(parent_handle, name), false, h5_type) {}
+        NdDistListReader(hid_t parent_handle, std::string name, hid_t h5_type) :
+                NdDistListBase(parent_handle, name, extract_item_dims(parent_handle, name),
+                               local_nitem(parent_handle, name), false, h5_type) {}
 
     public:
-        NdListReader(FileReader &parent, std::string name, hid_t h5_type) :
-                NdListReader(parent.m_handle, name, h5_type) {}
+        NdDistListReader(FileReader &parent, std::string name, hid_t h5_type) :
+                NdDistListReader(parent.m_handle, name, h5_type) {}
 
-        NdListReader(GroupReader &parent, std::string name, hid_t h5_type) :
-                NdListReader(parent.m_handle, name, h5_type) {}
+        NdDistListReader(GroupReader &parent, std::string name, hid_t h5_type) :
+                NdDistListReader(parent.m_handle, name, h5_type) {}
 
+        /**
+         * read the item stored at the iitem position into the data pointer
+         * @param iitem
+         *  item index determining the position on the HDF5 file buffer from which the data is copied
+         * @param data
+         *  pointer to data of any type. the counts in the hyperslab selection determine the number of elements n of the
+         *  native type T corresponding to m_h5type are to be read.
+         */
         void read_h5item_bytes(const size_t &iitem, void *data) {
             select_hyperslab(iitem);
             log::debug_("reading data...");

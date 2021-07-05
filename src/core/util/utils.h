@@ -42,11 +42,35 @@ namespace utils {
         return is_zero(&v);
     }
 
+
+    /**
+     * catch-all for non-arithmetic types attempts to use output stream << overload. If it doesn't exist, compile time
+     * error will be raised
+     * @tparam T
+     *  type of data to represent as a string
+     * @param v
+     *  value to represent as string
+     * @return
+     *  string representation of v
+     */
     template<typename T>
-    static std::string to_string(const T& v) {
+    static typename std::enable_if<!std::is_arithmetic<T>::value, std::string>::type
+    to_string(const T& v) {
+        std::stringstream out;
+        out << v;
+        return out.str();
+    }
+
+    /**
+     * catch-all for arithmetic types
+     */
+    template<typename T>
+    static typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type
+    to_string(const T& v) {
         if (v==std::numeric_limits<T>::max()) return "inf";
         return std::to_string(v);
     }
+
 
     static std::string to_string(const std::vector<std::string>& v) {
         std::string string("[");
