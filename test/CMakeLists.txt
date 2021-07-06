@@ -30,6 +30,7 @@ if (ENABLE_PROFILING)
     target_link_options(unittest PRIVATE -pg)
 endif()
 
+target_link_options(unittest PRIVATE -g -rdynamic)
 
 
 if (ENABLE_HDF5)
