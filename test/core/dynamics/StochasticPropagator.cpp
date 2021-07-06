@@ -18,7 +18,7 @@ TEST(StochasticPropagator, Test) {
     opts.m_av_ests.m_fermion_rdm.m_rank = 2;
     opts.m_wavefunction.m_replicate = true;
     opts.m_av_ests.m_ncycle = 2000;
-    opts.m_av_ests.m_periodic_output.m_period = 10;
+    opts.m_av_ests.m_stats_period = 10;
     opts.m_propagator.m_min_spawn_mag = 0.2;
     opts.m_propagator.m_min_death_mag = 0.2;
     opts.m_propagator.m_consolidate_spawns = false;

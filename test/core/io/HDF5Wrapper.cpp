@@ -34,6 +34,7 @@ TEST(HDF5Wrapper, FloatArray) {
         auto nelement = nd_utils::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         std::vector<float> v_read(nelement);
+        ASSERT_TRUE(gr.child_exists("a_float_array"));
         gr.load("a_float_array", v_read.data(), shape);
         auto v_def = v;
         v_def[2] = hashing::in_range(definitive_irank, 4, 18);
@@ -66,6 +67,29 @@ TEST(HDF5Wrapper, ComplexArray) {
     }
 }
 
+
+//TEST(HDF5Wrapper, BufferedFloats) {
+//    auto definitive_irank = hashing::in_range(99, 0, mpi::nrank());
+//    buffered::Numbers<float, 2> v({2, 3});
+//
+//    {
+//        hdf5::FileWriter fw("table_test.h5");
+//        hdf5::GroupWriter gw("container", fw);
+//        gw.save("a_complex_array", v.data(), shape, {"dim0", "dim1"}, definitive_irank);
+//    }
+//    mpi::barrier();
+//    {
+//        hdf5::FileReader fr("table_test.h5");
+//        hdf5::GroupReader gr("container", fr);
+//        auto nelement = nd_utils::nelement(shape);
+//        ASSERT_EQ(nelement, v.size());
+//        std::vector<std::complex<float>> v_read(nelement);
+//        gr.load("a_complex_array", v_read.data(), shape);
+//        auto v_def = v;
+//        v_def[2].imag(hashing::in_range(definitive_irank, 4, 18));
+//        ASSERT_EQ(v_read, v_def);
+//    }
+//}
 
 
 TEST(HDF5Wrapper, NumberDistributed) {

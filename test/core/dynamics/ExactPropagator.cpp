@@ -90,7 +90,7 @@ TEST(ExactPropagator, Test) {
     opts.m_propagator.m_nw_target = 50;
     opts.m_av_ests.m_delay = 4000;
     opts.m_av_ests.m_ncycle = 200;
-    opts.m_av_ests.m_periodic_output.m_period = 13;
+    opts.m_av_ests.m_stats_period = 13;
     opts.m_propagator.m_consolidate_spawns = false;
     opts.m_av_ests.m_fermion_rdm.m_rank = 0;
     opts.m_wavefunction.m_replicate = false;

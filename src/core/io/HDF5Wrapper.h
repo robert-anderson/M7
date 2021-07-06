@@ -355,10 +355,15 @@ namespace hdf5 {
         GroupReader(std::string name, const GroupReader &parent) :
                 GroupBase(parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
 
+        bool child_exists(const std::string& name) const {
+            auto status = H5Gget_objinfo (m_handle, name.c_str(), 0, NULL);
+            return status == 0;
+        }
 
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, T& v) {
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto dspace_handle = H5Screate(H5S_SCALAR);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
@@ -399,6 +404,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::complex<T> &v, size_t irank=0ul) {
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[0], irank);
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
         }
@@ -406,6 +412,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, T* v, const defs::inds& shape){
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto file_shape = get_dataset_shape(name);
             REQUIRE_EQ_ALL(shape, file_shape, "expected a container of a different shape");
             auto dims = convert_dims(shape);
@@ -420,6 +427,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::complex<T>* v, const defs::inds& shape){
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
             auto complex_shape = shape;
             complex_shape.push_back(2ul);
             auto file_shape = get_dataset_shape(name);

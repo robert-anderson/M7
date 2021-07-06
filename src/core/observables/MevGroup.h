@@ -229,7 +229,7 @@ struct MevGroup {
             m_opts(opts), m_accum_epoch("MEV accumulation"),
             m_fermion_rdm(opts.m_fermion_rdm.m_rank ? new FermionRdm(opts.m_fermion_rdm, nsite, nelec) : nullptr),
             m_ref_excits(opts.m_ref_excits.m_max_exlvl ? new RefExcits(opts.m_ref_excits, nsite) : nullptr),
-            m_period(opts.m_periodic_output.m_period), m_explicit_hf_conns(explicit_hf_conns) {
+            m_period(opts.m_stats_period), m_explicit_hf_conns(explicit_hf_conns) {
     }
 
 
@@ -270,6 +270,7 @@ struct MevGroup {
         return false;
     }
 
+    /*
     void save(size_t icycle){
         auto fname = log::format(m_opts.m_periodic_output.m_path, iperiod(icycle));
         hdf5::FileWriter fw(fname);
@@ -284,6 +285,7 @@ struct MevGroup {
         //if (m_fermion_rdm) m_fermion_rdm->save(fw);
         if (m_ref_excits) m_ref_excits->save(fw);
     }
+     */
 };
 
 /*
@@ -292,7 +294,7 @@ struct MevGroup {
 //    hdf5::GroupWriter gw("solver", fw);
 //    if (m_mevs.m_fermion_rdm) {
 //        hdf5::GroupWriter gw2("rdm", gw);
-//        m_mevs.m_fermion_rdm->h5_write(gw2);
+//        m_mevs.m_fermion_rdm->h5_save(gw2);
 //    }
  */
 

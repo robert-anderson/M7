@@ -50,7 +50,7 @@ void Solver::execute(size_t ncycle) {
         //loop_over_spawned();
         if (m_mevs.m_fermion_rdm) {
             hdf5::GroupReader gr2("rdm", gr);
-            m_mevs.m_fermion_rdm->h5_read(gr);
+            m_mevs.m_fermion_rdm->h5_load(gr);
             m_mevs.m_fermion_rdm->end_cycle();
         }
     */
@@ -616,11 +616,11 @@ void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, 
 
 void Solver::output_mevs(size_t icycle) {
     if (!m_mevs.is_period_cycle(icycle)) return;
-    m_mevs.save(icycle);
+    //m_mevs.save(icycle);
 }
 
 void Solver::output_mevs() {
-    m_mevs.save();
+    //m_mevs.save();
 }
 
 const MevGroup &Solver::mevs() const {

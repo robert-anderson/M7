@@ -16,14 +16,6 @@ fciqmc_config::Buffers::Buffers(config::Group *parent) :
         m_comm_exp_fac(this, "comm_expand_fac", 2.0,
                        "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
 
-fciqmc_config::Io::Io(config::Group *parent, std::string path_default) :
-        config::Section(parent, "io",
-                        "options relating to filesystem save and load of structures in an M7 calculation"),
-        m_save_path(this, "save_path", path_default,
-                    "path to which the HDF5 file containing the structure should be saved"),
-        m_load_path(this, "load_path", path_default,
-                    "path from which the HDF5 file containing the structure should be loaded") {}
-
 fciqmc_config::Prng::Prng(config::Group *parent) :
         config::Section(parent, "prng",
                         "options relating to the random number generator used in stochastic calculations"),
@@ -115,7 +107,7 @@ fciqmc_config::FermionRdm::FermionRdm(config::Group *parent) :
         m_rank(this, "rank", 0ul, "Rank of fermion RDM to accumulate"),
         m_mixed_estimator(this, "mixed_estimator", false,
                           "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
-        m_buffers(this), m_load_balancing(this) {}
+        m_buffers(this), m_load_balancing(this), m_io(this) {}
 
 fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
         config::Section(parent, "inst_ests",
@@ -130,40 +122,19 @@ fciqmc_config::RefExcits::RefExcits(config::Group *parent) :
                         "options relating to averaged amplitudes of reference-connected ONVs"),
         m_max_exlvl(this, "max_exlvl", 0ul,
                     "maximum excitation level from the reference for which to accumulate average amplitudes"),
-        m_buffers(this) {}
-
-
-fciqmc_config::PeriodicOutput::PeriodicOutput(config::Group *parent) :
-        config::Section(parent, "periodic_output", "options relating to structures which are output periodically to disk"),
-        m_period(this, "period", 0ul, "number of MC cycles between outputs"),
-        m_path(this, "path", "", "path to which the structure is output. if {} token appears, output data will be clobbered by subsequent output operations"){}
-
-void fciqmc_config::PeriodicOutput::verify() {
-    const auto &str = m_path.get();
-    if (str.empty()){
-        REQUIRE_EQ_ALL(m_period, 0ul, "non-zero period assigned but no path specified for output");
-    }
-    else {
-        size_t token_count = std::count(str.cbegin(), str.cend(), '{');
-        REQUIRE_LE_ALL(token_count, 1ul, "paths can have at most one {} token");
-        if (token_count) {
-            auto it_open = std::find(str.cbegin(), str.cend(), '{');
-            auto it_close = std::find(str.cbegin(), str.cend(), '}');
-            REQUIRE_EQ_ALL(std::distance(it_open, it_close), 1l,
-                           "path for periodic output should contain only one {} formatting point");
-        }
-    }
-}
+        m_buffers(this), m_io(this) {}
 
 fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
         config::Section(parent, "av_ests",
                         "options related to quantities estimated from the many-body wavefunction(s) and averaged on-the-fly over a number of MC cycles"),
-        m_delay(this, "delay", 0ul,
+        m_delay(this, "delay", 1000ul,
                 "number of MC cycles to wait after the onset of variable shift mode before beginning to accumulate MEVs"),
         m_ncycle(this, "ncycle", ~0ul,
                  "number of MC cycles for which to accumulate MEVs before terminating the calculation"),
-        m_fermion_rdm(this), m_ref_excits(this), m_io(this, "av_ests.h5"),
-        m_periodic_output(this){}
+        m_stats_period(this, "stats_period", 100ul,
+                       "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
+        m_stats_path(this, "stats_path", "M7.av_ests.stats", "output path for contracted value statistics"),
+        m_fermion_rdm(this), m_ref_excits(this){}
 
 fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),

@@ -19,11 +19,58 @@ namespace fciqmc_config {
         explicit Buffers(config::Group *parent);
     };
 
-    struct Io : config::Section {
-        config::Param<std::string> m_save_path;
+    struct Archive : config::Section {
         config::Param<std::string> m_load_path;
+        config::Param<std::string> m_save_path;
+        config::Param<std::string> m_chkpt_path;
+        config::Param<size_t> m_period;
+        config::Param<size_t> m_period_mins;
 
-        explicit Io(config::Group *parent, std::string path_default = "");
+        explicit Archive(config::Group *parent) :
+                config::Section(parent, "archive",
+                                "options relating to archives: HDF5 binary storage of calculation data"),
+                m_load_path(this, "load_path", "",
+                            "path to the HDF5 file from which the calculation is to be restarted"),
+                m_save_path(this, "save_path", "",
+                            "path to the HDF5 file into which calculation data is to be dumped at the end of the calculation"),
+                m_chkpt_path(this, "chkpt_path", "",
+                             "path to the HDF5 file (or file name format) into which calculation data is to be dumped periodically during the calculation"),
+                m_period(this, "period", 0ul, "number of MC cycles between checkpoint dumps"),
+                m_period_mins(this, "period_mins", 0ul, "time in minutes between checkpoint dumps") {}
+
+        void verify() override {
+            if (static_cast<bool>(m_period)==static_cast<bool>(m_period_mins))
+                log::warn("both cycle number and time periods are defined for checkpointing");
+
+            auto& str = m_chkpt_path.get();
+            size_t token_count = std::count(str.cbegin(), str.cend(), '{');
+            REQUIRE_LE_ALL(token_count, 1ul, "checkpoint paths can have at most one {} token");
+            if (token_count) {
+                auto it_open = std::find(str.cbegin(), str.cend(), '{');
+                auto it_close = std::find(str.cbegin(), str.cend(), '}');
+                REQUIRE_EQ_ALL(std::distance(it_open, it_close), 1l,
+                               "checkpoint path for periodic output should contain at most one {} formatting point");
+                log::info("formatting token found in path, successive checkpoints will not overwrite previous checkpoints from the same run");
+            }
+            else
+                log::info("formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run");
+        }
+    };
+
+    struct Io : config::Section {
+        config::Param<bool> m_load;
+        config::Param<bool> m_save;
+        config::Param<bool> m_chkpt;
+
+        explicit Io(config::Group *parent) :
+                config::Section(parent, "io",
+                                "options relating to archiving behavior"),
+                m_load(this, "load", false,
+                       "attempt to load the object from the archive at the beginning of the calculation"),
+                m_save(this, "save", false,
+                       "save the object to the archive at the end of the calculation"),
+                m_chkpt(this, "chkpt", false,
+                        "attempt to save the object to the checkpoint archive at each checkpointing period") {}
     };
 
     struct Prng : config::Section {
@@ -115,6 +162,7 @@ namespace fciqmc_config {
         config::Param<bool> m_mixed_estimator;
         Buffers m_buffers;
         LoadBalancing m_load_balancing;
+        Io m_io;
 
         explicit FermionRdm(config::Group *parent);
     };
@@ -129,25 +177,19 @@ namespace fciqmc_config {
     struct RefExcits : config::Section {
         config::Param<size_t> m_max_exlvl;
         Buffers m_buffers;
+        Io m_io;
 
         explicit RefExcits(config::Group *parent);
     };
 
-    struct PeriodicOutput : config::Section {
-        config::Param<size_t> m_period;
-        config::Param<std::string> m_path;
-        explicit PeriodicOutput(config::Group *parent);
-
-        void verify() override;
-    };
 
     struct AvEsts : config::Section {
         config::Param<size_t> m_delay;
         config::Param<size_t> m_ncycle;
+        config::Param<size_t> m_stats_period;
+        config::Param<std::string> m_stats_path;
         FermionRdm m_fermion_rdm;
         RefExcits m_ref_excits;
-        Io m_io;
-        PeriodicOutput m_periodic_output;
 
         explicit AvEsts(config::Group *parent);
     };
