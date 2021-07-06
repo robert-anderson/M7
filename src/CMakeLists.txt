@@ -16,13 +16,16 @@ target_link_libraries (prof ${MPI_LIBRARIES})
 
 target_compile_definitions(release PRIVATE NDEBUG=1)
 target_compile_options(release PRIVATE -O3)
+target_link_options(release PRIVATE -g -rdynamic)
 
 target_compile_definitions(debug PRIVATE VERBOSE=1)
 target_link_options(debug PRIVATE)
+target_link_options(debug PRIVATE -g -rdynamic)
 
 target_compile_definitions(prof PRIVATE NDEBUG=1)
 target_compile_options(prof PRIVATE -pg)
 target_link_options(prof PRIVATE -pg)
+target_link_options(prof PRIVATE -g -rdynamic)
 
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
