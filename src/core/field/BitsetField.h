@@ -192,8 +192,8 @@ struct BitsetField : FieldBase {
         hdf5::AttributeWriterBase::write(parent_handle, "bitset dim names", m_format.dim_names_vector());
     }
 
-    void h5_save(hdf5::NdDistListWriter &h5list, const size_t &iitem) override {
-        FieldBase::h5_save(h5list, iitem);
+    void save(hdf5::NdDistListWriter &h5list, const size_t &iitem) override {
+        FieldBase::save(h5list, iitem);
     }
 
     defs::inds h5_shape() const override {

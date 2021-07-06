@@ -74,7 +74,7 @@ public:
         for (size_t ifield = 0ul; ifield < m_selected_field_inds.size(); ++ifield) {
             auto &writer = m_writers[ifield];
             auto field = Row::m_fields[ifield];
-            if (iitem < m_nitem) field->h5_save(writer, iitem);
+            if (iitem < m_nitem) field->save(writer, iitem);
             else {
                 // runoff write operation for collective I/O
                 writer.write_h5item_bytes(iitem, nullptr);
@@ -120,7 +120,7 @@ public:
         for (size_t ifield = 0ul; ifield < m_readers.size(); ++ifield) {
             auto &reader = m_readers[ifield];
             auto &field = Row::m_fields[ifield];
-            if (iitem < m_nitem) field->h5_load(reader, iitem);
+            if (iitem < m_nitem) field->load(reader, iitem);
             else {
                 // runoff read operation for collective I/O
                 reader.read_h5item_bytes(iitem, nullptr);

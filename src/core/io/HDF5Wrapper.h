@@ -209,6 +209,37 @@ namespace hdf5 {
         FileReader(std::string name);
     };
 
+    /**
+     * parent class for HDF5 group I/O
+     *
+     * there are three different categories of object whose I/O is handled by this HDF5 wrapper:
+     *  1. Non-distributed primitive types and STL container specializations of primitive types
+     *  2. Non-distributed user-defined classes
+     *  3. Distributed user-defined classes (MappedTable)
+     *
+     * more complicated combinations of these are handled in the Archivable class, but the above are the building blocks.
+     *
+     * Categories 1 and 2 are typically for small metadata and verification information, writing these types requires
+     * the identification of a "definitive rank", defaulting to the root, whose value of the written data is taken to be
+     * the correct value to commit to disk.
+     *
+     * The most expensive category is 3 since this includes wavefunctions and multidimensional quantities. In recognition
+     * of this, the HDF5 files are opened in collective mode, and so even operations in categories 1 and 2 (which could
+     * be done in independent mode) involve null write operations on the non-definitive MPI rank, and all ranks read in
+     * the same value.
+     *
+     * save methods defined in the Writer subclass, and load methods defined in the Reader subclass are for category 1,
+     * i.e. the following types:
+     *  primitive
+     *  pointer to primitive (shaped)
+     *  vector of primitives
+     *  complex of primitives
+     *  pointer to complex of primitive (shaped)
+     *  vector of complex of primitives
+     * these are not user-defined classes and therefore we cannot define save and load methods on these objects, so
+     * these functions are handled in the subclass definitions below
+     *
+     */
     struct GroupBase {
         const hid_t m_parent_handle;
         const hid_t m_handle;
@@ -222,6 +253,9 @@ namespace hdf5 {
         }
     };
 
+    /**
+     * carries out all creation of datasets and Groups
+     */
     struct GroupWriter : GroupBase {
         GroupWriter(std::string name, const FileWriter &parent) :
                 GroupBase(parent.m_handle,
@@ -303,7 +337,6 @@ namespace hdf5 {
             H5Sclose(dspace_handle);
         }
 
-
         /**
          * commit a single value of a complex type (HDF5 simple dataset) to disk by writing a vector of size 2
          * @tparam T
@@ -346,6 +379,23 @@ namespace hdf5 {
             dims.push_back(2ul);
             save(name, reinterpret_cast<const T*>(v), dims, dim_labels, irank);
         }
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const std::vector<T>& v, const defs::inds& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul){
+            REQUIRE_EQ_ALL(v.size(), nd_utils::nelement(shape), "vector and shape are incompatible");
+            save(name, v.data(), shape, {}, irank);
+        }
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const std::vector<T>& v, size_t irank=0ul){
+            save(name, v, {v.size()}, {}, irank);
+        }
+
+        void save(std::string name, const std::vector<std::string>& v, size_t irank=0ul);
+
+        void save(std::string name, const std::string& v, size_t irank=0ul);
     };
 
     struct GroupReader : GroupBase {
@@ -439,6 +489,19 @@ namespace hdf5 {
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
             REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
+        }
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::vector<T>& v, const defs::inds& shape){
+            REQUIRE_EQ_ALL(v.size(), nd_utils::nelement(shape), "vector and shape are incompatible");
+            load(name, v.data(), shape);
+        }
+
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, std::vector<T>& v){
+            load(name, v, {v.size()});
         }
     };
 

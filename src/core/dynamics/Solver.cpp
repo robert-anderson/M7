@@ -50,7 +50,7 @@ void Solver::execute(size_t ncycle) {
         //loop_over_spawned();
         if (m_mevs.m_fermion_rdm) {
             hdf5::GroupReader gr2("rdm", gr);
-            m_mevs.m_fermion_rdm->h5_load(gr);
+            m_mevs.m_fermion_rdm->load(gr);
             m_mevs.m_fermion_rdm->end_cycle();
         }
     */

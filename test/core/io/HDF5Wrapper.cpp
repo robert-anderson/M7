@@ -16,6 +16,26 @@ namespace hdf5_wrapper_test {
 
 }
 
+TEST(HDF5Wrapper, StringVector) {
+    auto definitive_irank = hashing::in_range(99, 0, mpi::nrank());
+    std::vector<std::string> strings = {"Lorem", "ipsum dolor sit", "amet, consectetur adipiscing", "elit"};
+    {
+        hdf5::FileWriter fw("table_test.h5");
+        hdf5::GroupWriter gw("container", fw);
+        gw.save("a_string_vector", strings, definitive_irank);
+    }
+}
+
+TEST(HDF5Wrapper, String) {
+    auto definitive_irank = hashing::in_range(99, 0, mpi::nrank());
+    std::string s = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
+    {
+        hdf5::FileWriter fw("table_test.h5");
+        hdf5::GroupWriter gw("container", fw);
+        gw.save("a_string", s, definitive_irank);
+    }
+}
+
 TEST(HDF5Wrapper, FloatArray) {
     auto definitive_irank = hashing::in_range(99, 0, mpi::nrank());
     defs::inds shape = {2, 3};
@@ -67,11 +87,11 @@ TEST(HDF5Wrapper, ComplexArray) {
     }
 }
 
-
+//
 //TEST(HDF5Wrapper, BufferedFloats) {
 //    auto definitive_irank = hashing::in_range(99, 0, mpi::nrank());
 //    buffered::Numbers<float, 2> v({2, 3});
-//
+//    v = {1, 2, 3, 4, 5, 6};
 //    {
 //        hdf5::FileWriter fw("table_test.h5");
 //        hdf5::GroupWriter gw("container", fw);

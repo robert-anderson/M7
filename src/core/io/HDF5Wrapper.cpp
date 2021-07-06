@@ -197,3 +197,34 @@ hdf5::FileReader::FileReader(std::string name) : FileBase(
         (check_is_hdf5(name), H5Fopen(name.c_str(), H5F_ACC_RDONLY, AccessPList()))) {
     REQUIRE_GE(m_handle, 0, "HDF5 file could not be opened for reading.");
 }
+
+void hdf5::GroupWriter::save(std::string name, const std::vector<std::string>&v, size_t irank) {
+    auto memtype = H5Tcopy (H5T_C_S1);
+    auto longest = std::max_element(
+            v.cbegin(), v.cend(),[](const std::string& s1, const std::string& s2){return s1.size()<s2.size();});
+    auto size = longest->size();
+    std::vector<char> buffer(size*v.size());
+    size_t istr = 0ul;
+    for (auto& str: v) std::strcpy(buffer.data()+(istr++)*size, str.c_str());
+
+    auto status = H5Tset_size(memtype, size);
+    REQUIRE_FALSE_ALL(status, "failed to create string type");
+
+    /*
+     * Create dataset with a null dataspace.
+     */
+    std::vector<hsize_t> shape = {v.size()};
+    auto dspace_handle = H5Screate_simple(1, shape.data(), NULL);
+    auto dset_handle = H5Dcreate (m_handle, name.c_str(), memtype, dspace_handle, H5P_DEFAULT,
+                      H5P_DEFAULT, H5P_DEFAULT);
+
+    status = H5Dwrite(dset_handle, memtype, dspace_handle, dspace_handle, H5P_DEFAULT, buffer.data());
+    REQUIRE_FALSE_ALL(status, "HDF5 Error on string array save");
+    H5Dclose(dset_handle);
+    H5Sclose(dspace_handle);
+}
+
+void hdf5::GroupWriter::save(std::string name, const std::string &v, size_t irank) {
+    std::vector<std::string> vs = {v};
+    save(name, vs, irank);
+}

@@ -294,7 +294,7 @@ struct MevGroup {
 //    hdf5::GroupWriter gw("solver", fw);
 //    if (m_mevs.m_fermion_rdm) {
 //        hdf5::GroupWriter gw2("rdm", gw);
-//        m_mevs.m_fermion_rdm->h5_save(gw2);
+//        m_mevs.m_fermion_rdm->save(gw2);
 //    }
  */
 
