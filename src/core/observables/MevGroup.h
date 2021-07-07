@@ -270,6 +270,11 @@ struct MevGroup {
         return false;
     }
 
+    void save(hdf5::GroupWriter& parent) const {
+        //if (m_fermion_rdm) m_fermion_rdm->save(fw);
+        if (m_ref_excits) m_ref_excits->save(parent);
+    }
+
     /*
     void save(size_t icycle){
         auto fname = log::format(m_opts.m_periodic_output.m_path, iperiod(icycle));

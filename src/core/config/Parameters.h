@@ -186,5 +186,10 @@ namespace config {
     };
 }
 
+template<typename T>
+static std::ostream &operator<<(std::ostream &os, const config::Param<T> &v) {
+    os << v.get();
+    return os;
+}
 
 #endif //M7_PARAMETERS_H

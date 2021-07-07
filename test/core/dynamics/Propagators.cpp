@@ -37,4 +37,8 @@ TEST(Propagators, RefExcitTest) {
 
     Solver solver(opts, *prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
+
+    hdf5::FileWriter fw("M7.test.h5");
+    hdf5::GroupWriter gw("data", fw);
+    solver.mevs().save(gw);
 }

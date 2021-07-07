@@ -299,6 +299,24 @@ namespace hdf5 {
         }
 
         /**
+         * commit a single value of a complex type (HDF5 simple dataset) to disk by writing a vector of size 2
+         * @tparam T
+         *  primitive type of the components of the complex number
+         * @param name
+         *  key in the HDF5 Group in which the value is to be stored
+         * @param v
+         *  value to store
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        save(std::string name, const std::complex<T> &v, size_t irank=0ul) {
+            defs::inds shape = {2};
+            save(name, reinterpret_cast<T*>(&v), shape, {"real_imag"}, irank);
+        }
+
+        /**
          * commit a multidimensional array (HDF5 simple dataset) of a primitive type to disk
          * @tparam T
          *  primitive type of the elements of the array
@@ -335,24 +353,6 @@ namespace hdf5 {
             }
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
-        }
-
-        /**
-         * commit a single value of a complex type (HDF5 simple dataset) to disk by writing a vector of size 2
-         * @tparam T
-         *  primitive type of the components of the complex number
-         * @param name
-         *  key in the HDF5 Group in which the value is to be stored
-         * @param v
-         *  value to store
-         * @param irank
-         *  index of MPI rank which stores the definitive value of v
-         */
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        save(std::string name, const std::complex<T> &v, size_t irank=0ul) {
-            defs::inds shape = {2};
-            save(name, reinterpret_cast<T*>(&v), shape, {"real_imag"}, irank);
         }
 
         /**
@@ -409,21 +409,8 @@ namespace hdf5 {
             auto status = H5Gget_objinfo (m_handle, name.c_str(), 0, NULL);
             return status == 0;
         }
-
-        template<typename T>
-        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-        load(std::string name, T& v) {
-            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
-            auto dspace_handle = H5Screate(H5S_SCALAR);
-            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
-                                          H5P_DEFAULT, H5P_DEFAULT);
-            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void *>(&v));
-            REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type load");
-            H5Dclose(dset_handle);
-            H5Sclose(dspace_handle);
-        }
-
     private:
+
         size_t get_dataset_ndim(std::string name) {
             auto status = H5Gget_objinfo(m_handle, name.c_str(), 0, nullptr);
             REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
@@ -451,6 +438,30 @@ namespace hdf5 {
         }
 
     public:
+
+        /**
+         * load a single value of a primitive type (HDF5 scalar dataset) from disk
+         * @tparam T
+         *  primitive type (any type for which type_ind<T>() is not ~0ul)
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  value to retrieve
+         */
+        template<typename T>
+        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+        load(std::string name, T& v) {
+            DEBUG_ASSERT_TRUE(child_exists(name), "Can't read from non-existent object");
+            auto dspace_handle = H5Screate(H5S_SCALAR);
+            auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
+                                          H5P_DEFAULT, H5P_DEFAULT);
+            auto status = H5Dread(dset_handle, type<T>(), dspace_handle, dspace_handle, H5P_DEFAULT, static_cast<void *>(&v));
+            REQUIRE_FALSE_ALL(status, "HDF5 Error on primitive type load");
+            H5Dclose(dset_handle);
+            H5Sclose(dspace_handle);
+        }
+
+
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::complex<T> &v, size_t irank=0ul) {
@@ -459,6 +470,19 @@ namespace hdf5 {
             load(name, reinterpret_cast<std::array<T, 2>&>(v)[1], irank);
         }
 
+        /**
+         * load a multidimensional array (HDF5 simple dataset) of a primitive type from disk
+         * @tparam T
+         *  primitive type of the elements of the array
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  pointer to the beginning of the array data
+         * @param shape
+         *  vector of dimensional extents
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, T* v, const defs::inds& shape){
@@ -503,6 +527,9 @@ namespace hdf5 {
         load(std::string name, std::vector<T>& v){
             load(name, v, {v.size()});
         }
+
+
+
     };
 
     /**

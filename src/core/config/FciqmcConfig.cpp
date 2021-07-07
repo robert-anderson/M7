@@ -16,6 +16,48 @@ fciqmc_config::Buffers::Buffers(config::Group *parent) :
         m_comm_exp_fac(this, "comm_expand_fac", 2.0,
                        "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
 
+
+fciqmc_config::Archive::Archive(config::Group *parent) :
+        config::Section(parent, "archive",
+                        "options relating to archives: HDF5 binary storage of calculation data"),
+        m_load_path(this, "load_path", "",
+                    "path to the HDF5 file from which the calculation is to be restarted"),
+        m_save_path(this, "save_path", "",
+                    "path to the HDF5 file into which calculation data is to be dumped at the end of the calculation"),
+        m_chkpt_path(this, "chkpt_path", "",
+                     "path to the HDF5 file (or file name format) into which calculation data is to be dumped periodically during the calculation"),
+        m_period(this, "period", 0ul, "number of MC cycles between checkpoint dumps"),
+        m_period_mins(this, "period_mins", 0ul, "time in minutes between checkpoint dumps") {}
+
+void fciqmc_config::Archive::verify() {
+    if (static_cast<bool>(m_period)==static_cast<bool>(m_period_mins))
+        log::warn("both cycle number and time periods are defined for checkpointing");
+
+    auto& str = m_chkpt_path.get();
+    size_t token_count = std::count(str.cbegin(), str.cend(), '{');
+    REQUIRE_LE_ALL(token_count, 1ul, "checkpoint paths can have at most one {} token");
+    if (token_count) {
+        auto it_open = std::find(str.cbegin(), str.cend(), '{');
+        auto it_close = std::find(str.cbegin(), str.cend(), '}');
+        REQUIRE_EQ_ALL(std::distance(it_open, it_close), 1l,
+                       "checkpoint path for periodic output should contain at most one {} formatting point");
+        log::info("formatting token found in path, successive checkpoints will not overwrite previous checkpoints from the same run");
+    }
+    else
+        log::info("formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run");
+}
+
+fciqmc_config::Io::Io(config::Group *parent) :
+        config::Section(parent, "io",
+                        "options relating to archiving behavior"),
+        m_load(this, "load", false,
+               "attempt to load the object from the archive at the beginning of the calculation"),
+        m_save(this, "save", false,
+               "save the object to the archive at the end of the calculation"),
+        m_chkpt(this, "chkpt", false,
+                "attempt to save the object to the checkpoint archive at each checkpointing period") {}
+
+
 fciqmc_config::Prng::Prng(config::Group *parent) :
         config::Section(parent, "prng",
                         "options relating to the random number generator used in stochastic calculations"),
@@ -193,7 +235,8 @@ void fciqmc_config::Propagator::verify() {
 fciqmc_config::Document::Document(const yaml::File *file) :
         config::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
-        m_prng(this), m_wavefunction(this), m_reference(this), m_shift(this), m_propagator(this),
+        m_prng(this), m_archive(this), m_wavefunction(this), m_reference(this),
+        m_shift(this), m_propagator(this),
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 
 void fciqmc_config::Document::verify() {

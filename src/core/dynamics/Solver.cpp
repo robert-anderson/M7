@@ -17,7 +17,8 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                        new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_mevs(m_opts.m_av_ests, prop.m_ham.nsite(), prop.m_ham.nelec(), true) {
+        m_mevs(m_opts.m_av_ests, prop.m_ham.nsite(), prop.m_ham.nelec(), true),
+        m_archive(opts) {
 
     if (m_wf.nreplica() > 1 && m_prop.is_exact())
         log::warn("Attempting an exact-propagation estimation of MEVs with replication, "

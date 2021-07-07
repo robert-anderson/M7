@@ -67,11 +67,11 @@ struct FieldBase {
 
     }
 
-    virtual void save(hdf5::NdDistListWriter &h5list, const size_t &iitem) {
+    virtual void save(hdf5::NdDistListWriter &h5list, const size_t &iitem) const {
         h5list.write_h5item_bytes(iitem, begin());
     }
 
-    virtual void save(hdf5::GroupWriter &gw, size_t irank= 0ul) {
+    virtual void save(hdf5::GroupWriter &gw, size_t irank= 0ul) const {
         gw.save(m_name, begin(), {m_size}, {"raw_data"}, irank);
     }
 

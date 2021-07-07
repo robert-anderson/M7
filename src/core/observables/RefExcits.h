@@ -85,8 +85,10 @@ struct RefExcits {
         else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(m_conn, contrib, ipart);
     }
 
-    void save(hdf5::FileWriter& fw) const {
-        hdf5::GroupWriter gw("ref_excits", fw);
+    void save(hdf5::GroupWriter& parent) const {
+        hdf5::GroupWriter gw("ref_excits", parent);
+        //m_av_ref.save(gw, 0);
+        gw.save("0", m_av_ref[0]);
         for (auto& it: m_ref_excits) it.save(gw);
     }
 

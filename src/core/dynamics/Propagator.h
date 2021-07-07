@@ -6,9 +6,16 @@
 #define M7_PROPAGATOR_H
 
 #include <src/core/config/FciqmcConfig.h>
+#include <src/core/io/Archivable.h>
 #include "Shift.h"
 
-class Propagator {
+/**
+ * This class is not optionally archivable,
+ * if an archive is being saved or checkpointed, the propagator data must be included
+ * if an archive is being loaded, the propagator data must be read and verified against the data on file to ensure
+ * compatibility with any objects reinstated from disk
+ */
+class Propagator : Archivable {
 public:
     const NdFormat<defs::ndim_wf> &m_wf_fmt;
     const Hamiltonian<> &m_ham;
@@ -24,6 +31,7 @@ public:
     mutable VacantOrbitals m_vac;
 
     Propagator(const fciqmc_config::Document &opts, const Hamiltonian<> &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
+            Archivable("propagator", opts.m_archive),
             m_wf_fmt(wf_fmt),
             m_ham(ham),
             m_opts(opts),
@@ -51,6 +59,11 @@ public:
     void update(const size_t &icycle, const Wavefunction &wf);
 
     virtual bool is_exact() const = 0;
+
+private:
+    void load_fn(hdf5::GroupReader &parent) override;
+
+    void save_fn(hdf5::GroupWriter &parent) override;
 
 };
 

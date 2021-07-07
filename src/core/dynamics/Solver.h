@@ -12,6 +12,7 @@
 #include <src/core/observables/WeightedTwf.h>
 #include <src/core/observables/MevGroup.h>
 #include <src/core/io/FciqmcStats.h>
+#include <src/core/io/Archivable.h>
 #include "Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStats.h"
@@ -56,6 +57,7 @@ class Solver {
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;
     MevGroup m_mevs;
+    Archive m_archive;
 
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
 
