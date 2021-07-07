@@ -461,7 +461,16 @@ namespace hdf5 {
             H5Sclose(dspace_handle);
         }
 
-
+        /**
+         * load a single value of a complex type (HDF5 simple dataset) to disk by reinterpreting the complex number as
+         * a length-2 array and reading a simple dataset from the file
+         * @tparam T
+         *  primitive type of the components of the complex number
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  value to store
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::complex<T> &v, size_t irank=0ul) {
@@ -479,9 +488,7 @@ namespace hdf5 {
          * @param v
          *  pointer to the beginning of the array data
          * @param shape
-         *  vector of dimensional extents
-         * @param irank
-         *  index of MPI rank which stores the definitive value of v
+         *  vector of expected dimensional extents - throw error if this is not the same as the stored shape
          */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
@@ -498,6 +505,17 @@ namespace hdf5 {
             REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
         }
 
+        /**
+         * load a multidimensional array (HDF5 simple dataset) of a complex type from disk
+         * @tparam T
+         *  primitive type of the real and imag components of elements of the array
+         * @param name
+         *  key in the HDF5 Group in which the value is stored
+         * @param v
+         *  pointer to the beginning of the array data
+         * @param shape
+         *  vector of expected dimensional extents - throw error if this is not the same as the stored shape
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::complex<T>* v, const defs::inds& shape){
@@ -515,6 +533,9 @@ namespace hdf5 {
             REQUIRE_FALSE_ALL(status, "HDF5 Error on multidimensional load");
         }
 
+        /**
+         * convenient wrapper in the case that the destination is a vector but the source is shaped
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::vector<T>& v, const defs::inds& shape){
@@ -522,13 +543,35 @@ namespace hdf5 {
             load(name, v.data(), shape);
         }
 
+        /**
+         * convenient wrapper in the case that the destination is a vector
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::vector<T>& v){
             load(name, v, {v.size()});
         }
 
+        /**
+         * convenient wrapper for scalar load
+         */
+        template<typename T>
+        T load(std::string name) {
+            T tmp;
+            load(name, tmp);
+            return tmp;
+        }
 
+        /**
+         * convenient wrapper for vector load
+         */
+        template<typename T>
+        std::vector<T> load_vector(std::string name) {
+            auto nelement = nd_utils::nelement(get_dataset_shape(name));
+            std::vector<T> tmp(nelement);
+            load(name, tmp);
+            return tmp;
+        }
 
     };
 

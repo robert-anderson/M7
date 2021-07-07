@@ -12,9 +12,8 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
 }
 
 void Propagator::load_fn(hdf5::GroupReader &parent) {
-    size_t tmp;
-    parent.load("nsite", tmp);
-    parent.save("nelec", m_ham.nelec());
+    REQUIRE_EQ_ALL(parent.load<size_t>("nsite"), m_ham.nsite(), "number of sites is not consistent with archive");
+    REQUIRE_EQ_ALL(parent.load<size_t>("nelec"), m_ham.nsite(), "number of electrons is not consistent with archive");
 }
 
 void Propagator::save_fn(hdf5::GroupWriter &parent) {
