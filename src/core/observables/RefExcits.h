@@ -7,6 +7,7 @@
 
 #include <src/core/basis/Connections.h>
 #include <src/core/config/FciqmcConfig.h>
+#include <src/core/io/Archivable.h>
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
 #include "src/core/table/BufferedFields.h"
@@ -44,8 +45,9 @@ struct RefExcitsOneExlvl : BufferedTable<MevRow<defs::wf_t>, true> {
                 m_row.m_values.m_name};
     }
 
+    using Table<MevRow<defs::wf_t>>::save;
     void save(hdf5::GroupWriter& gw) const {
-        this->write(gw, std::to_string(nop()), h5_field_names());
+        Table<MevRow<defs::wf_t>>::save(gw, std::to_string(nop()), h5_field_names());
     }
 
     void make_contribs(const conn::Basic<>& m_conn, const defs::wf_t& contrib, const size_t& ipart) {
@@ -62,7 +64,7 @@ private:
 };
 
 
-struct RefExcits {
+struct RefExcits : Archivable {
     const fciqmc_config::RefExcits& m_opts;
     const size_t m_max_exlvl;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
@@ -73,6 +75,7 @@ struct RefExcits {
     conn::Basic<> m_conn;
 
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
+            Archivable("ref_excits", opts.m_io),
         m_opts(opts), m_max_exlvl(opts.m_max_exlvl), m_av_ref({1}), m_conn(nsite) {
         m_ref_excits.reserve(m_max_exlvl + 1);
         for (size_t i=1ul; i<=m_max_exlvl; ++i) m_ref_excits.emplace_back(i, i, 1);
@@ -85,17 +88,28 @@ struct RefExcits {
         else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(m_conn, contrib, ipart);
     }
 
+    bool all_stores_empty() const {
+        for (const auto& it: m_ref_excits) if(it.m_hwm) return false;
+        return true;
+    };
+
+private:
+    /*
+     *
     void save(hdf5::GroupWriter& parent) const {
+    }
+     */
+    void load_fn(hdf5::GroupReader &parent) override {
+
+    }
+
+    void save_fn(hdf5::GroupWriter &parent) override {
         hdf5::GroupWriter gw("ref_excits", parent);
         //m_av_ref.save(gw, 0);
         gw.save("0", m_av_ref[0]);
         for (auto& it: m_ref_excits) it.save(gw);
     }
 
-    bool all_stores_empty() const {
-        for (const auto& it: m_ref_excits) if(it.m_hwm) return false;
-        return true;
-    };
 };
 
 #endif //M7_REFEXCITS_H

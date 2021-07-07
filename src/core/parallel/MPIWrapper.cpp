@@ -72,7 +72,7 @@ bool mpi::on_node_i_am_root() {
 
 void mpi::abort_(std::string message) {
 #ifdef ENABLE_MPI
-    log::error_("Forcing MPI_Abort from this rank: \"{}\"", std::move(message));
+    log::error_("Forcing MPI_Abort from this rank: {}", std::move(message));
     log::error_backtrace_();
     log::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case

@@ -158,7 +158,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         m_ntotal_lookup = 0ul;
     }
 
-    void read(hdf5::GroupReader &parent, std::string name) override {
+    void load(hdf5::GroupReader &parent, std::string name) override {
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
         size_t iitem = 0ul;
         clear();

@@ -16,7 +16,7 @@ namespace props {
 
     static std::unique_ptr<Propagator> get(const Hamiltonian<>& ham, const fciqmc_config::Document& opts,
                                            const NdFormat<defs::ndim_wf>& wf_fmt){
-        if (opts.m_propagator.m_exact)
+        if (!opts.m_propagator.m_stochastic)
             return std::unique_ptr<Exact>(new Exact{ham, opts, wf_fmt});
         else
             return std::unique_ptr<Stoch>(new Stoch{ham, opts, wf_fmt});

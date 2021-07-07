@@ -99,3 +99,48 @@ const defs::wf_t &Reference::weight() const {
 defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ipart) const {
     return (m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart])/(m_global.m_row.occupied_ncycle(icycle));
 }
+
+References::References(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham, const Wavefunction &wf,
+                       std::vector<TableBase::Loc> locs) :
+        m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
+    ASSERT(locs.size()==wf.m_format.m_nelement);
+    m_refs.reserve(wf.m_format.m_nelement);
+    for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
+    ASSERT(m_refs.size()==wf.npart());
+}
+
+const Reference &References::operator[](const size_t &ipart) const {
+    return m_refs[ipart];
+}
+
+void References::begin_cycle() {
+    for (auto& ref: m_refs) ref.begin_cycle();
+}
+
+void References::end_cycle() {
+    for (auto& ref: m_refs) ref.end_cycle();
+}
+
+void References::contrib_row() {
+    for (auto& ref: m_refs) ref.contrib_row();
+}
+
+std::vector<bool> References::is_connected(const fields::Onv<> &onv) const {
+    std::vector<bool> out;
+    out.reserve(m_refs.size());
+    for (size_t ipart=0ul; ipart<m_refs.size(); ++ipart)
+        out.push_back(m_refs[ipart].is_connected(onv));
+    return out;
+}
+
+const fields::Numbers<defs::ham_t, defs::ndim_wf> &References::proj_energy_nums() {
+    size_t ipart = 0ul;
+    for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
+    return m_proj_energy_nums;
+}
+
+const fields::Numbers<defs::wf_t, defs::ndim_wf> &References::weights() {
+    size_t ipart = 0ul;
+    for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
+    return m_weights;
+}

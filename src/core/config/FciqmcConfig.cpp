@@ -30,7 +30,7 @@ fciqmc_config::Archive::Archive(config::Group *parent) :
         m_period_mins(this, "period_mins", 0ul, "time in minutes between checkpoint dumps") {}
 
 void fciqmc_config::Archive::verify() {
-    if (static_cast<bool>(m_period)==static_cast<bool>(m_period_mins))
+    if (static_cast<bool>(m_period) && static_cast<bool>(m_period_mins))
         log::warn("both cycle number and time periods are defined for checkpointing");
 
     auto& str = m_chkpt_path.get();
@@ -203,7 +203,7 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         config::Section(parent, "propagator",
                         "options relating to the propagation of the wavefunction from one MC cycle to the next"),
         m_ncycle(this, "ncycle", 10000ul, "number of MC cycles for which to iterate the solver"),
-        m_exact(this, "exact", false, "perform exact projective FCI (only practical for debugging in small systems)"),
+        m_stochastic(this, "stochastic", true, "if false, perform exact projective FCI (only practical for debugging in small systems)"),
         m_excit_gen(this, "excit_gen", "pchb", "excitation generation algorithm to use"),
         m_nw_target(this, "nw_target", 0ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,

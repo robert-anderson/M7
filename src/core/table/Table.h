@@ -39,7 +39,7 @@ struct Table : TableBase {
             row.jump(irow);
             tmp += std::to_string(irow) + ". " + row.to_string() + "\n";
         }
-        ASSERT(m_row.in_range());
+        DEBUG_ASSERT_TRUE(row.in_range(), "row is out of range");
         return tmp;
     }
 
@@ -79,17 +79,17 @@ private:
 
 public:
 
-    void write(hdf5::GroupWriter &parent, std::string name, std::vector<std::string> field_names) const {
+    virtual void save(hdf5::GroupWriter &parent, std::string name, std::vector<std::string> field_names) const {
         RowHdf5Writer<row_t> row_writer(m_row, parent, name, nrow_to_write(), field_names);
         write_rows(row_writer);
     }
 
-    void write(hdf5::GroupWriter &parent, std::string name) const {
+    virtual void save(hdf5::GroupWriter &parent, std::string name) const {
         RowHdf5Writer<row_t> row_writer(m_row, parent, name, nrow_to_write());
         write_rows(row_writer);
     }
 
-    virtual void read(hdf5::GroupReader &parent, std::string name) {
+    virtual void load(hdf5::GroupReader &parent, std::string name) {
         RowHdf5Reader<row_t> row_reader(m_row, parent, name);
         read_rows(row_reader);
     }

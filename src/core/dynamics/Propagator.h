@@ -15,7 +15,7 @@
  * if an archive is being loaded, the propagator data must be read and verified against the data on file to ensure
  * compatibility with any objects reinstated from disk
  */
-class Propagator : Archivable {
+class Propagator : public Archivable {
 public:
     const NdFormat<defs::ndim_wf> &m_wf_fmt;
     const Hamiltonian<> &m_ham;

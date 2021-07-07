@@ -157,7 +157,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     }
 
     void h5_write(hdf5::GroupWriter &parent) {
-        m_store.write(parent, std::to_string(nop()), h5_field_names());
+        m_store.save(parent, std::to_string(nop()), h5_field_names());
     }
 
     std::vector<std::string> h5_field_names() {

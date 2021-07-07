@@ -126,13 +126,13 @@ TEST(HDF5Wrapper, NumberDistributed) {
     {
         hdf5::FileWriter fw("table_test.h5");
         hdf5::GroupWriter gw("container", fw);
-        write_table.write(gw, "table");
+        write_table.save(gw, "table");
     }
     mpi::barrier();
     {
         hdf5::FileReader fr("table_test.h5");
         hdf5::GroupReader gr("container", fr);
-        read_table.read(gr, "table");
+        read_table.load(gr, "table");
     }
     for (row.restart(); row.in_range(); row.step()) {
         ASSERT_EQ(row.m_field, hashing::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123));

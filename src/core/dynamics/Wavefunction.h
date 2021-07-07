@@ -8,6 +8,7 @@
 #include <src/core/io/Options.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/parallel/Reduction.h>
+#include <src/core/io/Archivable.h>
 #include "src/core/table/Communicator.h"
 #include "src/core/dynamics/WalkerTable.h"
 #include "src/core/dynamics/SpawnTable.h"
@@ -26,7 +27,7 @@
  * This m_store is often called the "main walker list", and the CommunicatingPair tables
  * are the called the "spawning lists"
  */
-struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow> {
+struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     const fciqmc_config::Document &m_opts;
     const size_t m_nsite;
@@ -322,6 +323,13 @@ public:
             }
         }
     }
+
+
+protected:
+    void load_fn(hdf5::GroupReader &parent) override;
+
+    void save_fn(hdf5::GroupWriter &parent) override;
+
 };
 
 #endif //M7_WAVEFUNCTION_H

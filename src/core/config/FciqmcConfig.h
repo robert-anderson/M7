@@ -187,7 +187,7 @@ namespace fciqmc_config {
 
     struct Propagator : config::Section {
         config::Param<size_t> m_ncycle;
-        config::Param<bool> m_exact;
+        config::Param<bool> m_stochastic;
         config::Param<std::string> m_excit_gen;
         config::Param<double> m_nw_target;
         config::Param<double> m_max_bloom;

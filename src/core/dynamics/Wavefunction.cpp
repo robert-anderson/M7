@@ -21,6 +21,7 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
                 {{nsite, need_send_parents(opts)}},
                 opts.m_wavefunction.m_load_balancing.m_acceptable_imbalance
         ),
+        Archivable("wavefunction", opts.m_wavefunction.m_io),
         m_opts(opts),
         m_nsite(nsite),
         m_format(m_store.m_row.m_weight.m_format),
@@ -33,7 +34,7 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         m_nspawned(m_format),
         m_nannihilated(m_format){
     m_store.expand((m_opts.m_wavefunction.m_buffers.m_store_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
-    m_store.expand((m_opts.m_wavefunction.m_buffers.m_comm_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
+    m_comm.expand((m_opts.m_wavefunction.m_buffers.m_comm_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
     ASSERT(m_comm.recv().m_row.m_dst_onv.belongs_to_row());
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
@@ -48,7 +49,7 @@ std::vector<std::string> Wavefunction::h5_field_names() {
 }
 
 void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
-    m_store.write(parent, name, h5_field_names());
+    m_store.save(parent, name, h5_field_names());
 }
 
 void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
@@ -178,26 +179,17 @@ void Wavefunction::sort_recv() {
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {
     auto irank = m_ra.get_rank(dst_onv);
-#ifdef VERBOSE_DEBUGGING
-    std::cout << consts::verb << consts::chevs << "SENDING SPAWNED WALKER" << std::endl;
-        std::cout << consts::verb << "generated determinant:   " << dst_onv.to_string() << std::endl;
-        std::cout << consts::verb << "destination rank:        " << irank << std::endl;
-        std::cout << consts::verb << "spawned weight:          " << delta << std::endl;
-        std::cout << consts::verb << "parent is initiator:     " << initiator << std::endl;
-        std::cout << consts::verb << "parent is deterministic: " << deterministic << std::endl;
-#endif
     auto &dst_table = send(irank);
 
-    auto irow = dst_table.push_back();
     auto &row = dst_table.m_row;
-    row.jump(irow);
+    row.push_back_jump();
 
     row.m_dst_onv = dst_onv;
     row.m_delta_weight = delta;
     row.m_src_initiator = initiator;
     row.m_src_deterministic = deterministic;
     row.m_dst_ipart = dst_ipart;
-    return irow;
+    return row.index();
 }
 
 size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic,
@@ -205,10 +197,17 @@ size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &d
     auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
     auto irank = m_ra.get_rank(dst_onv);
     auto &row = send(irank).m_row;
-    row.jump(irow);
     if (row.m_send_parents) {
         row.m_src_onv = src_onv;
         row.m_src_weight = src_weight;
     }
     return irow;
+}
+
+void Wavefunction::load_fn(hdf5::GroupReader &parent) {
+
+}
+
+void Wavefunction::save_fn(hdf5::GroupWriter &parent) {
+
 }

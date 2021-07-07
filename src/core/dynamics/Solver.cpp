@@ -6,11 +6,9 @@
 
 Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefunction &wf,
                std::vector<TableBase::Loc> ref_locs) :
-        m_prop(prop),
-        m_opts(prop.m_opts),
-        m_wf(wf),
+        m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
-        m_exit("exit"),
+        m_exit( "exit"),
         m_uniform_twf(
                 m_opts.m_inst_ests.m_spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf ?
@@ -21,8 +19,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_archive(opts) {
 
     if (m_wf.nreplica() > 1 && m_prop.is_exact())
-        log::warn("Attempting an exact-propagation estimation of MEVs with replication, "
-                  "the replica population is redundant");
+        log::warn("Replica population is redundant when doing exact propagation");
 
     if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && !m_prop.is_exact())
         log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
@@ -38,23 +35,16 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_parallel_stats = std::unique_ptr<ParallelStats>(
                 new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
 
+    /**
+     * setup archive members and read previous calculation data into archivable objects if archive loading is enabled
+     */
+    m_archive.add_members(m_prop);
+    m_archive.load();
+
     m_wf.m_ra.activate(m_icycle);
 }
 
 void Solver::execute(size_t ncycle) {
-
-    /*
-    if (!m_opts.read_hdf5_fname.empty()) {
-        hdf5::FileReader fr(m_opts.read_hdf5_fname);
-        hdf5::GroupReader gr("solver", fr);
-        //m_wf.h5_read(gr, m_prop.m_ham, m_reference.get_onv());
-        //loop_over_spawned();
-        if (m_mevs.m_fermion_rdm) {
-            hdf5::GroupReader gr2("rdm", gr);
-            m_mevs.m_fermion_rdm->load(gr);
-            m_mevs.m_fermion_rdm->end_cycle();
-        }
-    */
 
     for (size_t i = 0ul; i < ncycle; ++i) {
         m_cycle_timer.reset();
@@ -69,6 +59,7 @@ void Solver::execute(size_t ncycle) {
 
         m_communicate_timer.reset();
         m_communicate_timer.unpause();
+
         m_wf.communicate();
         m_communicate_timer.pause();
 
@@ -87,18 +78,25 @@ void Solver::execute(size_t ncycle) {
         output_mevs(m_icycle);
         ++m_icycle;
 
-        if (m_exit.read() && m_exit.m_v) break;
+        if (m_exit.read() && m_exit.m_v) {
+            log::info("exit requested from file, terminating solver loop at MC cycle {}", i);
+            break;
+        }
         if (m_mevs.m_accum_epoch) {
-            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) break;
+            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
+                if (m_icycle==ncycle)
+                    log::info("maximum number of MEV accumulating cycles ({}) "
+                              "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
+                break;
+            }
         }
     }
-
+    if (m_icycle==ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
     if (m_mevs.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         --m_icycle;
         finalizing_loop_over_occupied_onvs();
     }
-
 }
 
 void Solver::begin_cycle() {
@@ -368,8 +366,10 @@ void Solver::make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs:
 }
 
 void Solver::loop_over_spawned() {
-    if (!m_wf.recv().m_hwm) return;
     mpi::barrier();
+    if (!m_wf.recv().m_hwm) return;
+    log::debug_("nrow before: {}", m_wf.m_store.m_hwm);
+
     if (m_opts.m_propagator.m_consolidate_spawns) {
         m_wf.sort_recv();
         /*
@@ -494,6 +494,7 @@ void Solver::loop_over_spawned() {
         }
     }
     m_wf.recv().clear();
+    log::debug_("nrow after: {}", m_wf.m_store.m_hwm);
 }
 
 void Solver::propagate_row(const size_t &ipart) {

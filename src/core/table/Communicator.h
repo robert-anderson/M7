@@ -104,9 +104,14 @@ public:
         for (auto &it: sendcounts) it *= row_dsize();
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
-        log::debug_("Sending {} rows", utils::to_string(m_last_send_counts));
+        auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
+        if (all_sends_empty && m_last_recv_count)
+            log::warn_("this rank is sending no data at all, but it received data in the previous communication");
 
+        log::debug_("Sending {} rows", utils::to_string(sendcounts));
         mpi::all_to_all(sendcounts, recvcounts);
+        log::debug_("Recving {} rows", utils::to_string(recvcounts));
+
 
         auto senddispls = m_send.displs();
         defs::inds recvdispls(mpi::nrank(), 0ul);
@@ -138,7 +143,7 @@ public:
                 (void *) (recv().dbegin() + recvdispls[mpi::irank()]),
                 recvcounts[mpi::irank()] * defs::nbyte_data) == 0);
 
-        if (!tmp) throw std::runtime_error("MPI AllToAllV failed");
+        REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
 
         recv().m_hwm = m_last_recv_count;
         m_send.clear();
