@@ -144,7 +144,6 @@ public:
                 recvcounts[mpi::irank()] * defs::nbyte_data) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
-
         recv().m_hwm = m_last_recv_count;
         m_send.clear();
     }
@@ -452,6 +451,8 @@ struct Communicator {
         SharedRow(const Communicator &comm, TableBase::Loc loc, std::string name) :
                 SharedRowSet(comm, name) {
             redefine(loc);
+            DEBUG_ASSERT_EQ(loc.is_mine(), comm.m_store.is_protected(),
+                            "the SharedRow's table should be protected");
         }
 
         void redefine(TableBase::Loc newloc) {

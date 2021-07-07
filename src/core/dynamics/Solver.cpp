@@ -19,7 +19,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_archive(opts) {
 
     if (m_wf.nreplica() > 1 && m_prop.is_exact())
-        log::warn("Replica population is redundant when doing exact propagation");
+        log::warn("Replica populations are redundant when doing exact propagation");
 
     if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && !m_prop.is_exact())
         log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
@@ -66,6 +66,7 @@ void Solver::execute(size_t ncycle) {
         m_annihilate_timer.reset();
         m_annihilate_timer.unpause();
         loop_over_spawned();
+        mpi::barrier();
         if (m_detsub) {
             m_detsub->make_mev_contribs(m_mevs, m_refs[0].get_onv());
             m_detsub->project(m_prop.tau());
@@ -75,6 +76,7 @@ void Solver::execute(size_t ncycle) {
         end_cycle();
         m_cycle_timer.pause();
         output_stats();
+
         output_mevs(m_icycle);
         ++m_icycle;
 
@@ -367,8 +369,12 @@ void Solver::make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs:
 
 void Solver::loop_over_spawned() {
     mpi::barrier();
-    if (!m_wf.recv().m_hwm) return;
-    log::debug_("nrow before: {}", m_wf.m_store.m_hwm);
+    if (!m_wf.recv().m_hwm) {
+        log::debug_("no rows received, omitting loop over spawned");
+        return;
+    }
+    auto hwm_before = m_wf.m_store.m_hwm;
+    DEBUG_ONLY(hwm_before);
 
     if (m_opts.m_propagator.m_consolidate_spawns) {
         m_wf.sort_recv();
@@ -447,16 +453,19 @@ void Solver::loop_over_spawned() {
                 total_delta += row_current.m_delta_weight;
             } else {
                 // row_current is in first row of next block
-                ASSERT(get_nrow_in_block() > 0);
+                DEBUG_ASSERT_GT(get_nrow_in_block(), 0ul,
+                    "if the current row is in a new block, there should be at least one row in the current block");
                 // get the row index (if any) of the dst_onv
                 auto irow_store = *m_wf.m_store[row_block_start.m_dst_onv];
                 make_mev_contribs_from_unique_src_onvs(row_block_start, row_block_start_src_blocks,
                                                        row_current.index() - 1, irow_store);
-                ASSERT(row_block_start.index() == row_current.index() - 1)
+                DEBUG_ASSERT_EQ(row_block_start.index(), row_current.index() - 1,
+                    "at the start of a new block, the block start should be at the immediately preceding row");
                 annihilate_row(dst_ipart, row_block_start.m_dst_onv, total_delta, get_allow_initiation(), irow_store);
                 // put block start to start of next block
                 row_block_start.step();
-                ASSERT(row_block_start.index() == row_current.index())
+                DEBUG_ASSERT_EQ(row_block_start.index(), row_current.index(),
+                    "after the final annihilation in the previous block, the block start row should be the same as the current row");
                 total_delta = row_current.m_delta_weight;
             }
         }
@@ -493,6 +502,8 @@ void Solver::loop_over_spawned() {
                            row.m_src_deterministic);
         }
     }
+    DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before+m_wf.recv().m_hwm,
+                    "the store table shouldn't have grown by more rows than were received!");
     m_wf.recv().clear();
     log::debug_("nrow after: {}", m_wf.m_store.m_hwm);
 }
@@ -521,7 +532,6 @@ void Solver::end_cycle() {
     }
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator ONVs have occurred");
-
     m_refs.end_cycle();
     if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();

@@ -11,7 +11,6 @@ Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     log::debug("Initial reference ONV for WF part {} is {}", m_ipart, get_onv().to_string());
-    ASSERT(wf.m_store.is_protected());
 }
 
 const fields::Onv<> &Reference::get_onv() const {
