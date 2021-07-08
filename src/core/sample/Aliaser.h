@@ -72,7 +72,7 @@ public:
 
     size_t draw(const size_t &irow, PRNG &prng) const {
         ASSERT(irow < m_nrow)
-        size_t iprob = std::floor(prng.draw_float() * m_nprob);
+        size_t iprob = prng.draw_uint(m_nprob);
         ASSERT(iprob < m_nprob)
         if (prng.draw_float() * m_norm.get(irow) < m_prob_table.get(irow, iprob)) return iprob;
         else return m_alias_table.get(irow, iprob);
