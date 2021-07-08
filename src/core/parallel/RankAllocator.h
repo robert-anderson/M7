@@ -93,11 +93,6 @@ struct RankDynamic {
  */
 struct RankAllocatorBase {
     /**
-     * The default number of consecutive instances of no change to the ranks to which blocks of
-     * elements are allocated ("null updates") before the rank allocation algorithm is turned off.
-     */
-    static constexpr size_t c_nnull_updates_deactivate = 20;
-    /**
      * The "cycle" on which the rank allocator was last made active. This is corresponds to the
      * loop variable of Solver::execute in this program usually, but is not required to.
      */
@@ -141,7 +136,7 @@ struct RankAllocatorBase {
      * the update method finds no reason to reallocate blocks. If this happens for a
      * certain m_nnull_updates_deactivate periods, m_active is automatically set to false.
      */
-    size_t m_nnull_updates_deactivate = c_nnull_updates_deactivate;
+    const size_t m_nnull_updates_deactivate;
     size_t m_nnull_updates = 0ul;
 
 private:
@@ -179,7 +174,7 @@ public:
      */
     void erase_dependent(RankDynamic *dependent);
 
-    RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance);
+    RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance, size_t nnull_updates_deactivate);
 
     /**
      * @return
@@ -282,8 +277,10 @@ class RankAllocator : public RankAllocatorBase {
     typedef typename KeyField<row_t>::type key_field_t;
 
 public:
-    RankAllocator(MappedTable<row_t> &table, size_t nblock, size_t period, double acceptable_imbalance) :
-            RankAllocatorBase(nblock, period, acceptable_imbalance), m_table(table), m_row(table.m_row) {}
+    RankAllocator(MappedTable<row_t> &table, size_t nblock, size_t period,
+                  double acceptable_imbalance, size_t nnull_updates_deactivate) :
+            RankAllocatorBase(nblock, period, acceptable_imbalance, nnull_updates_deactivate),
+            m_table(table), m_row(table.m_row) {}
 
     /**
      * implements base class method

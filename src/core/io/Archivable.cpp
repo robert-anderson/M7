@@ -7,11 +7,11 @@
 Archivable::Archivable(std::string name, bool load, bool save, bool chkpt) :
         m_name(std::move(name)), m_load(load), m_save(save), m_chkpt(chkpt) {}
 
-Archivable::Archivable(std::string name, const fciqmc_config::Io &io_opts) :
-        Archivable(std::move(name), io_opts.m_load, io_opts.m_save, io_opts.m_chkpt) {}
+Archivable::Archivable(std::string name, const fciqmc_config::Archivable &opts) :
+        Archivable(std::move(name), opts.m_load, opts.m_save, opts.m_chkpt) {}
 
-Archivable::Archivable(std::string name, const fciqmc_config::Archive &archive_opts) :
-        Archivable(std::move(name), archive_opts.do_load(), archive_opts.do_save(), archive_opts.do_chkpts()) {}
+Archivable::Archivable(std::string name, const fciqmc_config::Archive &opts) :
+        Archivable(std::move(name), opts.do_load(), opts.do_save(), opts.do_chkpts()) {}
 
 void Archivable::load(hdf5::GroupReader &parent) {
     if (m_load) {

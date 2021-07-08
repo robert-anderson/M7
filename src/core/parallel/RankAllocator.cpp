@@ -29,11 +29,11 @@ void RankAllocatorBase::erase_dependent(RankDynamic *dependent) {
     refresh_callback_list();
 }
 
-RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance) :
+RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance, size_t nnull_updates_deactivate) :
         m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
         m_mean_work_times(nblock, 0.0), m_gathered_total_times(mpi::nrank(), 0.0),
-        m_acceptable_imbalance(acceptable_imbalance)
+        m_acceptable_imbalance(acceptable_imbalance), m_nnull_updates_deactivate(nnull_updates_deactivate)
 {
     REQUIRE_GE_ALL(m_acceptable_imbalance, 0.0, "Acceptable imbalance fraction must be non-negative");
     REQUIRE_LE_ALL(m_acceptable_imbalance, 1.0, "Acceptable imbalance fraction must not exceed 100%");

@@ -47,8 +47,8 @@ void fciqmc_config::Archive::verify() {
         log::info("formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run");
 }
 
-fciqmc_config::Io::Io(config::Group *parent) :
-        config::Section(parent, "io",
+fciqmc_config::Archivable::Archivable(config::Group *parent) :
+        config::Section(parent, "archive",
                         "options relating to archiving behavior"),
         m_load(this, "load", false,
                "attempt to load the object from the archive at the beginning of the calculation"),
@@ -90,7 +90,7 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         m_replicate(this, "replicate", false, "evolve a statistically-independent replica of each walker population"),
         m_spin_restrict(this, "spin_restrict", 0ul,
                         "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves secondary spin quantum number"),
-        m_buffers(this), m_io(this), m_load_balancing(this) {}
+        m_buffers(this), m_archivable(this), m_load_balancing(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
         config::Section(parent, "reweight", "options relating to the on-the-fly correction of population control bias"),
@@ -149,7 +149,7 @@ fciqmc_config::FermionRdm::FermionRdm(config::Group *parent) :
         m_rank(this, "rank", 0ul, "Rank of fermion RDM to accumulate"),
         m_mixed_estimator(this, "mixed_estimator", false,
                           "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
-        m_buffers(this), m_load_balancing(this), m_io(this) {}
+        m_buffers(this), m_load_balancing(this), m_archivable(this) {}
 
 fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
         config::Section(parent, "inst_ests",
@@ -164,7 +164,7 @@ fciqmc_config::RefExcits::RefExcits(config::Group *parent) :
                         "options relating to averaged amplitudes of reference-connected ONVs"),
         m_max_exlvl(this, "max_exlvl", 0ul,
                     "maximum excitation level from the reference for which to accumulate average amplitudes"),
-        m_buffers(this), m_io(this) {}
+        m_buffers(this), m_archivable(this) {}
 
 fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
         config::Section(parent, "av_ests",

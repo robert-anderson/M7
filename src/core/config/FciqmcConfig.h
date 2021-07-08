@@ -45,12 +45,12 @@ namespace fciqmc_config {
         }
     };
 
-    struct Io : config::Section {
+    struct Archivable : config::Section {
         config::Param<bool> m_load;
         config::Param<bool> m_save;
         config::Param<bool> m_chkpt;
 
-        explicit Io(config::Group *parent);
+        explicit Archivable(config::Group *parent);
     };
 
     struct Prng : config::Section {
@@ -82,7 +82,7 @@ namespace fciqmc_config {
         config::Param<bool> m_replicate;
         config::Param<long> m_spin_restrict;
         Buffers m_buffers;
-        Io m_io;
+        Archivable m_archivable;
         LoadBalancing m_load_balancing;
 
         explicit Wavefunction(config::Group *parent);
@@ -142,7 +142,7 @@ namespace fciqmc_config {
         config::Param<bool> m_mixed_estimator;
         Buffers m_buffers;
         LoadBalancing m_load_balancing;
-        Io m_io;
+        Archivable m_archivable;
 
         explicit FermionRdm(config::Group *parent);
     };
@@ -157,7 +157,7 @@ namespace fciqmc_config {
     struct RefExcits : config::Section {
         config::Param<size_t> m_max_exlvl;
         Buffers m_buffers;
-        Io m_io;
+        Archivable m_archivable;
 
         explicit RefExcits(config::Group *parent);
     };

@@ -502,13 +502,20 @@ struct Communicator {
     Communicator(std::string name, double buffer_expansion_factor,
                  size_t nblock_ra, size_t period_ra,
                  const store_table_t &store, const send_table_t &send,
-                 double acceptable_imbalance):
+                 double acceptable_imbalance, size_t nnull_updates_deactivate):
             m_store(name + " store", store),
             m_comm(name, buffer_expansion_factor, send),
-            m_ra(m_store, nblock_ra, period_ra, acceptable_imbalance),
+            m_ra(m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }
+
+
+    Communicator(std::string name, const fciqmc_config::Buffers& buf_opts,
+                 const fciqmc_config::LoadBalancing& ra_opts,
+                 const store_table_t &store, const send_table_t &send):
+            Communicator(name, buf_opts.m_store_exp_fac, ra_opts.m_nblock_per_rank*mpi::nrank(), ra_opts.m_period,
+                         store, send, ra_opts.m_acceptable_imbalance, ra_opts.m_nnull_updates_deactivate){}
 
     virtual ~Communicator(){}
 
