@@ -6,7 +6,7 @@
 
 Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         Communicator<WalkerTableRow, SpawnTableRow, false>(
-                "walker",
+                "wavefunction",
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {

@@ -92,6 +92,7 @@ struct RankDynamic {
  * are linked to the RankAllocatorBase by a list of addresses.
  */
 struct RankAllocatorBase {
+    const std::string m_name;
     /**
      * The "cycle" on which the rank allocator was last made active. This is corresponds to the
      * loop variable of Solver::execute in this program usually, but is not required to.
@@ -174,7 +175,7 @@ public:
      */
     void erase_dependent(RankDynamic *dependent);
 
-    RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance, size_t nnull_updates_deactivate);
+    RankAllocatorBase(std::string name, size_t nblock, size_t period, double acceptable_imbalance, size_t nnull_updates_deactivate);
 
     /**
      * @return
@@ -277,9 +278,9 @@ class RankAllocator : public RankAllocatorBase {
     typedef typename KeyField<row_t>::type key_field_t;
 
 public:
-    RankAllocator(MappedTable<row_t> &table, size_t nblock, size_t period,
+    RankAllocator(std::string name, MappedTable<row_t> &table, size_t nblock, size_t period,
                   double acceptable_imbalance, size_t nnull_updates_deactivate) :
-            RankAllocatorBase(nblock, period, acceptable_imbalance, nnull_updates_deactivate),
+            RankAllocatorBase(name, nblock, period, acceptable_imbalance, nnull_updates_deactivate),
             m_table(table), m_row(table.m_row) {}
 
     /**

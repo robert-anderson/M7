@@ -505,7 +505,7 @@ struct Communicator {
                  double acceptable_imbalance, size_t nnull_updates_deactivate):
             m_store(name + " store", store),
             m_comm(name, buffer_expansion_factor, send),
-            m_ra(m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
+            m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name),
             m_buffer_expansion_factor(buffer_expansion_factor) {
     }

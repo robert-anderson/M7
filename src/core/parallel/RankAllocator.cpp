@@ -29,8 +29,9 @@ void RankAllocatorBase::erase_dependent(RankDynamic *dependent) {
     refresh_callback_list();
 }
 
-RankAllocatorBase::RankAllocatorBase(size_t nblock, size_t period, double acceptable_imbalance, size_t nnull_updates_deactivate) :
-        m_nblock(nblock), m_period(period),
+RankAllocatorBase::RankAllocatorBase(std::string name, size_t nblock, size_t period,
+                                     double acceptable_imbalance, size_t nnull_updates_deactivate) :
+        m_name(name), m_nblock(nblock), m_period(period),
         m_block_to_rank(nblock, 0ul), m_rank_to_blocks(mpi::nrank()),
         m_mean_work_times(nblock, 0.0), m_gathered_total_times(mpi::nrank(), 0.0),
         m_acceptable_imbalance(acceptable_imbalance), m_nnull_updates_deactivate(nnull_updates_deactivate)
@@ -159,7 +160,8 @@ void RankAllocatorBase::update(size_t icycle) {
     auto it_block_transfer = m_rank_to_blocks[irank_send].begin();
     for (size_t iskip=0ul; iskip<nskip; ++iskip) ++it_block_transfer;
 
-    log::info("Sending block {} from rank {} to {} on cycle {}", *it_block_transfer, irank_send, irank_recv, icycle);
+    log::info("Sending block {} of rank allocator \"{}\" from rank {} to {} on cycle {}",
+              *it_block_transfer, m_name, irank_send, irank_recv, icycle);
     // prepare vector of row indices to send
     defs::inds irows_send;
     if (mpi::i_am(irank_send)){
