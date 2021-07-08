@@ -17,9 +17,10 @@ void Propagator::load_fn(hdf5::GroupReader &parent) {
 }
 
 void Propagator::save_fn(hdf5::GroupWriter &parent) {
-    parent.save("nsite", m_ham.nsite());
-    parent.save("nelec", m_ham.nelec());
-    parent.save("shift", m_magnitude_logger.m_tau);
-    parent.save("tau", m_magnitude_logger.m_tau);
-    parent.save("psingle", m_magnitude_logger.m_psingle);
+    hdf5::GroupWriter gw("propagator", parent);
+    gw.save("nsite", m_ham.nsite());
+    gw.save("nelec", m_ham.nelec());
+    gw.save("shift", m_magnitude_logger.m_tau);
+    gw.save("tau", m_magnitude_logger.m_tau);
+    gw.save("psingle", m_magnitude_logger.m_psingle);
 }

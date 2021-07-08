@@ -38,7 +38,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
     /**
      * setup archive members and read previous calculation data into archivable objects if archive loading is enabled
      */
-    m_archive.add_members(m_prop);
+    m_archive.add_members(m_prop, *m_mevs.m_ref_excits);
     m_archive.load();
 
     m_wf.m_ra.activate(m_icycle);

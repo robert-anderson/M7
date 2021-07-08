@@ -105,8 +105,9 @@ private:
 
     void save_fn(hdf5::GroupWriter &parent) override {
         hdf5::GroupWriter gw("ref_excits", parent);
-        //m_av_ref.save(gw, 0);
-        gw.save("0", m_av_ref[0]);
+        defs::wf_t av_ref;
+        av_ref = mpi::all_sum(m_av_ref[0]);
+        gw.save("0", av_ref);
         for (auto& it: m_ref_excits) it.save(gw);
     }
 
