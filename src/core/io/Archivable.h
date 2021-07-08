@@ -26,7 +26,7 @@ struct Archivable {
 
     Archivable(std::string name, bool load, bool save, bool chkpt);
 
-    Archivable(std::string name, const fciqmc_config::Io &io_opts);
+    Archivable(std::string name, const fciqmc_config::Archivable &opts);
 
     /**
      * ctor for object which are not optionally archivable

@@ -75,7 +75,7 @@ struct RefExcits : Archivable {
     conn::Basic<> m_conn;
 
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
-            Archivable("ref_excits", opts.m_io),
+            Archivable("ref_excits", opts.m_archivable),
         m_opts(opts), m_max_exlvl(opts.m_max_exlvl), m_av_ref({1}), m_conn(nsite) {
         m_ref_excits.reserve(m_max_exlvl + 1);
         for (size_t i=1ul; i<=m_max_exlvl; ++i) m_ref_excits.emplace_back(i, i, 1);

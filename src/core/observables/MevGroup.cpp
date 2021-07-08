@@ -77,9 +77,7 @@ size_t FermionRdm::nrow_guess(size_t nann, size_t ncre, size_t nsite) {
 FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec) :
         base_t(
                 log::format("{}-body RDM", opts.m_rank),
-                opts.m_buffers.m_store_exp_fac,
-                opts.m_load_balancing.m_nblock_per_rank * mpi::nrank(),
-                opts.m_load_balancing.m_period,
+                opts.m_buffers, opts.m_load_balancing,
                 {
                         {opts.m_rank, 1},
                         MappedTableBase::nbucket_guess(
@@ -89,8 +87,7 @@ FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size
                         {opts.m_rank, 1},
                         MappedTableBase::nbucket_guess(
                                 nrow_guess(opts.m_rank, opts.m_rank, nsite) / mpi::nrank(), 3)
-                },
-                opts.m_load_balancing.m_acceptable_imbalance),
+                }),
         m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
         m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator) {
     m_store.resize(100);

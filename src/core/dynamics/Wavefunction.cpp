@@ -6,10 +6,9 @@
 
 Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         Communicator<WalkerTableRow, SpawnTableRow, false>(
-                "walker",
-                opts.m_wavefunction.m_buffers.m_store_exp_fac,
-                opts.m_wavefunction.m_load_balancing.m_nblock_per_rank * mpi::nrank(),
-                opts.m_wavefunction.m_load_balancing.m_period,
+                "wavefunction",
+                opts.m_wavefunction.m_buffers,
+                opts.m_wavefunction.m_load_balancing,
                 {
                         {
                                 nsite, opts.m_wavefunction.m_nroot,
@@ -18,10 +17,9 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
                             },
                             MappedTableBase::nbucket_guess(opts.m_propagator.m_nw_target / mpi::nrank(), 3)
                 },
-                {{nsite, need_send_parents(opts)}},
-                opts.m_wavefunction.m_load_balancing.m_acceptable_imbalance
+                {{nsite, need_send_parents(opts)}}
         ),
-        Archivable("wavefunction", opts.m_wavefunction.m_io),
+        Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
         m_nsite(nsite),
         m_format(m_store.m_row.m_weight.m_format),
