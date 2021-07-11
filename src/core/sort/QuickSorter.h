@@ -12,10 +12,9 @@
 struct QuickSorter {
 
     defs::inds m_inds;
-    typedef std::function<bool(const size_t &, const size_t &)> comp_t;
-    comp_t m_comp_fn;
+    comparators::index_cmp_fn_t m_cmp_fn;
 
-    QuickSorter(comp_t comp_fn);
+    QuickSorter(comparators::index_cmp_fn_t cmp_fn);
 
     const size_t& operator[](const size_t& i) const;
 
@@ -29,6 +28,24 @@ struct QuickSorter {
 
     void reorder_sort(TableBase &table);
 
+    /**
+     * run through rows and return false if an example is found where two consecutive rows do not conform to the
+     * ordering prescribed by m_cmp_fn.
+     * e.g. if the sorting criteria is "ascending", and the consecutive values are (1, 2), then this is test passes
+     * since the possible criteria which express this ordering (v_i > v_i-1 and v_i >= v_i-1) are both met
+     *
+     * however, sorts with equal consecutive values must be considered correctly sorted
+     *
+     *                     CASES
+     *  TEST        a < b   a==b    a > b
+     *  a < b         1       0       0
+     *
+     *
+     * @param table
+     *  table to check for correct ordering
+     * @return
+     *  true if the rows in the given table are sorted according to m_cmp_fn
+     */
     bool is_reorder_sorted(const TableBase &table);
 
 private:

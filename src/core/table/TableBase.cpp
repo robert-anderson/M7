@@ -82,7 +82,8 @@ size_t TableBase::bw_dsize() const {
 }
 
 void TableBase::resize(size_t nrow) {
-    assert(nrow > m_nrow);
+    DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
+    if (nrow==m_nrow) return;
     m_bw.resize(nrow * m_row_dsize);
     for(const auto &rp : m_row_protectors) rp->on_resize(nrow);
     m_nrow = nrow;
@@ -171,7 +172,16 @@ void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
 }
 
 std::string TableBase::to_string(const defs::inds *ordering) const {
-    return "";
+    std::string out;
+    auto row_ptr = dbegin();
+    for (size_t irow=0ul; irow<m_hwm; ++irow){
+        for (size_t idword=0ul; idword<m_row_dsize; ++idword){
+            out+=std::to_string(row_ptr[idword])+" ";
+        }
+        row_ptr+=m_row_dsize;
+        out+="\n";
+    }
+    return out;
 }
 
 void TableBase::all_gatherv(const TableBase &src) {
@@ -186,8 +196,26 @@ void TableBase::all_gatherv(const TableBase &src) {
     mpi::counts_to_displs_consec(counts, displs);
     auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
     push_back(nrow_total);
-    mpi::all_gatherv(src.dbegin(), m_hwm * m_row_dsize, dbegin(), counts, displs);
+    mpi::all_gatherv(src.dbegin(), src.m_hwm * m_row_dsize, dbegin(), counts, displs);
     post_insert_range(0, nrow_total);
+}
+
+void TableBase::gatherv(const TableBase &src, size_t irank) {
+    if (mpi::i_am(irank)) clear();
+    defs::inds nrows(mpi::nrank());
+    defs::inds counts(mpi::nrank());
+    defs::inds displs(mpi::nrank());
+    ASSERT(src.m_row_dsize == m_row_dsize);
+    mpi::all_gather(src.m_hwm, nrows);
+    counts = nrows;
+    for (auto &v: counts) v *= m_row_dsize;
+    mpi::counts_to_displs_consec(counts, displs);
+    auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
+    if (mpi::i_am(irank))
+        push_back(nrow_total);
+    mpi::gatherv(src.dbegin(), src.m_hwm * m_row_dsize, dbegin(), counts, displs, irank);
+    if (mpi::i_am(irank))
+        post_insert_range(0, nrow_total);
 }
 
 void TableBase::erase_protector(RowProtector *rp) const {

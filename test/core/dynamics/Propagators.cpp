@@ -9,7 +9,7 @@
 TEST(Propagators, RefExcitTest) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
-    opts.m_propagator.m_exact = true;
+    opts.m_propagator.m_stochastic = false;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.05;
     opts.m_propagator.m_nw_target = 100;

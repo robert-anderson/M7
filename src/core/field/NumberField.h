@@ -200,6 +200,16 @@ struct NdNumberField : NumberFieldBase {
         return ((const T *) begin())[m_format.flatten(inds)];
     }
 
+    template<typename U=T>
+    operator const typename std::enable_if<!nind, U>::type &() const {
+        return (*this)[0];
+    }
+
+    template<typename U=T>
+    operator typename std::enable_if<!nind, U>::type &() {
+        return (*this)[0];
+    }
+
     std::string to_string() const override {
         std::string tmp;
         if (nind > 0) tmp += "[";

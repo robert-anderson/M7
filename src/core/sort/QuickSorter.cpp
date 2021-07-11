@@ -4,7 +4,7 @@
 
 #include "QuickSorter.h"
 
-QuickSorter::QuickSorter(QuickSorter::comp_t comp_fn) : m_comp_fn(comp_fn) {}
+QuickSorter::QuickSorter(comparators::index_cmp_fn_t cmp_fn) : m_cmp_fn(cmp_fn) {}
 
 const size_t &QuickSorter::operator[](const size_t &i) const {
     ASSERT(i < m_inds.size());
@@ -26,7 +26,7 @@ void QuickSorter::preserve_sort(const TableBase &table) {
 
 bool QuickSorter::is_preserve_sorted(const size_t &hwm) {
     for (size_t irow = 1ul; irow < hwm; ++irow) {
-        if (!m_comp_fn(m_inds[irow - 1], m_inds[irow])) return false;
+        if (!m_cmp_fn(m_inds[irow - 1], m_inds[irow])) return false;
     }
     return true;
 }
@@ -43,7 +43,7 @@ void QuickSorter::reorder_sort(TableBase &table) {
 
 bool QuickSorter::is_reorder_sorted(const TableBase &table) {
     for (size_t irow = 1ul; irow < table.m_hwm; ++irow) {
-        if (!m_comp_fn(irow - 1, irow)) return false;
+        if (m_cmp_fn(irow, irow-1) && !m_cmp_fn(irow - 1, irow)) return false;
     }
     return true;
 }
@@ -59,7 +59,7 @@ size_t QuickSorter::partition(size_t iilo, size_t iihi) {
     auto ii = iilo - 1;
 
     for (size_t ij = iilo; ij <= iihi - 1; ij++) {
-        if (m_comp_fn(m_inds[ij], ip)) {
+        if (m_cmp_fn(m_inds[ij], ip)) {
             ii++;
             swap(ii, ij);
         }
@@ -86,7 +86,7 @@ size_t QuickSorter::partition(size_t iilo, size_t iihi, TableBase &table) {
     auto ii = iilo - 1;
 
     for (size_t ij = iilo; ij <= iihi - 1; ij++) {
-        if (m_comp_fn(ij, ip)) {
+        if (m_cmp_fn(ij, ip)) {
             ii++;
             swap(ii, ij, table);
         }

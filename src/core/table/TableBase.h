@@ -322,11 +322,20 @@ struct TableBase {
     virtual std::string to_string(const defs::inds *ordering = nullptr) const;
 
     /**
-     * gather contents of another table over all MPI ranks into this table all ranks
+     * gather contents of another table over all MPI ranks into this table on all ranks
      * @param src
      *  table whose rows are to be gathered.
      */
     virtual void all_gatherv(const TableBase &src);
+
+    /**
+     * gather contents of another table over all MPI ranks into this table on the given rank
+     * @param src
+     *  table whose rows are to be gathered.
+     * @param irank
+     *  index of the only rank in the communicator to receive the data from src
+     */
+    virtual void gatherv(const TableBase &src, size_t irank=0ul);
 
     /**
      * adds a rank-dynamic object to the RankAllocator

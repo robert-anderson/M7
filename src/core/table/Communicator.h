@@ -11,6 +11,7 @@
 #include "src/core/io/Logging.h"
 #include <set>
 #include <src/core/parallel/RankAllocator.h>
+#include <src/core/config/FciqmcConfig.h>
 #include "RowProtector.h"
 
 /**

@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 TEST(BufferedTable, Empty) {
-    typedef SingleFieldRow<fields::Number<double>> row_t;
+    typedef SingleFieldRow<fields::Number<int>> row_t;
     BufferedTable<row_t> table("", {{}});
     ASSERT_EQ(table.m_nrow, 0);
     ASSERT_EQ(table.m_hwm, 0);
@@ -19,60 +19,84 @@ TEST(BufferedTable, Empty) {
     ASSERT_FALSE(row.ptr_in_range());
 }
 
-//
-//
-//struct TestTable1 : public Table_NEW {
-//    NumericField<short, 1> shorts;
-//    NumericField<float, 1> floats;
-//    TestTable1(size_t n1, size_t n2):
-//        shorts(this, "some shorts", n1),
-//        floats(this, "some floats", n2)
-//    {}
-//};
-//
-//TEST(BufferedTable, DataIntegrityNumeric){
-//    const size_t nshort = 7;
-//    const size_t nfloat = 12;
-//    BufferedTable<TestTable1> bt(nshort, nfloat);
-//    const size_t nrow_ = 15;
-//    bt.expand(nrow_);
-//    for (size_t irow = 0ul; irow<nrow_; ++irow){
-//        ASSERT_EQ(bt.push_back(), irow);
-//        for (size_t ishort=0ul; ishort<nshort; ++ishort)
-//            bt.shorts(irow, ishort) = ishort*nshort;
-//        for (size_t ifloat=0ul; ifloat<nfloat; ++ifloat)
-//            bt.floats(irow, ifloat) = ifloat*nfloat;
-//    }
-//    for (size_t irow = 0ul; irow<nrow_; ++irow){
-//        for (size_t ishort=0ul; ishort<nshort; ++ishort)
-//            ASSERT_EQ(ishort*nshort, bt.shorts(irow, ishort));
-//        for (size_t ifloat=0ul; ifloat<nfloat; ++ifloat)
-//            ASSERT_EQ(ifloat*nfloat, bt.floats(irow, ifloat));
-//    }
-//    ASSERT_EQ(bt.m_hwm, nrow_);
-//    bt.clear();
-//    ASSERT_EQ(bt.m_nrow, nrow_);
-//    ASSERT_EQ(bt.m_hwm, 0);
-//}
-//
-//struct TestTable2 : public Table_NEW {
-//    NumericField<double, 1> doubles;
-//    NumericField<unsigned char, 1> chars;
-//    NumericVectorField<float, 1> float_vectors;
-//    TestTable2(size_t ndouble, size_t nchar, size_t nvector, size_t nvector_item):
-//    doubles(this, "some doubles", ndouble),
-//    chars(this, "some chars", nchar),
-//    float_vectors(this, nvector_item, "some vectors of floats", nvector)
-//    {}
-//};
+TEST(BufferedTable, AllGathervEmpty) {
+    typedef SingleFieldRow<fields::Number<int>> row_t;
+    BufferedTable<row_t> src_table("src", {{}});
+    BufferedTable<row_t> dst_table("dst", {{}});
+    dst_table.all_gatherv(src_table);
+    ASSERT_EQ(dst_table.m_hwm, 0ul);
+}
 
-//TEST(BufferedTable, DataIntegrityNumericVector) {
-//    BufferedTable<TestTable2> bt;
-//    bt.expand()
-//    const size_t nshort = 7;
-//    const size_t nfloat = 12;
-//    BufferedTable<TestTable1> bt(nshort, nfloat);
-//    const size_t nrow_ = 15;
-//    bt.expand(nrow_);
-//    for (size_t irow = 0ul; irow<nrow_; ++irow){
-//}
+TEST(BufferedTable, AllGatherv) {
+    /*
+     * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
+     * gathering functionality to deal with nullptr buffer dbegins.
+     */
+    const size_t irank_empty = mpi::nrank()==1 ? ~0ul: 1ul;
+    auto get_nrow = [irank_empty](size_t irank){return irank==irank_empty ? 0ul : hashing::in_range(irank, 3, 10);};
+    auto get_value = [](size_t irank, size_t irow){return hashing::in_range(irow * (irank+1), 0, 100);};
+    const size_t nrow_local = get_nrow(mpi::irank());
+    size_t nrow_global = 0ul;
+    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
+    ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
+
+    typedef SingleFieldRow<fields::Number<int>> row_t;
+    BufferedTable<row_t> src_table("src", {{}});
+    src_table.resize(nrow_local);
+    for (size_t irow = 0ul; irow<nrow_local; ++irow){
+        src_table.m_row.push_back_jump();
+        src_table.m_row.m_field = get_value(mpi::irank(), irow);
+    }
+    BufferedTable<row_t> dst_table("dst", {{}});
+    dst_table.all_gatherv(src_table);
+    ASSERT_EQ(dst_table.m_hwm, nrow_global);
+    auto& row = dst_table.m_row;
+    row.restart();
+    for (size_t irank=0ul; irank<mpi::nrank(); ++irank){
+        auto nrow = get_nrow(irank);
+        for (size_t irow=0ul; irow<nrow; ++irow){
+            ASSERT_EQ(row.m_field, get_value(irank, irow));
+            row.step();
+        }
+    }
+}
+
+TEST(BufferedTable, Gatherv) {
+    /*
+     * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
+     * gathering functionality to deal with nullptr buffer dbegins.
+     */
+    const size_t irank_empty = mpi::nrank()==1 ? ~0ul: 1ul;
+    auto get_nrow = [irank_empty](size_t irank){return irank==irank_empty ? 0ul : hashing::in_range(irank, 3, 10);};
+    auto get_value = [](size_t irank, size_t irow){return hashing::in_range(irow * (irank+1), 0, 100);};
+    const size_t nrow_local = get_nrow(mpi::irank());
+    size_t nrow_global = 0ul;
+    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
+    ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
+
+    typedef SingleFieldRow<fields::Number<int>> row_t;
+    BufferedTable<row_t> src_table("src", {{}});
+    src_table.resize(nrow_local);
+    for (size_t irow = 0ul; irow<nrow_local; ++irow){
+        src_table.m_row.push_back_jump();
+        src_table.m_row.m_field = get_value(mpi::irank(), irow);
+    }
+    BufferedTable<row_t> dst_table("dst", {{}});
+
+    dst_table.gatherv(src_table);
+    if (mpi::i_am_root()) {
+        ASSERT_EQ(dst_table.m_hwm, nrow_global);
+        auto &row = dst_table.m_row;
+        row.restart();
+        for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+            auto nrow = get_nrow(irank);
+            for (size_t irow = 0ul; irow < nrow; ++irow) {
+                ASSERT_EQ(row.m_field, get_value(irank, irow));
+                row.step();
+            }
+        }
+    }
+    else {
+        ASSERT_EQ(dst_table.m_hwm, 0ul);
+    }
+}
