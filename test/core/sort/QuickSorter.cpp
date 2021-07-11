@@ -9,7 +9,6 @@
 #include "src/core/dynamics/WalkerTable.h"
 #include "gtest/gtest.h"
 
-#ifndef ENABLE_BOSONS
 TEST(QuickSorter, Test){
     const size_t nsite = 5;
     const size_t nrow = 10;
@@ -21,13 +20,13 @@ TEST(QuickSorter, Test){
     /*
      * defining a stock of arbitrary ONVs
      */
-    buffered::Onv<> onv168(nsite);
+    buffered::Onv<0> onv168(nsite);
     onv168 = {1, 6, 8};
-    buffered::Onv<> onv239(nsite);
+    buffered::Onv<0> onv239(nsite);
     onv239 = {2, 3, 9};
-    buffered::Onv<> onv345(nsite);
+    buffered::Onv<0> onv345(nsite);
     onv345 = {3, 4, 5};
-    buffered::Onv<> onv468(nsite);
+    buffered::Onv<0> onv468(nsite);
     onv468 = {4, 6, 8};
 
     row.restart();
@@ -42,20 +41,15 @@ TEST(QuickSorter, Test){
     row.step(); row.m_dst_onv = onv168;
     row.step(); row.m_dst_onv = onv468;
 
-    std::vector<fields::Onv<>*> correct_order = {&onv239, &onv345, &onv168, &onv468};
+    std::vector<fields::Onv<0>*> correct_order = {&onv239, &onv345, &onv168, &onv468};
     std::vector<size_t> correct_counts = {3, 4, 2, 1};
-
-    std::cout <<
-    table.to_string()
-    << std::endl;
-
 
     auto row1 = table.m_row;
     auto row2 = table.m_row;
     auto comp_fn = [&](const size_t &irow1, const size_t &irow2){
         row1.jump(irow1);
         row2.jump(irow2);
-        return row1.m_dst_onv <= row2.m_dst_onv;
+        return row1.m_dst_onv < row2.m_dst_onv;
     };
 
     /*
@@ -80,9 +74,4 @@ TEST(QuickSorter, Test){
      * should be on last element of correct ordering so incrementation exhausts the iterator
      */
     ASSERT_TRUE(++correct==correct_order.cend());
-
-    std::cout <<
-              table.to_string(&qs.m_inds)
-              << std::endl;
 }
-#endif

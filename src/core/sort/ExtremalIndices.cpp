@@ -6,9 +6,7 @@
 #include "ExtremalIndices.h"
 #include "src/core/parallel/MPIAssert.h"
 
-ExtremalIndices::ExtremalIndices(comparators::index_cmp_fn_t cmp_fn) :
-    // reverse arg order to match ordering of QuickSort implementation
-    m_cmp_fn([cmp_fn](const size_t& i2, const size_t& i1){return cmp_fn(i1, i2);}){}
+ExtremalIndices::ExtremalIndices(comparators::index_cmp_fn_t cmp_fn): m_cmp_fn(cmp_fn){}
 
 const size_t &ExtremalIndices::nfound() const {
     return m_nfound;
@@ -20,22 +18,19 @@ size_t ExtremalIndices::nremain() const {
 }
 
 const size_t *ExtremalIndices::begin() const {
-    return m_inds.data()+(m_inds.size()-nfound());
+    return m_inds.data();
 }
 
 const size_t &ExtremalIndices::operator[](const size_t &ifound) const {
     ASSERT(ifound<m_nfound);
-    /*
-     * the results should be read from the back of the heap vector
-     */
-    return m_inds[m_inds.size()-1-ifound];
+    return m_inds[ifound];
 }
 
 void ExtremalIndices::find(size_t nfind) {
     REQUIRE_NE(m_hwm, ~0ul, "reset method must be called to initialise high water mark");
     auto limit = std::min(m_hwm, nfind+m_nfound);
-    while (m_nfound<limit)
-        std::pop_heap(m_inds.begin(), m_inds.end()-(m_nfound++), m_cmp_fn);
+    std::partial_sort(m_inds.begin()+m_nfound, m_inds.begin()+limit, m_inds.end(), m_cmp_fn);
+    m_nfound = limit;
 }
 
 void ExtremalIndices::reset(size_t hwm) {
@@ -44,7 +39,6 @@ void ExtremalIndices::reset(size_t hwm) {
     if (m_inds.capacity() < m_hwm) m_inds.reserve(m_hwm);
     m_inds.clear();
     for (size_t i = 0ul; i < m_hwm; ++i) m_inds.push_back(i);
-    std::make_heap(m_inds.begin(), m_inds.end(), m_cmp_fn);
 }
 
 void ExtremalIndices::reset(const TableBase &table) { reset(table.m_hwm); }

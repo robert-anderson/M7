@@ -24,8 +24,8 @@ class ExtremalIndices {
      */
     size_t m_hwm = ~0ul;
     /**
-     * inds will be used as a heap, with popped elements being accumulated in
-     * order from the back of the vector
+     * after a reset, this is ordered and consecutive. After a find, the first m_nfound are the extremal indices in the
+     * requested order
      */
     defs::inds m_inds;
     /**
@@ -54,7 +54,6 @@ public:
      */
     size_t nremain() const;
     /**
-     * wrapped to avoid confusion over the STL usage of the size_t vector as a heap
      * @return
      *  pointer to the last found element index
      */
@@ -67,8 +66,7 @@ public:
      */
     const size_t &operator[](const size_t &ifound) const;
     /**
-     * heapsort from scratch with the specified number of total elements, this does not change the physical location
-     * of any data in memory, it just creates an array of element indices in the order required by the comparator
+     * start from scratch with an ordered inds array
      * @param hwm
      *  new high water mark (total number of elements to heap sort a subset from)
      */
@@ -79,7 +77,7 @@ public:
      */
     void reset(const TableBase &table);
     /**
-     * execute a heap sort until an additional nfind elements are found
+     * execute a partial sort in order to find an additional nfind elements
      * @param nfind
      *  number of additional elements to find
      */

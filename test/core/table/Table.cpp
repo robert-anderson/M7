@@ -3,7 +3,6 @@
 //
 
 #include <src/core/sample/PRNG.h>
-#include <src/core/sort/ParallelExtremalValues.h>
 #include <src/core/sort/ExtremalIndices.h>
 #include <src/core/sort/QuickSorter.h>
 #include "gtest/gtest.h"

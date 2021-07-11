@@ -26,7 +26,7 @@ void QuickSorter::preserve_sort(const TableBase &table) {
 
 bool QuickSorter::is_preserve_sorted(const size_t &hwm) {
     for (size_t irow = 1ul; irow < hwm; ++irow) {
-        if (!m_cmp_fn(m_inds[irow - 1], m_inds[irow])) return false;
+        if (m_cmp_fn(m_inds[irow], m_inds[irow-1]) &&!m_cmp_fn(m_inds[irow - 1], m_inds[irow])) return false;
     }
     return true;
 }

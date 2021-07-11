@@ -64,3 +64,25 @@ TEST(ExtremalIndices, DescendingAbs) {
     ASSERT_EQ(data[xi[3]], -12);
     ASSERT_EQ(data[xi[4]], 9);
 }
+
+TEST(ExtremalIndices, AscendingMultiple) {
+    // find elements twice
+    std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};
+    auto cmp = [&data](const size_t& i1, const size_t& i2){
+        return data[i1]<data[i2];
+    };
+    ExtremalIndices xi(cmp);
+    xi.reset(data.size());
+    xi.find(3);
+    ASSERT_EQ(xi.nfound(), 3);
+    ASSERT_EQ(data[xi[0]], -99);
+    ASSERT_EQ(data[xi[1]], -12);
+    ASSERT_EQ(data[xi[2]], 0);
+    xi.find(2);
+    ASSERT_EQ(xi.nfound(), 5);
+    ASSERT_EQ(data[xi[0]], -99);
+    ASSERT_EQ(data[xi[1]], -12);
+    ASSERT_EQ(data[xi[2]], 0);
+    ASSERT_EQ(data[xi[3]], 1);
+    ASSERT_EQ(data[xi[4]], 2);
+}
