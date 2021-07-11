@@ -33,7 +33,7 @@ struct GlobalExtremalValues {
         reset();
     }
 
-    size_t get_nrank_with_remainder(){
+    size_t get_nrank_with_remainder() const {
         size_t tot = 0ul;
         for (size_t irank=0ul; irank<mpi::nrank(); ++irank) {
             DEBUG_ASSERT_LE(m_global_nfound[irank], m_global_hwm[irank],
@@ -66,15 +66,17 @@ private:
      *  true if the eventual set of globally-extremal rows lie within the set of those already found locally
      */
     bool have_all_required_rows() const {
-        auto nrank_with_remainder = get_nrank_with_remainder();
-        // if all ranks have found all the rows they store, then there are no more locally-extremal rows to find anywhere
-        if (!nrank_with_remainder) return true;
-        // get the best of the worst "botw"
-        auto irow_local_worst = m_global_nfound[mpi::irank()]-1;
-        auto& row = m_lxv.m_work_row;
-        auto& field = m_lxv.m_work_row_field;
-        row.jump(irow_local_worst);
-        const T& local_worst = field[m_lxv.m_ielement_cmp];
+        // TODO
+        return true;
+//        auto nrank_with_remainder = get_nrank_with_remainder();
+//        // if all ranks have found all the rows they store, then there are no more locally-extremal rows to find anywhere
+//        if (!nrank_with_remainder) return true;
+//        // get the best of the worst "botw"
+//        auto irow_local_worst = m_global_nfound[mpi::irank()]-1;
+//        auto& row = m_lxv.m_work_row;
+//        auto& field = m_lxv.m_work_row_field;
+//        row.jump(irow_local_worst);
+//        //const T& local_worst = field[m_lxv.m_ielement_cmp];
     }
 
     void find_required_local_rows(size_t nrow){

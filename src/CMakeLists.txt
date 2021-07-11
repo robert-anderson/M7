@@ -34,15 +34,10 @@ if(LAPACK_FOUND)
     target_link_libraries (prof ${LAPACK_LIBRARIES})
 endif()
 
-
 if (ENABLE_HDF5)
     target_link_libraries(release ${_HDF5_LIBS})
     target_link_libraries(debug ${_HDF5_LIBS})
     target_link_libraries(prof ${_HDF5_LIBS})
-endif ()
-
-
-if (ENABLE_HDF5)
     add_dependencies(release hdf5_local)
     add_dependencies(debug hdf5_local)
     add_dependencies(prof hdf5_local)
@@ -51,14 +46,17 @@ if (ENABLE_HDF5)
     target_link_libraries(prof ${_HDF5_LIBS})
     target_include_directories(release PUBLIC
             ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
             ${PROJECT_BINARY_DIR}/hdf5_local/build
             )
     target_include_directories(debug PUBLIC
             ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
             ${PROJECT_BINARY_DIR}/hdf5_local/build
             )
     target_include_directories(prof PUBLIC
             ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
             ${PROJECT_BINARY_DIR}/hdf5_local/build
             )
 endif ()

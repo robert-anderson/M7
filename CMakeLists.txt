@@ -60,7 +60,8 @@ if(ENABLE_HDF5)
         )
         set(_HDF5_LIBS
                 ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
-                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a -ldl)
+                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
+                -ldl)
     #endif()
 endif()
 

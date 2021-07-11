@@ -34,6 +34,7 @@ target_link_options(unittest PRIVATE -g -rdynamic)
 
 
 if (ENABLE_HDF5)
+    target_link_libraries(unittest ${_HDF5_LIBS})
     add_dependencies(unittest hdf5_local)
     target_link_libraries(unittest ${_HDF5_LIBS})
     target_include_directories(unittest PUBLIC
@@ -46,4 +47,5 @@ endif ()
 #target_compile_definitions(unittest PRIVATE DEBUG=1)
 #target_compile_options(unittest PRIVATE -O0)
 
+include_directories("${CMAKE_SOURCE_DIR}")
 include_directories($ENV{INCLUDE_PATH})
