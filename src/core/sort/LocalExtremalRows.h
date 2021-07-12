@@ -76,7 +76,7 @@ struct LocalExtremalRows {
     }
 
     void reset() {
-        m_xinds.reset(static_cast<const Row &>(m_work_row).m_table->m_hwm);
+        m_xinds.reset(*static_cast<const Row &>(m_work_row).m_table);
     }
 
     /**

@@ -33,13 +33,27 @@ void ExtremalIndices::find(size_t nfind) {
     m_nfound = limit;
 }
 
-void ExtremalIndices::reset(size_t hwm) {
+void ExtremalIndices::reset(size_t hwm, defs::inds inds_ignore) {
     m_nfound = 0ul;
     m_hwm = hwm;
     if (m_inds.capacity() < m_hwm) m_inds.reserve(m_hwm);
     m_inds.clear();
-    // fill m_inds as an ordered, consecutive array of indices
-    std::iota(m_inds.begin(), m_inds.end(), 0ul);
+    std::sort(inds_ignore.begin(), inds_ignore.end());
+    // fill m_inds as an ordered array of indices. the indices are consecutive unless they appear in inds_ignore
+    auto it_next_ignore=inds_ignore.begin();
+    for (size_t i=0ul; i<m_hwm; ++i){
+        if (it_next_ignore!=inds_ignore.end() && i==*it_next_ignore) ++it_next_ignore;
+        else m_inds.push_back(i);
+    }
 }
 
-void ExtremalIndices::reset(const TableBase &table) { reset(table.m_hwm); }
+void ExtremalIndices::reset(const TableBase &table) {
+    auto stack = table.m_free_rows;
+    defs::inds irows_free;
+    irows_free.reserve(stack.size());
+    while(!stack.empty()) {
+        irows_free.push_back(stack.top());
+        stack.pop();
+    }
+    reset(table.m_hwm, irows_free);
+}

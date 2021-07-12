@@ -163,3 +163,26 @@ TEST(LocalExtremalRows, DescendingComplex) {
         ASSERT_EQ(field, complex_data[irow]);
     }
 }
+
+TEST(LocalExtremalRows, WithClearedRows) {
+    using namespace local_extremal_rows_test;
+    int_scalar_table_t table("test", {{}});
+    setup(table);
+    ASSERT_EQ(table.nrow_nonzero(), 9);
+    table.clear(2); // -2
+    ASSERT_EQ(table.nrow_nonzero(), 8);
+    table.clear(7); // -7
+    ASSERT_EQ(table.nrow_nonzero(), 7);
+    auto &row = table.m_row;
+    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
+    lxv.find(c_nfind);
+    ASSERT_EQ(lxv.nfound(), c_nfind);
+    row.jump(lxv[0]);
+    ASSERT_EQ(row.m_field, -234);
+    row.jump(lxv[1]);
+    ASSERT_EQ(row.m_field, 1);
+    row.jump(lxv[2]);
+    ASSERT_EQ(row.m_field, 4);
+    row.jump(lxv[3]);
+    ASSERT_EQ(row.m_field, 6);
+}

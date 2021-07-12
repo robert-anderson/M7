@@ -68,12 +68,14 @@ public:
     /**
      * start from scratch with an ordered inds array
      * @param hwm
-     *  new high water mark (total number of elements to heap sort a subset from)
+     *  new high water mark (total number of elements to sort a subset from)
+     * @param inds_ignore
+     *  unsorted vector of indices which should be ignored in the partial sort
      */
-    void reset(size_t hwm);
+    void reset(size_t hwm, defs::inds inds_ignore={});
     /**
      * @param table
-     *  table object from which the m_hwm is accessed
+     *  table object from which the m_hwm and free row indices are accessed
      */
     void reset(const TableBase &table);
     /**
