@@ -2,10 +2,10 @@
 // Created by rja on 09/07/2021.
 //
 
-#ifndef M7_GLOBALEXTREMALVALUES_H
-#define M7_GLOBALEXTREMALVALUES_H
+#ifndef M7_GLOBALEXTREMALROWS_H
+#define M7_GLOBALEXTREMALROWS_H
 
-#include "LocalExtremalValues.h"
+#include "LocalExtremalRows.h"
 #include "src/core/table/BufferedTable.h"
 #include "QuickSorter.h"
 
@@ -16,10 +16,15 @@ struct GlobalSortingRow : Row {
     GlobalSortingRow(const NdFormat<nind>& format): m_irank(this), m_value(this, format){}
 };
 
-
+/**
+ * applies the LocalExtremalRows class to
+ * @tparam row_t
+ * @tparam T
+ * @tparam nind
+ */
 template<typename row_t, typename T, size_t nind=0>
-struct GlobalExtremalValues {
-    typedef LocalExtremalValues<row_t, T, nind> lxv_t;
+struct GlobalExtremalRows {
+    typedef LocalExtremalRows<row_t, T, nind> lxv_t;
     typedef GlobalSortingRow<T, nind> global_sort_row_t;
     typedef BufferedTable<global_sort_row_t, false> global_sort_table_t;
     lxv_t m_lxv;
@@ -27,9 +32,9 @@ struct GlobalExtremalValues {
     defs::inds m_global_hwm;
     defs::inds m_global_nfound;
     global_sort_table_t m_global_sorter;
-    GlobalExtremalValues(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=~0ul):
+    GlobalExtremalRows(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=~0ul):
     m_lxv(row, field, largest, absval, ielement_cmp), m_global_hwm(mpi::nrank()),
-    m_global_nfound(mpi::nrank()), m_global_sorter("Global extremal values sorter", {field.m_format}){
+    m_global_nfound(mpi::nrank()), m_global_sorter("Global extremal rows sorter", {field.m_format}){
         reset();
     }
 
@@ -96,7 +101,7 @@ private:
     void load_local_values(){
         REQUIRE_TRUE_ALL(nfound_global(), "required local rows haven't been found yet");
         auto& format = m_lxv.m_work_row_field.m_format;
-        global_sort_table_t local_loader("Local loader for global extremal values sorter", {format});
+        global_sort_table_t local_loader("Local loader for global extremal rows sorter", {format});
         auto nfound_local = m_global_nfound[mpi::irank()];
         static_cast<TableBase&>(local_loader).resize(nfound_local);
         auto& source_row = m_lxv.m_work_row;
@@ -134,16 +139,17 @@ private:
     }
 
 public:
+    /**
+     * exposes a public interface for the three private methods which compute the globally-extreme rows
+     * @param nrow
+     *  number of rows to find across all ranks, this will
+     */
     void find(size_t nrow){
         find_required_local_rows(nrow);
         load_local_values();
-        if (mpi::i_am_root())
-            std::cout << m_global_sorter.to_string() << std::endl;
         sort();
-        if (mpi::i_am_root())
-            std::cout << m_global_sorter.to_string() << std::endl;
     }
 };
 
 
-#endif //M7_GLOBALEXTREMALVALUES_H
+#endif //M7_GLOBALEXTREMALROWS_H

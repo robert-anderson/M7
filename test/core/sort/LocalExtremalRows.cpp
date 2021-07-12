@@ -3,10 +3,10 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/sort/LocalExtremalValues.h"
+#include "src/core/sort/LocalExtremalRows.h"
 #include <src/core/table/BufferedFields.h>
 
-namespace local_extremal_values_test {
+namespace local_extremal_rows_test {
     typedef SingleFieldRow<fields::Number<int>> int_scalar_row_t;
     typedef BufferedTable<int_scalar_row_t> int_scalar_table_t;
     typedef SingleFieldRow<fields::Number<std::complex<float>>> complex_scalar_row_t;
@@ -45,21 +45,21 @@ namespace local_extremal_values_test {
         }
     }
 }
-TEST(LocalExtremalValues, EmptyTable) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, EmptyTable) {
+    using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {{}});
     auto &row = table.m_row;
-    LocalExtremalValues<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
+    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), 0ul);
 }
 
-TEST(LocalExtremalValues, Ascending) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, Ascending) {
+    using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {{}});
     setup(table);
     auto &row = table.m_row;
-    LocalExtremalValues<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
+    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -72,12 +72,12 @@ TEST(LocalExtremalValues, Ascending) {
     ASSERT_EQ(row.m_field, 1);
 }
 
-TEST(LocalExtremalValues, AscendingAbs) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, AscendingAbs) {
+    using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {{}});
     setup(table);
     auto &row = table.m_row;
-    LocalExtremalValues<int_scalar_row_t, int> lxv(row, row.m_field, false, true, 0);
+    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, false, true, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -90,12 +90,12 @@ TEST(LocalExtremalValues, AscendingAbs) {
     ASSERT_EQ(row.m_field, 6);
 }
 
-TEST(LocalExtremalValues, Descending) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, Descending) {
+    using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {{}});
     setup(table);
     auto &row = table.m_row;
-    LocalExtremalValues<int_scalar_row_t, int> lxv(row, row.m_field, true, false, 0);
+    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, true, false, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -108,12 +108,12 @@ TEST(LocalExtremalValues, Descending) {
     ASSERT_EQ(row.m_field, 6);
 }
 
-TEST(LocalExtremalValues, DescendingAbs) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, DescendingAbs) {
+    using namespace local_extremal_rows_test;
     int_scalar_table_t table("test", {{}});
     setup(table);
     auto &row = table.m_row;
-    LocalExtremalValues<int_scalar_row_t, int> lxv(row, row.m_field, true, true, 0);
+    LocalExtremalRows<int_scalar_row_t, int> lxv(row, row.m_field, true, true, 0);
     lxv.find(c_nfind);
     ASSERT_EQ(lxv.nfound(), c_nfind);
     row.jump(lxv[0]);
@@ -126,12 +126,12 @@ TEST(LocalExtremalValues, DescendingAbs) {
     ASSERT_EQ(row.m_field, 21);
 }
 
-TEST(LocalExtremalValues, AscendingComplex) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, AscendingComplex) {
+    using namespace local_extremal_rows_test;
     complex_scalar_table_t table("test", {{}});
     setup(table);
     auto &row = table.m_row;
-    LocalExtremalValues<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, false, true, 0);
+    LocalExtremalRows<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, false, true, 0);
     lxv.find(c_nfind);
     // prepare verification data
     auto complex_data = get_complex_data();
@@ -145,12 +145,12 @@ TEST(LocalExtremalValues, AscendingComplex) {
     }
 }
 
-TEST(LocalExtremalValues, DescendingComplex) {
-    using namespace local_extremal_values_test;
+TEST(LocalExtremalRows, DescendingComplex) {
+    using namespace local_extremal_rows_test;
     complex_scalar_table_t table("test", {{}});
     setup(table);
     auto &row = table.m_row;
-    LocalExtremalValues<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, true, true, 0);
+    LocalExtremalRows<complex_scalar_row_t, std::complex<float>> lxv(row, row.m_field, true, true, 0);
     lxv.find(c_nfind);
     // prepare verification data
     auto complex_data = get_complex_data();

@@ -2,8 +2,8 @@
 // Created by rja on 09/05/2021.
 //
 
-#ifndef M7_LOCALEXTREMALVALUES_H
-#define M7_LOCALEXTREMALVALUES_H
+#ifndef M7_LOCALEXTREMALROWS_H
+#define M7_LOCALEXTREMALROWS_H
 
 
 #include <src/core/util/utils.h>
@@ -20,7 +20,7 @@
  *  number of elements in the shape of the numerical field (0 for scalar)
  */
 template<typename row_t, typename T, size_t nind=0>
-struct LocalExtremalValues {
+struct LocalExtremalRows {
     static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
     /**
      * once-initialized, frequently assigned working row
@@ -60,7 +60,7 @@ struct LocalExtremalValues {
      */
     ExtremalIndices m_xinds;
 
-    LocalExtremalValues(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=~0ul) :
+    LocalExtremalRows(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=~0ul) :
             m_work_row(row),
             m_work_row_field(fields::identify(m_work_row, row, field)),
             m_work_row_cmp(row),
@@ -81,7 +81,7 @@ struct LocalExtremalValues {
 
     /**
      * @param nfind
-     *  number of local extremal values to find
+     *  number of local extremal rows to find
      */
     void find(size_t nfind) {
         m_xinds.find(nfind);
@@ -107,4 +107,4 @@ struct LocalExtremalValues {
 };
 
 
-#endif //M7_LOCALEXTREMALVALUES_H
+#endif //M7_LOCALEXTREMALROWS_H

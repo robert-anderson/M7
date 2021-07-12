@@ -232,6 +232,10 @@ bool TableBase::is_protected(const size_t& irow) const {
                        [&](const RowProtector* rp){return rp->is_protected(irow);});
 }
 
+size_t TableBase::nrow_nonzero() const {
+    return m_hwm-m_free_rows.size();
+}
+
 TableBase::Loc::Loc(size_t irank, size_t irow) : m_irank(irank), m_irow(irow){
 #ifndef NDEBUG
     mpi::bcast(irank);

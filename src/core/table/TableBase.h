@@ -370,6 +370,12 @@ struct TableBase {
      *  true if any of the associated RowProtectors are protecting irow
      */
     bool is_protected(const size_t &irow) const;
+
+    /**
+     * @return
+     *  number rows below the high water mark that aren't free
+     */
+    size_t nrow_nonzero() const;
 };
 
 

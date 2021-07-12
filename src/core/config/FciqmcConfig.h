@@ -109,9 +109,12 @@ namespace fciqmc_config {
 
     struct Semistochastic : config::Section {
         config::Param<size_t> m_size;
+        config::Param<double> m_l1_fraction_cutoff;
         config::Param<size_t> m_delay;
 
         explicit Semistochastic(config::Group *parent);
+
+        void verify() override;
     };
 
     struct Fcidump : config::Section {

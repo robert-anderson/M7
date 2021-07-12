@@ -38,7 +38,8 @@ void ExtremalIndices::reset(size_t hwm) {
     m_hwm = hwm;
     if (m_inds.capacity() < m_hwm) m_inds.reserve(m_hwm);
     m_inds.clear();
-    for (size_t i = 0ul; i < m_hwm; ++i) m_inds.push_back(i);
+    // fill m_inds as an ordered, consecutive array of indices
+    std::iota(m_inds.begin(), m_inds.end(), 0ul);
 }
 
 void ExtremalIndices::reset(const TableBase &table) { reset(table.m_hwm); }

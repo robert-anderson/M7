@@ -112,8 +112,15 @@ fciqmc_config::Shift::Shift(config::Group *parent) :
 fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
         config::Section(parent, "semistochastic", "options related to semi-stochastic propagation"),
         m_size(this, "size", 0ul, "number of ONVs selected to comprise the semi-stochastic space"),
+        m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
+                             "requisite fraction of the total number of walkers required to reside on an ONV for inclusion in the semistochastic space"),
         m_delay(this, "delay", 0ul,
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
+
+void fciqmc_config::Semistochastic::verify() {
+    REQUIRE_NE_ALL(bool(m_size), m_l1_fraction_cutoff==1.0, "incompatible methods of subspace selection specified");
+    REQUIRE_LE_ALL(m_l1_fraction_cutoff, 1.0, "cutoff cannot exceed 1.0");
+}
 
 fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
         config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
