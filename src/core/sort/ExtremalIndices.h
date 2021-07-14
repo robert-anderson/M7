@@ -17,12 +17,12 @@
  * class, via the find method will store that number of element indices in the order determined by the sense of the
  * inequality in the comparator
  */
-class ExtremalIndices {
+struct ExtremalIndices {
     /**
-     * the "high water mark" or total number of elements from which to find the indices corresponding to the ordered
-     * extremal values
+     * total number of elements from which to find the indices corresponding to the ordered extremal values, for tables
+     * this is the high water mark - the number of row on the free stack
      */
-    size_t m_hwm = ~0ul;
+    size_t m_nind = ~0ul;
     /**
      * after a reset, this is ordered and consecutive. After a find, the first m_nfound are the extremal indices in the
      * requested order
@@ -38,8 +38,6 @@ class ExtremalIndices {
      * total number of extremal valued elements found so far. never greater than m_hwm.
      */
     size_t m_nfound;
-
-public:
 
     explicit ExtremalIndices(comparators::index_cmp_fn_t cmp_fn);
 

@@ -39,44 +39,44 @@ struct LocalExtremalRows {
      */
     fields::Numbers <T, nind> &m_work_row_cmp_field;
     /**
-     * get the largest values in the local table
+     * base class reference to the table associated with the work rows
      */
-    const bool m_largest;
-    /**
-     * take the std::abs of numeric data before comparison
-     */
-    const bool m_absval;
+    TableBase& m_table;
     /**
      * the element index of the number field to compare.
-     * if this is ~0ul, the comparator sorts based on all columns lexically, with 0 being the major element index
      */
     const size_t m_ielement_cmp;
     /**
      * comparator used to determine order of values
      */
-    const std::function<bool(const T &, const T &)> m_value_cmp_fn;
+    const comparators::value_cmp_fn_t<T> m_value_cmp_fn;
     /**
      * implements the underlying heapsort algorithm
      */
     ExtremalIndices m_xinds;
 
-    LocalExtremalRows(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=~0ul) :
+    LocalExtremalRows(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=0ul) :
             m_work_row(row),
             m_work_row_field(fields::identify(m_work_row, row, field)),
             m_work_row_cmp(row),
             m_work_row_cmp_field(fields::identify(m_work_row_cmp, row, field)),
-            m_largest(largest), m_absval(absval), m_ielement_cmp(ielement_cmp),
+            m_table(*static_cast<const Row &>(m_work_row).m_table),
+            m_ielement_cmp(ielement_cmp),
             m_value_cmp_fn(comparators::make_value_cmp_fn<T>(absval, largest)),
             m_xinds(comparators::make_num_field_row_cmp_fn(
                     m_work_row, m_work_row_field,
                     m_work_row_cmp, m_work_row_cmp_field, m_value_cmp_fn, ielement_cmp)) {
-        ASSERT(static_cast<const FieldBase&>(m_work_row_field).belongs_to_row(m_work_row));
-        ASSERT(static_cast<const FieldBase&>(m_work_row_cmp_field).belongs_to_row(m_work_row_cmp));
+        REQUIRE_TRUE_ALL(static_cast<const FieldBase&>(m_work_row_field).belongs_to_row(m_work_row),
+                              "the work row and work field must correspond");
+        REQUIRE_TRUE_ALL(static_cast<const FieldBase&>(m_work_row_cmp_field).belongs_to_row(m_work_row_cmp),
+                              "the work row and work field must correspond");
+        REQUIRE_EQ_ALL(static_cast<const Row &>(m_work_row).m_table, static_cast<const Row &>(m_work_row_cmp).m_table,
+                       "both work rows must point to the same table");
         reset();
     }
 
     void reset() {
-        m_xinds.reset(*static_cast<const Row &>(m_work_row).m_table);
+        m_xinds.reset(m_table);
     }
 
     /**
@@ -99,10 +99,21 @@ struct LocalExtremalRows {
         return m_xinds.nremain();
     }
 
-    size_t hwm() const {
-        return static_cast<const Row &>(m_work_row).m_table->m_hwm;
+    size_t nrow_nonzero() const {
+        DEBUG_ASSERT_EQ(m_xinds.m_nind, m_table.nrow_nonzero(), "inconsistent number of indices");
+        return m_xinds.m_nind;
     }
 
+    T get_value(const size_t& i) const {
+        DEBUG_ASSERT_LT(i, nrow_nonzero(), "row index is OOB wrt number of non-zero rows");
+        DEBUG_ASSERT_LT(i, nfound(), "row index is OOB wrt number of found extremal rows");
+        m_work_row.jump(m_xinds[i]);
+        return m_work_row_field[m_ielement_cmp];
+    }
+
+    bool cmp_values (const T& v1, const T& v2) const {
+        return m_value_cmp_fn(v1, v2);
+    }
 
 };
 

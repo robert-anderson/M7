@@ -18,7 +18,7 @@ public:
     Distributed(){}
 
     operator T&() { return m_local; }
-    //operator T() const { return m_local; }
+    operator T() const { return m_local; }
 
     Distributed<T>& operator=(const T& rhs){
         m_local = rhs;

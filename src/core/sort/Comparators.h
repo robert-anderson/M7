@@ -23,16 +23,20 @@ namespace comparators {
      * for others we have no option but to sort by the absolute values (complex)
      * these three categories are encapsulated in these compile time indices
      */
-    enum AbsValCategory {Any, Invalid, Only};
+    enum AbsValCategory {
+        Any, Invalid, Only
+    };
     /**
      * all row index comparators take a pair of indices and return their relative order as boolean
      */
     typedef std::function<bool(const size_t &, const size_t &)> index_cmp_fn_t;
     /**
-     * templated function definition for scalar value comparisons
+     * templated function definition for scalar value comparisons.
+     * returns true if the first argument is "better" than the second
      */
     template<typename T>
     using value_cmp_fn_t = std::function<bool(const T &, const T &)>;
+
     /**
      * make a function which orders values based on their magnitudes
      * @tparam T
@@ -49,6 +53,7 @@ namespace comparators {
         else
             return [](const T &v, const T &v_cmp) { return std::abs(v) < std::abs(v_cmp); };
     }
+
     /**
      * make a function which orders values directly
      * @tparam T
@@ -70,18 +75,24 @@ namespace comparators {
      * make a value comparison function for each of the three absval categories
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool absval, bool largest, IndTag<Any> category) {
+    static std::function<bool(const T &, const T &)>
+    make_value_cmp_fn(bool absval, bool largest, IndTag<Any> category) {
         if (absval) return make_value_cmp_fn<T>(largest, BoolTag<true>());
         else return make_value_cmp_fn<T>(largest, BoolTag<false>());
     }
+
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool absval, bool largest, IndTag<Only> category) {
+    static std::function<bool(const T &, const T &)>
+    make_value_cmp_fn(bool absval, bool largest, IndTag<Only> category) {
         return make_value_cmp_fn<T>(largest, BoolTag<true>());
     }
+
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool absval, bool largest, IndTag<Invalid> category) {
+    static std::function<bool(const T &, const T &)>
+    make_value_cmp_fn(bool absval, bool largest, IndTag<Invalid> category) {
         return make_value_cmp_fn<T>(largest, BoolTag<false>());
     }
+
     /**
      * make a function which orders values
      * @tparam T
@@ -120,8 +131,7 @@ namespace comparators {
      * @param value_cmp_fn
      *  the function which determines the relative ordering of values
      * @param ielement_cmp
-     *  the flat element index to be compared between the nind-dimensional fields. if this is ~0ul, the ordering is
-     *  done lexicographically starting with element 0
+     *  the flat element index to be compared between the nind-dimensional fields
      * @return
      *  a comparator which determines the relative ordering of two row indices in a Table
      */
@@ -130,28 +140,15 @@ namespace comparators {
             row_t &row1, fields::Numbers<T, nind> &field1,
             row_t &row2, fields::Numbers<T, nind> &field2,
             value_cmp_fn_t<T> value_cmp_fn, size_t ielement_cmp) {
-        REQUIRE_TRUE(static_cast<FieldBase&>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
-        REQUIRE_TRUE(static_cast<FieldBase&>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
-        if (ielement_cmp == ~0ul)
-            return [&row1, &field1, &row2, &field2, value_cmp_fn, ielement_cmp]
-                (const size_t &irow1, const size_t &irow2) {
-                static_cast<const Row &>(row1).jump(irow1);
-                static_cast<const Row &>(row2).jump(irow2);
-                for (size_t i = 0ul; i < field2.nelement(); ++i) {
-                    if (field1[i] != field2[i])
-                        return value_cmp_fn(field1[i], field2[i]);
-                }
-                return false;
-            };
-        else {
-            DEBUG_ASSERT_LE(ielement_cmp, field1.nelement(), "compared field index OOB");
-            return [&row1, &field1, &row2, &field2, value_cmp_fn, ielement_cmp]
+        REQUIRE_TRUE(static_cast<FieldBase &>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
+        REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
+        DEBUG_ASSERT_LE(ielement_cmp, field1.nelement(), "compared field index OOB");
+        return [&row1, &field1, &row2, &field2, value_cmp_fn, ielement_cmp]
                 (const size_t &irow, const size_t &irow_cmp) {
-                static_cast<const Row &>(row1).jump(irow);
-                static_cast<const Row &>(row2).jump(irow_cmp);
-                return value_cmp_fn(field1[ielement_cmp], field2[ielement_cmp]);
-            };
-        }
+            static_cast<const Row &>(row1).jump(irow);
+            static_cast<const Row &>(row2).jump(irow_cmp);
+            return value_cmp_fn(field1[ielement_cmp], field2[ielement_cmp]);
+        };
     }
 };
 
