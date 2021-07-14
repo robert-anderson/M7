@@ -85,7 +85,7 @@ struct Shift {
      * the numbers of walkers on each WF part in the last iteration is stored and updated each
      * MC cycle so that the growth rate can be computed
      */
-    buffered::Numbers<defs::wf_t, defs::ndim_wf> m_nwalker_last_update;
+    buffered::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_last_update;
     /**
      * values of the diagonal shift for each WF part
      */

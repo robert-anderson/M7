@@ -26,7 +26,7 @@ void Reference::update_ref_conn_flags() {
 }
 
 void Reference::accept_candidate(double redefinition_thresh) {
-    std::vector<defs::wf_t> gather(mpi::nrank());
+    std::vector<defs::wf_comp_t> gather(mpi::nrank());
     mpi::all_gather(m_candidate_abs_weight, gather);
     DEBUG_ASSERT_EQ(m_candidate_abs_weight, gather[mpi::irank()], "Gather error");
     size_t irank = std::distance(gather.begin(), std::max_element(gather.begin(), gather.end()));
@@ -96,7 +96,8 @@ const defs::wf_t &Reference::weight() const {
 }
 
 defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ipart) const {
-    return (m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart])/(m_global.m_row.occupied_ncycle(icycle));
+    auto unnorm = m_global.m_row.m_average_weight[ipart]+m_global.m_row.m_weight[ipart];
+    return unnorm/static_cast<defs::wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
 }
 
 References::References(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham, const Wavefunction &wf,

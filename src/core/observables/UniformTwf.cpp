@@ -44,7 +44,6 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
         }
     }
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
-        ASSERT(weight[ipart] > 0)
         m_numerator[ipart] += weight[ipart] * helem_sum; // no abs
     }
 }

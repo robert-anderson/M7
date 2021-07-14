@@ -30,7 +30,7 @@ class Reference : public Wavefunction::SharedRow {
      * If a candidate for redefinition of the reference is found, then its weight and row within m_list must be stored
      */
     size_t m_irow_candidate;
-    defs::wf_t m_candidate_abs_weight = 0.0;
+    defs::wf_comp_t m_candidate_abs_weight = 0.0;
     /**
      * default scale factor defining when the candidate weight has grown to the magnitude at which it must be made the
      * new reference for this WF part

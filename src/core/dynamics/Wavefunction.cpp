@@ -39,6 +39,18 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
                             m_nspawned, m_nannihilated);
 }
 
+Wavefunction::~Wavefunction() {
+    weights_gxr_t gxr(m_store.m_row, m_store.m_row.m_weight, true, true, 0);
+    gxr.find(20);
+    BufferedTable<WalkerTableRow> xr_gathered("global top weighted", {m_store.m_row});
+    gxr.gatherv(xr_gathered);
+    auto& row = xr_gathered.m_row;
+    log::info("Top-weighted WF elements for part 0:");
+    for (row.restart(); row.in_range(); row.step()){
+        log::info("{}  {}  {}", row.m_onv, row.m_weight[0], row.m_initiator[0]);
+    }
+}
+
 std::vector<std::string> Wavefunction::h5_field_names() {
     if (!defs::enable_bosons)
         return {"onv", "weight"};
@@ -63,9 +75,8 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
         row_reader.read(iitem);
         conn.connect(ref, row_reader.m_onv);
         bool ref_conn = !consts::float_is_zero(ham.get_element(conn));
-        conn.connect(row_reader.m_onv, row_reader.m_onv);
         ASSERT(row_reader.m_weight.nelement()==m_format.m_nelement);
-        create_row(0ul, row_reader.m_onv, ham.get_element(conn), std::vector<bool>(npart(), ref_conn));
+        create_row(0ul, row_reader.m_onv, ham.get_energy(row_reader.m_onv), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }
 }
@@ -84,7 +95,7 @@ defs::wf_comp_t Wavefunction::square_norm(const size_t &ipart) const {
     auto &row = m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
         const defs::wf_t &weight = row.m_weight[ipart];
-        res += std::pow(weight, 2.0);
+        res += std::pow(std::abs(weight), 2.0);
     }
     return mpi::all_sum(res);
 }

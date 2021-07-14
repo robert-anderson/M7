@@ -10,32 +10,33 @@
 
 buffered::FermionOnv ham_parts::Fermion::guess_reference(const int &spin_restrict) const {
     buffered::FermionOnv ref(m_nsite);
-    ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
+    REQUIRE_EQ(static_cast<size_t>(std::abs(spin_restrict)) % 2, nelec() % 2,
+               "2Ms value incompatible with electron number");
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
     size_t n_spin_1 = nelec() - n_spin_0;
     for (size_t i = 0ul; i < n_spin_0; ++i) ref.set({0, i});
     for (size_t i = 0ul; i < n_spin_1; ++i) ref.set({1, i});
-    ASSERT(ref.spin() == spin_restrict);
+    REQUIRE_EQ(ref.spin(), spin_restrict, "reference generated is not in the correct spin sector");
     return ref;
 }
 
 ham_parts::Fermion::Fermion(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e,
-                                       bool spin_conserving_2e, bool complex_valued, bool spin_resolved, size_t int_2e_rank) :
+                            bool spin_conserving_2e, bool complex_valued, bool spin_resolved, size_t int_2e_rank) :
         m_nelec(nelec), m_nsite(nsite),
         m_spin_conserving_1e(spin_conserving_1e),
         m_spin_conserving_2e(spin_conserving_2e),
         m_complex_valued(complex_valued),
         m_int_2e_rank(int_2e_rank),
         m_int_1(nsite, spin_resolved),
-        m_int_2(nsite, spin_resolved){}
+        m_int_2(nsite, spin_resolved) {}
 
 ham_parts::Fermion::Fermion(const FcidumpFileReader &file_reader) :
         Fermion(file_reader.nelec(), file_reader.nspatorb(),
-                           file_reader.spin_conserving_1e(),
-                           file_reader.spin_conserving_2e(),
-                           file_reader.m_complex_valued,
-                           file_reader.spin_resolved(),
-                           file_reader.int_2e_rank()) {
+                file_reader.spin_conserving_1e(),
+                file_reader.spin_conserving_2e(),
+                file_reader.m_complex_valued,
+                file_reader.spin_resolved(),
+                file_reader.int_2e_rank()) {
 
     using namespace ham_data;
     defs::inds inds(4);
@@ -49,19 +50,17 @@ ham_parts::Fermion::Fermion(const FcidumpFileReader &file_reader) :
         auto contrib_case = ham_data::get_coupling_contrib_case(inds);
         auto rank = c_contrib_inds[contrib_case].m_term.m_nann;
         // all integrals are particle number conserving (for now)
-        ASSERT(rank == c_contrib_inds[contrib_case].m_term.m_ncre);
+        DEBUG_ASSERT_EQ(rank, c_contrib_inds[contrib_case].m_term.m_ncre, "particle number non-conserving");
         m_nonzero_contribs[contrib_case] = true;
-        if (rank==2) {
+        if (rank == 2) {
             if (m_on_site_only_0022 && !on_site(inds[0], inds[1], inds[2], inds[3]))
                 m_on_site_only_0022 = false;
             m_int_2.set(inds, value);
-        }
-        else if (rank==1) {
+        } else if (rank == 1) {
             if (m_nn_only_1111 && !nearest_neighbors(inds[0], inds[1], false)) m_nn_only_1111 = false;
             if (m_nnp_only_1111 && !nearest_neighbors(inds[0], inds[1], true)) m_nnp_only_1111 = false;
             m_int_1.set(inds, value);
-        }
-        else if (rank==0) m_int_0 = value;
+        } else if (rank == 0) m_int_0 = value;
         else MPI_ABORT("File reader error");
     }
     mpi::barrier();
@@ -87,7 +86,7 @@ ham_parts::Fermion::Fermion(const FcidumpFileReader &file_reader) :
 }
 
 ham_parts::Fermion::Fermion(std::string fname, bool spin_major) :
-        Fermion(FcidumpFileReader(fname, spin_major)){}
+        Fermion(FcidumpFileReader(fname, spin_major)) {}
 
 defs::ham_comp_t ham_parts::Fermion::get_energy(const fields::Onv<0> &det) const {
     return consts::real(get_element_0(det));
@@ -132,7 +131,8 @@ defs::ham_t ham_parts::Fermion::get_element_1(const conn::Antisym<0> &connection
     return connection.phase() ? -element : element;
 }
 
-defs::ham_t ham_parts::Fermion::get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t
+ham_parts::Fermion::get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
 }
 
@@ -149,7 +149,9 @@ defs::ham_t ham_parts::Fermion::get_element(const conn::Antisym<0> &connection) 
     switch (connection.nexcit()) {
         case 0:
             return get_element_0(connection);
-        case 1: ASSERT(connection.ncom() + connection.nexcit() == nelec());
+        case 1:
+            DEBUG_ASSERT_EQ(connection.ncom() + connection.nexcit(), nelec(),
+                            "particle number not conserved by excitation");
             return get_element_1(connection);
         case 2:
             return get_element_2(connection);
@@ -165,7 +167,7 @@ defs::ham_t ham_parts::Fermion::get_element(const fields::Onv<0> &bra, const fie
 defs::ham_t ham_parts::Boson::get_element_0(const fields::BosonOnv &onv) const {
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode)
-        res += m_omegas[imode] * onv[imode];
+        res += m_omegas[imode] * static_cast<defs::ham_comp_t>(onv[imode]);
     return res;
 }
 
@@ -176,7 +178,7 @@ defs::ham_comp_t ham_parts::Boson::get_energy(const fields::BosonOnv &onv) const
 defs::ham_t ham_parts::Boson::get_element_0(const conn::Boson &conn) const {
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode)
-        res += m_omegas[imode] * conn.com(imode);
+        res += m_omegas[imode] * static_cast<defs::ham_comp_t>(conn.com(imode));
     return res;
 }
 
@@ -194,7 +196,7 @@ defs::ham_t ham_parts::Boson::get_element(const conn::Boson &bonvconn) const {
 }
 
 ham_parts::Coupling::Coupling(size_t nmode, size_t nboson_cutoff, defs::ham_t v) :
-        m_nmode(nmode), m_nboson_cutoff(nboson_cutoff), m_v(v){}
+        m_nmode(nmode), m_nboson_cutoff(nboson_cutoff), m_v(v) {}
 
 defs::ham_t ham_parts::Coupling::v(const size_t &p, const size_t &q, const size_t &n) const {
     return (p == q && p == n) ? m_v : 0.0;
@@ -224,8 +226,8 @@ defs::ham_t ham_parts::Coupling::get_element_1(const conn::Antisym<1> &aconn) co
         case 1: {
             auto p = aconn.cre()[0] % m_nmode;
             auto q = aconn.ann()[0] % m_nmode;
-            ASSERT(p != q) // spin conservation
-            ASSERT(v(p, q, imode) == 0)
+            DEBUG_ASSERT_NE(p, q, "the cre and ann SQ ops can't refer to the same site due to spin conservation");
+            DEBUG_ASSERT_EQ(v(p, q, imode), 0.0, "for now we only have the diagonal 1-electron contributions")
             return v(p, q, imode);
         }
         default:

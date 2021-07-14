@@ -21,7 +21,7 @@ struct FciqmcStatsRow : Row {
     fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_annihilated;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy_num;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_ref_weight;
-    fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_ref_proj_energy;
+    fields::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy;
     fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_l2_norm;
     fields::Numbers<size_t, defs::ndim_wf> m_ninitiator;
     fields::Numbers<size_t, defs::ndim_wf> m_nocc_onv;
@@ -35,7 +35,7 @@ struct FciqmcStatsRow : Row {
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_denom;
-    fields::Numbers<defs::ham_t, defs::ndim_wf> m_reweighting_factor;
+    fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_reweighting_factor;
 
     FciqmcStatsRow(NdFormat<2> format) :
             m_wf_format(format),

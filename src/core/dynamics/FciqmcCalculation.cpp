@@ -17,7 +17,7 @@ FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};
     m_wf.create_row(0, ref_onv, ref_energy, std::vector<bool>(m_wf.npart(), true));
     if (ref_loc.is_mine())
-        m_wf.set_weight(0, opts.m_wavefunction.m_nw_init);
+        m_wf.set_weight(0, opts.m_wavefunction.m_nw_init.get());
     m_prop->m_shift.m_values = ref_energy;
     Solver solver(opts, *m_prop, m_wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);

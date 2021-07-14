@@ -265,14 +265,13 @@ struct NumberField : NdNumberField<T, 0ul> {
         return *this;
     }
 
-    operator T &() {
+    operator T&() {
         return *(T *) FieldBase::begin();
     }
 
-    operator const T &() const {
+    operator const T&() const {
         return *(const T *) FieldBase::begin();
     }
 };
-
 
 #endif //M7_NUMBERFIELD_H

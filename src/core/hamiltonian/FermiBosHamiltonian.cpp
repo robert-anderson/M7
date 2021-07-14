@@ -11,7 +11,7 @@ FermiBosHamiltonian::FermiBosHamiltonian(std::string fname, bool spin_major, siz
 
 FermiBosHamiltonian::FermiBosHamiltonian(const fciqmc_config::Hamiltonian &opts):
     FermiBosHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_nboson_max,
-                            opts.m_boson_coupling, opts.m_boson_frequency){}
+                            opts.m_boson_coupling.get(), opts.m_boson_frequency.get()){}
 
 const BosonCouplings &FermiBosHamiltonian::bc() const {
     return m_boson_couplings;

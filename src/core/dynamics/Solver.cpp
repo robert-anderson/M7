@@ -140,8 +140,10 @@ void Solver::begin_cycle() {
 
     if (m_opts.m_propagator.m_semistochastic && !m_detsub) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
-            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(m_wf, m_icycle));
-            m_detsub->build_from_all_occupied(m_prop.m_ham);
+            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(
+                    m_opts.m_propagator.m_semistochastic, m_wf, m_icycle));
+            m_detsub->build_from_most_occupied(m_prop.m_ham);
+            //m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("Initialized deterministic subspace");
         }
     }
@@ -253,7 +255,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
     if (consts::float_is_zero(delta_weight)) return;
     ASSERT(!consts::float_is_zero(delta_weight));
 
-    m_wf.m_nspawned.m_local[dst_ipart] += delta_weight;
+    m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
     if (irow_store == ~0ul) {
         /*
          * the destination ONV is not currently occupied, so initiator rules
@@ -273,7 +275,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[dst_ipart];
         auto weight_after = weight_before + delta_weight;
         if (!consts::float_is_zero(weight_before) && !consts::float_is_zero(weight_after)
-            && ((weight_before > 0) != (weight_after > 0)))
+            && ((std::abs(weight_before) > 0) != (std::abs(weight_after) > 0)))
             m_wf.m_nannihilated.m_local[dst_ipart] += std::abs(std::abs(weight_before) - std::abs(weight_after));
         m_wf.change_weight(dst_ipart, delta_weight);
     }
@@ -283,7 +285,7 @@ void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
     if (!m_mevs.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     // the current cycle should be included in the denominator
-    auto ncycle_occ = row.occupied_ncycle(icycle);
+    auto ncycle_occ = static_cast<defs::wf_comp_t>(row.occupied_ncycle(icycle));
     if (!ncycle_occ) {
         ASSERT(row.m_average_weight.is_zero());
         return;
@@ -450,7 +452,7 @@ void Solver::loop_over_spawned() {
         for (row_current.restart(); row_current.in_range(); row_current.step()) {
             size_t dst_ipart = row_block_start.m_dst_ipart;
             if (still_in_block()) {
-                total_delta += row_current.m_delta_weight;
+                total_delta += row_current.m_delta_weight[0];
             } else {
                 // row_current is in first row of next block
                 DEBUG_ASSERT_GT(get_nrow_in_block(), 0ul,

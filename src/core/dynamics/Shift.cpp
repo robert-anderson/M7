@@ -57,7 +57,7 @@ bool Reweighter::product_chk() const {
 
 Shift::Shift(const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
-        m_nwalker_last_update(wf_fmt.m_shape, std::numeric_limits<defs::wf_t>::max()),
+        m_nwalker_last_update(wf_fmt.m_shape, std::numeric_limits<defs::wf_comp_t>::max()),
         m_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_avg_value_histories(wf_fmt.m_nelement, std::queue<defs::ham_comp_t>()),
         m_avg_values(wf_fmt.m_shape, opts.m_shift.m_init),

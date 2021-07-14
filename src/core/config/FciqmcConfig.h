@@ -179,9 +179,9 @@ namespace fciqmc_config {
 
     struct Hamiltonian : config::Section {
         Fcidump m_fcidump;
-        config::Param<defs::ham_t> m_boson_frequency;
-        config::Param<defs::ham_t> m_boson_coupling;
-        config::Param<defs::ham_t> m_nboson_max;
+        config::Param<defs::ham_comp_t> m_boson_frequency;
+        config::Param<defs::ham_comp_t> m_boson_coupling;
+        config::Param<defs::ham_comp_t> m_nboson_max;
 
         Hamiltonian(config::Group *parent);
 

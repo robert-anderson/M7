@@ -34,7 +34,7 @@ public:
     defs::ham_t get_element_0(const fields::BosonOnv &onv) const {
         defs::ham_t res = 0;
         for (size_t imode = 0ul; imode < m_nmode; ++imode)
-            res += m_omega * onv[imode];
+            res += m_omega * static_cast<defs::ham_comp_t>(onv[imode]);
         return res;
     }
 
@@ -46,7 +46,7 @@ public:
         defs::ham_t res = 0;
         if (aconn.nexcit()) return res;
         for (size_t imode = 0ul; imode < m_nmode; ++imode)
-            res += m_omega * bonvconn.com(imode);
+            res += m_omega * static_cast<defs::ham_comp_t>(bonvconn.com(imode));
         return res;
     }
 
@@ -79,7 +79,7 @@ public:
                 auto p = aconn.cre()[0] % m_nmode;
                 auto q = aconn.ann()[0] % m_nmode;
                 ASSERT(p != q) // spin conservation
-                ASSERT(v(p, q, imode) == 0)
+                ASSERT(v(p, q, imode) == 0.0)
                 return v(p, q, imode);
             }
             default:

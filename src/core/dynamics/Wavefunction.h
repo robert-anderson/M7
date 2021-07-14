@@ -16,6 +16,7 @@
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/field/Fields.h"
 #include "src/core/sort/QuickSorter.h"
+#include "src/core/sort/GlobalExtremalRows.h"
 
 /**
  * A communicator whose m_store is the list of occupation number vectors currently
@@ -28,6 +29,8 @@
  * are the called the "spawning lists"
  */
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
+
+    typedef GlobalExtremalRows<WalkerTableRow, defs::wf_t, defs::ndim_wf> weights_gxr_t;
 
     const fciqmc_config::Document &m_opts;
     const size_t m_nsite;
@@ -84,6 +87,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
     Wavefunction(const fciqmc_config::Document &opts, size_t nsite);
+
+    ~Wavefunction();
 
     static bool need_send_parents(const fciqmc_config::Document &opts) {
         return opts.m_av_ests.m_fermion_rdm.m_rank > 0;

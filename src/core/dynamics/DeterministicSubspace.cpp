@@ -17,10 +17,21 @@ void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDa
     local.m_weight = source.m_weight;
 }
 
-DeterministicSubspace::DeterministicSubspace(Wavefunction &wf, size_t icycle) :
+DeterministicSubspace::DeterministicSubspace(const fciqmc_config::Semistochastic& opts, Wavefunction &wf, size_t icycle) :
         Wavefunction::PartSharedRowSet<DeterministicDataRow>(wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
-        m_wf(wf), m_epoch("semistochastic"){
+        m_opts(opts), m_wf(wf), m_epoch("semistochastic"){
     m_epoch.update(icycle, true);
+}
+
+void DeterministicSubspace::build_from_most_occupied(const FermionHamiltonian &ham) {
+    auto row = m_wf.m_store.m_row;
+    Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, 0);
+    gxr.find(m_opts.m_size);
+    for (size_t i =0ul; i<gxr.m_ninclude; ++i) {
+        row.jump(gxr[i]);
+        add_(row);
+    }
+    build_connections(ham);
 }
 
 void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
@@ -28,6 +39,7 @@ void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
     log::debug("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
     conn::Antisym<> conn_work(m_wf.m_nsite);
     auto& row_local = m_local.m_row;
+    m_sparse_ham.resize(m_global.m_hwm);
     for (row_local.restart(); row_local.in_range(); row_local.step()){
         // loop over local subspace (H rows)
         auto& row_global = m_global.m_row;
@@ -45,9 +57,7 @@ void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
 void DeterministicSubspace::build_from_all_occupied(const FermionHamiltonian &ham) {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()){
-        if (!row.is_cleared()) add_(row.index());
-        for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
-            row.m_deterministic.set(ipart);
+        if (!row.is_cleared()) add_(row);
     }
     build_connections(ham);
 }
@@ -58,7 +68,7 @@ void DeterministicSubspace::build_from_occupied_connections(const FermionHamilto
     for (row.restart(); row.in_range(); row.step()){
         conn_work.connect(onv, row.m_onv);
         if (row.is_cleared() || conn_work.nexcit()>3) continue;
-        add_(row.index());
+        add_(row);
         for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             row.m_deterministic.set(ipart);
     }

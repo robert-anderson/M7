@@ -95,7 +95,6 @@ struct FieldBase {
         return 0;
     }
 
-
 private:
 
     int cmp(const FieldBase &other) const;

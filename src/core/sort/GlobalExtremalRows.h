@@ -61,23 +61,28 @@ struct GlobalExtremalRows {
             m_global_sorter("Global extremal rows sorter", {{}}) {
         reset();
     }
-
+    /**
+     * @return
+     *  the number of MPI ranks with any nonzero rows left to find in partial sorting operations
+     */
     size_t get_nrank_with_remainder() const {
         size_t count = m_lxr.nremain() > 0;
         return mpi::all_sum(count);
     }
-
+    /**
+     * start the sort from scratch
+     */
     void reset() {
         m_lxr.reset();
         m_ninclude.reset();
     }
 
-    size_t nremain() const {
-        return m_lxr.nremain();
-    }
-
 private:
-
+    /**
+     * in response to the newly expanded locally-extremal sets of rows, determine which of these should be included in
+     * the global set by identifying the rank with the "best of the worst values", If this rank still has nonzero rows
+     * remaining, its worst value is the criterion for inclusion of rows from all ranks.
+     */
     void update_ninclude() {
         /*
          * get the local worst value
@@ -100,6 +105,9 @@ private:
          */
         m_ninclude = m_lxr.nfound();
         if (ignored_ranks.size() < mpi::nrank()) {
+            /*
+             * setup a function to order the worst sorted values from each rank
+             */
             auto index_cmp_fn = [&](const size_t &irank, const size_t &jrank) {
                 return m_lxr.m_value_cmp_fn(local_worst_values[irank], local_worst_values[jrank]);
             };
@@ -110,22 +118,28 @@ private:
                 auto irank_botw = xi[0];
                 auto botw = local_worst_values[irank_botw];
                 while (m_ninclude && m_lxr.cmp_values(botw, m_lxr.get_value(m_ninclude-1))) {
-                    // reduce the number of included rows until:
-                    //      there are none left, or
-                    //      the best of the worst values is no longer better than the worst value on this rank
+                    /*
+                     * reduce the number of included rows until:
+                     *  there are none left, or
+                     *  the best of the worst values is no longer better than the worst value on this rank
+                     */
                     --m_ninclude;
                 }
             }
         }
         m_ninclude.mpi_sum();
     }
-
+    /**
+     * find more locally extremal rows. this is done so as to get close to the target number of rows but not overshoot
+     * by too much, since we eventually need to communicate all included values to the root rank for sorting
+     * @param nrow
+     *  target number of row to find globally
+     */
     void find_required_local_rows(size_t nrow) {
         REQUIRE_NE_ALL(m_ninclude.reduced(), ~0ul, "required local row reduction hasn't been performed");
         auto nrank_with_remainder = get_nrank_with_remainder();
         if (nrank_with_remainder == 0 || m_ninclude.reduced() >= nrow) {
-            // no ranks have any more rows to find
-            // or we already have enough rows
+            // no ranks have any more rows to find or we already have enough rows
             return;
         }
         /*
@@ -134,7 +148,7 @@ private:
          * X: the rest of the locally extreme rows (excluded)
          * O: the rest of the nonzero rows on the rank which are not in any particular order
          * IIIIIXXXXXXXXXOOOOOOOOOOO|
-         * a call to m_lxv.find(4) would change this picture to
+         * e.g. a call to m_lxv.find(4) would change this picture to
          * IIIIIXXXXXXXXXXXXXOOOOOOO|
          * the number of rows we want to make available for comparison in the next iteration is:
          */
@@ -159,8 +173,19 @@ private:
          */
         find_required_local_rows(nrow);
     }
-
-    void load_local_values() {
+    /**
+     * once the required number of locally extremal rows has been found, the next step is to prepare for the sorting
+     * operation by loading the locally extremal included values along with their rank of origin into a "local_loader"
+     * table, whereupon these tables are gathered onto the root rank into a table with the same row type
+     *
+     * this could of course have been done with lower communication overhead by just sending the values and associating
+     * the offset of the gathered data with the rank index. but crucially we need to keep track of the ranks of origin
+     * of each value in the sort so we know how many to include from each rank in the final globally extremal set, and
+     * so the rank-value rowed table would need to be constructed for the global sort anyway. The implemented solution
+     * is deemed to be the cleanest at this moment, but perhaps the communication overhead could be reduced as described
+     * here in future if it proves to be problematic.
+     */
+    void load_values_for_sorting() {
         REQUIRE_NE_ALL(m_ninclude.reduced(), ~0ul, "required local row reduction hasn't been performed");
         REQUIRE_TRUE_ALL(m_ninclude.reduced(), "required local rows haven't been found yet");
         global_sort_table_t local_loader("Local loader for global extremal rows sorter", {{}});
@@ -178,7 +203,12 @@ private:
             static_cast<TableBase &>(m_global_sorter).resize(m_ninclude.reduced());
         static_cast<TableBase &>(m_global_sorter).gatherv(local_loader);
     }
-
+    /**
+     * do an inplace quicksort on the gathered globally extremal rank-value pairs and loop over the result keeping tally
+     * of the number of times each rank of origin is encountered before the number of rows to be included is reached
+     * @param nrow
+     *  desired number of rows to find
+     */
     void sort(size_t nrow) {
         nrow = std::min(nrow, m_ninclude.reduced());
         defs::inds ninclude_each_rank(mpi::nrank(), 0ul);
@@ -211,8 +241,29 @@ public:
         update_ninclude();
         if (!mpi::all_sum(m_lxr.m_table.nrow_nonzero())) return;
         find_required_local_rows(nrow);
-        load_local_values();
+        load_values_for_sorting();
         sort(nrow);
+    }
+    /**
+     * @param i
+     *  ordinal index of the row among the local inclusions in the globally extremal set. with i=0, the row index
+     *  returned is the best value on this rank, and with i=m_ninclude-1 (provided that m_ninclude>0) the returned
+     *  index is that of the worst value on this rank to be included in the globally extremal set
+     * @return
+     *  the row index associated with the ordinal index
+     */
+    const size_t& operator[](const size_t& i) const {
+        DEBUG_ASSERT_LT(i, m_ninclude, "the specified index was not included in the globally extremal set");
+        return m_lxr[i];
+    }
+
+    void gatherv(Table<row_t>& dst, size_t iroot=0ul) const {
+        BufferedTable<row_t> m_local("locally included globally extreme rows", m_lxr.m_work_row);
+        m_local.push_back(m_ninclude);
+        for (size_t iinclude=0ul; iinclude<m_ninclude; ++iinclude){
+            m_local.copy_row_in(m_lxr.m_table, (*this)[iinclude], iinclude);
+        }
+        dst.gatherv(m_local, iroot);
     }
 };
 

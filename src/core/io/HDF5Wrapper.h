@@ -313,7 +313,7 @@ namespace hdf5 {
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::complex<T> &v, size_t irank=0ul) {
             defs::inds shape = {2};
-            save(name, reinterpret_cast<T*>(&v), shape, {"real_imag"}, irank);
+            save(name, reinterpret_cast<const T*>(&v), shape, {"real_imag"}, irank);
         }
 
         /**

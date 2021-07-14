@@ -68,13 +68,23 @@ public:
 
 
 struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataRow>{
+    typedef Wavefunction::PartSharedRowSet<DeterministicDataRow> base_t;
+    const fciqmc_config::Semistochastic& m_opts;
     Wavefunction& m_wf;
     sparse::Matrix<defs::ham_t> m_sparse_ham;
     Epoch m_epoch;
 
-    DeterministicSubspace(Wavefunction& wf, size_t icycle);
+    DeterministicSubspace(const fciqmc_config::Semistochastic& opts, Wavefunction& wf, size_t icycle);
 
     virtual ~DeterministicSubspace(){}
+
+    void add_(WalkerTableRow& row) {
+        base_t::add_(row.index());
+        for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
+            row.m_deterministic.set(ipart);
+    }
+
+    void build_from_most_occupied(const FermionHamiltonian &ham);
 
     void build_connections(const FermionHamiltonian &ham);
 

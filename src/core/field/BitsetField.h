@@ -17,6 +17,8 @@ struct BitsetField : FieldBase {
         BitsetField &m_field;
         const size_t m_ibit = 0;
 
+        BitView(BitsetField &field, size_t ibit): m_field(field), m_ibit(ibit){}
+
         operator bool() const {
             return m_field.get(m_ibit);
         }

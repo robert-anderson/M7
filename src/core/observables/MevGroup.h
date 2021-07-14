@@ -177,9 +177,9 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
      */
     defs::ham_comp_t get_energy(const FermionHamiltonian& ham) const {
         ASSERT(m_ncre==2 && m_nann==2);
-        defs::ham_comp_t e1 = 0.0;
-        defs::ham_comp_t e2 = 0.0;
-        defs::wf_comp_t trace = 0.0;
+        defs::ham_t e1 = 0.0;
+        defs::ham_t e2 = 0.0;
+        defs::wf_t trace = 0.0;
         auto row = m_store.m_row;
 
         for (row.restart(); row.in_range(); row.step()){
@@ -208,8 +208,8 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         e2 = mpi::all_sum(e2);
         trace = mpi::all_sum(trace);
         ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
-        const auto norm = trace / integer_utils::combinatorial(ham.nelec(), 2);
-        return ham.m_int_0 + (e1 + e2)/norm;
+        const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.nelec(), 2);
+        return consts::real(ham.m_int_0) + (consts::real(e1) + consts::real(e2))/norm;
     }
 };
 
