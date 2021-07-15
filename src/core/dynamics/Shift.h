@@ -8,7 +8,7 @@
 #include <src/core/io/InteractiveVariable.h>
 #include <queue>
 #include "src/core/hamiltonian/Hamiltonian.h"
-#include "Wavefunction.h"
+#include "src/core/wavefunction/Wavefunction.h"
 #include "MagnitudeLogger.h"
 
 /**

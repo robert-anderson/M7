@@ -2,7 +2,7 @@
 // Created by rja on 18/05/2021.
 //
 
-#include <src/core/dynamics/Wavefunction.h>
+#include <src/core/wavefunction/Wavefunction.h>
 #include <src/core/basis/CiSpaces.h>
 #include "gtest/gtest.h"
 

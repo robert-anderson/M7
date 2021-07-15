@@ -159,7 +159,7 @@ public:
         DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
         m_dbegin = m_table->dbegin() + m_dsize * i;
         m_i = i;
-        DEBUG_ASSERT_TRUE(in_range(), "Row is out of table bounds");
+        DEBUG_ASSERT_LE(i, m_table->m_hwm, "Row is out of table bounds");
     }
 
     void jump(const Row &other) const {

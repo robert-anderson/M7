@@ -7,7 +7,7 @@
 
 
 #include <src/core/config/FciqmcConfig.h>
-#include "Wavefunction.h"
+#include "src/core/wavefunction/Wavefunction.h"
 #include "StochasticPropagator.h"
 #include "Solver.h"
 

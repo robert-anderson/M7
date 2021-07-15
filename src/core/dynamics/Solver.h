@@ -13,12 +13,13 @@
 #include <src/core/observables/MevGroup.h>
 #include <src/core/io/FciqmcStats.h>
 #include <src/core/io/Archivable.h>
-#include "Reference.h"
+#include "src/core/wavefunction/Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStats.h"
 #include "src/core/io/ParallelStats.h"
 #include "Propagator.h"
-#include "DeterministicSubspace.h"
+#include "src/core/wavefunction/DeterministicSubspace.h"
+#include "Annihilator.h"
 
 class Solver {
 
@@ -27,6 +28,7 @@ class Solver {
     const fciqmc_config::Document &m_opts;
     Wavefunction &m_wf;
     References m_refs;
+    Annihilator m_annihilator;
 
     std::unique_ptr<FciqmcStats> m_stats = nullptr;
     std::unique_ptr<ParallelStats> m_parallel_stats = nullptr;

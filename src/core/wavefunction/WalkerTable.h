@@ -24,30 +24,13 @@ struct WalkerTableRow : public Row {
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
     fields::Number<size_t> m_icycle_occ;
 
-    fields::Onv<> &key_field() {
-        return m_onv;
-    };
+    fields::Onv<> &key_field();;
 
-    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights) :
-            m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
-            m_root_format({nroot}, {"nroot"}),
-            m_onv(this, nsite, "onv"),
-            m_weight(this, m_wf_format, "weight"),
-            m_hdiag(this, "diagonal H element"),
-            m_initiator(this, m_wf_format, "initiator status flag"),
-            m_deterministic(this, m_root_format, "deterministic subspace flag"),
-            m_ref_conn(this, m_root_format, "reference connection flag"),
-            m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
-            m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
-            {}
+    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights);
 
-    bool is_h5_write_exempt() const override {
-        return m_onv.is_zero();
-    }
+    bool is_h5_write_exempt() const override;
 
-    size_t occupied_ncycle(const size_t& icycle_current) const {
-        return icycle_current-m_icycle_occ;
-    }
+    size_t occupied_ncycle(const size_t& icycle_current) const;
 };
 
 struct UniqueOnvRow : public Row {

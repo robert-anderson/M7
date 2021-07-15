@@ -8,6 +8,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                std::vector<TableBase::Loc> ref_locs) :
         m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
+        m_annihilator(m_wf, m_prop.m_ham, m_refs, m_icycle, opts.m_propagator.m_nadd),
         m_exit( "exit"),
         m_uniform_twf(
                 m_opts.m_inst_ests.m_spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
@@ -378,6 +379,10 @@ void Solver::loop_over_spawned() {
     auto hwm_before = m_wf.m_store.m_hwm;
     DEBUG_ONLY(hwm_before);
 
+    m_annihilator.sort_recv();
+    m_annihilator.loop_over_dst_onvs();
+
+#if 0
     if (m_opts.m_propagator.m_consolidate_spawns) {
         m_wf.sort_recv();
         /*
@@ -504,6 +509,7 @@ void Solver::loop_over_spawned() {
                            row.m_src_deterministic);
         }
     }
+#endif
     DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before+m_wf.recv().m_hwm,
                     "the store table shouldn't have grown by more rows than were received!");
     m_wf.recv().clear();
@@ -598,6 +604,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_on
 
 void Solver::make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
                                                     const size_t &irow_block_end, const size_t &irow_store) {
+    if (!mevs()) return;
     // if the dst onv is not stored, it cannot give contributions to any MEVs
     if (irow_store == ~0ul) {
         row_current.jump(irow_block_end);

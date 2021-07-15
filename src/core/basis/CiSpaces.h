@@ -9,8 +9,8 @@
 #include <src/core/enumerator/Enumerator.h>
 #include <src/core/table/BufferedFields.h>
 #include <src/core/parallel/RankAllocator.h>
-#include <src/core/dynamics/WalkerTable.h>
-#include <src/core/dynamics/Wavefunction.h>
+#include <src/core/wavefunction/WalkerTable.h>
+#include <src/core/wavefunction/Wavefunction.h>
 #include <src/core/util/Foreach.h>
 
 namespace ci_gen {

@@ -10,8 +10,8 @@
 #include <src/core/parallel/Reduction.h>
 #include <src/core/io/Archivable.h>
 #include "src/core/table/Communicator.h"
-#include "src/core/dynamics/WalkerTable.h"
-#include "src/core/dynamics/SpawnTable.h"
+#include "WalkerTable.h"
+#include "SpawnTable.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/field/Fields.h"

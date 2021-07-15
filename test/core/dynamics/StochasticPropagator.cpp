@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/dynamics/Wavefunction.h"
+#include "src/core/wavefunction/Wavefunction.h"
 #include "src/core/dynamics/StochasticPropagator.h"
 #include "src/core/dynamics/Solver.h"
 

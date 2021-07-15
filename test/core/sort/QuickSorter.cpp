@@ -5,8 +5,8 @@
 #include "src/core/table/BufferedFields.h"
 #include "src/core/table/BufferedTable.h"
 #include "src/core/sort/QuickSorter.h"
-#include "src/core/dynamics/SpawnTable.h"
-#include "src/core/dynamics/WalkerTable.h"
+#include "src/core/wavefunction/SpawnTable.h"
+#include "src/core/wavefunction/WalkerTable.h"
 #include "gtest/gtest.h"
 
 TEST(QuickSorter, Test){

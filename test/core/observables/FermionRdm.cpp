@@ -3,7 +3,7 @@
 //
 
 #include <src/core/io/Options.h>
-#include <src/core/dynamics/Wavefunction.h>
+#include <src/core/wavefunction/Wavefunction.h>
 #include <src/core/dynamics/ExactPropagator.h>
 #include <src/core/dynamics/Solver.h>
 #include "gtest/gtest.h"
