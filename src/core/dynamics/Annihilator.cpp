@@ -31,7 +31,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     }
 }
 
-Annihilator::Annihilator(Wavefunction &wf, const FermionHamiltonian<> &ham, const References &refs,
+Annihilator::Annihilator(Wavefunction &wf, const Hamiltonian<> &ham, const References &refs,
                          const size_t &icycle, defs::wf_t nadd) :
         m_wf(wf), m_ham(ham), m_refs(refs), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_comm.recv().m_row), m_work_row2(wf.m_comm.recv().m_row),
@@ -43,7 +43,7 @@ void Annihilator::sort_recv() {
 }
 
 void
-Annihilator::annihilate_row(const size_t &dst_ipart, const FermionOnvField<> &dst_onv, const defs::wf_t &delta_weight,
+Annihilator::annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
                             bool allow_initiation, const size_t &irow_store) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
