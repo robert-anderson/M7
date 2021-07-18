@@ -93,6 +93,7 @@ void Solver::execute(size_t ncycle) {
                 break;
             }
         }
+        log::flush();
     }
     if (m_icycle==ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
     if (m_mevs.m_accum_epoch) {
