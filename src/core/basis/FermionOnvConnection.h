@@ -124,11 +124,5 @@ public:
     const bool& phase() const {return m_phase;}
 };
 
-template<typename T>
-struct MatrixElement {
-    AntisymFermionOnvConnection aconn;
-    T element = 0;
-    MatrixElement(const fields::Onv<0>& det): aconn(AntisymFermionOnvConnection(det)) {}
-};
 
 #endif //M7_FERMIONONVCONNECTION_H

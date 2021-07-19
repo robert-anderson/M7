@@ -6,7 +6,6 @@
 #define M7_UNIFORMTWF_H
 
 
-#include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include <src/core/parallel/Reducible.h>
 #include "src/core/wavefunction/WalkerTable.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
