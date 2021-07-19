@@ -18,7 +18,7 @@ struct Table : TableBase {
     row_t m_row;
 
     Table(const row_t &row) :
-            TableBase(static_cast<const Row &>(row).m_dsize), m_row(row) {
+            TableBase(static_cast<const Row &>(row).m_size), m_row(row) {
         static_cast<Row &>(m_row).m_table = this;
         static_cast<Row &>(m_row).select_null();
     }

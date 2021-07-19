@@ -40,12 +40,11 @@ struct TableBase {
     /**
      * The data layout of a Table is defined by a class derived from Row, but this templated dependence is not included
      * in this base class. While the fine detail of field offsets etc is not needed here, we need to know the basics,
-     * i.e. what amount of memory does a single row require. This is always padded to a whole number of data words.
-     * This number of defs::data_t words is called the "dsize"
+     * i.e. what amount of memory does a single row require. This is always padded to a whole number of system words.
+     * A system word is sizeof(size_t) bytes in length
      */
-    const size_t m_row_dsize;
     /**
-     * Size of the row in bytes i.e. sizeof(defs::data_t)*m_row_dsize
+     * Size of the row in bytes, which is always an integer multiple of the word length
      */
     const size_t m_row_size;
     /**
@@ -77,8 +76,12 @@ struct TableBase {
      * list of "row protectors". If any of these is protecting a row it should not be cleared
      */
     mutable std::list<RowProtector *> m_row_protectors;
+    /**
+     * save a buffer of zeros for fast memcmp to determine whether a row is cleared
+     */
+    const std::vector<char> m_null_row_string;
 
-    TableBase(size_t row_dsize);
+    TableBase(size_t row_size);
 
     TableBase(const TableBase &other);
 
@@ -86,13 +89,13 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the BufferWindow
      */
-    defs::data_t *dbegin();
+    defs::buf_t *begin();
 
     /**
      * @return
      * const pointer to the first data word of the BufferWindow
      */
-    const defs::data_t *dbegin() const;
+    const defs::buf_t *begin() const;
 
     /**
      * @param irow
@@ -100,7 +103,7 @@ struct TableBase {
      * @return
      *  pointer to the first data word of the indexed row in the BufferWindow
      */
-    defs::data_t *dbegin(const size_t &irow);
+    defs::buf_t *begin(const size_t &irow);
 
     /**
      * @param irow
@@ -108,7 +111,7 @@ struct TableBase {
      * @return
      *  const pointer to the first data word of the indexed row in the BufferWindow
      */
-    const defs::data_t *dbegin(const size_t &irow) const;
+    const defs::buf_t *begin(const size_t &irow) const;
 
     /**
      * Associate the table with a buffer by assigning the table an available BufferWindow
@@ -153,9 +156,9 @@ struct TableBase {
 
     /**
      * @return
-     *  size of the buffer window in data words
+     *  size of the buffer window in bytes
      */
-    size_t bw_dsize() const;
+    size_t bw_size() const;
 
     /**
      * @return
@@ -170,31 +173,18 @@ struct TableBase {
      *  true if entire row is zero
      */
     bool is_cleared(const size_t &irow) const;
-
     /**
      * call the resize method on the buffer window and reflect the reallocation in m_nrow
      * @param nrow
-     *  new number of rows
+     *  minimum number of rows in the new buffer. the buffer's resize_factor determines the actual size of the reallocation
      */
     void resize(size_t nrow);
-
     /**
-     * convenient wrapper for resize in which the argument is the additional number of rows rather than the total
+     * resize based on the number of additional rows required beyond those currently allocated
      * @param nrow
-     *  number of new rows to be added
+     *  minimum number of new rows. the buffer's resize_factor determines the actual size of the reallocation
      */
     void expand(size_t nrow);
-
-    /**
-     * in some situations it may be performant to reduce the number of reallocations, and this can be done by
-     * allocating some rounded-up fraction more than we need.
-     * @param nrow
-     *  number of new rows needed
-     * @param expansion_factor
-     *  fraction of nrow to be added as "extra"
-     */
-    void expand(size_t nrow, double expansion_factor);
-
     /**
      * erasure of rows changes meaning depending on the derived class, and so this is a virtual method. Here, we
      * simply call clear on each indexed row

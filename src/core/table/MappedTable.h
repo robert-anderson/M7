@@ -144,7 +144,7 @@ struct MappedTable : Table<row_t>, MappedTableBase {
         return;
         if (m_ntotal_lookup > m_remap_nlookup && (double(m_ntotal_skip) / double(m_ntotal_lookup)) > m_remap_ratio) {
             // use the same expansion factor as for the Table buffer
-            const size_t nbucket_new = nbucket() * TableBase::m_bw.expansion_factor();
+            const size_t nbucket_new = nbucket();// TODO * TableBase::m_bw.expansion_factor();
             std::vector<std::forward_list<size_t>> new_buckets(nbucket_new);
             for (const auto &old_bucket : m_buckets) {
                 for (const auto irow : old_bucket) {

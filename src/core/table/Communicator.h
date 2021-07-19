@@ -35,7 +35,6 @@ public:
 private:
     send_t m_send;
     recv_t m_recv;
-    double m_buffer_expansion_factor;
 
 public:
     /*
@@ -47,16 +46,15 @@ public:
     template<typename ...Args>
     CommunicatingPair(std::string name, double buffer_expansion_factor, const send_table_t &send):
             m_send(name + " send", mpi::nrank(), send),
-            m_recv(name + " recv", recv_table_t(send.m_row)),
-            m_buffer_expansion_factor(buffer_expansion_factor) {
-        m_send.set_expansion_factor(m_buffer_expansion_factor);
-        m_recv.set_expansion_factor(m_buffer_expansion_factor);
+            m_recv(name + " recv", recv_table_t(send.m_row)) {
+        m_send.set_expansion_factor(buffer_expansion_factor);
+        m_recv.set_expansion_factor(buffer_expansion_factor);
         m_send.expand(1);
         m_recv.expand(1);
     }
 
-    size_t row_dsize() const {
-        return static_cast<const TableBase &>(m_recv).m_row_dsize;
+    size_t row_size() const {
+        return static_cast<const TableBase &>(m_recv).m_row_size;
     }
 
     send_t &send() {
@@ -102,7 +100,7 @@ public:
     void communicate() {
         m_last_send_counts = m_send.hwms();
         defs::inds sendcounts(m_last_send_counts);
-        for (auto &it: sendcounts) it *= row_dsize();
+        for (auto &it: sendcounts) it *= row_size();
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
         auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
@@ -118,31 +116,30 @@ public:
         defs::inds recvdispls(mpi::nrank(), 0ul);
         for (size_t i = 1ul; i < mpi::nrank(); ++i)
             recvdispls[i] = recvdispls[i - 1] + recvcounts[i - 1];
-        auto recv_dsize = recvdispls.back() + recvcounts.back();
-        m_last_recv_count = recv_dsize / row_dsize();
+        auto recv_size = recvdispls.back() + recvcounts.back();
+        m_last_recv_count = recv_size / row_size();
 
-        if (recv_dsize > static_cast<const TableBase &>(recv()).bw_dsize()) {
+        if (recv_size > static_cast<const TableBase &>(recv()).bw_size()) {
             /*
              * the recv table is full
              * this expansion by a factor is done explicitly here, because we
              * want to expand relative to size of the incoming data, not the
              * current size of the buffer
              */
-            m_recv.resize(std::ceil((1.0 + m_buffer_expansion_factor) * m_last_recv_count));
+            m_recv.resize(m_last_recv_count);
         }
 
-        REQUIRE_TRUE_ALL(m_send.dbegin(), "Send buffer is not allocated on all ranks!");
-        REQUIRE_TRUE_ALL(m_recv.dbegin(), "Recv buffer is not allocated on all ranks!");
+        REQUIRE_TRUE_ALL(m_send.begin(), "Send buffer is not allocated on all ranks!");
+        REQUIRE_TRUE_ALL(m_recv.begin(), "Recv buffer is not allocated on all ranks!");
 
-        auto tmp = mpi::all_to_allv(m_send.dbegin(), sendcounts, senddispls,
-                                    m_recv.dbegin(), recvcounts, recvdispls);
+        auto tmp = mpi::all_to_allv(m_send.begin(), sendcounts, senddispls,
+                                    m_recv.begin(), recvcounts, recvdispls);
         /*
          * check that the data addressed to this rank from this rank has been copied correctly
          */
-        ASSERT(!send(mpi::irank()).dbegin() or std::memcmp(
-                (void *) (send(mpi::irank()).dbegin()),
-                (void *) (recv().dbegin() + recvdispls[mpi::irank()]),
-                recvcounts[mpi::irank()] * defs::nbyte_data) == 0);
+        ASSERT(!send(mpi::irank()).begin() or
+            std::memcmp(send(mpi::irank()).begin(),
+                        recv().dbegin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
         recv().m_hwm = m_last_recv_count;
@@ -404,14 +401,14 @@ struct Communicator {
             /*
              * convert from units of rows to datawords...
              */
-            for (auto &i : m_counts) i *= m_local.m_row_dsize;
-            for (auto &i : m_displs) i *= m_local.m_row_dsize;
-            mpi::all_gatherv(m_local.dbegin(), m_counts[mpi::irank()], m_global.dbegin(), m_counts, m_displs);
+            for (auto &i : m_counts) i *= m_local.m_row_size;
+            for (auto &i : m_displs) i *= m_local.m_row_size;
+            mpi::all_gatherv(m_local.begin(), m_counts[mpi::irank()], m_global.begin(), m_counts, m_displs);
             /*
              * ... and back again
              */
-            for (auto &i : m_counts) i /= m_local.m_row_dsize;
-            for (auto &i : m_displs) i /= m_local.m_row_dsize;
+            for (auto &i : m_counts) i /= m_local.m_row_size;
+            for (auto &i : m_displs) i /= m_local.m_row_size;
         }
 
         void update() override {

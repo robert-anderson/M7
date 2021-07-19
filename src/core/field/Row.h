@@ -49,15 +49,15 @@ private:
      * builds. no checks are enforced in the release build.
      *
      * if m_i < m_table->m_hwm:
-     *  m_dbegin should not be nullptr
+     *  m_begin should not be nullptr
      * else if m_i == m_table->m_hwm:
-     *  m_dbegin should be nullptr, and field dereferencing should fail ASSERTs
+     *  m_begin should be nullptr, and field dereferencing should fail ASSERTs
      * else:
      *  this state is invalid
      *
      * TODO: investigate whether dbegin needs to be cached with regard to performance
      */
-    mutable defs::data_t *m_dbegin = nullptr;
+    mutable defs::buf_t *m_begin = nullptr;
     mutable size_t m_i = 0ul;
 
 public:
@@ -65,10 +65,6 @@ public:
      * total size of a single row in bytes
      */
     size_t m_size = 0ul;
-    /**
-     * total size of a single row in data words (defs::data_t)
-     */
-    size_t m_dsize = 0ul;
     /**
      * number of bytes already allocated to added fields
      */
@@ -101,19 +97,19 @@ public:
      *  true if the m_dbegin pointer is valid with respect to the table object
      */
     bool ptr_in_range() const {
-        return (m_dbegin >= m_table->dbegin()) && (m_dbegin < m_table->dbegin() + m_table->m_hwm * m_dsize);
+        return (m_begin >= m_table->begin()) && (m_begin < m_table->begin() + m_table->m_hwm * m_size);
     }
 
-    defs::data_t *dbegin() {
+    defs::buf_t *begin() {
         DEBUG_ASSERT_TRUE(m_dbegin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
-        return m_dbegin;
+        return m_begin;
     }
 
-    const defs::data_t *dbegin() const {
+    const defs::buf_t *begin() const {
         DEBUG_ASSERT_TRUE(m_dbegin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
-        return m_dbegin;
+        return m_begin;
     }
 
     /**
@@ -134,10 +130,10 @@ public:
         DEBUG_ASSERT_LE(irow_begin, m_table->m_hwm, "Cannot restart to an out-of-range row index");
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         if (!m_table->m_hwm && !irow_begin){
-            m_dbegin = nullptr;
+            m_begin = nullptr;
         } else {
             DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
-            m_dbegin = m_table->dbegin(irow_begin);
+            m_begin = m_table->begin(irow_begin);
         }
         m_i = irow_begin;
     }
@@ -150,14 +146,14 @@ public:
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_TRUE(in_range(), "Row is out of table bounds");
-        m_dbegin += m_dsize;
+        m_begin += m_size;
         m_i++;
     }
 
     void jump(const size_t &i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
         DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
-        m_dbegin = m_table->dbegin() + m_dsize * i;
+        m_begin = m_table->begin() + m_size * i;
         m_i = i;
         DEBUG_ASSERT_LE(i, m_table->m_hwm, "Row is out of table bounds");
     }
@@ -172,12 +168,12 @@ public:
 
     void select_null() const {
         m_i = m_table->m_hwm;
-        m_dbegin = nullptr;
+        m_begin = nullptr;
     }
 
     bool null_selected() const {
-        DEBUG_ASSERT_EQ(m_i==m_table->m_hwm, m_dbegin==nullptr, "Row in inconsistent state");
-        return m_dbegin;
+        DEBUG_ASSERT_EQ(m_i==m_table->m_hwm, m_begin==nullptr, "Row in inconsistent state");
+        return m_begin;
     }
 
     /**
@@ -189,14 +185,14 @@ public:
 
     void copy_in(const Row &other) {
         ASSERT(other.m_dsize == m_dsize);
-        std::copy(other.dbegin(), other.dbegin() + m_dsize, dbegin());
+        std::copy(other.begin(), other.begin() + m_size, begin());
     }
 
     Row() {}
 
     Row(const Row &other) {
         m_table = other.m_table;
-        m_dbegin = other.m_dbegin;
+        m_begin = other.m_begin;
         other.m_child = this;
         ASSERT(m_fields.empty())
     }

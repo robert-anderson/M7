@@ -8,27 +8,26 @@
 #include "src/core/sort/ExtremalIndices.h"
 #include "RowProtector.h"
 
-TableBase::TableBase(size_t row_dsize) :
-        m_row_dsize(row_dsize), m_row_size(row_dsize * defs::nbyte_data){
-}
+TableBase::TableBase(size_t row_size) :
+        m_row_size(row_size), m_null_row_string(row_size, 0){}
 
 TableBase::TableBase(const TableBase &other) :
-        TableBase(other.m_row_dsize){}
+        TableBase(other.m_row_size){}
 
-defs::data_t *TableBase::dbegin() {
-    return m_bw.m_dbegin;
+defs::buf_t *TableBase::begin() {
+    return m_bw.m_begin;
 }
 
-const defs::data_t *TableBase::dbegin() const {
-    return m_bw.m_dbegin;
+const defs::buf_t *TableBase::begin() const {
+    return m_bw.m_begin;
 }
 
-defs::data_t *TableBase::dbegin(const size_t &irow) {
-    return m_bw.m_dbegin + irow * m_row_dsize;
+defs::buf_t *TableBase::begin(const size_t &irow) {
+    return m_bw.m_begin + irow * m_row_size;
 }
 
-const defs::data_t *TableBase::dbegin(const size_t &irow) const {
-    return m_bw.m_dbegin + irow * m_row_dsize;
+const defs::buf_t *TableBase::begin(const size_t &irow) const {
+    return m_bw.m_begin + irow * m_row_size;
 }
 
 void TableBase::set_buffer(Buffer *buffer) {
@@ -58,43 +57,39 @@ size_t TableBase::get_free_row() {
 void TableBase::clear() {
     ASSERT(!is_protected());
     if (!m_bw.allocated()) return;
-    std::memset(dbegin(), 0, m_row_size * m_hwm);
+    std::memset(begin(), 0, m_row_size * m_hwm);
     m_hwm = 0ul;
     while (!m_free_rows.empty()) m_free_rows.pop();
 }
 
 void TableBase::clear(const size_t &irow) {
     ASSERT(!is_protected(irow));
-    std::memset(dbegin(irow), 0, m_row_size);
+    std::memset(begin(irow), 0, m_row_size);
     m_free_rows.push(irow);
 }
 
 bool TableBase::is_cleared() const {
-    return std::all_of(dbegin(), dbegin() + m_row_dsize * m_nrow, [](const defs::data_t &i) { return i == 0; });
+    return std::memcmp(begin(), m_null_row_string.data(), m_row_size) == 0;
 }
 
 bool TableBase::is_cleared(const size_t &irow) const {
-    return std::all_of(dbegin(irow), dbegin(irow) + m_row_dsize, [](const defs::data_t &i) { return i == 0; });
+    return std::memcmp(begin(irow), m_null_row_string.data(), m_row_size) == 0;
 }
 
-size_t TableBase::bw_dsize() const {
-    return m_bw.dsize();
+size_t TableBase::bw_size() const {
+    return m_bw.size();
 }
 
 void TableBase::resize(size_t nrow) {
     DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
     if (nrow==m_nrow) return;
-    m_bw.resize(nrow * m_row_dsize);
+    m_bw.resize(nrow * m_row_size);
     for(const auto &rp : m_row_protectors) rp->on_resize(nrow);
     m_nrow = nrow;
 }
 
 void TableBase::expand(size_t nrow) {
-    resize(m_nrow + nrow);
-}
-
-void TableBase::expand(size_t nrow, double expansion_factor) {
-    resize((m_nrow + nrow)*(1+expansion_factor));
+    resize(m_nrow+nrow);
 }
 
 void TableBase::erase_rows(const defs::inds &irows) {
@@ -108,7 +103,7 @@ void TableBase::post_insert(const size_t& iinsert) {}
 void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::list<recv_cb_t> &callbacks) {
     for (size_t irow_recv = 0; irow_recv < nrow; ++irow_recv) {
         auto irow = get_free_row();
-        std::memcpy(dbegin(irow), recv.m_dbegin + irow_recv * m_row_dsize, m_row_size);
+        std::memcpy(begin(irow), recv.m_begin + irow_recv * m_row_size, m_row_size);
         post_insert(irow);
         for (auto f: callbacks) f(irow);
     }
@@ -127,12 +122,13 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
         }
         log::info_("Transferring {} rows outward to rank {}", nrow, irank_recv);
 
-        send_bw.make_room(nrow * m_row_dsize);
+        auto size_required = nrow*m_row_size;
+        if (send_bw.size() < size_required) send_bw.resize(size_required);
         for (auto iirow = 0ul; iirow < nrow; ++iirow) {
             const auto &irow = irows[iirow];
-            std::memcpy(send_bw.m_dbegin + iirow * m_row_dsize, dbegin(irow), m_row_size);
+            std::memcpy(send_bw.m_begin + iirow * m_row_size, begin(irow), m_row_size);
         }
-        mpi::send(send_bw.m_dbegin, m_row_dsize * nrow, irank_recv, m_transfer->m_irows_p2p_tag);
+        mpi::send(send_bw.m_begin, m_row_size * nrow, irank_recv, m_transfer->m_irows_p2p_tag);
         /*
          * sent rows can now be erased
          */
@@ -145,9 +141,10 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
             log::debug_("Recving rank notified by sending rank that no rows are transferred");
             return;
         }
-        recv_bw.make_room(nrow * m_row_dsize);
+        auto size_required = nrow * m_row_size;
+        if (recv_bw.size()<size_required) recv_bw.resize(size_required);
         log::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
-        mpi::recv(recv_bw.m_dbegin, m_row_dsize * nrow, irank_send, m_transfer->m_irows_p2p_tag);
+        mpi::recv(recv_bw.m_begin, m_row_size * nrow, irank_send, m_transfer->m_irows_p2p_tag);
         /*
          * now emplace received rows in TableBase buffer window, and call all callbacks for each
          */
@@ -157,28 +154,24 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
 
 void TableBase::copy_row_in(const TableBase &src, size_t irow_src, size_t irow_dst) {
     ASSERT(irow_dst < m_hwm);
-    std::memcpy(dbegin(irow_dst), src.dbegin(irow_src), m_row_size);
+    std::memcpy(begin(irow_dst), src.begin(irow_src), m_row_size);
 }
 
 void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
     if (irow == jrow) return;
-    auto iptr = dbegin(irow);
-    auto jptr = dbegin(jrow);
-    for (size_t idword = 0ul; idword < m_row_dsize; ++idword) {
-        std::swap(*iptr, *jptr);
-        ++iptr;
-        ++jptr;
-    }
+    auto iptr = begin(irow);
+    auto jptr = begin(jrow);
+    std::swap_ranges(iptr, iptr+m_row_size, jptr);
 }
 
 std::string TableBase::to_string(const defs::inds *ordering) const {
     std::string out;
-    auto row_ptr = dbegin();
+    auto row_ptr = begin();
     for (size_t irow=0ul; irow<m_hwm; ++irow){
-        for (size_t idword=0ul; idword<m_row_dsize; ++idword){
-            out+=std::to_string(row_ptr[idword])+" ";
+        for (size_t idword=0ul; idword<m_row_size; ++idword){
+            out+=std::to_string(static_cast<int>(row_ptr[idword]))+" ";
         }
-        row_ptr+=m_row_dsize;
+        row_ptr+=m_row_size;
         out+="\n";
     }
     return out;
@@ -192,11 +185,11 @@ void TableBase::all_gatherv(const TableBase &src) {
     ASSERT(src.m_row_dsize == m_row_dsize);
     mpi::all_gather(src.m_hwm, nrows);
     counts = nrows;
-    for (auto &v: counts) v *= m_row_dsize;
+    for (auto &v: counts) v *= m_row_size;
     mpi::counts_to_displs_consec(counts, displs);
     auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
     push_back(nrow_total);
-    mpi::all_gatherv(src.dbegin(), src.m_hwm * m_row_dsize, dbegin(), counts, displs);
+    mpi::all_gatherv(src.begin(), src.m_hwm * m_row_size, begin(), counts, displs);
     post_insert_range(0, nrow_total);
 }
 
@@ -208,12 +201,12 @@ void TableBase::gatherv(const TableBase &src, size_t irank) {
     ASSERT(src.m_row_dsize == m_row_dsize);
     mpi::all_gather(src.m_hwm, nrows);
     counts = nrows;
-    for (auto &v: counts) v *= m_row_dsize;
+    for (auto &v: counts) v *= m_row_size;
     mpi::counts_to_displs_consec(counts, displs);
     auto nrow_total = std::accumulate(nrows.cbegin(), nrows.cend(), 0ul);
     if (mpi::i_am(irank))
         push_back(nrow_total);
-    mpi::gatherv(src.dbegin(), src.m_hwm * m_row_dsize, dbegin(), counts, displs, irank);
+    mpi::gatherv(src.begin(), src.m_hwm * m_row_size, begin(), counts, displs, irank);
     if (mpi::i_am(irank))
         post_insert_range(0, nrow_total);
 }

@@ -15,16 +15,16 @@ private:
     Buffer m_buffer;
     std::vector<table_t> m_tables;
 
-    const size_t &row_dsize() const {
-        return static_cast<const TableBase &>(m_tables[0]).m_row_dsize;
+    const size_t &row_size() const {
+        return static_cast<const TableBase &>(m_tables[0]).m_row_size;
     }
 
-    size_t window_dsize() const {
-        return static_cast<const TableBase &>(m_tables[0]).m_bw.dsize();
+    size_t window_size() const {
+        return static_cast<const TableBase &>(m_tables[0]).m_bw.size();
     }
 
     void update_nrow() {
-        auto nrow = window_dsize() / row_dsize();
+        auto nrow = window_size() / row_size();
         for (size_t i = 0ul; i < ntable(); ++i) {
             static_cast<TableBase &>(m_tables[i]).m_nrow = nrow;
         }
@@ -36,20 +36,20 @@ public:
         return static_cast<const TableBase &>(m_tables[0]).m_nrow;
     }
 
-    defs::data_t *dbegin() {
-        return m_tables[0].dbegin();
+    defs::buf_t *begin() {
+        return m_tables[0].begin();
     }
 
-    const defs::data_t *dbegin() const {
-        return m_tables[0].dbegin();
+    const defs::buf_t *begin() const {
+        return m_tables[0].begin();
     }
 
-    size_t buffer_dsize() const {
-        return m_buffer.dsize();
+    size_t buffer_size() const {
+        return m_buffer.size();
     }
 
-    size_t bw_dsize() const {
-        return (*this)[0].bw_dsize();
+    size_t bw_size() const {
+        return (*this)[0].bw_size();
     }
 
     BufferedTableArray(std::string name, size_t ntable, const table_t& table):
@@ -72,7 +72,7 @@ public:
 
 
     BufferedTableArray& operator=(const BufferedTableArray<row_t, mapped> &other) {
-        m_buffer.resize(other.m_buffer.dsize());
+        m_buffer.resize(other.m_buffer.size());
         for (size_t itable = 0ul; itable < other.ntable(); ++itable) {
             auto& this_table = m_tables[itable];
             auto& other_table = other.m_tables[itable];
@@ -86,18 +86,12 @@ public:
     size_t ntable() const { return m_tables.size(); }
 
     void resize(size_t nrow_per_table) {
-        m_buffer.resize(ntable() * nrow_per_table * row_dsize());
+        m_buffer.resize(ntable() * nrow_per_table * row_size());
         update_nrow();
     }
 
-    void expand(size_t delta_nrow_per_table) {
-        m_buffer.expand(ntable() * delta_nrow_per_table * row_dsize());
-        update_nrow();
-    }
-
-    void expand(size_t delta_nrow_per_table, double expansion_factor) {
-        m_buffer.expand(ntable() * delta_nrow_per_table * row_dsize(), expansion_factor);
-        update_nrow();
+    void expand(size_t nrow_per_table) {
+        resize(this->nrow_per_table()+nrow_per_table);
     }
 
     table_t &operator[](const size_t &itable) {
@@ -118,7 +112,7 @@ public:
 
     defs::inds displs() const {
         defs::inds res(ntable());
-        for (size_t i = 0ul; i < ntable(); ++i) res[i] = bw_dsize() * i;
+        for (size_t i = 0ul; i < ntable(); ++i) res[i] = bw_size() * i;
         return res;
     }
 

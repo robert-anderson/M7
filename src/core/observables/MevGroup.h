@@ -125,7 +125,7 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     }
 
     void end_cycle() {
-        if (!send().buffer_dsize()) return;
+        if (!send().buffer_size()) return;
         communicate();
         auto &row = m_comm.recv().m_row;
         if (!m_comm.recv().m_hwm) return;

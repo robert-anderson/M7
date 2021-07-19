@@ -7,8 +7,8 @@
 
 #include "BitsetField.h"
 
-struct FermionOnvField : BitsetField<defs::data_t, 2> {
-    typedef BitsetField<defs::data_t, 2> base_t;
+struct FermionOnvField : BitsetField<size_t, 2> {
+    typedef BitsetField<size_t, 2> base_t;
     using base_t::get;
     using base_t::set;
     using base_t::clr;
@@ -63,25 +63,25 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
     }
 
     void excite(const size_t &i, const size_t &j) {
-        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        auto* dptr = reinterpret_cast<size_t *>(begin());
         clr(dptr, i);
         set(dptr, j);
     }
     void excite(inds_t ann, inds_t cre){
-        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        auto* dptr = reinterpret_cast<size_t *>(begin());
         clr(dptr, ann);
         set(dptr, cre);
     }
 
     void excite(const size_t &i, const size_t &j, const size_t &k, const size_t &l) {
-        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        auto* dptr = reinterpret_cast<size_t *>(begin());
         clr(dptr, i);
         clr(dptr, j);
         set(dptr, k);
         set(dptr, l);
     }
     void excite(inds_t ann1, inds_t ann2, inds_t cre1, inds_t cre2) {
-        auto* dptr = reinterpret_cast<defs::data_t *>(begin());
+        auto* dptr = reinterpret_cast<size_t *>(begin());
         clr(dptr, ann1);
         clr(dptr, ann1);
         set(dptr, cre1);
@@ -110,7 +110,7 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
 
     int spin() const {
         int spin = 0;
-        defs::data_t work;
+        size_t work;
         for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
             work = get_dataword(idataword);
             while (work) {
@@ -126,7 +126,7 @@ struct FermionOnvField : BitsetField<defs::data_t, 2> {
     int nalpha() const {
         // number of electrons occupying spinors in the alpha spin channel
         int nalpha = 0;
-        defs::data_t work;
+        size_t work;
         for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
             work = get_dataword(idataword);
             while (work) {

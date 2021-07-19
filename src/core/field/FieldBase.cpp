@@ -41,7 +41,7 @@ bool FieldBase::belongs_to_row(const Row& row) const {
 
 char *FieldBase::begin() const {
     DEBUG_ASSERT_TRUE(belongs_to_row(), "Field is not associated with row");
-    return (char *) (m_row->dbegin()) + m_row_offset;
+    return m_row->begin() + m_row_offset;
 }
 
 char *FieldBase::end() const {

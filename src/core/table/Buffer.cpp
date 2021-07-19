@@ -9,123 +9,104 @@
 Buffer::Window::Window(Buffer *buffer) {
     ASSERT(buffer);
     buffer->append_window(this);
-    ASSERT(m_buffer==buffer);
-    ASSERT(m_buffer->m_windows.back()==this);
+    ASSERT(m_buffer == buffer);
+    ASSERT(m_buffer->m_windows.back() == this);
 }
 
 bool Buffer::Window::allocated() const {
-    return m_buffer && m_buffer->dsize();
+    return m_buffer && m_buffer->size();
 }
 
-size_t Buffer::Window::dsize() const {
-    if (!m_dbegin) return 0;
-    ASSERT(m_dend);
+size_t Buffer::Window::size() const {
+    if (!m_begin) return 0;
+    ASSERT(m_end);
     ASSERT(m_buffer)
-    ASSERT(m_buffer->window_dsize()==(size_t)std::distance(m_dbegin, m_dend));
-    return std::distance(m_dbegin, m_dend);
+    ASSERT(m_buffer->window_dsize() == (size_t) std::distance(m_begin, m_end));
+    return std::distance(m_begin, m_end);
 }
 
-void Buffer::Window::move(defs::data_t *dbegin, defs::data_t *dend) {
-    if (m_dbegin) std::memmove(dbegin, m_dbegin, defs::nbyte_data*dsize());
-    m_dbegin = dbegin;
-    m_dend = dend;
+void Buffer::Window::move(defs::buf_t *begin, defs::buf_t *end) {
+    if (m_begin) std::memmove(begin, m_begin, size());
+    m_begin = begin;
+    m_end = end;
 }
 
-void Buffer::Window::resize(size_t dsize) {
+void Buffer::Window::resize(size_t size) {
     ASSERT(m_buffer)
-    m_buffer->resize(dsize * m_buffer->m_nwindow_max);
-}
-
-void Buffer::Window::make_room(size_t dsize) {
-    ASSERT(m_buffer)
-    m_buffer->make_room(dsize * m_buffer->m_nwindow_max);
-}
-
-void Buffer::Window::expand(size_t delta_dsize) {
-    ASSERT(m_buffer)
-    m_buffer->expand(delta_dsize * m_buffer->m_nwindow_max);
-}
-
-void Buffer::Window::expand(size_t delta_dsize, double expansion_factor) {
-    ASSERT(m_buffer)
-    m_buffer->expand(delta_dsize * m_buffer->m_nwindow_max, expansion_factor);
-}
-
-double Buffer::Window::expansion_factor() const {
-    return m_buffer->m_expansion_factor;
+    m_buffer->resize(size * m_buffer->m_nwindow_max);
 }
 
 Buffer::Buffer(std::string name, size_t nwindow_max) :
-        m_name(std::move(name)), m_nwindow_max(nwindow_max){
+        m_name(std::move(name)), m_nwindow_max(nwindow_max) {
     if (!name.empty()) log::info_("Creating \"{}\" buffer", name);
-    REQUIRE_TRUE(nwindow_max,"A buffer must allow at least one window");
+    REQUIRE_TRUE(nwindow_max, "A buffer must allow at least one window");
     m_windows.reserve(m_nwindow_max);
 }
 
-size_t Buffer::dsize() const {
+size_t Buffer::size() const {
     return m_data.size();
 }
 
-size_t Buffer::window_dsize() const {
-    return dsize() / m_nwindow_max;
+size_t Buffer::window_size() const {
+    return size() / m_nwindow_max;
 }
 
 void Buffer::append_window(Buffer::Window *window) {
     REQUIRE_LT(m_windows.size(), m_nwindow_max, "Buffer is over-subscribed");
-    if (dsize()) {
-        window->m_dbegin = m_data.data()+window_dsize() * m_windows.size();
-        window->m_dend = window->m_dbegin + window_dsize();
+    if (size()) {
+        window->m_begin = m_data.data() + window_size() * m_windows.size();
+        window->m_end = window->m_begin + window_size();
     }
     window->m_buffer = this;
     m_windows.push_back(window);
 }
 
-void Buffer::resize(size_t dsize) {
-    DEBUG_ASSERT_TRUE(dsize, "New size must be non-zero");
+void Buffer::resize(size_t size, double factor) {
+    if (size>this->size()) {
+        // expanding the buffer
+        if (factor < 0.0) factor = m_expansion_factor;
+    }
+    else{
+        // shrinking the buffer
+        factor = 0.0;
+    }
+    size = size*(1.0+m_expansion_factor);
+    DEBUG_ASSERT_TRUE(size, "New size must be non-zero");
     if (!m_name.empty()) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",
-        m_name, capacity_string(), capacity_string(dsize));
+                   m_name, capacity_string(), capacity_string(size));
     }
-    std::vector<defs::data_t> tmp(dsize, 0ul);
-    auto new_window_dsize = tmp.size() / m_nwindow_max;
+    std::vector<defs::buf_t> tmp;
+    try {
+        tmp.resize(size, 0ul);
+    }
+    catch (const std::bad_alloc& e){
+        ABORT(log::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));
+    }
+    auto new_window_size = tmp.size() / m_nwindow_max;
 
     for (size_t iwindow = 0ul; iwindow < m_windows.size(); ++iwindow) {
-        // work backwards for enlargement
-        auto jwindow = m_windows.size() - iwindow - 1;
+        // work forwards for shrinking, backwards for enlargement
+        auto jwindow = size < this->size() ? iwindow : m_windows.size() - iwindow - 1;
         auto window = m_windows[jwindow];
         ASSERT(window->m_buffer)
-        ASSERT(window->m_buffer==this)
-        auto new_dbegin = tmp.data() + jwindow * new_window_dsize;
-        window->move(new_dbegin, new_dbegin + new_window_dsize);
+        ASSERT(window->m_buffer == this)
+        auto new_dbegin = tmp.data() + jwindow * new_window_size;
+        window->move(new_dbegin, new_dbegin + new_window_size);
     }
     m_data = std::move(tmp);
-    ASSERT(m_data.size() == this->dsize());
-    ASSERT(m_data.data() ==m_windows[0]->m_dbegin);
+    ASSERT(m_data.size() == this->size());
+    ASSERT(m_data.data() == m_windows[0]->m_begin);
 }
 
-void Buffer::make_room(size_t dsize) {
-    if (this->dsize()<dsize) resize(dsize);
-}
-
-void Buffer::expand(size_t delta_dsize, double expansion_factor) {
-    REQUIRE_GT(expansion_factor, 0.0, "invalid expansion factor");
-    resize((dsize() + delta_dsize)*(1+expansion_factor));
-}
-
-void Buffer::expand(size_t delta_dsize) {
-    expand(delta_dsize, m_expansion_factor);
-}
-
-std::string Buffer::capacity_string(size_t dsize) const {
-    const auto ntable = "x "+std::to_string(m_windows.size())+" tables";
-    const auto per_table = std::to_string(dsize/(m_nwindow_max));
-    const auto total = std::to_string(dsize);
-    if (m_windows.size()==1)
-        return "[" + per_table +" datawords (" + string_utils::memsize(dsize*defs::nbyte_data) + ")]";
+std::string Buffer::capacity_string(size_t size) const {
+    const auto ntable = " x " + std::to_string(m_windows.size()) + " tables";
+    if (m_windows.size() == 1)
+        return "[ " + string_utils::memsize(size) + " ]";
     else
-        return "[" + per_table +" datawords "+ntable+" = " + total + " total (" + string_utils::memsize(dsize*defs::nbyte_data) + ")]";
+        return "[" + string_utils::memsize(size / m_nwindow_max) + ntable + " = " + string_utils::memsize(size) + "]";
 }
 
 std::string Buffer::capacity_string() const {
-    return capacity_string(dsize());
+    return capacity_string(size());
 }

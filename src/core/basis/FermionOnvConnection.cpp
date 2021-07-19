@@ -23,14 +23,14 @@ void FermionOnvConnection::connect(const fields::Onv<0> &in, const fields::Onv<0
     ASSERT(!in.is_zero())
     zero();
 
-    defs::data_t in_work, out_work, work;
+    size_t in_work, out_work, work;
     for (size_t idataword = 0ul; idataword<in.m_dsize; ++idataword){
         in_work = in.get_dataword(idataword);
         out_work = out.get_dataword(idataword);
         work = in_work&~out_work;
-        while (work) add_ann(bit_utils::next_setbit(work) + idataword * defs::nbit_data);
+        while (work) add_ann(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
         work = out_work &~ in_work;
-        while (work) add_cre(bit_utils::next_setbit(work) + idataword * defs::nbit_data);
+        while (work) add_cre(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
     }
 }
 
@@ -72,13 +72,13 @@ void AntisymFermionOnvConnection::connect(const fields::Onv<0> &in, const fields
     auto ann_iter = m_ann.begin();
     auto cre_iter = m_cre.begin();
 
-    defs::data_t in_work, out_work, work;
+    size_t in_work, out_work, work;
     for (size_t idataword = 0ul; idataword<in.m_dsize; ++idataword){
         in_work = in.get_dataword(idataword);
         out_work = out.get_dataword(idataword);
         work = in_work & out_work;
         while (work) {
-            auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
+            auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
             while (ann_iter != m_ann.end() && *ann_iter < setbit) {
                 // an annihilation operator has been passed in the iteration over common indices
                 ann_iter++;
@@ -109,7 +109,7 @@ void AntisymFermionOnvConnection::apply(const fields::Onv<0> &in) {
     for(size_t idataword=0ul; idataword<in.m_dsize; ++idataword){
         auto work = in.get_dataword(idataword);
         while (work) {
-            auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
+            auto setbit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
             if (ann_iter != m_ann.end() && setbit==*ann_iter) {
                 ann_iter++;
                 nperm+=ncom();

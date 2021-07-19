@@ -9,7 +9,7 @@ void OccupiedUpdater::operator()(const fields::Onv<0> &onv, defs::inds &inds) {
     inds.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_dataword(idataword);
-        while (work) inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_data);
+        while (work) inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
     }
 }
 
@@ -18,7 +18,7 @@ void VacantUpdater::operator()(const fields::Onv<0> &onv, defs::inds &inds) {
     inds.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_antidataword(idataword);
-        while (work) inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_data);
+        while (work) inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
     }
 }
 
@@ -28,7 +28,7 @@ void NdOccupiedUpdater::operator()(const fields::Onv<0> &onv, const defs::inds& 
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_dataword(idataword);
         while (work) {
-            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
+            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
             inds[map[ibit]].push_back(ibit);
         }
     }
@@ -39,7 +39,7 @@ void NdVacantUpdater::operator()(const fields::Onv<0> &onv, const defs::inds& ma
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_antidataword(idataword);
         while (work) {
-            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_data;
+            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
             inds[map[ibit]].push_back(ibit);
         }
     }

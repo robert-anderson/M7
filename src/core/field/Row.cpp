@@ -26,25 +26,24 @@ size_t Row::add_field(FieldBase *field) {
     if (!m_fields.empty()) {
         offset = m_fields.back()->m_row_offset + m_fields.back()->m_size;
         if (!(m_fields.back()->m_type_info == field->m_type_info)) {
-            // go to next whole dataword
-            offset = integer_utils::divceil(offset, defs::nbyte_data) * defs::nbyte_data;
+            // go to next whole system word
+            offset = integer_utils::divceil(offset, defs::nbyte_word) * defs::nbyte_word;
         }
     }
 
     m_current_offset = offset + field->m_size;
-    m_dsize = integer_utils::divceil(m_current_offset, defs::nbyte_data);
-    m_size = m_dsize * defs::nbyte_data;
+    m_size = integer_utils::divceil(m_current_offset, defs::nbyte_word) * defs::nbyte_word;
 
     m_fields.push_back(field);
     return offset;
 }
 
 void Row::clear() {
-    std::fill(m_dbegin, m_dbegin+m_dsize, 0);
+    std::fill(m_begin, m_begin+m_size, 0);
 }
 
 bool Row::is_cleared() const {
-    return std::all_of(m_dbegin, m_dbegin+m_dsize, [](const defs::data_t& d){return d==0;});
+    return m_table->is_cleared(index());
 }
 
 bool Row::is_h5_write_exempt() const {

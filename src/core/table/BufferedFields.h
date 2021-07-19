@@ -20,7 +20,7 @@ struct BufferedMultiField : WrappedRow, multi_field_t {
     BufferedMultiField(multi_field_t multi_field) :
             multi_field_t(multi_field),
             m_buffer("", 1),
-            m_table((multi_field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
+            m_table((multi_field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_size)) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table = &m_table;
         m_table.push_back();
@@ -35,7 +35,7 @@ struct BufferedField : WrappedRow, field_t {
     TableBase m_table;
     BufferedField(const field_t& field) : field_t(field),
                                    m_buffer("", 1),
-                                   m_table((field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_dsize)) {
+                                   m_table((field_t::add_to_row(&m_wrapped_row), m_wrapped_row.m_size)) {
         m_table.set_buffer(&m_buffer);
         m_wrapped_row.m_table = &m_table;
         m_table.push_back();
