@@ -37,7 +37,7 @@ struct StatsTable : BufferedTable<row_t> {
         for (size_t i=0ul; i<nformat; ++i) {
             for (const auto &it : m_format_strings) {
                 if (it.second==i){
-                    *m_file << "# " << (char)('A'+i) << ": " << it.first << "\n";
+                    *m_file << "# " << static_cast<char>('A'+i) << ": " << it.first << "\n";
                     break;
                 }
             }
@@ -51,7 +51,7 @@ struct StatsTable : BufferedTable<row_t> {
             auto it = m_format_strings.find(format_string);
             if (it==m_format_strings.end()) m_format_strings[format_string] = nformat++;
             *m_file << "#  " << icolumn << ".  " << num_field->m_name <<
-                " (" << (char)('A'+m_format_strings[num_field->format_string()]) << ")\n";
+                " (" << static_cast<char>('A'+m_format_strings[num_field->format_string()]) << ")\n";
             icolumn+=(num_field->m_is_complex+1)*num_field->m_nelement;
         }
         *m_file << "#\n";

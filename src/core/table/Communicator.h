@@ -139,7 +139,7 @@ public:
          */
         ASSERT(!send(mpi::irank()).begin() or
             std::memcmp(send(mpi::irank()).begin(),
-                        recv().dbegin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
+                        recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
         recv().m_hwm = m_last_recv_count;

@@ -470,14 +470,14 @@ public:
     template<typename T>
     static bool send(const T *data, size_t ndata, size_t irank_dst, int tag) {
 #ifdef ENABLE_MPI
-        return MPI_Send((void *) data, snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag, MPI_COMM_WORLD);
+        return MPI_Send(reinterpret_cast<const void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag, MPI_COMM_WORLD);
 #endif
     }
 
     template<typename T>
     static bool recv(T *data, size_t ndata, size_t irank_src, int tag) {
 #ifdef ENABLE_MPI
-        return MPI_Recv((void *) data, snrw(ndata), mpi_type<T>(), snrw(irank_src), tag, MPI_COMM_WORLD,
+        return MPI_Recv(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_src), tag, MPI_COMM_WORLD,
                         MPI_STATUS_IGNORE);
 #endif
     }
@@ -489,7 +489,7 @@ public:
     template<typename T>
     static bool bcast(T *data, size_t ndata = 1, size_t iroot = 0) {
 #ifdef ENABLE_MPI
-        return MPI_Bcast((void *) data, snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return true;
 #endif
@@ -503,9 +503,10 @@ public:
     template<typename T>
     static bool bcast(std::vector<T> &data, size_t ndata = 0, size_t iroot = 0) {
 #ifdef ENABLE_MPI
+        auto data_ptr = reinterpret_cast<void *>(data.data());
         if (!ndata) ndata = data.size();
         data.resize(ndata);
-        return MPI_Bcast((void *) data.data(), snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast(data_ptr, snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return true;
 #endif
@@ -570,8 +571,10 @@ public:
     template<typename T>
     static bool all_to_all(const T *send, size_t nsend, T *recv, size_t nrecv) {
 #ifdef ENABLE_MPI
-        return MPI_Alltoall((void *) send, snrw(nsend), mpi_type<T>(),
-                            (void *) recv, snrw(nrecv), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Alltoall(send_ptr, snrw(nsend), mpi_type<T>(),
+                            recv_ptr, snrw(nrecv), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         ASSERT(nsend == nrecv);
         return all_reduce(send, recv, MpiMax, nsend);
@@ -589,9 +592,11 @@ private:
             const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
             T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
 #ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Alltoallv(
-                (void *) send, sendcounts, senddispls, mpi_type<T>(),
-                (void *) recv, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcounts, senddispls, mpi_type<T>(),
+                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return all_to_all(send, senddispls[0]+sendcounts[0], recv, recvdispls[0]+recvcounts[0]);
 #endif
@@ -601,7 +606,9 @@ private:
     static bool gather(
             const T *send, size_t sendcount, T *recv, size_t recvcount, const size_t &iroot) {
 #ifdef ENABLE_MPI
-        return MPI_Gather((void *) send, snrw(sendcount), mpi_type<T>(), recv,
+        auto send_ptr = reinterpret_cast<void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Gather(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
                           snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return all_to_all(send, sendcount, recv, recvcount);
@@ -612,8 +619,10 @@ private:
     static bool all_gather(
             const T *send, size_t sendcount, T *recv, size_t recvcount) {
 #ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Allgather(
-                (void *) send, snrw(sendcount), mpi_type<T>(), recv, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) ==
+                send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) ==
                MPI_SUCCESS;
 #else
         return all_to_all(send, sendcount, recv, recvcount);
@@ -626,9 +635,11 @@ private:
             const T *send, const defs::mpi_count &sendcount,
             T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs, const size_t &iroot) {
 #ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Gatherv(
-                (void *) send, sendcount, mpi_type<T>(),
-                (void *) recv, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcount, mpi_type<T>(),
+                recv_ptr, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return all_to_all(send, sendcount, recv, recvcounts[0]);
 #endif
@@ -639,9 +650,11 @@ private:
             const T *send, const defs::mpi_count &sendcount,
             T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs) {
 #ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Allgatherv(
-                (void *) send, sendcount, mpi_type<T>(),
-                (void *) recv, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcount, mpi_type<T>(),
+                recv_ptr, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
 #else
         return all_to_all(send, sendcount, recv, recvcounts[0]);
 #endif

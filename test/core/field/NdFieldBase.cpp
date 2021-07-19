@@ -15,10 +15,10 @@ struct TestRow : Row {
 TEST(NdFieldBase, Test) {
 
     TestRow r;
-    ASSERT_EQ(r.m_dsize, 1);
+    ASSERT_EQ(r.m_size, defs::nbyte_word);
 
     BufferedTable<TestRow> t("", {{}});
-    ASSERT_EQ(t.m_row_dsize, 1);
+    ASSERT_EQ(t.m_row_size, defs::nbyte_word);
     t.push_back(2);
     auto r1 = t.m_row;
     r1.restart();
@@ -27,8 +27,6 @@ TEST(NdFieldBase, Test) {
 
     r1.m_det = {1, 3};
 
-    std::cout <<
-              t.to_string()
-              << std::endl;
+    std::cout << t.to_string() << std::endl;
 
 }

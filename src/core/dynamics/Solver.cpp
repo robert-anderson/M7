@@ -551,7 +551,7 @@ void Solver::end_cycle() {
 
 void Solver::output_stats() {
 
-    auto sync_overhead = mpi::all_sum((double) m_synchronization_timer);
+    auto sync_overhead = mpi::all_sum(static_cast<double>(m_synchronization_timer));
     if (mpi::i_am_root()) {
         auto &stats = m_stats->m_row;
         stats.m_icycle = m_icycle;

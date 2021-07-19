@@ -42,6 +42,22 @@ struct NdNumberField : NumberFieldBase {
         return m_format.m_nelement;
     }
 
+    T* dbegin() {
+        return reinterpret_cast<T*>(begin());
+    }
+
+    const T* dbegin() const {
+        return reinterpret_cast<const T*>(begin());
+    }
+
+    T* dend() {
+        return reinterpret_cast<T*>(end());
+    }
+
+    const T* dend() const {
+        return reinterpret_cast<const T*>(dend());
+    }
+
     NdNumberField(Row *row, NdFormat<nind> format, std::string name = "") :
             NumberFieldBase(row, sizeof(T), format.m_nelement,
                             consts::is_complex<T>(), typeid(T), name), m_format(format) {}
@@ -50,13 +66,13 @@ struct NdNumberField : NumberFieldBase {
             NdNumberField(other.row_of_copy(), other.m_format, other.m_name) {}
 
     NdNumberField &operator=(const T &v) {
-        std::fill((T *) begin(), (T *) end(), v);
+        std::fill(dbegin(), dend(), v);
         return *this;
     }
 
     NdNumberField &operator=(const std::vector<T> &v) {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
-        std::memcpy(begin(), v.data(), m_size);
+        std::copy(dbegin(), dend(), v.data());
         return *this;
     }
 
@@ -184,20 +200,20 @@ struct NdNumberField : NumberFieldBase {
      */
     T &operator[](const size_t &ielement) {
         DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
-        return ((T *) begin())[ielement];
+        return dbegin()[ielement];
     }
 
     const T &operator[](const size_t &ielement) const {
         DEBUG_ASSERT_LT(ielement, m_nelement, "Numeric field access OOB");
-        return ((const T *) begin())[ielement];
+        return dbegin()[ielement];
     }
 
     T &operator[](inds_t inds) {
-        return ((T *) begin())[m_format.flatten(inds)];
+        return dbegin()[m_format.flatten(inds)];
     }
 
     const T &operator[](inds_t inds) const {
-        return ((const T *) begin())[m_format.flatten(inds)];
+        return dbegin()[m_format.flatten(inds)];
     }
 
     template<typename U=T>
@@ -266,11 +282,11 @@ struct NumberField : NdNumberField<T, 0ul> {
     }
 
     operator T&() {
-        return *(T *) FieldBase::begin();
+        return *base_t::dbegin();
     }
 
     operator const T&() const {
-        return *(const T *) FieldBase::begin();
+        return *base_t::dbegin();
     }
 };
 

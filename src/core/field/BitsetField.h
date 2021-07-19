@@ -66,7 +66,7 @@ struct BitsetField : FieldBase {
     }
 
     T *dbegin() const {
-        return (T *) begin();
+        return reinterpret_cast<T *>(begin());
     }
 
     BitView operator[](const size_t &ibit) {
@@ -91,7 +91,7 @@ struct BitsetField : FieldBase {
     }
 
     bool get(const size_t &ibit) const {
-        return get(reinterpret_cast<T *>(begin()), ibit);
+        return get(dbegin(), ibit);
     }
 
     bool get(const T *dptr, inds_t inds) const {

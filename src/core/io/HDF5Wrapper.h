@@ -144,7 +144,8 @@ namespace hdf5 {
     public:
         template<typename T>
         static void write(hid_t parent, std::string name, const std::vector<T> &src) {
-            AttributeWriterBase(parent, name, {src.size()}, type<T>()).write_bytes((const char *) src.data());
+            AttributeWriterBase(parent, name, {src.size()}, type<T>()).write_bytes(
+                    reinterpret_cast<const char *>(src.data()));
         }
 
         static void write(hid_t parent, std::string name, const std::string &src);
@@ -184,7 +185,7 @@ namespace hdf5 {
     public:
         void read(std::vector<T> &dst) {
             MPI_REQUIRE(dst.size() == m_nelement, "Destination length is incompatible with specified shape");
-            read((char *) dst.data());
+            read(reinterpret_cast<char *>(dst.data()));
         }
     };
 
@@ -885,8 +886,8 @@ namespace hdf5 {
             auto dspace_handle = H5Screate_simple(1, &shape, nullptr);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
-
-            auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void *) &item);
+            auto item_ptr = reinterpret_cast<const void*>(&item);
+            auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, item_ptr);
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
             REQUIRE_FALSE(status, "HDF5 Error on primitive type save");
@@ -900,8 +901,8 @@ namespace hdf5 {
             auto dspace_handle = H5Screate_simple(1, &shape, nullptr);
             auto dset_handle = H5Dcreate2(m_handle, name.c_str(), type<T>(), dspace_handle, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT);
-
-            auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (const void *) &item);
+            auto item_ptr = reinterpret_cast<const void*>(&item);
+            auto status = H5Dwrite(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, item_ptr);
             DEBUG_ONLY(status);
             H5Dclose(dset_handle);
             H5Sclose(dspace_handle);
@@ -925,7 +926,8 @@ namespace hdf5 {
         load(T &item, std::string name) {
             REQUIRE_TRUE(!m_writemode, "File is open for writing - load not permitted.");
             auto dset_handle = H5Dopen2(m_handle, name.c_str(), H5P_DEFAULT);
-            auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *) &item);
+            auto item_ptr = reinterpret_cast<void*>(&item);
+            auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, item_ptr);
             MPI_REQUIRE_ALL(!status, "HDF5 Error on complex type load");
         }
 
@@ -934,7 +936,8 @@ namespace hdf5 {
         load(const std::complex<T> &item, std::string name) const {
             REQUIRE_TRUE(!m_writemode, "File is open for writing - load not permitted.");
             auto dset_handle = H5Dopen2(m_handle, name.c_str(), H5P_DEFAULT);
-            auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *) &item);
+            auto item_ptr = reinterpret_cast<void*>(&item);
+            auto status = H5Dread(dset_handle, type<T>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, item_ptr);
             REQUIRE_FALSE(status, "HDF5 Error on primitive type load");
         }
 

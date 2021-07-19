@@ -103,6 +103,7 @@ include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external/spdlog-1.x/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/lambda-lanczos/include")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)
+target_compile_options(yaml-cpp PRIVATE -Wno-error -Wno-effc++)
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 add_definitions(-Wall -Wextra -Werror)

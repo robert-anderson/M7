@@ -104,7 +104,7 @@ private:
         std::vector<bool> tmp2;
         tmp.reserve(tmp.size());
         for (const auto &c: tmp) {
-            if (c == 0 || c == 1) tmp2.push_back((bool) c);
+            if (c == 0 || c == 1) tmp2.push_back(!!c);
             else return false;
         }
         if (tmp2.size()==v.size()) v = tmp2;

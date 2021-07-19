@@ -16,7 +16,7 @@ TEST(Connection, ParticleNumberConserving) {
 
     defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 120, 138, 139};
     defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 137, 138};
-    ASSERT_EQ(ket.m_size, 3 * defs::nbyte_data);
+    ASSERT_EQ(ket.m_size, 3 * defs::nbyte_word);
     ASSERT_EQ(ket.m_dsize, 3);
     ASSERT_EQ(ket.m_nbit_in_last_dword, nsite * 2 - 2 * 64);
     ket = ketoccorbs;

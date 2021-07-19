@@ -32,7 +32,7 @@ namespace utils {
     template<typename T>
     static bool is_zero(const T *v) {
         for (size_t ichar = 0ul; ichar < sizeof(T); ++ichar) {
-            if (*((char *) v + ichar) != 0) return false;
+            if (reinterpret_cast<char *>(v)[ichar] != 0) return false;
         }
         return true;
     }
@@ -218,12 +218,12 @@ namespace integer_utils {
 namespace bit_utils {
     template<typename T>
     static inline void clr(T &x, const size_t &i) {
-        x &= ~((T) 1ul << i);
+        x &= ~(T(1ul) << i);
     }
 
     template<typename T>
     static inline void set(T &x, const size_t &i) {
-        x |= ((T) 1ul << i);
+        x |= (T(1ul) << i);
     }
 
     template<typename T>

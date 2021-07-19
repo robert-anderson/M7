@@ -182,7 +182,8 @@ void TableBase::all_gatherv(const TableBase &src) {
     defs::inds nrows(mpi::nrank());
     defs::inds counts(mpi::nrank());
     defs::inds displs(mpi::nrank());
-    ASSERT(src.m_row_dsize == m_row_dsize);
+    DEBUG_ASSERT_EQ(src.m_row_size, m_row_size,
+                    "the size of rows being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrows);
     counts = nrows;
     for (auto &v: counts) v *= m_row_size;
@@ -198,7 +199,8 @@ void TableBase::gatherv(const TableBase &src, size_t irank) {
     defs::inds nrows(mpi::nrank());
     defs::inds counts(mpi::nrank());
     defs::inds displs(mpi::nrank());
-    ASSERT(src.m_row_dsize == m_row_dsize);
+    DEBUG_ASSERT_EQ(src.m_row_size, m_row_size,
+                    "the size of rows being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrows);
     counts = nrows;
     for (auto &v: counts) v *= m_row_size;

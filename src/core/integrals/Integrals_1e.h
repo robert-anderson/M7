@@ -97,7 +97,7 @@ public:
     }
 
     static bool valid_inds(const defs::inds &inds) {
-        return inds[1] < (size_t) -1 && inds[2] == (size_t) -1;
+        return inds[1] < ~0ul && inds[2] == ~0ul;
     }
 
     bool spin_conserving() const {

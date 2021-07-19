@@ -19,9 +19,10 @@ bool Buffer::Window::allocated() const {
 
 size_t Buffer::Window::size() const {
     if (!m_begin) return 0;
-    ASSERT(m_end);
-    ASSERT(m_buffer)
-    ASSERT(m_buffer->window_dsize() == (size_t) std::distance(m_begin, m_end));
+    DEBUG_ASSERT_TRUE(m_end, "end pointer is not set");
+    DEBUG_ASSERT_TRUE(m_buffer, "buffer is not allocated")
+    DEBUG_ASSERT_EQ(m_buffer->window_size(), static_cast<size_t>(std::distance(m_begin, m_end)),
+                    "the begin and end pointers of the buffer window are not compatible with its size");
     return std::distance(m_begin, m_end);
 }
 

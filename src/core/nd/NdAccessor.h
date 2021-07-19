@@ -39,7 +39,10 @@ struct NdAccessor {
 
     NdAccessor &operator=(const std::vector<T> &v) {
         ASSERT(v.size() == nelement());
-        memcpy((void*)m_data, (void*)v.data(), nelement()*sizeof(T));
+        std::memcpy(
+                reinterpret_cast<void*>(m_data),
+                reinterpret_cast<void*>(v.data()),
+                nelement()*sizeof(T));
         return *this;
     }
 
@@ -75,7 +78,7 @@ struct NdAccessor {
     }
 
     void clear() {
-        std::memset((void*)m_data, 0, sizeof(T)*nelement());
+        std::memset(reinterpret_cast<void*>(m_data), 0, sizeof(T)*nelement());
     }
 };
 

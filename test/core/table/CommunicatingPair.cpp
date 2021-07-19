@@ -11,7 +11,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     const double expansion_factor = 0.5;
     CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{}});
     // after resize:
-    const size_t ndword_bw = comm_pair.row_dsize()*mpi::nrank();
+    const size_t bw_size = comm_pair.row_size() * mpi::nrank();
     const size_t hash_lo = 123, hash_hi = 789;
 
     comm_pair.resize(mpi::nrank());
@@ -23,9 +23,10 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
 
     for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
         // check pointer distance between adjacent send tables
-        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).dbegin(), comm_pair.send(idst).dbegin()), ndword_bw);
+        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).begin(), comm_pair.send(idst).begin()), bw_size);
         // check send values by pointer dereference relative to entire send table array
-        ASSERT_EQ(comm_pair.send().dbegin()[idst*ndword_bw], hashing::in_range({idst, mpi::irank()}, hash_lo, hash_hi));
+        auto v_send = *reinterpret_cast<size_t*>(comm_pair.send().begin()[idst*bw_size]);
+        ASSERT_EQ(v_send, hashing::in_range({idst, mpi::irank()}, hash_lo, hash_hi));
     }
 
     comm_pair.communicate();
@@ -43,7 +44,7 @@ TEST(CommunicatingPair, CommunicateVectors){
     const size_t nelement_vector = 13;
     CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{nelement_vector}});
     // after resize:
-    const size_t ndword_bw = comm_pair.row_dsize()*mpi::nrank();
+    const size_t bw_size = comm_pair.row_size() * mpi::nrank();
     const size_t hash_lo = 123, hash_hi = 789;
 
     comm_pair.resize(mpi::nrank());
@@ -56,11 +57,12 @@ TEST(CommunicatingPair, CommunicateVectors){
 
     for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
         // check pointer distance between adjacent send tables
-        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).dbegin(), comm_pair.send(idst).dbegin()), ndword_bw);
-        for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
+        ASSERT_EQ(std::distance(comm_pair.send(idst - 1).begin(), comm_pair.send(idst).begin()), bw_size);
+        for (size_t ielement=0ul; ielement<nelement_vector; ++ielement) {
             // check send values by pointer dereference relative to entire send table array
-            ASSERT_EQ(comm_pair.send().dbegin()[idst*ndword_bw+ielement],
-                      hashing::in_range({idst, mpi::irank(), ielement}, hash_lo, hash_hi));
+            auto v_send = *reinterpret_cast<size_t*>(comm_pair.send().begin()[idst * bw_size + ielement]);
+            ASSERT_EQ(v_send,hashing::in_range({idst, mpi::irank(), ielement}, hash_lo, hash_hi));
+        }
     }
 
     comm_pair.communicate();

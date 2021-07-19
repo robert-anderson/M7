@@ -101,13 +101,13 @@ public:
     }
 
     defs::buf_t *begin() {
-        DEBUG_ASSERT_TRUE(m_dbegin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_begin;
     }
 
     const defs::buf_t *begin() const {
-        DEBUG_ASSERT_TRUE(m_dbegin, "the row pointer is not set")
+        DEBUG_ASSERT_TRUE(m_begin, "the row pointer is not set")
         DEBUG_ASSERT_TRUE(ptr_in_range(), "the row is not pointing to memory in the permitted range");
         return m_begin;
     }
@@ -132,7 +132,7 @@ public:
         if (!m_table->m_hwm && !irow_begin){
             m_begin = nullptr;
         } else {
-            DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
+            DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
             m_begin = m_table->begin(irow_begin);
         }
         m_i = irow_begin;
@@ -144,7 +144,7 @@ public:
 
     void step() const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
-        DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
+        DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         DEBUG_ASSERT_TRUE(in_range(), "Row is out of table bounds");
         m_begin += m_size;
         m_i++;
@@ -152,7 +152,7 @@ public:
 
     void jump(const size_t &i) const {
         DEBUG_ASSERT_TRUE(m_table, "Row must be assigned to a Table");
-        DEBUG_ASSERT_TRUE(m_table->dbegin(), "Row is assigned to Table buffer window without a beginning");
+        DEBUG_ASSERT_TRUE(m_table->begin(), "Row is assigned to Table buffer window without a beginning");
         m_begin = m_table->begin() + m_size * i;
         m_i = i;
         DEBUG_ASSERT_LE(i, m_table->m_hwm, "Row is out of table bounds");
@@ -184,7 +184,7 @@ public:
     }
 
     void copy_in(const Row &other) {
-        ASSERT(other.m_dsize == m_dsize);
+        ASSERT(other.m_size == m_size);
         std::copy(other.begin(), other.begin() + m_size, begin());
     }
 

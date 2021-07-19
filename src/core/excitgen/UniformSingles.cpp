@@ -51,7 +51,7 @@ bool UniformSingles::_draw(const fields::Onv<0> &src_fonv, fields::Onv<0> &dst_f
     anticonn.zero();
     anticonn.add(i, a);
     anticonn.apply(src_fonv, dst_fonv);
-    prob = 1.0 / (defs::prob_t) (ncases);
+    prob = 1.0 / ncases;
     helem = m_h->get_element_1(anticonn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }

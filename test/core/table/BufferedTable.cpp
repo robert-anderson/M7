@@ -11,8 +11,8 @@ TEST(BufferedTable, Empty) {
     BufferedTable<row_t> table("", {{}});
     ASSERT_EQ(table.m_nrow, 0);
     ASSERT_EQ(table.m_hwm, 0);
-    ASSERT_EQ(table.m_bw.dsize(), 0);
-    ASSERT_EQ(table.m_bw.m_dbegin, nullptr);
+    ASSERT_EQ(table.m_bw.size(), 0);
+    ASSERT_EQ(table.m_bw.m_begin, nullptr);
     auto& row = table.m_row;
     row.restart();
     ASSERT_FALSE(row.in_range());

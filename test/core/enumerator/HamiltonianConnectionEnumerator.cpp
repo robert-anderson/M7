@@ -4,7 +4,6 @@
 
 #include <src/core/enumerator/ContainerCombinationEnumerator.h>
 #include "gtest/gtest.h"
-#include "src/core/enumerator/HamiltonianConnectionEnumerator.h"
 
 #if 0
 class ConnectionList : public MappedList<DeterminantElement> {

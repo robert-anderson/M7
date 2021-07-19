@@ -2,7 +2,6 @@
 // Created by rja on 09/05/2020.
 //
 
-#include <src/core/enumerator/HamiltonianConnectionEnumerator.h>
 #include "gtest/gtest.h"
 #include "src/core/excitgen/HeatBathDoubles.h"
 #include "src/core/field/Fields.h"
