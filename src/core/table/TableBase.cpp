@@ -85,7 +85,7 @@ void TableBase::resize(size_t nrow) {
     if (nrow==m_nrow) return;
     m_bw.resize(nrow * m_row_size);
     for(const auto &rp : m_row_protectors) rp->on_resize(nrow);
-    m_nrow = nrow;
+    m_nrow = m_bw.size()/m_row_size;
 }
 
 void TableBase::expand(size_t nrow) {

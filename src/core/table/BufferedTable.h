@@ -38,6 +38,10 @@ public:
     void set_expansion_factor(double f) {
         m_buffer.m_expansion_factor = f;
     }
+
+    double get_expansion_factor() const {
+        return m_buffer.m_expansion_factor;
+    }
 };
 
 #endif //M7_BUFFEREDTABLE_H

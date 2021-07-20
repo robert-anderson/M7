@@ -37,6 +37,14 @@ void Buffer::Window::resize(size_t size) {
     m_buffer->resize(size * m_buffer->m_nwindow_max);
 }
 
+std::string Buffer::Window::name() const {
+    return m_buffer->m_name;
+}
+
+double Buffer::Window::get_expansion_factor() const {
+    return m_buffer->m_expansion_factor;
+}
+
 Buffer::Buffer(std::string name, size_t nwindow_max) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max) {
     if (!name.empty()) log::info_("Creating \"{}\" buffer", name);
@@ -71,7 +79,9 @@ void Buffer::resize(size_t size, double factor) {
         // shrinking the buffer
         factor = 0.0;
     }
-    size = size*(1.0+m_expansion_factor);
+    size*=1.0+factor;
+    // always allocate an integral number of words
+    size = integer_utils::divceil(size, defs::nbyte_word)*defs::nbyte_word;
     DEBUG_ASSERT_TRUE(size, "New size must be non-zero");
     if (!m_name.empty()) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",
@@ -79,7 +89,7 @@ void Buffer::resize(size_t size, double factor) {
     }
     std::vector<defs::buf_t> tmp;
     try {
-        tmp.resize(size, 0ul);
+        tmp.resize(size, 0);
     }
     catch (const std::bad_alloc& e){
         ABORT(log::format("could not allocate sufficient memory to resize buffer \"{}\"", m_name));

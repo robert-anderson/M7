@@ -34,9 +34,9 @@ public:
 
         void resize(size_t size);
 
-        std::string name() const {
-            return m_buffer->m_name;
-        }
+        std::string name() const;
+
+        double get_expansion_factor() const;
 
     };
 

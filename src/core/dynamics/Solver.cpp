@@ -591,8 +591,8 @@ void Solver::output_stats() {
         stats.m_synchronization_overhead = m_synchronization_timer;
         stats.m_nblock_wf_ra = m_wf.m_ra.nblock_local();
         stats.m_nwalker_total = m_wf.m_nwalker.m_reduced.sum();
-        stats.m_nwalker_lookup_skip = m_wf.m_store.m_ntotal_skip;
-        stats.m_nwalker_lookup = m_wf.m_store.m_ntotal_lookup;
+        stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
+        stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;
         stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
         m_parallel_stats->flush();
     }

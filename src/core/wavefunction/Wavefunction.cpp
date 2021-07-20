@@ -85,11 +85,12 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
 
 void Wavefunction::begin_cycle() {
     m_summables.zero_all_local();
-    m_store.remap_if_required();
+    m_store.attempt_remap();
 }
 
 void Wavefunction::end_cycle() {
     m_summables.all_sum();
+    m_store.attempt_remap();
 }
 
 defs::wf_comp_t Wavefunction::square_norm(const size_t &ipart) const {

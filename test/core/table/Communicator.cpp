@@ -32,10 +32,4 @@ TEST(Communicator, SharedRow) {
     ASSERT_EQ(mpi::all_sum(comm.m_store.m_hwm), nrow_per_rank_expect*mpi::nrank());
 
     comm_t::SharedRow shared_row(comm, {0, 0}, "test shared row");
-
-    for (size_t irank=0ul; irank<mpi::nrank(); ++irank){
-        if (mpi::i_am(irank))
-            std::cout << comm.m_store.to_string() << std::endl;
-        mpi::barrier();
-    }
 }

@@ -94,6 +94,18 @@ namespace buffered {
         }
     };
 
+    template<typename T>
+    struct Number : BufferedField<fields::Number<T>> {
+        using BufferedField<fields::Number<T>>::operator=;
+        Number(): BufferedField<fields::Number<T>>({{}}){}
+        operator T&(){return (*this)[0];}
+        operator const T&() const {return (*this)[0];}
+        Number& operator=(const T& v){
+            static_cast<T&>(*this) = v;
+            return *this;
+        }
+    };
+
     struct FermionOnv : BufferedField<fields::FermionOnv> {
         using fields::FermionOnv::operator=;
         FermionOnv(size_t nsite) : BufferedField<fields::FermionOnv>({nullptr, nsite}){}

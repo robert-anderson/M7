@@ -67,6 +67,7 @@ struct log {
     template<typename ...Args>
     static void info_(const std::string& fmt_string, Args... args){
 #ifdef ENABLE_LOCAL_LOGGING
+        if (mpi::nrank()==1) info(fmt_string, args...);
         g_local_file_logger->info(fmt_string, args...);
 #endif
     }
@@ -81,6 +82,7 @@ struct log {
     template<typename ...Args>
     static void warn_(const std::string& fmt_string, Args... args){
 #ifdef ENABLE_LOCAL_LOGGING
+        if (mpi::nrank()==1) warn(fmt_string, args...);
         g_local_file_logger->warn(fmt_string, args...);
 #endif
     }
@@ -95,6 +97,7 @@ struct log {
     template<typename ...Args>
     static void error_(const std::string& fmt_string, Args... args){
 #ifdef ENABLE_LOCAL_LOGGING
+        if (mpi::nrank()==1) error(fmt_string, args...);
         g_local_file_logger->error(fmt_string, args...);
 #endif
     }
@@ -111,6 +114,7 @@ struct log {
     template<typename ...Args>
     static void critical_(const std::string& fmt_string, Args... args){
 #ifdef ENABLE_LOCAL_LOGGING
+        if (mpi::nrank()==1) critical(fmt_string, args...);
         g_local_file_logger->critical(fmt_string, args...);
 #endif
     }
@@ -128,6 +132,7 @@ struct log {
     static void debug_(const std::string& fmt_string, Args... args){
 #ifndef NDEBUG
 #ifdef ENABLE_LOCAL_LOGGING
+        if (mpi::nrank()==1) debug(fmt_string, args...);
         g_local_file_logger->debug(fmt_string, args...);
 #endif
 #endif

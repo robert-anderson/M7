@@ -173,18 +173,21 @@ struct TableBase {
      *  true if entire row is zero
      */
     bool is_cleared(const size_t &irow) const;
+
     /**
      * call the resize method on the buffer window and reflect the reallocation in m_nrow
      * @param nrow
      *  minimum number of rows in the new buffer. the buffer's resize_factor determines the actual size of the reallocation
      */
     void resize(size_t nrow);
+
     /**
      * resize based on the number of additional rows required beyond those currently allocated
      * @param nrow
      *  minimum number of new rows. the buffer's resize_factor determines the actual size of the reallocation
      */
     void expand(size_t nrow);
+
     /**
      * erasure of rows changes meaning depending on the derived class, and so this is a virtual method. Here, we
      * simply call clear on each indexed row
@@ -325,7 +328,7 @@ struct TableBase {
      * @param irank
      *  index of the only rank in the communicator to receive the data from src
      */
-    virtual void gatherv(const TableBase &src, size_t irank=0ul);
+    virtual void gatherv(const TableBase &src, size_t irank = 0ul);
 
     /**
      * adds a rank-dynamic object to the RankAllocator
@@ -366,6 +369,11 @@ struct TableBase {
      *  number rows below the high water mark that aren't free
      */
     size_t nrow_nonzero() const;
+
+    std::string name() const {
+        if (m_bw.allocated()) return m_bw.name();
+        return "";
+    }
 };
 
 
