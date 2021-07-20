@@ -98,6 +98,8 @@ TEST(MappedTable, Remap) {
     ASSERT_FALSE(table.m_nlookup_total);
     ASSERT_FALSE(table.m_nskip_total);
 
+    ASSERT_FALSE(table.remap_due());
+
     const auto nitem = table.nrow_nonzero();
     ASSERT_EQ(nitem, 20);
     const auto nbucket = (1+ table.m_bw.get_expansion_factor()) * nitem / (2 * remap_ratio + 1);

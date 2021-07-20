@@ -234,10 +234,12 @@ public:
      * counters reset
      */
     void attempt_remap() {
-        if (remap_due()) remap();
-        // reset counters
-        m_nskip_total = 0ul;
-        m_nlookup_total = 0ul;
+        if (remap_due()) {
+            remap();
+            // reset counters
+            m_nskip_total = 0ul;
+            m_nlookup_total = 0ul;
+        }
     }
 
     void load(hdf5::GroupReader &parent, std::string name) override {
