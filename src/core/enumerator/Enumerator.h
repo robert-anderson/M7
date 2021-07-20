@@ -97,6 +97,7 @@ namespace enums {
         const size_t &operator[](const size_t &i) const;
     };
 
+    static constexpr size_t c_cache_limit = 1ul<<20;
     /*
      * Enumerators are supposed to be as efficient as possible, but all overhead involved in
      * generation of their terms can be eliminated at the point of use by caching terms, this
@@ -104,7 +105,6 @@ namespace enums {
      */
     template<typename enum_T>
     struct Cache {
-        static constexpr size_t c_limit = 1ul<<20;
         const size_t m_n, m_r;
         const defs::inds m_v;
         const size_t m_nv;
@@ -117,8 +117,8 @@ namespace enums {
              * the enum_T to compute each term on the fly. This class is only to be used in situations
              * where the number of terms is small, and the number of iterations is expected to be large
              */
-            if (e.m_nv>c_limit)
-                log::warn("Attempting to create a Cache of over {} terms", c_limit);
+            if (e.m_nv>c_cache_limit)
+                log::warn("Attempting to create a Cache of over {} terms", c_cache_limit);
             defs::inds out;
             while (e.next()) out.insert(out.end(), e.m_v.cbegin(), e.m_v.cend());
             return out;

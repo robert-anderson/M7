@@ -10,8 +10,8 @@ Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
-    log::info("Initial reference ONV for WF part {} is {} with energy",
-              m_ipart, get_onv().to_string(), m_global.m_row.m_hdiag);
+    log::info("Initial reference ONV for WF part {} is {} with energy {}",
+              m_ipart, get_onv(), m_global.m_row.m_hdiag);
 }
 
 const fields::Onv<> &Reference::get_onv() const {

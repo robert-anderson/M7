@@ -38,7 +38,7 @@ struct log {
     static void finalize();
 
     template<typename ...Args>
-    static std::string format(const std::string& fmt_string, Args... args){
+    static std::string format(const std::string& fmt_string, Args&&... args){
         fmt::basic_memory_buffer<char, 250> buf;
         fmt::format_to(buf, fmt_string, std::forward<Args>(args)...);
         std::string tmp;
@@ -47,7 +47,7 @@ struct log {
     }
 
     template<typename ...Args>
-    static std::string bold_format(const std::string& fmt_string, Args... args){
+    static std::string bold_format(const std::string& fmt_string, Args&&... args){
         return format("\033[1m{}\033[0m", format(fmt_string, args...));
     }
 
@@ -58,14 +58,14 @@ struct log {
     static std::vector<std::string> get_backtrace(size_t depth);
 
     template<typename ...Args>
-    static void info(const std::string& fmt_string, Args... args){
+    static void info(const std::string& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->info(fmt_string, args...);
         g_reduced_file_logger->info(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void info_(const std::string& fmt_string, Args... args){
+    static void info_(const std::string& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) info(fmt_string, args...);
         g_local_file_logger->info(fmt_string, args...);
@@ -73,14 +73,14 @@ struct log {
     }
 
     template<typename ...Args>
-    static void warn(const std::string& fmt_string, Args... args){
+    static void warn(const std::string& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->warn(fmt_string, args...);
         g_reduced_file_logger->warn(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void warn_(const std::string& fmt_string, Args... args){
+    static void warn_(const std::string& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) warn(fmt_string, args...);
         g_local_file_logger->warn(fmt_string, args...);
@@ -88,14 +88,14 @@ struct log {
     }
 
     template<typename ...Args>
-    static void error(const std::string& fmt_string, Args... args){
+    static void error(const std::string& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->error(fmt_string, args...);
         g_reduced_file_logger->error(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void error_(const std::string& fmt_string, Args... args){
+    static void error_(const std::string& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) error(fmt_string, args...);
         g_local_file_logger->error(fmt_string, args...);
@@ -105,14 +105,14 @@ struct log {
     static void error_backtrace_(size_t depth=20);
 
     template<typename ...Args>
-    static void critical(const std::string& fmt_string, Args... args){
+    static void critical(const std::string& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->critical(fmt_string, args...);
         g_reduced_file_logger->critical(fmt_string, args...);
     }
 
     template<typename ...Args>
-    static void critical_(const std::string& fmt_string, Args... args){
+    static void critical_(const std::string& fmt_string, Args&&... args){
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) critical(fmt_string, args...);
         g_local_file_logger->critical(fmt_string, args...);
@@ -120,7 +120,7 @@ struct log {
     }
 
     template<typename ...Args>
-    static void debug(const std::string& fmt_string, Args... args){
+    static void debug(const std::string& fmt_string, Args&&... args){
 #ifndef NDEBUG
         if (!mpi::i_am_root()) return;
         g_reduced_stdout_logger->debug(fmt_string, args...);
@@ -129,7 +129,7 @@ struct log {
     }
 
     template<typename ...Args>
-    static void debug_(const std::string& fmt_string, Args... args){
+    static void debug_(const std::string& fmt_string, Args&&... args){
 #ifndef NDEBUG
 #ifdef ENABLE_LOCAL_LOGGING
         if (mpi::nrank()==1) debug(fmt_string, args...);
