@@ -25,13 +25,13 @@ public:
          * MPI_Win_allocate_shared (window_size,sizeof(double),MPI_INFO_NULL, nodecomm, &window_data,&node_window)
          */
 #ifdef ENABLE_MPI
-        auto baseptr = reinterpret_cast<void *>(m_data);
+        auto baseptr = reinterpret_cast<void *>(&m_data);
         if (mpi::on_node_i_am_root()) {
             auto ierr = MPI_Win_allocate_shared(size * sizeof(T), sizeof(T), MPI_INFO_NULL, g_node_comm,
                                                 baseptr, &m_win);
             if (ierr) throw std::runtime_error("MPI Shared memory error");
         } else {
-            auto ierr = MPI_Win_allocate_shared(0, sizeof(T), MPI_INFO_NULL, g_node_comm, m_data, &m_win);
+            auto ierr = MPI_Win_allocate_shared(0, sizeof(T), MPI_INFO_NULL, g_node_comm, baseptr, &m_win);
             if (ierr) throw std::runtime_error("MPI Shared memory error");
         }
         MPI_Win_lock_all(0, m_win);
@@ -48,7 +48,7 @@ public:
         ASSERT(disp_unit == sizeof(T))
         ASSERT((size_t) alloc_size == size * sizeof(T))
         MPI_Win_unlock_all(m_win);
-        if (mpi::on_node_i_am_root()) std::memset(baseptr, 0, size * sizeof(T));
+        if (mpi::on_node_i_am_root()) std::memset(m_data, 0, size * sizeof(T));
         mpi::barrier_on_node();
 #else
         m_rows = new T[m_size];

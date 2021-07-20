@@ -107,10 +107,7 @@ public:
         if (all_sends_empty && m_last_recv_count)
             log::warn_("this rank is sending no data at all, but it received data in the previous communication");
 
-        log::debug_("Sending {} rows", utils::to_string(sendcounts));
         mpi::all_to_all(sendcounts, recvcounts);
-        log::debug_("Recving {} rows", utils::to_string(recvcounts));
-
 
         auto senddispls = m_send.displs();
         defs::inds recvdispls(mpi::nrank(), 0ul);

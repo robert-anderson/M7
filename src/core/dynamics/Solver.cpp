@@ -514,7 +514,6 @@ void Solver::loop_over_spawned() {
     DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before+m_wf.recv().m_hwm,
                     "the store table shouldn't have grown by more rows than were received!");
     m_wf.recv().clear();
-    log::debug_("nrow after: {}", m_wf.m_store.m_hwm);
 }
 
 void Solver::propagate_row(const size_t &ipart) {

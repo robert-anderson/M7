@@ -10,7 +10,8 @@ Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
-    log::debug("Initial reference ONV for WF part {} is {}", m_ipart, get_onv().to_string());
+    log::info("Initial reference ONV for WF part {} is {} with energy",
+              m_ipart, get_onv().to_string(), m_global.m_row.m_hdiag);
 }
 
 const fields::Onv<> &Reference::get_onv() const {
@@ -33,10 +34,10 @@ void Reference::accept_candidate(double redefinition_thresh) {
     mpi::bcast(m_irow_candidate, irank);
     auto current_weight = weight();
     if (std::abs(gather[irank]) > std::abs(current_weight*redefinition_thresh)){
-        log::debug("Changing the reference ONV for WF part {}. current ONV: {}, weight: {}",
+        log::info("Changing the reference ONV for WF part {}. current ONV: {}, weight: {}",
                    m_ipart, get_onv().to_string(), current_weight);
         redefine({irank, m_irow_candidate});
-        log::debug("Changed the reference ONV for WF part {}. new ONV: {}, weight: {}",
+        log::info("Changed the reference ONV for WF part {}. new ONV: {}, weight: {}",
                    m_ipart, get_onv().to_string(), gather[irank]);
         m_candidate_abs_weight = 0.0;
         update_ref_conn_flags();
