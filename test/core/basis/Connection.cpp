@@ -82,143 +82,69 @@ TEST(Connection, Phase) {
     }
 }
 
-
-TEST(Connection, New) {
-
-
-
-
-    struct Promoter {
-
-    };
-
-
-    struct HamBase {
-    };
-
-
-    struct HamTermBase {
-        defs::inds m_fermion_rank;
-        defs::inds m_boson_rank;
-    };
-
-    //template<typename element_getter_fn>
-    struct HamTerm : HamTermBase {
-
-    };
-
-
-
-
-//    struct PromoterSet {
-//        ConnectionGeneral m_promoted_conn;
-//        std::vector<Promoter> m_proms_f;
-//        PromoterSet(size_t max_ncom_f, size_t max_ncom_b){
-//
-//        }
-//    };
-
-#if 0
-#if 1
+TEST(Connection, MultiWordPhase) {
     // choose a large enough nsite so that multiple 64bit datawords are required
     const size_t nsite = 100;
     buffered::FermionOnv bra(nsite);
     buffered::FermionOnv ket(nsite);
     buffered::FermionOnv check_onv(nsite);
-    FermionConnection connection(nsite);
+    AntisymFermionOnvConnection connection(nsite);
+
     bra = {{3,  4,  8,  13, 89},
            {13, 78, 95, 98, 99}};
     ket = bra;
     connection.connect(bra, ket);
-    ASSERT_FALSE(connection.m_phase);
+    ASSERT_FALSE(connection.phase());
     connection.apply(bra, check_onv);
-    ASSERT_FALSE(connection.m_phase);
+    ASSERT_FALSE(connection.phase());
     ASSERT_EQ(ket, check_onv);
 
     //                              78 -> 3 (-1)         (-1)
     ket = {{3, 4,  8,  13, 89},
            {3, 13, 95, 98, 99}};
     connection.connect(bra, ket);
-    ASSERT_TRUE(connection.m_phase);
-    ASSERT_EQ(connection.m_ann[0], nsite + 78);
-    ASSERT_EQ(connection.m_cre[0], nsite + 3);
+    ASSERT_TRUE(connection.phase());
+    ASSERT_EQ(connection.ann(0), nsite + 78);
+    ASSERT_EQ(connection.cre(0), nsite + 3);
     connection.apply(bra, check_onv);
-    ASSERT_TRUE(connection.m_phase);
+    ASSERT_TRUE(connection.phase());
 
-    std::cout << ConnectionGeneral::signature(0, 0) << std::endl;
-    std::cout << ConnectionGeneral::signature(1, 0) << std::endl;
-    std::cout << ConnectionGeneral::signature(2, 0) << std::endl;
-    std::cout << ConnectionGeneral::signature(3, 0) << std::endl;
-    std::cout << ConnectionGeneral::signature(0, 1) << std::endl;
-    std::cout << ConnectionGeneral::c_max_nop << std::endl;
     ASSERT_EQ(ket, check_onv);
 
     //                              98 -> 3 (-1)         (-1)
     ket = {{3, 4,  8,  13, 89},
            {3, 13, 78, 95, 99}};
     connection.connect(bra, ket);
-    ASSERT_TRUE(connection.m_phase);
-    ASSERT_EQ(connection.m_ann[0], nsite + 98);
-    ASSERT_EQ(connection.m_cre[0], nsite + 3);
+    ASSERT_TRUE(connection.phase());
+    ASSERT_EQ(connection.ann(0), nsite + 98);
+    ASSERT_EQ(connection.cre(0), nsite + 3);
     connection.apply(bra, check_onv);
-    ASSERT_TRUE(connection.m_phase);
+    ASSERT_TRUE(connection.phase());
     ASSERT_EQ(ket, check_onv);
 
     //     4 -> 99 (-1)             98 -> 3 (-1)         (+1)
     ket = {{3, 8,  13, 89, 99},
            {3, 13, 78, 95, 99}};
     connection.connect(bra, ket);
-    ASSERT_FALSE(connection.m_phase);
-    ASSERT_EQ(connection.m_ann[0], 4);
-    ASSERT_EQ(connection.m_ann[1], nsite + 98);
-    ASSERT_EQ(connection.m_cre[0], 99);
-    ASSERT_EQ(connection.m_cre[1], nsite + 3);
+    ASSERT_FALSE(connection.phase());
+    ASSERT_EQ(connection.ann(0), 4);
+    ASSERT_EQ(connection.ann(1), nsite + 98);
+    ASSERT_EQ(connection.cre(0), 99);
+    ASSERT_EQ(connection.cre(1), nsite + 3);
     connection.apply(bra, check_onv);
-    ASSERT_FALSE(connection.m_phase);
+    ASSERT_FALSE(connection.phase());
     ASSERT_EQ(ket, check_onv);
 
     //     4 -> 99 (-1)             98 -> 14 (+1)        (-1)
     ket = {{3,  8,  13, 89, 99},
            {13, 14, 78, 95, 99}};
     connection.connect(bra, ket);
-    ASSERT_TRUE(connection.m_phase);
-    ASSERT_EQ(connection.m_ann[0], 4);
-    ASSERT_EQ(connection.m_ann[1], nsite + 98);
-    ASSERT_EQ(connection.m_cre[0], 99);
-    ASSERT_EQ(connection.m_cre[1], nsite + 14);
+    ASSERT_TRUE(connection.phase());
+    ASSERT_EQ(connection.ann(0), 4);
+    ASSERT_EQ(connection.ann(1), nsite + 98);
+    ASSERT_EQ(connection.cre(0), 99);
+    ASSERT_EQ(connection.cre(1), nsite + 14);
     connection.apply(bra, check_onv);
-    ASSERT_TRUE(connection.m_phase);
+    ASSERT_TRUE(connection.phase());
     ASSERT_EQ(ket, check_onv);
-
-#else
-    SparseArrayFileReader<float> file_reader(
-            defs::assets_root + "/parity_test/parity_8.txt",
-            16ul, false, false);
-    defs::inds inds(16);
-    float value;
-
-    buffered::FermionOnv bra(4);
-    buffered::FermionOnv ket(4);
-    buffered::FermionOnv work_det(4);
-    FermionConnection connection(4);
-
-    while (file_reader.next(inds, value)) {
-        bra.zero();
-        ket.zero();
-        for (size_t i = 0ul; i < 8ul; ++i) {
-            if (inds[i]) bra.set(i);
-        }
-        for (size_t i = 8ul; i < 16ul; ++i) {
-            if (inds[i]) ket.set(i - 8);
-        }
-        if (bra.is_zero() || ket.is_zero()) continue;
-        if (bra.nsetbit() != ket.nsetbit()) continue;
-        connection.connect(ket, bra);
-        ASSERT_EQ(connection.m_phase, value < 0);
-//        connection.apply(ket, work_det);
-//        ASSERT_TRUE(bra==work_det);
-//        ASSERT_EQ(connection.phase(), value < 0);
-    }
-#endif
-#endif
 }
