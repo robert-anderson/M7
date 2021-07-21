@@ -61,13 +61,12 @@ TEST(ExactPropagator, DeterministicSubspace) {
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 5;
     opts.verify();
     //const auto benchmark = -99.9421389039331
-    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    //Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    Hamiltonian<> ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::Onv<> ref_onv(ham.nsite());
     ham.set_hf_onv(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
-    wf.m_store.expand(10);
-    wf.m_comm.expand(800);
     ExactPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
 

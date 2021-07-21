@@ -9,11 +9,11 @@ fciqmc_config::Buffers::Buffers(config::Group *parent) :
                         "options relating to the allocation and reallocation behavior of a Communicator"),
         m_store_fac_init(this, "store_fac_init", 0.5,
                          "the number of rows ultimately required by the store buffer is estimated, then that estimate is multiplied by this parameter to determine the initial row allocation"),
-        m_store_exp_fac(this, "store_expand_fac", 2.0,
+        m_store_exp_fac(this, "store_expand_fac", 0.5,
                         "additional number of rows that should be added to the store buffer's capacity as a fraction of the required number of additional rows"),
         m_comm_fac_init(this, "comm_fac_init", 0.5,
                         "the numbers of rows ultimately required by the communicating pair of buffers (send/recv) are estimated, then that estimate is multiplied by this parameter to determine the initial row allocations"),
-        m_comm_exp_fac(this, "comm_expand_fac", 2.0,
+        m_comm_exp_fac(this, "comm_expand_fac", 0.5,
                        "additional number of rows that should be added to the communicating buffers' capacities as a fraction of the required number of additional rows") {}
 
 

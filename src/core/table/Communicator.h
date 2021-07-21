@@ -49,8 +49,6 @@ public:
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         m_send.set_expansion_factor(buffer_expansion_factor);
         m_recv.set_expansion_factor(buffer_expansion_factor);
-        m_send.expand(1);
-        m_recv.expand(1);
     }
 
     size_t row_size() const {
@@ -173,7 +171,6 @@ struct Communicator {
     comm_t m_comm;
     mutable RankAllocator<store_row_t> m_ra;
     std::string m_name;
-    double m_buffer_expansion_factor;
 
     /**
      * A set of rows which responds correctly to rank reallocation and is protected from erasure
@@ -501,8 +498,7 @@ struct Communicator {
             m_store(name + " store", store),
             m_comm(name, buffer_expansion_factor, send),
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
-            m_name(name),
-            m_buffer_expansion_factor(buffer_expansion_factor) {
+            m_name(name) {
     }
 
 
@@ -545,12 +541,6 @@ struct Communicator {
     void communicate() {
         m_comm.communicate();
     }
-
-    void set_expansion_factor(double f) {
-        m_buffer_expansion_factor = f;
-        m_comm.set_expansion_factor(f);
-    }
-
 };
 
 #endif //M7_COMMUNICATOR_H

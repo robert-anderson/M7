@@ -98,6 +98,13 @@ TEST(MappedTable, Remap) {
     ASSERT_FALSE(table.m_nlookup_total);
     ASSERT_FALSE(table.m_nskip_total);
 
+    // remap can't be due since there haven't been any lookups since the last remap
+    ASSERT_FALSE(table.remap_due());
+
+    // make the required number of (non-skipping) lookups for remapping to be due
+    key = 120;
+    for (size_t i=0ul; i<nlookup_remap; ++i) table[key];
+    // remap still shouldn't be due since there were no skips
     ASSERT_FALSE(table.remap_due());
 
     const auto nitem = table.nrow_nonzero();

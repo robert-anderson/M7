@@ -69,6 +69,13 @@ struct MappedTableBase {
     void clear_map();
     /**
      * @return
+     *  current number of skips per lookup
+     */
+    double skip_lookup_ratio() const {
+        return double(m_nskip_total)/double(m_nlookup_total);
+    }
+    /**
+     * @return
      *  true if enough lookups have been attempted and the ratio of skips/lookups is worse than m_remap_ratio
      */
     bool remap_due() const;
@@ -216,7 +223,7 @@ public:
         if (!TableBase::name().empty()) {
             log::info_("remapping hash table for \"{}\"", TableBase::name());
             log::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
-                       double(m_nskip_total)/double(m_nlookup_total), m_remap_ratio);
+                       skip_lookup_ratio(), m_remap_ratio);
             log::info_("replacing current bucket vector of size {} with a new one of size {}",
                        nbucket(), nbucket_new);
         }
@@ -228,6 +235,7 @@ public:
         }
         // destroy current m_buckets and put new_buckets in its place
         m_buckets = std::move(new_buckets);
+        DEBUG_ASSERT_EQ(nbucket(), nbucket_new, "error in bucket vector update");
     }
     /**
      * if a remap is due (enough lookups + bad enough skips/lookups ratio), the remap will be executed and those
