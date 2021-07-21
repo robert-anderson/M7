@@ -92,6 +92,7 @@ TEST(MappedTable, Remap) {
     // remap is now due since there have been enough total lookups and skips/lookups ratio exceeds thresh
     ASSERT_TRUE(table.remap_due());
     // do the remap
+    auto ratio = table.skip_lookup_ratio();
     table.attempt_remap();
 
     // these counters should have been reset
@@ -109,7 +110,7 @@ TEST(MappedTable, Remap) {
 
     const auto nitem = table.nrow_nonzero();
     ASSERT_EQ(nitem, 20);
-    const auto nbucket = (1+ table.m_bw.get_expansion_factor()) * nitem / (2 * remap_ratio + 1);
+    const size_t nbucket = nbucket_init * (ratio / remap_ratio) * (1.0 + table.get_expansion_factor());
     ASSERT_EQ(nbucket, table.nbucket());
 
     // check that all elements are still mapped and present after remap operation

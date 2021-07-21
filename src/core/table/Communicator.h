@@ -25,7 +25,7 @@
  *  mapped field to be accumulated together instead of occupying separate rows.
  *  This is a trade-off at the expense of more costly access (via hash tables)
  */
-template<typename row_t, bool mapped=false>
+template<typename row_t, bool mapped = false>
 class CommunicatingPair {
 public:
     typedef BufferedTableArray<row_t, mapped> send_t;
@@ -43,12 +43,25 @@ public:
      */
     defs::inds m_last_send_counts;
     size_t m_last_recv_count = 0ul;
-    template<typename ...Args>
-    CommunicatingPair(std::string name, double buffer_expansion_factor, const send_table_t &send):
+
+    /**
+     * @param name
+     *  base name for the buffers to be created for the send and recv tables
+     * @param comm_nrow_est
+     *  estimate of the number of rows per rank that will ultimately be required in the send buffer
+     * @param exp_fac
+     *  fractional over-allocation to make when resizing both tables
+     * @param send
+     *  send table instance, this is passed rather than a row, since this class allows for the definition of the send
+     *  table as a MappedTable, whose ctor takes additional args
+     */
+    CommunicatingPair(std::string name, size_t comm_nrow_est, double exp_fac, const send_table_t &send) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
-        m_send.set_expansion_factor(buffer_expansion_factor);
-        m_recv.set_expansion_factor(buffer_expansion_factor);
+        m_send.resize(comm_nrow_est, 0.0);
+        m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
+        m_send.set_expansion_factor(exp_fac);
+        m_recv.set_expansion_factor(exp_fac);
     }
 
     size_t row_size() const {
@@ -79,22 +92,20 @@ public:
         return m_recv;
     }
 
-    void resize(size_t nrow) {
-        m_send.resize(nrow);
-        m_recv.resize(nrow * mpi::nrank());
+    void resize(size_t nrow, double factor = -1.0) {
+        m_send.resize(nrow, factor);
+        m_recv.resize(nrow * mpi::nrank(), factor);
     }
 
-    void expand(size_t nrow, double expansion_factor) {
-        m_send.expand(nrow, expansion_factor);
-        m_recv.expand(nrow * mpi::nrank(), expansion_factor);
-    }
-
-    void expand(size_t nrow) {
+    void expand(size_t nrow, double factor = -1.0) {
         m_send.expand(nrow);
         m_recv.expand(nrow * mpi::nrank());
     }
 
-
+    /**
+     * perform MPI alltoallv communication of the contents of all send buffers to all recv buffers then clear the send
+     * table.
+     */
     void communicate() {
         m_last_send_counts = m_send.hwms();
         defs::inds sendcounts(m_last_send_counts);
@@ -133,8 +144,8 @@ public:
          * check that the data addressed to this rank from this rank has been copied correctly
          */
         ASSERT(!send(mpi::irank()).begin() or
-            std::memcmp(send(mpi::irank()).begin(),
-                        recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
+               std::memcmp(send(mpi::irank()).begin(),
+                           recv().begin() + recvdispls[mpi::irank()], recvcounts[mpi::irank()]) == 0);
 
         REQUIRE_TRUE_ALL(tmp, "MPI AllToAllV failed");
         recv().m_hwm = m_last_recv_count;
@@ -156,7 +167,7 @@ public:
  * @tparam mapped_comm
  *  optional mapping of CommunicatingPair
  */
-template<typename store_row_t, typename comm_row_t, bool mapped_comm=false>
+template<typename store_row_t, typename comm_row_t, bool mapped_comm = false>
 struct Communicator {
     static_assert(std::is_base_of<Row, store_row_t>::value, "Template arg must be derived from Row");
     static_assert(std::is_base_of<Row, comm_row_t>::value, "Template arg must be derived from Row");
@@ -222,7 +233,7 @@ struct Communicator {
             m_ranks_with_any_rows.reserve(mpi::nrank());
         }
 
-        virtual ~DynamicRowSet(){}
+        virtual ~DynamicRowSet() {}
 
         size_t nrow_() const {
             return m_irows.size();
@@ -233,7 +244,7 @@ struct Communicator {
         }
 
         void clear() {
-            for (const auto& irow: m_irows) RowProtector::release(irow);
+            for (const auto &irow: m_irows) RowProtector::release(irow);
             m_irows.clear();
         }
 
@@ -242,7 +253,7 @@ struct Communicator {
             m_irows.insert(irow);
         }
 
-        void add_(const store_row_t& row) {
+        void add_(const store_row_t &row) {
             add_(row.index());
         }
 
@@ -251,13 +262,13 @@ struct Communicator {
             mpi::all_gather(nrow_(), m_counts);
             mpi::counts_to_displs_consec(m_counts, m_displs);
             m_ranks_with_any_rows.clear();
-            for (size_t irank=0; irank<mpi::nrank(); ++irank){
+            for (size_t irank = 0; irank < mpi::nrank(); ++irank) {
                 if (m_counts[irank]) m_ranks_with_any_rows.push_back(irank);
             }
         }
 
         bool has_row(size_t irow) override {
-            return m_irows.find(irow)!=m_irows.end();
+            return m_irows.find(irow) != m_irows.end();
         }
 
         void before_block_transfer(const defs::inds &irows_send, size_t irank_send, size_t irank_recv) override {
@@ -317,7 +328,8 @@ struct Communicator {
                 const auto next_itrow = m_idrows[m_ndrow_found];
                 if (m_itrow == next_itrow) {
                     // this transferred row is dynamic
-                    DEBUG_ASSERT_TRUE(m_irows.find(irow)==m_irows.end(), "Transferred dynamic row shouldn't already be here!");
+                    DEBUG_ASSERT_TRUE(m_irows.find(irow) == m_irows.end(),
+                                      "Transferred dynamic row shouldn't already be here!");
                     m_irows.insert(irow);
                     protect(irow);
                     ++m_ndrow_found;
@@ -357,14 +369,14 @@ struct Communicator {
         BufferedTable<contig_row_t> m_global;
         store_row_t m_source_row;
 
-        typedef std::function<void(const store_row_t&, contig_row_t&)> loading_fn_t;
+        typedef std::function<void(const store_row_t &, contig_row_t &)> loading_fn_t;
         const loading_fn_t m_loading_fn;
 
         PartSharedRowSet(const Communicator &comm, std::string name, contig_row_t contig_row, loading_fn_t loading_fn) :
                 DynamicRowSet(comm, name),
                 m_local("Dynamic shared row set \"" + name + "\" (local)", contig_row),
                 m_global("Dynamic shared set \"" + name + "\" (global)", contig_row),
-                m_source_row(comm.m_store.m_row), m_loading_fn(loading_fn){
+                m_source_row(comm.m_store.m_row), m_loading_fn(loading_fn) {
             m_local.push_back(1);
             m_global.push_back(1);
         }
@@ -377,13 +389,15 @@ struct Communicator {
              * First, we use these indices to randomly access the source MappedTable, and copy rows
              * into the local contiguous table (m_local)
              */
-            DEBUG_ASSERT_TRUE_ALL(nrow(), log::format("Total number of rows across all ranks should be non-zero (\"{}\").", m_name));
+            DEBUG_ASSERT_TRUE_ALL(nrow(),
+                                  log::format("Total number of rows across all ranks should be non-zero (\"{}\").",
+                                              m_name));
             m_local.clear();
             auto nrow = m_displs.back() + m_counts.back();
             m_local.push_back(m_counts[mpi::irank()]);
-            auto& local_row = m_local.m_row;
+            auto &local_row = m_local.m_row;
             local_row.restart();
-            for (auto &irow : m_irows){
+            for (auto &irow : m_irows) {
                 m_source_row.jump(irow);
                 m_loading_fn(m_source_row, local_row);
                 local_row.step();
@@ -417,12 +431,13 @@ struct Communicator {
     struct SharedRowSet : public PartSharedRowSet<store_row_t> {
 
         typedef typename PartSharedRowSet<store_row_t>::loading_fn_t loading_fn_t;
+
         static loading_fn_t make_copy_row_fn() {
-            return [](const store_row_t& source, store_row_t& local){local.copy_in(source);};
+            return [](const store_row_t &source, store_row_t &local) { local.copy_in(source); };
         }
 
-        SharedRowSet(const Communicator &comm, std::string name):
-                PartSharedRowSet<store_row_t>(comm, name, comm.m_store.m_row, make_copy_row_fn()){}
+        SharedRowSet(const Communicator &comm, std::string name) :
+                PartSharedRowSet<store_row_t>(comm, name, comm.m_store.m_row, make_copy_row_fn()) {}
     };
 
     struct SharedRow : public SharedRowSet {
@@ -462,7 +477,7 @@ struct Communicator {
         }
 
         size_t irank() const {
-            return m_ranks_with_any_rows.size()?m_ranks_with_any_rows[0]:~0ul;
+            return m_ranks_with_any_rows.size() ? m_ranks_with_any_rows[0] : ~0ul;
         }
 
         void update() override {
@@ -481,35 +496,85 @@ struct Communicator {
 
         bool is_mine() const {
             ASSERT(m_ranks_with_any_rows.size() == 1);
-            ASSERT(m_ranks_with_any_rows[0]==mpi::irank());
+            ASSERT(m_ranks_with_any_rows[0] == mpi::irank());
             return DynamicRowSet::nrow_();
         }
 
-        bool is_same(const store_row_t& row) const {
+        bool is_same(const store_row_t &row) const {
             return is_mine() ? row.index() == *m_irows.cbegin() : false;
         }
     };
 
-
-    Communicator(std::string name, double buffer_expansion_factor,
-                 size_t nblock_ra, size_t period_ra,
-                 const store_table_t &store, const send_table_t &send,
-                 double acceptable_imbalance, size_t nnull_updates_deactivate):
+    /**
+     * @param name
+     *  base name for all buffers created here
+     * @param store_nrow_est
+     *  estimate of the number of rows that will ultimately be required in the store table
+     * @param store_exp_fac
+     *  fractional over-allocation to make when store buffer is resized
+     * @param comm_nrow_est
+     *  estimate of the number of rows per rank that will ultimately be required in the send table of the CommunicatingPair
+     * @param comm_exp_fac
+     *  fractional over-allocation to make when CommunicatingPair buffers are resized
+     * @param store
+     *  store table instance
+     * @param send
+     *  send table instance
+     * @param nblock_ra
+     *  number of RankAllocator blocks per rank
+     * @param period_ra
+     *  number of cycles between rank reallocation attempts
+     * @param acceptable_imbalance
+     *  fractional imbalance of work between busiest and laziest ranks acceptable to the rank allocator
+     * @param nnull_updates_deactivate
+     *  number of consecutive acceptably-imbalanced periods required for dynamic load balancing to be deactivated
+     */
+    Communicator(std::string name, size_t store_nrow_est, double store_exp_fac, size_t comm_nrow_est,
+                 double comm_exp_fac, const store_table_t &store, const send_table_t &send, size_t nblock_ra,
+                 size_t period_ra, double acceptable_imbalance, size_t nnull_updates_deactivate) :
             m_store(name + " store", store),
-            m_comm(name, buffer_expansion_factor, send),
+            m_comm(name, comm_nrow_est, comm_exp_fac, send),
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
+        m_store.resize(store_nrow_est, 0.0);
+        m_store.set_expansion_factor(store_exp_fac);
     }
+    /**
+     * ctor which uses configuration records
+     * @param name
+     *  base name for all buffers created here
+     * @param store_nrow_crude_est
+     *  "crude" estimate of the number of rows required in the store table. In general the max number of rows required
+     *  cannot be known a-priori, so the best we can do is provide a sensible, order-of-magnitude estimation and allow
+     *  the user to tune this via the initial scale factors in the buffer options sections of the input file
+     * @param comm_nrow_crude_est
+     *  "crude" estimate of the number of rows required per rank in the send table of the CommunicatingPair
+     * @param buf_opts
+     *  options relating to the buffer allocation behavior for this object
+     * @param ra_opts
+     *  options relating to the RankAllocator behavior
+     * @param store
+     *  store table instance
+     * @param send
+     *  send table instance
+     */
+    Communicator(std::string name, size_t store_nrow_crude_est, size_t comm_nrow_crude_est,
+                 const fciqmc_config::Buffers &buf_opts, const fciqmc_config::LoadBalancing &ra_opts,
+                 const store_table_t &store, const send_table_t &send) :
+            Communicator(name, store_nrow_crude_est * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,
+                         comm_nrow_crude_est * buf_opts.m_comm_fac_init, buf_opts.m_comm_exp_fac,
+                         store, send,
+                         ra_opts.m_nblock_per_rank * mpi::nrank(), ra_opts.m_period, ra_opts.m_acceptable_imbalance,
+                         ra_opts.m_nnull_updates_deactivate) {}
 
+    virtual ~Communicator() {}
 
-    Communicator(std::string name, const fciqmc_config::Buffers& buf_opts,
-                 const fciqmc_config::LoadBalancing& ra_opts,
-                 const store_table_t &store, const send_table_t &send):
-            Communicator(name, buf_opts.m_store_exp_fac, ra_opts.m_nblock_per_rank*mpi::nrank(), ra_opts.m_period,
-                         store, send, ra_opts.m_acceptable_imbalance, ra_opts.m_nnull_updates_deactivate){}
-
-    virtual ~Communicator(){}
-
+    /**
+     * @param key
+     *  m_store-mapping key instance
+     * @return
+     *  rank index assigned to the key specified
+     */
     size_t get_rank(const key_field_t &key) const {
         return m_ra.get_rank(key);
     }
@@ -541,6 +606,7 @@ struct Communicator {
     void communicate() {
         m_comm.communicate();
     }
+
 };
 
 #endif //M7_COMMUNICATOR_H

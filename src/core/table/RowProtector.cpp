@@ -27,7 +27,8 @@ void RowProtector::on_resize(size_t nrow) {
 }
 
 bool RowProtector::is_protected(const size_t &irow) const {
-    ASSERT(irow < m_flags.size());
+    DEBUG_ASSERT_LT(irow, m_flags.size(),
+                    "row protection flag OOB - on_resize must be called when the source table is resized");
     return m_flags[irow];
 }
 

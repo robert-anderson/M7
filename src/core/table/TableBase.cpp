@@ -80,16 +80,16 @@ size_t TableBase::bw_size() const {
     return m_bw.size();
 }
 
-void TableBase::resize(size_t nrow) {
+void TableBase::resize(size_t nrow, double factor) {
     DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
     if (nrow==m_nrow) return;
-    m_bw.resize(nrow * m_row_size);
-    for(const auto &rp : m_row_protectors) rp->on_resize(nrow);
+    m_bw.resize(nrow * m_row_size, factor);
     m_nrow = m_bw.size()/m_row_size;
+    for(const auto &rp : m_row_protectors) rp->on_resize(m_nrow);
 }
 
-void TableBase::expand(size_t nrow) {
-    resize(m_nrow+nrow);
+void TableBase::expand(size_t nrow, double factor) {
+    resize(m_nrow+nrow, factor);
 }
 
 void TableBase::erase_rows(const defs::inds &irows) {

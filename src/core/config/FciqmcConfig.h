@@ -10,6 +10,13 @@
 
 namespace fciqmc_config {
 
+    struct HashMapping: config::Section {
+        config::Param<double> m_remap_ratio;
+        config::Param<size_t> m_remap_nlookup;
+
+        explicit HashMapping(config::Group *parent);
+    };
+
     struct Buffers : config::Section {
         config::Param<double> m_store_fac_init;
         config::Param<double> m_store_exp_fac;
@@ -82,6 +89,7 @@ namespace fciqmc_config {
         config::Param<bool> m_replicate;
         config::Param<long> m_spin_restrict;
         Buffers m_buffers;
+        HashMapping m_hash_mapping;
         Archivable m_archivable;
         LoadBalancing m_load_balancing;
 
@@ -144,6 +152,7 @@ namespace fciqmc_config {
         config::Param<size_t> m_rank;
         config::Param<bool> m_mixed_estimator;
         Buffers m_buffers;
+        HashMapping m_hash_mapping;
         LoadBalancing m_load_balancing;
         Archivable m_archivable;
 

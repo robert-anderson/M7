@@ -4,6 +4,14 @@
 
 #include "FciqmcConfig.h"
 
+
+fciqmc_config::HashMapping::HashMapping(config::Group *parent) :
+        config::Section(parent, "hash_mapping", "options relating to the behavior of hash-mapped tables"),
+        m_remap_ratio(this, "remap_ratio", 2.0,
+                      "ratio of bucket-searching skips to total lookups required to trigger remapping with a larger number of buckets"),
+        m_remap_nlookup(this, "remap_nlookup", 500ul,
+                        "number of lookups required before remapping based on the skips/lookups ratio is considered") {}
+
 fciqmc_config::Buffers::Buffers(config::Group *parent) :
         config::Section(parent, "buffers",
                         "options relating to the allocation and reallocation behavior of a Communicator"),
@@ -33,7 +41,7 @@ void fciqmc_config::Archive::verify() {
     if (static_cast<bool>(m_period) && static_cast<bool>(m_period_mins))
         log::warn("both cycle number and time periods are defined for checkpointing");
 
-    auto& str = m_chkpt_path.get();
+    auto &str = m_chkpt_path.get();
     size_t token_count = std::count(str.cbegin(), str.cend(), '{');
     REQUIRE_LE_ALL(token_count, 1ul, "checkpoint paths can have at most one {} token");
     if (token_count) {
@@ -41,10 +49,11 @@ void fciqmc_config::Archive::verify() {
         auto it_close = std::find(str.cbegin(), str.cend(), '}');
         REQUIRE_EQ_ALL(std::distance(it_open, it_close), 1l,
                        "checkpoint path for periodic output should contain at most one {} formatting point");
-        log::info("formatting token found in path, successive checkpoints will not overwrite previous checkpoints from the same run");
-    }
-    else
-        log::info("formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run");
+        log::info(
+                "formatting token found in path, successive checkpoints will not overwrite previous checkpoints from the same run");
+    } else
+        log::info(
+                "formatting token not found in path, successive checkpoints will overwrite previous checkpoints from the same run");
 }
 
 fciqmc_config::Archivable::Archivable(config::Group *parent) :
@@ -90,7 +99,7 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         m_replicate(this, "replicate", false, "evolve a statistically-independent replica of each walker population"),
         m_spin_restrict(this, "spin_restrict", 0ul,
                         "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves secondary spin quantum number"),
-        m_buffers(this), m_archivable(this), m_load_balancing(this) {}
+        m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
         config::Section(parent, "reweight", "options relating to the on-the-fly correction of population control bias"),
@@ -118,7 +127,7 @@ fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
 void fciqmc_config::Semistochastic::verify() {
-    REQUIRE_NE_ALL(bool(m_size), m_l1_fraction_cutoff==1.0, "incompatible methods of subspace selection specified");
+    REQUIRE_NE_ALL(bool(m_size), m_l1_fraction_cutoff == 1.0, "incompatible methods of subspace selection specified");
     REQUIRE_LE_ALL(m_l1_fraction_cutoff, 1.0, "cutoff cannot exceed 1.0");
 }
 
@@ -156,7 +165,7 @@ fciqmc_config::FermionRdm::FermionRdm(config::Group *parent) :
         m_rank(this, "rank", 0ul, "Rank of fermion RDM to accumulate"),
         m_mixed_estimator(this, "mixed_estimator", false,
                           "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
-        m_buffers(this), m_load_balancing(this), m_archivable(this) {}
+        m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
 
 fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
         config::Section(parent, "inst_ests",
@@ -183,7 +192,7 @@ fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
         m_stats_period(this, "stats_period", 100ul,
                        "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
         m_stats_path(this, "stats_path", "M7.av_ests.stats", "output path for contracted value statistics"),
-        m_fermion_rdm(this), m_ref_excits(this){}
+        m_fermion_rdm(this), m_ref_excits(this) {}
 
 fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),
@@ -210,7 +219,8 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         config::Section(parent, "propagator",
                         "options relating to the propagation of the wavefunction from one MC cycle to the next"),
         m_ncycle(this, "ncycle", 10000ul, "number of MC cycles for which to iterate the solver"),
-        m_stochastic(this, "stochastic", true, "if false, perform exact projective FCI (only practical for debugging in small systems)"),
+        m_stochastic(this, "stochastic", true,
+                     "if false, perform exact projective FCI (only practical for debugging in small systems)"),
         m_excit_gen(this, "excit_gen", "pchb", "excitation generation algorithm to use"),
         m_nw_target(this, "nw_target", 0ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,

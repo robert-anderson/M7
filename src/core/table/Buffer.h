@@ -32,7 +32,7 @@ public:
 
         void move(defs::buf_t *begin, defs::buf_t *end);
 
-        void resize(size_t size);
+        void resize(size_t size, double factor=-1.0);
 
         std::string name() const;
 
@@ -40,7 +40,7 @@ public:
 
     };
 
-    double m_expansion_factor = 0.5;
+    double m_expansion_factor = 0.0;
     const std::string m_name;
 private:
     const size_t m_nwindow_max;

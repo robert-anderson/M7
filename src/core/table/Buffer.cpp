@@ -32,9 +32,9 @@ void Buffer::Window::move(defs::buf_t *begin, defs::buf_t *end) {
     m_end = end;
 }
 
-void Buffer::Window::resize(size_t size) {
+void Buffer::Window::resize(size_t size, double factor) {
     ASSERT(m_buffer)
-    m_buffer->resize(size * m_buffer->m_nwindow_max);
+    m_buffer->resize(size * m_buffer->m_nwindow_max, factor);
 }
 
 std::string Buffer::Window::name() const {
@@ -113,9 +113,9 @@ void Buffer::resize(size_t size, double factor) {
 std::string Buffer::capacity_string(size_t size) const {
     const auto ntable = " x " + std::to_string(m_windows.size()) + " tables";
     if (m_windows.size() == 1)
-        return "[ " + string_utils::memsize(size) + " ]";
+        return string_utils::memsize(size);
     else
-        return "[" + string_utils::memsize(size / m_nwindow_max) + ntable + " = " + string_utils::memsize(size) + "]";
+        return string_utils::memsize(size / m_nwindow_max) + ntable + " = " + string_utils::memsize(size);
 }
 
 std::string Buffer::capacity_string() const {

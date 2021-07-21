@@ -85,8 +85,8 @@ public:
 
     size_t ntable() const { return m_tables.size(); }
 
-    void resize(size_t nrow_per_table) {
-        m_buffer.resize(ntable() * nrow_per_table * row_size());
+    void resize(size_t nrow_per_table, double factor=-1.0) {
+        m_buffer.resize(ntable() * nrow_per_table * row_size(), factor);
         update_nrow();
     }
 
