@@ -69,8 +69,12 @@ struct MappedTableBase {
      */
     void clear_map();
     /**
+     * debugging only - checks that all nonzero rows below the hwm of the source are mapped in the current m_buckets.
+     * Defined here to reduce bloat of the templated class MappedTable
+     * @param source
+     *  base class cast of the mapped table
      * @return
-     *  current number of skips per lookup
+     *  true if table passes verification
      */
     double skip_lookup_ratio() const {
         return double(m_nskip_total)/double(m_nlookup_total);
