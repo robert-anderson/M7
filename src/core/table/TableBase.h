@@ -179,14 +179,14 @@ struct TableBase {
      * @param nrow
      *  minimum number of rows in the new buffer. the buffer's resize_factor determines the actual size of the reallocation
      */
-    void resize(size_t nrow);
+    void resize(size_t nrow, double factor=-1.0);
 
     /**
      * resize based on the number of additional rows required beyond those currently allocated
      * @param nrow
      *  minimum number of new rows. the buffer's resize_factor determines the actual size of the reallocation
      */
-    void expand(size_t nrow);
+    void expand(size_t nrow, double factor=-1.0);
 
     /**
      * erasure of rows changes meaning depending on the derived class, and so this is a virtual method. Here, we

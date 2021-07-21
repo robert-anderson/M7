@@ -100,9 +100,11 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 
     const size_t &nop() const;
 
-    static size_t nrow_guess(size_t nann, size_t ncre, size_t nsite);
+    static size_t nrow_estimate(size_t nann, size_t ncre, size_t nsite);
 
-    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec);
+    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec);
+    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec):
+            FermionRdm(opts, nrow_estimate(opts.m_rank, opts.m_rank, nsite), nsite, nelec){}
 
     void make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
 

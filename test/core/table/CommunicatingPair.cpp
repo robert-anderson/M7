@@ -9,7 +9,7 @@
 TEST(CommunicatingPair, CommunicateSingleElement) {
     typedef SingleFieldRow<fields::Number<size_t>> row_t;
     const double expansion_factor = 0.5;
-    CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{}});
+    CommunicatingPair<row_t> comm_pair("Test pair", mpi::nrank(), expansion_factor, {{}});
     // after resize:
     const size_t bw_size = comm_pair.row_size() * mpi::nrank();
     const size_t hash_lo = 123, hash_hi = 789;
@@ -42,7 +42,7 @@ TEST(CommunicatingPair, CommunicateVectors){
     typedef SingleFieldRow<fields::Numbers<size_t, 1>> row_t;
     const double expansion_factor = 0.5;
     const size_t nelement_vector = 13;
-    CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{nelement_vector}});
+    CommunicatingPair<row_t> comm_pair("Test pair", mpi::nrank(), expansion_factor, {{nelement_vector}});
     // after resize:
     const size_t bw_size = comm_pair.row_size() * mpi::nrank();
     const size_t hash_lo = 123, hash_hi = 789;
@@ -82,7 +82,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
     const size_t nelement_vector = 5;
     const size_t nrow_rank_lo = 6, nrow_rank_hi = 15;
     const size_t nrow_this_rank = hashing::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
-    CommunicatingPair<row_t> comm_pair("Test pair", expansion_factor, {{nelement_vector}});
+    CommunicatingPair<row_t> comm_pair("Test pair", nrow_this_rank, expansion_factor, {{nelement_vector}});
     const size_t hash_lo = 123, hash_hi = 789;
 
     auto nrow_max = mpi::all_max(nrow_this_rank);

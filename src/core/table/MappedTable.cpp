@@ -26,6 +26,20 @@ bool MappedTableBase::remap_due() const {
            (double(m_nskip_total) / double(m_nlookup_total)) > m_remap_ratio;
 }
 
+bool MappedTableBase::all_nonzero_rows_mapped(const TableBase &source) const {
+    // make a set out of all bucketed indices
+    std::set<size_t> set;
+    for (const auto& bucket: m_buckets){
+        for (const auto& item: bucket) set.insert(item);
+    }
+    // then go through table, if the row is non-zero, its index should be in the set.
+    for (size_t irow=0ul; irow<source.m_hwm; ++irow){
+        bool in_set = set.find(irow)!=set.end();
+        if (source.is_cleared(irow)==in_set) return false;
+    }
+    return true;
+}
+
 constexpr size_t MappedTableBase::c_default_nbucket;
 constexpr double MappedTableBase::c_default_remap_ratio;
 constexpr size_t MappedTableBase::c_default_remap_nlookup;

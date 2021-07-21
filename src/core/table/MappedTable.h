@@ -6,6 +6,7 @@
 #define M7_MAPPEDTABLE_H
 
 #include <forward_list>
+#include <set>
 #include <src/core/io/HDF5Wrapper.h>
 #include "Table.h"
 #include "src/core/field/Fields.h"
@@ -79,6 +80,15 @@ struct MappedTableBase {
      *  true if enough lookups have been attempted and the ratio of skips/lookups is worse than m_remap_ratio
      */
     bool remap_due() const;
+    /**
+     * debugging only - checks that all nonzero rows below the hwm of the source are mapped in the current m_buckets.
+     * Defined here to reduce bloat of the templated class MappedTable
+     * @param source
+     *  base class cast of the mapped table
+     * @return
+     *  true if table passes verification
+     */
+    bool all_nonzero_rows_mapped(const TableBase &source) const;
 
 };
 
@@ -181,7 +191,7 @@ public:
      *  row index of the key
      */
     size_t insert(const key_field_t &key) {
-        ASSERT(!(uncounted_lookup(key)));
+        DEBUG_ASSERT_FALSE(uncounted_lookup(key), "cannot insert when the key already exists in the table");
         auto irow = TableBase::get_free_row();
         auto &bucket = m_buckets[key.hash() % nbucket()];
         bucket.insert_after(bucket.before_begin(), irow);
@@ -217,9 +227,10 @@ public:
      * construct a new vector of buckets with a different size
      */
     void remap() {
+        DEBUG_ASSERT_TRUE(all_nonzero_rows_mapped(*this), "mapping is inconsistent with table row content")
+        size_t nbucket_new = nbucket() * skip_lookup_ratio()/m_remap_ratio;
         // use the same expansion factor as for the Table buffer
-        const size_t nbucket_new = nbucket_guess(
-                TableBase::nrow_nonzero(), m_remap_ratio) * (1+ m_bw.get_expansion_factor());
+        nbucket_new *= 1.0 + m_bw.get_expansion_factor();
         if (!TableBase::name().empty()) {
             log::info_("remapping hash table for \"{}\"", TableBase::name());
             log::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",

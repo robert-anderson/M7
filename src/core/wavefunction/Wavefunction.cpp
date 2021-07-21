@@ -7,18 +7,23 @@
 Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
+                opts.m_propagator.m_nw_target,
+                size_t(opts.m_propagator.m_nw_target*opts.m_propagator.m_tau_init),
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {
                         {
                                 nsite, opts.m_wavefunction.m_nroot,
-                                opts.m_wavefunction.m_replicate ? 2ul:1ul,
+                                opts.m_wavefunction.m_replicate ? 2ul : 1ul,
                                 need_av_weights(opts)
-                            },
-                            MappedTableBase::nbucket_guess(opts.m_propagator.m_nw_target / mpi::nrank(), 3)
+                        },
+                        MappedTableBase::nbucket_guess(
+                                opts.m_propagator.m_nw_target / mpi::nrank(),
+                                opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
+                        opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
+                        opts.m_wavefunction.m_hash_mapping.m_remap_ratio
                 },
-                {{nsite, need_send_parents(opts)}}
-        ),
+                {{nsite, need_send_parents(opts)}}),
         Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
         m_nsite(nsite),

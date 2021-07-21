@@ -19,7 +19,12 @@ namespace communicator_test {
 TEST(Communicator, SharedRow) {
     using namespace communicator_test;
     typedef Communicator<TestRow, TestRow> comm_t;
-    comm_t comm("test communicator", 0.5, 5, 1, {{}, 10}, {{}}, 0.04, 20ul);
+    const size_t nrow_store_est = 20;
+    const double store_exp_fac = 0.0;
+    const size_t nrow_comm_est = 20;
+    const double comm_exp_fac = 0.0;
+    comm_t comm("test communicator", nrow_store_est, store_exp_fac, nrow_comm_est, comm_exp_fac,
+                {{}, 10}, {{}}, 5, 1, 0.02, 5);
     const size_t nrow_per_rank_expect = 6;
     auto &row = comm.m_store.m_row;
     for (size_t i = 0; i<nrow_per_rank_expect*mpi::nrank(); ++i){

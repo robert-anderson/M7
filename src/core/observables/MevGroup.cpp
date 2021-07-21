@@ -13,7 +13,7 @@ FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
 
     foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
     size_t icomb = 0ul;
-    auto fn = [&](){
+    auto fn = [&]() {
         for (size_t i = 0ul; i < nop_insert; ++i) {
             auto j = icomb * nop_insert + i;
             ASSERT(j < m_all_combs.size());
@@ -66,7 +66,7 @@ const size_t &FermionRdm::nop() const {
     return m_ncre;
 }
 
-size_t FermionRdm::nrow_guess(size_t nann, size_t ncre, size_t nsite) {
+size_t FermionRdm::nrow_estimate(size_t nann, size_t ncre, size_t nsite) {
     double nrow = 1.0;
     nrow *= integer_utils::combinatorial(2 * nsite, nann);
     nrow *= integer_utils::combinatorial(2 * nsite, ncre);
@@ -74,48 +74,52 @@ size_t FermionRdm::nrow_guess(size_t nann, size_t ncre, size_t nsite) {
     return nrow;
 }
 
-FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec) :
+FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec) :
         base_t(
                 log::format("{}-body RDM", opts.m_rank),
+                nrow_crude_est / mpi::nrank(),
+                nrow_crude_est / mpi::nrank(),
                 opts.m_buffers, opts.m_load_balancing,
                 {
                         {opts.m_rank, 1},
                         MappedTableBase::nbucket_guess(
-                                nrow_guess(opts.m_rank, opts.m_rank, nsite) / mpi::nrank(), 3)
+                                nrow_crude_est / mpi::nrank(), opts.m_hash_mapping.m_remap_ratio),
+                        opts.m_hash_mapping.m_remap_nlookup,
+                        opts.m_hash_mapping.m_remap_ratio
                 },
                 {
                         {opts.m_rank, 1},
                         MappedTableBase::nbucket_guess(
-                                nrow_guess(opts.m_rank, opts.m_rank, nsite) / mpi::nrank(), 3)
+                                nrow_crude_est / mpi::nrank(), opts.m_hash_mapping.m_remap_ratio),
+                        opts.m_hash_mapping.m_remap_nlookup,
+                        opts.m_hash_mapping.m_remap_ratio
                 }),
         m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
         m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator) {
-    m_store.resize(100);
-    m_comm.resize(100);
-    m_promoters.reserve(opts.m_rank+1);
-    for (size_t nins=0ul; nins<=opts.m_rank; ++nins) m_promoters.emplace_back(nelec+nins-opts.m_rank, nins);
+    m_promoters.reserve(opts.m_rank + 1);
+    for (size_t nins = 0ul; nins <= opts.m_rank; ++nins) m_promoters.emplace_back(nelec + nins - opts.m_rank, nins);
 }
 
 void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight,
                                const defs::wf_t &dst_weight) {
     const auto exlvl = conn.nexcit();
     if (conn.nann() > m_nann && conn.ncre() > m_ncre) return;
-    const auto nins = nop()-exlvl;
-    ASSERT(nins<=nop());
+    const auto nins = nop() - exlvl;
+    ASSERT(nins <= nop());
 
-    const auto& promoter = m_promoters[nins];
-    for (size_t icomb=0ul; icomb<promoter.m_ncomb; ++icomb){
+    const auto &promoter = m_promoters[nins];
+    for (size_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
         auto phase = promoter.apply(icomb, conn, m_lookup_inds);
-        if (!exlvl || !nins) {ASSERT(!phase);}
+        if (!exlvl || !nins) {ASSERT(!phase); }
         else {
-            if (m_lookup_inds.m_ann[0]==m_lookup_inds.m_cre[0]) ASSERT(!phase);
-            if (m_lookup_inds.m_ann[0]==m_lookup_inds.m_cre[1]) ASSERT(phase);
-            if (m_lookup_inds.m_ann[1]==m_lookup_inds.m_cre[0]) ASSERT(phase);
-            if (m_lookup_inds.m_ann[1]==m_lookup_inds.m_cre[1]) ASSERT(!phase);
+            if (m_lookup_inds.m_ann[0] == m_lookup_inds.m_cre[0]) ASSERT(!phase);
+            if (m_lookup_inds.m_ann[0] == m_lookup_inds.m_cre[1]) ASSERT(phase);
+            if (m_lookup_inds.m_ann[1] == m_lookup_inds.m_cre[0]) ASSERT(phase);
+            if (m_lookup_inds.m_ann[1] == m_lookup_inds.m_cre[1]) ASSERT(!phase);
         }
         auto irank_send = m_ra.get_rank(m_lookup_inds);
         ASSERT(m_lookup_inds.is_ordered());
-        auto& send_table = send(irank_send);
+        auto &send_table = send(irank_send);
         size_t irow = *send_table[m_lookup_inds];
         if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
 
@@ -123,7 +127,7 @@ void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &s
         /*
          * include the Fermi phase of the excitation
          */
-        phase = phase==conn.phase();
+        phase = phase == conn.phase();
         auto contrib = (phase ? -1.0 : 1.0) * src_weight * dst_weight;
         send_table.m_row.m_values[0] += contrib;
     }
