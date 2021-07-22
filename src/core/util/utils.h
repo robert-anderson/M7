@@ -7,6 +7,7 @@
 
 #include "src/defs.h"
 #include <vector>
+#include <array>
 #include <stack>
 #include <complex>
 #include <iostream>
@@ -55,7 +56,7 @@ namespace utils {
      */
     template<typename T>
     static typename std::enable_if<!std::is_arithmetic<T>::value, std::string>::type
-    to_string(const T& v) {
+    to_string(const T &v) {
         std::stringstream out;
         out << v;
         return out.str();
@@ -66,32 +67,32 @@ namespace utils {
      */
     template<typename T>
     static typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type
-    to_string(const T& v) {
-        if (v==std::numeric_limits<T>::max()) return "inf";
+    to_string(const T &v) {
+        if (v == std::numeric_limits<T>::max()) return "inf";
         return std::to_string(v);
     }
 
 
-    static std::string to_string(const std::vector<std::string>& v) {
+    static std::string to_string(const std::vector<std::string> &v) {
         std::string string("[");
-        for (const auto& str: v) string += str + " ";
+        for (const auto &str: v) string += str + " ";
         string += "]";
         return string;
     }
 
     template<typename T>
-    static std::string to_string(const std::vector<T>& v) {
+    static std::string to_string(const std::vector<T> &v) {
         std::string string("[");
-        for (const auto& i: v) string += std::to_string(i) + " ";
+        for (const auto &i: v) string += std::to_string(i) + " ";
         string += "]";
         return string;
     }
 
     template<typename T>
-    static std::string to_string(const std::stack<T>& v) {
+    static std::string to_string(const std::stack<T> &v) {
         auto cpy = v;
         std::vector<T> tmp;
-        while (!v.empty()){
+        while (!v.empty()) {
             tmp.push_back(cpy.top());
             cpy.pop();
         }
@@ -99,15 +100,15 @@ namespace utils {
     }
 
     template<typename T>
-    static std::string to_string(const std::list<T>& v) {
+    static std::string to_string(const std::list<T> &v) {
         auto cpy = v;
         std::vector<T> tmp;
-        for (const auto& i: v) tmp.push_back(i);
+        for (const auto &i: v) tmp.push_back(i);
         return to_string(tmp);
     }
 
-    static std::string to_string(const std::string& str) {
-        return "\""+str+"\"";
+    static std::string to_string(const std::string &str) {
+        return "\"" + str + "\"";
     }
 
     static std::string to_string(bool v) {
@@ -167,7 +168,7 @@ namespace utils {
     static narrow_t safe_narrow(const wide_t &wide) {
         static_assert(std::is_convertible<wide_t, narrow_t>::value, "incompatible types");
         static_assert(sizeof(wide_t) >= sizeof(narrow_t), "wide type must be at least as long as narrow type");
-        ASSERT(static_cast<wide_t>(static_cast<narrow_t>(wide))==wide); // narrowing loses information
+        ASSERT(static_cast<wide_t>(static_cast<narrow_t>(wide)) == wide); // narrowing loses information
         return static_cast<narrow_t>(wide);
     }
 
@@ -216,6 +217,33 @@ namespace integer_utils {
 }
 
 namespace bit_utils {
+
+    /**
+     * masks whose ith elements retain i bits when bitwise and-ed with another value of the same size (4 or 8 bytes)
+     */
+    static constexpr std::array<unsigned int, 33> c_trunc_mask_u =
+            {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
+             0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff, 0x3ffff,
+             0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff, 0xffffff,
+             0x1ffffff, 0x3ffffff, 0x7ffffff, 0xfffffff, 0x1fffffff,
+             0x3fffffff, 0x7fffffff, 0xffffffff};
+    static constexpr std::array<unsigned long, 65> c_trunc_mask_ul =
+            {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
+             0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff,
+             0x3ffff, 0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff,
+             0xffffff, 0x1ffffff, 0x3ffffff, 0x7ffffff, 0xfffffff,
+             0x1fffffff, 0x3fffffff, 0x7fffffff, 0xffffffff, 0x1ffffffff,
+             0x3ffffffff, 0x7ffffffff, 0xfffffffff, 0x1fffffffff,
+             0x3fffffffff, 0x7fffffffff, 0xffffffffff, 0x1ffffffffff,
+             0x3ffffffffff, 0x7ffffffffff, 0xfffffffffff, 0x1fffffffffff,
+             0x3fffffffffff, 0x7fffffffffff, 0xffffffffffff,
+             0x1ffffffffffff, 0x3ffffffffffff, 0x7ffffffffffff,
+             0xfffffffffffff, 0x1fffffffffffff, 0x3fffffffffffff,
+             0x7fffffffffffff, 0xffffffffffffff, 0x1ffffffffffffff,
+             0x3ffffffffffffff, 0x7ffffffffffffff, 0xfffffffffffffff,
+             0x1fffffffffffffff, 0x3fffffffffffffff, 0x7fffffffffffffff,
+             0xffffffffffffffff};
+
     template<typename T>
     static inline void clr(T &x, const size_t &i) {
         x &= ~(T(1ul) << i);
@@ -259,7 +287,7 @@ namespace bit_utils {
     }
 
     template<typename T>
-    static inline size_t nsetbit(const T &work);
+    inline size_t nsetbit(const T &work);
 
     template<>
     inline size_t nsetbit(const unsigned long long &work) {
@@ -279,16 +307,25 @@ namespace bit_utils {
         return _popcnt32(work);
     }
 
-    template<typename T>
-    T truncate(T &v, size_t n) {
-        const auto nbit = sizeof(T) * CHAR_BIT - n;
-        return (v << nbit) >> nbit;
+    static inline unsigned int truncate(const unsigned int &v, size_t n) {
+        static_assert(sizeof(unsigned int) == 4, "unsupported int definition");
+        return v & c_trunc_mask_u[n];
+    }
+
+    static inline unsigned long truncate(const unsigned long &v, size_t n) {
+        static_assert(sizeof(unsigned long) == 8, "unsupported int definition");
+        return v & c_trunc_mask_ul[n];
     }
 
     template<typename T>
-    std::string to_string(const T &v){
+    static inline size_t nsetbit_before(const T &v, size_t n) {
+        return nsetbit(truncate(v, n));
+    }
+
+    template<typename T>
+    static std::string to_string(const T &v) {
         std::string tmp;
-        for (size_t i=0ul; i<sizeof (T)*CHAR_BIT; ++i) tmp+=get(v, i)?'1':'0';
+        for (size_t i = 0ul; i < sizeof(T) * CHAR_BIT; ++i) tmp += get(v, i) ? '1' : '0';
         return tmp;
     }
 
@@ -396,7 +433,7 @@ namespace string_utils {
     }
 
     static inline bool is_divider(const char &c) {
-        return c == ' ' || c == ',' || c == ')' || c=='\r';
+        return c == ' ' || c == ',' || c == ')' || c == '\r';
     }
 
     static double read_double(const char *&ptr) {
@@ -443,12 +480,12 @@ namespace string_utils {
 
     static int64_t read_signed(const char *&ptr) {
         bool pos = true;
-        if (*ptr=='-') {
+        if (*ptr == '-') {
             pos = false;
             ptr++;
         }
         auto tmp = read_unsigned(ptr);
-        if (tmp==std::numeric_limits<size_t>::max()) return std::numeric_limits<int64_t>::max();
+        if (tmp == std::numeric_limits<size_t>::max()) return std::numeric_limits<int64_t>::max();
         return pos ? tmp : -tmp;
     }
 }
@@ -572,8 +609,8 @@ namespace mem_utils {
         return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
     }
 
-    static void print_cmp(char* c1, char* c2, size_t n){
-        for (size_t i=0; i<n; ++i){
+    static void print_cmp(char *c1, char *c2, size_t n) {
+        for (size_t i = 0; i < n; ++i) {
             std::cout << int(c1[i]) << " " << int(c2[i]) << std::endl;
         }
         std::cout << std::endl;
@@ -585,7 +622,7 @@ namespace sort_utils {
     template<typename viewable_t>
     std::function<bool(const size_t &, const size_t &)>
     static make_compare_fn(std::function<typename viewable_t::cview_t(const size_t &)> getter_fn, bool max,
-                    bool abs_val) {
+                           bool abs_val) {
         if (max) {
             if (abs_val)
                 return [getter_fn](const size_t &i1, const size_t &i2) {
@@ -595,8 +632,7 @@ namespace sort_utils {
                 return [getter_fn](const size_t &i1, const size_t &i2) {
                     return getter_fn(i1) >= getter_fn(i2);
                 };
-        }
-        else {
+        } else {
             if (abs_val)
                 return [getter_fn](const size_t &i1, const size_t &i2) {
                     return std::abs(getter_fn(i1)) <= std::abs(getter_fn(i2));
@@ -612,26 +648,24 @@ namespace sort_utils {
 namespace tuple_utils {
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
-    for_each(std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
-    { }
+    for_each(std::tuple<Tp...> &, FuncT &) // Unused arguments are given no names.
+    {}
 
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I < sizeof...(Tp), void>::type
-    for_each(std::tuple<Tp...>& t, FuncT& f)
-    {
+    for_each(std::tuple<Tp...> &t, FuncT &f) {
         f(std::get<I>(t));
         for_each<I + 1, FuncT, Tp...>(t, f);
     }
 
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
-    for_each(const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
-    { }
+    for_each(const std::tuple<Tp...> &, FuncT &) // Unused arguments are given no names.
+    {}
 
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I < sizeof...(Tp), void>::type
-    for_each(const std::tuple<Tp...>& t, FuncT& f)
-    {
+    for_each(const std::tuple<Tp...> &t, FuncT &f) {
         f(std::get<I>(t));
         for_each<I + 1, FuncT, Tp...>(t, f);
     }
@@ -642,13 +676,12 @@ namespace tuple_utils {
      */
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
-    for_each_pair(std::tuple<Tp...> &, std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
-    { }
+    for_each_pair(std::tuple<Tp...> &, std::tuple<Tp...> &, FuncT &) // Unused arguments are given no names.
+    {}
 
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I < sizeof...(Tp), void>::type
-    for_each_pair(std::tuple<Tp...>& t1, std::tuple<Tp...>& t2, FuncT& f)
-    {
+    for_each_pair(std::tuple<Tp...> &t1, std::tuple<Tp...> &t2, FuncT &f) {
         f(std::get<I>(t1), std::get<I>(t2));
         for_each_pair<I + 1, FuncT, Tp...>(t1, t2, f);
     }
@@ -659,13 +692,12 @@ namespace tuple_utils {
      */
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
-    for_each_pair(std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
-    { }
+    for_each_pair(std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT &) // Unused arguments are given no names.
+    {}
 
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I < sizeof...(Tp), void>::type
-    for_each_pair(std::tuple<Tp...>& t1, const std::tuple<Tp...>& t2, FuncT& f)
-    {
+    for_each_pair(std::tuple<Tp...> &t1, const std::tuple<Tp...> &t2, FuncT &f) {
         f(std::get<I>(t1), std::get<I>(t2));
         for_each_pair<I + 1, FuncT, Tp...>(t1, t2, f);
     }
@@ -675,13 +707,12 @@ namespace tuple_utils {
      */
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type
-    for_each_pair(const std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT&) // Unused arguments are given no names.
-    { }
+    for_each_pair(const std::tuple<Tp...> &, const std::tuple<Tp...> &, FuncT &) // Unused arguments are given no names.
+    {}
 
     template<std::size_t I = 0, typename FuncT, typename... Tp>
     inline typename std::enable_if<I < sizeof...(Tp), void>::type
-    for_each_pair(const std::tuple<Tp...>& t1, const std::tuple<Tp...>& t2, FuncT& f)
-    {
+    for_each_pair(const std::tuple<Tp...> &t1, const std::tuple<Tp...> &t2, FuncT &f) {
         f(std::get<I>(t1), std::get<I>(t2));
         for_each_pair<I + 1, FuncT, Tp...>(t1, t2, f);
     }
@@ -689,34 +720,37 @@ namespace tuple_utils {
 
 namespace nd_utils {
     template<typename T>
-    T nelement(const std::vector<T>& v){
+    T nelement(const std::vector<T> &v) {
         T out = 1;
-        for (const auto& i: v) out*=i;
+        for (const auto &i: v) out *= i;
         return out;
     };
 }
 
 namespace dispatch_utils {
     template<typename T>
-    struct TypeTag{};
+    struct TypeTag {
+    };
 
     template<size_t ind>
-    struct IndTag{};
+    struct IndTag {
+    };
 
     template<bool t>
-    struct BoolTag{};
+    struct BoolTag {
+    };
 }
 
 namespace array_utils {
     template<typename T, size_t nind>
-    static std::array<T, nind> filled(const T& v){
+    static std::array<T, nind> filled(const T &v) {
         std::array<T, nind> tmp;
         tmp.fill(v);
         return tmp;
     }
 
     template<typename T, size_t nind>
-    static std::vector<T> to_vector(const std::array<T, nind>& array) {
+    static std::vector<T> to_vector(const std::array<T, nind> &array) {
         std::vector<T> tmp;
         tmp.assign(array.cbegin(), array.cend());
         return tmp;
@@ -724,28 +758,33 @@ namespace array_utils {
 }
 
 namespace conn_utils {
-    static size_t left_obc(const size_t& ispinorb, const size_t& nsite) {
-        if (ispinorb==0 || ispinorb==nsite) return ~0ul;
-        return ispinorb-1;
+    static size_t left_obc(const size_t &ispinorb, const size_t &nsite) {
+        if (ispinorb == 0 || ispinorb == nsite) return ~0ul;
+        return ispinorb - 1;
     }
-    static size_t left_pbc(const size_t& ispinorb, const size_t& nsite) {
-        if (ispinorb==0) return nsite-1;
-        else if (ispinorb==nsite) return 2*nsite-1;
-        return ispinorb-1;
+
+    static size_t left_pbc(const size_t &ispinorb, const size_t &nsite) {
+        if (ispinorb == 0) return nsite - 1;
+        else if (ispinorb == nsite) return 2 * nsite - 1;
+        return ispinorb - 1;
     }
-    static size_t right_obc(const size_t& ispinorb, const size_t& nsite) {
-        if (ispinorb==nsite-1 || ispinorb==2*nsite-1) return ~0ul;
-        return ispinorb+1;
+
+    static size_t right_obc(const size_t &ispinorb, const size_t &nsite) {
+        if (ispinorb == nsite - 1 || ispinorb == 2 * nsite - 1) return ~0ul;
+        return ispinorb + 1;
     }
-    static size_t right_pbc(const size_t& ispinorb, const size_t& nsite) {
-        if (ispinorb==nsite-1) return 0;
-        else if (ispinorb==2*nsite-1) return nsite;
-        return ispinorb+1;
+
+    static size_t right_pbc(const size_t &ispinorb, const size_t &nsite) {
+        if (ispinorb == nsite - 1) return 0;
+        else if (ispinorb == 2 * nsite - 1) return nsite;
+        return ispinorb + 1;
     }
-    static size_t left(const size_t& ispinorb, const size_t& nsite, bool pbc=false) {
+
+    static size_t left(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
         return pbc ? left_obc(ispinorb, nsite) : left_pbc(ispinorb, nsite);
     }
-    static size_t right(const size_t& ispinorb, const size_t& nsite, bool pbc=false) {
+
+    static size_t right(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
         return pbc ? right_obc(ispinorb, nsite) : right_pbc(ispinorb, nsite);
     }
 }
@@ -762,4 +801,5 @@ static std::ostream &operator<<(std::ostream &os, const std::array<T, nind> &a) 
     os << utils::to_string(array_utils::to_vector(a));
     return os;
 }
+
 #endif //M7_UTILS_H
