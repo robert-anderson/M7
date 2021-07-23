@@ -30,8 +30,10 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         log::warn("Attempting a mixed estimation of MEVs with replication, "
                   "the replica population is redundant");
 
-    if (mpi::i_am_root())
+    if (mpi::i_am_root()) {
         m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
+        m_timing_stats = std::unique_ptr<TimingStats>(new TimingStats("M7.timing", "FCIQMC Timings", {}));
+    }
     if (m_opts.m_stats.m_parallel)
         m_parallel_stats = std::unique_ptr<ParallelStats>(
                 new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
@@ -570,11 +572,6 @@ void Solver::output_stats() {
         stats.m_nocc_onv = m_wf.m_nocc_onv.m_reduced;
         stats.m_delta_nocc_onv = m_wf.m_delta_nocc_onv.m_reduced;
         stats.m_psingle = m_prop.m_magnitude_logger.m_psingle;
-        stats.m_total_synchronization_overhead = sync_overhead;
-        stats.m_propagate_loop_time = m_propagate_timer;
-        stats.m_communication_time = m_communicate_timer;
-        stats.m_annihilation_loop_time = m_annihilate_timer;
-        stats.m_total_cycle_time = m_cycle_timer;
         if (m_uniform_twf) stats.m_uniform_twf_num = m_uniform_twf->m_numerator_total[0];
         if (m_weighted_twf) {
             stats.m_weighted_twf_num = m_weighted_twf->m_numerator_total[0];
@@ -582,6 +579,13 @@ void Solver::output_stats() {
         }
         stats.m_reweighting_factor = m_prop.m_shift.m_reweighter.m_total;
         m_stats->flush();
+
+        auto &timing_stats = m_timing_stats->m_row;
+        timing_stats.m_total_synchronization_overhead = sync_overhead;
+        timing_stats.m_propagate_loop_time = m_propagate_timer;
+        timing_stats.m_communication_time = m_communicate_timer;
+        timing_stats.m_annihilation_loop_time = m_annihilate_timer;
+        timing_stats.m_total_cycle_time = m_cycle_timer;
     }
 
     if (m_opts.m_stats.m_parallel) {

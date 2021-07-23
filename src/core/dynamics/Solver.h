@@ -13,6 +13,7 @@
 #include <src/core/observables/MevGroup.h>
 #include <src/core/io/FciqmcStats.h>
 #include <src/core/io/Archivable.h>
+#include <src/core/io/TimingStats.h>
 #include "src/core/wavefunction/Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStats.h"
@@ -31,6 +32,7 @@ class Solver {
     Annihilator m_annihilator;
 
     std::unique_ptr<FciqmcStats> m_stats = nullptr;
+    std::unique_ptr<TimingStats> m_timing_stats = nullptr;
     std::unique_ptr<ParallelStats> m_parallel_stats = nullptr;
 
     /*
