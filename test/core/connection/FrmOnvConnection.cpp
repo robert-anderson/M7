@@ -3,6 +3,7 @@
 //
 
 #include <src/core/table/BufferedFields.h>
+#include <src/core/io/SparseArrayFileReader.h>
 #include "src/core/connection/FrmOnvConnection.h"
 #include "gtest/gtest.h"
 
@@ -14,13 +15,13 @@ namespace frm_onv_connection_test {
     }
     static bool phase_connect(const fields::FrmOnv& src, const fields::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
-        FrmOpString com(src.m_nsite);
+        FrmOpProduct com(src.m_nsite);
         return connection.connect(src, dst, com);
     }
     static bool phase_apply(const fields::FrmOnv& src, const fields::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
-        FrmOpString com(src.m_nsite);
+        FrmOpProduct com(src.m_nsite);
         return connection.apply(src, com);
     }
     static size_t ncre(const fields::FrmOnv& src, const fields::FrmOnv& dst){
@@ -40,7 +41,7 @@ namespace frm_onv_connection_test {
     }
     static size_t string_chk(const fields::FrmOnv& src, const fields::FrmOnv& dst, defs::inds ann, defs::inds cre, defs::inds com){
         FrmOnvConnection connection(src.m_nsite);
-        FrmOpString com_chk(src.m_nsite);
+        FrmOpProduct com_chk(src.m_nsite);
         connection.connect(src, dst, com_chk);
         return (connection.m_ann == ann) && (connection.m_cre == cre) && (com_chk==com);
     }
@@ -182,4 +183,38 @@ TEST(FrmOnvConnection, Ex33){
     dst_onv = {8, 12, 14, 30, 123, 188, 189, 235};
     ASSERT_TRUE(string_chk(src_onv, dst_onv, {3, 144, 234}, {14, 189, 235}, {8, 12, 30, 123, 188}));
     ASSERT_PRED3(pred_true, phase_direct(src_onv, dst_onv), phase_connect(src_onv, dst_onv), phase_apply(src_onv, dst_onv));
+}
+
+TEST(Connection, EntireCiPhases) {
+    using namespace frm_onv_connection_test;
+    /**
+     * this file enumerates all determinantal connections in a small CI space along with their associated phases
+     */
+    SparseArrayFileReader<float> file_reader(
+            defs::assets_root + "/parity_test/parity_8.txt",
+            16ul, false, false);
+    defs::inds inds(16);
+    float value;
+
+    buffered::FrmOnv bra(4);
+    buffered::FrmOnv ket(4);
+    buffered::FrmOnv work_det(4);
+
+    while (file_reader.next(inds, value)) {
+        bra.zero();
+        ket.zero();
+        for (size_t i = 0ul; i < 8ul; ++i) {
+            if (inds[i]) bra.set(i);
+        }
+        for (size_t i = 8ul; i < 16ul; ++i) {
+            if (inds[i]) ket.set(i - 8);
+        }
+        if (bra.is_zero() || ket.is_zero()) continue;
+        if (bra.nsetbit() != ket.nsetbit()) continue;
+
+        if (value<0)
+            ASSERT_PRED3(pred_true, phase_direct(ket, bra), phase_connect(ket, bra), phase_apply(ket, bra));
+        else
+            ASSERT_PRED3(pred_false, phase_direct(ket, bra), phase_connect(ket, bra), phase_apply(ket, bra));
+    }
 }

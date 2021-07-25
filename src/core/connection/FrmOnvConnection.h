@@ -7,10 +7,15 @@
 
 #include "src/core/field/Fields.h"
 
-class FrmOpString {
+/**
+ * A generic string of ordered, distinct spin-orbital indices.
+ * the string is only modifiable via the clear and add methods, but (debug bounds checked) const access is provided to
+ * the underlying index vector
+ */
+class FrmOpProduct {
     defs::inds m_inds;
 public:
-    FrmOpString(size_t nsite) {
+    FrmOpProduct(size_t nsite) {
         m_inds.reserve(2*nsite);
     }
 
@@ -56,97 +61,204 @@ public:
         return m_inds.cend();
     }
 
+    /**
+     * @param src
+     *  the fermion ONV to check the occupation of
+     * @return
+     *  true if all elements of the index array are set bits in the ONV
+     */
     bool all_occ(const fields::FrmOnv &src) const {
         return std::any_of(cbegin(), cend(), [&src](size_t i) { return !src.get(i); });
     }
-
+    /**
+     * @param src
+     *  the fermion ONV to check the occupation of
+     * @return
+     *  true if all elements of the index array are clear bits in the ONV
+     */
     bool all_vac(const fields::FrmOnv &src) const {
         return std::any_of(cbegin(), cend(), [&src](size_t i) { return src.get(i); });
     }
-
-    bool is_sorted() const {
-        return std::is_sorted(cbegin(), cend());
+    /**
+     * @return
+     *  true if the stored indices are in ascending order and none are the same
+     */
+    bool is_valid() const {
+        if (!std::is_sorted(cbegin(), cend())) return false;
+        for (auto it = cbegin()+1; it!=cend(); ++it) if (*it==*(it-1)) return false;
+        return true;
     }
 };
 
-
+/**
+ * Stores two FrmOpProduct representing the difference in occupation between two determinants
+ */
 struct FrmOnvConnection {
     /**
      * Annihilation and creation second quantized opertor strings defining the difference in occupation between src and
      * dst fermionic ONVs
      */
-    FrmOpString m_ann, m_cre;
+    FrmOpProduct m_ann, m_cre;
 private:
     /**
      * efficient computation of phases without enumeration of common occupation requires the number of set bits between
      * the beginning of the bit string and the beginning of each each dataword to be cached
      */
     const size_t m_ndataword;
-    std::vector<bool> m_dataword_phases;
+    mutable std::vector<bool> m_dataword_phases;
 public:
 
     explicit FrmOnvConnection(size_t nsite);
-
+    /**
+     * update the internal state of the connection with the difference in occupation between the two given determinants
+     * @param src
+     *  fermion ONV to excite from
+     * @param dst
+     *  fermion ONV to excite to
+     */
     void connect(const fields::FrmOnv &src, const fields::FrmOnv &dst);
-
-    bool connect(const fields::FrmOnv &src, const fields::FrmOnv &dst, FrmOpString &com);
-
-    void apply(const fields::FrmOnv &src, fields::FrmOnv &dst);
-
-    bool apply(const fields::FrmOnv &src, FrmOpString &com);
-
-    bool apply(const fields::FrmOnv &src, fields::FrmOnv &dst, FrmOpString &com);
-
+    /**
+     * update the internal state of the connection with the difference in occupation between the two given determinants
+     * and populate the given FrmOpProduct with the indices occupied in both the src and dst
+     * @param src
+     *  fermion ONV to excite from
+     * @param dst
+     *  fermion ONV to excite to
+     * @param com
+     *  string of "common" spin orbital indices
+     * @return
+     *  antisymmetric phase of the connection
+     */
+    bool connect(const fields::FrmOnv &src, const fields::FrmOnv &dst, FrmOpProduct &com);
+    /**
+     * update the dst determinant given the src determinant and the internal state of the connection
+     * @param src
+     *  fermion ONV to excite from
+     * @param dst
+     *  fermion ONV to excite to
+     */
+    void apply(const fields::FrmOnv &src, fields::FrmOnv &dst) const;
+    /**
+     * update only the common indices, and compute the phase in the process
+     * @param src
+     *  fermion ONV to excite from
+     * @param com
+     *  string of "common" spin orbital indices
+     * @return
+     *  antisymmetric phase of the connection
+     */
+    bool apply(const fields::FrmOnv &src, FrmOpProduct &com) const;
+    /**
+     * update both the dst determinant and compute the associated phase given the src determinant and the internal
+     * state of the connection
+     * @param src
+     *  fermion ONV to excite from
+     * @param dst
+     *  fermion ONV to excite to
+     * @param com
+     *  string of "common" spin orbital indices
+     * @return
+     *  antisymmetric phase of the connection
+     */
+    bool apply(const fields::FrmOnv &src, fields::FrmOnv &dst, FrmOpProduct &com) const;
+    /**
+     * reset the internal state that to of a null excitation
+     */
     void clear();
-
+    /**
+     * convenient wrapper for a fermion number-conserving single excitation
+     * @param ann
+     *  spin orbital index to annihilate from a src determinant
+     * @param cre
+     *  spin orbital index to create in a dst determinant
+     */
     void add(const size_t &ann, const size_t &cre);
-
+    /**
+     * convenient wrapper for a fermion number-conserving double excitation
+     * @param ann1
+     *  first spin orbital index to annihilate from a src determinant
+     * @param ann2
+     *  second spin orbital index to annihilate from a src determinant
+     * @param cre1
+     *  first spin orbital index to create in a dst determinant
+     * @param cre2
+     *  second spin orbital index to create in a dst determinant
+     */
     void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2);
-
+    /**
+     * @return
+     *  the annihilation string cast to a vector
+     */
     const defs::inds& ann() const;
-
+    /**
+     * @return
+     *  the creation string cast to a vector
+     */
     const defs::inds& cre() const;
 
 private:
-    void update_dataword_phases(const fields::FrmOnv &onv);
-
     /**
-     * The individual phase of a bit position within a multi-word bit representation is the number of set bits
-     * before that position.
-     * @param onv
-     * @param ibit
-     * @return
+     * update the stored cache with the oddness or evenness of the number of set bits before each dataword in the
+     * integer representation of the fermion ONV
+     * @param src
+     *  fermion ONV to excite from
      */
-    bool independent_phase(const fields::FrmOnv &onv, const size_t &ibit);
+    void update_dataword_phases(const fields::FrmOnv &src) const;
+    /**
+     * compute the antisymmetric phase resulting if a second quantized operator with spin orbital index ibit were
+     * operated on the fermion ONV src
+     * @param src
+     *  fermion ONV to excite from
+     * @param ibit
+     *  spin orbital index
+     * @return
+     *  antisymmetric phase of the projection of a single creation or annihilation operator with index ibit
+     */
+    bool independent_phase(const fields::FrmOnv &src, const size_t &ibit) const;
 
 public:
     /**
-     * the overall phase of an excitation with respect to the "in" determinant is the product of the independent
-     * phases only if the operators are applied in such a way that they do not interfere with one another
-     * e.g. if the occupied set is [0, 1, 4, 6, 7, 9]
-     * and the excitation is 9 -> 5
-     * the independent phase of 9 is true, since there is an odd number of set bits before position 9
-     * the independent phase of 5 is true, since there is an odd number of set bits before position 5
-     * so overall, the phase is false, which is correct: the electron at position 9 moves past an even number of
-     * others to reach its final position
+     * the phase computed is the sign arising from the projection of the normal-ordered SQ operator product formed by
+     * the product of creation operators a^+(cre_i) annihilation operators a(ann_i) acting on the ket determinant src
      *
-     * on the other hand, if the excitation is 4 -> 8
-     * the independent phase of 4 is false, since there is an even number of set bits before position 4
-     * the independent phase of 8 is true, since there is an odd number of set bits before position 8
-     * so overall, the phase is true, which is clearly incorrect: the electron at position 4 moves past an even
-     * number of others to reach its final position
+     * both strings are applied in their stored order (ascending), but the creation string is hermitian-conjugated so
+     * it algebraically should be applied in descending order. This method takes this rearrangement into account
+     * 
+     * phase products are realised via the XOR operator on bools, since like-phases combine for positive (false) phase,
+     * and differing phases combine for a negative (true) phase.
+     * 
+     * the algorithm initially sets ann and cre iterators to the cbegin of their respective FrmOpProducts and loops
+     * until the iterators have been incremented beyond the last added (highest) element of each string. If the next
+     * lowest index is a creation operator, the phase associated with moving the operator past the remaining
+     * annihilation operators is taken into account.
      *
-     * in the second example, the number of set positions before 8 is not correct since we have deleted an electron
-     * at 4 first, so we need to compute the phase associated with doing the creation operation first.
+     * at this point, the determinant and connection index-specific antisymmety has been dealt with. All that remains is
+     * the include the excitation rank-associated details. The number of fermion exchanges required to invert a product
+     * of distinct operators of length n is the number of pairs that can be drawn from n objects. In this case, there
+     * is a phase associated with applying the creation operators in reverse order, and another associated with the fact
+     * that each applied operator had to be moved through each previously handled one as it was being (virtually)
+     * inserted into or removed from the determinant.
      *
-     * the algorithm is then to work through the creation and annihilation lists, and each time the smallest of the
-     * current indices is a creation operator, negate the overall phase if there is an odd number of annihilations
-     * remaining
+     * Let m be the number of creation ops, and n the number of annihilation ops, then the total number of exchanges
+     * entailed in the above process is the sum (or, equivalently the difference) of the two numbers of pairs:
      *
-     * @param onv
+     * nexchange = npair(m+n) - npair(n)
+     * i.e. 2*nexchange = (m+n)*(m+n-1) - n^2 + n = m^2 - m + 2mn
+     * i.e. nexchange = npair(m) + mn
+     *
+     * The numbers of pairs alternate between odd and even with a period of 2:
+     * 0->0   1->0   2->1   3->3   4->6   5->10   6->15
+     *   E      E      O      O      E      E       O    ....
+     *
+     * so it is quick to compute whether these exchanges implies an inversion in the phase computed from the connection
+     * indices, and this is done at the end of the implementation of this method
+     *
+     * @param src
+     *  fermion ONV to excite from
      * @return
+     *  true if the phase of the connection with respect to the src is negative
      */
-    bool phase(const fields::FrmOnv &onv);
+    bool phase(const fields::FrmOnv &src) const;
 };
 
 

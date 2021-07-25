@@ -26,9 +26,11 @@ void FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &
         work = dst_work & ~src_work;
         while (work) m_cre.add(bit_utils::next_setbit(work) + bit_offset);
     }
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
 }
 
-bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &dst, FrmOpString &com) {
+bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &dst, FrmOpProduct &com) {
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     connect(src, dst);
@@ -68,12 +70,16 @@ bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &
         cre_iter++;
         nperm += com.size();
     }
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     return nperm & 1ul;
 }
 
 
-void FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst) {
+void FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst) const {
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     const auto nann = m_ann.size();
     const auto ncre = m_cre.size();
     DEBUG_ASSERT_TRUE(m_ann.all_occ(src), "not all annihilation indices are occupied in src ONV");
@@ -87,11 +93,11 @@ void FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst) {
     DEBUG_ASSERT_TRUE(m_cre.all_occ(dst), "not all creation indices are occupied in dst ONV");
 }
 
-bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOpString &com) {
+bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOpProduct &com) const {
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
-    DEBUG_ASSERT_TRUE(m_cre.is_sorted(), "creation operator string is not in ascending order");
-    DEBUG_ASSERT_TRUE(m_ann.is_sorted(), "annihilation operator string is not in ascending order");
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     com.clear();
     size_t nperm = 0ul;
 
@@ -122,10 +128,12 @@ bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOpString &com) {
         cre_iter++;
         nperm += com.size();
     }
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     return nperm & 1ul;
 }
 
-bool FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst, FrmOpString &com) {
+bool FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst, FrmOpProduct &com) const {
     apply(src, dst);
     return apply(src, com);
 }
@@ -138,6 +146,8 @@ void FrmOnvConnection::clear() {
 void FrmOnvConnection::add(const size_t &ann, const size_t &cre) {
     m_ann.add(ann);
     m_cre.add(cre);
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
 }
 
 void FrmOnvConnection::add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2) {
@@ -145,6 +155,8 @@ void FrmOnvConnection::add(const size_t &ann1, const size_t &ann2, const size_t 
     m_ann.add(ann2);
     m_cre.add(cre1);
     m_cre.add(cre2);
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
 }
 
 const defs::inds &FrmOnvConnection::ann() const {
@@ -155,27 +167,28 @@ const defs::inds &FrmOnvConnection::cre() const {
     return m_cre;
 }
 
-
-void FrmOnvConnection::update_dataword_phases(const fields::Onv<0> &onv) {
+void FrmOnvConnection::update_dataword_phases(const fields::Onv<0> &src) const {
     for (size_t idataword = 1ul; idataword < m_ndataword; ++idataword) {
-        auto prev_dataword = onv.get_dataword(idataword - 1);
+        auto prev_dataword = src.get_dataword(idataword - 1);
         bool phase = bit_utils::nsetbit(prev_dataword) & 1ul;
         m_dataword_phases[idataword] = (m_dataword_phases[idataword - 1] != phase);
     }
 }
 
-bool FrmOnvConnection::independent_phase(const fields::Onv<0> &onv, const size_t &ibit) {
+bool FrmOnvConnection::independent_phase(const fields::Onv<0> &src, const size_t &ibit) const {
     DEBUG_ASSERT_TRUE(ibit<m_cre.capacity(), "spin orbital index is OOB");
     auto idataword = ibit / defs::nbit_word;
     DEBUG_ASSERT_TRUE(idataword<m_ndataword, "dataword index is OOB");
     auto ibit_in_word = ibit - idataword * defs::nbit_word;
     return m_dataword_phases[idataword] ^
-           (bit_utils::nsetbit_before(onv.get_dataword(idataword), ibit_in_word) & 1ul);
+           (bit_utils::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);
 }
 
-bool FrmOnvConnection::phase(const fields::Onv<0> &onv) {
+bool FrmOnvConnection::phase(const fields::Onv<0> &src) const {
+    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
+    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     bool out = false;
-    update_dataword_phases(onv);
+    update_dataword_phases(src);
     auto ann_iter = m_ann.cbegin();
     auto cre_iter = m_cre.cbegin();
     const auto ann_end = m_ann.cend();
@@ -184,12 +197,12 @@ bool FrmOnvConnection::phase(const fields::Onv<0> &onv) {
     while (ann_iter != ann_end || cre_iter != cre_end) {
         if (cre_iter!=cre_end && (ann_iter==ann_end || *cre_iter < *ann_iter)) {
             bool ann_remain_phase = std::distance(ann_iter, ann_end)&1l;
-            out ^= independent_phase(onv, *cre_iter++) ^ ann_remain_phase;
+            out ^= independent_phase(src, *cre_iter++) ^ ann_remain_phase;
         }
         else {
             DEBUG_ASSERT_FALSE(ann_iter==ann_end, "should not have reached the end of annihilation indices");
             DEBUG_ASSERT_TRUE(cre_iter==cre_end || *ann_iter < *cre_iter, "invalid connection");
-            out ^= independent_phase(onv, *ann_iter++);
+            out ^= independent_phase(src, *ann_iter++);
         }
     }
     out ^= (m_ann.size()/2)&1ul;
