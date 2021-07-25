@@ -155,7 +155,7 @@ namespace ham_parts {
             return m_int_2e_rank;
         }
 
-        buffered::FermionOnv guess_reference(const int &spin_level) const;
+        buffered::FrmOnv guess_reference(const int &spin_level) const;
 
 
         /*
@@ -177,7 +177,7 @@ namespace ham_parts {
          * @param spin
          *  spin (MS) number
          */
-        void set_hf_onv(fields::FermionOnv& onv, int spin) const {
+        void set_hf_onv(fields::FrmOnv& onv, int spin) const {
             auto nalpha = ci_utils::nalpha(nelec(), spin);
             auto nbeta = ci_utils::nbeta(nelec(), spin);
             DEBUG_ASSERT_EQ(nalpha+nbeta, nelec(), "inconsistent na, nb, nelec");
@@ -193,9 +193,9 @@ namespace ham_parts {
 
         Boson(const size_t& nmode, const defs::ham_t& omega): m_nmode(nmode), m_omegas(nmode, omega){}
 
-        defs::ham_t get_element_0(const fields::BosonOnv &onv) const;
+        defs::ham_t get_element_0(const fields::BosOnv &onv) const;
 
-        defs::ham_comp_t get_energy(const fields::BosonOnv &onv) const;
+        defs::ham_comp_t get_energy(const fields::BosOnv &onv) const;
 
         defs::ham_t get_element_0(const conn::Boson &conn) const;
 

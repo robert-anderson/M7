@@ -8,8 +8,8 @@
 #include "HamiltonianParts.h"
 #include "HamiltonianData.h"
 
-buffered::FermionOnv ham_parts::Fermion::guess_reference(const int &spin_restrict) const {
-    buffered::FermionOnv ref(m_nsite);
+buffered::FrmOnv ham_parts::Fermion::guess_reference(const int &spin_restrict) const {
+    buffered::FrmOnv ref(m_nsite);
     REQUIRE_EQ(static_cast<size_t>(std::abs(spin_restrict)) % 2, nelec() % 2,
                "2Ms value incompatible with electron number");
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
@@ -164,14 +164,14 @@ defs::ham_t ham_parts::Fermion::get_element(const fields::Onv<0> &bra, const fie
     return get_element(AntisymFermionOnvConnection(ket, bra));
 }
 
-defs::ham_t ham_parts::Boson::get_element_0(const fields::BosonOnv &onv) const {
+defs::ham_t ham_parts::Boson::get_element_0(const fields::BosOnv &onv) const {
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode)
         res += m_omegas[imode] * static_cast<defs::ham_comp_t>(onv[imode]);
     return res;
 }
 
-defs::ham_comp_t ham_parts::Boson::get_energy(const fields::BosonOnv &onv) const {
+defs::ham_comp_t ham_parts::Boson::get_energy(const fields::BosOnv &onv) const {
     return consts::real(get_element_0(onv));
 }
 

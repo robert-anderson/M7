@@ -28,7 +28,7 @@ TEST(StochasticPropagator, Test) {
 
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::FermionOnv ref_onv(ham.nsite());
+    buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
@@ -63,7 +63,7 @@ TEST(StochasticPropagator, RdmTest) {
     //const auto benchmark = -99.9421389039331
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::FermionOnv ref_onv(ham.nsite());
+    buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_onv(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
@@ -100,7 +100,7 @@ TEST(StochasticPropagator, Hdf5) {
     //const auto benchmark = -108.916561245585;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::FermionOnv ref_onv(ham.nsite());
+    buffered::FrmOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         ref_onv.set({0, i});
         ref_onv.set({1, i});

@@ -7,8 +7,8 @@
 
 #include "NumberField.h"
 #include "MultiField.h"
-#include "FermionOnvField.h"
-#include "BosonOnvField.h"
+#include "FrmOnvField.h"
+#include "BosOnvField.h"
 
 namespace fields {
     template<typename T, size_t nind>
@@ -26,40 +26,44 @@ namespace fields {
     using Flags = BitsetField<uint8_t, nind>;
     using Flag = BitField<uint8_t>;
 
-    using FermionOnv = FermionOnvField;
+    using FrmOnv = FrmOnvField;
 
-    using BosonOnv = BosonOnvField;
+    using BosOnv = BosOnvField;
 
-    struct FermiBosOnv : MultiField<FermionOnv, BosonOnv> {
+    struct FrmBosOnv : MultiField<FrmOnv, BosOnv> {
         const std::string m_name;
-        FermionOnv &m_frm;
-        BosonOnv &m_bos;
+        FrmOnv &m_frm;
+        BosOnv &m_bos;
 
-        FermiBosOnv(Row *row, size_t nsite, std::string name = "") :
-                MultiField<FermionOnv, BosonOnv>(row,
-                                                 {nullptr, nsite, name.empty() ? "" : name + " (fermion)"},
-                                                 {nullptr, nsite, name.empty() ? "" : name + " (boson)"}),
+        FrmBosOnv(Row *row, size_t nsite, std::string name = "") :
+                MultiField<FrmOnv, BosOnv>(row,
+                                           {nullptr, nsite, name.empty() ? "" : name + " (fermion)"},
+                                           {nullptr, nsite, name.empty() ? "" : name + " (boson)"}),
                 m_name(name), m_frm(get<0>()), m_bos(get<1>()) {
         }
 
-        FermiBosOnv(const FermiBosOnv &other) : FermiBosOnv(other.m_frm.row_of_copy(), other.m_frm.m_nsite,
-                                                            other.m_name) {}
+        FrmBosOnv(const FrmBosOnv &other) : FrmBosOnv(other.m_frm.row_of_copy(), other.m_frm.m_nsite,
+                                                      other.m_name) {}
 
-        FermiBosOnv &operator=(const FermiBosOnv &other) {
+        FrmBosOnv &operator=(const FrmBosOnv &other) {
             m_frm = other.m_frm;
             m_bos = other.m_bos;
             return *this;
         }
 
-        FermiBosOnv &operator=(const std::pair<defs::inds, defs::inds> &inds) {
+        FrmBosOnv &operator=(const std::pair<defs::inds, defs::inds> &inds) {
             m_frm = inds.first;
             m_bos = inds.second;
             return *this;
         }
     };
 
+    struct FrmCsf : FrmOnv {
+        FrmCsf(Row *row, size_t nsite, std::string name = ""): FrmOnv(row, nsite, name){}
+    };
+
     template<bool enable_bosons = defs::enable_bosons>
-    using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
+    using Onv = typename std::conditional<enable_bosons, FrmBosOnv, FrmOnv>::type;
 
     struct FermionMevInds : MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> {
         typedef MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> base_t;

@@ -11,8 +11,8 @@
 TEST(MevGroup, Promoter1BodyDiagonal) {
     const size_t nsite = 5;
     const size_t nop_insert = 1;
-    buffered::FermionOnv in(nsite);
-    buffered::FermionOnv out(nsite);
+    buffered::FrmOnv in(nsite);
+    buffered::FrmOnv out(nsite);
 
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 3, 4, 6, 7, 9};
@@ -38,8 +38,8 @@ TEST(MevGroup, Promoter1BodyDiagonal) {
 TEST(MevGroup, Promoter2BodyDiagonal) {
     const size_t nsite = 5;
     const size_t nop_insert = 2;
-    buffered::FermionOnv in(nsite);
-    buffered::FermionOnv out(nsite);
+    buffered::FrmOnv in(nsite);
+    buffered::FrmOnv out(nsite);
 
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 3, 4, 6, 7, 9};
@@ -74,8 +74,8 @@ TEST(MevGroup, Promoter2BodyDiagonal) {
 TEST(MevGroup, Promoter2BodySingle) {
     const size_t nsite = 5;
     const size_t nop_insert = 1;
-    buffered::FermionOnv in(nsite);
-    buffered::FermionOnv out(nsite);
+    buffered::FrmOnv in(nsite);
+    buffered::FrmOnv out(nsite);
 
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 4, 6, 7, 8, 9};
@@ -138,8 +138,8 @@ TEST(MevGroup, Promoter2BodyDouble) {
      */
     const size_t nsite = 5;
     const size_t nop_insert = 0;
-    buffered::FermionOnv in(nsite);
-    buffered::FermionOnv out(nsite);
+    buffered::FrmOnv in(nsite);
+    buffered::FrmOnv out(nsite);
 
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 2, 4, 6, 8, 9};

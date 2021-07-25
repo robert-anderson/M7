@@ -6,6 +6,6 @@
 #include "gtest/gtest.h"
 
 TEST(FermiBosConnection, Test){
-    const buffered::FermiBosOnv fonv(4);
+    const buffered::FrmBosOnv fonv(4);
     std::cout << fonv.to_string() << std::endl;
 }

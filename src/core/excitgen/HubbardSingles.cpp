@@ -4,7 +4,7 @@
 
 #include "HubbardSingles.h"
 
-bool HubbardSingles::_draw(const fields::FermionOnv &src_onv, fields::FermionOnv &dst_onv, const OccupiedOrbitals &occs,
+bool HubbardSingles::_draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv, const OccupiedOrbitals &occs,
                            const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem,
                            conn::Antisym<0> &anticonn) {
     auto rand = m_prng.draw_uint(2*occs.size());

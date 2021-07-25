@@ -106,30 +106,30 @@ namespace buffered {
         }
     };
 
-    struct FermionOnv : BufferedField<fields::FermionOnv> {
-        using fields::FermionOnv::operator=;
-        FermionOnv(size_t nsite) : BufferedField<fields::FermionOnv>({nullptr, nsite}){}
-        FermionOnv& operator=(const FermionOnv& other){
+    struct FrmOnv : BufferedField<fields::FrmOnv> {
+        using fields::FrmOnv::operator=;
+        FrmOnv(size_t nsite) : BufferedField<fields::FrmOnv>({nullptr, nsite}){}
+        FrmOnv& operator=(const FrmOnv& other){
             base_t::operator=(other);
             return *this;
         }
-        FermionOnv(const FermionOnv& other): FermionOnv(other.m_nsite){}
+        FrmOnv(const FrmOnv& other): FrmOnv(other.m_nsite){}
     };
 
-    struct BosonOnv : BufferedField<fields::BosonOnv> {
-        using fields::BosonOnv::operator=;
-        BosonOnv(size_t nsite) : BufferedField<fields::BosonOnv>({nullptr, nsite}){}
+    struct BosOnv : BufferedField<fields::BosOnv> {
+        using fields::BosOnv::operator=;
+        BosOnv(size_t nsite) : BufferedField<fields::BosOnv>({nullptr, nsite}){}
     };
 
 
-    struct FermiBosOnv : BufferedMultiField<fields::FermiBosOnv> {
-        using fields::FermiBosOnv::operator=;
-        FermiBosOnv(size_t nsite):
-                BufferedMultiField<fields::FermiBosOnv>({nullptr, nsite}){}
+    struct FrmBosOnv : BufferedMultiField<fields::FrmBosOnv> {
+        using fields::FrmBosOnv::operator=;
+        FrmBosOnv(size_t nsite):
+                BufferedMultiField<fields::FrmBosOnv>({nullptr, nsite}){}
     };
 
     template<bool enable_bosons=defs::enable_bosons>
-    using Onv = typename std::conditional<enable_bosons, FermiBosOnv, FermionOnv>::type;
+    using Onv = typename std::conditional<enable_bosons, FrmBosOnv, FrmOnv>::type;
 
     struct FermionMevInds : BufferedMultiField<fields::FermionMevInds> {
         using fields::FermionMevInds::operator=;

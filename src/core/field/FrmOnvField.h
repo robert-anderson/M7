@@ -2,12 +2,12 @@
 // Created by rja on 07/04/2021.
 //
 
-#ifndef M7_FERMIONONVFIELD_H
-#define M7_FERMIONONVFIELD_H
+#ifndef M7_FRMONVFIELD_H
+#define M7_FRMONVFIELD_H
 
 #include "BitsetField.h"
 
-struct FermionOnvField : BitsetField<size_t, 2> {
+struct FrmOnvField : BitsetField<size_t, 2> {
     typedef BitsetField<size_t, 2> base_t;
     using base_t::get;
     using base_t::set;
@@ -18,19 +18,19 @@ struct FermionOnvField : BitsetField<size_t, 2> {
 
     const size_t m_nsite;
 
-    FermionOnvField(Row* row, size_t nsite, std::string name=""):
+    FrmOnvField(Row* row, size_t nsite, std::string name=""):
         base_t(row, {{2, nsite}, {"spin channel", "site"}}, name), m_nsite(nsite){}
 
 
-    FermionOnvField(const FermionOnvField& other):
-            FermionOnvField(other.row_of_copy(), other.m_format.m_shape[1], other.m_name){}
+    FrmOnvField(const FrmOnvField& other):
+            FrmOnvField(other.row_of_copy(), other.m_format.m_shape[1], other.m_name){}
 
-    FermionOnvField& operator=(const FermionOnvField& other) {
+    FrmOnvField& operator=(const FrmOnvField& other) {
         FieldBase::operator=(other);
         return *this;
     }
 
-    FermionOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
+    FrmOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
         // prezero the element
         zero();
         for (const auto &ind: setbits.first) set(ind);
@@ -155,4 +155,4 @@ struct FermionOnvField : BitsetField<size_t, 2> {
 };
 
 
-#endif //M7_FERMIONONVFIELD_H
+#endif //M7_FRMONVFIELD_H

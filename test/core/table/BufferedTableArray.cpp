@@ -41,7 +41,7 @@ TEST(BufferedTableArray, Resize){
     bta[2].m_row.m_fonv = {7, 2, 5};
 
 
-    buffered::FermionOnv fonv(6);
+    buffered::FrmOnv fonv(6);
     ASSERT_TRUE(fonv.m_row);
     ASSERT_EQ(fonv.m_table.m_hwm, 1);
 

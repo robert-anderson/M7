@@ -11,8 +11,8 @@
 
 TEST(Connection, ParticleNumberConserving) {
     const size_t nsite = 70;
-    buffered::FermionOnv ket(nsite);
-    buffered::FermionOnv bra(nsite);
+    buffered::FrmOnv ket(nsite);
+    buffered::FrmOnv bra(nsite);
 
     defs::inds ketoccorbs = {1, 4, 6, 8, 11, 19, 120, 138, 139};
     defs::inds braoccorbs = {1, 4, 5, 6, 9, 11, 19, 137, 138};
@@ -58,9 +58,9 @@ TEST(Connection, Phase) {
     defs::inds inds(16);
     float value;
 
-    buffered::FermionOnv bra(4);
-    buffered::FermionOnv ket(4);
-    buffered::FermionOnv work_det(4);
+    buffered::FrmOnv bra(4);
+    buffered::FrmOnv ket(4);
+    buffered::FrmOnv work_det(4);
     AntisymFermionOnvConnection connection(ket);
 
     while (file_reader.next(inds, value)) {
@@ -95,7 +95,7 @@ TEST(Connection, MultiWordPhase) {
             m_dataword_phases[0] = false;
         }
 
-        void update_dataword_phases(const FermionOnvField &onv) {
+        void update_dataword_phases(const FrmOnvField &onv) {
             for (size_t idataword = 1ul; idataword < m_ndataword; ++idataword) {
                 auto prev_dataword = onv.get_dataword(idataword - 1);
                 bool phase = bit_utils::nsetbit(prev_dataword) & 1ul;
@@ -110,7 +110,7 @@ TEST(Connection, MultiWordPhase) {
          * @param ibit
          * @return
          */
-        bool independent_phase(const FermionOnvField &onv, const size_t &ibit) {
+        bool independent_phase(const FrmOnvField &onv, const size_t &ibit) {
             auto idataword = ibit / defs::nbit_word;
             auto ibit_in_word = ibit - idataword * defs::nbit_word;
             return m_dataword_phases[idataword] ^
@@ -118,6 +118,15 @@ TEST(Connection, MultiWordPhase) {
         }
 
         /**
+         *
+         *  ann_p ann_q | ... p ... q ... >  = P(p) P(q) | ... p' ... q' ... >
+         *  ann_p ann_q | ... p ... q ... >  = P(p) P(q) | ... p' ... q' ... >
+         *
+         *
+         *  cre_p cre_q | ... p ... q ... >  = P(p) P(q) | ... p' ... q' ... >
+         *
+         *
+         *
          * the overall phase of an excitation with respect to the "in" determinant is the product of the independent
          * phases only if the operators are applied in such a way that they do not interfere with one another
          * e.g. if the occupied set is [0, 1, 4, 6, 7, 9]
@@ -143,7 +152,7 @@ TEST(Connection, MultiWordPhase) {
          * @param onv
          * @return
          */
-        bool phase(const FermionOnvField &onv) {
+        bool phase(const FrmOnvField &onv) {
             bool out = false;
             update_dataword_phases(onv);
             auto iann = m_conn.nann()-1;
@@ -176,9 +185,9 @@ TEST(Connection, MultiWordPhase) {
 
     // choose a large enough nsite so that multiple 64bit datawords are required
     const size_t nsite = 100;
-    buffered::FermionOnv bra(nsite);
-    buffered::FermionOnv ket(nsite);
-    buffered::FermionOnv check_onv(nsite);
+    buffered::FrmOnv bra(nsite);
+    buffered::FrmOnv ket(nsite);
+    buffered::FrmOnv check_onv(nsite);
     AntisymFermionOnvConnection connection(nsite);
     FrmConnNew frmconn(nsite);
 
@@ -187,10 +196,10 @@ TEST(Connection, MultiWordPhase) {
            {13, 78, 95, 98, 99}};
 
     frmconn.update_dataword_phases(bra);
-    ASSERT_FALSE(frmconn.m_wordwise_cum_phase[0]);
-    ASSERT_FALSE(frmconn.m_wordwise_cum_phase[1]); // 4 setbits in dataword 0
-    ASSERT_FALSE(frmconn.m_wordwise_cum_phase[2]); // 2 setbits in dataword 1
-    ASSERT_TRUE(frmconn.m_wordwise_cum_phase[3]);  // 1 setbits in dataword 2
+    ASSERT_FALSE(frmconn.m_dataword_phases[0]);
+    ASSERT_FALSE(frmconn.m_dataword_phases[1]); // 4 setbits in dataword 0
+    ASSERT_FALSE(frmconn.m_dataword_phases[2]); // 2 setbits in dataword 1
+    ASSERT_TRUE(frmconn.m_dataword_phases[3]);  // 1 setbits in dataword 2
 
 
     ASSERT_FALSE(frmconn.independent_phase(bra, 0)); // 0 before

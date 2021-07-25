@@ -15,7 +15,7 @@ TEST(Fields, HashUniformityTrueRandom){
     defs::inds freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
-    buffered::FermionOnv fonv(nsite);
+    buffered::FrmOnv fonv(nsite);
 
     for (size_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();
@@ -50,7 +50,7 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
     defs::inds freqs(nbucket, 0ul);
     PRNG prng(14, 10000);
 
-    buffered::FermionOnv fonv(nsite);
+    buffered::FrmOnv fonv(nsite);
 
     for (size_t idraw=0ul; idraw<ndraw; ++idraw){
         fonv.zero();

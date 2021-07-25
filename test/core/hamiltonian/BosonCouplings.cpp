@@ -12,7 +12,7 @@ TEST(BosonCouplings, Element_b0) {
 
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    buffered::FermiBosOnv ket(nsite);
+    buffered::FrmBosOnv ket(nsite);
     ASSERT_TRUE(ket.m_row);
     ASSERT_TRUE(ket.m_frm.belongs_to_row());
     ASSERT_TRUE(ket.m_frm.m_row);
@@ -20,7 +20,7 @@ TEST(BosonCouplings, Element_b0) {
     ASSERT_TRUE(ket.m_bos.m_row);
     ASSERT_EQ(ket.m_row, ket.m_frm.m_row);
     ASSERT_EQ(ket.m_row, ket.m_bos.m_row);
-    buffered::FermiBosOnv bra(nsite);
+    buffered::FrmBosOnv bra(nsite);
 
 
     ket = {{1, 2, 3, 4},
@@ -49,8 +49,8 @@ TEST(BosonCouplings, Element_f0_b1){
 
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    buffered::FermiBosOnv ket(nsite);
-    buffered::FermiBosOnv bra(nsite);
+    buffered::FrmBosOnv ket(nsite);
+    buffered::FrmBosOnv bra(nsite);
 
     ket = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
@@ -84,8 +84,8 @@ TEST(BosonCouplings, Element_f1_b1){
 
     BosonCouplings bc(nboson_cutoff, nsite, v, omega);
 
-    buffered::FermiBosOnv ket(nsite);
-    buffered::FermiBosOnv bra(nsite);
+    buffered::FrmBosOnv ket(nsite);
+    buffered::FrmBosOnv bra(nsite);
 
     ket = {{1, 2, 3, 4},
            {2, 4, 0, 1}};

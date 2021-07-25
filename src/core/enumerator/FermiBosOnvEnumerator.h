@@ -13,8 +13,8 @@
 class FermiBosOnvEnumerator : public Enumerator<fields::Onv<1>> {
     FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
-    buffered::FermionOnv m_fonv;
-    buffered::BosonOnv m_bonv;
+    buffered::FrmOnv m_fonv;
+    buffered::BosOnv m_bonv;
 public:
     FermiBosOnvEnumerator(size_t nsite, size_t nelec, size_t nmode, size_t nboson_cutoff):
             m_det_enum(nsite, nelec), m_bonv_enum(nmode, nboson_cutoff), m_fonv(nsite), m_bonv(nmode){

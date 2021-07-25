@@ -2,23 +2,23 @@
 // Created by rja on 07/04/2021.
 //
 
-#ifndef M7_BOSONONVFIELD_H
-#define M7_BOSONONVFIELD_H
+#ifndef M7_BOSONVFIELD_H
+#define M7_BOSONVFIELD_H
 
 #include "NumberField.h"
 
-struct BosonOnvField : NdNumberField<uint8_t, 1> {
-    BosonOnvField(Row *row, size_t nmode, std::string name="") :
+struct BosOnvField : NdNumberField<uint8_t, 1> {
+    BosOnvField(Row *row, size_t nmode, std::string name="") :
     NdNumberField<uint8_t, 1>(row, {{nmode}, {"boson mode occupations"}}, name) {}
 
-    BosonOnvField(const BosonOnvField &other): BosonOnvField(other.m_row, other.m_format.m_shape[0], other.m_name){}
+    BosOnvField(const BosOnvField &other): BosOnvField(other.m_row, other.m_format.m_shape[0], other.m_name){}
 
-    BosonOnvField &operator=(const BosonOnvField &other) {
+    BosOnvField &operator=(const BosOnvField &other) {
         NdNumberField<uint8_t, 1>::operator=(other);
         return *this;
     }
 
-    BosonOnvField &operator=(const defs::inds &inds) {
+    BosOnvField &operator=(const defs::inds &inds) {
         DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");
         for (size_t i = 0ul; i < inds.size(); ++i) this->operator[](i) = inds[i];
         return *this;
@@ -26,4 +26,4 @@ struct BosonOnvField : NdNumberField<uint8_t, 1> {
 };
 
 
-#endif //M7_BOSONONVFIELD_H
+#endif //M7_BOSONVFIELD_H

@@ -57,7 +57,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.65146156994338;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::FermionOnv fonv(ham.nsite());
+    buffered::FrmOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set({0, i}); fonv.set({1, i});}
 
     auto elem = ham.get_element_0(fonv);
@@ -69,13 +69,13 @@ TEST(FermionHamiltonian, RhfEnergy) {
 TEST(FermionHamiltonian, RhfBrillouinTheorem) {
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::FermionOnv fonv(ham.nsite());
+    buffered::FrmOnv fonv(ham.nsite());
     fonv = {0, 1, 2,  6, 7, 8};
 
     OccupiedOrbitals occs(fonv);
     VacantOrbitals vacs(fonv);
 
-    buffered::FermionOnv excited(ham.nsite());
+    buffered::FrmOnv excited(ham.nsite());
 
     AntisymFermionOnvConnection connection(fonv);
 

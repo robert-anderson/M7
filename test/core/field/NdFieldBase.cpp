@@ -8,7 +8,7 @@
 
 
 struct TestRow : Row {
-    fields::FermionOnv m_det;
+    fields::FrmOnv m_det;
     TestRow() : m_det(this, 7){}
 };
 

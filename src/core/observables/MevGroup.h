@@ -108,8 +108,8 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 
     void make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
 
-    void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight) {
+    void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
+                       const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight) {
         m_conn.connect(src_onv, dst_onv);
         make_contribs(m_conn, src_weight, dst_weight);
     }
@@ -119,8 +119,8 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         make_contribs(src_onv.m_frm, src_weight, dst_onv.m_frm, dst_weight);
     }
 
-    void make_contribs(const fields::FermionOnv &src_onv, const defs::wf_t &src_weight,
-                       const fields::FermionOnv &dst_onv, const defs::wf_t &dst_weight, const size_t &nop_conn) {
+    void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
+                       const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight, const size_t &nop_conn) {
         m_conn.connect(src_onv, dst_onv);
         if (m_conn.nexcit() != nop_conn) return;
         make_contribs(m_conn, src_weight, dst_weight);

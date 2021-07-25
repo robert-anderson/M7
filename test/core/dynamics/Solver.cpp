@@ -18,13 +18,13 @@ TEST(Solver, RecvSort) {
     /*
      * set up some arbitrary system of determinants
      */
-    buffered::FermionOnv onv0(nsite);
+    buffered::FrmOnv onv0(nsite);
     onv0 = {0, 5, 6, 7};
-    buffered::FermionOnv onv1(nsite);
+    buffered::FrmOnv onv1(nsite);
     onv1 = {1, 5, 6, 7};
-    buffered::FermionOnv onv2(nsite);
+    buffered::FrmOnv onv2(nsite);
     onv2 = {2, 5, 6, 7};
-    buffered::FermionOnv onv3(nsite);
+    buffered::FrmOnv onv3(nsite);
     onv3 = {3, 5, 6, 7};
 
     auto& recv = wf.m_comm.recv();
@@ -45,7 +45,7 @@ TEST(Solver, Consolidation) {
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     Wavefunction wf(opts, ham.nsite());
     props::Exact prop(ham, opts, wf.m_format);
-    buffered::FermionOnv ref_onv(ham.nsite());
+    buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_onv(ref_onv, 0);
 
     auto ref_energy = ham.get_energy(ref_onv);

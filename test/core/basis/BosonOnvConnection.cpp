@@ -10,8 +10,8 @@
 TEST(BosonOnvConnection, NoChange) {
     size_t nmode = 4ul;
 
-    buffered::BosonOnv ket(nmode);
-    buffered::BosonOnv bra(nmode);
+    buffered::BosOnv ket(nmode);
+    buffered::BosOnv bra(nmode);
 
     ket = defs::inds{2, 4, 0, 1};
     bra =  defs::inds{2, 4, 0, 1};
@@ -25,9 +25,9 @@ TEST(BosonOnvConnection, SingleChange) {
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
-    buffered::BosonOnv ket(nmode);
-    buffered::BosonOnv bra(nmode);
-    buffered::BosonOnv work_bonv(nmode);
+    buffered::BosOnv ket(nmode);
+    buffered::BosOnv bra(nmode);
+    buffered::BosOnv work_bonv(nmode);
 
     for (size_t imode = 0; imode < nmode; ++imode) {
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
@@ -51,9 +51,9 @@ TEST(BosonOnvConnection, DoubleChange) {
     size_t nmode = 4ul;
     size_t occ_cutoff = 6ul;
 
-    buffered::BosonOnv ket(nmode);
-    buffered::BosonOnv bra(nmode);
-    buffered::BosonOnv work_bonv(nmode);
+    buffered::BosOnv ket(nmode);
+    buffered::BosOnv bra(nmode);
+    buffered::BosOnv work_bonv(nmode);
 
     for (size_t imode1 = 0; imode1 < nmode; ++imode1) {
         for (size_t imode2 = imode1+1; imode2 < nmode; ++imode2) {

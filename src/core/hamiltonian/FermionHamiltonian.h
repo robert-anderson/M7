@@ -246,7 +246,7 @@ public:
         return m_int_2e_rank;
     }
 
-    buffered::FermionOnv guess_reference(const int &spin_level) const;
+    buffered::FrmOnv guess_reference(const int &spin_level) const;
 
 
     void foreach_connection(const fields::Onv<0> &src_onv, const ham_sym_helpers::Fermion::body_fn_t &body,

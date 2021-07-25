@@ -17,8 +17,8 @@ TEST(Determinant, Phase) {
     float value;
 
     const size_t nsite = 4;
-    buffered::FermionOnv bra(nsite);
-    buffered::FermionOnv ket(nsite);
+    buffered::FrmOnv bra(nsite);
+    buffered::FrmOnv ket(nsite);
     AntisymFermionOnvConnection conn(bra);
 
     while (file_reader.next(inds, value)) {
@@ -39,7 +39,7 @@ TEST(Determinant, Phase) {
 }
 
 TEST(Determinant, Spin) {
-    buffered::FermionOnv det(4);
+    buffered::FrmOnv det(4);
     ASSERT_TRUE(det.is_zero());
     ASSERT_EQ(det.spin(), 0);
     det = {0,1,2,3};

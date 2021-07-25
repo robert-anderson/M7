@@ -22,8 +22,8 @@ class BosonOnvConnection {
 public:
 
     explicit BosonOnvConnection(const size_t& nmode);
-    BosonOnvConnection(const fields::BosonOnv &in, const fields::BosonOnv &out);
-    explicit BosonOnvConnection(const fields::BosonOnv &in);
+    BosonOnvConnection(const fields::BosOnv &in, const fields::BosOnv &out);
+    explicit BosonOnvConnection(const fields::BosOnv &in);
 
     operator bool() const {return nchanged_mode();}
 
@@ -34,11 +34,11 @@ public:
 
     const int & com(const size_t& icom) const;
 
-    void connect(const fields::BosonOnv &in, const fields::BosonOnv &out);
+    void connect(const fields::BosOnv &in, const fields::BosOnv &out);
 
-    void apply(const fields::BosonOnv &in, fields::BosonOnv& out);
+    void apply(const fields::BosOnv &in, fields::BosOnv& out);
 
-    void apply(const fields::BosonOnv &in);
+    void apply(const fields::BosOnv &in);
 
     void add(const size_t& imode, const int& change);
 

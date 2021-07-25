@@ -8,8 +8,8 @@
 #include "FermionHamiltonian.h"
 
 
-buffered::FermionOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
-    buffered::FermionOnv ref(m_nsite);
+buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
+    buffered::FrmOnv ref(m_nsite);
     ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
     size_t n_spin_0 = (nelec() + spin_restrict) / 2;
     size_t n_spin_1 = nelec() - n_spin_0;
