@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <src/core/basis/FermionOnvConnection.h>
 #include <src/core/basis/DecodedDeterminant.h>
-#include <src/core/basis/Connections.h>
+#include <src/core/connection/Connections.h>
 #include <src/core/io/Options.h>
 #include <src/core/config/FciqmcConfig.h>
 #include "src/core/integrals/Integrals_1e.h"

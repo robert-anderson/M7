@@ -5,9 +5,9 @@
 #ifndef M7_CONNECTIONS_H
 #define M7_CONNECTIONS_H
 
-#include "FermionOnvConnection.h"
-#include "BosonOnvConnection.h"
-#include "FermiBosConnection.h"
+#include "src/core/basis/FermionOnvConnection.h"
+#include "src/core/basis/BosonOnvConnection.h"
+#include "src/core/basis/FermiBosConnection.h"
 
 namespace conn {
 

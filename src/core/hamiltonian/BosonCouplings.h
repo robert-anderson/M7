@@ -5,7 +5,7 @@
 #ifndef M7_BOSONCOUPLINGS_H
 #define M7_BOSONCOUPLINGS_H
 
-#include "src/core/basis/Connections.h"
+#include "src/core/connection/Connections.h"
 
 class BosonCouplings {
     const size_t m_nboson_cutoff, m_nmode;

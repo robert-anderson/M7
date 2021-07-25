@@ -6,7 +6,7 @@
 #define M7_EXCITATIONGENERATOR_H
 
 #include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/basis/Connections.h>
+#include <src/core/connection/Connections.h>
 #include "src/core/sample/PRNG.h"
 
 class ExcitationGenerator {

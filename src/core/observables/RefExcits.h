@@ -5,7 +5,7 @@
 #ifndef M7_REFEXCITS_H
 #define M7_REFEXCITS_H
 
-#include <src/core/basis/Connections.h>
+#include <src/core/connection/Connections.h>
 #include <src/core/config/FciqmcConfig.h>
 #include <src/core/io/Archivable.h>
 #include "src/core/field/Fields.h"

@@ -2,7 +2,7 @@
 // Created by rja on 14/04/2021.
 //
 
-#include <src/core/basis/Connections.h>
+#include <src/core/connection/Connections.h>
 #include <src/core/observables/MevGroup.h>
 #include <src/core/util/Foreach.h>
 #include "gtest/gtest.h"
