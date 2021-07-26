@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/basis/BosonOnvConnection.h"
+#include "src/core/basis/BosOnvConnection.h"
 #include "src/core/table/BufferedFields.h"
 
 
@@ -16,7 +16,7 @@ TEST(BosonOnvConnection, NoChange) {
     ket = defs::inds{2, 4, 0, 1};
     bra =  defs::inds{2, 4, 0, 1};
 
-    BosonOnvConnection pc(ket, bra);
+    BosOnvConnection pc(ket, bra);
 
     ASSERT_EQ(pc.nchanged_mode(), 0);
 }
@@ -31,7 +31,7 @@ TEST(BosonOnvConnection, SingleChange) {
 
     for (size_t imode = 0; imode < nmode; ++imode) {
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
-            BosonOnvConnection pc(ket, bra);
+            BosOnvConnection pc(ket, bra);
 
             ket = {2, 4, 0, 1};
             bra = {2, 4, 0, 1};
@@ -63,7 +63,7 @@ TEST(BosonOnvConnection, DoubleChange) {
                     ket = {2, 4, 0, 1};
                     bra = {2, 4, 0, 1};
 
-                    BosonOnvConnection pc(ket, bra);
+                    BosOnvConnection pc(ket, bra);
                     bra[imode1] += idelta1;
                     bra[imode2] += idelta2;
                     pc.connect(ket, bra);

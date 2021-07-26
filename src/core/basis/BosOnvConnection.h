@@ -7,7 +7,7 @@
 
 #include "src/core/field/Fields.h"
 
-class BosonOnvConnection {
+class BosOnvConnection {
     struct Diff {
         defs::inds m_changed_modes;
         size_t m_nchanged_mode = 0ul;
@@ -21,9 +21,9 @@ class BosonOnvConnection {
 
 public:
 
-    explicit BosonOnvConnection(const size_t& nmode);
-    BosonOnvConnection(const fields::BosOnv &in, const fields::BosOnv &out);
-    explicit BosonOnvConnection(const fields::BosOnv &in);
+    explicit BosOnvConnection(const size_t& nmode);
+    BosOnvConnection(const fields::BosOnv &in, const fields::BosOnv &out);
+    explicit BosOnvConnection(const fields::BosOnv &in);
 
     operator bool() const {return nchanged_mode();}
 

@@ -6,13 +6,12 @@
 #define M7_CONNECTIONS_H
 
 #include "FrmOnvConnection.h"
-#include "src/core/basis/BosonOnvConnection.h"
-#include "src/core/basis/FermiBosConnection.h"
+#include "src/core/basis/BosOnvConnection.h"
 
 namespace conn {
 
     typedef FrmOnvConnection FrmOnv;
-    typedef BosonOnvConnection BosOnv;
+    typedef BosOnvConnection BosOnv;
 
     struct FrmBosOnv {
         FrmOnv m_frm;
