@@ -5,9 +5,8 @@
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/ForeachConnection.h"
 
-#if 0
 namespace foreach_connection_test {
-    typedef SingleFieldRow<fields::Onv<1>> result_row_t;
+    typedef SingleFieldRow<fields::FrmBosOnv> result_row_t;
     typedef BufferedTable<result_row_t, 1> result_table_t;
 
     result_table_t hubbard_6site() {
@@ -20,6 +19,37 @@ namespace foreach_connection_test {
     }
 }
 
+
+TEST(ForeachConnection, FrmHubbard) {
+    /*
+     * loop over all connections using the general foreach class, and again with the Hubbard-optimized, and ensure that
+     * the non-zero H-element connections returned are equivalent
+     */
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
+    conn::FrmOnv conn(ham.nsite());
+    buffered::FrmOnv onv(ham.nsite());
+    onv = {{0, 2, 4}, {0, 1, 5}};
+    const defs::ham_t t = -1.0;
+
+    std::vector<std::pair<defs::inds, defs::inds>> conns_gen;
+    foreach_conn2::frm::Fermion foreach_gen(ham);
+    auto fn_gen = [&](const conn::FrmOnv& conn, defs::ham_t helement){
+        conns_gen.emplace_back(conn.ann(), conn.cre());
+        ASSERT_EQ(helement, t);
+    };
+    foreach_gen(onv, fn_gen, true);
+
+    std::vector<std::pair<defs::inds, defs::inds>> conns_opt;
+    foreach_conn2::frm::Hubbard1D foreach_sym(ham);
+    auto fn_opt = [&](const conn::FrmOnv& conn, defs::ham_t helement){
+        conns_opt.emplace_back(conn.ann(), conn.cre());
+        ASSERT_EQ(helement, t);
+    };
+    foreach_sym(onv, fn_opt, true);
+    ASSERT_EQ(conns_opt, conns_gen);
+}
+
+#if 0
 TEST(ForeachConnection, FermionNoSym) {
     FermionHamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
     conn::FrmOnv conn(ham.nsite());

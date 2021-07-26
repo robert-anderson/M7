@@ -29,7 +29,7 @@ struct Hamiltonian {
     }
 
     /*
-     * fermion matrix elements
+     * pure fermion matrix elements
      */
 
     defs::ham_t get_element(const fields::FrmOnv &onv, const conn::FrmOnv &conn) const {
@@ -41,9 +41,40 @@ struct Hamiltonian {
     defs::ham_comp_t get_energy(const fields::FrmOnv &onv) const {
         return m_frm.get_energy(onv);
     }
+
+    /*
+     * pure boson matrix elements
+     */
+
+    defs::ham_t get_element(const fields::BosOnv &onv, const conn::BosOnv &conn) const {
+        return 0.0;
+    }
+    defs::ham_t get_element(const fields::BosOnv &onv) const {
+        return 0.0;
+    }
+    defs::ham_comp_t get_energy(const fields::BosOnv &onv) const {
+        return 0.0;
+    }
+
+    /*
+     * fermion-boson coupled matrix elements
+     */
+
+    defs::ham_t get_element(const fields::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+        return 0.0;
+    }
+    defs::ham_t get_element(const fields::FrmBosOnv &onv) const {
+        return 0.0;
+    }
+    defs::ham_comp_t get_energy(const fields::FrmBosOnv &onv) const {
+        return 0.0;
+    }
+
+
     void set_hf_mbf(fields::FrmOnv &onv, int spin) const {
         m_frm.set_hf_mbf(onv, spin);
     }
+
 };
 
 

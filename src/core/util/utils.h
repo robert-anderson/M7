@@ -770,12 +770,12 @@ namespace conn_utils {
     }
 
     static size_t right_obc(const size_t &ispinorb, const size_t &nsite) {
-        if (ispinorb == nsite - 1 || ispinorb == 2 * nsite - 1) return ~0ul;
+        if (ispinorb + 1 == nsite || ispinorb + 1 == 2 * nsite) return ~0ul;
         return ispinorb + 1;
     }
 
     static size_t right_pbc(const size_t &ispinorb, const size_t &nsite) {
-        if (ispinorb == nsite - 1) return 0;
+        if (ispinorb + 1 == nsite) return 0;
         else if (ispinorb == 2 * nsite - 1) return nsite;
         return ispinorb + 1;
     }

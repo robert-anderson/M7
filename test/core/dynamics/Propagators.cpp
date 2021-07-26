@@ -18,12 +18,13 @@ TEST(Propagators, BasicTest) {
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 5;
     opts.verify();
     //const auto benchmark = -99.9421389039331
-    Hamiltonian ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
+    //Hamiltonian ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
+    Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
-    props::Stoch prop(ham, opts, wf.m_format);
+    props::Exact prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);

@@ -185,6 +185,15 @@ public:
      *  second spin orbital index to create in a dst determinant
      */
     void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2);
+
+    void set(const size_t &ann, const size_t &cre) {
+        clear();
+        add(ann, cre);
+    }
+    void set(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2){
+        clear();
+        add(ann1, ann2, cre1, cre2);
+    }
     /**
      * @return
      *  the annihilation string cast to a vector

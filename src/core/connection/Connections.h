@@ -14,8 +14,8 @@ namespace conn {
     typedef BosOnvConnection BosOnv;
 
     struct FrmBosOnv {
-        FrmOnv m_frm;
-        BosOnv m_bos;
+        conn::FrmOnv m_frm;
+        conn::BosOnv m_bos;
         FrmBosOnv(size_t nsite): m_frm(nsite), m_bos(nsite){}
 
         void clear() {

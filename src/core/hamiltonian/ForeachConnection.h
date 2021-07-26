@@ -12,6 +12,171 @@
 
 #include <utility>
 #include <src/core/basis/AbelianGroup.h>
+#include <src/core/basis/Suites.h>
+
+
+namespace foreach_conn2 {
+
+    typedef std::function<void(const conn::FrmOnv&)> frm_fn_t;
+    typedef std::function<void(const conn::FrmOnv&, defs::ham_t)> frm_h_fn_t;
+    typedef std::function<void(const conn::BosOnv&)> bos_fn_t;
+    typedef std::function<void(const conn::BosOnv&, defs::ham_t)> bos_h_fn_t;
+    typedef std::function<void(const conn::FrmBosOnv&)> frmbos_fn_t;
+    typedef std::function<void(const conn::FrmBosOnv&, defs::ham_t)> frmbos_h_fn_t;
+
+    struct Base {
+        const Hamiltonian &m_ham;
+        OccupiedOrbitals m_occ;
+        VacantOrbitals m_vac;
+        suite::Conns m_conns;
+
+        Base(const Hamiltonian &ham) :
+                m_ham(ham), m_occ(ham.nsite()), m_vac(ham.nsite()), m_conns(ham.nsite()){}
+
+        virtual void operator()(const fields::FrmOnv& mbf, const frm_fn_t& body_fn) = 0;
+        virtual void operator()(const fields::BosOnv& mbf, const bos_fn_t& body_fn) = 0;
+        virtual void operator()(const fields::FrmBosOnv& mbf, const frmbos_fn_t& body_fn) = 0;
+
+        /*
+         * the following methods simply adapt the virtual methods for computation of the matrix elements
+         */
+        void operator()(const fields::FrmOnv& mbf, const frm_h_fn_t& body_fn, bool nonzero_h_only) {
+            frm_fn_t fn = [&](const conn::FrmOnv& conn) {
+                auto helem = m_ham.get_element(mbf, conn);
+                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+                body_fn(conn, helem);
+            };
+            (*this)(mbf, fn);
+        };
+        void operator()(const fields::BosOnv& mbf, const bos_h_fn_t& body_fn, bool nonzero_h_only) {
+            bos_fn_t fn = [&](const conn::BosOnv& conn) {
+                auto helem = m_ham.get_element(mbf, conn);
+                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+                body_fn(conn, helem);
+            };
+            (*this)(mbf, fn);
+        };
+        void operator()(const fields::FrmBosOnv& mbf, const frmbos_h_fn_t& body_fn, bool nonzero_h_only) {
+            frmbos_fn_t fn = [&](const conn::FrmBosOnv& conn) {
+                auto helem = m_ham.get_element(mbf, conn);
+                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+                body_fn(conn, helem);
+            };
+            (*this)(mbf, fn);
+        };
+    };
+
+    namespace frm {
+        /**
+         * no symmetry is respected in this basic case
+         */
+        struct Fermion : Base {
+            using Base::operator();
+
+            Fermion(const Hamiltonian &ham) : Base(ham) {}
+
+        protected:
+            virtual void singles(conn::FrmOnv &conn, const std::function<void()> &fn) const {
+                for (size_t iocc = 0ul; iocc < m_occ.size(); ++iocc) {
+                    for (size_t ivac = 0ul; ivac < m_vac.size(); ++ivac) {
+                        conn.clear();
+                        conn.add(m_occ[iocc], m_vac[ivac]);
+                        fn();
+                    }
+                }
+            }
+
+            virtual void singles(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) const {
+                singles(conn, fn);
+            }
+
+            virtual void doubles(conn::FrmOnv &conn, const std::function<void()> &fn) const {
+                for (size_t iocc = 0ul; iocc < m_occ.size(); ++iocc) {
+                    for (size_t ivac = 0ul; ivac < m_vac.size(); ++ivac) {
+                        for (size_t jocc = 0ul; jocc < iocc; ++jocc) {
+                            for (size_t jvac = 0ul; jvac < ivac; ++jvac) {
+                                conn.clear();
+                                conn.add(m_occ[jocc], m_occ[iocc], m_vac[jvac], m_vac[ivac]);
+                                fn();
+                            }
+                        }
+                    }
+                }
+            }
+
+            virtual void operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
+                m_occ.update(mbf);
+                m_vac.update(mbf);
+                singles(conn, fn);
+                doubles(conn, fn);
+            }
+
+        public:
+            void operator()(const fields::FrmOnv &mbf, const frm_fn_t &body_fn) override {
+                auto fn = [&]() { body_fn(m_conns.m_frmonv); };
+                (*this)(mbf, m_conns.m_frmonv, fn);
+            }
+
+            void operator()(const fields::BosOnv &mbf, const bos_fn_t &body_fn) override {}
+
+            void operator()(const fields::FrmBosOnv &mbf, const frmbos_fn_t &body_fn) override {
+                auto fn = [&]() { body_fn(m_conns.m_frmbosonv); };
+                (*this)(mbf.m_frm, m_conns.m_frmbosonv.m_frm, fn);
+            }
+        };
+
+        /**
+         * make use of spin and point-group symmetry in the loop over connections
+         */
+        struct SpinSym : Fermion {
+            using Fermion::operator();
+
+            SpinSym(const Hamiltonian &ham) : Fermion(ham) {}
+
+        protected:
+            void singles(conn::FrmOnv &conn, const std::function<void()> &fn) const override {
+                Fermion::singles(conn, fn);
+            }
+
+            void doubles(conn::FrmOnv &conn, const std::function<void()> &fn) const override {
+                Fermion::doubles(conn, fn);
+            }
+        };
+
+        struct Hubbard1D : Fermion {
+            using Fermion::operator();
+            const bool m_pbc;
+
+            Hubbard1D(const Hamiltonian &ham) : Fermion(ham), m_pbc(ham.m_frm.m_int_1(0, ham.nsite() - 1) != 0.0) {}
+
+        protected:
+            void
+            singles(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) const override {
+                for (const auto &occ: m_occ.inds()) {
+                    size_t neighbor;
+                    neighbor = conn_utils::left(occ, m_ham.nsite(), m_pbc);
+                    if (neighbor != ~0ul && !mbf.get(neighbor)) {
+                        conn.set(occ, neighbor);
+                        fn();
+                    }
+                    neighbor = conn_utils::right(occ, m_ham.nsite(), m_pbc);
+                    if (neighbor != ~0ul && !mbf.get(neighbor)) {
+                        conn.set(occ, neighbor);
+                        fn();
+                    }
+                }
+            }
+
+        public:
+
+            void operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) override {
+                m_occ.update(mbf);
+                singles(mbf, conn, fn);
+            }
+        };
+    }
+}
+
 
 namespace foreach_conn {
 
@@ -56,16 +221,14 @@ namespace foreach_conn {
             for (auto &iocc: m_occ.inds()) {
                 for (auto &ivac: m_vac.inds()) {
                     // singles
-                    m_conn.clear();
-                    m_conn.add(iocc, ivac);
+                    m_conn.set(iocc, ivac);
                     body_fn(src_onv);
                     for (auto &jocc: m_occ.inds()) {
                         // doubles
                         if (jocc <= iocc) continue;
                         for (auto &jvac: m_vac.inds()) {
                             if (jvac <= ivac) continue;
-                            m_conn.clear();
-                            m_conn.add(iocc, jocc, ivac, jvac);
+                            m_conn.set(iocc, jocc, ivac, jvac);
                             body_fn(src_onv);
                         }
                     }
@@ -88,15 +251,13 @@ namespace foreach_conn {
                 auto neighbor = conn_utils::left(iocc, m_ham.nsite(), m_pbc);
                 if (neighbor != ~0ul && !src_onv.get(neighbor)) {
                     // there is an orbital to the left, and it is unoccupied
-                    m_conn.clear();
-                    m_conn.add(iocc, neighbor);
+                    m_conn.set(iocc, neighbor);
                     body_fn(src_onv);
                 }
                 neighbor = conn_utils::right(iocc, m_ham.nsite(), m_pbc);
                 if (neighbor != ~0ul && !src_onv.get(neighbor)) {
                     // there is an orbital to the right, and it is unoccupied
-                    m_conn.clear();
-                    m_conn.add(iocc, neighbor);
+                    m_conn.set(iocc, neighbor);
                     body_fn(src_onv);
                 }
             }

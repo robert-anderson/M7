@@ -9,6 +9,7 @@
 #include <src/core/basis/DecodedDeterminant.h>
 #include <src/core/table/BufferedFields.h>
 
+#if 0
 /**
  * symmetry helpers use symmetries of the hamiltonian to reduce redundant looping in:
  *  1. the computation of hamiltonian matrix elements
@@ -19,10 +20,6 @@
  * 2. is only handled here. it is useful for exact propagation, test code and sign problem free energy estimators, and
  *    will likely have other applications in future
  */
-
-#if 0
-struct FermionHamiltonian;
-struct FermiBosHamiltonian;
 
 namespace ham_sym_helpers {
 

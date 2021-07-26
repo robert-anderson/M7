@@ -270,6 +270,7 @@ public:
 
 //    void foreach_connection(const fields::FrmOnv &src_onv, const ham_sym_helpers::Fermion::body_fn_t &body,
 //                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
+//        foreach_vo
 //        m_sym_helper->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
 //    }
 
