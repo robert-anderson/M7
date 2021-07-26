@@ -30,7 +30,7 @@
  *
  */
 
-
+#if 0
 TEST(SymmetryHelpers, Test) {
     Hamiltonian<1> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
     ham_sym_helpers::FermiBos sym_helper(ham);
@@ -60,3 +60,4 @@ TEST(SymmetryHelpers, Test2) {
     foreach_conn::Fermion(ham, conn, body_fn, true, false)(src_onv);
 
 }
+#endif

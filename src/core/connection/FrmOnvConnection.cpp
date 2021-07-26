@@ -30,7 +30,7 @@ void FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
 }
 
-bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &dst, FrmOpProduct &com) {
+bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &dst, FrmOps &com) {
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     connect(src, dst);
@@ -93,7 +93,7 @@ void FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst) con
     DEBUG_ASSERT_TRUE(m_cre.all_occ(dst), "not all creation indices are occupied in dst ONV");
 }
 
-bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOpProduct &com) const {
+bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOps &com) const {
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
@@ -133,7 +133,7 @@ bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOpProduct &com) const
     return nperm & 1ul;
 }
 
-bool FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst, FrmOpProduct &com) const {
+bool FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst, FrmOps &com) const {
     apply(src, dst);
     return apply(src, com);
 }
@@ -160,11 +160,11 @@ void FrmOnvConnection::add(const size_t &ann1, const size_t &ann2, const size_t 
 }
 
 const defs::inds &FrmOnvConnection::ann() const {
-    return m_ann;
+    return m_ann.inds();
 }
 
 const defs::inds &FrmOnvConnection::cre() const {
-    return m_cre;
+    return m_cre.inds();
 }
 
 void FrmOnvConnection::update_dataword_phases(const fields::Onv<0> &src) const {

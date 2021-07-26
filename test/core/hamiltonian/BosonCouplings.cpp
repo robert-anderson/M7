@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/BosonCouplings.h"
 
+#if 0
 TEST(BosonCouplings, Element_b0) {
     size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
@@ -95,3 +96,4 @@ TEST(BosonCouplings, Element_f1_b1){
     auto el = bc.get_element_1(fbconn);
     ASSERT_EQ(0, el);
 }
+#endif

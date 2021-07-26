@@ -6,6 +6,7 @@
 #include "SymmetryHelpers.h"
 #include "Hamiltonian.h"
 
+#if 0
 ham_sym_helpers::Fermion::Fermion(const FermionHamiltonian &ham) :
         m_ham(ham), m_nsite(ham.nsite()), m_conn_work(m_nsite),
         m_occ_work(m_nsite), m_vac_work(m_nsite), m_onv_work(m_nsite) {}
@@ -178,3 +179,4 @@ void ham_sym_helpers::FermiBos::foreach_connection(
     // do all purely fermionic connections:
     //m_ham.foreach_connection(src_onv.m_frm, frm_body, get_h, h_nonzero_only, include_diagonal);
 }
+#endif

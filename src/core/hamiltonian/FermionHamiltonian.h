@@ -86,7 +86,7 @@ public:
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
     ints1_t m_int_1;
     ints2_t m_int_2;
-    const std::unique_ptr<ham_sym_helpers::Fermion> m_sym_helper;
+    //const std::unique_ptr<ham_sym_helpers::Fermion> m_sym_helper;
 
     /**
      * stores whether connected elements are nonzero based on contrib case
@@ -132,7 +132,7 @@ public:
         auto jsite = iorb_to_isite(jorb);
         if (isite + 1 == jsite || jsite + 1 == isite) return true;
         if (periodic) {
-            return (isite == 0 && jsite == m_nsite-1) || (isite == m_nsite-1 && jsite == 0);
+            return (isite == 0 && jsite == m_nsite - 1) || (isite == m_nsite - 1 && jsite == 0);
         }
         return false;
     }
@@ -153,59 +153,79 @@ public:
     FermionHamiltonian(std::string fname, bool spin_major);
 
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
-        FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
+            FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
 
-    defs::ham_t get_element_0(const defs::inds &occs, const size_t &nocc) const;
+    defs::ham_t get_element(const fields::FrmOnv &fonv) const;
 
-    defs::ham_t get_element_0(const OccupiedOrbitals &occs) const;
+    defs::ham_comp_t get_energy(const fields::FrmOnv &fonv) const {
+        return consts::real(get_element(fonv));
+    }
 
-    defs::ham_t get_element_0(const fields::Onv<0> &fonv) const;
+    defs::ham_t get_element_1(const fields::FrmOnv &fonv, const conn::FrmOnv &conn) const {
+        const auto &ann = conn.m_ann[0];
+        const auto &cre = conn.m_cre[0];
 
-    defs::ham_t get_element_0(const conn::Antisym<0> &connection) const;
-
-    defs::ham_t get_element_1(const conn::Antisym<0> &connection) const;
+        defs::ham_t element = m_int_1(cre, ann);
+        auto fn = [&](const size_t &ibit) {
+            if (ibit != ann) element += m_int_2.phys_antisym_element(cre, ibit, ann, ibit);
+        };
+        fonv.foreach(fn);
+        return conn.phase(fonv) ? -element : element;
+    }
 
     defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
-    defs::ham_t get_element_2(const conn::Basic<0> &connection) const;
+    defs::ham_t get_element_2(const fields::FrmOnv &fonv, const conn::FrmOnv &conn) const {
+        const auto element = get_element_2(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
+        return conn.phase(fonv) ? -element : element;
+    }
 
-    defs::ham_t get_element_2(const conn::Antisym<0> &connection) const;
+    defs::ham_t get_element(const fields::FrmOnv &fonv, const conn::FrmOnv &conn) const {
+        switch (conn.size()) {
+            case 0: return get_element(fonv);
+            case 2: return get_element_1(fonv, conn);
+            case 4: return get_element_2(fonv, conn);
+            default: return 0.0;
+        }
+    }
 
-    defs::ham_t get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const;
-
+#if 0
 private:
-    defs::ham_t get_element_tag(const conn::Antisym<0> &conn, dispatch_utils::BoolTag<false> sym_opts) const {
-        switch (conn.nexcit()) {
+    defs::ham_t get_element_tag(const conn::FrmOnv &conn, dispatch_utils::BoolTag<false> sym_opts) const {
+        switch (conn.size()) {
             case 0:
                 return get_element_0(conn);
-            case 1: ASSERT(conn.ncom() + conn.nexcit() == nelec());
+            case 2: ASSERT(conn.ncom() + conn.nexcit() == nelec());
                 return get_element_1(conn);
-            case 2:
+            case 4:
                 return get_element_2(conn);
             default:
                 return 0;
         }
     }
-    defs::ham_t get_element_tag(const conn::Antisym<0> &conn, dispatch_utils::BoolTag<true> sym_opts) const {
+
+    defs::ham_t get_element_tag(const conn::FrmOnv &conn, dispatch_utils::BoolTag<true> sym_opts) const {
         return m_sym_helper->get_element(conn);
     }
 
-    defs::ham_comp_t get_energy_tag(const fields::Onv<0> &onv, dispatch_utils::BoolTag<false> sym_opts) const {
+    defs::ham_comp_t get_energy_tag(const fields::FrmOnv &onv, dispatch_utils::BoolTag<false> sym_opts) const {
         return consts::real(get_element_0(onv));
     }
-    defs::ham_comp_t get_energy_tag(const fields::Onv<0> &onv, dispatch_utils::BoolTag<true> sym_opts) const {
+
+    defs::ham_comp_t get_energy_tag(const fields::FrmOnv &onv, dispatch_utils::BoolTag<true> sym_opts) const {
         return m_sym_helper->get_energy(onv);
     }
 
-public:
-    defs::ham_t get_element(const conn::Antisym<0> &conn) const {
+    defs::ham_t get_element(const conn::FrmOnv &conn) const {
         return get_element_tag(conn, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
     }
 
-    defs::ham_comp_t get_energy(const fields::Onv<0> &onv) const {
+    defs::ham_comp_t get_energy(const fields::FrmOnv &onv) const {
         return get_energy_tag(onv, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
     }
 
+#endif
+public:
     bool is_hubbard() const {
         return m_on_site_only_0022 && m_nn_only_1111;
     }
@@ -249,10 +269,10 @@ public:
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
 
-    void foreach_connection(const fields::Onv<0> &src_onv, const ham_sym_helpers::Fermion::body_fn_t &body,
-                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
-        m_sym_helper->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
-    }
+//    void foreach_connection(const fields::FrmOnv &src_onv, const ham_sym_helpers::Fermion::body_fn_t &body,
+//                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
+//        m_sym_helper->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
+//    }
 
     /**
      * set the referenced ONV object to the assumed Hartree--Fock determinant within the given spin sector
@@ -261,13 +281,13 @@ public:
      * @param spin
      *  spin (MS) number
      */
-    void set_hf_onv(fields::Onv<0>& onv, int spin) const {
+    void set_hf_onv(fields::FrmOnv &onv, int spin) const {
         auto nalpha = ci_utils::nalpha(nelec(), spin);
         auto nbeta = ci_utils::nbeta(nelec(), spin);
-        DEBUG_ASSERT_EQ(nalpha+nbeta, nelec(), "inconsistent na, nb, nelec");
+        DEBUG_ASSERT_EQ(nalpha + nbeta, nelec(), "inconsistent na, nb, nelec");
         onv.zero();
-        for (size_t i=0ul; i<nalpha; ++i) onv.set({0, i});
-        for (size_t i=0ul; i<nbeta; ++i) onv.set({1, i});
+        for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
+        for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
     }
 
 };

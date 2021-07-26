@@ -29,7 +29,7 @@
 #include "FermionHamiltonian.h"
 #include "BosonCouplings.h"
 
-
+#if 0
 struct FermiBosHamiltonian : public FermionHamiltonian {
     BosonCouplings m_boson_couplings;
     const std::unique_ptr<ham_sym_helpers::FermiBos> m_bc_sym_helper;
@@ -42,12 +42,12 @@ public:
 
     const BosonCouplings &bc() const;
 
-    defs::ham_t get_element_0(const conn::Antisym<1> &afbconn) const;
+    defs::ham_t get_element_0(const conn::FrmBosOnv &conn) const;
 
-    defs::ham_t get_element_0(const fields::Onv<1> &onv) const;
+    defs::ham_t get_element_0(const fields::FrmBosOnv &onv) const;
 
     using FermionHamiltonian::get_element_1;
-    defs::ham_t get_element_1(const conn::Antisym<1> &afbconn) const;
+    defs::ham_t get_element_1(const conn::FrAntisym<1> &afbconn) const;
 
     using FermionHamiltonian::get_element_2;
     defs::ham_t get_element_2(const conn::Antisym<1> &afbconn) const;
@@ -116,4 +116,5 @@ public:
 };
 
 
+#endif //M7_BOSONCOUPLINGS_H
 #endif //M7_BOSONCOUPLINGS_H

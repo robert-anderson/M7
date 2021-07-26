@@ -10,9 +10,9 @@ UniformTwf::UniformTwf(size_t npart, size_t nsite) :
 
 void UniformTwf::add(const Hamiltonian<0> &ham,
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::Onv<0> &onv) {
-    conn::Antisym<0> conn(m_nsite);
-    buffered::Onv<0> work_onv(m_nsite);
+                     const fields::FrmOnv &onv) {
+    conn::FrmOnv conn(m_nsite);
+    buffered::FrmOnv work_onv(m_nsite);
     OccupiedOrbitals occ(m_nsite);
     VacantOrbitals vac(m_nsite);
 
@@ -22,23 +22,21 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
 
     // diagonal
     conn.connect(onv, onv);
-    helem_sum += ham.get_element(conn); // no abs
+    helem_sum += ham.get_element(onv, conn); // no abs
     for (auto &iocc: occ.inds()) {
         for (auto &ivac: vac.inds()) {
             // singles
-            conn.zero();
+            conn.clear();
             conn.add(iocc, ivac);
-            conn.apply(onv, work_onv);
-            helem_sum += ham.get_element(conn); // no abs
+            helem_sum += ham.get_element(onv, conn); // no abs
             for (auto &jocc: occ.inds()) {
                 // doubles
                 if (jocc <= iocc) continue;
                 for (auto &jvac: vac.inds()) {
                     if (jvac<=ivac) continue;
-                    conn.zero();
+                    conn.clear();
                     conn.add(iocc, jocc, ivac, jvac);
-                    conn.apply(onv, work_onv);
-                    helem_sum += ham.get_element(conn); // no abs
+                    helem_sum += ham.get_element(onv, conn); // no abs
                 }
             }
         }
@@ -54,10 +52,11 @@ void UniformTwf::reduce() {
 }
 
 
+#if 0
 void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::Onv<1> &onv) {
-    conn::Antisym<1> conn(m_nsite);
-    buffered::Onv<1> work_onv(m_nsite);
+                     const fields::FrmBosOnv &onv) {
+    conn::FrmBosOnv conn(m_nsite);
+    buffered::FrmBosOnv work_onv(m_nsite);
     OccupiedOrbitals occ(m_nsite);
     VacantOrbitals vac(m_nsite);
 
@@ -97,3 +96,4 @@ void UniformTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t
         m_numerator[ipart] += std::abs(weight[ipart]) * helem_sum;
     }
 }
+#endif

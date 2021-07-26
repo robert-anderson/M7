@@ -7,6 +7,7 @@
 
 #include <src/core/config/FciqmcConfig.h>
 #include <src/core/io/Archivable.h>
+#include <src/core/basis/Suites.h>
 #include "Shift.h"
 
 /**
@@ -25,8 +26,8 @@ public:
     /*
      * working objects
      */
-    mutable buffered::Onv<> m_dst_onv;
-    mutable conn::Antisym<> m_aconn;
+    mutable suite::Mbfs m_dst;
+    mutable suite::Conns m_conn;
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;
 
@@ -37,8 +38,8 @@ public:
             m_opts(opts),
             m_magnitude_logger(opts.m_propagator, ham.nsite(), ham.nelec()),
             m_shift(opts, wf_fmt),
-            m_dst_onv(ham.nsite()),
-            m_aconn(ham.nsite()),
+            m_dst(ham.nsite()),
+            m_conn(ham.nsite()),
             m_occ(ham.nsite()),
             m_vac(ham.nsite()) {}
 

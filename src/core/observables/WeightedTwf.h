@@ -25,9 +25,11 @@ public:
              const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::Onv<0> &onv) override;
 
+#if 0
     void add(const Hamiltonian<1> &ham,
              const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::Onv<1> &onv) override;
+#endif
 
     defs::ham_t evaluate_static_twf(const fields::Onv<0> &onv) const;
 

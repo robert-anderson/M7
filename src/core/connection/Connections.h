@@ -5,19 +5,25 @@
 #ifndef M7_CONNECTIONS_H
 #define M7_CONNECTIONS_H
 
-#include "src/core/basis/FermionOnvConnection.h"
+#include "FrmOnvConnection.h"
 #include "src/core/basis/BosonOnvConnection.h"
 #include "src/core/basis/FermiBosConnection.h"
 
 namespace conn {
 
-    template<bool enable_bosons = defs::enable_bosons>
-    using Basic = typename std::conditional<enable_bosons, AntisymFermiBosConnection, FermionOnvConnection>::type;
+    typedef FrmOnvConnection FrmOnv;
+    typedef BosonOnvConnection BosOnv;
 
-    template<bool enable_bosons = defs::enable_bosons>
-    using Antisym = typename std::conditional<enable_bosons, AntisymFermiBosConnection, AntisymFermionOnvConnection>::type;
+    struct FrmBosOnv {
+        FrmOnv m_frm;
+        BosOnv m_bos;
+        FrmBosOnv(size_t nsite): m_frm(nsite), m_bos(nsite){}
 
-    using Boson = BosonOnvConnection;
+        void clear() {
+            m_frm.clear();
+            m_bos.zero();
+        }
+    };
 
     struct ExlvlSector {
         defs::exlvl_t m_nann;
@@ -55,9 +61,9 @@ namespace conn {
     template<bool enable_bosons = defs::enable_bosons>
     static constexpr size_t nelement_exlvl() { return enable_bosons ? 4ul : 2ul; }
 
-    static Exlvl<0> exlvl(const Basic<0> &conn) {
-        return {conn.nann(), conn.nann()};
-    }
+//    static Exlvl<0> exlvl(const Basic<0> &conn) {
+//        return {conn.nann(), conn.nann()};
+//    }
 //    Exlvl<1> exlvl(const Basic<1>& conn){
 //        return {conn.nann(), conn.nann()}, conn.m_bonvconn.nexcit()};
 //    }

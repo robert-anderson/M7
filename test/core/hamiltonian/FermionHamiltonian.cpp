@@ -60,7 +60,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
     buffered::FrmOnv fonv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){fonv.set({0, i}); fonv.set({1, i});}
 
-    auto elem = ham.get_element_0(fonv);
+    auto elem = ham.get_element(fonv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
     ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
     ASSERT_TRUE(consts::floats_equal(ham.get_energy(fonv), benchmark));
@@ -77,16 +77,15 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
 
     buffered::FrmOnv excited(ham.nsite());
 
-    AntisymFermionOnvConnection connection(fonv);
+    conn::FrmOnv conn(fonv.m_nsite);
 
     for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
         const auto &occ = occs[iocc];
         for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
             const auto &vac = vacs[iocc];
-            connection.zero();
-            connection.add(occ, vac);
-            connection.apply(fonv);
-            ASSERT_TRUE(consts::float_is_zero(ham.get_element_1(connection)));
+            conn.clear();
+            conn.add(occ, vac);
+            ASSERT_TRUE(consts::float_is_zero(ham.get_element_1(fonv, conn)));
         }
     }
 }

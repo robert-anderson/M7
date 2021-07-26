@@ -71,7 +71,7 @@ void Solver::execute(size_t ncycle) {
         loop_over_spawned();
         mpi::barrier();
         if (m_detsub) {
-            m_detsub->make_mev_contribs(m_mevs, m_refs[0].get_onv());
+            m_detsub->make_mev_contribs(m_mevs, m_refs[0].get_mbf());
             m_detsub->project(m_prop.tau());
         }
         m_annihilate_timer.pause();
@@ -297,7 +297,7 @@ void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
 
     for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
         auto &ref = m_refs[ipart];
-        auto &ref_onv = ref.get_onv();
+        auto &ref_onv = ref.get_mbf();
         auto ipart_replica = m_wf.ipart_replica(ipart);
         /*
          * if contributions are coming from two replicas, we should take the mean
@@ -313,7 +313,7 @@ void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
          * accumulate contributions to reference excitations if required
          */
         if (m_mevs.m_ref_excits)
-            m_mevs.m_ref_excits->make_contribs(row.m_onv, m_refs[ipart].get_onv(),
+            m_mevs.m_ref_excits->make_contribs(row.m_onv, m_refs[ipart].get_mbf(),
                                                dupl_fac * ncycle_occ * av_weight, ipart);
 
         if (m_mevs.m_fermion_rdm) {
@@ -346,7 +346,7 @@ void Solver::make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs:
     // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst ONV
     if (!m_mevs.m_accum_epoch) return;
     if (m_mevs.m_explicit_hf_conns) {
-        if (src_onv == m_refs[dst_ipart].get_onv() || m_wf.m_store.m_row.m_onv == m_refs[dst_ipart].get_onv()) return;
+        if (src_onv == m_refs[dst_ipart].get_mbf() || m_wf.m_store.m_row.m_onv == m_refs[dst_ipart].get_mbf()) return;
     }
     auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
     double dupl_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;

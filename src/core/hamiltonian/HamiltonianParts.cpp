@@ -8,6 +8,7 @@
 #include "HamiltonianParts.h"
 #include "HamiltonianData.h"
 
+#if 0
 buffered::FrmOnv ham_parts::Fermion::guess_reference(const int &spin_restrict) const {
     buffered::FrmOnv ref(m_nsite);
     REQUIRE_EQ(static_cast<size_t>(std::abs(spin_restrict)) % 2, nelec() % 2,
@@ -243,3 +244,4 @@ defs::ham_t ham_parts::Coupling::get_element(const conn::Antisym<1> &aconn) cons
             return 0;
     }
 }
+#endif

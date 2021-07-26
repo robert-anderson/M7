@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/ForeachConnection.h"
 
+#if 0
 namespace foreach_connection_test {
     typedef SingleFieldRow<fields::Onv<1>> result_row_t;
     typedef BufferedTable<result_row_t, 1> result_table_t;
@@ -21,8 +22,8 @@ namespace foreach_connection_test {
 
 TEST(ForeachConnection, FermionNoSym) {
     FermionHamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
-    conn::Antisym<0> conn(ham.nsite());
-    buffered::Onv<0> onv(ham.nsite());
+    conn::FrmOnv conn(ham.nsite());
+    buffered::FrmOnv onv(ham.nsite());
     ham.set_hf_onv(onv, 0);
 
     auto counter = 0ul;
@@ -117,3 +118,4 @@ TEST(ForeachConnection, HubbardHolstein1D) {
 //    foreach_pbc(onv);
 //    ASSERT_EQ(counter, 5ul);
 }
+#endif

@@ -4,6 +4,7 @@
 
 #include "FermiBosHamiltonian.h"
 
+#if 0
 FermiBosHamiltonian::FermiBosHamiltonian(std::string fname, bool spin_major, size_t nboson_cutoff, defs::ham_t v,
                                          defs::ham_t omega) :
         FermionHamiltonian(fname, spin_major),
@@ -44,3 +45,4 @@ defs::ham_t FermiBosHamiltonian::get_element(const fields::Onv<1> &bra, const fi
 defs::ham_t FermiBosHamiltonian::get_element_0(const fields::Onv<1> &onv) const {
     return FermionHamiltonian::get_element_0(onv.m_frm) + m_boson_couplings.get_element_0(onv.m_bos);
 }
+#endif

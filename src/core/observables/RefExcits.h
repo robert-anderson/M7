@@ -25,12 +25,12 @@ struct RefExcitsOneExlvl : BufferedTable<MevRow<defs::wf_t>, true> {
         REQUIRE_EQ_ALL(nann, ncre, "different creation and annihilation operator numbers not currently supported");
     }
 
-    LookupResult operator[](const conn::Basic<0> &key) {
+    LookupResult operator[](const conn::FrmOnv &key) {
         set_working_inds(key);
         return MappedTable<MevRow<defs::wf_t>>::operator[](m_working_inds);
     }
 
-    size_t insert(const conn::Basic<0> &key) {
+    size_t insert(const conn::FrmOnv &key) {
         set_working_inds(key);
         return MappedTable<MevRow<defs::wf_t>>::insert(m_working_inds);
     }
@@ -50,15 +50,15 @@ struct RefExcitsOneExlvl : BufferedTable<MevRow<defs::wf_t>, true> {
         Table<MevRow<defs::wf_t>>::save(gw, std::to_string(nop()), h5_field_names());
     }
 
-    void make_contribs(const conn::Basic<>& m_conn, const defs::wf_t& contrib, const size_t& ipart) {
-        auto irow = *(*this)[m_conn];
-        if (irow==~0ul) irow = insert(m_conn);
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
+        auto irow = *(*this)[conn];
+        if (irow==~0ul) irow = insert(conn);
         m_row.jump(irow);
         m_row.m_values[ipart]+=contrib;
     }
 
 private:
-    void set_working_inds(const conn::Basic<0> &key) {
+    void set_working_inds(const conn::FrmOnv &key) {
         m_working_inds = {key.ann(), key.cre()};
     }
 };
@@ -72,7 +72,7 @@ struct RefExcits : Archivable {
     /**
      * work space for computing connections between reference and contributing ONVs
      */
-    conn::Basic<> m_conn;
+    conn::FrmOnv m_conn;
 
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
             Archivable("ref_excits", opts.m_archivable),
@@ -83,7 +83,7 @@ struct RefExcits : Archivable {
 
     void make_contribs(const fields::Onv<>& onv, const fields::Onv<>& ref_onv, const defs::wf_t& contrib, const size_t& ipart) {
         m_conn.connect(ref_onv, onv);
-        auto nop = m_conn.nexcit();
+        auto nop = m_conn.size();
         if (!nop) m_av_ref[ipart] += contrib;
         else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(m_conn, contrib, ipart);
     }

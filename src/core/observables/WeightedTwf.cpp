@@ -11,9 +11,9 @@ WeightedTwf::WeightedTwf(size_t npart, size_t nsite, double_t fermion_factor, do
         {}
 
 void WeightedTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::Onv<0> &onv) {
-    conn::Antisym<0> conn(m_nsite);
-    buffered::Onv<0> work_onv(m_nsite);
+                     const fields::FrmOnv &onv) {
+    conn::FrmOnv conn(m_nsite);
+    buffered::FrmOnv work_onv(m_nsite);
     OccupiedOrbitals occ(m_nsite);
     VacantOrbitals vac(m_nsite);
 
@@ -21,23 +21,20 @@ void WeightedTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_
     occ.update(onv);
     vac.update(onv);
 
-    conn.connect(onv, onv);
     auto this_twf = evaluate_static_twf(onv);
-    helem_sum += this_twf*ham.get_element(conn);
+    helem_sum += this_twf*ham.get_element(onv);
     for (auto &iocc: occ.inds()) {
         for (auto &ivac: vac.inds()) {
-            conn.zero();
+            conn.clear();
             conn.add(iocc, ivac);
-            conn.apply(onv, work_onv);
-            helem_sum += evaluate_static_twf(work_onv)*ham.get_element(conn);
+            helem_sum += evaluate_static_twf(work_onv)*ham.get_element(onv, conn);
             for (auto &jocc: occ.inds()) {
                 if (jocc <= iocc) continue;
                 for (auto &jvac: vac.inds()) {
                     if (jvac<=ivac) continue;
-                    conn.zero();
+                    conn.clear();
                     conn.add(iocc, jocc, ivac, jvac);
-                    conn.apply(onv, work_onv);
-                    helem_sum += evaluate_static_twf(work_onv)*ham.get_element(conn);
+                    helem_sum += evaluate_static_twf(work_onv)*ham.get_element(onv, conn);
                 }
             }
         }
@@ -64,6 +61,7 @@ defs::ham_t WeightedTwf::evaluate_static_twf(const fields::Onv<1> &onv) const{
     return std::exp(-m_boson_occ_penalty_factor*total_boson_occ) + evaluate_static_twf(onv.m_frm);
 }
 
+#if 0
 void WeightedTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<1> &onv) {
     conn::Antisym<1> conn(m_nsite);
@@ -116,3 +114,4 @@ void WeightedTwf::add(const Hamiltonian<1> &ham, const fields::Numbers<defs::wf_
         m_denominator[ipart] += this_twf * std::abs(weight[ipart]);
     }
 }
+#endif

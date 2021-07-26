@@ -9,8 +9,8 @@ void StochasticPropagator::add_boson_excitgen(const Hamiltonian<0> &ham) {}
 
 
 void StochasticPropagator::add_boson_excitgen(const Hamiltonian<1> &ham) {
-    m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-            new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
+//    m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+//            new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
 }
 
 StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt):
@@ -63,12 +63,15 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 #endif
     defs::prob_t prob;
     defs::ham_t helem;
+
+    auto& conn = m_conn[src_onv];
+    auto& dst_onv = m_dst[src_onv];
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        m_aconn.zero();
-        m_dst_onv = src_onv;
+        conn.clear();
+        dst_onv = src_onv;
         size_t iexgen = m_exgen_drawer->draw();
         auto &exgen = m_exgens[iexgen];
-        if (!exgen->draw(src_onv, m_dst_onv, m_occ, m_vac, prob, helem, m_aconn)) continue;
+        if (!exgen->draw(src_onv, dst_onv, m_occ, m_vac, prob, helem, conn)) continue;
         prob *= m_exgen_drawer->prob(iexgen);
         auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;
         if (consts::float_is_zero(delta)) continue;
@@ -85,7 +88,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
                 rdm_unbias_factor = 1.0 / (prob*nattempt);
             }
         }
-        wf.add_spawn(m_dst_onv, delta, flag_initiator, flag_deterministic,
+        wf.add_spawn(dst_onv, delta, flag_initiator, flag_deterministic,
                      ipart, src_onv, rdm_unbias_factor*weight);
     }
 }

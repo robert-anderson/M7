@@ -42,16 +42,16 @@ public:
         return consts::real(get_element_0(onv));
     }
 
-    defs::ham_t get_element_0(const conn::Antisym<0> &aconn, const conn::Boson &bonvconn) const {
+    defs::ham_t get_element_0(const conn::FrmOnv &frm_conn, const conn::BosOnv &bos_conn) const {
         defs::ham_t res = 0;
-        if (aconn.nexcit()) return res;
+        if (frm_conn.size()) return res;
         for (size_t imode = 0ul; imode < m_nmode; ++imode)
-            res += m_omega * static_cast<defs::ham_comp_t>(bonvconn.com(imode));
+            res += m_omega * static_cast<defs::ham_comp_t>(bos_conn.com(imode));
         return res;
     }
 
-    defs::ham_t get_element_0(const conn::Antisym<1> &conn) const {
-        return get_element_0(conn, conn.m_bonvconn);
+    defs::ham_t get_element_0(const conn::FrmBosOnv &conn) const {
+        return get_element_0(conn.m_frm, conn.m_bos);
     }
 
     defs::ham_t get_element_1(const size_t& p, const size_t& imode, const size_t& com) const {
@@ -59,25 +59,25 @@ public:
         return v(p, p, imode) * occ_fac;
     }
 
-    defs::ham_t get_element_1(const conn::Antisym<0> &aconn, const conn::Boson &bonvconn) const {
-        const auto imode = bonvconn.changed_mode(0);
-        const auto change = bonvconn.changes(0);
+    defs::ham_t get_element_1(const conn::FrmOnv &frm_conn, const FrmOps& frm_com, const conn::BosOnv &bos_conn) const {
+        const auto imode = bos_conn.changed_mode(0);
+        const auto change = bos_conn.changes(0);
 
         // bosons don't couple to higher fermion excitations (yet?)
         if (std::abs(change) > 1) return 0.0;
 
-        switch (aconn.nexcit()) {
+        switch (bos_conn.nexcit()) {
             case 0: {
                 defs::ham_t res = 0;
-                for (size_t iocc = 0ul; iocc < aconn.ncom(); ++iocc) {
-                    auto p = aconn.com()[iocc] % m_nmode;
-                    res += get_element_1(p, imode, bonvconn.com(imode));
+                for (auto& iocc: frm_com.inds()){
+                    auto isite = iocc % m_nmode;
+                    res += get_element_1(isite, imode, bos_conn.com(imode));
                 }
                 return res;
             }
             case 1: {
-                auto p = aconn.cre()[0] % m_nmode;
-                auto q = aconn.ann()[0] % m_nmode;
+                auto p = frm_conn.m_cre[0] % m_nmode;
+                auto q = frm_conn.m_ann[0] % m_nmode;
                 ASSERT(p != q) // spin conservation
                 ASSERT(v(p, q, imode) == 0.0)
                 return v(p, q, imode);
@@ -87,27 +87,26 @@ public:
         }
     }
 
-    defs::ham_t get_element_1(const conn::Antisym<1> &conn) const {
-        return get_element_1(conn, conn.m_bonvconn);
+    defs::ham_t get_element_1(const conn::FrmBosOnv &conn, const FrmOps& frm_com) const {
+        return get_element_1(conn.m_frm, frm_com, conn.m_bos);
     }
 
-    defs::ham_t get_element(const conn::Antisym<1> &conn) const {
-        return get_element(conn, conn.m_bonvconn);
+    defs::ham_t get_element(const conn::FrmBosOnv &conn, const FrmOps& frm_com) const {
+        return get_element(conn.m_frm, frm_com, conn.m_bos);
     }
 
-    defs::ham_t get_element(const conn::Antisym<0> &aconn,
-                            const conn::Boson &bonvconn) const {
-        switch (bonvconn.nchanged_mode()) {
+    defs::ham_t get_element(const conn::FrmOnv &frm_conn, const FrmOps& frm_com,
+                            const conn::BosOnv &bos_conn) const {
+        switch (bos_conn.nchanged_mode()) {
             case 0:
-                return get_element_0(aconn, bonvconn);
+                return get_element_0(frm_conn, bos_conn);
             case 1:
-                return get_element_1(aconn, bonvconn);
+                return get_element_1(frm_conn, frm_com, bos_conn);
             default:
                 return 0;
         }
     }
 
 };
-
 
 #endif //M7_BOSONCOUPLINGS_H

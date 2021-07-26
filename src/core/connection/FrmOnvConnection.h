@@ -12,14 +12,14 @@
  * the string is only modifiable via the clear and add methods, but (debug bounds checked) const access is provided to
  * the underlying index vector
  */
-class FrmOpProduct {
+class FrmOps {
     defs::inds m_inds;
 public:
-    FrmOpProduct(size_t nsite) {
+    FrmOps(size_t nsite) {
         m_inds.reserve(2*nsite);
     }
 
-    operator const defs::inds &() const {
+    const defs::inds & inds() const {
         return m_inds;
     }
 
@@ -60,7 +60,6 @@ public:
     defs::inds::const_iterator cend() const {
         return m_inds.cend();
     }
-
     /**
      * @param src
      *  the fermion ONV to check the occupation of
@@ -84,6 +83,7 @@ public:
      *  true if the stored indices are in ascending order and none are the same
      */
     bool is_valid() const {
+        if (!size()) return true;
         if (!std::is_sorted(cbegin(), cend())) return false;
         for (auto it = cbegin()+1; it!=cend(); ++it) if (*it==*(it-1)) return false;
         return true;
@@ -98,7 +98,7 @@ struct FrmOnvConnection {
      * Annihilation and creation second quantized opertor strings defining the difference in occupation between src and
      * dst fermionic ONVs
      */
-    FrmOpProduct m_ann, m_cre;
+    FrmOps m_ann, m_cre;
 private:
     /**
      * efficient computation of phases without enumeration of common occupation requires the number of set bits between
@@ -129,7 +129,7 @@ public:
      * @return
      *  antisymmetric phase of the connection
      */
-    bool connect(const fields::FrmOnv &src, const fields::FrmOnv &dst, FrmOpProduct &com);
+    bool connect(const fields::FrmOnv &src, const fields::FrmOnv &dst, FrmOps &com);
     /**
      * update the dst determinant given the src determinant and the internal state of the connection
      * @param src
@@ -147,7 +147,7 @@ public:
      * @return
      *  antisymmetric phase of the connection
      */
-    bool apply(const fields::FrmOnv &src, FrmOpProduct &com) const;
+    bool apply(const fields::FrmOnv &src, FrmOps &com) const;
     /**
      * update both the dst determinant and compute the associated phase given the src determinant and the internal
      * state of the connection
@@ -160,7 +160,7 @@ public:
      * @return
      *  antisymmetric phase of the connection
      */
-    bool apply(const fields::FrmOnv &src, fields::FrmOnv &dst, FrmOpProduct &com) const;
+    bool apply(const fields::FrmOnv &src, fields::FrmOnv &dst, FrmOps &com) const;
     /**
      * reset the internal state that to of a null excitation
      */
@@ -195,6 +195,14 @@ public:
      *  the creation string cast to a vector
      */
     const defs::inds& cre() const;
+
+    /**
+     * @return
+     *  total number of operators in connection product
+     */
+    size_t size() const {
+        return m_cre.size()+m_ann.size();
+    }
 
 private:
     /**

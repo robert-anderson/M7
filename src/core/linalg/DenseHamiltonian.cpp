@@ -12,12 +12,14 @@ DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source) :
 
     size_t ibra = ~0ul;
     enums::FermionOnv bra_enum(source.nsite(), source.nelec());
+    conn::FrmOnv conn(source.nsite());
 
     while (bra_enum.next(bra, ibra)) {
         size_t iket = ~0ul;
         enums::FermionOnv ket_enum(source.nsite(), source.nelec());
         while (ket_enum.next(ket, iket)) {
-            auto h_elem = source.get_element(bra, ket);
+            conn.connect(bra, ket);
+            auto h_elem = source.get_element(bra, conn);
             if (!consts::float_is_zero(h_elem)) {
                 (*this)(ibra, iket) = h_elem;
             } else ASSERT(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
@@ -25,6 +27,7 @@ DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source) :
     }
 }
 
+#if 0
 DenseHamiltonian::DenseHamiltonian(const FermiBosHamiltonian &source, int spin) :
         Matrix<defs::ham_t>(source.nci()) {
     const auto nsite = source.nsite();
@@ -48,7 +51,7 @@ DenseHamiltonian::DenseHamiltonian(const FermiBosHamiltonian &source, int spin) 
         }
     }
 }
-
+#endif
 
 //DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source, DeterminantList &detlist):
 //    Matrix<defs::ham_t>(detlist.high_water_mark(0)) {

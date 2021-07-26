@@ -113,8 +113,8 @@ FermionHamiltonian::FermionHamiltonian(const size_t &nelec, const size_t &nsite,
         m_complex_valued(complex_valued),
         m_int_2e_rank(int_2e_rank),
         m_int_1(nsite, spin_resolved),
-        m_int_2(nsite, spin_resolved),
-        m_sym_helper(new ham_sym_helpers::Fermion(*this))
+        m_int_2(nsite, spin_resolved)/*,
+        m_sym_helper(new ham_sym_helpers::Fermion(*this))*/
 {}
 
 FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
@@ -177,60 +177,18 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
         FermionHamiltonian(FcidumpFileReader(fname, spin_major)){}
 
-defs::ham_t FermionHamiltonian::get_element_0(const defs::inds &occs, const size_t &nocc) const {
+
+defs::ham_t FermionHamiltonian::get_element(const fields::Onv<0> &fonv) const {
     defs::ham_t element = m_int_0;
-    for (size_t i = 0ul; i < nocc; ++i) {
-        auto const &occi = occs[i];
-        element += m_int_1(occi, occi);
-        for (size_t j = 0ul; j < i; ++j) {
-            auto const &occj = occs[j];
-            element += m_int_2.phys_antisym_element(occi, occj, occi, occj);
-        }
-    }
+    auto singles_fn = [&](const size_t& i){ element+=m_int_1(i, i);};
+    auto doubles_fn = [&](const size_t& i, const size_t& j){ element+=m_int_2.phys_antisym_element(i, j, i, j);};
+    fonv.foreach_pair(singles_fn, doubles_fn);
     return element;
 }
 
-defs::ham_t FermionHamiltonian::get_element_0(const OccupiedOrbitals &occs) const {
-    return get_element_0(occs.inds(), occs.size());
-}
-
-defs::ham_t FermionHamiltonian::get_element_0(const fields::Onv<0> &fonv) const {
-    // TODO: make occs member data
-    OccupiedOrbitals occs(fonv);
-    return get_element_0(occs.inds(), occs.size());
-}
-
-defs::ham_t FermionHamiltonian::get_element_0(const conn::Antisym<0> &connection) const {
-    return get_element_0(connection.com(), connection.ncom());
-}
-
-defs::ham_t FermionHamiltonian::get_element_1(const conn::Antisym<0> &connection) const {
-    const auto &cre = connection.cre(0);
-    const auto &ann = connection.ann(0);
-    const auto &coms = connection.com();
-    const auto &ncom = connection.ncom();
-
-    defs::ham_t element = m_int_1(cre, ann);
-    for (size_t icom = 0ul; icom < ncom; ++icom)
-        element += m_int_2.phys_antisym_element(cre, coms[icom], ann, coms[icom]);
-    return connection.phase() ? -element : element;
-}
 
 defs::ham_t FermionHamiltonian::get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
-}
-
-defs::ham_t FermionHamiltonian::get_element_2(const conn::Basic<0> &connection) const {
-    return get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
-}
-
-defs::ham_t FermionHamiltonian::get_element_2(const conn::Antisym<0> &connection) const {
-    const auto element = get_element_2(connection.cre(0), connection.cre(1), connection.ann(0), connection.ann(1));
-    return connection.phase() ? -element : element;
-}
-
-defs::ham_t FermionHamiltonian::get_element(const fields::Onv<0> &bra, const fields::Onv<0> &ket) const {
-    return get_element(AntisymFermionOnvConnection(ket, bra));
 }
 
 #if 0

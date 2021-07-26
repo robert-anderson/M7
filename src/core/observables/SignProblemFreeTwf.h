@@ -29,9 +29,11 @@ public:
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<0> &onv) = 0;
 
+#if 0
     virtual void add(const Hamiltonian<1> &ham,
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::Onv<1> &onv) = 0;
+#endif
 
     virtual void reduce() {
         mpi::all_sum(m_numerator.data(), m_numerator_total.data(), m_numerator.size());

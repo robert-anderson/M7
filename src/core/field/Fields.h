@@ -65,6 +65,9 @@ namespace fields {
     template<bool enable_bosons = defs::enable_bosons>
     using Onv = typename std::conditional<enable_bosons, FrmBosOnv, FrmOnv>::type;
 
+    typedef std::tuple<FrmOnv, FrmBosOnv, FrmCsf> mbf_tup_t;
+    typedef typename std::tuple_element<defs::mbf_type_id, mbf_tup_t>::type mbf_t;
+
     struct FermionMevInds : MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> {
         typedef MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> base_t;
         const std::string m_name;

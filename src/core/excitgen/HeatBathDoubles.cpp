@@ -38,9 +38,9 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::_draw(const fields::Onv<0> &src_onv, fields::Onv<0> &dst_onv,
+bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv,
                             const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-                            defs::prob_t &prob, defs::ham_t &helem, conn::Antisym<0> &anticonn) {
+                            defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     // just draw uniform ij TODO! int weighted ij
     // return false if invalid excitation generated, true otherwise
     size_t i, j, a, b;
@@ -70,10 +70,9 @@ bool HeatBathDoubles::_draw(const fields::Onv<0> &src_onv, fields::Onv<0> &dst_o
     if (std::any_of(occs.inds().cbegin(), occs.inds().end(), either_vac_in_array)) {
         return false;
     }
-    anticonn.zero();
-    anticonn.add(i, j, a, b);
-    anticonn.apply(src_onv, dst_onv);
-    helem = m_h->get_element_2(anticonn);
+    conn.clear();
+    conn.add(i, j, a, b);
+    helem = m_h->get_element_2(dst_onv, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     ASSERT(prob <= 1)
     if (consts::float_nearly_zero(prob, 1e-14)) {

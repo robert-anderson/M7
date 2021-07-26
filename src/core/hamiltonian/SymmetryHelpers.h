@@ -20,7 +20,7 @@
  *    will likely have other applications in future
  */
 
-
+#if 0
 struct FermionHamiltonian;
 struct FermiBosHamiltonian;
 
@@ -81,24 +81,24 @@ namespace ham_sym_helpers {
     // no-sym base class
     struct Fermion {
 
-        typedef std::function<void(const conn::Antisym<0> &, const fields::Onv<0> &, const defs::ham_t &)> body_fn_t;
+        typedef std::function<void(const conn::FrmOnv &, const fields::FrmOnv &, const defs::ham_t &)> body_fn_t;
 
         const FermionHamiltonian &m_ham;
         const size_t m_nsite;
 
         mutable defs::ham_t m_helement_work;
-        mutable conn::Antisym<0> m_conn_work;
+        mutable conn::FrmOnv m_conn_work;
         mutable OccupiedOrbitals m_occ_work;
         mutable VacantOrbitals m_vac_work;
-        mutable buffered::Onv<0> m_onv_work;
+        mutable buffered::FrmOnv m_onv_work;
 
         Fermion(const FermionHamiltonian &ham);
 
         virtual ~Fermion(){};
 
-        virtual defs::ham_t get_element(const conn::Antisym<0> &conn) const;
+        virtual defs::ham_t get_element(const conn::FrmOnv &conn) const;
 
-        defs::ham_comp_t get_energy(const fields::Onv<0> &onv) const;
+        defs::ham_comp_t get_energy(const fields::FrmOnv &onv) const;
 
     private:
         /**
@@ -114,41 +114,41 @@ namespace ham_sym_helpers {
 
     protected:
 
-        void perform_diagonal(const fields::Onv<0> &src_onv,
+        void perform_diagonal(const fields::FrmOnv &src_onv,
                               const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        void perform_single(const fields::Onv<0> &src_onv, const size_t& occ, const size_t& vac,
+        void perform_single(const fields::FrmOnv &src_onv, const size_t& occ, const size_t& vac,
                             const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        void perform_double(const fields::Onv<0> &src_onv,
+        void perform_double(const fields::FrmOnv &src_onv,
                             const size_t& occ1, const size_t& occ2,
                             const size_t& vac1, const size_t& vac2,
                             const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        void foreach_connection_singles(const fields::Onv<0> &src_onv,
+        void foreach_connection_singles(const fields::FrmOnv &src_onv,
                                         const defs::inds &occs, const defs::inds &vacs,
                                         const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        void foreach_connection_subset_doubles(const fields::Onv<0> &src_onv,
+        void foreach_connection_subset_doubles(const fields::FrmOnv &src_onv,
                                                const defs::inds &occs1, const defs::inds &occs2,
                                                const defs::inds &vacs1, const defs::inds &vacs2,
                                                const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        virtual void foreach_connection_subset_doubles(const fields::Onv<0> &src_onv,
+        virtual void foreach_connection_subset_doubles(const fields::FrmOnv &src_onv,
                                                        const defs::inds &occs, const defs::inds &vacs,
                                                        const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        void foreach_connection_subset(const fields::Onv<0> &src_onv,
+        void foreach_connection_subset(const fields::FrmOnv &src_onv,
                                        const defs::inds &occs1, const defs::inds &occs2,
                                        const defs::inds &vacs1, const defs::inds &vacs2,
                                        const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
-        virtual void foreach_connection_subset(const fields::Onv<0> &src_onv,
+        virtual void foreach_connection_subset(const fields::FrmOnv &src_onv,
                                                const defs::inds &occs, const defs::inds &vacs,
                                                const body_fn_t &body, bool get_h, bool h_nonzero_only) const;
 
     public:
-        virtual void foreach_connection(const fields::Onv<0> &src_onv, const body_fn_t &body,
+        virtual void foreach_connection(const fields::FrmOnv &src_onv, const body_fn_t &body,
                                         bool get_h, bool h_nonzero_only, bool include_diagonal) const;
     };
 
@@ -156,16 +156,16 @@ namespace ham_sym_helpers {
     // no-sym base class
     struct FermiBos {
 
-        typedef std::function<void(const conn::Antisym<1> &, const fields::Onv<1> &, const defs::ham_t &)> body_fn_t;
+        typedef std::function<void(const conn::FrmBosOnv &, const fields::FrmBosOnv &, const defs::ham_t &)> body_fn_t;
 
         const FermiBosHamiltonian &m_ham;
         const size_t m_nsite;
 
         mutable defs::ham_t m_helement_work;
-        mutable conn::Antisym<1> m_conn_work;
+        mutable conn::FrmBosOnv m_conn_work;
         mutable OccupiedOrbitals m_occ_work;
         mutable VacantOrbitals m_vac_work;
-        mutable buffered::Onv<1> m_onv_work;
+        mutable buffered::FrmBosOnv m_onv_work;
 
         FermiBos(const FermiBosHamiltonian &ham);
 
@@ -181,15 +181,16 @@ namespace ham_sym_helpers {
 
     public:
 
-        virtual defs::ham_t get_element(const conn::Antisym<1> &conn) const;
+        virtual defs::ham_t get_element(const conn::FrmBosOnv &conn) const;
 
-        defs::ham_comp_t get_energy(const fields::Onv<1> &onv) const;
+        defs::ham_comp_t get_energy(const fields::FrmBosOnv &onv) const;
 
-        virtual void foreach_connection(const fields::Onv<1> &src_onv, const body_fn_t &body,
+        virtual void foreach_connection(const fields::FrmBosOnv &src_onv, const body_fn_t &body,
                                         bool get_h, bool h_nonzero_only, bool include_diagonal) const;
 
     };
 }
 
 
+#endif //M7_SYMMETRYHELPERS_H
 #endif //M7_SYMMETRYHELPERS_H

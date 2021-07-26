@@ -2,6 +2,7 @@
 // Created by rja on 16/06/2020.
 //
 
+#include <src/core/basis/Suites.h>
 #include "DeterministicSubspace.h"
 
 fields::Onv<> &DeterministicDataRow::key_field() {
@@ -37,8 +38,9 @@ void DeterministicSubspace::build_from_most_occupied(const FermionHamiltonian &h
 void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
     update();
     log::debug("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
-    conn::Antisym<> conn_work(m_wf.m_nsite);
+    suite::Conns conns_work(m_wf.m_nsite);
     auto& row_local = m_local.m_row;
+    auto& conn_work = conns_work[row_local.m_onv];
     m_sparse_ham.resize(m_global.m_hwm);
     for (row_local.restart(); row_local.in_range(); row_local.step()){
         // loop over local subspace (H rows)
@@ -47,8 +49,8 @@ void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
             conn_work.connect(row_local.m_onv, row_global.m_onv);
-            auto helem = ham.get_element(conn_work);
-            if (conn_work.nexcit() > 0 && conn_work.nexcit() < 3)
+            auto helem = ham.get_element(row_local.m_onv, conn_work);
+            if (conn_work.size() > 0 && conn_work.size() < 5)
                 m_sparse_ham.add(row_local.index(), row_global.index(), helem);
         }
     }
@@ -63,11 +65,12 @@ void DeterministicSubspace::build_from_all_occupied(const FermionHamiltonian &ha
 }
 
 void DeterministicSubspace::build_from_occupied_connections(const FermionHamiltonian &ham, const fields::Onv<> &onv) {
-    conn::Antisym<> conn_work(m_wf.m_nsite);
+    suite::Conns conns_work(m_wf.m_nsite);
     auto row = m_wf.m_store.m_row;
+    auto& conn_work = conns_work[row.m_onv];
     for (row.restart(); row.in_range(); row.step()){
         conn_work.connect(onv, row.m_onv);
-        if (row.is_cleared() || conn_work.nexcit()>3) continue;
+        if (row.is_cleared() || conn_work.size()>4) continue;
         add_(row);
         for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             row.m_deterministic.set(ipart);

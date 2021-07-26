@@ -13,7 +13,9 @@
 #include "SymmetryHelpers.h"
 
 
-typedef std::tuple<FermionHamiltonian, FermiBosHamiltonian> ham_tup_t;
+//typedef std::tuple<FermionHamiltonian, FermiBosHamiltonian> ham_tup_t;
+struct Dummy{};
+typedef std::tuple<FermionHamiltonian, Dummy> ham_tup_t;
 
 template<bool enable_bosons=defs::enable_bosons>
 using Hamiltonian = typename std::tuple_element<enable_bosons, ham_tup_t>::type;

@@ -15,13 +15,13 @@ namespace frm_onv_connection_test {
     }
     static bool phase_connect(const fields::FrmOnv& src, const fields::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
-        FrmOpProduct com(src.m_nsite);
+        FrmOps com(src.m_nsite);
         return connection.connect(src, dst, com);
     }
     static bool phase_apply(const fields::FrmOnv& src, const fields::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
-        FrmOpProduct com(src.m_nsite);
+        FrmOps com(src.m_nsite);
         return connection.apply(src, com);
     }
     static size_t ncre(const fields::FrmOnv& src, const fields::FrmOnv& dst){
@@ -41,7 +41,7 @@ namespace frm_onv_connection_test {
     }
     static size_t string_chk(const fields::FrmOnv& src, const fields::FrmOnv& dst, defs::inds ann, defs::inds cre, defs::inds com){
         FrmOnvConnection connection(src.m_nsite);
-        FrmOpProduct com_chk(src.m_nsite);
+        FrmOps com_chk(src.m_nsite);
         connection.connect(src, dst, com_chk);
         return (connection.m_ann == ann) && (connection.m_cre == cre) && (com_chk==com);
     }

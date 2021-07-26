@@ -6,6 +6,7 @@
 #define M7_REFERENCE_H
 
 #include <src/core/observables/RefExcits.h>
+#include <src/core/basis/Suites.h>
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
@@ -24,7 +25,7 @@ class Reference : public Wavefunction::SharedRow {
     /**
      * work space for computing connections to other ONVs via the Hamiltonian
      */
-    mutable conn::Antisym<> m_aconn;
+    mutable suite::Conns m_conn;
 
     /**
      * If a candidate for redefinition of the reference is found, then its weight and row within m_list must be stored
@@ -45,7 +46,7 @@ public:
     Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
-    const fields::Onv<>& get_onv() const;
+    const fields::Onv<>& get_mbf() const;
 
     size_t occupied_ncycle(const size_t& icycle) const {
         return m_global.m_row.occupied_ncycle(icycle);
@@ -87,8 +88,6 @@ public:
      *  true if the matrix element of the Hamiltonian between the current reference and the argument is non-zero
      */
     bool is_connected(const fields::Onv<> &onv) const;
-
-    bool connection_phase(const fields::Onv<> &onv) const;
 
     /**
      * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>

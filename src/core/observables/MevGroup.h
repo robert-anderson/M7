@@ -74,12 +74,16 @@ public:
      *  combination index
      * @param conn
      *  connection (no repeated SQ operator indices between ann and cre vectors)
+     * @param com
+     *  indices in common between bra and ket fermion ONVs
      * @param inds
      *  MEV index field
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
-    bool apply(const size_t &icomb, const conn::Antisym<0> &conn, fields::FermionMevInds &inds) const;
+    bool apply(const size_t &icomb, const conn::FrmOnv &conn,
+               const FrmOps& com, fields::FermionMevInds &inds) const;
+
 };
 
 struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
@@ -95,8 +99,9 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
      */
     std::vector<FermionPromoter> m_promoters;
 
-    conn::Antisym<0> m_conn;
+    conn::FrmOnv m_conn;
     const bool m_mixed_estimator;
+    mutable FrmOps m_com;
 
     const size_t &nop() const;
 
@@ -106,12 +111,13 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
     FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec):
             FermionRdm(opts, nrow_estimate(opts.m_rank, opts.m_rank, nsite), nsite, nelec){}
 
-    void make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
+    void make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
+                       const defs::wf_t &src_weight, const defs::wf_t &dst_weight);
 
     void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
                        const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight) {
-        m_conn.connect(src_onv, dst_onv);
-        make_contribs(m_conn, src_weight, dst_weight);
+        m_conn.connect(src_onv, dst_onv, m_com);
+        make_contribs(src_onv, m_conn, m_com, src_weight, dst_weight);
     }
 
     void make_contribs(const fields::Onv<1> &src_onv, const defs::wf_t &src_weight,
@@ -121,9 +127,9 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
 
     void make_contribs(const fields::FrmOnv &src_onv, const defs::wf_t &src_weight,
                        const fields::FrmOnv &dst_onv, const defs::wf_t &dst_weight, const size_t &nop_conn) {
-        m_conn.connect(src_onv, dst_onv);
-        if (m_conn.nexcit() != nop_conn) return;
-        make_contribs(m_conn, src_weight, dst_weight);
+        m_conn.connect(src_onv, dst_onv, m_com);
+        if (m_conn.size() != nop_conn) return;
+        make_contribs(src_onv, m_conn, m_com, src_weight, dst_weight);
     }
 
     void end_cycle() {

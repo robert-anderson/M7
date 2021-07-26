@@ -7,14 +7,14 @@
 Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham,
                      const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
         Wavefunction::SharedRow(wf, loc, "reference"),
-        m_ham(ham), m_wf(wf), m_ipart(ipart), m_aconn(ham.nsite()),
+        m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.nsite()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     log::info("Initial reference ONV for WF part {} is {} with energy {}",
-              m_ipart, get_onv(), m_global.m_row.m_hdiag);
+              m_ipart, get_mbf(), m_global.m_row.m_hdiag);
 }
 
-const fields::Onv<> &Reference::get_onv() const {
+const fields::Onv<> &Reference::get_mbf() const {
     return m_global.m_row.m_onv;
 }
 
@@ -35,10 +35,10 @@ void Reference::accept_candidate(double redefinition_thresh) {
     auto current_weight = weight();
     if (std::abs(gather[irank]) > std::abs(current_weight*redefinition_thresh)){
         log::info("Changing the reference ONV for WF part {}. current ONV: {}, weight: {}",
-                   m_ipart, get_onv().to_string(), current_weight);
+                  m_ipart, get_mbf().to_string(), current_weight);
         redefine({irank, m_irow_candidate});
         log::info("Changed the reference ONV for WF part {}. new ONV: {}, weight: {}",
-                   m_ipart, get_onv().to_string(), gather[irank]);
+                  m_ipart, get_mbf().to_string(), gather[irank]);
         m_candidate_abs_weight = 0.0;
         update_ref_conn_flags();
     }
@@ -67,19 +67,14 @@ void Reference::end_cycle() {
     m_summables.all_sum();
 }
 
-bool Reference::is_connected(const fields::Onv<> &onv) const {
-    m_aconn.connect(get_onv(), onv);
-    return !consts::float_is_zero(m_ham.get_element(m_aconn));
+bool Reference::is_connected(const fields::mbf_t &mbf) const {
+    m_conn[mbf].connect(get_mbf(), mbf);
+    return !consts::float_is_zero(m_ham.get_element(mbf, m_conn[mbf]));
 }
 
-bool Reference::connection_phase(const fields::Onv<> &onv) const {
-    m_aconn.connect(get_onv(), onv);
-    return m_aconn.phase();
-}
-
-void Reference::make_numerator_contribs(const fields::Onv<> &onv, const defs::wf_t& weight) {
-    m_aconn.connect(get_onv(), onv);
-    m_proj_energy_num.m_local += m_ham.get_element(m_aconn) * weight;
+void Reference::make_numerator_contribs(const fields::mbf_t &mbf, const defs::wf_t& weight) {
+    m_conn[mbf].connect(get_mbf(), mbf);
+    m_proj_energy_num.m_local += m_ham.get_element(mbf, m_conn[mbf]) * weight;
     m_nwalker_at_doubles.m_local += std::abs(weight);
 }
 

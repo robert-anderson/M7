@@ -8,7 +8,7 @@
 FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
         m_nop_insert(nop_insert),
         m_ncomb(integer_utils::combinatorial(ncom, nop_insert)),
-        m_all_combs(nop_insert * m_ncomb) {
+        m_all_combs(nop_insert * m_ncomb){
     if (!nop_insert) return;
 
     foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
@@ -29,21 +29,22 @@ const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
     return m_all_combs.data() + icomb * m_nop_insert;
 }
 
-bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<0> &conn, fields::FermionMevInds &inds) const {
+bool FermionPromoter::apply(const size_t &icomb, const conn::FrmOnv &conn,
+                            const FrmOps &com, fields::FermionMevInds &inds) const {
     auto comb_begin = begin(icomb);
     inds.zero();
     size_t ann_passed = 0ul;
     size_t cre_passed = 0ul;
     for (size_t iins = 0ul; iins < m_nop_insert; ++iins) {
-        auto ins = conn.com(comb_begin[iins]);
-        while (ann_passed < conn.nann() && conn.ann(ann_passed) < ins) {
-            inds.m_ann[ann_passed + iins] = conn.ann(ann_passed);
+        auto ins = com[comb_begin[iins]];
+        while (ann_passed < conn.m_ann.size() && conn.m_ann[ann_passed] < ins) {
+            inds.m_ann[ann_passed + iins] = conn.m_ann[ann_passed];
             ++ann_passed;
         }
         inds.m_ann[ann_passed + iins] = ins;
 
-        while (cre_passed < conn.ncre() && conn.cre(cre_passed) < ins) {
-            inds.m_cre[cre_passed + iins] = conn.cre(cre_passed);
+        while (cre_passed < conn.m_cre.size() && conn.m_cre[cre_passed] < ins) {
+            inds.m_cre[cre_passed + iins] = conn.m_cre[cre_passed];
             ++cre_passed;
         }
         inds.m_cre[cre_passed + iins] = ins;
@@ -51,12 +52,12 @@ bool FermionPromoter::apply(const size_t &icomb, const conn::Antisym<0> &conn, f
     auto phase = (ann_passed + cre_passed) & 1ul;
 
     // the rest of the promoted connection is the same as the connection
-    while (ann_passed < conn.nann()) {
-        inds.m_ann[ann_passed + m_nop_insert] = conn.ann(ann_passed);
+    while (ann_passed < conn.m_ann.size()) {
+        inds.m_ann[ann_passed + m_nop_insert] = conn.m_ann[ann_passed];
         ++ann_passed;
     }
-    while (cre_passed < conn.ncre()) {
-        inds.m_cre[cre_passed + m_nop_insert] = conn.cre(cre_passed);
+    while (cre_passed < conn.m_cre.size()) {
+        inds.m_cre[cre_passed + m_nop_insert] = conn.m_cre[cre_passed];
         ++cre_passed;
     }
     return phase;
@@ -95,21 +96,21 @@ FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_
                         opts.m_hash_mapping.m_remap_ratio
                 }),
         m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
-        m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator) {
+        m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator), m_com(nsite) {
     m_promoters.reserve(opts.m_rank + 1);
     for (size_t nins = 0ul; nins <= opts.m_rank; ++nins) m_promoters.emplace_back(nelec + nins - opts.m_rank, nins);
 }
 
-void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &src_weight,
-                               const defs::wf_t &dst_weight) {
-    const auto exlvl = conn.nexcit();
-    if (conn.nann() > m_nann && conn.ncre() > m_ncre) return;
+void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
+                               const defs::wf_t &src_weight, const defs::wf_t &dst_weight) {
+    const auto exlvl = conn.m_cre.size();
+    if (conn.m_ann.size() > m_nann && conn.m_cre.size() > m_ncre) return;
     const auto nins = nop() - exlvl;
     ASSERT(nins <= nop());
 
     const auto &promoter = m_promoters[nins];
     for (size_t icomb = 0ul; icomb < promoter.m_ncomb; ++icomb) {
-        auto phase = promoter.apply(icomb, conn, m_lookup_inds);
+        auto phase = promoter.apply(icomb, conn, com, m_lookup_inds);
         if (!exlvl || !nins) {ASSERT(!phase); }
         else {
             if (m_lookup_inds.m_ann[0] == m_lookup_inds.m_cre[0]) ASSERT(!phase);
@@ -127,7 +128,7 @@ void FermionRdm::make_contribs(const conn::Antisym<0> &conn, const defs::wf_t &s
         /*
          * include the Fermi phase of the excitation
          */
-        phase = phase == conn.phase();
+        phase = phase == conn.phase(src_onv);
         auto contrib = (phase ? -1.0 : 1.0) * src_weight * dst_weight;
         send_table.m_row.m_values[0] += contrib;
     }

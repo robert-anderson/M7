@@ -29,7 +29,6 @@
  * are the called the "spawning lists"
  */
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
-
     typedef GlobalExtremalRows<WalkerTableRow, defs::wf_t, defs::ndim_wf> weights_gxr_t;
 
     const fciqmc_config::Document &m_opts;

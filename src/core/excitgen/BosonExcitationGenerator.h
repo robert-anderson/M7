@@ -8,6 +8,7 @@
 #include "src/core/hamiltonian/BosonCouplings.h"
 #include "ExcitationGenerator.h"
 
+#if 0
 class BosonExcitationGenerator : public ExcitationGenerator {
 
     defs::ham_t get_helement(const Hamiltonian<0>* ham,
@@ -78,4 +79,5 @@ public:
 };
 
 
+#endif //M7_BOSONEXCITATIONGENERATOR_H
 #endif //M7_BOSONEXCITATIONGENERATOR_H
