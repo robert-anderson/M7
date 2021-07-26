@@ -5,16 +5,16 @@
 #include <src/core/basis/Suites.h>
 #include "DeterministicSubspace.h"
 
-fields::Onv<> &DeterministicDataRow::key_field() {
-    return m_onv;
+fields::mbf_t &DeterministicDataRow::key_field() {
+    return m_mbf;
 }
 
 DeterministicDataRow::DeterministicDataRow(const Wavefunction &wf) :
-        m_onv(this, onv::nsite(wf.m_store.m_row.m_onv), "onv"),
+        m_mbf(this, wf.m_store.m_row.m_mbf.m_nsite, "mbf"),
         m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight"){}
 
 void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDataRow &local) {
-    local.m_onv = source.m_onv;
+    local.m_mbf = source.m_mbf;
     local.m_weight = source.m_weight;
 }
 
@@ -40,7 +40,7 @@ void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
     log::debug("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
     suite::Conns conns_work(m_wf.m_nsite);
     auto& row_local = m_local.m_row;
-    auto& conn_work = conns_work[row_local.m_onv];
+    auto& conn_work = conns_work[row_local.m_mbf];
     m_sparse_ham.resize(m_global.m_hwm);
     for (row_local.restart(); row_local.in_range(); row_local.step()){
         // loop over local subspace (H rows)
@@ -48,8 +48,8 @@ void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
         for (row_global.restart(); row_global.in_range(); row_global.step()){
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
-            conn_work.connect(row_local.m_onv, row_global.m_onv);
-            auto helem = ham.get_element(row_local.m_onv, conn_work);
+            conn_work.connect(row_local.m_mbf, row_global.m_mbf);
+            auto helem = ham.get_element(row_local.m_mbf, conn_work);
             if (conn_work.size() > 0 && conn_work.size() < 5)
                 m_sparse_ham.add(row_local.index(), row_global.index(), helem);
         }
@@ -64,12 +64,12 @@ void DeterministicSubspace::build_from_all_occupied(const FermionHamiltonian &ha
     build_connections(ham);
 }
 
-void DeterministicSubspace::build_from_occupied_connections(const FermionHamiltonian &ham, const fields::Onv<> &onv) {
+void DeterministicSubspace::build_from_occupied_connections(const FermionHamiltonian &ham, const fields::mbf_t &mbf) {
     suite::Conns conns_work(m_wf.m_nsite);
     auto row = m_wf.m_store.m_row;
-    auto& conn_work = conns_work[row.m_onv];
+    auto& conn_work = conns_work[row.m_mbf];
     for (row.restart(); row.in_range(); row.step()){
-        conn_work.connect(onv, row.m_onv);
+        conn_work.connect(mbf, row.m_mbf);
         if (row.is_cleared() || conn_work.size()>4) continue;
         add_(row);
         for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
@@ -78,17 +78,17 @@ void DeterministicSubspace::build_from_occupied_connections(const FermionHamilto
     build_connections(ham);
 }
 
-void DeterministicSubspace::make_mev_contribs(MevGroup &mevs, const fields::Onv<> &ref) {
+void DeterministicSubspace::make_mev_contribs(MevGroup &mevs, const fields::mbf_t &ref) {
     if (!mevs.m_accum_epoch) return;
     auto& row_local = m_local.m_row;
     auto& row_global = m_global.m_row;
     for (row_local.restart(); row_local.in_range(); row_local.step()) {
-        if (row_local.m_onv==ref) continue;
+        if (row_local.m_mbf == ref) continue;
         for (const auto& entry: m_sparse_ham.row(row_local.index())) {
             row_global.jump(entry.icol);
-            if (row_global.m_onv==ref) continue;
-            mevs.m_fermion_rdm->make_contribs(row_local.m_onv, 0.5*row_local.m_weight[0], row_global.m_onv, row_global.m_weight[1]);
-            mevs.m_fermion_rdm->make_contribs(row_local.m_onv, 0.5*row_local.m_weight[1], row_global.m_onv, row_global.m_weight[0]);
+            if (row_global.m_mbf == ref) continue;
+            mevs.m_fermion_rdm->make_contribs(row_local.m_mbf, 0.5 * row_local.m_weight[0], row_global.m_mbf, row_global.m_weight[1]);
+            mevs.m_fermion_rdm->make_contribs(row_local.m_mbf, 0.5 * row_local.m_weight[1], row_global.m_mbf, row_global.m_weight[0]);
         }
     }
 }

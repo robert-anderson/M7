@@ -22,12 +22,12 @@ public:
         m_inds.reserve(2*nsite);
     }
 
-    explicit DecodedDeterminant(const fields::Onv<0> &onv) :
+    explicit DecodedDeterminant(const fields::FrmOnv &onv) :
             DecodedDeterminant(onv.m_nsite) {
         update(onv);
     }
 
-    explicit DecodedDeterminant(const fields::Onv<1> &onv) :
+    explicit DecodedDeterminant(const fields::FrmBosOnv &onv) :
             DecodedDeterminant(onv.m_frm.m_nsite) {}
 
     DecodedDeterminant(const DecodedDeterminant& other): DecodedDeterminant(other.m_inds.capacity()/2){}
@@ -54,23 +54,23 @@ public:
         return m_inds;
     }
 
-    void update(const fields::Onv<0> &onv) {
+    void update(const fields::FrmOnv &onv) {
         updater_fn()(onv, m_inds);
     };
 
-    void update(const fields::Onv<1> &onv) {
+    void update(const fields::FrmBosOnv &onv) {
         updater_fn()(onv.m_frm, m_inds);
     }
 };
 
 
 struct OccupiedUpdater {
-    void operator()(const fields::Onv<0> &onv, defs::inds &inds);
+    void operator()(const fields::FrmOnv &onv, defs::inds &inds);
 };
 
 
 struct VacantUpdater {
-    void operator()(const fields::Onv<0> &onv, defs::inds &inds);
+    void operator()(const fields::FrmOnv &onv, defs::inds &inds);
 };
 
 typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;
@@ -92,12 +92,12 @@ public:
         ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.m_nelement);
     }
 
-    NdDecodedDeterminant(std::array<size_t, nind> shape, const fields::Onv<0> &onv, const defs::inds& map) :
+    NdDecodedDeterminant(std::array<size_t, nind> shape, const fields::FrmOnv &onv, const defs::inds& map) :
             NdDecodedDeterminant(shape, onv.m_nsite, map) {
         update(onv);
     }
 
-    NdDecodedDeterminant(std::array<size_t, nind> shape, const fields::Onv<1> &onv, const defs::inds& map) :
+    NdDecodedDeterminant(std::array<size_t, nind> shape, const fields::FrmBosOnv &onv, const defs::inds& map) :
             NdDecodedDeterminant(shape, onv.m_frm.m_nsite, map) {}
 
 
@@ -131,23 +131,23 @@ public:
         return m_inds[m_format.flatten(inds)];
     }
 
-    void update(const fields::Onv<0> &onv) {
+    void update(const fields::FrmOnv &onv) {
         updater_fn()(onv, m_map, m_inds);
     };
 
-    void update(const fields::Onv<1> &onv) {
+    void update(const fields::FrmBosOnv &onv) {
         updater_fn()(onv.m_frm, m_map, m_inds);
     }
 };
 
 
 struct NdOccupiedUpdater {
-    void operator()(const fields::Onv<0> &onv, const defs::inds& map, std::vector<defs::inds> &inds);
+    void operator()(const fields::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds);
 };
 
 
 struct NdVacantUpdater {
-    void operator()(const fields::Onv<0> &onv, const defs::inds& map, std::vector<defs::inds> &inds);
+    void operator()(const fields::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds);
 };
 
 template<size_t nind>

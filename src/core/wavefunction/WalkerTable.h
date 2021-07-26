@@ -15,7 +15,7 @@
 struct WalkerTableRow : public Row {
     const NdFormat<defs::ndim_wf> m_wf_format;
     const NdFormat<defs::ndim_root> m_root_format;
-    fields::Onv<> m_onv;
+    fields::mbf_t m_mbf;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
     fields::Number<defs::ham_comp_t> m_hdiag;
     fields::Flags<defs::ndim_wf> m_initiator;
@@ -24,7 +24,7 @@ struct WalkerTableRow : public Row {
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
     fields::Number<size_t> m_icycle_occ;
 
-    fields::Onv<> &key_field();;
+    fields::mbf_t &key_field();;
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights);
 
@@ -45,14 +45,14 @@ struct UniqueOnvRow : public Row {
 };
 
 struct OnvRow : public Row {
-    fields::Onv<> m_onv;
+    fields::mbf_t m_mbf;
     fields::Number<size_t> m_nparent;
 
-    fields::Onv<> &key_field() {
-        return m_onv;
+    fields::mbf_t &key_field() {
+        return m_mbf;
     };
 
-    OnvRow(size_t nsite) : m_onv(this, nsite), m_nparent(this) {}
+    OnvRow(size_t nsite) : m_mbf(this, nsite), m_nparent(this) {}
 };
 
 

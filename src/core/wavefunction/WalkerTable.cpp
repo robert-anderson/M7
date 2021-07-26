@@ -4,14 +4,14 @@
 
 #include "WalkerTable.h"
 
-fields::Onv<> &WalkerTableRow::key_field() {
-    return m_onv;
+fields::mbf_t &WalkerTableRow::key_field() {
+    return m_mbf;
 }
 
 WalkerTableRow::WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
-        m_onv(this, nsite, "onv"),
+        m_mbf(this, nsite, "onv"),
         m_weight(this, m_wf_format, "weight"),
         m_hdiag(this, "diagonal H element"),
         m_initiator(this, m_wf_format, "initiator status flag"),
@@ -22,7 +22,7 @@ WalkerTableRow::WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool
 {}
 
 bool WalkerTableRow::is_h5_write_exempt() const {
-    return m_onv.is_zero();
+    return m_mbf.is_zero();
 }
 
 size_t WalkerTableRow::occupied_ncycle(const size_t &icycle_current) const {

@@ -88,7 +88,7 @@ public:
      * for each icycle in range [0, ncycle)
      *  // stats are zeroed.
      *  // wavefunction represents Psi_icycle
-     *  loop over occupied ONVs
+     *  loop over occupied MBFs
      *  // wavefunction represents intermediate state between Psi_icycle and Psi_(icycle+1)
      *  // since the death/cloning step has been applied but not the annihilation
      *  // local "state" stats reflect the wavefunction Psi_icycle
@@ -116,26 +116,26 @@ public:
     void propagate_row(const size_t &ipart);
 
     /**
-     * Loop over all rows in m_wf.m_store which have a non-zero ONV field
+     * Loop over all rows in m_wf.m_store which have a non-zero MBF field
      */
-    void loop_over_occupied_onvs();
+    void loop_over_occupied_mbfs();
 
     /**
-     * Loop over all rows in m_wf.m_store which have a non-zero ONV field but perform no propagation, just add any
+     * Loop over all rows in m_wf.m_store which have a non-zero MBF field but perform no propagation, just add any
      * required weight-averaged contributions to the MEVs
      */
-    void finalizing_loop_over_occupied_onvs();
+    void finalizing_loop_over_occupied_mbfs();
 
-    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+    void annihilate_row(const size_t &dst_ipart, const fields::mbf_t &dst_mbf, const defs::wf_t &delta_weight,
                         bool allow_initiation, bool src_deterministic, const size_t &irow_store);
 
-    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+    void annihilate_row(const size_t &dst_ipart, const fields::mbf_t &dst_mbf, const defs::wf_t &delta_weight,
                         bool allow_initiation, bool src_deterministic);
 
     /**
-     * Make all contributions to MEVs from the current occupied ONV row. These contributions always include the
-     * diagonals, where the bra and ket ONVs are the same. Explicit contributions from connections to the Hartree-Fock
-     * ONV are also optionally included here - in that case it is taken to be true that the single excitations are never
+     * Make all contributions to MEVs from the current occupied MBF row. These contributions always include the
+     * diagonals, where the bra and ket MBFs are the same. Explicit contributions from connections to the Hartree-Fock
+     * MBF are also optionally included here - in that case it is taken to be true that the single excitations are never
      * generated due to the Brillouin theorem
      *
      * Care is needed here to avoid off-by-one-like errors. Such considerations are required in a few different methods,
@@ -160,7 +160,7 @@ public:
      *     x * row.m_weight, and row.occupied_ncycle(m_icycle) would give x, the correct normalization
      *
      *  2. when the accumulation epoch begins while the wavefunction already contains an occupied set, each row must be
-     *     treated as though it were created on the previous iteration. In the loop over occupied ONVs, MC cycle i, if
+     *     treated as though it were created on the previous iteration. In the loop over occupied MBFs, MC cycle i, if
      *     the accumulation epoch has begun at the beginning of cycle i, then row.m_icycle_occ must be set to i-1, and
      *     the average zeroed. Then, immediately afterwards the cyclic summation of row.m_weight into
      *     row.m_average_weight would occur, and the same sanity checks as described in 1. would pass, since the number
@@ -170,7 +170,7 @@ public:
      *  3. if the conditions have been met for a row to be removed, namely all elements of the weight have become zero,
      *     then it is necessary that immediately prior to its deletion from m_wf.m_store, any contributions it owes to
      *     MEV elements which take contributions from products of averaged weights are made. if a row were added to
-     *     m_wf.m_store in the annihilation loop of cycle i, and then removed in the loop over occupied ONVs of cycle
+     *     m_wf.m_store in the annihilation loop of cycle i, and then removed in the loop over occupied MBFs of cycle
      *     i+1, then the number of occupied cycles would evaluate to 1, but the average weight of the row would not
      *     have yet received any contributions, and so the contributions to MEVs would be zero, correctly. If however
      *     the row survived for one more cycle before meeting the criteria for deletion, the initially added weight
@@ -178,28 +178,28 @@ public:
      *     necessarily zero, and so the contribution would be correct for row.occupied_ncycle(m_icycle)=2.
      *
      *  4. here, the row is treated as though it becomes unoccupied on cycle i, with its average value zeroed. thence,
-     *     in the loop over occupied ONVs of cycle i+1, the instantaneous weight is summed in and the normalization is
+     *     in the loop over occupied MBFs of cycle i+1, the instantaneous weight is summed in and the normalization is
      *     correct.
      *
      *  5. if the calculation ends and the number of iterations contributing to the unnormalized coefficient averages
      *     is not an integral multiple of the block averaging period, the contributions owed to the MEV estimates must
-     *     be added in a special "finalizing" loop over occupied ONVs. crucially, this is done *before* the
+     *     be added in a special "finalizing" loop over occupied MBFs. crucially, this is done *before* the
      *     instantaneous weight is summed into the average, since this was already done in the previous iteration.
      */
     void make_average_weight_mev_contribs(const size_t& icycle);
 
     /**
      * Make all MEV contributions due to products of instantaneous walker weights.
-     * @param src_onv
-     *  source ONV - from which the spawned walker originated
+     * @param src_mbf
+     *  source MBF - from which the spawned walker originated
      * @param src_weight
-     *  source weight - the number of walkers on the source ONV
+     *  source weight - the number of walkers on the source MBF
      * @param dst_ipart
      *  the WF part index for which this contribution is bound
      */
-    void make_instant_mev_contribs(const fields::Onv<> &src_onv, const defs::wf_t &src_weight, const size_t &dst_ipart);
+    void make_instant_mev_contribs(const fields::mbf_t &src_mbf, const defs::wf_t &src_weight, const size_t &dst_ipart);
 
-    void make_mev_contribs_from_unique_src_onvs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
+    void make_mev_contribs_from_unique_src_mbfs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
                                                 const size_t &irow_block_end, const size_t &irow_store);
 
     void loop_over_spawned();

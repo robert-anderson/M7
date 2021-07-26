@@ -29,11 +29,11 @@ TEST(StochasticPropagator, Test) {
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    ham.set_hf_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
     StochasticPropagator prop(ham, opts, wf.m_format);
-    ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
+    ASSERT_EQ(&wf.m_store.m_row.m_mbf, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
 
     auto ref_energy = ham.get_energy(ref_onv);
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
@@ -64,14 +64,14 @@ TEST(StochasticPropagator, RdmTest) {
     FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    ham.set_hf_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
     ASSERT_EQ(wf.npart(), 2);
     StochasticPropagator prop(ham, opts, wf.m_format);
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
+    ASSERT_EQ(&wf.m_store.m_row.m_mbf, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
 
     auto ref_energy = ham.get_energy(ref_onv);
 
@@ -110,7 +110,7 @@ TEST(StochasticPropagator, Hdf5) {
     StochasticPropagator prop(ham, opts, wf.npart());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
-    ASSERT_EQ(&wf.m_store.m_row.m_onv, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
+    ASSERT_EQ(&wf.m_store.m_row.m_mbf, &KeyField<WalkerTableRow>::get(wf.m_store.m_row));
 
     auto ref_energy = ham.get_energy(ref_onv);
 
@@ -144,8 +144,8 @@ TEST(StochasticPropagator, Hubbard) {
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    buffered::mbf_t ref_onv(ham.nsite());
+    ham.set_hf_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
@@ -175,8 +175,8 @@ TEST(StochasticPropagator, ExcitedStates) {
     // -99.9421389039332
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    buffered::mbf_t ref_onv(ham.nsite());
+    ham.set_hf_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
 
@@ -188,7 +188,7 @@ TEST(StochasticPropagator, ExcitedStates) {
     for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
 
 
-    buffered::Onv<> excit_onv(ham.nsite());
+    buffered::mbf_t excit_onv(ham.nsite());
     excit_onv = ref_onv;
     excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
@@ -202,9 +202,6 @@ TEST(StochasticPropagator, ExcitedStates) {
     ASSERT(wf.m_store.m_row.index()==2ul);
     wf.set_weight(2, opts.m_wavefunction.m_nw_init);
 
-    std::cout <<
-              wf.m_store.to_string()
-              << std::endl;
     prop.m_shift.m_values = ref_energy;
 
     Solver solver(opts, prop, wf, ref_loc);

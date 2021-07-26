@@ -58,7 +58,7 @@ public:
 
     void add(const Hamiltonian<0> &ham,
              const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-             const fields::Onv<0> &onv) override;
+             const fields::FrmOnv &onv) override;
 
 #if 0
     void add(const Hamiltonian<1> &ham,

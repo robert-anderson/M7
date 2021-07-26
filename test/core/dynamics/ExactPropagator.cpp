@@ -64,8 +64,8 @@ TEST(ExactPropagator, DeterministicSubspace) {
     //Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     Hamiltonian<> ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    buffered::mbf_t ref_onv(ham.nsite());
+    ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
     ExactPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
@@ -97,8 +97,8 @@ TEST(ExactPropagator, Test) {
     // -99.9421389039332
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    buffered::mbf_t ref_onv(ham.nsite());
+    ham.set_hf_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());
 
@@ -110,7 +110,7 @@ TEST(ExactPropagator, Test) {
     for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
 
 
-    buffered::Onv<> excit_onv(ham.nsite());
+    buffered::mbf_t excit_onv(ham.nsite());
     excit_onv = ref_onv;
     excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
@@ -145,8 +145,8 @@ TEST(ExactPropagator, RdmTest) {
     //const auto benchmark = -99.9421389039331
     Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    buffered::mbf_t ref_onv(ham.nsite());
+    ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
@@ -179,7 +179,7 @@ TEST(ExactPropagator, Hubbard) {
     Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
     ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
+    buffered::mbf_t ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         ref_onv.set({0, i});
         ref_onv.set({1, i});

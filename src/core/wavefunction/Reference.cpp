@@ -14,15 +14,15 @@ Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &
               m_ipart, get_mbf(), m_global.m_row.m_hdiag);
 }
 
-const fields::Onv<> &Reference::get_mbf() const {
-    return m_global.m_row.m_onv;
+const fields::mbf_t &Reference::get_mbf() const {
+    return m_global.m_row.m_mbf;
 }
 
 void Reference::update_ref_conn_flags() {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()){
-        if (row.m_onv.is_zero()) continue;
-        row.m_ref_conn.put(m_ipart, is_connected(row.m_onv));
+        if (row.m_mbf.is_zero()) continue;
+        row.m_ref_conn.put(m_ipart, is_connected(row.m_mbf));
     }
 }
 
@@ -52,7 +52,7 @@ void Reference::contrib_row() {
         m_irow_candidate = row.index();
     }
     if (row.m_ref_conn.get(m_ipart)) {
-        make_numerator_contribs(row.m_onv, row.m_weight[m_ipart]);
+        make_numerator_contribs(row.m_mbf, row.m_weight[m_ipart]);
     }
 }
 
@@ -121,11 +121,11 @@ void References::contrib_row() {
     for (auto& ref: m_refs) ref.contrib_row();
 }
 
-std::vector<bool> References::is_connected(const fields::Onv<> &onv) const {
+std::vector<bool> References::is_connected(const fields::mbf_t &mbf) const {
     std::vector<bool> out;
     out.reserve(m_refs.size());
     for (size_t ipart=0ul; ipart<m_refs.size(); ++ipart)
-        out.push_back(m_refs[ipart].is_connected(onv));
+        out.push_back(m_refs[ipart].is_connected(mbf));
     return out;
 }
 

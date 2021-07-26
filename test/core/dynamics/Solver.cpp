@@ -30,9 +30,9 @@ TEST(Solver, RecvSort) {
     auto& recv = wf.m_comm.recv();
     auto& row = recv.m_row;
     row.push_back_jump();
-    row.m_dst_onv = {0, 1, 4, 5};
+    row.m_dst_mbf = {0, 1, 4, 5};
     row.m_delta_weight = 1.0;
-    row.m_dst_onv = {0, 1, 4, 5};
+    row.m_dst_mbf = {0, 1, 4, 5};
     row.m_delta_weight = 1.0;
 }
 
@@ -46,7 +46,7 @@ TEST(Solver, Consolidation) {
     Wavefunction wf(opts, ham.nsite());
     props::Exact prop(ham, opts, wf.m_format);
     buffered::FrmOnv ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    ham.set_hf_mbf(ref_onv, 0);
 
     auto ref_energy = ham.get_energy(ref_onv);
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);

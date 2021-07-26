@@ -9,7 +9,7 @@
 #include "CombinationEnumerator.h"
 #include "src/core/field/Fields.h"
 
-class SpinConFonvEnumerator : public Enumerator<fields::Onv<0>> {
+class SpinConFonvEnumerator : public Enumerator<fields::FrmOnv> {
     CombinationEnumerator m_alpha_comb;
     CombinationEnumerator m_beta_comb;
     defs::inds m_alpha_setinds;
@@ -17,7 +17,7 @@ class SpinConFonvEnumerator : public Enumerator<fields::Onv<0>> {
 public:
     SpinConFonvEnumerator(size_t nsite, size_t nelec, int spin);
 
-    bool next_element(fields::Onv<0> &result) override;
+    bool next_element(fields::FrmOnv &result) override;
 };
 
 

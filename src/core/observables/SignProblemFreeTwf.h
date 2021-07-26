@@ -27,7 +27,7 @@ public:
 
     virtual void add(const Hamiltonian<0> &ham,
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::Onv<0> &onv) = 0;
+                     const fields::FrmOnv &onv) = 0;
 
 #if 0
     virtual void add(const Hamiltonian<1> &ham,

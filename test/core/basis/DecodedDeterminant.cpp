@@ -17,7 +17,7 @@ TEST(DecodedDeterminant, CopyAndMove){
 }
 
 TEST(DecodedDeterminant, Occupation){
-    buffered::Onv<0> onv(50);
+    buffered::FrmOnv onv(50);
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     onv = occ;
     defs::inds vac;
@@ -36,7 +36,7 @@ TEST(DecodedDeterminant, Occupation){
 
 TEST(DecodedDeterminant, SymmDecoded){
 
-    buffered::Onv<0> onv(10);
+    buffered::FrmOnv onv(10);
     defs::inds alpha_occ{0, 1, 2, 4, 7, 9};
     defs::inds beta_occ{2, 4, 5, 6, 7, 8};
     onv = {alpha_occ, beta_occ};

@@ -10,8 +10,8 @@
 
 struct SpawnTableRow : public Row {
     const bool m_send_parents;
-    fields::Onv<> m_src_onv;
-    fields::Onv<> m_dst_onv;
+    fields::mbf_t m_src_mbf;
+    fields::mbf_t m_dst_mbf;
     fields::Number<defs::wf_t> m_src_weight;
     fields::Number<defs::wf_t> m_delta_weight;
     fields::Flag m_src_initiator;
@@ -20,8 +20,8 @@ struct SpawnTableRow : public Row {
 
     SpawnTableRow(size_t nsite, bool send_parents) :
             m_send_parents(send_parents),
-            m_src_onv(send_parents ? this : nullptr, nsite),
-            m_dst_onv(this, nsite),
+            m_src_mbf(send_parents ? this : nullptr, nsite),
+            m_dst_mbf(this, nsite),
             m_src_weight(send_parents ? this : nullptr),
             m_delta_weight(this),
             m_src_initiator(this),

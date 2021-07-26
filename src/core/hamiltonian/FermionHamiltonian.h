@@ -154,7 +154,7 @@ public:
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
             FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
 
-    defs::ham_t get_element(const fields::FrmOnv &fonv) const;
+    defs::ham_t get_element(const fields::FrmOnv &onv) const;
 
     defs::ham_comp_t get_energy(const fields::FrmOnv &fonv) const {
         return consts::real(get_element(fonv));
@@ -280,7 +280,7 @@ public:
      * @param spin
      *  spin (MS) number
      */
-    void set_hf_onv(fields::FrmOnv &onv, int spin) const {
+    void set_hf_mbf(fields::FrmOnv &onv, int spin) const {
         auto nalpha = ci_utils::nalpha(nelec(), spin);
         auto nbeta = ci_utils::nbeta(nelec(), spin);
         DEBUG_ASSERT_EQ(nalpha + nbeta, nelec(), "inconsistent na, nb, nelec");

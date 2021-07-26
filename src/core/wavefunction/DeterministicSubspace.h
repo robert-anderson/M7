@@ -6,7 +6,6 @@
 #define M7_DETERMINISTICSUBSPACE_H
 
 #include <src/core/observables/MevGroup.h>
-#include <src/core/field/Onv.h>
 #include "src/core/sparse/SparseMatrix.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/field/Fields.h"
@@ -18,10 +17,10 @@
  * captures only the data from WalkerTableRow relevant to semistochastic propagation
  */
 struct DeterministicDataRow : Row {
-    fields::Onv<> m_onv;
+    fields::mbf_t m_mbf;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
 
-    fields::Onv<> &key_field();
+    fields::mbf_t &key_field();
 
     DeterministicDataRow(const Wavefunction& wf);
 
@@ -90,9 +89,9 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
 
     void build_from_all_occupied(const FermionHamiltonian &ham);
 
-    void build_from_occupied_connections(const FermionHamiltonian &ham, const fields::Onv<>& onv);
+    void build_from_occupied_connections(const FermionHamiltonian &ham, const fields::mbf_t& mbf);
 
-    void make_mev_contribs(MevGroup& mevs, const fields::Onv<>& ref);
+    void make_mev_contribs(MevGroup& mevs, const fields::mbf_t &ref);
 
     /**
       * for every deterministically-propagated row on this MPI rank, update its value.

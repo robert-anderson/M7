@@ -81,8 +81,8 @@ struct RefExcits : Archivable {
         for (size_t i=1ul; i<=m_max_exlvl; ++i) m_ref_excits.emplace_back(i, i, 1);
     }
 
-    void make_contribs(const fields::Onv<>& onv, const fields::Onv<>& ref_onv, const defs::wf_t& contrib, const size_t& ipart) {
-        m_conn.connect(ref_onv, onv);
+    void make_contribs(const fields::mbf_t& mbf, const fields::mbf_t& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
+        m_conn.connect(ref_mbf, mbf);
         auto nop = m_conn.size();
         if (!nop) m_av_ref[ipart] += contrib;
         else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(m_conn, contrib, ipart);

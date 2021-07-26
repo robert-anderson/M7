@@ -55,11 +55,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * number of ONVs with any associated weight in any part
      */
-    Reduction<size_t> m_nocc_onv;
+    Reduction<size_t> m_nocc_mbf;
     /**
      * change in the number of occupied ONVs
      */
-    Reduction<int> m_delta_nocc_onv;
+    Reduction<int> m_delta_nocc_mbf;
     /**
      * L1 norm of each part of the WF
      */
@@ -106,7 +106,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     void h5_write(hdf5::GroupWriter &parent, std::string name = "wavefunction");
 
-    void h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::Onv<> &ref,
+    void h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::mbf_t &ref,
                  std::string name = "wavefunction");
 
     void begin_cycle();
@@ -198,7 +198,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * Only called on the rank assigned to the ONV by the RankAllocator
      * @param icycle
      *  MC cycle index on which ONV is being added
-     * @param onv
+     * @param mbf
      *  ONV of row to be added
      * @param hdiag
      *  diagonal matrix element is cached here
@@ -209,15 +209,16 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    size_t create_row_(const size_t &icycle, const fields::Onv<> &onv,
+    size_t create_row_(const size_t &icycle, const fields::mbf_t &mbf,
                        const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
-        ASSERT(refconns.size()==npart());
-        ASSERT(mpi::i_am(m_ra.get_rank(onv)));
+        DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
+        DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
+                          "this method should only be called on the rank responsible for storing the MBF");
         if (m_store.is_full()) m_store.expand(1);
-        auto irow = m_store.insert(onv);
-        m_delta_nocc_onv.m_local++;
+        auto irow = m_store.insert(mbf);
+        m_delta_nocc_mbf.m_local++;
         m_store.m_row.jump(irow);
-        ASSERT(m_store.m_row.m_onv == onv)
+        DEBUG_ASSERT_EQ(m_store.m_row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
         m_store.m_row.m_hdiag = hdiag;
         for (size_t ipart=0ul; ipart<npart(); ++ipart)
             m_store.m_row.m_ref_conn.put(ipart, refconns[ipart]);
@@ -229,37 +230,37 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     }
 
 
-    size_t create_row_(const size_t &icycle, const fields::Onv<> &onv,
+    size_t create_row_(const size_t &icycle, const fields::mbf_t &mbf,
                        const defs::ham_comp_t &hdiag, bool refconn) {
-        return create_row_(icycle, onv, hdiag, std::vector<bool>(npart(), refconn));
+        return create_row_(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
 
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
-    TableBase::Loc create_row(const size_t& icycle, const fields::Onv<> &onv,
+    TableBase::Loc create_row(const size_t& icycle, const fields::mbf_t &mbf,
                               const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
-        size_t irank = m_ra.get_rank(onv);
+        size_t irank = m_ra.get_rank(mbf);
         size_t irow;
         if (mpi::i_am(irank)) {
-            irow = create_row_(icycle, onv, hdiag, refconns);
+            irow = create_row_(icycle, mbf, hdiag, refconns);
         }
         mpi::bcast(irow, irank);
         return {irank, irow};
     }
 
 
-    TableBase::Loc create_row(const size_t& icycle, const fields::Onv<> &onv,
+    TableBase::Loc create_row(const size_t& icycle, const fields::mbf_t &mbf,
                               const defs::ham_comp_t &hdiag, bool refconn) {
-        return create_row(icycle, onv, hdiag, std::vector<bool>(npart(), refconn));
+        return create_row(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
 
-    size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
+    size_t add_spawn(const fields::mbf_t &dst_mbf, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart);
 
-    size_t add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
+    size_t add_spawn(const fields::mbf_t &dst_mbf, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart,
-                     const fields::Onv<> &src_onv, const defs::wf_t &src_weight);
+                     const fields::mbf_t &src_mbf, const defs::wf_t &src_weight);
 
     const size_t& npart() const {
         return m_format.m_nelement;
@@ -320,7 +321,7 @@ public:
             for (size_t jroot = iroot; jroot < nroot(); ++jroot) {
                 for (size_t ireplica = 0ul; ireplica < nreplica(); ++ireplica) {
                     for (row.restart(); row.in_range(); row.step()) {
-                        if (!row.m_onv.is_zero()) orthogonalize(overlaps, iroot, jroot, ireplica);
+                        if (!row.m_mbf.is_zero()) orthogonalize(overlaps, iroot, jroot, ireplica);
                     }
                     overlaps.all_sum();
                 }

@@ -24,8 +24,8 @@ struct FciqmcStatsRow : Row {
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy;
     fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_l2_norm;
     fields::Numbers<size_t, defs::ndim_wf> m_ninitiator;
-    fields::Numbers<size_t, defs::ndim_wf> m_nocc_onv;
-    fields::Numbers<int, defs::ndim_wf> m_delta_nocc_onv;
+    fields::Numbers<size_t, defs::ndim_wf> m_nocc_mbf;
+    fields::Numbers<int, defs::ndim_wf> m_delta_nocc_mbf;
     fields::Numbers<defs::prob_t, defs::ndim_wf> m_psingle;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;

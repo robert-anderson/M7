@@ -120,8 +120,8 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
         make_contribs(src_onv, m_conn, m_com, src_weight, dst_weight);
     }
 
-    void make_contribs(const fields::Onv<1> &src_onv, const defs::wf_t &src_weight,
-                       const fields::Onv<1> &dst_onv, const defs::wf_t &dst_weight) {
+    void make_contribs(const fields::FrmBosOnv &src_onv, const defs::wf_t &src_weight,
+                       const fields::FrmBosOnv &dst_onv, const defs::wf_t &dst_weight) {
         make_contribs(src_onv.m_frm, src_weight, dst_onv.m_frm, dst_weight);
     }
 

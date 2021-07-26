@@ -39,8 +39,8 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         m_nannihilated(m_format){
     m_store.expand((m_opts.m_wavefunction.m_buffers.m_store_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
     m_comm.expand((m_opts.m_wavefunction.m_buffers.m_comm_fac_init * m_opts.m_propagator.m_nw_target) / mpi::nrank());
-    ASSERT(m_comm.recv().m_row.m_dst_onv.belongs_to_row());
-    m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_onv, m_delta_nocc_onv,
+    ASSERT(m_comm.recv().m_row.m_dst_mbf.belongs_to_row());
+    m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
 }
@@ -53,15 +53,15 @@ Wavefunction::~Wavefunction() {
     auto& row = xr_gathered.m_row;
     log::info("Top-weighted WF elements for part 0:");
     for (row.restart(); row.in_range(); row.step()){
-        log::info("{}  {}  {}", row.m_onv.to_string(), row.m_weight[0], row.m_initiator[0]);
+        log::info("{}  {}  {}", row.m_mbf.to_string(), row.m_weight[0], row.m_initiator[0]);
     }
 }
 
 std::vector<std::string> Wavefunction::h5_field_names() {
     if (!defs::enable_bosons)
-        return {"onv", "weight"};
+        return {"mbf", "weight"};
     else
-        return {"onv (fermion)", "onv (boson)", "weight"};
+        return {"mbf (fermion)", "mbf (boson)", "weight"};
 }
 
 void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
@@ -79,10 +79,10 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, 
     row_reader.restart();
     for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
         row_reader.read(iitem);
-        conn[ref].connect(ref, row_reader.m_onv);
+        conn[ref].connect(ref, row_reader.m_mbf);
         bool ref_conn = !consts::float_is_zero(ham.get_element(ref, conn[ref]));
         ASSERT(row_reader.m_weight.nelement()==m_format.m_nelement);
-        create_row(0ul, row_reader.m_onv, ham.get_energy(row_reader.m_onv), std::vector<bool>(npart(), ref_conn));
+        create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }
 }
@@ -157,27 +157,27 @@ void Wavefunction::zero_weight(const size_t &ipart) {
 }
 
 void Wavefunction::remove_row() {
-    auto lookup = m_store[m_store.m_row.m_onv];
+    auto lookup = m_store[m_store.m_row.m_mbf];
     ASSERT(lookup);
     for (size_t ipart = 0ul; ipart<m_format.m_nelement; ++ipart) {
         zero_weight(ipart);
         // in the case that nadd==0.0, the set_weight method won't revoke:
         revoke_initiator_status(ipart);
-        m_delta_nocc_onv.m_local--;
+        m_delta_nocc_mbf.m_local--;
     }
     m_store.erase(lookup);
 }
 
 
-size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta,
+size_t Wavefunction::add_spawn(const fields::mbf_t &dst_mbf, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {
-    auto irank = m_ra.get_rank(dst_onv);
+    auto irank = m_ra.get_rank(dst_mbf);
     auto &dst_table = send(irank);
 
     auto &row = dst_table.m_row;
     row.push_back_jump();
 
-    row.m_dst_onv = dst_onv;
+    row.m_dst_mbf = dst_mbf;
     row.m_delta_weight = delta;
     row.m_src_initiator = initiator;
     row.m_src_deterministic = deterministic;
@@ -185,13 +185,13 @@ size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &d
     return row.index();
 }
 
-size_t Wavefunction::add_spawn(const fields::Onv<> &dst_onv, const defs::wf_t &delta, bool initiator, bool deterministic,
-                        size_t dst_ipart, const fields::Onv<> &src_onv, const defs::wf_t &src_weight) {
-    auto irow = add_spawn(dst_onv, delta, initiator, deterministic, dst_ipart);
-    auto irank = m_ra.get_rank(dst_onv);
+size_t Wavefunction::add_spawn(const fields::mbf_t &dst_mbf, const defs::wf_t &delta, bool initiator, bool deterministic,
+                        size_t dst_ipart, const fields::mbf_t &src_mbf, const defs::wf_t &src_weight) {
+    auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
+    auto irank = m_ra.get_rank(dst_mbf);
     auto &row = send(irank).m_row;
     if (row.m_send_parents) {
-        row.m_src_onv = src_onv;
+        row.m_src_mbf = src_mbf;
         row.m_src_weight = src_weight;
     }
     return irow;

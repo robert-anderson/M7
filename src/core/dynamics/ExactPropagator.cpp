@@ -33,7 +33,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     auto &row = wf.m_store.m_row;
     const defs::ham_comp_t &hdiag = row.m_hdiag;
-    ASSERT(hdiag == m_ham.get_energy(row.m_onv));
+    ASSERT(hdiag == m_ham.get_energy(row.m_mbf));
     wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 

@@ -201,6 +201,10 @@ public:
         return res;
     }
 
+    const size_t& nsite() const {
+        return m_nsite;
+    }
+
 };
 
 

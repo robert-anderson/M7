@@ -11,7 +11,7 @@ FrmOnvConnection::FrmOnvConnection(size_t nsite) :
         m_dataword_phases[0] = false;
 }
 
-void FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &dst) {
+void FrmOnvConnection::connect(const fields::FrmOnv &src, const fields::FrmOnv &dst) {
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");
     clear();
@@ -30,7 +30,7 @@ void FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
 }
 
-bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &dst, FrmOps &com) {
+bool FrmOnvConnection::connect(const fields::FrmOnv &src, const fields::FrmOnv &dst, FrmOps &com) {
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     connect(src, dst);
@@ -76,7 +76,7 @@ bool FrmOnvConnection::connect(const fields::Onv<0> &src, const fields::Onv<0> &
 }
 
 
-void FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst) const {
+void FrmOnvConnection::apply(const fields::FrmOnv &src, fields::FrmOnv &dst) const {
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
@@ -93,7 +93,7 @@ void FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst) con
     DEBUG_ASSERT_TRUE(m_cre.all_occ(dst), "not all creation indices are occupied in dst ONV");
 }
 
-bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOps &com) const {
+bool FrmOnvConnection::apply(const fields::FrmOnv &src, FrmOps &com) const {
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
@@ -133,7 +133,7 @@ bool FrmOnvConnection::apply(const fields::Onv<0> &src, FrmOps &com) const {
     return nperm & 1ul;
 }
 
-bool FrmOnvConnection::apply(const fields::Onv<0> &src, fields::Onv<0> &dst, FrmOps &com) const {
+bool FrmOnvConnection::apply(const fields::FrmOnv &src, fields::FrmOnv &dst, FrmOps &com) const {
     apply(src, dst);
     return apply(src, com);
 }
@@ -167,7 +167,7 @@ const defs::inds &FrmOnvConnection::cre() const {
     return m_cre.inds();
 }
 
-void FrmOnvConnection::update_dataword_phases(const fields::Onv<0> &src) const {
+void FrmOnvConnection::update_dataword_phases(const fields::FrmOnv &src) const {
     for (size_t idataword = 1ul; idataword < m_ndataword; ++idataword) {
         auto prev_dataword = src.get_dataword(idataword - 1);
         bool phase = bit_utils::nsetbit(prev_dataword) & 1ul;
@@ -175,7 +175,7 @@ void FrmOnvConnection::update_dataword_phases(const fields::Onv<0> &src) const {
     }
 }
 
-bool FrmOnvConnection::independent_phase(const fields::Onv<0> &src, const size_t &ibit) const {
+bool FrmOnvConnection::independent_phase(const fields::FrmOnv &src, const size_t &ibit) const {
     DEBUG_ASSERT_TRUE(ibit<m_cre.capacity(), "spin orbital index is OOB");
     auto idataword = ibit / defs::nbit_word;
     DEBUG_ASSERT_TRUE(idataword<m_ndataword, "dataword index is OOB");
@@ -184,7 +184,7 @@ bool FrmOnvConnection::independent_phase(const fields::Onv<0> &src, const size_t
            (bit_utils::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);
 }
 
-bool FrmOnvConnection::phase(const fields::Onv<0> &src) const {
+bool FrmOnvConnection::phase(const fields::FrmOnv &src) const {
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     bool out = false;

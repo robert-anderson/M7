@@ -9,7 +9,7 @@
 
 namespace table_test {
     struct DetRow : Row {
-        fields::Onv<0> m_det;
+        fields::FrmOnv m_det;
         DetRow(size_t nsite) : m_det(this, nsite){}
     };
 }

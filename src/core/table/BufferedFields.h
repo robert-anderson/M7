@@ -128,9 +128,6 @@ namespace buffered {
                 BufferedMultiField<fields::FrmBosOnv>({nullptr, nsite}){}
     };
 
-    template<bool enable_bosons=defs::enable_bosons>
-    using Onv = typename std::conditional<enable_bosons, FrmBosOnv, FrmOnv>::type;
-
     typedef std::tuple<FrmOnv, FrmBosOnv> mbf_tup_t;
     typedef typename std::tuple_element<defs::mbf_type_id, mbf_tup_t>::type mbf_t;
 

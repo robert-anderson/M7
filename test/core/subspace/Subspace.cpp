@@ -17,7 +17,7 @@ TEST(Subspace, Test){
     ci_gen::SpinSym gen(nsite, nelec, 0, ci_gen::default_include_fn(wf));
 
     auto& table = wf.m_store;
-    gen(table.m_row, table.m_row.m_onv);
+    gen(table.m_row, table.m_row.m_mbf);
     ASSERT_TRUE(wf.m_ra.verify());
 
     /*

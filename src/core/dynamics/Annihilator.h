@@ -30,13 +30,13 @@ public:
 
     void sort_recv();
 
-    void annihilate_row(const size_t &dst_ipart, const fields::Onv<> &dst_onv, const defs::wf_t &delta_weight,
+    void annihilate_row(const size_t &dst_ipart, const fields::mbf_t &dst_mbf, const defs::wf_t &delta_weight,
                         bool allow_initiation, const size_t &irow_store);
 
-    void handle_dst_onv_block(SpawnTableRow &block_start, SpawnTableRow &current,
+    void handle_dst_mbf_block(SpawnTableRow &block_start, SpawnTableRow &current,
                               const defs::wf_t &total_delta, const size_t& irow_store);
 
-    void loop_over_dst_onvs();
+    void loop_over_dst_mbfs();
 
 };
 

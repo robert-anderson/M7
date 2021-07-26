@@ -58,14 +58,11 @@ namespace fields {
         }
     };
 
-    struct FrmCsf : FrmOnv {
-        FrmCsf(Row *row, size_t nsite, std::string name = ""): FrmOnv(row, nsite, name){}
-    };
+//    struct FrmCsf : FrmOnv {
+//        FrmCsf(Row *row, size_t nsite, std::string name = ""): FrmOnv(row, nsite, name){}
+//    };
 
-    template<bool enable_bosons = defs::enable_bosons>
-    using Onv = typename std::conditional<enable_bosons, FrmBosOnv, FrmOnv>::type;
-
-    typedef std::tuple<FrmOnv, FrmBosOnv, FrmCsf> mbf_tup_t;
+    typedef std::tuple<FrmOnv, FrmBosOnv> mbf_tup_t;
     typedef typename std::tuple_element<defs::mbf_type_id, mbf_tup_t>::type mbf_t;
 
     struct FermionMevInds : MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> {
