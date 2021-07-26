@@ -62,8 +62,8 @@ TEST(ExactPropagator, DeterministicSubspace) {
     opts.verify();
     //const auto benchmark = -99.9421389039331
     //Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    Hamiltonian<> ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
@@ -95,8 +95,8 @@ TEST(ExactPropagator, Test) {
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
     // -99.9421389039332
-    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -131,7 +131,7 @@ TEST(ExactPropagator, Test) {
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham)-prop.m_shift.m_values[0]<< std::endl;
+    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham.m_frm)-prop.m_shift.m_values[0]<< std::endl;
 }
 
 TEST(ExactPropagator, RdmTest) {
@@ -143,8 +143,8 @@ TEST(ExactPropagator, RdmTest) {
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
     //const auto benchmark = -99.9421389039331
-    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
@@ -176,9 +176,9 @@ TEST(ExactPropagator, Hubbard) {
     opts.m_av_ests.m_fermion_rdm.m_rank = 0;
     opts.verify();
 
-    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
-    ASSERT_TRUE(ham.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         ref_onv.set({0, i});
@@ -213,8 +213,8 @@ TEST(ExactPropagator, Cr2Test) {
     opts.m_propagator.m_ncycle = 50;
     opts.verify();
     //const auto benchmark = -108.916561245585;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set({1, i});}
     Wavefunction wf(opts, ham.nsite());

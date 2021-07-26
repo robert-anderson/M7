@@ -4,7 +4,7 @@
 
 #include "Reference.h"
 
-Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham,
+Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian &ham,
                      const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
         Wavefunction::SharedRow(wf, loc, "reference"),
         m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.nsite()),
@@ -96,7 +96,7 @@ defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ip
     return unnorm/static_cast<defs::wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
 }
 
-References::References(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham, const Wavefunction &wf,
+References::References(const fciqmc_config::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
                        std::vector<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
     ASSERT(locs.size()==wf.m_format.m_nelement);

@@ -7,18 +7,45 @@
 
 #include <type_traits>
 #include <src/defs.h>
-#include "FermiBosHamiltonian.h"
+#include "FermionHamiltonian.h"
 #include "src/core/nd/NdArray.h"
 #include "HamiltonianParts.h"
 #include "SymmetryHelpers.h"
 
 
-//typedef std::tuple<FermionHamiltonian, FermiBosHamiltonian> ham_tup_t;
-struct Dummy{};
-typedef std::tuple<FermionHamiltonian, Dummy> ham_tup_t;
+struct Hamiltonian {
+    FermionHamiltonian m_frm;
+    Hamiltonian(std::string fname, bool spin_major): m_frm(fname, spin_major){}
+    Hamiltonian(const fciqmc_config::Hamiltonian &opts): m_frm(opts){}
 
-template<bool enable_bosons=defs::enable_bosons>
-using Hamiltonian = typename std::tuple_element<enable_bosons, ham_tup_t>::type;
+    const size_t& nsite() const {
+        return m_frm.nsite();
+    }
+    const size_t& nelec() const {
+        return m_frm.nelec();
+    }
+    bool complex_valued() const {
+        return m_frm.complex_valued();
+    }
+
+    /*
+     * fermion matrix elements
+     */
+
+    defs::ham_t get_element(const fields::FrmOnv &onv, const conn::FrmOnv &conn) const {
+        return m_frm.get_element(onv, conn);
+    }
+    defs::ham_t get_element(const fields::FrmOnv &onv) const {
+        return m_frm.get_element(onv);
+    }
+    defs::ham_comp_t get_energy(const fields::FrmOnv &onv) const {
+        return m_frm.get_energy(onv);
+    }
+    void set_hf_mbf(fields::FrmOnv &onv, int spin) const {
+        m_frm.set_hf_mbf(onv, spin);
+    }
+};
+
 
 #if 0
 

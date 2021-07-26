@@ -4,7 +4,7 @@
 
 #include "HeatBathDoubles.h"
 
-HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
+HeatBathDoubles::HeatBathDoubles(const Hamiltonian *h, PRNG &prng) :
         FermionExcitationGenerator(h, prng, 2), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;
@@ -17,7 +17,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian<> *h, PRNG &prng) :
                 for (size_t a = 0ul; a < m_nintind; ++a) {
                     for (size_t b = 0ul; b < a; ++b) {
                         //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
-                        auto element = m_h->get_element_2(i, j, a, b);
+                        auto element = m_h->m_frm.get_element_2(i, j, a, b);
                         weights[ab] = std::abs(element);
                         //}
                         ++ab;
@@ -72,7 +72,7 @@ bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_on
     }
     conn.clear();
     conn.add(i, j, a, b);
-    helem = m_h->get_element_2(dst_onv, conn);
+    helem = m_h->m_frm.get_element_2(dst_onv, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     ASSERT(prob <= 1)
     if (consts::float_nearly_zero(prob, 1e-14)) {

@@ -68,7 +68,7 @@ void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
     m_store.save(parent, name, h5_field_names());
 }
 
-void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian<> &ham, const fields::mbf_t &ref,
+void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, const fields::mbf_t &ref,
                            std::string name) {
     m_store.clear();
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});

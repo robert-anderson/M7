@@ -11,7 +11,7 @@
 
 struct Annihilator {
     Wavefunction &m_wf;
-    const Hamiltonian<>& m_ham;
+    const Hamiltonian& m_ham;
     const References& m_refs;
     const defs::wf_t m_nadd;
     const size_t& m_icycle;
@@ -26,7 +26,7 @@ private:
 
 public:
 
-    Annihilator(Wavefunction &wf, const Hamiltonian<>& ham, const References& refs, const size_t& icycle, defs::wf_t nadd);
+    Annihilator(Wavefunction &wf, const Hamiltonian& ham, const References& refs, const size_t& icycle, defs::wf_t nadd);
 
     void sort_recv();
 

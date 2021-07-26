@@ -15,7 +15,7 @@
 #include "Wavefunction.h"
 
 class Reference : public Wavefunction::SharedRow {
-    const Hamiltonian<> &m_ham;
+    const Hamiltonian &m_ham;
     const Wavefunction &m_wf;
     /**
      * index to the "part" of the wavefunction for which this object tracks the reference row
@@ -43,7 +43,7 @@ class Reference : public Wavefunction::SharedRow {
     Reduction<defs::wf_comp_t> m_nwalker_at_doubles;
 
 public:
-    Reference(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham,
+    Reference(const fciqmc_config::Reference &opts, const Hamiltonian &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
     const fields::mbf_t& get_mbf() const;
@@ -127,7 +127,7 @@ struct References {
     buffered::Numbers<defs::ham_t, defs::ndim_wf> m_proj_energy_nums;
     buffered::Numbers<defs::wf_t, defs::ndim_wf> m_weights;
 
-    References(const fciqmc_config::Reference &opts, const Hamiltonian<> &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs);
+    References(const fciqmc_config::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf, std::vector<TableBase::Loc> locs);
 
     const Reference& operator[](const size_t& ipart) const;
 

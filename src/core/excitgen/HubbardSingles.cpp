@@ -21,6 +21,6 @@ bool HubbardSingles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv
     conn.clear();
     conn.add(occ, vac);
     conn.apply(src_onv, dst_onv);
-    helem = m_h->get_element_1(src_onv, conn);
+    helem = m_h->m_frm.get_element_1(src_onv, conn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }

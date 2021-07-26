@@ -24,7 +24,7 @@ DeterministicSubspace::DeterministicSubspace(const fciqmc_config::Semistochastic
     m_epoch.update(icycle, true);
 }
 
-void DeterministicSubspace::build_from_most_occupied(const FermionHamiltonian &ham) {
+void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham) {
     auto row = m_wf.m_store.m_row;
     Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, 0);
     gxr.find(m_opts.m_size);
@@ -35,7 +35,7 @@ void DeterministicSubspace::build_from_most_occupied(const FermionHamiltonian &h
     build_connections(ham);
 }
 
-void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
+void DeterministicSubspace::build_connections(const Hamiltonian &ham) {
     update();
     log::debug("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
     suite::Conns conns_work(m_wf.m_nsite);
@@ -56,7 +56,7 @@ void DeterministicSubspace::build_connections(const FermionHamiltonian &ham) {
     }
 }
 
-void DeterministicSubspace::build_from_all_occupied(const FermionHamiltonian &ham) {
+void DeterministicSubspace::build_from_all_occupied(const Hamiltonian &ham) {
     auto row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()){
         if (!row.is_cleared()) add_(row);
@@ -64,7 +64,7 @@ void DeterministicSubspace::build_from_all_occupied(const FermionHamiltonian &ha
     build_connections(ham);
 }
 
-void DeterministicSubspace::build_from_occupied_connections(const FermionHamiltonian &ham, const fields::mbf_t &mbf) {
+void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &ham, const fields::mbf_t &mbf) {
     suite::Conns conns_work(m_wf.m_nsite);
     auto row = m_wf.m_store.m_row;
     auto& conn_work = conns_work[row.m_mbf];

@@ -6,7 +6,7 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
-ExactPropagator::ExactPropagator(const Hamiltonian<> &ham, const fciqmc_config::Document &opts,
+ExactPropagator::ExactPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
                                  const NdFormat<defs::ndim_wf>& wf_fmt, bool only_nonzero_h_spawns) :
                                  Propagator(opts, ham, wf_fmt), m_only_nonzero_h_spawns(only_nonzero_h_spawns) {}
 

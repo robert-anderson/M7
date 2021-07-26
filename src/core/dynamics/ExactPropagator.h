@@ -15,7 +15,7 @@ class ExactPropagator : public Propagator {
      */
     const bool m_only_nonzero_h_spawns;
 
-    defs::ham_t off_diagonal_bosons(const Hamiltonian<0> &ham, conn::FrmOnv &conn,
+    defs::ham_t off_diagonal_bosons(const Hamiltonian &ham, conn::FrmOnv &conn,
                                     const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv, const size_t &occ, int change){
         return 0;
     }
@@ -43,7 +43,7 @@ class ExactPropagator : public Propagator {
 
 
 public:
-    ExactPropagator(const Hamiltonian<> &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
+    ExactPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
                     bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;

@@ -8,7 +8,7 @@ UniformTwf::UniformTwf(size_t npart, size_t nsite) :
         SpfTwfBase(npart, nsite)
         {}
 
-void UniformTwf::add(const Hamiltonian<0> &ham,
+void UniformTwf::add(const Hamiltonian &ham,
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::FrmOnv &onv) {
     conn::FrmOnv conn(m_nsite);
@@ -22,13 +22,13 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
 
     // diagonal
     conn.connect(onv, onv);
-    helem_sum += ham.get_element(onv, conn); // no abs
+    helem_sum += ham.m_frm.get_element(onv, conn); // no abs
     for (auto &iocc: occ.inds()) {
         for (auto &ivac: vac.inds()) {
             // singles
             conn.clear();
             conn.add(iocc, ivac);
-            helem_sum += ham.get_element(onv, conn); // no abs
+            helem_sum += ham.m_frm.get_element(onv, conn); // no abs
             for (auto &jocc: occ.inds()) {
                 // doubles
                 if (jocc <= iocc) continue;
@@ -36,7 +36,7 @@ void UniformTwf::add(const Hamiltonian<0> &ham,
                     if (jvac<=ivac) continue;
                     conn.clear();
                     conn.add(iocc, jocc, ivac, jvac);
-                    helem_sum += ham.get_element(onv, conn); // no abs
+                    helem_sum += ham.m_frm.get_element(onv, conn); // no abs
                 }
             }
         }

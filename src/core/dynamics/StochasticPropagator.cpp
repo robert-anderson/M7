@@ -5,28 +5,28 @@
 #include <src/core/excitgen/HubbardSingles.h>
 #include "StochasticPropagator.h"
 
-void StochasticPropagator::add_boson_excitgen(const Hamiltonian<0> &ham) {}
+void StochasticPropagator::add_boson_excitgen(const Hamiltonian &ham) {}
 
 
-void StochasticPropagator::add_boson_excitgen(const Hamiltonian<1> &ham) {
-//    m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-//            new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
-}
+//void StochasticPropagator::add_boson_excitgen(const Hamiltonian<1> &ham) {
+////    m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
+////            new BosonExcitationGenerator(&ham, m_prng, ham.nboson_cutoff())));
+//}
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian<> &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt):
+StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt):
         Propagator(opts, ham, wf_fmt), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {
 
 
-    if (ham.is_hubbard() || ham.is_hubbard_pbc()){
+    if (ham.m_frm.is_hubbard() || ham.m_frm.is_hubbard_pbc()){
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
-                new HubbardSingles(&m_ham, m_prng, ham.is_hubbard_pbc())));
+                new HubbardSingles(&m_ham, m_prng, ham.m_frm.is_hubbard_pbc())));
     }
     else {
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                 new UniformSingles(&m_ham, m_prng)));
     }
-    if (ham.int_2e_rank() && opts.m_propagator.m_excit_gen.get() == "pchb") {
+    if (ham.m_frm.int_2e_rank() && opts.m_propagator.m_excit_gen.get() == "pchb") {
         m_exgens.push_back(std::unique_ptr<ExcitationGenerator>(
                 new HeatBathDoubles(&m_ham, m_prng)));
     }

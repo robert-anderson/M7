@@ -21,7 +21,7 @@ public:
 
     virtual ~WeightedTwf(){}
 
-    void add(const Hamiltonian<0> &ham,
+    void add(const Hamiltonian &ham,
              const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::FrmOnv &onv) override;
 

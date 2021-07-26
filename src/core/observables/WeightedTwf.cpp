@@ -10,7 +10,7 @@ WeightedTwf::WeightedTwf(size_t npart, size_t nsite, double_t fermion_factor, do
         m_boson_occ_penalty_factor(boson_factor)
         {}
 
-void WeightedTwf::add(const Hamiltonian<0> &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+void WeightedTwf::add(const Hamiltonian &ham, const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::FrmOnv &onv) {
     conn::FrmOnv conn(m_nsite);
     buffered::FrmOnv work_onv(m_nsite);

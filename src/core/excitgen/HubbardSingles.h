@@ -10,7 +10,7 @@
 struct HubbardSingles : public UniformSingles {
     const bool m_pbc;
 
-    HubbardSingles(const Hamiltonian<>* h, PRNG& prng, bool pbc):
+    HubbardSingles(const Hamiltonian* h, PRNG& prng, bool pbc):
         UniformSingles(h, prng), m_pbc(pbc){}
 
     bool draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv,

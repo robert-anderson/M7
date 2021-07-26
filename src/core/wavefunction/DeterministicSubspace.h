@@ -83,13 +83,13 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
             row.m_deterministic.set(ipart);
     }
 
-    void build_from_most_occupied(const FermionHamiltonian &ham);
+    void build_from_most_occupied(const Hamiltonian &ham);
 
-    void build_connections(const FermionHamiltonian &ham);
+    void build_connections(const Hamiltonian &ham);
 
-    void build_from_all_occupied(const FermionHamiltonian &ham);
+    void build_from_all_occupied(const Hamiltonian &ham);
 
-    void build_from_occupied_connections(const FermionHamiltonian &ham, const fields::mbf_t& mbf);
+    void build_from_occupied_connections(const Hamiltonian &ham, const fields::mbf_t& mbf);
 
     void make_mev_contribs(MevGroup& mevs, const fields::mbf_t &ref);
 

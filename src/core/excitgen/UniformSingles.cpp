@@ -4,15 +4,15 @@
 
 #include "UniformSingles.h"
 
-UniformSingles::UniformSingles(const Hamiltonian<> *ham, PRNG &prng) :
+UniformSingles::UniformSingles(const Hamiltonian *ham, PRNG &prng) :
         FermionExcitationGenerator(ham, prng, 1) {}
 
-bool UniformSingles::draw(const fields::FrmOnv &src_fonv, fields::FrmOnv &dst_fonv, const OccupiedOrbitals &occs,
+bool UniformSingles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv, const OccupiedOrbitals &occs,
                           const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     size_t i, a, ia;
     size_t ncases;
     if (m_spin_conserving) {
-        size_t nalpha = src_fonv.nalpha();
+        size_t nalpha = src_onv.nalpha();
         size_t nbeta = m_nelec - nalpha;
         size_t nalpha_cases = nalpha * (m_h->nsite() - nalpha);
         size_t nbeta_cases = nbeta * (m_h->nsite() - nbeta);
@@ -49,8 +49,8 @@ bool UniformSingles::draw(const fields::FrmOnv &src_fonv, fields::FrmOnv &dst_fo
 #endif
     conn.clear();
     conn.add(i, a);
-    conn.apply(src_fonv, dst_fonv);
+    conn.apply(src_onv, dst_onv);
     prob = 1.0 / ncases;
-    helem = m_h->get_element_1(src_fonv, conn);
+    helem = m_h->m_frm.get_element_1(src_onv, conn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }

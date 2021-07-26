@@ -26,8 +26,8 @@ TEST(StochasticPropagator, Test) {
     //opts.ncycle_wait_detsub = 10;
     opts.verify();
 
-    FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -61,8 +61,8 @@ TEST(StochasticPropagator, RdmTest) {
     opts.verify();
 
     //const auto benchmark = -99.9421389039331
-    FermionHamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -98,8 +98,8 @@ TEST(StochasticPropagator, Hdf5) {
     //opts.write_hdf5_fname = "test_wf_save.h5";
     opts.verify();
     //const auto benchmark = -108.916561245585;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         ref_onv.set({0, i});
@@ -141,9 +141,9 @@ TEST(StochasticPropagator, Hubbard) {
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
 
-    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
-    ASSERT_TRUE(ham.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -173,8 +173,8 @@ TEST(StochasticPropagator, ExcitedStates) {
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
     // -99.9421389039332
-    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.spin_conserving());
+    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -206,7 +206,7 @@ TEST(StochasticPropagator, ExcitedStates) {
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham)-prop.m_shift.m_values[0]<< std::endl;
+    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham.m_frm)-prop.m_shift.m_values[0]<< std::endl;
 }
 
 

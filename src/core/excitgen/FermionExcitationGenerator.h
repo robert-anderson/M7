@@ -13,7 +13,7 @@ protected:
     const bool m_spin_conserving;
 
 public:
-    FermionExcitationGenerator(const Hamiltonian<> *h, PRNG &prng, size_t nexcit);
+    FermionExcitationGenerator(const Hamiltonian *h, PRNG &prng, size_t nexcit);
     
 };
 

@@ -18,7 +18,7 @@
  *  2RDM energy estimate
  */
 defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bool explicit_hf_conns){
-    Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     buffered::mbf_t ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -33,7 +33,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    return solver.mevs().m_fermion_rdm->get_energy(ham);
+    return solver.mevs().m_fermion_rdm->get_energy(ham.m_frm);
 }
 
 

@@ -19,7 +19,7 @@
 class Propagator : public Archivable {
 public:
     const NdFormat<defs::ndim_wf> &m_wf_fmt;
-    const Hamiltonian<> &m_ham;
+    const Hamiltonian &m_ham;
     const fciqmc_config::Document &m_opts;
     MagnitudeLogger m_magnitude_logger;
     Shift m_shift;
@@ -31,7 +31,7 @@ public:
     mutable OccupiedOrbitals m_occ;
     mutable VacantOrbitals m_vac;
 
-    Propagator(const fciqmc_config::Document &opts, const Hamiltonian<> &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
+    Propagator(const fciqmc_config::Document &opts, const Hamiltonian &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
             Archivable("propagator", opts.m_archive),
             m_wf_fmt(wf_fmt),
             m_ham(ham),

@@ -16,31 +16,30 @@
 namespace foreach_conn {
 
     struct Base {
+        const Hamiltonian &m_ham;
         std::function<void(defs::ham_t)> m_body_fn;
         const bool m_get_h, m_nonzero_h_only;
         defs::ham_t m_helem = 0.0;
 
-        Base(std::function<void(defs::ham_t)> body_fn, bool get_h = true, bool nonzero_h_only = true) :
-                m_body_fn(std::move(body_fn)), m_get_h(get_h), m_nonzero_h_only(nonzero_h_only) {}
+        Base(const Hamiltonian &ham, std::function<void(defs::ham_t)> body_fn, bool get_h = true, bool nonzero_h_only = true) :
+                m_ham(ham), m_body_fn(std::move(body_fn)), m_get_h(get_h), m_nonzero_h_only(nonzero_h_only) {}
     };
 
     struct Fermion : Base {
-        const Hamiltonian<0> &m_ham;
         conn::FrmOnv &m_conn;
         const size_t m_nsite;
         OccupiedOrbitals m_occ;
         VacantOrbitals m_vac;
 
-        Fermion(const Hamiltonian<0> &ham, conn::FrmOnv &conn,
+        Fermion(const Hamiltonian &ham, conn::FrmOnv &conn,
                 std::function<void(defs::ham_t)> body_fn, bool get_h = true, bool nonzero_h_only = true) :
-                Base(body_fn, get_h, nonzero_h_only),
-                m_ham(ham), m_conn(conn), m_nsite(ham.nsite()), m_occ(m_nsite), m_vac(m_nsite) {
-
+                Base(ham, body_fn, get_h, nonzero_h_only),
+                m_conn(conn), m_nsite(ham.nsite()), m_occ(m_nsite), m_vac(m_nsite) {
         }
 
     protected:
         bool update_helem(const fields::FrmOnv &src_onv) {
-            if (m_get_h) m_helem = m_ham.get_element(src_onv, m_conn);
+            if (m_get_h) m_helem = m_ham.m_frm.get_element(src_onv, m_conn);
             return !m_nonzero_h_only || !consts::float_is_zero(m_helem);
         }
 
@@ -78,7 +77,7 @@ namespace foreach_conn {
     struct Hubbard1D : Fermion {
         const bool m_pbc;
 
-        Hubbard1D(const Hamiltonian<0> &ham, conn::FrmOnv &conn,
+        Hubbard1D(const Hamiltonian &ham, conn::FrmOnv &conn,
                   std::function<void(defs::ham_t)> body_fn, bool pbc) :
                 Fermion(ham, conn, body_fn, true, true), m_pbc(pbc) {}
 

@@ -14,7 +14,7 @@
 class FciqmcCalculation {
 public:
     const fciqmc_config::Document& m_opts;
-    Hamiltonian<defs::enable_bosons> m_ham;
+    Hamiltonian m_ham;
     Wavefunction m_wf;
     std::unique_ptr<Propagator> m_prop;
 

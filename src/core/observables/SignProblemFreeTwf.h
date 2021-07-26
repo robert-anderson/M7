@@ -25,7 +25,7 @@ public:
             m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
     };
 
-    virtual void add(const Hamiltonian<0> &ham,
+    virtual void add(const Hamiltonian &ham,
                      const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::FrmOnv &onv) = 0;
 
