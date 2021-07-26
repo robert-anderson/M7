@@ -23,6 +23,13 @@ TEST(DenseHamiltonian, FciEnergyCheckRhf) {
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -108.916561245585, 1e-8));
 }
 
+TEST(DenseHamiltonian, FciEnergyCheckHf) {
+    FermionHamiltonian ham_src(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    DenseHamiltonian ham(ham_src);
+    auto solver = ham.diagonalize();
+    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -99.9421389039332, 1e-8));
+}
+
 TEST(DenseHamiltonian, PyscfX2cCheck) {
     FermionHamiltonian ham_src(defs::assets_root + "/H2O_X2C/FCIDUMP", false);
     DenseHamiltonian ham(ham_src);
