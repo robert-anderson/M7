@@ -14,7 +14,7 @@
 #include "src/core/integrals/Integrals_2e.h"
 #include "src/core/table/BufferedFields.h"
 #include "HamiltonianData.h"
-#include "SymmetryHelpers.h"
+#include "ForeachConnection.h"
 
 
 /**
@@ -85,7 +85,6 @@ public:
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
     ints1_t m_int_1;
     ints2_t m_int_2;
-    //const std::unique_ptr<ham_sym_helpers::Fermion> m_sym_helper;
 
     /**
      * stores whether connected elements are nonzero based on contrib case

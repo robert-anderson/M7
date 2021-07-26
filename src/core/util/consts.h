@@ -11,7 +11,6 @@
 
 namespace consts {
 
-
     template<typename T>
     struct is_complex_t : public std::false_type {};
 

@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/ForeachConnection.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 
 namespace foreach_connection_test {
     typedef SingleFieldRow<fields::FrmBosOnv> result_row_t;
@@ -32,7 +32,7 @@ TEST(ForeachConnection, FrmHubbard) {
     const defs::ham_t t = -1.0;
 
     std::vector<std::pair<defs::inds, defs::inds>> conns_gen;
-    foreach_conn2::frm::Fermion foreach_gen(ham);
+    foreach_conn::frm::Fermion foreach_gen(ham);
     auto fn_gen = [&](const conn::FrmOnv& conn, defs::ham_t helement){
         conns_gen.emplace_back(conn.ann(), conn.cre());
         ASSERT_EQ(helement, t);
@@ -40,7 +40,7 @@ TEST(ForeachConnection, FrmHubbard) {
     foreach_gen(onv, fn_gen, true);
 
     std::vector<std::pair<defs::inds, defs::inds>> conns_opt;
-    foreach_conn2::frm::Hubbard1D foreach_sym(ham);
+    foreach_conn::frm::Hubbard1D foreach_sym(ham);
     auto fn_opt = [&](const conn::FrmOnv& conn, defs::ham_t helement){
         conns_opt.emplace_back(conn.ann(), conn.cre());
         ASSERT_EQ(helement, t);

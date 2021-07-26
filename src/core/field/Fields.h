@@ -63,7 +63,10 @@ namespace fields {
 //    };
 
     typedef std::tuple<FrmOnv, FrmBosOnv> mbf_tup_t;
-    typedef typename std::tuple_element<defs::mbf_type_id, mbf_tup_t>::type mbf_t;
+
+    template<size_t mbf_ind>
+    using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
+    typedef mbf_t<defs::mbf_ind> Mbf;
 
     struct FermionMevInds : MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> {
         typedef MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> base_t;

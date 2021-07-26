@@ -15,8 +15,13 @@
 
 struct Hamiltonian {
     FermionHamiltonian m_frm;
-    Hamiltonian(std::string fname, bool spin_major): m_frm(fname, spin_major){}
-    Hamiltonian(const fciqmc_config::Hamiltonian &opts): m_frm(opts){}
+    mutable std::unique_ptr<foreach_conn::Base> m_foreach_conn = nullptr;
+
+    Hamiltonian(std::string fname, bool spin_major): m_frm(fname, spin_major){
+
+    }
+    Hamiltonian(const fciqmc_config::Hamiltonian &opts):
+        Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major){}
 
     const size_t& nsite() const {
         return m_frm.nsite();
@@ -74,6 +79,7 @@ struct Hamiltonian {
     void set_hf_mbf(fields::FrmOnv &onv, int spin) const {
         m_frm.set_hf_mbf(onv, spin);
     }
+
 
 };
 

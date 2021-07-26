@@ -87,10 +87,10 @@ namespace defs {
     // TODO: bool-> size_t to make way for additional many-body basis function types
 #ifdef ENABLE_BOSONS
     constexpr bool enable_bosons = true;
-    constexpr size_t mbf_type_id = 1;
+    constexpr size_t mbf_ind = 1;
 #else
     constexpr bool enable_bosons = false;
-    constexpr size_t mbf_type_id = 0;
+    constexpr size_t mbf_ind = 0;
 #endif
 
 #ifdef ENABLE_OPTIM_FOR_LATTICE_HAM
