@@ -4,7 +4,7 @@
 
 #include "WalkerTable.h"
 
-fields::mbf_t &WalkerTableRow::key_field() {
+fields::Mbf &WalkerTableRow::key_field() {
     return m_mbf;
 }
 

@@ -19,7 +19,7 @@ namespace foreach_connection_test {
     }
 }
 
-
+#if 0
 TEST(ForeachConnection, FrmHubbard) {
     /*
      * loop over all connections using the general foreach class, and again with the Hubbard-optimized, and ensure that
@@ -48,7 +48,7 @@ TEST(ForeachConnection, FrmHubbard) {
     foreach_sym(onv, fn_opt, true);
     ASSERT_EQ(conns_opt, conns_gen);
 }
-
+#endif
 #if 0
 TEST(ForeachConnection, FermionNoSym) {
     FermionHamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);

@@ -10,8 +10,8 @@
 
 struct SpawnTableRow : public Row {
     const bool m_send_parents;
-    fields::mbf_t m_src_mbf;
-    fields::mbf_t m_dst_mbf;
+    fields::Mbf m_src_mbf;
+    fields::Mbf m_dst_mbf;
     fields::Number<defs::wf_t> m_src_weight;
     fields::Number<defs::wf_t> m_delta_weight;
     fields::Flag m_src_initiator;

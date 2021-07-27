@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/basis/BosOnvConnection.h"
 #include "src/core/table/BufferedFields.h"
+#include "src/core/connection/Connections.h"
 
 
 TEST(BosonOnvConnection, NoChange) {
@@ -16,9 +16,10 @@ TEST(BosonOnvConnection, NoChange) {
     ket = defs::inds{2, 4, 0, 1};
     bra =  defs::inds{2, 4, 0, 1};
 
-    BosOnvConnection pc(ket, bra);
+    conn::BosOnv pc(nmode);
+    pc.connect(ket, bra);
 
-    ASSERT_EQ(pc.nchanged_mode(), 0);
+    ASSERT_EQ(pc.size(), 0);
 }
 
 TEST(BosonOnvConnection, SingleChange) {
@@ -31,16 +32,17 @@ TEST(BosonOnvConnection, SingleChange) {
 
     for (size_t imode = 0; imode < nmode; ++imode) {
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
-            BosOnvConnection pc(ket, bra);
+            BosOnvConnection pc(nmode);
+            pc.connect(ket, bra);
 
             ket = {2, 4, 0, 1};
             bra = {2, 4, 0, 1};
 
             bra[imode] += idelta;
             pc.connect(ket, bra);
-            ASSERT_EQ(pc.nchanged_mode(), 1);
-            ASSERT_EQ(pc.changed_mode(0), imode);
-            ASSERT_EQ(pc.changes(0), idelta);
+            ASSERT_EQ(pc.size(), 1);
+            ASSERT_EQ(pc.m_cre[0].m_imode, imode);
+            ASSERT_EQ(pc.m_cre[0].m_nop, idelta);
             pc.apply(ket, work_bonv);
             ASSERT_EQ(work_bonv, bra);
         }
@@ -55,24 +57,24 @@ TEST(BosonOnvConnection, DoubleChange) {
     buffered::BosOnv bra(nmode);
     buffered::BosOnv work_bonv(nmode);
 
-    for (size_t imode1 = 0; imode1 < nmode; ++imode1) {
-        for (size_t imode2 = imode1+1; imode2 < nmode; ++imode2) {
-            for (size_t idelta1 = 1; idelta1 < occ_cutoff; ++idelta1) {
-                for (size_t idelta2 = 1; idelta2 < occ_cutoff; ++idelta2) {
+    for (size_t imode0 = 0; imode0 < nmode; ++imode0) {
+        for (size_t imode1 = imode0 + 1; imode1 < nmode; ++imode1) {
+            for (size_t idelta0 = 1; idelta0 < occ_cutoff; ++idelta0) {
+                for (size_t idelta1 = 1; idelta1 < occ_cutoff; ++idelta1) {
 
                     ket = {2, 4, 0, 1};
                     bra = {2, 4, 0, 1};
 
-                    BosOnvConnection pc(ket, bra);
+                    BosOnvConnection pc(nmode);
+                    bra[imode0] += idelta0;
                     bra[imode1] += idelta1;
-                    bra[imode2] += idelta2;
                     pc.connect(ket, bra);
 
-                    ASSERT_EQ(pc.nchanged_mode(), 2);
-                    ASSERT_EQ(pc.changed_mode(0), imode1);
-                    ASSERT_EQ(pc.changed_mode(1), imode2);
-                    ASSERT_EQ(pc.changes(0), idelta1);
-                    ASSERT_EQ(pc.changes(1), idelta2);
+                    ASSERT_EQ(pc.size(), 2);
+                    ASSERT_EQ(pc.m_cre[0].m_imode, imode0);
+                    ASSERT_EQ(pc.m_cre[1].m_imode, imode1);
+                    ASSERT_EQ(pc.m_cre[0].m_nop, idelta0);
+                    ASSERT_EQ(pc.m_cre[1].m_nop, idelta1);
                     pc.apply(ket, work_bonv);
                     ASSERT_EQ(work_bonv, bra);
                 }

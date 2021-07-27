@@ -17,10 +17,10 @@
  * captures only the data from WalkerTableRow relevant to semistochastic propagation
  */
 struct DeterministicDataRow : Row {
-    fields::mbf_t m_mbf;
+    fields::Mbf m_mbf;
     fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
 
-    fields::mbf_t &key_field();
+    fields::Mbf &key_field();
 
     DeterministicDataRow(const Wavefunction& wf);
 
@@ -89,9 +89,9 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
 
     void build_from_all_occupied(const Hamiltonian &ham);
 
-    void build_from_occupied_connections(const Hamiltonian &ham, const fields::mbf_t& mbf);
+    void build_from_occupied_connections(const Hamiltonian &ham, const fields::Mbf& mbf);
 
-    void make_mev_contribs(MevGroup& mevs, const fields::mbf_t &ref);
+    void make_mev_contribs(MevGroup& mevs, const fields::Mbf &ref);
 
     /**
       * for every deterministically-propagated row on this MPI rank, update its value.

@@ -7,7 +7,7 @@
 #include "src/core/basis/CiSpaces.h"
 
 TEST(CiSpaces, Test){
-    typedef SingleFieldRow<fields::mbf_t> row_t;
+    typedef SingleFieldRow<fields::Mbf> row_t;
     const size_t nsite = 6;
     const size_t nelec = 6;
     BufferedTable<row_t> table("", {nsite});

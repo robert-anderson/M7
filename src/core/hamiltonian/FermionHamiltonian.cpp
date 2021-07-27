@@ -131,6 +131,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
 
     // assume no contribution cases to be nonzero unless a counterexample is found
     m_nonzero_contribs.fill(false);
+    REQUIRE_LE_ALL(nelec(), 2*nsite(), "unphysical number of electrons specified in FCIDUMP file");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {

@@ -62,7 +62,7 @@ namespace fields {
 //        FrmCsf(Row *row, size_t nsite, std::string name = ""): FrmOnv(row, nsite, name){}
 //    };
 
-    typedef std::tuple<FrmOnv, FrmBosOnv> mbf_tup_t;
+    typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
     template<size_t mbf_ind>
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;

@@ -19,7 +19,7 @@
  */
 defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bool explicit_hf_conns){
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    buffered::mbf_t ref_onv(ham.nsite());
+    buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.nsite());

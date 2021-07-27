@@ -16,20 +16,14 @@ struct Hamiltonian;
 
 namespace foreach_conn {
 
-    typedef std::function<void(const conn::FrmOnv&)> frm_fn_t;
-    typedef std::function<void(const conn::FrmOnv&, defs::ham_t)> frm_h_fn_t;
-    typedef std::function<void(const conn::FrmOnv&, const fields::FrmOnv&)> frm_d_fn_t;
-    typedef std::function<void(const conn::FrmOnv&, const fields::FrmOnv&, defs::ham_t)> frm_dh_fn_t;
-
-    typedef std::function<void(const conn::BosOnv&)> bos_fn_t;
-    typedef std::function<void(const conn::BosOnv&, defs::ham_t)> bos_h_fn_t;
-    typedef std::function<void(const conn::BosOnv&, const fields::BosOnv&)> bos_d_fn_t;
-    typedef std::function<void(const conn::BosOnv&, const fields::BosOnv&, defs::ham_t)> bos_dh_fn_t;
-
-    typedef std::function<void(const conn::FrmBosOnv&)> frmbos_fn_t;
-    typedef std::function<void(const conn::FrmBosOnv&, defs::ham_t)> frmbos_h_fn_t;
-    typedef std::function<void(const conn::FrmBosOnv&, const fields::FrmBosOnv&)> frmbos_d_fn_t;
-    typedef std::function<void(const conn::FrmBosOnv&, const fields::FrmBosOnv&, defs::ham_t)> frmbos_dh_fn_t;
+    template<typename mbf_t>
+    using fn_t = std::function<void(const conn::from_field_t<mbf_t>&)>;
+    template<typename mbf_t>
+    using fn_d_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&)>;
+    template<typename mbf_t>
+    using fn_h_t = std::function<void(const conn::from_field_t<mbf_t>&, defs::ham_t)>;
+    template<typename mbf_t>
+    using fn_dh_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&, defs::ham_t)>;
 
     struct Base {
         const Hamiltonian &m_ham;
@@ -40,35 +34,55 @@ namespace foreach_conn {
 
         explicit Base(const Hamiltonian &ham);
 
-        virtual void operator()(const fields::FrmOnv& mbf, const frm_fn_t& body_fn) = 0;
-        virtual void operator()(const fields::BosOnv& mbf, const bos_fn_t& body_fn) = 0;
-        virtual void operator()(const fields::FrmBosOnv& mbf, const frmbos_fn_t& body_fn) = 0;
+        virtual void operator()(const fields::FrmOnv& mbf, const fn_t<fields::FrmOnv>& body_fn) = 0;
+        virtual void operator()(const fields::FrmBosOnv& mbf, const fn_t<fields::FrmBosOnv>& body_fn) = 0;
+        virtual void operator()(const fields::BosOnv& mbf, const fn_t<fields::BosOnv>& body_fn) = 0;
+
+        defs::ham_t get_element(const fields::FrmOnv& mbf, const conn::FrmOnv& conn);
+        defs::ham_t get_element(const fields::FrmBosOnv& mbf, const conn::FrmBosOnv& conn);
+        defs::ham_t get_element(const fields::BosOnv& mbf, const conn::BosOnv& conn);
+
+        /*
+         * adapt the above virtual methods for computation of the connected MBF
+         */
+        template<typename mbf_t>
+        void operator()(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn) {
+            auto& dst_mbf = m_mbfs[mbf];
+            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+                conn.apply(mbf, dst_mbf);
+                body_fn(conn, dst_mbf);
+            };
+            (*this)(mbf, fn);
+        }
 
         /*
          * adapt the above virtual methods for computation of the matrix elements
          */
-        void operator()(const fields::FrmOnv& mbf, const frm_h_fn_t& body_fn, bool nonzero_h_only);
-        void operator()(const fields::BosOnv& mbf, const bos_h_fn_t& body_fn, bool nonzero_h_only);
-        void operator()(const fields::FrmBosOnv& mbf, const frmbos_h_fn_t& body_fn, bool nonzero_h_only);
+        template<typename mbf_t>
+        void operator()(const mbf_t& mbf, const fn_h_t<mbf_t>& body_fn, bool nonzero_h_only){
+            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+                auto helem = get_element(mbf, conn);
+                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+                body_fn(conn, helem);
+            };
+            (*this)(mbf, fn);
+        }
+
         /*
-         * adapt the above virtual methods for computation of the connected MBF
+         * adapt the above virtual methods for computation of both the connected MBF and the matrix elements
          */
-        void operator()(const fields::FrmOnv& mbf, const frm_d_fn_t& body_fn) {
+        template<typename mbf_t>
+        void operator()(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn, bool nonzero_h_only){
             auto& dst_mbf = m_mbfs[mbf];
-            frm_fn_t fn = [&](const conn::FrmOnv &conn) {
+            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+                auto helem = get_element(mbf, conn);
+                if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 conn.apply(mbf, dst_mbf);
-                body_fn(conn, dst_mbf);
+                body_fn(conn, dst_mbf, helem);
             };
             (*this)(mbf, fn);
         }
-        void operator()(const fields::BosOnv& mbf, const bos_d_fn_t& body_fn) {
-            auto& dst_mbf = m_mbfs[mbf];
-            bos_fn_t fn = [&](const conn::BosOnv &conn) {
-                conn.apply(mbf, dst_mbf);
-                body_fn(conn, dst_mbf);
-            };
-            (*this)(mbf, fn);
-        }
+
     };
 
     namespace frm {
@@ -90,11 +104,12 @@ namespace foreach_conn {
             virtual void operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
 
         public:
-            void operator()(const fields::FrmOnv &mbf, const frm_fn_t &body_fn) override;
+            void operator()(const fields::FrmOnv &mbf, const fn_t<fields::FrmOnv> &body_fn) override;
 
-            void operator()(const fields::BosOnv &mbf, const bos_fn_t &body_fn) override {}
+            void operator()(const fields::FrmBosOnv &mbf, const fn_t<fields::FrmBosOnv> &body_fn) override;
 
-            void operator()(const fields::FrmBosOnv &mbf, const frmbos_fn_t &body_fn) override;
+            void operator()(const fields::BosOnv &mbf, const fn_t<fields::BosOnv> &body_fn) override {}
+
         };
 
         /**

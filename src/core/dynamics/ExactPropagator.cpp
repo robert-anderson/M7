@@ -23,11 +23,11 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     ASSERT(!consts::float_is_zero(weight));
 
-    auto body = [&](const suite::Conns &conn, const fields::mbf_t& dst_onv, const defs::ham_t &helement){
+    auto body = [&](const conn::Mbf &conn, const fields::Mbf& dst_onv, defs::ham_t helement){
         const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
-    m_ham.foreach_connection(src_mbf, body);
+    m_ham.foreach_connection(src_mbf, body, m_only_nonzero_h_spawns);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

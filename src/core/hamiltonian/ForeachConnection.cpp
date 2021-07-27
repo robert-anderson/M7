@@ -9,35 +9,20 @@
 foreach_conn::Base::Base(const Hamiltonian &ham) :
         m_ham(ham), m_occ(ham.nsite()), m_vac(ham.nsite()), m_conns(ham.nsite()), m_mbfs(ham.nsite()) {}
 
-void foreach_conn::Base::operator()(const fields::FrmOnv &mbf,
-                                    const foreach_conn::frm_h_fn_t &body_fn, bool nonzero_h_only) {
-    frm_fn_t fn = [&](const conn::FrmOnv &conn) {
-        auto helem = m_ham.get_element(mbf, conn);
-        if (nonzero_h_only && consts::float_is_zero(helem)) return;
-        body_fn(conn, helem);
-    };
-    (*this)(mbf, fn);
+
+defs::ham_t foreach_conn::Base::get_element(const fields::FrmOnv &mbf, const conn::FrmOnv &conn) {
+    return m_ham.get_element(mbf, conn);
 }
 
-void foreach_conn::Base::operator()(const fields::BosOnv &mbf,
-                                    const foreach_conn::bos_h_fn_t &body_fn, bool nonzero_h_only) {
-    bos_fn_t fn = [&](const conn::BosOnv &conn) {
-        auto helem = m_ham.get_element(mbf, conn);
-        if (nonzero_h_only && consts::float_is_zero(helem)) return;
-        body_fn(conn, helem);
-    };
-    (*this)(mbf, fn);
+defs::ham_t foreach_conn::Base::get_element(const fields::FrmBosOnv &mbf, const conn::FrmBosOnv &conn) {
+    return m_ham.get_element(mbf, conn);
 }
 
-void foreach_conn::Base::operator()(const fields::FrmBosOnv &mbf,
-                                    const foreach_conn::frmbos_h_fn_t &body_fn, bool nonzero_h_only) {
-    frmbos_fn_t fn = [&](const conn::FrmBosOnv &conn) {
-        auto helem = m_ham.get_element(mbf, conn);
-        if (nonzero_h_only && consts::float_is_zero(helem)) return;
-        body_fn(conn, helem);
-    };
-    (*this)(mbf, fn);
+defs::ham_t foreach_conn::Base::get_element(const fields::BosOnv &mbf, const conn::BosOnv &conn) {
+    return m_ham.get_element(mbf, conn);
 }
+
+
 
 void foreach_conn::frm::Fermion::singles(conn::FrmOnv &conn, const std::function<void()> &fn) {
     for (size_t iocc = 0ul; iocc < m_occ.size(); ++iocc) {
@@ -76,12 +61,12 @@ foreach_conn::frm::Fermion::operator()(const fields::FrmOnv &mbf, conn::FrmOnv &
     doubles(conn, fn);
 }
 
-void foreach_conn::frm::Fermion::operator()(const fields::FrmOnv &mbf, const foreach_conn::frm_fn_t &body_fn) {
+void foreach_conn::frm::Fermion::operator()(const fields::FrmOnv &mbf, const foreach_conn::fn_t<fields::FrmOnv> &body_fn) {
     auto fn = [&]() { body_fn(m_conns.m_frmonv); };
     (*this)(mbf, m_conns.m_frmonv, fn);
 }
 
-void foreach_conn::frm::Fermion::operator()(const fields::FrmBosOnv &mbf, const foreach_conn::frmbos_fn_t &body_fn) {
+void foreach_conn::frm::Fermion::operator()(const fields::FrmBosOnv &mbf, const foreach_conn::fn_t<fields::FrmBosOnv> &body_fn) {
     auto fn = [&]() { body_fn(m_conns.m_frmbosonv); };
     (*this)(mbf.m_frm, m_conns.m_frmbosonv.m_frm, fn);
 }

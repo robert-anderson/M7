@@ -11,7 +11,7 @@
 FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
         m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.nsite()),
         m_prop(props::get(m_ham, opts, m_wf.m_format)) {
-    buffered::mbf_t ref_onv(m_ham.nsite());
+    buffered::Mbf ref_onv(m_ham.nsite());
     m_ham.set_hf_mbf(ref_onv, opts.m_wavefunction.m_spin_restrict);
     auto ref_energy = m_ham.get_energy(ref_onv);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_onv), 0ul};

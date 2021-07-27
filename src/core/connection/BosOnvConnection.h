@@ -45,6 +45,11 @@ public:
                         "should never have more distinct boson operators than modes");
         m_pairs.push_back(pair);
     }
+
+    const BosOpPair& operator[](const size_t& ipair) const {
+        DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
+        return m_pairs[ipair];
+    }
 };
 
 struct BosOnvConnection {
@@ -54,6 +59,10 @@ struct BosOnvConnection {
     void clear() {
         m_ann.clear();
         m_cre.clear();
+    }
+
+    size_t size() const {
+        return m_ann.size()+m_cre.size();
     }
 
     void connect(const fields::BosOnv& src, const fields::BosOnv& dst){

@@ -8,20 +8,32 @@
 #include <type_traits>
 #include <src/defs.h>
 #include "FermionHamiltonian.h"
+#include "BosonHamiltonian.h"
+#include "BosonCouplings.h"
 #include "src/core/nd/NdArray.h"
 #include "HamiltonianParts.h"
 #include "SymmetryHelpers.h"
 
+using namespace fields;
 
 struct Hamiltonian {
     FermionHamiltonian m_frm;
+    BosonHamiltonian m_bos;
+    BosonCouplings m_frmbos;
+    
     mutable std::unique_ptr<foreach_conn::Base> m_foreach_conn = nullptr;
 
-    Hamiltonian(std::string fname, bool spin_major): m_frm(fname, spin_major){
-
+    Hamiltonian(std::string fname, bool spin_major, size_t nboson_max=0, defs::ham_comp_t boson_frequency=0.0,
+                defs::ham_comp_t boson_coupling=0.0):
+    m_frm(fname, spin_major),
+    m_bos(m_frm.nsite(), nboson_max, boson_frequency),
+    m_frmbos(m_frm.nsite(), nboson_max, boson_coupling)
+    {
     }
+
     Hamiltonian(const fciqmc_config::Hamiltonian &opts):
-        Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major){}
+        Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
+                    opts.m_nboson_max, opts.m_boson_frequency, opts.m_boson_coupling){}
 
     const size_t& nsite() const {
         return m_frm.nsite();
@@ -37,13 +49,13 @@ struct Hamiltonian {
      * pure fermion matrix elements
      */
 
-    defs::ham_t get_element(const fields::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    defs::ham_t get_element(const FrmOnv &onv, const conn::FrmOnv &conn) const {
         return m_frm.get_element(onv, conn);
     }
-    defs::ham_t get_element(const fields::FrmOnv &onv) const {
+    defs::ham_t get_element(const FrmOnv &onv) const {
         return m_frm.get_element(onv);
     }
-    defs::ham_comp_t get_energy(const fields::FrmOnv &onv) const {
+    defs::ham_comp_t get_energy(const FrmOnv &onv) const {
         return m_frm.get_energy(onv);
     }
 
@@ -51,13 +63,14 @@ struct Hamiltonian {
      * pure boson matrix elements
      */
 
-    defs::ham_t get_element(const fields::BosOnv &onv, const conn::BosOnv &conn) const {
+    defs::ham_t get_element(const BosOnv &onv, const conn::BosOnv &conn) const {
+        //return m_bos.get_element(onv, conn);
         return 0.0;
     }
-    defs::ham_t get_element(const fields::BosOnv &onv) const {
+    defs::ham_t get_element(const BosOnv &onv) const {
         return 0.0;
     }
-    defs::ham_comp_t get_energy(const fields::BosOnv &onv) const {
+    defs::ham_comp_t get_energy(const BosOnv &onv) const {
         return 0.0;
     }
 
@@ -65,21 +78,73 @@ struct Hamiltonian {
      * fermion-boson coupled matrix elements
      */
 
-    defs::ham_t get_element(const fields::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    defs::ham_t get_element(const FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+        // return m_frm.get_element(onv.m_frm, conn.m_frm)+
+        // m_bos.get_element(onv.m_bos, conn.m_bos)+m_frmbos.get_element(onv, conn);
         return 0.0;
     }
-    defs::ham_t get_element(const fields::FrmBosOnv &onv) const {
+    defs::ham_t get_element(const FrmBosOnv &onv) const {
         return 0.0;
     }
-    defs::ham_comp_t get_energy(const fields::FrmBosOnv &onv) const {
+    defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {
         return 0.0;
     }
 
 
-    void set_hf_mbf(fields::FrmOnv &onv, int spin) const {
+    void set_hf_mbf(FrmOnv &onv, int spin) const {
         m_frm.set_hf_mbf(onv, spin);
     }
 
+    /*
+     * four foreach connection scenarios for each MBF type
+     */
+    /*
+     * fermion foreach
+     */
+    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_t<FrmOnv>& body_fn) const {
+        (*m_foreach_conn)(src_mbf, body_fn);
+    }
+    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_d_t<FrmOnv>& body_fn) const {
+        (*m_foreach_conn)(src_mbf, body_fn);
+    }
+    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_h_t<FrmOnv>& body_fn, bool nonzero_h_only) const {
+        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
+    }
+    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_dh_t<FrmOnv>& body_fn, bool nonzero_h_only) const {
+        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
+    }
+
+    /*
+     * fermion-boson foreach
+     */
+    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_t<FrmBosOnv>& body_fn) const {
+        (*m_foreach_conn)(src_mbf, body_fn);
+    }
+    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_d_t<FrmBosOnv>& body_fn) const {
+        (*m_foreach_conn)(src_mbf, body_fn);
+    }
+    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_h_t<FrmBosOnv>& body_fn, bool nonzero_h_only) const {
+        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
+    }
+    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_dh_t<FrmBosOnv>& body_fn, bool nonzero_h_only) const {
+        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
+    }
+
+    /*
+     * boson foreach
+     */
+    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_t<BosOnv>& body_fn) const {
+        (*m_foreach_conn)(src_mbf, body_fn);
+    }
+    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_d_t<BosOnv>& body_fn) const {
+        (*m_foreach_conn)(src_mbf, body_fn);
+    }
+    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_h_t<BosOnv>& body_fn, bool nonzero_h_only) const {
+        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
+    }
+    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_dh_t<BosOnv>& body_fn, bool nonzero_h_only) const {
+        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
+    }
 
 };
 
@@ -256,7 +321,7 @@ struct FermionConnection {
     /*
      * compute phase of connection applied to "in" ONV
      */
-    void apply(const fields::Onv<0> &in) {
+    void apply(const Onv<0> &in) {
         ASSERT(std::is_sorted(m_cre.begin(), m_cre.end()));
         ASSERT(std::is_sorted(m_ann.begin(), m_ann.end()));
         m_com.clear();
@@ -291,7 +356,7 @@ struct FermionConnection {
     }
 
 
-    void apply(const fields::Onv<0> &in, fields::Onv<0> &out) {
+    void apply(const Onv<0> &in, Onv<0> &out) {
         apply(in);
         ASSERT(!in.is_zero());
 #ifndef NDEBUG

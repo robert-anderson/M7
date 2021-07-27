@@ -6,7 +6,7 @@
 #define M7_CONNECTIONS_H
 
 #include "FrmOnvConnection.h"
-#include "src/core/basis/BosOnvConnection.h"
+#include "BosOnvConnection.h"
 
 namespace conn {
 
@@ -20,9 +20,29 @@ namespace conn {
 
         void clear() {
             m_frm.clear();
-            m_bos.zero();
+            m_bos.clear();
+        }
+
+        void apply(const fields::FrmBosOnv& src, fields::FrmBosOnv& dst) const {
+            m_frm.apply(src.m_frm, dst.m_frm);
+            m_bos.apply(src.m_bos, dst.m_bos);
         }
     };
+
+
+    typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
+
+    template<size_t mbf_ind>
+    using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
+    typedef mbf_t<defs::mbf_ind> Mbf;
+
+    template<typename T=void> struct selector {typedef void type;};
+    template<> struct selector<fields::FrmOnv> {typedef FrmOnv type;};
+    template<> struct selector<fields::FrmBosOnv> {typedef FrmBosOnv type;};
+    template<> struct selector<fields::BosOnv> {typedef BosOnv type;};
+
+    template<typename T>
+    using from_field_t = typename selector<T>::type;
 
     struct ExlvlSector {
         defs::exlvl_t m_nann;
