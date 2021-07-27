@@ -67,7 +67,7 @@ public:
      *  true if all elements of the index array are set bits in the ONV
      */
     bool all_occ(const fields::FrmOnv &src) const {
-        return std::any_of(cbegin(), cend(), [&src](size_t i) { return !src.get(i); });
+        return std::all_of(cbegin(), cend(), [&src](size_t i) { return src.get(i); });
     }
     /**
      * @param src
@@ -76,7 +76,7 @@ public:
      *  true if all elements of the index array are clear bits in the ONV
      */
     bool all_vac(const fields::FrmOnv &src) const {
-        return std::any_of(cbegin(), cend(), [&src](size_t i) { return src.get(i); });
+        return std::all_of(cbegin(), cend(), [&src](size_t i) { return !src.get(i); });
     }
     /**
      * @return

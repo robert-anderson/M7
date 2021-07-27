@@ -27,7 +27,9 @@ struct Hamiltonian {
                 defs::ham_comp_t boson_coupling = 0.0) :
             m_frm(fname, spin_major),
             m_frmbos(m_frm.nsite(), nboson_max, boson_coupling),
-            m_bos(m_frm.nsite(), nboson_max, boson_frequency) {}
+            m_bos(m_frm.nsite(), nboson_max, boson_frequency) {
+        m_foreach_conn = std::unique_ptr<foreach_conn::Base>(new foreach_conn::frm::Fermion(*this));
+    }
 
     Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
             Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
