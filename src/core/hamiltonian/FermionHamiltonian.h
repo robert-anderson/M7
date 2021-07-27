@@ -191,42 +191,6 @@ public:
         return ci_utils::fermion_dim(nsite(), nelec());
     }
 
-#if 0
-private:
-    defs::ham_t get_element_tag(const conn::FrmOnv &conn, dispatch_utils::BoolTag<false> sym_opts) const {
-        switch (conn.size()) {
-            case 0:
-                return get_element_0(conn);
-            case 2: ASSERT(conn.ncom() + conn.nexcit() == nelec());
-                return get_element_1(conn);
-            case 4:
-                return get_element_2(conn);
-            default:
-                return 0;
-        }
-    }
-
-    defs::ham_t get_element_tag(const conn::FrmOnv &conn, dispatch_utils::BoolTag<true> sym_opts) const {
-        return m_sym_helper->get_element(conn);
-    }
-
-    defs::ham_comp_t get_energy_tag(const fields::FrmOnv &onv, dispatch_utils::BoolTag<false> sym_opts) const {
-        return consts::real(get_element_0(onv));
-    }
-
-    defs::ham_comp_t get_energy_tag(const fields::FrmOnv &onv, dispatch_utils::BoolTag<true> sym_opts) const {
-        return m_sym_helper->get_energy(onv);
-    }
-
-    defs::ham_t get_element(const conn::FrmOnv &conn) const {
-        return get_element_tag(conn, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
-    }
-
-    defs::ham_comp_t get_energy(const fields::FrmOnv &onv) const {
-        return get_energy_tag(onv, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
-    }
-
-#endif
 public:
     bool is_hubbard() const {
         return m_on_site_only_0022 && m_nn_only_1111;
@@ -265,13 +229,6 @@ public:
     }
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
-
-
-//    void foreach_connection(const fields::FrmOnv &src_onv, const ham_sym_helpers::Fermion::body_fn_t &body,
-//                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
-//        foreach_vo
-//        m_sym_helper->foreach_connection(src_onv, body, get_h, h_nonzero_only, include_diagonal);
-//    }
 
     /**
      * set the referenced ONV object to the assumed Hartree--Fock determinant within the given spin sector

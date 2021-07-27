@@ -24,32 +24,17 @@ struct Hamiltonian {
     mutable std::unique_ptr<foreach_conn::Base> m_foreach_conn = nullptr;
 
     Hamiltonian(std::string fname, bool spin_major, size_t nboson_max = 0, defs::ham_comp_t boson_frequency = 0.0,
-                defs::ham_comp_t boson_coupling = 0.0) :
-            m_frm(fname, spin_major),
-            m_frmbos(m_frm.nsite(), nboson_max, boson_coupling),
-            m_bos(m_frm.nsite(), nboson_max, boson_frequency) {
-        m_foreach_conn = std::unique_ptr<foreach_conn::Base>(new foreach_conn::frm::Fermion(*this));
-    }
+                defs::ham_comp_t boson_coupling = 0.0);
 
-    Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
-            Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
-                        opts.m_nboson_max, opts.m_boson_frequency, opts.m_boson_coupling) {}
+    Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 
-    size_t nci() const {
-        return m_frm.nci() * m_bos.nci();
-    }
+    size_t nci() const;
 
-    const size_t &nsite() const {
-        return m_frm.nsite();
-    }
+    const size_t &nsite() const;
 
-    const size_t &nelec() const {
-        return m_frm.nelec();
-    }
+    const size_t &nelec() const;
 
-    bool complex_valued() const {
-        return m_frm.complex_valued();
-    }
+    bool complex_valued() const;
 
     /*
      * pure fermion matrix elements
