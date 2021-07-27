@@ -18,29 +18,33 @@ using namespace fields;
 
 struct Hamiltonian {
     FermionHamiltonian m_frm;
-    BosonHamiltonian m_bos;
     BosonCouplings m_frmbos;
-    
+    BosonHamiltonian m_bos;
+
     mutable std::unique_ptr<foreach_conn::Base> m_foreach_conn = nullptr;
 
-    Hamiltonian(std::string fname, bool spin_major, size_t nboson_max=0, defs::ham_comp_t boson_frequency=0.0,
-                defs::ham_comp_t boson_coupling=0.0):
-    m_frm(fname, spin_major),
-    m_bos(m_frm.nsite(), nboson_max, boson_frequency),
-    m_frmbos(m_frm.nsite(), nboson_max, boson_coupling)
-    {
+    Hamiltonian(std::string fname, bool spin_major, size_t nboson_max = 0, defs::ham_comp_t boson_frequency = 0.0,
+                defs::ham_comp_t boson_coupling = 0.0) :
+            m_frm(fname, spin_major),
+            m_frmbos(m_frm.nsite(), nboson_max, boson_coupling),
+            m_bos(m_frm.nsite(), nboson_max, boson_frequency) {}
+
+    Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
+            Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
+                        opts.m_nboson_max, opts.m_boson_frequency, opts.m_boson_coupling) {}
+
+    size_t nci() const {
+        return m_frm.nci() * m_bos.nci();
     }
 
-    Hamiltonian(const fciqmc_config::Hamiltonian &opts):
-        Hamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
-                    opts.m_nboson_max, opts.m_boson_frequency, opts.m_boson_coupling){}
-
-    const size_t& nsite() const {
+    const size_t &nsite() const {
         return m_frm.nsite();
     }
-    const size_t& nelec() const {
+
+    const size_t &nelec() const {
         return m_frm.nelec();
     }
+
     bool complex_valued() const {
         return m_frm.complex_valued();
     }
@@ -52,9 +56,11 @@ struct Hamiltonian {
     defs::ham_t get_element(const FrmOnv &onv, const conn::FrmOnv &conn) const {
         return m_frm.get_element(onv, conn);
     }
+
     defs::ham_t get_element(const FrmOnv &onv) const {
         return m_frm.get_element(onv);
     }
+
     defs::ham_comp_t get_energy(const FrmOnv &onv) const {
         return m_frm.get_energy(onv);
     }
@@ -67,9 +73,11 @@ struct Hamiltonian {
         //return m_bos.get_element(onv, conn);
         return 0.0;
     }
+
     defs::ham_t get_element(const BosOnv &onv) const {
         return 0.0;
     }
+
     defs::ham_comp_t get_energy(const BosOnv &onv) const {
         return 0.0;
     }
@@ -79,15 +87,20 @@ struct Hamiltonian {
      */
 
     defs::ham_t get_element(const FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
-        // return m_frm.get_element(onv.m_frm, conn.m_frm)+
-        // m_bos.get_element(onv.m_bos, conn.m_bos)+m_frmbos.get_element(onv, conn);
-        return 0.0;
+        defs::ham_t helement_frm = 0.0;
+        defs::ham_t helement_bos = 0.0;
+        if (!conn.m_bos.size()) helement_frm = m_frm.get_element(onv.m_frm, conn.m_frm);
+        if (!conn.m_frm.size()) helement_bos = m_bos.get_element(onv.m_bos, conn.m_bos);
+        defs::ham_t helement_frmbos = m_frmbos.get_element(onv, conn);
+        return helement_frm + helement_bos + helement_frmbos;
     }
+
     defs::ham_t get_element(const FrmBosOnv &onv) const {
-        return 0.0;
+        return m_frm.get_element(onv.m_frm)+m_bos.get_element(onv.m_bos);
     }
+
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {
-        return 0.0;
+        return consts::real(get_element(onv));
     }
 
 
@@ -101,48 +114,63 @@ struct Hamiltonian {
     /*
      * fermion foreach
      */
-    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_t<FrmOnv>& body_fn) const {
+    void foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_t<FrmOnv> &body_fn) const {
         (*m_foreach_conn)(src_mbf, body_fn);
     }
-    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_d_t<FrmOnv>& body_fn) const {
+
+    void foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_d_t<FrmOnv> &body_fn) const {
         (*m_foreach_conn)(src_mbf, body_fn);
     }
-    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_h_t<FrmOnv>& body_fn, bool nonzero_h_only) const {
+
+    void
+    foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_h_t<FrmOnv> &body_fn, bool nonzero_h_only) const {
         (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
-    void foreach_connection(const FrmOnv& src_mbf, const foreach_conn::fn_dh_t<FrmOnv>& body_fn, bool nonzero_h_only) const {
+
+    void
+    foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_dh_t<FrmOnv> &body_fn, bool nonzero_h_only) const {
         (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
 
     /*
      * fermion-boson foreach
      */
-    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_t<FrmBosOnv>& body_fn) const {
+    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_t<FrmBosOnv> &body_fn) const {
         (*m_foreach_conn)(src_mbf, body_fn);
     }
-    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_d_t<FrmBosOnv>& body_fn) const {
+
+    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_d_t<FrmBosOnv> &body_fn) const {
         (*m_foreach_conn)(src_mbf, body_fn);
     }
-    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_h_t<FrmBosOnv>& body_fn, bool nonzero_h_only) const {
+
+    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_h_t<FrmBosOnv> &body_fn,
+                            bool nonzero_h_only) const {
         (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
-    void foreach_connection(const FrmBosOnv& src_mbf, const foreach_conn::fn_dh_t<FrmBosOnv>& body_fn, bool nonzero_h_only) const {
+
+    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_dh_t<FrmBosOnv> &body_fn,
+                            bool nonzero_h_only) const {
         (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
 
     /*
      * boson foreach
      */
-    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_t<BosOnv>& body_fn) const {
+    void foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_t<BosOnv> &body_fn) const {
         (*m_foreach_conn)(src_mbf, body_fn);
     }
-    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_d_t<BosOnv>& body_fn) const {
+
+    void foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_d_t<BosOnv> &body_fn) const {
         (*m_foreach_conn)(src_mbf, body_fn);
     }
-    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_h_t<BosOnv>& body_fn, bool nonzero_h_only) const {
+
+    void
+    foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_h_t<BosOnv> &body_fn, bool nonzero_h_only) const {
         (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
-    void foreach_connection(const BosOnv& src_mbf, const foreach_conn::fn_dh_t<BosOnv>& body_fn, bool nonzero_h_only) const {
+
+    void
+    foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_dh_t<BosOnv> &body_fn, bool nonzero_h_only) const {
         (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
 

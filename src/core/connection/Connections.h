@@ -23,6 +23,11 @@ namespace conn {
             m_bos.clear();
         }
 
+        void connect(const fields::FrmBosOnv& src, const fields::FrmBosOnv& dst) {
+            m_frm.connect(src.m_frm, dst.m_frm);
+            m_bos.connect(src.m_bos, dst.m_bos);
+        }
+
         void apply(const fields::FrmBosOnv& src, fields::FrmBosOnv& dst) const {
             m_frm.apply(src.m_frm, dst.m_frm);
             m_bos.apply(src.m_bos, dst.m_bos);

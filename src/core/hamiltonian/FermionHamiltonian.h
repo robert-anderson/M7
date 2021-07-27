@@ -187,6 +187,10 @@ public:
         }
     }
 
+    size_t nci() const {
+        return ci_utils::fermion_dim(nsite(), nelec());
+    }
+
 #if 0
 private:
     defs::ham_t get_element_tag(const conn::FrmOnv &conn, dispatch_utils::BoolTag<false> sym_opts) const {
@@ -230,10 +234,6 @@ public:
 
     bool is_hubbard_pbc() const {
         return m_on_site_only_0022 && m_nnp_only_1111;
-    }
-
-    size_t nci() const {
-        return ci_utils::fermion_dim(nsite(), nelec());
     }
 
     const size_t &nsite() const {

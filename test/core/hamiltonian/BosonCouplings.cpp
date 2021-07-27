@@ -5,95 +5,133 @@
 #include <src/core/table/BufferedFields.h>
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/BosonCouplings.h"
+#include "src/core/hamiltonian/BosonHamiltonian.h"
 
-#if 0
 TEST(BosonCouplings, Element_b0) {
     size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
+    conn::FrmBosOnv conn(nsite);
 
-    BosonCouplings bc(nboson_cutoff, nsite, v, omega);
+    BosonCouplings bc(nsite, nboson_cutoff, v);
+    BosonHamiltonian bos_ham(nsite, nboson_cutoff, omega);
 
-    buffered::FrmBosOnv ket(nsite);
-    ASSERT_TRUE(ket.m_row);
-    ASSERT_TRUE(ket.m_frm.belongs_to_row());
-    ASSERT_TRUE(ket.m_frm.m_row);
-    ASSERT_TRUE(ket.m_bos.belongs_to_row());
-    ASSERT_TRUE(ket.m_bos.m_row);
-    ASSERT_EQ(ket.m_row, ket.m_frm.m_row);
-    ASSERT_EQ(ket.m_row, ket.m_bos.m_row);
-    buffered::FrmBosOnv bra(nsite);
+    buffered::FrmBosOnv src(nsite);
+    ASSERT_TRUE(src.m_row);
+    ASSERT_TRUE(src.m_frm.belongs_to_row());
+    ASSERT_TRUE(src.m_frm.m_row);
+    ASSERT_TRUE(src.m_bos.belongs_to_row());
+    ASSERT_TRUE(src.m_bos.m_row);
+    ASSERT_EQ(src.m_row, src.m_frm.m_row);
+    ASSERT_EQ(src.m_row, src.m_bos.m_row);
+    buffered::FrmBosOnv dst(nsite);
 
-
-    ket = {{1, 2, 3, 4},
+    src = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
-    bra = {{1, 2, 3, 4},
+    dst = {{1, 2, 3, 4},
            {0, 0, 0, 0}};
-    conn::Antisym<1> fbconn(ket, bra);
+    conn.connect(src, dst);
+    defs::ham_t helement;
 
-    auto el = bc.get_element_0(fbconn);
-    ASSERT_EQ(el, 0);
+    helement = bc.get_element(src, conn);
+    ASSERT_EQ(helement, 0);
+    helement = bos_ham.get_element(src.m_bos, conn.m_bos);
+    ASSERT_EQ(helement, 0);
 
-    ket = {{1, 2, 3, 4},
+    src = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
-    bra = {{1, 2, 3, 4},
+    dst = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
 
-    fbconn.connect(bra, ket);
+    conn.connect(src, dst);
 
-    el = bc.get_element_0(fbconn);
-    ASSERT_EQ(el, 7 * omega);
+    helement = bc.get_element(src, conn);
+    // no change in boson occupation, so no coupling
+    ASSERT_EQ(helement, 0.0);
+    helement = bos_ham.get_element(src.m_bos, conn.m_bos);
+    ASSERT_EQ(helement, 7 * omega);
 }
 
 TEST(BosonCouplings, Element_f0_b1){
     size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
+    conn::FrmBosOnv conn(nsite);
 
-    BosonCouplings bc(nboson_cutoff, nsite, v, omega);
+    BosonCouplings bc(nsite, nboson_cutoff, v);
+    BosonHamiltonian bos_ham(nsite, nboson_cutoff, omega);
 
-    buffered::FrmBosOnv ket(nsite);
-    buffered::FrmBosOnv bra(nsite);
+    buffered::FrmBosOnv src(nsite);
+    buffered::FrmBosOnv dst(nsite);
 
-    ket = {{1, 2, 3, 4},
+    src = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
-    bra = {{1, 2, 3, 4},
+    dst = {{1, 2, 3, 4},
            {2, 4, 0, 2}};
-    conn::Antisym<1> fbconn(ket, bra);
-    ASSERT_EQ(fbconn.m_bonvconn.nchanged_mode(), 1);
-    ASSERT_EQ(fbconn.m_bonvconn.changed_mode(0), 3);
-    ASSERT_EQ(fbconn.m_bonvconn.changes(0), 1);
+    conn.connect(src, dst);
 
-    auto el = bc.get_element_1(fbconn);
-    ASSERT_EQ(v*std::sqrt(2.0), el);
+    ASSERT_EQ(conn.m_bos.size(), 1ul);
+    ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, 3ul);
+    ASSERT_EQ(conn.m_bos.m_cre[0].m_nop, 1ul);
+    ASSERT_EQ(conn.m_bos.m_ann.size(), 0ul);
 
+    defs::ham_t helement;
 
-    ket = {{1, 2, 3, 4},
+    helement = bc.get_element(src, conn);
+    ASSERT_EQ(helement, v*std::sqrt(2.0));
+    helement = bos_ham.get_element(src.m_bos, conn.m_bos);
+    ASSERT_EQ(helement, 0.0);
+
+    src = {{1, 2, 3, 4},
            {2, 6, 0, 1}};
-    bra = {{1, 2, 3, 4},
+    dst = {{1, 2, 3, 4},
            {2, 5, 0, 1}};
-    fbconn.connect(ket, bra);
-    ASSERT_EQ(fbconn.m_bonvconn.nchanged_mode(), 1);
-    ASSERT_EQ(fbconn.m_bonvconn.changed_mode(0), 1);
-    ASSERT_EQ(fbconn.m_bonvconn.changes(0), -1);
+    conn.connect(src, dst);
 
-    el = bc.get_element_1(fbconn);
-    ASSERT_EQ(v*std::sqrt(6.0), el);
+    ASSERT_EQ(conn.m_bos.size(), 1ul);
+    ASSERT_EQ(conn.m_bos.m_ann[0].m_imode, 1ul);
+    ASSERT_EQ(conn.m_bos.m_ann[0].m_nop, 1ul);
+    ASSERT_EQ(conn.m_bos.m_cre.size(), 0ul);
+
+    helement = bc.get_element(src, conn);
+    ASSERT_EQ(helement, v*std::sqrt(6.0));
+    helement = bos_ham.get_element(src.m_bos, conn.m_bos);
+    ASSERT_EQ(helement, 0.0);
+
+
+    src = {{1, 2, 3, 4},
+           {2, 6, 0, 1}};
+    dst = {{1, 2, 3, 4},
+           {2, 7, 0, 1}};
+    conn.connect(src, dst);
+
+    ASSERT_EQ(conn.m_bos.size(), 1ul);
+    ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, 1ul);
+    ASSERT_EQ(conn.m_bos.m_cre[0].m_nop, 1ul);
+    ASSERT_EQ(conn.m_bos.m_ann.size(), 0ul);
+
+    helement = bc.get_element(src, conn);
+    ASSERT_EQ(helement, v*std::sqrt(7.0));
+    helement = bos_ham.get_element(src.m_bos, conn.m_bos);
+    ASSERT_EQ(helement, 0.0);
 }
 
 TEST(BosonCouplings, Element_f1_b1){
     size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
+    conn::FrmBosOnv conn(nsite);
 
-    BosonCouplings bc(nboson_cutoff, nsite, v, omega);
+    BosonCouplings bc(nsite, nboson_cutoff, v);
+    BosonHamiltonian bos_ham(nsite, nboson_cutoff, omega);
 
-    buffered::FrmBosOnv ket(nsite);
-    buffered::FrmBosOnv bra(nsite);
+    buffered::FrmBosOnv src(nsite);
+    buffered::FrmBosOnv dst(nsite);
 
-    ket = {{1, 2, 3, 4},
+    src = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
-    bra = {{1, 2, 3, 5},
+    dst = {{1, 2, 3, 5},
            {2, 4, 0, 2}};
-    conn::Antisym<1> fbconn(ket, bra);
-    auto el = bc.get_element_1(fbconn);
-    ASSERT_EQ(0, el);
+
+    conn.connect(src, dst);
+    defs::ham_t helement;
+    helement = bc.get_element(src, conn);
+    ASSERT_EQ(helement, 0.0);
 }
-#endif

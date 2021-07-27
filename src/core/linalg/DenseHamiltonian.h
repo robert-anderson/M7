@@ -7,14 +7,18 @@
 
 #include "src/defs.h"
 #include "Matrix.h"
-#include "src/core/hamiltonian/FermiBosHamiltonian.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 
 class DenseHamiltonian : public Matrix<defs::ham_t> {
+
+    void setup_frm(const Hamiltonian &source);
+
+    void setup_frmbos(const Hamiltonian &source);
+
 public:
-    DenseHamiltonian(const FermionHamiltonian &source);
-    //DenseHamiltonian(const FermiBosHamiltonian &source, int spin);
-    //DenseHamiltonian(const FermionHamiltonian &source, const BosonCouplings& bc);
-    //DenseHamiltonian(const FermionHamiltonian &source, DeterminantList &detlist);
+
+    DenseHamiltonian(const Hamiltonian &source);
+
 };
 
 #endif //M7_DENSEHAMILTONIAN_H

@@ -22,24 +22,25 @@ struct BosonCouplings {
         if (conn.m_bos.size()!=1) return 0.0;
         bool is_ann = conn.m_bos.m_ann.size();
 
-        const auto imode = (conn.m_bos.m_ann.size() ? conn.m_bos.m_ann[0] : conn.m_bos.m_cre[0]).m_imode;
+        const auto imode = is_ann ? conn.m_bos.m_ann[0].m_imode : conn.m_bos.m_cre[0].m_imode;
         const auto com = size_t(onv.m_bos[imode])-(is_ann?1:0);
 
         switch (conn.m_frm.size()) {
             case 0: {
+                const auto occ_fac = std::sqrt(com+1);
                 // fermion ONVs do not differ, so sum over occupied spin orbitals
-                defs::ham_t res = 0;
+                defs::ham_t res = 0.0;
                 auto fn = [&](const size_t& ibit){
                     auto isite = ibit % m_nmode;
-                    const auto occ_fac = std::sqrt(com + 1);
                     res += v(isite, isite, imode) * occ_fac;
                 };
                 onv.m_frm.foreach(fn);
+                return res;
             }
             case 2: {
                 auto isite = conn.m_frm.m_cre[0] % m_nmode;
                 auto jsite = conn.m_frm.m_ann[0] % m_nmode;
-                DEBUG_ASSERT_NE(isite, jsite, "single fermion excitation violates spin conservation");
+                if (isite==jsite) return 0.0; // spin conservation
                 // TODO: remove the below ASSERT in the general case of fermion-boson interaction
                 DEBUG_ASSERT_EQ(v(isite, jsite, imode), 0.0,
                                 "Hubbard--Holstein only couples fermions and bosons on the same site")
@@ -48,6 +49,11 @@ struct BosonCouplings {
             default:
                 return 0;
         }
+    }
+
+    defs::ham_t get_element(const fields::FrmBosOnv& onv, const conn::FrmBosOnv &conn) const {
+        if (conn.m_bos.size()!=1ul) return 0.0;
+        return get_element_1(onv, conn);
     }
 
 };

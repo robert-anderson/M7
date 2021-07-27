@@ -5,8 +5,8 @@
 #include <src/core/enumerator/Enumerators.h>
 #include "DenseHamiltonian.h"
 
-DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source) :
-        Matrix<defs::ham_t>(source.nci()) {
+void DenseHamiltonian::setup_frm(const Hamiltonian &source) {
+
     buffered::FrmOnv bra(source.nsite());
     buffered::FrmOnv ket(source.nsite());
 
@@ -27,51 +27,28 @@ DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source) :
     }
 }
 
-#if 0
-DenseHamiltonian::DenseHamiltonian(const FermiBosHamiltonian &source, int spin) :
-        Matrix<defs::ham_t>(source.nci()) {
-    const auto nsite = source.nsite();
-    const auto nelec = source.nelec();
-    const auto nmode = source.nmode();
-    const auto nboson_cutoff = source.nboson_cutoff();
-    buffered::FrmBosOnv bra(nsite);
-    buffered::FrmBosOnv ket(nsite);
+void DenseHamiltonian::setup_frmbos(const Hamiltonian &source) {
+    buffered::FrmBosOnv bra(source.nsite());
+    buffered::FrmBosOnv ket(source.nsite());
 
     size_t ibra = ~0ul;
-    enums::FermiBosOnv bra_enum(nsite, nelec, spin, nmode, nboson_cutoff);
+    enums::FermiBosOnv bra_enum(source.nsite(), source.nelec(), source.m_bos.m_nmode, source.m_bos.m_nboson_max);
+    conn::FrmBosOnv conn(source.nsite());
 
     while (bra_enum.next(bra, ibra)) {
         size_t iket = ~0ul;
-        enums::FermiBosOnv ket_enum(nsite, nelec, spin, nmode, nboson_cutoff);
+        enums::FermiBosOnv ket_enum(source.nsite(), source.nelec(), source.m_bos.m_nmode, source.m_bos.m_nboson_max);
         while (ket_enum.next(ket, iket)) {
-            auto h_elem = source.get_element(bra, ket);
+            conn.connect(bra, ket);
+            auto h_elem = source.get_element(bra, conn);
             if (!consts::float_is_zero(h_elem)) {
                 (*this)(ibra, iket) = h_elem;
             } else ASSERT(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
         }
     }
 }
-#endif
 
-//DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source, DeterminantList &detlist):
-//    Matrix<defs::ham_t>(detlist.high_water_mark(0)) {
-//    for (size_t ibra=0ul; ibra<m_nrow; ++ibra) {
-//        auto bra = detlist.m_determinant(ibra);
-//        for (size_t iket = 0ul; iket < m_nrow; ++iket) {
-//            auto ket = detlist.m_determinant(iket);
-//            auto h_elem = source.get_element(bra, ket);
-//            if (!consts::float_is_zero(h_elem)) (*this)(ibra, iket) = h_elem;
-//            else ASSERT(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
-//        }
-//    }
-//}
-
-//DenseHamiltonian::DenseHamiltonian(const FermionHamiltonian &source, const BosonCouplings &bc):
-//        Matrix<defs::ham_t>(source.nci()){
-//    FermionOnv dbra(source.nsite());
-//    FermionOnv dket(source.nsite());
-//    Permanent pbra(bc.nmode(), bc.nocc_cutoff());
-//    Permanent pket(bc.nmode(), bc.nocc_cutoff());
-//    // TODO James: generate all matrix elements
-//}
-//
+DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) : Matrix<defs::ham_t>(source.nci()) {
+    if (source.m_bos.m_nboson_max) setup_frmbos(source);
+    else setup_frm(source);
+}

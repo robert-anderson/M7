@@ -32,18 +32,17 @@ TEST(BosonOnvConnection, SingleChange) {
 
     for (size_t imode = 0; imode < nmode; ++imode) {
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
-            BosOnvConnection pc(nmode);
-            pc.connect(ket, bra);
+            BosOnvConnection conn(nmode);
 
             ket = {2, 4, 0, 1};
             bra = {2, 4, 0, 1};
 
             bra[imode] += idelta;
-            pc.connect(ket, bra);
-            ASSERT_EQ(pc.size(), 1);
-            ASSERT_EQ(pc.m_cre[0].m_imode, imode);
-            ASSERT_EQ(pc.m_cre[0].m_nop, idelta);
-            pc.apply(ket, work_bonv);
+            conn.connect(ket, bra);
+            ASSERT_EQ(conn.size(), 1);
+            ASSERT_EQ(conn.m_cre[0].m_imode, imode);
+            ASSERT_EQ(conn.m_cre[0].m_nop, idelta);
+            conn.apply(ket, work_bonv);
             ASSERT_EQ(work_bonv, bra);
         }
     }
