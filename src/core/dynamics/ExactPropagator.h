@@ -6,6 +6,7 @@
 #define M7_EXACTPROPAGATOR_H
 
 #include <src/core/config/FciqmcConfig.h>
+#include <src/core/hamiltonian/ForeachConnection.h>
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {
@@ -14,6 +15,7 @@ class ExactPropagator : public Propagator {
      * rank-2 RDMs since these spawns will make the exact contributions.
      */
     const bool m_only_nonzero_h_spawns;
+    std::unique_ptr<foreach_conn::Base> m_connections;
 
     defs::ham_t off_diagonal_bosons(const Hamiltonian &ham, conn::FrmOnv &conn,
                                     const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv, const size_t &occ, int change){

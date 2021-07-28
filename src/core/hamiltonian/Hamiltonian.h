@@ -21,8 +21,6 @@ struct Hamiltonian {
     BosonCouplings m_frmbos;
     BosonHamiltonian m_bos;
 
-    mutable std::unique_ptr<foreach_conn::Base> m_foreach_conn = nullptr;
-
     Hamiltonian(std::string fname, bool spin_major, size_t nboson_max = 0, defs::ham_comp_t boson_frequency = 0.0,
                 defs::ham_comp_t boson_coupling = 0.0);
 
@@ -93,72 +91,6 @@ struct Hamiltonian {
 
     void set_hf_mbf(FrmOnv &onv, int spin) const {
         m_frm.set_hf_mbf(onv, spin);
-    }
-
-    /*
-     * four foreach connection scenarios for each MBF type
-     */
-    /*
-     * fermion foreach
-     */
-    void foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_t<FrmOnv> &body_fn) const {
-        (*m_foreach_conn)(src_mbf, body_fn);
-    }
-
-    void foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_d_t<FrmOnv> &body_fn) const {
-        (*m_foreach_conn)(src_mbf, body_fn);
-    }
-
-    void
-    foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_h_t<FrmOnv> &body_fn, bool nonzero_h_only) const {
-        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
-    }
-
-    void
-    foreach_connection(const FrmOnv &src_mbf, const foreach_conn::fn_dh_t<FrmOnv> &body_fn, bool nonzero_h_only) const {
-        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
-    }
-
-    /*
-     * fermion-boson foreach
-     */
-    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_t<FrmBosOnv> &body_fn) const {
-        (*m_foreach_conn)(src_mbf, body_fn);
-    }
-
-    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_d_t<FrmBosOnv> &body_fn) const {
-        (*m_foreach_conn)(src_mbf, body_fn);
-    }
-
-    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_h_t<FrmBosOnv> &body_fn,
-                            bool nonzero_h_only) const {
-        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
-    }
-
-    void foreach_connection(const FrmBosOnv &src_mbf, const foreach_conn::fn_dh_t<FrmBosOnv> &body_fn,
-                            bool nonzero_h_only) const {
-        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
-    }
-
-    /*
-     * boson foreach
-     */
-    void foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_t<BosOnv> &body_fn) const {
-        (*m_foreach_conn)(src_mbf, body_fn);
-    }
-
-    void foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_d_t<BosOnv> &body_fn) const {
-        (*m_foreach_conn)(src_mbf, body_fn);
-    }
-
-    void
-    foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_h_t<BosOnv> &body_fn, bool nonzero_h_only) const {
-        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
-    }
-
-    void
-    foreach_connection(const BosOnv &src_mbf, const foreach_conn::fn_dh_t<BosOnv> &body_fn, bool nonzero_h_only) const {
-        (*m_foreach_conn)(src_mbf, body_fn, nonzero_h_only);
     }
 
 };

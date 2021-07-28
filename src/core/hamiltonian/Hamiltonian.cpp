@@ -9,7 +9,6 @@ Hamiltonian::Hamiltonian(std::string fname, bool spin_major, size_t nboson_max, 
         m_frm(fname, spin_major),
         m_frmbos(m_frm.nsite(), nboson_max, boson_coupling),
         m_bos(m_frm.nsite(), nboson_max, boson_frequency) {
-    m_foreach_conn = std::unique_ptr<foreach_conn::Base>(new foreach_conn::frm::Fermion(*this));
 }
 
 Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :

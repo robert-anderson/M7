@@ -11,8 +11,9 @@
 #include <utility>
 #include <src/core/basis/AbelianGroup.h>
 #include <src/core/basis/Suites.h>
+#include "Hamiltonian.h"
 
-struct Hamiltonian;
+using namespace fields;
 
 namespace foreach_conn {
 
@@ -33,56 +34,55 @@ namespace foreach_conn {
         suite::Mbfs m_mbfs;
 
         explicit Base(const Hamiltonian &ham);
+        virtual ~Base(){}
 
-        virtual void operator()(const fields::FrmOnv& mbf, const fn_t<fields::FrmOnv>& body_fn) = 0;
-        virtual void operator()(const fields::FrmBosOnv& mbf, const fn_t<fields::FrmBosOnv>& body_fn) = 0;
-        virtual void operator()(const fields::BosOnv& mbf, const fn_t<fields::BosOnv>& body_fn) = 0;
+        virtual void foreach(const FrmOnv& mbf, const fn_t<FrmOnv>& body_fn) = 0;
+        virtual void foreach(const FrmBosOnv& mbf, const fn_t<FrmBosOnv>& body_fn) = 0;
+        virtual void foreach(const BosOnv& mbf, const fn_t<BosOnv>& body_fn) = 0;
 
-        defs::ham_t get_element(const fields::FrmOnv& mbf, const conn::FrmOnv& conn);
-        defs::ham_t get_element(const fields::FrmBosOnv& mbf, const conn::FrmBosOnv& conn);
-        defs::ham_t get_element(const fields::BosOnv& mbf, const conn::BosOnv& conn);
+        defs::ham_t get_element(const FrmOnv& mbf, const conn::FrmOnv& conn);
+        defs::ham_t get_element(const FrmBosOnv& mbf, const conn::FrmBosOnv& conn);
+        defs::ham_t get_element(const BosOnv& mbf, const conn::BosOnv& conn);
 
         /*
          * adapt the above virtual methods for computation of the connected MBF
          */
         template<typename mbf_t>
-        void operator()(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn) {
+        void foreach(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn) {
             auto& dst_mbf = m_mbfs[mbf];
             auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
                 conn.apply(mbf, dst_mbf);
                 body_fn(conn, dst_mbf);
             };
-            (*this)(mbf, fn);
+            this->foreach(mbf, fn);
         }
 
         /*
          * adapt the above virtual methods for computation of the matrix elements
          */
         template<typename mbf_t>
-        void operator()(const mbf_t& mbf, const fn_h_t<mbf_t>& body_fn, bool nonzero_h_only){
+        void foreach(const mbf_t& mbf, const fn_h_t<mbf_t>& body_fn, bool nonzero_h_only){
             auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
                 auto helem = get_element(mbf, conn);
                 if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 body_fn(conn, helem);
             };
-            (*this)(mbf, fn);
+            this->foreach(mbf, fn);
         }
 
         /*
          * adapt the above virtual methods for computation of both the connected MBF and the matrix elements
          */
-        template<typename mbf_t>
-        void operator()(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn, bool nonzero_h_only){
+        void foreach(const FrmOnv& mbf, const fn_dh_t<FrmOnv>& body_fn, bool nonzero_h_only){
             auto& dst_mbf = m_mbfs[mbf];
-            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+            auto fn = [&](const conn::from_field_t<FrmOnv> &conn) {
                 auto helem = get_element(mbf, conn);
                 if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 conn.apply(mbf, dst_mbf);
                 body_fn(conn, dst_mbf, helem);
             };
-            (*this)(mbf, fn);
+            this->foreach(mbf, fn);
         }
-
     };
 
     namespace frm {
@@ -90,25 +90,25 @@ namespace foreach_conn {
          * no symmetry is respected in this basic case
          */
         struct Fermion : Base {
-            using Base::operator();
+            using Base::foreach;
 
             explicit Fermion(const Hamiltonian &ham) : Base(ham) {}
 
         protected:
             virtual void singles(conn::FrmOnv &conn, const std::function<void()> &fn);
 
-            virtual void singles(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
+            virtual void singles(const FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
 
             virtual void doubles(conn::FrmOnv &conn, const std::function<void()> &fn);
 
-            virtual void operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
+            virtual void foreach(const FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
 
         public:
-            void operator()(const fields::FrmOnv &mbf, const fn_t<fields::FrmOnv> &body_fn) override;
+            void foreach(const FrmOnv &mbf, const fn_t<FrmOnv> &body_fn) override;
 
-            void operator()(const fields::FrmBosOnv &mbf, const fn_t<fields::FrmBosOnv> &body_fn) override;
+            void foreach(const FrmBosOnv &mbf, const fn_t<FrmBosOnv> &body_fn) override;
 
-            void operator()(const fields::BosOnv &mbf, const fn_t<fields::BosOnv> &body_fn) override {}
+            void foreach(const BosOnv &mbf, const fn_t<BosOnv> &body_fn) override {}
 
         };
 
@@ -116,7 +116,7 @@ namespace foreach_conn {
          * make use of spin and point-group symmetry in the loop over connections
          */
         struct SpinSym : Fermion {
-            using Fermion::operator();
+            using Fermion::foreach;
 
             explicit SpinSym(const Hamiltonian &ham) : Fermion(ham) {}
 
@@ -127,18 +127,22 @@ namespace foreach_conn {
         };
 
         struct Hubbard1D : Fermion {
-            using Fermion::operator();
+            using Fermion::foreach;
             const bool m_pbc;
 
             explicit Hubbard1D(const Hamiltonian &ham);
 
         protected:
-            void singles(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) override;
+            void singles(const FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) override;
 
         public:
 
-            void operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) override;
+            void foreach(const FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) override;
         };
+    }
+
+    static std::unique_ptr<Base> make(const Hamiltonian& ham) {
+        return std::unique_ptr<Base>(new frm::Fermion(ham));
     }
 }
 

@@ -586,6 +586,7 @@ void Solver::output_stats() {
         timing_stats.m_communication_time = m_communicate_timer;
         timing_stats.m_annihilation_loop_time = m_annihilate_timer;
         timing_stats.m_total_cycle_time = m_cycle_timer;
+        m_timing_stats->flush();
     }
 
     if (m_opts.m_stats.m_parallel) {

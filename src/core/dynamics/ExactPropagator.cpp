@@ -6,9 +6,11 @@
 #include "ExactPropagator.h"
 #include "FciqmcCalculation.h"
 
-ExactPropagator::ExactPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
-                                 const NdFormat<defs::ndim_wf>& wf_fmt, bool only_nonzero_h_spawns) :
-                                 Propagator(opts, ham, wf_fmt), m_only_nonzero_h_spawns(only_nonzero_h_spawns) {}
+ExactPropagator::ExactPropagator(
+        const Hamiltonian &ham, const fciqmc_config::Document &opts,
+        const NdFormat<defs::ndim_wf>& wf_fmt, bool only_nonzero_h_spawns) :
+        Propagator(opts, ham, wf_fmt), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
+        m_connections(foreach_conn::make(ham)){}
 
 void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const auto &row = wf.m_store.m_row;
@@ -27,7 +29,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
-    m_ham.foreach_connection(src_mbf, body, m_only_nonzero_h_spawns);
+    m_connections->foreach(src_mbf, body, m_only_nonzero_h_spawns);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

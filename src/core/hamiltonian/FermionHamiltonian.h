@@ -14,8 +14,6 @@
 #include "src/core/integrals/Integrals_2e.h"
 #include "src/core/table/BufferedFields.h"
 #include "HamiltonianData.h"
-#include "ForeachConnection.h"
-
 
 /**
  * All interactions between the fermionic parts of ONVs are described in this class.

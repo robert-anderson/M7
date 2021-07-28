@@ -54,21 +54,21 @@ void foreach_conn::frm::Fermion::doubles(conn::FrmOnv &conn, const std::function
 }
 
 void
-foreach_conn::frm::Fermion::operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
+foreach_conn::frm::Fermion::foreach(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
     m_occ.update(mbf);
     m_vac.update(mbf);
     singles(conn, fn);
     doubles(conn, fn);
 }
 
-void foreach_conn::frm::Fermion::operator()(const fields::FrmOnv &mbf, const foreach_conn::fn_t<fields::FrmOnv> &body_fn) {
+void foreach_conn::frm::Fermion::foreach(const fields::FrmOnv &mbf, const foreach_conn::fn_t<fields::FrmOnv> &body_fn) {
     auto fn = [&]() { body_fn(m_conns.m_frmonv); };
-    (*this)(mbf, m_conns.m_frmonv, fn);
+    this->foreach(mbf, m_conns.m_frmonv, fn);
 }
 
-void foreach_conn::frm::Fermion::operator()(const fields::FrmBosOnv &mbf, const foreach_conn::fn_t<fields::FrmBosOnv> &body_fn) {
+void foreach_conn::frm::Fermion::foreach(const fields::FrmBosOnv &mbf, const foreach_conn::fn_t<fields::FrmBosOnv> &body_fn) {
     auto fn = [&]() { body_fn(m_conns.m_frmbosonv); };
-    (*this)(mbf.m_frm, m_conns.m_frmbosonv.m_frm, fn);
+    this->foreach(mbf.m_frm, m_conns.m_frmbosonv.m_frm, fn);
 }
 
 void foreach_conn::frm::SpinSym::singles(conn::FrmOnv &conn, const std::function<void()> &fn) {
@@ -100,7 +100,7 @@ void foreach_conn::frm::Hubbard1D::singles(
 }
 
 void
-foreach_conn::frm::Hubbard1D::operator()(const fields::FrmOnv &mbf, conn::FrmOnv &conn,
+foreach_conn::frm::Hubbard1D::foreach(const fields::FrmOnv &mbf, conn::FrmOnv &conn,
                                          const std::function<void()> &fn) {
     m_occ.update(mbf);
     singles(mbf, conn, fn);
