@@ -58,7 +58,11 @@ public:
     CommunicatingPair(std::string name, size_t comm_nrow_est, double exp_fac, const send_table_t &send) :
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
+        log::info("Initially allocating {} per rank for \"{}\"",
+                  string_utils::memsize(comm_nrow_est*m_send.m_row_size), m_send.name());
         m_send.resize(comm_nrow_est, 0.0);
+        log::info("Initially allocating {} per rank for \"{}\"",
+                  string_utils::memsize(mpi::nrank() * comm_nrow_est*m_send.m_row_size), m_send.name());
         m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
         m_send.set_expansion_factor(exp_fac);
         m_recv.set_expansion_factor(exp_fac);
@@ -536,6 +540,8 @@ struct Communicator {
             m_comm(name, comm_nrow_est, comm_exp_fac, send),
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
+        log::info("Initially allocating {} per rank for \"{}\"",
+                  string_utils::memsize(store_nrow_est*m_store.m_row_size), m_store.name());
         m_store.resize(store_nrow_est, 0.0);
         m_store.set_expansion_factor(store_exp_fac);
     }
