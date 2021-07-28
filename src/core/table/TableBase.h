@@ -371,8 +371,7 @@ struct TableBase {
     size_t nrow_nonzero() const;
 
     std::string name() const {
-        if (m_bw.allocated()) return m_bw.name();
-        return "";
+        return m_bw.name();
     }
 };
 

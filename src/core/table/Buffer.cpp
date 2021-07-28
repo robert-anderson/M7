@@ -38,6 +38,7 @@ void Buffer::Window::resize(size_t size, double factor) {
 }
 
 std::string Buffer::Window::name() const {
+    if (!m_buffer) return "";
     return m_buffer->m_name;
 }
 
