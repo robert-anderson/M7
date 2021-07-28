@@ -135,6 +135,11 @@ public:
         }
         return tmp;
     }
+
+    std::string name() const {
+        if (m_buffer.size()) return m_buffer.m_name;
+        return "";
+    }
 };
 
 #endif //M7_BUFFEREDTABLEARRAY_H
