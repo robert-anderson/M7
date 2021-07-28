@@ -47,8 +47,7 @@ bool UniformSingles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv
         else ASSERT(a >= m_h->nsite())
     }
 #endif
-    conn.clear();
-    conn.add(i, a);
+    conn.set(i, a);
     conn.apply(src_onv, dst_onv);
     prob = 1.0 / ncases;
     helem = m_h->m_frm.get_element_1(src_onv, conn);

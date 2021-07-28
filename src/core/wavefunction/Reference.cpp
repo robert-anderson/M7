@@ -69,12 +69,12 @@ void Reference::end_cycle() {
 
 bool Reference::is_connected(const fields::Mbf &mbf) const {
     m_conn[mbf].connect(get_mbf(), mbf);
-    return !consts::float_is_zero(m_ham.get_element(mbf, m_conn[mbf]));
+    return !consts::float_is_zero(m_ham.get_element(get_mbf(), m_conn[mbf]));
 }
 
 void Reference::make_numerator_contribs(const fields::Mbf &mbf, const defs::wf_t& weight) {
     m_conn[mbf].connect(get_mbf(), mbf);
-    m_proj_energy_num.m_local += m_ham.get_element(mbf, m_conn[mbf]) * weight;
+    m_proj_energy_num.m_local += m_ham.get_element(get_mbf(), m_conn[mbf]) * weight;
     m_nwalker_at_doubles.m_local += std::abs(weight);
 }
 

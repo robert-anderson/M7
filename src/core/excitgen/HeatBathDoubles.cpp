@@ -70,11 +70,11 @@ bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_on
     if (std::any_of(occs.inds().cbegin(), occs.inds().end(), either_vac_in_array)) {
         return false;
     }
-    conn.clear();
-    conn.add(i, j, a, b);
-    helem = m_h->m_frm.get_element_2(dst_onv, conn);
+    conn.set(i, j, a, b);
+    helem = m_h->m_frm.get_element_2(src_onv, conn);
+    conn.apply(src_onv, dst_onv);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
-    ASSERT(prob <= 1)
+    DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
     if (consts::float_nearly_zero(prob, 1e-14)) {
         return false;
     }

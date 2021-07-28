@@ -188,6 +188,8 @@ bool FrmOnvConnection::independent_phase(const fields::FrmOnv &src, const size_t
 }
 
 bool FrmOnvConnection::phase(const fields::FrmOnv &src) const {
+    DEBUG_ASSERT_TRUE(m_ann.all_occ(src), "not all annihilation indices are occupied in src ONV");
+    DEBUG_ASSERT_TRUE(m_cre.all_vac(src), "not all creation indices are vacant in src ONV");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     bool out = false;
