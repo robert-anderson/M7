@@ -48,7 +48,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
 }
 
 void Solver::execute(size_t ncycle) {
-
+    log::info("Beginning solver loop...");
     for (size_t i = 0ul; i < ncycle; ++i) {
         m_cycle_timer.reset();
         m_cycle_timer.unpause();

@@ -11,7 +11,7 @@ TEST(Propagators, BasicTest) {
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_wavefunction.m_replicate = false;
     opts.m_propagator.m_nadd = 3.0;
-    opts.m_propagator.m_tau_init = 0.005;
+    opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 100000;
     opts.m_propagator.m_consolidate_spawns = false;
     opts.m_wavefunction.m_load_balancing.m_period = 1;
@@ -24,7 +24,7 @@ TEST(Propagators, BasicTest) {
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
-    props::Exact prop(ham, opts, wf.m_format);
+    props::Stoch prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
