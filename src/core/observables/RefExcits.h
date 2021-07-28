@@ -83,7 +83,8 @@ struct RefExcits : Archivable {
 
     void make_contribs(const fields::Mbf& mbf, const fields::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
         m_conn.connect(ref_mbf, mbf);
-        auto nop = m_conn.size();
+        auto nop = m_conn.m_cre.size();
+        if (m_conn.m_ann.size()!=nop) return; // not supporting electron number non-conservation
         if (!nop) m_av_ref[ipart] += contrib;
         else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(m_conn, contrib, ipart);
     }
