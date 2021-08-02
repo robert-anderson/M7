@@ -87,8 +87,10 @@ void DeterministicSubspace::make_mev_contribs(MevGroup &mevs, const fields::Mbf 
         for (const auto& entry: m_sparse_ham.row(row_local.index())) {
             row_global.jump(entry.icol);
             if (row_global.m_mbf == ref) continue;
-            mevs.m_fermion_rdm->make_contribs(row_local.m_mbf, 0.5 * row_local.m_weight[0], row_global.m_mbf, row_global.m_weight[1]);
-            mevs.m_fermion_rdm->make_contribs(row_local.m_mbf, 0.5 * row_local.m_weight[1], row_global.m_mbf, row_global.m_weight[0]);
+            if (mevs.m_ref_excits)
+                mevs.m_ref_excits->make_contribs(row_local.m_mbf, ref, row_local.m_weight[0], 0);
+//            mevs.m_fermion_rdm->make_contribs(row_local.m_mbf, 0.5 * row_local.m_weight[0], row_global.m_mbf, row_global.m_weight[1]);
+//            mevs.m_fermion_rdm->make_contribs(row_local.m_mbf, 0.5 * row_local.m_weight[1], row_global.m_mbf, row_global.m_weight[0]);
         }
     }
 }
