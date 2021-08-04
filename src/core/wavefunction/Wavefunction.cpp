@@ -51,7 +51,7 @@ Wavefunction::~Wavefunction() {
     auto& row = xr_gathered.m_row;
     log::info("Top-weighted WF elements for part 0:");
     for (row.restart(); row.in_range(); row.step()){
-        log::info("{}  {}  {}", row.m_mbf.to_string(), row.m_weight[0], row.m_initiator[0]);
+        log::info("{:<4} {}  {: .5e}  {}", row.index(), row.m_mbf, row.m_weight[0], row.m_initiator[0]);
     }
 }
 

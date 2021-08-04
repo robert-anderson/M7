@@ -6,22 +6,17 @@
 #define M7_STOCHASTICPROPAGATOR_H
 
 #include <src/core/sample/PRNG.h>
-#include <src/core/excitgen/ExcitationGenerator.h>
+#include <src/core/excitgen/ExcitGen.h>
 #include <src/core/excitgen/UniformSingles.h>
 #include <src/core/excitgen/HeatBathDoubles.h>
-#include <src/core/sample/WeightedDrawer.h>
-#include <src/core/excitgen/BosonExcitationGenerator.h>
+#include <src/core/excitgen/ExcitGenGroup.h>
 #include "Propagator.h"
 
 class StochasticPropagator : public Propagator {
-
-    void add_boson_excitgen(const Hamiltonian &ham);
-
 protected:
     PRNG m_prng;
-    std::vector<std::unique_ptr<ExcitationGenerator>> m_exgens;
+    ExcitGenGroup m_excit_gens;
     const double &m_min_spawn_mag;
-    std::unique_ptr<WeightedDrawer> m_exgen_drawer;
 
 public:
     StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);

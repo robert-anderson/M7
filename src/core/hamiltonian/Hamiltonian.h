@@ -17,6 +17,7 @@
 using namespace fields;
 
 struct Hamiltonian {
+    const size_t m_nboson_max;
     FermionHamiltonian m_frm;
     BosonCouplings m_frmbos;
     BosonHamiltonian m_bos;
@@ -24,7 +25,7 @@ struct Hamiltonian {
     Hamiltonian(std::string fname, bool spin_major, size_t nboson_max = 0, defs::ham_comp_t boson_frequency = 0.0,
                 defs::ham_comp_t boson_coupling = 0.0);
 
-    Hamiltonian(const fciqmc_config::Hamiltonian &opts);
+    explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 
     size_t nci() const;
 

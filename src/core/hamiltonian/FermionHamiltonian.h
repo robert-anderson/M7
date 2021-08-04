@@ -190,11 +190,11 @@ public:
     }
 
 public:
-    bool is_hubbard() const {
+    bool is_hubbard_1d() const {
         return m_on_site_only_0022 && m_nn_only_1111;
     }
 
-    bool is_hubbard_pbc() const {
+    bool is_hubbard_1d_pbc() const {
         return m_on_site_only_0022 && m_nnp_only_1111;
     }
 

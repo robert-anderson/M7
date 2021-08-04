@@ -2,27 +2,29 @@
 // Created by rja on 02/05/2021.
 //
 
-#ifndef M7_HUBBARDSINGLES_H
-#define M7_HUBBARDSINGLES_H
+#ifndef M7_HUBBARD1DSINGLES_H
+#define M7_HUBBARD1DSINGLES_H
 
 #include "UniformSingles.h"
 
-struct HubbardSingles : public UniformSingles {
+struct Hubbard1dSingles : public UniformSingles {
     const bool m_pbc;
 
-    HubbardSingles(const Hamiltonian* h, PRNG& prng, bool pbc):
+    Hubbard1dSingles(const Hamiltonian& h, PRNG& prng, bool pbc):
         UniformSingles(h, prng), m_pbc(pbc){}
 
-    bool draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv,
+    bool draw(const fields::FrmOnv &src_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
 
-    bool draw(const fields::FrmBosOnv &src_onv, fields::FrmBosOnv &dst_onv,
+    bool draw(const fields::FrmBosOnv &src_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
-        return draw(src_onv.m_frm, dst_onv.m_frm, occs, vacs, prob, helem, conn.m_frm);
+        return draw(src_onv.m_frm, occs, vacs, prob, helem, conn.m_frm);
     }
+
+    size_t approx_nconn() const override;
 };
 
 
-#endif //M7_HUBBARDSINGLES_H
+#endif //M7_HUBBARD1DSINGLES_H

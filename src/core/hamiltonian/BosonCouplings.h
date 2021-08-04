@@ -8,11 +8,11 @@
 #include "src/core/connection/Connections.h"
 
 struct BosonCouplings {
-    const size_t m_nboson_cutoff, m_nmode;
+    const size_t m_nboson_max, m_nmode;
     const defs::ham_t m_v;
 
-    BosonCouplings(size_t nmode, size_t nboson_cutoff, defs::ham_t v) :
-            m_nboson_cutoff(nboson_cutoff), m_nmode(nmode), m_v(v) {}
+    BosonCouplings(size_t nmode, size_t nboson_max, defs::ham_t v) :
+        m_nboson_max(nboson_max), m_nmode(nmode), m_v(v) {}
 
     defs::ham_t v(const size_t &p, const size_t &q, const size_t &n) const {
         return (p == q && p == n) ? m_v : 0.0;

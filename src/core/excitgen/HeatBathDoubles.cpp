@@ -4,20 +4,20 @@
 
 #include "HeatBathDoubles.h"
 
-HeatBathDoubles::HeatBathDoubles(const Hamiltonian *h, PRNG &prng) :
-        FermionExcitationGenerator(h, prng, 2), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
+HeatBathDoubles::HeatBathDoubles(const Hamiltonian &h, PRNG &prng) :
+        FrmExcitGen(h, prng, 2), m_pick_ab_given_ij(m_norb_pair, m_norb_pair) {
     std::vector<defs::prob_t> weights(m_norb_pair, 0.0);
     size_t ij = 0ul;
     log::info("Initializing pre-computed heat bath sampling weights for doubles...");
     if (mpi::on_node_i_am_root()) {
-        for (size_t i = 0ul; i < m_nintind; ++i) {
+        for (size_t i = 0ul; i < m_nspinorb; ++i) {
             for (size_t j = 0ul; j < i; ++j) {
                 weights.assign(m_norb_pair, 0.0);
                 size_t ab = 0ul;
-                for (size_t a = 0ul; a < m_nintind; ++a) {
+                for (size_t a = 0ul; a < m_nspinorb; ++a) {
                     for (size_t b = 0ul; b < a; ++b) {
                         //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
-                        auto element = m_h->m_frm.get_element_2(i, j, a, b);
+                        auto element = m_h.m_frm.get_element_2(i, j, a, b);
                         weights[ab] = std::abs(element);
                         //}
                         ++ab;
@@ -38,7 +38,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian *h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_onv,
+bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv,
                             const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                             defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     // just draw uniform ij TODO! int weighted ij
@@ -71,12 +71,15 @@ bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv, fields::FrmOnv &dst_on
         return false;
     }
     conn.set(i, j, a, b);
-    helem = m_h->m_frm.get_element_2(src_onv, conn);
-    conn.apply(src_onv, dst_onv);
+    helem = m_h.m_frm.get_element_2(src_onv, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
     if (consts::float_nearly_zero(prob, 1e-14)) {
         return false;
     }
     return true;
+}
+
+size_t HeatBathDoubles::approx_nconn() const {
+    return m_nelec_pair*m_norb_pair;
 }
