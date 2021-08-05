@@ -4,59 +4,51 @@
 
 #include "MagnitudeLogger.h"
 
-MagnitudeLogger::MagnitudeLogger(const fciqmc_config::Propagator &opts, defs::prob_t psingle) :
-        m_opts(opts),
-        m_enough_singles_for_dynamic_tau("use singles ratio for dynamic tau"),
-        m_enough_doubles_for_dynamic_tau("use doubles ratio for dynamic tau"),
-        m_psingle(psingle), m_tau(m_opts.m_tau_init) {}
-
-void MagnitudeLogger::log(size_t nexcit, defs::ham_t helem, defs::prob_t prob) {
-    defs::ham_comp_t tmp_hi_mag;
-    if (nexcit == 1) {
-        ++m_nsingle;
-        tmp_hi_mag = std::abs(helem) / prob;
-#ifdef VERBOSE_DEBUGGING
-        if (m_tau*tmp_hi_mag>m_input.max_bloom) {
-            std::cout << consts::verb << consts::chevs << "MAX BLOOM EXCEEDED BY SINGLE EXCITATION" << std::endl;
-            std::cout << consts::verb << "weight transferred:     " << m_tau*tmp_hi_mag << std::endl;
-        }
-#endif
-        if (tmp_hi_mag>m_hi_mag_single.local()) m_hi_mag_single = tmp_hi_mag;
-    } else if (nexcit == 2) {
-        ++m_ndouble;
-        tmp_hi_mag = std::abs(helem) / prob;
-#ifdef VERBOSE_DEBUGGING
-        if (m_tau*tmp_hi_mag>m_input.max_bloom) {
-            std::cout << consts::verb << consts::chevs << "MAX BLOOM EXCEEDED BY DOUBLE EXCITATION" << std::endl;
-            std::cout << consts::verb << "weight transferred:     " << m_tau*tmp_hi_mag << std::endl;
-        }
-#endif
-        if (tmp_hi_mag>m_hi_mag_double.local()) m_hi_mag_double = tmp_hi_mag;
-    }
+MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, size_t nexlvl, bool static_tau,
+                                 bool static_probs, double tau_min, double tau_max, double prob_min, size_t period) :
+        m_max_bloom(max_bloom), m_ndraw_min(ndraw_min), m_static_tau(static_tau), m_static_probs(static_probs),
+        m_tau_min(tau_min), m_tau_max(tau_max), m_prob_min(prob_min), m_period(period), m_ndraw({nexlvl}),
+        m_gamma({nexlvl}), m_new_probs(nexlvl){
+    log::info("Initializing magnitude logger with max_bloom {} for {} excitation levels", max_bloom, nexlvl);
+    log::info("Dynamic tau optimization: {}", !m_static_tau);
+    if (!m_static_tau)
+        log::info("Dynamic tau to be kept above {} and below {}", m_tau_min, m_tau_max);
+    log::info("Dynamic excitation level probability optimization: {}", !m_static_probs);
+    if (!m_static_probs)
+        log::info("Dynamic excitation level probabilities to be kept above {}", m_prob_min);
 }
 
-void MagnitudeLogger::synchronize(size_t icycle) {
-    if (!m_opts.m_static_tau) {
-        m_enough_singles_for_dynamic_tau.update(icycle, m_nsingle>m_opts.m_nenough_spawns_for_dynamic_tau);
-        m_enough_doubles_for_dynamic_tau.update(icycle, m_nsingle>m_opts.m_nenough_spawns_for_dynamic_tau);
-        if (m_enough_singles_for_dynamic_tau && m_enough_doubles_for_dynamic_tau) {
-            m_hi_mag_single.mpi_max();
-            m_hi_mag_double.mpi_max();
-            auto hi_mag_sum = m_hi_mag_single.reduced() + m_hi_mag_double.reduced();
-            ASSERT(hi_mag_sum > 0.0);
-            /*
-             * highest transferred weight ~ tau x max(helem/prob)
-             * i.e. recommended tau = max bloom / max(helem/prob)
-             */
-            m_tau = m_opts.m_max_bloom / hi_mag_sum;
-            // go halfway to predicted value
-            m_psingle = (m_psingle+m_hi_mag_single / hi_mag_sum)/2;
-            m_psingle = std::max(m_psingle, m_opts.m_min_excit_class_prob.get());
-            m_hi_mag_single = std::numeric_limits<defs::ham_comp_t>::min();
-            m_hi_mag_double = std::numeric_limits<defs::ham_comp_t>::min();
-        }
-    }
+void MagnitudeLogger::log(const size_t &iexlvl, const defs::ham_comp_t &helem, const defs::prob_t &prob) {
+    DEBUG_ASSERT_NE(prob, 0.0, "null draw should never be logged");
+    auto& hi = m_gamma.m_local[iexlvl];
+    auto mag = helem / prob;
+    if (mag > hi) hi = mag;
+    ++m_ndraw.m_local[iexlvl];
 }
 
-MagnitudeLogger::MagnitudeLogger(const fciqmc_config::Propagator &opts, size_t nsite, size_t nelec) :
-        MagnitudeLogger(opts, opts.m_psingle_init ? opts.m_psingle_init : psingle_guess(nsite, nelec)){}
+void MagnitudeLogger::update_tau(double &tau, const defs::ham_comp_t &gamma_sum) {
+    if (m_static_tau) return;
+    tau = m_max_bloom / gamma_sum;
+    if (tau < m_tau_min) tau = m_tau_min;
+    if (tau > m_tau_max) tau = m_tau_max;
+}
+
+void MagnitudeLogger::update(size_t icycle, double &tau) {
+    if (!icycle || icycle%m_period) return;
+    m_gamma.all_max();
+    update_tau(tau, m_gamma.m_reduced.sum());
+}
+
+void MagnitudeLogger::update(size_t icycle, double &tau, ExcitGenGroup &excit_gens) {
+    if (!icycle || icycle%m_period) return;
+    m_gamma.all_max();
+    auto gamma_sum = m_gamma.m_reduced.sum();
+    update_tau(tau, gamma_sum);
+    if (!m_static_probs){
+        m_new_probs.assign(m_gamma.m_reduced.dbegin(), m_gamma.m_reduced.dend());
+        for (auto& new_prob : m_new_probs) new_prob /= gamma_sum;
+        prob_utils::rectify(m_new_probs, m_prob_min);
+        excit_gens.set_probs(m_new_probs);
+        m_gamma.m_local.zero();
+    }
+}

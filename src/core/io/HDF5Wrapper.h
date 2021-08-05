@@ -381,6 +381,10 @@ namespace hdf5 {
             save(name, reinterpret_cast<const T*>(v), dims, dim_labels, irank);
         }
 
+        /**
+         * wrapper for save of simple type in the case that the data source is a vector, but also has a multidimensional
+         * shape
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::vector<T>& v, const defs::inds& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul){
@@ -388,14 +392,35 @@ namespace hdf5 {
             save(name, v.data(), shape, {}, irank);
         }
 
+        /**
+         * wrapper for save of vector in the case that it is not multidimensional
+         */
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::vector<T>& v, size_t irank=0ul){
             save(name, v, {v.size()}, {}, irank);
         }
 
+
+//        template<typename T>
+//        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
+//        save(std::string name, const fields::Numbers<T>& field, size_t irank=0ul){
+//        }
+
+        /**
+         * save a vector of strings by creating a char array datatype for the longest element of the given vector v
+         * @param name
+         *  key in the HDF5 Group in which the value is to be stored
+         * @param v
+         *  vector of strings to store on disk
+         * @param irank
+         *  index of MPI rank which stores the definitive value of v
+         */
         void save(std::string name, const std::vector<std::string>& v, size_t irank=0ul);
 
+        /**
+         * wrapper for save in the case that only a single string is to be stored
+         */
         void save(std::string name, const std::string& v, size_t irank=0ul);
     };
 

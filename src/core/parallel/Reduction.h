@@ -5,6 +5,8 @@
 #ifndef M7_REDUCTION_H
 #define M7_REDUCTION_H
 
+#include "src/core/table/BufferedFields.h"
+
 template<typename T>
 struct ReductionBase {
     const size_t m_nelement;
@@ -37,8 +39,8 @@ private:
     }
 
 public:
-    NdReduction(const NdFormat<nind> &format) :
-            NdReduction(format, dispatch_utils::BoolTag<nind==0>()){}
+    NdReduction(const std::array<size_t, nind> &shape) :
+            NdReduction({shape}, dispatch_utils::BoolTag<nind==0>()){}
 
     NdReduction() : NdReduction({}, dispatch_utils::BoolTag<nind==0>()){
         static_assert(!nind, "This ctor is only valid in the scalar case");
@@ -46,6 +48,14 @@ public:
 
     void all_sum() {
         mpi::all_sum(m_local_ptr, m_reduced_ptr, m_nelement);
+    }
+
+    void all_max() {
+        mpi::all_max(m_local_ptr, m_reduced_ptr, m_nelement);
+    }
+
+    void all_min() {
+        mpi::all_min(m_local_ptr, m_reduced_ptr, m_nelement);
     }
 };
 
@@ -64,6 +74,10 @@ struct ReductionSyndicateGroupBase {
     virtual void zero_all() = 0;
 
     virtual void all_sum() = 0;
+
+    virtual void all_max() = 0;
+
+    virtual void all_min() = 0;
 };
 
 template<typename T>
@@ -120,6 +134,18 @@ public:
         mpi::all_sum(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
         disperse();
     }
+
+    void all_max() override {
+        collect();
+        mpi::all_max(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
+        disperse();
+    }
+
+    void all_min() override {
+        collect();
+        mpi::all_min(m_local_buffer.data(), m_reduced_buffer.data(), m_local_buffer.size());
+        disperse();
+    }
 };
 
 struct ReductionSyndicate {
@@ -155,6 +181,14 @@ struct ReductionSyndicate {
 
     void all_sum() {
         for (auto &group: m_groups) if (group) group->all_sum();
+    }
+
+    void all_max() {
+        for (auto &group: m_groups) if (group) group->all_max();
+    }
+
+    void all_min() {
+        for (auto &group: m_groups) if (group) group->all_min();
     }
 };
 

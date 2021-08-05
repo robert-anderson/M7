@@ -5,6 +5,7 @@
 #ifndef M7_EXCITGENGROUP_H
 #define M7_EXCITGENGROUP_H
 
+#include "src/core/parallel/Reduction.h"
 #include "Hubbard1dSingles.h"
 #include "HeatBathDoubles.h"
 
@@ -17,8 +18,6 @@ class ExcitGenGroup {
     std::vector<defs::prob_t> m_probs;
     std::vector<defs::prob_t> m_cumprobs;
     std::vector<ExcitGen *> m_ptrs;
-
-    defs::inds m_ndraws;
 
     void init_probs() {
         for (auto ptr: m_ptrs) m_probs.push_back(ptr->approx_nconn());
@@ -45,7 +44,8 @@ public:
      *  random number generator needed to construct the required exlvl-specific excitation generators and decide which
      *  exlvl to attempt to draw
      */
-    ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng): m_prng(prng) {
+    ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng):
+        m_prng(prng) {
         if (ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc()) {
             m_frm_singles = std::unique_ptr<FrmExcitGen>(
                     new Hubbard1dSingles(ham, prng, ham.m_frm.is_hubbard_1d_pbc()));
@@ -69,7 +69,6 @@ public:
         if (m_frm_singles) m_ptrs.push_back(m_frm_singles.get());
         if (m_frmbos) m_ptrs.push_back(m_frmbos.get());
         init_probs();
-        m_ndraws.assign(size(), 0ul);
     }
 
     size_t size() const {
@@ -104,40 +103,26 @@ public:
         set_prob(prob, m_frmbos.get());
     }
 
-    const defs::prob_t& get_prob(const size_t &i) const {
-        DEBUG_ASSERT_LT(i, size(), "excit gen index OOB");
-        return m_probs[i];
+    const defs::prob_t& get_prob(const size_t &iexlvl) const {
+        DEBUG_ASSERT_LT(iexlvl, size(), "excit gen index OOB");
+        return m_probs[iexlvl];
     }
 
-    ExcitGen &operator[](const size_t &i) {
-        DEBUG_ASSERT_LT(i, size(), "excit gen index OOB");
-        return *m_ptrs[i];
+    const std::vector<defs::prob_t>& get_probs() const {
+        return m_probs;
     }
 
-    size_t draw_exlvl_ind(){
+    ExcitGen &operator[](const size_t &iexlvl) {
+        DEBUG_ASSERT_LT(iexlvl, size(), "excit gen index OOB");
+        return *m_ptrs[iexlvl];
+    }
+
+    size_t draw_iexlvl(){
         auto r = m_prng.draw_float();
         for (size_t i=0ul; i < size(); ++i) {
             if (r<m_cumprobs[i]) return i;
         }
         return size()-1;
-    }
-
-    bool draw(const fields::FrmOnv &src_onv,
-                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-                      defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn){
-        auto exlvl_ind = draw_exlvl_ind();
-        auto res = m_ptrs[exlvl_ind]->draw(src_onv, occs, vacs, prob, helem, conn);
-        prob*=m_probs[exlvl_ind];
-        return res;
-    }
-
-    bool draw(const fields::FrmBosOnv &src_onv,
-                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-                      defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn){
-        auto exlvl_ind = draw_exlvl_ind();
-        auto res = m_ptrs[exlvl_ind]->draw(src_onv, occs, vacs, prob, helem, conn);
-        prob*=m_probs[exlvl_ind];
-        return res;
     }
 
     void log_breakdown() const {

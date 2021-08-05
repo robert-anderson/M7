@@ -5,7 +5,6 @@
 #ifndef M7_SIGNPROBLEMFREETWF_H
 #define M7_SIGNPROBLEMFREETWF_H
 
-#include <src/core/parallel/Reducible.h>
 #include "src/core/wavefunction/WalkerTable.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 

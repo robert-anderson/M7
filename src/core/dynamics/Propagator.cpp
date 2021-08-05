@@ -7,7 +7,6 @@
 
 
 void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
-    //m_magnitude_logger.synchronize(icycle);
     m_shift.update(wf, icycle, tau());
 }
 
@@ -20,7 +19,7 @@ void Propagator::save_fn(hdf5::GroupWriter &parent) {
     hdf5::GroupWriter gw("propagator", parent);
     gw.save("nsite", m_ham.nsite());
     gw.save("nelec", m_ham.nelec());
-    gw.save("shift", m_magnitude_logger.m_tau);
-    gw.save("tau", m_magnitude_logger.m_tau);
-    gw.save("psingle", m_magnitude_logger.m_psingle);
+    //gw.save("shift", m_shift.m_values);
+    gw.save("tau", m_tau);
+    //gw.save("psingle", m_magnitude_logger.m_psingle);
 }

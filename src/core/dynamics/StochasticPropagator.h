@@ -16,6 +16,7 @@ class StochasticPropagator : public Propagator {
 protected:
     PRNG m_prng;
     ExcitGenGroup m_excit_gens;
+    MagnitudeLogger m_mag_log;
     const double &m_min_spawn_mag;
 
 public:
@@ -49,7 +50,12 @@ public:
 
     void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
 
-    bool is_exact() const override;
+    size_t nexcit_gen() const override;
+
+    std::vector<defs::prob_t> exlvl_probs() const override;
+
+    void update(const size_t &icycle, const Wavefunction &wf) override;
+
 };
 
 #endif //M7_STOCHASTICPROPAGATOR_H

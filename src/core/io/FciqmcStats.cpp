@@ -4,10 +4,10 @@
 
 #include "FciqmcStats.h"
 
-FciqmcStatsRow::FciqmcStatsRow(NdFormat<2> format) :
-        m_wf_format(format),
+FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
+        m_wf_format(prop.m_wf_fmt),
         m_icycle(this, "Cycle number"),
-        m_tau(this, m_wf_format, "Timestep"),
+        m_tau(this, "Timestep"),
         m_shift(this, m_wf_format, "Diagonal shift"),
         m_nwalker(this, m_wf_format, "WF L1 norm (number of walkers)"),
         m_delta_nwalker(this, m_wf_format, "Walkers added this cycle"),
@@ -20,13 +20,9 @@ FciqmcStatsRow::FciqmcStatsRow(NdFormat<2> format) :
         m_ninitiator(this, m_wf_format, "Initiator ONVs"),
         m_nocc_mbf(this, m_wf_format, "Occupied ONVs"),
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied ONVs"),
-        m_psingle(this, m_wf_format, "Probability of attempting to draw a single excitation"),
+        m_exlvl_probs(prop.nexcit_gen() ? this : nullptr, {prop.nexcit_gen()}, "Probability of attempting to draw excitation level"),
         m_uniform_twf_num(this, m_wf_format, "Numerator of uniform TWF-projected energy estimator"),
         m_weighted_twf_num(this, m_wf_format, "Numerator of weighted TWF-projected energy estimator"),
         m_weighted_twf_denom(this, m_wf_format, "Denominator of weighted TWF-projected energy estimator"),
-        m_reweighting_factor(this, m_wf_format, "Reweighting factor for population "
-                                                "control unbiasing")
+        m_reweighting_factor(this, m_wf_format, "Reweighting factor for population control unbiasing")
 {}
-
-FciqmcStatsRow::FciqmcStatsRow(size_t nroot, size_t nreplica) :
-        FciqmcStatsRow({{nroot, nreplica}, {"nroot", "nreplica"}}){}

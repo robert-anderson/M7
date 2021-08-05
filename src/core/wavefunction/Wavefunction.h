@@ -315,7 +315,7 @@ public:
      */
     void orthogonalize() {
         // bra root, ket root, replica
-        NdReduction<defs::wf_t, 3> overlaps({{nroot(), nroot(), nreplica()}});
+        NdReduction<defs::wf_t, 3> overlaps({nroot(), nroot(), nreplica()});
         auto& row = m_store.m_row;
         for (size_t iroot = 0ul; iroot < nroot(); ++iroot) {
             for (size_t jroot = iroot; jroot < nroot(); ++jroot) {

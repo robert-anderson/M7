@@ -17,11 +17,12 @@
  * compatibility with any objects reinstated from disk
  */
 class Propagator : public Archivable {
+protected:
+    double m_tau;
 public:
     const NdFormat<defs::ndim_wf> &m_wf_fmt;
     const Hamiltonian &m_ham;
     const fciqmc_config::Document &m_opts;
-    MagnitudeLogger m_magnitude_logger;
     Shift m_shift;
     /*
      * working objects
@@ -33,10 +34,10 @@ public:
 
     Propagator(const fciqmc_config::Document &opts, const Hamiltonian &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
             Archivable("propagator", opts.m_archive),
+            m_tau(opts.m_propagator.m_tau_init),
             m_wf_fmt(wf_fmt),
             m_ham(ham),
             m_opts(opts),
-            m_magnitude_logger(opts.m_propagator, ham.nsite(), ham.nelec()),
             m_shift(opts, wf_fmt),
             m_dst(ham.nsite()),
             m_conn(ham.nsite()),
@@ -54,12 +55,18 @@ public:
     }
 
     const double &tau() const {
-        return m_magnitude_logger.m_tau;
+        return m_tau;
     }
 
-    void update(const size_t &icycle, const Wavefunction &wf);
+    virtual void update(const size_t &icycle, const Wavefunction &wf);
 
-    virtual bool is_exact() const = 0;
+    virtual size_t nexcit_gen() const {
+        return 0;
+    }
+
+    virtual std::vector<defs::prob_t> exlvl_probs() const {
+        return {};
+    }
 
 private:
     void load_fn(hdf5::GroupReader &parent) override;

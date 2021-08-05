@@ -9,7 +9,6 @@
 #include "src/core/sparse/SparseMatrix.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/field/Fields.h"
-#include "src/core/parallel/Reducible.h"
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 

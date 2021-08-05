@@ -8,7 +8,17 @@
 
 StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt):
         Propagator(opts, ham, wf_fmt), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
-        m_excit_gens(ham, opts.m_propagator, m_prng), m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {
+        m_excit_gens(ham, opts.m_propagator, m_prng),
+        m_mag_log(opts.m_propagator.m_max_bloom,
+                  opts.m_propagator.m_ndraw_min_for_dynamic,
+                  m_excit_gens.size(),
+                  opts.m_propagator.m_static_tau,
+                  opts.m_propagator.m_static_probs,
+                  opts.m_propagator.m_tau_min,
+                  opts.m_propagator.m_tau_max,
+                  opts.m_propagator.m_min_exlvl_prob,
+                  opts.m_propagator.m_period),
+        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {
     m_excit_gens.log_breakdown();
 }
 
@@ -27,16 +37,19 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     m_occ.update(src_onv);
     m_vac.update(src_onv);
     size_t nattempt = get_nattempt(weight);
-#ifdef VERBOSE_DEBUGGING
-    std::cout << consts::verb << "spawn attempts: " << nattempt << std::endl;
-#endif
+
     defs::prob_t prob;
     defs::ham_t helem;
 
     auto& conn = m_conn[src_onv];
     auto& dst_onv = m_dst[src_onv];
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
-        if (!m_excit_gens.draw(src_onv, m_occ, m_vac, prob, helem, conn)) continue;
+
+        auto iexlvl = m_excit_gens.draw_iexlvl();
+        if (!m_excit_gens[iexlvl].draw(src_onv, m_occ, m_vac, prob, helem, conn)) continue;
+        m_mag_log.log(iexlvl, helem, prob);
+        prob /= m_excit_gens.get_prob(iexlvl);
+
         conn.apply(src_onv, dst_onv);
         auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;
         if (consts::float_is_zero(delta)) continue;
@@ -79,6 +92,15 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     }
 }
 
-bool StochasticPropagator::is_exact() const {
-    return false;
+size_t StochasticPropagator::nexcit_gen() const {
+    return m_excit_gens.size();
+}
+
+std::vector<defs::prob_t> StochasticPropagator::exlvl_probs() const {
+    return m_excit_gens.get_probs();
+}
+
+void StochasticPropagator::update(const size_t &icycle, const Wavefunction &wf) {
+    Propagator::update(icycle, wf);
+    m_mag_log.update(icycle, m_tau, m_excit_gens);
 }

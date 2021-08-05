@@ -5,16 +5,16 @@
 #include "Epoch.h"
 #include "src/core/io/Logging.h"
 
-Epoch::Epoch(std::string name) :m_name(std::move(name)) {
-    m_icycle_start = ~0ul;
-    m_icycle_start.mpi_bcast(0);
+Epoch::Epoch(std::string name): m_name(std::move(name)) {
+    m_icycle_start.m_local = ~0ul;
+    m_icycle_start.m_reduced = ~0ul;
 }
 
 bool Epoch::update(size_t icycle, bool condition) {
     if (*this) return false;
     ASSERT(icycle_start() == ~0ul)
-    m_icycle_start = condition?icycle:~0ul;
-    m_icycle_start.mpi_min();
+    m_icycle_start.m_local = condition?icycle:~0ul;
+    m_icycle_start.all_min();
     if (*this) {
         log::info("Entering \"{}\" epoch on cycle {} ", m_name, icycle);
         return true;
@@ -26,8 +26,8 @@ void Epoch::terminate(size_t icycle) {
     if (!*this) return;
     ASSERT(icycle_start() != ~0ul)
     log::info("Terminating \"{}\" epoch on cycle {} ", m_name, icycle);
-    m_icycle_start = ~0ul;
-    m_icycle_start.mpi_bcast(0);
+    m_icycle_start.m_local = ~0ul;
+    m_icycle_start.m_reduced = ~0ul;
 }
 
 Epoch::operator bool() const {
@@ -35,14 +35,14 @@ Epoch::operator bool() const {
 }
 
 const size_t &Epoch::icycle_start() const {
-    return m_icycle_start.reduced();
+    return m_icycle_start.m_reduced;
 }
 
 bool Epoch::started_last_cycle(size_t icycle) const {
-    return (m_icycle_start.reduced()!=~0ul && m_icycle_start.reduced()+1==icycle);
+    return (m_icycle_start.m_reduced!=~0ul && m_icycle_start.m_reduced+1==icycle);
 }
 
 bool Epoch::started_this_cycle(size_t icycle) const {
-    return (m_icycle_start.reduced()!=~0ul && m_icycle_start.reduced()==icycle);
+    return (m_icycle_start.m_reduced!=~0ul && m_icycle_start.m_reduced==icycle);
 }
 

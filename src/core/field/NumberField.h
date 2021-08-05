@@ -72,7 +72,7 @@ struct NdNumberField : NumberFieldBase {
 
     NdNumberField &operator=(const std::vector<T> &v) {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
-        std::copy(dbegin(), dend(), v.data());
+        std::copy(v.data(), v.data()+nelement(), dbegin());
         return *this;
     }
 

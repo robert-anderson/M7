@@ -492,11 +492,16 @@ namespace string_utils {
 
 
 namespace prob_utils {
-    template<typename T>
-    void normalize(std::vector<T> &v, T norm = T(1)) {
-        T tot = std::accumulate(v.begin(), v.end(), T(0));
-        T fac = norm / tot;
+
+    static void normalize(std::vector<defs::prob_t> &v, defs::prob_t norm = 1.0) {
+        auto tot = std::accumulate(v.begin(), v.end(), 0.0);
+        auto fac = norm / tot;
         for (auto &i:v) i *= fac;
+    }
+
+    static void rectify(std::vector<defs::prob_t> &v, defs::prob_t min) {
+        for (auto &prob: v) if (prob<min) prob = min;
+        normalize(v);
     }
 }
 

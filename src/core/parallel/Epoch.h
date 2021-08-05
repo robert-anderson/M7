@@ -23,12 +23,15 @@
 #define M7_EPOCH_H
 
 #include <utility>
+#include <string>
+#include <vector>
 
-#include "Reducible.h"
+#include "Reduction.h"
+#include "MPIAssert.h"
 
 class Epoch {
     std::string m_name;
-    Reducible<size_t> m_icycle_start;
+    Reduction<size_t> m_icycle_start;
 
 public:
     explicit Epoch(std::string name);
@@ -74,12 +77,12 @@ public:
     }
 
     Epoch& operator[](const size_t i){
-        ASSERT(i<m_epochs.size());
+        DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }
 
     const Epoch& operator[](const size_t i) const{
-        ASSERT(i<m_epochs.size());
+        DEBUG_ASSERT_LT(i, m_epochs.size(), "Epoch index OOB");
         return m_epochs[i];
     }
 

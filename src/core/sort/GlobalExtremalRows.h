@@ -5,7 +5,7 @@
 #ifndef M7_GLOBALEXTREMALROWS_H
 #define M7_GLOBALEXTREMALROWS_H
 
-#include <src/core/parallel/Reducible.h>
+#include "src/core/parallel/Reduction.h"
 #include "LocalExtremalRows.h"
 #include "src/core/table/BufferedTable.h"
 #include "QuickSorter.h"
@@ -48,7 +48,7 @@ struct GlobalExtremalRows {
      *
      * After the global sort, the local number is revised lower or kept the same.
      */
-    Reducible<size_t> m_ninclude;
+    Reduction<size_t> m_ninclude;
     /**
      * once the number of included rows over all ranks is at least the number requested, the rank index and sorting
      * value will be loaded into a local table, and then gathered into this table on the root rank only, it is then
@@ -74,7 +74,7 @@ struct GlobalExtremalRows {
      */
     void reset() {
         m_lxr.reset();
-        m_ninclude.reset();
+        m_ninclude.m_local = 0ul;
     }
 
 private:
@@ -103,7 +103,7 @@ private:
          * set the number included to the maximum value and then decrease till the worst included value on each rank is
          * as good as or better than the botw values
          */
-        m_ninclude = m_lxr.nfound();
+        m_ninclude.m_local = m_lxr.nfound();
         if (ignored_ranks.size() < mpi::nrank()) {
             /*
              * setup a function to order the worst sorted values from each rank
@@ -117,17 +117,17 @@ private:
             if (xi.nfound()) {
                 auto irank_botw = xi[0];
                 auto botw = local_worst_values[irank_botw];
-                while (m_ninclude && m_lxr.cmp_values(botw, m_lxr.get_value(m_ninclude-1))) {
+                while (m_ninclude.m_local && m_lxr.cmp_values(botw, m_lxr.get_value(m_ninclude.m_local-1))) {
                     /*
                      * reduce the number of included rows until:
                      *  there are none left, or
                      *  the best of the worst values is no longer better than the worst value on this rank
                      */
-                    --m_ninclude;
+                    --m_ninclude.m_local;
                 }
             }
         }
-        m_ninclude.mpi_sum();
+        m_ninclude.all_sum();
     }
     /**
      * find more locally extremal rows. this is done so as to get close to the target number of rows but not overshoot
@@ -136,9 +136,9 @@ private:
      *  target number of row to find globally
      */
     void find_required_local_rows(size_t nrow) {
-        REQUIRE_NE_ALL(m_ninclude.reduced(), ~0ul, "required local row reduction hasn't been performed");
+        REQUIRE_NE_ALL(m_ninclude.m_reduced, ~0ul, "required local row reduction hasn't been performed");
         auto nrank_with_remainder = get_nrank_with_remainder();
-        if (nrank_with_remainder == 0 || m_ninclude.reduced() >= nrow) {
+        if (nrank_with_remainder == 0 || m_ninclude.m_reduced >= nrow) {
             // no ranks have any more rows to find or we already have enough rows
             return;
         }
@@ -152,14 +152,14 @@ private:
          * IIIIIXXXXXXXXXXXXXOOOOOOO|
          * the number of rows we want to make available for comparison in the next iteration is:
          */
-        auto nfind_local = integer_utils::divceil(nrow - m_ninclude.reduced(), nrank_with_remainder);
+        auto nfind_local = integer_utils::divceil(nrow - m_ninclude.m_reduced, nrank_with_remainder);
         /*
          * but this would find new locally extreme rows from X/O threshold, whereas we really want to find these from
          * the I/X threshold, since it doesn't make sense to find more rows on a process with few already included, thus
          * the offset must be subtracted. It may be that there are enough X rows on the rank that no local find is even
          * needed
          */
-        nfind_local -= std::min(nfind_local, m_lxr.nfound() - m_ninclude);
+        nfind_local -= std::min(nfind_local, m_lxr.nfound() - m_ninclude.m_local);
         /*
          * now find the required local extremal rows
          */
@@ -186,21 +186,21 @@ private:
      * here in future if it proves to be problematic.
      */
     void load_values_for_sorting() {
-        REQUIRE_NE_ALL(m_ninclude.reduced(), ~0ul, "required local row reduction hasn't been performed");
-        REQUIRE_TRUE_ALL(m_ninclude.reduced(), "required local rows haven't been found yet");
+        REQUIRE_NE_ALL(m_ninclude.m_reduced, ~0ul, "required local row reduction hasn't been performed");
+        REQUIRE_TRUE_ALL(m_ninclude.m_reduced, "required local rows haven't been found yet");
         global_sort_table_t local_loader("Local loader for global extremal rows sorter", {{}});
-        static_cast<TableBase &>(local_loader).resize(m_ninclude);
+        static_cast<TableBase &>(local_loader).resize(m_ninclude.m_local);
         auto &source_row = m_lxr.m_work_row;
         auto &source_field = m_lxr.m_work_row_field;
         auto &loader_row = local_loader.m_row;
-        for (size_t i = 0ul; i < m_ninclude; ++i) {
+        for (size_t i = 0ul; i < m_ninclude.m_local; ++i) {
             static_cast<Row &>(source_row).jump(m_lxr[i]);
             static_cast<Row &>(loader_row).push_back_jump();
             loader_row.m_irank = mpi::irank();
             loader_row.m_value = source_field[m_lxr.m_ielement_cmp];
         }
         if (mpi::i_am_root())
-            static_cast<TableBase &>(m_global_sorter).resize(m_ninclude.reduced());
+            static_cast<TableBase &>(m_global_sorter).resize(m_ninclude.m_reduced);
         static_cast<TableBase &>(m_global_sorter).gatherv(local_loader);
     }
     /**
@@ -210,10 +210,10 @@ private:
      *  desired number of rows to find
      */
     void sort(size_t nrow) {
-        nrow = std::min(nrow, m_ninclude.reduced());
+        nrow = std::min(nrow, m_ninclude.m_reduced);
         defs::inds ninclude_each_rank(mpi::nrank(), 0ul);
         if (mpi::i_am_root()) {
-            REQUIRE_EQ(m_global_sorter.m_hwm, m_ninclude.reduced(),
+            REQUIRE_EQ(m_global_sorter.m_hwm, m_ninclude.m_reduced,
                        "global sorting table should have as many filled rows as total found rows across all ranks");
             auto row1 = m_global_sorter.m_row;
             auto row2 = m_global_sorter.m_row;
@@ -227,8 +227,8 @@ private:
             }
         }
         mpi::bcast(ninclude_each_rank);
-        m_ninclude = ninclude_each_rank[mpi::irank()];
-        m_ninclude.mpi_sum();
+        m_ninclude.m_local = ninclude_each_rank[mpi::irank()];
+        m_ninclude.all_sum();
     }
 
 public:
@@ -253,14 +253,14 @@ public:
      *  the row index associated with the ordinal index
      */
     const size_t& operator[](const size_t& i) const {
-        DEBUG_ASSERT_LT(i, m_ninclude, "the specified index was not included in the globally extremal set");
+        DEBUG_ASSERT_LT(i, m_ninclude.m_local, "the specified index was not included in the globally extremal set");
         return m_lxr[i];
     }
 
     void gatherv(Table<row_t>& dst, size_t iroot=0ul) const {
         BufferedTable<row_t> m_local("locally included globally extreme rows", m_lxr.m_work_row);
-        m_local.push_back(m_ninclude);
-        for (size_t iinclude=0ul; iinclude<m_ninclude; ++iinclude){
+        m_local.push_back(m_ninclude.m_local);
+        for (size_t iinclude=0ul; iinclude<m_ninclude.m_local; ++iinclude){
             m_local.copy_row_in(m_lxr.m_table, (*this)[iinclude], iinclude);
         }
         dst.gatherv(m_local, iroot);

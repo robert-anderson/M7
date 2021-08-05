@@ -28,7 +28,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham) {
     auto row = m_wf.m_store.m_row;
     Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, 0);
     gxr.find(m_opts.m_size);
-    for (size_t i =0ul; i<gxr.m_ninclude; ++i) {
+    for (size_t i =0ul; i<gxr.m_ninclude.m_local; ++i) {
         row.jump(gxr[i]);
         add_(row);
     }

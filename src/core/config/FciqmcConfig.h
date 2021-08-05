@@ -205,12 +205,16 @@ namespace fciqmc_config {
         config::Param<double> m_max_bloom;
         config::Param<double> m_nadd;
         config::Param<double> m_tau_init;
+        config::Param<double> m_tau_min;
+        config::Param<double> m_tau_max;
         config::Param<bool> m_static_tau;
+        config::Param<bool> m_static_probs;
         config::Param<double> m_min_spawn_mag;
         config::Param<double> m_min_death_mag;
-        config::Param<double> m_min_excit_class_prob;
-        config::Param<double> m_psingle_init;
-        config::Param<size_t> m_nenough_spawns_for_dynamic_tau;
+        config::Param<double> m_min_exlvl_prob;
+        config::Param<std::vector<double>> m_exlvl_probs_init;
+        config::Param<size_t> m_ndraw_min_for_dynamic;
+        config::Param<size_t> m_period;
         config::Param<bool> m_consolidate_spawns;
         Semistochastic m_semistochastic;
 

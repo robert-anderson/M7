@@ -75,10 +75,12 @@ public:
         m_shape(array_utils::filled<size_t, nind>(extent)),
         m_strides(make_strides()), m_nelement(make_nelement()){}
 
-    NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names={}):
+    NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names):
         m_shape(shape), m_strides(make_strides()), m_dim_names(dim_names), m_nelement(make_nelement()){
         ASSERT(m_nelement!=~0ul);
     }
+
+    NdFormat(const std::array<size_t, nind>& shape): NdFormat(shape, {}){}
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
@@ -87,6 +89,10 @@ public:
             if (other.m_shape[iind]!=m_shape[iind]) return false;
         }
         return true;
+    }
+
+    operator std::array<size_t, nind>() const{
+        return m_shape;
     }
 
     /**

@@ -19,10 +19,10 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_mevs(m_opts.m_av_ests, prop.m_ham.nsite(), prop.m_ham.nelec(), true),
         m_archive(opts) {
 
-    if (m_wf.nreplica() > 1 && m_prop.is_exact())
+    if (m_wf.nreplica() > 1 && !m_prop.nexcit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && !m_prop.is_exact())
+    if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && m_prop.nexcit_gen())
         log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
                   "this is biased");
 
@@ -31,7 +31,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                   "the replica population is redundant");
 
     if (mpi::i_am_root()) {
-        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {wf.m_format}));
+        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {m_prop}));
         m_timing_stats = std::unique_ptr<TimingStats>(new TimingStats("M7.timing", "FCIQMC Timings", {}));
     }
     if (m_opts.m_stats.m_parallel)
@@ -571,7 +571,7 @@ void Solver::output_stats() {
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
-        stats.m_psingle = m_prop.m_magnitude_logger.m_psingle;
+        if (m_prop.nexcit_gen()) stats.m_exlvl_probs = m_prop.exlvl_probs();
         if (m_uniform_twf) stats.m_uniform_twf_num = m_uniform_twf->m_numerator_total[0];
         if (m_weighted_twf) {
             stats.m_weighted_twf_num = m_weighted_twf->m_numerator_total[0];

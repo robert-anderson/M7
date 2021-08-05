@@ -5,8 +5,6 @@
 #ifndef M7_WEIGHTEDTWF_H
 #define M7_WEIGHTEDTWF_H
 
-
-#include <src/core/parallel/Reducible.h>
 #include "src/core/wavefunction/WalkerTable.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/observables/SignProblemFreeTwf.h"

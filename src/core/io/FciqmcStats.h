@@ -5,6 +5,7 @@
 #ifndef M7_FCIQMCSTATS_H
 #define M7_FCIQMCSTATS_H
 
+#include <src/core/dynamics/Propagator.h>
 #include "src/core/field/Row.h"
 #include "StatsTable.h"
 
@@ -13,7 +14,7 @@ struct FciqmcStatsRow : Row {
     NdFormat<defs::ndim_wf> m_wf_format;
 
     fields::Number<size_t> m_icycle;
-    fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_tau;
+    fields::Number<double> m_tau;
     fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_shift;
     fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
     fields::Numbers<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
@@ -26,15 +27,13 @@ struct FciqmcStatsRow : Row {
     fields::Numbers<size_t, defs::ndim_wf> m_ninitiator;
     fields::Numbers<size_t, defs::ndim_wf> m_nocc_mbf;
     fields::Numbers<int, defs::ndim_wf> m_delta_nocc_mbf;
-    fields::Numbers<defs::prob_t, defs::ndim_wf> m_psingle;
+    fields::Numbers<defs::prob_t, 1ul> m_exlvl_probs;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;
     fields::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_denom;
     fields::Numbers<defs::ham_comp_t, defs::ndim_wf> m_reweighting_factor;
 
-    FciqmcStatsRow(NdFormat<2> format);
-
-    FciqmcStatsRow(size_t nroot, size_t nreplica);
+    FciqmcStatsRow(Propagator& prop);
 };
 
 typedef StatsTable<FciqmcStatsRow> FciqmcStats;
