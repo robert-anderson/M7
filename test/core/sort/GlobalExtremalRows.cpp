@@ -95,8 +95,8 @@ TEST(GlobalExtremalRows, FindAsc) {
     auto nrow_to_find = nfind();
     gxr.find(nrow_to_find);
 
-    ASSERT_TRUE(mpi::nrank()>0 || gxr.m_ninclude.reduced()==nrow_to_find);
-    ASSERT_EQ(gxr.m_ninclude.reduced(), std::min(nrow_to_find, mpi::all_sum(table.nrow_nonzero())));
+    ASSERT_TRUE(mpi::nrank()>0 || gxr.m_ninclude.m_reduced==nrow_to_find);
+    ASSERT_EQ(gxr.m_ninclude.m_reduced, std::min(nrow_to_find, mpi::all_sum(table.nrow_nonzero())));
 
     /*
      * the global sort only happens on the root rank
@@ -107,12 +107,12 @@ TEST(GlobalExtremalRows, FindAsc) {
          * the total number of values considered in the global sorter mus be at least at great as the total number of
          * rows included in the globally extremal set
          */
-        ASSERT_GE(gxr.m_global_sorter.m_hwm, gxr.m_ninclude.reduced());
+        ASSERT_GE(gxr.m_global_sorter.m_hwm, gxr.m_ninclude.m_reduced);
         auto right_order = get_all_sorted(false, false);
         ASSERT_EQ(right_order.size(), get_global_nrow());
 
         sorted_row.restart();
-        for (size_t iitem=0ul; iitem<gxr.m_ninclude.reduced(); ++iitem){
+        for (size_t iitem=0ul; iitem<gxr.m_ninclude.m_reduced; ++iitem){
             const auto& item = right_order[iitem];
             int value = sorted_row.m_value;
             ASSERT_EQ(value, item.m_value);
