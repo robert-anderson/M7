@@ -6,10 +6,12 @@
 #define M7_SIGNPROBLEMFREETWF_H
 
 #include "src/core/wavefunction/WalkerTable.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/ForeachConnection.h"
 
 class SpfTwfBase {
 protected:
+    const Hamiltonian& m_ham;
+    std::unique_ptr<foreach_conn::Base> m_foreach_conn;
     std::vector<defs::ham_t> m_numerator;
     std::vector<defs::ham_t> m_denominator;
     size_t m_nsite;
@@ -18,21 +20,17 @@ public:
     std::vector<defs::ham_t> m_numerator_total;
     std::vector<defs::ham_t> m_denominator_total;
 
-    SpfTwfBase(size_t npart, size_t nsite) :
+    SpfTwfBase(const Hamiltonian &ham, size_t npart, size_t nsite) :
+            m_ham(ham),  m_foreach_conn(foreach_conn::make(ham)),
             m_numerator(npart, 0.0), m_denominator(npart, 0.0),
-            m_nsite(nsite),
-            m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
-    };
+            m_nsite(nsite), m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
+    }
 
-    virtual void add(const Hamiltonian &ham,
-                     const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+    virtual void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::FrmOnv &onv) = 0;
 
-#if 0
-    virtual void add(const Hamiltonian<1> &ham,
-                     const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::Onv<1> &onv) = 0;
-#endif
+    virtual void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+                     const fields::FrmBosOnv &onv) = 0;
 
     virtual void reduce() {
         mpi::all_sum(m_numerator.data(), m_numerator_total.data(), m_numerator.size());

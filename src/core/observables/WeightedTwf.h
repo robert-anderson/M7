@@ -6,28 +6,24 @@
 #define M7_WEIGHTEDTWF_H
 
 #include "src/core/wavefunction/WalkerTable.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
 #include "src/core/observables/SignProblemFreeTwf.h"
 
 class WeightedTwf : public SpfTwfBase{
 protected:
-    double_t m_fermion_double_occ_penalty_factor;
-    double_t m_boson_occ_penalty_factor;
+    double m_frm_doub_occ_penalty_factor;
+    double m_bos_occ_penalty_factor;
 
 public:
-    WeightedTwf(size_t npart, size_t nsite, double_t fermion_factor=0.0, double_t boson_factor=0.0);
+    WeightedTwf(const Hamiltonian& ham, size_t npart, size_t nsite, double_t fermion_factor=0.0, double_t boson_factor=0.0);
 
     virtual ~WeightedTwf(){}
 
-    void add(const Hamiltonian &ham,
-             const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::FrmOnv &onv) override;
 
-#if 0
-    void add(const Hamiltonian<1> &ham,
-             const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-             const fields::Onv<1> &onv) override;
-#endif
+    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+             const fields::FrmBosOnv &onv) override;
+
 
     defs::ham_t evaluate_static_twf(const fields::FrmOnv &onv) const;
 

@@ -18,13 +18,18 @@ using namespace fields;
 namespace foreach_conn {
 
     template<typename mbf_t>
-    using fn_t = std::function<void(const conn::from_field_t<mbf_t>&)>;
+    using fn_c_t = std::function<void(const conn::from_field_t<mbf_t>&)>;
+//    template<typename mbf_t>
+//    using fn_cd_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&)>;
     template<typename mbf_t>
-    using fn_d_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&)>;
+    using fn_d_t = std::function<void(const mbf_t&)>;
     template<typename mbf_t>
-    using fn_h_t = std::function<void(const conn::from_field_t<mbf_t>&, defs::ham_t)>;
+    using fn_ch_t = std::function<void(const conn::from_field_t<mbf_t>&, defs::ham_t)>;
+    //using fn_h_t = std::function<void(defs::ham_t)>;
     template<typename mbf_t>
-    using fn_dh_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&, defs::ham_t)>;
+    using fn_cdh_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&, defs::ham_t)>;
+    template<typename mbf_t>
+    using fn_dh_t = std::function<void(const mbf_t&, defs::ham_t)>;
 
     struct Base {
         const Hamiltonian &m_ham;
@@ -36,9 +41,9 @@ namespace foreach_conn {
         explicit Base(const Hamiltonian &ham);
         virtual ~Base(){}
 
-        virtual void foreach(const FrmOnv& mbf, const fn_t<FrmOnv>& body_fn) = 0;
-        virtual void foreach(const FrmBosOnv& mbf, const fn_t<FrmBosOnv>& body_fn) = 0;
-        virtual void foreach(const BosOnv& mbf, const fn_t<BosOnv>& body_fn) = 0;
+        virtual void foreach(const FrmOnv& mbf, const fn_c_t<FrmOnv>& body_fn) = 0;
+        virtual void foreach(const FrmBosOnv& mbf, const fn_c_t<FrmBosOnv>& body_fn) = 0;
+        virtual void foreach(const BosOnv& mbf, const fn_c_t<BosOnv>& body_fn) = 0;
 
         defs::ham_t get_element(const FrmOnv& mbf, const conn::FrmOnv& conn);
         defs::ham_t get_element(const FrmBosOnv& mbf, const conn::FrmBosOnv& conn);
@@ -47,35 +52,50 @@ namespace foreach_conn {
         /*
          * adapt the above virtual methods for computation of the connected MBF
          */
-        template<typename mbf_t>
-        void foreach(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn) {
-            auto& dst_mbf = m_mbfs[mbf];
-            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
-                conn.apply(mbf, dst_mbf);
-                body_fn(conn, dst_mbf);
-            };
-            this->foreach(mbf, fn);
-        }
+//        template<typename mbf_t>
+//        void foreach(const mbf_t& mbf, const fn_cd_t<mbf_t>& body_fn) {
+//            auto& dst_mbf = m_mbfs[mbf];
+//            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+//                conn.apply(mbf, dst_mbf);
+//                body_fn(conn, dst_mbf);
+//            };
+//            this->foreach(mbf, fn);
+//        }
 
         /*
          * adapt the above virtual methods for computation of the matrix elements
          */
-        template<typename mbf_t>
-        void foreach(const mbf_t& mbf, const fn_h_t<mbf_t>& body_fn, bool nonzero_h_only){
-            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
-                auto helem = get_element(mbf, conn);
-                if (nonzero_h_only && consts::float_is_zero(helem)) return;
-                body_fn(conn, helem);
-            };
-            this->foreach(mbf, fn);
-        }
+//        template<typename mbf_t>
+//        void foreach(const mbf_t& mbf, const fn_ch_t<mbf_t>& body_fn, bool nonzero_h_only){
+//            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+//                auto helem = get_element(mbf, conn);
+//                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+//                body_fn(conn, helem);
+//            };
+//            this->foreach(mbf, fn);
+//        }
+
+        /*
+         * adapt the above virtual methods for computation of the matrix elements, and loop over calls to a function
+         * which ONLY requires the matrix elements
+         */
+//        template<typename mbf_t>
+//        void foreach(const mbf_t& mbf, const fn_h_t& body_fn){
+//            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+//                auto helem = get_element(mbf, conn);
+//                if (consts::float_is_zero(helem)) return;
+//                body_fn(helem);
+//            };
+//            this->foreach(mbf, fn);
+//        }
 
         /*
          * adapt the above virtual methods for computation of both the connected MBF and the matrix elements
          */
-        void foreach(const FrmOnv& mbf, const fn_dh_t<FrmOnv>& body_fn, bool nonzero_h_only){
+        template<typename mbf_t>
+        void foreach(const mbf_t& mbf, const fn_cdh_t<mbf_t>& body_fn, bool nonzero_h_only){
             auto& dst_mbf = m_mbfs[mbf];
-            auto fn = [&](const conn::from_field_t<FrmOnv> &conn) {
+            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
                 auto helem = get_element(mbf, conn);
                 if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 conn.apply(mbf, dst_mbf);
@@ -83,6 +103,39 @@ namespace foreach_conn {
             };
             this->foreach(mbf, fn);
         }
+
+        /*
+         * adapt the above virtual methods for computation of both the connected MBF and the matrix elements and loop
+         * over calls to a function which ONLY requires the connected MBF
+         */
+//        template<typename mbf_t>
+//        void foreach(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn, bool nonzero_h_only){
+//            auto& dst_mbf = m_mbfs[mbf];
+//            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+//                auto helem = get_element(mbf, conn);
+//                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+//                conn.apply(mbf, dst_mbf);
+//                body_fn(dst_mbf);
+//            };
+//            this->foreach(mbf, fn);
+//        }
+
+        /*
+         * adapt the above virtual methods for computation of both the connected MBF and the matrix elements and loop
+         * over calls to a function which ONLY requires the connected MBF and the matrix element, but not the connection
+         * itself
+         */
+//        template<typename mbf_t>
+//        void foreach(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn, bool nonzero_h_only){
+//            auto& dst_mbf = m_mbfs[mbf];
+//            auto fn = [&](const conn::from_field_t<mbf_t> &conn) {
+//                auto helem = get_element(mbf, conn);
+//                if (nonzero_h_only && consts::float_is_zero(helem)) return;
+//                conn.apply(mbf, dst_mbf);
+//                body_fn(dst_mbf, helem);
+//            };
+//            this->foreach(mbf, fn);
+//        }
     };
 
     namespace frm {
@@ -104,11 +157,11 @@ namespace foreach_conn {
             virtual void foreach(const FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
 
         public:
-            void foreach(const FrmOnv &mbf, const fn_t<FrmOnv> &body_fn) override;
+            void foreach(const FrmOnv &mbf, const fn_c_t<FrmOnv> &body_fn) override;
 
-            void foreach(const FrmBosOnv &mbf, const fn_t<FrmBosOnv> &body_fn) override;
+            void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override;
 
-            void foreach(const BosOnv &mbf, const fn_t<BosOnv> &body_fn) override {}
+            void foreach(const BosOnv &mbf, const fn_c_t<BosOnv> &body_fn) override {}
 
         };
 

@@ -9,11 +9,12 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_annihilator(m_wf, m_prop.m_ham, m_refs, m_icycle, opts.m_propagator.m_nadd),
-        m_exit( "exit"),
+        m_exit("exit"),
         m_uniform_twf(
-                m_opts.m_inst_ests.m_spf_uniform_twf ? new UniformTwf(m_wf.npart(), prop.m_ham.nsite()) : nullptr),
+                m_opts.m_inst_ests.m_spf_uniform_twf ?
+                new UniformTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite()) : nullptr),
         m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf ?
-                       new WeightedTwf(m_wf.npart(), prop.m_ham.nsite(),
+                       new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
         m_mevs(m_opts.m_av_ests, prop.m_ham.nsite(), prop.m_ham.nelec(), true),
@@ -89,7 +90,7 @@ void Solver::execute(size_t ncycle) {
         }
         if (m_mevs.m_accum_epoch) {
             if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
-                if (m_icycle==ncycle)
+                if (m_icycle == ncycle)
                     log::info("maximum number of MEV accumulating cycles ({}) "
                               "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
                 break;
@@ -97,7 +98,7 @@ void Solver::execute(size_t ncycle) {
         }
         log::flush();
     }
-    if (m_icycle==ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
+    if (m_icycle == ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
     if (m_mevs.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         --m_icycle;
@@ -219,8 +220,8 @@ void Solver::loop_over_occupied_mbfs() {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                if (m_opts.m_inst_ests.m_spf_uniform_twf) m_uniform_twf->add(m_prop.m_ham, row.m_weight, row.m_mbf);
-                if (m_opts.m_inst_ests.m_spf_weighted_twf) m_weighted_twf->add(m_prop.m_ham, row.m_weight, row.m_mbf);
+                if (m_opts.m_inst_ests.m_spf_uniform_twf) m_uniform_twf->add(row.m_weight, row.m_mbf);
+                if (m_opts.m_inst_ests.m_spf_weighted_twf) m_weighted_twf->add(row.m_weight, row.m_mbf);
             }
 
             if (m_wf.m_ra.is_active()) {
@@ -513,7 +514,7 @@ void Solver::loop_over_spawned() {
         }
     }
 #endif
-    DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before+m_wf.recv().m_hwm,
+    DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before + m_wf.recv().m_hwm,
                     "the store table shouldn't have grown by more rows than were received!");
     m_wf.recv().clear();
 }

@@ -8,6 +8,7 @@
 #include <src/core/connection/Connections.h>
 #include <src/core/config/FciqmcConfig.h>
 #include <src/core/io/Archivable.h>
+#include <src/core/basis/Suites.h>
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
 #include "src/core/table/BufferedFields.h"
@@ -72,7 +73,7 @@ struct RefExcits : Archivable {
     /**
      * work space for computing connections between reference and contributing ONVs
      */
-    conn::FrmOnv m_conn;
+    conn::Mbf m_conn;
 
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
             Archivable("ref_excits", opts.m_archivable),
@@ -81,12 +82,23 @@ struct RefExcits : Archivable {
         for (size_t i=1ul; i<=m_max_exlvl; ++i) m_ref_excits.emplace_back(i, i, 1);
     }
 
+private:
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
+        auto nop = conn.m_cre.size();
+        if (conn.m_ann.size()!=nop) return; // not supporting electron number non-conservation
+        if (!nop) m_av_ref[ipart] += contrib;
+        else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(conn, contrib, ipart);
+    }
+
+    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
+        make_contribs(conn.m_frm, contrib, ipart);
+    }
+
+public:
+
     void make_contribs(const fields::Mbf& mbf, const fields::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
         m_conn.connect(ref_mbf, mbf);
-        auto nop = m_conn.m_cre.size();
-        if (m_conn.m_ann.size()!=nop) return; // not supporting electron number non-conservation
-        if (!nop) m_av_ref[ipart] += contrib;
-        else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(m_conn, contrib, ipart);
+        make_contribs(m_conn, contrib, ipart);
     }
 
     bool all_stores_empty() const {

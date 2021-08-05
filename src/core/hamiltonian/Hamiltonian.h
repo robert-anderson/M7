@@ -94,6 +94,10 @@ struct Hamiltonian {
         m_frm.set_hf_mbf(onv, spin);
     }
 
+    void set_hf_mbf(FrmBosOnv &onv, int spin) const {
+        m_frm.set_hf_mbf(onv.m_frm, spin);
+    }
+
 };
 
 
