@@ -226,9 +226,9 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),
         m_nadd(this, "nadd", 3.0, "ONVs with weight above this value are granted initiator status"),
-        m_tau_init(this, "tau_init", 0.001, "initial value for the timestep"),
+        m_tau_init(this, "tau_init", 1e-3, "initial value for the timestep"),
         m_tau_min(this, "tau_min", 1e-5, "minimum allowed value for the dynamic timestep"),
-        m_tau_max(this, "tau_max", 1.0, "maximum allowed value for the dynamic timestep"),
+        m_tau_max(this, "tau_max", 1e-2, "maximum allowed value for the dynamic timestep"),
         m_static_tau(this, "static_tau", true, "keep tau value fixed"),
         m_static_probs(this, "static_probs", true, "keep excitation level probabilities fixed"),
         m_min_spawn_mag(this, "min_spawn_mag", 0.4,
@@ -251,6 +251,11 @@ void fciqmc_config::Propagator::verify() {
         m_min_death_mag = m_min_spawn_mag.get();
         log::warn("{} was zero, defaulting to the specified value of {}",
                   m_min_death_mag.m_path.to_string(), m_min_spawn_mag.m_path.to_string());
+    }
+    if (consts::float_is_zero(m_max_bloom.get())) {
+        m_max_bloom = m_nadd.get();
+        log::warn("{} was zero, defaulting to the specified value of {}",
+                  m_max_bloom.m_path.to_string(), m_nadd.m_path.to_string());
     }
 }
 
