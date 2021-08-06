@@ -220,8 +220,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         m_store.m_row.jump(irow);
         DEBUG_ASSERT_EQ(m_store.m_row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
         m_store.m_row.m_hdiag = hdiag;
-        for (size_t ipart=0ul; ipart<npart(); ++ipart)
-            m_store.m_row.m_ref_conn.put(ipart, refconns[ipart]);
+        for (size_t iroot=0ul; iroot < nroot(); ++iroot)
+            m_store.m_row.m_ref_conn.put(iroot, refconns[iroot]);
         if (storing_av_weights()) {
             m_store.m_row.m_icycle_occ = icycle;
             m_store.m_row.m_average_weight = 0;

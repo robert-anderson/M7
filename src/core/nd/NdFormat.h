@@ -60,27 +60,31 @@ struct NdFormat : NdFormatBase {
         return nind ? m_shape.front()*m_strides.front() : 1ul;
     }
 
+    std::array<std::string, nind> make_default_dim_names() const {
+        std::array<std::string, nind> dim_names;
+        for (size_t i=0ul; i<nind; ++i) dim_names[i] = "dim_"+std::to_string(i);
+        return dim_names;
+    }
+
 
 public:
     NdFormat(): m_shape(), m_strides(), m_dim_names(), m_nelement(make_nelement()){
         static_assert(!nind, "This ctor is only valid in the scalar case");
     }
 
-    /**
-     * construct a scheme where all extents are the same
-     * @param extent
-     *  value to copy to all elements of the shape
-     */
-    NdFormat(size_t extent):
-        m_shape(array_utils::filled<size_t, nind>(extent)),
-        m_strides(make_strides()), m_nelement(make_nelement()){}
-
     NdFormat(const std::array<size_t, nind>& shape, const std::array<std::string, nind>& dim_names):
         m_shape(shape), m_strides(make_strides()), m_dim_names(dim_names), m_nelement(make_nelement()){
         ASSERT(m_nelement!=~0ul);
     }
 
-    NdFormat(const std::array<size_t, nind>& shape): NdFormat(shape, {}){}
+    NdFormat(const std::array<size_t, nind>& shape): NdFormat(shape, make_default_dim_names()){}
+
+    /**
+     * construct a scheme where all extents are the same
+     * @param extent
+     *  value to copy to all elements of the shape
+     */
+    NdFormat(size_t extent): NdFormat(array_utils::filled<size_t, nind>(extent)){}
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
@@ -91,7 +95,7 @@ public:
         return true;
     }
 
-    operator std::array<size_t, nind>() const{
+    operator const std::array<size_t, nind>&() const{
         return m_shape;
     }
 
@@ -222,15 +226,8 @@ public:
         if (!nind) return "scalar";
         std::string tmp;
         auto size = nind;
-        if (m_dim_names==std::array<std::string, nind>{}){
-            for (size_t i=0ul; i<size; ++i) {
-                tmp+=" "+std::to_string(m_shape[i]);
-            }
-        }
-        else {
-            for (size_t i=0ul; i<size; ++i) {
-                tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
-            }
+        for (size_t i=0ul; i<size; ++i) {
+            tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
         }
         return tmp;
     }
