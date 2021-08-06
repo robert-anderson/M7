@@ -32,7 +32,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
-    m_connections->foreach(src_mbf, body, m_only_nonzero_h_spawns);
+    m_connections->foreach<fields::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

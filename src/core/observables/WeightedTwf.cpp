@@ -16,7 +16,20 @@ void WeightedTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
     auto fn = [&](const fields::FrmOnv& dst, defs::ham_t helem){
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
-    m_foreach_conn->foreach(onv, fn, true);
+    m_foreach_conn->foreach<fields::FrmOnv>(onv, fn, true);
+    for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
+        m_numerator[ipart] += weight[ipart] * helem_sum;
+        m_denominator[ipart] += weight[ipart] * diag_fac;
+    }
+}
+
+void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv) {
+    auto diag_fac = evaluate_static_twf(onv);
+    defs::ham_t helem_sum = diag_fac * m_ham.get_element(onv);
+    auto fn = [&](const fields::FrmBosOnv& dst, defs::ham_t helem){
+        helem_sum+= evaluate_static_twf(dst)*helem;
+    };
+    m_foreach_conn->foreach<fields::FrmBosOnv>(onv, fn, true);
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
         m_numerator[ipart] += weight[ipart] * helem_sum;
         m_denominator[ipart] += weight[ipart] * diag_fac;
