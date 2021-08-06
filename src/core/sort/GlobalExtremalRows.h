@@ -113,6 +113,7 @@ private:
             };
             ExtremalIndices xi(index_cmp_fn);
             xi.reset(mpi::nrank(), ignored_ranks);
+            // find the "best of the worst"
             xi.find(1);
             if (xi.nfound()) {
                 auto irank_botw = xi[0];

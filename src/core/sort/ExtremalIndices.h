@@ -20,7 +20,7 @@
 struct ExtremalIndices {
     /**
      * total number of elements from which to find the indices corresponding to the ordered extremal values, for tables
-     * this is the high water mark - the number of row on the free stack
+     * this is (the high water mark) - (the number of row on the free stack)
      */
     size_t m_nind = ~0ul;
     /**

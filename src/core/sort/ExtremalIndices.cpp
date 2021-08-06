@@ -36,15 +36,16 @@ void ExtremalIndices::find(size_t nfind) {
 void ExtremalIndices::reset(size_t hwm, defs::inds inds_ignore) {
     m_nfound = 0ul;
     m_nind = hwm - inds_ignore.size();
-    if (m_inds.capacity() < m_nind) m_inds.reserve(m_nind);
+    m_inds.reserve(m_nind);
     m_inds.clear();
     std::sort(inds_ignore.begin(), inds_ignore.end());
     // fill m_inds as an ordered array of indices. the indices are consecutive unless they appear in inds_ignore
     auto it_next_ignore=inds_ignore.begin();
-    for (size_t i=0ul; i<m_nind; ++i){
+    for (size_t i=0ul; i<hwm; ++i){
         if (it_next_ignore!=inds_ignore.end() && i==*it_next_ignore) ++it_next_ignore;
         else m_inds.push_back(i);
     }
+    DEBUG_ASSERT_EQ(m_inds.size(), m_nind, "not all un-ignored indices have been added");
 }
 
 void ExtremalIndices::reset(const TableBase &table) {
@@ -55,5 +56,5 @@ void ExtremalIndices::reset(const TableBase &table) {
         irows_free.push_back(stack.top());
         stack.pop();
     }
-    reset(table.nrow_nonzero(), irows_free);
+    reset(table.m_hwm, irows_free);
 }
