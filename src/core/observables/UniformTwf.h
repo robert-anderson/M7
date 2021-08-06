@@ -17,6 +17,10 @@ public:
 
     virtual ~UniformTwf() {}
 
+private:
+    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum);
+
+public:
     void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::FrmOnv &onv) override;
 

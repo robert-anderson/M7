@@ -18,6 +18,10 @@ public:
 
     virtual ~WeightedTwf(){}
 
+private:
+    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum, defs::ham_t diag_fac);
+
+public:
     void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const fields::FrmOnv &onv) override;
 

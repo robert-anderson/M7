@@ -9,6 +9,13 @@ WeightedTwf::WeightedTwf(const Hamiltonian& ham, size_t npart, size_t nsite, dou
         m_frm_doub_occ_penalty_factor(fermion_factor),
         m_bos_occ_penalty_factor(boson_factor) {}
 
+void WeightedTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum, defs::ham_t diag_fac) {
+    for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
+        m_numerator[ipart] += weight[ipart] * helem_sum;
+        m_denominator[ipart] += weight[ipart] * diag_fac;
+    }
+}
+
 void WeightedTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                       const fields::FrmOnv &onv) {
     auto diag_fac = evaluate_static_twf(onv);
@@ -17,10 +24,7 @@ void WeightedTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
     m_foreach_conn->foreach<fields::FrmOnv>(onv, fn, true);
-    for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
-        m_numerator[ipart] += weight[ipart] * helem_sum;
-        m_denominator[ipart] += weight[ipart] * diag_fac;
-    }
+    add(weight, helem_sum, diag_fac);
 }
 
 void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv) {
@@ -30,10 +34,7 @@ void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
     m_foreach_conn->foreach<fields::FrmBosOnv>(onv, fn, true);
-    for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {
-        m_numerator[ipart] += weight[ipart] * helem_sum;
-        m_denominator[ipart] += weight[ipart] * diag_fac;
-    }
+    add(weight, helem_sum, diag_fac);
 }
 
 defs::ham_t WeightedTwf::evaluate_static_twf(const fields::FrmOnv &onv) const {
