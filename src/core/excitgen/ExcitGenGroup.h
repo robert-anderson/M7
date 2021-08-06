@@ -93,15 +93,6 @@ private:
     }
 
 public:
-    void set_prob_frm_singles(const defs::prob_t& prob) {
-        set_prob(prob, m_frm_singles.get());
-    }
-    void set_prob_frm_doubles(const defs::prob_t& prob) {
-        set_prob(prob, m_frm_doubles.get());
-    }
-    void set_prob_frmbos(const defs::prob_t& prob) {
-        set_prob(prob, m_frmbos.get());
-    }
 
     const defs::prob_t& get_prob(const size_t &iexlvl) const {
         DEBUG_ASSERT_LT(iexlvl, size(), "excit gen index OOB");

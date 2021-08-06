@@ -48,7 +48,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         auto iexlvl = m_excit_gens.draw_iexlvl();
         if (!m_excit_gens[iexlvl].draw(src_onv, m_occ, m_vac, prob, helem, conn)) continue;
         m_mag_log.log(iexlvl, helem, prob);
-        prob /= m_excit_gens.get_prob(iexlvl);
+        prob *= m_excit_gens.get_prob(iexlvl);
 
         conn.apply(src_onv, dst_onv);
         auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;

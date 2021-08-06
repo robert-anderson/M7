@@ -3,23 +3,9 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "src/core/hamiltonian/ForeachConnection.h"
 
-namespace foreach_connection_test {
-    typedef SingleFieldRow<fields::FrmBosOnv> result_row_t;
-    typedef BufferedTable<result_row_t, 1> result_table_t;
-
-    result_table_t hubbard_6site() {
-        result_table_t table("", {{6}, 10});
-        auto &row = table.m_row;
-        row.push_back_jump();
-        row.m_field = {{1, 4, 5},
-                       {1, 3, 0, 0, 2, 1}};
-        return table;
-    }
-}
-
-TEST(ForeachConnection, FrmHubbard) {
+TEST(ForeachConnection, FrmHubbard1d) {
     /*
      * loop over all connections using the general foreach class, and again with the Hubbard-optimized, and ensure that
      * the non-zero H-element connections returned are equivalent
@@ -30,13 +16,13 @@ TEST(ForeachConnection, FrmHubbard) {
     onv = {{0, 2, 4}, {0, 1, 5}};
     const defs::ham_t t = -1.0;
 
-    std::vector<std::pair<defs::inds, defs::inds>> conns_gen;
-    foreach_conn::frm::Fermion foreach_gen(ham);
-    auto fn_gen = [&](const conn::FrmOnv& conn, defs::ham_t helement){
-        conns_gen.emplace_back(conn.ann(), conn.cre());
+    std::vector<std::pair<defs::inds, defs::inds>> conns_general;
+    foreach_conn::frm::Fermion foreach_general(ham);
+    auto fn_general = [&](const conn::FrmOnv& conn, defs::ham_t helement){
+        conns_general.emplace_back(conn.ann(), conn.cre());
         ASSERT_EQ(helement, t);
     };
-    foreach_gen(onv, fn_gen, true);
+    foreach_general.foreach<fields::FrmOnv>(onv, fn_general, true);
 
     std::vector<std::pair<defs::inds, defs::inds>> conns_opt;
     foreach_conn::frm::Hubbard1D foreach_sym(ham);
@@ -44,40 +30,38 @@ TEST(ForeachConnection, FrmHubbard) {
         conns_opt.emplace_back(conn.ann(), conn.cre());
         ASSERT_EQ(helement, t);
     };
-    foreach_sym(onv, fn_opt, true);
-    ASSERT_EQ(conns_opt, conns_gen);
+    foreach_sym.foreach<fields::FrmOnv>(onv, fn_opt, true);
+    ASSERT_EQ(conns_opt, conns_general);
 }
 
 
-#if 0
-TEST(ForeachConnection, FermionNoSym) {
-    FermionHamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
+TEST(ForeachConnection, FrmNoSym) {
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
     conn::FrmOnv conn(ham.nsite());
     buffered::FrmOnv onv(ham.nsite());
-    ham.set_hf_onv(onv, 0);
+    ham.set_hf_mbf(onv, 0);
 
     auto counter = 0ul;
-    auto fn = [&](defs::ham_t helem) {
+    auto fn = [&](const conn::FrmOnv& conn) {
         ++counter;
     };
-    foreach_conn::Fermion nosym(ham, conn, fn, true, false);
-    nosym(onv);
+    foreach_conn::frm::Fermion foreach(ham);
+
     const auto nocc = ham.nelec();
     const auto nvac = 2 * ham.nsite() - nocc;
     const auto nsingle = nocc * nvac;
     const auto ndouble = integer_utils::combinatorial(nocc, 2) * integer_utils::combinatorial(nvac, 2);
+
+    foreach.foreach<fields::FrmOnv>(onv, fn, false);
     ASSERT_EQ(counter, nsingle + ndouble);
+
     counter = 0ul;
-    auto fn_hnonzero = [&](defs::ham_t helem) {
-        ++counter;
-        ASSERT_FLOAT_EQ(helem, -1.0);
-    };
-    foreach_conn::Fermion nosym_hnonzero(ham, conn, fn_hnonzero);
-    nosym_hnonzero(onv);
+    foreach.foreach<fields::FrmOnv>(onv, fn, true);
+    // can only excite to the vacant orbital to the right in both spin channels
     ASSERT_EQ(counter, 2ul);
 }
 
-
+#if 0
 TEST(ForeachConnection, Hubbard1D) {
     FermionHamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
     conn::Antisym<0> conn(ham.nsite());

@@ -61,6 +61,24 @@ namespace foreach_conn {
          */
     private:
         /**
+         * adapts "c" closure to "c" closure which optionally checks for nonzero H matrix element before calling body_fn
+         * @tparam mbf_t
+         *  many-body basis function type
+         * @param mbf
+         *  source many-body basis function from which to enumerate all connections and call the given function
+         * @param body_fn
+         *  void function which accepts connection and connected MBF args
+         * @param nonzero_h_only
+         *  if true, body_fn is only called when the loop generates a connection with non-zero H matrix element
+         */
+        template<typename mbf_t>
+        fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_c_t<mbf_t>& body_fn, bool nonzero_h_only){
+            return [&, nonzero_h_only](const conn::from_field_t<mbf_t> &conn) {
+                if (nonzero_h_only && consts::float_is_zero(get_element(mbf, conn))) return;
+                body_fn(conn);
+            };
+        }
+        /**
          * adapts "cd" closure to "c" closure
          * @tparam mbf_t
          *  many-body basis function type
@@ -74,7 +92,7 @@ namespace foreach_conn {
         template<typename mbf_t>
         fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_cd_t<mbf_t>& body_fn, bool nonzero_h_only){
             auto& dst_mbf = m_mbfs[mbf];
-            return [&](const conn::from_field_t<mbf_t> &conn) {
+            return [&, nonzero_h_only](const conn::from_field_t<mbf_t> &conn) {
                 if (nonzero_h_only && consts::float_is_zero(get_element(mbf, conn))) return;
                 conn.apply(mbf, dst_mbf);
                 body_fn(conn, dst_mbf);
@@ -94,7 +112,7 @@ namespace foreach_conn {
          */
         template<typename mbf_t>
         fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_ch_t<mbf_t>& body_fn, bool nonzero_h_only){
-            return [&](const conn::from_field_t<mbf_t> &conn) {
+            return [&, nonzero_h_only](const conn::from_field_t<mbf_t> &conn) {
                 auto helem = get_element(mbf, conn);
                 if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 body_fn(conn, helem);
@@ -115,7 +133,7 @@ namespace foreach_conn {
         template<typename mbf_t>
         fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_cdh_t<mbf_t>& body_fn, bool nonzero_h_only) {
             auto &dst_mbf = m_mbfs[mbf];
-            return [&](const conn::from_field_t<mbf_t> &conn) {
+            return [&, nonzero_h_only](const conn::from_field_t<mbf_t> &conn) {
                 auto helem = get_element(mbf, conn);
                 if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 conn.apply(mbf, dst_mbf);
@@ -137,7 +155,7 @@ namespace foreach_conn {
         template<typename mbf_t>
         fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn, bool nonzero_h_only){
             auto& dst_mbf = m_mbfs[mbf];
-            return [&](const conn::from_field_t<mbf_t> &conn) {
+            return [&, nonzero_h_only](const conn::from_field_t<mbf_t> &conn) {
                 if (nonzero_h_only && consts::float_is_zero(get_element(mbf, conn))) return;
                 conn.apply(mbf, dst_mbf);
                 body_fn(dst_mbf);
@@ -176,7 +194,7 @@ namespace foreach_conn {
         template<typename mbf_t>
         fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn, bool nonzero_h_only) {
             auto &dst_mbf = m_mbfs[mbf];
-            return [&](const conn::from_field_t<mbf_t> &conn) {
+            return [&, nonzero_h_only](const conn::from_field_t<mbf_t> &conn) {
                 auto helem = get_element(mbf, conn);
                 if (nonzero_h_only && consts::float_is_zero(helem)) return;
                 conn.apply(mbf, dst_mbf);
@@ -189,6 +207,12 @@ namespace foreach_conn {
          * The following definitions adapt the body functions of various types for use with the above "fn_c_t" foreach
          * virtual methods
          */
+
+        template<typename mbf_t>
+        void foreach(const mbf_t& mbf, const fn_c_t<mbf_t>& body_fn, bool nonzero_h_only) {
+            auto fn = adapt(mbf, body_fn, nonzero_h_only);
+            this->foreach(mbf, fn);
+        }
 
         template<typename mbf_t>
         void foreach(const mbf_t& mbf, const fn_cd_t<mbf_t>& body_fn, bool nonzero_h_only) {
