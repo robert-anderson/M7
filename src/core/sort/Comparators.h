@@ -15,7 +15,7 @@
  * algorithms.
  */
 namespace comparators {
-    using namespace dispatch_utils;
+    using namespace tags;
     /**
      * the optionality of ordering based on absolute values if not universal,
      * for some types we have the option,
@@ -47,7 +47,7 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, BoolTag<true> absval) {
+    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Bool<true> absval) {
         if (largest)
             return [](const T &v, const T &v_cmp) { return std::abs(v) > std::abs(v_cmp); };
         else
@@ -64,7 +64,7 @@ namespace comparators {
      *  value comparator
      */
     template<typename T>
-    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, BoolTag<false> absval) {
+    static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool largest, Bool<false> absval) {
         if (largest)
             return [](const T &v, const T &v_cmp) { return v > v_cmp; };
         else
@@ -76,21 +76,21 @@ namespace comparators {
      */
     template<typename T>
     static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, IndTag<Any> category) {
-        if (absval) return make_value_cmp_fn<T>(largest, BoolTag<true>());
-        else return make_value_cmp_fn<T>(largest, BoolTag<false>());
+    make_value_cmp_fn(bool absval, bool largest, Ind<Any> category) {
+        if (absval) return make_value_cmp_fn<T>(largest, Bool<true>());
+        else return make_value_cmp_fn<T>(largest, Bool<false>());
     }
 
     template<typename T>
     static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, IndTag<Only> category) {
-        return make_value_cmp_fn<T>(largest, BoolTag<true>());
+    make_value_cmp_fn(bool absval, bool largest, Ind<Only> category) {
+        return make_value_cmp_fn<T>(largest, Bool<true>());
     }
 
     template<typename T>
     static std::function<bool(const T &, const T &)>
-    make_value_cmp_fn(bool absval, bool largest, IndTag<Invalid> category) {
-        return make_value_cmp_fn<T>(largest, BoolTag<false>());
+    make_value_cmp_fn(bool absval, bool largest, Ind<Invalid> category) {
+        return make_value_cmp_fn<T>(largest, Bool<false>());
     }
 
     /**
@@ -109,7 +109,7 @@ namespace comparators {
         // decide category of the given type:
         constexpr size_t category = consts::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
         // use this category for tagged dispatch
-        return make_value_cmp_fn<T>(absval, largest, IndTag<category>());
+        return make_value_cmp_fn<T>(absval, largest, Ind<category>());
     }
 
     /**

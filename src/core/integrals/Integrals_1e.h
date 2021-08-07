@@ -29,14 +29,14 @@ class Integrals_1e : public Integrals {
     std::vector<T> m_data;
 
 public:
-    Integrals_1e(const size_t &nsite, bool spin_resolved) :
-            Integrals(nsite, spin_resolved), m_nelem(nelem(m_nintind)) {
+    Integrals_1e(const size_t &nsite, bool spin_res) :
+            Integrals(nsite, spin_res), m_nelem(nelem(m_nintind)) {
         m_data.resize(m_nelem, 0.0);
     }
 
     /*
     Integrals_1e(std::string fname) :
-            Integrals_1e(FcidumpFileReader<T>(fname).m_nintind, FcidumpFileReader<T>(fname).m_spin_resolved) {
+            Integrals_1e(FcidumpFileReader<T>(fname).m_nintind, FcidumpFileReader<T>(fname).m_spin_res) {
         FcidumpFileReader<T> file_iterator(fname);
         defs::inds inds(4);
         T value;
@@ -76,7 +76,7 @@ public:
 
 private:
     T get(const size_t &i, const size_t &j) const {
-        //auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i / 2, j / 2);
+        //auto iflat = m_spin_res ? flat_index(i, j) : flat_index(i / 2, j / 2);
         auto iflat = flat_index(i, j);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
@@ -91,8 +91,8 @@ public:
         /*
          * return the one-body integral between the two SPINORS indexed by i and j
          */
-        if (!m_spin_resolved && ((i < m_nintind) != (j < m_nintind))) return 0.0;
-        auto iflat = m_spin_resolved ? flat_index(i, j) : flat_index(i % m_nintind, j % m_nintind);
+        if (!m_spin_res && ((i < m_nintind) != (j < m_nintind))) return 0.0;
+        auto iflat = m_spin_res ? flat_index(i, j) : flat_index(i % m_nintind, j % m_nintind);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }
 
@@ -101,7 +101,7 @@ public:
     }
 
     bool spin_conserving() const {
-        if (!m_spin_resolved) return true;
+        if (!m_spin_res) return true;
         /*
          * iterate through integrals looking for an example of a non-zero
          * spin non-conserving one-body integral

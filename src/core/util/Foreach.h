@@ -64,28 +64,28 @@ namespace foreach {
             Unrestricted(const size_t& extent) : Unrestricted(array_utils::filled<size_t, nind>(extent)){}
 
             template<size_t ilevel>
-            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<ilevel>) {
+            void level_loop(cr_body_fn_t body, tags::Ind<ilevel>) {
                 constexpr size_t iind = ilevel - 1;
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto &extent = m_shape[iind];
-                for (ind = 0ul; ind < extent; ++ind) level_loop(body, dispatch_utils::IndTag<ilevel + 1>());
+                for (ind = 0ul; ind < extent; ++ind) level_loop(body, tags::Ind<ilevel + 1>());
             }
 
-            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<nind>) {
+            void level_loop(cr_body_fn_t body, tags::Ind<nind>) {
                 constexpr size_t iind = nind - 1;
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) body();
             }
 
-            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<true>) {}
+            void loop(cr_body_fn_t body, tags::Bool<true>) {}
 
-            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<false>) {
-                level_loop(body, dispatch_utils::IndTag<1>());
+            void loop(cr_body_fn_t body, tags::Bool<false>) {
+                level_loop(body, tags::Ind<1>());
             }
 
             void operator()(cr_body_fn_t body) override {
-                loop(body, dispatch_utils::BoolTag<nind == 0>());
+                loop(body, tags::Bool<nind == 0>());
             }
         };
 
@@ -106,15 +106,15 @@ namespace foreach {
                     Base<nind>(nterm(n)), m_n(n) {}
 
             template<size_t ilevel>
-            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<ilevel>) {
+            void level_loop(cr_body_fn_t body, tags::Ind<ilevel>) {
                 constexpr size_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_inds[ascending ? iind + 1 : iind - 1] + !strict;
-                for (ind = 0ul; ind < extent; ++ind) level_loop(body, dispatch_utils::IndTag<ilevel + 1>());
+                for (ind = 0ul; ind < extent; ++ind) level_loop(body, tags::Ind<ilevel + 1>());
             }
 
-            void level_loop(cr_body_fn_t body, dispatch_utils::IndTag<nind>) {
+            void level_loop(cr_body_fn_t body, tags::Ind<nind>) {
                 constexpr size_t iind = ascending ? 0 : nind - 1;
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_inds[iind];
@@ -122,14 +122,14 @@ namespace foreach {
                 for (ind = 0ul; ind < extent; ++ind) body();
             }
 
-            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<true>) {}
+            void loop(cr_body_fn_t body, tags::Bool<true>) {}
 
-            void loop(cr_body_fn_t body, dispatch_utils::BoolTag<false>) {
-                level_loop(body, dispatch_utils::IndTag<1>());
+            void loop(cr_body_fn_t body, tags::Bool<false>) {
+                level_loop(body, tags::Ind<1>());
             }
 
             void operator()(cr_body_fn_t body) override {
-                loop(body, dispatch_utils::BoolTag<nind == 0>());
+                loop(body, tags::Bool<nind == 0>());
             }
         };
     }

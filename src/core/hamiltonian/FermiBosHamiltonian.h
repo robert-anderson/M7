@@ -57,7 +57,7 @@ public:
     defs::ham_t get_element(const fields::Onv<1> &bra, const fields::Onv<1> &ket) const;
 
 private:
-    defs::ham_t get_element_tag(const conn::Antisym<1> &aconn, dispatch_utils::BoolTag<false> sym_opts) const {
+    defs::ham_t get_element_tag(const conn::Antisym<1> &aconn, tags::Bool<false> sym_opts) const {
         if (!aconn) return get_element_0(aconn);
         else if (!aconn.m_bonvconn) {
             if (aconn.nexcit() == 1)
@@ -72,25 +72,25 @@ private:
         return 0.0;
     }
 
-    defs::ham_t get_element_tag(const conn::Antisym<1> &aconn, dispatch_utils::BoolTag<true> sym_opts) const {
+    defs::ham_t get_element_tag(const conn::Antisym<1> &aconn, tags::Bool<true> sym_opts) const {
         return m_bc_sym_helper->get_element(aconn);
     }
 
-    defs::ham_comp_t get_energy_tag(const fields::Onv<1> &onv, dispatch_utils::BoolTag<false> sym_opts) const {
+    defs::ham_comp_t get_energy_tag(const fields::Onv<1> &onv, tags::Bool<false> sym_opts) const {
         return consts::real(get_element_0(onv));
     }
-    defs::ham_comp_t get_energy_tag(const fields::Onv<1> &onv, dispatch_utils::BoolTag<true> sym_opts) const {
+    defs::ham_comp_t get_energy_tag(const fields::Onv<1> &onv, tags::Bool<true> sym_opts) const {
         return m_bc_sym_helper->get_energy(onv);
     }
 
 public:
 
     defs::ham_t get_element(const conn::Antisym<1> &aconn) const {
-        return get_element_tag(aconn, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
+        return get_element_tag(aconn, tags::Bool<defs::enable_optim_for_lattice_ham>());
     }
 
     defs::ham_comp_t get_energy(const fields::Onv<1> &onv) const{
-        return get_energy_tag(onv, dispatch_utils::BoolTag<defs::enable_optim_for_lattice_ham>());
+        return get_energy_tag(onv, tags::Bool<defs::enable_optim_for_lattice_ham>());
     }
 
     size_t nci() const {

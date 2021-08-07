@@ -43,7 +43,6 @@ namespace utils {
         return is_zero(&v);
     }
 
-
     /**
      * catch-all for non-arithmetic types attempts to use output stream << overload. If it doesn't exist, compile time
      * error will be raised
@@ -178,6 +177,33 @@ namespace utils {
         narrows.reserve(wides.size());
         for (auto &it : wides) narrows.push_back(utils::safe_narrow<defs::mpi_count>(it));
         return narrows;
+    }
+
+    template<size_t exp, typename T=void>
+    static typename std::enable_if<exp==0, T>::type
+    pow(const T& v){
+        return 1ul;
+    }
+    template<size_t exp, typename T=void>
+    static typename std::enable_if<exp!=0, T>::type
+    pow(const T& v){
+        return v*pow<exp-1, T>(v);
+    }
+
+    template<size_t n>
+    static typename std::enable_if<!n, size_t>::type
+    ntup_num(size_t extent){
+        return 1ul;
+    }
+    template<size_t n>
+    static typename std::enable_if<n, size_t>::type
+    ntup_num(size_t extent){
+        return extent*ntup_num<n-1>(extent-1);
+    }
+
+    template<size_t n>
+    static size_t ntup(size_t extent){
+        return ntup_num<n>(extent)/ntup_num<n>(n);
     }
 }
 
@@ -732,18 +758,15 @@ namespace nd_utils {
     };
 }
 
-namespace dispatch_utils {
+namespace tags {
     template<typename T>
-    struct TypeTag {
-    };
+    struct Type {};
 
     template<size_t ind>
-    struct IndTag {
-    };
+    struct Ind {};
 
     template<bool t>
-    struct BoolTag {
-    };
+    struct Bool {};
 }
 
 namespace array_utils {

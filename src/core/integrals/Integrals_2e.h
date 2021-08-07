@@ -30,8 +30,8 @@ class Integrals_2e : public Integrals {
     const size_t m_nintind2, m_nintind3, m_nelem_8fold, m_nelem;
     SharedArray<T> m_data;
 public:
-    Integrals_2e(const size_t &nsite, bool spin_resolved) :
-            Integrals(nsite, spin_resolved), m_nintind2(m_nintind * m_nintind), m_nintind3(m_nintind2 * m_nintind),
+    Integrals_2e(const size_t &nsite, bool spin_res) :
+            Integrals(nsite, spin_res), m_nintind2(m_nintind * m_nintind), m_nintind3(m_nintind2 * m_nintind),
             m_nelem_8fold(trig(0, trig(0, m_nintind))), m_nelem(nelem(m_nintind)), m_data(m_nelem){
     }
 
@@ -103,7 +103,7 @@ public:
         /*
          * return spin-orbital indexed integral from indices in chemists' ordering
          */
-        if (m_spin_resolved) return get(i, j, k, l);
+        if (m_spin_res) return get(i, j, k, l);
         else {
             // enforce spin symmetry
             if (((i < m_nintind) != (j < m_nintind)) || ((k < m_nintind) != (l < m_nintind))) return 0.0;
