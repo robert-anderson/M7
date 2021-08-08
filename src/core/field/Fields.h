@@ -56,6 +56,10 @@ namespace fields {
             m_bos = inds.second;
             return *this;
         }
+
+        const size_t& nsite() const {
+            return m_frm.m_nsite;
+        }
     };
 
 //    struct FrmCsf : FrmOnv {

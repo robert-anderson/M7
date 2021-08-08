@@ -13,38 +13,37 @@ TEST(ExactPropagator, BosonTest) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
-    opts.tau_initial = 0.01;
-    opts.nwalker_target = 50;
-    opts.write_hdf5_fname = "rdm.h5";
-    opts.ncycle_wait_mevs = 4000;
-    opts.ncycle_accumulate_mevs = 200;
-    opts.ncycle_mev_period = 13;
-    opts.consolidate_spawns = false;
-    opts.explicit_hf_conn_mevs = false;
-    opts.output_mevs_periodically = true;
-    opts.rdm_rank = 2;
-    opts.replicate = false;
-    opts.init();
+    opts.m_wavefunction.m_nw_init = 100;
+    opts.m_propagator.m_nadd = 0.0;
+    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_propagator.m_nw_target = 10000;
+    opts.m_shift.m_period = 1;
+    opts.m_wavefunction.m_replicate = false;
+    opts.m_propagator.m_min_spawn_mag = 0.2;
+    opts.m_propagator.m_min_death_mag = 0.2;
+    opts.m_propagator.m_consolidate_spawns = false;
+    opts.verify();
     // nboson_cutoff 1: -6.9875779675355165
     // nboson_cutoff 2: -10.328242246088791
-    Hamiltonian<1> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
-    ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    buffered::Mbf ref(ham.nsite());
+    ham.set_hf_mbf(ref, 0);
 
     Wavefunction wf(opts, ham.nsite());
-    if (!opts.replicate && opts.nroot == 1) { ASSERT_EQ(wf.npart(), 1); }
-    ExactPropagator prop(ham, opts, wf.m_format, opts.explicit_hf_conn_mevs);
-    auto ref_energy = ham.get_energy(ref_onv);
+    if (!opts.m_wavefunction.m_replicate && opts.m_wavefunction.m_nroot == 1) { ASSERT_EQ(wf.npart(), 1); }
+    bool explicit_hf_conn_mevs = false; //TODO
+    ExactPropagator prop(ham, opts, wf.m_format, explicit_hf_conn_mevs);
+    auto ref_energy = ham.get_energy(ref);
 
-    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart) wf.set_weight(ipart, opts.nwalker_initial);
+    auto ref_loc = wf.create_row(0, ref, ref_energy, 1);
+    for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart) wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
 
     prop.m_shift.m_values = ref_energy;
 
-    Solver solver(prop, wf, ref_loc);
-    solver.execute(opts.ncycle);
-    std::cout << solver.mevs().m_fermion_rdm->get_energy(ham) - prop.m_shift.m_values[0] << std::endl;
+    Solver solver(opts, prop, wf, ref_loc);
+    solver.execute(opts.m_propagator.m_ncycle);
+    //std::cout << solver.mevs().m_fermion_rdm->get_energy(ham.m_frm) - prop.m_shift.m_values[0] << std::endl;
 }
 
 #else

@@ -23,12 +23,14 @@ public:
     }
 
     explicit DecodedDeterminant(const fields::FrmOnv &onv) :
-            DecodedDeterminant(onv.m_nsite) {
+            DecodedDeterminant(onv.nsite()) {
         update(onv);
     }
 
     explicit DecodedDeterminant(const fields::FrmBosOnv &onv) :
-            DecodedDeterminant(onv.m_frm.m_nsite) {}
+            DecodedDeterminant(onv.nsite()) {
+        update(onv);
+    }
 
     DecodedDeterminant(const DecodedDeterminant& other): DecodedDeterminant(other.m_inds.capacity()/2){}
     DecodedDeterminant(DecodedDeterminant&& other): DecodedDeterminant(other.m_inds.capacity()/2){}

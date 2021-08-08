@@ -28,6 +28,8 @@ public:
 
     void add(BosOpPair&& pair);
 
+    void set(BosOpPair&& pair);
+
     const BosOpPair& operator[](const size_t& ipair) const;
 };
 

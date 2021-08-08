@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "src/core/dynamics/Solver.h"
 
+#if 0
 TEST(Solver, RecvSort) {
     fciqmc_config::Document opts;
     opts.m_propagator.m_nw_target = 1000;
@@ -62,3 +63,4 @@ TEST(Solver, Consolidation) {
     solver.loop_over_spawned();
 
 }
+#endif

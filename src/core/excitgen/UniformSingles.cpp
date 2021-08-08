@@ -47,7 +47,7 @@ bool UniformSingles::draw(const fields::FrmOnv &src_onv, const OccupiedOrbitals 
         else ASSERT(a >= m_h.nsite())
     }
 #endif
-    conn.set(i, a);
+    conn.add(i, a);
     prob = 1.0 / ncases;
     helem = m_h.m_frm.get_element_1(src_onv, conn);
     return !consts::float_nearly_zero(helem, 1e-12);

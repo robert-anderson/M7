@@ -215,38 +215,35 @@ TEST(StochasticPropagator, ExcitedStates) {
 #else
 
 TEST(StochasticPropagator, BosonTest) {
-    Options opts;
-    opts.nwalker_initial = 10;
-    opts.nadd_initiator = 0.0;
-    opts.tau_initial = 0.01;
-    opts.nwalker_target = 10000;
-    opts.shift_damp = 0.4;
-    opts.ncycle = 5000;
-    opts.rdm_rank = 0;
-    opts.replicate = false;
-    opts.reference_redefinition_thresh = 2.0;
-    //opts.spf_uniform_twf = true;
-    //opts.write_hdf5_fname = "test_wf_save.h5";
-    //opts.read_hdf5_fname = "test_wf_save.h5";
-    opts.init();
+    fciqmc_config::Document opts;
+    opts.m_wavefunction.m_nw_init = 100;
+    opts.m_propagator.m_nadd = 0.0;
+    opts.m_propagator.m_tau_init = 0.001;
+    opts.m_propagator.m_nw_target = 10000;
+    opts.m_shift.m_period = 1;
+    opts.m_wavefunction.m_replicate = false;
+    opts.m_propagator.m_min_spawn_mag = 0.2;
+    opts.m_propagator.m_min_death_mag = 0.2;
+    opts.m_propagator.m_consolidate_spawns = false;
+    opts.verify();
 
     // -10.328242246088791
-    Hamiltonian<> ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 2, 1.4, 0.3);
+    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 1.4, 0.3);
 
-    ASSERT_TRUE(ham.spin_conserving());
-    buffered::Onv<> ref_onv(ham.nsite());
-    ham.set_hf_onv(ref_onv, 0);
+    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    buffered::Mbf ref(ham.nsite());
+    ham.set_hf_mbf(ref, 0);
     Wavefunction wf(opts, ham.nsite());
     wf.m_store.expand(10);
     wf.m_comm.expand(800);
     StochasticPropagator prop(ham, opts, wf.m_format);
-    auto ref_energy = ham.get_energy(ref_onv);
+    auto ref_energy = ham.get_energy(ref);
     prop.m_shift.m_values = ref_energy;
 
-    auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
+    auto ref_loc = wf.create_row(0, ref, ref_energy, 1);
     wf.set_weight(0, ref_energy);
-    Solver solver(prop, wf, ref_loc);
+    Solver solver(opts, prop, wf, ref_loc);
 
-    solver.execute(opts.ncycle);
+    solver.execute(opts.m_propagator.m_ncycle);
 }
 #endif

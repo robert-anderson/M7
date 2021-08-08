@@ -22,13 +22,10 @@ defs::ham_t foreach_conn::Base::get_element(const fields::BosOnv &mbf, const con
     return m_ham.get_element(mbf, conn);
 }
 
-
-
 void foreach_conn::frm::Fermion::singles(conn::FrmOnv &conn, const std::function<void()> &fn) {
     for (size_t iocc = 0ul; iocc < m_occ.size(); ++iocc) {
         for (size_t ivac = 0ul; ivac < m_vac.size(); ++ivac) {
-            conn.clear();
-            conn.add(m_occ[iocc], m_vac[ivac]);
+            conn.set(m_occ[iocc], m_vac[ivac]);
             fn();
         }
     }
@@ -44,8 +41,7 @@ void foreach_conn::frm::Fermion::doubles(conn::FrmOnv &conn, const std::function
         for (size_t ivac = 0ul; ivac < m_vac.size(); ++ivac) {
             for (size_t jocc = 0ul; jocc < iocc; ++jocc) {
                 for (size_t jvac = 0ul; jvac < ivac; ++jvac) {
-                    conn.clear();
-                    conn.add(m_occ[jocc], m_occ[iocc], m_vac[jvac], m_vac[ivac]);
+                    conn.set(m_occ[jocc], m_occ[iocc], m_vac[jvac], m_vac[ivac]);
                     fn();
                 }
             }
@@ -53,8 +49,7 @@ void foreach_conn::frm::Fermion::doubles(conn::FrmOnv &conn, const std::function
     }
 }
 
-void
-foreach_conn::frm::Fermion::foreach(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
+void foreach_conn::frm::Fermion::foreach(const fields::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
     m_occ.update(mbf);
     m_vac.update(mbf);
     singles(conn, fn);

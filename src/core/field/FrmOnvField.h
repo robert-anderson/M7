@@ -88,122 +88,28 @@ struct FrmOnvField : BitsetField<size_t, 2> {
         set(dptr, cre2);
     }
 
-    void set_from_string(const std::string &s) {
-        zero();
-        size_t i = 0ul;
-        for (auto c: s) {
-            // divider
-            if (c != ',') {
-                if (c != '0' && c != '1')
-                    throw std::runtime_error(
-                            R"(FermionOnv-defining string must contain only "0", "1", or ",")");
-                if (c == '1') set(i);
-                ++i;
-            } else {
-                if (i != m_nsite)
-                    throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
-            }
-        }
-        REQUIRE_GT(i, nbit(), "FermionOnv-defining string not long enough");
-        REQUIRE_LT(i, nbit(), "FermionOnv-defining string too long");
-    }
+    void set_from_string(const std::string &s);
 
-    void foreach(const std::function<void(const size_t&)>& body_fn) const {
-        size_t work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                body_fn(ibit);
-            }
-        }
-    }
+    void foreach(const std::function<void(const size_t&)>& body_fn) const;
 
 private:
-    void foreach_pair_inner(const size_t& ibit, const std::function<void(const size_t&, const size_t&)>& body_fn) const {
-        size_t work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t jbit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                if (jbit==ibit) return;
-                body_fn(jbit, ibit);
-            }
-        }
-    }
+    void foreach_pair_inner(const size_t& ibit, const std::function<void(const size_t&, const size_t&)>& body_fn) const;
 
 public:
-    void foreach_pair(const std::function<void(const size_t&, const size_t&)>& body_fn) const {
-        size_t work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                foreach_pair_inner(ibit, body_fn);
-            }
-        }
-    }
+    void foreach_pair(const std::function<void(const size_t&, const size_t&)>& body_fn) const;
 
     void foreach_pair(const std::function<void(const size_t&)>& body_fn_outer,
-                      const std::function<void(const size_t&, const size_t&)>& body_fn_inner) const {
-        size_t work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                body_fn_outer(ibit);
-                foreach_pair_inner(ibit, body_fn_inner);
-            }
-        }
-    }
+                      const std::function<void(const size_t&, const size_t&)>& body_fn_inner) const;
 
-    int spin() const {
-        int spin = 0;
-        size_t work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                if (ibit < m_nsite) ++spin;
-                else if (ibit >= nbit()) return spin;
-                else --spin;
-            }
-        }
-        return spin;
-    }
+    int spin() const;
 
-    int nalpha() const {
-        // number of electrons occupying spinors in the alpha spin channel
-        int nalpha = 0;
-        size_t work;
-        for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-                if (ibit >= m_nsite) return nalpha;
-                nalpha++;
-            }
-        }
-        return nalpha;
-    }
+    int nalpha() const;
 
-    std::string to_string() const override {
-        std::string res;
-        res += "(";
-        res.reserve(nbit() + 3);
-        size_t i = 0ul;
-        for (; i < m_nsite; ++i)
-            res += get(i) ? "1" : "0";
-        res += ","; // spin channel delimiter
-        for (; i < nbit(); ++i)
-            res += get(i) ? "1" : "0";
-        res += ")";
-        return res;
-    }
+    size_t site_nocc(const size_t& isite) const;
 
-    const size_t& nsite() const {
-        return m_nsite;
-    }
+    std::string to_string() const override;
+
+    const size_t& nsite() const;
 
 };
 

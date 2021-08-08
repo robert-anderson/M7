@@ -3,6 +3,7 @@
 //
 
 #include "ExcitGenGroup.h"
+#include "UniformFrmBos.h"
 
 void ExcitGenGroup::init_probs() {
     for (auto ptr: m_ptrs) m_probs.push_back(ptr->approx_nconn());
@@ -35,8 +36,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
         }
     }
     if (ham.m_bos.m_nboson_max) {
-        m_frmbos = std::unique_ptr<FrmBosExcitGen>(
-                new FrmBosExcitGen(ham, prng));
+        m_frmbos = std::unique_ptr<FrmBosExcitGen>(new UniformFrmBos(ham, prng));
     }
 
     // add to ptrs in reverse order of generally expected precedence:

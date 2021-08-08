@@ -15,7 +15,7 @@ class ExactPropagator : public Propagator {
      * rank-2 RDMs since these spawns will make the exact contributions.
      */
     const bool m_only_nonzero_h_spawns;
-    std::unique_ptr<foreach_conn::Base> m_connections;
+    foreach_conn::vector_t m_foreach_conns;
     MagnitudeLogger m_mag_log;
 
 public:

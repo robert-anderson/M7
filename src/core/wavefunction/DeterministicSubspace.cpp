@@ -10,7 +10,7 @@ fields::Mbf &DeterministicDataRow::key_field() {
 }
 
 DeterministicDataRow::DeterministicDataRow(const Wavefunction &wf) :
-        m_mbf(this, wf.m_store.m_row.m_mbf.m_nsite, "mbf"),
+        m_mbf(this, wf.m_store.m_row.m_mbf.nsite(), "mbf"),
         m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight"){}
 
 void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDataRow &local) {
@@ -50,7 +50,7 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham) {
             // only add to sparse H if dets are connected
             conn_work.connect(row_local.m_mbf, row_global.m_mbf);
             auto helem = ham.get_element(row_local.m_mbf, conn_work);
-            if (conn_work.size() > 0 && conn_work.size() < 5)
+            if (!consts::float_is_zero(helem))
                 m_sparse_ham.add(row_local.index(), row_global.index(), helem);
         }
     }
@@ -69,8 +69,10 @@ void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &h
     auto row = m_wf.m_store.m_row;
     auto& conn_work = conns_work[row.m_mbf];
     for (row.restart(); row.in_range(); row.step()){
+        if (row.is_cleared()) continue;
         conn_work.connect(mbf, row.m_mbf);
-        if (row.is_cleared() || conn_work.size()>4) continue;
+        auto helem = ham.get_element(mbf, conn_work);
+        if (consts::float_is_zero(helem)) continue;
         add_(row);
         for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             row.m_deterministic.set(ipart);

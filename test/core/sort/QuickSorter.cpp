@@ -9,6 +9,7 @@
 #include "src/core/wavefunction/WalkerTable.h"
 #include "gtest/gtest.h"
 
+#ifndef ENABLE_BOSONS
 TEST(QuickSorter, Test){
     const size_t nsite = 5;
     const size_t nrow = 10;
@@ -75,3 +76,4 @@ TEST(QuickSorter, Test){
      */
     ASSERT_TRUE(++correct==correct_order.cend());
 }
+#endif

@@ -23,7 +23,7 @@ void WeightedTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
     auto fn = [&](const fields::FrmOnv& dst, defs::ham_t helem){
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
-    m_foreach_conn->foreach<fields::FrmOnv>(onv, fn, true);
+    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach<fields::FrmOnv>(onv, fn, true);
     add(weight, helem_sum, diag_fac);
 }
 
@@ -33,7 +33,7 @@ void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv
     auto fn = [&](const fields::FrmBosOnv& dst, defs::ham_t helem){
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
-    m_foreach_conn->foreach<fields::FrmBosOnv>(onv, fn, true);
+    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach<fields::FrmBosOnv>(onv, fn, true);
     add(weight, helem_sum, diag_fac);
 }
 

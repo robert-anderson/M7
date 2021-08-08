@@ -15,11 +15,11 @@ struct Hubbard1dSingles : public UniformSingles {
 
     bool draw(const fields::FrmOnv &src_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-               defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
+               defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
 
     bool draw(const fields::FrmBosOnv &src_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
-               defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
+               defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override {
         return draw(src_onv.m_frm, occs, vacs, prob, helem, conn.m_frm);
     }
 

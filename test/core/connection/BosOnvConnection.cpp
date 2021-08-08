@@ -39,7 +39,9 @@ TEST(BosonOnvConnection, SingleChange) {
 
             bra[imode] += idelta;
             conn.connect(ket, bra);
-            ASSERT_EQ(conn.size(), 1);
+            ASSERT_EQ(conn.m_cre.size(), idelta);
+            ASSERT_EQ(conn.m_ann.size(), 0);
+            ASSERT_EQ(conn.size(), idelta);
             ASSERT_EQ(conn.m_cre[0].m_imode, imode);
             ASSERT_EQ(conn.m_cre[0].m_nop, idelta);
             conn.apply(ket, work_bonv);
@@ -69,7 +71,7 @@ TEST(BosonOnvConnection, DoubleChange) {
                     bra[imode1] += idelta1;
                     pc.connect(ket, bra);
 
-                    ASSERT_EQ(pc.size(), 2);
+                    ASSERT_EQ(pc.size(), idelta0+idelta1);
                     ASSERT_EQ(pc.m_cre[0].m_imode, imode0);
                     ASSERT_EQ(pc.m_cre[1].m_imode, imode1);
                     ASSERT_EQ(pc.m_cre[0].m_nop, idelta0);

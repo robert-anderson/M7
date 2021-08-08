@@ -18,11 +18,11 @@ bool Hubbard1dSingles::draw(const fields::FrmOnv &src_onv, const OccupiedOrbital
     if (vac == ~0ul) return false;
     if (src_onv.get(vac)) return false;
 
-    conn.set(occ, vac);
+    conn.add(occ, vac);
     helem = m_h.m_frm.get_element_1(src_onv, conn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }
 
 size_t Hubbard1dSingles::approx_nconn() const {
-    return 2ul;
+    return m_nelec;
 }

@@ -35,6 +35,11 @@ void BosOps::add(BosOpPair &&pair) {
     m_nop += pair.m_nop;
 }
 
+void BosOps::set(BosOpPair &&pair) {
+    clear();
+    add(std::forward<BosOpPair>(pair));
+}
+
 const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
     return m_pairs[ipair];

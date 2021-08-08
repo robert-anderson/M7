@@ -11,7 +11,7 @@
 class SpfTwfBase {
 protected:
     const Hamiltonian& m_ham;
-    std::unique_ptr<foreach_conn::Base> m_foreach_conn;
+    foreach_conn::vector_t m_foreach_conns;
     std::vector<defs::ham_t> m_numerator;
     std::vector<defs::ham_t> m_denominator;
     size_t m_nsite;
@@ -21,7 +21,7 @@ public:
     std::vector<defs::ham_t> m_denominator_total;
 
     SpfTwfBase(const Hamiltonian &ham, size_t npart, size_t nsite) :
-            m_ham(ham),  m_foreach_conn(foreach_conn::make(ham)),
+            m_ham(ham),  m_foreach_conns(foreach_conn::make_all(ham)),
             m_numerator(npart, 0.0), m_denominator(npart, 0.0),
             m_nsite(nsite), m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
     }

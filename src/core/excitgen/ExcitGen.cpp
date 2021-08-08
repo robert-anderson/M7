@@ -28,7 +28,6 @@ ExcitGen::ExcitGen(const Hamiltonian &h, PRNG &prng) :
 
 bool ExcitGen::draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
                     defs::ham_t &helem, conn::FrmOnv &conn) {
-    conn.clear();
     prob = 0.0;
     helem = 0.0;
     return false;
@@ -36,7 +35,6 @@ bool ExcitGen::draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const V
 
 bool ExcitGen::draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
                defs::ham_t &helem, conn::FrmBosOnv &conn) {
-    conn.clear();
     prob = 0.0;
     helem = 0.0;
     return false;

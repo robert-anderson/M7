@@ -17,7 +17,7 @@ void UniformTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::FrmOnv &onv) {
     defs::ham_t helem_sum = m_ham.get_element(onv);
     auto fn = [&helem_sum](defs::ham_t helem){helem_sum+=helem;};
-    m_foreach_conn->foreach(onv, fn);
+    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach(onv, fn);
     add(weight, helem_sum);
 }
 
@@ -25,7 +25,7 @@ void UniformTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const fields::FrmBosOnv &onv) {
     defs::ham_t helem_sum = m_ham.get_element(onv);
     auto fn = [&helem_sum](defs::ham_t helem){helem_sum+=helem;};
-    m_foreach_conn->foreach(onv, fn);
+    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach(onv, fn);
     add(weight, helem_sum);
 }
 
