@@ -96,12 +96,12 @@ struct ReductionSyndicateGroup : ReductionSyndicateGroupBase {
 
     void zero_all_local() override {
         for (ReductionBase<T> *member: m_members)
-            std::memset(member->m_local_ptr, 0, member->m_nelement * sizeof(T));
+            std::memset(reinterpret_cast<char*>(member->m_local_ptr), 0, member->m_nelement * sizeof(T));
     }
 
     void zero_all_reduced() override {
         for (ReductionBase<T> *member: m_members)
-            std::memset(member->m_reduced_ptr, 0, member->m_nelement * sizeof(T));
+            std::memset(reinterpret_cast<char*>(member->m_reduced_ptr), 0, member->m_nelement * sizeof(T));
     }
 
     void zero_all() override {

@@ -18,10 +18,10 @@ MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, s
         log::info("Dynamic excitation level probabilities to be kept above {}", m_prob_min);
 }
 
-void MagnitudeLogger::log(const size_t &iexlvl, const defs::ham_comp_t &helem, const defs::prob_t &prob) {
+void MagnitudeLogger::log(const size_t &iexlvl, const defs::ham_t &helem, const defs::prob_t &prob) {
     DEBUG_ASSERT_NE(prob, 0.0, "null draw should never be logged");
     auto& hi = m_gamma.m_local[iexlvl];
-    auto mag = helem / prob;
+    auto mag = std::abs(helem) / prob;
     if (mag > hi) hi = mag;
     ++m_ndraw.m_local[iexlvl];
 }

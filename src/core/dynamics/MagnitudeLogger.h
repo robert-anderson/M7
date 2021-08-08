@@ -51,7 +51,7 @@ struct MagnitudeLogger {
      *  probability that this excitation was drawn *given* iexlvl (i.e. prob of attempting an iexlvl excitation is not
      *  factored in)
      */
-    void log(const size_t& iexlvl, const defs::ham_comp_t& helem, const defs::prob_t& prob);
+    void log(const size_t& iexlvl, const defs::ham_t& helem, const defs::prob_t& prob);
 
 private:
     /**

@@ -44,7 +44,7 @@ public:
         std::stack<size_t> larger;
         for (size_t iprob = 0ul; iprob < m_nprob; ++iprob) {
             m_prob_table.set(irow, iprob, probs[iprob] * m_nprob);
-            if (m_prob_table.get(irow, iprob) < m_norm.get(irow)) smaller.push(iprob);
+            if (m_prob_table.get(irow, iprob) < m_norm[irow]) smaller.push(iprob);
             else larger.push(iprob);
         }
         size_t small, large;
@@ -55,8 +55,8 @@ public:
             larger.pop();
             m_alias_table.set(irow, small, large);
             m_prob_table.set(irow, large,
-                             m_prob_table.get(irow, large) - (m_norm.get(irow) - m_prob_table.get(irow, small)));
-            if (m_prob_table.get(irow, large) < m_norm.get(irow)) smaller.push(large);
+                             m_prob_table.get(irow, large) - (m_norm[irow] - m_prob_table.get(irow, small)));
+            if (m_prob_table.get(irow, large) < m_norm[irow]) smaller.push(large);
             else larger.push(large);
         }
     }
@@ -74,7 +74,7 @@ public:
         ASSERT(irow < m_nrow)
         size_t iprob = prng.draw_uint(m_nprob);
         ASSERT(iprob < m_nprob)
-        if (prng.draw_float() * m_norm.get(irow) < m_prob_table.get(irow, iprob)) return iprob;
+        if (prng.draw_float() * m_norm[irow] < m_prob_table.get(irow, iprob)) return iprob;
         else return m_alias_table.get(irow, iprob);
     }
 
@@ -85,7 +85,7 @@ public:
 
     const defs::prob_t &norm(const size_t &irow) const {
         ASSERT(irow < m_nrow)
-        return m_norm.get(irow);
+        return m_norm[irow];
     }
 
     const size_t &nprob() const {
@@ -93,7 +93,7 @@ public:
     }
 
     defs::prob_t prob(const size_t &irow, const size_t &iprob) const {
-        return m_prob_table.get(irow, iprob) / m_norm.get(irow);
+        return m_prob_table.get(irow, iprob) / m_norm[irow];
     }
 };
 

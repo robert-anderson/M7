@@ -25,7 +25,7 @@ public:
     const T& get(const size_t &irow, const size_t& icol) const {
         ASSERT(irow<m_nrow)
         ASSERT(icol<m_ncol)
-        return SharedArray<T>::get(irow*m_ncol+icol);
+        return SharedArray<T>::operator[](irow*m_ncol+icol);
     }
 
 };

@@ -17,22 +17,21 @@ TEST(FcidumpFileIterator, Real_6orb){
     // first entry
     test_inds = {0,0,0,0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(v, 0.53644984080846303));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.53644984080846303));
     // scan to arbitrary element
     for (size_t i=0; i<17; ++i) file_reader.next(inds, v);
     test_inds = {4,5,2,0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(v, 0.0043863275703943001));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.0043863275703943001));
     // scan to final element
     while(file_reader.next(inds, v)){}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(v, -98.3339467443989));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), -98.3339467443989));
 }
 
-
+#ifdef ENABLE_COMPLEX
 TEST(FcidumpFileIterator, Complex_10orb){
-    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     FcidumpFileReader file_reader(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_EQ(file_reader.nspatorb(), 5);
     defs::inds inds(4);
@@ -58,3 +57,4 @@ TEST(FcidumpFileIterator, Complex_10orb){
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_TRUE(consts::float_is_zero(v));
 }
+#endif

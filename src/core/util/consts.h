@@ -6,26 +6,31 @@
 #define M7_CONSTS_H
 
 #include <complex>
+#include <array>
 #include <limits>
 #include <typeinfo>
 
 namespace consts {
 
     template<typename T>
-    struct is_complex_t : public std::false_type {};
+    struct is_complex_t : public std::false_type {
+    };
 
     template<typename T>
-    struct is_complex_t<std::complex<T>> : public std::true_type {};
+    struct is_complex_t<std::complex<T>> : public std::true_type {
+    };
 
     template<typename T>
-    struct is_complex_t<const std::complex<T>> : public std::true_type {};
+    struct is_complex_t<const std::complex<T>> : public std::true_type {
+    };
 
     template<typename T>
-    struct is_complex_t<std::complex<T>&> : public std::true_type {};
+    struct is_complex_t<std::complex<T> &> : public std::true_type {
+    };
 
     template<typename T>
-    struct is_complex_t<const std::complex<T>&> : public std::true_type {};
-
+    struct is_complex_t<const std::complex<T> &> : public std::true_type {
+    };
 
 
     template<typename T>
@@ -37,7 +42,7 @@ namespace consts {
     template<typename T>
     static constexpr T conj(const T &v) {
         static_assert(!is_complex<T>(), "Complex values should be conjugated by overloads.");
-	   	return v;
+        return v;
     }
 
     template<typename T>
@@ -52,20 +57,41 @@ namespace consts {
     }
 
     template<typename T>
-    static constexpr T real(std::complex<T> v) {
-        return std::real(v);
+    static constexpr T real(const std::complex<T> &v) {
+        return v.real();
     }
 
     template<typename T>
-    static constexpr T imag(T &v) {
+    static constexpr T imag(const T &v) {
         static_assert(!is_complex<T>(), "Imaginary part of complex values should be taken by overloads.");
         return T(0);
     }
 
     template<typename T>
-    static constexpr T imag(std::complex<T> v) {
-        return std::imag(v);
+    static constexpr T imag(const std::complex<T>& v) {
+        return v.imag();
     }
+
+    template<typename T>
+    static constexpr const T &real_ref(const std::complex<T> &v) {
+        return reinterpret_cast<const std::array<T, 2> &>(v)[0];
+    }
+
+    template<typename T>
+    static constexpr T &real_ref(std::complex<T> &v) {
+        return reinterpret_cast<std::array<T, 2> &>(v)[0];
+    }
+
+    template<typename T>
+    static constexpr const T &imag_ref(const std::complex<T> &v) {
+        return reinterpret_cast<const std::array<T, 2> &>(v)[1];
+    }
+
+    template<typename T>
+    static constexpr T &imag_ref(std::complex<T> &v) {
+        return reinterpret_cast<std::array<T, 2> &>(v)[1];
+    }
+
 
     template<typename T>
     static constexpr T first_quadrant(T &v) {
@@ -84,7 +110,7 @@ namespace consts {
 
     template<typename T>
     static constexpr T l1_norm(std::complex<T> v) {
-        return std::abs(v.real())+std::abs(v.imag());
+        return std::abs(v.real()) + std::abs(v.imag());
     }
 
     template<typename T>
@@ -109,12 +135,12 @@ namespace consts {
 
     template<typename T>
     static constexpr T real_ratio(T &v1, T &v2) {
-        return v1/v2;
+        return v1 / v2;
     }
 
     template<typename T>
     static constexpr std::complex<T> real_ratio(std::complex<T> v1, std::complex<T> v2) {
-        return std::complex<T>(v1.real()/v2.real(), v1.imag()/v2.imag());
+        return std::complex<T>(v1.real() / v2.real(), v1.imag() / v2.imag());
     }
 
     template<typename T>
@@ -128,7 +154,7 @@ namespace consts {
     };
 
     template<typename T>
-    struct component_t<const std::complex<T>&> {
+    struct component_t<const std::complex<T> &> {
         typedef T type;
     };
 
@@ -136,29 +162,29 @@ namespace consts {
     using real_t = typename component_t<T>::type;
 
     template<typename T>
-    static constexpr bool float_nearly_zero(T v, typename component_t<T>::type eps){
-        return std::abs(v)<eps;
+    static constexpr bool float_nearly_zero(T v, typename component_t<T>::type eps) {
+        return std::abs(v) < eps;
     }
 
     template<typename T>
-    static constexpr bool float_is_zero(T v){
+    static constexpr bool float_is_zero(T v) {
         return float_nearly_zero(v, std::numeric_limits<typename component_t<T>::type>::epsilon());
     }
 
     template<typename T>
-    static constexpr bool floats_equal(T v1, T v2){
-        return float_is_zero(v1-v2);
+    static constexpr bool floats_equal(T v1, T v2) {
+        return float_is_zero(v1 - v2);
     }
 
     template<typename T>
-    static constexpr bool floats_nearly_equal(T v1, T v2, typename component_t<T>::type eps=1e-12){
-        return float_nearly_zero(v1-v2, eps);
+    static constexpr bool floats_nearly_equal(T v1, T v2, typename component_t<T>::type eps = 1e-12) {
+        return float_nearly_zero(v1 - v2, eps);
     }
 
-    const double pi = std::atan(1.0)*4;
-    const double two_pi = 2*pi;
+    const double pi = std::atan(1.0) * 4;
+    const double two_pi = 2 * pi;
     const double sqrt2 = std::sqrt(2.0);
-    const double invsqrt2 = 1.0/sqrt2;
+    const double invsqrt2 = 1.0 / sqrt2;
 
     // for debugging output
     const std::string verb = "\t[VERBOSE]  ";

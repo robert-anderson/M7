@@ -4,16 +4,18 @@
 
 
 #include <gtest/gtest.h>
+#include <src/core/integrals/IntegralArray2e.h>
 #include "src/core/integrals/Integrals_2e.h"
 
+#ifdef ENABLE_COMPLEX
 TEST(Integrals_2e, FourFoldCheck) {
     /*
      * check that all integrals are properly stored by retrieving all
      * values specified in the FCIDUMP and validating against stored values
      */
-    if (!consts::is_complex<defs::ham_t>()) GTEST_SKIP();
     std::string fname = defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP";
     Integrals_2e<defs::ham_t, 4> ints(10, true);
+
     defs::inds inds(4);
     defs::ham_t value;
     if (mpi::on_node_i_am_root()) {
@@ -41,3 +43,4 @@ TEST(Integrals_2e, FourFoldCheck) {
     //std::cout << std::endl << ints.get_phys(3, 1, 2, 1, 4, 1, 4, 1) << std::endl;
 
 }
+#endif

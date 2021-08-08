@@ -8,7 +8,7 @@
 
 #ifdef ENABLE_COMPLEX
 TEST(DenseHamiltonian, FciEnergyCheck4c) {
-    DenseHamiltonian ham(FermionHamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
+    DenseHamiltonian ham(Hamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));

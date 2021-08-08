@@ -27,7 +27,8 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart) wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
+    for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart)
+        wf.set_weight(ipart, defs::wf_t(opts.m_wavefunction.m_nw_init));
 
     prop.m_shift.m_values = ref_energy;
 

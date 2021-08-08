@@ -32,7 +32,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
 }
 
 Annihilator::Annihilator(Wavefunction &wf, const Hamiltonian &ham, const References &refs,
-                         const size_t &icycle, defs::wf_t nadd) :
+                         const size_t &icycle, defs::wf_comp_t nadd) :
         m_wf(wf), m_ham(ham), m_refs(refs), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_comm.recv().m_row), m_work_row2(wf.m_comm.recv().m_row),
         m_send_parents(m_work_row1.m_send_parents), m_sort_cmp_fn(make_sort_cmp_fn()) {}

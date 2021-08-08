@@ -107,7 +107,7 @@ TEST(ExactPropagator, Test) {
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, opts.m_wavefunction.m_nw_init);
+    for (size_t ipart=0ul; ipart<wf.npart(); ++ipart) wf.set_weight(ipart, defs::wf_t(opts.m_wavefunction.m_nw_init));
 
 
     buffered::Mbf excit_onv(ham.nsite());
@@ -115,14 +115,14 @@ TEST(ExactPropagator, Test) {
     excit_onv.excite(ham.nelec()/2-1, ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
     ASSERT(wf.m_store.m_row.index()==1);
-    wf.set_weight(1, opts.m_wavefunction.m_nw_init);
+    wf.set_weight(1, defs::wf_t(opts.m_wavefunction.m_nw_init));
 
 
     excit_onv = ref_onv;
     excit_onv.excite(ham.nsite()+ham.nelec()/2-1, ham.nsite()+ham.nelec()/2);
     wf.create_row(0, excit_onv, ham.get_energy(excit_onv), false);
     ASSERT(wf.m_store.m_row.index()==2ul);
-    wf.set_weight(2, opts.m_wavefunction.m_nw_init);
+    wf.set_weight(2, defs::wf_t(opts.m_wavefunction.m_nw_init));
 
     std::cout <<
               wf.m_store.to_string()

@@ -33,9 +33,9 @@ TEST(BosonCouplings, Element_b0) {
     defs::ham_t helement;
 
     helement = bc.get_element(src, conn);
-    ASSERT_EQ(helement, 0);
+    ASSERT_EQ(helement, 0.0);
     helement = bos_ham.get_element(src.m_bos, conn.m_bos);
-    ASSERT_EQ(helement, 0);
+    ASSERT_EQ(helement, 0.0);
 
     src = {{1, 2, 3, 4},
            {2, 4, 0, 1}};
@@ -48,7 +48,7 @@ TEST(BosonCouplings, Element_b0) {
     // no change in boson occupation, so no coupling
     ASSERT_EQ(helement, 0.0);
     helement = bos_ham.get_element(src.m_bos, conn.m_bos);
-    ASSERT_EQ(helement, 7 * omega);
+    ASSERT_EQ(helement, 7.0 * omega);
 }
 
 TEST(BosonCouplings, Element_f0_b1){

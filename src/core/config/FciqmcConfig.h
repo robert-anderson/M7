@@ -202,8 +202,8 @@ namespace fciqmc_config {
         config::Param<bool> m_stochastic;
         config::Param<std::string> m_excit_gen;
         config::Param<double> m_nw_target;
-        config::Param<double> m_max_bloom;
-        config::Param<double> m_nadd;
+        config::Param<defs::wf_comp_t> m_max_bloom;
+        config::Param<defs::wf_comp_t> m_nadd;
         config::Param<double> m_tau_init;
         config::Param<double> m_tau_min;
         config::Param<double> m_tau_max;

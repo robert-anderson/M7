@@ -290,4 +290,14 @@ struct NumberField : NdNumberField<T, 0ul> {
     }
 };
 
+template<typename T>
+T operator+(const T& lhs, const NumberField<T>& rhs){
+    return lhs+static_cast<const T&>(rhs);
+}
+template<typename T>
+T& operator+=(T& lhs, const NumberField<T>& rhs){
+    lhs+=static_cast<const T&>(rhs);
+    return lhs;
+}
+
 #endif //M7_NUMBERFIELD_H

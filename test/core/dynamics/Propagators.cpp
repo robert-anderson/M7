@@ -61,7 +61,7 @@ TEST(Propagators, RefExcitTest) {
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(0, opts.m_wavefunction.m_nw_init);
+    wf.set_weight(0, defs::wf_t(opts.m_wavefunction.m_nw_init));
 
     prop->m_shift.m_values = ref_energy;
 

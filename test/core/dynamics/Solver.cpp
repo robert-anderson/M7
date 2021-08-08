@@ -51,7 +51,7 @@ TEST(Solver, Consolidation) {
 
     auto ref_energy = ham.get_energy(ref_onv);
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);
-    wf.set_weight(opts.m_wavefunction.m_nw_init);
+    wf.set_weight(defs::wf_t(opts.m_wavefunction.m_nw_init));
 
     Solver solver(opts, prop, wf, ref_loc);
 

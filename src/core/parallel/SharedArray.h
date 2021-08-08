@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include "MPIWrapper.h"
+#include "MPIAssert.h"
 
 template<typename T>
 class SharedArray {
@@ -48,7 +49,7 @@ public:
         ASSERT(disp_unit == sizeof(T))
         ASSERT((size_t) alloc_size == size * sizeof(T))
         MPI_Win_unlock_all(m_win);
-        if (mpi::on_node_i_am_root()) std::memset(m_data, 0, size * sizeof(T));
+        if (mpi::on_node_i_am_root()) std::memset(reinterpret_cast<char*>(m_data), 0, size * sizeof(T));
         mpi::barrier_on_node();
 #else
         m_rows = new T[m_size];
@@ -88,18 +89,14 @@ public:
     void set(const size_t &i, const T &v) {
         // element-modifying access should only take place on the root rank
         if (mpi::on_node_i_am_root()) {
-            ASSERT(i < m_size)
+            DEBUG_ASSERT_LT(i, m_size, "SharedArray element OOB");
             m_data[i] = v;
         }
     }
 
-    const T &get(const size_t &i) const {
-        ASSERT(i < m_size)
-        return m_data[i];
-    }
-
     const T &operator[](const size_t &i) const {
-        return get(i);
+        DEBUG_ASSERT_LT(i, m_size, "SharedArray element OOB");
+        return m_data[i];
     }
 };
 
