@@ -270,6 +270,8 @@ void fciqmc_config::Document::verify() {
     config::Document::verify();
     REQUIRE_LT_ALL(m_wavefunction.m_nw_init, m_propagator.m_nw_target,
                    "initial number of walkers must not exceed the target population");
-    REQUIRE_GE_ALL(m_wavefunction.m_nw_init, m_propagator.m_nadd,
-                   "initial number of walkers must be at least the initiator cutoff");
+    if (m_wavefunction.m_nw_init < m_propagator.m_nadd) {
+        m_wavefunction.m_nw_init = m_propagator.m_nadd.get();
+        log::warn("initial number of walkers must be at least the initiator threshold");
+    }
 }
