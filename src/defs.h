@@ -74,11 +74,8 @@ namespace defs {
     typedef unsigned char exlvl_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
-    //typedef uint64_t data_t;
     typedef char buf_t;
     typedef unsigned char mev_ind_t;
-//    constexpr size_t nbyte_data = sizeof(data_t);
-//    constexpr size_t nbit_data = CHAR_BIT * nbyte_data;
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     const size_t isym_1e = 2;
@@ -104,9 +101,5 @@ namespace defs {
     //  nroot
     constexpr size_t ndim_root = 1;
     typedef std::array<size_t, ndim_wf> wf_inds_t;
-
-    // width of the cache line in bytes
-//    constexpr size_t ndata_cacheline = 8;
-//    constexpr size_t ncacheline_byte = ndata_cacheline * sizeof(data_t);
 }
 #endif //M7_DEFS_H
