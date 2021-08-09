@@ -30,7 +30,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
     for (size_t ipart = 0ul; ipart < wf.npart(); ++ipart)
         wf.set_weight(ipart, defs::wf_t(opts.m_wavefunction.m_nw_init));
 
-    prop.m_shift.m_values = ref_energy;
+    prop.m_shift.m_values = ref_energy+opts.m_shift.m_init.get();
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
@@ -43,9 +43,11 @@ void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 50;
+    opts.m_propagator.m_ncycle = 10000;
+    opts.m_shift.m_init = 0.1;
     // enough cycles to solve for the ground state of this small system exactly
-    opts.m_av_ests.m_delay = 2000;
-    opts.m_av_ests.m_ncycle = 100;
+    opts.m_av_ests.m_delay = 100;
+    opts.m_av_ests.m_ncycle = 400;
     opts.m_av_ests.m_stats_period = 10;
     opts.m_propagator.m_consolidate_spawns = false;
     opts.m_av_ests.m_fermion_rdm.m_rank = 2;

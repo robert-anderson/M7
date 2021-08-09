@@ -565,8 +565,8 @@ struct Communicator {
     Communicator(std::string name, size_t store_nrow_crude_est, size_t comm_nrow_crude_est,
                  const fciqmc_config::Buffers &buf_opts, const fciqmc_config::LoadBalancing &ra_opts,
                  const store_table_t &store, const send_table_t &send) :
-            Communicator(name, store_nrow_crude_est * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,
-                         comm_nrow_crude_est * buf_opts.m_comm_fac_init, buf_opts.m_comm_exp_fac,
+            Communicator(name, std::max(1ul, store_nrow_crude_est) * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,
+                         std::max(1ul, comm_nrow_crude_est) * buf_opts.m_comm_fac_init, buf_opts.m_comm_exp_fac,
                          store, send,
                          ra_opts.m_nblock_per_rank * mpi::nrank(), ra_opts.m_period, ra_opts.m_acceptable_imbalance,
                          ra_opts.m_nnull_updates_deactivate) {}
