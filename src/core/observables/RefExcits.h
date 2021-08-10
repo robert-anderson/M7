@@ -14,26 +14,26 @@
 #include "src/core/table/BufferedFields.h"
 #include "MevTable.h"
 
-struct RefExcitsOneExlvl : BufferedTable<MevRow<defs::wf_t>, true> {
+struct RefExcitsOneExlvl : BufferedTable<MaeRow<defs::wf_t>, true> {
     /**
      * work space for converting between indexing vector type and the stored key type of the MEV tables
      */
     buffered::FermionMevInds m_working_inds;
 
     RefExcitsOneExlvl(size_t nann, size_t ncre, size_t nvalue, size_t nbucket = 100) :
-            BufferedTable<MevRow<defs::wf_t>, true>("average coefficients", {{nann, ncre, nvalue}, nbucket}),
+            BufferedTable<MaeRow<defs::wf_t>, true>("average coefficients", {{nann, ncre, nvalue}, nbucket}),
             m_working_inds({nann, ncre}) {
         REQUIRE_EQ_ALL(nann, ncre, "different creation and annihilation operator numbers not currently supported");
     }
 
     LookupResult operator[](const conn::FrmOnv &key) {
         set_working_inds(key);
-        return MappedTable<MevRow<defs::wf_t>>::operator[](m_working_inds);
+        return MappedTable<MaeRow<defs::wf_t>>::operator[](m_working_inds);
     }
 
     size_t insert(const conn::FrmOnv &key) {
         set_working_inds(key);
-        return MappedTable<MevRow<defs::wf_t>>::insert(m_working_inds);
+        return MappedTable<MaeRow<defs::wf_t>>::insert(m_working_inds);
     }
 
     size_t nop() const {
@@ -46,9 +46,9 @@ struct RefExcitsOneExlvl : BufferedTable<MevRow<defs::wf_t>, true> {
                 m_row.m_values.m_name};
     }
 
-    using Table<MevRow<defs::wf_t>>::save;
+    using Table<MaeRow<defs::wf_t>>::save;
     void save(hdf5::GroupWriter& gw) const {
-        Table<MevRow<defs::wf_t>>::save(gw, std::to_string(nop()), h5_field_names());
+        Table<MaeRow<defs::wf_t>>::save(gw, std::to_string(nop()), h5_field_names());
     }
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {

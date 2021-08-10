@@ -90,11 +90,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     ~Wavefunction();
 
     static bool need_send_parents(const fciqmc_config::Document &opts) {
-        return opts.m_av_ests.m_fermion_rdm.m_rank > 0;
+        return opts.m_av_ests.m_fermion_rdm.m_ranks.get().size();
     }
 
     static bool need_av_weights(const fciqmc_config::Document &opts) {
-        if (opts.m_av_ests.m_fermion_rdm.m_rank > 0) return true;
+        if (need_send_parents(opts)) return true;
         return opts.m_av_ests.m_ref_excits.m_max_exlvl > 0;
     }
 

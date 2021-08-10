@@ -8,11 +8,11 @@
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
 /**
- * Multidimensional Expectation Values
+ * Multidimensional Averaged Estimators
  */
 
 template <typename T>
-struct MevRow : public Row {
+struct MaeRow : public Row {
     fields::FermionMevInds m_inds;
     fields::Numbers<T, 1> m_values;
 
@@ -20,11 +20,11 @@ struct MevRow : public Row {
         return m_inds;
     };
 
-    MevRow(size_t nann, size_t ncre, size_t nvalue):
+    MaeRow(size_t nann, size_t ncre, size_t nvalue):
     m_inds(this, nann, ncre, "spin_orbs"), m_values(this, {nvalue}, "values"){}
 
 
-    MevRow(size_t nop, size_t nvalue): MevRow(nop, nop, nvalue){}
+    MaeRow(size_t nop, size_t nvalue): MaeRow(nop, nop, nvalue){}
 };
 
 

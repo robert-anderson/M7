@@ -10,7 +10,7 @@
 #include "HeatBathDoubles.h"
 
 /**
- * dynamically constructs an array those excitation generators required for the stochastic propagation of the given
+ * dynamically constructs an array of those excitation generators required for the stochastic propagation of the given
  * Hamiltonian. All excitation signatures which in general give rise to non-zero H matrix elements are called "active"
  * exsigs, and are conventionally indexed with the symbol iex.
  * E.g.

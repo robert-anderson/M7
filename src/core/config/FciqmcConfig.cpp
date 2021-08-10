@@ -162,7 +162,7 @@ void fciqmc_config::SpfWeightedTwf::verify() {
 fciqmc_config::FermionRdm::FermionRdm(config::Group *parent) :
         config::Section(parent, "fermion_rdm",
                         "options relating to the accumulation and sampling of fermion RDM elements"),
-        m_rank(this, "rank", 0ul, "Rank of fermion RDM to accumulate"),
+        m_ranks(this, "rank", {}, "Ranks of fermion RDMs to accumulate"),
         m_mixed_estimator(this, "mixed_estimator", false,
                           "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}

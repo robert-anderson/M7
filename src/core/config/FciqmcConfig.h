@@ -149,7 +149,7 @@ namespace fciqmc_config {
     };
 
     struct FermionRdm : config::Section {
-        config::Param<size_t> m_rank;
+        config::Param<defs::inds> m_ranks;
         config::Param<bool> m_mixed_estimator;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
