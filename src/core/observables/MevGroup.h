@@ -86,7 +86,7 @@ public:
 
 };
 
-struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
+struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true>, Archivable {
     typedef Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> base_t;
     const size_t m_nann, m_ncre, m_nelec;
     /**
@@ -173,6 +173,13 @@ struct FermionRdm : Communicator<MevRow<defs::wf_t>, MevRow<defs::wf_t>, true> {
                 m_store.m_row.m_inds.m_cre.m_name,
                 m_store.m_row.m_values.m_name};
     }
+
+protected:
+    void load_fn(hdf5::GroupReader &parent) override;
+
+    void save_fn(hdf5::GroupWriter &parent) override;
+
+public:
 
     /**
      * compute the 2-RDM energy

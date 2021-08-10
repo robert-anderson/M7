@@ -785,6 +785,9 @@ namespace array_utils {
     }
 }
 
+/**
+ * functions related to connections between many-body basis functions
+ */
 namespace conn_utils {
     static size_t left_obc(const size_t &ispinorb, const size_t &nsite) {
         if (ispinorb == 0 || ispinorb == nsite) return ~0ul;
@@ -815,6 +818,53 @@ namespace conn_utils {
     static size_t right(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
         return pbc ? right_obc(ispinorb, nsite) : right_pbc(ispinorb, nsite);
     }
+
+    using namespace defs;
+
+    static constexpr size_t exsig(size_t ncref, size_t nannf, size_t ncreb, size_t nannb) {
+        return (ncref > exsig_nop_mask_frm || nannf > exsig_nop_mask_frm ||
+            ncreb > exsig_nop_mask_bos || nannb > exsig_nop_mask_bos) ?
+            ~0ul : ncref | (nannf << nbit_exsig_nop_frm) |
+            (ncreb << (2*nbit_exsig_nop_frm)) |
+            (nannb << (2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
+    }
+
+    static constexpr size_t extract_ncref(size_t exsig) {
+        return exsig_nop_mask_frm & exsig;
+    }
+    static constexpr size_t extract_nannf(size_t exsig) {
+        return exsig_nop_mask_frm & (exsig>>nbit_exsig_nop_frm);
+    }
+    static constexpr size_t extract_ncreb(size_t exsig) {
+        return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm));
+    }
+    static constexpr size_t extract_nannb(size_t exsig) {
+        return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
+    }
+
+    /**
+     * add all excitation signatures corresponding to the operator product encoded in the given rank signature
+     * e.g. rank = (2, 2, 0, 1)
+     * @param rank_sig
+     *  signature of the rank of operator product accumulated in the RDM
+     * @param gamma_conns
+     */
+    static void add_exsigs(size_t ranksig, std::array<bool, nexsig> &array) {
+        auto ncref = extract_ncref(ranksig);
+        auto nannf = extract_nannf(ranksig);
+        while (ncref != ~0ul && nannf != ~0ul) {
+            auto ncreb = extract_ncreb(ranksig);
+            auto nannb = extract_nannb(ranksig);
+            while (ncreb != ~0ul && nannb != ~0ul) {
+                array[exsig(ncref, nannf, ncreb, nannb)] = true;
+                --ncreb;
+                --nannb;
+            }
+            --ncref;
+            --nannf;
+        }
+    }
+
 }
 
 

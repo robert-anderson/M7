@@ -39,6 +39,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
 
 
 void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
+    opts.m_archive.m_save_path = "M7.save";
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.01;

@@ -50,6 +50,8 @@ struct BosOnvConnection {
     void apply(const fields::BosOnv &src, BosOps &com) const;
 
     void apply(const fields::BosOnv &src, fields::BosOnv &dst, BosOps &com) const;
+
+    size_t exsig() const;
 };
 
 

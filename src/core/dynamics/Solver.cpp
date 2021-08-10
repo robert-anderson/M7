@@ -40,9 +40,14 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                 new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
 
     /**
-     * setup archive members and read previous calculation data into archivable objects if archive loading is enabled
+     * setup archive members
      */
-    m_archive.add_members(m_prop, *m_mevs.m_ref_excits);
+    m_archive.add_member(m_prop);
+    if (m_mevs.m_ref_excits) m_archive.add_member(*m_mevs.m_ref_excits);
+    if (m_mevs.m_fermion_rdm) m_archive.add_member(*m_mevs.m_fermion_rdm);
+    /**
+     * read previous calculation data into archivable objects if archive loading is enabled
+     */
     m_archive.load();
 
     m_wf.m_ra.activate(m_icycle);

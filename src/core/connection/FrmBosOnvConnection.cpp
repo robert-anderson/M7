@@ -1,0 +1,26 @@
+//
+// Created by rja on 10/08/2021.
+//
+
+#include "FrmBosOnvConnection.h"
+
+FrmBosOnvConnection::FrmBosOnvConnection(size_t nsite) : m_frm(nsite), m_bos(nsite){}
+
+void FrmBosOnvConnection::clear() {
+    m_frm.clear();
+    m_bos.clear();
+}
+
+void FrmBosOnvConnection::connect(const fields::FrmBosOnv &src, const fields::FrmBosOnv &dst) {
+    m_frm.connect(src.m_frm, dst.m_frm);
+    m_bos.connect(src.m_bos, dst.m_bos);
+}
+
+void FrmBosOnvConnection::apply(const fields::FrmBosOnv &src, fields::FrmBosOnv &dst) const {
+    m_frm.apply(src.m_frm, dst.m_frm);
+    m_bos.apply(src.m_bos, dst.m_bos);
+}
+
+size_t FrmBosOnvConnection::exsig() const {
+    return conn_utils::exsig(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
+}

@@ -215,3 +215,7 @@ bool FrmOnvConnection::phase(const fields::FrmOnv &src) const {
     out ^= (m_ann.size()&1ul) & (m_cre.size()&1ul);
     return out;
 }
+
+size_t FrmOnvConnection::exsig() const {
+    return conn_utils::exsig(m_cre.size(), m_ann.size(), 0ul, 0ul);
+}

@@ -276,6 +276,8 @@ public:
      *  true if the phase of the connection with respect to the src is negative
      */
     bool phase(const fields::FrmOnv &src) const;
+
+    size_t exsig() const;
 };
 
 

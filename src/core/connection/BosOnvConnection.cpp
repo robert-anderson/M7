@@ -96,3 +96,7 @@ void BosOnvConnection::apply(const fields::BosOnv &src, fields::BosOnv &dst, Bos
     apply(src, dst);
     apply(src, com);
 }
+
+size_t BosOnvConnection::exsig() const {
+    return conn_utils::exsig(0, 0, m_cre.size(), m_ann.size());
+}

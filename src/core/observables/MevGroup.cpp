@@ -95,6 +95,7 @@ FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_
                         opts.m_hash_mapping.m_remap_nlookup,
                         opts.m_hash_mapping.m_remap_ratio
                 }),
+        Archivable("rdm", opts.m_archivable),
         m_nann(opts.m_rank), m_ncre(opts.m_rank), m_nelec(nelec), m_lookup_inds(opts.m_rank),
         m_conn(nsite), m_mixed_estimator(opts.m_mixed_estimator), m_com(nsite) {
     m_promoters.reserve(opts.m_rank + 1);
@@ -132,4 +133,12 @@ void FermionRdm::make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv
         auto contrib = (phase ? -1.0 : 1.0) * src_weight * dst_weight;
         send_table.m_row.m_values[0] += contrib;
     }
+}
+
+void FermionRdm::load_fn(hdf5::GroupReader &parent) {
+
+}
+
+void FermionRdm::save_fn(hdf5::GroupWriter &parent) {
+    m_store.save(parent, std::to_string(nop()), h5_field_names());
 }

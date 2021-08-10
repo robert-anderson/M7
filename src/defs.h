@@ -81,6 +81,31 @@ namespace defs {
     const size_t isym_1e = 2;
     const size_t isym_2e = 8;
 
+    /**
+     * "exsigs", short for "excitation signatures", encode in a single word the number of each type of second-quantised
+     * operator in an operator product.
+     */
+    /**
+     * number of bits in the signature representing each number of fermion SQ operators
+     */
+    static constexpr size_t nbit_exsig_nop_frm = 3;
+    /**
+     * number of bits in the signature representing each number of boson SQ operators
+     */
+    static constexpr size_t nbit_exsig_nop_bos = 1;
+    /**
+     * mask and max value for extraction of a number of fermion SQ operators
+     */
+    static constexpr size_t exsig_nop_mask_frm = (1 << nbit_exsig_nop_frm)-1;
+    /**
+     * mask and max value for extraction of a number of boson SQ operators
+     */
+    static constexpr size_t exsig_nop_mask_bos = (1 << nbit_exsig_nop_bos)-1;
+    /**
+     * total number of distinct excitation signatures that can be stored
+     */
+    static constexpr size_t nexsig = (1 << (2 * nbit_exsig_nop_frm + 2*nbit_exsig_nop_bos));
+
     // TODO: bool-> size_t to make way for additional many-body basis function types
 #ifdef ENABLE_BOSONS
     constexpr bool enable_bosons = true;
