@@ -5,45 +5,67 @@
 #include "ExcitGenGroup.h"
 #include "UniformFrmBos.h"
 
-void ExcitGenGroup::init_probs() {
-    for (auto ptr: m_ptrs) m_probs.push_back(ptr->approx_nconn());
-    auto norm = std::accumulate(m_probs.cbegin(), m_probs.cend(), 0.0);
+void ExcitGenGroup::init() {
+    defs::prob_t norm = 0.0;
+    for (size_t exsig=0ul; exsig<defs::nexsig; ++exsig){
+        const auto ptr = m_exgens[exsig].get();
+        if (!ptr) continue;
+        if (conn_utils::pure_frm(exsig)) m_frm_inds.push_back(m_active_exsigs.size());
+        m_probs.push_back(ptr->approx_nconn());
+        norm+=m_probs.back();
+        m_active_exsigs.push_back(exsig);
+    }
     for (auto &prob: m_probs) prob /= norm;
     update_cumprobs();
 }
 
 void ExcitGenGroup::update_cumprobs() {
     m_cumprobs = m_probs;
+    m_frm_probs.clear();
+    m_frm_norm = 0.0;
+    auto it = m_probs.cbegin();
+    for (const auto& exsig: m_active_exsigs){
+        if (conn_utils::pure_frm(exsig)) {
+            m_frm_probs.push_back(*it);
+            m_frm_norm+=m_frm_probs.back();
+        }
+        ++it;
+    }
+
     for (size_t iprob = 1ul; iprob < m_probs.size(); ++iprob)
         m_cumprobs[iprob] = m_cumprobs[iprob - 1] + m_probs[iprob];
     DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_cumprobs.back()),
+                      "cumulative probability should be 1.0");
+    m_frm_cumprobs = m_frm_probs;
+    for (size_t iprob = 1ul; iprob < m_frm_probs.size(); ++iprob)
+        m_frm_cumprobs[iprob] = m_frm_cumprobs[iprob - 1] + m_frm_probs[iprob];
+    DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_frm_cumprobs.back()),
                       "cumulative probability should be 1.0");
 }
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng) {
     if (ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc()) {
-        m_frm_singles = std::unique_ptr<FrmExcitGen>(
+        m_exgens[conn_utils::exsig(1,1,0,0)] = std::unique_ptr<ExcitGen>(
                 new Hubbard1dSingles(ham, prng, ham.m_frm.is_hubbard_1d_pbc()));
     } else {
-        m_frm_singles = std::unique_ptr<FrmExcitGen>(
+        m_exgens[conn_utils::exsig(1,1,0,0)] = std::unique_ptr<ExcitGen>(
                 new UniformSingles(ham, prng));
     }
     if (ham.m_frm.int_2e_rank()) {
         if (opts.m_excit_gen.get() == "pchb") {
-            m_frm_doubles = std::unique_ptr<FrmExcitGen>(
+            m_exgens[conn_utils::exsig(2,2,0,0)] = std::unique_ptr<ExcitGen>(
                     new HeatBathDoubles(ham, prng));
         }
     }
     if (ham.m_bos.m_nboson_max) {
-        m_frmbos = std::unique_ptr<FrmBosExcitGen>(new UniformFrmBos(ham, prng));
+        m_exgens[conn_utils::exsig(0,0,1,0)] =
+                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, true));
+        m_exgens[conn_utils::exsig(0,0,0,1)] =
+                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, false));
     }
 
-    // add to ptrs in reverse order of generally expected precedence:
-    if (m_frm_doubles) m_ptrs.push_back(m_frm_doubles.get());
-    if (m_frm_singles) m_ptrs.push_back(m_frm_singles.get());
-    if (m_frmbos) m_ptrs.push_back(m_frmbos.get());
-    init_probs();
+    init();
 
     auto spec_probs = opts.m_exlvl_probs_init.get();
     if (spec_probs.size()) {
@@ -60,7 +82,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
 }
 
 size_t ExcitGenGroup::size() const {
-    return m_ptrs.size();
+    return m_active_exsigs.size();
 }
 
 void ExcitGenGroup::set_probs(const std::vector<defs::prob_t> &probs) {
@@ -69,31 +91,30 @@ void ExcitGenGroup::set_probs(const std::vector<defs::prob_t> &probs) {
     update_cumprobs();
 }
 
-void ExcitGenGroup::set_prob(const defs::prob_t &prob, ExcitGen *ptr) {
-    DEBUG_ASSERT_LE(prob, 1.0, "given prob exceeds one");
-    DEBUG_ASSERT_GE(prob, 0.0, "given prob is less than zero");
-    auto norm_remain = 1.0 - prob;
-    for (size_t i = 0ul; i < size(); ++i) {
-        if (m_ptrs[i] != ptr) m_probs[i] *= norm_remain;
-    }
-    update_cumprobs();
+defs::prob_t ExcitGenGroup::get_prob(const size_t &iex) const {
+    DEBUG_ASSERT_LT(iex, size(), "excit gen index OOB");
+    return m_probs[iex];
 }
 
-const defs::prob_t &ExcitGenGroup::get_prob(const size_t &iexlvl) const {
-    DEBUG_ASSERT_LT(iexlvl, size(), "excit gen index OOB");
-    return m_probs[iexlvl];
+defs::prob_t ExcitGenGroup::get_prob_frm(const size_t &iex) const {
+    return get_prob(iex) / m_frm_norm;
 }
 
 const std::vector<defs::prob_t> &ExcitGenGroup::get_probs() const {
     return m_probs;
 }
 
-ExcitGen &ExcitGenGroup::operator[](const size_t &iexlvl) {
-    DEBUG_ASSERT_LT(iexlvl, size(), "excit gen index OOB");
-    return *m_ptrs[iexlvl];
+ExcitGen &ExcitGenGroup::operator[](const size_t &iex) {
+    DEBUG_ASSERT_LT(iex, size(), "excit gen index OOB");
+    return *m_exgens[m_active_exsigs[iex]];
 }
 
-size_t ExcitGenGroup::draw_iexlvl() {
+const ExcitGen &ExcitGenGroup::operator[](const size_t &iex) const {
+    DEBUG_ASSERT_LT(iex, size(), "excit gen index OOB");
+    return *m_exgens[m_active_exsigs[iex]];
+}
+
+size_t ExcitGenGroup::draw_iex() {
     auto r = m_prng.draw_float();
     for (size_t i = 0ul; i < size(); ++i) {
         if (r < m_cumprobs[i]) return i;
@@ -101,8 +122,17 @@ size_t ExcitGenGroup::draw_iexlvl() {
     return size() - 1;
 }
 
+size_t ExcitGenGroup::draw_iex_frm() {
+    auto r = m_prng.draw_float();
+    auto size = m_frm_inds.size();
+    for (size_t i = 0ul; i < size; ++i) {
+        if (r < m_frm_cumprobs[i]) return m_frm_inds[i];
+    }
+    return m_frm_inds[size - 1];
+}
+
 void ExcitGenGroup::log_breakdown() const {
     log::info("Excitation class probability breakdown:");
     for (size_t i = 0ul; i < size(); ++i)
-        log::info("{:<40} {}", m_ptrs[i]->description(), get_prob(i));
+        log::info("{:<40} {}", (*this)[i].description(), get_prob(i));
 }

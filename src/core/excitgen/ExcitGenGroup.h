@@ -9,18 +9,57 @@
 #include "Hubbard1dSingles.h"
 #include "HeatBathDoubles.h"
 
-
+/**
+ * dynamically constructs an array those excitation generators required for the stochastic propagation of the given
+ * Hamiltonian. All excitation signatures which in general give rise to non-zero H matrix elements are called "active"
+ * exsigs, and are conventionally indexed with the symbol iex.
+ * E.g.
+ * The ab-initio fermionic many-body Hamiltonian has two such active exsigs: 0 (1100), 1 (2200)
+ * whereas the 1d site-basis Hubbard-Holstein model has three active exsigs: 0 (1100), 1 (0010), 2 (0001)
+ */
 class ExcitGenGroup {
     PRNG &m_prng;
-    std::unique_ptr<FrmExcitGen> m_frm_singles;
-    std::unique_ptr<FrmExcitGen> m_frm_doubles;
-    std::unique_ptr<FrmBosExcitGen> m_frmbos;
+    /**
+     * one excitation generator is dynamically constructable per active exsig
+     */
+    std::array<std::unique_ptr<ExcitGen>, defs::nexsig> m_exgens;
+    /**
+     * vector storing all active exsigs consecutively
+     */
+    defs::inds m_active_exsigs;
+    /**
+     * probability of attempting to draw from each of the active exsigs
+     */
     std::vector<defs::prob_t> m_probs;
+    /**
+     * cached cumulative probability for all the active exsigs for slight performance benefit
+     */
     std::vector<defs::prob_t> m_cumprobs;
-    std::vector<ExcitGen *> m_ptrs;
 
-    void init_probs();
+    /**
+     * indices which point to positions in m_active_exsigs corresponding to purely fermionic excitations
+     */
+    defs::inds m_frm_inds;
+    /**
+     * probabilities for each purely fermionic active exsig
+     */
+    std::vector<defs::prob_t> m_frm_probs;
+    std::vector<defs::prob_t> m_frm_cumprobs;
+    /**
+     * normalization for the fermionic active exsigs
+     */
+    defs::prob_t m_frm_norm = 1.0;
 
+    /**
+     * initialize vectors of exsigs and pointers to excitation generators in general. Also initialize the vector
+     * m_frm_inds, which identifies positions of purely fermionic excitation generators from the general vector
+     */
+    void init();
+
+    /**
+     * given only the current value of m_probs, update the probability of purely fermionic exctiation generations and
+     * update the cumulative probability vectors for all excitations and for fermionic excitations only
+     */
     void update_cumprobs();
 
 public:
@@ -35,22 +74,27 @@ public:
      */
     ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng);
 
+    /**
+     * @result
+     *  the number of active exsigs
+     */
     size_t size() const;
 
     void set_probs(const std::vector<defs::prob_t> &probs);
 
-private:
-    void set_prob(const defs::prob_t &prob, ExcitGen *ptr);
+    defs::prob_t get_prob(const size_t &iex) const;
 
-public:
-
-    const defs::prob_t &get_prob(const size_t &iexlvl) const;
+    defs::prob_t get_prob_frm(const size_t &iex) const;
 
     const std::vector<defs::prob_t> &get_probs() const;
 
-    ExcitGen &operator[](const size_t &iexlvl);
+    ExcitGen &operator[](const size_t &iex);
 
-    size_t draw_iexlvl();
+    const ExcitGen &operator[](const size_t &iex) const;
+
+    size_t draw_iex();
+
+    size_t draw_iex_frm();
 
     void log_breakdown() const;
 };

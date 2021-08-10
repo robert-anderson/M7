@@ -841,6 +841,18 @@ namespace conn_utils {
     static constexpr size_t extract_nannb(size_t exsig) {
         return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
     }
+    static constexpr bool pure_frm(size_t exsig) {
+        return !(extract_ncreb(exsig) || extract_nannb(exsig)) && (extract_ncref(exsig) || extract_nannf(exsig));
+    }
+    static constexpr bool pure_bos(size_t exsig) {
+        return !(extract_ncref(exsig) || extract_nannf(exsig)) && (extract_ncreb(exsig) || extract_nannb(exsig));
+    }
+    static constexpr bool conserve_nfrm(size_t exsig) {
+        return extract_ncref(exsig) == extract_nannf(exsig);
+    }
+    static constexpr bool conserve_nbos(size_t exsig) {
+        return extract_ncreb(exsig) == extract_nannb(exsig);
+    }
 
     /**
      * add all excitation signatures corresponding to the operator product encoded in the given rank signature
