@@ -11,7 +11,28 @@
 #include "Rdm.h"
 #include "SpectralMoment.h"
 
-
+/**
+ * Projection onto a trial wavefunction is sufficient for the estimation of many-body expectation values if the operator
+ * in question commutes with the Hamiltonian. When the operator does not commute with the Hamiltonian, the projection
+ * by a trial wavefunction is just an approximation called a "mixed estimator".
+ *
+ * In this general case, the only way to obtain estimates which are exact in the infinite sampling limit is to use the
+ * wavefunction itself as the trial wavefunction, and thus we obtain estimates of a quantity which is "bilinear" in the
+ * wavefunction.
+ *
+ * This is statistically problematic when the WF is stochastically propagated, since products of correlated walker
+ * populations introduce a systematic bias. This is overcome by replicating walker populations for each root.
+ *
+ * Two different types of multidimensional bilinear estimator are currently implemented.
+ *  1. reduced density matrices (RDMs)
+ *  2. spectral moments (SpecMoms)
+ *
+ * In M7, RDMs are defined as the expectation value of a normal ordered product of second quantized (SQ) operators and
+ * may include fermionic spin orbital indices or bosonic modes as free indices.
+ *
+ * SpecMoms are defined as matrix elements of some power of the Hamiltonian between perturbed wavefunctions, where the
+ * perturbing operators have arbitrary rank but are limited to fermionic spin orbital indices.
+ */
 struct BilinearEstimatorGroup {
 
     std::array<std::unique_ptr<Rdm>, defs::nexsig> m_rdms;

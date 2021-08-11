@@ -15,13 +15,13 @@ mae_inds::Frm::Frm(const Frm &other) :
                        other.m_ann.m_format.m_nelement,
                        other.m_cre.m_format.m_nelement, other.m_name) {}
 
-Frm &mae_inds::Frm::operator=(const Frm &other) {
+mae_inds::Frm &mae_inds::Frm::operator=(const Frm &other) {
     m_ann = other.m_ann;
     m_cre = other.m_cre;
     return *this;
 }
 
-Frm &mae_inds::Frm::operator=(const std::pair<defs::inds, defs::inds> &inds) {
+mae_inds::Frm &mae_inds::Frm::operator=(const std::pair<defs::inds, defs::inds> &inds) {
     for (size_t i = 0ul; i < inds.first.size(); ++i) m_ann[i] = inds.first[i];
     for (size_t i = 0ul; i < inds.second.size(); ++i) m_cre[i] = inds.second[i];
     return *this;

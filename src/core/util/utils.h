@@ -853,6 +853,9 @@ namespace conn_utils {
     static constexpr bool conserve_nbos(size_t exsig) {
         return extract_ncreb(exsig) == extract_nannb(exsig);
     }
+    static constexpr size_t conj(size_t exsig) {
+        return conn_utils::exsig(extract_nannf(exsig),extract_ncref(exsig),extract_nannb(exsig),extract_ncreb(exsig));
+    }
 
     /**
      * add all excitation signatures corresponding to the operator product encoded in the given rank signature
