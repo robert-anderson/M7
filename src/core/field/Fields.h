@@ -7,8 +7,7 @@
 
 #include "NumberField.h"
 #include "MultiField.h"
-#include "FrmOnvField.h"
-#include "BosOnvField.h"
+#include "FrmBosOnvField.h"
 
 namespace fields {
     template<typename T, size_t nind>
@@ -30,37 +29,7 @@ namespace fields {
 
     using BosOnv = BosOnvField;
 
-    struct FrmBosOnv : MultiField<FrmOnv, BosOnv> {
-        const std::string m_name;
-        FrmOnv &m_frm;
-        BosOnv &m_bos;
-
-        FrmBosOnv(Row *row, size_t nsite, std::string name = "") :
-                MultiField<FrmOnv, BosOnv>(row,
-                                           {nullptr, nsite, name.empty() ? "" : name + " (fermion)"},
-                                           {nullptr, nsite, name.empty() ? "" : name + " (boson)"}),
-                m_name(name), m_frm(get<0>()), m_bos(get<1>()) {
-        }
-
-        FrmBosOnv(const FrmBosOnv &other) : FrmBosOnv(other.m_frm.row_of_copy(), other.m_frm.m_nsite,
-                                                      other.m_name) {}
-
-        FrmBosOnv &operator=(const FrmBosOnv &other) {
-            m_frm = other.m_frm;
-            m_bos = other.m_bos;
-            return *this;
-        }
-
-        FrmBosOnv &operator=(const std::pair<defs::inds, defs::inds> &inds) {
-            m_frm = inds.first;
-            m_bos = inds.second;
-            return *this;
-        }
-
-        const size_t& nsite() const {
-            return m_frm.m_nsite;
-        }
-    };
+    using FrmBosOnv = FrmBosOnvField;
 
 //    struct FrmCsf : FrmOnv {
 //        FrmCsf(Row *row, size_t nsite, std::string name = ""): FrmOnv(row, nsite, name){}
@@ -71,85 +40,6 @@ namespace fields {
     template<size_t mbf_ind>
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_ind> Mbf;
-
-    struct FermionMevInds : MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> {
-        typedef MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> base_t;
-        const std::string m_name;
-        Numbers<defs::mev_ind_t, 1> &m_ann;
-        Numbers<defs::mev_ind_t, 1> &m_cre;
-
-        FermionMevInds(Row *row, size_t nann, size_t ncre, std::string name = "") :
-                base_t(row, {nullptr, {nann}, name.empty() ? "" : name + "_ann"},
-                       {nullptr, {ncre}, name.empty() ? "" : name + "_cre"}),
-                m_name(name), m_ann(get<0>()), m_cre(get<1>()) {
-        }
-
-        FermionMevInds(const FermionMevInds &other) :
-                FermionMevInds(other.m_ann.row_of_copy(),
-                               other.m_ann.m_format.m_nelement,
-                               other.m_cre.m_format.m_nelement, other.m_name) {}
-
-        FermionMevInds &operator=(const FermionMevInds &other) {
-            m_ann = other.m_ann;
-            m_cre = other.m_cre;
-            return *this;
-        }
-
-        FermionMevInds &operator=(const std::pair<defs::inds, defs::inds> &inds) {
-            for (size_t i = 0ul; i < inds.first.size(); ++i) m_ann[i] = inds.first[i];
-            for (size_t i = 0ul; i < inds.second.size(); ++i) m_cre[i] = inds.second[i];
-            return *this;
-        }
-
-        /**
-         * The RDM entry keys represent the ascending-ordered sector of the normal-ordered pure expectation values,
-         * the full spin-resolved RDM can be constructed from this via permutations of the indices.
-         * @return
-         *  true if the SQ creation and annihilation operator index vectors are properly ordered
-         */
-        bool is_ordered() const {
-            return m_ann.is_ordered(false, true) && m_cre.is_ordered(false, true);
-        }
-
-        /**
-         * all elements of the RDM have the same rank, but not the same excitation level. If the number of indices in
-         * common between the creation and annihilation operators is zero, the excitation level is the same as the rank
-         * @return
-         *  number of indices in common between ascending ordered creation and annihilation spin orbital operator strings
-         */
-        size_t ncommon_sq_op_ind() const {
-            size_t ncommon = 0ul;
-            size_t icre = 0ul;
-            size_t iann = 0ul;
-            ASSERT(is_ordered());
-            while(icre<m_cre.nelement() && iann<m_ann.nelement()){
-                if (m_cre[icre]>m_ann[iann]) ++icre;
-                else if (m_cre[icre]<m_ann[iann]) ++iann;
-                else {
-                    // common element found
-                    ++ncommon;
-                    ++icre; ++iann;
-                }
-            }
-            return ncommon;
-        }
-
-        void common_sq_op_inds(defs::inds& common) const {
-            common.clear();
-            size_t icre = 0ul;
-            size_t iann = 0ul;
-            ASSERT(is_ordered());
-            while(icre<m_cre.nelement() && iann<m_ann.nelement()){
-                if (m_cre[icre]>m_ann[iann]) ++icre;
-                else if (m_cre[icre]<m_ann[iann]) ++iann;
-                else {
-                    // common element found
-                    common.push_back(m_cre[icre]);
-                    ++icre; ++iann;
-                }
-            }
-        }
-    };
 
     /**
      * Fields are defined as symbols, i.e. members within a Row-derived class.
