@@ -137,8 +137,8 @@ namespace comparators {
      */
     template<typename row_t, typename T, size_t nind = 0ul>
     static index_cmp_fn_t make_num_field_row_cmp_fn(
-            row_t &row1, fields::Numbers<T, nind> &field1,
-            row_t &row2, fields::Numbers<T, nind> &field2,
+            row_t &row1, field::Numbers<T, nind> &field1,
+            row_t &row2, field::Numbers<T, nind> &field2,
             value_cmp_fn_t<T> value_cmp_fn, size_t ielement_cmp) {
         REQUIRE_TRUE(static_cast<FieldBase &>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
         REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");

@@ -43,7 +43,7 @@ void Annihilator::sort_recv() {
 }
 
 void
-Annihilator::annihilate_row(const size_t &dst_ipart, const fields::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
                             bool allow_initiation, const size_t &irow_store) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,

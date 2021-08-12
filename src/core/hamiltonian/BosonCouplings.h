@@ -19,7 +19,7 @@ struct BosonCouplings {
         return (p == q && p == n) ? m_v : 0.0;
     }
 
-    defs::ham_t get_element_1(const fields::FrmBosOnv& onv, const conn::FrmBosOnv &conn) const {
+    defs::ham_t get_element_1(const field::FrmBosOnv& onv, const conn::FrmBosOnv &conn) const {
         if (conn.m_bos.size()!=1) return 0.0;
         bool is_ann = conn.m_bos.m_ann.size();
 
@@ -52,7 +52,7 @@ struct BosonCouplings {
         }
     }
 
-    defs::ham_t get_element(const fields::FrmBosOnv& onv, const conn::FrmBosOnv &conn) const {
+    defs::ham_t get_element(const field::FrmBosOnv& onv, const conn::FrmBosOnv &conn) const {
         if (conn.m_bos.size()!=1ul) return 0.0;
         return get_element_1(onv, conn);
     }

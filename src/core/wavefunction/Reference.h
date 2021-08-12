@@ -46,7 +46,7 @@ public:
     Reference(const fciqmc_config::Reference &opts, const Hamiltonian &ham,
               const Wavefunction &wf, size_t ipart, TableBase::Loc loc);
 
-    const fields::Mbf& get_mbf() const;
+    const field::Mbf& get_mbf() const;
 
     size_t occupied_ncycle(const size_t& icycle) const {
         return m_global.m_row.occupied_ncycle(icycle);
@@ -87,14 +87,14 @@ public:
      * @return
      *  true if the matrix element of the Hamiltonian between the current reference and the argument is non-zero
      */
-    bool is_connected(const fields::Mbf &onv) const;
+    bool is_connected(const field::Mbf &onv) const;
 
     /**
      * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>
      * @param onv
      * @param weights
      */
-    void make_numerator_contribs(const fields::Mbf &onv, const defs::wf_t& weight);
+    void make_numerator_contribs(const field::Mbf &onv, const defs::wf_t& weight);
 
     const defs::wf_comp_t &nwalker_at_doubles();
 
@@ -137,11 +137,11 @@ struct References {
 
     void contrib_row();
 
-    std::vector<bool> is_connected(const fields::Mbf &onv) const;
+    std::vector<bool> is_connected(const field::Mbf &onv) const;
 
-    const fields::Numbers<defs::ham_t, defs::ndim_wf>& proj_energy_nums();
+    const field::Numbers<defs::ham_t, defs::ndim_wf>& proj_energy_nums();
 
-    const fields::Numbers<defs::wf_t, defs::ndim_wf>& weights();
+    const field::Numbers<defs::wf_t, defs::ndim_wf>& weights();
 
 };
 

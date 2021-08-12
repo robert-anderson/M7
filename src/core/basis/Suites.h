@@ -17,13 +17,13 @@ namespace suite {
         //buffered::FrmCsf m_frmcsf;
         Mbfs(size_t nsite): m_frmonv(nsite), m_bosonv(nsite), m_frmbosonv(nsite){}//, m_frmcsf(nsite){}
 
-        fields::FrmOnv& operator[](const fields::FrmOnv& mbf){
+        field::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
         }
-        fields::BosOnv& operator[](const fields::BosOnv& mbf){
+        field::BosOnv& operator[](const field::BosOnv& mbf){
             return m_bosonv;
         }
-        fields::FrmBosOnv& operator[](const fields::FrmBosOnv& mbf){
+        field::FrmBosOnv& operator[](const field::FrmBosOnv& mbf){
             return m_frmbosonv;
         }
     };
@@ -34,13 +34,13 @@ namespace suite {
         conn::FrmBosOnv m_frmbosonv;
         Conns(size_t nsite): m_frmonv(nsite), m_bosonv(nsite), m_frmbosonv(nsite){}
 
-        conn::FrmOnv& operator[](const fields::FrmOnv& mbf){
+        conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
         }
-        conn::BosOnv& operator[](const fields::BosOnv& mbf){
+        conn::BosOnv& operator[](const field::BosOnv& mbf){
             return m_bosonv;
         }
-        conn::FrmBosOnv& operator[](const fields::FrmBosOnv& mbf){
+        conn::FrmBosOnv& operator[](const field::FrmBosOnv& mbf){
             return m_frmbosonv;
         }
     };

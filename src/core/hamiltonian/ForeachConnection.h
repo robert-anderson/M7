@@ -13,7 +13,7 @@
 #include <src/core/basis/Suites.h>
 #include "Hamiltonian.h"
 
-using namespace fields;
+using namespace field;
 
 namespace foreach_conn {
 

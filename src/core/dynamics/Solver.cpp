@@ -255,7 +255,7 @@ void Solver::finalizing_loop_over_occupied_mbfs() {
     //if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
 }
 
-void Solver::annihilate_row(const size_t &dst_ipart, const fields::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
                             bool allow_initiation, bool src_deterministic, const size_t &irow_store) {
     if (m_opts.m_propagator.m_nadd == 0.0) ASSERT(allow_initiation);
     ASSERT(!dst_mbf.is_zero());
@@ -347,7 +347,7 @@ void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
 }
 
 
-void Solver::make_instant_mev_contribs(const fields::Mbf &src_mbf, const defs::wf_t &src_weight,
+void Solver::make_instant_mev_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight,
                                        const size_t &dst_ipart) {
     // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst MBF
     if (!m_mevs.m_accum_epoch) return;
@@ -608,7 +608,7 @@ void Solver::output_stats() {
     }
 }
 
-void Solver::annihilate_row(const size_t &dst_ipart, const fields::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
                             bool allow_initiation, bool src_deterministic) {
     annihilate_row(dst_ipart, dst_mbf, delta_weight, allow_initiation, src_deterministic, *m_wf.m_store[dst_mbf]);
 }

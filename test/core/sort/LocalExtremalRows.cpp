@@ -7,9 +7,9 @@
 #include <src/core/table/BufferedFields.h>
 
 namespace local_extremal_rows_test {
-    typedef SingleFieldRow<fields::Number<int>> int_scalar_row_t;
+    typedef SingleFieldRow<field::Number<int>> int_scalar_row_t;
     typedef BufferedTable<int_scalar_row_t> int_scalar_table_t;
-    typedef SingleFieldRow<fields::Number<std::complex<float>>> complex_scalar_row_t;
+    typedef SingleFieldRow<field::Number<std::complex<float>>> complex_scalar_row_t;
     typedef BufferedTable<complex_scalar_row_t> complex_scalar_table_t;
     static constexpr size_t c_nfind = 4;
 

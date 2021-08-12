@@ -24,7 +24,7 @@ struct ProtectedKeySet : RowProtector {
         /**
          * row index of key within the mapped table ()
          */
-        fields::Number<size_t> m_row_id;
+        field::Number<size_t> m_row_id;
     };
 
     BufferedTable<KeyRow, true> m_local;

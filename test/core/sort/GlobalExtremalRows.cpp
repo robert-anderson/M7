@@ -7,7 +7,7 @@
 #include "src/core/sort/GlobalExtremalRows.h"
 
 namespace global_extremal_rows_test {
-    typedef SingleFieldRow<fields::Number<int>> scalar_row_t;
+    typedef SingleFieldRow<field::Number<int>> scalar_row_t;
     typedef BufferedTable<scalar_row_t> scalar_table_t;
 
     static size_t nfind() {

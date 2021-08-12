@@ -42,7 +42,7 @@ TEST(QuickSorter, Test){
     row.step(); row.m_dst_mbf = onv168;
     row.step(); row.m_dst_mbf = onv468;
 
-    std::vector<fields::FrmOnv*> correct_order = {&onv239, &onv345, &onv168, &onv468};
+    std::vector<field::FrmOnv*> correct_order = {&onv239, &onv345, &onv168, &onv468};
     std::vector<size_t> correct_counts = {3, 4, 2, 1};
 
     auto row1 = table.m_row;

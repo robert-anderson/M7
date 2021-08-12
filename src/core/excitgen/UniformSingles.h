@@ -12,11 +12,11 @@ class UniformSingles : public FrmExcitGen {
 public:
     UniformSingles(const Hamiltonian& ham, PRNG& prng);
 
-    bool draw(const fields::FrmOnv &src_onv,
+    bool draw(const field::FrmOnv &src_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
 
-    bool draw(const fields::FrmBosOnv &src_onv,
+    bool draw(const field::FrmBosOnv &src_onv,
                const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override {
         return draw(src_onv.m_frm, occs, vacs, prob, helem, conn.m_frm);

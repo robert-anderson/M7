@@ -8,38 +8,38 @@
 #include "gtest/gtest.h"
 
 namespace frm_onv_connection_test {
-    static bool phase_direct(const fields::FrmOnv& src, const fields::FrmOnv& dst){
+    static bool phase_direct(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
         return connection.phase(src);
     }
-    static bool phase_connect(const fields::FrmOnv& src, const fields::FrmOnv& dst){
+    static bool phase_connect(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         FrmOps com(src.m_nsite);
         return connection.connect(src, dst, com);
     }
-    static bool phase_apply(const fields::FrmOnv& src, const fields::FrmOnv& dst){
+    static bool phase_apply(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
         FrmOps com(src.m_nsite);
         return connection.apply(src, com);
     }
-    static size_t ncre(const fields::FrmOnv& src, const fields::FrmOnv& dst){
+    static size_t ncre(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
         return connection.m_cre.size();
     }
-    static size_t nann(const fields::FrmOnv& src, const fields::FrmOnv& dst){
+    static size_t nann(const field::FrmOnv& src, const field::FrmOnv& dst){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
         return connection.m_ann.size();
     }
-    static size_t string_chk(const fields::FrmOnv& src, const fields::FrmOnv& dst, defs::inds ann, defs::inds cre){
+    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::inds ann, defs::inds cre){
         FrmOnvConnection connection(src.m_nsite);
         connection.connect(src, dst);
         return (connection.m_ann == ann) && (connection.m_cre == cre);
     }
-    static size_t string_chk(const fields::FrmOnv& src, const fields::FrmOnv& dst, defs::inds ann, defs::inds cre, defs::inds com){
+    static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::inds ann, defs::inds cre, defs::inds com){
         FrmOnvConnection connection(src.m_nsite);
         FrmOps com_chk(src.m_nsite);
         connection.connect(src, dst, com_chk);

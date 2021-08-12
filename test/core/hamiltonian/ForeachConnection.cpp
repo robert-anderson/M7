@@ -22,7 +22,7 @@ TEST(ForeachConnection, FrmHubbard1d) {
         conns_general.emplace_back(conn.ann(), conn.cre());
         ASSERT_EQ(helement, t);
     };
-    foreach_general.foreach<fields::FrmOnv>(onv, fn_general, true);
+    foreach_general.foreach<field::FrmOnv>(onv, fn_general, true);
 
     std::vector<std::pair<defs::inds, defs::inds>> conns_opt;
     foreach_conn::frm::Hubbard1D foreach_sym(ham);
@@ -30,7 +30,7 @@ TEST(ForeachConnection, FrmHubbard1d) {
         conns_opt.emplace_back(conn.ann(), conn.cre());
         ASSERT_EQ(helement, t);
     };
-    foreach_sym.foreach<fields::FrmOnv>(onv, fn_opt, true);
+    foreach_sym.foreach<field::FrmOnv>(onv, fn_opt, true);
     ASSERT_EQ(conns_opt, conns_general);
 }
 
@@ -52,11 +52,11 @@ TEST(ForeachConnection, FrmNoSym) {
     const auto nsingle = nocc * nvac;
     const auto ndouble = integer_utils::combinatorial(nocc, 2) * integer_utils::combinatorial(nvac, 2);
 
-    foreach.foreach<fields::FrmOnv>(onv, fn, false);
+    foreach.foreach<field::FrmOnv>(onv, fn, false);
     ASSERT_EQ(counter, nsingle + ndouble);
 
     counter = 0ul;
-    foreach.foreach<fields::FrmOnv>(onv, fn, true);
+    foreach.foreach<field::FrmOnv>(onv, fn, true);
     // can only excite to the vacant orbital to the right in both spin channels
     ASSERT_EQ(counter, 2ul);
 }

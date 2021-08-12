@@ -8,13 +8,13 @@
 #include "CombinationEnumerator.h"
 #include "src/core/field/Fields.h"
 
-class SpinNonConFonvEnumerator : public Enumerator<fields::FrmOnv> {
+class SpinNonConFonvEnumerator : public Enumerator<field::FrmOnv> {
     CombinationEnumerator m_combs;
     defs::inds m_setinds;
 public:
     SpinNonConFonvEnumerator(size_t nsite, size_t nelec);
 
-    bool next_element(fields::FrmOnv &result) override;
+    bool next_element(field::FrmOnv &result) override;
 };
 
 

@@ -151,13 +151,13 @@ public:
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
             FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
 
-    defs::ham_t get_element(const fields::FrmOnv &onv) const;
+    defs::ham_t get_element(const field::FrmOnv &onv) const;
 
-    defs::ham_comp_t get_energy(const fields::FrmOnv &fonv) const {
+    defs::ham_comp_t get_energy(const field::FrmOnv &fonv) const {
         return consts::real(get_element(fonv));
     }
 
-    defs::ham_t get_element_1(const fields::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    defs::ham_t get_element_1(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
         const auto &ann = conn.m_ann[0];
         const auto &cre = conn.m_cre[0];
 
@@ -171,12 +171,12 @@ public:
 
     defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
-    defs::ham_t get_element_2(const fields::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    defs::ham_t get_element_2(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
         const auto element = get_element_2(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
         return conn.phase(onv) ? -element : element;
     }
 
-    defs::ham_t get_element(const fields::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    defs::ham_t get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
         switch (conn.size()) {
             case 0: return get_element(onv);
             case 2: return get_element_1(onv, conn);
@@ -235,7 +235,7 @@ public:
      * @param spin
      *  spin (MS) number
      */
-    void set_hf_mbf(fields::FrmOnv &onv, int spin) const {
+    void set_hf_mbf(field::FrmOnv &onv, int spin) const {
         auto nalpha = ci_utils::nalpha(nelec(), spin);
         auto nbeta = ci_utils::nbeta(nelec(), spin);
         DEBUG_ASSERT_EQ(nalpha + nbeta, nelec(), "inconsistent na, nb, nelec");

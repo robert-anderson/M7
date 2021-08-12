@@ -16,14 +16,14 @@
 
 namespace ci_gen {
 
-    typedef std::function<bool(const fields::Mbf &)> include_fn_t;
+    typedef std::function<bool(const field::Mbf &)> include_fn_t;
 
     static include_fn_t default_include_fn() {
-        return [](const fields::Mbf &) { return true; };
+        return [](const field::Mbf &) { return true; };
     }
 
     static include_fn_t default_include_fn(const RankAllocator<WalkerTableRow> &ra) {
-        return [&ra](const fields::Mbf &mbf) { return mpi::i_am(ra.get_rank(mbf)); };
+        return [&ra](const field::Mbf &mbf) { return mpi::i_am(ra.get_rank(mbf)); };
     }
 
     static include_fn_t default_include_fn(const Wavefunction &wf) {
@@ -38,7 +38,7 @@ namespace ci_gen {
 
         Base(size_t nsite, size_t nelec, include_fn_t include_fn = default_include_fn());
 
-        void add_if_included(Row &row, fields::Mbf &mbf) {
+        void add_if_included(Row &row, field::Mbf &mbf) {
             if (m_include_fn(m_mbf_work[mbf])) {
                 row.push_back_jump();
                 mbf = m_mbf_work[mbf];
@@ -47,16 +47,16 @@ namespace ci_gen {
         }
 
     protected:
-        static void set_from_inds(fields::FrmOnv& onv, const defs::inds& inds){
+        static void set_from_inds(field::FrmOnv& onv, const defs::inds& inds){
             onv = inds;
         }
-        static void set_from_inds(fields::FrmBosOnv& onv, const defs::inds& inds){
+        static void set_from_inds(field::FrmBosOnv& onv, const defs::inds& inds){
             onv.m_frm = inds;
         }
-        static void set_from_inds(fields::FrmOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
+        static void set_from_inds(field::FrmOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
             onv.set(alpha_inds, beta_inds);
         }
-        static void set_from_inds(fields::FrmBosOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
+        static void set_from_inds(field::FrmBosOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
             onv.m_frm.set(alpha_inds, beta_inds);
         }
     };
@@ -68,7 +68,7 @@ namespace ci_gen {
 
     public:
 
-        void operator()(Row &row, fields::Mbf &mbf){
+        void operator()(Row &row, field::Mbf &mbf){
             ASSERT(mbf.belongs_to_row(&row));
             row.m_table->clear();
             auto body = [&](){
@@ -85,7 +85,7 @@ namespace ci_gen {
 
         SpinSym(size_t nsite, size_t nelec, int spin, const include_fn_t &include_fn = default_include_fn());
 
-        void operator()(Row &row, fields::Mbf &mbf);
+        void operator()(Row &row, field::Mbf &mbf);
     };
 
 };

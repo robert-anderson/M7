@@ -9,11 +9,11 @@
 #include "StatsTable.h"
 
 struct TimingStatsRow : Row {
-    fields::Number<double> m_total_synchronization_overhead;
-    fields::Number<double> m_propagate_loop_time;
-    fields::Number<double> m_communication_time;
-    fields::Number<double> m_annihilation_loop_time;
-    fields::Number<double> m_total_cycle_time;
+    field::Number<double> m_total_synchronization_overhead;
+    field::Number<double> m_propagate_loop_time;
+    field::Number<double> m_communication_time;
+    field::Number<double> m_annihilation_loop_time;
+    field::Number<double> m_total_cycle_time;
 
     TimingStatsRow() :
         m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier"),

@@ -8,7 +8,7 @@
 
 
 struct TestRow : Row {
-    fields::FrmOnv m_det;
+    field::FrmOnv m_det;
     TestRow() : m_det(this, 7){}
 };
 

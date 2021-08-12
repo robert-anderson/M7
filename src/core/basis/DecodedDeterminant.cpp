@@ -4,7 +4,7 @@
 
 #include "DecodedDeterminant.h"
 
-void OccupiedUpdater::operator()(const fields::FrmOnv &onv, defs::inds &inds) {
+void OccupiedUpdater::operator()(const field::FrmOnv &onv, defs::inds &inds) {
     DEBUG_ASSERT_LE(onv.nbit(), inds.capacity(), "occupied updater inds not large enough for ONV");
     inds.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
@@ -13,7 +13,7 @@ void OccupiedUpdater::operator()(const fields::FrmOnv &onv, defs::inds &inds) {
     }
 }
 
-void VacantUpdater::operator()(const fields::FrmOnv &onv, defs::inds &inds) {
+void VacantUpdater::operator()(const field::FrmOnv &onv, defs::inds &inds) {
     DEBUG_ASSERT_LE(onv.nbit(), inds.capacity(), "vacant updater inds not large enough for ONV");
     inds.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
@@ -23,7 +23,7 @@ void VacantUpdater::operator()(const fields::FrmOnv &onv, defs::inds &inds) {
 }
 
 
-void NdOccupiedUpdater::operator()(const fields::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds) {
+void NdOccupiedUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds) {
     for (auto& v :inds) v.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_dataword(idataword);
@@ -34,7 +34,7 @@ void NdOccupiedUpdater::operator()(const fields::FrmOnv &onv, const defs::inds& 
     }
 }
 
-void NdVacantUpdater::operator()(const fields::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds){
+void NdVacantUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds){
     for (auto& v :inds) v.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_antidataword(idataword);

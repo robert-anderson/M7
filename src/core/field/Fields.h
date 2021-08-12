@@ -10,7 +10,7 @@
 #include "FrmBosOnvField.h"
 #include "SpecMomIndsField.h"
 
-namespace fields {
+namespace field {
     template<typename T, size_t nind>
     using Numbers = NdNumberField<T, nind>;
 

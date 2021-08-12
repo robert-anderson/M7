@@ -8,10 +8,10 @@
 
 namespace communicator_test {
     struct TestRow : Row {
-        fields::Number<size_t> m_key;
-        fields::Number<double> m_value;
+        field::Number<size_t> m_key;
+        field::Number<double> m_value;
         TestRow(): m_key(this, "key"), m_value(this, "value"){}
-        fields::Number<size_t> &key_field() {
+        field::Number<size_t> &key_field() {
             return m_key;
         };
     };

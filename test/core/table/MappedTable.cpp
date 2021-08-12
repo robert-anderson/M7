@@ -7,11 +7,11 @@
 
 namespace mapped_table_test {
     struct MyRow : Row {
-        fields::Number<size_t> m_key;
+        field::Number<size_t> m_key;
 
         MyRow() : m_key(this) {}
 
-        fields::Number<size_t> &key_field() {
+        field::Number<size_t> &key_field() {
             return m_key;
         }
     };

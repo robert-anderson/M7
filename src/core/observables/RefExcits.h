@@ -84,7 +84,7 @@ private:
 
 public:
 
-    void make_contribs(const fields::Mbf& mbf, const fields::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
+    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
         m_conn.connect(ref_mbf, mbf);
         make_contribs(m_conn, contrib, ipart);
     }

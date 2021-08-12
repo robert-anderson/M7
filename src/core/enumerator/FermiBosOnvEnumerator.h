@@ -10,7 +10,7 @@
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedFields.h"
 
-class FermiBosOnvEnumerator : public Enumerator<fields::FrmBosOnv> {
+class FermiBosOnvEnumerator : public Enumerator<field::FrmBosOnv> {
     FermionOnvEnumerator m_det_enum;
     BosonOnvEnumerator m_bonv_enum;
     buffered::FrmOnv m_fonv;
@@ -25,7 +25,7 @@ public:
         m_det_enum.next_element(m_fonv);
     }
 
-    bool next_element(fields::FrmBosOnv &result) override {
+    bool next_element(field::FrmBosOnv &result) override {
         bool inner_allfound = !m_bonv_enum.next(m_bonv);
         if (inner_allfound) {
             m_bonv_enum.next(m_bonv);

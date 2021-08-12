@@ -17,8 +17,8 @@
  */
 template<typename T>
 struct GlobalSortingRow : Row {
-    fields::Number<size_t> m_irank;
-    fields::Number<T> m_value;
+    field::Number<size_t> m_irank;
+    field::Number<T> m_value;
 
     GlobalSortingRow() : m_irank(this), m_value(this) {}
 };
@@ -56,7 +56,7 @@ struct GlobalExtremalRows {
      */
     global_sort_table_t m_global_sorter;
 
-    GlobalExtremalRows(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp) :
+    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp) :
             m_lxr(row, field, largest, absval, ielement_cmp),
             m_global_sorter("Global extremal rows sorter", {{}}) {
         reset();

@@ -10,7 +10,7 @@
 
 TEST(BufferedTableArray, Resize){
     struct TestRow : Row {
-        fields::FrmOnv m_onv;
+        field::FrmOnv m_onv;
         TestRow(size_t nsite): m_onv(this, nsite){}
     };
     BufferedTableArray<TestRow> bta("Test table", 3, {{6}});

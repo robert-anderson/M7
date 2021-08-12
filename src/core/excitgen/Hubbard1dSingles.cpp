@@ -4,8 +4,8 @@
 
 #include "Hubbard1dSingles.h"
 
-bool Hubbard1dSingles::draw(const fields::FrmOnv &src_onv, const OccupiedOrbitals &occs,
-                          const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
+bool Hubbard1dSingles::draw(const field::FrmOnv &src_onv, const OccupiedOrbitals &occs,
+                            const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     auto rand = m_prng.draw_uint(2 * occs.size());
     bool choose_left = rand / occs.size();
     auto occ = occs[choose_left ? rand - occs.size() : rand];

@@ -9,10 +9,10 @@
 
 template <typename T>
 struct MaeRow : public Row {
-    fields::MaeInds m_inds;
-    fields::Numbers<T, 1> m_values;
+    field::MaeInds m_inds;
+    field::Numbers<T, 1> m_values;
 
-    fields::MaeInds &key_field() {
+    field::MaeInds &key_field() {
         return m_inds;
     };
 
@@ -22,10 +22,10 @@ struct MaeRow : public Row {
 
 template <typename T>
 struct SpecMomsRow : public Row {
-    fields::SpecMomInds m_inds;
-    fields::Numbers<T, 1> m_values;
+    field::SpecMomInds m_inds;
+    field::Numbers<T, 1> m_values;
 
-    fields::SpecMomInds &key_field() {
+    field::SpecMomInds &key_field() {
         return m_inds;
     };
 

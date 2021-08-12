@@ -62,12 +62,12 @@ struct BufferedField : WrappedRow, field_t {
 namespace buffered {
 
     template<typename T, size_t nind>
-    struct NdBitset : BufferedField<fields::NdBitset<T, nind>> {
-        typedef BufferedField<fields::NdBitset<T, nind>> base_t;
-        typedef typename fields::NdBitset<T, nind>::inds_t inds_t;
-        using fields::NdBitset<T, nind>::operator=;
-        NdBitset(inds_t shape) : BufferedField<fields::NdBitset<T, nind>>({nullptr, shape}){}
-        NdBitset(const fields::NdBitset<T, nind>& field): BufferedField<fields::NdBitset<T, nind>>(field){}
+    struct NdBitset : BufferedField<field::NdBitset<T, nind>> {
+        typedef BufferedField<field::NdBitset<T, nind>> base_t;
+        typedef typename field::NdBitset<T, nind>::inds_t inds_t;
+        using field::NdBitset<T, nind>::operator=;
+        NdBitset(inds_t shape) : BufferedField<field::NdBitset<T, nind>>({nullptr, shape}){}
+        NdBitset(const field::NdBitset<T, nind>& field): BufferedField<field::NdBitset<T, nind>>(field){}
     };
 
 
@@ -78,16 +78,16 @@ namespace buffered {
 
 
     template<typename T, size_t nind>
-    struct Numbers : BufferedField<fields::Numbers<T, nind>> {
-        typedef BufferedField<fields::Numbers<T, nind>> base_t;
-        typedef typename fields::Numbers<T, nind>::inds_t inds_t;
-        using fields::Numbers<T, nind>::operator=;
+    struct Numbers : BufferedField<field::Numbers<T, nind>> {
+        typedef BufferedField<field::Numbers<T, nind>> base_t;
+        typedef typename field::Numbers<T, nind>::inds_t inds_t;
+        using field::Numbers<T, nind>::operator=;
         Numbers(inds_t shape) : base_t({nullptr, shape}){}
         Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
             *this = init_value;
         }
-        Numbers(const fields::Numbers<T, nind>& field): BufferedField<fields::Numbers<T, nind>>(field){}
-        Numbers(const Numbers& field): BufferedField<fields::Numbers<T, nind>>(field){}
+        Numbers(const field::Numbers<T, nind>& field): BufferedField<field::Numbers<T, nind>>(field){}
+        Numbers(const Numbers& field): BufferedField<field::Numbers<T, nind>>(field){}
         Numbers& operator=(const Numbers& field){
             base_t::operator=(field);
             return *this;
@@ -95,9 +95,9 @@ namespace buffered {
     };
 
     template<typename T>
-    struct Number : BufferedField<fields::Number<T>> {
-        using BufferedField<fields::Number<T>>::operator=;
-        Number(): BufferedField<fields::Number<T>>({{}}){}
+    struct Number : BufferedField<field::Number<T>> {
+        using BufferedField<field::Number<T>>::operator=;
+        Number(): BufferedField<field::Number<T>>({{}}){}
         operator T&(){return (*this)[0];}
         operator const T&() const {return (*this)[0];}
         Number& operator=(const T& v){
@@ -106,9 +106,9 @@ namespace buffered {
         }
     };
 
-    struct FrmOnv : BufferedField<fields::FrmOnv> {
-        using fields::FrmOnv::operator=;
-        FrmOnv(size_t nsite) : BufferedField<fields::FrmOnv>({nullptr, nsite}){}
+    struct FrmOnv : BufferedField<field::FrmOnv> {
+        using field::FrmOnv::operator=;
+        FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>({nullptr, nsite}){}
         FrmOnv& operator=(const FrmOnv& other){
             base_t::operator=(other);
             return *this;
@@ -116,16 +116,16 @@ namespace buffered {
         FrmOnv(const FrmOnv& other): FrmOnv(other.m_nsite){}
     };
 
-    struct BosOnv : BufferedField<fields::BosOnv> {
-        using fields::BosOnv::operator=;
-        BosOnv(size_t nsite) : BufferedField<fields::BosOnv>({nullptr, nsite}){}
+    struct BosOnv : BufferedField<field::BosOnv> {
+        using field::BosOnv::operator=;
+        BosOnv(size_t nsite) : BufferedField<field::BosOnv>({nullptr, nsite}){}
     };
 
 
-    struct FrmBosOnv : BufferedMultiField<fields::FrmBosOnv> {
-        using fields::FrmBosOnv::operator=;
+    struct FrmBosOnv : BufferedMultiField<field::FrmBosOnv> {
+        using field::FrmBosOnv::operator=;
         FrmBosOnv(size_t nsite):
-                BufferedMultiField<fields::FrmBosOnv>({nullptr, nsite}){}
+                BufferedMultiField<field::FrmBosOnv>({nullptr, nsite}){}
     };
 
     typedef std::tuple<FrmOnv, FrmBosOnv> mbf_tup_t;
@@ -134,18 +134,18 @@ namespace buffered {
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_ind> Mbf;
 
-    struct MaeInds : BufferedField<fields::MaeInds> {
-        using fields::MaeInds::operator=;
-        using fields::MaeInds::m_frm;
-        using fields::MaeInds::m_bos;
+    struct MaeInds : BufferedField<field::MaeInds> {
+        using field::MaeInds::operator=;
+        using field::MaeInds::m_frm;
+        using field::MaeInds::m_bos;
         MaeInds(size_t exsig):
-        BufferedField<fields::MaeInds>({nullptr, exsig}){}
+        BufferedField<field::MaeInds>({nullptr, exsig}){}
     };
 
-    struct SpecMomInds : BufferedMultiField<fields::SpecMomInds> {
-        using fields::SpecMomInds::operator=;
+    struct SpecMomInds : BufferedMultiField<field::SpecMomInds> {
+        using field::SpecMomInds::operator=;
         SpecMomInds(size_t exsig):
-        BufferedMultiField<fields::SpecMomInds>({nullptr, exsig}){}
+        BufferedMultiField<field::SpecMomInds>({nullptr, exsig}){}
     };
 }
 

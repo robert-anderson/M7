@@ -113,7 +113,7 @@ TEST(HDF5Wrapper, ComplexArray) {
 
 
 TEST(HDF5Wrapper, NumberDistributed) {
-    BufferedTable<SingleFieldRow<fields::Number<int>>> write_table("test int table", {{"integer_field"}});
+    BufferedTable<SingleFieldRow<field::Number<int>>> write_table("test int table", {{"integer_field"}});
     auto read_table = write_table;
     const auto nrow = hashing::in_range(mpi::irank() + 1, 10, 20);
     log::debug_("number of local rows {}", nrow);

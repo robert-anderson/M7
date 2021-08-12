@@ -29,7 +29,7 @@ struct LocalExtremalRows {
     /**
      * reference to order-determining field in m_work_row;
      */
-    fields::Numbers <T, nind> &m_work_row_field;
+    field::Numbers <T, nind> &m_work_row_field;
     /**
      * once-initialized, frequently assigned working row for comparisons
      */
@@ -37,7 +37,7 @@ struct LocalExtremalRows {
     /**
      * reference to order-determining field in m_work_row_cmp;
      */
-    fields::Numbers <T, nind> &m_work_row_cmp_field;
+    field::Numbers <T, nind> &m_work_row_cmp_field;
     /**
      * base class reference to the table associated with the work rows
      */
@@ -55,11 +55,11 @@ struct LocalExtremalRows {
      */
     ExtremalIndices m_xinds;
 
-    LocalExtremalRows(row_t &row, fields::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=0ul) :
+    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=0ul) :
             m_work_row(row),
-            m_work_row_field(fields::identify(m_work_row, row, field)),
+            m_work_row_field(field::identify(m_work_row, row, field)),
             m_work_row_cmp(row),
-            m_work_row_cmp_field(fields::identify(m_work_row_cmp, row, field)),
+            m_work_row_cmp_field(field::identify(m_work_row_cmp, row, field)),
             m_table(*static_cast<const Row &>(m_work_row).m_table),
             m_ielement_cmp(ielement_cmp),
             m_value_cmp_fn(comparators::make_value_cmp_fn<T>(absval, largest)),

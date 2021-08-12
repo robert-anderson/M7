@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 TEST(CommunicatingPair, CommunicateSingleElement) {
-    typedef SingleFieldRow<fields::Number<size_t>> row_t;
+    typedef SingleFieldRow<field::Number<size_t>> row_t;
     const double expansion_factor = 0.5;
     CommunicatingPair<row_t> comm_pair("Test pair", mpi::nrank(), expansion_factor, {{}});
     // after resize:
@@ -39,7 +39,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
 }
 
 TEST(CommunicatingPair, CommunicateVectors){
-    typedef SingleFieldRow<fields::Numbers<size_t, 1>> row_t;
+    typedef SingleFieldRow<field::Numbers<size_t, 1>> row_t;
     const double expansion_factor = 0.5;
     const size_t nelement_vector = 13;
     CommunicatingPair<row_t> comm_pair("Test pair", mpi::nrank(), expansion_factor, {{nelement_vector}});
@@ -77,7 +77,7 @@ TEST(CommunicatingPair, CommunicateVectors){
 }
 
 TEST(CommunicatingPair, CommunicateMultipleVectors){
-    typedef SingleFieldRow<fields::Numbers<size_t, 1>> row_t;
+    typedef SingleFieldRow<field::Numbers<size_t, 1>> row_t;
     const double expansion_factor = 0.5;
     const size_t nelement_vector = 5;
     const size_t nrow_rank_lo = 6, nrow_rank_hi = 15;

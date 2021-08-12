@@ -19,19 +19,19 @@ public:
     virtual ~WeightedTwf(){}
 
 private:
-    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum, defs::ham_t diag_fac);
+    void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum, defs::ham_t diag_fac);
 
 public:
-    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-             const fields::FrmOnv &onv) override;
+    void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+             const field::FrmOnv &onv) override;
 
-    void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-             const fields::FrmBosOnv &onv) override;
+    void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+             const field::FrmBosOnv &onv) override;
 
 
-    defs::ham_t evaluate_static_twf(const fields::FrmOnv &onv) const;
+    defs::ham_t evaluate_static_twf(const field::FrmOnv &onv) const;
 
-    defs::ham_t evaluate_static_twf(const fields::FrmBosOnv &onv) const;
+    defs::ham_t evaluate_static_twf(const field::FrmBosOnv &onv) const;
 
 };
 

@@ -14,7 +14,7 @@ Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian &ha
               m_ipart, get_mbf(), m_global.m_row.m_hdiag);
 }
 
-const fields::Mbf &Reference::get_mbf() const {
+const field::Mbf &Reference::get_mbf() const {
     return m_global.m_row.m_mbf;
 }
 
@@ -67,12 +67,12 @@ void Reference::end_cycle() {
     m_summables.all_sum();
 }
 
-bool Reference::is_connected(const fields::Mbf &mbf) const {
+bool Reference::is_connected(const field::Mbf &mbf) const {
     m_conn[mbf].connect(get_mbf(), mbf);
     return !consts::float_is_zero(m_ham.get_element(get_mbf(), m_conn[mbf]));
 }
 
-void Reference::make_numerator_contribs(const fields::Mbf &mbf, const defs::wf_t& weight) {
+void Reference::make_numerator_contribs(const field::Mbf &mbf, const defs::wf_t& weight) {
     m_conn[mbf].connect(get_mbf(), mbf);
     m_proj_energy_num.m_local += m_ham.get_element(get_mbf(), m_conn[mbf]) * weight;
     m_nwalker_at_doubles.m_local += std::abs(weight);
@@ -121,7 +121,7 @@ void References::contrib_row() {
     for (auto& ref: m_refs) ref.contrib_row();
 }
 
-std::vector<bool> References::is_connected(const fields::Mbf &mbf) const {
+std::vector<bool> References::is_connected(const field::Mbf &mbf) const {
     std::vector<bool> out;
     out.reserve(m_refs.size());
     for (size_t ipart=0ul; ipart<m_refs.size(); ++ipart)
@@ -129,13 +129,13 @@ std::vector<bool> References::is_connected(const fields::Mbf &mbf) const {
     return out;
 }
 
-const fields::Numbers<defs::ham_t, defs::ndim_wf> &References::proj_energy_nums() {
+const field::Numbers<defs::ham_t, defs::ndim_wf> &References::proj_energy_nums() {
     size_t ipart = 0ul;
     for (auto& ref: m_refs) m_proj_energy_nums[ipart++] = ref.proj_energy_num();
     return m_proj_energy_nums;
 }
 
-const fields::Numbers<defs::wf_t, defs::ndim_wf> &References::weights() {
+const field::Numbers<defs::wf_t, defs::ndim_wf> &References::weights() {
     size_t ipart = 0ul;
     for (auto& ref: m_refs) m_weights[ipart++] = ref.weight();
     return m_weights;

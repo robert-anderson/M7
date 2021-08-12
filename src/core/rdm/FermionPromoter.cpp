@@ -31,7 +31,7 @@ const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
 }
 
 bool FermionPromoter::apply(const size_t &icomb, const conn::FrmOnv &conn,
-                            const FrmOps &com, fields::MaeInds &inds) const {
+                            const FrmOps &com, field::MaeInds &inds) const {
     auto comb_begin = begin(icomb);
     inds.zero();
     size_t ann_passed = 0ul;

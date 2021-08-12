@@ -14,7 +14,7 @@
 #include "HamiltonianParts.h"
 #include "SymmetryHelpers.h"
 
-using namespace fields;
+using namespace field;
 
 struct Hamiltonian {
     const size_t m_nboson_max;

@@ -20,11 +20,11 @@ protected:
 public:
     ExcitGen(const Hamiltonian &h, PRNG &prng);
 
-    virtual bool draw(const fields::FrmOnv &src_onv,
+    virtual bool draw(const field::FrmOnv &src_onv,
                       const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
 
-    virtual bool draw(const fields::FrmBosOnv &src_onv,
+    virtual bool draw(const field::FrmBosOnv &src_onv,
                       const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
 

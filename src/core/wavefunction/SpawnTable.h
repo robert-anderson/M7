@@ -10,13 +10,13 @@
 
 struct SpawnTableRow : public Row {
     const bool m_send_parents;
-    fields::Mbf m_src_mbf;
-    fields::Mbf m_dst_mbf;
-    fields::Number<defs::wf_t> m_src_weight;
-    fields::Number<defs::wf_t> m_delta_weight;
-    fields::Flag m_src_initiator;
-    fields::Flag m_src_deterministic;
-    fields::Number<uint8_t> m_dst_ipart;
+    field::Mbf m_src_mbf;
+    field::Mbf m_dst_mbf;
+    field::Number<defs::wf_t> m_src_weight;
+    field::Number<defs::wf_t> m_delta_weight;
+    field::Flag m_src_initiator;
+    field::Flag m_src_deterministic;
+    field::Number<uint8_t> m_dst_ipart;
 
     SpawnTableRow(size_t nsite, bool send_parents) :
             m_send_parents(send_parents),

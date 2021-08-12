@@ -5,7 +5,7 @@
 #include "SpinConFonvEnumerator.h"
 
 SpinConFonvEnumerator::SpinConFonvEnumerator(size_t nsite, size_t nelec, int spin) :
-        Enumerator<fields::FrmOnv>(),
+        Enumerator<field::FrmOnv>(),
         m_alpha_comb(nsite, ci_utils::nalpha(nelec, spin)),
         m_beta_comb(nsite, ci_utils::nbeta(nelec, spin)),
         m_alpha_setinds(ci_utils::nalpha(nelec, spin)),
@@ -14,7 +14,7 @@ SpinConFonvEnumerator::SpinConFonvEnumerator(size_t nsite, size_t nelec, int spi
     m_alpha_comb.next(m_alpha_setinds);
 }
 
-bool SpinConFonvEnumerator::next_element(fields::FrmOnv &result) {
+bool SpinConFonvEnumerator::next_element(field::FrmOnv &result) {
     bool inner_allfound = !m_beta_comb.next(m_beta_setinds);
     if (inner_allfound) {
         m_beta_comb.next(m_beta_setinds);

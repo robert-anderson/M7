@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 TEST(BufferedTable, Empty) {
-    typedef SingleFieldRow<fields::Number<int>> row_t;
+    typedef SingleFieldRow<field::Number<int>> row_t;
     BufferedTable<row_t> table("", {{}});
     ASSERT_EQ(table.m_nrow, 0);
     ASSERT_EQ(table.m_hwm, 0);
@@ -20,7 +20,7 @@ TEST(BufferedTable, Empty) {
 }
 
 TEST(BufferedTable, AllGathervEmpty) {
-    typedef SingleFieldRow<fields::Number<int>> row_t;
+    typedef SingleFieldRow<field::Number<int>> row_t;
     BufferedTable<row_t> src_table("src", {{}});
     BufferedTable<row_t> dst_table("dst", {{}});
     dst_table.all_gatherv(src_table);
@@ -40,7 +40,7 @@ TEST(BufferedTable, AllGatherv) {
     for (size_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
-    typedef SingleFieldRow<fields::Number<int>> row_t;
+    typedef SingleFieldRow<field::Number<int>> row_t;
     BufferedTable<row_t> src_table("src", {{}});
     src_table.resize(nrow_local);
     for (size_t irow = 0ul; irow<nrow_local; ++irow){
@@ -74,7 +74,7 @@ TEST(BufferedTable, Gatherv) {
     for (size_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
     ASSERT_EQ(nrow_global,mpi::all_sum(nrow_local));
 
-    typedef SingleFieldRow<fields::Number<int>> row_t;
+    typedef SingleFieldRow<field::Number<int>> row_t;
     BufferedTable<row_t> src_table("src", {{}});
     src_table.resize(nrow_local);
     for (size_t irow = 0ul; irow<nrow_local; ++irow){

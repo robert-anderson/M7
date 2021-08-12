@@ -5,7 +5,7 @@
 #include <src/core/basis/Suites.h>
 #include "DeterministicSubspace.h"
 
-fields::Mbf &DeterministicDataRow::key_field() {
+field::Mbf &DeterministicDataRow::key_field() {
     return m_mbf;
 }
 
@@ -64,7 +64,7 @@ void DeterministicSubspace::build_from_all_occupied(const Hamiltonian &ham) {
     build_connections(ham);
 }
 
-void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &ham, const fields::Mbf &mbf) {
+void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &ham, const field::Mbf &mbf) {
     suite::Conns conns_work(m_wf.m_nsite);
     auto row = m_wf.m_store.m_row;
     auto& conn_work = conns_work[row.m_mbf];
@@ -80,7 +80,7 @@ void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &h
     build_connections(ham);
 }
 
-void DeterministicSubspace::make_mev_contribs(MevGroup &mevs, const fields::Mbf &ref) {
+void DeterministicSubspace::make_mev_contribs(MevGroup &mevs, const field::Mbf &ref) {
     if (!mevs.m_accum_epoch) return;
     //if (!mevs.m_fermion_rdm) return;
     auto& row_local = m_local.m_row;

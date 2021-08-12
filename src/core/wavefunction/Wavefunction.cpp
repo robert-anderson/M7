@@ -66,7 +66,7 @@ void Wavefunction::h5_write(hdf5::GroupWriter &parent, std::string name) {
     m_store.save(parent, name, h5_field_names());
 }
 
-void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, const fields::Mbf &ref,
+void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, const field::Mbf &ref,
                            std::string name) {
     m_store.clear();
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
@@ -167,7 +167,7 @@ void Wavefunction::remove_row() {
 }
 
 
-size_t Wavefunction::add_spawn(const fields::Mbf &dst_mbf, const defs::wf_t &delta,
+size_t Wavefunction::add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
                                bool initiator, bool deterministic, size_t dst_ipart) {
     auto irank = m_ra.get_rank(dst_mbf);
     auto &dst_table = send(irank);
@@ -183,8 +183,8 @@ size_t Wavefunction::add_spawn(const fields::Mbf &dst_mbf, const defs::wf_t &del
     return row.index();
 }
 
-size_t Wavefunction::add_spawn(const fields::Mbf &dst_mbf, const defs::wf_t &delta, bool initiator, bool deterministic,
-                        size_t dst_ipart, const fields::Mbf &src_mbf, const defs::wf_t &src_weight) {
+size_t Wavefunction::add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta, bool initiator, bool deterministic,
+                               size_t dst_ipart, const field::Mbf &src_mbf, const defs::wf_t &src_weight) {
     auto irow = add_spawn(dst_mbf, delta, initiator, deterministic, dst_ipart);
     auto irank = m_ra.get_rank(dst_mbf);
     auto &row = send(irank).m_row;

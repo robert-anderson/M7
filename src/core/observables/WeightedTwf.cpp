@@ -16,28 +16,28 @@ void WeightedTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ha
     }
 }
 
-void WeightedTwf::add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                      const fields::FrmOnv &onv) {
+void WeightedTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+                      const field::FrmOnv &onv) {
     auto diag_fac = evaluate_static_twf(onv);
     defs::ham_t helem_sum = diag_fac * m_ham.get_element(onv);
-    auto fn = [&](const fields::FrmOnv& dst, defs::ham_t helem){
+    auto fn = [&](const field::FrmOnv& dst, defs::ham_t helem){
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
-    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach<fields::FrmOnv>(onv, fn, true);
+    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach<field::FrmOnv>(onv, fn, true);
     add(weight, helem_sum, diag_fac);
 }
 
 void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv) {
     auto diag_fac = evaluate_static_twf(onv);
     defs::ham_t helem_sum = diag_fac * m_ham.get_element(onv);
-    auto fn = [&](const fields::FrmBosOnv& dst, defs::ham_t helem){
+    auto fn = [&](const field::FrmBosOnv& dst, defs::ham_t helem){
         helem_sum+= evaluate_static_twf(dst)*helem;
     };
-    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach<fields::FrmBosOnv>(onv, fn, true);
+    for (auto& foreach_conn: m_foreach_conns) foreach_conn->foreach<field::FrmBosOnv>(onv, fn, true);
     add(weight, helem_sum, diag_fac);
 }
 
-defs::ham_t WeightedTwf::evaluate_static_twf(const fields::FrmOnv &onv) const {
+defs::ham_t WeightedTwf::evaluate_static_twf(const field::FrmOnv &onv) const {
     size_t num_double_occ_sites = 0;
     for (size_t isite = 0; isite < m_nsite; isite++) {
         num_double_occ_sites += (onv.get({0, isite}) and onv.get({1, isite}));
@@ -45,7 +45,7 @@ defs::ham_t WeightedTwf::evaluate_static_twf(const fields::FrmOnv &onv) const {
     return std::exp(-m_frm_doub_occ_penalty_factor * num_double_occ_sites);
 }
 
-defs::ham_t WeightedTwf::evaluate_static_twf(const fields::FrmBosOnv &onv) const {
+defs::ham_t WeightedTwf::evaluate_static_twf(const field::FrmBosOnv &onv) const {
     size_t total_boson_occ = 0;
     for (size_t isite = 0; isite < m_nsite; isite++) {
         total_boson_occ += onv.m_bos[isite];

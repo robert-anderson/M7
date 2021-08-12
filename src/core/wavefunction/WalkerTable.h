@@ -15,16 +15,16 @@
 struct WalkerTableRow : public Row {
     const NdFormat<defs::ndim_wf> m_wf_format;
     const NdFormat<defs::ndim_root> m_root_format;
-    fields::Mbf m_mbf;
-    fields::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
-    fields::Number<defs::ham_comp_t> m_hdiag;
-    fields::Flags<defs::ndim_wf> m_initiator;
-    fields::Flags<defs::ndim_root> m_deterministic;
-    fields::Flags<defs::ndim_root> m_ref_conn;
-    fields::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
-    fields::Number<size_t> m_icycle_occ;
+    field::Mbf m_mbf;
+    field::Numbers<defs::wf_t, defs::ndim_wf> m_weight;
+    field::Number<defs::ham_comp_t> m_hdiag;
+    field::Flags<defs::ndim_wf> m_initiator;
+    field::Flags<defs::ndim_root> m_deterministic;
+    field::Flags<defs::ndim_root> m_ref_conn;
+    field::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
+    field::Number<size_t> m_icycle_occ;
 
-    fields::Mbf &key_field();;
+    field::Mbf &key_field();;
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights);
 
@@ -34,10 +34,10 @@ struct WalkerTableRow : public Row {
 };
 
 struct UniqueOnvRow : public Row {
-    fields::Number<size_t> m_ind;
-    fields::Number<size_t> m_nparent;
+    field::Number<size_t> m_ind;
+    field::Number<size_t> m_nparent;
 
-    fields::Number<size_t> &key_field() {
+    field::Number<size_t> &key_field() {
         return m_ind;
     };
 
@@ -45,10 +45,10 @@ struct UniqueOnvRow : public Row {
 };
 
 struct OnvRow : public Row {
-    fields::Mbf m_mbf;
-    fields::Number<size_t> m_nparent;
+    field::Mbf m_mbf;
+    field::Number<size_t> m_nparent;
 
-    fields::Mbf &key_field() {
+    field::Mbf &key_field() {
         return m_mbf;
     };
 

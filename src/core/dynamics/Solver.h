@@ -126,10 +126,10 @@ public:
      */
     void finalizing_loop_over_occupied_mbfs();
 
-    void annihilate_row(const size_t &dst_ipart, const fields::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+    void annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
                         bool allow_initiation, bool src_deterministic, const size_t &irow_store);
 
-    void annihilate_row(const size_t &dst_ipart, const fields::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+    void annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
                         bool allow_initiation, bool src_deterministic);
 
     /**
@@ -197,7 +197,7 @@ public:
      * @param dst_ipart
      *  the WF part index for which this contribution is bound
      */
-    void make_instant_mev_contribs(const fields::Mbf &src_mbf, const defs::wf_t &src_weight, const size_t &dst_ipart);
+    void make_instant_mev_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight, const size_t &dst_ipart);
 
     void make_mev_contribs_from_unique_src_mbfs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
                                                 const size_t &irow_block_end, const size_t &irow_store);

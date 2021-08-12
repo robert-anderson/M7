@@ -28,13 +28,13 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     ASSERT(!consts::float_is_zero(weight));
 
-    auto body = [&](const conn::Mbf &conn, const fields::Mbf &dst_onv, defs::ham_t helement) {
+    auto body = [&](const conn::Mbf &conn, const field::Mbf &dst_onv, defs::ham_t helement) {
         m_mag_log.log(0, helement, 1.0);
         const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
     for (auto& foreach_conn: m_foreach_conns)
-        foreach_conn->foreach<fields::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
+        foreach_conn->foreach<field::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

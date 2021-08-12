@@ -78,7 +78,7 @@ public:
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
     bool apply(const size_t &icomb, const conn::FrmOnv &conn,
-               const FrmOps& com, fields::MaeInds &inds) const;
+               const FrmOps& com, field::MaeInds &inds) const;
 
 };
 

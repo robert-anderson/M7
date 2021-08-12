@@ -17,7 +17,7 @@ ci_gen::SpinSym::SpinSym(size_t nsite, size_t nelec, int spin, const include_fn_
         m_foreach_alpha(nsite, ci_utils::nalpha(nelec, spin)),
         m_foreach_beta(nsite, ci_utils::nbeta(nelec, spin)){}
 
-void ci_gen::SpinSym::operator()(Row &row, fields::Mbf &mbf) {
+void ci_gen::SpinSym::operator()(Row &row, field::Mbf &mbf) {
     ASSERT(mbf.belongs_to_row(&row));
     row.m_table->clear();
 

@@ -38,7 +38,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian &h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::draw(const fields::FrmOnv &src_onv,
+bool HeatBathDoubles::draw(const field::FrmOnv &src_onv,
                             const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                             defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     // just draw uniform ij TODO! int weighted ij

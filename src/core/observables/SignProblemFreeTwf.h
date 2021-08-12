@@ -26,11 +26,11 @@ public:
             m_nsite(nsite), m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
     }
 
-    virtual void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::FrmOnv &onv) = 0;
+    virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+                     const field::FrmOnv &onv) = 0;
 
-    virtual void add(const fields::Numbers<defs::wf_t, defs::ndim_wf> &weight,
-                     const fields::FrmBosOnv &onv) = 0;
+    virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+                     const field::FrmBosOnv &onv) = 0;
 
     virtual void reduce() {
         mpi::all_sum(m_numerator.data(), m_numerator_total.data(), m_numerator.size());

@@ -106,7 +106,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     void h5_write(hdf5::GroupWriter &parent, std::string name = "wavefunction");
 
-    void h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, const fields::Mbf &ref,
+    void h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, const field::Mbf &ref,
                  std::string name = "wavefunction");
 
     void begin_cycle();
@@ -159,7 +159,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         for (size_t ipart=0ul; ipart<m_format.m_nelement; ++ipart) set_weight(ipart, new_weight);
     }
 
-    void set_weight(const fields::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
+    void set_weight(const field::Numbers<defs::wf_t, defs::ndim_wf> &new_weight){
         for (size_t i=0ul; i < m_format.m_nelement; ++i) set_weight(i, new_weight[i]);
     }
 
@@ -209,7 +209,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      *  i.e. the connection to the reference has a non-zero H matrix element
      * @return
      */
-    size_t create_row_(const size_t &icycle, const fields::Mbf &mbf,
+    size_t create_row_(const size_t &icycle, const field::Mbf &mbf,
                        const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
         DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
         DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
@@ -230,7 +230,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     }
 
 
-    size_t create_row_(const size_t &icycle, const fields::Mbf &mbf,
+    size_t create_row_(const size_t &icycle, const field::Mbf &mbf,
                        const defs::ham_comp_t &hdiag, bool refconn) {
         return create_row_(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
@@ -238,7 +238,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     /**
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
-    TableBase::Loc create_row(const size_t& icycle, const fields::Mbf &mbf,
+    TableBase::Loc create_row(const size_t& icycle, const field::Mbf &mbf,
                               const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
         size_t irank = m_ra.get_rank(mbf);
         size_t irow;
@@ -250,17 +250,17 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     }
 
 
-    TableBase::Loc create_row(const size_t& icycle, const fields::Mbf &mbf,
+    TableBase::Loc create_row(const size_t& icycle, const field::Mbf &mbf,
                               const defs::ham_comp_t &hdiag, bool refconn) {
         return create_row(icycle, mbf, hdiag, std::vector<bool>(npart(), refconn));
     }
 
-    size_t add_spawn(const fields::Mbf &dst_mbf, const defs::wf_t &delta,
+    size_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart);
 
-    size_t add_spawn(const fields::Mbf &dst_mbf, const defs::wf_t &delta,
+    size_t add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delta,
                      bool initiator, bool deterministic, size_t dst_ipart,
-                     const fields::Mbf &src_mbf, const defs::wf_t &src_weight);
+                     const field::Mbf &src_mbf, const defs::wf_t &src_weight);
 
     const size_t& npart() const {
         return m_format.m_nelement;

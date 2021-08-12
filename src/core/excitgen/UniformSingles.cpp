@@ -7,7 +7,7 @@
 UniformSingles::UniformSingles(const Hamiltonian &ham, PRNG &prng) :
         FrmExcitGen(ham, prng, 1) {}
 
-bool UniformSingles::draw(const fields::FrmOnv &src_onv, const OccupiedOrbitals &occs,
+bool UniformSingles::draw(const field::FrmOnv &src_onv, const OccupiedOrbitals &occs,
                           const VacantOrbitals &vacs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     size_t i, a, ia;
     size_t ncases;
