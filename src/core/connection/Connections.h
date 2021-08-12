@@ -20,9 +20,9 @@ namespace conn {
     typedef mbf_t<defs::mbf_ind> Mbf;
 
     template<typename T=void> struct selector {typedef void type;};
-    template<> struct selector<fields::FrmOnv> {typedef FrmOnv type;};
-    template<> struct selector<fields::FrmBosOnv> {typedef FrmBosOnv type;};
-    template<> struct selector<fields::BosOnv> {typedef BosOnv type;};
+    template<> struct selector<FrmOnvField> {typedef FrmOnv type;};
+    template<> struct selector<FrmBosOnvField> {typedef FrmBosOnv type;};
+    template<> struct selector<BosOnvField> {typedef BosOnv type;};
 
     template<typename T>
     using from_field_t = typename selector<T>::type;

@@ -8,6 +8,7 @@
 #include "NumberField.h"
 #include "MultiField.h"
 #include "FrmBosOnvField.h"
+#include "SpecMomIndsField.h"
 
 namespace fields {
     template<typename T, size_t nind>
@@ -40,6 +41,9 @@ namespace fields {
     template<size_t mbf_ind>
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_ind> Mbf;
+
+    typedef MaeIndsField MaeInds;
+    typedef SpecMomIndsField SpecMomInds;
 
     /**
      * Fields are defined as symbols, i.e. members within a Row-derived class.

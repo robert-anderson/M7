@@ -7,6 +7,7 @@
 
 #include "FrmOnvField.h"
 #include "BosOnvField.h"
+#include "MultiField.h"
 
 struct FrmBosOnvField : MultiField<FrmOnvField, BosOnvField> {
     const std::string m_name;

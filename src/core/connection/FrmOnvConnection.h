@@ -5,7 +5,7 @@
 #ifndef M7_FRMONVCONNECTION_H
 #define M7_FRMONVCONNECTION_H
 
-#include "src/core/field/Fields.h"
+#include "src/core/field/FrmOnvField.h"
 
 /**
  * A generic string of ordered, distinct spin-orbital indices.
@@ -66,7 +66,7 @@ public:
      * @return
      *  true if all elements of the index array are set bits in the ONV
      */
-    bool all_occ(const fields::FrmOnv &src) const {
+    bool all_occ(const FrmOnvField &src) const {
         return std::all_of(cbegin(), cend(), [&src](size_t i) { return src.get(i); });
     }
     /**
@@ -75,7 +75,7 @@ public:
      * @return
      *  true if all elements of the index array are clear bits in the ONV
      */
-    bool all_vac(const fields::FrmOnv &src) const {
+    bool all_vac(const FrmOnvField &src) const {
         return std::all_of(cbegin(), cend(), [&src](size_t i) { return !src.get(i); });
     }
     /**
@@ -116,7 +116,7 @@ public:
      * @param dst
      *  fermion ONV to excite to
      */
-    void connect(const fields::FrmOnv &src, const fields::FrmOnv &dst);
+    void connect(const FrmOnvField &src, const FrmOnvField &dst);
     /**
      * update the internal state of the connection with the difference in occupation between the two given determinants
      * and populate the given FrmOpProduct with the indices occupied in both the src and dst
@@ -129,7 +129,7 @@ public:
      * @return
      *  antisymmetric phase of the connection
      */
-    bool connect(const fields::FrmOnv &src, const fields::FrmOnv &dst, FrmOps &com);
+    bool connect(const FrmOnvField &src, const FrmOnvField &dst, FrmOps &com);
     /**
      * update the dst determinant given the src determinant and the internal state of the connection
      * @param src
@@ -137,7 +137,7 @@ public:
      * @param dst
      *  fermion ONV to excite to
      */
-    void apply(const fields::FrmOnv &src, fields::FrmOnv &dst) const;
+    void apply(const FrmOnvField &src, FrmOnvField &dst) const;
     /**
      * update only the common indices, and compute the phase in the process
      * @param src
@@ -147,7 +147,7 @@ public:
      * @return
      *  antisymmetric phase of the connection
      */
-    bool apply(const fields::FrmOnv &src, FrmOps &com) const;
+    bool apply(const FrmOnvField &src, FrmOps &com) const;
     /**
      * update both the dst determinant and compute the associated phase given the src determinant and the internal
      * state of the connection
@@ -160,7 +160,7 @@ public:
      * @return
      *  antisymmetric phase of the connection
      */
-    bool apply(const fields::FrmOnv &src, fields::FrmOnv &dst, FrmOps &com) const;
+    bool apply(const FrmOnvField &src, FrmOnvField &dst, FrmOps &com) const;
     /**
      * reset the internal state that to of a null excitation
      */
@@ -220,7 +220,7 @@ private:
      * @param src
      *  fermion ONV to excite from
      */
-    void update_dataword_phases(const fields::FrmOnv &src) const;
+    void update_dataword_phases(const FrmOnvField &src) const;
     /**
      * compute the antisymmetric phase resulting if a second quantized operator with spin orbital index ibit were
      * operated on the fermion ONV src
@@ -231,7 +231,7 @@ private:
      * @return
      *  antisymmetric phase of the projection of a single creation or annihilation operator with index ibit
      */
-    bool independent_phase(const fields::FrmOnv &src, const size_t &ibit) const;
+    bool independent_phase(const FrmOnvField &src, const size_t &ibit) const;
 
 public:
     /**
@@ -275,9 +275,17 @@ public:
      * @return
      *  true if the phase of the connection with respect to the src is negative
      */
-    bool phase(const fields::FrmOnv &src) const;
+    bool phase(const FrmOnvField &src) const;
 
     size_t exsig() const;
+
+    /**
+     * @param nop_insert
+     *  number of pairs of same-indexed creation and annihilation operators to insert into the normal-ordered product
+     * @return
+     *  excitation signature of the resulting term
+     */
+    size_t exsig(const size_t& nop_insert) const;
 };
 
 

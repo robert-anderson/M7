@@ -12,43 +12,36 @@
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
 #include "src/core/table/BufferedFields.h"
-#include "MevTable.h"
+#include "src/core/mae/MaeTable.h"
 
-struct RefExcitsOneExlvl : BufferedTable<MaeRow<defs::wf_t>, true> {
+struct RefExcitsOneExsig : BufferedTable<MaeRow<defs::wf_t>, true> {
     /**
      * work space for converting between indexing vector type and the stored key type of the MEV tables
      */
-    buffered::FermionMevInds m_working_inds;
+    buffered::MaeInds m_working_inds;
 
-    RefExcitsOneExlvl(size_t nann, size_t ncre, size_t nvalue, size_t nbucket = 100) :
-            BufferedTable<MaeRow<defs::wf_t>, true>("average coefficients", {{nann, ncre, nvalue}, nbucket}),
-            m_working_inds({nann, ncre}) {
-        REQUIRE_EQ_ALL(nann, ncre, "different creation and annihilation operator numbers not currently supported");
+    RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100) :
+            BufferedTable<MaeRow<defs::wf_t>, true>("average coefficients", {{exsig, nvalue}, nbucket}),
+            m_working_inds(exsig) {
     }
 
     LookupResult operator[](const conn::FrmOnv &key) {
-        set_working_inds(key);
+        m_working_inds = key;
         return MappedTable<MaeRow<defs::wf_t>>::operator[](m_working_inds);
     }
 
     size_t insert(const conn::FrmOnv &key) {
-        set_working_inds(key);
+        m_working_inds = key;
         return MappedTable<MaeRow<defs::wf_t>>::insert(m_working_inds);
     }
 
-    size_t nop() const {
-        return m_working_inds.m_ann.m_size;
-    }
-
     std::vector<std::string> h5_field_names() const {
-        return {m_row.m_inds.m_ann.m_name,
-                m_row.m_inds.m_cre.m_name,
-                m_row.m_values.m_name};
+        return {m_row.m_inds.m_name, m_row.m_values.m_name};
     }
 
     using Table<MaeRow<defs::wf_t>>::save;
     void save(hdf5::GroupWriter& gw) const {
-        Table<MaeRow<defs::wf_t>>::save(gw, std::to_string(nop()), h5_field_names());
+        Table<MaeRow<defs::wf_t>>::save(gw, m_working_inds.get_exsig_string(), h5_field_names());
     }
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
@@ -57,11 +50,6 @@ struct RefExcitsOneExlvl : BufferedTable<MaeRow<defs::wf_t>, true> {
         m_row.jump(irow);
         m_row.m_values[ipart]+=contrib;
     }
-
-private:
-    void set_working_inds(const conn::FrmOnv &key) {
-        m_working_inds = {key.ann(), key.cre()};
-    }
 };
 
 
@@ -69,7 +57,7 @@ struct RefExcits : Archivable {
     const fciqmc_config::RefExcits& m_opts;
     const size_t m_max_exlvl;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
-    std::vector<RefExcitsOneExlvl> m_ref_excits;
+    std::vector<RefExcitsOneExsig> m_ref_excits;
     /**
      * work space for computing connections between reference and contributing ONVs
      */

@@ -5,7 +5,8 @@
 #ifndef M7_FERMIONPROMOTER_H
 #define M7_FERMIONPROMOTER_H
 
-#include <src/core/connection/Connections.h>
+#include "src/core/connection/Connections.h"
+#include "src/core/field/Fields.h"
 
 /**
  * given a Connection, iterate over common operators
@@ -77,7 +78,7 @@ public:
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
     bool apply(const size_t &icomb, const conn::FrmOnv &conn,
-               const FrmOps& com, fields::FermionMevInds &inds) const;
+               const FrmOps& com, fields::MaeInds &inds) const;
 
 };
 

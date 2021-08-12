@@ -134,14 +134,18 @@ namespace buffered {
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_ind> Mbf;
 
-    struct FermionMevInds : BufferedMultiField<fields::FermionMevInds> {
-        using fields::FermionMevInds::operator=;
-        using fields::FermionMevInds::m_ann;
-        using fields::FermionMevInds::m_cre;
-        FermionMevInds(size_t nann, size_t ncre):
-                BufferedMultiField<fields::FermionMevInds>({nullptr, nann, ncre}){}
+    struct MaeInds : BufferedField<fields::MaeInds> {
+        using fields::MaeInds::operator=;
+        using fields::MaeInds::m_frm;
+        using fields::MaeInds::m_bos;
+        MaeInds(size_t exsig):
+        BufferedField<fields::MaeInds>({nullptr, exsig}){}
+    };
 
-        FermionMevInds(size_t nop): FermionMevInds(nop, nop){}
+    struct SpecMomInds : BufferedMultiField<fields::SpecMomInds> {
+        using fields::SpecMomInds::operator=;
+        SpecMomInds(size_t exsig):
+        BufferedMultiField<fields::SpecMomInds>({nullptr, exsig}){}
     };
 }
 

@@ -82,7 +82,7 @@ void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &h
 
 void DeterministicSubspace::make_mev_contribs(MevGroup &mevs, const fields::Mbf &ref) {
     if (!mevs.m_accum_epoch) return;
-    if (!mevs.m_fermion_rdm) return;
+    //if (!mevs.m_fermion_rdm) return;
     auto& row_local = m_local.m_row;
     auto& row_global = m_global.m_row;
     for (row_local.restart(); row_local.in_range(); row_local.step()) {

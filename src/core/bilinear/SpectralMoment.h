@@ -5,11 +5,11 @@
 #ifndef M7_SPECTRALMOMENT_H
 #define M7_SPECTRALMOMENT_H
 
+#include <src/core/mae/MaeTable.h>
 #include "src/core/field/Fields.h"
 
 
-Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, Archivable
-
+//Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, Archivable
 struct SpectralMoment {
     const size_t m_exsig, m_order;
     SpectralMoment(size_t exsig, size_t order): m_exsig(exsig), m_order(order){

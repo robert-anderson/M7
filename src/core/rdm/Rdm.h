@@ -8,9 +8,10 @@
 #include <src/core/io/Archivable.h>
 #include "src/core/table/Communicator.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
-#include "src/core/observables/MevTable.h"
 #include "FermionPromoter.h"
 
+
+#if 0
 struct Rdm {};
 
 struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, Archivable {
@@ -168,4 +169,5 @@ struct RdmGroup {
 
 };
 
+#endif //M7_RDM_H
 #endif //M7_RDM_H

@@ -5,7 +5,7 @@
 #ifndef M7_BOSONVCONNECTION_H
 #define M7_BOSONVCONNECTION_H
 
-#include <src/core/field/Fields.h>
+#include "src/core/field/BosOnvField.h"
 #include "src/core/parallel/MPIAssert.h"
 
 struct BosOpPair {
@@ -41,15 +41,15 @@ struct BosOnvConnection {
 
     size_t size() const;
 
-    void connect(const fields::BosOnv& src, const fields::BosOnv& dst);
+    void connect(const BosOnvField& src, const BosOnvField& dst);
 
-    void connect(const fields::BosOnv& src, const fields::BosOnv& dst, BosOps& com);
+    void connect(const BosOnvField& src, const BosOnvField& dst, BosOps& com);
 
-    void apply(const fields::BosOnv &src, fields::BosOnv &dst) const;
+    void apply(const BosOnvField &src, BosOnvField &dst) const;
 
-    void apply(const fields::BosOnv &src, BosOps &com) const;
+    void apply(const BosOnvField &src, BosOps &com) const;
 
-    void apply(const fields::BosOnv &src, fields::BosOnv &dst, BosOps &com) const;
+    void apply(const BosOnvField &src, BosOnvField &dst, BosOps &com) const;
 
     size_t exsig() const;
 };

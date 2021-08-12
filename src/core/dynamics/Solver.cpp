@@ -44,7 +44,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
      */
     m_archive.add_member(m_prop);
     if (m_mevs.m_ref_excits) m_archive.add_member(*m_mevs.m_ref_excits);
-    if (m_mevs.m_fermion_rdm) m_archive.add_member(*m_mevs.m_fermion_rdm);
+    //if (m_mevs.m_fermion_rdm) m_archive.add_member(*m_mevs.m_fermion_rdm);
     /**
      * read previous calculation data into archivable objects if archive loading is enabled
      */
@@ -142,9 +142,9 @@ void Solver::begin_cycle() {
 
     if (m_mevs) {
         if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
-            if (m_mevs.m_fermion_rdm)
-                REQUIRE_EQ_ALL(m_mevs.m_fermion_rdm->m_store.m_hwm, 0ul,
-                               "Fermion RDM is only beginning to be accumulated, but its store table is not empty!");
+//            if (m_mevs.m_fermion_rdm)
+//                REQUIRE_EQ_ALL(m_mevs.m_fermion_rdm->m_store.m_hwm, 0ul,
+//                               "Fermion RDM is only beginning to be accumulated, but its store table is not empty!");
         }
     }
 
@@ -252,7 +252,7 @@ void Solver::finalizing_loop_over_occupied_mbfs() {
     for (row.restart(); row.in_range(); row.step()) {
         if (!row.m_mbf.is_zero()) make_average_weight_mev_contribs(m_icycle);
     }
-    if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
+    //if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
 }
 
 void Solver::annihilate_row(const size_t &dst_ipart, const fields::Mbf &dst_mbf, const defs::wf_t &delta_weight,
@@ -319,28 +319,28 @@ void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
          * accumulate contributions to reference excitations if required
          */
         if (m_mevs.m_ref_excits)
-            m_mevs.m_ref_excits->make_contribs(row.m_mbf, m_refs[ipart].get_mbf(),
+            m_mevs.m_ref_excits->make_contribs(row.m_mbf, ref_mbf,
                                                dupl_fac * ncycle_occ * av_weight, ipart);
 
-        if (m_mevs.m_fermion_rdm) {
-            auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);
-            /*
-             * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
-             * single averaged contribution (ncycle_occ)
-             */
-            m_mevs.m_fermion_rdm->make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight, row.m_mbf, av_weight_rep);
-            if (m_mevs.m_explicit_hf_conns) {
-                if (row.m_ref_conn.get(0) && !ref.is_same(row)) {
-                    const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
-                    const auto av_weight_ref_rep = m_mevs.get_ket_weight(
-                            ref.norm_average_weight(icycle, ipart_replica));
-                    m_mevs.m_fermion_rdm->make_contribs(ref_mbf, dupl_fac * ncycle_occ * av_weight_ref,
-                                                        row.m_mbf, av_weight_rep);
-                    m_mevs.m_fermion_rdm->make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight,
-                                                        ref_mbf, av_weight_ref_rep);
-                }
-            }
-        }
+//        if (m_mevs.m_fermion_rdm) {
+//            auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);
+//            /*
+//             * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
+//             * single averaged contribution (ncycle_occ)
+//             */
+//            m_mevs.m_fermion_rdm->make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight, row.m_mbf, av_weight_rep);
+//            if (m_mevs.m_explicit_hf_conns) {
+//                if (row.m_ref_conn.get(0) && !ref.is_same(row)) {
+//                    const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
+//                    const auto av_weight_ref_rep = m_mevs.get_ket_weight(
+//                            ref.norm_average_weight(icycle, ipart_replica));
+//                    m_mevs.m_fermion_rdm->make_contribs(ref_mbf, dupl_fac * ncycle_occ * av_weight_ref,
+//                                                        row.m_mbf, av_weight_rep);
+//                    m_mevs.m_fermion_rdm->make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight,
+//                                                        ref_mbf, av_weight_ref_rep);
+//                }
+//            }
+//        }
     }
     row.m_average_weight = 0;
     row.m_icycle_occ = icycle;
@@ -354,29 +354,29 @@ void Solver::make_instant_mev_contribs(const fields::Mbf &src_mbf, const defs::w
     if (m_mevs.m_explicit_hf_conns) {
         if (src_mbf == m_refs[dst_ipart].get_mbf() || m_wf.m_store.m_row.m_mbf == m_refs[dst_ipart].get_mbf()) return;
     }
-    auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
-    double dupl_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;
-    if (m_mevs.m_fermion_rdm) {
-        /*
-         * We need to be careful of the intermediate state of the walker weights.
-         * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
-         * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to
-         * introduce a second post-annihilation loop over occupied MBFs to apply the diagonal part of the
-         * propagator, so for MEVs, the solution is to reconstitute the value of the walker weight before the
-         * diagonal death/cloning.
-         *
-         * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
-         * Ci -> Ci*(1 - tau (Hii-shift)).
-         * By the time MEV contributions are being made, the death step has already been applied, and so the pre-
-         * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
-         * is just Cdst/(1 - tau (Hii-shift))
-         */
-        auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart_replica];
-        dst_weight_before_death /=
-                1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
-        m_mevs.m_fermion_rdm->make_contribs(src_mbf, dupl_fac * src_weight, m_wf.m_store.m_row.m_mbf,
-                                            dst_weight_before_death);
-    }
+    //auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
+    //double dupl_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;
+//    if (m_mevs.m_fermion_rdm) {
+//        /*
+//         * We need to be careful of the intermediate state of the walker weights.
+//         * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
+//         * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to
+//         * introduce a second post-annihilation loop over occupied MBFs to apply the diagonal part of the
+//         * propagator, so for MEVs, the solution is to reconstitute the value of the walker weight before the
+//         * diagonal death/cloning.
+//         *
+//         * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
+//         * Ci -> Ci*(1 - tau (Hii-shift)).
+//         * By the time MEV contributions are being made, the death step has already been applied, and so the pre-
+//         * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
+//         * is just Cdst/(1 - tau (Hii-shift))
+//         */
+//        auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart_replica];
+//        dst_weight_before_death /=
+//                1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
+//        m_mevs.m_fermion_rdm->make_contribs(src_mbf, dupl_fac * src_weight, m_wf.m_store.m_row.m_mbf,
+//                                            dst_weight_before_death);
+//    }
 }
 
 void Solver::loop_over_spawned() {
@@ -549,7 +549,7 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator MBFs have occurred");
     m_refs.end_cycle();
-    if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
+    //if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();
     m_prop.update(m_icycle, m_wf);
     if (m_uniform_twf) m_uniform_twf->reduce();

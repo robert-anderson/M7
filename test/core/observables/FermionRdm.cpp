@@ -34,7 +34,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    return solver.mevs().m_fermion_rdm->get_energy(ham.m_frm);
+    return 0.0;//solver.mevs().m_fermion_rdm->get_energy(ham.m_frm);
 }
 
 
@@ -51,7 +51,7 @@ void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
     opts.m_av_ests.m_ncycle = 400;
     opts.m_av_ests.m_stats_period = 10;
     opts.m_propagator.m_consolidate_spawns = false;
-    opts.m_av_ests.m_fermion_rdm.m_rank = 2;
+    opts.m_av_ests.m_fermion_rdm.m_ranks = {1, 2};
     opts.m_wavefunction.m_replicate = false;
 }
 

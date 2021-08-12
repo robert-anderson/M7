@@ -7,6 +7,7 @@
 
 #include "FrmOnvConnection.h"
 #include "BosOnvConnection.h"
+#include "src/core/field/FrmBosOnvField.h"
 
 struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;
@@ -15,9 +16,9 @@ struct FrmBosOnvConnection {
 
     void clear();
 
-    void connect(const fields::FrmBosOnv& src, const fields::FrmBosOnv& dst);
+    void connect(const FrmBosOnvField& src, const FrmBosOnvField& dst);
 
-    void apply(const fields::FrmBosOnv& src, fields::FrmBosOnv& dst) const;
+    void apply(const FrmBosOnvField& src, FrmBosOnvField& dst) const;
 
     size_t exsig() const;
 };

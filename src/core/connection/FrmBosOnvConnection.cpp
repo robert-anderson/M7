@@ -11,12 +11,12 @@ void FrmBosOnvConnection::clear() {
     m_bos.clear();
 }
 
-void FrmBosOnvConnection::connect(const fields::FrmBosOnv &src, const fields::FrmBosOnv &dst) {
+void FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvField &dst) {
     m_frm.connect(src.m_frm, dst.m_frm);
     m_bos.connect(src.m_bos, dst.m_bos);
 }
 
-void FrmBosOnvConnection::apply(const fields::FrmBosOnv &src, fields::FrmBosOnv &dst) const {
+void FrmBosOnvConnection::apply(const FrmBosOnvField &src, FrmBosOnvField &dst) const {
     m_frm.apply(src.m_frm, dst.m_frm);
     m_bos.apply(src.m_bos, dst.m_bos);
 }

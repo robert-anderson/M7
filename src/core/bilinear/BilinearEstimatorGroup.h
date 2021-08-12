@@ -11,6 +11,7 @@
 #include "Rdm.h"
 #include "SpectralMoment.h"
 
+#if 0
 /**
  * Projection onto a trial wavefunction is sufficient for the estimation of many-body expectation values if the operator
  * in question commutes with the Hamiltonian. When the operator does not commute with the Hamiltonian, the projection
@@ -102,11 +103,11 @@ struct BilinearEstimatorGroup {
         }
     }
 
-
     defs::ham_comp_t estimate_energy(const Hamiltonian &ham) {
         return 0.0;
     }
 };
 
 
+#endif //M7_BILINEARESTIMATORGROUP_H
 #endif //M7_BILINEARESTIMATORGROUP_H

@@ -31,7 +31,7 @@ const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
 }
 
 bool FermionPromoter::apply(const size_t &icomb, const conn::FrmOnv &conn,
-                            const FrmOps &com, fields::FermionMevInds &inds) const {
+                            const FrmOps &com, fields::MaeInds &inds) const {
     auto comb_begin = begin(icomb);
     inds.zero();
     size_t ann_passed = 0ul;
@@ -39,26 +39,26 @@ bool FermionPromoter::apply(const size_t &icomb, const conn::FrmOnv &conn,
     for (size_t iins = 0ul; iins < m_nop_insert; ++iins) {
         auto ins = com[comb_begin[iins]];
         while (ann_passed < conn.m_ann.size() && conn.m_ann[ann_passed] < ins) {
-            inds.m_ann[ann_passed + iins] = conn.m_ann[ann_passed];
+            inds.m_frm.m_ann[ann_passed + iins] = conn.m_ann[ann_passed];
             ++ann_passed;
         }
-        inds.m_ann[ann_passed + iins] = ins;
+        inds.m_frm.m_ann[ann_passed + iins] = ins;
 
         while (cre_passed < conn.m_cre.size() && conn.m_cre[cre_passed] < ins) {
-            inds.m_cre[cre_passed + iins] = conn.m_cre[cre_passed];
+            inds.m_frm.m_cre[cre_passed + iins] = conn.m_cre[cre_passed];
             ++cre_passed;
         }
-        inds.m_cre[cre_passed + iins] = ins;
+        inds.m_frm.m_cre[cre_passed + iins] = ins;
     }
     auto phase = (ann_passed + cre_passed) & 1ul;
 
     // the rest of the promoted connection is the same as the connection
     while (ann_passed < conn.m_ann.size()) {
-        inds.m_ann[ann_passed + m_nop_insert] = conn.m_ann[ann_passed];
+        inds.m_frm.m_ann[ann_passed + m_nop_insert] = conn.m_ann[ann_passed];
         ++ann_passed;
     }
     while (cre_passed < conn.m_cre.size()) {
-        inds.m_cre[cre_passed + m_nop_insert] = conn.m_cre[cre_passed];
+        inds.m_frm.m_cre[cre_passed + m_nop_insert] = conn.m_cre[cre_passed];
         ++cre_passed;
     }
     return phase;

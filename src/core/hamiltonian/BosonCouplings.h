@@ -6,6 +6,7 @@
 #define M7_BOSONCOUPLINGS_H
 
 #include "src/core/connection/Connections.h"
+#include "src/core/field/Fields.h"
 
 struct BosonCouplings {
     const size_t m_nboson_max, m_nmode;

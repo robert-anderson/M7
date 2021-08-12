@@ -4,6 +4,7 @@
 
 #include "Rdm.h"
 
+#if 0
 const size_t &FermionRdm::nop() const {
     return m_ncre;
 }
@@ -83,3 +84,4 @@ void FermionRdm::load_fn(hdf5::GroupReader &parent) {
 void FermionRdm::save_fn(hdf5::GroupWriter &parent) {
     m_store.save(parent, std::to_string(nop()), h5_field_names());
 }
+#endif

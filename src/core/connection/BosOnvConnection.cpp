@@ -56,7 +56,7 @@ size_t BosOnvConnection::size() const {
     return m_ann.size()+m_cre.size();
 }
 
-void BosOnvConnection::connect(const fields::BosOnv &src, const fields::BosOnv &dst) {
+void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst) {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
     for (size_t imode=0ul; imode<src.nelement(); ++imode){
@@ -65,7 +65,7 @@ void BosOnvConnection::connect(const fields::BosOnv &src, const fields::BosOnv &
     }
 }
 
-void BosOnvConnection::connect(const fields::BosOnv &src, const fields::BosOnv &dst, BosOps &com) {
+void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst, BosOps &com) {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
     for (size_t imode=0ul; imode<src.nelement(); ++imode){
@@ -75,14 +75,14 @@ void BosOnvConnection::connect(const fields::BosOnv &src, const fields::BosOnv &
     }
 }
 
-void BosOnvConnection::apply(const fields::BosOnv &src, fields::BosOnv &dst) const {
+void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst) const {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     dst = src;
     for (auto& pair: m_ann.pairs()) dst[pair.m_imode]-=pair.m_nop;
     for (auto& pair: m_cre.pairs()) dst[pair.m_imode]+=pair.m_nop;
 }
 
-void BosOnvConnection::apply(const fields::BosOnv &src, BosOps &com) const {
+void BosOnvConnection::apply(const BosOnvField &src, BosOps &com) const {
     auto ann_iter = m_ann.pairs().cbegin();
     auto ann_end = m_ann.pairs().cend();
     for (size_t imode=0ul; imode<src.nelement(); ++imode) {
@@ -92,7 +92,7 @@ void BosOnvConnection::apply(const fields::BosOnv &src, BosOps &com) const {
     }
 }
 
-void BosOnvConnection::apply(const fields::BosOnv &src, fields::BosOnv &dst, BosOps &com) const {
+void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &com) const {
     apply(src, dst);
     apply(src, com);
 }

@@ -15,7 +15,7 @@
 struct MevGroup {
     const fciqmc_config::AvEsts &m_opts;
     Epoch m_accum_epoch;
-    std::unique_ptr<FermionRdm> m_fermion_rdm;
+    //std::unique_ptr<FermionRdm> m_fermion_rdm;
     /**
      * optionally accumulate averaged walker occupations of excitations of the reference
      */
@@ -26,7 +26,7 @@ struct MevGroup {
 
     MevGroup(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, bool explicit_hf_conns=true) :
             m_opts(opts), m_accum_epoch("MEV accumulation"),
-            m_fermion_rdm(opts.m_fermion_rdm.m_rank ? new FermionRdm(opts.m_fermion_rdm, nsite, nelec) : nullptr),
+            //m_fermion_rdm(opts.m_fermion_rdm.m_rank ? new FermionRdm(opts.m_fermion_rdm, nsite, nelec) : nullptr),
             m_ref_excits(opts.m_ref_excits.m_max_exlvl ? new RefExcits(opts.m_ref_excits, nsite) : nullptr),
             m_period(opts.m_stats_period), m_explicit_hf_conns(explicit_hf_conns) {
     }
@@ -55,17 +55,17 @@ struct MevGroup {
      *  weight unchanged if not using the mixed estimator, else signed unit
      */
     defs::wf_t get_ket_weight(const defs::wf_t& weight) const {
-        if (m_fermion_rdm->m_mixed_estimator)
-            return consts::real(weight) > 0.0 ? 1.0 : -1.0;
+//        if (m_fermion_rdm->m_mixed_estimator)
+//            return consts::real(weight) > 0.0 ? 1.0 : -1.0;
         return weight;
     };
 
     operator bool() const {
-        return m_fermion_rdm || m_ref_excits;
+        return m_ref_excits!= nullptr;
     }
 
     bool is_bilinear() const {
-        if (m_fermion_rdm) return (*this) && !m_fermion_rdm->m_mixed_estimator;
+        //if (m_fermion_rdm) return (*this) && !m_fermion_rdm->m_mixed_estimator;
         return false;
     }
 
