@@ -49,6 +49,7 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham) {
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
             conn_work.connect(row_local.m_mbf, row_global.m_mbf);
+            if (!conn_work.exsig()) continue; // diagonal
             auto helem = ham.get_element(row_local.m_mbf, conn_work);
             if (!consts::float_is_zero(helem))
                 m_sparse_ham.add(row_local.index(), row_global.index(), helem);

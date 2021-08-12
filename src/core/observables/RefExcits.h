@@ -45,6 +45,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow<defs::wf_t>, true> {
     }
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
+        DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_exsig, "incompatible connection");
         auto irow = *(*this)[conn];
         if (irow==~0ul) irow = insert(conn);
         m_row.jump(irow);
@@ -55,9 +56,9 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow<defs::wf_t>, true> {
 
 struct RefExcits : Archivable {
     const fciqmc_config::RefExcits& m_opts;
-    const size_t m_max_exlvl;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
-    std::vector<RefExcitsOneExsig> m_ref_excits;
+    std::array<std::unique_ptr<RefExcitsOneExsig>, defs::nexsig> m_ref_excits;
+    defs::inds m_active_exsigs;
     /**
      * work space for computing connections between reference and contributing ONVs
      */
@@ -65,17 +66,20 @@ struct RefExcits : Archivable {
 
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
             Archivable("ref_excits", opts.m_archivable),
-        m_opts(opts), m_max_exlvl(opts.m_max_exlvl), m_av_ref({1}), m_conn(nsite) {
-        m_ref_excits.reserve(m_max_exlvl + 1);
-        for (size_t i=1ul; i<=m_max_exlvl; ++i) m_ref_excits.emplace_back(i, i, 1);
+        m_opts(opts), m_av_ref({1}), m_conn(nsite) {
+        for (size_t iexlvl=1ul; iexlvl<opts.m_max_exlvl; ++iexlvl){
+            auto exsig = conn_utils::exsig(iexlvl, iexlvl, 0, 0);
+            m_active_exsigs.push_back(exsig);
+            m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, 1);
+        }
     }
 
 private:
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
-        auto nop = conn.m_cre.size();
-        if (conn.m_ann.size()!=nop) return; // not supporting electron number non-conservation
-        if (!nop) m_av_ref[ipart] += contrib;
-        else if (nop<=m_max_exlvl) m_ref_excits[nop - 1].make_contribs(conn, contrib, ipart);
+        auto exsig = conn.exsig();
+        if (!exsig) m_av_ref[ipart] += contrib;
+        if (exsig==~0ul || !m_ref_excits[exsig]) return;
+        m_ref_excits[exsig]->make_contribs(conn, contrib, ipart);
     }
 
     void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
@@ -90,16 +94,15 @@ public:
     }
 
     bool all_stores_empty() const {
-        for (const auto& it: m_ref_excits) if(it.m_hwm) return false;
+        for (const auto& i: m_active_exsigs) {
+            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");
+            if (m_ref_excits[i]->m_hwm) return false;
+        }
         return true;
     };
 
 private:
-    /*
-     *
-    void save(hdf5::GroupWriter& parent) const {
-    }
-     */
+
     void load_fn(hdf5::GroupReader &parent) override {
 
     }
@@ -108,10 +111,12 @@ private:
         hdf5::GroupWriter gw("ref_excits", parent);
         defs::wf_t av_ref;
         av_ref = mpi::all_sum(m_av_ref[0]);
-        gw.save("0", av_ref);
-        for (auto& it: m_ref_excits) it.save(gw);
+        gw.save("0000", av_ref);
+        for (const auto& i: m_active_exsigs) {
+            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");
+            m_ref_excits[i]->save(gw);
+        }
     }
-
 };
 
 #endif //M7_REFEXCITS_H
