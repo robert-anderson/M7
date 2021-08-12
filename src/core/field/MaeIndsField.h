@@ -14,7 +14,7 @@ class MaeIndsPartition {
     const size_t m_offset, m_size;
 public:
     MaeIndsPartition(NdNumberField<defs::mev_ind_t, 1> &field, size_t offset, size_t size) :
-            m_field(field), m_offset(offset), m_size(size) {}
+        m_field(field), m_offset(offset), m_size(size) {}
 
     const defs::mev_ind_t &operator[](const size_t &iind) const {
         DEBUG_ASSERT_LT(iind, m_size, "operator index OOB in partition");
@@ -77,6 +77,8 @@ private:
 
 public:
     MaeIndsField(Row *row, size_t exsig, std::string name = "indices");
+
+    MaeIndsField(const MaeIndsField& other);
 
     MaeIndsField &operator=(const MaeIndsField &other);
     MaeIndsField &operator=(const FrmOnvConnection& conn);

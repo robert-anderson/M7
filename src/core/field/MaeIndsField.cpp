@@ -14,7 +14,7 @@ std::array<size_t, 4> MaeIndsField::make_nops() const {
 }
 
 std::array<size_t, 4> MaeIndsField::make_nop_offsets() const {
-    auto nop_offsets = m_nops;
+    std::array<size_t, 4> nop_offsets{};
     for (size_t i = 1ul; i < 4; ++i) nop_offsets[i] = nop_offsets[i - 1] + m_nops[i - 1];
     return nop_offsets;
 }
@@ -25,8 +25,12 @@ MaeIndsField::MaeIndsField(Row *row, size_t exsig, std::string name) :
     m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
     m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
+MaeIndsField::MaeIndsField(const MaeIndsField &other) :
+    NdNumberField<defs::mev_ind_t, 1>(other), m_exsig(other.m_exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
+    m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
+    m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}
 
-    MaeIndsField &MaeIndsField::operator=(const MaeIndsField &other) {
+MaeIndsField &MaeIndsField::operator=(const MaeIndsField &other) {
     *this = static_cast<const base_t &>(other);
     return *this;
 }

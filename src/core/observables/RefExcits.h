@@ -22,8 +22,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow<defs::wf_t>, true> {
 
     RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100) :
             BufferedTable<MaeRow<defs::wf_t>, true>("average coefficients", {{exsig, nvalue}, nbucket}),
-            m_working_inds(exsig) {
-    }
+            m_working_inds(exsig) {}
 
     LookupResult operator[](const conn::FrmOnv &key) {
         m_working_inds = key;
@@ -67,7 +66,7 @@ struct RefExcits : Archivable {
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
             Archivable("ref_excits", opts.m_archivable),
         m_opts(opts), m_av_ref({1}), m_conn(nsite) {
-        for (size_t iexlvl=1ul; iexlvl<opts.m_max_exlvl; ++iexlvl){
+        for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
             auto exsig = conn_utils::exsig(iexlvl, iexlvl, 0, 0);
             m_active_exsigs.push_back(exsig);
             m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, 1);
