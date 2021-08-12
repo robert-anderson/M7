@@ -16,7 +16,7 @@ struct MultiField {
     std::tuple<Args...> m_subfields;
     std::vector<char> m_null_field_string;
 
-    MultiField(Row *row, Args&&... subfields): m_subfields(subfields...) {
+    MultiField(Row *row, Args &&... subfields) : m_subfields(subfields...) {
         add_to_row(row);
         m_null_field_string.assign(max_size(), 0);
     }
@@ -26,13 +26,13 @@ struct MultiField {
      * part of a row copy. This is in contrast to the FieldBase class, which may be
      * legitimately copied without reference to a row.
      */
-    MultiField(const MultiField& other) :
+    MultiField(const MultiField &other) :
             m_row(other.m_row ? other.m_row->m_child : nullptr),
-            m_subfields(other.m_subfields){
+            m_subfields(other.m_subfields) {
         add_to_row(m_row);
     }
 
-    MultiField& operator=(const MultiField& other) {
+    MultiField &operator=(const MultiField &other) {
         MPI_ASSERT(is_comparable(other), "Shapes are incompatible");
         struct fn_t {
             const MultiField& other;
@@ -43,7 +43,7 @@ struct MultiField {
         return *this;
     }
 
-    void add_to_row(Row* row) {
+    void add_to_row(Row *row) {
         if (!row) return;
         REQUIRE_TRUE(!m_row, "MultiField must not be already associated with a row");
         struct fn_t {
@@ -53,13 +53,14 @@ struct MultiField {
             }
         };
         m_row = row;
-        fn_t fn {m_row};
+        fn_t fn{m_row};
         tuple_utils::for_each(m_subfields, fn);
     }
 
     bool operator==(const MultiField &other) const {
         struct fn_t {
             bool m_and = true;
+
             void operator()(const FieldBase &f1, const FieldBase &f2) { m_and &= f1 == f2; }
         };
         fn_t fn;
@@ -68,7 +69,7 @@ struct MultiField {
     }
 
     bool operator!=(const MultiField &other) const {
-        return !(*this==other);
+        return !(*this == other);
     }
 
     bool operator<(const MultiField &other) const {
@@ -100,16 +101,17 @@ struct MultiField {
     }
 
     bool operator>(const MultiField &other) const {
-        return !(*this<=other);
+        return !(*this <= other);
     }
 
     bool operator>=(const MultiField &other) const {
-        return !(*this<other);
+        return !(*this < other);
     }
 
     bool is_comparable(const MultiField &other) const {
         struct fn_t {
             bool m_and = true;
+
             void operator()(const FieldBase &f1, const FieldBase &f2) { m_and &= f1.is_comparable(f2); }
         };
         fn_t fn;
@@ -148,6 +150,7 @@ struct MultiField {
     bool belongs_to_row() const {
         struct fn_t {
             bool m_and = true;
+
             void operator()(const FieldBase &f) { m_and &= f.belongs_to_row(); }
         };
         fn_t fn;
@@ -155,10 +158,12 @@ struct MultiField {
         return fn.m_and;
     }
 
-    bool belongs_to_row(Row* row) const {
+    bool belongs_to_row(Row *row) const {
         struct fn_t {
-            const Row* m_row;
-            fn_t(const Row* row):m_row(row){}
+            const Row *m_row;
+
+            fn_t(const Row *row) : m_row(row) {}
+
             bool m_and = true;
             void operator()(const FieldBase &f) { m_and &= f.belongs_to_row(m_row); }
         };
@@ -177,7 +182,6 @@ struct MultiField {
         return fn.m_hash;
     }
 
-public:
     std::string to_string() const {
         struct fn_t {
             std::string m_str;
@@ -197,6 +201,10 @@ public:
     template<size_t ifield>
     typename std::tuple_element<ifield, std::tuple<Args...>>::type &get() {
         return std::get<ifield>(m_subfields);
+    }
+
+    Row *row_of_copy() const {
+        return static_cast<const FieldBase &>(get<0>()).row_of_copy();
     }
 };
 

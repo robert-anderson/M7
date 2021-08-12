@@ -83,10 +83,14 @@ struct NdNumberField : NumberFieldBase {
         return *this;
     }
 
-    bool is_ordered(bool strict, bool ascending) {
+    bool is_ordered(size_t ibegin, size_t iend, bool strict, bool ascending) const {
         if (!nelement()) return true;
-        T last_value = (*this)[0];
-        for (size_t i = 1ul; i < nelement(); ++i) {
+        DEBUG_ASSERT_LT(ibegin, m_nelement, "first element OOB");
+        DEBUG_ASSERT_LT(iend, m_nelement, "last element OOB");
+        DEBUG_ASSERT_LE(ibegin, iend, "first element must be before last element");
+        if (ibegin==iend) return true;
+        T last_value = (*this)[ibegin];
+        for (size_t i = ibegin+1; i < iend; ++i) {
             auto this_value = (*this)[i];
             if (strict) {
                 if (ascending) {
@@ -105,11 +109,13 @@ struct NdNumberField : NumberFieldBase {
         return true;
     }
 
+    bool is_ordered(bool strict, bool ascending) const {
+        return is_ordered(0, m_nelement, strict, ascending);
+    }
 
     /*
      * math ops
      */
-
 
     template<typename U>
     NdNumberField &add_scaled(const U &factor, const NdNumberField &other) {
@@ -263,8 +269,6 @@ struct NdNumberField : NumberFieldBase {
     hid_t h5_type() const override {
         return hdf5::type<T>();
     }
-
-
 };
 
 template<typename T>

@@ -7,41 +7,61 @@
 
 #include "src/core/field/Fields.h"
 
-using namespace fields;
+struct MaeInds : fields::Numbers<defs::mev_ind_t, 1> {
+    typedef fields::Numbers<defs::mev_ind_t, 1> base_t;
+    const size_t m_exsig;
+    const std::array<size_t, 4> m_nops;
+    const std::array<size_t, 4> m_nop_offsets;
 
-namespace mae_inds {
-    struct Frm : MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> {
-        typedef MultiField<Numbers<defs::mev_ind_t, 1>, Numbers<defs::mev_ind_t, 1>> base_t;
-        const std::string m_name;
-        Numbers<defs::mev_ind_t, 1> &m_ann;
-        Numbers<defs::mev_ind_t, 1> &m_cre;
+private:
+    std::array<size_t, 4> make_nops() const;
 
-        Frm(Row *row, size_t nann, size_t ncre, std::string name = "");
+    std::array<size_t, 4> make_nop_offsets() const;
 
-        Frm(const Frm &other);
+public:
+    MaeInds(Row *row, size_t exsig, std::string name="indices");
 
-        Frm &operator=(const Frm &other);
+    MaeInds& operator=(const std::array<defs::inds, 4> &inds);
 
-        Frm &operator=(const std::pair<defs::inds, defs::inds> &inds);
+    const size_t& nop(const size_t& iop) const;
 
-        /**
-         * The RDM entry keys represent the ascending-ordered sector of the normal-ordered pure expectation values,
-         * the full spin-resolved RDM can be constructed from this via permutations of the indices.
-         * @return
-         *  true if the SQ creation and annihilation operator index vectors are properly ordered
-         */
-        bool is_ordered() const;
+    const defs::mev_ind_t& get_ref(const size_t& iop, const size_t& iind) const;
 
-        /**
-         * all elements of the RDM have the same rank, but not the same excitation level. If the number of indices in
-         * common between the creation and annihilation operators is zero, the excitation level is the same as the rank
-         * @return
-         *  number of indices in common between ascending ordered creation and annihilation spin orbital operator strings
-         */
-        size_t ncommon_sq_op_ind() const;
+    defs::mev_ind_t& get_ref(const size_t& iop, const size_t& iind);
 
-        void common_sq_op_inds(defs::inds &common) const;
-    };
-}
+    template<size_t iop>
+    const defs::mev_ind_t& get_ref(const size_t& iind) const{
+        static_assert(iop<4, "index OOB");
+        DEBUG_ASSERT_LT(iind, m_nops[iop], "operator index OOB");
+        return (*this)[m_nop_offsets[iop]+iind];
+    }
+
+    template<size_t iop>
+    defs::mev_ind_t& get_ref(const size_t& iind) {
+        static_assert(iop<4, "index OOB");
+        DEBUG_ASSERT_LT(iind, m_nops[iop], "operator index OOB");
+        return (*this)[m_nop_offsets[iop]+iind];
+    }
+
+private:
+    bool is_ordered(const size_t& iop, bool strict) const;
+public:
+    bool is_ordered() const;
+
+    void common_frm_inds(defs::inds &common) const;
+
+    std::string get_exsig_string() const;
+};
+
+struct SpecMomInds : MultiField<MaeInds, MaeInds> {
+    typedef MultiField<MaeInds, MaeInds> base_t;
+    const size_t m_exsig;
+    const std::string m_name;
+    MaeInds &m_left, m_right;
+
+    SpecMomInds(Row *row, size_t exsig, std::string name = "indices");
+
+    SpecMomInds(const SpecMomInds &other);
+};
 
 #endif //M7_MAETABLE_H

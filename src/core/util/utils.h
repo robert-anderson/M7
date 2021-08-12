@@ -841,6 +841,15 @@ namespace conn_utils {
     static constexpr size_t extract_nannb(size_t exsig) {
         return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
     }
+    static constexpr size_t extract_nopf(size_t exsig) {
+        return extract_ncref(exsig)+extract_nannf(exsig);
+    }
+    static constexpr size_t extract_nopb(size_t exsig) {
+        return extract_ncreb(exsig)+extract_nannb(exsig);
+    }
+    static constexpr size_t extract_nop(size_t exsig) {
+        return extract_nopf(exsig)+extract_nopb(exsig);
+    }
     static constexpr bool pure_frm(size_t exsig) {
         return !(extract_ncreb(exsig) || extract_nannb(exsig)) && (extract_ncref(exsig) || extract_nannf(exsig));
     }

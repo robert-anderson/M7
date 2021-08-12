@@ -7,9 +7,13 @@
 
 #include "src/core/field/Fields.h"
 #include "src/core/table/BufferedTable.h"
+
 /**
  * Multidimensional Averaged Estimators
  */
+
+struct MaeInds : fields::Numbers<T, 1>
+
 
 template <typename T>
 struct MaeRow : public Row {
