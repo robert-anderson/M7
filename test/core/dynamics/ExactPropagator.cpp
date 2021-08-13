@@ -90,7 +90,7 @@ TEST(ExactPropagator, Test) {
     opts.m_av_ests.m_ncycle = 200;
     opts.m_av_ests.m_stats_period = 13;
     opts.m_propagator.m_consolidate_spawns = false;
-    opts.m_av_ests.m_fermion_rdm.m_ranks = {};
+    opts.m_av_ests.m_rdm.m_ranks = {};
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
     // -99.9421389039332
@@ -172,7 +172,7 @@ TEST(ExactPropagator, Hubbard) {
     opts.m_shift.m_damp = 0.4;
     opts.m_propagator.m_ncycle = 3000;
     opts.m_inst_ests.m_spf_uniform_twf = 0;
-    opts.m_av_ests.m_fermion_rdm.m_ranks = {};
+    opts.m_av_ests.m_rdm.m_ranks = {};
     opts.verify();
 
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);

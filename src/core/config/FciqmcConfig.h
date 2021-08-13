@@ -148,15 +148,16 @@ namespace fciqmc_config {
         void verify() override;
     };
 
-    struct FermionRdm : config::Section {
-        config::Param<defs::inds> m_ranks;
-        config::Param<bool> m_mixed_estimator;
+    struct Bilinear : config::Section {
+        config::Param<std::vector<std::string>> m_ranks;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         LoadBalancing m_load_balancing;
         Archivable m_archivable;
 
-        explicit FermionRdm(config::Group *parent);
+        explicit Bilinear(config::Group *parent, std::string name, std::string description);
+
+        void verify() override;
     };
 
     struct InstEsts : config::Section {
@@ -174,13 +175,13 @@ namespace fciqmc_config {
         explicit RefExcits(config::Group *parent);
     };
 
-
     struct AvEsts : config::Section {
         config::Param<size_t> m_delay;
         config::Param<size_t> m_ncycle;
         config::Param<size_t> m_stats_period;
         config::Param<std::string> m_stats_path;
-        FermionRdm m_fermion_rdm;
+        Bilinear m_rdm;
+        Bilinear m_spec_mom;
         RefExcits m_ref_excits;
 
         explicit AvEsts(config::Group *parent);

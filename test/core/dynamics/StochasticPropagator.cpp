@@ -15,7 +15,7 @@ TEST(StochasticPropagator, Test) {
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 100000;
-    opts.m_av_ests.m_fermion_rdm.m_ranks = {2};
+    opts.m_av_ests.m_rdm.m_ranks = {2};
     opts.m_wavefunction.m_replicate = true;
     opts.m_av_ests.m_ncycle = 2000;
     opts.m_av_ests.m_stats_period = 10;
@@ -55,7 +55,7 @@ TEST(StochasticPropagator, RdmTest) {
     opts.m_shift.m_damp = 0.5;
     opts.m_av_ests.m_delay = 200;
     opts.m_av_ests.m_ncycle = 1000;
-    opts.m_av_ests.m_fermion_rdm.m_ranks = {1};
+    opts.m_av_ests.m_rdm.m_ranks = {1};
     opts.m_wavefunction.m_replicate = true;
     opts.m_propagator.m_consolidate_spawns = true;
     opts.verify();
@@ -137,7 +137,7 @@ TEST(StochasticPropagator, Hubbard) {
     opts.m_inst_ests.m_spf_uniform_twf = false;
     opts.m_shift.m_reweight.m_ncycle = 200;
     opts.m_shift.m_reweight.m_delay = 20000;
-    opts.m_av_ests.m_fermion_rdm.m_ranks = {};
+    opts.m_av_ests.m_rdm.m_ranks = {};
     opts.m_wavefunction.m_replicate = false;
     opts.verify();
 

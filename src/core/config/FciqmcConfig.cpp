@@ -159,13 +159,16 @@ void fciqmc_config::SpfWeightedTwf::verify() {
                        "Boson exponential parameter is non-zero but bosons are compile time disabled");
 }
 
-fciqmc_config::FermionRdm::FermionRdm(config::Group *parent) :
-        config::Section(parent, "fermion_rdm",
-                        "options relating to the accumulation and sampling of fermion RDM elements"),
-        m_ranks(this, "rank", {}, "Ranks of fermion RDMs to accumulate"),
-        m_mixed_estimator(this, "mixed_estimator", false,
-                          "replace one instance of the wavefunction in the bilinear RDM definition with an SPF TWF"),
+fciqmc_config::Bilinear::Bilinear(config::Group *parent, std::string name, std::string description) :
+        config::Section(parent, name, description),
+        m_ranks(this, "ranks", {}, "Ranks to accumulate"),
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
+
+void fciqmc_config::Bilinear::verify() {
+    for (const auto& rank: m_ranks.get()){
+        REQUIRE_TRUE_ALL(rank.size()==1 || rank.size()==4, "invalid rank specifier");
+    }
+}
 
 fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
         config::Section(parent, "inst_ests",
@@ -192,7 +195,9 @@ fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
         m_stats_period(this, "stats_period", 100ul,
                        "number of MC cycles between computation and output of all contracted values computed from the averaged estimators"),
         m_stats_path(this, "stats_path", "M7.av_ests.stats", "output path for contracted value statistics"),
-        m_fermion_rdm(this), m_ref_excits(this) {}
+        m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
+        m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),
+        m_ref_excits(this) {}
 
 fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),

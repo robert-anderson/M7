@@ -51,7 +51,7 @@ void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
     opts.m_av_ests.m_ncycle = 400;
     opts.m_av_ests.m_stats_period = 10;
     opts.m_propagator.m_consolidate_spawns = false;
-    opts.m_av_ests.m_fermion_rdm.m_ranks = {1, 2};
+    opts.m_av_ests.m_rdm.m_ranks = {1, 2};
     opts.m_wavefunction.m_replicate = false;
 }
 

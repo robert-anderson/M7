@@ -88,6 +88,14 @@ namespace utils {
     }
 
     template<typename T>
+    static std::string to_string(const std::vector<std::vector<T>> &v) {
+        std::string string("[");
+        for (const auto &i: v) string += to_string(i) + " ";
+        string += "]";
+        return string;
+    }
+
+    template<typename T>
     static std::string to_string(const std::stack<T> &v) {
         auto cpy = v;
         std::vector<T> tmp;

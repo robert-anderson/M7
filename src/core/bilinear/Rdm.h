@@ -7,39 +7,48 @@
 
 #include "src/core/field/Fields.h"
 
+using namespace conn_utils;
+
 struct Rdm {
 
-    const size_t m_exsig;
+    const size_t m_ranksig;
 
-    /**
-     * some RDMs don't get contributions from the square of a CI coefficient, and so do not have "diagonal" elements
-     * @return
-     *  true if the operator definition conserves particle number
-     */
-    bool has_diagonals() const {
-        return conn_utils::conserve_nfrm(m_exsig)&&conn_utils::conserve_nbos(m_exsig);
-    }
-
-    Rdm(size_t exsig): m_exsig(exsig){
+    Rdm(size_t ranksig): m_ranksig(ranksig){
 
     }
 };
 
-struct FrmRdm : Rdm {
-    FrmRdm(size_t exsig): Rdm(exsig){
-        REQUIRE_TRUE(conn_utils::pure_frm(exsig), "Fermion RDM must refer to purely fermionic excitations");
+class Rdms {
+    std::array<std::unique_ptr<Rdm>, defs::nexsig> m_rdms;
+    const defs::inds m_active_ranksigs;
+    const std::array<defs::inds, defs::nexsig> m_exsig_ranks;
+
+    std::array<defs::inds, defs::nexsig> make_exsig_ranks() const {
+        std::array<defs::inds, defs::nexsig> exsig_ranks{};
+        for (auto& ranksig: m_active_ranksigs){
+            auto nfrm_cre = extract_ncref(ranksig);
+            auto nfrm_ann = extract_ncref(ranksig);
+            while(nfrm_cre!=~0ul && nfrm_ann!=~0ul){
+                auto nbos_cre = extract_ncref(ranksig);
+                auto nbos_ann = extract_ncref(ranksig);
+                while(nbos_cre!=~0ul && nbos_ann!=~0ul){
+                    exsig_ranks[exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann)].push_back(ranksig);
+                    --nbos_cre;
+                    --nbos_ann;
+                }
+                --nfrm_cre;
+                --nfrm_ann;
+            }
+        }
+        return exsig_ranks;
     }
-};
 
-struct BosRdm : Rdm {
-    BosRdm(size_t exsig): Rdm(exsig){
-        REQUIRE_TRUE(conn_utils::pure_bos(exsig), "Boson RDM must refer to purely bosonic excitations");
-    }
-};
-
-struct FrmBosRdm : Rdm {
-    FrmBosRdm(size_t exsig): Rdm(exsig){
-
+public:
+    Rdms(defs::inds ranksigs) : m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()){
+        for (const auto& ranksig: m_active_ranksigs) {
+            REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
+            m_rdms[ranksig] = std::unique_ptr<Rdm>(new Rdm(ranksig));
+        }
     }
 };
 
