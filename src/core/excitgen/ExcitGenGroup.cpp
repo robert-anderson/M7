@@ -10,7 +10,7 @@ void ExcitGenGroup::init() {
     for (size_t exsig=0ul; exsig<defs::nexsig; ++exsig){
         const auto ptr = m_exgens[exsig].get();
         if (!ptr) continue;
-        if (conn_utils::pure_frm(exsig)) m_frm_inds.push_back(m_active_exsigs.size());
+        if (conn_utils::is_pure_frm(exsig)) m_frm_inds.push_back(m_active_exsigs.size());
         m_probs.push_back(ptr->approx_nconn());
         norm+=m_probs.back();
         m_active_exsigs.push_back(exsig);
@@ -25,7 +25,7 @@ void ExcitGenGroup::update_cumprobs() {
     m_frm_norm = 0.0;
     auto it = m_probs.cbegin();
     for (const auto& exsig: m_active_exsigs){
-        if (conn_utils::pure_frm(exsig)) {
+        if (conn_utils::is_pure_frm(exsig)) {
             m_frm_probs.push_back(*it);
             m_frm_norm+=m_frm_probs.back();
         }
@@ -46,22 +46,22 @@ void ExcitGenGroup::update_cumprobs() {
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng) {
     if (ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc()) {
-        m_exgens[conn_utils::exsig(1,1,0,0)] = std::unique_ptr<ExcitGen>(
+        m_exgens[conn_utils::encode_exsig(1, 1, 0, 0)] = std::unique_ptr<ExcitGen>(
                 new Hubbard1dSingles(ham, prng, ham.m_frm.is_hubbard_1d_pbc()));
     } else {
-        m_exgens[conn_utils::exsig(1,1,0,0)] = std::unique_ptr<ExcitGen>(
+        m_exgens[conn_utils::encode_exsig(1, 1, 0, 0)] = std::unique_ptr<ExcitGen>(
                 new UniformSingles(ham, prng));
     }
     if (ham.m_frm.int_2e_rank()) {
         if (opts.m_excit_gen.get() == "pchb") {
-            m_exgens[conn_utils::exsig(2,2,0,0)] = std::unique_ptr<ExcitGen>(
+            m_exgens[conn_utils::encode_exsig(2, 2, 0, 0)] = std::unique_ptr<ExcitGen>(
                     new HeatBathDoubles(ham, prng));
         }
     }
     if (ham.m_bos.m_nboson_max) {
-        m_exgens[conn_utils::exsig(0,0,1,0)] =
+        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
                 std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, true));
-        m_exgens[conn_utils::exsig(0,0,0,1)] =
+        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
                 std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, false));
     }
 

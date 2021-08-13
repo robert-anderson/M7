@@ -26,13 +26,13 @@ class Rdms {
     std::array<defs::inds, defs::nexsig> make_exsig_ranks() const {
         std::array<defs::inds, defs::nexsig> exsig_ranks{};
         for (auto& ranksig: m_active_ranksigs){
-            auto nfrm_cre = extract_ncref(ranksig);
-            auto nfrm_ann = extract_ncref(ranksig);
+            auto nfrm_cre = decode_nfrm_cre(ranksig);
+            auto nfrm_ann = decode_nfrm_cre(ranksig);
             while(nfrm_cre!=~0ul && nfrm_ann!=~0ul){
-                auto nbos_cre = extract_ncref(ranksig);
-                auto nbos_ann = extract_ncref(ranksig);
+                auto nbos_cre = decode_nfrm_cre(ranksig);
+                auto nbos_ann = decode_nfrm_cre(ranksig);
                 while(nbos_cre!=~0ul && nbos_ann!=~0ul){
-                    exsig_ranks[exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann)].push_back(ranksig);
+                    exsig_ranks[encode_exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann)].push_back(ranksig);
                     --nbos_cre;
                     --nbos_ann;
                 }

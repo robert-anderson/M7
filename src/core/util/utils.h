@@ -829,74 +829,139 @@ namespace conn_utils {
 
     using namespace defs;
 
-    static constexpr size_t exsig(size_t ncref, size_t nannf, size_t ncreb, size_t nannb) {
-        return (ncref > exsig_nop_mask_frm || nannf > exsig_nop_mask_frm ||
-            ncreb > exsig_nop_mask_bos || nannb > exsig_nop_mask_bos) ?
-            ~0ul : ncref | (nannf << nbit_exsig_nop_frm) |
-            (ncreb << (2*nbit_exsig_nop_frm)) |
-            (nannb << (2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
+    /**
+     * compactly expresses an arbitrary SQ operator product as a single integer given some compile-time constant numbers
+     * of bits for each element. e.g. if nbit_exsig_nop_frm = 3 and nbit_exsig_nop_bos = 1, then 2x3+2x1 = 8 bits are
+     * required to store a connection excitation level as an exsig (excitation signature) with upto 7 fermion creation
+     * operators, 7 fermion annihilation operators and 1 each of boson creation and annihilation operators, this limit
+     * should be sufficient for all foreseeable applications, but these bit segment lengths are not hardcoded.
+     * @param nfrm_cre
+     *  number of fermion creation indices in the SQ operator product
+     * @param nfrm_ann
+     *  number of fermion annihilation indices in the SQ operator product
+     * @param nbos_cre
+     *  number of boson creation indices in the SQ operator product
+     * @param nbos_ann
+     *  number of boson annihilation indices in the SQ operator product
+     * @return
+     *  the excitation signature
+     */
+    static constexpr size_t encode_exsig(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann) {
+        return (nfrm_cre > exsig_nop_mask_frm || nfrm_ann > exsig_nop_mask_frm ||
+                nbos_cre > exsig_nop_mask_bos || nbos_ann > exsig_nop_mask_bos) ?
+               ~0ul : nfrm_cre | (nfrm_ann << nbit_exsig_nop_frm) |
+                      (nbos_cre << (2 * nbit_exsig_nop_frm)) |
+                      (nbos_ann << (2 * nbit_exsig_nop_frm + nbit_exsig_nop_bos));
     }
-
-    static constexpr size_t extract_ncref(size_t exsig) {
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the number of fermion creation indices in the SQ operator product encoded within exsig
+     */
+    static constexpr size_t decode_nfrm_cre(size_t exsig) {
         return exsig_nop_mask_frm & exsig;
     }
-    static constexpr size_t extract_nannf(size_t exsig) {
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the number of fermion annihilation indices in the SQ operator product encoded within exsig
+     */
+    static constexpr size_t decode_nfrm_ann(size_t exsig) {
         return exsig_nop_mask_frm & (exsig>>nbit_exsig_nop_frm);
     }
-    static constexpr size_t extract_ncreb(size_t exsig) {
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the number of boson creation indices in the SQ operator product encoded within exsig
+     */
+    static constexpr size_t decode_nbos_cre(size_t exsig) {
         return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm));
     }
-    static constexpr size_t extract_nannb(size_t exsig) {
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the number of boson annihilation indices in the SQ operator product encoded within exsig
+     */
+    static constexpr size_t decode_nbos_ann(size_t exsig) {
         return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
     }
-    static constexpr size_t extract_nopf(size_t exsig) {
-        return extract_ncref(exsig)+extract_nannf(exsig);
-    }
-    static constexpr size_t extract_nopb(size_t exsig) {
-        return extract_ncreb(exsig)+extract_nannb(exsig);
-    }
-    static constexpr size_t extract_nop(size_t exsig) {
-        return extract_nopf(exsig)+extract_nopb(exsig);
-    }
-    static constexpr bool pure_frm(size_t exsig) {
-        return !(extract_ncreb(exsig) || extract_nannb(exsig)) && (extract_ncref(exsig) || extract_nannf(exsig));
-    }
-    static constexpr bool pure_bos(size_t exsig) {
-        return !(extract_ncref(exsig) || extract_nannf(exsig)) && (extract_ncreb(exsig) || extract_nannb(exsig));
-    }
-    static constexpr bool conserve_nfrm(size_t exsig) {
-        return extract_ncref(exsig) == extract_nannf(exsig);
-    }
-    static constexpr bool conserve_nbos(size_t exsig) {
-        return extract_ncreb(exsig) == extract_nannb(exsig);
-    }
-    static constexpr size_t conj(size_t exsig) {
-        return conn_utils::exsig(extract_nannf(exsig),extract_ncref(exsig),extract_nannb(exsig),extract_ncreb(exsig));
-    }
-
     /**
-     * add all excitation signatures corresponding to the operator product encoded in the given rank signature
-     * e.g. rank = (2, 2, 0, 1)
-     * @param rank_sig
-     *  signature of the rank of operator product accumulated in the RDM
-     * @param gamma_conns
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the total number of fermion indices in the SQ operator product encoded within exsig
      */
-    static void add_exsigs(size_t ranksig, std::array<bool, nexsig> &array) {
-        auto ncref = extract_ncref(ranksig);
-        auto nannf = extract_nannf(ranksig);
-        while (ncref != ~0ul && nannf != ~0ul) {
-            auto ncreb = extract_ncreb(ranksig);
-            auto nannb = extract_nannb(ranksig);
-            while (ncreb != ~0ul && nannb != ~0ul) {
-                array[exsig(ncref, nannf, ncreb, nannb)] = true;
-                --ncreb;
-                --nannb;
-            }
-            --ncref;
-            --nannf;
-        }
+    static constexpr size_t decode_nfrm(size_t exsig) {
+        return decode_nfrm_cre(exsig) + decode_nfrm_ann(exsig);
     }
-
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the total number of boson indices in the SQ operator product encoded within exsig
+     */
+    static constexpr size_t decode_nbos(size_t exsig) {
+        return decode_nbos_cre(exsig) + decode_nbos_ann(exsig);
+    }
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the total number of operators of any particle type in the SQ operator product encoded within exsig
+     */
+    static constexpr size_t decode_nop(size_t exsig) {
+        return decode_nfrm(exsig) + decode_nbos(exsig);
+    }
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  true if the exsig has any fermion operators and no boson operators
+     */
+    static constexpr bool is_pure_frm(size_t exsig) {
+        return !(decode_nbos_cre(exsig) || decode_nbos_ann(exsig)) && (decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig));
+    }
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  true if the exsig has any boson operators and no fermion operators
+     */
+    static constexpr bool is_pure_bos(size_t exsig) {
+        return !(decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig)) && (decode_nbos_cre(exsig) || decode_nbos_ann(exsig));
+    }
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  true if the exsig represents a fermion number-conserving operator product
+     */
+    static constexpr bool conserves_nfrm(size_t exsig) {
+        return decode_nfrm_cre(exsig) == decode_nfrm_ann(exsig);
+    }
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  true if the exsig represents a boson number-conserving operator product
+     */
+    static constexpr bool conserves_nbos(size_t exsig) {
+        return decode_nbos_cre(exsig) == decode_nbos_ann(exsig);
+    }
+    /**
+     * @param exsig
+     *  excitation signature
+     * @return
+     *  the exsig representing the hermitian conjugate of the operator represented by the argument
+     */
+    static constexpr size_t hermconj(size_t exsig) {
+        return conn_utils::encode_exsig(decode_nfrm_ann(exsig), decode_nfrm_cre(exsig), decode_nbos_ann(exsig),
+                                        decode_nbos_cre(exsig));
+    }
 }
 
 

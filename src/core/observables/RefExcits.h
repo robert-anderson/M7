@@ -67,7 +67,7 @@ struct RefExcits : Archivable {
             Archivable("ref_excits", opts.m_archivable),
         m_opts(opts), m_av_ref({1}), m_conn(nsite) {
         for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
-            auto exsig = conn_utils::exsig(iexlvl, iexlvl, 0, 0);
+            auto exsig = conn_utils::encode_exsig(iexlvl, iexlvl, 0, 0);
             m_active_exsigs.push_back(exsig);
             m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, 1);
         }
@@ -94,7 +94,7 @@ public:
 
     bool all_stores_empty() const {
         for (const auto& i: m_active_exsigs) {
-            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");
+            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active encode_exsig was not allocated!");
             if (m_ref_excits[i]->m_hwm) return false;
         }
         return true;
@@ -112,7 +112,7 @@ private:
         av_ref = mpi::all_sum(m_av_ref[0]);
         gw.save("0000", av_ref);
         for (const auto& i: m_active_exsigs) {
-            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");
+            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active encode_exsig was not allocated!");
             m_ref_excits[i]->save(gw);
         }
     }

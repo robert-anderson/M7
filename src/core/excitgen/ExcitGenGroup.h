@@ -20,7 +20,7 @@
 class ExcitGenGroup {
     PRNG &m_prng;
     /**
-     * one excitation generator is dynamically constructable per active exsig
+     * one excitation generator is dynamically constructable per active encode_exsig
      */
     std::array<std::unique_ptr<ExcitGen>, defs::nexsig> m_exgens;
     /**
@@ -41,7 +41,7 @@ class ExcitGenGroup {
      */
     defs::inds m_frm_inds;
     /**
-     * probabilities for each purely fermionic active exsig
+     * probabilities for each purely fermionic active encode_exsig
      */
     std::vector<defs::prob_t> m_frm_probs;
     std::vector<defs::prob_t> m_frm_cumprobs;

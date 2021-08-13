@@ -14,7 +14,7 @@ struct SpectralMoment {
     const size_t m_exsig, m_order;
     SpectralMoment(size_t exsig, size_t order): m_exsig(exsig), m_order(order){
         REQUIRE_EQ(order, 1ul, "Spectral moment quantities are currently only implemented for n=1")
-        REQUIRE_TRUE(conn_utils::pure_frm(exsig),
+        REQUIRE_TRUE(conn_utils::is_pure_frm(exsig),
                      "Spectral moment excitations must refer to purely fermionic perturbations");
     }
 };

@@ -22,5 +22,5 @@ void FrmBosOnvConnection::apply(const FrmBosOnvField &src, FrmBosOnvField &dst) 
 }
 
 size_t FrmBosOnvConnection::exsig() const {
-    return conn_utils::exsig(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
+    return conn_utils::encode_exsig(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
 }
