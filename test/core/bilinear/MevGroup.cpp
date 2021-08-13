@@ -3,7 +3,7 @@
 //
 
 #include <src/core/connection/Connections.h>
-#include "src/core/rdm/FermionPromoter.h"
+#include "src/core/bilinear/FermionPromoter.h"
 #include <src/core/util/Foreach.h>
 #include "gtest/gtest.h"
 #include "src/core/table/BufferedFields.h"

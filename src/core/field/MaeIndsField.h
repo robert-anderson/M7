@@ -8,7 +8,9 @@
 #include <src/core/connection/FrmBosOnvConnection.h>
 #include "NumberField.h"
 
-
+/**
+ * accesses an operator-type specific partition of a field containing all indices of the MAE element
+ */
 class MaeIndsPartition {
     NdNumberField<defs::mev_ind_t, 1> &m_field;
     const size_t m_offset, m_size;
@@ -30,6 +32,10 @@ public:
         return m_size;
     }
 
+    void zero() {
+        for (size_t i=0ul; i<m_size; ++i) (*this)[i]=0ul;
+    }
+
     /**
      * can't simply copy inds since the mev_ind_t is not the same as size_t in general, so must do a narrowing loop
      * @param inds
@@ -45,30 +51,46 @@ public:
     }
 };
 
-struct MaeIndsPartitionPair {
+/**
+ * a pair of partitions, one for creation operators, and one for annihilations
+ */
+struct MaeIndsPair {
     MaeIndsPartition m_cre;
     MaeIndsPartition m_ann;
 
-    MaeIndsPartitionPair(NdNumberField<defs::mev_ind_t, 1> &field, size_t cre_offset,
-                         size_t cre_size, size_t ann_offset, size_t ann_size) :
+    MaeIndsPair(NdNumberField<defs::mev_ind_t, 1> &field, size_t cre_offset,
+                size_t cre_size, size_t ann_offset, size_t ann_size) :
             m_cre(field, cre_offset, cre_size),
             m_ann(field, ann_offset, ann_size) {}
 
-    MaeIndsPartitionPair &operator=(const std::pair<defs::inds, defs::inds> &inds) {
+    MaeIndsPair &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_cre = inds.first;
         m_ann = inds.second;
         return *this;
     }
+
+    void zero() {
+        m_cre.zero();
+        m_ann.zero();
+    }
 };
 
+/**
+ * Field for storage of general MAE indices,
+ * Constructs two MaeIndsPair objects as views on the fermion and boson sectors of the indices respectively.
+ * Unlike the ONV case, in this situation it is overhead-free to handle fermions and bosons at the same time, because
+ * they do not demand fundamentally different datastructures. If the calculation is purely fermionic, the m_bos view
+ * will simply not be accessed, since neither view is considered in hashing and comparison operations, the underlying
+ * field is.
+ */
 struct MaeIndsField : NdNumberField<defs::mev_ind_t, 1> {
     typedef NdNumberField<defs::mev_ind_t, 1> base_t;
     using base_t::operator=;
     const size_t m_exsig;
     const std::array<size_t, 4> m_nops;
     const std::array<size_t, 4> m_nop_offsets;
-    MaeIndsPartitionPair m_frm;
-    MaeIndsPartitionPair m_bos;
+    MaeIndsPair m_frm;
+    MaeIndsPair m_bos;
 
 private:
     std::array<size_t, 4> make_nops() const;

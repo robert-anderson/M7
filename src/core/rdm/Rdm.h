@@ -8,7 +8,7 @@
 #include <src/core/io/Archivable.h>
 #include "src/core/table/Communicator.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
-#include "FermionPromoter.h"
+#include "src/core/bilinear/FermionPromoter.h"
 
 
 #if 0

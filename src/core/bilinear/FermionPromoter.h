@@ -72,13 +72,13 @@ public:
      *  connection (no repeated SQ operator indices between ann and cre vectors)
      * @param com
      *  indices in common between bra and ket fermion ONVs
-     * @param inds
+     * @param frm_inds
      *  MEV index field
      * @return
      *  antisymmetric phase associated with sorting both ann and cre to ascending order
      */
     bool apply(const size_t &icomb, const conn::FrmOnv &conn,
-               const FrmOps& com, field::MaeInds &inds) const;
+               const FrmOps& com, MaeIndsPair &frm_inds) const;
 
 };
 

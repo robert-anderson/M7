@@ -9,47 +9,32 @@
 #include "src/core/field/Fields.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/Archivable.h"
+#include "FermionPromoter.h"
 
 using namespace conn_utils;
 
 class Rdm : Communicator<MaeRow, MaeRow, true> {
-
-    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, size_t nsite) {
-        double nrow = 1.0;
-        nrow *= integer_utils::combinatorial(2 * nsite, nfrm_cre);
-        nrow *= integer_utils::combinatorial(2 * nsite, nfrm_ann);
-        nrow *= integer_utils::combinatorial(nsite, nbos_cre);
-        nrow *= integer_utils::combinatorial(nsite, nbos_ann);
-        nrow /= integer_utils::factorial(nfrm_cre + nfrm_ann);
-        nrow /= integer_utils::factorial(nbos_cre + nbos_ann);
-        return nrow;
-    }
-
-    static size_t nrow_estimate(size_t exsig, size_t nsite) {
-        return nrow_estimate(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig),
-                             decode_nbos_cre(exsig), decode_nbos_ann(exsig), nsite);
-    }
-
     const size_t m_ranksig;
+    const size_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
+    std::vector<FermionPromoter> m_frm_promoters;
+    buffered::MaeInds m_lookup_inds;
+
+    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, size_t nsite);
+
+    static size_t nrow_estimate(size_t exsig, size_t nsite);
+
 public:
-    Rdm(const fciqmc_config::Bilinear &opts, size_t ranksig, size_t nsite, size_t nvalue) :
-            Communicator<MaeRow, MaeRow, true>(
-                    "rdm_" + to_string(ranksig),
-                    nrow_estimate(ranksig, nsite),
-                    nrow_estimate(ranksig, nsite),
-                    opts.m_buffers, opts.m_load_balancing,
-                    {{ranksig, nvalue}}, {{ranksig, nvalue}}
-            ),
-            m_ranksig(ranksig) {
+    Rdm(const fciqmc_config::Bilinear &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue);
 
-//        m_promoters.reserve(opts.m_rank + 1);
-//        for (size_t nins = 0ul; nins <= opts.m_rank; ++nins) m_promoters.emplace_back(nelec + nins - opts.m_rank, nins);
+    void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
+                       const FrmOps &com, const defs::wf_t &contrib);
 
-    }
+    void make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
+                       const FrmOps &com, const defs::wf_t &contrib);
 
-    void save(hdf5::GroupWriter& gw) const {
-        m_store.save(gw, to_string(m_ranksig));
-    }
+    void end_cycle();
+
+    void save(hdf5::GroupWriter& gw) const;
 };
 
 class Rdms : Archivable {
@@ -57,35 +42,10 @@ class Rdms : Archivable {
     const defs::inds m_active_ranksigs;
     const std::array<defs::inds, defs::nexsig> m_exsig_ranks;
 
-    std::array<defs::inds, defs::nexsig> make_exsig_ranks() const {
-        std::array<defs::inds, defs::nexsig> exsig_ranks{};
-        for (auto &ranksig: m_active_ranksigs) {
-            auto nfrm_cre = decode_nfrm_cre(ranksig);
-            auto nfrm_ann = decode_nfrm_cre(ranksig);
-            while (nfrm_cre != ~0ul && nfrm_ann != ~0ul) {
-                auto nbos_cre = decode_nfrm_cre(ranksig);
-                auto nbos_ann = decode_nfrm_cre(ranksig);
-                while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
-                    exsig_ranks[encode_exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann)].push_back(ranksig);
-                    --nbos_cre;
-                    --nbos_ann;
-                }
-                --nfrm_cre;
-                --nfrm_ann;
-            }
-        }
-        return exsig_ranks;
-    }
+    std::array<defs::inds, defs::nexsig> make_exsig_ranks() const;
 
 public:
-    Rdms(const fciqmc_config::Bilinear &opts, defs::inds ranksigs, size_t nsite) :
-            Archivable("rdms", opts.m_archivable),
-            m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()) {
-        for (const auto &ranksig: m_active_ranksigs) {
-            REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
-            m_rdms[ranksig] = std::unique_ptr<Rdm>(new Rdm(opts, ranksig, nsite, 1ul));
-        }
-    }
+    Rdms(const fciqmc_config::Bilinear &opts, defs::inds ranksigs, size_t nsite, size_t nelec);
 
 private:
     void load_fn(hdf5::GroupReader &parent) override {
