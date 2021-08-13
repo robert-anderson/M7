@@ -962,6 +962,12 @@ namespace conn_utils {
         return conn_utils::encode_exsig(decode_nfrm_ann(exsig), decode_nfrm_cre(exsig), decode_nbos_ann(exsig),
                                         decode_nbos_cre(exsig));
     }
+
+    static std::string to_string(size_t exsig) {
+        if (exsig > nexsig) return "invalid";
+        return std::to_string(decode_nfrm_cre(exsig))+std::to_string(decode_nfrm_ann(exsig))+
+            std::to_string(decode_nbos_cre(exsig))+std::to_string(decode_nbos_ann(exsig));
+    }
 }
 
 

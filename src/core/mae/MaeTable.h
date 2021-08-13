@@ -7,10 +7,9 @@
 
 #include "src/core/field/Fields.h"
 
-template <typename T>
 struct MaeRow : public Row {
     field::MaeInds m_inds;
-    field::Numbers<T, 1> m_values;
+    field::Numbers<defs::wf_t, 1> m_values;
 
     field::MaeInds &key_field() {
         return m_inds;
@@ -20,10 +19,9 @@ struct MaeRow : public Row {
         m_inds(this, exsig), m_values(this, {nvalue}, "values"){}
 };
 
-template <typename T>
 struct SpecMomsRow : public Row {
     field::SpecMomInds m_inds;
-    field::Numbers<T, 1> m_values;
+    field::Numbers<defs::wf_t, 1> m_values;
 
     field::SpecMomInds &key_field() {
         return m_inds;

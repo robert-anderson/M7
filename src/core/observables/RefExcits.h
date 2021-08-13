@@ -14,33 +14,33 @@
 #include "src/core/table/BufferedFields.h"
 #include "src/core/mae/MaeTable.h"
 
-struct RefExcitsOneExsig : BufferedTable<MaeRow<defs::wf_t>, true> {
+struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     /**
      * work space for converting between indexing vector type and the stored key type of the MEV tables
      */
     buffered::MaeInds m_working_inds;
 
     RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100) :
-            BufferedTable<MaeRow<defs::wf_t>, true>("average coefficients", {{exsig, nvalue}, nbucket}),
+            BufferedTable<MaeRow, true>("average coefficients", {{exsig, nvalue}, nbucket}),
             m_working_inds(exsig) {}
 
     LookupResult operator[](const conn::FrmOnv &key) {
         m_working_inds = key;
-        return MappedTable<MaeRow<defs::wf_t>>::operator[](m_working_inds);
+        return MappedTable<MaeRow>::operator[](m_working_inds);
     }
 
     size_t insert(const conn::FrmOnv &key) {
         m_working_inds = key;
-        return MappedTable<MaeRow<defs::wf_t>>::insert(m_working_inds);
+        return MappedTable<MaeRow>::insert(m_working_inds);
     }
 
     std::vector<std::string> h5_field_names() const {
         return {m_row.m_inds.m_name, m_row.m_values.m_name};
     }
 
-    using Table<MaeRow<defs::wf_t>>::save;
+    using Table<MaeRow>::save;
     void save(hdf5::GroupWriter& gw) const {
-        Table<MaeRow<defs::wf_t>>::save(gw, m_working_inds.get_exsig_string(), h5_field_names());
+        Table<MaeRow>::save(gw, m_working_inds.get_exsig_string(), h5_field_names());
     }
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
@@ -112,7 +112,7 @@ private:
         av_ref = mpi::all_sum(m_av_ref[0]);
         gw.save("0000", av_ref);
         for (const auto& i: m_active_exsigs) {
-            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active encode_exsig was not allocated!");
+            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");
             m_ref_excits[i]->save(gw);
         }
     }
