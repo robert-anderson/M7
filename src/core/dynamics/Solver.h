@@ -10,10 +10,12 @@
 #include <src/core/observables/RefExcits.h>
 #include <src/core/observables/UniformTwf.h>
 #include <src/core/observables/WeightedTwf.h>
-#include <src/core/observables/MevGroup.h>
+#include <src/core/observables/RefExcits.h>
+#include <src/core/bilinear/BilinearEstimators.h>
 #include <src/core/io/FciqmcStats.h>
 #include <src/core/io/Archivable.h>
 #include <src/core/io/TimingStats.h>
+#include <src/core/mae/Maes.h>
 #include "src/core/wavefunction/Reference.h"
 #include "src/core/table/Communicator.h"
 #include "src/core/io/FciqmcStats.h"
@@ -60,7 +62,7 @@ class Solver {
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;
-    MevGroup m_mevs;
+    Maes m_maes;
     Archive m_archive;
 
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
@@ -133,31 +135,35 @@ public:
                         bool allow_initiation, bool src_deterministic);
 
     /**
-     * Make all contributions to MEVs from the current occupied MBF row. These contributions always include the
-     * diagonals, where the bra and ket MBFs are the same. Explicit contributions from connections to the Hartree-Fock
-     * MBF are also optionally included here - in that case it is taken to be true that the single excitations are never
-     * generated due to the Brillouin theorem
+     * Make all contributions to MAEs from the current occupied MBF row.
+     *
+     * Currently these MAEs consist of the average reference excitations and the bilinears, of which the latter entail
+     * the most careful handling.
+     *
+     * Averaged contributions to the bilinear MAEs always include the diagonals, where the bra and ket MBFs are the
+     * same. Explicit contributions from connections to the Hartree-Fock MBF are also optionally included here - in that
+     * case it is taken to be true that the 1100 excitations are never generated due to the Brillouin theorem
      *
      * Care is needed here to avoid off-by-one-like errors. Such considerations are required in a few different methods,
      * but all relevant details are summarised here.
      *
      * Five different types of event must be considered in the proper accumulation of averaged contributions:
      *  1. a row is created in the walker table
-     *  2. the mev accumulation epoch begins
+     *  2. the bilinear MAE accumulation epoch begins
      *  3. a row is about to be removed from the walker table
      *  4. the boundary between two block averaging periods is reached
-     *  5. the end of the calculation is reached (equivalent to 3. for every row in the table)
+     *  5. the end of the calculation is reached (equivalent to #3 for every row in the table)
      *
      * these are each handled in the following manner:
      *  1. if row creation is performed in the annhilation step of cycle i, at least one component of its weight array
      *     will be set to a non-zero value immediately afterwards in the same cycle. the next cycle (i+1) will be
      *     treated as the first cycle of the lifetime of this new row. thus, on creation of the row, the m_icycle_occ
      *     member of the row will be set to i, and the m_average_weight will be zeroed. then, if contributions were
-     *     "averaged" every cycle (i.e. m_opts.ncycle_mev_period=1), the newly added instantaneous row.m_weight would be
-     *     summed into row.m_average_weight and a call to row.occupied_ncycle(m_icycle) would return 1, since m_icycle
-     *     would be incremented to i+1. therefore, the added contribution would be correct. assuming that an arbitrary
-     *     element of the weight then remains unchanged, on cycle i+x row.m_average_weight would be
-     *     x * row.m_weight, and row.occupied_ncycle(m_icycle) would give x, the correct normalization
+     *     "averaged" every cycle the newly added instantaneous row.m_weight would be summed into row.m_average_weight
+     *     and a call to row.occupied_ncycle(m_icycle) would return 1, since m_icycle would be incremented to i+1.
+     *     therefore, the added contribution would be correct. assuming that an arbitrary element of the weight then
+     *     remains unchanged, on cycle i+x row.m_average_weight would be x * row.m_weight, and
+     *     row.occupied_ncycle(m_icycle) would give x, the correct normalization
      *
      *  2. when the accumulation epoch begins while the wavefunction already contains an occupied set, each row must be
      *     treated as though it were created on the previous iteration. In the loop over occupied MBFs, MC cycle i, if
@@ -186,7 +192,7 @@ public:
      *     be added in a special "finalizing" loop over occupied MBFs. crucially, this is done *before* the
      *     instantaneous weight is summed into the average, since this was already done in the previous iteration.
      */
-    void make_average_weight_mev_contribs(const size_t& icycle);
+    void make_average_mae_contribs(const size_t& icycle);
 
     /**
      * Make all MEV contributions due to products of instantaneous walker weights.

@@ -13,7 +13,7 @@
 
 using namespace conn_utils;
 
-class Rdm : Communicator<MaeRow, MaeRow, true> {
+class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const size_t m_ranksig;
     const size_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
     std::vector<FermionPromoter> m_frm_promoters;
@@ -24,7 +24,7 @@ class Rdm : Communicator<MaeRow, MaeRow, true> {
     static size_t nrow_estimate(size_t exsig, size_t nsite);
 
 public:
-    Rdm(const fciqmc_config::Bilinear &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue);
+    Rdm(const fciqmc_config::Bilinears &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue);
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
                        const FrmOps &com, const defs::wf_t &contrib);
@@ -37,7 +37,7 @@ public:
     void save(hdf5::GroupWriter& gw) const;
 };
 
-class Rdms : Archivable {
+class Rdms : public Archivable {
     std::array<std::unique_ptr<Rdm>, defs::nexsig> m_rdms;
     const defs::inds m_active_ranksigs;
     const std::array<defs::inds, defs::nexsig> m_exsig_ranks;
@@ -45,10 +45,33 @@ class Rdms : Archivable {
     std::array<defs::inds, defs::nexsig> make_exsig_ranks() const;
 
 public:
-    Rdms(const fciqmc_config::Bilinear &opts, defs::inds ranksigs, size_t nsite, size_t nelec);
+    Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec);
 
     operator bool() const {
         return !m_active_ranksigs.empty();
+    }
+
+    void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
+                       const FrmOps &com, const defs::wf_t &contrib){
+        auto exsig = conn.exsig();
+        for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
+    }
+
+    void make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
+                       const FrmOps &com, const defs::wf_t &contrib){
+        auto exsig = conn.exsig();
+        for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
+    }
+
+    bool all_stores_empty() const {
+        for (auto& ranksig: m_active_ranksigs)
+            if (!m_rdms[ranksig]->m_store.is_cleared())
+                return false;
+        return true;
+    }
+
+    void end_cycle() {
+        for (auto& ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
     }
 
 private:

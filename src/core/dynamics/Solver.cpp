@@ -17,19 +17,14 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                        new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_mevs(m_opts.m_av_ests, prop.m_ham.nsite(), prop.m_ham.nelec(), true),
-        m_archive(opts) {
+        m_maes(m_opts.m_av_ests, m_prop.m_ham), m_archive(opts) {
 
     if (m_wf.nreplica() > 1 && !m_prop.nexcit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_mevs.is_bilinear() && m_wf.nreplica() == 1 && m_prop.nexcit_gen())
-        log::warn("Attempting a stochastic propagation estimation of MEVs without replication, "
+    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.nexcit_gen())
+        log::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
-
-    if (m_mevs && !m_mevs.is_bilinear() && m_wf.nreplica() > 1)
-        log::warn("Attempting a mixed estimation of MEVs with replication, "
-                  "the replica population is redundant");
 
     if (mpi::i_am_root()) {
         m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {m_prop}));
@@ -43,8 +38,11 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
      * setup archive members
      */
     m_archive.add_member(m_prop);
-    if (m_mevs.m_ref_excits) m_archive.add_member(*m_mevs.m_ref_excits);
-    //if (m_mevs.m_fermion_rdm) m_archive.add_member(*m_mevs.m_fermion_rdm);
+    if (m_maes.m_ref_excits) m_archive.add_member(m_maes.ref_excits);
+    if (m_maes.m_bilinears) {
+        if (m_maes.m_bilinears.m_rdms) m_archive.add_member(m_maes.m_bilinears.m_rdms);
+        if (m_maes.m_bilinears.m_spec_moms) m_archive.add_member(m_maes.m_bilinears.m_spec_moms);
+    }
     /**
      * read previous calculation data into archivable objects if archive loading is enabled
      */
@@ -77,7 +75,7 @@ void Solver::execute(size_t ncycle) {
         loop_over_spawned();
         mpi::barrier();
         if (m_detsub) {
-            m_detsub->make_mev_contribs(m_mevs, m_refs[0].get_mbf());
+            m_detsub->make_mev_contribs(m_maes.m_bilinears, m_refs[0].get_mbf());
             m_detsub->project(m_prop.tau());
         }
         m_annihilate_timer.pause();
@@ -93,8 +91,8 @@ void Solver::execute(size_t ncycle) {
             log::info("exit requested from file, terminating solver loop at MC cycle {}", i);
             break;
         }
-        if (m_mevs.m_accum_epoch) {
-            if (i == m_mevs.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
+        if (m_bilinears.m_accum_epoch) {
+            if (i == m_bilinears.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
                 if (m_icycle == ncycle)
                     log::info("maximum number of MEV accumulating cycles ({}) "
                               "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
@@ -104,7 +102,7 @@ void Solver::execute(size_t ncycle) {
         log::flush();
     }
     if (m_icycle == ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
-    if (m_mevs.m_accum_epoch) {
+    if (m_bilinears.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         --m_icycle;
         finalizing_loop_over_occupied_mbfs();
@@ -140,11 +138,10 @@ void Solver::begin_cycle() {
         return false;
     };
 
-    if (m_mevs) {
-        if (m_mevs.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
-//            if (m_mevs.m_fermion_rdm)
-//                REQUIRE_EQ_ALL(m_mevs.m_fermion_rdm->m_store.m_hwm, 0ul,
-//                               "Fermion RDM is only beginning to be accumulated, but its store table is not empty!");
+    if (m_bilinears) {
+        if (m_bilinears.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
+            REQUIRE_TRUE_ALL(m_bilinears.all_stores_empty(),
+                             "Bilinear MAEs only beginning to be accumulated, but not all store tables are empty");
         }
     }
 
@@ -179,7 +176,7 @@ void Solver::loop_over_occupied_mbfs() {
              * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
              * associated averaged contributions to MEVs
              */
-            make_average_weight_mev_contribs(m_icycle);
+            make_average_mae_contribs(m_icycle);
             m_wf.remove_row();
             continue;
         }
@@ -188,22 +185,22 @@ void Solver::loop_over_occupied_mbfs() {
          * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
          */
-        if (m_mevs.m_accum_epoch.started_this_cycle(m_icycle)) {
-            ASSERT(m_mevs.m_accum_epoch);
+        if (m_bilinears.m_accum_epoch.started_this_cycle(m_icycle)) {
+            ASSERT(m_bilinears.m_accum_epoch);
             row.m_icycle_occ = m_icycle - 1;
             row.m_average_weight = 0;
         }
 
-        if (m_mevs.m_accum_epoch) {
+        if (m_bilinears.m_accum_epoch) {
             row.m_average_weight += row.m_weight;
         }
 
-        if (m_mevs.is_period_cycle(m_icycle)) {
+        if (m_bilinears.is_period_cycle(m_icycle)) {
             /*
              * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
              * which need to be included in the average
              */
-            make_average_weight_mev_contribs(m_icycle);
+            make_average_mae_contribs(m_icycle);
         }
 
         m_refs.contrib_row();
@@ -247,12 +244,12 @@ void Solver::loop_over_occupied_mbfs() {
 }
 
 void Solver::finalizing_loop_over_occupied_mbfs() {
-    if (!m_mevs.m_accum_epoch) return;
+    if (!m_bilinears.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
-        if (!row.m_mbf.is_zero()) make_average_weight_mev_contribs(m_icycle);
+        if (!row.m_mbf.is_zero()) make_average_mae_contribs(m_icycle);
     }
-    //if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
+    m_bilinears.end_cycle();
 }
 
 void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
@@ -291,13 +288,13 @@ void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, 
     }
 }
 
-void Solver::make_average_weight_mev_contribs(const size_t &icycle) {
-    if (!m_mevs.m_accum_epoch) return;
+void Solver::make_average_mae_contribs(const size_t &icycle) {
+    if (!m_maes.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     // the current cycle should be included in the denominator
-    auto ncycle_occ = static_cast<defs::wf_comp_t>(row.occupied_ncycle(icycle));
+    defs::wf_comp_t ncycle_occ = row.occupied_ncycle(icycle);
     if (!ncycle_occ) {
-        ASSERT(row.m_average_weight.is_zero());
+        DEBUG_ASSERT_TRUE(row.m_average_weight.is_zero(), "average value should have been rezeroed");
         return;
     }
 

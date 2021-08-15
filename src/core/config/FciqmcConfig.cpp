@@ -159,12 +159,12 @@ void fciqmc_config::SpfWeightedTwf::verify() {
                        "Boson exponential parameter is non-zero but bosons are compile time disabled");
 }
 
-fciqmc_config::Bilinear::Bilinear(config::Group *parent, std::string name, std::string description) :
+fciqmc_config::Bilinears::Bilinears(config::Group *parent, std::string name, std::string description) :
         config::Section(parent, name, description),
         m_ranks(this, "ranks", {}, "Ranks to accumulate"),
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
 
-void fciqmc_config::Bilinear::verify() {
+void fciqmc_config::Bilinears::verify() {
     for (const auto& rank: m_ranks.get()){
         REQUIRE_TRUE_ALL(rank.size()==1 || rank.size()==4, "invalid rank specifier");
     }

@@ -6,10 +6,11 @@
 #define M7_SPECTRALMOMENT_H
 
 #include <src/core/mae/MaeTable.h>
+#include <src/core/io/Archivable.h>
 #include "src/core/field/Fields.h"
 
 
-//Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, Archivable
+//Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>
 struct SpectralMoment {
     const size_t m_exsig, m_order;
     SpectralMoment(size_t exsig, size_t order): m_exsig(exsig), m_order(order){
@@ -19,10 +20,31 @@ struct SpectralMoment {
     }
 };
 
-class SpecMoms {
+class SpecMoms : public Archivable {
 
 public:
 
+    SpecMoms(const fciqmc_config::Bilinears& opts): Archivable("spec_moms", opts.m_archivable){}
+
+    operator bool() const {
+        return false;//!m_active_ranksigs.empty();
+    }
+
+    bool all_stores_empty() const {
+//        for (auto& ranksig: m_active_ranksigs)
+//            if (!m_rdms[ranksig]->m_store.is_cleared())
+//                return false;
+            return true;
+    }
+
+protected:
+    void load_fn(hdf5::GroupReader &parent) override {
+
+    }
+
+    void save_fn(hdf5::GroupWriter &parent) override {
+
+    }
 
 };
 

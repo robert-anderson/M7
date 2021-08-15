@@ -55,6 +55,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 
 struct RefExcits : Archivable {
     const fciqmc_config::RefExcits& m_opts;
+    Epoch m_accum_epoch;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
     std::array<std::unique_ptr<RefExcitsOneExsig>, defs::nexsig> m_ref_excits;
     defs::inds m_active_exsigs;
@@ -65,7 +66,7 @@ struct RefExcits : Archivable {
 
     RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
             Archivable("ref_excits", opts.m_archivable),
-        m_opts(opts), m_av_ref({1}), m_conn(nsite) {
+        m_opts(opts), m_accum_epoch("average reference excitation accumulation"), m_av_ref({1}), m_conn(nsite) {
         for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
             auto exsig = conn_utils::encode_exsig(iexlvl, iexlvl, 0, 0);
             m_active_exsigs.push_back(exsig);
@@ -99,6 +100,10 @@ public:
         }
         return true;
     };
+
+    operator bool() const {
+        return !m_active_exsigs.empty();
+    }
 
 private:
 

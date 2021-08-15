@@ -20,7 +20,7 @@ size_t Rdm::nrow_estimate(size_t exsig, size_t nsite) {
                          decode_nbos_cre(exsig), decode_nbos_ann(exsig), nsite);
 }
 
-Rdm::Rdm(const fciqmc_config::Bilinear &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue) :
+Rdm::Rdm(const fciqmc_config::Bilinears &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue) :
         Communicator<MaeRow, MaeRow, true>(
                 "rdm_" + to_string(ranksig),
                 nrow_estimate(ranksig, nsite),
@@ -137,7 +137,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const fciqmc_config::Bilinear &opts, defs::inds ranksigs, size_t nsite, size_t nelec) :
+Rdms::Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()) {
     for (const auto &ranksig: m_active_ranksigs) {

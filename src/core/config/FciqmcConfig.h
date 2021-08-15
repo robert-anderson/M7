@@ -148,16 +148,24 @@ namespace fciqmc_config {
         void verify() override;
     };
 
-    struct Bilinear : config::Section {
+    struct Bilinears : config::Section {
         config::Param<std::vector<std::string>> m_ranks;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         LoadBalancing m_load_balancing;
         Archivable m_archivable;
 
-        explicit Bilinear(config::Group *parent, std::string name, std::string description);
+        explicit Bilinears(config::Group *parent, std::string name, std::string description);
 
         void verify() override;
+    };
+
+    struct SpecMoms : Bilinears {
+        config::Param<bool> m_stochastic;
+
+        explicit SpecMoms(config::Group *parent, std::string name, std::string description):
+                Bilinears(parent, name, description), m_stochastic(this, "stochastic", true,
+                             "if false, perform exact projective FCI (only practical for debugging in small systems)"),
     };
 
     struct InstEsts : config::Section {
@@ -180,8 +188,8 @@ namespace fciqmc_config {
         config::Param<size_t> m_ncycle;
         config::Param<size_t> m_stats_period;
         config::Param<std::string> m_stats_path;
-        Bilinear m_rdm;
-        Bilinear m_spec_mom;
+        Bilinears m_rdm;
+        Bilinears m_spec_mom;
         RefExcits m_ref_excits;
 
         explicit AvEsts(config::Group *parent);
