@@ -11,7 +11,6 @@
 #include "Rdm.h"
 #include "SpectralMoment.h"
 
-#if 0
 /**
  * Projection onto a trial wavefunction is sufficient for the estimation of many-body expectation values if the operator
  * in question commutes with the Hamiltonian. When the operator does not commute with the Hamiltonian, the projection
@@ -36,18 +35,10 @@
  */
 struct BilinearEstimatorGroup {
 
-    std::array<std::unique_ptr<Rdm>, defs::nexsig> m_rdms;
-    const defs::inds m_rdm_exsigs;
-    std::array<std::unique_ptr<SpectralMoment>, defs::nexsig> m_specmoms;
-    const defs::inds m_specmom_exsigs;
+    Rdms m_rdms;
+    //std::array<std::unique_ptr<SpectralMoment>, defs::nexsig> m_specmoms;
+    //const defs::inds m_specmom_exsigs;
 
-    bool any_rdms() const {
-        return !m_rdm_exsigs.empty();
-    }
-
-    bool any_specmoms() const {
-        return !m_specmom_exsigs.empty();
-    }
 
     /**
      * replication is needed if we are estimating any bilinears stochastically
@@ -108,6 +99,4 @@ struct BilinearEstimatorGroup {
     }
 };
 
-
-#endif //M7_BILINEARESTIMATORGROUP_H
 #endif //M7_BILINEARESTIMATORGROUP_H

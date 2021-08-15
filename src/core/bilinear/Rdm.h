@@ -47,6 +47,10 @@ class Rdms : Archivable {
 public:
     Rdms(const fciqmc_config::Bilinear &opts, defs::inds ranksigs, size_t nsite, size_t nelec);
 
+    operator bool() const {
+        return !m_active_ranksigs.empty();
+    }
+
 private:
     void load_fn(hdf5::GroupReader &parent) override {
 

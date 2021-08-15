@@ -44,7 +44,8 @@ Rdm::Rdm(const fciqmc_config::Bilinear &opts, size_t ranksig, size_t nsite, size
         m_frm_promoters.emplace_back(nelec + nins - rank, nins);
 }
 
-void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com, const wf_t &contrib) {
+void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
+                        const FrmOps &com, const wf_t &contrib) {
     const auto exlvl = conn.m_cre.size();
     DEBUG_ASSERT_TRUE(conn.m_ann.size() <= m_nfrm_ann && conn.m_cre.size() <= m_nfrm_cre,
                       "this method should not have been delegated given the exsig of the contribution");
@@ -77,8 +78,8 @@ void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn, 
     }
 }
 
-void
-Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn, const FrmOps &com, const wf_t &contrib) {
+void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
+                        const FrmOps &com, const wf_t &contrib) {
     m_lookup_inds = conn.m_bos;
     make_contribs(src_onv.m_frm, conn.m_frm, com, contrib);
     auto exsig = conn.exsig();

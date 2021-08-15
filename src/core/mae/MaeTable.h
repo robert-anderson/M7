@@ -11,24 +11,18 @@ struct MaeRow : public Row {
     field::MaeInds m_inds;
     field::Numbers<defs::wf_t, 1> m_values;
 
-    field::MaeInds &key_field() {
-        return m_inds;
-    };
+    field::MaeInds &key_field();;
 
-    MaeRow(size_t exsig, size_t nvalue):
-        m_inds(this, exsig), m_values(this, {nvalue}, "values"){}
+    MaeRow(size_t exsig, size_t nvalue);
 };
 
 struct SpecMomsRow : public Row {
     field::SpecMomInds m_inds;
     field::Numbers<defs::wf_t, 1> m_values;
 
-    field::SpecMomInds &key_field() {
-        return m_inds;
-    };
+    field::SpecMomInds &key_field();;
 
-    SpecMomsRow(size_t exsig, size_t nvalue):
-        m_inds(this, exsig), m_values(this, {nvalue}, "values"){}
+    SpecMomsRow(size_t exsig, size_t nvalue);
 };
 
 

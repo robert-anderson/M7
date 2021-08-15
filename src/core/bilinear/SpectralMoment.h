@@ -19,4 +19,11 @@ struct SpectralMoment {
     }
 };
 
+class SpecMoms {
+
+public:
+
+
+};
+
 #endif //M7_SPECTRALMOMENT_H
