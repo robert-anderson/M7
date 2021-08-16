@@ -20,9 +20,7 @@ namespace sparse {
         std::vector<std::forward_list<size_t>> m_rows_icols;
 
     public:
-        void resize(const size_t nrow);
-
-        void expand(const size_t delta_nrow);
+        virtual void resize(const size_t& nrow);
 
         size_t nrow() const;
 
@@ -38,6 +36,12 @@ namespace sparse {
         std::vector<std::forward_list<T>> m_rows_values;
 
     public:
+
+        void resize(const size_t &nrow) override {
+            Network::resize(nrow);
+            if (nrow > m_rows_values.size()) m_rows_values.resize(nrow);
+        }
+
         void add(const size_t &irow, const size_t &icol, const T& v) {
             Network::add(irow, icol);
             if (irow >= m_rows_values.size()) resize(irow + 1);
@@ -51,13 +55,11 @@ namespace sparse {
             for (size_t irow = 0; irow < m_rows_icols.size(); ++irow) {
                 auto icol_it = m_rows_icols[irow].cbegin();
                 auto value_it = m_rows_values[irow].cbegin();
-                while (icol_it!=m_rows_icols[irow].cend()){
+                for (; icol_it!=m_rows_icols[irow].cend(); (++icol_it, ++value_it)){
                     DEBUG_ASSERT_LT(*icol_it, in.size(), "sparse matrix column OOB");
                     DEBUG_ASSERT_FALSE(value_it==m_rows_values[irow].cend(),
                                        "values list incongruent with column indices list");
                     out[irow] += *value_it * in[*icol_it];
-                    ++icol_it;
-                    ++value_it;
                 }
             }
         }

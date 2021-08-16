@@ -2,7 +2,6 @@
 // Created by rja on 16/06/2020.
 //
 
-#include <src/core/basis/Suites.h>
 #include "DeterministicSubspace.h"
 
 field::Mbf &DeterministicDataRow::key_field() {
@@ -94,11 +93,16 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
         if (row_local.m_mbf == ref) continue;
         auto icol_list = m_ham_matrix[row_local.index()].first;
         auto icol_it = icol_list.cbegin();
-        while (icol_it != icol_list.cend()) {
+        for (; icol_it != icol_list.cend(); ++icol_it) {
             row_global.jump(*icol_it);
             if (row_global.m_mbf == ref) continue;
-            rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, 0.5 * row_local.m_weight[0] * row_global.m_weight[1]);
-            rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, 0.5 * row_local.m_weight[1] * row_global.m_weight[0]);
+            if (m_wf.nreplica()==2){
+                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, 0.5 * row_local.m_weight[0] * row_global.m_weight[1]);
+                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, 0.5 * row_local.m_weight[1] * row_global.m_weight[0]);
+            }
+            else {
+                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, row_local.m_weight[0] * row_global.m_weight[0]);
+            }
         }
     }
 }
@@ -113,12 +117,10 @@ void DeterministicSubspace::project(double tau) {
         auto lists = m_ham_matrix[row_local.index()];
         auto icol_it = lists.first.cbegin();
         auto value_it = lists.second.cbegin();
-        while (icol_it != lists.first.cend()) {
-            DEBUG_ASSERT_FALSE(value_it != list.second.cend(), "values list incongruent with column indices list");
+        for (; icol_it != lists.first.cend(); (++icol_it, ++value_it)) {
+            DEBUG_ASSERT_FALSE(value_it == lists.second.cend(), "values list incongruent with column indices list");
             row_global.jump(*icol_it);
             row_wf.m_weight.sub_scaled(*value_it * tau, row_global.m_weight);
-            ++icol_it;
-            ++value_it;
         }
         ++irow_wf_it;
     }

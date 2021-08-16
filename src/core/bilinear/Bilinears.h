@@ -64,6 +64,8 @@ private:
     static defs::inds parse_exsigs(const std::vector<std::string> &strings) {
         defs::inds out;
         for (auto &string: strings) out.push_back(parse_exsig(string));
+        DEBUG_ASSERT_EQ(out.size(), strings.size(),
+                        "output should have the same number of exsigs as specification");
         return out;
     }
 

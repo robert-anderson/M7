@@ -20,7 +20,7 @@ FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
         for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             m_wf.set_weight(ipart, opts.m_wavefunction.m_nw_init.get());
     }
-    m_prop->m_shift.m_values = ref_energy;
+    m_prop->m_shift.m_values = ref_energy+opts.m_shift.m_init;
     Solver solver(opts, *m_prop, m_wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
 }

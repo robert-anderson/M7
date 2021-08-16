@@ -118,15 +118,17 @@ void Rdm::save(hdf5::GroupWriter &gw) const {
 }
 
 std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
-    std::array<defs::inds, defs::nexsig> exsig_ranks{};
-    for (auto &ranksig: m_active_ranksigs) {
+    std::array<defs::inds, defs::nexsig> exsig_ranks;
+    for (const auto &ranksig: m_active_ranksigs) {
         auto nfrm_cre = decode_nfrm_cre(ranksig);
         auto nfrm_ann = decode_nfrm_cre(ranksig);
         while (nfrm_cre != ~0ul && nfrm_ann != ~0ul) {
-            auto nbos_cre = decode_nfrm_cre(ranksig);
-            auto nbos_ann = decode_nfrm_cre(ranksig);
+            auto nbos_cre = decode_nbos_cre(ranksig);
+            auto nbos_ann = decode_nbos_ann(ranksig);
             while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
-                exsig_ranks[encode_exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann)].push_back(ranksig);
+                auto exsig = encode_exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
+                DEBUG_ASSERT_LT(exsig, defs::nexsig, "exsig OOB");
+                exsig_ranks[exsig].push_back(ranksig);
                 --nbos_cre;
                 --nbos_ann;
             }
@@ -138,7 +140,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
 }
 
 Rdms::Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch& accum_epoch) :
-        Archivable("rdms", opts.m_archivable),
+        Archivable((log::info("{}", utils::to_string(ranksigs)), "rdms"), opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
         m_work_conns(nsite), m_work_com_ops(nsite), m_accum_epoch(accum_epoch) {
     for (const auto &ranksig: m_active_ranksigs) {
@@ -149,6 +151,6 @@ Rdms::Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsi
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
         REQUIRE_TRUE(m_rdms[ranksig]==nullptr, "No RDM rank should appear more than once in the specification");
-        m_rdms[ranksig] = std::unique_ptr<Rdm>(new Rdm(opts, ranksig, nsite, nelec, 1ul));
+        m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, nsite, nelec, 1ul);
     }
 }

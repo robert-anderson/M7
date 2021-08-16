@@ -21,7 +21,9 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     buffered::MaeInds m_working_inds;
 
     RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100) :
-            BufferedTable<MaeRow, true>("average coefficients", {{exsig, nvalue}, nbucket}),
+            BufferedTable<MaeRow, true>(
+                    log::format("average {} reference excitation coefficients", conn_utils::to_string(exsig)),
+                                        {{exsig, nvalue}, nbucket}),
             m_working_inds(exsig) {}
 
     LookupResult operator[](const conn::FrmOnv &key) {

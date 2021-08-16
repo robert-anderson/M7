@@ -4,13 +4,8 @@
 
 #include "Sparse.h"
 
-void sparse::Network::resize(const size_t nrow) {
-    DEBUG_ASSERT_GE(nrow, m_rows_icols.size(), "should be resizing to a larger number of rows");
-    m_rows_icols.resize(nrow);
-}
-
-void sparse::Network::expand(const size_t delta_nrow) {
-    resize(m_rows_icols.size() + delta_nrow);
+void sparse::Network::resize(const size_t& nrow) {
+    if (nrow > m_rows_icols.size()) m_rows_icols.resize(nrow);
 }
 
 size_t sparse::Network::nrow() const {

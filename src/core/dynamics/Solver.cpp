@@ -186,7 +186,7 @@ void Solver::loop_over_occupied_mbfs() {
          * loop of the last MC cycle.
          */
         if (m_maes.m_accum_epoch.started_this_cycle(m_icycle)) {
-            ASSERT(m_bilinears.m_accum_epoch);
+            DEBUG_ASSERT_TRUE(m_maes.m_accum_epoch, "should be in MAE accumulation epoch");
             row.m_icycle_occ = m_icycle - 1;
             row.m_average_weight = 0;
         }
@@ -346,10 +346,10 @@ void Solver::make_average_mae_contribs(const size_t &icycle) {
 void Solver::make_instant_mev_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight,
                                        const size_t &dst_ipart) {
     // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst MBF
-    if (!m_mevs.m_accum_epoch) return;
-    if (m_mevs.m_explicit_hf_conns) {
-        if (src_mbf == m_refs[dst_ipart].get_mbf() || m_wf.m_store.m_row.m_mbf == m_refs[dst_ipart].get_mbf()) return;
-    }
+    if (!m_maes.m_accum_epoch) return;
+//    if (m_maes.m_explicit_hf_conns) {
+//        if (src_mbf == m_refs[dst_ipart].get_mbf() || m_wf.m_store.m_row.m_mbf == m_refs[dst_ipart].get_mbf()) return;
+//    }
     //auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
     //double dupl_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;
 //    if (m_mevs.m_fermion_rdm) {
@@ -611,6 +611,7 @@ void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, 
 
 void Solver::make_mev_contribs_from_unique_src_mbfs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
                                                     const size_t &irow_block_end, const size_t &irow_store) {
+#if 0
     if (!mevs()) return;
     // if the dst MBF is not stored, it cannot give contributions to any MEVs
     if (irow_store == ~0ul) {
@@ -640,17 +641,14 @@ void Solver::make_mev_contribs_from_unique_src_mbfs(SpawnTableRow &row_current, 
     }
     // finish off last block
     make_instant_mev_contribs(row_block_start.m_src_mbf, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
+#endif
 }
 
 void Solver::output_mevs(size_t icycle) {
-    if (!m_mevs.is_period_cycle(icycle)) return;
+    if (!m_maes.is_period_cycle(icycle)) return;
     //m_mevs.save(icycle);
 }
 
 void Solver::output_mevs() {
     //m_mevs.save();
-}
-
-const MevGroup &Solver::mevs() const {
-    return m_mevs;
 }
