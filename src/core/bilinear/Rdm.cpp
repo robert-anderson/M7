@@ -137,9 +137,10 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec) :
+Rdms::Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch& accum_epoch) :
         Archivable("rdms", opts.m_archivable),
-        m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()) {
+        m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
+        m_work_conns(nsite), m_work_com_ops(nsite), m_accum_epoch(accum_epoch) {
     for (const auto &ranksig: m_active_ranksigs) {
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
         REQUIRE_TRUE(conserves_nfrm(ranksig), "fermion non-conserving RDMs are not yet supported");
@@ -147,6 +148,7 @@ Rdms::Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsi
                    "RDMs with more than one boson creation operator are not yet supported");
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
+        REQUIRE_TRUE(m_rdms[ranksig]==nullptr, "No RDM rank should appear more than once in the specification");
         m_rdms[ranksig] = std::unique_ptr<Rdm>(new Rdm(opts, ranksig, nsite, nelec, 1ul));
     }
 }

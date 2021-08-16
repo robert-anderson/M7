@@ -77,7 +77,7 @@ namespace fciqmc_config {
     };
 
     struct Reference : config::Section {
-        config::Param<std::vector<std::string>> m_init_onv;
+        config::Param<std::vector<std::string>> m_init_mbf;
         config::Param<double> m_redef_thresh;
 
         explicit Reference(config::Group *parent);
@@ -162,10 +162,9 @@ namespace fciqmc_config {
 
     struct SpecMoms : Bilinears {
         config::Param<bool> m_stochastic;
+        config::Param<double> m_nattempt_per_walker;
 
-        explicit SpecMoms(config::Group *parent, std::string name, std::string description):
-                Bilinears(parent, name, description), m_stochastic(this, "stochastic", true,
-                             "if false, perform exact projective FCI (only practical for debugging in small systems)"),
+        explicit SpecMoms(config::Group *parent, std::string name, std::string description);
     };
 
     struct InstEsts : config::Section {
@@ -189,7 +188,7 @@ namespace fciqmc_config {
         config::Param<size_t> m_stats_period;
         config::Param<std::string> m_stats_path;
         Bilinears m_rdm;
-        Bilinears m_spec_mom;
+        SpecMoms m_spec_mom;
         RefExcits m_ref_excits;
 
         explicit AvEsts(config::Group *parent);

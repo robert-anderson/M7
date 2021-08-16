@@ -38,7 +38,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
      * setup archive members
      */
     m_archive.add_member(m_prop);
-    if (m_maes.m_ref_excits) m_archive.add_member(m_maes.ref_excits);
+    if (m_maes.m_ref_excits) m_archive.add_member(m_maes.m_ref_excits);
     if (m_maes.m_bilinears) {
         if (m_maes.m_bilinears.m_rdms) m_archive.add_member(m_maes.m_bilinears.m_rdms);
         if (m_maes.m_bilinears.m_spec_moms) m_archive.add_member(m_maes.m_bilinears.m_spec_moms);
@@ -75,7 +75,7 @@ void Solver::execute(size_t ncycle) {
         loop_over_spawned();
         mpi::barrier();
         if (m_detsub) {
-            m_detsub->make_mev_contribs(m_maes.m_bilinears, m_refs[0].get_mbf());
+            m_detsub->make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_refs[0].get_mbf());
             m_detsub->project(m_prop.tau());
         }
         m_annihilate_timer.pause();
@@ -91,8 +91,8 @@ void Solver::execute(size_t ncycle) {
             log::info("exit requested from file, terminating solver loop at MC cycle {}", i);
             break;
         }
-        if (m_bilinears.m_accum_epoch) {
-            if (i == m_bilinears.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
+        if (m_maes.m_accum_epoch) {
+            if (i == m_maes.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
                 if (m_icycle == ncycle)
                     log::info("maximum number of MEV accumulating cycles ({}) "
                               "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
@@ -102,7 +102,7 @@ void Solver::execute(size_t ncycle) {
         log::flush();
     }
     if (m_icycle == ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
-    if (m_bilinears.m_accum_epoch) {
+    if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
         --m_icycle;
         finalizing_loop_over_occupied_mbfs();
@@ -138,10 +138,10 @@ void Solver::begin_cycle() {
         return false;
     };
 
-    if (m_bilinears) {
-        if (m_bilinears.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
-            REQUIRE_TRUE_ALL(m_bilinears.all_stores_empty(),
-                             "Bilinear MAEs only beginning to be accumulated, but not all store tables are empty");
+    if (m_maes) {
+        if (m_maes.m_accum_epoch.update(m_icycle, update_epoch(m_opts.m_av_ests.m_delay))) {
+            REQUIRE_TRUE_ALL(m_maes.all_stores_empty(),
+                             "MAEs only beginning to be accumulated, but not all store tables are empty");
         }
     }
 
@@ -149,7 +149,7 @@ void Solver::begin_cycle() {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(
                     m_opts.m_propagator.m_semistochastic, m_wf, m_icycle));
-            m_detsub->build_from_most_occupied(m_prop.m_ham);
+            m_detsub->build_from_most_occupied(m_prop.m_ham, m_maes.m_bilinears);
             //m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("Initialized deterministic subspace");
         }
@@ -185,17 +185,17 @@ void Solver::loop_over_occupied_mbfs() {
          * if the accumulation of MEVs has just started, treat the row as though it became occupied in the annihilation
          * loop of the last MC cycle.
          */
-        if (m_bilinears.m_accum_epoch.started_this_cycle(m_icycle)) {
+        if (m_maes.m_accum_epoch.started_this_cycle(m_icycle)) {
             ASSERT(m_bilinears.m_accum_epoch);
             row.m_icycle_occ = m_icycle - 1;
             row.m_average_weight = 0;
         }
 
-        if (m_bilinears.m_accum_epoch) {
+        if (m_maes.m_accum_epoch) {
             row.m_average_weight += row.m_weight;
         }
 
-        if (m_bilinears.is_period_cycle(m_icycle)) {
+        if (m_maes.is_period_cycle(m_icycle)) {
             /*
              * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
              * which need to be included in the average
@@ -244,12 +244,12 @@ void Solver::loop_over_occupied_mbfs() {
 }
 
 void Solver::finalizing_loop_over_occupied_mbfs() {
-    if (!m_bilinears.m_accum_epoch) return;
+    if (!m_maes.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
         if (!row.m_mbf.is_zero()) make_average_mae_contribs(m_icycle);
     }
-    m_bilinears.end_cycle();
+    m_maes.end_cycle();
 }
 
 void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
@@ -315,9 +315,8 @@ void Solver::make_average_mae_contribs(const size_t &icycle) {
         /*
          * accumulate contributions to reference excitations if required
          */
-        if (m_mevs.m_ref_excits)
-            m_mevs.m_ref_excits->make_contribs(row.m_mbf, ref_mbf,
-                                               dupl_fac * ncycle_occ * av_weight, ipart);
+        if (m_maes.m_ref_excits)
+            m_maes.m_ref_excits.make_contribs(row.m_mbf, ref_mbf, dupl_fac * ncycle_occ * av_weight, ipart);
 
 //        if (m_mevs.m_fermion_rdm) {
 //            auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);

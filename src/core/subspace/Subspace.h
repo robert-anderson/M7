@@ -41,7 +41,7 @@ struct ProtectedKeySet : RowProtector {
 
 
 /**
- * Connections of a specific excitation level
+ * Network of a specific excitation level
  */
 struct SubspaceExlvl {
 

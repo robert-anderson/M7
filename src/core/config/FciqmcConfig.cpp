@@ -85,11 +85,11 @@ fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
                                    "number of consecutive attempted updates which do not exceed the maximum acceptable imbalance required to meet the deactivation criterion") {}
 
 fciqmc_config::Reference::Reference(config::Group *parent) :
-        config::Section(parent, "reference", "options relating to the reference ONV"),
-        m_init_onv(this, "init_reference_onv", {},
-                   "string representations of the ONVs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
+        config::Section(parent, "reference", "options relating to the reference MBF"),
+        m_init_mbf(this, "init_reference_mbf", {},
+                   "string representations of the MBFs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
         m_redef_thresh(this, "redef_thresh", 10.0,
-                       "when the highest-weighted non-reference ONV (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
+                       "when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
 
 fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         config::Section(parent, "wavefunction",
@@ -110,7 +110,7 @@ fciqmc_config::Reweight::Reweight(config::Group *parent) :
 fciqmc_config::Shift::Shift(config::Group *parent) :
         config::Section(parent, "shift",
                         "options relating to the diagonal shift parameter and the manner in which it is varied"),
-        m_init(this, "init", 0.0, "initial shift relative to the energy of the initial reference ONV"),
+        m_init(this, "init", 0.0, "initial shift relative to the energy of the initial reference MBF"),
         m_damp(this, "damp", 0.05, "damping factor in shift update"),
         m_period(this, "period", 5, "number of MC cycles between shift updates"),
         m_ncycle_av(this, "ncycle_av", 100ul, "number of cycles over which to maintain a rolling average"),
@@ -120,9 +120,9 @@ fciqmc_config::Shift::Shift(config::Group *parent) :
 
 fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
         config::Section(parent, "semistochastic", "options related to semi-stochastic propagation"),
-        m_size(this, "size", 0ul, "number of ONVs selected to comprise the semi-stochastic space"),
+        m_size(this, "size", 0ul, "number of MBFs selected to comprise the semi-stochastic space"),
         m_l1_fraction_cutoff(this, "l1_fraction_cutoff", 1.0,
-                             "requisite fraction of the total number of walkers required to reside on an ONV for inclusion in the semistochastic space"),
+                             "requisite fraction of the total number of walkers required to reside on an MBF for inclusion in the semistochastic space"),
         m_delay(this, "delay", 0ul,
                 "number of MC cycles to wait after the onset of variable shift mode before initializing the semi-stochastic space") {}
 
@@ -165,10 +165,17 @@ fciqmc_config::Bilinears::Bilinears(config::Group *parent, std::string name, std
         m_buffers(this), m_hash_mapping(this), m_load_balancing(this), m_archivable(this) {}
 
 void fciqmc_config::Bilinears::verify() {
-    for (const auto& rank: m_ranks.get()){
-        REQUIRE_TRUE_ALL(rank.size()==1 || rank.size()==4, "invalid rank specifier");
+    for (const auto &rank: m_ranks.get()) {
+        REQUIRE_TRUE_ALL(rank.size() == 1 || rank.size() == 4, "invalid rank specifier");
     }
 }
+
+fciqmc_config::SpecMoms::SpecMoms(config::Group *parent, std::string name, std::string description) :
+        Bilinears(parent, name, description),
+        m_stochastic(this, "stochastic", true,
+                     "if false, perform exact evaluation of contributing connections"),
+        m_nattempt_per_walker(this, "nattempt_per_walker", 1.0,
+                              "number of attempts to generate contributions per integerized walker on the source MBF") {}
 
 fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
         config::Section(parent, "inst_ests",
@@ -180,7 +187,7 @@ fciqmc_config::InstEsts::InstEsts(config::Group *parent) :
 
 fciqmc_config::RefExcits::RefExcits(config::Group *parent) :
         config::Section(parent, "ref_excits",
-                        "options relating to averaged amplitudes of reference-connected ONVs"),
+                        "options relating to averaged amplitudes of reference-connected MBFs"),
         m_max_exlvl(this, "max_exlvl", 0ul,
                     "maximum excitation level from the reference for which to accumulate average amplitudes"),
         m_buffers(this), m_archivable(this) {}
@@ -230,7 +237,7 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         m_nw_target(this, "nw_target", 0ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),
-        m_nadd(this, "nadd", 3.0, "ONVs with weight above this value are granted initiator status"),
+        m_nadd(this, "nadd", 3.0, "MBFs with weight above this value are granted initiator status"),
         m_tau_init(this, "tau_init", 1e-3, "initial value for the timestep"),
         m_tau_min(this, "tau_min", 1e-5, "minimum allowed value for the dynamic timestep"),
         m_tau_max(this, "tau_max", 1e-2, "maximum allowed value for the dynamic timestep"),
@@ -248,7 +255,7 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
         m_consolidate_spawns(this, "consolidate_spawns", false,
-                             "sort and consolidate received spawns so that there is at most one update to any ONV weight in an annihilation loop"),
+                             "sort and consolidate received spawns so that there is at most one update to any MBF weight in an annihilation loop"),
         m_semistochastic(this) {}
 
 void fciqmc_config::Propagator::verify() {

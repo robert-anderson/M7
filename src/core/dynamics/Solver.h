@@ -11,7 +11,7 @@
 #include <src/core/observables/UniformTwf.h>
 #include <src/core/observables/WeightedTwf.h>
 #include <src/core/observables/RefExcits.h>
-#include <src/core/bilinear/BilinearEstimators.h>
+#include <src/core/bilinear/Bilinears.h>
 #include <src/core/io/FciqmcStats.h>
 #include <src/core/io/Archivable.h>
 #include <src/core/io/TimingStats.h>
@@ -218,7 +218,6 @@ public:
 
     void output_stats();
 
-    const MevGroup& mevs() const;
 };
 
 #endif //M7_SOLVER_H

@@ -5,8 +5,8 @@
 #ifndef M7_DETERMINISTICSUBSPACE_H
 #define M7_DETERMINISTICSUBSPACE_H
 
-#include <src/core/observables/MevGroup.h>
-#include "src/core/sparse/SparseMatrix.h"
+#include "src/core/bilinear/Bilinears.h"
+#include "src/core/linalg/Sparse.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 #include "src/core/field/Fields.h"
 #include "WalkerTable.h"
@@ -26,71 +26,60 @@ struct DeterministicDataRow : Row {
     static void load_fn(const WalkerTableRow& source, DeterministicDataRow& local);
 };
 
-
-class PureConnections {
-    bool m_resized_by_add = false;
-    std::vector<std::forward_list<size_t>> m_rows{};
-
-public:
-    void resize(const size_t nrow) {
-        ASSERT(nrow >= m_rows.size());
-        m_rows.resize(nrow);
-    }
-
-    void expand(const size_t delta_nrow) {
-        resize(m_rows.size() + delta_nrow);
-    }
-
-    size_t nrow() const {
-        return m_rows.size();
-    }
-
-    void add(const size_t &irow, const size_t &icol) {
-        if (irow >= m_rows.size()) {
-            if (!m_resized_by_add) {
-                log::warn("Resizing SparseMatrix by adding a row (this entails reallocation which is inefficient)");
-                log::warn("Call resize before filling if number of rows is known in advance");
-                m_resized_by_add = true;
-            }
-            resize(irow + 1);
-        }
-        m_rows[irow].push_front(icol);
-    }
-
-    bool empty() { return m_rows.empty(); }
-
-    const std::forward_list<size_t>& row(const size_t &irow) const {
-        return m_rows[irow];
-    }
-};
-
-
+/**
+ * the implementation of the semistochastic adaptation calls for a subspace of many-body basis functions to be
+ * designated as a deterministic subspace within which the exact propagator is applied to update the CI coefficients
+ */
 struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataRow>{
+    /**
+     * the deterministic subspace is just a selection of rows from an MPI-distributed wavefunction object
+     */
     typedef Wavefunction::PartSharedRowSet<DeterministicDataRow> base_t;
+    /**
+     * options from the configuration object
+     */
     const fciqmc_config::Semistochastic& m_opts;
+    /**
+     * need to maintain a reference to the wavefunction so the affected coefficients can be gathered and updated
+     */
     Wavefunction& m_wf;
-    sparse::Matrix<defs::ham_t> m_sparse_ham;
+    /**
+     * all the non-zero Hamiltonian connections and their matrix elements for the locally-stored rows (with respect to
+     * columns distributed across all ranks)
+     */
+    sparse::Matrix<defs::ham_t> m_ham_matrix;
+    /**
+     * in general RDMs take contributions from MBF connections which correspond to H matrix elements of zero. These
+     * are stored here. We do NOT duplicate elements from the sparse_ham here, only those MBF pairs which may
+     * contribute to RDM elements, but which are H-unconnected
+     */
+    sparse::Network m_rdm_network;
     Epoch m_epoch;
 
     DeterministicSubspace(const fciqmc_config::Semistochastic& opts, Wavefunction& wf, size_t icycle);
 
     virtual ~DeterministicSubspace(){}
 
+    /**
+     * add a row to the subspace on this MPI rank (not collectively), and reflect this status in the flags of the WF row
+     * @param row
+     *  row of the wavefunction store which is pointing at the MBF to add into the subspace
+     */
     void add_(WalkerTableRow& row) {
         base_t::add_(row.index());
         for (size_t ipart=0ul; ipart<m_wf.npart(); ++ipart)
             row.m_deterministic.set(ipart);
     }
 
-    void build_from_most_occupied(const Hamiltonian &ham);
+    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears& bilinears);
 
-    void build_connections(const Hamiltonian &ham);
+    void build_connections(const Hamiltonian &ham, const Bilinears& bilinears);
 
-    void build_from_all_occupied(const Hamiltonian &ham);
+    void build_from_all_occupied(const Hamiltonian &ham, const Bilinears& bilinears);
 
-    void build_from_occupied_connections(const Hamiltonian &ham, const field::Mbf& mbf);
+    void build_from_occupied_connections(const Hamiltonian &ham, const field::Mbf& mbf, const Bilinears& bilinears);
 
-    void make_mev_contribs(MevGroup& mevs, const field::Mbf &ref);
+    void make_rdm_contribs(Rdms& rdms, const field::Mbf &ref);
 
     /**
       * for every deterministically-propagated row on this MPI rank, update its value.

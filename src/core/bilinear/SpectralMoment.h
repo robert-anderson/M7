@@ -24,7 +24,7 @@ class SpecMoms : public Archivable {
 
 public:
 
-    SpecMoms(const fciqmc_config::Bilinears& opts): Archivable("spec_moms", opts.m_archivable){}
+    SpecMoms(const fciqmc_config::SpecMoms& opts): Archivable("spec_moms", opts.m_archivable){}
 
     operator bool() const {
         return false;//!m_active_ranksigs.empty();

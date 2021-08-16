@@ -5,6 +5,7 @@
 #ifndef M7_RDM_H
 #define M7_RDM_H
 
+#include <src/core/basis/Suites.h>
 #include "src/core/mae/MaeTable.h"
 #include "src/core/field/Fields.h"
 #include "src/core/table/Communicator.h"
@@ -42,13 +43,21 @@ class Rdms : public Archivable {
     const defs::inds m_active_ranksigs;
     const std::array<defs::inds, defs::nexsig> m_exsig_ranks;
 
+    suite::Conns m_work_conns;
+    FrmOps m_work_com_ops;
+
     std::array<defs::inds, defs::nexsig> make_exsig_ranks() const;
 
 public:
-    Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec);
+    const Epoch& m_accum_epoch;
+    Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch& accum_epoch);
 
     operator bool() const {
         return !m_active_ranksigs.empty();
+    }
+
+    bool takes_contribs_from(const size_t& exsig) const {
+        return !m_exsig_ranks[exsig].empty();
     }
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
@@ -61,6 +70,16 @@ public:
                        const FrmOps &com, const defs::wf_t &contrib){
         auto exsig = conn.exsig();
         for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
+    }
+
+    void make_contribs(const field::FrmOnv &src_onv, const field::FrmOnv &dst_onv, const defs::wf_t &contrib){
+        m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
+        make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
+    }
+
+    void make_contribs(const field::FrmBosOnv &src_onv, const field::FrmBosOnv &dst_onv, const defs::wf_t &contrib){
+        m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
+        make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
     }
 
     bool all_stores_empty() const {

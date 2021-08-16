@@ -18,6 +18,8 @@ struct FrmBosOnvConnection {
 
     void connect(const FrmBosOnvField& src, const FrmBosOnvField& dst);
 
+    bool connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, FrmOps &com);
+
     void apply(const FrmBosOnvField& src, FrmBosOnvField& dst) const;
 
     size_t exsig() const;
