@@ -71,6 +71,10 @@ void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_
     } else {
         m_wf.m_store.m_row.jump(irow_store);
         defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[dst_ipart];
+        if (consts::float_is_zero(weight_before) && !allow_initiation){
+            // the row may exist, but that does not necessarily mean that each part has non-zero occupation
+            return;
+        }
         auto weight_after = weight_before + delta_weight;
         if (!consts::float_is_zero(weight_before) && !consts::float_is_zero(weight_after)
             && ((std::abs(weight_before) > 0) != (std::abs(weight_after) > 0)))
@@ -97,22 +101,19 @@ void Annihilator::handle_dst_mbf_block(SpawnTableRow &block_start, SpawnTableRow
 void Annihilator::loop_over_dst_mbfs() {
     if (!m_wf.recv().m_hwm) return;
 
+    /*
+     * put the block_start row to the beginning of the recv table
+     */
     auto &block_start = m_work_row1;
     block_start.restart();
     defs::wf_t total_delta = 0.0;
 
-    auto &store_row = m_wf.m_store.m_row;
-    bool dst_deterministic = false;
-    size_t irow_dst = ~0ul;
-    auto find_dst = [&]() {
-        irow_dst = *m_wf.m_store[block_start.m_dst_mbf];
-        if (irow_dst != ~0ul) {
-            store_row.jump(irow_dst);
-            dst_deterministic = store_row.m_deterministic.get(0);
-        } else dst_deterministic = false;
-    };
+    /*
+     * we need to be able to lookup the dst in the main table. these variables are for
+     */
+    DstFinder dst_finder;
 
-    find_dst();
+    dst_finder();
 
     auto &current = m_work_row2;
     for (current.restart();; current.step()) {
@@ -123,7 +124,7 @@ void Annihilator::loop_over_dst_mbfs() {
                             "block_start should have been pointed to the beginning of the next block");
             if (!block_start.in_range()) return;
             total_delta = 0.0;
-            find_dst();
+            dst_finder();
         } else {
             DEBUG_ASSERT_EQ(current.m_dst_mbf, block_start.m_dst_mbf, "dst ONVs should be the same");
         }
