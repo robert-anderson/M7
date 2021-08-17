@@ -24,13 +24,19 @@ struct WalkerTableRow : public Row {
     field::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
     field::Number<size_t> m_icycle_occ;
 
-    field::Mbf &key_field();;
+    field::Mbf &key_field();
 
     WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights);
 
     bool is_h5_write_exempt() const override;
 
     size_t occupied_ncycle(const size_t& icycle_current) const;
+
+    const size_t& nroot() const;
+
+    const size_t& nreplica() const;
+
+    size_t ipart_replica(const size_t& ipart) const;
 };
 
 struct UniqueOnvRow : public Row {

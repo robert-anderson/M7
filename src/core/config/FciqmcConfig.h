@@ -160,6 +160,12 @@ namespace fciqmc_config {
         void verify() override;
     };
 
+    struct Rdms : Bilinears {
+        config::Param<bool> m_explicit_ref_conns;
+
+        explicit Rdms(config::Group *parent, std::string name, std::string description);
+    };
+
     struct SpecMoms : Bilinears {
         config::Param<bool> m_stochastic;
         config::Param<double> m_nattempt_per_walker;
@@ -187,7 +193,7 @@ namespace fciqmc_config {
         config::Param<size_t> m_ncycle;
         config::Param<size_t> m_stats_period;
         config::Param<std::string> m_stats_path;
-        Bilinears m_rdm;
+        Rdms m_rdm;
         SpecMoms m_spec_mom;
         RefExcits m_ref_excits;
 

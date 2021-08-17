@@ -176,7 +176,7 @@ void Solver::loop_over_occupied_mbfs() {
              * MBF has become unoccupied in all parts and must be removed from mapped list, but it must first make all
              * associated averaged contributions to MEVs
              */
-            make_average_mae_contribs(m_icycle);
+            m_maes.make_average_contribs(row, m_refs, m_icycle);
             m_wf.remove_row();
             continue;
         }
@@ -200,7 +200,7 @@ void Solver::loop_over_occupied_mbfs() {
              * this is the end of a planned block-averaging cycle, therefore there may be unaccounted-for contributions
              * which need to be included in the average
              */
-            make_average_mae_contribs(m_icycle);
+            m_maes.make_average_contribs(row, m_refs, m_icycle);
         }
 
         m_refs.contrib_row();
@@ -247,7 +247,7 @@ void Solver::finalizing_loop_over_occupied_mbfs() {
     if (!m_maes.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
-        if (!row.m_mbf.is_zero()) make_average_mae_contribs(m_icycle);
+        if (!row.m_mbf.is_zero()) m_maes.make_average_contribs(row, m_refs, m_icycle);
     }
     m_maes.end_cycle();
 }
@@ -286,93 +286,6 @@ void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, 
             m_wf.m_nannihilated.m_local[dst_ipart] += std::abs(std::abs(weight_before) - std::abs(weight_after));
         m_wf.change_weight(dst_ipart, delta_weight);
     }
-}
-
-void Solver::make_average_mae_contribs(const size_t &icycle) {
-    if (!m_maes.m_accum_epoch) return;
-    auto &row = m_wf.m_store.m_row;
-    // the current cycle should be included in the denominator
-    defs::wf_comp_t ncycle_occ = row.occupied_ncycle(icycle);
-    if (!ncycle_occ) {
-        DEBUG_ASSERT_TRUE(row.m_average_weight.is_zero(), "average value should have been rezeroed");
-        return;
-    }
-
-    for (size_t ipart = 0ul; ipart < m_wf.m_format.m_nelement; ++ipart) {
-        auto &ref = m_refs[ipart];
-        auto &ref_mbf = ref.get_mbf();
-        auto ipart_replica = m_wf.ipart_replica(ipart);
-        /*
-         * if contributions are coming from two replicas, we should take the mean
-         */
-        double dupl_fac = (ipart_replica == ipart) ? 1.0 : 0.5;
-        /*
-         * the "average" weights actually refer to the unnormalized average. The averages are obtained by dividing
-         * each by the number of cycles for which the row is occupied.
-         */
-        const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
-
-        /*
-         * accumulate contributions to reference excitations if required
-         */
-        if (m_maes.m_ref_excits)
-            m_maes.m_ref_excits.make_contribs(row.m_mbf, ref_mbf, dupl_fac * ncycle_occ * av_weight, ipart);
-
-//        if (m_mevs.m_fermion_rdm) {
-//            auto av_weight_rep = m_mevs.get_ket_weight(row.m_average_weight[ipart_replica] / ncycle_occ);
-//            /*
-//             * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
-//             * single averaged contribution (ncycle_occ)
-//             */
-//            m_mevs.m_fermion_rdm->make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight, row.m_mbf, av_weight_rep);
-//            if (m_mevs.m_explicit_hf_conns) {
-//                if (row.m_ref_conn.get(0) && !ref.is_same(row)) {
-//                    const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
-//                    const auto av_weight_ref_rep = m_mevs.get_ket_weight(
-//                            ref.norm_average_weight(icycle, ipart_replica));
-//                    m_mevs.m_fermion_rdm->make_contribs(ref_mbf, dupl_fac * ncycle_occ * av_weight_ref,
-//                                                        row.m_mbf, av_weight_rep);
-//                    m_mevs.m_fermion_rdm->make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight,
-//                                                        ref_mbf, av_weight_ref_rep);
-//                }
-//            }
-//        }
-    }
-    row.m_average_weight = 0;
-    row.m_icycle_occ = icycle;
-}
-
-
-void Solver::make_instant_mev_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight,
-                                       const size_t &dst_ipart) {
-    // m_wf.m_store.m_row is assumed to have jumped to the store row of the dst MBF
-    if (!m_maes.m_accum_epoch) return;
-//    if (m_maes.m_explicit_hf_conns) {
-//        if (src_mbf == m_refs[dst_ipart].get_mbf() || m_wf.m_store.m_row.m_mbf == m_refs[dst_ipart].get_mbf()) return;
-//    }
-    //auto dst_ipart_replica = m_wf.ipart_replica(dst_ipart);
-    //double dupl_fac = (dst_ipart_replica == dst_ipart) ? 1.0 : 0.5;
-//    if (m_mevs.m_fermion_rdm) {
-//        /*
-//         * We need to be careful of the intermediate state of the walker weights.
-//         * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
-//         * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to
-//         * introduce a second post-annihilation loop over occupied MBFs to apply the diagonal part of the
-//         * propagator, so for MEVs, the solution is to reconstitute the value of the walker weight before the
-//         * diagonal death/cloning.
-//         *
-//         * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
-//         * Ci -> Ci*(1 - tau (Hii-shift)).
-//         * By the time MEV contributions are being made, the death step has already been applied, and so the pre-
-//         * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
-//         * is just Cdst/(1 - tau (Hii-shift))
-//         */
-//        auto dst_weight_before_death = m_wf.m_store.m_row.m_weight[dst_ipart_replica];
-//        dst_weight_before_death /=
-//                1 - m_prop.tau() * (m_wf.m_store.m_row.m_hdiag - m_prop.m_shift[dst_ipart_replica]);
-//        m_mevs.m_fermion_rdm->make_contribs(src_mbf, dupl_fac * src_weight, m_wf.m_store.m_row.m_mbf,
-//                                            dst_weight_before_death);
-//    }
 }
 
 void Solver::loop_over_spawned() {

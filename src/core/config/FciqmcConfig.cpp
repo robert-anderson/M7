@@ -170,6 +170,12 @@ void fciqmc_config::Bilinears::verify() {
     }
 }
 
+
+fciqmc_config::Rdms::Rdms(config::Group *parent, std::string name, std::string description) :
+        Bilinears(parent, name, description),
+            m_explicit_ref_conns(this, "explicit_ref_conns", true,
+             "if true, take contributions from reference connections into account exactly"){}
+
 fciqmc_config::SpecMoms::SpecMoms(config::Group *parent, std::string name, std::string description) :
         Bilinears(parent, name, description),
         m_stochastic(this, "stochastic", true,

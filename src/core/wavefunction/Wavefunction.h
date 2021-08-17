@@ -114,15 +114,15 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     void end_cycle();
 
     const size_t& nroot() const {
-        return m_format.m_shape[0];
+        return m_store.m_row.nroot();
     }
 
     const size_t& nreplica() const {
-        return m_format.m_shape[1];
+        return m_store.m_row.nreplica();
     }
 
     size_t ipart_replica(const size_t& ipart) const {
-        return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
+        return m_store.m_row.ipart_replica(ipart);
     }
 
     defs::wf_comp_t square_norm(const size_t& ipart) const;

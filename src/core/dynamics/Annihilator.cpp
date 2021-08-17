@@ -42,9 +42,8 @@ void Annihilator::sort_recv() {
     qs.reorder_sort(m_wf.recv());
 }
 
-void
-Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
-                            bool allow_initiation, const size_t &irow_store) {
+void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
+                                 bool allow_initiation, const size_t &irow_store) {
     if (m_nadd == 0.0) {
         DEBUG_ASSERT_TRUE(allow_initiation,
                           "initiator rules are turned off, every initiating annihilation should be allowed");
@@ -80,9 +79,8 @@ Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, 
     }
 }
 
-void
-Annihilator::handle_dst_mbf_block(SpawnTableRow &block_start, SpawnTableRow &current, const defs::wf_t &total_delta,
-                                  const size_t &irow_store) {
+void Annihilator::handle_dst_mbf_block(SpawnTableRow &block_start, SpawnTableRow &current,
+                                       const defs::wf_t &total_delta, const size_t &irow_store) {
     DEBUG_ASSERT_LT(block_start.index(), current.index(),
                     "block start should be strictly before current row in recv table");
     // row_block_start is now at last row in last block
@@ -108,17 +106,16 @@ void Annihilator::loop_over_dst_mbfs() {
     size_t irow_dst = ~0ul;
     auto find_dst = [&]() {
         irow_dst = *m_wf.m_store[block_start.m_dst_mbf];
-        if (irow_dst!=~0ul) {
+        if (irow_dst != ~0ul) {
             store_row.jump(irow_dst);
             dst_deterministic = store_row.m_deterministic.get(0);
-        }
-        else dst_deterministic = false;
+        } else dst_deterministic = false;
     };
 
     find_dst();
 
     auto &current = m_work_row2;
-    for (current.restart(); ;current.step()) {
+    for (current.restart();; current.step()) {
         if (!current.in_range() || (current.m_dst_mbf != block_start.m_dst_mbf)) {
             // handle the block just finished
             handle_dst_mbf_block(block_start, current, total_delta, irow_dst);

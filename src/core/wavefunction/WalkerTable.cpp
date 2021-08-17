@@ -28,3 +28,15 @@ bool WalkerTableRow::is_h5_write_exempt() const {
 size_t WalkerTableRow::occupied_ncycle(const size_t &icycle_current) const {
     return icycle_current-m_icycle_occ;
 }
+
+const size_t &WalkerTableRow::nroot() const {
+    return m_wf_format.m_shape[0];
+}
+
+const size_t &WalkerTableRow::nreplica() const {
+    return m_wf_format.m_shape[1];
+}
+
+size_t WalkerTableRow::ipart_replica(const size_t &ipart) const {
+    return nreplica()==1 ? ipart : (ipart/2)*2+!(ipart&1ul);
+}

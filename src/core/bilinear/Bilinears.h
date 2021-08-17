@@ -104,8 +104,7 @@ public:
                       parse_exsigs(opts.m_spec_mom.m_ranks), ham, epoch) {}
 
     bool all_stores_empty() const {
-        return m_rdms.all_stores_empty();
-        return m_spec_moms.all_stores_empty();
+        return m_rdms.all_stores_empty() && m_spec_moms.all_stores_empty();
     }
 
     void end_cycle() {
@@ -113,15 +112,16 @@ public:
     }
 
     /**
+     * Make all "diagonal" contributions
      * should only be called if:
      *  the WF row is about to be removed
      *  the end of a sampling period has been reached
      *  the end of the calculation has been reached (all WF rows are about to be removed)
      * @param mbf
      */
-//    void make_diagonal_contribs(const field::FrmOnv &onv, const defs::wf_t& ci_product) {
-//        m_rdms.make_contribs(onv, );
-//    }
+    void make_contribs(const field::Mbf &onv, const defs::wf_t& ci_product) {
+        m_rdms.make_contribs(onv, onv, ci_product);
+    }
 
     defs::ham_comp_t estimate_energy(const Hamiltonian &ham) {
         return 0.0;

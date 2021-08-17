@@ -75,7 +75,6 @@ struct RefExcits : Archivable {
         }
     }
 
-private:
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
         auto exsig = conn.exsig();
         if (!exsig) m_av_ref[ipart] += contrib;
@@ -86,8 +85,6 @@ private:
     void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
         make_contribs(conn.m_frm, contrib, ipart);
     }
-
-public:
 
     void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
         m_conn.connect(ref_mbf, mbf);

@@ -6,6 +6,8 @@
 #define M7_RDM_H
 
 #include <src/core/basis/Suites.h>
+#include <src/core/wavefunction/Reference.h>
+#include <src/core/dynamics/Propagator.h>
 #include "src/core/mae/MaeTable.h"
 #include "src/core/field/Fields.h"
 #include "src/core/table/Communicator.h"
@@ -25,7 +27,7 @@ class Rdm : public Communicator<MaeRow, MaeRow, true> {
     static size_t nrow_estimate(size_t exsig, size_t nsite);
 
 public:
-    Rdm(const fciqmc_config::Bilinears &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue);
+    Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue);
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
                        const FrmOps &com, const defs::wf_t &contrib);
@@ -35,7 +37,7 @@ public:
 
     void end_cycle();
 
-    void save(hdf5::GroupWriter& gw) const;
+    void save(hdf5::GroupWriter &gw) const;
 };
 
 class Rdms : public Archivable {
@@ -49,48 +51,80 @@ class Rdms : public Archivable {
     std::array<defs::inds, defs::nexsig> make_exsig_ranks() const;
 
 public:
-    const Epoch& m_accum_epoch;
-    Rdms(const fciqmc_config::Bilinears &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch& accum_epoch);
+    const bool m_explicit_ref_conns;
+    const Epoch &m_accum_epoch;
+
+    Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch &accum_epoch);
 
     operator bool() const {
         return !m_active_ranksigs.empty();
     }
 
-    bool takes_contribs_from(const size_t& exsig) const {
+    bool takes_contribs_from(const size_t &exsig) const {
+        if (exsig > defs::nexsig) return false;
         return !m_exsig_ranks[exsig].empty();
     }
 
-    void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
-                       const FrmOps &com, const defs::wf_t &contrib){
+    void make_contribs(const field::Mbf &src_onv, const conn::Mbf &conn,
+                       const FrmOps &com, const defs::wf_t &contrib) {
         auto exsig = conn.exsig();
         for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
     }
 
-    void make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
-                       const FrmOps &com, const defs::wf_t &contrib){
-        auto exsig = conn.exsig();
-        for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
-    }
-
-    void make_contribs(const field::FrmOnv &src_onv, const field::FrmOnv &dst_onv, const defs::wf_t &contrib){
+    void make_contribs(const field::Mbf &src_onv, const field::Mbf &dst_onv, const defs::wf_t &contrib) {
         m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
         make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
     }
 
-    void make_contribs(const field::FrmBosOnv &src_onv, const field::FrmBosOnv &dst_onv, const defs::wf_t &contrib){
-        m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
-        make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
+    /**
+     * We need to be careful of the intermediate state of the walker weights.
+     * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
+     * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to
+     * introduce a second post-annihilation loop over occupied MBFs to apply the diagonal part of the
+     * propagator, so for MEVs, the solution is to reconstitute the value of the walker weight before the
+     * diagonal death/cloning.
+     *
+     * The death-step behaviour of the exact (and stochastic on average) propagator is to scale the WF:
+     * Ci -> Ci*(1 - tau (Hii-shift)).
+     * By the time MEV contributions are being made, the death step has already been applied, and so the pre-
+     * death value of the weight must be reconstituted by undoing the scaling, thus, the pre-death value of Cdst
+     * is just Cdst/(1 - tau (Hii-shift))
+     *
+     * @param src_mbf
+     * @param dst_row
+     * @param prop
+     * @param refs
+     * @param ipart_dst
+     */
+    void make_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight, const WalkerTableRow &dst_row,
+                       const Propagator &prop, const References &refs, const size_t &ipart_dst) {
+        if (!*this) return;
+        if (!m_accum_epoch) return;
+        /*
+         * if all connections to the reference are being handled exactly by block-averaging, don't allow duplicate
+         * contributions here
+         */
+        auto &ref_mbf = refs[ipart_dst].get_mbf();
+        if (m_explicit_ref_conns && (src_mbf == ref_mbf || dst_row.m_mbf == ref_mbf)) return;
+
+        auto ipart_dst_replica = dst_row.ipart_replica(ipart_dst);
+        double dupl_fac = 1.0 / dst_row.nreplica();
+
+        auto dst_weight_before_death = dst_row.m_weight[ipart_dst_replica];
+        dst_weight_before_death /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_dst_replica]);
+        make_contribs(src_mbf, dst_row.m_mbf, dupl_fac * src_weight * dst_weight_before_death);
     }
+
 
     bool all_stores_empty() const {
-        for (auto& ranksig: m_active_ranksigs)
+        for (auto &ranksig: m_active_ranksigs)
             if (!m_rdms[ranksig]->m_store.is_cleared())
                 return false;
         return true;
     }
 
     void end_cycle() {
-        for (auto& ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
+        for (auto &ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
     }
 
 private:
@@ -100,7 +134,7 @@ private:
 
     void save_fn(hdf5::GroupWriter &parent) override {
         hdf5::GroupWriter gw("rdms", parent);
-        for (const auto& i: m_active_ranksigs) {
+        for (const auto &i: m_active_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
             m_rdms[i]->save(gw);
         }
