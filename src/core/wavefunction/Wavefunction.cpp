@@ -179,7 +179,7 @@ size_t Wavefunction::add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delt
     row.m_delta_weight = delta;
     row.m_src_initiator = initiator;
     row.m_src_deterministic = deterministic;
-    row.m_dst_ipart = dst_ipart;
+    row.m_ipart_dst = dst_ipart;
     return row.index();
 }
 
@@ -192,6 +192,7 @@ size_t Wavefunction::add_spawn(const field::Mbf &dst_mbf, const defs::wf_t &delt
         row.m_src_mbf = src_mbf;
         row.m_src_weight = src_weight;
     }
+    DEBUG_ASSERT_NE(dst_mbf, src_mbf, "spawning diagonally");
     return irow;
 }
 

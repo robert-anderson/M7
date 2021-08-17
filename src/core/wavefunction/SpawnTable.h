@@ -16,7 +16,7 @@ struct SpawnTableRow : public Row {
     field::Number<defs::wf_t> m_delta_weight;
     field::Flag m_src_initiator;
     field::Flag m_src_deterministic;
-    field::Number<uint8_t> m_dst_ipart;
+    field::Number<uint8_t> m_ipart_dst;
 
     SpawnTableRow(size_t nsite, bool send_parents) :
             m_send_parents(send_parents),
@@ -26,7 +26,7 @@ struct SpawnTableRow : public Row {
             m_delta_weight(this),
             m_src_initiator(this),
             m_src_deterministic(this),
-            m_dst_ipart(this) {}
+            m_ipart_dst(this) {}
 };
 
 #endif //M7_SPAWNTABLE_H

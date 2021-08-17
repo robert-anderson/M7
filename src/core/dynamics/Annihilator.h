@@ -8,27 +8,32 @@
 
 #include <src/core/wavefunction/Wavefunction.h>
 #include <src/core/wavefunction/Reference.h>
+#include "src/core/bilinear/Rdm.h"
 
 /**
  * we need to be able to lookup the dst in the main table.
  */
 struct DstFinder {
     Wavefunction& m_wf;
-    WalkerTableRow &m_store_row;
     SpawnTableRow &m_block_start_row;
-    bool m_dst_deterministic = false;
-    size_t m_irow_dst = ~0ul;
+    bool m_deterministic = false;
     DstFinder(Wavefunction& wf, SpawnTableRow& block_start_row):
-    m_store_row(wf.m_store.m_row), m_block_start_row(block_start_row){}
+        m_wf(wf), m_block_start_row(block_start_row){}
 
     void operator()() {
-        irow_dst = *m_wf.m_store[block_start.m_dst_mbf];
+        auto irow_dst = *m_wf.m_store[m_block_start_row.m_dst_mbf];
         if (irow_dst != ~0ul) {
-            store_row.jump(irow_dst);
-            dst_deterministic = store_row.m_deterministic.get(0);
-        } else dst_deterministic = false;
+            m_wf.m_store.m_row.jump(irow_dst);
+            m_deterministic = m_wf.m_store.m_row.m_deterministic.get(0);
+        } else {
+            m_wf.m_store.m_row.select_null();
+            m_deterministic = false;
+        }
     };
 
+    WalkerTableRow& store_row() {
+        return m_wf.m_store.m_row;
+    }
 };
 
 
@@ -41,13 +46,13 @@ struct Annihilator {
     Wavefunction &m_wf;
     const Hamiltonian& m_ham;
     const References& m_refs;
+    Rdms& m_rdms;
     const defs::wf_comp_t m_nadd;
     const size_t& m_icycle;
 
 private:
     SpawnTableRow m_work_row1;
     SpawnTableRow m_work_row2;
-    const bool m_send_parents;
     /**
      * function that returns the relative order of two rows in the receive buffer
      */
@@ -61,9 +66,28 @@ private:
      */
     comparators::index_cmp_fn_t make_sort_cmp_fn();
 
+    /**
+     * @param row1
+     *  spawning row
+     * @param row2
+     *  another spawning row to compare with
+     * @return
+     *  true if row1 and row2 are in distinct (dst_mbf, ipart_dst) blocks
+     */
+    static bool in_same_dst_block(const SpawnTableRow& row1, const SpawnTableRow& row2){
+        if (row1.in_range() != row2.in_range()) return false;
+        return (row1.m_dst_mbf == row2.m_dst_mbf) && (row1.m_ipart_dst == row2.m_ipart_dst);
+    }
+
+    static bool in_same_src_block(const SpawnTableRow& row1, const SpawnTableRow& row2){
+        if (!in_same_dst_block(row1, row2)) return false;
+        return row1.m_src_mbf == row2.m_src_mbf;
+    }
+
 public:
 
-    Annihilator(Wavefunction &wf, const Hamiltonian& ham, const References& refs, const size_t& icycle, defs::wf_comp_t nadd);
+    Annihilator(Wavefunction &wf, const Hamiltonian& ham, const References& refs, Rdms& rdms,
+                const size_t& icycle, defs::wf_comp_t nadd);
 
     /**
      * using the comparator implementation, sort the m_recv table of the referenced wavefunction
@@ -84,15 +108,31 @@ public:
      *  at index dst_ipart is zero, then the contribution should only be made if this arg is true, otherwise the spawn
      *  is said to be aborted. Allow initiation is true if any of the contributing src_mbfs are initiators, or if there
      *  are multiple src_mbfs spawning to the same zero-weighted part in the same cycle
-     * @param irow_store
-     *  the result of the lookup on the main m_wf.m_store table
      */
     void annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
-                        bool allow_initiation, const size_t &irow_store);
+                        bool allow_initiation, WalkerTableRow& dst_row);
+    /**
+     * given that all rows between block_start (inclusively) and current (exclusively) correspond the the same (dst_mbf,
+     * ipart_dst) pair, make all contributions to that pair in m_wf.m_store only after making all contributions to the
+     * MAEs. block_start should be pointing to the same row as current on termination of this function
+     * @param block_begin
+     *  first row of the (dst_mbf, ipart_dst) block being handled
+     * @param next_block_begin
+     *  first row of the next (dst_mbf, ipart_dst) block or past the end of the recv table
+     * @param total_delta
+     *  total change in the ipart_dst indexed weight element of dst_mbf due to the sum of all spawns
+     * @param dst_row
+     *  row in m_wf.m_store which stores the dst_mbf if found
+     */
+    void handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &next_block_begin,
+                          const defs::wf_t &total_delta, WalkerTableRow& dst_row);
 
-    void handle_dst_mbf_block(SpawnTableRow &block_start, SpawnTableRow &current,
-                              const defs::wf_t &total_delta, const size_t& irow_store);
+    void handle_src_block(SpawnTableRow &block_begin, WalkerTableRow& dst_row);
 
+    /**
+     * loop through all received spawned rows and group them into blocks using a pair of Row objects. Once a block has
+     * been identified, handle its MAE and WF contributions via handle_dst_block method
+     */
     void loop_over_dst_mbfs();
 
 };

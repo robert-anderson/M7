@@ -8,7 +8,6 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                std::vector<TableBase::Loc> ref_locs) :
         m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
-        m_annihilator(m_wf, m_prop.m_ham, m_refs, m_icycle, opts.m_propagator.m_nadd),
         m_exit("exit"),
         m_uniform_twf(
                 m_opts.m_inst_ests.m_spf_uniform_twf ?
@@ -17,7 +16,9 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                        new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_maes(m_opts.m_av_ests, m_prop.m_ham), m_archive(opts) {
+        m_maes(m_opts.m_av_ests, m_prop.m_ham),
+        m_annihilator(m_wf, m_prop.m_ham, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
+        m_archive(opts) {
 
     if (m_wf.nreplica() > 1 && !m_prop.nexcit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");

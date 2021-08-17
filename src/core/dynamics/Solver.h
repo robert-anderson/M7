@@ -30,7 +30,6 @@ class Solver {
     const fciqmc_config::Document &m_opts;
     Wavefunction &m_wf;
     References m_refs;
-    Annihilator m_annihilator;
 
     std::unique_ptr<FciqmcStats> m_stats = nullptr;
     std::unique_ptr<TimingStats> m_timing_stats = nullptr;
@@ -62,6 +61,7 @@ class Solver {
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;
     Maes m_maes;
+    Annihilator m_annihilator;
     Archive m_archive;
 
     std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;

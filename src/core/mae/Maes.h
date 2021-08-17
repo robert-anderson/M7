@@ -130,7 +130,7 @@ struct Maes {
 
             m_conn_work.connect(ref_mbf, row.m_mbf, m_com_work);
             auto exsig_from_ref = m_conn_work.exsig();
-            auto is_ref_conn = !exsig_from_ref && m_bilinears.m_rdms.takes_contribs_from(exsig_from_ref);
+            auto is_ref_conn = exsig_from_ref && m_bilinears.m_rdms.takes_contribs_from(exsig_from_ref);
 
             /*
              * accumulate contributions to reference excitations if required

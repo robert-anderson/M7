@@ -22,13 +22,15 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     bool src_deterministic = row.m_deterministic.get(ipart);
     OccupiedOrbitals occs(src_mbf);
 
-    ASSERT(occs.size() > 0);
+    DEBUG_ASSERT_GT(occs.size(), 0ul, "no occupied orbital indices");
     VacantOrbitals vacs(src_mbf);
-    ASSERT(vacs.size() > 0);
+    DEBUG_ASSERT_GT(vacs.size(), 0ul, "no vacant orbital indices");
 
-    ASSERT(!consts::float_is_zero(weight));
+    DEBUG_ASSERT_FALSE(consts::float_is_zero(weight),
+                    "shouldn't be trying to propagate off-diagonal from zero weight");
 
     auto body = [&](const conn::Mbf &conn, const field::Mbf &dst_onv, defs::ham_t helement) {
+        DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
         m_mag_log.log(0, helement, 1.0);
         const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
@@ -40,7 +42,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     auto &row = wf.m_store.m_row;
     const defs::ham_comp_t &hdiag = row.m_hdiag;
-    ASSERT(hdiag == m_ham.get_energy(row.m_mbf));
+    DEBUG_ASSERT_TRUE(consts::floats_equal(hdiag, m_ham.get_energy(row.m_mbf)), "incorrect diagonal H element cached");
     wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 
