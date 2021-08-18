@@ -16,7 +16,7 @@ WalkerTableRow::WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool
         m_hdiag(this, "diagonal H element"),
         m_initiator(this, m_wf_format, "initiator status flag"),
         m_deterministic(this, m_root_format, "deterministic subspace flag"),
-        m_ref_conn(this, m_root_format, "reference connection flag"),
+        m_ref_conn(this, m_wf_format, "reference connection flag"),
         m_average_weight(average_weights ? this : nullptr, m_wf_format, "unnormalized average weight"),
         m_icycle_occ(average_weights ? this : nullptr, "cycle index at row creation")
 {}

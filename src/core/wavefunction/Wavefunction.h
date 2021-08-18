@@ -85,9 +85,11 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
-    Wavefunction(const fciqmc_config::Document &opts, size_t nsite);
+    Wavefunction(const fciqmc_config::Document &opts, size_t nsite, bool replicate);
 
     ~Wavefunction();
+
+    void log_top_weighted(size_t ipart, size_t nrow=20);
 
     static bool need_send_parents(const fciqmc_config::Document &opts) {
         return opts.m_av_ests.m_rdm.m_ranks.get().size();

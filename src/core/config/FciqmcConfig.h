@@ -86,7 +86,6 @@ namespace fciqmc_config {
     struct Wavefunction : config::Section {
         config::Param<double> m_nw_init;
         config::Param<size_t> m_nroot;
-        config::Param<bool> m_replicate;
         config::Param<long> m_spin_restrict;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
@@ -198,6 +197,10 @@ namespace fciqmc_config {
         RefExcits m_ref_excits;
 
         explicit AvEsts(config::Group *parent);
+
+        bool any_bilinears() const {
+            return !(m_rdm.m_ranks.get().empty() && m_spec_mom.m_ranks.get().empty());
+        }
     };
 
     struct Hamiltonian : config::Section {

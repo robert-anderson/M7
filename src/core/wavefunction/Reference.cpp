@@ -46,7 +46,7 @@ void Reference::accept_candidate(double redefinition_thresh) {
 
 void Reference::contrib_row() {
     auto &row = m_wf.m_store.m_row;
-    auto weight = row.m_weight[m_ipart];
+    auto weight = 0.5*(row.m_weight[m_ipart]+row.m_weight[m_wf.ipart_replica(m_ipart)]);
     if (std::abs(weight) > m_candidate_abs_weight) {
         m_candidate_abs_weight = std::abs(weight);
         m_irow_candidate = row.index();

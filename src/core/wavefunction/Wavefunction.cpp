@@ -5,19 +5,15 @@
 #include <src/core/basis/Suites.h>
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
+Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite, bool replicate) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
                 opts.m_propagator.m_nw_target,
-                size_t(opts.m_propagator.m_nw_target*opts.m_propagator.m_tau_init),
+                size_t(opts.m_propagator.m_nw_target * opts.m_propagator.m_tau_init),
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {
-                        {
-                                nsite, opts.m_wavefunction.m_nroot,
-                                opts.m_wavefunction.m_replicate ? 2ul : 1ul,
-                                need_av_weights(opts)
-                        },
+                        {nsite, opts.m_wavefunction.m_nroot, replicate ? 2ul:1ul, need_av_weights(opts)},
                         MappedTableBase::nbucket_guess(
                                 opts.m_propagator.m_nw_target / mpi::nrank(),
                                 opts.m_wavefunction.m_hash_mapping.m_remap_ratio),
@@ -36,23 +32,27 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite):
         m_l2_norm_square(m_format),
         m_delta_l2_norm_square(m_format),
         m_nspawned(m_format),
-        m_nannihilated(m_format){
+        m_nannihilated(m_format) {
     ASSERT(m_comm.recv().m_row.m_dst_mbf.belongs_to_row());
     m_summables.add_members(m_ninitiator, m_delta_ninitiator, m_nocc_mbf, m_delta_nocc_mbf,
                             m_nwalker, m_delta_nwalker, m_l2_norm_square, m_delta_l2_norm_square,
                             m_nspawned, m_nannihilated);
 }
 
-Wavefunction::~Wavefunction() {
-    weights_gxr_t gxr(m_store.m_row, m_store.m_row.m_weight, true, true, 0);
-    gxr.find(20);
+void Wavefunction::log_top_weighted(size_t ipart, size_t nrow) {
+    weights_gxr_t gxr(m_store.m_row, m_store.m_row.m_weight, true, true, ipart);
+    gxr.find(nrow);
     BufferedTable<WalkerTableRow> xr_gathered("global top weighted", {m_store.m_row});
     gxr.gatherv(xr_gathered);
-    auto& row = xr_gathered.m_row;
-    log::info("Top-weighted WF elements for part 0:");
-    for (row.restart(); row.in_range(); row.step()){
-        log::info("{:<4} {}  {: .5e}  {}", row.index(), row.m_mbf, row.m_weight[0], row.m_initiator[0]);
+    auto &row = xr_gathered.m_row;
+    log::info("Top-weighted WF elements for part {}:", ipart);
+    for (row.restart(); row.in_range(); row.step()) {
+        log::info("{:<4} {}  {: .5e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
     }
+}
+
+Wavefunction::~Wavefunction() {
+    for (size_t ipart=0ul; ipart<npart(); ++ipart) log_top_weighted(ipart);
 }
 
 std::vector<std::string> Wavefunction::h5_field_names() {
@@ -79,7 +79,7 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, co
         row_reader.read(iitem);
         conn[ref].connect(ref, row_reader.m_mbf);
         bool ref_conn = !consts::float_is_zero(ham.get_element(ref, conn[ref]));
-        ASSERT(row_reader.m_weight.nelement()==m_format.m_nelement);
+        ASSERT(row_reader.m_weight.nelement() == m_format.m_nelement);
         create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }
@@ -157,7 +157,7 @@ void Wavefunction::zero_weight(const size_t &ipart) {
 void Wavefunction::remove_row() {
     auto lookup = m_store[m_store.m_row.m_mbf];
     ASSERT(lookup);
-    for (size_t ipart = 0ul; ipart<m_format.m_nelement; ++ipart) {
+    for (size_t ipart = 0ul; ipart < m_format.m_nelement; ++ipart) {
         zero_weight(ipart);
         // in the case that nadd==0.0, the set_weight method won't revoke:
         revoke_initiator_status(ipart);

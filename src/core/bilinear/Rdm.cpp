@@ -138,7 +138,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
 }
 
 Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch &accum_epoch) :
-        Archivable((log::info("{}", utils::to_string(ranksigs)), "rdms"), opts.m_archivable),
+        Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
         m_work_conns(nsite), m_work_com_ops(nsite),
         m_explicit_ref_conns(opts.m_explicit_ref_conns), m_accum_epoch(accum_epoch) {

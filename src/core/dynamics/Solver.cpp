@@ -20,7 +20,8 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts) {
 
-    if (m_wf.nreplica() > 1 && !m_prop.nexcit_gen())
+    log::info("Replicating walker populations: {}", m_wf.nreplica()==2);
+    if (m_wf.nreplica()==2 && !m_prop.nexcit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");
 
     if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.nexcit_gen())

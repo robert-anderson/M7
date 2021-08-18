@@ -96,7 +96,6 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
-        m_replicate(this, "replicate", false, "evolve a statistically-independent replica of each walker population"),
         m_spin_restrict(this, "spin_restrict", 0ul,
                         "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves secondary spin quantum number"),
         m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}

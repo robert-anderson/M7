@@ -20,7 +20,7 @@ struct WalkerTableRow : public Row {
     field::Number<defs::ham_comp_t> m_hdiag;
     field::Flags<defs::ndim_wf> m_initiator;
     field::Flags<defs::ndim_root> m_deterministic;
-    field::Flags<defs::ndim_root> m_ref_conn;
+    field::Flags<defs::ndim_wf> m_ref_conn;
     field::Numbers<defs::wf_t, defs::ndim_wf> m_average_weight;
     field::Number<size_t> m_icycle_occ;
 
