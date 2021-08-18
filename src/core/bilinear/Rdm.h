@@ -56,34 +56,16 @@ public:
 
     Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch &accum_epoch);
 
-    operator bool() const {
-        return !m_active_ranksigs.empty();
-    }
+    operator bool() const;
 
-    bool takes_contribs_from(const size_t &exsig) const {
-        if (exsig > defs::nexsig) return false;
-        return !m_exsig_ranks[exsig].empty();
-    }
+    bool takes_contribs_from(const size_t &exsig) const;
 
     void make_contribs(const field::Mbf &src_onv, const conn::Mbf &conn,
-                       const FrmOps &com, const defs::wf_t &contrib) {
-        auto exsig = conn.exsig();
-        for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
-    }
+                       const FrmOps &com, const defs::wf_t &contrib);
 
-    void make_contribs(const field::Mbf &src_onv, const field::Mbf &dst_onv, const defs::wf_t &contrib) {
-        m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
-        make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
-    }
+    void make_contribs(const field::Mbf &src_onv, const field::Mbf &dst_onv, const defs::wf_t &contrib);
 
-    void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop){
-        DEBUG_ASSERT_EQ(recv_row.m_src_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
-        defs::wf_t contrib = dst_row.m_weight[recv_row.m_ipart_dst];
-        contrib = consts::conj(contrib);
-        contrib *= recv_row.m_src_weight;
-        contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[recv_row.m_ipart_dst]);
-        make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
-    }
+    void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop);
 
     /**
      * We need to be careful of the intermediate state of the walker weights.
@@ -119,16 +101,20 @@ public:
 //    }
 
 
-    bool all_stores_empty() const {
-        for (auto &ranksig: m_active_ranksigs)
-            if (!m_rdms[ranksig]->m_store.is_cleared())
-                return false;
-        return true;
-    }
+    bool all_stores_empty() const;
 
-    void end_cycle() {
-        for (auto &ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
-    }
+    void end_cycle();
+
+    /**
+     * compute the 2-RDM energy
+     * @return
+     *  MPI-reduced sum of 0, 1, and 2 body parts of the RDM energy
+     *
+     *  E_RDM = h0 + h1[i,j] * rdm1[i,j] + <ij|kl> * rdm2[i,j,k,l]
+     *
+     *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
+     */
+    defs::ham_comp_t get_energy(const FermionHamiltonian& ham) const;
 
 private:
     void load_fn(hdf5::GroupReader &parent) override {

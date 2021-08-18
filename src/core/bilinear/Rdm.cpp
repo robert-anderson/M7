@@ -153,3 +153,80 @@ Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, s
         m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, nsite, nelec, 1ul);
     }
 }
+
+Rdms::operator bool() const {
+    return !m_active_ranksigs.empty();
+}
+
+bool Rdms::takes_contribs_from(const size_t &exsig) const {
+    if (exsig > defs::nexsig) return false;
+    return !m_exsig_ranks[exsig].empty();
+}
+
+void Rdms::make_contribs(const Mbf &src_onv, const conn::Mbf &conn, const FrmOps &com, const wf_t &contrib) {
+    auto exsig = conn.exsig();
+    for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
+}
+
+void Rdms::make_contribs(const Mbf &src_onv, const Mbf &dst_onv, const wf_t &contrib) {
+    m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
+    make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
+}
+
+void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop) {
+    DEBUG_ASSERT_EQ(recv_row.m_src_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
+    defs::wf_t contrib = dst_row.m_weight[recv_row.m_ipart_dst];
+    contrib = consts::conj(contrib);
+    contrib *= recv_row.m_src_weight;
+    contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[recv_row.m_ipart_dst]);
+    make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
+}
+
+bool Rdms::all_stores_empty() const {
+    for (auto &ranksig: m_active_ranksigs)
+        if (!m_rdms[ranksig]->m_store.is_cleared())
+            return false;
+    return true;
+}
+
+void Rdms::end_cycle() {
+    for (auto &ranksig: m_active_ranksigs) m_rdms[ranksig]->end_cycle();
+}
+
+defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
+    auto& rdm2 = m_rdms[conn_utils::encode_exsig(2,2,0,0)];
+    REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
+    defs::ham_t e1 = 0.0;
+    defs::ham_t e2 = 0.0;
+    defs::wf_t trace = 0.0;
+    auto row = rdm2->m_store.m_row;
+
+    for (row.restart(); row.in_range(); row.step()){
+        const size_t i=row.m_inds.m_frm.m_cre[0];
+        const size_t j=row.m_inds.m_frm.m_cre[1];
+        ASSERT(i<j);
+        const size_t k=row.m_inds.m_frm.m_ann[0];
+        const size_t l=row.m_inds.m_frm.m_ann[1];
+        ASSERT(k<l);
+        const auto rdm_element = row.m_values[0];
+        e2 += rdm_element*ham.m_int_2.phys_antisym_element(i, j, k, l);
+        /*
+         * signs of the following contributions come from the Fermi phase of bringing the like-valued creation and
+         * annihilation operators together to act on the ket, leading to a factor of (nelec - 1), accounted for
+         * after the loop.
+         */
+        if (i == k) e1 += rdm_element*ham.m_int_1(j,l);
+        if (j == l) e1 += rdm_element*ham.m_int_1(i,k);
+        if (i == l) e1 -= rdm_element*ham.m_int_1(j,k);
+        if (j == k) e1 -= rdm_element*ham.m_int_1(i,l);
+        if ((i==k) && (j==l)) trace+=rdm_element;
+    }
+    // scale the one-body contribution by the number of two-body contributions
+    e1 /= ham.nelec()-1;
+    e1 = mpi::all_sum(e1);
+    e2 = mpi::all_sum(e2);
+    trace = mpi::all_sum(trace);
+    ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
+    const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.nelec(), 2);
+    return consts::real(ham.m_int_0) + (consts::real(e1) + consts::real(e2))/norm;
+}

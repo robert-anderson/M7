@@ -16,7 +16,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                        new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_maes(m_opts.m_av_ests, m_prop.m_ham),
+        m_maes(m_opts.m_av_ests, m_prop.m_ham.nsite(), m_prop.m_ham.nelec()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts) {
 
@@ -85,7 +85,7 @@ void Solver::execute(size_t ncycle) {
         m_cycle_timer.pause();
         output_stats();
 
-        output_mevs(m_icycle);
+        m_maes.output(m_icycle, m_prop.m_ham);
         ++m_icycle;
 
         if (m_exit.read() && m_exit.m_v) {
@@ -108,6 +108,7 @@ void Solver::execute(size_t ncycle) {
         --m_icycle;
         finalizing_loop_over_occupied_mbfs();
     }
+    std::cout << m_maes.m_bilinears.m_rdms.get_energy(m_prop.m_ham.m_frm)+7.878453652277122 << std::endl;
 }
 
 void Solver::begin_cycle() {
@@ -253,42 +254,6 @@ void Solver::finalizing_loop_over_occupied_mbfs() {
     m_maes.end_cycle();
 }
 
-void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
-                            bool allow_initiation, bool src_deterministic, const size_t &irow_store) {
-    if (m_opts.m_propagator.m_nadd == 0.0) ASSERT(allow_initiation);
-    ASSERT(!dst_mbf.is_zero());
-    // check that the received determinant has come to the right place
-    ASSERT(m_wf.m_ra.get_rank(dst_mbf) == mpi::irank())
-    // zero magnitude weights should not have been communicated
-    if (consts::float_is_zero(delta_weight)) return;
-    ASSERT(!consts::float_is_zero(delta_weight));
-
-    m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
-    if (irow_store == ~0ul) {
-        /*
-         * the destination MBF is not currently occupied, so initiator rules
-         * must be applied
-         */
-        if (!allow_initiation) {
-            //m_aborted_weight += std::abs(*delta_weight);
-            return;
-        }
-
-        m_wf.create_row_(m_icycle, dst_mbf, m_prop.m_ham.get_energy(dst_mbf), m_refs.is_connected(dst_mbf));
-        m_wf.set_weight(dst_ipart, delta_weight);
-
-    } else {
-        m_wf.m_store.m_row.jump(irow_store);
-        if (src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) return;
-        defs::wf_t weight_before = m_wf.m_store.m_row.m_weight[dst_ipart];
-        auto weight_after = weight_before + delta_weight;
-        if (!consts::float_is_zero(weight_before) && !consts::float_is_zero(weight_after)
-            && ((std::abs(weight_before) > 0) != (std::abs(weight_after) > 0)))
-            m_wf.m_nannihilated.m_local[dst_ipart] += std::abs(std::abs(weight_before) - std::abs(weight_after));
-        m_wf.change_weight(dst_ipart, delta_weight);
-    }
-}
-
 void Solver::loop_over_spawned() {
     mpi::barrier();
     if (!m_wf.recv().m_hwm) {
@@ -301,134 +266,6 @@ void Solver::loop_over_spawned() {
     m_annihilator.sort_recv();
     m_annihilator.loop_over_dst_mbfs();
 
-#if 0
-    if (m_opts.m_propagator.m_consolidate_spawns) {
-        m_wf.sort_recv();
-        /*
-         * now that the recv list is reordered according to dst MBF, we must process its
-         * contents in dst MBF *blocks*.
-         *
-         * e.g.
-         * irow  dst   src
-         * 0     A     P
-         * 1     A     P
-         * 2     A     Q
-         * 3     A     Q
-         * 4     A     Q
-         * 5     B     P
-         * 6     B     R
-         * 7     B     R
-         * 8     C     Q
-         * 9     C     Q
-         * 10    C     R
-         *
-         * the algorithm uses two row indices:
-         *      irow_block_start
-         *      irow_current
-         *
-         * initially, both are 0.
-         *
-         * irow_current is iteratively incremented until its dst MBF does not equal that of
-         * irow_block_start. at each iteration, the delta_weight is accumulated into a total.
-         *
-         * once this condition is met (at row 5 in the example), irow_block_start is iterated
-         * to the row before irow_current,
-         *
-         * We also need to be careful of the walker weights
-         * if Csrc is taken from the wavefunction at cycle i,
-         * Cdst is at an intermediate value equal to the wavefunction at cycle i with the diagonal
-         * part of the propagator already applied.
-         *
-         * We don't want to introduce a second post-annihilation loop over occupied MBFs to apply
-         * the diagonal part of the propagator, so for MEVs, the solution is to reconstitute the
-         * value of the walker weight before the diagonal death/cloning.
-         *
-         * In the exact propagator, the death step does:
-         * Ci -> Ci*(1 - tau (Hii-shift)).
-         *
-         * thus, the pre-death value of Cdst is just Cdst/(1 - tau (Hii-shift))
-         *
-         */
-
-        auto row_block_start = m_wf.recv().m_row;
-        auto row_current = m_wf.recv().m_row;
-        auto row_block_start_src_blocks = m_wf.recv().m_row;
-
-        auto get_nrow_in_block = [&]() { return row_current.index() - row_block_start.index(); };
-        auto get_allow_initiation = [&]() {
-            // row_block_start is now at last row in last block
-            bool allow = get_nrow_in_block() > 1;
-            if (!allow) {
-                // only one src_mbf for this dst_mbf. If the parent is an initiator,
-                // contributions to unoccupied MBFs are allowed
-                allow = row_block_start.m_src_initiator;
-            }
-            return allow;
-        };
-
-        auto still_in_block = [&]() {
-            return row_current.m_dst_mbf == row_block_start.m_dst_mbf &&
-                   row_current.m_dst_ipart == row_block_start.m_dst_ipart;
-        };
-
-        row_block_start.restart();
-        defs::wf_t total_delta = 0.0;
-        for (row_current.restart(); row_current.in_range(); row_current.step()) {
-            size_t dst_ipart = row_block_start.m_dst_ipart;
-            if (still_in_block()) {
-                total_delta += row_current.m_delta_weight[0];
-            } else {
-                // row_current is in first row of next block
-                DEBUG_ASSERT_GT(get_nrow_in_block(), 0ul,
-                    "if the current row is in a new block, there should be at least one row in the current block");
-                // get the row index (if any) of the dst_mbf
-                auto irow_store = *m_wf.m_store[row_block_start.m_dst_mbf];
-                make_mev_contribs_from_unique_src_mbfs(row_block_start, row_block_start_src_blocks,
-                                                       row_current.index() - 1, irow_store);
-                DEBUG_ASSERT_EQ(row_block_start.index(), row_current.index() - 1,
-                    "at the start of a new block, the block start should be at the immediately preceding row");
-                annihilate_row(dst_ipart, row_block_start.m_dst_mbf, total_delta, get_allow_initiation(), irow_store);
-                // put block start to start of next block
-                row_block_start.step();
-                DEBUG_ASSERT_EQ(row_block_start.index(), row_current.index(),
-                    "after the final annihilation in the previous block, the block start row should be the same as the current row");
-                total_delta = row_current.m_delta_weight;
-            }
-        }
-        // finish off last block
-        if (row_block_start.in_range()) {
-            size_t dst_ipart = row_block_start.m_dst_ipart;
-            auto irow_store = *m_wf.m_store[row_block_start.m_dst_mbf];
-            make_mev_contribs_from_unique_src_mbfs(row_block_start, row_block_start_src_blocks,
-                                                   m_wf.recv().m_hwm - 1, irow_store);
-            annihilate_row(dst_ipart, row_block_start.m_dst_mbf, total_delta,
-                           get_allow_initiation(), row_block_start.m_src_deterministic, irow_store);
-        }
-    } else {
-        auto &row = m_wf.recv().m_row;
-        if (m_opts.m_av_ests.m_fermion_rdm.m_rank > 0 && m_mevs.m_accum_epoch) {
-            /*
-             * an additional loop over recvd spawns is required in this case, in order to make the necessary
-             * MEV contributions before the new spawns are added to the instantaneous populations
-             */
-            for (row.restart(); row.in_range(); row.step()) {
-                auto irow_store = *m_wf.m_store[row.m_dst_mbf];
-                if (irow_store != ~0ul) {
-                    m_wf.m_store.m_row.jump(irow_store);
-                    if (row.m_src_deterministic && m_wf.m_store.m_row.m_deterministic.get(0)) {
-                        continue;
-                    }
-                    make_instant_mev_contribs(row.m_src_mbf, row.m_src_weight, row.m_dst_ipart);
-                }
-            }
-        }
-
-        for (row.restart(); row.in_range(); row.step()) {
-            annihilate_row(row.m_dst_ipart, row.m_dst_mbf, row.m_delta_weight, row.m_src_initiator,
-                           row.m_src_deterministic);
-        }
-    }
-#endif
     DEBUG_ASSERT_LE(m_wf.m_store.m_hwm, hwm_before + m_wf.recv().m_hwm,
                     "the store table shouldn't have grown by more rows than were received!");
     m_wf.recv().clear();
@@ -516,53 +353,4 @@ void Solver::output_stats() {
         stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
         m_parallel_stats->flush();
     }
-}
-
-void Solver::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_mbf, const defs::wf_t &delta_weight,
-                            bool allow_initiation, bool src_deterministic) {
-    annihilate_row(dst_ipart, dst_mbf, delta_weight, allow_initiation, src_deterministic, *m_wf.m_store[dst_mbf]);
-}
-
-void Solver::make_mev_contribs_from_unique_src_mbfs(SpawnTableRow &row_current, SpawnTableRow &row_block_start,
-                                                    const size_t &irow_block_end, const size_t &irow_store) {
-#if 0
-    if (!mevs()) return;
-    // if the dst MBF is not stored, it cannot give contributions to any MEVs
-    if (irow_store == ~0ul) {
-        row_current.jump(irow_block_end);
-        return;
-    }
-    m_wf.m_store.m_row.jump(irow_store);
-    /*
-     * similar approach to loop_over_spawned, except the "blocks" in this instance refer to groups
-     * of contributions from the same source MBF. src_weights emitted by a stochastic propagator are
-     * appropriately scaled by the probability that at least one excitation to dst_mbf was drawn.
-     */
-
-    row_block_start.jump(row_current);
-
-    for (; row_current.in_range(irow_block_end); row_current.step()) {
-        ASSERT(m_wf.m_store.m_row.m_mbf == row_current.m_dst_mbf);
-        // seek to next "parent" MBF
-        if (row_current.m_src_mbf != row_block_start.m_src_mbf) {
-            ASSERT(row_current.index() > row_block_start.index());
-            // row_current is pointing to the first row of the next src_mbf block
-            // row_block_start can be used to access the src MBF data
-            make_instant_mev_contribs(row_block_start.m_src_mbf, row_block_start.m_src_weight,
-                                      row_block_start.m_dst_ipart);
-            row_block_start.jump(row_current);
-        }
-    }
-    // finish off last block
-    make_instant_mev_contribs(row_block_start.m_src_mbf, row_block_start.m_src_weight, row_block_start.m_dst_ipart);
-#endif
-}
-
-void Solver::output_mevs(size_t icycle) {
-    if (!m_maes.is_period_cycle(icycle)) return;
-    //m_mevs.save(icycle);
-}
-
-void Solver::output_mevs() {
-    //m_mevs.save();
 }

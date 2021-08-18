@@ -179,6 +179,9 @@ def three_from_four_rdm(four_rdm, nelec):
     three_rdm /= (np.sum(nelec)-3)
     return three_rdm
 
+reorder_rdm12 = pyscf.fci.rdm.reorder_dm12
+reorder_rdm123 = pyscf.fci.rdm.reorder_dm123
+reorder_rdm1234 = pyscf.fci.rdm.reorder_dm1234
 
 '''
 "unreorder" methods do the opposite of the "reorder" methods in pyscf/fci/rdm.py,

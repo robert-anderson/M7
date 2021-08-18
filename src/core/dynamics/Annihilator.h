@@ -86,7 +86,7 @@ private:
 
 public:
 
-    Annihilator(Wavefunction &wf, const Propagator& ham, const References& refs, Rdms& rdms,
+    Annihilator(Wavefunction &wf, const Propagator& prop, const References& refs, Rdms& rdms,
                 const size_t& icycle, defs::wf_comp_t nadd);
 
     /**

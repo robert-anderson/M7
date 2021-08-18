@@ -6,7 +6,8 @@
 #include "StochasticPropagator.h"
 
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt):
+StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
+                                           const NdFormat<defs::ndim_wf> &wf_fmt) :
         Propagator(opts, ham, wf_fmt), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gens(ham, opts.m_propagator, m_prng),
         m_mag_log(opts.m_propagator.m_max_bloom,
@@ -25,7 +26,7 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_
 
 void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const auto &row = wf.m_store.m_row;
-    const defs::wf_t& weight = row.m_weight[ipart];
+    const defs::wf_t &weight = row.m_weight[ipart];
     double rdm_factor = 1.0;
 
     ASSERT(!consts::float_is_zero(weight));
@@ -41,8 +42,8 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     defs::prob_t prob;
     defs::ham_t helem;
 
-    auto& conn = m_conn[src_onv];
-    auto& dst_onv = m_dst[src_onv];
+    auto &conn = m_conn[src_onv];
+    auto &dst_onv = m_dst[src_onv];
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
@@ -57,15 +58,9 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         delta = m_prng.stochastic_threshold(delta, m_opts.m_propagator.m_min_spawn_mag);
         if (consts::float_is_zero(delta)) continue;
 
-        if (wf.recv().m_row.m_send_parents){
-            if (m_opts.m_propagator.m_consolidate_spawns) {
-                // reweight by probability that this connection was sampled a non-zero number of times
-                rdm_factor = 1.0 / (1.0 - std::pow(1 - prob, nattempt));
-            }
-            else {
-                // reweight for expected number of draws of this connection
-                rdm_factor = 1.0 / (prob * nattempt);
-            }
+        if (wf.recv().m_row.m_send_parents) {
+            // reweight by probability that this connection was sampled a non-zero number of times
+            rdm_factor = 1.0 / (1.0 - std::pow(1 - prob, nattempt));
         }
         wf.add_spawn(dst_onv, delta, flag_initiator, flag_deterministic,
                      ipart, src_onv, rdm_factor * weight);
@@ -81,8 +76,8 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     } else {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift[ipart]) * tau();
-        if (death_rate==0.0) return;
-        if (death_rate < 0.0 || death_rate > 1.0 || m_opts.m_propagator.m_min_spawn_mag==0.0) {
+        if (death_rate == 0.0) return;
+        if (death_rate < 0.0 || death_rate > 1.0 || m_opts.m_propagator.m_min_spawn_mag == 0.0) {
             // clone / create antiwalkers continuously
             wf.scale_weight(ipart, 1 - death_rate);
         } else {

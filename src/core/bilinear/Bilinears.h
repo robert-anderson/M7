@@ -96,13 +96,13 @@ public:
     }
 
     Bilinears(const fciqmc_config::AvEsts &opts, defs::inds rdm_ranksigs, defs::inds specmom_exsigs,
-              const Hamiltonian &ham, const Epoch &epoch) :
-            m_rdms(opts.m_rdm, rdm_ranksigs, ham.nsite(), ham.nelec(), epoch),
-            m_spec_moms(opts.m_spec_mom), m_total_norm({1}){}
+              size_t nsite, size_t nelec, const Epoch &epoch) :
+            m_rdms(opts.m_rdm, rdm_ranksigs, nsite, nelec, epoch),
+            m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
 
-    Bilinears(const fciqmc_config::AvEsts &opts, const Hamiltonian &ham, const Epoch &epoch) :
+    Bilinears(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
-                      parse_exsigs(opts.m_spec_mom.m_ranks), ham, epoch) {}
+                      parse_exsigs(opts.m_spec_mom.m_ranks), nsite, nelec, epoch) {}
 
     bool all_stores_empty() const {
         return m_rdms.all_stores_empty() && m_spec_moms.all_stores_empty();
@@ -120,7 +120,7 @@ public:
      *  the end of the calculation has been reached (all WF rows are about to be removed)
      * @param mbf
      */
-    void make_contribs(const field::Mbf &onv, const defs::wf_t& ci_product) {
+    void make_contribs(const field::Mbf &onv, const defs::wf_t &ci_product) {
         m_total_norm[0] += ci_product;
         m_rdms.make_contribs(onv, onv, ci_product);
     }

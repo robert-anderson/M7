@@ -260,8 +260,6 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
                                 "number of spawns logged for excitation type magnitudes to be used in tau and probability update"),
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
-        m_consolidate_spawns(this, "consolidate_spawns", false,
-                             "sort and consolidate received spawns so that there is at most one update to any MBF weight in an annihilation loop"),
         m_semistochastic(this) {}
 
 void fciqmc_config::Propagator::verify() {
