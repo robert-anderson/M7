@@ -72,6 +72,11 @@ bool Reference::is_connected(const field::Mbf &mbf) const {
     return !consts::float_is_zero(m_ham.get_element(get_mbf(), m_conn[mbf]));
 }
 
+size_t Reference::exsig(const field::Mbf &mbf) const {
+    m_conn[mbf].connect(get_mbf(), mbf);
+    return m_conn[mbf].exsig();
+}
+
 void Reference::make_numerator_contribs(const field::Mbf &mbf, const defs::wf_t& weight) {
     m_conn[mbf].connect(get_mbf(), mbf);
     m_proj_energy_num.m_local += m_ham.get_element(get_mbf(), m_conn[mbf]) * weight;
@@ -106,6 +111,7 @@ References::References(const fciqmc_config::Reference &opts, const Hamiltonian &
 }
 
 const Reference &References::operator[](const size_t &ipart) const {
+    DEBUG_ASSERT_LT(ipart, m_refs.size(), "reference part index OOB");
     return m_refs[ipart];
 }
 

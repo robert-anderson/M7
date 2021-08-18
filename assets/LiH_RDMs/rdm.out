@@ -1,0 +1,164 @@
+#INFO: **** input file is /home/rja/CLionProjects/M7/assets/LiH_RDMs/rdm.py ****
+from pyscf import M, mrpt, mcscf, scf, fci, symm, fciqmcscf, tools, ao2mo
+import sys, os
+from functools import reduce
+sys.path.append(os.path.abspath('.'))
+import numpy
+
+d = {
+        'mol_kwargs': {
+            'atom':
+            '''
+            H 0.000000 0.000000 0.000000
+            Li 0.000000 0.000000 1.4
+            ''',
+            'basis': {'H': 'sto-3g', 'Li': 'sto-3g'},
+            'symmetry': True,
+            'symmetry_subgroup': 'C2v',
+            'verbose': 4,
+            'charge': 0,
+            'spin': 0
+        }
+    }
+
+mol = M(**d['mol_kwargs'])
+myhf = scf.RHF(mol)
+myhf.kernel()
+myhf.analyze()
+
+myfci = fci.FCI(myhf)
+fcie, fcivec = myfci.kernel()
+
+nelecb = (mol.nelectron-mol.spin)//2
+neleca = mol.nelectron - nelecb
+norb = len(myhf.mo_energy)
+
+dm1, dm2, dm3 = fci.rdm.make_dm123('FCI3pdm_kern_sf', fcivec, fcivec, norb, (neleca, nelecb))
+
+numpy.set_printoptions(precision=4)
+
+print('1RDM diagonal: {}'.format(dm1.diagonal()))
+print(dm1)
+
+
+h1e = reduce(numpy.dot, (myhf.mo_coeff.T, myhf.get_hcore(), myhf.mo_coeff))
+eri = mol.intor('int2e').reshape(norb, norb, norb, norb)
+eri = ao2mo.kernel(ao2mo.restore(8, eri, norb), myhf.mo_coeff, verbose=0, compact=False)
+
+
+tools.fcidump.from_integrals('FCIDUMP', h1e, eri, norb, mol.nelectron, myhf.energy_nuc(), 0, [1,]*norb)
+
+dms = {
+        '1': numpy.array(dm1),
+        '2': numpy.array(dm2),
+        '3': numpy.array(dm3)
+        }
+
+import pickle as pkl
+with open('exact_rdms.pkl', 'wb') as f:
+    pkl.dump(dms, f)
+#INFO: ******************** input file end ********************
+
+
+System: uname_result(system='Linux', node='MS-7B86', release='5.4.0-80-generic', version='#90~18.04.1-Ubuntu SMP Tue Jul 13 19:40:02 UTC 2021', machine='x86_64', processor='x86_64')  Threads 12
+Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
+[GCC 8.4.0]
+numpy 1.18.4  scipy 1.4.1
+Date: Wed Aug 18 18:11:36 2021
+PySCF version 1.7.3
+PySCF path  /home/rja/opt/pyscf/pyscf
+GIT HEAD      ref: refs/heads/master
+GIT master branch  adbdcbdd426356485d9a249d7461f668d19d6f9e
+
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 4
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry True subgroup C2v
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 H      0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr
+[INPUT]  2 Li     0.000000000000   0.000000000000   1.400000000000 AA    0.000000000000   0.000000000000   2.645616574391 Bohr
+
+nuclear repulsion = 1.13395116625714
+point group symmetry = Coov, use subgroup C2v
+num. orbitals of irrep A1 = 4
+num. orbitals of irrep B1 = 1
+num. orbitals of irrep B2 = 1
+number of shells = 4
+number of NR pGTOs = 18
+number of NR cGTOs = 6
+basis = {'H': 'sto-3g', 'Li': 'sto-3g'}
+ecp = {}
+CPU time:         0.25
+
+
+******** <class 'pyscf.scf.hf_symm.SymAdaptedRHF'> ********
+method = SymAdaptedRHF-RHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /home/rja/CLionProjects/M7/assets/LiH_RDMs/tmpj01854qp
+max_memory 4000 MB (current use 75 MB)
+Freeze 0 electrons in irreps []
+    4 free electrons in irreps A1 B1 B2
+Set gradient conv threshold to 3.16228e-05
+init E= -7.61455306827914
+HOMO (A1) = -0.294107173947103  LUMO (A1) = 0.0297336220310757
+cycle= 1 E= -7.85259212219785  delta_E= -0.238  |g|= 0.101  |ddm|= 1.12
+HOMO (A1) = -0.290369761459111  LUMO (A1) = 0.0782169279098985
+cycle= 2 E= -7.85958366753391  delta_E= -0.00699  |g|= 0.0223  |ddm|= 0.229
+HOMO (A1) = -0.304922762947419  LUMO (A1) = 0.0798104522293346
+cycle= 3 E= -7.86036944316774  delta_E= -0.000786  |g|= 0.00803  |ddm|= 0.0706
+HOMO (A1) = -0.301132078212797  LUMO (A1) = 0.0795970425774476
+cycle= 4 E= -7.86053853850301  delta_E= -0.000169  |g|= 0.000289  |ddm|= 0.0498
+HOMO (A1) = -0.301201271575881  LUMO (A1) = 0.0794943329269681
+cycle= 5 E= -7.86053866067065  delta_E= -1.22e-07  |g|= 1.8e-05  |ddm|= 0.00138
+HOMO (A1) = -0.301198954388433  LUMO (A1) = 0.0794992059464354
+cycle= 6 E= -7.86053866101928  delta_E= -3.49e-10  |g|= 8.99e-07  |ddm|= 6.31e-05
+HOMO (A1) = -0.301198648314831  LUMO (A1) = 0.0794994906573656
+Extra cycle  E= -7.86053866102069  delta_E= -1.42e-12  |g|= 4.25e-07  |ddm|= 2.75e-06
+converged SCF energy = -7.86053866102069
+**** SCF Summaries ****
+Total Energy =                          -7.860538661020692
+Nuclear Repulsion Energy =               1.133951166257143
+One-electron Energy =                  -12.694634737283913
+Two-electron Energy =                    3.700144910006077
+Wave-function symmetry = A1
+occupancy for each irrep:     A1   B1   B2
+                               2    0    0
+**** MO energy ****
+MO #1 (A1 #1), energy= -2.34597368936961 occ= 2
+MO #2 (A1 #2), energy= -0.301198648314831 occ= 2
+MO #3 (A1 #3), energy= 0.0794994906573656 occ= 0
+MO #4 (B1 #1), energy= 0.163275071154775 occ= 0
+MO #5 (B2 #1), energy= 0.163275071154775 occ= 0
+MO #6 (A1 #4), energy= 0.596917725883246 occ= 0
+ ** Mulliken pop on meta-lowdin orthogonal AOs  **
+ ** Mulliken pop  **
+pop of  0 H 1s        1.36972
+pop of  1 Li 1s        1.99942
+pop of  1 Li 2s        0.47336
+pop of  1 Li 2px       0.00000
+pop of  1 Li 2py       0.00000
+pop of  1 Li 2pz       0.15750
+ ** Mulliken atomic charges  **
+charge of  0H =     -0.36972
+charge of  1Li =      0.36972
+Dipole moment(X, Y, Z, Debye):  0.00000,  0.00000,  4.82200
+1RDM diagonal: [1.9999e+00 1.9616e+00 9.0037e-03 1.7931e-03 1.7931e-03 2.5864e-02]
+[[ 1.9999e+00 -5.4891e-04  4.8382e-04  0.0000e+00  0.0000e+00 -1.1732e-03]
+ [-5.4891e-04  1.9616e+00  6.5094e-02  0.0000e+00  0.0000e+00  7.6241e-03]
+ [ 4.8382e-04  6.5094e-02  9.0037e-03  0.0000e+00  0.0000e+00 -1.2985e-02]
+ [ 0.0000e+00  0.0000e+00  0.0000e+00  1.7931e-03  0.0000e+00  0.0000e+00]
+ [ 0.0000e+00  0.0000e+00  0.0000e+00  0.0000e+00  1.7931e-03  0.0000e+00]
+ [-1.1732e-03  7.6241e-03 -1.2985e-02  0.0000e+00  0.0000e+00  2.5864e-02]]

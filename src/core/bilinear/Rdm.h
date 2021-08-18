@@ -76,6 +76,15 @@ public:
         make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
     }
 
+    void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop){
+        DEBUG_ASSERT_EQ(recv_row.m_src_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
+        defs::wf_t contrib = dst_row.m_weight[recv_row.m_ipart_dst];
+        contrib = consts::conj(contrib);
+        contrib *= recv_row.m_src_weight;
+        contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[recv_row.m_ipart_dst]);
+        make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
+    }
+
     /**
      * We need to be careful of the intermediate state of the walker weights.
      * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
@@ -96,24 +105,18 @@ public:
      * @param refs
      * @param ipart_dst
      */
-    void make_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight, const WalkerTableRow &dst_row,
-                       const Propagator &prop, const References &refs, const size_t &ipart_dst) {
-        if (!*this) return;
-        if (!m_accum_epoch) return;
-        /*
-         * if all connections to the reference are being handled exactly by block-averaging, don't allow duplicate
-         * contributions here
-         */
-        auto &ref_mbf = refs[ipart_dst].get_mbf();
-        if (m_explicit_ref_conns && (src_mbf == ref_mbf || dst_row.m_mbf == ref_mbf)) return;
-
-        auto ipart_dst_replica = dst_row.ipart_replica(ipart_dst);
-        double dupl_fac = 1.0 / dst_row.nreplica();
-
-        auto dst_weight_before_death = dst_row.m_weight[ipart_dst_replica];
-        dst_weight_before_death /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_dst_replica]);
-        make_contribs(src_mbf, dst_row.m_mbf, dupl_fac * src_weight * dst_weight_before_death);
-    }
+//    void make_contribs(const field::Mbf &src_mbf, const defs::wf_t &src_weight, const WalkerTableRow &dst_row,
+//                       const Propagator &prop, const References &refs, const size_t &ipart_dst) {
+//        if (!*this) return;
+//        if (!m_accum_epoch) return;
+//
+//        auto ipart_dst_replica = dst_row.ipart_replica(ipart_dst);
+//        double dupl_fac = 1.0 / dst_row.nreplica();
+//
+//        auto dst_weight_before_death = dst_row.m_weight[ipart_dst_replica];
+//        dst_weight_before_death /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_dst_replica]);
+//        make_contribs(src_mbf, dst_row.m_mbf, dupl_fac * src_weight * dst_weight_before_death);
+//    }
 
 
     bool all_stores_empty() const {

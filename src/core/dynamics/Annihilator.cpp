@@ -31,9 +31,9 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     }
 }
 
-Annihilator::Annihilator(Wavefunction &wf, const Hamiltonian &ham, const References &refs,
+Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const References &refs,
                          Rdms &rdms, const size_t &icycle, defs::wf_comp_t nadd) :
-        m_wf(wf), m_ham(ham), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
+        m_wf(wf), m_prop(prop), m_refs(refs), m_rdms(rdms), m_nadd(nadd), m_icycle(icycle),
         m_work_row1(wf.m_comm.recv().m_row), m_work_row2(wf.m_comm.recv().m_row),
         m_sort_cmp_fn(make_sort_cmp_fn()) {
     REQUIRE_TRUE_ALL(bool(m_rdms)==wf.m_comm.recv().m_row.m_send_parents,
@@ -68,7 +68,7 @@ void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_
             return;
         }
 
-        m_wf.create_row_(m_icycle, dst_mbf, m_ham.get_energy(dst_mbf), m_refs.is_connected(dst_mbf));
+        m_wf.create_row_(m_icycle, dst_mbf, m_prop.m_ham.get_energy(dst_mbf), m_refs.is_connected(dst_mbf));
         m_wf.set_weight(dst_ipart, delta_weight);
 
     } else {
@@ -148,11 +148,23 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
 void Annihilator::handle_src_block(SpawnTableRow &block_begin, WalkerTableRow &dst_row) {
     DEBUG_ASSERT_TRUE(m_rdms.m_accum_epoch, "shouldn't be sampling RDMs yet");
     DEBUG_ASSERT_EQ(block_begin.m_dst_mbf, dst_row.m_mbf, "wrong dst_row found");
-    auto ipart_dst = block_begin.m_ipart_dst;
-    // don't make contributions to RDMs if they already take contributions from deterministic subspace connections.
+
+    size_t ipart_dst = block_begin.m_ipart_dst;
+
+    /*
+     * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic
+     * average connections to the reference
+     */
+    if (m_rdms.m_explicit_ref_conns){
+        if (dst_row.m_mbf == m_refs[ipart_dst].get_mbf()) return;
+        if (block_begin.m_src_mbf == m_refs[m_wf.ipart_replica(ipart_dst)].get_mbf()) return;
+    }
+    /*
+     * or if they already take contributions from deterministic subspace connections.
+     */
     if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(ipart_dst)) return;
-    auto dst_weight = consts::conj(dst_row.m_weight[block_begin.m_ipart_dst]);
-    m_rdms.make_contribs(block_begin.m_src_mbf, dst_row.m_mbf, block_begin.m_src_weight * dst_weight);
+
+    m_rdms.make_contribs(block_begin, dst_row, m_prop);
 }
 
 void Annihilator::loop_over_dst_mbfs() {
@@ -186,7 +198,7 @@ void Annihilator::loop_over_dst_mbfs() {
              * which would be the start of the next block if current is not past the end of recv rows. In any case, the
              * two rows should be the same. If the new start of block is past the end of recv rows, we're done
              */
-            if (!block_begin.in_range()) return;
+            if (!block_begin.in_range()) break;
             DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
                             "block_begin should have been pointed to the beginning of the next block");
             /*
@@ -195,7 +207,8 @@ void Annihilator::loop_over_dst_mbfs() {
             total_delta = 0.0;
             dst_finder();
         } else {
-            DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,"should never have diagonal connections at annihilation");
+            DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,
+                            "should never have diagonal connections at annihilation");
             DEBUG_ASSERT_EQ(current.m_dst_mbf, block_begin.m_dst_mbf, "dst MBFs should be the same");
             DEBUG_ASSERT_EQ(current.m_ipart_dst, block_begin.m_ipart_dst, "dst iparts should be the same");
         }

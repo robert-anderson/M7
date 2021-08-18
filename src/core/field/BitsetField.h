@@ -219,7 +219,7 @@ template<typename T>
 struct BitField : BitsetField<T, 0> {
     typedef BitsetField<T, 0> base_t;
 
-    BitField(Row *row) : base_t(row, {}) {}
+    BitField(Row *row, std::string name="") : base_t(row, {}, name) {}
 
     BitField &operator=(bool v) {
         base_t::put(0, v);

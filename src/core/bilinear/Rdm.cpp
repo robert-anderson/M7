@@ -67,7 +67,6 @@ void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
         auto &send_table = send(irank_send);
         size_t irow = *send_table[m_lookup_inds];
         if (irow == ~0ul) irow = send_table.insert(m_lookup_inds);
-
         send_table.m_row.jump(irow);
         /*
          * include the Fermi phase of the excitation

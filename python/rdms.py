@@ -67,6 +67,8 @@ assert parity((2,1,0))==-1
 assert parity((1,2,0))==1
 assert parity((1,0,2))==-1
 
+def interleave(v1, v2):
+    return tuple(reduce(lambda a,b:a+b, zip(v1, v2)))
 
 def make_all_perms(rank):
     all_perms = []
@@ -79,10 +81,38 @@ def put_permutations(rdm, perms, creinds, desinds, element):
         creperm = tuple(creinds[i] for i in creorder)
         for desorder, desparity in perms:
             desperm = tuple(desinds[i] for i in desorder)
-            inds = tuple(i for pair in zip(creperm, desperm) for i in pair)
-            #if abs(rdm[inds])>1e-12: assert abs(rdm[inds]-element*creparity*desparity)<1e-12
+            inds = interleave(creperm, desperm)
+            if abs(rdm[inds])>1e-12: 
+                assert abs(rdm[inds]-element*creparity*desparity)<1e-12, "permutationally symmetric element already set to a different value"
             rdm[inds] = element*creparity*desparity
             
+'''
+assume that only the ascending-ordered tuples of creation and annihilation spin orbital indices are non-zero in the nord_rdm,
+an fill the other elements that are related by permutational symmetry
+'''
+def restore_perm_syms(nord_rdm, spin_major, time_reversal_sym, tol=1e-12):
+    norb = nord_rdm.shape[0]//2
+    rank = len(nord_rdm.shape)//2
+    sm = norb if spin_major else None
+    nspinorb = norb*2
+    rdm = np.zeros((nspinorb,)*(rank*2))
+    perms = make_all_perms(rank)
+    for icre, creinds in enumerate(combinations(range(nspinorb), rank)):
+        crespins = spins(creinds, sm)
+        for ides, desinds in enumerate(combinations(range(nspinorb), rank)):
+            if ides > icre: continue # hermiticity (T)
+            desspins = spins(desinds, sm)
+            if sum(crespins)!=sum(desspins): continue # spin conservation
+            if time_reversal_sym and desspins[0]: continue # time reversal symmetry (K)
+            element = nord_rdm[interleave(creinds, desinds)]
+            if abs(element)<tol: continue
+
+            put_permutations(rdm, perms, creinds, desinds, element)
+            put_permutations(rdm, perms, desinds, creinds, element) # T
+            if time_reversal_sym:
+                put_permutations(rdm, perms, kramers_op(creinds, sm), kramers_op(desinds, sm), element) # K
+                put_permutations(rdm, perms, kramers_op(desinds, sm), kramers_op(creinds, sm), element) # T and K
+    return rdm
 
 def make_spin_resolved_rdm(norb, rank, get_expval, spin_major, time_reversal_sym, tol=1e-12):
     sm = norb if spin_major else None
@@ -223,6 +253,41 @@ def make_spinfree_pose_rdms(nelec, norb, rank, get_expval, spin_major, time_reve
     return spinfree_nord_to_pose(
             make_spinfree_nord_rdm(nelec, norb, rank, get_expval, spin_major, time_reversal_sym, tol=1e-12), nelec)
 
+
+def fact(n):
+    out = 1.0;
+    for i in range(1, n+1): out*=i
+    return out
+
+def ncomb(n, r):
+    assert n >= r
+    if r == 0 or n == 1 or r == n: return 1
+    return fact(n)/(fact(r)*fact(n-r))
+
+import h5py
+from functools import reduce
+def load_spin_resolved_rdm(fname, rank):
+    archive = h5py.File(fname, 'r')['archive']
+    nspinorb = int(archive['propagator']['nsite'][()])*2
+    nelec = int(archive['propagator']['nelec'][()])
+    nord_rdm = np.zeros((nspinorb,)*(rank*2))
+    data = archive['rdms'][str(rank)*2+'00']
+    assert rank*2 == data['indices'][:,:].shape[1]
+    ndata = data['indices'][:,:].shape[0]
+    trace = 0.0
+    for idata in range(ndata):
+        creinds = data['indices'][idata,:rank]
+        anninds = data['indices'][idata,rank:]
+        assert all(creinds==sorted(creinds))
+        assert all(anninds==sorted(anninds))
+        inds = interleave(creinds, anninds)
+        nord_rdm[inds] = data['values'][idata]
+        # enforce hermiticity:
+        #inds = interleave(anninds, creinds)
+        #nord_rdm[inds] = data['values'][idata]
+        if all(creinds==anninds): trace+= data['values'][idata]
+    nord_rdm *= ncomb(nelec, rank)/trace
+    return nord_rdm
 
 
 

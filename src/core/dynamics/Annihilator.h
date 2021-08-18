@@ -44,7 +44,7 @@ struct DstFinder {
  */
 struct Annihilator {
     Wavefunction &m_wf;
-    const Hamiltonian& m_ham;
+    const Propagator& m_prop;
     const References& m_refs;
     Rdms& m_rdms;
     const defs::wf_comp_t m_nadd;
@@ -86,7 +86,7 @@ private:
 
 public:
 
-    Annihilator(Wavefunction &wf, const Hamiltonian& ham, const References& refs, Rdms& rdms,
+    Annihilator(Wavefunction &wf, const Propagator& ham, const References& refs, Rdms& rdms,
                 const size_t& icycle, defs::wf_comp_t nadd);
 
     /**

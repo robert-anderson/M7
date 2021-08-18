@@ -82,12 +82,19 @@ public:
     void end_cycle();
 
     /**
-     * @param onv
-     *  reference to ONV
+     * @param mbf
+     *  reference to MBF
      * @return
      *  true if the matrix element of the Hamiltonian between the current reference and the argument is non-zero
      */
-    bool is_connected(const field::Mbf &onv) const;
+    bool is_connected(const field::Mbf &mbf) const;
+    /**
+     * @param mbf
+     *  reference to MBF
+     * @return
+     *  excitation signature from ref to arg
+     */
+    size_t exsig(const field::Mbf &mbf) const;
 
     /**
      * occupied ONVs connected to the reference must contribute to the numerator inner product <ref | H | onv>

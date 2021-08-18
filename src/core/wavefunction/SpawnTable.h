@@ -20,13 +20,13 @@ struct SpawnTableRow : public Row {
 
     SpawnTableRow(size_t nsite, bool send_parents) :
             m_send_parents(send_parents),
-            m_src_mbf(send_parents ? this : nullptr, nsite),
-            m_dst_mbf(this, nsite),
-            m_src_weight(send_parents ? this : nullptr),
-            m_delta_weight(this),
-            m_src_initiator(this),
-            m_src_deterministic(this),
-            m_ipart_dst(this) {}
+            m_src_mbf(send_parents ? this : nullptr, nsite, "source MBF"),
+            m_dst_mbf(this, nsite, "destination MBF"),
+            m_src_weight(send_parents ? this : nullptr, "source weight"),
+            m_delta_weight(this, "spawned walker weight"),
+            m_src_initiator(this, "source initiator flag"),
+            m_src_deterministic(this, "source deterministic flag"),
+            m_ipart_dst(this, "WF part index of destination") {}
 };
 
 #endif //M7_SPAWNTABLE_H

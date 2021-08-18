@@ -5,6 +5,7 @@
 #ifndef M7_MAES_H
 #define M7_MAES_H
 
+#include <src/core/io/MaeStats.h>
 #include "src/core/bilinear/Bilinears.h"
 #include "src/core/observables/RefExcits.h"
 
@@ -14,6 +15,7 @@ struct Maes {
     RefExcits m_ref_excits;
     const size_t m_period;
     size_t m_icycle_period_start = ~0ul;
+    std::unique_ptr<MaeStats> m_stats = nullptr;
     /**
      * work space
      */
@@ -23,7 +25,14 @@ struct Maes {
     Maes(const fciqmc_config::AvEsts &opts, const Hamiltonian &ham) :
             m_accum_epoch("MAE accumulation"), m_bilinears(opts, ham, m_accum_epoch),
             m_ref_excits(opts.m_ref_excits, ham.nsite()), m_period(opts.m_stats_period),
-            m_conn_work(ham.nsite()), m_com_work(ham.nsite()) {}
+            m_conn_work(ham.nsite()), m_com_work(ham.nsite()) {
+        if (*this){
+            m_stats = mem_utils::make_unique<MaeStats>(
+                    "M7.maes.stats",
+                    "FCIQMC Multidimensional Averaged Estimators",
+                    MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms, false));
+        }
+    }
 
     operator bool() const {
         return m_bilinears || m_ref_excits;
@@ -128,9 +137,6 @@ struct Maes {
              */
             const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
 
-            m_conn_work.connect(ref_mbf, row.m_mbf, m_com_work);
-            auto exsig_from_ref = m_conn_work.exsig();
-            auto is_ref_conn = exsig_from_ref && m_bilinears.m_rdms.takes_contribs_from(exsig_from_ref);
 
             /*
              * accumulate contributions to reference excitations if required
@@ -144,7 +150,11 @@ struct Maes {
                  * single averaged contribution (ncycle_occ)
                  */
                 m_bilinears.make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight * av_weight_rep);
+
+                auto exsig_from_ref = ref.exsig(row.m_mbf);
+                auto is_ref_conn = exsig_from_ref && m_bilinears.m_rdms.takes_contribs_from(exsig_from_ref);
                 if (m_bilinears.m_rdms.m_explicit_ref_conns && is_ref_conn) {
+                    exit(0);
                     const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
                     const auto av_weight_ref_rep = ref.norm_average_weight(icycle, ipart_replica);
                     m_bilinears.m_rdms.make_contribs(ref_mbf, row.m_mbf,

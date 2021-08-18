@@ -37,6 +37,7 @@
 struct Bilinears {
     Rdms m_rdms;
     SpecMoms m_spec_moms;
+    buffered::Numbers<defs::wf_t, defs::ndim_root> m_total_norm;
     //const bool m_explicit_hf_conns;
 
     //std::array<std::unique_ptr<SpectralMoment>, defs::nexsig> m_specmoms;
@@ -97,7 +98,7 @@ public:
     Bilinears(const fciqmc_config::AvEsts &opts, defs::inds rdm_ranksigs, defs::inds specmom_exsigs,
               const Hamiltonian &ham, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, ham.nsite(), ham.nelec(), epoch),
-            m_spec_moms(opts.m_spec_mom) {}
+            m_spec_moms(opts.m_spec_mom), m_total_norm({1}){}
 
     Bilinears(const fciqmc_config::AvEsts &opts, const Hamiltonian &ham, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
@@ -120,6 +121,7 @@ public:
      * @param mbf
      */
     void make_contribs(const field::Mbf &onv, const defs::wf_t& ci_product) {
+        m_total_norm[0] += ci_product;
         m_rdms.make_contribs(onv, onv, ci_product);
     }
 
