@@ -48,7 +48,10 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
         conn.clear();
         auto iex = m_excit_gens.draw_iex();
-        if (!m_excit_gens[iex].draw(src_onv, m_occ, m_vac, prob, helem, conn)) continue;
+        if (!m_excit_gens[iex].draw(src_onv, m_occ, m_vac, prob, helem, conn)) {
+            // null excitation generated
+            continue;
+        }
         m_mag_log.log(iex, helem, prob);
         prob *= m_excit_gens.get_prob(iex);
 

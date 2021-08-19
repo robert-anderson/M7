@@ -4,14 +4,6 @@
 
 #include "FcidumpFileReader.h"
 
-void FcidumpFileReader::decrement_inds(defs::inds &inds) {
-    for (auto& i:inds) i = ((i==0 || i==~0ul) ? ~0ul : i-1);
-}
-
-void FcidumpFileReader::decrement_inds_and_transpose(defs::inds &inds, const size_t &nspatorb) {
-    for (auto& i:inds) i = ((i==0 || i==~0ul) ? ~0ul : ((i-1)/2 + ((i&1ul)?0:nspatorb)));
-}
-
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
         HamiltonianFileReader(fname, 4, false),
         m_spin_major(spin_major),
@@ -19,17 +11,6 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         m_orbsym(read_header_array(fname, "ORBSYM"))
 {
     set_symm_and_rank(fname);
-
-    if (m_spin_resolved&!m_spin_major){
-        m_inds_to_orbs = [&](defs::inds& inds){
-            decrement_inds_and_transpose(inds, m_nspatorb);
-        };
-    }
-    else {
-        m_inds_to_orbs = [&](defs::inds& inds){
-            decrement_inds(inds);
-        };
-    }
 
     if (m_spin_resolved) {
         defs::inds inds(4);
@@ -39,7 +20,7 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
                 if (((inds[0] < m_nspatorb) != (inds[1] < m_nspatorb)) ||
                     ((inds[2] < m_nspatorb) != (inds[3] < m_nspatorb))) {
                     // spin non-conserving example found
-                    if (nind(inds)==2) m_spin_conserving_1e = false;
+                    if (nset_ind(inds)==2) m_spin_conserving_1e = false;
                     else m_spin_conserving_2e = false;
                 }
             }
@@ -51,18 +32,6 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
     if (m_spin_conserving_2e) log::info("FCIDUMP file conserves spin in 2 particle integrals");
     else log::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
     log::info("FCIDUMP file contains 2 particle integrals of maximum excitation rank " + std::to_string(m_int_2e_rank));
-}
-
-bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) const {
-    auto result = SparseArrayFileReader<defs::ham_t>::next(inds, v);
-    m_inds_to_orbs(inds);
-    // validate elements
-    ASSERT(!result || std::all_of(inds.begin(), inds.end(), [this](const size_t& i){return (i==~0ul)||(i<m_norb);}))
-    return result;
-}
-
-size_t FcidumpFileReader::nind(const defs::inds &inds) {
-    return std::count_if(inds.begin(), inds.end(), [](const size_t& a){return a!=~0ul;});
 }
 
 bool FcidumpFileReader::spin_conserving() const {

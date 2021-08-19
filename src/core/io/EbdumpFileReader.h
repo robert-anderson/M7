@@ -8,7 +8,7 @@
 #include "HamiltonianFileReader.h"
 
 struct EbdumpFileReader : HamiltonianFileReader {
-    EbdumpFileReader(): HamiltonianFileReader(m_fname, 3, false){
+    EbdumpFileReader(const std::string &fname): HamiltonianFileReader(fname, 3, false){
         REQUIRE_FALSE_ALL(m_spin_resolved, "spin resolved electron-boson dumps are not currently supported");
     }
 

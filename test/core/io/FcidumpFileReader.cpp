@@ -7,9 +7,9 @@
 
 TEST(FcidumpFileReader, Real_6orb){
     FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_FALSE(file_reader.spin_resolved());
+    ASSERT_FALSE(file_reader.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
-    ASSERT_EQ(file_reader.nspatorb(), 6);
+    ASSERT_EQ(file_reader.m_nspatorb, 6);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);
@@ -17,17 +17,42 @@ TEST(FcidumpFileReader, Real_6orb){
     // first entry
     test_inds = {0,0,0,0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.53644984080846303));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v),  0.5406487462037872));
     // scan to arbitrary element
     for (size_t i=0; i<17; ++i) file_reader.next(inds, v);
-    test_inds = {4,5,2,0};
+    test_inds = {2,1,4,3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.0043863275703943001));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.01759459248922075));
     // scan to final element
     while(file_reader.next(inds, v)){}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), -98.3339467443989));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), -98.46644393370157));
+}
+
+TEST(FcidumpFileReader, Integer_8orb){
+    FcidumpFileReader file_reader(defs::assets_root+"/Hubbard_U4_8site/FCIDUMP", false);
+    ASSERT_FALSE(file_reader.m_spin_resolved);
+    ASSERT_TRUE(file_reader.spin_conserving());
+    ASSERT_EQ(file_reader.m_nspatorb, 8);
+    defs::inds inds(4);
+    defs::ham_t v;
+    file_reader.next(inds, v);
+    defs::inds test_inds(4);
+    // core energy is the first entry
+    test_inds = {~0ul,~0ul,~0ul,~0ul};
+    ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.0));
+    // scan to arbitrary element
+    for (size_t i=0; i<8; ++i) file_reader.next(inds, v);
+    test_inds = {7,7,7,7};
+    ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), 4.0));
+    // scan to final element
+    while(file_reader.next(inds, v)){}
+    test_inds = {7, 6, ~0ul, ~0ul};
+    ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
+    ASSERT_TRUE(consts::floats_equal(consts::real(v), -1.0));
 }
 
 #ifdef ENABLE_COMPLEX

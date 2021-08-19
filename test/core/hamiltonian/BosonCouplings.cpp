@@ -7,6 +7,7 @@
 #include "src/core/hamiltonian/BosonCouplings.h"
 #include "src/core/hamiltonian/BosonHamiltonian.h"
 
+#if 0
 TEST(BosonCouplings, Element_b0) {
     size_t nboson_cutoff = 4, nsite = 4;
     defs::ham_t v = 0.5, omega = 0.025;
@@ -135,3 +136,4 @@ TEST(BosonCouplings, Element_f1_b1){
     helement = bc.get_element(src, conn);
     ASSERT_EQ(helement, 0.0);
 }
+#endif
