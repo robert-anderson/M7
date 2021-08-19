@@ -50,9 +50,7 @@ void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
     opts.m_av_ests.m_delay = 100;
     opts.m_av_ests.m_ncycle = 400;
     opts.m_av_ests.m_stats_period = 10;
-    opts.m_propagator.m_consolidate_spawns = false;
-    opts.m_av_ests.m_rdm.m_ranks = {1, 2};
-    opts.m_wavefunction.m_replicate = false;
+    opts.m_av_ests.m_rdm.m_ranks = {"1", "2"};
 }
 
 TEST(FermionRdm, EnergyExactAverageEveryCycle) {
@@ -97,7 +95,6 @@ TEST(FermionRdm, EnergyExactReplicated) {
     fciqmc_config::Document opts;
     fermion_rdm_energy_opts(opts);
     opts.m_av_ests.m_stats_period = 13;
-    opts.m_wavefunction.m_replicate = true;
     opts.verify();
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
 }
@@ -106,7 +103,6 @@ TEST(FermionRdm, EnergyExactExplicitHfConnections) {
     fciqmc_config::Document opts;
     fermion_rdm_energy_opts(opts);
     opts.m_av_ests.m_stats_period = 13;
-    opts.m_wavefunction.m_replicate = true;
     opts.verify();
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, true), -99.9421389039332);
 }

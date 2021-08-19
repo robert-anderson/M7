@@ -5,7 +5,7 @@
 #include <src/core/basis/Suites.h>
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite, bool replicate) :
+Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
                 opts.m_propagator.m_nw_target,
@@ -13,7 +13,8 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite, bo
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {
-                        {nsite, opts.m_wavefunction.m_nroot, replicate ? 2ul:1ul, need_av_weights(opts)},
+                        {nsite, opts.m_wavefunction.m_nroot,
+                         opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)},
                         MappedTableBase::nbucket_guess(
                                 opts.m_propagator.m_nw_target / mpi::nrank(),
                                 opts.m_wavefunction.m_hash_mapping.m_remap_ratio),

@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/sparse/SparseMatrix.h"
+#include "src/core/linalg/Sparse.h"
 
 TEST(SparseMatrix, RealMultiplication){
     typedef double T;

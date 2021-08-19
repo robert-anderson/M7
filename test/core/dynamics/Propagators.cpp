@@ -9,11 +9,9 @@
 TEST(Propagators, BasicTest) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
-    opts.m_wavefunction.m_replicate = false;
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 100000;
-    opts.m_propagator.m_consolidate_spawns = false;
     opts.m_wavefunction.m_load_balancing.m_period = 1;
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 5;
     opts.verify();
@@ -43,7 +41,6 @@ TEST(Propagators, RefExcitTest) {
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.05;
     opts.m_propagator.m_nw_target = 100;
-    opts.m_wavefunction.m_replicate = false;
     opts.m_av_ests.m_stats_period = 10;
     opts.m_av_ests.m_ref_excits.m_max_exlvl = 2;
     opts.m_av_ests.m_delay = 100;
@@ -67,8 +64,4 @@ TEST(Propagators, RefExcitTest) {
 
     Solver solver(opts, *prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-
-    hdf5::FileWriter fw("M7.test.h5");
-    hdf5::GroupWriter gw("data", fw);
-    solver.mevs().save(gw);
 }

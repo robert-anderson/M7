@@ -51,11 +51,9 @@ TEST(ExactPropagator, BosonTest) {
 TEST(ExactPropagator, DeterministicSubspace) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
-    opts.m_wavefunction.m_replicate = false;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.05;
     opts.m_propagator.m_nw_target = 1000;
-    opts.m_propagator.m_consolidate_spawns = false;
     opts.m_wavefunction.m_load_balancing.m_period = 1;
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 5;
     opts.verify();
@@ -89,9 +87,7 @@ TEST(ExactPropagator, Test) {
     opts.m_av_ests.m_delay = 4000;
     opts.m_av_ests.m_ncycle = 200;
     opts.m_av_ests.m_stats_period = 13;
-    opts.m_propagator.m_consolidate_spawns = false;
     opts.m_av_ests.m_rdm.m_ranks = {};
-    opts.m_wavefunction.m_replicate = false;
     opts.verify();
     // -99.9421389039332
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
@@ -101,7 +97,7 @@ TEST(ExactPropagator, Test) {
 
     Wavefunction wf(opts, ham.nsite());
 
-    if (!opts.m_wavefunction.m_replicate && opts.m_wavefunction.m_nroot==1){ASSERT_EQ(wf.npart(), 1);}
+    if (wf.nreplica()==1 && opts.m_wavefunction.m_nroot==1){ASSERT_EQ(wf.npart(), 1);}
     ExactPropagator prop(ham, opts, wf.m_format, true);
     auto ref_energy = ham.get_energy(ref_onv);
 
@@ -139,7 +135,6 @@ TEST(ExactPropagator, RdmTest) {
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.05;
     opts.m_propagator.m_nw_target = 1000;
-    opts.m_wavefunction.m_replicate = false;
     opts.verify();
     //const auto benchmark = -99.9421389039331
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);

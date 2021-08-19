@@ -15,13 +15,11 @@ TEST(StochasticPropagator, Test) {
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 100000;
-    opts.m_av_ests.m_rdm.m_ranks = {2};
-    opts.m_wavefunction.m_replicate = true;
+    opts.m_av_ests.m_rdm.m_ranks = {"2"};
     opts.m_av_ests.m_ncycle = 2000;
     opts.m_av_ests.m_stats_period = 10;
     opts.m_propagator.m_min_spawn_mag = 0.2;
     opts.m_propagator.m_min_death_mag = 0.2;
-    opts.m_propagator.m_consolidate_spawns = false;
     opts.m_av_ests.m_delay = 1000;
     //opts.ncycle_wait_detsub = 10;
     opts.verify();
@@ -55,9 +53,7 @@ TEST(StochasticPropagator, RdmTest) {
     opts.m_shift.m_damp = 0.5;
     opts.m_av_ests.m_delay = 200;
     opts.m_av_ests.m_ncycle = 1000;
-    opts.m_av_ests.m_rdm.m_ranks = {1};
-    opts.m_wavefunction.m_replicate = true;
-    opts.m_propagator.m_consolidate_spawns = true;
+    opts.m_av_ests.m_rdm.m_ranks = {"1"};
     opts.verify();
 
     //const auto benchmark = -99.9421389039331
@@ -138,7 +134,6 @@ TEST(StochasticPropagator, Hubbard) {
     opts.m_shift.m_reweight.m_ncycle = 200;
     opts.m_shift.m_reweight.m_delay = 20000;
     opts.m_av_ests.m_rdm.m_ranks = {};
-    opts.m_wavefunction.m_replicate = false;
     opts.verify();
 
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
@@ -169,8 +164,6 @@ TEST(StochasticPropagator, ExcitedStates) {
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 10000;
-    opts.m_propagator.m_consolidate_spawns = false;
-    opts.m_wavefunction.m_replicate = false;
     opts.verify();
     // -99.9421389039332
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
@@ -180,7 +173,7 @@ TEST(StochasticPropagator, ExcitedStates) {
 
     Wavefunction wf(opts, ham.nsite());
 
-    if (!opts.m_wavefunction.m_replicate && opts.m_wavefunction.m_nroot==1){ASSERT_EQ(wf.npart(), 1);}
+    if (wf.nreplica() && opts.m_wavefunction.m_nroot==1){ASSERT_EQ(wf.npart(), 1);}
     StochasticPropagator prop(ham, opts, wf.m_format);
     auto ref_energy = ham.get_energy(ref_onv);
 

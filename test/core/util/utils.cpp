@@ -137,6 +137,7 @@ TEST(Utils, Exsigs) {
 }
 
 
+#if 0
 TEST(Utils, SetAllExsigsFromRanksig) {
     size_t ranksig;
     std::array<bool, defs::nexsig> exsigs{};
@@ -188,3 +189,4 @@ TEST(Utils, SetAllExsigsFromRanksig) {
     ASSERT_TRUE(exsigs[conn_utils::encode_exsig(0, 0, 0, 1)]);
     ASSERT_EQ(std::count(exsigs.cbegin(), exsigs.cend(), true), 3);
 }
+#endif

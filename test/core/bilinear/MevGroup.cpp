@@ -25,13 +25,13 @@ TEST(MevGroup, Promoter1BodyDiagonal) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::exsig(1, 1, 0, 0));
+    ASSERT_EQ(exsig, conn_utils::encode_exsig(1, 1, 0, 0));
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
      */
     for (size_t icomb=0ul; icomb<fp.m_ncomb; ++icomb) {
-        auto phase = fp.apply(0, conn, com, inds);
+        auto phase = fp.apply(0, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
         ASSERT_EQ(inds.m_frm.m_cre[0], com[0]);
         ASSERT_EQ(inds.m_frm.m_ann[0], com[0]);
@@ -55,7 +55,7 @@ TEST(MevGroup, Promoter2BodyDiagonal) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::exsig(2, 2, 0, 0));
+    ASSERT_EQ(exsig, conn_utils::encode_exsig(2, 2, 0, 0));
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
@@ -63,7 +63,7 @@ TEST(MevGroup, Promoter2BodyDiagonal) {
     foreach::rtnd::Ordered<> foreach_comb(com.size(), nop_insert);
     size_t icomb = 0ul;
     auto fn = [&]() {
-        auto phase = fp.apply(icomb, conn, com, inds);
+        auto phase = fp.apply(icomb, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
         // since this is a diagonal element, all indices are "inserted" and should be found in order in the com array
         for (size_t iop = 0ul; iop < inds.m_frm.m_cre.size(); ++iop)
@@ -96,40 +96,40 @@ TEST(MevGroup, Promoter2BodySingle) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::exsig(2, 2, 0, 0));
+    ASSERT_EQ(exsig, conn_utils::encode_exsig(2, 2, 0, 0));
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9
     bool phase;
-    phase = fp.apply(0, conn, com, inds);
+    phase = fp.apply(0, conn, com, inds.m_frm);
     ASSERT_FALSE(phase);
     ASSERT_EQ(inds.m_frm.m_ann[0], 1);
     ASSERT_EQ(inds.m_frm.m_ann[1], 3);
     ASSERT_EQ(inds.m_frm.m_cre[0], 1);
     ASSERT_EQ(inds.m_frm.m_cre[1], 8);
 
-    phase = fp.apply(1, conn, com, inds);
+    phase = fp.apply(1, conn, com, inds.m_frm);
     ASSERT_TRUE(phase);
     ASSERT_EQ(inds.m_frm.m_ann[0], 3);
     ASSERT_EQ(inds.m_frm.m_ann[1], 4);
     ASSERT_EQ(inds.m_frm.m_cre[0], 4);
     ASSERT_EQ(inds.m_frm.m_cre[1], 8);
 
-    phase = fp.apply(2, conn, com, inds);
+    phase = fp.apply(2, conn, com, inds.m_frm);
     ASSERT_TRUE(phase);
     ASSERT_EQ(inds.m_frm.m_ann[0], 3);
     ASSERT_EQ(inds.m_frm.m_ann[1], 6);
     ASSERT_EQ(inds.m_frm.m_cre[0], 6);
     ASSERT_EQ(inds.m_frm.m_cre[1], 8);
 
-    phase = fp.apply(3, conn, com, inds);
+    phase = fp.apply(3, conn, com, inds.m_frm);
     ASSERT_TRUE(phase);
     ASSERT_EQ(inds.m_frm.m_ann[0], 3);
     ASSERT_EQ(inds.m_frm.m_ann[1], 7);
     ASSERT_EQ(inds.m_frm.m_cre[0], 7);
     ASSERT_EQ(inds.m_frm.m_cre[1], 8);
 
-    phase = fp.apply(4, conn, com, inds);
+    phase = fp.apply(4, conn, com, inds.m_frm);
     ASSERT_FALSE(phase);
     ASSERT_EQ(inds.m_frm.m_ann[0], 3);
     ASSERT_EQ(inds.m_frm.m_ann[1], 9);
@@ -163,11 +163,11 @@ TEST(MevGroup, Promoter2BodyDouble) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::exsig(2, 2, 0, 0));
+    ASSERT_EQ(exsig, conn_utils::encode_exsig(2, 2, 0, 0));
     ASSERT_EQ(exsig, conn.exsig());
     buffered::MaeInds inds(exsig);
 
-    bool phase = fp.apply(0, conn, com, inds);
+    bool phase = fp.apply(0, conn, com, inds.m_frm);
     ASSERT_FALSE(phase);
     ASSERT_EQ(inds.m_frm.m_ann[0], 3);
     ASSERT_EQ(inds.m_frm.m_ann[1], 7);
