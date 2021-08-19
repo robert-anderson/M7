@@ -12,7 +12,7 @@ struct BosonHamiltonian {
     const size_t m_nboson_max, m_nmode;
     const defs::ham_t m_omega;
 
-    BosonHamiltonian(size_t nmode, size_t nboson_max, defs::ham_t omega);
+    BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname);
 
     defs::ham_t get_element(const field::BosOnv &onv) const;
 

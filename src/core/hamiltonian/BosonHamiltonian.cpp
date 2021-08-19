@@ -4,8 +4,8 @@
 
 #include "BosonHamiltonian.h"
 
-BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, defs::ham_t omega) :
-        m_nboson_max(nboson_max), m_nmode(nmode), m_omega(omega) {}
+BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname):
+        m_nboson_max(nboson_max), m_nmode(nmode), m_omega(0) {}
 
 defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
     defs::ham_t res = 0;

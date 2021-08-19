@@ -13,13 +13,10 @@ void FcidumpFileReader::decrement_inds_and_transpose(defs::inds &inds, const siz
 }
 
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
-        base_t(fname, 4, false),
+        HamiltonianFileReader(fname, 4, false),
         m_spin_major(spin_major),
-        m_norb(read_header_int(fname, "NORB")),
         m_nelec(read_header_int(fname, "NELEC")),
-        m_orbsym(read_header_array(fname, "ORBSYM")),
-        m_spin_resolved(read_header_bool(fname, "UHF") || read_header_bool(fname, "TREL")),
-        m_nspatorb(m_spin_resolved?m_norb/2:m_norb)
+        m_orbsym(read_header_array(fname, "ORBSYM"))
 {
     set_symm_and_rank(fname);
 
@@ -100,44 +97,7 @@ void FcidumpFileReader::inds_to_orbs(defs::inds &inds) {
     m_inds_to_orbs(inds);
 }
 
-size_t FcidumpFileReader::read_header_int(const std::string &fname, const std::string &label, size_t default_) {
-    const auto regex = std::regex(label + R"(\s*\=\s*[0-9]+)");
-    FileReader iterator(fname);
-    std::string line;
-    std::smatch match;
-    while (iterator.next(line)) {
-        std::regex_search(line, match, regex);
-        if (match.size()) {
-            std::string match_string(match.str());
-            std::regex_search(match_string, match, std::regex(R"([0-9]+)"));
-            return std::atol(match.str().c_str());
-        }
-        std::regex_search(line, match, header_terminator_regex);
-        if (match.size()) break;
-    }
-    return default_;
-}
 
-defs::inds FcidumpFileReader::read_header_array(const std::string &fname, const std::string &label) {
-    return defs::inds{0, 1};
-}
-
-size_t FcidumpFileReader::read_header_bool(const std::string &fname, const std::string &label, size_t default_) {
-    std::regex regex;
-    if (default_) regex = std::regex(label + R"(\s?\=\s?\.FALSE\.)");
-    else regex = std::regex(label + R"(\s?\=\s?\.TRUE\.)");
-    FileReader iterator(fname);
-    std::string line;
-    std::smatch match;
-    std::string match_string;
-    while (iterator.next(line)) {
-        std::regex_search(line, match, regex);
-        if (match.size()) return !default_;
-        std::regex_search(line, match, header_terminator_regex);
-        if (match.size()) break;
-    }
-    return default_;
-}
 
 void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
     m_int_2e_rank = 0;

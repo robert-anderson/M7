@@ -7,16 +7,19 @@
 
 #include "src/core/connection/Connections.h"
 #include "src/core/field/Fields.h"
+#include "src/core/parallel/SharedArray.h"
 
 struct BosonCouplings {
     const size_t m_nboson_max, m_nmode;
-    const defs::ham_t m_v;
+    const size_t m_nmode2;
+    SharedArray<defs::ham_t> m_v;
 
-    BosonCouplings(size_t nmode, size_t nboson_max, defs::ham_t v) :
-        m_nboson_max(nboson_max), m_nmode(nmode), m_v(v) {}
+    BosonCouplings(size_t nmode, size_t nboson_max, std::string fname) :
+        m_nboson_max(nboson_max), m_nmode(nmode), m_nmode2(nmode*nmode), m_v(m_nmode2*nmode) {
+    }
 
     defs::ham_t v(const size_t &p, const size_t &q, const size_t &n) const {
-        return (p == q && p == n) ? m_v : 0.0;
+        return 0;//(p == q && p == n) ? m_v : 0.0;
     }
 
     defs::ham_t get_element_1(const field::FrmBosOnv& onv, const conn::FrmBosOnv &conn) const {
