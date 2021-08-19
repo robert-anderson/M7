@@ -31,12 +31,12 @@ FermionHamiltonian::FermionHamiltonian(const size_t &nelec, const size_t &nsite,
 {}
 
 FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
-        FermionHamiltonian(file_reader.nelec(), file_reader.nspatorb(),
-                           file_reader.spin_conserving_1e(),
-                           file_reader.spin_conserving_2e(),
+        FermionHamiltonian(file_reader.m_nelec, file_reader.m_nspatorb,
+                           file_reader.m_spin_conserving_1e,
+                           file_reader.m_spin_conserving_2e,
                            file_reader.m_complex_valued,
-                           file_reader.spin_resolved(),
-                           file_reader.int_2e_rank()) {
+                           file_reader.m_spin_resolved,
+                           file_reader.m_int_2e_rank) {
 
     using namespace ham_data;
     defs::inds inds(4);

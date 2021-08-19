@@ -28,21 +28,21 @@ class FcidumpFileReader : public HamiltonianFileReader {
      * were generated for. E.g. NECI uses spin-minor ordering throughout, so if the FCIDUMP supplied was intended for
      * use with NECI, spin_major should be passed in as false.
      */
+    // spin major and spin restricted (non-resolved) cases
+    static void decrement_inds(defs::inds& inds);
+    // spin minor case
+    static void decrement_inds_and_transpose(defs::inds& inds, const size_t& nspatorb);
+    std::function<void(defs::inds& inds)> m_inds_to_orbs;
+
+public:
     const bool m_spin_major;
     const size_t m_nelec;
     const defs::inds m_orbsym;
-    std::function<void(defs::inds& inds)> m_inds_to_orbs;
 
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
     size_t m_isymm, m_int_2e_rank;
 
-    // spin major and spin restricted (non-resolved) cases
-    static void decrement_inds(defs::inds& inds);
-    // spin minor case
-    static void decrement_inds_and_transpose(defs::inds& inds, const size_t& nspatorb);
-
-public:
     using base_t::m_complex_valued;
     FcidumpFileReader(const std::string &fname, bool spin_major);
 
@@ -50,18 +50,10 @@ public:
 
     static size_t nind(const defs::inds& inds);
 
-    const size_t& norb() const;
-    const size_t& nelec() const;
-    const size_t& nspatorb() const;
-    const bool& spin_resolved() const;
-    bool spin_conserving_1e() const;
-    bool spin_conserving_2e() const;
     bool spin_conserving() const;
     void inds_to_orbs(defs::inds& inds);
 
     void set_symm_and_rank(const std::string &filename);
-
-    const size_t& int_2e_rank() const {return m_int_2e_rank;}
 };
 
 #endif //M7_FCIDUMPFILEREADER_H

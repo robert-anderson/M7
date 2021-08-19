@@ -65,30 +65,6 @@ size_t FcidumpFileReader::nind(const defs::inds &inds) {
     return std::count_if(inds.begin(), inds.end(), [](const size_t& a){return a!=~0ul;});
 }
 
-const size_t &FcidumpFileReader::norb() const {
-    return m_norb;
-}
-
-const size_t &FcidumpFileReader::nelec() const {
-    return m_nelec;
-}
-
-const size_t &FcidumpFileReader::nspatorb() const {
-    return m_nspatorb;
-}
-
-const bool &FcidumpFileReader::spin_resolved() const {
-    return m_spin_resolved;
-}
-
-bool FcidumpFileReader::spin_conserving_1e() const {
-    return m_spin_conserving_1e;
-}
-
-bool FcidumpFileReader::spin_conserving_2e() const {
-    return m_spin_conserving_2e;
-}
-
 bool FcidumpFileReader::spin_conserving() const {
     return m_spin_conserving_1e && m_spin_conserving_2e;
 }
@@ -96,7 +72,6 @@ bool FcidumpFileReader::spin_conserving() const {
 void FcidumpFileReader::inds_to_orbs(defs::inds &inds) {
     m_inds_to_orbs(inds);
 }
-
 
 
 void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {

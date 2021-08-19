@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "src/core/io/FcidumpFileReader.h"
 
-TEST(FcidumpFileIterator, Real_6orb){
+TEST(FcidumpFileReader, Real_6orb){
     FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.spin_resolved());
     ASSERT_TRUE(file_reader.spin_conserving());
@@ -31,7 +31,7 @@ TEST(FcidumpFileIterator, Real_6orb){
 }
 
 #ifdef ENABLE_COMPLEX
-TEST(FcidumpFileIterator, Complex_10orb){
+TEST(FcidumpFileReader, Complex_10orb){
     FcidumpFileReader file_reader(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_EQ(file_reader.nspatorb(), 5);
     defs::inds inds(4);
