@@ -8,7 +8,7 @@
 void ExcitGenGroup::init() {
     defs::prob_t norm = 0.0;
     for (size_t exsig=0ul; exsig<defs::nexsig; ++exsig){
-        const auto ptr = m_exgens[exsig].get();
+        auto ptr = m_exsigs_to_exgens[exsig];
         if (!ptr) continue;
         if (conn_utils::is_pure_frm(exsig)) m_frm_inds.push_back(m_active_exsigs.size());
         m_probs.push_back(ptr->approx_nconn());
@@ -46,23 +46,23 @@ void ExcitGenGroup::update_cumprobs() {
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng) {
     if (ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc()) {
-        m_exgens[conn_utils::encode_exsig(1, 1, 0, 0)] = std::unique_ptr<ExcitGen>(
-                new Hubbard1dSingles(ham, prng, ham.m_frm.is_hubbard_1d_pbc()));
+        add_exgen(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng, ham.m_frm.is_hubbard_1d_pbc())),
+                  conn_utils::encode_exsig(1, 1, 0, 0));
     } else {
-        m_exgens[conn_utils::encode_exsig(1, 1, 0, 0)] = std::unique_ptr<ExcitGen>(
-                new UniformSingles(ham, prng));
+        add_exgen(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)),
+                  conn_utils::encode_exsig(1, 1, 0, 0));
     }
-    if (ham.m_frm.int_2e_rank()) {
+    if (ham.m_frm.m_int_2e_rank) {
         if (opts.m_excit_gen.get() == "pchb") {
-            m_exgens[conn_utils::encode_exsig(2, 2, 0, 0)] = std::unique_ptr<ExcitGen>(
-                    new HeatBathDoubles(ham, prng));
+            add_exgen(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)),
+                      conn_utils::encode_exsig(2, 2, 0, 0));
         }
     }
     if (ham.m_bos.m_nboson_max) {
-        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
-                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, true));
-        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
-                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, false));
+//        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
+//                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, true));
+//        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
+//                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, false));
     }
 
     init();
@@ -106,12 +106,12 @@ const std::vector<defs::prob_t> &ExcitGenGroup::get_probs() const {
 
 ExcitGen &ExcitGenGroup::operator[](const size_t &iex) {
     DEBUG_ASSERT_LT(iex, size(), "excit gen index OOB");
-    return *m_exgens[m_active_exsigs[iex]];
+    return *m_exsigs_to_exgens[m_active_exsigs[iex]];
 }
 
 const ExcitGen &ExcitGenGroup::operator[](const size_t &iex) const {
     DEBUG_ASSERT_LT(iex, size(), "excit gen index OOB");
-    return *m_exgens[m_active_exsigs[iex]];
+    return *m_exsigs_to_exgens[m_active_exsigs[iex]];
 }
 
 size_t ExcitGenGroup::draw_iex() {

@@ -222,11 +222,11 @@ defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
         if ((i==k) && (j==l)) trace+=rdm_element;
     }
     // scale the one-body contribution by the number of two-body contributions
-    e1 /= ham.nelec()-1;
+    e1 /= ham.m_nelec-1;
     e1 = mpi::all_sum(e1);
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
-    const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.nelec(), 2);
+    const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.m_nelec, 2);
     return consts::real(ham.m_int_0) + (consts::real(e1) + consts::real(e2))/norm;
 }

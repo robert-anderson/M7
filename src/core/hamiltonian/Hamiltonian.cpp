@@ -7,8 +7,8 @@
 Hamiltonian::Hamiltonian(std::string fname, bool spin_major, size_t nboson_max, defs::ham_comp_t boson_frequency,
                          defs::ham_comp_t boson_coupling) :
         m_nboson_max(nboson_max), m_frm(fname, spin_major),
-        m_frmbos(m_frm.nsite(), m_nboson_max, fname),
-        m_bos(m_frm.nsite(), m_nboson_max, fname) {
+        m_frmbos(m_frm.m_nsite, m_nboson_max, fname),
+        m_bos(m_frm.m_nsite, m_nboson_max, fname) {
 }
 
 Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
@@ -20,13 +20,13 @@ size_t Hamiltonian::nci() const {
 }
 
 const size_t &Hamiltonian::nsite() const {
-    return m_frm.nsite();
+    return m_frm.m_nsite;
 }
 
 const size_t &Hamiltonian::nelec() const {
-    return m_frm.nelec();
+    return m_frm.m_nelec;
 }
 
 bool Hamiltonian::complex_valued() const {
-    return m_frm.complex_valued();
+    return m_frm.m_complex_valued;
 }

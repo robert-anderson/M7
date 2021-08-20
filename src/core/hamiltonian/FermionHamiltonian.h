@@ -20,7 +20,6 @@
  */
 struct FermionHamiltonian {
 
-protected:
     const size_t m_nelec;
     const size_t m_nsite;
     const bool m_spin_conserving_1e, m_spin_conserving_2e;
@@ -136,7 +135,7 @@ public:
     }
 
     size_t nci() const {
-        return ci_utils::fermion_dim(nsite(), nelec());
+        return ci_utils::fermion_dim(m_nsite, m_nelec);
     }
 
 public:
@@ -148,32 +147,8 @@ public:
         return m_on_site_only_0022 && m_nnp_only_1111;
     }
 
-    const size_t &nsite() const {
-        return m_nsite;
-    }
-
-    bool spin_conserving_1e() const {
-        return m_spin_conserving_1e;
-    }
-
-    bool spin_conserving_2e() const {
-        return m_spin_conserving_2e;
-    }
-
     bool spin_conserving() const {
         return m_spin_conserving_1e && m_spin_conserving_2e;
-    }
-
-    const size_t &nelec() const {
-        return m_nelec;
-    }
-
-    const bool &complex_valued() const {
-        return m_complex_valued;
-    }
-
-    const size_t &int_2e_rank() const {
-        return m_int_2e_rank;
     }
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
@@ -186,9 +161,9 @@ public:
      *  spin (MS) number
      */
     void set_hf_mbf(field::FrmOnv &onv, int spin) const {
-        auto nalpha = ci_utils::nalpha(nelec(), spin);
-        auto nbeta = ci_utils::nbeta(nelec(), spin);
-        DEBUG_ASSERT_EQ(nalpha + nbeta, nelec(), "inconsistent na, nb, nelec");
+        auto nalpha = ci_utils::nalpha(m_nelec, spin);
+        auto nbeta = ci_utils::nbeta(m_nelec, spin);
+        DEBUG_ASSERT_EQ(nalpha + nbeta, m_nelec, "inconsistent na, nb, nelec");
         onv.zero();
         for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
         for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});

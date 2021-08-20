@@ -10,12 +10,13 @@
 
 buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
     buffered::FrmOnv ref(m_nsite);
-    ASSERT((size_t)abs(spin_restrict) % 2 == nelec() % 2);
-    size_t n_spin_0 = (nelec() + spin_restrict) / 2;
-    size_t n_spin_1 = nelec() - n_spin_0;
+    REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_nelec % 2,
+               "Sz quantum number given incompatible with nelec");
+    size_t n_spin_0 = (m_nelec + spin_restrict) / 2;
+    size_t n_spin_1 = m_nelec - n_spin_0;
     for (size_t i = 0ul; i < n_spin_0; ++i) ref.set({0, i});
     for (size_t i = 0ul; i < n_spin_1; ++i) ref.set({1, i});
-    ASSERT(ref.spin() == spin_restrict);
+    DEBUG_ASSERT_EQ(ref.spin(), spin_restrict, "constructed fermion ONV does not have expected Sz");
     return ref;
 }
 
@@ -44,7 +45,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
 
     // assume no contribution cases to be nonzero unless a counterexample is found
     m_nonzero_contribs.fill(false);
-    REQUIRE_LE_ALL(nelec(), 2*nsite(), "unphysical number of electrons specified in FCIDUMP file");
+    REQUIRE_LE_ALL(m_nelec, 2*m_nsite, "unphysical number of electrons specified in FCIDUMP file");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -104,91 +105,3 @@ defs::ham_t FermionHamiltonian::get_element(const field::FrmOnv &onv) const {
 defs::ham_t FermionHamiltonian::get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
 }
-
-#if 0
-FermionHamiltonian::SpinTerms::SpinTerms(const FermionHamiltonian &ham) : Terms(ham),
-                                                                          m_spin_occ_work(ham.nsite()), m_spin_vac_work(ham.nsite()){
-}
-
-void FermionHamiltonian::SpinTerms::foreach_connection(const fields::FermionOnv &src_onv,
-                                                       const FermionHamiltonian::Terms::body_fn_t &body, bool get_h,
-                                                       bool h_nonzero_only, bool include_diagonal) const {
-    m_helement_work = 0.0;
-    m_spin_occ_work.update(src_onv);
-    m_spin_vac_work.update(src_onv);
-    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
-    // spin a->a, aa->aa
-    foreach_connection_subset(src_onv, m_spin_occ_work[0], m_spin_vac_work[0], body, get_h, h_nonzero_only);
-    // spin b->b, bb->bb
-    foreach_connection_subset(src_onv, m_spin_occ_work[1], m_spin_vac_work[1], body, get_h, h_nonzero_only);
-    // spin ab->ab
-    foreach_connection_subset_doubles(src_onv, m_spin_occ_work[0], m_spin_occ_work[1],
-                                      m_spin_vac_work[0], m_spin_vac_work[1], body, get_h, h_nonzero_only);
-}
-
-FermionHamiltonian::Hubbard1DTerms::Hubbard1DTerms(const FermionHamiltonian &ham) : SpinTerms(ham){}
-
-void FermionHamiltonian::Hubbard1DTerms::foreach_connection(const fields::FermionOnv &src_onv,
-                                                            const FermionHamiltonian::Terms::body_fn_t &body,
-                                                            bool get_h, bool h_nonzero_only, bool include_diagonal) const {
-    m_helement_work = 0.0;
-    m_spin_occ_work.update(src_onv);
-    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
-    // spin a
-    for (auto& occ: m_spin_occ_work[0]) {
-        // to the left
-        if (occ > 0 && !src_onv.get(occ - 1))
-            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
-        // to the right
-        if (occ+1<src_onv.m_nsite && !src_onv.get(occ+1))
-            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
-    }
-    // spin b
-    for (auto& occ: m_spin_occ_work[1]) {
-        // to the left
-        if (occ > src_onv.m_nsite && !src_onv.get(occ - 1))
-            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
-        // to the right
-        if (occ+1<src_onv.nbit() && !src_onv.get(occ+1))
-            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
-    }
-}
-
-void FermionHamiltonian::Hubbard1DPbcTerms::foreach_connection(const fields::FermionOnv &src_onv,
-                                                               const FermionHamiltonian::Terms::body_fn_t &body,
-                                                               bool get_h, bool h_nonzero_only, bool include_diagonal) const {
-    if (include_diagonal) perform_diagonal(src_onv, body, get_h, h_nonzero_only);
-    m_helement_work = 0.0;
-    m_spin_occ_work.update(src_onv);
-    // spin a
-    for (auto& occ: m_spin_occ_work[0]) {
-        // to the left
-        if (occ > 0 && !src_onv.get(occ - 1))
-            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
-            // to the left (wrap-around)
-        else if (occ == 0 && !src_onv.get(src_onv.m_nsite))
-            perform_single(src_onv, occ, src_onv.m_nsite-1, body, get_h, h_nonzero_only);
-        // to the right
-        if (occ+1<src_onv.m_nsite && !src_onv.get(occ+1))
-            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
-            // to the right (wrap-around)
-        else if (occ+1 == src_onv.m_nsite && !src_onv.get(0))
-            perform_single(src_onv, occ, 0, body, get_h, h_nonzero_only);
-    }
-    // spin b
-    for (auto& occ: m_spin_occ_work[1]) {
-        // to the left
-        if (occ > src_onv.m_nsite && !src_onv.get(occ - 1))
-            perform_single(src_onv, occ, occ - 1, body, get_h, h_nonzero_only);
-            // to the left (wrap-around)
-        else if (occ == src_onv.m_nsite && !src_onv.get(src_onv.nbit()-1))
-            perform_single(src_onv, occ, src_onv.nbit()-1, body, get_h, h_nonzero_only);
-        // to the right
-        if (occ+1<src_onv.nbit() && !src_onv.get(occ+1))
-            perform_single(src_onv, occ, occ+1, body, get_h, h_nonzero_only);
-            // to the right (wrap-around)
-        else if (occ+1 == src_onv.nbit() && !src_onv.get(src_onv.m_nsite-1))
-            perform_single(src_onv, occ, src_onv.m_nsite-1, body, get_h, h_nonzero_only);
-    }
-}
-#endif

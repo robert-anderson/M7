@@ -20,11 +20,17 @@
 class ExcitGenGroup {
     PRNG &m_prng;
     /**
-     * one excitation generator is dynamically constructable per active encode_exsig
+     * an excitation generator may be invoked for more than one exsig, so here we store all active excitation generators
+     * to be pointed to possibly many times by the m_exsigs_to_exgens array
      */
-    std::array<std::unique_ptr<ExcitGen>, defs::nexsig> m_exgens;
+    std::forward_list<std::unique_ptr<ExcitGen>> m_exgens;
     /**
-     * vector storing all active exsigs consecutively
+     * one dynamically-constructed excitation generator can be used to generate excitations of many different exsigs
+     */
+    std::array<ExcitGen*, defs::nexsig> m_exsigs_to_exgens;
+    /**
+     * vector storing all active exsigs consecutively (i.e. those elements of m_exsigs_to_exgens which are non-null
+     * pointers to exsig objects)
      */
     defs::inds m_active_exsigs;
     /**
@@ -62,15 +68,30 @@ class ExcitGenGroup {
      */
     void update_cumprobs();
 
+    void add_exgen(std::unique_ptr<ExcitGen> &&exgen, const defs::inds &exsigs) {
+        m_exgens.emplace_front(std::move(exgen));
+        auto ptr = m_exgens.begin()->get();
+        for (auto &exsig: exsigs) {
+            REQUIRE_LT(exsig, defs::nexsig, "exsig OOB");
+            REQUIRE_TRUE(m_exsigs_to_exgens[exsig] == nullptr,
+                         "can't specify more than one excitation generator for the same exsig in an ExcitationGroup");
+            m_exsigs_to_exgens[exsig] = ptr;
+        }
+    }
+
+    void add_exgen(std::unique_ptr<ExcitGen> &&exgen, size_t exsig) {
+        add_exgen(std::move(exgen), defs::inds{exsig});
+    }
+
 public:
     /**
      * infer from the given Hamiltonian exactly which excitation generators are required, and initialize them
      * @param ham
-     *  general Hamiltonian object whose excitation level information is queried to determine the required exlvl-specific
+     *  general Hamiltonian object whose excitation level information is queried to determine the required exsig-specific
      *  excitation generation objects
      * @param prng
      *  random number generator needed to construct the required exlvl-specific excitation generators and decide which
-     *  exlvl to attempt to draw
+     *  exsig to attempt to draw
      */
     ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng);
 
