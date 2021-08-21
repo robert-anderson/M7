@@ -8,8 +8,8 @@
  * ONV connection classes.
  *
  * get_element_0: sum of fermionic and bosonic diagonal H matrix elements
- * get_element_1: purely fermionic 1-body H matrix element
- * get_element_2: purely fermionic 2-body H matrix element
+ * get_element_1100: purely fermionic 1-body H matrix element
+ * get_element_2200: purely fermionic 2-body H matrix element
  * get_element_01: H matrix element of the coupling between boson modes and (diagonal)
  *      fermionic density
  * // get_element_11: H matrix element of the coupling between boson modes and one-body fermionic
@@ -61,9 +61,9 @@ private:
         if (!aconn) return get_element_0(aconn);
         else if (!aconn.m_bonvconn) {
             if (aconn.nexcit() == 1)
-                return FermionHamiltonian::get_element_1(aconn);
+                return FermionHamiltonian::get_element_1100(aconn);
             else if (aconn.nexcit() == 2)
-                return FermionHamiltonian::get_element_2(aconn);
+                return FermionHamiltonian::get_element_2200(aconn);
         }
         else if (!aconn.nexcit()) {
             if (aconn.m_bonvconn.nexcit()==1)

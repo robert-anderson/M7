@@ -17,7 +17,7 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian &h, PRNG &prng) :
                 for (size_t a = 0ul; a < m_nspinorb; ++a) {
                     for (size_t b = 0ul; b < a; ++b) {
                         //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
-                        auto element = m_h.m_frm.get_element_2(i, j, a, b);
+                        auto element = m_h.m_frm.get_element_2200(i, j, a, b);
                         weights[ab] = std::abs(element);
                         //}
                         ++ab;
@@ -71,7 +71,7 @@ bool HeatBathDoubles::draw(const field::FrmOnv &src_onv,
         return false;
     }
     conn.set(i, j, a, b);
-    helem = m_h.m_frm.get_element_2(src_onv, conn);
+    helem = m_h.m_frm.get_element_2200(src_onv, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
     if (consts::float_nearly_zero(prob, 1e-14)) {

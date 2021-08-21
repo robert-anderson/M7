@@ -19,7 +19,7 @@ bool Hubbard1dSingles::draw(const field::FrmOnv &src_onv, const OccupiedOrbitals
     if (src_onv.get(vac)) return false;
 
     conn.add(occ, vac);
-    helem = m_h.m_frm.get_element_1(src_onv, conn);
+    helem = m_h.m_frm.get_element_1100(src_onv, conn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }
 

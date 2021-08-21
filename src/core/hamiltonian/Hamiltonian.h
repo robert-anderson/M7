@@ -16,11 +16,29 @@
 
 using namespace field;
 
+/**
+ * generalized Hamiltonian class for fermionic, bosonic, and fermion-boson coupled interactions
+ */
 struct Hamiltonian {
+    /**
+     * the maximum number of bosons permitted to occupy any mode
+     */
     const size_t m_nboson_max;
+    /**
+     * fermion-only object for traditional electronic structure calculations
+     */
     FermionHamiltonian m_frm;
+    /**
+     * coupling term between the fermion and boson sectors
+     */
     BosonCouplings m_frmbos;
+    /**
+     * boson operator-only term in the Hamiltonian
+     */
     BosonHamiltonian m_bos;
+
+
+    //const defs::inds m_ranksigs;
 
     Hamiltonian(std::string fname, bool spin_major, size_t nboson_max = 0, defs::ham_comp_t boson_frequency = 0.0,
                 defs::ham_comp_t boson_coupling = 0.0);
@@ -44,7 +62,7 @@ struct Hamiltonian {
     }
 
     defs::ham_t get_element(const FrmOnv &onv) const {
-        return m_frm.get_element(onv);
+        return m_frm.get_element_0000(onv);
     }
 
     defs::ham_comp_t get_energy(const FrmOnv &onv) const {
@@ -56,8 +74,7 @@ struct Hamiltonian {
      */
 
     defs::ham_t get_element(const BosOnv &onv, const conn::BosOnv &conn) const {
-        //return m_bos.get_element(onv, conn);
-        return 0.0;
+        return m_bos.get_element(onv, conn);
     }
 
     defs::ham_t get_element(const BosOnv &onv) const {
@@ -587,7 +604,7 @@ struct Ham {
  *
  * get_element_0: (diagonal)
  * get_element_1: (single fermionic excitation)
- * get_element_1: (single excitation)
+ * get_element_1100: (single excitation)
  */
 
 

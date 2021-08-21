@@ -93,7 +93,7 @@ FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
         FermionHamiltonian(FcidumpFileReader(fname, spin_major)){}
 
 
-defs::ham_t FermionHamiltonian::get_element(const field::FrmOnv &onv) const {
+defs::ham_t FermionHamiltonian::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t element = m_int_0;
     auto singles_fn = [&](const size_t& i){ element+=m_int_1(i, i);};
     auto doubles_fn = [&](const size_t& i, const size_t& j){ element+=m_int_2.phys_antisym_element(i, j, i, j);};
@@ -102,6 +102,6 @@ defs::ham_t FermionHamiltonian::get_element(const field::FrmOnv &onv) const {
 }
 
 
-defs::ham_t FermionHamiltonian::get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t FermionHamiltonian::get_element_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
 }

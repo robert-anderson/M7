@@ -100,13 +100,18 @@ public:
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
             FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
 
-    defs::ham_t get_element(const field::FrmOnv &onv) const;
+    defs::ham_t get_element_0000(const field::FrmOnv &onv) const;
 
-    defs::ham_comp_t get_energy(const field::FrmOnv &fonv) const {
-        return consts::real(get_element(fonv));
+    defs::ham_t get_element(const field::FrmOnv &onv) const {
+        return get_element_0000(onv);
     }
 
-    defs::ham_t get_element_1(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    defs::ham_comp_t get_energy(const field::FrmOnv &onv) const {
+        return consts::real(get_element_0000(onv));
+    }
+
+    defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+        DEBUG_ASSERT_EQ(conn.exsig(), conn_utils::encode_exsig(1,1,0,0), "expected 1100 exsig");
         const auto &ann = conn.m_ann[0];
         const auto &cre = conn.m_cre[0];
 
@@ -118,18 +123,19 @@ public:
         return conn.phase(onv) ? -element : element;
     }
 
-    defs::ham_t get_element_2(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
+    defs::ham_t get_element_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
-    defs::ham_t get_element_2(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-        const auto element = get_element_2(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
+    defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+        DEBUG_ASSERT_EQ(conn.exsig(), conn_utils::encode_exsig(2,2,0,0), "expected 2200 exsig");
+        const auto element = get_element_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
         return conn.phase(onv) ? -element : element;
     }
 
     defs::ham_t get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
         switch (conn.size()) {
-            case 0: return get_element(onv);
-            case 2: return get_element_1(onv, conn);
-            case 4: return get_element_2(onv, conn);
+            case 0: return get_element_0000(onv);
+            case 2: return get_element_1100(onv, conn);
+            case 4: return get_element_2200(onv, conn);
             default: return 0.0;
         }
     }
