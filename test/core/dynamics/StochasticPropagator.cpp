@@ -25,7 +25,7 @@ TEST(StochasticPropagator, Test) {
     opts.verify();
 
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -58,7 +58,7 @@ TEST(StochasticPropagator, RdmTest) {
 
     //const auto benchmark = -99.9421389039331
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -95,7 +95,7 @@ TEST(StochasticPropagator, Hdf5) {
     opts.verify();
     //const auto benchmark = -108.916561245585;
     Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         ref_onv.set({0, i});
@@ -138,7 +138,7 @@ TEST(StochasticPropagator, Hubbard) {
 
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -167,7 +167,7 @@ TEST(StochasticPropagator, ExcitedStates) {
     opts.verify();
     // -99.9421389039332
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -223,7 +223,7 @@ TEST(StochasticPropagator, BosonTest) {
     // -10.328242246088791
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 1.4, 0.3);
 
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref(ham.nsite());
     ham.set_hf_mbf(ref, 0);
     Wavefunction wf(opts, ham.nsite());

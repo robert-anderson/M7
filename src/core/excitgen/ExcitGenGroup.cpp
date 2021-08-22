@@ -45,14 +45,14 @@ void ExcitGenGroup::update_cumprobs() {
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng) {
-    if (ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc()) {
-        add_exgen(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng, ham.m_frm.is_hubbard_1d_pbc())),
-                  conn_utils::encode_exsig(1, 1, 0, 0));
+    if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
+        add_exgen(std::unique_ptr<ExcitGen>(
+                new Hubbard1dSingles(ham, prng, ham.m_frm.m_model_attrs.is_hubbard_1d_pbc())),
+                  conn_utils::singles);
     } else {
-        add_exgen(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)),
-                  conn_utils::encode_exsig(1, 1, 0, 0));
+        add_exgen(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)), conn_utils::singles);
     }
-    if (ham.m_frm.m_int_2e_rank) {
+    if (ham.m_frm.m_contribs_2200.is_nonzero(conn_utils::doubles)){
         if (opts.m_excit_gen.get() == "pchb") {
             add_exgen(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)),
                       conn_utils::encode_exsig(2, 2, 0, 0));

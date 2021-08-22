@@ -101,3 +101,22 @@ void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
         m_isymm/=8;    // 8->1; 4->2; 2->4; 1->8
     }
 }
+
+size_t FcidumpFileReader::ranksig(const defs::inds &inds) const {
+    auto nset_inds = HamiltonianFileReader::nset_ind(inds);
+    return conn_utils::encode_exsig(nset_inds/2, nset_inds/2, 0, 0);
+}
+
+size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t ranksig) const {
+    switch (ranksig) {
+        case 0ul: return 0ul;
+        case conn_utils::singles:
+            return inds[0]==inds[1] ? 0ul : conn_utils::singles;
+        case conn_utils::doubles:
+            return inds[0]==inds[2] ?
+                (inds[1]==inds[3] ? 0ul : conn_utils::singles):
+                (inds[1]==inds[3] ? conn_utils::singles : conn_utils::doubles);
+        default:
+            return ~0ul;
+    }
+}

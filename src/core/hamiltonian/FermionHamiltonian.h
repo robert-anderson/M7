@@ -15,6 +15,7 @@
 #include "src/core/table/BufferedFields.h"
 #include "HamiltonianData.h"
 
+
 /**
  * All interactions between the fermionic parts of ONVs are described in this class.
  */
@@ -22,76 +23,20 @@ struct FermionHamiltonian {
 
     const size_t m_nelec;
     const size_t m_nsite;
-    const bool m_spin_conserving_1e, m_spin_conserving_2e;
     const bool m_complex_valued;
-    const size_t m_int_2e_rank;
 
-public:
     defs::ham_t m_int_0;
     typedef Integrals_1e<defs::ham_t, defs::isym_1e> ints1_t;
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    /**
-     * stores whether connected elements are nonzero based on contrib case
-     */
-    std::array<bool, ham_data::contrib_count> m_nonzero_contribs;
-    /**
-     * are (1, 1)-rank contribs due to (1, 1)-excitations nonzero only for (1D) nearest neighbors?
-     * assume this is the case unless counterexample found in loop over nonzero elements
-     */
-    bool m_nn_only_1111 = true;
-    /**
-     * same as above, but with (1D) periodic boundary conditions
-     */
-    bool m_nnp_only_1111 = true;
-    /**
-     * are (2, 2)-rank contribs due to (0, 0)-excitations nonzero only when all operator indices refer to the same site?
-     * assume this is the case unless counterexample found in loop over nonzero elements
-     */
-    bool m_on_site_only_0022 = true;
+    ham_data::TermContribs m_contribs_1100;
+    ham_data::TermContribs m_contribs_2200;
+    ham_data::FrmModelAttributes m_model_attrs;
+    ham_data::KramersAttributes m_kramers_attrs;
 
-public:
-
-    /**
-     * @param iorb
-     *  orbital index (site if integrals spin resolved, else spin oribtal index)
-     * @return
-     *  site index
-     */
-    size_t iorb_to_isite(const size_t &iorb) const {
-        return iorb < m_nsite ? iorb : iorb + m_nsite;
-    }
-
-    /**
-     * @param iorb
-     * @param jorb
-     * @param periodic
-     *  if true, lowest and highest site indices count as neighbors.
-     * @return
-     * true if orbitals are nearest neighbors
-     */
-    bool nearest_neighbors(const size_t &iorb, const size_t &jorb, bool periodic) const {
-        auto isite = iorb_to_isite(iorb);
-        auto jsite = iorb_to_isite(jorb);
-        if (isite + 1 == jsite || jsite + 1 == isite) return true;
-        if (periodic) {
-            return (isite == 0 && jsite == m_nsite - 1) || (isite == m_nsite - 1 && jsite == 0);
-        }
-        return false;
-    }
-
-    bool on_site(const size_t &iorb, const size_t &jorb, const size_t &korb, const size_t &lorb) const {
-        auto isite = iorb_to_isite(iorb);
-        auto jsite = iorb_to_isite(jorb);
-        auto ksite = iorb_to_isite(korb);
-        auto lsite = iorb_to_isite(lorb);
-        return isite == jsite && jsite == ksite && ksite == lsite;
-    }
-
-    FermionHamiltonian(const size_t &nelec, const size_t &nsite, bool spin_conserving_1e, bool spin_conserving_2e,
-                       bool complex_valued, bool spin_resolved, size_t int_2e_rank);
+    FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued, bool spin_resolved);
 
     FermionHamiltonian(const FcidumpFileReader &file_reader);
 
@@ -144,19 +89,6 @@ public:
         return ci_utils::fermion_dim(m_nsite, m_nelec);
     }
 
-public:
-    bool is_hubbard_1d() const {
-        return m_on_site_only_0022 && m_nn_only_1111;
-    }
-
-    bool is_hubbard_1d_pbc() const {
-        return m_on_site_only_0022 && m_nnp_only_1111;
-    }
-
-    bool spin_conserving() const {
-        return m_spin_conserving_1e && m_spin_conserving_2e;
-    }
-
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
     /**
@@ -173,6 +105,28 @@ public:
         onv.zero();
         for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
         for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
+    }
+
+    /**
+     * output some useful logs identifying the kind of H detected
+     */
+    void log_ham_data() const {
+        if (!m_contribs_1100.is_nonzero(0ul))
+            log::info("1-electron term has no diagonal contributions");
+        if (!m_contribs_1100.is_nonzero(conn_utils::singles))
+            log::info("1-electron term has no single-excitation contributions");
+        if (!m_contribs_2200.is_nonzero(0ul))
+            log::info("2-electron term has no diagonal contributions");
+        if (!m_contribs_2200.is_nonzero(conn_utils::singles))
+            log::info("2-electron term has no single-excitation contributions");
+        if (!m_contribs_2200.is_nonzero(conn_utils::doubles))
+            log::info("2-electron term has no double-excitation contributions");
+        if (m_model_attrs.m_nnp_only_singles)
+            log::info("single-excitation contributions to 1-electron term are periodic nearest-neighbor only");
+        else if (m_model_attrs.m_nn_only_singles)
+            log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");
+        if (m_model_attrs.m_on_site_only_doubles)
+            log::info("2-electron term diagonal contributions are on-site only");
     }
 
 };

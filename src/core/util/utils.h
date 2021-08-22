@@ -25,6 +25,13 @@
 
 namespace utils {
 
+    static constexpr size_t min(size_t i, size_t j){
+        return i<j ? i: j;
+    }
+    static constexpr size_t max(size_t i, size_t j){
+        return i>j ? i: j;
+    }
+
     /*
      * tests whether all bytes are zero.
      * This is slow, only use for checking that memsets and other zeroing operations
@@ -188,30 +195,32 @@ namespace utils {
     }
 
     template<size_t exp, typename T=void>
-    static typename std::enable_if<exp==0, T>::type
-    pow(const T& v){
+    static typename std::enable_if<exp == 0, T>::type
+    pow(const T &v) {
         return 1ul;
     }
+
     template<size_t exp, typename T=void>
-    static typename std::enable_if<exp!=0, T>::type
-    pow(const T& v){
-        return v*pow<exp-1, T>(v);
+    static typename std::enable_if<exp != 0, T>::type
+    pow(const T &v) {
+        return v * pow<exp - 1, T>(v);
     }
 
     template<size_t n>
     static typename std::enable_if<!n, size_t>::type
-    ntup_num(size_t extent){
+    ntup_num(size_t extent) {
         return 1ul;
-    }
-    template<size_t n>
-    static typename std::enable_if<n, size_t>::type
-    ntup_num(size_t extent){
-        return extent*ntup_num<n-1>(extent-1);
     }
 
     template<size_t n>
-    static size_t ntup(size_t extent){
-        return ntup_num<n>(extent)/ntup_num<n>(n);
+    static typename std::enable_if<n, size_t>::type
+    ntup_num(size_t extent) {
+        return extent * ntup_num<n - 1>(extent - 1);
+    }
+
+    template<size_t n>
+    static size_t ntup(size_t extent) {
+        return ntup_num<n>(extent) / ntup_num<n>(n);
     }
 }
 
@@ -534,7 +543,7 @@ namespace prob_utils {
     }
 
     static void rectify(std::vector<defs::prob_t> &v, defs::prob_t min) {
-        for (auto &prob: v) if (prob<min) prob = min;
+        for (auto &prob: v) if (prob < min) prob = min;
         normalize(v);
     }
 }
@@ -768,13 +777,16 @@ namespace nd_utils {
 
 namespace tags {
     template<typename T>
-    struct Type {};
+    struct Type {
+    };
 
     template<size_t ind>
-    struct Ind {};
+    struct Ind {
+    };
 
     template<bool t>
-    struct Bool {};
+    struct Bool {
+    };
 }
 
 namespace array_utils {
@@ -853,6 +865,7 @@ namespace conn_utils {
                       (nbos_cre << (2 * nbit_exsig_nop_frm)) |
                       (nbos_ann << (2 * nbit_exsig_nop_frm + nbit_exsig_nop_bos));
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -862,6 +875,7 @@ namespace conn_utils {
     static constexpr size_t decode_nfrm_cre(size_t exsig) {
         return exsig_nop_mask_frm & exsig;
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -869,8 +883,9 @@ namespace conn_utils {
      *  the number of fermion annihilation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nfrm_ann(size_t exsig) {
-        return exsig_nop_mask_frm & (exsig>>nbit_exsig_nop_frm);
+        return exsig_nop_mask_frm & (exsig >> nbit_exsig_nop_frm);
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -878,8 +893,9 @@ namespace conn_utils {
      *  the number of boson creation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nbos_cre(size_t exsig) {
-        return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm));
+        return exsig_nop_mask_bos & (exsig >> (2 * nbit_exsig_nop_frm));
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -887,8 +903,9 @@ namespace conn_utils {
      *  the number of boson annihilation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nbos_ann(size_t exsig) {
-        return exsig_nop_mask_bos & (exsig>>(2*nbit_exsig_nop_frm+nbit_exsig_nop_bos));
+        return exsig_nop_mask_bos & (exsig >> (2 * nbit_exsig_nop_frm + nbit_exsig_nop_bos));
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -898,6 +915,7 @@ namespace conn_utils {
     static constexpr size_t decode_nfrm(size_t exsig) {
         return decode_nfrm_cre(exsig) + decode_nfrm_ann(exsig);
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -907,6 +925,7 @@ namespace conn_utils {
     static constexpr size_t decode_nbos(size_t exsig) {
         return decode_nbos_cre(exsig) + decode_nbos_ann(exsig);
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -916,6 +935,7 @@ namespace conn_utils {
     static constexpr size_t decode_nop(size_t exsig) {
         return decode_nfrm(exsig) + decode_nbos(exsig);
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -923,8 +943,10 @@ namespace conn_utils {
      *  true if the exsig has any fermion operators and no boson operators
      */
     static constexpr bool is_pure_frm(size_t exsig) {
-        return !(decode_nbos_cre(exsig) || decode_nbos_ann(exsig)) && (decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig));
+        return !(decode_nbos_cre(exsig) || decode_nbos_ann(exsig)) &&
+               (decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig));
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -932,8 +954,10 @@ namespace conn_utils {
      *  true if the exsig has any boson operators and no fermion operators
      */
     static constexpr bool is_pure_bos(size_t exsig) {
-        return !(decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig)) && (decode_nbos_cre(exsig) || decode_nbos_ann(exsig));
+        return !(decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig)) &&
+               (decode_nbos_cre(exsig) || decode_nbos_ann(exsig));
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -943,6 +967,7 @@ namespace conn_utils {
     static constexpr bool conserves_nfrm(size_t exsig) {
         return decode_nfrm_cre(exsig) == decode_nfrm_ann(exsig);
     }
+
     /**
      * @param exsig
      *  excitation signature
@@ -952,6 +977,43 @@ namespace conn_utils {
     static constexpr bool conserves_nbos(size_t exsig) {
         return decode_nbos_cre(exsig) == decode_nbos_ann(exsig);
     }
+
+    static constexpr size_t ncontrib_frm(size_t exsig) {
+        return utils::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig))+1;
+    }
+
+    static constexpr size_t ncontrib_bos(size_t exsig) {
+        return utils::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig))+1;
+    }
+
+    static constexpr size_t base_exsig(size_t exsig) {
+        return encode_exsig(
+                decode_nfrm_cre(exsig) - (ncontrib_frm(exsig)-1),
+                decode_nfrm_ann(exsig) - (ncontrib_frm(exsig)-1),
+                decode_nbos_cre(exsig) - (ncontrib_bos(exsig)-1),
+                decode_nbos_ann(exsig) - (ncontrib_bos(exsig)-1)
+        );
+    }
+
+    static constexpr size_t add_ops(size_t exsig, size_t nfrm, size_t nbos) {
+        return encode_exsig(decode_nfrm_cre(exsig) + nfrm, decode_nfrm_ann(exsig) + nfrm,
+                            decode_nbos_cre(exsig) + nbos, decode_nbos_ann(exsig) + nbos);
+    }
+
+    static constexpr bool contribs_to_frm(size_t exsig, size_t ranksig) {
+        return (decode_nfrm_cre(exsig) <= decode_nfrm_cre(ranksig)) && (
+                decode_nfrm_cre(ranksig) - decode_nfrm_cre(exsig) == decode_nfrm_ann(ranksig) - decode_nfrm_ann(exsig));
+    }
+
+    static constexpr bool contribs_to_bos(size_t exsig, size_t ranksig) {
+        return (decode_nbos_cre(exsig) <= decode_nbos_cre(ranksig)) && (
+                decode_nbos_cre(ranksig) - decode_nbos_cre(exsig) == decode_nbos_ann(ranksig) - decode_nbos_ann(exsig));
+    }
+
+    static constexpr bool contribs_to(size_t exsig, size_t ranksig) {
+        return contribs_to_frm(exsig, ranksig) && contribs_to_bos(exsig, ranksig);
+    }
+
     /**
      * @param exsig
      *  excitation signature
@@ -965,9 +1027,12 @@ namespace conn_utils {
 
     static std::string to_string(size_t exsig) {
         if (exsig > nexsig) return "invalid";
-        return std::to_string(decode_nfrm_cre(exsig))+std::to_string(decode_nfrm_ann(exsig))+
-            std::to_string(decode_nbos_cre(exsig))+std::to_string(decode_nbos_ann(exsig));
+        return std::to_string(decode_nfrm_cre(exsig)) + std::to_string(decode_nfrm_ann(exsig)) +
+               std::to_string(decode_nbos_cre(exsig)) + std::to_string(decode_nbos_ann(exsig));
     }
+
+    static constexpr size_t singles = encode_exsig(1,1,0,0);
+    static constexpr size_t doubles = encode_exsig(2,2,0,0);
 }
 
 

@@ -38,6 +38,10 @@ struct FcidumpFileReader : public HamiltonianFileReader {
     void inds_to_orbs(defs::inds& inds);
 
     void set_symm_and_rank(const std::string &filename);
+
+    size_t ranksig(const defs::inds &inds) const override;
+
+    size_t exsig(const defs::inds &inds, const size_t ranksig) const override;
 };
 
 #endif //M7_FCIDUMPFILEREADER_H

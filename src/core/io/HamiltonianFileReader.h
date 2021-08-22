@@ -91,6 +91,14 @@ struct HamiltonianFileReader : public SparseArrayFileReader<defs::ham_t> {
         return std::count_if(inds.begin(), inds.end(), [](const size_t& a){return a!=~0ul;});
     }
 
+    virtual size_t ranksig(const defs::inds &inds) const = 0;
+
+    virtual size_t exsig(const defs::inds &inds, const size_t ranksig) const = 0;
+
+    size_t exsig(const defs::inds &inds) const {
+        return exsig(inds, ranksig(inds));
+    }
+
 private:
     /**
      * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they

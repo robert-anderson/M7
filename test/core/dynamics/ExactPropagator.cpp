@@ -60,7 +60,7 @@ TEST(ExactPropagator, DeterministicSubspace) {
     //const auto benchmark = -99.9421389039331
     //Hamiltonian<> ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     Hamiltonian ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
@@ -91,7 +91,7 @@ TEST(ExactPropagator, Test) {
     opts.verify();
     // -99.9421389039332
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
 
@@ -138,7 +138,7 @@ TEST(ExactPropagator, RdmTest) {
     opts.verify();
     //const auto benchmark = -99.9421389039331
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
@@ -172,7 +172,7 @@ TEST(ExactPropagator, Hubbard) {
 
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);
 
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     for (size_t i = 0ul; i < ham.nelec() / 2; ++i) {
         ref_onv.set({0, i});
@@ -208,7 +208,7 @@ TEST(ExactPropagator, Cr2Test) {
     opts.verify();
     //const auto benchmark = -108.916561245585;
     Hamiltonian ham(defs::assets_root + "/RHF_Cr2_12o12e/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv ref_onv(ham.nsite());
     for (size_t i=0ul; i<ham.nelec()/2; ++i){ref_onv.set(0, i); ref_onv.set({1, i});}
     Wavefunction wf(opts, ham.nsite());

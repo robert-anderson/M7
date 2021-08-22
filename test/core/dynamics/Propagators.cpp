@@ -18,7 +18,7 @@ TEST(Propagators, BasicTest) {
     //const auto benchmark = -99.9421389039331
     //Hamiltonian ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
     Hamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());
@@ -48,7 +48,7 @@ TEST(Propagators, RefExcitTest) {
     opts.verify();
     //const auto benchmark = -99.9421389039331
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref_onv(ham.nsite());
     ham.set_hf_mbf(ref_onv, 0);
     Wavefunction wf(opts, ham.nsite());

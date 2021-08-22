@@ -6,7 +6,7 @@
 
 FrmExcitGen::FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit) :
 ExcitGen(h, prng), m_nexcit(nexcit),
-m_spin_conserving(nexcit == 1 ? h.m_frm.m_spin_conserving_1e : h.m_frm.m_spin_conserving_2e) {}
+m_spin_conserving(nexcit == 1 ? h.m_frm.m_kramers_attrs.m_conserving_singles : h.m_frm.m_kramers_attrs.m_conserving_double) {}
 
 bool FrmExcitGen::draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                        defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {

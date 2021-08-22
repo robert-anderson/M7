@@ -2,12 +2,12 @@
 // Created by rja on 19/08/2021.
 //
 
-#include "src/core/io/EbdumpFileReader.h"
+#include "src/core/io/EbDumpFileReader.h"
 #include "gtest/gtest.h"
 
-TEST(EbdumpFileReader, ReadFile){
+TEST(EbDumpFileReader, ReadFile){
     std::string fname = "/home/rja/CLionProjects/M7/assets/Hubbard_U4_4site/EBDUMP";
-    EbdumpFileReader file_reader(fname);
+    EbDumpFileReader file_reader(fname);
     ASSERT_FALSE(file_reader.m_spin_resolved);
     ASSERT_EQ(file_reader.m_norb, 4ul);
     defs::inds inds(3);
@@ -25,16 +25,9 @@ TEST(EbdumpFileReader, ReadFile){
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_TRUE(consts::floats_equal(consts::real(value), -0.009244953059296356));
 
-    // scan to first "omega" element
-    while(file_reader.next(inds, value)){if (HamiltonianFileReader::nset_ind(inds)==1) break;}
-
-    test_inds = {0, ~0ul, ~0ul};
-    ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), 0.7134575551055222));
-
     // scan to final element
     while(file_reader.next(inds, value)){}
-    test_inds = {3, ~0ul, ~0ul};
+    test_inds = {3, 3, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), 0.708348137895966));
+    ASSERT_TRUE(consts::floats_equal(consts::real(value), -0.09669569380966529));
 }
