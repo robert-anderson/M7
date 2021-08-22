@@ -18,22 +18,22 @@ TEST(ExactPropagator, BosonTest) {
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 10000;
     opts.m_shift.m_period = 1;
-    opts.m_wavefunction.m_replicate = false;
     opts.m_propagator.m_min_spawn_mag = 0.2;
     opts.m_propagator.m_min_death_mag = 0.2;
-    opts.m_propagator.m_consolidate_spawns = false;
     opts.verify();
-    // nboson_cutoff 1: -6.9875779675355165
-    // nboson_cutoff 2: -10.328242246088791
-    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 1, 1.4, 0.3);
-    ASSERT_TRUE(ham.m_frm.spin_conserving());
+    // nboson_cutoff 1: -3.1699561178752873
+    // nboson_cutoff 2: -6.692966463435127
+    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
+    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref(ham.nsite());
     ham.set_hf_mbf(ref, 0);
 
     Wavefunction wf(opts, ham.nsite());
-    if (!opts.m_wavefunction.m_replicate && opts.m_wavefunction.m_nroot == 1) { ASSERT_EQ(wf.npart(), 1); }
-    bool explicit_hf_conn_mevs = false; //TODO
-    ExactPropagator prop(ham, opts, wf.m_format, explicit_hf_conn_mevs);
+    if (wf.nreplica()!=1 && opts.m_wavefunction.m_nroot == 1) { ASSERT_EQ(wf.npart(), 1); }
+    ExactPropagator prop(ham, opts, wf.m_format, true);
     auto ref_energy = ham.get_energy(ref);
 
     auto ref_loc = wf.create_row(0, ref, ref_energy, 1);
@@ -43,7 +43,6 @@ TEST(ExactPropagator, BosonTest) {
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    //std::cout << solver.mevs().m_fermion_rdm->get_energy(ham.m_frm) - prop.m_shift.m_values[0] << std::endl;
 }
 
 #else

@@ -61,6 +61,34 @@ TEST(ForeachConnection, FrmNoSym) {
     ASSERT_EQ(counter, 2ul);
 }
 
+
+TEST(ForeachConnection, HubbardHolstein) {
+    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
+    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, 3);
+
+    conn::FrmBosOnv conn(ham.nsite());
+    buffered::FrmBosOnv onv(ham.nsite());
+
+    onv = {{1, 2, 3, 4}, {1, 0, 2}};
+
+    struct Result {
+        defs::inds m_frm_cre, m_frm_ann, m_bos_cre, m_bos_ann;
+    };
+
+    std::vector<Result> results;
+    auto fn = [&](const conn::FrmBosOnv& conn) {
+        results.push_back({conn.m_frm.m_cre.inds(), conn.m_frm.m_ann.inds(),
+                             conn.m_bos.m_cre.to_vector(), conn.m_bos.m_ann.to_vector()});
+        std::cout << results.back().m_bos_ann << " " << results.back().m_bos_cre << std::endl;
+    };
+    foreach_conn::frmbos::Holstein foreach(ham);
+
+    foreach.foreach<field::FrmBosOnv>(onv, fn, false);
+}
+
+
 #if 0
 TEST(ForeachConnection, Hubbard1D) {
     FermionHamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 0);

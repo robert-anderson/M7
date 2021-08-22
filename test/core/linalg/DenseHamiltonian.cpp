@@ -110,6 +110,16 @@ TEST(DenseHamiltonian, BosonCouplingMaxOcc2) {
     ASSERT_FLOAT_EQ(solver.m_evals[0], -6.692966463435127);
 }
 
+TEST(DenseHamiltonian, BosonCouplingMaxOcc1) {
+    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
+    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
+    Hamiltonian h(fname, fname_eb, fname_bos, false, 1);
+    DenseHamiltonian dh(h);
+    auto solver = dh.diagonalize();
+    ASSERT_FLOAT_EQ(solver.m_evals[0], -3.1699561178752873);
+}
+
 TEST(DenseHamiltonian, BosonCouplingMaxOcc3) {
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";

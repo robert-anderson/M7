@@ -313,40 +313,41 @@ namespace foreach_conn {
     }
 
     namespace frmbos {
-        struct FrmBos : Base {
-            explicit FrmBos(const Hamiltonian& ham): Base(ham){}
+
+        struct Holstein : Base {
+            using Base::foreach;
+            explicit Holstein(const Hamiltonian& ham): Base(ham){}
 
             void foreach(const FrmOnv &mbf, const fn_c_t<FrmOnv> &body_fn) override {}
 
-            void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override {
-                if (!m_ham.m_nboson_max) return;
-                auto& conn = m_conns.m_frmbosonv;
-                conn.clear();
-                m_occ.update(mbf);
-                for (const auto& occ: m_occ.inds()){
-                    const size_t imode = occ < m_ham.nsite() ? occ : occ-m_ham.nsite();
-                    DEBUG_ASSERT_LE(mbf.m_bos[imode], m_ham.m_nboson_max, "max boson occupation exceeded");
-                    if (mbf.m_bos[imode]<m_ham.m_nboson_max){
-                        conn.m_bos.m_cre.set({imode, 1ul});
-                        body_fn(conn);
-                    }
-                    if (mbf.m_bos[imode]>0){
-                        conn.m_bos.m_ann.set({imode, 1ul});
-                        body_fn(conn);
-                    }
-                }
-            }
+            void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override;
 
             void foreach(const BosOnv &mbf, const fn_c_t<BosOnv> &body_fn) override {}
         };
+
+        struct FrmBos : Holstein {
+            using Holstein::foreach;
+
+            explicit FrmBos(const Hamiltonian& ham): Holstein(ham){}
+
+            void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override;
+        };
+
     }
 
     typedef std::vector<std::unique_ptr<Base>> vector_t;
-    static vector_t make_all(const Hamiltonian& ham) {
+    static vector_t make_all(const Hamiltonian& ham){
         vector_t v;
-        v.push_back(std::unique_ptr<Base>(new frm::Fermion(ham)));
-        if (ham.m_nboson_max)
-            v.push_back(std::unique_ptr<Base>(new frmbos::FrmBos(ham)));
+        if (ham.m_frm.is_hubbard_1d())
+            v.push_back(std::unique_ptr<Base>(new frm::Hubbard1D(ham)));
+        else
+            v.push_back(std::unique_ptr<Base>(new frm::Fermion(ham)));
+        if (ham.m_nboson_max){
+            if (ham.m_frmbos.is_holstein())
+                v.push_back(std::unique_ptr<Base>(new frmbos::Holstein(ham)));
+            else
+                v.push_back(std::unique_ptr<Base>(new frmbos::FrmBos(ham)));
+        }
         return v;
     }
 }

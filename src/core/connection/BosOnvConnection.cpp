@@ -16,6 +16,16 @@ const std::vector<BosOpPair> &BosOps::pairs() const {
     return m_pairs;
 }
 
+defs::inds BosOps::to_vector() const {
+    defs::inds vec;
+    vec.reserve(size());
+    for (auto& pair: m_pairs) {
+        for (size_t iop=0ul; iop<pair.m_nop; ++iop) vec.push_back(pair.m_imode);
+    }
+    DEBUG_ASSERT_EQ(vec.size(), size(), "incorrect number of operators in vector");
+    return vec;
+}
+
 void BosOps::clear() {
     m_pairs.clear();
     m_nop = 0ul;

@@ -98,37 +98,16 @@ struct FermionHamiltonian {
      * @param spin
      *  spin (MS) number
      */
-    void set_hf_mbf(field::FrmOnv &onv, int spin) const {
-        auto nalpha = ci_utils::nalpha(m_nelec, spin);
-        auto nbeta = ci_utils::nbeta(m_nelec, spin);
-        DEBUG_ASSERT_EQ(nalpha + nbeta, m_nelec, "inconsistent na, nb, nelec");
-        onv.zero();
-        for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
-        for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
-    }
+    void set_hf_mbf(field::FrmOnv &onv, int spin) const;
 
     /**
      * output some useful logs identifying the kind of H detected
      */
-    void log_ham_data() const {
-        if (!m_contribs_1100.is_nonzero(0ul))
-            log::info("1-electron term has no diagonal contributions");
-        if (!m_contribs_1100.is_nonzero(conn_utils::singles))
-            log::info("1-electron term has no single-excitation contributions");
-        if (!m_contribs_2200.is_nonzero(0ul))
-            log::info("2-electron term has no diagonal contributions");
-        if (!m_contribs_2200.is_nonzero(conn_utils::singles))
-            log::info("2-electron term has no single-excitation contributions");
-        if (!m_contribs_2200.is_nonzero(conn_utils::doubles))
-            log::info("2-electron term has no double-excitation contributions");
-        if (m_model_attrs.m_nnp_only_singles)
-            log::info("single-excitation contributions to 1-electron term are periodic nearest-neighbor only");
-        else if (m_model_attrs.m_nn_only_singles)
-            log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");
-        if (m_model_attrs.m_on_site_only_doubles)
-            log::info("2-electron term diagonal contributions are on-site only");
-    }
+    void log_data() const;
 
+    bool is_hubbard_1d() const {
+        return m_model_attrs.is_hubbard_1d();
+    }
 };
 
 #endif //M7_FERMIONHAMILTONIAN_H

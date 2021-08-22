@@ -64,7 +64,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
     }
     mpi::barrier();
     log::info("FCIDUMP loading complete.");
-    log_ham_data();
+    log_data();
 }
 
 FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
@@ -83,4 +83,32 @@ defs::ham_t FermionHamiltonian::get_element_0000(const field::FrmOnv &onv) const
 defs::ham_t
 FermionHamiltonian::get_element_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
+}
+
+void FermionHamiltonian::set_hf_mbf(field::FrmOnv &onv, int spin) const {
+    auto nalpha = ci_utils::nalpha(m_nelec, spin);
+    auto nbeta = ci_utils::nbeta(m_nelec, spin);
+    DEBUG_ASSERT_EQ(nalpha + nbeta, m_nelec, "inconsistent na, nb, nelec");
+    onv.zero();
+    for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
+    for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
+}
+
+void FermionHamiltonian::log_data() const {
+    if (!m_contribs_1100.is_nonzero(0ul))
+        log::info("1-electron term has no diagonal contributions");
+    if (!m_contribs_1100.is_nonzero(conn_utils::singles))
+        log::info("1-electron term has no single-excitation contributions");
+    if (!m_contribs_2200.is_nonzero(0ul))
+        log::info("2-electron term has no diagonal contributions");
+    if (!m_contribs_2200.is_nonzero(conn_utils::singles))
+        log::info("2-electron term has no single-excitation contributions");
+    if (!m_contribs_2200.is_nonzero(conn_utils::doubles))
+        log::info("2-electron term has no double-excitation contributions");
+    if (m_model_attrs.m_nn_only_singles)
+        log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");
+    else if (m_model_attrs.m_nnp_only_singles)
+        log::info("single-excitation contributions to 1-electron term are periodic nearest-neighbor only");
+    if (m_model_attrs.m_on_site_only_doubles)
+        log::info("2-electron term diagonal contributions are on-site only");
 }

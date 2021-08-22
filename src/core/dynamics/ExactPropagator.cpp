@@ -4,7 +4,6 @@
 
 #include "src/core/enumerator/ContainerCombinationEnumerator.h"
 #include "ExactPropagator.h"
-#include "FciqmcCalculation.h"
 
 ExactPropagator::ExactPropagator(
         const Hamiltonian &ham, const fciqmc_config::Document &opts,

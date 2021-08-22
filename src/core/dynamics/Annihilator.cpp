@@ -155,7 +155,7 @@ void Annihilator::handle_src_block(SpawnTableRow &block_begin, WalkerTableRow &d
      * don't make contributions to RDM elements if they already take the equivalent contribution from deterministic
      * average connections to the reference
      */
-    if (m_rdms.m_explicit_ref_conns){
+    if (m_rdms.m_explicit_ref_conns) {
         if (dst_row.m_mbf == m_refs[ipart_dst].get_mbf()) return;
         if (block_begin.m_src_mbf == m_refs[m_wf.ipart_replica(ipart_dst)].get_mbf()) return;
     }
@@ -207,7 +207,8 @@ void Annihilator::loop_over_dst_mbfs() {
             total_delta = 0.0;
             dst_finder();
         } else {
-            DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,
+            if (current.m_send_parents)
+                DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,
                             "should never have diagonal connections at annihilation");
             DEBUG_ASSERT_EQ(current.m_dst_mbf, block_begin.m_dst_mbf, "dst MBFs should be the same");
             DEBUG_ASSERT_EQ(current.m_ipart_dst, block_begin.m_ipart_dst, "dst iparts should be the same");

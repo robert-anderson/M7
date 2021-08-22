@@ -26,12 +26,11 @@ public:
 
     defs::ham_comp_t get_energy(const field::BosOnv &onv) const;
 
-    defs::ham_t get_element(const field::BosOnv &onv, const conn::BosOnv& conn) const {
-        if (conn.size()) return 0.0;
-        return get_element(onv);
-    }
+    defs::ham_t get_element(const field::BosOnv &onv, const conn::BosOnv& conn) const;
 
     size_t nci() const;
+
+    void log_data() const;
 };
 
 

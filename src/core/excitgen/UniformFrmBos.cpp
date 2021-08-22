@@ -12,7 +12,7 @@ bool UniformFrmBos::draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs,
                     "excit gen assumes one boson mode per fermion site");
 
     auto imode = occs[m_prng.draw_uint(occs.size())] % src_onv.m_frm.m_nsite;
-    // if cre, attempt to generate an ONV with an additional boson occupying the mode at imode
+    // if m_cre, attempt to generate an ONV with an additional boson occupying the mode at imode
     // else, attempt to generate a "de-excited" ONV with one less boson occupying the mode at imode
     size_t curr_occ = src_onv.m_bos[imode];
     DEBUG_ASSERT_LE(curr_occ, m_h.m_nboson_max, "current occupation of selected mode exceeds cutoff");

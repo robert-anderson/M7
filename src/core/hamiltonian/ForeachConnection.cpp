@@ -49,7 +49,8 @@ void foreach_conn::frm::Fermion::doubles(conn::FrmOnv &conn, const std::function
     }
 }
 
-void foreach_conn::frm::Fermion::foreach(const field::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
+void
+foreach_conn::frm::Fermion::foreach(const field::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
     m_occ.update(mbf);
     m_vac.update(mbf);
     singles(conn, fn);
@@ -98,4 +99,55 @@ void foreach_conn::frm::Hubbard1D::foreach(const field::FrmOnv &mbf, conn::FrmOn
                                            const std::function<void()> &fn) {
     m_occ.update(mbf);
     singles(mbf, conn, fn);
+}
+
+void foreach_conn::frmbos::Holstein::foreach(
+        const FrmBosOnv &mbf, const foreach_conn::fn_c_t<FrmBosOnv> &body_fn) {
+    if (!m_ham.m_nboson_max) return;
+    auto &conn = m_conns.m_frmbosonv;
+    for (size_t imode = 0ul; imode < mbf.m_bos.nelement(); ++imode) {
+        if (mbf.m_frm.site_nocc(imode)) {
+            if (mbf.m_bos[imode] < m_ham.m_nboson_max) {
+                conn.clear();
+                conn.m_bos.m_cre.set({imode, 1ul});
+                DEBUG_ASSERT_EQ(conn.m_bos.size(), 1ul, "should have only one boson operator index");
+                body_fn(conn);
+            }
+            if (mbf.m_bos[imode] > 0) {
+                conn.clear();
+                conn.m_bos.m_ann.set({imode, 1ul});
+                DEBUG_ASSERT_EQ(conn.m_bos.size(), 1ul, "should have only one boson operator index");
+                body_fn(conn);
+            }
+        }
+    }
+}
+
+void foreach_conn::frmbos::FrmBos::foreach(const FrmBosOnv &mbf, const foreach_conn::fn_c_t<FrmBosOnv> &body_fn) {
+    auto &conn = m_conns.m_frmbosonv;
+    // do all the 0001 / 0010 excits first
+    Holstein::foreach(mbf, body_fn);
+    // now do all those that involve single-fermion excitations
+    m_occ.update(mbf);
+    m_vac.update(mbf);
+    for (const auto& occ : m_occ.inds()){
+        for (const auto& vac : m_vac.inds()){
+            conn.clear();
+            conn.m_frm.set(occ, vac);
+            for (size_t imode=0ul; imode<mbf.nsite(); ++imode) {
+                if (mbf.m_bos[imode] < m_ham.m_nboson_max) {
+                    conn.m_bos.clear();
+                    conn.m_bos.m_cre.set({imode, 1ul});
+                    DEBUG_ASSERT_EQ(conn.m_bos.size(), 1ul, "should have only one boson operator index");
+                    body_fn(conn);
+                }
+                if (mbf.m_bos[imode] > 0) {
+                    conn.m_bos.clear();
+                    conn.m_bos.m_ann.set({imode, 1ul});
+                    DEBUG_ASSERT_EQ(conn.m_bos.size(), 1ul, "should have only one boson operator index");
+                    body_fn(conn);
+                }
+            }
+        }
+    }
 }

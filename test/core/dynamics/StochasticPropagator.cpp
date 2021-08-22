@@ -15,7 +15,7 @@ TEST(StochasticPropagator, Test) {
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
     opts.m_propagator.m_nw_target = 100000;
-    opts.m_av_ests.m_rdm.m_ranks = {"2"};
+    //opts.m_av_ests.m_rdm.m_ranks = {"2"};
     opts.m_av_ests.m_ncycle = 2000;
     opts.m_av_ests.m_stats_period = 10;
     opts.m_propagator.m_min_spawn_mag = 0.2;
@@ -214,14 +214,15 @@ TEST(StochasticPropagator, BosonTest) {
     opts.m_propagator.m_tau_init = 0.001;
     opts.m_propagator.m_nw_target = 10000;
     opts.m_shift.m_period = 1;
-    opts.m_wavefunction.m_replicate = false;
     opts.m_propagator.m_min_spawn_mag = 0.2;
     opts.m_propagator.m_min_death_mag = 0.2;
-    opts.m_propagator.m_consolidate_spawns = false;
     opts.verify();
 
     // -10.328242246088791
-    Hamiltonian ham(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 0, 0, 1.4, 0.3);
+    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
+    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
 
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref(ham.nsite());

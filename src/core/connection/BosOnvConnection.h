@@ -22,6 +22,8 @@ public:
 
     const std::vector<BosOpPair>& pairs() const;
 
+    defs::inds to_vector() const;
+
     void clear();
 
     size_t size() const;

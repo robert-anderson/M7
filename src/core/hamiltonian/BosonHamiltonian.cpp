@@ -20,12 +20,15 @@ BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, std::string 
         if (consts::float_is_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        m_contribs_0011.is_nonzero(exsig);
+        DEBUG_ASSERT_TRUE(conn_utils::contribs_to(exsig, ranksig), "excitation does not contribute to this operator rank");
+        m_contribs_0011.set_nonzero(exsig);
         m_coeffs.set(index(inds[0], inds[1]), value);
     }
+    log_data();
 }
 
 defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
+    if (!m_nboson_max) return 0.0;
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode)
         res += m_coeffs[index(imode, imode)] * static_cast<defs::ham_comp_t>(onv[imode]);
@@ -36,6 +39,18 @@ defs::ham_comp_t BosonHamiltonian::get_energy(const field::BosOnv &onv) const {
     return consts::real(get_element(onv));
 }
 
+defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+    if (conn.size()) return 0.0;
+    return get_element(onv);
+}
+
 size_t BosonHamiltonian::nci() const {
     return ci_utils::boson_dim(m_nmode, m_nboson_max);
+}
+
+void BosonHamiltonian::log_data() const {
+    if (!m_contribs_0011.is_nonzero(0ul))
+        log::info("1-boson (0011) term has no diagonal (0000) contributions");
+    if (!m_contribs_0011.is_nonzero(conn_utils::encode_exsig(0,0,1,1)))
+        log::info("1-boson (0011) term has no single-excitation (0011) contributions");
 }
