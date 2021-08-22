@@ -6,11 +6,19 @@
 #define M7_BOSONHAMILTONIAN_H
 
 #include "src/core/connection/Connections.h"
+#include "src/core/parallel/SharedArray.h"
 #include "src/core/field/Fields.h"
+#include "HamiltonianData.h"
 
-struct BosonHamiltonian {
+class BosonHamiltonian {
+    size_t index(const size_t &n, const size_t &m) const {
+        return n * m_nmode + m;
+    }
+
+public:
     const size_t m_nboson_max, m_nmode;
-    const defs::ham_t m_omega;
+    SharedArray<defs::ham_t> m_coeffs;
+    ham_data::TermContribs m_contribs_0011;
 
     BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname);
 

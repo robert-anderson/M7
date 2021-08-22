@@ -2,12 +2,12 @@
 // Created by rja on 19/08/2021.
 //
 
-#include "src/core/io/EbDumpFileReader.h"
+#include "src/core/io/EbdumpFileReader.h"
 #include "gtest/gtest.h"
 
 TEST(EbDumpFileReader, ReadFile){
     std::string fname = "/home/rja/CLionProjects/M7/assets/Hubbard_U4_4site/EBDUMP";
-    EbDumpFileReader file_reader(fname);
+    EbdumpFileReader file_reader(fname);
     ASSERT_FALSE(file_reader.m_spin_resolved);
     ASSERT_EQ(file_reader.m_norb, 4ul);
     defs::inds inds(3);

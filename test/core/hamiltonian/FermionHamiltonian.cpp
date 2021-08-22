@@ -52,7 +52,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 #endif
 
 TEST(FermionHamiltonian, RhfEnergy) {
-    const auto benchmark = -108.65146156994338;
+    const auto benchmark = -108.76171800006861;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv fonv(ham.m_nsite);

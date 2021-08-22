@@ -127,6 +127,7 @@ namespace fciqmc_config {
     struct Fcidump : config::Section {
         config::Param<std::string> m_path;
         config::Param<std::string> m_eb_path;
+        config::Param<std::string> m_bos_path;
         config::Param<bool> m_spin_major;
 
         explicit Fcidump(config::Group *parent);

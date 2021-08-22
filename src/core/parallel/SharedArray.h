@@ -18,13 +18,6 @@ class SharedArray {
     T *m_data = nullptr;
 public:
     SharedArray(size_t size) : m_size(size) {
-        /*
-         * MPI_Aint window_size; double *window_data; MPI_Win node_window;
-         * if (onnode_procid==0)
-         * window_size = sizeof(double);
-         * else window_size = 0;
-         * MPI_Win_allocate_shared (window_size,sizeof(double),MPI_INFO_NULL, nodecomm, &window_data,&node_window)
-         */
 #ifdef ENABLE_MPI
         auto baseptr = reinterpret_cast<void *>(&m_data);
         if (mpi::on_node_i_am_root()) {

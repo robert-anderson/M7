@@ -8,5 +8,7 @@
 
 TEST(FileReader, Skip){
     FileReader file_reader(defs::assets_root+"/RHF_N2_CCPVTZ/FCIDUMP");
-    file_reader.skip(1);
+    size_t n = 0ul;
+    while (file_reader.next()) ++n;
+    ASSERT_EQ(n, 180704);
 }

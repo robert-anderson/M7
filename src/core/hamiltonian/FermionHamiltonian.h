@@ -25,7 +25,7 @@ struct FermionHamiltonian {
     const size_t m_nsite;
     const bool m_complex_valued;
 
-    defs::ham_t m_int_0;
+    defs::ham_t m_int_0 = 0.0;
     typedef Integrals_1e<defs::ham_t, defs::isym_1e> ints1_t;
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
     ints1_t m_int_1;

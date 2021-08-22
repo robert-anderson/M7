@@ -21,28 +21,15 @@ namespace ham_data {
 
         std::vector<bool> m_exsig_nonzero;
 
-        size_t ind(size_t exsig) const {
-            if (!contribs_to(exsig, m_ranksig)) return ~0ul;
-            size_t ifrm = decode_nfrm_cre(exsig);
-            DEBUG_ASSERT_LT(ifrm, m_nexsig_contrib_frm, "invalid number of like-indexed fermion operators");
-            size_t ibos = decode_nbos_cre(exsig);
-            DEBUG_ASSERT_LT(ibos, m_nexsig_contrib_bos, "invalid number of like-indexed boson operators");
-            return ifrm*m_nexsig_contrib_bos+ibos;
-        }
+        size_t ind(size_t exsig) const;
 
 
     public:
-        TermContribs(size_t ranksig): m_ranksig(ranksig), m_basesig(base_exsig(ranksig)),
-                                      m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
-                                      m_exsig_nonzero(m_nexsig_contrib_frm*m_nexsig_contrib_bos, false){}
+        TermContribs(size_t ranksig);
 
-        void set_nonzero(size_t exsig) {
-            m_exsig_nonzero[ind(exsig)] = true;
-        }
+        void set_nonzero(size_t exsig);
 
-        bool is_nonzero(size_t exsig) const {
-            return m_exsig_nonzero[ind(exsig)];
-        }
+        bool is_nonzero(size_t exsig) const;
 
     };
 
@@ -60,22 +47,16 @@ namespace ham_data {
          */
         bool m_on_site_only_doubles = true;
 
-        bool is_hubbard_1d() const {
-            return m_on_site_only_doubles && m_nn_only_singles;
-        }
+        bool is_hubbard_1d() const;
 
-        bool is_hubbard_1d_pbc() const {
-            return m_on_site_only_doubles && m_nnp_only_singles;
-        }
+        bool is_hubbard_1d_pbc() const;
         /**
          * @param iorb
          *  orbital index (site if integrals spin resolved, else spin oribtal index)
          * @return
          *  site index
          */
-        static size_t iorb_to_isite(const size_t &iorb, const size_t &nsite) {
-            return iorb < nsite ? iorb : iorb + nsite;
-        }
+        static size_t iorb_to_isite(const size_t &iorb, const size_t &nsite);
 
         /**
          * @param iorb
@@ -85,51 +66,23 @@ namespace ham_data {
          * @return
          * true if orbitals are nearest neighbors
          */
-        static bool nearest_neighbors(const size_t &nsite, const size_t &iorb, const size_t &jorb, bool periodic) {
-            auto isite = iorb_to_isite(iorb, nsite);
-            auto jsite = iorb_to_isite(jorb, nsite);
-            if (isite + 1 == jsite || jsite + 1 == isite) return true;
-            if (periodic) {
-                return (isite == 0 && jsite == nsite - 1) || (isite == nsite - 1 && jsite == 0);
-            }
-            return false;
-        }
+        static bool nearest_neighbors(const size_t &nsite, const size_t &iorb, const size_t &jorb, bool periodic);
 
-        bool on_site(const size_t &nsite, const size_t &iorb, const size_t &jorb, const size_t &korb, const size_t &lorb) const {
-            auto isite = iorb_to_isite(iorb, nsite);
-            auto jsite = iorb_to_isite(jorb, nsite);
-            auto ksite = iorb_to_isite(korb, nsite);
-            auto lsite = iorb_to_isite(lorb, nsite);
-            return isite == jsite && jsite == ksite && ksite == lsite;
-        }
+        bool on_site(const size_t &nsite, const size_t &iorb, const size_t &jorb, const size_t &korb, const size_t &lorb) const;
 
-        void nonzero(const size_t & nsite, const size_t & i, const size_t & j){
-            if (i==j){
-                // one-electron term is not purely off-diagonal
-                m_nn_only_singles = false;
-                m_nnp_only_singles = false;
-            }
-            else {
-                if (!nearest_neighbors(nsite, i, j, false)) m_nn_only_singles = false;
-                if (!nearest_neighbors(nsite, i, j, true)) m_nnp_only_singles = false;
-            }
-        }
+        void nonzero(const size_t & nsite, const size_t & i, const size_t & j);
 
         /**
          * non-zero integral reached with chemical notation (ij|kl)
          */
-        void nonzero(const size_t & nsite, const size_t & i, const size_t & j, const size_t & k, const size_t & l){
-            if (!(i==j && j==k && k==l)) m_on_site_only_doubles = false;
-        }
+        void nonzero(const size_t & nsite, const size_t & i, const size_t & j, const size_t & k, const size_t & l);
     };
 
     struct KramersAttributes {
         bool m_conserving_singles = true;
         bool m_conserving_double = true;
 
-        bool conserving() const {
-            return m_conserving_singles && m_conserving_double;
-        }
+        bool conserving() const;
     };
 }
 

@@ -44,7 +44,7 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
 
-        if (ranksig==~0ul) {
+        if (ranksig==0ul) {
             m_int_0 = value;
             continue;
         }

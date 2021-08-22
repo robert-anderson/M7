@@ -37,11 +37,9 @@ struct Hamiltonian {
      */
     BosonHamiltonian m_bos;
 
+    Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos, bool spin_major, size_t nboson_max = 0);
 
-    //const defs::inds m_ranksigs;
-
-    Hamiltonian(std::string fname, bool spin_major, size_t nboson_max = 0, defs::ham_comp_t boson_frequency = 0.0,
-                defs::ham_comp_t boson_coupling = 0.0);
+    Hamiltonian(std::string fname, bool spin_major): Hamiltonian(fname, "", "", spin_major, 0ul){}
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 

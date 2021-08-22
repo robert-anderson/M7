@@ -133,7 +133,8 @@ void fciqmc_config::Semistochastic::verify() {
 fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
         config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
         m_path(this, "path", "FCIDUMP", "path to file defining fermionic Hamiltonian"),
-        m_eb_path(this, "path", "EBDUMP", "path to file defining bosonic Hamiltonian and fermion-boson coupling"),
+        m_eb_path(this, "eb_path", "EBDUMP", "path to file defining fermion-boson coupling"),
+        m_bos_path(this, "bos_path", "BOSDUMP", "path to file defining bosonic Hamiltonian"),
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.") {}
 
