@@ -17,7 +17,7 @@
 
 
 /**
- * All interactions between the fermionic parts of ONVs are described in this class.
+ * All interactions between the fermionic parts of MBFs are described in this class.
  */
 struct FermionHamiltonian {
 

@@ -3,7 +3,7 @@
 //
 
 #include "ExcitGenGroup.h"
-#include "UniformFrmBos.h"
+#include "UniformHolstein.h"
 
 void ExcitGenGroup::init() {
     defs::prob_t norm = 0.0;
@@ -60,9 +60,9 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
     }
     if (ham.m_bos.m_nboson_max) {
 //        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
-//                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, true));
+//                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, true));
 //        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
-//                std::unique_ptr<ExcitGen>(new UniformFrmBos(ham, prng, false));
+//                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, false));
     }
 
     init();

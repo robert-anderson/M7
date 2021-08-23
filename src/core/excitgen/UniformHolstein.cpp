@@ -2,9 +2,9 @@
 // Created by rja on 04/08/2021.
 //
 
-#include "UniformFrmBos.h"
+#include "UniformHolstein.h"
 
-bool UniformFrmBos::draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+bool UniformHolstein::draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
                          defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
     if(!m_h.m_nboson_max) return false;
 
@@ -34,11 +34,11 @@ bool UniformFrmBos::draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs,
     return true;
 }
 
-std::string UniformFrmBos::description() const {
+std::string UniformHolstein::description() const {
     return log::format("Boson {} {} if fermion site is occupied", (m_cre ? "create":"annihilate"), 1ul);
 }
 
-size_t UniformFrmBos::approx_nconn() const {
+size_t UniformHolstein::approx_nconn() const {
     // assume there's one excitation or de-excitation available per electron
     return m_h.m_frm.m_nelec;
 }

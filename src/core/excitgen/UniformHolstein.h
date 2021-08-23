@@ -2,15 +2,15 @@
 // Created by rja on 04/08/2021.
 //
 
-#ifndef M7_UNIFORMFRMBOS_H
-#define M7_UNIFORMFRMBOS_H
+#ifndef M7_UNIFORMHOLSTEIN_H
+#define M7_UNIFORMHOLSTEIN_H
 
 #include "ExcitGen.h"
 
-class UniformFrmBos : public FrmBosExcitGen {
+class UniformHolstein : public FrmBosExcitGen {
     const bool m_cre;
 public:
-    UniformFrmBos(const Hamiltonian &h, PRNG &prng, bool cre) : FrmBosExcitGen(h, prng), m_cre(cre){}
+    UniformHolstein(const Hamiltonian &h, PRNG &prng, bool cre) : FrmBosExcitGen(h, prng), m_cre(cre){}
 
     bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
               defs::ham_t &helem, conn::FrmBosOnv &conn) override;
@@ -22,4 +22,4 @@ private:
 };
 
 
-#endif //M7_UNIFORMFRMBOS_H
+#endif //M7_UNIFORMHOLSTEIN_H

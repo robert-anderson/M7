@@ -44,6 +44,36 @@ public:
  */
 class FrmExcitGen : public ExcitGen {
 protected:
+    const defs::inds m_exsigs;
+    const bool m_spin_conserving;
+
+public:
+    FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+
+    bool draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
+              defs::ham_t &helem, conn::FrmOnv &conn) override;
+
+    bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
+              defs::ham_t &helem, conn::FrmBosOnv &conn) override;
+
+    std::string description() const override {
+        std::string name;
+        for (auto exsig: m_exsigs) name+= conn_utils::to_string(exsig)+" ";
+        if (m_exsigs.size()==1) {
+            switch (m_exsigs[0]) {
+                case conn_utils::encode_exsig(1,1,0,0): name = "singles";
+                case conn_utils::encode_exsig(2,2,0,0): name = "doubles";
+            }
+        }
+        return log::format("Fermion {}", name);
+    }
+};
+
+/**
+ * Base class for stochastic Boson sector excitations
+ */
+class BosExcitGen : public ExcitGen {
+protected:
     const size_t m_nexcit;
     const bool m_spin_conserving;
 
