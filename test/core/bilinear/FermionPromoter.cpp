@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 #include "src/core/table/BufferedFields.h"
 
-TEST(MevGroup, Promoter1BodyDiagonal) {
+TEST(FermionPromoter, Promoter1BodyDiagonal) {
     const size_t nsite = 5;
     const size_t nop_insert = 1;
     buffered::FrmOnv in(nsite);
@@ -38,7 +38,7 @@ TEST(MevGroup, Promoter1BodyDiagonal) {
     }
 }
 
-TEST(MevGroup, Promoter2BodyDiagonal) {
+TEST(FermionPromoter, Promoter2BodyDiagonal) {
     const size_t nsite = 5;
     const size_t nop_insert = 2;
     buffered::FrmOnv in(nsite);
@@ -76,7 +76,7 @@ TEST(MevGroup, Promoter2BodyDiagonal) {
 }
 
 
-TEST(MevGroup, Promoter2BodySingle) {
+TEST(FermionPromoter, Promoter2BodySingle) {
     const size_t nsite = 5;
     const size_t nop_insert = 1;
     buffered::FrmOnv in(nsite);
@@ -137,7 +137,7 @@ TEST(MevGroup, Promoter2BodySingle) {
     ASSERT_EQ(inds.m_frm.m_cre[1], 9);
 }
 
-TEST(MevGroup, Promoter2BodyDouble) {
+TEST(FermionPromoter, Promoter2BodyDouble) {
     /*
      * simple test of the edge-case where no promotion is actually performed, but we need to ensure that the connection's
      * contents are faithfully reproduced in the single contributing key (fields::FermionMevInds object) emitted.

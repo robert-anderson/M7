@@ -12,7 +12,7 @@
 #include "RefExcits.h"
 
 
-struct MevGroup {
+struct FermionPromoter {
     const fciqmc_config::AvEsts &m_opts;
     Epoch m_accum_epoch;
     //std::unique_ptr<FermionRdm> m_fermion_rdm;
@@ -24,7 +24,7 @@ struct MevGroup {
     const bool m_explicit_hf_conns;
     size_t m_icycle_period_start = ~0ul;
 
-    MevGroup(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, bool explicit_hf_conns=true) :
+    FermionPromoter(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, bool explicit_hf_conns=true) :
             m_opts(opts), m_accum_epoch("MEV accumulation"),
             //m_fermion_rdm(opts.m_fermion_rdm.m_rank ? new FermionRdm(opts.m_fermion_rdm, nsite, nelec) : nullptr),
             m_ref_excits(opts.m_ref_excits.m_max_exlvl ? new RefExcits(opts.m_ref_excits, nsite) : nullptr),

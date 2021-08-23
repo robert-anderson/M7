@@ -34,10 +34,10 @@ defs::ham_t BosonCouplings::v(const size_t &n, const size_t &p, const size_t &q)
 defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     if (conn.m_bos.size() != 1ul) return 0.0;
     if (!conn.m_frm.kramers_conserve()) return 0.0;
-    bool is_ann = conn.m_bos.m_ann.size();
+    bool cre = conn.m_bos.m_cre.size();
 
-    const auto imode = is_ann ? conn.m_bos.m_ann[0].m_imode : conn.m_bos.m_cre[0].m_imode;
-    const auto com = size_t(onv.m_bos[imode]) - (is_ann ? 1 : 0);
+    const auto imode = cre ? conn.m_bos.m_cre[0].m_imode : conn.m_bos.m_ann[0].m_imode;
+    const auto com = size_t(onv.m_bos[imode]) - (cre ? 0 : 1);
 
     const auto occ_fac = std::sqrt(com + 1);
     switch (conn.m_frm.size()) {
@@ -60,7 +60,7 @@ defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn:
              * respect hermitian conjugation of the fermion-boson operator product: 1110 (boson creation) is the
              * conventionally non-conjugated term
              */
-            auto element = is_ann ? v(imode, jsite, isite) : v(imode, isite, jsite);
+            auto element = cre ? v(imode, isite, jsite) : v(imode, jsite, isite);
             element*=occ_fac;
             return conn.m_frm.phase(onv.m_frm) ? -element : element;
         }

@@ -155,9 +155,11 @@ fciqmc_config::SpfWeightedTwf::SpfWeightedTwf(config::Group *parent) :
 
 void fciqmc_config::SpfWeightedTwf::verify() {
     Section::verify();
-    if (!defs::enable_bosons)
+    if (!defs::enable_bosons) {
         REQUIRE_EQ_ALL(m_boson_fac, 0.0,
-                       "Boson exponential parameter is non-zero but bosons are compile time disabled");
+                       "Boson exponential parameter is non-zero but bosons are compile time disabled. "
+                       "Specify -DENABLE_BOSONS to cmake and recompile");
+    }
 }
 
 fciqmc_config::Bilinears::Bilinears(config::Group *parent, std::string name, std::string description) :
@@ -174,8 +176,8 @@ void fciqmc_config::Bilinears::verify() {
 
 fciqmc_config::Rdms::Rdms(config::Group *parent, std::string name, std::string description) :
         Bilinears(parent, name, description),
-            m_explicit_ref_conns(this, "explicit_ref_conns", true,
-             "if true, take contributions from reference connections into account exactly"){}
+        m_explicit_ref_conns(this, "explicit_ref_conns", true,
+                             "if true, take contributions from reference connections into account exactly") {}
 
 fciqmc_config::SpecMoms::SpecMoms(config::Group *parent, std::string name, std::string description) :
         Bilinears(parent, name, description),
@@ -226,18 +228,22 @@ void fciqmc_config::Hamiltonian::verify() {
     Section::verify();
     if (!defs::enable_bosons) {
         REQUIRE_EQ_ALL(m_boson_coupling, 0.0,
-                       "Boson coupling parameter is non-zero but bosons are compile time disabled");
+                       "Boson coupling parameter is non-zero but bosons are compile time disabled. "
+                       "Specify -DENABLE_BOSONS to cmake and recompile");
         REQUIRE_EQ_ALL(m_boson_frequency, 0.0,
-                       "Boson frequency parameter is non-zero but bosons are compile time disabled");
+                       "Boson frequency parameter is non-zero but bosons are compile time disabled. "
+                       "Specify -DENABLE_BOSONS to cmake and recompile");
         REQUIRE_EQ_ALL(m_nboson_max, 0ul,
-                       "Maximum boson number per mode is non-zero but bosons are compile time disabled");
+                       "Maximum boson number per mode is non-zero but bosons are compile time disabled. "
+                       "Specify -DENABLE_BOSONS to cmake and recompile");
     }
+
 }
 
 fciqmc_config::Propagator::Propagator(config::Group *parent) :
         config::Section(parent, "propagator",
                         "options relating to the propagation of the wavefunction from one MC cycle to the next"),
-        m_ncycle(this, "ncycle", 10000ul, "number of MC cycles for which to iterate the solver"),
+        m_ncycle(this, "ncycle", ~0ul, "number of MC cycles for which to iterate the solver"),
         m_stochastic(this, "stochastic", true,
                      "if false, perform exact projective FCI (only practical for debugging in small systems)"),
         m_excit_gen(this, "excit_gen", "pchb", "excitation generation algorithm to use"),
