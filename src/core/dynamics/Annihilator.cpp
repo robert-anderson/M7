@@ -207,9 +207,10 @@ void Annihilator::loop_over_dst_mbfs() {
             total_delta = 0.0;
             dst_finder();
         } else {
-            if (current.m_send_parents)
+            if (current.m_send_parents){
                 DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,
-                            "should never have diagonal connections at annihilation");
+                                "should never have diagonal connections at annihilation");
+            }
             DEBUG_ASSERT_EQ(current.m_dst_mbf, block_begin.m_dst_mbf, "dst MBFs should be the same");
             DEBUG_ASSERT_EQ(current.m_ipart_dst, block_begin.m_ipart_dst, "dst iparts should be the same");
         }

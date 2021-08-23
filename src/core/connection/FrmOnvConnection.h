@@ -13,9 +13,10 @@
  * the underlying index vector
  */
 class FrmOps {
+    const size_t m_nsite;
     defs::inds m_inds;
 public:
-    FrmOps(size_t nsite) {
+    FrmOps(size_t nsite): m_nsite(nsite) {
         m_inds.reserve(2*nsite);
     }
 
@@ -87,6 +88,12 @@ public:
         if (!std::is_sorted(cbegin(), cend())) return false;
         for (auto it = cbegin()+1; it!=cend(); ++it) if (*it==*(it-1)) return false;
         return true;
+    }
+
+    size_t nalpha() const {
+        size_t n=0ul;
+        for (auto i: m_inds) n+=i<m_nsite;
+        return n;
     }
 };
 
@@ -211,6 +218,11 @@ public:
      */
     size_t size() const {
         return m_cre.size()+m_ann.size();
+    }
+
+    bool kramers_conserve() const {
+        if (m_cre.size()!=m_ann.size()) return false;
+        return m_cre.nalpha() == m_ann.nalpha();
     }
 
 private:

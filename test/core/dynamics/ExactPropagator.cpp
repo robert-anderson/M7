@@ -15,7 +15,7 @@ TEST(ExactPropagator, BosonTest) {
     opts.m_propagator.m_nadd = 0.0;
     opts.m_wavefunction.m_nw_init = 100;
     opts.m_propagator.m_nadd = 0.0;
-    opts.m_propagator.m_tau_init = 0.01;
+    opts.m_propagator.m_tau_init = 0.001;
     opts.m_propagator.m_nw_target = 10000;
     opts.m_shift.m_period = 1;
     opts.m_propagator.m_min_spawn_mag = 0.2;
@@ -23,10 +23,13 @@ TEST(ExactPropagator, BosonTest) {
     opts.verify();
     // nboson_cutoff 1: -3.1699561178752873
     // nboson_cutoff 2: -6.692966463435127
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
+//    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+//    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
+//    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
+    auto fname = defs::assets_root + "/Hubbard_U4_4site/FCIDUMP";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_4site/EBDUMP";
+    auto fname_bos = defs::assets_root + "/Hubbard_U4_4site/BOSDUMP";
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, 1);
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::Mbf ref(ham.nsite());
     ham.set_hf_mbf(ref, 0);

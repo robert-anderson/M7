@@ -43,7 +43,10 @@ void DenseHamiltonian::setup_frmbos(const Hamiltonian &source) {
             auto h_elem = source.get_element(bra, conn);
             if (!consts::float_is_zero(h_elem)) {
                 (*this)(ibra, iket) = h_elem;
-            } else ASSERT(consts::floats_nearly_equal(h_elem, (*this)(ibra, iket)));
+            } else {
+                DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(consts::conj(h_elem), (*this)(ibra, iket)),
+                                  "hermiticity not respected");
+            }
         }
     }
 }

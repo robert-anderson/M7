@@ -91,7 +91,7 @@ public:
         /*
          * return the one-body integral between the two SPINORS indexed by i and j
          */
-        if (!m_spin_res && ((i < m_nintind) != (j < m_nintind))) return 0.0;
+        if (!m_spin_res && ((i < m_nintind) != (j < m_nintind))) return 0.0; // spin conservation
         auto iflat = m_spin_res ? flat_index(i, j) : flat_index(i % m_nintind, j % m_nintind);
         return (isym == 2 && i > j) ? consts::conj(m_data[iflat]) : m_data[iflat];
     }

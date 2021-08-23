@@ -29,8 +29,6 @@ public:
 
     defs::ham_t v(const size_t &n, const size_t &p, const size_t &q) const;
 
-    defs::ham_t get_element_1(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
-
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
 
     bool is_holstein() const {

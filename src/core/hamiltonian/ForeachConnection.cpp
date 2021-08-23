@@ -124,16 +124,17 @@ void foreach_conn::frmbos::Holstein::foreach(
 }
 
 void foreach_conn::frmbos::FrmBos::foreach(const FrmBosOnv &mbf, const foreach_conn::fn_c_t<FrmBosOnv> &body_fn) {
-    auto &conn = m_conns.m_frmbosonv;
     // do all the 0001 / 0010 excits first
     Holstein::foreach(mbf, body_fn);
     // now do all those that involve single-fermion excitations
     m_occ.update(mbf);
     m_vac.update(mbf);
+    auto &conn = m_conns.m_frmbosonv;
     for (const auto& occ : m_occ.inds()){
         for (const auto& vac : m_vac.inds()){
             conn.clear();
             conn.m_frm.set(occ, vac);
+            if (!conn.m_frm.kramers_conserve()) continue;
             for (size_t imode=0ul; imode<mbf.nsite(); ++imode) {
                 if (mbf.m_bos[imode] < m_ham.m_nboson_max) {
                     conn.m_bos.clear();

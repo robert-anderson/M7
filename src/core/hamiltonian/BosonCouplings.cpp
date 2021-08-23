@@ -32,39 +32,42 @@ defs::ham_t BosonCouplings::v(const size_t &n, const size_t &p, const size_t &q)
     return m_v[index(n, p, q)];
 }
 
-defs::ham_t BosonCouplings::get_element_1(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
-    if (conn.m_bos.size() != 1) return 0.0;
+defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    if (conn.m_bos.size() != 1ul) return 0.0;
+    if (!conn.m_frm.kramers_conserve()) return 0.0;
     bool is_ann = conn.m_bos.m_ann.size();
 
     const auto imode = is_ann ? conn.m_bos.m_ann[0].m_imode : conn.m_bos.m_cre[0].m_imode;
     const auto com = size_t(onv.m_bos[imode]) - (is_ann ? 1 : 0);
 
+    const auto occ_fac = std::sqrt(com + 1);
     switch (conn.m_frm.size()) {
         case 0: {
-            const auto occ_fac = std::sqrt(com + 1);
             // fermion ONVs do not differ, so sum over occupied spin orbitals
             defs::ham_t res = 0.0;
             auto fn = [&](const size_t &ibit) {
                 auto isite = ibit % m_nmode;
-                res += v(imode, isite, isite) * occ_fac;
+                res += v(imode, isite, isite);
             };
             onv.m_frm.foreach(fn);
-            return res;
+            return res * occ_fac;
         }
         case 2: {
+            DEBUG_ASSERT_TRUE(onv.m_frm.get(conn.m_frm.m_ann[0]), "annihilated op not occupied in ONV")
+            DEBUG_ASSERT_FALSE(onv.m_frm.get(conn.m_frm.m_cre[0]), "created op occupied in ONV")
             auto isite = conn.m_frm.m_cre[0] % m_nmode;
             auto jsite = conn.m_frm.m_ann[0] % m_nmode;
-            if (isite == jsite) return 0.0; // spin conservation
-            return v(imode, isite, jsite);
+            /*
+             * respect hermitian conjugation of the fermion-boson operator product: 1110 (boson creation) is the
+             * conventionally non-conjugated term
+             */
+            auto element = is_ann ? v(imode, jsite, isite) : v(imode, isite, jsite);
+            element*=occ_fac;
+            return conn.m_frm.phase(onv.m_frm) ? -element : element;
         }
         default:
             return 0;
     }
-}
-
-defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
-    if (conn.m_bos.size() != 1ul) return 0.0;
-    return get_element_1(onv, conn);
 }
 
 void BosonCouplings::log_data() const {
