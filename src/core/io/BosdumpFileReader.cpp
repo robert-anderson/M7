@@ -10,11 +10,11 @@ BosdumpFileReader::BosdumpFileReader(const std::string &fname) : HamiltonianFile
 
 size_t BosdumpFileReader::ranksig(const defs::inds &inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 2ul, "incorrect maximum number of SQ operator indices");
-    return conn_utils::encode_exsig(0, 0, 1, 1);
+    return exsig_utils::encode(0, 0, 1, 1);
 }
 
 size_t BosdumpFileReader::exsig(const defs::inds &inds, const size_t ranksig) const {
     DEBUG_ASSERT_EQ(inds.size(), 2ul, "incorrect maximum number of SQ operator indices");
     size_t n = inds[0]!=inds[1];
-    return conn_utils::encode_exsig(0, 0, n, n);
+    return exsig_utils::encode(0, 0, n, n);
 }

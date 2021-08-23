@@ -11,7 +11,7 @@
 
 
 namespace ham_data {
-    using namespace conn_utils;
+    using namespace exsig_utils;
 
     class TermContribs {
 

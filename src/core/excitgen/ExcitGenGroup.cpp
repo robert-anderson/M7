@@ -10,7 +10,7 @@ void ExcitGenGroup::init() {
     for (size_t exsig=0ul; exsig<defs::nexsig; ++exsig){
         auto ptr = m_exsigs_to_exgens[exsig];
         if (!ptr) continue;
-        if (conn_utils::is_pure_frm(exsig)) m_frm_inds.push_back(m_active_exsigs.size());
+        if (exsig_utils::is_pure_frm(exsig)) m_frm_inds.push_back(m_active_exsigs.size());
         m_probs.push_back(ptr->approx_nconn());
         norm+=m_probs.back();
         m_active_exsigs.push_back(exsig);
@@ -25,7 +25,7 @@ void ExcitGenGroup::update_cumprobs() {
     m_frm_norm = 0.0;
     auto it = m_probs.cbegin();
     for (const auto& exsig: m_active_exsigs){
-        if (conn_utils::is_pure_frm(exsig)) {
+        if (exsig_utils::is_pure_frm(exsig)) {
             m_frm_probs.push_back(*it);
             m_frm_norm+=m_frm_probs.back();
         }
@@ -48,15 +48,13 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
     if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
         add_exgen(std::unique_ptr<ExcitGen>(
                 new Hubbard1dSingles(ham, prng, ham.m_frm.m_model_attrs.is_hubbard_1d_pbc())),
-                  conn_utils::singles);
+                  ex_single);
     } else {
-        add_exgen(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)), conn_utils::singles);
+        add_exgen(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)), ex_single);
     }
-    if (ham.m_frm.m_contribs_2200.is_nonzero(conn_utils::doubles)){
-        if (opts.m_excit_gen.get() == "pchb") {
-            add_exgen(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)),
-                      conn_utils::encode_exsig(2, 2, 0, 0));
-        }
+    if (ham.m_frm.m_contribs_2200.is_nonzero(ex_double)){
+        if (opts.m_excit_gen.get() == "pchb")
+            add_exgen(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)), ex_double);
     }
     if (ham.m_bos.m_nboson_max) {
 //        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =

@@ -17,8 +17,9 @@ protected:
     const size_t m_nelec;
     const size_t m_norb_pair;
     const size_t m_nelec_pair;
+    const defs::inds m_exsigs;
 public:
-    ExcitGen(const Hamiltonian &h, PRNG &prng);
+    ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs);
 
     virtual bool draw(const field::FrmOnv &src_onv,
                       const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
@@ -33,7 +34,9 @@ public:
     }
 
     virtual std::string description() const {
-        return "";
+        std::vector<std::string> strings;
+        for (auto const& exsig: m_exsigs) strings.push_back(exsig_utils::to_string(exsig));
+        return log::format("excitation generator for exsigs {}", string_utils::join(strings, ","));
     }
 
     virtual ~ExcitGen(){}
@@ -44,7 +47,6 @@ public:
  */
 class FrmExcitGen : public ExcitGen {
 protected:
-    const defs::inds m_exsigs;
     const bool m_spin_conserving;
 
 public:
@@ -55,57 +57,38 @@ public:
 
     bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
               defs::ham_t &helem, conn::FrmBosOnv &conn) override;
-
-    std::string description() const override {
-        std::string name;
-        for (auto exsig: m_exsigs) name+= conn_utils::to_string(exsig)+" ";
-        if (m_exsigs.size()==1) {
-            switch (m_exsigs[0]) {
-                case conn_utils::encode_exsig(1,1,0,0): name = "singles";
-                case conn_utils::encode_exsig(2,2,0,0): name = "doubles";
-            }
-        }
-        return log::format("Fermion {}", name);
-    }
 };
 
 /**
  * Base class for stochastic Boson sector excitations
  */
-class BosExcitGen : public ExcitGen {
-protected:
-    const size_t m_nexcit;
-    const bool m_spin_conserving;
-
-public:
-    FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
-
-    bool draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
-              defs::ham_t &helem, conn::FrmOnv &conn) override;
-
-    bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
-              defs::ham_t &helem, conn::FrmBosOnv &conn) override;
-
-    std::string description() const override {
-        return log::format("Fermion annihilate {}, create {}", m_nexcit, m_nexcit);
-    }
-};
+//class BosExcitGen : public ExcitGen {
+//protected:
+//    const size_t m_nexcit;
+//    const bool m_spin_conserving;
+//
+//public:
+//    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+//
+//    bool draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
+//              defs::ham_t &helem, conn::FrmOnv &conn) override;
+//
+//    bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
+//              defs::ham_t &helem, conn::FrmBosOnv &conn) override;
+//};
 
 /**
  * Base class for stochastic excitations which may couple Fermion and Boson sectors excitations
  */
 class FrmBosExcitGen : public ExcitGen {
 public:
-    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng) : ExcitGen(h, prng){}
+    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng) : ExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}){}
 
     bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
               defs::ham_t &helem, conn::FrmBosOnv &conn) override {
         return ExcitGen::draw(src_onv, occs, vacs, prob, helem, conn);
     }
 
-    std::string description() const override {
-        return "Fermion-Boson coupling";
-    }
 };
 
 #endif //M7_EXCITGEN_H

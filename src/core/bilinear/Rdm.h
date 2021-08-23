@@ -14,7 +14,7 @@
 #include "src/core/io/Archivable.h"
 #include "FermionPromoter.h"
 
-using namespace conn_utils;
+using namespace exsig_utils;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const size_t m_ranksig;

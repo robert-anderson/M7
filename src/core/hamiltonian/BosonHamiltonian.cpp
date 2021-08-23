@@ -7,7 +7,7 @@
 
 BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname):
         m_nboson_max(nboson_max), m_nmode(nmode), m_coeffs(m_nboson_max ? m_nmode * m_nmode : 0ul),
-        m_contribs_0011(conn_utils::encode_exsig(0, 0, 1, 1)){
+        m_contribs_0011(exsig_utils::ex_0011){
     if (!m_nboson_max) return;
 
     defs::inds inds(2);
@@ -20,7 +20,7 @@ BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, std::string 
         if (consts::float_is_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        DEBUG_ASSERT_TRUE(conn_utils::contribs_to(exsig, ranksig), "excitation does not contribute to this operator rank");
+        DEBUG_ASSERT_TRUE(exsig_utils::contribs_to(exsig, ranksig), "excitation does not contribute to this operator rank");
         m_contribs_0011.set_nonzero(exsig);
         m_coeffs.set(index(inds[0], inds[1]), value);
     }
@@ -51,6 +51,6 @@ size_t BosonHamiltonian::nci() const {
 void BosonHamiltonian::log_data() const {
     if (!m_contribs_0011.is_nonzero(0ul))
         log::info("1-boson (0011) term has no diagonal (0000) contributions");
-    if (!m_contribs_0011.is_nonzero(conn_utils::encode_exsig(0,0,1,1)))
+    if (!m_contribs_0011.is_nonzero(exsig_utils::encode(0,0,1,1)))
         log::info("1-boson (0011) term has no single-excitation (0011) contributions");
 }

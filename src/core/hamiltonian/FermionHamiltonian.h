@@ -56,7 +56,7 @@ struct FermionHamiltonian {
     }
 
     defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-        DEBUG_ASSERT_EQ(conn.exsig(), conn_utils::encode_exsig(1,1,0,0), "expected 1100 exsig");
+        DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_single, "expected 1100 (aka fermion single) exsig");
         const auto &ann = conn.m_ann[0];
         const auto &cre = conn.m_cre[0];
 
@@ -71,7 +71,7 @@ struct FermionHamiltonian {
     defs::ham_t get_element_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const;
 
     defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-        DEBUG_ASSERT_EQ(conn.exsig(), conn_utils::encode_exsig(2,2,0,0), "expected 2200 exsig");
+        DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "expected 2200 (aka fermion double) exsig");
         const auto element = get_element_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
         return conn.phase(onv) ? -element : element;
     }

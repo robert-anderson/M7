@@ -108,5 +108,5 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &c
 }
 
 size_t BosOnvConnection::exsig() const {
-    return conn_utils::encode_exsig(0, 0, m_cre.size(), m_ann.size());
+    return exsig_utils::encode(0, 0, m_cre.size(), m_ann.size());
 }

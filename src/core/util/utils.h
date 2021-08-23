@@ -805,10 +805,11 @@ namespace array_utils {
     }
 }
 
+
 /**
- * functions related to connections between many-body basis functions
+ * functions related to lattice model geometries (currently just 1D)
  */
-namespace conn_utils {
+namespace model_utils {
     static size_t left_obc(const size_t &ispinorb, const size_t &nsite) {
         if (ispinorb == 0 || ispinorb == nsite) return ~0ul;
         return ispinorb - 1;
@@ -838,6 +839,12 @@ namespace conn_utils {
     static size_t right(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
         return pbc ? right_obc(ispinorb, nsite) : right_pbc(ispinorb, nsite);
     }
+}
+
+/**
+ * functions related to "excitation signatures" of connections between many-body basis functions
+ */
+namespace exsig_utils {
 
     using namespace defs;
 
@@ -858,7 +865,7 @@ namespace conn_utils {
      * @return
      *  the excitation signature
      */
-    static constexpr size_t encode_exsig(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann) {
+    static constexpr size_t encode(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann) {
         return (nfrm_cre > exsig_nop_mask_frm || nfrm_ann > exsig_nop_mask_frm ||
                 nbos_cre > exsig_nop_mask_bos || nbos_ann > exsig_nop_mask_bos) ?
                ~0ul : nfrm_cre | (nfrm_ann << nbit_exsig_nop_frm) |
@@ -987,7 +994,7 @@ namespace conn_utils {
     }
 
     static constexpr size_t base_exsig(size_t exsig) {
-        return encode_exsig(
+        return encode(
                 decode_nfrm_cre(exsig) - (ncontrib_frm(exsig)-1),
                 decode_nfrm_ann(exsig) - (ncontrib_frm(exsig)-1),
                 decode_nbos_cre(exsig) - (ncontrib_bos(exsig)-1),
@@ -996,7 +1003,7 @@ namespace conn_utils {
     }
 
     static constexpr size_t add_ops(size_t exsig, size_t nfrm, size_t nbos) {
-        return encode_exsig(decode_nfrm_cre(exsig) + nfrm, decode_nfrm_ann(exsig) + nfrm,
+        return encode(decode_nfrm_cre(exsig) + nfrm, decode_nfrm_ann(exsig) + nfrm,
                             decode_nbos_cre(exsig) + nbos, decode_nbos_ann(exsig) + nbos);
     }
 
@@ -1021,7 +1028,7 @@ namespace conn_utils {
      *  the exsig representing the hermitian conjugate of the operator represented by the argument
      */
     static constexpr size_t hermconj(size_t exsig) {
-        return conn_utils::encode_exsig(decode_nfrm_ann(exsig), decode_nfrm_cre(exsig), decode_nbos_ann(exsig),
+        return exsig_utils::encode(decode_nfrm_ann(exsig), decode_nfrm_cre(exsig), decode_nbos_ann(exsig),
                                         decode_nbos_cre(exsig));
     }
 
@@ -1031,8 +1038,17 @@ namespace conn_utils {
                std::to_string(decode_nbos_cre(exsig)) + std::to_string(decode_nbos_ann(exsig));
     }
 
-    static constexpr size_t singles = encode_exsig(1,1,0,0);
-    static constexpr size_t doubles = encode_exsig(2,2,0,0);
+    static constexpr size_t ex_single = encode(1,1,0,0);
+    static constexpr size_t ex_double = encode(2,2,0,0);
+    static constexpr size_t ex_triple = encode(3,3,0,0);
+    static constexpr size_t ex_1100 = ex_single;
+    static constexpr size_t ex_2200 = ex_double;
+    static constexpr size_t ex_3300 = ex_triple;
+    static constexpr size_t ex_1101 = encode(1,1,0,1);
+    static constexpr size_t ex_1110 = encode(1,1,1,0);
+    static constexpr size_t ex_0001 = encode(0,0,0,1);
+    static constexpr size_t ex_0010 = encode(0,0,1,0);
+    static constexpr size_t ex_0011 = encode(0,0,1,1);
 }
 
 

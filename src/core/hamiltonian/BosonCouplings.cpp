@@ -7,8 +7,7 @@
 BosonCouplings::BosonCouplings(size_t nmode, size_t nboson_max, std::string fname) :
         m_nboson_max(nboson_max), m_nmode(nmode), m_nmode2(nmode * nmode),
         m_v(m_nboson_max ? m_nmode2 * nmode : 0ul),
-        m_contribs_1110(conn_utils::encode_exsig(1, 1, 1, 0)),
-        m_contribs_1101(conn_utils::encode_exsig(1, 1, 0, 1)) {
+        m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101){
     if (!m_nboson_max) return;
 
     defs::inds inds(3);
@@ -22,7 +21,7 @@ BosonCouplings::BosonCouplings(size_t nmode, size_t nboson_max, std::string fnam
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
         m_contribs_1110.set_nonzero(exsig);
-        m_contribs_1101.set_nonzero(conn_utils::hermconj(exsig));
+        m_contribs_1101.set_nonzero(exsig_utils::hermconj(exsig));
         m_v.set(index(inds[0], inds[1], inds[2]), value);
     }
     log_data();
@@ -71,12 +70,12 @@ defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn:
 }
 
 void BosonCouplings::log_data() const {
-    if (!m_contribs_1101.is_nonzero(conn_utils::encode_exsig(0,0,0,1)))
+    if (!m_contribs_1101.is_nonzero(exsig_utils::ex_0001))
         log::info("1101 fermion-boson coupling term has no 0001 contributions");
-    if (!m_contribs_1101.is_nonzero(conn_utils::encode_exsig(1,1,0,1)))
+    if (!m_contribs_1101.is_nonzero(exsig_utils::ex_1101))
         log::info("1101 fermion-boson coupling term has no 1101 contributions");
-    if (!m_contribs_1110.is_nonzero(conn_utils::encode_exsig(0,0,1,0)))
-        log::info("1101 fermion-boson coupling term has no 0010 contributions");
-    if (!m_contribs_1110.is_nonzero(conn_utils::encode_exsig(1,1,1,0)))
+    if (!m_contribs_1110.is_nonzero(exsig_utils::ex_0010))
+        log::info("1110 fermion-boson coupling term has no 0010 contributions");
+    if (!m_contribs_1110.is_nonzero(exsig_utils::ex_1110))
         log::info("1110 fermion-boson coupling term has no 1110 contributions");
 }

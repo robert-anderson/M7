@@ -22,7 +22,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 
     RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100) :
             BufferedTable<MaeRow, true>(
-                    log::format("average {} reference excitation coefficients", conn_utils::to_string(exsig)),
+                    log::format("average {} reference excitation coefficients", exsig_utils::to_string(exsig)),
                                         {{exsig, nvalue}, nbucket}),
             m_working_inds(exsig) {}
 
@@ -42,7 +42,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 
     using Table<MaeRow>::save;
     void save(hdf5::GroupWriter& gw) const {
-        Table<MaeRow>::save(gw, m_working_inds.get_exsig_string(), h5_field_names());
+        Table<MaeRow>::save(gw, exsig_utils::to_string(m_working_inds.m_exsig), h5_field_names());
     }
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
@@ -69,7 +69,7 @@ struct RefExcits : Archivable {
             Archivable("ref_excits", opts.m_archivable),
         m_opts(opts), m_av_ref({1}), m_conn(nsite) {
         for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
-            auto exsig = conn_utils::encode_exsig(iexlvl, iexlvl, 0, 0);
+            auto exsig = exsig_utils::encode(iexlvl, iexlvl, 0, 0);
             m_active_exsigs.push_back(exsig);
             m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, 1);
         }

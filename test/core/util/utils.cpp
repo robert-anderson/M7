@@ -109,6 +109,7 @@ TEST(Utils, CompileTimeNtup){
 }
 
 TEST(Utils, Exsigs) {
+    using namespace exsig_utils;
     /*
      * assert that all excitation signatures are encoded and decoded correctly
      */
@@ -117,22 +118,22 @@ TEST(Utils, Exsigs) {
         for (size_t nannf = 0ul; nannf<=defs::exsig_nop_mask_frm; ++nannf){
             for (size_t ncreb = 0ul; ncreb<=defs::exsig_nop_mask_bos; ++ncreb){
                 for (size_t nannb = 0ul; nannb<=defs::exsig_nop_mask_bos; ++nannb){
-                    exsig = conn_utils::encode_exsig(ncref, nannf, ncreb, nannb);
-                    ASSERT_EQ(conn_utils::decode_nfrm_cre(exsig), ncref);
-                    ASSERT_EQ(conn_utils::decode_nfrm_ann(exsig), nannf);
-                    ASSERT_EQ(conn_utils::decode_nbos_cre(exsig), ncreb);
-                    ASSERT_EQ(conn_utils::decode_nbos_ann(exsig), nannb);
+                    exsig = encode(ncref, nannf, ncreb, nannb);
+                    ASSERT_EQ(decode_nfrm_cre(exsig), ncref);
+                    ASSERT_EQ(decode_nfrm_ann(exsig), nannf);
+                    ASSERT_EQ(decode_nbos_cre(exsig), ncreb);
+                    ASSERT_EQ(decode_nbos_ann(exsig), nannb);
                 }
-                exsig = conn_utils::encode_exsig(ncref, nannf, ncreb, defs::exsig_nop_mask_bos + 1);
+                exsig = encode(ncref, nannf, ncreb, defs::exsig_nop_mask_bos + 1);
                 ASSERT_EQ(exsig, ~0ul);
             }
-            exsig = conn_utils::encode_exsig(ncref, nannf, defs::exsig_nop_mask_bos + 1, 0ul);
+            exsig = encode(ncref, nannf, defs::exsig_nop_mask_bos + 1, 0ul);
             ASSERT_EQ(exsig, ~0ul);
         }
-        exsig = conn_utils::encode_exsig(ncref, defs::exsig_nop_mask_frm + 1, 0ul, 0ul);
+        exsig = encode(ncref, defs::exsig_nop_mask_frm + 1, 0ul, 0ul);
         ASSERT_EQ(exsig, ~0ul);
     }
-    exsig = conn_utils::encode_exsig(defs::exsig_nop_mask_frm + 1, 0ul, 0ul, 0ul);
+    exsig = encode(defs::exsig_nop_mask_frm + 1, 0ul, 0ul, 0ul);
     ASSERT_EQ(exsig, ~0ul);
 }
 

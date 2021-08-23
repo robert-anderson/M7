@@ -34,10 +34,6 @@ bool UniformHolstein::draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occ
     return true;
 }
 
-std::string UniformHolstein::description() const {
-    return log::format("Boson {} {} if fermion site is occupied", (m_cre ? "create":"annihilate"), 1ul);
-}
-
 size_t UniformHolstein::approx_nconn() const {
     // assume there's one excitation or de-excitation available per electron
     return m_h.m_frm.m_nelec;

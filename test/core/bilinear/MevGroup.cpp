@@ -25,7 +25,7 @@ TEST(MevGroup, Promoter1BodyDiagonal) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::encode_exsig(1, 1, 0, 0));
+    ASSERT_EQ(exsig, exsig_utils::ex_1100);
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
@@ -55,7 +55,7 @@ TEST(MevGroup, Promoter2BodyDiagonal) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::encode_exsig(2, 2, 0, 0));
+    ASSERT_EQ(exsig, exsig_utils::ex_2200);
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
@@ -96,7 +96,7 @@ TEST(MevGroup, Promoter2BodySingle) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::encode_exsig(2, 2, 0, 0));
+    ASSERT_EQ(exsig, exsig_utils::ex_double);
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9
@@ -163,7 +163,7 @@ TEST(MevGroup, Promoter2BodyDouble) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, conn_utils::encode_exsig(2, 2, 0, 0));
+    ASSERT_EQ(exsig, exsig_utils::ex_2200);
     ASSERT_EQ(exsig, conn.exsig());
     buffered::MaeInds inds(exsig);
 

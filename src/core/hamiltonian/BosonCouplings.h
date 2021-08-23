@@ -32,7 +32,7 @@ public:
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
 
     bool is_holstein() const {
-        return !m_contribs_1101.is_nonzero(conn_utils::encode_exsig(1, 1, 0, 1));
+        return !m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
     }
 
     /**

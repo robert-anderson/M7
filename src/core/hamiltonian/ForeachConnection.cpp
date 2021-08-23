@@ -82,12 +82,12 @@ void foreach_conn::frm::Hubbard1D::singles(
         const field::FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn) {
     for (const auto &occ: m_occ.inds()) {
         size_t neighbor;
-        neighbor = conn_utils::left(occ, m_ham.nsite(), m_pbc);
+        neighbor = model_utils::left(occ, m_ham.nsite(), m_pbc);
         if (neighbor != ~0ul && !mbf.get(neighbor)) {
             conn.set(occ, neighbor);
             fn();
         }
-        neighbor = conn_utils::right(occ, m_ham.nsite(), m_pbc);
+        neighbor = model_utils::right(occ, m_ham.nsite(), m_pbc);
         if (neighbor != ~0ul && !mbf.get(neighbor)) {
             conn.set(occ, neighbor);
             fn();

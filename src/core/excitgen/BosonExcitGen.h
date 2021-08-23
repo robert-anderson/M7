@@ -7,9 +7,9 @@
 
 #include "ExcitGen.h"
 
-class BosonExcitGen : BosonExcitGen {
-
-};
+//class BosonExcitGen : BosonExcitGen {
+//
+//};
 
 
 #endif //M7_BOSONEXCITGEN_H

@@ -23,8 +23,7 @@ buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) c
 FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued, bool spin_resolved) :
         m_nelec(nelec), m_nsite(nsite), m_complex_valued(complex_valued),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
-        m_contribs_1100(conn_utils::encode_exsig(1, 1, 0, 0)),
-        m_contribs_2200(conn_utils::encode_exsig(2, 2, 0, 0)){}
+        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double){}
 
 
 FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
@@ -49,14 +48,14 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
             continue;
         }
 
-        auto& rank_contrib = ranksig==singles ? m_contribs_1100 : m_contribs_2200;
+        auto& rank_contrib = ranksig==ex_single ? m_contribs_1100 : m_contribs_2200;
         rank_contrib.set_nonzero(exsig);
 
-        if (ranksig==singles) {
+        if (ranksig==ex_single) {
             m_int_1.set(inds, value);
             m_model_attrs.nonzero(m_nsite, inds[0], inds[1]);
         }
-        else if (ranksig==doubles) {
+        else if (ranksig==ex_double) {
             m_int_2.set(inds, value);
             m_model_attrs.nonzero(m_nsite, inds[0], inds[1], inds[2], inds[3]);
         }
@@ -97,13 +96,13 @@ void FermionHamiltonian::set_hf_mbf(field::FrmOnv &onv, int spin) const {
 void FermionHamiltonian::log_data() const {
     if (!m_contribs_1100.is_nonzero(0ul))
         log::info("1-electron term has no diagonal contributions");
-    if (!m_contribs_1100.is_nonzero(conn_utils::singles))
+    if (!m_contribs_1100.is_nonzero(exsig_utils::ex_single))
         log::info("1-electron term has no single-excitation contributions");
     if (!m_contribs_2200.is_nonzero(0ul))
         log::info("2-electron term has no diagonal contributions");
-    if (!m_contribs_2200.is_nonzero(conn_utils::singles))
+    if (!m_contribs_2200.is_nonzero(exsig_utils::ex_single))
         log::info("2-electron term has no single-excitation contributions");
-    if (!m_contribs_2200.is_nonzero(conn_utils::doubles))
+    if (!m_contribs_2200.is_nonzero(exsig_utils::ex_double))
         log::info("2-electron term has no double-excitation contributions");
     if (m_model_attrs.m_nn_only_singles)
         log::info("single-excitation contributions to 1-electron term are nearest-neighbor only");

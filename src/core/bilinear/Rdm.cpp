@@ -124,7 +124,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
             auto nbos_cre = decode_nbos_cre(ranksig);
             auto nbos_ann = decode_nbos_ann(ranksig);
             while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
-                auto exsig = encode_exsig(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
+                auto exsig = encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
                 DEBUG_ASSERT_LT(exsig, defs::nexsig, "exsig OOB");
                 exsig_ranks[exsig].push_back(ranksig);
                 --nbos_cre;
@@ -194,7 +194,7 @@ void Rdms::end_cycle() {
 }
 
 defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
-    auto& rdm2 = m_rdms[conn_utils::encode_exsig(2,2,0,0)];
+    auto& rdm2 = m_rdms[ex_2200];
     REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
     defs::ham_t e1 = 0.0;
     defs::ham_t e2 = 0.0;

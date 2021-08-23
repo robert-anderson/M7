@@ -16,8 +16,6 @@ public:
               defs::ham_t &helem, conn::FrmBosOnv &conn) override;
 
 private:
-    std::string description() const override;
-
     size_t approx_nconn() const override;
 };
 

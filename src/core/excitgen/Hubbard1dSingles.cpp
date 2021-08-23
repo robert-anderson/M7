@@ -9,8 +9,8 @@ bool Hubbard1dSingles::draw(const field::FrmOnv &src_onv, const OccupiedOrbitals
     auto rand = m_prng.draw_uint(2 * occs.size());
     bool choose_left = rand / occs.size();
     auto occ = occs[choose_left ? rand - occs.size() : rand];
-    auto left = m_pbc ? conn_utils::left_pbc(occ, src_onv.m_nsite) : conn_utils::left(occ, src_onv.m_nsite);
-    auto right = m_pbc ? conn_utils::right_pbc(occ, src_onv.m_nsite) : conn_utils::right(occ, src_onv.m_nsite);
+    auto left = m_pbc ? model_utils::left_pbc(occ, src_onv.m_nsite) : model_utils::left(occ, src_onv.m_nsite);
+    auto right = m_pbc ? model_utils::right_pbc(occ, src_onv.m_nsite) : model_utils::right(occ, src_onv.m_nsite);
 
     prob = 0.5 / occs.size();
     size_t vac = ~0ul;
