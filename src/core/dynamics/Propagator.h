@@ -29,8 +29,6 @@ public:
      */
     mutable suite::Mbfs m_dst;
     mutable suite::Conns m_conn;
-    mutable OccOrbs m_occ;
-    mutable VacOrbs m_vac;
 
     Propagator(const fciqmc_config::Document &opts, const Hamiltonian &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
             Archivable("propagator", opts.m_archive),
@@ -40,9 +38,7 @@ public:
             m_opts(opts),
             m_shift(opts, wf_fmt),
             m_dst(ham.nsite()),
-            m_conn(ham.nsite()),
-            m_occ(ham.nsite()),
-            m_vac(ham.nsite()) {}
+            m_conn(ham.nsite()){}
 
     virtual ~Propagator() {}
 

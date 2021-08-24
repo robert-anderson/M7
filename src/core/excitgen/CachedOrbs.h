@@ -5,7 +5,7 @@
 #ifndef M7_CACHEDORBS_H
 #define M7_CACHEDORBS_H
 
-#include <src/core/basis/DecodedDeterminant.h>
+#include <src/core/basis/DecodedDeterminants.h>
 
 /**
  * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbtial indices when

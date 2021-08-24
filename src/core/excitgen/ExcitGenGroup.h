@@ -128,6 +128,8 @@ public:
     bool draw(const size_t &iex, const field::FrmBosOnv &src,
               defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
 
+    void clear_cached_orbs();
+
     void log_breakdown() const;
 };
 

@@ -35,9 +35,10 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     bool flag_initiator = row.m_initiator.get(ipart);
     bool flag_deterministic = row.m_deterministic.get(ipart);
 
-    m_occ.update(src_onv);
-    m_vac.update(src_onv);
     size_t nattempt = get_nattempt(weight);
+    if (!nattempt) return;
+
+    m_excit_gens.clear_cached_orbs();
 
     defs::prob_t prob;
     defs::ham_t helem;

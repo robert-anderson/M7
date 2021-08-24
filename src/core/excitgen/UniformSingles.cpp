@@ -29,7 +29,7 @@ bool UniformSingles::draw(const size_t& exsig, const field::FrmOnv &src, CachedO
         DEBUG_ASSERT_LT(i, nocc, "drawn occupied case OOB");
         DEBUG_ASSERT_LT(a, nvac, "drawn vacant case OOB");
         i = occs[i];
-        a = occs[a];
+        a = vacs[a];
     } else {
         ncases = m_nelec * (2 * m_h.nsite() - m_nelec);
         ia = m_prng.draw_uint(ncases);
@@ -39,8 +39,8 @@ bool UniformSingles::draw(const size_t& exsig, const field::FrmOnv &src, CachedO
     }
 #ifndef NDEBUG
     if (m_spin_conserving) {
-        if (i < m_h.nsite()) ASSERT(a < m_h.nsite())
-        else ASSERT(a >= m_h.nsite())
+        if (i < m_h.nsite()) {DEBUG_ASSERT_LT(a, m_h.nsite(), "spin not conserved");}
+        else {DEBUG_ASSERT_GE(a, m_h.nsite(), "spin not conserved");}
     }
 #endif
     conn.add(i, a);

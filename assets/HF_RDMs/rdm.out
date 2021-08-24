@@ -1,0 +1,226 @@
+
+#INFO: **** input file is /home/rja/work/bases/rdm.py ****
+from pyscf import M, mrpt, mcscf, scf, fci, symm, fciqmcscf
+import sys, os
+sys.path.append(os.path.abspath('.'))
+import numpy as np
+
+d = {
+        'mol_kwargs': {
+            'atom':
+            '''
+            H 0.000000 0.000000 0.000000
+            F 0.000000 0.000000 1.4
+            ''',
+            'basis': {'H': 'cc-pvdz', 'F': 'cc-pvdz'},
+            'symmetry': True,
+            'symmetry_subgroup': 'C2v',
+            'verbose': 4,
+            'charge': 0,
+            'spin': 0
+        }
+    }
+
+nelecas = 6
+ncas = 5
+
+mol = M(**d['mol_kwargs'])
+nelecb = (nelecas-mol.spin)//2
+neleca = nelecas - nelecb
+
+myhf = scf.ROHF(mol)
+myhf.kernel()
+myhf.analyze()
+
+mc = mcscf.CASCI(myhf, ncas, nelecas)
+mc.kernel()
+
+ao_rdm = mc.make_rdm1()[mc.ncore:mc.ncore+ncas, mc.ncore:mc.ncore+ncas]
+mo_rdm = mc.fcisolver.make_rdm1(mc.fcisolver.ci, ncas, nelecas)
+
+
+dm1, dm2, dm3 = fci.rdm.make_dm123('FCI3pdm_kern_sf', mc.fcisolver.ci, mc.fcisolver.ci, ncas, (neleca, nelecb))
+dm1, dm2, dm3 = fci.rdm.reorder_dm123(dm1, dm2, dm3)
+
+assert ao_rdm.shape==mo_rdm.shape
+print(mo_rdm.diagonal())
+print(sum(mo_rdm.diagonal()))
+print(mo_rdm)
+
+dms = {
+        '1': np.array(dm1),
+        '2': np.array(dm2),
+        '3': np.array(dm3)
+        }
+
+import pickle as pkl
+with open('exact_rdms.pkl', 'wb') as f:
+    pkl.dump(dms, f)
+
+'''
+mc = mcscf.CASCI(myhf, ncas, nelecas)
+mc.fcisolver = fciqmcscf.fciqmc.FCIQMCCI(mol)
+mc.kernel()
+'''
+#INFO: ******************** input file end ********************
+
+
+System: uname_result(system='Linux', node='MS-7B86', release='5.4.0-72-generic', version='#80~18.04.1-Ubuntu SMP Mon Apr 12 23:26:25 UTC 2021', machine='x86_64', processor='x86_64')  Threads 12
+Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
+[GCC 8.4.0]
+numpy 1.18.4  scipy 1.4.1
+Date: Thu Apr 29 07:56:43 2021
+PySCF version 1.7.3
+PySCF path  /home/rja/opt/pyscf/pyscf
+GIT HEAD      ref: refs/heads/master
+GIT master branch  adbdcbdd426356485d9a249d7461f668d19d6f9e
+
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 10
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry True subgroup C2v
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 H      0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr
+[INPUT]  2 F      0.000000000000   0.000000000000   1.400000000000 AA    0.000000000000   0.000000000000   2.645616574391 Bohr
+
+nuclear repulsion = 3.40185349877143
+point group symmetry = Coov, use subgroup C2v
+num. orbitals of irrep A1 = 10
+num. orbitals of irrep A2 = 1
+num. orbitals of irrep B1 = 4
+num. orbitals of irrep B2 = 4
+number of shells = 8
+number of NR pGTOs = 33
+number of NR cGTOs = 19
+basis = {'H': 'cc-pvdz', 'F': 'cc-pvdz'}
+ecp = {}
+CPU time:         0.24
+
+
+******** <class 'pyscf.scf.hf_symm.SymAdaptedROHF'> ********
+method = SymAdaptedROHF-ROHF-RHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /home/rja/work/bases/tmp9w7gweq7
+max_memory 4000 MB (current use 76 MB)
+num. doubly occ = 5  num. singly occ = 0
+Freeze 0 electrons in irreps []
+    10 free electrons in irreps A1 A2 B1 B2
+Set gradient conv threshold to 3.16228e-05
+init E= -99.4736608092961
+HOMO (B1) = -0.622836761526098  LUMO (A1) = -0.0671283112376556
+cycle= 1 E= -99.8167374576533  delta_E= -0.343  |g|= 0.568  |ddm|= 0.54
+HOMO (B1) = -0.400219308423758  LUMO (A1) = 0.0235185423814558
+cycle= 2 E= -99.8660687139546  delta_E= -0.0493  |g|= 0.481  |ddm|= 0.418
+HOMO (B2) = -0.57789305089769  LUMO (A1) = 0.0201152440866953
+cycle= 3 E= -99.8992273107928  delta_E= -0.0332  |g|= 0.0467  |ddm|= 0.169
+HOMO (B2) = -0.588582089065241  LUMO (A1) = 0.0433746557935513
+cycle= 4 E= -99.9006606814954  delta_E= -0.00143  |g|= 0.0146  |ddm|= 0.0421
+HOMO (A1) = -0.589138577166344  LUMO (A1) = 0.0456183283857617
+cycle= 5 E= -99.9007877828253  delta_E= -0.000127  |g|= 0.00218  |ddm|= 0.0162
+HOMO (A1) = -0.588792336740402  LUMO (A1) = 0.0450098228040149
+cycle= 6 E= -99.900789729742  delta_E= -1.95e-06  |g|= 0.000387  |ddm|= 0.00206
+HOMO (A1) = -0.5889133542906  LUMO (A1) = 0.0451430607589174
+cycle= 7 E= -99.9007897926556  delta_E= -6.29e-08  |g|= 3.14e-05  |ddm|= 0.000405
+HOMO (A1) = -0.588883963052488  LUMO (A1) = 0.0451310615031614
+cycle= 8 E= -99.9007897928924  delta_E= -2.37e-10  |g|= 5.33e-06  |ddm|= 1.62e-05
+HOMO (A1) = -0.588887403751202  LUMO (A1) = 0.0451328406727375
+Extra cycle  E= -99.9007897928981  delta_E= -5.63e-12  |g|= 1.81e-06  |ddm|= 2.98e-06
+converged SCF energy = -99.9007897928981
+**** SCF Summaries ****
+Total Energy =                         -99.900789792898053
+Nuclear Repulsion Energy =               3.401853498771429
+One-electron Energy =                 -147.491624143051240
+Two-electron Energy =                   44.188980851381764
+Wave-function symmetry = A1
+occupancy for each irrep:     A1   A2   B1   B2
+double occ                     3    0    1    1
+single occ                     0    0    0    0
+**** MO energy ****
+                          Roothaan           | alpha              | beta
+MO #1   (A1  #1 ) energy= -26.2801705445606  | -26.2801705445607  | -26.2801705445607  occ= 2
+MO #2   (A1  #2 ) energy= -1.4925185586862   | -1.49251855868619  | -1.49251855868619  occ= 2
+MO #3   (B1  #1 ) energy= -0.597630747215336 | -0.597630747215335 | -0.597630747215335 occ= 2
+MO #4   (B2  #1 ) energy= -0.597630747215333 | -0.597630747215333 | -0.597630747215333 occ= 2
+MO #5   (A1  #3 ) energy= -0.588887403751202 | -0.588887403751202 | -0.588887403751202 occ= 2
+MO #6   (A1  #4 ) energy= 0.0451328406727375 | 0.0451328406727359 | 0.0451328406727359 occ= 0
+MO #7   (A1  #5 ) energy= 0.585884083939433  | 0.585884083939435  | 0.585884083939435  occ= 0
+MO #8   (B1  #2 ) energy= 1.31425679099995   | 1.31425679099995   | 1.31425679099995   occ= 0
+MO #9   (B2  #2 ) energy= 1.31425679099996   | 1.31425679099996   | 1.31425679099996   occ= 0
+MO #10  (A1  #6 ) energy= 1.56743306088791   | 1.56743306088791   | 1.56743306088791   occ= 0
+MO #11  (A1  #7 ) energy= 1.60737055187226   | 1.60737055187226   | 1.60737055187226   occ= 0
+MO #12  (B1  #3 ) energy= 1.6163482071078    | 1.6163482071078    | 1.6163482071078    occ= 0
+MO #13  (B2  #3 ) energy= 1.6163482071078    | 1.6163482071078    | 1.6163482071078    occ= 0
+MO #14  (A1  #8 ) energy= 2.30051769941305   | 2.30051769941305   | 2.30051769941305   occ= 0
+MO #15  (A1  #9 ) energy= 4.03722626034269   | 4.03722626034269   | 4.03722626034269   occ= 0
+MO #16  (A2  #1 ) energy= 4.03722626034269   | 4.03722626034269   | 4.03722626034269   occ= 0
+MO #17  (B1  #4 ) energy= 4.04590855836412   | 4.04590855836412   | 4.04590855836412   occ= 0
+MO #18  (B2  #4 ) energy= 4.04590855836412   | 4.04590855836412   | 4.04590855836412   occ= 0
+MO #19  (A1  #10) energy= 4.33267983139734   | 4.33267983139734   | 4.33267983139734   occ= 0
+ ** Mulliken pop on meta-lowdin orthogonal AOs  **
+ ** Mulliken pop  **
+pop of  0 H 1s        0.61296
+pop of  0 H 2s        0.00012
+pop of  0 H 2px       0.00052
+pop of  0 H 2py       0.00052
+pop of  0 H 2pz       0.00177
+pop of  1 F 1s        2.00000
+pop of  1 F 2s        1.95799
+pop of  1 F 3s        0.00027
+pop of  1 F 2px       1.99904
+pop of  1 F 2py       1.99904
+pop of  1 F 2pz       1.42552
+pop of  1 F 3px       0.00035
+pop of  1 F 3py       0.00035
+pop of  1 F 3pz       0.00087
+pop of  1 F 3dxy      0.00000
+pop of  1 F 3dyz      0.00010
+pop of  1 F 3dz^2     0.00050
+pop of  1 F 3dxz      0.00010
+pop of  1 F 3dx2-y2    0.00000
+ ** Mulliken atomic charges  **
+charge of  0H =      0.38411
+charge of  1F =     -0.38411
+Dipole moment(X, Y, Z, Debye):  0.00000,  0.00000, -2.81239
+Active space CI wfn symmetry = A1
+
+******** CASCI flags ********
+CAS (3e+3e, 5o), ncore = 2, nvir = 12
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 (MB)
+******** <class 'pyscf.fci.direct_spin1_symm.FCISolver'> ********
+max. cycles = 200
+conv_tol = 1e-08
+davidson only = True
+linear dependence = 1e-10
+level shift = 0.001
+max iter space = 12
+max_memory 4000 MB
+nroots = 1
+pspace_size = 0
+spin = None
+Input CI wfn symmetry = A1
+Density matrix diagonal elements [1.99976515 1.99976515 1.89438488 0.09365305 0.01243177]
+CASCI converged
+CASCI E = -99.9421389039332  E(CI) = -14.4625646137448  S^2 = 0.0000000
+[1.99976515 1.99976515 1.89438488 0.09365305 0.01243177]
+6.000000000000003
+[[ 1.99976515  0.          0.          0.          0.        ]
+ [ 0.          1.99976515  0.          0.          0.        ]
+ [ 0.          0.          1.89438488 -0.09695294 -0.03325109]
+ [ 0.          0.         -0.09695294  0.09365305  0.03376582]
+ [ 0.          0.         -0.03325109  0.03376582  0.01243177]]

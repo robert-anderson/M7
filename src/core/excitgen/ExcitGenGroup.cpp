@@ -144,3 +144,7 @@ bool ExcitGenGroup::draw(const size_t &iex, const FrmBosOnv &src, prob_t &prob, 
     auto exsig = m_active_exsigs[iex];
     return (*this)[iex].draw(exsig, src, m_cached_orbs, prob, helem, conn);
 }
+
+void ExcitGenGroup::clear_cached_orbs() {
+    m_cached_orbs.clear();
+}
