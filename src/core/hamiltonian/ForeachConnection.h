@@ -7,7 +7,7 @@
 
 
 #include <src/core/connection/Connections.h>
-#include <src/core/basis/DecodedDeterminant.h>
+#include <src/core/basis/DecodedDeterminants.h>
 #include <utility>
 #include <src/core/basis/AbelianGroup.h>
 #include <src/core/basis/Suites.h>
@@ -34,8 +34,8 @@ namespace foreach_conn {
 
     struct Base {
         const Hamiltonian &m_ham;
-        OccupiedOrbitals m_occ;
-        VacantOrbitals m_vac;
+        OccOrbs m_occ;
+        VacOrbs m_vac;
         suite::Conns m_conns;
         suite::Mbfs m_mbfs;
 

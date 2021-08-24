@@ -3,7 +3,7 @@
 //
 
 #include "src/core/enumerator/ContainerCombinationEnumerator.h"
-#include "src/core/basis/DecodedDeterminant.h"
+#include "src/core/basis/DecodedDeterminants.h"
 #include "src/core/parallel/RankAllocator.h"
 #include "FermionHamiltonian.h"
 

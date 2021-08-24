@@ -3,7 +3,7 @@
 //
 
 #include <src/core/io/FcidumpFileReader.h>
-#include <src/core/basis/DecodedDeterminant.h>
+#include <src/core/basis/DecodedDeterminants.h>
 #include <src/core/connection/Connections.h>
 #include "HamiltonianParts.h"
 #include "HamiltonianData.h"

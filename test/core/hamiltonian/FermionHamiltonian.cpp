@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/basis/DecodedDeterminant.h"
+#include "src/core/basis/DecodedDeterminants.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 
 #ifdef ENABLE_COMPLEX
@@ -75,8 +75,8 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
     buffered::FrmOnv fonv(ham.m_nsite);
     fonv = {0, 1, 2, 6, 7, 8};
 
-    OccupiedOrbitals occs(fonv);
-    VacantOrbitals vacs(fonv);
+    OccOrbs occs(fonv);
+    VacOrbs vacs(fonv);
 
     buffered::FrmOnv excited(ham.m_nsite);
 

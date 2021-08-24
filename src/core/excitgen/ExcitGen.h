@@ -8,8 +8,10 @@
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/connection/Connections.h>
 #include "src/core/sample/PRNG.h"
+#include "CachedOrbs.h"
 
-class ExcitGen {
+struct ExcitGen {
+
 protected:
     const Hamiltonian &m_h;
     PRNG &m_prng;
@@ -18,15 +20,14 @@ protected:
     const size_t m_norb_pair;
     const size_t m_nelec_pair;
     const defs::inds m_exsigs;
+
 public:
     ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs);
 
-    virtual bool draw(const field::FrmOnv &src_onv,
-                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+    virtual bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
 
-    virtual bool draw(const field::FrmBosOnv &src_onv,
-                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+    virtual bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
 
     virtual size_t approx_nconn() const {
@@ -35,11 +36,11 @@ public:
 
     virtual std::string description() const {
         std::vector<std::string> strings;
-        for (auto const& exsig: m_exsigs) strings.push_back(exsig_utils::to_string(exsig));
+        for (auto const &exsig: m_exsigs) strings.push_back(exsig_utils::to_string(exsig));
         return log::format("excitation generator for exsigs {}", string_utils::join(strings, ","));
     }
 
-    virtual ~ExcitGen(){}
+    virtual ~ExcitGen() {}
 };
 
 /**
@@ -52,11 +53,11 @@ protected:
 public:
     FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
 
-    bool draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
-              defs::ham_t &helem, conn::FrmOnv &conn) override;
+    bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
 
-    bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
-              defs::ham_t &helem, conn::FrmBosOnv &conn) override;
+    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override;
 };
 
 /**
@@ -82,11 +83,12 @@ public:
  */
 class FrmBosExcitGen : public ExcitGen {
 public:
-    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng) : ExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}){}
+    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng) :
+            ExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}) {}
 
-    bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
+    bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
               defs::ham_t &helem, conn::FrmBosOnv &conn) override {
-        return ExcitGen::draw(src_onv, occs, vacs, prob, helem, conn);
+        return ExcitGen::draw(exsig, src, orbs, prob, helem, conn);
     }
 
 };
