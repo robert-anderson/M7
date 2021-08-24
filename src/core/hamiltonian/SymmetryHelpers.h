@@ -6,7 +6,7 @@
 #define M7_SYMMETRYHELPERS_H
 
 #include <src/core/connection/Connections.h>
-#include <src/core/basis/DecodedDeterminant.h>
+#include <src/core/basis/DecodedDeterminants.h>
 #include <src/core/table/BufferedFields.h>
 
 #if 0

@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#include "DecodedDeterminant.h"
+#include "DecodedDeterminants.h"
 
 void OccupiedUpdater::operator()(const field::FrmOnv &onv, defs::inds &inds) {
     DEBUG_ASSERT_LE(onv.nbit(), inds.capacity(), "occupied updater inds not large enough for ONV");

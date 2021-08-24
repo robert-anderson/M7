@@ -7,7 +7,7 @@
 
 
 #include <src/core/connection/Connections.h>
-#include <src/core/basis/DecodedDeterminant.h>
+#include <src/core/basis/DecodedDeterminants.h>
 #include <utility>
 #include <src/core/basis/AbelianGroup.h>
 #include <src/core/basis/Suites.h>

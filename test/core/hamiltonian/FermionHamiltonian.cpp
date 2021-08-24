@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/basis/DecodedDeterminant.h"
+#include "src/core/basis/DecodedDeterminants.h"
 #include "src/core/hamiltonian/FermionHamiltonian.h"
 
 #ifdef ENABLE_COMPLEX

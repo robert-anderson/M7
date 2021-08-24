@@ -3,7 +3,7 @@
 //
 
 #include <src/core/table/BufferedFields.h>
-#include "src/core/basis/DecodedDeterminant.h"
+#include "src/core/basis/DecodedDeterminants.h"
 #include "gtest/gtest.h"
 
 TEST(DecodedDeterminant, CopyAndMove){
