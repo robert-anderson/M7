@@ -29,8 +29,8 @@ public:
      */
     mutable suite::Mbfs m_dst;
     mutable suite::Conns m_conn;
-    mutable OccupiedOrbitals m_occ;
-    mutable VacantOrbitals m_vac;
+    mutable OccOrbs m_occ;
+    mutable VacOrbs m_vac;
 
     Propagator(const fciqmc_config::Document &opts, const Hamiltonian &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
             Archivable("propagator", opts.m_archive),

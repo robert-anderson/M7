@@ -23,24 +23,31 @@ void VacantUpdater::operator()(const field::FrmOnv &onv, defs::inds &inds) {
 }
 
 
-void NdOccupiedUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds) {
-    for (auto& v :inds) v.clear();
+void NdOccupiedUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map,
+        defs::inds& flat_inds, std::vector<defs::inds> &nd_inds) {
+    flat_inds.clear();
+    for (auto& v :nd_inds) v.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_dataword(idataword);
         while (work) {
             auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
-            inds[map[ibit]].push_back(ibit);
+            nd_inds[map[ibit]].push_back(ibit);
+            flat_inds.push_back(ibit);
         }
     }
 }
 
-void NdVacantUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds){
-    for (auto& v :inds) v.clear();
+
+void NdVacantUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map,
+        defs::inds& flat_inds, std::vector<defs::inds> &nd_inds){
+    flat_inds.clear();
+    for (auto& v :nd_inds) v.clear();
     for (size_t idataword = 0ul; idataword < onv.m_dsize; ++idataword) {
         auto work = onv.get_antidataword(idataword);
         while (work) {
             auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
-            inds[map[ibit]].push_back(ibit);
+            nd_inds[map[ibit]].push_back(ibit);
+            flat_inds.push_back(ibit);
         }
     }
 }

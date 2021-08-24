@@ -56,6 +56,10 @@ class ExcitGenGroup {
      * normalization for the fermionic active exsigs
      */
     defs::prob_t m_frm_norm = 1.0;
+    /**
+     *
+     */
+    CachedOrbs m_cached_orbs;
 
     /**
      * initialize vectors of exsigs and pointers to excitation generators in general. Also initialize the vector
@@ -117,6 +121,12 @@ public:
     size_t draw_iex();
 
     size_t draw_iex_frm();
+
+    bool draw(const size_t &iex, const field::FrmOnv &src,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
+
+    bool draw(const size_t &iex, const field::FrmBosOnv &src,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
 
     void log_breakdown() const;
 };

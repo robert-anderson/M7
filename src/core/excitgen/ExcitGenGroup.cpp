@@ -44,7 +44,7 @@ void ExcitGenGroup::update_cumprobs() {
 }
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
-        m_prng(prng) {
+        m_prng(prng), m_cached_orbs(ham.m_frm.m_point_group_map) {
     if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
         add_exgen(std::unique_ptr<ExcitGen>(
                 new Hubbard1dSingles(ham, prng, ham.m_frm.m_model_attrs.is_hubbard_1d_pbc())),
@@ -133,4 +133,14 @@ void ExcitGenGroup::log_breakdown() const {
     log::info("Excitation class probability breakdown:");
     for (size_t i = 0ul; i < size(); ++i)
         log::info("{:<40} {}", (*this)[i].description(), get_prob(i));
+}
+
+bool ExcitGenGroup::draw(const size_t &iex, const FrmOnv &src, prob_t &prob, ham_t &helem, conn::FrmOnv &conn) {
+    auto exsig = m_active_exsigs[iex];
+    return (*this)[iex].draw(exsig, src, m_cached_orbs, prob, helem, conn);
+}
+
+bool ExcitGenGroup::draw(const size_t &iex, const FrmBosOnv &src, prob_t &prob, ham_t &helem, conn::FrmBosOnv &conn) {
+    auto exsig = m_active_exsigs[iex];
+    return (*this)[iex].draw(exsig, src, m_cached_orbs, prob, helem, conn);
 }

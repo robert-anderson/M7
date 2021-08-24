@@ -13,32 +13,34 @@
  */
 
 template<typename updater_fn>
-class DecodedDeterminant {
-    // spin orbital indices
+struct FlatOrbs {
+    /**
+     * spin orbital indices
+     */
     defs::inds m_inds;
 
 public:
-    explicit DecodedDeterminant(size_t nsite) {
+    explicit FlatOrbs(size_t nsite) {
         m_inds.reserve(2*nsite);
     }
 
-    explicit DecodedDeterminant(const field::FrmOnv &onv) :
-            DecodedDeterminant(onv.nsite()) {
-        update(onv);
+    explicit FlatOrbs(const field::FrmOnv &mbf) :
+            FlatOrbs(mbf.nsite()) {
+        update(mbf);
     }
 
-    explicit DecodedDeterminant(const field::FrmBosOnv &onv) :
-            DecodedDeterminant(onv.nsite()) {
-        update(onv);
+    explicit FlatOrbs(const field::FrmBosOnv &mbf) :
+            FlatOrbs(mbf.nsite()) {
+        update(mbf);
     }
 
-    DecodedDeterminant(const DecodedDeterminant& other): DecodedDeterminant(other.m_inds.capacity()/2){}
-    DecodedDeterminant(DecodedDeterminant&& other): DecodedDeterminant(other.m_inds.capacity()/2){}
-    DecodedDeterminant& operator=(const DecodedDeterminant& other){
+    FlatOrbs(const FlatOrbs& other): FlatOrbs(other.m_inds.capacity() / 2){}
+    FlatOrbs(FlatOrbs&& other): FlatOrbs(other.m_inds.capacity() / 2){}
+    FlatOrbs& operator=(const FlatOrbs& other){
         m_inds = other.m_inds;
         return *this;
     }
-    DecodedDeterminant& operator=(DecodedDeterminant&& other){
+    FlatOrbs& operator=(FlatOrbs&& other){
         m_inds = std::move(other.m_inds);
         return *this;
     }
@@ -56,62 +58,68 @@ public:
         return m_inds;
     }
 
-    void update(const field::FrmOnv &onv) {
-        updater_fn()(onv, m_inds);
+    void update(const field::FrmOnv &mbf) {
+        updater_fn()(mbf, m_inds);
     };
 
-    void update(const field::FrmBosOnv &onv) {
-        updater_fn()(onv.m_frm, m_inds);
+    void update(const field::FrmBosOnv &mbf) {
+        updater_fn()(mbf.m_frm, m_inds);
+    }
+
+    void clear() {
+        m_inds.clear();
+    }
+    bool empty() {
+        return m_inds.empty();
     }
 };
 
 
 struct OccupiedUpdater {
-    void operator()(const field::FrmOnv &onv, defs::inds &inds);
+    void operator()(const field::FrmOnv &mbf, defs::inds &inds);
 };
 
 
 struct VacantUpdater {
-    void operator()(const field::FrmOnv &onv, defs::inds &inds);
+    void operator()(const field::FrmOnv &mbf, defs::inds &inds);
 };
 
-typedef DecodedDeterminant<OccupiedUpdater> OccupiedOrbitals;
-typedef DecodedDeterminant<VacantUpdater> VacantOrbitals;
-
+typedef FlatOrbs<OccupiedUpdater> OccOrbs;
+typedef FlatOrbs<VacantUpdater> VacOrbs;
 
 
 template<typename updater_fn, size_t nind>
-class NdDecodedDeterminant {
+struct NdOrbs {
     const NdFormat<nind> m_format;
     std::vector<defs::inds> m_inds;
     const defs::inds m_map;
 
-public:
-    NdDecodedDeterminant(std::array<size_t, nind> shape, size_t nsite, const defs::inds& map):
-        m_format(shape), m_inds(m_format.m_nelement), m_map(map){
+    FlatOrbs<updater_fn> m_flat;
+    NdOrbs(std::array<size_t, nind> shape, size_t nsite, const defs::inds& map):
+        m_format(shape), m_inds(m_format.m_nelement), m_map(map), m_flat(nsite){
         for (auto& v: m_inds) v.reserve(2*nsite);
         ASSERT(m_map.size()==2*nsite);
         ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.m_nelement);
     }
 
-    NdDecodedDeterminant(std::array<size_t, nind> shape, const field::FrmOnv &onv, const defs::inds& map) :
-            NdDecodedDeterminant(shape, onv.m_nsite, map) {
-        update(onv);
+    NdOrbs(std::array<size_t, nind> shape, const field::FrmOnv &mbf, const defs::inds& map) :
+            NdOrbs(shape, mbf.m_nsite, map) {
+        update(mbf);
     }
 
-    NdDecodedDeterminant(std::array<size_t, nind> shape, const field::FrmBosOnv &onv, const defs::inds& map) :
-            NdDecodedDeterminant(shape, onv.m_frm.m_nsite, map) {}
+    NdOrbs(std::array<size_t, nind> shape, const field::FrmBosOnv &mbf, const defs::inds& map) :
+            NdOrbs(shape, mbf.m_frm.m_nsite, map) {}
 
 
-    NdDecodedDeterminant(const NdDecodedDeterminant& other):
-        NdDecodedDeterminant(other.m_format.m_shape, other.m_inds.capacity()/2, other.m_map){}
-    NdDecodedDeterminant(NdDecodedDeterminant&& other):
-            NdDecodedDeterminant(other.m_format.m_shape, other.m_inds.capacity()/2, other.m_map){}
-    NdDecodedDeterminant& operator=(const NdDecodedDeterminant& other){
+    NdOrbs(const NdOrbs& other):
+            NdOrbs(other.m_format.m_shape, other.m_inds.capacity() / 2, other.m_map){}
+    NdOrbs(NdOrbs&& other):
+            NdOrbs(other.m_format.m_shape, other.m_inds.capacity() / 2, other.m_map){}
+    NdOrbs& operator=(const NdOrbs& other){
         m_inds = other.m_inds;
         return *this;
     }
-    NdDecodedDeterminant& operator=(NdDecodedDeterminant&& other){
+    NdOrbs& operator=(NdOrbs&& other){
         m_inds = std::move(other.m_inds);
         return *this;
     }
@@ -133,33 +141,66 @@ public:
         return m_inds[m_format.flatten(inds)];
     }
 
-    void update(const field::FrmOnv &onv) {
-        updater_fn()(onv, m_map, m_inds);
+    void update(const field::FrmOnv &mbf) {
+        updater_fn()(mbf, m_map, m_flat.m_inds, m_inds);
     };
 
-    void update(const field::FrmBosOnv &onv) {
-        updater_fn()(onv.m_frm, m_map, m_inds);
+    void update(const field::FrmBosOnv &mbf) {
+        updater_fn()(mbf.m_frm, m_map, m_flat.m_inds, m_inds);
+    }
+
+    /**
+     * doesn't actually clear the Nd partitions, just the flat. the update calls always clear m_inds anyway
+     */
+    void clear() {
+        m_flat.clear();
+    }
+    bool empty() {
+        return m_flat.empty();
     }
 };
 
 
 struct NdOccupiedUpdater {
-    void operator()(const field::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds);
+    /**
+     * update the flat and N-dimensional ragged arrays of set bits in the fermion ONV
+     * @param mbf
+     *  many fermion basis function to decode
+     * @param map
+     *  map between spin orbitals and their label (i.e. element of nd_inds they append to)
+     * @param flat_inds
+     *  the vector storing set bits of any label
+     * @param nd_inds
+     *  the vector of vectors storing set bits in each label
+     */
+    void operator()(const field::FrmOnv &mbf, const defs::inds& map,
+            defs::inds& flat_inds, std::vector<defs::inds> &nd_inds);
 };
 
 
 struct NdVacantUpdater {
-    void operator()(const field::FrmOnv &onv, const defs::inds& map, std::vector<defs::inds> &inds);
+    /**
+     * update the flat and N-dimensional ragged arrays of clear bits in the fermion ONV
+     * @param mbf
+     *  many fermion basis function to decode
+     * @param map
+     *  map between spin orbitals and their label (i.e. element of nd_inds they append to)
+     * @param flat_inds
+     *  the vector storing clear bits of any label
+     * @param nd_inds
+     *  the vector of vectors storing clear bits in each label
+     */
+    void operator()(const field::FrmOnv &mbf, const defs::inds& map,
+            defs::inds& flat_inds, std::vector<defs::inds> &nd_inds);
 };
 
 template<size_t nind>
-using NdOccupiedOrbitals = NdDecodedDeterminant<NdOccupiedUpdater, nind>;
+using NdOccOrbs = NdOrbs<NdOccupiedUpdater, nind>;
 template<size_t nind>
-using NdVacantOrbitals = NdDecodedDeterminant<NdVacantUpdater, nind>;
+using NdVacOrbs = NdOrbs<NdVacantUpdater, nind>;
 
 template<typename updater_fn>
-class SpinDecodedDeterminant : public NdDecodedDeterminant<updater_fn, 1> {
-
+class SpinNdOrbs : public NdOrbs<updater_fn, 1> {
     defs::inds make_spin_map(size_t nsite) {
         defs::inds out(2*nsite, 0);
         for (auto it = out.begin()+nsite; it!=out.end(); ++it) *it = 1ul;
@@ -167,15 +208,15 @@ class SpinDecodedDeterminant : public NdDecodedDeterminant<updater_fn, 1> {
     }
 
 public:
-    explicit SpinDecodedDeterminant(size_t nsite) :
-        NdDecodedDeterminant<updater_fn, 1>({2}, nsite, make_spin_map(nsite)){}
+    explicit SpinNdOrbs(size_t nsite) :
+            NdOrbs<updater_fn, 1>({2}, nsite, make_spin_map(nsite)){}
 };
 
-typedef SpinDecodedDeterminant<NdOccupiedUpdater> SpinOccupiedOrbitals;
-typedef SpinDecodedDeterminant<NdVacantUpdater> SpinVacantOrbitals;
+typedef SpinNdOrbs<NdOccupiedUpdater> SpinOccOrbs;
+typedef SpinNdOrbs<NdVacantUpdater> SpinVacOrbs;
 
 template<typename updater_fn>
-class SymmDecodedDeterminant : public NdDecodedDeterminant<updater_fn, 2> {
+class SpinSymNdOrbs : public NdOrbs<updater_fn, 2> {
 
     defs::inds make_map(const AbelianGroupMap& grp_map) {
         defs::inds out(2*grp_map.m_nsite, 0);
@@ -186,13 +227,13 @@ class SymmDecodedDeterminant : public NdDecodedDeterminant<updater_fn, 2> {
     }
 
 public:
-    explicit SymmDecodedDeterminant(const AbelianGroupMap& grp_map) :
-            NdDecodedDeterminant<updater_fn, 2>({2, grp_map.m_grp.nirrep()}, grp_map.m_nsite, make_map(grp_map)){
+    explicit SpinSymNdOrbs(const AbelianGroupMap& grp_map) :
+            NdOrbs<updater_fn, 2>({2, grp_map.m_grp.nirrep()}, grp_map.m_nsite, make_map(grp_map)){
     }
 };
 
-typedef SymmDecodedDeterminant<NdOccupiedUpdater> SymmOccupiedOrbitals;
-typedef SymmDecodedDeterminant<NdVacantUpdater> SymmVacantOrbitals;
+typedef SpinSymNdOrbs<NdOccupiedUpdater> SpinSymOccOrbs;
+typedef SpinSymNdOrbs<NdVacantUpdater> SpinSymVacOrbs;
 
 
 #endif //M7_DECODEDDETERMINANT_H

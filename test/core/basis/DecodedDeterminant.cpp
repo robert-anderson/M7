@@ -8,7 +8,7 @@
 
 TEST(DecodedDeterminant, CopyAndMove){
     const size_t n = 6;
-    OccupiedOrbitals occorbs(n);
+    OccOrbs occorbs(n);
     ASSERT_EQ(occorbs.inds().capacity(), 2*n);
     auto occorbs_cpy = occorbs;
     ASSERT_EQ(occorbs_cpy.inds().capacity(), 2*n);
@@ -27,10 +27,10 @@ TEST(DecodedDeterminant, Occupation){
         else vac.push_back(i);
     }
 
-    OccupiedOrbitals occorbs(onv);
+    OccOrbs occorbs(onv);
     ASSERT_TRUE(std::equal(occ.begin(), occ.end(), occorbs.inds().begin()));
 
-    VacantOrbitals vacorbs(onv);
+    VacOrbs vacorbs(onv);
     ASSERT_TRUE(std::equal(vac.begin(), vac.end(), vacorbs.inds().begin()));
 }
 
@@ -69,8 +69,8 @@ TEST(DecodedDeterminant, SymmDecoded){
 
     ASSERT_EQ(grp_map.m_nsite, 10);
 
-    SymmOccupiedOrbitals occorbs(grp_map);
-    SymmVacantOrbitals vacorbs(grp_map);
+    SpinSymOccOrbs occorbs(grp_map);
+    SpinSymVacOrbs vacorbs(grp_map);
 
     occorbs.update(onv);
     vacorbs.update(onv);
