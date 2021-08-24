@@ -272,9 +272,9 @@ namespace foreach_conn {
 
             virtual void doubles(conn::FrmOnv &conn, const std::function<void()> &fn);
 
+        public:
             virtual void foreach(const FrmOnv &mbf, conn::FrmOnv &conn, const std::function<void()> &fn);
 
-        public:
             void foreach(const FrmOnv &mbf, const fn_c_t<FrmOnv> &body_fn) override;
 
             void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override;
@@ -312,11 +312,26 @@ namespace foreach_conn {
         };
     }
 
+    namespace bos {
+        struct Boson : Base {
+            using Base::foreach;
+            explicit Boson(const Hamiltonian &ham) : Base(ham) {}
+
+            virtual void foreach(const BosOnv &mbf, conn::BosOnv &conn, const std::function<void()> &fn);
+
+            void foreach(const FrmOnv &mbf, const fn_c_t<FrmOnv> &body_fn) override {}
+
+            void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override;
+
+            void foreach(const BosOnv &mbf, const fn_c_t<BosOnv> &body_fn) override;
+        };
+    }
+
     namespace frmbos {
 
-        struct Holstein : Base {
-            using Base::foreach;
-            explicit Holstein(const Hamiltonian& ham): Base(ham){}
+        struct FrmBos : Base {
+            bos::Boson m_boson;
+            explicit FrmBos(const Hamiltonian& ham): Base(ham), m_boson(ham){}
 
             void foreach(const FrmOnv &mbf, const fn_c_t<FrmOnv> &body_fn) override {}
 
@@ -325,14 +340,12 @@ namespace foreach_conn {
             void foreach(const BosOnv &mbf, const fn_c_t<BosOnv> &body_fn) override {}
         };
 
-        struct FrmBos : Holstein {
-            using Holstein::foreach;
-
-            explicit FrmBos(const Hamiltonian& ham): Holstein(ham){}
+        struct Holstein : FrmBos {
+            using FrmBos::foreach;
+            explicit Holstein(const Hamiltonian& ham): FrmBos(ham){}
 
             void foreach(const FrmBosOnv &mbf, const fn_c_t<FrmBosOnv> &body_fn) override;
         };
-
     }
 
     typedef std::vector<std::unique_ptr<Base>> vector_t;
