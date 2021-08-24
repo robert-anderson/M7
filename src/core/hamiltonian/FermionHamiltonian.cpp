@@ -20,15 +20,20 @@ buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) c
     return ref;
 }
 
-FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued, bool spin_resolved) :
+FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
+                                       bool spin_resolved, defs::inds site_irreps) :
         m_nelec(nelec), m_nsite(nsite), m_complex_valued(complex_valued),
+        m_point_group_map(PointGroup(), site_irreps.empty() ? defs::inds(nsite, 0ul) : site_irreps),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
-        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double){}
+        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double){
+
+    DEBUG_ASSERT_EQ(m_point_group_map.m_site_irreps.size(), nsite, "site map size incorrect");
+}
 
 
 FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
         FermionHamiltonian(file_reader.m_nelec, file_reader.m_nspatorb,
-                           file_reader.m_complex_valued, file_reader.m_spin_resolved) {
+                           file_reader.m_complex_valued, file_reader.m_spin_resolved, file_reader.m_orbsym) {
 
     using namespace ham_data;
     defs::inds inds(4);

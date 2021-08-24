@@ -54,9 +54,14 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
+    ASSERT_EQ(ham.m_point_group_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv fonv(ham.m_nsite);
-    for (size_t i=0ul; i<ham.m_nelec/2; ++i){fonv.set({0, i}); fonv.set({1, i});}
+    for (size_t i = 0ul; i < ham.m_nelec / 2; ++i) {
+        fonv.set({0, i});
+        fonv.set({1, i});
+    }
 
     auto elem = ham.get_element(fonv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
@@ -68,7 +73,7 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
     FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv fonv(ham.m_nsite);
-    fonv = {0, 1, 2,  6, 7, 8};
+    fonv = {0, 1, 2, 6, 7, 8};
 
     OccupiedOrbitals occs(fonv);
     VacantOrbitals vacs(fonv);

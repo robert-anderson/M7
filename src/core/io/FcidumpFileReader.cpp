@@ -8,7 +8,7 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         HamiltonianFileReader(fname, 4, false),
         m_spin_major(spin_major),
         m_nelec(read_header_int(fname, "NELEC")),
-        m_orbsym(read_header_array(fname, "ORBSYM"))
+        m_orbsym(read_header_array(fname, "ORBSYM", -1))
 {
     set_symm_and_rank(fname);
 

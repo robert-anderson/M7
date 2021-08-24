@@ -118,13 +118,13 @@ void foreach_conn::bos::Boson::foreach(const BosOnv &mbf, conn::BosOnv &conn, co
         if (mbf[imode] < m_ham.m_nboson_max) {
             conn.clear();
             conn.m_cre.set({imode, 1ul});
-            DEBUG_ASSERT_EQ(conn.m_bos.size(), 1ul, "should have only one boson operator index");
+            DEBUG_ASSERT_EQ(conn.size(), 1ul, "should have only one boson operator index");
             fn();
         }
         if (mbf[imode] > 0) {
             conn.clear();
             conn.m_ann.set({imode, 1ul});
-            DEBUG_ASSERT_EQ(conn.m_bos.size(), 1ul, "should have only one boson operator index");
+            DEBUG_ASSERT_EQ(conn.size(), 1ul, "should have only one boson operator index");
             fn();
         }
     }

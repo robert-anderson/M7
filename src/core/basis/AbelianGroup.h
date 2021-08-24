@@ -83,6 +83,16 @@ struct AbelianGroup {
 
 };
 
+/**
+ * FCIDUMPs don't specify exactly which symmetry labels are identified by each index. All supported point groups have
+ * the same XOR multiplication table so knowing the exact point group is only necessary if we want to accurately report
+ * the symmetries of orbitals.
+ */
+struct PointGroup : AbelianGroup {
+    PointGroup() : AbelianGroup({"0", "1", "2", "3", "4", "5", "6", "7"},
+               [](const size_t& i, const size_t& j){return i^j;}){}
+};
+// D2h; "A1g", "B1g", "B2g", "B3g", "Au", "B1u", "B2u", "B3u"
 
 struct AbelianGroupMap {
     const AbelianGroup m_grp;

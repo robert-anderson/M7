@@ -5,6 +5,26 @@
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/ForeachConnection.h"
 
+
+//struct ForEachInExsig {
+//    const size_t m_exsig;
+////    SymmOccupiedOrbitals m_occ;
+////    SymmVacantOrbitals m_vac;
+//
+//
+//    virtual void loop() {
+//
+//    }
+//    virtual bool draw(const field::FrmOnv &src_onv,
+//                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
+//                      defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
+//};
+
+
+TEST(ForeachConnection, FrmNoSymDoubles){
+
+}
+
 TEST(ForeachConnection, FrmHubbard1d) {
     /*
      * loop over all connections using the general foreach class, and again with the Hubbard-optimized, and ensure that
@@ -62,6 +82,7 @@ TEST(ForeachConnection, FrmNoSym) {
 }
 
 
+#if 0
 TEST(ForeachConnection, HubbardHolstein) {
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
@@ -87,6 +108,7 @@ TEST(ForeachConnection, HubbardHolstein) {
 
     foreach.foreach<field::FrmBosOnv>(onv, fn, false);
 }
+#endif
 
 
 #if 0

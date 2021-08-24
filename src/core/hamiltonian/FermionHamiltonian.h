@@ -24,6 +24,7 @@ struct FermionHamiltonian {
     const size_t m_nelec;
     const size_t m_nsite;
     const bool m_complex_valued;
+    AbelianGroupMap m_point_group_map;
 
     defs::ham_t m_int_0 = 0.0;
     typedef Integrals_1e<defs::ham_t, defs::isym_1e> ints1_t;
@@ -36,7 +37,8 @@ struct FermionHamiltonian {
     ham_data::FrmModelAttributes m_model_attrs;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued, bool spin_resolved);
+    FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
+                       bool spin_resolved, defs::inds site_irreps={});
 
     FermionHamiltonian(const FcidumpFileReader &file_reader);
 
