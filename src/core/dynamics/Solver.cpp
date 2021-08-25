@@ -153,7 +153,6 @@ void Solver::begin_cycle() {
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(
                     m_opts.m_propagator.m_semistochastic, m_wf, m_icycle));
             m_detsub->build_from_most_occupied(m_prop.m_ham, m_maes.m_bilinears);
-            //m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("Initialized deterministic subspace");
         }
     }

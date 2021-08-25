@@ -96,7 +96,8 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
     /*
      * only consider RDM contributions if there are any RDMs being accumulated and the destination exists
      */
-    if (m_rdms.m_accum_epoch && dst_row.in_range()) {
+    if (m_rdms && m_rdms.m_accum_epoch && dst_row.in_range()) {
+        DEBUG_ASSERT_TRUE(block_begin.m_send_parents, "RDM sampling requires that parent MBFs are communicated");
         /*
          * store the original positions of the row objects in the recv table
          */
