@@ -109,7 +109,6 @@ void Solver::execute(size_t ncycle) {
         --m_icycle;
         finalizing_loop_over_occupied_mbfs();
     }
-    std::cout << m_maes.m_bilinears.m_rdms.get_energy(m_prop.m_ham.m_frm)+7.878453652277122 << std::endl;
 }
 
 void Solver::begin_cycle() {
@@ -153,7 +152,6 @@ void Solver::begin_cycle() {
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(
                     m_opts.m_propagator.m_semistochastic, m_wf, m_icycle));
             m_detsub->build_from_most_occupied(m_prop.m_ham, m_maes.m_bilinears);
-            //m_detsub->build_from_all_occupied(m_prop.m_ham);
             log::debug("Initialized deterministic subspace");
         }
     }
