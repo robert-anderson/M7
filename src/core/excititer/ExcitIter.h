@@ -16,7 +16,7 @@
 struct ExcitIter {
 protected:
     const size_t m_exsig;
-    const Hamiltonian& m_ham;
+    const Hamiltonian &m_ham;
     suite::Conns m_work_conn;
     suite::Mbfs m_work_dst;
     CachedOrbs m_work_orbs;
@@ -52,7 +52,7 @@ protected:
      *  false if the connection is to be discounted on the grounds that it corresponds to a zero matrix element
      */
     template<typename mbf_t>
-    bool set_helement(const mbf_t& src, const conn::from_field_t<mbf_t>& conn) {
+    bool set_helement(const mbf_t &src, const conn::from_field_t<mbf_t> &conn) {
         if (!m_need_helement) return true;
         m_work_helement = m_ham.get_element(src, conn);
         return !m_nonzero_helement_only || !consts::float_is_zero(m_work_helement);
@@ -70,29 +70,29 @@ protected:
      * classes. all other prototypes are constructed as needed by the adaptors
      */
     template<typename mbf_t>
-    using fn_c_t = std::function<void(const conn::from_field_t<mbf_t>&)>;
+    using fn_c_t = std::function<void(const conn::from_field_t<mbf_t> &)>;
 private:
     /**
      * body function which accepts connection and dst MBF as const refs
      */
     template<typename mbf_t>
-    using fn_cd_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&)>;
+    using fn_cd_t = std::function<void(const conn::from_field_t<mbf_t> &, const mbf_t &)>;
     /**
      * body function which accepts connection as const ref and matrix element by value
      */
     template<typename mbf_t>
-    using fn_ch_t = std::function<void(const conn::from_field_t<mbf_t>&, defs::ham_t)>;
+    using fn_ch_t = std::function<void(const conn::from_field_t<mbf_t> &, defs::ham_t)>;
     /**
      * most complete prototype of body function which accepts connection and dst MBF as const refs and the matrix
      * element by value
      */
     template<typename mbf_t>
-    using fn_cdh_t = std::function<void(const conn::from_field_t<mbf_t>&, const mbf_t&, defs::ham_t)>;
+    using fn_cdh_t = std::function<void(const conn::from_field_t<mbf_t> &, const mbf_t &, defs::ham_t)>;
     /**
      * body function which accepts dst MBF as const ref only
      */
     template<typename mbf_t>
-    using fn_d_t = std::function<void(const mbf_t&)>;
+    using fn_d_t = std::function<void(const mbf_t &)>;
     /**
      * untemplated body function which accepts matrix element by value only
      */
@@ -101,7 +101,7 @@ private:
      * body function which accepts dst MBF  as const ref and matrix element by value
      */
     template<typename mbf_t>
-    using fn_dh_t = std::function<void(const mbf_t&, defs::ham_t)>;
+    using fn_dh_t = std::function<void(const mbf_t &, defs::ham_t)>;
 
 
 
@@ -126,13 +126,14 @@ private:
      *  void function which accepts connection and connected MBF args
      */
     template<typename mbf_t>
-    fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_cd_t<mbf_t>& body_fn){
-        auto& dst_mbf = m_work_dst[mbf];
+    fn_c_t<mbf_t> adapt(const mbf_t &mbf, const fn_cd_t<mbf_t> &body_fn) {
+        auto &dst_mbf = m_work_dst[mbf];
         return [&](const conn::from_field_t<mbf_t> &conn) {
             conn.apply(mbf, dst_mbf);
             body_fn(conn, dst_mbf);
         };
     }
+
     /**
      * adapts "ch" closure to "c" closure
      * @tparam mbf_t
@@ -143,13 +144,14 @@ private:
      *  void function which accepts connection and H matrix element args
      */
     template<typename mbf_t>
-    fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_ch_t<mbf_t>& body_fn){
+    fn_c_t<mbf_t> adapt(const mbf_t &mbf, const fn_ch_t<mbf_t> &body_fn) {
         return [&](const conn::from_field_t<mbf_t> &conn) {
             DEBUG_ASSERT_EQ(m_ham.get_element(mbf, conn), m_work_helement,
                             "canonical foreach definition did not compute the correct matrix element");
             body_fn(conn, m_work_helement);
         };
     }
+
     /**
      * adapts "cdh" closure to "c" closure
      * @tparam mbf_t
@@ -160,7 +162,7 @@ private:
      *  void function which accepts connection, connected MBF args, and H matrix element as args
      */
     template<typename mbf_t>
-    fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_cdh_t<mbf_t>& body_fn){
+    fn_c_t<mbf_t> adapt(const mbf_t &mbf, const fn_cdh_t<mbf_t> &body_fn) {
         auto &dst_mbf = m_work_dst[mbf];
         return [&](const conn::from_field_t<mbf_t> &conn) {
             DEBUG_ASSERT_EQ(m_ham.get_element(mbf, conn), m_work_helement,
@@ -169,6 +171,7 @@ private:
             body_fn(conn, dst_mbf, m_work_helement);
         };
     }
+
     /**
      * adapts "d" closure to "c" closure
      * @tparam mbf_t
@@ -181,13 +184,14 @@ private:
      *  if true, body_fn is only called when the loop generates a connection with non-zero H matrix element
      */
     template<typename mbf_t>
-    fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn){
-        auto& dst_mbf = m_work_dst[mbf];
+    fn_c_t<mbf_t> adapt(const mbf_t &mbf, const fn_d_t<mbf_t> &body_fn) {
+        auto &dst_mbf = m_work_dst[mbf];
         return [&](const conn::from_field_t<mbf_t> &conn) {
             conn.apply(mbf, dst_mbf);
             body_fn(dst_mbf);
         };
     }
+
     /**
      * adapts "h" closure to "c" closure
      * @tparam mbf_t
@@ -198,13 +202,14 @@ private:
      *  void function which accepts H matrix element as its only argument
      */
     template<typename mbf_t>
-    fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_h_t& body_fn){
+    fn_c_t<mbf_t> adapt(const mbf_t &mbf, const fn_h_t &body_fn) {
         return [&](const conn::from_field_t<mbf_t> &conn) {
             DEBUG_ASSERT_EQ(m_ham.get_element(mbf, conn), m_work_helement,
                             "canonical foreach definition did not compute the correct matrix element");
             body_fn(m_work_helement);
         };
     }
+
     /**
      * adapts "dh" closure to "c" closure
      * @tparam mbf_t
@@ -217,7 +222,7 @@ private:
      *  if true, body_fn is only called when the loop generates a connection with non-zero H matrix element
      */
     template<typename mbf_t>
-    fn_c_t<mbf_t> adapt(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn){
+    fn_c_t<mbf_t> adapt(const mbf_t &mbf, const fn_dh_t<mbf_t> &body_fn) {
         auto &dst_mbf = m_work_dst[mbf];
         return [&](const conn::from_field_t<mbf_t> &conn) {
             DEBUG_ASSERT_EQ(m_ham.get_element(mbf, conn), m_work_helement,
@@ -230,7 +235,7 @@ private:
 
 public:
 
-    ExcitIter(size_t exsig, const Hamiltonian& ham);
+    ExcitIter(const Hamiltonian &ham, size_t exsig);
 
     /*
      * these are the "canonical" foreach definitions - the only methods which need to be overridden in derived classes
@@ -239,31 +244,32 @@ public:
     /**
      * @param src
      *  fermion ONV
-     * @param work_conn
+     * @param conn
      *  workspace for setting the connection
      * @param body
      *  canonical function body object
      */
-    virtual void foreach(const field::FrmOnv& src, conn::FrmOnv& work_conn, const fn_c_t<FrmOnv>& body) = 0;
+    virtual void foreach(const field::FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<FrmOnv> &body) = 0;
+
     /**
      * @param src
      *  fermion-boson ONV
-     * @param work_conn
+     * @param conn
      *  workspace for setting the connection
      * @param body
      *  canonical function body object
      */
-    virtual void foreach(const field::FrmBosOnv& src, conn::FrmBosOnv& work_conn, const fn_c_t<FrmBosOnv>& body) = 0;
+    virtual void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) = 0;
+
     /**
      * @param src
      *  boson ONV
-     * @param work_conn
+     * @param conn
      *  workspace for setting the connection
      * @param body
      *  canonical function body object
      */
-    virtual void foreach(const field::BosOnv& src, conn::BosOnv& work_conn, const fn_c_t<BosOnv>& body) = 0;
-
+    virtual void foreach(const field::BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) = 0;
 
 
     /*
@@ -271,54 +277,87 @@ public:
      * to that of the canonical definition they delegate to
      */
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_c_t<mbf_t>& body_fn, bool nonzero_h_only) {
+    void foreach(const mbf_t &mbf, const fn_c_t<mbf_t> &body_fn, bool nonzero_h_only) {
         reset(false, nonzero_h_only);
         this->foreach(mbf, m_work_conn[mbf], body_fn);
     }
 
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_cd_t<mbf_t>& body_fn, bool nonzero_h_only) {
+    void foreach(const mbf_t &mbf, const fn_cd_t<mbf_t> &body_fn, bool nonzero_h_only) {
         reset(false, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_ch_t<mbf_t>& body_fn, bool nonzero_h_only) {
+    void foreach(const mbf_t &mbf, const fn_ch_t<mbf_t> &body_fn, bool nonzero_h_only) {
         reset(true, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_cdh_t<mbf_t>& body_fn, bool nonzero_h_only) {
+    void foreach(const mbf_t &mbf, const fn_cdh_t<mbf_t> &body_fn, bool nonzero_h_only) {
         reset(true, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn, bool nonzero_h_only) {
+    void foreach(const mbf_t &mbf, const fn_d_t<mbf_t> &body_fn, bool nonzero_h_only) {
         reset(false, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_h_t& body_fn) {
+    void foreach(const mbf_t &mbf, const fn_h_t &body_fn) {
         reset(true, true);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
-    void foreach(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn, bool nonzero_h_only) {
+    void foreach(const mbf_t &mbf, const fn_dh_t<mbf_t> &body_fn, bool nonzero_h_only) {
         reset(true, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
-
 };
+
+
+namespace excititers {
+
+    struct Frm : public ExcitIter {
+
+        Frm(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
+            REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature should not have bosonic operators")
+        }
+
+        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
+
+    };
+
+    struct FrmBos : public ExcitIter {
+
+        FrmBos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {}
+
+        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
+
+        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
+
+    };
+
+    struct Bos : public ExcitIter {
+
+        Bos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
+            REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature should not have fermionic operators")
+        }
+
+        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
+
+    };
+}
 
 
 #endif //M7_EXCITITER_H

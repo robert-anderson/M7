@@ -31,7 +31,7 @@ class ExcitGenGroup {
     std::array<ExcitGen*, defs::nexsig> m_exsigs_to_exgens;
     /**
      * vector storing all active exsigs consecutively (i.e. those elements of m_exsigs_to_exgens which are non-null
-     * pointers to exsig objects)
+     * pointers to ExcitGen objects)
      */
     defs::inds m_active_exsigs;
     /**
@@ -73,20 +73,9 @@ class ExcitGenGroup {
      */
     void update_cumprobs();
 
-    void add_exgen(std::unique_ptr<ExcitGen> &&exgen, const defs::inds &exsigs) {
-        m_exgens.emplace_front(std::move(exgen));
-        auto ptr = m_exgens.begin()->get();
-        for (auto &exsig: exsigs) {
-            REQUIRE_LT(exsig, defs::nexsig, "exsig OOB");
-            REQUIRE_TRUE(m_exsigs_to_exgens[exsig] == nullptr,
-                         "can't specify more than one excitation generator for the same exsig in an ExcitationGroup");
-            m_exsigs_to_exgens[exsig] = ptr;
-        }
-    }
+    void add(std::unique_ptr<ExcitGen> &&exgen, const defs::inds &exsigs);
 
-    void add_exgen(std::unique_ptr<ExcitGen> &&exgen, size_t exsig) {
-        add_exgen(std::move(exgen), defs::inds{exsig});
-    }
+    void add(std::unique_ptr<ExcitGen> &&exgen, size_t exsig);
 
 public:
     /**
@@ -94,8 +83,10 @@ public:
      * @param ham
      *  general Hamiltonian object whose excitation level information is queried to determine the required exsig-specific
      *  excitation generation objects
+     * @param opts
+     *  config options for propagator to enable the user to specify particular excitgen implementations
      * @param prng
-     *  random number generator needed to construct the required exlvl-specific excitation generators and decide which
+     *  random number generator needed to construct the required exsig-specific excitation generators and decide which
      *  exsig to attempt to draw
      */
     ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng);

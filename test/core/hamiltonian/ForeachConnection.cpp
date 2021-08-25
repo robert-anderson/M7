@@ -4,7 +4,7 @@
 
 #include <src/core/util/Foreach.h>
 #include <src/core/excitgen/CachedOrbs.h>
-#include <src/core/excititer/FrmExcitIter.h>
+#include <src/core/excititer/FrmConserve.h>
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/ForeachConnection.h"
 
@@ -29,7 +29,7 @@
 
 TEST(ForeachConnection, FrmNoSymDoubles){
     Hamiltonian ham("/home/rja/CLionProjects/M7/assets/HF_RDMs/FCIDUMP", 0);
-    FrmExcitIter iter(exsig_utils::ex_double, ham);
+    FrmConserveExcitIter iter(exsig_utils::ex_double, ham);
 
     auto fn = [](const field::FrmOnv& dst, defs::ham_t h){
         std::cout << dst << " " << h << std::endl;

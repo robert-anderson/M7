@@ -15,6 +15,6 @@ void ExcitIter::reset(bool need, bool nonzero) {
     if (m_nonzero_helement_only) m_need_helement = true;
 }
 
-ExcitIter::ExcitIter(size_t exsig, const Hamiltonian &ham) :
+ExcitIter::ExcitIter(const Hamiltonian &ham, size_t exsig) :
         m_exsig(exsig), m_ham(ham), m_work_conn(ham.nsite()), m_work_dst(ham.nsite()),
         m_work_orbs(ham.m_frm.m_point_group_map){}

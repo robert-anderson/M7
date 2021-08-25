@@ -110,6 +110,9 @@ struct FermionHamiltonian {
     bool is_hubbard_1d() const {
         return m_model_attrs.is_hubbard_1d();
     }
+    bool is_hubbard_1d_pbc() const {
+        return m_model_attrs.is_hubbard_1d_pbc();
+    }
 };
 
 #endif //M7_FERMIONHAMILTONIAN_H
