@@ -148,7 +148,7 @@ void Solver::begin_cycle() {
         }
     }
 
-    if (m_opts.m_propagator.m_semistochastic && !m_detsub) {
+    if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsub) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
             m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(
                     m_opts.m_propagator.m_semistochastic, m_wf, m_icycle));
