@@ -4,7 +4,8 @@
 
 #include "ExcitIter.h"
 
-void ExcitIter::set_helement_reqs(bool need, bool nonzero) {
+void ExcitIter::reset(bool need, bool nonzero) {
+    m_work_orbs.clear();
     m_need_helement = need;
     m_nonzero_helement_only = nonzero;
     /*

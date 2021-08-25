@@ -31,13 +31,13 @@ private:
     bool m_nonzero_helement_only = true;
 
     /**
-     * set up the above "matrix element requirements" flags
+     * clear the cached orbs, and set up the above "matrix element requirements" flags
      * @param need
      *  true if currently invoked foreach overload requires the matrix element
      * @param nonzero
      *  true if currently invoked foreach overload requests the discounting of connections with zero matrix element
      */
-    void set_helement_reqs(bool need, bool nonzero);
+    void reset(bool need, bool nonzero);
 
 protected:
     /**
@@ -272,48 +272,48 @@ public:
      */
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_c_t<mbf_t>& body_fn, bool nonzero_h_only) {
-        set_helement_reqs(false, nonzero_h_only);
+        reset(false, nonzero_h_only);
         this->foreach(mbf, m_work_conn[mbf], body_fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_cd_t<mbf_t>& body_fn, bool nonzero_h_only) {
-        set_helement_reqs(false, nonzero_h_only);
+        reset(false, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_ch_t<mbf_t>& body_fn, bool nonzero_h_only) {
-        set_helement_reqs(true, nonzero_h_only);
+        reset(true, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_cdh_t<mbf_t>& body_fn, bool nonzero_h_only) {
-        set_helement_reqs(true, nonzero_h_only);
+        reset(true, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_d_t<mbf_t>& body_fn, bool nonzero_h_only) {
-        set_helement_reqs(false, nonzero_h_only);
+        reset(false, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_h_t& body_fn) {
-        set_helement_reqs(true, true);
+        reset(true, true);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t& mbf, const fn_dh_t<mbf_t>& body_fn, bool nonzero_h_only) {
-        set_helement_reqs(true, nonzero_h_only);
+        reset(true, nonzero_h_only);
         auto fn = adapt(mbf, body_fn);
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
