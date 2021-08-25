@@ -8,7 +8,7 @@
 #include <src/core/basis/DecodedDeterminants.h>
 
 /**
- * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbtial indices when
+ * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbital indices when
  * needed
  */
 class CachedOrbs {

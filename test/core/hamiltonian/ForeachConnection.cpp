@@ -2,27 +2,42 @@
 // Created by rja on 06/06/2021.
 //
 
+#include <src/core/util/Foreach.h>
+#include <src/core/excitgen/CachedOrbs.h>
+#include <src/core/excititer/FrmExcitIter.h>
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/ForeachConnection.h"
 
 
 //struct ForEachInExsig {
 //    const size_t m_exsig;
-////    SymmOccupiedOrbitals m_occ;
-////    SymmVacantOrbitals m_vac;
 //
+//    virtual void loop() = 0;
 //
-//    virtual void loop() {
-//
-//    }
 //    virtual bool draw(const field::FrmOnv &src_onv,
 //                      const OccupiedOrbitals &occs, const VacantOrbitals &vacs,
 //                      defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
 //};
 
 
-TEST(ForeachConnection, FrmNoSymDoubles){
 
+//struct ForeachGroup {
+//    typedef std::function<void(conn::FrmOnv)> fn_t;
+//    void loop()
+//};
+
+
+TEST(ForeachConnection, FrmNoSymDoubles){
+    Hamiltonian ham("/home/rja/CLionProjects/M7/assets/HF_RDMs/FCIDUMP", 0);
+    FrmExcitIter iter(exsig_utils::ex_double, ham);
+
+    auto fn = [](const field::FrmOnv& dst, defs::ham_t h){
+        std::cout << dst << " " << h << std::endl;
+    };
+    buffered::FrmOnv onv(ham.nsite());
+    onv = {{0, 1, 2}, {0, 1, 2}};
+
+    iter.foreach<field::FrmOnv>(onv, fn, true);
 }
 
 TEST(ForeachConnection, FrmHubbard1d) {

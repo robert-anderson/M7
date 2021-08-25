@@ -20,6 +20,20 @@ public:
         m_inds.reserve(2*nsite);
     }
 
+    FrmOps(const FrmOps& other): FrmOps(other.m_nsite){}
+
+    FrmOps& operator=(const FrmOps& other){
+        DEBUG_ASSERT_EQ(other.m_inds.capacity(), m_inds.capacity(), "incompatible FrmOps instances");
+        m_inds.assign(other.m_inds.cbegin(), other.m_inds.cend());
+        return *this;
+    }
+
+    FrmOps& operator=(const defs::inds& inds){
+        DEBUG_ASSERT_LT(inds.size(), m_inds.capacity(), "incompatible FrmOps instances");
+        m_inds.assign(inds.cbegin(), inds.cend());
+        return *this;
+    }
+
     const defs::inds & inds() const {
         return m_inds;
     }
@@ -52,6 +66,12 @@ public:
         DEBUG_ASSERT_LT(size(), capacity(),
                         "should never have more fermion operators than spin orbitals");
         m_inds.push_back(i);
+    }
+
+    void set(const defs::inds& orbs, const defs::inds& inds){
+        clear();
+        for (const auto& ind: inds) add(orbs[ind]);
+        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
     }
 
     defs::inds::const_iterator cbegin() const {
