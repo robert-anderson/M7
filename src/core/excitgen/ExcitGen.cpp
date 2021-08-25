@@ -28,7 +28,10 @@ bool ExcitGen::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
 FrmExcitGen::FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
         ExcitGen(h, prng, {exsig}),
         m_spin_conserving(exsig == exsig_utils::ex_single ?
-                          h.m_frm.m_kramers_attrs.m_conserving_singles : h.m_frm.m_kramers_attrs.m_conserving_double) {}
+                          h.m_frm.m_kramers_attrs.m_conserving_singles : h.m_frm.m_kramers_attrs.m_conserving_double) {
+    DEBUG_ASSERT_EQ(exsig_utils::decode_nfrm_cre(exsig), exsig_utils::decode_nfrm_ann(exsig),
+                    "fermion number non-conservation is not currently supported");
+}
 
 bool FrmExcitGen::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                        defs::ham_t &helem, conn::FrmOnv &conn) {

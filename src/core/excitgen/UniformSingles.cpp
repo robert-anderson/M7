@@ -5,7 +5,7 @@
 #include "UniformSingles.h"
 
 UniformSingles::UniformSingles(const Hamiltonian &ham, PRNG &prng) :
-        FrmExcitGen(ham, prng, 1) {}
+        FrmExcitGen(ham, prng, exsig_utils::ex_single) {}
 
 bool UniformSingles::draw(const size_t& exsig, const field::FrmOnv &src, CachedOrbs &orbs,
                           defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
