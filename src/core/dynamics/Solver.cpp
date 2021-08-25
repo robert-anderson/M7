@@ -124,20 +124,9 @@ void Solver::begin_cycle() {
     m_refs.begin_cycle();
 
     auto update_epoch = [&](const size_t &ncycle_wait) {
-        if (m_wf.nreplica() == 2) {
-            if (m_prop.m_shift.m_variable_mode[0] && m_prop.m_shift.m_variable_mode[1]) {
-                auto max_start = std::max(
-                        m_prop.m_shift.m_variable_mode[0].icycle_start(),
-                        m_prop.m_shift.m_variable_mode[1].icycle_start());
-                if (m_icycle > max_start + ncycle_wait) return true;
-            }
-        } else {
-            if (m_prop.m_shift.m_variable_mode[0]) {
-                auto start = m_prop.m_shift.m_variable_mode[0].icycle_start();
-                if (m_icycle > start + ncycle_wait) return true;
-            }
-        }
-        return false;
+        const auto& epochs = m_prop.m_shift.m_variable_mode;
+        if (!epochs) return false;
+        return m_icycle > epochs.icycle_start_last() + ncycle_wait;
     };
 
     if (m_maes) {

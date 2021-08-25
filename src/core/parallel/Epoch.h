@@ -92,12 +92,16 @@ public:
 
     /**
      * @return
+     * the cycle on which the last epoch to start started, or ~0ul if any epochs have yet to start
+     */
+    size_t icycle_start_last() const;
+
+    /**
+     * @return
      *  true only if all epochs have begun
      */
-    operator bool() const {
-        for (const auto& epoch : m_epochs) if (!epoch) return false;
-        return true;
-    }
+    operator bool() const;
+
 };
 
 

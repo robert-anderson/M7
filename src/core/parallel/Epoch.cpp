@@ -46,3 +46,14 @@ bool Epoch::started_this_cycle(size_t icycle) const {
     return (m_icycle_start.m_reduced!=~0ul && m_icycle_start.m_reduced==icycle);
 }
 
+size_t Epochs::icycle_start_last() const {
+    size_t highest = 0ul;
+    for (const auto& epoch : m_epochs) {
+        if (epoch.icycle_start()>highest) highest=epoch.icycle_start();
+    }
+    return highest;
+}
+
+Epochs::operator bool() const {
+    return icycle_start_last() != ~0ul;
+}
