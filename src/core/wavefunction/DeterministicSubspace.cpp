@@ -17,16 +17,15 @@ void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDa
     local.m_weight = source.m_weight;
 }
 
-DeterministicSubspace::DeterministicSubspace(const fciqmc_config::Semistochastic &opts, Wavefunction &wf, size_t icycle)
-        :
-        Wavefunction::PartSharedRowSet<DeterministicDataRow>(wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
-        m_opts(opts), m_wf(wf), m_epoch("semistochastic") {
-    m_epoch.update(icycle, true);
-}
+DeterministicSubspace::DeterministicSubspace(
+        const fciqmc_config::Semistochastic &opts, Wavefunction &wf, size_t iroot) :
+        Wavefunction::PartSharedRowSet<DeterministicDataRow>(
+                wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
+        m_opts(opts), m_wf(wf), m_iroot(iroot), m_iparts(make_iparts()) {}
 
 void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears) {
     auto row = m_wf.m_store.m_row;
-    Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, {0});
+    Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, m_iparts);
     gxr.find(m_opts.m_size);
     for (size_t i = 0ul; i < gxr.m_ninclude.m_local; ++i) {
         row.jump(gxr[i]);
@@ -58,31 +57,6 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             }
         }
     }
-}
-
-void DeterministicSubspace::build_from_all_occupied(const Hamiltonian &ham, const Bilinears &bilinears) {
-    auto row = m_wf.m_store.m_row;
-    for (row.restart(); row.in_range(); row.step()) {
-        if (!row.is_cleared()) add_(row);
-    }
-    build_connections(ham, bilinears);
-}
-
-void DeterministicSubspace::build_from_occupied_connections(
-        const Hamiltonian &ham, const field::Mbf &mbf, const Bilinears &bilinears) {
-    suite::Conns conns_work(m_wf.m_nsite);
-    auto row = m_wf.m_store.m_row;
-    auto &conn_work = conns_work[row.m_mbf];
-    for (row.restart(); row.in_range(); row.step()) {
-        if (row.is_cleared()) continue;
-        conn_work.connect(mbf, row.m_mbf);
-        auto helem = ham.get_element(mbf, conn_work);
-        if (consts::float_is_zero(helem)) continue;
-        add_(row);
-        for (size_t ipart = 0ul; ipart < m_wf.npart(); ++ipart)
-            row.m_deterministic.set(ipart);
-    }
-    build_connections(ham, bilinears);
 }
 
 void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref) {

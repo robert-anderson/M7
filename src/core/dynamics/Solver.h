@@ -63,8 +63,7 @@ class Solver {
     Maes m_maes;
     Annihilator m_annihilator;
     Archive m_archive;
-
-    std::unique_ptr<DeterministicSubspace> m_detsub = nullptr;
+    DeterministicSubspaces m_detsubs;
 
 public:
 

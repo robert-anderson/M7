@@ -18,7 +18,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
         m_maes(m_opts.m_av_ests, m_prop.m_ham.nsite(), m_prop.m_ham.nelec()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
-        m_archive(opts) {
+        m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
 
     log::info("Replicating walker populations: {}", m_wf.nreplica()==2);
     if (m_wf.nreplica()==2 && !m_prop.nexcit_gen())
@@ -62,7 +62,7 @@ void Solver::execute(size_t ncycle) {
 
         m_propagate_timer.reset();
         m_propagate_timer.unpause();
-        if (m_detsub) m_detsub->update();
+        if (m_detsubs) m_detsubs.update();
         loop_over_occupied_mbfs();
         m_propagate_timer.pause();
 
@@ -76,9 +76,9 @@ void Solver::execute(size_t ncycle) {
         m_annihilate_timer.unpause();
         loop_over_spawned();
         mpi::barrier();
-        if (m_detsub) {
-            m_detsub->make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_refs[0].get_mbf());
-            m_detsub->project(m_prop.tau());
+        if (m_detsubs) {
+            m_detsubs.make_rdm_contribs(m_maes.m_bilinears.m_rdms, m_refs[0].get_mbf());
+            m_detsubs.project(m_prop.tau());
         }
         m_annihilate_timer.pause();
 
@@ -136,12 +136,10 @@ void Solver::begin_cycle() {
         }
     }
 
-    if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsub) {
+    if (m_opts.m_propagator.m_semistochastic.m_size && !m_detsubs) {
         if (update_epoch(m_opts.m_propagator.m_semistochastic.m_delay)) {
-            m_detsub = std::unique_ptr<DeterministicSubspace>(new DeterministicSubspace(
-                    m_opts.m_propagator.m_semistochastic, m_wf, m_icycle));
-            m_detsub->build_from_most_occupied(m_prop.m_ham, m_maes.m_bilinears);
-            log::debug("Initialized deterministic subspace");
+            m_detsubs.build_from_most_occupied(m_prop.m_ham, m_maes.m_bilinears, m_wf, m_icycle);
+            log::info("Initialized deterministic subspace");
         }
     }
 }

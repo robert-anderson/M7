@@ -142,7 +142,9 @@ namespace comparators {
             value_cmp_fn_t<T> value_cmp_fn, defs::inds inds_to_cmp) {
         REQUIRE_TRUE(static_cast<FieldBase &>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
         REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
-        DEBUG_ASSERT_LE(ielement_cmp, field1.nelement(), "compared field index OOB");
+        DEBUG_ASSERT_FALSE(inds_to_cmp.empty(), "need at least one numeric field index for comparison");
+        DEBUG_ASSERT_TRUE(std::all_of(inds_to_cmp.cbegin(), inds_to_cmp.cend(),
+                                      [&field1](size_t i) { return i < field1.nelement(); }), "compared field index OOB");
         return [&row1, &field1, &row2, &field2, value_cmp_fn, inds_to_cmp]
                 (const size_t &irow, const size_t &irow_cmp) {
             static_cast<const Row &>(row1).jump(irow);
