@@ -33,7 +33,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
     const auto &src_onv = row.m_mbf;
     bool flag_initiator = row.m_initiator.get(ipart);
-    bool flag_deterministic = row.m_deterministic.get(ipart);
+    bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
 
     size_t nattempt = get_nattempt(weight);
     if (!nattempt) return;

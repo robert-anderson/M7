@@ -41,7 +41,7 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite) :
 }
 
 void Wavefunction::log_top_weighted(size_t ipart, size_t nrow) {
-    weights_gxr_t gxr(m_store.m_row, m_store.m_row.m_weight, true, true, {ipart});
+    weights_gxr_t gxr(m_store.m_row, m_store.m_row.m_weight, true, true, ipart);
     gxr.find(nrow);
     BufferedTable<WalkerTableRow> xr_gathered("global top weighted", {m_store.m_row});
     gxr.gatherv(xr_gathered);

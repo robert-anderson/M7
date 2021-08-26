@@ -61,6 +61,10 @@ struct GlobalExtremalRows {
             m_global_sorter("Global extremal rows sorter", {{}}) {
         reset();
     }
+
+    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ind_to_cmp) :
+            GlobalExtremalRows(row, field, largest, absval, defs::inds{ind_to_cmp}){}
+
     /**
      * @return
      *  the number of MPI ranks with any nonzero rows left to find in partial sorting operations

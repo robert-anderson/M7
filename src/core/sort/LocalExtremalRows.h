@@ -75,6 +75,9 @@ struct LocalExtremalRows {
         reset();
     }
 
+    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ind_to_cmp):
+            LocalExtremalRows(row, field, largest, absval, defs::inds{ind_to_cmp}){}
+
     void reset() {
         m_xinds.reset(m_table);
     }
