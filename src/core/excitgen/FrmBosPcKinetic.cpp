@@ -2,12 +2,11 @@
 // Created by rja on 26/08/2021.
 //
 
-#include "FrmBosKinetic.h"
+#include "FrmBosPcKinetic.h"
 
-FrmBosKinetic::FrmBosKinetic(const Hamiltonian &h, PRNG &prng) :
-        FrmBosExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}),
-        m_pick_n_given_pq(h.nsite()*h.nsite(), h.nsite()),
-        m_singles(h, prng){
+FrmBosPcKinetic::FrmBosPcKinetic(const Hamiltonian &h, PRNG &prng) :
+        FrmBosUniformKinetic(h, prng),
+        m_pick_n_given_pq(h.nsite()*h.nsite(), h.nsite()) {
     const auto nmode = h.nsite();
     std::vector<defs::prob_t> weights(nmode, 0.0);
     size_t pq = 0ul;
@@ -31,7 +30,7 @@ FrmBosKinetic::FrmBosKinetic(const Hamiltonian &h, PRNG &prng) :
     mpi::barrier();
 }
 
-bool FrmBosKinetic::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+bool FrmBosPcKinetic::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                          conn::FrmBosOnv &conn) {
     /*
      * draw random occupied and vacant fermion indices
