@@ -5,18 +5,20 @@
 #ifndef M7_EXCITITER_H
 #define M7_EXCITITER_H
 
-#include <src/core/basis/Suites.h>
-#include <src/core/excitgen/CachedOrbs.h>
-#include <src/core/hamiltonian/Hamiltonian.h>
+#include "src/core/basis/Suites.h"
+#include "src/core/excitgen/CachedOrbs.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
+#include "BodyFnTypes.h"
 
+using namespace body_fn_types;
 /**
  * deterministic equivalent of the excitation generators, provides customisable loops which can be injected with
  * arbitrary code in the form of a body function argument
  */
 struct ExcitIter {
-protected:
     const size_t m_exsig;
     const Hamiltonian &m_ham;
+protected:
     suite::Conns m_work_conn;
     suite::Mbfs m_work_dst;
     CachedOrbs m_work_orbs;
@@ -58,56 +60,9 @@ protected:
         return !m_nonzero_helement_only || !consts::float_is_zero(m_work_helement);
     }
 
-    /*
-     * body function definitions
-     * the names of these contain one-letter abbreviations of the arguments they expect:
-     *  "c": the generated connection
-     *  "d": the destination MBF
-     *  "h": the associated hamiltonian matrix element
-     */
-    /**
-     * this is the "canonical" prototype of the body function, and so it is provided as protected for use in derived
-     * classes. all other prototypes are constructed as needed by the adaptors
-     */
-    template<typename mbf_t>
-    using fn_c_t = std::function<void(const conn::from_field_t<mbf_t> &)>;
 private:
-    /**
-     * body function which accepts connection and dst MBF as const refs
-     */
-    template<typename mbf_t>
-    using fn_cd_t = std::function<void(const conn::from_field_t<mbf_t> &, const mbf_t &)>;
-    /**
-     * body function which accepts connection as const ref and matrix element by value
-     */
-    template<typename mbf_t>
-    using fn_ch_t = std::function<void(const conn::from_field_t<mbf_t> &, defs::ham_t)>;
-    /**
-     * most complete prototype of body function which accepts connection and dst MBF as const refs and the matrix
-     * element by value
-     */
-    template<typename mbf_t>
-    using fn_cdh_t = std::function<void(const conn::from_field_t<mbf_t> &, const mbf_t &, defs::ham_t)>;
-    /**
-     * body function which accepts dst MBF as const ref only
-     */
-    template<typename mbf_t>
-    using fn_d_t = std::function<void(const mbf_t &)>;
-    /**
-     * untemplated body function which accepts matrix element by value only
-     */
-    using fn_h_t = std::function<void(defs::ham_t)>;
-    /**
-     * body function which accepts dst MBF  as const ref and matrix element by value
-     */
-    template<typename mbf_t>
-    using fn_dh_t = std::function<void(const mbf_t &, defs::ham_t)>;
-
-
-
-
     /*
-     * The following adaptors transform the body functions of various types for use with the above virtual methods.
+     * The following adaptors transform the body functions of various types for use with the cononical virtual methods.
      *
      * For now, these are kept private since the user can just call one of the foreach overloads and the adapt method
      * will be automatically called before delegating to the canonical (virtual) foreach definition. There is a case for
@@ -324,40 +279,5 @@ public:
         this->foreach(mbf, m_work_conn[mbf], fn);
     }
 };
-
-
-namespace excititers {
-
-    struct Frm : public ExcitIter {
-
-        Frm(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
-            REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature should not have bosonic operators")
-        }
-
-        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
-
-    };
-
-    struct FrmBos : public ExcitIter {
-
-        FrmBos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {}
-
-        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
-
-        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
-
-    };
-
-    struct Bos : public ExcitIter {
-
-        Bos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
-            REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature should not have fermionic operators")
-        }
-
-        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
-
-    };
-}
-
 
 #endif //M7_EXCITITER_H

@@ -3,7 +3,6 @@
 //
 
 #include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/hamiltonian/ForeachConnection.h>
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/SymmetryHelpers.h"
 

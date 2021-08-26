@@ -6,6 +6,7 @@
 #define M7_CONNECTIONS_H
 
 #include "FrmBosOnvConnection.h"
+#include "src/core/table/BufferedFields.h"
 
 namespace conn {
 
@@ -23,6 +24,9 @@ namespace conn {
     template<> struct selector<FrmOnvField> {typedef FrmOnv type;};
     template<> struct selector<FrmBosOnvField> {typedef FrmBosOnv type;};
     template<> struct selector<BosOnvField> {typedef BosOnv type;};
+    template<> struct selector<buffered::FrmOnv> {typedef FrmOnv type;};
+    template<> struct selector<buffered::FrmBosOnv> {typedef FrmBosOnv type;};
+    template<> struct selector<buffered::BosOnv> {typedef BosOnv type;};
 
     template<typename T>
     using from_field_t = typename selector<T>::type;

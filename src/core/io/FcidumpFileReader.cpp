@@ -10,6 +10,7 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         m_nelec(read_header_int(fname, "NELEC")),
         m_orbsym(read_header_array(fname, "ORBSYM", -1))
 {
+    REQUIRE_EQ(m_orbsym.size(), m_norb, "invalid ORBSYM specified in FCIDUMP file");
     set_symm_and_rank(fname);
 
     if (m_spin_resolved) {

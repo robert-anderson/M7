@@ -98,6 +98,15 @@ void FermionHamiltonian::set_hf_mbf(field::FrmOnv &onv, int spin) const {
     for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
 }
 
+void FermionHamiltonian::set_afm_mbf(field::FrmOnv &onv, bool alpha_first) const {
+    onv.zero();
+    size_t ispin = !alpha_first;
+    for (size_t isite=0ul; isite<m_nsite; ++isite){
+        onv.set({ispin, isite});
+        ispin = !ispin;
+    }
+}
+
 void FermionHamiltonian::log_data() const {
     if (!m_contribs_1100.is_nonzero(0ul))
         log::info("1-electron term has no diagonal contributions");

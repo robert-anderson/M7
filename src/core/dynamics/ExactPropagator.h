@@ -5,8 +5,8 @@
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
-#include <src/core/config/FciqmcConfig.h>
-#include <src/core/hamiltonian/ForeachConnection.h>
+#include "src/core/config/FciqmcConfig.h"
+#include "src/core/excititer/ExcitIterGroup.h"
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {
@@ -15,7 +15,7 @@ class ExactPropagator : public Propagator {
      * rank-2 RDMs since these spawns will make the exact contributions.
      */
     const bool m_only_nonzero_h_spawns;
-    foreach_conn::vector_t m_foreach_conns;
+    ExcitIterGroup m_excit_iters;
     MagnitudeLogger m_mag_log;
 
 public:

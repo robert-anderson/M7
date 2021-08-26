@@ -9,7 +9,7 @@ ExactPropagator::ExactPropagator(
         const Hamiltonian &ham, const fciqmc_config::Document &opts,
         const NdFormat<defs::ndim_wf> &wf_fmt, bool only_nonzero_h_spawns) :
         Propagator(opts, ham, wf_fmt), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
-        m_foreach_conns(foreach_conn::make_all(ham)),
+        m_excit_iters(ham),
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}
 
@@ -34,8 +34,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         const auto delta = -weight * tau() * helement;
         wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
-    for (auto& foreach_conn: m_foreach_conns)
-        foreach_conn->foreach<field::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
+    m_excit_iters.foreach<field::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

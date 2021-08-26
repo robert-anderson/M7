@@ -10,12 +10,13 @@ size_t ham_data::TermContribs::ind(size_t exsig) const {
     DEBUG_ASSERT_LE(ifrm, m_nexsig_contrib_frm, "invalid number of like-indexed fermion operators");
     size_t ibos = decode_nbos_cre(exsig);
     DEBUG_ASSERT_LE(ibos, m_nexsig_contrib_bos, "invalid number of like-indexed boson operators");
-    return ifrm*m_nexsig_contrib_bos+ibos;
+    return ifrm * m_nexsig_contrib_bos + ibos;
 }
 
-ham_data::TermContribs::TermContribs(size_t ranksig) : m_ranksig(ranksig), m_basesig(base_exsig(ranksig)),
-                                                       m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
-                                                       m_exsig_nonzero(m_nexsig_contrib_frm*m_nexsig_contrib_bos, false){}
+ham_data::TermContribs::TermContribs(size_t ranksig) :
+        m_ranksig(ranksig), m_basesig(base_exsig(ranksig)),
+        m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
+        m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, false) {}
 
 void ham_data::TermContribs::set_nonzero(size_t exsig) {
     m_exsig_nonzero[ind(exsig)] = true;
@@ -30,7 +31,7 @@ bool ham_data::FrmModelAttributes::is_hubbard_1d() const {
 }
 
 bool ham_data::FrmModelAttributes::is_hubbard_1d_pbc() const {
-    return m_on_site_only_doubles && m_nnp_only_singles;
+    return m_on_site_only_doubles && (m_nnp_only_singles && !m_nn_only_singles);
 }
 
 size_t ham_data::FrmModelAttributes::iorb_to_isite(const size_t &iorb, const size_t &nsite) {
@@ -59,12 +60,11 @@ ham_data::FrmModelAttributes::on_site(const size_t &nsite, const size_t &iorb, c
 }
 
 void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i, const size_t &j) {
-    if (i==j){
+    if (i == j) {
         // one-electron term is not purely off-diagonal
         m_nn_only_singles = false;
         m_nnp_only_singles = false;
-    }
-    else {
+    } else {
         if (!nearest_neighbors(nsite, i, j, false)) m_nn_only_singles = false;
         if (!nearest_neighbors(nsite, i, j, true)) m_nnp_only_singles = false;
     }
@@ -72,7 +72,7 @@ void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i,
 
 void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i, const size_t &j, const size_t &k,
                                            const size_t &l) {
-    if (!(i==j && j==k && k==l)) m_on_site_only_doubles = false;
+    if (!(i == j && j == k && k == l)) m_on_site_only_doubles = false;
 }
 
 bool ham_data::KramersAttributes::conserving() const {

@@ -24,7 +24,7 @@ bool Hubbard1dSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &
     if (vac == ~0ul) return false;
     if (src.get(vac)) return false;
 
-    conn.add(occ, vac);
+    conn.set(occ, vac);
     helem = m_h.m_frm.get_element_1100(src, conn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }

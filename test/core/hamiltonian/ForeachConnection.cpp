@@ -4,9 +4,7 @@
 
 #include <src/core/util/Foreach.h>
 #include <src/core/excitgen/CachedOrbs.h>
-#include <src/core/excititer/FrmConserve.h>
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/ForeachConnection.h"
 
 
 //struct ForEachInExsig {
@@ -27,6 +25,7 @@
 //};
 
 
+#if 0
 TEST(ForeachConnection, FrmNoSymDoubles){
     Hamiltonian ham("/home/rja/CLionProjects/M7/assets/HF_RDMs/FCIDUMP", 0);
     FrmConserveExcitIter iter(exsig_utils::ex_double, ham);
@@ -97,7 +96,6 @@ TEST(ForeachConnection, FrmNoSym) {
 }
 
 
-#if 0
 TEST(ForeachConnection, HubbardHolstein) {
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";

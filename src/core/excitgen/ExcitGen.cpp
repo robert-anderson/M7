@@ -32,13 +32,3 @@ FrmExcitGen::FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
     DEBUG_ASSERT_EQ(exsig_utils::decode_nfrm_cre(exsig), exsig_utils::decode_nfrm_ann(exsig),
                     "fermion number non-conservation is not currently supported");
 }
-
-bool FrmExcitGen::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                       defs::ham_t &helem, conn::FrmOnv &conn) {
-    return ExcitGen::draw(exsig, src, orbs, prob, helem, conn);
-}
-
-bool FrmExcitGen::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                       defs::ham_t &helem, conn::FrmBosOnv &conn) {
-    return draw(exsig, src.m_frm, orbs, prob, helem, conn.m_frm);
-}

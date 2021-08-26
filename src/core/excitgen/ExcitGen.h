@@ -30,6 +30,9 @@ public:
     virtual bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
 
+    virtual bool draw(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs,
+                      defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
+
     virtual size_t approx_nconn() const {
         return 0ul;
     }
@@ -52,31 +55,19 @@ protected:
 
 public:
     FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
-
-    bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
-
-    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override;
 };
 
 /**
  * Base class for stochastic Boson sector excitations
  */
-//class BosExcitGen : public ExcitGen {
-//protected:
-//    const size_t m_nexcit;
-//    const bool m_spin_conserving;
-//
-//public:
-//    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
-//
-//    bool draw(const FrmOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
-//              defs::ham_t &helem, conn::FrmOnv &conn) override;
-//
-//    bool draw(const FrmBosOnv &src_onv, const OccupiedOrbitals &occs, const VacantOrbitals &vacs, defs::prob_t &prob,
-//              defs::ham_t &helem, conn::FrmBosOnv &conn) override;
-//};
+class BosExcitGen : public ExcitGen {
+protected:
+    const bool m_spin_conserving;
+
+public:
+    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+};
+
 
 /**
  * Base class for stochastic excitations which may couple Fermion and Boson sectors excitations
@@ -85,12 +76,6 @@ class FrmBosExcitGen : public ExcitGen {
 public:
     FrmBosExcitGen(const Hamiltonian &h, PRNG &prng) :
             ExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}) {}
-
-    bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-              defs::ham_t &helem, conn::FrmBosOnv &conn) override {
-        return ExcitGen::draw(exsig, src, orbs, prob, helem, conn);
-    }
-
 };
 
 #endif //M7_EXCITGEN_H

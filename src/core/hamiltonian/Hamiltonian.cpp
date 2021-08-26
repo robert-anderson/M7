@@ -31,3 +31,19 @@ const size_t &Hamiltonian::nelec() const {
 bool Hamiltonian::complex_valued() const {
     return m_frm.m_complex_valued;
 }
+
+void Hamiltonian::set_hf_mbf(FrmOnv &onv, int spin) const {
+    m_frm.set_hf_mbf(onv, spin);
+}
+
+void Hamiltonian::set_hf_mbf(FrmBosOnv &onv, int spin) const {
+    m_frm.set_hf_mbf(onv.m_frm, spin);
+}
+
+void Hamiltonian::set_afm_mbf(FrmOnv &onv, bool alpha_first) const {
+    m_frm.set_afm_mbf(onv, alpha_first);
+}
+
+void Hamiltonian::set_afm_mbf(FrmBosOnv &onv, bool alpha_first) const {
+    m_frm.set_afm_mbf(onv.m_frm, alpha_first);
+}
