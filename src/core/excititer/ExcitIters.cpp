@@ -67,3 +67,48 @@ void excititers::Hubbard1dSingles::foreach(const FrmOnv &src, conn::FrmOnv &conn
         }
     }
 }
+
+excititers::FrmBosHolstein::FrmBosHolstein(const Hamiltonian &ham, size_t exsig) :
+        FrmBos(ham, exsig), m_cre(exsig_utils::decode_nbos_cre(exsig)){}
+
+void excititers::FrmBosHolstein::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
+    conn.clear();
+    const auto &occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
+    for (const auto& occ: occs) {
+        // skip if we reach an alpha orbital whose corresponding beta will produce a call to body
+        auto imode = occ < src.nsite() ? occ : occ - src.nsite();
+        if (occ < src.nsite() && src.m_frm.get({1, imode})) continue;
+        if (m_cre) conn.m_bos.m_cre.set({imode, 1});
+        else conn.m_bos.m_ann.set({imode, 1});
+    }
+}
+
+excititers::FrmBosKinetic::FrmBosKinetic(const Hamiltonian &ham, size_t exsig) :
+        FrmBos(ham, exsig), m_cre(exsig_utils::decode_nbos_cre(exsig)){}
+
+void excititers::FrmBosKinetic::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
+    conn.clear();
+    const auto& occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
+    const auto& vacs = m_work_orbs.vac(src.m_frm).m_flat.inds();
+
+    for (size_t imode=0ul; imode<m_ham.nsite(); ++imode) {
+        if (m_cre) {
+            if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
+            conn.m_bos.m_cre.set({imode, 1});
+        }
+        else {
+            if (src.m_bos[imode] == 0ul) continue;
+            conn.m_bos.m_ann.set({imode, 1});
+        }
+        for (auto& occ: occs){
+            conn.m_frm.m_ann.clear();
+            conn.m_frm.m_ann.add(occ);
+            for (auto& vac: vacs) {
+                conn.m_frm.m_cre.clear();
+                conn.m_frm.m_cre.add(vac);
+                if (!set_helement(src, conn)) continue;
+                body(conn);
+            }
+        }
+    }
+}

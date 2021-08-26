@@ -24,6 +24,23 @@ protected:
 public:
     ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs);
 
+
+    /*
+     * when the H matrix element is not necessary:
+     */
+    virtual bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
+                      defs::prob_t &prob, conn::FrmOnv &conn);
+
+    virtual bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
+                      defs::prob_t &prob, conn::FrmBosOnv &conn);
+
+    virtual bool draw(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs,
+                      defs::prob_t &prob, conn::BosOnv &conn);
+
+    /*
+     * when the H matrix element is necessary. these can delegate the above methods in this base class, but in derived
+     * classes it may make more sense to call specific methods to compute the matrix element in a more efficient way
+     */
     virtual bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
 
@@ -32,6 +49,7 @@ public:
 
     virtual bool draw(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs,
                       defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
+
 
     virtual size_t approx_nconn() const {
         return 0ul;
@@ -49,22 +67,30 @@ public:
 /**
  * Base class for stochastic Fermion sector excitations
  */
-class FrmExcitGen : public ExcitGen {
+struct FrmExcitGen : public ExcitGen {
+    using ExcitGen::draw;
 protected:
     const bool m_spin_conserving;
-
 public:
     FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+
+
+    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
+              defs::prob_t &prob, conn::FrmBosOnv &conn) override {
+        return draw(exsig, src.m_frm, orbs, prob, conn.m_frm);
+    }
+
+    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override {
+        return draw(exsig, src.m_frm, orbs, prob, helem, conn.m_frm);
+    }
+
 };
 
 /**
  * Base class for stochastic Boson sector excitations
  */
-class BosExcitGen : public ExcitGen {
-protected:
-    const bool m_spin_conserving;
-
-public:
+struct BosExcitGen : public ExcitGen {
     BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
 };
 
@@ -72,10 +98,9 @@ public:
 /**
  * Base class for stochastic excitations which may couple Fermion and Boson sectors excitations
  */
-class FrmBosExcitGen : public ExcitGen {
-public:
-    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng) :
-            ExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}) {}
+struct FrmBosExcitGen : public ExcitGen {
+    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs) :
+            ExcitGen(h, prng, exsigs) {}
 };
 
 #endif //M7_EXCITGEN_H

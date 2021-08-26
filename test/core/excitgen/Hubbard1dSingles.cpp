@@ -2,7 +2,7 @@
 // Created by rja on 26/08/2021.
 //
 
-#include <src/core/excititer/ExcitIters.h>
+#include "src/core/excititer/ExcitIters.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 #include "src/core/excitgen/Hubbard1dSingles.h"

@@ -63,7 +63,6 @@ namespace excititers {
         void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
     };
 
-
     struct Hubbard1dSingles : public FrmConserve {
         using FrmConserve::foreach;
         const bool m_pbc;
@@ -72,6 +71,22 @@ namespace excititers {
 
         void foreach(const field::FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <field::FrmOnv> &body) override;
 
+    };
+
+    struct FrmBosHolstein : public FrmBos {
+        using FrmBos::foreach;
+        const bool m_cre;
+        FrmBosHolstein(const Hamiltonian &ham, size_t exsig);
+
+        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
+    };
+
+    struct FrmBosKinetic : public FrmBos {
+        using FrmBos::foreach;
+        const bool m_cre;
+        FrmBosKinetic(const Hamiltonian &ham, size_t exsig);
+
+        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
     };
 
 }

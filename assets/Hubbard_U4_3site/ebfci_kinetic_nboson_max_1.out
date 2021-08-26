@@ -1,0 +1,38 @@
+nsite, nelec = 3, 4
+U = 4
+t = 1
+nboson_max = 1
+(3, 3, 2, 2, 2)
+tol 1e-10  toloose 1e-05
+max_cycle 100  max_space 12  max_memory 2000  incore True
+davidson 0 1  |r|= 1.71  e= [8.]  max|de|=    8  lindep=    1
+davidson 1 2  |r|= 2.42  e= [3.44962629]  max|de|= -4.55  lindep= 0.999
+davidson 2 3  |r|= 1.45  e= [2.21151423]  max|de|= -1.24  lindep= 0.993
+davidson 3 4  |r|= 1.06  e= [1.50300098]  max|de|= -0.709  lindep= 0.997
+davidson 4 5  |r|= 0.432  e= [1.30980934]  max|de|= -0.193  lindep= 0.992
+davidson 5 6  |r|= 0.225  e= [1.26644422]  max|de|= -0.0434  lindep= 0.994
+davidson 6 7  |r|= 0.214  e= [1.24587732]  max|de|= -0.0206  lindep= 0.985
+davidson 7 8  |r|= 0.102  e= [1.23291918]  max|de|= -0.013  lindep= 0.996
+davidson 8 9  |r|= 0.0699  e= [1.22992438]  max|de|= -0.00299  lindep= 0.996
+davidson 9 10  |r|= 0.0486  e= [1.2283307]  max|de|= -0.00159  lindep= 0.995
+davidson 10 11  |r|= 0.0453  e= [1.22734051]  max|de|= -0.00099  lindep= 0.984
+davidson 11 12  |r|= 0.0197  e= [1.22684671]  max|de|= -0.000494  lindep= 0.984
+davidson 12 1  |r|= 0.0197  e= [1.22684671]  max|de|=    0  lindep= 0.998
+davidson 13 2  |r|= 0.0101  e= [1.22676121]  max|de|= -8.55e-05  lindep= 0.998
+davidson 14 3  |r|= 0.00596  e= [1.2267356]  max|de|= -2.56e-05  lindep= 0.996
+davidson 15 4  |r|= 0.00336  e= [1.22672559]  max|de|= -1e-05  lindep= 0.995
+davidson 16 5  |r|= 0.0022  e= [1.22672244]  max|de|= -3.15e-06  lindep= 0.996
+davidson 17 6  |r|= 0.0015  e= [1.22672074]  max|de|= -1.7e-06  lindep= 0.996
+davidson 18 7  |r|= 0.00119  e= [1.22671996]  max|de|= -7.87e-07  lindep= 0.986
+davidson 19 8  |r|= 0.00087  e= [1.22671954]  max|de|= -4.12e-07  lindep= 0.988
+davidson 20 9  |r|= 0.000496  e= [1.22671938]  max|de|= -1.66e-07  lindep= 0.984
+davidson 21 10  |r|= 0.000303  e= [1.2267193]  max|de|= -8.32e-08  lindep= 0.984
+davidson 22 11  |r|= 0.00015  e= [1.22671927]  max|de|= -2.43e-08  lindep= 0.973
+davidson 23 12  |r|= 8.73e-05  e= [1.22671926]  max|de|= -6.22e-09  lindep= 0.982
+davidson 24 1  |r|= 8.73e-05  e= [1.22671926]  max|de|= -2.22e-16  lindep= 0.997
+davidson 25 2  |r|= 4.87e-05  e= [1.22671926]  max|de|= -1.45e-09  lindep= 0.993
+davidson 26 3  |r|= 2.62e-05  e= [1.22671926]  max|de|= -7.33e-10  lindep= 0.998
+davidson 27 4  |r|= 1.3e-05  e= [1.22671926]  max|de|= -1.73e-10  lindep= 0.988
+root 0 converged  |r|= 7.69e-06  e= 1.2267192625127803  max|de|= -4.29e-11
+converged 28 5  |r|= 7.69e-06  e= [1.22671926]  max|de|= -4.29e-11
+1.2267192625127803

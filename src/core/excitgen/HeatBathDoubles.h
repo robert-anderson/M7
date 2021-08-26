@@ -12,7 +12,9 @@
 /**
  * precomputed sampler for fermion double excitations
  */
-class HeatBathDoubles : public FrmExcitGen {
+struct HeatBathDoubles : public FrmExcitGen {
+    using FrmExcitGen::draw;
+private:
     Aliaser m_pick_ab_given_ij;
 
 public:
@@ -20,11 +22,6 @@ public:
 
     bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
-
-    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override {
-        return draw(exsig, src.m_frm, orbs, prob, helem, conn.m_frm);
-    }
 
     size_t approx_nconn() const override;
 

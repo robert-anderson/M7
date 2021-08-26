@@ -7,18 +7,16 @@
 
 #include "ExcitGen.h"
 
-class UniformSingles : public FrmExcitGen {
+struct UniformSingles : public FrmExcitGen {
+    using FrmExcitGen::draw;
 
-public:
     UniformSingles(const Hamiltonian& ham, PRNG& prng);
 
     bool draw(const size_t& exsig, const field::FrmOnv &src, CachedOrbs& orbs,
-               defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
+               defs::prob_t &prob, conn::FrmOnv &conn) override;
 
-    bool draw(const size_t& exsig, const field::FrmBosOnv &src, CachedOrbs& orbs,
-               defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override {
-        return draw(exsig, src.m_frm, orbs, prob, helem, conn.m_frm);
-    }
+    bool draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
+              conn::FrmOnv &conn) override;
 
     size_t approx_nconn() const override;
 
