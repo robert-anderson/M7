@@ -18,12 +18,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     auto &src_mbf = row.m_mbf;
     const defs::wf_t &weight = row.m_weight[ipart];
     bool src_initiator = row.m_initiator.get(ipart);
-    bool src_deterministic = row.m_deterministic.get(ipart);
-    OccOrbs occs(src_mbf);
-
-    DEBUG_ASSERT_GT(occs.size(), 0ul, "no occupied orbital indices");
-    VacOrbs vacs(src_mbf);
-    DEBUG_ASSERT_GT(vacs.size(), 0ul, "no vacant orbital indices");
+    bool src_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
 
     DEBUG_ASSERT_FALSE(consts::float_is_zero(weight),
                     "shouldn't be trying to propagate off-diagonal from zero weight");

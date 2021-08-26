@@ -24,7 +24,7 @@ struct DstFinder {
         auto irow_dst = *m_wf.m_store[m_block_start_row.m_dst_mbf];
         if (irow_dst != ~0ul) {
             m_wf.m_store.m_row.jump(irow_dst);
-            m_deterministic = m_wf.m_store.m_row.m_deterministic.get(0);
+            m_deterministic = m_wf.m_store.m_row.m_deterministic.get(m_wf.iroot_part(m_block_start_row.m_ipart_dst));
         } else {
             m_wf.m_store.m_row.select_null();
             m_deterministic = false;

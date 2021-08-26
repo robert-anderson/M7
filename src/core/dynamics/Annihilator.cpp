@@ -163,7 +163,7 @@ void Annihilator::handle_src_block(SpawnTableRow &block_begin, WalkerTableRow &d
     /*
      * or if they already take contributions from deterministic subspace connections.
      */
-    if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(ipart_dst)) return;
+    if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(m_wf.iroot_part(ipart_dst))) return;
 
     m_rdms.make_contribs(block_begin, dst_row, m_prop);
 }

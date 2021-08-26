@@ -127,6 +127,10 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         return m_store.m_row.ipart_replica(ipart);
     }
 
+    size_t iroot_part(const size_t& ipart) const {
+        return ipart/2;
+    }
+
     defs::wf_comp_t square_norm(const size_t& ipart) const;
 
     defs::wf_comp_t l1_norm(const size_t& ipart) const;
