@@ -54,6 +54,6 @@ bool FrmBosPcKinetic::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs
         if (src.m_bos[n] == 0ul) return false;
         conn.m_bos.m_ann.set({n, 1});
     };
-    prob *= m_pick_n_given_pq.prob(pq, n) / m_pick_n_given_pq.norm(pq);
+    prob *= m_pick_n_given_pq.prob(pq, n);
     return true;
 }
