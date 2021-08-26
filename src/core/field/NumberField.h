@@ -83,6 +83,12 @@ struct NdNumberField : NumberFieldBase {
         return *this;
     }
 
+    T sum_over(const defs::inds& inds) const {
+        T tot{};
+        for (const auto& ind: inds) tot+=(*this)[ind];
+        return tot;
+    }
+
     bool is_ordered(size_t ibegin, size_t iend, bool strict, bool ascending) const {
         if (!nelement()) return true;
         DEBUG_ASSERT_TRUE(ibegin<m_nelement || ibegin==iend, "first element OOB");

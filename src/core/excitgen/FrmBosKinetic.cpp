@@ -9,7 +9,6 @@ FrmBosKinetic::FrmBosKinetic(const Hamiltonian &h, PRNG &prng) :
         m_pick_n_given_pq(h.nsite()*h.nsite(), h.nsite()),
         m_singles(h, prng){
     const auto nmode = h.nsite();
-    const auto nmode2 = nmode*nmode;
     std::vector<defs::prob_t> weights(nmode, 0.0);
     size_t pq = 0ul;
     log::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
@@ -27,7 +26,7 @@ FrmBosKinetic::FrmBosKinetic(const Hamiltonian &h, PRNG &prng) :
                 ++pq;
             }
         }
-        DEBUG_ASSERT_EQ(pq, nmode2, "not all single fermion excitations handled");
+        DEBUG_ASSERT_EQ(pq, nmode*nmode, "not all single fermion excitations handled");
     }
     mpi::barrier();
 }

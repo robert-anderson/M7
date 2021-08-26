@@ -26,7 +26,7 @@ DeterministicSubspace::DeterministicSubspace(const fciqmc_config::Semistochastic
 
 void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears) {
     auto row = m_wf.m_store.m_row;
-    Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, 0);
+    Wavefunction::weights_gxr_t gxr(row, row.m_weight, true, true, {0});
     gxr.find(m_opts.m_size);
     for (size_t i = 0ul; i < gxr.m_ninclude.m_local; ++i) {
         row.jump(gxr[i]);
@@ -68,8 +68,8 @@ void DeterministicSubspace::build_from_all_occupied(const Hamiltonian &ham, cons
     build_connections(ham, bilinears);
 }
 
-void DeterministicSubspace::build_from_occupied_connections(const Hamiltonian &ham, const field::Mbf &mbf,
-                                                            const Bilinears &bilinears) {
+void DeterministicSubspace::build_from_occupied_connections(
+        const Hamiltonian &ham, const field::Mbf &mbf, const Bilinears &bilinears) {
     suite::Conns conns_work(m_wf.m_nsite);
     auto row = m_wf.m_store.m_row;
     auto &conn_work = conns_work[row.m_mbf];
@@ -96,11 +96,12 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
         for (; icol_it != icol_list.cend(); ++icol_it) {
             row_global.jump(*icol_it);
             if (row_global.m_mbf == ref) continue;
-            if (m_wf.nreplica()==2){
-                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, 0.5 * row_local.m_weight[0] * row_global.m_weight[1]);
-                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, 0.5 * row_local.m_weight[1] * row_global.m_weight[0]);
-            }
-            else {
+            if (m_wf.nreplica() == 2) {
+                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
+                                   0.5 * row_local.m_weight[0] * row_global.m_weight[1]);
+                rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
+                                   0.5 * row_local.m_weight[1] * row_global.m_weight[0]);
+            } else {
                 rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, row_local.m_weight[0] * row_global.m_weight[0]);
             }
         }

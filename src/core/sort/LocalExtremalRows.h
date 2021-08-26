@@ -43,9 +43,9 @@ struct LocalExtremalRows {
      */
     TableBase& m_table;
     /**
-     * the element index of the number field to compare.
+     * the element indices of the number field to compare (via arithmetic mean)
      */
-    const size_t m_ielement_cmp;
+    const defs::inds m_inds_to_cmp;
     /**
      * comparator used to determine order of values
      */
@@ -55,17 +55,17 @@ struct LocalExtremalRows {
      */
     ExtremalIndices m_xinds;
 
-    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp=0ul) :
+    LocalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, defs::inds inds_to_cmp) :
             m_work_row(row),
             m_work_row_field(field::identify(m_work_row, row, field)),
             m_work_row_cmp(row),
             m_work_row_cmp_field(field::identify(m_work_row_cmp, row, field)),
             m_table(*static_cast<const Row &>(m_work_row).m_table),
-            m_ielement_cmp(ielement_cmp),
+            m_inds_to_cmp(inds_to_cmp),
             m_value_cmp_fn(comparators::make_value_cmp_fn<T>(absval, largest)),
             m_xinds(comparators::make_num_field_row_cmp_fn(
                     m_work_row, m_work_row_field,
-                    m_work_row_cmp, m_work_row_cmp_field, m_value_cmp_fn, ielement_cmp)) {
+                    m_work_row_cmp, m_work_row_cmp_field, m_value_cmp_fn, inds_to_cmp)) {
         REQUIRE_TRUE_ALL(static_cast<const FieldBase&>(m_work_row_field).belongs_to_row(m_work_row),
                               "the work row and work field must correspond");
         REQUIRE_TRUE_ALL(static_cast<const FieldBase&>(m_work_row_cmp_field).belongs_to_row(m_work_row_cmp),
@@ -108,7 +108,7 @@ struct LocalExtremalRows {
         DEBUG_ASSERT_LT(i, nrow_nonzero(), "row index is OOB wrt number of non-zero rows");
         DEBUG_ASSERT_LT(i, nfound(), "row index is OOB wrt number of found extremal rows");
         m_work_row.jump(m_xinds[i]);
-        return m_work_row_field[m_ielement_cmp];
+        return m_work_row_field.sum_over(m_inds_to_cmp);
     }
 
     bool cmp_values (const T& v1, const T& v2) const {

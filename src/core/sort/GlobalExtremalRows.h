@@ -56,8 +56,8 @@ struct GlobalExtremalRows {
      */
     global_sort_table_t m_global_sorter;
 
-    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, size_t ielement_cmp) :
-            m_lxr(row, field, largest, absval, ielement_cmp),
+    GlobalExtremalRows(row_t &row, field::Numbers<T, nind> &field, bool largest, bool absval, defs::inds inds_to_cmp) :
+            m_lxr(row, field, largest, absval, inds_to_cmp),
             m_global_sorter("Global extremal rows sorter", {{}}) {
         reset();
     }
@@ -198,7 +198,7 @@ private:
             static_cast<Row &>(source_row).jump(m_lxr[i]);
             static_cast<Row &>(loader_row).push_back_jump();
             loader_row.m_irank = mpi::irank();
-            loader_row.m_value = source_field[m_lxr.m_ielement_cmp];
+            loader_row.m_value = source_field.sum_over(m_lxr.m_inds_to_cmp);
         }
         if (mpi::i_am_root())
             static_cast<TableBase &>(m_global_sorter).resize(m_ninclude.m_reduced);
@@ -219,7 +219,7 @@ private:
             auto row1 = m_global_sorter.m_row;
             auto row2 = m_global_sorter.m_row;
             auto cmp_fn = comparators::make_num_field_row_cmp_fn(
-                    row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, m_lxr.m_ielement_cmp);
+                    row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, m_lxr.m_inds_to_cmp);
             QuickSorter qs(cmp_fn);
             qs.reorder_sort(m_global_sorter);
             for (size_t irow = 0ul; irow < nrow; ++irow) {

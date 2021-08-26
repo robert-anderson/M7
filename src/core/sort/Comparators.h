@@ -130,8 +130,8 @@ namespace comparators {
      *  the field on which the position of row2 relative to row1 is determined
      * @param value_cmp_fn
      *  the function which determines the relative ordering of values
-     * @param ielement_cmp
-     *  the flat element index to be compared between the nind-dimensional fields
+     * @param inds_to_cmp
+     *  vector of the flat element indices to be summed together in the comparison of two fields
      * @return
      *  a comparator which determines the relative ordering of two row indices in a Table
      */
@@ -139,15 +139,15 @@ namespace comparators {
     static index_cmp_fn_t make_num_field_row_cmp_fn(
             row_t &row1, field::Numbers<T, nind> &field1,
             row_t &row2, field::Numbers<T, nind> &field2,
-            value_cmp_fn_t<T> value_cmp_fn, size_t ielement_cmp) {
+            value_cmp_fn_t<T> value_cmp_fn, defs::inds inds_to_cmp) {
         REQUIRE_TRUE(static_cast<FieldBase &>(field1).belongs_to_row(row1), "specified row-field pair must correspond");
         REQUIRE_TRUE(static_cast<FieldBase &>(field2).belongs_to_row(row2), "specified row-field pair must correspond");
         DEBUG_ASSERT_LE(ielement_cmp, field1.nelement(), "compared field index OOB");
-        return [&row1, &field1, &row2, &field2, value_cmp_fn, ielement_cmp]
+        return [&row1, &field1, &row2, &field2, value_cmp_fn, inds_to_cmp]
                 (const size_t &irow, const size_t &irow_cmp) {
             static_cast<const Row &>(row1).jump(irow);
             static_cast<const Row &>(row2).jump(irow_cmp);
-            return value_cmp_fn(field1[ielement_cmp], field2[ielement_cmp]);
+            return value_cmp_fn(field1.sum_over(inds_to_cmp), field2.sum_over(inds_to_cmp));
         };
     }
 };
