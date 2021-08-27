@@ -50,7 +50,8 @@ bool UniformSingles::draw(const size_t &exsig, const field::FrmOnv &src, CachedO
 
 bool UniformSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
                           defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
-    draw(exsig, src, orbs, prob, conn);
+    auto result = draw(exsig, src, orbs, prob, conn);
+    if (!result) return false;
     helem = m_h.m_frm.get_element_1100(src, conn);
     return !consts::float_nearly_zero(helem, 1e-12);
 }

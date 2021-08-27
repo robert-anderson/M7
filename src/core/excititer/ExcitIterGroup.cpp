@@ -13,7 +13,8 @@ void ExcitIterGroup::init() {
     }
 }
 
-void ExcitIterGroup::add(std::unique_ptr<ExcitIter> &&excit_iter, size_t exsig) {
+void ExcitIterGroup::add(std::unique_ptr<ExcitIter> &&excit_iter) {
+    auto exsig = excit_iter->m_exsig;
     REQUIRE_TRUE(m_excit_iters[exsig] == nullptr,
                  "can't specify more than one excitation iterator for the same exsig in an ExcitIterGroup");
     m_excit_iters[exsig] = std::move(excit_iter);

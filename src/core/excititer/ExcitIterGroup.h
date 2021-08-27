@@ -29,7 +29,7 @@ struct ExcitIterGroup {
      */
     void init();
 
-    void add(std::unique_ptr<ExcitIter> &&excit_iter, size_t exsig);
+    void add(std::unique_ptr<ExcitIter> &&excit_iter);
 
 public:
     /**
@@ -39,14 +39,19 @@ public:
      *  excitation iterator objects
      */
     ExcitIterGroup(const Hamiltonian &ham) {
-        if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
-            add(std::unique_ptr<ExcitIter>(new excititers::Hubbard1dSingles(ham)), ex_single);
-        } else {
-            add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_single)), ex_single);
+
+        bool any_singles = ham.m_frm.m_contribs_1100.is_nonzero(ex_single) || ham.m_frm.m_contribs_2200.is_nonzero(ex_single);
+        if (any_singles) {
+            if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
+                add(std::unique_ptr<ExcitIter>(new excititers::Hubbard1dSingles(ham)));
+            } else {
+                add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_single)));
+            }
         }
         if (ham.m_frm.m_contribs_2200.is_nonzero(ex_double)) {
-            add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_double)), ex_double);
+            add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_double)));
         }
+
         if (ham.m_bos.m_nboson_max) {
 //        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
 //                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, true));
