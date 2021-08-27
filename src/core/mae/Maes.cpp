@@ -6,8 +6,7 @@
 
 Maes::Maes(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec) :
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, nsite, nelec, m_accum_epoch),
-        m_ref_excits(opts.m_ref_excits, nsite), m_period(opts.m_stats_period),
-        m_conn_work(nsite), m_com_work(nsite) {
+        m_ref_excits(opts.m_ref_excits, nsite), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = mem_utils::make_unique<MaeStats>(
                 "M7.maes.stats",
@@ -65,7 +64,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         /*
          * accumulate contributions to reference excitations if required
          */
-        m_ref_excits.make_contribs(m_conn_work, dupl_fac * ncycle_occ * av_weight, ipart);
+        m_ref_excits.make_contribs(row.m_mbf, ref_mbf, dupl_fac * ncycle_occ * av_weight, ipart);
 
         if (m_bilinears.m_rdms) {
             auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;

@@ -20,38 +20,18 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
      */
     buffered::MaeInds m_working_inds;
 
-    RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100) :
-            BufferedTable<MaeRow, true>(
-                    log::format("average {} reference excitation coefficients", exsig_utils::to_string(exsig)),
-                                        {{exsig, nvalue}, nbucket}),
-            m_working_inds(exsig) {}
+    RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100);
 
-    LookupResult operator[](const conn::FrmOnv &key) {
-        m_working_inds = key;
-        return MappedTable<MaeRow>::operator[](m_working_inds);
-    }
+    LookupResult operator[](const conn::FrmOnv &key);
 
-    size_t insert(const conn::FrmOnv &key) {
-        m_working_inds = key;
-        return MappedTable<MaeRow>::insert(m_working_inds);
-    }
+    size_t insert(const conn::FrmOnv &key);
 
-    std::vector<std::string> h5_field_names() const {
-        return {m_row.m_inds.m_name, m_row.m_values.m_name};
-    }
+    std::vector<std::string> h5_field_names() const;
 
     using Table<MaeRow>::save;
-    void save(hdf5::GroupWriter& gw) const {
-        Table<MaeRow>::save(gw, exsig_utils::to_string(m_working_inds.m_exsig), h5_field_names());
-    }
+    void save(hdf5::GroupWriter& gw) const;
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
-        DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_exsig, "incompatible connection");
-        auto irow = *(*this)[conn];
-        if (irow==~0ul) irow = insert(conn);
-        m_row.jump(irow);
-        m_row.m_values[ipart]+=contrib;
-    }
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart);
 };
 
 
@@ -65,60 +45,23 @@ struct RefExcits : Archivable {
      */
     conn::Mbf m_conn;
 
-    RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite) :
-            Archivable("ref_excits", opts.m_archivable),
-        m_opts(opts), m_av_ref({1}), m_conn(nsite) {
-        for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
-            auto exsig = exsig_utils::encode(iexlvl, iexlvl, 0, 0);
-            m_active_exsigs.push_back(exsig);
-            m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, 1);
-        }
-    }
+    RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite);
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
-        auto exsig = conn.exsig();
-        if (!exsig) m_av_ref[ipart] += contrib;
-        if (exsig==~0ul || !m_ref_excits[exsig]) return;
-        m_ref_excits[exsig]->make_contribs(conn, contrib, ipart);
-    }
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart);
 
-    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& ipart) {
-        make_contribs(conn.m_frm, contrib, ipart);
-    }
+    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& ipart);
 
-    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart) {
-        m_conn.connect(ref_mbf, mbf);
-        make_contribs(m_conn, contrib, ipart);
-    }
+    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart);
 
-    bool all_stores_empty() const {
-        for (const auto& i: m_active_exsigs) {
-            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active encode_exsig was not allocated!");
-            if (m_ref_excits[i]->m_hwm) return false;
-        }
-        return true;
-    };
+    bool all_stores_empty() const;
 
-    operator bool() const {
-        return !m_active_exsigs.empty();
-    }
+    operator bool() const;
 
 private:
 
-    void load_fn(hdf5::GroupReader &parent) override {
+    void load_fn(hdf5::GroupReader &parent) override;
 
-    }
-
-    void save_fn(hdf5::GroupWriter &parent) override {
-        hdf5::GroupWriter gw("ref_excits", parent);
-        defs::wf_t av_ref;
-        av_ref = mpi::all_sum(m_av_ref[0]);
-        gw.save("0000", av_ref);
-        for (const auto& i: m_active_exsigs) {
-            DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");
-            m_ref_excits[i]->save(gw);
-        }
-    }
+    void save_fn(hdf5::GroupWriter &parent) override;
 };
 
 #endif //M7_REFEXCITS_H

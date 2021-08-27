@@ -16,11 +16,6 @@ struct Maes {
     const size_t m_period;
     size_t m_icycle_period_start = ~0ul;
     std::unique_ptr<MaeStats> m_stats = nullptr;
-    /**
-     * work space
-     */
-    conn::Mbf m_conn_work;
-    FrmOps m_com_work;
 
     Maes(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec);
 
