@@ -8,6 +8,7 @@
 #include "UniformSingles.h"
 
 struct Hubbard1dSingles : public UniformSingles {
+    using UniformSingles::draw;
     const bool m_pbc;
 
     Hubbard1dSingles(const Hamiltonian& h, PRNG& prng):
