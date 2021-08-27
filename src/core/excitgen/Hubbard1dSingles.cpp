@@ -8,7 +8,6 @@ size_t Hubbard1dSingles::approx_nconn() const {
     return m_nelec;
 }
 
-#if 0
 bool Hubbard1dSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
                             defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
     const auto nelec = m_h.nelec();
@@ -34,4 +33,3 @@ bool Hubbard1dSingles::draw(const size_t &exsig, const FrmBosOnv &src_onv, Cache
                             defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
     return draw(exsig, src_onv.m_frm, orbs, prob, helem, conn.m_frm);
 }
-#endif
