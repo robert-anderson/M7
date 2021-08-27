@@ -19,6 +19,7 @@ TEST(HeatBathDoubles, SmallFromHFDeterminant){
     const size_t ndraw = 10000000;
     tester.run(src_mbf, ndraw);
     ASSERT_TRUE(tester.all_drawn_at_least_once());
+    std::cout << tester.m_results.to_string() << std::endl;
     auto av_err1 = tester.mean_abs_error(ndraw);
     tester.run(src_mbf, ndraw);
     auto av_err2 = tester.mean_abs_error(2*ndraw);

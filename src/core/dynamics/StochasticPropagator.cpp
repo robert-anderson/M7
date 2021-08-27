@@ -73,7 +73,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
 void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     auto &row = wf.m_store.m_row;
-    bool flag_deterministic = row.m_deterministic.get(ipart);
+    bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
     const defs::ham_comp_t &hdiag = row.m_hdiag;
     if (flag_deterministic) {
         wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());

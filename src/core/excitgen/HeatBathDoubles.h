@@ -23,6 +23,16 @@ public:
     bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
 
+    bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
+              defs::prob_t &prob, conn::FrmOnv &conn) override {
+        /*
+         * need the helement to compute the probability so if it isn't actually needed, just dispose of it
+         * in contrast to the generic case where it is not assumed that the helement must be computed to get the prob
+         */
+        defs::ham_t helem;
+        return draw(exsig, src, orbs, prob, helem, conn);
+    }
+
     size_t approx_nconn() const override;
 
 };

@@ -27,6 +27,7 @@ myhf.analyze()
 
 myfci = fci.FCI(myhf)
 fcie, fcivec = myfci.kernel()
+print('FCI energy: {}'.format(fcie))
 
 nelecb = (mol.nelectron-mol.spin)//2
 neleca = mol.nelectron - nelecb

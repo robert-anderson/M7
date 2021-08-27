@@ -28,6 +28,7 @@ myhf.analyze()
 
 myfci = fci.FCI(myhf)
 fcie, fcivec = myfci.kernel()
+print('FCI energy: {}'.format(fcie))
 
 nelecb = (mol.nelectron-mol.spin)//2
 neleca = mol.nelectron - nelecb
@@ -60,11 +61,11 @@ with open('exact_rdms.pkl', 'wb') as f:
 #INFO: ******************** input file end ********************
 
 
-System: uname_result(system='Linux', node='MS-7B86', release='5.4.0-80-generic', version='#90~18.04.1-Ubuntu SMP Tue Jul 13 19:40:02 UTC 2021', machine='x86_64', processor='x86_64')  Threads 12
+System: uname_result(system='Linux', node='MS-7B86', release='5.4.0-81-generic', version='#91~18.04.1-Ubuntu SMP Fri Jul 23 13:36:29 UTC 2021', machine='x86_64', processor='x86_64')  Threads 12
 Python 3.6.9 (default, Jan 26 2021, 15:33:00) 
 [GCC 8.4.0]
 numpy 1.18.4  scipy 1.4.1
-Date: Wed Aug 18 18:11:36 2021
+Date: Fri Aug 27 01:02:35 2021
 PySCF version 1.7.3
 PySCF path  /home/rja/opt/pyscf/pyscf
 GIT HEAD      ref: refs/heads/master
@@ -91,7 +92,7 @@ number of NR pGTOs = 18
 number of NR cGTOs = 6
 basis = {'H': 'sto-3g', 'Li': 'sto-3g'}
 ecp = {}
-CPU time:         0.25
+CPU time:         0.23
 
 
 ******** <class 'pyscf.scf.hf_symm.SymAdaptedRHF'> ********
@@ -107,42 +108,42 @@ SCF conv_tol_grad = None
 SCF max_cycles = 50
 direct_scf = True
 direct_scf_tol = 1e-13
-chkfile to save SCF result = /home/rja/CLionProjects/M7/assets/LiH_RDMs/tmpj01854qp
-max_memory 4000 MB (current use 75 MB)
+chkfile to save SCF result = /home/rja/CLionProjects/M7/assets/LiH_RDMs/tmpj2k2jyvu
+max_memory 4000 MB (current use 76 MB)
 Freeze 0 electrons in irreps []
     4 free electrons in irreps A1 B1 B2
 Set gradient conv threshold to 3.16228e-05
 init E= -7.61455306827914
-HOMO (A1) = -0.294107173947103  LUMO (A1) = 0.0297336220310757
+HOMO (A1) = -0.294107173947103  LUMO (A1) = 0.0297336220310755
 cycle= 1 E= -7.85259212219785  delta_E= -0.238  |g|= 0.101  |ddm|= 1.12
 HOMO (A1) = -0.290369761459111  LUMO (A1) = 0.0782169279098985
-cycle= 2 E= -7.85958366753391  delta_E= -0.00699  |g|= 0.0223  |ddm|= 0.229
+cycle= 2 E= -7.85958366753392  delta_E= -0.00699  |g|= 0.0223  |ddm|= 0.229
 HOMO (A1) = -0.304922762947419  LUMO (A1) = 0.0798104522293346
 cycle= 3 E= -7.86036944316774  delta_E= -0.000786  |g|= 0.00803  |ddm|= 0.0706
-HOMO (A1) = -0.301132078212797  LUMO (A1) = 0.0795970425774476
+HOMO (A1) = -0.301132078212795  LUMO (A1) = 0.079597042577449
 cycle= 4 E= -7.86053853850301  delta_E= -0.000169  |g|= 0.000289  |ddm|= 0.0498
-HOMO (A1) = -0.301201271575881  LUMO (A1) = 0.0794943329269681
+HOMO (A1) = -0.301201271575881  LUMO (A1) = 0.0794943329269676
 cycle= 5 E= -7.86053866067065  delta_E= -1.22e-07  |g|= 1.8e-05  |ddm|= 0.00138
-HOMO (A1) = -0.301198954388433  LUMO (A1) = 0.0794992059464354
-cycle= 6 E= -7.86053866101928  delta_E= -3.49e-10  |g|= 8.99e-07  |ddm|= 6.31e-05
-HOMO (A1) = -0.301198648314831  LUMO (A1) = 0.0794994906573656
-Extra cycle  E= -7.86053866102069  delta_E= -1.42e-12  |g|= 4.25e-07  |ddm|= 2.75e-06
+HOMO (A1) = -0.301198954388435  LUMO (A1) = 0.0794992059464336
+cycle= 6 E= -7.86053866101927  delta_E= -3.49e-10  |g|= 8.99e-07  |ddm|= 6.31e-05
+HOMO (A1) = -0.301198648314831  LUMO (A1) = 0.0794994906573647
+Extra cycle  E= -7.86053866102069  delta_E= -1.41e-12  |g|= 4.25e-07  |ddm|= 2.75e-06
 converged SCF energy = -7.86053866102069
 **** SCF Summaries ****
-Total Energy =                          -7.860538661020692
+Total Energy =                          -7.860538661020685
 Nuclear Repulsion Energy =               1.133951166257143
-One-electron Energy =                  -12.694634737283913
-Two-electron Energy =                    3.700144910006077
+One-electron Energy =                  -12.694634737283899
+Two-electron Energy =                    3.700144910006069
 Wave-function symmetry = A1
 occupancy for each irrep:     A1   B1   B2
                                2    0    0
 **** MO energy ****
 MO #1 (A1 #1), energy= -2.34597368936961 occ= 2
 MO #2 (A1 #2), energy= -0.301198648314831 occ= 2
-MO #3 (A1 #3), energy= 0.0794994906573656 occ= 0
+MO #3 (A1 #3), energy= 0.0794994906573647 occ= 0
 MO #4 (B1 #1), energy= 0.163275071154775 occ= 0
 MO #5 (B2 #1), energy= 0.163275071154775 occ= 0
-MO #6 (A1 #4), energy= 0.596917725883246 occ= 0
+MO #6 (A1 #4), energy= 0.596917725883247 occ= 0
  ** Mulliken pop on meta-lowdin orthogonal AOs  **
  ** Mulliken pop  **
 pop of  0 H 1s        1.36972
@@ -155,6 +156,7 @@ pop of  1 Li 2pz       0.15750
 charge of  0H =     -0.36972
 charge of  1Li =      0.36972
 Dipole moment(X, Y, Z, Debye):  0.00000,  0.00000,  4.82200
+FCI energy: -7.878453652277122
 1RDM diagonal: [1.9999e+00 1.9616e+00 9.0037e-03 1.7931e-03 1.7931e-03 2.5864e-02]
 [[ 1.9999e+00 -5.4891e-04  4.8382e-04  0.0000e+00  0.0000e+00 -1.1732e-03]
  [-5.4891e-04  1.9616e+00  6.5094e-02  0.0000e+00  0.0000e+00  7.6241e-03]

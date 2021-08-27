@@ -75,7 +75,7 @@ class ExcitGenGroup {
 
     void add(std::unique_ptr<ExcitGen> &&exgen, const defs::inds &exsigs);
 
-    void add(std::unique_ptr<ExcitGen> &&exgen, size_t exsig);
+    void add(std::unique_ptr<ExcitGen> &&exgen);
 
 public:
     /**

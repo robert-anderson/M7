@@ -38,10 +38,8 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian &h, PRNG &prng) :
 #endif
 }
 
-bool HeatBathDoubles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
-                      conn::FrmOnv &conn) {
-    // just draw uniform ij TODO! int weighted ij
-    // return false if invalid excitation generated, true otherwise
+bool HeatBathDoubles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+                           defs::ham_t &helem, conn::FrmOnv &conn) {
     size_t i, j, a, b;
     size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
@@ -72,7 +70,7 @@ bool HeatBathDoubles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &o
     }
     conn.set(i, j, a, b);
     helem = m_h.m_frm.get_element_2200(src, conn);
-    prob = m_pick_ab_given_ij.prob(ij, ab) / m_nelec_pair;
+    prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
     if (consts::float_nearly_zero(prob, 1e-14)) {
         return false;

@@ -54,20 +54,21 @@ void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen, const inds &exsigs) {
     }
 }
 
-void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen, size_t exsig) {
-    add(std::move(exgen), defs::inds{exsig});
+void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen) {
+    auto exsigs = exgen->m_exsigs;
+    add(std::move(exgen), exsigs);
 }
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng), m_cached_orbs(ham.m_frm.m_point_group_map) {
     if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
-        add(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng)), ex_single);
+        add(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng)));
     } else {
-        add(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)), ex_single);
+        add(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)));
     }
     if (ham.m_frm.m_contribs_2200.is_nonzero(ex_double)) {
         if (opts.m_excit_gen.get() == "pchb")
-            add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)), ex_double);
+            add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
     }
     if (ham.m_bos.m_nboson_max) {
 //        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =

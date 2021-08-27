@@ -19,9 +19,9 @@ protected:
     const size_t m_nelec;
     const size_t m_norb_pair;
     const size_t m_nelec_pair;
+public:
     const defs::inds m_exsigs;
 
-public:
     ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs);
 
 
