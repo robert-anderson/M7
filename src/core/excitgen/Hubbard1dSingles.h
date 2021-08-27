@@ -14,11 +14,13 @@ struct Hubbard1dSingles : public UniformSingles {
     Hubbard1dSingles(const Hamiltonian& h, PRNG& prng):
         UniformSingles(h, prng), m_pbc(h.m_frm.m_model_attrs.is_hubbard_1d_pbc()){}
 
+#if 0
     bool draw(const size_t& exsig, const field::FrmOnv &src,
               CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) override;
 
     bool draw(const size_t& exsig, const field::FrmBosOnv &src_onv,
               CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override;
+#endif
 
     size_t approx_nconn() const override;
 };
