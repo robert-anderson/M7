@@ -18,8 +18,7 @@ target_compile_definitions(release PRIVATE NDEBUG=1)
 target_compile_options(release PRIVATE -O3)
 target_link_options(release PRIVATE -g -rdynamic)
 
-target_compile_definitions(debug PRIVATE VERBOSE=1)
-target_link_options(debug PRIVATE)
+target_compile_options(debug PRIVATE -Og)
 target_link_options(debug PRIVATE -g -rdynamic)
 
 target_compile_definitions(prof PRIVATE NDEBUG=1)

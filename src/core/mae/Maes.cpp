@@ -60,7 +60,6 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
          */
         const auto av_weight = row.m_average_weight[ipart] / ncycle_occ;
 
-
         /*
          * accumulate contributions to reference excitations if required
          */
@@ -84,9 +83,9 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
                 m_bilinears.m_rdms.make_contribs(row.m_mbf, ref_mbf,
                                                  dupl_fac * ncycle_occ * av_weight * av_weight_ref_rep);
             }
-            row.m_average_weight = 0;
-            row.m_icycle_occ = icycle;
         }
+        row.m_average_weight = 0;
+        row.m_icycle_occ = icycle;
     }
 }
 

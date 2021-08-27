@@ -48,7 +48,7 @@ void Wavefunction::log_top_weighted(size_t ipart, size_t nrow) {
     auto &row = xr_gathered.m_row;
     log::info("Top-weighted WF elements for part {}:", ipart);
     for (row.restart(); row.in_range(); row.step()) {
-        log::info("{:<4} {}  {: .5e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
+        log::info("{:<4} {}  {: .8e}  {}", row.index(), row.m_mbf, row.m_weight[ipart], row.m_initiator[ipart]);
     }
 }
 

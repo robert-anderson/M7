@@ -124,7 +124,7 @@ public:
      * Loop over all rows in m_wf.m_store which have a non-zero MBF field but perform no propagation, just add any
      * required weight-averaged contributions to the MEVs
      */
-    void finalizing_loop_over_occupied_mbfs();
+    void finalizing_loop_over_occupied_mbfs(size_t icycle);
 
     void loop_over_spawned();
 

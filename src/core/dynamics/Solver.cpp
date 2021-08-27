@@ -56,6 +56,14 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
 void Solver::execute(size_t ncycle) {
     log::info("Beginning solver loop...");
     for (size_t i = 0ul; i < ncycle; ++i) {
+        if (m_maes.m_accum_epoch) {
+            if (i == m_maes.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
+                if (m_icycle == ncycle)
+                    log::info("maximum number of MEV accumulating cycles ({}) "
+                              "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
+                break;
+            }
+        }
         m_cycle_timer.reset();
         m_cycle_timer.unpause();
         begin_cycle();
@@ -93,21 +101,12 @@ void Solver::execute(size_t ncycle) {
             log::info("exit requested from file, terminating solver loop at MC cycle {}", i);
             break;
         }
-        if (m_maes.m_accum_epoch) {
-            if (i == m_maes.m_accum_epoch.icycle_start() + m_opts.m_av_ests.m_ncycle) {
-                if (m_icycle == ncycle)
-                    log::info("maximum number of MEV accumulating cycles ({}) "
-                              "reached at MC cycle {}", m_opts.m_av_ests.m_ncycle, i);
-                break;
-            }
-        }
         log::flush();
     }
     if (m_icycle == ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
-        --m_icycle;
-        finalizing_loop_over_occupied_mbfs();
+        finalizing_loop_over_occupied_mbfs(m_icycle-1);
     }
 }
 
@@ -175,7 +174,7 @@ void Solver::loop_over_occupied_mbfs() {
          */
         if (m_maes.m_accum_epoch.started_this_cycle(m_icycle)) {
             DEBUG_ASSERT_TRUE(m_maes.m_accum_epoch, "should be in MAE accumulation epoch");
-            row.m_icycle_occ = m_icycle - 1;
+            row.m_icycle_occ = m_icycle;
             row.m_average_weight = 0;
         }
 
@@ -231,11 +230,11 @@ void Solver::loop_over_occupied_mbfs() {
     m_synchronization_timer.pause();
 }
 
-void Solver::finalizing_loop_over_occupied_mbfs() {
+void Solver::finalizing_loop_over_occupied_mbfs(size_t icycle) {
     if (!m_maes.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
-        if (!row.m_mbf.is_zero()) m_maes.make_average_contribs(row, m_refs, m_icycle);
+        if (!row.m_mbf.is_zero()) m_maes.make_average_contribs(row, m_refs, icycle);
     }
     m_maes.end_cycle();
 }
