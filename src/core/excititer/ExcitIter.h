@@ -192,6 +192,8 @@ public:
 
     ExcitIter(const Hamiltonian &ham, size_t exsig);
 
+    virtual ~ExcitIter(){}
+
     /*
      * these are the "canonical" foreach definitions - the only methods which need to be overridden in derived classes
      * to change the behaviour of the loop
