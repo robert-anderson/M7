@@ -115,8 +115,10 @@ public:
         defs::inds recvcounts(mpi::nrank(), 0ul);
 
         auto all_sends_empty = !std::accumulate(sendcounts.cbegin(), sendcounts.cend(), 0ul);
-        if (all_sends_empty && m_last_recv_count)
-            log::warn_("this rank is sending no data at all, but it received data in the previous communication");
+        DEBUG_ONLY(all_sends_empty);
+        if (all_sends_empty && m_last_recv_count) {
+            log::debug_("this rank is sending no data at all, but it received data in the previous communication");
+        }
 
         mpi::all_to_all(sendcounts, recvcounts);
 

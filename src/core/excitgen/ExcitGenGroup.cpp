@@ -61,10 +61,12 @@ void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen) {
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng), m_cached_orbs(ham.m_frm.m_point_group_map) {
-    if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
-        add(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng)));
-    } else {
-        add(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)));
+    if (ham.m_frm.m_contribs_1100.is_nonzero(ex_single)) {
+        if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
+            add(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng)));
+        } else {
+            add(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)));
+        }
     }
     if (ham.m_frm.m_contribs_2200.is_nonzero(ex_double)) {
         if (opts.m_excit_gen.get() == "pchb")
