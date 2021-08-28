@@ -122,6 +122,15 @@ void mpi::setup_mpi_globals() {
 #endif
 }
 
+void mpi::blocking_print(const std::string &str) {
+    for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
+        if (mpi::i_am(irank)) {
+            std::cout << str << std::endl;
+        }
+        mpi::barrier();
+    }
+}
+
 
 size_t g_irank = 0;
 size_t g_nrank = 1;

@@ -803,6 +803,13 @@ public:
      */
     static void abort(std::string message);
 
+    /**
+     * debugging: each rank waits till the one before has finished before starting
+     * @param str
+     *  string to output to stdout
+     */
+    static void blocking_print(const std::string& str);
+
 };
 
 #endif //M7_MPIWRAPPER_H

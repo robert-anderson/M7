@@ -181,7 +181,6 @@ TEST(DenseHamiltonian, HubbardHolsteinZpmMaxOcc2) {
     auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
     Hamiltonian h(fname, fname_eb, fname_bos, false, 2);
     DenseHamiltonian dh(h);
-    std::cout << dh.m_ncol << std::endl;
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -2.802375057848359);
 }

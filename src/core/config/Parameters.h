@@ -111,7 +111,10 @@ namespace config {
     }
 
     template<>
-    std::string type_str<long>() { return "integer"; }
+    std::string type_str<int>() { return "integer"; }
+
+    template<>
+    std::string type_str<long>() { return "long integer"; }
 
     template<>
     std::string type_str<size_t>() { return "unsigned integer"; }

@@ -20,7 +20,7 @@ class ExactPropagator : public Propagator {
 
 public:
     ExactPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
-                    bool only_nonzero_h_spawns=false);
+                    bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;
 

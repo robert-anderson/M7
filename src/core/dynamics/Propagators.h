@@ -16,7 +16,7 @@ namespace props {
 
     static std::unique_ptr<Propagator> get(const Hamiltonian &ham, const fciqmc_config::Document &opts,
                                            const NdFormat<defs::ndim_wf> &wf_fmt) {
-        bool only_nonzero_h_spawns = !opts.m_av_ests.m_rdm.m_explicit_ref_conns;
+        bool only_nonzero_h_spawns = true;
         if (!opts.m_propagator.m_stochastic)
             return std::unique_ptr<Exact>(new Exact{ham, opts, wf_fmt, only_nonzero_h_spawns});
         else

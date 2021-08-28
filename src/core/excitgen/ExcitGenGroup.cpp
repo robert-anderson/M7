@@ -31,6 +31,7 @@ void ExcitGenGroup::update_cumprobs() {
         }
         ++it;
     }
+    for (auto& frm_prob: m_frm_probs) frm_prob/=m_frm_norm;
 
     for (size_t iprob = 1ul; iprob < m_probs.size(); ++iprob)
         m_cumprobs[iprob] = m_cumprobs[iprob - 1] + m_probs[iprob];
@@ -62,7 +63,8 @@ void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen) {
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng), m_cached_orbs(ham.m_frm.m_point_group_map) {
     m_exsigs_to_exgens.fill(nullptr);
-    bool any_singles = ham.m_frm.m_contribs_1100.is_nonzero(ex_single) || ham.m_frm.m_contribs_2200.is_nonzero(ex_single);
+    bool any_singles =
+            ham.m_frm.m_contribs_1100.is_nonzero(ex_single) || ham.m_frm.m_contribs_2200.is_nonzero(ex_single);
     if (any_singles) {
         if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
             add(std::unique_ptr<ExcitGen>(new Hubbard1dSingles(ham, prng)));
@@ -75,6 +77,8 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
     }
     if (ham.m_bos.m_nboson_max) {
+//        add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)),
+//            {exsig_utils::ex_0010, exsig_utils::ex_0001});
 //        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
 //                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, true));
 //        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =

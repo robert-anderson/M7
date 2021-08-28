@@ -7,14 +7,14 @@
 
 #include "NumberField.h"
 
-struct BosOnvField : NdNumberField<uint8_t, 1> {
+struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     BosOnvField(Row *row, size_t nmode, std::string name="") :
-    NdNumberField<uint8_t, 1>(row, {{nmode}, {"boson mode occupations"}}, name) {}
+    NdNumberField<defs::bos_occ_t, 1>(row, {{nmode}, {"boson mode occupations"}}, name) {}
 
     BosOnvField(const BosOnvField &other): BosOnvField(other.m_row, other.m_format.m_shape[0], other.m_name){}
 
     BosOnvField &operator=(const BosOnvField &other) {
-        NdNumberField<uint8_t, 1>::operator=(other);
+        NdNumberField<defs::bos_occ_t, 1>::operator=(other);
         return *this;
     }
 

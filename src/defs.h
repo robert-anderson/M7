@@ -76,6 +76,8 @@ namespace defs {
     typedef uint64_t hash_t;
     typedef char buf_t;
     typedef unsigned char mev_ind_t;
+    typedef unsigned char bos_occ_t;
+    constexpr size_t max_bos_occ = std::numeric_limits<bos_occ_t>::max();
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     const size_t isym_1e = 2;

@@ -229,6 +229,9 @@ void fciqmc_config::Hamiltonian::verify() {
                        "Maximum boson number per mode is non-zero but bosons are compile time disabled. "
                        "Specify -DENABLE_BOSONS to cmake and recompile");
     }
+    REQUIRE_LE_ALL(m_nboson_max, defs::max_bos_occ,
+                   log::format("Maximum boson number mustn't exceed the capacity of the integer container ({})",
+                               defs::max_bos_occ));
 
 }
 
