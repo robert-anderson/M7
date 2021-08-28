@@ -108,6 +108,7 @@ defs::inds HamiltonianFileReader::parse_int_array(const std::string str, long of
     auto end = str.cend();
     while (it!=end){
         std::regex_search(it, end, match, std::regex(R"([0-9]+)"));
+        if (!match.size()) break;
         result.push_back(std::atol(match.str().c_str())+offset);
         it+=match.position()+match.size();
     }

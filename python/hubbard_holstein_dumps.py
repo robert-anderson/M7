@@ -41,7 +41,7 @@ def write_bosdump(w, nsite, fname='BOSDUMP'):
     ndim = len(w.shape)
     assert ndim==2
     with open(fname, 'w') as f:
-        f.write(header)
+        f.write(header.format(nsite))
         for n in range(nsite):
             for m in range(nsite):
                 if (w[n, m]==0.0): continue
@@ -86,7 +86,7 @@ def make_zpm_coeffs(tmat, nsite, nelec, g, omega0):
     nav = nelec/float(nsite)
     tmat_trans = tmat.copy()
     tmat_trans -= numpy.eye(nsite)*(2.0*nav*g**2)/omega0
-    return tmat_trans, numpy.ones(nsite)*nav*g, delta_zpm(g, nelec, omega0, nsite)
+    return tmat_trans, -numpy.ones(nsite)*nav*g, delta_zpm(g, nelec, omega0, nsite)
 
 
 def write_all(tmat, Umat, Vmat, Vmat_unc, Omat, ecore, nelec, fname_fcidump='FCIDUMP', fname_ebdump='EBDUMP', fname_bosdump='BOSDUMP'):
@@ -127,9 +127,11 @@ if __name__ == '__main__':
     for nboson_max in range(7):
         res0 = kernel(tmat, Umat, Vmat, Omat, nsite, nelec, nsite, nboson_max, adj_zero_pho = False)
         e1 = res0[0]
+        print(f'*\n* nboson_max = {nboson_max}, standard energy = {e1}\n*')
         res0 = kernel(tmat_trans, Umat, Vmat, Omat, nsite, nelec, nsite, nboson_max, adj_zero_pho = True)
-        e2 = res0[0]
-        errs.append(abs(e1-(e2+delta_zpm)))
+        e2 = res0[0]+delta_zpm
+        print(f'*\n* nboson_max = {nboson_max}, ZPM-removed energy = {e2}\n*')
+        errs.append(abs(e1-e2))
 
     print(errs)
     assert numpy.all(numpy.diff(errs) < 0)

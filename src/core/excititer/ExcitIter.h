@@ -62,7 +62,7 @@ protected:
 
 private:
     /*
-     * The following adaptors transform the body functions of various types for use with the cononical virtual methods.
+     * The following adaptors transform the body functions of various types for use with the canonical virtual methods.
      *
      * For now, these are kept private since the user can just call one of the foreach overloads and the adapt method
      * will be automatically called before delegating to the canonical (virtual) foreach definition. There is a case for

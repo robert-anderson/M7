@@ -6,6 +6,10 @@
 #include <src/core/linalg/EigenSolver.h>
 #include "src/core/linalg/DenseHamiltonian.h"
 
+/*
+ * exact diagonalization in the entire hilbert space for integration testing of matrix elements for very small systems
+ */
+
 #ifdef ENABLE_COMPLEX
 TEST(DenseHamiltonian, FciEnergyCheck4c) {
     DenseHamiltonian ham(Hamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
@@ -80,8 +84,8 @@ TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc2) {
     for (size_t n=0ul; n<h.nsite(); ++n){
         for (size_t p=0ul; p<h.nsite(); ++p){
             for (size_t q=0ul; q<h.nsite(); ++q){
-                if (n==p && p==q) ASSERT_FLOAT_EQ(h.m_ladder.v(n, p, q), 1.4);
-                else ASSERT_FLOAT_EQ(h.m_ladder.v(n, p, q), 0.0);
+                if (n==p && p==q) ASSERT_FLOAT_EQ(h.m_ladder.m_v.get(n, p, q), 1.4);
+                else ASSERT_FLOAT_EQ(h.m_ladder.m_v.get(n, p, q), 0.0);
             }
         }
     }
@@ -159,4 +163,25 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     DenseHamiltonian dh(h);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -0.9998830020871416);
+}
+
+TEST(DenseHamiltonian, HubbardHolsteinZpmMaxOcc1) {
+    auto fname = defs::assets_root + "/HH_ZPM/FCIDUMP_ZPM";
+    auto fname_eb = defs::assets_root + "/HH_ZPM/EBDUMP_ZPM";
+    auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
+    Hamiltonian h(fname, fname_eb, fname_bos, false, 1);
+    DenseHamiltonian dh(h);
+    auto solver = dh.diagonalize();
+    ASSERT_FLOAT_EQ(solver.m_evals[0], -2.802372680550795);
+}
+
+TEST(DenseHamiltonian, HubbardHolsteinZpmMaxOcc2) {
+    auto fname = defs::assets_root + "/HH_ZPM/FCIDUMP_ZPM";
+    auto fname_eb = defs::assets_root + "/HH_ZPM/EBDUMP_ZPM";
+    auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
+    Hamiltonian h(fname, fname_eb, fname_bos, false, 2);
+    DenseHamiltonian dh(h);
+    std::cout << dh.m_ncol << std::endl;
+    auto solver = dh.diagonalize();
+    ASSERT_FLOAT_EQ(solver.m_evals[0], -2.802375057848359);
 }

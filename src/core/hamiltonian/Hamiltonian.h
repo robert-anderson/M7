@@ -77,11 +77,11 @@ struct Hamiltonian {
     }
 
     defs::ham_t get_element(const BosOnv &onv) const {
-        return 0.0;
+        return m_bos.get_element(onv);
     }
 
     defs::ham_comp_t get_energy(const BosOnv &onv) const {
-        return 0.0;
+        return m_bos.get_energy(onv);
     }
 
     /*
@@ -93,8 +93,8 @@ struct Hamiltonian {
         defs::ham_t helement_bos = 0.0;
         if (!conn.m_bos.size()) helement_frm = m_frm.get_element(onv.m_frm, conn.m_frm);
         if (!conn.m_frm.size()) helement_bos = m_bos.get_element(onv.m_bos, conn.m_bos);
-        defs::ham_t helement_frmbos = m_ladder.get_element(onv, conn);
-        return helement_frm + helement_bos + helement_frmbos;
+        defs::ham_t helement_ladder = m_ladder.get_element(onv, conn);
+        return helement_frm + helement_bos + helement_ladder;
     }
 
     defs::ham_t get_element(const FrmBosOnv &onv) const {

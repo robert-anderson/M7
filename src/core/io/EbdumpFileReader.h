@@ -14,7 +14,13 @@ struct EbdumpFileReader : HamiltonianFileReader {
 
     size_t ranksig(const defs::inds &inds) const override {
         DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
-        return exsig_utils::ex_1110;
+        switch (nset_ind(inds)) {
+            case 1ul:
+                DEBUG_ASSERT_NE(inds[0], ~0ul, "set index should be the first one: the boson mode index");
+                return exsig_utils::ex_0010;
+            case 3ul: return exsig_utils::ex_1110;
+            default: return ~0ul;
+        }
     }
 
     size_t exsig(const defs::inds &inds, const size_t ranksig) const override {

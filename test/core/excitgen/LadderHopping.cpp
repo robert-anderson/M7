@@ -10,7 +10,7 @@
 TEST(LadderHopping, HubbardUniform1101){
     PRNG prng(14, 1000000);
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_KINETIC";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
     Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
@@ -35,7 +35,7 @@ TEST(LadderHopping, HubbardUniform1101){
 TEST(LadderHopping, HubbardUniform1110){
     PRNG prng(14, 1000000);
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_KINETIC";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
     Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
@@ -60,7 +60,7 @@ TEST(LadderHopping, HubbardUniform1110){
 TEST(LadderHopping, HubbardPc1101){
     PRNG prng(14, 1000000);
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_KINETIC";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
     Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
@@ -86,7 +86,7 @@ TEST(LadderHopping, HubbardPc1101){
 TEST(LadderHopping, HubbardPc1110){
     PRNG prng(14, 1000000);
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_KINETIC";
+    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
     Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
