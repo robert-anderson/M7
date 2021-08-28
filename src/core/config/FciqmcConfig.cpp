@@ -218,21 +218,13 @@ fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
 fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),
         m_fcidump(this),
-        m_boson_frequency(this, "boson_frequency", 0.0,
-                          "frequency of onsite boson modes for Hubbard-Holstein model"),
-        m_boson_coupling(this, "boson_coupling", 0.0,
-                         "coupling of onsite boson modes for Hubbard-Holstein model"),
+        m_charge(this, "charge", 0,
+                          "electron deficit relative to the number given in the FCIDUMP header (positive value to remove elecs)"),
         m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes") {}
 
 void fciqmc_config::Hamiltonian::verify() {
     Section::verify();
     if (!defs::enable_bosons) {
-        REQUIRE_EQ_ALL(m_boson_coupling, 0.0,
-                       "Boson coupling parameter is non-zero but bosons are compile time disabled. "
-                       "Specify -DENABLE_BOSONS to cmake and recompile");
-        REQUIRE_EQ_ALL(m_boson_frequency, 0.0,
-                       "Boson frequency parameter is non-zero but bosons are compile time disabled. "
-                       "Specify -DENABLE_BOSONS to cmake and recompile");
         REQUIRE_EQ_ALL(m_nboson_max, 0ul,
                        "Maximum boson number per mode is non-zero but bosons are compile time disabled. "
                        "Specify -DENABLE_BOSONS to cmake and recompile");

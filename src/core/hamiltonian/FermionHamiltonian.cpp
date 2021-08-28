@@ -31,8 +31,8 @@ FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_
 }
 
 
-FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
-        FermionHamiltonian(file_reader.m_nelec, file_reader.m_nspatorb,
+FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader, int charge) :
+        FermionHamiltonian(file_reader.m_nelec-charge, file_reader.m_nspatorb,
                            file_reader.m_complex_valued, file_reader.m_spin_resolved, file_reader.m_orbsym) {
 
     using namespace ham_data;
@@ -71,8 +71,8 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader) :
     log_data();
 }
 
-FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major) :
-        FermionHamiltonian(FcidumpFileReader(fname, spin_major)) {}
+FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major, int charge) :
+        FermionHamiltonian(FcidumpFileReader(fname, spin_major), charge) {}
 
 
 defs::ham_t FermionHamiltonian::get_element_0000(const field::FrmOnv &onv) const {

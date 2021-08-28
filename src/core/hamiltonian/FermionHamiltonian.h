@@ -40,12 +40,15 @@ struct FermionHamiltonian {
     FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
                        bool spin_resolved, defs::inds site_irreps={});
 
-    FermionHamiltonian(const FcidumpFileReader &file_reader);
+    FermionHamiltonian(const FcidumpFileReader &file_reader, int charge=0);
 
-    FermionHamiltonian(std::string fname, bool spin_major);
+    FermionHamiltonian(std::string fname, bool spin_major, int charge=0);
 
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
-            FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major) {}
+            FermionHamiltonian(
+                    opts.m_fcidump.m_path,
+                    opts.m_fcidump.m_spin_major,
+                    opts.m_charge) {}
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const;
 
