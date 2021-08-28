@@ -2,8 +2,8 @@
 // Created by rja on 05/11/2020.
 //
 
-#ifndef M7_BOSONCOUPLINGS_H
-#define M7_BOSONCOUPLINGS_H
+#ifndef M7_LADDERHAMILTONIAN_H
+#define M7_LADDERHAMILTONIAN_H
 
 #include <src/core/io/EbdumpFileReader.h>
 #include "src/core/connection/Connections.h"
@@ -11,7 +11,7 @@
 #include "src/core/parallel/SharedArray.h"
 #include "HamiltonianData.h"
 
-class BosonCouplings {
+class LadderHamiltonian {
     size_t index(const size_t &n, const size_t &p, const size_t &q) const {
         return n * m_nmode2 + p * m_nmode + q;
     }
@@ -25,7 +25,7 @@ public:
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    BosonCouplings(size_t nmode, size_t nboson_max, std::string fname);
+    LadderHamiltonian(size_t nmode, size_t nboson_max, std::string fname);
 
     defs::ham_t v(const size_t &n, const size_t &p, const size_t &q) const;
 
@@ -42,4 +42,4 @@ public:
 
 };
 
-#endif //M7_BOSONCOUPLINGS_H
+#endif //M7_LADDERHAMILTONIAN_H

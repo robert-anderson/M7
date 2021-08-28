@@ -2,9 +2,9 @@
 // Created by rja on 05/11/2020.
 //
 
-#include "BosonCouplings.h"
+#include "LadderHamiltonian.h"
 
-BosonCouplings::BosonCouplings(size_t nmode, size_t nboson_max, std::string fname) :
+LadderHamiltonian::LadderHamiltonian(size_t nmode, size_t nboson_max, std::string fname) :
         m_nboson_max(nboson_max), m_nmode(nmode), m_nmode2(nmode * nmode),
         m_v(m_nboson_max ? m_nmode2 * nmode : 0ul),
         m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101){
@@ -27,11 +27,11 @@ BosonCouplings::BosonCouplings(size_t nmode, size_t nboson_max, std::string fnam
     log_data();
 }
 
-defs::ham_t BosonCouplings::v(const size_t &n, const size_t &p, const size_t &q) const {
+defs::ham_t LadderHamiltonian::v(const size_t &n, const size_t &p, const size_t &q) const {
     return m_v[index(n, p, q)];
 }
 
-defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     if (conn.m_bos.size() != 1ul) return 0.0;
     if (!conn.m_frm.kramers_conserve()) return 0.0;
     bool cre = conn.m_bos.m_cre.size();
@@ -69,7 +69,7 @@ defs::ham_t BosonCouplings::get_element(const field::FrmBosOnv &onv, const conn:
     }
 }
 
-void BosonCouplings::log_data() const {
+void LadderHamiltonian::log_data() const {
     if (!m_contribs_1101.is_nonzero(exsig_utils::ex_0001))
         log::info("1101 fermion-boson coupling term has no 0001 contributions");
     if (!m_contribs_1101.is_nonzero(exsig_utils::ex_1101))

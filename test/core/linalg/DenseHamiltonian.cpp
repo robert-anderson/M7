@@ -80,8 +80,8 @@ TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc2) {
     for (size_t n=0ul; n<h.nsite(); ++n){
         for (size_t p=0ul; p<h.nsite(); ++p){
             for (size_t q=0ul; q<h.nsite(); ++q){
-                if (n==p && p==q) ASSERT_FLOAT_EQ(h.m_frmbos.v(n, p, q), 1.4);
-                else ASSERT_FLOAT_EQ(h.m_frmbos.v(n, p, q), 0.0);
+                if (n==p && p==q) ASSERT_FLOAT_EQ(h.m_ladder.v(n, p, q), 1.4);
+                else ASSERT_FLOAT_EQ(h.m_ladder.v(n, p, q), 0.0);
             }
         }
     }

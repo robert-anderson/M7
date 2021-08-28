@@ -88,19 +88,19 @@ public:
 };
 
 /**
- * Base class for stochastic Boson sector excitations
+ * Base class for stochastic excitations which involve single boson creation or annihilation operators
  */
-struct BosExcitGen : public ExcitGen {
-    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+struct LadderExcitGen : public ExcitGen {
+    LadderExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs) :
+            ExcitGen(h, prng, exsigs) {}
 };
 
 
 /**
- * Base class for stochastic excitations which may couple Fermion and Boson sectors excitations
+ * Base class for stochastic Boson number-conserving excitations
  */
-struct FrmBosExcitGen : public ExcitGen {
-    FrmBosExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs) :
-            ExcitGen(h, prng, exsigs) {}
+struct BosExcitGen : public ExcitGen {
+    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
 };
 
 #endif //M7_EXCITGEN_H

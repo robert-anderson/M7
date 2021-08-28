@@ -40,8 +40,6 @@ public:
     const defs::prob_t &norm(const size_t &irow) const;
 
     const size_t &nprob() const;
-
-    defs::prob_t prob(const size_t &irow, const size_t &iprob) const;
 };
 
 #endif //M7_ALIASER_H

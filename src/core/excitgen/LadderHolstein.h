@@ -2,21 +2,21 @@
 // Created by rja on 04/08/2021.
 //
 
-#ifndef M7_FRMBOSHOLSTEIN_H
-#define M7_FRMBOSHOLSTEIN_H
+#ifndef M7_LADDERHOLSTEIN_H
+#define M7_LADDERHOLSTEIN_H
 
 #include "ExcitGen.h"
 
-struct FrmBosHolstein : public FrmBosExcitGen {
-    const bool m_cre;
-public:
-    FrmBosHolstein(const Hamiltonian &h, PRNG &prng, bool cre) :
-        FrmBosExcitGen(h, prng, {exsig_utils::ex_0001, exsig_utils::ex_0010}), m_cre(cre) {}
+struct LadderHolstein : public LadderExcitGen {
+    LadderHolstein(const Hamiltonian &h, PRNG &prng) :
+            LadderExcitGen(h, prng, {exsig_utils::ex_0001, exsig_utils::ex_0010}) {}
 
     bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override {
 
         if(!m_h.m_nboson_max) return false;
+
+        bool cre = exsig_utils::decode_nbos_cre(exsig);
 
         const auto& occs = orbs.occ(src.m_frm).m_flat;
         DEBUG_ASSERT_EQ(src.m_bos.nelement(), src.m_frm.m_nsite,
@@ -32,13 +32,13 @@ public:
         prob = src.m_frm.site_nocc(imode);
         prob/=occs.size();
 
-        if (m_cre && curr_occ == m_h.m_nboson_max) return false;
-        if (!m_cre && curr_occ == 0) return false;
+        if (cre && curr_occ == m_h.m_nboson_max) return false;
+        if (!cre && curr_occ == 0) return false;
 
-        DEBUG_ASSERT_LE(size_t(curr_occ+m_cre), m_h.m_nboson_max, "generated boson occupation exceeds cutoff");
+        DEBUG_ASSERT_LE(size_t(curr_occ+cre), m_h.m_nboson_max, "generated boson occupation exceeds cutoff");
 
         conn.clear();
-        if (m_cre) conn.m_bos.m_cre.add({imode, 1ul});
+        if (cre) conn.m_bos.m_cre.add({imode, 1ul});
         else conn.m_bos.m_ann.add({imode, 1ul});
         return true;
     }
@@ -48,4 +48,4 @@ private:
 };
 
 
-#endif //M7_FRMBOSHOLSTEIN_H
+#endif //M7_LADDERHOLSTEIN_H

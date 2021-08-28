@@ -71,7 +71,3 @@ const defs::prob_t &Aliaser::norm(const size_t &irow) const {
 const size_t &Aliaser::nprob() const {
     return m_nprob;
 }
-
-defs::prob_t Aliaser::prob(const size_t &irow, const size_t &iprob) const {
-    return m_prob_table.get(irow, iprob) / m_norm[irow];
-}

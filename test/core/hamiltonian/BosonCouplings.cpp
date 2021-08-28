@@ -4,7 +4,7 @@
 
 #include <src/core/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/BosonCouplings.h"
+#include "src/core/hamiltonian/LadderHamiltonian.h"
 #include "src/core/hamiltonian/BosonHamiltonian.h"
 
 #if 0

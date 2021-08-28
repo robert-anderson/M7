@@ -2,20 +2,20 @@
 // Created by rja on 26/08/2021.
 //
 
-#ifndef M7_FRMBOSUNIFORMKINETIC_H
-#define M7_FRMBOSUNIFORMKINETIC_H
+#ifndef M7_LADDERHOPPINGUNIFORM_H
+#define M7_LADDERHOPPINGUNIFORM_H
 
 #include "ExcitGen.h"
 #include "UniformSingles.h"
 
-struct FrmBosUniformKinetic : public FrmBosExcitGen {
+struct LadderHoppingUniform : public LadderExcitGen {
     UniformSingles m_singles;
 
-    FrmBosUniformKinetic(const Hamiltonian &h, PRNG &prng);
+    LadderHoppingUniform(const Hamiltonian &h, PRNG &prng);
 
     bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
 };
 
 
-#endif //M7_FRMBOSUNIFORMKINETIC_H
+#endif //M7_LADDERHOPPINGUNIFORM_H

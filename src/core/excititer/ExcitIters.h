@@ -24,9 +24,10 @@ namespace excititers {
 
     };
 
-    struct FrmBos : public ExcitIter {
-
-        FrmBos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {}
+    struct Ladder : public ExcitIter {
+        const bool m_cre;
+        Ladder(const Hamiltonian &ham, size_t exsig) :
+            ExcitIter(ham, exsig), m_cre(exsig_utils::decode_nbos_cre(exsig)){}
 
         void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
 
@@ -73,18 +74,28 @@ namespace excititers {
 
     };
 
-    struct FrmBosHolstein : public FrmBos {
-        using FrmBos::foreach;
-        const bool m_cre;
-        FrmBosHolstein(const Hamiltonian &ham, size_t exsig);
+    struct LadderHolstein : public Ladder {
+        using Ladder::foreach;
+        LadderHolstein(const Hamiltonian &ham, size_t exsig);
 
         void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
     };
 
-    struct FrmBosKinetic : public FrmBos {
-        using FrmBos::foreach;
-        const bool m_cre;
-        FrmBosKinetic(const Hamiltonian &ham, size_t exsig);
+    struct LadderHopping : public Ladder {
+        using Ladder::foreach;
+        LadderHopping(const Hamiltonian &ham, size_t exsig);
+
+        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
+    };
+
+    struct LadderUncoupled : public Ladder {
+        using Ladder::foreach;
+    protected:
+        fn_c_t <field::BosOnv> convert(conn::FrmBosOnv &work_conn, const fn_c_t <field::FrmBosOnv> &fn);
+    public:
+        LadderUncoupled(const Hamiltonian &ham, size_t exsig);
+
+        void foreach(const field::BosOnv &src, conn::BosOnv &conn, const fn_c_t <field::BosOnv> &body) override;
 
         void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
     };

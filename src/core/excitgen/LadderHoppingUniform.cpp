@@ -2,12 +2,12 @@
 // Created by rja on 26/08/2021.
 //
 
-#include "FrmBosUniformKinetic.h"
+#include "LadderHoppingUniform.h"
 
-FrmBosUniformKinetic::FrmBosUniformKinetic(const Hamiltonian &h, PRNG &prng) :
-        FrmBosExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}), m_singles(h, prng) {}
+LadderHoppingUniform::LadderHoppingUniform(const Hamiltonian &h, PRNG &prng) :
+        LadderExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}), m_singles(h, prng) {}
 
-bool FrmBosUniformKinetic::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+bool LadderHoppingUniform::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                                 conn::FrmBosOnv &conn) {
     /*
      * draw random occupied and vacant fermion indices

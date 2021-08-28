@@ -3,7 +3,7 @@
 //
 
 #include "ExcitGenGroup.h"
-#include "FrmBosHolstein.h"
+#include "LadderHolstein.h"
 
 void ExcitGenGroup::init() {
     defs::prob_t norm = 0.0;

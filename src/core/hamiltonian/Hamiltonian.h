@@ -9,7 +9,7 @@
 #include <src/defs.h>
 #include "FermionHamiltonian.h"
 #include "BosonHamiltonian.h"
-#include "BosonCouplings.h"
+#include "LadderHamiltonian.h"
 #include "src/core/nd/NdArray.h"
 #include "HamiltonianParts.h"
 #include "SymmetryHelpers.h"
@@ -25,15 +25,16 @@ struct Hamiltonian {
      */
     const size_t m_nboson_max;
     /**
-     * fermion-only object for traditional electronic structure calculations
+     * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
     FermionHamiltonian m_frm;
     /**
-     * coupling term between the fermion and boson sectors
+     * hamiltonian encapsulating all terms involving a single boson creation or annihilation operator
+     * i.e. ranksigs 0010, 0001, 1110, 1101
      */
-    BosonCouplings m_frmbos;
+    LadderHamiltonian m_ladder;
     /**
-     * boson operator-only term in the Hamiltonian
+     * purely bosonic number-conserving terms in the Hamiltonian
      */
     BosonHamiltonian m_bos;
 
@@ -92,7 +93,7 @@ struct Hamiltonian {
         defs::ham_t helement_bos = 0.0;
         if (!conn.m_bos.size()) helement_frm = m_frm.get_element(onv.m_frm, conn.m_frm);
         if (!conn.m_frm.size()) helement_bos = m_bos.get_element(onv.m_bos, conn.m_bos);
-        defs::ham_t helement_frmbos = m_frmbos.get_element(onv, conn);
+        defs::ham_t helement_frmbos = m_ladder.get_element(onv, conn);
         return helement_frm + helement_bos + helement_frmbos;
     }
 

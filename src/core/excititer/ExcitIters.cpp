@@ -68,10 +68,9 @@ void excititers::Hubbard1dSingles::foreach(const FrmOnv &src, conn::FrmOnv &conn
     }
 }
 
-excititers::FrmBosHolstein::FrmBosHolstein(const Hamiltonian &ham, size_t exsig) :
-        FrmBos(ham, exsig), m_cre(exsig_utils::decode_nbos_cre(exsig)){}
+excititers::LadderHolstein::LadderHolstein(const Hamiltonian &ham, size_t exsig) : Ladder(ham, exsig){}
 
-void excititers::FrmBosHolstein::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
+void excititers::LadderHolstein::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
     conn.clear();
     const auto &occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
     for (const auto& occ: occs) {
@@ -83,10 +82,10 @@ void excititers::FrmBosHolstein::foreach(const FrmBosOnv &src, conn::FrmBosOnv &
     }
 }
 
-excititers::FrmBosKinetic::FrmBosKinetic(const Hamiltonian &ham, size_t exsig) :
-        FrmBos(ham, exsig), m_cre(exsig_utils::decode_nbos_cre(exsig)){}
+excititers::LadderHopping::LadderHopping(const Hamiltonian &ham, size_t exsig) :
+        Ladder(ham, exsig) {}
 
-void excititers::FrmBosKinetic::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
+void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
     conn.clear();
     const auto& occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
     const auto& vacs = m_work_orbs.vac(src.m_frm).m_flat.inds();
@@ -111,4 +110,34 @@ void excititers::FrmBosKinetic::foreach(const FrmBosOnv &src, conn::FrmBosOnv &c
             }
         }
     }
+}
+
+fn_c_t<field::BosOnv> excititers::LadderUncoupled::convert(conn::FrmBosOnv &work_conn, const fn_c_t<FrmBosOnv> &fn) {
+    work_conn.m_frm.clear();
+    return [&](const conn::BosOnv &conn){
+        fn(work_conn);
+    };
+}
+
+excititers::LadderUncoupled::LadderUncoupled(const Hamiltonian &ham, size_t exsig) : Ladder(ham, exsig) {}
+
+void excititers::LadderUncoupled::foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) {
+    conn.clear();
+    for (size_t imode=0ul; imode<src.m_nelement; ++imode){
+        if (m_cre) {
+            if (src[imode] == m_ham.m_nboson_max) continue;
+            conn.m_cre.set({imode, 1});
+        }
+        else {
+            if (src[imode] == 0ul) continue;
+            conn.m_ann.set({imode, 1});
+        }
+        if (!set_helement(src, conn)) continue;
+        body(conn);
+    }
+}
+
+void excititers::LadderUncoupled::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) {
+    auto converted_body = convert(conn, body);
+    foreach(src.m_bos, conn.m_bos, converted_body);
 }
