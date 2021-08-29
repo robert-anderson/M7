@@ -76,6 +76,10 @@ void RankAllocatorBase::deactivate() {
 
 void RankAllocatorBase::activate(size_t icycle) {
     if (mpi::nrank()==1) return;
+    if (!m_period) {
+        log::info("Dynamic load balancing disabled for \"{}\"", m_name);
+        return;
+    }
     log::info("Activating dynamic load balancing on cycle {}.", icycle);
     m_icycle_active = icycle;
     // rezero the counter in case of later reactivation
