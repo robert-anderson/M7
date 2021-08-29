@@ -18,7 +18,7 @@ TEST(NdFieldBase, Test) {
     ASSERT_EQ(r.m_size, defs::nbyte_word);
 
     BufferedTable<TestRow> t("", {{}});
-    ASSERT_EQ(t.m_row_size, defs::nbyte_word);
+    ASSERT_EQ(t.row_size(), defs::nbyte_word);
     t.push_back(2);
     auto r1 = t.m_row;
     r1.restart();

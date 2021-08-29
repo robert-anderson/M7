@@ -44,15 +44,14 @@ struct TableBase {
      * A system word is sizeof(size_t) bytes in length
      */
     /**
-     * Size of the row in bytes, which is always an integer multiple of the word length
-     */
-    const size_t m_row_size;
-    /**
      * The contents of the Table are ultimately stored in a Buffer, which is just a wrapper for a dynamically
      * allocated array of defs::data_t elements. Buffers can be shared by many Tables though, so a table is instead
      * given access to a "window" of that Buffer. All tables which have windows on the same buffer have the ability
      * to resize, and in response to this, the Buffer will ensure that table row data is moved to new positions
      * in the resized buffer, and that each of the other windows are pointed to the beginning of that data.
+     *
+     * the m_row_size member of m_bw is the definitive length of the Table's row in bytes, and the Row class ensures
+     * that this is always an integer multiple of the system word length
      */
     Buffer::Window m_bw;
     /**
@@ -84,8 +83,14 @@ struct TableBase {
     /**
      * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
      */
-    size_t nrow() const {
-        return m_bw.m_size/m_row_size;
+    const size_t& nrow() const {
+        return m_bw.m_nrow;
+    }
+    /**
+     * the size of a single row in bytes (always an integer number of system words)
+     */
+    const size_t& row_size() const {
+        return m_bw.m_row_size;
     }
 
     /**

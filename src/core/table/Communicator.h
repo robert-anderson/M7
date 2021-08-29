@@ -59,7 +59,7 @@ public:
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                  string_utils::memsize(mpi::nrank() * comm_nrow_est*m_recv.m_row_size), name);
+                  string_utils::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
         m_send.resize(comm_nrow_est, 0.0);
         m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
         m_send.set_expansion_factor(exp_fac);
@@ -67,7 +67,7 @@ public:
     }
 
     size_t row_size() const {
-        return static_cast<const TableBase &>(m_recv).m_row_size;
+        return static_cast<const TableBase &>(m_recv).row_size();
     }
 
     send_t &send() {
@@ -414,14 +414,14 @@ struct Communicator {
             /*
              * convert from units of rows to datawords...
              */
-            for (auto &i : m_counts) i *= m_local.m_row_size;
-            for (auto &i : m_displs) i *= m_local.m_row_size;
+            for (auto &i : m_counts) i *= m_local.row_size();
+            for (auto &i : m_displs) i *= m_local.row_size();
             mpi::all_gatherv(m_local.begin(), m_counts[mpi::irank()], m_global.begin(), m_counts, m_displs);
             /*
              * ... and back again
              */
-            for (auto &i : m_counts) i /= m_local.m_row_size;
-            for (auto &i : m_displs) i /= m_local.m_row_size;
+            for (auto &i : m_counts) i /= m_local.row_size();
+            for (auto &i : m_displs) i /= m_local.row_size();
         }
 
         void update() override {
@@ -542,7 +542,7 @@ struct Communicator {
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
         log::info("Initially allocating {} per rank for store buffer of \"{}\" ",
-                  string_utils::memsize(store_nrow_est*m_store.m_row_size), name);
+                  string_utils::memsize(store_nrow_est*m_store.row_size()), name);
         m_store.resize(store_nrow_est, 0.0);
         m_store.set_expansion_factor(store_exp_fac);
     }

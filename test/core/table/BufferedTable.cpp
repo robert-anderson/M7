@@ -9,9 +9,9 @@
 TEST(BufferedTable, Empty) {
     typedef SingleFieldRow<field::Number<int>> row_t;
     BufferedTable<row_t> table("", {{}});
-    ASSERT_EQ(table.m_nrow, 0);
+    ASSERT_EQ(table.nrow(), 0);
     ASSERT_EQ(table.m_hwm, 0);
-    ASSERT_EQ(table.m_bw.size(), 0);
+    ASSERT_EQ(table.m_bw.m_size, 0);
     ASSERT_EQ(table.m_bw.m_begin, nullptr);
     auto& row = table.m_row;
     row.restart();

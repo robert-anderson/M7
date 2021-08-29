@@ -16,7 +16,7 @@ private:
     std::vector<table_t> m_tables;
 
     const size_t &row_size() const {
-        return static_cast<const TableBase &>(m_tables[0]).m_row_size;
+        return static_cast<const TableBase &>(m_tables[0]).row_size();
     }
 
     size_t window_size() const {

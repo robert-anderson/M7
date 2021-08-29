@@ -6,11 +6,22 @@
 #include "src/core/io/Logging.h"
 #include "src/core/parallel/MPIAssert.h"
 
-Buffer::Window::Window(Buffer *buffer) {
+Buffer::Window::Window(Buffer *buffer, size_t row_size): Window(row_size) {
     ASSERT(buffer);
     buffer->append_window(this);
     ASSERT(m_buffer == buffer);
     ASSERT(m_buffer->m_windows.back() == this);
+}
+
+Buffer::Window &Buffer::Window::operator=(const Buffer::Window &other) {
+    DEBUG_ASSERT_EQ(other.m_row_size, m_row_size, "can't assign to incompatible window");
+    DEBUG_ASSERT_FALSE(m_begin==nullptr, "this is an unallocated buffer window");
+    DEBUG_ASSERT_FALSE(other.m_begin==nullptr, "can't assign to an unallocated buffer window");
+    auto nbyte = std::min(other.m_size, m_size);
+    std::memcpy(m_begin, other.m_begin, nbyte);
+    m_size = nbyte;
+    m_nrow = m_size/m_row_size;
+    return *this;
 }
 
 bool Buffer::Window::allocated() const {
@@ -22,6 +33,7 @@ void Buffer::Window::move(defs::buf_t *begin, size_t new_size) {
     if (m_begin) std::memmove(begin, m_begin, m_size);
     m_begin = begin;
     m_size = new_size;
+    m_nrow = m_size/m_row_size;
 }
 
 void Buffer::Window::resize(size_t size, double factor) {
@@ -37,6 +49,7 @@ std::string Buffer::Window::name() const {
 double Buffer::Window::get_expansion_factor() const {
     return m_buffer->m_expansion_factor;
 }
+
 
 Buffer::Buffer(std::string name, size_t nwindow_max) :
         m_name(std::move(name)), m_nwindow_max(nwindow_max) {

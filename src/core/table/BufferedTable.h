@@ -12,7 +12,7 @@ class BufferedTable : public std::conditional<mapped, MappedTable<row_t>, Table<
     Buffer m_buffer;
 public:
     typedef typename std::conditional<mapped, MappedTable<row_t>, Table<row_t>>::type table_t;
-    using TableBase::m_row_size;
+    using TableBase::m_bw;
 
     BufferedTable(std::string name, const table_t& table):
             table_t(table), m_buffer(name, 1) {
