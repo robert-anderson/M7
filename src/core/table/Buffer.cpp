@@ -17,23 +17,15 @@ bool Buffer::Window::allocated() const {
     return m_buffer && m_buffer->size();
 }
 
-size_t Buffer::Window::size() const {
-    if (!m_begin) return 0;
-    DEBUG_ASSERT_TRUE(m_end, "end pointer is not set");
-    DEBUG_ASSERT_TRUE(m_buffer, "buffer is not allocated")
-    DEBUG_ASSERT_EQ(m_buffer->window_size(), static_cast<size_t>(std::distance(m_begin, m_end)),
-                    "the begin and end pointers of the buffer window are not compatible with its size");
-    return std::distance(m_begin, m_end);
-}
-
-void Buffer::Window::move(defs::buf_t *begin, defs::buf_t *end) {
-    if (m_begin) std::memmove(begin, m_begin, size());
+void Buffer::Window::move(defs::buf_t *begin, size_t new_size) {
+    DEBUG_ASSERT_FALSE(begin==nullptr, "moving to invalid buffer pointer");
+    if (m_begin) std::memmove(begin, m_begin, m_size);
     m_begin = begin;
-    m_end = end;
+    m_size = new_size;
 }
 
 void Buffer::Window::resize(size_t size, double factor) {
-    ASSERT(m_buffer)
+    DEBUG_ASSERT_FALSE(m_buffer==nullptr, "resizing window not associated with buffer");
     m_buffer->resize(size * m_buffer->m_nwindow_max, factor);
 }
 
@@ -65,14 +57,14 @@ void Buffer::append_window(Buffer::Window *window) {
     REQUIRE_LT(m_windows.size(), m_nwindow_max, "Buffer is over-subscribed");
     if (size()) {
         window->m_begin = m_data.data() + window_size() * m_windows.size();
-        window->m_end = window->m_begin + window_size();
+        window->m_size = window_size();
     }
     window->m_buffer = this;
     m_windows.push_back(window);
 }
 
 void Buffer::resize(size_t size, double factor) {
-    if (size>this->size()) {
+    if (size>=this->size()) {
         // expanding the buffer
         if (factor < 0.0) factor = m_expansion_factor;
     }
@@ -101,14 +93,17 @@ void Buffer::resize(size_t size, double factor) {
         // work forwards for shrinking, backwards for enlargement
         auto jwindow = size < this->size() ? iwindow : m_windows.size() - iwindow - 1;
         auto window = m_windows[jwindow];
-        ASSERT(window->m_buffer)
-        ASSERT(window->m_buffer == this)
+        DEBUG_ASSERT_FALSE(window->m_buffer==nullptr, "window is not associated with any buffer");
+        DEBUG_ASSERT_TRUE(window->m_buffer==this, "window is not associated with this buffer");
         auto new_dbegin = tmp.data() + jwindow * new_window_size;
-        window->move(new_dbegin, new_dbegin + new_window_size);
+        window->move(new_dbegin, new_window_size);
     }
+    auto tmp_ptr = tmp.data();
+    DEBUG_ONLY(tmp_ptr);
     m_data = std::move(tmp);
-    ASSERT(m_data.size() == this->size());
-    ASSERT(m_data.data() == m_windows[0]->m_begin);
+    DEBUG_ASSERT_EQ(m_data.data(), tmp_ptr, "new base ptr was not preserved in move");
+    DEBUG_ASSERT_EQ(m_data.size(), this->size(), "new size is incorrect");
+    DEBUG_ASSERT_EQ(m_data.data(), m_windows[0]->m_begin, "first window not pointing at begin of buffer");
 }
 
 std::string Buffer::capacity_string(size_t size) const {

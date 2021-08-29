@@ -24,7 +24,7 @@ public:
         if (other.m_buffer.size()) {
             m_buffer.resize(other.m_buffer.size());
             Table<row_t>::clear();
-            Table<row_t>::push_back(other.m_nrow);
+            Table<row_t>::push_back(other.m_hwm);
             Table<row_t>::m_bw = other.m_bw;
         }
         return *this;

@@ -75,6 +75,7 @@ private:
      *  true if row1 and row2 are in distinct (dst_mbf, ipart_dst) blocks
      */
     static bool in_same_dst_block(const SpawnTableRow& row1, const SpawnTableRow& row2){
+        DEBUG_ASSERT_TRUE(row1.in_range() || row2.in_range(), "rows should not both be out of range");
         if (row1.in_range() != row2.in_range()) return false;
         return (row1.m_dst_mbf == row2.m_dst_mbf) && (row1.m_ipart_dst == row2.m_ipart_dst);
     }

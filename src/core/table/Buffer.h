@@ -20,7 +20,7 @@ public:
 
     public:
         defs::buf_t *m_begin = nullptr;
-        defs::buf_t *m_end = nullptr;
+        size_t m_size = 0ul;
 
         Window() {}
 
@@ -28,9 +28,7 @@ public:
 
         bool allocated() const;
 
-        size_t size() const;
-
-        void move(defs::buf_t *begin, defs::buf_t *end);
+        void move(defs::buf_t *begin, size_t new_size);
 
         void resize(size_t size, double factor=-1.0);
 

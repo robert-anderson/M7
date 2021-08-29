@@ -142,7 +142,7 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
         // contributions to unoccupied ONVs are allowed
         allow_initiation = block_begin.m_src_initiator;
     }
-    annihilate_row(0, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_row);
+    annihilate_row(block_begin.m_ipart_dst, block_begin.m_dst_mbf, total_delta, allow_initiation, dst_row);
     block_begin.jump(next_block_begin);
 }
 
@@ -194,21 +194,21 @@ void Annihilator::loop_over_dst_mbfs() {
              * sorting field, so we must handle the block just finished
              */
             handle_dst_block(block_begin, current, total_delta, dst_finder.store_row());
+            DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
+                            "block_begin should have been pointed to the beginning of the next block");
             /*
              * the above call iterates block_begin through the contributions until the row index matches that of current
              * which would be the start of the next block if current is not past the end of recv rows. In any case, the
              * two rows should be the same. If the new start of block is past the end of recv rows, we're done
              */
             if (!block_begin.in_range()) break;
-            DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
-                            "block_begin should have been pointed to the beginning of the next block");
             /*
              * new block of dst_mbfs, so reset total contrib
              */
             total_delta = 0.0;
             dst_finder();
         } else {
-            if (current.m_send_parents){
+            if (current.m_send_parents) {
                 DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,
                                 "should never have diagonal connections at annihilation");
             }

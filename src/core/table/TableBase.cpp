@@ -37,11 +37,11 @@ void TableBase::set_buffer(Buffer *buffer) {
 }
 
 bool TableBase::is_full() const {
-    return m_hwm == m_nrow;
+    return m_hwm == nrow();
 }
 
 size_t TableBase::push_back(size_t nrow) {
-    if (m_hwm + nrow > m_nrow) expand(nrow);
+    if (m_hwm + nrow > this->nrow()) expand(nrow);
     auto tmp = m_hwm;
     m_hwm += nrow;
     return tmp;
@@ -77,19 +77,18 @@ bool TableBase::is_cleared(const size_t &irow) const {
 }
 
 size_t TableBase::bw_size() const {
-    return m_bw.size();
+    return m_bw.m_size;
 }
 
 void TableBase::resize(size_t nrow, double factor) {
     DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
-    if (nrow==m_nrow) return;
     m_bw.resize(nrow * m_row_size, factor);
-    m_nrow = m_bw.size()/m_row_size;
-    for(const auto &rp : m_row_protectors) rp->on_resize(m_nrow);
+    DEBUG_ASSERT_LT(m_hwm, m_bw.m_size/m_row_size, "resize has discarded uncleared data");
+    for(const auto &rp : m_row_protectors) rp->on_resize(this->nrow());
 }
 
 void TableBase::expand(size_t nrow, double factor) {
-    resize(m_nrow+nrow, factor);
+    resize(this->nrow()+nrow, factor);
 }
 
 void TableBase::erase_rows(const defs::inds &irows) {
@@ -123,7 +122,7 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
         log::info_("Transferring {} rows outward to rank {}", nrow, irank_recv);
 
         auto size_required = nrow*m_row_size;
-        if (send_bw.size() < size_required) send_bw.resize(size_required);
+        if (send_bw.m_size < size_required) send_bw.resize(size_required);
         for (auto iirow = 0ul; iirow < nrow; ++iirow) {
             const auto &irow = irows[iirow];
             std::memcpy(send_bw.m_begin + iirow * m_row_size, begin(irow), m_row_size);
@@ -142,7 +141,7 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
             return;
         }
         auto size_required = nrow * m_row_size;
-        if (recv_bw.size()<size_required) recv_bw.resize(size_required);
+        if (recv_bw.m_size<size_required) recv_bw.resize(size_required);
         log::info_("Transferring {} rows inward from rank {}", nrow, irank_send);
         mpi::recv(recv_bw.m_begin, m_row_size * nrow, irank_send, m_transfer->m_irows_p2p_tag);
         /*

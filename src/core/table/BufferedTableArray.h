@@ -20,20 +20,13 @@ private:
     }
 
     size_t window_size() const {
-        return static_cast<const TableBase &>(m_tables[0]).m_bw.size();
-    }
-
-    void update_nrow() {
-        auto nrow = window_size() / row_size();
-        for (size_t i = 0ul; i < ntable(); ++i) {
-            static_cast<TableBase &>(m_tables[i]).m_nrow = nrow;
-        }
+        return static_cast<const TableBase &>(m_tables[0]).m_bw.m_size;
     }
 
 public:
 
-    const size_t &nrow_per_table() const {
-        return static_cast<const TableBase &>(m_tables[0]).m_nrow;
+    size_t nrow_per_table() const {
+        return static_cast<const TableBase &>(m_tables[0]).nrow();
     }
 
     defs::buf_t *begin() {
@@ -87,7 +80,6 @@ public:
 
     void resize(size_t nrow_per_table, double factor=-1.0) {
         m_buffer.resize(ntable() * nrow_per_table * row_size(), factor);
-        update_nrow();
     }
 
     void expand(size_t nrow_per_table) {

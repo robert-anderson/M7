@@ -56,10 +56,6 @@ struct TableBase {
      */
     Buffer::Window m_bw;
     /**
-     * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
-     */
-    size_t m_nrow = 0ul;
-    /**
      * "high water mark" is result of the next call to push_back. Think of this as the Table's size by analogy to
      * std::vector
      */
@@ -84,6 +80,13 @@ struct TableBase {
     TableBase(size_t row_size);
 
     TableBase(const TableBase &other);
+
+    /**
+     * the number of rows in the BufferWindow. Think of this as the Table's capacity by analogy to std::vector
+     */
+    size_t nrow() const {
+        return m_bw.m_size/m_row_size;
+    }
 
     /**
      * @return

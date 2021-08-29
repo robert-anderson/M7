@@ -138,6 +138,7 @@ public:
              */
             m_recv.resize(m_last_recv_count);
         }
+        DEBUG_ASSERT_LE_ALL(recv_size, static_cast<const TableBase &>(recv()).bw_size(), "resize failed");
 
         REQUIRE_TRUE_ALL(m_send.begin(), "Send buffer is not allocated on all ranks!");
         REQUIRE_TRUE_ALL(m_recv.begin(), "Recv buffer is not allocated on all ranks!");
