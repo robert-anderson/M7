@@ -20,6 +20,8 @@ struct UniformSingles : public FrmExcitGen {
 
     size_t approx_nconn() const override;
 
+    std::string description() const override;
+
 };
 
 

@@ -15,6 +15,8 @@ struct LadderHoppingUniform : public LadderExcitGen {
 
     bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
+
+    std::string description() const override;
 };
 
 

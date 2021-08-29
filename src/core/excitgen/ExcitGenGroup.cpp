@@ -77,8 +77,8 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
     }
     if (ham.m_bos.m_nboson_max) {
-//        add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)),
-//            {exsig_utils::ex_0010, exsig_utils::ex_0001});
+        add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)),
+            {exsig_utils::ex_0010, exsig_utils::ex_0001});
 //        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
 //                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, true));
 //        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
@@ -152,9 +152,12 @@ size_t ExcitGenGroup::draw_iex_frm() {
 }
 
 void ExcitGenGroup::log_breakdown() const {
-    log::info("Excitation class probability breakdown:");
-    for (size_t i = 0ul; i < size(); ++i)
-        log::info("{:<40} {}", (*this)[i].description(), get_prob(i));
+    log::info("Excitation generation probability breakdown by excitation signature:");
+    for (size_t i = 0ul; i < size(); ++i) {
+        auto exsig = exsig_utils::to_string(m_active_exsigs[i]);
+        log::info("excitation generator {:<40} for exsig {}:  prob={}",
+                  (*this)[i].description(), exsig, get_prob(i));
+    }
 }
 
 bool ExcitGenGroup::draw(const size_t &iex, const FrmOnv &src, prob_t &prob, ham_t &helem, conn::FrmOnv &conn) {

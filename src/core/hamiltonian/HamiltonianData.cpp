@@ -60,11 +60,8 @@ ham_data::FrmModelAttributes::on_site(const size_t &nsite, const size_t &iorb, c
 }
 
 void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i, const size_t &j) {
-    if (i == j) {
-        // one-electron term is not purely off-diagonal
-        m_nn_only_singles = false;
-        m_nnp_only_singles = false;
-    } else {
+    // non-diagonal 1body term is not disqualifying for "hubbard-like" Hamiltonian designation
+    if (i != j){
         if (!nearest_neighbors(nsite, i, j, false)) m_nn_only_singles = false;
         if (!nearest_neighbors(nsite, i, j, true)) m_nnp_only_singles = false;
     }

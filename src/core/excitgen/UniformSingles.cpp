@@ -64,3 +64,7 @@ size_t UniformSingles::approx_nconn() const {
         return m_nelec * (m_nspinorb - m_nelec);
     }
 }
+
+std::string UniformSingles::description() const {
+    return "uniform";
+}

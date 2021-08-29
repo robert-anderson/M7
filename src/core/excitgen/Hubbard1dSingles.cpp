@@ -33,3 +33,7 @@ bool Hubbard1dSingles::draw(const size_t &exsig, const FrmBosOnv &src_onv, Cache
                             defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
     return draw(exsig, src_onv.m_frm, orbs, prob, helem, conn.m_frm);
 }
+
+std::string Hubbard1dSingles::description() const {
+    return log::format("Hubbard 1D with {}BCs", m_pbc ? "P" : "O");
+}

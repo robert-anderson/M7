@@ -55,11 +55,7 @@ public:
         return 0ul;
     }
 
-    virtual std::string description() const {
-        std::vector<std::string> strings;
-        for (auto const &exsig: m_exsigs) strings.push_back(exsig_utils::to_string(exsig));
-        return log::format("excitation generator for exsigs {}", string_utils::join(strings, ","));
-    }
+    virtual std::string description() const = 0;
 
     virtual ~ExcitGen() {}
 };

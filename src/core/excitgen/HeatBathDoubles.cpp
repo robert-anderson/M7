@@ -81,3 +81,7 @@ bool HeatBathDoubles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &o
 size_t HeatBathDoubles::approx_nconn() const {
     return m_nelec_pair*m_norb_pair;
 }
+
+std::string HeatBathDoubles::description() const {
+    return "precomputed heat-bath fermion doubles";
+}

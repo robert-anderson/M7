@@ -206,6 +206,9 @@ void Annihilator::loop_over_dst_mbfs() {
              * new block of dst_mbfs, so reset total contrib
              */
             total_delta = 0.0;
+            /*
+             * and look it up in the wavefunction store
+             */
             dst_finder();
         } else {
             if (current.m_send_parents) {

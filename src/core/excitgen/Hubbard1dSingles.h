@@ -21,6 +21,8 @@ struct Hubbard1dSingles : public UniformSingles {
               CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) override;
 
     size_t approx_nconn() const override;
+
+    std::string description() const override;
 };
 
 

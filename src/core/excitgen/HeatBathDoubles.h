@@ -35,6 +35,8 @@ public:
 
     size_t approx_nconn() const override;
 
+    std::string description() const override;
+
 };
 
 #endif //M7_HEATBATHDOUBLES_H

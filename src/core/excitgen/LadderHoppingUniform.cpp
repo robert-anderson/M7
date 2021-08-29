@@ -31,3 +31,7 @@ bool LadderHoppingUniform::draw(const size_t &exsig, const FrmBosOnv &src, Cache
     prob /= m_h.nsite();
     return true;
 }
+
+std::string LadderHoppingUniform::description() const {
+    return "uniform";
+}
