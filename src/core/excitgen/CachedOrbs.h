@@ -32,6 +32,10 @@ class CachedOrbs {
      * site indices with 2 electrons
      */
     defs::inds m_doubly_occ_sites;
+    /**
+     * site indices with 0 or 2 electrons
+     */
+    defs::inds m_not_singly_occ_sites;
 public:
     CachedOrbs(const AbelianGroupMap& grp_map);
     /**
