@@ -11,8 +11,6 @@
 #include "BosonHamiltonian.h"
 #include "LadderHamiltonian.h"
 #include "src/core/nd/NdArray.h"
-#include "HamiltonianParts.h"
-#include "SymmetryHelpers.h"
 
 using namespace field;
 
