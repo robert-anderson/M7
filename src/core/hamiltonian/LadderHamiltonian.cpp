@@ -88,3 +88,18 @@ void LadderHamiltonian::log_data() const {
     if (!m_contribs_1101.is_nonzero(exsig_utils::ex_1101))
         log::info("1101 fermion-coupled boson ladder term has no 1101 contributions");
 }
+
+bool LadderHamiltonian::is_holstein() const {
+    return !m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
+}
+
+bool LadderHamiltonian::constant_uncoupled() const {
+    auto v = m_v_unc[0];
+    for (size_t i=1ul; i<m_nmode; ++i) if (m_v_unc[i]!=v) return false;
+    return true;
+}
+
+bool LadderHamiltonian::is_zpm_half_filled() const {
+    if (!is_holstein()) return false;
+    return constant_uncoupled() && m_v.constant_diagonal() && (m_v.get(0,0,0)==-m_v_unc[0]);
+}

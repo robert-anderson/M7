@@ -17,3 +17,9 @@ void FrmBosCoupledCoeffs::set(const size_t &n, const size_t &p, const size_t &q,
 const defs::ham_t &FrmBosCoupledCoeffs::get(const size_t &n, const size_t &p, const size_t &q) const {
     return m_v[index(n, p, q)];
 }
+
+bool FrmBosCoupledCoeffs::constant_diagonal() const {
+    auto v = get(0,0,0);
+    for (size_t i=1ul; i<m_nmode; ++i) if (get(i,i,i)!=v) return false;
+    return true;
+}

@@ -21,6 +21,7 @@ public:
 
     const defs::ham_t& get(const size_t& n, const size_t& p, const size_t& q) const;
 
+    bool constant_diagonal() const;
 };
 
 

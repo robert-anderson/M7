@@ -4,7 +4,8 @@
 
 #include "CachedOrbs.h"
 
-CachedOrbs::CachedOrbs(const AbelianGroupMap &grp_map) : m_occ(grp_map), m_vac(grp_map){
+CachedOrbs::CachedOrbs(const AbelianGroupMap &grp_map) :
+    m_occ(grp_map), m_vac(grp_map){
     clear();
 }
 
@@ -33,4 +34,31 @@ const defs::inds &CachedOrbs::nonempty_pair_labels(const field::FrmOnv &mbf) {
         }
     }
     return m_nonempty_pair_labels;
+}
+
+const defs::inds &CachedOrbs::doubly_occ_sites(const field::FrmOnv &mbf) {
+    if (m_doubly_occ_sites.empty()) {
+        for (size_t isite = 0ul; isite < mbf.nsite(); ++isite) {
+            if (mbf.site_nocc(isite)==2) m_doubly_occ_sites.push_back(isite);
+        }
+    }
+    return m_doubly_occ_sites;
+}
+
+const defs::inds &CachedOrbs::occ_sites(const field::FrmOnv &mbf) {
+    if (m_occ_sites.empty()) {
+        for (size_t isite = 0ul; isite < mbf.nsite(); ++isite) {
+            if (mbf.site_nocc(isite)) m_occ_sites.push_back(isite);
+        }
+    }
+    return m_occ_sites;
+}
+
+const defs::inds &CachedOrbs::not_singly_occ_sites(const field::FrmOnv &mbf) {
+    if (m_occ_sites.empty()) {
+        for (size_t isite = 0ul; isite < mbf.nsite(); ++isite) {
+            if (mbf.site_nocc(isite)!=1) m_occ_sites.push_back(isite);
+        }
+    }
+    return m_occ_sites;
 }

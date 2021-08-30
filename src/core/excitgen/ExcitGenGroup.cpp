@@ -3,7 +3,7 @@
 //
 
 #include "ExcitGenGroup.h"
-#include "LadderPureHolstein.h"
+#include "LadderPureHolsteinZpm.h"
 
 void ExcitGenGroup::init() {
     defs::prob_t norm = 0.0;
@@ -77,12 +77,12 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
     }
     if (ham.m_bos.m_nboson_max) {
-        add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)),
+        if (ham.m_ladder.is_zpm_half_filled())
+            add(std::unique_ptr<ExcitGen>(new LadderPureHolsteinZpm(ham, prng)),
             {exsig_utils::ex_0010, exsig_utils::ex_0001});
-//        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
-//                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, true));
-//        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
-//                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, false));
+        else
+            add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)),
+                {exsig_utils::ex_0010, exsig_utils::ex_0001});
     }
 
     init();
