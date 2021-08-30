@@ -35,3 +35,7 @@ bool LadderPureHolstein::draw(const size_t &exsig, const FrmBosOnv &src, CachedO
     else conn.m_bos.m_ann.add({imode, 1ul});
     return true;
 }
+
+std::string LadderPureHolstein::description() const {
+    return "Holstein";
+}

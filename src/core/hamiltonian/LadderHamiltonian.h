@@ -38,9 +38,11 @@ struct LadderHamiltonian {
 
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
 
-    bool is_holstein() const {
-        return !m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
-    }
+    bool is_holstein() const;
+
+    bool constant_uncoupled() const;
+
+    bool is_zpm_half_filled() const;
 
     /**
      * output some useful logs identifying the kind of H detected
