@@ -17,23 +17,9 @@ struct DstFinder {
     Wavefunction& m_wf;
     SpawnTableRow &m_block_start_row;
     bool m_deterministic = false;
-    DstFinder(Wavefunction& wf, SpawnTableRow& block_start_row):
-        m_wf(wf), m_block_start_row(block_start_row){}
+    DstFinder(Wavefunction& wf, SpawnTableRow& block_start_row);
 
-    void operator()() {
-        auto irow_dst = *m_wf.m_store[m_block_start_row.m_dst_mbf];
-        if (irow_dst != ~0ul) {
-            m_wf.m_store.m_row.jump(irow_dst);
-            m_deterministic = m_wf.m_store.m_row.m_deterministic.get(m_wf.iroot_part(m_block_start_row.m_ipart_dst));
-        } else {
-            m_wf.m_store.m_row.select_null();
-            m_deterministic = false;
-        }
-    };
-
-    WalkerTableRow& store_row() {
-        return m_wf.m_store.m_row;
-    }
+    bool find();
 };
 
 

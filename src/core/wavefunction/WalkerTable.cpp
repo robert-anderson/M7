@@ -26,7 +26,7 @@ bool WalkerTableRow::is_h5_write_exempt() const {
 }
 
 size_t WalkerTableRow::occupied_ncycle(const size_t &icycle_current) const {
-    return icycle_current-m_icycle_occ;
+    return (1+icycle_current)-m_icycle_occ;
 }
 
 const size_t &WalkerTableRow::nroot() const {

@@ -198,8 +198,6 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
 
     void remove_row();
 
-    void sort_recv();
-
     /**
      * Only called on the rank assigned to the ONV by the RankAllocator
      * @param icycle
@@ -228,8 +226,15 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         m_store.m_row.m_hdiag = hdiag;
         for (size_t iroot=0ul; iroot < nroot(); ++iroot)
             m_store.m_row.m_ref_conn.put(iroot, refconns[iroot]);
+        /*
+         * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
+         * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial
+         * occupation of the initial row. if a spawning event leads to the creation of another row, it is created on
+         * iteration 1 even though it is added in the annihilating call of iteration 0. so, if this method is called in
+         * the annihilating process of MC cycle i, it actually "becomes occupied" on cycle i+1.
+         */
         if (storing_av_weights()) {
-            m_store.m_row.m_icycle_occ = icycle;
+            m_store.m_row.m_icycle_occ = icycle+1;
             m_store.m_row.m_average_weight = 0;
         }
         return irow;

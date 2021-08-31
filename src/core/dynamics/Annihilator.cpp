@@ -4,6 +4,24 @@
 
 #include "Annihilator.h"
 
+DstFinder::DstFinder(Wavefunction &wf, SpawnTableRow &block_start_row) :
+        m_wf(wf), m_block_start_row(block_start_row) {}
+
+bool DstFinder::find() {
+    const auto &recv_row = m_block_start_row;
+    const auto &store_row = m_wf.m_store.m_row;
+    auto irow_dst = *m_wf.m_store[recv_row.m_dst_mbf];
+    if (irow_dst != ~0ul) {
+        store_row.jump(irow_dst);
+        m_deterministic = store_row.m_deterministic.get(m_wf.iroot_part(recv_row.m_ipart_dst));
+        return true;
+    } else {
+        store_row.select_null();
+        m_deterministic = false;
+        return false;
+    }
+}
+
 comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
     if (m_rdms) {
         return [&](const size_t &irow1, const size_t &irow2) {
@@ -183,7 +201,7 @@ void Annihilator::loop_over_dst_mbfs() {
     DstFinder dst_finder(m_wf, block_begin);
 
     defs::wf_t total_delta = 0.0;
-    dst_finder();
+    dst_finder.find();
 
     auto &current = m_work_row2;
     for (current.restart();; current.step()) {
@@ -193,7 +211,7 @@ void Annihilator::loop_over_dst_mbfs() {
              * different (dst_mbf, ipart_dst) pair. In either case, we have reached the end of a block of the major
              * sorting field, so we must handle the block just finished
              */
-            handle_dst_block(block_begin, current, total_delta, dst_finder.store_row());
+            handle_dst_block(block_begin, current, total_delta, m_wf.m_store.m_row);
             DEBUG_ASSERT_EQ(block_begin.index(), current.index(),
                             "block_begin should have been pointed to the beginning of the next block");
             /*
@@ -209,7 +227,7 @@ void Annihilator::loop_over_dst_mbfs() {
             /*
              * and look it up in the wavefunction store
              */
-            dst_finder();
+            dst_finder.find();
         } else {
             if (current.m_send_parents) {
                 DEBUG_ASSERT_NE(current.m_dst_mbf, current.m_src_mbf,

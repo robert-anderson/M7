@@ -80,9 +80,9 @@ void RefExcits::load_fn(hdf5::GroupReader &parent) {
 }
 
 void RefExcits::save_fn(hdf5::GroupWriter &parent) {
-    hdf5::GroupWriter gw("ref_excits", parent);
     defs::wf_t av_ref;
     av_ref = mpi::all_sum(m_av_ref[0]);
+    hdf5::GroupWriter gw("ref_excits", parent);
     gw.save("0000", av_ref);
     for (const auto& i: m_active_exsigs) {
         DEBUG_ASSERT_TRUE(m_ref_excits[i].get(), "active exsig was not allocated!");

@@ -30,6 +30,14 @@ struct WalkerTableRow : public Row {
 
     bool is_h5_write_exempt() const override;
 
+    /**
+     * if the current cycle index is the cycle on which the row became occupied, then the occupied ncycle is 1, since
+     * the instantaneous weight has been summed-into the average already, hence the "1+"
+     * @param icycle_current
+     *  currently in-progress MC cycle
+     * @return
+     *  correct normalization for the average weight
+     */
     size_t occupied_ncycle(const size_t& icycle_current) const;
 
     const size_t& nroot() const;

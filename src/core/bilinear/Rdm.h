@@ -122,6 +122,10 @@ private:
     }
 
     void save_fn(hdf5::GroupWriter &parent) override {
+        if (!m_accum_epoch) {
+            log::warn("MAE accumulation epoch was not reached in this calculation: omitting RDM save");
+            return;
+        }
         hdf5::GroupWriter gw("rdms", parent);
         for (const auto &i: m_active_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");

@@ -234,7 +234,8 @@ void Solver::finalizing_loop_over_occupied_mbfs(size_t icycle) {
     if (!m_maes.m_accum_epoch) return;
     auto &row = m_wf.m_store.m_row;
     for (row.restart(); row.in_range(); row.step()) {
-        if (!row.m_mbf.is_zero()) m_maes.make_average_contribs(row, m_refs, icycle);
+        if (row.m_mbf.is_zero()) continue;
+        m_maes.make_average_contribs(row, m_refs, icycle);
     }
     m_maes.end_cycle();
 }

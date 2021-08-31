@@ -85,7 +85,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
             }
         }
         row.m_average_weight = 0;
-        row.m_icycle_occ = icycle;
+        row.m_icycle_occ = icycle+1;
     }
 }
 
