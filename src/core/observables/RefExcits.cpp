@@ -4,10 +4,10 @@
 
 #include "RefExcits.h"
 
-RefExcitsOneExsig::RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket) :
+RefExcitsOneExsig::RefExcitsOneExsig(size_t exsig, size_t nroot, size_t nbucket) :
         BufferedTable<MaeRow, true>(
                 log::format("average {} reference excitation coefficients", exsig_utils::to_string(exsig)),
-                {{exsig, nvalue}, nbucket}),
+                {{exsig, nroot}, nbucket}),
         m_working_inds(exsig) {}
 
 LookupResult RefExcitsOneExsig::operator[](const conn::FrmOnv &key) {
@@ -28,39 +28,40 @@ void RefExcitsOneExsig::save(hdf5::GroupWriter &gw) const {
     Table<MaeRow>::save(gw, exsig_utils::to_string(m_working_inds.m_exsig), h5_field_names());
 }
 
-void RefExcitsOneExsig::make_contribs(const conn::FrmOnv &conn, const defs::wf_t &contrib, const size_t &ipart) {
+void RefExcitsOneExsig::make_contribs(const conn::FrmOnv &conn, const defs::wf_t &contrib, const size_t &iroot) {
     DEBUG_ASSERT_EQ(conn.exsig(), m_working_inds.m_exsig, "incompatible connection");
     auto irow = *(*this)[conn];
     if (irow==~0ul) irow = insert(conn);
     m_row.jump(irow);
-    m_row.m_values[ipart]+=contrib;
+    m_row.m_values[iroot]+=contrib;
 }
 
-RefExcits::RefExcits(const fciqmc_config::RefExcits &opts, size_t nsite) :
+RefExcits::RefExcits(const fciqmc_config::RefExcits &opts, size_t nsite, size_t nroot) :
         Archivable("ref_excits", opts.m_archivable),
-        m_opts(opts), m_av_ref({1}), m_conn(nsite) {
+        m_opts(opts), m_av_ref({nroot}), m_conn(nsite) {
+    REQUIRE_EQ_ALL(nroot, 1ul, "reference excitation averaging currently only implemented for a single root");
     for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
         auto exsig = exsig_utils::encode(iexlvl, iexlvl, 0, 0);
         m_active_exsigs.push_back(exsig);
-        m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, 1);
+        m_ref_excits[exsig] = mem_utils::make_unique<RefExcitsOneExsig>(exsig, nroot);
     }
 }
 
-void RefExcits::make_contribs(const conn::FrmOnv &conn, const defs::wf_t &contrib, const size_t &ipart) {
+void RefExcits::make_contribs(const conn::FrmOnv &conn, const defs::wf_t &contrib, const size_t &iroot) {
     auto exsig = conn.exsig();
-    if (!exsig) m_av_ref[ipart] += contrib;
+    if (!exsig) m_av_ref[iroot] += contrib;
     if (exsig==~0ul || !m_ref_excits[exsig]) return;
-    m_ref_excits[exsig]->make_contribs(conn, contrib, ipart);
+    m_ref_excits[exsig]->make_contribs(conn, contrib, iroot);
 }
 
-void RefExcits::make_contribs(const conn::FrmBosOnv &conn, const defs::wf_t &contrib, const size_t &ipart) {
-    make_contribs(conn.m_frm, contrib, ipart);
+void RefExcits::make_contribs(const conn::FrmBosOnv &conn, const defs::wf_t &contrib, const size_t &iroot) {
+    make_contribs(conn.m_frm, contrib, iroot);
 }
 
 void RefExcits::make_contribs(const field::Mbf &mbf, const field::Mbf &ref_mbf, const defs::wf_t &contrib,
-                              const size_t &ipart) {
+                              const size_t &iroot) {
     m_conn.connect(ref_mbf, mbf);
-    make_contribs(m_conn, contrib, ipart);
+    make_contribs(m_conn, contrib, iroot);
 }
 
 bool RefExcits::all_stores_empty() const {

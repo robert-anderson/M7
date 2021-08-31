@@ -222,8 +222,11 @@ private:
                        "global sorting table should have as many filled rows as total found rows across all ranks");
             auto row1 = m_global_sorter.m_row;
             auto row2 = m_global_sorter.m_row;
+            /*
+             * values are averaged into one in the global_sort_table_t tables, so just one index to compare;
+             */
             auto cmp_fn = comparators::make_num_field_row_cmp_fn(
-                    row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, m_lxr.m_inds_to_cmp);
+                    row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, {0ul});
             QuickSorter qs(cmp_fn);
             qs.reorder_sort(m_global_sorter);
             for (size_t irow = 0ul; irow < nrow; ++irow) {

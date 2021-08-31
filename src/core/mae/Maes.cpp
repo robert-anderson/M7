@@ -4,9 +4,9 @@
 
 #include "Maes.h"
 
-Maes::Maes(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec) :
+Maes::Maes(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, size_t nroot) :
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, nsite, nelec, m_accum_epoch),
-        m_ref_excits(opts.m_ref_excits, nsite), m_period(opts.m_stats_period) {
+        m_ref_excits(opts.m_ref_excits, nsite, nroot), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = mem_utils::make_unique<MaeStats>(
                 "M7.maes.stats",
@@ -50,10 +50,11 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         auto &ref = refs[ipart];
         auto &ref_mbf = ref.get_mbf();
         auto ipart_replica = row.ipart_replica(ipart);
+        const auto iroot = ipart/row.nreplica();
         /*
          * if contributions are coming from two replicas, we should take the mean
          */
-        double dupl_fac = (ipart_replica == ipart) ? 1.0 : 0.5;
+        const auto dupl_fac = 1.0;///double(row.nreplica());
         /*
          * the "average" weights actually refer to the unnormalized average. The averages are obtained by dividing
          * each by the number of cycles for which the row is occupied.
@@ -63,7 +64,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         /*
          * accumulate contributions to reference excitations if required
          */
-        m_ref_excits.make_contribs(row.m_mbf, ref_mbf, dupl_fac * ncycle_occ * av_weight, ipart);
+        m_ref_excits.make_contribs(row.m_mbf, ref_mbf, dupl_fac * ncycle_occ * av_weight, iroot);
 
         if (m_bilinears.m_rdms) {
             auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;

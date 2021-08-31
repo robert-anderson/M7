@@ -16,7 +16,7 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                        new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_maes(m_opts.m_av_ests, m_prop.m_ham.nsite(), m_prop.m_ham.nelec()),
+        m_maes(m_opts.m_av_ests, m_prop.m_ham.nsite(), m_prop.m_ham.nelec(), m_wf.nroot()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
 

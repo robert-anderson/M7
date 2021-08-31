@@ -20,7 +20,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
      */
     buffered::MaeInds m_working_inds;
 
-    RefExcitsOneExsig(size_t exsig, size_t nvalue, size_t nbucket = 100);
+    RefExcitsOneExsig(size_t exsig, size_t nroot, size_t nbucket = 100);
 
     LookupResult operator[](const conn::FrmOnv &key);
 
@@ -31,7 +31,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     using Table<MaeRow>::save;
     void save(hdf5::GroupWriter& gw) const;
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart);
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
 };
 
 
@@ -45,13 +45,13 @@ struct RefExcits : Archivable {
      */
     conn::Mbf m_conn;
 
-    RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite);
+    RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite, size_t nroot);
 
-    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& ipart);
+    void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
 
-    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& ipart);
+    void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
 
-    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& ipart);
+    void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& iroot);
 
     bool all_stores_empty() const;
 
