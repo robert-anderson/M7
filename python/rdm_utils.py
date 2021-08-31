@@ -292,6 +292,18 @@ def load_spin_resolved_rdm(fname, rank):
     nord_rdm *= ncomb(nelec, rank)/trace
     return nord_rdm
 
+def load_spinfree_1rdm_from_m7(h5_fname):
+    rdm1 = load_spin_resolved_rdm(h5_fname, 1)
+    rdm1_restored = restore_perm_syms(rdm1, True, False)
+    rdm1_sf = spin_resolved_to_spinfree(rdm1_restored, True)
+    return rdm1_sf
+
+def load_spinfree_1_2rdm_from_m7(h5_fname, nelec):
+    rdm2 = load_spin_resolved_rdm(h5_fname, 2)
+    rdm2_restored = restore_perm_syms(rdm2, True, False)
+    rdm2_sf = spin_resolved_to_spinfree(rdm2_restored, True)
+    rdm1_sf = one_from_two_rdm(rdm2_sf, nelec)
+    return unreorder_rdm12(rdm1_sf, rdm2_sf, False)
 
 
 if __name__=='__main__':
