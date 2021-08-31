@@ -123,10 +123,10 @@ struct DeterministicSubspaces {
     }
 
     void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, size_t icycle) {
-        m_detsubs.reserve(wf.nroot());
+        m_detsubs.resize(wf.nroot());
         REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
         for (size_t iroot=0ul; iroot<wf.nroot(); ++iroot) {
-            DEBUG_ASSERT_TRUE_ALL(m_detsubs[iroot]==nullptr, "detsubs should not already be allocated");
+            REQUIRE_TRUE_ALL(m_detsubs[iroot]==nullptr, "detsubs should not already be allocated");
             m_detsubs[iroot] = mem_utils::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
             m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);
         }

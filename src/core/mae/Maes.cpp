@@ -52,10 +52,6 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         auto ipart_replica = row.ipart_replica(ipart);
         const auto iroot = ipart/row.nreplica();
         /*
-         * if contributions are coming from two replicas, we should take the mean
-         */
-        const auto dupl_fac = 1.0;///double(row.nreplica());
-        /*
          * the "average" weights actually refer to the unnormalized average. The averages are obtained by dividing
          * each by the number of cycles for which the row is occupied.
          */
@@ -64,7 +60,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         /*
          * accumulate contributions to reference excitations if required
          */
-        m_ref_excits.make_contribs(row.m_mbf, ref_mbf, dupl_fac * ncycle_occ * av_weight, iroot);
+        m_ref_excits.make_contribs(row.m_mbf, ref_mbf, ncycle_occ * av_weight, iroot);
 
         if (m_bilinears.m_rdms) {
             auto av_weight_rep = row.m_average_weight[ipart_replica] / ncycle_occ;
@@ -72,7 +68,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
              * scale up the product by a factor of the number of instantaneous contributions being accounted for in this
              * single averaged contribution (ncycle_occ)
              */
-            m_bilinears.make_contribs(row.m_mbf, dupl_fac * ncycle_occ * av_weight * av_weight_rep);
+            m_bilinears.make_contribs(row.m_mbf, ncycle_occ * av_weight * av_weight_rep);
 
             auto exsig_from_ref = ref.exsig(row.m_mbf);
             auto is_ref_conn = exsig_from_ref && m_bilinears.m_rdms.takes_contribs_from(exsig_from_ref);
@@ -80,14 +76,14 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
                 const auto av_weight_ref = ref.norm_average_weight(icycle, ipart);
                 const auto av_weight_ref_rep = ref.norm_average_weight(icycle, ipart_replica);
                 m_bilinears.m_rdms.make_contribs(ref_mbf, row.m_mbf,
-                                                 dupl_fac * ncycle_occ * av_weight_ref * av_weight_rep);
+                                                 ncycle_occ * av_weight_ref * av_weight_rep);
                 m_bilinears.m_rdms.make_contribs(row.m_mbf, ref_mbf,
-                                                 dupl_fac * ncycle_occ * av_weight * av_weight_ref_rep);
+                                                 ncycle_occ * av_weight * av_weight_ref_rep);
             }
         }
-        row.m_average_weight = 0;
-        row.m_icycle_occ = icycle+1;
     }
+    row.m_average_weight = 0;
+    row.m_icycle_occ = icycle+1;
 }
 
 void Maes::output(size_t icycle, const Hamiltonian &ham) {

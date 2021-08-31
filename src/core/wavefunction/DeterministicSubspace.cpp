@@ -72,9 +72,9 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
             if (row_global.m_mbf == ref) continue;
             if (m_wf.nreplica() == 2) {
                 rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
-                                   0.5 * row_local.m_weight[0] * row_global.m_weight[1]);
+                                   row_local.m_weight[0] * row_global.m_weight[1]);
                 rdms.make_contribs(row_local.m_mbf, row_global.m_mbf,
-                                   0.5 * row_local.m_weight[1] * row_global.m_weight[0]);
+                                   row_local.m_weight[1] * row_global.m_weight[0]);
             } else {
                 rdms.make_contribs(row_local.m_mbf, row_global.m_mbf, row_local.m_weight[0] * row_global.m_weight[0]);
             }
@@ -95,7 +95,9 @@ void DeterministicSubspace::project(double tau) {
         for (; icol_it != lists.first.cend(); (++icol_it, ++value_it)) {
             DEBUG_ASSERT_FALSE(value_it == lists.second.cend(), "values list incongruent with column indices list");
             row_global.jump(*icol_it);
-            row_wf.m_weight.sub_scaled(*value_it * tau, row_global.m_weight);
+            // one replica or two
+            for (const auto& ipart: m_iparts)
+                row_wf.m_weight[ipart]-=*value_it * tau * row_global.m_weight[ipart];
         }
         ++irow_wf_it;
     }

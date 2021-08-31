@@ -224,8 +224,8 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
         m_store.m_row.jump(irow);
         DEBUG_ASSERT_EQ(m_store.m_row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
         m_store.m_row.m_hdiag = hdiag;
-        for (size_t iroot=0ul; iroot < nroot(); ++iroot)
-            m_store.m_row.m_ref_conn.put(iroot, refconns[iroot]);
+        for (size_t ipart=0ul; ipart < npart(); ++ipart)
+            m_store.m_row.m_ref_conn.put(ipart, refconns[ipart]);
         /*
          * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
          * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial
