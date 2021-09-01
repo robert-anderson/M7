@@ -1,0 +1,11 @@
+---
+hamiltonian:
+    nboson_max: 4
+wavefunction:
+    nw_init: 10
+propagator:
+    nadd: 3
+    static_tau: yes
+    static_probs: yes
+    nw_target: 10000
+    tau_init: 0.001
