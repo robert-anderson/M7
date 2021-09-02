@@ -123,3 +123,19 @@ std::string FrmOnvField::to_string() const {
 const size_t &FrmOnvField::nsite() const {
     return m_nsite;
 }
+
+size_t FrmOnvField::isite(const size_t &ibit) {
+    return ibit < m_nsite ? ibit : ibit - m_nsite;
+}
+
+size_t FrmOnvField::ispin(const size_t &ibit) {
+    return ibit >= m_nsite;
+}
+
+size_t FrmOnvField::isite(const size_t &ibit, const size_t &nsite) {
+    return ibit < nsite ? ibit : ibit - nsite;
+}
+
+size_t FrmOnvField::ispin(const size_t &ibit, const size_t &nsite) {
+    return ibit >= nsite;
+}

@@ -13,7 +13,7 @@ struct MaeStatsRow : Row {
     field::Number<defs::wf_t> m_total_norm;
     field::Number<defs::ham_comp_t> m_rdm_energy;
 
-    MaeStatsRow(bool rdms, bool spec_moms, bool have_energy);
+    MaeStatsRow(bool rdms, bool spec_moms);
 };
 
 typedef StatsTable<MaeStatsRow> MaeStats;

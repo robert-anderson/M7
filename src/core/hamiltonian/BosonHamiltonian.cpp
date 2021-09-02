@@ -6,7 +6,7 @@
 #include "src/core/io/BosdumpFileReader.h"
 
 BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname):
-        m_nboson_max(nboson_max), m_nmode(nmode), m_coeffs(m_nboson_max ? m_nmode * m_nmode : 0ul),
+        m_nboson_max(nboson_max), m_nmode(nmode), m_coeffs(m_nboson_max ? m_nmode : 0ul),
         m_contribs_0011(exsig_utils::ex_0011){
     if (!m_nboson_max) return;
 
@@ -22,7 +22,7 @@ BosonHamiltonian::BosonHamiltonian(size_t nmode, size_t nboson_max, std::string 
         auto exsig = file_reader.exsig(inds, ranksig);
         DEBUG_ASSERT_TRUE(exsig_utils::contribs_to(exsig, ranksig), "excitation does not contribute to this operator rank");
         m_contribs_0011.set_nonzero(exsig);
-        m_coeffs.set(index(inds[0], inds[1]), value);
+        m_coeffs.set(inds[0], inds[1], value);
     }
     log_data();
 }
@@ -31,7 +31,7 @@ defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
     if (!m_nboson_max) return 0.0;
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode)
-        res += m_coeffs[index(imode, imode)] * static_cast<defs::ham_comp_t>(onv[imode]);
+        res += m_coeffs.get(imode, imode) * static_cast<defs::ham_comp_t>(onv[imode]);
     return res;
 }
 

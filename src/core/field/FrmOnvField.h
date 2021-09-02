@@ -111,6 +111,26 @@ public:
 
     const size_t& nsite() const;
 
+    /**
+     * convenient conversion between spin-site and site indices
+     * @param ibit
+     *  bit index
+     * @return
+     *  associated site index
+     */
+    size_t isite(const size_t& ibit);
+    /**
+     * convenient conversion between spin-site and spin indices
+     * @param ibit
+     *  bit index
+     * @return
+     *  associated spin index (0 or 1)
+     */
+    size_t ispin(const size_t& ibit);
+
+    static size_t isite(const size_t& ibit, const size_t& nsite);
+
+    static size_t ispin(const size_t& ibit, const size_t& nsite);
 };
 
 

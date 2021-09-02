@@ -32,10 +32,6 @@ namespace field {
 
     using FrmBosOnv = FrmBosOnvField;
 
-//    struct FrmCsf : FrmOnv {
-//        FrmCsf(Row *row, size_t nsite, std::string name = ""): FrmOnv(row, nsite, name){}
-//    };
-
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
     template<size_t mbf_ind>

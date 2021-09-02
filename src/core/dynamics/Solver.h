@@ -130,10 +130,6 @@ public:
 
     void end_cycle();
 
-    void output_mevs(size_t icycle);
-
-    void output_mevs();
-
     void output_stats();
 
 };

@@ -531,6 +531,11 @@ namespace string_utils {
         if (tmp == std::numeric_limits<size_t>::max()) return std::numeric_limits<int64_t>::max();
         return pos ? tmp : -tmp;
     }
+
+    static size_t parse_decimal_digit(const char* c){
+        if (*c<'0' || *c>'9') return ~0ul;
+        return *c-'0';
+    }
 }
 
 

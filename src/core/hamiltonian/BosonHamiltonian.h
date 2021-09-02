@@ -5,19 +5,15 @@
 #ifndef M7_BOSONHAMILTONIAN_H
 #define M7_BOSONHAMILTONIAN_H
 
+#include <src/core/integrals/BosonCoeffs.h>
 #include "src/core/connection/Connections.h"
 #include "src/core/parallel/SharedArray.h"
 #include "src/core/field/Fields.h"
 #include "HamiltonianData.h"
 
-class BosonHamiltonian {
-    size_t index(const size_t &n, const size_t &m) const {
-        return n * m_nmode + m;
-    }
-
-public:
+struct BosonHamiltonian {
     const size_t m_nboson_max, m_nmode;
-    SharedArray<defs::ham_t> m_coeffs;
+    BosonCoeffs m_coeffs;
     ham_data::TermContribs m_contribs_0011;
 
     BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname);

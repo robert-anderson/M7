@@ -53,6 +53,7 @@ class Rdms : public Archivable {
 public:
     const bool m_explicit_ref_conns;
     const Epoch &m_accum_epoch;
+    Reduction<defs::wf_comp_t> m_total_norm;
 
     Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch &accum_epoch);
 
@@ -65,7 +66,7 @@ public:
 
     void make_contribs(const field::Mbf &src_onv, const field::Mbf &dst_onv, const defs::wf_t &contrib);
 
-    void make_contribs(const SpawnTableRow& recv_row, const WalkerTableRow& dst_row, const Propagator& prop);
+    void make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop);
 
     /**
      * We need to be careful of the intermediate state of the walker weights.
@@ -105,8 +106,11 @@ public:
 
     void end_cycle();
 
+    bool is_energy_sufficient(const Hamiltonian &ham) const;
+
     /**
-     * compute the 2-RDM energy
+     * compute the fermion 2-RDM energy
+     * @param ham
      * @return
      *  MPI-reduced sum of 0, 1, and 2 body parts of the RDM energy
      *
@@ -114,7 +118,38 @@ public:
      *
      *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
-    defs::ham_comp_t get_energy(const FermionHamiltonian& ham) const;
+    defs::ham_comp_t get_energy(const FermionHamiltonian &ham) const;
+
+    /**
+     * compute the RDM energy contribution from the boson number-nonconserving terms
+     * @param ham
+     *  boson ladder-operator (pure and coupled) hamiltonian
+     * @return
+     */
+    defs::ham_comp_t get_energy(const LadderHamiltonian &ham, size_t nelec, size_t exsig) const;
+
+    defs::ham_comp_t get_energy(const LadderHamiltonian &ham, size_t nelec) const {
+        return get_energy(ham, nelec, exsig_utils::ex_1101) + get_energy(ham, nelec, exsig_utils::ex_1110);
+    }
+
+    /**
+     * compute the RDM energy contribution from the boson number-conserving terms
+     * @param ham
+     *  boson number conserving hamiltonian
+     * @return
+     */
+    defs::ham_comp_t get_energy(const BosonHamiltonian &ham) const;
+
+    /**
+     * @param ham
+     *  full hamiltonian including all terms
+     * @return
+     *  E_RDM = E_2RDM + E_RDM_ladder + E_RDM_boson
+     */
+    defs::ham_comp_t get_energy(const Hamiltonian &ham) const {
+        if (!is_energy_sufficient(ham)) return 0.0;
+        return get_energy(ham.m_frm) + get_energy(ham.m_ladder, ham.nelec()) + get_energy(ham.m_bos);
+    }
 
 private:
     void load_fn(hdf5::GroupReader &parent) override {

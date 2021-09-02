@@ -49,7 +49,7 @@ defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const co
             defs::ham_t res = m_v_unc[imode];
             // fermion ONVs do not differ, so sum over occupied spin orbitals
             auto fn = [&](const size_t &ibit) {
-                auto isite = ibit % m_nmode;
+                auto isite = onv.m_frm.isite(ibit);
                 res += m_v.get(imode, isite, isite);
             };
             onv.m_frm.foreach(fn);
@@ -58,8 +58,8 @@ defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const co
         case 2: {
             DEBUG_ASSERT_TRUE(onv.m_frm.get(conn.m_frm.m_ann[0]), "annihilated op not occupied in ONV")
             DEBUG_ASSERT_FALSE(onv.m_frm.get(conn.m_frm.m_cre[0]), "created op occupied in ONV")
-            auto isite = conn.m_frm.m_cre[0] % m_nmode;
-            auto jsite = conn.m_frm.m_ann[0] % m_nmode;
+            auto isite = onv.m_frm.isite(conn.m_frm.m_cre[0]);
+            auto jsite = onv.m_frm.isite(conn.m_frm.m_ann[0]);
             /*
              * respect hermitian conjugation of the fermion-boson operator product: 1110 (boson creation) is the
              * conventionally non-conjugated term

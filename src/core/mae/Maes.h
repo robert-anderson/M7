@@ -87,7 +87,7 @@ struct Maes {
      */
     void make_average_contribs(WalkerTableRow &row, const References &refs, const size_t &icycle);
 
-    void output(size_t icycle, const Hamiltonian& ham);
+    void output(size_t icycle, const Hamiltonian& ham, bool final=false);
 };
 
 

@@ -45,6 +45,12 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         if (m_maes.m_bilinears.m_rdms) m_archive.add_member(m_maes.m_bilinears.m_rdms);
         if (m_maes.m_bilinears.m_spec_moms) m_archive.add_member(m_maes.m_bilinears.m_spec_moms);
     }
+    if (m_maes.m_bilinears.m_rdms) {
+        if (m_maes.m_bilinears.m_rdms.is_energy_sufficient(m_prop.m_ham))
+            log::info("Specified RDM rank signatures are sufficient for variational energy estimation");
+        else
+            log::warn("Specified RDM rank signatures are insufficient for variational energy estimation");
+    }
     /**
      * read previous calculation data into archivable objects if archive loading is enabled
      */
@@ -238,6 +244,7 @@ void Solver::finalizing_loop_over_occupied_mbfs(size_t icycle) {
         m_maes.make_average_contribs(row, m_refs, icycle);
     }
     m_maes.end_cycle();
+    m_maes.output(m_icycle, m_prop.m_ham, true);
 }
 
 void Solver::loop_over_spawned() {
@@ -339,4 +346,6 @@ void Solver::output_stats() {
         stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
         m_parallel_stats->flush();
     }
+
+    m_maes.output(m_icycle, m_prop.m_ham);
 }

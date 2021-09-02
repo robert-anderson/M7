@@ -85,7 +85,7 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const field::Mbf &ref)
 void DeterministicSubspace::project(double tau) {
     auto &row_local = m_local.m_row;
     auto &row_global = m_global.m_row;
-    auto row_wf = m_wf.m_store.m_row;
+    auto &row_wf = m_wf.m_store.m_row;
     auto irow_wf_it = m_irows.cbegin();
     for (row_local.restart(); row_local.in_range(); row_local.step()) {
         row_wf.jump(*irow_wf_it);
@@ -97,7 +97,7 @@ void DeterministicSubspace::project(double tau) {
             row_global.jump(*icol_it);
             // one replica or two
             for (const auto& ipart: m_iparts)
-                row_wf.m_weight[ipart]-=*value_it * tau * row_global.m_weight[ipart];
+                m_wf.change_weight(ipart, - *value_it * tau * row_global.m_weight[ipart]);
         }
         ++irow_wf_it;
     }

@@ -19,10 +19,14 @@ ham_data::TermContribs::TermContribs(size_t ranksig) :
         m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, false) {}
 
 void ham_data::TermContribs::set_nonzero(size_t exsig) {
-    m_exsig_nonzero[ind(exsig)] = true;
+    auto i = ind(exsig);
+    REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
+    m_exsig_nonzero[i] = true;
 }
 
 bool ham_data::TermContribs::is_nonzero(size_t exsig) const {
+    auto i = ind(exsig);
+    REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
     return m_exsig_nonzero[ind(exsig)];
 }
 

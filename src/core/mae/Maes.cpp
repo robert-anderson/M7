@@ -8,10 +8,9 @@ Maes::Maes(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, size_t
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, nsite, nelec, m_accum_epoch),
         m_ref_excits(opts.m_ref_excits, nsite, nroot), m_period(opts.m_stats_period) {
     if (*this) {
-        m_stats = mem_utils::make_unique<MaeStats>(
-                "M7.maes.stats",
+        m_stats = mem_utils::make_unique<MaeStats>("M7.maes.stats",
                 "FCIQMC Multidimensional Averaged Estimators",
-                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms, false));
+                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms));
     }
 }
 
@@ -86,7 +85,20 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
     row.m_icycle_occ = icycle+1;
 }
 
-void Maes::output(size_t icycle, const Hamiltonian &ham) {
+void Maes::output(size_t icycle, const Hamiltonian &ham, bool final) {
     if (!*this) return;
-    if (!is_period_cycle(icycle)) return;
+    if (!is_period_cycle(icycle) && !final) return;
+    auto& stats_row = m_stats->m_row;
+
+    defs::ham_comp_t rdm_energy = 0.0;
+    if (m_bilinears.m_rdms.is_energy_sufficient(ham)) rdm_energy = m_bilinears.m_rdms.get_energy(ham);
+
+    if (mpi::i_am_root()) {
+        stats_row.m_icycle = icycle;
+        if (m_bilinears.m_rdms) {
+            stats_row.m_total_norm = m_bilinears.m_rdms.m_total_norm.m_reduced;
+            stats_row.m_rdm_energy = rdm_energy;
+        }
+        m_stats->flush();
+    }
 }

@@ -40,7 +40,8 @@ public:
      */
     ExcitIterGroup(const Hamiltonian &ham) {
 
-        bool any_singles = ham.m_frm.m_contribs_1100.is_nonzero(ex_single) || ham.m_frm.m_contribs_2200.is_nonzero(ex_single);
+        bool any_singles =
+                ham.m_frm.m_contribs_1100.is_nonzero(ex_single) || ham.m_frm.m_contribs_2200.is_nonzero(ex_single);
         if (any_singles) {
             if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
                 add(std::unique_ptr<ExcitIter>(new excititers::Hubbard1dSingles(ham)));
@@ -53,49 +54,72 @@ public:
         }
 
         if (ham.m_bos.m_nboson_max) {
-//        m_exgens[conn_utils::encode_exsig(0, 0, 1, 0)] =
-//                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, true));
-//        m_exgens[conn_utils::encode_exsig(0, 0, 0, 1)] =
-//                std::unique_ptr<ExcitGen>(new UniformHolstein(ham, prng, false));
+            bool any_pures;
+            any_pures = ham.m_ladder.m_contribs_0010.is_nonzero(exsig_utils::ex_0010)
+                             || ham.m_ladder.m_contribs_1110.is_nonzero(exsig_utils::ex_0010);
+            if (any_pures) {
+                if (ham.m_ladder.is_holstein())
+                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0010)));
+                else
+                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPure(ham, exsig_utils::ex_0010)));
+            }
+            any_pures = ham.m_ladder.m_contribs_0001.is_nonzero(exsig_utils::ex_0001)
+                             || ham.m_ladder.m_contribs_1101.is_nonzero(exsig_utils::ex_0001);
+            if (any_pures) {
+                if (ham.m_ladder.is_holstein())
+                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0001)));
+                else
+                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPure(ham, exsig_utils::ex_0001)));
+            }
+
+            bool any_hopping;
+            any_hopping = ham.m_ladder.m_contribs_1110.is_nonzero(exsig_utils::ex_1110);
+            if (any_hopping)
+                add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1110)));
+            any_hopping = ham.m_ladder.m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
+            if (any_hopping)
+                add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1101)));
         }
 
         init();
     }
 
+    void log_breakdown() const;
+
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_c_t<mbf_t> &body_fn, bool nonzero_h_only) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_cd_t<mbf_t> &body_fn, bool nonzero_h_only) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_ch_t<mbf_t> &body_fn, bool nonzero_h_only) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_cdh_t<mbf_t> &body_fn, bool nonzero_h_only) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_d_t<mbf_t> &body_fn, bool nonzero_h_only) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_h_t &body_fn) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn);
     }
 
     template<typename mbf_t>
     void foreach(const mbf_t &mbf, const fn_dh_t<mbf_t> &body_fn, bool nonzero_h_only) {
-        for (const auto& exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
+        for (const auto &exsig: m_active_exsigs) m_excit_iters[exsig]->foreach<mbf_t>(mbf, body_fn, nonzero_h_only);
     }
 };
 
