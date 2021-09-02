@@ -952,22 +952,20 @@ namespace exsig_utils {
      * @param exsig
      *  excitation signature
      * @return
-     *  true if the exsig has any fermion operators and no boson operators
+     *  true if the exsig has no boson operators
      */
     static constexpr bool is_pure_frm(size_t exsig) {
-        return !(decode_nbos_cre(exsig) || decode_nbos_ann(exsig)) &&
-               (decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig));
+        return !(decode_nbos_cre(exsig) || decode_nbos_ann(exsig));
     }
 
     /**
      * @param exsig
      *  excitation signature
      * @return
-     *  true if the exsig has any boson operators and no fermion operators
+     *  true if the exsig has no fermion operators
      */
     static constexpr bool is_pure_bos(size_t exsig) {
-        return !(decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig)) &&
-               (decode_nbos_cre(exsig) || decode_nbos_ann(exsig));
+        return !(decode_nfrm_cre(exsig) || decode_nfrm_ann(exsig));
     }
 
     /**

@@ -83,7 +83,7 @@ public:
      */
     void add_(WalkerTableRow &row) {
         base_t::add_(row.index());
-        for (const auto &ipart : m_iparts) row.m_deterministic.set(ipart);
+        row.m_deterministic.set(m_iroot);
     }
 
     void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears);
