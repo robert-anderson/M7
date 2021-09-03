@@ -64,11 +64,10 @@ private:
      */
     const defs::inds m_iparts;
 
-    defs::inds make_iparts(){
-        if (m_wf.nreplica()==1) return {m_iroot};
-        auto ipart = m_wf.m_format.flatten({m_iroot, 0});
-        return {ipart, ipart+1};
-    }
+    defs::inds make_iparts();
+
+    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const std::forward_list<size_t>& icol_list);
+
 
 public:
 
@@ -81,10 +80,7 @@ public:
      * @param row
      *  row of the wavefunction store which is pointing at the MBF to add into the subspace
      */
-    void add_(WalkerTableRow &row) {
-        base_t::add_(row.index());
-        row.m_deterministic.set(m_iroot);
-    }
+    void add_(WalkerTableRow &row);
 
     void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears);
 
@@ -114,39 +110,17 @@ struct DeterministicSubspaces {
      */
     std::vector<std::unique_ptr<DeterministicSubspace>> m_detsubs;
 
-    DeterministicSubspaces(const fciqmc_config::Semistochastic &opts) :
-            m_opts(opts), m_epoch("semistochastic"){
-    }
+    DeterministicSubspaces(const fciqmc_config::Semistochastic &opts);
 
-    operator bool() const {
-        return m_opts.m_size && m_epoch;
-    }
+    operator bool() const;
 
-    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, size_t icycle) {
-        m_detsubs.resize(wf.nroot());
-        REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
-        for (size_t iroot=0ul; iroot<wf.nroot(); ++iroot) {
-            REQUIRE_TRUE_ALL(m_detsubs[iroot]==nullptr, "detsubs should not already be allocated");
-            m_detsubs[iroot] = mem_utils::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
-            m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);
-        }
-        m_epoch.update(icycle, true);
-    }
+    void build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf, size_t icycle);
 
-    void update() {
-        if (!*this) return;
-        for (auto& detsub: m_detsubs) detsub->update();
-    }
+    void update();
 
-    void project(double tau) {
-        if (!*this) return;
-        for (auto& detsub: m_detsubs) detsub->project(tau);
-    }
+    void project(double tau);
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref) {
-        if (!*this) return;
-        for (auto& detsub: m_detsubs) detsub->make_rdm_contribs(rdms, ref);
-    }
+    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref);
 };
 
 #endif //M7_DETERMINISTICSUBSPACE_H
