@@ -264,7 +264,7 @@ defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
     trace = mpi::all_sum(trace);
     ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
     const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.m_nelec, 2);
-    REQUIRE_TRUE(consts::float_nearly_zero(norm / m_total_norm.m_reduced - 1.0, 1e-12),
+    REQUIRE_TRUE(consts::float_nearly_zero(norm / m_total_norm.m_reduced - 1.0, 1e-8),
                  "2RDM norm should match total of sampled diagonal contributions");
     return consts::real(ham.m_int_0) + (consts::real(e1) + consts::real(e2))/norm;
 }

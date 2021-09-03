@@ -49,7 +49,7 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         auto &ref = refs[ipart];
         auto &ref_mbf = ref.get_mbf();
         auto ipart_replica = row.ipart_replica(ipart);
-        const auto iroot = ipart/row.nreplica();
+        const auto iroot = ipart / row.nreplica();
         /*
          * the "average" weights actually refer to the unnormalized average. The averages are obtained by dividing
          * each by the number of cycles for which the row is occupied.
@@ -82,13 +82,13 @@ void Maes::make_average_contribs(WalkerTableRow &row, const References &refs, co
         }
     }
     row.m_average_weight = 0;
-    row.m_icycle_occ = icycle+1;
+    row.m_icycle_occ = icycle + 1;
 }
 
 void Maes::output(size_t icycle, const Hamiltonian &ham, bool final) {
     if (!*this) return;
     if (!is_period_cycle(icycle) && !final) return;
-    auto& stats_row = m_stats->m_row;
+    auto &stats_row = m_stats->m_row;
 
     defs::ham_comp_t rdm_energy = 0.0;
     if (m_bilinears.m_rdms.is_energy_sufficient(ham)) rdm_energy = m_bilinears.m_rdms.get_energy(ham);

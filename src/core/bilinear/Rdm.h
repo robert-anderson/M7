@@ -162,6 +162,7 @@ private:
             return;
         }
         hdf5::GroupWriter gw("rdms", parent);
+        gw.save("norm", m_total_norm.m_reduced);
         for (const auto &i: m_active_ranksigs) {
             DEBUG_ASSERT_TRUE(m_rdms[i].get(), "active ranksig was not allocated!");
             m_rdms[i]->save(gw);

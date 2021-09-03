@@ -20,6 +20,20 @@ try:
 except IndexError:
     rootdir = '.'
 
+'''
+def write_results_xml(fname, results):
+    with open(fname, 'w') as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+<testsuites tests="3" failures="0" disabled="0" errors="0" time="13.646" timestamp="2021-09-01T22:16:12" name="AllTests">
+  <testsuite name="Fields" tests="3" failures="0" disabled="0" errors="0" time="13.646" timestamp="2021-09-01T22:16:12">
+    <testcase name="HashUniformityTrueRandom" status="run" result="completed" time="5.632" timestamp="2021-09-01T22:16:12" classname="Fields" />
+    <testcase name="HashUniformityLowIndexMoreLikely" status="run" result="completed" time="8.013" timestamp="2021-09-01T22:16:18" classname="Fields" />
+    <testcase name="Indentification" status="run" result="completed" time="0.001" timestamp="2021-09-01T22:16:26" classname="Fields" />
+  </testsuite>
+</testsuites>
+'''
+
+
 paths = tuple(Path(rootdir).rglob('__init__.py'))
 
 home = os.getcwd()

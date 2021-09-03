@@ -292,6 +292,7 @@ void Solver::end_cycle() {
     //if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();
     m_prop.update(m_icycle, m_wf);
+    m_maes.end_cycle();
     if (m_uniform_twf) m_uniform_twf->reduce();
     if (m_weighted_twf) m_weighted_twf->reduce();
 }
@@ -346,6 +347,4 @@ void Solver::output_stats() {
         stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
         m_parallel_stats->flush();
     }
-
-    m_maes.output(m_icycle, m_prop.m_ham);
 }

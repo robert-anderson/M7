@@ -298,12 +298,34 @@ def load_spinfree_1rdm_from_m7(h5_fname):
     rdm1_sf = spin_resolved_to_spinfree(rdm1_restored, True)
     return rdm1_sf
 
-def load_spinfree_1_2rdm_from_m7(h5_fname, nelec):
+def load_spinfree_1_2rdm_from_m7(h5_fname, nelec=None):
+    if nelec is None:
+        archive = h5py.File(fname, 'r')['archive']
+        nelec = int(archive['propagator']['nelec'][()])
     rdm2 = load_spin_resolved_rdm(h5_fname, 2)
     rdm2_restored = restore_perm_syms(rdm2, True, False)
     rdm2_sf = spin_resolved_to_spinfree(rdm2_restored, True)
     rdm1_sf = one_from_two_rdm(rdm2_sf, nelec)
     return unreorder_rdm12(rdm1_sf, rdm2_sf, False)
+
+def load_spinfree_ladder_rdm_from_m7(fname, cre):
+    archive = h5py.File(fname, 'r')['archive']
+    nsite = int(archive['propagator']['nsite'])
+    norm = float(archive = h5py.File(fname, 'r')['archive']['rdm']['norm'][()])
+
+    label = '1110' if cre else '1101'
+
+    rdm = np.zeros((nspinorb,)*(rank*2))
+    data = archive['rdms'][label]
+    ndata = data['indices'][:,:].shape[0]
+    for idata in range(ndata):
+        imode, ispinorb, jspinorb = data['indices'][idata, :]
+        assert (ispinorb < nsite) == (jspinorb < nsite), "Sz non-conservation is incompatible with spin averaging"
+        isite = ispinorb%nsite
+        jsite = jspinorb%nsite
+        rdm[imode, isite, jsite] = data['values'][idata]
+    rdm /= norm
+    return rdm
 
 
 if __name__=='__main__':
