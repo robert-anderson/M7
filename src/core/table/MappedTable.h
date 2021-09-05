@@ -231,10 +231,10 @@ public:
      * construct a new vector of buckets with a different size
      */
     void remap() {
-        DEBUG_ASSERT_TRUE(all_nonzero_rows_mapped(*this), "mapping is inconsistent with table row content")
+        DEBUG_ASSERT_TRUE(all_nonzero_rows_mapped(*this), "mapping is inconsistent with table row content");
         size_t nbucket_new = nbucket() * skip_lookup_ratio()/m_remap_ratio;
         // use the same expansion factor as for the Table buffer
-        nbucket_new *= 1.0 + m_bw.get_expansion_factor();
+        nbucket_new *= 1.0 + this->m_bw.get_expansion_factor();
         if (!TableBase::name().empty()) {
             log::info_("remapping hash table for \"{}\"", TableBase::name());
             log::info_("current ratio of skips to total lookups ({}) exceeds set limit ({})",
