@@ -35,3 +35,7 @@ bool LadderHoppingUniform::draw(const size_t &exsig, const FrmBosOnv &src, Cache
 std::string LadderHoppingUniform::description() const {
     return "uniform";
 }
+
+size_t LadderHoppingUniform::approx_nconn() const {
+    return m_nelec*(m_nspinorb-m_nelec)*m_nspinorb;
+}

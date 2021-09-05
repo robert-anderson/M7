@@ -17,6 +17,8 @@ struct LadderHoppingUniform : public LadderExcitGen {
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
 
     std::string description() const override;
+
+    size_t approx_nconn() const override;
 };
 
 
