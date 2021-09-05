@@ -7,6 +7,8 @@
 #include "src/core/dynamics/StochasticPropagator.h"
 #include "src/core/dynamics/Solver.h"
 
+// tests of propagators should be done in the verification suite
+#if 0
 
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
@@ -240,4 +242,5 @@ TEST(StochasticPropagator, BosonTest) {
 
     solver.execute(opts.m_propagator.m_ncycle);
 }
+#endif
 #endif

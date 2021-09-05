@@ -6,6 +6,10 @@
 #include "gtest/gtest.h"
 #include "src/core/dynamics/Propagators.h"
 
+
+// tests of propagators should be done in the verification suite
+#if 0
+
 TEST(Propagators, BasicTest) {
     fciqmc_config::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
@@ -65,3 +69,4 @@ TEST(Propagators, RefExcitTest) {
     Solver solver(opts, *prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
 }
+#endif

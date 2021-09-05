@@ -7,6 +7,8 @@
 #include "src/core/dynamics/ExactPropagator.h"
 #include "src/core/dynamics/Solver.h"
 
+// tests of propagators should be done in the verification suite
+#if 0
 
 #ifdef ENABLE_BOSONS
 TEST(ExactPropagator, BosonTest) {
@@ -231,4 +233,5 @@ TEST(ExactPropagator, Cr2Test) {
 
     solver.execute(opts.m_propagator.m_ncycle);
 }
+#endif
 #endif

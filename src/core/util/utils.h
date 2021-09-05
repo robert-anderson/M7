@@ -632,7 +632,7 @@ namespace complex_utils {
 namespace ci_utils {
     static size_t nalpha(size_t nelec, int spin) {
         size_t spin_odd = std::abs(spin) % 2;
-        ASSERT(nelec % 2 == spin_odd)
+        ASSERT(nelec % 2 == spin_odd);
         size_t nalpha = nelec / 2 + (std::abs(spin)) / 2 + spin_odd;
         return spin >= 0 ? nalpha : nelec - nalpha;
     }

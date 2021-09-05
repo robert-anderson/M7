@@ -18,9 +18,9 @@ void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDa
 }
 
 defs::inds DeterministicSubspace::make_iparts() {
-    if (m_wf.nreplica()==1) return {m_iroot};
+    if (m_wf.nreplica() == 1) return {m_iroot};
     auto ipart = m_wf.m_format.flatten({m_iroot, 0});
-    return {ipart, ipart+1};
+    return {ipart, ipart + 1};
 }
 
 void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const std::forward_list<size_t> &icol_list) {
@@ -81,13 +81,13 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             // loop over full subspace (H columns)
             // only add to sparse H if dets are connected
             conn_work.connect(row_local.m_mbf, row_global.m_mbf);
-            if (!conn_work.exsig()) continue; // diagonal
+            const auto exsig = conn_work.exsig();
+            if (!exsig || exsig > defs::nexsig) continue; // diagonal
             auto helem = ham.get_element(row_local.m_mbf, conn_work);
             if (!consts::float_is_zero(helem)) {
                 m_ham_matrix.add(row_local.index(), row_global.index(), helem);
                 ++n_hconn;
-            }
-            else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
+            } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {
                 m_rdm_network.add(row_local.index(), row_global.index());
                 ++n_rdm_conn;
             }
@@ -122,15 +122,15 @@ void DeterministicSubspace::project(double tau) {
             DEBUG_ASSERT_FALSE(value_it == lists.second.cend(), "values list incongruent with column indices list");
             row_global.jump(*icol_it);
             // one replica or two
-            for (const auto& ipart: m_iparts)
-                m_wf.change_weight(ipart, - *value_it * tau * row_global.m_weight[ipart]);
+            for (const auto &ipart: m_iparts)
+                m_wf.change_weight(ipart, -*value_it * tau * row_global.m_weight[ipart]);
         }
         ++irow_wf_it;
     }
 }
 
 DeterministicSubspaces::DeterministicSubspaces(const fciqmc_config::Semistochastic &opts) :
-        m_opts(opts), m_epoch("semistochastic"){
+        m_opts(opts), m_epoch("semistochastic") {
 }
 
 DeterministicSubspaces::operator bool() const {
@@ -142,8 +142,8 @@ DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, const B
                                                  size_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
-    for (size_t iroot=0ul; iroot<wf.nroot(); ++iroot) {
-        REQUIRE_TRUE_ALL(m_detsubs[iroot]==nullptr, "detsubs should not already be allocated");
+    for (size_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
+        REQUIRE_TRUE_ALL(m_detsubs[iroot] == nullptr, "detsubs should not already be allocated");
         m_detsubs[iroot] = mem_utils::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
         m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);
     }
@@ -152,15 +152,15 @@ DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, const B
 
 void DeterministicSubspaces::update() {
     if (!*this) return;
-    for (auto& detsub: m_detsubs) detsub->update();
+    for (auto &detsub: m_detsubs) detsub->update();
 }
 
 void DeterministicSubspaces::project(double tau) {
     if (!*this) return;
-    for (auto& detsub: m_detsubs) detsub->project(tau);
+    for (auto &detsub: m_detsubs) detsub->project(tau);
 }
 
 void DeterministicSubspaces::make_rdm_contribs(Rdms &rdms, const Mbf &ref) {
     if (!*this) return;
-    for (auto& detsub: m_detsubs) detsub->make_rdm_contribs(rdms, ref);
+    for (auto &detsub: m_detsubs) detsub->make_rdm_contribs(rdms, ref);
 }
