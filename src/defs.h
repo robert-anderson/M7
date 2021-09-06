@@ -71,7 +71,6 @@ namespace defs {
     typedef ham_comp_t wf_comp_t;
     typedef std::conditional<enable_complex, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
     typedef ham_t wf_t;
-    typedef unsigned char exlvl_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef char buf_t;
@@ -81,7 +80,7 @@ namespace defs {
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     const size_t isym_1e = 2;
-    const size_t isym_2e = 4;
+    const size_t isym_2e = 8;
 
     /**
      * "exsigs", short for "excitation signatures", encode in a single word the number of each type of second-quantised

@@ -27,7 +27,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
         return [&](const size_t &irow1, const size_t &irow2) {
             m_work_row1.jump(irow1);
             m_work_row2.jump(irow2);
-            // sort criteria from major to minor: dst ONV, dst_ipart, src ONV,
+            // sort criteria from major to minor: dst MBF, dst_ipart, src MBF,
             if (m_work_row1.m_dst_mbf == m_work_row2.m_dst_mbf) {
                 if (m_work_row1.m_ipart_dst == m_work_row2.m_ipart_dst) {
                     return m_work_row1.m_src_mbf < m_work_row2.m_src_mbf;
@@ -40,7 +40,7 @@ comparators::index_cmp_fn_t Annihilator::make_sort_cmp_fn() {
         return [&](const size_t &irow1, const size_t &irow2) {
             m_work_row1.jump(irow1);
             m_work_row2.jump(irow2);
-            // sort criteria from major to minor: dst ONV, dst_ipart, src ONV,
+            // sort criteria from major to minor: dst MBF, dst_ipart
             if (m_work_row1.m_dst_mbf == m_work_row2.m_dst_mbf) {
                 return m_work_row1.m_ipart_dst < m_work_row2.m_ipart_dst;
             }
