@@ -10,7 +10,7 @@
 TEST(FermionHamiltonian, DhfEnergy) {
     const auto benchmark = -14.354220448530139;
     FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
-    ASSERT_FALSE(ham.spin_conserving());
+    ASSERT_FALSE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_nsite);
     onv = {0, 1, ham.m_nsite, ham.m_nsite + 1};
     auto elem = ham.get_element(onv);
@@ -21,12 +21,12 @@ TEST(FermionHamiltonian, DhfEnergy) {
 
 TEST(FermionHamiltonian, DhfBrillouinTheorem) {
     FermionHamiltonian ham(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false);
-    ASSERT_FALSE(ham.spin_conserving());
+    ASSERT_FALSE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv hf_det(ham.m_nsite);
     hf_det = {0, 1, ham.m_nsite, ham.m_nsite + 1};
 
-    OccupiedOrbitals occs(hf_det);
-    VacantOrbitals vacs(hf_det);
+    OccOrbs occs(hf_det);
+    VacOrbs vacs(hf_det);
 
     buffered::FrmOnv excited(ham.m_nsite);
 
@@ -38,14 +38,6 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
             const auto &vac = vacs[iocc];
             conn.set(occ, vac);
             ASSERT_TRUE(consts::float_is_zero(ham.get_element(hf_det, conn)));
-            /*
-            excited = hf_det;
-            excited.excite(vac, occ);
-            AntisymFermionOnvConnection connection(hf_det, excited);
-            ASSERT_TRUE(consts::float_is_zero(ham.get_element(hf_det, connection)));
-            connection.connect(excited, hf_det);
-            ASSERT_TRUE(consts::float_is_zero(ham.get_element(excited, connection)));
-             */
         }
     }
 }

@@ -11,8 +11,6 @@ TEST(BosonOnvEnumerator, Test){
     BosonOnvEnumerator enumerator(nmode, occ_cutoff);
     size_t i=~0ul;
     buffered::BosOnv bonv(nmode);
-    while (enumerator.next(bonv, i)){
-        std::cout << bonv.to_string() << std::endl;
-    }
+    while (enumerator.next(bonv, i)){}
     ASSERT_EQ(i, ci_utils::boson_dim(nmode, occ_cutoff));
 }

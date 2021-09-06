@@ -42,7 +42,7 @@ TEST(AbelianGroup, Loop) {
     foreach::ctnd::Unrestricted<2> ann_spin(2);
     auto fn = [&](){
         if (d2h.is_conservative(cre_pg.inds(), ann_pg.inds()) && (cre_spin.sum() == ann_spin.sum())) {
-            std::cout << labels[cre_pg[0]] << " " << labels[cre_pg[1]] << " " << labels[ann_pg[0]] << " " << labels[ann_pg[1]] << " " << cre_spin.inds() << " " << ann_spin.inds() << std::endl;
+            //std::cout << labels[cre_pg[0]] << " " << labels[cre_pg[1]] << " " << labels[ann_pg[0]] << " " << labels[ann_pg[1]] << " " << cre_spin.inds() << " " << ann_spin.inds() << std::endl;
         }
     };
     foreach::ctnd::chain(fn, cre_pg, ann_pg, cre_spin, ann_spin);

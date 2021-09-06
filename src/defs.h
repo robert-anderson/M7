@@ -81,7 +81,7 @@ namespace defs {
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     const size_t isym_1e = 2;
-    const size_t isym_2e = 8;
+    const size_t isym_2e = 4;
 
     /**
      * "exsigs", short for "excitation signatures", encode in a single word the number of each type of second-quantised

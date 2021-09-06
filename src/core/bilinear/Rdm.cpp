@@ -109,7 +109,7 @@ void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &
             if (!ncom) continue;
             m_lookup_inds.m_bos.m_cre[0] = imode;
             m_lookup_inds.m_bos.m_ann[0] = imode;
-            make_contribs(src_onv.m_frm, conn.m_frm, com, ncom * contrib);
+            make_contribs(src_onv.m_frm, conn.m_frm, com, double(ncom) * contrib);
         }
     }
 }
@@ -184,7 +184,7 @@ bool Rdms::takes_contribs_from(const size_t &exsig) const {
 
 void Rdms::make_contribs(const Mbf &src_onv, const conn::Mbf &conn, const FrmOps &com, const wf_t &contrib) {
     auto exsig = conn.exsig();
-    if (!exsig) m_total_norm.m_local+=contrib;
+    if (!exsig) m_total_norm.m_local+=std::abs(contrib);
     for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
 }
 
@@ -197,7 +197,7 @@ void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &ds
     DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
     defs::wf_t contrib = dst_row.m_weight[recv_row.m_ipart_dst];
     contrib = consts::conj(contrib);
-    contrib *= recv_row.m_src_weight;
+    contrib *= recv_row.m_src_weight[0];
     contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[recv_row.m_ipart_dst]);
     make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
 }
@@ -299,7 +299,9 @@ defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian &ham, size_t nelec, si
     e_uncoupled = mpi::all_sum(e_uncoupled);
     e_uncoupled/=nelec;
     e_coupled = mpi::all_sum(e_coupled);
-    return (e_uncoupled + e_coupled) / m_total_norm.m_reduced;
+    auto e = (e_uncoupled + e_coupled) / m_total_norm.m_reduced;
+    REQUIRE_TRUE(consts::float_nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")
+    return consts::real(e);
 }
 
 defs::ham_comp_t Rdms::get_energy(const BosonHamiltonian &ham) const {
@@ -316,6 +318,7 @@ defs::ham_comp_t Rdms::get_energy(const BosonHamiltonian &ham) const {
         const auto rdm_element = row.m_values[0];
         e += rdm_element*ham.m_coeffs.get(n, m);
     }
-    e = mpi::all_sum(e);
-    return e / m_total_norm.m_reduced;
+    e = mpi::all_sum(e) / m_total_norm.m_reduced;
+    REQUIRE_TRUE(consts::float_nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")
+    return consts::real(e);
 }

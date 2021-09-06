@@ -27,7 +27,8 @@ FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
         m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double){
 
-    DEBUG_ASSERT_EQ(m_point_group_map.m_site_irreps.size(), nsite, "site map size incorrect");
+
+    REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), m_int_1.m_nintind, "site map size incorrect");
 }
 
 

@@ -58,7 +58,7 @@ TEST(FcidumpFileReader, Integer_8orb){
 #ifdef ENABLE_COMPLEX
 TEST(FcidumpFileReader, Complex_10orb){
     FcidumpFileReader file_reader(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
-    ASSERT_EQ(file_reader.nspatorb(), 5);
+    ASSERT_EQ(file_reader.m_nspatorb, 5);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);
