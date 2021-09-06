@@ -46,18 +46,18 @@ TEST(SparseArrayFileReader, EntryReadingRealIndsLastToComplexContainer) {
     std::complex<double> v;
     file_reader.next(inds, v);
     ASSERT_EQ(inds, defs::inds({1, 1, 1, 1}));
-    ASSERT_EQ(v, std::complex<double>(0.536449840808463, 0));
-    // on source file line #5 - advance 250 lines to #255
-    //    0.0287053880352757   6   4   4   6
-    for (size_t i = 0; i < 250; i++)
+    ASSERT_EQ(v, std::complex<double>(0.5406487462037872, 0));
+    // on source file line #5 - advance 27 lines to #32
+    //    0.01496307814605687    4    2    5    3
+    for (size_t i = 0; i < 27; i++)
         ASSERT_TRUE(file_reader.next(inds, v));
-    ASSERT_EQ(inds, defs::inds({6, 4, 4, 6}));
-    ASSERT_EQ(v, std::complex<double>(0.0287053880352757, 0.0));
-    // last line is #275
-    for (size_t i = 0; i < 275 - 255; i++)
+    ASSERT_EQ(inds, defs::inds({4, 2, 5, 3}));
+    ASSERT_EQ(v, std::complex<double>(0.01496307814605687, 0.0));
+    // last line is #80
+    for (size_t i = 0; i < 80 - 32; i++)
         ASSERT_TRUE(file_reader.next(inds, v));
     ASSERT_EQ(inds, defs::inds({0, 0, 0, 0}));
-    ASSERT_EQ(v, std::complex<double>(-98.3339467443989, 0.0));
+    ASSERT_EQ(v, std::complex<double>(-98.46644393370157, 0.0));
     ASSERT_FALSE(file_reader.next(inds, v));
 }
 
@@ -67,17 +67,17 @@ TEST(SparseArrayFileReader, EntryReadingRealIndsLastToRealContainer) {
     double v;
     file_reader.next(inds, v);
     ASSERT_EQ(inds, defs::inds({1, 1, 1, 1}));
-    ASSERT_EQ(v, 0.536449840808463);
-    // on source file line #5 - advance 250 lines to #255
-    //    0.0287053880352757   6   4   4   6
-    for (size_t i = 0; i < 250; i++)
+    ASSERT_EQ(v, 0.5406487462037872);
+    // on source file line #5 - advance 27 lines to #32
+    //    0.01496307814605687    4    2    5    3
+    for (size_t i = 0; i < 27; i++)
         ASSERT_TRUE(file_reader.next(inds, v));
-    ASSERT_EQ(inds, defs::inds({6, 4, 4, 6}));
-    ASSERT_EQ(v, 0.0287053880352757);
-    // last line is #275
-    for (size_t i = 0; i < 275 - 255; i++)
+    ASSERT_EQ(inds, defs::inds({4, 2, 5, 3}));
+    ASSERT_EQ(v, 0.01496307814605687);
+    // last line is #80
+    for (size_t i = 0; i < 80 - 32; i++)
         ASSERT_TRUE(file_reader.next(inds, v));
     ASSERT_EQ(inds, defs::inds({0, 0, 0, 0}));
-    ASSERT_EQ(v, -98.3339467443989);
+    ASSERT_EQ(v, -98.46644393370157);
     ASSERT_FALSE(file_reader.next(inds, v));
 }

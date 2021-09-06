@@ -60,7 +60,10 @@ class Solver {
     InteractiveVariable<bool> m_exit;
     std::unique_ptr<UniformTwf> m_uniform_twf;
     std::unique_ptr<WeightedTwf> m_weighted_twf;
+public:
     Maes m_maes;
+
+private:
     Annihilator m_annihilator;
     Archive m_archive;
     DeterministicSubspaces m_detsubs;

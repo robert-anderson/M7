@@ -34,7 +34,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
 
     Solver solver(opts, prop, wf, ref_loc);
     solver.execute(opts.m_propagator.m_ncycle);
-    return 0.0;//solver.mevs().m_fermion_rdm->get_energy(ham.m_frm);
+    return solver.m_maes.m_bilinears.estimate_energy(ham);
 }
 
 
@@ -89,22 +89,6 @@ TEST(FermionRdm, EnergyExactLeftoverIters) {
      */
     opts.verify();
     ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
-}
-
-TEST(FermionRdm, EnergyExactReplicated) {
-    fciqmc_config::Document opts;
-    fermion_rdm_energy_opts(opts);
-    opts.m_av_ests.m_stats_period = 13;
-    opts.verify();
-    ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, false), -99.9421389039332);
-}
-
-TEST(FermionRdm, EnergyExactExplicitHfConnections) {
-    fciqmc_config::Document opts;
-    fermion_rdm_energy_opts(opts);
-    opts.m_av_ests.m_stats_period = 13;
-    opts.verify();
-    ASSERT_FLOAT_EQ(fermion_rdm_energy_test(opts, true), -99.9421389039332);
 }
 
 #endif

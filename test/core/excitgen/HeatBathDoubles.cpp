@@ -36,6 +36,6 @@ TEST(HeatBathDoubles, LargeFromHFDeterminant){
     buffered::FrmOnv src_mbf(ham.nsite());
     ham.set_hf_mbf(src_mbf, 0);
     tester.fill_results_table(src_mbf);
-    tester.run(src_mbf, 10000000);
+    tester.run(src_mbf, 50000000);
     ASSERT_TRUE(tester.all_drawn_at_least_once());
 }

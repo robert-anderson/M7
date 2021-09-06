@@ -86,12 +86,12 @@ TEST(ExtremalIndices, AscendingMultiple) {
     ASSERT_EQ(data[xi[3]], 1);
     ASSERT_EQ(data[xi[4]], 2);
     xi.find(2);
-    ASSERT_EQ(xi.nfound(), 5);
+    ASSERT_EQ(xi.nfound(), 7);
     ASSERT_EQ(data[xi[0]], -99);
     ASSERT_EQ(data[xi[1]], -12);
     ASSERT_EQ(data[xi[2]], 0);
     ASSERT_EQ(data[xi[3]], 1);
     ASSERT_EQ(data[xi[4]], 2);
     ASSERT_EQ(data[xi[5]], 6);
-    ASSERT_EQ(data[xi[6]], 13);
+    ASSERT_EQ(data[xi[6]], 9);
 }

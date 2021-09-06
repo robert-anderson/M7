@@ -29,9 +29,9 @@ public:
         reset();
         if (m_indsfirst) log::info("Reading sparse array from file with indices before values");
         else log::info("Reading sparse array from file with indices after values");
-        REQUIRE_EQ_ALL(m_complex_valued, consts::is_complex<T>(), "Trying to read complex-valued array entries into a real container");
+        REQUIRE_TRUE_ALL(!m_complex_valued || consts::is_complex<T>(), "Trying to read complex-valued array entries into a real container");
         if (consts::is_complex<T>() && !m_complex_valued)
-            log::info("Reading real-valued array into complex container, consider recompiling with real arithmetic");
+            log::warn("Reading real-valued array into complex container, consider recompiling with real arithmetic");
     }
 
     void reset() {

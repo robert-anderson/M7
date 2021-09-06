@@ -142,7 +142,7 @@ TEST(GlobalExtremalRows, FindAsc) {
          */
         ASSERT_GE(gxr.m_global_sorter.m_hwm, gxr.m_ninclude.m_reduced);
         auto right_order = get_all_sorted(false, false);
-        ASSERT_EQ(right_order.size(), get_global_nrow());
+        ASSERT_EQ(right_order.size(), get_global_nrow_nonzero());
 
         sorted_row.restart();
         for (size_t iitem = 0ul; iitem < gxr.m_ninclude.m_reduced; ++iitem) {

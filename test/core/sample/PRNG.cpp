@@ -56,7 +56,7 @@ TEST(PRNG, StochasticThreshold) {
     double rounding_magnitude = 2.7;
     ASSERT_EQ(prng.stochastic_threshold(123.34, rounding_magnitude), 123.34);
 
-    const size_t n=10000000;
+    const size_t n=20000000;
     double v = -0.14;
     double tot = 0;
     for (size_t i=0; i<n; ++i){
