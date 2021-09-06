@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 
 TEST(EbDumpFileReader, ReadFile){
-    std::string fname = "/home/rja/CLionProjects/M7/assets/Hubbard_U4_4site/EBDUMP";
+    std::string fname = defs::assets_root + "/Hubbard_U4_4site/EBDUMP";
     EbdumpFileReader file_reader(fname);
     ASSERT_FALSE(file_reader.m_spin_resolved);
     ASSERT_EQ(file_reader.m_norb, 4ul);

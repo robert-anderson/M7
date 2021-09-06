@@ -62,7 +62,8 @@ bool enums::CombinationsDistinct::next() {
     return true;
 }
 
-enums::PermutationsWithRepetition::PermutationsWithRepetition(const defs::inds& shape) : Enumerator(~0ul, shape.size(), ~0ul),
+enums::PermutationsWithRepetition::PermutationsWithRepetition(const defs::inds& shape) :
+    Enumerator(shape[0], shape.size(), nd_utils::nelement(shape)),
     m_shape(shape){
     m_v.back() = ~0ul;
 }

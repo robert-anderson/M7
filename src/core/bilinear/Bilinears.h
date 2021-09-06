@@ -126,7 +126,7 @@ public:
     }
 
     defs::ham_comp_t estimate_energy(const Hamiltonian &ham) {
-        return 0.0;
+        return m_rdms.get_energy(ham);
     }
 };
 
