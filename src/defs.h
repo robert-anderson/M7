@@ -107,20 +107,20 @@ namespace defs {
      */
     static constexpr size_t nexsig = (1 << (2 * nbit_exsig_nop_frm + 2*nbit_exsig_nop_bos));
 
-    // TODO: bool-> size_t to make way for additional many-body basis function types
-#ifdef ENABLE_BOSONS
-    constexpr bool enable_bosons = true;
-    constexpr size_t mbf_ind = 1;
-#else
-    constexpr bool enable_bosons = false;
-    constexpr size_t mbf_ind = 0;
+    /**
+     * Many-body basis function definitions
+     *  0: fermion only (determinant basis)
+     *  1: fermion-boson (determinant-permanent product basis)
+     *  2: boson only (permanent basis)
+     *  3: fermion only spin-adapted (CSF basis) (TODO: not currently implemented)
+     */
+#ifndef MBF_IND
+#define MBF_IND 0;
 #endif
+    constexpr size_t mbf_ind = MBF_IND;
 
-#ifdef ENABLE_OPTIM_FOR_LATTICE_HAM
-    constexpr bool enable_optim_for_lattice_ham = true;
-#else
-    constexpr bool enable_optim_for_lattice_ham = false;
-#endif
+    constexpr bool enable_bosons = mbf_ind==0;
+    constexpr bool enable_fermions = mbf_ind!=2;
 
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;

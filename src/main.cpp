@@ -10,7 +10,14 @@ int main(int argc, char **argv) {
     mpi::initialize(&argc, &argv);
     log::initialize();
 
-    if (argc == 1){
+    log::info("Initializing M7 instance");
+    /*
+     * log compile-time defintions
+     */
+    log::info("Many-body basis definition: {}", consts::mbf_type_name<defs::mbf_ind>());
+    log::info("Walker arithmetic type: {}", defs::enable_complex ? "complex" : "real");
+
+    if (argc == 1) {
         // input file not provided, print out help string
         std::cout << fciqmc_config::Document(nullptr).help_string() << std::endl;
         mpi::finalize();
