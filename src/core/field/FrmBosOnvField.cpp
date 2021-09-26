@@ -4,15 +4,15 @@
 
 #include "FrmBosOnvField.h"
 
-FrmBosOnvField::FrmBosOnvField(Row *row, size_t nsite, std::string name) :
+FrmBosOnvField::FrmBosOnvField(Row *row, BasisDims bd, std::string name) :
         MultiField<FrmOnvField, BosOnvField>(row,
-                                             {nullptr, nsite, name.empty() ? "" : name + " (fermion)"},
-                                             {nullptr, nsite, name.empty() ? "" : name + " (boson)"}),
+             {nullptr, {bd.m_nsite, 0ul}, name.empty() ? "" : name + " (fermion)"},
+             {nullptr, {0ul, bd.m_nmode}, name.empty() ? "" : name + " (boson)"}),
         m_name(name), m_frm(get<0>()), m_bos(get<1>()) {
 }
 
-FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField &other) : FrmBosOnvField(other.m_frm.row_of_copy(), other.m_frm.m_nsite,
-                                                                             other.m_name) {}
+FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField &other) :
+        FrmBosOnvField(other.m_frm.row_of_copy(), {other.m_frm.m_nsite, 0ul}, other.m_name) {}
 
 FrmBosOnvField &FrmBosOnvField::operator=(const FrmBosOnvField &other) {
     m_frm = other.m_frm;

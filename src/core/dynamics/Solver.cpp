@@ -11,17 +11,17 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_exit("exit"),
         m_uniform_twf(
                 m_opts.m_inst_ests.m_spf_uniform_twf ?
-                new UniformTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite()) : nullptr),
+                new UniformTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.m_bd) : nullptr),
         m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf ?
-                       new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.nsite(),
+                       new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.m_bd,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
-        m_maes(m_opts.m_av_ests, m_prop.m_ham.nsite(), m_prop.m_ham.nelec(), m_wf.nroot()),
+        m_maes(m_opts.m_av_ests, m_prop.m_ham.m_bd, m_prop.m_ham.nelec(), m_wf.nroot()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
 
-    log::info("Replicating walker populations: {}", m_wf.nreplica()==2);
-    if (m_wf.nreplica()==2 && !m_prop.nexcit_gen())
+    log::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
+    if (m_wf.nreplica() == 2 && !m_prop.nexcit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");
 
     if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.nexcit_gen())
@@ -112,7 +112,7 @@ void Solver::execute(size_t ncycle) {
     if (m_icycle == ncycle) log::info("maximum cycle number ({}) reached", m_icycle);
     if (m_maes.m_accum_epoch) {
         // repeat the last cycle but do not perform any propagation
-        finalizing_loop_over_occupied_mbfs(m_icycle-1);
+        finalizing_loop_over_occupied_mbfs(m_icycle - 1);
     }
 }
 
@@ -129,7 +129,7 @@ void Solver::begin_cycle() {
     m_refs.begin_cycle();
 
     auto update_epoch = [&](const size_t &ncycle_wait) {
-        const auto& epochs = m_prop.m_shift.m_variable_mode;
+        const auto &epochs = m_prop.m_shift.m_variable_mode;
         if (!epochs) return false;
         return m_icycle > epochs.icycle_start_last() + ncycle_wait;
     };

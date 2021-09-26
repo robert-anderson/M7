@@ -31,9 +31,9 @@ bool UniformSingles::draw(const size_t &exsig, const field::FrmOnv &src, CachedO
         i = occs[i];
         a = vacs[a];
     } else {
-        ncases = m_nelec * (2 * m_h.nsite() - m_nelec);
+        ncases = m_nelec * (m_h.m_bd.m_nspinorb - m_nelec);
         ia = m_prng.draw_uint(ncases);
-        integer_utils::inv_rectmap(i, a, 2 * m_h.nsite() - m_nelec, ia);
+        integer_utils::inv_rectmap(i, a, m_h.m_bd.m_nspinorb - m_nelec, ia);
         i = orbs.occ(src).m_flat[i];
         a = orbs.vac(src).m_flat[a];
     }
@@ -59,9 +59,9 @@ bool UniformSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &or
 
 size_t UniformSingles::approx_nconn() const {
     if (m_spin_conserving) {
-        return 2 * (m_nelec / 2) * ((m_nspinorb - m_nelec) / 2);
+        return 2 * (m_nelec / 2) * ((m_bd.m_nspinorb - m_nelec) / 2);
     } else {
-        return m_nelec * (m_nspinorb - m_nelec);
+        return m_nelec * (m_bd.m_nspinorb - m_nelec);
     }
 }
 

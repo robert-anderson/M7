@@ -45,7 +45,7 @@ struct RefExcits : Archivable {
      */
     conn::Mbf m_conn;
 
-    RefExcits(const fciqmc_config::RefExcits& opts, size_t nsite, size_t nroot);
+    RefExcits(const fciqmc_config::RefExcits& opts, BasisDims bd, size_t nroot);
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
 

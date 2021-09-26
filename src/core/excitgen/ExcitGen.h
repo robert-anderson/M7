@@ -15,7 +15,7 @@ struct ExcitGen {
 protected:
     const Hamiltonian &m_h;
     PRNG &m_prng;
-    const size_t m_nspinorb;
+    const BasisDims m_bd;
     const size_t m_nelec;
     const size_t m_norb_pair;
     const size_t m_nelec_pair;

@@ -27,14 +27,18 @@ struct Hamiltonian {
      */
     FermionHamiltonian m_frm;
     /**
+     * purely bosonic number-conserving terms in the Hamiltonian
+     */
+    BosonHamiltonian m_bos;
+    /**
      * hamiltonian encapsulating all terms involving a single boson creation or annihilation operator
      * i.e. ranksigs 0010, 0001, 1110, 1101
      */
     LadderHamiltonian m_ladder;
     /**
-     * purely bosonic number-conserving terms in the Hamiltonian
+     * specifies number of fermion sites and boson modes defining the single-particle basis
      */
-    BosonHamiltonian m_bos;
+    const BasisDims m_bd;
 
     Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos, bool spin_major, size_t nboson_max = 0);
 
@@ -43,8 +47,6 @@ struct Hamiltonian {
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 
     size_t nci() const;
-
-    const size_t &nsite() const;
 
     const size_t &nelec() const;
 

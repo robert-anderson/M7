@@ -4,7 +4,9 @@
 
 #include "BosdumpFileReader.h"
 
-BosdumpFileReader::BosdumpFileReader(const std::string &fname) : HamiltonianFileReader(fname, 3, false){
+BosdumpFileReader::BosdumpFileReader(const std::string &fname) :
+    HamiltonianFileReader(fname, 3, false),
+    m_nmode(read_header_int(fname, "NMODE")) {
     REQUIRE_FALSE_ALL(m_spin_resolved, "spin resolved boson dumps are invalid");
 }
 
@@ -13,7 +15,7 @@ size_t BosdumpFileReader::ranksig(const defs::inds &inds) const {
     return exsig_utils::encode(0, 0, 1, 1);
 }
 
-size_t BosdumpFileReader::exsig(const defs::inds &inds, const size_t ranksig) const {
+size_t BosdumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) const {
     DEBUG_ASSERT_EQ(inds.size(), 2ul, "incorrect maximum number of SQ operator indices");
     size_t n = inds[0]!=inds[1];
     return exsig_utils::encode(0, 0, n, n);

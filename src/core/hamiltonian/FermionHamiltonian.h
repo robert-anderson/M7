@@ -15,7 +15,6 @@
 #include "src/core/table/BufferedFields.h"
 #include "HamiltonianData.h"
 
-
 /**
  * All interactions between the fermionic parts of MBFs are described in this class.
  */

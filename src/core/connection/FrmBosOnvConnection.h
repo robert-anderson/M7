@@ -12,7 +12,7 @@
 struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;
     BosOnvConnection m_bos;
-    FrmBosOnvConnection(size_t nsite);
+    FrmBosOnvConnection(BasisDims bd);
 
     void clear();
 

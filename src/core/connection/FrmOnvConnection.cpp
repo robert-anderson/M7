@@ -4,11 +4,12 @@
 
 #include "FrmOnvConnection.h"
 
-FrmOnvConnection::FrmOnvConnection(size_t nsite) :
-    m_ann(nsite), m_cre(nsite),
-    m_ndataword(integer_utils::divceil(nsite * 2, defs::nbit_word)),
+FrmOnvConnection::FrmOnvConnection(BasisDims bd) :
+    m_ann(bd.m_nsite), m_cre(bd.m_nsite),
+    m_ndataword(integer_utils::divceil(bd.m_nsite * 2, defs::nbit_word)),
     m_dataword_phases(m_ndataword){
         m_dataword_phases[0] = false;
+        bd.require_pure_frm();
 }
 
 void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {

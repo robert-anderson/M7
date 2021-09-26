@@ -108,24 +108,24 @@ namespace buffered {
 
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
-        FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>({nullptr, nsite}){}
+        FrmOnv(BasisDims bd) : BufferedField<field::FrmOnv>({nullptr, bd}){}
         FrmOnv& operator=(const FrmOnv& other){
             base_t::operator=(other);
             return *this;
         }
-        FrmOnv(const FrmOnv& other): FrmOnv(other.m_nsite){}
+        FrmOnv(const FrmOnv& other): FrmOnv({other.m_nsite, 0ul}){}
     };
 
     struct BosOnv : BufferedField<field::BosOnv> {
         using field::BosOnv::operator=;
-        BosOnv(size_t nsite) : BufferedField<field::BosOnv>({nullptr, nsite}){}
+        BosOnv(BasisDims bd) : BufferedField<field::BosOnv>({nullptr, bd}){}
     };
 
 
     struct FrmBosOnv : BufferedMultiField<field::FrmBosOnv> {
         using field::FrmBosOnv::operator=;
-        FrmBosOnv(size_t nsite):
-                BufferedMultiField<field::FrmBosOnv>({nullptr, nsite}){}
+        FrmBosOnv(BasisDims bd):
+                BufferedMultiField<field::FrmBosOnv>({nullptr, bd}){}
     };
 
     typedef std::tuple<FrmOnv, FrmBosOnv> mbf_tup_t;

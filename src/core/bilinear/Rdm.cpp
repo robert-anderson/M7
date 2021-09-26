@@ -4,33 +4,32 @@
 
 #include "Rdm.h"
 
-size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, size_t nsite) {
+size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisDims bd) {
     double nrow = 1.0;
-    nrow *= integer_utils::combinatorial(2 * nsite, nfrm_cre);
-    nrow *= integer_utils::combinatorial(2 * nsite, nfrm_ann);
-    nrow *= integer_utils::combinatorial(nsite, nbos_cre);
-    nrow *= integer_utils::combinatorial(nsite, nbos_ann);
+    nrow *= integer_utils::combinatorial(2 * bd.m_nsite, nfrm_cre);
+    nrow *= integer_utils::combinatorial(2 * bd.m_nsite, nfrm_ann);
+    nrow *= integer_utils::combinatorial(bd.m_nmode, nbos_cre);
+    nrow *= integer_utils::combinatorial(bd.m_nmode, nbos_ann);
     nrow /= integer_utils::factorial(nfrm_cre + nfrm_ann);
     nrow /= integer_utils::factorial(nbos_cre + nbos_ann);
     return nrow;
 }
 
-size_t Rdm::nrow_estimate(size_t exsig, size_t nsite) {
+size_t Rdm::nrow_estimate(size_t exsig, BasisDims bd) {
     return nrow_estimate(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig),
-                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), nsite);
+                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), bd);
 }
 
-Rdm::Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, size_t nsite, size_t nelec, size_t nvalue) :
+Rdm::Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisDims bd, size_t nelec, size_t nvalue) :
         Communicator<MaeRow, MaeRow, true>(
-                "rdm_" + to_string(ranksig),
-                nrow_estimate(ranksig, nsite),
-                nrow_estimate(ranksig, nsite),
-                opts.m_buffers, opts.m_load_balancing,
+                "rdm_" + to_string(ranksig), nrow_estimate(ranksig, bd),
+                nrow_estimate(ranksig, bd), opts.m_buffers, opts.m_load_balancing,
                 {{ranksig, nvalue}}, {{ranksig, nvalue}}
         ),
         m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
-        m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)), m_lookup_inds(ranksig) {
+        m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
+        m_lookup_inds(ranksig), m_bd(bd) {
 
     /*
      * if contributing exsig != ranksig, there is promotion to do
@@ -154,10 +153,10 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, size_t nelec, const Epoch &accum_epoch) :
+Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisDims bd, size_t nelec, const Epoch &accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
-        m_work_conns(nsite), m_work_com_ops(nsite),
+        m_work_conns(bd), m_work_com_ops(bd.m_nsite),
         m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch) {
     for (const auto &ranksig: m_active_ranksigs) {
@@ -168,7 +167,7 @@ Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, size_t nsite, s
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
         REQUIRE_TRUE(m_rdms[ranksig] == nullptr, "No RDM rank should appear more than once in the specification");
-        m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, nsite, nelec, 1ul);
+        m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, bd, nelec, 1ul);
     }
     m_total_norm.m_local = 0.0;
 }
@@ -280,14 +279,15 @@ defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian &ham, size_t nelec, si
     auto& row = rdm->m_store.m_row;
     bool cre = exsig_utils::decode_nbos_cre(exsig);
 
+    const auto& nsite = rdm->m_bd.m_nsite;
     for (row.restart(); row.in_range(); row.step()){
         const size_t p=row.m_inds.m_frm.m_cre[0];
         const size_t q=row.m_inds.m_frm.m_ann[0];
         const size_t n=cre ? row.m_inds.m_bos.m_cre[0] : row.m_inds.m_bos.m_ann[0];
 
         const auto rdm_element = row.m_values[0];
-        auto psite = FrmOnv::isite(p, ham.m_nmode);
-        auto qsite = FrmOnv::isite(q, ham.m_nmode);
+        auto psite = FrmOnv::isite(p, nsite);
+        auto qsite = FrmOnv::isite(q, nsite);
         /*
          * default definition is the creation ladder operator, so the fermion indices must be interchanged if computing
          * the energy of the boson-annihilating RDM

@@ -5,6 +5,7 @@
 #ifndef M7_FRMONVFIELD_H
 #define M7_FRMONVFIELD_H
 
+#include <src/core/basis/BasisDims.h>
 #include "BitsetField.h"
 
 struct FrmOnvField : BitsetField<size_t, 2> {
@@ -18,25 +19,16 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     const size_t m_nsite;
 
-    FrmOnvField(Row* row, size_t nsite, std::string name=""):
-        base_t(row, {{2, nsite}, {"spin channel", "site"}}, name), m_nsite(nsite){}
+    FrmOnvField(Row* row, BasisDims bd, std::string name="");
 
-
-    FrmOnvField(const FrmOnvField& other):
-            FrmOnvField(other.row_of_copy(), other.m_format.m_shape[1], other.m_name){}
+    FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {
         FieldBase::operator=(other);
         return *this;
     }
 
-    FrmOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
-        // prezero the element
-        zero();
-        for (const auto &ind: setbits.first) set(ind);
-        for (const auto &ind: setbits.second) set(ind+m_nsite);
-        return *this;
-    }
+    FrmOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits);
 
     void set(const size_t& bit_offset, const defs::inds& setbits) {
         for(auto& i: setbits) set(bit_offset+i);

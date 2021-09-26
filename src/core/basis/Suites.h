@@ -15,7 +15,7 @@ namespace suite {
         buffered::BosOnv m_bosonv;
         buffered::FrmBosOnv m_frmbosonv;
         //buffered::FrmCsf m_frmcsf;
-        Mbfs(size_t nsite): m_frmonv(nsite), m_bosonv(nsite), m_frmbosonv(nsite){}//, m_frmcsf(nsite){}
+        Mbfs(BasisDims bd): m_frmonv(bd), m_bosonv(bd), m_frmbosonv(bd){}//, m_frmcsf(nsite){}
 
         field::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
@@ -32,7 +32,7 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        Conns(size_t nsite): m_frmonv(nsite), m_bosonv(nsite), m_frmbosonv(nsite){}
+        Conns(BasisDims bd): m_frmonv(bd), m_bosonv(bd), m_frmbosonv(bd){}
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;

@@ -7,16 +7,16 @@
 
 void DenseHamiltonian::setup_frm(const Hamiltonian &source) {
 
-    buffered::FrmOnv bra(source.nsite());
-    buffered::FrmOnv ket(source.nsite());
+    buffered::FrmOnv bra(source.m_bd);
+    buffered::FrmOnv ket(source.m_bd);
 
     size_t ibra = ~0ul;
-    enums::FermionOnv bra_enum(source.nsite(), source.nelec());
-    conn::FrmOnv conn(source.nsite());
+    enums::FermionOnv bra_enum(source.m_bd, source.nelec());
+    conn::FrmOnv conn(source.m_bd);
 
     while (bra_enum.next(bra, ibra)) {
         size_t iket = ~0ul;
-        enums::FermionOnv ket_enum(source.nsite(), source.nelec());
+        enums::FermionOnv ket_enum(source.m_bd, source.nelec());
         while (ket_enum.next(ket, iket)) {
             conn.connect(bra, ket);
             auto h_elem = source.get_element(bra, conn);
@@ -28,16 +28,16 @@ void DenseHamiltonian::setup_frm(const Hamiltonian &source) {
 }
 
 void DenseHamiltonian::setup_frmbos(const Hamiltonian &source) {
-    buffered::FrmBosOnv bra(source.nsite());
-    buffered::FrmBosOnv ket(source.nsite());
+    buffered::FrmBosOnv bra(source.m_bd);
+    buffered::FrmBosOnv ket(source.m_bd);
 
     size_t ibra = ~0ul;
-    enums::FermiBosOnv bra_enum(source.nsite(), source.nelec(), source.m_bos.m_nmode, source.m_bos.m_nboson_max);
-    conn::FrmBosOnv conn(source.nsite());
+    enums::FermiBosOnv bra_enum(source.m_bd, source.nelec(), source.m_bos.m_nmode, source.m_bos.m_nboson_max);
+    conn::FrmBosOnv conn(source.m_bd);
 
     while (bra_enum.next(bra, ibra)) {
         size_t iket = ~0ul;
-        enums::FermiBosOnv ket_enum(source.nsite(), source.nelec(), source.m_bos.m_nmode, source.m_bos.m_nboson_max);
+        enums::FermiBosOnv ket_enum(source.m_bd, source.nelec(), source.m_bos.m_nmode, source.m_bos.m_nboson_max);
         while (ket_enum.next(ket, iket)) {
             conn.connect(bra, ket);
             auto h_elem = source.get_element(bra, conn);

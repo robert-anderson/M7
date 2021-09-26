@@ -8,7 +8,10 @@
 #include "HamiltonianFileReader.h"
 
 struct EbdumpFileReader : HamiltonianFileReader {
-    EbdumpFileReader(const std::string &fname): HamiltonianFileReader(fname, 3, false){
+    const size_t m_nmode;
+
+    EbdumpFileReader(const std::string &fname): HamiltonianFileReader(fname, 3, false),
+        m_nmode(read_header_int(fname, "NMODE")){
         REQUIRE_FALSE_ALL(m_spin_resolved, "spin resolved electron-boson dumps are not currently supported");
     }
 
@@ -23,7 +26,7 @@ struct EbdumpFileReader : HamiltonianFileReader {
         }
     }
 
-    size_t exsig(const defs::inds &inds, const size_t ranksig) const override {
+    size_t exsig(const defs::inds &inds, const size_t& ranksig) const override {
         DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
         if (inds[1]==inds[2]) return exsig_utils::ex_0010;
         else return exsig_utils::ex_1110;

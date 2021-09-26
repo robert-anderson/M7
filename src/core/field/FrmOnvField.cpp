@@ -4,6 +4,24 @@
 
 #include "FrmOnvField.h"
 
+
+FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
+        base_t(row, {{2, bd.m_nsite}, {"spin channel", "site"}}, name),
+        m_nsite(bd.m_nsite){
+    bd.require_pure_frm();
+}
+
+FrmOnvField::FrmOnvField(const FrmOnvField &other) :
+        FrmOnvField(other.row_of_copy(), {other.m_format.m_shape[1], 0ul}, other.m_name){}
+
+FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
+    // prezero the element
+    zero();
+    for (const auto &ind: setbits.first) set(ind);
+    for (const auto &ind: setbits.second) set(ind+m_nsite);
+    return *this;
+}
+
 void FrmOnvField::set_from_string(const std::string &s) {
     zero();
     size_t i = 0ul;

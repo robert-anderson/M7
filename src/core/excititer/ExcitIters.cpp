@@ -15,7 +15,7 @@ excititers::FrmConserve::convert(conn::FrmBosOnv &work_conn, const fn_c_t<FrmBos
 
 excititers::FrmConserve::FrmConserve(const Hamiltonian &ham, size_t exsig) :
         Frm(ham, exsig),
-        m_cre_loop(2*ham.nsite()-ham.nelec(), exsig_utils::decode_nfrm_cre(exsig)),
+        m_cre_loop(m_bd.m_nspinorb-ham.nelec(), exsig_utils::decode_nfrm_cre(exsig)),
         m_ann_loop(ham.nelec(), exsig_utils::decode_nfrm_ann(exsig)){
     DEBUG_ASSERT_TRUE(exsig_utils::is_pure_frm(exsig), "exsig should have no bosonic operators");
 }
@@ -53,13 +53,13 @@ void excititers::Hubbard1dSingles::foreach(const FrmOnv &src, conn::FrmOnv &conn
     const auto &occs = m_work_orbs.occ(src).m_flat.inds();
     for (const auto &occ: occs) {
         size_t neighbor;
-        neighbor = model_utils::left(occ, m_ham.nsite(), m_pbc);
+        neighbor = model_utils::left(occ, m_bd.m_nsite, m_pbc);
         if (neighbor != ~0ul && !src.get(neighbor)) {
             conn.set(occ, neighbor);
             set_helement(src, conn);
             body(conn);
         }
-        neighbor = model_utils::right(occ, m_ham.nsite(), m_pbc);
+        neighbor = model_utils::right(occ, m_bd.m_nsite, m_pbc);
         if (neighbor != ~0ul && !src.get(neighbor)) {
             conn.set(occ, neighbor);
             set_helement(src, conn);
@@ -115,7 +115,7 @@ void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &c
     const auto& occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
     const auto& vacs = m_work_orbs.vac(src.m_frm).m_flat.inds();
 
-    for (size_t imode=0ul; imode<m_ham.nsite(); ++imode) {
+    for (size_t imode=0ul; imode<m_bd.m_nmode; ++imode) {
         if (m_cre) {
             if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
             conn.m_bos.m_cre.set({imode, 1});

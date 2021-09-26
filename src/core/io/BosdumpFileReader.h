@@ -8,11 +8,13 @@
 #include "HamiltonianFileReader.h"
 
 struct BosdumpFileReader : HamiltonianFileReader {
+    const size_t m_nmode;
+
     BosdumpFileReader(const std::string &fname);
 
     size_t ranksig(const defs::inds &inds) const override;
 
-    size_t exsig(const defs::inds &inds, const size_t ranksig) const override;
+    size_t exsig(const defs::inds &inds, const size_t& ranksig) const override;
 
 };
 

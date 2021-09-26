@@ -3,11 +3,11 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/enumerator/FermiBosOnvEnumerator.h"
+#include "src/core/enumerator/FrmBosOnvEnumerator.h"
 
 TEST(FermionBosonEnumerator, SpinNonCon){
     const size_t nsite=4, nelec=4, nmode=4, occ_cutoff=3;
-    FermiBosOnvEnumerator enumerator(nsite, nelec, nmode, occ_cutoff);
+    FrmBosOnvEnumerator enumerator(nsite, nelec, nmode, occ_cutoff);
     size_t i = ~0ul;
     buffered::FrmBosOnv config(nsite);
     while(enumerator.next(config, i)){}
@@ -17,7 +17,7 @@ TEST(FermionBosonEnumerator, SpinNonCon){
 TEST(FermionBosonEnumerator, SpinCon){
     const size_t nsite=4, nelec=4, nmode=4, occ_cutoff=3;
     int spin=0;
-    FermiBosOnvEnumerator enumerator(nsite, nelec, spin, nmode, occ_cutoff);
+    FrmBosOnvEnumerator enumerator(nsite, nelec, spin, nmode, occ_cutoff);
     size_t i = ~0ul;
     buffered::FrmBosOnv config(nsite);
     while(enumerator.next(config, i)){}

@@ -8,8 +8,9 @@ BosOpPair::BosOpPair(size_t imode, size_t nop) : m_imode(imode), m_nop(nop){
     DEBUG_ASSERT_GT(m_nop, 0ul, "mode with no associated operators should not appear in operator product")
 }
 
-BosOps::BosOps(size_t nmode) {
-    m_pairs.reserve(nmode);
+BosOps::BosOps(BasisDims bd){
+    bd.require_pure_bos();
+    m_pairs.reserve(bd.m_nmode);
 }
 
 const std::vector<BosOpPair> &BosOps::pairs() const {
@@ -55,7 +56,8 @@ const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     return m_pairs[ipair];
 }
 
-BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
+BosOnvConnection::BosOnvConnection(BasisDims bd) :
+    m_ann({0ul, bd.m_nmode}), m_cre({bd.m_nsite, 0ul}){}
 
 void BosOnvConnection::clear() {
     m_ann.clear();

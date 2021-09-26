@@ -31,12 +31,13 @@ namespace ci_gen {
     }
 
     struct Base {
-        const size_t m_nsite, m_nelec;
+        const BasisDims m_bd;
+        const size_t m_nelec;
         mutable suite::Mbfs m_mbf_work;
         const include_fn_t m_include_fn;
 
 
-        Base(size_t nsite, size_t nelec, include_fn_t include_fn = default_include_fn());
+        Base(BasisDims bd, size_t nelec, include_fn_t include_fn = default_include_fn());
 
         void add_if_included(Row &row, field::Mbf &mbf) {
             if (m_include_fn(m_mbf_work[mbf])) {
@@ -64,7 +65,7 @@ namespace ci_gen {
     struct NoSym : Base {
         foreach::rtnd::Ordered<> m_foreach;
 
-        NoSym(size_t nsite, size_t nelec, const include_fn_t &include_fn = default_include_fn());
+        NoSym(BasisDims bd, size_t nelec, const include_fn_t &include_fn = default_include_fn());
 
     public:
 
@@ -83,7 +84,7 @@ namespace ci_gen {
         foreach::rtnd::Ordered<> m_foreach_alpha;
         foreach::rtnd::Ordered<> m_foreach_beta;
 
-        SpinSym(size_t nsite, size_t nelec, int spin, const include_fn_t &include_fn = default_include_fn());
+        SpinSym(BasisDims bd, size_t nelec, int spin, const include_fn_t &include_fn = default_include_fn());
 
         void operator()(Row &row, field::Mbf &mbf);
     };

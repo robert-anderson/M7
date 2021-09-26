@@ -16,5 +16,5 @@ void ExcitIter::reset(bool need, bool nonzero) {
 }
 
 ExcitIter::ExcitIter(const Hamiltonian &ham, size_t exsig) :
-        m_exsig(exsig), m_ham(ham), m_work_conn(ham.nsite()), m_work_dst(ham.nsite()),
-        m_work_orbs(ham.m_frm.m_point_group_map){}
+        m_exsig(exsig), m_ham(ham), m_bd(m_ham.m_bd), m_work_conn(m_bd),
+        m_work_dst(m_bd), m_work_orbs(ham.m_frm.m_point_group_map) {}

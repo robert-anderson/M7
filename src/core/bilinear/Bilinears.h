@@ -96,13 +96,13 @@ public:
     }
 
     Bilinears(const fciqmc_config::AvEsts &opts, defs::inds rdm_ranksigs, defs::inds specmom_exsigs,
-              size_t nsite, size_t nelec, const Epoch &epoch) :
-            m_rdms(opts.m_rdm, rdm_ranksigs, nsite, nelec, epoch),
+              BasisDims bd, size_t nelec, const Epoch &epoch) :
+            m_rdms(opts.m_rdm, rdm_ranksigs, bd, nelec, epoch),
             m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
 
-    Bilinears(const fciqmc_config::AvEsts &opts, size_t nsite, size_t nelec, const Epoch &epoch) :
+    Bilinears(const fciqmc_config::AvEsts &opts, BasisDims bd, size_t nelec, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
-                      parse_exsigs(opts.m_spec_mom.m_ranks), nsite, nelec, epoch) {}
+                      parse_exsigs(opts.m_spec_mom.m_ranks), bd, nelec, epoch) {}
 
     bool all_stores_empty() const {
         return m_rdms.all_stores_empty() && m_spec_moms.all_stores_empty();

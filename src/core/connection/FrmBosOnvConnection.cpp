@@ -4,7 +4,8 @@
 
 #include "FrmBosOnvConnection.h"
 
-FrmBosOnvConnection::FrmBosOnvConnection(size_t nsite) : m_frm(nsite), m_bos(nsite){}
+FrmBosOnvConnection::FrmBosOnvConnection(BasisDims bd) :
+    m_frm({bd.m_nsite, 0ul}), m_bos({0ul, bd.m_nmode}){}
 
 void FrmBosOnvConnection::clear() {
     m_frm.clear();

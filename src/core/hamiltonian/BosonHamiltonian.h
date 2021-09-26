@@ -6,6 +6,7 @@
 #define M7_BOSONHAMILTONIAN_H
 
 #include <src/core/integrals/BosonCoeffs.h>
+#include <src/core/io/BosdumpFileReader.h>
 #include "src/core/connection/Connections.h"
 #include "src/core/parallel/SharedArray.h"
 #include "src/core/field/Fields.h"
@@ -16,7 +17,9 @@ struct BosonHamiltonian {
     BosonCoeffs m_coeffs;
     ham_data::TermContribs m_contribs_0011;
 
-    BosonHamiltonian(size_t nmode, size_t nboson_max, std::string fname);
+    BosonHamiltonian(const BosdumpFileReader &file_reader, size_t nboson_max);
+
+    BosonHamiltonian(std::string fname, size_t nboson_max);
 
     defs::ham_t get_element(const field::BosOnv &onv) const;
 

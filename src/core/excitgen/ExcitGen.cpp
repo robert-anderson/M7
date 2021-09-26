@@ -6,9 +6,9 @@
 
 ExcitGen::ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs) :
         m_h(h), m_prng(prng),
-        m_nspinorb(m_h.nsite() * 2),
+        m_bd(m_h.m_bd),
         m_nelec(m_h.nelec()),
-        m_norb_pair(integer_utils::nspair(m_nspinorb)),
+        m_norb_pair(integer_utils::nspair(m_bd.m_nspinorb)),
         m_nelec_pair(integer_utils::nspair(m_nelec)), m_exsigs(std::move(exsigs)) {}
 
 bool ExcitGen::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,

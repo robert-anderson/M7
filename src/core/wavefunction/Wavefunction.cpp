@@ -5,7 +5,7 @@
 #include <src/core/basis/Suites.h>
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite) :
+Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisDims bd) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
                 opts.m_propagator.m_nw_target,
@@ -13,7 +13,7 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite) :
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {
-                        {nsite, opts.m_wavefunction.m_nroot,
+                        {bd, opts.m_wavefunction.m_nroot,
                          opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)},
                         MappedTableBase::nbucket_guess(
                                 opts.m_propagator.m_nw_target / mpi::nrank(),
@@ -21,10 +21,10 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, size_t nsite) :
                         opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
                         opts.m_wavefunction.m_hash_mapping.m_remap_ratio
                 },
-                {{nsite, need_send_parents(opts)}}),
+                {{bd, need_send_parents(opts)}}),
         Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
-        m_nsite(nsite),
+        m_bd(bd),
         m_format(m_store.m_row.m_weight.m_format),
         m_ninitiator(m_format),
         m_delta_ninitiator(m_format),
@@ -73,7 +73,7 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, co
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
     RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
-    suite::Conns conn(m_nsite);
+    suite::Conns conn(m_bd);
 
     row_reader.restart();
     for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {

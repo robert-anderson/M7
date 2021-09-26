@@ -16,7 +16,6 @@ struct HamiltonianFileReader : public SparseArrayFileReader<defs::ham_t> {
     typedef SparseArrayFileReader<defs::ham_t> base_t;
     std::function<void(defs::inds& inds)> m_inds_to_orbs;
 
-
     const std::regex m_header_terminator_regex;
     const bool m_spin_major;
     const size_t m_norb;
@@ -37,7 +36,7 @@ struct HamiltonianFileReader : public SparseArrayFileReader<defs::ham_t> {
 
     virtual size_t ranksig(const defs::inds &inds) const = 0;
 
-    virtual size_t exsig(const defs::inds &inds, const size_t ranksig) const = 0;
+    virtual size_t exsig(const defs::inds &inds, const size_t& ranksig) const = 0;
 
     size_t exsig(const defs::inds &inds) const;
 
@@ -52,7 +51,7 @@ private:
     // spin minor case
     static void decrement_inds_and_transpose(defs::inds& inds, const size_t& nspatorb);
 
-    static defs::inds parse_int_array(const std::string str, long offset=0);
+    static defs::inds parse_int_array(const std::string& str, long offset=0);
 };
 
 

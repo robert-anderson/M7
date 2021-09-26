@@ -13,7 +13,8 @@
 
 struct LadderHamiltonian {
 
-    const size_t m_nboson_max, m_nmode;
+    const size_t m_nboson_max;
+    const BasisDims m_bd;
     /**
      * coefficients for "coupled" ranksigs 1110, 1101. contributing exsigs are either:
      *  "density coupled" (0010, 0001), or
@@ -34,7 +35,10 @@ struct LadderHamiltonian {
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    LadderHamiltonian(size_t nmode, size_t nboson_max, std::string fname);
+    LadderHamiltonian(const EbdumpFileReader &file_reader, size_t nboson_max);
+
+    LadderHamiltonian(std::string fname, size_t nboson_max):
+            LadderHamiltonian(EbdumpFileReader(fname), nboson_max){}
 
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
 

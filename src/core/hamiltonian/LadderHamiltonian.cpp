@@ -4,16 +4,17 @@
 
 #include "LadderHamiltonian.h"
 
-LadderHamiltonian::LadderHamiltonian(size_t nmode, size_t nboson_max, std::string fname) :
-        m_nboson_max(nboson_max), m_nmode(nmode), m_v(nmode), m_v_unc(nmode, 0.0),
+LadderHamiltonian::LadderHamiltonian(const EbdumpFileReader &file_reader, size_t nboson_max):
+        m_nboson_max(nboson_max),
+        m_bd({file_reader.m_norb, file_reader.m_nmode}),
+        m_v(m_bd, file_reader.m_spin_resolved), m_v_unc(m_bd.m_nmode, 0.0),
         m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
         m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
     if (!m_nboson_max) return;
 
     defs::inds inds(3);
     defs::ham_t value;
-    EbdumpFileReader file_reader(fname);
-    REQUIRE_EQ_ALL(file_reader.m_nspatorb, m_nmode, "expected number of boson modes not found in file");
+    REQUIRE_EQ_ALL(file_reader.m_nmode, m_bd.m_nmode, "expected number of boson modes not found in file");
 
     log::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -95,7 +96,7 @@ bool LadderHamiltonian::is_holstein() const {
 
 bool LadderHamiltonian::constant_uncoupled() const {
     auto v = m_v_unc[0];
-    for (size_t i=1ul; i<m_nmode; ++i) if (m_v_unc[i]!=v) return false;
+    for (size_t imode=1ul; imode < m_bd.m_nmode; ++imode) if (m_v_unc[imode] != v) return false;
     return true;
 }
 

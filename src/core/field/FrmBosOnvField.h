@@ -14,7 +14,7 @@ struct FrmBosOnvField : MultiField<FrmOnvField, BosOnvField> {
     FrmOnvField &m_frm;
     BosOnvField &m_bos;
 
-    FrmBosOnvField(Row *row, size_t nsite, std::string name = "");
+    FrmBosOnvField(Row *row, BasisDims bd, std::string name = "");
 
     FrmBosOnvField(const FrmBosOnvField &other);
 

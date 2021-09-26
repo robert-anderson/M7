@@ -26,7 +26,7 @@ struct WalkerTableRow : public Row {
 
     field::Mbf &key_field();
 
-    WalkerTableRow(size_t nsite, size_t nroot, size_t nreplica, bool average_weights);
+    WalkerTableRow(BasisDims bd, size_t nroot, size_t nreplica, bool average_weights);
 
     bool is_h5_write_exempt() const override;
 
@@ -66,7 +66,7 @@ struct OnvRow : public Row {
         return m_mbf;
     };
 
-    OnvRow(size_t nsite) : m_mbf(this, nsite), m_nparent(this) {}
+    OnvRow(BasisDims bd) : m_mbf(this, bd), m_nparent(this) {}
 };
 
 

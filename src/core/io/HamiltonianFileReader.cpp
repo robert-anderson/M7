@@ -101,7 +101,7 @@ void HamiltonianFileReader::decrement_inds_and_transpose(defs::inds &inds, const
     for (auto &i:inds) i = ((i == 0 || i == ~0ul) ? ~0ul : ((i - 1) / 2 + ((i & 1ul) ? 0 : nspatorb)));
 }
 
-defs::inds HamiltonianFileReader::parse_int_array(const std::string str, long offset) {
+defs::inds HamiltonianFileReader::parse_int_array(const std::string& str, long offset) {
     defs::inds result;
     std::smatch match;
     auto it = str.cbegin();

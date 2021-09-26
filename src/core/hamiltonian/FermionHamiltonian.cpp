@@ -9,7 +9,7 @@
 
 
 buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) const {
-    buffered::FrmOnv ref(m_nsite);
+    buffered::FrmOnv ref({m_nsite, 0ul});
     REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_nelec % 2,
                "Sz quantum number given incompatible with nelec");
     size_t n_spin_0 = (m_nelec + spin_restrict) / 2;

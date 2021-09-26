@@ -6,16 +6,16 @@
 
 #include <utility>
 
-ci_gen::Base::Base(size_t nsite, size_t nelec, include_fn_t include_fn) :
-    m_nsite(nsite), m_nelec(nelec), m_mbf_work(nsite), m_include_fn(std::move(include_fn)){}
+ci_gen::Base::Base(BasisDims bd, size_t nelec, include_fn_t include_fn) :
+    m_bd(bd), m_nelec(nelec), m_mbf_work(bd), m_include_fn(std::move(include_fn)){}
 
-ci_gen::NoSym::NoSym(size_t nsite, size_t nelec, const include_fn_t& include_fn) :
-        Base(nsite, nelec, include_fn), m_foreach(2*nsite, nelec) {}
+ci_gen::NoSym::NoSym(BasisDims bd, size_t nelec, const include_fn_t& include_fn) :
+        Base(bd, nelec, include_fn), m_foreach(2*bd.m_nsite, nelec) {}
 
-ci_gen::SpinSym::SpinSym(size_t nsite, size_t nelec, int spin, const include_fn_t& include_fn) :
-        Base(nsite, nelec, include_fn),
-        m_foreach_alpha(nsite, ci_utils::nalpha(nelec, spin)),
-        m_foreach_beta(nsite, ci_utils::nbeta(nelec, spin)){}
+ci_gen::SpinSym::SpinSym(BasisDims bd, size_t nelec, int spin, const include_fn_t& include_fn) :
+        Base(bd, nelec, include_fn),
+        m_foreach_alpha(bd.m_nsite, ci_utils::nalpha(nelec, spin)),
+        m_foreach_beta(bd.m_nsite, ci_utils::nbeta(nelec, spin)){}
 
 void ci_gen::SpinSym::operator()(Row &row, field::Mbf &mbf) {
     ASSERT(mbf.belongs_to_row(&row));

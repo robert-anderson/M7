@@ -19,6 +19,7 @@ struct ExcitIter {
     const size_t m_exsig;
     const Hamiltonian &m_ham;
 protected:
+    const BasisDims m_bd;
     suite::Conns m_work_conn;
     suite::Mbfs m_work_dst;
     CachedOrbs m_work_orbs;

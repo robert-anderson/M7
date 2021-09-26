@@ -18,15 +18,7 @@ struct SpawnTableRow : public Row {
     field::Flag m_src_deterministic;
     field::Number<uint8_t> m_ipart_dst;
 
-    SpawnTableRow(size_t nsite, bool send_parents) :
-            m_send_parents(send_parents),
-            m_src_mbf(send_parents ? this : nullptr, nsite, "source MBF"),
-            m_dst_mbf(this, nsite, "destination MBF"),
-            m_src_weight(send_parents ? this : nullptr, "source weight"),
-            m_delta_weight(this, "spawned walker weight"),
-            m_src_initiator(this, "source initiator flag"),
-            m_src_deterministic(this, "source deterministic flag"),
-            m_ipart_dst(this, "WF part index of destination") {}
+    SpawnTableRow(BasisDims bd, bool send_parents);
 };
 
 #endif //M7_SPAWNTABLE_H

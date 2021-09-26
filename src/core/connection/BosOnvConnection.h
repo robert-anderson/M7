@@ -18,7 +18,7 @@ class BosOps {
     std::vector<BosOpPair> m_pairs;
     size_t m_nop = 0ul;
 public:
-    BosOps(size_t nmode);
+    BosOps(BasisDims bd);
 
     const std::vector<BosOpPair>& pairs() const;
 
@@ -37,7 +37,7 @@ public:
 
 struct BosOnvConnection {
     BosOps m_ann, m_cre;
-    BosOnvConnection(size_t nmode);
+    BosOnvConnection(BasisDims bd);
 
     void clear();
 

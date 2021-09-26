@@ -108,7 +108,7 @@ size_t FcidumpFileReader::ranksig(const defs::inds &inds) const {
     return exsig_utils::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
-size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t ranksig) const {
+size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
         case exsig_utils::ex_single:
