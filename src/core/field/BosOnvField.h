@@ -9,10 +9,10 @@
 #include "src/core/basis/BasisDims.h"
 
 struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
-    BosOnvField(Row *row, BasisDims bd, std::string name="") :
-    NdNumberField<defs::bos_occ_t, 1>(row, {{bd.m_nmode}, {"boson mode occupations"}}, name) {
-        bd.require_pure_bos();
-    }
+
+    BosOnvField(Row *row, size_t nmode, std::string name="");
+
+    BosOnvField(Row *row, BasisDims bd, std::string name="");
 
     BosOnvField(const BosOnvField &other): BosOnvField(other.m_row, {0ul, other.m_format.m_shape[0]}, other.m_name){}
 

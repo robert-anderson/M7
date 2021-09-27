@@ -4,8 +4,11 @@
 
 #include "FrmBosOnvConnection.h"
 
-FrmBosOnvConnection::FrmBosOnvConnection(BasisDims bd) :
-    m_frm({bd.m_nsite, 0ul}), m_bos({0ul, bd.m_nmode}){}
+FrmBosOnvConnection::FrmBosOnvConnection(BasisDims bd) : m_frm(bd.m_nsite), m_bos(bd.m_nmode){}
+
+FrmBosOnvConnection::FrmBosOnvConnection(const FrmBosOnvField &mbf) :
+        FrmBosOnvConnection({mbf.m_frm.m_nsite, mbf.m_bos.m_nelement}){}
+
 
 void FrmBosOnvConnection::clear() {
     m_frm.clear();

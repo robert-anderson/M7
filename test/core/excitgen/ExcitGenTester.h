@@ -66,7 +66,7 @@ namespace excit_gen_tester {
         size_t run(const mbf_t &src_mbf, size_t ndraw) {
             typedef conn::from_field_t<mbf_t> conn_t;
             CachedOrbs orbs(m_iter.m_ham.m_frm.m_point_group_map);
-            conn_t conn(src_mbf.nsite());
+            conn_t conn(src_mbf);
             size_t exsig = m_iter.m_exsig;
             buffered::MaeInds work_inds(m_iter.m_exsig);
             size_t nnull = 0ul;

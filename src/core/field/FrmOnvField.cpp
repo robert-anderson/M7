@@ -5,9 +5,13 @@
 #include "FrmOnvField.h"
 
 
+FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
+        base_t(row, {{2, nsite}, {"spin channel", "site"}}, name),
+        m_nsite(nsite){
+}
+
 FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
-        base_t(row, {{2, bd.m_nsite}, {"spin channel", "site"}}, name),
-        m_nsite(bd.m_nsite){
+        FrmOnvField(row, bd.m_nsite, name){
     bd.require_pure_frm();
 }
 

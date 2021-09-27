@@ -19,7 +19,7 @@ TEST(LadderPure, HubbardUniform0001){
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0001);
     LadderPureUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */
@@ -44,7 +44,7 @@ TEST(LadderPure, HubbardUniform0010){
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0010);
     LadderPureUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */
@@ -71,7 +71,7 @@ TEST(LadderPure, HolsteinZpm0001){
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0001);
     LadderPureHolsteinZpm excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */
@@ -98,7 +98,7 @@ TEST(LadderPure, HolsteinZpm0010){
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0010);
     LadderPureHolsteinZpm excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */

@@ -12,7 +12,9 @@
 struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;
     BosOnvConnection m_bos;
-    FrmBosOnvConnection(BasisDims bd);
+    explicit FrmBosOnvConnection(BasisDims bd);
+
+    explicit FrmBosOnvConnection(const FrmBosOnvField& mbf);
 
     void clear();
 

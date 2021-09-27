@@ -13,8 +13,9 @@ TEST(Subspace, Test){
     opts.verify();
     const size_t nsite = 6;
     const size_t nelec = 6;
-    Wavefunction wf(opts, nsite);
-    ci_gen::SpinSym gen(nsite, nelec, 0, ci_gen::default_include_fn(wf));
+    const BasisDims bd = {nsite, 0};
+    Wavefunction wf(opts, bd);
+    ci_gen::SpinSym gen(bd, nelec, 0, ci_gen::default_include_fn(wf));
 
     auto& table = wf.m_store;
     gen(table.m_row, table.m_row.m_mbf);

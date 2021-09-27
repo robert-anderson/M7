@@ -14,7 +14,7 @@ TEST(Hubbard1dSingles, ObcFromAfmDet) {
     ASSERT_FALSE(excit_gen.m_pbc);
     excititers::FrmConserve excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmOnv src_mbf(ham.nsite());
+    buffered::FrmOnv src_mbf(ham.m_bd);
     ham.set_afm_mbf(src_mbf, true);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
@@ -34,7 +34,7 @@ TEST(Hubbard1dSingles, PbcFromAfmDet) {
     ASSERT_TRUE(excit_gen.m_pbc);
     excititers::FrmConserve excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmOnv src_mbf(ham.nsite());
+    buffered::FrmOnv src_mbf(ham.m_bd);
     ham.set_afm_mbf(src_mbf, true);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;

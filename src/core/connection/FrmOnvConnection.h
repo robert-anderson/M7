@@ -135,7 +135,11 @@ private:
     mutable std::vector<bool> m_dataword_phases;
 public:
 
+    explicit FrmOnvConnection(size_t nsite);
+
     explicit FrmOnvConnection(BasisDims bd);
+
+    explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**
      * update the internal state of the connection with the difference in occupation between the two given determinants
      * @param src

@@ -19,6 +19,8 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     const size_t m_nsite;
 
+    FrmOnvField(Row* row, size_t nsite, std::string name="");
+
     FrmOnvField(Row* row, BasisDims bd, std::string name="");
 
     FrmOnvField(const FrmOnvField& other);

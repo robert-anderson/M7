@@ -16,7 +16,7 @@ TEST(LadderHopping, HubbardUniform1101){
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
     LadderHoppingUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */
@@ -41,7 +41,7 @@ TEST(LadderHopping, HubbardUniform1110){
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
     LadderHoppingUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */
@@ -66,7 +66,7 @@ TEST(LadderHopping, HubbardPc1101){
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
     LadderHoppingPc excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */
@@ -92,7 +92,7 @@ TEST(LadderHopping, HubbardPc1110){
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
     LadderHoppingPc excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
-    buffered::FrmBosOnv src(ham.nsite());
+    buffered::FrmBosOnv src(ham.m_bd);
     /*
      * arbitrary source ONV
      */

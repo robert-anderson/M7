@@ -7,7 +7,7 @@
 #include "src/core/linalg/DenseHamiltonian.h"
 
 /*
- * exact diagonalization in the entire hilbert space for integration testing of matrix elements for very small systems
+ * exact diagonalization in the entire Hilbert space for integration testing of matrix elements for very small systems
  */
 
 #ifdef ENABLE_COMPLEX
@@ -81,10 +81,13 @@ TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc2) {
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
     Hamiltonian h(fname, fname_eb, fname_bos, false, 2);
-    for (size_t n=0ul; n<h.nsite(); ++n){
-        for (size_t p=0ul; p<h.nsite(); ++p){
-            for (size_t q=0ul; q<h.nsite(); ++q){
-                if (n==p && p==q) ASSERT_FLOAT_EQ(consts::real(h.m_ladder.m_v.get(n, p, q)), 1.4);
+    for (size_t n=0ul; n<h.m_bd.m_nmode; ++n){
+        for (size_t p=0ul; p<h.m_bd.m_nspinorb; ++p){
+            const auto psite = FrmOnvField::isite(p, h.m_bd.m_nsite);
+            for (size_t q=0ul; q<h.m_bd.m_nspinorb; ++q){
+                const auto qsite = FrmOnvField::isite(q, h.m_bd.m_nsite);
+                if (n==psite && psite==qsite)
+                    ASSERT_FLOAT_EQ(consts::real(h.m_ladder.m_v.get(n, p, q)), 1.4);
                 else ASSERT_FLOAT_EQ(consts::real(h.m_ladder.m_v.get(n, p, q)), 0.0);
             }
         }
@@ -140,7 +143,9 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian h(fname, fname_eb, fname_bos, false, 1);
     DenseHamiltonian dh(h);
-    ASSERT_EQ(dh.m_ncol, ci_utils::fermion_dim(h.nsite(), h.nelec())*ci_utils::boson_dim(h.nsite(), h.m_nboson_max));
+    const auto frm_dim = ci_utils::fermion_dim(h.m_bd.m_nsite, h.nelec());
+    const auto bos_dim = ci_utils::boson_dim(h.m_bd.m_nsite, h.m_nboson_max);
+    ASSERT_EQ(dh.m_ncol, frm_dim*bos_dim);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], 0.5090148148366922);
 }

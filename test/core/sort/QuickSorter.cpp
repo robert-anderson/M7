@@ -13,8 +13,9 @@
 TEST(QuickSorter, Test){
     const size_t nsite = 5;
     const size_t nrow = 10;
+    const BasisDims bd = {nsite, 0};
 
-    BufferedTable<SpawnTableRow> table("test", {{nsite, false}});
+    BufferedTable<SpawnTableRow> table("test", {{bd, false}});
     table.push_back(nrow);
     auto row = table.m_row;
 

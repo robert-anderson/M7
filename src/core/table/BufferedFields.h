@@ -109,6 +109,7 @@ namespace buffered {
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
         FrmOnv(BasisDims bd) : BufferedField<field::FrmOnv>({nullptr, bd}){}
+        FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>({nullptr, nsite}){}
         FrmOnv& operator=(const FrmOnv& other){
             base_t::operator=(other);
             return *this;
@@ -118,6 +119,7 @@ namespace buffered {
 
     struct BosOnv : BufferedField<field::BosOnv> {
         using field::BosOnv::operator=;
+        BosOnv(size_t nmode) : BufferedField<field::BosOnv>({nullptr, nmode}){}
         BosOnv(BasisDims bd) : BufferedField<field::BosOnv>({nullptr, bd}){}
     };
 

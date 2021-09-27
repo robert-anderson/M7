@@ -15,58 +15,23 @@ protected:
 
 public:
     const std::string m_fname;
-    FileReader(const std::string &fname, size_t iline = 0ul) : m_fname(fname) {
-        reset(iline);
-    }
+    explicit FileReader(std::string fname, size_t iline = 0ul);
 
-    void reset(size_t iline=0ul){
-        if (m_file) m_file->close();
-        m_file = std::unique_ptr<std::ifstream>(new std::ifstream(m_fname));
-        if (!m_file->is_open()) throw std::runtime_error("File \"" + m_fname + "\" not found.");
-        m_iline = ~0ul;
-        skip(iline);
-    }
+    void reset(size_t iline=0ul);
 
-    virtual ~FileReader() {
-        m_file->close();
-    }
+    virtual ~FileReader();
 
-    const size_t &iline() {
-        return m_iline;
-    }
+    const size_t &iline();
 
-    size_t nline(){
-        while (next()){}
-        auto nline = iline();
-        reset();
-        return nline;
-    }
+    size_t nline();
 
-    bool next(std::string &line) const {
-        m_iline++;
-        getline(*m_file, line);
-        return !line.empty();
-    }
+    bool next(std::string &line) const;
 
-    bool next() {
-        std::string tmp;
-        return next(tmp);
-    }
+    bool next();
 
-    void skip(size_t nline) {
-        for (size_t i = 0ul; i < nline; ++i) next();
-    }
+    void skip(size_t nline);
 
-    static std::string to_string(const std::string& fname){
-        std::string all;
-        std::string line;
-        FileReader reader(fname);
-        while (reader.next(line)) {
-            all.append("\n"+line);
-            line.clear();
-        }
-        return all;
-    }
+    static std::string to_string(const std::string& fname);
 
 };
 

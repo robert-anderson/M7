@@ -39,8 +39,8 @@ bool UniformSingles::draw(const size_t &exsig, const field::FrmOnv &src, CachedO
     }
 #ifndef NDEBUG
     if (m_spin_conserving) {
-        if (i < m_h.nsite()) { DEBUG_ASSERT_LT(a, m_h.nsite(), "spin not conserved"); }
-        else { DEBUG_ASSERT_GE(a, m_h.nsite(), "spin not conserved"); }
+        if (i < m_h.m_bd.m_nsite) { DEBUG_ASSERT_LT(a, m_h.m_bd.m_nsite, "spin not conserved"); }
+        else { DEBUG_ASSERT_GE(a, m_h.m_bd.m_nsite, "spin not conserved"); }
     }
 #endif
     conn.set(i, a);

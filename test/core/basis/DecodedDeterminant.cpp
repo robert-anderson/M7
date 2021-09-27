@@ -17,7 +17,7 @@ TEST(DecodedDeterminant, CopyAndMove){
 }
 
 TEST(DecodedDeterminant, Occupation){
-    buffered::FrmOnv onv(50);
+    buffered::FrmOnv onv({50, 0});
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     onv = occ;
     defs::inds vac;
