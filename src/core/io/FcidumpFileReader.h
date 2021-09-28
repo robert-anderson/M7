@@ -42,6 +42,8 @@ struct FcidumpFileReader : public HamiltonianFileReader {
     size_t ranksig(const defs::inds &inds) const override;
 
     size_t exsig(const defs::inds &inds, const size_t& ranksig) const override;
+
+    bool inds_in_range(const defs::inds &inds) const override;
 };
 
 #endif //M7_FCIDUMPFILEREADER_H

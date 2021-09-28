@@ -4,12 +4,15 @@
 
 #include "LadderHamiltonian.h"
 
-LadderHamiltonian::LadderHamiltonian(const std::string &fname, size_t nboson_max):
+LadderHamiltonian::LadderHamiltonian(const std::string &fname, size_t nboson_max) :
         m_nboson_max(nboson_max), m_bd(read_bd(fname)),
         m_v(m_bd, read_spin_resolved(fname)), m_v_unc(m_bd.m_nmode, 0.0),
         m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
         m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
     if (!m_nboson_max || !m_bd) return;
+    REQUIRE_EQ(m_bd.m_nsite == 0, m_bd.m_nmode == 0,
+               "if the number of sites is non-zero, so also must be the number of boson modes. "
+               "NMODE definition may be missing from EBDUMP file header");
 
     defs::inds inds(3);
     defs::ham_t value;
@@ -20,12 +23,11 @@ LadderHamiltonian::LadderHamiltonian(const std::string &fname, size_t nboson_max
         if (consts::float_is_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        if (ranksig==exsig_utils::ex_0010){
+        if (ranksig == exsig_utils::ex_0010) {
             m_contribs_0010.set_nonzero(exsig);
             m_contribs_0001.set_nonzero(exsig_utils::hermconj(exsig));
             m_v_unc[inds[0]] = value;
-        }
-        else {
+        } else {
             DEBUG_ASSERT_EQ(ranksig, exsig_utils::ex_1110, "ranksig should be either 0010 or 1110");
             m_contribs_1110.set_nonzero(exsig);
             m_contribs_1101.set_nonzero(exsig_utils::hermconj(exsig));
@@ -65,7 +67,7 @@ defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const co
              * conventionally non-conjugated term
              */
             auto element = cre ? m_v.get(imode, isite, jsite) : m_v.get(imode, jsite, isite);
-            element*=occ_fac;
+            element *= occ_fac;
             return conn.m_frm.phase(onv.m_frm) ? -element : element;
         }
         default:
@@ -95,13 +97,13 @@ bool LadderHamiltonian::is_holstein() const {
 
 bool LadderHamiltonian::constant_uncoupled() const {
     auto v = m_v_unc[0];
-    for (size_t imode=1ul; imode < m_bd.m_nmode; ++imode) if (m_v_unc[imode] != v) return false;
+    for (size_t imode = 1ul; imode < m_bd.m_nmode; ++imode) if (m_v_unc[imode] != v) return false;
     return true;
 }
 
 bool LadderHamiltonian::is_zpm_half_filled() const {
     if (!is_holstein()) return false;
-    return constant_uncoupled() && m_v.constant_diagonal() && (m_v.get(0,0,0)==-m_v_unc[0]);
+    return constant_uncoupled() && m_v.constant_diagonal() && (m_v.get(0, 0, 0) == -m_v_unc[0]);
 }
 
 BasisDims LadderHamiltonian::read_bd(const std::string &fname) {

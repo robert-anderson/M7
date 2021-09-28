@@ -13,7 +13,6 @@ BosonHamiltonian::BosonHamiltonian(const std::string& fname, size_t nboson_max) 
     BosdumpFileReader file_reader(fname);
     defs::inds inds(2);
     defs::ham_t value;
-    REQUIRE_EQ_ALL(file_reader.m_nspatorb, m_nmode, "expected number of boson modes not found in file");
 
     log::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {

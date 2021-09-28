@@ -121,3 +121,7 @@ size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) c
             return ~0ul;
     }
 }
+
+bool FcidumpFileReader::inds_in_range(const defs::inds &inds) const {
+    return std::all_of(inds.begin(), inds.end(), [this](const size_t &i) {return ind_in_range(i, m_norb); });
+}

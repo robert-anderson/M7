@@ -18,13 +18,13 @@ class FrmBosOnvEnumerator : public Enumerator<field::FrmBosOnv> {
 public:
     FrmBosOnvEnumerator(BasisDims bd, size_t nelec, size_t nboson_cutoff):
             m_fonv_enum(bd.m_nsite, nelec), m_bonv_enum(bd.m_nmode, nboson_cutoff),
-            m_fonv(bd.frm()), m_bonv(bd.bos()){
+            m_fonv(bd.m_nsite), m_bonv(bd.m_nmode){
         m_fonv_enum.next(m_fonv);
     }
     FrmBosOnvEnumerator(BasisDims bd, size_t nelec, int spin, size_t nboson_cutoff):
             m_fonv_enum(bd.m_nsite, nelec, spin),
             m_bonv_enum(bd.m_nmode, nboson_cutoff),
-            m_fonv(bd.frm()), m_bonv(bd.bos()){
+            m_fonv(bd.m_nsite), m_bonv(bd.m_nmode){
         m_fonv_enum.next_element(m_fonv);
     }
 

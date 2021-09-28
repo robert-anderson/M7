@@ -80,8 +80,7 @@ bool HamiltonianFileReader::next(defs::inds &inds, defs::ham_t &v) const {
     auto result = SparseArrayFileReader<defs::ham_t>::next(inds, v);
     if (result) m_inds_to_orbs(inds);
     // validate elements
-    ASSERT(!result ||
-           std::all_of(inds.begin(), inds.end(), [this](const size_t &i) { return (i == ~0ul) || (i < m_norb); }))
+    DEBUG_ASSERT_TRUE(!result || inds_in_range(inds), "indices in hamiltonian-defining file are not valid");
     return result;
 }
 

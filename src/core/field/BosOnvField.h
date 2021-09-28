@@ -23,7 +23,7 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
 
     BosOnvField &operator=(const defs::inds &inds) {
         DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");
-        for (size_t i = 0ul; i < inds.size(); ++i) this->operator[](i) = inds[i];
+        for (size_t i = 0ul; i < inds.size(); ++i) (*this)[i] = inds[i];
         return *this;
     }
 };

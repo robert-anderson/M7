@@ -9,6 +9,10 @@ Hamiltonian::Hamiltonian(std::string fname, std::string fname_eb, std::string fn
         m_ladder(fname_eb, m_nboson_max), m_bd(m_frm.m_nsite, m_bos.m_nmode) {
     if (nboson_max && !defs::enable_bosons)
         log::warn("non-zero boson occupation specified with bosons disabled at compile time");
+    if (nboson_max) {
+        REQUIRE_EQ(m_ladder.m_bd.m_nsite, m_frm.m_nsite, "EBDUMP incompatible with FCIDUMP");
+        REQUIRE_EQ(m_ladder.m_bd.m_nmode, m_bos.m_nmode, "EBDUMP incompatible with BOSDUMP");
+    }
 }
 
 Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :

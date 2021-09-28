@@ -113,6 +113,14 @@ public:
         if(indsfirst){ f(1); f(0);}
         else {f(0); f(1);}
     }
+
+    virtual bool inds_in_range(const defs::inds& inds) const {
+        return true;
+    }
+
+    static bool ind_in_range(size_t ind, size_t extent) {
+        return ind < extent || ind==~0ul;
+    }
 };
 
 
