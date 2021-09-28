@@ -5,11 +5,12 @@
 #include "BosonHamiltonian.h"
 #include "src/core/io/BosdumpFileReader.h"
 
-BosonHamiltonian::BosonHamiltonian(const BosdumpFileReader &file_reader, size_t nboson_max) :
-        m_nboson_max(nboson_max), m_nmode(file_reader.m_nmode),
+BosonHamiltonian::BosonHamiltonian(const std::string& fname, size_t nboson_max) :
+        m_nboson_max(nboson_max), m_nmode(read_nmode(fname)),
         m_coeffs(m_nboson_max ? m_nmode : 0ul), m_contribs_0011(exsig_utils::ex_0011) {
-    if (!m_nboson_max) return;
+    if (!m_nboson_max || !m_nmode) return;
 
+    BosdumpFileReader file_reader(fname);
     defs::inds inds(2);
     defs::ham_t value;
     REQUIRE_EQ_ALL(file_reader.m_nspatorb, m_nmode, "expected number of boson modes not found in file");
@@ -26,9 +27,6 @@ BosonHamiltonian::BosonHamiltonian(const BosdumpFileReader &file_reader, size_t 
     }
     log_data();
 }
-
-BosonHamiltonian::BosonHamiltonian(std::string fname, size_t nboson_max) :
-        BosonHamiltonian(BosdumpFileReader(fname), nboson_max){}
 
 defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
     if (!m_nboson_max) return 0.0;

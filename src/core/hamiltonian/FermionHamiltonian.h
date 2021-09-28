@@ -36,6 +36,9 @@ struct FermionHamiltonian {
     ham_data::FrmModelAttributes m_model_attrs;
     ham_data::KramersAttributes m_kramers_attrs;
 
+    /* TODO: reduce number of ctors here and allow for the the instantiation of an object without a valid FCIDUMP (for
+     * boson-only calcs)
+     */
     FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
                        bool spin_resolved, defs::inds site_irreps={});
 

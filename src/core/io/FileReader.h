@@ -33,6 +33,7 @@ public:
 
     static std::string to_string(const std::string& fname);
 
+    static bool exists(const std::string& fname);
 };
 
 #endif //M7_FILEREADER_H

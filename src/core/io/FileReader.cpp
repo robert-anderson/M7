@@ -57,3 +57,10 @@ std::string FileReader::to_string(const std::string &fname) {
     }
     return all;
 }
+
+bool FileReader::exists(const std::string &fname) {
+    auto f = std::unique_ptr<std::ifstream>(new std::ifstream(fname));
+    bool res = f->is_open();
+    if (res) f->close();
+    return res;
+}

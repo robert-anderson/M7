@@ -7,6 +7,7 @@
 BosdumpFileReader::BosdumpFileReader(const std::string &fname) :
     HamiltonianFileReader(fname, 3, false),
     m_nmode(read_header_int(fname, "NMODE")) {
+    // We implement spinless bosons, so the spin resolved flag doesn't make sense in this derived class
     REQUIRE_FALSE_ALL(m_spin_resolved, "spin resolved boson dumps are invalid");
 }
 
