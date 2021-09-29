@@ -88,8 +88,10 @@ fciqmc_config::Reference::Reference(config::Group *parent) :
         config::Section(parent, "reference", "options relating to the reference MBF"),
         m_init_mbf(this, "init_reference_mbf", {},
                    "string representations of the MBFs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
+        m_init_mbf_neel(this, "init_mbf_neel", false,
+                       "initialize the reference to a Neel state rather than assuming Aufbau principle"),
         m_redef_thresh(this, "redef_thresh", 10.0,
-                       "when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
+"when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
 
 fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
         config::Section(parent, "wavefunction",

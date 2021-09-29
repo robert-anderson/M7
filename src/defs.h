@@ -117,10 +117,23 @@ namespace defs {
 #ifndef MBF_TYPE_IND
 #define MBF_TYPE_IND 0;
 #endif
+
+#if (MBF_TYPE_IND==1) || (MBF_TYPE_IND==2)
+#define ENABLE_BOSONS 1;
+#else
+#define ENABLE_BOSONS 0;
+#endif
+
+#if (MBF_TYPE_IND==0) || (MBF_TYPE_IND==1)
+#define ENABLE_FERMIONS 1;
+#else
+#define ENABLE_FERMIONS 0;
+#endif
+
     constexpr size_t mbf_type_ind = MBF_TYPE_IND;
 
-    constexpr bool enable_bosons = mbf_type_ind!=0;
-    constexpr bool enable_fermions = mbf_type_ind!=2;
+    constexpr bool enable_bosons = ENABLE_BOSONS;
+    constexpr bool enable_fermions = ENABLE_FERMIONS;
 
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;

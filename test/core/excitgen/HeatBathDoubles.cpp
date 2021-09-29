@@ -14,7 +14,7 @@ TEST(HeatBathDoubles, SmallFromHFDeterminant){
     excititers::FrmConserve excit_iter(ham, exsig_utils::ex_double);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_hf_mbf(src_mbf, 0);
+    ham.set_aufbau_mbf(src_mbf, 0);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 10000000;
     tester.run(src_mbf, ndraw);
@@ -34,7 +34,7 @@ TEST(HeatBathDoubles, LargeFromHFDeterminant){
     excititers::FrmConserve excit_iter(ham, exsig_utils::ex_double);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_hf_mbf(src_mbf, 0);
+    ham.set_aufbau_mbf(src_mbf, 0);
     tester.fill_results_table(src_mbf);
     tester.run(src_mbf, 50000000);
     ASSERT_TRUE(tester.all_drawn_at_least_once());

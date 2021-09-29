@@ -105,13 +105,17 @@ struct Hamiltonian {
         return consts::real(get_element(onv));
     }
 
-    void set_hf_mbf(FrmOnv &onv, int spin) const;
+    void set_aufbau_mbf(FrmOnv &onv, int spin) const;
 
-    void set_hf_mbf(FrmBosOnv &onv, int spin) const;
+    void set_aufbau_mbf(FrmBosOnv &onv, int spin) const;
 
-    void set_afm_mbf(FrmOnv &onv, bool alpha_first) const;
+    void set_neel_mbf(FrmOnv &onv, bool alpha_first) const;
 
-    void set_afm_mbf(FrmBosOnv &onv, bool alpha_first) const;
+    void set_neel_mbf(FrmBosOnv &onv, bool alpha_first) const;
+
+    void set_mbf(FrmOnv &onv, bool neel, int spin_restrict) const;
+
+    void set_mbf(FrmBosOnv &onv, bool neel, int spin_restrict) const;
 };
 
 #endif //M7_HAMILTONIAN_H

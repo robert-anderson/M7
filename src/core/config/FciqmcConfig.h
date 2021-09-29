@@ -78,6 +78,7 @@ namespace fciqmc_config {
 
     struct Reference : config::Section {
         config::Param<std::vector<std::string>> m_init_mbf;
+        config::Param<bool> m_init_mbf_neel;
         config::Param<double> m_redef_thresh;
 
         explicit Reference(config::Group *parent);

@@ -7,7 +7,7 @@
 #include "ExcitGenTester.h"
 #include "src/core/excitgen/Hubbard1dSingles.h"
 
-TEST(Hubbard1dSingles, ObcFromAfmDet) {
+TEST(Hubbard1dSingles, ObcFromNeel) {
     PRNG prng(14, 1000000);
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", false);
     Hubbard1dSingles excit_gen(ham, prng);
@@ -15,7 +15,7 @@ TEST(Hubbard1dSingles, ObcFromAfmDet) {
     excititers::FrmConserve excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_afm_mbf(src_mbf, true);
+    ham.set_neel_mbf(src_mbf, true);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
     tester.run(src_mbf, ndraw);
@@ -27,7 +27,7 @@ TEST(Hubbard1dSingles, ObcFromAfmDet) {
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
 }
 
-TEST(Hubbard1dSingles, PbcFromAfmDet) {
+TEST(Hubbard1dSingles, PbcFromNeel) {
     PRNG prng(14, 1000000);
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site_pbc/FCIDUMP", false);
     Hubbard1dSingles excit_gen(ham, prng);
@@ -35,7 +35,7 @@ TEST(Hubbard1dSingles, PbcFromAfmDet) {
     excititers::FrmConserve excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_afm_mbf(src_mbf, true);
+    ham.set_neel_mbf(src_mbf, true);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
     tester.run(src_mbf, ndraw);
