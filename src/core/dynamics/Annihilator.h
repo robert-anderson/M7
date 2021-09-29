@@ -122,6 +122,17 @@ public:
      */
     void loop_over_dst_mbfs();
 
+    /**
+     * TODO: complex sign problem or "phase problem"
+     *
+     *  magnitude of the sign difference between two real-valued walker weights
+     */
+    template<typename T>
+    static T annihilated_magnitude(const T& weight, const T& delta){
+        if (weight > 0.0 && delta < 0.0) return std::min(weight, -delta);
+        if (weight < 0.0 && delta > 0.0) return std::min(-weight, delta);
+        return 0.0;
+    }
 };
 
 

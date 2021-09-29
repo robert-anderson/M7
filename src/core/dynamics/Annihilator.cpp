@@ -96,10 +96,7 @@ void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_
             //m_aborted_weight += std::abs(*delta_weight);
             return;
         }
-        auto weight_after = weight_before + delta_weight;
-        if (!consts::float_is_zero(weight_before) && !consts::float_is_zero(weight_after)
-            && ((std::abs(weight_before) > 0) != (std::abs(weight_after) > 0)))
-            m_wf.m_nannihilated.m_local[dst_ipart] += std::abs(std::abs(weight_before) - std::abs(weight_after));
+        m_wf.m_nannihilated.m_local[dst_ipart] += annihilated_magnitude(weight_before, delta_weight);
         m_wf.change_weight(dst_ipart, delta_weight);
     }
 }
