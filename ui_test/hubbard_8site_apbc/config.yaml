@@ -1,0 +1,5 @@
+---
+wavefunction:
+    nw_init: 10
+propagator:
+    nw_target: 100
