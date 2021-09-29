@@ -114,13 +114,13 @@ namespace defs {
      *  2: boson only (permanent basis)
      *  3: fermion only spin-adapted (CSF basis) (TODO: not currently implemented)
      */
-#ifndef MBF_IND
-#define MBF_IND 0;
+#ifndef MBF_TYPE_IND
+#define MBF_TYPE_IND 0;
 #endif
-    constexpr size_t mbf_ind = MBF_IND;
+    constexpr size_t mbf_type_ind = MBF_TYPE_IND;
 
-    constexpr bool enable_bosons = mbf_ind==0;
-    constexpr bool enable_fermions = mbf_ind!=2;
+    constexpr bool enable_bosons = mbf_type_ind!=0;
+    constexpr bool enable_fermions = mbf_type_ind!=2;
 
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;

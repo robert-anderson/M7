@@ -34,9 +34,9 @@ namespace field {
 
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
-    template<size_t mbf_ind>
-    using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
-    typedef mbf_t<defs::mbf_ind> Mbf;
+    template<size_t mbf_type_ind>
+    using mbf_t = typename std::tuple_element<mbf_type_ind, mbf_tup_t>::type;
+    typedef mbf_t<defs::mbf_type_ind> Mbf;
 
     typedef MaeIndsField MaeInds;
     typedef SpecMomIndsField SpecMomInds;

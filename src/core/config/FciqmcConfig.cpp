@@ -160,7 +160,7 @@ void fciqmc_config::SpfWeightedTwf::verify() {
     if (!defs::enable_bosons) {
         REQUIRE_EQ_ALL(m_boson_fac, 0.0,
                        "Boson exponential parameter is non-zero but bosons are compile time disabled. "
-                       "Specify -DENABLE_BOSONS to cmake and recompile");
+                       "Specify -DMBF_TYPE_IND to cmake and recompile");
     }
 }
 

@@ -18,7 +18,7 @@ namespace conn {
 
     template<size_t mbf_ind>
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
-    typedef mbf_t<defs::mbf_ind> Mbf;
+    typedef mbf_t<defs::mbf_type_ind> Mbf;
 
     template<typename T=void> struct selector {typedef void type;};
     template<> struct selector<FrmOnvField> {typedef FrmOnv type;};

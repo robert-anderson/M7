@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     /*
      * log compile-time defintions
      */
-    log::info("Many-body basis definition: {}", consts::mbf_type_name<defs::mbf_ind>());
+    log::info("Many-body basis definition: {}", consts::mbf_type_name<defs::mbf_type_ind>());
     log::info("Walker arithmetic type: {}", defs::enable_complex ? "complex" : "real");
 
     if (argc == 1) {

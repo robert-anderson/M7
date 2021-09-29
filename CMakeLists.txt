@@ -68,19 +68,14 @@ endif()
 #
 # Command line args for M7
 #
-option(ENABLE_BOSONS "ENABLE_BOSONS" 0)
-if (ENABLE_BOSONS)
-    add_compile_definitions(ENABLE_BOSONS)
+option(MBF_TYPE_IND "MBF_TYPE_IND" 0)
+if (MBF_TYPE_IND)
+    add_compile_definitions(MBF_TYPE_IND)
 endif()
 
 option(ENABLE_COMPLEX "ENABLE_COMPLEX" 0)
 if (ENABLE_COMPLEX)
     add_compile_definitions(ENABLE_COMPLEX)
-endif()
-
-option(ENABLE_MEVS "ENABLE_MEVS" 0)
-if (ENABLE_MEVS)
-    add_compile_definitions(ENABLE_MEVS)
 endif()
 
 option(ENABLE_ROUNDING_SPAWN_ATTEMPTS "ENABLE_ROUNDING_SPAWN_ATTEMPTS" 0)
