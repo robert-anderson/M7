@@ -147,8 +147,15 @@ fciqmc_config::Stats::Stats(config::Group *parent) :
                         "options relating to the recording of time series statistics about the calculation"),
         m_path(this, "path", "M7.stats",
                "path to the file to which MC cycle statistics will be output"),
+        m_period(this, "period", 1,
+               "path to the file to which MC cycle statistics will be output"),
         m_parallel(this, "parallel", false,
                    "output additional stats from each MPI rank") {}
+
+void fciqmc_config::Stats::verify() {
+    Section::verify();
+    REQUIRE_TRUE_ALL(m_period, "Stats output period must be non-zero");
+}
 
 fciqmc_config::SpfWeightedTwf::SpfWeightedTwf(config::Group *parent) :
         config::Section(parent, "spf_weighted_twf",

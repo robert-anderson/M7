@@ -17,19 +17,7 @@ struct NumberFieldBase : FieldBase {
             FieldBase(row, element_size * nelement, type_info, name),
             m_element_size(element_size), m_nelement(nelement), m_is_complex(is_complex) {}
 
-    virtual std::string stats_string() const = 0;
-
     virtual std::string format_string() const = 0;
-
-    template<typename T>
-    static std::string stats_string_element(const T &v) {
-        return utils::num_to_string(v);
-    }
-
-    template<typename T>
-    static std::string stats_string_element(const std::complex<T> &v) {
-        return utils::num_to_string(v.real()) + " " + utils::num_to_string(v.imag());
-    }
 };
 
 
@@ -244,13 +232,6 @@ struct NdNumberField : NumberFieldBase {
         for (size_t ielement = 0ul; ielement < nelement(); ++ielement)
             tmp += utils::num_to_string((*this)[ielement]) + " ";
         if (nind > 0) tmp += "]";
-        return tmp;
-    }
-
-    std::string stats_string() const override {
-        std::string tmp;
-        for (size_t ielement = 0ul; ielement < nelement(); ++ielement)
-            tmp += stats_string_element((*this)[ielement]) + " ";
         return tmp;
     }
 

@@ -29,12 +29,15 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
                   "this is biased");
 
     if (mpi::i_am_root()) {
-        m_stats = std::unique_ptr<FciqmcStats>(new FciqmcStats("M7.stats", "FCIQMC", {m_prop}));
-        m_timing_stats = std::unique_ptr<TimingStats>(new TimingStats("M7.timing", "FCIQMC Timings", {}));
+        m_stats = std::unique_ptr<FciqmcStats>(
+                new FciqmcStats("M7.stats", "FCIQMC", {m_prop}, m_opts.m_stats.m_period));
+        m_timing_stats = std::unique_ptr<TimingStats>(
+                new TimingStats("M7.timing", "FCIQMC Timings", {}, m_opts.m_stats.m_period));
     }
     if (m_opts.m_stats.m_parallel)
         m_parallel_stats = std::unique_ptr<ParallelStats>(
-                new ParallelStats("M7.stats." + std::to_string(mpi::irank()), "FCIQMC Parallelization", {}));
+                new ParallelStats("M7.stats." + std::to_string(mpi::irank()),
+                                  "FCIQMC Parallelization", {}, m_opts.m_stats.m_period));
 
     /**
      * setup archive members
@@ -325,7 +328,7 @@ void Solver::output_stats() {
             stats.m_weighted_twf_denom = m_weighted_twf->m_denominator_total[0];
         }
         stats.m_reweighting_factor = m_prop.m_shift.m_reweighter.m_total;
-        m_stats->flush();
+        m_stats->commit();
 
         auto &timing_stats = m_timing_stats->m_row;
         timing_stats.m_total_synchronization_overhead = sync_overhead;
@@ -333,7 +336,7 @@ void Solver::output_stats() {
         timing_stats.m_communication_time = m_communicate_timer;
         timing_stats.m_annihilation_loop_time = m_annihilate_timer;
         timing_stats.m_total_cycle_time = m_cycle_timer;
-        m_timing_stats->flush();
+        m_timing_stats->commit();
     }
 
     if (m_opts.m_stats.m_parallel) {
@@ -345,6 +348,6 @@ void Solver::output_stats() {
         stats.m_nwalker_lookup_skip = m_wf.m_store.m_nskip_total;
         stats.m_nwalker_lookup = m_wf.m_store.m_nlookup_total;
         stats.m_nrow_recv = m_wf.m_comm.m_last_recv_count;
-        m_parallel_stats->flush();
+        m_parallel_stats->commit();
     }
 }

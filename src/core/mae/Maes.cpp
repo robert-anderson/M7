@@ -10,7 +10,7 @@ Maes::Maes(const fciqmc_config::AvEsts &opts, BasisDims bd, size_t nelec, size_t
     if (*this) {
         m_stats = mem_utils::make_unique<MaeStats>("M7.maes.stats",
                 "FCIQMC Multidimensional Averaged Estimators",
-                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms));
+                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms), 1);
     }
 }
 
@@ -99,6 +99,6 @@ void Maes::output(size_t icycle, const Hamiltonian &ham, bool final) {
             stats_row.m_total_norm = m_bilinears.m_rdms.m_total_norm.m_reduced;
             stats_row.m_rdm_energy = rdm_energy;
         }
-        m_stats->flush();
+        m_stats->commit();
     }
 }

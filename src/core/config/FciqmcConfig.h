@@ -136,9 +136,12 @@ namespace fciqmc_config {
 
     struct Stats : config::Section {
         config::Param<std::string> m_path;
+        config::Param<size_t> m_period;
         config::Param<bool> m_parallel;
 
         explicit Stats(config::Group *parent);
+
+        void verify() override;
     };
 
     struct SpfWeightedTwf : config::Section {

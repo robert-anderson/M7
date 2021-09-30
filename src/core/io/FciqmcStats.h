@@ -9,29 +9,29 @@
 #include "src/core/field/Row.h"
 #include "StatsTable.h"
 
-struct FciqmcStatsRow : Row {
+struct FciqmcStatsRow : StatsRow {
 
     NdFormat<defs::ndim_wf> m_wf_format;
 
-    field::Number<size_t> m_icycle;
-    field::Number<double> m_tau;
-    field::Numbers<defs::ham_comp_t, defs::ndim_wf> m_shift;
-    field::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
-    field::Numbers<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
-    field::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_spawned;
-    field::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_annihilated;
-    field::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy_num;
-    field::Numbers<defs::wf_t, defs::ndim_wf> m_ref_weight;
-    field::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy;
-    field::Numbers<defs::ham_comp_t, defs::ndim_wf> m_l2_norm;
-    field::Numbers<size_t, defs::ndim_wf> m_ninitiator;
-    field::Numbers<size_t, defs::ndim_wf> m_nocc_mbf;
-    field::Numbers<int, defs::ndim_wf> m_delta_nocc_mbf;
-    field::Numbers<defs::prob_t, 1ul> m_exlvl_probs;
-    field::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
-    field::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;
-    field::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_denom;
-    field::Numbers<defs::ham_comp_t, defs::ndim_wf> m_reweighting_factor;
+    statistic::Number<size_t> m_icycle;
+    statistic::Number<double> m_tau;
+    statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_shift;
+    statistic::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker;
+    statistic::Numbers<defs::wf_comp_t, defs::ndim_wf> m_delta_nwalker;
+    statistic::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_spawned;
+    statistic::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_annihilated;
+    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy_num;
+    statistic::Numbers<defs::wf_t, defs::ndim_wf> m_ref_weight;
+    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_ref_proj_energy;
+    statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_l2_norm;
+    statistic::Numbers<size_t, defs::ndim_wf> m_ninitiator;
+    statistic::Numbers<size_t, defs::ndim_wf> m_nocc_mbf;
+    statistic::Numbers<int, defs::ndim_wf> m_delta_nocc_mbf;
+    statistic::Numbers<defs::prob_t, 1ul> m_exlvl_probs;
+    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
+    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;
+    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_denom;
+    statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_reweighting_factor;
 
     FciqmcStatsRow(Propagator& prop);
 };

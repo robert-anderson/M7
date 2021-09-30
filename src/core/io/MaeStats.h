@@ -8,7 +8,7 @@
 #include "src/core/field/Row.h"
 #include "StatsTable.h"
 
-struct MaeStatsRow : Row {
+struct MaeStatsRow : StatsRow {
     field::Number<size_t> m_icycle;
     field::Number<defs::wf_t> m_total_norm;
     field::Number<defs::ham_comp_t> m_rdm_energy;

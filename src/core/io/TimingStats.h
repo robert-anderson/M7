@@ -8,12 +8,12 @@
 #include "src/core/field/Row.h"
 #include "StatsTable.h"
 
-struct TimingStatsRow : Row {
-    field::Number<double> m_total_synchronization_overhead;
-    field::Number<double> m_propagate_loop_time;
-    field::Number<double> m_communication_time;
-    field::Number<double> m_annihilation_loop_time;
-    field::Number<double> m_total_cycle_time;
+struct TimingStatsRow : StatsRow {
+    statistic::Number<double> m_total_synchronization_overhead;
+    statistic::Number<double> m_propagate_loop_time;
+    statistic::Number<double> m_communication_time;
+    statistic::Number<double> m_annihilation_loop_time;
+    statistic::Number<double> m_total_cycle_time;
 
     TimingStatsRow() :
         m_total_synchronization_overhead(this, "Total time waited at MPI_Barrier"),
