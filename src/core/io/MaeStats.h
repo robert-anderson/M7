@@ -9,9 +9,9 @@
 #include "StatsTable.h"
 
 struct MaeStatsRow : StatsRow {
-    field::Number<size_t> m_icycle;
-    field::Number<defs::wf_t> m_total_norm;
-    field::Number<defs::ham_comp_t> m_rdm_energy;
+    statistic::Number<size_t> m_icycle;
+    statistic::Number<defs::wf_t> m_total_norm;
+    statistic::Number<defs::ham_comp_t> m_rdm_energy;
 
     MaeStatsRow(bool rdms, bool spec_moms);
 };

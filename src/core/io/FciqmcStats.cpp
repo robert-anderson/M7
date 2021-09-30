@@ -6,7 +6,7 @@
 
 FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
         m_wf_format(prop.m_wf_fmt),
-        m_icycle(this, "Cycle number"),
+        m_icycle(this, "Cycle number", false),
         m_tau(this, "Timestep"),
         m_shift(this, m_wf_format, "Diagonal shift"),
         m_nwalker(this, m_wf_format, "WF L1 norm (number of walkers)"),

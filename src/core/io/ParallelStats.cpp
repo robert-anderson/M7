@@ -5,7 +5,7 @@
 #include "ParallelStats.h"
 
 ParallelStatsRow::ParallelStatsRow() :
-        m_icycle(this, "Cycle number"),
+        m_icycle(this, "Cycle number", false),
         m_synchronization_overhead(this, "Time waited at MPI_Barrier"),
         m_nblock_wf_ra(this, "Number of blocks of the WF rank allocator stored here"),
         m_nwalker_total(this, "Total WF L1 norm (number of walkers) over all WF parts"),

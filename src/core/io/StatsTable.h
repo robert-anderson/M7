@@ -23,13 +23,13 @@ namespace statistic {
         virtual std::string stats_string() const = 0;
 
         template<typename T>
-        static std::string stats_string_element(const T &v) {
-            return utils::num_to_string(v);
+        static std::string stats_string_element(const T &v, size_t denom) {
+            return utils::num_to_string(v / denom);
         }
 
         template<typename T>
-        static std::string stats_string_element(const std::complex<T> &v) {
-            return utils::num_to_string(v.real()) + " " + utils::num_to_string(v.imag());
+        static std::string stats_string_element(const std::complex<T> &v, size_t denom) {
+            return utils::num_to_string(v.real() / denom) + " " + utils::num_to_string(v.imag() / denom);
         }
     };
 
@@ -41,7 +41,7 @@ namespace statistic {
         using base_t::operator+=;
 
         const bool m_mean;
-        bool m_is_reset = true;
+        size_t m_ncommit_this_period = 0ul;
 
         buffered::Numbers<T, nind> m_reduced;
 
@@ -53,20 +53,20 @@ namespace statistic {
 
         void commit() override {
             if (m_mean) m_reduced += *this;
-            else if (!m_is_reset) m_reduced = *this;
-            m_is_reset = false;
+            else if (!m_ncommit_this_period) m_reduced = *this;
+            ++m_ncommit_this_period;
             NumberFieldBase::zero();
         }
 
         void reset() override {
             m_reduced.zero();
-            m_is_reset = true;
+            m_ncommit_this_period = 0ul;
         }
 
         std::string stats_string() const override {
             std::string tmp;
             for (size_t ielement = 0ul; ielement < nelement(); ++ielement)
-                tmp += stats_string_element((*this)[ielement]) + " ";
+                tmp += stats_string_element(m_reduced[ielement], m_mean ? m_ncommit_this_period : 1ul) + " ";
             return tmp;
         }
 
@@ -80,7 +80,7 @@ namespace statistic {
     struct Number : Numbers<T, 0ul> {
         typedef Numbers<T, 0ul> base_t;
         using base_t::operator=;
-        Number(StatsRow *row, std::string name = "") : base_t(row, {}, name) {}
+        Number(StatsRow *row, std::string name = "", bool mean=true) : base_t(row, {}, name, mean) {}
 
         Number(const Number& other): base_t(other){}
         Number& operator=(const Number<T>& other) {return *this;}
@@ -147,11 +147,10 @@ struct StatsTable : BufferedTable<row_t> {
     }
 
     void commit() {
-        if (m_ncommit && !(m_ncommit % m_period)) flush();
         const auto &row = static_cast<const Row &>(Table<row_t>::m_row);
         for (FieldBase *field : row.m_fields)
             dynamic_cast<statistic::Base *>(field)->commit();
-        ++m_ncommit;
+        if (!(++m_ncommit % m_period)) flush();
     }
 
 private:
@@ -170,8 +169,8 @@ private:
         *m_file << make_line() << std::endl;
         auto &row = static_cast<Row &>(Table<row_t>::m_row);
         for (FieldBase *field : row.m_fields) {
-            auto num_field = dynamic_cast<NumberFieldBase *>(field);
-            num_field->zero();
+            auto num_field = dynamic_cast<statistic::Base *>(field);
+            num_field->reset();
         }
     }
 };
