@@ -53,6 +53,7 @@ TEST(DenseHamiltonian, Hubbard3Site) {
 TEST(DenseHamiltonian, Hubbard4Site) {
     Hamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
     ASSERT_EQ(h.nelec(), 4);
+    ASSERT_EQ(h.m_bd.m_nsite, 4);
     DenseHamiltonian dh(h);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
@@ -61,6 +62,7 @@ TEST(DenseHamiltonian, Hubbard4Site) {
 TEST(DenseHamiltonian, Hubbard6Site) {
     Hamiltonian h(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 1);
     ASSERT_EQ(h.nelec(), 6);
+    ASSERT_EQ(h.m_bd.m_nsite, 6);
     DenseHamiltonian dh(h);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -3.0925653194551845);

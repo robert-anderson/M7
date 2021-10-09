@@ -11,12 +11,12 @@ void DenseHamiltonian::setup_frm(const Hamiltonian &source) {
     buffered::FrmOnv ket(source.m_bd);
 
     size_t ibra = ~0ul;
-    enums::FermionOnv bra_enum(source.m_bd, source.nelec());
+    enums::FermionOnv bra_enum(source.m_bd.m_nsite, source.nelec());
     conn::FrmOnv conn(source.m_bd);
 
     while (bra_enum.next(bra, ibra)) {
         size_t iket = ~0ul;
-        enums::FermionOnv ket_enum(source.m_bd, source.nelec());
+        enums::FermionOnv ket_enum(source.m_bd.m_nsite, source.nelec());
         while (ket_enum.next(ket, iket)) {
             conn.connect(bra, ket);
             auto h_elem = source.get_element(bra, conn);

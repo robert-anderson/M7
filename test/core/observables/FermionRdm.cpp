@@ -20,7 +20,7 @@
 defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bool explicit_hf_conns){
     Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
     buffered::Mbf ref_onv(ham.m_bd);
-    ham.set_hf_mbf(ref_onv, 0);
+    ham.set_aufbau_mbf(ref_onv, 0);
 
     Wavefunction wf(opts, ham.m_bd);
     ExactPropagator prop(ham, opts, wf.m_format, explicit_hf_conns);
