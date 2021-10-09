@@ -1,5 +1,14 @@
 ---
 wavefunction:
     nw_init: 10
+reference:
+    init_mbf_neel: yes
 propagator:
-    nw_target: 100
+    nadd: 0.0
+    nw_target: 40000
+    tau_init: 0.001
+shift:
+    period: 1
+    damp: 0.5
+stats:
+    period: 10

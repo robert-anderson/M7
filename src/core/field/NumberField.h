@@ -107,9 +107,19 @@ struct NdNumberField : NumberFieldBase {
         return is_ordered(0, m_nelement, strict, ascending);
     }
 
+    void copy_to(std::vector<T>& v) const {
+        DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
+        std::memcpy(v.data(), begin(), m_size);
+    }
+
     /*
      * math ops
      */
+
+    void add_to(std::vector<T>& v) const {
+        DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
+        for (size_t i = 0ul; i < m_nelement; ++i) v[i] += (*this)[i];
+    }
 
     template<typename U>
     NdNumberField &add_scaled(const U &factor, const NdNumberField &other) {

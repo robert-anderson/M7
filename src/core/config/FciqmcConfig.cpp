@@ -169,7 +169,7 @@ void fciqmc_config::SpfWeightedTwf::verify() {
     if (!defs::enable_bosons) {
         REQUIRE_EQ_ALL(m_boson_fac, 0.0,
                        "Boson exponential parameter is non-zero but bosons are compile time disabled. "
-                       "Specify -DMBF_TYPE_IND to cmake and recompile");
+                       "Set CMake variable -DMBF_TYPE_IND to 1 or 2 and recompile");
     }
 }
 
@@ -238,7 +238,7 @@ void fciqmc_config::Hamiltonian::verify() {
     if (!defs::enable_bosons) {
         REQUIRE_EQ_ALL(m_nboson_max, 0ul,
                        "Maximum boson number per mode is non-zero but bosons are compile time disabled. "
-                       "Specify -DENABLE_BOSONS to cmake and recompile");
+                       "Set CMake variable -DMBF_TYPE_IND to 1 or 2 and recompile");
     }
     REQUIRE_LE_ALL(m_nboson_max, defs::max_bos_occ,
                    log::format("Maximum boson number mustn't exceed the capacity of the integer container ({})",

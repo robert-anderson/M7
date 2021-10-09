@@ -115,25 +115,30 @@ namespace defs {
      *  3: fermion only spin-adapted (CSF basis) (TODO: not currently implemented)
      */
 #ifndef MBF_TYPE_IND
-#define MBF_TYPE_IND 0;
+#define MBF_TYPE_IND 0
 #endif
 
 #if (MBF_TYPE_IND==1) || (MBF_TYPE_IND==2)
-#define ENABLE_BOSONS 1;
-#else
-#define ENABLE_BOSONS 0;
+#define ENABLE_BOSONS 1
 #endif
 
 #if (MBF_TYPE_IND==0) || (MBF_TYPE_IND==1)
-#define ENABLE_FERMIONS 1;
-#else
-#define ENABLE_FERMIONS 0;
+#define ENABLE_FERMIONS
 #endif
 
     constexpr size_t mbf_type_ind = MBF_TYPE_IND;
 
-    constexpr bool enable_bosons = ENABLE_BOSONS;
-    constexpr bool enable_fermions = ENABLE_FERMIONS;
+#ifdef ENABLE_BOSONS
+    constexpr bool enable_bosons = true;
+#else
+    constexpr bool enable_bosons = false;
+#endif
+
+#ifdef ENABLE_FERMIONS
+    constexpr bool enable_fermions = true;
+#else
+    constexpr bool enable_fermions = false;
+#endif
 
     //  nroot, nreplica
     constexpr size_t ndim_wf = 2;

@@ -41,25 +41,28 @@ namespace statistic {
         using base_t::operator+=;
 
         const bool m_mean;
+        const size_t m_precision;
         size_t m_ncommit_this_period = 0ul;
 
-        buffered::Numbers<T, nind> m_reduced;
+        std::vector<T> m_reduced;
 
-        Numbers(StatsRow *row, NdFormat<nind> format, std::string name = "", bool mean = true) :
-                NdNumberField<T, nind>(row, format, name), m_mean(mean), m_reduced(format) {}
+        Numbers(StatsRow *row, NdFormat<nind> format, std::string name = "", bool mean = true, size_t precision=6) :
+                NdNumberField<T, nind>(row, format, name), m_mean(mean),
+                m_precision(precision), m_reduced(this->m_nelement) {}
 
         Numbers(const Numbers& other):
-                NdNumberField<T, nind>(other), m_mean(other.m_mean), m_reduced(other.m_format){}
+                NdNumberField<T, nind>(other), m_mean(other.m_mean),
+                m_precision(other.m_precision), m_reduced(other.m_nelement){}
 
         void commit() override {
-            if (m_mean) m_reduced += *this;
-            else if (!m_ncommit_this_period) m_reduced = *this;
+            if (m_mean) this->add_to(m_reduced);
+            else if (!m_ncommit_this_period) this->copy_to(m_reduced);
             ++m_ncommit_this_period;
             NumberFieldBase::zero();
         }
 
         void reset() override {
-            m_reduced.zero();
+            m_reduced.assign(this->m_nelement, 0);
             m_ncommit_this_period = 0ul;
         }
 
