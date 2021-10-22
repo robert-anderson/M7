@@ -23,6 +23,39 @@
 #include "src/core/wavefunction/DeterministicSubspace.h"
 #include "Annihilator.h"
 
+/**
+ * This central class brings together wavefunctions, propagator, expectation values, and statistics.
+ *
+ * The main loop of the projector method is carried out in the execute method, and each iteration of the loop is
+ * referred to as a cycle.
+ *
+ * Many dependent objects have a state which is cyclic in nature, and such situations can give rise to confusion with
+ * regard to recognising at any given point in the algorithm which quantities correspond to the "last", "current",
+ * and "next" cycles.
+ *
+ * Variables need to be accumulated and reset cyclically.
+ *
+ * The basic structure of a Solver::execute cycle is as follows
+ * call begin_cycle
+ * do WF(i+1) = Prop(i) x WF(i)
+ * call end_cycle
+ * write stats
+ *
+ * begin_cycle and end_cycle defined here call in turn the begin_cycle and end_cycle methods of dependent objects. One
+ * might look to put all resets of cyclical variables in a single method, but it is actually necessary to split these
+ * procedures up. E.g. the number of walkers must be zeroed in begin_cycle, before being accumulated in the loop over
+ * occupied MBFs, and then being sum-reduced over all MPI ranks. This reduced value is required by other modules
+ * including notably the stats writer.
+ *
+ * begin_cycle should be the more logically intricate method, handling:
+ *  - updates to variables derived from cyclical (reducable) variables
+ *  - cyclical variable rezeroing
+ *  - interactive variable changes
+ *
+ * where as end_cycle should be relatively lightweight, performing only the reductions themselves.
+ *
+ * The execution order of begin_cycle calls is in general significant, but that of end_cycle calls should never be.
+ */
 class Solver {
 
     size_t m_icycle = 0ul;

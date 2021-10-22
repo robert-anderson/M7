@@ -57,7 +57,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         prob *= m_excit_gens.get_prob(iex);
 
         conn.apply(src_onv, dst_onv);
-        auto delta = -(weight / (defs::ham_comp_t) nattempt) * tau() * helem / prob;
+        auto delta = -tau() * helem / prob;
         if (consts::float_is_zero(delta)) continue;
         delta = m_prng.stochastic_threshold(delta, m_opts.m_propagator.m_min_spawn_mag);
         if (consts::float_is_zero(delta)) continue;

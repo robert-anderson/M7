@@ -292,7 +292,6 @@ void Solver::end_cycle() {
 //    MPI_REQUIRE(m_chk_ninitiator_local == m_wf.m_ninitiator(0, 0),
 //                "Unlogged creations of initiator MBFs have occurred");
     m_refs.end_cycle();
-    //if (m_mevs.m_fermion_rdm) m_mevs.m_fermion_rdm->end_cycle();
     m_wf.end_cycle();
     m_prop.update(m_icycle, m_wf);
     m_maes.end_cycle();
