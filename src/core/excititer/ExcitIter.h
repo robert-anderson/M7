@@ -11,6 +11,7 @@
 #include "BodyFnTypes.h"
 
 using namespace body_fn_types;
+
 /**
  * deterministic equivalent of the excitation generators, provides customisable loops which can be injected with
  * arbitrary code in the form of a body function argument
@@ -193,7 +194,7 @@ public:
 
     ExcitIter(const Hamiltonian &ham, size_t exsig);
 
-    virtual ~ExcitIter(){}
+    virtual ~ExcitIter() {}
 
     /*
      * these are the "canonical" foreach definitions - the only methods which need to be overridden in derived classes

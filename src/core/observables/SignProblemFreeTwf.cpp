@@ -6,7 +6,7 @@
 
 SpfTwfBase::SpfTwfBase(const Hamiltonian &ham, size_t npart, size_t nsite) :
         m_ham(ham),  m_excit_iters(ham), m_numerator(npart, 0.0), m_denominator(npart, 0.0),
-        m_nsite(nsite), m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
+        m_numerator_total(npart, 0.0), m_denominator_total(npart, 0.0) {
 }
 
 void SpfTwfBase::reduce() {

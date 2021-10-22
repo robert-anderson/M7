@@ -14,7 +14,6 @@ protected:
     ExcitIterGroup m_excit_iters;
     std::vector<defs::ham_t> m_numerator;
     std::vector<defs::ham_t> m_denominator;
-    size_t m_nsite;
 
 public:
     std::vector<defs::ham_t> m_numerator_total;
@@ -28,7 +27,7 @@ public:
     virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const field::FrmBosOnv &onv) = 0;
 
-    virtual void reduce();;
+    virtual void reduce();
 };
 
 #endif //M7_SIGNPROBLEMFREETWF_H

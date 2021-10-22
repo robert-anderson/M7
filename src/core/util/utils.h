@@ -838,11 +838,11 @@ namespace model_utils {
     }
 
     static size_t left(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
-        return pbc ? left_obc(ispinorb, nsite) : left_pbc(ispinorb, nsite);
+        return pbc ? left_pbc(ispinorb, nsite) : left_obc(ispinorb, nsite);
     }
 
     static size_t right(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
-        return pbc ? right_obc(ispinorb, nsite) : right_pbc(ispinorb, nsite);
+        return pbc ? right_pbc(ispinorb, nsite) : right_obc(ispinorb, nsite);
     }
 }
 

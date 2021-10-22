@@ -40,11 +40,9 @@ void excititers::FrmConserve::foreach(const FrmBosOnv &src, conn::FrmBosOnv &con
     foreach(src.m_frm, conn.m_frm, converted_body);
 }
 
-
-
 excititers::Hubbard1dSingles::Hubbard1dSingles(const Hamiltonian &ham) :
         FrmConserve(ham, exsig_utils::ex_single), m_pbc(ham.m_frm.is_hubbard_1d_pbc()) {
-    REQUIRE_TRUE(ham.m_frm.is_hubbard_1d(),
+    REQUIRE_TRUE(ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc(),
                  "Hamiltonian is not 1D hubbard, so this class will not generate all connections");
 }
 
