@@ -38,51 +38,7 @@ public:
      *  general Hamiltonian object whose excitation level information is queried to determine the required exsig-specific
      *  excitation iterator objects
      */
-    ExcitIterGroup(const Hamiltonian &ham) {
-
-        bool any_singles =
-                ham.m_frm.m_contribs_1100.is_nonzero(ex_single) || ham.m_frm.m_contribs_2200.is_nonzero(ex_single);
-        if (any_singles) {
-            if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
-                add(std::unique_ptr<ExcitIter>(new excititers::Hubbard1dSingles(ham)));
-            } else {
-                add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_single)));
-            }
-        }
-        if (ham.m_frm.m_contribs_2200.is_nonzero(ex_double)) {
-            add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_double)));
-        }
-
-        if (ham.m_bos.m_nboson_max) {
-            bool any_pures;
-            any_pures = ham.m_ladder.m_contribs_0010.is_nonzero(exsig_utils::ex_0010)
-                             || ham.m_ladder.m_contribs_1110.is_nonzero(exsig_utils::ex_0010);
-            if (any_pures) {
-                if (ham.m_ladder.is_holstein())
-                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0010)));
-                else
-                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPure(ham, exsig_utils::ex_0010)));
-            }
-            any_pures = ham.m_ladder.m_contribs_0001.is_nonzero(exsig_utils::ex_0001)
-                             || ham.m_ladder.m_contribs_1101.is_nonzero(exsig_utils::ex_0001);
-            if (any_pures) {
-                if (ham.m_ladder.is_holstein())
-                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0001)));
-                else
-                    add(std::unique_ptr<ExcitIter>(new excititers::LadderPure(ham, exsig_utils::ex_0001)));
-            }
-
-            bool any_hopping;
-            any_hopping = ham.m_ladder.m_contribs_1110.is_nonzero(exsig_utils::ex_1110);
-            if (any_hopping)
-                add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1110)));
-            any_hopping = ham.m_ladder.m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
-            if (any_hopping)
-                add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1101)));
-        }
-
-        init();
-    }
+    explicit ExcitIterGroup(const Hamiltonian &ham);
 
     void log_breakdown() const;
 

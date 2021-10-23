@@ -47,7 +47,7 @@ namespace body_fn_types {
      */
     using fn_h_t = std::function<void(defs::ham_t)>;
     /**
-     * body function which accepts dst MBF  as const ref and matrix element by value
+     * body function which accepts dst MBF as const ref and matrix element by value
      */
     template<typename mbf_t>
     using fn_dh_t = std::function<void(const mbf_t &, defs::ham_t)>;

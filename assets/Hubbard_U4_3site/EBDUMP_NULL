@@ -1,4 +1,4 @@
-&FCI NORB=3
+&FCI NORB=3, NMODE=3
 &END
 0    1    1    1
 0    2    2    2

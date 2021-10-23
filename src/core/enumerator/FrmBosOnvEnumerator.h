@@ -34,8 +34,8 @@ public:
             m_bonv_enum.next(m_bonv);
             if (!m_fonv_enum.next(m_fonv)) return false;
         }
-        result.m_frm = m_fonv;
-        result.m_bos = m_bonv;
+        result.m_frm = static_cast<const FrmOnvField&>(m_fonv);
+        result.m_bos = static_cast<const BosOnvField&>(m_bonv);
         return true;
     }
 };
