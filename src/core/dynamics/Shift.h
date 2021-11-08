@@ -82,10 +82,9 @@ private:
 struct Shift {
     const fciqmc_config::Document &m_opts;
     /**
-     * the numbers of walkers on each WF part in the last iteration is stored and updated each
-     * MC cycle so that the growth rate can be computed
+     * the numbers of walkers on each WF part in the last period is stored so that the growth rate can be computed
      */
-    buffered::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_last_update;
+    buffered::Numbers<defs::wf_comp_t, defs::ndim_wf> m_nwalker_last_period;
     /**
      * values of the diagonal shift for each WF part
      */
@@ -118,25 +117,9 @@ struct Shift {
     /**
      * compute the change in all parts of the shift value based on the current values of wf.m_nwalkers
      *
-     * The number of walkers available at the end of a propagation loop i is the number of walkers before the ith cycle.
-     * if we use this statistic to update the shift with update period 1, the following incorrect update cycle is defined:
-     *
-     *     S(0)
-     * N(0) -> N(1)
-     *
-     *     S(0)
-     * N(1) -> N(2)
-     *
-     *     S(1)
-     * N(2) -> N(3)
-     * ....
-     *
-     * one possible solution is to compute the number of walkers in cycle i+1 with another loop over occupied rows, but
-     * this entails additional cost.
-     *
-     * The most efficient way is to accumulate all changes to walkers into a "delta" variable, such that the number of
-     * walkers at the start of the next cycle can be known in advance.
-     *
+     * the shift value is changed for a WF part if:
+     *  - the walker number for the part exceeds the target
+     *  - the cycle number is a nonzero multiple of the configured update period
      *
      * @param wf
      *  wavefunction whose population growth defines the change in shift

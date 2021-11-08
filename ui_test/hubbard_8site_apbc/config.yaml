@@ -5,10 +5,12 @@ reference:
     init_mbf_neel: yes
 propagator:
     nadd: 0.0
-    nw_target: 40000
+    nw_target: 50000
     tau_init: 0.001
 shift:
-    period: 1
+    period: 10
     damp: 0.5
 stats:
     period: 10
+inst_ests:
+    spf_uniform_twf: yes

@@ -57,13 +57,14 @@ bool Reweighter::product_chk() const {
 
 Shift::Shift(const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
-        m_nwalker_last_update(wf_fmt.m_shape, std::numeric_limits<defs::wf_comp_t>::max()),
+        m_nwalker_last_period(wf_fmt.m_shape, std::numeric_limits<defs::wf_comp_t>::max()),
         m_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_avg_value_histories(wf_fmt.m_nelement, std::queue<defs::ham_comp_t>()),
         m_avg_values(wf_fmt.m_shape, opts.m_shift.m_init),
         m_variable_mode("variable shift mode", wf_fmt.m_nelement, "WF part"),
         m_nwalker_target("nwalker_target", opts.m_propagator.m_nw_target),
         m_reweighter(opts.m_shift, wf_fmt){
+    m_nwalker_last_period.zero();
     DEBUG_ASSERT_FALSE(m_variable_mode, "Shift should not initially be in variable mode");
 }
 
@@ -74,34 +75,26 @@ const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
 void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
 
-    if (icycle % m_opts.m_shift.m_period) return;
-
-    /**
-     * we are computing S(icycle), but have the walker number at icycle-1 Nw(icycle-1)
-     * to compute S(icycle), we need Nw(icycle)
-     *
-     * this is constructed by Nw(icycle-1)+deltaNw(icycle-1)
-     *
-     * the ratio between Nw(icycle) and Nw(icycle - period) is taken to determine the new shift value
-     *
-     * Nw(icycle) is stored in m_nwalker_last_update
-     *
-     */
-     /**
-      * on the 0-th cycle this makes no difference, since Nw(-period) is taken to be zero
-      */
-    if (m_nwalker_last_update[0]==std::numeric_limits<defs::wf_t>::max()){
-        m_nwalker_last_update = wf.m_nwalker.m_reduced;
-        return;
-    }
-
     for (size_t ipart=0ul; ipart < m_variable_mode.nelement(); ++ipart){
+        /*
+         * at the beginning of cycle i - where this update is performed, Nw_i is not available directly since the loop
+         * over the current occupied list has yet to be performed. Nw_i is required so compute S_i, so we must get it by
+         * adding the difference in Nw due to the application of cycle i-1 propagator.
+         */
+        auto nw = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
         auto& variable_mode = m_variable_mode[ipart];
-        variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target);
+        /*
+         * number of cycles since last update,
+         * this is the shift update period unless the target walker number has been reached before the end of a period
+         */
+        size_t a = 0ul;
+        if (variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target))
+            a = icycle % m_opts.m_shift.m_period;
+        if (!a) a = m_opts.m_shift.m_period;
+
         if (variable_mode) {
-            auto next_nw = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
-            auto rate = next_nw / m_nwalker_last_update[ipart];
-            m_values[ipart] -= m_opts.m_shift.m_damp * consts::real_log(rate) / (tau * m_opts.m_shift.m_period);
+            auto rate =  nw / m_nwalker_last_period[ipart];
+            m_values[ipart] -= m_opts.m_shift.m_damp * consts::real_log(rate) / (tau * a);
             if (m_opts.m_shift.m_reweight) {
                 bool reweight_begin_cond = icycle >= variable_mode.icycle_start() + m_opts.m_shift.m_reweight.m_delay;
                 m_reweighter.update(icycle, ipart, reweight_begin_cond, get_average(ipart));
@@ -110,7 +103,11 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
 
         }
         add_to_average();
-        m_nwalker_last_update[ipart] = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
+    }
+    // if this was a period cycle, update the last nw value
+    if (icycle % m_opts.m_shift.m_period==0) {
+        m_nwalker_last_period = wf.m_nwalker.m_reduced;
+        m_nwalker_last_period += wf.m_delta_nwalker.m_reduced;
     }
 }
 

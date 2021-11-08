@@ -79,9 +79,6 @@ public:
      */
     void begin_cycle();
 
-    /**
-     * redefine to candidate ref if needed, and perform necessary MPI reductions
-     */
     void end_cycle();
 
     /**

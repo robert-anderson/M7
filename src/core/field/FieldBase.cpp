@@ -8,7 +8,7 @@
 
 FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :
         m_type_info(type_info), m_size(size),
-        m_name(name), m_null_string(m_size, 0) {
+        m_name(name), m_null_string(std::max(1ul, m_size), 0) {
     m_row = row;
     if (m_row) m_row_offset = m_row->add_field(this);
 }

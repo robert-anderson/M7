@@ -122,6 +122,9 @@ void Solver::execute(size_t ncycle) {
 void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
     m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{(0, 0)}];
+
+    m_prop.update(m_icycle, m_wf);
+
     m_wf.begin_cycle();
     ASSERT(m_wf.m_nwalker.m_local[0] == 0);
     m_wf.m_ra.update(m_icycle);
@@ -293,7 +296,6 @@ void Solver::end_cycle() {
 //                "Unlogged creations of initiator MBFs have occurred");
     m_refs.end_cycle();
     m_wf.end_cycle();
-    m_prop.update(m_icycle, m_wf);
     m_maes.end_cycle();
     if (m_uniform_twf) m_uniform_twf->reduce();
     if (m_weighted_twf) m_weighted_twf->reduce();

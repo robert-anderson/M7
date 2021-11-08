@@ -57,13 +57,13 @@ void Reference::contrib_row() {
 }
 
 void Reference::begin_cycle() {
+    accept_candidate(m_redefinition_thresh);
     m_candidate_abs_weight = 0.0;
     m_summables.zero_all_local();
     update();
 }
 
 void Reference::end_cycle() {
-    accept_candidate(m_redefinition_thresh);
     m_summables.all_sum();
 }
 

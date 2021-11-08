@@ -93,7 +93,6 @@ void Wavefunction::begin_cycle() {
 
 void Wavefunction::end_cycle() {
     m_summables.all_sum();
-    m_store.attempt_remap();
 }
 
 defs::wf_comp_t Wavefunction::square_norm(const size_t &ipart) const {
