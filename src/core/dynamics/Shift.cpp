@@ -74,6 +74,7 @@ const defs::ham_comp_t &Shift::operator[](const size_t &ipart) {
 
 void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &tau) {
     if (m_nwalker_target.read()) m_variable_mode.terminate(icycle);
+    const bool is_period_cycle = !(icycle % m_opts.m_shift.m_period);
 
     for (size_t ipart=0ul; ipart < m_variable_mode.nelement(); ++ipart){
         /*
@@ -84,15 +85,14 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
         auto nw = wf.m_nwalker.m_reduced[ipart] + wf.m_delta_nwalker.m_reduced[ipart];
         auto& variable_mode = m_variable_mode[ipart];
         /*
-         * number of cycles since last update,
-         * this is the shift update period unless the target walker number has been reached before the end of a period
+         * number of cycles since last update
          */
         size_t a = 0ul;
         if (variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target))
             a = icycle % m_opts.m_shift.m_period;
-        if (!a) a = m_opts.m_shift.m_period;
+        if (is_period_cycle) a = m_opts.m_shift.m_period;
 
-        if (variable_mode) {
+        if (variable_mode && a) {
             auto rate =  nw / m_nwalker_last_period[ipart];
             m_values[ipart] -= m_opts.m_shift.m_damp * consts::real_log(rate) / (tau * a);
             if (m_opts.m_shift.m_reweight) {
@@ -104,8 +104,8 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
         }
         add_to_average();
     }
-    // if this was a period cycle, update the last nw value
-    if (icycle % m_opts.m_shift.m_period==0) {
+
+    if (is_period_cycle){
         m_nwalker_last_period = wf.m_nwalker.m_reduced;
         m_nwalker_last_period += wf.m_delta_nwalker.m_reduced;
     }
