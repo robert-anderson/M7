@@ -88,8 +88,11 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
          * number of cycles since last update
          */
         size_t a = 0ul;
-        if (variable_mode.update(icycle, wf.m_nwalker.m_reduced[ipart] >= m_nwalker_target))
+        if (variable_mode.update(icycle, nw >= m_nwalker_target)) {
+            log::info("Variable shift triggered for WF part {}. Cycle {} nw: {}, cycle {} nw: {}",
+                      ipart, icycle-1, wf.m_nwalker.m_reduced[ipart], icycle, nw);
             a = icycle % m_opts.m_shift.m_period;
+        }
         if (is_period_cycle) a = m_opts.m_shift.m_period;
 
         if (variable_mode && a) {
