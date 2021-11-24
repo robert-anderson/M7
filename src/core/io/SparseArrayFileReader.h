@@ -46,8 +46,7 @@ public:
         std::string line;
         bool result = FileReader::next(line);
         if (!result) return false;
-        extract(line, m_nind, m_indsfirst, m_complex_valued, inds, v);
-        return true;
+        return extract(line, m_nind, m_indsfirst, m_complex_valued, inds, v);
     }
 
     size_t first_valid_line(const std::string &fname, const size_t &nind, Tern &indsfirst, Tern &complex_valued) {
@@ -96,22 +95,34 @@ public:
         return true;
     }
 
-    static void
+    static bool
     extract(const std::string &line, size_t nind, bool indsfirst, bool complex_valued, defs::inds &inds, T &value) {
+        DEBUG_ASSERT_LE(nind, inds.size(), "inds vector not long enough for the parsed number of indices");
         const char *p = line.begin().base();
+        /**
+         * TODO: deal with incorrect number of indices in data file appropriately
+         */
         auto f = [&p, &nind, &complex_valued, &inds, &value](bool indsnext) {
             if (indsnext) {
                 for (size_t i = 0ul; i < nind; ++i) {
+                    if (!*p) return false;
                     inds[i] = string_utils::read_unsigned(p);
                 }
             } else {
+                if (!*p) return false;
                 value = string_utils::read_double(p);
                 if (consts::is_complex<T>() && complex_valued)
                     complex_utils::set_imag_part(value, string_utils::read_double(p));
             }
+            return true;
         };
-        if(indsfirst){ f(1); f(0);}
-        else {f(0); f(1);}
+        if(indsfirst){
+            if (!f(1) || !f(0)) return false;
+        }
+        else {
+            if (!f(0) || !f(1)) return false;
+        }
+        return true;
     }
 
     virtual bool inds_in_range(const defs::inds& inds) const {

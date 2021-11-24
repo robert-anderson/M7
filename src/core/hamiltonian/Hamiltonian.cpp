@@ -27,6 +27,10 @@ const size_t &Hamiltonian::nelec() const {
     return m_frm.m_nelec;
 }
 
+const size_t &Hamiltonian::nboson() const {
+    return m_bos.m_nboson;
+}
+
 bool Hamiltonian::complex_valued() const {
     return m_frm.m_complex_valued;
 }

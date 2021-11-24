@@ -6,12 +6,14 @@
 #include "src/core/io/BosdumpFileReader.h"
 
 BosonHamiltonian::BosonHamiltonian(const std::string& fname, size_t nboson_max) :
-        m_nboson_max(nboson_max), m_nmode(read_nmode(fname)),
-        m_coeffs(m_nboson_max ? m_nmode : 0ul), m_contribs_0011(exsig_utils::ex_0011) {
+        m_nboson_max(nboson_max), m_nmode(read_nmode(fname)), m_nboson(read_nboson(fname)),
+        m_coeffs_1(m_nboson_max ? m_nmode : 0ul),
+        m_coeffs_2(m_nboson_max ? m_nmode : 0ul),
+        m_contribs_0011(exsig_utils::ex_0011) {
     if (!m_nboson_max || !m_nmode) return;
 
     BosdumpFileReader file_reader(fname);
-    defs::inds inds(2);
+    defs::inds inds(4);
     defs::ham_t value;
 
     log::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");
@@ -21,8 +23,12 @@ BosonHamiltonian::BosonHamiltonian(const std::string& fname, size_t nboson_max) 
         auto exsig = file_reader.exsig(inds, ranksig);
         DEBUG_ASSERT_TRUE(exsig_utils::contribs_to(exsig, ranksig),
                           "excitation does not contribute to this operator rank");
-        m_contribs_0011.set_nonzero(exsig);
-        m_coeffs.set(inds[0], inds[1], value);
+        if (ranksig == exsig_utils::ex_0011) {
+            m_contribs_0011.set_nonzero(exsig);
+            m_coeffs_1.set(inds[0], inds[1], value);
+        } else if (ranksig == exsig_utils::ex_0022) {
+            m_coeffs_2.set(inds[0], inds[1], inds[2], inds[3], value);
+        }
     }
     log_data();
 }
@@ -30,8 +36,19 @@ BosonHamiltonian::BosonHamiltonian(const std::string& fname, size_t nboson_max) 
 defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
     if (!m_nboson_max) return 0.0;
     defs::ham_t res = 0;
-    for (size_t imode = 0ul; imode < m_nmode; ++imode)
-        res += m_coeffs.get(imode, imode) * static_cast<defs::ham_comp_t>(onv[imode]);
+    for (size_t imode = 0ul; imode < m_nmode; ++imode) {
+        if (!onv[imode]) continue;
+        defs::ham_comp_t occi = onv[imode];
+        res += m_coeffs_1.get(imode, imode) * occi;
+        for (size_t jmode = 0ul; jmode < imode; ++jmode) {
+            if (!onv[jmode]) continue;
+            defs::ham_comp_t occj = onv[jmode];
+            // imode and jmode are different
+            // i, j -> i, j
+            res += 2*m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
+        }
+        res += 0.5*m_coeffs_2.get(imode, imode, imode, imode) * occi * (occi-1);
+    }
     return res;
 }
 

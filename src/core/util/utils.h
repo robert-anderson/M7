@@ -1052,6 +1052,7 @@ namespace exsig_utils {
     static constexpr size_t ex_0001 = encode(0,0,0,1);
     static constexpr size_t ex_0010 = encode(0,0,1,0);
     static constexpr size_t ex_0011 = encode(0,0,1,1);
+    static constexpr size_t ex_0022 = encode(0,0,2,2);
 }
 
 

@@ -5,7 +5,8 @@
 #ifndef M7_BOSONHAMILTONIAN_H
 #define M7_BOSONHAMILTONIAN_H
 
-#include <src/core/integrals/BosonCoeffs.h>
+#include <src/core/integrals/BosonCoeffs_1.h>
+#include <src/core/integrals/BosonCoeffs_2.h>
 #include <src/core/io/BosdumpFileReader.h>
 #include "src/core/connection/Connections.h"
 #include "src/core/parallel/SharedArray.h"
@@ -13,8 +14,9 @@
 #include "HamiltonianData.h"
 
 struct BosonHamiltonian {
-    const size_t m_nboson_max, m_nmode;
-    BosonCoeffs m_coeffs;
+    const size_t m_nboson_max, m_nmode, m_nboson;
+    BosonCoeffs_1 m_coeffs_1;
+    BosonCoeffs_2 m_coeffs_2;
     ham_data::TermContribs m_contribs_0011;
 
     BosonHamiltonian(const std::string& fname, size_t nboson_max);
@@ -33,6 +35,10 @@ private:
     static size_t read_nmode(const std::string& fname){
         if (!FileReader::exists(fname)) return 0ul;
         return BosdumpFileReader(fname).m_nmode;
+    }
+    static size_t read_nboson(const std::string& fname){
+        if (!FileReader::exists(fname)) return 0ul;
+        return BosdumpFileReader(fname).m_nboson;
     }
 };
 

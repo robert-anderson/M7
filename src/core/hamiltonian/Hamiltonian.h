@@ -50,6 +50,8 @@ struct Hamiltonian {
 
     const size_t &nelec() const;
 
+    const size_t &nboson() const;
+
     bool complex_valued() const;
 
     /*

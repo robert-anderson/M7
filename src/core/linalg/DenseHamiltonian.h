@@ -15,6 +15,8 @@ class DenseHamiltonian : public Matrix<defs::ham_t> {
 
     void setup_frmbos(const Hamiltonian &source);
 
+    void setup_bos(const Hamiltonian &source);
+
 public:
 
     DenseHamiltonian(const Hamiltonian &source);

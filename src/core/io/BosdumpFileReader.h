@@ -8,7 +8,7 @@
 #include "HamiltonianFileReader.h"
 
 struct BosdumpFileReader : HamiltonianFileReader {
-    const size_t m_nmode;
+    const size_t m_nmode, m_nboson;
 
     BosdumpFileReader(const std::string &fname);
 

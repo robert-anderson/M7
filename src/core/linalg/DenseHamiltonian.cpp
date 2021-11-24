@@ -4,6 +4,7 @@
 
 #include <src/core/enumerator/Enumerators.h>
 #include "DenseHamiltonian.h"
+#include "src/core/util/Foreach.h"
 
 void DenseHamiltonian::setup_frm(const Hamiltonian &source) {
 
@@ -49,6 +50,21 @@ void DenseHamiltonian::setup_frmbos(const Hamiltonian &source) {
             }
         }
     }
+}
+
+void DenseHamiltonian::setup_bos(const Hamiltonian &source) {
+
+    /*
+    buffered::BosOnv bra(source.m_bd);
+    buffered::BosOnv ket(source.m_bd);
+
+    foreach::rtnd::Ordered<false, true> foreach_bra(source.m_bd.m_nmode, source.nboson());
+    foreach::rtnd::Ordered<false, true> foreach_ket(source.m_bd.m_nmode, source.nboson());
+
+    auto ket_fn = [&]() {
+        foreach_ket.inds()
+    };
+     */
 }
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) : Matrix<defs::ham_t>(source.nci()) {

@@ -2,12 +2,12 @@
 // Created by rja on 02/09/2021.
 //
 
-#ifndef M7_BOSONCOEFFS_H
-#define M7_BOSONCOEFFS_H
+#ifndef M7_BOSONCOEFFS_1_H
+#define M7_BOSONCOEFFS_1_H
 
 #include "src/core/parallel/SharedArray.h"
 
-class BosonCoeffs {
+class BosonCoeffs_1 {
 
     size_t index(const size_t &n, const size_t &m) const {
         return n * m_nmode + m;
@@ -17,7 +17,7 @@ public:
     const size_t m_nmode;
     SharedArray<defs::ham_t> m_v;
 
-    BosonCoeffs(size_t nmode);
+    BosonCoeffs_1(size_t nmode);
 
     void set(const size_t& n, const size_t& m, const defs::ham_t& value);
 
@@ -25,4 +25,4 @@ public:
 };
 
 
-#endif //M7_BOSONCOEFFS_H
+#endif //M7_BOSONCOEFFS_1_H
