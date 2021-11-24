@@ -11,7 +11,6 @@ void BosonCoeffs_2::set(const size_t &i, const size_t &j, const size_t &k, const
 }
 
 const defs::ham_t &BosonCoeffs_2::get(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-    std::cout << i << " " << j << " " << k << " " << l << " " << m_v[index(i, j, k, l)] << std::endl;
     return m_v[index(i, j, k, l)];
 }
 

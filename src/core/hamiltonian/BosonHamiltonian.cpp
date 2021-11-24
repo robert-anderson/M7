@@ -5,7 +5,7 @@
 #include "BosonHamiltonian.h"
 #include "src/core/io/BosdumpFileReader.h"
 
-BosonHamiltonian::BosonHamiltonian(const std::string& fname, size_t nboson_max) :
+BosonHamiltonian::BosonHamiltonian(const std::string &fname, size_t nboson_max) :
         m_nboson_max(nboson_max), m_nmode(read_nmode(fname)), m_nboson(read_nboson(fname)),
         m_coeffs_1(m_nboson_max ? m_nmode : 0ul),
         m_coeffs_2(m_nboson_max ? m_nmode : 0ul),
@@ -45,9 +45,9 @@ defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
             defs::ham_comp_t occj = onv[jmode];
             // imode and jmode are different
             // i, j -> i, j
-            res += 2*m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
+            res += 2 * m_coeffs_2.get(imode, imode, jmode, jmode) * occi * occj;
         }
-        res += 0.5*m_coeffs_2.get(imode, imode, imode, imode) * occi * (occi-1);
+        res += 0.5 * m_coeffs_2.get(imode, imode, imode, imode) * occi * (occi - 1);
     }
     return res;
 }
@@ -57,8 +57,40 @@ defs::ham_comp_t BosonHamiltonian::get_energy(const field::BosOnv &onv) const {
 }
 
 defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    if (conn.size()) return 0.0;
-    return get_element(onv);
+    REQUIRE_FALSE(conn.size() == 2, "single number-conserving boson operators not implemented");
+    if (!conn.size()) return get_element(onv);
+    if (conn.size() == 4) {
+        auto i = conn.m_cre[0].m_imode;
+        auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;
+        auto k = conn.m_ann[0].m_imode;
+        auto l = conn.m_ann[0].m_nop == 2 ? k : conn.m_ann[1].m_imode;
+        size_t ni = onv[i];
+        size_t nj = onv[j];
+        size_t nk = onv[k];
+        size_t nl = onv[l];
+
+        defs::ham_comp_t occ_fac = 1.0;
+        if (i == j) {
+            if (k == l) {
+                DEBUG_ASSERT_NE(i, k, "ii <- ii case implies diagonal element, not double excitation");
+                // ii <- kk
+                occ_fac = 0.5*std::sqrt((ni + 2) * (ni + 1) * nk * (nk - 1));
+            } else {
+                // ii <- kl
+                occ_fac = std::sqrt((ni + 2) * (ni + 1) * nk * nl);
+            }
+        } else {
+            if (k == l) {
+                // ij <- kk
+                occ_fac = std::sqrt((ni + 1) * (nj + 1) * nk * (nk - 1));
+            } else {
+                // ij <- kl
+                occ_fac = 2*std::sqrt((ni + 1) * (nj + 1) * nk * nl);
+            }
+        }
+        return m_coeffs_2.phys_element(i, j, k, l) * occ_fac;
+    }
+    return 0.0;
 }
 
 size_t BosonHamiltonian::nci() const {

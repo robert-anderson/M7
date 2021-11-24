@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "src/core/hamiltonian/BosonHamiltonian.h"
 
-TEST(BosonHamiltonian, Coefficients){
+TEST(BosonHamiltonian, Coefficients) {
     BosonHamiltonian ham(defs::assets_root + "/LandauLevels/BOSDUMP", 12);
     ASSERT_EQ(ham.m_nmode, 5ul);
     ASSERT_EQ(ham.m_nboson, 5ul);
@@ -15,7 +15,7 @@ TEST(BosonHamiltonian, Coefficients){
     ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(4, 2, 0, 2), 0.1530931089);
 }
 
-TEST(BosonHamiltonian, DiagonalMatrixElements){
+TEST(BosonHamiltonian, DiagonalMatrixElements) {
     /*
      *  ONV (L=15)       diag. matrix element
      *  [0. 0. 0. 5. 0.] 3.125
@@ -41,7 +41,7 @@ TEST(BosonHamiltonian, DiagonalMatrixElements){
     ASSERT_FLOAT_EQ(ham.get_element(onv), 3.0859375);
 }
 
-TEST(BosonHamiltonian, OffDiagonalMatrixElements){
+TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
     /*
      *  ONVs
      *  [0. 0. 0. 5. 0.]
@@ -61,9 +61,28 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements){
     BosonHamiltonian ham(defs::assets_root + "/LandauLevels/BOSDUMP", 12);
     buffered::BosOnv src(ham.m_nmode);
     buffered::BosOnv dst(ham.m_nmode);
-    src = {0, 0, 0, 5, 0};
-    dst = {0, 0, 1, 3, 1};
     conn::BosOnv conn(src);
-    conn.connect(src, dst);
-    ASSERT_FLOAT_EQ(ham.get_element(src, conn), 1.2103073);
+
+    std::vector<defs::inds> basis =
+            {{0, 0, 0, 5, 0},
+             {0, 0, 1, 3, 1},
+             {0, 0, 2, 1, 2},
+             {0, 1, 0, 2, 2},
+             {0, 1, 1, 0, 3},
+             {1, 0, 0, 1, 3}};
+
+    std::vector<defs::ham_comp_t> h_upper_triangle = {1.2103072956898178, 0.0, 0.0, 0.0, 0.0, 1.3258252147247769,
+                                                    1.0825317547305484, 0.0, 0.0, 0.6123724356957947,
+                                                    1.0825317547305484, 0.37500000000000006, 0.6629126073623882,
+                                                    0.6123724356957946, 0.43301270189221935};
+    size_t n = 0ul;
+    for (size_t i=0ul; i<basis.size(); ++i){
+        src = basis[i];
+        for (size_t j=i+1; j<basis.size(); ++j) {
+            dst = basis[j];
+            conn.connect(src, dst);
+            ASSERT_FLOAT_EQ(ham.get_element(src, conn), h_upper_triangle[n]);
+            ++n;
+        }
+    }
 }
