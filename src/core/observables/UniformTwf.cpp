@@ -25,13 +25,15 @@ void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const field::FrmBosOnv &onv) {
     defs::ham_t helem_sum = m_ham.get_element(onv);
     auto fn = [&helem_sum](const conn::FrmBosOnv& conn, defs::ham_t helem){
-//        std::cout << conn.m_frm.ann() << " -> " << conn.m_frm.cre() << "    "
-//        << conn.m_bos.m_ann.to_vector() << " -> " << conn.m_bos.m_cre.to_vector() << std::endl;
         helem_sum-=std::abs(helem);
     };
-//    std::cout << onv << std::endl;
     m_excit_iters.foreach<field::FrmBosOnv>(onv, fn, false);
     add(weight, helem_sum);
+}
+
+void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+                     const field::BosOnv &onv) {
+    ABORT("not yet implemented");
 }
 
 void UniformTwf::reduce() {

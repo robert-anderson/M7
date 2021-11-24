@@ -231,7 +231,8 @@ fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         m_fcidump(this),
         m_charge(this, "charge", 0,
                           "electron deficit relative to the number given in the FCIDUMP header (positive value to remove elecs)"),
-        m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes") {}
+        m_elecs(this, "elecs", true, "include fermionic operators in the Hamiltonian"),
+        m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes. Disregard bosonic operators in the Hamiltonian if set to 0") {}
 
 void fciqmc_config::Hamiltonian::verify() {
     Section::verify();

@@ -9,7 +9,7 @@ BosonHamiltonian::BosonHamiltonian(const std::string &fname, size_t nboson_max) 
         m_nboson_max(nboson_max), m_nmode(read_nmode(fname)), m_nboson(read_nboson(fname)),
         m_coeffs_1(m_nboson_max ? m_nmode : 0ul),
         m_coeffs_2(m_nboson_max ? m_nmode : 0ul),
-        m_contribs_0011(exsig_utils::ex_0011) {
+        m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {
     if (!m_nboson_max || !m_nmode) return;
 
     BosdumpFileReader file_reader(fname);
@@ -27,6 +27,7 @@ BosonHamiltonian::BosonHamiltonian(const std::string &fname, size_t nboson_max) 
             m_contribs_0011.set_nonzero(exsig);
             m_coeffs_1.set(inds[0], inds[1], value);
         } else if (ranksig == exsig_utils::ex_0022) {
+            m_contribs_0022.set_nonzero(exsig);
             m_coeffs_2.set(inds[0], inds[1], inds[2], inds[3], value);
         }
     }
@@ -100,6 +101,12 @@ size_t BosonHamiltonian::nci() const {
 void BosonHamiltonian::log_data() const {
     if (!m_contribs_0011.is_nonzero(0ul))
         log::info("1-boson (0011) term has no diagonal (0000) contributions");
-    if (!m_contribs_0011.is_nonzero(exsig_utils::encode(0, 0, 1, 1)))
+    if (!m_contribs_0011.is_nonzero(exsig_utils::ex_0011))
         log::info("1-boson (0011) term has no single-excitation (0011) contributions");
+    if (!m_contribs_0022.is_nonzero(0ul))
+        log::info("2-boson (0022) term has no diagonal (0000) contributions");
+    if (!m_contribs_0022.is_nonzero(exsig_utils::ex_0011))
+        log::info("2-boson (0022) term has no single-excitation (0011) contributions");
+    if (!m_contribs_0022.is_nonzero(exsig_utils::ex_0022))
+        log::info("2-boson (0022) term has no double-excitation (0022) contributions");
 }

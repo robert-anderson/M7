@@ -6,7 +6,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (APPLE)
     set(CMAKE_MACOSX_RPATH 1)
-endif()
+endif ()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x)
 
@@ -19,8 +19,8 @@ find_package(MPI REQUIRED COMPONENTS C)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
 if (MPI_FOUND)
     add_compile_definitions(ENABLE_MPI)
-else()
-endif()
+else ()
+endif ()
 
 set(ExternalProjectCMakeArgs
         -DHDF5_ENABLE_PARALLEL=ON
@@ -31,62 +31,60 @@ set(ExternalProjectCMakeArgs
 
 option(FORCE_HDF5_INSTALL "Force the download and installation of HDF5" 1)
 option(ENABLE_HDF5 "Enable HDF5 support" 1)
-if(ENABLE_HDF5)
+if (ENABLE_HDF5)
     set(HDF5_USE_STATIC_LIBRARIES 1)
     #find_package(HDF5)
     #if(HDF5_FOUND)
     #    include_directories(${HDF5_INCLUDE_DIR})
     #    set(_HDF5_LIBS hdf5)
     #else()
-        # we did not find it so we fetch it from the web, configure, compile, and link
-        include(ExternalProject)
-        set(_HDF5_VERSION "1.10.5")
-        file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-        ExternalProject_Add(hdf5_local
-                URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
-                #URL /home/rja/Downloads/hdf5-${_HDF5_VERSION}.tar.gz
-                URL_MD5 e115eeb66e944fa7814482415dd21cc4
-                CMAKE_ARGS ${ExternalProjectCMakeArgs}
-                SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
-                BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
-                STAMP_DIR  ${PROJECT_BINARY_DIR}/hdf5_local/stamp
-                TMP_DIR    ${PROJECT_BINARY_DIR}/hdf5_local/tmp
-                INSTALL_COMMAND ""
-                )
-        include_directories(
-                ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
-                ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
-                ${PROJECT_BINARY_DIR}/hdf5_local/build
-        )
-        set(_HDF5_LIBS
-                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
-                ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
-                -ldl)
+    # we did not find it so we fetch it from the web, configure, compile, and link
+    include(ExternalProject)
+    set(_HDF5_VERSION "1.10.5")
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
+    ExternalProject_Add(hdf5_local
+            URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+            #URL /home/rja/Downloads/hdf5-${_HDF5_VERSION}.tar.gz
+            URL_MD5 e115eeb66e944fa7814482415dd21cc4
+            CMAKE_ARGS ${ExternalProjectCMakeArgs}
+            SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
+            BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
+            STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
+            TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
+            INSTALL_COMMAND ""
+            )
+    include_directories(
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build
+    )
+    set(_HDF5_LIBS
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
+            -ldl)
     #endif()
-endif()
-
+endif ()
 #
 # Command line args for M7
 #
-option(MBF_TYPE_IND "MBF_TYPE_IND" 0)
-if (MBF_TYPE_IND)
-    add_compile_definitions(MBF_TYPE_IND)
-endif()
+set(MBF_TYPE_IND "0" CACHE STRING "Many-body basis function type index (0: determinants (default),
+               1: determinant-permanent products, 2: permanents)")
+add_definitions(-DMBF_TYPE_IND=${MBF_TYPE_IND})
 
 option(ENABLE_COMPLEX "ENABLE_COMPLEX" 0)
 if (ENABLE_COMPLEX)
     add_compile_definitions(ENABLE_COMPLEX)
-endif()
+endif ()
 
 option(ENABLE_ROUNDING_SPAWN_ATTEMPTS "ENABLE_ROUNDING_SPAWN_ATTEMPTS" 0)
 if (ENABLE_ROUNDING_SPAWN_ATTEMPTS)
     add_compile_definitions(ENABLE_ROUNDING_SPAWN_ATTEMPTS)
-endif()
+endif ()
 
 option(ENABLE_LOCAL_LOGGING "ENABLE_LOCAL_LOGGING" 0)
 if (ENABLE_LOCAL_LOGGING)
     add_compile_definitions(ENABLE_LOCAL_LOGGING)
-endif()
+endif ()
 
 
 include_directories(${MPI_INCLUDE_PATH})

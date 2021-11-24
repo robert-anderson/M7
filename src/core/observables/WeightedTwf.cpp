@@ -27,7 +27,7 @@ void WeightedTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
     add(weight, helem_sum, diag_fac);
 }
 
-void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv) {
+void WeightedTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, const field::FrmBosOnv &onv) {
     auto diag_fac = evaluate_static_twf(onv);
     defs::ham_t helem_sum = diag_fac * m_ham.get_element(onv);
     auto fn = [&](const field::FrmBosOnv& dst, defs::ham_t helem){
@@ -35,6 +35,10 @@ void WeightedTwf::add(const Numbers<defs::wf_t, 2> &weight, const FrmBosOnv &onv
     };
     m_excit_iters.foreach<field::FrmBosOnv>(onv, fn, true);
     add(weight, helem_sum, diag_fac);
+}
+
+void WeightedTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, const field::BosOnv &onv) {
+    ABORT("not yet implemented");
 }
 
 defs::ham_t WeightedTwf::evaluate_static_twf(const field::FrmOnv &onv) const {

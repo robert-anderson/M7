@@ -27,6 +27,9 @@ public:
     void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const field::FrmBosOnv &onv) override;
 
+    void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+             const field::BosOnv &onv) override;
+
     void reduce() override;
 };
 

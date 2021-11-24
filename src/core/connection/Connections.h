@@ -20,16 +20,54 @@ namespace conn {
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_type_ind> Mbf;
 
-    template<typename T=void> struct selector {typedef void type;};
-    template<> struct selector<FrmOnvField> {typedef FrmOnv type;};
-    template<> struct selector<FrmBosOnvField> {typedef FrmBosOnv type;};
-    template<> struct selector<BosOnvField> {typedef BosOnv type;};
-    template<> struct selector<buffered::FrmOnv> {typedef FrmOnv type;};
-    template<> struct selector<buffered::FrmBosOnv> {typedef FrmBosOnv type;};
-    template<> struct selector<buffered::BosOnv> {typedef BosOnv type;};
+    template<typename T=void>
+    struct selector {
+        typedef void type;
+    };
+    template<>
+    struct selector<FrmOnvField> {
+        typedef FrmOnv type;
+    };
+    template<>
+    struct selector<FrmBosOnvField> {
+        typedef FrmBosOnv type;
+    };
+    template<>
+    struct selector<BosOnvField> {
+        typedef BosOnv type;
+    };
+    template<>
+    struct selector<buffered::FrmOnv> {
+        typedef FrmOnv type;
+    };
+    template<>
+    struct selector<buffered::FrmBosOnv> {
+        typedef FrmBosOnv type;
+    };
+    template<>
+    struct selector<buffered::BosOnv> {
+        typedef BosOnv type;
+    };
 
     template<typename T>
     using from_field_t = typename selector<T>::type;
+}
+
+namespace com_ops {
+    using Frm = FrmOps;
+    using Bos = BosOps;
+    struct FrmBos {
+        FrmOps m_frm;
+        BosOps m_bos;
+        FrmBos(BasisDims bd) : m_frm(bd.m_nsite), m_bos(bd.m_nmode) {}
+
+    };
+
+    typedef std::tuple<Frm, FrmBos, Bos> mbf_tup_t;
+
+    template<size_t mbf_ind>
+    using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
+    typedef mbf_t<defs::mbf_type_ind> Mbf;
 }
 
 #endif //M7_CONNECTIONS_H

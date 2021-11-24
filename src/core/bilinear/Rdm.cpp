@@ -77,11 +77,11 @@ void Rdm::make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
 }
 
 void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
-                        const FrmOps &com, const wf_t &contrib) {
+                        const com_ops::FrmBos &com, const wf_t &contrib) {
     auto exsig = conn.exsig();
     m_lookup_inds.zero();
     if (is_pure_frm(exsig) && is_pure_frm(m_ranksig))
-        make_contribs(src_onv.m_frm, conn.m_frm, com, contrib);
+        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib);
     /*
      * fermion promotion (if any) is handled in the delegated method, but if this is a hopping-coupled or density-coupled
      * boson contribution, then the boson occupation factor must also be included (like we have to consider in the
@@ -93,7 +93,7 @@ void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &
         size_t nboson_common = 1ul;
         if (exsig_utils::decode_nbos_cre(exsig)) nboson_common = src_onv.m_bos[conn.m_bos.m_cre[0].m_imode] + 1;
         else if (exsig_utils::decode_nbos_ann(exsig)) nboson_common = src_onv.m_bos[conn.m_bos.m_ann[0].m_imode];
-        make_contribs(src_onv.m_frm, conn.m_frm, com, contrib * std::sqrt(nboson_common));
+        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * std::sqrt(nboson_common));
     }
 
     m_lookup_inds.m_frm.zero();
@@ -108,7 +108,7 @@ void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &
             if (!ncom) continue;
             m_lookup_inds.m_bos.m_cre[0] = imode;
             m_lookup_inds.m_bos.m_ann[0] = imode;
-            make_contribs(src_onv.m_frm, conn.m_frm, com, double(ncom) * contrib);
+            make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, double(ncom) * contrib);
         }
     }
 }
@@ -156,8 +156,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
 Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisDims bd, size_t nelec, const Epoch &accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
-        m_work_conns(bd), m_work_com_ops(bd.m_nsite),
-        m_explicit_ref_conns(opts.m_explicit_ref_conns),
+        m_work_conns(bd), m_work_com_ops(bd), m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch) {
     for (const auto &ranksig: m_active_ranksigs) {
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
@@ -181,15 +180,15 @@ bool Rdms::takes_contribs_from(const size_t &exsig) const {
     return !m_exsig_ranks[exsig].empty();
 }
 
-void Rdms::make_contribs(const Mbf &src_onv, const conn::Mbf &conn, const FrmOps &com, const wf_t &contrib) {
+void Rdms::make_contribs(const Mbf &src_onv, const conn::Mbf &conn, const com_ops::Mbf &com, const wf_t &contrib) {
     auto exsig = conn.exsig();
     if (!exsig) m_total_norm.m_local+=std::abs(contrib);
     for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
 }
 
 void Rdms::make_contribs(const Mbf &src_onv, const Mbf &dst_onv, const wf_t &contrib) {
-    m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops);
-    make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops, contrib);
+    m_work_conns[src_onv].connect(src_onv, dst_onv, m_work_com_ops[src_onv]);
+    make_contribs(src_onv, m_work_conns[src_onv], m_work_com_ops[src_onv], contrib);
 }
 
 void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop) {

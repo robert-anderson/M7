@@ -58,6 +58,10 @@ void RefExcits::make_contribs(const conn::FrmBosOnv &conn, const defs::wf_t &con
     make_contribs(conn.m_frm, contrib, iroot);
 }
 
+void RefExcits::make_contribs(const conn::BosOnv &conn, const defs::wf_t &contrib, const size_t &iroot) {
+    ABORT("not yet implemented");
+}
+
 void RefExcits::make_contribs(const field::Mbf &mbf, const field::Mbf &ref_mbf, const defs::wf_t &contrib,
                               const size_t &iroot) {
     m_conn.connect(ref_mbf, mbf);

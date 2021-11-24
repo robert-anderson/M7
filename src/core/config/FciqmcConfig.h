@@ -212,6 +212,7 @@ namespace fciqmc_config {
     struct Hamiltonian : config::Section {
         Fcidump m_fcidump;
         config::Param<int> m_charge;
+        config::Param<bool> m_elecs;
         config::Param<size_t> m_nboson_max;
 
         Hamiltonian(config::Group *parent);

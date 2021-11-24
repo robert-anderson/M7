@@ -45,6 +45,23 @@ namespace suite {
         }
     };
 
+    struct ComOps {
+        com_ops::Frm m_frm;
+        com_ops::FrmBos m_frmbos;
+        com_ops::Bos m_bos;
+        ComOps(BasisDims bd): m_frm(bd.m_nsite), m_frmbos(bd), m_bos(bd.m_nmode){}
+
+        FrmOps& operator[](const field::FrmOnv& mbf){
+            return m_frm;
+        }
+        BosOps& operator[](const field::BosOnv& mbf){
+            return m_bos;
+        }
+        ComOps& operator[](const field::FrmBosOnv& mbf){
+            return *this;
+        }
+    };
+
 }
 
 #endif //M7_SUITES_H

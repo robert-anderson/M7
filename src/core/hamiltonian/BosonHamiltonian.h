@@ -18,6 +18,7 @@ struct BosonHamiltonian {
     BosonCoeffs_1 m_coeffs_1;
     BosonCoeffs_2 m_coeffs_2;
     ham_data::TermContribs m_contribs_0011;
+    ham_data::TermContribs m_contribs_0022;
 
     BosonHamiltonian(const std::string& fname, size_t nboson_max);
 

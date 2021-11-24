@@ -31,10 +31,15 @@ public:
     Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisDims bd, size_t nelec, size_t nvalue);
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
-                       const FrmOps &com, const defs::wf_t &contrib);
+                       const com_ops::Frm &com, const defs::wf_t &contrib);
 
     void make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &conn,
-                       const FrmOps &com, const defs::wf_t &contrib);
+                       const com_ops::FrmBos &com, const defs::wf_t &contrib);
+
+    void make_contribs(const field::BosOnv &src_onv, const conn::BosOnv &conn,
+                       const com_ops::Bos &com, const defs::wf_t &contrib) {
+        ABORT("not yet implemented");
+    }
 
     void end_cycle();
 
@@ -47,7 +52,7 @@ class Rdms : public Archivable {
     const std::array<defs::inds, defs::nexsig> m_exsig_ranks;
 
     suite::Conns m_work_conns;
-    FrmOps m_work_com_ops;
+    suite::ComOps m_work_com_ops;
 
     std::array<defs::inds, defs::nexsig> make_exsig_ranks() const;
 
@@ -63,13 +68,14 @@ public:
     bool takes_contribs_from(const size_t &exsig) const;
 
     void make_contribs(const field::Mbf &src_onv, const conn::Mbf &conn,
-                       const FrmOps &com, const defs::wf_t &contrib);
+                       const com_ops::Mbf &com, const defs::wf_t &contrib);
 
     void make_contribs(const field::Mbf &src_onv, const field::Mbf &dst_onv, const defs::wf_t &contrib);
 
     void make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop);
 
     /**
+     * TODO: remove. this is now done in the Annihilator class
      * We need to be careful of the intermediate state of the walker weights.
      * if src_weight is taken from the wavefunction at cycle i, dst_weight is at an intermediate value equal to
      * the wavefunction at cycle i with the diagonal part of the propagator already applied. We don't want to

@@ -51,6 +51,8 @@ struct RefExcits : Archivable {
 
     void make_contribs(const conn::FrmBosOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
 
+    void make_contribs(const conn::BosOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
+
     void make_contribs(const field::Mbf& mbf, const field::Mbf& ref_mbf, const defs::wf_t& contrib, const size_t& iroot);
 
     bool all_stores_empty() const;

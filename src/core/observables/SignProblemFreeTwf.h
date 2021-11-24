@@ -27,6 +27,9 @@ public:
     virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const field::FrmBosOnv &onv) = 0;
 
+    virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+                     const field::BosOnv &onv) = 0;
+
     virtual void reduce();
 };
 

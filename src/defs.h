@@ -93,7 +93,7 @@ namespace defs {
     /**
      * number of bits in the signature representing each number of boson SQ operators
      */
-    static constexpr size_t nbit_exsig_nop_bos = 1;
+    static constexpr size_t nbit_exsig_nop_bos = 2;
     /**
      * mask and max value for extraction of a number of fermion SQ operators
      */

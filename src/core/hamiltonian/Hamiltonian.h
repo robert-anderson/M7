@@ -19,6 +19,10 @@ using namespace field;
  */
 struct Hamiltonian {
     /**
+     * the maximum number of electrons permitted to occupy any spin orbital
+     */
+    const bool m_elecs;
+    /**
      * the maximum number of bosons permitted to occupy any mode
      */
     const size_t m_nboson_max;
@@ -40,9 +44,10 @@ struct Hamiltonian {
      */
     const BasisDims m_bd;
 
-    Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos, bool spin_major, size_t nboson_max = 0);
+    Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
+                bool spin_major, bool elecs, size_t nboson_max);
 
-    Hamiltonian(std::string fname, bool spin_major): Hamiltonian(fname, "", "", spin_major, 0ul){}
+    Hamiltonian(std::string fname, bool spin_major): Hamiltonian(fname, "", "", spin_major, true, 0ul){}
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 

@@ -54,11 +54,17 @@ namespace ci_gen {
         static void set_from_inds(field::FrmBosOnv& onv, const defs::inds& inds){
             onv.m_frm = inds;
         }
+        static void set_from_inds(field::BosOnv& onv, const defs::inds& inds){
+            onv.zero();
+        }
         static void set_from_inds(field::FrmOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
             onv.set(alpha_inds, beta_inds);
         }
         static void set_from_inds(field::FrmBosOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
             onv.m_frm.set(alpha_inds, beta_inds);
+        }
+        static void set_from_inds(field::BosOnv& onv, const defs::inds& alpha_inds, const defs::inds& beta_inds){
+            onv.zero();
         }
     };
 

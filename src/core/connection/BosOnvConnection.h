@@ -32,6 +32,10 @@ public:
 
     void set(BosOpPair&& pair);
 
+    void set(const size_t& imode);
+
+    void set(const size_t& imode, const size_t& jmode);
+
     const BosOpPair& operator[](const size_t& ipair) const;
 };
 

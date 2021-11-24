@@ -12,7 +12,7 @@ TEST(Hubbard1dSingles, ObcFromNeel) {
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", false);
     Hubbard1dSingles excit_gen(ham, prng);
     ASSERT_FALSE(excit_gen.m_pbc);
-    excititers::FrmConserve excit_iter(ham, exsig_utils::ex_single);
+    excititers::Frm excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
     ham.set_neel_mbf(src_mbf, true);
@@ -32,7 +32,7 @@ TEST(Hubbard1dSingles, PbcFromNeel) {
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site_pbc/FCIDUMP", false);
     Hubbard1dSingles excit_gen(ham, prng);
     ASSERT_TRUE(excit_gen.m_pbc);
-    excititers::FrmConserve excit_iter(ham, exsig_utils::ex_single);
+    excititers::Frm excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
     ham.set_neel_mbf(src_mbf, true);

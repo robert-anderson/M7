@@ -3,6 +3,10 @@
 //
 
 #include "ExcitIterGroup.h"
+#include "Hubbard1dSingles.h"
+#include "LadderPure.h"
+#include "LadderPureHolstein.h"
+#include "LadderHopping.h"
 
 void ExcitIterGroup::init() {
     for (size_t exsig=0ul; exsig<defs::nexsig; ++exsig){
@@ -35,11 +39,11 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         if (ham.m_frm.m_model_attrs.is_hubbard_1d() || ham.m_frm.m_model_attrs.is_hubbard_1d_pbc()) {
             add(std::unique_ptr<ExcitIter>(new excititers::Hubbard1dSingles(ham)));
         } else {
-            add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_single)));
+            add(std::unique_ptr<ExcitIter>(new excititers::Frm(ham, ex_single)));
         }
     }
     if (ham.m_frm.m_contribs_2200.is_nonzero(ex_double)) {
-        add(std::unique_ptr<ExcitIter>(new excititers::FrmConserve(ham, ex_double)));
+        add(std::unique_ptr<ExcitIter>(new excititers::Frm(ham, ex_double)));
     }
 
     if (ham.m_bos.m_nboson_max) {
@@ -70,6 +74,11 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         any_hopping = ham.m_ladder.m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
         if (any_hopping)
             add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1101)));
+
+
+        if(ham.m_bos.m_contribs_0022.is_nonzero(exsig_utils::ex_0022)){
+            add(std::unique_ptr<ExcitIter>(new excititers::Bos(ham, exsig_utils::ex_0022)));
+        }
     }
 
     init();

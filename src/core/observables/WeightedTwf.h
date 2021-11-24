@@ -28,6 +28,8 @@ public:
     void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
              const field::FrmBosOnv &onv) override;
 
+    void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
+             const field::BosOnv &onv) override;
 
     defs::ham_t evaluate_static_twf(const field::FrmOnv &onv) const;
 

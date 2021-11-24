@@ -49,6 +49,19 @@ void BosOps::set(BosOpPair &&pair) {
     clear();
     add(std::forward<BosOpPair>(pair));
 }
+void BosOps::set(const size_t &imode) {
+    set({imode, 1ul});
+}
+
+void BosOps::set(const size_t &imode, const size_t &jmode) {
+    clear();
+    if (imode==jmode) add({imode, 2ul});
+    else {
+        add({imode, 1l});
+        add({jmode, 1l});
+    };
+}
+
 
 const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");

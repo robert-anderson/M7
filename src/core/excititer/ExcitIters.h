@@ -15,89 +15,52 @@
 namespace excititers {
 
     struct Frm : public ExcitIter {
-
-        Frm(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
-            REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature should not have bosonic operators")
-        }
-
-        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
-
-    };
-
-    struct Ladder : public ExcitIter {
-        const bool m_cre;
-        Ladder(const Hamiltonian &ham, size_t exsig) :
-            ExcitIter(ham, exsig), m_cre(exsig_utils::decode_nbos_cre(exsig)){}
-
-        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
-
-        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
-
-    };
-
-    struct Bos : public ExcitIter {
-
-        Bos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
-            REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature should not have fermionic operators")
-        }
-
-        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <FrmOnv> &body) override {}
-
-    };
-
-
-    struct FrmConserve : public Frm {
-        using Frm::foreach;
+        using ExcitIter::foreach;
     protected:
         foreach::rtnd::Ordered<> m_cre_loop;
         foreach::rtnd::Ordered<> m_ann_loop;
 
-        fn_c_t <field::FrmOnv> convert(conn::FrmBosOnv &work_conn, const fn_c_t <field::FrmBosOnv> &fn);
+        fn_c_t<field::FrmOnv> convert(conn::FrmBosOnv &work_conn, const fn_c_t<field::FrmBosOnv> &fn);
 
     public:
-        FrmConserve(const Hamiltonian &ham, size_t exsig);
+        Frm(const Hamiltonian &ham, size_t exsig);
 
-        void foreach(const field::FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <field::FrmOnv> &body) override;
+        void foreach(const field::FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<field::FrmOnv> &body) override;
 
-        void foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <FrmBosOnv> &body) override;
+        void foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) override;
 
-        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t <BosOnv> &body) override {}
-    };
-
-    struct Hubbard1dSingles : public FrmConserve {
-        using FrmConserve::foreach;
-        const bool m_pbc;
-
-        Hubbard1dSingles(const Hamiltonian &ham);
-
-        void foreach(const field::FrmOnv &src, conn::FrmOnv &conn, const fn_c_t <field::FrmOnv> &body) override;
-
-    };
-
-    struct LadderPureHolstein : public Ladder {
-        using Ladder::foreach;
-        LadderPureHolstein(const Hamiltonian &ham, size_t exsig);
-
-        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
-    };
-
-    struct LadderPure : public Ladder {
-        using Ladder::foreach;
-
-        LadderPure(const Hamiltonian &ham, size_t exsig);
-
-        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
-    };
-
-    struct LadderHopping : public Ladder {
-        using Ladder::foreach;
-        LadderHopping(const Hamiltonian &ham, size_t exsig);
-
-        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t <field::FrmBosOnv> &body) override;
+        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) override {}
     };
 
 
+    struct Ladder : public ExcitIter {
+        const bool m_cre;
 
+        Ladder(const Hamiltonian &ham, size_t exsig);
+
+        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<FrmOnv> &body) override {}
+
+        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) override {}
+
+    };
+
+    struct Bos : public ExcitIter {
+    protected:
+        fn_c_t<field::BosOnv> convert(conn::FrmBosOnv &work_conn, const fn_c_t<field::FrmBosOnv> &fn);
+    public:
+
+        Bos(const Hamiltonian &ham, size_t exsig) : ExcitIter(ham, exsig) {
+            REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature should not have fermionic operators")
+            REQUIRE_TRUE(exsig_utils::conserves_nbos(exsig), "excitation signature should conserve boson number");
+            REQUIRE_EQ(exsig_utils::decode_nbos_ann(exsig), 2ul, "only currently implemented for doubles");
+        }
+
+        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<FrmOnv> &body) override {}
+
+        void foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<FrmBosOnv> &body) override;
+
+        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) override;
+    };
 }
 
 
