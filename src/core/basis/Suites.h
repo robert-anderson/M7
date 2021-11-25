@@ -10,21 +10,30 @@
 
 namespace suite {
 
-    struct Mbfs {
-        buffered::FrmOnv m_frmonv;
-        buffered::BosOnv m_bosonv;
-        buffered::FrmBosOnv m_frmbosonv;
-        //buffered::FrmCsf m_frmcsf;
-        Mbfs(BasisDims bd): m_frmonv(bd.m_nsite), m_bosonv(bd.m_nsite), m_frmbosonv(bd){}//, m_frmcsf(nsite){}
+    struct MbfsRow : Row {
+        field::FrmOnv m_frm;
+        field::FrmBosOnv m_frmbos;
+        field::BosOnv m_bos;
+        MbfsRow(BasisDims bd):
+            m_frm(this, bd.m_nsite, "fermion ONV"),
+            m_frmbos(this, bd, "fermion-boson ONV"),
+            m_bos(this, bd.m_nmode, "boson ONV"){}
+    };
+
+    struct Mbfs : BufferedTable<MbfsRow>{
+
+        Mbfs(BasisDims bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
+            m_row.restart();
+        }
 
         field::FrmOnv& operator[](const field::FrmOnv& mbf){
-            return m_frmonv;
-        }
-        field::BosOnv& operator[](const field::BosOnv& mbf){
-            return m_bosonv;
+            return m_row.m_frm;
         }
         field::FrmBosOnv& operator[](const field::FrmBosOnv& mbf){
-            return m_frmbosonv;
+            return m_row.m_frmbos;
+        }
+        field::BosOnv& operator[](const field::BosOnv& mbf){
+            return m_row.m_bos;
         }
     };
 

@@ -47,7 +47,8 @@ struct Hamiltonian {
     Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
                 bool spin_major, bool elecs, size_t nboson_max);
 
-    Hamiltonian(std::string fname, bool spin_major): Hamiltonian(fname, "", "", spin_major, true, 0ul){}
+    Hamiltonian(std::string fname, bool spin_major):
+        Hamiltonian(fname, "", "", spin_major, true, 0ul){}
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 

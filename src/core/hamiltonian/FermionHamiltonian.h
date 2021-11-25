@@ -36,21 +36,16 @@ struct FermionHamiltonian {
     ham_data::FrmModelAttributes m_model_attrs;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    /* TODO: reduce number of ctors here and allow for the the instantiation of an object without a valid FCIDUMP (for
-     * boson-only calcs)
-     */
     FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
-                       bool spin_resolved, defs::inds site_irreps={});
+                       bool spin_resolved, defs::inds site_irreps = {});
 
-    FermionHamiltonian(const FcidumpFileReader &file_reader, int charge=0);
+    FermionHamiltonian(const FcidumpFileReader &file_reader, bool elecs, int charge = 0);
 
-    FermionHamiltonian(std::string fname, bool spin_major, int charge=0);
+    FermionHamiltonian(std::string fname, bool spin_major, bool elecs, int charge = 0);
 
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
-            FermionHamiltonian(
-                    opts.m_fcidump.m_path,
-                    opts.m_fcidump.m_spin_major,
-                    opts.m_charge) {}
+            FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
+                               opts.m_elecs, opts.m_charge) {}
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const;
 
@@ -85,10 +80,14 @@ struct FermionHamiltonian {
 
     defs::ham_t get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
         switch (conn.size()) {
-            case 0: return get_element_0000(onv);
-            case 2: return get_element_1100(onv, conn);
-            case 4: return get_element_2200(onv, conn);
-            default: return 0.0;
+            case 0:
+                return get_element_0000(onv);
+            case 2:
+                return get_element_1100(onv, conn);
+            case 4:
+                return get_element_2200(onv, conn);
+            default:
+                return 0.0;
         }
     }
 
@@ -126,6 +125,17 @@ struct FermionHamiltonian {
     }
     bool is_hubbard_1d_pbc() const {
         return m_model_attrs.is_hubbard_1d_pbc();
+    }
+
+private:
+    /**
+     * if electrons are disabled, the m_nsite members of the integrals will be set to zero so as
+     * not to allocate unnecessary memory
+     * @return
+     * number of distinctly specified (spin-)orbitals in the Hamiltonian defintion
+     */
+    size_t nintind() const {
+        return (1ul+m_int_1.m_spin_res)*m_nsite;
     }
 };
 

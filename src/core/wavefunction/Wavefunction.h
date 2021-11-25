@@ -214,31 +214,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * @return
      */
     size_t create_row_(const size_t &icycle, const field::Mbf &mbf,
-                       const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
-        DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
-        DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
-                          "this method should only be called on the rank responsible for storing the MBF");
-        if (m_store.is_full()) m_store.expand(1);
-        auto irow = m_store.insert(mbf);
-        m_delta_nocc_mbf.m_local++;
-        m_store.m_row.jump(irow);
-        DEBUG_ASSERT_EQ(m_store.m_row.key_field(), mbf, "MBF was not properly copied into key field of WF row");
-        m_store.m_row.m_hdiag = hdiag;
-        for (size_t ipart=0ul; ipart < npart(); ++ipart)
-            m_store.m_row.m_ref_conn.put(ipart, refconns[ipart]);
-        /*
-         * we need to be very careful here of off-by-one-like mistakes. the initial walker is "created" at the beginning
-         * of MC cycle 0, and so the stats line output for cycle 0 will show that the number of walkers is the initial
-         * occupation of the initial row. if a spawning event leads to the creation of another row, it is created on
-         * iteration 1 even though it is added in the annihilating call of iteration 0. so, if this method is called in
-         * the annihilating process of MC cycle i, it actually "becomes occupied" on cycle i+1.
-         */
-        if (storing_av_weights()) {
-            m_store.m_row.m_icycle_occ = icycle+1;
-            m_store.m_row.m_average_weight = 0;
-        }
-        return irow;
-    }
+                       const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns);
 
 
     size_t create_row_(const size_t &icycle, const field::Mbf &mbf,
@@ -250,15 +226,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      * Called on all ranks, dispatching create_row_ on the assigned rank only
      */
     TableBase::Loc create_row(const size_t& icycle, const field::Mbf &mbf,
-                              const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns) {
-        size_t irank = m_ra.get_rank(mbf);
-        size_t irow;
-        if (mpi::i_am(irank)) {
-            irow = create_row_(icycle, mbf, hdiag, refconns);
-        }
-        mpi::bcast(irow, irank);
-        return {irank, irow};
-    }
+                              const defs::ham_comp_t &hdiag, const std::vector<bool>& refconns);
 
 
     TableBase::Loc create_row(const size_t& icycle, const field::Mbf &mbf,

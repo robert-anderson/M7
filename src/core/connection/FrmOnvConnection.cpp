@@ -8,7 +8,7 @@ FrmOnvConnection::FrmOnvConnection(size_t nsite) :
         m_ann(nsite), m_cre(nsite),
         m_ndataword(integer_utils::divceil(nsite * 2, defs::nbit_word)),
         m_dataword_phases(m_ndataword){
-    m_dataword_phases[0] = false;
+    if (m_ndataword) m_dataword_phases[0] = false;
 }
 
 FrmOnvConnection::FrmOnvConnection(BasisDims bd) : FrmOnvConnection(bd.m_nsite){

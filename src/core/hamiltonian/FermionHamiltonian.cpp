@@ -26,16 +26,19 @@ FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_
         m_point_group_map(PointGroup(), site_irreps.empty() ? defs::inds(nsite, 0ul) : site_irreps),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
         m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double){
-
-
-    REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), m_int_1.m_nintind, "site map size incorrect");
+    if (!nsite) return;
+    REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), nintind(), "site map size incorrect");
 }
 
 
-FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader, int charge) :
-        FermionHamiltonian(file_reader.m_nelec-charge, file_reader.m_nspatorb,
-                           file_reader.m_complex_valued, file_reader.m_spin_resolved, file_reader.m_orbsym) {
+FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader, bool elecs, int charge) :
+        FermionHamiltonian(file_reader.m_nelec-charge, elecs ? file_reader.m_nspatorb : 0ul,
+                           file_reader.m_complex_valued, file_reader.m_spin_resolved,file_reader.m_orbsym) {
 
+    if (!elecs) {
+        log::info("Electronic operators are disabled in the Hamiltonian");
+        return;
+    }
     using namespace ham_data;
     defs::inds inds(4);
     defs::ham_t value;
@@ -72,8 +75,8 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader, int
     log_data();
 }
 
-FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major, int charge) :
-        FermionHamiltonian(FcidumpFileReader(fname, spin_major), charge) {}
+FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major, bool elecs, int charge) :
+        FermionHamiltonian(FcidumpFileReader(fname, spin_major), elecs, charge) {}
 
 
 defs::ham_t FermionHamiltonian::get_element_0000(const field::FrmOnv &onv) const {
