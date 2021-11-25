@@ -86,8 +86,10 @@ fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
 
 fciqmc_config::Reference::Reference(config::Group *parent) :
         config::Section(parent, "reference", "options relating to the reference MBF"),
-        m_init_mbf(this, "init_reference_mbf", {},
-                   "string representations of the MBFs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
+        m_frm_onv_init(this, "frm_onv_init", {},
+                       "string representations of the MBFs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
+        m_bos_onv_init(this, "bos_onv_init", {},
+                       "array of occupations for each mode of the initial ONV"),
         m_init_mbf_neel(this, "init_mbf_neel", false,
                        "initialize the reference to a Neel state rather than assuming Aufbau principle"),
         m_redef_thresh(this, "redef_thresh", 10.0,

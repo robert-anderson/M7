@@ -11,8 +11,13 @@ TEST(BosonHamiltonian, Coefficients) {
     ASSERT_EQ(ham.m_nboson, 5ul);
     //0.2209708691 2 4 5 3
     ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
+    ASSERT_FLOAT_EQ(ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
     //0.1530931089 5 3 1 3
     ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(4, 2, 0, 2), 0.1530931089);
+    ASSERT_FLOAT_EQ(ham.m_coeffs_2.phys_element(4, 0, 2, 2), 0.1530931089);
+
+    ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(0, 3, 0, 3), 0.0);
+    ASSERT_FLOAT_EQ(ham.m_coeffs_2.phys_element(0, 0, 3, 3), 0.0);
 }
 
 TEST(BosonHamiltonian, DiagonalMatrixElements) {
@@ -82,7 +87,18 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
             dst = basis[j];
             conn.connect(src, dst);
             ASSERT_FLOAT_EQ(ham.get_element(src, conn), h_upper_triangle[n]);
+            // hamiltonian is hermitian
+            conn.connect(dst, src);
+            ASSERT_FLOAT_EQ(ham.get_element(dst, conn), h_upper_triangle[n]);
             ++n;
         }
     }
+
+    src = basis[0];
+    dst = {2, 0, 0, 3, 0};
+    // should not be connected due to angular momentum conservation
+    conn.connect(src, dst);
+    ASSERT_FLOAT_EQ(ham.get_element(src, conn), 0.0);
+    conn.connect(dst, src);
+    ASSERT_FLOAT_EQ(ham.get_element(dst, conn), 0.0);
 }

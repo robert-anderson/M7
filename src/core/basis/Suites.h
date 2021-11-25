@@ -23,7 +23,7 @@ namespace suite {
     struct Mbfs : BufferedTable<MbfsRow>{
 
         Mbfs(BasisDims bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
-            m_row.restart();
+            m_row.push_back_jump();
         }
 
         field::FrmOnv& operator[](const field::FrmOnv& mbf){

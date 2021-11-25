@@ -77,7 +77,8 @@ namespace fciqmc_config {
     };
 
     struct Reference : config::Section {
-        config::Param<std::vector<std::string>> m_init_mbf;
+        config::Param<std::string> m_frm_onv_init;
+        config::Param<defs::inds> m_bos_onv_init;
         config::Param<bool> m_init_mbf_neel;
         config::Param<double> m_redef_thresh;
 

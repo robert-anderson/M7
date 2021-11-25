@@ -11,11 +11,12 @@
 class BosonCoeffs_2 {
 
     size_t index(const size_t &i, const size_t &j, const size_t& k, const size_t& l) const {
-        auto ij = i<=j ? trig(i, j) : trig(j, i);
-        auto kl = k<=l ? trig(k, l) : trig(l, k);
+        auto ij = i*m_nmode+j;
+        auto kl = k*m_nmode+l;
         return ij<=kl ? trig(ij, kl) : trig(kl, ij);
     }
 
+    const size_t m_nmode;
 public:
     SharedArray<defs::ham_t> m_v;
 

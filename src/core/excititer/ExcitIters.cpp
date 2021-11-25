@@ -59,18 +59,17 @@ void excititers::Bos::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn, const
 void excititers::Bos::foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) {
     conn.clear();
     for (size_t imode = 0ul; imode < src.m_size; ++imode) {
-        if (src[imode]==m_ham.m_nboson_max) continue;
         for (size_t jmode = imode; jmode < src.m_size; ++jmode) {
-            if (src[jmode]==m_ham.m_nboson_max) continue;
-            if (imode==jmode && (src[jmode]+1ul)==m_ham.m_nboson_max) continue;
             conn.m_cre.set(imode, jmode);
             for (size_t kmode = 0ul; kmode < src.m_size; ++kmode) {
                 if (!src[kmode]) continue;
+                if (kmode==imode || kmode==jmode) continue;
                 for (size_t lmode = kmode; lmode < src.m_size; ++lmode) {
                     if (!src[lmode]) continue;
                     if (kmode==lmode && src[lmode]==1) continue;
+                    if (lmode==imode || lmode==jmode) continue;
                     conn.m_ann.set(kmode, lmode);
-                    if (!set_helement(src, conn)) return;
+                    if (!set_helement(src, conn)) continue;
                     body(conn);
                 }
             }

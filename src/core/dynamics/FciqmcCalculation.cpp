@@ -12,7 +12,7 @@ FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
         m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.m_bd),
         m_prop(props::get(m_ham, opts, m_wf.m_format)) {
     buffered::Mbf ref_mbf(m_ham.m_bd);
-    m_ham.set_mbf(ref_mbf, opts.m_reference.m_init_mbf_neel, opts.m_wavefunction.m_spin_restrict);
+    ref_mbf.attempt_set_from_input(opts.m_reference.m_bos_onv_init);
 
     auto ref_energy = m_ham.get_energy(ref_mbf);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_mbf), 0ul};
