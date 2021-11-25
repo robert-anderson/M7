@@ -39,9 +39,9 @@ struct FermionHamiltonian {
     FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
                        bool spin_resolved, defs::inds site_irreps = {});
 
-    FermionHamiltonian(const FcidumpFileReader &file_reader, bool elecs, int charge = 0);
+    FermionHamiltonian(const FcidumpFileReader &file_reader, bool elecs=true, int charge = 0);
 
-    FermionHamiltonian(std::string fname, bool spin_major, bool elecs, int charge = 0);
+    FermionHamiltonian(std::string fname, bool spin_major, bool elecs=true, int charge = 0);
 
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
             FermionHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,

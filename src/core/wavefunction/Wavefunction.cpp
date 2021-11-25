@@ -171,7 +171,6 @@ size_t Wavefunction::create_row_(const size_t &icycle, const Mbf &mbf, const def
     DEBUG_ASSERT_EQ(refconns.size(), npart(), "should have as many reference rows as WF parts");
     DEBUG_ASSERT_TRUE(mpi::i_am(m_ra.get_rank(mbf)),
                       "this method should only be called on the rank responsible for storing the MBF");
-    if (m_store.is_full()) m_store.expand(1);
     auto irow = m_store.insert(mbf);
     m_delta_nocc_mbf.m_local++;
     m_store.m_row.jump(irow);

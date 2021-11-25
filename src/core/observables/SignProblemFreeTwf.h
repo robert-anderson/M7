@@ -19,7 +19,7 @@ public:
     std::vector<defs::ham_t> m_numerator_total;
     std::vector<defs::ham_t> m_denominator_total;
 
-    SpfTwfBase(const Hamiltonian &ham, size_t npart, size_t nsite);
+    SpfTwfBase(const Hamiltonian &ham, size_t npart);
 
     virtual void add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const field::FrmOnv &onv) = 0;

@@ -2,7 +2,7 @@
 // Created by rja on 26/08/2021.
 //
 
-#include "src/core/excititer/ExcitIters.h"
+#include "src/core/excititer/LadderHopping.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 #include "src/core/excitgen/LadderHoppingPc.h"
@@ -12,7 +12,7 @@ TEST(LadderHopping, HubbardUniform1101){
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
     LadderHoppingUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -37,7 +37,7 @@ TEST(LadderHopping, HubbardUniform1110){
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
     LadderHoppingUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -62,7 +62,7 @@ TEST(LadderHopping, HubbardPc1101){
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
     LadderHoppingPc excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -88,7 +88,7 @@ TEST(LadderHopping, HubbardPc1110){
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 2);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
     LadderHoppingPc excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);

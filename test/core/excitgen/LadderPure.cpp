@@ -3,7 +3,7 @@
 //
 
 #include <src/core/excitgen/LadderPureHolsteinZpm.h>
-#include "src/core/excititer/ExcitIters.h"
+#include "src/core/excititer/LadderPure.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 #include "src/core/excitgen/LadderPureUniform.h"
@@ -13,7 +13,7 @@ TEST(LadderPure, HubbardUniform0001){
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4_WITH_UNC";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 3);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 3);
     std::vector<defs::ham_t> uncs_chk = {0.4, 1.3, 0.7};
     ASSERT_EQ(ham.m_ladder.m_v_unc, uncs_chk);
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0001);
@@ -40,7 +40,7 @@ TEST(LadderPure, HubbardUniform0010){
     auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4_WITH_UNC";
     auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 3);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 3);
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0010);
     LadderPureUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -65,7 +65,7 @@ TEST(LadderPure, HolsteinZpm0001){
     auto fname = defs::assets_root + "/HH_ZPM/FCIDUMP_ZPM";
     auto fname_eb = defs::assets_root + "/HH_ZPM/EBDUMP_ZPM";
     auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 3);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 3);
     std::vector<defs::ham_t> uncs_chk = {-0.1, -0.1, -0.1, -0.1};
     ASSERT_EQ(ham.m_ladder.m_v_unc, uncs_chk);
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0001);
@@ -92,7 +92,7 @@ TEST(LadderPure, HolsteinZpm0010){
     auto fname = defs::assets_root + "/HH_ZPM/FCIDUMP_ZPM";
     auto fname_eb = defs::assets_root + "/HH_ZPM/EBDUMP_ZPM";
     auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, 3);
+    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 3);
     std::vector<defs::ham_t> uncs_chk = {-0.1, -0.1, -0.1, -0.1};
     ASSERT_EQ(ham.m_ladder.m_v_unc, uncs_chk);
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0010);

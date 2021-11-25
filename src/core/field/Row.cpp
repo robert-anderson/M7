@@ -21,6 +21,7 @@ std::string Row::to_string() const {
 }
 
 size_t Row::add_field(FieldBase *field) {
+    REQUIRE_TRUE(field, "Field pointer should not be null");
     // returns the offset in bytes for the column being added
     auto offset = 0ul;
     if (!m_fields.empty()) {

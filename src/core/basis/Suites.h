@@ -60,14 +60,14 @@ namespace suite {
         com_ops::Bos m_bos;
         ComOps(BasisDims bd): m_frm(bd.m_nsite), m_frmbos(bd), m_bos(bd.m_nmode){}
 
-        FrmOps& operator[](const field::FrmOnv& mbf){
+        com_ops::Frm& operator[](const field::FrmOnv& mbf){
             return m_frm;
         }
-        BosOps& operator[](const field::BosOnv& mbf){
-            return m_bos;
+        com_ops::FrmBos& operator[](const field::FrmBosOnv& mbf){
+            return m_frmbos;
         }
-        ComOps& operator[](const field::FrmBosOnv& mbf){
-            return *this;
+        com_ops::Bos& operator[](const field::BosOnv& mbf){
+            return m_bos;
         }
     };
 

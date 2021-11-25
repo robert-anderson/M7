@@ -4,8 +4,7 @@
 
 #include "UniformTwf.h"
 
-UniformTwf::UniformTwf(const Hamiltonian& ham, size_t npart, size_t nsite) :
-        SpfTwfBase(ham, npart, nsite){}
+UniformTwf::UniformTwf(const Hamiltonian& ham, size_t npart) : SpfTwfBase(ham, npart){}
 
 void UniformTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham_t helem_sum) {
     for (size_t ipart = 0ul; ipart < m_numerator.size(); ++ipart) {

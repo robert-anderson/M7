@@ -14,7 +14,8 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
 
     BosOnvField(Row *row, BasisDims bd, std::string name="");
 
-    BosOnvField(const BosOnvField &other): BosOnvField(other.m_row, {0ul, other.m_format.m_shape[0]}, other.m_name){}
+    BosOnvField(const BosOnvField &other):
+        BosOnvField(other.row_of_copy(), {0ul, other.m_format.m_shape[0]}, other.m_name){}
 
     BosOnvField &operator=(const BosOnvField &other) {
         NdNumberField<defs::bos_occ_t, 1>::operator=(other);

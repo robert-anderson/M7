@@ -14,7 +14,7 @@ protected:
     double m_bos_occ_penalty_factor;
 
 public:
-    WeightedTwf(const Hamiltonian& ham, size_t npart, size_t nsite, double_t fermion_factor=0.0, double_t boson_factor=0.0);
+    WeightedTwf(const Hamiltonian& ham, size_t npart, double_t fermion_factor=0.0, double_t boson_factor=0.0);
 
     virtual ~WeightedTwf(){}
 

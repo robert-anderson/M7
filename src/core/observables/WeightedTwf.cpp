@@ -4,8 +4,8 @@
 
 #include "WeightedTwf.h"
 
-WeightedTwf::WeightedTwf(const Hamiltonian& ham, size_t npart, size_t nsite, double_t fermion_factor, double_t boson_factor) :
-        SpfTwfBase(ham, npart, nsite),
+WeightedTwf::WeightedTwf(const Hamiltonian& ham, size_t npart, double_t fermion_factor, double_t boson_factor) :
+        SpfTwfBase(ham, npart),
         m_frm_doub_occ_penalty_factor(fermion_factor),
         m_bos_occ_penalty_factor(boson_factor) {}
 

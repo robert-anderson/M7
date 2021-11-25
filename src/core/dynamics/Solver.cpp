@@ -11,9 +11,9 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_exit("exit"),
         m_uniform_twf(
                 m_opts.m_inst_ests.m_spf_uniform_twf ?
-                new UniformTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.m_bd) : nullptr),
+                new UniformTwf(m_prop.m_ham, m_wf.npart()) : nullptr),
         m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf ?
-                       new WeightedTwf(m_prop.m_ham, m_wf.npart(), prop.m_ham.m_bd,
+                       new WeightedTwf(m_prop.m_ham, m_wf.npart(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
         m_maes(m_opts.m_av_ests, m_prop.m_ham.m_bd, m_prop.m_ham.nelec(), m_wf.nroot()),
