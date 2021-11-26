@@ -68,3 +68,7 @@ BosExcitGen::BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
     DEBUG_ASSERT_TRUE(exsig_utils::is_pure_bos(exsig),
                       "boson excitation generator is not applicable to exsigs with fermionic operators");
 }
+
+size_t BosExcitGen::approx_nconn() const {
+    return m_h.m_bos.m_nboson*2;
+}

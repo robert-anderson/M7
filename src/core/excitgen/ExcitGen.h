@@ -97,6 +97,8 @@ struct LadderExcitGen : public ExcitGen {
  */
 struct BosExcitGen : public ExcitGen {
     BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig);
+
+    size_t approx_nconn() const override;
 };
 
 #endif //M7_EXCITGEN_H

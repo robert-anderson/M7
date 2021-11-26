@@ -5,6 +5,7 @@
 #include "ExcitGenGroup.h"
 #include "LadderPureHolsteinZpm.h"
 #include "LadderHoppingPc.h"
+#include "BosonSumConservingDoubles.h"
 
 void ExcitGenGroup::init() {
     defs::prob_t norm = 0.0;
@@ -16,6 +17,7 @@ void ExcitGenGroup::init() {
         norm += m_probs.back();
         m_active_exsigs.push_back(exsig);
     }
+    REQUIRE_FALSE(m_active_exsigs.empty(), "there should be at least one active excitation signature");
     for (auto &prob: m_probs) prob /= norm;
     update_cumprobs();
 }
@@ -38,11 +40,13 @@ void ExcitGenGroup::update_cumprobs() {
         m_cumprobs[iprob] = m_cumprobs[iprob - 1] + m_probs[iprob];
     DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_cumprobs.back()),
                       "cumulative probability should be 1.0");
-    m_frm_cumprobs = m_frm_probs;
-    for (size_t iprob = 1ul; iprob < m_frm_probs.size(); ++iprob)
-        m_frm_cumprobs[iprob] = m_frm_cumprobs[iprob - 1] + m_frm_probs[iprob];
-    DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_frm_cumprobs.back()),
-                      "cumulative probability should be 1.0");
+    if (!m_frm_inds.empty()) {
+        m_frm_cumprobs = m_frm_probs;
+        for (size_t iprob = 1ul; iprob < m_frm_probs.size(); ++iprob)
+            m_frm_cumprobs[iprob] = m_frm_cumprobs[iprob - 1] + m_frm_probs[iprob];
+        DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_frm_cumprobs.back()),
+                          "cumulative probability should be 1.0");
+    }
 }
 
 void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen, const inds &exsigs) {
@@ -107,6 +111,10 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
              */
             add(std::unique_ptr<ExcitGen>(new LadderHoppingPc(ham, prng)), exsigs);
         }
+    }
+
+    if (ham.m_bos.m_nboson){
+        add(std::unique_ptr<ExcitGen>(new BosonSumConservingDoubles(ham, prng)));
     }
 
     init();
