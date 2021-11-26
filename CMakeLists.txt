@@ -67,9 +67,21 @@ endif ()
 #
 # Command line args for M7
 #
-set(MBF_TYPE_IND "0" CACHE STRING "Many-body basis function type index (0: determinants (default),
+set(MBF_TYPE "0" CACHE STRING "Many-body basis function type index (0: determinants (default),
                1: determinant-permanent products, 2: permanents)")
-add_definitions(-DMBF_TYPE_IND=${MBF_TYPE_IND})
+
+if(${MBF_TYPE} LESS_EQUAL 2)
+elseif (${MBF_TYPE} STREQUAL "fermion")
+    set(MBF_TYPE 0)
+elseif (${MBF_TYPE} STREQUAL "fermion-boson")
+    set(MBF_TYPE 1)
+elseif (${MBF_TYPE} STREQUAL "boson")
+    set(MBF_TYPE 2)
+else()
+    message(FATAL_ERROR "Specified MBF_TYPE \"${MBF_TYPE}\" is invalid")
+endif()
+
+add_definitions(-DMBF_TYPE=${MBF_TYPE})
 
 option(ENABLE_COMPLEX "ENABLE_COMPLEX" 0)
 if (ENABLE_COMPLEX)

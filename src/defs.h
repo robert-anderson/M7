@@ -107,6 +107,7 @@ namespace defs {
      */
     static constexpr size_t nexsig = (1 << (2 * nbit_exsig_nop_frm + 2*nbit_exsig_nop_bos));
 
+    enum MbfTypeInd {Frm, FrmBos, Bos};
     /**
      * Many-body basis function definitions
      *  0: fermion only (determinant basis)
@@ -114,19 +115,19 @@ namespace defs {
      *  2: boson only (permanent basis)
      *  3: fermion only spin-adapted (CSF basis) (TODO: not currently implemented)
      */
-#ifndef MBF_TYPE_IND
-#define MBF_TYPE_IND 0
+#ifndef MBF_TYPE
+    #define MBF_TYPE 0
 #endif
 
-#if (MBF_TYPE_IND==1) || (MBF_TYPE_IND==2)
-#define ENABLE_BOSONS 1
+#if (MBF_TYPE==1) || (MBF_TYPE==2)
+    #define ENABLE_BOSONS 1
 #endif
 
-#if (MBF_TYPE_IND==0) || (MBF_TYPE_IND==1)
-#define ENABLE_FERMIONS
+#if (MBF_TYPE==0) || (MBF_TYPE==1)
+    #define ENABLE_FERMIONS
 #endif
 
-    constexpr size_t mbf_type_ind = MBF_TYPE_IND;
+    constexpr size_t mbf_type_ind = MBF_TYPE;
 
 #ifdef ENABLE_BOSONS
     constexpr bool enable_bosons = true;
