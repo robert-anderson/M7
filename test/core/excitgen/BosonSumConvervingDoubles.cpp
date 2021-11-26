@@ -14,9 +14,9 @@ TEST(BosonSumConservingDoubles, LandauLevels) {
     excititers::Bos excit_iter(ham, exsig_utils::ex_0022);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::BosOnv src_mbf(ham.m_bd);
-    src_mbf = {0, 2, 0, 4, 0, 0, 0, 0};
+    src_mbf = {2, 0, 1, 2, 0, 0, 1, 0};
     tester.fill_results_table(src_mbf);
-    const size_t ndraw = 1000000;
+    const size_t ndraw = 10000000;
     tester.run(src_mbf, ndraw);
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     std::cout << tester.m_results.to_string() << std::endl;
