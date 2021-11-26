@@ -25,11 +25,12 @@
 
 namespace utils {
 
-    static constexpr size_t min(size_t i, size_t j){
-        return i<j ? i: j;
+    static constexpr size_t min(size_t i, size_t j) {
+        return i < j ? i : j;
     }
-    static constexpr size_t max(size_t i, size_t j){
-        return i>j ? i: j;
+
+    static constexpr size_t max(size_t i, size_t j) {
+        return i > j ? i : j;
     }
 
     /*
@@ -207,13 +208,13 @@ namespace utils {
     }
 
     template<size_t n>
-    static typename std::enable_if<!n, size_t>::type
+    static typename std::enable_if<n == 0ul, size_t>::type
     ntup_num(size_t extent) {
         return 1ul;
     }
 
     template<size_t n>
-    static typename std::enable_if<n, size_t>::type
+    static typename std::enable_if<n != 0ul, size_t>::type
     ntup_num(size_t extent) {
         return extent * ntup_num<n - 1>(extent - 1);
     }
@@ -532,9 +533,9 @@ namespace string_utils {
         return pos ? tmp : -tmp;
     }
 
-    static size_t parse_decimal_digit(const char* c){
-        if (*c<'0' || *c>'9') return ~0ul;
-        return *c-'0';
+    static size_t parse_decimal_digit(const char *c) {
+        if (*c < '0' || *c > '9') return ~0ul;
+        return *c - '0';
     }
 }
 
@@ -552,8 +553,8 @@ namespace prob_utils {
         normalize(v);
     }
 
-    static defs::prob_t linear_bias_prob(const size_t& n, const size_t& i){
-        return (2*i+1)/defs::prob_t(n*n);
+    static defs::prob_t linear_bias_prob(const size_t &n, const size_t &i) {
+        return (2 * i + 1) / defs::prob_t(n * n);
     }
 }
 
@@ -993,25 +994,25 @@ namespace exsig_utils {
     }
 
     static constexpr size_t ncontrib_frm(size_t exsig) {
-        return utils::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig))+1;
+        return utils::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig)) + 1;
     }
 
     static constexpr size_t ncontrib_bos(size_t exsig) {
-        return utils::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig))+1;
+        return utils::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig)) + 1;
     }
 
     static constexpr size_t base_exsig(size_t exsig) {
         return encode(
-                decode_nfrm_cre(exsig) - (ncontrib_frm(exsig)-1),
-                decode_nfrm_ann(exsig) - (ncontrib_frm(exsig)-1),
-                decode_nbos_cre(exsig) - (ncontrib_bos(exsig)-1),
-                decode_nbos_ann(exsig) - (ncontrib_bos(exsig)-1)
+                decode_nfrm_cre(exsig) - (ncontrib_frm(exsig) - 1),
+                decode_nfrm_ann(exsig) - (ncontrib_frm(exsig) - 1),
+                decode_nbos_cre(exsig) - (ncontrib_bos(exsig) - 1),
+                decode_nbos_ann(exsig) - (ncontrib_bos(exsig) - 1)
         );
     }
 
     static constexpr size_t add_ops(size_t exsig, size_t nfrm, size_t nbos) {
         return encode(decode_nfrm_cre(exsig) + nfrm, decode_nfrm_ann(exsig) + nfrm,
-                            decode_nbos_cre(exsig) + nbos, decode_nbos_ann(exsig) + nbos);
+                      decode_nbos_cre(exsig) + nbos, decode_nbos_ann(exsig) + nbos);
     }
 
     static constexpr bool contribs_to_frm(size_t exsig, size_t ranksig) {
@@ -1036,7 +1037,7 @@ namespace exsig_utils {
      */
     static constexpr size_t hermconj(size_t exsig) {
         return exsig_utils::encode(decode_nfrm_ann(exsig), decode_nfrm_cre(exsig), decode_nbos_ann(exsig),
-                                        decode_nbos_cre(exsig));
+                                   decode_nbos_cre(exsig));
     }
 
     static std::string to_string(size_t exsig) {
@@ -1045,18 +1046,18 @@ namespace exsig_utils {
                std::to_string(decode_nbos_cre(exsig)) + std::to_string(decode_nbos_ann(exsig));
     }
 
-    static constexpr size_t ex_single = encode(1,1,0,0);
-    static constexpr size_t ex_double = encode(2,2,0,0);
-    static constexpr size_t ex_triple = encode(3,3,0,0);
+    static constexpr size_t ex_single = encode(1, 1, 0, 0);
+    static constexpr size_t ex_double = encode(2, 2, 0, 0);
+    static constexpr size_t ex_triple = encode(3, 3, 0, 0);
     static constexpr size_t ex_1100 = ex_single;
     static constexpr size_t ex_2200 = ex_double;
     static constexpr size_t ex_3300 = ex_triple;
-    static constexpr size_t ex_1101 = encode(1,1,0,1);
-    static constexpr size_t ex_1110 = encode(1,1,1,0);
-    static constexpr size_t ex_0001 = encode(0,0,0,1);
-    static constexpr size_t ex_0010 = encode(0,0,1,0);
-    static constexpr size_t ex_0011 = encode(0,0,1,1);
-    static constexpr size_t ex_0022 = encode(0,0,2,2);
+    static constexpr size_t ex_1101 = encode(1, 1, 0, 1);
+    static constexpr size_t ex_1110 = encode(1, 1, 1, 0);
+    static constexpr size_t ex_0001 = encode(0, 0, 0, 1);
+    static constexpr size_t ex_0010 = encode(0, 0, 1, 0);
+    static constexpr size_t ex_0011 = encode(0, 0, 1, 1);
+    static constexpr size_t ex_0022 = encode(0, 0, 2, 2);
 }
 
 
