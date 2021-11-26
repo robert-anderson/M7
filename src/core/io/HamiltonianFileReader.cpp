@@ -21,6 +21,7 @@ HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, size_t ni
 }
 
 size_t HamiltonianFileReader::read_header_int(const std::string &fname, const std::string &label, size_t default_) {
+    if (!FileReader::exists(fname)) return default_;
     const auto regex = std::regex(label + R"(\s*\=\s*[0-9]+)");
     FileReader iterator(fname);
     std::string line;
@@ -40,6 +41,7 @@ size_t HamiltonianFileReader::read_header_int(const std::string &fname, const st
 
 defs::inds HamiltonianFileReader::read_header_array(
         const std::string &fname, const std::string &label, long offset, defs::inds default_) {
+    if (!FileReader::exists(fname)) return default_;
     const auto regex = std::regex(label + R"(\s*\=\s*[0-9\,\s]+)");
     FileReader iterator(fname);
     std::string line;
@@ -60,6 +62,7 @@ defs::inds HamiltonianFileReader::read_header_array(
 }
 
 size_t HamiltonianFileReader::read_header_bool(const std::string &fname, const std::string &label, size_t default_) {
+    if (!FileReader::exists(fname)) return default_;
     std::regex regex;
     if (default_) regex = std::regex(label + R"(\s?\=\s?\.FALSE\.)");
     else regex = std::regex(label + R"(\s?\=\s?\.TRUE\.)");

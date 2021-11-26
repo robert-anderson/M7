@@ -25,20 +25,20 @@ FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_
         m_nelec(nelec), m_nsite(nsite), m_complex_valued(complex_valued),
         m_point_group_map(PointGroup(), site_irreps.empty() ? defs::inds(nsite, 0ul) : site_irreps),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
-        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double){
+        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {
     if (!nsite) return;
     REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), nintind(), "site map size incorrect");
 }
 
-
-FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader, bool elecs, int charge) :
-        FermionHamiltonian(file_reader.m_nelec-charge, elecs ? file_reader.m_nspatorb : 0ul,
-                           file_reader.m_complex_valued, file_reader.m_spin_resolved,file_reader.m_orbsym) {
-
+FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major, bool elecs, int charge) :
+        FermionHamiltonian(read_nelec(fname) - charge, elecs ? read_nspatorb(fname) : 0ul,
+                           read_complex_valued(fname), read_spin_resolved(fname), read_orbsym(fname)) {
     if (!elecs) {
         log::info("Electronic operators are disabled in the Hamiltonian");
         return;
     }
+    FcidumpFileReader file_reader(fname, spin_major);
+
     using namespace ham_data;
     defs::inds inds(4);
     defs::ham_t value;
@@ -52,37 +52,34 @@ FermionHamiltonian::FermionHamiltonian(const FcidumpFileReader &file_reader, boo
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
 
-        if (ranksig==0ul) {
+        if (ranksig == 0ul) {
             m_int_0 = value;
             continue;
         }
 
-        auto& rank_contrib = ranksig==ex_single ? m_contribs_1100 : m_contribs_2200;
+        auto &rank_contrib = ranksig == ex_single ? m_contribs_1100 : m_contribs_2200;
         rank_contrib.set_nonzero(exsig);
 
-        if (ranksig==ex_single) {
+        if (ranksig == ex_single) {
             m_int_1.set(inds, value);
             m_model_attrs.nonzero(m_nsite, inds[0], inds[1]);
-        }
-        else if (ranksig==ex_double) {
+        } else if (ranksig == ex_double) {
             m_int_2.set(inds, value);
             m_model_attrs.nonzero(m_nsite, inds[0], inds[1], inds[2], inds[3]);
-        }
-        else MPI_ABORT("File reader error");
+        } else MPI_ABORT("File reader error");
     }
     mpi::barrier();
     log::info("FCIDUMP loading complete.");
     log_data();
 }
 
-FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major, bool elecs, int charge) :
-        FermionHamiltonian(FcidumpFileReader(fname, spin_major), elecs, charge) {}
-
 
 defs::ham_t FermionHamiltonian::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t element = m_int_0;
     auto singles_fn = [&](const size_t &i) { element += m_int_1(i, i); };
-    auto doubles_fn = [&](const size_t &i, const size_t &j) { element += m_int_2.phys_antisym_element(i, j, i, j); };
+    auto doubles_fn = [&](const size_t &i, const size_t &j) {
+        element += m_int_2.phys_antisym_element(i, j, i, j);
+    };
     onv.foreach_pair(singles_fn, doubles_fn);
     return element;
 }
@@ -105,7 +102,7 @@ void FermionHamiltonian::set_hf_mbf(field::FrmOnv &onv, int spin) const {
 void FermionHamiltonian::set_afm_mbf(field::FrmOnv &onv, bool alpha_first) const {
     onv.zero();
     size_t ispin = !alpha_first;
-    for (size_t isite=0ul; isite<m_nsite; ++isite){
+    for (size_t isite = 0ul; isite < m_nsite; ++isite) {
         onv.set({ispin, isite});
         ispin = !ispin;
     }

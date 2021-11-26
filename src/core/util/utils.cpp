@@ -63,6 +63,7 @@ void integer_utils::inv_strigmap(size_t &i, size_t &j, const size_t &n) {
 }
 
 size_t integer_utils::nspair(const size_t &ndim) {
+    if (!ndim) return 0ul;
     return strigmap(ndim, 0);
 }
 

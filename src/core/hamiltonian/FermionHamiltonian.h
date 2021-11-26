@@ -39,8 +39,6 @@ struct FermionHamiltonian {
     FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
                        bool spin_resolved, defs::inds site_irreps = {});
 
-    FermionHamiltonian(const FcidumpFileReader &file_reader, bool elecs=true, int charge = 0);
-
     FermionHamiltonian(std::string fname, bool spin_major, bool elecs=true, int charge = 0);
 
     FermionHamiltonian(const fciqmc_config::Hamiltonian &opts) :
@@ -136,6 +134,31 @@ private:
      */
     size_t nintind() const {
         return (1ul+m_int_1.m_spin_res)*m_nsite;
+    }
+
+    size_t read_nelec(const std::string& fname){
+        if (!FileReader::exists(fname)) return 0ul;
+        return FcidumpFileReader(fname, false).m_nelec;
+    }
+
+    size_t read_nspatorb(const std::string& fname){
+        if (!FileReader::exists(fname)) return 0ul;
+        return FcidumpFileReader(fname, false).m_nspatorb;
+    }
+
+    bool read_complex_valued(const std::string& fname){
+        if (!FileReader::exists(fname)) return false;
+        return FcidumpFileReader(fname, false).m_complex_valued;
+    }
+
+    bool read_spin_resolved(const std::string& fname){
+        if (!FileReader::exists(fname)) return false;
+        return FcidumpFileReader(fname, false).m_spin_resolved;
+    }
+
+    defs::inds read_orbsym(const std::string& fname){
+        if (!FileReader::exists(fname)) return {};
+        return FcidumpFileReader(fname, false).m_orbsym;
     }
 };
 

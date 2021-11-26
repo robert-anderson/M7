@@ -36,6 +36,18 @@ class CachedOrbs {
      * site indices with 0 or 2 electrons
      */
     defs::inds m_not_singly_occ_sites;
+    /**
+     * boson mode indices with repetition
+     *  e.g. [0, 2, 0, 3, 1] decodes as:
+     *      [1, 1, 3, 3, 3, 4]
+     */
+     defs::inds m_bos_op_inds;
+     /**
+      * indices of boson modes with any occupation
+     *  e.g. [0, 2, 0, 3, 1] decodes as:
+     *      [1, 3, 4]
+      */
+     defs::inds m_occ_bos_inds;
 public:
     CachedOrbs(const AbelianGroupMap& grp_map);
     /**
@@ -90,6 +102,16 @@ public:
      *  vector of site indices with zero or two fermions
      */
     const defs::inds& not_singly_occ_sites(const field::FrmOnv &mbf);
+    /**
+     * update the vector mode indices of boson creation operators which would create mbf upon application to the vacuum
+     * @param mbf
+     *  bosonic many-body basis function
+     * @return
+     *  vector of occupied bosonic modes with repetition
+     */
+    const defs::inds& bos_op_inds(const field::BosOnv &mbf);
+
+    const defs::inds& occ_bos_inds(const field::BosOnv &mbf);
 };
 
 

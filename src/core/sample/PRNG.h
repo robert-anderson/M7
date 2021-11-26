@@ -23,34 +23,42 @@ public:
 
     uint32_t draw_uint();
 
-    uint32_t draw_uint(uint32_t);
+    uint32_t draw_uint(uint32_t modular_base);
+
+    uint32_t draw_uint(uint32_t min, uint32_t max);
+
+    /**
+     * sample integers according to a linear distribution (favoring larger integers in the range)
+     * @param modular_base
+     * @return
+     */
+    uint32_t draw_uint_linear_bias(uint32_t modular_base);
 
     double draw_float();
 
-    template <typename T>
-    T stochastic_round(const T& v, const double& magnitude){
+    template<typename T>
+    T stochastic_round(const T &v, const double &magnitude) {
         ASSERT(magnitude > 0);
         static_assert(std::is_floating_point<T>::value, "Stochastic round is only applicable to floating point types");
-        const double ratio = v/magnitude;
+        const double ratio = v / magnitude;
         const long int_ratio = ratio;
-        if (ratio>=0){
-            if (draw_float()<(ratio-int_ratio)) return (int_ratio+1)*magnitude;
-            else return int_ratio*magnitude;
-        }
-        else {
-            if (draw_float()<(int_ratio-ratio)) return (int_ratio-1)*magnitude;
-            else return int_ratio*magnitude;
+        if (ratio >= 0) {
+            if (draw_float() < (ratio - int_ratio)) return (int_ratio + 1) * magnitude;
+            else return int_ratio * magnitude;
+        } else {
+            if (draw_float() < (int_ratio - ratio)) return (int_ratio - 1) * magnitude;
+            else return int_ratio * magnitude;
         }
     }
 
-    template <typename T>
-    std::complex<T> stochastic_round(const std::complex<T>& v, const double& magnitude) {
-        return stochastic_round(std::abs(v), magnitude)*v/std::abs(v);
+    template<typename T>
+    std::complex<T> stochastic_round(const std::complex<T> &v, const double &magnitude) {
+        return stochastic_round(std::abs(v), magnitude) * v / std::abs(v);
     }
 
-    template <typename T>
-    T stochastic_threshold(const T& v, const double& magnitude){
-        if (std::abs(v)<magnitude) return stochastic_round(v, magnitude);
+    template<typename T>
+    T stochastic_threshold(const T &v, const double &magnitude) {
+        if (std::abs(v) < magnitude) return stochastic_round(v, magnitude);
         return v;
     }
 

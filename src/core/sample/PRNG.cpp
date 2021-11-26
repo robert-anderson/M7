@@ -3,6 +3,7 @@
 //
 
 #include <src/core/parallel/MPIWrapper.h>
+#include <src/core/parallel/MPIAssert.h>
 #include "PRNG.h"
 
 PRNG::PRNG(const size_t &seed, const size_t &block_size) :
@@ -28,6 +29,15 @@ uint32_t PRNG::draw_uint(uint32_t modular_base) {
     return draw_uint() % modular_base;
 }
 
+uint32_t PRNG::draw_uint(uint32_t min, uint32_t max){
+    DEBUG_ASSERT_LT(min, max, "invalid limits");
+    return min + draw_uint(max-min);
+}
+
 double PRNG::draw_float() {
     return double(draw_uint()) / (1ul + std::mt19937::max());
+}
+
+uint32_t PRNG::draw_uint_linear_bias(uint32_t modular_base) {
+    return std::floor(modular_base*std::sqrt(draw_float()));
 }

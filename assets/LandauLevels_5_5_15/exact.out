@@ -1,0 +1,25 @@
+Basis generation progress [%]  0.0
+Many-body configurations
+------------------------
+Index:  0
+State:  [0. 0. 0. 5. 0.]
+z-Ang.mom. 15
+Index:  1
+State:  [0. 0. 1. 3. 1.]
+z-Ang.mom. 15
+Index:  2
+State:  [0. 0. 2. 1. 2.]
+z-Ang.mom. 15
+Index:  3
+State:  [0. 1. 0. 2. 2.]
+z-Ang.mom. 15
+Index:  4
+State:  [0. 1. 1. 0. 3.]
+z-Ang.mom. 15
+Index:  5
+State:  [1. 0. 0. 1. 3.]
+z-Ang.mom. 15
+------------------------
+Diagonalising Hamiltonian...
+Hamiltonian eigenvalues [V0]
+[2.10692052 2.82106087 3.14970435 4.05023446 4.85080254 7.33377726]

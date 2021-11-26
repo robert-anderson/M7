@@ -551,6 +551,10 @@ namespace prob_utils {
         for (auto &prob: v) if (prob < min) prob = min;
         normalize(v);
     }
+
+    static defs::prob_t linear_bias_prob(const size_t& n, const size_t& i){
+        return (2*i+1)/defs::prob_t(n*n);
+    }
 }
 
 namespace stat_utils {

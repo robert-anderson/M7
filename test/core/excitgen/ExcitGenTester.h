@@ -59,7 +59,7 @@ namespace excit_gen_tester {
                 row.m_weight = 0.0;
                 row.m_helem = helem;
             };
-            m_iter.foreach<mbf_t>(src_mbf, body_fn, true);
+            m_iter.foreach(src_mbf, body_fn, true);
         }
 
         template<typename mbf_t>

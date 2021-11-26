@@ -46,6 +46,7 @@ MaeIndsField &MaeIndsField::operator=(const BosOnvConnection &conn) {
         for (size_t iop=0ul; iop<pair.m_nop; ++iop)
             m_bos.m_cre[iind++] = pair.m_imode;
     }
+    iind = 0ul;
     for (auto& pair : conn.m_ann.pairs()) {
         for (size_t iop=0ul; iop<pair.m_nop; ++iop)
             m_bos.m_ann[iind++] = pair.m_imode;

@@ -6,7 +6,7 @@
 #include "src/core/hamiltonian/BosonHamiltonian.h"
 
 TEST(BosonHamiltonian, Coefficients) {
-    BosonHamiltonian ham(defs::assets_root + "/LandauLevels/BOSDUMP", 12);
+    BosonHamiltonian ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
     ASSERT_EQ(ham.m_nmode, 5ul);
     ASSERT_EQ(ham.m_nboson, 5ul);
     //0.2209708691 2 4 5 3
@@ -30,7 +30,7 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
      *  [0. 1. 1. 0. 3.] 3.9140625
      *  [1. 0. 0. 1. 3.] 3.0859375
      */
-    BosonHamiltonian ham(defs::assets_root + "/LandauLevels/BOSDUMP", 12);
+    BosonHamiltonian ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
     buffered::BosOnv onv(ham.m_nmode);
     onv = {0, 0, 0, 5, 0};
     ASSERT_FLOAT_EQ(ham.get_element(onv), 3.125);
@@ -49,12 +49,12 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
 TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
     /*
      *  ONVs
-     *  [0. 0. 0. 5. 0.]
-     *  [0. 0. 1. 3. 1.]
-     *  [0. 0. 2. 1. 2.]
-     *  [0. 1. 0. 2. 2.]
-     *  [0. 1. 1. 0. 3.]
-     *  [1. 0. 0. 1. 3.]
+     *  [0, 0, 0, 5, 0]
+     *  [0, 0, 1, 3, 1]
+     *  [0, 0, 2, 1, 2]
+     *  [0, 1, 0, 2, 2]
+     *  [0, 1, 1, 0, 3]
+     *  [1, 0, 0, 1, 3]
      *
      * [[3.125      1.2103073  0.         0.         0.         0.        ]
      *  [1.2103073  4.921875   1.32582521 1.08253175 0.         0.        ]
@@ -63,7 +63,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         1.08253175 0.66291261 3.9140625  0.4330127 ]
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
-    BosonHamiltonian ham(defs::assets_root + "/LandauLevels/BOSDUMP", 12);
+    BosonHamiltonian ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
     buffered::BosOnv src(ham.m_nmode);
     buffered::BosOnv dst(ham.m_nmode);
     conn::BosOnv conn(src);
@@ -76,10 +76,11 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
              {0, 1, 1, 0, 3},
              {1, 0, 0, 1, 3}};
 
-    std::vector<defs::ham_comp_t> h_upper_triangle = {1.2103072956898178, 0.0, 0.0, 0.0, 0.0, 1.3258252147247769,
-                                                    1.0825317547305484, 0.0, 0.0, 0.6123724356957947,
-                                                    1.0825317547305484, 0.37500000000000006, 0.6629126073623882,
-                                                    0.6123724356957946, 0.43301270189221935};
+    std::vector<defs::ham_comp_t> h_upper_triangle =
+            {1.2103072956898178, 0.0, 0.0, 0.0, 0.0, 1.3258252147247769,
+            1.0825317547305484, 0.0, 0.0, 0.6123724356957947,
+            1.0825317547305484, 0.37500000000000006, 0.6629126073623882,
+            0.6123724356957946, 0.43301270189221935};
     size_t n = 0ul;
     for (size_t i=0ul; i<basis.size(); ++i){
         src = basis[i];

@@ -96,7 +96,7 @@ struct LadderExcitGen : public ExcitGen {
  * Base class for stochastic Boson number-conserving excitations
  */
 struct BosExcitGen : public ExcitGen {
-    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig);
 };
 
 #endif //M7_EXCITGEN_H

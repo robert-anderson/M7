@@ -75,3 +75,14 @@ TEST(PRNG, ModularBase){
     }
     ASSERT_TRUE(std::all_of(frequencies.cbegin(), frequencies.cend(), [](const size_t &i){return i>0;}));
 }
+
+TEST(PRNG, InRange) {
+    PRNG prng(0, 1000);
+    const uint32_t min = 5, max = 10;
+    const size_t n = 10000000;
+    size_t tot = 0ul;
+    for (size_t i = 0; i < n; ++i) {
+        tot += prng.draw_uint(min, max);
+    }
+    ASSERT_LT(std::abs(tot / n - (max-min-1)/2.0), 1e-4);
+}

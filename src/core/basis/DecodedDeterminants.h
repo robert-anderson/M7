@@ -97,6 +97,7 @@ struct NdOrbs {
     FlatOrbs<updater_fn> m_flat;
     NdOrbs(std::array<size_t, nind> shape, size_t nsite, const defs::inds& map):
         m_format(shape), m_inds(m_format.m_nelement), m_map(map), m_flat(nsite){
+        if (!nsite) return;
         for (auto& v: m_inds) v.reserve(2*nsite);
         ASSERT(m_map.size()==2*nsite);
         ASSERT(*std::max_element(map.cbegin(), map.cend())<m_format.m_nelement);

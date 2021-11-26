@@ -16,6 +16,8 @@ void CachedOrbs::clear() {
     m_occ_sites.clear();
     m_doubly_occ_sites.clear();
     m_not_singly_occ_sites.clear();
+    m_bos_op_inds.clear();
+    m_occ_bos_inds.clear();
 }
 
 const SpinSymOccOrbs &CachedOrbs::occ(const field::FrmOnv &mbf) {
@@ -64,4 +66,24 @@ const defs::inds &CachedOrbs::not_singly_occ_sites(const field::FrmOnv &mbf) {
         }
     }
     return m_not_singly_occ_sites;
+}
+
+const defs::inds &CachedOrbs::bos_op_inds(const field::BosOnv &mbf) {
+    if (m_bos_op_inds.empty()) {
+        for (size_t imode = 0ul; imode < mbf.m_nelement; ++imode) {
+            for (size_t iop =0ul; iop<mbf[imode]; ++iop){
+                m_bos_op_inds.push_back(imode);
+            }
+        }
+    }
+    return m_bos_op_inds;
+}
+
+const defs::inds &CachedOrbs::occ_bos_inds(const field::BosOnv &mbf) {
+    if (m_occ_bos_inds.empty()) {
+        for (size_t imode = 0ul; imode < mbf.m_nelement; ++imode) {
+            if (mbf[imode]) m_occ_bos_inds.push_back(imode);
+        }
+    }
+    return m_occ_bos_inds;
 }
