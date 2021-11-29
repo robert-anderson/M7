@@ -90,6 +90,7 @@ fciqmc_config::Reference::Reference(config::Group *parent) :
                        "string representations of the MBFs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
         m_bos_onv_init(this, "bos_onv_init", {},
                        "array of occupations for each mode of the initial ONV"),
+        m_mbf_init(this, "mbf_init"),
         m_init_mbf_neel(this, "init_mbf_neel", false,
                        "initialize the reference to a Neel state rather than assuming Aufbau principle"),
         m_redef_thresh(this, "redef_thresh", 10.0,
@@ -307,3 +308,11 @@ void fciqmc_config::Document::verify() {
         log::warn("initial number of walkers must be at least the initiator threshold");
     }
 }
+
+fciqmc_config::MbfDef::MbfDef(config::Group *parent, std::string name) :
+        config::Section(parent, name, "definition of a vector of many-body basis functions"),
+        m_frm(this, "fermion", {},
+              "fermion sector occupation of the MBF (each element can be a boolean "
+              "array of occupation status of all spin-orbitals or list of occupied spin-obrital indices)"),
+        m_bos(this, "boson", {}, "boson sector occupation of the MBF as an arrays of occupation "
+                                   "levels of all modes") {}

@@ -35,13 +35,13 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      * @return
      *  *this
      */
-    BosOnvField &attempt_set_from_input(const defs::inds &v) {
-        if (!v.empty()) {
-            REQUIRE_EQ(v.size(), m_nelement, "Incorrectly sized boson ONV value given");
-            *this = v;
-        }
-        return *this;
-    }
+//    BosOnvField &attempt_set_from_input(const defs::inds &v) {
+//        if (!v.empty()) {
+//            REQUIRE_EQ(v.size(), m_nelement, "Incorrectly sized boson ONV value given");
+//            *this = v;
+//        }
+//        return *this;
+//    }
 
 };
 

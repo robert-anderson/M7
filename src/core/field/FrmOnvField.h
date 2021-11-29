@@ -18,6 +18,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::inds_t;
 
     const size_t m_nsite;
+    const size_t& m_nspinorb;
 
     FrmOnvField(Row* row, size_t nsite, std::string name="");
 
@@ -81,8 +82,6 @@ struct FrmOnvField : BitsetField<size_t, 2> {
         set(dptr, cre1);
         set(dptr, cre2);
     }
-
-    void set_from_string(const std::string &s);
 
     void foreach(const std::function<void(const size_t&)>& body_fn) const;
 

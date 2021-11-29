@@ -10,7 +10,7 @@
 
 namespace fciqmc_config {
 
-    struct HashMapping: config::Section {
+    struct HashMapping : config::Section {
         config::Param<double> m_remap_ratio;
         config::Param<size_t> m_remap_nlookup;
 
@@ -44,9 +44,11 @@ namespace fciqmc_config {
         bool do_load() const {
             return !m_load_path.get().empty();
         }
+
         bool do_save() const {
             return !m_save_path.get().empty();
         }
+
         bool do_chkpts() const {
             return !m_chkpt_path.get().empty() && (m_period_mins || m_period);
         }
@@ -76,9 +78,18 @@ namespace fciqmc_config {
         explicit LoadBalancing(config::Group *parent);
     };
 
+    struct MbfDef : config::Section {
+        config::Param<std::vector<defs::inds>> m_frm;
+        config::Param<std::vector<defs::inds>> m_bos;
+        //config::Param<std::vector<defs::inds>> m_csf;
+
+        explicit MbfDef(config::Group *parent, std::string name);
+    };
+
     struct Reference : config::Section {
         config::Param<std::string> m_frm_onv_init;
         config::Param<defs::inds> m_bos_onv_init;
+        MbfDef m_mbf_init;
         config::Param<bool> m_init_mbf_neel;
         config::Param<double> m_redef_thresh;
 

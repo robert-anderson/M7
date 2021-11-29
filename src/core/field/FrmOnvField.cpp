@@ -7,7 +7,7 @@
 
 FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
         base_t(row, {{2, nsite}, {"spin channel", "site"}}, name),
-        m_nsite(nsite){
+        m_nsite(nsite), m_nspinorb(m_format.m_nelement){
 }
 
 FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
@@ -24,26 +24,6 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::in
     for (const auto &ind: setbits.first) set(ind);
     for (const auto &ind: setbits.second) set(ind+m_nsite);
     return *this;
-}
-
-void FrmOnvField::set_from_string(const std::string &s) {
-    zero();
-    size_t i = 0ul;
-    for (auto c: s) {
-        // divider
-        if (c != ',') {
-            if (c != '0' && c != '1')
-                throw std::runtime_error(
-                        R"(FermionOnv-defining string must contain only "0", "1", or ",")");
-            if (c == '1') set(i);
-            ++i;
-        } else {
-            if (i != m_nsite)
-                throw std::runtime_error("Divider \",\" is not centralized in FermionOnv-defining string");
-        }
-    }
-    REQUIRE_GT(i, nbit(), "FermionOnv-defining string not long enough");
-    REQUIRE_LT(i, nbit(), "FermionOnv-defining string too long");
 }
 
 void FrmOnvField::foreach(const std::function<void(const size_t &)> &body_fn) const {
