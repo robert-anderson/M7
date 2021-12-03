@@ -4,10 +4,14 @@
 
 #include "EbdumpFileReader.h"
 
-EbdumpFileReader::EbdumpFileReader(const std::string &fname) : HamiltonianFileReader(fname, 3, false),
-                                                               m_nmode(read_header_int(fname, "NMODE")) {
-    REQUIRE_FALSE_ALL(m_spin_resolved, "spin resolved electron-boson dumps are not currently supported");
-}
+
+EbdumpHeader::EbdumpHeader(const std::string &fname) :
+        FortranNamelistReader(fname), m_nmode(read_int("NMODE")), m_nsite(read_int("NORB")), m_uhf(read_bool("UHF")) {}
+
+
+EbdumpFileReader::EbdumpFileReader(const std::string &fname) :
+        HamiltonianFileReader(fname, 3),
+        m_header(fname), m_norb_distinct((m_header.m_uhf ? 2 : 1)*m_header.m_nsite){}
 
 size_t EbdumpFileReader::ranksig(const defs::inds &inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
@@ -29,5 +33,5 @@ size_t EbdumpFileReader::exsig(const defs::inds &inds, const size_t &ranksig) co
 }
 
 bool EbdumpFileReader::inds_in_range(const defs::inds &inds) const {
-    return inds[0] < m_nmode && ind_in_range(inds[1], m_norb) && ind_in_range(inds[2], m_norb);
+    return inds[0] <= m_header.m_nmode && inds[1] <= m_norb_distinct && inds[2] <= m_norb_distinct;
 }

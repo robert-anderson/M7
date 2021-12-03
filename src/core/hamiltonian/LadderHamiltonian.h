@@ -35,7 +35,10 @@ struct LadderHamiltonian {
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    LadderHamiltonian(const std::string& fname, size_t nboson_max);
+    LadderHamiltonian(const EbdumpHeader& header, size_t nboson_max);
+
+    LadderHamiltonian(const std::string& fname, size_t nboson_max) :
+        LadderHamiltonian(EbdumpHeader(fname), nboson_max){}
 
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
 
@@ -49,11 +52,6 @@ struct LadderHamiltonian {
      * output some useful logs identifying the kind of H detected
      */
     void log_data() const;
-
-private:
-    static BasisDims read_bd(const std::string& fname);
-
-    static bool read_spin_resolved(const std::string& fname);
 };
 
 #endif //M7_LADDERHAMILTONIAN_H

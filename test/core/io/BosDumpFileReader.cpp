@@ -8,8 +8,7 @@
 TEST(BosdumpFileReader, ReadFile){
     std::string fname = defs::assets_root + "/Hubbard_U4_4site/BOSDUMP";
     BosdumpFileReader file_reader(fname);
-    ASSERT_FALSE(file_reader.m_spin_resolved);
-    ASSERT_EQ(file_reader.m_norb, 4ul);
+    ASSERT_EQ(file_reader.m_header.m_nmode, 4ul);
     defs::inds inds(2);
     defs::inds test_inds(2);
     defs::ham_t value;

@@ -4,9 +4,9 @@
 
 #include "LadderHamiltonian.h"
 
-LadderHamiltonian::LadderHamiltonian(const std::string &fname, size_t nboson_max) :
-        m_nboson_max(nboson_max), m_bd(read_bd(fname)),
-        m_v(m_bd, read_spin_resolved(fname)), m_v_unc(m_bd.m_nmode, 0.0),
+LadderHamiltonian::LadderHamiltonian(const EbdumpHeader &header, size_t nboson_max) :
+        m_nboson_max(nboson_max), m_bd({header.m_nsite, header.m_nmode}),
+        m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_nmode, 0.0),
         m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
         m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
     if (!m_nboson_max || !(m_bd.m_nsite || m_bd.m_nmode)) return;
@@ -16,7 +16,7 @@ LadderHamiltonian::LadderHamiltonian(const std::string &fname, size_t nboson_max
 
     defs::inds inds(3);
     defs::ham_t value;
-    EbdumpFileReader file_reader(fname);
+    EbdumpFileReader file_reader(header.m_fname);
 
     log::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -104,16 +104,4 @@ bool LadderHamiltonian::constant_uncoupled() const {
 bool LadderHamiltonian::is_zpm_half_filled() const {
     if (!is_holstein()) return false;
     return constant_uncoupled() && m_v.constant_diagonal() && (m_v.get(0, 0, 0) == -m_v_unc[0]);
-}
-
-BasisDims LadderHamiltonian::read_bd(const std::string &fname) {
-    if (!FileReader::exists(fname)) return {0, 0};
-    EbdumpFileReader file_reader(fname);
-    return {file_reader.m_norb, file_reader.m_nmode};
-}
-
-bool LadderHamiltonian::read_spin_resolved(const std::string &fname) {
-    if (!FileReader::exists(fname)) return false;
-    EbdumpFileReader file_reader(fname);
-    return file_reader.m_spin_resolved;
 }

@@ -6,9 +6,17 @@
 #define M7_EBDUMPFILEREADER_H
 
 #include "HamiltonianFileReader.h"
+#include "FortranNamelistReader.h"
+
+struct EbdumpHeader : FortranNamelistReader {
+    const size_t m_nmode, m_nsite;
+    const bool m_uhf;
+    EbdumpHeader(const std::string& fname);
+};
 
 struct EbdumpFileReader : HamiltonianFileReader {
-    const size_t m_nmode;
+    const EbdumpHeader m_header;
+    const size_t m_norb_distinct;
 
     EbdumpFileReader(const std::string &fname);
 

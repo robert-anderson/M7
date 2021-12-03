@@ -78,6 +78,12 @@ TEST(utils, MeanAndStd){
     ASSERT_FLOAT_EQ(mean_std.second, 1.6110081384717527);
 }
 
+TEST(utils, SplitLine){
+    const std::string line = "0.5000000000 1 1 2 2";
+    auto tokens = string_utils::split(line, ' ');
+    std::cout << tokens << std::endl;
+}
+
 TEST(utils, JoinAndSplit){
     const std::string line = " this is   an   example   string   ";
     auto tokens = string_utils::split(line, ' ');

@@ -29,8 +29,10 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const defs::wf_t &weight = row.m_weight[ipart];
     double rdm_factor = 1.0;
 
-    ASSERT(!consts::float_is_zero(weight));
-    ASSERT(consts::imag(weight) == 0.0 || m_ham.complex_valued())
+    DEBUG_ASSERT_FALSE(consts::float_is_zero(weight),
+                       "should not attempt offdiagonal propagation from zero weight");
+    DEBUG_ASSERT_TRUE(consts::imag(weight) == 0.0 || m_ham.complex_valued(),
+                      "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto &src_onv = row.m_mbf;
     bool flag_initiator = row.m_initiator.get(ipart);
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));

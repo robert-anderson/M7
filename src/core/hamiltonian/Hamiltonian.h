@@ -58,7 +58,9 @@ struct Hamiltonian {
 
     const size_t &nboson() const;
 
-    bool complex_valued() const;
+    bool complex_valued() const {
+        return m_frm.m_complex_valued;
+    }
 
     /*
      * pure fermion matrix elements

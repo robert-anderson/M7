@@ -435,6 +435,16 @@ namespace string_utils {
         return result;
     }
 
+    static void split(std::string &line, std::vector<std::string>& tokens, const std::string &delimiters){
+        tokens.clear();
+        char *ptr;
+        ptr = strtok(const_cast<char *>(line.c_str()), delimiters.c_str());
+        while (ptr != nullptr) {
+            tokens.emplace_back(ptr);
+            ptr = strtok(nullptr, delimiters.c_str());
+        }
+    }
+
     static std::string yn(bool t) {
         return t ? "yes" : "no";
     }

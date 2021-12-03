@@ -8,8 +8,9 @@
 TEST(EbDumpFileReader, ReadFile){
     std::string fname = defs::assets_root + "/Hubbard_U4_4site/EBDUMP";
     EbdumpFileReader file_reader(fname);
-    ASSERT_FALSE(file_reader.m_spin_resolved);
-    ASSERT_EQ(file_reader.m_norb, 4ul);
+    ASSERT_FALSE(file_reader.m_header.m_uhf);
+    ASSERT_EQ(file_reader.m_header.m_nmode, 4ul);
+    ASSERT_EQ(file_reader.m_header.m_nsite, 4ul);
     defs::inds inds(3);
     defs::inds test_inds(3);
     defs::ham_t value;

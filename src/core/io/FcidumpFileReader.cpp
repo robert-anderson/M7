@@ -5,28 +5,24 @@
 #include "FcidumpFileReader.h"
 
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
-        HamiltonianFileReader(fname, 4, false),
-        m_spin_major(spin_major),
-        m_nelec(read_header_int(fname, "NELEC")),
-        m_orbsym(read_header_array(fname, "ORBSYM", -1))
-{
-    REQUIRE_EQ(m_orbsym.size(), m_norb, "invalid ORBSYM specified in FCIDUMP file");
-    set_symm_and_rank(fname);
+        HamiltonianFileReader(fname, 4), m_header(fname), m_spin_major(spin_major) {
+    set_symm_and_rank();
 
-    if (m_spin_resolved) {
+    auto nsite = m_header.m_nsite;
+    if (m_header.m_spin_resolved) {
         defs::inds inds(4);
         defs::ham_t v;
         while (next(inds, v)) {
             if (!consts::float_is_zero(std::abs(v))) {
-                if (((inds[0] < m_nspatorb) != (inds[1] < m_nspatorb)) ||
-                    ((inds[2] < m_nspatorb) != (inds[3] < m_nspatorb))) {
+                if (((inds[0] < nsite) != (inds[1] < nsite)) ||
+                    ((inds[2] < nsite) != (inds[3] < nsite))) {
                     // spin non-conserving example found
                     if (nset_ind(inds)==2) m_spin_conserving_1e = false;
                     else m_spin_conserving_2e = false;
                 }
             }
         }
-        SparseArrayFileReader<defs::ham_t>::reset(); // go back to beginning of entries
+        FileReader::reset(); // go back to beginning of entries
     }
     if (m_spin_conserving_1e) log::info("FCIDUMP file conserves spin in 1 particle integrals");
     else log::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
@@ -40,11 +36,11 @@ bool FcidumpFileReader::spin_conserving() const {
 }
 
 void FcidumpFileReader::inds_to_orbs(defs::inds &inds) {
-    m_inds_to_orbs(inds);
+    if (!m_header.m_spin_resolved || m_spin_major) return;
+    for (auto &i:inds) i = ((i == ~0ul) ? ~0ul : (i / 2 + (i & 1ul) ? m_header.m_nsite : 0));
 }
 
-
-void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
+void FcidumpFileReader::set_symm_and_rank() {
     m_int_2e_rank = 0;
     auto get_rank = [](const defs::inds& inds){
         // [ij|kl]
@@ -58,14 +54,13 @@ void FcidumpFileReader::set_symm_and_rank(const std::string &filename) {
     };
 
     log::info("Determining permutational symmetry of integral file entries");
-    SparseArrayFileReader<defs::ham_t> reader(filename, 4, false);
     defs::inds inds(4);
     defs::ham_t value;
     // this will eventually hold all orderings of the first example of an
     // integral with 4 distinct indices
     std::array<defs::inds, 8> inds_distinct;
     m_isymm = 0ul;
-    while (reader.next(inds, value)) {
+    while (next(inds, value)) {
         if (std::all_of(inds.begin(), inds.end(), [](size_t i){return i>0;})) {
             // we have a two body integral
             if (m_int_2e_rank<2) {
@@ -123,5 +118,5 @@ size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) c
 }
 
 bool FcidumpFileReader::inds_in_range(const defs::inds &inds) const {
-    return std::all_of(inds.begin(), inds.end(), [this](const size_t &i) {return ind_in_range(i, m_norb); });
+    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_header.m_norb_distinct;});
 }

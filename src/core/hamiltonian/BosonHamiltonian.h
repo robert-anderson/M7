@@ -20,7 +20,9 @@ struct BosonHamiltonian {
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
-    BosonHamiltonian(const std::string& fname, size_t nboson_max);
+    BosonHamiltonian(const BosdumpHeader& header, size_t nboson_max);
+
+    BosonHamiltonian(const std::string& fname, size_t nboson_max): BosonHamiltonian(BosdumpHeader(fname), nboson_max){}
 
     defs::ham_t get_element(const field::BosOnv &onv) const;
 
@@ -32,15 +34,6 @@ struct BosonHamiltonian {
 
     void log_data() const;
 
-private:
-    static size_t read_nmode(const std::string& fname){
-        if (!FileReader::exists(fname)) return 0ul;
-        return BosdumpFileReader(fname).m_nmode;
-    }
-    static size_t read_nboson(const std::string& fname){
-        if (!FileReader::exists(fname)) return 0ul;
-        return BosdumpFileReader(fname).m_nboson;
-    }
 };
 
 

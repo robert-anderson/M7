@@ -6,31 +6,25 @@
 #define M7_HAMILTONIANFILEREADER_H
 
 #include <regex>
-#include "SparseArrayFileReader.h"
+#include "CsvFileReader.h"
+#include "FortranNamelistReader.h"
 
 /**
- * base class for all Hamiltonian-defining files with a FORTRAN namelist header, and all values defined at the beginning
+ * base class for all Hamiltonian-defining files with a Fortran namelist header, and all values defined at the beginning
  * of the line with indices following
  */
-struct HamiltonianFileReader : public SparseArrayFileReader<defs::ham_t> {
-    typedef SparseArrayFileReader<defs::ham_t> base_t;
-    std::function<void(defs::inds& inds)> m_inds_to_orbs;
+class HamiltonianFileReader : public NumericCsvFileReader {
 
-    const std::regex m_header_terminator_regex;
-    const bool m_spin_major;
-    const size_t m_norb;
-    const bool m_spin_resolved;
-    const size_t m_nspatorb;
+    std::vector<std::string> m_work_tokens;
 
-    HamiltonianFileReader(const std::string &fname, size_t nind, bool spin_major);
+public:
+    const bool m_complex_valued;
 
-    size_t read_header_int(const std::string &fname, const std::string &label, size_t default_=0);
+    static size_t iline_fn(const std::string& fname);
 
-    defs::inds read_header_array(const std::string &fname, const std::string &label, long offset=0, defs::inds default_={});
+    HamiltonianFileReader(const std::string &fname, size_t nind);
 
-    size_t read_header_bool(const std::string &fname, const std::string &label, size_t default_=false);
-
-    bool next(defs::inds &inds, defs::ham_t &v) const;
+    bool next(defs::inds &inds, defs::ham_t &v);
 
     static size_t nset_ind(const defs::inds &inds);
 
@@ -40,18 +34,10 @@ struct HamiltonianFileReader : public SparseArrayFileReader<defs::ham_t> {
 
     size_t exsig(const defs::inds &inds) const;
 
-private:
-    /**
-     * spin-resolved FCIDUMPs index in spinorbs, which may not or may not be spin-major, depending on the program they
-     * were generated for. E.g. NECI uses spin-minor ordering throughout, so if the FCIDUMP supplied was intended for
-     * use with NECI, spin_major should be passed in as false.
-     */
-    // spin major and spin restricted (non-resolved) cases
-    static void decrement_inds(defs::inds& inds);
-    // spin minor case
-    static void decrement_inds_and_transpose(defs::inds& inds, const size_t& nspatorb);
+    virtual bool inds_in_range(const defs::inds& inds) const;
 
-    static defs::inds parse_int_array(const std::string& str, long offset=0);
+private:
+    static void decrement_inds(defs::inds& inds);
 };
 
 

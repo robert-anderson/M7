@@ -7,9 +7,9 @@
 
 TEST(FcidumpFileReader, Real_6orb){
     FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_FALSE(file_reader.m_spin_resolved);
+    ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
-    ASSERT_EQ(file_reader.m_nspatorb, 6);
+    ASSERT_EQ(file_reader.m_header.m_nsite, 6);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);
@@ -32,9 +32,9 @@ TEST(FcidumpFileReader, Real_6orb){
 
 TEST(FcidumpFileReader, Integer_8orb){
     FcidumpFileReader file_reader(defs::assets_root+"/Hubbard_U4_8site/FCIDUMP", false);
-    ASSERT_FALSE(file_reader.m_spin_resolved);
+    ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
-    ASSERT_EQ(file_reader.m_nspatorb, 8);
+    ASSERT_EQ(file_reader.m_header.m_nsite, 8);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);

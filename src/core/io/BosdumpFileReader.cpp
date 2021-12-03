@@ -4,13 +4,9 @@
 
 #include "BosdumpFileReader.h"
 
-BosdumpFileReader::BosdumpFileReader(const std::string &fname) :
-        HamiltonianFileReader(fname, 4, false),
-        m_nmode(read_header_int(fname, "NMODE")),
-        m_nboson(read_header_int(fname, "NBOSON")) {
-    // We implement spinless bosons, so the spin resolved flag doesn't make sense in this derived class
-    REQUIRE_FALSE_ALL(m_spin_resolved, "spin resolved boson dumps are invalid");
-}
+
+BosdumpFileReader::BosdumpFileReader(const std::string &fname) : HamiltonianFileReader(fname, 4), m_header(BosdumpHeader(fname)){}
+
 
 size_t BosdumpFileReader::ranksig(const defs::inds &inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect maximum number of SQ operator indices");
@@ -34,5 +30,5 @@ size_t BosdumpFileReader::exsig(const defs::inds &inds, const size_t &ranksig) c
 }
 
 bool BosdumpFileReader::inds_in_range(const defs::inds &inds) const {
-    return std::all_of(inds.begin(), inds.end(), [this](const size_t &i) { return (i == ~0ul) || (i < m_nmode); });
+    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_header.m_nmode;});
 }

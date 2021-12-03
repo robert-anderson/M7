@@ -20,24 +20,23 @@ buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) c
     return ref;
 }
 
-FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued,
-                                       bool spin_resolved, defs::inds site_irreps) :
+FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool spin_resolved, bool complex_valued, defs::inds site_irreps) :
         m_nelec(nelec), m_nsite(nsite), m_complex_valued(complex_valued),
         m_point_group_map(PointGroup(), site_irreps.empty() ? defs::inds(nsite, 0ul) : site_irreps),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
         m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {
     if (!nsite) return;
-    REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), nintind(), "site map size incorrect");
+    REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
 }
 
-FermionHamiltonian::FermionHamiltonian(std::string fname, bool spin_major, bool elecs, int charge) :
-        FermionHamiltonian(read_nelec(fname) - charge, elecs ? read_nspatorb(fname) : 0ul,
-                           read_complex_valued(fname), read_spin_resolved(fname), read_orbsym(fname)) {
+FermionHamiltonian::FermionHamiltonian(const FcidumpHeader& header, bool spin_major, bool elecs, int charge) :
+        FermionHamiltonian(header.m_nelec - charge, elecs ? header.m_nsite : 0ul, header.m_spin_resolved,
+                           FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
     if (!elecs) {
         log::info("Electronic operators are disabled in the Hamiltonian");
         return;
     }
-    FcidumpFileReader file_reader(fname, spin_major);
+    FcidumpFileReader file_reader(header.m_fname, spin_major);
 
     using namespace ham_data;
     defs::inds inds(4);

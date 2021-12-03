@@ -3,7 +3,7 @@
 //
 
 #include <src/core/table/BufferedFields.h>
-#include <src/core/io/SparseArrayFileReader.h>
+#include <src/core/io/CsvFileReader.h>
 #include "src/core/connection/FrmOnvConnection.h"
 #include "gtest/gtest.h"
 
@@ -190,17 +190,18 @@ TEST(Connection, EntireCiPhases) {
     /**
      * this file enumerates all determinantal connections in a small CI space along with their associated phases
      */
-    SparseArrayFileReader<float> file_reader(
-            defs::assets_root + "/parity_test/parity_8.txt",
-            16ul, false, false);
+    NumericCsvFileReader file_reader(defs::assets_root + "/parity_test/parity_8.txt", 17);
     defs::inds inds(16);
-    float value;
+    int value;
 
     buffered::FrmOnv bra(4);
     buffered::FrmOnv ket(4);
     buffered::FrmOnv work_det(4);
 
-    while (file_reader.next(inds, value)) {
+    std::vector<std::string> tokens;
+    while (file_reader.next(tokens)) {
+        NumericCsvFileReader::parse(tokens.cbegin(), tokens.cbegin()+1, value);
+        NumericCsvFileReader::parse(tokens.cbegin()+1, tokens.cend(), inds);
         bra.zero();
         ket.zero();
         for (size_t i = 0ul; i < 8ul; ++i) {
