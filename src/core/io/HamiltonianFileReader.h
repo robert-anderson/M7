@@ -34,7 +34,7 @@ public:
 
     size_t exsig(const defs::inds &inds) const;
 
-    virtual bool inds_in_range(const defs::inds& inds) const;
+    virtual bool inds_in_range(const defs::inds& inds) const = 0;
 
 private:
     static void decrement_inds(defs::inds& inds);

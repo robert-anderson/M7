@@ -4,6 +4,8 @@
 
 #include "FortranNamelistReader.h"
 
+std::regex FortranNamelistReader::c_header_terminator_regex(R"(\&END)");
+
 void FortranNamelistReader::read(size_t &v, const std::string &label, size_t default_) {
     v = default_;
     if (!m_exists) return;

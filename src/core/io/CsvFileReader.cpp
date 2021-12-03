@@ -13,6 +13,8 @@ bool CsvFileReader::next(std::vector<std::string> &tokens) {
     return true;
 }
 
+std::string NumericCsvFileReader::c_allowed_chars(".(),+-eE");
+
 bool NumericCsvFileReader::valid_numeric(const std::string &token) {
     for (auto &c: token) {
         if (c >= '0' && c <= '9') continue;

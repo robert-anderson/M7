@@ -22,7 +22,7 @@ public:
 };
 
 class NumericCsvFileReader : public CsvFileReader {
-    static const std::string c_allowed_chars;
+    static std::string c_allowed_chars;
     bool valid_numeric(const std::string& token);
     bool valid_numeric(const std::vector<std::string>& tokens);
 
@@ -86,7 +86,5 @@ public:
 
     static size_t ncolumn(const std::string& fname, std::function<size_t(const std::string&)> iline_fn);
 };
-
-const std::string NumericCsvFileReader::c_allowed_chars = ".(),+-eE";
 
 #endif //M7_CSVFILEREADER_H
