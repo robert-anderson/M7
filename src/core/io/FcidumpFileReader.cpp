@@ -10,11 +10,11 @@ FcidumpHeader::FcidumpHeader(const std::string& fname):
     m_uhf(read_bool("UHF")),
     m_relativistic(read_bool("TREL")),
     m_spin_resolved(m_uhf || m_relativistic),
-    m_nelec(read_int("NELEC")),
-    m_nsite(read_int("NORB")),
+    m_nelec(read_uint("NELEC")),
+    m_nsite(read_uint("NORB")),
     m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
     m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
-    m_orbsym(read_int_array("ORBSYM", -1, defs::inds(m_nsite, 1ul))){
+    m_orbsym(read_uints("ORBSYM", -1, defs::inds(m_nsite, 1ul))){
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }
 

@@ -4,93 +4,102 @@
 
 #include "FortranNamelistReader.h"
 
-std::regex FortranNamelistReader::c_header_terminator_regex(R"(\&END)");
+const std::string FortranNamelistReader::c_header_terminator = "&END";
 
 FortranNamelistReader::FortranNamelistReader(std::string fname):
         m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){}
 
-void FortranNamelistReader::read(size_t &v, const std::string &label, size_t default_) {
-    v = default_;
-    if (!m_exists) return;
-    const auto regex = std::regex(label + R"(\s*\=\s*[0-9]+)");
-    FileReader file_reader(m_fname);
-    std::string line;
-    std::smatch match;
-    while (file_reader.next(line)) {
-        std::regex_search(line, match, regex);
-        if (match.size()) {
-            std::string match_string(match.str());
-            std::regex_search(match_string, match, std::regex(R"([0-9]+)"));
-            v = std::atol(match.str().c_str());
-            return;
-        }
-        std::regex_search(line, match, c_header_terminator_regex);
-        if (match.size()) break;
+std::string FortranNamelistReader::isolate_value(const std::string &line, const std::string &label) {
+    auto ibegin = line.find(label + "=");
+    if (ibegin >= line.size()) return "";
+    // go to end of label and = sign
+    ibegin += label.size();
+    // strip whitespace before value
+    while(line[++ibegin]==' '){}
+    auto substring = line.substr(ibegin, std::string::npos);
+    auto iend = substring.find('=');
+    if (iend > substring.size()) {
+        iend = substring.size();
     }
+    else {
+        // another key value pair was found after this one
+        while(--iend) {
+            // walk back to last occurrence of the delimiter before the '='
+            if (substring[iend]==',') break;
+        }
+    }
+    return substring.substr(0, iend);
 }
 
 
-void FortranNamelistReader::read(defs::inds &v, const std::string &label, long offset, defs::inds default_) {
-    v = default_;
-    if (!m_exists) return;
+std::vector<std::string> FortranNamelistReader::read(const std::string &line, const std::string &label) {
     std::vector<std::string> tokens;
-    defs::inds inds;
-    const auto regex = std::regex(label + R"(\s*\=\s*[0-9\,\s]+)");
+    auto value = isolate_value(line, label);
+    string_utils::split(value, tokens, ", ");
+    return tokens;
+}
+
+std::vector<std::string> FortranNamelistReader::read(const std::string &label) {
+    if (!m_exists) return {};
     FileReader file_reader(m_fname);
     std::string line;
-    std::smatch match;
     while (file_reader.next(line)) {
-        std::regex_search(line, match, regex);
-        if (match.size()) {
-            // strip away label so any numeric digits in the label are not picked up in error by parse_int_array
-            std::string content = match.str();
-            std::regex_search(content, match, std::regex(R"(\=.*)"));
-            content = match.str();
-            string_utils::split(content, tokens, ", ");
-            NumericCsvFileReader::parse(tokens.cbegin(), tokens.cend(), inds);
-            for (auto &ind: inds) ind += offset;
-            return;
-        }
-        std::regex_search(line, match, c_header_terminator_regex);
-        if (match.size()) break;
+        auto tokens = read(line, label);
+        if (!tokens.empty()) return tokens;
+        if (line.find(c_header_terminator)<line.size()) break;
     }
+    return {};
 }
 
-void FortranNamelistReader::read(bool &v, const std::string &label, bool default_) {
-    v = default_;
-    if (!m_exists) return;
-    std::regex regex;
-    if (default_) regex = std::regex(label + R"(\s?\=\s?\.FALSE\.)");
-    else regex = std::regex(label + R"(\s?\=\s?\.TRUE\.)");
-    FileReader file_reader(m_fname);
-    std::string line;
-    std::smatch match;
-    std::string match_string;
-    while (file_reader.next(line)) {
-        std::regex_search(line, match, regex);
-        if (match.size()) {
-            v = !default_;
-            return;
-        }
-        std::regex_search(line, match, c_header_terminator_regex);
-        if (match.size()) return;
-    }
-}
-
-size_t FortranNamelistReader::read_int(const std::string &label, size_t default_) {
-    size_t tmp;
-    read(tmp, label, default_);
-    return tmp;
-}
-
-defs::inds FortranNamelistReader::read_int_array(const std::string &label, long offset, defs::inds default_) {
-    defs::inds tmp;
+std::vector<long> FortranNamelistReader::read_ints(const std::string &label, long offset, std::vector<long> default_) {
+    std::vector<long> tmp;
     read(tmp, label, offset, default_);
     return tmp;
 }
 
-bool FortranNamelistReader::read_bool(const std::string &label, size_t default_) {
-    bool tmp;
-    read(tmp, label, default_);
+std::vector<size_t>
+FortranNamelistReader::read_uints(const std::string &label, long offset, std::vector<size_t> default_) {
+    std::vector<size_t> tmp;
+    read(tmp, label, offset, default_);
     return tmp;
+}
+
+std::vector<bool> FortranNamelistReader::read_bools(const std::string &label, long offset, std::vector<bool> default_) {
+    std::vector<bool> tmp;
+    read(tmp, label, offset, default_);
+    return tmp;
+}
+
+long FortranNamelistReader::read_int(const std::string &label, long default_) {
+    auto tmp = read_ints(label, 0, {default_});
+    REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
+    return tmp[0];
+}
+
+size_t FortranNamelistReader::read_uint(const std::string &label, size_t default_) {
+    auto tmp = read_uints(label, 0, {default_});
+    REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
+    return tmp[0];
+}
+
+bool FortranNamelistReader::read_bool(const std::string &label, bool default_) {
+    auto tmp = read_bools(label, 0, {default_});
+    REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
+    return tmp[0];
+}
+
+void FortranNamelistReader::read(std::vector<bool> &v, const std::string &label,
+                                 long offset, std::vector<bool> default_) {
+    v = default_;
+    auto tokens = read(label);
+    if (tokens.empty()) return;
+    v.clear();
+    for (auto &token: tokens) {
+        if (token==".TRUE.") v.push_back(true);
+        else if (token==".FALSE.") v.push_back(false);
+        else {
+            v = default_;
+            return;
+        }
+    }
 }

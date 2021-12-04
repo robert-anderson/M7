@@ -62,6 +62,10 @@ bool NumericCsvFileReader::parsable_as(const std::string &str, float &v) {
 }
 
 void NumericCsvFileReader::parse(const std::string &str, size_t &v) {
+    v = std::stoul(str);
+}
+
+void NumericCsvFileReader::parse(const std::string &str, long &v) {
     v = std::stol(str);
 }
 

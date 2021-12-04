@@ -5,7 +5,6 @@
 #ifndef M7_HAMILTONIANFILEREADER_H
 #define M7_HAMILTONIANFILEREADER_H
 
-#include <regex>
 #include "CsvFileReader.h"
 #include "FortranNamelistReader.h"
 

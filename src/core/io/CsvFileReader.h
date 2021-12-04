@@ -41,6 +41,7 @@ public:
     static bool parsable_as(const std::string& str, float& v);
 
     static void parse(const std::string& str, size_t& v);
+    static void parse(const std::string& str, long& v);
     static void parse(const std::string& str, int& v);
     static void parse(const std::string& str, double & v);
     static void parse(const std::string& str, float & v);

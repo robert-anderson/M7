@@ -5,10 +5,6 @@
 #include "gtest/gtest.h"
 #include "src/core/io/FcidumpFileReader.h"
 
-TEST(FcidumpFileReader, HeaderReader) {
-    FcidumpHeader header(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP");
-}
-
 TEST(FcidumpFileReader, Real_6orb){
     FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_header.m_spin_resolved);

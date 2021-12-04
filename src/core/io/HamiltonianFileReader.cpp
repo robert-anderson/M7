@@ -8,11 +8,9 @@ size_t HamiltonianFileReader::iline_fn(const std::string &fname) {
     FileReader file_reader(fname);
     std::string line;
     size_t iline=0ul;
-    std::smatch match;
     while (file_reader.next(line)){
         ++iline;
-        std::regex_search(line, match, FortranNamelistReader::c_header_terminator_regex);
-        if (match.size()) return iline;
+        if (line.find(FortranNamelistReader::c_header_terminator) > line.size()) return iline;
     }
     return ~0ul;
 }

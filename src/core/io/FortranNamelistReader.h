@@ -18,21 +18,39 @@ class FortranNamelistReader {
     const bool m_exists;
 
 public:
-    static std::regex c_header_terminator_regex;
+    static const std::string c_header_terminator;
     const std::string m_fname;
     FortranNamelistReader(std::string fname);
 
-    void read(size_t& v, const std::string &label, size_t default_=0);
+    static std::string isolate_value(const std::string &line, const std::string &label);
 
-    void read(defs::inds& v, const std::string &label, long offset=0, defs::inds default_={});
+    static std::vector<std::string> read(const std::string &line, const std::string &label);
 
-    void read(bool& v, const std::string &label, bool default_=false);
+    std::vector<std::string> read(const std::string &label);
 
-    size_t read_int(const std::string &label, size_t default_=0);
+    template<typename T>
+    void read(std::vector<T>& v, const std::string &label, long offset=0, std::vector<T> default_={}) {
+        v = default_;
+        auto tokens = read(label);
+        if (tokens.empty()) return;
+        NumericCsvFileReader::parse(tokens.cbegin(), tokens.cend(), v);
+        for (auto &i: v) i+=offset;
+    }
 
-    defs::inds read_int_array(const std::string &label, long offset=0, defs::inds default_={});
+    void read(std::vector<bool>& v, const std::string &label, long offset=0, std::vector<bool> default_={});
 
-    bool read_bool(const std::string &label, size_t default_=false);
+    std::vector<long> read_ints(const std::string &label, long offset=0, std::vector<long> default_={});
+
+    std::vector<size_t> read_uints(const std::string &label, long offset=0, std::vector<size_t> default_={});
+
+    std::vector<bool> read_bools(const std::string &label, long offset=0, std::vector<bool> default_={});
+
+    long read_int(const std::string &label, long default_=0l);
+
+    size_t read_uint(const std::string &label, size_t default_=0l);
+
+    bool read_bool(const std::string &label, bool default_=0l);
+
 };
 
 #endif //M7_FORTRANNAMELISTREADER_H
