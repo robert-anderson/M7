@@ -12,7 +12,7 @@ FileReader::FileReader(std::string fname, size_t iline) : m_fname(std::move(fnam
 void FileReader::reset(size_t iline) {
     if (m_file) m_file->close();
     m_file = std::unique_ptr<std::ifstream>(new std::ifstream(m_fname));
-    REQUIRE_TRUE(m_file->is_open(), "File not found: {}" + m_fname);
+    REQUIRE_TRUE(m_file->is_open(), "File not found: " + m_fname);
     m_iline = ~0ul;
     skip(iline);
 }

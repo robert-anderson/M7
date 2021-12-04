@@ -36,11 +36,8 @@ public:
     typedef std::vector<std::string>::const_iterator c_iter_token_t;
 
     static bool parsable_as(const std::string& str, size_t& v);
-
     static bool parsable_as(const std::string& str, int& v);
-
     static bool parsable_as(const std::string& str, double& v);
-
     static bool parsable_as(const std::string& str, float& v);
 
     static void parse(const std::string& str, size_t& v);

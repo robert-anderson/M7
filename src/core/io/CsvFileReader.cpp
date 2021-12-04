@@ -78,6 +78,7 @@ void NumericCsvFileReader::parse(const std::string &str, float &v) {
 }
 
 size_t NumericCsvFileReader::ncolumn(const std::string &fname, std::function<size_t(const std::string &)> iline_fn) {
+    if (!FileReader::exists(fname)) return 0ul;
     CsvFileReader file_reader(fname);
     auto iline = iline_fn(fname);
     REQUIRE_NE(iline, ~0ul, "first valid line of CSV data could not be found in file");

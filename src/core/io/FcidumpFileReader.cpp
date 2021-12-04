@@ -4,6 +4,22 @@
 
 #include "FcidumpFileReader.h"
 
+
+FcidumpHeader::FcidumpHeader(const std::string& fname):
+    FortranNamelistReader(fname),
+    m_uhf(read_bool("UHF")),
+    m_relativistic(read_bool("TREL")),
+    m_spin_resolved(m_uhf || m_relativistic),
+    m_nelec(read_int("NELEC")),
+    m_nsite(read_int("NORB")),
+    m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
+    m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
+    m_orbsym(read_int_array("ORBSYM", -1, defs::inds(m_nsite, 1ul))){
+    REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
+}
+
+
+
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
         HamiltonianFileReader(fname, 4), m_header(fname), m_spin_major(spin_major) {
     set_symm_and_rank();
@@ -38,6 +54,12 @@ bool FcidumpFileReader::spin_conserving() const {
 void FcidumpFileReader::inds_to_orbs(defs::inds &inds) {
     if (!m_header.m_spin_resolved || m_spin_major) return;
     for (auto &i:inds) i = ((i == ~0ul) ? ~0ul : (i / 2 + (i & 1ul) ? m_header.m_nsite : 0));
+}
+
+bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) {
+    if (!HamiltonianFileReader::next(inds, v)) return false;
+    inds_to_orbs(inds);
+    return true;
 }
 
 void FcidumpFileReader::set_symm_and_rank() {

@@ -20,8 +20,7 @@ class FortranNamelistReader {
 public:
     static std::regex c_header_terminator_regex;
     const std::string m_fname;
-    FortranNamelistReader(std::string fname):
-        m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){}
+    FortranNamelistReader(std::string fname);
 
     void read(size_t& v, const std::string &label, size_t default_=0);
 
