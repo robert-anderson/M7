@@ -31,7 +31,7 @@ FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool spin_res
 
 FermionHamiltonian::FermionHamiltonian(const FcidumpHeader& header, bool spin_major, bool elecs, int charge) :
         FermionHamiltonian(header.m_nelec - charge, elecs ? header.m_nsite : 0ul, header.m_spin_resolved,
-                           FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
+                           elecs && FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
     if (!elecs) {
         log::info("Electronic operators are disabled in the Hamiltonian");
         return;
