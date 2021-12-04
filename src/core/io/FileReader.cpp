@@ -35,6 +35,9 @@ size_t FileReader::nline() {
 bool FileReader::next(std::string &line) const {
     m_iline++;
     getline(*m_file, line);
+    if (line.empty()) return false;
+    // deal with carriage return character
+    if (line[line.size()-1]=='\r') line.resize(line.size()-1);
     return !line.empty();
 }
 
