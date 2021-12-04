@@ -7,7 +7,10 @@
 const std::string FortranNamelistReader::c_header_terminator = "&END";
 
 FortranNamelistReader::FortranNamelistReader(std::string fname):
-        m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){}
+        m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){
+    if (!m_exists)
+        REQUIRE_TRUE(m_fname.empty(), "cannot read Fortran namelist header from non-existent file: "+m_fname);
+}
 
 std::string FortranNamelistReader::isolate_value(const std::string &line, const std::string &label) {
     auto ibegin = line.find(label + "=");

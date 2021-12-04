@@ -118,6 +118,7 @@ void FcidumpFileReader::set_symm_and_rank() {
         log::info("Permutational symmetry of integral file found to be {}", 8/m_isymm);
         m_isymm/=8;    // 8->1; 4->2; 2->4; 1->8
     }
+    reset();
 }
 
 size_t FcidumpFileReader::ranksig(const defs::inds &inds) const {

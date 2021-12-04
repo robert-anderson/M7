@@ -5,6 +5,16 @@
 #include "gtest/gtest.h"
 #include "src/core/io/FcidumpFileReader.h"
 
+TEST(FcidumpHeader, EmptyFilename) {
+    FcidumpHeader header("");
+    ASSERT_EQ(header.m_nsite, 0ul);
+    ASSERT_EQ(header.m_nelec, 0ul);
+    ASSERT_EQ(header.m_spin_resolved, false);
+    ASSERT_EQ(header.m_uhf, false);
+    ASSERT_EQ(header.m_orbsym.size(), 0ul);
+    ASSERT_EQ(header.m_relativistic, false);
+}
+
 TEST(FcidumpFileReader, Real_6orb){
     FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
@@ -17,7 +27,7 @@ TEST(FcidumpFileReader, Real_6orb){
     // first entry
     test_inds = {0,0,0,0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v),  0.5406487462037872));
+    ASSERT_FLOAT_EQ(consts::real(v),  0.5406487462037872);
     // scan to arbitrary element
     for (size_t i=0; i<17; ++i) file_reader.next(inds, v);
     test_inds = {2,1,4,3};
