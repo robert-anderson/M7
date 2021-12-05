@@ -6,7 +6,7 @@
 #include "src/core/io/BosdumpFileReader.h"
 
 BosonHamiltonian::BosonHamiltonian(const BosdumpHeader &header, size_t nboson_max) :
-        m_nmode(header.m_nmode), m_nboson(header.m_nmode), m_nboson_max(m_nboson ? m_nboson : nboson_max),
+        m_nmode(header.m_nmode), m_nboson(header.m_nboson), m_nboson_max(m_nboson ? m_nboson : nboson_max),
         m_coeffs_1(m_nboson_max ? m_nmode : 0ul),
         m_coeffs_2(m_nboson_max ? m_nmode : 0ul),
         m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {

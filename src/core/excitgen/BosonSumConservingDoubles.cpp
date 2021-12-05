@@ -11,14 +11,19 @@ BosonSumConservingDoubles::BosonSumConservingDoubles(const Hamiltonian &h, PRNG 
 bool BosonSumConservingDoubles::draw(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                                      conn::BosOnv &conn) {
     const auto &op_inds = orbs.bos_op_inds(src);
+    DEBUG_ASSERT_EQ(op_inds.size(), m_h.nboson(), "picked i, j should be in ascending order");
     const auto &nmode = src.m_nelement;
     size_t ij = m_prng.draw_uint(m_nboson_pair);
     size_t i, j;
     integer_utils::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb inds:
     DEBUG_ASSERT_LT(i, j, "picked i, j should be in ascending order");
+    DEBUG_ASSERT_LT(i, m_h.nboson(), "i index OOB");
+    DEBUG_ASSERT_LT(j, m_h.nboson(), "j index OOB");
     i = op_inds[i];
     j = op_inds[j];
+    DEBUG_ASSERT_LT(i, src.m_nelement, "i index OOB");
+    DEBUG_ASSERT_LT(j, src.m_nelement, "j index OOB");
 
     auto min = 0ul;
     // e.g. nmode = 5, i = 3, j = 3. a can't be 0 or 1, since b would need to be 6 or 5 respectively to conserve sum
