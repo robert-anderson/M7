@@ -63,6 +63,8 @@ struct BosOnvConnection {
     void apply(const BosOnvField &src, BosOnvField &dst, BosOps &com) const;
 
     size_t exsig() const;
+
+    bool respects_occ_range(const BosOnvField &src, size_t nboson_max) const;
 };
 
 

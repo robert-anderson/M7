@@ -28,7 +28,7 @@ struct BosonHamiltonian {
 
     defs::ham_comp_t get_energy(const field::BosOnv &onv) const;
 
-    defs::ham_t get_element(const field::BosOnv &onv, const conn::BosOnv& conn) const;
+    defs::ham_t get_element(const field::BosOnv &src, const conn::BosOnv& conn) const;
 
     size_t nci() const;
 

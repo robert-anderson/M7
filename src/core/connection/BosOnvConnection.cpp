@@ -127,3 +127,9 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &c
 size_t BosOnvConnection::exsig() const {
     return exsig_utils::encode(0, 0, m_cre.size(), m_ann.size());
 }
+
+bool BosOnvConnection::respects_occ_range(const BosOnvField &src, size_t nboson_max) const {
+    for (auto& pair: m_cre.pairs()) if (src[pair.m_imode]+pair.m_nop > nboson_max) return false;
+    for (auto& pair: m_ann.pairs()) if (src[pair.m_imode] < pair.m_nop) return false;
+    return true;
+}
