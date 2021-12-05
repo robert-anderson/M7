@@ -8,8 +8,6 @@ add_executable(M7 main.cpp ${CPP_HEADER_FILES} ${CPP_SOURCE_FILES})
 target_link_libraries (M7 yaml-cpp)
 target_link_libraries (M7 ${MPI_LIBRARIES})
 
-target_link_options(M7 PRIVATE -g -rdynamic)
-
 find_package(LAPACK REQUIRED)
 if(LAPACK_FOUND)
     target_link_libraries (M7 ${LAPACK_LIBRARIES})
