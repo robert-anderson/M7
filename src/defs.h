@@ -44,10 +44,10 @@
 
 namespace defs {
 
-#ifdef NDEBUG
-    constexpr bool enable_debug = false;
-#else
+#ifndef NDEBUG
     constexpr bool enable_debug = true;
+#else
+    constexpr bool enable_debug = false;
 #endif
     const std::string assets_root = PROJECT_ROOT"/assets";
     typedef std::vector<size_t> inds;
