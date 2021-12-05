@@ -10,7 +10,23 @@ endif ()
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    message(STATUS "CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
+else ()
+    message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
+endif()
 
 find_package(LAPACK REQUIRED)
 
