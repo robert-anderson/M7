@@ -18,6 +18,8 @@ size_t HamiltonianFileReader::iline_fn(const std::string &fname) {
 HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, size_t nind) :
         NumericCsvFileReader(fname, ncolumn(fname, iline_fn)),
         m_complex_valued(m_ncolumn==nind+2) {
+    REQUIRE_GT(m_ncolumn, nind, "not enough columns in body of file "+fname);
+    REQUIRE_LE(m_ncolumn, nind+2, "too many columns in body of file "+fname);
     if (!consts::is_complex<defs::ham_t>()){
         REQUIRE_FALSE(m_complex_valued, "can't read complex-valued array into a real container");
     }
@@ -26,11 +28,12 @@ HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, size_t ni
 bool HamiltonianFileReader::next(defs::inds &inds, defs::ham_t &v) {
     auto result = NumericCsvFileReader::next(m_work_tokens);
     if (!result) return false;
+    REQUIRE_EQ(m_work_tokens.size(), m_ncolumn, "invalid line found in file "+m_fname);
     auto begin = m_work_tokens.cbegin();
     auto ind_begin = begin + (m_complex_valued ? 2 : 1);
     NumericCsvFileReader::parse(begin, ind_begin, v);
     NumericCsvFileReader::parse(ind_begin, m_work_tokens.cend(), inds);
-    DEBUG_ASSERT_TRUE(inds_in_range(inds), "index OOB");
+    REQUIRE_TRUE(inds_in_range(inds), "index OOB");
     // 1-based indexing is assumed
     decrement_inds(inds);
     return true;
