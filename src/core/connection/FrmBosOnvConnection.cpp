@@ -3,6 +3,7 @@
 //
 
 #include "FrmBosOnvConnection.h"
+#include "ComOps.h"
 
 FrmBosOnvConnection::FrmBosOnvConnection(BasisDims bd) : m_frm(bd.m_nsite), m_bos(bd.m_nmode){}
 
@@ -20,9 +21,9 @@ void FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvFiel
     m_bos.connect(src.m_bos, dst.m_bos);
 }
 
-bool FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, FrmOps &com) {
+bool FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, com_ops::FrmBos &com) {
     m_bos.connect(src.m_bos, dst.m_bos);
-    return m_frm.connect(src.m_frm, dst.m_frm, com);
+    return m_frm.connect(src.m_frm, dst.m_frm, com.m_frm);
 }
 
 
