@@ -36,7 +36,7 @@ NumericCsvFileReader::NumericCsvFileReader(const std::string &fname,
 bool NumericCsvFileReader::next(std::vector<std::string> &tokens) {
     do {
         if (!CsvFileReader::next(tokens)) return false;
-    } while (!valid_numeric(tokens) || tokens.size() != m_ncolumn);
+    } while (tokens.size() != m_ncolumn || !valid_numeric(tokens));
     return true;
 }
 

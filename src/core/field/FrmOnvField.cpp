@@ -74,7 +74,7 @@ void FrmOnvField::foreach_pair(const std::function<void(const size_t &)> &body_f
     }
 }
 
-int FrmOnvField::spin() const {
+int FrmOnvField::ms2() const {
     int spin = 0;
     size_t work;
     for (size_t idataword = 0; idataword < m_dsize; ++idataword) {

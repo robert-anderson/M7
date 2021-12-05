@@ -38,6 +38,8 @@ LadderHamiltonian::LadderHamiltonian(const EbdumpHeader &header, size_t nboson_m
 }
 
 defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    DEBUG_ASSERT_TRUE(conn.respects_occ_range(onv, m_nboson_max),
+                      "excitation puts boson occupation out of range");
     if (conn.m_bos.size() != 1ul) return 0.0;
     if (!conn.m_frm.kramers_conserve()) return 0.0;
     bool cre = conn.m_bos.m_cre.size();

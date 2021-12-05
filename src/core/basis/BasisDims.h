@@ -16,10 +16,10 @@ struct BasisDims {
     BasisDims(size_t nsite, size_t nmode):
         m_nsite(nsite), m_nmode(nmode), m_nspinorb(nsite*2){}
 
-    void require_pure_frm() {
+    void require_pure_frm() const {
         REQUIRE_FALSE(m_nmode, "MBF specification is not purely fermionic");
     }
-    void require_pure_bos() {
+    void require_pure_bos() const {
         REQUIRE_FALSE(m_nsite, "MBF specification is not purely bosonic");
     }
 };

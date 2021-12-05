@@ -32,27 +32,3 @@ const size_t &Hamiltonian::nelec() const {
 const size_t &Hamiltonian::nboson() const {
     return m_bos.m_nboson;
 }
-
-void Hamiltonian::set_aufbau_mbf(FrmOnv &onv, int spin) const {
-    m_frm.set_hf_mbf(onv, spin);
-}
-
-void Hamiltonian::set_aufbau_mbf(FrmBosOnv &onv, int spin) const {
-    m_frm.set_hf_mbf(onv.m_frm, spin);
-}
-
-void Hamiltonian::set_neel_mbf(FrmOnv &onv, bool alpha_first) const {
-    m_frm.set_afm_mbf(onv, alpha_first);
-}
-
-void Hamiltonian::set_neel_mbf(FrmBosOnv &onv, bool alpha_first) const {
-    m_frm.set_afm_mbf(onv.m_frm, alpha_first);
-}
-
-void Hamiltonian::set_mbf(FrmOnv &onv, bool neel, int spin_restrict) const {
-    neel ? set_neel_mbf(onv, true) : set_aufbau_mbf(onv, spin_restrict);
-}
-
-void Hamiltonian::set_mbf(FrmBosOnv &onv, bool neel, int spin_restrict) const {
-    neel ? set_neel_mbf(onv, true) : set_aufbau_mbf(onv, spin_restrict);
-}

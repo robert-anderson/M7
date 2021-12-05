@@ -3,6 +3,7 @@
 //
 
 #include "FrmBosOnvConnection.h"
+#include "ComOps.h"
 
 FrmBosOnvConnection::FrmBosOnvConnection(BasisDims bd) : m_frm(bd.m_nsite), m_bos(bd.m_nmode){}
 
@@ -20,9 +21,9 @@ void FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvFiel
     m_bos.connect(src.m_bos, dst.m_bos);
 }
 
-bool FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, FrmOps &com) {
+bool FrmBosOnvConnection::connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, com_ops::FrmBos &com) {
     m_bos.connect(src.m_bos, dst.m_bos);
-    return m_frm.connect(src.m_frm, dst.m_frm, com);
+    return m_frm.connect(src.m_frm, dst.m_frm, com.m_frm);
 }
 
 
@@ -33,4 +34,8 @@ void FrmBosOnvConnection::apply(const FrmBosOnvField &src, FrmBosOnvField &dst) 
 
 size_t FrmBosOnvConnection::exsig() const {
     return exsig_utils::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
+}
+
+bool FrmBosOnvConnection::respects_occ_range(const FrmBosOnvField &src, size_t nboson_max) const {
+    return m_bos.respects_occ_range(src.m_bos, nboson_max);
 }

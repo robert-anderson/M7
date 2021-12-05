@@ -57,18 +57,21 @@ defs::ham_comp_t BosonHamiltonian::get_energy(const field::BosOnv &onv) const {
     return consts::real(get_element(onv));
 }
 
-defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    REQUIRE_FALSE(conn.size() == 2, "single number-conserving boson operators not implemented");
-    if (!conn.size()) return get_element(onv);
+defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &src, const conn::BosOnv &conn) const {
+    // this Hamiltonian conserves boson number
+    if (conn.m_ann.size() != conn.m_cre.size()) return 0.0;
+    // single number-conserving boson operators not implemented;
+    if(conn.size() == 2) return 0.0;
+    if (!conn.size()) return get_element(src);
     if (conn.size() == 4) {
         auto i = conn.m_cre[0].m_imode;
         auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;
         auto k = conn.m_ann[0].m_imode;
         auto l = conn.m_ann[0].m_nop == 2 ? k : conn.m_ann[1].m_imode;
-        size_t ni = onv[i];
-        size_t nj = onv[j];
-        size_t nk = onv[k];
-        size_t nl = onv[l];
+        size_t ni = src[i];
+        size_t nj = src[j];
+        size_t nk = src[k];
+        size_t nl = src[l];
 
         defs::ham_comp_t occ_fac = 1.0;
         if (i == j) {
