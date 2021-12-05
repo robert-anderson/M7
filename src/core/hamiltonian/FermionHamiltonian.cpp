@@ -16,7 +16,7 @@ buffered::FrmOnv FermionHamiltonian::guess_reference(const int &spin_restrict) c
     size_t n_spin_1 = m_nelec - n_spin_0;
     for (size_t i = 0ul; i < n_spin_0; ++i) ref.set({0, i});
     for (size_t i = 0ul; i < n_spin_1; ++i) ref.set({1, i});
-    DEBUG_ASSERT_EQ(ref.spin(), spin_restrict, "constructed fermion ONV does not have expected Sz");
+    DEBUG_ASSERT_EQ(ref.ms2(), spin_restrict, "constructed fermion ONV does not have expected Sz");
     return ref;
 }
 
@@ -84,27 +84,9 @@ defs::ham_t FermionHamiltonian::get_element_0000(const field::FrmOnv &onv) const
 }
 
 
-defs::ham_t
-FermionHamiltonian::get_element_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t FermionHamiltonian::get_element_2200(const size_t &i, const size_t &j,
+                                                 const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
-}
-
-void FermionHamiltonian::set_hf_mbf(field::FrmOnv &onv, int spin) const {
-    auto nalpha = ci_utils::nalpha(m_nelec, spin);
-    auto nbeta = ci_utils::nbeta(m_nelec, spin);
-    DEBUG_ASSERT_EQ(nalpha + nbeta, m_nelec, "inconsistent na, nb, nelec");
-    onv.zero();
-    for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
-    for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
-}
-
-void FermionHamiltonian::set_afm_mbf(field::FrmOnv &onv, bool alpha_first) const {
-    onv.zero();
-    size_t ispin = !alpha_first;
-    for (size_t isite = 0ul; isite < m_nsite; ++isite) {
-        onv.set({ispin, isite});
-        ispin = !ispin;
-    }
 }
 
 void FermionHamiltonian::log_data() const {

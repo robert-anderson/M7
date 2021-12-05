@@ -81,16 +81,14 @@ namespace fciqmc_config {
     struct MbfDef : config::Section {
         config::Param<std::vector<defs::inds>> m_frm;
         config::Param<std::vector<defs::inds>> m_bos;
+        config::Param<bool> m_neel;
         //config::Param<std::vector<defs::inds>> m_csf;
 
         explicit MbfDef(config::Group *parent, std::string name);
     };
 
     struct Reference : config::Section {
-        config::Param<std::string> m_frm_onv_init;
-        config::Param<defs::inds> m_bos_onv_init;
         MbfDef m_mbf_init;
-        config::Param<bool> m_init_mbf_neel;
         config::Param<double> m_redef_thresh;
 
         explicit Reference(config::Group *parent);
@@ -99,7 +97,7 @@ namespace fciqmc_config {
     struct Wavefunction : config::Section {
         config::Param<double> m_nw_init;
         config::Param<size_t> m_nroot;
-        config::Param<long> m_spin_restrict;
+        config::Param<int> m_ms2_restrict;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Archivable m_archivable;

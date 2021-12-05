@@ -98,24 +98,6 @@ struct FermionHamiltonian {
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
     /**
-     * set the referenced ONV object to the assumed Hartree--Fock determinant within the given spin sector
-     * @param onv
-     *  target onv object
-     * @param spin
-     *  spin (MS) number
-     */
-    void set_hf_mbf(field::FrmOnv &onv, int spin) const;
-
-    /**
-     * set the referenced ONV object to the "anti-ferromagnetic" configuration
-     * @param onv
-     *  target onv object
-     * @param alpha_first
-     *  occupy site 0 with an alpha electron
-     */
-    void set_afm_mbf(field::FrmOnv &onv, bool alpha_first) const;
-
-    /**
      * output some useful logs identifying the kind of H detected
      */
     void log_data() const;

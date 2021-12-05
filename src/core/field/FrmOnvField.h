@@ -94,7 +94,12 @@ public:
     void foreach_pair(const std::function<void(const size_t&)>& body_fn_outer,
                       const std::function<void(const size_t&, const size_t&)>& body_fn_inner) const;
 
-    int spin() const;
+    /**
+     * 2 x the total z-axis projection of total spin
+     * @return
+     *  nalpha-nbeta where alpha is conventionally the 0 spin channel
+     */
+    int ms2() const;
 
     int nalpha() const;
 
