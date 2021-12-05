@@ -7,6 +7,7 @@
 
 #include "FrmOnvConnection.h"
 #include "BosOnvConnection.h"
+#include "ComOps.h"
 #include "src/core/field/FrmBosOnvField.h"
 
 struct FrmBosOnvConnection {
@@ -20,7 +21,7 @@ struct FrmBosOnvConnection {
 
     void connect(const FrmBosOnvField& src, const FrmBosOnvField& dst);
 
-    bool connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, FrmOps &com);
+    bool connect(const FrmBosOnvField &src, const FrmBosOnvField &dst, com_ops::FrmBos &com);
 
     void apply(const FrmBosOnvField& src, FrmBosOnvField& dst) const;
 
