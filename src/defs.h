@@ -16,12 +16,6 @@
 #include <cstdlib>
 #include "src/core/util/consts.h"
 
-#ifndef NDEBUG
-#ifdef M7_VERBOSE
-#define VERBOSE_DEBUGGING
-#endif
-#endif
-
 /**
  * basic debugging macro for verification of low-level functionality, in general prefer the macros MpiAssert.h defines
  */
@@ -49,6 +43,12 @@
 #endif
 
 namespace defs {
+
+#ifdef NDEBUG
+    constexpr bool enable_debug = false;
+#else
+    constexpr bool enable_debug = true;
+#endif
     const std::string assets_root = PROJECT_ROOT"/assets";
     typedef std::vector<size_t> inds;
 

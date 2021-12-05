@@ -16,11 +16,10 @@ Then create a directory in which CMake can build its targets---typically under t
 cd M7
 mkdir build
 cd build
-cmake ..
-make -j TARGET
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j M7
 ```
-Where TARGET is either debug, release or unittest.
-The binary will then appear at either src/debug, src/release, or test/unittest.
+The binary will then appear at src/M7. `Release` can be replaced with `Debug` above to build the debug binary.
 
 Parallel HDF5 is a non-prerequisite dependency which is downloaded, compiled, and linked as a static library during the build process.
 If using the Intel C++ compiler, make sure the compilevars.sh has been sourced to correctly configure the library path environment variables prior to invoking CMake.
