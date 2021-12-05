@@ -4,12 +4,40 @@
 
 #include "Mbf.h"
 
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, const Sector &sector) {
+    auto nalpha = ci_utils::nalpha(sector.m_nelec, sector.m_ms2);
+    auto nbeta = ci_utils::nbeta(sector.m_nelec, sector.m_ms2);
+    DEBUG_ASSERT_EQ(nalpha + nbeta, sector.m_nelec, "inconsistent na, nb, nelec");
+    onv.zero();
+    for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
+    for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
+}
 
-void mbf::set_from_def(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef) {
-    if (def.m_frm.get().empty()) return;
-    REQUIRE_LT(idef, def.m_frm.get().size(), "MBF definition index OOB");
+void mbf::set_aufbau_mbf(field::BosOnv &onv, const Sector &sector) {
+    onv.zero();
+    auto nboson = sector.m_nboson;
+    size_t imode = 0;
+    while (nboson > sector.m_nboson_max) {
+        onv[imode++] = std::min(nboson, sector.m_nboson_max);
+        nboson-=sector.m_nboson_max;
+    }
+}
+
+void mbf::set_neel_mbf(field::FrmOnv &onv, const Sector &sector) {
+    REQUIRE_EQ(sector.m_ms2, 0, "Neel state requires zero overall spin");
+    onv.zero();
+    size_t ispin = 0;
+    for (size_t isite = 0ul; isite < sector.m_nelec; ++isite) {
+        onv.set({ispin, isite});
+        ispin = !ispin;
+    }
+}
+
+void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &def, size_t idef) {
+    if (def.empty()) return;
+    REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
     mbf.zero();
-    auto& definds = def.m_frm.get()[idef];
+    auto& definds = def[idef];
     if (definds.size() == mbf.m_nspinorb) {
         // assume the determinant is specified as a bit string
         for (size_t i=0ul; i<definds.size(); ++i) {
@@ -27,18 +55,31 @@ void mbf::set_from_def(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, siz
     }
 }
 
-void mbf::set_from_def(field::FrmBosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef) {
-    set_from_def(mbf.m_frm, def, idef);
-    set_from_def(mbf.m_bos, def, idef);
-}
-
-void mbf::set_from_def(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef) {
-    if (def.m_bos.get().empty()) return;
-    REQUIRE_LT(idef, def.m_bos.get().size(), "MBF definition index OOB");
+void mbf::set_from_def_array(field::BosOnv &mbf, const std::vector<defs::inds> &def, size_t idef) {
+    if (def.empty()) return;
+    REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
     mbf.zero();
-    auto& definds = def.m_bos.get()[idef];
+    auto& definds = def[idef];
     REQUIRE_EQ(definds.size(), mbf.m_nelement,
                "length of input vector does not match number of boson modes");
     size_t i = 0ul;
     for (auto &occ: definds) mbf[i++] = occ;
+}
+
+void mbf::set(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, const Sector &sector, size_t idef) {
+    if (!def.m_frm.get().empty()) set_from_def_array(mbf, def.m_frm, idef);
+    else if (def.m_neel) set_neel_mbf(mbf, sector);
+    else set_aufbau_mbf(mbf, sector);
+    REQUIRE_EQ(mbf.nsetbit(), sector.m_nelec, "too many electrons in MBF");
+    REQUIRE_EQ(mbf.ms2(), sector.m_ms2, "MBF has incorrect total Ms");
+}
+
+void mbf::set(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, const Sector &sector, size_t idef) {
+    if (!def.m_bos.get().empty()) set_from_def_array(mbf, def.m_bos, idef);
+    else set_aufbau_mbf(mbf, sector);
+}
+
+void mbf::set(field::FrmBosOnv &mbf, const fciqmc_config::MbfDef &def, const Sector &sector, size_t idef) {
+    set(mbf.m_frm, def, sector, idef);
+    set(mbf.m_bos, def, sector, idef);
 }

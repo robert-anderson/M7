@@ -86,13 +86,7 @@ fciqmc_config::LoadBalancing::LoadBalancing(config::Group *parent) :
 
 fciqmc_config::Reference::Reference(config::Group *parent) :
         config::Section(parent, "reference", "options relating to the reference MBF"),
-        m_frm_onv_init(this, "frm_onv_init", {},
-                       "string representations of the MBFs to use as the init references for each root. If replication is used, the init state will be used for both replicas of a root population."),
-        m_bos_onv_init(this, "bos_onv_init", {},
-                       "array of occupations for each mode of the initial ONV"),
         m_mbf_init(this, "mbf_init"),
-        m_init_mbf_neel(this, "init_mbf_neel", false,
-                       "initialize the reference to a Neel state rather than assuming Aufbau principle"),
         m_redef_thresh(this, "redef_thresh", 10.0,
 "when the highest-weighted non-reference MBF (the candidate) reaches this multiple of the weight on the reference, the candidate will be adopted as the new reference") {}
 
@@ -101,8 +95,8 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
-        m_spin_restrict(this, "spin_restrict", 0ul,
-                        "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves secondary spin quantum number"),
+        m_ms2_restrict(this, "ms2_restrict", 0ul,
+                       "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves secondary spin quantum number"),
         m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
@@ -315,4 +309,6 @@ fciqmc_config::MbfDef::MbfDef(config::Group *parent, std::string name) :
               "fermion sector occupation of the MBF (each element can be a boolean "
               "array of occupation status of all spin-orbitals or list of occupied spin-obrital indices)"),
         m_bos(this, "boson", {}, "boson sector occupation of the MBF as an arrays of occupation "
-                                   "levels of all modes") {}
+                                   "levels of all modes"),
+        m_neel(this, "neel", false,
+                        "initialize the MBF to a Neel state rather than assuming Aufbau principle"){}

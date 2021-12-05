@@ -7,6 +7,7 @@
 
 #include <src/core/config/FciqmcConfig.h>
 #include "Fields.h"
+#include "src/core/basis/Sector.h"
 
 /**
  * namespace for utility methods that apply to all MBF types
@@ -14,12 +15,32 @@
 
 namespace mbf {
 
-    void set_from_def(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef);
+    /**
+     * set the referenced ONV object to the assumed Hartree--Fock determinant within the given sector
+     */
+    void set_aufbau_mbf(field::FrmOnv &onv, const Sector& sector);
 
-    void set_from_def(field::FrmBosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef);
+    /**
+     * there is no proper aufbau principle for bosons, so fill from the 0 mode until max nbosons is reached, then
+     * advance to the next mode
+     */
+    void set_aufbau_mbf(field::BosOnv &onv, const Sector& sector);
 
-    void set_from_def(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef);
 
+    /**
+     * set the referenced ONV object to the "anti-ferromagnetic" configuration
+     */
+    void set_neel_mbf(field::FrmOnv &onv, const Sector& sector);
+
+    void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &def, size_t idef);
+
+    void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::inds> &def, size_t idef);
+
+    void set(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, const Sector& sector, size_t idef);
+
+    void set(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, const Sector& sector, size_t idef);
+
+    void set(field::FrmBosOnv &mbf, const fciqmc_config::MbfDef &def, const Sector& sector, size_t idef);
 };
 
 
