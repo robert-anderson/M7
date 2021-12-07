@@ -72,14 +72,14 @@ struct AbelianGroup {
 
     AbelianGroup(const AbelianGroup &g1, const AbelianGroup &g2) :
             AbelianGroup(merge_labels(g1, g2),
-                         [&](const size_t &iirrep, const size_t &jirrep) {
-                             // combine the product tables of the two groups
-                             const size_t iirrep1 = iirrep / g2.nirrep();
-                             const size_t iirrep2 = iirrep - iirrep1 * g2.nirrep();
-                             const size_t jirrep1 = jirrep / g2.nirrep();
-                             const size_t jirrep2 = jirrep - jirrep1 * g2.nirrep();
-                             return g1.m_products[iirrep1, jirrep1] * g2.nirrep() + g2.m_products[iirrep2, jirrep2];
-                         }) {};
+             [&](const size_t &iirrep, const size_t &jirrep) {
+                 // combine the product tables of the two groups
+                 const size_t iirrep1 = iirrep / g2.nirrep();
+                 const size_t iirrep2 = iirrep - iirrep1 * g2.nirrep();
+                 const size_t jirrep1 = jirrep / g2.nirrep();
+                 const size_t jirrep2 = jirrep - jirrep1 * g2.nirrep();
+                 return g1.m_products[{iirrep1, jirrep1}] * g2.nirrep() + g2.m_products[{iirrep2, jirrep2}];
+             }) {};
 
 };
 

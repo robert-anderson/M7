@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 #include "src/core/excitgen/HeatBathDoubles.h"
+#include "src/core/field/Mbf.h"
 
 TEST(HeatBathDoubles, SmallFromHFDeterminant){
     PRNG prng(14, 1000000);
@@ -14,7 +15,8 @@ TEST(HeatBathDoubles, SmallFromHFDeterminant){
     excititers::Frm excit_iter(ham, exsig_utils::ex_double);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_aufbau_mbf(src_mbf, 0);
+    Sector sector{ham.nelec(), true, 0, 0, 0};
+    mbf::set_aufbau_mbf(src_mbf, sector);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 10000000;
     tester.run(src_mbf, ndraw);
@@ -34,7 +36,8 @@ TEST(HeatBathDoubles, LargeFromHFDeterminant){
     excititers::Frm excit_iter(ham, exsig_utils::ex_double);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_aufbau_mbf(src_mbf, 0);
+    Sector sector{ham.nelec(), true, 0, 0, 0};
+    mbf::set_aufbau_mbf(src_mbf, sector);
     tester.fill_results_table(src_mbf);
     tester.run(src_mbf, 50000000);
     ASSERT_TRUE(tester.all_drawn_at_least_once());

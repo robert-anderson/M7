@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 #include "src/core/excitgen/Hubbard1dSingles.h"
+#include "src/core/field/Mbf.h"
 
 TEST(Hubbard1dSingles, ObcFromNeel) {
     PRNG prng(14, 1000000);
@@ -15,7 +16,8 @@ TEST(Hubbard1dSingles, ObcFromNeel) {
     excititers::Frm excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_neel_mbf(src_mbf, true);
+    Sector sector{ham.nelec(), true, 0, 0, 0};
+    mbf::set_neel_mbf(src_mbf, sector);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
     tester.run(src_mbf, ndraw);
@@ -35,7 +37,8 @@ TEST(Hubbard1dSingles, PbcFromNeel) {
     excititers::Frm excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    ham.set_neel_mbf(src_mbf, true);
+    Sector sector{ham.nelec(), true, 0, 0, 0};
+    mbf::set_neel_mbf(src_mbf, sector);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
     tester.run(src_mbf, ndraw);

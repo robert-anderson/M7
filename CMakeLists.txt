@@ -124,11 +124,11 @@ include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external/spdlog-1.x/include")
 include_directories("${CMAKE_SOURCE_DIR}/external/lambda-lanczos/include")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)
-target_compile_options(yaml-cpp PRIVATE -Wno-error -Wno-effc++)
+target_compile_options(yaml-cpp PRIVATE -w)
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 add_definitions(-Wall -Wextra -Werror)
-add_definitions(-Wno-unused-function -Wno-unused-parameter -Wno-unused-value)
+add_definitions(-Wno-unused-function -Wno-unused-parameter)
 
 add_subdirectory(src)
 add_subdirectory(test)

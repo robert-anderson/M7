@@ -121,7 +121,7 @@ void Solver::execute(size_t ncycle) {
 
 void Solver::begin_cycle() {
     m_chk_nwalker_local = m_wf.m_nwalker.m_local[{0, 0}] + m_wf.m_delta_nwalker.m_local[{0, 0}];
-    m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{(0, 0)}];
+    m_chk_ninitiator_local = m_wf.m_ninitiator.m_local[{0, 0}] + m_wf.m_delta_ninitiator.m_local[{0, 0}];
 
     m_prop.update(m_icycle, m_wf);
 

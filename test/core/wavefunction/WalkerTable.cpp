@@ -8,8 +8,23 @@
 TEST(WalkerTable, Fields){
     WalkerTable table(WalkerTableRow({0, 5}, 1, 1, false));
     auto& row = table.m_row;
-    std::vector<const FieldBase*> fields = {
-            &row.m_mbf, &row.m_weight, &row.m_hdiag, &row.m_initiator, &row.m_deterministic, &row.m_ref_conn};
+
+    /**
+     * use overloading to handle the MultiField case of FrmBosOnv
+     */
+    struct Appender {
+        static void append(std::vector<const FieldBase*>& v, const FieldBase& f){
+            v.push_back(&f);
+        }
+        static void append(std::vector<const FieldBase*>& v, const field::FrmBosOnv& f){
+            v.push_back(&f.m_frm);
+            v.push_back(&f.m_bos);
+        }
+    };
+
+    std::vector<const FieldBase*> fields;
+    Appender::append(fields, row.m_mbf);
+    fields.insert(fields.end(), {&row.m_weight, &row.m_hdiag, &row.m_initiator, &row.m_deterministic, &row.m_ref_conn});
     size_t i = 0ul;
     for (auto field: fields) {
         ASSERT_EQ(field->m_row, &row);
