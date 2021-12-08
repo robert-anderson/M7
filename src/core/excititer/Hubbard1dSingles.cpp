@@ -5,9 +5,9 @@
 #include "Hubbard1dSingles.h"
 
 excititers::Hubbard1dSingles::Hubbard1dSingles(const Hamiltonian &ham) :
-        Frm(ham, exsig_utils::ex_single), m_pbc(ham.m_frm.is_hubbard_1d_pbc()) {
-    REQUIRE_TRUE(ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc(),
-                 "Hamiltonian is not 1D hubbard, so this class will not generate all connections");
+        Frm(ham, exsig_utils::ex_single), m_pbc(true) {
+//    REQUIRE_TRUE(ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc(),
+//                 "Hamiltonian is not 1D hubbard, so this class will not generate all connections");
 }
 
 void excititers::Hubbard1dSingles::foreach(const FrmOnv &src, conn::FrmOnv &conn,

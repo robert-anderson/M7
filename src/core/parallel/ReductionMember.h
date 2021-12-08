@@ -23,9 +23,9 @@ struct ReductionMember : FormattedNdAccessor<T, nind>, ReductionMemberBase<T> {
     }
 
     void update_data_ptrs(void *local_ptr, void *reduced_ptr, void* rank_indices_ptr) override {
-        NdAccessor<T, nind>::m_data = (T*)local_ptr;
-        m_reduced.m_data = (T*)reduced_ptr;
-        m_rank_indices.m_data = (size_t *)rank_indices_ptr;
+        NdAccessor<T, nind>::m_buffer = (T*)local_ptr;
+        m_reduced.m_buffer = (T*)reduced_ptr;
+        m_rank_indices.m_buffer = (size_t *)rank_indices_ptr;
     }
 
     template<typename ...Args>

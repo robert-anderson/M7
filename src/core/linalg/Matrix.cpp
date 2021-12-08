@@ -13,7 +13,7 @@ void Matrix<double>::multiply(const std::vector<double> &in, std::vector<double>
     int ncol = m_ncol;
     int incx = 1;
     int incy = 1;
-    dgemv_(&trans, &ncol, &nrow, &alpha, data(0,0), &nrow, in.data(), &incx, &beta, out.data(), &incy);
+    dgemv_(&trans, &ncol, &nrow, &alpha, m_buffer.data(), &nrow, in.data(), &incx, &beta, out.data(), &incy);
 }
 
 template<>
@@ -25,5 +25,5 @@ void Matrix<std::complex<double>>::multiply(const std::vector<std::complex<doubl
     int ncol = m_ncol;
     int incx = 1;
     int incy = 1;
-    zgemv_(&trans, &ncol, &nrow, &alpha, data(0,0), &nrow, in.data(), &incx, &beta, out.data(), &incy);
+    zgemv_(&trans, &ncol, &nrow, &alpha, m_buffer.data(), &nrow, in.data(), &incx, &beta, out.data(), &incy);
 }

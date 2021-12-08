@@ -155,7 +155,7 @@ public:
      */
     defs::ham_comp_t get_energy(const Hamiltonian &ham) const {
         if (!is_energy_sufficient(ham)) return 0.0;
-        return get_energy(ham.m_frm) + get_energy(ham.m_ladder, ham.nelec()) + get_energy(ham.m_bos);
+        return get_energy(*ham.m_frm) + get_energy(ham.m_ladder, ham.nelec()) + get_energy(ham.m_bos);
     }
 
 private:

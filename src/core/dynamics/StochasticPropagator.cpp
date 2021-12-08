@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
-#include <src/core/excitgen/Hubbard1dSingles.h>
+#include <src/core/excitgen/HubbardSingles.h>
 #include "StochasticPropagator.h"
 
 

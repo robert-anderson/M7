@@ -2,8 +2,8 @@
 // Created by rja on 14/06/2020.
 //
 
-#ifndef M7_SPARSEMATRIX_H
-#define M7_SPARSEMATRIX_H
+#ifndef M7_SPARSE_H
+#define M7_SPARSE_H
 
 #include <vector>
 #include <forward_list>
@@ -17,7 +17,7 @@ namespace sparse {
         bool m_resized_by_add = false;
 
     protected:
-        std::vector<std::forward_list<size_t>> m_rows_icols;
+        std::vector<defs::inds> m_rows_icols;
 
     public:
         virtual void resize(const size_t& nrow);
@@ -28,12 +28,12 @@ namespace sparse {
 
         bool empty();
 
-        const std::forward_list<size_t>& operator[](const size_t& irow);
+        const defs::inds& operator[](const size_t& irow);
     };
 
     template<typename T>
     class Matrix : public Network {
-        std::vector<std::forward_list<T>> m_rows_values;
+        std::vector<std::vector<T>> m_rows_values;
 
     public:
 
@@ -45,7 +45,11 @@ namespace sparse {
         void add(const size_t &irow, const size_t &icol, const T& v) {
             Network::add(irow, icol);
             if (irow >= m_rows_values.size()) resize(irow + 1);
-            m_rows_values[irow].push_front(v);
+            m_rows_values[irow].push_back(v);
+        }
+
+        void add(const size_t &irow, const std::pair<size_t, T>& pair){
+            add(irow, pair.first, pair.second);
         }
 
         void multiply(const std::vector<T> &in, std::vector<T> &out) const {
@@ -64,11 +68,11 @@ namespace sparse {
             }
         }
 
-        std::pair<const std::forward_list<size_t>&, const std::forward_list<T>&> operator[](const size_t& irow) {
+        std::pair<const defs::inds&, const std::vector<T>&> operator[](const size_t& irow) const {
             ASSERT(irow<nrow());
             return {m_rows_icols[irow], m_rows_values[irow]};
         }
     };
 };
 
-#endif //M7_SPARSEMATRIX_H
+#endif //M7_SPARSE_H

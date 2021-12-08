@@ -2,7 +2,7 @@
 // Created by rja on 24/11/2021.
 //
 
-#ifndef M7_HUBBARD1DSINGLES_H
+#ifndef M7_HUBBARDSINGLES_H
 #define M7_HUBBARD1DSINGLES_H
 
 #include "ExcitIters.h"
@@ -21,4 +21,4 @@ namespace excititers {
 }
 
 
-#endif //M7_HUBBARD1DSINGLES_H
+#endif //M7_HUBBARDSINGLES_H

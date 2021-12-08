@@ -27,10 +27,8 @@ public:
     template<typename T>
     size_t get_nattempt(const T &weight) {
         static_assert(std::is_floating_point<T>::value, "template arg must be floating point");
-
-#ifndef ENABLE_CEILING_SPAWN_ATTEMPTS
         return m_prng.stochastic_round(std::abs(weight), 1.0);
-#else
+#if 0
         /*
          * We want to make nattempt = ceil(|weight|) spawning attempts.
          * can't rely on std::abs to provide the right answer in the case of complex arithmetic with
@@ -44,8 +42,7 @@ public:
 
     template<typename T>
     size_t get_nattempt(const std::complex<T> &weight) {
-        if (m_ham.complex_valued()) return get_nattempt(std::abs(weight));
-        else return get_nattempt(consts::real(weight));
+        return get_nattempt(std::abs(weight));
     }
 
     void off_diagonal(Wavefunction &wf, const size_t& ipart) override;

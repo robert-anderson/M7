@@ -66,7 +66,7 @@ private:
 
     defs::inds make_iparts();
 
-    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const std::forward_list<size_t>& icol_list);
+    void make_rdm_contribs(Rdms &rdms, const field::Mbf &ref, const defs::inds& icol_list);
 
 
 public:

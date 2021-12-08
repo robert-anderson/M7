@@ -23,7 +23,7 @@ defs::inds DeterministicSubspace::make_iparts() {
     return {ipart, ipart + 1};
 }
 
-void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const std::forward_list<size_t> &icol_list) {
+void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const defs::inds &icol_list) {
     auto &row_local = m_local.m_row;
     auto &row_global = m_global.m_row;
 

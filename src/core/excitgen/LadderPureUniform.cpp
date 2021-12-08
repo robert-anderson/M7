@@ -27,7 +27,7 @@ bool LadderPureUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, C
 
 size_t LadderPureUniform::approx_nconn() const {
     // assume there's one excitation or de-excitation available per electron
-    return m_h.m_frm.m_nelec;
+    return m_h.m_frm->m_nelec;
 }
 
 std::string LadderPureUniform::description() const {

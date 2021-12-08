@@ -57,7 +57,7 @@ bool ExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, CachedO
 FrmExcitGen::FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
         ExcitGen(h, prng, {exsig}),
         m_spin_conserving(exsig == exsig_utils::ex_single ?
-                          h.m_frm.m_kramers_attrs.m_conserving_singles : h.m_frm.m_kramers_attrs.m_conserving_double) {
+                          h.m_frm->m_kramers_attrs.m_conserving_singles : h.m_frm->m_kramers_attrs.m_conserving_double) {
     DEBUG_ASSERT_TRUE(exsig_utils::is_pure_frm(exsig),
                       "fermion excitation generator is not applicable to exsigs with bosonic operators");
     DEBUG_ASSERT_EQ(exsig_utils::decode_nfrm_cre(exsig), exsig_utils::decode_nfrm_ann(exsig),

@@ -243,16 +243,16 @@ defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
         const size_t l=row.m_inds.m_frm.m_ann[1];
         ASSERT(k<l);
         const auto rdm_element = row.m_values[0];
-        e2 += rdm_element*ham.m_int_2.phys_antisym_element(i, j, k, l);
+        e2 += rdm_element*ham.get_coeff_2200(i, j, k, l);
         /*
          * signs of the following contributions come from the Fermi phase of bringing the like-valued creation and
          * annihilation operators together to act on the ket, leading to a factor of (nelec - 1), accounted for
          * after the loop.
          */
-        if (i == k) e1 += rdm_element*ham.m_int_1(j,l);
-        if (j == l) e1 += rdm_element*ham.m_int_1(i,k);
-        if (i == l) e1 -= rdm_element*ham.m_int_1(j,k);
-        if (j == k) e1 -= rdm_element*ham.m_int_1(i,l);
+        if (i == k) e1 += rdm_element*ham.get_coeff_1100(j,l);
+        if (j == l) e1 += rdm_element*ham.get_coeff_1100(i,k);
+        if (i == l) e1 -= rdm_element*ham.get_coeff_1100(j,k);
+        if (j == k) e1 -= rdm_element*ham.get_coeff_1100(i,l);
         if ((i==k) && (j==l)) trace+=rdm_element;
     }
     // scale the one-body contribution by the number of two-body contributions
@@ -264,7 +264,7 @@ defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
     const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.m_nelec, 2);
     REQUIRE_TRUE(consts::float_nearly_zero(norm / m_total_norm.m_reduced - 1.0, 1e-8),
                  "2RDM norm should match total of sampled diagonal contributions");
-    return consts::real(ham.m_int_0) + (consts::real(e1) + consts::real(e2))/norm;
+    return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
 }
 
 defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian &ham, size_t nelec, size_t exsig) const {

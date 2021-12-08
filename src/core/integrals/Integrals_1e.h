@@ -18,7 +18,7 @@
  * ispin, jspin: these refer to the spin channel [0, 1] of the spin orbital,
  *       which is discarded in the non-spin-resolved case
  * isat, jspat: these index the spatial orbital or kramers pair [0, nspatorb)
- * flat_index: the position of the symmetrically unique integral value within m_data.
+ * flat_index: the position of the symmetrically unique integral value within m_buffer.
  */
 
 template<typename T, size_t isym>

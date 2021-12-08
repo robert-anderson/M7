@@ -29,7 +29,7 @@ struct Hamiltonian {
     /**
      * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
-    FermionHamiltonian m_frm;
+    std::unique_ptr<FermionHamiltonian> m_frm;
     /**
      * purely bosonic number-conserving terms in the Hamiltonian
      */
@@ -58,8 +58,14 @@ struct Hamiltonian {
 
     const size_t &nboson() const;
 
-    bool complex_valued() const {
-        return m_frm.m_complex_valued;
+    /*
+     * pure fermion coefficients
+     */
+    defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const {
+        return m_frm->get_coeff_1100(i, j);
+    }
+    defs::ham_t get_coeff_2200(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const {
+        return m_frm->get_coeff_2200(i, j, k, l);
     }
 
     /*
@@ -67,15 +73,15 @@ struct Hamiltonian {
      */
 
     defs::ham_t get_element(const FrmOnv &onv, const conn::FrmOnv &conn) const {
-        return m_frm.get_element(onv, conn);
+        return m_frm->get_element(onv, conn);
     }
 
     defs::ham_t get_element(const FrmOnv &onv) const {
-        return m_frm.get_element_0000(onv);
+        return m_frm->get_element_0000(onv);
     }
 
     defs::ham_comp_t get_energy(const FrmOnv &onv) const {
-        return m_frm.get_energy(onv);
+        return m_frm->get_energy(onv);
     }
 
     /*
@@ -101,18 +107,22 @@ struct Hamiltonian {
     defs::ham_t get_element(const FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
         defs::ham_t helement_frm = 0.0;
         defs::ham_t helement_bos = 0.0;
-        if (!conn.m_bos.size()) helement_frm = m_frm.get_element(onv.m_frm, conn.m_frm);
+        if (!conn.m_bos.size()) helement_frm = m_frm->get_element(onv.m_frm, conn.m_frm);
         if (!conn.m_frm.size()) helement_bos = m_bos.get_element(onv.m_bos, conn.m_bos);
         defs::ham_t helement_ladder = m_ladder.get_element(onv, conn);
         return helement_frm + helement_bos + helement_ladder;
     }
 
     defs::ham_t get_element(const FrmBosOnv &onv) const {
-        return m_frm.get_element(onv.m_frm)+m_bos.get_element(onv.m_bos);
+        return m_frm->get_element(onv.m_frm)+m_bos.get_element(onv.m_bos);
     }
 
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {
         return consts::real(get_element(onv));
+    }
+
+    bool complex_valued() const {
+        return m_frm->m_complex_valued;
     }
 };
 

@@ -21,12 +21,12 @@ void sparse::Network::add(const size_t &irow, const size_t &icol) {
         }
         resize(irow + 1);
     }
-    m_rows_icols[irow].push_front(icol);
+    m_rows_icols[irow].push_back(icol);
 }
 
 bool sparse::Network::empty() { return m_rows_icols.empty(); }
 
-const std::forward_list<size_t> &sparse::Network::operator[](const size_t &irow) {
+const defs::inds &sparse::Network::operator[](const size_t &irow) {
     ASSERT(irow<nrow());
     return m_rows_icols[irow];
 }

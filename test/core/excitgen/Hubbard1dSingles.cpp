@@ -5,13 +5,13 @@
 #include "src/core/excititer/ExcitIters.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
-#include "src/core/excitgen/Hubbard1dSingles.h"
+#include "src/core/excitgen/HubbardSingles.h"
 #include "src/core/field/Mbf.h"
 
 TEST(Hubbard1dSingles, ObcFromNeel) {
     PRNG prng(14, 1000000);
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", false);
-    Hubbard1dSingles excit_gen(ham, prng);
+    HubbardSingles excit_gen(ham, prng);
     ASSERT_FALSE(excit_gen.m_pbc);
     excititers::Frm excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -32,7 +32,7 @@ TEST(Hubbard1dSingles, ObcFromNeel) {
 TEST(Hubbard1dSingles, PbcFromNeel) {
     PRNG prng(14, 1000000);
     Hamiltonian ham(defs::assets_root + "/Hubbard_U4_6site_pbc/FCIDUMP", false);
-    Hubbard1dSingles excit_gen(ham, prng);
+    HubbardSingles excit_gen(ham, prng);
     ASSERT_TRUE(excit_gen.m_pbc);
     excititers::Frm excit_iter(ham, exsig_utils::ex_single);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);

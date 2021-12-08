@@ -6,7 +6,7 @@
 #define M7_EXCITGENGROUP_H
 
 #include "src/core/parallel/Reduction.h"
-#include "Hubbard1dSingles.h"
+#include "HubbardSingles.h"
 #include "HeatBathDoubles.h"
 
 using namespace exsig_utils;

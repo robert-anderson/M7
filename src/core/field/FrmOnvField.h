@@ -116,7 +116,7 @@ public:
      * @return
      *  associated site index
      */
-    size_t isite(const size_t& ibit);
+    size_t isite(const size_t& ibit) const;
     /**
      * convenient conversion between spin-site and spin indices
      * @param ibit
@@ -124,7 +124,7 @@ public:
      * @return
      *  associated spin index (0 or 1)
      */
-    size_t ispin(const size_t& ibit);
+    size_t ispin(const size_t& ibit) const;
 
     static size_t isite(const size_t& ibit, const size_t& nsite);
 
