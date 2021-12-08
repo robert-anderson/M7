@@ -435,6 +435,11 @@ namespace hdf5 {
             auto status = H5Gget_objinfo (m_handle, name.c_str(), 0, NULL);
             return status == 0;
         }
+
+        size_t first_existing_child(const std::vector<std::string>& names) const {
+            for (size_t i=0ul; i<names.size(); ++i) if (child_exists(names[i])) return i;
+            return ~0ul;
+        }
     private:
 
         size_t get_dataset_ndim(std::string name) {
