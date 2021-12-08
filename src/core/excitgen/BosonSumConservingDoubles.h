@@ -11,7 +11,13 @@ struct BosonSumConservingDoubles : public BosExcitGen {
     const size_t m_nboson_pair;
     BosonSumConservingDoubles(const Hamiltonian &h, PRNG &prng);
 
-    bool draw(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, conn::BosOnv &conn) override;
+    bool draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, conn::FrmBosOnv &conn) override {
+        return draw(exsig, src.m_bos, orbs, prob, conn.m_bos);
+    }
+
+    bool draw_bos(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, conn::BosOnv &conn) override;
+
+
 
     std::string description() const override;
 

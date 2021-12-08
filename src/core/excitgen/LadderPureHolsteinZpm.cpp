@@ -4,7 +4,7 @@
 
 #include "LadderPureHolsteinZpm.h"
 
-bool LadderPureHolsteinZpm::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+bool LadderPureHolsteinZpm::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                                  conn::FrmBosOnv &conn) {
     const auto& sites = orbs.not_singly_occ_sites(src.m_frm);
     if (sites.empty()) return false;

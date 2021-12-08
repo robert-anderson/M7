@@ -91,7 +91,7 @@ void TableBase::expand(size_t nrow, double factor) {
     resize(this->nrow()+nrow, factor);
 }
 
-void TableBase::erase_rows(const defs::inds &irows) {
+void TableBase::clear_rows(const defs::inds &irows) {
     for (auto irow : irows) {
         clear(irow);
     }
@@ -131,7 +131,7 @@ void TableBase::transfer_rows(const defs::inds &irows, size_t irank_send, size_t
         /*
          * sent rows can now be erased
          */
-        erase_rows(irows);
+        clear_rows(irows);
     }
     if (mpi::i_am(irank_recv)){
         auto& recv_bw = m_transfer->m_send_bw;

@@ -38,10 +38,6 @@ namespace excititers {
 
         Ladder(const Hamiltonian &ham, size_t exsig);
 
-        void foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<FrmOnv> &body) override {}
-
-        void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) override {}
-
     };
 
     struct Bos : public ExcitIter {

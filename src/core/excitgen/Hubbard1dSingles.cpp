@@ -8,8 +8,8 @@ size_t Hubbard1dSingles::approx_nconn() const {
     return m_nelec;
 }
 
-bool Hubbard1dSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
-                            defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
+bool Hubbard1dSingles::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
+                            defs::prob_t &prob, conn::FrmOnv &conn) {
     const auto nelec = m_h.nelec();
     auto rand = m_prng.draw_uint(2 * nelec);
     bool choose_left = rand / nelec;
@@ -25,13 +25,12 @@ bool Hubbard1dSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &
     if (src.get(vac)) return false;
 
     conn.set(occ, vac);
-    helem = m_h.m_frm.get_element_1100(src, conn);
-    return !consts::float_nearly_zero(helem, 1e-12);
+    return true;
 }
 
-bool Hubbard1dSingles::draw(const size_t &exsig, const FrmBosOnv &src_onv, CachedOrbs &orbs,
-                            defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
-    return draw(exsig, src_onv.m_frm, orbs, prob, helem, conn.m_frm);
+bool Hubbard1dSingles::draw_frmbos(const size_t &exsig, const FrmBosOnv &src_onv, CachedOrbs &orbs,
+                            defs::prob_t &prob, conn::FrmBosOnv &conn) {
+    return draw(exsig, src_onv.m_frm, orbs, prob, conn.m_frm);
 }
 
 std::string Hubbard1dSingles::description() const {

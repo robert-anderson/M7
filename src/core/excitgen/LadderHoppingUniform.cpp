@@ -7,8 +7,8 @@
 LadderHoppingUniform::LadderHoppingUniform(const Hamiltonian &h, PRNG &prng) :
         LadderExcitGen(h, prng, {exsig_utils::ex_1110, exsig_utils::ex_1101}), m_singles(h, prng) {}
 
-bool LadderHoppingUniform::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                                conn::FrmBosOnv &conn) {
+bool LadderHoppingUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+                                       conn::FrmBosOnv &conn) {
     /*
      * draw random occupied and vacant fermion indices
      */

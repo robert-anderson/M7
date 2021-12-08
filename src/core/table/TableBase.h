@@ -197,12 +197,11 @@ struct TableBase {
     void expand(size_t nrow, double factor=-1.0);
 
     /**
-     * erasure of rows changes meaning depending on the derived class, and so this is a virtual method. Here, we
      * simply call clear on each indexed row
      * @param irows
      *  all row indices marked for erasure
      */
-    virtual void erase_rows(const defs::inds &irows);
+    void clear_rows(const defs::inds &irows);
 
     /**
      * in some derived classes, there is more to adding new rows than simply copying their contents into the hwm. In

@@ -7,7 +7,7 @@
 UniformSingles::UniformSingles(const Hamiltonian &ham, PRNG &prng) :
         FrmExcitGen(ham, prng, exsig_utils::ex_single) {}
 
-bool UniformSingles::draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
+bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
                           defs::prob_t &prob, conn::FrmOnv &conn) {
     size_t i, a, ia;
     size_t ncases;
@@ -47,15 +47,6 @@ bool UniformSingles::draw(const size_t &exsig, const field::FrmOnv &src, CachedO
     prob = 1.0 / ncases;
     return true;
 }
-
-bool UniformSingles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
-                          defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
-    auto result = draw(exsig, src, orbs, prob, conn);
-    if (!result) return false;
-    helem = m_h.m_frm.get_element_1100(src, conn);
-    return !consts::float_nearly_zero(helem, 1e-12);
-}
-
 
 size_t UniformSingles::approx_nconn() const {
     if (m_spin_conserving) {

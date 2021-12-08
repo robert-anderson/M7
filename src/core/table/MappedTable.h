@@ -161,18 +161,13 @@ public:
         TableBase::clear();
         clear_map();
     }
-    /**
-     * remove many rows
-     * @param irows
-     *  row indices to lookup and erase
-     */
-    void erase_rows(const defs::inds &irows) override {
-        for (auto irow : irows) {
-            m_row.jump(irow);
-            auto lookup = (*this)[KeyField<row_t>::get(m_row)];
-            erase(lookup);
-        }
+
+    void clear(const size_t &irow) override {
+        m_row.jump(irow);
+        auto lookup = (*this)[KeyField<row_t>::get(m_row)];
+        erase(lookup);
     }
+
     /**
      * remove the row pointed to by lookup by:
      *  1. physically clearing the row by zeroing its slice of the buffer,

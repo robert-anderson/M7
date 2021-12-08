@@ -11,7 +11,7 @@ struct LadderPureUniform : public LadderExcitGen {
     LadderPureUniform(const Hamiltonian& ham, PRNG& prng):
         LadderExcitGen(ham, prng, {exsig_utils::ex_0010, exsig_utils::ex_0001}){}
 
-    bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
+    bool draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
 
     std::string description() const override;

@@ -31,7 +31,7 @@ LadderHoppingPc::LadderHoppingPc(const Hamiltonian &h, PRNG &prng) :
     mpi::barrier();
 }
 
-bool LadderHoppingPc::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+bool LadderHoppingPc::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                          conn::FrmBosOnv &conn) {
     /*
      * draw random occupied and vacant fermion indices

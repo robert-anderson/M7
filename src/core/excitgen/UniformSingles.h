@@ -12,11 +12,8 @@ struct UniformSingles : public FrmExcitGen {
 
     UniformSingles(const Hamiltonian& ham, PRNG& prng);
 
-    bool draw(const size_t& exsig, const field::FrmOnv &src, CachedOrbs& orbs,
+    bool draw_frm(const size_t& exsig, const field::FrmOnv &src, CachedOrbs& orbs,
                defs::prob_t &prob, conn::FrmOnv &conn) override;
-
-    bool draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
-              conn::FrmOnv &conn) override;
 
     size_t approx_nconn() const override;
 

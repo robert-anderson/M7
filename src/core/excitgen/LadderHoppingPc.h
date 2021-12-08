@@ -10,14 +10,14 @@
 
 /**
  * pre-compute a one-per-node shared Aliaser akin to that of the HeatBathDoubles but this time for sampling the 1101 and
- * 1101 exsigs of the general fermion-boson Hamiltonian
+ * 1110 exsigs of the general fermion-boson Hamiltonian
  */
 struct LadderHoppingPc : public LadderHoppingUniform {
     Aliaser m_pick_n_given_pq;
 
     LadderHoppingPc(const Hamiltonian &h, PRNG &prng);
 
-    bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
+    bool draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
 };
 

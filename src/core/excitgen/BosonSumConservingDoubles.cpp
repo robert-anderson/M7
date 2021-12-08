@@ -8,8 +8,8 @@ BosonSumConservingDoubles::BosonSumConservingDoubles(const Hamiltonian &h, PRNG 
         BosExcitGen(h, prng, exsig_utils::ex_0022),
         m_nboson_pair(integer_utils::nspair(h.nboson())) {}
 
-bool BosonSumConservingDoubles::draw(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                                     conn::BosOnv &conn) {
+bool BosonSumConservingDoubles::draw_bos(const size_t &exsig, const BosOnv &src,
+                                         CachedOrbs &orbs, defs::prob_t &prob, conn::BosOnv &conn) {
     const auto &op_inds = orbs.bos_op_inds(src);
     DEBUG_ASSERT_EQ(op_inds.size(), m_h.nboson(), "picked i, j should be in ascending order");
     const auto &nmode = src.m_nelement;
@@ -32,22 +32,22 @@ bool BosonSumConservingDoubles::draw(const size_t &exsig, const BosOnv &src, Cac
     auto max = std::min(i + j + 1, nmode);
 
     size_t nexclude = 1 + (i != j);
-    if (min+nexclude==max) return false;
-    size_t a = m_prng.draw_uint(min, max-nexclude);
+    if (min + nexclude == max) return false;
+    size_t a = m_prng.draw_uint(min, max - nexclude);
     // skip mode indices to prevent selection of i or j as creation operators
-    if (a>=i)++a;
-    if (i!=j && a>=j)++a;
+    if (a >= i)++a;
+    if (i != j && a >= j)++a;
     DEBUG_ASSERT_LT(a, max, "a is OOB");
 
     if (i == j) {
-        prob = src[i] * (src[i] - 1) / double(2*m_nboson_pair);
+        prob = src[i] * (src[i] - 1) / double(2 * m_nboson_pair);
     } else {
         prob = src[i] * src[j] / double(m_nboson_pair);
     }
-    auto b = (i+j)-a;
-    if (a>b)std::swap(a, b);
+    auto b = (i + j) - a;
+    if (a > b)std::swap(a, b);
     if (a != b) prob *= 2;
-    prob/=(max-min)-nexclude;
+    prob /= (max - min) - nexclude;
     DEBUG_ASSERT_TRUE(i != a && j != a && i != b && j != b,
                       "should never draw same index for a pair of creation and annihilation ops");
     DEBUG_ASSERT_LT(a, nmode, "boson index OOB");

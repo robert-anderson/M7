@@ -13,7 +13,7 @@ struct LadderHoppingUniform : public LadderExcitGen {
 
     LadderHoppingUniform(const Hamiltonian &h, PRNG &prng);
 
-    bool draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
+    bool draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
 
     std::string description() const override;

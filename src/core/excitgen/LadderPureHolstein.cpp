@@ -4,9 +4,8 @@
 
 #include "LadderPureHolstein.h"
 
-bool LadderPureHolstein::draw(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                              conn::FrmBosOnv &conn) {
-
+bool LadderPureHolstein::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+                                     conn::FrmBosOnv &conn) {
     if (!m_h.m_nboson_max) return false;
 
     bool cre = exsig_utils::decode_nbos_cre(exsig);

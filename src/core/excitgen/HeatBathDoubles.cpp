@@ -23,23 +23,18 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian &h, PRNG &prng) :
                         ++ab;
                     }
                 }
-                ASSERT(ab == m_norb_pair)
+                DEBUG_ASSERT_EQ(ab, m_norb_pair, "loop did not include all vacant orbital pairs");
                 m_pick_ab_given_ij.update(ij, weights);
                 ++ij;
             }
         }
-        ASSERT(ij == m_norb_pair)
+        DEBUG_ASSERT_EQ(ij, m_norb_pair, "loop did not include all occupied orbital pairs");
     }
     mpi::barrier();
-#ifndef NDEBUG
-    for (ij = 0ul; ij < m_norb_pair; ++ij) {
-        ASSERT(m_pick_ab_given_ij.nprob() == m_norb_pair)
-    }
-#endif
 }
 
-bool HeatBathDoubles::draw(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                           defs::ham_t &helem, conn::FrmOnv &conn) {
+bool HeatBathDoubles::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
+                                 defs::ham_t &helem, conn::FrmOnv &conn) {
     size_t i, j, a, b;
     size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
