@@ -213,13 +213,13 @@ void Rdms::end_cycle() {
 }
 
 bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
-    if (ham.m_bos.m_contribs_0011.is_nonzero(0ul)){
+    if (ham.m_bos->m_contribs_0011.is_nonzero(0ul)){
         if (!m_rdms[exsig_utils::ex_0011]) return false;
     }
-    if (ham.m_ladder.m_contribs_0010.is_nonzero(exsig_utils::ex_0010)){
+    if (ham.m_ladder->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)){
         if (!m_rdms[exsig_utils::ex_0010]) return false;
     }
-    if (ham.m_ladder.m_contribs_0001.is_nonzero(exsig_utils::ex_0001)){
+    if (ham.m_ladder->m_contribs_0001.is_nonzero(exsig_utils::ex_0001)){
         if (!m_rdms[exsig_utils::ex_0001]) return false;
     }
     if (!m_rdms[exsig_utils::ex_double]) return false;
@@ -227,7 +227,7 @@ bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
 }
 
 
-defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
+defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian* ham) const {
     auto& rdm2 = m_rdms[ex_2200];
     REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
     defs::ham_t e1 = 0.0;
@@ -243,32 +243,32 @@ defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian &ham) const {
         const size_t l=row.m_inds.m_frm.m_ann[1];
         ASSERT(k<l);
         const auto rdm_element = row.m_values[0];
-        e2 += rdm_element*ham.get_coeff_2200(i, j, k, l);
+        e2 += rdm_element*ham->get_coeff_2200(i, j, k, l);
         /*
          * signs of the following contributions come from the Fermi phase of bringing the like-valued creation and
          * annihilation operators together to act on the ket, leading to a factor of (nelec - 1), accounted for
          * after the loop.
          */
-        if (i == k) e1 += rdm_element*ham.get_coeff_1100(j,l);
-        if (j == l) e1 += rdm_element*ham.get_coeff_1100(i,k);
-        if (i == l) e1 -= rdm_element*ham.get_coeff_1100(j,k);
-        if (j == k) e1 -= rdm_element*ham.get_coeff_1100(i,l);
+        if (i == k) e1 += rdm_element*ham->get_coeff_1100(j,l);
+        if (j == l) e1 += rdm_element*ham->get_coeff_1100(i,k);
+        if (i == l) e1 -= rdm_element*ham->get_coeff_1100(j,k);
+        if (j == k) e1 -= rdm_element*ham->get_coeff_1100(i,l);
         if ((i==k) && (j==l)) trace+=rdm_element;
     }
     // scale the one-body contribution by the number of two-body contributions
-    e1 /= ham.m_nelec-1;
+    e1 /= ham->m_nelec-1;
     e1 = mpi::all_sum(e1);
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
-    const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.m_nelec, 2);
+    const auto norm = consts::real(trace) / integer_utils::combinatorial(ham->m_nelec, 2);
     REQUIRE_TRUE(consts::float_nearly_zero(norm / m_total_norm.m_reduced - 1.0, 1e-8),
                  "2RDM norm should match total of sampled diagonal contributions");
-    return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
+    return consts::real(ham->m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
 }
 
-defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian &ham, size_t nelec, size_t exsig) const {
-    if (!ham.m_nboson_max) return 0.0;
+defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian *ham, size_t nelec, size_t exsig) const {
+    if (!ham->m_nboson_max) return 0.0;
     auto& rdm = m_rdms[exsig];
     REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,
                      "currently only supporting linear boson operators in the ladder term");
@@ -291,9 +291,9 @@ defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian &ham, size_t nelec, si
          * default definition is the creation ladder operator, so the fermion indices must be interchanged if computing
          * the energy of the boson-annihilating RDM
          */
-        e_coupled += rdm_element*ham.m_v.get(n, cre ? psite : qsite, cre ? qsite : psite);
+        e_coupled += rdm_element*ham->m_v.get(n, cre ? psite : qsite, cre ? qsite : psite);
 
-        if (p == q) e_uncoupled += rdm_element*ham.m_v_unc[n];
+        if (p == q) e_uncoupled += rdm_element*ham->m_v_unc[n];
     }
     e_uncoupled = mpi::all_sum(e_uncoupled);
     e_uncoupled/=nelec;
@@ -303,8 +303,8 @@ defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian &ham, size_t nelec, si
     return consts::real(e);
 }
 
-defs::ham_comp_t Rdms::get_energy(const BosonHamiltonian &ham) const {
-    if (!ham.m_nboson_max) return 0.0;
+defs::ham_comp_t Rdms::get_energy(const BosonHamiltonian *ham) const {
+    if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig_utils::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");
     defs::ham_t e = 0.0;
@@ -315,7 +315,7 @@ defs::ham_comp_t Rdms::get_energy(const BosonHamiltonian &ham) const {
         const size_t m=row.m_inds.m_bos.m_ann[0];
         REQUIRE_EQ(n, m, "0011-RDM should currently only take 0000-exsig contributions");
         const auto rdm_element = row.m_values[0];
-        e += rdm_element*ham.m_coeffs_1.get(n, m);
+        e += rdm_element*ham->m_coeffs_1.get(n, m);
     }
     e = mpi::all_sum(e) / m_total_norm.m_reduced;
     REQUIRE_TRUE(consts::float_nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")

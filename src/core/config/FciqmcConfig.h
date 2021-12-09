@@ -7,6 +7,7 @@
 
 
 #include "Parameters.h"
+#include "Hamiltonian.h"
 
 namespace fciqmc_config {
 
@@ -97,7 +98,6 @@ namespace fciqmc_config {
     struct Wavefunction : config::Section {
         config::Param<double> m_nw_init;
         config::Param<size_t> m_nroot;
-        config::Param<int> m_ms2_restrict;
         Buffers m_buffers;
         HashMapping m_hash_mapping;
         Archivable m_archivable;
@@ -133,15 +133,6 @@ namespace fciqmc_config {
         explicit Semistochastic(config::Group *parent);
 
         void verify() override;
-    };
-
-    struct Fcidump : config::Section {
-        config::Param<std::string> m_path;
-        config::Param<std::string> m_eb_path;
-        config::Param<std::string> m_bos_path;
-        config::Param<bool> m_spin_major;
-
-        explicit Fcidump(config::Group *parent);
     };
 
     struct Stats : config::Section {
@@ -217,17 +208,6 @@ namespace fciqmc_config {
         bool any_bilinears() const {
             return !(m_rdm.m_ranks.get().empty() && m_spec_mom.m_ranks.get().empty());
         }
-    };
-
-    struct Hamiltonian : config::Section {
-        Fcidump m_fcidump;
-        config::Param<int> m_charge;
-        config::Param<bool> m_elecs;
-        config::Param<size_t> m_nboson_max;
-
-        Hamiltonian(config::Group *parent);
-
-        void verify() override;
     };
 
     struct Propagator : config::Section {

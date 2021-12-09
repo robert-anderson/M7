@@ -38,8 +38,13 @@ std::pair<size_t, int> HubbardHamiltonian::get_coordination(const defs::inds &si
     return {get_coord_index(site_inds, idim, dim_ind), t_element};
 }
 
-HubbardHamiltonian::HubbardHamiltonian(size_t nelec, defs::inds site_shape, std::vector<int> bcs, defs::ham_t u) :
-        FermionHamiltonian(nelec, NdFormatD(site_shape).m_nelement),
+size_t HubbardHamiltonian::nsite(const defs::inds &site_shape) {
+    return NdFormatD(site_shape).m_nelement;
+}
+
+HubbardHamiltonian::HubbardHamiltonian(const defs::inds& site_shape, std::vector<int> bcs, defs::ham_t u,
+        int ms2_restrict, int charge) :
+        FermionHamiltonian(nsite(site_shape)-charge, nsite(site_shape), ms2_restrict),
         m_format(site_shape), m_u(u), m_t_mat_dense(m_nsite) {
     m_t_mat_sparse.resize(m_nsite);
     m_t_mat_dense.zero();

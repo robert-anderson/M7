@@ -33,12 +33,12 @@ void DenseHamiltonian::setup_frmbos(const Hamiltonian &source) {
     buffered::FrmBosOnv ket(source.m_bd);
 
     size_t ibra = ~0ul;
-    enums::FermiBosOnv bra_enum(source.m_bd, source.nelec(), source.m_bos.m_nboson_max);
+    enums::FermiBosOnv bra_enum(source.m_bd, source.nelec(), source.m_ladder->m_nboson_max);
     conn::FrmBosOnv conn(source.m_bd);
 
     while (bra_enum.next(bra, ibra)) {
         size_t iket = ~0ul;
-        enums::FermiBosOnv ket_enum(source.m_bd, source.nelec(), source.m_bos.m_nboson_max);
+        enums::FermiBosOnv ket_enum(source.m_bd, source.nelec(), source.m_ladder->m_nboson_max);
         while (ket_enum.next(ket, iket)) {
             conn.connect(bra, ket);
             auto h_elem = source.get_element(bra, conn);
@@ -68,6 +68,6 @@ void DenseHamiltonian::setup_bos(const Hamiltonian &source) {
 }
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) : Matrix<defs::ham_t>(source.nci()) {
-    if (source.m_bos.m_nboson_max) setup_frmbos(source);
+    if (source.m_ladder->m_nboson_max) setup_frmbos(source);
     else setup_frm(source);
 }

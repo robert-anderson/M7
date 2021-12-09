@@ -97,3 +97,7 @@ size_t integer_utils::combinatorial(const size_t &n, const size_t &r) {
         if (ri == r && ni == r) return out;
     }
 }
+
+size_t integer_utils::combinatorial_with_repetition(const size_t &n, const size_t &r) {
+    return combinatorial(n+r-1, r);
+}

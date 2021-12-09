@@ -5,12 +5,10 @@
 #include "BosonHamiltonian.h"
 #include "src/core/io/BosdumpFileReader.h"
 
-BosonHamiltonian::BosonHamiltonian(const BosdumpHeader &header, size_t nboson_max) :
-        m_nmode(header.m_nmode), m_nboson(header.m_nboson), m_nboson_max(m_nboson ? m_nboson : nboson_max),
-        m_coeffs_1(m_nboson_max ? m_nmode : 0ul),
-        m_coeffs_2(m_nboson_max ? m_nmode : 0ul),
+BosonHamiltonian::BosonHamiltonian(const BosdumpHeader &header) :
+        m_nmode(header.m_nmode), m_nboson(header.m_nboson),
+        m_coeffs_1(m_nmode), m_coeffs_2(m_nmode),
         m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {
-    if (!m_nboson_max || !m_nmode) return;
 
     BosdumpFileReader file_reader(header.m_fname);
     defs::inds inds(4);
@@ -35,7 +33,6 @@ BosonHamiltonian::BosonHamiltonian(const BosdumpHeader &header, size_t nboson_ma
 }
 
 defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
-    if (!m_nboson_max) return 0.0;
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {
         if (!onv[imode]) continue;
@@ -98,7 +95,7 @@ defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &src, const conn::
 }
 
 size_t BosonHamiltonian::nci() const {
-    return ci_utils::boson_dim(m_nmode, m_nboson_max);
+    return ci_utils::boson_dim(m_nmode, m_nboson, true);
 }
 
 void BosonHamiltonian::log_data() const {

@@ -82,20 +82,20 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
         if (opts.m_excit_gen.get() == "pchb")
             add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
     }
-    if (ham.m_bos.m_nboson_max) {
+    if (ham.m_ladder) {
         /*
          * first, the "pure" boson exsigs 0010 and 0001
          */
         defs::inds exsigs;
-        if (ham.m_ladder.m_contribs_0010.is_nonzero(ex_0010) || ham.m_ladder.m_contribs_1110.is_nonzero(ex_0010))
+        if (ham.m_ladder->m_contribs_0010.is_nonzero(ex_0010) || ham.m_ladder->m_contribs_1110.is_nonzero(ex_0010))
             exsigs.push_back(ex_0010);
-        if (ham.m_ladder.m_contribs_0001.is_nonzero(ex_0001) || ham.m_ladder.m_contribs_1101.is_nonzero(ex_0001))
+        if (ham.m_ladder->m_contribs_0001.is_nonzero(ex_0001) || ham.m_ladder->m_contribs_1101.is_nonzero(ex_0001))
             exsigs.push_back(ex_0001);
         if (!exsigs.empty()) {
             /*
              * hamiltonian has non-zero off-diagonal elements of one or both of the "pure" ladder operator type
              */
-            if (ham.m_ladder.is_zpm_half_filled())
+            if (ham.m_ladder->is_zpm_half_filled())
                 add(std::unique_ptr<ExcitGen>(new LadderPureHolsteinZpm(ham, prng)), exsigs);
             else
                 add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)), exsigs);
@@ -104,8 +104,8 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
          * then the "hopping" type exsigs 1110 and 1101
          */
         exsigs.clear();
-        if (ham.m_ladder.m_contribs_1110.is_nonzero(ex_1110)) exsigs.push_back(ex_1110);
-        if (ham.m_ladder.m_contribs_1101.is_nonzero(ex_1101)) exsigs.push_back(ex_1101);
+        if (ham.m_ladder->m_contribs_1110.is_nonzero(ex_1110)) exsigs.push_back(ex_1110);
+        if (ham.m_ladder->m_contribs_1101.is_nonzero(ex_1101)) exsigs.push_back(ex_1101);
         if (!exsigs.empty()) {
             /*
              * hamiltonian has non-zero off-diagonal elements of one or both of the "pure" ladder operator type
@@ -114,8 +114,9 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
         }
     }
 
-    if (ham.m_bos.m_nboson){
-        add(std::unique_ptr<ExcitGen>(new BosonSumConservingDoubles(ham, prng)));
+    if (ham.m_bos){
+        if (ham.m_bos->m_nboson)
+            add(std::unique_ptr<ExcitGen>(new BosonSumConservingDoubles(ham, prng)));
     }
 
     init();

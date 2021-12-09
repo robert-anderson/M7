@@ -19,44 +19,56 @@ using namespace field;
  */
 struct Hamiltonian {
     /**
-     * the maximum number of electrons permitted to occupy any spin orbital
+     * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
-    const bool m_elecs;
+    std::unique_ptr<FermionHamiltonian> m_frm;
+    /**
+     * hamiltonian encapsulating all terms involving a single boson creation or annihilation operator
+     * i.e. ranksigs 0010, 0001, 1110, 1101
+     */
+    std::unique_ptr<LadderHamiltonian> m_ladder;
+    /**
+     * purely bosonic number-conserving terms in the Hamiltonian
+     */
+    std::unique_ptr<BosonHamiltonian> m_bos;
     /**
      * the maximum number of bosons permitted to occupy any mode
      */
     const size_t m_nboson_max;
     /**
-     * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
-     */
-    std::unique_ptr<FermionHamiltonian> m_frm;
-    /**
-     * purely bosonic number-conserving terms in the Hamiltonian
-     */
-    BosonHamiltonian m_bos;
-    /**
-     * hamiltonian encapsulating all terms involving a single boson creation or annihilation operator
-     * i.e. ranksigs 0010, 0001, 1110, 1101
-     */
-    LadderHamiltonian m_ladder;
-    /**
      * specifies number of fermion sites and boson modes defining the single-particle basis
      */
     const BasisDims m_bd;
 
+private:
+    BasisDims make_bd() const;
+public:
+
+    Hamiltonian(std::unique_ptr<FermionHamiltonian>&& frm,
+                std::unique_ptr<LadderHamiltonian>&& ladder,
+                std::unique_ptr<BosonHamiltonian>&& bos):
+                m_frm(std::move(frm)), m_ladder(std::move(ladder)), m_bos(std::move(bos)),
+                m_nboson_max(ladder ? ladder->m_nboson_max : 0ul), m_bd(make_bd()){
+        if (!m_frm) log::info("Fermion Hamiltonian is disabled");
+        if (defs::enable_bosons) {
+            if (!m_ladder) log::info("Fermion-boson ladder Hamiltonian is disabled");
+            if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
+        }
+    }
+
     Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
-                bool spin_major, bool elecs, size_t nboson_max);
+                bool spin_major, size_t nboson_max);
 
     Hamiltonian(std::string fname, bool spin_major):
-        Hamiltonian(fname, "", "", spin_major, true, 0ul){}
+        Hamiltonian(fname, "", "", spin_major, 0ul){}
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 
     size_t nci() const;
 
-    const size_t &nelec() const;
+    size_t nelec() const;
 
-    const size_t &nboson() const;
+    size_t nboson() const;
 
     /*
      * pure fermion coefficients
@@ -89,15 +101,15 @@ struct Hamiltonian {
      */
 
     defs::ham_t get_element(const BosOnv &onv, const conn::BosOnv &conn) const {
-        return m_bos.get_element(onv, conn);
+        return m_bos->get_element(onv, conn);
     }
 
     defs::ham_t get_element(const BosOnv &onv) const {
-        return m_bos.get_element(onv);
+        return m_bos->get_element(onv);
     }
 
     defs::ham_comp_t get_energy(const BosOnv &onv) const {
-        return m_bos.get_energy(onv);
+        return m_bos->get_energy(onv);
     }
 
     /*
@@ -108,13 +120,13 @@ struct Hamiltonian {
         defs::ham_t helement_frm = 0.0;
         defs::ham_t helement_bos = 0.0;
         if (!conn.m_bos.size()) helement_frm = m_frm->get_element(onv.m_frm, conn.m_frm);
-        if (!conn.m_frm.size()) helement_bos = m_bos.get_element(onv.m_bos, conn.m_bos);
-        defs::ham_t helement_ladder = m_ladder.get_element(onv, conn);
+        if (!conn.m_frm.size()) helement_bos = m_bos->get_element(onv.m_bos, conn.m_bos);
+        defs::ham_t helement_ladder = m_ladder->get_element(onv, conn);
         return helement_frm + helement_bos + helement_ladder;
     }
 
     defs::ham_t get_element(const FrmBosOnv &onv) const {
-        return m_frm->get_element(onv.m_frm)+m_bos.get_element(onv.m_bos);
+        return m_frm->get_element(onv.m_frm)+m_bos->get_element(onv.m_bos);
     }
 
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {

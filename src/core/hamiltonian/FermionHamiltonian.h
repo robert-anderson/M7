@@ -22,6 +22,7 @@ struct FermionHamiltonian {
 
     const size_t m_nelec;
     const size_t m_nsite;
+    const int m_ms2_restrict;
     const bool m_complex_valued;
 
     AbelianGroupMap m_point_group_map;
@@ -32,7 +33,8 @@ struct FermionHamiltonian {
     ham_data::TermContribs m_contribs_2200;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued=false, defs::inds site_irreps = {});
+    FermionHamiltonian(size_t nelec, size_t nsite, int ms2_restrict,
+                       bool complex_valued=false, defs::inds site_irreps = {});
 
     virtual defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const = 0;
     virtual defs::ham_t get_coeff_2200(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const = 0;

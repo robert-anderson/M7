@@ -18,14 +18,15 @@ struct AbinitioHamiltonian : FermionHamiltonian {
     ham_data::TermContribs m_contribs_2200;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    AbinitioHamiltonian(size_t nelec, size_t nsite, bool spin_resolved, bool complex_valued, defs::inds site_irreps = {});
+    AbinitioHamiltonian(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict,
+                        bool complex_valued, defs::inds site_irreps = {});
 
-    AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, bool elecs=true, int charge = 0);
+    AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
 
     AbinitioHamiltonian(std::string fname, bool spin_major, bool elecs=true, int charge = 0):
             AbinitioHamiltonian(FcidumpHeader(fname), spin_major, elecs, charge){}
 
-    explicit AbinitioHamiltonian(const fciqmc_config::Hamiltonian &opts) :
+    explicit AbinitioHamiltonian(const fciqmc_config::FermionHamiltonian &opts) :
             AbinitioHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
                                opts.m_elecs, opts.m_charge) {}
 

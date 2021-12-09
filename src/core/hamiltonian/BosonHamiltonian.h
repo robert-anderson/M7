@@ -14,15 +14,15 @@
 #include "HamiltonianData.h"
 
 struct BosonHamiltonian {
-    const size_t m_nmode, m_nboson, m_nboson_max;
+    const size_t m_nmode, m_nboson;
     BosonCoeffs_1 m_coeffs_1;
     BosonCoeffs_2 m_coeffs_2;
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
-    BosonHamiltonian(const BosdumpHeader& header, size_t nboson_max);
+    BosonHamiltonian(const BosdumpHeader& header);
 
-    BosonHamiltonian(const std::string& fname, size_t nboson_max): BosonHamiltonian(BosdumpHeader(fname), nboson_max){}
+    BosonHamiltonian(const std::string& fname): BosonHamiltonian(BosdumpHeader(fname)){}
 
     defs::ham_t get_element(const field::BosOnv &onv) const;
 

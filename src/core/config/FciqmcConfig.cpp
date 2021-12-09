@@ -95,8 +95,6 @@ fciqmc_config::Wavefunction::Wavefunction(config::Group *parent) :
                         "options relating to the storage and update of a distributed many-body wavefunction"),
         m_nw_init(this, "nw_init", 1ul, "L1 norm of the initial wavefunction"),
         m_nroot(this, "nroot", 1ul, "number of the lowest-lying eigenvectors of the hamiltonian to target"),
-        m_ms2_restrict(this, "ms2_restrict", 0ul,
-                       "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves secondary spin quantum number"),
         m_buffers(this), m_hash_mapping(this), m_archivable(this), m_load_balancing(this) {}
 
 fciqmc_config::Reweight::Reweight(config::Group *parent) :
@@ -128,16 +126,6 @@ void fciqmc_config::Semistochastic::verify() {
     REQUIRE_NE_ALL(bool(m_size), m_l1_fraction_cutoff == 1.0, "incompatible methods of subspace selection specified");
     REQUIRE_LE_ALL(m_l1_fraction_cutoff, 1.0, "cutoff cannot exceed 1.0");
 }
-
-fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
-        config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
-        m_path(this, "path", defs::enable_fermions ? "FCIDUMP" : "", "path to file defining fermionic Hamiltonian"),
-        m_eb_path(this, "eb_path", defs::enable_fermions && defs::enable_bosons ? "EBDUMP" : "",
-                  "path to file defining fermion-boson coupling"),
-        m_bos_path(this, "bos_path", defs::enable_bosons ? "BOSDUMP" : "",
-                   "path to file defining bosonic Hamiltonian"),
-        m_spin_major(this, "spin_major", false,
-                     "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.") {}
 
 fciqmc_config::Stats::Stats(config::Group *parent) :
         config::Section(parent, "stats",
@@ -222,27 +210,6 @@ fciqmc_config::AvEsts::AvEsts(config::Group *parent) :
         m_rdm(this, "rdm", "options relating to the accumulation and sampling of RDM elements"),
         m_spec_mom(this, "spec_mom", "options relating to the accumulation and sampling of spectral moments"),
         m_ref_excits(this) {}
-
-fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
-        config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator"),
-        m_fcidump(this),
-        m_charge(this, "charge", 0,
-                          "electron deficit relative to the number given in the FCIDUMP header (positive value to remove elecs)"),
-        m_elecs(this, "elecs", true, "include fermionic operators in the Hamiltonian"),
-        m_nboson_max(this, "nboson_max", 0ul, "maximum allowed occupation of bosonic modes. Disregard bosonic operators in the Hamiltonian if set to 0") {}
-
-void fciqmc_config::Hamiltonian::verify() {
-    Section::verify();
-    if (!defs::enable_bosons) {
-        REQUIRE_EQ_ALL(m_nboson_max, 0ul,
-                       "Maximum boson number per mode is non-zero but bosons are compile time disabled. "
-                       "Set CMake variable -DMBF_TYPE_IND to 1 or 2 and recompile");
-    }
-    REQUIRE_LE_ALL(m_nboson_max, defs::max_bos_occ,
-                   log::format("Maximum boson number mustn't exceed the capacity of the integer container ({})",
-                               defs::max_bos_occ));
-
-}
 
 fciqmc_config::Propagator::Propagator(config::Group *parent) :
         config::Section(parent, "propagator",

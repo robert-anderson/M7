@@ -18,21 +18,18 @@ buffered::FrmOnv AbinitioHamiltonian::guess_reference(const int &spin_restrict) 
 }
 
 AbinitioHamiltonian::AbinitioHamiltonian(size_t nelec, size_t nsite, bool spin_resolved,
-                                         bool complex_valued, defs::inds site_irreps) :
-        FermionHamiltonian(nelec, nsite, complex_valued, site_irreps),
+                                         int ms2_restrict, bool complex_valued, defs::inds site_irreps) :
+        FermionHamiltonian(nelec, nsite, ms2_restrict, complex_valued, site_irreps),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
         m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {
     if (!nsite) return;
     REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
 }
 
-AbinitioHamiltonian::AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, bool elecs, int charge) :
-        AbinitioHamiltonian(header.m_nelec - charge, elecs ? header.m_nsite : 0ul, header.m_spin_resolved,
-                           elecs && FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
-    if (!elecs) {
-        log::info("Electronic operators are disabled in the Hamiltonian");
-        return;
-    }
+AbinitioHamiltonian::AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
+        AbinitioHamiltonian(header.m_nelec - charge, header.m_nsite, header.m_spin_resolved, ms2_restrict,
+                           FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
+
     FcidumpFileReader file_reader(header.m_fname, spin_major);
 
     using namespace ham_data;

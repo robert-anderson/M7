@@ -71,5 +71,5 @@ BosExcitGen::BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
 }
 
 size_t BosExcitGen::approx_nconn() const {
-    return m_h.m_bos.m_nboson * 2;
+    return m_h.m_bos->m_nboson * 2;
 }

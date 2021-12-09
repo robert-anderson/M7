@@ -258,6 +258,8 @@ namespace integer_utils {
     size_t factorial(const size_t &n);
 
     size_t combinatorial(const size_t &n, const size_t &r);
+
+    size_t combinatorial_with_repetition(const size_t &n, const size_t &r);
 }
 
 namespace bit_utils {
@@ -665,8 +667,19 @@ namespace ci_utils {
         return std::pow(integer_utils::combinatorial(nsite, nalpha(nelec, spin)), 2);
     }
 
-    static size_t boson_dim(size_t boson_nmode, size_t boson_cutoff) {
-        return std::pow(boson_cutoff + 1, boson_nmode);
+    /**
+     * @param nmode
+     *  number of boson modes
+     * @param nboson
+     *  total number of bosons if number conserving, else the cutoff occupation for each mode
+     * @param number_conserve
+     *  true if the hamiltonian is boson number-conserving (no ladder terms)
+     * @return
+     *  dimension of the bosonic sector of the Hilbert space
+     */
+    static size_t boson_dim(size_t nmode, size_t nboson, bool number_conserve) {
+        if (number_conserve) return integer_utils::combinatorial_with_repetition(nmode, nboson);
+        else return std::pow(nboson + 1, nmode);
     }
 }
 

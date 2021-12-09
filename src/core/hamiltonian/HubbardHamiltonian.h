@@ -22,9 +22,11 @@ private:
 
     std::pair<size_t, int> get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const;
 
+    static size_t nsite(const defs::inds& site_shape);
+
 public:
 
-    HubbardHamiltonian(size_t nelec, defs::inds site_shape, std::vector<int> bcs, defs::ham_t u);
+    HubbardHamiltonian(const defs::inds& site_shape, std::vector<int> bcs, defs::ham_t u, int ms2_restrict, int charge);
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
 

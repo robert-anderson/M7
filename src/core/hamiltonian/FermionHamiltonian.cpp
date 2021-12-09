@@ -7,8 +7,9 @@
 #include "src/core/parallel/RankAllocator.h"
 #include "FermionHamiltonian.h"
 
-FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, bool complex_valued, defs::inds site_irreps):
-        m_nelec(nelec), m_nsite(nsite), m_complex_valued(complex_valued),
+FermionHamiltonian::FermionHamiltonian(size_t nelec, size_t nsite, int ms2_restrict,
+                                       bool complex_valued, defs::inds site_irreps):
+        m_nelec(nelec), m_nsite(nsite), m_ms2_restrict(ms2_restrict), m_complex_valued(complex_valued),
         m_point_group_map(PointGroup(), site_irreps.empty() ? defs::inds(nsite, 0ul) : site_irreps),
         m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
 
