@@ -19,6 +19,16 @@ protected:
     MagnitudeLogger m_mag_log;
     const double &m_min_spawn_mag;
 
+    template<typename T>
+    static T phase(const T& weight) {
+        return weight < 0.0 ? -1.0: 1.0;
+    }
+
+    template<typename T>
+    static std::complex<T> phase(const std::complex<T>& weight) {
+        return weight/std::abs(weight);
+    }
+
 public:
     StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
 
