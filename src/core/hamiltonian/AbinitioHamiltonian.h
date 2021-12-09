@@ -23,12 +23,11 @@ struct AbinitioHamiltonian : FermionHamiltonian {
 
     AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
 
-    AbinitioHamiltonian(std::string fname, bool spin_major, bool elecs=true, int charge = 0):
-            AbinitioHamiltonian(FcidumpHeader(fname), spin_major, elecs, charge){}
+    AbinitioHamiltonian(std::string fname, bool spin_major, int charge = 0):
+            AbinitioHamiltonian(FcidumpHeader(fname), spin_major, charge){}
 
     explicit AbinitioHamiltonian(const fciqmc_config::FermionHamiltonian &opts) :
-            AbinitioHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major,
-                               opts.m_elecs, opts.m_charge) {}
+            AbinitioHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_charge) {}
 
     defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const override;
 

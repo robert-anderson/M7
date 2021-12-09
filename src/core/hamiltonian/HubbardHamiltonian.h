@@ -26,7 +26,15 @@ private:
 
 public:
 
-    HubbardHamiltonian(const defs::inds& site_shape, std::vector<int> bcs, defs::ham_t u, int ms2_restrict, int charge);
+    HubbardHamiltonian(const defs::inds& site_shape, const std::vector<int>& bcs,
+                       defs::ham_t u, int ms2_restrict, int charge);
+
+    HubbardHamiltonian(const fciqmc_config::FermionHamiltonian& opts);
+
+    defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const override;
+
+    defs::ham_t get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const override;
+
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
 

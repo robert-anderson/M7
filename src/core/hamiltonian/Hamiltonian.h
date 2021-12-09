@@ -11,6 +11,8 @@
 #include "BosonHamiltonian.h"
 #include "LadderHamiltonian.h"
 #include "src/core/nd/NdArray.h"
+#include "HubbardHamiltonian.h"
+#include "AbinitioHamiltonian.h"
 
 using namespace field;
 
@@ -42,13 +44,33 @@ struct Hamiltonian {
 
 private:
     BasisDims make_bd() const;
+
+    std::unique_ptr<FermionHamiltonian> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
+        if (opts.m_hubbard)
+            return std::unique_ptr<FermionHamiltonian>(new HubbardHamiltonian(opts));
+        else if (opts.m_fcidump)
+            return std::unique_ptr<FermionHamiltonian>(new AbinitioHamiltonian(opts));
+        return nullptr;
+    }
+
+    /*
+    std::unique_ptr<LadderHamiltonian> make_ladder(const fciqmc_config::LadderHamiltonian &opts) {
+        if (opts.m_holstein_coupling!=0.0)
+            return std::unique_ptr<LadderHamiltonian>(new HubbardHamiltonian(opts));
+        else if (opts.m_ebdump)
+            return std::unique_ptr<LadderHamiltonian>(new LadderHamiltonian(opts));
+        else
+            return nullptr;
+    }
+     */
+
 public:
 
-    Hamiltonian(std::unique_ptr<FermionHamiltonian>&& frm,
-                std::unique_ptr<LadderHamiltonian>&& ladder,
-                std::unique_ptr<BosonHamiltonian>&& bos):
-                m_frm(std::move(frm)), m_ladder(std::move(ladder)), m_bos(std::move(bos)),
-                m_nboson_max(ladder ? ladder->m_nboson_max : 0ul), m_bd(make_bd()){
+    Hamiltonian(std::unique_ptr<FermionHamiltonian> &&frm,
+                std::unique_ptr<LadderHamiltonian> &&ladder,
+                std::unique_ptr<BosonHamiltonian> &&bos) :
+            m_frm(std::move(frm)), m_ladder(std::move(ladder)), m_bos(std::move(bos)),
+            m_nboson_max(ladder ? ladder->m_nboson_max : 0ul), m_bd(make_bd()) {
         if (!m_frm) log::info("Fermion Hamiltonian is disabled");
         if (defs::enable_bosons) {
             if (!m_ladder) log::info("Fermion-boson ladder Hamiltonian is disabled");
@@ -59,8 +81,8 @@ public:
     Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
                 bool spin_major, size_t nboson_max);
 
-    Hamiltonian(std::string fname, bool spin_major):
-        Hamiltonian(fname, "", "", spin_major, 0ul){}
+    Hamiltonian(std::string fname, bool spin_major) :
+            Hamiltonian(fname, "", "", spin_major, 0ul) {}
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 
@@ -73,10 +95,11 @@ public:
     /*
      * pure fermion coefficients
      */
-    defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const {
+    defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const {
         return m_frm->get_coeff_1100(i, j);
     }
-    defs::ham_t get_coeff_2200(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const {
+
+    defs::ham_t get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
         return m_frm->get_coeff_2200(i, j, k, l);
     }
 
@@ -126,7 +149,7 @@ public:
     }
 
     defs::ham_t get_element(const FrmBosOnv &onv) const {
-        return m_frm->get_element(onv.m_frm)+m_bos->get_element(onv.m_bos);
+        return m_frm->get_element(onv.m_frm) + m_bos->get_element(onv.m_bos);
     }
 
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {

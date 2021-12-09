@@ -42,7 +42,7 @@ size_t HubbardHamiltonian::nsite(const defs::inds &site_shape) {
     return NdFormatD(site_shape).m_nelement;
 }
 
-HubbardHamiltonian::HubbardHamiltonian(const defs::inds& site_shape, std::vector<int> bcs, defs::ham_t u,
+HubbardHamiltonian::HubbardHamiltonian(const defs::inds& site_shape, const std::vector<int>& bcs, defs::ham_t u,
         int ms2_restrict, int charge) :
         FermionHamiltonian(nsite(site_shape)-charge, nsite(site_shape), ms2_restrict),
         m_format(site_shape), m_u(u), m_t_mat_dense(m_nsite) {
@@ -68,6 +68,10 @@ HubbardHamiltonian::HubbardHamiltonian(const defs::inds& site_shape, std::vector
     loop(fn);
 }
 
+HubbardHamiltonian::HubbardHamiltonian(const fciqmc_config::FermionHamiltonian &opts) :
+        HubbardHamiltonian(opts.m_hubbard.m_site_shape, opts.m_hubbard.m_boundary_conds,
+                           opts.m_hubbard.m_repulsion, opts.m_ms2_restrict, opts.m_charge){}
+
 defs::ham_t HubbardHamiltonian::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;
     for (size_t isite = 0ul; isite < m_nsite; ++isite)
@@ -88,4 +92,13 @@ defs::ham_t HubbardHamiltonian::get_element_2200(const field::FrmOnv &onv, const
 
 void HubbardHamiltonian::log_data() const {
     FermionHamiltonian::log_data();
+}
+
+defs::ham_t HubbardHamiltonian::get_coeff_1100(const size_t &i, const size_t &j) const {
+    return m_t_mat_dense(i, j);
+}
+
+defs::ham_t HubbardHamiltonian::get_coeff_2200(const size_t &i, const size_t &j,
+                                               const size_t &k, const size_t &l) const {
+    return 0.0;
 }

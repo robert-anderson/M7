@@ -42,10 +42,11 @@ namespace fciqmc_config {
         Fcidump m_fcidump;
         Hubbard m_hubbard;
         config::Param<int> m_charge;
-        config::Param<bool> m_elecs;
         config::Param<int> m_ms2_restrict;
 
         FermionHamiltonian(config::Group *parent);
+
+        void verify() override;
     };
 
     struct LadderHamiltonian : config::Section {

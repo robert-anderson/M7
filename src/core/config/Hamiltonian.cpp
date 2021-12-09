@@ -39,9 +39,13 @@ fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
         m_fcidump(this), m_hubbard(this),
         m_charge(this, "charge", 0,
                  "electron deficit relative to the default value in the FCIDUMP file or that assumed by the model system (positive value to remove elecs)"),
-        m_elecs(this, "elecs", true, "include fermionic operators in the Hamiltonian"),
         m_ms2_restrict(this, "ms2_restrict", 0ul,
                        "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number") {}
+
+void fciqmc_config::FermionHamiltonian::verify() {
+    size_t ndefined = m_fcidump + m_hubbard;
+    REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
+}
 
 fciqmc_config::LadderHamiltonian::LadderHamiltonian(config::Group *parent) :
         config::Section(parent, "ladder",
