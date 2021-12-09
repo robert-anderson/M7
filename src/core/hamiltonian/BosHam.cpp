@@ -2,10 +2,10 @@
 // Created by rja on 26/07/2021.
 //
 
-#include "BosonHamiltonian.h"
+#include "BosHam.h"
 #include "src/core/io/BosdumpFileReader.h"
 
-BosonHamiltonian::BosonHamiltonian(const BosdumpHeader &header) :
+BosHam::BosHam(const BosdumpHeader &header) :
         m_nmode(header.m_nmode), m_nboson(header.m_nboson),
         m_coeffs_1(m_nmode), m_coeffs_2(m_nmode),
         m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {
@@ -32,7 +32,7 @@ BosonHamiltonian::BosonHamiltonian(const BosdumpHeader &header) :
     log_data();
 }
 
-defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
+defs::ham_t BosHam::get_element(const field::BosOnv &onv) const {
     defs::ham_t res = 0;
     for (size_t imode = 0ul; imode < m_nmode; ++imode) {
         if (!onv[imode]) continue;
@@ -50,11 +50,11 @@ defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &onv) const {
     return res;
 }
 
-defs::ham_comp_t BosonHamiltonian::get_energy(const field::BosOnv &onv) const {
+defs::ham_comp_t BosHam::get_energy(const field::BosOnv &onv) const {
     return consts::real(get_element(onv));
 }
 
-defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &src, const conn::BosOnv &conn) const {
+defs::ham_t BosHam::get_element(const field::BosOnv &src, const conn::BosOnv &conn) const {
     // this Hamiltonian conserves boson number
     if (conn.m_ann.size() != conn.m_cre.size()) return 0.0;
     // single number-conserving boson operators not implemented;
@@ -94,11 +94,11 @@ defs::ham_t BosonHamiltonian::get_element(const field::BosOnv &src, const conn::
     return 0.0;
 }
 
-size_t BosonHamiltonian::nci() const {
+size_t BosHam::nci() const {
     return ci_utils::boson_dim(m_nmode, m_nboson, true);
 }
 
-void BosonHamiltonian::log_data() const {
+void BosHam::log_data() const {
     if (!m_contribs_0011.is_nonzero(0ul))
         log::info("1-boson (0011) term has no diagonal (0000) contributions");
     if (!m_contribs_0011.is_nonzero(exsig_utils::ex_0011))

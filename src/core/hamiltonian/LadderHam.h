@@ -2,8 +2,8 @@
 // Created by rja on 05/11/2020.
 //
 
-#ifndef M7_LADDERHAMILTONIAN_H
-#define M7_LADDERHAMILTONIAN_H
+#ifndef M7_LADDERHAM_H
+#define M7_LADDERHAM_H
 
 #include <src/core/io/EbdumpFileReader.h>
 #include <src/core/integrals/FrmBosCoupledCoeffs.h>
@@ -11,7 +11,7 @@
 #include "src/core/field/Fields.h"
 #include "HamiltonianData.h"
 
-struct LadderHamiltonian {
+struct LadderHam {
 
     const size_t m_nboson_max;
     const BasisDims m_bd;
@@ -35,10 +35,10 @@ struct LadderHamiltonian {
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    LadderHamiltonian(const EbdumpHeader& header, size_t nboson_max);
+    LadderHam(const EbdumpHeader& header, size_t nboson_max);
 
-    LadderHamiltonian(const std::string& fname, size_t nboson_max) :
-        LadderHamiltonian(EbdumpHeader(fname), nboson_max){}
+    LadderHam(const std::string& fname, size_t nboson_max) :
+        LadderHam(EbdumpHeader(fname), nboson_max){}
 
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
 
@@ -54,4 +54,4 @@ struct LadderHamiltonian {
     void log_data() const;
 };
 
-#endif //M7_LADDERHAMILTONIAN_H
+#endif //M7_LADDERHAM_H

@@ -2,8 +2,8 @@
 // Created by rja on 26/07/2021.
 //
 
-#ifndef M7_BOSONHAMILTONIAN_H
-#define M7_BOSONHAMILTONIAN_H
+#ifndef M7_BOSHAM_H
+#define M7_BOSHAM_H
 
 #include <src/core/integrals/BosonCoeffs_1.h>
 #include <src/core/integrals/BosonCoeffs_2.h>
@@ -13,16 +13,16 @@
 #include "src/core/field/Fields.h"
 #include "HamiltonianData.h"
 
-struct BosonHamiltonian {
+struct BosHam {
     const size_t m_nmode, m_nboson;
     BosonCoeffs_1 m_coeffs_1;
     BosonCoeffs_2 m_coeffs_2;
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
-    BosonHamiltonian(const BosdumpHeader& header);
+    BosHam(const BosdumpHeader& header);
 
-    BosonHamiltonian(const std::string& fname): BosonHamiltonian(BosdumpHeader(fname)){}
+    BosHam(const std::string& fname): BosHam(BosdumpHeader(fname)){}
 
     defs::ham_t get_element(const field::BosOnv &onv) const;
 
@@ -37,4 +37,4 @@ struct BosonHamiltonian {
 };
 
 
-#endif //M7_BOSONHAMILTONIAN_H
+#endif //M7_BOSHAM_H

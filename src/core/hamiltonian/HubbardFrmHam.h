@@ -2,15 +2,15 @@
 // Created by anderson on 12/8/21.
 //
 
-#ifndef M7_HUBBARDHAMILTONIAN_H
-#define M7_HUBBARDHAMILTONIAN_H
+#ifndef M7_HUBBARDFRMHAM_H
+#define M7_HUBBARDFRMHAM_H
 
 #include <src/core/util/Foreach.h>
 #include <src/core/nd/NdFormatD.h>
-#include "FermionHamiltonian.h"
+#include "FrmHam.h"
 #include "src/core/linalg/Sparse.h"
 
-struct HubbardHamiltonian : FermionHamiltonian {
+struct HubbardFrmHam : FrmHam {
     const NdFormatD m_format;
     const std::vector<int> m_bcs;
     const defs::ham_t m_u;
@@ -26,10 +26,10 @@ private:
 
 public:
 
-    HubbardHamiltonian(const defs::inds& site_shape, const std::vector<int>& bcs,
+    HubbardFrmHam(const defs::inds& site_shape, const std::vector<int>& bcs,
                        defs::ham_t u, int ms2_restrict, int charge);
 
-    HubbardHamiltonian(const fciqmc_config::FermionHamiltonian& opts);
+    HubbardFrmHam(const fciqmc_config::FermionHamiltonian& opts);
 
     defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const override;
 
@@ -46,4 +46,4 @@ public:
 };
 
 
-#endif //M7_HUBBARDHAMILTONIAN_H
+#endif //M7_HUBBARDFRMHAM_H

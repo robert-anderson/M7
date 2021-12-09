@@ -4,8 +4,8 @@
 
 #include <src/core/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/LadderHamiltonian.h"
-#include "src/core/hamiltonian/BosonHamiltonian.h"
+#include "src/core/hamiltonian/LadderHam.h"
+#include "src/core/hamiltonian/BosHam.h"
 
 #if 0
 TEST(BosonCouplings, Element_b0) {

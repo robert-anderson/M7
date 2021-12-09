@@ -3,10 +3,10 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/BosonHamiltonian.h"
+#include "src/core/hamiltonian/BosHam.h"
 
 TEST(BosonHamiltonian, Coefficients) {
-    BosonHamiltonian ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
+    BosHam ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
     ASSERT_EQ(ham.m_nmode, 5ul);
     ASSERT_EQ(ham.m_nboson, 5ul);
     //0.2209708691 2 4 5 3
@@ -30,7 +30,7 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
      *  [0. 1. 1. 0. 3.] 3.9140625
      *  [1. 0. 0. 1. 3.] 3.0859375
      */
-    BosonHamiltonian ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
+    BosHam ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
     buffered::BosOnv onv(ham.m_nmode);
     onv = {0, 0, 0, 5, 0};
     ASSERT_FLOAT_EQ(ham.get_element(onv), 3.125);
@@ -63,7 +63,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         1.08253175 0.66291261 3.9140625  0.4330127 ]
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
-    BosonHamiltonian ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
+    BosHam ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
     buffered::BosOnv src(ham.m_nmode);
     buffered::BosOnv dst(ham.m_nmode);
     conn::BosOnv conn(src);

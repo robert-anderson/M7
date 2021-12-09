@@ -2,12 +2,12 @@
 // Created by anderson on 12/8/21.
 //
 
-#ifndef M7_ABINITIOHAMILTONIAN_H
-#define M7_ABINITIOHAMILTONIAN_H
+#ifndef M7_GENERALFRMHAM_H
+#define M7_GENERALFRMHAM_H
 
-#include "FermionHamiltonian.h"
+#include "FrmHam.h"
 
-struct AbinitioHamiltonian : FermionHamiltonian {
+struct GeneralFrmHam : FrmHam {
 
     typedef Integrals_1e<defs::ham_t, defs::isym_1e> ints1_t;
     typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
@@ -18,16 +18,16 @@ struct AbinitioHamiltonian : FermionHamiltonian {
     ham_data::TermContribs m_contribs_2200;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    AbinitioHamiltonian(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict,
+    GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict,
                         bool complex_valued, defs::inds site_irreps = {});
 
-    AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
+    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
 
-    AbinitioHamiltonian(std::string fname, bool spin_major, int charge = 0):
-            AbinitioHamiltonian(FcidumpHeader(fname), spin_major, charge){}
+    GeneralFrmHam(std::string fname, bool spin_major, int charge = 0):
+            GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
 
-    explicit AbinitioHamiltonian(const fciqmc_config::FermionHamiltonian &opts) :
-            AbinitioHamiltonian(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_charge) {}
+    explicit GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
+            GeneralFrmHam(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_charge) {}
 
     defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const override;
 
@@ -70,4 +70,4 @@ private:
 };
 
 
-#endif //M7_ABINITIOHAMILTONIAN_H
+#endif //M7_GENERALFRMHAM_H

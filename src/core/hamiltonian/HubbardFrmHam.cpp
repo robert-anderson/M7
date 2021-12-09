@@ -2,9 +2,9 @@
 // Created by anderson on 12/8/21.
 //
 
-#include "HubbardHamiltonian.h"
+#include "HubbardFrmHam.h"
 
-size_t HubbardHamiltonian::get_coord_index(const defs::inds &site_inds, size_t idim, size_t value) const {
+size_t HubbardFrmHam::get_coord_index(const defs::inds &site_inds, size_t idim, size_t value) const {
     auto orig_value = site_inds[idim];
     auto &inds = const_cast<defs::inds &>(site_inds);
     inds[idim] = value;
@@ -14,7 +14,7 @@ size_t HubbardHamiltonian::get_coord_index(const defs::inds &site_inds, size_t i
     return i;
 }
 
-std::pair<size_t, int> HubbardHamiltonian::get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
+std::pair<size_t, int> HubbardFrmHam::get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
     size_t dim_ind = ~0ul;
     int t_element = 0;
     if (site_inds[idim] == 0 && !inc) {
@@ -38,13 +38,13 @@ std::pair<size_t, int> HubbardHamiltonian::get_coordination(const defs::inds &si
     return {get_coord_index(site_inds, idim, dim_ind), t_element};
 }
 
-size_t HubbardHamiltonian::nsite(const defs::inds &site_shape) {
+size_t HubbardFrmHam::nsite(const defs::inds &site_shape) {
     return NdFormatD(site_shape).m_nelement;
 }
 
-HubbardHamiltonian::HubbardHamiltonian(const defs::inds& site_shape, const std::vector<int>& bcs, defs::ham_t u,
+HubbardFrmHam::HubbardFrmHam(const defs::inds& site_shape, const std::vector<int>& bcs, defs::ham_t u,
         int ms2_restrict, int charge) :
-        FermionHamiltonian(nsite(site_shape)-charge, nsite(site_shape), ms2_restrict),
+        FrmHam(nsite(site_shape)-charge, nsite(site_shape), ms2_restrict),
         m_format(site_shape), m_u(u), m_t_mat_dense(m_nsite) {
     m_t_mat_sparse.resize(m_nsite);
     m_t_mat_dense.zero();
@@ -68,37 +68,37 @@ HubbardHamiltonian::HubbardHamiltonian(const defs::inds& site_shape, const std::
     loop(fn);
 }
 
-HubbardHamiltonian::HubbardHamiltonian(const fciqmc_config::FermionHamiltonian &opts) :
-        HubbardHamiltonian(opts.m_hubbard.m_site_shape, opts.m_hubbard.m_boundary_conds,
+HubbardFrmHam::HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
+        HubbardFrmHam(opts.m_hubbard.m_site_shape, opts.m_hubbard.m_boundary_conds,
                            opts.m_hubbard.m_repulsion, opts.m_ms2_restrict, opts.m_charge){}
 
-defs::ham_t HubbardHamiltonian::get_element_0000(const field::FrmOnv &onv) const {
+defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;
     for (size_t isite = 0ul; isite < m_nsite; ++isite)
         if (onv.get({0, isite}) && onv.get({1, isite})) h += m_u;
     return h;
 }
 
-defs::ham_t HubbardHamiltonian::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     DEBUG_ASSERT_EQ(conn.size(), 2ul, "incorrect connection exsig");
     int t_mat_element = m_t_mat_dense(conn.m_ann[0], conn.m_cre[0]);
     if (!t_mat_element) return 0.0;
     return conn.phase(onv) ? -t_mat_element : t_mat_element;
 }
 
-defs::ham_t HubbardHamiltonian::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t HubbardFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     return 0;
 }
 
-void HubbardHamiltonian::log_data() const {
-    FermionHamiltonian::log_data();
+void HubbardFrmHam::log_data() const {
+    FrmHam::log_data();
 }
 
-defs::ham_t HubbardHamiltonian::get_coeff_1100(const size_t &i, const size_t &j) const {
+defs::ham_t HubbardFrmHam::get_coeff_1100(const size_t &i, const size_t &j) const {
     return m_t_mat_dense(i, j);
 }
 
-defs::ham_t HubbardHamiltonian::get_coeff_2200(const size_t &i, const size_t &j,
+defs::ham_t HubbardFrmHam::get_coeff_2200(const size_t &i, const size_t &j,
                                                const size_t &k, const size_t &l) const {
     return 0.0;
 }

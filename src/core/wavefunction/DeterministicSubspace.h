@@ -7,7 +7,7 @@
 
 #include "src/core/bilinear/Bilinears.h"
 #include "src/core/linalg/Sparse.h"
-#include "src/core/hamiltonian/FermionHamiltonian.h"
+#include "src/core/hamiltonian/FrmHam.h"
 #include "src/core/field/Fields.h"
 #include "WalkerTable.h"
 #include "Wavefunction.h"

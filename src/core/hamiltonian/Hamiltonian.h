@@ -7,12 +7,12 @@
 
 #include <type_traits>
 #include <src/defs.h>
-#include "FermionHamiltonian.h"
-#include "BosonHamiltonian.h"
-#include "LadderHamiltonian.h"
+#include "FrmHam.h"
+#include "BosHam.h"
+#include "LadderHam.h"
 #include "src/core/nd/NdArray.h"
-#include "HubbardHamiltonian.h"
-#include "AbinitioHamiltonian.h"
+#include "HubbardFrmHam.h"
+#include "GeneralFrmHam.h"
 
 using namespace field;
 
@@ -23,16 +23,16 @@ struct Hamiltonian {
     /**
      * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
-    std::unique_ptr<FermionHamiltonian> m_frm;
+    std::unique_ptr<FrmHam> m_frm;
     /**
      * hamiltonian encapsulating all terms involving a single boson creation or annihilation operator
      * i.e. ranksigs 0010, 0001, 1110, 1101
      */
-    std::unique_ptr<LadderHamiltonian> m_ladder;
+    std::unique_ptr<LadderHam> m_ladder;
     /**
      * purely bosonic number-conserving terms in the Hamiltonian
      */
-    std::unique_ptr<BosonHamiltonian> m_bos;
+    std::unique_ptr<BosHam> m_bos;
     /**
      * the maximum number of bosons permitted to occupy any mode
      */
@@ -45,18 +45,18 @@ struct Hamiltonian {
 private:
     BasisDims make_bd() const;
 
-    std::unique_ptr<FermionHamiltonian> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
+    std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
         if (opts.m_hubbard)
-            return std::unique_ptr<FermionHamiltonian>(new HubbardHamiltonian(opts));
-        else if (opts.m_fcidump)
-            return std::unique_ptr<FermionHamiltonian>(new AbinitioHamiltonian(opts));
+            return std::unique_ptr<FrmHam>(new HubbardFrmHam(opts));
+        else if (defs::enable_fermions)
+            return std::unique_ptr<FrmHam>(new GeneralFrmHam(opts));
         return nullptr;
     }
 
     /*
     std::unique_ptr<LadderHamiltonian> make_ladder(const fciqmc_config::LadderHamiltonian &opts) {
         if (opts.m_holstein_coupling!=0.0)
-            return std::unique_ptr<LadderHamiltonian>(new HubbardHamiltonian(opts));
+            return std::unique_ptr<LadderHamiltonian>(new HubbardFrmHam(opts));
         else if (opts.m_ebdump)
             return std::unique_ptr<LadderHamiltonian>(new LadderHamiltonian(opts));
         else
@@ -66,9 +66,9 @@ private:
 
 public:
 
-    Hamiltonian(std::unique_ptr<FermionHamiltonian> &&frm,
-                std::unique_ptr<LadderHamiltonian> &&ladder,
-                std::unique_ptr<BosonHamiltonian> &&bos) :
+    Hamiltonian(std::unique_ptr<FrmHam> &&frm,
+                std::unique_ptr<LadderHam> &&ladder,
+                std::unique_ptr<BosHam> &&bos) :
             m_frm(std::move(frm)), m_ladder(std::move(ladder)), m_bos(std::move(bos)),
             m_nboson_max(ladder ? ladder->m_nboson_max : 0ul), m_bd(make_bd()) {
         if (!m_frm) log::info("Fermion Hamiltonian is disabled");

@@ -2,9 +2,9 @@
 // Created by rja on 05/11/2020.
 //
 
-#include "LadderHamiltonian.h"
+#include "LadderHam.h"
 
-LadderHamiltonian::LadderHamiltonian(const EbdumpHeader &header, size_t nboson_max) :
+LadderHam::LadderHam(const EbdumpHeader &header, size_t nboson_max) :
         m_nboson_max(nboson_max), m_bd({header.m_nsite, header.m_nmode}),
         m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_nmode, 0.0),
         m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
@@ -37,7 +37,7 @@ LadderHamiltonian::LadderHamiltonian(const EbdumpHeader &header, size_t nboson_m
     log_data();
 }
 
-defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+defs::ham_t LadderHam::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
     DEBUG_ASSERT_TRUE(conn.respects_occ_range(onv, m_nboson_max),
                       "excitation puts boson occupation out of range");
     if (conn.m_bos.size() != 1ul) return 0.0;
@@ -77,7 +77,7 @@ defs::ham_t LadderHamiltonian::get_element(const field::FrmBosOnv &onv, const co
     }
 }
 
-void LadderHamiltonian::log_data() const {
+void LadderHam::log_data() const {
     if (!m_contribs_0010.is_nonzero(exsig_utils::ex_0010))
         log::info("0010 uncoupled boson ladder hamiltonian term has no contributions");
     if (!m_contribs_0001.is_nonzero(exsig_utils::ex_0001))
@@ -93,17 +93,17 @@ void LadderHamiltonian::log_data() const {
         log::info("1101 fermion-coupled boson ladder term has no 1101 contributions");
 }
 
-bool LadderHamiltonian::is_holstein() const {
+bool LadderHam::is_holstein() const {
     return !m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
 }
 
-bool LadderHamiltonian::constant_uncoupled() const {
+bool LadderHam::constant_uncoupled() const {
     auto v = m_v_unc[0];
     for (size_t imode = 1ul; imode < m_bd.m_nmode; ++imode) if (m_v_unc[imode] != v) return false;
     return true;
 }
 
-bool LadderHamiltonian::is_zpm_half_filled() const {
+bool LadderHam::is_zpm_half_filled() const {
     if (!is_holstein()) return false;
     return constant_uncoupled() && m_v.constant_diagonal() && (m_v.get(0, 0, 0) == -m_v_unc[0]);
 }

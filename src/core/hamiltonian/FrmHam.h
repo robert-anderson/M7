@@ -2,8 +2,8 @@
 // Created by rja on 27/02/2020.
 //
 
-#ifndef M7_FERMIONHAMILTONIAN_H
-#define M7_FERMIONHAMILTONIAN_H
+#ifndef M7_FRMHAM_H
+#define M7_FRMHAM_H
 
 #include <cstddef>
 #include <src/core/basis/DecodedDeterminants.h>
@@ -18,7 +18,7 @@
 /**
  * All interactions between the fermionic parts of MBFs are described in this class.
  */
-struct FermionHamiltonian {
+struct FrmHam {
 
     const size_t m_nelec;
     const size_t m_nsite;
@@ -33,7 +33,7 @@ struct FermionHamiltonian {
     ham_data::TermContribs m_contribs_2200;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    FermionHamiltonian(size_t nelec, size_t nsite, int ms2_restrict,
+    FrmHam(size_t nelec, size_t nsite, int ms2_restrict,
                        bool complex_valued=false, defs::inds site_irreps = {});
 
     virtual defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const = 0;
@@ -58,4 +58,4 @@ struct FermionHamiltonian {
     virtual void log_data() const;
 };
 
-#endif //M7_FERMIONHAMILTONIAN_H
+#endif //M7_FRMHAM_H

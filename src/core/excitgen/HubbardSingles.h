@@ -6,13 +6,13 @@
 #define M7_HUBBARDSINGLES_H
 
 #include "UniformSingles.h"
-#include "src/core/hamiltonian/HubbardHamiltonian.h"
+#include "src/core/hamiltonian/HubbardFrmHam.h"
 
 struct HubbardSingles : public UniformSingles {
     using UniformSingles::draw;
 
-    const HubbardHamiltonian* h_cast() {
-        return dynamic_cast<const HubbardHamiltonian*>(m_h.m_frm.get());
+    const HubbardFrmHam* h_cast() {
+        return dynamic_cast<const HubbardFrmHam*>(m_h.m_frm.get());
     }
 
     HubbardSingles(const Hamiltonian& h, PRNG& prng): UniformSingles(h, prng) {

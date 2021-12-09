@@ -227,7 +227,7 @@ bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
 }
 
 
-defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian* ham) const {
+defs::ham_comp_t Rdms::get_energy(const FrmHam* ham) const {
     auto& rdm2 = m_rdms[ex_2200];
     REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
     defs::ham_t e1 = 0.0;
@@ -267,7 +267,7 @@ defs::ham_comp_t Rdms::get_energy(const FermionHamiltonian* ham) const {
     return consts::real(ham->m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
 }
 
-defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian *ham, size_t nelec, size_t exsig) const {
+defs::ham_comp_t Rdms::get_energy(const LadderHam *ham, size_t nelec, size_t exsig) const {
     if (!ham->m_nboson_max) return 0.0;
     auto& rdm = m_rdms[exsig];
     REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,
@@ -303,7 +303,7 @@ defs::ham_comp_t Rdms::get_energy(const LadderHamiltonian *ham, size_t nelec, si
     return consts::real(e);
 }
 
-defs::ham_comp_t Rdms::get_energy(const BosonHamiltonian *ham) const {
+defs::ham_comp_t Rdms::get_energy(const BosHam *ham) const {
     if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig_utils::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");

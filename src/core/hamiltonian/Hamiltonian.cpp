@@ -3,7 +3,7 @@
 //
 
 #include "Hamiltonian.h"
-#include "AbinitioHamiltonian.h"
+#include "GeneralFrmHam.h"
 
 BasisDims Hamiltonian::make_bd() const {
     size_t nsite = 0ul;
@@ -17,9 +17,9 @@ BasisDims Hamiltonian::make_bd() const {
 Hamiltonian::Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
                          bool spin_major, size_t nboson_max):
         Hamiltonian(
-                std::unique_ptr<FermionHamiltonian>(new AbinitioHamiltonian(fname, spin_major)),
-                std::unique_ptr<LadderHamiltonian>(new LadderHamiltonian(fname_eb, nboson_max)),
-                std::unique_ptr<BosonHamiltonian>(new BosonHamiltonian(fname_bos))){
+                std::unique_ptr<FrmHam>(new GeneralFrmHam(fname, spin_major)),
+                std::unique_ptr<LadderHam>(new LadderHam(fname_eb, nboson_max)),
+                std::unique_ptr<BosHam>(new BosHam(fname_bos))){
     if (nboson_max && !defs::enable_bosons)
         log::warn("non-zero boson occupation specified with bosons disabled at compile time");
     if (nboson_max) {

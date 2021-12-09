@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include "src/core/basis/DecodedDeterminants.h"
-#include "src/core/hamiltonian/FermionHamiltonian.h"
+#include "src/core/hamiltonian/FrmHam.h"
 
 #ifdef ENABLE_COMPLEX
 TEST(FermionHamiltonian, DhfEnergy) {
@@ -45,7 +45,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
 TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
-    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    FrmHam ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
     ASSERT_EQ(ham.m_point_group_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());
@@ -62,7 +62,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
 }
 
 TEST(FermionHamiltonian, RhfBrillouinTheorem) {
-    FermionHamiltonian ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    FrmHam ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_TRUE(ham.m_kramers_attrs.conserving());
     buffered::FrmOnv fonv(ham.m_nsite);
     fonv = {0, 1, 2, 6, 7, 8};

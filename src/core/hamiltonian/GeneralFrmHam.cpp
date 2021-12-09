@@ -2,10 +2,10 @@
 // Created by anderson on 12/8/21.
 //
 
-#include "AbinitioHamiltonian.h"
+#include "GeneralFrmHam.h"
 
 
-buffered::FrmOnv AbinitioHamiltonian::guess_reference(const int &spin_restrict) const {
+buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const {
     buffered::FrmOnv ref({m_nsite, 0ul});
     REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_nelec % 2,
                "Sz quantum number given incompatible with nelec");
@@ -17,17 +17,17 @@ buffered::FrmOnv AbinitioHamiltonian::guess_reference(const int &spin_restrict) 
     return ref;
 }
 
-AbinitioHamiltonian::AbinitioHamiltonian(size_t nelec, size_t nsite, bool spin_resolved,
+GeneralFrmHam::GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved,
                                          int ms2_restrict, bool complex_valued, defs::inds site_irreps) :
-        FermionHamiltonian(nelec, nsite, ms2_restrict, complex_valued, site_irreps),
+        FrmHam(nelec, nsite, ms2_restrict, complex_valued, site_irreps),
         m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
         m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {
     if (!nsite) return;
     REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
 }
 
-AbinitioHamiltonian::AbinitioHamiltonian(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
-        AbinitioHamiltonian(header.m_nelec - charge, header.m_nsite, header.m_spin_resolved, ms2_restrict,
+GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
+        GeneralFrmHam(header.m_nelec - charge, header.m_nsite, header.m_spin_resolved, ms2_restrict,
                            FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
@@ -65,7 +65,7 @@ AbinitioHamiltonian::AbinitioHamiltonian(const FcidumpHeader& header, bool spin_
 }
 
 
-defs::ham_t AbinitioHamiltonian::get_element_0000(const field::FrmOnv &onv) const {
+defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t element = m_e_core;
     auto singles_fn = [&](const size_t &i) { element += m_int_1(i, i); };
     auto doubles_fn = [&](const size_t &i, const size_t &j) {
@@ -75,10 +75,10 @@ defs::ham_t AbinitioHamiltonian::get_element_0000(const field::FrmOnv &onv) cons
     return element;
 }
 
-defs::ham_t AbinitioHamiltonian::get_coeff_1100(const size_t &i, const size_t &j) const {
+defs::ham_t GeneralFrmHam::get_coeff_1100(const size_t &i, const size_t &j) const {
     return m_int_1(i, j);
 }
 
-defs::ham_t AbinitioHamiltonian::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t GeneralFrmHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
 }

@@ -125,7 +125,7 @@ public:
      *
      *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
-    defs::ham_comp_t get_energy(const FermionHamiltonian *ham) const;
+    defs::ham_comp_t get_energy(const FrmHam *ham) const;
 
     /**
      * compute the RDM energy contribution from the boson number-nonconserving terms
@@ -133,9 +133,9 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const LadderHamiltonian *ham, size_t nelec, size_t exsig) const;
+    defs::ham_comp_t get_energy(const LadderHam *ham, size_t nelec, size_t exsig) const;
 
-    defs::ham_comp_t get_energy(const LadderHamiltonian *ham, size_t nelec) const {
+    defs::ham_comp_t get_energy(const LadderHam *ham, size_t nelec) const {
         return get_energy(ham, nelec, exsig_utils::ex_1101) + get_energy(ham, nelec, exsig_utils::ex_1110);
     }
 
@@ -145,7 +145,7 @@ public:
      *  boson number conserving hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const BosonHamiltonian *ham) const;
+    defs::ham_comp_t get_energy(const BosHam *ham) const;
 
     /**
      * @param ham
