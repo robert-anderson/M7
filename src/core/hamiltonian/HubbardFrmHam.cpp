@@ -18,15 +18,15 @@ size_t HubbardFrmHam::get_coord_index(const defs::inds &site_inds, size_t idim, 
 std::pair<size_t, int> HubbardFrmHam::get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
     size_t dim_ind = ~0ul;
     int t_element = 0;
-    if (site_inds[idim] == 0 && !inc) {
+    if (!inc && site_inds[idim] == 0) {
         // lower boundary
         if (m_bcs[idim]) {
             dim_ind = m_format.m_shape[idim] - 1;
             t_element = -m_bcs[idim];
         }
-    } else if (site_inds[idim] + 1 == m_format.m_shape[idim] && inc) {
+    } else if (inc && (site_inds[idim] + 1 == m_format.m_shape[idim])) {
         // upper boundary
-        if (!m_bcs[idim]) {
+        if (m_bcs[idim]) {
             dim_ind = 0ul;
             t_element = -m_bcs[idim];
         }
@@ -90,6 +90,7 @@ HubbardFrmHam::HubbardFrmHam(const defs::inds& site_shape, const std::vector<int
         }
     };
     loop(fn);
+
     log::info("Hubbard Hamiltonian initialized with U={}, site shape={}, boundary conds={}",
               m_u, utils::to_string(m_format.m_shape), utils::to_string(m_bcs));
     log::info("This model {} sign problem-free", m_spf ? "is" : "is not");
@@ -113,7 +114,7 @@ defs::ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
     int t_mat_element = m_t_mat_dense(isite, jsite);
     if (!t_mat_element) return 0.0;
     // don't need to compute fermi phase if the model meets the SPF conditions
-    if (m_spf) return t_mat_element;
+    if (m_spf) return -1;
     return conn.phase(onv) ? -t_mat_element : t_mat_element;
 }
 

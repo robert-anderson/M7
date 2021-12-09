@@ -120,17 +120,6 @@ public:
     size_t nboson() const;
 
     /*
-     * pure fermion coefficients
-     */
-    defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const {
-        return m_frm->get_coeff_1100(i, j);
-    }
-
-    defs::ham_t get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-        return m_frm->get_coeff_2200(i, j, k, l);
-    }
-
-    /*
      * pure fermion matrix elements
      */
 

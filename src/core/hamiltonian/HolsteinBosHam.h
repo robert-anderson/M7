@@ -22,11 +22,7 @@ struct HolsteinBosHam : BosHam {
 
     defs::ham_t get_element_0000(const field::BosOnv &onv) const override {
         defs::ham_t h = 0;
-        for (size_t imode = 0ul; imode < m_nmode; ++imode) {
-            if (!onv[imode]) continue;
-            defs::ham_comp_t occ = onv[imode];
-            h += occ;
-        }
+        for (size_t imode = 0ul; imode < m_nmode; ++imode) h+= onv[imode];
         return h*m_omega;
     }
 
