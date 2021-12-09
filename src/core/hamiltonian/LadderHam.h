@@ -13,40 +13,46 @@
 
 struct LadderHam {
 
-    const size_t m_nboson_max;
     const BasisDims m_bd;
-    /**
-     * coefficients for "coupled" ranksigs 1110, 1101. contributing exsigs are either:
-     *  "density coupled" (0010, 0001), or
-     *  "hopping coupled" (1110, 1101)
-     */
-    FrmBosCoupledCoeffs m_v;
-    /**
-     * coefficients for "uncoupled" ranksigs 0010, 0001. only contributing exsigs are
-     *  "uncoupled" (0010, 0001)
-     *
-     * density-coupled and uncoupled excitations have the same exsig, collectively they will be called "pure" bosonic
-     * excitations / de-excitations, as opposed to the fermion-coupled "hopping" exsigs
-     */
-    std::vector<defs::ham_t> m_v_unc;
+    const size_t m_nboson_max;
 
     ham_data::TermContribs m_contribs_0010;
     ham_data::TermContribs m_contribs_0001;
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    LadderHam(const EbdumpHeader& header, size_t nboson_max);
+    LadderHam(const BasisDims &bd, size_t nboson_max);
 
-    LadderHam(const std::string& fname, size_t nboson_max) :
-        LadderHam(EbdumpHeader(fname), nboson_max){}
+    virtual defs::ham_t get_coeff_0010(const size_t& imode) const {return 0;}
+    virtual defs::ham_t get_coeff_0001(const size_t& imode) const {return 0;}
+    virtual defs::ham_t get_coeff_1110(const size_t &imode, const size_t &j, const size_t &i) const {return 0;}
+    virtual defs::ham_t get_coeff_1101(const size_t &imode, const size_t &j, const size_t &i) const {return 0;}
 
-    defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const;
+    virtual defs::ham_t get_element_0010(const field::BosOnv& onv, const conn::BosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_0001(const field::BosOnv& onv, const conn::BosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_0010(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_0001(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_1110(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
+    virtual defs::ham_t get_element_1101(const field::FrmBosOnv& onv, const conn::FrmBosOnv& conn) const {return 0;}
 
-    bool is_holstein() const;
 
-    bool constant_uncoupled() const;
+    defs::ham_t get_element(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+        switch (conn.exsig()) {
+            case exsig_utils::ex_0001: return get_element_0001(onv, conn);
+            case exsig_utils::ex_0010: return get_element_0010(onv, conn);
+        }
+        return 0.0;
+    }
 
-    bool is_zpm_half_filled() const;
+    defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+        switch (conn.exsig()) {
+            case exsig_utils::ex_0001: return get_element_0001(onv, conn);
+            case exsig_utils::ex_0010: return get_element_0010(onv, conn);
+            case exsig_utils::ex_1101: return get_element_1101(onv, conn);
+            case exsig_utils::ex_1110: return get_element_1110(onv, conn);
+        }
+        return 0.0;
+    }
 
     /**
      * output some useful logs identifying the kind of H detected

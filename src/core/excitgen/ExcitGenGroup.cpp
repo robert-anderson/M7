@@ -83,6 +83,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
     }
     if (ham.m_ladder) {
+        bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_ladder.get());
         /*
          * first, the "pure" boson exsigs 0010 and 0001
          */
@@ -95,10 +96,8 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             /*
              * hamiltonian has non-zero off-diagonal elements of one or both of the "pure" ladder operator type
              */
-            if (ham.m_ladder->is_zpm_half_filled())
-                add(std::unique_ptr<ExcitGen>(new LadderPureHolsteinZpm(ham, prng)), exsigs);
-            else
-                add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)), exsigs);
+            if (is_holstein) add(std::unique_ptr<ExcitGen>(new LadderPureHolstein(ham, prng)), exsigs);
+            else add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)), exsigs);
         }
         /*
          * then the "hopping" type exsigs 1110 and 1101

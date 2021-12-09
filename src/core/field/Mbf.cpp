@@ -14,6 +14,7 @@ void mbf::set_aufbau_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
 }
 
 void mbf::set_aufbau_mbf(field::BosOnv &onv, const Hamiltonian& ham) {
+    if (!onv.nelement()) return;
     onv.zero();
     onv[0] = ham.nboson();
 }

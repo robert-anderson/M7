@@ -14,6 +14,7 @@ BasisDims Hamiltonian::make_bd() const {
     return {nsite, nmode};
 }
 
+#if 0
 Hamiltonian::Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
                          bool spin_major, size_t nboson_max):
         Hamiltonian(
@@ -27,11 +28,7 @@ Hamiltonian::Hamiltonian(std::string fname, std::string fname_eb, std::string fn
         REQUIRE_EQ(m_ladder->m_bd.m_nmode, m_bos->m_nmode, "EBDUMP incompatible with BOSDUMP");
     }
 }
-
-Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
-        Hamiltonian(opts.m_fermion.m_fcidump.m_path,
-                    opts.m_ladder.m_ebdump.m_path, opts.m_boson.m_bosdump.m_path,
-                    opts.m_fermion.m_fcidump.m_spin_major, opts.m_ladder.m_nboson_max){}
+#endif
 
 size_t Hamiltonian::nci() const {
     return m_frm->nci() * m_bos->nci();

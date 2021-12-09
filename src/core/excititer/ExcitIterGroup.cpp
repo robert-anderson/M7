@@ -3,6 +3,7 @@
 //
 
 #include <src/core/hamiltonian/HubbardFrmHam.h>
+#include <src/core/hamiltonian/HolsteinLadderHam.h>
 #include "ExcitIterGroup.h"
 #include "Hubbard1dSingles.h"
 #include "LadderPure.h"
@@ -51,11 +52,12 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
     }
 
     if (ham.m_ladder) {
+        bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_ladder.get());
         bool any_pures;
         any_pures = ham.m_ladder->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)
                     || ham.m_ladder->m_contribs_1110.is_nonzero(exsig_utils::ex_0010);
         if (any_pures) {
-            if (ham.m_ladder->is_holstein()) {
+            if (is_holstein) {
                 add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0010)));
             }
             else {
@@ -65,7 +67,7 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         any_pures = ham.m_ladder->m_contribs_0001.is_nonzero(exsig_utils::ex_0001)
                     || ham.m_ladder->m_contribs_1101.is_nonzero(exsig_utils::ex_0001);
         if (any_pures) {
-            if (ham.m_ladder->is_holstein())
+            if (is_holstein)
                 add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0001)));
             else
                 add(std::unique_ptr<ExcitIter>(new excititers::LadderPure(ham, exsig_utils::ex_0001)));

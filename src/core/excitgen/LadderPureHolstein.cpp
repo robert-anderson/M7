@@ -36,5 +36,5 @@ bool LadderPureHolstein::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, 
 }
 
 std::string LadderPureHolstein::description() const {
-    return "Holstein";
+    return "holstein";
 }

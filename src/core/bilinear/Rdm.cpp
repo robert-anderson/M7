@@ -291,9 +291,9 @@ defs::ham_comp_t Rdms::get_energy(const LadderHam *ham, size_t nelec, size_t exs
          * default definition is the creation ladder operator, so the fermion indices must be interchanged if computing
          * the energy of the boson-annihilating RDM
          */
-        e_coupled += rdm_element*ham->m_v.get(n, cre ? psite : qsite, cre ? qsite : psite);
+        e_coupled += rdm_element* ham->get_coeff_1101(n, cre ? psite : qsite, cre ? qsite : psite);
 
-        if (p == q) e_uncoupled += rdm_element*ham->m_v_unc[n];
+        if (p == q) e_uncoupled += rdm_element*ham->get_coeff_0001(n);
     }
     e_uncoupled = mpi::all_sum(e_uncoupled);
     e_uncoupled/=nelec;
@@ -315,7 +315,7 @@ defs::ham_comp_t Rdms::get_energy(const BosHam *ham) const {
         const size_t m=row.m_inds.m_bos.m_ann[0];
         REQUIRE_EQ(n, m, "0011-RDM should currently only take 0000-exsig contributions");
         const auto rdm_element = row.m_values[0];
-        e += rdm_element*ham->m_coeffs_1.get(n, m);
+        e += rdm_element*ham->get_coeff_0011(n, m);
     }
     e = mpi::all_sum(e) / m_total_norm.m_reduced;
     REQUIRE_TRUE(consts::float_nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")

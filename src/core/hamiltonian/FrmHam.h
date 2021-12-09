@@ -36,12 +36,13 @@ struct FrmHam {
     FrmHam(size_t nelec, size_t nsite, int ms2_restrict,
                        bool complex_valued=false, defs::inds site_irreps = {});
 
-    virtual defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const = 0;
-    virtual defs::ham_t get_coeff_2200(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const = 0;
+    virtual defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const {return 0;}
+    virtual defs::ham_t get_coeff_2200(const size_t& i, const size_t& j,
+                                       const size_t& k, const size_t& l) const {return 0;}
 
-    virtual defs::ham_t get_element_0000(const field::FrmOnv &onv) const = 0;
-    virtual defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const = 0;
-    virtual defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const = 0;
+    virtual defs::ham_t get_element_0000(const field::FrmOnv &onv) const {return 0;}
+    virtual defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {return 0;}
+    virtual defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {return 0;}
     //virtual defs::ham_t get_element_3300(const field::FrmOnv &onv, const conn::FrmOnv &conn) const = 0;
 
     defs::ham_t get_element(const field::FrmOnv &onv) const;

@@ -133,3 +133,22 @@ bool BosOnvConnection::respects_occ_range(const BosOnvField &src, size_t nboson_
     for (auto& pair: m_ann.pairs()) if (src[pair.m_imode] < pair.m_nop) return false;
     return true;
 }
+
+double BosOnvConnection::occ_fac(const BosOnvField &src) const {
+    double fac = 1.0;
+    for (auto& pair : m_ann.pairs()) {
+        for (size_t i=0ul; i<pair.m_nop; ++i) fac*= src[pair.m_imode] - i;
+    }
+    for (auto& pair : m_cre.pairs()) {
+        for (size_t i=1ul; i<=pair.m_nop; ++i) fac*= src[pair.m_imode] + i;
+    }
+    return std::sqrt(fac);
+}
+
+double BosOnvConnection::occ_fac(const BosOnvField &src, const BosOps &com) const {
+    double fac = occ_fac(src);
+    for (auto& pair : com.pairs()) {
+        for (size_t i=0ul; i<pair.m_nop; ++i) fac*=src[pair.m_imode]-i;
+    }
+    return fac;
+}

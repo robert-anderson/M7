@@ -11,11 +11,31 @@
 #include "src/core/linalg/Sparse.h"
 
 struct HubbardFrmHam : FrmHam {
+    /**
+     * multidimensional format describing the orthogonally-coordinated lattice sites
+     */
     const NdFormatD m_format;
+    /**
+     * boundary conditions for each lattice dimension (0 for OBC, 1 for PBC, -1 for APBC)
+     */
     const std::vector<int> m_bcs;
+    /**
+     * on-site repulsion scalar in units of the hopping
+     */
     const defs::ham_t m_u;
+    /**
+     * sparse map enabling lookup of all coordinated sites given a row site
+     */
     sparse::Matrix<int> m_t_mat_sparse;
+    /**
+     * dense map of coordinated sites allowing lookup of the 1-body H matrix element given the flat indices of two site
+     * index vectors
+     */
     Matrix<int> m_t_mat_dense;
+    /**
+     * whether the model meets the sign problem-free conditions
+     */
+    const bool m_spf;
 private:
 
     size_t get_coord_index(const defs::inds &site_inds, size_t idim, size_t value) const;
@@ -23,6 +43,13 @@ private:
     std::pair<size_t, int> get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const;
 
     static size_t nsite(const defs::inds& site_shape);
+
+    /**
+     * determine whether this hubbard hamiltonian is sign-problematic
+     * @return
+     *  true if the model is sign problem-free
+     */
+    bool sign_problem() const;
 
 public:
 

@@ -27,7 +27,7 @@ fciqmc_config::Hubbard::Hubbard(config::Group *parent) :
                      "dimensionality of the orthogonally-coordinated N-dimensional Hubbard lattice"),
         m_boundary_conds(this, "boundary_conds", {},
                          "boundary conditions for each dimension of the Hubbard lattice (-1: anti-periodic, 0: open, 1: periodic)"),
-        m_repulsion(this, "repulsion", 0ul, "on-site repulsion coefficient \"U\"") {}
+        m_repulsion(this, "repulsion", 0ul, "on-site repulsion coefficient \"U\" in units of the hopping") {}
 
 void fciqmc_config::Hubbard::verify() {
     REQUIRE_EQ(m_site_shape.get().size(), m_boundary_conds.get().size(),

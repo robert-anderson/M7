@@ -65,6 +65,33 @@ struct BosOnvConnection {
     size_t exsig() const;
 
     bool respects_occ_range(const BosOnvField &src, size_t nboson_max) const;
+
+    /**
+     * compute the "occupation factor" required to keep the boson ONV basis orthonormal.
+     * b |n>  = sqrt(n) |n-1>
+     * b+ |n> = sqrt(n+1) |n+1>
+     *
+     * b^m |n>  = sqrt(n(n-1)...(n-m+1)) |n-m>
+     * b+^m |n>  = sqrt((n+1)(n+2)...(n+m)) |n+m>
+     * @param src
+     * @return
+     */
+    double occ_fac(const BosOnvField& src) const;
+
+    /**
+     * if the matrix element in question is actually contracted, with common indices among the creation and annihilation
+     * operators, the occupation factors change.
+     * the ONV can be rearranged to group operators in mode-wise normal order. for a given mode, common indices result
+     * in the following factor:
+     * b+b |n> = n |n>
+     * b+^2b^2 |n> = n(n-1) |n>
+     * b+^mb^m |n> = n(n-1)...(n-m+1) |n>
+     * @param src
+     * @param com
+     * @return
+     */
+    double occ_fac(const BosOnvField& src, const BosOps& com) const;
+
 };
 
 

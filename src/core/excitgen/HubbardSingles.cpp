@@ -30,5 +30,5 @@ bool HubbardSingles::draw_frmbos(const size_t &exsig, const FrmBosOnv &src_onv, 
 }
 
 std::string HubbardSingles::description() const {
-    return "";//log::format("Hubbard 1D with {}BCs", m_pbc ? "P" : "O");
+    return "hubbard hopping";
 }

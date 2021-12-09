@@ -13,6 +13,8 @@
 #include "src/core/nd/NdArray.h"
 #include "HubbardFrmHam.h"
 #include "GeneralFrmHam.h"
+#include "HolsteinLadderHam.h"
+#include "HolsteinBosHam.h"
 
 using namespace field;
 
@@ -53,6 +55,23 @@ private:
         return nullptr;
     }
 
+    std::unique_ptr<LadderHam> make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite) {
+        if (opts.m_holstein_coupling) {
+            auto nboson_max = opts.m_nboson_max.get();
+            auto g = opts.m_holstein_coupling.get();
+            return std::unique_ptr<LadderHam>(new HolsteinLadderHam(nsite, nboson_max, g));
+        }
+        return nullptr;
+    }
+
+    std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts, size_t nsite) {
+        if (opts.m_holstein_omega) {
+            auto omega = opts.m_holstein_omega.get();
+            return std::unique_ptr<BosHam>(new HolsteinBosHam(nsite, omega));
+        }
+        return std::unique_ptr<BosHam>(new BosHam(0ul, 0ul));
+    }
+
     /*
     std::unique_ptr<LadderHamiltonian> make_ladder(const fciqmc_config::LadderHamiltonian &opts) {
         if (opts.m_holstein_coupling!=0.0)
@@ -66,16 +85,13 @@ private:
 
 public:
 
+#if 0
     Hamiltonian(std::unique_ptr<FrmHam> &&frm,
                 std::unique_ptr<LadderHam> &&ladder,
                 std::unique_ptr<BosHam> &&bos) :
             m_frm(std::move(frm)), m_ladder(std::move(ladder)), m_bos(std::move(bos)),
             m_nboson_max(ladder ? ladder->m_nboson_max : 0ul), m_bd(make_bd()) {
-        if (!m_frm) log::info("Fermion Hamiltonian is disabled");
-        if (defs::enable_bosons) {
-            if (!m_ladder) log::info("Fermion-boson ladder Hamiltonian is disabled");
-            if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
-        }
+
     }
 
     Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
@@ -83,8 +99,19 @@ public:
 
     Hamiltonian(std::string fname, bool spin_major) :
             Hamiltonian(fname, "", "", spin_major, 0ul) {}
+#endif
 
-    explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
+    explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts):
+        m_frm(make_frm(opts.m_fermion)),
+        m_ladder(make_ladder(opts.m_ladder, m_frm->m_nsite)),
+        m_bos(make_bos(opts.m_boson, m_frm->m_nsite)),
+        m_nboson_max(m_ladder ? m_ladder->m_nboson_max : 0ul), m_bd(make_bd()){
+        if (!m_frm) log::info("Fermion Hamiltonian is disabled");
+        if (defs::enable_bosons) {
+            if (!m_ladder) log::info("Fermion-boson ladder Hamiltonian is disabled");
+            if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
+        }
+    }
 
     size_t nci() const;
 
@@ -149,7 +176,7 @@ public:
     }
 
     defs::ham_t get_element(const FrmBosOnv &onv) const {
-        return m_frm->get_element(onv.m_frm) + m_bos->get_element(onv.m_bos);
+        return get_element(onv.m_frm) + get_element(onv.m_bos);
     }
 
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {
