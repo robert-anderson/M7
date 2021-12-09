@@ -40,6 +40,8 @@ namespace excititers {
 
         void foreach(const field::FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<field::FrmOnv> &body) override {}
 
+        void foreach(const field::FrmBosOnv &src, conn::FrmBosOnv &conn, const fn_c_t<field::FrmBosOnv> &body) override {}
+
         void foreach(const BosOnv &src, conn::BosOnv &conn, const fn_c_t<BosOnv> &body) override {}
     };
 
