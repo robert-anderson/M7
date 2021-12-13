@@ -11,7 +11,7 @@ namespace config {
 
     struct Node {
         const Node *m_parent;
-        const yaml::Path m_path;
+        const yaml::Path m_yaml_path;
         const std::string m_description;
         std::list<Node *> m_children;
         const std::string m_indent;
@@ -70,7 +70,7 @@ namespace config {
         std::string help_string() const override;
 
         void log_value() const override {
-            if (!*this) log::info("section {} unspecified, using defaults", m_path.to_string());
+            if (!*this) log::info("section {} unspecified, using defaults", m_yaml_path.to_string());
             for (auto child: m_children) child->log_value();
         }
     };
@@ -158,12 +158,12 @@ namespace config {
             auto file = parent->get_file();
             if (file) {
                 try {
-                    if (file->exists(m_path)) m_v = file->get_as<T>(m_path);
+                    if (file->exists(m_yaml_path)) m_v = file->get_as<T>(m_yaml_path);
                     else m_v = v_default;
                 }
                 catch (const YAML::BadConversion &ex) {
                     ABORT(log::format("failed reading value {} from line {} of YAML config file",
-                                      m_path.to_string(), ex.mark.line));
+                                      m_yaml_path.to_string(), ex.mark.line));
                 }
             } else {
                 m_v = v_default;
@@ -179,7 +179,7 @@ namespace config {
         }
 
         void log_value() const override {
-            log::info("{}: {}", m_path.to_string(), utils::to_string(m_v));
+            log::info("{}: {}", m_yaml_path.to_string(), utils::to_string(m_v));
         }
 
         Param& operator=(const T& v){

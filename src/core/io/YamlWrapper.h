@@ -14,13 +14,13 @@
 
 namespace yaml {
     struct Path {
-        std::list<std::string> m_path;
+        std::list<std::string> m_name_list;
 
-        Path(std::list<std::string> path);
+        Path(std::list<std::string> name_list);
 
-        Path(std::vector<std::string> path);
+        Path(std::vector<std::string> name_list);
 
-        Path(std::string path);
+        Path(std::string name);
 
         Path(const Path &other);
 

@@ -4,36 +4,36 @@
 
 #include "YamlWrapper.h"
 
-yaml::Path::Path(std::list<std::string> path) : m_path(std::move(path)) {}
+yaml::Path::Path(std::list<std::string> name_list) : m_name_list(std::move(name_list)) {}
 
-yaml::Path::Path(std::vector<std::string> path) : m_path(path.cbegin(), path.cend()) {}
+yaml::Path::Path(std::vector<std::string> name_list) : m_name_list(name_list.cbegin(), name_list.cend()) {}
 
-yaml::Path::Path(std::string path) : Path(string_utils::split(path, '.')) {}
+yaml::Path::Path(std::string name) : Path(string_utils::split(name, '.')) {}
 
-yaml::Path::Path(const yaml::Path &other) : m_path(other.m_path) {}
+yaml::Path::Path(const yaml::Path &other) : m_name_list(other.m_name_list) {}
 
 std::string yaml::Path::to_string() const {
-    auto it = m_path.cbegin();
+    auto it = m_name_list.cbegin();
     std::string out = *it;
     ++it;
-    for (; it != m_path.cend(); ++it) out += "." + *it;
+    for (; it != m_name_list.cend(); ++it) out += "." + *it;
     return out;
 }
 
 yaml::Path yaml::Path::operator+(const std::string &name) const {
     auto tmp = *this;
-    tmp.m_path.push_back(name);
+    tmp.m_name_list.push_back(name);
     return tmp;
 }
 
 yaml::Path yaml::Path::up() const {
     auto tmp = *this;
-    tmp.m_path.pop_back();
+    tmp.m_name_list.pop_back();
     return tmp;
 }
 
 size_t yaml::Path::depth() const {
-    return m_path.size();
+    return m_name_list.size();
 }
 
 yaml::File::File(const std::string &fname) : m_fname(fname) {
@@ -54,7 +54,7 @@ yaml::File::File(const std::string &fname) : m_fname(fname) {
 
 YAML::Node yaml::File::get(yaml::Path path) const {
     auto node = m_root;
-    for (const auto &it : path.m_path) node.reset(node[it]);
+    for (const auto &it : path.m_name_list) node.reset(node[it]);
     return node;
 }
 

@@ -60,8 +60,7 @@ defs::ham_t GeneralLadderHam::get_element_0001(const field::BosOnv &onv, const c
 }
 
 defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, const size_t &imode, bool cre) const {
-    const auto com = size_t(onv.m_bos[imode]) - !cre;
-    const auto occ_fac = std::sqrt(com + 1);
+    const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
     defs::ham_t res = m_v_unc[imode];
     // fermion ONVs do not differ, so sum over occupied spin orbitals
     auto fn = [&](const size_t &ibit) {
@@ -82,10 +81,9 @@ defs::ham_t GeneralLadderHam::get_element_0001(const field::FrmBosOnv &onv, cons
 
 defs::ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
                                                   const conn::FrmOnv &frm_conn, const size_t &imode, bool cre) const {
-    DEBUG_ASSERT_TRUE(onv.m_frm.get(conn.m_frm.m_ann[0]), "annihilated op not occupied in ONV")
-    DEBUG_ASSERT_FALSE(onv.m_frm.get(conn.m_frm.m_cre[0]), "created op occupied in ONV")
-    const auto com = size_t(onv.m_bos[imode]) - !cre;
-    const auto occ_fac = std::sqrt(com + 1);
+    DEBUG_ASSERT_TRUE(onv.m_frm.get(frm_conn.m_ann[0]), "annihilated op not occupied in ONV")
+    DEBUG_ASSERT_FALSE(onv.m_frm.get(frm_conn.m_cre[0]), "created op occupied in ONV")
+    const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
     auto isite = onv.m_frm.isite(frm_conn.m_cre[0]);
     auto jsite = onv.m_frm.isite(frm_conn.m_ann[0]);
     /*

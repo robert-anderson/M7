@@ -5,19 +5,18 @@
 #include "Parameters.h"
 
 config::Node::Node(config::Node *parent, std::string name, std::string description) :
-        m_parent(parent), m_path(parent->m_path + name),
-        m_description(description), m_indent(2 * (m_path.depth() - 1), ' ') {
+        m_parent(parent), m_yaml_path(parent ? yaml::Path(parent->m_yaml_path + name) : yaml::Path(name)),
+        m_description(description), m_indent(2 * (m_yaml_path.depth() - 1), ' ') {
 }
 
-config::Node::Node(std::string description) :
-        m_parent(nullptr), m_path(""), m_description(description), m_indent() {}
+config::Node::Node(std::string description) : Node(nullptr, "", description){}
 
 std::string config::Node::help_string() const {
     return "";
 }
 
 const yaml::File *config::Node::get_file() const {
-    REQUIRE_TRUE(m_parent, "Non-root Nodes must have a parent");
+    if (!m_parent) return nullptr;
     return m_parent->get_file();
 }
 
@@ -26,14 +25,14 @@ std::string config::Node::invalid_file_key() const {
 }
 
 const std::string &config::Node::name() const {
-    return m_path.m_path.back();
+    return m_yaml_path.m_name_list.back();
 }
 
 std::set<std::string> config::Group::make_file_keys() const {
     std::set<std::string> file_keys;
     auto yf = get_file();
     if (!yf) return file_keys;
-    auto yaml_node = yf->get(m_path);
+    auto yaml_node = yf->get(m_yaml_path);
     for (auto it = yaml_node.begin(); it != yaml_node.end(); ++it)
         file_keys.insert(YAML::Dump(it->first));
     return file_keys;
@@ -51,8 +50,8 @@ std::set<std::string> config::Group::make_child_keys() const {
 
 config::Group::Group(config::Group *parent, std::string name, std::string description) :
         Node(parent, name, description) {
-    REQUIRE_TRUE(m_parent, "Non-root config::Nodes must have a parent");
-    parent->add_child(this);
+    //REQUIRE_TRUE(m_parent, "Non-root config::Nodes must have a parent");
+    if (parent) parent->add_child(this);
 }
 
 config::Group::Group(std::string description) : Node(description) {}
@@ -77,7 +76,7 @@ std::string config::Group::invalid_file_key() const {
 
 bool config::Section::make_exists() const {
     auto file = get_file();
-    if (file) return file->exists(m_path);
+    if (file) return file->exists(m_yaml_path);
     return false;
 }
 
@@ -90,7 +89,7 @@ config::Section::operator bool() const {
 
 std::string config::Section::help_string() const {
     std::string str;
-    str.append(log::format("{}Section:       {}\n", m_indent, log::bold_format(m_path.to_string())));
+    str.append(log::format("{}Section:       {}\n", m_indent, log::bold_format(m_yaml_path.to_string())));
     str.append(log::format("{}Description:   {}\n\n", m_indent, m_description));
     for (auto child: m_children) str.append(child->help_string() + "\n");
     return str;

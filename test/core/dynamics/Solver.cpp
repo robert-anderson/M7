@@ -42,7 +42,7 @@ TEST(Solver, Consolidation) {
     opts.m_propagator.m_nw_target = 1000;
     opts.m_propagator.m_consolidate_spawns = true;
     opts.m_wavefunction.m_nw_init = 10;
-    opts.m_hamiltonian.m_fcidump.m_path = defs::assets_root + "/HF_RDMs/FCIDUMP";
+    opts.m_hamiltonian.m_fcidump.m_yaml_path = defs::assets_root + "/HF_RDMs/FCIDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
     Wavefunction wf(opts, ham.nsite());

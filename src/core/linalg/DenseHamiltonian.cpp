@@ -68,6 +68,6 @@ void DenseHamiltonian::setup_bos(const Hamiltonian &source) {
 }
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &source) : Matrix<defs::ham_t>(source.nci()) {
-    if (source.m_ladder->m_nboson_max) setup_frmbos(source);
+    if (source.m_nboson_max) setup_frmbos(source);
     else setup_frm(source);
 }
