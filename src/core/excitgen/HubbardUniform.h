@@ -2,20 +2,20 @@
 // Created by rja on 02/05/2021.
 //
 
-#ifndef M7_HUBBARDSINGLES_H
-#define M7_HUBBARDSINGLES_H
+#ifndef M7_HUBBARDUNIFORM_H
+#define M7_HUBBARDUNIFORM_H
 
 #include "UniformSingles.h"
 #include "src/core/hamiltonian/HubbardFrmHam.h"
 
-struct HubbardSingles : public UniformSingles {
+struct HubbardUniform : public UniformSingles {
     using UniformSingles::draw;
 
     const HubbardFrmHam* h_cast() {
         return dynamic_cast<const HubbardFrmHam*>(m_h.m_frm.get());
     }
 
-    HubbardSingles(const Hamiltonian& h, PRNG& prng): UniformSingles(h, prng) {
+    HubbardUniform(const Hamiltonian& h, PRNG& prng): UniformSingles(h, prng) {
         REQUIRE_TRUE(h_cast(), "fermion hamiltonian is not of hubbard hamiltonian type");
     }
 
@@ -32,4 +32,4 @@ struct HubbardSingles : public UniformSingles {
 };
 
 
-#endif //M7_HUBBARDSINGLES_H
+#endif //M7_HUBBARDUNIFORM_H

@@ -47,7 +47,7 @@ struct BosHam {
 
     size_t nci() const;
 
-    void log_data() const;
+    virtual void log_data() const;
 
 };
 

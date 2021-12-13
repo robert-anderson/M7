@@ -9,7 +9,10 @@
 
 TEST(BosonSumConservingDoubles, LandauLevels) {
     PRNG prng(14, 1000000);
-    Hamiltonian ham("", "", defs::assets_root + "/LandauLevels_6_8_14/BOSDUMP", false, false, 0ul);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_6_8_14/BOSDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     BosonSumConservingDoubles excit_gen(ham, prng);
     excititers::Bos excit_iter(ham, exsig_utils::ex_0022);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);

@@ -9,10 +9,14 @@
 
 TEST(LadderHopping, HubbardUniform1101){
     PRNG prng(14, 1000000);
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
     LadderHoppingUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -34,10 +38,14 @@ TEST(LadderHopping, HubbardUniform1101){
 
 TEST(LadderHopping, HubbardUniform1110){
     PRNG prng(14, 1000000);
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
     LadderHoppingUniform excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -59,10 +67,12 @@ TEST(LadderHopping, HubbardUniform1110){
 
 TEST(LadderHopping, HubbardPc1101){
     PRNG prng(14, 1000000);
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1101);
     LadderHoppingPc excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -77,7 +87,6 @@ TEST(LadderHopping, HubbardPc1101){
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);
     tester.run(src, ndraw);
-    std::cout << tester.m_results.to_string() << std::endl;
     auto av_err2 = tester.mean_abs_error(2 * ndraw);
     ASSERT_LT(av_err2, av_err1);
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
@@ -85,10 +94,12 @@ TEST(LadderHopping, HubbardPc1101){
 
 TEST(LadderHopping, HubbardPc1110){
     PRNG prng(14, 1000000);
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian ham(fname, fname_eb, fname_bos, false, true, 2);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     excititers::LadderHopping excit_iter(ham, exsig_utils::ex_1110);
     LadderHoppingPc excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
@@ -103,7 +114,6 @@ TEST(LadderHopping, HubbardPc1110){
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);
     tester.run(src, ndraw);
-    std::cout << tester.m_results.to_string() << std::endl;
     auto av_err2 = tester.mean_abs_error(2 * ndraw);
     ASSERT_LT(av_err2, av_err1);
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));

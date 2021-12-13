@@ -73,7 +73,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
     if (any_singles) {
         bool is_hubbard = dynamic_cast<const HubbardFrmHam*>(ham.m_frm.get());
         if (is_hubbard){
-            add(std::unique_ptr<ExcitGen>(new HubbardSingles(ham, prng)));
+            add(std::unique_ptr<ExcitGen>(new HubbardUniform(ham, prng)));
         } else {
             add(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)));
         }

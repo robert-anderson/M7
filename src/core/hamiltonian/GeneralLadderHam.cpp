@@ -4,12 +4,9 @@
 
 #include "GeneralLadderHam.h"
 
-#if 0
 GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max) :
-        m_nboson_max(nboson_max), m_bd({header.m_nsite, header.m_nmode}),
-        m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_nmode, 0.0),
-        m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
-        m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
+        LadderHam({header.m_nsite, header.m_nmode}, nboson_max),
+        m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_nmode, 0.0) {
     if (!m_nboson_max || !(m_bd.m_nsite || m_bd.m_nmode)) return;
     REQUIRE_EQ(m_bd.m_nsite == 0, m_bd.m_nmode == 0,
                "if the number of sites is non-zero, so also must be the number of boson modes. "
@@ -38,71 +35,72 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max
     log_data();
 }
 
-defs::ham_t GeneralLadderHam::get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
-    DEBUG_ASSERT_TRUE(conn.respects_occ_range(onv, m_nboson_max),
-                      "excitation puts boson occupation out of range");
-    if (conn.m_bos.size() != 1ul) return 0.0;
-    if (!conn.m_frm.kramers_conserve()) return 0.0;
-    bool cre = conn.m_bos.m_cre.size();
+defs::ham_t GeneralLadderHam::get_coeff_0010(const size_t &imode) const {
+    return m_v_unc[imode];
+}
 
-    const auto imode = cre ? conn.m_bos.m_cre[0].m_imode : conn.m_bos.m_ann[0].m_imode;
-    const auto com = size_t(onv.m_bos[imode]) - (cre ? 0 : 1);
+defs::ham_t GeneralLadderHam::get_coeff_0001(const size_t &imode) const {
+    return m_v_unc[imode];
+}
 
+defs::ham_t GeneralLadderHam::get_coeff_1110(const size_t &imode, const size_t &j, const size_t &i) const {
+    return m_v.get(imode, i, j);
+}
+
+defs::ham_t GeneralLadderHam::get_coeff_1101(const size_t &imode, const size_t &j, const size_t &i) const {
+    return m_v.get(imode, i, j);
+}
+
+defs::ham_t GeneralLadderHam::get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+    return m_v_unc[conn.m_cre[0].m_imode] * conn.occ_fac(onv);
+}
+
+defs::ham_t GeneralLadderHam::get_element_0001(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+    return m_v_unc[conn.m_ann[0].m_imode] * conn.occ_fac(onv);
+}
+
+defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, const size_t &imode, bool cre) const {
+    const auto com = size_t(onv.m_bos[imode]) - !cre;
     const auto occ_fac = std::sqrt(com + 1);
-    switch (conn.m_frm.size()) {
-        case 0: {
-            defs::ham_t res = m_v_unc[imode];
-            // fermion ONVs do not differ, so sum over occupied spin orbitals
-            auto fn = [&](const size_t &ibit) {
-                auto isite = onv.m_frm.isite(ibit);
-                res += m_v.get(imode, isite, isite);
-            };
-            onv.m_frm.foreach(fn);
-            return res * occ_fac;
-        }
-        case 2: {
-            DEBUG_ASSERT_TRUE(onv.m_frm.get(conn.m_frm.m_ann[0]), "annihilated op not occupied in ONV")
-            DEBUG_ASSERT_FALSE(onv.m_frm.get(conn.m_frm.m_cre[0]), "created op occupied in ONV")
-            auto isite = onv.m_frm.isite(conn.m_frm.m_cre[0]);
-            auto jsite = onv.m_frm.isite(conn.m_frm.m_ann[0]);
-            /*
-             * respect hermitian conjugation of the fermion-boson operator product: 1110 (boson creation) is the
-             * conventionally non-conjugated term
-             */
-            auto element = cre ? m_v.get(imode, isite, jsite) : m_v.get(imode, jsite, isite);
-            element *= occ_fac;
-            return conn.m_frm.phase(onv.m_frm) ? -element : element;
-        }
-        default:
-            return 0;
-    }
+    defs::ham_t res = m_v_unc[imode];
+    // fermion ONVs do not differ, so sum over occupied spin orbitals
+    auto fn = [&](const size_t &ibit) {
+        auto isite = onv.m_frm.isite(ibit);
+        res += m_v.get(imode, isite, isite);
+    };
+    onv.m_frm.foreach(fn);
+    return res * occ_fac;
 }
 
-void GeneralLadderHam::log_data() const {
-    if (!m_contribs_0010.is_nonzero(exsig_utils::ex_0010))
-        log::info("0010 uncoupled boson ladder hamiltonian term has no contributions");
-    if (!m_contribs_0001.is_nonzero(exsig_utils::ex_0001))
-        log::info("0001 uncoupled boson ladder hamiltonian term has no contributions");
-
-    if (!m_contribs_1110.is_nonzero(exsig_utils::ex_0010))
-        log::info("1110 fermion-coupled boson ladder term has no 0010 contributions");
-    if (!m_contribs_1110.is_nonzero(exsig_utils::ex_1110))
-        log::info("1110 fermion-coupled boson ladder term has no 1110 contributions");
-    if (!m_contribs_1101.is_nonzero(exsig_utils::ex_0001))
-        log::info("1101 fermion-coupled boson ladder term has no 0001 contributions");
-    if (!m_contribs_1101.is_nonzero(exsig_utils::ex_1101))
-        log::info("1101 fermion-coupled boson ladder term has no 1101 contributions");
+defs::ham_t GeneralLadderHam::get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    return get_element_pure(onv, conn.m_bos.m_cre[0].m_imode, true);
 }
 
-bool LadderHam::constant_uncoupled() const {
-    auto v = m_v_unc[0];
-    for (size_t imode = 1ul; imode < m_bd.m_nmode; ++imode) if (m_v_unc[imode] != v) return false;
-    return true;
+defs::ham_t GeneralLadderHam::get_element_0001(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    return get_element_pure(onv, conn.m_bos.m_ann[0].m_imode, false);
 }
 
-bool LadderHam::is_zpm_half_filled() const {
-    if (!is_holstein()) return false;
-    return constant_uncoupled() && m_v.constant_diagonal() && (m_v.get(0, 0, 0) == -m_v_unc[0]);
+defs::ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
+                                                  const conn::FrmOnv &frm_conn, const size_t &imode, bool cre) const {
+    DEBUG_ASSERT_TRUE(onv.m_frm.get(conn.m_frm.m_ann[0]), "annihilated op not occupied in ONV")
+    DEBUG_ASSERT_FALSE(onv.m_frm.get(conn.m_frm.m_cre[0]), "created op occupied in ONV")
+    const auto com = size_t(onv.m_bos[imode]) - !cre;
+    const auto occ_fac = std::sqrt(com + 1);
+    auto isite = onv.m_frm.isite(frm_conn.m_cre[0]);
+    auto jsite = onv.m_frm.isite(frm_conn.m_ann[0]);
+    /*
+     * respect hermitian conjugation of the fermion-boson operator product: 1110 (boson creation) is the
+     * conventionally non-conjugated term
+     */
+    auto element = cre ? m_v.get(imode, isite, jsite) : m_v.get(imode, jsite, isite);
+    element *= occ_fac;
+    return frm_conn.phase(onv.m_frm) ? -element : element;
 }
 
-#endif
+defs::ham_t GeneralLadderHam::get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    return get_element_coupled(onv, conn.m_frm, conn.m_bos.m_cre[0].m_imode, true);
+}
+
+defs::ham_t GeneralLadderHam::get_element_1101(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
+    return get_element_coupled(onv, conn.m_frm, conn.m_bos.m_ann[0].m_imode, false);
+}

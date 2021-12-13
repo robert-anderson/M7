@@ -10,13 +10,15 @@
 
 TEST(HeatBathDoubles, SmallFromHFDeterminant){
     PRNG prng(14, 1000000);
-    Hamiltonian ham(defs::assets_root + "/RHF_LiH_STO-3G/FCIDUMP", false);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_LiH_STO-3G/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     HeatBathDoubles excit_gen(ham, prng);
     excititers::Frm excit_iter(ham, exsig_utils::ex_double);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    Sector sector{ham.nelec(), true, 0, 0, 0};
-    mbf::set_aufbau_mbf(src_mbf, sector);
+    mbf::set_aufbau_mbf(src_mbf, ham);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 10000000;
     tester.run(src_mbf, ndraw);
@@ -31,13 +33,15 @@ TEST(HeatBathDoubles, SmallFromHFDeterminant){
 
 TEST(HeatBathDoubles, LargeFromHFDeterminant){
     PRNG prng(14, 1000000);
-    Hamiltonian ham(defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP", false);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     HeatBathDoubles excit_gen(ham, prng);
     excititers::Frm excit_iter(ham, exsig_utils::ex_double);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(ham.m_bd);
-    Sector sector{ham.nelec(), true, 0, 0, 0};
-    mbf::set_aufbau_mbf(src_mbf, sector);
+    mbf::set_aufbau_mbf(src_mbf, ham);
     tester.fill_results_table(src_mbf);
     tester.run(src_mbf, 50000000);
     ASSERT_TRUE(tester.all_drawn_at_least_once());

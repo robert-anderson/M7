@@ -12,7 +12,7 @@ TEST(FermionBosonEnumerator, SpinNonCon){
     size_t i = ~0ul;
     buffered::FrmBosOnv mbf(bd);
     while(enumerator.next(mbf, i)){}
-    ASSERT_EQ(i, ci_utils::fermion_dim(nsite, nelec)*ci_utils::boson_dim(nmode, occ_cutoff));
+    ASSERT_EQ(i, ci_utils::fermion_dim(nsite, nelec)*ci_utils::boson_dim(nmode, occ_cutoff, false));
 }
 
 TEST(FermionBosonEnumerator, SpinCon){
@@ -23,5 +23,5 @@ TEST(FermionBosonEnumerator, SpinCon){
     size_t i = ~0ul;
     buffered::FrmBosOnv mbf(bd);
     while(enumerator.next(mbf, i)){}
-    ASSERT_EQ(i, ci_utils::fermion_dim(nsite, nelec, spin)*ci_utils::boson_dim(nmode, occ_cutoff));
+    ASSERT_EQ(i, ci_utils::fermion_dim(nsite, nelec, spin)*ci_utils::boson_dim(nmode, occ_cutoff, false));
 }

@@ -5,7 +5,7 @@
 #include <src/core/hamiltonian/HubbardFrmHam.h>
 #include <src/core/hamiltonian/HolsteinLadderHam.h>
 #include "ExcitIterGroup.h"
-#include "Hubbard1dSingles.h"
+#include "HubbardSingles.h"
 #include "LadderPure.h"
 #include "LadderPureHolstein.h"
 #include "LadderHopping.h"
@@ -41,7 +41,7 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         if (any_singles) {
             bool is_hubbard = dynamic_cast<const HubbardFrmHam *>(ham.m_frm.get());
             if (is_hubbard) {
-                add(std::unique_ptr<ExcitIter>(new excititers::Hubbard1dSingles(ham)));
+                add(std::unique_ptr<ExcitIter>(new excititers::HubbardSingles(ham)));
             } else {
                 add(std::unique_ptr<ExcitIter>(new excititers::Frm(ham, ex_single)));
             }

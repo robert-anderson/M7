@@ -2,22 +2,28 @@
 // Created by rja on 21/11/2021.
 //
 
+#include <src/core/hamiltonian/GeneralBosHam.h>
+#include "src/core/config/FciqmcConfig.h"
+#include "src/core/hamiltonian/Hamiltonian.h"
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/BosHam.h"
 
 TEST(BosonHamiltonian, Coefficients) {
-    BosHam ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
-    ASSERT_EQ(ham.m_nmode, 5ul);
-    ASSERT_EQ(ham.m_nboson, 5ul);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
+    ASSERT_EQ(ham.m_bd.m_nmode, 5ul);
+    ASSERT_EQ(ham.nboson(), 5ul);
     //0.2209708691 2 4 5 3
-    ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
-    ASSERT_FLOAT_EQ(ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
+    auto& bos_ham = dynamic_cast<const GeneralBosHam&>(*ham.m_bos);
+    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
+    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
     //0.1530931089 5 3 1 3
-    ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(4, 2, 0, 2), 0.1530931089);
-    ASSERT_FLOAT_EQ(ham.m_coeffs_2.phys_element(4, 0, 2, 2), 0.1530931089);
+    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(4, 2, 0, 2), 0.1530931089);
+    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(4, 0, 2, 2), 0.1530931089);
 
-    ASSERT_FLOAT_EQ(ham.m_coeffs_2.get(0, 3, 0, 3), 0.0);
-    ASSERT_FLOAT_EQ(ham.m_coeffs_2.phys_element(0, 0, 3, 3), 0.0);
+    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(0, 3, 0, 3), 0.0);
+    ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(0, 0, 3, 3), 0.0);
 }
 
 TEST(BosonHamiltonian, DiagonalMatrixElements) {
@@ -30,8 +36,11 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
      *  [0. 1. 1. 0. 3.] 3.9140625
      *  [1. 0. 0. 1. 3.] 3.0859375
      */
-    BosHam ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
-    buffered::BosOnv onv(ham.m_nmode);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
+    buffered::BosOnv onv(ham.m_bd);
     onv = {0, 0, 0, 5, 0};
     ASSERT_FLOAT_EQ(ham.get_element(onv), 3.125);
     onv = {0, 0, 1, 3, 1};
@@ -63,9 +72,12 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         1.08253175 0.66291261 3.9140625  0.4330127 ]
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
-    BosHam ham(defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP", 12);
-    buffered::BosOnv src(ham.m_nmode);
-    buffered::BosOnv dst(ham.m_nmode);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
+    buffered::BosOnv src(ham.m_bd);
+    buffered::BosOnv dst(ham.m_bd);
     conn::BosOnv conn(src);
 
     std::vector<defs::inds> basis =

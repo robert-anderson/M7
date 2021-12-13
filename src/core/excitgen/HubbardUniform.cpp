@@ -2,13 +2,13 @@
 // Created by rja on 02/05/2021.
 //
 
-#include "HubbardSingles.h"
+#include "HubbardUniform.h"
 
-size_t HubbardSingles::approx_nconn() const {
+size_t HubbardUniform::approx_nconn() const {
     return m_nelec;
 }
 
-bool HubbardSingles::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
+bool HubbardUniform::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
                             defs::prob_t &prob, conn::FrmOnv &conn) {
     auto rand = m_prng.draw_uint(m_nelec);
     const auto occ = orbs.occ(src).m_flat[rand];
@@ -24,11 +24,11 @@ bool HubbardSingles::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs
     return true;
 }
 
-bool HubbardSingles::draw_frmbos(const size_t &exsig, const FrmBosOnv &src_onv, CachedOrbs &orbs,
+bool HubbardUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src_onv, CachedOrbs &orbs,
                             defs::prob_t &prob, conn::FrmBosOnv &conn) {
     return draw(exsig, src_onv.m_frm, orbs, prob, conn.m_frm);
 }
 
-std::string HubbardSingles::description() const {
+std::string HubbardUniform::description() const {
     return "hubbard hopping";
 }

@@ -3,8 +3,9 @@
 //
 
 #include <gtest/gtest.h>
+#include <src/core/hamiltonian/Hamiltonian.h>
+#include <src/core/field/Mbf.h>
 #include "src/core/basis/DecodedDeterminants.h"
-#include "src/core/hamiltonian/FrmHam.h"
 
 #ifdef ENABLE_COMPLEX
 TEST(FermionHamiltonian, DhfEnergy) {
@@ -45,34 +46,36 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
 TEST(FermionHamiltonian, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
-    FrmHam ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
     defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
-    ASSERT_EQ(ham.m_point_group_map.m_site_irreps, chk_orbsyms);
-    ASSERT_TRUE(ham.m_kramers_attrs.conserving());
-    buffered::FrmOnv fonv(ham.m_nsite);
-    for (size_t i = 0ul; i < ham.m_nelec / 2; ++i) {
-        fonv.set({0, i});
-        fonv.set({1, i});
-    }
-
-    auto elem = ham.get_element(fonv);
+    ASSERT_EQ(ham.m_frm->m_point_group_map.m_site_irreps, chk_orbsyms);
+    ASSERT_TRUE(ham.m_frm->m_kramers_attrs.conserving());
+    buffered::FrmOnv onv(ham.m_bd.m_nsite);
+    mbf::set_aufbau_mbf(onv, ham);
+    auto elem = ham.get_element(onv);
     ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
     ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
-    ASSERT_TRUE(consts::floats_equal(ham.get_energy(fonv), benchmark));
+    ASSERT_TRUE(consts::floats_equal(ham.get_energy(onv), benchmark));
 }
 
 TEST(FermionHamiltonian, RhfBrillouinTheorem) {
-    FrmHam ham(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_TRUE(ham.m_kramers_attrs.conserving());
-    buffered::FrmOnv fonv(ham.m_nsite);
-    fonv = {0, 1, 2, 6, 7, 8};
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham(opts.m_hamiltonian);
+    ASSERT_TRUE(ham.m_frm->m_kramers_attrs.conserving());
+    buffered::FrmOnv onv(ham.m_bd.m_nsite);
+    mbf::set_aufbau_mbf(onv, ham);
 
-    OccOrbs occs(fonv);
-    VacOrbs vacs(fonv);
+    OccOrbs occs(onv);
+    VacOrbs vacs(onv);
 
-    buffered::FrmOnv excited(ham.m_nsite);
+    buffered::FrmOnv excited(ham.m_bd.m_nsite);
 
-    conn::FrmOnv conn(fonv.m_nsite);
+    conn::FrmOnv conn(onv.m_nsite);
 
     for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
         const auto &occ = occs[iocc];
@@ -80,7 +83,7 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
             const auto &vac = vacs[iocc];
             conn.clear();
             conn.add(occ, vac);
-            ASSERT_TRUE(consts::float_is_zero(ham.get_element_1100(fonv, conn)));
+            ASSERT_TRUE(consts::float_is_zero(ham.m_frm->get_element_1100(onv, conn)));
         }
     }
 }

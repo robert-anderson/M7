@@ -21,21 +21,30 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
 #endif
 
 TEST(DenseHamiltonian, N2Rhf) {
-    Hamiltonian ham_src(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -108.916561245585, 1e-8));
 }
 
 TEST(DenseHamiltonian, HF) {
-    Hamiltonian ham_src(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/HF_RDMs/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -99.9421389039332, 1e-8));
 }
 
 TEST(DenseHamiltonian, PyscfX2cCheck) {
-    Hamiltonian ham_src(defs::assets_root + "/H2O_X2C/FCIDUMP", false);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/H2O_X2C/FCIDUMP";
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values
@@ -43,151 +52,191 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
 }
 
 TEST(DenseHamiltonian, Hubbard3Site) {
-    Hamiltonian h(defs::assets_root + "/Hubbard_U4_3site/FCIDUMP", 1);
-    ASSERT_EQ(h.nelec(), 4);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    ASSERT_EQ(ham_src.nelec(), 4);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], 2.0);
 }
 
 TEST(DenseHamiltonian, Hubbard4Site) {
-    Hamiltonian h(defs::assets_root + "/Hubbard_U4_4site/FCIDUMP", 1);
-    ASSERT_EQ(h.nelec(), 4);
-    ASSERT_EQ(h.m_bd.m_nsite, 4);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {4};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    ASSERT_EQ(ham_src.nelec(), 4);
+    ASSERT_EQ(ham_src.m_bd.m_nsite, 4);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -1.9531453086749293);
 }
 
 TEST(DenseHamiltonian, Hubbard6Site) {
-    Hamiltonian h(defs::assets_root + "/Hubbard_U4_6site/FCIDUMP", 1);
-    ASSERT_EQ(h.nelec(), 6);
-    ASSERT_EQ(h.m_bd.m_nsite, 6);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {6};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    ASSERT_EQ(ham_src.nelec(), 6);
+    ASSERT_EQ(ham_src.m_bd.m_nsite, 6);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -3.0925653194551845);
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoField) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_NULL";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 2);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_holstein_coupling = 0.0;
+    opts.m_hamiltonian.m_boson.m_holstein_omega = 0.3;
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], 2.0);
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc2) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 2);
-    for (size_t n=0ul; n<h.m_bd.m_nmode; ++n){
-        for (size_t p=0ul; p<h.m_bd.m_nspinorb; ++p){
-            const auto psite = FrmOnvField::isite(p, h.m_bd.m_nsite);
-            for (size_t q=0ul; q<h.m_bd.m_nspinorb; ++q){
-                const auto qsite = FrmOnvField::isite(q, h.m_bd.m_nsite);
-                if (n==psite && psite==qsite)
-                    ASSERT_FLOAT_EQ(consts::real(h.m_ladder.m_v.get(n, p, q)), 1.4);
-                else ASSERT_FLOAT_EQ(consts::real(h.m_ladder.m_v.get(n, p, q)), 0.0);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_holstein_coupling = 1.4;
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 2;
+    opts.m_hamiltonian.m_boson.m_holstein_omega = 0.0;
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    for (size_t n = 0ul; n < ham_src.m_bd.m_nmode; ++n) {
+        for (size_t p = 0ul; p < ham_src.m_bd.m_nspinorb; ++p) {
+            const auto psite = FrmOnvField::isite(p, ham_src.m_bd.m_nsite);
+            for (size_t q = 0ul; q < ham_src.m_bd.m_nspinorb; ++q) {
+                const auto qsite = FrmOnvField::isite(q, ham_src.m_bd.m_nsite);
+                if (n == psite && psite == qsite) {
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1101(n, p, q)), 1.4);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1110(n, p, q)), 1.4);
+                } else {
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1101(n, p, q)), 0.0);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1110(n, p, q)), 0.0);
+                }
             }
         }
     }
-    DenseHamiltonian dh(h);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -7.699484522379835);
 }
 
 TEST(DenseHamiltonian, BosonCouplingNoFrequencyMaxOcc3) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 3);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_holstein_coupling = 1.4;
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 3;
+    opts.m_hamiltonian.m_boson.m_holstein_omega = 0.0;
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -11.07271962268484);
 }
 
 TEST(DenseHamiltonian, BosonCouplingMaxOcc2) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 2);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_holstein_coupling = 1.4;
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 2;
+    opts.m_hamiltonian.m_boson.m_holstein_omega = 0.3;
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -6.692966463435127);
 }
 
 TEST(DenseHamiltonian, BosonCouplingMaxOcc1) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 1);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_holstein_coupling = 1.4;
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 1;
+    opts.m_hamiltonian.m_boson.m_holstein_omega = 0.3;
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -3.1699561178752873);
 }
 
 TEST(DenseHamiltonian, BosonCouplingMaxOcc3) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_HH_W0.3";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 3);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
+    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    opts.m_hamiltonian.m_ladder.m_holstein_coupling = 1.4;
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 3;
+    opts.m_hamiltonian.m_boson.m_holstein_omega = 0.3;
+    opts.verify();
+    Hamiltonian ham_src(opts.m_hamiltonian);
+    DenseHamiltonian dh(ham_src);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -9.423844225360671);
 }
 
 TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 1);
-    DenseHamiltonian dh(h);
-    const auto frm_dim = ci_utils::fermion_dim(h.m_bd.m_nsite, h.nelec());
-    const auto bos_dim = ci_utils::boson_dim(h.m_bd.m_nsite, h.m_nboson_max);
-    ASSERT_EQ(dh.m_ncol, frm_dim*bos_dim);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 1;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
+    Hamiltonian src_ham(opts.m_hamiltonian);
+    DenseHamiltonian dh(src_ham);
+    const auto frm_dim = ci_utils::fermion_dim(src_ham.m_bd.m_nsite, src_ham.nelec());
+    const auto bos_dim = ci_utils::boson_dim(src_ham.m_bd.m_nsite, src_ham.m_nboson_max, false);
+    ASSERT_EQ(dh.m_ncol, frm_dim * bos_dim);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], 0.5090148148366922);
 }
 
 TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc2) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 2);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 2;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
+    Hamiltonian src_ham(opts.m_hamiltonian);
+    DenseHamiltonian dh(src_ham);
+    const auto frm_dim = ci_utils::fermion_dim(src_ham.m_bd.m_nsite, src_ham.nelec());
+    const auto bos_dim = ci_utils::boson_dim(src_ham.m_bd.m_nsite, src_ham.m_nboson_max, false);
+    ASSERT_EQ(dh.m_ncol, frm_dim * bos_dim);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -0.38125085248276913);
 }
 
 TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
-    auto fname = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
-    auto fname_eb = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    auto fname_bos = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 3);
-    DenseHamiltonian dh(h);
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
+    opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
+    opts.m_hamiltonian.m_ladder.m_nboson_max = 3;
+    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
+    Hamiltonian src_ham(opts.m_hamiltonian);
+    DenseHamiltonian dh(src_ham);
+    const auto frm_dim = ci_utils::fermion_dim(src_ham.m_bd.m_nsite, src_ham.nelec());
+    const auto bos_dim = ci_utils::boson_dim(src_ham.m_bd.m_nsite, src_ham.m_nboson_max, false);
+    ASSERT_EQ(dh.m_ncol, frm_dim * bos_dim);
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -0.9998830020871416);
-}
-
-TEST(DenseHamiltonian, HubbardHolsteinZpmMaxOcc1) {
-    auto fname = defs::assets_root + "/HH_ZPM/FCIDUMP_ZPM";
-    auto fname_eb = defs::assets_root + "/HH_ZPM/EBDUMP_ZPM";
-    auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 1);
-    DenseHamiltonian dh(h);
-    auto solver = dh.diagonalize();
-    ASSERT_FLOAT_EQ(solver.m_evals[0], -2.802372680550795);
-}
-
-TEST(DenseHamiltonian, HubbardHolsteinZpmMaxOcc2) {
-    auto fname = defs::assets_root + "/HH_ZPM/FCIDUMP_ZPM";
-    auto fname_eb = defs::assets_root + "/HH_ZPM/EBDUMP_ZPM";
-    auto fname_bos = defs::assets_root + "/HH_ZPM/BOSDUMP";
-    Hamiltonian h(fname, fname_eb, fname_bos, false, true, 2);
-    DenseHamiltonian dh(h);
-    auto solver = dh.diagonalize();
-    ASSERT_FLOAT_EQ(solver.m_evals[0], -2.802375057848359);
 }

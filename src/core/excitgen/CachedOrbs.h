@@ -29,6 +29,10 @@ class CachedOrbs {
      */
     defs::inds m_occ_sites;
     /**
+     * site indices with any electrons and any associated bosons (imode==isite) e.g. holstein
+     */
+    defs::inds m_occ_sites_nonzero_bosons;
+    /**
      * site indices with 2 electrons
      */
     defs::inds m_doubly_occ_sites;
@@ -43,7 +47,7 @@ class CachedOrbs {
      */
      defs::inds m_bos_op_inds;
      /**
-      * indices of boson modes with any occupation
+      * indices of boson modes with any non-zero occupation
      *  e.g. [0, 2, 0, 3, 1] decodes as:
      *      [1, 3, 4]
       */
@@ -86,6 +90,14 @@ public:
      *  vector of site indices with at least one fermion
      */
     const defs::inds& occ_sites(const field::FrmOnv &mbf);
+    /**
+     * update the vector of site indices with at least one fermion and at least one boson
+     * @param mbf
+     *  many-body basis function
+     * @return
+     *  vector of site indices with at least one fermion and at least one boson
+     */
+    const defs::inds& occ_sites_nonzero_bosons(const field::FrmBosOnv &mbf);
     /**
      * update the vector of site indices occupied with two fermions
      * @param mbf

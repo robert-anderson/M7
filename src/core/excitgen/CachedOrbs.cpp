@@ -14,6 +14,7 @@ void CachedOrbs::clear() {
     m_vac.clear();
     m_nonempty_pair_labels.clear();
     m_occ_sites.clear();
+    m_occ_sites_nonzero_bosons.clear();
     m_doubly_occ_sites.clear();
     m_not_singly_occ_sites.clear();
     m_bos_op_inds.clear();
@@ -48,6 +49,14 @@ const defs::inds &CachedOrbs::occ_sites(const field::FrmOnv &mbf) {
         }
     }
     return m_occ_sites;
+}
+
+const defs::inds &CachedOrbs::occ_sites_nonzero_bosons(const field::FrmBosOnv &mbf) {
+    if (m_occ_sites_nonzero_bosons.empty()) {
+        const auto& occ = occ_sites(mbf.m_frm);
+        for (auto& imode: occ) if (mbf.m_bos[imode]) m_occ_sites_nonzero_bosons.push_back(imode);
+    }
+    return m_occ_sites_nonzero_bosons;
 }
 
 const defs::inds &CachedOrbs::doubly_occ_sites(const field::FrmOnv &mbf) {
