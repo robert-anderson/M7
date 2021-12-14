@@ -98,7 +98,7 @@ void Shift::update(const Wavefunction &wf, const size_t &icycle, const double &t
         if (variable_mode && a) {
             auto rate =  nw / m_nwalker_last_period[ipart];
             m_values[ipart] -= m_opts.m_shift.m_damp * consts::real_log(rate) / (tau * a);
-            if (m_opts.m_shift.m_reweight) {
+            if (m_opts.m_shift.m_reweight.enabled()) {
                 bool reweight_begin_cond = icycle >= variable_mode.icycle_start() + m_opts.m_shift.m_reweight.m_delay;
                 m_reweighter.update(icycle, ipart, reweight_begin_cond, get_average(ipart));
                 m_reweighter.add(ipart, m_values[ipart], icycle, tau);

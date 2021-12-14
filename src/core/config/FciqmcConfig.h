@@ -86,6 +86,8 @@ namespace fciqmc_config {
         //config::Param<std::vector<defs::inds>> m_csf;
 
         explicit MbfDef(config::Group *parent, std::string name);
+
+        bool enabled() const override;
     };
 
     struct Reference : config::Section {

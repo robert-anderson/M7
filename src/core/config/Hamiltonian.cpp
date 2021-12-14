@@ -6,19 +6,31 @@
 
 fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
         config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
-        m_path(this, "path", defs::enable_fermions ? "FCIDUMP" : "", "path to file defining fermionic Hamiltonian"),
+        m_path(this, "path", "", "path to file defining fermionic Hamiltonian"),
         m_spin_major(this, "spin_major", false,
                      "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.") {}
+
+bool fciqmc_config::Fcidump::enabled() const {
+    return !m_path.get().empty();
+}
 
 fciqmc_config::Bosdump::Bosdump(config::Group *parent) :
         config::Section(parent, "bosdump",
                         "options relating to 4-indexed text file defining arbitrary number-conserving boson interactions"),
         m_path(this, "path", defs::enable_bosons ? "BOSDUMP" : "", "path to BOSDUMP format file") {}
 
+bool fciqmc_config::Bosdump::enabled() const {
+    return !m_path.get().empty();
+}
+
 fciqmc_config::Ebdump::Ebdump(config::Group *parent) :
         config::Section(parent, "bosdump",
                         "options relating to 3-indexed text file defining arbitrary couplings between electron hopping (and one-electron density) and boson (de-)excitations"),
         m_path(this, "path", defs::enable_bosons ? "EBDUMP" : "", "path to EBDUMP format file") {}
+
+bool fciqmc_config::Ebdump::enabled() const {
+    return !m_path.get().empty();
+}
 
 fciqmc_config::Hubbard::Hubbard(config::Group *parent) :
         config::Section(parent, "hubbard",
@@ -34,6 +46,10 @@ void fciqmc_config::Hubbard::verify() {
                "boundary conditions must be defined for each element of the lattice shape");
 }
 
+bool fciqmc_config::Hubbard::enabled() const {
+    return !m_site_shape.get().empty();
+}
+
 fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
         config::Section(parent, "fermion", "options relating to the fermion hamiltonian terms"),
         m_fcidump(this), m_hubbard(this),
@@ -43,8 +59,12 @@ fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
                        "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number") {}
 
 void fciqmc_config::FermionHamiltonian::verify() {
-    size_t ndefined = m_fcidump + m_hubbard;
+    size_t ndefined = m_fcidump.enabled() + m_hubbard.enabled();
     REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
+}
+
+bool fciqmc_config::FermionHamiltonian::enabled() const {
+    return m_fcidump.enabled() || m_hubbard.enabled();
 }
 
 fciqmc_config::LadderHamiltonian::LadderHamiltonian(config::Group *parent) :
@@ -67,10 +87,18 @@ void fciqmc_config::LadderHamiltonian::verify() {
                                defs::max_bos_occ));
 }
 
+bool fciqmc_config::LadderHamiltonian::enabled() const {
+    return m_ebdump.enabled() || m_holstein_coupling.get()!=0.0;
+}
+
 fciqmc_config::BosonHamiltonian::BosonHamiltonian(config::Group *parent) :
         config::Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
         m_bosdump(this),
         m_holstein_omega(this, "holstein_omega", 0.0, "constant frequency of the boson modes in the Holstein model") {}
+
+bool fciqmc_config::BosonHamiltonian::enabled() const {
+    return !m_bosdump.m_path.get().empty();
+}
 
 fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator terms"),

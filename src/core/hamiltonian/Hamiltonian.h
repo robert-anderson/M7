@@ -48,7 +48,7 @@ private:
     BasisDims make_bd() const;
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
-        if (opts.m_hubbard)
+        if (opts.m_hubbard.enabled())
             return std::unique_ptr<FrmHam>(new HubbardFrmHam(opts));
         else if (defs::enable_fermions)
             return std::unique_ptr<FrmHam>(new GeneralFrmHam(opts));

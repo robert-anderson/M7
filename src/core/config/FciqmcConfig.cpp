@@ -279,3 +279,7 @@ fciqmc_config::MbfDef::MbfDef(config::Group *parent, std::string name) :
                                    "levels of all modes"),
         m_neel(this, "neel", false,
                         "initialize the MBF to a Neel state rather than assuming Aufbau principle"){}
+
+bool fciqmc_config::MbfDef::enabled() const {
+    return !m_bos.get().empty() || !m_frm.get().empty() || m_neel.get();
+}

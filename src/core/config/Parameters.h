@@ -34,6 +34,12 @@ namespace config {
         virtual std::string invalid_file_key() const;
 
         const std::string &name() const;
+
+        virtual bool enabled() const {
+            return true;
+        }
+
+        bool parents_enabled() const;
     };
 
     struct Group : Node {
@@ -58,19 +64,11 @@ namespace config {
 
 
     struct Section : Group {
-        const bool m_is_specified;
-    private:
-        bool make_exists() const;
-
-    public:
         Section(Group *parent, std::string name, std::string description);
-
-        operator bool() const;
 
         std::string help_string() const override;
 
         void log_value() const override {
-            if (!*this) log::info("section {} unspecified, using defaults", m_yaml_path.to_string());
             for (auto child: m_children) child->log_value();
         }
     };
@@ -150,23 +148,25 @@ namespace config {
 
     template<typename T>
     class Param : public ParamBase {
+        const T m_v_default;
         T m_v;
 
     public:
         Param(Group *parent, std::string name, const T &v_default, std::string description) :
-                ParamBase(parent, name, description, utils::to_string(v_default), dim_str(v_default)) {
+                ParamBase(parent, name, description, utils::to_string(v_default), dim_str(v_default)),
+                m_v_default(v_default) {
             auto file = parent->get_file();
             if (file) {
                 try {
                     if (file->exists(m_yaml_path)) m_v = file->get_as<T>(m_yaml_path);
-                    else m_v = v_default;
+                    else m_v = m_v_default;
                 }
                 catch (const YAML::BadConversion &ex) {
                     ABORT(log::format("failed reading value {} from line {} of YAML config file",
                                       m_yaml_path.to_string(), ex.mark.line));
                 }
             } else {
-                m_v = v_default;
+                m_v = m_v_default;
             }
         }
 

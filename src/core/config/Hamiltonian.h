@@ -14,18 +14,24 @@ namespace fciqmc_config {
         config::Param<bool> m_spin_major;
 
         explicit Fcidump(config::Group *parent);
+
+        bool enabled() const override;
     };
 
     struct Bosdump : config::Section {
         config::Param<std::string> m_path;
 
         explicit Bosdump(config::Group *parent);
+
+        bool enabled() const override;
     };
 
     struct Ebdump : config::Section {
         config::Param<std::string> m_path;
 
         explicit Ebdump(config::Group *parent);
+
+        bool enabled() const override;
     };
 
     struct Hubbard : config::Section {
@@ -36,6 +42,8 @@ namespace fciqmc_config {
         Hubbard(config::Group *parent);
 
         void verify() override;
+
+        bool enabled() const override;
     };
 
     struct FermionHamiltonian : config::Section {
@@ -47,6 +55,8 @@ namespace fciqmc_config {
         FermionHamiltonian(config::Group *parent);
 
         void verify() override;
+
+        bool enabled() const override;
     };
 
     struct LadderHamiltonian : config::Section {
@@ -57,12 +67,16 @@ namespace fciqmc_config {
         LadderHamiltonian(config::Group *parent);
 
         void verify() override;
+
+        bool enabled() const override;
     };
 
     struct BosonHamiltonian : config::Section {
         Bosdump m_bosdump;
         config::Param<defs::ham_comp_t > m_holstein_omega;
         BosonHamiltonian(config::Group *parent);
+
+        bool enabled() const override;
     };
 
     struct Hamiltonian : config::Section {

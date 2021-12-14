@@ -28,6 +28,13 @@ const std::string &config::Node::name() const {
     return m_yaml_path.m_name_list.back();
 }
 
+bool config::Node::parents_enabled() const {
+    for (auto node = m_parent; node!= nullptr; node=node->m_parent){
+        if (!node->enabled()) return false;
+    }
+    return true;
+}
+
 std::set<std::string> config::Group::make_file_keys() const {
     std::set<std::string> file_keys;
     auto yf = get_file();
@@ -73,18 +80,8 @@ std::string config::Group::invalid_file_key() const {
     return "";
 }
 
-bool config::Section::make_exists() const {
-    auto file = get_file();
-    if (file) return file->exists(m_yaml_path);
-    return false;
-}
-
 config::Section::Section(config::Group *parent, std::string name, std::string description) :
-        Group(parent, name, description), m_is_specified(make_exists()) {}
-
-config::Section::operator bool() const {
-    return m_is_specified;
-}
+        Group(parent, name, description) {}
 
 std::string config::Section::help_string() const {
     std::string str;

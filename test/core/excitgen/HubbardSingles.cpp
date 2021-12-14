@@ -10,12 +10,12 @@
 
 TEST(HubbardUniform, ObcFromNeel1D) {
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
-    opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4.0;
-    opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {6};
-    opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
+    fciqmc_config::Hamiltonian opts(nullptr);
+    opts.m_fermion.m_hubbard.m_repulsion = 4.0;
+    opts.m_fermion.m_hubbard.m_site_shape = {6};
+    opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.verify();
-    Hamiltonian ham(opts.m_hamiltonian);
+    Hamiltonian ham(opts);
     HubbardUniform excit_gen(ham, prng);
     ASSERT_FALSE(excit_gen.h_cast()->m_bcs[0]);
     excititers::Frm excit_iter(ham, exsig_utils::ex_single);

@@ -35,6 +35,8 @@ TEST(NumericCsvFileReader, Fcidump){
 
 TEST(NumericCsvFileReader, ParseScientific){
     double v;
+    NumericCsvFileReader::parse("1.e6", v);
+    ASSERT_FLOAT_EQ(v, 1000000.0);
     NumericCsvFileReader::parse("-0.4e3", v);
     ASSERT_FLOAT_EQ(v, -400.0);
     NumericCsvFileReader::parse("+3141.596e-3", v);

@@ -10,9 +10,9 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),
         m_uniform_twf(
-                m_opts.m_inst_ests.m_spf_uniform_twf ?
+                m_opts.m_inst_ests.m_spf_uniform_twf.enabled() ?
                 new UniformTwf(m_prop.m_ham, m_wf.npart()) : nullptr),
-        m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf ?
+        m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf.enabled() ?
                        new WeightedTwf(m_prop.m_ham, m_wf.npart(),
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
                                        m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
@@ -221,8 +221,10 @@ void Solver::loop_over_occupied_mbfs() {
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
             if (ipart == 0) {
-                if (m_opts.m_inst_ests.m_spf_uniform_twf) m_uniform_twf->add(row.m_weight, row.m_mbf);
-                if (m_opts.m_inst_ests.m_spf_weighted_twf) m_weighted_twf->add(row.m_weight, row.m_mbf);
+                if (m_opts.m_inst_ests.m_spf_uniform_twf.enabled())
+                    m_uniform_twf->add(row.m_weight, row.m_mbf);
+                if (m_opts.m_inst_ests.m_spf_weighted_twf.enabled())
+                    m_weighted_twf->add(row.m_weight, row.m_mbf);
             }
 
             if (m_wf.m_ra.is_active()) {
