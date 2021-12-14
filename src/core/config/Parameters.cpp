@@ -6,7 +6,7 @@
 
 config::Node::Node(config::Node *parent, std::string name, std::string description) :
         m_parent(parent), m_yaml_path(parent ? yaml::Path(parent->m_yaml_path + name) : yaml::Path(name)),
-        m_description(description), m_indent(2 * (m_yaml_path.depth() - 1), ' ') {
+        m_description(description), m_indent(2 * m_yaml_path.depth(), ' ') {
 }
 
 config::Node::Node(std::string description) : Node(nullptr, "", description){}
@@ -50,7 +50,6 @@ std::set<std::string> config::Group::make_child_keys() const {
 
 config::Group::Group(config::Group *parent, std::string name, std::string description) :
         Node(parent, name, description) {
-    //REQUIRE_TRUE(m_parent, "Non-root config::Nodes must have a parent");
     if (parent) parent->add_child(this);
 }
 

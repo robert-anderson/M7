@@ -13,6 +13,7 @@ yaml::Path::Path(std::string name) : Path(string_utils::split(name, '.')) {}
 yaml::Path::Path(const yaml::Path &other) : m_name_list(other.m_name_list) {}
 
 std::string yaml::Path::to_string() const {
+    if (m_name_list.empty()) return "";
     auto it = m_name_list.cbegin();
     std::string out = *it;
     ++it;
