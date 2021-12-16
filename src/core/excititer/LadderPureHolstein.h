@@ -2,8 +2,8 @@
 // Created by rja on 24/11/2021.
 //
 
-#ifndef M7_LADDERPUREHOLSTEIN_H
-#define M7_LADDERPUREHOLSTEIN_H
+#ifndef M7_EXCITITER_LADDERPUREHOLSTEIN_H
+#define M7_EXCITITER_LADDERPUREHOLSTEIN_H
 
 #include "ExcitIters.h"
 
@@ -18,4 +18,4 @@ namespace excititers {
 }
 
 
-#endif //M7_LADDERPUREHOLSTEIN_H
+#endif //M7_EXCITITER_LADDERPUREHOLSTEIN_H

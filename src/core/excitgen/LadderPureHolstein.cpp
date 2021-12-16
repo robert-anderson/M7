@@ -14,7 +14,7 @@ bool LadderPureHolstein::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, 
     DEBUG_ASSERT_EQ(src.m_bos.nelement(), src.m_frm.m_nsite,
                     "excit gen assumes one boson mode per fermion site");
 
-    auto imode = occs[m_prng.draw_uint(occs.size())] % src.m_frm.m_nsite;
+    auto imode = src.m_frm.isite(occs[m_prng.draw_uint(occs.size())]);
     // if m_cre, attempt to generate an ONV with an additional boson occupying the mode at imode
     // else, attempt to generate a "de-excited" ONV with one less boson occupying the mode at imode
     size_t curr_occ = src.m_bos[imode];

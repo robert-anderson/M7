@@ -2,12 +2,11 @@
 // Created by rja on 28/08/2021.
 //
 
-#include <src/core/excitgen/LadderPureHolsteinZpm.h>
+#include <src/core/excitgen/LadderPureHolstein.h>
 #include <src/core/hamiltonian/GeneralLadderHam.h>
 #include "src/core/excititer/LadderPure.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
-#include "src/core/excitgen/LadderPureUniform.h"
 
 TEST(LadderPure, Uniform0001){
     PRNG prng(14, 1000000);
