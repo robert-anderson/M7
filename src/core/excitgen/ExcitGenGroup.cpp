@@ -3,7 +3,7 @@
 //
 
 #include "ExcitGenGroup.h"
-#include "LadderPureHolsteinZpm.h"
+#include "LadderPureHolstein.h"
 #include "LadderHoppingPc.h"
 #include "BosonSumConservingDoubles.h"
 
@@ -96,8 +96,12 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             /*
              * hamiltonian has non-zero off-diagonal elements of one or both of the "pure" ladder operator type
              */
-            if (is_holstein) add(std::unique_ptr<ExcitGen>(new LadderPureHolstein(ham, prng)), exsigs);
-            else add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng)), exsigs);
+            if (is_holstein) {
+                // boson creation and annihilation are treated differently for excit generation
+                add(std::unique_ptr<ExcitGen>(new LadderHolsteinCre(ham, prng)));
+                add(std::unique_ptr<ExcitGen>(new LadderHolsteinAnn(ham, prng)));
+            }
+            else add(std::unique_ptr<ExcitGen>(new LadderPureUniform(ham, prng, exsigs)));
         }
         /*
          * then the "hopping" type exsigs 1110 and 1101

@@ -8,19 +8,19 @@
 #include "ExcitGenTester.h"
 
 
-TEST(LadderPureHolstein, Holstein0001){
+TEST(LadderPureHolstein, HolsteinAnn){
     PRNG prng(14, 1000000);
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {6};
-    opts.m_fermion.m_hubbard.m_boundary_conds = {-1};
+    opts.m_fermion.m_hubbard.m_boundary_conds = {1};
     opts.m_ladder.m_holstein_coupling = 0.3;
     opts.m_ladder.m_nboson_max = 4;
     opts.m_boson.m_holstein_omega = 1.4;
     opts.verify();
     Hamiltonian ham(opts);
     excititers::LadderPureHolstein excit_iter(ham, exsig_utils::ex_0001);
-    LadderPureHolstein excit_gen(ham, prng);
+    LadderHolsteinAnn excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmBosOnv src(ham.m_bd);
     /*
@@ -38,19 +38,19 @@ TEST(LadderPureHolstein, Holstein0001){
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
 }
 
-TEST(LadderPureHolstein, Holstein0010){
+TEST(LadderPureHolstein, HolsteinCre){
     PRNG prng(14, 1000000);
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {6};
-    opts.m_fermion.m_hubbard.m_boundary_conds = {-1};
+    opts.m_fermion.m_hubbard.m_boundary_conds = {1};
     opts.m_ladder.m_holstein_coupling = 0.3;
     opts.m_ladder.m_nboson_max = 4;
     opts.m_boson.m_holstein_omega = 1.4;
     opts.verify();
     Hamiltonian ham(opts);
     excititers::LadderPureHolstein excit_iter(ham, exsig_utils::ex_0010);
-    LadderPureHolstein excit_gen(ham, prng);
+    LadderHolsteinCre excit_gen(ham, prng);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmBosOnv src(ham.m_bd);
     /*

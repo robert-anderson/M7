@@ -20,7 +20,7 @@ TEST(LadderPure, Uniform0001){
     auto& h_cast = dynamic_cast<const GeneralLadderHam&>(*ham.m_ladder);
     ASSERT_EQ(h_cast.m_v_unc, uncs_chk);
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0001);
-    LadderPureUniform excit_gen(ham, prng);
+    LadderPureUniform excit_gen(ham, prng, {exsig_utils::ex_0001});
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmBosOnv src(ham.m_bd);
     /*
@@ -50,7 +50,7 @@ TEST(LadderPure, Uniform0010){
     auto& h_cast = dynamic_cast<const GeneralLadderHam&>(*ham.m_ladder);
     ASSERT_EQ(h_cast.m_v_unc, uncs_chk);
     excititers::LadderPure excit_iter(ham, exsig_utils::ex_0010);
-    LadderPureUniform excit_gen(ham, prng);
+    LadderPureUniform excit_gen(ham, prng, {exsig_utils::ex_0010});
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::FrmBosOnv src(ham.m_bd);
     /*

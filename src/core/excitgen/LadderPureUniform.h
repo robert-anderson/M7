@@ -8,8 +8,9 @@
 #include "ExcitGen.h"
 
 struct LadderPureUniform : public LadderExcitGen {
-    LadderPureUniform(const Hamiltonian& ham, PRNG& prng):
-        LadderExcitGen(ham, prng, {exsig_utils::ex_0010, exsig_utils::ex_0001}){}
+    LadderPureUniform(const Hamiltonian& ham, PRNG& prng, const defs::inds& exsigs):
+        LadderExcitGen(ham, prng, exsigs){
+    }
 
     bool draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
