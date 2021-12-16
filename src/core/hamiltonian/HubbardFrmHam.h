@@ -33,6 +33,10 @@ struct HubbardFrmHam : FrmHam {
      */
     Matrix<int> m_t_mat_dense;
     /**
+     * to help with excitation generation.
+     */
+    size_t m_unique_nconn_product;
+    /**
      * whether the model meets the sign problem-free conditions
      */
     const bool m_spf;

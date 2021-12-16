@@ -73,23 +73,26 @@ HubbardFrmHam::HubbardFrmHam(const defs::inds& site_shape, const std::vector<int
     m_t_mat_dense.zero();
 
     foreach::rtnd::Unrestricted loop(m_format.m_shape);
+    std::set<size_t> nconns;
     auto fn = [&]() {
         auto &inds = loop.m_inds;
         auto irow = m_format.flatten(inds);
+        size_t nconn = 0ul;
         for (size_t idim = 0ul; idim < inds.size(); ++idim) {
-            auto pair = get_coordination(inds, idim, false);
-            if (pair.first != ~0ul) {
-                m_t_mat_sparse.add(irow, pair);
-                m_t_mat_dense(irow, pair.first) = pair.second;
-            }
-            pair = get_coordination(inds, idim, true);
-            if (pair.first != ~0ul) {
-                m_t_mat_sparse.add(irow, pair);
-                m_t_mat_dense(irow, pair.first) = pair.second;
+            for (bool inc : {false, true}){
+                auto pair = get_coordination(inds, idim, inc);
+                if (pair.first != ~0ul) {
+                    m_t_mat_sparse.add(irow, pair);
+                    m_t_mat_dense(irow, pair.first) = pair.second;
+                    ++nconn;
+                }
             }
         }
+        nconns.insert(nconn);
     };
     loop(fn);
+    m_unique_nconn_product = 1ul;
+    for (const auto& unique_nconn: nconns) m_unique_nconn_product*=unique_nconn;
 
     log::info("Hubbard Hamiltonian initialized with U={}, site shape={}, boundary conds={}",
               m_u, utils::to_string(m_format.m_shape), utils::to_string(m_bcs));

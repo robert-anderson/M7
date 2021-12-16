@@ -10,14 +10,19 @@ size_t HubbardUniform::approx_nconn() const {
 
 bool HubbardUniform::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
                             defs::prob_t &prob, conn::FrmOnv &conn) {
-    auto rand = m_prng.draw_uint(m_nelec);
-    const auto occ = orbs.occ(src).m_flat[rand];
+    const auto h = h_cast();
+    /*
+     * the number of neighboring sites accessible is not decided till the occupied index has been chosen. If the integer
+     * picked is an integral multiple of all possible numbers of accessible sites, then in any case the modular
+     * remainder will provide an unbiased index - saving a PRNG call
+     */
+    auto rand = m_prng.draw_uint(m_nelec*h->m_unique_nconn_product);
+    const auto occ = orbs.occ(src).m_flat[rand/h->m_unique_nconn_product];
     const auto isite = src.isite(occ);
     const auto ispin = src.ispin(occ);
     auto t_mat_row = h_cast()->m_t_mat_sparse[isite];
     const auto nvac = t_mat_row.first.size();
-    rand = m_prng.draw_uint(nvac);
-    auto vac = src.m_format.flatten({ispin, t_mat_row.first[rand]});
+    auto vac = src.m_format.flatten({ispin, t_mat_row.first[rand%nvac]});
     if (src.get(vac)) return false;
     prob = 1.0 / double (m_nelec * nvac);
     conn.set(occ, vac);
