@@ -9,13 +9,6 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),
-        m_uniform_twf(
-                m_opts.m_inst_ests.m_spf_uniform_twf.enabled() ?
-                new UniformTwf(m_prop.m_ham, m_wf.npart()) : nullptr),
-        m_weighted_twf(m_opts.m_inst_ests.m_spf_weighted_twf.enabled() ?
-                       new WeightedTwf(m_prop.m_ham, m_wf.npart(),
-                                       m_opts.m_inst_ests.m_spf_weighted_twf.m_fermion_fac,
-                                       m_opts.m_inst_ests.m_spf_weighted_twf.m_boson_fac) : nullptr),
         m_maes(m_opts.m_av_ests, m_prop.m_ham.m_bd, m_prop.m_ham.nelec(), m_wf.nroot()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
         m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
@@ -220,13 +213,6 @@ void Solver::loop_over_occupied_mbfs() {
             m_wf.m_nwalker.m_local[ipart] += std::abs(weight);
             m_wf.m_l2_norm_square.m_local[ipart] += std::pow(std::abs(weight), 2.0);
 
-            if (ipart == 0) {
-                if (m_opts.m_inst_ests.m_spf_uniform_twf.enabled())
-                    m_uniform_twf->add(row.m_weight, row.m_mbf);
-                if (m_opts.m_inst_ests.m_spf_weighted_twf.enabled())
-                    m_weighted_twf->add(row.m_weight, row.m_mbf);
-            }
-
             if (m_wf.m_ra.is_active()) {
                 m_spawning_timer.reset();
                 m_spawning_timer.unpause();
@@ -299,8 +285,6 @@ void Solver::end_cycle() {
     m_refs.end_cycle();
     m_wf.end_cycle();
     m_maes.end_cycle();
-    if (m_uniform_twf) m_uniform_twf->reduce();
-    if (m_weighted_twf) m_weighted_twf->reduce();
 }
 
 void Solver::output_stats() {
@@ -325,11 +309,6 @@ void Solver::output_stats() {
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
         if (m_prop.nexcit_gen()) stats.m_exlvl_probs = m_prop.exlvl_probs();
-        if (m_uniform_twf) stats.m_uniform_twf_num = m_uniform_twf->m_numerator_total[0];
-        if (m_weighted_twf) {
-            stats.m_weighted_twf_num = m_weighted_twf->m_numerator_total[0];
-            stats.m_weighted_twf_denom = m_weighted_twf->m_denominator_total[0];
-        }
         stats.m_reweighting_factor = m_prop.m_shift.m_reweighter.m_total;
         m_stats->commit();
 

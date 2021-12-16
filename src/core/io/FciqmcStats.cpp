@@ -23,8 +23,5 @@ FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
         m_exlvl_probs(prop.nexcit_gen() ? this : nullptr,
                       {{prop.nexcit_gen()}, {"excitation generator index"}},
                       "Probability of attempting to draw excitation level"),
-        m_uniform_twf_num(this, m_wf_format, "Numerator of uniform TWF-projected energy estimator"),
-        m_weighted_twf_num(this, m_wf_format, "Numerator of weighted TWF-projected energy estimator"),
-        m_weighted_twf_denom(this, m_wf_format, "Denominator of weighted TWF-projected energy estimator"),
         m_reweighting_factor(this, m_wf_format, "Reweighting factor for population control unbiasing")
 {}

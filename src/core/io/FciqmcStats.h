@@ -28,9 +28,6 @@ struct FciqmcStatsRow : StatsRow {
     statistic::Numbers<size_t, defs::ndim_wf> m_nocc_mbf;
     statistic::Numbers<int, defs::ndim_wf> m_delta_nocc_mbf;
     statistic::Numbers<defs::prob_t, 1ul> m_exlvl_probs;
-    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_uniform_twf_num;
-    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_num;
-    statistic::Numbers<defs::ham_t, defs::ndim_wf> m_weighted_twf_denom;
     statistic::Numbers<defs::ham_comp_t, defs::ndim_wf> m_reweighting_factor;
 
     FciqmcStatsRow(Propagator& prop);
