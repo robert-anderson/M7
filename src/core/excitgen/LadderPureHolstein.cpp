@@ -23,7 +23,6 @@ bool LadderHolsteinCre::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, C
     prob /= occs.size();
 
     if (curr_occ == m_h.m_nboson_max) return false;
-    DEBUG_ASSERT_LE(size_t(curr_occ + 1), m_h.m_nboson_max, "generated boson occupation exceeds cutoff");
 
     conn.clear();
     conn.m_bos.m_cre.add({imode, 1ul});
@@ -39,12 +38,10 @@ bool LadderHolsteinAnn::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, C
 
     auto imode = occs[m_prng.draw_uint(occs.size())];
     // attempt to generate a "de-excited" ONV with one less boson occupying the mode at imode
-    size_t curr_occ = src.m_bos[imode];
-    DEBUG_ASSERT_LE(curr_occ, m_h.m_nboson_max, "current occupation of selected mode exceeds cutoff");
+    DEBUG_ASSERT_LE(src.m_bos[imode], m_h.m_nboson_max, "current occupation of selected mode exceeds cutoff");
+    DEBUG_ASSERT_TRUE(src.m_bos[imode], "selected boson mode should have non-zero occupation");
 
     prob = 1.0/occs.size();
-
-    DEBUG_ASSERT_TRUE(curr_occ, "generated boson occupation exceeds cutoff");
 
     conn.clear();
     conn.m_bos.m_ann.add({imode, 1ul});
