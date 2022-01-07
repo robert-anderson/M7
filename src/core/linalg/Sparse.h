@@ -15,16 +15,22 @@ namespace sparse {
 
     class Network {
         bool m_resized_by_add = false;
+        size_t m_nentry = 0ul;
 
     protected:
         std::vector<defs::inds> m_rows_icols;
 
     public:
+
         virtual void resize(const size_t& nrow);
 
         size_t nrow() const;
 
+        size_t nentry() const;
+
         void add(const size_t &irow, const size_t &icol);
+
+        void add(const size_t &irow, const defs::inds &icols);
 
         bool empty();
 
@@ -46,6 +52,11 @@ namespace sparse {
             Network::add(irow, icol);
             if (irow >= m_rows_values.size()) resize(irow + 1);
             m_rows_values[irow].push_back(v);
+        }
+
+        void add(const size_t &irow, const defs::inds &icols, const std::vector<T>& vs) {
+            REQUIRE_EQ(icols.size(), vs.size(), "must have same number of column indices and values");
+            for (size_t i=0ul; i<icols.size(); ++i) add(irow, icols[i], vs[i]);
         }
 
         void add(const size_t &irow, const std::pair<size_t, T>& pair){

@@ -6,6 +6,7 @@
 #define M7_HASHER_H
 
 
+#include <set>
 #include "src/defs.h"
 
 namespace hashing {
@@ -45,7 +46,7 @@ namespace hashing {
     }
 
     /**
-     * deterministically generates integers in a range for the purpose of generating hashed test data
+     * deterministically generate arbitrary testing data: NOT a random number generator
      * @param v
      *  value to be hashed
      * @param lo
@@ -55,19 +56,30 @@ namespace hashing {
      * @return
      *  hash value
      */
-    static defs::hash_t in_range(defs::hash_t v, const defs::hash_t& lo, const defs::hash_t& hi){
-        ASSERT(hi>lo);
-        v = fnv_hash(v+312194ul);
-        v%=hi-lo;
-        return v+lo;
-    }
+    defs::hash_t in_range(defs::hash_t v, const defs::hash_t& lo, const defs::hash_t& hi);
 
-    static defs::hash_t in_range(const std::vector<defs::hash_t>& v, const defs::hash_t& lo, const defs::hash_t& hi){
-        ASSERT(!v.empty());
-        auto out = in_range(v[0], lo, hi);
-        for (size_t i=1ul; i<v.size(); ++i) out = in_range(out+4321*v[i], lo, hi);
-        return out;
-    }
+    defs::hash_t in_range(const std::vector<defs::hash_t>& v, const defs::hash_t& lo, const defs::hash_t& hi);
+
+    /**
+     * deterministically generate arbitrary testing data: NOT a random number generator
+     * @param v
+     *  value to be hashed
+     * @param ngen
+     *  number of values to generate
+     * @param lo
+     *  inclusive minimum value included in result
+     * @param hi
+     *  exclusive maximum value included in result
+     * @param sorted
+     *  true if the result should be put to ascending order before returning
+     * @return
+     *  unrepeated arbitrary integers in the [lo, hi) range
+     */
+    std::vector<defs::hash_t> in_range(const std::vector<defs::hash_t>& v, size_t ngen,
+                                              const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
+
+    std::vector<defs::hash_t> in_range(defs::hash_t v, size_t ngen,
+                                              const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
 };
 
 

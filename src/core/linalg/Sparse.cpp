@@ -12,6 +12,10 @@ size_t sparse::Network::nrow() const {
     return m_rows_icols.size();
 }
 
+size_t sparse::Network::nentry() const {
+    return m_nentry;
+}
+
 void sparse::Network::add(const size_t &irow, const size_t &icol) {
     if (irow >= m_rows_icols.size()) {
         if (!m_resized_by_add) {
@@ -22,6 +26,11 @@ void sparse::Network::add(const size_t &irow, const size_t &icol) {
         resize(irow + 1);
     }
     m_rows_icols[irow].push_back(icol);
+    ++m_nentry;
+}
+
+void sparse::Network::add(const size_t &irow, const defs::inds &icols) {
+    for (auto& icol: icols) add(irow, icol);
 }
 
 bool sparse::Network::empty() { return m_rows_icols.empty(); }
