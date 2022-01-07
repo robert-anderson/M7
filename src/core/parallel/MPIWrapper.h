@@ -161,9 +161,9 @@ extern size_t g_irank_on_node;
 extern size_t g_nrank_on_node;
 extern int g_p2p_tag;
 
-struct mpi {
+namespace mpi {
 
-    static void setup_mpi_globals();
+    void setup_mpi_globals();
 
     static const size_t &nrank() {
         return g_nrank;
@@ -189,9 +189,9 @@ struct mpi {
         return &g_node_comm;
     }
 
-    static void barrier();
+    void barrier();
 
-    static void barrier_on_node();
+    void barrier_on_node();
 
     static defs::mpi_count snrw(const size_t &i) {
         return utils::safe_narrow<defs::mpi_count>(i);
@@ -220,8 +220,6 @@ struct mpi {
         return displs;
     }
 
-
-private:
     template<typename T>
     static bool reduce(const T *send, T *recv, MpiOp op, size_t ndata = 1, size_t iroot = 0) {
         return MPI_Reduce(send, recv, snrw(ndata), mpi_type<T>(), op_map[op], snrw(iroot), MPI_COMM_WORLD) ==
@@ -261,7 +259,6 @@ private:
         return all_reduce(send.data(), recv.data(), op, send.size());
     }
 
-public:
     /*
      * MAX REDUCE CONVENIENCE METHODS
      */
@@ -523,30 +520,13 @@ public:
         return all_minloc(send.data(), recv.data(), send.size());
     }
 
-    template<typename T>
-    static bool all_to_all(const T *send, size_t nsend, T *recv, size_t nrecv) {
-        auto send_ptr = reinterpret_cast<const void *>(send);
-        auto recv_ptr = reinterpret_cast<void *>(recv);
-        return MPI_Alltoall(send_ptr, snrw(nsend), mpi_type<T>(),
-                            recv_ptr, snrw(nrecv), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
-    }
+    /*
+     * COLLECTIVE CALLS
+     */
 
-    template<typename T>
-    static bool all_to_all(const std::vector<T> &send, std::vector<T> &recv) {
-        return all_to_all(send.data(), 1ul, recv.data(), 1ul);
-    }
-
-private:
-    template<typename T>
-    static bool all_to_allv(
-            const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
-        auto send_ptr = reinterpret_cast<const void *>(send);
-        auto recv_ptr = reinterpret_cast<void *>(recv);
-        return MPI_Alltoallv(
-                send_ptr, sendcounts, senddispls, mpi_type<T>(),
-                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
-    }
+    /*
+     * GATHER
+     */
 
     template<typename T>
     static bool gather(
@@ -567,6 +547,16 @@ private:
                MPI_SUCCESS;
     }
 
+    template<typename T>
+    static bool all_gather(const T& send, T *recv){
+        return all_gather(&send, 1, recv, 1);
+    }
+
+    template<typename T>
+    static bool all_gather(const T& send, std::vector<T>& recv){
+        recv.resize(nrank());
+        return all_gather(send, recv.data());
+    }
 
     template<typename T>
     static bool gatherv(
@@ -590,21 +580,6 @@ private:
                 recv_ptr, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
-
-public:
-    template<typename T>
-    static bool all_to_allv(
-            const T *send, const defs::inds &sendcounts, const defs::inds &senddispls,
-            T *recv, const defs::inds &recvcounts, const defs::inds &recvdispls) {
-        auto tmp_sendcounts = snrw(sendcounts);
-        auto tmp_senddispls = snrw(senddispls);
-        auto tmp_recvcounts = snrw(recvcounts);
-        auto tmp_recvdispls = snrw(recvdispls);
-        return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
-                           tmp_recvcounts.data(), tmp_recvdispls.data());
-    }
-
-
     template<typename T>
     static bool gatherv(const T *send, size_t sendcount, T *recv,
                         const defs::inds &recvcounts, const defs::inds &recvdispls, const size_t &iroot) {
@@ -622,19 +597,6 @@ public:
         return all_gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data());
     }
 
-
-    template<typename T>
-    static bool gather(const T &send, std::vector<T> &recv, const size_t &iroot) {
-        if (recv.size() < nrank()) recv.resize(nrank());
-        return gather(&send, 1ul, recv.data(), 1ul, iroot);
-    }
-
-    template<typename T>
-    static bool all_gather(const T &send, std::vector<T> &recv) {
-        if (recv.size() < nrank()) recv.resize(nrank());
-        return all_gather(&send, 1ul, recv.data(), 1ul);
-    }
-
     template<typename T>
     static std::vector<T> all_gathered(const T &send) {
         std::vector<T> out(mpi::nrank());
@@ -642,104 +604,120 @@ public:
         return out;
     }
 
+    /*
+     * SCATTER
+     */
 
     template<typename T>
-    static bool gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv,
-                        defs::inds &recvcounts, defs::inds &recvdispls, const size_t &iroot) {
-        recvcounts.resize(nrank());
-        recvdispls.resize(nrank());
-        gather(sendcount, recvcounts, iroot);
-        counts_to_displs_consec(recvcounts, recvdispls);
-        const size_t nrecv = recvdispls.back() + recvcounts.back();
-        if (recv.size() < nrecv) recv.resize(nrecv);
-        return gatherv(send.data(), sendcount, recv.data(), recvcounts, recvdispls, iroot);
+    static bool scatter(
+            const T *send, size_t sendcount, T *recv, size_t recvcount, const size_t &iroot) {
+        auto send_ptr = reinterpret_cast<void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Scatter(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
+                          snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv,
-                            defs::inds &recvcounts, defs::inds &recvdispls) {
-        recvcounts.resize(nrank());
-        recvdispls.resize(nrank());
-        all_gather(sendcount, recvcounts);
-        counts_to_displs_consec(recvcounts, recvdispls);
-        const size_t nrecv = recvdispls.back() + recvcounts.back();
-        if (recv.size() < nrecv) recv.resize(nrecv);
-        return all_gatherv(send.data(), sendcount, recv.data(), recvcounts, recvdispls);
-    }
-
-
-    template<typename T>
-    static bool gatherv(const std::vector<T> &send, std::vector<T> &recv,
-                        defs::inds &recvcounts, defs::inds &recvdispls, const size_t &iroot) {
-        return gatherv(send, send.size(), recv, recvcounts, recvdispls, iroot);
+    static bool scatterv(
+            const T *send, const defs::mpi_count &sendcount,
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs, const size_t &iroot) {
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Scatterv(
+                send_ptr, sendcount, mpi_type<T>(),
+                recv_ptr, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv,
-                            defs::inds &recvcounts, defs::inds &recvdispls) {
-        return all_gatherv(send, send.size(), recv, recvcounts, recvdispls);
+    static bool scatterv(const T *send, size_t sendcount, T *recv,
+                        const defs::inds &recvcounts, const defs::inds &recvdispls, const size_t &iroot) {
+        auto tmp_recvcounts = snrw(recvcounts);
+        auto tmp_recvdispls = snrw(recvdispls);
+        return gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data(), iroot);
     }
 
 
-    template<typename T>
-    static bool gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv, const size_t &iroot) {
-        defs::inds recvcounts, recvdispls;
-        return gatherv(send, sendcount, recv, recvcounts, recvdispls, iroot);
-    }
+    /*
+     * ALL-TO-ALL
+     */
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, size_t sendcount, std::vector<T> &recv) {
-        defs::inds recvcounts, recvdispls;
-        return all_gatherv(send, sendcount, recv, recvcounts, recvdispls);
-    }
-
-    template<typename T>
-    static bool gatherv(const std::vector<T> &send, std::vector<T> &recv, const size_t &iroot) {
-        return gatherv(send, send.size(), recv, iroot);
+    static bool all_to_all(const T *send, size_t nsend, T *recv, size_t nrecv) {
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Alltoall(send_ptr, snrw(nsend), mpi_type<T>(),
+                            recv_ptr, snrw(nrecv), mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
-    static bool all_gatherv(const std::vector<T> &send, std::vector<T> &recv) {
-        return all_gatherv(send, send.size(), recv);
+    static bool all_to_all(const std::vector<T> &send, std::vector<T> &recv) {
+        return all_to_all(send.data(), 1ul, recv.data(), 1ul);
     }
 
-    static bool i_am(const size_t &i);
+    template<typename T>
+    static bool all_to_allv(
+            const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Alltoallv(
+                send_ptr, sendcounts, senddispls, mpi_type<T>(),
+                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+    }
 
-    static bool on_node_i_am(const size_t &i);
+    template<typename T>
+    static bool all_to_allv(
+            const T *send, const defs::inds &sendcounts, const defs::inds &senddispls,
+            T *recv, const defs::inds &recvcounts, const defs::inds &recvdispls) {
+        auto tmp_sendcounts = snrw(sendcounts);
+        auto tmp_senddispls = snrw(senddispls);
+        auto tmp_recvcounts = snrw(recvcounts);
+        auto tmp_recvdispls = snrw(recvdispls);
+        return all_to_allv(send, tmp_sendcounts.data(), tmp_senddispls.data(), recv,
+                           tmp_recvcounts.data(), tmp_recvdispls.data());
+    }
 
-    static bool i_am_root();
+    /*
+     * NODE INDEXING
+     */
 
-    static bool on_node_i_am_root();
+    bool i_am(const size_t &i);
 
-    static bool initialized();
+    bool on_node_i_am(const size_t &i);
 
-    static bool finalized();
+    bool i_am_root();
 
-    static void initialize(int *argc = NULL, char ***argv = NULL);
+    bool on_node_i_am_root();
 
-    static void finalize();
+    bool initialized();
+
+    bool finalized();
+
+    void initialize(int *argc = nullptr, char ***argv = nullptr);
+
+    void finalize();
 
     /**
      * call on any rank to terminate the entire communicator
      * @param message
      *  string to output to error log
      */
-    static void abort_(std::string message);
+    void abort_(std::string message);
 
     /**
      * call on all ranks to terminate the entire communicator
      * @param message
      *  string to output to error log
      */
-    static void abort(std::string message);
+    void abort(std::string message);
 
     /**
      * debugging: each rank waits till the one before has finished before starting
      * @param str
      *  string to output to stdout
      */
-    static void blocking_print(const std::string& str);
+    void blocking_print(const std::string& str);
 
-};
+}
 
 #endif //M7_MPIWRAPPER_H

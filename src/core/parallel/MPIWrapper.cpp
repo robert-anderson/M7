@@ -8,50 +8,36 @@
 #include "src/core/io/Logging.h"
 
 void mpi::barrier() {
-#if ENABLE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
-#endif
 }
 
 void mpi::barrier_on_node() {
-#if ENABLE_MPI
     MPI_Barrier(g_node_comm);
-#endif
 }
 
 bool mpi::initialized() {
-#if ENABLE_MPI
     int tmp;
     MPI_Initialized(&tmp);
     return tmp;
-#endif
-    return true;
 }
 
 bool mpi::finalized() {
-#if ENABLE_MPI
     int tmp;
     MPI_Finalized(&tmp);
     return tmp;
-#endif
-    return true;
 }
 
 void mpi::initialize(int *argc, char ***argv) {
-#if ENABLE_MPI
     if (!initialized()) {
         MPI_Init(argc, argv);
         setup_mpi_globals();
     }
-#endif
 }
 
 void mpi::finalize() {
-#if ENABLE_MPI
     if (initialized() && !finalized()) {
         MPI_Finalize();
     }
-#endif
 }
 
 bool mpi::i_am(const size_t& i) {
@@ -71,21 +57,15 @@ bool mpi::on_node_i_am_root() {
 }
 
 void mpi::abort_(std::string message) {
-#ifdef ENABLE_MPI
     log::error_("Forcing MPI_Abort from this rank: {}", std::move(message));
     log::error_backtrace_();
     log::finalize();
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
     if (mpi::nrank()==1) std::abort();
     MPI_Abort(MPI_COMM_WORLD, -1);
-#else
-    std::cout << "Aborting: \"" << message << "\""<< std::endl;
-        exit(0);
-#endif
 }
 
 void mpi::abort(std::string message){
-#ifdef ENABLE_MPI
     if (mpi::nrank()==1)
         log::error("Reason: {}", std::move(message));
     else
@@ -96,15 +76,10 @@ void mpi::abort(std::string message){
     // SIGABRT is caught by IDEs for nice call stack debugging in the serial case
     if (mpi::nrank()==1) std::abort();
     MPI_Abort(MPI_COMM_WORLD, -1);
-#else
-    std::cout << "Aborting: \"" << message << "\""<< std::endl;
-        exit(0);
-#endif
 }
 
 
 void mpi::setup_mpi_globals() {
-#ifdef ENABLE_MPI
     int tmp;
     MPI_Comm_size(MPI_COMM_WORLD, &tmp);
     g_nrank = tmp;
@@ -119,7 +94,6 @@ void mpi::setup_mpi_globals() {
     g_nrank_on_node = tmp;
     MPI_Comm_rank(g_node_comm, &tmp);
     g_irank_on_node = tmp;
-#endif
 }
 
 void mpi::blocking_print(const std::string &str) {
@@ -135,9 +109,7 @@ void mpi::blocking_print(const std::string &str) {
 size_t g_irank = 0;
 size_t g_nrank = 1;
 std::string g_processor_name = "";
-#ifdef ENABLE_MPI
 MPI_Comm g_node_comm;
-#endif
 size_t g_irank_on_node = 0;
 size_t g_nrank_on_node = 1;
 int g_p2p_tag = 0;
