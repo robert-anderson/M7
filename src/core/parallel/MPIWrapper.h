@@ -30,7 +30,7 @@
  *
  * defs::mpi_count and defs::mpi_counts are the scalar and vector typedefs for the MPI integer
  *
- * The cleanest way to acheive this aim is to expose only the overloads that use size_t and
+ * The cleanest way to achieve this aim is to expose only the overloads that use size_t and
  * std::vector<size_t> (defs::inds) to define counts and displs. if sizeof(defs::mpi_count)
  * is less than sizeof(size_t), a narrowing conversion is required, but since this is at the
  * level of communication, and not inside a main loop, this minor overhead will more than
@@ -527,6 +527,66 @@ namespace mpi {
     /*
      * GATHER
      */
+
+    template<typename T>
+    static bool scatter(
+            const T *send, size_t sendcount, T *recv, size_t recvcount, const size_t &iroot) {
+#ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Scatter(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
+                          snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcount);
+#endif
+    }
+
+    template<typename T>
+    static bool all_scatter(
+            const T *send, size_t sendcount, T *recv, size_t recvcount) {
+#ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Allscatter(
+                send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr, snrw(recvcount), mpi_type<T>(), MPI_COMM_WORLD) ==
+               MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcount);
+#endif
+    }
+
+
+    template<typename T>
+    static bool scatterv(
+            const T *send, const defs::mpi_count &sendcount,
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs, const size_t &iroot) {
+#ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Scatterv(
+                send_ptr, sendcount, mpi_type<T>(),
+                recv_ptr, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcounts[0]);
+#endif
+    }
+
+    template<typename T>
+    static bool all_scatterv(
+            const T *send, const defs::mpi_count &sendcount,
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs) {
+#ifdef ENABLE_MPI
+        auto send_ptr = reinterpret_cast<const void *>(send);
+        auto recv_ptr = reinterpret_cast<void *>(recv);
+        return MPI_Allscatterv(
+                send_ptr, sendcount, mpi_type<T>(),
+                recv_ptr, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+#else
+        return all_to_all(send, sendcount, recv, recvcounts[0]);
+#endif
+    }
+
+
 
     template<typename T>
     static bool gather(
