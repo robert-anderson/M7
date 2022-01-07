@@ -52,7 +52,7 @@ namespace sparse {
             add(irow, pair.first, pair.second);
         }
 
-        void multiply(const std::vector<T> &in, std::vector<T> &out) const {
+        void multiply(const T* in, T* out) const {
             // each row of the out vector receives a contribution from every
             // corresponding entry in the sparse matrix row
             // out_i = sum_j H_ij in_j
@@ -60,12 +60,15 @@ namespace sparse {
                 auto icol_it = m_rows_icols[irow].cbegin();
                 auto value_it = m_rows_values[irow].cbegin();
                 for (; icol_it!=m_rows_icols[irow].cend(); (++icol_it, ++value_it)){
-                    DEBUG_ASSERT_LT(*icol_it, in.size(), "sparse matrix column OOB");
                     DEBUG_ASSERT_FALSE(value_it==m_rows_values[irow].cend(),
                                        "values list incongruent with column indices list");
                     out[irow] += *value_it * in[*icol_it];
                 }
             }
+        }
+
+        void multiply(const std::vector<T> &in, std::vector<T> &out) const {
+            multiply(in.data(), out.data());
         }
 
         std::pair<const defs::inds&, const std::vector<T>&> operator[](const size_t& irow) const {
