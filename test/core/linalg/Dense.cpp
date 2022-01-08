@@ -3,13 +3,13 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/linalg/Matrix.h"
+#include "src/core/linalg/Dense.h"
 
 TEST(Matrix, SquareRealMultiplication){
     typedef double T;
     const size_t n=3;
     std::vector<T> v(n, 0);
-    Matrix<T> matrix(n);
+    dense::Matrix<T> matrix(n);
     for(size_t i=0; i<n; ++i) {
         v[i] = i+1;
         for(size_t j=0; j<n; ++j) {
@@ -27,7 +27,7 @@ TEST(Matrix, SquareComplexMultiplication){
     typedef std::complex<double> T;
     const size_t n=3;
     std::vector<T> v(n, 0);
-    Matrix<T> matrix(n);
+    dense::Matrix<T> matrix(n);
     for(size_t i=0; i<n; ++i) {
         v[i] = T{double(i+1), 2};
         for(size_t j=0; j<n; ++j) {

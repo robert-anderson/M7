@@ -6,10 +6,10 @@
 #define M7_DENSEHAMILTONIAN_H
 
 #include "src/defs.h"
-#include "Matrix.h"
+#include "Dense.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 
-class DenseHamiltonian : public Matrix<defs::ham_t> {
+class DenseHamiltonian : public dense::Matrix<defs::ham_t> {
 
     void setup_frm(const Hamiltonian &source);
 

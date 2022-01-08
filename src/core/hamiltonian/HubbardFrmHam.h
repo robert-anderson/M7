@@ -31,7 +31,7 @@ struct HubbardFrmHam : FrmHam {
      * dense map of coordinated sites allowing lookup of the 1-body H matrix element given the flat indices of two site
      * index vectors
      */
-    Matrix<int> m_t_mat_dense;
+    dense::Matrix<int> m_t_mat_dense;
     /**
      * to help with excitation generation.
      */

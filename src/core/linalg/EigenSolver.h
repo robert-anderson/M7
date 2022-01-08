@@ -5,7 +5,7 @@
 #ifndef M7_EIGENSOLVER_H
 #define M7_EIGENSOLVER_H
 
-#include "Matrix.h"
+#include "Dense.h"
 
 template<typename T>
 class EigenSolver {
@@ -17,10 +17,10 @@ class EigenSolver {
     std::vector<T> m_work;
     std::unique_ptr<std::vector<typename consts::component_t<T>::type>> m_rwork = nullptr;
 public:
-    Matrix<T> m_evecs;
+    dense::Matrix<T> m_evecs;
     std::vector<typename consts::component_t<T>::type> m_evals;
 
-    EigenSolver(const Matrix<T> &matrix) :
+    EigenSolver(const dense::Matrix<T> &matrix) :
             m_n((int) matrix.m_nrow), m_lwork(std::max(1, 3 * m_n - 1)), m_work(m_lwork),
             m_evecs(matrix), m_evals(matrix.m_nrow) {
         execute();

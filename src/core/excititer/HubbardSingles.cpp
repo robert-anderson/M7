@@ -6,23 +6,16 @@
 
 excititers::HubbardSingles::HubbardSingles(const Hamiltonian &ham) :
         Frm(ham, exsig_utils::ex_single), m_pbc(true) {
-//    REQUIRE_TRUE(ham.m_frm.is_hubbard_1d() || ham.m_frm.is_hubbard_1d_pbc(),
-//                 "Hamiltonian is not 1D hubbard, so this class will not generate all connections");
 }
 
 void excititers::HubbardSingles::foreach(const FrmOnv &src, conn::FrmOnv &conn,
                                            const fn_c_t<FrmOnv> &body) {
     const auto &occs = m_work_orbs.occ(src).m_flat.inds();
-    for (const auto &occ: occs) {
-        size_t neighbor;
-        neighbor = model_utils::left(occ, m_bd.m_nsite, m_pbc);
-        if (neighbor != ~0ul && !src.get(neighbor)) {
-            conn.set(occ, neighbor);
-            set_helement(src, conn);
-            body(conn);
-        }
-        neighbor = model_utils::right(occ, m_bd.m_nsite, m_pbc);
-        if (neighbor != ~0ul && !src.get(neighbor)) {
+    auto h_cast = dynamic_cast<const HubbardFrmHam*>(m_ham.m_frm.get());
+    REQUIRE_TRUE(h_cast, "Fermion hamiltonian is not hubbard type");
+    auto& sparse_conns = h_cast->m_t_mat_sparse;
+    for (auto &occ: occs) {
+        for (auto& neighbor: sparse_conns[occ].first) {
             conn.set(occ, neighbor);
             set_helement(src, conn);
             body(conn);

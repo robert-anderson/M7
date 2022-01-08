@@ -2,10 +2,10 @@
 // Created by Robert John Anderson on 2020-01-24.
 //
 
-#include "Matrix.h"
+#include "Dense.h"
 
 template<>
-void Matrix<double>::multiply(const std::vector<double> &in, std::vector<double> &out) {
+void dense::Matrix<double>::multiply(const std::vector<double> &in, std::vector<double> &out) {
     char trans = 'N';
     const double alpha = 1.0;
     const double beta = 1.0;
@@ -17,7 +17,7 @@ void Matrix<double>::multiply(const std::vector<double> &in, std::vector<double>
 }
 
 template<>
-void Matrix<std::complex<double>>::multiply(const std::vector<std::complex<double>> &in, std::vector<std::complex<double>> &out) {
+void dense::Matrix<std::complex<double>>::multiply(const std::vector<std::complex<double>> &in, std::vector<std::complex<double>> &out) {
     char trans = 'N';
     const std::complex<double> alpha = 1.0;
     const std::complex<double> beta = 1.0;

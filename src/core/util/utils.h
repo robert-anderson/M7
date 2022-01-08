@@ -131,6 +131,14 @@ namespace utils {
     }
 
     template<typename T>
+    static std::vector<std::string> to_strings(const std::vector<T> &v) {
+        std::vector<std::string> out;
+        out.reserve(v.size());
+        for (auto& i: v) out.push_back(to_string(i));
+        return out;
+    }
+
+    template<typename T>
     static std::string fp_to_string(const T &v, size_t fp_precision = 6) {
         ASSERT(std::is_floating_point<T>::value);
         std::stringstream tmp;
@@ -222,6 +230,14 @@ namespace utils {
     template<size_t n>
     static size_t ntup(size_t extent) {
         return ntup_num<n>(extent) / ntup_num<n>(n);
+    }
+
+    template<typename T1, typename T2>
+    static void convert(const std::vector<T1>& v1, std::vector<T2>& v2){
+        static_assert(std::is_convertible<T1, T2>::value, "incompatible types");
+        v2.clear();
+        v2.reserve(v1.size());
+        for (auto& i: v1) v2.push_back(i);
     }
 }
 
@@ -379,176 +395,44 @@ namespace bit_utils {
 
 
 namespace string_utils {
-    static std::string join(const std::vector<std::string> &words, const std::string &divider, const bool &bookends) {
-        std::string out{""};
-        if (bookends) out += divider;
-        for (size_t i = 0ul; i < words.size() - 1; ++i) {
-            out += words[i] + divider;
-        }
-        out += words[words.size() - 1];
-        if (bookends) out += divider;
-        return out;
-    }
+    std::string join(const std::vector<std::string> &words, const std::string &divider);
 
-    static std::string join(const std::vector<std::string> &words, const std::string &divider) {
-        return join(words, divider, false);
-    }
+    std::string join(const std::vector<std::string> &words);
 
-    static std::string join(const std::vector<std::string> &words, const bool &bookends) {
-        return join(words, " ", bookends);
-    }
+    std::string join(const std::string &word, const size_t &nrepeat, const std::string &divider);
 
-    static std::string join(const std::vector<std::string> &words) {
-        return join(words, " ", false);
-    }
+    std::string join(const std::string &word, const size_t &nrepeat);
 
-    static std::string
-    join(const std::string &word, const size_t &nrepeat, const std::string &divider, const bool &bookends) {
-        return join(std::vector<std::string>(nrepeat, word), divider, bookends);
-    }
+    std::vector<std::string> split(const std::string &line, char delimiter);
 
-    static std::string join(const std::string &word, const size_t &nrepeat, const std::string &divider) {
-        return join(word, nrepeat, divider, false);
-    }
+    std::vector<std::string> split(const std::string &line, const std::string &delimiters);
 
-    static std::string join(const std::string &word, const size_t &nrepeat) {
-        return join(word, nrepeat, " ", false);
-    }
+    void split(std::string &line, std::vector<std::string>& tokens, const std::string &delimiters);
 
-    static std::vector<std::string> split(const std::string &line, char delimiter) {
-        std::vector<std::string> result{};
-        std::stringstream ss(line);
-        std::string token;
-        while (std::getline(ss, token, delimiter)) {
-            if (token.size()) result.push_back(token);
-        }
-        return result;
-    }
+    std::string yn(bool t);
 
-    static std::vector<std::string> split(const std::string &line, const std::string &delimiters) {
-        std::string mutable_copy = line;
-        std::vector<std::string> result{};
-        char *ptr;
-        ptr = strtok(const_cast<char *>(mutable_copy.c_str()), delimiters.c_str());
-        while (ptr != nullptr) {
-            result.emplace_back(ptr);
-            ptr = strtok(nullptr, delimiters.c_str());
-        }
-        return result;
-    }
+    std::string YN(bool t);
 
-    static void split(std::string &line, std::vector<std::string>& tokens, const std::string &delimiters){
-        tokens.clear();
-        char *ptr;
-        ptr = strtok(const_cast<char *>(line.c_str()), delimiters.c_str());
-        while (ptr != nullptr) {
-            tokens.emplace_back(ptr);
-            ptr = strtok(nullptr, delimiters.c_str());
-        }
-    }
+    std::string memsize(size_t nbyte);
 
-    static std::string yn(bool t) {
-        return t ? "yes" : "no";
-    }
-
-    static std::string YN(bool t) {
-        return t ? "YES" : "NO";
-    }
-
-    static std::string memsize(size_t nbyte) {
-        if (nbyte < 1e3) {
-            return std::to_string(nbyte) + "B";
-        } else if (nbyte < 1e6) {
-            return std::to_string(nbyte / 1.0e3) + "KB";
-        } else if (nbyte < 1e9) {
-            return std::to_string(nbyte / (1.0e6)) + "MB";
-        } else {
-            return std::to_string(nbyte / (1.0e9)) + "GB";
-        }
-    }
-
-    static std::string boxed(std::string s, size_t padding = 4, char c = '#') {
-        std::string res;
-        res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
-        res += c + std::string(padding, ' ') + s + std::string(padding, ' ') + c + "\n";
-        res += std::string(s.size() + 2 * (padding + 1), c) + '\n';
-        return res;
-    }
+    std::string boxed(std::string s, size_t padding = 4, char c = '#');
 
 
-    static inline bool is_numeric(const char &c) {
-        return '0' <= c && c <= '9';
-    }
+    inline bool is_numeric(const char &c);
 
-    static inline bool is_partial_standard_float(const char &c) {
-        return is_numeric(c) || c == '.' || c == '-';
-    }
+    inline bool is_partial_standard_float(const char &c);
 
-    static inline bool is_partial_scientific(const char &c) {
-        return is_partial_standard_float(c) || c == 'e' || c == 'E' || c == 'd' || c == 'D' || c == '+';
-    }
+    inline bool is_partial_scientific(const char &c);
 
-    static inline bool is_divider(const char &c) {
-        return c == ' ' || c == ',' || c == ')' || c == '\r';
-    }
+    inline bool is_divider(const char &c);
 
-    static double read_double(const char *&ptr) {
-        const char *begin = nullptr;
-        ASSERT(ptr != nullptr)
-        for (; *ptr != 0; ptr++) {
-            if (!begin) {
-                if (is_partial_standard_float(*ptr)) begin = ptr;
-            } else {
-                if (is_divider(*ptr) && is_numeric(ptr[-1])) {
-                    return std::strtod(begin, const_cast<char **>(&ptr));
-                } else if (!is_partial_scientific(*ptr)) {
-                    begin = nullptr;
-                }
-            }
-        }
-        if (begin && is_numeric(ptr[-1])) {
-            return std::strtod(begin, const_cast<char **>(&ptr)); // this will decrement the pointer!
-        } else {
-            return std::numeric_limits<double>::max();
-        }
-    }
+    double read_double(const char *&ptr);
 
-    static size_t read_unsigned(const char *&ptr) {
-        const char *begin = nullptr;
-        ASSERT(ptr != nullptr)
-        for (; *ptr != 0; ptr++) {
-            if (!begin) {
-                if (is_numeric(*ptr)) begin = ptr;
-            } else {
-                if (is_divider(*ptr)) {
-                    return std::strtoul(begin, const_cast<char **>(&ptr), 10);
-                } else if (!is_numeric(*ptr)) {
-                    begin = nullptr;
-                }
-            }
-        }
-        if (begin && is_numeric(ptr[-1])) {
-            return std::strtoul(begin, const_cast<char **>(&ptr), 10); // this will decrement the pointer!
-        } else {
-            return std::numeric_limits<size_t>::max();
-        }
-    }
+    size_t read_unsigned(const char *&ptr);
 
-    static int64_t read_signed(const char *&ptr) {
-        bool pos = true;
-        if (*ptr == '-') {
-            pos = false;
-            ptr++;
-        }
-        auto tmp = read_unsigned(ptr);
-        if (tmp == std::numeric_limits<size_t>::max()) return std::numeric_limits<int64_t>::max();
-        return pos ? tmp : -tmp;
-    }
+    int64_t read_signed(const char *&ptr);
 
-    static size_t parse_decimal_digit(const char *c) {
-        if (*c < '0' || *c > '9') return ~0ul;
-        return *c - '0';
-    }
+    size_t parse_decimal_digit(const char *c);
 }
 
 
@@ -838,41 +722,6 @@ namespace array_utils {
     }
 }
 
-
-/**
- * functions related to lattice model geometries (currently just 1D)
- */
-namespace model_utils {
-    static size_t left_obc(const size_t &ispinorb, const size_t &nsite) {
-        if (ispinorb == 0 || ispinorb == nsite) return ~0ul;
-        return ispinorb - 1;
-    }
-
-    static size_t left_pbc(const size_t &ispinorb, const size_t &nsite) {
-        if (ispinorb == 0) return nsite - 1;
-        else if (ispinorb == nsite) return 2 * nsite - 1;
-        return ispinorb - 1;
-    }
-
-    static size_t right_obc(const size_t &ispinorb, const size_t &nsite) {
-        if (ispinorb + 1 == nsite || ispinorb + 1 == 2 * nsite) return ~0ul;
-        return ispinorb + 1;
-    }
-
-    static size_t right_pbc(const size_t &ispinorb, const size_t &nsite) {
-        if (ispinorb + 1 == nsite) return 0;
-        else if (ispinorb == 2 * nsite - 1) return nsite;
-        return ispinorb + 1;
-    }
-
-    static size_t left(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
-        return pbc ? left_pbc(ispinorb, nsite) : left_obc(ispinorb, nsite);
-    }
-
-    static size_t right(const size_t &ispinorb, const size_t &nsite, bool pbc = false) {
-        return pbc ? right_pbc(ispinorb, nsite) : right_obc(ispinorb, nsite);
-    }
-}
 
 /**
  * functions related to "excitation signatures" of connections between many-body basis functions

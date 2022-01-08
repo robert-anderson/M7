@@ -88,7 +88,7 @@ TEST(utils, JoinAndSplit){
     const std::string line = " this is   an   example   string   ";
     auto tokens = string_utils::split(line, ' ');
     ASSERT_EQ(tokens.size(), 5);
-    auto joinder = string_utils::join(tokens, " ", false);
+    auto joinder = string_utils::join(tokens, " ");
     // splitting will eliminate consecutive occurrences of the delimiter
     ASSERT_EQ("this is an example string", joinder);
 }

@@ -73,12 +73,33 @@ namespace hashing {
      * @param sorted
      *  true if the result should be put to ascending order before returning
      * @return
-     *  unrepeated arbitrary integers in the [lo, hi) range
+     *  arbitrary integers with repetition allowed in the [lo, hi) range
      */
     std::vector<defs::hash_t> in_range(const std::vector<defs::hash_t>& v, size_t ngen,
-                                              const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
+                                       const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
 
     std::vector<defs::hash_t> in_range(defs::hash_t v, size_t ngen,
+                                       const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
+
+    /**
+     * deterministically generate arbitrary testing data: NOT a random number generator
+     * @param v
+     *  value to be hashed
+     * @param ngen
+     *  number of values to generate
+     * @param lo
+     *  inclusive minimum value included in result
+     * @param hi
+     *  exclusive maximum value included in result
+     * @param sorted
+     *  true if the result should be put to ascending order before returning
+     * @return
+     *  unrepeated arbitrary integers in the [lo, hi) range
+     */
+    std::vector<defs::hash_t> unique_in_range(const std::vector<defs::hash_t>& v, size_t ngen,
+                                              const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
+
+    std::vector<defs::hash_t> unique_in_range(defs::hash_t v, size_t ngen,
                                               const defs::hash_t& lo, const defs::hash_t& hi, bool sorted=false);
 };
 

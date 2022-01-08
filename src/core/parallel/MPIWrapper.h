@@ -8,6 +8,7 @@
 #include <array>
 
 #define OMPI_SKIP_MPICXX
+
 #include <mpi.h>
 // we don't use the C++ MPI bindings
 
@@ -201,9 +202,34 @@ namespace mpi {
         return utils::safe_narrow<defs::mpi_count>(v);
     }
 
-    static size_t share_evenly(size_t nitem_global) {
+    /**
+     *
+     * e.g. nrank = 6, nitem = 16
+     *  remainder = 16 % 6 = 4
+     *  count = nitem/nrank + (irank < remainder) =
+     *         3  3  3  3  2  2
+     *
+     *  number of tall stacks before irank: ntb = min(irank, remainder)
+     *  number of short stacks before irank: nsb = irank - ntb
+     *  displ = ntb * (ss + 1) + nsb * ss
+     *        = ntb + irank * ss =
+     *         0  3  6  9 12 14
+     *
+     *  rank   0  1  2  3  4  5
+     *         x  x  x  x  x  x
+     *         x  x  x  x  x  x
+     *         x  x  x  x
+     * @param nitem_global
+     * @return
+     */
+    static size_t evenly_shared_count(size_t nitem_global) {
         auto remainder = nitem_global % nrank();
         return nitem_global / nrank() + (irank() < remainder);
+    }
+
+    static size_t evenly_shared_displ(size_t nitem_global) {
+        auto ntb = std::min(irank(), nitem_global % nrank());
+        return ntb + irank() * (nitem_global / nrank());
     }
 
     template<typename T>
@@ -437,12 +463,14 @@ namespace mpi {
 
     template<typename T>
     static bool send(const T *data, size_t ndata, size_t irank_dst, int tag) {
-        return MPI_Send(reinterpret_cast<const void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag, MPI_COMM_WORLD);
+        return MPI_Send(reinterpret_cast<const void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_dst), tag,
+                        MPI_COMM_WORLD);
     }
 
     template<typename T>
     static bool recv(T *data, size_t ndata, size_t irank_src, int tag) {
-        return MPI_Recv(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_src), tag, MPI_COMM_WORLD,
+        return MPI_Recv(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(irank_src), tag,
+                        MPI_COMM_WORLD,
                         MPI_STATUS_IGNORE);
     }
 
@@ -452,7 +480,8 @@ namespace mpi {
      */
     template<typename T>
     static bool bcast(T *data, size_t ndata = 1, size_t iroot = 0) {
-        return MPI_Bcast(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) == MPI_SUCCESS;
+        return MPI_Bcast(reinterpret_cast<void *>(data), snrw(ndata), mpi_type<T>(), snrw(iroot), MPI_COMM_WORLD) ==
+               MPI_SUCCESS;
     }
 
     template<typename T>
@@ -472,9 +501,8 @@ namespace mpi {
         size_t nchar = data.size();
         mpi::bcast(nchar, iroot);
         data.resize(nchar);
-        return mpi::bcast(const_cast<char*>(data.c_str()), nchar);
+        return mpi::bcast(const_cast<char *>(data.c_str()), nchar);
     }
-
 
     /*
      * MAXLOC CONVENIENCE FUNCTIONS
@@ -548,12 +576,12 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool all_gather(const T& send, T *recv){
+    static bool all_gather(const T &send, T *recv) {
         return all_gather(&send, 1, recv, 1);
     }
 
     template<typename T>
-    static bool all_gather(const T& send, std::vector<T>& recv){
+    static bool all_gather(const T &send, std::vector<T> &recv) {
         recv.resize(nrank());
         return all_gather(send, recv.data());
     }
@@ -561,23 +589,23 @@ namespace mpi {
     template<typename T>
     static bool gatherv(
             const T *send, const defs::mpi_count &sendcount,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs, const size_t &iroot) {
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls, const size_t &iroot) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Gatherv(
                 send_ptr, sendcount, mpi_type<T>(),
-                recv_ptr, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
     static bool all_gatherv(
             const T *send, const defs::mpi_count &sendcount,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs) {
+            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Allgatherv(
                 send_ptr, sendcount, mpi_type<T>(),
-                recv_ptr, recvcounts, displs, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
+                recv_ptr, recvcounts, recvdispls, mpi_type<T>(), MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
@@ -614,26 +642,26 @@ namespace mpi {
         auto send_ptr = reinterpret_cast<void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Scatter(send_ptr, snrw(sendcount), mpi_type<T>(), recv_ptr,
-                          snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+                           snrw(recvcount), mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
     static bool scatterv(
-            const T *send, const defs::mpi_count &sendcount,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *displs, const size_t &iroot) {
+            const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
+            T *recv, const defs::mpi_count &recvcount, const size_t &iroot) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Scatterv(
-                send_ptr, sendcount, mpi_type<T>(),
-                recv_ptr, recvcounts, displs, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
+                send_ptr, sendcounts, senddispls, mpi_type<T>(),
+                recv_ptr, recvcount, mpi_type<T>(), iroot, MPI_COMM_WORLD) == MPI_SUCCESS;
     }
 
     template<typename T>
-    static bool scatterv(const T *send, size_t sendcount, T *recv,
-                        const defs::inds &recvcounts, const defs::inds &recvdispls, const size_t &iroot) {
-        auto tmp_recvcounts = snrw(recvcounts);
-        auto tmp_recvdispls = snrw(recvdispls);
-        return gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data(), iroot);
+    static bool scatterv(const T *send, const defs::inds sendcounts, const defs::inds &senddispls,
+                         T *recv, const size_t &recvcount, const size_t &iroot) {
+        auto tmp_sendcounts = snrw(sendcounts);
+        auto tmp_senddispls = snrw(senddispls);
+        return gatherv(send, tmp_sendcounts, tmp_senddispls, recv, snrw(recvcount), iroot);
     }
 
 
@@ -716,7 +744,7 @@ namespace mpi {
      * @param str
      *  string to output to stdout
      */
-    void blocking_print(const std::string& str);
+    void blocking_print(const std::string &str);
 
 }
 

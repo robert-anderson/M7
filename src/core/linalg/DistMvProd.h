@@ -29,38 +29,51 @@ namespace dist_mv_prod {
         Base(size_t nelement_local) :
                 m_nelement_local(nelement_local), m_nelement(mpi::all_sum(nelement_local)),
                 m_counts(make_counts()), m_displs(mpi::counts_to_displs_consec(m_counts)),
-                m_in_vec(nelement_local, 0), m_out_vec(nelement_local, 0) {}
+                m_in_vec(m_nelement, 0), m_out_vec(nelement_local, 0) {}
 
-        void scatter(const T *in, size_t iroot = 0ul) {
-            mpi::scatterv(in, m_nelement, m_in_vec.data(), m_counts.data(), m_displs.data(), iroot);
+        T* get_in_ptr(const T *in) const {
+            auto ptr = in;
+            if (!ptr) ptr = m_in_vec.data();
+            return const_cast<T*>(ptr);
         }
 
-        void gather(T *out, size_t iroot = 0ul) {
-            mpi::gatherv(m_out_vec.data(), m_nelement, out, m_counts.data(), m_displs.data(), iroot);
+        void bcast(const T *in) {
+            mpi::bcast(get_in_ptr(in), m_nelement);
+        }
+
+        void gather(T *out) {
+            mpi::gatherv(m_out_vec.data(), m_nelement_local, out, m_counts.data(), m_displs.data(), 0ul);
         }
 
         void all_gather(T *out) {
-            mpi::all_gatherv(m_out_vec.data(), m_nelement, out, m_counts.data(), m_displs.data());
+            mpi::all_gatherv(m_out_vec.data(), m_nelement_local, out, m_counts.data(), m_displs.data());
         }
 
         void parallel_multiply(const T *in, T *out, bool all_out = false) {
-            scatter(in);
-            multiply();
+            bcast(in);
+            multiply(in);
             all_out ? all_gather(out) : gather(out);
         }
 
+        void parallel_multiply(const std::vector<T> &in, std::vector<T> &out, bool all_out = false) {
+            if (all_out || mpi::i_am_root()) out.resize(m_nelement);
+            parallel_multiply(in.data(), out.data(), all_out);
+        }
+
     protected:
-        virtual void multiply() = 0;
+        virtual void multiply(const T *in) = 0;
     };
 
     template<typename T>
-    struct Sparse: Base<T> {
+    struct Sparse: public Base<T> {
         const sparse::Matrix<T>& m_mat;
         Sparse(const sparse::Matrix<T>& mat): Base<T>(mat.nrow()), m_mat(mat){}
 
     protected:
-        void multiply() override {
-            m_mat.multiply(m_in_vec, m_out_vec);
+        using Base<T>::m_in_vec;
+        using Base<T>::m_out_vec;
+        void multiply(const T *in) override {
+            m_mat.multiply(Base<T>::get_in_ptr(in), m_out_vec.data());
         }
     };
 
