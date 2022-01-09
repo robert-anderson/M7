@@ -22,6 +22,8 @@ if (ENABLE_HDF5)
             ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
             ${PROJECT_BINARY_DIR}/hdf5_local/build)
 endif ()
+set(BUILD_SHARED_LIBS off)
+target_link_libraries(M7 libarpack.a)
 
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories($ENV{INCLUDE_PATH})

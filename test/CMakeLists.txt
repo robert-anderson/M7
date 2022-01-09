@@ -44,6 +44,10 @@ if (ENABLE_HDF5)
     )
 endif ()
 
+add_dependencies(unittest arpack-ng)
+add_dependencies(unittest arpackpp)
+#target_link_libraries(unittest ${_HDF5_LIBS})
+
 #target_compile_definitions(unittest PRIVATE DEBUG=1)
 #target_compile_options(unittest PRIVATE -O0)
 

@@ -38,48 +38,71 @@ if (MPI_FOUND)
 else ()
 endif ()
 
-set(ExternalProjectCMakeArgs
+#
+# Download and build HDF5
+#
+set(Hdf5CMakeArgs
         -DHDF5_ENABLE_PARALLEL=ON
         -DHDF5_BUILD_CPP_LIB=OFF
         -DHDF5_BUILD_JAVA=OFF
         -DHDF5_ENABLE_THREADSAFE=OFF
         -DCMAKE_C_FLAGS="-w") # we don't need to see compiler warnings from external dependencies
 
-option(FORCE_HDF5_INSTALL "Force the download and installation of HDF5" 1)
-option(ENABLE_HDF5 "Enable HDF5 support" 1)
-if (ENABLE_HDF5)
-    set(HDF5_USE_STATIC_LIBRARIES 1)
-    #find_package(HDF5)
-    #if(HDF5_FOUND)
-    #    include_directories(${HDF5_INCLUDE_DIR})
-    #    set(_HDF5_LIBS hdf5)
-    #else()
-    # we did not find it so we fetch it from the web, configure, compile, and link
-    include(ExternalProject)
-    set(_HDF5_VERSION "1.10.5")
-    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-    ExternalProject_Add(hdf5_local
-            URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
-            #URL /home/rja/Downloads/hdf5-${_HDF5_VERSION}.tar.gz
-            URL_MD5 e115eeb66e944fa7814482415dd21cc4
-            CMAKE_ARGS ${ExternalProjectCMakeArgs}
-            SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
-            BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
-            STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
-            TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
-            INSTALL_COMMAND ""
-            )
-    include_directories(
-            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
-            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
-            ${PROJECT_BINARY_DIR}/hdf5_local/build
-    )
-    set(_HDF5_LIBS
-            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
-            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
-            -ldl)
-    #endif()
-endif ()
+set(HDF5_USE_STATIC_LIBRARIES 1)
+include(ExternalProject)
+set(_HDF5_VERSION "1.10.5")
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
+ExternalProject_Add(hdf5_local
+        URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+        URL_MD5 e115eeb66e944fa7814482415dd21cc4
+        CMAKE_ARGS ${Hdf5CMakeArgs}
+        SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
+        BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
+        STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
+        TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
+        INSTALL_COMMAND ""
+        )
+include_directories(
+        ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
+        ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
+        ${PROJECT_BINARY_DIR}/hdf5_local/build
+)
+set(_HDF5_LIBS
+        ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
+        ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
+        -ldl)
+
+#
+# Download and build static lib target of arpack-ng dependency of arpackpp
+#
+include(ExternalProject)
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/arpack-ng/src)
+ExternalProject_Add(arpack-ng
+        URL https://github.com/opencollab/arpack-ng/archive/refs/heads/master.zip
+        URL_MD5 88487b64fab4069f67e2b21c606d4602
+        CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF
+        SOURCE_DIR ${PROJECT_BINARY_DIR}/arpack-ng/src/arpackpp
+        BINARY_DIR ${PROJECT_BINARY_DIR}/arpack-ng/build
+        STAMP_DIR ${PROJECT_BINARY_DIR}/arpack-ng/stamp
+        TMP_DIR ${PROJECT_BINARY_DIR}/arpack-ng/tmp
+        INSTALL_COMMAND ""
+        )
+
+#
+# Download and build arpack
+#
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/arpackpp/src)
+ExternalProject_Add(arpackpp
+        URL https://github.com/robert-anderson/arpackpp/archive/refs/heads/master.zip
+        URL_MD5 0b86d918706571c3195ed4f52709bed0
+        CMAKE_ARGS -DCMAKE_LIBRARY_PATH=${PROJECT_BINARY_DIR}/arpack-ng/build
+        SOURCE_DIR ${PROJECT_BINARY_DIR}/arpackpp/src/arpackpp
+        BINARY_DIR ${PROJECT_BINARY_DIR}/arpackpp/build
+        STAMP_DIR ${PROJECT_BINARY_DIR}/arpackpp/stamp
+        TMP_DIR ${PROJECT_BINARY_DIR}/arpackpp/tmp
+        INSTALL_COMMAND ""
+        )
+
 #
 # Command line args for M7
 #
@@ -122,9 +145,9 @@ set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/external/spdlog-1.x/include")
-include_directories("${CMAKE_SOURCE_DIR}/external/lambda-lanczos/include")
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)
 target_compile_options(yaml-cpp PRIVATE -w)
+include_directories("${PROJECT_BINARY_DIR}/arpackpp/src/")
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 add_definitions(-Wall -Wextra -Werror)
