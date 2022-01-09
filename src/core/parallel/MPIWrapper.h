@@ -222,15 +222,13 @@ namespace mpi {
      * @param nitem_global
      * @return
      */
-    static size_t evenly_shared_count(size_t nitem_global) {
-        auto remainder = nitem_global % nrank();
-        return nitem_global / nrank() + (irank() < remainder);
-    }
+    defs::mpi_count evenly_shared_count(size_t nitem_global, size_t irank);
+    defs::mpi_count evenly_shared_count(size_t nitem_global);
+    defs::mpi_counts evenly_shared_counts(size_t nitem_global);
 
-    static size_t evenly_shared_displ(size_t nitem_global) {
-        auto ntb = std::min(irank(), nitem_global % nrank());
-        return ntb + irank() * (nitem_global / nrank());
-    }
+    size_t evenly_shared_displ(size_t nitem_global, size_t irank);
+    size_t evenly_shared_displ(size_t nitem_global);
+    defs::mpi_counts evenly_shared_displs(size_t nitem_global);
 
     template<typename T>
     static void counts_to_displs_consec(const std::vector<T> &counts, std::vector<T> &displs) {

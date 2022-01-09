@@ -9,59 +9,89 @@
 #include "Sparse.h"
 
 namespace dist_mv_prod {
+    /**
+     * matrix representation-agnostic base class for computing the product Mv over all MPI ranks
+     * @tparam T
+     *  type of the elements of v and Mv
+     */
     template<typename T>
     struct Base {
-        const size_t m_nelement_local;
-        const size_t m_nelement;
+        /**
+         * number of elements of the product vector (Mv) stored on this rank
+         * this is the same as the number of rows of the matrix multiplied by the input vector v on this rank
+         */
+        const size_t m_nrow_local;
+        /**
+         * total number of elements in the product vector (Mv) over all ranks
+         */
+        const size_t m_nrow;
+        /**
+         * m_nrow_local values for all ranks
+         */
         const defs::mpi_counts m_counts;
+        /**
+         * cumulative counts
+         */
         const defs::mpi_counts m_displs;
-        std::vector<T> m_in_vec;
-        std::vector<T> m_out_vec;
+        /**
+         * input vector buffer whose size is given by the number of columns of M. This size is not assumed to be known
+         * until an input vector is passed to the multiply method, whereupon all m_in_vecs are resized accordingly
+         */
+        std::vector<T> m_v;
+        /**
+         * partial product vector. the full Mv is recovered when these are combined consecutively across all ranks
+         */
+        std::vector<T> m_partial_mv;
 
     private:
         defs::mpi_counts make_counts() const {
             defs::mpi_counts counts(mpi::nrank());
-            defs::mpi_count tmp = m_nelement_local;
+            defs::mpi_count tmp = m_nrow_local;
             return mpi::all_gathered(tmp);
         }
 
     public:
-        Base(size_t nelement_local) :
-                m_nelement_local(nelement_local), m_nelement(mpi::all_sum(nelement_local)),
+        Base(size_t nelement_mv_local) :
+                m_nrow_local(nelement_mv_local), m_nrow(mpi::all_sum(nelement_mv_local)),
                 m_counts(make_counts()), m_displs(mpi::counts_to_displs_consec(m_counts)),
-                m_in_vec(m_nelement, 0), m_out_vec(nelement_local, 0) {}
+                m_v(mpi::i_am_root() ? 0 : m_nrow, 0), m_partial_mv(nelement_mv_local, 0) {}
+                
+        void parallel_multiply(const T *v, size_t v_size, T *mv, bool all_gather_mv = false) {
+            bcast(v, v_size);
+            multiply(v, v_size);
+            all_gather_mv ? all_gather(mv) : gather(mv);
+        }
 
-        T* get_in_ptr(const T *in) const {
-            auto ptr = in;
-            if (!ptr) ptr = m_in_vec.data();
+        void parallel_multiply(const std::vector<T> &v, std::vector<T> &mv, bool all_gather_mv = false) {
+            if (all_gather_mv || mpi::i_am_root()) mv.resize(m_nrow);
+            parallel_multiply(v.data(), v.size(), mv.data(), all_gather_mv);
+        }
+        
+    protected:
+        T* get_v_ptr(const T *v, size_t v_size) {
+            auto ptr = v;
+            if (!ptr) {
+                m_v.resize(v_size);
+                ptr = m_v.data();
+            }
             return const_cast<T*>(ptr);
         }
 
-        void bcast(const T *in) {
-            mpi::bcast(get_in_ptr(in), m_nelement);
+        void bcast(const T *v, size_t v_size) {
+            mpi::bcast(get_v_ptr(v, v_size), m_nrow);
         }
 
-        void gather(T *out) {
-            mpi::gatherv(m_out_vec.data(), m_nelement_local, out, m_counts.data(), m_displs.data(), 0ul);
+        void gather(T *mv) {
+            REQUIRE_TRUE_ALL(mv || !mpi::i_am_root(), "gathering pointer must be non-null");
+            mpi::gatherv(m_partial_mv.data(), m_nrow_local, mv, m_counts.data(), m_displs.data(), 0ul);
         }
 
-        void all_gather(T *out) {
-            mpi::all_gatherv(m_out_vec.data(), m_nelement_local, out, m_counts.data(), m_displs.data());
+        void all_gather(T *mv) {
+            REQUIRE_TRUE_ALL(mv, "all gathering pointers must be non-null");
+            mpi::all_gatherv(m_partial_mv.data(), m_nrow_local, mv, m_counts.data(), m_displs.data());
         }
 
-        void parallel_multiply(const T *in, T *out, bool all_out = false) {
-            bcast(in);
-            multiply(in);
-            all_out ? all_gather(out) : gather(out);
-        }
-
-        void parallel_multiply(const std::vector<T> &in, std::vector<T> &out, bool all_out = false) {
-            if (all_out || mpi::i_am_root()) out.resize(m_nelement);
-            parallel_multiply(in.data(), out.data(), all_out);
-        }
-
-    protected:
-        virtual void multiply(const T *in) = 0;
+        virtual void multiply(const T *v, size_t v_size) = 0;
     };
 
     template<typename T>
@@ -70,10 +100,8 @@ namespace dist_mv_prod {
         Sparse(const sparse::Matrix<T>& mat): Base<T>(mat.nrow()), m_mat(mat){}
 
     protected:
-        using Base<T>::m_in_vec;
-        using Base<T>::m_out_vec;
-        void multiply(const T *in) override {
-            m_mat.multiply(Base<T>::get_in_ptr(in), m_out_vec.data());
+        void multiply(const T *v, size_t v_size) override {
+            m_mat.multiply(Base<T>::get_v_ptr(v, v_size), Base<T>::m_partial_mv.data());
         }
     };
 

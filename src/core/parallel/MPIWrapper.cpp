@@ -15,6 +15,38 @@ void mpi::barrier_on_node() {
     MPI_Barrier(g_node_comm);
 }
 
+defs::mpi_count mpi::evenly_shared_count(size_t nitem_global, size_t irank) {
+    auto remainder = nitem_global % nrank();
+    return nitem_global / nrank() + (irank < remainder);
+}
+
+defs::mpi_count mpi::evenly_shared_count(size_t nitem_global) {
+    return evenly_shared_count(nitem_global, mpi::irank());
+}
+
+defs::mpi_counts mpi::evenly_shared_counts(size_t nitem_global) {
+    defs::mpi_counts tmp;
+    tmp.reserve(nrank());
+    for (size_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_count(nitem_global, irank));
+    return tmp;
+}
+
+size_t mpi::evenly_shared_displ(size_t nitem_global, size_t irank) {
+    auto ntb = std::min(irank, nitem_global % nrank());
+    return ntb + irank * (nitem_global / nrank());
+}
+
+size_t mpi::evenly_shared_displ(size_t nitem_global) {
+    return evenly_shared_displ(nitem_global, mpi::irank());
+}
+
+defs::mpi_counts mpi::evenly_shared_displs(size_t nitem_global) {
+    defs::mpi_counts tmp;
+    tmp.reserve(nrank());
+    for (size_t irank=0ul; irank<nrank(); ++irank) tmp.push_back(evenly_shared_displ(nitem_global, irank));
+    return tmp;
+}
+
 bool mpi::initialized() {
     int tmp;
     MPI_Initialized(&tmp);

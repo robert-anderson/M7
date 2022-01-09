@@ -15,8 +15,8 @@ TEST(DistMvProd, SparseRealSym) {
     sparse::Matrix<T> global_mat;
     global_mat.resize(nrow);
     sparse::Matrix<T> local_mat;
-    const auto nrow_local = mpi::evenly_shared_count(nrow);
-    const auto displ_local = mpi::evenly_shared_displ(nrow);
+    const size_t nrow_local = mpi::evenly_shared_count(nrow);
+    const size_t displ_local = mpi::evenly_shared_displ(nrow);
     local_mat.resize(nrow_local);
 
     defs::inds icols;
