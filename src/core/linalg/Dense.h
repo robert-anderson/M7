@@ -18,7 +18,6 @@
 template<typename T>
 class EigenSolver;
 
-extern "C" double ddot_(int *n, double *sx, int *incx, double *sy, int *incy);
 extern "C" void
 dsyev_(char *jobz, char *uplo, int *n, double *a, int *lda, double *w, double *work, int *lwork, int *info);
 extern "C" void zheev_(char *jobz, char *uplo, int *n, std::complex<double> *a, int *lda, double *w,
