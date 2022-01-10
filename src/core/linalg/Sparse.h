@@ -33,6 +33,8 @@ namespace sparse {
 
         void add(const size_t &irow, const size_t &icol);
 
+        void checked_add(const size_t &irow, const size_t &icol);
+
         void add(const size_t &irow, const defs::inds &icols);
 
         bool empty();
@@ -42,6 +44,8 @@ namespace sparse {
         virtual std::vector<std::string> row_to_strings(size_t irow) const;
 
         std::string to_string() const;
+
+        Network get_symmetrized() const;
     };
 
     template<typename T>
@@ -116,7 +120,24 @@ namespace sparse {
             }
             return mat;
         }
+
+        Matrix<T> get_symmetrized(bool conj) const {
+            Matrix<T> sym_mat;
+            sym_mat.resize(nrow());
+            REQUIRE_LT(max_column_index(), nrow(), "too many columns for this to be a symmetric matrix");
+            for (size_t irow=0ul; irow<nrow(); ++irow) {
+                const auto& icols = m_rows_icols[irow];
+                const auto& values = m_rows_values[irow];
+                for (size_t iicol=0ul; iicol < icols.size(); ++iicol) {
+                    const auto& icol = icols[iicol];
+                    const auto& value = values[iicol];
+                    sym_mat.add(irow, icol, value);
+                    if (icol != irow) sym_mat.checked_add(icol, irow, value);
+                }
+            }
+            return sym_mat;
+        }
     };
-};
+}
 
 #endif //M7_SPARSE_H

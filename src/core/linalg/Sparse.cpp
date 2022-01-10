@@ -34,8 +34,15 @@ void sparse::Network::add(const size_t &irow, const size_t &icol) {
     ++m_nentry;
 }
 
+void sparse::Network::checked_add(const size_t &irow, const size_t &icol) {
+    const auto& row = m_rows_icols[irow];
+    REQUIRE_FALSE(std::any_of(row.cbegin(), row.cend(), [&icol](const size_t& i){return i==icol;}),
+                  "row entries in sparse network must have a unique column index");
+    add(irow, icol);
+}
+
 void sparse::Network::add(const size_t &irow, const defs::inds &icols) {
-    for (auto& icol: icols) add(irow, icol);
+    for (auto &icol: icols) add(irow, icol);
 }
 
 bool sparse::Network::empty() { return m_rows_icols.empty(); }
@@ -56,4 +63,19 @@ std::string sparse::Network::to_string() const {
         out+= std::to_string(irow) + ": " + string_utils::join(row_to_strings(irow), ", ")+"\n";
     }
     return out;
+}
+
+sparse::Network sparse::Network::get_symmetrized() const {
+    Network sym_net;
+    sym_net.resize(nrow());
+    REQUIRE_LT(max_column_index(), nrow(), "too many columns for this to be a symmetric matrix");
+    for (size_t irow=0ul; irow<nrow(); ++irow) {
+        const auto& icols = m_rows_icols[irow];
+        for (size_t iicol=0ul; iicol < icols.size(); ++iicol) {
+            const auto& icol = icols[iicol];
+            sym_net.add(irow, icol);
+            if (icol != irow) sym_net.checked_add(icol, irow);
+        }
+    }
+    return sym_net;
 }
