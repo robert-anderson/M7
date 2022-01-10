@@ -18,6 +18,8 @@ target_link_libraries(unittest gtest gtest_main)
 
 if (LAPACK_FOUND)
     target_link_libraries(unittest ${LAPACK_LIBRARIES})
+else()
+    message(FATAL_ERROR "LAPACK implementation not found")
 endif ()
 
 
@@ -32,24 +34,19 @@ endif()
 
 target_link_options(unittest PRIVATE -g -rdynamic)
 
+target_link_libraries(unittest ${HDF5_LIBS})
+add_dependencies(unittest hdf5_local)
+target_link_libraries(unittest ${HDF5_LIBS})
+target_include_directories(unittest PUBLIC
+        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/src
+        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/hl/src
+        ${CMAKE_BINARY_DIR}/hdf5_local/build
+)
 
-if (ENABLE_HDF5)
-    target_link_libraries(unittest ${_HDF5_LIBS})
-    add_dependencies(unittest hdf5_local)
-    target_link_libraries(unittest ${_HDF5_LIBS})
-    target_include_directories(unittest PUBLIC
-            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
-            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
-            ${PROJECT_BINARY_DIR}/hdf5_local/build
-    )
-endif ()
-
+target_link_libraries(unittest ${ARPACK_LIBS})
 add_dependencies(unittest arpack-ng)
 add_dependencies(unittest arpackpp)
-find_library(ARPACK_LIBRARY arpack HINTS ${CMAKE_BINARY_DIR}/arpack-ng/build)
-message(FATAL_ERROR ${CMAKE_BINARY_DIR}/arpack-ng/build)
-target_link_libraries(unittest arpack)
-#link_libraries(${ARPACK_LIBRARY})
+
 
 #target_compile_definitions(unittest PRIVATE DEBUG=1)
 #target_compile_options(unittest PRIVATE -O0)
