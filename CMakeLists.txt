@@ -30,7 +30,6 @@ endif()
 
 find_package(LAPACK REQUIRED)
 
-
 find_package(MPI REQUIRED COMPONENTS C)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
 if (MPI_FOUND)
@@ -78,7 +77,7 @@ set(HDF5_LIBS
 include(ExternalProject)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/arpack-ng/src)
 ExternalProject_Add(arpack-ng
-        URL https://github.com/opencollab/arpack-ng/archive/refs/heads/master.zip
+        URL https://github.com/robert-anderson/arpack-ng/archive/refs/heads/master.zip
         URL_MD5 88487b64fab4069f67e2b21c606d4602
         CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF
         SOURCE_DIR ${PROJECT_BINARY_DIR}/arpack-ng/src/arpackpp

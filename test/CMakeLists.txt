@@ -43,7 +43,7 @@ target_include_directories(unittest PUBLIC
         ${CMAKE_BINARY_DIR}/hdf5_local/build
 )
 
-target_link_libraries(unittest ${ARPACK_LIBS})
+target_link_libraries(unittest ${ARPACK_LIBS} -lgfortran)
 add_dependencies(unittest arpack-ng)
 add_dependencies(unittest arpackpp)
 
