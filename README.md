@@ -82,5 +82,6 @@ Developers should be aware that while it is a tidy approach, runtime polymorphis
 The low-level "datasystem" modules have avoided virtual methods, which should be the most frequently called, so in the development of future functionality, the use of this polymorphism is likely beneficial in terms of code readability and will not degrade performance noticeably.
 
 C preprocessing directive blocks should never appear outside of `src/defs.h` and the few other places where macros are defined.
-However, when introducing a new piece of optional functionality, it is encouraged that a corresponding `ENABLE_` macro be introduced, along with a `constexpr` boolean variable which is to be used in other parts of the code to effect compile-time branching.
-Otherwise, new modules cause unnecessary run-time branching, potentially having an adverse effect on performance.
+Any required preprocessor definitions should initialise a `constexpr` symbol in `src/defs.h`, and from there all compile-time branching
+can be effected using the proper features of the C++ language (overloading and templates) and not the basic text manipulation
+offered by the preprocessor.

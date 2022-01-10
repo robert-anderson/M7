@@ -36,7 +36,7 @@ namespace global_extremal_rows_test {
         out.reserve(nrow);
         const int vmax = 20;
         for (size_t i = 0ul; i < nrow; ++i)
-            out.push_back(-vmax + hashing::in_range({i, irank}, 0, 2 * vmax));
+            out.push_back(-vmax + int(hashing::in_range({i, irank}, 0, 2 * vmax)));
         return out;
     }
 

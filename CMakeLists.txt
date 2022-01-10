@@ -41,7 +41,7 @@ endif ()
 #
 # Download and build HDF5
 #
-set(Hdf5CMakeArgs
+set(HDF5_CMAKE_ARGS
         -DHDF5_ENABLE_PARALLEL=ON
         -DHDF5_BUILD_CPP_LIB=OFF
         -DHDF5_BUILD_JAVA=OFF
@@ -50,13 +50,13 @@ set(Hdf5CMakeArgs
 
 set(HDF5_USE_STATIC_LIBRARIES 1)
 include(ExternalProject)
-set(_HDF5_VERSION "1.10.5")
+set(HDF5_VERSION "1.10.5")
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
 ExternalProject_Add(hdf5_local
-        URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${_HDF5_VERSION}.tar.gz
+        URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF5_VERSION}.tar.gz
         URL_MD5 e115eeb66e944fa7814482415dd21cc4
-        CMAKE_ARGS ${Hdf5CMakeArgs}
-        SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}
+        CMAKE_ARGS ${HDF5_CMAKE_ARGS}
+        SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}
         BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
         STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
         TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
@@ -67,7 +67,7 @@ include_directories(
         ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
         ${PROJECT_BINARY_DIR}/hdf5_local/build
 )
-set(_HDF5_LIBS
+set(HDF5_LIBS
         ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
         ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
         -ldl)
@@ -94,14 +94,16 @@ ExternalProject_Add(arpack-ng
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/arpackpp/src)
 ExternalProject_Add(arpackpp
         URL https://github.com/robert-anderson/arpackpp/archive/refs/heads/master.zip
-        URL_MD5 0b86d918706571c3195ed4f52709bed0
-        CMAKE_ARGS -DCMAKE_LIBRARY_PATH=${PROJECT_BINARY_DIR}/arpack-ng/build
+        URL_MD5 eb7eaaf9674e54b6c6b7785102a7c24b
+        CMAKE_ARGS -DCMAKE_LIBRARY_PATH=${CMAKE_BINARY_DIR}/arpack-ng/build
         SOURCE_DIR ${PROJECT_BINARY_DIR}/arpackpp/src/arpackpp
         BINARY_DIR ${PROJECT_BINARY_DIR}/arpackpp/build
         STAMP_DIR ${PROJECT_BINARY_DIR}/arpackpp/stamp
         TMP_DIR ${PROJECT_BINARY_DIR}/arpackpp/tmp
         INSTALL_COMMAND ""
         )
+
+set(ARPACK_LIBS ${PROJECT_BINARY_DIR}/arpack-ng/build/libarpack.a)
 
 #
 # Command line args for M7
