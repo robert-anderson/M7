@@ -57,6 +57,7 @@ namespace dist_mv_prod {
                 m_v(mpi::i_am_root() ? 0 : m_nrow, 0), m_partial_mv(nelement_mv_local, 0) {}
                 
         void parallel_multiply(const T *v, size_t v_size, T *mv, bool all_gather_mv = false) {
+            if (!m_nrow) return;
             bcast(v, v_size);
             multiply(v, v_size);
             all_gather_mv ? all_gather(mv) : gather(mv);

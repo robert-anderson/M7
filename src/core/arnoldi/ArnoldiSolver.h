@@ -20,7 +20,10 @@ struct ArnoldiSolver {
 
 
     bool solve(dist_mv_prod::Base<T>& mat, size_t nroot) {
-        m_arpack_solver_nonsym = std::unique_ptr<ARrcNonSymStdEig<double>>(new ARrcNonSymStdEig<double> (mat.m_nrow, nroot));
+        std::cout << mat.m_nrow << std::endl;
+        m_arpack_solver_nonsym = std::unique_ptr<ARrcNonSymStdEig<double>>(
+                new ARrcNonSymStdEig<double>(
+                        mat.m_nrow, nroot, 0.1));
         while (!m_arpack_solver_nonsym->ArnoldiBasisFound()) {
             mpi::barrier();
             // Calling ARPACK FORTRAN code. Almost all work needed to

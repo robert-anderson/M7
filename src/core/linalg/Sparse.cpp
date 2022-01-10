@@ -79,3 +79,25 @@ sparse::Network sparse::Network::get_symmetrized() const {
     }
     return sym_net;
 }
+
+void sparse::Network::get_row_subset(Network &subnet, size_t count, size_t displ) const {
+    REQUIRE_LE(displ, nrow(), "row offset OOB");
+    REQUIRE_LE(displ+count, nrow(), "row offset+count OOB");
+    subnet.resize(count);
+    auto begin = m_rows_icols.cbegin()+defs::inds::difference_type(displ);
+    auto end = begin + defs::inds::difference_type(count);
+    subnet.m_rows_icols = std::vector<defs::inds>(begin, end);
+    // data is now copied, now update metadata
+    for (const auto& row: subnet.m_rows_icols){
+        if (row.empty()) continue;
+        subnet.m_nentry+=row.size();
+        auto max_element = std::max_element(row.cbegin(), row.cend());
+        subnet.m_max_icol = std::max(subnet.m_max_icol, *max_element);
+    }
+}
+
+sparse::Network sparse::Network::get_row_subset(size_t count, size_t displ) const {
+    Network subnet;
+    get_row_subset(subnet, count, displ);
+    return subnet;
+}

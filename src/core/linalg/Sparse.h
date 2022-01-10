@@ -46,6 +46,11 @@ namespace sparse {
         std::string to_string() const;
 
         Network get_symmetrized() const;
+
+        Network get_row_subset(size_t count, size_t displ) const;
+
+    protected:
+        void get_row_subset(Network &subnet, size_t count, size_t displ) const;
     };
 
     template<typename T>
@@ -136,6 +141,16 @@ namespace sparse {
                 }
             }
             return sym_mat;
+        }
+
+        Matrix<T> get_row_subset(size_t count, size_t displ) const {
+            Matrix<T> submat;
+            Network::get_row_subset(count, displ);
+            auto begin = m_rows_values.cbegin()+defs::inds::difference_type(displ);
+            auto end = begin + defs::inds::difference_type(count);
+            REQUIRE_GE(std::distance(end, m_rows_values.cend()), 0, "end iterator OOB");
+            submat.m_rows_values = std::vector<std::vector<T>>(begin, end);
+            return submat;
         }
     };
 }
