@@ -94,7 +94,7 @@ ExternalProject_Add(arpack-ng
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/arpackpp/src)
 ExternalProject_Add(arpackpp
         URL https://github.com/robert-anderson/arpackpp/archive/refs/heads/master.zip
-        URL_MD5 eb7eaaf9674e54b6c6b7785102a7c24b
+        URL_MD5 1969570b383c35bd1a57ee72d31b6d3b
         CMAKE_ARGS -DCMAKE_LIBRARY_PATH=${CMAKE_BINARY_DIR}/arpack-ng/build
         SOURCE_DIR ${PROJECT_BINARY_DIR}/arpackpp/src/arpackpp
         BINARY_DIR ${PROJECT_BINARY_DIR}/arpackpp/build
