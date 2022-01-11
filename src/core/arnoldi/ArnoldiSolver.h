@@ -145,5 +145,77 @@ public:
     }
 };
 
+/**
+ * Real, symmetric eigenvalue problem. It is the user's responsibility to ensure the operator is actually real symmetric
+ * @tparam T
+ *  floating point type of Krylov vectors
+ */
+template<typename T>
+struct ArnoldiProblemNonSym : ArnoldiProblemWithProduct<T> {
+    using ArnoldiProblemBase::m_nroot;
+    using ArnoldiProblemBase::solve_base;
+
+    std::unique_ptr<ARrcNonSymStdEig<T>> m_solver;
+
+    ArnoldiProblemNonSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){}
+
+private:
+    bool basis_found() override { return m_solver->ArnoldiBasisFound(); }
+
+    void take_step() override { m_solver->TakeStep(); }
+
+    bool do_another_mv_call() override {
+        return (m_solver->GetIdo() == 1) || (m_solver->GetIdo() == -1);
+    }
+
+    void find_eigenvalues() override { m_solver->FindEigenvalues(); }
+
+    void setup(size_t nrow, bool dist) override {
+        if (mpi::i_am_root() || !dist) m_solver = mem_utils::make_unique<ARrcNonSymStdEig<T>>(nrow, m_nroot);
+    }
+
+    void product(dist_mv_prod::Base<T> &mv_prod) override {
+        mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
+    }
+
+    void product(sparse::Matrix<T> &sparse_mat) override {
+        sparse_mat.multiply(get_vector(), put_vector(), sparse_mat.nrow());
+    }
+
+    const T* get_vector() const {
+        return m_solver ? m_solver->GetVector(): nullptr;
+    }
+
+    T* put_vector() const {
+        return m_solver ? m_solver->PutVector(): nullptr;
+    }
+
+public:
+    bool solve(dist_mv_prod::Base<T> &mv_prod) override {
+        setup(mv_prod.m_nrow, true);
+        auto prod_fn = [&]() {
+            mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
+        };
+        return solve_base(prod_fn, true);
+    }
+
+    bool solve(sparse::Matrix<T> &sparse_mat) override {
+        setup(sparse_mat.nrow(), false);
+        auto prod_fn = [&]() { sparse_mat.multiply(m_solver->GetVector(), m_solver->PutVector(), sparse_mat.nrow()); };
+        return solve_base(prod_fn, false);
+    }
+
+    T real_eigenvalue(size_t i) override {
+        auto z = complex_eigenvalue(i);
+        if (!consts::float_is_zero(z.imag()))
+            log::warn("taking real part of eigenvalue with non-zero imaginary part");
+        return consts::real(complex_eigenvalue(i));
+    }
+
+    std::complex<T> complex_eigenvalue(size_t i) override {
+        return m_solver->Eigenvalue(i);
+    }
+};
+
 
 #endif //M7_ARNOLDISOLVER_H
