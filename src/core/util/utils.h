@@ -437,6 +437,7 @@ namespace string_utils {
     std::string plural(size_t i, std::string plu_ending="s", std::string sing_ending="");
 
     std::string plural(std::string base, size_t i, std::string plu_ending="s", std::string sing_ending="");
+
 }
 
 

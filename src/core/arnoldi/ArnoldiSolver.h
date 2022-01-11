@@ -41,7 +41,7 @@ struct ArnoldiProblemBase {
     virtual void find_eigenvalues() = 0;
 
 protected:
-    bool solve_base(const std::function<void()> &product_fn);
+    bool solve_base(const std::function<void()> &product_fn, bool dist);
 };
 
 template<typename T>
@@ -49,7 +49,7 @@ struct ArnoldiProblemWithProduct : ArnoldiProblemBase {
 
     ArnoldiProblemWithProduct(size_t nroot): ArnoldiProblemBase(nroot){}
 
-    virtual void setup(size_t nrow) = 0;
+    virtual void setup(size_t nrow, bool parallel) = 0;
 
     virtual bool solve(dist_mv_prod::Base<T> &mv_prod) = 0;
 
@@ -86,53 +86,58 @@ struct ArnoldiProblemSym : ArnoldiProblemWithProduct<T> {
     using ArnoldiProblemBase::m_nroot;
     using ArnoldiProblemBase::solve_base;
 
-    ARrcSymStdEig<T> m_solver;
+    std::unique_ptr<ARrcSymStdEig<T>> m_solver;
 
-    ArnoldiProblemSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){
-        m_solver.ChangeShift(sigma);
-    }
+    ArnoldiProblemSym(size_t nroot, T sigma=0.0) : ArnoldiProblemWithProduct<T>(nroot){}
 
 private:
-    bool basis_found() override { return m_solver.ArnoldiBasisFound(); }
+    bool basis_found() override { return m_solver->ArnoldiBasisFound(); }
 
-    void take_step() override { m_solver.TakeStep(); }
+    void take_step() override { m_solver->TakeStep(); }
 
     bool do_another_mv_call() override {
-        return (m_solver.GetIdo() == 1) || (m_solver.GetIdo() == -1);
+        return (m_solver->GetIdo() == 1) || (m_solver->GetIdo() == -1);
     }
 
-    void find_eigenvalues() override { m_solver.FindEigenvalues(); }
+    void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
-    void setup(size_t nrow) override {
-        m_solver.DefineParameters(nrow, m_nroot);
+    void setup(size_t nrow, bool dist) override {
+        if (mpi::i_am_root() || !dist) m_solver = mem_utils::make_unique<ARrcSymStdEig<T>>(nrow, m_nroot);
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
-        mv_prod.parallel_multiply(m_solver.GetVector(), mv_prod.m_nrow,
-                                  m_solver.PutVector(), mv_prod.m_nrow);
+        mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
     }
 
     void product(sparse::Matrix<T> &sparse_mat) override {
-        sparse_mat.multiply(m_solver.GetVector(), m_solver.PutVector(), sparse_mat.nrow());
+        sparse_mat.multiply(get_vector(), put_vector(), sparse_mat.nrow());
+    }
+
+    const T* get_vector() const {
+        return m_solver ? m_solver->GetVector(): nullptr;
+    }
+
+    T* put_vector() const {
+        return m_solver ? m_solver->PutVector(): nullptr;
     }
 
 public:
     bool solve(dist_mv_prod::Base<T> &mv_prod) override {
-        setup(mv_prod.m_nrow);
+        setup(mv_prod.m_nrow, true);
         auto prod_fn = [&]() {
-            mv_prod.parallel_multiply(m_solver.GetVector(), mv_prod.m_nrow, m_solver.PutVector(), mv_prod.m_nrow);
+            mv_prod.parallel_multiply(get_vector(), mv_prod.m_nrow, put_vector(), mv_prod.m_nrow);
         };
-        return solve_base(prod_fn);
+        return solve_base(prod_fn, true);
     }
 
     bool solve(sparse::Matrix<T> &sparse_mat) override {
-        setup(sparse_mat.nrow());
-        auto prod_fn = [&]() { sparse_mat.multiply(m_solver.GetVector(), m_solver.PutVector(), sparse_mat.nrow()); };
-        return solve_base(prod_fn);
+        setup(sparse_mat.nrow(), false);
+        auto prod_fn = [&]() { sparse_mat.multiply(m_solver->GetVector(), m_solver->PutVector(), sparse_mat.nrow()); };
+        return solve_base(prod_fn, false);
     }
 
     T real_eigenvalue(size_t i) override {
-        return m_solver.Eigenvalue(i);
+        return m_solver->Eigenvalue(i);
     }
 
     std::complex<T> complex_eigenvalue(size_t i) override {
