@@ -20,7 +20,7 @@ size_t sparse::Network::max_column_index() const {
     return m_max_icol;
 }
 
-void sparse::Network::add(const size_t &irow, const size_t &icol) {
+size_t sparse::Network::add(const size_t &irow, const size_t &icol) {
     if (irow >= m_rows_icols.size()) {
         if (!m_resized_by_add) {
             log::warn("Resizing sparse matrix by adding a row (this entails reallocation which is inefficient)");
@@ -32,17 +32,23 @@ void sparse::Network::add(const size_t &irow, const size_t &icol) {
     m_rows_icols[irow].push_back(icol);
     if (icol>m_max_icol) m_max_icol = icol;
     ++m_nentry;
+    return m_rows_icols[irow].size()-1;
 }
 
-void sparse::Network::checked_add(const size_t &irow, const size_t &icol) {
-    const auto& row = m_rows_icols[irow];
-    REQUIRE_FALSE(std::any_of(row.cbegin(), row.cend(), [&icol](const size_t& i){return i==icol;}),
-                  "row entries in sparse network must have a unique column index");
-    add(irow, icol);
+size_t sparse::Network::insert(const size_t &irow, const size_t &icol) {
+    auto& row = m_rows_icols[irow];
+    auto element = std::find(row.begin(), row.end(), icol);
+    if (element==row.end()) return add(irow, icol);
+    *element = icol;
+    return std::distance(row.begin(), element);
 }
 
 void sparse::Network::add(const size_t &irow, const defs::inds &icols) {
     for (auto &icol: icols) add(irow, icol);
+}
+
+void sparse::Network::insert(const size_t &irow, const defs::inds &icols) {
+    for (auto &icol: icols) insert(irow, icol);
 }
 
 bool sparse::Network::empty() { return m_rows_icols.empty(); }
@@ -74,7 +80,7 @@ sparse::Network sparse::Network::get_symmetrized() const {
         for (size_t iicol=0ul; iicol < icols.size(); ++iicol) {
             const auto& icol = icols[iicol];
             sym_net.add(irow, icol);
-            if (icol != irow) sym_net.checked_add(icol, irow);
+            if (icol != irow) sym_net.insert(icol, irow);
         }
     }
     return sym_net;

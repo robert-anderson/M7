@@ -2,37 +2,22 @@
 // Created by rja on 09/01/2022.
 //
 
+#include <test/core/sparse/Examples.h>
 #include "gtest/gtest.h"
 #include "src/core/arnoldi/ArnoldiSolver.h"
+#include "src/core/linalg/EigenSolver.h"
 
 TEST(ArnoldiSolver, Test) {
-    typedef double T;
-    sparse::Matrix<T> mat;
-    /*
-     *  a[0,0], a[0,1], a[1,2], a[2,2], a[3,0], a[4,1], a[4,2], a[5, 0], a[5,2], a[6, 1] =
-     *      1, -1, 2, -2, 3, -3, 4, -4, 5, -5
-     *  v = [-9, 8, 2]
-     *
-     *  a.v = [-17, 4, -4, -27, -16,  46, -40]
-     */
     const size_t nrow = 7;
-    defs::inds irows = {0, 0, 1, 2, 3, 4, 4, 5, 5, 6};
-    defs::inds icols = {0, 1, 2, 2, 0, 1, 2, 0, 2, 1};
-    std::vector<T> vs = {1, -1, 2, -2, 3, -3, 4, -4, 5, -5};
-    mat.resize(nrow);
-    for (size_t i=0ul; i<irows.size(); ++i) mat.add(irows[i], icols[i], vs[i]);
+    auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
+    auto sym = mat.get_symmetrized(false);
+    dist_mv_prod::Sparse<double> prod(sym);
 
-    std::vector<T> in = {-9, 8, 2};
-    ASSERT_EQ(in.size(), mat.max_column_index()+1);
-    std::vector<T> out;
-    std::vector<T> out_chk = {-17, 4, -4, -27, -16,  46, -40};
-    mat.multiply(in, out);
-    ASSERT_EQ(out, out_chk);
+    ArnoldiProblemSym<double> arnoldi_problem(2);
+    arnoldi_problem.solve(prod);
 
-    dist_mv_prod::Sparse<double> prod(mat);
-
-    ArnoldiSolver<double, double> solver;
-    solver.solve(prod, 1);
-
-
+    EigenSolver<double> dense_solver(sym.to_dense());
+    std::cout << dense_solver.m_evals << std::endl;
+    std::cout << arnoldi_problem.real_eigenvalue(0) << std::endl;
+    std::cout << arnoldi_problem.real_eigenvalue(1) << std::endl;
 }

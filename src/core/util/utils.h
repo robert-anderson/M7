@@ -433,6 +433,10 @@ namespace string_utils {
     int64_t read_signed(const char *&ptr);
 
     size_t parse_decimal_digit(const char *c);
+
+    std::string plural(size_t i, std::string plu_ending="s", std::string sing_ending="");
+
+    std::string plural(std::string base, size_t i, std::string plu_ending="s", std::string sing_ending="");
 }
 
 

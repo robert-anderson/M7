@@ -31,11 +31,13 @@ namespace sparse {
 
         size_t max_column_index() const;
 
-        void add(const size_t &irow, const size_t &icol);
+        size_t add(const size_t &irow, const size_t &icol);
 
-        void checked_add(const size_t &irow, const size_t &icol);
+        size_t insert(const size_t &irow, const size_t &icol);
 
         void add(const size_t &irow, const defs::inds &icols);
+
+        void insert(const size_t &irow, const defs::inds &icols);
 
         bool empty();
 
@@ -64,10 +66,20 @@ namespace sparse {
             if (nrow > m_rows_values.size()) m_rows_values.resize(nrow);
         }
 
-        void add(const size_t &irow, const size_t &icol, const T &v) {
-            Network::add(irow, icol);
+        size_t add(const size_t &irow, const size_t &icol, const T &v) {
+            auto i = Network::add(irow, icol);
             if (irow >= m_rows_values.size()) resize(irow + 1);
             m_rows_values[irow].push_back(v);
+            return i;
+        }
+
+        size_t insert(const size_t &irow, const size_t &icol, const T &v) {
+            auto i = Network::insert(irow, icol);
+            if (irow >= m_rows_values.size()) resize(irow + 1);
+            auto& row = m_rows_values[irow];
+            if (i < row.size()) row[i] = v;
+            else row.push_back(v);
+            return i;
         }
 
         void add(const size_t &irow, const defs::inds &icols, const std::vector<T> &vs) {
@@ -75,28 +87,38 @@ namespace sparse {
             for (size_t i = 0ul; i < icols.size(); ++i) add(irow, icols[i], vs[i]);
         }
 
+        void insert(const size_t &irow, const defs::inds &icols, const std::vector<T> &vs) {
+            REQUIRE_EQ(icols.size(), vs.size(), "must have same number of column indices and values");
+            for (size_t i = 0ul; i < icols.size(); ++i) insert(irow, icols[i], vs[i]);
+        }
+
         void add(const size_t &irow, const std::pair<size_t, T> &pair) {
             add(irow, pair.first, pair.second);
         }
 
-        void multiply(const T *in, T *out) const {
-            // each row of the out vector receives a contribution from every
-            // corresponding entry in the sparse matrix row
-            // out_i = sum_j H_ij in_j
+        void insert(const size_t &irow, const std::pair<size_t, T> &pair) {
+            insert(irow, pair.first, pair.second);
+        }
+
+        void multiply(const T *v, T *mv, size_t mv_size) const {
+            // each row of the mv vector receives a contribution from every
+            // corresponding entry v the sparse matrix row
+            // (Mv)_i = sum_j M_ij v_j
+            std::memset(static_cast<void*>(mv), 0, sizeof(T) * mv_size);
             for (size_t irow = 0; irow < m_rows_icols.size(); ++irow) {
                 auto icol_it = m_rows_icols[irow].cbegin();
                 auto value_it = m_rows_values[irow].cbegin();
                 for (; icol_it != m_rows_icols[irow].cend(); (++icol_it, ++value_it)) {
                     DEBUG_ASSERT_FALSE(value_it == m_rows_values[irow].cend(),
                                        "values list incongruent with column indices list");
-                    out[irow] += *value_it * in[*icol_it];
+                    mv[irow] += *value_it * v[*icol_it];
                 }
             }
         }
 
-        void multiply(const std::vector<T> &in, std::vector<T> &out) const {
-            if (nrow() > out.size()) out.resize(nrow());
-            multiply(in.data(), out.data());
+        void multiply(const std::vector<T> &v, std::vector<T> &mv) const {
+            if (nrow() > mv.size()) mv.resize(nrow());
+            multiply(v.data(), mv.data(), mv.size());
         }
 
         std::pair<const defs::inds &, const std::vector<T> &> operator[](const size_t &irow) const {
@@ -136,8 +158,8 @@ namespace sparse {
                 for (size_t iicol=0ul; iicol < icols.size(); ++iicol) {
                     const auto& icol = icols[iicol];
                     const auto& value = values[iicol];
-                    sym_mat.add(irow, icol, value);
-                    if (icol != irow) sym_mat.checked_add(icol, irow, value);
+                    sym_mat.insert(irow, icol, value);
+                    if (icol != irow) sym_mat.insert(icol, irow, value);
                 }
             }
             return sym_mat;
@@ -145,7 +167,7 @@ namespace sparse {
 
         Matrix<T> get_row_subset(size_t count, size_t displ) const {
             Matrix<T> submat;
-            Network::get_row_subset(count, displ);
+            Network::get_row_subset(submat, count, displ);
             auto begin = m_rows_values.cbegin()+defs::inds::difference_type(displ);
             auto end = begin + defs::inds::difference_type(count);
             REQUIRE_GE(std::distance(end, m_rows_values.cend()), 0, "end iterator OOB");

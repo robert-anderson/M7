@@ -16,6 +16,8 @@ TEST(DistMvProd, SparseRealSym) {
     const size_t count_local = mpi::evenly_shared_count(nrow);
     const size_t displ_local = mpi::evenly_shared_displ(nrow);
     auto local_mat = global_mat.get_row_subset(count_local, displ_local);
+    ASSERT_EQ(global_mat.nrow(), nrow);
+    ASSERT_EQ(mpi::all_sum(local_mat.nrow()), nrow);
 
     std::vector<T> in, out, out_chk;
     if (mpi::i_am_root()) utils::convert(hashing::in_range(0, nrow, 0, 12, false), in);

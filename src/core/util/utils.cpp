@@ -13,12 +13,12 @@ size_t integer_utils::rectmap(const size_t &irow, const size_t &icol, const size
      * 0 1 2 3   0,0 0,1 0,2 0,3
      * 4 5 6 7   1,0 1,1 1,2 1,3
      */
-    return irow*ncol+icol;
+    return irow * ncol + icol;
 }
 
 void integer_utils::inv_rectmap(size_t &irow, size_t &icol, const size_t &ncol, const size_t &flat) {
-    irow = flat/ncol;
-    icol = flat-irow*ncol;
+    irow = flat / ncol;
+    icol = flat - irow * ncol;
 }
 
 size_t integer_utils::trigmap(const size_t &i, const size_t &j) {
@@ -99,7 +99,7 @@ size_t integer_utils::combinatorial(const size_t &n, const size_t &r) {
 }
 
 size_t integer_utils::combinatorial_with_repetition(const size_t &n, const size_t &r) {
-    return combinatorial(n+r-1, r);
+    return combinatorial(n + r - 1, r);
 }
 
 std::string string_utils::join(const std::vector<std::string> &words, const std::string &divider) {
@@ -255,4 +255,12 @@ int64_t string_utils::read_signed(const char *&ptr) {
 size_t string_utils::parse_decimal_digit(const char *c) {
     if (*c < '0' || *c > '9') return ~0ul;
     return *c - '0';
+}
+
+std::string string_utils::plural(size_t i, std::string plu_ending, std::string sing_ending) {
+    return (i == 1) ? sing_ending : plu_ending;
+}
+
+std::string string_utils::plural(std::string base, size_t i, std::string plu_ending, std::string sing_ending) {
+    return std::to_string(i) + " " + base + plural(i, plu_ending, sing_ending);
 }
