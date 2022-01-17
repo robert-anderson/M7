@@ -19,7 +19,7 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
 }
 #endif
-
+#if 0
 TEST(DenseHamiltonian, N2Rhf) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
@@ -240,3 +240,4 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     auto solver = dh.diagonalize();
     ASSERT_FLOAT_EQ(solver.m_evals[0], -0.9998830020871416);
 }
+#endif

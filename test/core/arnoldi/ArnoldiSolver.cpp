@@ -19,7 +19,8 @@ TEST(ArnoldiSolver, SymNonDist) {
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
-    EigenSolver<double> dense_solver(sym.to_dense());
+    dense::SquareMatrix<double> dense(sym);
+    EigenSolver<double> dense_solver(dense);
     auto dense_eval_it = dense_solver.m_evals.cbegin()+(nrow-nroot);
     for (size_t iroot=0ul; iroot<nroot; ++iroot){
         ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
@@ -40,7 +41,8 @@ TEST(ArnoldiSolver, SymDist) {
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     if (mpi::i_am_root()) {
-        EigenSolver<double> dense_solver(sym.to_dense());
+        dense::SquareMatrix<double> dense(sym);
+        EigenSolver<double> dense_solver(dense);
         auto dense_eval_it = dense_solver.m_evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
@@ -59,7 +61,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     //EigenSolver<double> dense_solver(mat.to_dense());
-    mat.to_dense().print();
+    std::cout << dense::SquareMatrix<double>(mat).to_string() << std::endl;
     //auto dense_eval_it = dense_solver.m_evals.cbegin()+(nrow-nroot);
     for (size_t iroot=0ul; iroot<nroot; ++iroot){
         std::cout << arnoldi_problem.real_eigenvalue(iroot) << std::endl;
@@ -81,7 +83,8 @@ TEST(ArnoldiSolver, NonSymDist) {
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     if (mpi::i_am_root()) {
-        EigenSolver<double> dense_solver(sym.to_dense());
+        dense::SquareMatrix<double> dense(sym);
+        EigenSolver<double> dense_solver(dense);
         auto dense_eval_it = dense_solver.m_evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);

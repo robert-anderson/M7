@@ -8,7 +8,6 @@
 #include <vector>
 #include <forward_list>
 #include <src/core/parallel/MPIAssert.h>
-#include "src/core/linalg/Dense.h"
 #include "src/core/io/Logging.h"
 
 namespace sparse {
@@ -134,18 +133,6 @@ namespace sparse {
                 out.push_back("(" + utils::to_string(icol) + " -> " + utils::to_string(v) + ")");
             }
             return out;
-        }
-
-        dense::Matrix<T> to_dense() const {
-            dense::Matrix<T> mat(nrow());
-            for (size_t irow = 0ul; irow < nrow(); ++irow) {
-                for (size_t ientry = 0ul; ientry < m_rows_icols[irow].size(); ++ientry) {
-                    size_t icol = m_rows_icols[irow][ientry];
-                    auto v = m_rows_values[irow][ientry];
-                    mat(irow, icol) = v;
-                }
-            }
-            return mat;
         }
 
         Matrix<T> get_symmetrized(bool conj) const {

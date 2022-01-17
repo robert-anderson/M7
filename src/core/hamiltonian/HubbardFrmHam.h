@@ -8,7 +8,7 @@
 #include <src/core/util/Foreach.h>
 #include <src/core/nd/NdFormatD.h>
 #include "FrmHam.h"
-#include "src/core/linalg/Sparse.h"
+#include "src/core/linalg/Dense.h"
 
 struct HubbardFrmHam : FrmHam {
     /**
@@ -31,7 +31,7 @@ struct HubbardFrmHam : FrmHam {
      * dense map of coordinated sites allowing lookup of the 1-body H matrix element given the flat indices of two site
      * index vectors
      */
-    dense::Matrix<int> m_t_mat_dense;
+    dense::SquareMatrix<int> m_t_mat_dense;
     /**
      * to help with excitation generation.
      */
