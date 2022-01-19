@@ -85,26 +85,22 @@ namespace dense {
             return *this;
         }
 
-        void get_real_part(Matrix<consts::component_t<T>>&){
-            Matrix<consts::component_t<T>> out(m_nrow, m_ncol);
-            auto out_it = out.m_buffer.begin();
-            for (const auto& v: m_buffer) (out_it++)=consts::real(v);
-            return out;
-        }
-
-        Matrix<consts::component_t<T>> imag(){
-            Matrix<consts::component_t<T>> out(m_nrow, m_ncol);
-            auto out_it = out.m_buffer.begin();
-            for (const auto& v: m_buffer) (out_it++)=consts::imag(v);
-            return out;
-        }
-
         T* ptr(const size_t &irow=0) {
             return m_buffer.data()+index(irow, 0);
         }
 
         const T* ptr(const size_t &irow=0) const {
             return m_buffer.data()+index(irow, 0);
+        }
+
+        T &operator[](const size_t &iflat) {
+            DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
+            return m_buffer[iflat];
+        }
+
+        const T &operator[](const size_t &iflat) const {
+            DEBUG_ASSERT_LT(iflat, m_buffer.size(), "index OOB");
+            return m_buffer[iflat];
         }
 
         T &operator()(const size_t &irow, const size_t &icol) {
@@ -119,7 +115,7 @@ namespace dense {
             m_buffer.assign(m_buffer.size(), 0);
         }
 
-        bool nearly_equal(const Matrix<T>& other, T eps=std::numeric_limits<T>::epsilon()) const {
+        bool nearly_equal(const Matrix<T>& other, consts::component_t<T>::type eps=std::numeric_limits<consts::component_t<T>::type>::epsilon()) const {
             for (size_t i=0ul; i<m_buffer.size(); ++i) {
                 if (!consts::floats_nearly_equal(m_buffer[i], other.m_buffer[i], eps)) return false;
             }
