@@ -260,9 +260,9 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam* ham) const {
     e1 = mpi::all_sum(e1);
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
-    ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
+    DEBUG_ASSERT_NEARLY_NE(std::abs(trace), 0.0, 1e-14, "RDM trace should be non-zero");
     const auto norm = consts::real(trace) / integer_utils::combinatorial(ham->m_nelec, 2);
-    REQUIRE_TRUE(consts::float_nearly_zero(norm / m_total_norm.m_reduced - 1.0, 1e-8),
+    REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
                  "2RDM norm should match total of sampled diagonal contributions");
     return consts::real(ham->m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
 }
@@ -299,7 +299,7 @@ defs::ham_comp_t Rdms::get_energy(const LadderHam *ham, size_t nelec, size_t exs
     e_uncoupled/=nelec;
     e_coupled = mpi::all_sum(e_coupled);
     auto e = (e_uncoupled + e_coupled) / m_total_norm.m_reduced;
-    REQUIRE_TRUE(consts::float_nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")
+    REQUIRE_NEARLY_EQ(consts::imag(e), 0.0, 1e-12, "energy should be purely real");
     return consts::real(e);
 }
 
@@ -318,6 +318,6 @@ defs::ham_comp_t Rdms::get_energy(const BosHam *ham) const {
         e += rdm_element*ham->get_coeff_0011(n, m);
     }
     e = mpi::all_sum(e) / m_total_norm.m_reduced;
-    REQUIRE_TRUE(consts::float_nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")
+    REQUIRE_TRUE(consts::nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")
     return consts::real(e);
 }

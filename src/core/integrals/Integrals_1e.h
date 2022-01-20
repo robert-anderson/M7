@@ -56,9 +56,10 @@ public:
     void set(const size_t &i, const size_t &j, const T &value) {
         auto iflat = flat_index(i, j);
         auto conjd_value = (isym == 2 && i > j) ? consts::conj(value) : value;
-        if (consts::float_is_zero(m_data[iflat])) m_data[iflat] = conjd_value;
+        if (consts::nearly_zero(m_data[iflat])) m_data[iflat] = conjd_value;
         else {
-            ASSERT(consts::floats_nearly_equal(m_data[iflat], conjd_value));
+            DEBUG_ASSERT_NEARLY_EQ(m_data[iflat], conjd_value, consts::eps(value),
+                                   "conjugated value conflicts with current non-zero value");
         }
     }
 
@@ -69,8 +70,8 @@ public:
     }
 
     void set(const defs::inds &inds, const T &value) {
-        ASSERT(inds.size() == 4);
-        ASSERT(inds[2] == ~0ul && inds[3] == ~0ul);
+        DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect number of indices");
+        DEBUG_ASSERT_TRUE(inds[2] == ~0ul && inds[3] == ~0ul, "only the first two indices should be valid");
         set(inds[0], inds[1], value);
     }
 
@@ -108,7 +109,7 @@ public:
          */
         for (size_t i = 0ul; i < m_nintind; ++i) {
             for (size_t j = 0ul; i < m_nintind; ++i) {
-                if (!consts::float_is_zero(get(i, 0, j, 1))) return false;
+                if (!consts::nearly_zero(get(i, 0, j, 1))) return false;
             }
         }
         return true;

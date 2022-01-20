@@ -25,7 +25,7 @@ protected:
     void set_data(std::vector<T> &data, const size_t &iflat, const T& elem) {
         DEBUG_ASSERT_LT(iflat, data.size(), "flat 1e integral index OOB");
         auto& existing = data[iflat];
-        REQUIRE_TRUE(existing==0.0 || consts::floats_nearly_equal(existing, elem),
+        REQUIRE_TRUE(existing==0.0 || consts::nearly_equal(existing, elem),
                      "Overwriting integral data with different value: wrong permutational symmetries assumed?");
         existing = elem;
     }

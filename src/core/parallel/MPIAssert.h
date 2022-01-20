@@ -60,6 +60,28 @@ namespace asserts {
         }
     }
 
+    template<typename lhs_t, typename rhs_t>
+    static void compare_nearly_abort(const char *kind, const char *op, const lhs_t &lhs, const rhs_t &rhs,
+                                     const consts::comp_t<lhs_t>& tol, const char *lhs_sym, const char *rhs_sym,
+                              const char *file, int line, bool collective, bool outcome, const std::string &reason) {
+        if (collective || mpi::nrank() == 1) {
+            outcome = mpi::all_land(outcome);
+            if (!outcome) {
+                log::error("{} {} failed with tolerance of {}", kind, op, tol);
+                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::to_string(lhs));
+                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::to_string(rhs));
+                abort(file, line, collective, reason);
+            }
+        } else {
+            if (!outcome) {
+                log::error_("{} {} failed with tolerance of {}", kind, op, tol);
+                log::error_("{} value is: {}", lhs_sym, utils::to_string(lhs));
+                log::error_("{} value is: {}", rhs_sym, utils::to_string(rhs));
+                abort(file, line, collective, reason);
+            }
+        }
+    }
+
     static void bool_abort(const char *kind, const char *sym, const char *file, int line, bool collective,
                            bool outcome, bool truth, const std::string &reason) {
         auto right = truth ? "true" : "false";
@@ -93,6 +115,22 @@ namespace asserts {
     static void ne(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const char *lhs_sym, const char *rhs_sym,
                    const char *file, int line, bool collective, const std::string &reason) {
         compare_abort(kind, "not equal", lhs, rhs, lhs_sym, rhs_sym, file, line, collective, lhs != rhs, reason);
+    }
+
+    template<typename lhs_t, typename rhs_t>
+    static void nearly_eq(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const consts::comp_t<lhs_t> &tol,
+                          const char *lhs_sym, const char *rhs_sym,
+                          const char *file, int line, bool collective, const std::string &reason) {
+        compare_nearly_abort(kind, "equal", lhs, rhs, tol, lhs_sym, rhs_sym, file, line,
+                             collective, consts::nearly_equal(lhs, rhs, tol), reason);
+    }
+
+    template<typename lhs_t, typename rhs_t>
+    static void nearly_ne(const char *kind, const lhs_t &lhs, const rhs_t &rhs, const consts::comp_t<lhs_t> &tol,
+                          const char *lhs_sym, const char *rhs_sym,
+                          const char *file, int line, bool collective, const std::string &reason) {
+        compare_nearly_abort(kind, "not equal", lhs, rhs, tol, lhs_sym, rhs_sym, file, line,
+                             collective, consts::nearly_equal(lhs, rhs, tol), reason);
     }
 
     template<typename lhs_t, typename rhs_t>
@@ -140,6 +178,8 @@ namespace asserts {
 
 #define MPI_EQ_BASE(kind, lhs, rhs, collective, reason) asserts::eq(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
 #define MPI_NE_BASE(kind, lhs, rhs, collective, reason) asserts::ne(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
+#define MPI_NEARLY_EQ_BASE(kind, lhs, rhs, tol, collective, reason) asserts::nearly_eq(kind, lhs, rhs, tol, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
+#define MPI_NEARLY_NE_BASE(kind, lhs, rhs, tol, collective, reason) asserts::nearly_ne(kind, lhs, rhs, tol, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
 #define MPI_LT_BASE(kind, lhs, rhs, collective, reason) asserts::lt(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
 #define MPI_LE_BASE(kind, lhs, rhs, collective, reason) asserts::le(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
 #define MPI_GT_BASE(kind, lhs, rhs, collective, reason) asserts::gt(kind, lhs, rhs, #lhs, #rhs, __FILE__, __LINE__, collective, reason);
@@ -151,6 +191,15 @@ namespace asserts {
 #ifndef NDEBUG
 #define DEBUG_ASSERT_EQ_ALL(lhs, rhs, reason) MPI_EQ_BASE("ASSERT", lhs, rhs, true, reason)
 #define DEBUG_ASSERT_EQ(lhs, rhs, reason) MPI_EQ_BASE("ASSERT", lhs, rhs, false, reason)
+
+#define DEBUG_ASSERT_NE_ALL(lhs, rhs, reason) MPI_NE_BASE("ASSERT", lhs, rhs, true, reason)
+#define DEBUG_ASSERT_NE(lhs, rhs, reason) MPI_NE_BASE("ASSERT", lhs, rhs, false, reason)
+
+#define DEBUG_ASSERT_NEARLY_EQ_ALL(lhs, rhs, tol, reason) MPI_NEARLY_EQ_BASE("ASSERT", lhs, rhs, tol, true, reason)
+#define DEBUG_ASSERT_NEARLY_EQ(lhs, rhs, tol, reason) MPI_NEARLY_EQ_BASE("ASSERT", lhs, rhs, tol, false, reason)
+
+#define DEBUG_ASSERT_NEARLY_NE_ALL(lhs, rhs, tol, reason) MPI_NEARLY_NE_BASE("ASSERT", lhs, rhs, tol, true, reason)
+#define DEBUG_ASSERT_NEARLY_NE(lhs, rhs, tol, reason) MPI_NEARLY_NE_BASE("ASSERT", lhs, rhs, tol, false, reason)
 
 #define DEBUG_ASSERT_NE_ALL(lhs, rhs, reason) MPI_NE_BASE("ASSERT", lhs, rhs, true, reason)
 #define DEBUG_ASSERT_NE(lhs, rhs, reason) MPI_NE_BASE("ASSERT", lhs, rhs, false, reason)
@@ -179,6 +228,12 @@ namespace asserts {
 #define DEBUG_ASSERT_NE_ALL(lhs, rhs, reason)
 #define DEBUG_ASSERT_NE(lhs, rhs, reason)
 
+#define DEBUG_ASSERT_NEARLY_EQ_ALL(lhs, rhs, tol, reason)
+#define DEBUG_ASSERT_NEARLY_EQ(lhs, rhs, tol, reason)
+
+#define DEBUG_ASSERT_NEARLY_NE_ALL(lhs, rhs, tol, reason)
+#define DEBUG_ASSERT_NEARLY_NE(lhs, rhs, tol, reason)
+
 #define DEBUG_ASSERT_LT_ALL(lhs, rhs, reason)
 #define DEBUG_ASSERT_LT(lhs, rhs, reason)
 
@@ -203,6 +258,12 @@ namespace asserts {
 
 #define REQUIRE_NE_ALL(lhs, rhs, reason) MPI_NE_BASE("REQUIRE", lhs, rhs, true, reason)
 #define REQUIRE_NE(lhs, rhs, reason) MPI_NE_BASE("REQUIRE", lhs, rhs, false, reason)
+
+#define REQUIRE_NEARLY_EQ_ALL(lhs, rhs, tol, reason) MPI_NEARLY_EQ_BASE("REQUIRE", lhs, rhs, tol, true, reason)
+#define REQUIRE_NEARLY_EQ(lhs, rhs, tol, reason) MPI_NEARLY_EQ_BASE("REQUIRE", lhs, rhs, tol, false, reason)
+
+#define REQUIRE_NEARLY_NE_ALL(lhs, rhs, tol, reason) MPI_NEARLY_NE_BASE("REQUIRE", lhs, rhs, tol, true, reason)
+#define REQUIRE_NEARLY_NE(lhs, rhs, tol, reason) MPI_NEARLY_NE_BASE("REQUIRE", lhs, rhs, tol, false, reason)
 
 #define REQUIRE_LT_ALL(lhs, rhs, reason) MPI_LT_BASE("REQUIRE", lhs, rhs, true, reason)
 #define REQUIRE_LT(lhs, rhs, reason) MPI_LT_BASE("REQUIRE", lhs, rhs, false, reason)

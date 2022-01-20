@@ -13,31 +13,47 @@
 namespace consts {
 
     template<typename T>
-    struct is_complex_t : public std::false_type {
+    struct is_complex_base_t : public std::false_type {};
+
+    template<typename T>
+    struct is_complex_base_t<std::complex<T>> : public std::true_type {};
+
+    template<typename T>
+    struct remove_const_ref_t {
+        typedef typename std::remove_reference<typename std::remove_const<T>::type>::type type;
     };
 
     template<typename T>
-    struct is_complex_t<std::complex<T>> : public std::true_type {
+    constexpr bool is_complex() {
+        return is_complex_base_t<typename remove_const_ref_t<T>::type>::value;
+    }
+
+    template<typename T>
+    struct comp_base_t {
+        typedef T type;
     };
 
     template<typename T>
-    struct is_complex_t<const std::complex<T>> : public std::true_type {
+    struct comp_base_t<std::complex<T>> {
+        typedef T type;
     };
 
     template<typename T>
-    struct is_complex_t<std::complex<T> &> : public std::true_type {
-    };
-
-    template<typename T>
-    struct is_complex_t<const std::complex<T> &> : public std::true_type {
-    };
+    using comp_t = typename comp_base_t<typename remove_const_ref_t<T>::type>::type;
 
 
     template<typename T>
-    constexpr bool is_arithmetic() { return is_complex_t<T>::value || std::is_arithmetic<T>::value; }
+    constexpr bool is_arithmetic() { return is_complex<T>() || std::is_arithmetic<T>::value; }
 
     template<typename T>
-    constexpr bool is_complex() { return is_complex_t<T>::value; }
+    constexpr comp_t<T> eps() {
+        return std::numeric_limits<comp_t<T>>::epsilon();
+    }
+
+    template<typename T>
+    constexpr comp_t<T> eps(const T& v) {
+        return eps<T>();
+    }
 
     template<typename T>
     static constexpr T conj(const T &v) {
@@ -144,51 +160,19 @@ namespace consts {
     }
 
     template<typename T>
-    struct component_t {
-        typedef T type;
-    };
-
-    template<typename T>
-    struct component_t<std::complex<T>> {
-        typedef T type;
-    };
-
-    template<typename T>
-    struct component_t<const std::complex<T> &> {
-        typedef T type;
-    };
-
-    template<typename T>
-    using real_t = typename component_t<T>::type;
-
-    template<typename T>
-    static constexpr bool float_nearly_zero(T v, typename component_t<T>::type eps) {
-        return std::abs(v) < eps;
+    static constexpr bool nearly_zero(const T& v,  comp_t<T> tol = eps<T>()){
+        return std::abs(v) < tol;
     }
 
     template<typename T>
-    static constexpr bool float_is_zero(T v) {
-        return float_nearly_zero(v, std::numeric_limits<typename component_t<T>::type>::epsilon());
-    }
-
-    template<typename T>
-    static constexpr bool floats_equal(T v1, T v2) {
-        return float_is_zero(v1 - v2);
-    }
-
-    template<typename T>
-    static constexpr bool floats_nearly_equal(T v1, T v2, typename component_t<T>::type eps = 1e-12) {
-        return float_nearly_zero(v1 - v2, eps);
+    static constexpr bool nearly_equal(const T& v1, const T& v2, comp_t<T> tol = eps<T>()) {
+        return nearly_zero(v1 - v2, tol);
     }
 
     const double pi = std::atan(1.0) * 4;
     const double two_pi = 2 * pi;
     const double sqrt2 = std::sqrt(2.0);
     const double invsqrt2 = 1.0 / sqrt2;
-
-    // for debugging output
-    const std::string verb = "\t[VERBOSE]  ";
-    const std::string chevs = " >>> ";
 
     template<typename T>
     static std::string type_name() { return typeid(T).name(); }

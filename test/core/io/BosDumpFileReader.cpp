@@ -16,19 +16,19 @@ TEST(BosdumpFileReader, ReadFile){
     test_inds = {0, 0, 0, 0};
     file_reader.next(inds, value);
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), 1.0));
+    ASSERT_FLOAT_EQ(consts::real(value), 1.0);
 
     // scan to arbitrary element
     // 0.3535533906 3 2 1 2
     for (size_t i=3; i<37; ++i) file_reader.next(inds, value);
     test_inds = {2, 1, 0, 1};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), 0.3535533906));
+    ASSERT_FLOAT_EQ(consts::real(value), 0.3535533906);
 
     // scan to final element
     // 0.2734375000 5 5 5 5
     while(file_reader.next(inds, value)){}
     test_inds = {4, 4, 4, 4};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), 0.2734375000));
+    ASSERT_FLOAT_EQ(consts::real(value), 0.2734375000);
 }

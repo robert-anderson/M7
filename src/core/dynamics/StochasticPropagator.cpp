@@ -29,8 +29,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     const defs::wf_t &weight = row.m_weight[ipart];
     double rdm_factor = 1.0;
 
-    DEBUG_ASSERT_FALSE(consts::float_is_zero(weight),
-                       "should not attempt offdiagonal propagation from zero weight");
+    DEBUG_ASSERT_NE(weight, 0.0, "should not attempt offdiagonal propagation from zero weight");
     DEBUG_ASSERT_TRUE(consts::imag(weight) == 0.0 || m_ham.complex_valued(),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto &src_onv = row.m_mbf;
@@ -60,9 +59,9 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
         conn.apply(src_onv, dst_onv);
         auto delta = -tau() * phase(weight) * helem / prob;
-        if (consts::float_is_zero(delta)) continue;
+        if (consts::nearly_zero(delta, 1e-14)) continue;
         delta = m_prng.stochastic_threshold(delta, m_opts.m_propagator.m_min_spawn_mag);
-        if (consts::float_is_zero(delta)) continue;
+        if (consts::nearly_zero(delta, 1e-14)) continue;
 
         if (wf.recv().m_row.m_send_parents) {
             // reweight by probability that this connection was sampled a non-zero number of times

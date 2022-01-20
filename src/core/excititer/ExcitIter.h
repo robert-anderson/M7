@@ -59,7 +59,7 @@ protected:
     bool set_helement(const mbf_t &src, const conn::from_field_t<mbf_t> &conn) {
         if (!m_need_helement) return true;
         m_work_helement = m_ham.get_element(src, conn);
-        return !m_nonzero_helement_only || !consts::float_is_zero(m_work_helement);
+        return !m_nonzero_helement_only || !consts::nearly_zero(m_work_helement);
     }
 
 private:

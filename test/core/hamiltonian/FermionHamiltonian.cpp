@@ -56,9 +56,9 @@ TEST(FermionHamiltonian, RhfEnergy) {
     buffered::FrmOnv onv(ham.m_bd.m_nsite);
     mbf::set_aufbau_mbf(onv, ham);
     auto elem = ham.get_element(onv);
-    ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
-    ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
-    ASSERT_TRUE(consts::floats_equal(ham.get_energy(onv), benchmark));
+    ASSERT_FLOAT_EQ(consts::real(elem), benchmark);
+    ASSERT_FLOAT_EQ(consts::imag(elem), 1e-14);
+    ASSERT_FLOAT_EQ(ham.get_energy(onv), benchmark);
 }
 
 TEST(FermionHamiltonian, RhfBrillouinTheorem) {
@@ -83,7 +83,7 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
             const auto &vac = vacs[iocc];
             conn.clear();
             conn.add(occ, vac);
-            ASSERT_TRUE(consts::float_is_zero(ham.m_frm->get_element_1100(onv, conn)));
+            ASSERT_FLOAT_EQ(ham.m_frm->get_element_1100(onv, conn), 0.0);
         }
     }
 }

@@ -207,7 +207,7 @@ public:
 
     T real_eigenvalue(size_t i) override {
         auto z = complex_eigenvalue(i);
-        if (!consts::float_is_zero(z.imag()))
+        if (!consts::nearly_zero(z.imag()))
             log::warn("taking real part of eigenvalue with non-zero imaginary part");
         return consts::real(complex_eigenvalue(i));
     }

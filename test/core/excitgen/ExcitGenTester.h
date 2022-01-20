@@ -81,7 +81,7 @@ namespace excit_gen_tester {
                     ++nnull;
                     continue;
                 }
-                DEBUG_ASSERT_FALSE(consts::float_is_zero(prob), "non-null excitation generated with zero prob!");
+                DEBUG_ASSERT_FALSE(consts::nearly_zero(prob), "non-null excitation generated with zero prob!");
                 DEBUG_ASSERT_EQ(conn.exsig(), exsig, "generated excitation has the wrong exsig");
                 work_inds = conn;
                 auto irow = *m_results[work_inds];
@@ -89,7 +89,7 @@ namespace excit_gen_tester {
                 row.jump(irow);
                 row.m_occur++;
                 row.m_weight += 1 / prob;
-                DEBUG_ASSERT_TRUE(consts::floats_equal(defs::ham_t(row.m_helem), helem),
+                DEBUG_ASSERT_TRUE(consts::nearly_equal(defs::ham_t(row.m_helem), helem),
                                   "excit gen returned the wrong H matrix element");
             }
             return nnull;

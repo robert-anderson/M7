@@ -84,7 +84,7 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             const auto exsig = conn_work.exsig();
             if (!exsig || exsig > defs::nexsig) continue; // diagonal
             auto helem = ham.get_element(row_local.m_mbf, conn_work);
-            if (!consts::float_is_zero(helem)) {
+            if (!consts::nearly_zero(helem)) {
                 m_ham_matrix.add(row_local.index(), row_global.index(), helem);
                 ++n_hconn;
             } else if (bilinears.m_rdms.takes_contribs_from(conn_work.exsig())) {

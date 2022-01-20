@@ -32,12 +32,12 @@ TEST(FcidumpFileReader, Real_6orb){
     for (size_t i=0; i<17; ++i) file_reader.next(inds, v);
     test_inds = {2,1,4,3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.01759459248922075));
+    ASSERT_FLOAT_EQ(consts::real(v), 0.01759459248922075);
     // scan to final element
     while(file_reader.next(inds, v)){}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), -98.46644393370157));
+    ASSERT_FLOAT_EQ(consts::real(v), -98.46644393370157);
 }
 
 TEST(FcidumpFileReader, Integer_8orb){
@@ -52,17 +52,17 @@ TEST(FcidumpFileReader, Integer_8orb){
     // core energy is the first entry
     test_inds = {~0ul,~0ul,~0ul,~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), 0.0));
+    ASSERT_FLOAT_EQ(consts::real(v), 0.0);
     // scan to arbitrary element
     for (size_t i=0; i<8; ++i) file_reader.next(inds, v);
     test_inds = {7,7,7,7};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), 4.0));
+    ASSERT_FLOAT_EQ(consts::real(v), 4.0);
     // scan to final element
     while(file_reader.next(inds, v)){}
     test_inds = {7, 6, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(v), -1.0));
+    ASSERT_FLOAT_EQ(consts::real(v), -1.0);
 }
 
 #ifdef ENABLE_COMPLEX

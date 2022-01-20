@@ -18,17 +18,17 @@ TEST(EbDumpFileReader, ReadFile){
     test_inds = {0, 0, 0};
     file_reader.next(inds, value);
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), -0.01832284815866287));
+    ASSERT_FLOAT_EQ(consts::real(value), -0.01832284815866287);
 
     // scan to arbitrary element
     for (size_t i=0; i<18; ++i) file_reader.next(inds, value);
     test_inds = {1, 0, 2};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), -0.009244953059296356));
+    ASSERT_FLOAT_EQ(consts::real(value), -0.009244953059296356);
 
     // scan to final element
     while(file_reader.next(inds, value)){}
     test_inds = {3, 3, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_TRUE(consts::floats_equal(consts::real(value), -0.09669569380966529));
+    ASSERT_FLOAT_EQ(consts::real(value), -0.09669569380966529);
 }

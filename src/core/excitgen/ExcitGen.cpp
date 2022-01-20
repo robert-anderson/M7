@@ -34,7 +34,7 @@ bool ExcitGen::draw_h_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &or
     auto result = draw(exsig, src, orbs, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::float_is_zero(helem);
+    return !consts::nearly_zero(helem);
 }
 
 bool ExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
@@ -42,7 +42,7 @@ bool ExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, C
     auto result = draw(exsig, src, orbs, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::float_is_zero(helem);
+    return !consts::nearly_zero(helem);
 }
 
 bool ExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
@@ -50,7 +50,7 @@ bool ExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, CachedO
     auto result = draw(exsig, src, orbs, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::float_is_zero(helem);
+    return !consts::nearly_zero(helem);
 }
 
 

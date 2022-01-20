@@ -38,14 +38,14 @@ void ExcitGenGroup::update_cumprobs() {
 
     for (size_t iprob = 1ul; iprob < m_probs.size(); ++iprob)
         m_cumprobs[iprob] = m_cumprobs[iprob - 1] + m_probs[iprob];
-    DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_cumprobs.back()),
-                      "cumulative probability should be 1.0");
+    DEBUG_ASSERT_NEARLY_EQ(m_cumprobs.back(), 1.0, consts::eps<prob_t>(),
+            "cumulative probability should be 1.0");
     if (!m_frm_inds.empty()) {
         m_frm_cumprobs = m_frm_probs;
         for (size_t iprob = 1ul; iprob < m_frm_probs.size(); ++iprob)
             m_frm_cumprobs[iprob] = m_frm_cumprobs[iprob - 1] + m_frm_probs[iprob];
-        DEBUG_ASSERT_TRUE(consts::floats_nearly_equal(1.0, m_frm_cumprobs.back()),
-                          "cumulative probability should be 1.0");
+            DEBUG_ASSERT_NEARLY_EQ(m_frm_cumprobs.back(), 1.0, consts::eps<prob_t>(),
+                               "cumulative probability for fermionic excitations should be 1.0");
     }
 }
 

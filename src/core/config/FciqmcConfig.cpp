@@ -241,12 +241,12 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         m_semistochastic(this) {}
 
 void fciqmc_config::Propagator::verify() {
-    if (consts::float_is_zero(m_min_death_mag.get())) {
+    if (consts::nearly_zero(m_min_death_mag.get())) {
         m_min_death_mag = m_min_spawn_mag.get();
         log::warn("{} was zero, defaulting to the specified value of {}",
                   m_min_death_mag.m_yaml_path.to_string(), m_min_spawn_mag.m_yaml_path.to_string());
     }
-    if (consts::float_is_zero(m_max_bloom.get())) {
+    if (consts::nearly_zero(m_max_bloom.get())) {
         m_max_bloom = m_nadd.get();
         log::warn("{} was zero, defaulting to the specified value of {}",
                   m_max_bloom.m_yaml_path.to_string(), m_nadd.m_yaml_path.to_string());

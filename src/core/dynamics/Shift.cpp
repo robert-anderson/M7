@@ -49,7 +49,7 @@ bool Reweighter::product_chk() const {
             total *= histories_copy.front();
             histories_copy.pop();
         }
-        if (!consts::floats_nearly_equal(total/m_total[ipart], 1.0, 1e-12))
+        if (!consts::nearly_equal(total/m_total[ipart], 1.0, 1e-12))
             return false;
     }
     return true;

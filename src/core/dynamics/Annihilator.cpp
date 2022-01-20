@@ -73,7 +73,7 @@ void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_
     DEBUG_ASSERT_EQ(m_wf.m_ra.get_rank(dst_mbf), mpi::irank(),
                     "the received ONV has not been sent to the right MPI rank!")
     // zero magnitude weights should not have been communicated
-    if (consts::float_is_zero(delta_weight)) return;
+    if (consts::nearly_zero(delta_weight)) return;
 
     m_wf.m_nspawned.m_local[dst_ipart] += std::abs(delta_weight);
     if (!dst_row.in_range()) {
@@ -91,7 +91,7 @@ void Annihilator::annihilate_row(const size_t &dst_ipart, const field::Mbf &dst_
 
     } else {
         defs::wf_t weight_before = dst_row.m_weight[dst_ipart];
-        if (consts::float_is_zero(weight_before) && !allow_initiation) {
+        if (consts::nearly_zero(weight_before) && !allow_initiation) {
             // the row exists, but that does not necessarily mean that each part has non-zero occupation
             //m_aborted_weight += std::abs(*delta_weight);
             return;
@@ -140,8 +140,8 @@ void Annihilator::handle_dst_block(SpawnTableRow &block_begin, SpawnTableRow &ne
                 DEBUG_ASSERT_EQ(current.m_dst_mbf, block_begin.m_dst_mbf, "dst MBFs should be the same");
                 DEBUG_ASSERT_EQ(current.m_ipart_dst, block_begin.m_ipart_dst, "dst iparts should be the same");
                 DEBUG_ASSERT_EQ(current.m_src_mbf, block_begin.m_src_mbf, "src MBFs should be the same");
-                DEBUG_ASSERT_TRUE(consts::floats_equal(src_weight, defs::wf_t(current.m_src_weight)),
-                                  "all spawns with the same dst_mbf, ipart_dst, and src_mbf should have the same src_weight");
+                DEBUG_ASSERT_EQ(src_weight, defs::wf_t(current.m_src_weight),
+                    "all spawns with the same dst_mbf, ipart_dst, and src_mbf should have exactly the same src_weight");
             }
         }
         /*

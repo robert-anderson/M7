@@ -49,7 +49,7 @@ bool HeatBathDoubles::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, 
     ASSERT(i < j);
 
     ij = integer_utils::strigmap(j, i); // i and j are orbital indices
-    if (consts::float_is_zero(m_pick_ab_given_ij.norm(ij))){
+    if (consts::nearly_zero(m_pick_ab_given_ij.norm(ij))){
         // can't have a valid excitation if the row norm is zero
         return false;
     }
@@ -67,7 +67,7 @@ bool HeatBathDoubles::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, 
     helem = m_h.m_frm->get_element_2200(src, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
-    if (consts::float_nearly_zero(prob, 1e-14)) {
+    if (consts::nearly_zero(prob, 1e-14)) {
         return false;
     }
     return true;

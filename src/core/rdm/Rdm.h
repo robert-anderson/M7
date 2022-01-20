@@ -162,7 +162,7 @@ struct RdmGroup {
         e1 = mpi::all_sum(e1);
         e2 = mpi::all_sum(e2);
         trace = mpi::all_sum(trace);
-        ASSERT(!consts::float_nearly_zero(std::abs(trace), 1e-14));
+        ASSERT(!consts::nearly_zero(std::abs(trace), 1e-14));
         const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.nelec(), 2);
         return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2))/norm;
     }

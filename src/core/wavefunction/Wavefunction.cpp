@@ -76,11 +76,11 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, co
     suite::Conns conn(m_bd);
 
     row_reader.restart();
+    DEBUG_ASSERT_EQ(row_reader.m_weight.nelement(), m_format.m_nelement, "row reader has incompatible dimensionality");
     for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
         row_reader.read(iitem);
         conn[ref].connect(ref, row_reader.m_mbf);
-        bool ref_conn = !consts::float_is_zero(ham.get_element(ref, conn[ref]));
-        ASSERT(row_reader.m_weight.nelement() == m_format.m_nelement);
+        bool ref_conn = !consts::nearly_zero(ham.get_element(ref, conn[ref]));
         create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }

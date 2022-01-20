@@ -15,10 +15,10 @@ class EigenSolver {
     int m_lwork;
     int m_info;
     std::vector<T> m_work;
-    std::unique_ptr<std::vector<typename consts::component_t<T>::type>> m_rwork = nullptr;
+    std::unique_ptr<std::vector<consts::comp_t<T>>> m_rwork = nullptr;
 public:
     dense::Matrix<T> m_evecs;
-    std::vector<typename consts::component_t<T>::type> m_evals;
+    std::vector<consts::comp_t<T>> m_evals;
 
     EigenSolver(const dense::Matrix<T> &matrix) :
             m_n((int) matrix.m_nrow), m_lwork(std::max(1, 3 * m_n - 1)), m_work(m_lwork),

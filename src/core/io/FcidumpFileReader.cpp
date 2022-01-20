@@ -29,7 +29,7 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
         defs::inds inds(4);
         defs::ham_t v;
         while (next(inds, v)) {
-            if (!consts::float_is_zero(std::abs(v))) {
+            if (!consts::nearly_zero(v)) {
                 if (((inds[0] < nsite) != (inds[1] < nsite)) ||
                     ((inds[2] < nsite) != (inds[3] < nsite))) {
                     // spin non-conserving example found
