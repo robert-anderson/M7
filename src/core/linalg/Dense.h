@@ -32,6 +32,15 @@ extern "C" void dgeev_(const char *jobvl, const char *jobvr, const int *n, doubl
                        double *vr, const int* ldvr,
                        double *work, const int *lwork, int *info);
 
+
+extern "C" void dgemm_(const char *transa, const char *transb,
+                       const int *m, const int *n, const int *k,
+                       const double *alpha,
+                       const double *a, const int *lda,
+                       const double *b, const int *ldb,
+                       const double *beta,
+                       double *c, const int *ldc);
+
 extern "C" void dgemv_(const char *trans, const int *m, const int *n,
                        const double *alpha, const double *a, const int *lda,
                        const double *x, const int *incx, const double *beta,
@@ -53,8 +62,8 @@ namespace dense {
             return irow * m_ncol + icol;
         }
 
+        size_t m_nrow, m_ncol;
     public:
-        const size_t m_nrow, m_ncol;
 
         Matrix(size_t nrow, size_t ncol) : m_buffer(nrow * ncol, T(0)), m_nrow(nrow), m_ncol(ncol) {}
         Matrix(const sparse::Matrix<T>& sparse) : Matrix(sparse.nrow(), sparse.max_column_index()+1){
@@ -84,6 +93,9 @@ namespace dense {
             }
             return *this;
         }
+
+        const size_t& nrow() const {return m_nrow;}
+        const size_t& ncol() const {return m_ncol;}
 
         T* ptr(const size_t &irow=0) {
             return m_buffer.data()+index(irow, 0);
@@ -115,23 +127,59 @@ namespace dense {
             m_buffer.assign(m_buffer.size(), 0);
         }
 
-        bool nearly_equal(const Matrix<T>& other, consts::component_t<T>::type eps=std::numeric_limits<consts::component_t<T>::type>::epsilon()) const {
+        bool nearly_equal(const Matrix<T>& other, consts::comp_t<T> eps=consts::eps<T>()) const {
             for (size_t i=0ul; i<m_buffer.size(); ++i) {
-                if (!consts::floats_nearly_equal(m_buffer[i], other.m_buffer[i], eps)) return false;
+                if (!consts::nearly_equal(m_buffer[i], other.m_buffer[i], eps)) return false;
             }
             return true;
         }
 
+    protected:
+        /*
+         * for bounds safety, we keep these set-from-pointer methods protected
+         */
+        void set_row(const size_t &irow, const T* v) {
+            memcpy(m_buffer.data() + index(irow, 0ul), v, m_ncol * sizeof(T));
+        }
+
+        void set_col(const size_t &icol, const T* v) {
+            for (size_t irow = 0ul; irow<m_nrow; ++irow) (*this)(irow, icol) = v[irow];
+        }
+
+    public:
+
+        /**
+         * out-of-place transposition
+         */
+        void transpose() {
+            auto tmp = m_buffer;
+            std::swap(m_nrow, m_ncol);
+            const auto ptr = tmp.data();
+            for (size_t icol = 0ul; icol<m_ncol; ++icol) {
+                set_col(icol, ptr);
+                ptr+=m_nrow;
+            }
+        }
+
+        void conj() {
+            for (auto& v: m_buffer) v = consts::conj(v);
+        }
+
         void set_row(const size_t &irow, const std::vector<T> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
-            memcpy(m_buffer.data() + index(irow, 0ul), v.data(), m_ncol * sizeof(T));
+            set_row(irow, v.data());
+        }
+
+        void set_col(const size_t &icol, const std::vector<T> &v) {
+            DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
+            set_col(icol, v.data());
         }
 
         EigenSolver<T> diagonalize() const {
             return EigenSolver<T>(*this);
         }
 
-        void multiply(const std::vector<T> &in, std::vector<T> &out);
+        void mv_multiply(const std::vector<T> &in, std::vector<T> &out);
 
         std::string to_string() const {
             std::string out;
@@ -189,6 +237,36 @@ namespace dense {
             return evals;
         }
     };
+
+    /**
+     * the storage convention used in this namespace is row-contiguous, but LAPACK assumes column-contiguous ordering.
+     * so if we have a product of A (x, y) and B (y, z), we must compute the product
+     * BT (z, y) AT (y, x) = CT (z, x)
+     */
+    struct GemmArgs {
+        const char m_transa = 'T', m_transb = 'T';
+        const int m_nrow_op_a, m_ncol_op_a, m_ncol_op_b;
+        const int& m_nrow_c, &m_ncol_c;
+        const int m_lda, m_ldb, m_ldc;
+
+        GemmArgs(int nrowa, int ncola, int nrowb, int ncolb);
+
+        GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc);
+
+    };
+
+    void multiply(GemmArgs args, const double *a, const double *b, double *c);
+
+    /**
+     * compute the matrix-vector product
+     * @param a
+     *  matrix with dimensions (m, n)
+     * @param b
+     *  column vector of length n
+     * @param c
+     *  column vector of length m
+     */
+    void multiply(const Matrix<double>& a, const std::vector<double>& b, std::vector<double> &c, char trans='N');
 
 }
 

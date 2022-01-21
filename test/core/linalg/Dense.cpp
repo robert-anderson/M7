@@ -5,6 +5,36 @@
 #include <gtest/gtest.h>
 #include "src/core/linalg/Dense.h"
 
+
+TEST(Dense, RectDoubleMultiplication) {
+    dense::Matrix<double> mat(3, 5);
+    /*
+     * [[0.19364438, 0.3531796 , 0.52104427, 0.95861011, 0.24152934],
+       [0.40380409, 0.47257182, 0.72758775, 0.54275635, 0.14668889],
+       [0.82846904, 0.25265891, 0.44343331, 0.29338956, 0.75317756]]
+     */
+    mat.set_row(0, {0.19364438, 0.3531796 , 0.52104427, 0.95861011, 0.24152934});
+    mat.set_row(1, {0.40380409, 0.47257182, 0.72758775, 0.54275635, 0.14668889});
+    mat.set_row(2, {0.82846904, 0.25265891, 0.44343331, 0.29338956, 0.75317756});
+    /*
+     * [0.841402  , 0.36135032, 0.81559813, 0.61318608, 0.3841952 ]
+     */
+    std::vector<double> vec = {0.841402, 0.36135032, 0.81559813, 0.61318608, 0.3841952};
+    std::vector<double> prod(3);
+
+    std::vector<double> prod_chk = {1.39611785, 1.49311256, 1.61930685};
+
+    dense::multiply(mat, vec, prod);
+    /*
+     * [1.39611785, 1.49311256, 1.61930685]
+     */
+    ASSERT_EQ(prod.size(), prod_chk.size());
+    std::cout << prod << std::endl;
+    for (size_t i=0ul; i<prod.size(); ++i){
+        ASSERT_FLOAT_EQ(prod[i], prod_chk[i]);
+    }
+}
+
 TEST(Dense, SquareRealMultiplication) {
     typedef double T;
     const size_t n = 3;
@@ -17,7 +47,7 @@ TEST(Dense, SquareRealMultiplication) {
         }
     }
     std::vector<T> res(n, 0);
-    matrix.multiply(v, res);
+    matrix.mv_multiply(v, res);
     ASSERT_EQ(res[0], -10);
     ASSERT_EQ(res[1], 8);
     ASSERT_EQ(res[2], 26);
@@ -35,7 +65,7 @@ TEST(Dense, SquareComplexMultiplication) {
         }
     }
     std::vector<T> res(n, 0);
-    matrix.multiply(v, res);
+    matrix.mv_multiply(v, res);
     ASSERT_EQ(res[0].real(), -16);
     ASSERT_EQ(res[0].imag(), 2);
     ASSERT_EQ(res[1].real(), -4);

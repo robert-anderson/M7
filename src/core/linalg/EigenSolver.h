@@ -21,8 +21,8 @@ public:
     std::vector<consts::comp_t<T>> m_evals;
 
     EigenSolver(const dense::Matrix<T> &matrix) :
-            m_n((int) matrix.m_nrow), m_lwork(std::max(1, 3 * m_n - 1)), m_work(m_lwork),
-            m_evecs(matrix), m_evals(matrix.m_nrow) {
+            m_n((int) matrix.nrow()), m_lwork(std::max(1, 3 * m_n - 1)), m_work(m_lwork),
+            m_evecs(matrix), m_evals(matrix.nrow()) {
         execute();
     }
 
