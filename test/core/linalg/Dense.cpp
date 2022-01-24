@@ -5,6 +5,63 @@
 #include <gtest/gtest.h>
 #include "src/core/linalg/Dense.h"
 
+TEST(Dense, RectDoubleMatMat) {
+    dense::Matrix<double> a(3, 5);
+    /*
+     * [[0.19364438, 0.3531796 , 0.52104427, 0.95861011, 0.24152934],
+       [0.40380409, 0.47257182, 0.72758775, 0.54275635, 0.14668889],
+       [0.82846904, 0.25265891, 0.44343331, 0.29338956, 0.75317756]]
+     */
+    a.set_row(0, {0.19364438, 0.3531796, 0.52104427, 0.95861011, 0.24152934});
+    a.set_row(1, {0.40380409, 0.47257182, 0.72758775, 0.54275635, 0.14668889});
+    a.set_row(2, {0.82846904, 0.25265891, 0.44343331, 0.29338956, 0.75317756});
+
+    dense::Matrix<double> b(5, 4);
+    /*
+     * [[0.30956665, 0.22356503, 0.16403001, 0.16778347],
+       [0.98204608, 0.09321414, 0.33691216, 0.96922774],
+       [0.99337084, 0.02047967, 0.79441171, 0.90144784],
+       [0.14334389, 0.24888777, 0.55248866, 0.26391891],
+       [0.93825075, 0.85974888, 0.66939391, 0.14758825]]
+     */
+    b.set_row(0, {0.30956665, 0.22356503, 0.16403001, 0.16778347});
+    b.set_row(1, {0.98204608, 0.09321414, 0.33691216, 0.96922774});
+    b.set_row(2, {0.99337084, 0.02047967, 0.79441171, 0.90144784});
+    b.set_row(3, {0.14334389, 0.24888777, 0.55248866, 0.26391891});
+    b.set_row(4, {0.93825075, 0.85974888, 0.66939391, 0.14758825});
+
+    /*
+     * [[1.28840066, 0.53312517, 1.25597715, 1.13313825],
+       [1.52728781, 0.41042863, 1.20151479, 1.34655699],
+       [1.69380781, 0.93841409, 1.23955313, 0.97221065]])
+     */
+    dense::Matrix<double> c_chk(3, 4);
+    c_chk.set_row(0, {1.28840066, 0.53312517, 1.25597715, 1.13313825});
+    c_chk.set_row(1, {1.52728781, 0.41042863, 1.20151479, 1.34655699});
+    c_chk.set_row(2, {1.69380781, 0.93841409, 1.23955313, 0.97221065});
+
+    std::cout << c_chk.to_string() << std::endl;
+
+    char transa = 'N';
+    char transb = 'N';
+    // nrow of op(A)
+    int m = b.ncol();
+    // ncol of op(B)
+    int n = a.nrow();
+    // ncol of op(A)
+    int k = b.nrow();
+    int nrowb = a.ncol();
+
+    double alpha=1.0, beta=1.0;
+    dense::Matrix<double> c(3, 4);
+
+    dgemm_(&transa, &transb, &m, &n, &k, &alpha, b.ptr(), &m, a.ptr(), &nrowb, &beta, c.ptr(), &m);
+    std::cout << c.to_string() << std::endl;
+
+
+}
+
+
 
 TEST(Dense, RectDoubleMultiplication) {
     dense::Matrix<double> mat(3, 5);
@@ -20,16 +77,33 @@ TEST(Dense, RectDoubleMultiplication) {
      * [0.841402  , 0.36135032, 0.81559813, 0.61318608, 0.3841952 ]
      */
     std::vector<double> vec = {0.841402, 0.36135032, 0.81559813, 0.61318608, 0.3841952};
-    std::vector<double> prod(3);
+    std::vector<double> prod(3, 0.0);
 
     std::vector<double> prod_chk = {1.39611785, 1.49311256, 1.61930685};
 
+    /*
+     * A (m x n) is not a valid LAPACK shape for the row-contiguous flat-packed matrix A
+     *
+     * if A is row-contiguous
+     *
+     *    x x x x x
+     *    x x x x x
+     *    x x x x x
+     *
+     * we don't have a LAPACK-compatible representation of A, but one of AT
+     */
+
     dense::multiply(mat, vec, prod);
+
+    std::cout << prod_chk << std::endl;
+    std::cout << prod << std::endl;
+
+    exit(0);
+
     /*
      * [1.39611785, 1.49311256, 1.61930685]
      */
     ASSERT_EQ(prod.size(), prod_chk.size());
-    std::cout << prod << std::endl;
     for (size_t i=0ul; i<prod.size(); ++i){
         ASSERT_FLOAT_EQ(prod[i], prod_chk[i]);
     }

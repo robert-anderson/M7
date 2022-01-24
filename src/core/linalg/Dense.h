@@ -240,18 +240,19 @@ namespace dense {
 
     /**
      * the storage convention used in this namespace is row-contiguous, but LAPACK assumes column-contiguous ordering.
-     * so if we have a product of A (x, y) and B (y, z), we must compute the product
-     * BT (z, y) AT (y, x) = CT (z, x)
+     * thus, the storage of the matrix represents the transpose of the matrix when the row and column extents are
+     * switched.
+     * C = A.B
+     * CT = BT.AT
      */
     struct GemmArgs {
         const char m_transa = 'T', m_transb = 'T';
         const int m_nrow_op_a, m_ncol_op_a, m_ncol_op_b;
-        const int& m_nrow_c, &m_ncol_c;
         const int m_lda, m_ldb, m_ldc;
 
-        GemmArgs(int nrowa, int ncola, int nrowb, int ncolb);
+        GemmArgs(size_t nrowa, size_t ncola, size_t nrowb, size_t ncolb);
 
-        GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc);
+//       GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc);
 
     };
 

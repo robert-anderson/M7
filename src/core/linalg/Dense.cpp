@@ -69,26 +69,25 @@ void dense::diagonalize(SquareMatrix<double>& mat, std::vector<std::complex<doub
     for (size_t i=0ul; i<mat.nrow(); ++i) evals.push_back({wr[i], wi[i]});
 }
 
-dense::GemmArgs::GemmArgs(int nrowa, int ncola, int nrowb, int ncolb) :
-        m_nrow_op_a(ncola), m_ncol_op_a(nrowa), m_ncol_op_b(nrowb),
-        m_nrow_c(m_ncol_op_b), m_ncol_c(m_nrow_op_a),
-        m_lda(ncola), m_ldb(ncolb), m_ldc(m_ncol_op_b){
-    REQUIRE_EQ(m_ncol_op_a, ncolb, "mismatch of contracted dimensions");
+dense::GemmArgs::GemmArgs(size_t nrowa, size_t ncola, size_t nrowb, size_t ncolb):
+        m_nrow_op_a(ncolb), m_ncol_op_a(nrowb), m_ncol_op_b(nrowa),
+        m_lda(ncolb), m_ldb(ncola), m_ldc(m_ldb){
+    //REQUIRE_EQ(m_ncol_op_a, int(ncolb), "mismatch of contracted dimensions");
 }
-dense::GemmArgs::GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc) :
-        GemmArgs(nrowa, ncola, nrowb, ncolb){
-    REQUIRE_EQ(m_nrow_c, nrowc, "mismatch of output row dimension");
-    REQUIRE_EQ(m_ncol_c, ncolc, "mismatch of output column dimension");
-}
+//dense::GemmArgs::GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc) :
+//        GemmArgs(nrowa, ncola, nrowb, ncolb){
+//    REQUIRE_EQ(m_nrow_c, nrowc, "mismatch of output row dimension");
+//    REQUIRE_EQ(m_ncol_c, ncolc, "mismatch of output column dimension");
+//}
 
 void dense::multiply(GemmArgs args, const double *a, const double *b, double *c) {
     const double alpha = 1.0, beta = 1.0;
     dgemm_(&args.m_transa, &args.m_transb, &args.m_nrow_op_a, &args.m_ncol_op_b, &args.m_ncol_op_a,
-           &alpha, a, &args.m_lda, b, &args.m_ldb, &beta, c, &args.m_ldc);
+           &alpha, b, &args.m_lda, a, &args.m_ldb, &beta, c, &args.m_ldc);
 }
 
 void dense::multiply(const dense::Matrix<double> &a, const std::vector<double> &b, std::vector<double> &c, char trans) {
-    GemmArgs args(b.size(), 1, a.nrow(), a.ncol());
-    c.resize(args.m_nrow_c);
-    multiply(args, b.data(), a.ptr(), c.data());
+    GemmArgs args(a.nrow(), a.ncol(), b.size(), 1);
+    //c.resize(args.m_nrow_c);
+    multiply(args, a.ptr(), b.data(), c.data());
 }
