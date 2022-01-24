@@ -411,17 +411,15 @@ TEST(Dense, ComplexDoubleInnerProduct) {
 }
 
 
-#if 0
-
 TEST(Dense, RealSymEig) {
     typedef double T;
     const size_t n = 4;
     dense::SquareMatrix<T> mat(n);
     /*
      * [[ 0,  2, -1,  2],
-       [ 2,  4, -1, -1],
-       [-1, -1,  2, -5],
-       [ 2, -1, -5,  4]]
+        [ 2,  4, -1, -1],
+        [-1, -1,  2, -5],
+        [ 2, -1, -5,  4]]
      */
     mat.set_row(0, {0, 2, -1, 2});
     mat.set_row(1, {2, 4, -1, -1});
@@ -448,6 +446,7 @@ TEST(Dense, RealSymEig) {
     ASSERT_TRUE(mat.nearly_equal(evecs, 1e-7));
 }
 
+#if 0
 
 TEST(Dense, ComplexHermEig) {
     typedef double T;

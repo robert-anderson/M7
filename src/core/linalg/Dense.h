@@ -19,6 +19,11 @@
 template<typename T>
 class EigenSolver;
 
+
+extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,
+                       float *work, const int *lwork, int *info);
+
+
 extern "C" void dsyev_(const char *jobz, const char *uplo, const int *n, double *a, const int *lda, double *w,
                        double *work, const int *lwork, int *info);
 
@@ -366,6 +371,43 @@ namespace dense {
         wrapper.multiply(p.data(), q.data(), &r, 1.0, 0.0);
         return r;
     }
+
+    /*
+     * Diagonalization routines do not admit the same common interface as GEMM, so here there is no wrapper class, but
+     * we use overloading to infer the LAPACK routine which should be called in order to perform the diagonalization.
+     * All of these LAPACK routines are destructive of the input matrix, but all diagonalization functions defined in
+     * this namespace make a copy to pass to the solver and so do not modify the given matrix. Functions are not
+     * provided for the complex-symmetric case, only the hermitian case.
+     *
+     *    A (matrix)      R (right evecs)  L (left evecs)  D (evals)       Routine
+     *    float           -                -               float           ssyev 
+     *    float           float            -               float           ssyev
+     *    float           -                -               complex float   sgeev 
+     *    float           complex float    complex float   complex float   sgeev
+     *
+     *    double          -                -               double          dsyev 
+     *    double          double           -               double          dsyev
+     *    double          -                -               complex double  dgeev 
+     *    double          complex double   complex double  complex double  dgeev
+     *
+     *    complex float   -                -               float           cheev 
+     *    complex float   complex float    -               float           cheev
+     *    complex float   -                -               complex float   cgeev
+     *    complex float   complex float    complex float   complex float   cgeev
+     *
+     *    complex double  -                -               double          zheev
+     *    complex double  complex double   -               double          zheev
+     *    complex double  -                -               complex double  zgeev
+     *    complex double  complex double   complex double  complex double  zgeev
+     */
+
+//    static void ssyev(){}
+//
+//    static void diag(const Matrix<float>& a, std::vector<float>& d){
+//        char jobz = 'N';
+//        ssyev_(&jobz, )
+//
+//    }
 }
 
 #endif //M7_DENSE_H
