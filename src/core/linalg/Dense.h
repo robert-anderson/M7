@@ -238,36 +238,44 @@ namespace dense {
         }
     };
 
+
     /**
-     * the storage convention used in this namespace is row-contiguous, but LAPACK assumes column-contiguous ordering.
-     * thus, the storage of the matrix represents the transpose of the matrix when the row and column extents are
-     * switched.
-     * C = A.B
-     * CT = BT.AT
+     * Each of the overloaded GEMM implementations has a common interface in terms of dimensional extents, strides,
+     * and transposition. These are expressed in the members of this class to reduce code duplication, and to handle
+     * the required reversal of the order of multiplication.
+     *
+     * BLAS assumes the Fortran convention of column-major ordering, i.e. columns are assumed to be consecutively laid-
+     * out in linear memory. This is in contrast to the C/C++ convention of row-major ordering. Where we have a (m x n)
+     * matrix in row-major memory, we have a column-major representation of its transpose. Thus, row and column labels
+     * are swapped as well as the identities of the buffers containing the matrices before passing to GEMM.
+     *
+     * let the desired product of matrices and the GEMM product be denoted by P.Q = R and A.B = C respectively.
+     * we actually do QT.PT = RT with GEMM.
      */
-    struct GemmArgs {
-        const char m_transa = 'T', m_transb = 'T';
-        const int m_nrow_op_a, m_ncol_op_a, m_ncol_op_b;
-        const int m_lda, m_ldb, m_ldc;
+    struct GemmWrapper {
+        const char m_transa = 'N';
+        const char m_transb = 'N';
+        // nrow of op(A)
+        const int m_m;
+        // ncol of op(B)
+        const int m_n;
+        // ncol of op(A)
+        const int m_k;
+        // nrow of op(B)
+        const int m_nrow_opb;
 
-        GemmArgs(size_t nrowa, size_t ncola, size_t nrowb, size_t ncolb);
+        GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq);
 
-//       GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc);
+        /**
+         * overloaded ctor to conveniently check dimensional compatibility of result
+         */
+        GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq, size_t nrowr, size_t ncolr);
+
+        void multiply(const double* p, const double* q, double* r, double alpha, double beta);
 
     };
 
-    void multiply(GemmArgs args, const double *a, const double *b, double *c);
-
-    /**
-     * compute the matrix-vector product
-     * @param a
-     *  matrix with dimensions (m, n)
-     * @param b
-     *  column vector of length n
-     * @param c
-     *  column vector of length m
-     */
-    void multiply(const Matrix<double>& a, const std::vector<double>& b, std::vector<double> &c, char trans='N');
+    void multiply(const Matrix<double>& p, const Matrix<double>& q, Matrix<double>& r, double alpha=1.0, double beta=0.0);
 
 }
 

@@ -40,28 +40,12 @@ TEST(Dense, RectDoubleMatMat) {
     c_chk.set_row(1, {1.52728781, 0.41042863, 1.20151479, 1.34655699});
     c_chk.set_row(2, {1.69380781, 0.93841409, 1.23955313, 0.97221065});
 
-    std::cout << c_chk.to_string() << std::endl;
-
-    char transa = 'N';
-    char transb = 'N';
-    // nrow of op(A)
-    int m = b.ncol();
-    // ncol of op(B)
-    int n = a.nrow();
-    // ncol of op(A)
-    int k = b.nrow();
-    int nrowb = a.ncol();
-
-    double alpha=1.0, beta=1.0;
     dense::Matrix<double> c(3, 4);
-
-    dgemm_(&transa, &transb, &m, &n, &k, &alpha, b.ptr(), &m, a.ptr(), &nrowb, &beta, c.ptr(), &m);
-    std::cout << c.to_string() << std::endl;
-
-
+    dense::multiply(a, b, c);
+    ASSERT_TRUE(c.nearly_equal(c_chk, 1e-8));
 }
 
-
+#if 0
 
 TEST(Dense, RectDoubleMultiplication) {
     dense::Matrix<double> mat(3, 5);
@@ -108,6 +92,8 @@ TEST(Dense, RectDoubleMultiplication) {
         ASSERT_FLOAT_EQ(prod[i], prod_chk[i]);
     }
 }
+
+#endif
 
 TEST(Dense, SquareRealMultiplication) {
     typedef double T;

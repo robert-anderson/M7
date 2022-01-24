@@ -69,25 +69,26 @@ void dense::diagonalize(SquareMatrix<double>& mat, std::vector<std::complex<doub
     for (size_t i=0ul; i<mat.nrow(); ++i) evals.push_back({wr[i], wi[i]});
 }
 
-dense::GemmArgs::GemmArgs(size_t nrowa, size_t ncola, size_t nrowb, size_t ncolb):
-        m_nrow_op_a(ncolb), m_ncol_op_a(nrowb), m_ncol_op_b(nrowa),
-        m_lda(ncolb), m_ldb(ncola), m_ldc(m_ldb){
-    //REQUIRE_EQ(m_ncol_op_a, int(ncolb), "mismatch of contracted dimensions");
-}
-//dense::GemmArgs::GemmArgs(int nrowa, int ncola, int nrowb, int ncolb, int nrowc, int ncolc) :
-//        GemmArgs(nrowa, ncola, nrowb, ncolb){
-//    REQUIRE_EQ(m_nrow_c, nrowc, "mismatch of output row dimension");
-//    REQUIRE_EQ(m_ncol_c, ncolc, "mismatch of output column dimension");
-//}
-
-void dense::multiply(GemmArgs args, const double *a, const double *b, double *c) {
-    const double alpha = 1.0, beta = 1.0;
-    dgemm_(&args.m_transa, &args.m_transb, &args.m_nrow_op_a, &args.m_ncol_op_b, &args.m_ncol_op_a,
-           &alpha, b, &args.m_lda, a, &args.m_ldb, &beta, c, &args.m_ldc);
+dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq) :
+        m_m(utils::safe_narrow<int>(ncolq)),
+        m_n(utils::safe_narrow<int>(nrowp)),
+        m_k(utils::safe_narrow<int>(nrowq)),
+        m_nrow_opb(utils::safe_narrow<int>(ncolp)){
+    REQUIRE_EQ(m_k, m_nrow_opb, "mismatch of contracted dimensions");
 }
 
-void dense::multiply(const dense::Matrix<double> &a, const std::vector<double> &b, std::vector<double> &c, char trans) {
-    GemmArgs args(a.nrow(), a.ncol(), b.size(), 1);
-    //c.resize(args.m_nrow_c);
-    multiply(args, a.ptr(), b.data(), c.data());
+dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq, size_t nrowr, size_t ncolr) :
+        GemmWrapper(nrowp, ncolp, nrowq, ncolq) {
+    REQUIRE_EQ(nrowr, nrowp, "incompatible result dimension");
+    REQUIRE_EQ(ncolr, ncolq, "incompatible result dimension");
+}
+
+void dense::GemmWrapper::multiply(const double *p, const double *q, double *r, double alpha, double beta) {
+    dgemm_(&m_transa, &m_transb, &m_m, &m_n, &m_k, &alpha, q, &m_m, p, &m_nrow_opb, &beta, r, &m_m);
+}
+
+void dense::multiply(const dense::Matrix<double> &p, const dense::Matrix<double> &q,
+                     dense::Matrix<double> &r, double alpha, double beta) {
+    GemmWrapper wrapper(p.nrow(), p.ncol(), q.nrow(), q.ncol(), r.nrow(), r.ncol());
+    wrapper.multiply(p.ptr(), q.ptr(), r.ptr(), alpha, beta);
 }
