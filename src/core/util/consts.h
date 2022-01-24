@@ -160,8 +160,8 @@ namespace consts {
     }
 
     template<typename T>
-    static constexpr bool nearly_zero(const T& v,  comp_t<T> tol = eps<T>()){
-        return std::abs(v) < tol;
+    static constexpr bool nearly_zero(const T& v, comp_t<T> tol = eps<T>()){
+        return std::abs(v) <= tol;
     }
 
     template<typename T>

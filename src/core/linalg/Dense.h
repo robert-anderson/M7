@@ -33,6 +33,17 @@ extern "C" void dgeev_(const char *jobvl, const char *jobvr, const int *n, doubl
                        double *work, const int *lwork, int *info);
 
 
+
+
+
+extern "C" void sgemm_(const char *transa, const char *transb,
+                       const int *m, const int *n, const int *k,
+                       const float *alpha,
+                       const float *a, const int *lda,
+                       const float *b, const int *ldb,
+                       const float *beta,
+                       float *c, const int *ldc);
+
 extern "C" void dgemm_(const char *transa, const char *transb,
                        const int *m, const int *n, const int *k,
                        const double *alpha,
@@ -41,16 +52,40 @@ extern "C" void dgemm_(const char *transa, const char *transb,
                        const double *beta,
                        double *c, const int *ldc);
 
-extern "C" void dgemv_(const char *trans, const int *m, const int *n,
-                       const double *alpha, const double *a, const int *lda,
-                       const double *x, const int *incx, const double *beta,
-                       double *y, const int *incy);
+extern "C" void cgemm_(const char *transa, const char *transb,
+                       const int *m, const int *n, const int *k,
+                       const std::complex<float> *alpha,
+                       const std::complex<float> *a, const int *lda,
+                       const std::complex<float> *b, const int *ldb,
+                       const std::complex<float> *beta,
+                       std::complex<float> *c, const int *ldc);
 
-extern "C" void zgemv_(const char *trans, const int *m, const int *n, const std::complex<double> *alpha,
-                       const std::complex<double> *a, const int *lda, const std::complex<double> *x, const int *incx,
-                       const std::complex<double> *beta, std::complex<double> *y, const int *incy);
+extern "C" void zgemm_(const char *transa, const char *transb,
+                       const int *m, const int *n, const int *k,
+                       const std::complex<double> *alpha,
+                       const std::complex<double> *a, const int *lda,
+                       const std::complex<double> *b, const int *ldb,
+                       const std::complex<double> *beta,
+                       std::complex<double> *c, const int *ldc);
+
 
 namespace dense {
+
+
+    template<typename T>
+    static bool nearly_equal(const T* v1, const T* v2, size_t size, consts::comp_t<T> eps=consts::eps<T>()){
+        for (size_t i=0ul; i<size; ++i) {
+            if (!consts::nearly_equal(v1[i], v2[i], eps)) return false;
+        }
+        return true;
+    }
+
+    template<typename T>
+    static bool nearly_equal(const std::vector<T> v1, const std::vector<T> v2, consts::comp_t<T> eps=consts::eps<T>()){
+        REQUIRE_EQ(v1.size(), v2.size(), "vectors must have same number of elements to be compared");
+        return nearly_equal(v1.data(), v2.data(), v1.size(), eps);
+    }
+
 
     template<typename T>
     class Matrix {
@@ -128,10 +163,9 @@ namespace dense {
         }
 
         bool nearly_equal(const Matrix<T>& other, consts::comp_t<T> eps=consts::eps<T>()) const {
-            for (size_t i=0ul; i<m_buffer.size(); ++i) {
-                if (!consts::nearly_equal(m_buffer[i], other.m_buffer[i], eps)) return false;
-            }
-            return true;
+            REQUIRE_TRUE(m_buffer.size()==other.m_buffer.size(),
+                         "matrices must have same number of elements to be compared");
+            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), eps);
         }
 
     protected:
@@ -149,20 +183,31 @@ namespace dense {
     public:
 
         /**
-         * out-of-place transposition
+         * in-place physical transposition via out-of-place buffer procedure
          */
         void transpose() {
             auto tmp = m_buffer;
             std::swap(m_nrow, m_ncol);
-            const auto ptr = tmp.data();
+            auto ptr = tmp.data();
             for (size_t icol = 0ul; icol<m_ncol; ++icol) {
                 set_col(icol, ptr);
                 ptr+=m_nrow;
             }
         }
 
+        /**
+         * in-place complex conjugation
+         */
         void conj() {
             for (auto& v: m_buffer) v = consts::conj(v);
+        }
+
+        /**
+         * in-place hermitian conjugate-transposition
+         */
+        void dagger() {
+            transpose();
+            conj();
         }
 
         void set_row(const size_t &irow, const std::vector<T> &v) {
@@ -178,8 +223,6 @@ namespace dense {
         EigenSolver<T> diagonalize() const {
             return EigenSolver<T>(*this);
         }
-
-        void mv_multiply(const std::vector<T> &in, std::vector<T> &out);
 
         std::string to_string() const {
             std::string out;
@@ -253,8 +296,8 @@ namespace dense {
      * we actually do QT.PT = RT with GEMM.
      */
     struct GemmWrapper {
-        const char m_transa = 'N';
-        const char m_transb = 'N';
+        const char m_transa;
+        const char m_transb;
         // nrow of op(A)
         const int m_m;
         // ncol of op(B)
@@ -263,20 +306,66 @@ namespace dense {
         const int m_k;
         // nrow of op(B)
         const int m_nrow_opb;
+        // strides of row-contiguous arrays
+        const int m_lda, m_ldb, m_ldc;
 
-        GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq);
+        /**
+         * @param t
+         *  input transposition flag for validation
+         * @return
+         *  the capitalized transposition flag
+         */
+        static char valid_trans(char t);
 
         /**
          * overloaded ctor to conveniently check dimensional compatibility of result
          */
-        GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq, size_t nrowr, size_t ncolr);
+        GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq, char transp, char transq, size_t nrowr, size_t ncolr);
+
+        void multiply(const float* p, const float* q, float* r, float alpha, float beta);
 
         void multiply(const double* p, const double* q, double* r, double alpha, double beta);
 
+        void multiply(const std::complex<float>* p, const std::complex<float>* q, std::complex<float>* r,
+                      std::complex<float> alpha, std::complex<float> beta);
+
+        void multiply(const std::complex<double>* p, const std::complex<double>* q, std::complex<double>* r,
+                      std::complex<double> alpha, std::complex<double> beta);
+
+
     };
 
-    void multiply(const Matrix<double>& p, const Matrix<double>& q, Matrix<double>& r, double alpha=1.0, double beta=0.0);
+    template<typename T>
+    void multiply(const Matrix<T>& p, const Matrix<T>& q, Matrix<T>& r,
+                  char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
+        GemmWrapper wrapper(p.nrow(), p.ncol(), q.nrow(), q.ncol(), transp, transq, r.nrow(), r.ncol());
+        wrapper.multiply(p.ptr(), q.ptr(), r.ptr(), alpha, beta);
+    }
 
+    template<typename T>
+    void multiply(const Matrix<T>& p, const std::vector<T>& q, std::vector<T>& r,
+                  char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
+        r.resize(transp=='N' ? p.nrow() : p.ncol());
+        GemmWrapper wrapper(p.nrow(), p.ncol(), q.size(), 1ul, transp, transq, r.size(), 1ul);
+        wrapper.multiply(p.ptr(), q.data(), r.data(), alpha, beta);
+    }
+
+    template<typename T>
+    std::vector<T> multiply(const Matrix<T>& p, const std::vector<T>& q,
+                                char transp='N', char transq='N', T alpha=1.0, T beta=0.0){
+        std::vector<T> r;
+        multiply(p, q, r, transp, transq, alpha, beta);
+        return r;
+    }
+
+    template<typename T>
+    T inner_product(const std::vector<T>& p, const std::vector<T>& q, bool herm=false){
+        REQUIRE_EQ(p.size(), q.size(), "vector lengths don't match");
+        GemmWrapper wrapper(p.size(), 1ul, q.size(), 1ul, herm ? 'C' : 'T', 'N', 1ul, 1ul);
+        T r = 0;
+        wrapper.multiply(p.data(), q.data(), &r, 1.0, 0.0);
+        return r;
+    }
 }
 
 #endif //M7_DENSE_H

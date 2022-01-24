@@ -4,29 +4,6 @@
 
 #include "Dense.h"
 
-template<>
-void dense::Matrix<double>::mv_multiply(const std::vector<double> &in, std::vector<double> &out) {
-    char trans = 'N';
-    const double alpha = 1.0;
-    const double beta = 1.0;
-    int nrow = m_nrow;
-    int ncol = m_ncol;
-    int incx = 1;
-    int incy = 1;
-    dgemv_(&trans, &ncol, &nrow, &alpha, m_buffer.data(), &nrow, in.data(), &incx, &beta, out.data(), &incy);
-}
-
-template<>
-void dense::Matrix<std::complex<double>>::mv_multiply(const std::vector<std::complex<double>> &in, std::vector<std::complex<double>> &out) {
-    char trans = 'N';
-    const std::complex<double> alpha = 1.0;
-    const std::complex<double> beta = 1.0;
-    int nrow = m_nrow;
-    int ncol = m_ncol;
-    int incx = 1;
-    int incy = 1;
-    zgemv_(&trans, &ncol, &nrow, &alpha, m_buffer.data(), &nrow, in.data(), &incx, &beta, out.data(), &incy);
-}
 
 void dense::diag_inplace(SquareMatrix<double> &mat, std::vector<double> &evals) {
     const char jobz = 'V';
@@ -69,26 +46,42 @@ void dense::diagonalize(SquareMatrix<double>& mat, std::vector<std::complex<doub
     for (size_t i=0ul; i<mat.nrow(); ++i) evals.push_back({wr[i], wi[i]});
 }
 
-dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq) :
-        m_m(utils::safe_narrow<int>(ncolq)),
-        m_n(utils::safe_narrow<int>(nrowp)),
-        m_k(utils::safe_narrow<int>(nrowq)),
-        m_nrow_opb(utils::safe_narrow<int>(ncolp)){
-    REQUIRE_EQ(m_k, m_nrow_opb, "mismatch of contracted dimensions");
+
+dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq,
+                                char transp, char transq, size_t nrowr, size_t ncolr) :
+        m_transa(valid_trans(transq)), m_transb(valid_trans(transp)),
+        m_m(utils::safe_narrow<int>((m_transa=='N') ? ncolq : nrowq)),
+        m_n(utils::safe_narrow<int>((m_transb=='N') ? nrowp : ncolp)),
+        m_k(utils::safe_narrow<int>((m_transa=='N') ? nrowq : ncolq)),
+        m_nrow_opb(utils::safe_narrow<int>((m_transb=='N') ? ncolp : nrowp)),
+        m_lda(utils::safe_narrow<int>(ncolq)), m_ldb(utils::safe_narrow<int>(ncolp)),
+        m_ldc(utils::safe_narrow<int>(ncolr)){
+            REQUIRE_EQ(m_k, m_nrow_opb, "mismatch of contracted dimensions");
+            REQUIRE_EQ(nrowr, (m_transb=='N') ? nrowp: ncolp, "incompatible result dimension");
+            REQUIRE_EQ(ncolr, (m_transa=='N') ? ncolq: nrowq, "incompatible result dimension");
 }
 
-dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq, size_t nrowr, size_t ncolr) :
-        GemmWrapper(nrowp, ncolp, nrowq, ncolq) {
-    REQUIRE_EQ(nrowr, nrowp, "incompatible result dimension");
-    REQUIRE_EQ(ncolr, ncolq, "incompatible result dimension");
+void dense::GemmWrapper::multiply(const float *p, const float *q, float *r, float alpha, float beta) {
+    sgemm_(&m_transa, &m_transb, &m_m, &m_n, &m_k, &alpha, q, &m_lda, p, &m_ldb, &beta, r, &m_ldc);
 }
 
 void dense::GemmWrapper::multiply(const double *p, const double *q, double *r, double alpha, double beta) {
-    dgemm_(&m_transa, &m_transb, &m_m, &m_n, &m_k, &alpha, q, &m_m, p, &m_nrow_opb, &beta, r, &m_m);
+    dgemm_(&m_transa, &m_transb, &m_m, &m_n, &m_k, &alpha, q, &m_lda, p, &m_ldb, &beta, r, &m_ldc);
 }
 
-void dense::multiply(const dense::Matrix<double> &p, const dense::Matrix<double> &q,
-                     dense::Matrix<double> &r, double alpha, double beta) {
-    GemmWrapper wrapper(p.nrow(), p.ncol(), q.nrow(), q.ncol(), r.nrow(), r.ncol());
-    wrapper.multiply(p.ptr(), q.ptr(), r.ptr(), alpha, beta);
+void dense::GemmWrapper::multiply(const std::complex<float> *p, const std::complex<float> *q, std::complex<float> *r,
+                                  std::complex<float> alpha, std::complex<float> beta) {
+    cgemm_(&m_transa, &m_transb, &m_m, &m_n, &m_k, &alpha, q, &m_lda, p, &m_ldb, &beta, r, &m_ldc);
+}
+
+void dense::GemmWrapper::multiply(const std::complex<double> *p, const std::complex<double> *q, std::complex<double> *r,
+                                  std::complex<double> alpha, std::complex<double> beta) {
+    zgemm_(&m_transa, &m_transb, &m_m, &m_n, &m_k, &alpha, q, &m_lda, p, &m_ldb, &beta, r, &m_ldc);
+}
+
+char dense::GemmWrapper::valid_trans(char t) {
+    const std::string valid_chars = "NnCcTt";
+    auto i = valid_chars.find(t);
+    REQUIRE_LT(i, valid_chars.size(), "invalid character given");
+    return valid_chars[2*(i/2)];
 }
