@@ -6,6 +6,7 @@
 #include <src/core/wavefunction/Wavefunction.h>
 #include <src/core/dynamics/ExactPropagator.h>
 #include <src/core/dynamics/Solver.h>
+#include <src/core/field/Mbf.h>
 #include "gtest/gtest.h"
 
 
@@ -18,9 +19,9 @@
  *  2RDM energy estimate
  */
 defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bool explicit_hf_conns){
-    Hamiltonian ham(defs::assets_root + "/HF_RDMs/FCIDUMP", false);
+    Hamiltonian ham(opts.m_hamiltonian);
     buffered::Mbf ref_onv(ham.m_bd);
-    ham.set_aufbau_mbf(ref_onv, 0);
+    mbf::set_aufbau_mbf(ref_onv, ham);
 
     Wavefunction wf(opts, ham.m_bd);
     ExactPropagator prop(ham, opts, wf.m_format, explicit_hf_conns);
@@ -41,6 +42,8 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
 
 
 void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/HF_RDMs/FCIDUMP";
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_spin_major = false;
     opts.m_archive.m_save_path = "M7.save";
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
