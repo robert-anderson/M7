@@ -7,9 +7,7 @@
 
 #include "BosHam.h"
 
-class GeneralBosHam : BosHam {
-    const size_t m_nmode, m_nboson;
-public:
+struct GeneralBosHam : BosHam {
     BosonCoeffs_1 m_coeffs_1;
     BosonCoeffs_2 m_coeffs_2;
     ham_data::TermContribs m_contribs_0011;

@@ -116,7 +116,7 @@ std::string string_utils::join(const std::vector<std::string> &words) {
 }
 
 std::string string_utils::join(const std::string &word, const size_t &nrepeat, const std::string &divider) {
-    return join(word, nrepeat, divider);
+    return join(std::vector<std::string>(nrepeat, word), divider);
 }
 
 std::string string_utils::join(const std::string &word, const size_t &nrepeat) {
