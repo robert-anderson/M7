@@ -102,6 +102,7 @@ ExternalProject_Add(arpackpp
         INSTALL_COMMAND ""
         )
 
+add_dependencies(arpackpp arpack-ng)
 set(ARPACK_LIBS ${PROJECT_BINARY_DIR}/arpack-ng/build/libarpack.a)
 
 #
