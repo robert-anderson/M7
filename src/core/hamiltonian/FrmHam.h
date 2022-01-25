@@ -35,6 +35,7 @@ struct FrmHam {
 
     FrmHam(size_t nelec, size_t nsite, int ms2_restrict,
                        bool complex_valued=false, defs::inds site_irreps = {});
+	virtual ~FrmHam(){}
 
     virtual defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const {return 0;}
     virtual defs::ham_t get_coeff_2200(const size_t& i, const size_t& j,

@@ -22,6 +22,7 @@ struct LadderHam {
     ham_data::TermContribs m_contribs_1101;
 
     LadderHam(const BasisDims &bd, size_t nboson_max);
+	virtual ~LadderHam(){}
 
     virtual defs::ham_t get_coeff_0010(const size_t& imode) const {return 0;}
     virtual defs::ham_t get_coeff_0001(const size_t& imode) const {return 0;}

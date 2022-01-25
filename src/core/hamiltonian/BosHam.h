@@ -19,6 +19,7 @@ struct BosHam {
     ham_data::TermContribs m_contribs_0022;
 
     BosHam(size_t nmode, size_t nboson);
+	virtual ~BosHam(){}
 
     virtual defs::ham_t get_coeff_0011(const size_t& i, const size_t& j) const {return 0;}
     virtual defs::ham_t get_coeff_0022(const size_t& i, const size_t& j,
