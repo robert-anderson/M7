@@ -230,6 +230,7 @@ namespace fciqmc_config {
         config::Param<std::vector<double>> m_exlvl_probs_init;
         config::Param<size_t> m_ndraw_min_for_dynamic;
         config::Param<size_t> m_period;
+        config::Param<double> m_imp_samp_exp;
         Semistochastic m_semistochastic;
 
         explicit Propagator(config::Group *parent);

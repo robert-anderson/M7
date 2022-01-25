@@ -238,6 +238,8 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
                                 "number of spawns logged for excitation type magnitudes to be used in tau and probability update"),
         m_period(this, "period", 10ul,
                  "number of MC cycles between updates of tau and probabilities if requested"),
+        m_imp_samp_exp(this, "imp_samp_exp", 0.0,
+               "exponential factor in the Gutzwiller-like guiding wavefunction"),
         m_semistochastic(this) {}
 
 void fciqmc_config::Propagator::verify() {
@@ -251,6 +253,7 @@ void fciqmc_config::Propagator::verify() {
         log::warn("{} was zero, defaulting to the specified value of {}",
                   m_max_bloom.m_yaml_path.to_string(), m_nadd.m_yaml_path.to_string());
     }
+    REQUIRE_GE(m_imp_samp_exp.get(), 0.0, "importance sampling exponent must be non-negative");
 }
 
 fciqmc_config::Document::Document(const yaml::File *file) :

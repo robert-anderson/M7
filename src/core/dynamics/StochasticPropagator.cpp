@@ -32,7 +32,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     DEBUG_ASSERT_NE(weight, 0.0, "should not attempt offdiagonal propagation from zero weight");
     DEBUG_ASSERT_TRUE(consts::imag(weight) == 0.0 || m_ham.complex_valued(),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
-    const auto &src_onv = row.m_mbf;
+    const auto &src_mbf = row.m_mbf;
     bool flag_initiator = row.m_initiator.get(ipart);
     bool flag_deterministic = row.m_deterministic.get(wf.iroot_part(ipart));
 
@@ -44,22 +44,23 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     defs::prob_t prob;
     defs::ham_t helem;
 
-    auto &conn = m_conn[src_onv];
-    auto &dst_onv = m_dst[src_onv];
+    auto &conn = m_conn[src_mbf];
+    auto &dst_mbf = m_dst[src_mbf];
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
         auto iex = m_excit_gens.draw_iex();
-        if (!m_excit_gens.draw(iex, src_onv, prob, helem, conn)) {
+        if (!m_excit_gens.draw(iex, src_mbf, prob, helem, conn)) {
             // null excitation generated
             continue;
         }
         m_mag_log.log(iex, helem, prob);
         prob *= m_excit_gens.get_prob(iex);
 
-        conn.apply(src_onv, dst_onv);
+        conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob;
         if (consts::nearly_zero(delta, 1e-14)) continue;
+        imp_samp_delta(delta, src_mbf, dst_mbf);
         delta = m_prng.stochastic_threshold(delta, m_opts.m_propagator.m_min_spawn_mag);
         if (consts::nearly_zero(delta, 1e-14)) continue;
 
@@ -67,8 +68,8 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
             // reweight by probability that this connection was sampled a non-zero number of times
             rdm_factor = 1.0 / (1.0 - std::pow(1 - prob, nattempt));
         }
-        wf.add_spawn(dst_onv, delta, flag_initiator, flag_deterministic,
-                     ipart, src_onv, rdm_factor * weight);
+        wf.add_spawn(dst_mbf, delta, flag_initiator, flag_deterministic,
+                     ipart, src_mbf, rdm_factor * weight);
     }
 }
 

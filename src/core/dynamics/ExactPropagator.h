@@ -24,7 +24,7 @@ public:
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;
 
-    void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
+    void off_diagonal(Wavefunction &wf, const size_t& dst_mbf) override;
 
     void update(const size_t &icycle, const Wavefunction &wf) override;
 };

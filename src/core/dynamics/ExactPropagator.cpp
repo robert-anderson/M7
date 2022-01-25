@@ -22,11 +22,12 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     DEBUG_ASSERT_TRUE(weight,"shouldn't be trying to propagate off-diagonal from zero weight");
 
-    auto body = [&](const conn::Mbf &conn, const field::Mbf &dst_onv, defs::ham_t helement) {
+    auto body = [&](const conn::Mbf &conn, const field::Mbf &dst_mbf, defs::ham_t helement) {
         DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
         m_mag_log.log(0, helement, 1.0);
-        const auto delta = -weight * tau() * helement;
-        wf.add_spawn(dst_onv, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
+        auto delta = -weight * tau() * helement;
+        imp_samp_delta(delta, src_mbf, dst_mbf);
+        wf.add_spawn(dst_mbf, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
     m_excit_iters.foreach<field::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
 }
