@@ -18,8 +18,8 @@ target_link_libraries(M7 ${HDF5_LIBS})
 add_dependencies(M7 hdf5_local)
 target_link_libraries(M7 ${HDF5_LIBS})
 target_include_directories(M7 PUBLIC
-        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
-        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
+        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/src
+        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/hl/src
         ${CMAKE_BINARY_DIR}/hdf5_local/build
 )
 
