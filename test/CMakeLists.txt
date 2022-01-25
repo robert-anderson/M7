@@ -50,8 +50,5 @@ add_dependencies(unittest arpack-ng)
 add_dependencies(unittest arpackpp)
 
 
-#target_compile_definitions(unittest PRIVATE DEBUG=1)
-#target_compile_options(unittest PRIVATE -O0)
-
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories($ENV{INCLUDE_PATH})
