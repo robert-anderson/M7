@@ -71,12 +71,13 @@ public:
      *  source MBF
      * @param dst_mbf
      *  destination MBF
+     * @param src_energy
+     *  energy of the source MBF is in practice cached in the wavefunction table, so no need to recompute
      */
-    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf) const {
-        auto& g = m_opts.m_propagator.m_imp_samp_exp.get();
-        // check that importance sampling is in use at all before evaluating energies
-        if (g) delta*=std::exp(g*(m_ham.get_energy(src_mbf)-m_ham.get_energy(dst_mbf)));
-    }
+    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf,
+                        const defs::ham_comp_t& src_energy) const;
+
+    void imp_samp_delta(defs::wf_t& delta, const field::Mbf& src_mbf, const field::Mbf& dst_mbf) const;
 
 private:
     void load_fn(hdf5::GroupReader &parent) override;

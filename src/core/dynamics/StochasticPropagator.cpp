@@ -60,7 +60,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob;
         if (consts::nearly_zero(delta, 1e-14)) continue;
-        imp_samp_delta(delta, src_mbf, dst_mbf);
+        imp_samp_delta(delta, src_mbf, dst_mbf, row.m_hdiag);
         delta = m_prng.stochastic_threshold(delta, m_opts.m_propagator.m_min_spawn_mag);
         if (consts::nearly_zero(delta, 1e-14)) continue;
 

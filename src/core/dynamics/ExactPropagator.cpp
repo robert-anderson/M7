@@ -26,7 +26,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
         m_mag_log.log(0, helement, 1.0);
         auto delta = -weight * tau() * helement;
-        imp_samp_delta(delta, src_mbf, dst_mbf);
+        imp_samp_delta(delta, src_mbf, dst_mbf, row.m_hdiag);
         wf.add_spawn(dst_mbf, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
     m_excit_iters.foreach<field::Mbf>(src_mbf, body, m_only_nonzero_h_spawns);
