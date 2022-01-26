@@ -12,8 +12,21 @@ struct CompFieldTestRow : Row {
     field::FrmOnv m_frm_onv;
     CompositeField<field::FrmOnv, field::FrmOnv> m_comp_field;
     CompFieldTestRow() :
-    m_frm_onv({this, 6, "alfa"}),
-    m_comp_field({this, 6, "bravo"}, {this, 8, "charlie"}){}
+            m_frm_onv({this, 6, "alfa"}),
+            m_comp_field({this, 6, "bravo"}, {this, 8, "charlie"}){}
+};
+
+struct NestedCompFieldTestRow : Row {
+    field::FrmOnv m_frm_onv;
+    typedef CompositeField<field::FrmOnv, field::FrmOnv> frm_onv_pair_t;
+    frm_onv_pair_t m_comp_field;
+    CompositeField<frm_onv_pair_t, field::BosOnv> m_nested_field;
+
+    NestedCompFieldTestRow() :
+            m_frm_onv({this, 6, "alfa"}),
+            m_comp_field({this, 6, "bravo"}, {this, 8, "charlie"}),
+            m_nested_field({{this, 10, "delta"}, {this, 5, "echo"}},
+                           {this, 9, "foxtrot"}){}
 };
 
 TEST(CompositeField, CopyMoveSemantics) {
@@ -31,5 +44,15 @@ TEST(CompositeField, CopyMoveSemantics) {
     bt.resize(10);
     bt.push_back(4);
     std::cout << bt.to_string() << std::endl;
+}
 
+TEST(CompositeField, NestedCopyMoveSemantics) {
+
+    //NestedCompFieldTestRow row;
+
+    BufferedTable<NestedCompFieldTestRow> bt("test table", {{}});
+    std::cout << bt.m_row.m_fields.size() << std::endl;
+    bt.resize(10);
+    bt.push_back(4);
+    std::cout << bt.to_string() << std::endl;
 }

@@ -289,10 +289,17 @@ struct NumberField : NdNumberField<T, 0ul> {
 
     NumberField(Row *row, std::string name = "") : base_t(row, {}, name) {}
 
-    NumberField(const NumberField& other): NumberField(other.row_of_copy(), other.m_name){}
+    NumberField(const NumberField& other): base_t(other){}
 
     NumberField& operator=(const NumberField& other){
         base_t::operator=(other);
+        return *this;
+    }
+
+    NumberField(NumberField&& other): base_t(std::move(other)){}
+
+    NumberField& operator=(NumberField&& other){
+        *this = other;
         return *this;
     }
 
