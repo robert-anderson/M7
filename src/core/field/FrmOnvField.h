@@ -27,7 +27,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {
-        FieldBase::operator=(other);
+        base_t::operator=(other);
         return *this;
     }
 

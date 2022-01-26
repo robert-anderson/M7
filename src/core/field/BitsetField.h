@@ -48,6 +48,8 @@ struct BitsetField : FieldBase {
         m_format(other.m_format), m_dsize(other.m_dsize), m_nbit_in_last_dword(other.m_nbit_in_last_dword){}
 
     BitsetField &operator=(const BitsetField &other) {
+        DEBUG_ASSERT_EQ(m_format.m_nelement, other.m_format.m_nelement,
+                        "cannot copy bitset: length mismatch");
         FieldBase::operator=(other);
         return *this;
     }

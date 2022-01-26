@@ -16,7 +16,7 @@ FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
 }
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
-        BitsetField<size_t, 2>(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){
+        base_t(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){
 }
 
 FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
@@ -28,7 +28,7 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::in
 }
 
 FrmOnvField::FrmOnvField(FrmOnvField &&other) :
-        BitsetField<size_t, 2>(std::move(other)), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){}
+        base_t(std::move(other)), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){}
 
 FrmOnvField &FrmOnvField::operator=(FrmOnvField &&other) {
     *this = other;
