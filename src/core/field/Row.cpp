@@ -39,6 +39,10 @@ size_t Row::add_field(FieldBase *field) {
     return offset;
 }
 
+size_t Row::nfield() const {
+    return m_fields.size();
+}
+
 void Row::clear() {
     std::fill(m_begin, m_begin+m_size, 0);
 }
@@ -54,3 +58,12 @@ bool Row::is_h5_write_exempt() const {
 bool Row::is_protected() const {
     return m_table->is_protected(m_i);
 }
+
+Row::Row(const Row &other) {
+    m_table = other.m_table;
+    m_begin = other.m_begin;
+    other.m_child = this;
+    REQUIRE_TRUE(m_fields.empty(), "newly copied Row has associated Fields");
+}
+
+Row::~Row() {}

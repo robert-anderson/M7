@@ -41,13 +41,11 @@ struct BitsetField : FieldBase {
     using FieldBase::begin;
 
     BitsetField(Row *row, NdFormat<nind> format, std::string name="") :
-            FieldBase(row, integer_utils::divceil(format.m_nelement, nbit_dword()) * sizeof(T),
-                      typeid(T), name), m_format(format),
-            m_dsize(m_size / sizeof(T)),
-            m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {
-    }
+        FieldBase(row, integer_utils::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
+        m_format(format), m_dsize(m_size / sizeof(T)), m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {}
 
-    BitsetField(const BitsetField &other) : BitsetField(other.row_of_copy(), other.m_format, other.m_name) {}
+    BitsetField(const BitsetField &other) : FieldBase(other),
+        m_format(other.m_format), m_dsize(other.m_dsize), m_nbit_in_last_dword(other.m_nbit_in_last_dword){}
 
     BitsetField &operator=(const BitsetField &other) {
         FieldBase::operator=(other);
@@ -58,6 +56,14 @@ struct BitsetField : FieldBase {
         // prezero the element
         zero();
         for (const auto &ind: setbits) set(ind);
+        return *this;
+    }
+
+    BitsetField(BitsetField &&other) : FieldBase(std::move(other)),
+       m_format(other.m_format), m_dsize(other.m_dsize), m_nbit_in_last_dword(other.m_nbit_in_last_dword){}
+
+    BitsetField &operator=(BitsetField &&other) {
+        *this = other;
         return *this;
     }
 

@@ -190,12 +190,9 @@ public:
 
     Row() {}
 
-    Row(const Row &other) {
-        m_table = other.m_table;
-        m_begin = other.m_begin;
-        other.m_child = this;
-        ASSERT(m_fields.empty())
-    }
+    ~Row();
+
+    Row(const Row &other);
 
     Row &operator=(const Row &other) {
         copy_in(other);
@@ -207,6 +204,8 @@ public:
     std::string to_string() const;
 
     size_t add_field(FieldBase *field);
+
+    size_t nfield() const;
 
     void clear();
 

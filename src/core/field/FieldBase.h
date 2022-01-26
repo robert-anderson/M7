@@ -12,20 +12,47 @@
 #include "src/core/io/HDF5Wrapper.h"
 #include "Row.h"
 
+/**
+ * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.
+ *
+ * Due to the bi-directional references between Fields and Rows, and the dual role of these classes as data-LAYOUT
+ * specifiers and pointers to the DATA itself, copy/move special methods for this class and all derived classes must be
+ * carefully implemented to respect the following semantics
+ *
+ *  - copy ctor: the LAYOUT is being copied since the containing Row is delegating this ctor in the process of being
+ *          itself copy-constructed. Raise an error if the Row If the Row's m_child member is undefined
+ *  - copy assign: the DATA is being copied. This method is not delegated by the Row, since Row data copies are done by
+ *          buffer copy without reference to the layout defined by the associated Field set
+ *  - move ctor: the LAYOUT is being moved into a new symbol. Here, the row pointer is copied from the FieldBase being
+ *          moved since it is assumed that this moving is due to forwarding in the execution of Row and CompoundField
+ *          ctors.
+ *  - move assign: semantically, the DATA is being moved, but the Field doesn't own the data buffer, it only points
+ *          to a certain location within it. Attempted move assignment of Fields could be considered an error, but it is
+ *          fine to simply delegate to the copy assignment instead.
+ */
 struct FieldBase {
-    Row *m_row;
+    Row *m_row = nullptr;
     const std::type_info &m_type_info;
     const size_t m_size;
     const std::string m_name;
     size_t m_row_offset = ~0ul;
-
     std::vector<char> m_null_string;
 
+private:
+    size_t m_row_index = ~0ul;
+
+    FieldBase(size_t size, const std::type_info &type_info, std::string name);
+
+public:
     FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name);
 
     FieldBase(const FieldBase &other);
 
     FieldBase &operator=(const FieldBase &other);
+
+    FieldBase(FieldBase &&other);
+
+    FieldBase &operator=(FieldBase &&other);
 
     bool is_comparable(const FieldBase &other) const;
 

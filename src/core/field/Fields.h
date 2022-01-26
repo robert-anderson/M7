@@ -8,6 +8,7 @@
 #include "NumberField.h"
 #include "MultiField.h"
 #include "FrmBosOnvField.h"
+#include "FrmBosXonvField.h"
 #include "SpecMomIndsField.h"
 
 namespace field {
@@ -31,6 +32,8 @@ namespace field {
     using BosOnv = BosOnvField;
 
     using FrmBosOnv = FrmBosOnvField;
+
+    //using FrmBosXonv = FrmBosXonvField;
 
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 

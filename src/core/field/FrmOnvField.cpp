@@ -16,13 +16,22 @@ FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
 }
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
-        FrmOnvField(other.row_of_copy(), {other.m_format.m_shape[1], 0ul}, other.m_name){}
+        BitsetField<size_t, 2>(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){
+}
 
 FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
     // prezero the element
     zero();
     for (const auto &ind: setbits.first) set(ind);
     for (const auto &ind: setbits.second) set(ind+m_nsite);
+    return *this;
+}
+
+FrmOnvField::FrmOnvField(FrmOnvField &&other) :
+        BitsetField<size_t, 2>(std::move(other)), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){}
+
+FrmOnvField &FrmOnvField::operator=(FrmOnvField &&other) {
+    *this = other;
     return *this;
 }
 
