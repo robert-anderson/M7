@@ -13,11 +13,6 @@ NumberFieldBase::NumberFieldBase(const NumberFieldBase &other) :
     FieldBase(other), m_element_size(other.m_element_size),
     m_nelement(other.m_nelement), m_is_complex(other.m_is_complex){}
 
-NumberFieldBase &NumberFieldBase::operator=(const NumberFieldBase &other) {
-    FieldBase::operator=(other);
-    return *this;
-}
-
 NumberFieldBase::NumberFieldBase(NumberFieldBase &&other) :
     FieldBase(std::move(other)),  m_element_size(other.m_element_size),
     m_nelement(other.m_nelement), m_is_complex(other.m_is_complex){}

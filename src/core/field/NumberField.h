@@ -17,8 +17,11 @@ struct NumberFieldBase : FieldBase {
 
     NumberFieldBase(const NumberFieldBase& other);
 
-    NumberFieldBase& operator=(const NumberFieldBase& other);
-
+    NumberFieldBase& operator=(const NumberFieldBase& other) {
+        FieldBase::operator=(other);
+        return *this;
+    }
+    
     NumberFieldBase(NumberFieldBase&& other);
 
     NumberFieldBase& operator=(NumberFieldBase&& other);

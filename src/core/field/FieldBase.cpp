@@ -22,14 +22,6 @@ FieldBase::FieldBase(const FieldBase &other) :
     add_to_row(other.row_of_copy());
 }
 
-FieldBase &FieldBase::operator=(const FieldBase &other) {
-    if (&other == this) return *this;
-    DEBUG_ASSERT_TRUE(is_comparable(other), "can't compare to incompatible field");
-    std::memcpy(begin(), other.begin(), m_size);
-    return *this;
-}
-
-
 FieldBase::FieldBase(FieldBase &&other) :
     FieldBase(other.m_size, other.m_type_info, other.m_name) {
     // the Row pointer must be taken from the Field being moved...
