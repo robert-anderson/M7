@@ -13,9 +13,15 @@ struct NumberFieldBase : FieldBase {
     const bool m_is_complex;
 
     NumberFieldBase(Row *row, size_t element_size, size_t nelement, bool is_complex,
-                    const std::type_info &type_info, std::string name = "") :
-            FieldBase(row, element_size * nelement, type_info, name),
-            m_element_size(element_size), m_nelement(nelement), m_is_complex(is_complex) {}
+                    const std::type_info &type_info, std::string name = "");
+
+    NumberFieldBase(const NumberFieldBase& other);
+
+    NumberFieldBase& operator=(const NumberFieldBase& other);
+
+    NumberFieldBase(NumberFieldBase&& other);
+
+    NumberFieldBase& operator=(NumberFieldBase&& other);
 
     virtual std::string format_string() const = 0;
 };
@@ -50,8 +56,13 @@ struct NdNumberField : NumberFieldBase {
             NumberFieldBase(row, sizeof(T), format.m_nelement,
                             consts::is_complex<T>(), typeid(T), name), m_format(format) {}
 
-    NdNumberField(const NdNumberField &other) :
-            NdNumberField(other.row_of_copy(), other.m_format, other.m_name) {}
+    NdNumberField(const NdNumberField &other) : NumberFieldBase(other), m_format(other.m_format){}
+
+    NdNumberField& operator=(const NdNumberField &other) {
+        DEBUG_ASSERT_TRUE(m_format==other.m_format, "cannot copy NdNumberField: format mismatch");
+        NumberFieldBase::operator=(other);
+        return *this;
+    }
 
     NdNumberField &operator=(const T &v) {
         std::fill(dbegin(), dend(), v);
@@ -64,10 +75,10 @@ struct NdNumberField : NumberFieldBase {
         return *this;
     }
 
-    NdNumberField &operator=(const NdNumberField &other) {
-        DEBUG_ASSERT_EQ(nelement(), other.nelement(),
-                              "Can't assign from incompatible instance");
-        static_cast<FieldBase &>(*this) = other;
+    NdNumberField(NdNumberField &&other) : NumberFieldBase(std::move(other)), m_format(other.m_format){}
+
+    NdNumberField& operator=(NdNumberField &&other) {
+        *this = other;
         return *this;
     }
 

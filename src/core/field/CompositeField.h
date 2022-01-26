@@ -5,14 +5,13 @@
 #ifndef M7_COMPOSITEFIELD_H
 #define M7_COMPOSITEFIELD_H
 
-
+#include <tuple>
 
 template<typename ...Args>
 struct CompositeField {
     /**
      * can be made up of FieldBase descendants or other CompositeFields
      */
-    size_t m;
     std::tuple<Args...> m_children;
     CompositeField(Args &&... children) : m_children(std::forward<Args>(children)...) {
     }
