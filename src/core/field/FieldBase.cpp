@@ -8,8 +8,7 @@
 
 FieldBase::FieldBase(size_t size, const std::type_info &type_info, std::string name) :
         m_type_info(type_info), m_size(size),
-        m_name(name), m_null_string(std::max(1ul, m_size), 0) {
-}
+        m_name(name), m_null_string(std::max(1ul, m_size), 0) {}
 
 
 FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :
@@ -26,9 +25,9 @@ FieldBase::FieldBase(FieldBase &&other) :
     FieldBase(other.m_size, other.m_type_info, other.m_name) {
     // the Row pointer must be taken from the Field being moved...
     m_row = nullptr;
-    std::swap(m_row, other.m_row);
+    //std::swap(m_row, other.m_row);
     // but the associated Field pointer must also be updated in the Row's record
-    m_row->m_fields[other.m_row_index] = this;
+    //m_row->m_fields[other.m_row_index] = this;
     // and the offsets remain the same
     m_row_offset = other.m_row_offset;
     m_row_index = other.m_row_index;
@@ -46,7 +45,6 @@ bool FieldBase::is_comparable(const FieldBase &other) const {
 
 void FieldBase::add_to_row(Row *row) {
     REQUIRE_TRUE(row, "cannot add Field to null Row");
-    if (!row) return;
     REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
     m_row_offset = row->add_field(this);
     m_row = row;

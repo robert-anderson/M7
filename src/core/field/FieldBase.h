@@ -37,15 +37,16 @@ struct FieldBase {
     const std::type_info &m_type_info;
     const size_t m_size;
     const std::string m_name;
-    size_t m_row_offset = ~0ul;
-    std::vector<char> m_null_string;
 
 private:
+    std::vector<char> m_null_string;
+    size_t m_row_offset = ~0ul;
     size_t m_row_index = ~0ul;
-
-    FieldBase(size_t size, const std::type_info &type_info, std::string name);
+    friend Row;
 
 public:
+    FieldBase(size_t size, const std::type_info &type_info, std::string name);
+
     FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name);
 
     FieldBase(const FieldBase &other);
