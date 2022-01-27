@@ -33,11 +33,6 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     FrmOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits);
 
-    FrmOnvField(FrmOnvField&& other);
-
-    FrmOnvField &operator=(FrmOnvField &&other);
-
-
     void set(const size_t& bit_offset, const defs::inds& setbits) {
         for(auto& i: setbits) set(bit_offset+i);
     }

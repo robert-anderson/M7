@@ -16,8 +16,8 @@
  * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.
  *
  * Due to the bi-directional references between Fields and Rows, and the dual role of these classes as data LAYOUT
- * specifiers and pointers to the DATA itself, copy/move special methods for this class and all derived classes must be
- * carefully implemented to respect the following useful semantics
+ * specifiers and pointers to the DATA itself, special methods for copying inthis class and all derived classes must be
+ * carefully implemented to respect the following semantics:
  *
  *  - copy ctor: the LAYOUT is being copied since the containing Row is delegating this ctor in the process of being
  *          itself copy-constructed. Raise an error if the Row's m_child member is undefined
@@ -25,12 +25,10 @@
  *          buffer copy without reference to the layout defined by the associated Field set. As the main method of data
  *          copy, it is performance CRITICAL, therefore the base assigment definition and that of all subclasses should
  *          be defined in the header files to give the compiler the chance to inline
- *  - move ctor: the LAYOUT is being moved into a new symbol. Here, the row pointer is copied from the FieldBase being
- *          moved since it is assumed that this moving is due to forwarding in the execution of Row and CompoundField
- *          ctors.
- *  - move assign: semantically, the DATA is being moved, but the Field doesn't own the data buffer, it only points
- *          to a certain location within it. Attempted move assignment of Fields could be considered an error, but it is
- *          fine to simply delegate to the copy assignment instead.
+ *
+ * move semantics are not utilized since all necessary use cases for Fields are covered by the rule-of-three methods.
+ * The Field never needs to be moved into another symbol, since user-defined Rows and CompositeFields are classes with
+ * their own members, and so the initializing ctor is sufficient.
  */
 struct FieldBase {
     Row *m_row = nullptr;
@@ -45,8 +43,17 @@ private:
     friend Row;
 
 public:
-    FieldBase(size_t size, const std::type_info &type_info, std::string name);
 
+    /**
+     * @param row
+     *  row object to which the new field should be added
+     * @param size
+     *  bytes required to store the field (not including the padding between dissimilarly-typed fields in a Row)
+     * @param type_info
+     *  run time evaluated type signature, only used so the Row can determine whether to jump the offset to the next word
+     * @param name
+     *  name of the field i.e. "column heading"
+     */
     FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name);
 
     FieldBase(const FieldBase &other);
@@ -57,10 +64,6 @@ public:
         std::memcpy(begin(), other.begin(), m_size);
         return *this;
     }
-
-    FieldBase(FieldBase &&other);
-
-    FieldBase &operator=(FieldBase &&other);
 
     bool is_comparable(const FieldBase &other) const;
 

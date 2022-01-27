@@ -22,10 +22,6 @@ struct NumberFieldBase : FieldBase {
         return *this;
     }
     
-    NumberFieldBase(NumberFieldBase&& other);
-
-    NumberFieldBase& operator=(NumberFieldBase&& other);
-
     virtual std::string format_string() const = 0;
 };
 
@@ -75,13 +71,6 @@ struct NdNumberField : NumberFieldBase {
     NdNumberField &operator=(const std::vector<T> &v) {
         DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
         std::copy(v.data(), v.data()+nelement(), dbegin());
-        return *this;
-    }
-
-    NdNumberField(NdNumberField &&other) : NumberFieldBase(std::move(other)), m_format(other.m_format){}
-
-    NdNumberField& operator=(NdNumberField &&other) {
-        *this = other;
         return *this;
     }
 
@@ -293,13 +282,6 @@ struct NumberField : NdNumberField<T, 0ul> {
 
     NumberField& operator=(const NumberField& other){
         base_t::operator=(other);
-        return *this;
-    }
-
-    NumberField(NumberField&& other): base_t(std::move(other)){}
-
-    NumberField& operator=(NumberField&& other){
-        *this = other;
         return *this;
     }
 

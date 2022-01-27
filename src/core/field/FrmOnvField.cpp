@@ -27,14 +27,6 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::in
     return *this;
 }
 
-FrmOnvField::FrmOnvField(FrmOnvField &&other) :
-        base_t(std::move(other)), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){}
-
-FrmOnvField &FrmOnvField::operator=(FrmOnvField &&other) {
-    *this = other;
-    return *this;
-}
-
 void FrmOnvField::foreach(const std::function<void(const size_t &)> &body_fn) const {
     size_t work;
     for (size_t idataword = 0; idataword < m_dsize; ++idataword) {

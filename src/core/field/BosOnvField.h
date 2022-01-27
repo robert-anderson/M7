@@ -24,10 +24,6 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
 
     BosOnvField &operator=(const defs::inds &inds);
 
-    BosOnvField(BosOnvField &&other);
-
-    BosOnvField &operator=(BosOnvField &&other);
-
 };
 
 

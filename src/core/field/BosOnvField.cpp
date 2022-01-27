@@ -16,10 +16,3 @@ BosOnvField &BosOnvField::operator=(const defs::inds &inds) {
     for (size_t i = 0ul; i < inds.size(); ++i) (*this)[i] = inds[i];
     return *this;
 }
-
-BosOnvField::BosOnvField(BosOnvField &&other) : base_t(std::move(other)) {}
-
-BosOnvField &BosOnvField::operator=(BosOnvField &&other) {
-    *this = other;
-    return *this;
-}

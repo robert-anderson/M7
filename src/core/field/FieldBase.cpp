@@ -6,38 +6,14 @@
 #include "src/core/parallel/MPIAssert.h"
 
 
-FieldBase::FieldBase(size_t size, const std::type_info &type_info, std::string name) :
-        m_type_info(type_info), m_size(size),
-        m_name(name), m_null_string(std::max(1ul, m_size), 0) {}
-
-
 FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :
-        FieldBase(size, type_info, name){
+        m_type_info(type_info), m_size(size),
+        m_name(name), m_null_string(std::max(1ul, m_size), 0) {
     add_to_row(row);
 }
 
 FieldBase::FieldBase(const FieldBase &other) :
-        FieldBase(other.m_size, other.m_type_info, other.m_name) {
-    add_to_row(other.row_of_copy());
-}
-
-FieldBase::FieldBase(FieldBase &&other) :
-    FieldBase(other.m_size, other.m_type_info, other.m_name) {
-    // the Row pointer must be taken from the Field being moved...
-    m_row = nullptr;
-    //std::swap(m_row, other.m_row);
-    // but the associated Field pointer must also be updated in the Row's record
-    //m_row->m_fields[other.m_row_index] = this;
-    // and the offsets remain the same
-    m_row_offset = other.m_row_offset;
-    m_row_index = other.m_row_index;
-}
-
-FieldBase &FieldBase::operator=(FieldBase &&other) {
-    *this = other;
-    return *this;
-}
-
+        FieldBase(other.row_of_copy(), other.m_size, other.m_type_info, other.m_name) {}
 
 bool FieldBase::is_comparable(const FieldBase &other) const {
     return m_type_info == other.m_type_info && m_size == other.m_size;

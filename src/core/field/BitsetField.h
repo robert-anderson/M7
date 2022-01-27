@@ -61,14 +61,6 @@ struct BitsetField : FieldBase {
         return *this;
     }
 
-    BitsetField(BitsetField &&other) : FieldBase(std::move(other)),
-       m_format(other.m_format), m_dsize(other.m_dsize), m_nbit_in_last_dword(other.m_nbit_in_last_dword){}
-
-    BitsetField &operator=(BitsetField &&other) {
-        *this = other;
-        return *this;
-    }
-
     const size_t &nbit() const {
         return m_format.m_nelement;
     }
