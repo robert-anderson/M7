@@ -29,3 +29,32 @@ FrmBosOnvField &FrmBosOnvField::operator=(const std::pair<defs::inds, defs::inds
 const size_t &FrmBosOnvField::nsite() const {
     return m_frm.m_nsite;
 }
+
+
+
+#if 0
+
+FrmBosOnvField::FrmBosOnvField(Row *row, BasisDims bd, std::string name) :
+        CompositeField<FrmOnvField, BosOnvField>(m_frm, m_bos),
+        m_frm(row, bd.m_nsite, name.empty() ? "" : name + " fermion"),
+        m_bos(row, bd.m_nmode, name.empty() ? "" : name + " boson"){}
+
+FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField& other): base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos){}
+
+FrmBosOnvField &FrmBosOnvField::operator=(const std::pair<defs::inds, defs::inds> &inds) {
+    m_frm = inds.first;
+    m_bos = inds.second;
+    return *this;
+}
+
+const size_t &FrmBosOnvField::nsite() const {
+    return m_frm.m_nsite;
+}
+
+FrmBosOnvField &FrmBosOnvField::operator=(const FrmBosOnvField &other) {
+    m_frm = other.m_frm;
+    m_bos = other.m_bos;
+    return *this;
+}
+
+#endif

@@ -20,4 +20,21 @@ struct SpecMomIndsField : MultiField<MaeIndsField, MaeIndsField> {
 };
 
 
+#if 0
+#include "CompositeField.h"
+#include "MaeIndsField.h"
+
+struct SpecMomIndsField : CompositeField<MaeIndsField, MaeIndsField> {
+    typedef CompositeField<MaeIndsField, MaeIndsField> base_t;
+    const size_t m_exsig;
+    MaeIndsField m_left, m_right;
+
+    SpecMomIndsField(Row *row, size_t exsig, std::string name = "indices");
+
+    SpecMomIndsField(const SpecMomIndsField &other);
+
+    SpecMomIndsField& operator=(const SpecMomIndsField &other);
+};
+#endif
+
 #endif //M7_SPECMOMINDSFIELD_H

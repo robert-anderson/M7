@@ -69,10 +69,19 @@ struct DetPermTestRow : Row {
 //                           {this, 9, "foxtrot"}){}
 //};
 
+
 TEST(CompositeField, Test) {
 
-    DetPermTestRow row;
-    ASSERT_EQ(&row.m_dp.m_frm, &row.m_dp.get<0>());
+    Buffered<field::FrmOnv> b(8);
+    //b = {1, 5, 6};
+    Buffered<field::FrmOnv> c = b;
+    std::cout << b.to_string() << std::endl;
+    std::cout << c.to_string() << std::endl;
+
+
+
+//    DetPermTestRow row;
+//    ASSERT_EQ(&row.m_dp.m_frm, &row.m_dp.get<0>());
 }
 
 
