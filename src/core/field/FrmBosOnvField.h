@@ -7,23 +7,30 @@
 
 #include "FrmOnvField.h"
 #include "BosOnvField.h"
-#include "MultiField.h"
+#include "CompositeField.h"
 
-struct FrmBosOnvField : MultiField<FrmOnvField, BosOnvField> {
-    const std::string m_name;
-    FrmOnvField &m_frm;
-    BosOnvField &m_bos;
+struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
+    typedef CompositeField<FrmOnvField, BosOnvField> base_t;
+    FrmOnvField m_frm;
+    BosOnvField m_bos;
+    FrmBosOnvField(Row* row, BasisDims bd, std::string name="");
 
-    FrmBosOnvField(Row *row, BasisDims bd, std::string name = "");
+    FrmBosOnvField(const FrmBosOnvField& other);
 
-    FrmBosOnvField(const FrmBosOnvField &other);
+    FrmBosOnvField& operator=(const FrmBosOnvField& other) {
+        m_frm = other.m_frm;
+        m_bos = other.m_bos;
+        return *this;
+    }
 
-    FrmBosOnvField &operator=(const FrmBosOnvField &other);
+    FrmBosOnvField& operator=(const std::pair<defs::inds, defs::inds> &inds);
 
-    FrmBosOnvField &operator=(const std::pair<defs::inds, defs::inds> &inds);
+    const size_t &nsite() const {
+        return m_frm.m_nsite;
+    }
 
-    const size_t& nsite() const;
 };
+
 
 
 #endif //M7_FRMBOSONVFIELD_H

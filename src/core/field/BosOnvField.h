@@ -10,12 +10,16 @@
 
 struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     typedef NdNumberField<defs::bos_occ_t, 1> base_t;
+    /**
+     * alias for the number of elements in the 1D numeric array
+     */
+    const size_t& m_nmode;
 
     BosOnvField(Row *row, size_t nmode, std::string name = "");
 
     BosOnvField(Row *row, BasisDims bd, std::string name = "");
 
-    BosOnvField(const BosOnvField &other) : base_t(other) {}
+    BosOnvField(const BosOnvField &other) : base_t(other), m_nmode(m_nelement) {}
 
     BosOnvField &operator=(const BosOnvField &other) {
         base_t::operator=(other);

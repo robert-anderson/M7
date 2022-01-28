@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "src/core/sort/LocalExtremalRows.h"
-#include <src/core/table/BufferedFields.h>
+#include <src/core/table/BufferedTable.h>
 
 namespace local_extremal_rows_test {
     typedef SingleFieldRow<field::Number<int>> int_scalar_row_t;

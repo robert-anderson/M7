@@ -4,6 +4,7 @@
 
 #include <src/core/sample/PRNG.h>
 #include <src/core/table/BufferedFields.h>
+#include <src/core/table/Table.h>
 #include "gtest/gtest.h"
 
 TEST(Fields, HashUniformityTrueRandom){

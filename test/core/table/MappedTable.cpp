@@ -3,6 +3,7 @@
 //
 
 #include "gtest/gtest.h"
+#include "src/core/table/BufferedTable.h"
 #include "src/core/table/BufferedFields.h"
 
 namespace mapped_table_test {

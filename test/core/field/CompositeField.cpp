@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "src/core/field/CompositeField.h"
-#include "src/core/table/BufferedFields2.h"
+#include "src/core/table/BufferedFields.h"
 
 
 struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {
@@ -71,16 +71,19 @@ struct DetPermTestRow : Row {
 
 TEST(CompositeField, Test) {
 
-//    buffered2::BosOnv b(5);
+//    buffered::BosOnv b(5);
 //    b = {1, 5, 6, 9, 19};
-//    buffered2::BosOnv c(5);
+//    buffered::BosOnv c(5);
 //    c = static_cast<const field::BosOnv&>(b);
-    buffered2::FrmBosOnv b({6, 4});
+    buffered::FrmBosOnv b({6, 4});
+    //buffered::FrmBosOnv c({6, 4});
+    field::FrmBosOnv& bref(b);
     b = {{1, 5, 7}, {1, 5, 6, 9}};
-//    buffered2::FrmBosOnv c(5);
-//    c = static_cast<const field::BosOnv&>(b);
+    buffered::FrmBosOnv c(bref);
     std::cout << b.to_string() << std::endl;
-//    std::cout << c.to_string() << std::endl;
+    std::cout << c.to_string() << std::endl;
+    c = b;
+    std::cout << c.to_string() << std::endl;
 
 
 

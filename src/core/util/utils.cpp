@@ -264,3 +264,9 @@ std::string string_utils::plural(size_t i, std::string plu_ending, std::string s
 std::string string_utils::plural(std::string base, size_t i, std::string plu_ending, std::string sing_ending) {
     return std::to_string(i) + " " + base + plural(i, plu_ending, sing_ending);
 }
+
+std::string string_utils::prefix(std::string base, std::string prefix, char delimiter) {
+    if (prefix.empty()) return base;
+    prefix.push_back(delimiter);
+    return prefix+base;
+}

@@ -43,7 +43,7 @@ TEST(BufferedTableArray, Resize){
 
     buffered::FrmOnv onv(6);
     ASSERT_TRUE(onv.m_row);
-    ASSERT_EQ(onv.m_table.m_hwm, 1);
+    ASSERT_EQ(onv.m_internal_table.m_hwm, 1);
 
     bta[0].m_row.restart();
     onv = {1, 2, 3}; ASSERT_EQ(bta[0].m_row.m_onv, onv);

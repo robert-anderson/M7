@@ -229,4 +229,15 @@ struct KeyField {
 };
 
 
+template<typename field_t>
+struct SingleFieldRow : Row {
+    field_t m_field;
+    template<typename ...Args>
+    SingleFieldRow(Args... args): Row(), m_field(this, args...){}
+
+    field_t &key_field() {
+        return m_field;
+    };
+};
+
 #endif //M7_ROW_H
