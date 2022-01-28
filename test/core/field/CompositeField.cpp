@@ -2,10 +2,9 @@
 // Created by anderson on 1/25/22.
 //
 
-#include <src/core/table/BufferedTable.h>
 #include "gtest/gtest.h"
 #include "src/core/field/CompositeField.h"
-#include "src/core/field/Fields.h"
+#include "src/core/table/BufferedFields2.h"
 
 
 struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {
@@ -72,11 +71,16 @@ struct DetPermTestRow : Row {
 
 TEST(CompositeField, Test) {
 
-    Buffered<field::FrmOnv> b(8);
-    //b = {1, 5, 6};
-    Buffered<field::FrmOnv> c = b;
+//    buffered2::BosOnv b(5);
+//    b = {1, 5, 6, 9, 19};
+//    buffered2::BosOnv c(5);
+//    c = static_cast<const field::BosOnv&>(b);
+    buffered2::FrmBosOnv b({6, 4});
+    b = {{1, 5, 7}, {1, 5, 6, 9}};
+//    buffered2::FrmBosOnv c(5);
+//    c = static_cast<const field::BosOnv&>(b);
     std::cout << b.to_string() << std::endl;
-    std::cout << c.to_string() << std::endl;
+//    std::cout << c.to_string() << std::endl;
 
 
 
@@ -84,7 +88,7 @@ TEST(CompositeField, Test) {
 //    ASSERT_EQ(&row.m_dp.m_frm, &row.m_dp.get<0>());
 }
 
-
+#if 0
 
 TEST(CompositeField, CopyMoveSemantics) {
 
@@ -139,3 +143,4 @@ TEST(CompositeField, CopyMoveSemantics) {
 //    std::cout << bt.to_string() << std::endl;
 //
 //}
+#endif

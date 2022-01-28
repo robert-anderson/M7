@@ -5,6 +5,10 @@
 #ifndef M7_BUFFEREDFIELDS2_H
 #define M7_BUFFEREDFIELDS2_H
 
+#include "src/core/field/Fields.h"
+#include "src/core/field/CompositeField.h"
+
+
 struct BufferedFieldRow {
     Row m_internal_row;
     BufferedFieldRow():m_internal_row(){}
@@ -39,7 +43,8 @@ public:
         init();
     }
 
-    BufferedField2(const BufferedField2& other): Wrapp(other.m_internal_row), T(static_cast<const T&>(other)),
+    BufferedField2(const BufferedField2& other):
+        BufferedFieldRow(other.m_internal_row), T(static_cast<const T&>(other)),
         m_internal_buffer("", 1), m_internal_table(m_internal_row.m_size){
         init();
         // data is also copied:
@@ -50,15 +55,11 @@ public:
         static_cast<T&>(*this) = other;
         return *this;
     }
-
-    BufferedField2& operator=(const BufferedField2& other) {
-        static_cast<T&>(*this) = static_cast<const T&>(other);
-        return *this;
-    }
 };
 
 namespace buffered2 {
 
+#if 0
     template<typename T, size_t nind>
     struct NdBitset : BufferedField2<field::NdBitset<T, nind>> {
         typedef BufferedField2<field::NdBitset<T, nind>> base_t;
@@ -76,16 +77,16 @@ namespace buffered2 {
 
 
     template<typename T, size_t nind>
-    struct Numbers : BufferedField<field::Numbers<T, nind>> {
-        typedef BufferedField<field::Numbers<T, nind>> base_t;
+    struct Numbers : BufferedField2<field::Numbers<T, nind>> {
+        typedef BufferedField2<field::Numbers<T, nind>> base_t;
         typedef typename field::Numbers<T, nind>::inds_t inds_t;
         using field::Numbers<T, nind>::operator=;
         Numbers(inds_t shape) : base_t({nullptr, shape}){}
         Numbers(inds_t shape, T init_value) : base_t({nullptr, shape}){
             *this = init_value;
         }
-        Numbers(const field::Numbers<T, nind>& field): BufferedField<field::Numbers<T, nind>>(field){}
-        Numbers(const Numbers& field): BufferedField<field::Numbers<T, nind>>(field){}
+        Numbers(const field::Numbers<T, nind>& field): BufferedField2<field::Numbers<T, nind>>(field){}
+        Numbers(const Numbers& field): BufferedField2<field::Numbers<T, nind>>(field){}
         Numbers& operator=(const Numbers& field){
             base_t::operator=(field);
             return *this;
@@ -93,9 +94,9 @@ namespace buffered2 {
     };
 
     template<typename T>
-    struct Number : BufferedField<field::Number<T>> {
-        using BufferedField<field::Number<T>>::operator=;
-        Number(): BufferedField<field::Number<T>>({{}}){}
+    struct Number : BufferedField2<field::Number<T>> {
+        using BufferedField2<field::Number<T>>::operator=;
+        Number(): BufferedField2<field::Number<T>>({{}}){}
         operator T&(){return (*this)[0];}
         operator const T&() const {return (*this)[0];}
         Number& operator=(const T& v){
@@ -103,30 +104,60 @@ namespace buffered2 {
             return *this;
         }
     };
-
-    struct FrmOnv : BufferedField<field::FrmOnv> {
+#endif
+    struct FrmOnv : BufferedField2<field::FrmOnv> {
         using field::FrmOnv::operator=;
-        FrmOnv(BasisDims bd) : BufferedField<field::FrmOnv>({nullptr, bd}){}
-        FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>({nullptr, nsite}){}
-        FrmOnv& operator=(const FrmOnv& other){
-            base_t::operator=(other);
+        FrmOnv(BasisDims bd) : BufferedField2<field::FrmOnv>(bd){}
+        FrmOnv(size_t nsite) : BufferedField2<field::FrmOnv>(nsite){}
+    };
+
+    struct BosOnv : BufferedField2<field::BosOnv> {
+        using field::BosOnv::operator=;
+        BosOnv(size_t nmode) : BufferedField2<field::BosOnv>(nmode){}
+        BosOnv(BasisDims bd) : BufferedField2<field::BosOnv>(bd){}
+    };
+
+
+
+    struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {
+        typedef CompositeField<field::FrmOnv, field::BosOnv> base_t;
+        field::FrmOnv m_frm;
+        field::BosOnv m_bos;
+        DetPerm(Row* row, BasisDims bd):
+                base_t(m_frm, m_bos),
+                m_frm(row, bd.m_nsite, "fermions"),
+                m_bos(row, bd.m_nmode, "bosons"){}
+
+        DetPerm(const DetPerm& other): base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos){}
+
+        DetPerm& operator=(const DetPerm& other) {
+            m_frm = other.m_frm;
+            m_bos = other.m_bos;
             return *this;
         }
-        FrmOnv(const FrmOnv& other): FrmOnv({other.m_nsite, 0ul}){}
+
+        DetPerm& operator=(const std::pair<defs::inds, defs::inds> &inds) {
+            m_frm = inds.first;
+            m_bos = inds.second;
+            return *this;
+        }
+
+        const size_t &nsite() const {
+            return m_frm.m_nsite;
+        }
+
     };
 
-    struct BosOnv : BufferedField<field::BosOnv> {
-        using field::BosOnv::operator=;
-        BosOnv(size_t nmode) : BufferedField<field::BosOnv>({nullptr, nmode}){}
-        BosOnv(BasisDims bd) : BufferedField<field::BosOnv>({nullptr, bd}){}
-    };
 
 
-    struct FrmBosOnv : BufferedMultiField<field::FrmBosOnv> {
-        using field::FrmBosOnv::operator=;
-        FrmBosOnv(BasisDims bd):
-                BufferedMultiField<field::FrmBosOnv>({nullptr, bd}){}
+
+
+    struct FrmBosOnv : BufferedField2<DetPerm> {
+        using DetPerm::operator=;
+        FrmBosOnv(BasisDims bd): BufferedField2<DetPerm>(bd){}
     };
+
+#if 0
 
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
@@ -134,19 +165,20 @@ namespace buffered2 {
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_type_ind> Mbf;
 
-    struct MaeInds : BufferedField<field::MaeInds> {
+    struct MaeInds : BufferedField2<field::MaeInds> {
         using field::MaeInds::operator=;
         using field::MaeInds::m_frm;
         using field::MaeInds::m_bos;
         MaeInds(size_t exsig):
-        BufferedField<field::MaeInds>({nullptr, exsig}){}
+        BufferedField2<field::MaeInds>({nullptr, exsig}){}
     };
 
-    struct SpecMomInds : BufferedMultiField<field::SpecMomInds> {
+    struct SpecMomInds : BufferedField2<field::SpecMomInds> {
         using field::SpecMomInds::operator=;
         SpecMomInds(size_t exsig):
-        BufferedMultiField<field::SpecMomInds>({nullptr, exsig}){}
+        BufferedField2<field::SpecMomInds>({nullptr, exsig}){}
     };
+#endif
 }
 
 template<typename field_t>
