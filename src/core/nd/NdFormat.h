@@ -62,7 +62,7 @@ struct NdFormat : NdFormatBase {
 
     std::array<std::string, nind> make_default_dim_names() const {
         std::array<std::string, nind> dim_names;
-        for (size_t i=0ul; i<nind; ++i) dim_names[i] = "dim_"+std::to_string(i);
+        for (size_t i=0ul; i!=nind; ++i) dim_names[i] = "dim_"+std::to_string(i);
         return dim_names;
     }
 
@@ -89,7 +89,7 @@ public:
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
     bool operator==(const NdFormat<nind> &other) const{
-        for (size_t iind=0ul; iind<nind; ++iind){
+        for (size_t iind=0ul; iind!=nind; ++iind){
             if (other.m_shape[iind]!=m_shape[iind]) return false;
         }
         return true;
@@ -160,7 +160,7 @@ public:
      */
     size_t flatten(std::array<size_t, nind> inds) const {
         size_t i = 0ul;
-        for (size_t iind=0ul; iind<nind; ++iind) i+=inds[iind]*m_strides[iind];
+        for (size_t iind=0ul; iind!=nind; ++iind) i+=inds[iind]*m_strides[iind];
         return i;
     }
 
@@ -215,7 +215,7 @@ public:
 
     void decode_flat(const size_t& iflat, std::array<size_t, nind>& inds) const {
         size_t remainder = iflat;
-        for (size_t i=0ul; i<nind; ++i){
+        for (size_t i=0ul; i!=nind; ++i){
             auto& ind = inds[i];
             ind = remainder/m_strides[i];
             remainder-=ind*m_strides[i];
@@ -225,8 +225,7 @@ public:
     std::string to_string() const override {
         if (!nind) return "scalar";
         std::string tmp;
-        auto size = nind;
-        for (size_t i=0ul; i<size; ++i) {
+        for (size_t i=0ul; i!=nind; ++i) {
             tmp+=m_dim_names[i]+" ("+std::to_string(m_shape[i])+") ";
         }
         return tmp;
@@ -260,7 +259,7 @@ public:
     size_t partial_offset(std::array<size_t, nind_spec> inds) const {
         static_assert(nind_spec<=nind, "Too many indices specified");
         size_t iflat = 0ul;
-        for (size_t i=0ul; i < nind_spec; ++i) {
+        for (size_t i=0ul; i!=nind_spec; ++i) {
             ASSERT(inds[i]<m_shape[i]);
             iflat+= inds[i] * m_strides[i];
         }
@@ -277,7 +276,7 @@ struct NdEnumeration : NdFormat<nind>{
         enums::PermutationsWithRepetition e(format.shape_vector());
         size_t iinds = 0ul;
         while (e.next()){
-            for (size_t i=0; i<nind; ++i) out[iinds][i] = e[i];
+            for (size_t i=0; i!=nind; ++i) out[iinds][i] = e[i];
             ++iinds;
         }
         ASSERT(iinds==format.m_nelement);

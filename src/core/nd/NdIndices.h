@@ -20,7 +20,8 @@ class NdIndices : NdFormat<nind> {
         DEBUG_ASSERT_LT(iflat, m_nelement, "flat index OOB");
         if (!nind) return {};
         std::array<size_t, nind> inds{};
-        for (size_t i=0ul; nind != 0 && i < nind; ++i) {
+        // avoiding the usual i<nind termination condition due to unsigned type errors on some compilers
+        for (size_t i=0ul; i!=nind; ++i) {
             inds[i] = iflat / m_strides[i];
             iflat -= inds[i]*m_strides[i];
         }
