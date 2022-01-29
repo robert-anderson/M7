@@ -16,6 +16,10 @@ struct BufferedFieldRow {
 };
 
 /**
+ * BufferedFields allow for the use of Fields and CompositeFields without referencing an external Table to provide the
+ * data buffer. Instead this class in effect provides subclasses of Fields and CompositeFields which own their own data
+ * buffers.
+ *
  * Multiple inheritance is only used so that the m_internal_row member ctor is called before that of can be initialized
  * before that of the template arg
  */
@@ -43,6 +47,11 @@ public:
     }
 };
 
+/**
+ * the above-defined templated class is not intended to be directly usable: it only provides the data storage and a
+ * generic forwarding constructor. The classes in this namespace inherit from BufferedField and re-implement the exact
+ * ctors of the underlying Field or CompositeField along with the copy ctors and copy assignment operators.
+ */
 namespace buffered {
 
     template<typename T, size_t nind>
@@ -61,7 +70,6 @@ namespace buffered {
             field::NdBitset<T, nind>::operator=(field);
             return *this;
         }
-        //NdBitset(const field::NdBitset<T, nind>& field): BufferedField<field::NdBitset<T, nind>>(field){}
     };
 
 
