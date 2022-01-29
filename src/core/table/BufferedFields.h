@@ -8,11 +8,11 @@
 #include "src/core/field/Fields.h"
 #include "src/core/field/CompositeField.h"
 
-
 struct BufferedFieldRow {
     Row m_internal_row;
-    BufferedFieldRow():m_internal_row(){}
-    BufferedFieldRow(const Row& row): m_internal_row(row){}
+    Buffer m_internal_buffer;
+    BufferedFieldRow();
+    BufferedFieldRow(const Row& row);
 };
 
 /**
@@ -22,7 +22,6 @@ struct BufferedFieldRow {
 template<typename T>
 struct BufferedField : BufferedFieldRow, T {
     using T::operator=;
-    Buffer m_internal_buffer;
     TableBase m_internal_table;
 
 private:
@@ -39,22 +38,9 @@ private:
 public:
     template<typename ...Args>
     BufferedField(Args&&... args):
-        T(&m_internal_row, std::forward<Args>(args)...),
-        m_internal_buffer("", 1), m_internal_table(m_internal_row.m_size) {
+        T(&m_internal_row, std::forward<Args>(args)...), m_internal_table(m_internal_row.m_size) {
         init();
     }
-//    BufferedField(const BufferedField& other):
-//        BufferedFieldRow(other.m_internal_row), T(static_cast<const T&>(other)),
-//        m_internal_buffer("", 1), m_internal_table(m_internal_row.m_size){
-//        init();
-//        // data is also copied:
-//        *this = other;
-//    }
-//
-//    BufferedField& operator=(const T& other) {
-//        static_cast<T&>(*this) = other;
-//        return *this;
-//    }
 };
 
 namespace buffered {
@@ -65,7 +51,17 @@ namespace buffered {
         typedef typename field::NdBitset<T, nind>::inds_t inds_t;
         using field::NdBitset<T, nind>::operator=;
         explicit NdBitset(inds_t shape) : BufferedField<field::NdBitset<T, nind>>(shape){}
-//        NdBitset(const field::NdBitset<T, nind>& field): BufferedField<field::NdBitset<T, nind>>(field){}
+        NdBitset(const NdBitset& other) : NdBitset(other.m_format.m_shape){
+            *this = other;
+        }
+        NdBitset(const field::NdBitset<T, nind>& other) : NdBitset(other.m_format.m_shape){
+            *this = other;
+        }
+        NdBitset& operator=(const NdBitset& field){
+            field::NdBitset<T, nind>::operator=(field);
+            return *this;
+        }
+        //NdBitset(const field::NdBitset<T, nind>& field): BufferedField<field::NdBitset<T, nind>>(field){}
     };
 
 
@@ -84,8 +80,9 @@ namespace buffered {
         Numbers(inds_t shape, T init_value) : base_t(shape){
             *this = init_value;
         }
-//        explicit Numbers(const field::Numbers<T, nind>& field): BufferedField<field::Numbers<T, nind>>(field){}
-//        Numbers(const Numbers& field): BufferedField<field::Numbers<T, nind>>(field){}
+        Numbers(const Numbers& other): Numbers(other.m_format.m_shape){
+            *this = other;
+        }
         Numbers& operator=(const Numbers& field){
             field::Numbers<T, nind>::operator=(field);
             return *this;
