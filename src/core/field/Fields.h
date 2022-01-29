@@ -6,7 +6,6 @@
 #define M7_FIELDS_H
 
 #include "NumberField.h"
-#include "MultiField.h"
 #include "FrmBosOnvField.h"
 #include "FrmBosXonvField.h"
 #include "SpecMomIndsField.h"
@@ -81,30 +80,29 @@ namespace field {
     }
 
     /**
-     * same as the above function, but for references to MultiFields instead
+     * same as the above function, but for references to CompositeFields instead
      * @tparam row_t
      *  Row-derived class containing the field_t symbol
      * @tparam Args
-     *  FieldBase-derived arguments to the MultiField class template
+     *  FieldBase-derived arguments to the CompositeField class template
      * @param target
-     *  Row object for which the multifield reference is desired
+     *  Row object for which the CompositeField reference is desired
      * @param source
-     *  Row object for which the multifield reference is specified
+     *  Row object for which the CompositeField reference is specified
      * @param multifield
-     *  MultiField-derived object which is the referenced symbol within the source row
+     *  CompositeField-derived object which is the referenced symbol within the source row
      * @return
-     *  reference to the same MultiField within "target" as is represented by "field" within "source"
+     *  reference to the same CompositeField within "target" as is represented by "field" within "source"
      */
     template<typename row_t, typename ...Args>
-    static MultiField<Args...>& identify(row_t& target, row_t& source, MultiField<Args...>& multifield){
+    static CompositeField<Args...>& identify(row_t& target, row_t& source, CompositeField<Args...>& composite){
         static_assert(std::is_base_of<Row, row_t>::value, "Template arg must be derived from Row");
-        REQUIRE_TRUE(multifield.belongs_to_row(source), "multifield arg must belong to source arg");
         auto target_ptr = reinterpret_cast<char*>(&target);
         auto source_ptr = reinterpret_cast<char*>(&source);
-        auto field_ptr = reinterpret_cast<char*>(&multifield);
+        auto field_ptr = reinterpret_cast<char*>(&composite);
         long byte_offset = field_ptr - source_ptr;
         DEBUG_ASSERT_GT(byte_offset, 0, "field pointer is not positively offset from row!");
-        auto ptr = reinterpret_cast<MultiField<Args...>*>(target_ptr + byte_offset);
+        auto ptr = reinterpret_cast<CompositeField<Args...>*>(target_ptr + byte_offset);
         DEBUG_ASSERT_TRUE(ptr->belongs_to_row(target), "multifield identification failed");
         return *ptr;
     }
