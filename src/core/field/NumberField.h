@@ -115,6 +115,12 @@ struct NdNumberField : NumberFieldBase {
         std::memcpy(v.data(), begin(), m_size);
     }
 
+    std::vector<T> to_vector() const {
+        std::vector<T> tmp(m_nelement);
+        copy_to(tmp);
+        return tmp;
+    }
+
     /*
      * math ops
      */
@@ -283,6 +289,10 @@ struct NumberField : NdNumberField<T, 0ul> {
     NumberField& operator=(const NumberField& other){
         base_t::operator=(other);
         return *this;
+    }
+
+    bool operator==(const T& v) const{
+        return (*this)[0] == v;
     }
 
     operator T&() {

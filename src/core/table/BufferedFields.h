@@ -55,6 +55,45 @@ public:
 namespace buffered {
 
     template<typename T, size_t nind>
+    struct Numbers : BufferedField<field::Numbers<T, nind>> {
+        typedef BufferedField<field::Numbers<T, nind>> base_t;
+        typedef typename field::Numbers<T, nind>::inds_t inds_t;
+        using field::Numbers<T, nind>::operator=;
+        explicit Numbers(inds_t shape) : base_t(shape){}
+        Numbers(inds_t shape, T init_value) : base_t(shape){
+            *this = init_value;
+        }
+        Numbers(const Numbers& other): Numbers(other.m_format.m_shape){
+            *this = other;
+        }
+        Numbers(const field::Numbers<T, nind>& other): Numbers(other.m_format.m_shape){
+            *this = other;
+        }
+        Numbers& operator=(const Numbers& field){
+            field::Numbers<T, nind>::operator=(field);
+            return *this;
+        }
+    };
+
+    template<typename T>
+    struct Number : BufferedField<field::Number<T>> {
+        using BufferedField<field::Number<T>>::operator=;
+        using BufferedField<field::Number<T>>::operator==;
+        using BufferedField<field::Number<T>>::operator T &;
+        Number(): BufferedField<field::Number<T>>({}){}
+        Number(const Number& other): Number() {
+            *this = other;
+        }
+        Number(const field::Number<T>& other): Number() {
+            *this = other;
+        }
+        Number& operator=(const Number<T>& other) {
+            field::Number<T>::operator=(other);
+            return *this;
+        }
+    };
+
+    template<typename T, size_t nind>
     struct NdBitset : BufferedField<field::NdBitset<T, nind>> {
         typedef BufferedField<field::NdBitset<T, nind>> base_t;
         typedef typename field::NdBitset<T, nind>::inds_t inds_t;
@@ -72,41 +111,20 @@ namespace buffered {
         }
     };
 
-
     template<typename T>
     struct Bitset : NdBitset<T, 1ul> {
+        using field::Bitset<size_t>::operator=;
         explicit Bitset(size_t nbit): NdBitset<T, 1ul>({nbit}){}
-    };
-
-
-    template<typename T, size_t nind>
-    struct Numbers : BufferedField<field::Numbers<T, nind>> {
-        typedef BufferedField<field::Numbers<T, nind>> base_t;
-        typedef typename field::Numbers<T, nind>::inds_t inds_t;
-        using field::Numbers<T, nind>::operator=;
-        explicit Numbers(inds_t shape) : base_t(shape){}
-        Numbers(inds_t shape, T init_value) : base_t(shape){
-            *this = init_value;
-        }
-        Numbers(const Numbers& other): Numbers(other.m_format.m_shape){
+        Bitset(const Bitset& other) : Bitset(other.m_format.m_nelement){
             *this = other;
         }
-        Numbers& operator=(const Numbers& field){
-            field::Numbers<T, nind>::operator=(field);
+        Bitset(const field::Bitset<size_t>& other) : Bitset(other.m_format.m_nelement){
+            *this = other;
+        }
+        Bitset& operator=(const Bitset& field){
+            field::Bitset<T>::operator=(field);
             return *this;
         }
-    };
-
-    template<typename T>
-    struct Number : BufferedField<field::Number<T>> {
-        using BufferedField<field::Number<T>>::operator=;
-        Number(): BufferedField<field::Number<T>>({}){}
-//        operator T&(){return (*this)[0];}
-//        operator const T&() const {return (*this)[0];}
-//        Number& operator=(const T& v){
-//            static_cast<T&>(*this) = v;
-//            return *this;
-//        }
     };
 
     struct FrmOnv : BufferedField<field::FrmOnv> {

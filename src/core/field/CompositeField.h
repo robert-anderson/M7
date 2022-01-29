@@ -26,6 +26,17 @@ protected:
         template<typename T>
         void operator()(const T &v) { m_str += v.to_string() + " "; }
     };
+
+    struct ZeroFn {
+        template<typename T>
+        void operator()(T &v) { v.zero(); }
+    };
+
+    struct IsZeroFn {
+        bool m_and = true;
+        template<typename T>
+        void operator()(const T &v) { m_and &= v.is_zero(); }
+    };
 };
 
 
@@ -51,6 +62,17 @@ struct CompositeField : CompositeFieldBase {
         ToStringFn fn;
         tuple_utils::for_each(m_refs, fn);
         return fn.m_str;
+    }
+
+    void zero() {
+        ZeroFn fn;
+        tuple_utils::for_each(m_refs, fn);
+    }
+
+    bool is_zero() const {
+        IsZeroFn fn;
+        tuple_utils::for_each(m_refs, fn);
+        return fn.m_and;
     }
 
     template<size_t ifield>
