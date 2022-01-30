@@ -20,7 +20,8 @@
  * carefully implemented to respect the following semantics:
  *
  *  - copy ctor: the LAYOUT is being copied since the containing Row is delegating this ctor in the process of being
- *          itself copy-constructed. Raise an error if the Row's m_child member is undefined
+ *          itself copy-constructed. Raise an error if the Row's m_child member is undefined, and also copy assign so
+ *          that the initial value of the copied Field is that of the Field from which it was copied
  *  - copy assign: the DATA is being copied. This method is not delegated by the Row, since Row data copies are done by
  *          buffer copy without reference to the layout defined by the associated Field set. As the main method of data
  *          copy, it is performance CRITICAL, therefore the base assigment definition and that of all subclasses should
@@ -31,7 +32,7 @@
  * their own members, and so the initializing ctor is sufficient.
  */
 struct FieldBase {
-    Row *m_row = nullptr;
+    Row *m_row;
     const std::type_info &m_type_info;
     const size_t m_size;
     const std::string m_name;
@@ -66,8 +67,6 @@ public:
     }
 
     bool is_comparable(const FieldBase &other) const;
-
-    void add_to_row(Row *row);
 
     bool belongs_to_row() const;
 

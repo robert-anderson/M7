@@ -9,7 +9,11 @@
 FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :
         m_type_info(type_info), m_size(size),
         m_name(name), m_null_string(std::max(1ul, m_size), 0) {
-    add_to_row(row);
+    REQUIRE_TRUE(row, "cannot add Field to null Row");
+    REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
+    m_row_offset = row->add_field(this);
+    m_row = row;
+    m_row_index = m_row->m_fields.size()-1;
 }
 
 FieldBase::FieldBase(const FieldBase &other) :
@@ -17,14 +21,6 @@ FieldBase::FieldBase(const FieldBase &other) :
 
 bool FieldBase::is_comparable(const FieldBase &other) const {
     return m_type_info == other.m_type_info && m_size == other.m_size;
-}
-
-void FieldBase::add_to_row(Row *row) {
-    REQUIRE_TRUE(row, "cannot add Field to null Row");
-    REQUIRE_FALSE(belongs_to_row(), "Field must not be already associated with a row");
-    m_row_offset = row->add_field(this);
-    m_row = row;
-    m_row_index = m_row->m_fields.size()-1;
 }
 
 bool FieldBase::belongs_to_row() const {

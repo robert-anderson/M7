@@ -131,12 +131,32 @@ namespace buffered {
         using field::FrmOnv::operator=;
         FrmOnv(BasisDims bd) : BufferedField<field::FrmOnv>(bd){}
         FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>(nsite){}
+        FrmOnv(const FrmOnv& other) : FrmOnv(other.m_nsite){
+            *this = other;
+        }
+        FrmOnv(const field::FrmOnv& other) : FrmOnv(other.m_nsite){
+            *this = other;
+        }
+        FrmOnv& operator=(const FrmOnv& field){
+            field::FrmOnv::operator=(field);
+            return *this;
+        }
     };
 
     struct BosOnv : BufferedField<field::BosOnv> {
         using field::BosOnv::operator=;
         BosOnv(size_t nmode) : BufferedField<field::BosOnv>(nmode){}
         BosOnv(BasisDims bd) : BufferedField<field::BosOnv>(bd){}
+        BosOnv(const BosOnv& other) : BosOnv(other.m_nmode){
+            *this = other;
+        }
+        BosOnv(const field::BosOnv& other) : BosOnv(other.m_nmode){
+            *this = other;
+        }
+        BosOnv& operator=(const BosOnv& field){
+            field::BosOnv::operator=(field);
+            return *this;
+        }
     };
 
     struct FrmBosOnv : BufferedField<field::FrmBosOnv> {

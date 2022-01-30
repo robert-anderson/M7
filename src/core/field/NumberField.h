@@ -110,13 +110,23 @@ struct NdNumberField : NumberFieldBase {
         return is_ordered(0, m_nelement, strict, ascending);
     }
 
+private:
+    template<typename U>
+    void copy_to(std::vector<U>& v) const {
+        DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
+        // can't copy since the target type doesn't match: must dereference element-wise and attempt to convert
+        for (size_t i=0ul; i<m_nelement; ++i) v[i] = U((*this)[i]);
+    }
+
+public:
     void copy_to(std::vector<T>& v) const {
         DEBUG_ASSERT_EQ(v.size(), m_nelement, "incorrect vector size");
         std::memcpy(v.data(), begin(), m_size);
     }
 
-    std::vector<T> to_vector() const {
-        std::vector<T> tmp(m_nelement);
+    template<typename U=T>
+    std::vector<U> to_vector() const {
+        std::vector<U> tmp(m_nelement);
         copy_to(tmp);
         return tmp;
     }
