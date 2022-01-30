@@ -32,7 +32,7 @@
  * their own members, and so the initializing ctor is sufficient.
  */
 struct FieldBase {
-    Row *m_row;
+    Row *m_row = nullptr;
     const std::type_info &m_type_info;
     const size_t m_size;
     const std::string m_name;
