@@ -78,6 +78,8 @@ public:
 
     char *end() const;
 
+    const Row *row() const;
+
     Row *row_of_copy() const;
 
     void zero();

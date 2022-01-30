@@ -44,6 +44,10 @@ char *FieldBase::end() const {
     return begin() + m_size;
 }
 
+const Row *FieldBase::row() const {
+    return m_row;
+}
+
 Row *FieldBase::row_of_copy() const {
     REQUIRE_TRUE(m_row, "Row not defined");
     REQUIRE_TRUE(m_row->m_child, "Row did not produce a copy");
