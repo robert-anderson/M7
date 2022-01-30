@@ -172,6 +172,49 @@ namespace buffered {
         }
     };
 
+    struct FrmXonv : BufferedField<field::FrmXonv> {
+        using field::FrmXonv::operator=;
+        FrmXonv(size_t nsite): BufferedField<field::FrmXonv>(nsite){}
+        FrmXonv(BasisDims bd): FrmXonv(bd.m_nsite){}
+        FrmXonv(const field::FrmXonv& other): FrmXonv(other.m_ket.m_nsite){
+            *this = other;
+        }
+        FrmXonv(const FrmXonv& other): FrmXonv(static_cast<const field::FrmXonv&>(other)){}
+        FrmXonv& operator=(const FrmXonv& other){
+            field::FrmXonv::operator=(other);
+            return *this;
+        }
+    };
+
+    struct BosXonv : BufferedField<field::BosXonv> {
+        using field::BosXonv::operator=;
+        BosXonv(size_t nmode): BufferedField<field::BosXonv>(nmode){}
+        BosXonv(BasisDims bd): BosXonv(bd.m_nmode){}
+        BosXonv(const field::BosXonv& other): BosXonv(other.m_ket.m_nmode){
+            *this = other;
+        }
+        BosXonv(const BosXonv& other): BosXonv(static_cast<const field::BosXonv&>(other)){}
+        BosXonv& operator=(const BosXonv& other){
+            field::BosXonv::operator=(other);
+            return *this;
+        }
+    };
+
+
+    struct FrmBosXonv : BufferedField<field::FrmBosXonv> {
+        using field::FrmBosXonv::operator=;
+        FrmBosXonv(BasisDims bd): BufferedField<field::FrmBosXonv>(bd){}
+        FrmBosXonv(const field::FrmBosXonv& other):
+                FrmBosXonv({other.m_ket.m_frm.m_nsite, other.m_ket.m_bos.m_nmode}){
+            *this = other;
+        }
+        FrmBosXonv(const FrmBosXonv& other): FrmBosXonv(static_cast<const field::FrmBosXonv&>(other)){}
+        FrmBosXonv& operator=(const FrmBosXonv& other){
+            field::FrmBosXonv::operator=(other);
+            return *this;
+        }
+    };
+
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
     template<size_t mbf_ind>

@@ -7,7 +7,7 @@
 
 #include "NumberField.h"
 #include "FrmBosOnvField.h"
-#include "FrmBosXonvField.h"
+#include "XonvField.h"
 #include "SpecMomIndsField.h"
 
 namespace field {
@@ -32,7 +32,9 @@ namespace field {
 
     using FrmBosOnv = FrmBosOnvField;
 
-    //using FrmBosXonv = FrmBosXonvField;
+    using FrmXonv = FrmXonvField;
+    using BosXonv = BosXonvField;
+    using FrmBosXonv = FrmBosXonvField;
 
     typedef std::tuple<FrmOnv, FrmBosOnv, BosOnv> mbf_tup_t;
 
