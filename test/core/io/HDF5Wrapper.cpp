@@ -87,7 +87,7 @@ TEST(HDF5Wrapper, ComplexArray) {
     }
 }
 
-//
+
 //TEST(HDF5Wrapper, BufferedFloats) {
 //    auto definitive_irank = hashing::in_range(99, 0, mpi::nrank());
 //    buffered::Numbers<float, 2> v({2, 3});
@@ -132,6 +132,11 @@ TEST(HDF5Wrapper, NumberDistributed) {
     {
         hdf5::FileReader fr("table_test.h5");
         hdf5::GroupReader gr("container", fr);
+
+        ASSERT_EQ(gr.child_name(0), "table");
+        ASSERT_EQ(gr.m_parent_handle, fr.m_handle);
+        ASSERT_TRUE(gr.child_exists("table"));
+        ASSERT_FALSE(gr.child_exists("not_the_table"));
         read_table.load(gr, "table");
     }
     for (row.restart(); row.in_range(); row.step()) {

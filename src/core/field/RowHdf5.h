@@ -121,12 +121,12 @@ protected:
      * @return
      *  all field names
      */
-    static std::vector<std::string> get_all_field_names(const Row &row, const hdf5::GroupReader &parent);
+    static std::vector<std::string> stored_field_names(const Row &row, const hdf5::GroupReader &parent, std::string name);
 
 private:
 
-    size_t get_nitem(const Row &row, hdf5::GroupReader &parent,
-                     std::string name, std::vector<std::string> field_names) const;
+    static size_t get_nitem(const Row &row, hdf5::GroupReader &parent,
+                            std::string name, std::vector<std::string> field_names);
 
     /**
      * reads actual data. called in the case that m_iitem < m_nitem
@@ -183,7 +183,7 @@ struct RowHdf5Reader : row_t, RowHdf5ReaderBase {
             row_t(row), RowHdf5ReaderBase(*this, parent, name, field_names) {}
 
     RowHdf5Reader(const row_t &row, hdf5::GroupReader &parent, std::string name) :
-            RowHdf5Reader(row, parent, name, get_all_field_names(row, parent)) {}
+            RowHdf5Reader(row, parent, name, stored_field_names(row, parent, name)) {}
 };
 
 #endif //M7_ROWHDF5_H
