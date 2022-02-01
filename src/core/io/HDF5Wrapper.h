@@ -242,28 +242,23 @@ namespace hdf5 {
      *
      */
     struct GroupBase {
+        const std::string m_name;
         const hid_t m_parent_handle;
         const hid_t m_handle;
     protected:
-        GroupBase(hid_t parent_handle, hid_t handle) :
-                m_parent_handle(parent_handle), m_handle(handle) {}
+        GroupBase(std::string name, hid_t parent_handle, hid_t handle);
 
-        ~GroupBase() {
-            auto status = H5Gclose(m_handle);
-            REQUIRE_TRUE(!status, "HDF5 Error on closing group");
-        }
+        ~GroupBase();
     };
 
     /**
      * carries out all creation of datasets and Groups
      */
     struct GroupWriter : GroupBase {
-        GroupWriter(std::string name, const FileWriter &parent) :
-                GroupBase(parent.m_handle,
-                          H5Gcreate(parent.m_handle, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
+        GroupWriter(std::string name, const FileWriter &parent);
 
         GroupWriter(std::string name, const GroupWriter &parent) :
-                GroupBase(parent.m_handle,
+                GroupBase(name, parent.m_handle,
                           H5Gcreate(parent.m_handle, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
 
         template<typename T>
@@ -402,11 +397,6 @@ namespace hdf5 {
         }
 
 
-//        template<typename T>
-//        typename std::enable_if<type_ind<T>() != ~0ul, void>::type
-//        save(std::string name, const fields::Numbers<T>& field, size_t irank=0ul){
-//        }
-
         /**
          * save a vector of strings by creating a char array datatype for the longest element of the given vector v
          * @param name
@@ -425,48 +415,27 @@ namespace hdf5 {
     };
 
     struct GroupReader : GroupBase {
-        GroupReader(std::string name, const FileReader &parent) :
-                GroupBase(parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
+        GroupReader(std::string name, const FileReader &parent);
 
-        GroupReader(std::string name, const GroupReader &parent) :
-                GroupBase(parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
+        GroupReader(std::string name, const GroupReader &parent);
 
-        bool child_exists(const std::string& name) const {
-            auto status = H5Gget_objinfo (m_handle, name.c_str(), 0, NULL);
-            return status == 0;
-        }
+        bool child_exists(const std::string& name) const;
 
-        size_t first_existing_child(const std::vector<std::string>& names) const {
-            for (size_t i=0ul; i<names.size(); ++i) if (child_exists(names[i])) return i;
-            return ~0ul;
-        }
+        size_t first_existing_child(const std::vector<std::string>& names) const;
+
+        size_t nchild() const;
+
+        std::string child_name(size_t ichild) const;
+
+        int child_type(size_t i) const;
+
+        std::vector<std::string> child_names(int type=-1) const;
+
     private:
 
-        size_t get_dataset_ndim(std::string name) {
-            auto status = H5Gget_objinfo(m_handle, name.c_str(), 0, nullptr);
-            REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
-            auto dataset = H5Dopen1(m_handle, name.c_str());
-            auto dataspace = H5Dget_space(dataset);
-            auto rank = H5Sget_simple_extent_ndims(dataspace);
-            H5Sclose(dataspace);
-            H5Dclose(dataset);
-            return rank;
-        }
+        size_t get_dataset_ndim(std::string name);
 
-        defs::inds get_dataset_shape(std::string name) {
-            auto ndim = get_dataset_ndim(name);
-            auto dataset = H5Dopen1(m_handle, name.c_str());
-            REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
-            auto dataspace = H5Dget_space(dataset);
-            std::vector<hsize_t> dims(ndim, 0ul);
-            H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
-            H5Sclose(dataspace);
-            H5Dclose(dataset);
-            defs::inds out;
-            out.reserve(dims.size());
-            for (const auto &i: dims) out.push_back(i);
-            return out;
-        }
+        defs::inds get_dataset_shape(std::string name);
 
     public:
 

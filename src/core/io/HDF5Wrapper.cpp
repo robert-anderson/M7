@@ -59,6 +59,99 @@ void hdf5::AttributeWriterBase::write(hid_t parent, std::string name, const std:
     DEBUG_ASSERT_FALSE(status, "HDF5 string type release failed");
 }
 
+
+hdf5::GroupWriter::GroupWriter(std::string name, const FileWriter &parent) :
+        GroupBase(name, parent.m_handle,
+                  H5Gcreate(parent.m_handle, name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) {}
+
+void hdf5::GroupWriter::save(std::string name, const std::string &v, size_t irank) {
+    std::vector<std::string> vs = {v};
+    save(name, vs, irank);
+}
+
+hdf5::GroupBase::GroupBase(std::string name, hid_t parent_handle, hid_t handle) :
+        m_name(name), m_parent_handle(parent_handle), m_handle(handle) {}
+
+hdf5::GroupBase::~GroupBase() {
+    auto status = H5Gclose(m_handle);
+    REQUIRE_TRUE(!status, "HDF5 Error on closing group");
+}
+
+hdf5::GroupReader::GroupReader(std::string name, const hdf5::FileReader &parent) :
+        GroupBase(name, parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
+
+hdf5::GroupReader::GroupReader(std::string name, const hdf5::GroupReader &parent) :
+        GroupBase(name, parent.m_handle, H5Gopen2(parent.m_handle, name.c_str(), H5P_DEFAULT)) {}
+
+bool hdf5::GroupReader::child_exists(const std::string &name) const {
+    for (size_t i=0ul; i<nchild(); ++i) if (name==child_name(i)) return true;
+    return false;
+}
+
+size_t hdf5::GroupReader::first_existing_child(const std::vector<std::string> &names) const {
+    for (size_t i=0ul; i<names.size(); ++i) if (child_exists(names[i])) return i;
+    return ~0ul;
+}
+
+size_t hdf5::GroupReader::nchild() const {
+    hsize_t num;
+    auto status = H5Gget_num_objs(m_handle, &num);
+    REQUIRE_TRUE(!status, "could not get number of objects within HDF5 group");
+    return status == 0;
+}
+
+std::string hdf5::GroupReader::child_name(size_t ichild) const {
+    size_t size = H5Lget_name_by_idx(m_handle, ".", H5_INDEX_NAME,
+                                     H5_ITER_INC, ichild, nullptr, 0, H5P_DEFAULT);
+    std::string name(size, 0);
+    auto name_ptr = const_cast<char*>(name.c_str());
+    size_t size_chk = H5Lget_name_by_idx(m_handle, ".", H5_INDEX_NAME,
+                                         H5_ITER_INC, ichild, name_ptr, size+1, H5P_DEFAULT);
+    REQUIRE_EQ(size, size_chk, "inconsistent number of chars in name");
+    return name;
+}
+
+int hdf5::GroupReader::child_type(size_t i) const {
+    return H5Gget_objtype_by_idx(m_handle, i);
+}
+
+std::vector<std::string> hdf5::GroupReader::child_names(int type) const {
+    std::vector<std::string> names;
+    auto n = nchild();
+    names.reserve(n);
+    for (size_t i=0ul; i<n; ++i) {
+        if (type<0 || child_type(i)==type) names.push_back(child_name(i));
+    }
+    return names;
+}
+
+size_t hdf5::GroupReader::get_dataset_ndim(std::string name) {
+    auto status = H5Gget_objinfo(m_handle, name.c_str(), 0, nullptr);
+    REQUIRE_TRUE(!status, "Dataset \"" + name + "\" does not exist");
+    auto dataset = H5Dopen1(m_handle, name.c_str());
+    auto dataspace = H5Dget_space(dataset);
+    auto rank = H5Sget_simple_extent_ndims(dataspace);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+    return rank;
+}
+
+defs::inds hdf5::GroupReader::get_dataset_shape(std::string name) {
+    auto ndim = get_dataset_ndim(name);
+    auto dataset = H5Dopen1(m_handle, name.c_str());
+    REQUIRE_GT_ALL(dataset, 0, log::format("no such dataset \"{}\"", name));
+    auto dataspace = H5Dget_space(dataset);
+    std::vector<hsize_t> dims(ndim, 0ul);
+    H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+    defs::inds out;
+    out.reserve(dims.size());
+    for (const auto &i: dims) out.push_back(i);
+    return out;
+}
+
+
 void hdf5::NdDistListWriter::write_h5item_bytes(const size_t &iitem, const void *data) {
     DEBUG_ASSERT_EQ(bool(data), iitem < m_nitem_local,
                "data is null and items remain, or this is a runoff write op and data is not null");
@@ -188,7 +281,8 @@ void hdf5::FileBase::check_is_hdf5(const std::string &name) {
     REQUIRE_TRUE(H5Fis_hdf5(name.c_str()), "Specified file is not HDF5 format");
 }
 
-hdf5::FileWriter::FileWriter(std::string name) : FileBase(H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, AccessPList())) {
+hdf5::FileWriter::FileWriter(std::string name) :
+FileBase(H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, AccessPList())) {
     REQUIRE_GE(m_handle, 0,
                     "HDF5 file could not be opened for writing. It may be locked by another program");
 }
@@ -222,9 +316,4 @@ void hdf5::GroupWriter::save(std::string name, const std::vector<std::string>&v,
     REQUIRE_FALSE_ALL(status, "HDF5 Error on string array save");
     H5Dclose(dset_handle);
     H5Sclose(dspace_handle);
-}
-
-void hdf5::GroupWriter::save(std::string name, const std::string &v, size_t irank) {
-    std::vector<std::string> vs = {v};
-    save(name, vs, irank);
 }

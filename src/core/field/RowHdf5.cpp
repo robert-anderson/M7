@@ -49,6 +49,7 @@ bool RowHdf5WriterBase::write(const size_t &n) {
         if (m_iitem >= m_nitem || m_row.is_h5_write_exempt()) null_write_all_fields();
         else write_all_fields();
         if (m_iitem < m_nitem) m_row.step();
+        ++m_iitem;
     }
     mpi::barrier();
     log::debug_("ending HDF5 write loop over rows");
@@ -101,25 +102,27 @@ RowHdf5ReaderBase::RowHdf5ReaderBase(Row &row, hdf5::GroupReader &parent, std::s
 }
 
 
-std::vector<std::string> RowHdf5ReaderBase::get_all_field_names(const Row &row, const hdf5::GroupReader &parent) {
+std::vector<std::string> RowHdf5ReaderBase::stored_field_names(
+        const Row &row, const hdf5::GroupReader &parent, std::string name) {
+    hdf5::GroupReader group(name, parent);
     std::vector<std::string> out;
     out.reserve(row.m_fields.size());
     for (FieldBase *field: row.m_fields) {
         REQUIRE_FALSE(field->m_name.empty(), "All fields selected for HDF5 write must be named");
-        if (parent.child_exists(field->m_name)) out.emplace_back(field->m_name);
+        if (group.child_exists(field->m_name)) out.emplace_back(field->m_name);
     }
     return out;
 }
 
 
 size_t RowHdf5ReaderBase::get_nitem(const Row &row, hdf5::GroupReader &parent, std::string name,
-                                    std::vector<std::string> field_names) const {
+                                    std::vector<std::string> field_names) {
     if (row.m_fields.empty()) return 0ul;
     hdf5::GroupReader group(name, parent);
     // take the number of items in the first selected column
     auto ifield = group.first_existing_child(field_names);
     REQUIRE_LE(ifield, field_names.size(), "no selected field not found in HDF5 group");
-    return hdf5::NdDistListReader::local_nitem(parent.m_handle, field_names[ifield]);
+    return hdf5::NdDistListReader::local_nitem(group.m_handle, field_names[ifield]);
 }
 
 void RowHdf5ReaderBase::read_all_fields() {
