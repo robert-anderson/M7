@@ -30,49 +30,53 @@ namespace hdf5 {
 
     static_assert(have_parallel, "HDF5 must be compiled with parallel functionality");
 
-    static const std::array<hid_t, 11> types =
-            {H5T_NATIVE_CHAR, H5T_NATIVE_SHORT, H5T_NATIVE_INT32, H5T_NATIVE_LONG,
+    static const std::array<hid_t, 12> types =
+            {0, H5T_NATIVE_CHAR, H5T_NATIVE_SHORT, H5T_NATIVE_INT32, H5T_NATIVE_LONG,
              H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT, H5T_NATIVE_UINT32, H5T_NATIVE_ULONG,
              H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE};
 
     template<typename T=void>
-    static constexpr size_t type_ind() { return ~0ul; }
+    static constexpr size_t type_ind() { return 0; }
 
     template<>
-    constexpr size_t type_ind<char>() { return 0; }
+    constexpr size_t type_ind<char>() { return 1; }
 
     template<>
-    constexpr size_t type_ind<short int>() { return 1; }
+    constexpr size_t type_ind<short int>() { return 2; }
 
     template<>
-    constexpr size_t type_ind<int>() { return 2; }
+    constexpr size_t type_ind<int>() { return 3; }
 
     template<>
-    constexpr size_t type_ind<long int>() { return 3; }
+    constexpr size_t type_ind<long int>() { return 4; }
 
     template<>
-    constexpr size_t type_ind<unsigned char>() { return 4; }
+    constexpr size_t type_ind<unsigned char>() { return 5; }
 
     template<>
-    constexpr size_t type_ind<unsigned short int>() { return 5; }
+    constexpr size_t type_ind<unsigned short int>() { return 6; }
 
     template<>
-    constexpr size_t type_ind<unsigned int>() { return 6; }
+    constexpr size_t type_ind<unsigned int>() { return 7; }
 
     template<>
-    constexpr size_t type_ind<unsigned long int>() { return 7; }
+    constexpr size_t type_ind<unsigned long int>() { return 8; }
 
     template<>
-    constexpr size_t type_ind<unsigned long long int>() { return 8; }
+    constexpr size_t type_ind<unsigned long long int>() { return 9; }
 
     template<>
-    constexpr size_t type_ind<float>() { return 9; }
+    constexpr size_t type_ind<float>() { return 10; }
 
     template<>
-    constexpr size_t type_ind<double>() { return 10; }
+    constexpr size_t type_ind<double>() { return 11; }
 
     template<typename T>
-    const hid_t &type() { return types[type_ind<T>()]; }
+    const hid_t &type() {
+        typedef consts::comp_t<T> comp_t;
+        static_assert(type_ind<comp_t>(), "type has no HDF5 equivalent");
+        return types[type_ind<comp_t>()];
+    }
 
     struct Group;
 
