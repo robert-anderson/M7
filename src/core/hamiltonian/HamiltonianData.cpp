@@ -27,7 +27,7 @@ void ham_data::TermContribs::set_nonzero(size_t exsig) {
 bool ham_data::TermContribs::is_nonzero(size_t exsig) const {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
-    return m_exsig_nonzero[ind(exsig)];
+    return m_exsig_nonzero[i];
 }
 
 bool ham_data::FrmModelAttributes::is_hubbard_1d() const {

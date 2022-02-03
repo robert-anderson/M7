@@ -15,6 +15,7 @@
 #include "GeneralFrmHam.h"
 #include "HolsteinLadderHam.h"
 #include "HolsteinBosHam.h"
+#include "GeneralBosHam.h"
 
 using namespace field;
 
@@ -69,7 +70,7 @@ private:
             auto omega = opts.m_holstein_omega.get();
             return std::unique_ptr<BosHam>(new HolsteinBosHam(nsite, omega));
         }
-        return std::unique_ptr<BosHam>(new BosHam(0ul, 0ul));
+        return std::unique_ptr<BosHam>(new GeneralBosHam(opts));
     }
 
     /*
@@ -85,26 +86,10 @@ private:
 
 public:
 
-#if 0
-    Hamiltonian(std::unique_ptr<FrmHam> &&frm,
-                std::unique_ptr<LadderHam> &&ladder,
-                std::unique_ptr<BosHam> &&bos) :
-            m_frm(std::move(frm)), m_ladder(std::move(ladder)), m_bos(std::move(bos)),
-            m_nboson_max(ladder ? ladder->m_nboson_max : 0ul), m_bd(make_bd()) {
-
-    }
-
-    Hamiltonian(std::string fname, std::string fname_eb, std::string fname_bos,
-                bool spin_major, size_t nboson_max);
-
-    Hamiltonian(std::string fname, bool spin_major) :
-            Hamiltonian(fname, "", "", spin_major, 0ul) {}
-#endif
-
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts):
         m_frm(make_frm(opts.m_fermion)),
-        m_ladder(make_ladder(opts.m_ladder, m_frm->m_nsite)),
-        m_bos(make_bos(opts.m_boson, m_frm->m_nsite)),
+        m_ladder(make_ladder(opts.m_ladder, m_frm ? m_frm->m_nsite : 0ul)),
+        m_bos(make_bos(opts.m_boson, m_frm ? m_frm->m_nsite : 0ul)),
         m_nboson_max(m_ladder ? m_ladder->m_nboson_max : 0ul), m_bd(make_bd()){
         if (!m_frm) log::info("Fermion Hamiltonian is disabled");
         if (defs::enable_bosons) {

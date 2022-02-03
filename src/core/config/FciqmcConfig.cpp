@@ -133,7 +133,7 @@ fciqmc_config::Stats::Stats(config::Group *parent) :
         m_path(this, "path", "M7.stats",
                "path to the file to which MC cycle statistics will be output"),
         m_period(this, "period", 1,
-               "path to the file to which MC cycle statistics will be output"),
+               "number of MC cycles between output of averaged stats"),
         m_parallel(this, "parallel", false,
                    "output additional stats from each MPI rank") {}
 

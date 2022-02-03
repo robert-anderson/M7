@@ -5,15 +5,16 @@
 #ifndef M7_GENERALBOSHAM_H
 #define M7_GENERALBOSHAM_H
 
+#include <src/core/config/Hamiltonian.h>
 #include "BosHam.h"
 
 struct GeneralBosHam : BosHam {
     BosonCoeffs_1 m_coeffs_1;
     BosonCoeffs_2 m_coeffs_2;
-    ham_data::TermContribs m_contribs_0011;
-    ham_data::TermContribs m_contribs_0022;
 
     GeneralBosHam(const BosdumpHeader &header);
+
+    GeneralBosHam(const fciqmc_config::BosonHamiltonian &opts) : GeneralBosHam(BosdumpHeader(opts.m_bosdump.m_path)){}
 
     defs::ham_t get_coeff_0011(const size_t &i, const size_t &j) const override;
 

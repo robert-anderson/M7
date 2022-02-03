@@ -7,8 +7,7 @@
 
 GeneralBosHam::GeneralBosHam(const BosdumpHeader &header) :
         BosHam(header.m_nmode, header.m_nboson),
-        m_coeffs_1(m_nmode), m_coeffs_2(m_nmode),
-        m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {
+        m_coeffs_1(m_nmode), m_coeffs_2(m_nmode) {
 
     BosdumpFileReader file_reader(header.m_fname);
     defs::inds inds(4);
