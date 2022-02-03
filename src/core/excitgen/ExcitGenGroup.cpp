@@ -66,7 +66,7 @@ void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen) {
 }
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
-        m_prng(prng), m_cached_orbs(ham.m_frm ? ham.m_frm->m_point_group_map : AbelianGroupMap(PointGroup(), defs::inds(0, 0ul))) {
+        m_prng(prng), m_cached_orbs(ham.m_frm->m_point_group_map){
     m_exsigs_to_exgens.fill(nullptr);
     if (ham.m_frm) {
         bool any_singles =

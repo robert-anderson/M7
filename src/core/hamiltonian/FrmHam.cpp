@@ -39,6 +39,7 @@ size_t FrmHam::nci() const {
 }
 
 void FrmHam::log_data() const {
+    if (!*this) return;
     if (!m_contribs_1100.is_nonzero(0ul))
         log::info("1-electron term has no diagonal contributions");
     if (!m_contribs_1100.is_nonzero(exsig_utils::ex_single))

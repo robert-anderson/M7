@@ -59,6 +59,18 @@ struct LadderHam {
      * output some useful logs identifying the kind of H detected
      */
     void log_data() const;
+
+    virtual operator bool () const {
+        return true;
+    }
+};
+
+struct NullLadderHam : LadderHam {
+    NullLadderHam() : LadderHam({0, 0}, 0){}
+
+    operator bool() const override {
+        return false;
+    }
 };
 
 #endif //M7_LADDERHAM_H

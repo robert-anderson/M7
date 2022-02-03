@@ -58,6 +58,18 @@ struct FrmHam {
      * output some useful logs identifying the kind of H detected
      */
     virtual void log_data() const;
+
+    virtual operator bool () const {
+        return true;
+    }
+};
+
+struct NullFrmHam : FrmHam {
+    NullFrmHam() : FrmHam(0, 0, true, false, {}){}
+
+    operator bool() const override {
+        return false;
+    }
 };
 
 #endif //M7_FRMHAM_H

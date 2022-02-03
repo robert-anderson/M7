@@ -15,6 +15,7 @@ LadderHam::LadderHam(const BasisDims &bd, size_t nboson_max) :
 }
 
 void LadderHam::log_data() const {
+    if (!*this) return;
     if (!m_contribs_0010.is_nonzero(exsig_utils::ex_0010))
         log::info("0010 uncoupled boson ladder hamiltonian term has no contributions");
     if (!m_contribs_0001.is_nonzero(exsig_utils::ex_0001))

@@ -50,6 +50,17 @@ struct BosHam {
 
     virtual void log_data() const;
 
+    virtual operator bool () const {
+        return true;
+    }
+};
+
+struct NullBosHam : BosHam {
+    NullBosHam() : BosHam(0, 0){}
+
+    operator bool() const override {
+        return false;
+    }
 };
 
 

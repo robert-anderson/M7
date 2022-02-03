@@ -17,4 +17,4 @@ void ExcitIter::reset(bool need, bool nonzero) {
 
 ExcitIter::ExcitIter(const Hamiltonian &ham, size_t exsig) :
         m_exsig(exsig), m_ham(ham), m_bd(m_ham.m_bd), m_work_conn(m_bd),
-        m_work_dst(m_bd), m_work_orbs(ham.m_frm ? ham.m_frm->m_point_group_map : AbelianGroupMap(PointGroup(), defs::inds(0, 0ul))) {}
+        m_work_dst(m_bd), m_work_orbs(ham.m_frm->m_point_group_map){}
