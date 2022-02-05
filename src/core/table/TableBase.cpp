@@ -81,6 +81,7 @@ size_t TableBase::bw_size() const {
 }
 
 void TableBase::resize(size_t nrow, double factor) {
+    DEBUG_ASSERT_TRUE(row_size(), "cannot resize, row size is zero");
     DEBUG_ASSERT_GE(nrow, m_hwm, "resize would discard uncleared data");
     m_bw.resize(nrow * row_size(), factor);
     DEBUG_ASSERT_LT(m_hwm, m_bw.m_size/row_size(), "resize has discarded uncleared data");

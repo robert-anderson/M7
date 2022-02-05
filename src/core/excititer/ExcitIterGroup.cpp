@@ -35,7 +35,7 @@ void ExcitIterGroup::log_breakdown() const {
 }
 
 ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
-    if (ham.m_frm) {
+    if (ham.m_frm->enabled()) {
         bool any_singles =
                 ham.m_frm->m_contribs_1100.is_nonzero(ex_single) || ham.m_frm->m_contribs_2200.is_nonzero(ex_single);
         if (any_singles) {
@@ -51,7 +51,7 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         }
     }
 
-    if (ham.m_ladder) {
+    if (ham.m_ladder->enabled()) {
         bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_ladder.get());
         bool any_pures;
         any_pures = ham.m_ladder->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)
@@ -82,7 +82,7 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
             add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1101)));
     }
 
-    if (ham.m_bos){
+    if (ham.m_bos->enabled()){
         if(ham.m_bos->m_contribs_0022.is_nonzero(exsig_utils::ex_0022)){
             add(std::unique_ptr<ExcitIter>(new excititers::Bos(ham, exsig_utils::ex_0022)));
         }

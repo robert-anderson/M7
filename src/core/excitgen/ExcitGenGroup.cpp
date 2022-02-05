@@ -68,7 +68,7 @@ void ExcitGenGroup::add(std::unique_ptr<ExcitGen> &&exgen) {
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng), m_cached_orbs(ham.m_frm->m_point_group_map){
     m_exsigs_to_exgens.fill(nullptr);
-    if (ham.m_frm) {
+    if (ham.m_frm->enabled()) {
         bool any_singles =
                 ham.m_frm->m_contribs_1100.is_nonzero(ex_single) || ham.m_frm->m_contribs_2200.is_nonzero(ex_single);
         if (any_singles) {
@@ -84,7 +84,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
                 add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
         }
     }
-    if (ham.m_ladder) {
+    if (ham.m_ladder->enabled()) {
         bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_ladder.get());
         /*
          * first, the "pure" boson exsigs 0010 and 0001
@@ -119,7 +119,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
         }
     }
 
-    if (ham.m_bos){
+    if (ham.m_bos->enabled()){
         if (ham.m_bos->m_nboson)
             add(std::unique_ptr<ExcitGen>(new BosonSumConservingDoubles(ham, prng)));
     }

@@ -59,15 +59,19 @@ struct FrmHam {
      */
     virtual void log_data() const;
 
-    virtual operator bool () const {
+    virtual bool enabled() const {
         return true;
+    }
+
+    bool disabled() const {
+        return !enabled();
     }
 };
 
 struct NullFrmHam : FrmHam {
     NullFrmHam() : FrmHam(0, 0, true, false, {}){}
 
-    operator bool() const override {
+    bool enabled() const override {
         return false;
     }
 };

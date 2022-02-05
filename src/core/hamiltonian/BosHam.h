@@ -50,15 +50,19 @@ struct BosHam {
 
     virtual void log_data() const;
 
-    virtual operator bool () const {
+    virtual bool enabled() const {
         return true;
+    }
+
+    bool disabled() const {
+        return !enabled();
     }
 };
 
 struct NullBosHam : BosHam {
     NullBosHam() : BosHam(0, 0){}
 
-    operator bool() const override {
+    bool enabled() const override {
         return false;
     }
 };

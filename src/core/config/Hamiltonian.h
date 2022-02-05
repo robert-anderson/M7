@@ -35,6 +35,7 @@ namespace fciqmc_config {
     };
 
     struct Hubbard : config::Section {
+        config::Param<std::string> m_topology;
         config::Param<defs::inds> m_site_shape;
         config::Param<std::vector<int>> m_boundary_conds;
         config::Param<defs::ham_comp_t> m_repulsion;

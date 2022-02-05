@@ -28,6 +28,8 @@ namespace sparse {
 
         size_t nentry() const;
 
+        size_t nentry(const size_t& irow) const;
+
         size_t max_column_index() const;
 
         size_t add(const size_t &irow, const size_t &icol);
@@ -38,9 +40,11 @@ namespace sparse {
 
         void insert(const size_t &irow, const defs::inds &icols);
 
-        bool empty();
+        bool empty() const;
 
-        const defs::inds &operator[](const size_t &irow);
+        bool empty(const size_t& irow) const;
+
+        const defs::inds &operator[](const size_t &irow) const;
 
         virtual std::vector<std::string> row_to_strings(size_t irow) const;
 
@@ -121,7 +125,7 @@ namespace sparse {
         }
 
         std::pair<const defs::inds &, const std::vector<T> &> operator[](const size_t &irow) const {
-            ASSERT(irow < nrow());
+            DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
             return {m_rows_icols[irow], m_rows_values[irow]};
         }
 

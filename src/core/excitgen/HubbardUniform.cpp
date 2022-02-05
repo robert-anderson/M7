@@ -16,11 +16,12 @@ bool HubbardUniform::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs
      * picked is an integral multiple of all possible numbers of accessible sites, then in any case the modular
      * remainder will provide an unbiased index - saving a PRNG call
      */
-    auto rand = m_prng.draw_uint(m_nelec*h->m_unique_nconn_product);
-    const auto occ = orbs.occ(src).m_flat[rand/h->m_unique_nconn_product];
+    const auto& nconn_product = h->m_lattice.m_unique_nconn_product;
+    auto rand = m_prng.draw_uint(m_nelec*nconn_product);
+    const auto occ = orbs.occ(src).m_flat[rand/nconn_product];
     const auto isite = src.isite(occ);
     const auto ispin = src.ispin(occ);
-    auto t_mat_row = h_cast()->m_t_mat_sparse[isite];
+    auto t_mat_row = h->m_lattice.m_sparse[isite];
     const auto nvac = t_mat_row.first.size();
     auto vac = src.m_format.flatten({ispin, t_mat_row.first[rand%nvac]});
     if (src.get(vac)) return false;

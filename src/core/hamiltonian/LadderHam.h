@@ -60,17 +60,22 @@ struct LadderHam {
      */
     void log_data() const;
 
-    virtual operator bool () const {
+    virtual bool enabled() const {
         return true;
+    }
+
+    bool disabled() const {
+        return !enabled();
     }
 };
 
-struct NullLadderHam : LadderHam {
+struct NullLadderHam: LadderHam {
     NullLadderHam() : LadderHam({0, 0}, 0){}
 
-    operator bool() const override {
+    bool enabled() const override {
         return false;
     }
 };
+
 
 #endif //M7_LADDERHAM_H

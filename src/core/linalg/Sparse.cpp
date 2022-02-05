@@ -16,6 +16,10 @@ size_t sparse::Network::nentry() const {
     return m_nentry;
 }
 
+size_t sparse::Network::nentry(const size_t& irow) const {
+    return (*this)[irow].size();
+}
+
 size_t sparse::Network::max_column_index() const {
     return m_max_icol;
 }
@@ -51,9 +55,15 @@ void sparse::Network::insert(const size_t &irow, const defs::inds &icols) {
     for (auto &icol: icols) insert(irow, icol);
 }
 
-bool sparse::Network::empty() { return m_rows_icols.empty(); }
+bool sparse::Network::empty() const {
+    return m_rows_icols.empty();
+}
 
-const defs::inds &sparse::Network::operator[](const size_t &irow) {
+bool sparse::Network::empty(const size_t &irow) const {
+    return (*this)[irow].empty();
+}
+
+const defs::inds &sparse::Network::operator[](const size_t &irow) const{
     ASSERT(irow<nrow());
     return m_rows_icols[irow];
 }

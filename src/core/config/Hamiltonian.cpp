@@ -17,7 +17,7 @@ bool fciqmc_config::Fcidump::enabled() const {
 fciqmc_config::Bosdump::Bosdump(config::Group *parent) :
         config::Section(parent, "bosdump",
                         "options relating to 4-indexed text file defining arbitrary number-conserving boson interactions"),
-        m_path(this, "path", defs::enable_bosons ? "BOSDUMP" : "", "path to BOSDUMP format file") {}
+        m_path(this, "path", "", "path to BOSDUMP format file") {}
 
 bool fciqmc_config::Bosdump::enabled() const {
     return !m_path.get().empty();
@@ -26,7 +26,7 @@ bool fciqmc_config::Bosdump::enabled() const {
 fciqmc_config::Ebdump::Ebdump(config::Group *parent) :
         config::Section(parent, "bosdump",
                         "options relating to 3-indexed text file defining arbitrary couplings between electron hopping (and one-electron density) and boson (de-)excitations"),
-        m_path(this, "path", defs::enable_bosons ? "EBDUMP" : "", "path to EBDUMP format file") {}
+        m_path(this, "path", "", "path to EBDUMP format file") {}
 
 bool fciqmc_config::Ebdump::enabled() const {
     return !m_path.get().empty();
@@ -35,8 +35,10 @@ bool fciqmc_config::Ebdump::enabled() const {
 fciqmc_config::Hubbard::Hubbard(config::Group *parent) :
         config::Section(parent, "hubbard",
                         "parameters of the arbitrarily dimensioned Hubbard model in the site basis. half-filling is the default, and doping can be achieved by modifying the charge parameter of the hamiltonian section"),
+        m_topology(this, "topology", "ortho",
+                   "geometric layout of the N-dimensional Hubbard lattice"),
         m_site_shape(this, "site_shape", {},
-                     "dimensionality of the orthogonally-coordinated N-dimensional Hubbard lattice"),
+                     "dimensionality of the N-dimensional Hubbard lattice"),
         m_boundary_conds(this, "boundary_conds", {},
                          "boundary conditions for each dimension of the Hubbard lattice (-1: anti-periodic, 0: open, 1: periodic)"),
         m_repulsion(this, "repulsion", 0ul, "on-site repulsion coefficient \"U\" in units of the hopping") {}
