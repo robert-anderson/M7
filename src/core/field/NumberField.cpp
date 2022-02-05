@@ -30,6 +30,27 @@ StringField &StringField::operator=(const char *str) {
     return *this;
 }
 
+StringField &StringField::operator=(const std::string &str) {
+    *this=str.c_str();
+    return *this;
+}
+
+bool StringField::operator==(const char *str) const {
+    return !memcmp(str, dbegin(), std::strlen(str));
+}
+
+bool StringField::operator==(const std::string &str) const {
+    return (*this==str.c_str());
+}
+
+bool StringField::operator!=(const char *str) const {
+    return !(*this==str);
+}
+
+bool StringField::operator!=(const std::string &str) const {
+    return !(*this==str);
+}
+
 std::string StringField::to_string() const {
     auto len = std::min(nelement(), std::strlen(dbegin()));
     return {dbegin(), len};

@@ -300,18 +300,12 @@ struct StringField : NdNumberField<char, 1ul> {
 
     StringField& operator=(const char* str);
 
-    bool operator==(const char* str) const {
-        return !memcmp(str, dbegin(), std::strlen(str));
-    }
-    bool operator==(const std::string& str) const {
-        return (*this==str.c_str());
-    }
-    bool operator!=(const char* str) const {
-        return !(*this==str);
-    }
-    bool operator!=(const std::string& str) const {
-        return !(*this==str);
-    }
+    StringField& operator=(const std::string& str);
+
+    bool operator==(const char* str) const;
+    bool operator==(const std::string& str) const;
+    bool operator!=(const char* str) const;
+    bool operator!=(const std::string& str) const;
 
     std::string to_string() const override;
 };
