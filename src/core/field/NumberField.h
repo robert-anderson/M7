@@ -287,6 +287,35 @@ public:
     }
 };
 
+/**
+ * no practical use for this class - included only for testing
+ */
+struct StringField : NdNumberField<char, 1ul> {
+    typedef NdNumberField<char, 1ul> base_t;
+    StringField(Row *row, size_t length, std::string name = "");
+
+    StringField(const StringField& other);
+
+    StringField& operator=(const StringField& other);
+
+    StringField& operator=(const char* str);
+
+    bool operator==(const char* str) const {
+        return !memcmp(str, dbegin(), std::strlen(str));
+    }
+    bool operator==(const std::string& str) const {
+        return (*this==str.c_str());
+    }
+    bool operator!=(const char* str) const {
+        return !(*this==str);
+    }
+    bool operator!=(const std::string& str) const {
+        return !(*this==str);
+    }
+
+    std::string to_string() const override;
+};
+
 template<typename T>
 struct NumberField : NdNumberField<T, 0ul> {
     typedef NdNumberField<T, 0ul> base_t;

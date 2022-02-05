@@ -2,16 +2,16 @@
 // Created by rja on 29/11/2020.
 //
 
-#include "QuickSorter.h"
+#include "LambdaQuickSorter.h"
 
-QuickSorter::QuickSorter(comparators::index_cmp_fn_t cmp_fn) : m_cmp_fn(cmp_fn) {}
+LambdaQuickSorter::LambdaQuickSorter(comparators::index_cmp_fn_t cmp_fn) : m_cmp_fn(cmp_fn) {}
 
-const size_t &QuickSorter::operator[](const size_t &i) const {
+const size_t &LambdaQuickSorter::operator[](const size_t &i) const {
     ASSERT(i < m_inds.size());
     return m_inds[i];
 }
 
-void QuickSorter::preserve_sort(const size_t &hwm) {
+void LambdaQuickSorter::preserve_sort(const size_t &hwm) {
     if (m_inds.size() < hwm) m_inds.reserve(hwm);
     m_inds.clear();
     // reset ordering
@@ -20,41 +20,41 @@ void QuickSorter::preserve_sort(const size_t &hwm) {
     ASSERT(is_preserve_sorted(hwm));
 }
 
-void QuickSorter::preserve_sort(const TableBase &table) {
+void LambdaQuickSorter::preserve_sort(const TableBase &table) {
     preserve_sort(table.m_hwm);
 }
 
-bool QuickSorter::is_preserve_sorted(const size_t &hwm) {
+bool LambdaQuickSorter::is_preserve_sorted(const size_t &hwm) {
     for (size_t irow = 1ul; irow < hwm; ++irow) {
         if (m_cmp_fn(m_inds[irow], m_inds[irow-1]) &&!m_cmp_fn(m_inds[irow - 1], m_inds[irow])) return false;
     }
     return true;
 }
 
-bool QuickSorter::is_preserve_sorted(const TableBase &table) {
+bool LambdaQuickSorter::is_preserve_sorted(const TableBase &table) {
     return is_preserve_sorted(table.m_hwm);
 }
 
 
-void QuickSorter::reorder_sort(TableBase &table) {
+void LambdaQuickSorter::reorder_sort(TableBase &table) {
     qs(0, table.m_hwm - 1, table);
     ASSERT(is_reorder_sorted(table));
 }
 
-bool QuickSorter::is_reorder_sorted(const TableBase &table) {
+bool LambdaQuickSorter::is_reorder_sorted(const TableBase &table) {
     for (size_t irow = 1ul; irow < table.m_hwm; ++irow) {
         if (m_cmp_fn(irow, irow-1) && !m_cmp_fn(irow - 1, irow)) return false;
     }
     return true;
 }
 
-void QuickSorter::swap(size_t ii1, size_t ii2) {
+void LambdaQuickSorter::swap(size_t ii1, size_t ii2) {
     auto i2 = m_inds[ii2];
     m_inds[ii2] = m_inds[ii1];
     m_inds[ii1] = i2;
 }
 
-size_t QuickSorter::partition(size_t iilo, size_t iihi) {
+size_t LambdaQuickSorter::partition(size_t iilo, size_t iihi) {
     auto ip = m_inds[iihi];
     auto ii = iilo - 1;
 
@@ -68,7 +68,7 @@ size_t QuickSorter::partition(size_t iilo, size_t iihi) {
     return ii + 1;
 }
 
-void QuickSorter::qs(size_t iilo, size_t iihi) {
+void LambdaQuickSorter::qs(size_t iilo, size_t iihi) {
     if (iihi != ~0ul && iilo < iihi) {
         auto iip = partition(iilo, iihi);
         qs(iilo, iip - 1);
@@ -77,11 +77,11 @@ void QuickSorter::qs(size_t iilo, size_t iihi) {
 }
 
 
-void QuickSorter::swap(size_t ii1, size_t ii2, TableBase &table) {
+void LambdaQuickSorter::swap(size_t ii1, size_t ii2, TableBase &table) {
     table.swap_rows(ii1, ii2);
 }
 
-size_t QuickSorter::partition(size_t iilo, size_t iihi, TableBase &table) {
+size_t LambdaQuickSorter::partition(size_t iilo, size_t iihi, TableBase &table) {
     auto ip = iihi;
     auto ii = iilo - 1;
 
@@ -95,7 +95,7 @@ size_t QuickSorter::partition(size_t iilo, size_t iihi, TableBase &table) {
     return ii + 1;
 }
 
-void QuickSorter::qs(size_t iilo, size_t iihi, TableBase &table) {
+void LambdaQuickSorter::qs(size_t iilo, size_t iihi, TableBase &table) {
     if (iihi != ~0ul && iilo < iihi) {
         auto iip = partition(iilo, iihi, table);
         qs(iilo, iip - 1, table);

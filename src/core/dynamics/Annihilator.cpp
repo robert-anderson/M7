@@ -59,7 +59,7 @@ Annihilator::Annihilator(Wavefunction &wf, const Propagator &prop, const Referen
 }
 
 void Annihilator::sort_recv() {
-    QuickSorter qs(m_sort_cmp_fn);
+    LambdaQuickSorter qs(m_sort_cmp_fn);
     qs.reorder_sort(m_wf.recv());
 }
 

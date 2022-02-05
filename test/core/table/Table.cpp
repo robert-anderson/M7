@@ -4,7 +4,7 @@
 
 #include <src/core/sample/PRNG.h>
 #include <src/core/sort/ExtremalIndices.h>
-#include <src/core/sort/QuickSorter.h>
+#include <src/core/sort/LambdaQuickSorter.h>
 #include "gtest/gtest.h"
 
 #if 0

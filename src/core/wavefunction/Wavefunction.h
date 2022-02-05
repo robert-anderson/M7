@@ -15,7 +15,7 @@
 #include "src/core/parallel/RankAllocator.h"
 #include "src/core/parallel/ReductionMember.h"
 #include "src/core/field/Fields.h"
-#include "src/core/sort/QuickSorter.h"
+#include "src/core/sort/LambdaQuickSorter.h"
 #include "src/core/sort/GlobalExtremalRows.h"
 
 /**

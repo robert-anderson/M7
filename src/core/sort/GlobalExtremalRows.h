@@ -8,7 +8,7 @@
 #include "src/core/parallel/Reduction.h"
 #include "LocalExtremalRows.h"
 #include "src/core/table/BufferedTable.h"
-#include "QuickSorter.h"
+#include "LambdaQuickSorter.h"
 
 /**
  * A row for the loading and gathering of locally sorted values and their MPI rank index of origin
@@ -227,7 +227,7 @@ private:
              */
             auto cmp_fn = comparators::make_num_field_row_cmp_fn(
                     row1, row1.m_value, row2, row2.m_value, m_lxr.m_value_cmp_fn, {0ul});
-            QuickSorter qs(cmp_fn);
+            LambdaQuickSorter qs(cmp_fn);
             qs.reorder_sort(m_global_sorter);
             for (size_t irow = 0ul; irow < nrow; ++irow) {
                 row1.jump(irow);

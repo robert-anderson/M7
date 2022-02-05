@@ -2,19 +2,19 @@
 // Created by rja on 29/11/2020.
 //
 
-#ifndef M7_QUICKSORTER_H
-#define M7_QUICKSORTER_H
+#ifndef M7_LAMBDAQUICKSORTER_H
+#define M7_LAMBDAQUICKSORTER_H
 
 #include <src/defs.h>
 #include <functional>
 #include "src/core/table/Table.h"
 
-struct QuickSorter {
+struct LambdaQuickSorter {
 
     defs::inds m_inds;
     comparators::index_cmp_fn_t m_cmp_fn;
 
-    QuickSorter(comparators::index_cmp_fn_t cmp_fn);
+    LambdaQuickSorter(comparators::index_cmp_fn_t cmp_fn);
 
     const size_t& operator[](const size_t& i) const;
 
