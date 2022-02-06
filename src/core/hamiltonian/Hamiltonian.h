@@ -16,6 +16,7 @@
 #include "HolsteinLadderHam.h"
 #include "HolsteinBosHam.h"
 #include "GeneralBosHam.h"
+#include "HeisenbergFrmHam.h"
 
 using namespace field;
 
@@ -51,6 +52,8 @@ private:
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
         if (opts.m_hubbard.enabled())
             return std::unique_ptr<FrmHam>(new HubbardFrmHam(opts));
+        else if (opts.m_hubbard.enabled())
+            return std::unique_ptr<FrmHam>(new HeisenbergFrmHam(opts));
         else if (defs::enable_fermions)
             return std::unique_ptr<FrmHam>(new GeneralFrmHam(opts));
         return std::unique_ptr<FrmHam>(new NullFrmHam);

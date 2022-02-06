@@ -34,22 +34,34 @@ namespace fciqmc_config {
         bool enabled() const override;
     };
 
-    struct Hubbard : config::Section {
+    struct LatticeModel : config::Section {
         config::Param<std::string> m_topology;
         config::Param<defs::inds> m_site_shape;
         config::Param<std::vector<int>> m_boundary_conds;
-        config::Param<defs::ham_comp_t> m_repulsion;
 
-        Hubbard(config::Group *parent);
+        LatticeModel(config::Group *parent, std::string name, std::string description);
 
         void verify() override;
 
         bool enabled() const override;
     };
 
+    struct Hubbard : LatticeModel {
+        config::Param<defs::ham_comp_t> m_repulsion;
+        Hubbard(config::Group *parent);
+    };
+
+
+    struct Heisenberg : LatticeModel {
+        config::Param<defs::ham_comp_t> m_coupling;
+        Heisenberg(config::Group *parent);
+    };
+
+
     struct FermionHamiltonian : config::Section {
         Fcidump m_fcidump;
         Hubbard m_hubbard;
+        Heisenberg m_heisenberg;
         config::Param<int> m_charge;
         config::Param<int> m_ms2_restrict;
 

@@ -10,6 +10,7 @@
 
 #include <utility>
 #include <src/core/util/Foreach.h>
+#include <src/core/config/Hamiltonian.h>
 #include "src/core/linalg/Sparse.h"
 
 /**
@@ -24,12 +25,12 @@ struct Lattice {
     /**
      * sparse map enabling lookup of all coordinated sites given a row site
      */
-    sparse::Matrix<defs::ham_t> m_sparse;
+    sparse::Matrix<int> m_sparse;
     /**
      * dense map of coordinated sites allowing lookup of the 1-body H matrix element given the flat indices of two site
      * index vectors
      */
-    dense::SquareMatrix<defs::ham_t> m_dense;
+    dense::SquareMatrix<int> m_dense;
 
     enum Topology {Ortho, NullTopology};
 
@@ -90,7 +91,7 @@ public:
                  utils::to_string(m_spec.m_bcs));
     }
 
-    void add(size_t irow, const defs::inds& icols, const std::vector<defs::ham_t>& coeffs) {
+    void add(size_t irow, const defs::inds& icols, const std::vector<int>& coeffs) {
         REQUIRE_TRUE(m_sparse.empty(irow), "row already added");
         REQUIRE_EQ(icols.size(), coeffs.size(), "unequal lengths of column indices and values");
         auto ncol = icols.size();
@@ -126,30 +127,30 @@ class OrthoLattice : public Lattice {
         return i;
     }
 
-    std::pair<size_t, defs::ham_t> get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
+    std::pair<size_t, int> get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
         auto &format = m_spec.m_format;
         auto &bcs = m_spec.m_bcs;
         size_t dim_ind = ~0ul;
-        int t_element = 0;
+        int sign = 0;
         if (!inc && site_inds[idim] == 0) {
             // lower boundary
             if (bcs[idim]) {
                 dim_ind = format.m_shape[idim] - 1;
-                t_element = -bcs[idim];
+                sign = -bcs[idim];
             }
         } else if (inc && (site_inds[idim] + 1 == format.m_shape[idim])) {
             // upper boundary
             if (bcs[idim]) {
                 dim_ind = 0ul;
-                t_element = -bcs[idim];
+                sign = -bcs[idim];
             }
         } else {
             // not at a boundary
             dim_ind = site_inds[idim] + (inc ? 1 : -1);
-            t_element = -1;
+            sign = -1;
         }
         if (dim_ind == ~0ul) return {~0ul, 0};
-        return {get_coord_index(site_inds, idim, dim_ind), t_element};
+        return {get_coord_index(site_inds, idim, dim_ind), sign};
     }
 
 public:
@@ -159,22 +160,22 @@ public:
          */
         foreach::rtnd::Unrestricted loop(m_spec.m_format.m_shape);
         defs::inds cols;
-        std::vector<defs::ham_t> coeffs;
+        std::vector<int> signs;
         auto fn = [&]() {
             auto &inds = loop.m_inds;
             cols.clear();
-            coeffs.clear();
+            signs.clear();
             for (size_t idim = 0ul; idim < inds.size(); ++idim) {
                 for (bool inc : {false, true}){
                     auto pair = get_coordination(inds, idim, inc);
                     if (pair.first != ~0ul) {
                         cols.push_back(pair.first);
-                        coeffs.push_back(pair.second);
+                        signs.push_back(pair.second);
                     }
                 }
             }
             auto irow = m_spec.m_format.flatten(inds);
-            add(irow, cols, coeffs);
+            add(irow, cols, signs);
         };
         loop(fn);
     }
@@ -190,6 +191,10 @@ namespace lattice {
                 ABORT("invalid lattice topology given");
         }
         return {0, Lattice::Spec(Lattice::NullTopology, {}, {})};
+    }
+
+    static Lattice make(const fciqmc_config::LatticeModel& opts) {
+        return make({opts.m_topology, opts.m_site_shape, opts.m_boundary_conds});
     }
 }
 #endif //M7_LATTICE_H

@@ -31,10 +31,7 @@ HubbardFrmHam::HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2_restrict, i
 }
 
 HubbardFrmHam::HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
-        HubbardFrmHam(opts.m_hubbard.m_repulsion,
-                      lattice::make(Lattice::Spec(
-                              opts.m_hubbard.m_topology, opts.m_hubbard.m_site_shape,
-                              opts.m_hubbard.m_boundary_conds)), opts.m_ms2_restrict, opts.m_charge){}
+        HubbardFrmHam(opts.m_hubbard.m_repulsion, lattice::make(opts.m_hubbard), opts.m_ms2_restrict, opts.m_charge){}
 
 defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;

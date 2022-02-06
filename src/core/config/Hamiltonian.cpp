@@ -32,29 +32,39 @@ bool fciqmc_config::Ebdump::enabled() const {
     return !m_path.get().empty();
 }
 
-fciqmc_config::Hubbard::Hubbard(config::Group *parent) :
-        config::Section(parent, "hubbard",
-                        "parameters of the arbitrarily dimensioned Hubbard model in the site basis. half-filling is the default, and doping can be achieved by modifying the charge parameter of the hamiltonian section"),
+fciqmc_config::LatticeModel::LatticeModel(config::Group *parent, std::string name, std::string description) :
+        config::Section(parent, name, description),
         m_topology(this, "topology", "ortho",
-                   "geometric layout of the N-dimensional Hubbard lattice"),
+                   "geometric layout of the N-dimensional lattice"),
         m_site_shape(this, "site_shape", {},
-                     "dimensionality of the N-dimensional Hubbard lattice"),
+                     "dimensionality of the N-dimensional lattice"),
         m_boundary_conds(this, "boundary_conds", {},
-                         "boundary conditions for each dimension of the Hubbard lattice (-1: anti-periodic, 0: open, 1: periodic)"),
-        m_repulsion(this, "repulsion", 0ul, "on-site repulsion coefficient \"U\" in units of the hopping") {}
+                         "boundary conditions for each dimension of the lattice (-1: anti-periodic, 0: open, 1: periodic)"){}
 
-void fciqmc_config::Hubbard::verify() {
+void fciqmc_config::LatticeModel::verify() {
     REQUIRE_EQ(m_site_shape.get().size(), m_boundary_conds.get().size(),
                "boundary conditions must be defined for each element of the lattice shape");
 }
 
-bool fciqmc_config::Hubbard::enabled() const {
+bool fciqmc_config::LatticeModel::enabled() const {
     return !m_site_shape.get().empty();
 }
 
+fciqmc_config::Hubbard::Hubbard(config::Group *parent) :
+        LatticeModel(parent, "hubbard",
+                     "parameters of the arbitrarily dimensioned Hubbard model in the site basis. half-filling is the default, and doping can be achieved by modifying the charge parameter of the hamiltonian section"),
+        m_repulsion(this, "repulsion", 0ul, "on-site repulsion coefficient \"U\" in units of the hopping") {}
+
+fciqmc_config::Heisenberg::Heisenberg(config::Group *parent) :
+        LatticeModel(parent, "heisenberg",
+                     "parameters of the arbitrarily dimensioned Heisenberg spin model in the site basis."),
+        m_coupling(this, "coupling", 1.0,
+                   "interaction coefficient \"J\": just scales the energy unless there are other terms in the Hamiltonian") {}
+
+
 fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
         config::Section(parent, "fermion", "options relating to the fermion hamiltonian terms"),
-        m_fcidump(this), m_hubbard(this),
+        m_fcidump(this), m_hubbard(this), m_heisenberg(this),
         m_charge(this, "charge", 0,
                  "electron deficit relative to the default value in the FCIDUMP file or that assumed by the model system (positive value to remove elecs)"),
         m_ms2_restrict(this, "ms2_restrict", 0ul,
