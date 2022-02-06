@@ -127,6 +127,18 @@ const size_t &FrmOnvField::nsite() const {
     return m_nsite;
 }
 
+size_t FrmOnvField::isite(const size_t &ibit, const size_t &nsite) {
+    return ibit < nsite ? ibit : ibit - nsite;
+}
+
+size_t FrmOnvField::ispin(const size_t &ibit, const size_t &nsite) {
+    return ibit >= nsite;
+}
+
+size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite, const size_t &nsite) {
+    return ispin ? nsite+isite : nsite;
+}
+
 size_t FrmOnvField::isite(const size_t &ibit) const {
     return ibit < m_nsite ? ibit : ibit - m_nsite;
 }
@@ -135,10 +147,7 @@ size_t FrmOnvField::ispin(const size_t &ibit) const {
     return ibit >= m_nsite;
 }
 
-size_t FrmOnvField::isite(const size_t &ibit, const size_t &nsite) {
-    return ibit < nsite ? ibit : ibit - nsite;
+size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite) const {
+    return ibit(ispin, isite, m_nsite);
 }
 
-size_t FrmOnvField::ispin(const size_t &ibit, const size_t &nsite) {
-    return ibit >= nsite;
-}

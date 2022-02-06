@@ -81,7 +81,7 @@ public:
     }
 
     virtual size_t approx_nconn() const {
-        return 0ul;
+        return 1ul;
     }
 
     virtual std::string description() const = 0;
@@ -97,7 +97,7 @@ struct FrmExcitGen : public ExcitGen {
 protected:
     const bool m_spin_conserving;
 public:
-    FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t nexcit);
+    FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig);
 
     bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override {

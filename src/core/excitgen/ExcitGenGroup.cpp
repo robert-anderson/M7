@@ -6,6 +6,7 @@
 #include "LadderPureHolstein.h"
 #include "LadderHoppingPc.h"
 #include "BosonSumConservingDoubles.h"
+#include "HeisenbergUniform.h"
 
 void ExcitGenGroup::init() {
     defs::prob_t norm = 0.0;
@@ -79,9 +80,15 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
                 add(std::unique_ptr<ExcitGen>(new UniformSingles(ham, prng)));
             }
         }
-        if (ham.m_frm->m_contribs_2200.is_nonzero(ex_double)) {
-            if (opts.m_excit_gen.get() == "pchb")
+        bool any_doubles = ham.m_frm->m_contribs_2200.is_nonzero(ex_double);
+        if (any_doubles) {
+            bool is_heisenberg = dynamic_cast<const HeisenbergFrmHam *>(ham.m_frm.get());
+            if (is_heisenberg) {
+                add(std::unique_ptr<ExcitGen>(new HeisenbergUniform(ham, prng)));
+            }
+            else if (opts.m_excit_gen.get() == "pchb") {
                 add(std::unique_ptr<ExcitGen>(new HeatBathDoubles(ham, prng)));
+            }
         }
     }
     if (ham.m_ladder->enabled()) {

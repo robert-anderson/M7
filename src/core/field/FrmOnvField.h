@@ -109,6 +109,13 @@ public:
 
     const size_t& nsite() const;
 
+
+    static size_t isite(const size_t& ibit, const size_t& nsite);
+
+    static size_t ispin(const size_t& ibit, const size_t& nsite);
+
+    static size_t ibit(const size_t& ispin, const size_t& isite, const size_t& nsite);
+
     /**
      * convenient conversion between spin-site and site indices
      * @param ibit
@@ -125,10 +132,16 @@ public:
      *  associated spin index (0 or 1)
      */
     size_t ispin(const size_t& ibit) const;
-
-    static size_t isite(const size_t& ibit, const size_t& nsite);
-
-    static size_t ispin(const size_t& ibit, const size_t& nsite);
+    /**
+     * convenient conversion between spin and site indices and the flat "bit" index
+     * @param ispin
+     *  spin channel index
+     * @param isite
+     *  site index
+     * @return
+     *  flat index od spin-site
+     */
+    size_t ibit(const size_t& ispin, const size_t& isite) const;
 };
 
 
