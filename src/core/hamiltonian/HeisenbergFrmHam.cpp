@@ -16,16 +16,14 @@ HeisenbergFrmHam::HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts
 
 defs::ham_t HeisenbergFrmHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     /*
-     * (ik|jl) only have non-zero coeff if i and k spins are opposite and so also are those of j and l
-     * also require site(i)==site(k) and site(j)==site(l)
-     *  (ia ib | jb ja)     <ia jb | ib ja>
+     * normal-ordered SQ operators are:
+     *      pa+  qb+  qa   pb
+     *  and h.c.:
+     *      pb+  qa+  qb   pa
+     *
      */
     auto isite = field::FrmOnv::isite(i, m_nsite);
     auto jsite = field::FrmOnv::isite(j, m_nsite);
-//    if (field::FrmOnv::ispin(i, m_nsite)==field::FrmOnv::ispin(k, m_nsite)) return 0.0;
-//    if (field::FrmOnv::ispin(j, m_nsite)==field::FrmOnv::ispin(l, m_nsite)) return 0.0;
-//    if (isite!=field::FrmOnv::isite(k, m_nsite)) return 0.0;
-//    if (jsite!=field::FrmOnv::isite(l, m_nsite)) return 0.0;
     // fermi phase not included here
     return 0.5*m_j*m_lattice.m_dense(isite, jsite);
 }
@@ -58,5 +56,5 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
 defs::ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "expected 2200 (aka fermion double) exsig");
     // fermi phase is always negative
-    return -HeisenbergFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
+    return -HeisenbergFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[1], conn.m_ann[0]);
 }
