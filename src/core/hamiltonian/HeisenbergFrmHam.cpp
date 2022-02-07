@@ -16,15 +16,16 @@ HeisenbergFrmHam::HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts
 
 defs::ham_t HeisenbergFrmHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
     /*
-     * [ik|jl] only have non-zero coeff if i and k spins are opposite and so also are those of j and l
+     * (ik|jl) only have non-zero coeff if i and k spins are opposite and so also are those of j and l
      * also require site(i)==site(k) and site(j)==site(l)
+     *  (ia ib | jb ja)     <ia jb | ib ja>
      */
-    if (field::FrmOnv::ispin(i, m_nsite)==field::FrmOnv::ispin(k, m_nsite)) return 0.0;
-    if (field::FrmOnv::ispin(j, m_nsite)==field::FrmOnv::ispin(l, m_nsite)) return 0.0;
     auto isite = field::FrmOnv::isite(i, m_nsite);
     auto jsite = field::FrmOnv::isite(j, m_nsite);
-    if (isite!=field::FrmOnv::isite(k, m_nsite)) return 0.0;
-    if (jsite!=field::FrmOnv::isite(l, m_nsite)) return 0.0;
+//    if (field::FrmOnv::ispin(i, m_nsite)==field::FrmOnv::ispin(k, m_nsite)) return 0.0;
+//    if (field::FrmOnv::ispin(j, m_nsite)==field::FrmOnv::ispin(l, m_nsite)) return 0.0;
+//    if (isite!=field::FrmOnv::isite(k, m_nsite)) return 0.0;
+//    if (jsite!=field::FrmOnv::isite(l, m_nsite)) return 0.0;
     // fermi phase not included here
     return 0.5*m_j*m_lattice.m_dense(isite, jsite);
 }

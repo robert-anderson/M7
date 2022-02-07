@@ -16,14 +16,20 @@ bool HeisenbergUniform::draw_frm(const size_t &exsig, const FrmOnv &src, CachedO
     auto rand = m_prng.draw_uint(h->m_nsite*nconn_product);
     const auto isite = src.isite(rand/nconn_product);
     const auto ispin = src.get({1, isite});
-    auto t_mat_row = h->m_lattice.m_sparse[isite];
-    const auto nvac = t_mat_row.first.size();
-    auto jsite = t_mat_row.first[rand%nvac];
+    auto row = h->m_lattice.m_sparse[isite];
+    const auto nvac = row.first.size();
+    auto jsite = row.first[rand%nvac];
     auto jspin = src.get({1, jsite});
     if (jspin==ispin) return false; // no exchange
     DEBUG_ASSERT_NE(src.get({0, isite}), src.get({0, jsite}), "sites do not have opposite spins");
     prob = 1.0 / double (h->m_nsite * nvac);
-    conn.set(src.ibit(jspin, isite), src.ibit(ispin, jsite), src.ibit(jspin, jsite), src.ibit(ispin, isite));
+    //    <i  j  |  a  b>
+    auto i = src.ibit(ispin, isite);
+    auto j = src.ibit(jspin, jsite);
+    auto a = src.ibit(ispin, jsite);
+    auto b = src.ibit(jspin, isite);
+    if (jspin) conn.set(i, j, a, b);
+    else conn.set(j, i, b, a);
     return true;
 }
 
