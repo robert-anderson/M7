@@ -30,6 +30,8 @@ namespace mbf {
     /**
      * set the referenced ONV object to the "anti-ferromagnetic" configuration
      */
+    void set_neel_mbf(field::FrmOnv &onv, size_t nelec);
+
     void set_neel_mbf(field::FrmOnv &onv, const Hamiltonian& ham);
 
     void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &def, size_t idef);

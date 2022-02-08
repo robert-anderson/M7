@@ -105,6 +105,8 @@ public:
 
     size_t site_nocc(const size_t& isite) const;
 
+    bool all_sites_single_occ() const;
+
     std::string to_string() const override;
 
     const size_t& nsite() const;

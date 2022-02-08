@@ -24,8 +24,8 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(const size_t &i, const size_t &j, c
      */
     auto isite = field::FrmOnv::isite(i, m_nsite);
     auto jsite = field::FrmOnv::isite(j, m_nsite);
-    // fermi phase not included here
-    return 0.5*m_j*m_lattice.m_dense(isite, jsite);
+    // fermi phase not included here, minus sign is due to product of opposite spins
+    return -m_j*m_lattice.m_dense(isite, jsite);
 }
 
 defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
@@ -44,13 +44,14 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
         int sj_tot = 0;
         for (size_t ineigh=0ul; ineigh<nneigh; ++ineigh) {
             auto jsite = row.first[ineigh];
-            int jspin = onv.get({0, jsite}) ? -1: 1;
+            int jspin = onv.get({0, jsite}) ? 1: -1;
             sj_tot+= row.second[ineigh]*jspin;
         }
-        int ispin = onv.get({0, isite}) ? -1: 1;
+        int ispin = onv.get({0, isite}) ? 1: -1;
         si_sj_tot+=sj_tot*ispin;
     }
-    return si_sj_tot*m_j;
+    // each spin in the product carries a factor of 1/2
+    return si_sj_tot*m_j/4.0;
 }
 
 defs::ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
