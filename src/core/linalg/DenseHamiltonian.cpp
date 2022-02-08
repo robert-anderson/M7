@@ -15,10 +15,14 @@ void DenseHamiltonian::setup_frm(const Hamiltonian &source) {
     enums::FermionOnv bra_enum(source.m_bd.m_nsite, source.nelec());
     conn::FrmOnv conn(source.m_bd);
 
+    bool spins_only = dynamic_cast<const HeisenbergFrmHam*>(source.m_frm.get());
+
     while (bra_enum.next(bra, ibra)) {
+        if (spins_only && !bra.all_sites_single_occ()) continue;
         size_t iket = ~0ul;
         enums::FermionOnv ket_enum(source.m_bd.m_nsite, source.nelec());
         while (ket_enum.next(ket, iket)) {
+            if (spins_only && !ket.all_sites_single_occ()) continue;
             conn.connect(bra, ket);
             auto h_elem = source.get_element(bra, conn);
             (*this)(ibra, iket) = h_elem;

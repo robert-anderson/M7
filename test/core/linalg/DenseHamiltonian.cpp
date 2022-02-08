@@ -19,7 +19,6 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[1], -14.28883698406, 1e-10));
 }
 #endif
-#if 0
 TEST(DenseHamiltonian, N2Rhf) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
@@ -27,9 +26,31 @@ TEST(DenseHamiltonian, N2Rhf) {
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
     auto solver = ham.diagonalize();
-    ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -108.916561245585, 1e-8));
+    ASSERT_TRUE(consts::nearly_equal(solver.m_evals[0], -108.916561245585, 1e-8));
 }
 
+TEST(DenseHamiltonian, HeisenbergFrmHam) {
+    fciqmc_config::Hamiltonian opts(nullptr);
+    opts.m_fermion.m_heisenberg.m_site_shape = {4};
+    opts.m_fermion.m_heisenberg.m_boundary_conds = {1};
+    opts.verify();
+    Hamiltonian ham_src(opts);
+    DenseHamiltonian ham(ham_src);
+    auto solver = ham.diagonalize();
+    /*
+     * https://doi.org/10.1016/0378-4363(78)90115-8
+     *  nsite  exact eigenvalue
+     *   4     -4.0
+     *   6     -5.605551275463988
+     *   8     -7.3021868178743485
+     *   10    -9.030892708984082
+     *   12    -10.774781834890415
+     */
+    std::cout << solver.m_evals[0] << std::endl;
+    ASSERT_TRUE(consts::nearly_equal(solver.m_evals[0], -5.605551275463988, 1e-8));
+}
+
+#if 0
 TEST(DenseHamiltonian, HF) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/HF_RDMs/FCIDUMP";

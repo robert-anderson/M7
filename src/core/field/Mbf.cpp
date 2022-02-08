@@ -19,14 +19,18 @@ void mbf::set_aufbau_mbf(field::BosOnv &onv, const Hamiltonian& ham) {
     onv[0] = ham.nboson();
 }
 
-void mbf::set_neel_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
-    REQUIRE_EQ(ham.m_frm->m_ms2_restrict, 0, "Neel state requires zero overall spin");
+void mbf::set_neel_mbf(FrmOnv &onv, size_t nelec) {
     onv.zero();
     size_t ispin = 0;
-    for (size_t isite = 0ul; isite < ham.nelec(); ++isite) {
+    for (size_t isite = 0ul; isite < nelec; ++isite) {
         onv.set({ispin, isite});
         ispin = !ispin;
     }
+}
+
+void mbf::set_neel_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
+    REQUIRE_EQ(ham.m_frm->m_ms2_restrict, 0, "Neel state requires zero overall spin");
+    set_neel_mbf(onv, ham.nelec());
 }
 
 void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &def, size_t idef) {

@@ -109,6 +109,11 @@ size_t FrmOnvField::site_nocc(const size_t &isite) const {
     return get({0, isite}) + get({1, isite});
 }
 
+bool FrmOnvField::all_sites_single_occ() const {
+    for (size_t isite = 0ul; isite<m_nsite; ++isite) if (site_nocc(isite)!=1ul) return false;
+    return true;
+}
+
 std::string FrmOnvField::to_string() const {
     std::string res;
     res += "(";
@@ -150,4 +155,3 @@ size_t FrmOnvField::ispin(const size_t &ibit) const {
 size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite) const {
     return ibit(ispin, isite, m_nsite);
 }
-

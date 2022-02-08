@@ -79,85 +79,18 @@ public:
  */
 class OrthoLattice : public Lattice {
 
-    size_t get_coord_index(const defs::inds &site_inds, size_t idim, size_t value) const {
-        DEBUG_ASSERT_LT(value, m_spec.m_format.m_shape[idim], "site inds value OOB");
-        auto orig_value = site_inds[idim];
-        auto &inds = const_cast<defs::inds &>(site_inds);
-        inds[idim] = value;
-        auto i = m_spec.m_format.flatten(inds);
-        // leave inds unchanged
-        inds[idim] = orig_value;
-        return i;
-    }
+    size_t get_coord_index(const defs::inds &site_inds, size_t idim, size_t value) const;
 
-    std::pair<size_t, int> get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
-        auto &format = m_spec.m_format;
-        auto &bcs = m_spec.m_bcs;
-        size_t dim_ind = ~0ul;
-        int sign = 0;
-        if (!inc && site_inds[idim] == 0) {
-            // lower boundary
-            if (bcs[idim]) {
-                dim_ind = format.m_shape[idim] - 1;
-                sign = -bcs[idim];
-            }
-        } else if (inc && (site_inds[idim] + 1 == format.m_shape[idim])) {
-            // upper boundary
-            if (bcs[idim]) {
-                dim_ind = 0ul;
-                sign = -bcs[idim];
-            }
-        } else {
-            // not at a boundary
-            dim_ind = site_inds[idim] + (inc ? 1 : -1);
-            sign = -1;
-        }
-        if (dim_ind == ~0ul) return {~0ul, 0};
-        return {get_coord_index(site_inds, idim, dim_ind), sign};
-    }
+    std::pair<size_t, int> get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const;
 
 public:
-    OrthoLattice(Spec spec): Lattice(spec.m_format.m_nelement, spec){
-        /*
-         * set up loop for orthogonally-coordinated lattice
-         */
-        foreach::rtnd::Unrestricted loop(m_spec.m_format.m_shape);
-        defs::inds cols;
-        std::vector<int> signs;
-        auto fn = [&]() {
-            auto &inds = loop.m_inds;
-            cols.clear();
-            signs.clear();
-            for (size_t idim = 0ul; idim < inds.size(); ++idim) {
-                for (bool inc : {false, true}){
-                    auto pair = get_coordination(inds, idim, inc);
-                    if (pair.first != ~0ul) {
-                        cols.push_back(pair.first);
-                        signs.push_back(pair.second);
-                    }
-                }
-            }
-            auto irow = m_spec.m_format.flatten(inds);
-            add(irow, cols, signs);
-        };
-        loop(fn);
-    }
+    OrthoLattice(Spec spec);
 };
 
 namespace lattice {
 
-    static Lattice make(const Lattice::Spec &spec) {
-        switch (spec.m_topo) {
-            case Lattice::Ortho:
-                return OrthoLattice(spec);
-            case Lattice::NullTopology:
-                ABORT("invalid lattice topology given");
-        }
-        return {0, Lattice::Spec(Lattice::NullTopology, {}, {})};
-    }
+    Lattice make(const Lattice::Spec &spec);
 
-    static Lattice make(const fciqmc_config::LatticeModel& opts) {
-        return make({opts.m_topology, opts.m_site_shape, opts.m_boundary_conds});
-    }
+    Lattice make(const fciqmc_config::LatticeModel& opts);
 }
 #endif //M7_LATTICE_H
