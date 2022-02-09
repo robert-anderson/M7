@@ -19,7 +19,18 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     const size_t m_nsite;
     const size_t& m_nspinorb;
+private:
+    const defs::inds m_alpha_mask;
 
+    defs::inds make_alpha_mask(){
+        defs::inds tmp;
+        tmp.reserve(m_dsize);
+        for (size_t i=0ul; i<m_dsize; ++i) {
+            if (i*nbit_dword() > m_nsite) tmp.push_back()
+        }
+    }
+
+public:
     FrmOnvField(Row* row, size_t nsite, std::string name="");
 
     FrmOnvField(Row* row, BasisDims bd, std::string name="");
