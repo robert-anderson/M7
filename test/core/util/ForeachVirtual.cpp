@@ -12,6 +12,7 @@ namespace foreach_virtual_test {
 
     template<size_t nind>
     struct CtndUnrestricted : ctnd::Unrestricted<nind> {
+        using ctnd::Base<nind>::inds;
         /**
          * pass status of the test
          */
@@ -28,13 +29,14 @@ namespace foreach_virtual_test {
         CtndUnrestricted(ctnd::inds_t<nind> shape, std::vector<ctnd::inds_t<nind>> chk_inds) :
                 ctnd::Unrestricted<nind>(shape), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(const ctnd::inds_t<nind> &inds) override {
-            if (inds != m_chk_inds[m_i++]) m_pass = false;
+        void body() override {
+            if (inds() != m_chk_inds[m_i++]) m_pass = false;
         }
     };
 
     template<size_t nind, bool strict = true, bool ascending = true>
     struct CtndOrdered : ctnd::Ordered<nind, strict, ascending> {
+        using ctnd::Base<nind>::inds;
         /**
          * pass status of the test
          */
@@ -51,12 +53,13 @@ namespace foreach_virtual_test {
         CtndOrdered(size_t n, std::vector<ctnd::inds_t<nind>> chk_inds) :
                 ctnd::Ordered<nind, strict, ascending>(n), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(const ctnd::inds_t<nind> &inds) override {
-            if (inds != m_chk_inds[m_i++]) m_pass = false;
+        void body() override {
+            if (inds() != m_chk_inds[m_i++]) m_pass = false;
         }
     };
 
     struct RtndUnrestricted : rtnd::Unrestricted {
+        using rtnd::Base::inds;
         /**
          * pass status of the test
          */
@@ -73,13 +76,14 @@ namespace foreach_virtual_test {
         RtndUnrestricted(rtnd::inds_t shape, std::vector<rtnd::inds_t> chk_inds) :
                 rtnd::Unrestricted(shape), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(const rtnd::inds_t &inds) override {
-            if (inds != m_chk_inds[m_i++]) m_pass = false;
+        void body() override {
+            if (inds() != m_chk_inds[m_i++]) m_pass = false;
         }
     };
 
     template<bool strict = true, bool ascending = true>
     struct RtndOrdered : rtnd::Ordered<strict, ascending> {
+        using rtnd::Base::inds;
         /**
          * pass status of the test
          */
@@ -96,8 +100,8 @@ namespace foreach_virtual_test {
         RtndOrdered(size_t n, size_t r, std::vector<rtnd::inds_t> chk_inds) :
                 rtnd::Ordered<strict, ascending>(n, r), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(const rtnd::inds_t &inds) override {
-            if (inds != m_chk_inds[m_i++]) m_pass = false;
+        void body() override {
+            if (inds() != m_chk_inds[m_i++]) m_pass = false;
         }
     };
 }
@@ -172,8 +176,8 @@ TEST(ForeachVirtual, CtndUnrestrictedExit) {
         Foreach(ctnd::inds_t<3> shape, ctnd::inds_t<3> term_inds) :
                 CtndUnrestricted<3>(shape, {}), m_term_inds(term_inds) {}
 
-        void body(const ctnd::inds_t<3> &inds) override {
-            if (inds == m_term_inds) throw ExitLoop();
+        void body() override {
+            if (inds() == m_term_inds) throw ExitLoop();
             ++m_i;
         }
     };
@@ -237,8 +241,8 @@ TEST(ForeachVirtual, CtndOrderedExit) {
         Foreach(size_t n, ctnd::inds_t<3> term_inds) :
                 CtndOrdered<3, true, true>(n, {}), m_term_inds(term_inds) {}
 
-        void body(const ctnd::inds_t<3> &inds) override {
-            if (inds == m_term_inds) throw ExitLoop();
+        void body() override {
+            if (inds() == m_term_inds) throw ExitLoop();
             ++m_i;
         }
     };
@@ -406,8 +410,8 @@ TEST(ForeachVirtual, RtndUnrestrictedExit) {
         Foreach(rtnd::inds_t shape, rtnd::inds_t term_inds) :
                 RtndUnrestricted(std::move(shape), {}), m_term_inds(std::move(term_inds)) {}
 
-        void body(const rtnd::inds_t &inds) override {
-            if (inds == m_term_inds) throw ExitLoop();
+        void body() override {
+            if (inds() == m_term_inds) throw ExitLoop();
             ++m_i;
         }
     };
@@ -471,8 +475,8 @@ TEST(ForeachVirtual, RtndOrderedExit) {
         Foreach(size_t n, rtnd::inds_t term_inds) :
                 RtndOrdered<true, true>(n, 3, {}), m_term_inds(std::move(term_inds)) {}
 
-        void body(const rtnd::inds_t &inds) override {
-            if (inds == m_term_inds) throw ExitLoop();
+        void body() override {
+            if (inds() == m_term_inds) throw ExitLoop();
             ++m_i;
         }
     };
