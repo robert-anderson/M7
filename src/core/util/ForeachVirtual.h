@@ -9,8 +9,8 @@
 
 namespace foreach_virtual {
 
-    class ExitLoop: public std::exception {
-        virtual const char* what() const throw() {
+    class ExitLoop : public std::exception {
+        virtual const char *what() const throw() {
             return "Loop body requested early termination of loop";
         }
     };
@@ -27,17 +27,21 @@ namespace foreach_virtual {
         struct Base {
             const size_t m_nterm;
             inds_t<nind> m_inds;
-            const inds_t<nind>& inds() const {return m_inds;}
-            const size_t& operator[](const size_t& i){
-                ASSERT(i<nind);
+
+            const inds_t<nind> &inds() const { return m_inds; }
+
+            const size_t &operator[](const size_t &i) {
+                ASSERT(i < nind);
                 return m_inds[i];
             }
+
             size_t sum() const {
                 return std::accumulate(m_inds.cbegin(), m_inds.cend(), 0);
             }
-            virtual void body(const inds_t<nind>&) = 0;
 
             Base(size_t nterm) : m_nterm(nterm) {}
+
+            virtual void body(const inds_t<nind> &) = 0;
 
             virtual void loop() = 0;
 
@@ -58,7 +62,8 @@ namespace foreach_virtual {
 
         public:
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(nterm(shape)), m_shape(shape) {}
-            Unrestricted(const size_t& extent) : Unrestricted(array_utils::filled<size_t, nind>(extent)){}
+
+            Unrestricted(const size_t &extent) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
 
             template<size_t ilevel>
             void level_loop(tags::Ind<ilevel>) {
@@ -66,8 +71,8 @@ namespace foreach_virtual {
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) {
-                    try {level_loop(tags::Ind<ilevel + 1>());}
-                    catch (const ExitLoop& ex) {throw ex;}
+                    try { level_loop(tags::Ind<ilevel + 1>()); }
+                    catch (const ExitLoop &ex) { throw ex; }
                 }
             }
 
@@ -76,16 +81,16 @@ namespace foreach_virtual {
                 auto &ind = m_inds[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) {
-                    try {body(m_inds);}
-                    catch (const ExitLoop& ex) {throw ex;}
+                    try { body(m_inds); }
+                    catch (const ExitLoop &ex) { throw ex; }
                 }
             }
 
             void top_loop(tags::Bool<true>) {}
 
             void top_loop(tags::Bool<false>) {
-                try {level_loop(tags::Ind<1>());}
-                catch (const ExitLoop& ex) {}
+                try { level_loop(tags::Ind<1>()); }
+                catch (const ExitLoop &) {}
 
             }
 
@@ -117,8 +122,8 @@ namespace foreach_virtual {
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_inds[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) {
-                    try {level_loop(tags::Ind<ilevel + 1>());}
-                    catch (const ExitLoop& ex) {throw ex;}
+                    try { level_loop(tags::Ind<ilevel + 1>()); }
+                    catch (const ExitLoop &ex) { throw ex; }
                 }
             }
 
@@ -128,16 +133,16 @@ namespace foreach_virtual {
                 auto &ind = Base<nind>::m_inds[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_inds[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) {
-                    try {body(m_inds);}
-                    catch (const ExitLoop& ex) {throw ex;}
+                    try { body(m_inds); }
+                    catch (const ExitLoop &ex) { throw ex; }
                 }
             }
 
             void top_loop(tags::Bool<true>) {}
 
             void top_loop(tags::Bool<false>) {
-                try {level_loop(tags::Ind<1>());}
-                catch (const ExitLoop& ex) {}
+                try { level_loop(tags::Ind<1>()); }
+                catch (const ExitLoop &) {}
             }
 
             void loop() override {
@@ -151,48 +156,33 @@ namespace foreach_virtual {
      */
     namespace rtnd {
         using inds_t = std::vector<size_t>;
-        using body_fn_t = std::function<void()>;
-        using cr_body_fn_t = const body_fn_t &;
 
         struct Base {
             const size_t m_nind;
             const size_t m_nterm;
             inds_t m_inds;
 
-            const inds_t& inds() const {return m_inds;}
+            const inds_t &inds() const { return m_inds; }
 
-            const size_t& operator[](const size_t& i){
-                ASSERT(i<m_nind);
+            const size_t &operator[](const size_t &i) {
+                ASSERT(i < m_nind);
                 return m_inds[i];
             }
 
             size_t ind_sum() const {
-                return std::accumulate(m_inds.cbegin(), m_inds.cend(), 0);
+                return std::accumulate(m_inds.cbegin(), m_inds.cend(), 0ul);
             }
 
-            virtual void operator()(cr_body_fn_t body) = 0;
+            Base(size_t nind, size_t nterm) : m_nind(nind), m_nterm(nterm), m_inds(m_nind, 0) {}
 
-            template<typename ...Args>
-            void operator()(cr_body_fn_t body, Base& next, Args&... rest) {
-                auto this_body = [&](){
-                    next(body, rest...);
-                };
-                (*this)(this_body);
-            }
+            virtual void body(const inds_t &) = 0;
 
-            Base(size_t nind, size_t nterm) : m_nind(nind),
-                                              m_nterm(nterm), m_inds(m_nind, 0) {}
+            virtual void loop() = 0;
 
         };
 
-        template<typename ...Args>
-        static void chain(cr_body_fn_t body, Base& first, Args&... rest) {
-            first(body, rest...);
-        }
-
         struct Unrestricted : Base {
             const inds_t m_shape;
-            using Base::operator();
         private:
             static size_t nterm(const inds_t &shape) {
                 if (shape.empty()) return 0;
@@ -203,28 +193,32 @@ namespace foreach_virtual {
 
         public:
             Unrestricted(const inds_t &shape) : Base(shape.size(), nterm(shape)), m_shape(shape) {}
-            Unrestricted(const size_t& nind, const size_t& extent) : Unrestricted(std::vector<size_t>(nind, extent)){}
 
-            void level_loop(cr_body_fn_t body, size_t ilevel) {
+            Unrestricted(const size_t &nind, const size_t &extent) : Unrestricted(std::vector<size_t>(nind, extent)) {}
+
+            void level_loop(size_t ilevel) {
                 const auto &iind = ilevel - 1;
                 auto &ind = m_inds[iind];
                 const auto &extent = m_shape[iind];
-                if (ilevel < m_nind)
-                    for (ind = 0ul; ind < extent; ++ind) level_loop(body, ilevel + 1);
-                else
-                    for (ind = 0ul; ind < extent; ++ind) body();
+                try {
+                    if (ilevel < m_nind)
+                        for (ind = 0ul; ind < extent; ++ind) level_loop(ilevel + 1);
+                    else
+                        for (ind = 0ul; ind < extent; ++ind) body(m_inds);
+                }
+                catch (const ExitLoop& ex){throw ex;}
             }
 
-            void operator()(cr_body_fn_t body) override {
+            void loop() override {
                 if (m_nind == 0) return;
-                level_loop(body, 1);
+                try {level_loop(1);}
+                catch (const ExitLoop&) {}
             }
         };
 
         template<bool strict = true, bool ascending = true>
         struct Ordered : Base {
             const size_t m_n;
-            using Base::operator();
 
             static size_t nterm(size_t n, size_t r) {
                 if (!r) return 0ul;
@@ -235,20 +229,24 @@ namespace foreach_virtual {
             Ordered(const size_t &n, const size_t &r) :
                     Base(r, nterm(n, r)), m_n(n) {}
 
-            void level_loop(cr_body_fn_t body, size_t ilevel) {
+            void level_loop(size_t ilevel) {
                 const size_t iind = ascending ? (m_nind - ilevel) : (ilevel - 1);
                 const size_t iind_unrestrict = ascending ? m_nind - 1 : 0;
                 auto &ind = m_inds[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_inds[ascending ? iind + 1 : iind - 1] + !strict;
-                if (ilevel < m_nind)
-                    for (ind = 0ul; ind < extent; ++ind) level_loop(body, ilevel + 1);
-                else
-                    for (ind = 0ul; ind < extent; ++ind) body();
+                try {
+                    if (ilevel < m_nind)
+                        for (ind = 0ul; ind < extent; ++ind) level_loop(ilevel + 1);
+                    else
+                        for (ind = 0ul; ind < extent; ++ind) body(m_inds);
+                }
+                catch (const ExitLoop& ex){throw ex;}
             }
 
-            void operator()(cr_body_fn_t body) override {
+            void loop() override {
                 if (m_nind == 0) return;
-                level_loop(body, 1);
+                try {level_loop(1);}
+                catch (const ExitLoop&){}
             }
         };
     }
