@@ -291,13 +291,18 @@ namespace bit_utils {
     /**
      * masks whose ith elements retain i bits when bitwise and-ed with another value of the same size (4 or 8 bytes)
      */
-    static constexpr std::array<unsigned int, 33> c_trunc_mask_u =
+    static constexpr std::array<uint8_t, 9> c_trunc_mask_8 =
+            {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff};
+    static constexpr std::array<uint16_t, 17> c_trunc_mask_16 =
+            {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
+             0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff};
+    static constexpr std::array<uint32_t, 33> c_trunc_mask_32 =
             {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
              0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff, 0x3ffff,
              0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff, 0xffffff,
              0x1ffffff, 0x3ffffff, 0x7ffffff, 0xfffffff, 0x1fffffff,
              0x3fffffff, 0x7fffffff, 0xffffffff};
-    static constexpr std::array<unsigned long, 65> c_trunc_mask_ul =
+    static constexpr std::array<uint64_t, 65> c_trunc_mask_64 =
             {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff,
              0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff,
              0x3ffff, 0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff,
@@ -316,17 +321,17 @@ namespace bit_utils {
 
     template<typename T>
     static inline void clr(T &x, const size_t &i) {
-        x &= ~(T(1ul) << i);
+        x &= ~(T(1) << T(i));
     }
 
     template<typename T>
     static inline void set(T &x, const size_t &i) {
-        x |= (T(1ul) << i);
+        x |= (T(1) << T(i));
     }
 
     template<typename T>
     static inline bool get(const T &x, const size_t &i) {
-        return (x >> i) & T(1ul);
+        return x & (T(1) << T(i));
     }
 
     template<typename T>
@@ -377,14 +382,43 @@ namespace bit_utils {
         return _popcnt32(work);
     }
 
-    static inline unsigned int truncate(const unsigned int &v, size_t n) {
-        static_assert(sizeof(unsigned int) == 4, "unsupported int definition");
-        return v & c_trunc_mask_u[n];
+    static uint8_t truncate(const uint8_t &v, const size_t& n) {
+        return v & c_trunc_mask_8[n];
+    }
+    static uint16_t truncate(const uint16_t &v, const size_t& n) {
+        return v & c_trunc_mask_16[n];
+    }
+    static uint32_t truncate(const uint32_t &v, const size_t& n) {
+        return v & c_trunc_mask_32[n];
+    }
+    static uint64_t truncate(const uint64_t &v, const size_t& n) {
+        return v & c_trunc_mask_64[n];
     }
 
-    static inline unsigned long truncate(const unsigned long &v, size_t n) {
-        static_assert(sizeof(unsigned long) == 8, "unsupported int definition");
-        return v & c_trunc_mask_ul[n];
+    static int8_t truncate(const int8_t &v, const size_t& n) {
+        return truncate(uint8_t(v), n);
+    }
+    static int16_t truncate(const int16_t &v, const size_t& n) {
+        return truncate(uint16_t(v), n);
+    }
+    static int32_t truncate(const int32_t &v, const size_t& n) {
+        return truncate(uint32_t(v), n);
+    }
+    static int64_t truncate(const int64_t &v, const size_t& n) {
+        return truncate(uint64_t(v), n);
+    }
+
+    static void make_range_mask(uint8_t& v, const size_t& ibegin, const size_t& iend){
+        v = c_trunc_mask_8[iend] & ~c_trunc_mask_8[ibegin];
+    }
+    static void make_range_mask(uint16_t& v, const size_t& ibegin, const size_t& iend){
+        v = c_trunc_mask_16[iend] & ~c_trunc_mask_16[ibegin];
+    }
+    static void make_range_mask(uint32_t& v, const size_t& ibegin, const size_t& iend){
+        v = c_trunc_mask_32[iend] & ~c_trunc_mask_32[ibegin];
+    }
+    static void make_range_mask(uint64_t& v, const size_t& ibegin, const size_t& iend){
+        v = c_trunc_mask_64[iend] & ~c_trunc_mask_64[ibegin];
     }
 
     template<typename T>

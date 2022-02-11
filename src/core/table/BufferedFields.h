@@ -113,12 +113,12 @@ namespace buffered {
 
     template<typename T>
     struct Bitset : NdBitset<T, 1ul> {
-        using field::Bitset<size_t>::operator=;
+        using field::Bitset<T>::operator=;
         explicit Bitset(size_t nbit): NdBitset<T, 1ul>({nbit}){}
         Bitset(const Bitset& other) : Bitset(other.m_format.m_nelement){
             *this = other;
         }
-        Bitset(const field::Bitset<size_t>& other) : Bitset(other.m_format.m_nelement){
+        Bitset(const field::Bitset<T>& other) : Bitset(other.m_format.m_nelement){
             *this = other;
         }
         Bitset& operator=(const Bitset& field){

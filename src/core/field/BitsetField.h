@@ -119,6 +119,23 @@ struct BitsetField : FieldBase {
         set(m_format.flatten(inds));
     }
 
+    void set_range(const size_t &ibegin, const size_t &iend) {
+//        T mask;
+//        size_t k;
+//        DEBUG_ASSERT_LT(ibegin, iend, "invalid bit range");
+//        for (size_t iword=0ul; iword<m_dsize; ++iword){
+//            auto ibit_first = iword*nbit_dword();
+//            auto ibit_last = ibit_first+nbit_dword();
+//            if (ibit_first <= ibegin && ibegin <= ibit_last) {
+//                // begin bit is in this word
+//                k = (ibit_first <= iend && iend <= ibit_last) ? iend : nbit_dword();
+//                // end bit is in this word
+//                bit_utils::make_range_mask(mask, ibegin, k);
+//                dbegin()[iword] |= mask;
+//                break;
+//            }
+//        }
+    }
 
     void clr(T *dptr, const size_t &ibit) {
         ASSERT(ibit < nbit());
