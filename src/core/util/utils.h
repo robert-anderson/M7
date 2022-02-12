@@ -421,6 +421,38 @@ namespace bit_utils {
         v = c_trunc_mask_64[iend] & ~c_trunc_mask_64[ibegin];
     }
 
+    /**
+     * apply an arbitrary bit mask to a single buffer word
+     * e.g. for a range mask:
+     *  F:    10101010101010110
+     *  M:    00000111111000000
+     *  F|M:  10101010101010110
+     *  F&~M: 10101000000010110
+     *
+     * @tparam T
+     *  buffer type of the bit field (integer of any size)
+     * @param v
+     *  buffer word
+     * @param mask
+     *  masking word
+     * @param set
+     *  true if bits that are set in the mask are to be set, else they are cleared
+     */
+    template<typename T>
+    void apply_mask(T& v, const T& mask, bool set){
+        if (set) v |= mask;
+        else v&= ~mask;
+    }
+    /**
+     * make the range mask word then apply it
+     */
+    template<typename T>
+    void apply_mask(T& v, const size_t& ibegin, const size_t& iend, bool set){
+        T mask;
+        make_range_mask(mask, ibegin, iend);
+        apply_mask(v, mask, set);
+    }
+
     template<typename T>
     static inline size_t nsetbit_before(const T &v, size_t n) {
         return nsetbit(truncate(v, n));

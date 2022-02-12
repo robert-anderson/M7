@@ -119,22 +119,39 @@ struct BitsetField : FieldBase {
         set(m_format.flatten(inds));
     }
 
+    void put_range(const size_t &ibegin, const size_t &iend, bool set) {
+        T mask;
+        auto iword_begin = ibegin/nbit_dword();
+        auto iword_end = iend/nbit_dword();
+        auto ibitword_begin = ibegin-iword_begin*nbit_dword();
+        auto ibitword_end = iend-iword_end*nbit_dword();
+        if (iword_begin==iword_end) {
+            // begin and end bits are in the same word, so apply mask and return
+            bit_utils::apply_mask(dbegin()[iword_begin], ibitword_begin, ibitword_end, set);
+            return;
+        }
+        // begin part: act from first bit to end of its word
+        bit_utils::apply_mask(dbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
+        // end part: act to the last bit from the beginning of its word
+        bit_utils::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
+        // make the all-bits mask
+        bit_utils::make_range_mask(mask, 0, nbit_dword());
+        for (size_t iword=iword_begin+1; iword<iword_end; ++iword){
+            // apply it to all words between begin and end
+            bit_utils::apply_mask(dbegin()[iword], mask, set);
+        }
+    }
+
     void set_range(const size_t &ibegin, const size_t &iend) {
-//        T mask;
-//        size_t k;
-//        DEBUG_ASSERT_LT(ibegin, iend, "invalid bit range");
-//        for (size_t iword=0ul; iword<m_dsize; ++iword){
-//            auto ibit_first = iword*nbit_dword();
-//            auto ibit_last = ibit_first+nbit_dword();
-//            if (ibit_first <= ibegin && ibegin <= ibit_last) {
-//                // begin bit is in this word
-//                k = (ibit_first <= iend && iend <= ibit_last) ? iend : nbit_dword();
-//                // end bit is in this word
-//                bit_utils::make_range_mask(mask, ibegin, k);
-//                dbegin()[iword] |= mask;
-//                break;
-//            }
-//        }
+        put_range(ibegin, iend, true);
+    }
+
+    void set() {
+        set_range(0, m_format.m_nelement);
+    }
+
+    void clr_range(const size_t &ibegin, const size_t &iend) {
+        put_range(ibegin, iend, false);
     }
 
     void clr(T *dptr, const size_t &ibit) {

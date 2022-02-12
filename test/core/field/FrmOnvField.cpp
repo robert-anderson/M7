@@ -16,15 +16,21 @@ TEST(FrmOnvField, SetFromInds) {
     }
 }
 
-TEST(FrmOnvField, ClearSpinChannel) {
-//    const size_t nsite = 123;
-//    buffered::FrmOnv mbf(nsite);
-//
-//    const size_t i
-//    mbf.set(ibegin, iend);
-//
-
-//    for (size_t ibit=0ul; ibit<mbf.m_nspinorb; ++ibit) mbf.set(ibit);
-//    ASSERT_EQ(mbf.nalpha(), nsite);
-//    ASSERT_EQ(mbf.nsetbit(), 2*nsite);
+TEST(FrmOnvField, ClrSpinChannel) {
+    const size_t nsite = 123;
+    buffered::FrmOnv mbf(nsite);
+    ASSERT_EQ(mbf.nalpha(), 0ul);
+    ASSERT_EQ(mbf.nsetbit(), 0ul);
+    mbf.put_spin_channel(0, true);
+    ASSERT_EQ(mbf.nalpha(), nsite);
+    ASSERT_EQ(mbf.nsetbit(), nsite);
+    mbf.put_spin_channel(1, true);
+    ASSERT_EQ(mbf.nalpha(), nsite);
+    ASSERT_EQ(mbf.nsetbit(), 2*nsite);
+    mbf.put_spin_channel(0, false);
+    ASSERT_EQ(mbf.nalpha(), 0ul);
+    ASSERT_EQ(mbf.nsetbit(), nsite);
+    mbf.put_spin_channel(1, false);
+    ASSERT_EQ(mbf.nalpha(), 0ul);
+    ASSERT_EQ(mbf.nsetbit(), 0ul);
 }

@@ -48,6 +48,11 @@ struct FrmOnvField : BitsetField<size_t, 2> {
         for(auto& i: setbits_beta) set({1, i});
     }
 
+    void put_spin_channel(const size_t& ispin, bool set){
+        auto ibegin = ibit(ispin, 0);
+        put_range(ibegin, ibegin+m_nsite, set);
+    }
+
     void clr(const size_t& bit_offset, const defs::inds& clrbits) {
         for(auto& i: clrbits) clr(bit_offset+i);
     }

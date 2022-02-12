@@ -6,23 +6,54 @@
 #include "src/core/table/BufferedFields.h"
 
 TEST(BitsetField, SetFromInds) {
-
-    size_t ibegin = 8;
-    size_t iend = 9;
-
-    typedef short T;
-    T buf = 0;
-    buf = ~buf;
-    const size_t nbit_word = sizeof(T)*CHAR_BIT;
-    buf = (buf >> T(nbit_word-iend)) & (buf << ibegin);
-
-    for (size_t ibit=0; ibit<nbit_word; ++ibit)
-        std::cout << (bit_utils::get(buf, ibit) ? '1':'0');
-    std::cout << std::endl;
-
-    //const size_t nbit = 100;
+    const size_t nbit = 100;
+    const size_t nsetbit = 50;
     // deliberately using non-standard container type
-    //buffered::Bitset<short> field(nbit);
-    //std::cout << field << std::endl;
-    //field.set_range(0, 5);
+    buffered::Bitset<uint16_t> field(nbit);
+    auto setbits = hashing::unique_in_range(0, nsetbit, 0, nbit, true);
+    field = setbits;
+    auto it = setbits.cbegin();
+    for (size_t ibit=0ul; ibit<nbit; ++ibit){
+        if (it==setbits.cend() || ibit<*it) {
+            ASSERT_FALSE(field.get(ibit));
+        }
+        else {
+            ASSERT_TRUE(field.get(ibit));
+            ++it;
+        }
+    }
+}
+
+TEST(BitsetField, SetRange) {
+    const size_t nbit = 100;
+    // deliberately using non-standard container type
+    buffered::Bitset<uint16_t> field(nbit);
+    for (size_t ibegin=0ul; ibegin<nbit; ++ibegin){
+        for (size_t iend=ibegin+1; iend<nbit; ++iend) {
+            field.zero();
+            field.set_range(ibegin, iend);
+            for (size_t ibit=0ul; ibit<nbit; ++ibit){
+                if (ibit<ibegin) {ASSERT_FALSE(field.get(ibit));}
+                else if (ibit>=iend) {ASSERT_FALSE(field.get(ibit));}
+                else {ASSERT_TRUE(field.get(ibit));}
+            }
+        }
+    }
+}
+
+TEST(BitsetField, ClrRange) {
+    const size_t nbit = 100;
+    // deliberately using non-standard container type
+    buffered::Bitset<uint16_t> field(nbit);
+    for (size_t ibegin=0ul; ibegin<nbit; ++ibegin){
+        for (size_t iend=ibegin+1; iend<nbit; ++iend) {
+            field.set();
+            field.clr_range(ibegin, iend);
+            for (size_t ibit=0ul; ibit<nbit; ++ibit){
+                if (ibit<ibegin) {ASSERT_TRUE(field.get(ibit));}
+                else if (ibit>=iend) {ASSERT_TRUE(field.get(ibit));}
+                else {ASSERT_FALSE(field.get(ibit));}
+            }
+        }
+    }
 }
