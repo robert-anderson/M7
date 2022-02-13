@@ -8,25 +8,100 @@
 
 #include <src/core/field/Fields.h>
 #include <src/core/util/ForeachVirtual.h>
+#include <src/core/table/BufferedFields.h>
 
 namespace mbf_foreach {
     using namespace foreach_virtual::rtnd;
 
     struct FrmOnv {
-        field::FrmOnv &m_mbf;
-        FrmOnv(field::FrmOnv &mbf) : m_mbf(mbf) {}
+        buffered::FrmOnv m_mbf;
+        FrmOnv(size_t nsite) : m_mbf(nsite) {}
         virtual void body() = 0;
         virtual void loop() = 0;
     };
 
-//    struct FrmOnvSpinConserve : FrmOnv {
-//        /**
-//         * iterator over a single spin channel
-//         */
-//        struct Foreach : Ordered<> {
-//            Foreach(size_t nsite, size_t nelec): Ordered<>(nsite, )
-//        };
-//    };
+    struct FrmOnvGeneral : FrmOnv {
+        struct Foreach : Ordered<> {
+            FrmOnvGeneral& m_context;
+            Foreach(FrmOnvGeneral& context, size_t nelec):
+                    Ordered<>(context.m_mbf.m_nspinorb, nelec), m_context(context){}
+
+            void body() override {
+                field::NdBitset<size_t, 2>& mbf = m_context.m_mbf;
+                mbf.zero();
+                mbf = inds();
+                m_context.body();
+            }
+        };
+        Foreach m_foreach;
+        FrmOnvGeneral(size_t nsite, size_t nelec): FrmOnv(nsite), m_foreach(*this, nelec){}
+
+        void loop() override {
+            m_foreach.loop();
+        }
+    };
+
+    struct FrmOnvSpins : FrmOnv {
+        struct Foreach : Ordered<> {
+            FrmOnvSpins& m_context;
+            Foreach(FrmOnvSpins& context, int ms2):
+                    Ordered<>(context.m_mbf.m_nsite, (context.m_mbf.m_nsite+ms2)/2), m_context(context){}
+
+            void body() override {
+                std::cout << inds() << std::endl;
+                m_context.m_mbf.set_spins(inds());
+                m_context.body();
+            }
+        };
+        Foreach m_foreach;
+        FrmOnvSpins(size_t nsite, int ms2): FrmOnv(nsite), m_foreach(*this, ms2){}
+
+        void loop() override {
+            m_foreach.loop();
+        }
+    };
+
+    struct FrmOnvSzConserve : FrmOnv {
+        /**
+         * iterator over a single spin channel
+         */
+        struct Foreach : Ordered<> {
+            FrmOnvSzConserve& m_context;
+            Foreach(FrmOnvSzConserve& context, size_t nelec):
+                Ordered<>(context.m_mbf.nsite(), nelec), m_context(context){}
+        };
+        /**
+         * iterator over inner spin channel
+         */
+        struct BetaForeach : Foreach {
+            BetaForeach(FrmOnvSzConserve& context, size_t nelec): Foreach(context, nelec){}
+            void body() override {
+                m_context.m_mbf.put_spin_channel(1, false);
+                m_context.m_mbf.set(m_context.m_mbf.m_nsite, inds());
+                m_context.body();
+            }
+        };
+        /**
+         * iterator over outer spin channel
+         */
+        struct AlphaForeach : Foreach {
+            AlphaForeach(FrmOnvSzConserve& context, size_t nelec): Foreach(context, nelec){}
+            void body() override {
+                m_context.m_mbf.put_spin_channel(0, false);
+                m_context.m_mbf.set(0, inds());
+                m_context.m_beta_foreach.loop();
+            }
+        };
+
+        AlphaForeach m_alpha_foreach;
+        BetaForeach m_beta_foreach;
+        FrmOnvSzConserve(size_t nsite, size_t nelec): FrmOnv(nsite),
+                                                      m_alpha_foreach(*this, nelec), m_beta_foreach(*this, nelec){}
+
+        void loop() override {
+            m_alpha_foreach.loop();
+        }
+    };
 
 }
 

@@ -155,3 +155,45 @@ size_t FrmOnvField::ispin(const size_t &ibit) const {
 size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite) const {
     return ibit(ispin, isite, m_nsite);
 }
+
+void FrmOnvField::set(const size_t &bit_offset, const defs::inds &setbits) {
+    for(auto& i: setbits) set(bit_offset+i);
+}
+
+void FrmOnvField::set(const size_t &site_offset, const defs::inds &setbits_alpha, const defs::inds &setbits_beta) {
+    for(auto& i: setbits_alpha) set({0, site_offset+i});
+    for(auto& i: setbits_beta) set({1, site_offset+i});
+}
+
+void FrmOnvField::set(const defs::inds &setbits_alpha, const defs::inds &setbits_beta) {
+    zero();
+    for(auto& i: setbits_alpha) set({0, i});
+    for(auto& i: setbits_beta) set({1, i});
+}
+
+void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
+    DEBUG_ASSERT_LE(alpha_sites.size(), m_nsite, "can't have more spins than sites");
+    zero();
+    auto it = alpha_sites.cbegin();
+    for (size_t isite=0ul; isite<m_nsite; ++isite){
+        if (it==alpha_sites.cend() || *it>isite) set({1, isite});
+        else {
+            set({0, isite});
+            ++it;
+        };
+    }
+}
+
+void FrmOnvField::put_spin_channel(const size_t &ispin, bool set) {
+    auto ibegin = ibit(ispin, 0);
+    put_range(ibegin, ibegin+m_nsite, set);
+}
+
+void FrmOnvField::clr(const size_t &bit_offset, const defs::inds &clrbits) {
+    for(auto& i: clrbits) clr(bit_offset+i);
+}
+
+void FrmOnvField::clr(const size_t &site_offset, const defs::inds &clrbits_alpha, const defs::inds &clrbits_beta) {
+    for(auto& i: clrbits_alpha) clr({0, site_offset+i});
+    for(auto& i: clrbits_beta) clr({1, site_offset+i});
+}

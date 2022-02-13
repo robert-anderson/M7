@@ -33,34 +33,19 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     FrmOnvField &operator=(std::pair<const defs::inds &, const defs::inds &> setbits);
 
-    void set(const size_t& bit_offset, const defs::inds& setbits) {
-        for(auto& i: setbits) set(bit_offset+i);
-    }
+    void set(const size_t& bit_offset, const defs::inds& setbits);
 
-    void set(const size_t& site_offset, const defs::inds& setbits_alpha, const defs::inds& setbits_beta) {
-        for(auto& i: setbits_alpha) set({0, site_offset+i});
-        for(auto& i: setbits_beta) set({1, site_offset+i});
-    }
+    void set(const size_t& site_offset, const defs::inds& setbits_alpha, const defs::inds& setbits_beta);
 
-    void set(const defs::inds& setbits_alpha, const defs::inds& setbits_beta) {
-        zero();
-        for(auto& i: setbits_alpha) set({0, i});
-        for(auto& i: setbits_beta) set({1, i});
-    }
+    void set(const defs::inds& setbits_alpha, const defs::inds& setbits_beta);
 
-    void put_spin_channel(const size_t& ispin, bool set){
-        auto ibegin = ibit(ispin, 0);
-        put_range(ibegin, ibegin+m_nsite, set);
-    }
+    void set_spins(const defs::inds& alpha_sites);
 
-    void clr(const size_t& bit_offset, const defs::inds& clrbits) {
-        for(auto& i: clrbits) clr(bit_offset+i);
-    }
+    void put_spin_channel(const size_t& ispin, bool set);
 
-    void clr(const size_t& site_offset, const defs::inds& clrbits_alpha, const defs::inds& clrbits_beta) {
-        for(auto& i: clrbits_alpha) clr({0, site_offset+i});
-        for(auto& i: clrbits_beta) clr({1, site_offset+i});
-    }
+    void clr(const size_t& bit_offset, const defs::inds& clrbits);
+
+    void clr(const size_t& site_offset, const defs::inds& clrbits_alpha, const defs::inds& clrbits_beta);
 
     void excite(const size_t &i, const size_t &j) {
         auto* dptr = reinterpret_cast<size_t *>(begin());
