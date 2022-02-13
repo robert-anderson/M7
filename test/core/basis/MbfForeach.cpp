@@ -34,7 +34,7 @@ namespace mbf_foreach_test {
             }
 
             void body() override {
-                ASSERT_TRUE(m_mbf == m_chk_inds[iiter()]);
+                ASSERT_TRUE(value() == m_chk_inds[iiter()]);
             }
         };
 
@@ -53,7 +53,7 @@ namespace mbf_foreach_test {
             }
 
             void body() override {
-                ASSERT_TRUE(m_mbf == m_chk_inds[iiter()]);
+                ASSERT_TRUE(value() == m_chk_inds[iiter()]);
             }
         };
 
@@ -93,7 +93,7 @@ namespace mbf_foreach_test {
             }
 
             void body() override {
-                ASSERT_TRUE(m_mbf == m_chk_inds[iiter()]);
+                ASSERT_TRUE(value() == m_chk_inds[iiter()]);
             }
         };
     }
@@ -138,7 +138,7 @@ namespace mbf_foreach_test {
             }
 
             void body() override {
-                ASSERT_TRUE(m_mbf == m_chk_inds[iiter()]);
+                ASSERT_TRUE(value() == m_chk_inds[iiter()]);
             }
         };
 
