@@ -107,7 +107,7 @@ TEST(BitsetEnumerator, DeterminantSet) {
 
     OccupiedOrbitals occorbs(det);
     for (size_t i=0; i<occorbs.m_nind; ++i){
-        std::cout << occorbs.m_inds[i] <<std::endl;
+        std::cout << occorbs.m_value[i] <<std::endl;
     }
 
 }

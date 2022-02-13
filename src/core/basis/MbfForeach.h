@@ -18,6 +18,7 @@ namespace mbf_foreach {
         FrmOnv(size_t nsite) : m_mbf(nsite) {}
         virtual void body() = 0;
         virtual void loop() = 0;
+        virtual size_t iiter() = 0;
     };
 
     struct FrmOnvGeneral : FrmOnv {
@@ -29,7 +30,7 @@ namespace mbf_foreach {
             void body() override {
                 field::NdBitset<size_t, 2>& mbf = m_context.m_mbf;
                 mbf.zero();
-                mbf = inds();
+                mbf = value();
                 m_context.body();
             }
         };
@@ -38,6 +39,10 @@ namespace mbf_foreach {
 
         void loop() override {
             m_foreach.loop();
+        }
+
+        size_t iiter() override {
+            return m_foreach.iiter();
         }
     };
 
@@ -48,8 +53,7 @@ namespace mbf_foreach {
                     Ordered<>(context.m_mbf.m_nsite, (context.m_mbf.m_nsite+ms2)/2), m_context(context){}
 
             void body() override {
-                std::cout << inds() << std::endl;
-                m_context.m_mbf.set_spins(inds());
+                m_context.m_mbf.set_spins(value());
                 m_context.body();
             }
         };
@@ -58,6 +62,10 @@ namespace mbf_foreach {
 
         void loop() override {
             m_foreach.loop();
+        }
+
+        size_t iiter() override {
+            return m_foreach.iiter();
         }
     };
 
@@ -77,7 +85,7 @@ namespace mbf_foreach {
             BetaForeach(FrmOnvSzConserve& context, size_t nelec): Foreach(context, nelec){}
             void body() override {
                 m_context.m_mbf.put_spin_channel(1, false);
-                m_context.m_mbf.set(m_context.m_mbf.m_nsite, inds());
+                m_context.m_mbf.set(m_context.m_mbf.m_nsite, value());
                 m_context.body();
             }
         };
@@ -88,7 +96,7 @@ namespace mbf_foreach {
             AlphaForeach(FrmOnvSzConserve& context, size_t nelec): Foreach(context, nelec){}
             void body() override {
                 m_context.m_mbf.put_spin_channel(0, false);
-                m_context.m_mbf.set(0, inds());
+                m_context.m_mbf.set(0, value());
                 m_context.m_beta_foreach.loop();
             }
         };
@@ -100,6 +108,10 @@ namespace mbf_foreach {
 
         void loop() override {
             m_alpha_foreach.loop();
+        }
+
+        size_t iiter() override {
+            return m_alpha_foreach.iiter()*m_beta_foreach.m_niter + m_beta_foreach.iiter();
         }
     };
 

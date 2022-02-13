@@ -4,7 +4,33 @@
 
 #include <src/core/table/BufferedFields.h>
 #include <src/core/basis/MbfForeach.h>
+#include <src/core/table/BufferedTable.h>
 #include "gtest/gtest.h"
+
+namespace mbf_foreach_test {
+    namespace spins {
+        struct Foreach : mbf_foreach::FrmOnvSpins {
+            std::vector<defs::inds> m_chk_inds;
+
+            Foreach() : mbf_foreach::FrmOnvSpins(4, 0) {
+                m_chk_inds.reserve(6);
+                m_chk_inds.push_back({0, 1, 6, 7});
+                m_chk_inds.push_back({0, 2, 5, 7});
+                m_chk_inds.push_back({1, 2, 4, 7});
+                m_chk_inds.push_back({0, 3, 5, 6});
+                m_chk_inds.push_back({1, 3, 4, 6});
+                m_chk_inds.push_back({2, 3, 4, 5});
+            }
+
+            void body() override {
+                std::cout << m_mbf << std::endl;
+                std::cout << iiter() << std::endl;
+                std::cout << m_chk_inds[iiter()] << std::endl;
+                ASSERT_TRUE(m_mbf == m_chk_inds[iiter()]);
+            }
+        };
+    }
+}
 
 TEST(MbfForeach, FrmOnvGeneral) {
 
@@ -22,17 +48,8 @@ TEST(MbfForeach, FrmOnvGeneral) {
 }
 
 TEST(MbfForeach, FrmOnvSpins) {
-
-    struct Foreach : mbf_foreach::FrmOnvSpins {
-        Foreach(size_t nsite):
-                mbf_foreach::FrmOnvSpins(nsite, 0){}
-
-        void body() override {
-            std::cout << m_mbf << std::endl;
-        }
-    };
-
-    Foreach foreach(6);
+    using namespace mbf_foreach_test::spins;
+    Foreach foreach;
     foreach.loop();
 }
 

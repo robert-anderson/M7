@@ -27,6 +27,12 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::in
     return *this;
 }
 
+bool FrmOnvField::operator==(const defs::inds &inds) const {
+    if (nsetbit()!=inds.size()) return false;
+    for (const auto& ind: inds) if (!get(ind)) return false;
+    return true;
+}
+
 void FrmOnvField::foreach(const std::function<void(const size_t &)> &body_fn) const {
     size_t work;
     for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
