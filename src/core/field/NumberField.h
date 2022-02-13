@@ -74,6 +74,17 @@ struct NdNumberField : NumberFieldBase {
         return *this;
     }
 
+    template<typename U>
+    bool operator==(const std::vector<U> &v) const {
+        DEBUG_ASSERT_EQ(v.size(), nelement(), "Vector size does not match that of numeric field");
+        for (size_t i=0ul; i<m_nelement; ++i) if (v[i]!=(*this)[i]) return false;
+        return true;
+    }
+
+    bool operator==(const NdNumberField &other) const {
+        return FieldBase::operator==(other);
+    }
+
     T sum_over(const defs::inds& inds) const {
         T tot{};
         for (const auto& ind: inds) tot+=(*this)[ind];

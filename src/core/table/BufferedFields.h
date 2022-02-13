@@ -145,6 +145,7 @@ namespace buffered {
 
     struct BosOnv : BufferedField<field::BosOnv> {
         using field::BosOnv::operator=;
+        using field::BosOnv::operator==;
         BosOnv(size_t nmode) : BufferedField<field::BosOnv>(nmode){}
         BosOnv(BasisDims bd) : BufferedField<field::BosOnv>(bd){}
         BosOnv(const BosOnv& other) : BosOnv(other.m_nmode){

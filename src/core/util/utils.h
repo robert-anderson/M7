@@ -612,15 +612,23 @@ namespace complex_utils {
 }
 
 namespace ci_utils {
-    static size_t nalpha(size_t nelec, int spin) {
-        size_t spin_odd = std::abs(spin) % 2;
+    /**
+     * @param nelec
+     *  total number of electrons in determinant
+     * @param ms2
+     *  total z component of spin 2*(nalpha-nbeta)
+     * @return
+     *  number of alpha (spin channel 0) electrons
+     */
+    static size_t nalpha(size_t nelec, int ms2) {
+        size_t spin_odd = std::abs(ms2) % 2;
         ASSERT(nelec % 2 == spin_odd);
-        size_t nalpha = nelec / 2 + (std::abs(spin)) / 2 + spin_odd;
-        return spin >= 0 ? nalpha : nelec - nalpha;
+        size_t nalpha = nelec / 2 + (std::abs(ms2)) / 2 + spin_odd;
+        return ms2 >= 0 ? nalpha : nelec - nalpha;
     }
 
-    static size_t nbeta(size_t nelec, int spin) {
-        return nelec - nalpha(nelec, spin);
+    static size_t nbeta(size_t nelec, int ms2) {
+        return nelec - nalpha(nelec, ms2);
     }
 
     static size_t fermion_dim(size_t nsite, size_t nelec) {
