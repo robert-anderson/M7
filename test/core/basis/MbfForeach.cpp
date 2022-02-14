@@ -13,7 +13,8 @@ namespace mbf_foreach_test {
         struct General : mbf_foreach::frm::General {
             const std::vector<defs::inds> m_chk_inds;
 
-            General() : mbf_foreach::frm::General(3, 4), m_chk_inds(chk_inds()) {}
+            General(field::FrmOnv *mbf = nullptr) : mbf_foreach::frm::General(3, 4, mbf), m_chk_inds(chk_inds()) {}
+            General(const General &other, field::FrmOnv *mbf = nullptr) : General(mbf) {}
 
             void body() override {
                 ASSERT_LT(iiter(), m_chk_inds.size());
@@ -32,7 +33,8 @@ namespace mbf_foreach_test {
         struct Spins : mbf_foreach::frm::Spins {
             const std::vector<defs::inds> m_chk_inds;
 
-            Spins() : mbf_foreach::frm::Spins(4, 0), m_chk_inds(chk_inds()) {}
+            Spins(field::FrmOnv *mbf = nullptr) : mbf_foreach::frm::Spins(4, 0, mbf), m_chk_inds(chk_inds()) {}
+            Spins(const Spins &other, field::FrmOnv *mbf = nullptr) : Spins(mbf) {}
 
             void body() override {
                 ASSERT_LT(iiter(), m_chk_inds.size());
@@ -75,7 +77,7 @@ namespace mbf_foreach_test {
         struct General : mbf_foreach::bos::General {
             const std::vector<defs::inds> m_chk_inds;
 
-            General(field::BosOnv *mbf = nullptr) : mbf_foreach::bos::General(3, 2), 
+            General(field::BosOnv *mbf = nullptr) : mbf_foreach::bos::General(3, 2, mbf),
                 m_chk_inds(chk_inds()) {}
 
             General(const General &other, field::BosOnv *mbf = nullptr) : General(mbf) {}
@@ -96,15 +98,18 @@ namespace mbf_foreach_test {
     }
 
     namespace frm_bos {
-        typedef mbf_foreach::frm_bos::Product<frm::Ms2Conserve, bos::General> product_base_t;
 
-        struct ProductMs2Conserve : product_base_t {
+        template<typename frm_t, typename bos_t>
+        struct Product : mbf_foreach::frm_bos::Product<frm_t, bos_t> {
+            typedef mbf_foreach::frm_bos::Product<frm_t, bos_t> base_t;
             const std::vector<defs::inds> m_frm_chk_inds;
             const std::vector<defs::inds> m_bos_chk_inds;
 
-            ProductMs2Conserve() : product_base_t({}, {}),
-                m_frm_chk_inds(frm::Ms2Conserve::chk_inds()), m_bos_chk_inds(bos::General::chk_inds()){}
+            Product() : base_t({}, {}),
+                m_frm_chk_inds(frm_t::chk_inds()), m_bos_chk_inds(bos_t::chk_inds()){}
 
+            using base_t::iiter;
+            using base_t::value;
             void body() override {
                 ASSERT_LT(iiter(), m_frm_chk_inds.size()*m_bos_chk_inds.size());
                 auto iiter_frm = iiter()/m_bos_chk_inds.size();
@@ -120,33 +125,47 @@ TEST(MbfForeach, FrmGeneral) {
     using namespace mbf_foreach_test::frm;
     General foreach;
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_chk_inds.size());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_chk_inds.size());
 }
 
 TEST(MbfForeach, FrmSpins) {
     using namespace mbf_foreach_test::frm;
     Spins foreach;
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_chk_inds.size());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_chk_inds.size());
 }
 
 TEST(MbfForeach, FrmMs2Conserve) {
     using namespace mbf_foreach_test::frm;
     Ms2Conserve foreach;
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_chk_inds.size());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_chk_inds.size());
 }
 
 TEST(MbfForeach, BosGeneral) {
     using namespace mbf_foreach_test::bos;
     General foreach;
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_chk_inds.size());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_chk_inds.size());
 }
 
-TEST(MbfForeach, FrmBosProduct) {
-    using namespace mbf_foreach_test::frm_bos;
-    ProductMs2Conserve foreach;
+TEST(MbfForeach, FrmBosGeneral) {
+    using namespace mbf_foreach_test;
+    frm_bos::Product<frm::General, bos::General> foreach;
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_frm_chk_inds.size()*foreach.m_bos_chk_inds.size());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_frm_chk_inds.size()*foreach.m_bos_chk_inds.size());
+}
+
+TEST(MbfForeach, FrmBosSpins) {
+    using namespace mbf_foreach_test;
+    frm_bos::Product<frm::Spins, bos::General> foreach;
+    foreach.loop();
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_frm_chk_inds.size()*foreach.m_bos_chk_inds.size());
+}
+
+TEST(MbfForeach, FrmBosMs2Conserve) {
+    using namespace mbf_foreach_test;
+    frm_bos::Product<frm::Ms2Conserve, bos::General> foreach;
+    foreach.loop();
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_frm_chk_inds.size()*foreach.m_bos_chk_inds.size());
 }

@@ -30,10 +30,6 @@ namespace foreach_virtual_test {
             DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
             if (value() != m_chk_inds[iiter()]) m_pass = false;
         }
-        
-        bool value_is_null() {
-            return std::all_of(value().cbegin(), value().cend(), [](size_t i){return i==~0ul;});
-        }
     };
 
     template<size_t nind, bool strict = true, bool ascending = true>
@@ -56,10 +52,6 @@ namespace foreach_virtual_test {
             DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
             if (value() != m_chk_inds[iiter()]) m_pass = false;
         }
-
-        bool value_is_null() {
-            return std::all_of(value().cbegin(), value().cend(), [](size_t i){return i==~0ul;});
-        }
     };
 
     struct RtndUnrestricted : rtnd::Unrestricted {
@@ -79,10 +71,6 @@ namespace foreach_virtual_test {
         void body() override {
             DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
             if (value() != m_chk_inds[iiter()]) m_pass = false;
-        }
-
-        bool value_is_null() {
-            return std::all_of(value().cbegin(), value().cend(), [](size_t i){return i==~0ul;});
         }
     };
 
@@ -105,10 +93,6 @@ namespace foreach_virtual_test {
         void body() override {
             DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
             if (value() != m_chk_inds[iiter()]) m_pass = false;
-        }
-
-        bool value_is_null() {
-            return std::all_of(value().cbegin(), value().cend(), [](size_t i){return i==~0ul;});
         }
     };
 }
@@ -161,14 +145,12 @@ TEST(ForeachVirtual, CtndUnrestricted3) {
     CtndUnrestricted<3> foreach(shape, chk_inds);
 
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -232,14 +214,12 @@ TEST(ForeachVirtual, CtndOrderedStrictAsc3) {
     };
     CtndOrdered<3, true, true> foreach(n, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -303,14 +283,12 @@ TEST(ForeachVirtual, CtndOrderedStrictDesc3) {
     };
     CtndOrdered<3, true, false> foreach(n, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -340,14 +318,12 @@ TEST(ForeachVirtual, CtndOrderedAsc3) {
     };
     CtndOrdered<3, false, true> foreach(n, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -377,14 +353,12 @@ TEST(ForeachVirtual, CtndOrderedDesc3) {
     };
     CtndOrdered<3, false, false> foreach(n, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -431,14 +405,12 @@ TEST(ForeachVirtual, RtndUnrestricted3) {
     };
     RtndUnrestricted foreach(shape, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -499,14 +471,12 @@ TEST(ForeachVirtual, RtndOrderedStrictAsc3) {
     };
     RtndOrdered<true, true> foreach(n, 3, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -570,14 +540,12 @@ TEST(ForeachVirtual, RtndOrderedStrictDesc3) {
     };
     RtndOrdered<true, false> foreach(n, 3, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -607,14 +575,12 @@ TEST(ForeachVirtual, RtndOrderedAsc3) {
     };
     RtndOrdered<false, true> foreach(n, 3,chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }
 
@@ -644,13 +610,11 @@ TEST(ForeachVirtual, RtndOrderedDesc3) {
     };
     RtndOrdered<false, false> foreach(n, 3, chk_inds);
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 
     // check the loop works as required when reused
     foreach.loop();
-    ASSERT_EQ(foreach.iiter(), foreach.m_niter);
-    ASSERT_TRUE(foreach.value_is_null());
+    ASSERT_EQ(foreach.iiter()+1, foreach.m_niter);
     ASSERT_TRUE(foreach.m_pass);
 }

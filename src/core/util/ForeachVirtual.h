@@ -59,10 +59,6 @@ namespace foreach_virtual {
                 return std::accumulate(m_value.cbegin(), m_value.cend(), 0);
             }
 
-            void set_null_value() {
-                m_value.fill(~0ul);
-            }
-
             Base(size_t nterm) : m_niter(nterm) {}
 
             /**
@@ -82,14 +78,10 @@ namespace foreach_virtual {
                     m_iiter = ~0ul;
                     try {
                         throwing_loop();
-                        // if loop completes without early termination, increment to final value
-                        ++m_iiter;
-                        DEBUG_ASSERT_EQ(m_iiter, m_niter, "loop completed after incorrect number of iterations");
+                        DEBUG_ASSERT_EQ(m_iiter+1, m_niter, "loop completed after incorrect number of iterations");
                     }
                     catch (const ExitLoop &) {}
                 } else m_iiter = 0ul;
-                // leave value "undefined"
-                set_null_value();
             }
         };
 
@@ -251,19 +243,13 @@ namespace foreach_virtual {
              */
             const size_t m_niter;
 
-            const inds_t &value() const { return m_value; }
+            const inds_t &value() const;
 
-            const size_t &iiter() const { return m_iiter; }
+            const size_t &iiter() const;
 
-            size_t ind_sum() const {
-                return std::accumulate(m_value.cbegin(), m_value.cend(), 0ul);
-            }
+            size_t ind_sum() const;
 
-            void set_null_value() {
-                m_value.assign(m_nind, ~0ul);
-            }
-
-            Base(size_t nind, size_t nterm) : m_value(nind, 0), m_nind(nind), m_niter(nterm) {}
+            Base(size_t nind, size_t nterm);
 
             /**
              * function to be called each time a new set of indices is formed
@@ -281,57 +267,22 @@ namespace foreach_virtual {
              * exposed wrapper function which catches any instance of the ExitLoop exception thrown, and gracefully
              * handles the zero-dimensional edge case
              */
-            void loop() {
-                if (m_nind) {
-                    m_iiter = ~0ul;
-                    try {
-                        throwing_loop();
-                        // if loop completes without early termination, increment to final value
-                        ++m_iiter;
-                        DEBUG_ASSERT_EQ(m_iiter, m_niter, "loop completed after incorrect number of iterations");
-                    }
-                    catch (const ExitLoop &) {}
-                } else m_iiter = 0ul;
-                // leave value "undefined"
-                set_null_value();
-            }
+            void loop();
         };
 
         struct Unrestricted : Base {
             const inds_t m_shape;
         private:
-            static size_t nterm(const inds_t &shape) {
-                if (shape.empty()) return 0;
-                size_t n = 1;
-                for (const auto &i: shape) n *= i;
-                return n;
-            }
+            static size_t nterm(const inds_t &shape);
 
-            void level_loop(size_t ilevel) {
-                const auto &iind = ilevel - 1;
-                auto &ind = m_value[iind];
-                const auto &extent = m_shape[iind];
-                try {
-                    if (ilevel < m_nind)
-                        for (ind = 0ul; ind < extent; ++ind) level_loop(ilevel + 1);
-                    else {
-                        for (ind = 0ul; ind < extent; ++ind) {
-                            ++m_iiter;
-                            body();
-                        }
-                    }
-                }
-                catch (const ExitLoop& ex){throw ex;}
-            }
+            void level_loop(size_t ilevel);
         public:
-            Unrestricted(const inds_t &shape) : Base(shape.size(), nterm(shape)), m_shape(shape) {}
+            explicit Unrestricted(const inds_t &shape);
 
-            Unrestricted(const size_t &nind, const size_t &extent) : Unrestricted(std::vector<size_t>(nind, extent)) {}
+            Unrestricted(const size_t &nind, const size_t &extent);
 
         protected:
-            void throwing_loop() override {
-                level_loop(1);
-            }
+            void throwing_loop() override;
         };
 
         template<bool strict = true, bool ascending = true>
