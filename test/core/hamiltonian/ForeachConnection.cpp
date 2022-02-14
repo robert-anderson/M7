@@ -117,7 +117,7 @@ TEST(ForeachConnection, HubbardHolstein) {
                              conn.m_bos.m_cre.to_vector(), conn.m_bos.m_ann.to_vector()});
         std::cout << results.back().m_bos_ann << " " << results.back().m_bos_cre << std::endl;
     };
-    foreach_conn::frmbos::Holstein foreach(ham);
+    foreach_conn::frm_bos::Holstein foreach(ham);
 
     foreach.foreach<field::FrmBosOnv>(onv, fn, false);
 }

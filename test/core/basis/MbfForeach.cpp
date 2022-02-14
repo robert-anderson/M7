@@ -141,7 +141,14 @@ namespace mbf_foreach_test {
                 ASSERT_TRUE(value() == m_chk_inds[iiter()]);
             }
         };
+    }
 
+    namespace frm_bos {
+        typedef mbf_foreach::frm_bos::Product<frm::Ms2Conserve, bos::General> product_base_t;
+        struct ProductMs2Conserve : product_base_t {
+            std::vector<defs::inds> m_chk_inds;
+            ProductMs2Conserve() : product_base_t(frm::Ms2Conserve(), bos::General()) {}
+        };
     }
 }
 
@@ -163,4 +170,9 @@ TEST(MbfForeach, FrmMs2Conserve) {
 TEST(MbfForeach, BosGeneral) {
     using namespace mbf_foreach_test::bos;
     General().loop();
+}
+
+TEST(MbfForeach, FrmBosProduct) {
+    using namespace mbf_foreach_test::frm_bos;
+    ProductMs2Conserve().loop();
 }
