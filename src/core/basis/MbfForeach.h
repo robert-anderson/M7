@@ -55,7 +55,7 @@ namespace mbf_foreach {
         typedef std::function<void(const field_t&, size_t)> body_fn_t;
         body_fn_t m_body_fn;
     public:
-        Base(BasisDims bd, body_fn_t body_fn, field_t *mbf = nullptr) :
+        Base(BasisDims bd, body_fn_t body_fn = {}, field_t *mbf = nullptr) :
                 MbfForeach(bd), m_mbf_internal(bd), m_mbf(mbf ? mbf : &m_mbf_internal), m_body_fn(std::move(body_fn)) {}
 
         Base(const Base &other, field_t *mbf = nullptr) : Base(other.m_bd, other.m_body_fn, mbf) {}
@@ -73,7 +73,8 @@ namespace mbf_foreach {
 
         class Base : public mbf_foreach::Base<defs::Frm> {
         public:
-            Base(size_t nsite, body_fn_t body_fn, field_t *mbf = nullptr);
+            static constexpr size_t mbf_ind = defs::Frm;
+            Base(size_t nsite, body_fn_t body_fn = {}, field_t *mbf = nullptr);
 
             Base(const mbf_foreach::frm::Base &other, field_t *mbf);
         };
@@ -90,7 +91,7 @@ namespace mbf_foreach {
             Foreach m_foreach;
 
         public:
-            General(size_t nsite, size_t nelec, body_fn_t body_fn, field_t *mbf = nullptr);
+            General(size_t nsite, size_t nelec, body_fn_t body_fn = {}, field_t *mbf = nullptr);
 
             General(const General &other, field_t *mbf = nullptr);
 
@@ -116,7 +117,7 @@ namespace mbf_foreach {
             int ms2() const;
 
         public:
-            Spins(size_t nsite, int ms2, body_fn_t body_fn, field_t *mbf = nullptr);
+            Spins(size_t nsite, int ms2, body_fn_t body_fn = {}, field_t *mbf = nullptr);
 
             Spins(const Spins &other, field_t *mbf = nullptr);
 
@@ -165,7 +166,7 @@ namespace mbf_foreach {
             int ms2() const;
 
         public:
-            Ms2Conserve(size_t nsite, size_t nelec, int ms2, body_fn_t body_fn, field_t *mbf = nullptr);
+            Ms2Conserve(size_t nsite, size_t nelec, int ms2, body_fn_t body_fn = {}, field_t *mbf = nullptr);
 
             Ms2Conserve(const Ms2Conserve &other, field_t *mbf = nullptr);
 
@@ -181,7 +182,8 @@ namespace mbf_foreach {
 
         class Base : public mbf_foreach::Base<defs::Bos> {
         public:
-            Base(size_t nmode, body_fn_t body_fn, field_t *mbf = nullptr);
+            static constexpr size_t mbf_ind = defs::Bos;
+            Base(size_t nmode, body_fn_t body_fn = {}, field_t *mbf = nullptr);
 
             Base(const Base &other, field_t *mbf = nullptr);
         };
@@ -199,7 +201,7 @@ namespace mbf_foreach {
 
             Foreach m_foreach;
         public:
-            General(size_t nmode, size_t nboson_max, body_fn_t body_fn, field::BosOnv *mbf = nullptr);
+            General(size_t nmode, size_t nboson_max, body_fn_t body_fn = {}, field::BosOnv *mbf = nullptr);
 
             General(const General &other, field::BosOnv *mbf = nullptr);
 
@@ -215,7 +217,8 @@ namespace mbf_foreach {
 
         class Base : public mbf_foreach::Base<defs::FrmBos> {
         public:
-            Base(BasisDims bd, body_fn_t body_fn, field_t *mbf = nullptr) :
+            static constexpr size_t mbf_ind = defs::FrmBos;
+            Base(BasisDims bd, body_fn_t body_fn = {}, field_t *mbf = nullptr) :
                     mbf_foreach::Base<defs::FrmBos>(bd, std::move(body_fn), mbf) {}
 
             Base(const Base &other, field_t *mbf = nullptr) :
@@ -262,7 +265,7 @@ namespace mbf_foreach {
             BosForeach m_bos_foreach;
 
             Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach,
-                        body_fn_t body_fn, field_t *mbf=nullptr):
+                        body_fn_t body_fn = {}, field_t *mbf=nullptr):
                     Base({frm_foreach.m_bd.m_nsite, bos_foreach.m_bd.m_nmode}, std::move(body_fn), mbf),
                     m_frm_foreach(*this, frm_foreach), m_bos_foreach(*this, bos_foreach) {}
 
@@ -288,8 +291,9 @@ namespace mbf_foreach {
         };
     }
 
-    template<size_t mbf_ind, typename foreach_t>
+    template<typename foreach_t>
     class Pair : public MbfForeach {
+        static constexpr size_t mbf_ind = foreach_t::mbf_ind;
         static_assert(std::is_base_of<Base<mbf_ind>, foreach_t>::value,
                 "template arg foreach_t is not compatible with mbf_ind");
     protected:
@@ -335,7 +339,7 @@ namespace mbf_foreach {
             return m_outer.niter()*m_inner.niter();
         }
 
-        Pair(const foreach_t &foreach, body_fn_t body_fn):
+        Pair(const foreach_t &foreach, body_fn_t body_fn = {}):
             MbfForeach(foreach), m_body_fn(body_fn), m_inner(*this, foreach), m_outer(*this, foreach){}
 
     };
