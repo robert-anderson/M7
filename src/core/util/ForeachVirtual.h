@@ -8,14 +8,13 @@
 #include <src/core/parallel/MPIAssert.h>
 #include "utils.h"
 
+class ExitLoop : public std::exception {
+    virtual const char *what() const throw() {
+        return "Loop body requested early termination of loop";
+    }
+};
+
 namespace foreach_virtual {
-
-    class ExitLoop : public std::exception {
-        virtual const char *what() const throw() {
-            return "Loop body requested early termination of loop";
-        }
-    };
-
     /**
      * "compile time number of dimensions"
      */
@@ -75,7 +74,6 @@ namespace foreach_virtual {
         public:
             void loop() {
                 if (nind) {
-                    m_iiter = ~0ul;
                     try {
                         throwing_loop();
                         DEBUG_ASSERT_EQ(m_iiter+1, m_niter, "loop completed after incorrect number of iterations");
@@ -157,6 +155,7 @@ namespace foreach_virtual {
 
         protected:
             void throwing_loop() override {
+                m_iiter = ~0ul;
                 top_loop(tags::Bool<nind == 0>());
             }
         };
@@ -212,6 +211,7 @@ namespace foreach_virtual {
 
         protected:
             void throwing_loop() override {
+                m_iiter = ~0ul;
                 top_loop(tags::Bool<nind == 0>());
             }
         };
@@ -256,13 +256,11 @@ namespace foreach_virtual {
              */
             virtual void body() = 0;
 
-        protected:
             /**
              * function with defines the looping logic, calls body, and increments the iteration counter
              */
             virtual void throwing_loop() = 0;
 
-        public:
             /**
              * exposed wrapper function which catches any instance of the ExitLoop exception thrown, and gracefully
              * handles the zero-dimensional edge case
@@ -281,7 +279,6 @@ namespace foreach_virtual {
 
             Unrestricted(const size_t &nind, const size_t &extent);
 
-        protected:
             void throwing_loop() override;
         };
 
@@ -317,8 +314,8 @@ namespace foreach_virtual {
             Ordered(const size_t &n, const size_t &r) :
                     Base(r, nterm(n, r)), m_n(n) {}
 
-        protected:
             void throwing_loop() override {
+                m_iiter = ~0ul;
                 level_loop(1);
             }
         };

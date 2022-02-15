@@ -29,8 +29,12 @@ namespace mbf_foreach {
         /**
          * iterates over all values and iiters
          */
-        virtual void loop() = 0;
+        void loop() {
+            try {throwing_loop();}
+            catch (const ExitLoop&){}
+        }
 
+        virtual void throwing_loop() = 0;
         /**
          * @return
          *  current value of the iteration counter
@@ -95,7 +99,7 @@ namespace mbf_foreach {
 
             General(const General &other, field_t *mbf = nullptr);
 
-            void loop() override;
+            void throwing_loop() override;
 
             size_t iiter() const override;
 
@@ -121,7 +125,7 @@ namespace mbf_foreach {
 
             Spins(const Spins &other, field_t *mbf = nullptr);
 
-            void loop() override;
+            void throwing_loop() override;
 
             size_t iiter() const override;
 
@@ -170,7 +174,7 @@ namespace mbf_foreach {
 
             Ms2Conserve(const Ms2Conserve &other, field_t *mbf = nullptr);
 
-            void loop() override;
+            void throwing_loop() override;
 
             size_t iiter() const override;
 
@@ -205,7 +209,7 @@ namespace mbf_foreach {
 
             General(const General &other, field::BosOnv *mbf = nullptr);
 
-            void loop() override;
+            void throwing_loop() override;
 
             size_t iiter() const override;
 
@@ -256,7 +260,7 @@ namespace mbf_foreach {
 
                 void body() override {
                     frm_foreach_t::body();
-                    m_context.m_bos_foreach.loop();
+                    m_context.m_bos_foreach.throwing_loop();
                 }
             };
 
@@ -272,8 +276,8 @@ namespace mbf_foreach {
             Product(const Product &other, field_t *mbf = nullptr) :
                     Product(other.m_frm_foreach, other.m_bos_foreach, other.m_body_fn, mbf) {}
 
-            void loop() override {
-                m_frm_foreach.loop();
+            void throwing_loop() override {
+                m_frm_foreach.throwing_loop();
             }
 
             size_t iiter() const override {
@@ -316,7 +320,7 @@ namespace mbf_foreach {
             Outer(Pair& context, const foreach_t &other) : foreach_t(other, nullptr), m_context(context){}
             void body() override {
                 foreach_t::body();
-                m_context.m_inner.loop();
+                m_context.m_inner.throwing_loop();
             }
         };
 
@@ -327,8 +331,8 @@ namespace mbf_foreach {
             if (m_body_fn) m_body_fn(m_outer.mbf(), m_outer.iiter(), m_inner.mbf(), m_inner.iiter());
         }
     public:
-        void loop() override {
-            m_outer.loop();
+        void throwing_loop() override {
+            m_outer.throwing_loop();
         }
 
         size_t iiter() const override {

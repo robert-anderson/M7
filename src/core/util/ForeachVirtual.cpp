@@ -56,5 +56,6 @@ foreach_virtual::rtnd::Unrestricted::Unrestricted(const size_t &nind, const size
     Unrestricted(std::vector<size_t>(nind, extent)) {}
 
 void foreach_virtual::rtnd::Unrestricted::throwing_loop() {
+    m_iiter = ~0ul;
     level_loop(1);
 }

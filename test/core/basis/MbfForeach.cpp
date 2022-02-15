@@ -70,6 +70,17 @@ TEST(MbfForeach, FrmGeneral) {
     ASSERT_EQ(foreach.iiter() + 1, chk_inds.size());
 }
 
+TEST(MbfForeach, FrmGeneralEarlyExit) {
+    using namespace mbf_foreach_test;
+    const auto chk_inds = frm::general::chk_inds();
+    auto fn = [&chk_inds](const field::FrmOnv &field, size_t iiter) {
+        if (iiter==8) throw ExitLoop();
+    };
+    mbf_foreach::frm::General foreach(3, 4, fn);
+    foreach.loop();
+    ASSERT_EQ(foreach.iiter(), 8);
+}
+
 TEST(MbfForeach, FrmGeneralPair) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
@@ -114,6 +125,16 @@ TEST(MbfForeach, BosGeneral) {
     mbf_foreach::bos::General foreach(3, 2, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, chk_inds.size());
+}
+
+TEST(MbfForeach, BosGeneralEarlyExit) {
+    using namespace mbf_foreach_test;
+    auto fn = [](const field::BosOnv &field, size_t iiter) {
+        if (iiter==8) throw ExitLoop();
+    };
+    mbf_foreach::bos::General foreach(3, 2, fn);
+    foreach.loop();
+    ASSERT_EQ(foreach.iiter(), 8);
 }
 
 TEST(MbfForeach, BosGeneralPair) {
@@ -162,6 +183,19 @@ TEST(MbfForeach, FrmBosSpins) {
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::General> foreach(outer, inner, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, frm_chk_inds.size() * bos_chk_inds.size());
+}
+
+
+TEST(MbfForeach, FrmBosSpinsEarlyExit) {
+    using namespace mbf_foreach_test;
+    auto fn = [](const field::FrmBosOnv &field, size_t iiter) {
+        if (iiter==8) throw ExitLoop();
+    };
+    mbf_foreach::frm::Spins outer(4, 0);
+    mbf_foreach::bos::General inner(3, 2);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::General> foreach(outer, inner, fn);
+    foreach.loop();
+    ASSERT_EQ(foreach.iiter(), 8);
 }
 
 
