@@ -5,48 +5,6 @@
 #include "Dense.h"
 
 
-void dense::diag_inplace(SquareMatrix<double> &mat, std::vector<double> &evals) {
-    const char jobz = 'V';
-    const char uplo = 'U';
-    const int n = mat.nrow();
-    const int lwork = std::max(1, 3 * n - 1);
-    std::vector<double> work(lwork);
-    int info;
-    evals.resize(n);
-    dsyev_(&jobz, &uplo, &n, mat.ptr(), &n, evals.data(), work.data(), &lwork, &info);
-}
-
-void dense::diag_inplace(SquareMatrix<std::complex<double>> &mat, std::vector<double> &evals) {
-    const char jobz = 'V';
-    const char uplo = 'U';
-    const int n = mat.nrow();
-    const int lwork = std::max(1, 3 * n - 1);
-    std::vector<std::complex<double>> work(lwork);
-    std::vector<double> rwork(std::max(1, 3 * n - 2));
-    int info;
-    evals.resize(n);
-    zheev_(&jobz, &uplo, &n, mat.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
-}
-
-void dense::diagonalize(SquareMatrix<double>& mat, std::vector<std::complex<double>>& evals) {
-    char jobvl = 'N';
-    char jobvr = 'N';
-    const int n = mat.nrow();
-    std::vector<double> wr(n);
-    std::vector<double> wi(n);
-    const int ldvl = 1;
-    const int ldvr = 1;
-    const int lwork = std::max(1, 3 * n);
-    int info;
-    std::vector<double> work(lwork);
-    dgeev_(&jobvl, &jobvr, &n, mat.ptr(), &n, wr.data(), wi.data(), nullptr,
-           &ldvl, nullptr, &ldvr, work.data(), &lwork, &info);
-    evals.clear();
-    evals.reserve(n);
-    for (size_t i=0ul; i<mat.nrow(); ++i) evals.push_back({wr[i], wi[i]});
-}
-
-
 dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq,
                                 char transp, char transq, size_t nrowr, size_t ncolr) :
         m_transa(valid_trans(transq)), m_transb(valid_trans(transp)),
@@ -84,4 +42,85 @@ char dense::GemmWrapper::valid_trans(char t) {
     auto i = valid_chars.find(t);
     REQUIRE_LT(i, valid_chars.size(), "invalid character given");
     return valid_chars[2*(i/2)];
+}
+
+void dense::diag(const dense::SquareMatrix<float> &mat, std::vector<float> &evals) {
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 3 * n - 1);
+    std::vector<float> work(lwork);
+    int info;
+    evals.resize(n);
+    auto a = mat;
+    ssyev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+}
+
+void dense::diag(const dense::SquareMatrix<float> &mat, dense::SquareMatrix<float> &evecs, std::vector<float> &evals) {
+    REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 3 * n - 1);
+    std::vector<float> work(lwork);
+    int info;
+    evals.resize(n);
+    evecs = mat;
+    ssyev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+}
+
+void dense::diag(const dense::SquareMatrix<float> &mat, std::vector<std::complex<float>> &evals) {
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 3 * n - 1);
+    std::vector<float> work(lwork);
+    int info;
+    std::vector<float> real_evals(n, 0.0);
+    std::vector<float> imag_evals(n, 0.0);
+    auto a = mat;
+    sgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
+           nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
+    complex_utils::combine(real_evals, imag_evals, evals);
+}
+
+void dense::diag(const dense::SquareMatrix<double> &mat, std::vector<double> &evals) {
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 3 * n - 1);
+    std::vector<double> work(lwork);
+    int info;
+    evals.resize(n);
+    auto a = mat;
+    dsyev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+}
+
+void dense::diag(const dense::SquareMatrix<double> &mat, dense::SquareMatrix<double> &evecs, std::vector<double> &evals) {
+    REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 3 * n - 1);
+    std::vector<double> work(lwork);
+    int info;
+    evals.resize(n);
+    evecs = mat;
+    dsyev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+}
+
+void dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, std::vector<double> &evals) {
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 2 * n - 1);
+    const int lrwork = std::max(1, 3 * n - 1);
+    std::vector<std::complex<double>> work(lwork);
+    std::vector<double> rwork(lrwork);
+    int info;
+    evals.resize(n);
+    auto a = mat;
+    zheev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
+}
+
+void dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::SquareMatrix<std::complex<double>> &evecs,
+                 std::vector<double> &evals) {
+    REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 2 * n - 1);
+    const int lrwork = std::max(1, 3 * n - 1);
+    std::vector<std::complex<double>> work(lwork);
+    std::vector<double> rwork(lrwork);
+    int info;
+    evals.resize(n);
+    evecs = mat;
+    zheev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
 }

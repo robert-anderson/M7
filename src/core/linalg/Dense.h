@@ -23,6 +23,10 @@ class EigenSolver;
 extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,
                        float *work, const int *lwork, int *info);
 
+extern "C" void sgeev_(const char *jobvl, const char *jobvr, const int *n, float *a, const int *lda,
+                       float *wr, float *wi, float *vl, const int *ldvl, float *vr, const int *ldvr,
+                       float *work, const int *lwork, int *info);
+
 
 extern "C" void dsyev_(const char *jobz, const char *uplo, const int *n, double *a, const int *lda, double *w,
                        double *work, const int *lwork, int *info);
@@ -136,6 +140,7 @@ namespace dense {
 
         const size_t& nrow() const {return m_nrow;}
         const size_t& ncol() const {return m_ncol;}
+        std::pair<size_t, size_t> dims() const {return {nrow(), ncol()};}
 
         T* ptr(const size_t &irow=0) {
             return m_buffer.data()+index(irow, 0);
@@ -241,33 +246,6 @@ namespace dense {
         }
     };
 
-    template<typename T> class SquareMatrix;
-    /**
-     * double precision, real symmetric eigensolver
-     * @param mat
-     *  matrix to diagonalize in-place
-     * @param evals
-     *  vector whose elements hold the eigenvalues
-     */
-    void diag_inplace(SquareMatrix<double>& mat, std::vector<double>& evals);
-    /**
-     * double precision, complex hermitian eigensolver
-     * @param mat
-     *  matrix to diagonalize in-place
-     * @param evals
-     *  vector whose elements hold the eigenvalues
-     */
-    void diag_inplace(SquareMatrix<std::complex<double>> &mat, std::vector<double>& evals);
-
-    /**
-     * double precision, real non-symmetric eigensolver with no eigenvectors
-     * @param mat
-     *  matrix to diag_inplace
-     * @param evals
-     *  vector whose elements hold the eigenvalues
-     */
-    void diagonalize(SquareMatrix<double>& mat, std::vector<std::complex<double>>& evals);
-
     template<typename T>
     class SquareMatrix : public Matrix<T> {
     public:
@@ -276,13 +254,6 @@ namespace dense {
         SquareMatrix(const sparse::Matrix<T>& sparse) :
             SquareMatrix(std::max(sparse.nrow(), sparse.max_column_index()+1)){
             *this = sparse;
-        }
-
-        template<typename U>
-        std::vector<U> diag_inplace(){
-            std::vector<U> evals;
-            dense::diag_inplace(*this, evals);
-            return evals;
         }
     };
 
@@ -401,13 +372,23 @@ namespace dense {
      *    complex double  complex double   complex double  complex double  zgeev
      */
 
-//    static void ssyev(){}
-//
-//    static void diag(const Matrix<float>& a, std::vector<float>& d){
-//        char jobz = 'N';
-//        ssyev_(&jobz, )
-//
-//    }
+    void diag(const SquareMatrix<float>& mat, std::vector<float>& evals);
+
+    void diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, std::vector<float>& evals);
+
+    void diag(const SquareMatrix<float>& mat, std::vector<std::complex<float>>& evals);
+
+
+    void diag(const SquareMatrix<double>& mat, std::vector<double>& evals);
+
+    void diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, std::vector<double>& evals);
+
+
+    void diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+
+
+    void diag(const SquareMatrix<std::complex<double>>& mat,
+              SquareMatrix<std::complex<double>>& evecs, std::vector<double>& evals);
 }
 
 #endif //M7_DENSE_H

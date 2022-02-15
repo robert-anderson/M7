@@ -609,6 +609,14 @@ namespace complex_utils {
     static std::complex<double> normal_from_sector(const size_t &isector, const size_t &nsector) {
         return normal_from_polar(consts::two_pi * double(isector) / double(nsector));
     }
+
+    template<typename T>
+    static void combine(const std::vector<T>& real, const std::vector<T>& imag, std::vector<std::complex<T>>& v){
+        auto n = std::min(real.size(), imag.size());
+        v.clear();
+        v.reserve(n);
+        for (size_t i=0ul; i<n; ++i) v.push_back({real[i], imag[i]});
+    }
 }
 
 namespace ci_utils {

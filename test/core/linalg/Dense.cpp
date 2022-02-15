@@ -426,7 +426,9 @@ TEST(Dense, RealSymEig) {
     mat.set_row(2, {-1, -1, 2, -5});
     mat.set_row(3, {2, -1, -5, 4});
 
-    auto evals = mat.diag_inplace<double>();
+    dense::SquareMatrix<T> evecs(n);
+    std::vector<T> evals;
+    dense::diag(mat, evecs, evals);
 
     std::vector<T> evals_chk = {-2.84695223, -0.7346574, 4.90333541, 8.67827421};
 
@@ -437,13 +439,13 @@ TEST(Dense, RealSymEig) {
        [-0.29154909, -0.92861347,  0.02794618,  0.22780509],
        [ 0.26077289,  0.08247022, -0.60888775,  0.74461525]]
      */
-    dense::SquareMatrix<T> evecs(n);
-    evecs.set_row(0, {0.42674891, -0.30080954, -0.59964891, -0.6064818});
-    evecs.set_row(1, {0.81540297, -0.2009709, 0.51855174, 0.16072585});
-    evecs.set_row(2, {-0.29154909, -0.92861347, 0.02794618, 0.22780509});
-    evecs.set_row(3, {0.26077289, 0.08247022, -0.60888775, 0.74461525});
+    dense::SquareMatrix<T> evecs_chk(n);
+    evecs_chk.set_row(0, {0.42674891, -0.30080954, -0.59964891, -0.6064818});
+    evecs_chk.set_row(1, {0.81540297, -0.2009709, 0.51855174, 0.16072585});
+    evecs_chk.set_row(2, {-0.29154909, -0.92861347, 0.02794618, 0.22780509});
+    evecs_chk.set_row(3, {0.26077289, 0.08247022, -0.60888775, 0.74461525});
 
-    ASSERT_TRUE(mat.nearly_equal(evecs, 1e-7));
+    ASSERT_TRUE(evecs.nearly_equal(evecs_chk, 1e-7));
 }
 
 #if 0
