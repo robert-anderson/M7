@@ -24,6 +24,7 @@ namespace mbf_foreach {
         const BasisDims m_bd;
 
         MbfForeach(BasisDims bd) : m_bd(bd) {}
+        MbfForeach(const MbfForeach &other) : m_bd(other.m_bd) {}
 
         /**
          * iterates over all values and iiters
@@ -61,6 +62,10 @@ namespace mbf_foreach {
 
         virtual void body() {
             if (m_body_fn) m_body_fn(*m_mbf, iiter());
+        }
+
+        const field_t& mbf() const {
+            return *m_mbf;
         }
     };
 
@@ -262,7 +267,7 @@ namespace mbf_foreach {
                     m_frm_foreach(*this, frm_foreach), m_bos_foreach(*this, bos_foreach) {}
 
             Product(const Product &other, field_t *mbf = nullptr) :
-                    Base(other.m_frm_foreach, other.m_bos_foreach, other.m_body_fn, mbf) {}
+                    Product(other.m_frm_foreach, other.m_bos_foreach, other.m_body_fn, mbf) {}
 
             void loop() override {
                 m_frm_foreach.loop();
@@ -282,6 +287,58 @@ namespace mbf_foreach {
             }
         };
     }
+
+    template<size_t mbf_ind, typename foreach_t>
+    class Pair : public MbfForeach {
+        static_assert(std::is_base_of<Base<mbf_ind>, foreach_t>::value,
+                "template arg foreach_t is not compatible with mbf_ind");
+    protected:
+        typedef field::mbf_t<mbf_ind> field_t;
+        typedef std::function<void(const field_t&, size_t, const field_t&, size_t)> body_fn_t;
+
+        body_fn_t m_body_fn;
+
+        struct Inner : public foreach_t {
+            Pair& m_context;
+            Inner(Pair& context, const foreach_t &other) : foreach_t(other, nullptr), m_context(context){}
+            void body() override {
+                foreach_t::body();
+                m_context.body();
+            }
+        };
+
+        struct Outer : public foreach_t {
+            Pair& m_context;
+            Outer(Pair& context, const foreach_t &other) : foreach_t(other, nullptr), m_context(context){}
+            void body() override {
+                foreach_t::body();
+                m_context.m_inner.loop();
+            }
+        };
+
+        Inner m_inner;
+        Outer m_outer;
+
+        void body() {
+            if (m_body_fn) m_body_fn(m_outer.mbf(), m_outer.iiter(), m_inner.mbf(), m_inner.iiter());
+        }
+    public:
+        void loop() override {
+            m_outer.loop();
+        }
+
+        size_t iiter() const override {
+            return m_outer.iiter()*m_inner.niter()+m_inner.iiter();
+        }
+
+        size_t niter() const override {
+            return m_outer.niter()*m_inner.niter();
+        }
+
+        Pair(const foreach_t &foreach, body_fn_t body_fn):
+            MbfForeach(foreach), m_body_fn(body_fn), m_inner(*this, foreach), m_outer(*this, foreach){}
+
+    };
 }
 
 #endif //M7_MBFFOREACH_H
