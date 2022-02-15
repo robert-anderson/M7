@@ -252,8 +252,15 @@ namespace dense {
         using Matrix<T>::operator=;
         SquareMatrix(size_t n): Matrix<T>(n, n){}
         SquareMatrix(const sparse::Matrix<T>& sparse) :
-            SquareMatrix(std::max(sparse.nrow(), sparse.max_column_index()+1)){
+                SquareMatrix(std::max(sparse.nrow(), sparse.max_column_index()+1)){
             *this = sparse;
+        }
+        SquareMatrix(const SquareMatrix& other) : SquareMatrix(other.nrow()){
+            *this = other;
+        }
+        SquareMatrix& operator=(const SquareMatrix& other) {
+            Matrix<T>::operator=(other);
+            return *this;
         }
     };
 
