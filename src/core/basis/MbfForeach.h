@@ -9,6 +9,7 @@
 #include <src/core/field/Fields.h>
 #include <src/core/util/ForeachVirtual.h>
 #include <src/core/table/BufferedFields.h>
+#include <utility>
 
 namespace mbf_foreach {
     /**
@@ -16,16 +17,13 @@ namespace mbf_foreach {
      */
     using namespace foreach_virtual::rtnd;
 
-    struct Base {
+    /**
+     * untemplated, polymorphic base class
+     */
+    struct MbfForeach {
         const BasisDims m_bd;
 
-        Base(BasisDims bd) : m_bd(bd) {}
-
-        /**
-         * function to inject into structured loop, referencing value and iiter methods just as in the primitive
-         * foreach iterators
-         */
-        virtual void body() = 0;
+        MbfForeach(BasisDims bd) : m_bd(bd) {}
 
         /**
          * iterates over all values and iiters
@@ -45,100 +43,86 @@ namespace mbf_foreach {
         virtual size_t niter() const = 0;
     };
 
+    template<size_t mbf_ind>
+    class Base : public MbfForeach {
+        typedef buffered::mbf_t<mbf_ind> buffered_t;
+        buffered_t m_mbf_internal;
+    protected:
+        typedef field::mbf_t<mbf_ind> field_t;
+        field_t *m_mbf;
+
+        typedef std::function<void(const field_t&, size_t)> body_fn_t;
+        body_fn_t m_body_fn;
+    public:
+        Base(BasisDims bd, body_fn_t body_fn, field_t *mbf = nullptr) :
+                MbfForeach(bd), m_mbf_internal(bd), m_mbf(mbf ? mbf : &m_mbf_internal), m_body_fn(std::move(body_fn)) {}
+
+        Base(const Base &other, field_t *mbf = nullptr) : Base(other.m_bd, other.m_body_fn, mbf) {}
+
+        virtual void body() {
+            if (m_body_fn) m_body_fn(*m_mbf, iiter());
+        }
+    };
+
     namespace frm {
 
-        class Base : public mbf_foreach::Base {
-            buffered::FrmOnv m_mbf_internal;
-        protected:
-            field::FrmOnv *m_mbf;
+        class Base : public mbf_foreach::Base<defs::Frm> {
         public:
-            Base(size_t nsite, field::FrmOnv *mbf = nullptr) :
-                    mbf_foreach::Base({nsite, 0ul}),
-                    m_mbf_internal(nsite), m_mbf(mbf ? mbf : &m_mbf_internal) {}
+            Base(size_t nsite, body_fn_t body_fn, field_t *mbf = nullptr);
 
-            Base(const Base &other, field::FrmOnv *mbf = nullptr) : Base(other.m_mbf->m_nsite, mbf) {}
-
-            const field::FrmOnv &value() const {
-                return *m_mbf;
-            }
+            Base(const mbf_foreach::frm::Base &other, field_t *mbf);
         };
 
         class General : public Base {
             struct Foreach : Ordered<> {
                 General &m_context;
 
-                Foreach(General &context, size_t nelec) :
-                        Ordered<>(context.m_mbf->m_nspinorb, nelec), m_context(context) {}
+                Foreach(General &context, size_t nelec);
 
-                void body() override {
-                    m_context.m_mbf->zero();
-                    *m_context.m_mbf = value();
-                    m_context.body();
-                }
+                void body() override;
             };
 
             Foreach m_foreach;
 
         public:
-            General(size_t nsite, size_t nelec, field::FrmOnv *mbf = nullptr) :
-                    Base(nsite, mbf), m_foreach(*this, nelec) {}
+            General(size_t nsite, size_t nelec, body_fn_t body_fn, field_t *mbf = nullptr);
 
-            General(const General &other, field::FrmOnv *mbf = nullptr) :
-                    General(other.m_bd.m_nsite, other.m_foreach.m_nind, mbf) {}
+            General(const General &other, field_t *mbf = nullptr);
 
-            void loop() override {
-                m_foreach.loop();
-            }
+            void loop() override;
 
-            size_t iiter() const override {
-                return m_foreach.iiter();
-            }
+            size_t iiter() const override;
 
-            size_t niter() const override {
-                return m_foreach.m_niter;
-            }
+            size_t niter() const override;
         };
 
         class Spins : public Base {
             struct Foreach : Ordered<> {
                 Spins &m_context;
 
-                Foreach(Spins &context, int ms2) :
-                        Ordered<>(context.m_mbf->m_nsite, (context.m_mbf->m_nsite + ms2) / 2), m_context(context) {}
+                Foreach(Spins &context, int ms2);
 
-                void body() override {
-                    m_context.m_mbf->set_spins(value());
-                    m_context.body();
-                }
+                void body() override;
 
             };
 
             Foreach m_foreach;
 
-            int ms2() const {
-                return 2 * m_foreach.m_nind - m_mbf->m_nsite;
-            }
+            int ms2() const;
 
         public:
-            Spins(size_t nsite, int ms2, field::FrmOnv *mbf = nullptr) : Base(nsite, mbf), m_foreach(*this, ms2) {}
+            Spins(size_t nsite, int ms2, body_fn_t body_fn, field_t *mbf = nullptr);
 
-            Spins(const Spins &other, field::FrmOnv *mbf = nullptr) : Spins(other.m_bd.m_nsite, other.ms2(), mbf) {}
+            Spins(const Spins &other, field_t *mbf = nullptr);
 
-            void loop() override {
-                m_foreach.loop();
-            }
+            void loop() override;
 
-            size_t iiter() const override {
-                return m_foreach.iiter();
-            }
+            size_t iiter() const override;
 
-            size_t niter() const override {
-                return m_foreach.m_niter;
-            }
+            size_t niter() const override;
         };
 
         using namespace ci_utils;
-
         class Ms2Conserve : public Base {
             /**
              * iterator over a single spin channel
@@ -146,8 +130,7 @@ namespace mbf_foreach {
             struct Foreach : Ordered<> {
                 Ms2Conserve &m_context;
 
-                Foreach(Ms2Conserve &context, size_t nelec) :
-                        Ordered<>(context.m_mbf->m_nsite, nelec), m_context(context) {}
+                Foreach(Ms2Conserve &context, size_t nelec);
             };
 
             /**
@@ -156,11 +139,7 @@ namespace mbf_foreach {
             struct BetaForeach : Foreach {
                 BetaForeach(Ms2Conserve &context, size_t nelec) : Foreach(context, nelec) {}
 
-                void body() override {
-                    m_context.m_mbf->put_spin_channel(1, false);
-                    m_context.m_mbf->set(m_context.m_mbf->m_nsite, value());
-                    m_context.body();
-                }
+                void body() override;
             };
 
             /**
@@ -169,127 +148,80 @@ namespace mbf_foreach {
             struct AlphaForeach : Foreach {
                 AlphaForeach(Ms2Conserve &context, size_t nelec) : Foreach(context, nelec) {}
 
-                void body() override {
-                    m_context.m_mbf->put_spin_channel(0, false);
-                    m_context.m_mbf->set(0, value());
-                    m_context.m_beta_foreach.loop();
-                }
+                void body() override;
             };
 
             AlphaForeach m_alpha_foreach;
             BetaForeach m_beta_foreach;
 
 
-            size_t nelec() const {
-                return m_alpha_foreach.m_nind + m_beta_foreach.m_nind;
-            }
+            size_t nelec() const;
 
-            int ms2() const {
-                return m_alpha_foreach.m_nind - m_beta_foreach.m_nind;
-            }
+            int ms2() const;
 
         public:
-            Ms2Conserve(size_t nsite, size_t nelec, int ms2, field::FrmOnv *mbf = nullptr) :
-                    Base(nsite, mbf),
-                    m_alpha_foreach(*this, nalpha(nelec, ms2)),
-                    m_beta_foreach(*this, nbeta(nelec, ms2)) {}
+            Ms2Conserve(size_t nsite, size_t nelec, int ms2, body_fn_t body_fn, field_t *mbf = nullptr);
 
-            Ms2Conserve(const Ms2Conserve &other, field::FrmOnv *mbf = nullptr) :
-                    Ms2Conserve(other.m_bd.m_nsite, other.nelec(), other.ms2(), mbf) {}
+            Ms2Conserve(const Ms2Conserve &other, field_t *mbf = nullptr);
 
-            void loop() override {
-                m_alpha_foreach.loop();
-            }
+            void loop() override;
 
-            size_t iiter() const override {
-                return m_alpha_foreach.iiter() * m_beta_foreach.m_niter + m_beta_foreach.iiter();
-            }
+            size_t iiter() const override;
 
-            size_t niter() const override {
-                return m_alpha_foreach.m_niter * m_beta_foreach.m_niter;
-            }
+            size_t niter() const override;
         };
     }
 
     namespace bos {
-        class Base : public mbf_foreach::Base {
-            buffered::BosOnv m_mbf_internal;
-        protected:
-            field::BosOnv *m_mbf;
+
+        class Base : public mbf_foreach::Base<defs::Bos> {
         public:
-            Base(size_t nmode, field::BosOnv *mbf = nullptr) :
-                    mbf_foreach::Base({0, nmode}),
-                    m_mbf_internal(nmode), m_mbf(mbf ? mbf : &m_mbf_internal) {}
+            Base(size_t nmode, body_fn_t body_fn, field_t *mbf = nullptr);
 
-            Base(const Base &other, field::BosOnv *mbf = nullptr) : Base(other.m_bd.m_nmode, mbf) {}
-
-            const field::BosOnv &value() const {
-                return *m_mbf;
-            }
+            Base(const Base &other, field_t *mbf = nullptr);
         };
 
         class General : public Base {
             struct Foreach : Unrestricted {
                 General &m_context;
 
-                Foreach(General &context, size_t nboson_max) :
-                        Unrestricted(context.m_mbf->m_nmode, nboson_max + 1), m_context(context) {}
+                Foreach(General &context, size_t nboson_max);
 
-                void body() override {
-                    *m_context.m_mbf = value();
-                    m_context.body();
-                }
+                void body() override;
 
-                size_t nboson_max() const {
-                    if (m_shape.empty()) return ~0ul;
-                    return m_shape[0] - 1;
-                }
+                size_t nboson_max() const;
             };
 
             Foreach m_foreach;
         public:
-            General(size_t nmode, size_t nboson_max, field::BosOnv *mbf = nullptr) :
-                    Base(nmode, mbf), m_foreach(*this, nboson_max) {}
+            General(size_t nmode, size_t nboson_max, body_fn_t body_fn, field::BosOnv *mbf = nullptr);
 
-            General(const General &other, field::BosOnv *mbf = nullptr) :
-                    General(other.m_bd.m_nmode, other.m_foreach.nboson_max(), mbf) {}
+            General(const General &other, field::BosOnv *mbf = nullptr);
 
-            void loop() override {
-                m_foreach.loop();
-            }
+            void loop() override;
 
-            size_t iiter() const override {
-                return m_foreach.iiter();
-            }
+            size_t iiter() const override;
 
-            size_t niter() const override {
-                return m_foreach.m_niter;
-            }
+            size_t niter() const override;
         };
     }
 
     namespace frm_bos {
 
-        class Base : public mbf_foreach::Base {
-            buffered::FrmBosOnv m_mbf_internal;
-        protected:
-            field::FrmBosOnv *m_mbf;
+        class Base : public mbf_foreach::Base<defs::FrmBos> {
         public:
-            Base(BasisDims bd, field::FrmBosOnv *mbf = nullptr) :
-                    mbf_foreach::Base(bd), m_mbf_internal(bd), m_mbf(mbf ? mbf : &m_mbf_internal) {}
+            Base(BasisDims bd, body_fn_t body_fn, field_t *mbf = nullptr) :
+                    mbf_foreach::Base<defs::FrmBos>(bd, std::move(body_fn), mbf) {}
 
-            Base(const Base &other, field::FrmBosOnv *mbf = nullptr) : Base(other.m_bd, mbf) {}
-
-            const field::FrmBosOnv &value() const {
-                return *m_mbf;
-            }
+            Base(const Base &other, field_t *mbf = nullptr) :
+                    Base(other.m_bd, other.m_body_fn, mbf) {}
         };
 
         template<typename frm_foreach_t, typename bos_foreach_t>
         class Product : public Base {
-            static_assert(std::is_base_of<mbf_foreach::frm::Base, frm_foreach_t>::value,
+            static_assert(std::is_base_of<frm::Base, frm_foreach_t>::value,
                           "template arg must be derived from the base type of fermion foreach iterators");
-            static_assert(std::is_base_of<mbf_foreach::bos::Base, bos_foreach_t>::value,
+            static_assert(std::is_base_of<bos::Base, bos_foreach_t>::value,
                           "template arg must be derived from the base type of boson foreach iterators");
 
             struct BosForeach : public bos_foreach_t {
@@ -324,25 +256,28 @@ namespace mbf_foreach {
             FrmForeach m_frm_foreach;
             BosForeach m_bos_foreach;
 
-            Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach, field::FrmBosOnv *mbf=nullptr):
-                Base({static_cast<const mbf_foreach::frm::Base &>(frm_foreach).m_bd.m_nsite,
-                        static_cast<const mbf_foreach::bos::Base &>(bos_foreach).m_bd.m_nmode}, mbf),
+            Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach,
+                        body_fn_t body_fn, field_t *mbf=nullptr):
+                    Base({frm_foreach.m_bd.m_nsite, bos_foreach.m_bd.m_nmode}, std::move(body_fn), mbf),
                     m_frm_foreach(*this, frm_foreach), m_bos_foreach(*this, bos_foreach) {}
+
+            Product(const Product &other, field_t *mbf = nullptr) :
+                    Base(other.m_frm_foreach, other.m_bos_foreach, other.m_body_fn, mbf) {}
 
             void loop() override {
                 m_frm_foreach.loop();
             }
 
             size_t iiter() const override {
-                auto iiter_frm = static_cast<const mbf_foreach::Base &>(m_frm_foreach).iiter();
-                auto iiter_bos = static_cast<const mbf_foreach::Base &>(m_bos_foreach).iiter();
-                auto niter_bos = static_cast<const mbf_foreach::Base &>(m_bos_foreach).niter();
+                auto iiter_frm = m_frm_foreach.iiter();
+                auto iiter_bos = m_bos_foreach.iiter();
+                auto niter_bos = m_bos_foreach.niter();
                 return iiter_frm * niter_bos + iiter_bos;
             }
 
             size_t niter() const override {
-                auto niter_frm = static_cast<const mbf_foreach::Base &>(m_frm_foreach).niter();
-                auto niter_bos = static_cast<const mbf_foreach::Base &>(m_bos_foreach).niter();
+                auto niter_frm = m_frm_foreach.niter();
+                auto niter_bos = m_bos_foreach.niter();
                 return niter_frm * niter_bos;
             }
         };

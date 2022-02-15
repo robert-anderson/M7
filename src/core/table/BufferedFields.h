@@ -222,6 +222,27 @@ namespace buffered {
     using mbf_t = typename std::tuple_element<mbf_ind, mbf_tup_t>::type;
     typedef mbf_t<defs::mbf_type_ind> Mbf;
 
+    template<typename T=void>
+    struct selector {
+        typedef void type;
+    };
+    template<>
+    struct selector<FrmOnv> {
+        typedef FrmOnvField type;
+    };
+    template<>
+    struct selector<FrmBosOnv> {
+        typedef FrmBosOnvField type;
+    };
+    template<>
+    struct selector<BosOnv> {
+        typedef BosOnvField type;
+    };
+
+    template<typename T>
+    using from_field_t = typename selector<T>::type;
+
+
     struct MaeInds : BufferedField<field::MaeInds> {
         using field::MaeInds::operator=;
         using field::MaeInds::m_frm;
