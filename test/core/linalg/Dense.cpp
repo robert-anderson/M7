@@ -50,7 +50,7 @@ TEST(Dense, Dagger) {
 }
 
 TEST(Dense, RectSingleMatMatProduct) {
-    const float tol = 1e-6;
+    const float tol = 5e-6;
     dense::Matrix<float> p(3, 5);
 
     p.set_row(0, {0.7, 3. , 2.8, 2.9, 3.7});
