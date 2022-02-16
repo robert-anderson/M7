@@ -25,6 +25,7 @@ namespace mbf_foreach {
 
         MbfForeach(BasisDims bd) : m_bd(bd) {}
         MbfForeach(const MbfForeach &other) : m_bd(other.m_bd) {}
+        virtual ~MbfForeach(){}
 
         /**
          * iterates over all values and iiters
@@ -293,10 +294,24 @@ namespace mbf_foreach {
                 return niter_frm * niter_bos;
             }
         };
+
+        /**
+         * convenient definition for case when the boson sector iteration is "general" i.e. unconstrained
+         */
+        template<typename frm_foreach_t>
+        using BosGeneral = Product<frm_foreach_t, bos::General>;
     }
 
+    class PairBase : public MbfForeach {
+    public:
+        PairBase(BasisDims bd): MbfForeach(bd){}
+        PairBase(const MbfForeach& other): MbfForeach(other){}
+        virtual ~PairBase(){}
+        virtual size_t nrow() = 0;
+    };
+
     template<typename foreach_t>
-    class Pair : public MbfForeach {
+    class Pair : public PairBase {
         static constexpr size_t mbf_ind = foreach_t::mbf_ind;
         static_assert(std::is_base_of<Base<mbf_ind>, foreach_t>::value,
                 "template arg foreach_t is not compatible with mbf_ind");
@@ -343,8 +358,15 @@ namespace mbf_foreach {
             return m_outer.niter()*m_inner.niter();
         }
 
+    private:
+        size_t nrow() override {
+            return m_outer.niter();
+        }
+
+    public:
+
         Pair(const foreach_t &foreach, body_fn_t body_fn = {}):
-            MbfForeach(foreach), m_body_fn(body_fn), m_inner(*this, foreach), m_outer(*this, foreach){}
+                PairBase(foreach), m_body_fn(body_fn), m_inner(*this, foreach), m_outer(*this, foreach){}
 
     };
 }

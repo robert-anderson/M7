@@ -44,6 +44,7 @@ defs::ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
     DEBUG_ASSERT_EQ(conn.size(), 2ul, "incorrect connection exsig");
     auto isite = onv.isite(conn.m_ann[0]);
     auto jsite = onv.isite(conn.m_cre[0]);
+    if (onv.ispin(conn.m_ann[0])!=onv.ispin(conn.m_cre[0])) return 0.0;
     int t_mat_element = -m_lattice.m_dense(isite, jsite);
     if (!t_mat_element) return 0.0;
     // don't need to compute fermi phase if the model meets the SPF conditions

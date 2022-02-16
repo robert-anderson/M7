@@ -4,6 +4,7 @@
 
 #include "Hamiltonian.h"
 #include "GeneralFrmHam.h"
+#include "GeneralLadderHam.h"
 
 BasisDims Hamiltonian::make_bd() const {
     if (m_ladder->enabled()) return m_ladder->m_bd;
@@ -26,6 +27,7 @@ std::unique_ptr<LadderHam> Hamiltonian::make_ladder(const fciqmc_config::LadderH
         auto g = opts.m_holstein_coupling.get();
         return std::unique_ptr<LadderHam>(new HolsteinLadderHam(nsite, nboson_max, g));
     }
+    else if (opts.m_ebdump.enabled()) return std::unique_ptr<LadderHam>(new GeneralLadderHam(opts));
     return std::unique_ptr<LadderHam>(new NullLadderHam);
 }
 
@@ -43,7 +45,8 @@ Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
         m_frm(make_frm(opts.m_fermion)),
         m_ladder(make_ladder(opts.m_ladder, m_frm->m_nsite)),
         m_bos(make_bos(opts.m_boson, m_frm->m_nsite)),
-        m_nboson_max(m_ladder->m_nboson_max), m_bd(make_bd()){
+        m_nboson_max(m_ladder->m_nboson_max),
+        m_bd(make_bd()), m_work_conn(m_bd){
     REQUIRE_TRUE(m_bd.m_nsite || m_bd.m_nmode, "No system defined");
     if (m_frm->disabled()) log::info("Fermion Hamiltonian is disabled");
     if (defs::enable_bosons) {

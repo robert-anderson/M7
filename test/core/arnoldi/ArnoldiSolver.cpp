@@ -3,9 +3,9 @@
 //
 
 #include <test/core/sparse/Examples.h>
+#include <src/core/linalg/Dense.h>
 #include "gtest/gtest.h"
 #include "src/core/arnoldi/ArnoldiSolver.h"
-#include "src/core/linalg/EigenSolver.h"
 
 TEST(ArnoldiSolver, SymNonDist) {
     const size_t nrow = 20;
@@ -20,8 +20,10 @@ TEST(ArnoldiSolver, SymNonDist) {
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     dense::SquareMatrix<double> dense(sym);
-    EigenSolver<double> dense_solver(dense);
-    auto dense_eval_it = dense_solver.m_evals.cbegin()+(nrow-nroot);
+    std::vector<double> evals;
+    dense::diag(dense, evals);
+    // Arnoldi finds the extremal eigenvalue. in this case, the most positive
+    auto dense_eval_it = evals.cbegin()+(nrow-nroot);
     for (size_t iroot=0ul; iroot<nroot; ++iroot){
         ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
     }
@@ -42,8 +44,9 @@ TEST(ArnoldiSolver, SymDist) {
      */
     if (mpi::i_am_root()) {
         dense::SquareMatrix<double> dense(sym);
-        EigenSolver<double> dense_solver(dense);
-        auto dense_eval_it = dense_solver.m_evals.cbegin() + (nrow - nroot);
+        std::vector<double> evals;
+        dense::diag(dense, evals);
+        auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
         }
@@ -84,8 +87,9 @@ TEST(ArnoldiSolver, NonSymDist) {
      */
     if (mpi::i_am_root()) {
         dense::SquareMatrix<double> dense(sym);
-        EigenSolver<double> dense_solver(dense);
-        auto dense_eval_it = dense_solver.m_evals.cbegin() + (nrow - nroot);
+        std::vector<double> evals;
+        dense::diag(dense, evals);
+        auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
         }

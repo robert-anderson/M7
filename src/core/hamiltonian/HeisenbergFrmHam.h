@@ -28,7 +28,7 @@
  * with positive J, similarly spinned neighbors incur an energy penalty, and so the model is antiferromagnetic in this
  * regime.
  */
-struct HeisenbergFrmHam : FrmHam {
+struct HeisenbergFrmHam : SpinFrmHam {
     /**
      * interaction strength
      */

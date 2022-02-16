@@ -67,11 +67,11 @@ fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
         m_fcidump(this), m_hubbard(this), m_heisenberg(this),
         m_charge(this, "charge", 0,
                  "electron deficit relative to the default value in the FCIDUMP file or that assumed by the model system (positive value to remove elecs)"),
-        m_ms2_restrict(this, "ms2_restrict", 0ul,
+        m_ms2_restrict(this, "ms2_restrict", 0,
                        "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number") {}
 
 void fciqmc_config::FermionHamiltonian::verify() {
-    size_t ndefined = m_fcidump.enabled() + m_hubbard.enabled();
+    size_t ndefined = m_fcidump.enabled() + m_hubbard.enabled() + m_heisenberg.enabled();
     REQUIRE_LE(ndefined, 1ul, "conflicting hamiltonian definitions are defined");
 }
 
@@ -89,10 +89,9 @@ fciqmc_config::LadderHamiltonian::LadderHamiltonian(config::Group *parent) :
                      "maximum allowed occupation of bosonic modes. Disregard bosonic operators entirely in the Hamiltonian if set to 0") {}
 
 void fciqmc_config::LadderHamiltonian::verify() {
-    if (!defs::enable_bosons) {
-        REQUIRE_EQ_ALL(m_nboson_max, 0ul,
-                       "Maximum boson number per mode is non-zero but bosons are compile time disabled. "
-                       "Set CMake variable -DMBF_TYPE to \"fermion-boson\" (or 1) and recompile");
+    if (defs::enable_fermions && !defs::enable_bosons && m_nboson_max) {
+        log::warn("Maximum boson number per mode is non-zero but bosons are compile time disabled.");
+        log::warn("Set CMake variable -DMBF_TYPE to \"fermion-boson\" and recompile or propagation will only involve the fermion sector");
     }
     REQUIRE_LE_ALL(m_nboson_max, defs::max_bos_occ,
                    log::format("Maximum boson number mustn't exceed the capacity of the integer container ({})",

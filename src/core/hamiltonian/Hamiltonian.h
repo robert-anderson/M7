@@ -7,6 +7,7 @@
 
 #include <type_traits>
 #include <src/defs.h>
+#include <src/core/basis/Suites.h>
 #include "FrmHam.h"
 #include "BosHam.h"
 #include "LadderHam.h"
@@ -47,6 +48,8 @@ struct Hamiltonian {
     const BasisDims m_bd;
 
 private:
+    mutable suite::Conns m_work_conn;
+
     BasisDims make_bd() const;
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts);
@@ -54,17 +57,6 @@ private:
     std::unique_ptr<LadderHam> make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite);
 
     std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts, size_t nsite);
-
-    /*
-    std::unique_ptr<LadderHamiltonian> make_ladder(const fciqmc_config::LadderHamiltonian &opts) {
-        if (opts.m_holstein_coupling!=0.0)
-            return std::unique_ptr<LadderHamiltonian>(new HubbardFrmHam(opts));
-        else if (opts.m_ebdump)
-            return std::unique_ptr<LadderHamiltonian>(new LadderHamiltonian(opts));
-        else
-            return nullptr;
-    }
-     */
 
 public:
 
@@ -127,6 +119,16 @@ public:
 
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {
         return consts::real(get_element(onv));
+    }
+
+    /*
+     * convenience methods for matrix elements directly from bra and ket, using working connection object
+     */
+    template<typename mbf_t>
+    defs::ham_t get_element(const mbf_t &src, const mbf_t &dst) const {
+        auto& conn = m_work_conn[src];
+        conn.connect(src, dst);
+        return get_element(src, conn);
     }
 
     bool complex_valued() const;

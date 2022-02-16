@@ -4,7 +4,6 @@
 
 #include <src/core/dynamics/StochasticPropagator.h>
 #include <src/core/linalg/DenseHamiltonian.h>
-#include <src/core/linalg/EigenSolver.h>
 #include "gtest/gtest.h"
 #include "src/core/dynamics/FciqmcCalculation.h"
 

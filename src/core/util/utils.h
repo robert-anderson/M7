@@ -643,9 +643,11 @@ namespace ci_utils {
         return integer_utils::combinatorial(2 * nsite, nelec);
     }
 
-    static size_t fermion_dim(size_t nsite, size_t nelec, int spin) {
-        ASSERT(static_cast<size_t>(spin) % 2 == nelec % 2)
-        return std::pow(integer_utils::combinatorial(nsite, nalpha(nelec, spin)), 2);
+    static size_t fermion_dim(size_t nsite, size_t nelec, int ms2_restrict) {
+        ASSERT(static_cast<size_t>(ms2_restrict) % 2 == nelec % 2)
+        auto na = integer_utils::combinatorial(nsite, nalpha(nelec, ms2_restrict));
+        auto nb = integer_utils::combinatorial(nsite, nbeta(nelec, ms2_restrict));
+        return na*nb;
     }
 
     /**

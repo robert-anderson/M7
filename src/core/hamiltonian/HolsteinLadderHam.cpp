@@ -12,12 +12,14 @@ defs::ham_t HolsteinLadderHam::get_coeff_0001(const size_t &imode) const {
     return 0;
 }
 
-defs::ham_t HolsteinLadderHam::get_coeff_1110(const size_t &imode, const size_t &j, const size_t &i) const {
+defs::ham_t HolsteinLadderHam::get_coeff_1110(const size_t &imode, const size_t &i, const size_t &j) const {
+    if (imode != field::FrmOnv::isite(i, m_bd.m_nsite)) return 0;
+    if (imode != field::FrmOnv::isite(j, m_bd.m_nsite)) return 0;
     return m_g;
 }
 
-defs::ham_t HolsteinLadderHam::get_coeff_1101(const size_t &imode, const size_t &j, const size_t &i) const {
-    return m_g;
+defs::ham_t HolsteinLadderHam::get_coeff_1101(const size_t &imode, const size_t &i, const size_t &j) const {
+    return get_coeff_1110(imode, j, i);
 }
 
 defs::ham_t HolsteinLadderHam::get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const {

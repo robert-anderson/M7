@@ -16,10 +16,6 @@
 #include "Sparse.h"
 
 
-template<typename T>
-class EigenSolver;
-
-
 extern "C" void ssyev_(const char *jobz, const char *uplo, const int *n, float *a, const int *lda, float *w,
                        float *work, const int *lwork, int *info);
 
@@ -228,10 +224,6 @@ namespace dense {
         void set_col(const size_t &icol, const std::vector<T> &v) {
             DEBUG_ASSERT_EQ(v.size(), m_ncol, "length of vector does not match that of matrix row");
             set_col(icol, v.data());
-        }
-
-        EigenSolver<T> diagonalize() const {
-            return EigenSolver<T>(*this);
         }
 
         std::string to_string() const {
