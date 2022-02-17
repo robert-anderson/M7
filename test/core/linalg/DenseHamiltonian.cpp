@@ -31,24 +31,23 @@ TEST(DenseHamiltonian, N2Rhf) {
 
 TEST(DenseHamiltonian, HeisenbergFrmHam) {
     fciqmc_config::Hamiltonian opts(nullptr);
-    opts.m_fermion.m_heisenberg.m_site_shape = {4};
     opts.m_fermion.m_heisenberg.m_boundary_conds = {1};
     opts.verify();
-    Hamiltonian ham_src(opts);
-    DenseHamiltonian ham(ham_src);
-    std::vector<double> evals;
-    dense::diag(ham, evals);
     /*
      * https://doi.org/10.1016/0378-4363(78)90115-8
-     *  nsite  exact eigenvalue
-     *   4     -4.0
-     *   6     -5.605551275463988
-     *   8     -7.3021868178743485
-     *   10    -9.030892708984082
-     *   12    -10.774781834890415
      */
-    std::cout << evals[0] << std::endl;
-    //ASSERT_TRUE(consts::nearly_equal(evals[0], -5.605551275463988, 1e-8));
+    defs::inds nsites = {4, 6, 8, 10, 12};
+    std::vector<defs::ham_comp_t> energies = {-2.0, -2.8027756375, -3.6510934085, -4.515446354, -5.387390917};
+    for (size_t i=0ul; i<nsites.size(); ++i){
+        auto nsite = nsites[i];
+        auto energy = energies[i];
+        opts.m_fermion.m_heisenberg.m_site_shape = {nsite};
+        Hamiltonian ham_src(opts);
+        std::vector<double> evals;
+        DenseHamiltonian ham(ham_src);
+        dense::diag(ham, evals);
+        ASSERT_TRUE(consts::nearly_equal(evals[0], energy, 1e-8));
+    }
 }
 
 TEST(DenseHamiltonian, HF) {

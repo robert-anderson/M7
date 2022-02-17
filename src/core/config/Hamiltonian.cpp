@@ -91,7 +91,7 @@ fciqmc_config::LadderHamiltonian::LadderHamiltonian(config::Group *parent) :
 void fciqmc_config::LadderHamiltonian::verify() {
     if (defs::enable_fermions && !defs::enable_bosons && m_nboson_max) {
         log::warn("Maximum boson number per mode is non-zero but bosons are compile time disabled.");
-        log::warn("Set CMake variable -DMBF_TYPE to \"fermion-boson\" and recompile or propagation will only involve the fermion sector");
+        log::warn("Set CMake variable -DMBF_TYPE to \"fermion-boson\" and recompile else propagation will only involve the fermion sector");
     }
     REQUIRE_LE_ALL(m_nboson_max, defs::max_bos_occ,
                    log::format("Maximum boson number mustn't exceed the capacity of the integer container ({})",

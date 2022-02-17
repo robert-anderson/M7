@@ -19,8 +19,7 @@ void mbf_foreach::frm::General::Foreach::body() {
     m_context.body();
 }
 
-mbf_foreach::frm::General::General(size_t nsite, size_t nelec, body_fn_t body_fn,
-                                   field_t *mbf) :
+mbf_foreach::frm::General::General(size_t nsite, size_t nelec, body_fn_t body_fn, field_t *mbf) :
         Base(nsite, std::move(body_fn), mbf), m_foreach(*this, nelec) {}
 
 mbf_foreach::frm::General::General(const General &other, field_t *mbf) :
