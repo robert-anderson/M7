@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/util/ForeachVirtual.h"
+#include "src/core/foreach/ForeachVirtual.h"
 
 #include <utility>
 

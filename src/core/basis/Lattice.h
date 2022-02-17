@@ -9,7 +9,7 @@
 #include <src/core/nd/NdFormatD.h>
 
 #include <utility>
-#include <src/core/util/Foreach.h>
+#include <src/core/foreach/Foreach.h>
 #include <src/core/config/Hamiltonian.h>
 #include "src/core/linalg/Sparse.h"
 

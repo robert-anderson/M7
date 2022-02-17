@@ -4,7 +4,7 @@
 
 #include <src/core/enumerator/Enumerators.h>
 #include "DenseHamiltonian.h"
-#include "src/core/util/Foreach.h"
+#include "src/core/foreach/Foreach.h"
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, bool force_general) {
     if (force_general) return make_pair_iterator(h);

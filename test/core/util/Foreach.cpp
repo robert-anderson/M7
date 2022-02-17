@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/util/Foreach.h"
+#include "src/core/foreach/Foreach.h"
 
 
 /*

@@ -2,7 +2,7 @@
 // Created by rja on 06/06/2021.
 //
 
-#include <src/core/util/Foreach.h>
+#include <src/core/foreach/Foreach.h>
 #include <src/core/excitgen/CachedOrbs.h>
 #include "gtest/gtest.h"
 

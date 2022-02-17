@@ -5,7 +5,7 @@
 #ifndef M7_HUBBARDFRMHAM_H
 #define M7_HUBBARDFRMHAM_H
 
-#include <src/core/util/Foreach.h>
+#include <src/core/foreach/Foreach.h>
 #include <src/core/nd/NdFormatD.h>
 #include <src/core/basis/Lattice.h>
 #include "FrmHam.h"

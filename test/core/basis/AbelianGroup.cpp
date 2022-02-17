@@ -2,7 +2,7 @@
 // Created by rja on 07/06/2021.
 //
 
-#include <src/core/util/Foreach.h>
+#include <src/core/foreach/Foreach.h>
 #include "gtest/gtest.h"
 #include "src/core/basis/AbelianGroup.h"
 

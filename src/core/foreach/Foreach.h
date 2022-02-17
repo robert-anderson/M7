@@ -5,7 +5,7 @@
 #ifndef M7_FOREACH_H
 #define M7_FOREACH_H
 
-#include "utils.h"
+#include "src/core/util/utils.h"
 
 namespace foreach {
     /**

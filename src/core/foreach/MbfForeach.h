@@ -7,7 +7,7 @@
 
 
 #include <src/core/field/Fields.h>
-#include <src/core/util/ForeachVirtual.h>
+#include <src/core/foreach/ForeachVirtual.h>
 #include <src/core/table/BufferedFields.h>
 #include <utility>
 

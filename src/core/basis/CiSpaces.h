@@ -11,7 +11,7 @@
 #include <src/core/parallel/RankAllocator.h>
 #include <src/core/wavefunction/WalkerTable.h>
 #include <src/core/wavefunction/Wavefunction.h>
-#include <src/core/util/Foreach.h>
+#include <src/core/foreach/Foreach.h>
 #include "Suites.h"
 
 namespace ci_gen {

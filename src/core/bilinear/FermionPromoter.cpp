@@ -2,7 +2,7 @@
 // Created by rja on 10/08/2021.
 //
 
-#include <src/core/util/Foreach.h>
+#include <src/core/foreach/Foreach.h>
 #include "FermionPromoter.h"
 
 

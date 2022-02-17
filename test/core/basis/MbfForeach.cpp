@@ -3,7 +3,7 @@
 //
 
 #include <src/core/table/BufferedFields.h>
-#include <src/core/basis/MbfForeach.h>
+#include <src/core/foreach/MbfForeach.h>
 #include "gtest/gtest.h"
 
 namespace mbf_foreach_test {
