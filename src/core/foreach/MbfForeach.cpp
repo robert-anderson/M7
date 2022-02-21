@@ -34,7 +34,7 @@ size_t mbf_foreach::frm::General::iiter() const {
 }
 
 size_t mbf_foreach::frm::General::niter() const {
-    return m_foreach.m_niter;
+    return m_foreach.niter();
 }
 
 mbf_foreach::frm::Spins::Foreach::Foreach(mbf_foreach::frm::Spins &context, int ms2) :
@@ -65,7 +65,7 @@ size_t mbf_foreach::frm::Spins::iiter() const {
 }
 
 size_t mbf_foreach::frm::Spins::niter() const {
-    return m_foreach.m_niter;
+    return m_foreach.niter();
 }
 
 mbf_foreach::frm::Ms2Conserve::Foreach::Foreach(mbf_foreach::frm::Ms2Conserve &context, size_t nelec) :
@@ -105,11 +105,11 @@ void mbf_foreach::frm::Ms2Conserve::throwing_loop() {
 }
 
 size_t mbf_foreach::frm::Ms2Conserve::iiter() const {
-    return m_alpha_foreach.iiter() * m_beta_foreach.m_niter + m_beta_foreach.iiter();
+    return m_alpha_foreach.iiter() * m_beta_foreach.niter() + m_beta_foreach.iiter();
 }
 
 size_t mbf_foreach::frm::Ms2Conserve::niter() const {
-    return m_alpha_foreach.m_niter * m_beta_foreach.m_niter;
+    return m_alpha_foreach.niter() * m_beta_foreach.niter();
 }
 
 
@@ -147,5 +147,5 @@ size_t mbf_foreach::bos::General::iiter() const {
 }
 
 size_t mbf_foreach::bos::General::niter() const {
-    return m_foreach.m_niter;
+    return m_foreach.niter();
 }

@@ -8,11 +8,9 @@ const foreach_virtual::rtnd::inds_t &foreach_virtual::rtnd::Base::value() const 
 
 const size_t &foreach_virtual::rtnd::Base::iiter() const { return m_iiter; }
 
-size_t foreach_virtual::rtnd::Base::ind_sum() const {
-    return std::accumulate(m_value.cbegin(), m_value.cend(), 0ul);
-}
+const size_t &foreach_virtual::rtnd::Base::niter() const { return m_niter; }
 
-foreach_virtual::rtnd::Base::Base(size_t nind, size_t nterm) : m_value(nind, 0), m_nind(nind), m_niter(nterm) {}
+foreach_virtual::rtnd::Base::Base(size_t nind, size_t nterm) : m_value(nind, 0), m_niter(nterm), m_nind(nind){}
 
 void foreach_virtual::rtnd::Base::loop() {
     if (m_nind) {

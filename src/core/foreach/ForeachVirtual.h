@@ -34,6 +34,10 @@ namespace foreach_virtual {
              * integer index of the current iteration (body call)
              */
             size_t m_iiter;
+            /**
+             * length of the index iterator
+             */
+            size_t m_niter = 0ul;
         public:
             /**
              * getter for the current index value so that body implementations make immutable reference to the indices
@@ -46,19 +50,9 @@ namespace foreach_virtual {
             const size_t &iiter() const { return m_iiter; }
 
             /**
-             * length of the index iterator
+             * getter for the length of the iterator
              */
-            const size_t m_niter;
-
-            /**
-             * @return
-             *  sum over current indices
-             */
-            size_t sum() const {
-                return std::accumulate(m_value.cbegin(), m_value.cend(), 0);
-            }
-
-            Base(size_t nterm) : m_niter(nterm) {}
+            const size_t &niter() const { return m_niter; }
 
             /**
              * function to be called each time a new set of indices is formed
@@ -87,6 +81,7 @@ namespace foreach_virtual {
         struct Unrestricted : Base<nind> {
             using Base<nind>::m_value;
             using Base<nind>::m_iiter;
+            using Base<nind>::m_niter;
             using Base<nind>::body;
             const inds_t<nind> m_shape;
         private:
@@ -149,9 +144,18 @@ namespace foreach_virtual {
             }
 
         public:
-            Unrestricted(const inds_t<nind> &shape) : Base<nind>(nterm(shape)), m_shape(shape) {}
 
-            Unrestricted(const size_t &extent) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
+            void set_shape(const inds_t<nind> &shape){
+                m_shape = shape;
+                m_niter = nterm(shape);
+            }
+
+            Unrestricted(const inds_t<nind> &shape) {
+                set_shape(shape);
+            }
+
+            Unrestricted(const size_t &extent=0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
+
 
         protected:
             void throwing_loop() override {
@@ -164,9 +168,11 @@ namespace foreach_virtual {
         struct Ordered : Base<nind> {
             using Base<nind>::m_value;
             using Base<nind>::m_iiter;
+            using Base<nind>::m_niter;
             using Base<nind>::body;
             using inds_t = std::array<size_t, nind>;
-            const size_t m_n;
+        protected:
+            size_t m_n;
 
         private:
             static size_t nterm(size_t n) {
@@ -206,8 +212,15 @@ namespace foreach_virtual {
             }
 
         public:
-            Ordered(size_t n) :
-                    Base<nind>(nterm(n)), m_n(n) {}
+
+            void set_shape(size_t n) {
+                m_n = n;
+                m_niter = nterm(n);
+            }
+
+            Ordered(size_t n=0) {
+                set_shape(n);
+            }
 
         protected:
             void throwing_loop() override {
@@ -233,21 +246,21 @@ namespace foreach_virtual {
              * integer index of the current iteration (body call)
              */
             size_t m_iiter;
+            /**
+             * length of the index iterator
+             */
+            size_t m_niter;
         public:
             /**
              * number of dimensions: length of the index array
              */
             const size_t m_nind;
-            /**
-             * length of the index iterator
-             */
-            const size_t m_niter;
 
             const inds_t &value() const;
 
             const size_t &iiter() const;
 
-            size_t ind_sum() const;
+            const size_t &niter() const;
 
             Base(size_t nind, size_t nterm);
 

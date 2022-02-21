@@ -12,6 +12,9 @@
 #include "src/core/connection/Connections.h"
 #include "ForeachVirtual.h"
 
+/**
+ * Foreach-type iterators for inter-MBF connections of a certain excitation signature
+ */
 namespace conn_foreach {
 
     using namespace foreach_virtual::ctnd;
@@ -20,7 +23,8 @@ namespace conn_foreach {
         const BasisDims m_bd;
         CachedOrbs m_work_orbs;
 
-        ConnForeach(BasisDims bd) : m_bd(bd), m_work_orbs(AbelianGroupMap(AbelianGroup({}))) {}
+        explicit ConnForeach(BasisDims bd) : m_bd(bd){}
+
         ConnForeach(const ConnForeach &other) : ConnForeach(other.m_bd){}
         virtual ~ConnForeach(){}
 
@@ -87,6 +91,9 @@ namespace conn_foreach {
             Base(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
                 conn_foreach::Base<defs::Frm>({nsite, 0ul}, std::move(body_fn), conn){}
 
+            void frm_throwing_loop(const field::FrmOnv &src) override {
+                m_work_orbs.clear();
+            }
             void bos_throwing_loop(const field::BosOnv &src) override {}
             void frmbos_throwing_loop(const field::FrmBosOnv &src) override {
                 frm_throwing_loop(src.m_frm);
@@ -96,14 +103,23 @@ namespace conn_foreach {
         template<size_t nexcit>
         class General : public Base {
 
-            Ordered<nexcit>
+            struct Foreach : Ordered<nexcit> {
+                General& m_context;
+                Foreach(General& context, size_t nbit): Ordered<nexcit>(nbit), m_context(context){}
 
-            General(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
-                Base(nsite, std::move(body_fn), conn){}
+                void body() override {
+                    //m_context.m_conn->set()
+                }
+            };
+            Foreach m_foreach;
 
         public:
-            void frm_throwing_loop(const field::FrmOnv &src) override {
+            General(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
+                Base(nsite, std::move(body_fn), conn), m_foreach(2*nsite){}
 
+            void frm_throwing_loop(const field::FrmOnv &src) override {
+                Base::frm_throwing_loop(src);
+                m_foreach.loop();
             }
 
             size_t iiter() const override {

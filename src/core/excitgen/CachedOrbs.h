@@ -53,7 +53,7 @@ class CachedOrbs {
       */
      defs::inds m_occ_bos_inds;
 public:
-    CachedOrbs(const AbelianGroupMap& grp_map);
+    CachedOrbs(const AbelianGroupMap& grp_map = {});
     /**
      * set both occ and vac spin orbital stores to "un-updated" status
      */
