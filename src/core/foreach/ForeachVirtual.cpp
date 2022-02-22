@@ -10,7 +10,7 @@ const size_t &foreach_virtual::rtnd::Base::iiter() const { return m_iiter; }
 
 const size_t &foreach_virtual::rtnd::Base::niter() const { return m_niter; }
 
-foreach_virtual::rtnd::Base::Base(size_t nind, size_t nterm) : m_value(nind, 0), m_niter(nterm), m_nind(nind){}
+foreach_virtual::rtnd::Base::Base(size_t nind, size_t niter) : m_value(nind, 0), m_niter(niter), m_nind(nind){}
 
 void foreach_virtual::rtnd::Base::loop() {
     if (m_nind) {

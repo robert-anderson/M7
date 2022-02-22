@@ -37,7 +37,7 @@ namespace foreach_virtual {
             /**
              * length of the index iterator
              */
-            size_t m_niter = 0ul;
+            const size_t m_niter;
         public:
             /**
              * getter for the current index value so that body implementations make immutable reference to the indices
@@ -66,6 +66,9 @@ namespace foreach_virtual {
             virtual void throwing_loop() = 0;
 
         public:
+
+            Base(size_t niter): m_niter(niter){}
+
             void loop() {
                 if (nind) {
                     try {
@@ -145,14 +148,7 @@ namespace foreach_virtual {
 
         public:
 
-            void set_shape(const inds_t<nind> &shape){
-                m_shape = shape;
-                m_niter = nterm(shape);
-            }
-
-            Unrestricted(const inds_t<nind> &shape) {
-                set_shape(shape);
-            }
+            Unrestricted(const inds_t<nind> &shape) : Base<nind>(nterm(shape)), m_shape(shape){}
 
             Unrestricted(const size_t &extent=0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
 
@@ -213,14 +209,7 @@ namespace foreach_virtual {
 
         public:
 
-            void set_shape(size_t n) {
-                m_n = n;
-                m_niter = nterm(n);
-            }
-
-            Ordered(size_t n=0) {
-                set_shape(n);
-            }
+            Ordered(size_t n) : Base<nind>(nterm(n)), m_n(n){}
 
         protected:
             void throwing_loop() override {
@@ -249,7 +238,7 @@ namespace foreach_virtual {
             /**
              * length of the index iterator
              */
-            size_t m_niter;
+            const size_t m_niter;
         public:
             /**
              * number of dimensions: length of the index array
@@ -262,7 +251,7 @@ namespace foreach_virtual {
 
             const size_t &niter() const;
 
-            Base(size_t nind, size_t nterm);
+            Base(size_t nind, size_t niter);
 
             /**
              * function to be called each time a new set of indices is formed

@@ -154,10 +154,6 @@ namespace foreach {
                 return m_inds[i];
             }
 
-            size_t ind_sum() const {
-                return std::accumulate(m_inds.cbegin(), m_inds.cend(), 0);
-            }
-
             virtual void operator()(cr_body_fn_t body) = 0;
 
             template<typename ...Args>

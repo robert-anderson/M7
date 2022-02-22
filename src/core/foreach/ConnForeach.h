@@ -115,7 +115,7 @@ namespace conn_foreach {
 
         public:
             General(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
-                Base(nsite, std::move(body_fn), conn), m_foreach(2*nsite){}
+                Base(nsite, std::move(body_fn), conn), m_foreach(*this, 2*nsite){}
 
             void frm_throwing_loop(const field::FrmOnv &src) override {
                 Base::frm_throwing_loop(src);
@@ -130,7 +130,6 @@ namespace conn_foreach {
                 return 0;
             }
         };
-
     }
 
     namespace bos {
