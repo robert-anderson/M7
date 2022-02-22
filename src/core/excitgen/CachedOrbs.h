@@ -52,10 +52,27 @@ class CachedOrbs {
      *      [1, 3, 4]
       */
      defs::inds m_occ_bos_inds;
+    /**
+     * clear only those cached assets which depend on both the fermion and boson sectors of the src MBF
+     */
+    void clear_frmbos_only();
+    /**
+     * clear all fermion sector-dependent cached assets
+     */
+    void clear_frm();
+    /**
+     * clear all boson sector-dependent cached assets
+     */
+    void clear_bos();
+
 public:
     CachedOrbs(const AbelianGroupMap& grp_map = {});
+
+    void clear(const field::FrmOnv& mbf);
+    void clear(const field::BosOnv& mbf);
+    void clear(const field::FrmBosOnv& mbf);
     /**
-     * set both occ and vac spin orbital stores to "un-updated" status
+     * alias for the FrmBosOnv overload: clear all cached assets
      */
     void clear();
     /**

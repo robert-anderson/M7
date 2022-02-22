@@ -9,16 +9,42 @@ CachedOrbs::CachedOrbs(const AbelianGroupMap &grp_map) :
     clear();
 }
 
-void CachedOrbs::clear() {
+void CachedOrbs::clear_frmbos_only() {
+    m_occ_sites_nonzero_bosons.clear(); // frm-bos cached assets must cleared in both frm and bos clear methods
+}
+
+void CachedOrbs::clear_frm() {
     m_occ.clear();
     m_vac.clear();
     m_nonempty_pair_labels.clear();
     m_occ_sites.clear();
-    m_occ_sites_nonzero_bosons.clear();
     m_doubly_occ_sites.clear();
     m_not_singly_occ_sites.clear();
+    clear_frmbos_only();
+}
+
+void CachedOrbs::clear(const field::FrmOnv& mbf) {
+    clear_frm();
+}
+
+void CachedOrbs::clear_bos() {
     m_bos_op_inds.clear();
     m_occ_bos_inds.clear();
+    clear_frmbos_only();
+}
+
+void CachedOrbs::clear(const field::BosOnv& mbf) {
+    clear_bos();
+}
+
+void CachedOrbs::clear(const field::FrmBosOnv& mbf) {
+    clear(mbf.m_frm);
+    clear(mbf.m_bos);
+}
+
+void CachedOrbs::clear() {
+    clear_frm();
+    clear_bos();
 }
 
 const SpinSymOccOrbs &CachedOrbs::occ(const field::FrmOnv &mbf) {
