@@ -47,10 +47,10 @@ void foreach_virtual::rtnd::Unrestricted::level_loop(size_t ilevel) {
     catch (const ExitLoop& ex){throw ex;}
 }
 
-foreach_virtual::rtnd::Unrestricted::Unrestricted(const foreach_virtual::rtnd::inds_t &shape) :
-    Base(shape.size(), nterm(shape)), m_shape(shape) {}
+foreach_virtual::rtnd::Unrestricted::Unrestricted(foreach_virtual::rtnd::inds_t shape) :
+    Base(shape.size(), nterm(shape)), m_shape(std::move(shape)) {}
 
-foreach_virtual::rtnd::Unrestricted::Unrestricted(const size_t &nind, const size_t &extent) :
+foreach_virtual::rtnd::Unrestricted::Unrestricted(size_t nind, size_t extent) :
     Unrestricted(std::vector<size_t>(nind, extent)) {}
 
 void foreach_virtual::rtnd::Unrestricted::throwing_loop() {

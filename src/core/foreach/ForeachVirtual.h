@@ -153,7 +153,7 @@ namespace foreach_virtual {
 
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(nterm(shape)), m_shape(shape){}
 
-            Unrestricted(const size_t &extent=0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
+            Unrestricted(size_t extent=0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
 
 
         protected:
@@ -238,7 +238,13 @@ namespace foreach_virtual {
                 }
             };
             template<size_t nind>
-            using Unrestricted = Lambda<ctnd::Unrestricted<nind>>;
+            struct Unrestricted : Lambda<ctnd::Unrestricted<nind>> {
+                typedef Lambda<ctnd::Unrestricted<nind>> base_t;
+                using typename base_t::body_fn_t;
+                using typename base_t::inds_t;
+                Unrestricted(body_fn_t fn, inds_t shape): base_t(fn, std::move(shape)){}
+                Unrestricted(body_fn_t fn, size_t extent): base_t(fn, extent){}
+            };
             template<size_t nind, bool strict = true, bool ascending = true>
             using Ordered = Lambda<ctnd::Ordered<nind, strict, ascending>>;
         }
@@ -302,9 +308,9 @@ namespace foreach_virtual {
 
             void level_loop(size_t ilevel);
         public:
-            explicit Unrestricted(const inds_t &shape);
+            explicit Unrestricted(inds_t shape);
 
-            Unrestricted(const size_t &nind, const size_t &extent);
+            Unrestricted(size_t nind, size_t extent);
 
             void throwing_loop() override;
         };
@@ -338,8 +344,7 @@ namespace foreach_virtual {
             }
 
         public:
-            Ordered(const size_t &n, const size_t &r) :
-                    Base(r, nterm(n, r)), m_n(n) {}
+            Ordered(size_t n, size_t r) : Base(r, nterm(n, r)), m_n(n) {}
 
             void throwing_loop() override {
                 m_iiter = ~0ul;
@@ -357,16 +362,24 @@ namespace foreach_virtual {
                 typedef std::function<void(size_t iiter, const defs::inds &value)> body_fn_t;
                 body_fn_t m_body_fn;
                 template<typename ...Args>
-                Lambda(body_fn_t fn, Args&&... args): foreach_t(std::forward<Args...>(args...)), m_body_fn(std::move(fn)){}
+                Lambda(body_fn_t fn, Args&&... args):
+                    foreach_t(std::forward<Args>(args)...), m_body_fn(std::move(fn)){}
                 void body(size_t iiter, const inds_t &value) override {
                     m_body_fn(iiter, value);
                 }
             };
             struct Unrestricted : Lambda<rtnd::Unrestricted> {
-
+                typedef Lambda<rtnd::Unrestricted> base_t;
+                Unrestricted(body_fn_t fn, inds_t shape): base_t(std::move(fn), std::move(shape)){}
+                Unrestricted(body_fn_t fn, size_t nind, size_t extent): base_t(std::move(fn), nind, extent){}
             };
+
             template<bool strict = true, bool ascending = true>
-            using Ordered = Lambda<rtnd::Ordered<strict, ascending>>;
+            struct Ordered: Lambda<rtnd::Ordered<strict, ascending>> {
+                typedef Lambda<rtnd::Ordered<strict, ascending>> base_t;
+                using typename base_t::body_fn_t;
+                Ordered(body_fn_t fn, size_t n, size_t r): base_t(std::move(fn), n, r){}
+            };
         }
     }
 }
