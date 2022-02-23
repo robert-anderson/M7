@@ -6,6 +6,8 @@
 #define M7_FOREACHVIRTUAL_H
 
 #include <src/core/parallel/MPIAssert.h>
+
+#include <utility>
 #include "src/core/util/utils.h"
 
 class ExitLoop : public std::exception {
@@ -26,6 +28,7 @@ namespace foreach_virtual {
         template<size_t nind>
         struct Base {
         protected:
+            static constexpr size_t c_nind = nind;
             /**
              * work space into which each set of indices is inserted: should not be directly accessed in derived classes
              */
@@ -57,7 +60,7 @@ namespace foreach_virtual {
             /**
              * function to be called each time a new set of indices is formed
              */
-            virtual void body() = 0;
+            virtual void body(size_t iiter, const inds_t <nind> &value) = 0;
 
         protected:
             /**
@@ -126,7 +129,7 @@ namespace foreach_virtual {
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) {
                     ++m_iiter;
-                    try { body(); }
+                    try { body(m_iiter, m_value); }
                     catch (const ExitLoop &ex) { throw ex; }
                 }
             }
@@ -195,7 +198,7 @@ namespace foreach_virtual {
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) {
                     ++m_iiter;
-                    try { body(); }
+                    try { body(m_iiter, m_value); }
                     catch (const ExitLoop &ex) { throw ex; }
                 }
             }
@@ -217,6 +220,28 @@ namespace foreach_virtual {
                 top_loop(tags::Bool<nind == 0>());
             }
         };
+
+        /**
+         * functional objects are convenient but entail non-negligible overhead. If this is non-critical, the following
+         * definitions may be confidently used
+         */
+        namespace lambda {
+            template<typename foreach_t>
+            struct Lambda : foreach_t {
+                typedef ctnd::inds_t<foreach_t::c_nind> inds_t;
+                typedef std::function<void(size_t iiter, const inds_t &value)> body_fn_t;
+                body_fn_t m_body_fn;
+                template<typename ...Args>
+                Lambda(body_fn_t fn, Args&&... args): foreach_t(std::forward<Args...>(args...)), m_body_fn(fn){}
+                void body(size_t iiter, const inds_t &value) override {
+                    m_body_fn(iiter, value);
+                }
+            };
+            template<size_t nind>
+            using Unrestricted = Lambda<ctnd::Unrestricted<nind>>;
+            template<size_t nind, bool strict = true, bool ascending = true>
+            using Ordered = Lambda<ctnd::Ordered<nind, strict, ascending>>;
+        }
     }
 
     /**
@@ -256,7 +281,7 @@ namespace foreach_virtual {
             /**
              * function to be called each time a new set of indices is formed
              */
-            virtual void body() = 0;
+            virtual void body(size_t iiter, const inds_t& value) = 0;
 
             /**
              * function with defines the looping logic, calls body, and increments the iteration counter
@@ -305,7 +330,7 @@ namespace foreach_virtual {
                     else {
                         for (ind = 0ul; ind < extent; ++ind) {
                             ++m_iiter;
-                            body();
+                            body(m_iiter, m_value);
                         }
                     }
                 }
@@ -321,6 +346,28 @@ namespace foreach_virtual {
                 level_loop(1);
             }
         };
+
+        /**
+         * functional objects are convenient but entail non-negligible overhead. If this is non-critical, the following
+         * definitions may be confidently used
+         */
+        namespace lambda {
+            template<typename foreach_t>
+            struct Lambda : foreach_t {
+                typedef std::function<void(size_t iiter, const defs::inds &value)> body_fn_t;
+                body_fn_t m_body_fn;
+                template<typename ...Args>
+                Lambda(body_fn_t fn, Args&&... args): foreach_t(std::forward<Args...>(args...)), m_body_fn(std::move(fn)){}
+                void body(size_t iiter, const inds_t &value) override {
+                    m_body_fn(iiter, value);
+                }
+            };
+            struct Unrestricted : Lambda<rtnd::Unrestricted> {
+
+            };
+            template<bool strict = true, bool ascending = true>
+            using Ordered = Lambda<rtnd::Ordered<strict, ascending>>;
+        }
     }
 }
 

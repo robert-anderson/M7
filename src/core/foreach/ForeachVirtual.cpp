@@ -40,7 +40,7 @@ void foreach_virtual::rtnd::Unrestricted::level_loop(size_t ilevel) {
         else {
             for (ind = 0ul; ind < extent; ++ind) {
                 ++m_iiter;
-                body();
+                body(m_iiter, m_value);
             }
         }
     }

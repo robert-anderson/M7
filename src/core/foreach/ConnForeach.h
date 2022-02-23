@@ -100,6 +100,7 @@ namespace conn_foreach {
             }
         };
 
+#if 0
         template<size_t nexcit>
         class General : public Base {
 
@@ -130,6 +131,7 @@ namespace conn_foreach {
                 return 0;
             }
         };
+#endif
     }
 
     namespace bos {

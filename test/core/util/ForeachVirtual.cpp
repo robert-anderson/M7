@@ -26,9 +26,9 @@ namespace foreach_virtual_test {
         CtndUnrestricted(ctnd::inds_t<nind> shape, std::vector<ctnd::inds_t<nind>> chk_inds) :
                 ctnd::Unrestricted<nind>(shape), m_chk_inds(std::move(chk_inds)) {}
 
-        void body() override {
-            DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
-            if (value() != m_chk_inds[iiter()]) m_pass = false;
+        void body(size_t iiter, const ctnd::inds_t<nind>& value) override {
+            DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
+            if (value != m_chk_inds[iiter]) m_pass = false;
         }
     };
 
@@ -48,9 +48,9 @@ namespace foreach_virtual_test {
         CtndOrdered(size_t n, std::vector<ctnd::inds_t<nind>> chk_inds) :
                 ctnd::Ordered<nind, strict, ascending>(n), m_chk_inds(std::move(chk_inds)) {}
 
-        void body() override {
-            DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
-            if (value() != m_chk_inds[iiter()]) m_pass = false;
+        void body(size_t iiter, const ctnd::inds_t<nind> &value) override {
+            DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
+            if (value != m_chk_inds[iiter]) m_pass = false;
         }
     };
 
@@ -68,9 +68,9 @@ namespace foreach_virtual_test {
         RtndUnrestricted(rtnd::inds_t shape, std::vector<rtnd::inds_t> chk_inds) :
                 rtnd::Unrestricted(shape), m_chk_inds(std::move(chk_inds)) {}
 
-        void body() override {
-            DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
-            if (value() != m_chk_inds[iiter()]) m_pass = false;
+        void body(size_t iiter, const rtnd::inds_t &value) override {
+            DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
+            if (value!= m_chk_inds[iiter]) m_pass = false;
         }
     };
 
@@ -90,9 +90,9 @@ namespace foreach_virtual_test {
         RtndOrdered(size_t n, size_t r, std::vector<rtnd::inds_t> chk_inds) :
                 rtnd::Ordered<strict, ascending>(n, r), m_chk_inds(std::move(chk_inds)) {}
 
-        void body() override {
-            DEBUG_ASSERT_LT(iiter(), m_chk_inds.size(), "iteration count OOB");
-            if (value() != m_chk_inds[iiter()]) m_pass = false;
+        void body(size_t iiter, const rtnd::inds_t &value) override {
+            DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
+            if (value != m_chk_inds[iiter]) m_pass = false;
         }
     };
 }
@@ -152,6 +152,14 @@ TEST(ForeachVirtual, CtndUnrestricted3) {
     foreach.loop();
     ASSERT_EQ(foreach.iiter()+1, foreach.niter());
     ASSERT_TRUE(foreach.m_pass);
+
+    // testing lambda wrapper
+    auto fn = [&chk_inds](size_t iiter, const ctnd::inds_t<3>& value){
+        ASSERT_EQ(chk_inds[iiter], value);
+    };
+    ctnd::lambda::Unrestricted<3> lambda_foreach(fn, shape);
+    lambda_foreach.loop();
+    ASSERT_EQ(lambda_foreach.iiter()+1, lambda_foreach.niter());
 }
 
 TEST(ForeachVirtual, CtndUnrestrictedExit) {
@@ -175,8 +183,8 @@ TEST(ForeachVirtual, CtndUnrestrictedExit) {
         Foreach(ctnd::inds_t<3> shape, ctnd::inds_t<3> term_value) :
                 CtndUnrestricted<3>(shape, {}), m_term_value(term_value) {}
 
-        void body() override {
-            if (value() == m_term_value) throw ExitLoop();
+        void body(size_t iiter, const ctnd::inds_t<3> &value) override {
+            if (value== m_term_value) throw ExitLoop();
         }
     };
     for (size_t i = 0ul; i < chk_inds.size(); ++i) {
@@ -221,6 +229,14 @@ TEST(ForeachVirtual, CtndOrderedStrictAsc3) {
     foreach.loop();
     ASSERT_EQ(foreach.iiter()+1, foreach.niter());
     ASSERT_TRUE(foreach.m_pass);
+
+    // testing lambda wrapper
+    auto fn = [&chk_inds](size_t iiter, const ctnd::inds_t<3>& value){
+        ASSERT_EQ(chk_inds[iiter], value);
+    };
+    ctnd::lambda::Ordered<3, true, true> lambda_foreach(fn, n);
+    lambda_foreach.loop();
+    ASSERT_EQ(lambda_foreach.iiter()+1, lambda_foreach.niter());
 }
 
 TEST(ForeachVirtual, CtndOrderedExit) {
@@ -245,8 +261,8 @@ TEST(ForeachVirtual, CtndOrderedExit) {
         Foreach(size_t n, ctnd::inds_t<3> term_value) :
                 CtndOrdered<3, true, true>(n, {}), m_term_value(term_value) {}
 
-        void body() override {
-            if (value() == m_term_value) throw ExitLoop();
+        void body(size_t iiter, const ctnd::inds_t<3> &value) override {
+            if (value == m_term_value) throw ExitLoop();
         }
     };
     for (size_t i = 0ul; i < chk_inds.size(); ++i) {
@@ -412,6 +428,14 @@ TEST(ForeachVirtual, RtndUnrestricted3) {
     foreach.loop();
     ASSERT_EQ(foreach.iiter()+1, foreach.niter());
     ASSERT_TRUE(foreach.m_pass);
+
+    // testing lambda wrapper
+    auto fn = [&chk_inds](size_t iiter, const defs::inds& value){
+        ASSERT_EQ(chk_inds[iiter], value);
+    };
+    rtnd::lambda::Unrestricted lambda_foreach(fn, shape);
+    lambda_foreach.loop();
+    ASSERT_EQ(lambda_foreach.iiter()+1, lambda_foreach.niter());
 }
 
 TEST(ForeachVirtual, RtndUnrestrictedExit) {
@@ -433,8 +457,8 @@ TEST(ForeachVirtual, RtndUnrestrictedExit) {
         Foreach(rtnd::inds_t shape, rtnd::inds_t term_value) :
                 RtndUnrestricted(std::move(shape), {}), m_term_value(std::move(term_value)) {}
 
-        void body() override {
-            if (value() == m_term_value) throw ExitLoop();
+        void body(size_t iiter, const rtnd::inds_t &value) override {
+            if (value == m_term_value) throw ExitLoop();
         }
     };
     for (size_t i = 0ul; i < chk_inds.size(); ++i) {
@@ -478,6 +502,14 @@ TEST(ForeachVirtual, RtndOrderedStrictAsc3) {
     foreach.loop();
     ASSERT_EQ(foreach.iiter()+1, foreach.niter());
     ASSERT_TRUE(foreach.m_pass);
+
+    // testing lambda wrapper
+    auto fn = [&chk_inds](size_t iiter, const defs::inds& value){
+        ASSERT_EQ(chk_inds[iiter], value);
+    };
+    rtnd::lambda::Ordered<true, true> lambda_foreach(fn, n, 3);
+    lambda_foreach.loop();
+    ASSERT_EQ(lambda_foreach.iiter()+1, lambda_foreach.niter());
 }
 
 TEST(ForeachVirtual, RtndOrderedExit) {
@@ -502,8 +534,8 @@ TEST(ForeachVirtual, RtndOrderedExit) {
         Foreach(size_t n, rtnd::inds_t term_value) :
                 RtndOrdered<true, true>(n, 3, {}), m_term_value(std::move(term_value)) {}
 
-        void body() override {
-            if (value() == m_term_value) throw ExitLoop();
+        void body(size_t iiter, const rtnd::inds_t &value) override {
+            if (value == m_term_value) throw ExitLoop();
         }
     };
     for (size_t i = 0ul; i < chk_inds.size(); ++i) {

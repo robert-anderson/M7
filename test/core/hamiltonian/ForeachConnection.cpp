@@ -20,7 +20,7 @@
 
 
 //struct ForeachGroup {
-//    typedef std::function<void(conn::FrmOnv)> fn_t;
+//    typedef std::function<void(conn::FrmOnv)> body_fn_t;
 //    void loop()
 //};
 
