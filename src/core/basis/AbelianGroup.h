@@ -7,20 +7,21 @@
 
 #include <functional>
 #include <utility>
-#include <src/core/table/BufferedFields.h>
+#include <src/core/linalg/Dense.h>
+#include <vector>
 
 struct AbelianGroup {
     typedef std::function<size_t(const size_t &, const size_t &)> direct_prod_fn_t;
     typedef const direct_prod_fn_t &cr_direct_prod_fn_t;
     const std::vector<std::string> m_labels;
-    buffered::Numbers<size_t, 2> m_products;
+    dense::Matrix<size_t> m_products;
 
     size_t nirrep() const {
         return m_labels.size();
     }
 
     const size_t &product(const size_t &iirrep, const size_t &jirrep) const {
-        return m_products[{iirrep, jirrep}];
+        return m_products(iirrep, jirrep);
     }
 
     const std::string &product_label(const size_t &iirrep, const size_t &jirrep) const {
@@ -51,7 +52,7 @@ struct AbelianGroup {
             m_labels(std::move(labels)), m_products({nirrep(), nirrep()}) {
         for (size_t iirrep = 0ul; iirrep < nirrep(); ++iirrep)
             for (size_t jirrep = 0ul; jirrep < nirrep(); ++jirrep)
-                m_products[{iirrep, jirrep}] = direct_prod_fn(iirrep, jirrep);
+                m_products(iirrep, jirrep) = direct_prod_fn(iirrep, jirrep);
     }
 
     AbelianGroup(): AbelianGroup({}, [](const size_t&, const size_t&){return 0ul;}){}
@@ -80,7 +81,7 @@ struct AbelianGroup {
                  const size_t iirrep2 = iirrep - iirrep1 * g2.nirrep();
                  const size_t jirrep1 = jirrep / g2.nirrep();
                  const size_t jirrep2 = jirrep - jirrep1 * g2.nirrep();
-                 return g1.m_products[{iirrep1, jirrep1}] * g2.nirrep() + g2.m_products[{iirrep2, jirrep2}];
+                 return g1.m_products(iirrep1, jirrep1) * g2.nirrep() + g2.m_products(iirrep2, jirrep2);
              }) {};
 
 };
