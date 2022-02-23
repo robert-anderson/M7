@@ -6,7 +6,7 @@
 #define M7_EXCITITER_H
 
 #include "src/core/basis/Suites.h"
-#include "src/core/excitgen/CachedOrbs.h"
+#include "src/core/caches/CachedOrbs.h"
 #include "src/core/hamiltonian/Hamiltonian.h"
 #include "BodyFnTypes.h"
 

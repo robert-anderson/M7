@@ -6,7 +6,7 @@
 #define M7_FRMHAM_H
 
 #include <cstddef>
-#include <src/core/basis/DecodedDeterminants.h>
+#include <src/core/caches/DecodedDeterminants.h>
 #include <src/core/connection/Connections.h>
 #include <src/core/io/Options.h>
 #include <src/core/config/FciqmcConfig.h>

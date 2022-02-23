@@ -6,7 +6,7 @@
 #define M7_DECODEDDETERMINANTS_H
 
 #include "src/core/field/Fields.h"
-#include "AbelianGroup.h"
+#include "src/core/basis/AbelianGroup.h"
 
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)

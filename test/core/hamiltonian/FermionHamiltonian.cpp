@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/field/Mbf.h>
-#include "src/core/basis/DecodedDeterminants.h"
+#include "src/core/caches/DecodedDeterminants.h"
 
 #ifdef ENABLE_COMPLEX
 TEST(FermionHamiltonian, DhfEnergy) {

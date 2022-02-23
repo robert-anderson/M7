@@ -3,7 +3,7 @@
 //
 
 #include <src/core/foreach/Foreach.h>
-#include <src/core/excitgen/CachedOrbs.h>
+#include <src/core/caches/CachedOrbs.h>
 #include "gtest/gtest.h"
 
 

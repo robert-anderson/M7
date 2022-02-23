@@ -6,12 +6,13 @@
 #define M7_CONNFOREACH_H
 
 #include <utility>
-#include <src/core/excitgen/CachedOrbs.h>
+#include <src/core/caches/CachedOrbs.h>
 
 #include "src/core/basis/Suites.h"
 #include "src/core/connection/Connections.h"
 #include "ForeachVirtual.h"
 
+#if 0
 /**
  * Foreach-type iterators for inter-MBF connections of a certain excitation signature
  */
@@ -28,20 +29,13 @@ namespace conn_foreach {
         ConnForeach(const ConnForeach &other) : ConnForeach(other.m_bd){}
         virtual ~ConnForeach(){}
 
-        virtual void frm_throwing_loop(const field::FrmOnv& src) = 0;
-        virtual void bos_throwing_loop(const field::BosOnv& src) = 0;
-        virtual void frmbos_throwing_loop(const field::FrmBosOnv& src) = 0;
-
-        void throwing_loop(const field::FrmOnv& src) {frm_throwing_loop(src);}
-        void throwing_loop(const field::BosOnv& src) {bos_throwing_loop(src);}
-        void throwing_loop(const field::FrmBosOnv& src) {frmbos_throwing_loop(src);}
+        virtual void throwing_loop() = 0;
 
         /**
          * iterates over all values and iiters
          */
-        template<typename mbf_t>
-        void loop(const mbf_t& mbf){
-            try {throwing_loop(mbf);}
+        void loop(){
+            try {throwing_loop();}
             catch (const ExitLoop&){}
         }
 
@@ -87,9 +81,11 @@ namespace conn_foreach {
 
     namespace frm {
         class Base : public conn_foreach::Base<defs::Frm> {
+            const field::FrmOnv& m_src;
         public:
-            Base(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
-                conn_foreach::Base<defs::Frm>({nsite, 0ul}, std::move(body_fn), conn){}
+            Base(const field::FrmOnv& src, body_fn_t body_fn = {}, conn_t *conn = nullptr):
+                conn_foreach::Base<defs::Frm>({src.nsite(), 0ul}, std::move(body_fn), conn),
+                m_src(src){}
 
             void frm_throwing_loop(const field::FrmOnv &src) override {
                 m_work_orbs.clear();
@@ -100,13 +96,15 @@ namespace conn_foreach {
             }
         };
 
-#if 0
         template<size_t nexcit>
         class General : public Base {
+            const defs::inds& m_occ;
+            const defs::inds& m_vac;
 
             struct Foreach : Ordered<nexcit> {
                 General& m_context;
-                Foreach(General& context, size_t nbit): Ordered<nexcit>(nbit), m_context(context){}
+                Foreach(General& context):
+                    Ordered<nexcit>((context.m_work_orbs.nbit), m_context(context){}
 
                 void body() override {
                     //m_context.m_conn->set()
@@ -116,7 +114,9 @@ namespace conn_foreach {
 
         public:
             General(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
-                Base(nsite, std::move(body_fn), conn), m_foreach(*this, 2*nsite){}
+                Base(nsite, std::move(body_fn), conn),
+                m_occ(m_work_orbs.occ(mbf)),
+                m_foreach(*this, 2*nsite){}
 
             void frm_throwing_loop(const field::FrmOnv &src) override {
                 Base::frm_throwing_loop(src);
@@ -131,7 +131,6 @@ namespace conn_foreach {
                 return 0;
             }
         };
-#endif
     }
 
     namespace bos {
@@ -173,4 +172,5 @@ class ConnForeach {
 };
 
 
+#endif //M7_CONNFOREACH_H
 #endif //M7_CONNFOREACH_H
