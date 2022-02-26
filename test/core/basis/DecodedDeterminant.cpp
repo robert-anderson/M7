@@ -3,35 +3,54 @@
 //
 
 #include <src/core/table/BufferedFields.h>
+#include <src/core/foreach/ForeachVirtual.h>
 #include "src/core/caches/DecodedDeterminants.h"
 #include "gtest/gtest.h"
 
-TEST(DecodedDeterminant, CopyAndMove){
-    const size_t n = 6;
-    OccOrbs occorbs(n);
-    ASSERT_EQ(occorbs.inds().capacity(), 2*n);
-    auto occorbs_cpy = occorbs;
-    ASSERT_EQ(occorbs_cpy.inds().capacity(), 2*n);
-    auto occorbs_mov = std::move(occorbs);
-    ASSERT_EQ(occorbs_mov.inds().capacity(), 2*n);
-}
-
-TEST(DecodedDeterminant, Occupation){
-    buffered::FrmOnv onv({50, 0});
+TEST(DecodedDeterminant, FlatOccAndVac){
+    buffered::FrmOnv mbf({50, 0});
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
-    onv = occ;
+    mbf = occ;
     defs::inds vac;
     auto iter = occ.begin();
-    for (size_t i=0ul; i < onv.nbit(); ++i){
+    for (size_t i=0ul; i < mbf.nbit(); ++i){
         if (iter!=occ.end() && i==*iter) iter++;
         else vac.push_back(i);
     }
 
-    OccOrbs occorbs(onv);
+    FlatOccOrbs occorbs;
+    occorbs.update(mbf);
     ASSERT_TRUE(std::equal(occ.begin(), occ.end(), occorbs.inds().begin()));
 
-    VacOrbs vacorbs(onv);
+    FlatVacOrbs vacorbs;
+    vacorbs.update(mbf);
     ASSERT_TRUE(std::equal(vac.begin(), vac.end(), vacorbs.inds().begin()));
+
+    /*
+     * for a small number of occupied orbs, run through all possible arrangements
+     */
+    const size_t noccorb = 3;
+    auto occ_fn = [&mbf, &occorbs](size_t iiter, const defs::inds &value) {
+        mbf.zero();
+        mbf = value;
+        occorbs.update(mbf);
+        ASSERT_EQ(occorbs.inds(), value);
+    };
+    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_nspinorb, noccorb);
+    occ_foreach.loop();
+
+    /*
+     * for a small number of vacant orbs, run through all possible arrangements
+     */
+    const size_t nvacorb = 3;
+    auto vac_fn = [&mbf, &vacorbs](size_t iiter, const defs::inds &value) {
+        mbf.set();
+        for (auto i: value) mbf.clr(i);
+        vacorbs.update(mbf);
+        ASSERT_EQ(vacorbs.inds(), value);
+    };
+    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_nspinorb, nvacorb);
+    vac_foreach.loop();
 }
 
 TEST(DecodedDeterminant, SymmDecoded){

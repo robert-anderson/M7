@@ -7,7 +7,7 @@
 
 FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
         base_t(row, {{2, nsite}, {"spin channel", "site"}}, name),
-        m_nsite(nsite), m_nspinorb(m_format.m_nelement){
+        m_nsite(nsite), m_nspinorb(m_format.m_nelement)/*, m_decoded(*this)*/{
 }
 
 FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
@@ -16,7 +16,7 @@ FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
 }
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
-        base_t(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb){
+        base_t(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb)/*, m_decoded(*this)*/{
 }
 
 FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {

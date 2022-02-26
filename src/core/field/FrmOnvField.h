@@ -6,6 +6,7 @@
 #define M7_FRMONVFIELD_H
 
 #include <src/core/basis/BasisDims.h>
+//#include <src/core/caches/CachedOrbs.h>
 #include "BitsetField.h"
 
 struct FrmOnvField : BitsetField<size_t, 2> {
@@ -19,6 +20,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     const size_t m_nsite;
     const size_t& m_nspinorb;
+    //mutable decoded_mbf::FrmOnv m_decoded;
 
     FrmOnvField(Row* row, size_t nsite, std::string name="");
 
