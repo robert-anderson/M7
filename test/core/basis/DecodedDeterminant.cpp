@@ -4,10 +4,11 @@
 
 #include <src/core/table/BufferedFields.h>
 #include <src/core/foreach/ForeachVirtual.h>
-#include "src/core/caches/DecodedDeterminants.h"
+#include "src/core/caches/CachedOrbs.h"
 #include "gtest/gtest.h"
 
-TEST(DecodedDeterminant, FlatOccAndVac){
+TEST(DecodedDeterminant, SimpleOccAndVac){
+    using namespace decoded_mbf::spinorbs;
     buffered::FrmOnv mbf({50, 0});
     defs::inds occ{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     mbf = occ;
@@ -18,11 +19,11 @@ TEST(DecodedDeterminant, FlatOccAndVac){
         else vac.push_back(i);
     }
 
-    FlatOccOrbs occorbs;
+    SimpleOccs occorbs;
     occorbs.update(mbf);
     ASSERT_TRUE(std::equal(occ.begin(), occ.end(), occorbs.inds().begin()));
 
-    FlatVacOrbs vacorbs;
+    SimpleVacs vacorbs;
     vacorbs.update(mbf);
     ASSERT_TRUE(std::equal(vac.begin(), vac.end(), vacorbs.inds().begin()));
 
@@ -54,6 +55,7 @@ TEST(DecodedDeterminant, FlatOccAndVac){
 }
 
 TEST(DecodedDeterminant, SymmDecoded){
+    using namespace decoded_mbf::spinorbs;
 
     buffered::FrmOnv onv(10);
     defs::inds alpha_occ{0, 1, 2, 4, 7, 9};
@@ -88,8 +90,8 @@ TEST(DecodedDeterminant, SymmDecoded){
 
     ASSERT_EQ(grp_map.m_nsite, 10);
 
-    SpinSymOccOrbs occorbs(grp_map);
-    SpinSymVacOrbs vacorbs(grp_map);
+    SpinSymOccs occorbs(grp_map);
+    SpinSymVacs vacorbs(grp_map);
 
     occorbs.update(onv);
     vacorbs.update(onv);

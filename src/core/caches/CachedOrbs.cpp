@@ -21,12 +21,12 @@ void decoded_mbf::FrmOnv::clear() {
     m_not_singly_occ_sites.clear();
 }
 
-const SpinSymOccOrbs &decoded_mbf::FrmOnv::occ() {
+const decoded_mbf::spinorbs::SpinSymOccs& decoded_mbf::FrmOnv::occ() {
     if (m_occ.empty()) m_occ.update(m_mbf);
     return m_occ;
 }
 
-const SpinSymVacOrbs &decoded_mbf::FrmOnv::vac() {
+const decoded_mbf::spinorbs::SpinSymVacs& decoded_mbf::FrmOnv::vac() {
     if (m_vac.empty()) m_vac.update(m_mbf);
     return m_vac;
 }
@@ -157,12 +157,12 @@ void CachedOrbs::clear() {
     clear_bos();
 }
 
-const SpinSymOccOrbs &CachedOrbs::occ(const field::FrmOnv &mbf) {
+const SpinSymOccOrbs__ &CachedOrbs::occ(const field::FrmOnv &mbf) {
     if (m_occ.empty()) m_occ.update(mbf);
     return m_occ;
 }
 
-const SpinSymVacOrbs &CachedOrbs::vac(const field::FrmOnv &mbf) {
+const SpinSymVacOrbs__ &CachedOrbs::vac(const field::FrmOnv &mbf) {
     if (m_vac.empty()) m_vac.update(mbf);
     return m_vac;
 }
@@ -231,4 +231,149 @@ const defs::inds &CachedOrbs::occ_bos_inds(const field::BosOnv &mbf) {
         }
     }
     return m_occ_bos_inds;
+}
+
+
+
+
+
+
+
+
+
+
+
+size_t decoded_mbf::spinorbs::SimpleBase::size() const {
+    return m_inds.size();
+}
+
+const size_t &decoded_mbf::spinorbs::SimpleBase::operator[](const size_t &i) const {
+    ASSERT(i<size());
+    return m_inds[i];
+}
+
+const defs::inds &decoded_mbf::spinorbs::SimpleBase::inds() const {
+    return m_inds;
+}
+
+void decoded_mbf::spinorbs::SimpleBase::clear() {
+    m_inds.clear();
+}
+
+bool decoded_mbf::spinorbs::SimpleBase::empty() {
+    return m_inds.empty();
+}
+
+void decoded_mbf::spinorbs::SimpleOccs::update(const FrmOnvField &mbf) {
+    m_inds.clear();
+    for (size_t idataword = 0ul; idataword < mbf.m_dsize; ++idataword) {
+        auto work = mbf.get_dataword(idataword);
+        while (work) m_inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
+    }
+}
+
+void decoded_mbf::spinorbs::SimpleVacs::update(const FrmOnvField &mbf) {
+    m_inds.clear();
+    for (size_t idataword = 0ul; idataword < mbf.m_dsize; ++idataword) {
+        auto work = mbf.get_antidataword(idataword);
+        while (work) m_inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
+    }
+}
+
+defs::inds decoded_mbf::spinorbs::LabelledBase::make_spinorb_map(const defs::inds &site_irreps, size_t nirrep) {
+    auto nsite = site_irreps.size();
+    defs::inds out(2*nsite, 0);
+    std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin());
+    std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin()+nsite);
+    for (size_t i=nsite; i<nsite*2; ++i) out[i]+=nirrep;
+    return out;
+}
+
+decoded_mbf::spinorbs::LabelledBase::LabelledBase(size_t nelement, const defs::inds &map) :
+    m_inds(nelement), m_map(map){
+    REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
+               "not allocating enough elements in ragged array to accommodate label map");
+}
+
+decoded_mbf::spinorbs::LabelledBase::LabelledBase(const decoded_mbf::spinorbs::LabelledBase &other) :
+        LabelledBase(other.m_inds.size(), other.m_map){}
+
+decoded_mbf::spinorbs::LabelledBase::LabelledBase(decoded_mbf::spinorbs::LabelledBase &&other) :
+        LabelledBase(other.m_inds.size(), other.m_map){}
+
+decoded_mbf::spinorbs::LabelledBase &decoded_mbf::spinorbs::LabelledBase::operator=(
+        const decoded_mbf::spinorbs::LabelledBase &other) {
+    DEBUG_ASSERT_EQ(m_map, other.m_map, "label maps do not match");
+    m_inds = other.m_inds;
+    return *this;
+}
+
+decoded_mbf::spinorbs::LabelledBase &decoded_mbf::spinorbs::LabelledBase::operator=(
+        decoded_mbf::spinorbs::LabelledBase &&other) {
+    DEBUG_ASSERT_EQ(m_map, other.m_map, "label maps do not match");
+    m_inds = std::move(other.m_inds);
+    return *this;
+}
+
+size_t decoded_mbf::spinorbs::LabelledBase::size(const size_t &ielement) const {
+    return m_inds[ielement].size();
+}
+
+const defs::inds &decoded_mbf::spinorbs::LabelledBase::operator[](const size_t &i) const {
+    ASSERT(i<m_inds.size());
+    return m_inds[i];
+}
+
+void decoded_mbf::spinorbs::LabelledBase::clear() {
+    for (auto& v: m_inds) v.clear();
+}
+
+decoded_mbf::spinorbs::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map) :
+        LabelledBase(nelement, map){}
+
+void decoded_mbf::spinorbs::LabelledOccs::update(const FrmOnvField &mbf) {
+    m_simple.clear();
+    for (auto& v : m_inds) v.clear();
+    for (size_t idataword = 0ul; idataword < mbf.m_dsize; ++idataword) {
+        auto work = mbf.get_dataword(idataword);
+        while (work) {
+            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
+            m_inds[m_map[ibit]].push_back(ibit);
+            m_simple.m_inds.push_back(ibit);
+        }
+    }
+}
+
+void decoded_mbf::spinorbs::LabelledOccs::clear() {
+    LabelledBase::clear();
+    m_simple.clear();
+}
+
+bool decoded_mbf::spinorbs::LabelledOccs::empty() {
+    return m_simple.empty();
+}
+
+decoded_mbf::spinorbs::LabelledVacs::LabelledVacs(size_t nelement, const defs::inds &map) :
+        LabelledBase(nelement, map){}
+
+void decoded_mbf::spinorbs::LabelledVacs::update(const FrmOnvField &mbf) {
+    m_simple.clear();
+    for (auto& v : m_inds) v.clear();
+    for (size_t idataword = 0ul; idataword < mbf.m_dsize; ++idataword) {
+        auto work = mbf.get_antidataword(idataword);
+        while (work) {
+            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
+            m_inds[m_map[ibit]].push_back(ibit);
+            m_simple.m_inds.push_back(ibit);
+        }
+    }
+}
+
+void decoded_mbf::spinorbs::LabelledVacs::clear() {
+    LabelledBase::clear();
+    m_simple.clear();
+}
+
+bool decoded_mbf::spinorbs::LabelledVacs::empty() {
+    return m_simple.empty();
 }
