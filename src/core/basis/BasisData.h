@@ -14,9 +14,21 @@
  * admits a common interface for all initialisations of MBFs
  */
 struct BasisData {
+    /**
+     * number of fermionic sites or orbitals
+     */
     size_t m_nsite;
+    /**
+     * number of bosonic modes
+     */
     size_t m_nmode;
+    /**
+     * number of fermionic degrees of freedom (2*nsite)
+     */
     size_t m_nspinorb;
+    /**
+     * mapping from fermion site indices to abelian group labels
+     */
     AbelianGroupMap m_frm_abgrp_map;
     BasisData(size_t nsite, size_t nmode, AbelianGroupMap frm_abgrp_map):
         m_nsite(nsite), m_nmode(nmode), m_nspinorb(nsite*2), m_frm_abgrp_map(std::move(frm_abgrp_map)){}
