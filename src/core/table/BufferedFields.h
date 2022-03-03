@@ -131,6 +131,7 @@ namespace buffered {
         using field::FrmOnv::operator=;
         FrmOnv(BasisDims bd) : BufferedField<field::FrmOnv>(bd){}
         FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>(nsite){}
+
         FrmOnv(const FrmOnv& other) : FrmOnv(other.m_nsite){
             *this = other;
         }

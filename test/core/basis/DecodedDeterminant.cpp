@@ -54,16 +54,8 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
     vac_foreach.loop();
 }
 
-#if 0
-TEST(DecodedDeterminant, SymmDecoded){
+TEST(DecodedDeterminant, SpinSymOccAndVac){
     using namespace decoded_mbf::spinorbs;
-
-    buffered::FrmOnv onv(10);
-    defs::inds alpha_occ{0, 1, 2, 4, 7, 9};
-    defs::inds beta_occ{2, 4, 5, 6, 7, 8};
-    onv = {alpha_occ, beta_occ};
-    ASSERT_EQ(onv.nsetbit(), alpha_occ.size()+beta_occ.size());
-
     // arbitrary, fictitious group
     AbelianGroup grp({"X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){
         return (iirrep+jirrep)%3;
@@ -74,6 +66,7 @@ TEST(DecodedDeterminant, SymmDecoded){
      * occupied orbitals (beta ):              /  /  o  /  o  o  o  o  o  /
      */
     AbelianGroupMap grp_map(grp, {0, 1, 1, 2, 0, 0, 1, 2, 1, 0});
+    ASSERT_EQ(grp_map.m_nsite, 10);
     /*
      * irrep occupations (alpha):
      *  0("Xa"): 3, 1("Ya"): 2, 2("Za"): 1
@@ -89,66 +82,66 @@ TEST(DecodedDeterminant, SymmDecoded){
      *  3("Xb"): 2, 4("Yb"): 1, 5("Zb"): 1
      */
 
-    ASSERT_EQ(grp_map.m_nsite, 10);
-
-    onv.m_decoded.
-    occorbs.update(onv);
-    vacorbs.update(onv);
+    buffered::FrmOnv mbf({10, 0, grp_map});
+    defs::inds alpha_occ{0, 1, 2, 4, 7, 9};
+    defs::inds beta_occ{2, 4, 5, 6, 7, 8};
+    mbf = {alpha_occ, beta_occ};
+    ASSERT_EQ(mbf.nsetbit(), alpha_occ.size() + beta_occ.size());
 
     defs::inds chk_inds;
 
+    auto& occs = mbf.m_decoded.spin_sym_occs();
+    auto& vacs = mbf.m_decoded.spin_sym_vacs();
     /*
      * alpha occupied
      */
-    ASSERT_EQ(occorbs.size(0), 3);
-    chk_inds = occorbs[{0, 0}];
+    ASSERT_EQ(occs.size(0), 3);
+    chk_inds = occs[{0, 0}];
     ASSERT_EQ(chk_inds, defs::inds({0, 4, 9}));
-    ASSERT_EQ(occorbs.size(1), 2);
-    chk_inds = occorbs[{0, 1}];
+    ASSERT_EQ(occs.size(1), 2);
+    chk_inds = occs[{0, 1}];
     ASSERT_EQ(chk_inds, defs::inds({1, 2}));
-    ASSERT_EQ(occorbs.size(2), 1);
-    chk_inds = occorbs[{0, 2}];
+    ASSERT_EQ(occs.size(2), 1);
+    chk_inds = occs[{0, 2}];
     ASSERT_EQ(chk_inds, defs::inds({7}));
 
     /*
      * alpha vacant
      */
-    ASSERT_EQ(vacorbs.size(0), 1);
-    chk_inds = vacorbs[{0, 0}];
+    ASSERT_EQ(vacs.size(0), 1);
+    chk_inds = vacs[{0, 0}];
     ASSERT_EQ(chk_inds, defs::inds({5}));
-    ASSERT_EQ(vacorbs.size(1), 2);
-    chk_inds = vacorbs[{0, 1}];
+    ASSERT_EQ(vacs.size(1), 2);
+    chk_inds = vacs[{0, 1}];
     ASSERT_EQ(chk_inds, defs::inds({6, 8}));
-    ASSERT_EQ(vacorbs.size(2), 1);
-    chk_inds = vacorbs[{0, 2}];
+    ASSERT_EQ(vacs.size(2), 1);
+    chk_inds = vacs[{0, 2}];
     ASSERT_EQ(chk_inds, defs::inds({3}));
-
 
     /*
      * beta occupied
      * beta_occ{2, 4, 5, 6, 7, 8} -> 12, 14, 15, 16, 17, 18
      */
-    ASSERT_EQ(occorbs.size(3), 2);
-    chk_inds = occorbs[{1, 0}];
+    ASSERT_EQ(occs.size(3), 2);
+    chk_inds = occs[{1, 0}];
     ASSERT_EQ(chk_inds, defs::inds({14, 15}));
-    ASSERT_EQ(occorbs.size(4), 3);
-    chk_inds = occorbs[{1, 1}];
+    ASSERT_EQ(occs.size(4), 3);
+    chk_inds = occs[{1, 1}];
     ASSERT_EQ(chk_inds, defs::inds({12, 16, 18}));
-    ASSERT_EQ(occorbs.size(5), 1);
-    chk_inds = occorbs[{1, 2}];
+    ASSERT_EQ(occs.size(5), 1);
+    chk_inds = occs[{1, 2}];
     ASSERT_EQ(chk_inds, defs::inds({17}));
 
     /*
      * beta vacant
      */
-    ASSERT_EQ(vacorbs.size(3), 2);
-    chk_inds = vacorbs[{1, 0}];
+    ASSERT_EQ(vacs.size(3), 2);
+    chk_inds = vacs[{1, 0}];
     ASSERT_EQ(chk_inds, defs::inds({10, 19}));
-    ASSERT_EQ(vacorbs.size(4), 1);
-    chk_inds = vacorbs[{1, 1}];
+    ASSERT_EQ(vacs.size(4), 1);
+    chk_inds = vacs[{1, 1}];
     ASSERT_EQ(chk_inds, defs::inds({11}));
-    ASSERT_EQ(vacorbs.size(5), 1);
-    chk_inds = vacorbs[{1, 2}];
+    ASSERT_EQ(vacs.size(5), 1);
+    chk_inds = vacs[{1, 2}];
     ASSERT_EQ(chk_inds, defs::inds({13}));
 }
-#endif

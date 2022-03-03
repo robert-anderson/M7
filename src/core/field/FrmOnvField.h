@@ -26,9 +26,8 @@ struct FrmOnvField : BitsetField<size_t, 2> {
      */
     mutable decoded_mbf::FrmOnv m_decoded;
 
-    FrmOnvField(Row* row, size_t nsite, std::string name="");
-
     FrmOnvField(Row* row, BasisDims bd, std::string name="");
+    FrmOnvField(Row* row, size_t nsite, std::string name="");
 
     FrmOnvField(const FrmOnvField& other);
 

@@ -5,14 +5,15 @@
 #include "FrmOnvField.h"
 
 
-FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
-        base_t(row, {{2, nsite}, {"spin channel", "site"}}, name),
-        m_nsite(nsite), m_nspinorb(m_format.m_nelement), m_decoded(*this){}
-
 FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
-        FrmOnvField(row, bd.m_nsite, name){
+        base_t(row, {{2, bd.m_nsite},
+                     {"spin channel", "site"}}, name),
+        m_nsite(bd.m_nsite), m_nspinorb(m_format.m_nelement), m_decoded(*this, bd.m_frm_abgrp_map){
     bd.require_pure_frm();
 }
+
+FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
+    FrmOnvField(row, {nsite, 0ul}, name){}
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
         base_t(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb), m_decoded((exit(0), *this)){
