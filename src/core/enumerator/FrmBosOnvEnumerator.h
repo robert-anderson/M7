@@ -16,12 +16,12 @@ class FrmBosOnvEnumerator : public Enumerator<field::FrmBosOnv> {
     buffered::FrmOnv m_fonv;
     buffered::BosOnv m_bonv;
 public:
-    FrmBosOnvEnumerator(BasisDims bd, size_t nelec, size_t nboson_cutoff):
+    FrmBosOnvEnumerator(BasisData bd, size_t nelec, size_t nboson_cutoff):
             m_fonv_enum(bd.m_nsite, nelec), m_bonv_enum(bd.m_nmode, nboson_cutoff),
             m_fonv(bd.m_nsite), m_bonv(bd.m_nmode){
         m_fonv_enum.next(m_fonv);
     }
-    FrmBosOnvEnumerator(BasisDims bd, size_t nelec, int spin, size_t nboson_cutoff):
+    FrmBosOnvEnumerator(BasisData bd, size_t nelec, int spin, size_t nboson_cutoff):
             m_fonv_enum(bd.m_nsite, nelec, spin),
             m_bonv_enum(bd.m_nmode, nboson_cutoff),
             m_fonv(bd.m_nsite), m_bonv(bd.m_nmode){

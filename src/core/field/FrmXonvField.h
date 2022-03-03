@@ -13,7 +13,7 @@ struct FrmXonvField : CompositeField<FrmOnvField, FrmOnvField> {
 
     FrmXonvField(Row* row, size_t nsite, std::string name="");
 
-    FrmXonvField(Row* row, BasisDims bd, std::string name="");
+    FrmXonvField(Row* row, BasisData bd, std::string name="");
 
     FrmXonvField(const FrmXonvField& other);
 

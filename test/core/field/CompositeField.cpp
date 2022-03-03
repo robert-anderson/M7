@@ -11,7 +11,7 @@ struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {
     typedef CompositeField<field::FrmOnv, field::BosOnv> base_t;
     field::FrmOnv m_frm;
     field::BosOnv m_bos;
-    DetPerm(Row* row, BasisDims bd, std::string prefix):
+    DetPerm(Row* row, BasisData bd, std::string prefix):
         base_t(m_frm, m_bos),
         m_frm(row, bd.m_nsite, prefix+" fermions"),
         m_bos(row, bd.m_nmode, prefix+" bosons"){}
@@ -29,7 +29,7 @@ struct OuterDetPerm : CompositeField<DetPerm, DetPerm> {
     typedef CompositeField<DetPerm, DetPerm> base_t;
     DetPerm m_ket;
     DetPerm m_bra;
-    OuterDetPerm(Row* row, BasisDims bd): base_t(m_ket, m_bra),
+    OuterDetPerm(Row* row, BasisData bd): base_t(m_ket, m_bra),
         m_ket(row, bd, "ket"), m_bra(row, bd, "bra"){}
 
     OuterDetPerm(const OuterDetPerm& other): base_t(m_ket, m_bra), m_ket(other.m_ket), m_bra(other.m_bra){}

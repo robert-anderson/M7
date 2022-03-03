@@ -137,7 +137,7 @@ public:
 
     explicit FrmOnvConnection(size_t nsite);
 
-    explicit FrmOnvConnection(BasisDims bd);
+    explicit FrmOnvConnection(BasisData bd);
 
     explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**

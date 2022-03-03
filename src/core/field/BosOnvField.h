@@ -6,7 +6,7 @@
 #define M7_BOSONVFIELD_H
 
 #include "NumberField.h"
-#include "src/core/basis/BasisDims.h"
+#include "src/core/basis/BasisData.h"
 
 struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     typedef NdNumberField<defs::bos_occ_t, 1> base_t;
@@ -17,7 +17,7 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
 
     BosOnvField(Row *row, size_t nmode, std::string name = "");
 
-    BosOnvField(Row *row, BasisDims bd, std::string name = "");
+    BosOnvField(Row *row, BasisData bd, std::string name = "");
 
     BosOnvField(const BosOnvField &other) : base_t(other), m_nmode(m_nelement) {}
 

@@ -14,7 +14,7 @@ size_t FrmBosCoupledCoeffs::index(size_t n, size_t p, size_t q) const {
     return n * m_nintind_frm2 + p * m_nintind_frm + q;
 }
 
-FrmBosCoupledCoeffs::FrmBosCoupledCoeffs(BasisDims bd, bool spin_resolved):
+FrmBosCoupledCoeffs::FrmBosCoupledCoeffs(BasisData bd, bool spin_resolved):
         m_bd(bd), m_nintind_frm(m_bd.m_nsite * (spin_resolved ? 2ul: 1ul)), m_nintind_frm2(m_nintind_frm*m_nintind_frm),
         m_nintind_bos(bd.m_nmode), m_v(m_nintind_bos*m_nintind_frm2){}
 

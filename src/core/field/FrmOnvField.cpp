@@ -5,7 +5,7 @@
 #include "FrmOnvField.h"
 
 
-FrmOnvField::FrmOnvField(Row *row, BasisDims bd, std::string name) :
+FrmOnvField::FrmOnvField(Row *row, BasisData bd, std::string name) :
         base_t(row, {{2, bd.m_nsite},
                      {"spin channel", "site"}}, name),
         m_nsite(bd.m_nsite), m_nspinorb(m_format.m_nelement), m_decoded(*this, bd.m_frm_abgrp_map){

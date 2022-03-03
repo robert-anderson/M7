@@ -7,7 +7,7 @@
 BosOnvField::BosOnvField(Row *row, size_t nmode, std::string name) :
         base_t(row, {{nmode}, {"boson mode occupations"}}, name), m_nmode(m_nelement) {}
 
-BosOnvField::BosOnvField(Row *row, BasisDims bd, std::string name) : BosOnvField(row, bd.m_nmode, name) {
+BosOnvField::BosOnvField(Row *row, BasisData bd, std::string name) : BosOnvField(row, bd.m_nmode, name) {
     bd.require_pure_bos();
 }
 

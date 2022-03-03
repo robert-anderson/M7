@@ -6,13 +6,13 @@
 
 #include <utility>
 
-ci_gen::Base::Base(BasisDims bd, size_t nelec, include_fn_t include_fn) :
+ci_gen::Base::Base(BasisData bd, size_t nelec, include_fn_t include_fn) :
     m_bd(bd), m_nelec(nelec), m_mbf_work(bd), m_include_fn(std::move(include_fn)){}
 
-ci_gen::NoSym::NoSym(BasisDims bd, size_t nelec, const include_fn_t& include_fn) :
+ci_gen::NoSym::NoSym(BasisData bd, size_t nelec, const include_fn_t& include_fn) :
         Base(bd, nelec, include_fn), m_foreach(2*bd.m_nsite, nelec) {}
 
-ci_gen::SpinSym::SpinSym(BasisDims bd, size_t nelec, int spin, const include_fn_t& include_fn) :
+ci_gen::SpinSym::SpinSym(BasisData bd, size_t nelec, int spin, const include_fn_t& include_fn) :
         Base(bd, nelec, include_fn),
         m_foreach_alpha(bd.m_nsite, ci_utils::nalpha(nelec, spin)),
         m_foreach_beta(bd.m_nsite, ci_utils::nbeta(nelec, spin)){}

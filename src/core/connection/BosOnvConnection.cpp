@@ -70,7 +70,7 @@ const BosOpPair &BosOps::operator[](const size_t &ipair) const {
 
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
 
-BosOnvConnection::BosOnvConnection(BasisDims bd) : BosOnvConnection(bd.m_nmode){}
+BosOnvConnection::BosOnvConnection(BasisData bd) : BosOnvConnection(bd.m_nmode){}
 
 BosOnvConnection::BosOnvConnection(const BosOnvField &mbf) : BosOnvConnection(mbf.nelement()){}
 

@@ -8,7 +8,7 @@ field::Mbf &WalkerTableRow::key_field() {
     return m_mbf;
 }
 
-WalkerTableRow::WalkerTableRow(BasisDims bd, size_t nroot, size_t nreplica, bool average_weights) :
+WalkerTableRow::WalkerTableRow(BasisData bd, size_t nroot, size_t nreplica, bool average_weights) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
         m_mbf(this, bd, "many-body basis function"),

@@ -5,7 +5,7 @@
 #include <src/core/basis/Suites.h>
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisDims bd) :
+Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisData bd) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
                 opts.m_propagator.m_nw_target,

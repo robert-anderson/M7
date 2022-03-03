@@ -11,7 +11,7 @@ FrmOnvConnection::FrmOnvConnection(size_t nsite) :
     if (m_ndataword) m_dataword_phases[0] = false;
 }
 
-FrmOnvConnection::FrmOnvConnection(BasisDims bd) : FrmOnvConnection(bd.m_nsite){
+FrmOnvConnection::FrmOnvConnection(BasisData bd) : FrmOnvConnection(bd.m_nsite){
     bd.require_pure_frm();
 }
 

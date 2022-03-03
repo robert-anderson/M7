@@ -4,7 +4,7 @@
 
 #include "Rdm.h"
 
-size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisDims bd) {
+size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisData bd) {
     double nrow = 1.0;
     nrow *= integer_utils::combinatorial(2 * bd.m_nsite, nfrm_cre);
     nrow *= integer_utils::combinatorial(2 * bd.m_nsite, nfrm_ann);
@@ -15,12 +15,12 @@ size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, siz
     return nrow;
 }
 
-size_t Rdm::nrow_estimate(size_t exsig, BasisDims bd) {
+size_t Rdm::nrow_estimate(size_t exsig, BasisData bd) {
     return nrow_estimate(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig),
                          decode_nbos_cre(exsig), decode_nbos_ann(exsig), bd);
 }
 
-Rdm::Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisDims bd, size_t nelec, size_t nvalue) :
+Rdm::Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisData bd, size_t nelec, size_t nvalue) :
         Communicator<MaeRow, MaeRow, true>(
                 "rdm_" + to_string(ranksig), nrow_estimate(ranksig, bd),
                 nrow_estimate(ranksig, bd), opts.m_buffers, opts.m_load_balancing,
@@ -153,7 +153,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisDims bd, size_t nelec, const Epoch &accum_epoch) :
+Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisData bd, size_t nelec, const Epoch &accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
         m_work_conns(bd), m_work_com_ops(bd), m_explicit_ref_conns(opts.m_explicit_ref_conns),

@@ -21,9 +21,9 @@ namespace mbf_foreach {
      * untemplated, polymorphic base class
      */
     struct MbfForeach {
-        const BasisDims m_bd;
+        const BasisData m_bd;
 
-        MbfForeach(BasisDims bd) : m_bd(bd) {}
+        MbfForeach(BasisData bd) : m_bd(bd) {}
         MbfForeach(const MbfForeach &other) : m_bd(other.m_bd) {}
         virtual ~MbfForeach(){}
 
@@ -60,7 +60,7 @@ namespace mbf_foreach {
         typedef std::function<void(const field_t&, size_t)> body_fn_t;
         body_fn_t m_body_fn;
     public:
-        Base(BasisDims bd, body_fn_t body_fn = {}, field_t *mbf = nullptr) :
+        Base(BasisData bd, body_fn_t body_fn = {}, field_t *mbf = nullptr) :
                 MbfForeach(bd), m_mbf_internal(bd), m_mbf(mbf ? mbf : &m_mbf_internal), m_body_fn(std::move(body_fn)) {}
 
         Base(const Base &other, field_t *mbf = nullptr) : Base(other.m_bd, other.m_body_fn, mbf) {}
@@ -223,7 +223,7 @@ namespace mbf_foreach {
         class Base : public mbf_foreach::Base<defs::FrmBos> {
         public:
             static constexpr size_t mbf_ind = defs::FrmBos;
-            Base(BasisDims bd, body_fn_t body_fn = {}, field_t *mbf = nullptr) :
+            Base(BasisData bd, body_fn_t body_fn = {}, field_t *mbf = nullptr) :
                     mbf_foreach::Base<defs::FrmBos>(bd, std::move(body_fn), mbf) {}
 
             Base(const Base &other, field_t *mbf = nullptr) :
@@ -304,7 +304,7 @@ namespace mbf_foreach {
 
     class PairBase : public MbfForeach {
     public:
-        PairBase(BasisDims bd): MbfForeach(bd){}
+        PairBase(BasisData bd): MbfForeach(bd){}
         PairBase(const MbfForeach& other): MbfForeach(other){}
         virtual ~PairBase(){}
         virtual size_t nrow() = 0;

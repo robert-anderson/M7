@@ -44,7 +44,7 @@ struct BosOnvConnection {
 
     BosOnvConnection(size_t nmode);
 
-    BosOnvConnection(BasisDims bd);
+    BosOnvConnection(BasisData bd);
 
     BosOnvConnection(const BosOnvField& mbf);
 

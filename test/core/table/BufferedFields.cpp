@@ -290,7 +290,7 @@ TEST(BufferedFields, BosOnv){
 }
 
 TEST(BufferedFields, FrmBosOnv){
-    const BasisDims bd = {4, 5};
+    const BasisData bd = {4, 5};
     defs::inds frm_inds = {0, 2, 4, 5, 7};
     defs::inds bos_inds = {3, 1, 2, 4, 9};
 
@@ -431,7 +431,7 @@ TEST(BufferedFields, BosXonv){
 }
 
 TEST(BufferedFields, FrmBosXonv){
-    const BasisDims bd = {4, 5};
+    const BasisData bd = {4, 5};
     defs::inds ket_frm_inds = {0, 2, 4, 5, 7};
     defs::inds ket_bos_inds = {3, 1, 2, 4, 9};
     defs::inds bra_frm_inds = {1, 2, 3, 7};

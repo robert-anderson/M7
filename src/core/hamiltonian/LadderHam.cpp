@@ -4,7 +4,7 @@
 
 #include "LadderHam.h"
 
-LadderHam::LadderHam(const BasisDims &bd, size_t nboson_max) :
+LadderHam::LadderHam(const BasisData &bd, size_t nboson_max) :
         m_bd(bd), m_nboson_max(nboson_max),
         m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
         m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {

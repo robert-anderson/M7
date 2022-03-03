@@ -4,7 +4,7 @@
 
 #include "FrmBosOnvField.h"
 
-FrmBosOnvField::FrmBosOnvField(Row *row, BasisDims bd, std::string name) :
+FrmBosOnvField::FrmBosOnvField(Row *row, BasisData bd, std::string name) :
         base_t(m_frm, m_bos),
         m_frm(row, bd.m_nsite, prefix("fermions", name)),
         m_bos(row, bd.m_nmode, prefix("bosons", name)){}

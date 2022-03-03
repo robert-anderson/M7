@@ -45,12 +45,12 @@ struct Hamiltonian {
     /**
      * specifies number of fermion sites and boson modes defining the single-particle basis
      */
-    const BasisDims m_bd;
+    const BasisData m_bd;
 
 private:
     mutable suite::Conns m_work_conn;
 
-    BasisDims make_bd() const;
+    BasisData make_bd() const;
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts);
 

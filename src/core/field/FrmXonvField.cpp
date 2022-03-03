@@ -9,7 +9,7 @@ FrmXonvField::FrmXonvField(Row *row, size_t nsite, std::string name) :
         m_ket(row, nsite, prefix("ket", name)),
         m_bra(row, nsite, prefix("bra", name)) {}
 
-FrmXonvField::FrmXonvField(Row *row, BasisDims bd, std::string name) :
+FrmXonvField::FrmXonvField(Row *row, BasisData bd, std::string name) :
         FrmXonvField(row, bd.m_nsite, name) {}
 
 FrmXonvField::FrmXonvField(const FrmXonvField &other) :

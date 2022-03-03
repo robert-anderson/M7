@@ -5,7 +5,7 @@
 #ifndef M7_FRMBOSCOUPLEDCOEFFS_H
 #define M7_FRMBOSCOUPLEDCOEFFS_H
 
-#include <src/core/basis/BasisDims.h>
+#include <src/core/basis/BasisData.h>
 #include "src/core/parallel/SharedArray.h"
 
 class FrmBosCoupledCoeffs {
@@ -23,7 +23,7 @@ class FrmBosCoupledCoeffs {
     size_t index(size_t n, size_t p, size_t q) const;
 
 public:
-    const BasisDims m_bd;
+    const BasisData m_bd;
     /**
      * the extent of the fermion indices in the array and its square to give the stride between consecutive mode indices
      */
@@ -37,7 +37,7 @@ public:
      */
     SharedArray<defs::ham_t> m_v;
 
-    FrmBosCoupledCoeffs(BasisDims bd, bool spin_resolved);
+    FrmBosCoupledCoeffs(BasisData bd, bool spin_resolved);
 
     /**
      * assign a value to the indexed element (should only be called on the root rank of each node)

@@ -2,8 +2,8 @@
 // Created by rja on 14/09/2021.
 //
 
-#ifndef M7_BASISDIMS_H
-#define M7_BASISDIMS_H
+#ifndef M7_BASISDATA_H
+#define M7_BASISDATA_H
 
 #include <utility>
 
@@ -13,15 +13,15 @@
 /**
  * admits a common interface for all initialisations of MBFs
  */
-struct BasisDims {
+struct BasisData {
     size_t m_nsite;
     size_t m_nmode;
     size_t m_nspinorb;
     AbelianGroupMap m_frm_abgrp_map;
-    BasisDims(size_t nsite, size_t nmode, AbelianGroupMap frm_abgrp_map):
+    BasisData(size_t nsite, size_t nmode, AbelianGroupMap frm_abgrp_map):
         m_nsite(nsite), m_nmode(nmode), m_nspinorb(nsite*2), m_frm_abgrp_map(std::move(frm_abgrp_map)){}
 
-    BasisDims(size_t nsite, size_t nmode): BasisDims(nsite, nmode, {nsite}){}
+    BasisData(size_t nsite, size_t nmode): BasisData(nsite, nmode, {nsite}){}
 
     void require_pure_frm() const {
         REQUIRE_FALSE(m_nmode, "MBF specification is not purely fermionic");
@@ -32,4 +32,4 @@ struct BasisDims {
 };
 
 
-#endif //M7_BASISDIMS_H
+#endif //M7_BASISDATA_H

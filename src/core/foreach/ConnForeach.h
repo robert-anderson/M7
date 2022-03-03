@@ -21,10 +21,10 @@ namespace conn_foreach {
     using namespace foreach_virtual::ctnd;
 
     struct ConnForeach {
-        const BasisDims m_bd;
+        const BasisData m_bd;
         CachedOrbs m_work_orbs;
 
-        explicit ConnForeach(BasisDims bd) : m_bd(bd){}
+        explicit ConnForeach(BasisData bd) : m_bd(bd){}
 
         ConnForeach(const ConnForeach &other) : ConnForeach(other.m_bd){}
         virtual ~ConnForeach(){}
@@ -63,7 +63,7 @@ namespace conn_foreach {
         typedef std::function<void(const conn_t&, size_t)> body_fn_t;
         body_fn_t m_body_fn;
     public:
-        Base(BasisDims bd, body_fn_t body_fn = {}, conn_t *conn = nullptr) :
+        Base(BasisData bd, body_fn_t body_fn = {}, conn_t *conn = nullptr) :
                 ConnForeach(bd), m_conn_internal(bd), m_conn(conn ? conn : &m_conn_internal),
                 m_body_fn(std::move(body_fn)) {}
 
@@ -150,7 +150,7 @@ namespace conn_foreach {
 
         class Base : public conn_foreach::Base<defs::FrmBos> {
         public:
-            Base(BasisDims bd, body_fn_t body_fn = {}, conn_t *conn = nullptr):
+            Base(BasisData bd, body_fn_t body_fn = {}, conn_t *conn = nullptr):
                 conn_foreach::Base<defs::FrmBos>(bd, std::move(body_fn), conn){}
 
             void frm_throwing_loop(const field::FrmOnv &src) override {}

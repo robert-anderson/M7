@@ -13,7 +13,7 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     typedef CompositeField<FrmOnvField, BosOnvField> base_t;
     FrmOnvField m_frm;
     BosOnvField m_bos;
-    FrmBosOnvField(Row* row, BasisDims bd, std::string name="");
+    FrmBosOnvField(Row* row, BasisData bd, std::string name="");
 
     FrmBosOnvField(const FrmBosOnvField& other);
 
