@@ -8,49 +8,50 @@
 #include "src/core/field/BosOnvField.h"
 #include "src/core/field/FrmBosOnvField.h"
 
+
+void decoded_mbf::SimpleContainer::clear() {
+    m_inds.clear();
+}
+
+bool decoded_mbf::SimpleContainer::empty() {
+    return m_inds.empty();
+}
+
+bool decoded_mbf::frm::Base::validate() const {
+    return !defs::enable_debug || (m_mbf.hash()==m_last_update_hash);
+}
+
+
+
+
+
+
+
+
 decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf, const AbelianGroupMap& grp_map):
-        m_mbf(mbf), m_simple_occ(mbf), m_simple_vac(mbf),
-        m_spin_sym_occ(grp_map, mbf), m_spin_sym_vac(grp_map, mbf){
+        m_mbf(mbf), m_simple_occs(mbf), m_simple_vacs(mbf),
+        m_spin_sym_occs(grp_map, mbf), m_spin_sym_vacs(grp_map, mbf){
     clear();
 }
 
 decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf): FrmOnv(mbf, {mbf.m_nsite}){}
 
 void decoded_mbf::FrmOnv::clear() {
-    m_simple_occ.clear();
-    m_simple_vac.clear();
-    m_spin_sym_occ.clear();
-    m_spin_sym_vac.clear();
+    m_simple_occs.clear();
+    m_simple_vacs.clear();
+    m_spin_sym_occs.clear();
+    m_spin_sym_vacs.clear();
     m_nonempty_pair_labels.clear();
     m_occ_sites.clear();
     m_doubly_occ_sites.clear();
     m_not_singly_occ_sites.clear();
 }
 
-const decoded_mbf::spinorbs::SimpleOccs& decoded_mbf::FrmOnv::simple_occs() {
-    if (m_simple_occ.empty()) m_simple_occ.update();
-    return m_simple_occ;
-}
-
-const decoded_mbf::spinorbs::SimpleVacs& decoded_mbf::FrmOnv::simple_vacs() {
-    if (m_simple_vac.empty()) m_simple_vac.update();
-    return m_simple_vac;
-}
-
-const decoded_mbf::spinorbs::SpinSymOccs& decoded_mbf::FrmOnv::spin_sym_occs() {
-    if (m_spin_sym_occ.empty()) m_spin_sym_occ.update();
-    return m_spin_sym_occ;
-}
-
-const decoded_mbf::spinorbs::SpinSymVacs& decoded_mbf::FrmOnv::spin_sym_vacs() {
-    if (m_spin_sym_vac.empty()) m_spin_sym_vac.update();
-    return m_spin_sym_vac;
-}
 
 const defs::inds &decoded_mbf::FrmOnv::nonempty_pair_labels() {
     if (m_nonempty_pair_labels.empty()){
-        auto& occ = this->spin_sym_occs();
-        auto& vac = this->spin_sym_vacs();
+        auto& occ = m_spin_sym_occs.get();
+        auto& vac = m_spin_sym_vacs.get();
         for (size_t i=0ul; i<occ.m_format.m_nelement; ++i){
             if (!occ[i].empty() && !vac[i].empty()) m_nonempty_pair_labels.push_back(i);
         }
@@ -128,45 +129,33 @@ const defs::inds &decoded_mbf::FrmBosOnv::occ_sites_nonzero_bosons() {
     return m_occ_sites_nonzero_bosons;
 }
 
-
-size_t decoded_mbf::spinorbs::SimpleBase::size() const {
-    return m_inds.size();
-}
-
-const size_t &decoded_mbf::spinorbs::SimpleBase::operator[](const size_t &i) const {
-    ASSERT(i<size());
-    return m_inds[i];
-}
-
-const defs::inds &decoded_mbf::spinorbs::SimpleBase::inds() const {
-    return m_inds;
-}
-
-void decoded_mbf::spinorbs::SimpleBase::clear() {
-    m_inds.clear();
-}
-
-bool decoded_mbf::spinorbs::SimpleBase::empty() {
-    return m_inds.empty();
-}
-
-void decoded_mbf::spinorbs::SimpleOccs::update() {
-    m_inds.clear();
+const defs::inds& decoded_mbf::frm::SimpleOccs::get() {
+    if (!empty()) {
+        DEBUG_ASSERT_TRUE(validate(), "cache is not in sync with current MBF value");
+        return m_inds;
+    }
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
         while (work) m_inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
     }
+    m_last_update_hash = m_mbf.hash();
+    return m_inds;
 }
 
-void decoded_mbf::spinorbs::SimpleVacs::update() {
-    m_inds.clear();
+const defs::inds& decoded_mbf::frm::SimpleVacs::get() {
+    if (!empty()) {
+        DEBUG_ASSERT_TRUE(validate(), "cache is not in sync with current MBF value");
+        return m_inds;
+    }
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
         while (work) m_inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
     }
+    m_last_update_hash = m_mbf.hash();
+    return m_inds;
 }
 
-defs::inds decoded_mbf::spinorbs::LabelledBase::make_spinorb_map(const defs::inds &site_irreps, size_t nirrep) {
+defs::inds decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::inds &site_irreps, size_t nirrep) {
     auto nsite = site_irreps.size();
     defs::inds out(2*nsite, 0);
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin());
@@ -175,29 +164,24 @@ defs::inds decoded_mbf::spinorbs::LabelledBase::make_spinorb_map(const defs::ind
     return out;
 }
 
-size_t decoded_mbf::spinorbs::LabelledBase::size(const size_t &ielement) const {
-    return m_inds[ielement].size();
-}
-
-const defs::inds &decoded_mbf::spinorbs::LabelledBase::operator[](const size_t &i) const {
-    ASSERT(i<m_inds.size());
-    return m_inds[i];
-}
-
-void decoded_mbf::spinorbs::LabelledBase::clear() {
+void decoded_mbf::frm::LabelledBase::clear() {
     for (auto& v: m_inds) v.clear();
     m_simple_inds.clear();
 }
 
-bool decoded_mbf::spinorbs::LabelledBase::empty() {
+bool decoded_mbf::frm::LabelledBase::empty() {
     return m_simple_inds.empty();
 }
 
-decoded_mbf::spinorbs::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
+decoded_mbf::frm::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
-void decoded_mbf::spinorbs::LabelledOccs::update() {
-    m_simple_inds.clear();
+const std::vector<defs::inds>& decoded_mbf::frm::LabelledOccs::get() {
+    if (!empty()) {
+        DEBUG_ASSERT_TRUE(validate(), "cache is not in sync with current MBF value");
+        return m_inds;
+    }
+    // simple inds are all ready cleared
     for (auto& v : m_inds) v.clear();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
@@ -207,13 +191,24 @@ void decoded_mbf::spinorbs::LabelledOccs::update() {
             m_simple_inds.push_back(ibit);
         }
     }
+    m_last_update_hash = m_mbf.hash();
+    return m_inds;
 }
 
-decoded_mbf::spinorbs::LabelledVacs::LabelledVacs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
+const defs::inds &decoded_mbf::frm::LabelledOccs::simple() {
+    get();
+    return m_simple_inds;
+}
+
+decoded_mbf::frm::LabelledVacs::LabelledVacs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
-void decoded_mbf::spinorbs::LabelledVacs::update() {
-    m_simple_inds.clear();
+const std::vector<defs::inds>& decoded_mbf::frm::LabelledVacs::get() {
+    if (!empty()) {
+        DEBUG_ASSERT_TRUE(validate(), "cache is not in sync with current MBF value");
+        return m_inds;
+    }
+    // simple inds are all ready cleared
     for (auto& v : m_inds) v.clear();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
@@ -223,4 +218,11 @@ void decoded_mbf::spinorbs::LabelledVacs::update() {
             m_simple_inds.push_back(ibit);
         }
     }
+    m_last_update_hash = m_mbf.hash();
+    return m_inds;
+}
+
+const defs::inds &decoded_mbf::frm::LabelledVacs::simple() {
+    get();
+    return m_simple_inds;
 }

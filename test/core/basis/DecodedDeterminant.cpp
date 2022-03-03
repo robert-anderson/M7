@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 
 TEST(DecodedDeterminant, SimpleOccAndVac){
-    using namespace decoded_mbf::spinorbs;
+    using namespace decoded_mbf::frm;
     buffered::FrmOnv mbf({50, 0});
     defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     mbf = setbits;
@@ -19,11 +19,11 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
         else clrbits.push_back(i);
     }
 
-    auto& occs = mbf.m_decoded.simple_occs();
-    ASSERT_TRUE(std::equal(occs.inds().cbegin(), occs.inds().cend(), setbits.cbegin()));
+    auto& occs = mbf.m_decoded.m_simple_occs.get();
+    ASSERT_TRUE(std::equal(occs.cbegin(), occs.cend(), setbits.cbegin()));
 
-    auto& vacs = mbf.m_decoded.simple_vacs();
-    ASSERT_TRUE(std::equal(vacs.inds().cbegin(), vacs.inds().cend(), clrbits.cbegin()));
+    auto& vacs = mbf.m_decoded.m_simple_vacs.get();
+    ASSERT_TRUE(std::equal(vacs.cbegin(), vacs.cend(), clrbits.cbegin()));
 
     /*
      * for a small number of occupied orbs, run through all possible arrangements
@@ -33,7 +33,7 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
         mbf.zero();
         mbf = value;
         mbf.m_decoded.clear();
-        auto& occ_simple_inds = mbf.m_decoded.simple_occs().inds();
+        auto& occ_simple_inds = mbf.m_decoded.m_simple_occs.get();
         ASSERT_EQ(occ_simple_inds, value);
     };
     foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_nspinorb, noccorb);
@@ -47,7 +47,7 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
         mbf.set();
         for (auto i: value) mbf.clr(i);
         mbf.m_decoded.clear();
-        auto& vac_simple_inds = mbf.m_decoded.simple_vacs().inds();
+        auto& vac_simple_inds = mbf.m_decoded.m_simple_vacs.get();
         ASSERT_EQ(vac_simple_inds, value);
     };
     foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_nspinorb, nvacorb);
@@ -55,7 +55,7 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
 }
 
 TEST(DecodedDeterminant, SpinSymOccAndVac){
-    using namespace decoded_mbf::spinorbs;
+    using namespace decoded_mbf::frm;
     // arbitrary, fictitious group
     AbelianGroup grp({"X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){
         return (iirrep+jirrep)%3;
@@ -90,8 +90,8 @@ TEST(DecodedDeterminant, SpinSymOccAndVac){
 
     defs::inds chk_inds;
 
-    auto& occs = mbf.m_decoded.spin_sym_occs();
-    auto& vacs = mbf.m_decoded.spin_sym_vacs();
+    auto& occs = mbf.m_decoded.m_spin_sym_occs.get();
+    auto& vacs = mbf.m_decoded.m_spin_sym_vacs.get();
     /*
      * alpha occupied
      */
