@@ -29,12 +29,13 @@ namespace decoded_mbf {
          * the subclasses must provide the logic for updating based on the clear or set positions.
          */
         struct SimpleBase {
+        protected:
             /**
              * spin orbital indices
              */
             defs::inds m_inds;
             const FrmOnvField &m_mbf;
-
+        public:
             SimpleBase(const FrmOnvField &mbf) : m_mbf(mbf) {}
 
             size_t size() const;
@@ -73,6 +74,7 @@ namespace decoded_mbf {
          * the subclasses must provide the logic for updating based on the clear or set positions.
          */
         struct LabelledBase {
+        protected:
             /**
              * ragged array of vectors to store set or clear positions. one vector per label
              */
@@ -81,11 +83,16 @@ namespace decoded_mbf {
              * map from the spinorb index to the "label"
              */
             const defs::inds m_map;
-        protected:
-            SimpleBase &m_simple_ref;
+            /**
+             * the simple decoding is cached at the same time, since it is often useful and available at small
+             * additional cost
+             */
+             defs::inds m_simple_inds;
 
-            LabelledBase(size_t nelement, const defs::inds &map, SimpleBase &simple_ref) :
-                    m_inds(nelement), m_map(map), m_simple_ref(simple_ref){
+            const FrmOnvField& m_mbf;
+
+            LabelledBase(size_t nelement, const defs::inds &map, const FrmOnvField &mbf) :
+                m_inds(nelement), m_map(map), m_mbf(mbf){
                 REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
                            "not allocating enough elements in ragged array to accommodate label map");
             }
@@ -119,10 +126,6 @@ namespace decoded_mbf {
          * update based on the set positions
          */
         struct LabelledOccs : LabelledBase {
-            /**
-             * flat orbitals are included so they can be decoded in the same loop as the labelled indices
-             */
-            SimpleOccs m_simple;
         protected:
             LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField &mbf);
 
@@ -134,11 +137,6 @@ namespace decoded_mbf {
          * update based on the clr positions
          */
         struct LabelledVacs : LabelledBase {
-            /**
-             * flat orbitals are included so they can be decoded in the same loop as the labelled indices
-             */
-            SimpleVacs m_simple;
-
         protected:
             LabelledVacs(size_t nelement, const defs::inds &map, const FrmOnvField &mbf);
 
@@ -234,13 +232,21 @@ namespace decoded_mbf {
     class FrmOnv {
         const FrmOnvField &m_mbf;
         /**
+         * occupied spin orbitals
+         */
+        spinorbs::SimpleOccs m_simple_occ;
+        /**
+         * vacant spin orbitals
+         */
+        spinorbs::SimpleVacs m_simple_vac;
+        /**
          * spin/sym-partitioned occupied spin orbitals
          */
-        spinorbs::SpinSymOccs m_occ;
+        spinorbs::SpinSymOccs m_spin_sym_occ;
         /**
          * spin/sym-partitioned vacant spin orbitals
          */
-        spinorbs::SpinSymVacs m_vac;
+        spinorbs::SpinSymVacs m_spin_sym_vac;
         /**
          * labels (flat indices of the partitioning) with at least one occupied and one vacant orbital
          */
@@ -267,20 +273,33 @@ namespace decoded_mbf {
          * clear all cached assets
          */
         void clear();
-
         /**
-         * call update on the occupied orbitals if required
+         * call update on the simply-decoded occupied orbitals if required
          * @return
          *  the occupied spin orbitals
          */
-        const spinorbs::SpinSymOccs &occ();
+        const spinorbs::SimpleOccs &simple_occs();
 
         /**
-         * call update on the occupied orbitals if required
+         * call update on the simply-decoded vacant orbitals if required
+         * @return
+         *  the vacant spin orbitals
+         */
+        const spinorbs::SimpleVacs &simple_vacs();
+
+        /**
+         * call update on the spin and point group symmetry-segregated occupied orbitals if required
          * @return
          *  the occupied spin orbitals
          */
-        const spinorbs::SpinSymVacs &vac();
+        const spinorbs::SpinSymOccs &spin_sym_occs();
+
+        /**
+         * call update on the spin and point group symmetry-segregated vacant orbitals if required
+         * @return
+         *  the vacant spin orbitals
+         */
+        const spinorbs::SpinSymVacs &spin_sym_vacs();
 
         /**
          * update the vector of labels of nonempty occupied and vacant spin orbs

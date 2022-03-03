@@ -19,14 +19,11 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
         else clrbits.push_back(i);
     }
 
+    auto& occs = mbf.m_decoded.simple_occs();
+    ASSERT_TRUE(std::equal(occs.inds().cbegin(), occs.inds().cend(), setbits.cbegin()));
 
-    auto& occ = mbf.m_decoded.occ();
-    auto& occ_simple_inds = occ.m_simple.m_inds;
-    ASSERT_TRUE(std::equal(occ_simple_inds.begin(), occ_simple_inds.end(), setbits.begin()));
-
-    auto& vac = mbf.m_decoded.vac();
-    auto& vac_simple_inds = vac.m_simple.m_inds;
-    ASSERT_TRUE(std::equal(vac_simple_inds.begin(), vac_simple_inds.end(), clrbits.begin()));
+    auto& vacs = mbf.m_decoded.simple_vacs();
+    ASSERT_TRUE(std::equal(vacs.inds().cbegin(), vacs.inds().cend(), clrbits.cbegin()));
 
     /*
      * for a small number of occupied orbs, run through all possible arrangements
@@ -36,26 +33,25 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
         mbf.zero();
         mbf = value;
         mbf.m_decoded.clear();
-        auto occ_simple_inds = mbf.m_decoded.occ().m_simple.m_inds;
+        auto& occ_simple_inds = mbf.m_decoded.simple_occs().inds();
         ASSERT_EQ(occ_simple_inds, value);
     };
     foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_nspinorb, noccorb);
     occ_foreach.loop();
-#if 0
 
     /*
      * for a small number of vacant orbs, run through all possible arrangements
      */
     const size_t nvacorb = 3;
-    auto vac_fn = [&mbf, &vacorbs](size_t iiter, const defs::inds &value) {
+    auto vac_fn = [&mbf](size_t iiter, const defs::inds &value) {
         mbf.set();
         for (auto i: value) mbf.clr(i);
-        vacorbs.update(mbf);
-        ASSERT_EQ(vacorbs.inds(), value);
+        mbf.m_decoded.clear();
+        auto& vac_simple_inds = mbf.m_decoded.simple_vacs().inds();
+        ASSERT_EQ(vac_simple_inds, value);
     };
     foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_nspinorb, nvacorb);
     vac_foreach.loop();
-#endif
 }
 
 #if 0
@@ -95,9 +91,7 @@ TEST(DecodedDeterminant, SymmDecoded){
 
     ASSERT_EQ(grp_map.m_nsite, 10);
 
-    SpinSymOccs occorbs(grp_map);
-    SpinSymVacs vacorbs(grp_map);
-
+    onv.m_decoded.
     occorbs.update(onv);
     vacorbs.update(onv);
 

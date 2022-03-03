@@ -9,35 +9,48 @@
 #include "src/core/field/FrmBosOnvField.h"
 
 decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf, const AbelianGroupMap& grp_map):
-        m_mbf(mbf), m_occ(grp_map, mbf), m_vac(grp_map, mbf){
+        m_mbf(mbf), m_simple_occ(mbf), m_simple_vac(mbf),
+        m_spin_sym_occ(grp_map, mbf), m_spin_sym_vac(grp_map, mbf){
     clear();
 }
 
 decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf): FrmOnv(mbf, {mbf.m_nsite}){}
 
 void decoded_mbf::FrmOnv::clear() {
-    m_occ.clear();
-    m_vac.clear();
+    m_simple_occ.clear();
+    m_simple_vac.clear();
+    m_spin_sym_occ.clear();
+    m_spin_sym_vac.clear();
     m_nonempty_pair_labels.clear();
     m_occ_sites.clear();
     m_doubly_occ_sites.clear();
     m_not_singly_occ_sites.clear();
 }
 
-const decoded_mbf::spinorbs::SpinSymOccs& decoded_mbf::FrmOnv::occ() {
-    if (m_occ.empty()) m_occ.update();
-    return m_occ;
+const decoded_mbf::spinorbs::SimpleOccs& decoded_mbf::FrmOnv::simple_occs() {
+    if (m_simple_occ.empty()) m_simple_occ.update();
+    return m_simple_occ;
 }
 
-const decoded_mbf::spinorbs::SpinSymVacs& decoded_mbf::FrmOnv::vac() {
-    if (m_vac.empty()) m_vac.update();
-    return m_vac;
+const decoded_mbf::spinorbs::SimpleVacs& decoded_mbf::FrmOnv::simple_vacs() {
+    if (m_simple_vac.empty()) m_simple_vac.update();
+    return m_simple_vac;
+}
+
+const decoded_mbf::spinorbs::SpinSymOccs& decoded_mbf::FrmOnv::spin_sym_occs() {
+    if (m_spin_sym_occ.empty()) m_spin_sym_occ.update();
+    return m_spin_sym_occ;
+}
+
+const decoded_mbf::spinorbs::SpinSymVacs& decoded_mbf::FrmOnv::spin_sym_vacs() {
+    if (m_spin_sym_vac.empty()) m_spin_sym_vac.update();
+    return m_spin_sym_vac;
 }
 
 const defs::inds &decoded_mbf::FrmOnv::nonempty_pair_labels() {
     if (m_nonempty_pair_labels.empty()){
-        auto& occ = this->occ();
-        auto& vac = this->vac();
+        auto& occ = this->spin_sym_occs();
+        auto& vac = this->spin_sym_vacs();
         for (size_t i=0ul; i<occ.m_format.m_nelement; ++i){
             if (!occ[i].empty() && !vac[i].empty()) m_nonempty_pair_labels.push_back(i);
         }
@@ -173,43 +186,41 @@ const defs::inds &decoded_mbf::spinorbs::LabelledBase::operator[](const size_t &
 
 void decoded_mbf::spinorbs::LabelledBase::clear() {
     for (auto& v: m_inds) v.clear();
-    m_simple_ref.clear();
+    m_simple_inds.clear();
 }
 
 bool decoded_mbf::spinorbs::LabelledBase::empty() {
-    return m_simple_ref.empty();
+    return m_simple_inds.empty();
 }
 
 decoded_mbf::spinorbs::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
-        LabelledBase(nelement, map, m_simple), m_simple(mbf){}
+        LabelledBase(nelement, map, mbf){}
 
 void decoded_mbf::spinorbs::LabelledOccs::update() {
-    m_simple.clear();
-    auto& mbf = m_simple.m_mbf;
+    m_simple_inds.clear();
     for (auto& v : m_inds) v.clear();
-    for (size_t idataword = 0ul; idataword < mbf.m_dsize; ++idataword) {
-        auto work = mbf.get_dataword(idataword);
+    for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
+        auto work = m_mbf.get_dataword(idataword);
         while (work) {
             auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
             m_inds[m_map[ibit]].push_back(ibit);
-            m_simple.m_inds.push_back(ibit);
+            m_simple_inds.push_back(ibit);
         }
     }
 }
 
 decoded_mbf::spinorbs::LabelledVacs::LabelledVacs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
-        LabelledBase(nelement, map, m_simple), m_simple(mbf){}
+        LabelledBase(nelement, map, mbf){}
 
 void decoded_mbf::spinorbs::LabelledVacs::update() {
-    m_simple.clear();
-    auto& mbf = m_simple.m_mbf;
+    m_simple_inds.clear();
     for (auto& v : m_inds) v.clear();
-    for (size_t idataword = 0ul; idataword < mbf.m_dsize; ++idataword) {
-        auto work = mbf.get_antidataword(idataword);
+    for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
+        auto work = m_mbf.get_antidataword(idataword);
         while (work) {
             auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
             m_inds[m_map[ibit]].push_back(ibit);
-            m_simple.m_inds.push_back(ibit);
+            m_simple_inds.push_back(ibit);
         }
     }
 }
