@@ -55,7 +55,10 @@ struct AbelianGroup {
                 m_products(iirrep, jirrep) = direct_prod_fn(iirrep, jirrep);
     }
 
-    AbelianGroup(): AbelianGroup({}, [](const size_t&, const size_t&){return 0ul;}){}
+    /**
+     * default group has only one irrep label
+     */
+    AbelianGroup(): AbelianGroup({"A"}, [](const size_t&, const size_t&){return 0ul;}){}
 
     AbelianGroup(const AbelianGroup& other):
             m_labels(other.m_labels), m_products(other.m_products){
@@ -108,7 +111,7 @@ struct AbelianGroupMap {
                            [&](const size_t& i){return i<m_grp.nirrep();}));
     }
 
-    AbelianGroupMap(): AbelianGroupMap({}, {}){}
+    AbelianGroupMap(size_t nsite): AbelianGroupMap({}, defs::inds(nsite, 0)){}
 };
 
 #endif //M7_ABELIANGROUP_H

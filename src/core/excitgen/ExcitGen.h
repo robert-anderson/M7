@@ -8,7 +8,7 @@
 #include <src/core/hamiltonian/Hamiltonian.h>
 #include <src/core/connection/Connections.h>
 #include "src/core/sample/PRNG.h"
-#include "src/core/caches/CachedOrbs.h"
+#include "src/core/caches/CachedOrbsOld.h"
 
 struct ExcitGen {
 
