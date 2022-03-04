@@ -4,10 +4,9 @@
 
 #include <src/core/table/BufferedFields.h>
 #include <src/core/foreach/ForeachVirtual.h>
-#include "src/core/caches/CachedOrbs.h"
 #include "gtest/gtest.h"
 
-TEST(DecodedDeterminant, Simple){
+TEST(DecodedMbf, Simple){
     using namespace decoded_mbf::frm;
     buffered::FrmOnv mbf({50, 0});
     defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
@@ -54,7 +53,7 @@ TEST(DecodedDeterminant, Simple){
     vac_foreach.loop();
 }
 
-TEST(DecodedDeterminant, Labelled){
+TEST(DecodedMbf, Labelled){
     using namespace decoded_mbf::frm;
     // arbitrary, fictitious group
     AbelianGroup grp({"W", "X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){

@@ -6,7 +6,6 @@
 #define M7_CONNFOREACH_H
 
 #include <utility>
-#include <src/core/caches/CachedOrbs.h>
 
 #include "src/core/basis/Suites.h"
 #include "src/core/connection/Connections.h"

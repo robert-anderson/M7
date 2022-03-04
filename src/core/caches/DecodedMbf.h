@@ -2,8 +2,8 @@
 // Created by rja on 24/08/2021.
 //
 
-#ifndef M7_CACHEDORBS_H
-#define M7_CACHEDORBS_H
+#ifndef M7_DECODEDMBF_H
+#define M7_DECODEDMBF_H
 
 #include <algorithm>
 #include <src/core/basis/AbelianGroup.h>
@@ -437,4 +437,4 @@ namespace decoded_mbf {
     };
 };
 
-#endif //M7_CACHEDORBS_H
+#endif //M7_DECODEDMBF_H
