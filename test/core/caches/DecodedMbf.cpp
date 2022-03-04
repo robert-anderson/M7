@@ -7,7 +7,6 @@
 #include "gtest/gtest.h"
 
 TEST(DecodedMbf, Simple){
-    using namespace decoded_mbf::frm;
     buffered::FrmOnv mbf({50, 0});
     defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     mbf = setbits;
@@ -53,8 +52,25 @@ TEST(DecodedMbf, Simple){
     vac_foreach.loop();
 }
 
+TEST(DecodedMbf, SingleMultipleOccupation) {
+    const size_t nsite = 8;
+    defs::inds alpha_inds = {0, 4, 5, 7};
+    defs::inds beta_inds = {0, 1, 2, 5};
+    buffered::FrmOnv mbf(nsite);
+    mbf = {alpha_inds, beta_inds};
+    defs::inds chk_inds;
+
+    chk_inds = {0, 1, 2, 4, 5, 7};
+    ASSERT_EQ(mbf.m_decoded.m_occ_sites.get(), chk_inds);
+
+    chk_inds = {0, 5};
+    ASSERT_EQ(mbf.m_decoded.m_doubly_occ_sites.get(), chk_inds);
+
+    chk_inds = {0, 3, 5, 6};
+    ASSERT_EQ(mbf.m_decoded.m_not_singly_occ_sites.get(), chk_inds);
+}
+
 TEST(DecodedMbf, Labelled){
-    using namespace decoded_mbf::frm;
     // arbitrary, fictitious group
     AbelianGroup grp({"W", "X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){
         return (iirrep+jirrep)%4;

@@ -155,11 +155,43 @@ const defs::inds &decoded_mbf::frm::NonEmptyPairLabels::get() {
     return m_inds;
 }
 
+decoded_mbf::frm::OccSites::OccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
+
+const defs::inds &decoded_mbf::frm::OccSites::get() {
+    if (!empty()) return validated();
+    for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
+        if (m_mbf.site_nocc(isite)) m_inds.push_back(isite);
+    }
+    return m_inds;
+}
+
+decoded_mbf::frm::DoublyOccSites::DoublyOccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
+
+const defs::inds &decoded_mbf::frm::DoublyOccSites::get() {
+    if (!empty()) return validated();
+    for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
+        if (m_mbf.site_nocc(isite)==2) m_inds.push_back(isite);
+    }
+    return m_inds;
+}
+
+decoded_mbf::frm::NotSinglyOccSites::NotSinglyOccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
+
+const defs::inds &decoded_mbf::frm::NotSinglyOccSites::get() {
+    if (!empty()) return validated();
+    for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
+        if (m_mbf.site_nocc(isite)!=1) m_inds.push_back(isite);
+    }
+    return m_inds;
+}
+
+
 
 decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf, const AbelianGroupMap& grp_map):
         m_simple_occs(mbf), m_simple_vacs(mbf),
         m_spin_sym_occs(grp_map, mbf), m_spin_sym_vacs(grp_map, mbf),
-        m_nonempty_pair_labels(mbf, m_spin_sym_occs, m_spin_sym_vacs){
+        m_nonempty_pair_labels(mbf, m_spin_sym_occs, m_spin_sym_vacs),
+        m_occ_sites(mbf), m_doubly_occ_sites(mbf), m_not_singly_occ_sites(mbf){
     clear();
 }
 
@@ -174,33 +206,6 @@ void decoded_mbf::FrmOnv::clear() {
     m_occ_sites.clear();
     m_doubly_occ_sites.clear();
     m_not_singly_occ_sites.clear();
-}
-
-const defs::inds &decoded_mbf::FrmOnv::occ_sites() {
-//    if (m_occ_sites.empty()) {
-//        for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
-//            if (m_mbf.site_nocc(isite)) m_occ_sites.push_back(isite);
-//        }
-//    }
-    return m_occ_sites;
-}
-
-const defs::inds &decoded_mbf::FrmOnv::doubly_occ_sites() {
-//    if (m_doubly_occ_sites.empty()) {
-//        for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
-//            if (m_mbf.site_nocc(isite)==2) m_doubly_occ_sites.push_back(isite);
-//        }
-//    }
-    return m_doubly_occ_sites;
-}
-
-const defs::inds &decoded_mbf::FrmOnv::not_singly_occ_sites() {
-//    if (m_not_singly_occ_sites.empty()) {
-//        for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
-//            if (m_mbf.site_nocc(isite)!=1) m_not_singly_occ_sites.push_back(isite);
-//        }
-//    }
-    return m_not_singly_occ_sites;
 }
 
 
@@ -245,3 +250,4 @@ const defs::inds &decoded_mbf::FrmBosOnv::occ_sites_nonzero_bosons() {
     }
     return m_occ_sites_nonzero_bosons;
 }
+

@@ -252,22 +252,34 @@ namespace decoded_mbf {
             SpinSymOccs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf);
         };
 
-        /**
-         * vacant orbital analogue of the above definition
-         */
         struct SpinSymVacs : NdLabelledVacs<2> {
             SpinSymVacs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf);
         };
 
-        /**
-         * labels (flat indices of the spin-sym partitioning) with at least one occupied and one vacant orbital
-         */
         struct NonEmptyPairLabels : SimpleBase {
         protected:
             SpinSymOccs &m_occs;
             SpinSymVacs &m_vacs;
         public:
             NonEmptyPairLabels(const FrmOnvField &mbf, SpinSymOccs &occs, SpinSymVacs &vacs);
+
+            const defs::inds& get();
+        };
+
+        struct OccSites : SimpleBase {
+            OccSites(const FrmOnvField &mbf);
+
+            const defs::inds& get();
+        };
+
+        struct DoublyOccSites : SimpleBase {
+            DoublyOccSites(const FrmOnvField &mbf);
+
+            const defs::inds& get();
+        };
+
+        struct NotSinglyOccSites : SimpleBase {
+            NotSinglyOccSites(const FrmOnvField &mbf);
 
             const defs::inds& get();
         };
@@ -298,15 +310,15 @@ namespace decoded_mbf {
         /**
          * site indices with any electrons
          */
-        defs::inds m_occ_sites;
+        frm::OccSites m_occ_sites;
         /**
          * site indices with 2 electrons
          */
-        defs::inds m_doubly_occ_sites;
+        frm::DoublyOccSites m_doubly_occ_sites;
         /**
          * site indices with 0 or 2 electrons
          */
-        defs::inds m_not_singly_occ_sites;
+        frm::NotSinglyOccSites m_not_singly_occ_sites;
 
         FrmOnv(const FrmOnvField &mbf, const AbelianGroupMap &grp_map);
 
@@ -316,64 +328,6 @@ namespace decoded_mbf {
          * clear all cached assets
          */
         void clear();
-
-#if 0
-        /**
-         * call update on the simply-decoded occupied orbitals if required
-         * @return
-         *  the occupied spin orbitals
-         */
-        const frm::SimpleOccs &simple_occs();
-
-        /**
-         * call update on the simply-decoded vacant orbitals if required
-         * @return
-         *  the vacant spin orbitals
-         */
-        const frm::SimpleVacs &simple_vacs();
-
-        /**
-         * call update on the spin and point group symmetry-segregated occupied orbitals if required
-         * @return
-         *  the occupied spin orbitals
-         */
-        const frm::SpinSymOccs &spin_sym_occs();
-
-        /**
-         * call update on the spin and point group symmetry-segregated vacant orbitals if required
-         * @return
-         *  the vacant spin orbitals
-         */
-        const frm::SpinSymVacs &spin_sym_vacs();
-
-        /**
-         * update the vector of labels of nonempty occupied and vacant spin orbs
-         * @return
-         *  vector of labels of nonempty occupied and vacant spin orbs
-         */
-        const defs::inds &nonempty_pair_labels();
-
-#endif
-        /**
-         * update the vector of site indices with at least one fermion
-         * @return
-         *  vector of site indices with at least one fermion
-         */
-        const defs::inds &occ_sites();
-
-        /**
-         * update the vector of site indices occupied with two fermions
-         * @return
-         *  vector of site indices with two fermions
-         */
-        const defs::inds &doubly_occ_sites();
-
-        /**
-         * update the vector of site indices occupied with zero or two fermions
-         * @return
-         *  vector of site indices with zero or two fermions
-         */
-        const defs::inds &not_singly_occ_sites();
     };
 
     class BosOnv {
