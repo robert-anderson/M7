@@ -7,7 +7,7 @@
 #include "src/core/caches/CachedOrbs.h"
 #include "gtest/gtest.h"
 
-TEST(DecodedDeterminant, SimpleOccAndVac){
+TEST(DecodedDeterminant, Simple){
     using namespace decoded_mbf::frm;
     buffered::FrmOnv mbf({50, 0});
     defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
@@ -54,37 +54,38 @@ TEST(DecodedDeterminant, SimpleOccAndVac){
     vac_foreach.loop();
 }
 
-TEST(DecodedDeterminant, SpinSymOccAndVac){
+TEST(DecodedDeterminant, Labelled){
     using namespace decoded_mbf::frm;
     // arbitrary, fictitious group
-    AbelianGroup grp({"X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){
-        return (iirrep+jirrep)%3;
+    AbelianGroup grp({"W", "X", "Y", "Z"}, [](const size_t& iirrep, const size_t& jirrep){
+        return (iirrep+jirrep)%4;
     });
 
+    defs::inds alpha_occ{0, 1, 2, 4, 7, 9};
+    defs::inds beta_occ{2, 4, 5, 6, 7, 8};
     /*                                         0  1  2  3  4  5  6  7  8  9
      * occupied orbitals (alpha):              o  o  o  /  o  /  /  o  /  o
      * occupied orbitals (beta ):              /  /  o  /  o  o  o  o  o  /
      */
-    AbelianGroupMap grp_map(grp, {0, 1, 1, 2, 0, 0, 1, 2, 1, 0});
+    AbelianGroupMap grp_map(grp, {0, 1, 1, 3, 0, 0, 1, 3, 1, 0});
+    // note that label Y is unused
     ASSERT_EQ(grp_map.m_nsite, 10);
     /*
      * irrep occupations (alpha):
-     *  0("Xa"): 3, 1("Ya"): 2, 2("Za"): 1
+     *  0("Wa"): 3, 1("Xa"): 2, 2("Ya"): 0, 3("Za"): 1
      *
      * irrep vacancies (alpha):
-     *  0("Xa"): 1, 1("Ya"): 2, 2("Za"): 1
+     *  0("Wa"): 1, 1("Xa"): 2, 2("Ya"): 0, 3("Za"): 1
      *
      *
      * irrep occupations (beta):
-     *  3("Xb"): 2, 4("Yb"): 3, 5("Zb"): 1
+     *  4("Wb"): 2, 5("Xb"): 3, 6("Yb"): 0, 7("Zb"): 1
      *
      * irrep vacancies (beta):
-     *  3("Xb"): 2, 4("Yb"): 1, 5("Zb"): 1
+     *  4("Wb"): 2, 5("Xb"): 1, 6("Yb"): 0, 7("Zb"): 1
      */
 
     buffered::FrmOnv mbf({10, 0, grp_map});
-    defs::inds alpha_occ{0, 1, 2, 4, 7, 9};
-    defs::inds beta_occ{2, 4, 5, 6, 7, 8};
     mbf = {alpha_occ, beta_occ};
     ASSERT_EQ(mbf.nsetbit(), alpha_occ.size() + beta_occ.size());
 
@@ -95,53 +96,84 @@ TEST(DecodedDeterminant, SpinSymOccAndVac){
     /*
      * alpha occupied
      */
-    ASSERT_EQ(occs.size(0), 3);
+    ASSERT_EQ(occs.size({0, 0}), 3);
     chk_inds = occs[{0, 0}];
     ASSERT_EQ(chk_inds, defs::inds({0, 4, 9}));
-    ASSERT_EQ(occs.size(1), 2);
+
+    ASSERT_EQ(occs.size({0, 1}), 2);
     chk_inds = occs[{0, 1}];
     ASSERT_EQ(chk_inds, defs::inds({1, 2}));
-    ASSERT_EQ(occs.size(2), 1);
+
+    ASSERT_EQ(occs.size({0, 2}), 0);
     chk_inds = occs[{0, 2}];
+    ASSERT_EQ(chk_inds, defs::inds({}));
+
+    ASSERT_EQ(occs.size({0, 3}), 1);
+    chk_inds = occs[{0, 3}];
     ASSERT_EQ(chk_inds, defs::inds({7}));
 
     /*
      * alpha vacant
      */
-    ASSERT_EQ(vacs.size(0), 1);
+    ASSERT_EQ(vacs.size({0, 0}), 1);
     chk_inds = vacs[{0, 0}];
     ASSERT_EQ(chk_inds, defs::inds({5}));
-    ASSERT_EQ(vacs.size(1), 2);
+
+    ASSERT_EQ(vacs.size({0, 1}), 2);
     chk_inds = vacs[{0, 1}];
     ASSERT_EQ(chk_inds, defs::inds({6, 8}));
-    ASSERT_EQ(vacs.size(2), 1);
+
+    ASSERT_EQ(vacs.size({0, 2}), 0);
     chk_inds = vacs[{0, 2}];
+    ASSERT_EQ(chk_inds, defs::inds({}));
+
+    ASSERT_EQ(vacs.size({0, 3}), 1);
+    chk_inds = vacs[{0, 3}];
     ASSERT_EQ(chk_inds, defs::inds({3}));
 
     /*
      * beta occupied
      * beta_occ{2, 4, 5, 6, 7, 8} -> 12, 14, 15, 16, 17, 18
      */
-    ASSERT_EQ(occs.size(3), 2);
+    ASSERT_EQ(occs.size({1, 0}), 2);
     chk_inds = occs[{1, 0}];
     ASSERT_EQ(chk_inds, defs::inds({14, 15}));
-    ASSERT_EQ(occs.size(4), 3);
+
+    ASSERT_EQ(occs.size({1, 1}), 3);
     chk_inds = occs[{1, 1}];
     ASSERT_EQ(chk_inds, defs::inds({12, 16, 18}));
-    ASSERT_EQ(occs.size(5), 1);
+
+    ASSERT_EQ(occs.size({1, 2}), 0);
     chk_inds = occs[{1, 2}];
+    ASSERT_EQ(chk_inds, defs::inds({}));
+
+    ASSERT_EQ(occs.size({1, 3}), 1);
+    chk_inds = occs[{1, 3}];
     ASSERT_EQ(chk_inds, defs::inds({17}));
 
     /*
      * beta vacant
      */
-    ASSERT_EQ(vacs.size(3), 2);
+    ASSERT_EQ(vacs.size({1, 0}), 2);
     chk_inds = vacs[{1, 0}];
     ASSERT_EQ(chk_inds, defs::inds({10, 19}));
-    ASSERT_EQ(vacs.size(4), 1);
+
+    ASSERT_EQ(vacs.size({1, 1}), 1);
     chk_inds = vacs[{1, 1}];
     ASSERT_EQ(chk_inds, defs::inds({11}));
-    ASSERT_EQ(vacs.size(5), 1);
+
+    ASSERT_EQ(vacs.size({1, 2}), 0);
     chk_inds = vacs[{1, 2}];
+    ASSERT_EQ(chk_inds, defs::inds({}));
+
+    ASSERT_EQ(vacs.size({1, 3}), 1);
+    chk_inds = vacs[{1, 3}];
     ASSERT_EQ(chk_inds, defs::inds({13}));
+
+    /*
+     *
+     */
+    auto& nonempty_pair_labels = mbf.m_decoded.m_nonempty_pair_labels.get();
+    chk_inds = {0, 1, 3, 4, 5, 7};
+    ASSERT_EQ(chk_inds, nonempty_pair_labels);
 }

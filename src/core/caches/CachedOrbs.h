@@ -31,7 +31,7 @@ namespace decoded_mbf {
          * @return
          *  true if the current hash matches that of the last update
          */
-        virtual bool validate() const = 0;
+        virtual bool is_valid() const = 0;
     protected:
         /**
          * should be updated only in the debug build any time an update is performed
@@ -59,9 +59,9 @@ namespace decoded_mbf {
         protected:
             const FrmOnvField &m_mbf;
         public:
-            Base(const FrmOnvField &mbf): m_mbf(mbf){}
+            Base(const FrmOnvField &mbf);
 
-            bool validate() const override;
+            bool is_valid() const override;
         };
 
         /**
@@ -71,18 +71,16 @@ namespace decoded_mbf {
          */
         struct SimpleBase : Base, SimpleContainer {
         protected:
-            /**
-             * spin orbital indices
-             */
+            const defs::inds& validated() const;
         public:
-            SimpleBase(const FrmOnvField &mbf) : Base(mbf) {}
+            explicit SimpleBase(const FrmOnvField &mbf);
         };
 
         /**
          * update based on the set positions
          */
         struct SimpleOccs : SimpleBase {
-            SimpleOccs(const FrmOnvField &mbf) : SimpleBase(mbf) {}
+            explicit SimpleOccs(const FrmOnvField &mbf);
             const defs::inds& get();
         };
 
@@ -90,7 +88,7 @@ namespace decoded_mbf {
          * update based on the clr positions
          */
         struct SimpleVacs : SimpleBase {
-            SimpleVacs(const FrmOnvField &mbf) : SimpleBase(mbf) {}
+            explicit SimpleVacs(const FrmOnvField &mbf);
             const defs::inds& get();
         };
 
@@ -116,11 +114,9 @@ namespace decoded_mbf {
              */
              defs::inds m_simple_inds;
 
-            LabelledBase(size_t nelement, const defs::inds &map, const FrmOnvField &mbf) :
-                Base(mbf), m_inds(nelement), m_map(map) {
-                REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
-                           "not allocating enough elements in ragged array to accommodate label map");
-            }
+            LabelledBase(size_t nelement, const defs::inds &map, const FrmOnvField &mbf);
+
+            const std::vector<defs::inds>& validated() const;
 
         public:
             /**
@@ -203,12 +199,22 @@ namespace decoded_mbf {
          *  number of elements in shape of label array
          */
         template<size_t nind>
-        struct NdLabelledOccs : LabelledOccs, private NdBase<nind> {
+        struct NdLabelledOccs : LabelledOccs {
+        protected:
+            NdBase<nind> m_nd_inds;
+        public:
             NdLabelledOccs(std::array<size_t, nind> shape, const defs::inds &map, const FrmOnvField &mbf) :
-                    LabelledOccs(NdFormat<nind>(shape).m_nelement, map, mbf), NdBase<nind>(shape, m_inds) {}
+                    LabelledOccs(NdFormat<nind>(shape).m_nelement, map, mbf),
+                    m_nd_inds(shape, m_inds) {}
             const NdBase<nind>& get(){
                 LabelledOccs::get();
-                return *this;
+                return m_nd_inds;
+            }
+
+        protected:
+            const NdBase<nind>& validated() const {
+                DEBUG_ASSERT_TRUE(is_valid(), "cache is not in sync with current MBF value");
+                return m_nd_inds;
             }
         };
 
@@ -219,12 +225,22 @@ namespace decoded_mbf {
          *  number of elements in shape of label array
          */
         template<size_t nind>
-        struct NdLabelledVacs : LabelledVacs, private NdBase<nind> {
+        struct NdLabelledVacs : LabelledVacs {
+        protected:
+            NdBase<nind> m_nd_inds;
+        public:
             NdLabelledVacs(std::array<size_t, nind> shape, const defs::inds &map, const FrmOnvField &mbf) :
-                    LabelledVacs(NdFormat<nind>(shape).m_nelement, map, mbf), NdBase<nind>(shape, m_inds) {}
+                    LabelledVacs(NdFormat<nind>(shape).m_nelement, map, mbf),
+                    m_nd_inds(shape, m_inds) {}
             const NdBase<nind>& get(){
                 LabelledVacs::get();
-                return *this;
+                return m_nd_inds;
+            }
+
+        protected:
+            const NdBase<nind>& validated() const {
+                DEBUG_ASSERT_TRUE(is_valid(), "cache is not in sync with current MBF value");
+                return m_nd_inds;
             }
         };
 
@@ -233,24 +249,32 @@ namespace decoded_mbf {
          * where there is utility in segregating the set or clear indices by both spin and point group irrep.
          */
         struct SpinSymOccs : NdLabelledOccs<2> {
-            SpinSymOccs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf) :
-                    NdLabelledOccs<2>({2, grp_map.m_grp.nirrep()},
-                                      make_spinorb_map(grp_map.m_site_irreps, grp_map.m_grp.nirrep()), mbf) {
-            }
+            SpinSymOccs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf);
         };
 
         /**
          * vacant orbital analogue of the above definition
          */
         struct SpinSymVacs : NdLabelledVacs<2> {
-            SpinSymVacs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf) :
-                    NdLabelledVacs<2>({2, grp_map.m_grp.nirrep()},
-                                      make_spinorb_map(grp_map.m_site_irreps, grp_map.m_grp.nirrep()), mbf) {}
+            SpinSymVacs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf);
         };
+
+        /**
+         * labels (flat indices of the spin-sym partitioning) with at least one occupied and one vacant orbital
+         */
+        struct NonEmptyPairLabels : SimpleBase {
+        protected:
+            SpinSymOccs &m_occs;
+            SpinSymVacs &m_vacs;
+        public:
+            NonEmptyPairLabels(const FrmOnvField &mbf, SpinSymOccs &occs, SpinSymVacs &vacs);
+
+            const defs::inds& get();
+        };
+
     }
 
     struct FrmOnv {
-        const FrmOnvField &m_mbf;
         /**
          * occupied spin orbitals
          */
@@ -268,9 +292,9 @@ namespace decoded_mbf {
          */
         frm::SpinSymVacs m_spin_sym_vacs;
         /**
-         * labels (flat indices of the partitioning) with at least one occupied and one vacant orbital
+         * labels (flat indices of the spin-sym partitioning) with at least one occupied and one vacant orbital
          */
-        defs::inds m_nonempty_pair_labels;
+        frm::NonEmptyPairLabels m_nonempty_pair_labels;
         /**
          * site indices with any electrons
          */
@@ -321,7 +345,6 @@ namespace decoded_mbf {
          *  the vacant spin orbitals
          */
         const frm::SpinSymVacs &spin_sym_vacs();
-#endif
 
         /**
          * update the vector of labels of nonempty occupied and vacant spin orbs
@@ -330,6 +353,7 @@ namespace decoded_mbf {
          */
         const defs::inds &nonempty_pair_labels();
 
+#endif
         /**
          * update the vector of site indices with at least one fermion
          * @return

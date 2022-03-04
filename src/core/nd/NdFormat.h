@@ -160,7 +160,10 @@ public:
      */
     size_t flatten(std::array<size_t, nind> inds) const {
         size_t i = 0ul;
-        for (size_t iind=0ul; iind!=nind; ++iind) i+=inds[iind]*m_strides[iind];
+        for (size_t iind=0ul; iind!=nind; ++iind) {
+            DEBUG_ASSERT_LT(inds[iind], m_shape[iind], "index OOB");
+            i+=inds[iind]*m_strides[iind];
+        }
         return i;
     }
 
