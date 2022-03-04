@@ -7,6 +7,7 @@
 
 #include "NumberField.h"
 #include "src/core/basis/BasisData.h"
+#include "src/core/caches/DecodedBosOnv.h"
 
 struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     typedef NdNumberField<defs::bos_occ_t, 1> base_t;
@@ -14,12 +15,16 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      * alias for the number of elements in the 1D numeric array
      */
     const size_t& m_nmode;
+    /**
+     * a refreshable cache of useful representations for excitation generation and enumeration
+     */
+    mutable decoded_mbf::BosOnv m_decoded;
 
     BosOnvField(Row *row, size_t nmode, std::string name = "");
 
     BosOnvField(Row *row, BasisData bd, std::string name = "");
 
-    BosOnvField(const BosOnvField &other) : base_t(other), m_nmode(m_nelement) {}
+    BosOnvField(const BosOnvField &other);
 
     BosOnvField &operator=(const BosOnvField &other) {
         base_t::operator=(other);

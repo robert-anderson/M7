@@ -5,8 +5,8 @@
 #ifndef M7_FRMONVFIELD_H
 #define M7_FRMONVFIELD_H
 
-#include <src/core/basis/BasisData.h>
-#include <src/core/caches/DecodedMbf.h>
+#include "src/core/basis/BasisData.h"
+#include "src/core/caches/DecodedFrmOnv.h"
 #include "BitsetField.h"
 
 struct FrmOnvField : BitsetField<size_t, 2> {
@@ -18,6 +18,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::operator=;
     using base_t::inds_t;
 
+    const BasisData m_bd;
     const size_t m_nsite;
     const size_t& m_nspinorb;
     /**

@@ -8,7 +8,8 @@
 FrmOnvField::FrmOnvField(Row *row, BasisData bd, std::string name) :
         base_t(row, {{2, bd.m_nsite},
                      {"spin channel", "site"}}, name),
-        m_nsite(bd.m_nsite), m_nspinorb(m_format.m_nelement), m_decoded(*this, bd.m_frm_abgrp_map){
+        m_bd(bd), m_nsite(bd.m_nsite), m_nspinorb(m_format.m_nelement),
+        m_decoded(*this, bd.m_frm_abgrp_map){
     bd.require_pure_frm();
 }
 
@@ -16,8 +17,8 @@ FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
     FrmOnvField(row, {nsite, 0ul}, name){}
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
-        base_t(other), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb), m_decoded((exit(0), *this)){
-}
+        base_t(other), m_bd(other.m_bd), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb),
+        m_decoded(*this, other.m_bd.m_frm_abgrp_map){}
 
 FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
     // prezero the element

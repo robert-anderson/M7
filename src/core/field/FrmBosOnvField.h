@@ -8,11 +8,16 @@
 #include "FrmOnvField.h"
 #include "BosOnvField.h"
 #include "CompositeField.h"
+#include "src/core/caches/DecodedFrmBosOnv.h"
 
 struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     typedef CompositeField<FrmOnvField, BosOnvField> base_t;
     FrmOnvField m_frm;
     BosOnvField m_bos;
+    /**
+     * a refreshable cache of useful representations for excitation generation and enumeration
+     */
+    mutable decoded_mbf::FrmBosOnv m_decoded;
     FrmBosOnvField(Row* row, BasisData bd, std::string name="");
 
     FrmBosOnvField(const FrmBosOnvField& other);

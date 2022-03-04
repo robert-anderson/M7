@@ -186,9 +186,32 @@ TEST(DecodedMbf, Labelled){
     ASSERT_EQ(chk_inds, defs::inds({13}));
 
     /*
-     *
+     * all spinorb labels except those correcsponing to irrep "Y" have nonempty pairs
      */
     auto& nonempty_pair_labels = mbf.m_decoded.m_nonempty_pair_labels.get();
     chk_inds = {0, 1, 3, 4, 5, 7};
     ASSERT_EQ(chk_inds, nonempty_pair_labels);
+}
+
+TEST(DecodedMbf, Bosons) {
+    const size_t nmode = 8;
+    buffered::BosOnv mbf(nmode);
+    mbf = {0, 1, 0, 3, 1, 0, 1, 2};
+    defs::inds chk_inds;
+
+    chk_inds = {1, 3, 3, 3, 4, 6, 7, 7};
+    ASSERT_EQ(mbf.m_decoded.m_expanded.get(), chk_inds);
+
+    chk_inds = {1, 3, 4, 6, 7};
+    ASSERT_EQ(mbf.m_decoded.m_occ_modes.get(), chk_inds);
+}
+
+TEST(DecodedMbf, Holstein) {
+    const size_t nmode = 8;
+    buffered::FrmBosOnv mbf({nmode, nmode});
+    mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
+    mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};
+
+    defs::inds chk_inds = {1, 3, 6, 7};
+    ASSERT_EQ(mbf.m_decoded.m_occ_sites_nonzero_bosons.get(), chk_inds);
 }
