@@ -13,6 +13,7 @@
 
 
 namespace conn_foreach {
+    using namespace foreach_virtual::ctnd;
 
     struct ConnForeach {
         virtual void frm_throwing_loop(const FrmOnvField &src) = 0;
@@ -67,11 +68,58 @@ namespace conn_foreach {
             if (m_body_fn) m_body_fn(*m_conn, iiter());
         }
 
-        const conn_t& conn() const {
-            return *m_conn;
-        }
+//        const conn_t& conn() const {
+//            return *m_conn;
+//        }
     };
 
+#if 0
+    namespace frm {
+        class Base : public conn_foreach::Base<defs::Frm> {
+            const field::FrmOnv& m_src;
+        public:
+            Base(const field::FrmOnv& src, body_fn_t body_fn = {}, conn_t *conn = nullptr):
+                    conn_foreach::Base<defs::Frm>({src.nsite(), 0ul}, std::move(body_fn), conn),
+                    m_src(src){}
+
+            void bos_throwing_loop(const field::BosOnv &src) override {}
+            void frmbos_throwing_loop(const field::FrmBosOnv &src) override {
+                frm_throwing_loop(src.m_frm);
+            }
+        };
+
+        template<size_t nexcit>
+        class General : public Base {
+            struct Foreach : Ordered<nexcit> {
+                General& m_context;
+                Foreach(General& context):
+                        Ordered<nexcit>((context.m_work_orbs.nbit), m_context(context){}
+
+                void body() override {
+                    //m_context.m_conn->set()
+                }
+            };
+
+        public:
+            General(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
+                    Base(nsite, std::move(body_fn), conn), m_foreach(*this, 2*nsite){}
+
+            void frm_throwing_loop(const field::FrmOnv &src) override {
+                src.m_decoded.clear(); // reset all caches
+                m_foreach.loop();
+            }
+
+            size_t iiter() const override {
+                return 0;
+            }
+
+            size_t niter() const override {
+                return 0;
+            }
+        };
+    }
+
+#endif
 
 }
 

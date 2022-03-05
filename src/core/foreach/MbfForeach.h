@@ -90,7 +90,7 @@ namespace mbf_foreach {
 
                 Foreach(General &context, size_t nelec);
 
-                void body(size_t iiter, const inds_t &value) override;
+                void body(const inds_t &value, size_t iiter) override;
             };
 
             Foreach m_foreach;
@@ -113,7 +113,7 @@ namespace mbf_foreach {
 
                 Foreach(Spins &context, int ms2);
 
-                void body(size_t iiter, const inds_t &value) override;
+                void body(const inds_t &value, size_t iiter) override;
 
             };
 
@@ -150,7 +150,7 @@ namespace mbf_foreach {
             struct BetaForeach : Foreach {
                 BetaForeach(Ms2Conserve &context, size_t nelec) : Foreach(context, nelec) {}
 
-                void body(size_t iiter, const inds_t &value) override;
+                void body(const inds_t &value, size_t iiter) override;
             };
 
             /**
@@ -159,7 +159,7 @@ namespace mbf_foreach {
             struct AlphaForeach : Foreach {
                 AlphaForeach(Ms2Conserve &context, size_t nelec) : Foreach(context, nelec) {}
 
-                void body(size_t iiter, const inds_t &value) override;
+                void body(const inds_t &value, size_t iiter) override;
             };
 
             AlphaForeach m_alpha_foreach;
@@ -199,7 +199,7 @@ namespace mbf_foreach {
 
                 Foreach(General &context, size_t nboson_max);
 
-                void body(size_t iiter, const inds_t &value) override;
+                void body(const inds_t &value, size_t iiter) override;
 
                 size_t nboson_max() const;
             };

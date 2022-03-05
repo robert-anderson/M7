@@ -26,7 +26,7 @@ namespace foreach_virtual_test {
         CtndUnrestricted(ctnd::inds_t<nind> shape, std::vector<ctnd::inds_t<nind>> chk_inds) :
                 ctnd::Unrestricted<nind>(shape), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(size_t iiter, const ctnd::inds_t<nind>& value) override {
+        void body(const ctnd::inds_t<nind>& value, size_t iiter) override {
             DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
             if (value != m_chk_inds[iiter]) m_pass = false;
         }
@@ -48,7 +48,7 @@ namespace foreach_virtual_test {
         CtndOrdered(size_t n, std::vector<ctnd::inds_t<nind>> chk_inds) :
                 ctnd::Ordered<nind, strict, ascending>(n), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(size_t iiter, const ctnd::inds_t<nind> &value) override {
+        void body(const ctnd::inds_t<nind> &value, size_t iiter) override {
             DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
             if (value != m_chk_inds[iiter]) m_pass = false;
         }
@@ -68,7 +68,7 @@ namespace foreach_virtual_test {
         RtndUnrestricted(rtnd::inds_t shape, std::vector<rtnd::inds_t> chk_inds) :
                 rtnd::Unrestricted(shape), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(size_t iiter, const rtnd::inds_t &value) override {
+        void body(const rtnd::inds_t &value, size_t iiter) override {
             DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
             if (value!= m_chk_inds[iiter]) m_pass = false;
         }
@@ -90,7 +90,7 @@ namespace foreach_virtual_test {
         RtndOrdered(size_t n, size_t r, std::vector<rtnd::inds_t> chk_inds) :
                 rtnd::Ordered<strict, ascending>(n, r), m_chk_inds(std::move(chk_inds)) {}
 
-        void body(size_t iiter, const rtnd::inds_t &value) override {
+        void body(const rtnd::inds_t &value, size_t iiter) override {
             DEBUG_ASSERT_LT(iiter, m_chk_inds.size(), "iteration count OOB");
             if (value != m_chk_inds[iiter]) m_pass = false;
         }
@@ -154,7 +154,7 @@ TEST(ForeachVirtual, CtndUnrestricted3) {
     ASSERT_TRUE(foreach.m_pass);
 
     // testing lambda wrapper
-    auto fn = [&chk_inds](size_t iiter, const ctnd::inds_t<3>& value){
+    auto fn = [&chk_inds](const ctnd::inds_t<3>& value, size_t iiter){
         ASSERT_EQ(chk_inds[iiter], value);
     };
     ctnd::lambda::Unrestricted<3> lambda_foreach(fn, shape);
@@ -183,7 +183,7 @@ TEST(ForeachVirtual, CtndUnrestrictedExit) {
         Foreach(ctnd::inds_t<3> shape, ctnd::inds_t<3> term_value) :
                 CtndUnrestricted<3>(shape, {}), m_term_value(term_value) {}
 
-        void body(size_t iiter, const ctnd::inds_t<3> &value) override {
+        void body(const ctnd::inds_t<3> &value, size_t iiter) override {
             if (value== m_term_value) throw ExitLoop();
         }
     };
@@ -231,7 +231,7 @@ TEST(ForeachVirtual, CtndOrderedStrictAsc3) {
     ASSERT_TRUE(foreach.m_pass);
 
     // testing lambda wrapper
-    auto fn = [&chk_inds](size_t iiter, const ctnd::inds_t<3>& value){
+    auto fn = [&chk_inds](const ctnd::inds_t<3>& value, size_t iiter){
         ASSERT_EQ(chk_inds[iiter], value);
     };
     ctnd::lambda::Ordered<3, true, true> lambda_foreach(fn, n);
@@ -261,7 +261,7 @@ TEST(ForeachVirtual, CtndOrderedExit) {
         Foreach(size_t n, ctnd::inds_t<3> term_value) :
                 CtndOrdered<3, true, true>(n, {}), m_term_value(term_value) {}
 
-        void body(size_t iiter, const ctnd::inds_t<3> &value) override {
+        void body(const ctnd::inds_t<3> &value, size_t iiter) override {
             if (value == m_term_value) throw ExitLoop();
         }
     };
@@ -430,7 +430,7 @@ TEST(ForeachVirtual, RtndUnrestricted3) {
     ASSERT_TRUE(foreach.m_pass);
 
     // testing lambda wrapper
-    auto fn = [&chk_inds](size_t iiter, const defs::inds& value){
+    auto fn = [&chk_inds](const defs::inds& value, size_t iiter){
         ASSERT_EQ(chk_inds[iiter], value);
     };
     rtnd::lambda::Unrestricted lambda_foreach(fn, shape);
@@ -457,7 +457,7 @@ TEST(ForeachVirtual, RtndUnrestrictedExit) {
         Foreach(rtnd::inds_t shape, rtnd::inds_t term_value) :
                 RtndUnrestricted(std::move(shape), {}), m_term_value(std::move(term_value)) {}
 
-        void body(size_t iiter, const rtnd::inds_t &value) override {
+        void body(const rtnd::inds_t &value, size_t iiter) override {
             if (value == m_term_value) throw ExitLoop();
         }
     };
@@ -504,7 +504,7 @@ TEST(ForeachVirtual, RtndOrderedStrictAsc3) {
     ASSERT_TRUE(foreach.m_pass);
 
     // testing lambda wrapper
-    auto fn = [&chk_inds](size_t iiter, const defs::inds& value){
+    auto fn = [&chk_inds](const defs::inds& value, size_t iiter){
         ASSERT_EQ(chk_inds[iiter], value);
     };
     rtnd::lambda::Ordered<true, true> lambda_foreach(fn, n, 3);
@@ -534,7 +534,7 @@ TEST(ForeachVirtual, RtndOrderedExit) {
         Foreach(size_t n, rtnd::inds_t term_value) :
                 RtndOrdered<true, true>(n, 3, {}), m_term_value(std::move(term_value)) {}
 
-        void body(size_t iiter, const rtnd::inds_t &value) override {
+        void body(const rtnd::inds_t &value, size_t iiter) override {
             if (value == m_term_value) throw ExitLoop();
         }
     };

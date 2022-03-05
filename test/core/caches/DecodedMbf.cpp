@@ -27,7 +27,7 @@ TEST(DecodedMbf, Simple){
      * for a small number of occupied orbs, run through all possible arrangements
      */
     const size_t noccorb = 3;
-    auto occ_fn = [&mbf](size_t iiter, const defs::inds &value) {
+    auto occ_fn = [&mbf](const defs::inds &value, size_t iiter) {
         mbf.zero();
         mbf = value;
         mbf.m_decoded.clear();
@@ -41,7 +41,7 @@ TEST(DecodedMbf, Simple){
      * for a small number of vacant orbs, run through all possible arrangements
      */
     const size_t nvacorb = 3;
-    auto vac_fn = [&mbf](size_t iiter, const defs::inds &value) {
+    auto vac_fn = [&mbf](const defs::inds &value, size_t iiter) {
         mbf.set();
         for (auto i: value) mbf.clr(i);
         mbf.m_decoded.clear();

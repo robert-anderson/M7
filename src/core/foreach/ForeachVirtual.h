@@ -60,7 +60,7 @@ namespace foreach_virtual {
             /**
              * function to be called each time a new set of indices is formed
              */
-            virtual void body(size_t iiter, const inds_t <nind> &value) = 0;
+            virtual void body(const inds_t <nind> &value, size_t iiter) = 0;
 
         protected:
             /**
@@ -129,7 +129,7 @@ namespace foreach_virtual {
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) {
                     ++m_iiter;
-                    try { body(m_iiter, m_value); }
+                    try { body(m_value, m_iiter); }
                     catch (const ExitLoop &ex) { throw ex; }
                 }
             }
@@ -198,7 +198,7 @@ namespace foreach_virtual {
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) {
                     ++m_iiter;
-                    try { body(m_iiter, m_value); }
+                    try { body(m_value, m_iiter); }
                     catch (const ExitLoop &ex) { throw ex; }
                 }
             }
@@ -229,12 +229,12 @@ namespace foreach_virtual {
             template<typename foreach_t>
             struct Lambda : foreach_t {
                 typedef ctnd::inds_t<foreach_t::c_nind> inds_t;
-                typedef std::function<void(size_t iiter, const inds_t &value)> body_fn_t;
+                typedef std::function<void(const inds_t &value, size_t iiter)> body_fn_t;
                 body_fn_t m_body_fn;
                 template<typename ...Args>
                 Lambda(body_fn_t fn, Args&&... args): foreach_t(std::forward<Args...>(args...)), m_body_fn(fn){}
-                void body(size_t iiter, const inds_t &value) override {
-                    m_body_fn(iiter, value);
+                void body(const inds_t &value, size_t iiter) override {
+                    m_body_fn(value, iiter);
                 }
             };
             template<size_t nind>
@@ -287,7 +287,7 @@ namespace foreach_virtual {
             /**
              * function to be called each time a new set of indices is formed
              */
-            virtual void body(size_t iiter, const inds_t& value) = 0;
+            virtual void body(const inds_t &value, size_t iiter) = 0;
 
             /**
              * function with defines the looping logic, calls body, and increments the iteration counter
@@ -336,7 +336,7 @@ namespace foreach_virtual {
                     else {
                         for (ind = 0ul; ind < extent; ++ind) {
                             ++m_iiter;
-                            body(m_iiter, m_value);
+                            body(m_value, m_iiter);
                         }
                     }
                 }
@@ -359,13 +359,13 @@ namespace foreach_virtual {
         namespace lambda {
             template<typename foreach_t>
             struct Lambda : foreach_t {
-                typedef std::function<void(size_t iiter, const defs::inds &value)> body_fn_t;
+                typedef std::function<void(const defs::inds &value, size_t iiter)> body_fn_t;
                 body_fn_t m_body_fn;
                 template<typename ...Args>
                 Lambda(body_fn_t fn, Args&&... args):
                     foreach_t(std::forward<Args>(args)...), m_body_fn(std::move(fn)){}
-                void body(size_t iiter, const inds_t &value) override {
-                    m_body_fn(iiter, value);
+                void body(const inds_t &value, size_t iiter) override {
+                    m_body_fn(value, iiter);
                 }
             };
             struct Unrestricted : Lambda<rtnd::Unrestricted> {
