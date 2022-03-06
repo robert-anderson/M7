@@ -6,6 +6,7 @@
 #define M7_CONNFOREACH_H
 
 #include <utility>
+#include <array>
 
 #include "src/core/basis/Suites.h"
 #include "src/core/connection/Connections.h"
@@ -16,6 +17,8 @@ namespace conn_foreach {
     using namespace foreach_virtual::ctnd;
 
     struct ConnForeach {
+        const size_t m_exsig;
+        ConnForeach(size_t exsig): m_exsig(exsig){}
         virtual void frm_throwing_loop(const FrmOnvField &src) = 0;
         virtual void bos_throwing_loop(const BosOnvField &src) = 0;
         virtual void frmbos_throwing_loop(const FrmBosOnvField &src) = 0;
@@ -29,22 +32,25 @@ namespace conn_foreach {
             frmbos_throwing_loop(src);
         }
 
+        virtual size_t frm_niter(const FrmOnvField &src) = 0;
+        virtual size_t bos_niter(const BosOnvField &src) = 0;
+        virtual size_t frmbos_niter(const FrmBosOnvField &src) = 0;
+
+        size_t niter(const FrmOnvField &src) {
+            return frm_niter(src);
+        }
+        size_t niter(const BosOnvField &src) {
+            return bos_niter(src);
+        }
+        size_t niter(const FrmBosOnvField &src) {
+            return frmbos_niter(src);
+        }
+
         template<class mbf_t>
         void loop(const mbf_t& src){
             try {throwing_loop(src);}
             catch (const ExitLoop&){}
         }
-        /**
-         * @return
-         *  current value of the iteration counter
-         */
-        virtual size_t iiter() const = 0;
-
-        /**
-         * @return
-         *  number of calls to body if no early termination
-         */
-        virtual size_t niter() const = 0;
     };
 
 
@@ -55,72 +61,95 @@ namespace conn_foreach {
         conn_t m_conn_internal;
         conn_t *m_conn;
 
-        typedef std::function<void(const conn_t&, size_t)> body_fn_t;
+        typedef std::function<void(const conn_t&)> body_fn_t;
         body_fn_t m_body_fn;
     public:
-        Base(BasisData bd, body_fn_t body_fn = {}, conn_t *conn = nullptr) :
-                m_conn_internal(bd), m_conn(conn ? conn : &m_conn_internal),
-                m_body_fn(std::move(body_fn)) {}
+        Base(size_t exsig, BasisData bd, body_fn_t body_fn = {}, conn_t *conn = nullptr) :
+                ConnForeach(exsig), m_conn_internal(bd),
+                m_conn(conn ? conn : &m_conn_internal), m_body_fn(std::move(body_fn)) {}
 
         Base(const Base &other, conn_t *conn = nullptr) : Base(other.m_bd, other.m_body_fn, conn) {}
 
         virtual void body() {
-            if (m_body_fn) m_body_fn(*m_conn, iiter());
+            if (m_body_fn) m_body_fn(*m_conn);
         }
-
-//        const conn_t& conn() const {
-//            return *m_conn;
-//        }
     };
 
-#if 0
     namespace frm {
         class Base : public conn_foreach::Base<defs::Frm> {
-            const field::FrmOnv& m_src;
         public:
-            Base(const field::FrmOnv& src, body_fn_t body_fn = {}, conn_t *conn = nullptr):
-                    conn_foreach::Base<defs::Frm>({src.nsite(), 0ul}, std::move(body_fn), conn),
-                    m_src(src){}
+            Base(size_t exsig, size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
+                    conn_foreach::Base<defs::Frm>(exsig, {nsite, 0ul}, std::move(body_fn), conn){}
 
             void bos_throwing_loop(const field::BosOnv &src) override {}
             void frmbos_throwing_loop(const field::FrmBosOnv &src) override {
                 frm_throwing_loop(src.m_frm);
             }
+
+            size_t bos_niter(const BosOnvField &src) override {
+                return 0;
+            }
+
+            size_t frmbos_niter(const FrmBosOnvField &src) override {
+                return frm_niter(src.m_frm);
+            }
         };
 
         template<size_t nexcit>
         class General : public Base {
-            struct Foreach : Ordered<nexcit> {
-                General& m_context;
-                Foreach(General& context):
-                        Ordered<nexcit>((context.m_work_orbs.nbit), m_context(context){}
 
-                void body() override {
-                    //m_context.m_conn->set()
+            struct VacForeach : Ordered<nexcit> {
+                General& m_context;
+                const defs::inds& m_vacs;
+                VacForeach(General& context, const defs::inds& vacs):
+                        Ordered<nexcit>(vacs.size()), m_context(context), m_vacs(vacs){}
+
+                void body(const inds_t<nexcit> &value, size_t iiter) override {
+                    m_context.m_conn->m_cre.clear();
+                    for (size_t i=0ul; i<nexcit; ++i) m_context.m_conn->m_cre.add(m_vacs[value[i]]);
+                    m_context.body();
+                }
+            };
+
+            struct OccForeach : Ordered<nexcit> {
+                General& m_context;
+                const defs::inds& m_occs;
+                const defs::inds& m_vacs;
+                OccForeach(General& context, const defs::inds& occs, const defs::inds& vacs):
+                        Ordered<nexcit>(occs.size()), m_context(context), m_occs(occs), m_vacs(vacs){}
+
+                void body(const inds_t<nexcit> &value, size_t iiter) override {
+                    m_context.m_conn->clear();
+                    for (size_t i=0ul; i<nexcit; ++i) m_context.m_conn->m_ann.add(m_occs[value[i]]);
+                    VacForeach(m_context, m_vacs).loop();
                 }
             };
 
         public:
             General(size_t nsite, body_fn_t body_fn = {}, conn_t *conn = nullptr):
-                    Base(nsite, std::move(body_fn), conn), m_foreach(*this, 2*nsite){}
+                    Base(exsig_utils::encode(nexcit, nexcit, 0, 0), nsite, std::move(body_fn), conn){}
 
             void frm_throwing_loop(const field::FrmOnv &src) override {
                 src.m_decoded.clear(); // reset all caches
-                m_foreach.loop();
+                auto &occs = src.m_decoded.m_simple_occs.get();
+                auto &vacs = src.m_decoded.m_simple_vacs.get();
+                if (occs.empty() || vacs.empty()) return;
+                OccForeach(*this, occs, vacs).loop();
             }
 
-            size_t iiter() const override {
-                return 0;
-            }
-
-            size_t niter() const override {
-                return 0;
+            size_t frm_niter(const FrmOnvField &src) override {
+                auto &occs = src.m_decoded.m_simple_occs.get();
+                auto &vacs = src.m_decoded.m_simple_vacs.get();
+                auto nocc_comb = integer_utils::combinatorial(occs.size(), nexcit);
+                auto nvac_comb = integer_utils::combinatorial(vacs.size(), nexcit);
+                return nocc_comb*nvac_comb;
             }
         };
     }
 
-#endif
+    namespace bos {
 
+    }
 }
 
 #if 0

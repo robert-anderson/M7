@@ -210,6 +210,17 @@ namespace decoded_mbf {
         };
 
         /**
+         * segregating the set or clear indices by spin value
+         */
+        struct SpinOccs : NdLabelledOccs<1> {
+            SpinOccs(const FrmOnvField &mbf);
+        };
+
+        struct SpinVacs : NdLabelledVacs<1> {
+            SpinVacs(const FrmOnvField &mbf);
+        };
+
+        /**
          * The immediate practical application of the general multidimensional decoding defined above, is in the case
          * where there is utility in segregating the set or clear indices by both spin and point group irrep.
          */
@@ -256,6 +267,14 @@ namespace decoded_mbf {
          * vacant spin orbitals
          */
         frm::SimpleVacs m_simple_vacs;
+        /**
+         * spin-partitioned occupied spin orbitals
+         */
+        frm::SpinOccs m_spin_occs;
+        /**
+         * spin-partitioned vacant spin orbitals
+         */
+        frm::SpinVacs m_spin_vacs;
         /**
          * spin/sym-partitioned occupied spin orbitals
          */

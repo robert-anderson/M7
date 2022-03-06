@@ -120,6 +120,12 @@ const defs::inds &decoded_mbf::frm::LabelledVacs::simple() {
     return m_simple_inds;
 }
 
+decoded_mbf::frm::SpinOccs::SpinOccs(const FrmOnvField &mbf):
+        NdLabelledOccs<1>({2}, make_spinorb_map(defs::inds(mbf.nsite(), 0), 1), mbf){}
+
+decoded_mbf::frm::SpinVacs::SpinVacs(const FrmOnvField &mbf):
+        NdLabelledVacs<1>({2}, make_spinorb_map(defs::inds(mbf.nsite(), 0), 1), mbf){}
+
 decoded_mbf::frm::SpinSymOccs::SpinSymOccs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf) :
         NdLabelledOccs<2>({2, grp_map.m_grp.nirrep()},
                           make_spinorb_map(grp_map.m_site_irreps, grp_map.m_grp.nirrep()), mbf) {
@@ -175,6 +181,7 @@ const defs::inds &decoded_mbf::frm::NotSinglyOccSites::get() {
 
 decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf, const AbelianGroupMap& grp_map):
         m_simple_occs(mbf), m_simple_vacs(mbf),
+        m_spin_occs(mbf), m_spin_vacs(mbf),
         m_spin_sym_occs(grp_map, mbf), m_spin_sym_vacs(grp_map, mbf),
         m_nonempty_pair_labels(mbf), m_occ_sites(mbf),
         m_doubly_occ_sites(mbf), m_not_singly_occ_sites(mbf){
@@ -186,6 +193,8 @@ decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf): FrmOnv(mbf, {mbf.m_nsite}){
 void decoded_mbf::FrmOnv::clear() {
     m_simple_occs.clear();
     m_simple_vacs.clear();
+    m_sym_occs.clear();
+    m_sym_vacs.clear();
     m_spin_sym_occs.clear();
     m_spin_sym_vacs.clear();
     m_nonempty_pair_labels.clear();
