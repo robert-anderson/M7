@@ -193,11 +193,11 @@ namespace mbf_foreach {
             Base(const Base &other, field_t *mbf = nullptr);
         };
 
-        class General : public Base {
+        class GeneralOpen : public Base {
             struct Foreach : Unrestricted {
-                General &m_context;
+                GeneralOpen &m_context;
 
-                Foreach(General &context, size_t nboson_max);
+                Foreach(GeneralOpen &context, size_t nboson_max);
 
                 void body(const inds_t &value, size_t iiter) override;
 
@@ -206,9 +206,38 @@ namespace mbf_foreach {
 
             Foreach m_foreach;
         public:
-            General(size_t nmode, size_t nboson_max, body_fn_t body_fn = {}, field::BosOnv *mbf = nullptr);
+            GeneralOpen(size_t nmode, size_t nboson_max, body_fn_t body_fn = {}, field::BosOnv *mbf = nullptr);
 
-            General(const General &other, field::BosOnv *mbf = nullptr);
+            GeneralOpen(const GeneralOpen &other, field::BosOnv *mbf = nullptr);
+
+            void throwing_loop() override;
+
+            size_t iiter() const override;
+
+            size_t niter() const override;
+        };
+
+        class GeneralClosed : public Base {
+            struct Foreach : Ordered<false, true> {
+                GeneralClosed &m_context;
+
+                Foreach(GeneralClosed &context, size_t nboson):
+                    Ordered<false, true>(context.m_bd.m_nmode, nboson), m_context(context){}
+
+                void body(const inds_t &value, size_t iiter) override {
+                    m_context.m_mbf->set_ops(value);
+                    m_context.body();
+                }
+            };
+
+            Foreach m_foreach;
+
+        public:
+            GeneralClosed(size_t nmode, size_t nboson, body_fn_t body_fn = {}, field::BosOnv *mbf = nullptr):
+                    Base(nmode, body_fn, mbf), m_foreach(*this, nboson) {}
+
+            GeneralClosed(const GeneralClosed &other, field::BosOnv *mbf = nullptr):
+                    GeneralClosed(other.m_bd.m_nmode, other.m_foreach.m_nind, other.m_body_fn, mbf) {}
 
             void throwing_loop() override;
 
@@ -296,10 +325,11 @@ namespace mbf_foreach {
         };
 
         /**
-         * convenient definition for case when the boson sector iteration is "general" i.e. unconstrained
+         * convenient definition for case when the boson sector iteration is "general" i.e. unconstrained and boson
+         * number non-conserving upto a maximum occupation cutoff
          */
         template<typename frm_foreach_t>
-        using BosGeneral = Product<frm_foreach_t, bos::General>;
+        using BosGeneralOpen = Product<frm_foreach_t, bos::GeneralOpen>;
     }
 
     class PairBase : public MbfForeach {

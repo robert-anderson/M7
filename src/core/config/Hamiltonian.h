@@ -48,13 +48,13 @@ namespace fciqmc_config {
 
     struct Hubbard : LatticeModel {
         config::Param<defs::ham_comp_t> m_repulsion;
-        Hubbard(config::Group *parent);
+        explicit Hubbard(config::Group *parent);
     };
 
 
     struct Heisenberg : LatticeModel {
         config::Param<defs::ham_comp_t> m_coupling;
-        Heisenberg(config::Group *parent);
+        explicit Heisenberg(config::Group *parent);
     };
 
 
@@ -65,7 +65,7 @@ namespace fciqmc_config {
         config::Param<int> m_charge;
         config::Param<int> m_ms2_restrict;
 
-        FermionHamiltonian(config::Group *parent);
+        explicit FermionHamiltonian(config::Group *parent);
 
         void verify() override;
 
@@ -77,17 +77,28 @@ namespace fciqmc_config {
         config::Param<defs::ham_t> m_holstein_coupling;
         config::Param<size_t> m_nboson_max;
 
-        LadderHamiltonian(config::Group *parent);
+        explicit LadderHamiltonian(config::Group *parent);
 
         void verify() override;
 
         bool enabled() const override;
     };
 
+    struct InteractingBoseGas : config::Section {
+        config::Param<size_t> m_ndim;
+        config::Param<size_t> m_nplanewave;
+        config::Param<defs::ham_t> m_ek_scale;
+        explicit InteractingBoseGas(config::Group *parent);
+
+        bool enabled() const override;
+    };
+
     struct BosonHamiltonian : config::Section {
         Bosdump m_bosdump;
-        config::Param<defs::ham_comp_t > m_holstein_omega;
-        BosonHamiltonian(config::Group *parent);
+        config::Param<size_t> m_nboson;
+        config::Param<defs::ham_comp_t> m_holstein_omega;
+        InteractingBoseGas m_interacting_bose_gas;
+        explicit BosonHamiltonian(config::Group *parent);
 
         bool enabled() const override;
     };
@@ -97,7 +108,7 @@ namespace fciqmc_config {
         LadderHamiltonian m_ladder;
         BosonHamiltonian m_boson;
 
-        Hamiltonian(config::Group *parent);
+        explicit Hamiltonian(config::Group *parent);
     };
 
 }

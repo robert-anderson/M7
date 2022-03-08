@@ -120,34 +120,48 @@ mbf_foreach::bos::Base::Base(size_t nmode, body_fn_t body_fn, field_t *mbf) :
 mbf_foreach::bos::Base::Base(const Base &other, field_t *mbf) :
         Base(other.m_bd.m_nsite, other.m_body_fn, mbf) {}
 
-mbf_foreach::bos::General::Foreach::Foreach(General &context, size_t nboson_max) :
+mbf_foreach::bos::GeneralOpen::Foreach::Foreach(GeneralOpen &context, size_t nboson_max) :
         Unrestricted(context.m_mbf->m_nmode, nboson_max + 1), m_context(context) {}
 
-void mbf_foreach::bos::General::Foreach::body(const inds_t &value, size_t iiter) {
+void mbf_foreach::bos::GeneralOpen::Foreach::body(const inds_t &value, size_t iiter) {
     *m_context.m_mbf = value;
     m_context.body();
 }
 
-size_t mbf_foreach::bos::General::Foreach::nboson_max() const {
+size_t mbf_foreach::bos::GeneralOpen::Foreach::nboson_max() const {
     if (m_shape.empty()) return ~0ul;
     return m_shape[0] - 1;
 }
 
 
-mbf_foreach::bos::General::General(size_t nmode, size_t nboson_max, body_fn_t body_fn, field::BosOnv *mbf) :
+mbf_foreach::bos::GeneralOpen::GeneralOpen(size_t nmode, size_t nboson_max, body_fn_t body_fn, field::BosOnv *mbf) :
         Base(nmode, std::move(body_fn), mbf), m_foreach(*this, nboson_max) {}
 
-mbf_foreach::bos::General::General(const mbf_foreach::bos::General &other, field::BosOnv *mbf) :
-        General(other.m_bd.m_nmode, other.m_foreach.nboson_max(), other.m_body_fn, mbf) {}
+mbf_foreach::bos::GeneralOpen::GeneralOpen(const mbf_foreach::bos::GeneralOpen &other, field::BosOnv *mbf) :
+        GeneralOpen(other.m_bd.m_nmode, other.m_foreach.nboson_max(), other.m_body_fn, mbf) {}
 
-void mbf_foreach::bos::General::throwing_loop() {
+void mbf_foreach::bos::GeneralOpen::throwing_loop() {
     m_foreach.throwing_loop();
 }
 
-size_t mbf_foreach::bos::General::iiter() const {
+size_t mbf_foreach::bos::GeneralOpen::iiter() const {
     return m_foreach.iiter();
 }
 
-size_t mbf_foreach::bos::General::niter() const {
+size_t mbf_foreach::bos::GeneralOpen::niter() const {
+    return m_foreach.niter();
+}
+
+
+
+void mbf_foreach::bos::GeneralClosed::throwing_loop() {
+    m_foreach.throwing_loop();
+}
+
+size_t mbf_foreach::bos::GeneralClosed::iiter() const {
+    return m_foreach.iiter();
+}
+
+size_t mbf_foreach::bos::GeneralClosed::niter() const {
     return m_foreach.niter();
 }

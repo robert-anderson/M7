@@ -5,6 +5,7 @@
 #include "Hamiltonian.h"
 #include "GeneralFrmHam.h"
 #include "GeneralLadderHam.h"
+#include "InteractingBoseGasBosHam.h"
 
 BasisData Hamiltonian::make_bd() const {
     if (m_ladder->enabled()) return m_ladder->m_bd;
@@ -16,7 +17,7 @@ std::unique_ptr<FrmHam> Hamiltonian::make_frm(const fciqmc_config::FermionHamilt
         return std::unique_ptr<FrmHam>(new HubbardFrmHam(opts));
     else if (opts.m_heisenberg.enabled())
         return std::unique_ptr<FrmHam>(new HeisenbergFrmHam(opts));
-    else if (defs::enable_fermions)
+    else if (opts.m_fcidump.enabled())
         return std::unique_ptr<FrmHam>(new GeneralFrmHam(opts));
     return std::unique_ptr<FrmHam>(new NullFrmHam);
 }
@@ -36,6 +37,8 @@ std::unique_ptr<BosHam> Hamiltonian::make_bos(const fciqmc_config::BosonHamilton
         auto omega = opts.m_holstein_omega.get();
         return std::unique_ptr<BosHam>(new HolsteinBosHam(nsite, omega));
     }
+    else if (opts.m_interacting_bose_gas.enabled())
+        return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
     else if (opts.m_bosdump.enabled())
         return std::unique_ptr<BosHam>(new GeneralBosHam(opts));
     return std::unique_ptr<BosHam>(new NullBosHam);

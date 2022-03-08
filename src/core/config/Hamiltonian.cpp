@@ -102,10 +102,22 @@ bool fciqmc_config::LadderHamiltonian::enabled() const {
     return m_ebdump.enabled() || m_holstein_coupling.get()!=0.0;
 }
 
+fciqmc_config::InteractingBoseGas::InteractingBoseGas(config::Group *parent) :
+        config::Section(parent, "interacting_bose_gas", "options relating to the N-dimensional interacting boson gas"),
+        m_ndim(this, "ndim", 1ul, "number of dimensions"),
+        m_nplanewave(this, "nplanewave", 0ul, "number of positive momentum values per dimension"),
+        m_ek_scale(this, "ek_scale", 0.0, "scale of the kinetic energy in terms of the scattering interaction strength"){}
+
+bool fciqmc_config::InteractingBoseGas::enabled() const {
+    return m_nplanewave.get();
+}
+
 fciqmc_config::BosonHamiltonian::BosonHamiltonian(config::Group *parent) :
         config::Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
         m_bosdump(this),
-        m_holstein_omega(this, "holstein_omega", 0.0, "constant frequency of the boson modes in the Holstein model") {}
+        m_nboson(this, "nboson", 0ul, "number of bosons in the system. if zero, the the Hamiltonian is not assumed to conserve boson number"),
+        m_holstein_omega(this, "holstein_omega", 0.0, "constant frequency of the boson modes in the Holstein model"),
+        m_interacting_bose_gas(this){}
 
 bool fciqmc_config::BosonHamiltonian::enabled() const {
     return !m_bosdump.m_path.get().empty();
@@ -114,3 +126,4 @@ bool fciqmc_config::BosonHamiltonian::enabled() const {
 fciqmc_config::Hamiltonian::Hamiltonian(config::Group *parent) :
         config::Section(parent, "hamiltonian", "options relating to the Hamiltonian operator terms"),
         m_fermion(this), m_ladder(this), m_boson(this) {}
+

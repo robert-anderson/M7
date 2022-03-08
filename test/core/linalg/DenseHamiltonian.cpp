@@ -282,3 +282,21 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     dense::diag(ham, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], -0.9998830020871416, 1e-10));
 }
+
+TEST(DenseHamiltonian, InteractingBoseGas1D) {
+    const size_t nplanewave = 3;
+    fciqmc_config::Hamiltonian opts(nullptr);
+    opts.m_boson.m_interacting_bose_gas.m_ndim = 1;
+    opts.m_boson.m_interacting_bose_gas.m_nplanewave = nplanewave;
+    opts.m_boson.m_interacting_bose_gas.m_ek_scale = 0.2;
+    opts.m_boson.m_nboson = 3;
+    Hamiltonian ham_src(opts);
+    ASSERT_EQ(ham_src.m_bd.m_nmode, 2*nplanewave+1);
+    DenseHamiltonian ham(ham_src);
+    std::cout << ham.to_string() << std::endl;
+
+    std::vector<double> evals;
+    dense::diag(ham, evals);
+    std::cout << evals[0] << std::endl;
+    ASSERT_TRUE(consts::nearly_equal(evals[0], -0.9998830020871416, 1e-10));
+}

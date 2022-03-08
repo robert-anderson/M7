@@ -216,7 +216,9 @@ public:
         return partial_offset<0>(inds...);
     }
 
-    void decode_flat(const size_t& iflat, std::array<size_t, nind>& inds) const {
+    template<typename T>
+    void decode_flat(const size_t& iflat, std::array<T, nind>& inds) const {
+        static_assert(std::is_integral<T>::value, "index type must be integral");
         size_t remainder = iflat;
         for (size_t i=0ul; i!=nind; ++i){
             auto& ind = inds[i];

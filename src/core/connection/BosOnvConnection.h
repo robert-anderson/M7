@@ -37,6 +37,14 @@ public:
     void set(const size_t& imode, const size_t& jmode);
 
     const BosOpPair& operator[](const size_t& ipair) const;
+
+    /**
+     * @param iop
+     *  operator index in the expanded product
+     * @return
+     *  mode index corresponding to the operator index
+     */
+    size_t get_imode(size_t iop) const;
 };
 
 struct BosOnvConnection {

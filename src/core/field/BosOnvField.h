@@ -33,6 +33,13 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
 
     BosOnvField &operator=(const defs::inds &inds);
 
+    /**
+     * set based on the (repeated) boson operator indices
+     * @param iops
+     *  operator indices (one for each boson in the state)
+     */
+    void set_ops(const defs::inds &iops);
+
 };
 
 

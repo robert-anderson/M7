@@ -43,7 +43,7 @@ namespace mbf_foreach_test {
     }
 
     namespace bos {
-        namespace general {
+        namespace general_open {
             static std::vector<defs::inds> chk_inds() {
                 return {
                         {0, 0, 0}, {0, 0, 1}, {0, 0, 2}, {0, 1, 0}, {0, 1, 1}, {0, 1, 2}, {0, 2, 0}, {0, 2, 1},
@@ -116,43 +116,43 @@ TEST(MbfForeach, FrmMs2Conserve) {
 }
 
 
-TEST(MbfForeach, BosGeneral) {
+TEST(MbfForeach, BosGeneralOpen) {
     using namespace mbf_foreach_test;
-    const auto chk_inds = bos::general::chk_inds();
+    const auto chk_inds = bos::general_open::chk_inds();
     auto fn = [&chk_inds](const field::BosOnv &field, size_t iiter) {
         ASSERT_EQ(field, chk_inds[iiter]);
     };
-    mbf_foreach::bos::General foreach(3, 2, fn);
+    mbf_foreach::bos::GeneralOpen foreach(3, 2, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, chk_inds.size());
 }
 
-TEST(MbfForeach, BosGeneralEarlyExit) {
+TEST(MbfForeach, BosGeneralOpenEarlyExit) {
     using namespace mbf_foreach_test;
     auto fn = [](const field::BosOnv &field, size_t iiter) {
         if (iiter==8) throw ExitLoop();
     };
-    mbf_foreach::bos::General foreach(3, 2, fn);
+    mbf_foreach::bos::GeneralOpen foreach(3, 2, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter(), 8);
 }
 
-TEST(MbfForeach, BosGeneralPair) {
+TEST(MbfForeach, BosGeneralOpenPair) {
     using namespace mbf_foreach_test;
-    const auto chk_inds = bos::general::chk_inds();
+    const auto chk_inds = bos::general_open::chk_inds();
     auto fn = [&chk_inds](const field::BosOnv &outer, size_t iouter, const field::BosOnv &inner, size_t iinner) {
         ASSERT_EQ(outer, chk_inds[iouter]);
         ASSERT_EQ(inner, chk_inds[iinner]);
     };
-    mbf_foreach::Pair<mbf_foreach::bos::General> foreach({3, 2}, fn);
+    mbf_foreach::Pair<mbf_foreach::bos::GeneralOpen> foreach({3, 2}, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, chk_inds.size() * chk_inds.size());
 }
 
-TEST(MbfForeach, FrmBosGeneral) {
+TEST(MbfForeach, FrmBosGeneralOpen) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::general::chk_inds();
-    const auto bos_chk_inds = bos::general::chk_inds();
+    const auto bos_chk_inds = bos::general_open::chk_inds();
     auto fn = [&frm_chk_inds, &bos_chk_inds](const field::FrmBosOnv &field, size_t iiter) {
         ASSERT_LT(iiter, frm_chk_inds.size() * bos_chk_inds.size());
         auto iiter_frm = iiter / bos_chk_inds.size();
@@ -161,8 +161,8 @@ TEST(MbfForeach, FrmBosGeneral) {
         ASSERT_TRUE(field.m_bos == bos_chk_inds[iiter_bos]);
     };
     mbf_foreach::frm::General outer(3, 4);
-    mbf_foreach::bos::General inner(3, 2);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::General, mbf_foreach::bos::General> foreach(outer, inner, fn);
+    mbf_foreach::bos::GeneralOpen inner(3, 2);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::General, mbf_foreach::bos::GeneralOpen> foreach(outer, inner, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, frm_chk_inds.size() * bos_chk_inds.size());
 }
@@ -170,7 +170,7 @@ TEST(MbfForeach, FrmBosGeneral) {
 TEST(MbfForeach, FrmBosSpins) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::spins::chk_inds();
-    const auto bos_chk_inds = bos::general::chk_inds();
+    const auto bos_chk_inds = bos::general_open::chk_inds();
     auto fn = [&frm_chk_inds, &bos_chk_inds](const field::FrmBosOnv &field, size_t iiter) {
         ASSERT_LT(iiter, frm_chk_inds.size() * bos_chk_inds.size());
         auto iiter_frm = iiter / bos_chk_inds.size();
@@ -179,8 +179,8 @@ TEST(MbfForeach, FrmBosSpins) {
         ASSERT_TRUE(field.m_bos == bos_chk_inds[iiter_bos]);
     };
     mbf_foreach::frm::Spins outer(4, 0);
-    mbf_foreach::bos::General inner(3, 2);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::General> foreach(outer, inner, fn);
+    mbf_foreach::bos::GeneralOpen inner(3, 2);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, frm_chk_inds.size() * bos_chk_inds.size());
 }
@@ -192,8 +192,8 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
         if (iiter==8) throw ExitLoop();
     };
     mbf_foreach::frm::Spins outer(4, 0);
-    mbf_foreach::bos::General inner(3, 2);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::General> foreach(outer, inner, fn);
+    mbf_foreach::bos::GeneralOpen inner(3, 2);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter(), 8);
 }
@@ -202,7 +202,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
 TEST(MbfForeach, FrmBosMs2Conserve) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::ms2_conserve::chk_inds();
-    const auto bos_chk_inds = bos::general::chk_inds();
+    const auto bos_chk_inds = bos::general_open::chk_inds();
     auto fn = [&frm_chk_inds, &bos_chk_inds](const field::FrmBosOnv &field, size_t iiter) {
         ASSERT_LT(iiter, frm_chk_inds.size() * bos_chk_inds.size());
         auto iiter_frm = iiter / bos_chk_inds.size();
@@ -211,8 +211,8 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
         ASSERT_TRUE(field.m_bos == bos_chk_inds[iiter_bos]);
     };
     mbf_foreach::frm::Ms2Conserve outer(4, 5, 1);
-    mbf_foreach::bos::General inner(3, 2);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::General> foreach(outer, inner, fn);
+    mbf_foreach::bos::GeneralOpen inner(3, 2);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> foreach(outer, inner, fn);
     foreach.loop();
     ASSERT_EQ(foreach.iiter() + 1, frm_chk_inds.size() * bos_chk_inds.size());
 }
@@ -221,7 +221,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
 TEST(MbfForeach, FrmBosMs2ConservePair) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::ms2_conserve::chk_inds();
-    const auto bos_chk_inds = bos::general::chk_inds();
+    const auto bos_chk_inds = bos::general_open::chk_inds();
     auto fn = [&frm_chk_inds, &bos_chk_inds](const field::FrmBosOnv &outer, size_t iouter,
                                              const field::FrmBosOnv &inner, size_t iinner) {
         ASSERT_LT(iouter, frm_chk_inds.size() * bos_chk_inds.size());
@@ -236,8 +236,8 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
         ASSERT_TRUE(inner.m_bos == bos_chk_inds[iinner_bos]);
     };
     mbf_foreach::frm::Ms2Conserve frm_foreach(4, 5, 1);
-    mbf_foreach::bos::General bos_foreach(3, 2);
-    typedef mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::General> product_t;
+    mbf_foreach::bos::GeneralOpen bos_foreach(3, 2);
+    typedef mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> product_t;
 
     mbf_foreach::Pair<product_t> foreach(product_t(frm_foreach, bos_foreach), fn);
     foreach.loop();

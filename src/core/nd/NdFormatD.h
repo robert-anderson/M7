@@ -45,6 +45,8 @@ struct NdFormatD {
 
     NdFormatD(const defs::inds& shape): NdFormatD(shape, std::vector<std::string>(shape.size(), "")){}
 
+    NdFormatD(size_t nind, size_t extent): NdFormatD(defs::inds(nind, extent)){}
+
     size_t flatten(const defs::inds& inds) const {
         size_t iflat = 0ul;
         for (size_t i=0ul; i<std::min(inds.size(), m_nind); ++i) {
@@ -53,6 +55,18 @@ struct NdFormatD {
         }
         return iflat;
     }
+
+    template<typename T>
+    void decode_flat(const size_t& iflat, std::vector<T>& inds) const {
+        static_assert(std::is_integral<T>::value, "index type must be integral");
+        inds.clear();
+        size_t remainder = iflat;
+        for (size_t i=0ul; i!=m_nind; ++i){
+            inds.push_back(remainder/m_strides[i]);
+            remainder-=inds.back()*m_strides[i];
+        }
+    }
+
 
 };
 

@@ -18,3 +18,8 @@ BosOnvField &BosOnvField::operator=(const defs::inds &inds) {
     for (size_t i = 0ul; i < inds.size(); ++i) (*this)[i] = inds[i];
     return *this;
 }
+
+void BosOnvField::set_ops(const defs::inds &iops) {
+    zero();
+    for (auto& iop: iops) (*this)[iop]++;
+}

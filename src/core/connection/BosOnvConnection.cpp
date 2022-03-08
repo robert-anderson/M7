@@ -68,6 +68,15 @@ const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     return m_pairs[ipair];
 }
 
+size_t BosOps::get_imode(size_t iop) const {
+    DEBUG_ASSERT_LT(iop, m_nop, "Boson operator index OOB");
+    for (const auto& pair: m_pairs) {
+        if (iop<pair.m_nop) return pair.m_imode;
+        iop-=pair.m_nop;
+    }
+    return ~0ul;
+}
+
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
 
 BosOnvConnection::BosOnvConnection(BasisData bd) : BosOnvConnection(bd.m_nmode){}
