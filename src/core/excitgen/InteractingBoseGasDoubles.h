@@ -34,8 +34,8 @@ class InteractingBoseGasDoubles : BosExcitGen {
         integer_utils::inv_strigmap(imode, jmode, ipair_occ);
         imode = bos_op_inds[imode];
         jmode = bos_op_inds[jmode];
-        h->get_ikpoints(imode, m_ikpoints_i_work);
-        h->get_ikpoints(jmode, m_ikpoints_j_work);
+//        h->get_ikpoints(imode, m_ikpoints_i_work);
+//        h->get_ikpoints(jmode, m_ikpoints_j_work);
         // sum the momenta in each dim
         for (size_t i=0ul; i<m_ikpoints_i_work.size(); ++i) m_ikpoints_i_work[i]+=m_ikpoints_j_work[i];
         /*

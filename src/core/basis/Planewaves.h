@@ -17,7 +17,13 @@
 class Planewaves {
     const NdFormatD m_wave_format;
     const NdFormatD m_momentum_format;
-    const size_t m_nbasis;
+    /**
+     * number of degrees of freedom (sites or modes)
+     */
+    const size_t m_size;
+    /**
+     * number of physical dimensions
+     */
     const size_t m_ndim;
     const std::vector<std::vector<int>> m_momvecs;
     mutable std::vector<int> m_momvec_work;
@@ -28,6 +34,9 @@ class Planewaves {
     static std::vector<std::vector<int>> make_momvecs(const defs::inds& wave_shape);
 
 public:
+    static size_t size(const defs::inds& wave_shape);
+    static size_t size(size_t ndim, size_t nwave);
+
     explicit Planewaves(const defs::inds& wave_shape);
 
     Planewaves(size_t ndim, size_t nwave);

@@ -9,11 +9,10 @@ defs::inds Planewaves::make_momentum_shape(const defs::inds &wave_shape) {
     for (auto extent: wave_shape) shape.push_back(2*extent+1);
     return shape;
 }
-
 std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::inds &wave_shape) {
     std::vector<std::vector<int>> momvecs;
     auto momentum_shape = make_momentum_shape(wave_shape);
-    momvecs.reserve(NdFormatD(momentum_shape).m_nelement);
+    momvecs.reserve(size(wave_shape));
     auto fn = [&wave_shape, &momvecs](const defs::inds& inds, size_t iiter){
         momvecs.emplace_back();
         for (size_t idim=0ul; idim < wave_shape.size(); ++idim){
@@ -26,15 +25,24 @@ std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::inds &wave_sh
     return momvecs;
 }
 
+size_t Planewaves::size(const defs::inds &wave_shape) {
+    const auto shape = make_momentum_shape(wave_shape);
+    return NdFormatD(shape).m_nelement;
+}
+
+size_t Planewaves::size(size_t ndim, size_t nwave) {
+    return size(defs::inds(ndim, nwave));
+}
+
 Planewaves::Planewaves(const defs::inds& wave_shape) :
     m_wave_format(wave_shape), m_momentum_format(make_momentum_shape(wave_shape)),
-    m_nbasis(m_momentum_format.m_nelement), m_ndim(m_momentum_format.m_nind),
+    m_size(m_momentum_format.m_nelement), m_ndim(m_momentum_format.m_nind),
     m_momvecs(make_momvecs(wave_shape)){}
 
 Planewaves::Planewaves(size_t ndim, size_t nwave) : Planewaves(defs::inds(ndim, nwave)){}
 
 const std::vector<int> &Planewaves::operator[](const size_t &i) const {
-    DEBUG_ASSERT_LT(i, m_nbasis, "basis function index OOB");
+    DEBUG_ASSERT_LT(i, m_size, "basis function index OOB");
     return m_momvecs[i];
 }
 
@@ -83,7 +91,7 @@ size_t Planewaves::encode(const std::vector<int> &momvec) const {
 }
 
 const size_t &Planewaves::size() const {
-    return m_nbasis;
+    return m_size;
 }
 
 int Planewaves::kinetic_energy(const size_t &i) const {

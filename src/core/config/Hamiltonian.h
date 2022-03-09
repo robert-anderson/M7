@@ -86,7 +86,7 @@ namespace fciqmc_config {
 
     struct InteractingBoseGas : config::Section {
         config::Param<size_t> m_ndim;
-        config::Param<size_t> m_nplanewave;
+        config::Param<size_t> m_nwave;
         config::Param<defs::ham_t> m_ek_scale;
         explicit InteractingBoseGas(config::Group *parent);
 

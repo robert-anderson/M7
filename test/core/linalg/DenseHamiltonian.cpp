@@ -287,7 +287,7 @@ TEST(DenseHamiltonian, InteractingBoseGas1D) {
     const size_t nplanewave = 3;
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_boson.m_interacting_bose_gas.m_ndim = 1;
-    opts.m_boson.m_interacting_bose_gas.m_nplanewave = nplanewave;
+    opts.m_boson.m_interacting_bose_gas.m_nwave = nplanewave;
     opts.m_boson.m_interacting_bose_gas.m_ek_scale = 0.2;
     opts.m_boson.m_nboson = 3;
     Hamiltonian ham_src(opts);

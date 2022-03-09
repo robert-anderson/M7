@@ -105,11 +105,11 @@ bool fciqmc_config::LadderHamiltonian::enabled() const {
 fciqmc_config::InteractingBoseGas::InteractingBoseGas(config::Group *parent) :
         config::Section(parent, "interacting_bose_gas", "options relating to the N-dimensional interacting boson gas"),
         m_ndim(this, "ndim", 1ul, "number of dimensions"),
-        m_nplanewave(this, "nplanewave", 0ul, "number of positive momentum values per dimension"),
+        m_nwave(this, "nwave", 0ul, "number of plane waves per dimension (number of degrees of freedom is 2*nwave + 1)"),
         m_ek_scale(this, "ek_scale", 0.0, "scale of the kinetic energy in terms of the scattering interaction strength"){}
 
 bool fciqmc_config::InteractingBoseGas::enabled() const {
-    return m_nplanewave.get();
+    return m_nwave.get();
 }
 
 fciqmc_config::BosonHamiltonian::BosonHamiltonian(config::Group *parent) :

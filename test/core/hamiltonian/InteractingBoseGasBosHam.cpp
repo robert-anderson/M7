@@ -7,10 +7,10 @@
 #include "src/core/hamiltonian/Hamiltonian.h"
 
 TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
-    const size_t nplanewave = 3;
+    const size_t nwave = 3;
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_boson.m_interacting_bose_gas.m_ndim = 1;
-    opts.m_boson.m_interacting_bose_gas.m_nplanewave = nplanewave;
+    opts.m_boson.m_interacting_bose_gas.m_nwave = nwave;
     opts.m_boson.m_interacting_bose_gas.m_ek_scale = 1.0;
     opts.m_boson.m_nboson = 3;
     Hamiltonian ham_src(opts);
