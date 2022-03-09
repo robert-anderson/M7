@@ -193,8 +193,8 @@ decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf): FrmOnv(mbf, {mbf.m_nsite}){
 void decoded_mbf::FrmOnv::clear() {
     m_simple_occs.clear();
     m_simple_vacs.clear();
-    m_sym_occs.clear();
-    m_sym_vacs.clear();
+    m_spin_occs.clear();
+    m_spin_vacs.clear();
     m_spin_sym_occs.clear();
     m_spin_sym_vacs.clear();
     m_nonempty_pair_labels.clear();
