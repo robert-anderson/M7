@@ -24,6 +24,8 @@ public:
 
     defs::inds to_vector() const;
 
+    void from_vector(const defs::inds& imodes);
+
     void clear();
 
     size_t size() const;
@@ -50,11 +52,11 @@ public:
 struct BosOnvConnection {
     BosOps m_ann, m_cre;
 
-    BosOnvConnection(size_t nmode);
+    explicit BosOnvConnection(size_t nmode);
 
-    BosOnvConnection(BasisData bd);
+    explicit BosOnvConnection(BasisData bd);
 
-    BosOnvConnection(const BosOnvField& mbf);
+    explicit BosOnvConnection(const BosOnvField& mbf);
 
     void clear();
 
@@ -84,7 +86,14 @@ struct BosOnvConnection {
      * @param src
      * @return
      */
+    size_t occ_fac_square(const BosOnvField& src) const;
+
     double occ_fac(const BosOnvField& src) const;
+
+private:
+    static size_t occ_fac_square_com(const size_t& occ, const size_t& nop_com);
+
+public:
 
     /**
      * if the matrix element in question is actually contracted, with common indices among the creation and annihilation
@@ -98,6 +107,8 @@ struct BosOnvConnection {
      * @param com
      * @return
      */
+    size_t occ_fac_square(const BosOnvField& src, const BosOps& com) const;
+
     double occ_fac(const BosOnvField& src, const BosOps& com) const;
 
 };

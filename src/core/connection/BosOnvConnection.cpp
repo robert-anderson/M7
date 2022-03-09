@@ -26,6 +26,19 @@ defs::inds BosOps::to_vector() const {
     return vec;
 }
 
+void BosOps::from_vector(const defs::inds &imodes) {
+    clear();
+    if (imodes.empty()) return;
+    size_t istart = 0;
+    for(size_t i = 1; i<imodes.size(); ++i){
+        if (imodes[istart]!=imodes[i]) {
+            add({imodes[istart], i - istart});
+            istart = i;
+        }
+    }
+    add({imodes[istart], imodes.size()-istart});
+}
+
 void BosOps::clear() {
     m_pairs.clear();
     m_nop = 0ul;
@@ -62,7 +75,6 @@ void BosOps::set(const size_t &imode, const size_t &jmode) {
     };
 }
 
-
 const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
     return m_pairs[ipair];
@@ -76,7 +88,6 @@ size_t BosOps::get_imode(size_t iop) const {
     }
     return ~0ul;
 }
-
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
 
 BosOnvConnection::BosOnvConnection(BasisData bd) : BosOnvConnection(bd.m_nmode){}
@@ -143,21 +154,68 @@ bool BosOnvConnection::respects_occ_range(const BosOnvField &src, size_t nboson_
     return true;
 }
 
-double BosOnvConnection::occ_fac(const BosOnvField &src) const {
-    double fac = 1.0;
+size_t BosOnvConnection::occ_fac_square(const BosOnvField &src) const {
+    size_t fac = 1;
     for (auto& pair : m_ann.pairs()) {
         for (size_t i=0ul; i<pair.m_nop; ++i) fac*= src[pair.m_imode] - i;
     }
     for (auto& pair : m_cre.pairs()) {
         for (size_t i=1ul; i<=pair.m_nop; ++i) fac*= src[pair.m_imode] + i;
     }
-    return std::sqrt(fac);
+    return fac;
+}
+
+double BosOnvConnection::occ_fac(const BosOnvField &src) const {
+    return std::sqrt(double(occ_fac_square(src)));
+}
+
+size_t BosOnvConnection::occ_fac_square_com(const size_t &occ, const size_t &nop_com) {
+    size_t fac = 1;
+    for (size_t i=0ul; i<nop_com; ++i){
+        auto com_fac = occ-i;
+        fac*=com_fac*com_fac;
+    }
+    return fac;
+}
+
+size_t BosOnvConnection::occ_fac_square(const BosOnvField &src, const BosOps &com) const {
+    size_t fac = 1;
+    size_t icom = 0;
+    auto ncom = com.pairs().size();
+    /*
+     * loop over bosonic annihilations
+     */
+    for (auto& pair : m_ann.pairs()) {
+        for (size_t i=0ul; i<pair.m_nop; ++i) {
+            fac*= src[pair.m_imode] - i;
+            if (icom<ncom){
+                // there are common operator modes remaining
+                if (com[icom].m_imode==pair.m_imode) {
+                    // the current common operator mode is the same as the one just annihilated
+                    fac*= occ_fac_square_com((src[pair.m_imode] - i) - 1, com[icom].m_nop);
+                    ++icom;
+                }
+                else if (com[icom].m_imode<pair.m_imode) {
+                    // the current common operator mode can't be in the annihilated array, since it's been skipped over
+                    fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
+                    ++icom;
+                }
+            }
+        }
+    }
+    // only the annihilation part is affected by the common operators in normal ordering: do the creation ops as normal
+    for (auto& pair : m_cre.pairs()) {
+        for (size_t i=1ul; i<=pair.m_nop; ++i) {
+            fac*= src[pair.m_imode] + i;
+        }
+    }
+    // do the rest of the common orbs that were not reached in the loop over annihilations
+    for (;icom < ncom; ++icom) {
+        fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
+    }
+    return fac;
 }
 
 double BosOnvConnection::occ_fac(const BosOnvField &src, const BosOps &com) const {
-    double fac = occ_fac(src);
-    for (auto& pair : com.pairs()) {
-        for (size_t i=0ul; i<pair.m_nop; ++i) fac*=src[pair.m_imode]-i;
-    }
-    return fac;
+    return std::sqrt(double(occ_fac_square(src, com)));
 }
