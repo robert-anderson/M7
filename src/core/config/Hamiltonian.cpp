@@ -68,7 +68,8 @@ fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
         m_charge(this, "charge", 0,
                  "electron deficit relative to the default value in the FCIDUMP file or that assumed by the model system (positive value to remove elecs)"),
         m_ms2_restrict(this, "ms2_restrict", 0,
-                       "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number") {}
+                       "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number"),
+        m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
 void fciqmc_config::FermionHamiltonian::verify() {
     size_t ndefined = m_fcidump.enabled() + m_hubbard.enabled() + m_heisenberg.enabled();
