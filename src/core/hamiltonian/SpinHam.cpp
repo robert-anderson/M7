@@ -1,0 +1,58 @@
+//
+// Created by Oskar Weser on 17/3/22.
+//
+
+#include "SpinHam.h"
+
+
+defs::ham_t SpinHam::get_element_0000(const field::FrmOnv &onv) const {
+    // TODO(@Oskar): make it a const member
+    const auto Sz_term = 0.25 * m_ms2_restrict * (m_ms2_restrict - 2);
+    uint n_os_a = 0;
+    auto count_n_OS_a = [&](const size_t &i) {
+        if (i < m_nsite) {
+            n_os_a += onv.get(i + m_nsite);
+        };
+    };
+    onv.foreach(count_n_OS_a);
+    return Sz_term + n_os_a;
+}
+
+
+defs::ham_t SpinHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    return 0.0;
+}
+
+
+defs::ham_t SpinHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    const auto element = this->get_coeff_2200(
+                conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
+    return conn.phase(onv) ? -element : element;
+}
+
+defs::ham_t SpinHam::get_coeff_1100(const size_t &i, const size_t &j) const {
+    return 0.0;
+}
+
+defs::ham_t SpinHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+    // g_ijkl = i j l k
+    if (field::FrmOnv::ispin(i, m_nsite) == field::FrmOnv::ispin(j, m_nsite)) return 0.0;
+    if (field::FrmOnv::ispin(k, m_nsite) == field::FrmOnv::ispin(l, m_nsite)) return 0.0;
+    if (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(j, m_nsite)) return 0.0;
+    if (field::FrmOnv::isite(k, m_nsite) == field::FrmOnv::isite(l, m_nsite)) return 0.0;
+
+    if (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(k, m_nsite)) {
+        if (field::FrmOnv::isite(j, m_nsite) == field::FrmOnv::isite(l, m_nsite)) {
+        } else {
+            return 0.0;
+        }
+    } else if (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(l, m_nsite)) {
+        if (field::FrmOnv::isite(j, m_nsite) == field::FrmOnv::isite(k, m_nsite)) {
+        } else {
+            return 0.0;
+        }
+    } else {
+        return 0.0;
+    }
+    return 1.0;
+}

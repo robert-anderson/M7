@@ -65,7 +65,7 @@ private:
      * number of distinctly specified (spin-)orbitals in the Hamiltonian defintion
      */
     size_t norb_distinct() const {
-        return (1ul+m_int_1.m_spin_res)*m_nsite;
+        return (1ul + m_int_1.m_spin_res) * m_nsite;
     }
 };
 

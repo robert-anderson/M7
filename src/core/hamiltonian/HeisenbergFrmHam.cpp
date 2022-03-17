@@ -25,7 +25,7 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(const size_t &i, const size_t &j, c
     auto isite = field::FrmOnv::isite(i, m_nsite);
     auto jsite = field::FrmOnv::isite(j, m_nsite);
     // fermi phase not included here, minus sign is due to product of opposite spins
-    return -m_j*m_lattice.m_dense(isite, jsite)/2.0;
+    return -m_j * m_lattice.m_dense(isite, jsite)/2.0;
 }
 
 defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {

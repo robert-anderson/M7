@@ -136,6 +136,9 @@ public:
             const size_t &jspat, const size_t &jspin,
             const size_t &kspat, const size_t &kspin,
             const size_t &lspat, const size_t &lspin) {
+        /*
+         * phys_element(i, j, k, l) == < i j | \hat{g} | k l >
+         */
         return phys_element(spinorb(ispat, ispin), spinorb(jspat, jspin),
                         spinorb(kspat, kspin), spinorb(lspat, lspin));
     }

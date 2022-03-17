@@ -27,23 +27,23 @@ struct SumFrmHam : FrmHam {
         m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){}
 
     defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const override {
-        return m_h1.get_coeff_1100(i, j)+m_weight*m_h2.get_coeff_1100(i, j);
+        return m_h1.get_coeff_1100(i, j) + m_weight * m_h2.get_coeff_1100(i, j);
     }
 
     defs::ham_t get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const override {
-        return m_h1.get_coeff_2200(i, j)+m_weight*m_h2.get_coeff_2200(i, j);
+        return m_h1.get_coeff_2200(i, j) + m_weight * m_h2.get_coeff_2200(i, j);
     }
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override {
-        return m_h1.get_element_0000(onv)+m_weight*m_h2.get_element_0000(onv);
+        return m_h1.get_element_0000(onv) + m_weight * m_h2.get_element_0000(onv);
     }
 
     defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override {
-        return m_h1.get_element_1100(onv, conn)+m_weight*m_h2.get_element_1100(onv, conn);
+        return m_h1.get_element_1100(onv, conn) + m_weight * m_h2.get_element_1100(onv, conn);
     }
 
     defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override{
-        return m_h1.get_element_2200(onv, conn)+m_weight*m_h2.get_element_2200(onv, conn);
+        return m_h1.get_element_2200(onv, conn) + m_weight * m_h2.get_element_2200(onv, conn);
     }
 };
 
