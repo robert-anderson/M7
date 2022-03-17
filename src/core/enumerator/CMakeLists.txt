@@ -1,0 +1,22 @@
+target_sources(M7
+    PRIVATE
+        BitsetEnumerator.h
+        BosonOnvEnumerator.cpp
+        BosonOnvEnumerator.h
+        CombinationEnumerator.cpp
+        CombinationEnumerator.h
+        ContainerCombinationEnumerator.cpp
+        ContainerCombinationEnumerator.h
+        Enumerator.cpp
+        Enumerator.h
+        Enumerators.h
+        FermionOnvEnumerator.cpp
+        FermionOnvEnumerator.h
+        FrmBosOnvEnumerator.cpp
+        FrmBosOnvEnumerator.h
+        ProductEnumerator.h
+        SpinConFonvEnumerator.cpp
+        SpinConFonvEnumerator.h
+        SpinNonConFonvEnumerator.cpp
+        SpinNonConFonvEnumerator.h
+)

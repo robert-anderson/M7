@@ -1,0 +1,18 @@
+target_sources(M7
+    PRIVATE
+        BodyFnTypes.h
+        ExcitIter.cpp
+        ExcitIter.h
+        ExcitIterGroup.cpp
+        ExcitIterGroup.h
+        ExcitIters.cpp
+        ExcitIters.h
+        HubbardSingles.cpp
+        HubbardSingles.h
+        LadderHopping.cpp
+        LadderHopping.h
+        LadderPure.cpp
+        LadderPure.h
+        LadderPureHolstein.cpp
+        LadderPureHolstein.h
+)

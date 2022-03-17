@@ -1,0 +1,20 @@
+target_sources(M7
+    PRIVATE
+        Distributed.h
+        DistributedAccumulation.h
+        Epoch.cpp
+        Epoch.h
+        Gatherable.h
+        MPIAssert.h
+        MPIWrapper.cpp
+        MPIWrapper.h
+        RankAllocator.cpp
+        RankAllocator.h
+        Reduction.h
+        ReductionMember.h
+        ReductionMemberBase.h
+        ReductionSyndicate.cpp
+        ReductionSyndicate.h
+        SharedArray.h
+        SharedMatrix.h
+)

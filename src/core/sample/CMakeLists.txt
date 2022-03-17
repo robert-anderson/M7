@@ -1,0 +1,9 @@
+target_sources(M7
+    PRIVATE
+        Aliaser.cpp
+        Aliaser.h
+        PRNG.cpp
+        PRNG.h
+        UniformSampler.cpp
+        UniformSampler.h
+)

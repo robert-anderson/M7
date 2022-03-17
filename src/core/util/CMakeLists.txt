@@ -1,0 +1,11 @@
+target_sources(M7
+    PRIVATE
+        ProgressMonitor.cpp
+        ProgressMonitor.h
+        Ternary.h
+        Timer.cpp
+        Timer.h
+        consts.h
+        utils.cpp
+        utils.h
+)

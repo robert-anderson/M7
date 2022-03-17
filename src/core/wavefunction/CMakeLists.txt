@@ -1,0 +1,13 @@
+target_sources(M7
+    PRIVATE
+        DeterministicSubspace.cpp
+        DeterministicSubspace.h
+        Reference.cpp
+        Reference.h
+        SpawnTable.cpp
+        SpawnTable.h
+        WalkerTable.cpp
+        WalkerTable.h
+        Wavefunction.cpp
+        Wavefunction.h
+)

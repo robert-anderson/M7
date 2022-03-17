@@ -1,0 +1,18 @@
+target_sources(M7
+    PRIVATE
+        BosonCoeffs_1.cpp
+        BosonCoeffs_1.h
+        BosonCoeffs_2.cpp
+        BosonCoeffs_2.h
+        FrmBosCoupledCoeffs.cpp
+        FrmBosCoupledCoeffs.h
+        IntegralArray.cpp
+        IntegralArray.h
+        IntegralArray1e.cpp
+        IntegralArray1e.h
+        IntegralArray2e.cpp
+        IntegralArray2e.h
+        Integrals.h
+        Integrals_1e.h
+        Integrals_2e.h
+)

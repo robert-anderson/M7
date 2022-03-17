@@ -1,0 +1,12 @@
+target_sources(M7
+    PRIVATE
+        Comparators.h
+        ExtremalIndices.cpp
+        ExtremalIndices.h
+        GlobalExtremalRows.cpp
+        GlobalExtremalRows.h
+        LambdaQuickSorter.cpp
+        LambdaQuickSorter.h
+        LocalExtremalRows.h
+        QuickSorter.h
+)

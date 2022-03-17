@@ -1,0 +1,10 @@
+target_sources(M7
+    PRIVATE
+        Dense.cpp
+        Dense.h
+        DenseHamiltonian.cpp
+        DenseHamiltonian.h
+        DistMvProd.h
+        Sparse.cpp
+        Sparse.h
+)

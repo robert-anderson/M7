@@ -1,0 +1,15 @@
+target_sources(M7
+    PRIVATE
+        AbelianGroup.cpp
+        AbelianGroup.h
+        BasisData.h
+        CiSpaces.cpp
+        CiSpaces.h
+        Lattice.cpp
+        Lattice.h
+        MappedDeterminantList.cpp
+        MappedDeterminantList.h
+        Planewaves.cpp
+        Planewaves.h
+        Suites.h
+)

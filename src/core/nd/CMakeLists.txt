@@ -1,0 +1,13 @@
+target_sources(M7
+    PRIVATE
+        NdAccessor.h
+        NdArray.h
+        NdArrayList.h
+        NdFormat.h
+        NdFormatD.cpp
+        NdFormatD.h
+        NdIndices.h
+        NdSelector.cpp
+        NdSelector.h
+        NdSequence.h
+)

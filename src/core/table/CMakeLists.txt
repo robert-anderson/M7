@@ -1,0 +1,17 @@
+target_sources(M7
+    PRIVATE
+        Buffer.cpp
+        Buffer.h
+        BufferedFields.cpp
+        BufferedFields.h
+        BufferedTable.h
+        BufferedTableArray.h
+        Communicator.h
+        MappedTable.cpp
+        MappedTable.h
+        RowProtector.cpp
+        RowProtector.h
+        Table.h
+        TableBase.cpp
+        TableBase.h
+)

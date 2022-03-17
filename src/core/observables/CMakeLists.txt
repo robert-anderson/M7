@@ -1,0 +1,15 @@
+target_sources(M7
+    PRIVATE
+        KramersSectorOccupation.cpp
+        KramersSectorOccupation.h
+        RefExcits.cpp
+        RefExcits.h
+        SignProblemFreeTwf.cpp
+        SignProblemFreeTwf.h
+        TrialWavefunction.cpp
+        TrialWavefunction.h
+        UniformTwf.cpp
+        UniformTwf.h
+        WeightedTwf.cpp
+        WeightedTwf.h
+)

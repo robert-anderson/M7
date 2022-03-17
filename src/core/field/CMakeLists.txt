@@ -1,0 +1,31 @@
+target_sources(M7
+    PRIVATE
+        BitsetField.h
+        BosOnvField.cpp
+        BosOnvField.h
+        CompositeField.cpp
+        CompositeField.h
+        FieldBase.cpp
+        FieldBase.h
+        Fields.h
+        FrmBosOnvField.cpp
+        FrmBosOnvField.h
+        FrmOnvField.cpp
+        FrmOnvField.h
+        FrmXonvField.cpp
+        FrmXonvField.h
+        MaeIndsField.cpp
+        MaeIndsField.h
+        Mbf.cpp
+        Mbf.h
+        NumberField.cpp
+        NumberField.h
+        Row.cpp
+        Row.h
+        RowHdf5.cpp
+        RowHdf5.h
+        SpecMomIndsField.cpp
+        SpecMomIndsField.h
+        XonvField.cpp
+        XonvField.h
+)

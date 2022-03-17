@@ -1,0 +1,30 @@
+target_sources(M7
+    PRIVATE
+        BosHam.cpp
+        BosHam.h
+        FrmHam.cpp
+        FrmHam.h
+        GeneralBosHam.cpp
+        GeneralBosHam.h
+        GeneralFrmHam.cpp
+        GeneralFrmHam.h
+        GeneralLadderHam.cpp
+        GeneralLadderHam.h
+        Hamiltonian.cpp
+        Hamiltonian.h
+        HamiltonianData.cpp
+        HamiltonianData.h
+        HeisenbergFrmHam.cpp
+        HeisenbergFrmHam.h
+        HolsteinBosHam.cpp
+        HolsteinBosHam.h
+        HolsteinLadderHam.cpp
+        HolsteinLadderHam.h
+        HubbardFrmHam.cpp
+        HubbardFrmHam.h
+        InteractingBoseGasBosHam.cpp
+        InteractingBoseGasBosHam.h
+        LadderHam.cpp
+        LadderHam.h
+        SumFrmHam.h
+)

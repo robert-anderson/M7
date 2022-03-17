@@ -1,0 +1,12 @@
+target_sources(M7
+    PRIVATE
+        BosOnvConnection.cpp
+        BosOnvConnection.h
+        ComOps.cpp
+        ComOps.h
+        Connections.h
+        FrmBosOnvConnection.cpp
+        FrmBosOnvConnection.h
+        FrmOnvConnection.cpp
+        FrmOnvConnection.h
+)

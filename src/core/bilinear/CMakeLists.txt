@@ -1,0 +1,11 @@
+target_sources(M7
+    PRIVATE
+        Bilinears.cpp
+        Bilinears.h
+        FermionPromoter.cpp
+        FermionPromoter.h
+        Rdm.cpp
+        Rdm.h
+        SpectralMoment.cpp
+        SpectralMoment.h
+)

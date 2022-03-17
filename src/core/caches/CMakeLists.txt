@@ -1,0 +1,15 @@
+target_sources(M7
+    PRIVATE
+        CachedOrbsOld.cpp
+        CachedOrbsOld.h
+        DecodedBosOnv.cpp
+        DecodedBosOnv.h
+        DecodedDeterminants.cpp
+        DecodedDeterminants.h
+        DecodedFrmBosOnv.cpp
+        DecodedFrmBosOnv.h
+        DecodedFrmOnv.cpp
+        DecodedFrmOnv.h
+        DecodedMbf.cpp
+        DecodedMbf.h
+)

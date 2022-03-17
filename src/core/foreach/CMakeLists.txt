@@ -1,0 +1,10 @@
+target_sources(M7
+    PRIVATE
+        ConnForeach.cpp
+        ConnForeach.h
+        Foreach.h
+        ForeachVirtual.cpp
+        ForeachVirtual.h
+        MbfForeach.cpp
+        MbfForeach.h
+)
