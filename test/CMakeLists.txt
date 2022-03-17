@@ -36,14 +36,7 @@ endif()
 
 target_link_options(unittest PRIVATE -g -rdynamic)
 
-target_link_libraries(unittest ${HDF5_LIBS})
-add_dependencies(unittest hdf5_local)
-target_link_libraries(unittest ${HDF5_LIBS})
-target_include_directories(unittest PUBLIC
-        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/src
-        ${CMAKE_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/hl/src
-        ${CMAKE_BINARY_DIR}/hdf5_local/build
-)
+target_link_libraries(unittest m7_hdf5)
 
 target_link_libraries(unittest ${ARPACK_LIBS} -lgfortran)
 add_dependencies(unittest arpack-ng)

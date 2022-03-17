@@ -8,6 +8,8 @@ if (APPLE)
     set(CMAKE_MACOSX_RPATH 1)
 endif ()
 
+include(ExternalProject)
+
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -37,44 +39,61 @@ if (MPI_FOUND)
 else ()
 endif ()
 
+
+option(BUILD_HDF5 OFF)
+
+if(BUILD_HDF5)
 #
 # Download and build HDF5
 #
-set(HDF5_CMAKE_ARGS
-        -DHDF5_ENABLE_PARALLEL=ON
-        -DHDF5_BUILD_CPP_LIB=OFF
-        -DHDF5_BUILD_JAVA=OFF
-        -DHDF5_ENABLE_THREADSAFE=OFF
-        -DCMAKE_C_FLAGS="-w") # we don't need to see compiler warnings from external dependencies
+    set(HDF5_CMAKE_ARGS
+            -DHDF5_ENABLE_PARALLEL=ON
+            -DHDF5_BUILD_CPP_LIB=OFF
+            -DHDF5_BUILD_JAVA=OFF
+            -DHDF5_ENABLE_THREADSAFE=OFF
+            -DCMAKE_C_FLAGS="-w") # we don't need to see compiler warnings from external dependencies
 
-set(HDF5_USE_STATIC_LIBRARIES 1)
-include(ExternalProject)
-set(HDF5_VERSION "1.10.5")
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-ExternalProject_Add(hdf5_local
-        URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF5_VERSION}.tar.gz
-        URL_MD5 e115eeb66e944fa7814482415dd21cc4
-        CMAKE_ARGS ${HDF5_CMAKE_ARGS}
-        SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}
-        BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
-        STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
-        TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
-        INSTALL_COMMAND ""
-        )
-include_directories(
-        ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/src
-        ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${_HDF5_VERSION}/hl/src
-        ${PROJECT_BINARY_DIR}/hdf5_local/build
-)
-set(HDF5_LIBS
-        ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
-        ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
-        -ldl)
+    set(HDF5_USE_STATIC_LIBRARIES 1)
+    set(HDF5_VERSION "1.10.5")
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
+    ExternalProject_Add(built_hdf5
+            URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF5_VERSION}.tar.gz
+            URL_MD5 e115eeb66e944fa7814482415dd21cc4
+            CMAKE_ARGS ${HDF5_CMAKE_ARGS}
+            SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}
+            BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
+            STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
+            TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
+            INSTALL_COMMAND ""
+            )
+
+    add_library(m7_hdf5 INTERFACE)
+    add_dependencies(m7_hdf5 built_hdf5)
+
+    set_property(TARGET m7_hdf5 PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/hl/src
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/
+    )
+    set_property(TARGET m7_hdf5 PROPERTY
+        IMPORTED_LOCATION
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
+            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
+    )
+
+else()
+    find_package(HDF5 REQUIRED COMPONENTS C HL)
+
+    add_library(m7_hdf5 INTERFACE)
+    target_link_libraries(m7_hdf5 INTERFACE hdf5::hdf5 hdf5::hdf5_hl)
+
+endif()
+target_link_libraries(m7_hdf5 INTERFACE ${CMAKE_DL_LIBS})
 
 #
 # Download and build static lib target of arpack-ng dependency of arpackpp
 #
-include(ExternalProject)
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/arpack-ng/src)
 ExternalProject_Add(arpack-ng
         URL https://github.com/robert-anderson/arpack-ng/archive/refs/heads/master.zip
@@ -152,8 +171,8 @@ target_compile_options(yaml-cpp PRIVATE -w)
 include_directories("${PROJECT_BINARY_DIR}/arpackpp/src/")
 
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
-add_definitions(-Wall -Wextra -Werror)
-add_definitions(-Wno-unused-function -Wno-unused-parameter)
+add_compile_options(-Wall -Wextra)
+add_compile_options(-Wno-unused-function -Wno-unused-parameter)
 
 add_subdirectory(src)
 add_subdirectory(test)
