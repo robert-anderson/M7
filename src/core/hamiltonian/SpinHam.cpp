@@ -35,24 +35,12 @@ defs::ham_t SpinHam::get_coeff_1100(const size_t &i, const size_t &j) const {
 }
 
 defs::ham_t SpinHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-    // g_ijkl = i j l k
-    if (field::FrmOnv::ispin(i, m_nsite) == field::FrmOnv::ispin(j, m_nsite)) return 0.0;
-    if (field::FrmOnv::ispin(k, m_nsite) == field::FrmOnv::ispin(l, m_nsite)) return 0.0;
-    if (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(j, m_nsite)) return 0.0;
-    if (field::FrmOnv::isite(k, m_nsite) == field::FrmOnv::isite(l, m_nsite)) return 0.0;
-
-    if (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(k, m_nsite)) {
-        if (field::FrmOnv::isite(j, m_nsite) == field::FrmOnv::isite(l, m_nsite)) {
-        } else {
-            return 0.0;
-        }
-    } else if (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(l, m_nsite)) {
-        if (field::FrmOnv::isite(j, m_nsite) == field::FrmOnv::isite(k, m_nsite)) {
-        } else {
-            return 0.0;
-        }
-    } else {
-        return 0.0;
-    }
-    return 1.0;
+    return (field::FrmOnv::ispin(i, m_nsite) == field::FrmOnv::ispin(j, m_nsite)
+                || field::FrmOnv::ispin(k, m_nsite) == field::FrmOnv::ispin(l, m_nsite)
+                || field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(j, m_nsite)
+                || field::FrmOnv::isite(k, m_nsite) == field::FrmOnv::isite(l, m_nsite)
+                || (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(k, m_nsite)
+                    && field::FrmOnv::isite(j, m_nsite) != field::FrmOnv::isite(l, m_nsite))
+                || (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(l, m_nsite)
+                    && field::FrmOnv::isite(j, m_nsite) != field::FrmOnv::isite(k, m_nsite))) ? 0.0 : 1.0;
 }
