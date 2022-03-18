@@ -1,3 +1,5 @@
+project(tests)
+
 add_subdirectory(
         ${CMAKE_SOURCE_DIR}/external/googletest
         ${CMAKE_BINARY_DIR}/external/googletest

@@ -67,7 +67,7 @@ if(BUILD_HDF5)
             STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
             TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
             INSTALL_COMMAND ""
-    )
+            )
 
     add_library(m7_hdf5 INTERFACE)
     add_dependencies(m7_hdf5 built_hdf5)
@@ -78,9 +78,8 @@ if(BUILD_HDF5)
             ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/hl/src
             ${PROJECT_BINARY_DIR}/hdf5_local/build/
     )
-
     set_property(TARGET m7_hdf5 PROPERTY
-       INTERFACE_LINK_LIBRARIES
+        IMPORTED_LOCATION
             ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
             ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
     )
