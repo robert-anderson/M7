@@ -14,8 +14,8 @@
 
 #include <iostream>
 #include <cstring>
-#include <src/defs.h>
-#include "src/core/util/utils.h"
+#include <defs.h>
+#include "util/utils.h"
 
 /**
  * With MPI, we potentially have a typing issue. By default MPI libraries are typically

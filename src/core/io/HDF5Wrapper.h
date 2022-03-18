@@ -7,9 +7,9 @@
 
 #include <string>
 #include <memory>
-#include "src/core/parallel/MPIWrapper.h"
-#include "src/core/parallel/MPIAssert.h"
-#include "src/core/nd/NdFormat.h"
+#include "parallel/MPIWrapper.h"
+#include "parallel/MPIAssert.h"
+#include "nd/NdFormat.h"
 #include "hdf5.h"
 #include "hdf5_hl.h"
 

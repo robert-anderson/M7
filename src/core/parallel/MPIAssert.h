@@ -6,7 +6,7 @@
 #define M7_MPIASSERT_H
 
 #include "MPIWrapper.h"
-#include "src/core/io/Logging.h"
+#include "io/Logging.h"
 
 /**
  * This file furnishes a set of macros for code verification.

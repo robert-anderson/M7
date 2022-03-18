@@ -6,12 +6,13 @@
 #define M7_HAMILTONIAN_H
 
 #include <type_traits>
-#include <src/defs.h>
-#include <src/core/basis/Suites.h>
+#include <defs.h>
+#include <basis/Suites.h>
+#include <nd/NdArray.h>
+
 #include "FrmHam.h"
 #include "BosHam.h"
 #include "LadderHam.h"
-#include "src/core/nd/NdArray.h"
 #include "HubbardFrmHam.h"
 #include "GeneralFrmHam.h"
 #include "HolsteinLadderHam.h"

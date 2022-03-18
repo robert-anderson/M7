@@ -5,7 +5,8 @@
 #ifndef M7_MAEINDSFIELD_H
 #define M7_MAEINDSFIELD_H
 
-#include <src/core/connection/FrmBosOnvConnection.h>
+#include <connection/FrmBosOnvConnection.h>
+
 #include "NumberField.h"
 
 /**

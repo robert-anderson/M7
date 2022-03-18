@@ -5,13 +5,14 @@
 #ifndef M7_RDM_H
 #define M7_RDM_H
 
-#include <src/core/basis/Suites.h>
-#include <src/core/wavefunction/Reference.h>
-#include <src/core/dynamics/Propagator.h>
-#include "src/core/mae/MaeTable.h"
-#include "src/core/field/Fields.h"
-#include "src/core/table/Communicator.h"
-#include "src/core/io/Archivable.h"
+#include <basis/Suites.h>
+#include <wavefunction/Reference.h>
+#include <dynamics/Propagator.h>
+#include <mae/MaeTable.h>
+#include <field/Fields.h>
+#include <table/Communicator.h>
+#include <io/Archivable.h>
+
 #include "FermionPromoter.h"
 
 using namespace exsig_utils;

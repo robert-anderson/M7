@@ -5,7 +5,7 @@
 #ifndef M7_TIMINGSTATS_H
 #define M7_TIMINGSTATS_H
 
-#include "src/core/field/Row.h"
+#include "field/Row.h"
 #include "StatsTable.h"
 
 struct TimingStatsRow : StatsRow {

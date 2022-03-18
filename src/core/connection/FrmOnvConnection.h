@@ -5,7 +5,7 @@
 #ifndef M7_FRMONVCONNECTION_H
 #define M7_FRMONVCONNECTION_H
 
-#include "src/core/field/FrmOnvField.h"
+#include <field/FrmOnvField.h>
 
 /**
  * A generic string of ordered, distinct spin-orbital indices.
@@ -276,10 +276,10 @@ public:
      *
      * both strings are applied in their stored order (ascending), but the creation string is hermitian-conjugated so
      * it algebraically should be applied in descending order. This method takes this rearrangement into account
-     * 
+     *
      * phase products are realised via the XOR operator on bools, since like-phases combine for positive (false) phase,
      * and differing phases combine for a negative (true) phase.
-     * 
+     *
      * the algorithm initially sets ann and cre iterators to the cbegin of their respective FrmOpProducts and loops
      * until the iterators have been incremented beyond the last added (highest) element of each string. If the next
      * lowest index is a creation operator, the phase associated with moving the operator past the remaining

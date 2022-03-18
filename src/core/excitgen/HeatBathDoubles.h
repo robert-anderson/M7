@@ -5,9 +5,10 @@
 #ifndef M7_HEATBATHDOUBLES_H
 #define M7_HEATBATHDOUBLES_H
 
+#include <sample/Aliaser.h>
+#include <field/Fields.h>
+
 #include "ExcitGen.h"
-#include "src/core/sample/Aliaser.h"
-#include "src/core/field/Fields.h"
 
 /**
  * precomputed sampler for fermion double excitations

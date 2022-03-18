@@ -5,7 +5,8 @@
 #ifndef M7_XONVFIELD_H
 #define M7_XONVFIELD_H
 
-#include "src/core/basis/BasisData.h"
+#include <basis/BasisData.h>
+
 #include "CompositeField.h"
 #include "Row.h"
 #include "FrmOnvField.h"

@@ -5,8 +5,8 @@
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
-#include <src/core/enumerator/Enumerator.h>
-#include "src/defs.h"
+#include <enumerator/Enumerator.h>
+#include "defs.h"
 #include "array"
 #include "algorithm"
 

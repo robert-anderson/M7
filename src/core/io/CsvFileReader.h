@@ -6,8 +6,8 @@
 #define M7_CSVFILEREADER_H
 
 #include <algorithm>
-#include <src/core/util/utils.h>
-#include <src/core/parallel/MPIAssert.h>
+#include <util/utils.h>
+#include <parallel/MPIAssert.h>
 #include "FileReader.h"
 
 class CsvFileReader : public FileReader {

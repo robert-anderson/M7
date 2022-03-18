@@ -5,7 +5,7 @@
 #ifndef M7_UTILS_H
 #define M7_UTILS_H
 
-#include "src/defs.h"
+#include "defs.h"
 #include <vector>
 #include <array>
 #include <stack>

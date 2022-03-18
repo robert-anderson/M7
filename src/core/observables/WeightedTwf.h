@@ -5,8 +5,8 @@
 #ifndef M7_WEIGHTEDTWF_H
 #define M7_WEIGHTEDTWF_H
 
-#include "src/core/wavefunction/WalkerTable.h"
-#include "src/core/observables/SignProblemFreeTwf.h"
+#include "wavefunction/WalkerTable.h"
+#include "observables/SignProblemFreeTwf.h"
 
 class WeightedTwf : public SpfTwfBase{
 protected:

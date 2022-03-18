@@ -5,8 +5,8 @@
 #ifndef M7_INTEGRALARRAY1E_H
 #define M7_INTEGRALARRAY1E_H
 
-#include <src/core/parallel/MPIAssert.h>
-#include "src/defs.h"
+#include <parallel/MPIAssert.h>
+#include "defs.h"
 #include "IntegralArray.h"
 
 struct IntegralArray1e : IntegralArray {

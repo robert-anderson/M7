@@ -3,7 +3,7 @@
 //
 
 #include "BosHam.h"
-#include "src/core/io/BosdumpFileReader.h"
+#include "io/BosdumpFileReader.h"
 
 
 BosHam::BosHam(size_t nmode, size_t nboson):

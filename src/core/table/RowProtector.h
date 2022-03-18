@@ -5,7 +5,7 @@
 #ifndef M7_ROWPROTECTOR_H
 #define M7_ROWPROTECTOR_H
 
-#include <src/core/parallel/RankAllocator.h>
+#include <parallel/RankAllocator.h>
 
 /**
  * keeps track of rows which must not be erased

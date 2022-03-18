@@ -2,7 +2,7 @@
 // Created by rja on 28/08/2021.
 //
 
-#include "src/core/field/FrmOnvField.h"
+#include "field/FrmOnvField.h"
 #include "FrmBosCoupledCoeffs.h"
 
 size_t FrmBosCoupledCoeffs::index(size_t n, size_t p, size_t q) const {

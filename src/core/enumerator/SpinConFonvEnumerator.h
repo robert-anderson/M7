@@ -6,8 +6,9 @@
 #define M7_SPINCONFONVENUMERATOR_H
 
 
+#include <field/Fields.h>
+
 #include "CombinationEnumerator.h"
-#include "src/core/field/Fields.h"
 
 class SpinConFonvEnumerator : public Enumerator<field::FrmOnv> {
     CombinationEnumerator m_alpha_comb;

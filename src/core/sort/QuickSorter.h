@@ -5,9 +5,9 @@
 #ifndef M7_QUICKSORTER_H
 #define M7_QUICKSORTER_H
 
-#include <src/defs.h>
+#include <defs.h>
 #include <functional>
-#include "src/core/table/Table.h"
+#include "table/Table.h"
 
 template<typename Fn>
 struct QuickSorter {

@@ -6,7 +6,7 @@
 #define M7_REDUCTIONMEMBER_H
 
 #if 0
-#include "src/core/nd/NdAccessor.h"
+#include "nd/NdAccessor.h"
 #include "ReductionSyndicate.h"
 
 

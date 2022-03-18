@@ -5,10 +5,11 @@
 #ifndef M7_EXCITGEN_H
 #define M7_EXCITGEN_H
 
-#include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/connection/Connections.h>
-#include "src/core/sample/PRNG.h"
-#include "src/core/caches/CachedOrbsOld.h"
+#include <hamiltonian/Hamiltonian.h>
+#include <connection/Connections.h>
+#include <caches/CachedOrbsOld.h>
+
+#include "sample/PRNG.h"
 
 struct ExcitGen {
 

@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include "ExtremalIndices.h"
-#include "src/core/parallel/MPIAssert.h"
+#include "parallel/MPIAssert.h"
 
 ExtremalIndices::ExtremalIndices(comparators::index_cmp_fn_t cmp_fn): m_cmp_fn(cmp_fn){}
 

@@ -2,9 +2,9 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
-#include <src/core/enumerator/Enumerators.h>
+#include <enumerator/Enumerators.h>
 #include "DenseHamiltonian.h"
-#include "src/core/foreach/Foreach.h"
+#include "foreach/Foreach.h"
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, bool force_general) {
     if (force_general) return make_pair_iterator(h);

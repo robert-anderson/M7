@@ -5,9 +5,9 @@
 #ifndef M7_LAMBDAQUICKSORTER_H
 #define M7_LAMBDAQUICKSORTER_H
 
-#include <src/defs.h>
+#include <defs.h>
 #include <functional>
-#include "src/core/table/Table.h"
+#include "table/Table.h"
 
 struct LambdaQuickSorter {
 

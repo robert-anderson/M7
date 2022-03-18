@@ -5,9 +5,9 @@
 #ifndef M7_GLOBALEXTREMALROWS_H
 #define M7_GLOBALEXTREMALROWS_H
 
-#include "src/core/parallel/Reduction.h"
+#include "parallel/Reduction.h"
 #include "LocalExtremalRows.h"
-#include "src/core/table/BufferedTable.h"
+#include "table/BufferedTable.h"
 #include "LambdaQuickSorter.h"
 
 /**

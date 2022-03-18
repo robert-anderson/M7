@@ -3,7 +3,7 @@
 //
 
 #include "Hashing.h"
-#include "src/core/parallel/MPIAssert.h"
+#include "parallel/MPIAssert.h"
 #include <algorithm>
 
 defs::hash_t hashing::in_range(defs::hash_t v, const defs::hash_t &lo, const defs::hash_t &hi) {

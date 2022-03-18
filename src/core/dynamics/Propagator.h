@@ -5,9 +5,10 @@
 #ifndef M7_PROPAGATOR_H
 #define M7_PROPAGATOR_H
 
-#include <src/core/config/FciqmcConfig.h>
-#include <src/core/io/Archivable.h>
-#include <src/core/basis/Suites.h>
+#include <config/FciqmcConfig.h>
+#include <io/Archivable.h>
+#include <basis/Suites.h>
+
 #include "Shift.h"
 
 /**

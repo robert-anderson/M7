@@ -7,7 +7,7 @@
 
 
 #include <set>
-#include "src/defs.h"
+#include <defs.h>
 
 namespace hashing {
 

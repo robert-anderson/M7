@@ -5,8 +5,8 @@
 #ifndef M7_SUITES_H
 #define M7_SUITES_H
 
-#include "src/core/table/BufferedTable.h"
-#include "src/core/connection/Connections.h"
+#include <table/BufferedTable.h>
+#include <connection/Connections.h>
 
 namespace suite {
 

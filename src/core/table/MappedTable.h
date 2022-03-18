@@ -7,9 +7,9 @@
 
 #include <forward_list>
 #include <set>
-#include <src/core/io/HDF5Wrapper.h>
+#include <io/HDF5Wrapper.h>
 #include "Table.h"
-#include "src/core/field/Fields.h"
+#include "field/Fields.h"
 
 struct LookupResult {
     std::forward_list<size_t> &m_bucket;

@@ -5,10 +5,11 @@
 #ifndef M7_FOREACHVIRTUAL_H
 #define M7_FOREACHVIRTUAL_H
 
-#include <src/core/parallel/MPIAssert.h>
 
 #include <utility>
-#include "src/core/util/utils.h"
+
+#include <parallel/MPIAssert.h>
+#include <util/utils.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {

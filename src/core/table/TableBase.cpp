@@ -3,9 +3,9 @@
 //
 
 #include "TableBase.h"
-#include "src/core/io/Logging.h"
-#include "src/core/parallel/MPIAssert.h"
-#include "src/core/sort/ExtremalIndices.h"
+#include "io/Logging.h"
+#include "parallel/MPIAssert.h"
+#include "sort/ExtremalIndices.h"
 #include "RowProtector.h"
 
 TableBase::TableBase(size_t row_size) :

@@ -5,9 +5,10 @@
 #ifndef M7_BOSONVFIELD_H
 #define M7_BOSONVFIELD_H
 
+#include <basis/BasisData.h>
+#include <caches/DecodedBosOnv.h>
+
 #include "NumberField.h"
-#include "src/core/basis/BasisData.h"
-#include "src/core/caches/DecodedBosOnv.h"
 
 struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     typedef NdNumberField<defs::bos_occ_t, 1> base_t;

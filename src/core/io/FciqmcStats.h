@@ -5,8 +5,8 @@
 #ifndef M7_FCIQMCSTATS_H
 #define M7_FCIQMCSTATS_H
 
-#include <src/core/dynamics/Propagator.h>
-#include "src/core/field/Row.h"
+#include <dynamics/Propagator.h>
+#include "field/Row.h"
 #include "StatsTable.h"
 
 struct FciqmcStatsRow : StatsRow {

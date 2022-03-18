@@ -5,7 +5,7 @@
 #ifndef M7_PARAMETERS_H
 #define M7_PARAMETERS_H
 
-#include "src/core/io/YamlWrapper.h"
+#include <io/YamlWrapper.h>
 
 namespace config {
 

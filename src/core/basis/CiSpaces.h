@@ -6,12 +6,12 @@
 #define M7_CISPACES_H
 
 
-#include <src/core/enumerator/Enumerator.h>
-#include <src/core/table/BufferedFields.h>
-#include <src/core/parallel/RankAllocator.h>
-#include <src/core/wavefunction/WalkerTable.h>
-#include <src/core/wavefunction/Wavefunction.h>
-#include <src/core/foreach/Foreach.h>
+#include <enumerator/Enumerator.h>
+#include <table/BufferedFields.h>
+#include <parallel/RankAllocator.h>
+#include <wavefunction/WalkerTable.h>
+#include <wavefunction/Wavefunction.h>
+#include <foreach/Foreach.h>
 #include "Suites.h"
 
 namespace ci_gen {

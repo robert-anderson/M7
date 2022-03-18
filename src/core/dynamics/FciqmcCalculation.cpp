@@ -3,9 +3,9 @@
 //
 
 #include "FciqmcCalculation.h"
-#include "src/core/io/Logging.h"
+#include "io/Logging.h"
 #include "Propagators.h"
-#include <src/core/field/Mbf.h>
+#include <field/Mbf.h>
 
 FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
         m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.m_bd),

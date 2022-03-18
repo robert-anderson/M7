@@ -5,7 +5,7 @@
 #ifndef M7_YAMLWRAPPER_H
 #define M7_YAMLWRAPPER_H
 
-#include <src/core/parallel/MPIAssert.h>
+#include <parallel/MPIAssert.h>
 #include "external/yaml-cpp/include/yaml-cpp/yaml.h"
 #include "external/yaml-cpp/include/yaml-cpp/node/node.h"
 #include "external/yaml-cpp/include/yaml-cpp/parser.h"

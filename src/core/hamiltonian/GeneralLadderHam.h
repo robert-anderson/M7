@@ -5,9 +5,9 @@
 #ifndef M7_GENERALLADDERHAM_H
 #define M7_GENERALLADDERHAM_H
 
-#include <src/core/io/EbdumpFileReader.h>
-#include <src/core/integrals/FrmBosCoupledCoeffs.h>
-#include <src/core/config/Hamiltonian.h>
+#include <io/EbdumpFileReader.h>
+#include <integrals/FrmBosCoupledCoeffs.h>
+#include <config/Hamiltonian.h>
 #include "LadderHam.h"
 
 struct GeneralLadderHam : LadderHam {

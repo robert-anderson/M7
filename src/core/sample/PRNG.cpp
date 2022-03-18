@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-02-20.
 //
 
-#include <src/core/parallel/MPIWrapper.h>
-#include <src/core/parallel/MPIAssert.h>
+#include <parallel/MPIWrapper.h>
+#include <parallel/MPIAssert.h>
 #include "PRNG.h"
 
 PRNG::PRNG(const size_t &seed, const size_t &block_size) :

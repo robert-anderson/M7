@@ -7,8 +7,9 @@
 
 #include <functional>
 #include <utility>
-#include <src/core/linalg/Dense.h>
 #include <vector>
+
+#include <linalg/Dense.h>
 
 struct AbelianGroup {
     typedef std::function<size_t(const size_t &, const size_t &)> direct_prod_fn_t;

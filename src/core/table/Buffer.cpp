@@ -3,8 +3,8 @@
 //
 
 #include "Buffer.h"
-#include "src/core/io/Logging.h"
-#include "src/core/parallel/MPIAssert.h"
+#include "io/Logging.h"
+#include "parallel/MPIAssert.h"
 
 Buffer::Window::Window(Buffer *buffer, size_t row_size): Window(row_size) {
     ASSERT(buffer);

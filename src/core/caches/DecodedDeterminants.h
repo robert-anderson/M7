@@ -5,9 +5,9 @@
 #ifndef M7_DECODEDDETERMINANTS_H
 #define M7_DECODEDDETERMINANTS_H
 
-#include <src/core/nd/NdFormatD.h>
-#include "src/core/field/Fields.h"
-#include "src/core/basis/AbelianGroup.h"
+#include <nd/NdFormatD.h>
+#include <field/Fields.h>
+#include <basis/AbelianGroup.h>
 
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)

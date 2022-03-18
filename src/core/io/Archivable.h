@@ -5,8 +5,8 @@
 #ifndef M7_ARCHIVABLE_H
 #define M7_ARCHIVABLE_H
 
-#include <src/core/config/FciqmcConfig.h>
-#include <src/core/util/Timer.h>
+#include <config/FciqmcConfig.h>
+#include <util/Timer.h>
 #include "HDF5Wrapper.h"
 
 struct Archivable {

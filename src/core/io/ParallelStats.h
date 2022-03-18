@@ -5,7 +5,7 @@
 #ifndef M7_PARALLELSTATS_H
 #define M7_PARALLELSTATS_H
 
-#include "src/core/field/Row.h"
+#include "field/Row.h"
 #include "StatsTable.h"
 
 struct ParallelStatsRow : StatsRow {

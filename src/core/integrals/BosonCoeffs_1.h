@@ -5,7 +5,7 @@
 #ifndef M7_BOSONCOEFFS_1_H
 #define M7_BOSONCOEFFS_1_H
 
-#include "src/core/parallel/SharedArray.h"
+#include <parallel/SharedArray.h>
 
 class BosonCoeffs_1 {
 

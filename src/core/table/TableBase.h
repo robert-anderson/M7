@@ -5,8 +5,8 @@
 #ifndef M7_TABLEBASE_H
 #define M7_TABLEBASE_H
 
-#include "src/core/table/Buffer.h"
-#include "src/core/io/Logging.h"
+#include "table/Buffer.h"
+#include "io/Logging.h"
 
 struct RowTransfer {
     /**

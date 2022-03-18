@@ -5,7 +5,7 @@
 #ifndef M7_PROGRESSMONITOR_H
 #define M7_PROGRESSMONITOR_H
 
-#include "src/core/io/Logging.h"
+#include "io/Logging.h"
 
 struct ProgressMonitor {
     const bool m_local;

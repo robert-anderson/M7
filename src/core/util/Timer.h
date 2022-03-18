@@ -6,8 +6,8 @@
 #define M7_TIMER_H
 
 #include <chrono>
-#include "src/defs.h"
-#include "src/core/parallel/MPIAssert.h"
+#include "defs.h"
+#include "parallel/MPIAssert.h"
 
 class Timer {
     std::chrono::duration<double> m_start, m_total;

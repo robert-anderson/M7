@@ -7,11 +7,11 @@
 
 #include "BufferedTable.h"
 #include "BufferedTableArray.h"
-#include "src/core/parallel/MPIWrapper.h"
-#include "src/core/io/Logging.h"
+#include "parallel/MPIWrapper.h"
+#include "io/Logging.h"
 #include <set>
-#include <src/core/parallel/RankAllocator.h>
-#include <src/core/config/FciqmcConfig.h>
+#include <parallel/RankAllocator.h>
+#include <config/FciqmcConfig.h>
 #include "RowProtector.h"
 
 /**

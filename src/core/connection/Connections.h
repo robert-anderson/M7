@@ -5,8 +5,9 @@
 #ifndef M7_CONNECTIONS_H
 #define M7_CONNECTIONS_H
 
+#include <table/BufferedFields.h>
+
 #include "FrmBosOnvConnection.h"
-#include "src/core/table/BufferedFields.h"
 
 namespace conn {
 

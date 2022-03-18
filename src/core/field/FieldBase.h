@@ -5,11 +5,12 @@
 #ifndef M7_FIELDBASE_H
 #define M7_FIELDBASE_H
 
-#include <src/defs.h>
+#include <defs.h>
 #include <cstring>
-#include <src/core/hash/Hashing.h>
-#include <src/core/nd/NdArrayList.h>
-#include "src/core/io/HDF5Wrapper.h"
+#include <hash/Hashing.h>
+#include <nd/NdArrayList.h>
+#include <io/HDF5Wrapper.h>
+
 #include "Row.h"
 
 /**
@@ -87,7 +88,7 @@ public:
     bool is_zero() const;
 
     bool operator==(const FieldBase &other) const;
-    
+
     bool operator!=(const FieldBase &other) const;
 
     bool operator<(const FieldBase &other) const;

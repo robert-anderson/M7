@@ -5,10 +5,11 @@
 #ifndef M7_FRMBOSONVENUMERATOR_H
 #define M7_FRMBOSONVENUMERATOR_H
 
+#include <field/Fields.h>
+#include <table/BufferedFields.h>
+
 #include "FermionOnvEnumerator.h"
 #include "BosonOnvEnumerator.h"
-#include "src/core/field/Fields.h"
-#include "src/core/table/BufferedFields.h"
 
 class FrmBosOnvEnumerator : public Enumerator<field::FrmBosOnv> {
     FermionOnvEnumerator m_fonv_enum;

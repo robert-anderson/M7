@@ -5,22 +5,23 @@
 #ifndef M7_SOLVER_H
 #define M7_SOLVER_H
 
-#include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/util/Timer.h>
-#include <src/core/observables/RefExcits.h>
-#include <src/core/observables/UniformTwf.h>
-#include <src/core/observables/WeightedTwf.h>
-#include <src/core/observables/RefExcits.h>
-#include <src/core/bilinear/Bilinears.h>
-#include <src/core/io/FciqmcStats.h>
-#include <src/core/io/Archivable.h>
-#include <src/core/io/TimingStats.h>
-#include <src/core/mae/Maes.h>
-#include "src/core/wavefunction/Reference.h"
-#include "src/core/io/FciqmcStats.h"
-#include "src/core/io/ParallelStats.h"
+#include <hamiltonian/Hamiltonian.h>
+#include <util/Timer.h>
+#include <observables/RefExcits.h>
+#include <observables/UniformTwf.h>
+#include <observables/WeightedTwf.h>
+#include <observables/RefExcits.h>
+#include <bilinear/Bilinears.h>
+#include <io/FciqmcStats.h>
+#include <io/Archivable.h>
+#include <io/TimingStats.h>
+#include <io/FciqmcStats.h>
+#include <io/ParallelStats.h>
+#include <mae/Maes.h>
+#include <wavefunction/Reference.h>
+#include <wavefunction/DeterministicSubspace.h>
+
 #include "Propagator.h"
-#include "src/core/wavefunction/DeterministicSubspace.h"
 #include "Annihilator.h"
 
 /**

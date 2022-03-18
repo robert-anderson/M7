@@ -6,9 +6,9 @@
 #define M7_NDSEQUENCE_H
 
 #include "NdFormat.h"
-#include "src/core/enumerator/ProductEnumerator.h"
-#include "src/core/io/Logging.h"
-#include "src/core/parallel/MPIAssert.h"
+#include "enumerator/ProductEnumerator.h"
+#include "io/Logging.h"
+#include "parallel/MPIAssert.h"
 
 template<size_t nind>
 struct NdSequence {

@@ -6,8 +6,8 @@
 #define M7_MAPPEDDETERMINANTLIST_H
 
 
-//#include <src/core/basis/DeterminantField.h>
-//#include <src/core/list/MappedList.h>
+//#include <basis/DeterminantField.h>
+//#include <list/MappedList.h>
 //
 //struct MappedDeterminantList : public MappedList<DeterminantElement>{
 //    DeterminantField m_determinant;

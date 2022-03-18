@@ -5,8 +5,8 @@
 #ifndef M7_BUFFEREDFIELDS_H
 #define M7_BUFFEREDFIELDS_H
 
-#include "src/core/field/Fields.h"
-#include "src/core/field/CompositeField.h"
+#include "field/Fields.h"
+#include "field/CompositeField.h"
 
 struct BufferedFieldRow {
     Row m_internal_row;

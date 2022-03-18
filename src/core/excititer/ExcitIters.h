@@ -5,7 +5,8 @@
 #ifndef M7_EXCITITERS_H
 #define M7_EXCITITERS_H
 
-#include <src/core/foreach/Foreach.h>
+#include <foreach/Foreach.h>
+
 #include "ExcitIter.h"
 
 /**

@@ -2,8 +2,8 @@
 // Created by rja on 25/08/2021.
 //
 
-#include <src/core/hamiltonian/HubbardFrmHam.h>
-#include <src/core/hamiltonian/HolsteinLadderHam.h>
+#include <hamiltonian/HubbardFrmHam.h>
+#include <hamiltonian/HolsteinLadderHam.h>
 #include "ExcitIterGroup.h"
 #include "HubbardSingles.h"
 #include "LadderPure.h"

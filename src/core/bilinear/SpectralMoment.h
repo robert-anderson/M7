@@ -5,9 +5,9 @@
 #ifndef M7_SPECTRALMOMENT_H
 #define M7_SPECTRALMOMENT_H
 
-#include <src/core/mae/MaeTable.h>
-#include <src/core/io/Archivable.h>
-#include "src/core/field/Fields.h"
+#include <mae/MaeTable.h>
+#include <io/Archivable.h>
+#include <field/Fields.h>
 
 
 //Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>

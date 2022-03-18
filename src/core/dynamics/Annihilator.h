@@ -6,9 +6,9 @@
 #define M7_ANNIHILATOR_H
 
 
-#include <src/core/wavefunction/Wavefunction.h>
-#include <src/core/wavefunction/Reference.h>
-#include "src/core/bilinear/Rdm.h"
+#include <wavefunction/Wavefunction.h>
+#include <wavefunction/Reference.h>
+#include <bilinear/Rdm.h>
 
 /**
  * we need to be able to lookup the dst in the main table.

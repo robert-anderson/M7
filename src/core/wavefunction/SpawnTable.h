@@ -5,8 +5,8 @@
 #ifndef M7_SPAWNTABLE_H
 #define M7_SPAWNTABLE_H
 
-#include "src/core/field/Fields.h"
-#include "src/core/table/MappedTable.h"
+#include "field/Fields.h"
+#include "table/MappedTable.h"
 
 struct SpawnTableRow : public Row {
     const bool m_send_parents;

@@ -7,9 +7,9 @@
 
 #if 0
 
-#include <src/core/parallel/Reducible.h>
-#include "src/core/util/defs.h"
-#include "src/core/basis/DeterminantField.h"
+#include <parallel/Reducible.h>
+#include "util/defs.h"
+#include "basis/DeterminantField.h"
 
 class KramersSectorOccupation {
     const size_t m_nelec;

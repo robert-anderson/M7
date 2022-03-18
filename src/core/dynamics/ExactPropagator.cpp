@@ -2,7 +2,7 @@
 // Created by rja on 27/02/2020.
 //
 
-#include "src/core/enumerator/ContainerCombinationEnumerator.h"
+#include "enumerator/ContainerCombinationEnumerator.h"
 #include "ExactPropagator.h"
 
 ExactPropagator::ExactPropagator(

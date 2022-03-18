@@ -5,11 +5,12 @@
 #ifndef M7_STOCHASTICPROPAGATOR_H
 #define M7_STOCHASTICPROPAGATOR_H
 
-#include <src/core/sample/PRNG.h>
-#include <src/core/excitgen/ExcitGen.h>
-#include <src/core/excitgen/UniformSingles.h>
-#include <src/core/excitgen/HeatBathDoubles.h>
-#include <src/core/excitgen/ExcitGenGroup.h>
+#include <sample/PRNG.h>
+#include <excitgen/ExcitGen.h>
+#include <excitgen/UniformSingles.h>
+#include <excitgen/HeatBathDoubles.h>
+#include <excitgen/ExcitGenGroup.h>
+
 #include "Propagator.h"
 
 class StochasticPropagator : public Propagator {

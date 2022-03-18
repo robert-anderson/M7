@@ -6,8 +6,8 @@
 #define M7_LOCALEXTREMALROWS_H
 
 
-#include <src/core/util/utils.h>
-#include <src/core/field/Fields.h>
+#include <util/utils.h>
+#include <field/Fields.h>
 #include "ExtremalIndices.h"
 
 /**

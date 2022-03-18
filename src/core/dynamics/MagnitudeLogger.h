@@ -7,10 +7,11 @@
 
 
 #include <cstddef>
-#include <src/defs.h>
-#include <src/core/parallel/Reduction.h>
-#include <src/core/excitgen/ExcitGenGroup.h>
-#include "src/core/config/FciqmcConfig.h"
+
+#include <defs.h>
+#include <parallel/Reduction.h>
+#include <excitgen/ExcitGenGroup.h>
+#include <config/FciqmcConfig.h>
 
 struct MagnitudeLogger {
     /**

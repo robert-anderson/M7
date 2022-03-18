@@ -5,12 +5,12 @@
 #ifndef M7_ARNOLDISOLVER_H
 #define M7_ARNOLDISOLVER_H
 
-#include "src/core/linalg/DistMvProd.h"
-#include "arpackpp/include/arpackf.h"
-#include "arpackpp/include/arrssym.h"
-#include "arpackpp/include/arlnsmat.h"
-#include "arpackpp/include/arrsnsym.h"
-#include "arpackpp/include/arrscomp.h"
+#include <linalg/DistMvProd.h>
+#include <arpackpp/include/arpackf.h>
+#include <arpackpp/include/arrssym.h>
+#include <arpackpp/include/arlnsmat.h>
+#include <arpackpp/include/arrsnsym.h>
+#include <arpackpp/include/arrscomp.h>
 
 /**
  * put all type-independent operations in this un-templated base class

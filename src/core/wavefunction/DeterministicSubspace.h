@@ -5,10 +5,10 @@
 #ifndef M7_DETERMINISTICSUBSPACE_H
 #define M7_DETERMINISTICSUBSPACE_H
 
-#include "src/core/bilinear/Bilinears.h"
-#include "src/core/linalg/Sparse.h"
-#include "src/core/hamiltonian/FrmHam.h"
-#include "src/core/field/Fields.h"
+#include "bilinear/Bilinears.h"
+#include "linalg/Sparse.h"
+#include "hamiltonian/FrmHam.h"
+#include "field/Fields.h"
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 

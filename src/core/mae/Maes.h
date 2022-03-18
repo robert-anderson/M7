@@ -5,9 +5,9 @@
 #ifndef M7_MAES_H
 #define M7_MAES_H
 
-#include <src/core/io/MaeStats.h>
-#include "src/core/bilinear/Bilinears.h"
-#include "src/core/observables/RefExcits.h"
+#include <io/MaeStats.h>
+#include "bilinear/Bilinears.h"
+#include "observables/RefExcits.h"
 
 struct Maes {
     Epoch m_accum_epoch;

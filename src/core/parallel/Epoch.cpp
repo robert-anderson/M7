@@ -3,7 +3,7 @@
 //
 
 #include "Epoch.h"
-#include "src/core/io/Logging.h"
+#include "io/Logging.h"
 
 Epoch::Epoch(std::string name): m_name(std::move(name)) {
     m_icycle_start.m_local = ~0ul;

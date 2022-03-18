@@ -8,7 +8,6 @@ target_sources(M7_lib
         ContainerCombinationEnumerator.cpp
         ContainerCombinationEnumerator.h
         Enumerator.cpp
-        Enumerator.h
         Enumerators.h
         FermionOnvEnumerator.cpp
         FermionOnvEnumerator.h
@@ -19,4 +18,6 @@ target_sources(M7_lib
         SpinConFonvEnumerator.h
         SpinNonConFonvEnumerator.cpp
         SpinNonConFonvEnumerator.h
+    PUBLIC
+        Enumerator.h
 )

@@ -6,9 +6,10 @@
 #define M7_BILINEARS_H
 
 #include <utility>
-#include <src/core/hamiltonian/Hamiltonian.h>
 
-#include "src/core/field/Fields.h"
+#include <hamiltonian/Hamiltonian.h>
+#include <field/Fields.h>
+
 #include "Rdm.h"
 #include "SpectralMoment.h"
 

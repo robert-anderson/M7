@@ -5,14 +5,14 @@
 #ifndef M7_REFEXCITS_H
 #define M7_REFEXCITS_H
 
-#include <src/core/connection/Connections.h>
-#include <src/core/config/FciqmcConfig.h>
-#include <src/core/io/Archivable.h>
-#include <src/core/basis/Suites.h>
-#include "src/core/field/Fields.h"
-#include "src/core/table/BufferedTable.h"
-#include "src/core/table/BufferedFields.h"
-#include "src/core/mae/MaeTable.h"
+#include <connection/Connections.h>
+#include <config/FciqmcConfig.h>
+#include <io/Archivable.h>
+#include <basis/Suites.h>
+#include "field/Fields.h"
+#include "table/BufferedTable.h"
+#include "table/BufferedFields.h"
+#include "mae/MaeTable.h"
 
 struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     /**

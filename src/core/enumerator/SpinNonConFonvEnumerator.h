@@ -5,8 +5,9 @@
 #ifndef M7_SPINNONCONFONVENUMERATOR_H
 #define M7_SPINNONCONFONVENUMERATOR_H
 
+#include <field/Fields.h>
+
 #include "CombinationEnumerator.h"
-#include "src/core/field/Fields.h"
 
 class SpinNonConFonvEnumerator : public Enumerator<field::FrmOnv> {
     CombinationEnumerator m_combs;

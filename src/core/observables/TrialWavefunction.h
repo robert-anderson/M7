@@ -57,9 +57,9 @@
 #define M7_TRIALWAVEFUNCTION_H
 
 #if 0
-#include "src/core/dynamics/WalkerTable.h"
-#include "src/core/basis/DeterminantList.h"
-#include "src/core/basis/MappedDeterminantList.h"
+#include "dynamics/WalkerTable.h"
+#include "basis/DeterminantList.h"
+#include "basis/MappedDeterminantList.h"
 
 class TrialWavefunction {
 

@@ -5,10 +5,10 @@
 #ifndef M7_ROW_H
 #define M7_ROW_H
 
-#include "src/core/util/utils.h"
-#include "src/core/io/HDF5Wrapper.h"
-#include "src/core/parallel/MPIAssert.h"
-#include "src/core/table/TableBase.h"
+#include <util/utils.h>
+#include <io/HDF5Wrapper.h>
+#include <parallel/MPIAssert.h>
+#include <table/TableBase.h>
 
 struct FieldBase;
 

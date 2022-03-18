@@ -5,8 +5,8 @@
 #ifndef M7_SIGNPROBLEMFREETWF_H
 #define M7_SIGNPROBLEMFREETWF_H
 
-#include "src/core/wavefunction/WalkerTable.h"
-#include "src/core/excititer/ExcitIterGroup.h"
+#include "wavefunction/WalkerTable.h"
+#include "excititer/ExcitIterGroup.h"
 
 class SpfTwfBase {
 protected:

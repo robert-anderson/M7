@@ -5,8 +5,8 @@
 #ifndef M7_FERMIONPROMOTER_H
 #define M7_FERMIONPROMOTER_H
 
-#include "src/core/connection/Connections.h"
-#include "src/core/field/Fields.h"
+#include <connection/Connections.h>
+#include <field/Fields.h>
 
 /**
  * given a Connection, iterate over common operators

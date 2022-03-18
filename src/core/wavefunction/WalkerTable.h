@@ -5,11 +5,11 @@
 #ifndef M7_WALKERTABLE_H
 #define M7_WALKERTABLE_H
 
-#include <src/core/connection/Connections.h>
-#include "src/core/io/Options.h"
-#include "src/core/field/Row.h"
-#include "src/core/table/MappedTable.h"
-#include "src/core/field/Fields.h"
+#include <connection/Connections.h>
+#include "io/Options.h"
+#include "field/Row.h"
+#include "table/MappedTable.h"
+#include "field/Fields.h"
 
 
 struct WalkerTableRow : public Row {

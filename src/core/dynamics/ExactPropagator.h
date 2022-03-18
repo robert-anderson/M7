@@ -5,8 +5,9 @@
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
-#include "src/core/config/FciqmcConfig.h"
-#include "src/core/excititer/ExcitIterGroup.h"
+#include <config/FciqmcConfig.h>
+#include <excititer/ExcitIterGroup.h>
+
 #include "Propagator.h"
 
 class ExactPropagator : public Propagator {

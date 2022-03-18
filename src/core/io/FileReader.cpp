@@ -2,7 +2,7 @@
 // Created by rja on 27/09/2021.
 //
 
-#include <src/core/parallel/MPIAssert.h>
+#include <parallel/MPIAssert.h>
 #include "FileReader.h"
 
 FileReader::FileReader(std::string fname, size_t iline) : m_fname(std::move(fname)) {

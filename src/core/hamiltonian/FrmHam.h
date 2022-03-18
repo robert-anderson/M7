@@ -6,13 +6,14 @@
 #define M7_FRMHAM_H
 
 #include <cstddef>
-#include <src/core/caches/DecodedDeterminants.h>
-#include <src/core/connection/Connections.h>
-#include <src/core/io/Options.h>
-#include <src/core/config/FciqmcConfig.h>
-#include "src/core/integrals/Integrals_1e.h"
-#include "src/core/integrals/Integrals_2e.h"
-#include "src/core/table/BufferedFields.h"
+#include <caches/DecodedDeterminants.h>
+#include <connection/Connections.h>
+#include <io/Options.h>
+#include <config/FciqmcConfig.h>
+#include <integrals/Integrals_1e.h>
+#include <integrals/Integrals_2e.h>
+#include <table/BufferedFields.h>
+
 #include "HamiltonianData.h"
 
 /**

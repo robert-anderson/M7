@@ -9,10 +9,10 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
-#include "src/core/util/consts.h"
-#include "src/defs.h"
-#include "src/core/io/FcidumpFileReader.h"
-#include "src/core/parallel/SharedArray.h"
+#include "util/consts.h"
+#include "defs.h"
+#include "io/FcidumpFileReader.h"
+#include "parallel/SharedArray.h"
 #include "Integrals.h"
 
 /*

@@ -7,9 +7,9 @@
 
 #include <vector>
 #include <algorithm>
-#include "src/defs.h"
-#include "src/core/util/utils.h"
-#include "src/core/parallel/MPIAssert.h"
+#include <defs.h>
+#include <util/utils.h>
+#include <parallel/MPIAssert.h>
 
 template <typename result_t>
 class Enumerator {

@@ -5,9 +5,10 @@
 #ifndef M7_EXCITITER_H
 #define M7_EXCITITER_H
 
-#include "src/core/basis/Suites.h"
-#include "src/core/caches/CachedOrbsOld.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include <basis/Suites.h>
+#include <caches/CachedOrbsOld.h>
+#include <hamiltonian/Hamiltonian.h>
+
 #include "BodyFnTypes.h"
 
 using namespace body_fn_types;

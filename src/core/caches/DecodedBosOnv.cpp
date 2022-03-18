@@ -3,7 +3,7 @@
 //
 
 #include "DecodedBosOnv.h"
-#include "src/core/field/BosOnvField.h"
+#include "field/BosOnvField.h"
 
 decoded_mbf::bos::Base::Base(const BosOnvField &mbf) : m_mbf(mbf){}
 

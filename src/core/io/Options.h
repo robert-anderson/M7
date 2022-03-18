@@ -6,7 +6,7 @@
 #define M7_OPTIONS_H
 
 #include <string>
-#include <src/defs.h>
+#include <defs.h>
 
 #if 0
 struct Options {

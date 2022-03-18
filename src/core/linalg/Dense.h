@@ -10,9 +10,9 @@
 #include <vector>
 #include <memory>
 #include <cstring>
-#include <src/core/parallel/MPIAssert.h>
-#include "src/core/util/consts.h"
-#include "src/defs.h"
+#include <parallel/MPIAssert.h>
+#include "util/consts.h"
+#include "defs.h"
 #include "Sparse.h"
 
 

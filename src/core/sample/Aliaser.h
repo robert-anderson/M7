@@ -6,12 +6,12 @@
 #define M7_ALIASER_H
 
 #include <vector>
-#include <src/defs.h>
+#include <defs.h>
 #include <stack>
 #include <iostream>
-#include <src/core/util/utils.h>
-#include <src/core/parallel/SharedMatrix.h>
-#include <src/core/parallel/MPIAssert.h>
+#include <util/utils.h>
+#include <parallel/SharedMatrix.h>
+#include <parallel/MPIAssert.h>
 #include "PRNG.h"
 
 class Aliaser {

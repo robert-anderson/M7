@@ -5,10 +5,11 @@
 #ifndef M7_FRMBOSONVCONNECTION_H
 #define M7_FRMBOSONVCONNECTION_H
 
+#include <field/FrmBosOnvField.h>
+
 #include "FrmOnvConnection.h"
 #include "BosOnvConnection.h"
 #include "ComOps.h"
-#include "src/core/field/FrmBosOnvField.h"
 
 struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;

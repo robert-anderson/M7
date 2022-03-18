@@ -7,8 +7,8 @@
 
 #include "HamiltonianFileReader.h"
 #include "FortranNamelistReader.h"
-#include "src/core/integrals/Integrals_1e.h"
-#include "src/core/io/Logging.h"
+#include "integrals/Integrals_1e.h"
+#include "io/Logging.h"
 
 static constexpr std::array<std::array<size_t, 4>, 8> orderings{
         {

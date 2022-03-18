@@ -3,7 +3,7 @@
 //
 
 #include "FieldBase.h"
-#include "src/core/parallel/MPIAssert.h"
+#include "parallel/MPIAssert.h"
 
 
 FieldBase::FieldBase(Row *row, size_t size, const std::type_info &type_info, std::string name) :

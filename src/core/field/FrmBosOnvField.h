@@ -5,10 +5,11 @@
 #ifndef M7_FRMBOSONVFIELD_H
 #define M7_FRMBOSONVFIELD_H
 
+#include <caches/DecodedFrmBosOnv.h>
+
 #include "FrmOnvField.h"
 #include "BosOnvField.h"
 #include "CompositeField.h"
-#include "src/core/caches/DecodedFrmBosOnv.h"
 
 struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     typedef CompositeField<FrmOnvField, BosOnvField> base_t;

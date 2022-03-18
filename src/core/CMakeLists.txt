@@ -1,9 +1,8 @@
-add_library(M7_lib ../defs.h)
+add_library(M7_lib defs.h)
+
 
 target_include_directories(M7_lib
     PUBLIC
-        ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

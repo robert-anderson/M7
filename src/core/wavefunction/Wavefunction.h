@@ -5,18 +5,18 @@
 #ifndef M7_WAVEFUNCTION_H
 #define M7_WAVEFUNCTION_H
 
-#include <src/core/io/Options.h>
-#include <src/core/hamiltonian/Hamiltonian.h>
-#include <src/core/parallel/Reduction.h>
-#include <src/core/io/Archivable.h>
-#include "src/core/table/Communicator.h"
+#include <io/Options.h>
+#include <hamiltonian/Hamiltonian.h>
+#include <parallel/Reduction.h>
+#include <io/Archivable.h>
+#include "table/Communicator.h"
 #include "WalkerTable.h"
 #include "SpawnTable.h"
-#include "src/core/parallel/RankAllocator.h"
-#include "src/core/parallel/ReductionMember.h"
-#include "src/core/field/Fields.h"
-#include "src/core/sort/LambdaQuickSorter.h"
-#include "src/core/sort/GlobalExtremalRows.h"
+#include "parallel/RankAllocator.h"
+#include "parallel/ReductionMember.h"
+#include "field/Fields.h"
+#include "sort/LambdaQuickSorter.h"
+#include "sort/GlobalExtremalRows.h"
 
 /**
  * A communicator whose m_store is the list of occupation number vectors currently

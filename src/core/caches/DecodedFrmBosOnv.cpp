@@ -3,7 +3,7 @@
 //
 
 #include "DecodedFrmBosOnv.h"
-#include "src/core/field/FrmBosOnvField.h"
+#include "field/FrmBosOnvField.h"
 
 decoded_mbf::frmbos::Base::Base(const FrmBosOnvField &mbf) : m_mbf(mbf){}
 

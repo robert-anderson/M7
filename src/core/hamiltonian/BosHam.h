@@ -5,12 +5,13 @@
 #ifndef M7_BOSHAM_H
 #define M7_BOSHAM_H
 
-#include <src/core/integrals/BosonCoeffs_1.h>
-#include <src/core/integrals/BosonCoeffs_2.h>
-#include <src/core/io/BosdumpFileReader.h>
-#include "src/core/connection/Connections.h"
-#include "src/core/parallel/SharedArray.h"
-#include "src/core/field/Fields.h"
+#include <integrals/BosonCoeffs_1.h>
+#include <integrals/BosonCoeffs_2.h>
+#include <io/BosdumpFileReader.h>
+#include <connection/Connections.h>
+#include <parallel/SharedArray.h>
+#include <field/Fields.h>
+
 #include "HamiltonianData.h"
 
 struct BosHam {

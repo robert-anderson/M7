@@ -5,7 +5,8 @@
 #ifndef M7_EXCITGENGROUP_H
 #define M7_EXCITGENGROUP_H
 
-#include "src/core/parallel/Reduction.h"
+#include <parallel/Reduction.h>
+
 #include "HubbardUniform.h"
 #include "HeatBathDoubles.h"
 

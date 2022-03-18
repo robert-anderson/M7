@@ -5,8 +5,9 @@
 #ifndef M7_CONTAINERCOMBINATIONENUMERATOR_H
 #define M7_CONTAINERCOMBINATIONENUMERATOR_H
 
+#include <defs.h>
+
 #include "CombinationEnumerator.h"
-#include "src/defs.h"
 
 template<typename T>
 class ContainerCombinationEnumerator : public CombinationEnumerator {

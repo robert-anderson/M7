@@ -14,7 +14,7 @@
 #include <array>
 #include <climits>
 #include <cstdlib>
-#include "src/core/util/consts.h"
+#include "util/consts.h"
 
 /**
  * basic debugging macro for verification of low-level functionality, in general prefer the macros MpiAssert.h defines

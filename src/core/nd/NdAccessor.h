@@ -8,7 +8,7 @@
 #include <cstring>
 #include <functional>
 #include "NdFormat.h"
-#include "src/core/parallel/MPIWrapper.h"
+#include "parallel/MPIWrapper.h"
 
 template <typename T, size_t nind>
 struct NdAccessor {

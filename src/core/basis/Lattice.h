@@ -5,13 +5,13 @@
 #ifndef M7_LATTICE_H
 #define M7_LATTICE_H
 
-#include <src/core/linalg/Dense.h>
-#include <src/core/nd/NdFormatD.h>
-
 #include <utility>
-#include <src/core/foreach/Foreach.h>
-#include <src/core/config/Hamiltonian.h>
-#include "src/core/linalg/Sparse.h"
+
+#include <linalg/Dense.h>
+#include <nd/NdFormatD.h>
+#include <foreach/Foreach.h>
+#include <config/Hamiltonian.h>
+#include <linalg/Sparse.h>
 
 /**
  * In lattice models and potentially other systems of interest, the sums over sites, modes, or spin orbitals in the

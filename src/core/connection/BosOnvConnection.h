@@ -5,8 +5,8 @@
 #ifndef M7_BOSONVCONNECTION_H
 #define M7_BOSONVCONNECTION_H
 
-#include "src/core/field/BosOnvField.h"
-#include "src/core/parallel/MPIAssert.h"
+#include <field/BosOnvField.h>
+#include <parallel/MPIAssert.h>
 
 struct BosOpPair {
     const size_t m_imode;

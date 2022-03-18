@@ -5,8 +5,9 @@
 #ifndef M7_HUBBARDUNIFORM_H
 #define M7_HUBBARDUNIFORM_H
 
+#include <hamiltonian/HubbardFrmHam.h>
+
 #include "UniformSingles.h"
-#include "src/core/hamiltonian/HubbardFrmHam.h"
 
 struct HubbardUniform : public UniformSingles {
     using UniformSingles::draw;

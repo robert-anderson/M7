@@ -5,9 +5,10 @@
 #ifndef M7_INTERACTINGBOSEGASBOSHAM_H
 #define M7_INTERACTINGBOSEGASBOSHAM_H
 
-#include "src/core/config/Hamiltonian.h"
-#include "src/core/basis/Planewaves.h"
-#include "src/core/nd/NdFormatD.h"
+#include <config/Hamiltonian.h>
+#include <basis/Planewaves.h>
+#include <nd/NdFormatD.h>
+
 #include "BosHam.h"
 
 struct InteractingBoseGasBosHam : BosHam {

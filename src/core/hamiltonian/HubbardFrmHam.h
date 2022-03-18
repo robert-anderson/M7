@@ -5,11 +5,12 @@
 #ifndef M7_HUBBARDFRMHAM_H
 #define M7_HUBBARDFRMHAM_H
 
-#include <src/core/foreach/Foreach.h>
-#include <src/core/nd/NdFormatD.h>
-#include <src/core/basis/Lattice.h>
+#include <foreach/Foreach.h>
+#include <nd/NdFormatD.h>
+#include <basis/Lattice.h>
+#include <linalg/Dense.h>
+
 #include "FrmHam.h"
-#include "src/core/linalg/Dense.h"
 
 struct HubbardFrmHam : FrmHam {
     /**

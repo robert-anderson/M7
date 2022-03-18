@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-04-03.
 //
 
-#include <src/core/basis/Suites.h>
+#include <basis/Suites.h>
 #include "Wavefunction.h"
 
 Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisData bd) :

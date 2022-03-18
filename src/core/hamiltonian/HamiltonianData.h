@@ -6,8 +6,8 @@
 #define M7_HAMILTONIANDATA_H
 
 
-#include <src/core/util/utils.h>
-#include <src/core/parallel/MPIAssert.h>
+#include <util/utils.h>
+#include <parallel/MPIAssert.h>
 
 
 namespace ham_data {

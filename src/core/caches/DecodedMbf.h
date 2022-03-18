@@ -6,10 +6,10 @@
 #define M7_DECODEDMBF_H
 
 #include <algorithm>
-#include <src/core/basis/AbelianGroup.h>
-#include "src/core/parallel/MPIAssert.h"
-#include "src/core/nd/NdFormat.h"
-#include "src/defs.h"
+#include <basis/AbelianGroup.h>
+#include <parallel/MPIAssert.h>
+#include <nd/NdFormat.h>
+#include <defs.h>
 
 struct FrmOnvField;
 struct BosOnvField;

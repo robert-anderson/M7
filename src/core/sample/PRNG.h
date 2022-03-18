@@ -8,7 +8,7 @@
 #include <random>
 #include <algorithm>
 #include <complex>
-#include "src/defs.h"
+#include "defs.h"
 
 class PRNG {
     typedef std::vector<uint32_t> U;

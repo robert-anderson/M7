@@ -5,7 +5,7 @@
 #ifndef M7_MAETABLE_H
 #define M7_MAETABLE_H
 
-#include "src/core/field/Fields.h"
+#include "field/Fields.h"
 
 struct MaeRow : public Row {
     field::MaeInds m_inds;

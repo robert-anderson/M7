@@ -5,9 +5,9 @@
 #ifndef M7_STATSTABLE_H
 #define M7_STATSTABLE_H
 
-#include "src/core/field/Row.h"
-#include "src/core/table/BufferedTable.h"
-#include "src/core/table/BufferedFields.h"
+#include "field/Row.h"
+#include "table/BufferedTable.h"
+#include "table/BufferedFields.h"
 #include <fstream>
 #include <map>
 

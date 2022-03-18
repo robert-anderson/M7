@@ -6,8 +6,9 @@
 #define M7_FCIQMCCALCULATION_H
 
 
-#include <src/core/config/FciqmcConfig.h>
-#include "src/core/wavefunction/Wavefunction.h"
+#include <config/FciqmcConfig.h>
+#include <wavefunction/Wavefunction.h>
+
 #include "StochasticPropagator.h"
 #include "Solver.h"
 
@@ -26,12 +27,12 @@ public:
 #if 0
 
 #include <omp.h>
-#include <src/core/util/Timer.h>
-#include "src/core/hamiltonian/AbInitioHamiltonian.h"
-#include "src/core/io/FciqmcStatsFile.h"
-#include "src/core/io/ParallelizationStatsFile.h"
-#include "src/core/io/Options.h"
-#include "src/core/basis/DecodedDeterminant.h"
+#include <util/Timer.h>
+#include "hamiltonian/AbInitioHamiltonian.h"
+#include "io/FciqmcStatsFile.h"
+#include "io/ParallelizationStatsFile.h"
+#include "io/Options.h"
+#include "basis/DecodedDeterminant.h"
 #include "Propagator.h"
 #include "Wavefunction.h"
 

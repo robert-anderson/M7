@@ -5,9 +5,10 @@
 #ifndef M7_MBF_H
 #define M7_MBF_H
 
-#include <src/core/config/FciqmcConfig.h>
+#include <config/FciqmcConfig.h>
+#include <hamiltonian/Hamiltonian.h>
+
 #include "Fields.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
 
 /**
  * namespace for utility methods that apply to all MBF types

@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "src/core/parallel/MPIAssert.h"
+#include <parallel/MPIAssert.h>
 #include "AbelianGroup.h"
 
 /**

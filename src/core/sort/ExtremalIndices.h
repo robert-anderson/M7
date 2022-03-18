@@ -6,10 +6,10 @@
 #define M7_EXTREMALINDICES_H
 
 
-#include "src/defs.h"
+#include "defs.h"
 #include <functional>
-#include <src/core/parallel/MPIAssert.h>
-#include "src/core/table/TableBase.h"
+#include <parallel/MPIAssert.h>
+#include "table/TableBase.h"
 #include "Comparators.h"
 
 /**

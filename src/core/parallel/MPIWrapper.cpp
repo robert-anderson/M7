@@ -5,7 +5,7 @@
 #include "MPIWrapper.h"
 
 #include <utility>
-#include "src/core/io/Logging.h"
+#include "io/Logging.h"
 
 void mpi::barrier() {
     MPI_Barrier(MPI_COMM_WORLD);

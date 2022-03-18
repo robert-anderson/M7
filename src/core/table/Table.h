@@ -6,10 +6,10 @@
 #define M7_TABLE_H
 
 #include <stack>
-#include <src/core/field/RowHdf5.h>
-#include <src/core/field/Fields.h>
-#include <src/core/sort/ExtremalIndices.h>
-#include "src/core/field/Row.h"
+#include <field/RowHdf5.h>
+#include <field/Fields.h>
+#include <sort/ExtremalIndices.h>
+#include "field/Row.h"
 #include "TableBase.h"
 
 template<typename row_t>

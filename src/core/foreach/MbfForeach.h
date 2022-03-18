@@ -6,10 +6,11 @@
 #define M7_MBFFOREACH_H
 
 
-#include <src/core/field/Fields.h>
-#include <src/core/foreach/ForeachVirtual.h>
-#include <src/core/table/BufferedFields.h>
 #include <utility>
+
+#include <field/Fields.h>
+#include <foreach/ForeachVirtual.h>
+#include <table/BufferedFields.h>
 
 namespace mbf_foreach {
     /**

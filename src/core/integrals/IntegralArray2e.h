@@ -5,9 +5,9 @@
 #ifndef M7_INTEGRALARRAY2E_H
 #define M7_INTEGRALARRAY2E_H
 
-#include "src/defs.h"
+#include "defs.h"
 #include "IntegralArray.h"
-#include "src/core/parallel/SharedArray.h"
+#include "parallel/SharedArray.h"
 
 /**
  * store two-electron integrals with the chemists' notation (ij|kl) where the integrand is i*(x1)j(x1) 1/r12 k*(x2)l(x2)

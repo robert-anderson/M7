@@ -5,7 +5,7 @@
 #ifndef M7_DISTMVPROD_H
 #define M7_DISTMVPROD_H
 
-#include "src/core/parallel/MPIWrapper.h"
+#include "parallel/MPIWrapper.h"
 #include "Sparse.h"
 
 namespace dist_mv_prod {

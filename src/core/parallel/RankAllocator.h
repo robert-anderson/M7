@@ -27,15 +27,15 @@
 #ifndef M7_RANKALLOCATOR_H
 #define M7_RANKALLOCATOR_H
 
-#include "src/core/field/FieldBase.h"
-#include "src/core/table/MappedTable.h"
-#include "src/core/parallel/Gatherable.h"
-#include "src/core/io/Logging.h"
+#include "field/FieldBase.h"
+#include "table/MappedTable.h"
+#include "parallel/Gatherable.h"
+#include "io/Logging.h"
 #include "MPIWrapper.h"
 #include "Epoch.h"
 #include <forward_list>
 #include <algorithm>
-#include <src/core/util/Timer.h>
+#include <util/Timer.h>
 
 // forward decl since a ref is required by RankDynamic class
 struct RankAllocatorBase;

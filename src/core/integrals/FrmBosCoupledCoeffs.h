@@ -5,8 +5,8 @@
 #ifndef M7_FRMBOSCOUPLEDCOEFFS_H
 #define M7_FRMBOSCOUPLEDCOEFFS_H
 
-#include <src/core/basis/BasisData.h>
-#include "src/core/parallel/SharedArray.h"
+#include <basis/BasisData.h>
+#include <parallel/SharedArray.h>
 
 class FrmBosCoupledCoeffs {
 

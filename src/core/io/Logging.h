@@ -8,7 +8,7 @@
 #include <iostream>
 #include <execinfo.h>
 #include <cxxabi.h>
-#include "src/core/parallel/MPIWrapper.h"
+#include "parallel/MPIWrapper.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"

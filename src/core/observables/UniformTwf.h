@@ -6,10 +6,10 @@
 #define M7_UNIFORMTWF_H
 
 
-#include "src/core/wavefunction/WalkerTable.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
-#include "src/core/observables/SignProblemFreeTwf.h"
-#include "src/core/basis/Suites.h"
+#include "wavefunction/WalkerTable.h"
+#include "hamiltonian/Hamiltonian.h"
+#include "observables/SignProblemFreeTwf.h"
+#include "basis/Suites.h"
 
 class UniformTwf : public SpfTwfBase {
 public:

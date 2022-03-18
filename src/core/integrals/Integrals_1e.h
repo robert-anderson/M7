@@ -7,9 +7,9 @@
 
 #include <cstddef>
 #include <vector>
-#include <src/core/io/FcidumpFileReader.h>
+#include <io/FcidumpFileReader.h>
 #include "Integrals.h"
-#include "src/core/util/consts.h"
+#include "util/consts.h"
 
 /*
  * notational conventions used are as follows:

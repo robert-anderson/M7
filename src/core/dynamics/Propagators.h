@@ -6,6 +6,7 @@
 #define M7_PROPAGATORS_H
 
 #include <memory>
+
 #include "ExactPropagator.h"
 #include "StochasticPropagator.h"
 

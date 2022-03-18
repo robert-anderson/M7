@@ -6,9 +6,9 @@
 #define M7_BUFFER_H
 
 #include <list>
-#include <src/core/parallel/MPIAssert.h>
-#include "src/defs.h"
-#include "src/core/parallel/MPIWrapper.h"
+#include <parallel/MPIAssert.h>
+#include "defs.h"
+#include "parallel/MPIWrapper.h"
 
 
 class Buffer {

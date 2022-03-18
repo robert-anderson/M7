@@ -5,7 +5,7 @@
 #ifndef M7_HEISENBERGFRMHAM_H
 #define M7_HEISENBERGFRMHAM_H
 
-#include <src/core/basis/Lattice.h>
+#include <basis/Lattice.h>
 #include "FrmHam.h"
 
 /**

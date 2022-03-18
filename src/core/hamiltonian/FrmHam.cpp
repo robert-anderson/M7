@@ -2,9 +2,9 @@
 // Created by rja on 27/02/2020.
 //
 
-#include "src/core/enumerator/ContainerCombinationEnumerator.h"
-#include "src/core/caches/DecodedDeterminants.h"
-#include "src/core/parallel/RankAllocator.h"
+#include "enumerator/ContainerCombinationEnumerator.h"
+#include "caches/DecodedDeterminants.h"
+#include "parallel/RankAllocator.h"
 #include "FrmHam.h"
 
 FrmHam::FrmHam(size_t nelec, size_t nsite, int ms2_restrict,

@@ -7,8 +7,8 @@
 
 #include <vector>
 #include <forward_list>
-#include <src/core/parallel/MPIAssert.h>
-#include "src/core/io/Logging.h"
+#include <parallel/MPIAssert.h>
+#include "io/Logging.h"
 
 namespace sparse {
 

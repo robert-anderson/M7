@@ -5,7 +5,8 @@
 #ifndef M7_COMPOSITEFIELD_H
 #define M7_COMPOSITEFIELD_H
 
-#include "src/core/util/utils.h"
+#include <util/utils.h>
+
 #include "FieldBase.h"
 
 struct CompositeFieldBase {

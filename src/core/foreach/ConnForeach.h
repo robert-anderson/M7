@@ -8,8 +8,9 @@
 #include <utility>
 #include <array>
 
-#include "src/core/basis/Suites.h"
-#include "src/core/connection/Connections.h"
+#include <basis/Suites.h>
+#include <connection/Connections.h>
+
 #include "ForeachVirtual.h"
 
 

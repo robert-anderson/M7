@@ -3,7 +3,7 @@
 //
 
 #include "DecodedMbf.h"
-#include "src/core/basis/AbelianGroup.h"
+#include "basis/AbelianGroup.h"
 
 void decoded_mbf::SimpleContainer::clear() {
     m_inds.clear();

@@ -5,12 +5,12 @@
 #ifndef M7_REFERENCE_H
 #define M7_REFERENCE_H
 
-#include <src/core/observables/RefExcits.h>
-#include <src/core/basis/Suites.h>
-#include "src/core/parallel/RankAllocator.h"
-#include "src/core/parallel/ReductionMember.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
-#include "src/core/nd/NdArray.h"
+#include <observables/RefExcits.h>
+#include <basis/Suites.h>
+#include "parallel/RankAllocator.h"
+#include "parallel/ReductionMember.h"
+#include "hamiltonian/Hamiltonian.h"
+#include "nd/NdArray.h"
 #include "WalkerTable.h"
 #include "Wavefunction.h"
 

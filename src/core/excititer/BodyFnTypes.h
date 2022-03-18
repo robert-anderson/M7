@@ -5,7 +5,7 @@
 #ifndef M7_BODYFNTYPES_H
 #define M7_BODYFNTYPES_H
 
-#include "src/core/connection/Connections.h"
+#include <connection/Connections.h>
 
 namespace body_fn_types {
     /*

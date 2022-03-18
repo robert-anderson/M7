@@ -5,7 +5,7 @@
 #ifndef M7_REDUCTION_H
 #define M7_REDUCTION_H
 
-#include "src/core/table/BufferedFields.h"
+#include "table/BufferedFields.h"
 
 template<typename T>
 struct ReductionBase {

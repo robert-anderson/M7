@@ -5,7 +5,7 @@
 #ifndef M7_SUBSPACE_H
 #define M7_SUBSPACE_H
 
-#include <src/core/wavefunction/Wavefunction.h>
+#include <wavefunction/Wavefunction.h>
 
 /**
  * Set of MappedTable keys distributed over all MPI ranks.

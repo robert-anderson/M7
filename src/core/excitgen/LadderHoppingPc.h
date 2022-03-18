@@ -5,7 +5,8 @@
 #ifndef M7_LADDERHOPPINGPC_H
 #define M7_LADDERHOPPINGPC_H
 
-#include "src/core/sample/Aliaser.h"
+#include <sample/Aliaser.h>
+
 #include "LadderHoppingUniform.h"
 
 /**

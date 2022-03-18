@@ -6,9 +6,9 @@
 #define M7_COMPARATORS_H
 
 
-#include <src/core/util/utils.h>
-#include <src/core/field/Row.h>
-#include <src/core/field/Fields.h>
+#include <util/utils.h>
+#include <field/Row.h>
+#include <field/Fields.h>
 
 /**
  * type definitions and helper functions for the creation of std::function objects which compare objects in sorting

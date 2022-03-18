@@ -5,10 +5,10 @@
 #ifndef M7_RDM_H
 #define M7_RDM_H
 
-#include <src/core/io/Archivable.h>
-#include "src/core/table/Communicator.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
-#include "src/core/bilinear/FermionPromoter.h"
+#include <io/Archivable.h>
+#include "table/Communicator.h"
+#include "hamiltonian/Hamiltonian.h"
+#include "bilinear/FermionPromoter.h"
 
 
 #if 0

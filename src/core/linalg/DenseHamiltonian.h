@@ -5,10 +5,10 @@
 #ifndef M7_DENSEHAMILTONIAN_H
 #define M7_DENSEHAMILTONIAN_H
 
-#include <src/core/foreach/MbfForeach.h>
-#include "src/defs.h"
+#include <foreach/MbfForeach.h>
+#include "defs.h"
 #include "Dense.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "hamiltonian/Hamiltonian.h"
 
 
 using namespace mbf_foreach;

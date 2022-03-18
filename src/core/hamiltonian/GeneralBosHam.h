@@ -5,7 +5,8 @@
 #ifndef M7_GENERALBOSHAM_H
 #define M7_GENERALBOSHAM_H
 
-#include <src/core/config/Hamiltonian.h>
+#include <config/Hamiltonian.h>
+
 #include "BosHam.h"
 
 struct GeneralBosHam : BosHam {

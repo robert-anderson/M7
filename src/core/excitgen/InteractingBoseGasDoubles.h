@@ -5,7 +5,8 @@
 #ifndef M7_INTERACTINGBOSEGASDOUBLES_H
 #define M7_INTERACTINGBOSEGASDOUBLES_H
 
-#include "src/core/hamiltonian/InteractingBoseGasBosHam.h"
+#include <hamiltonian/InteractingBoseGasBosHam.h>
+
 #include "ExcitGen.h"
 
 class InteractingBoseGasDoubles : BosExcitGen {
