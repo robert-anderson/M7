@@ -1,4 +1,4 @@
-target_sources(M7
+target_sources(M7_lib
     PRIVATE
         BosonCoeffs_1.cpp
         BosonCoeffs_1.h
