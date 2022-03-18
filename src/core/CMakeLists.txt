@@ -35,7 +35,6 @@ add_subdirectory(table)
 add_subdirectory(util)
 add_subdirectory(wavefunction)
 
-
 target_link_libraries(M7_lib yaml-cpp)
 target_link_libraries(M7_lib ${MPI_LIBRARIES})
 

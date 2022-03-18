@@ -48,48 +48,57 @@ if(BUILD_HDF5)
 #
 # Download and build HDF5
 #
-    set(HDF5_CMAKE_ARGS
-            -DHDF5_ENABLE_PARALLEL=ON
-            -DHDF5_BUILD_CPP_LIB=OFF
-            -DHDF5_BUILD_JAVA=OFF
-            -DHDF5_ENABLE_THREADSAFE=OFF
-            -DCMAKE_C_FLAGS="-w") # we don't need to see compiler warnings from external dependencies
-
+    set(OWN_HDF5_ROOT ${PROJECT_BINARY_DIR}/lib/hdf5)
+    set(OWN_HDF5_BUILD ${PROJECT_BINARY_DIR}/hdf5_local/)
     set(HDF5_USE_STATIC_LIBRARIES 1)
     set(HDF5_VERSION "1.10.5")
-    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/hdf5_local/src)
-    ExternalProject_Add(built_hdf5
-            URL https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF5_VERSION}.tar.gz
-            URL_MD5 e115eeb66e944fa7814482415dd21cc4
-            CMAKE_ARGS ${HDF5_CMAKE_ARGS}
-            SOURCE_DIR ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}
-            BINARY_DIR ${PROJECT_BINARY_DIR}/hdf5_local/build
-            STAMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/stamp
-            TMP_DIR ${PROJECT_BINARY_DIR}/hdf5_local/tmp
-            INSTALL_COMMAND ""
-            )
 
+    file(MAKE_DIRECTORY ${OWN_HDF5_ROOT})
+    file(MAKE_DIRECTORY ${OWN_HDF5_BUILD})
+    ExternalProject_Add(built_hdf5
+            URL
+                https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF5_VERSION}.tar.gz
+            URL_MD5
+                e115eeb66e944fa7814482415dd21cc4
+            CMAKE_ARGS
+                -DHDF5_ENABLE_PARALLEL=ON
+                -DHDF5_BUILD_CPP_LIB=OFF
+                -DHDF5_BUILD_JAVA=OFF
+                -DCMAKE_INSTALL_PREFIX=${OWN_HDF5_ROOT}
+                -DHDF5_ENABLE_THREADSAFE=OFF
+                -DHDF5_BUILD_TOOLS=OFF
+                -DHDF5_BUILD_EXAMPLES=OFF
+                -DBUILD_TESTING=OFF
+                -DCMAKE_C_FLAGS="-w"
+            SOURCE_DIR
+                ${OWN_HDF5_BUILD}/src/hdf5-${HDF5_VERSION}
+            BINARY_DIR
+                ${OWN_HDF5_BUILD}/build
+            STAMP_DIR
+                ${OWN_HDF5_BUILD}/stamp
+            TMP_DIR
+                ${OWN_HDF5_BUILD}/tmp
+            INSTALL_DIR
+                ""
+            INSTALL_COMMAND
+                make install
+    )
     add_library(m7_hdf5 INTERFACE)
     add_dependencies(m7_hdf5 built_hdf5)
-
-    set_property(TARGET m7_hdf5 PROPERTY
-        INTERFACE_INCLUDE_DIRECTORIES
-            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/src
-            ${PROJECT_BINARY_DIR}/hdf5_local/src/hdf5-${HDF5_VERSION}/hl/src
-            ${PROJECT_BINARY_DIR}/hdf5_local/build/
+    target_include_directories(m7_hdf5
+        INTERFACE
+            ${OWN_HDF5_ROOT}/include
     )
-    set_property(TARGET m7_hdf5 PROPERTY
-        IMPORTED_LOCATION
-            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5.a
-            ${PROJECT_BINARY_DIR}/hdf5_local/build/bin/libhdf5_hl.a
+    target_link_libraries(m7_hdf5
+        INTERFACE
+            ${OWN_HDF5_ROOT}/lib/libhdf5_hl.a
+            ${OWN_HDF5_ROOT}/lib/libhdf5.a
     )
-
 else()
     find_package(HDF5 REQUIRED COMPONENTS C HL)
 
     add_library(m7_hdf5 INTERFACE)
     target_link_libraries(m7_hdf5 INTERFACE hdf5::hdf5 hdf5::hdf5_hl)
-
 endif()
 target_link_libraries(m7_hdf5 INTERFACE ${CMAKE_DL_LIBS})
 
