@@ -1,9 +1,9 @@
 #include <iostream>
 #include <iomanip>
-#include <src/core/parallel/MPIWrapper.h>
-#include <src/core/dynamics/FciqmcCalculation.h>
-#include <src/core/io/YamlWrapper.h>
-#include <src/core/config/FciqmcConfig.h>
+#include <M7_lib/parallel/MPIWrapper.h>
+#include <M7_lib/dynamics/FciqmcCalculation.h>
+#include <M7_lib/io/YamlWrapper.h>
+#include <M7_lib/config/FciqmcConfig.h>
 
 int main(int argc, char **argv) {
 

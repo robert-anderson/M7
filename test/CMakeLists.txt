@@ -7,7 +7,11 @@ add_subdirectory(
 
 # adding the Google_Tests_run target
 add_executable(unittest test.cpp)
-add_subdirectory(core)
+target_include_directories(unittest
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+add_subdirectory(test_core)
 target_link_libraries(unittest M7_lib)
 
 target_link_libraries(unittest gtest gtest_main)

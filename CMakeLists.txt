@@ -32,71 +32,11 @@ else ()
     message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
 endif()
 
-find_package(LAPACK REQUIRED)
+# find_package(LAPACK REQUIRED)
 
 find_package(MPI REQUIRED COMPONENTS C)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
 add_compile_definitions(ENABLE_MPI)
-
-
-option(BUILD_HDF5 OFF)
-if(BUILD_HDF5)
-#
-# Download and build HDF5
-#
-    set(OWN_HDF5_ROOT ${PROJECT_BINARY_DIR}/lib/hdf5)
-    set(OWN_HDF5_BUILD ${PROJECT_BINARY_DIR}/hdf5_local/)
-    set(HDF5_USE_STATIC_LIBRARIES 1)
-    set(HDF5_VERSION "1.10.5")
-
-    file(MAKE_DIRECTORY ${OWN_HDF5_ROOT})
-    file(MAKE_DIRECTORY ${OWN_HDF5_BUILD})
-    ExternalProject_Add(built_hdf5
-            URL
-                https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF5_VERSION}.tar.gz
-            URL_MD5
-                e115eeb66e944fa7814482415dd21cc4
-            CMAKE_ARGS
-                -DHDF5_ENABLE_PARALLEL=ON
-                -DHDF5_BUILD_CPP_LIB=OFF
-                -DHDF5_BUILD_JAVA=OFF
-                -DCMAKE_INSTALL_PREFIX=${OWN_HDF5_ROOT}
-                -DHDF5_ENABLE_THREADSAFE=OFF
-                -DHDF5_BUILD_TOOLS=OFF
-                -DHDF5_BUILD_EXAMPLES=OFF
-                -DBUILD_TESTING=OFF
-                -DCMAKE_C_FLAGS="-w"
-            SOURCE_DIR
-                ${OWN_HDF5_BUILD}/src/hdf5-${HDF5_VERSION}
-            BINARY_DIR
-                ${OWN_HDF5_BUILD}/build
-            STAMP_DIR
-                ${OWN_HDF5_BUILD}/stamp
-            TMP_DIR
-                ${OWN_HDF5_BUILD}/tmp
-            INSTALL_DIR
-                ""
-            INSTALL_COMMAND
-                make install
-    )
-    add_library(M7_hdf5 INTERFACE)
-    add_dependencies(M7_hdf5 built_hdf5)
-    target_include_directories(M7_hdf5
-        INTERFACE
-            ${OWN_HDF5_ROOT}/include
-    )
-    target_link_libraries(M7_hdf5
-        INTERFACE
-            ${OWN_HDF5_ROOT}/lib/libhdf5_hl.a
-            ${OWN_HDF5_ROOT}/lib/libhdf5.a
-    )
-else()
-    find_package(HDF5 REQUIRED COMPONENTS C HL)
-
-    add_library(M7_hdf5 INTERFACE)
-    target_link_libraries(M7_hdf5 INTERFACE hdf5::hdf5 hdf5::hdf5_hl)
-endif()
-target_link_libraries(M7_hdf5 INTERFACE ${CMAKE_DL_LIBS})
 
 #
 # Download and build static lib target of arpack-ng dependency of arpackpp
@@ -111,7 +51,7 @@ ExternalProject_Add(arpack-ng
         STAMP_DIR ${PROJECT_BINARY_DIR}/arpack-ng/stamp
         TMP_DIR ${PROJECT_BINARY_DIR}/arpack-ng/tmp
         INSTALL_COMMAND ""
-        )
+)
 
 #
 # Download and build arpack
@@ -126,10 +66,13 @@ ExternalProject_Add(arpackpp
         STAMP_DIR ${PROJECT_BINARY_DIR}/arpackpp/stamp
         TMP_DIR ${PROJECT_BINARY_DIR}/arpackpp/tmp
         INSTALL_COMMAND ""
-        )
+)
 
 add_dependencies(arpackpp arpack-ng)
-set(ARPACK_LIBS ${PROJECT_BINARY_DIR}/arpack-ng/build/libarpack.a)
+
+add_library(my_arpack INTERFACE)
+target_include_directories(my_arpack INTERFACE ${PROJECT_BINARY_DIR}/arpackpp/src/arpackpp/include/)
+target_link_libraries(my_arpack INTERFACE ${PROJECT_BINARY_DIR}/arpack-ng/build/libarpack.a)
 
 #
 # Command line args for M7
@@ -150,17 +93,17 @@ endif()
 
 add_definitions(-DMBF_TYPE=${MBF_TYPE})
 
-option(ENABLE_COMPLEX "ENABLE_COMPLEX" 0)
+option(ENABLE_COMPLEX "ENABLE_COMPLEX")
 if (ENABLE_COMPLEX)
     add_compile_definitions(ENABLE_COMPLEX)
 endif ()
 
-option(ENABLE_ROUNDING_SPAWN_ATTEMPTS "ENABLE_ROUNDING_SPAWN_ATTEMPTS" 0)
+option(ENABLE_ROUNDING_SPAWN_ATTEMPTS "ENABLE_ROUNDING_SPAWN_ATTEMPTS")
 if (ENABLE_ROUNDING_SPAWN_ATTEMPTS)
     add_compile_definitions(ENABLE_ROUNDING_SPAWN_ATTEMPTS)
 endif ()
 
-option(ENABLE_LOCAL_LOGGING "ENABLE_LOCAL_LOGGING" 0)
+option(ENABLE_LOCAL_LOGGING "ENABLE_LOCAL_LOGGING")
 if (ENABLE_LOCAL_LOGGING)
     add_compile_definitions(ENABLE_LOCAL_LOGGING)
 endif ()
@@ -171,16 +114,10 @@ set(CMAKE_CXX_COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS}")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 
 
-include_directories("${CMAKE_SOURCE_DIR}")
-include_directories("${CMAKE_SOURCE_DIR}/external/spdlog-1.x/include")
-add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" yaml-cpp)
-target_compile_options(yaml-cpp PRIVATE -w)
-include_directories("${PROJECT_BINARY_DIR}/arpackpp/src/")
-
 add_definitions(-DPROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 add_compile_options(-Wall -Wextra)
 add_compile_options(-Wno-unused-function -Wno-unused-parameter)
 
 add_subdirectory(src)
-add_subdirectory(test)
+# add_subdirectory(test)
 add_subdirectory(assets)
