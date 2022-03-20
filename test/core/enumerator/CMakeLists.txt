@@ -1,0 +1,11 @@
+target_sources(unittest
+    PRIVATE
+        BitsetEnumerator.cpp
+        BosonOnvEnumerator.cpp
+        CombinationEnumerator.cpp
+        DeterminantEnumerator.cpp
+        Enumerator.cpp
+        FermionBosonEnumerator.cpp
+        HamiltonianConnectionEnumerator.cpp
+        ProductEnumerator.cpp
+)

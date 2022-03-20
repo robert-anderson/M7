@@ -1,0 +1,12 @@
+target_sources(unittest
+    PRIVATE
+        BufferedFields.cpp
+        BufferedTable.cpp
+        BufferedTableArray.cpp
+        CommunicatingPair.cpp
+        Communicator.cpp
+        DynamicRowSet.cpp
+        MappedTable.cpp
+        Table.cpp
+        TableTest.h
+)

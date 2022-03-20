@@ -36,14 +36,10 @@ find_package(LAPACK REQUIRED)
 
 find_package(MPI REQUIRED COMPONENTS C)
 message(STATUS "MPI_FOUND ${MPI_FOUND}")
-if (MPI_FOUND)
-    add_compile_definitions(ENABLE_MPI)
-else ()
-endif ()
+add_compile_definitions(ENABLE_MPI)
 
 
 option(BUILD_HDF5 OFF)
-
 if(BUILD_HDF5)
 #
 # Download and build HDF5
@@ -83,13 +79,13 @@ if(BUILD_HDF5)
             INSTALL_COMMAND
                 make install
     )
-    add_library(m7_hdf5 INTERFACE)
-    add_dependencies(m7_hdf5 built_hdf5)
-    target_include_directories(m7_hdf5
+    add_library(M7_hdf5 INTERFACE)
+    add_dependencies(M7_hdf5 built_hdf5)
+    target_include_directories(M7_hdf5
         INTERFACE
             ${OWN_HDF5_ROOT}/include
     )
-    target_link_libraries(m7_hdf5
+    target_link_libraries(M7_hdf5
         INTERFACE
             ${OWN_HDF5_ROOT}/lib/libhdf5_hl.a
             ${OWN_HDF5_ROOT}/lib/libhdf5.a
@@ -97,10 +93,10 @@ if(BUILD_HDF5)
 else()
     find_package(HDF5 REQUIRED COMPONENTS C HL)
 
-    add_library(m7_hdf5 INTERFACE)
-    target_link_libraries(m7_hdf5 INTERFACE hdf5::hdf5 hdf5::hdf5_hl)
+    add_library(M7_hdf5 INTERFACE)
+    target_link_libraries(M7_hdf5 INTERFACE hdf5::hdf5 hdf5::hdf5_hl)
 endif()
-target_link_libraries(m7_hdf5 INTERFACE ${CMAKE_DL_LIBS})
+target_link_libraries(M7_hdf5 INTERFACE ${CMAKE_DL_LIBS})
 
 #
 # Download and build static lib target of arpack-ng dependency of arpackpp
@@ -186,5 +182,5 @@ add_compile_options(-Wall -Wextra)
 add_compile_options(-Wno-unused-function -Wno-unused-parameter)
 
 add_subdirectory(src)
-# add_subdirectory(test)
+add_subdirectory(test)
 add_subdirectory(assets)

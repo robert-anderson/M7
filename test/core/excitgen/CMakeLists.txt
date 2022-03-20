@@ -1,0 +1,11 @@
+target_sources(unittest
+    PRIVATE
+        BosonSumConvervingDoubles.cpp
+        ExcitGenTester.cpp
+        ExcitGenTester.h
+        HeatBathDoubles.cpp
+        HubbardSingles.cpp
+        LadderHopping.cpp
+        LadderPure.cpp
+        LadderPureHolstein.cpp
+)

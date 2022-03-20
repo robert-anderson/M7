@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include <src/defs.h>
+#include <defs.h>
 #include <src/core/sample/Aliaser.h>
 
 TEST(Aliaser, DistributionCheck) {

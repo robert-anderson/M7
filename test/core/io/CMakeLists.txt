@@ -1,0 +1,11 @@
+target_sources(unittest
+    PRIVATE
+        BosDumpFileReader.cpp
+        CsvFileReader.cpp
+        EbDumpFileReader.cpp
+        FcidumpFileReader.cpp
+        FileReader.cpp
+        FortranNamelistReader.cpp
+        HDF5Wrapper.cpp
+        InteractiveVariable.cpp
+)

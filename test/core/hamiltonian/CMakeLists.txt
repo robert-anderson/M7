@@ -1,0 +1,9 @@
+target_sources(unittest
+    PRIVATE
+        BosonCouplings.cpp
+        BosonHamiltonian.cpp
+        FermionHamiltonian.cpp
+        ForeachConnection.cpp
+        HeisenbergFrmHam.cpp
+        InteractingBoseGasBosHam.cpp
+)
