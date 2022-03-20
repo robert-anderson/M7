@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/linalg/DenseHamiltonian.h"
+#include "M7_lib/linalg/DenseHamiltonian.h"
 
 /*
  * exact diagonalization in the entire Hilbert space for integration testing of matrix elements for very small systems

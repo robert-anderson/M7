@@ -3,9 +3,9 @@
 //
 
 #include <test_core/sparse/Examples.h>
-#include <linalg/Dense.h>
+#include <M7_lib/linalg/Dense.h>
+#include "M7_lib/arnoldi/ArnoldiSolver.h"
 #include "gtest/gtest.h"
-#include "src/core/arnoldi/ArnoldiSolver.h"
 
 TEST(ArnoldiSolver, SymNonDist) {
     const size_t nrow = 20;

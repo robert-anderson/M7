@@ -2,7 +2,7 @@
 // Created by rja on 19/08/2021.
 //
 
-#include "src/core/nd/NdIndices.h"
+#include "M7_lib/nd/NdIndices.h"
 #include "gtest/gtest.h"
 
 TEST(NdIndices, Scalar){

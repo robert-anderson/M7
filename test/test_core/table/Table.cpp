@@ -2,9 +2,9 @@
 // Created by rja on 02/10/2020.
 //
 
-#include <src/core/sample/PRNG.h>
-#include <src/core/sort/ExtremalIndices.h>
-#include <src/core/sort/LambdaQuickSorter.h>
+#include <M7_lib/sample/PRNG.h>
+#include <M7_lib/sort/ExtremalIndices.h>
+#include <M7_lib/sort/LambdaQuickSorter.h>
 #include "gtest/gtest.h"
 
 #if 0

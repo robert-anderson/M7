@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/enumerator/BosonOnvEnumerator.h"
-#include "src/core/table/BufferedFields.h"
+#include "M7_lib/enumerator/BosonOnvEnumerator.h"
+#include "M7_lib/table/BufferedFields.h"
 
 TEST(BosonOnvEnumerator, Test){
     const size_t nmode=6ul, occ_cutoff=4;

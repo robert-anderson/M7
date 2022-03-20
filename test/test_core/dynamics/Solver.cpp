@@ -2,9 +2,9 @@
 // Created by rja on 14/07/2021.
 //
 
-#include <src/core/dynamics/Propagators.h>
+#include <M7_lib/dynamics/Propagators.h>
 #include "gtest/gtest.h"
-#include "src/core/dynamics/Solver.h"
+#include "M7_lib/dynamics/Solver.h"
 
 #if 0
 TEST(Solver, RecvSort) {

@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/linalg/Dense.h"
+#include "M7_lib/linalg/Dense.h"
 
 TEST(Dense, Transpose) {
     dense::Matrix<int> p(3, 5);

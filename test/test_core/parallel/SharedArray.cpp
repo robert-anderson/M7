@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/parallel/SharedArray.h"
+#include "M7_lib/parallel/SharedArray.h"
 
 TEST(SharedArray, Test) {
     const size_t nelement_per_rank = 10000;

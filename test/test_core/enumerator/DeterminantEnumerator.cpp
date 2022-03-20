@@ -3,8 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/enumerator/FermionOnvEnumerator.h"
-#include "src/core/table/BufferedFields.h"
+#include "M7_lib/enumerator/FermionOnvEnumerator.h"
+#include "M7_lib/table/BufferedFields.h"
 
 
 TEST(SpinNonConDetEnumerator, SimpleConstruction){

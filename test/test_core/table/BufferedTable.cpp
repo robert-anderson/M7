@@ -2,8 +2,8 @@
 // Created by rja on 02/10/2020.
 //
 
-#include <src/core/table/BufferedFields.h>
-#include "src/core/table//BufferedTable.h"
+#include <M7_lib/table/BufferedFields.h>
+#include "M7_lib/table//BufferedTable.h"
 #include "gtest/gtest.h"
 
 TEST(BufferedTable, Empty) {

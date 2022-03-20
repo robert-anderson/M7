@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/parallel/RankAllocator.h"
+#include "M7_lib/parallel/RankAllocator.h"
 #include "TableTest.h"
 
 #if 0

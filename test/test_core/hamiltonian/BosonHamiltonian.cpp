@@ -2,9 +2,9 @@
 // Created by rja on 21/11/2021.
 //
 
-#include <src/core/hamiltonian/GeneralBosHam.h>
-#include "src/core/config/FciqmcConfig.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include <M7_lib/hamiltonian/GeneralBosHam.h>
+#include "M7_lib/config/FciqmcConfig.h"
+#include "M7_lib/hamiltonian/Hamiltonian.h"
 #include "gtest/gtest.h"
 
 TEST(BosonHamiltonian, Coefficients) {

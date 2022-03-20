@@ -2,7 +2,7 @@
 // Created by rja on 13/07/2021.
 //
 
-#include "src/core/sort/Comparators.h"
+#include "M7_lib/sort/Comparators.h"
 #include "gtest/gtest.h"
 
 TEST(Comparators, ValueFnsInt) {

@@ -2,8 +2,8 @@
 // Created by rja on 19/07/2020.
 //
 
-#include <defs.h>
-#include <src/core/io/FileReader.h>
+#include <M7_lib/defs.h>
+#include <M7_lib/io/FileReader.h>
 #include "gtest/gtest.h"
 
 TEST(FileReader, Skip){

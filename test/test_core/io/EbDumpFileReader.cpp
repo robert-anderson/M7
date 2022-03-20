@@ -2,7 +2,7 @@
 // Created by rja on 19/08/2021.
 //
 
-#include "src/core/io/EbdumpFileReader.h"
+#include "M7_lib/io/EbdumpFileReader.h"
 #include "gtest/gtest.h"
 
 TEST(EbDumpFileReader, ReadFile){

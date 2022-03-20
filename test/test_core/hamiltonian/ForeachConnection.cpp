@@ -2,8 +2,8 @@
 // Created by rja on 06/06/2021.
 //
 
-#include <src/core/foreach/Foreach.h>
-#include <src/core/caches/DecodedMbf.h>
+#include <M7_lib/foreach/Foreach.h>
+#include <M7_lib/caches/DecodedMbf.h>
 #include "gtest/gtest.h"
 
 

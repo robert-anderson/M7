@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/parallel/Gatherable.h"
+#include "M7_lib/parallel/Gatherable.h"
 
 TEST(Gatherable, Test){
     Gatherable<size_t> gatherable;

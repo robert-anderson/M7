@@ -2,9 +2,9 @@
 // Created by rja on 06/04/2021.
 //
 
-#include <src/core/table/BufferedTable.h>
+#include <M7_lib/table/BufferedTable.h>
 #include "gtest/gtest.h"
-#include "src/core/field/Fields.h"
+#include "M7_lib/field/Fields.h"
 
 
 struct TestRow : Row {

@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/sort/LocalExtremalRows.h"
-#include <src/core/table/BufferedTable.h>
+#include "M7_lib/sort/LocalExtremalRows.h"
+#include <M7_lib/table/BufferedTable.h>
 
 namespace local_extremal_rows_test {
     typedef SingleFieldRow<field::Number<int>> int_scalar_row_t;

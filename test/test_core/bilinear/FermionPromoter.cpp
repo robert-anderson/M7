@@ -2,11 +2,11 @@
 // Created by rja on 14/04/2021.
 //
 
-#include <src/core/connection/Connections.h>
-#include "src/core/bilinear/FermionPromoter.h"
-#include <src/core/foreach/Foreach.h>
+#include <M7_lib/connection/Connections.h>
+#include "M7_lib/bilinear/FermionPromoter.h"
+#include <M7_lib/foreach/Foreach.h>
 #include "gtest/gtest.h"
-#include "src/core/table/BufferedFields.h"
+#include "M7_lib/table/BufferedFields.h"
 
 TEST(FermionPromoter, Promoter1BodyDiagonal) {
     const size_t nsite = 5;

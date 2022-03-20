@@ -4,11 +4,11 @@
 
 #if 0
 
-#include "src/core/basis/FermionOnv.h"
-#include "src/core/basis/DecodedDeterminant.h"
+#include "M7_lib/basis/FermionOnv.h"
+#include "M7_lib/basis/DecodedDeterminant.h"
 #include "gtest/gtest.h"
-#include "src/core/enumerator/BitsetEnumerator.h"
-#include "src/core/table/Bitset.h"
+#include "M7_lib/enumerator/BitsetEnumerator.h"
+#include "M7_lib/table/Bitset.h"
 
 TEST(BitsetEnumerator, BitsetSet) {
     Bitset bitset(200);

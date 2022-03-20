@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/config/FciqmcConfig.h"
+#include "M7_lib/config/FciqmcConfig.h"
 
 TEST(FciqmcConfig, Test){
     fciqmc_config::Document doc(nullptr);

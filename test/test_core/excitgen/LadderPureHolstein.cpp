@@ -2,8 +2,8 @@
 // Created by rja on 16/12/2021.
 //
 
-#include <src/core/excitgen/LadderPureHolstein.h>
-#include <src/core/excititer/LadderPureHolstein.h>
+#include <M7_lib/excitgen/LadderPureHolstein.h>
+#include <M7_lib/excititer/LadderPureHolstein.h>
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 

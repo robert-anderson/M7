@@ -2,14 +2,14 @@
 // Created by rja on 13/12/2020.
 //
 
-#include <src/core/hash/Hashing.h>
-#include <src/core/field/Row.h>
-#include <src/core/field/Fields.h>
-#include <src/core/table/Table.h>
-#include <src/core/table/BufferedTable.h>
-#include <src/core/table/BufferedFields.h>
+#include <M7_lib/hash/Hashing.h>
+#include <M7_lib/field/Row.h>
+#include <M7_lib/field/Fields.h>
+#include <M7_lib/table/Table.h>
+#include <M7_lib/table/BufferedTable.h>
+#include <M7_lib/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/io/HDF5Wrapper.h"
+#include "M7_lib/io/HDF5Wrapper.h"
 
 
 namespace hdf5_wrapper_test {

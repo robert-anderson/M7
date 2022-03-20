@@ -2,8 +2,8 @@
 // Created by anderson on 09/02/2022.
 //
 
-#include <src/core/table/BufferedFields.h>
-#include <src/core/foreach/MbfForeach.h>
+#include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/foreach/MbfForeach.h>
 #include "gtest/gtest.h"
 
 namespace mbf_foreach_test {

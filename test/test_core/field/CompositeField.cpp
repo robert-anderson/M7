@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/field/CompositeField.h"
-#include "src/core/table/BufferedFields.h"
+#include "M7_lib/field/CompositeField.h"
+#include "M7_lib/table/BufferedFields.h"
 
 
 struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {

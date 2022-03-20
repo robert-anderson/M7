@@ -2,9 +2,9 @@
 // Created by rja on 28/08/2021.
 //
 
-#include <src/core/excitgen/LadderPureHolstein.h>
-#include <src/core/hamiltonian/GeneralLadderHam.h>
-#include "src/core/excititer/LadderPure.h"
+#include <M7_lib/excitgen/LadderPureHolstein.h>
+#include <M7_lib/hamiltonian/GeneralLadderHam.h>
+#include "M7_lib/excititer/LadderPure.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
 

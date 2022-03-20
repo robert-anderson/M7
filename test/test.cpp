@@ -5,8 +5,8 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <memory>
-#include <src/core/io/Logging.h>
-#include "src/core/parallel/MPIWrapper.h"
+#include <M7_lib/io/Logging.h>
+#include "M7_lib/parallel/MPIWrapper.h"
 
 int main(int argc, char **argv) {
     // Filter out Google Test arguments

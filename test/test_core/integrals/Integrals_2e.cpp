@@ -4,8 +4,8 @@
 
 
 #include <gtest/gtest.h>
-#include <src/core/integrals/IntegralArray2e.h>
-#include "src/core/integrals/Integrals_2e.h"
+#include <M7_lib/integrals/IntegralArray2e.h>
+#include "M7_lib/integrals/Integrals_2e.h"
 
 #ifdef ENABLE_COMPLEX
 TEST(Integrals_2e, FourFoldCheck) {

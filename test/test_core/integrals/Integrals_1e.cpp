@@ -4,7 +4,7 @@
 
 
 #include <gtest/gtest.h>
-#include "src/core/integrals/Integrals_1e.h"
+#include "M7_lib/integrals/Integrals_1e.h"
 
 #if 0
 TEST(Integrals_1e, TwoFoldCheckReal) {

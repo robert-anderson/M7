@@ -2,9 +2,9 @@
 // Created by rja on 24/07/2021.
 //
 
-#include <src/core/table/BufferedFields.h>
-#include <src/core/io/CsvFileReader.h>
-#include "src/core/connection/FrmOnvConnection.h"
+#include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/io/CsvFileReader.h>
+#include "M7_lib/connection/FrmOnvConnection.h"
 #include "gtest/gtest.h"
 
 namespace frm_onv_connection_test {

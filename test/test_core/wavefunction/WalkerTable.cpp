@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/wavefunction/WalkerTable.h"
+#include "M7_lib/wavefunction/WalkerTable.h"
 
 TEST(WalkerTable, Fields){
     WalkerTable table(WalkerTableRow({0, 5}, 1, 1, false));

@@ -2,9 +2,9 @@
 // Created by Robert John Anderson on 2020-04-15.
 //
 
-#include <src/core/hash/Hashing.h>
+#include <M7_lib/hash/Hashing.h>
 #include "gtest/gtest.h"
-#include "src/core/parallel/MPIWrapper.h"
+#include "M7_lib/parallel/MPIWrapper.h"
 
 TEST(MPIWrapper, AllSum){
     size_t i = mpi::irank()+1;

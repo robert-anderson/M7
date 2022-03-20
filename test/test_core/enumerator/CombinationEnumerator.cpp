@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-03-30.
 //
 
-#include <src/core/enumerator/CombinationEnumerator.h>
+#include <M7_lib/enumerator/CombinationEnumerator.h>
 #include "gtest/gtest.h"
 
 std::vector<std::vector<size_t>> get_results() {

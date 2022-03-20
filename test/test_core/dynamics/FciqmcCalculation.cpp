@@ -2,10 +2,10 @@
 // Created by rja on 24/05/2020.
 //
 
-#include <src/core/dynamics/StochasticPropagator.h>
-#include <src/core/linalg/DenseHamiltonian.h>
+#include <M7_lib/dynamics/StochasticPropagator.h>
+#include <M7_lib/linalg/DenseHamiltonian.h>
 #include "gtest/gtest.h"
-#include "src/core/dynamics/FciqmcCalculation.h"
+#include "M7_lib/dynamics/FciqmcCalculation.h"
 
 #if 0
 TEST(FciqmcCalculation, ExactPropagation){

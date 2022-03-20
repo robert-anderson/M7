@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/table/BufferedFields.h"
+#include "M7_lib/table/BufferedFields.h"
 
 TEST(BitsetField, SetFromInds) {
     const size_t nbit = 100;

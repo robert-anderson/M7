@@ -2,10 +2,10 @@
 // Created by rja on 26/11/2021.
 //
 
-#include <src/core/excititer/ExcitIters.h>
+#include <M7_lib/excititer/ExcitIters.h>
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
-#include "src/core/excitgen/BosonSumConservingDoubles.h"
+#include "M7_lib/excitgen/BosonSumConservingDoubles.h"
 
 TEST(BosonSumConservingDoubles, LandauLevels) {
     PRNG prng(14, 1000000);

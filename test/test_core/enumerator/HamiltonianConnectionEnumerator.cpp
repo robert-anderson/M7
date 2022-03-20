@@ -2,7 +2,7 @@
 // Created by rja on 06/07/2020.
 //
 
-#include <src/core/enumerator/ContainerCombinationEnumerator.h>
+#include <M7_lib/enumerator/ContainerCombinationEnumerator.h>
 #include "gtest/gtest.h"
 
 #if 0

@@ -2,10 +2,10 @@
 // Created by jhalson on 30/09/2020.
 //
 
-#include <src/core/table/BufferedFields.h>
+#include <M7_lib/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/LadderHam.h"
-#include "src/core/hamiltonian/BosHam.h"
+#include "M7_lib/hamiltonian/LadderHam.h"
+#include "M7_lib/hamiltonian/BosHam.h"
 
 #if 0
 TEST(BosonCouplings, Element_b0) {

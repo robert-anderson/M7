@@ -2,9 +2,9 @@
 // Created by rja on 29/06/2021.
 //
 
-#include <src/core/dynamics/Solver.h>
+#include <M7_lib/dynamics/Solver.h>
 #include "gtest/gtest.h"
-#include "src/core/dynamics/Propagators.h"
+#include "M7_lib/dynamics/Propagators.h"
 
 
 // tests of propagators should be done in the verification suite

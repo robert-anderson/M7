@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/nd/NdFormat.h"
+#include "M7_lib/nd/NdFormat.h"
 
 TEST(NdFormat, SubFormats) {
     NdFormat<4> format({3, 4, 2, 6});

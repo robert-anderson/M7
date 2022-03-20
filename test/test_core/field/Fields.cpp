@@ -2,9 +2,9 @@
 // Created by rja on 26/01/2021.
 //
 
-#include <src/core/sample/PRNG.h>
-#include <src/core/table/BufferedFields.h>
-#include <src/core/table/Table.h>
+#include <M7_lib/sample/PRNG.h>
+#include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/table/Table.h>
 #include "gtest/gtest.h"
 
 TEST(Fields, HashUniformityTrueRandom){

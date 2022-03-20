@@ -2,9 +2,9 @@
 // Created by anderson on 1/7/22.
 //
 
-#include <src/core/hash/Hashing.h>
-#include "src/core/linalg/DistMvProd.h"
-#include "test/core/sparse/Examples.h"
+#include <M7_lib/hash/Hashing.h>
+#include <M7_lib/linalg/DistMvProd.h>
+#include <test_core/sparse/Examples.h>
 #include "gtest/gtest.h"
 
 TEST(DistMvProd, SparseRealSym) {

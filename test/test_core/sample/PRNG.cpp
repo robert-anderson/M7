@@ -3,7 +3,7 @@
 //
 
 #include <gtest/gtest.h>
-#include "src/core/sample/PRNG.h"
+#include "M7_lib/sample/PRNG.h"
 
 TEST(PRNG, MeanCheck) {
     PRNG prng(0, 1000);

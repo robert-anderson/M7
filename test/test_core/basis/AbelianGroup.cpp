@@ -2,9 +2,9 @@
 // Created by rja on 07/06/2021.
 //
 
-#include <foreach/Foreach.h>
+#include <M7_lib/foreach/Foreach.h>
 #include "gtest/gtest.h"
-#include "src/core/basis/AbelianGroup.h"
+#include "M7_lib/basis/AbelianGroup.h"
 
 TEST(AbelianGroup, D2h){
     std::vector<std::string> labels = {"A1g", "B1g", "B2g", "B3g", "A1u", "B1u", "B2u", "B3u"};

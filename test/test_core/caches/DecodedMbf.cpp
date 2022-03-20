@@ -2,8 +2,8 @@
 // Created by Robert John Anderson on 2020-03-31.
 //
 
-#include <src/core/table/BufferedFields.h>
-#include <src/core/foreach/ForeachVirtual.h>
+#include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/foreach/ForeachVirtual.h>
 #include "gtest/gtest.h"
 
 TEST(DecodedMbf, Simple){

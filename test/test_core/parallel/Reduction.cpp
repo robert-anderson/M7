@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/parallel/Reduction.h"
+#include "M7_lib/parallel/Reduction.h"
 
 TEST(Reduction, NdAllSum) {
     const size_t nrow = 5, ncol = 6;

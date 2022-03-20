@@ -2,11 +2,11 @@
 // Created by rja on 31/05/2021.
 //
 
-#include <src/core/io/Options.h>
-#include <src/core/wavefunction/Wavefunction.h>
-#include <src/core/dynamics/ExactPropagator.h>
-#include <src/core/dynamics/Solver.h>
-#include <src/core/field/Mbf.h>
+#include <M7_lib/io/Options.h>
+#include <M7_lib/wavefunction/Wavefunction.h>
+#include <M7_lib/dynamics/ExactPropagator.h>
+#include <M7_lib/dynamics/Solver.h>
+#include <M7_lib/field/Mbf.h>
 #include "gtest/gtest.h"
 
 

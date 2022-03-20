@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/io/FortranNamelistReader.h"
+#include "M7_lib/io/FortranNamelistReader.h"
 
 TEST(FortranNamelistReader, IsolateValue) {
     std::string line = " &FCI NORB=  12,NELEC=12,MS2=0, TREL=.TRUE., ORBSYM=3,2,1,1,4,1,5,3,2,1,5,6";

@@ -2,10 +2,10 @@
 // Created by RJA on 24/09/2020.
 //
 
-#include <src/core/foreach/ForeachVirtual.h>
+#include <M7_lib/foreach/ForeachVirtual.h>
 #include "gtest/gtest.h"
-#include "src/core/table/BufferedFields.h"
-#include "src/core/connection/Connections.h"
+#include "M7_lib/table/BufferedFields.h"
+#include "M7_lib/connection/Connections.h"
 
 namespace bos_onv_connection_test {
     /**

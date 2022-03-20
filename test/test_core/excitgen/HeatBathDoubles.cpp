@@ -2,11 +2,11 @@
 // Created by rja on 09/05/2020.
 //
 
-#include <src/core/excititer/ExcitIters.h>
+#include <M7_lib/excititer/ExcitIters.h>
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
-#include "src/core/excitgen/HeatBathDoubles.h"
-#include "src/core/field/Mbf.h"
+#include "M7_lib/excitgen/HeatBathDoubles.h"
+#include "M7_lib/field/Mbf.h"
 
 TEST(HeatBathDoubles, SmallFromHFDeterminant){
     PRNG prng(14, 1000000);

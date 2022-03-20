@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/hamiltonian/InteractingBoseGasBosHam.h"
-#include "src/core/hamiltonian/Hamiltonian.h"
+#include "M7_lib/hamiltonian/InteractingBoseGasBosHam.h"
+#include "M7_lib/hamiltonian/Hamiltonian.h"
 
 TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     const size_t nwave = 3;

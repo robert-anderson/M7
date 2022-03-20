@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/enumerator/FrmBosOnvEnumerator.h"
+#include "M7_lib/enumerator/FrmBosOnvEnumerator.h"
 
 TEST(FermionBosonEnumerator, SpinNonCon){
     const size_t nsite=4, nelec=4, nmode=4, occ_cutoff=3;

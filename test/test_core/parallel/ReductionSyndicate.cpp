@@ -2,10 +2,10 @@
 // Created by RJA on 19/11/2020.
 //
 
-#include <src/core/table/BufferedFields.h>
-#include <src/core/parallel/Reduction.h>
+#include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/parallel/Reduction.h>
 #include "gtest/gtest.h"
-#include "src/core/parallel/ReductionMember.h"
+#include "M7_lib/parallel/ReductionMember.h"
 
 /*
 TEST(ReductionSyndicate, Test){

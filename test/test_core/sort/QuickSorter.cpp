@@ -2,10 +2,10 @@
 // Created by rja on 03/03/2021.
 //
 
-#include "src/core/table/BufferedFields.h"
-#include "src/core/table/BufferedTable.h"
-#include "src/core/sort/LambdaQuickSorter.h"
-#include "src/core/sort/QuickSorter.h"
+#include "M7_lib/table/BufferedFields.h"
+#include "M7_lib/table/BufferedTable.h"
+#include "M7_lib/sort/LambdaQuickSorter.h"
+#include "M7_lib/sort/QuickSorter.h"
 #include "gtest/gtest.h"
 
 namespace quick_sorter_test {

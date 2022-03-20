@@ -3,8 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include <defs.h>
-#include <src/core/sample/Aliaser.h>
+#include <M7_lib/defs.h>
+#include <M7_lib/sample/Aliaser.h>
 
 TEST(Aliaser, DistributionCheck) {
     PRNG prng(18, 1e4);

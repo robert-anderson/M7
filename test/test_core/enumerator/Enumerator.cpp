@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/enumerator/Enumerator.h"
+#include "M7_lib/enumerator/Enumerator.h"
 
 TEST(Enumerator, CombinationsDistinct){
     const size_t n=5, r=2;

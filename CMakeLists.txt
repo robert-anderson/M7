@@ -119,5 +119,5 @@ add_compile_options(-Wall -Wextra)
 add_compile_options(-Wno-unused-function -Wno-unused-parameter)
 
 add_subdirectory(src)
-# add_subdirectory(test)
+add_subdirectory(test)
 add_subdirectory(assets)

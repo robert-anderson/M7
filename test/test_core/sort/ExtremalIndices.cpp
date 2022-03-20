@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/sort/ExtremalIndices.h"
+#include "M7_lib/sort/ExtremalIndices.h"
 
 TEST(ExtremalIndices, Ascending) {
     std::vector<int> data = {6, 13, -12, 2, 9, 0, 1, -99, 1999};

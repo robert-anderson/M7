@@ -2,7 +2,7 @@
 // Created by rja on 22/08/2021.
 //
 
-#include "src/core/io/BosdumpFileReader.h"
+#include "M7_lib/io/BosdumpFileReader.h"
 #include "gtest/gtest.h"
 
 TEST(BosdumpFileReader, ReadFile){

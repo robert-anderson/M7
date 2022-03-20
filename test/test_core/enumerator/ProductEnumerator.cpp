@@ -3,8 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/enumerator/ProductEnumerator.h"
-#include "src/core/util/utils.h"
+#include "M7_lib/enumerator/ProductEnumerator.h"
+#include "M7_lib/util/utils.h"
 
 TEST(ProductEnumerator, Test){
     const size_t nind = 4;

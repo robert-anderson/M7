@@ -2,7 +2,7 @@
 // Created by rja on 07/01/2022.
 //
 
-#include "src/core/linalg/Sparse.h"
+#include "M7_lib/linalg/Sparse.h"
 #include "gtest/gtest.h"
 
 TEST(Sparse, RectMatrixVectorProduct){

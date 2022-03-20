@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/io/FcidumpFileReader.h"
+#include "M7_lib/io/FcidumpFileReader.h"
 
 TEST(FcidumpHeader, EmptyFilename) {
     FcidumpHeader header("");

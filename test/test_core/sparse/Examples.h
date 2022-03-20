@@ -5,7 +5,7 @@
 #ifndef M7_SPARSE_EXAMPLES_H
 #define M7_SPARSE_EXAMPLES_H
 
-#include "linalg/Sparse.h"
+#include "M7_lib/linalg/Sparse.h"
 
 namespace sparse_matrix_examples {
 

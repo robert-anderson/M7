@@ -2,10 +2,10 @@
 // Created by rja on 26/08/2021.
 //
 
-#include "src/core/excititer/LadderHopping.h"
+#include "M7_lib/excititer/LadderHopping.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"
-#include "src/core/excitgen/LadderHoppingPc.h"
+#include "M7_lib/excitgen/LadderHoppingPc.h"
 
 TEST(LadderHopping, HubbardUniform1101){
     PRNG prng(14, 1000000);

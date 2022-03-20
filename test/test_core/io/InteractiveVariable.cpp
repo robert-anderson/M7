@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/io/InteractiveVariable.h"
+#include "M7_lib/io/InteractiveVariable.h"
 
 TEST(InteractiveVariable, Test){
     InteractiveVariableFile iv("some_uint");

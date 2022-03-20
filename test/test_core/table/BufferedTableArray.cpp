@@ -2,11 +2,11 @@
 // Created by rja on 11/11/2020.
 //
 
-#include <src/core/field/Row.h>
-#include <src/core/field/Fields.h>
-#include <src/core/table/BufferedFields.h>
+#include <M7_lib/field/Row.h>
+#include <M7_lib/field/Fields.h>
+#include <M7_lib/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "src/core/table/BufferedTableArray.h"
+#include "M7_lib/table/BufferedTableArray.h"
 
 TEST(BufferedTableArray, Resize){
     struct TestRow : Row {

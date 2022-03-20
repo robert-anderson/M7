@@ -5,8 +5,8 @@
 #ifndef M7_EXCITGENTESTER_H
 #define M7_EXCITGENTESTER_H
 
-#include "src/core/excitgen/ExcitGen.h"
-#include "src/core/excititer/ExcitIter.h"
+#include "M7_lib/excitgen/ExcitGen.h"
+#include "M7_lib/excititer/ExcitIter.h"
 
 namespace excit_gen_tester {
     struct ResultRow : Row {

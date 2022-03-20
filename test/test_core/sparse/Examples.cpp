@@ -3,8 +3,8 @@
 //
 
 #include "Examples.h"
-#include "hash/Hashing.h"
-#include "parallel/MPIAssert.h"
+#include "M7_lib/hash/Hashing.h"
+#include "M7_lib/parallel/MPIAssert.h"
 
 sparse::Matrix<double>
 sparse_matrix_examples::rect_double(const size_t &nrow, const size_t &ncol, const size_t &nnonzero_per_row) {

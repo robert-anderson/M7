@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-04-01.
 //
 
-#include <src/core/hash/Hashing.h>
+#include <M7_lib/hash/Hashing.h>
 #include "gtest/gtest.h"
 
 TEST(Hashing, Determinism){

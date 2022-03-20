@@ -3,9 +3,9 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/wavefunction/Wavefunction.h"
-#include "src/core/dynamics/ExactPropagator.h"
-#include "src/core/dynamics/Solver.h"
+#include "M7_lib/wavefunction/Wavefunction.h"
+#include "M7_lib/dynamics/ExactPropagator.h"
+#include "M7_lib/dynamics/Solver.h"
 
 // tests of propagators should be done in the verification suite
 #if 0

@@ -2,7 +2,7 @@
 // Created by rja on 07/08/2021.
 //
 
-#include "src/core/util/utils.h"
+#include "M7_lib/util/utils.h"
 #include "gtest/gtest.h"
 
 using namespace integer_utils;

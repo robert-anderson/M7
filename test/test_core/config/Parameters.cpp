@@ -2,7 +2,7 @@
 // Created by rja on 23/06/2021.
 //
 
-#include <src/core/config/Parameters.h>
+#include <M7_lib/config/Parameters.h>
 #include "gtest/gtest.h"
 
 namespace parameters_test {

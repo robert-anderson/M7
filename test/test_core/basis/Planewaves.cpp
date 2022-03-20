@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "src/core/basis/Planewaves.h"
+#include "M7_lib/basis/Planewaves.h"
 
 TEST(Planewaves, HeterogeneousExtents) {
     defs::inds shape = {3, 5, 2};
