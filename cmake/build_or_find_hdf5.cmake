@@ -51,7 +51,14 @@ function(build_or_find_hdf5 target)
                 ${OWN_HDF5_ROOT}/lib/libhdf5.a
         )
     else()
-        find_package(HDF5 REQUIRED COMPONENTS C HL)
+        find_package(HDF5 COMPONENTS C HL)
+        if (NOT ${HDF5_FOUND})
+            message(FATAL_ERROR "HDF5 not found. Either specify the environment "
+                "variable HDF5_ROOT to guide to a valid HDF5 installation, "
+                "or use the option `-DBUILD_HDF5=ON` to download "
+                "and compile HDF5 automatically."
+            )
+        endif()
 
         add_library(${target} INTERFACE)
         target_link_libraries(${target} INTERFACE hdf5::hdf5 hdf5::hdf5_hl)

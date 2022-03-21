@@ -36,11 +36,17 @@ add_subdirectory(table)
 add_subdirectory(util)
 add_subdirectory(wavefunction)
 
-add_subdirectory("${CMAKE_SOURCE_DIR}/external/yaml-cpp" lib/yaml-cpp)
+add_subdirectory(
+    "${CMAKE_SOURCE_DIR}/external/yaml-cpp"
+    "${CMAKE_BINARY_DIR}/external/yaml-cpp"
+)
 target_compile_options(yaml-cpp PRIVATE -w)
 target_link_libraries(M7_lib yaml-cpp)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/spdlog-1.x lib/spdlog)
+add_subdirectory(
+    ${CMAKE_SOURCE_DIR}/external/spdlog-1.x
+    ${CMAKE_BINARY_DIR}/external/spdlog-1.x
+)
 target_link_libraries(M7_lib spdlog)
 
 build_arpack(my_arpack)
@@ -96,11 +102,10 @@ endif ()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(M7_lib
         PUBLIC
-             -mbmi
+             -mbmi -g
         PRIVATE
-            -g
-            -Wall -Wextra
             -Wno-unused-function -Wno-unused-parameter
+            -Wall -Wextra
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
         target_compile_options(M7_lib
@@ -130,3 +135,10 @@ message(STATUS "${compile_options}")
 get_target_property(compile_definitions M7_lib COMPILE_DEFINITIONS)
 message(STATUS "The compile definitions are:")
 message(STATUS "${compile_definitions}")
+
+
+
+set_source_files_properties(test.cpp
+    PROPERTIES COMPILE_FLAGS
+        -Wno-unused-function
+)
