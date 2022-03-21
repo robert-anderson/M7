@@ -32,8 +32,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             -Wall -Wextra
     )
     if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-        target_compile_options(unittest
-        )
     elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
         target_compile_options(unittest
             PRIVATE
