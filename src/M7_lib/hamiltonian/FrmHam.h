@@ -87,8 +87,8 @@ struct NullFrmHam : FrmHam {
 /**
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
-struct SpinFrmHam : FrmHam {
-    SpinFrmHam(size_t nelec, size_t nsite, int ms2_restrict): FrmHam(nelec, nsite, ms2_restrict){}
+struct SpinModelFrmHam : FrmHam {
+    SpinModelFrmHam(size_t nelec, size_t nsite, int ms2_restrict): FrmHam(nelec, nsite, ms2_restrict){}
 };
 
 #endif //M7_FRMHAM_H

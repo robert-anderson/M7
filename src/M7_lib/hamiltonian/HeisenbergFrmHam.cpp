@@ -5,7 +5,7 @@
 #include "HeisenbergFrmHam.h"
 
 HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice) :
-        SpinFrmHam(lattice.nsite(), lattice.nsite(), 0), m_j(j), m_lattice(std::move(lattice)){
+        SpinModelFrmHam(lattice.nsite(), lattice.nsite(), 0), m_j(j), m_lattice(std::move(lattice)){
     m_contribs_2200.set_nonzero(exsig_utils::ex_double);
     m_contribs_2200.set_nonzero(0);
     log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice.info());

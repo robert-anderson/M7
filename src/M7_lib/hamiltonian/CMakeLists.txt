@@ -27,6 +27,6 @@ target_sources(M7_lib
         LadderHam.cpp
         LadderHam.h
         SumFrmHam.h
-        SpinHam.cpp
-        SpinHam.h
+        SpinSquareFrmHam.cpp
+        SpinSquareFrmHam.h
 )

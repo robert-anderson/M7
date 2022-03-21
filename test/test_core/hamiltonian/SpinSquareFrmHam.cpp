@@ -4,13 +4,13 @@
 
 #include <gtest/gtest.h>
 
-#include <M7_lib/hamiltonian/SpinHam.h>
+#include <M7_lib/hamiltonian/SpinSquareFrmHam.h>
 #include <M7_lib/table/BufferedFields.h>
 #include <M7_lib/connection/Connections.h>
 
 
-TEST(SpinHam, TestSpinHamiltonian) {
-    SpinHam s2(8, 6, 2);
+TEST(SpinSquareFrmHam, TestSpinHamiltonian) {
+    SpinSquareFrmHam s2(8, 6, 2);
 
     {
         buffered::FrmOnv det_i(s2.m_nsite);

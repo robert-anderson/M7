@@ -20,7 +20,7 @@
 #include "GeneralBosHam.h"
 #include "HeisenbergFrmHam.h"
 #include "SumFrmHam.h"
-#include "SpinHam.h"
+#include "SpinSquareFrmHam.h"
 
 
 using namespace field;
@@ -79,11 +79,11 @@ private:
          * bare hamiltonian
          */
         ham_t bare_ham(opts);
-        SpinHam spin_ham(bare_ham);
+        SpinSquareFrmHam spin_ham(bare_ham);
         /*
          * now the sum can be cheaply created my moving these two components
          */
-        return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinHam>(std::move(bare_ham), std::move(spin_ham), j));
+        return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinSquareFrmHam>(std::move(bare_ham), std::move(spin_ham), j));
     }
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts);

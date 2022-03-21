@@ -17,7 +17,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
         auto fn = [this, &h](const field::FrmOnv &bra, size_t ibra, const field::FrmOnv &ket, size_t iket) {
             (*this)(ibra, iket) = h.get_element(bra, ket);
         };
-        if (dynamic_cast<const SpinFrmHam *>(h.m_frm.get())) {
+        if (dynamic_cast<const SpinModelFrmHam *>(h.m_frm.get())) {
             return unique_t(new Pair<frm::Spins>({h.m_bd.m_nsite, h.m_frm->m_ms2_restrict}, fn));
         } else if (h.m_frm->m_kramers_attrs.conserving()) {
             return unique_t(new Pair<frm::Ms2Conserve>({h.m_bd.m_nsite, h.nelec(), h.m_frm->m_ms2_restrict}, fn));
@@ -39,7 +39,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
             (*this)(ibra, iket) = h.get_element(bra, ket);
         };
 
-        if (dynamic_cast<const SpinFrmHam *>(h.m_frm.get())) {
+        if (dynamic_cast<const SpinModelFrmHam *>(h.m_frm.get())) {
             typedef frm_bos::BosGeneralOpen<frm::Spins> foreach_t;
             return std::unique_ptr<PairBase>(
                     new Pair<foreach_t>({{h.m_bd.m_nsite, h.m_frm->m_ms2_restrict}, bos_foreach}, fn));
