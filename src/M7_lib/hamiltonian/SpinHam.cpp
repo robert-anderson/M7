@@ -43,12 +43,10 @@ defs::ham_t SpinHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) cons
     {
         return field::FrmOnv::isite(i, m_nsite);
     };
-    return (get_spin(i) == get_spin(j)
-            || get_spin(k) == get_spin(l)
-            || spatial_orbital(i) == spatial_orbital(j)
-            || spatial_orbital(k) == spatial_orbital(l)
-            || (spatial_orbital(i) == spatial_orbital(k)
-             && spatial_orbital(j) != spatial_orbital(l))
-            || (spatial_orbital(i) == spatial_orbital(l)
-             && spatial_orbital(j) != spatial_orbital(k))) ? 0.0 : 1.0;
+    return get_spin(i) != get_spin(j)
+                && get_spin(k) != get_spin(l)
+                && spatial_orbital(i) != spatial_orbital(j)
+                && spatial_orbital(k) != spatial_orbital(l)
+                && ((spatial_orbital(i) == spatial_orbital(k) && spatial_orbital(j) == spatial_orbital(l))
+                    || (spatial_orbital(i) == spatial_orbital(l) && spatial_orbital(j) == spatial_orbital(k)));
 }

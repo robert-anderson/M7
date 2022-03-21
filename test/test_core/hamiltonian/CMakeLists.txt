@@ -6,4 +6,5 @@ target_sources(unittest
         ForeachConnection.cpp
         HeisenbergFrmHam.cpp
         InteractingBoseGasBosHam.cpp
+        SpinHam.cpp
 )

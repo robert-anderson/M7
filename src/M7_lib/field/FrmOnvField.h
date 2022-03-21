@@ -120,6 +120,10 @@ public:
 
     static size_t ibit(const size_t& ispin, const size_t& isite, const size_t& nsite);
 
+    static size_t ibit(std::pair<size_t, size_t> pair, const size_t& nsite) {
+        return ibit(pair.first, pair.second, nsite);
+    };
+
     /**
      * convenient conversion between spin-site and site indices
      * @param ibit
@@ -146,6 +150,10 @@ public:
      *  flat index od spin-site
      */
     size_t ibit(const size_t& ispin, const size_t& isite) const;
+
+    size_t ibit(std::pair<size_t, size_t>& pair) const {
+        return ibit(pair.first, pair.second);
+    }
 };
 
 

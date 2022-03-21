@@ -68,10 +68,24 @@ public:
         m_inds.push_back(i);
     }
 
+    void add(std::pair<size_t, size_t> pair) {
+        add(FrmOnvField::ibit(pair.first, pair.second, m_nsite));
+    }
+
     void set(const defs::inds& orbs, const defs::inds& inds){
         clear();
         for (const auto& ind: inds) add(orbs[ind]);
         DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
+    }
+
+    void add(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
+        add(pair1);
+        add(pair2);
+    }
+
+    void set(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
+        clear();
+        add(pair1, pair2);
     }
 
     defs::inds::const_iterator cbegin() const {
@@ -225,6 +239,67 @@ public:
         clear();
         add(ann1, ann2, cre1, cre2);
     }
+
+    /**
+     * convenient wrapper for a fermion number-conserving single excitation
+     *
+     * The pairs are denoting {spin index, site index} to directly index spin orbitals
+     * @param ann
+     *  first spin orbital index pair to annihilate from a src determinant
+     * @param cre
+     *  first spin orbital index pair to create in a dst determinant
+     */
+    void add(
+        std::pair<size_t, size_t> ann,
+        std::pair<size_t, size_t> cre
+    ) {
+        m_ann.add(ann);
+        m_cre.add(cre);
+    };
+
+
+    void set(
+        std::pair<size_t, size_t> ann,
+        std::pair<size_t, size_t> cre
+    ) {
+        clear();
+        add(ann, cre);
+    };
+
+    /**
+     * convenient wrapper for a fermion number-conserving double excitation
+     *
+     * The pairs are denoting {spin index, site index} to directly index spin orbitals
+     * @param ann1
+     *  first spin orbital index pair to annihilate from a src determinant
+     * @param ann2
+     *  second spin orbital index pair to annihilate from a src determinant
+     * @param cre1
+     *  first spin orbital index pair to create in a dst determinant
+     * @param cre2
+     *  second spin orbital index pair to create in a dst determinant
+     */
+    void add(
+        std::pair<size_t, size_t> ann1,
+        std::pair<size_t, size_t> ann2,
+        std::pair<size_t, size_t> cre1,
+        std::pair<size_t, size_t> cre2
+    ) {
+        m_ann.add(ann1, ann2);
+        m_cre.add(cre1, cre2);
+    };
+
+
+    void set(
+        std::pair<size_t, size_t> ann1,
+        std::pair<size_t, size_t> ann2,
+        std::pair<size_t, size_t> cre1,
+        std::pair<size_t, size_t> cre2
+    ) {
+        clear();
+        add(ann1, ann2, cre1, cre2);
+    };
+
     /**
      * @return
      *  the annihilation string cast to a vector
