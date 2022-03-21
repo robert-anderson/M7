@@ -8,8 +8,8 @@
 #if 0
 
 #include <M7_lib/parallel/Reducible.h>
-#include <M7_lib/util/defs.h"
-#include <M7_lib/basis/DeterminantField.h"
+#include <M7_lib/util/defs.h>
+#include <M7_lib/basis/DeterminantField.h>
 
 class KramersSectorOccupation {
     const size_t m_nelec;
