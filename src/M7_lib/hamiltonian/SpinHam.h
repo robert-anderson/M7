@@ -2,18 +2,16 @@
 // Created by Oskar Weser on 17/3/22.
 //
 
-#ifndef M7_GENERALFRMHAM_H
-#define M7_GENERALFRMHAM_H
+#ifndef M7_SPINHAM_H
+#define M7_SPINHAM_H
 
 #include "FrmHam.h"
 
 struct SpinHam : FrmHam {
 
-    SpinHam(size_t nelec, size_t nsite, int ms2_restrict)
-        : FrmHam(nelec, nsite, ms2_restrict){}
+    SpinHam(size_t nelec, size_t nsite, int ms2_restrict) : FrmHam(nelec, nsite, ms2_restrict){}
 
-    SpinHam(const FrmHam &in_ham)
-        : SpinHam(in_ham.m_nelec, in_ham.m_nsite, in_ham.m_ms2_restrict) {}
+    SpinHam(const FrmHam &in_ham): FrmHam(in_ham){};
 
     explicit SpinHam(const fciqmc_config::FermionHamiltonian &opts);
 
@@ -28,5 +26,4 @@ struct SpinHam : FrmHam {
     defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 };
 
-
-#endif //M7_GENERALFRMHAM_H
+#endif //M7_SPINHAM_H

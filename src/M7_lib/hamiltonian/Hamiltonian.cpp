@@ -6,7 +6,6 @@
 #include "GeneralFrmHam.h"
 #include "GeneralLadderHam.h"
 #include "InteractingBoseGasBosHam.h"
-#include "SumFrmHam.h"
 
 BasisData Hamiltonian::make_bd() const {
     if (m_ladder->enabled()) return m_ladder->m_bd;
@@ -14,19 +13,13 @@ BasisData Hamiltonian::make_bd() const {
 }
 
 std::unique_ptr<FrmHam> Hamiltonian::make_frm(const fciqmc_config::FermionHamiltonian &opts) {
-    std::unique_ptr<FrmHam> H;
     if (opts.m_hubbard.enabled())
-        H = std::unique_ptr<FrmHam>(new HubbardFrmHam(opts));
+        return make_frm<HubbardFrmHam>(opts);
     else if (opts.m_heisenberg.enabled())
-        H = std::unique_ptr<FrmHam>(new HeisenbergFrmHam(opts));
+        return make_frm<HeisenbergFrmHam>(opts);
     else if (opts.m_fcidump.enabled())
-        H = std::unique_ptr<FrmHam>(new GeneralFrmHam(opts));
-    else
-        return std::unique_ptr<FrmHam>(new NullFrmHam);
-
-    if (opts.m_spin_penalty_j)
-        H = std::unique_ptr<FrmHam>(new SumFrmHam(H, SpinHam(H), opts.m_spin_penalty_j));
-    return H;
+        return make_frm<GeneralFrmHam>(opts);
+    return std::unique_ptr<FrmHam>(new NullFrmHam);
 }
 
 std::unique_ptr<LadderHam> Hamiltonian::make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite) {

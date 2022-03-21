@@ -24,14 +24,14 @@ struct SumFrmHam : FrmHam {
     defs::ham_t m_weight;
 
     SumFrmHam(ham_t1&& h1, ham_t2&& h2, defs::ham_t weight):
-        m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){}
+            FrmHam(h1), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){}
 
     defs::ham_t get_coeff_1100(size_t i, size_t j) const override {
         return m_h1.get_coeff_1100(i, j) + m_weight * m_h2.get_coeff_1100(i, j);
     }
 
     defs::ham_t get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const override {
-        return m_h1.get_coeff_2200(i, j) + m_weight * m_h2.get_coeff_2200(i, j);
+        return m_h1.get_coeff_2200(i, j, k, l) + m_weight * m_h2.get_coeff_2200(i, j, k, l);
     }
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override {

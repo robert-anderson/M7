@@ -19,6 +19,9 @@
 #include "HolsteinBosHam.h"
 #include "GeneralBosHam.h"
 #include "HeisenbergFrmHam.h"
+#include "SumFrmHam.h"
+#include "SpinHam.h"
+
 
 using namespace field;
 
@@ -52,6 +55,36 @@ private:
     mutable suite::Conns m_work_conn;
 
     BasisData make_bd() const;
+
+    /**
+     * make the type of fermion Hamiltonian called for by the configuration, Then either return it directly, or combine
+     * it with the spin penalty if this modification is specified in the options
+     * @tparam ham_t
+     *  FrmHam-derived class defining the Hamiltonian being created
+     * @param opts
+     *  configuration document section pertaining to the fermion hamiltonian
+     * @return
+     *  unique pointer to the polymorphic base class, FrmHam
+     */
+    template<typename ham_t>
+    std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
+        static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
+        auto j = opts.m_spin_penalty_j.get();
+        /*
+         * if the scalar of the spin square operator is zero, just return the bare hamiltonian
+         */
+        if (j==0.0) return std::unique_ptr<FrmHam>(new ham_t(opts));
+        /*
+         * build the bare hamiltonian and let a spin square hamiltonian instance be created by read-only access to the
+         * bare hamiltonian
+         */
+        ham_t bare_ham(opts);
+        SpinHam spin_ham(bare_ham);
+        /*
+         * now the sum can be cheaply created my moving these two components
+         */
+        return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinHam>(std::move(bare_ham), std::move(spin_ham), j));
+    }
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts);
 
