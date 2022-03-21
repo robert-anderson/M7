@@ -35,12 +35,20 @@ defs::ham_t SpinHam::get_coeff_1100(const size_t &i, const size_t &j) const {
 }
 
 defs::ham_t SpinHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
-    return (field::FrmOnv::ispin(i, m_nsite) == field::FrmOnv::ispin(j, m_nsite)
-                || field::FrmOnv::ispin(k, m_nsite) == field::FrmOnv::ispin(l, m_nsite)
-                || field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(j, m_nsite)
-                || field::FrmOnv::isite(k, m_nsite) == field::FrmOnv::isite(l, m_nsite)
-                || (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(k, m_nsite)
-                    && field::FrmOnv::isite(j, m_nsite) != field::FrmOnv::isite(l, m_nsite))
-                || (field::FrmOnv::isite(i, m_nsite) == field::FrmOnv::isite(l, m_nsite)
-                    && field::FrmOnv::isite(j, m_nsite) != field::FrmOnv::isite(k, m_nsite))) ? 0.0 : 1.0;
+    auto get_spin = [this](size_t i)
+    {
+        return field::FrmOnv::ispin(i, m_nsite);
+    };
+    auto spatial_orbital = [this](size_t i)
+    {
+        return field::FrmOnv::isite(i, m_nsite);
+    };
+    return (get_spin(i) == get_spin(j)
+            || get_spin(k) == get_spin(l)
+            || spatial_orbital(i) == spatial_orbital(j)
+            || spatial_orbital(k) == spatial_orbital(l)
+            || (spatial_orbital(i) == spatial_orbital(k)
+             && spatial_orbital(j) != spatial_orbital(l))
+            || (spatial_orbital(i) == spatial_orbital(l)
+             && spatial_orbital(j) != spatial_orbital(k))) ? 0.0 : 1.0;
 }
