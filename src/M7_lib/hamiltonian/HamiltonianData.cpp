@@ -38,11 +38,11 @@ bool ham_data::FrmModelAttributes::is_hubbard_1d_pbc() const {
     return m_on_site_only_doubles && (m_nnp_only_singles && !m_nn_only_singles);
 }
 
-size_t ham_data::FrmModelAttributes::iorb_to_isite(const size_t &iorb, const size_t &nsite) {
+size_t ham_data::FrmModelAttributes::iorb_to_isite(size_t iorb, size_t nsite) {
     return iorb < nsite ? iorb : iorb + nsite;
 }
 
-bool ham_data::FrmModelAttributes::nearest_neighbors(const size_t &nsite, const size_t &iorb, const size_t &jorb,
+bool ham_data::FrmModelAttributes::nearest_neighbors(size_t nsite, size_t iorb, size_t jorb,
                                                      bool periodic) {
     auto isite = iorb_to_isite(iorb, nsite);
     auto jsite = iorb_to_isite(jorb, nsite);
@@ -54,8 +54,8 @@ bool ham_data::FrmModelAttributes::nearest_neighbors(const size_t &nsite, const 
 }
 
 bool
-ham_data::FrmModelAttributes::on_site(const size_t &nsite, const size_t &iorb, const size_t &jorb, const size_t &korb,
-                                      const size_t &lorb) const {
+ham_data::FrmModelAttributes::on_site(size_t nsite, size_t iorb, size_t jorb, size_t korb,
+                                      size_t lorb) const {
     auto isite = iorb_to_isite(iorb, nsite);
     auto jsite = iorb_to_isite(jorb, nsite);
     auto ksite = iorb_to_isite(korb, nsite);
@@ -63,7 +63,7 @@ ham_data::FrmModelAttributes::on_site(const size_t &nsite, const size_t &iorb, c
     return isite == jsite && jsite == ksite && ksite == lsite;
 }
 
-void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i, const size_t &j) {
+void ham_data::FrmModelAttributes::nonzero(size_t nsite, size_t i, size_t j) {
     // non-diagonal 1body term is not disqualifying for "hubbard-like" Hamiltonian designation
     if (i != j){
         if (!nearest_neighbors(nsite, i, j, false)) m_nn_only_singles = false;
@@ -71,8 +71,8 @@ void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i,
     }
 }
 
-void ham_data::FrmModelAttributes::nonzero(const size_t &nsite, const size_t &i, const size_t &j, const size_t &k,
-                                           const size_t &l) {
+void ham_data::FrmModelAttributes::nonzero(size_t nsite, size_t i, size_t j, size_t k,
+                                           size_t l) {
     if (!(i == j && j == k && k == l)) m_on_site_only_doubles = false;
 }
 

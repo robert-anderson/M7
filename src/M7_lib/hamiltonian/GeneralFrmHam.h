@@ -29,9 +29,9 @@ struct GeneralFrmHam : FrmHam {
     explicit GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
             GeneralFrmHam(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_charge) {}
 
-    defs::ham_t get_coeff_1100(const size_t &i, const size_t &j) const override;
+    defs::ham_t get_coeff_1100(size_t i, size_t j) const override;
 
-    defs::ham_t get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const override;
+    defs::ham_t get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const override;
 
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
@@ -42,7 +42,7 @@ struct GeneralFrmHam : FrmHam {
         const auto &cre = conn.m_cre[0];
 
         defs::ham_t element = m_int_1(cre, ann);
-        auto fn = [&](const size_t &ibit) {
+        auto fn = [&](size_t ibit) {
             if (ibit != ann) element += m_int_2.phys_antisym_element(cre, ibit, ann, ibit);
         };
         onv.foreach(fn);

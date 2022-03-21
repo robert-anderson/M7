@@ -31,20 +31,20 @@ struct GeneralLadderHam : LadderHam {
     GeneralLadderHam(const fciqmc_config::LadderHamiltonian &opts) :
         GeneralLadderHam(EbdumpHeader(opts.m_ebdump.m_path), opts.m_nboson_max){}
 
-    defs::ham_t get_coeff_0010(const size_t &imode) const override;
+    defs::ham_t get_coeff_0010(size_t imode) const override;
 
-    defs::ham_t get_coeff_0001(const size_t &imode) const override;
+    defs::ham_t get_coeff_0001(size_t imode) const override;
 
-    defs::ham_t get_coeff_1110(const size_t &imode, const size_t &j, const size_t &i) const override;
+    defs::ham_t get_coeff_1110(size_t imode, size_t j, size_t i) const override;
 
-    defs::ham_t get_coeff_1101(const size_t &imode, const size_t &j, const size_t &i) const override;
+    defs::ham_t get_coeff_1101(size_t imode, size_t j, size_t i) const override;
 
     defs::ham_t get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
 
     defs::ham_t get_element_0001(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
 
 
-    defs::ham_t get_element_pure(const field::FrmBosOnv &onv, const size_t& imode, bool cre) const;
+    defs::ham_t get_element_pure(const field::FrmBosOnv &onv, size_t imode, bool cre) const;
 
     defs::ham_t get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 
@@ -52,7 +52,7 @@ struct GeneralLadderHam : LadderHam {
 
 
     defs::ham_t get_element_coupled(const field::FrmBosOnv &onv,
-                                    const conn::FrmOnv& frm_conn, const size_t& imode, bool cre) const;
+                                    const conn::FrmOnv& frm_conn, size_t imode, bool cre) const;
 
     defs::ham_t get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 

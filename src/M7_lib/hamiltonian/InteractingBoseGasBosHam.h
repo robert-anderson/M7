@@ -31,11 +31,11 @@ public:
                                      opts.m_interacting_bose_gas.m_nwave, opts.m_interacting_bose_gas.m_ek_scale){}
 
 
-    defs::ham_t get_coeff_0011(const size_t &i, const size_t &j) const override {
+    defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
         return 0.0;
     }
 
-    defs::ham_t get_coeff_0022(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const override {
+    defs::ham_t get_coeff_0022(size_t i, size_t j, size_t k, size_t l) const override {
         return m_planewaves.conserving(i, j, k, l) ? 1.0 : 0.0;
     }
 

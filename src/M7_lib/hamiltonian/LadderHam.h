@@ -25,10 +25,10 @@ struct LadderHam {
     LadderHam(const BasisData &bd, size_t nboson_max);
 	virtual ~LadderHam(){}
 
-    virtual defs::ham_t get_coeff_0010(const size_t& imode) const {return 0;}
-    virtual defs::ham_t get_coeff_0001(const size_t& imode) const {return 0;}
-    virtual defs::ham_t get_coeff_1110(const size_t &imode, const size_t &j, const size_t &i) const {return 0;}
-    virtual defs::ham_t get_coeff_1101(const size_t &imode, const size_t &j, const size_t &i) const {return 0;}
+    virtual defs::ham_t get_coeff_0010(size_t imode) const {return 0;}
+    virtual defs::ham_t get_coeff_0001(size_t imode) const {return 0;}
+    virtual defs::ham_t get_coeff_1110(size_t imode, size_t j, size_t i) const {return 0;}
+    virtual defs::ham_t get_coeff_1101(size_t imode, size_t j, size_t i) const {return 0;}
 
     virtual defs::ham_t get_element_0010(const field::BosOnv& onv, const conn::BosOnv& conn) const {return 0;}
     virtual defs::ham_t get_element_0001(const field::BosOnv& onv, const conn::BosOnv& conn) const {return 0;}

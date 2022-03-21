@@ -60,12 +60,12 @@ void HubbardFrmHam::log_data() const {
     FrmHam::log_data();
 }
 
-defs::ham_t HubbardFrmHam::get_coeff_1100(const size_t &i, const size_t &j) const {
+defs::ham_t HubbardFrmHam::get_coeff_1100(size_t i, size_t j) const {
     // hopping coeff is always -t
     return -m_lattice.m_dense(i, j);
 }
 
-defs::ham_t HubbardFrmHam::get_coeff_2200(const size_t &i, const size_t &j,
-                                               const size_t &k, const size_t &l) const {
+defs::ham_t HubbardFrmHam::get_coeff_2200(size_t i, size_t j,
+                                               size_t k, size_t l) const {
     return 0.0;
 }

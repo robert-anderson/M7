@@ -56,7 +56,7 @@ namespace ham_data {
          * @return
          *  site index
          */
-        static size_t iorb_to_isite(const size_t &iorb, const size_t &nsite);
+        static size_t iorb_to_isite(size_t iorb, size_t nsite);
 
         /**
          * @param iorb
@@ -66,16 +66,16 @@ namespace ham_data {
          * @return
          * true if orbitals are nearest neighbors
          */
-        static bool nearest_neighbors(const size_t &nsite, const size_t &iorb, const size_t &jorb, bool periodic);
+        static bool nearest_neighbors(size_t nsite, size_t iorb, size_t jorb, bool periodic);
 
-        bool on_site(const size_t &nsite, const size_t &iorb, const size_t &jorb, const size_t &korb, const size_t &lorb) const;
+        bool on_site(size_t nsite, size_t iorb, size_t jorb, size_t korb, size_t lorb) const;
 
-        void nonzero(const size_t & nsite, const size_t & i, const size_t & j);
+        void nonzero(size_t  nsite, size_t  i, size_t  j);
 
         /**
          * non-zero integral reached with chemical notation (ij|kl)
          */
-        void nonzero(const size_t & nsite, const size_t & i, const size_t & j, const size_t & k, const size_t & l);
+        void nonzero(size_t  nsite, size_t  i, size_t  j, size_t  k, size_t  l);
     };
 
     struct KramersAttributes {

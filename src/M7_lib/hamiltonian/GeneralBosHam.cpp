@@ -31,11 +31,11 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header) :
     log_data();
 }
 
-defs::ham_t GeneralBosHam::get_coeff_0011(const size_t &i, const size_t &j) const {
+defs::ham_t GeneralBosHam::get_coeff_0011(size_t i, size_t j) const {
     return BosHam::get_coeff_0011(i, j);
 }
 
-defs::ham_t GeneralBosHam::get_coeff_0022(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t GeneralBosHam::get_coeff_0022(size_t i, size_t j, size_t k, size_t l) const {
     return BosHam::get_coeff_0022(i, j, k, l);
 }
 

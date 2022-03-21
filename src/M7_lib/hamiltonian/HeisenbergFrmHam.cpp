@@ -14,7 +14,7 @@ HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice) :
 HeisenbergFrmHam::HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
         HeisenbergFrmHam(opts.m_heisenberg.m_coupling, lattice::make(opts.m_heisenberg)){}
 
-defs::ham_t HeisenbergFrmHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
     /*
      * normal-ordered SQ operators are:
      *      pa+  qb+  qa   pb

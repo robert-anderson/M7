@@ -39,9 +39,9 @@ struct FrmHam {
                        bool complex_valued=false, defs::inds site_irreps = {});
 	virtual ~FrmHam(){}
 
-    virtual defs::ham_t get_coeff_1100(const size_t& i, const size_t& j) const {return 0;}
-    virtual defs::ham_t get_coeff_2200(const size_t& i, const size_t& j,
-                                       const size_t& k, const size_t& l) const {return 0;}
+    virtual defs::ham_t get_coeff_1100(size_t i, size_t j) const {return 0;}
+    virtual defs::ham_t get_coeff_2200(size_t i, size_t j,
+                                       size_t k, size_t l) const {return 0;}
 
     virtual defs::ham_t get_element_0000(const field::FrmOnv &onv) const {return 0;}
     virtual defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {return 0;}

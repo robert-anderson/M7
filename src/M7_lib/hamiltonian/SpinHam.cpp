@@ -9,7 +9,7 @@ defs::ham_t SpinHam::get_element_0000(const field::FrmOnv &onv) const {
     // TODO(@Oskar): make it a const member
     const auto Sz_term = 0.25 * m_ms2_restrict * (m_ms2_restrict - 2);
     uint n_os_a = 0;
-    auto count_n_OS_a = [&](const size_t &i) {
+    auto count_n_OS_a = [&](size_t i) {
         if (i < m_nsite) {
             n_os_a += onv.get(i + m_nsite);
         };
@@ -30,11 +30,11 @@ defs::ham_t SpinHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmO
     return conn.phase(onv) ? -element : element;
 }
 
-defs::ham_t SpinHam::get_coeff_1100(const size_t &i, const size_t &j) const {
+defs::ham_t SpinHam::get_coeff_1100(size_t i, size_t j) const {
     return 0.0;
 }
 
-defs::ham_t SpinHam::get_coeff_2200(const size_t &i, const size_t &j, const size_t &k, const size_t &l) const {
+defs::ham_t SpinHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
     auto get_spin = [this](size_t i)
     {
         return field::FrmOnv::ispin(i, m_nsite);

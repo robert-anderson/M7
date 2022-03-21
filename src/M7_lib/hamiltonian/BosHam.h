@@ -22,9 +22,9 @@ struct BosHam {
     BosHam(size_t nmode, size_t nboson);
 	virtual ~BosHam(){}
 
-    virtual defs::ham_t get_coeff_0011(const size_t& i, const size_t& j) const {return 0;}
-    virtual defs::ham_t get_coeff_0022(const size_t& i, const size_t& j,
-                                       const size_t& k, const size_t& l) const {return 0;}
+    virtual defs::ham_t get_coeff_0011(size_t i, size_t j) const {return 0;}
+    virtual defs::ham_t get_coeff_0022(size_t i, size_t j,
+                                       size_t k, size_t l) const {return 0;}
 
     virtual defs::ham_t get_element_0000(const field::BosOnv &onv) const {return 0;}
     virtual defs::ham_t get_element_0011(const field::BosOnv &onv, const conn::BosOnv& conn) const {return 0;}
