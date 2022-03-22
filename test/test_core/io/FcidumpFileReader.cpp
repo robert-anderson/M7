@@ -15,8 +15,8 @@ TEST(FcidumpHeader, EmptyFilename) {
     ASSERT_EQ(header.m_relativistic, false);
 }
 
-TEST(FcidumpFileReader, Real_6orb){
-    FcidumpFileReader file_reader(defs::assets_root+"/RHF_N2_6o6e/FCIDUMP", false);
+TEST(FcidumpFileReader, Real_6orb) {
+    FcidumpFileReader file_reader(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_header.m_nsite, 6);
@@ -25,23 +25,23 @@ TEST(FcidumpFileReader, Real_6orb){
     file_reader.next(inds, v);
     defs::inds test_inds(4);
     // first entry
-    test_inds = {0,0,0,0};
+    test_inds = {0, 0, 0, 0};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(v),  0.5406487462037872);
+    ASSERT_FLOAT_EQ(consts::real(v), 0.5406487462037872);
     // scan to arbitrary element
-    for (size_t i=0; i<17; ++i) file_reader.next(inds, v);
-    test_inds = {2,1,4,3};
+    for (size_t i = 0; i < 17; ++i) file_reader.next(inds, v);
+    test_inds = {2, 1, 4, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_FLOAT_EQ(consts::real(v), 0.01759459248922075);
     // scan to final element
-    while(file_reader.next(inds, v)){}
+    while (file_reader.next(inds, v)) {}
     test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_FLOAT_EQ(consts::real(v), -98.46644393370157);
 }
 
-TEST(FcidumpFileReader, Integer_8orb){
-    FcidumpFileReader file_reader(defs::assets_root+"/Hubbard_U4_8site/FCIDUMP", false);
+TEST(FcidumpFileReader, Integer_8orb) {
+    FcidumpFileReader file_reader(defs::assets_root + "/Hubbard_U4_8site/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_header.m_nsite, 8);
@@ -50,19 +50,38 @@ TEST(FcidumpFileReader, Integer_8orb){
     file_reader.next(inds, v);
     defs::inds test_inds(4);
     // core energy is the first entry
-    test_inds = {~0ul,~0ul,~0ul,~0ul};
+    test_inds = {~0ul, ~0ul, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_FLOAT_EQ(consts::real(v), 0.0);
     // scan to arbitrary element
-    for (size_t i=0; i<8; ++i) file_reader.next(inds, v);
-    test_inds = {7,7,7,7};
+    for (size_t i = 0; i < 8; ++i) file_reader.next(inds, v);
+    test_inds = {7, 7, 7, 7};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_FLOAT_EQ(consts::real(v), 4.0);
     // scan to final element
-    while(file_reader.next(inds, v)){}
+    while (file_reader.next(inds, v)) {}
     test_inds = {7, 6, ~0ul, ~0ul};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
     ASSERT_FLOAT_EQ(consts::real(v), -1.0);
+}
+
+TEST(FcidumpFileReader, Molcas) {
+    FcidumpFileReader file_reader(defs::assets_root + "/O2_Molcas/FCIDUMP", false);
+    ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
+    ASSERT_TRUE(file_reader.spin_conserving());
+    ASSERT_EQ(file_reader.m_header.m_nsite, 6);
+    defs::inds inds(4);
+    defs::ham_t v;
+    file_reader.next(inds, v);
+    defs::inds test_inds(4);
+
+    test_inds = {0, 0, 0, 0};
+    ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
+    ASSERT_FLOAT_EQ(consts::real(v), 0.75132124044);
+    file_reader.next(inds, v);
+    test_inds = {1, 0, 1, 0};
+    ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
+    ASSERT_FLOAT_EQ(consts::real(v), 0.32107592937E-01);
 }
 
 #ifdef ENABLE_COMPLEX
