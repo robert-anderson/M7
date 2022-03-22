@@ -19,7 +19,7 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j M7
 ```
-The binary will then appear at src/M7. `Release` can be replaced with `Debug` above to build the debug binary.
+The binary will then appear at bin/M7. `Release` can be replaced with `Debug` above to build the debug binary.
 
 Parallel HDF5 is a non-prerequisite dependency which is downloaded, compiled, and linked as a static library during the build process.
 If using the Intel C++ compiler, make sure the compilevars.sh has been sourced to correctly configure the library path environment variables prior to invoking CMake.
