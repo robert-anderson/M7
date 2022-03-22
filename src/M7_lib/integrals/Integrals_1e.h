@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <M7_lib/defs.h>
+#include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/io/FcidumpFileReader.h>
 #include <M7_lib/util/consts.h>
 
@@ -73,8 +74,8 @@ public:
     }
 
     void set(const defs::inds &inds, const T &value) {
-        // DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect number of indices");
-        // DEBUG_ASSERT_TRUE(inds[2] == ~0ul && inds[3] == ~0ul, "only the first two indices should be valid");
+        DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect number of indices");
+        DEBUG_ASSERT_TRUE(inds[2] == ~0ul && inds[3] == ~0ul, "only the first two indices should be valid");
         set(inds[0], inds[1], value);
     }
 
