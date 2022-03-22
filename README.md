@@ -32,13 +32,9 @@ In such cases, set the PATH variable within the IDE's toolchain dialogue to cont
 
 
 # Usage
-The program takes all run time variables through the command line interface.
-The command line options available can be listed by executing the debug or release binaries with the -h or --help option.
-
-Complex configurations can become cumbersome to manage on the command line directly, so particular run time configurations can easily be split over multiple lines in a shell script.
+The program takes all run time variables by parsing a YAML configuration file. To run a calculation specified by `config.yaml`, simply pass the path to `config.yaml` as the only command line argument to the M7 binary. Otherwise, if no argument is specified, the complete specification for the configuration document is written to standard output. Piping this output to `less -RS` may aid the user in searching for particular options.
 
 If the user chooses, the python/ directory contains a simple and convenient wrapper which encapsulates all options, and can handle the execution of distributed instances of M7.
-
 
 # General remarks for contributing developers
 
