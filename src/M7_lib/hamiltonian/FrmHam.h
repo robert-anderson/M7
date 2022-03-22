@@ -25,9 +25,9 @@ struct FrmHam {
     const size_t m_nelec;
     const size_t m_nsite;
     const int m_ms2_restrict;
-    const bool m_complex_valued = false;
+    const bool m_complex_valued;
 
-    AbelianGroupMap m_point_group_map{PointGroup(), defs::inds(m_nsite, 0ul)};
+    AbelianGroupMap m_point_group_map;
 
     defs::ham_t m_e_core = 0.0;
 
@@ -35,20 +35,11 @@ struct FrmHam {
     ham_data::TermContribs m_contribs_2200;
     ham_data::KramersAttributes m_kramers_attrs;
 
-    FrmHam() = delete;
-
     FrmHam(size_t nelec, size_t nsite, int ms2_restrict,
-           bool complex_valued, defs::inds site_irreps);
+                       bool complex_valued=false, defs::inds site_irreps = {});
 
-    FrmHam(size_t nelec, size_t nsite, int ms2_restrict, bool complex_valued);
-
-    FrmHam(size_t nelec, size_t nsite, int ms2_restrict, defs::inds site_irreps);
-
-    FrmHam(size_t nelec, size_t nsite, int ms2_restrict);
-
-    FrmHam(const FrmHam& other)
-        : FrmHam(other.m_nelec, other.m_nsite, other.m_ms2_restrict,
-                 other.m_complex_valued, other.m_point_group_map.m_site_irreps){}
+    FrmHam(const FrmHam& other): FrmHam(other.m_nelec, other.m_nsite, other.m_ms2_restrict,
+                                        other.m_complex_valued, other.m_point_group_map.m_site_irreps){}
 
     FrmHam& operator=(const FrmHam& other){return *this;}
 
