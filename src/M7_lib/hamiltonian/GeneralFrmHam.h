@@ -14,8 +14,7 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict,
-                        bool complex_valued, defs::inds site_irreps = {});
+    GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict, defs::inds site_irreps = {});
 
     GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
 
