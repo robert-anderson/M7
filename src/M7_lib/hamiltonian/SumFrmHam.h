@@ -16,6 +16,8 @@
  */
 template<typename ham_t1, typename ham_t2>
 struct SumFrmHam : FrmHam {
+    static_assert(std::is_base_of<FrmHam, ham_t1>::value, "first template arg must be derived from FrmHam");
+    static_assert(std::is_base_of<FrmHam, ham_t1>::value, "second template arg must be derived from FrmHam");
     ham_t1 m_h1;
     ham_t2 m_h2;
     /**
@@ -24,7 +26,16 @@ struct SumFrmHam : FrmHam {
     defs::ham_t m_weight;
 
     SumFrmHam(ham_t1&& h1, ham_t2&& h2, defs::ham_t weight):
-            FrmHam(h1), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){}
+            FrmHam(h1), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
+        /*
+         * combine attributes of the components
+         */
+        auto& h1_base = static_cast<const FrmHam&>(m_h1);
+        auto& h2_base = static_cast<const FrmHam&>(m_h2);
+        m_contribs_1100 = ham_data::TermContribs(h1_base.m_contribs_1100, h2_base.m_contribs_1100);
+        m_contribs_2200 = ham_data::TermContribs(h1_base.m_contribs_2200, h2_base.m_contribs_2200);
+        m_kramers_attrs = ham_data::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
+    }
 
     defs::ham_t get_coeff_1100(size_t i, size_t j) const override {
         return m_h1.get_coeff_1100(i, j) + m_weight * m_h2.get_coeff_1100(i, j);
