@@ -5,6 +5,14 @@
 #include "SpinSquareFrmHam.h"
 
 
+SpinSquareFrmHam::SpinSquareFrmHam(size_t nelec, size_t nsite, int ms2_restrict)
+        : FrmHam(nelec, nsite, ms2_restrict){}
+
+SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &in_ham) : FrmHam(in_ham){
+    REQUIRE_TRUE(in_ham.m_kramers_attrs.conserving(),
+                 "spin square operator inconsistent with Kramers non-conservation");
+}
+
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     uint n_os_a = 0;
     auto count_n_OS_a = [&](size_t i) {

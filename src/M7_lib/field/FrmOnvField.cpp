@@ -151,6 +151,11 @@ size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite, const size_t 
     return ispin ? nsite+isite : isite;
 }
 
+size_t FrmOnvField::ibit(std::pair<size_t, size_t> pair, const size_t &nsite) {
+    return ibit(pair.first, pair.second, nsite);
+}
+
+
 size_t FrmOnvField::isite(const size_t &ibit) const {
     return isite(ibit, m_nsite);
 }
@@ -161,6 +166,10 @@ size_t FrmOnvField::ispin(const size_t &ibit) const {
 
 size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite) const {
     return ibit(ispin, isite, m_nsite);
+}
+
+size_t FrmOnvField::ibit(std::pair<size_t, size_t> &pair) const {
+    return ibit(pair.first, pair.second);
 }
 
 void FrmOnvField::set(const size_t &bit_offset, const defs::inds &setbits) {
