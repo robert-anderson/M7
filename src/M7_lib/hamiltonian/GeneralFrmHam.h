@@ -14,10 +14,6 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    ham_data::TermContribs m_contribs_1100;
-    ham_data::TermContribs m_contribs_2200;
-    ham_data::KramersAttributes m_kramers_attrs;
-
     GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict,
                         bool complex_valued, defs::inds site_irreps = {});
 
