@@ -6,8 +6,6 @@
 
 
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
-    // TODO(@Oskar): make it a const member
-    const auto Sz_term = 0.25 * m_ms2_restrict * (m_ms2_restrict - 2);
     uint n_os_a = 0;
     auto count_n_OS_a = [&](size_t i) {
         if (i < m_nsite) {
@@ -15,7 +13,7 @@ defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
         };
     };
     onv.foreach(count_n_OS_a);
-    return Sz_term + n_os_a;
+    return m_Sz_term + n_os_a;
 }
 
 

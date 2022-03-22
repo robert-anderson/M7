@@ -9,6 +9,9 @@
 
 struct SpinSquareFrmHam : FrmHam {
 
+    // This is Sz * (Sz - 1) which stays constant
+    const defs::ham_comp_t m_Sz_term = 0.25 * m_ms2_restrict * (m_ms2_restrict - 2);
+
     SpinSquareFrmHam(size_t nelec, size_t nsite, int ms2_restrict) : FrmHam(nelec, nsite, ms2_restrict){}
 
     SpinSquareFrmHam(const FrmHam &in_ham): FrmHam(in_ham){};
