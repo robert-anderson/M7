@@ -51,14 +51,14 @@ bool FcidumpFileReader::spin_conserving() const {
     return m_spin_conserving_1e && m_spin_conserving_2e;
 }
 
-void FcidumpFileReader::inds_to_orbs(defs::inds &inds) {
+void FcidumpFileReader::convert_inds(defs::inds &inds) {
     if (!m_header.m_spin_resolved || m_spin_major) return;
     for (auto &i:inds) i = ((i == ~0ul) ? ~0ul : (i / 2 + (i & 1ul) ? m_header.m_nsite : 0));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) {
     if (!HamiltonianFileReader::next(inds, v)) return false;
-    inds_to_orbs(inds);
+    convert_inds(inds);
     return true;
 }
 

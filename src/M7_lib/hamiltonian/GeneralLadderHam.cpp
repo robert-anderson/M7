@@ -63,9 +63,8 @@ defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, size
     const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
     defs::ham_t res = m_v_unc[imode];
     // fermion ONVs do not differ, so sum over occupied spin orbitals
-    auto fn = [&](size_t ibit) {
-        auto isite = onv.m_frm.isite(ibit);
-        res += m_v.get(imode, isite, isite);
+    auto fn = [&](size_t i) {
+        res += m_v.get(imode, i, i);
     };
     onv.m_frm.foreach(fn);
     return res * occ_fac;
@@ -84,13 +83,13 @@ defs::ham_t GeneralLadderHam::get_element_coupled(const field::FrmBosOnv &onv,
     DEBUG_ASSERT_TRUE(onv.m_frm.get(frm_conn.m_ann[0]), "annihilated op not occupied in ONV")
     DEBUG_ASSERT_FALSE(onv.m_frm.get(frm_conn.m_cre[0]), "created op occupied in ONV")
     const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
-    auto isite = onv.m_frm.isite(frm_conn.m_cre[0]);
-    auto jsite = onv.m_frm.isite(frm_conn.m_ann[0]);
+    auto i = frm_conn.m_cre[0];
+    auto j = frm_conn.m_ann[0];
     /*
      * respect hermitian conjugation of the fermion-boson operator product: 1110 (boson creation) is the
      * conventionally non-conjugated term
      */
-    auto element = cre ? m_v.get(imode, isite, jsite) : m_v.get(imode, jsite, isite);
+    auto element = cre ? m_v.get(imode, i, j) : m_v.get(imode, j, i);
     element *= occ_fac;
     return frm_conn.phase(onv.m_frm) ? -element : element;
 }

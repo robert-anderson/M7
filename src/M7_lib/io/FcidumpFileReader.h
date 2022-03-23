@@ -51,7 +51,13 @@ struct FcidumpFileReader : public HamiltonianFileReader {
 
     bool spin_conserving() const;
 
-    void inds_to_orbs(defs::inds &inds);
+    /**
+     * the index convention employed in the file may differ from that of the coefficient storage, so convert them if
+     * necessary
+     * @param inds
+     *  indices to convert to the storage convention
+     */
+    void convert_inds(defs::inds &inds);
 
     bool next(defs::inds &inds, defs::ham_t &v);
 

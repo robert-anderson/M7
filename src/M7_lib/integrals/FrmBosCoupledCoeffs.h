@@ -64,12 +64,7 @@ public:
      *  coefficient value
      */
     const defs::ham_t& get(const size_t& n, const size_t& p, const size_t& q) const;
-    /**
-     * only applies in cases where the number of sites is equal to number of modes
-     * @return
-     *  true if applicable and all V[i, i, i] have the same value (e.g. Hubbard--Holstein)
-     */
-    bool constant_diagonal() const;
+
 };
 
 

@@ -24,7 +24,7 @@ bool fciqmc_config::Bosdump::enabled() const {
 }
 
 fciqmc_config::Ebdump::Ebdump(config::Group *parent) :
-        config::Section(parent, "bosdump",
+        config::Section(parent, "ebdump",
                         "options relating to 3-indexed text file defining arbitrary couplings between electron hopping (and one-electron density) and boson (de-)excitations"),
         m_path(this, "path", "", "path to EBDUMP format file") {}
 
