@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.19)
 project(M7 CXX C)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0076 NEW)
