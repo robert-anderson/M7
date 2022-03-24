@@ -17,20 +17,18 @@ buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const 
     return ref;
 }
 
-GeneralFrmHam::GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved,
-                                         int ms2_restrict, bool complex_valued, defs::inds site_irreps) :
-        FrmHam(nelec, nsite, ms2_restrict, complex_valued, site_irreps),
-        m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved),
-        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {
+GeneralFrmHam::GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict, defs::inds site_irreps) :
+        FrmHam(nelec, nsite, ms2_restrict, site_irreps),
+        m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved) {
     if (!nsite) return;
     REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
 }
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
-        GeneralFrmHam(header.m_nelec - charge, header.m_nsite, header.m_spin_resolved, ms2_restrict,
-                           FcidumpFileReader(header.m_fname, spin_major).m_complex_valued, header.m_orbsym) {
+        GeneralFrmHam(header.m_nelec - charge, header.m_nsite, header.m_spin_resolved, ms2_restrict, header.m_orbsym) {
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
+    m_complex_valued = file_reader.m_complex_valued;
 
     using namespace ham_data;
     defs::inds inds(4);

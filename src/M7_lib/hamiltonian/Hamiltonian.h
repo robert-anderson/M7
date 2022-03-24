@@ -81,7 +81,7 @@ private:
         ham_t bare_ham(opts);
         SpinSquareFrmHam spin_ham(bare_ham);
         /*
-         * now the sum can be cheaply created my moving these two components
+         * now the sum can be cheaply created by moving these two components
          */
         return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinSquareFrmHam>(std::move(bare_ham), std::move(spin_ham), j));
     }
