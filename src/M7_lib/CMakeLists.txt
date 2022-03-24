@@ -53,7 +53,7 @@ build_arpack(my_arpack)
 target_link_libraries(M7_lib my_arpack)
 
 find_package(LAPACK REQUIRED)
-target_link_libraries(M7_lib LAPACK::LAPACK)
+target_link_libraries(M7_lib -llapack)
 
 build_or_find_hdf5(M7_hdf5)
 target_link_libraries(M7_lib M7_hdf5)
@@ -100,9 +100,10 @@ if (ENABLE_LOCAL_LOGGING)
 endif ()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_libraries(my_arpack INTERFACE -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
-             -mbmi -g
+             -mbmi -g -Wno-cast-function-type
         PRIVATE
             -Wno-unused-function -Wno-unused-parameter
             -Wall -Wextra
