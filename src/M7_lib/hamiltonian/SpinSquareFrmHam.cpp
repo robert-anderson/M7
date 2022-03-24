@@ -17,7 +17,7 @@ defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     uint n_os_a = 0;
     auto count_n_OS_a = [&](size_t i) {
         if (i < m_nsite) {
-            n_os_a += onv.get(i + m_nsite);
+            n_os_a += onv.get({1, i});
         };
     };
     onv.foreach(count_n_OS_a);
