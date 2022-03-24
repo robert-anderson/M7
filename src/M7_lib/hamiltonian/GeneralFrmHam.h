@@ -31,24 +31,9 @@ struct GeneralFrmHam : FrmHam {
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
 
-    defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override {
-        DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_single, "expected 1100 (aka fermion single) exsig");
-        const auto &ann = conn.m_ann[0];
-        const auto &cre = conn.m_cre[0];
+    defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
-        defs::ham_t element = m_int_1(cre, ann);
-        auto fn = [&](size_t ibit) {
-            if (ibit != ann) element += m_int_2.phys_antisym_element(cre, ibit, ann, ibit);
-        };
-        onv.foreach(fn);
-        return conn.phase(onv) ? -element : element;
-    }
-
-    defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override {
-        DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "expected 2200 (aka fermion double) exsig");
-        const auto element = m_int_2.phys_antisym_element(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
-        return conn.phase(onv) ? -element : element;
-    }
+    defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 

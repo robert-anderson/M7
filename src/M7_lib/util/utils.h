@@ -1031,6 +1031,18 @@ namespace exsig_utils {
     static constexpr size_t ex_0022 = encode(0, 0, 2, 2);
 }
 
+namespace functor_utils {
+    template<typename signature_t, typename T>
+    void assert_prototype(){
+        static_assert(std::is_convertible<T, std::function<signature_t>>::value,
+                      "body function does not conform to required prototype");
+    }
+    template<typename signature_t, typename T>
+    void assert_prototype(const T& t){
+        assert_prototype<T, signature_t>();
+    }
+}
+
 
 template<typename T>
 static std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {

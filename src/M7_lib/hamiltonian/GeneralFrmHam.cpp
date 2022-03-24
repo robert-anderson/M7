@@ -63,20 +63,39 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
 }
 
 
-defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
-    defs::ham_t element = m_e_core;
-    auto singles_fn = [&](size_t i) { element += m_int_1(i, i); };
-    auto doubles_fn = [&](size_t i, size_t j) {
-        element += m_int_2.phys_antisym_element(i, j, i, j);
-    };
-    onv.foreach_pair(singles_fn, doubles_fn);
-    return element;
-}
-
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t i, size_t j) const {
     return m_int_1(i, j);
 }
 
 defs::ham_t GeneralFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
     return m_int_2.phys_antisym_element(i, j, k, l);
+}
+
+defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
+    defs::ham_t element = m_e_core;
+    auto singles_fn = [&](size_t i) { element += m_int_1(i, i); };
+    auto doubles_fn = [&](size_t i, size_t j) {
+        element += m_int_2.phys_antisym_element(i, j, i, j);
+    };
+    onv.foreach_setbit_pair(singles_fn, doubles_fn);
+    return element;
+}
+
+defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_single, "expected 1100 (aka fermion single) exsig");
+    const auto &ann = conn.m_ann[0];
+    const auto &cre = conn.m_cre[0];
+
+    defs::ham_t element = m_int_1(cre, ann);
+    auto fn = [&](size_t ibit) {
+        if (ibit != ann) element += m_int_2.phys_antisym_element(cre, ibit, ann, ibit);
+    };
+    onv.foreach_setbit(fn);
+    return conn.phase(onv) ? -element : element;
+}
+
+defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+    DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "expected 2200 (aka fermion double) exsig");
+    const auto element = m_int_2.phys_antisym_element(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
+    return conn.phase(onv) ? -element : element;
 }

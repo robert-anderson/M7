@@ -34,54 +34,6 @@ bool FrmOnvField::operator==(const defs::inds &inds) const {
     return true;
 }
 
-void FrmOnvField::foreach(const std::function<void(const size_t &)> &body_fn) const {
-    size_t work;
-    for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-        work = get_dataword(idataword);
-        while (work) {
-            size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            body_fn(ibit);
-        }
-    }
-}
-
-void FrmOnvField::foreach_pair_inner(const size_t &ibit,
-                                     const std::function<void(const size_t &, const size_t &)> &body_fn) const {
-    size_t work;
-    for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-        work = get_dataword(idataword);
-        while (work) {
-            size_t jbit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            if (jbit==ibit) return;
-            body_fn(jbit, ibit);
-        }
-    }
-}
-
-void FrmOnvField::foreach_pair(const std::function<void(const size_t &, const size_t &)> &body_fn) const {
-    size_t work;
-    for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-        work = get_dataword(idataword);
-        while (work) {
-            size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            foreach_pair_inner(ibit, body_fn);
-        }
-    }
-}
-
-void FrmOnvField::foreach_pair(const std::function<void(const size_t &)> &body_fn_outer,
-                               const std::function<void(const size_t &, const size_t &)> &body_fn_inner) const {
-    size_t work;
-    for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-        work = get_dataword(idataword);
-        while (work) {
-            size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            body_fn_outer(ibit);
-            foreach_pair_inner(ibit, body_fn_inner);
-        }
-    }
-}
-
 int FrmOnvField::ms2() const {
     int spin = 0;
     size_t work;

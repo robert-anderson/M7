@@ -20,7 +20,7 @@ defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
             n_os_a += onv.get({1, i});
         };
     };
-    onv.foreach(count_n_OS_a);
+    onv.foreach_setbit(count_n_OS_a);
     return m_Sz_term + n_os_a;
 }
 

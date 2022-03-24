@@ -207,6 +207,64 @@ struct BitsetField : FieldBase {
         return tmp;
     }
 
+
+    template<typename fn_t>
+    void foreach_setbit(const fn_t& fn) const {
+        functor_utils::assert_prototype<void(size_t), fn_t>();
+        T work;
+        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
+            work = get_dataword(idataword);
+            while (work) {
+                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
+                fn(ibit);
+            }
+        }
+    }
+
+private:
+    template<typename fn_t>
+    void foreach_setbit_pair_inner(size_t ibit, const fn_t &fn) const {
+        functor_utils::assert_prototype<void(size_t, size_t), fn_t>();
+        T work;
+        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
+            work = get_dataword(idataword);
+            while (work) {
+                size_t jbit = idataword * nbit_dword() + bit_utils::next_setbit(work);
+                if (jbit==ibit) return;
+                fn(jbit, ibit);
+            }
+        }
+    }
+
+public:
+    template<typename fn_t>
+    void foreach_setbit_pair(const fn_t& fn) const {
+        functor_utils::assert_prototype<void(size_t, size_t), fn_t>();
+        T work;
+        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
+            work = get_dataword(idataword);
+            while (work) {
+                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
+                foreach_setbit_pair_inner(ibit, fn);
+            }
+        }
+    }
+
+    template<typename fn_outer_t, typename fn_inner_t>
+    void foreach_setbit_pair(const fn_outer_t& fn_outer, const fn_inner_t& fn_inner) const {
+        functor_utils::assert_prototype<void(size_t), fn_outer_t>();
+        functor_utils::assert_prototype<void(size_t, size_t), fn_inner_t>();
+        T work;
+        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
+            work = get_dataword(idataword);
+            while (work) {
+                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
+                fn_outer(ibit);
+                foreach_setbit_pair_inner(ibit, fn_inner);
+            }
+        }
+    }
+
     size_t nsetbit() const {
         size_t result = 0;
         for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {

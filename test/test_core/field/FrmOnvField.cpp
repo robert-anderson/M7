@@ -34,3 +34,34 @@ TEST(FrmOnvField, ClrSpinChannel) {
     ASSERT_EQ(mbf.nalpha(), 0ul);
     ASSERT_EQ(mbf.nsetbit(), 0ul);
 }
+
+TEST(FrmOnvField, ForeachSetBit) {
+    const size_t nsite = 123;
+    buffered::FrmOnv mbf(nsite);
+    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_nspinorb, true);
+    mbf = setbits;
+
+    auto it = setbits.cbegin();
+    auto fn = [&it](size_t ibit){
+        ASSERT_EQ(ibit, *(it++));
+    };
+    mbf.foreach_setbit(fn);
+    // make sure all bits were iterated over
+    ASSERT_EQ(it, setbits.cend());
+}
+
+TEST(FrmOnvField, ForeachSetBitPair) {
+    const size_t nsite = 123;
+    buffered::FrmOnv mbf(nsite);
+    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_nspinorb, true);
+    mbf = setbits;
+
+    auto it = setbits.cbegin();
+    auto fn = [&it](size_t ibit, size_t jbit){
+        std::cout << ibit << " " << jbit << std::endl;
+        //ASSERT_EQ(ibit, *(it++));
+    };
+    mbf.foreach_setbit_pair(fn);
+    // make sure all bits were iterated over
+    //ASSERT_EQ(it, setbits.cend());
+}

@@ -66,7 +66,7 @@ defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, size
     auto fn = [&](size_t i) {
         res += m_v.get(imode, i, i);
     };
-    onv.m_frm.foreach(fn);
+    onv.m_frm.foreach_setbit(fn);
     return res * occ_fac;
 }
 

@@ -85,17 +85,6 @@ struct FrmOnvField : BitsetField<size_t, 2> {
         set(dptr, cre2);
     }
 
-    void foreach(const std::function<void(const size_t&)>& body_fn) const;
-
-private:
-    void foreach_pair_inner(const size_t& ibit, const std::function<void(const size_t&, const size_t&)>& body_fn) const;
-
-public:
-    void foreach_pair(const std::function<void(const size_t&, const size_t&)>& body_fn) const;
-
-    void foreach_pair(const std::function<void(const size_t&)>& body_fn_outer,
-                      const std::function<void(const size_t&, const size_t&)>& body_fn_inner) const;
-
     /**
      * 2 x the total z-axis projection of total spin
      * @return
