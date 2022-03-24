@@ -99,7 +99,9 @@ if (ENABLE_LOCAL_LOGGING)
     target_compile_definitions(M7_lib PRIVATE ENABLE_LOCAL_LOGGING)
 endif ()
 
+target_compile_options(M7_lib PUBLIC -Wno-cast-function-type)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_libraries(M7_lib -lgfortran)
     target_compile_options(M7_lib
         PUBLIC
              -mbmi -g

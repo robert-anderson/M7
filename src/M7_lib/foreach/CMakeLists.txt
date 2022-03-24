@@ -1,5 +1,6 @@
 target_sources(M7_lib
     PRIVATE
+        BasicForeach.h
         ConnForeach.cpp
         ConnForeach.h
         Foreach.h
