@@ -2,6 +2,7 @@
 // Created by anderson on 09/02/2022.
 //
 
+#include <M7_lib/foreach/BasicForeach.h>
 #include "gtest/gtest.h"
 #include "M7_lib/table/BufferedFields.h"
 
@@ -56,12 +57,27 @@ TEST(FrmOnvField, ForeachSetBitPair) {
     auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_nspinorb, true);
     mbf = setbits;
 
-    auto it = setbits.cbegin();
+    /*
+     * set up checking vectors for the pairs of set bits that should be found
+     * the order of set bit pairs returned should match that of the ascending-ordered basic foreach pair iterator
+     */
+    using namespace basic_foreach;
+    std::vector<ctnd::inds_t<2>> setbit_pairs;
+    {
+        auto fn = [&](const ctnd::inds_t<2>& inds) {
+            setbit_pairs.push_back({setbits[inds[0]], setbits[inds[1]]});
+        };
+        ctnd::Ordered<2, true, true> foreach(setbits.size());
+        foreach.loop(fn);
+    }
+
+    auto it = setbit_pairs.cbegin();
     auto fn = [&it](size_t ibit, size_t jbit){
-        std::cout << ibit << " " << jbit << std::endl;
-        //ASSERT_EQ(ibit, *(it++));
+        ASSERT_EQ(ibit, (*it)[0]);
+        ASSERT_EQ(jbit, (*it)[1]);
+        ++it;
     };
     mbf.foreach_setbit_pair(fn);
     // make sure all bits were iterated over
-    //ASSERT_EQ(it, setbits.cend());
+    ASSERT_EQ(it, setbit_pairs.cend());
 }
