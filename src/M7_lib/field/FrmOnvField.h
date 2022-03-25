@@ -171,27 +171,57 @@ public:
      */
     size_t get_beta_dataword(size_t idataword) const;
 
-private:
-//    template<typename body_fn_t, typename get_work_fn_t>
-//    void foreach_openshell(const body_fn_t& fn, const get_work_fn_t& get_work_fn) const {
-//        functor_utils::assert_prototype<void(size_t), body_fn_t>();
-//        functor_utils::assert_prototype<size_t(size_t), get_work_fn_t>();
-//        size_t work;
-//        for (size_t idataword = 0; idataword < m_dsize_spin_channel; ++idataword) {
-//            work = get_work_fn(idataword);
-//            while (work) {
-//                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
-//                fn(ibit);
-//            }
-//        }
-//    }
-
-public:
+    template<typename body_fn_t>
+    void foreach_alpha(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return get_alpha_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
 
     template<typename body_fn_t>
-    void foreach_openshell(const body_fn_t& fn) const {
+    void foreach_beta(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
-    //            work = get_alpha_dataword(idataword) ^ get_beta_dataword(idataword);
+
+
+    /**
+     * efficiently iterate over the singly-occupied site indices
+     * @tparam body_fn_t
+     *  functor to call each time a singly-occupied site is found
+     * @param fn
+     *  body_fn_t instance
+     */
+    template<typename body_fn_t>
+    void foreach_openshell(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return get_alpha_dataword(idataword) ^ get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+
+    /**
+     * efficiently iterate over the indices of those sites where the alpha spin orbital is occupied but the beta spin
+     * orbital is vacant
+     * @tparam body_fn_t
+     *  functor to call each time an alpha-occupied, beta-vacant site is found
+     * @param fn
+     *  body_fn_t instance
+     */
+    template<typename body_fn_t>
+    void foreach_openshell_alpha(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return get_alpha_dataword(idataword) &~ get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+
+    size_t nopenshell() const;
+
+    size_t nopenshell_alpha() const;
 };
 
 

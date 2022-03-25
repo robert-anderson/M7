@@ -421,6 +421,13 @@ namespace bit_utils {
         v = c_trunc_mask_64[iend] & ~c_trunc_mask_64[ibegin];
     }
 
+    template<typename T>
+    static T make_range_mask(const size_t& ibegin, const size_t& iend) {
+        T v;
+        make_range_mask(v, ibegin, iend);
+        return v;
+    }
+
     /**
      * apply an arbitrary bit mask to a single buffer word
      * e.g. for a range mask:

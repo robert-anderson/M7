@@ -185,18 +185,34 @@ size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
      * suppose we are storing an nsite=19 FrmOnv with 8-bit dataword:
      *
      * |aaaaaaaa|aaaaaaaa|aaabbbbb|bbbbbbbb|bbbbbb--|
-     * m_dsize_spin_channel = 3
-     * backshift = nsite % nbit_per_word = 3
-     * first dataword is at m_dsize_spin_channel-1
-     * idataword = 0
      *
-     * truncate(first<<backshift
+     * shift to the left
+     *                   |bbbbb---|
+     * shift to the right
+     *                            |-----bbb|
+     * then combine
      */
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
     size_t *dptr = reinterpret_cast<size_t *>(begin());
-    auto tmp = dptr[m_dsize_spin_channel+idataword];
-    if (idataword + 1 == m_dsize_spin_channel) {
-        tmp = bit_utils::truncate(tmp, m_nbit_in_last_alpha_dataword);
-    }
-    return tmp;
+    auto left = dptr[m_dsize_spin_channel-1+idataword];
+    left >>= m_nbit_in_last_alpha_dataword;
+    auto nbit_in_left = defs::nbit_word-m_nbit_in_last_alpha_dataword;
+    bit_utils::truncate(left, m_nbit_in_last_alpha_dataword);
+    auto right = dptr[m_dsize_spin_channel+idataword];
+    right <<= nbit_in_left;
+    return left|right;
+}
+
+size_t FrmOnvField::nopenshell() const {
+    size_t count = 0ul;
+    auto fn = [&count](size_t isite){++count;};
+    foreach_openshell(fn);
+    return count;
+}
+
+size_t FrmOnvField::nopenshell_alpha() const {
+    size_t count = 0ul;
+    auto fn = [&count](size_t isite){++count;};
+    foreach_openshell_alpha(fn);
+    return count;
 }
