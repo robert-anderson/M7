@@ -41,7 +41,7 @@ struct NdFormatD {
 
     NdFormatD(const defs::inds& shape, std::vector<std::string> dim_names): m_shape(shape),
         m_strides(make_strides(shape)), m_dim_names(std::move(dim_names)),
-        m_nelement(shape.empty() ? 1:m_strides.front()*m_shape.front()), m_nind(shape.size()){}
+        m_nelement(shape.empty() ? 0ul: m_strides.front()*m_shape.front()), m_nind(shape.size()){}
 
     NdFormatD(const defs::inds& shape): NdFormatD(shape, std::vector<std::string>(shape.size(), "")){}
 

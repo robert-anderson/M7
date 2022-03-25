@@ -273,3 +273,269 @@ TEST(BasicForeach, CtndOrderedDesc3) {
     ASSERT_EQ(it, chk_inds.cend());
     ASSERT_TRUE(all_correct);
 }
+
+/*
+ * Run-time number of dimensions
+ */
+TEST(BasicForeach, RtndUnrestricted0) {
+    using namespace basic_foreach;
+    rtnd::Unrestricted foreach({});
+    ASSERT_EQ(foreach.m_niter, 0);
+    size_t iiter = 0ul;
+    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    foreach.loop(fn);
+    ASSERT_FALSE(iiter);
+}
+
+TEST(BasicForeach, RtndUnrestricted3) {
+    using namespace basic_foreach;
+    const rtnd::inds_t shape = {3, 4, 2};
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {0, 0, 0},
+            {0, 0, 1},
+            {0, 1, 0},
+            {0, 1, 1},
+            {0, 2, 0},
+            {0, 2, 1},
+            {0, 3, 0},
+            {0, 3, 1},
+            {1, 0, 0},
+            {1, 0, 1},
+            {1, 1, 0},
+            {1, 1, 1},
+            {1, 2, 0},
+            {1, 2, 1},
+            {1, 3, 0},
+            {1, 3, 1},
+            {2, 0, 0},
+            {2, 0, 1},
+            {2, 1, 0},
+            {2, 1, 1},
+            {2, 2, 0},
+            {2, 2, 1},
+            {2, 3, 0},
+            {2, 3, 1}
+    };
+    rtnd::Unrestricted foreach(shape);
+    auto it = chk_inds.cbegin();
+    bool all_correct = true;
+    auto fn = [&](const rtnd::inds_t& inds) {
+        if (inds!=*it++) all_correct = false;
+    };
+    foreach.loop(fn);
+    ASSERT_EQ(it, chk_inds.cend());
+    ASSERT_TRUE(all_correct);
+}
+
+
+TEST(BasicForeach, RtndUnrestrictedExit) {
+    using namespace basic_foreach;
+    const rtnd::inds_t shape = {2, 2, 2};
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {0, 0, 0},
+            {0, 0, 1},
+            {0, 1, 0},
+            {0, 1, 1},
+            {1, 0, 0},
+            {1, 0, 1},
+            {1, 1, 0},
+            {1, 1, 1}
+    };
+
+    for (size_t i = 0ul; i < chk_inds.size(); ++i) {
+        const auto& terminal_inds = chk_inds[i];
+
+        size_t iiter = 0ul;
+        auto fn = [&](const rtnd::inds_t& inds){
+            if (inds==terminal_inds) throw ExitLoop();
+            ++iiter;
+        };
+
+        rtnd::Unrestricted foreach(shape);
+        foreach.loop(fn);
+        // should have terminated on item i
+        ASSERT_EQ(iiter, i);
+    }
+}
+
+
+TEST(BasicForeach, RtndOrderedStrictAsc0) {
+    using namespace basic_foreach;
+    rtnd::Ordered<true, true> foreach(0, 0);
+    ASSERT_EQ(foreach.m_niter, 0);
+    size_t iiter = 0ul;
+    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    foreach.loop(fn);
+    ASSERT_FALSE(iiter);
+}
+
+TEST(BasicForeach, RtndOrderedStrictAsc3) {
+    using namespace basic_foreach;
+    const size_t nind = 3;
+    const size_t n = 5;
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {0, 1, 2},
+            {0, 1, 3},
+            {0, 2, 3},
+            {1, 2, 3},
+            {0, 1, 4},
+            {0, 2, 4},
+            {1, 2, 4},
+            {0, 3, 4},
+            {1, 3, 4},
+            {2, 3, 4}
+    };
+    rtnd::Ordered<true, true> foreach(n, nind);
+    auto it = chk_inds.cbegin();
+    bool all_correct = true;
+    auto fn = [&](const rtnd::inds_t& inds) {
+        if (inds!=*it++) all_correct = false;
+    };
+    foreach.loop(fn);
+    ASSERT_EQ(it, chk_inds.cend());
+    ASSERT_TRUE(all_correct);
+}
+
+TEST(BasicForeach, RtndOrderedExit) {
+    using namespace basic_foreach;
+    const size_t n = 5;
+    const size_t nind = 3;
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {0, 1, 2},
+            {0, 1, 3},
+            {0, 2, 3},
+            {1, 2, 3},
+            {0, 1, 4},
+            {0, 2, 4},
+            {1, 2, 4},
+            {0, 3, 4},
+            {1, 3, 4},
+            {2, 3, 4}
+    };
+
+    for (size_t i = 0ul; i < chk_inds.size(); ++i) {
+        const auto& terminal_inds = chk_inds[i];
+
+        size_t iiter = 0ul;
+        auto fn = [&](const rtnd::inds_t& inds){
+            if (inds==terminal_inds) throw ExitLoop();
+            ++iiter;
+        };
+
+        rtnd::Ordered<true, true> foreach(n, nind);
+        foreach.loop(fn);
+        // should have terminated on item i
+        ASSERT_EQ(iiter, i);
+    }
+}
+
+TEST(BasicForeach, RtndOrderedStrictDesc0) {
+    using namespace basic_foreach;
+    rtnd::Ordered<true, false> foreach(0, 0);
+    ASSERT_EQ(foreach.m_niter, 0);
+    size_t iiter = 0ul;
+    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    foreach.loop(fn);
+    ASSERT_FALSE(iiter);
+}
+
+TEST(BasicForeach, RtndOrderedStrictDesc3) {
+    using namespace basic_foreach;
+    const size_t nind = 3;
+    const size_t n = 5;
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {2, 1, 0},
+            {3, 1, 0},
+            {3, 2, 0},
+            {3, 2, 1},
+            {4, 1, 0},
+            {4, 2, 0},
+            {4, 2, 1},
+            {4, 3, 0},
+            {4, 3, 1},
+            {4, 3, 2}
+    };
+    rtnd::Ordered<true, false> foreach(n, nind);
+    auto it = chk_inds.cbegin();
+    bool all_correct = true;
+    auto fn = [&](const rtnd::inds_t& inds) {
+        if (inds!=*it++) all_correct = false;
+    };
+    foreach.loop(fn);
+    ASSERT_EQ(it, chk_inds.cend());
+    ASSERT_TRUE(all_correct);
+}
+
+TEST(BasicForeach, RtndOrderedAsc0) {
+    using namespace basic_foreach;
+    rtnd::Ordered<false, true> foreach(0, 0);
+    ASSERT_EQ(foreach.m_niter, 0);
+    size_t iiter = 0ul;
+    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    foreach.loop(fn);
+    ASSERT_FALSE(iiter);
+}
+
+TEST(BasicForeach, RtndOrderedAsc3) {
+    using namespace basic_foreach;
+    const size_t nind = 3;
+    const size_t n = 3;
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {0, 0, 0},
+            {0, 0, 1},
+            {0, 1, 1},
+            {1, 1, 1},
+            {0, 0, 2},
+            {0, 1, 2},
+            {1, 1, 2},
+            {0, 2, 2},
+            {1, 2, 2},
+            {2, 2, 2}
+    };
+    rtnd::Ordered<false, true> foreach(n, nind);
+    auto it = chk_inds.cbegin();
+    bool all_correct = true;
+    auto fn = [&](const rtnd::inds_t& inds) {
+        if (inds!=*it++) all_correct = false;
+    };
+    foreach.loop(fn);
+    ASSERT_EQ(it, chk_inds.cend());
+    ASSERT_TRUE(all_correct);
+}
+
+TEST(BasicForeach, RtndOrderedDesc0) {
+    using namespace basic_foreach;
+    rtnd::Ordered<false, false> foreach(0, 0);
+    ASSERT_EQ(foreach.m_niter, 0);
+    size_t iiter = 0ul;
+    auto fn = [&](const rtnd::inds_t &inds) { ++iiter; };
+    foreach.loop(fn);
+    ASSERT_FALSE(iiter);
+}
+
+TEST(BasicForeach, RtndOrderedDesc3) {
+    using namespace basic_foreach;
+    const size_t nind = 3;
+    const size_t n = 3;
+    const std::vector<rtnd::inds_t> chk_inds = {
+            {0, 0, 0},
+            {1, 0, 0},
+            {1, 1, 0},
+            {1, 1, 1},
+            {2, 0, 0},
+            {2, 1, 0},
+            {2, 1, 1},
+            {2, 2, 0},
+            {2, 2, 1},
+            {2, 2, 2}
+    };
+    rtnd::Ordered<false, false> foreach(n, nind);
+    auto it = chk_inds.cbegin();
+    bool all_correct = true;
+    auto fn = [&](const rtnd::inds_t &inds) {
+        if (inds != *it++) all_correct = false;
+    };
+    foreach.loop(fn);
+    ASSERT_EQ(it, chk_inds.cend());
+    ASSERT_TRUE(all_correct);
+}

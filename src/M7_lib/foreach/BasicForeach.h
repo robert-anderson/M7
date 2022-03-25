@@ -10,6 +10,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/utils.h>
 #include <M7_lib/nd/NdFormat.h>
+#include <M7_lib/nd/NdFormatD.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {
@@ -40,7 +41,7 @@ namespace basic_foreach {
             const size_t m_niter;
 
 
-            Base(size_t niter): m_niter(niter){}
+            Base(size_t niter) : m_niter(niter) {}
         };
 
         template<size_t nind>
@@ -55,60 +56,48 @@ namespace basic_foreach {
              *  current level (position in the m_value array)
              */
             template<size_t ilevel, typename fn_t>
-            void level_loop(const fn_t& fn, tags::Ind<ilevel>) {
+            void level_loop(const fn_t &fn, tags::Ind<ilevel>) {
                 constexpr size_t iind = ilevel - 1;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto &extent = m_shape[iind];
-                for (ind = 0ul; ind < extent; ++ind) {
-                    try { level_loop(fn, tags::Ind<ilevel + 1>()); }
-                    catch (const ExitLoop &ex) { throw ex; }
-                }
+                for (ind = 0ul; ind < extent; ++ind) level_loop(fn, tags::Ind<ilevel + 1>());
             }
 
             /**
              * overload for when the last index has been reached
              */
             template<typename fn_t>
-            void level_loop(const fn_t& fn, tags::Ind<nind>) {
+            void level_loop(const fn_t &fn, tags::Ind<nind>) {
                 constexpr size_t iind = nind - 1;
                 auto &ind = m_value[iind];
                 const auto &extent = m_shape[iind];
-                for (ind = 0ul; ind < extent; ++ind) {
-                    try { fn(m_value); }
-                    catch (const ExitLoop &ex) { throw ex; }
-                }
+                for (ind = 0ul; ind < extent; ++ind) fn(m_value);
             }
 
             /**
              * in the edge case that the nind is 0, do nothing
              */
             template<typename fn_t>
-            void top_loop(const fn_t& fn, tags::Bool<true>) {}
+            void top_loop(const fn_t &fn, tags::Bool<true>) {}
 
             /**
              * if nind is nonzero, start at the first index
              */
             template<typename fn_t>
-            void top_loop(const fn_t& fn, tags::Bool<false>) {
-                try { level_loop(fn, tags::Ind<1>()); }
-                catch (const ExitLoop &ex) {throw ex;}
+            void top_loop(const fn_t &fn, tags::Bool<false>) {
+                level_loop(fn, tags::Ind<1>());
             }
 
         public:
 
-            Unrestricted(const inds_t<nind> &shape) : Base<nind>(NdFormat<nind>(shape).m_nelement), m_shape(shape){}
+            Unrestricted(const inds_t<nind> &shape) : Base<nind>(NdFormat<nind>(shape).m_nelement), m_shape(shape) {}
 
-            Unrestricted(size_t extent=0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
-
-            template<typename fn_t>
-            void throwing_loop(const fn_t& fn) {
-                top_loop(fn, tags::Bool<nind == 0>());
-            }
+            Unrestricted(size_t extent = 0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
 
             template<typename fn_t>
-            void loop(const fn_t& fn) {
-                functor_utils::assert_prototype<void(const inds_t<nind>&), fn_t>();
-                try { throwing_loop(fn); }
+            void loop(const fn_t &fn) {
+                functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                try { top_loop(fn, tags::Bool<nind == 0>()); }
                 catch (const ExitLoop &) {}
             }
         };
@@ -127,57 +116,44 @@ namespace basic_foreach {
             }
 
             template<size_t ilevel, typename fn_t>
-            void level_loop(const fn_t& fn, tags::Ind<ilevel>) {
+            void level_loop(const fn_t &fn, tags::Ind<ilevel>) {
                 constexpr size_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
-                for (ind = 0ul; ind < extent; ++ind) {
-                    try { level_loop(fn, tags::Ind<ilevel + 1>()); }
-                    catch (const ExitLoop &ex) { throw ex; }
-                }
+                for (ind = 0ul; ind < extent; ++ind) level_loop(fn, tags::Ind<ilevel + 1>());
             }
 
             template<typename fn_t>
-            void level_loop(const fn_t& fn, tags::Ind<nind>) {
+            void level_loop(const fn_t &fn, tags::Ind<nind>) {
                 constexpr size_t iind = ascending ? 0 : nind - 1;
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
-                for (ind = 0ul; ind < extent; ++ind) {
-                    try { fn(m_value); }
-                    catch (const ExitLoop &ex) { throw ex; }
-                }
+                for (ind = 0ul; ind < extent; ++ind) fn(m_value);
             }
 
             template<typename fn_t>
-            void top_loop(const fn_t& fn, tags::Bool<true>) {}
+            void top_loop(const fn_t &fn, tags::Bool<true>) {}
 
             template<typename fn_t>
-            void top_loop(const fn_t& fn, tags::Bool<false>) {
-                try { level_loop(fn, tags::Ind<1>()); }
-                catch (const ExitLoop &ex) {throw ex;}
+            void top_loop(const fn_t &fn, tags::Bool<false>) {
+                level_loop(fn, tags::Ind<1>());
             }
 
         public:
 
-            Ordered(size_t n) : Base<nind>(make_nterm(n)), m_n(n){}
+            Ordered(size_t n) : Base<nind>(make_nterm(n)), m_n(n) {}
 
             template<typename fn_t>
-            void throwing_loop(const fn_t& fn) {
-                top_loop(fn, tags::Bool<nind == 0>());
-            }
-
-            template<typename fn_t>
-            void loop(const fn_t& fn) {
-                functor_utils::assert_prototype<void(const inds_t<nind>&), fn_t>();
-                try { throwing_loop(fn); }
+            void loop(const fn_t &fn) {
+                functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                try { top_loop(fn, tags::Bool<nind == 0>()); }
                 catch (const ExitLoop &) {}
             }
         };
     }
 
-#if 0
     /**
      * "run time number of dimensions"
      */
@@ -185,62 +161,54 @@ namespace basic_foreach {
         using inds_t = std::vector<size_t>;
 
         struct Base {
+            /**
+             * length of the index iterator
+             */
+            const size_t m_niter;
         protected:
             /**
              * work space into which each set of indices is inserted: should not be directly accessed in derived classes
              */
             inds_t m_value;
-            /**
-             * integer index of the current iteration (body call)
-             */
-            size_t m_iiter;
-            /**
-             * length of the index iterator
-             */
-            const size_t m_niter;
         public:
             /**
              * number of dimensions: length of the index array
              */
             const size_t m_nind;
 
-            const inds_t &value() const;
-
-            const size_t &iiter() const;
-
-            const size_t &niter() const;
-
-            Base(size_t nind, size_t niter);
-
-            /**
-             * function to be called each time a new set of indices is formed
-             */
-            virtual void body(const inds_t &value, size_t iiter) = 0;
-
-            /**
-             * function with defines the looping logic, calls body, and increments the iteration counter
-             */
-            virtual void throwing_loop() = 0;
-
-            /**
-             * exposed wrapper function which catches any instance of the ExitLoop exception thrown, and gracefully
-             * handles the zero-dimensional edge case
-             */
-            void loop();
+            Base(size_t nind, size_t niter) : m_niter(niter), m_value(nind, 0ul), m_nind(nind) {}
         };
 
         struct Unrestricted : Base {
             const inds_t m_shape;
         private:
-            static size_t nterm(const inds_t &shape);
 
-            void level_loop(size_t ilevel);
+            template<typename fn_t>
+            void level_loop(const fn_t &fn, size_t ilevel) {
+                const auto &iind = ilevel - 1;
+                auto &ind = m_value[iind];
+                const auto &extent = m_shape[iind];
+                if (ilevel < m_nind)
+                    for (ind = 0ul; ind < extent; ++ind) level_loop(fn, ilevel + 1);
+                else {
+                    for (ind = 0ul; ind < extent; ++ind) fn(m_value);
+                }
+            }
+
         public:
-            explicit Unrestricted(inds_t shape);
+            explicit Unrestricted(inds_t shape):
+                Base(shape.size(), NdFormatD(shape).m_nelement), m_shape(std::move(shape)) {}
 
-            Unrestricted(size_t nind, size_t extent);
+            Unrestricted(size_t nind, size_t extent):
+                    Unrestricted(std::vector<size_t>(nind, extent)) {}
 
-            void throwing_loop() override;
+            template<typename fn_t>
+            void loop(const fn_t &fn) {
+                functor_utils::assert_prototype<void(const inds_t &), fn_t>();
+                if (!m_nind) return;
+                try { level_loop(fn, 1); }
+                catch (const ExitLoop &) {}
+            }
         };
 
         template<bool strict = true, bool ascending = true>
@@ -248,71 +216,37 @@ namespace basic_foreach {
         private:
             const size_t m_n;
 
-            static size_t nterm(size_t n, size_t r) {
+            static size_t make_nterm(size_t n, size_t r) {
                 if (!r) return 0ul;
                 return integer_utils::combinatorial(strict ? n : (n + r) - 1, r);
             }
 
-            void level_loop(size_t ilevel) {
+            template<typename fn_t>
+            void level_loop(const fn_t &fn, size_t ilevel) {
                 const size_t iind = ascending ? (m_nind - ilevel) : (ilevel - 1);
                 const size_t iind_unrestrict = ascending ? m_nind - 1 : 0;
                 auto &ind = m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
-                try {
-                    if (ilevel < m_nind)
-                        for (ind = 0ul; ind < extent; ++ind) level_loop(ilevel + 1);
-                    else {
-                        for (ind = 0ul; ind < extent; ++ind) {
-                            ++m_iiter;
-                            body(m_value, m_iiter);
-                        }
-                    }
+                if (ilevel < m_nind)
+                    for (ind = 0ul; ind < extent; ++ind) level_loop(fn, ilevel + 1);
+                else {
+                    for (ind = 0ul; ind < extent; ++ind) fn(m_value);
                 }
-                catch (const ExitLoop& ex){throw ex;}
             }
 
         public:
-            Ordered(size_t n, size_t r) : Base(r, nterm(n, r)), m_n(n) {}
+            Ordered(size_t n, size_t r) : Base(r, make_nterm(n, r)), m_n(n) {}
 
-            void throwing_loop() override {
-                m_iiter = ~0ul;
-                level_loop(1);
+            template<typename fn_t>
+            void loop(const fn_t& fn) {
+                functor_utils::assert_prototype<void(const inds_t &), fn_t>();
+                if (!m_nind) return;
+                try{level_loop(fn, 1);}
+                catch (const ExitLoop& ex){}
             }
         };
-
-        /**
-         * functional objects are convenient but entail non-negligible overhead. If this is non-critical, the following
-         * definitions may be confidently used
-         */
-        namespace lambda {
-            template<typename foreach_t>
-            struct Lambda : foreach_t {
-                typedef std::function<void(const defs::inds &value, size_t iiter)> body_fn_t;
-                body_fn_t m_body_fn;
-                template<typename ...Args>
-                Lambda(body_fn_t fn, Args&&... args):
-                        foreach_t(std::forward<Args>(args)...), m_body_fn(std::move(fn)){}
-                void body(const inds_t &value, size_t iiter) override {
-                    m_body_fn(value, iiter);
-                }
-            };
-            struct Unrestricted : Lambda<rtnd::Unrestricted> {
-                typedef Lambda<rtnd::Unrestricted> base_t;
-                Unrestricted(body_fn_t fn, inds_t shape): base_t(std::move(fn), std::move(shape)){}
-                Unrestricted(body_fn_t fn, size_t nind, size_t extent): base_t(std::move(fn), nind, extent){}
-            };
-
-            template<bool strict = true, bool ascending = true>
-            struct Ordered: Lambda<rtnd::Ordered<strict, ascending>> {
-                typedef Lambda<rtnd::Ordered<strict, ascending>> base_t;
-                using typename base_t::body_fn_t;
-                Ordered(body_fn_t fn, size_t n, size_t r): base_t(std::move(fn), n, r){}
-            };
-        }
     }
-#endif
 }
-
 
 
 #endif //M7_BASICFOREACH_H
