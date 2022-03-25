@@ -5,6 +5,7 @@
 #ifndef M7_BITSETFIELD_H
 #define M7_BITSETFIELD_H
 
+#include <M7_lib/foreach/SetbitForeach.h>
 #include "FieldBase.h"
 
 template<typename T, size_t nind>
@@ -188,6 +189,7 @@ struct BitsetField : FieldBase {
     }
 
     T get_dataword(const size_t &idataword) const {
+        DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
         T *dptr = reinterpret_cast<T *>(begin());
         auto tmp = dptr[idataword];
         if (idataword + 1 == m_dsize) {
@@ -199,6 +201,7 @@ struct BitsetField : FieldBase {
     }
 
     T get_antidataword(const size_t &idataword) const {
+        DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
         T *dptr = reinterpret_cast<T *>(begin());
         auto tmp = ~dptr[idataword];
         if ((idataword + 1) == m_dsize) {
@@ -207,62 +210,22 @@ struct BitsetField : FieldBase {
         return tmp;
     }
 
-
     template<typename fn_t>
     void foreach_setbit(const fn_t& fn) const {
-        functor_utils::assert_prototype<void(size_t), fn_t>();
-        T work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
-                fn(ibit);
-            }
-        }
-    }
-
-private:
-    template<typename fn_t>
-    void foreach_setbit_pair_inner(size_t ibit, const fn_t &fn) const {
-        functor_utils::assert_prototype<void(size_t, size_t), fn_t>();
-        T work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t jbit = idataword * nbit_dword() + bit_utils::next_setbit(work);
-                if (jbit==ibit) return;
-                fn(jbit, ibit);
-            }
-        }
-    }
-
-public:
-    template<typename fn_t>
-    void foreach_setbit_pair(const fn_t& fn) const {
-        functor_utils::assert_prototype<void(size_t, size_t), fn_t>();
-        T work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
-                foreach_setbit_pair_inner(ibit, fn);
-            }
-        }
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::single<T>(m_dsize, fn, get_work_fn);
     }
 
     template<typename fn_outer_t, typename fn_inner_t>
     void foreach_setbit_pair(const fn_outer_t& fn_outer, const fn_inner_t& fn_inner) const {
-        functor_utils::assert_prototype<void(size_t), fn_outer_t>();
-        functor_utils::assert_prototype<void(size_t, size_t), fn_inner_t>();
-        T work;
-        for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
-            work = get_dataword(idataword);
-            while (work) {
-                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
-                fn_outer(ibit);
-                foreach_setbit_pair_inner(ibit, fn_inner);
-            }
-        }
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::pair<T>(m_dsize, fn_outer, fn_inner, get_work_fn);
+    }
+
+    template<typename fn_inner_t>
+    void foreach_setbit_pair(const fn_inner_t& fn_inner) const {
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::pair<T>(m_dsize, fn_inner, get_work_fn);
     }
 
     size_t nsetbit() const {

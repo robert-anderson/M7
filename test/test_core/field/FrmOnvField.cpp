@@ -2,8 +2,9 @@
 // Created by anderson on 09/02/2022.
 //
 
-#include <M7_lib/foreach/BasicForeach.h>
 #include "gtest/gtest.h"
+
+#include <M7_lib/foreach/BasicForeach.h>
 #include "M7_lib/table/BufferedFields.h"
 
 TEST(FrmOnvField, SetFromInds) {
@@ -80,4 +81,24 @@ TEST(FrmOnvField, ForeachSetBitPair) {
     mbf.foreach_setbit_pair(fn);
     // make sure all bits were iterated over
     ASSERT_EQ(it, setbit_pairs.cend());
+}
+
+
+TEST(FrmOnvField, ForeachOpenShell) {
+    const size_t nsite = 123;
+    buffered::FrmOnv mbf(nsite);
+    auto alpha_setbits = hashing::unique_in_range(0, 64, 0, nsite, true);
+    auto beta_setbits = hashing::unique_in_range(1, 64, 0, nsite, true);
+    mbf = {alpha_setbits, beta_setbits};
+    defs::inds isites_openshell;
+    std::cout << mbf << std::endl;
+    for (size_t isite=0ul; isite<nsite; ++isite){
+        if (mbf.get({0, isite})!=mbf.get({1, isite})) isites_openshell.push_back(isite);
+    }
+    auto it = isites_openshell.cbegin();
+    auto fn = [&](size_t isite){
+        ASSERT_EQ(isite, (*it++));
+    };
+    std::cout << isites_openshell << std::endl;
+    mbf.foreach_openshell(fn);
 }

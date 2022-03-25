@@ -27,6 +27,18 @@ struct FrmOnvField : BitsetField<size_t, 2> {
      */
     mutable decoded_mbf::FrmOnv m_decoded;
 
+private:
+    /**
+     * number of data words required for the storage of a single spin channel (alpha, beta)
+     */
+    const size_t m_dsize_spin_channel;
+    /**
+     * alpha and beta strings in general share a dataword, so store the bit position which marks the interface
+     */
+    const size_t m_nbit_in_last_alpha_dataword;
+
+public:
+
     FrmOnvField(Row* row, BasisData bd, std::string name="");
     FrmOnvField(Row* row, size_t nsite, std::string name="");
 
@@ -139,6 +151,47 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     size_t ibit(const size_t& ispin, const size_t& isite) const;
 
     size_t ibit(std::pair<size_t, size_t>& pair) const;
+
+    /**
+     * @param idataword
+     *  dataword index within the spin channel
+     * @return
+     *  raw dataword representing a portion of the alpha spin channel of the FrmOnv
+     */
+    size_t get_alpha_dataword(size_t idataword) const;
+
+    /**
+     * slightly more involved than the alpha channel counterpart. since the spin channels are not separated by a word
+     * boundary, the beta channel dataword must in general be formed by shift-AND operations on adjacent datawords of
+     * the buffer.
+     * @param idataword
+     *  dataword index within the spin channel
+     * @return
+     *  raw dataword representing a portion of the beta spin channel of the FrmOnv
+     */
+    size_t get_beta_dataword(size_t idataword) const;
+
+private:
+//    template<typename body_fn_t, typename get_work_fn_t>
+//    void foreach_openshell(const body_fn_t& fn, const get_work_fn_t& get_work_fn) const {
+//        functor_utils::assert_prototype<void(size_t), body_fn_t>();
+//        functor_utils::assert_prototype<size_t(size_t), get_work_fn_t>();
+//        size_t work;
+//        for (size_t idataword = 0; idataword < m_dsize_spin_channel; ++idataword) {
+//            work = get_work_fn(idataword);
+//            while (work) {
+//                size_t ibit = idataword * nbit_dword() + bit_utils::next_setbit(work);
+//                fn(ibit);
+//            }
+//        }
+//    }
+
+public:
+
+    template<typename body_fn_t>
+    void foreach_openshell(const body_fn_t& fn) const {
+    }
+    //            work = get_alpha_dataword(idataword) ^ get_beta_dataword(idataword);
 };
 
 

@@ -9,7 +9,9 @@ FrmOnvField::FrmOnvField(Row *row, BasisData bd, std::string name) :
         base_t(row, {{2, bd.m_nsite},
                      {"spin channel", "site"}}, name),
         m_bd(bd), m_nsite(bd.m_nsite), m_nspinorb(m_format.m_nelement),
-        m_decoded(*this, bd.m_frm_abgrp_map){
+        m_decoded(*this, bd.m_frm_abgrp_map),
+        m_dsize_spin_channel(integer_utils::divceil(m_nsite, defs::nbit_word)),
+        m_nbit_in_last_alpha_dataword(m_nsite%defs::nbit_word){
     bd.require_pure_frm();
 }
 
@@ -18,7 +20,9 @@ FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
         base_t(other), m_bd(other.m_bd), m_nsite(other.m_nsite), m_nspinorb(other.m_nspinorb),
-        m_decoded(*this, other.m_bd.m_frm_abgrp_map){}
+        m_decoded(*this, other.m_bd.m_frm_abgrp_map),
+        m_dsize_spin_channel(other.m_dsize_spin_channel),
+        m_nbit_in_last_alpha_dataword(other.m_nbit_in_last_alpha_dataword){}
 
 FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::inds &> setbits) {
     // prezero the element
@@ -164,4 +168,35 @@ void FrmOnvField::clr(const size_t &bit_offset, const defs::inds &clrbits) {
 void FrmOnvField::clr(const size_t &site_offset, const defs::inds &clrbits_alpha, const defs::inds &clrbits_beta) {
     for(auto& i: clrbits_alpha) clr({0, site_offset+i});
     for(auto& i: clrbits_beta) clr({1, site_offset+i});
+}
+
+size_t FrmOnvField::get_alpha_dataword(size_t idataword) const {
+    DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
+    size_t *dptr = reinterpret_cast<size_t *>(begin());
+    auto tmp = dptr[idataword];
+    if (idataword + 1 == m_dsize_spin_channel) {
+        tmp = bit_utils::truncate(tmp, m_nbit_in_last_alpha_dataword);
+    }
+    return tmp;
+}
+
+size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
+    /*
+     * suppose we are storing an nsite=19 FrmOnv with 8-bit dataword:
+     *
+     * |aaaaaaaa|aaaaaaaa|aaabbbbb|bbbbbbbb|bbbbbb--|
+     * m_dsize_spin_channel = 3
+     * backshift = nsite % nbit_per_word = 3
+     * first dataword is at m_dsize_spin_channel-1
+     * idataword = 0
+     *
+     * truncate(first<<backshift
+     */
+    DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
+    size_t *dptr = reinterpret_cast<size_t *>(begin());
+    auto tmp = dptr[m_dsize_spin_channel+idataword];
+    if (idataword + 1 == m_dsize_spin_channel) {
+        tmp = bit_utils::truncate(tmp, m_nbit_in_last_alpha_dataword);
+    }
+    return tmp;
 }
