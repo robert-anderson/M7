@@ -1046,7 +1046,7 @@ namespace functor_utils {
     }
     template<typename signature_t, typename T>
     void assert_prototype(const T& t){
-        assert_prototype<T, signature_t>();
+        assert_prototype<signature_t, T>();
     }
 }
 

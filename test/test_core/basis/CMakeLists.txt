@@ -1,6 +1,6 @@
 target_sources(unittest
     PRIVATE
         AbelianGroup.cpp
-        MbfForeach.cpp
+        ../foreach/MbfForeach.cpp
         Planewaves.cpp
 )

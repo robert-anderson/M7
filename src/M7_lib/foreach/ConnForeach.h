@@ -50,7 +50,7 @@ namespace conn_foreach {
         template<class mbf_t>
         void loop(const mbf_t& src){
             try {throwing_loop(src);}
-            catch (const ExitLoop&){}
+            catch (const foreach_virtual::ExitLoop&){}
         }
     };
 

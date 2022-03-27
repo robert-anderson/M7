@@ -8,4 +8,6 @@ target_sources(M7_lib
         ForeachVirtual.h
         MbfForeach.cpp
         MbfForeach.h
+        MbfForeachOld.cpp
+        MbfForeachOld.h
 )

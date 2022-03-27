@@ -6,13 +6,13 @@
 #define M7_DENSEHAMILTONIAN_H
 
 #include <M7_lib/defs.h>
-#include <M7_lib/foreach/MbfForeach.h>
+#include <M7_lib/foreach/MbfForeachOld.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 
 #include "Dense.h"
 
 
-using namespace mbf_foreach;
+using namespace mbf_foreach_old;
 class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
 
     /**

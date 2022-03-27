@@ -97,8 +97,7 @@ namespace basic_foreach {
             template<typename fn_t>
             void loop(const fn_t &fn) {
                 functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
-                try { top_loop(fn, tags::Bool<nind == 0>()); }
-                catch (const ExitLoop &) {}
+                top_loop(fn, tags::Bool<nind == 0>());
             }
         };
 
@@ -148,8 +147,7 @@ namespace basic_foreach {
             template<typename fn_t>
             void loop(const fn_t &fn) {
                 functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
-                try { top_loop(fn, tags::Bool<nind == 0>()); }
-                catch (const ExitLoop &) {}
+                top_loop(fn, tags::Bool<nind == 0>());
             }
         };
     }
@@ -206,8 +204,7 @@ namespace basic_foreach {
             void loop(const fn_t &fn) {
                 functor_utils::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
-                try { level_loop(fn, 1); }
-                catch (const ExitLoop &) {}
+                level_loop(fn, 1);
             }
         };
 
@@ -241,8 +238,7 @@ namespace basic_foreach {
             void loop(const fn_t& fn) {
                 functor_utils::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
-                try{level_loop(fn, 1);}
-                catch (const ExitLoop& ex){}
+                level_loop(fn, 1);
             }
         };
     }

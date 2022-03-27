@@ -11,13 +11,15 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/utils.h>
 
-class ExitLoop : public std::exception {
-    virtual const char *what() const throw() {
-        return "Loop body requested early termination of loop";
-    }
-};
+
 
 namespace foreach_virtual {
+
+    class ExitLoop : public std::exception {
+        virtual const char *what() const throw() {
+            return "Loop body requested early termination of loop";
+        }
+    };
     /**
      * "compile time number of dimensions"
      */
