@@ -190,7 +190,7 @@ struct BitsetField : FieldBase {
 
     T get_dataword(const size_t &idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
-        T *dptr = reinterpret_cast<T *>(begin());
+        auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = dptr[idataword];
         if (idataword + 1 == m_dsize) {
             DEBUG_ASSERT_EQ(tmp, bit_utils::truncate(tmp, m_nbit_in_last_dword),
@@ -202,7 +202,7 @@ struct BitsetField : FieldBase {
 
     T get_antidataword(const size_t &idataword) const {
         DEBUG_ASSERT_LT(idataword, m_dsize, "dataword index OOB");
-        T *dptr = reinterpret_cast<T *>(begin());
+        auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = ~dptr[idataword];
         if ((idataword + 1) == m_dsize) {
             tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);

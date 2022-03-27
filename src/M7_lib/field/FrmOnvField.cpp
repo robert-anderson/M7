@@ -172,7 +172,7 @@ void FrmOnvField::clr(const size_t &site_offset, const defs::inds &clrbits_alpha
 
 size_t FrmOnvField::get_alpha_dataword(size_t idataword) const {
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
-    size_t *dptr = reinterpret_cast<size_t *>(begin());
+    auto dptr = reinterpret_cast<size_t *>(begin());
     auto tmp = dptr[idataword];
     if (idataword + 1 == m_dsize_spin_channel) {
         tmp = bit_utils::truncate(tmp, m_nbit_in_last_alpha_dataword);
@@ -183,24 +183,28 @@ size_t FrmOnvField::get_alpha_dataword(size_t idataword) const {
 size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
     /*
      * suppose we are storing an nsite=19 FrmOnv with 8-bit dataword:
-     *
+     *                       00000 00011111 111222
      * |aaaaaaaa|aaaaaaaa|aaabbbbb|bbbbbbbb|bbbbbb--|
-     *
-     * shift to the left
-     *                   |bbbbb---|
-     * shift to the right
-     *                            |-----bbb|
-     * then combine
      */
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
-    size_t *dptr = reinterpret_cast<size_t *>(begin());
-    auto left = dptr[m_dsize_spin_channel-1+idataword];
-    left >>= m_nbit_in_last_alpha_dataword;
-    auto nbit_in_left = defs::nbit_word-m_nbit_in_last_alpha_dataword;
-    bit_utils::truncate(left, m_nbit_in_last_alpha_dataword);
-    auto right = dptr[m_dsize_spin_channel+idataword];
-    right <<= nbit_in_left;
-    return left|right;
+
+    const auto nbit_offset= m_nbit_in_last_alpha_dataword;
+    const auto nbit_next = defs::nbit_word - nbit_offset;
+    auto this_dword_mask = bit_utils::make_range_mask<size_t>(nbit_offset, defs::nbit_word);
+    auto next_dword_mask = bit_utils::make_range_mask<size_t>(0, nbit_offset);
+    std::cout << bit_utils::to_string(this_dword_mask) << std::endl;
+    std::cout << bit_utils::to_string(next_dword_mask) << std::endl;
+    std::cout << bit_utils::to_string(this_dword_mask >> nbit_offset) << std::endl;
+    std::cout << bit_utils::to_string(next_dword_mask << nbit_next) << std::endl;
+
+    auto dptr = reinterpret_cast<size_t *>(begin())+(m_dsize_spin_channel - 1);
+    auto this_dword = (this_dword_mask & dptr[idataword]) >> nbit_offset;
+    if (idataword+1==m_dsize_spin_channel){
+        // last dword, there is no next_dword
+        return this_dword;
+    }
+    auto next_dword = (next_dword_mask & dptr[idataword+1]) << nbit_next;
+    return this_dword | next_dword;
 }
 
 size_t FrmOnvField::nopenshell() const {

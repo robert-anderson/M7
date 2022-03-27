@@ -84,9 +84,55 @@ TEST(FrmOnvField, ForeachSetBitPair) {
 }
 
 
+TEST(FrmOnvField, ForeachSetBitInSpinChannel) {
+    auto test_fn = [](const size_t& nsite, const size_t& nset) {
+        buffered::FrmOnv mbf(nsite);
+        auto alpha_setbits = hashing::unique_in_range(0, nset, 0, nsite, true);
+        auto beta_setbits = hashing::unique_in_range(1, nset, 0, nsite, true);
+        mbf = {alpha_setbits, beta_setbits};
+        ASSERT_EQ(mbf.nsetbit(), 2*nset);
+        {
+            /*
+             * check that alpha channel iterator returns the correct site indices
+             */
+            auto it = alpha_setbits.cbegin();
+            auto fn = [&it](size_t isite){
+                ASSERT_EQ(isite, *(it++));
+            };
+            mbf.foreach_alpha(fn);
+            ASSERT_EQ(it, alpha_setbits.cend());
+        }
+        {
+            /*
+             * check that beta channel iterator returns the correct site indices
+             */
+            std::cout << beta_setbits << std::endl;
+            auto it = beta_setbits.cbegin();
+            auto fn = [&](size_t isite){
+                std::cout << isite << std::endl;
+                ASSERT_NE(it, beta_setbits.cend());
+                ASSERT_EQ(isite, *(it++));
+            };
+            mbf.foreach_beta(fn);
+            ASSERT_EQ(it, beta_setbits.cend());
+        }
+    };
+
+    // less than one dataword per channel, unaligned
+    test_fn(39, 19);
+
+    // two datawords per channel, unaligned
+//    test_fn(68, 17);
+    // multiple datawords per channel, unaligned
+//    test_fn(235, 145);
+    // multiple datawords per channel, aligned
+    //test_fn(3*defs::nbit_word, defs::nbit_word);
+}
+
+
 TEST(FrmOnvField, ForeachOpenShell) {
-    const size_t nsite = 68; //123;
-    const size_t nset = 17; //64;
+    const size_t nsite = 235;
+    const size_t nset = 145;
     buffered::FrmOnv mbf(nsite);
     auto alpha_setbits = hashing::unique_in_range(0, nset, 0, nsite, true);
     auto beta_setbits = hashing::unique_in_range(1, nset, 0, nsite, true);
@@ -108,8 +154,11 @@ TEST(FrmOnvField, ForeachOpenShell) {
         /*
          * check that beta channel iterator returns the correct site indices
          */
+        std::cout << beta_setbits << std::endl;
         auto it = beta_setbits.cbegin();
-        auto fn = [&it](size_t isite){
+        auto fn = [&](size_t isite){
+            std::cout << isite << std::endl;
+            ASSERT_NE(it, beta_setbits.cend());
             ASSERT_EQ(isite, *(it++));
         };
         mbf.foreach_beta(fn);
