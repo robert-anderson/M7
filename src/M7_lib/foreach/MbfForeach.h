@@ -18,13 +18,12 @@ namespace mbf_foreach {
     /**
      * untemplated, polymorphic base class
      */
-    struct MbfForeach {
+    struct Base {
         const BasisData m_bd;
         const size_t m_niter;
 
-        MbfForeach(BasisData bd, size_t niter) : m_bd(bd), m_niter(niter) {}
-        //MbfForeach(const MbfForeach &other) : m_bd(other.m_bd) {}
-        virtual ~MbfForeach(){}
+        Base(BasisData bd, size_t niter) : m_bd(bd), m_niter(niter) {}
+        virtual ~Base(){}
 
         template<typename mbf_t>
         using function_t = std::function<void(const mbf_t &)>;
@@ -58,8 +57,8 @@ namespace mbf_foreach {
 
     template<typename mbf_t, typename foreach_t>
     struct Pair : PairBase {
-        static_assert(std::is_base_of<MbfForeach, foreach_t>::value,
-                      "template arg must be derived from mbf_foreach::MbfForeach");
+        static_assert(std::is_base_of<Base, foreach_t>::value,
+                      "template arg must be derived from mbf_foreach::Base");
         foreach_t m_foreach_outer;
         foreach_t m_foreach_inner;
 
@@ -83,9 +82,9 @@ namespace mbf_foreach {
 
     namespace frm {
 
-        struct Base : MbfForeach {
+        struct Base : mbf_foreach::Base {
             buffered::FrmOnv m_mbf;
-            Base(size_t nsite, size_t niter): MbfForeach({nsite, 0ul}, niter), m_mbf(nsite){}
+            Base(size_t nsite, size_t niter): mbf_foreach::Base({nsite, 0ul}, niter), m_mbf(nsite){}
         };
 
         struct NumberConserve : Base {
@@ -178,7 +177,6 @@ namespace mbf_foreach {
             }
         };
     }
-
 
 }
 
