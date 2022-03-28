@@ -57,11 +57,15 @@ namespace mbf_foreach {
 
 
     public:
+        virtual ~PairBase(){}
+
         void loop(const function_t<field::FrmOnv> &fn) { frm_loop(fn); }
 
         void loop(const function_t<field::BosOnv> &fn) { bos_loop(fn); }
 
         void loop(const function_t<field::FrmBosOnv> &fn) { frmbos_loop(fn); }
+
+        virtual size_t nrow() = 0;
     };
 
     template<typename mbf_t, typename foreach_t>
@@ -72,6 +76,10 @@ namespace mbf_foreach {
         foreach_t m_foreach_inner;
 
         Pair(const foreach_t &foreach) : m_foreach_outer(foreach), m_foreach_inner(foreach) {}
+
+        size_t nrow() override {
+            return static_cast<const mbf_foreach::Base&>(m_foreach_outer).m_niter;
+        }
 
         template<typename fn_t>
         void loop(const fn_t &fn) {
@@ -322,6 +330,27 @@ namespace mbf_foreach {
             void frmbos_loop(const std::function<void(const field::FrmBosOnv &)> &fn) override { loop(fn); }
         };
 
+        /**
+         * convenient partial specialization for fermions coupled to a closed bosonic quantum system
+         * @tparam frm_foreach_t
+         *  fermion foreach iterator type
+         */
+        template<typename frm_foreach_t>
+        struct ClosedProduct : Product<frm_foreach_t, bos::GeneralClosed>{
+            ClosedProduct(const frm_foreach_t& frm_foreach, size_t nmode, size_t nboson):
+                    Product<frm_foreach_t, bos::GeneralClosed>(frm_foreach, {nmode, nboson}){}
+        };
+
+        /**
+         * convenient partial specialization for fermions coupled to an open bosonic quantum system
+         * @tparam frm_foreach_t
+         *  fermion foreach iterator type
+         */
+        template<typename frm_foreach_t>
+        struct OpenProduct : Product<frm_foreach_t, bos::GeneralOpen>{
+            OpenProduct(const frm_foreach_t& frm_foreach, size_t nmode, size_t nboson_max):
+                    Product<frm_foreach_t, bos::GeneralOpen>(frm_foreach, {nmode, nboson_max}){}
+        };
 
         template<typename foreach_t>
         struct Pair : mbf_foreach::Pair<field::FrmBosOnv, foreach_t> {
@@ -334,6 +363,7 @@ namespace mbf_foreach {
         protected:
             void frmbos_loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) override {base_t::loop(fn);}
         };
+
     }
 
 }

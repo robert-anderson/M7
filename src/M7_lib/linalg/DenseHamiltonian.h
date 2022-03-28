@@ -6,15 +6,15 @@
 #define M7_DENSEHAMILTONIAN_H
 
 #include <M7_lib/defs.h>
-#include <M7_lib/foreach/MbfForeachOld.h>
+#include <M7_lib/foreach/MbfForeach.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 
 #include "Dense.h"
 
 
-using namespace mbf_foreach_old;
+using namespace mbf_foreach;
 class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
-
+    typedef std::unique_ptr<PairBase> unique_t;
     /**
      * examine the requirements of the given Hamiltonian, and build an iterator over the row and column spaces
      * of its matrix representation in a physically appropriate, complete space of MBFs
@@ -33,6 +33,14 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
     std::unique_ptr<PairBase> make_pair_iterator(const Hamiltonian& h);
 
     size_t nrow(const Hamiltonian& h, bool force_general);
+
+    template<typename mbf_t>
+    void loop_over_pair_iterator(PairBase* foreach, const Hamiltonian& h){
+        auto fn = [this, &h](const field::FrmOnv &bra, size_t ibra, const field::FrmOnv &ket, size_t iket) {
+            (*this)(ibra, iket) = h.get_element(bra, ket);
+        };
+        foreach->loop(fn);
+    }
 
 public:
     DenseHamiltonian(const Hamiltonian& h, bool force_general=false);
