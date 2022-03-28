@@ -26,12 +26,12 @@ public:
             Table<row_t>::clear();
             Table<row_t>::push_back(other.m_hwm);
             Table<row_t>::m_bw = other.m_bw;
+            Table<row_t>::m_row.restart();
         }
         return *this;
     }
 
-    BufferedTable(const BufferedTable<row_t, mapped> &other) :
-            BufferedTable(other.m_buffer.m_name, other){
+    BufferedTable(const BufferedTable<row_t, mapped> &other) : BufferedTable(other.m_buffer.m_name, other){
         *this = other;
     }
 
