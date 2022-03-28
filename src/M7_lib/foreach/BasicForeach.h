@@ -40,7 +40,6 @@ namespace basic_foreach {
              */
             const size_t m_niter;
 
-
             Base(size_t niter) : m_niter(niter) {}
         };
 
@@ -90,7 +89,11 @@ namespace basic_foreach {
 
         public:
 
-            Unrestricted(const inds_t<nind> &shape) : Base<nind>(NdFormat<nind>(shape).m_nelement), m_shape(shape) {}
+            static size_t niter(const inds_t<nind> &shape){
+                return NdFormat<nind>(shape).m_nelement;
+            }
+
+            Unrestricted(const inds_t<nind> &shape) : Base<nind>(niter(shape)), m_shape(shape) {}
 
             Unrestricted(size_t extent = 0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
 
@@ -105,14 +108,15 @@ namespace basic_foreach {
         struct Ordered : Base<nind> {
             using Base<nind>::m_value;
             using Base<nind>::m_niter;
+
+            static size_t niter(size_t n) {
+                if (!nind) return 0ul;
+                return integer_utils::combinatorial(strict ? n : (n + nind) - 1, nind);
+            }
         protected:
             size_t m_n;
 
         private:
-            static size_t make_nterm(size_t n) {
-                if (!nind) return 0ul;
-                return integer_utils::combinatorial(strict ? n : (n + nind) - 1, nind);
-            }
 
             template<size_t ilevel, typename fn_t>
             void level_loop(const fn_t &fn, tags::Ind<ilevel>) {
@@ -142,7 +146,7 @@ namespace basic_foreach {
 
         public:
 
-            Ordered(size_t n) : Base<nind>(make_nterm(n)), m_n(n) {}
+            Ordered(size_t n) : Base<nind>(niter(n)), m_n(n) {}
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
@@ -194,8 +198,17 @@ namespace basic_foreach {
             }
 
         public:
+
+            static size_t niter(const inds_t& shape) {
+                return NdFormatD(shape).m_nelement;
+            }
+
+            static size_t niter(size_t nind, size_t extent){
+                return std::pow(extent, nind);
+            }
+
             explicit Unrestricted(inds_t shape):
-                Base(shape.size(), NdFormatD(shape).m_nelement), m_shape(std::move(shape)) {}
+                Base(shape.size(), niter(shape)), m_shape(std::move(shape)) {}
 
             Unrestricted(size_t nind, size_t extent):
                     Unrestricted(std::vector<size_t>(nind, extent)) {}
@@ -210,13 +223,16 @@ namespace basic_foreach {
 
         template<bool strict = true, bool ascending = true>
         struct Ordered : Base {
-        private:
-            const size_t m_n;
 
-            static size_t make_nterm(size_t n, size_t r) {
+            static size_t niter(size_t n, size_t r) {
                 if (!r) return 0ul;
                 return integer_utils::combinatorial(strict ? n : (n + r) - 1, r);
             }
+
+        private:
+            const size_t m_n;
+
+
 
             template<typename fn_t>
             void level_loop(const fn_t &fn, size_t ilevel) {
@@ -232,7 +248,7 @@ namespace basic_foreach {
             }
 
         public:
-            Ordered(size_t n, size_t r) : Base(r, make_nterm(n, r)), m_n(n) {}
+            Ordered(size_t n, size_t r) : Base(r, niter(n, r)), m_n(n) {}
 
             template<typename fn_t>
             void loop(const fn_t& fn) {

@@ -46,6 +46,8 @@ namespace mbf_foreach {
 
     struct PairBase {
 
+        const size_t m_niter;
+
         template<typename mbf_t>
         using function_t = std::function<void(const mbf_t &, size_t, const mbf_t &, size_t)>;
     protected:
@@ -57,15 +59,15 @@ namespace mbf_foreach {
 
 
     public:
-        virtual ~PairBase(){}
+        PairBase(size_t niter_single) : m_niter(niter_single * niter_single) {}
+
+        virtual ~PairBase() {}
 
         void loop(const function_t<field::FrmOnv> &fn) { frm_loop(fn); }
 
         void loop(const function_t<field::BosOnv> &fn) { bos_loop(fn); }
 
         void loop(const function_t<field::FrmBosOnv> &fn) { frmbos_loop(fn); }
-
-        virtual size_t nrow() = 0;
     };
 
     template<typename mbf_t, typename foreach_t>
@@ -75,11 +77,9 @@ namespace mbf_foreach {
         foreach_t m_foreach_outer;
         foreach_t m_foreach_inner;
 
-        Pair(const foreach_t &foreach) : m_foreach_outer(foreach), m_foreach_inner(foreach) {}
-
-        size_t nrow() override {
-            return static_cast<const mbf_foreach::Base&>(m_foreach_outer).m_niter;
-        }
+        Pair(const foreach_t &foreach) :
+                PairBase(static_cast<const mbf_foreach::Base &>(foreach).m_niter),
+                m_foreach_outer(foreach), m_foreach_inner(foreach) {}
 
         template<typename fn_t>
         void loop(const fn_t &fn) {
@@ -113,10 +113,12 @@ namespace mbf_foreach {
         };
 
         struct General : NumberConserve {
-            basic_foreach::rtnd::Ordered<true, true> m_foreach;
+            typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
+            foreach_t m_foreach;
 
-            General(size_t nsite, size_t nelec) : NumberConserve(nsite, nelec, 1),
-                                                  m_foreach(m_bd.m_nspinorb, m_nelec) {}
+            General(size_t nsite, size_t nelec) :
+                    NumberConserve(nsite, nelec, foreach_t::niter(2 * nsite, nelec)),
+                    m_foreach(2 * nsite, nelec) {}
 
         public:
             template<typename fn_t>
@@ -136,10 +138,12 @@ namespace mbf_foreach {
 
         struct Spins : NumberConserve {
             const int m_ms2;
-            basic_foreach::rtnd::Ordered<true, true> m_foreach;
+            typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
+            foreach_t m_foreach;
 
-            Spins(size_t nsite, int ms2) : NumberConserve(nsite, nsite + ms2 / 2, 1), m_ms2(ms2),
-                                           m_foreach(m_bd.m_nsite, (m_bd.m_nsite + m_ms2) / 2) {}
+            Spins(size_t nsite, int ms2) :
+                    NumberConserve(nsite, nsite + ms2 / 2, foreach_t::niter(nsite, (nsite + ms2) / 2)),
+                    m_ms2(ms2), m_foreach(nsite, (nsite + ms2) / 2) {}
 
         public:
             template<typename fn_t>
@@ -159,14 +163,19 @@ namespace mbf_foreach {
 
         struct Ms2Conserve : NumberConserve {
             const int m_ms2;
-            basic_foreach::rtnd::Ordered<true, true> m_alpha_foreach;
-            basic_foreach::rtnd::Ordered<true, true> m_beta_foreach;
+            typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
+            foreach_t m_alpha_foreach, m_beta_foreach;
 
-            Ms2Conserve(size_t nsite, size_t nelec, int ms2) : NumberConserve(nsite, nelec, 1), m_ms2(ms2),
-                                                               m_alpha_foreach(m_bd.m_nsite,
-                                                                               ci_utils::nalpha(m_nelec, m_ms2)),
-                                                               m_beta_foreach(m_bd.m_nsite,
-                                                                              ci_utils::nbeta(m_nelec, m_ms2)) {}
+            static size_t niter(size_t nsite, size_t nelec, int ms2) {
+                auto na = foreach_t::niter(nsite, ci_utils::nalpha(nelec, ms2));
+                auto nb = foreach_t::niter(nsite, ci_utils::nbeta(nelec, ms2));
+                return na * nb;
+            }
+
+            Ms2Conserve(size_t nsite, size_t nelec, int ms2) :
+                    NumberConserve(nsite, nelec, niter(nsite, nelec, ms2)), m_ms2(ms2),
+                    m_alpha_foreach(m_bd.m_nsite, ci_utils::nalpha(m_nelec, m_ms2)),
+                    m_beta_foreach(m_bd.m_nsite, ci_utils::nbeta(m_nelec, m_ms2)) {}
 
         public:
             template<typename fn_t>
@@ -189,7 +198,6 @@ namespace mbf_foreach {
             void frm_loop(const std::function<void(const field::FrmOnv &)> &fn) override { loop(fn); }
 
         };
-
 
         template<typename foreach_t>
         struct Pair : mbf_foreach::Pair<field::FrmOnv, foreach_t> {
@@ -220,10 +228,11 @@ namespace mbf_foreach {
         };
 
         struct GeneralClosed : NumberConserve {
-            basic_foreach::rtnd::Ordered<false, true> m_foreach;
+            typedef basic_foreach::rtnd::Ordered<false, true> foreach_t;
+            foreach_t m_foreach;
 
-            GeneralClosed(size_t nmode, size_t nboson) : NumberConserve(nmode, nboson, 1),
-                                                         m_foreach(nmode, nboson) {}
+            GeneralClosed(size_t nmode, size_t nboson) :
+                    NumberConserve(nmode, nboson, foreach_t::niter(nmode, nboson)), m_foreach(nmode, nboson) {}
 
         public:
             template<typename fn_t>
@@ -242,10 +251,12 @@ namespace mbf_foreach {
         };
 
         struct GeneralOpen : Base {
-            basic_foreach::rtnd::Unrestricted m_foreach;
+            typedef basic_foreach::rtnd::Unrestricted foreach_t;
+            foreach_t m_foreach;
 
-            GeneralOpen(size_t nmode, size_t nboson_max) : Base(nmode, 1),
-                                                           m_foreach(nmode, nboson_max + 1) {}
+            GeneralOpen(size_t nmode, size_t nboson_max) :
+                    Base(nmode, foreach_t::niter(nmode, nboson_max + 1)),
+                    m_foreach(nmode, nboson_max + 1) {}
 
         public:
             template<typename fn_t>
@@ -272,13 +283,14 @@ namespace mbf_foreach {
             Pair(const foreach_t &foreach) : base_t(foreach) {}
 
         protected:
-            void bos_loop(const mbf_foreach::PairBase::function_t<field::BosOnv> &fn) override {base_t::loop(fn);}
+            void bos_loop(const mbf_foreach::PairBase::function_t<field::BosOnv> &fn) override { base_t::loop(fn); }
         };
     }
 
     namespace frm_bos {
         struct Base : mbf_foreach::Base {
             buffered::FrmBosOnv m_mbf;
+
             Base(BasisData bd, size_t niter) : mbf_foreach::Base(bd, niter), m_mbf(bd) {}
         };
 
@@ -292,32 +304,34 @@ namespace mbf_foreach {
             bos_foreach_t m_bos_foreach;
 
         private:
-            static std::pair<const frm::Base&, const bos::Base&> cast_to_bases(
-                    const frm_foreach_t& frm_foreach, const bos_foreach_t& bos_foreach) {
+            static std::pair<const frm::Base &, const bos::Base &> cast_to_bases(
+                    const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 return {frm_foreach, bos_foreach};
             }
-            static BasisData make_bd(const frm_foreach_t& frm_foreach, const bos_foreach_t& bos_foreach) {
+
+            static BasisData make_bd(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 auto bases = cast_to_bases(frm_foreach, bos_foreach);
                 return {bases.first.m_bd.m_nsite, bases.second.m_bd.m_nmode};
             }
-            static size_t make_niter(const frm_foreach_t& frm_foreach, const bos_foreach_t& bos_foreach) {
+
+            static size_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 auto bases = cast_to_bases(frm_foreach, bos_foreach);
                 return bases.first.m_niter * bases.second.m_niter;
             }
 
         public:
-            Product(const frm_foreach_t& frm_foreach, const bos_foreach_t& bos_foreach):
+            Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) :
                     Base(make_bd(frm_foreach, bos_foreach), make_niter(frm_foreach, bos_foreach)),
-                    m_frm_foreach(frm_foreach), m_bos_foreach(bos_foreach){}
+                    m_frm_foreach(frm_foreach), m_bos_foreach(bos_foreach) {}
 
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
                 functor_utils::assert_prototype<void(const field::FrmBosOnv &)>(fn);
 
-                auto frm_loop_fn = [this, &fn](const field::FrmOnv& frm_mbf){
+                auto frm_loop_fn = [this, &fn](const field::FrmOnv &frm_mbf) {
                     m_mbf.m_frm = frm_mbf;
-                    auto bos_loop_fn = [this, &fn](const field::BosOnv& bos_mbf) {
+                    auto bos_loop_fn = [this, &fn](const field::BosOnv &bos_mbf) {
                         m_mbf.m_bos = bos_mbf;
                         fn(m_mbf);
                     };
@@ -336,9 +350,9 @@ namespace mbf_foreach {
          *  fermion foreach iterator type
          */
         template<typename frm_foreach_t>
-        struct ClosedProduct : Product<frm_foreach_t, bos::GeneralClosed>{
-            ClosedProduct(const frm_foreach_t& frm_foreach, size_t nmode, size_t nboson):
-                    Product<frm_foreach_t, bos::GeneralClosed>(frm_foreach, {nmode, nboson}){}
+        struct ClosedProduct : Product<frm_foreach_t, bos::GeneralClosed> {
+            ClosedProduct(const frm_foreach_t &frm_foreach, size_t nmode, size_t nboson) :
+                    Product<frm_foreach_t, bos::GeneralClosed>(frm_foreach, {nmode, nboson}) {}
         };
 
         /**
@@ -347,9 +361,9 @@ namespace mbf_foreach {
          *  fermion foreach iterator type
          */
         template<typename frm_foreach_t>
-        struct OpenProduct : Product<frm_foreach_t, bos::GeneralOpen>{
-            OpenProduct(const frm_foreach_t& frm_foreach, size_t nmode, size_t nboson_max):
-                    Product<frm_foreach_t, bos::GeneralOpen>(frm_foreach, {nmode, nboson_max}){}
+        struct OpenProduct : Product<frm_foreach_t, bos::GeneralOpen> {
+            OpenProduct(const frm_foreach_t &frm_foreach, size_t nmode, size_t nboson_max) :
+                    Product<frm_foreach_t, bos::GeneralOpen>(frm_foreach, {nmode, nboson_max}) {}
         };
 
         template<typename foreach_t>
@@ -361,7 +375,9 @@ namespace mbf_foreach {
             Pair(const foreach_t &foreach) : base_t(foreach) {}
 
         protected:
-            void frmbos_loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) override {base_t::loop(fn);}
+            void frmbos_loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) override {
+                base_t::loop(fn);
+            }
         };
 
     }

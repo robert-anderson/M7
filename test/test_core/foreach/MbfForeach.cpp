@@ -73,6 +73,7 @@ TEST(MbfForeach, FrmGeneral) {
     };
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
 
 TEST(MbfForeach, FrmGeneralEarlyExit) {
@@ -90,6 +91,7 @@ TEST(MbfForeach, FrmGeneralEarlyExit) {
     try { ASSERT_ANY_THROW(foreach.loop(fn)); }
     catch (const ExitLoop &) {}
     ASSERT_EQ(iiter, 8);
+    ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
 
 TEST(MbfForeach, FrmGeneralPair) {
@@ -105,6 +107,7 @@ TEST(MbfForeach, FrmGeneralPair) {
     };
     mbf_foreach::frm::Pair<mbf_foreach::frm::General> foreach({nsite, nelec});
     ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_EQ(foreach.m_niter, chk_inds.size()*chk_inds.size());
 }
 
 TEST(MbfForeach, FrmSpins) {
@@ -121,6 +124,7 @@ TEST(MbfForeach, FrmSpins) {
     mbf_foreach::frm::Spins foreach(nsite, ms2);
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
 
 TEST(MbfForeach, FrmMs2Conserve) {
@@ -138,6 +142,7 @@ TEST(MbfForeach, FrmMs2Conserve) {
     mbf_foreach::frm::Ms2Conserve foreach(nsite, nelec, ms2);
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
 
 TEST(MbfForeach, BosGeneralOpen) {
@@ -154,6 +159,7 @@ TEST(MbfForeach, BosGeneralOpen) {
     mbf_foreach::bos::GeneralOpen foreach(nmode, nboson_max);
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
 
 TEST(MbfForeach, BosGeneralOpenEarlyExit) {
@@ -171,6 +177,7 @@ TEST(MbfForeach, BosGeneralOpenEarlyExit) {
     mbf_foreach::bos::GeneralOpen foreach(nmode, nboson_max);
     ASSERT_ANY_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, 8);
+    ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
 
 TEST(MbfForeach, BosGeneralOpenPair) {
@@ -186,6 +193,7 @@ TEST(MbfForeach, BosGeneralOpenPair) {
     };
     mbf_foreach::bos::Pair<mbf_foreach::bos::GeneralOpen> foreach({nmode, nboson_max});
     ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_EQ(foreach.m_niter, chk_inds.size()*chk_inds.size());
 }
 
 TEST(MbfForeach, FrmBosGeneralOpen) {
@@ -211,6 +219,7 @@ TEST(MbfForeach, FrmBosGeneralOpen) {
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::General, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
 
 TEST(MbfForeach, FrmBosSpins) {
@@ -236,6 +245,7 @@ TEST(MbfForeach, FrmBosSpins) {
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
 
 TEST(MbfForeach, FrmBosSpinsEarlyExit) {
@@ -264,6 +274,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
     try { ASSERT_ANY_THROW(foreach.loop(fn)); }
     catch (const ExitLoop &) {}
     ASSERT_EQ(iiter, 32);
+    ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
 
 TEST(MbfForeach, FrmBosMs2Conserve) {
@@ -290,6 +301,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
     ASSERT_NO_THROW(foreach.loop(fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
+    ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
 
 TEST(MbfForeach, FrmBosMs2ConservePair) {
@@ -318,4 +330,6 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
     typedef mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> product_t;
     mbf_foreach::frm_bos::Pair<product_t> foreach({{nsite, nelec, ms2}, {nmode, nboson_max}});
     ASSERT_NO_THROW(foreach.loop(fn));
+    auto n = frm_chk_inds.size()*bos_chk_inds.size();
+    ASSERT_EQ(foreach.m_niter, n*n);
 }
