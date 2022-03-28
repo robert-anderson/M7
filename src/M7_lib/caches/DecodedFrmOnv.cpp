@@ -45,8 +45,10 @@ const defs::inds& decoded_mbf::frm::SimpleVacs::get() {
 
 decoded_mbf::frm::LabelledBase::LabelledBase(size_t nelement, const defs::inds &map, const FrmOnvField &mbf) :
         Base(mbf), m_inds(nelement), m_map(map) {
-    REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
-               "not allocating enough elements in ragged array to accommodate label map");
+    if (mbf.m_nsite) {
+        REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
+                   "not allocating enough elements in ragged array to accommodate label map");
+    }
 }
 
 const std::vector<defs::inds> &decoded_mbf::frm::LabelledBase::validated() const {

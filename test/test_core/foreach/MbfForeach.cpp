@@ -71,7 +71,8 @@ TEST(MbfForeach, FrmGeneral) {
         ASSERT_EQ(mbf, chk_inds[iiter]);
         ++iiter;
     };
-    ASSERT_NO_THROW(foreach.loop(fn));
+    buffered::FrmOnv mbf(nsite);
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, chk_inds.size());
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
@@ -88,7 +89,7 @@ TEST(MbfForeach, FrmGeneralEarlyExit) {
         if (iiter == 8) throw ExitLoop();
         ++iiter;
     };
-    try { ASSERT_ANY_THROW(foreach.loop(fn)); }
+    try { ASSERT_ANY_THROW(foreach.loop_fn(fn)); }
     catch (const ExitLoop &) {}
     ASSERT_EQ(iiter, 8);
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
@@ -106,7 +107,7 @@ TEST(MbfForeach, FrmGeneralPair) {
         ASSERT_EQ(inner, chk_inds[iinner]);
     };
     mbf_foreach::frm::Pair<mbf_foreach::frm::General> foreach({nsite, nelec});
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(foreach.m_niter, chk_inds.size()*chk_inds.size());
 }
 
@@ -122,7 +123,7 @@ TEST(MbfForeach, FrmSpins) {
         ++iiter;
     };
     mbf_foreach::frm::Spins foreach(nsite, ms2);
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, chk_inds.size());
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
@@ -140,7 +141,7 @@ TEST(MbfForeach, FrmMs2Conserve) {
         ++iiter;
     };
     mbf_foreach::frm::Ms2Conserve foreach(nsite, nelec, ms2);
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, chk_inds.size());
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
@@ -157,7 +158,7 @@ TEST(MbfForeach, BosGeneralOpen) {
         ++iiter;
     };
     mbf_foreach::bos::GeneralOpen foreach(nmode, nboson_max);
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, chk_inds.size());
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
@@ -175,7 +176,7 @@ TEST(MbfForeach, BosGeneralOpenEarlyExit) {
         ++iiter;
     };
     mbf_foreach::bos::GeneralOpen foreach(nmode, nboson_max);
-    ASSERT_ANY_THROW(foreach.loop(fn));
+    ASSERT_ANY_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, 8);
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
 }
@@ -192,7 +193,7 @@ TEST(MbfForeach, BosGeneralOpenPair) {
         ASSERT_EQ(inner, chk_inds[iinner]);
     };
     mbf_foreach::bos::Pair<mbf_foreach::bos::GeneralOpen> foreach({nmode, nboson_max});
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(foreach.m_niter, chk_inds.size()*chk_inds.size());
 }
 
@@ -217,7 +218,7 @@ TEST(MbfForeach, FrmBosGeneralOpen) {
     mbf_foreach::frm::General outer(nsite, nelec);
     mbf_foreach::bos::GeneralOpen inner(nmode, nboson_max);
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::General, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
@@ -243,7 +244,7 @@ TEST(MbfForeach, FrmBosSpins) {
     mbf_foreach::frm::Spins outer(nsite, ms2);
     mbf_foreach::bos::GeneralOpen inner(nmode, nboson_max);
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
@@ -271,7 +272,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
     mbf_foreach::bos::GeneralOpen inner(nmode, nboson_max);
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
 
-    try { ASSERT_ANY_THROW(foreach.loop(fn)); }
+    try { ASSERT_ANY_THROW(foreach.loop_fn(fn)); }
     catch (const ExitLoop &) {}
     ASSERT_EQ(iiter, 32);
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
@@ -299,7 +300,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
     mbf_foreach::frm::Ms2Conserve outer(nsite, nelec, ms2);
     mbf_foreach::bos::GeneralOpen inner(nmode, nboson_max);
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
 }
@@ -329,7 +330,7 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
     };
     typedef mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> product_t;
     mbf_foreach::frm_bos::Pair<product_t> foreach({{nsite, nelec, ms2}, {nmode, nboson_max}});
-    ASSERT_NO_THROW(foreach.loop(fn));
+    ASSERT_NO_THROW(foreach.loop_fn(fn));
     auto n = frm_chk_inds.size()*bos_chk_inds.size();
     ASSERT_EQ(foreach.m_niter, n*n);
 }
