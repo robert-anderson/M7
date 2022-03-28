@@ -36,7 +36,7 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
 
     template<typename mbf_t>
     void loop_over_pair_iterator(PairBase* foreach, const Hamiltonian& h){
-        auto fn = [this, &h](const field::FrmOnv &bra, size_t ibra, const field::FrmOnv &ket, size_t iket) {
+        auto fn = [this, &h](const mbf_t &bra, size_t ibra, const mbf_t &ket, size_t iket) {
             (*this)(ibra, iket) = h.get_element(bra, ket);
         };
         foreach->loop(fn);

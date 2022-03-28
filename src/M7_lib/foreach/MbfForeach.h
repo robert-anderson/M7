@@ -46,6 +46,7 @@ namespace mbf_foreach {
 
     struct PairBase {
 
+        const size_t m_nrow;
         const size_t m_niter;
 
         template<typename mbf_t>
@@ -59,7 +60,7 @@ namespace mbf_foreach {
 
 
     public:
-        PairBase(size_t niter_single) : m_niter(niter_single * niter_single) {}
+        PairBase(size_t nrow) : m_nrow(nrow), m_niter(nrow * nrow) {}
 
         virtual ~PairBase() {}
 
