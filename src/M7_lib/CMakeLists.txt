@@ -82,7 +82,7 @@ else()
     message(FATAL_ERROR "Specified MBF_TYPE \"${MBF_TYPE}\" is invalid")
 endif()
 
-target_compile_definitions(M7_lib PRIVATE DMBF_TYPE=${MBF_TYPE})
+target_compile_definitions(M7_lib PUBLIC MBF_TYPE=${MBF_TYPE})
 
 option(ENABLE_COMPLEX "ENABLE_COMPLEX")
 if (ENABLE_COMPLEX)

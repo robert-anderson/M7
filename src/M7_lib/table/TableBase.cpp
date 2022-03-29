@@ -42,6 +42,7 @@ bool TableBase::is_full() const {
 }
 
 size_t TableBase::push_back(size_t nrow) {
+    DEBUG_ASSERT_TRUE(row_size(), "cannot resize a table with zero row size");
     if (m_hwm + nrow > this->nrow()) expand(nrow);
     auto tmp = m_hwm;
     m_hwm += nrow;

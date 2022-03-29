@@ -45,6 +45,12 @@ struct Bilinears {
     //const defs::inds m_specmom_exsigs;
 
 private:
+    /**
+     * @param string
+     *  excitation signature or fermion operator rank defined in the configuration document
+     * @return
+     *  integer excitation signature
+     */
     static size_t parse_exsig(const std::string &string) {
         REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
         if (string.size() == 1) {
@@ -62,7 +68,12 @@ private:
         REQUIRE_LE_ALL(nbos_ann, defs::exsig_nop_mask_bos, "number of boson annihilation operators exceeds limit");
         return exsig_utils::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
     }
-
+    /**
+     * @param strings
+     *  excitation signatures or fermion operator ranks defined in the configuration document
+     * @return
+     *  integer excitation signatures
+     */
     static defs::inds parse_exsigs(const std::vector<std::string> &strings) {
         defs::inds out;
         for (auto &string: strings) out.push_back(parse_exsig(string));

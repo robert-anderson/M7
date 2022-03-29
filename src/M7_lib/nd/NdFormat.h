@@ -57,7 +57,7 @@ struct NdFormat : NdFormatBase {
      * helper function to decide the number of elements assuming the m_shape and m_stride members have already been set
      */
     size_t make_nelement() const {
-        return nind ? m_shape.front()*m_strides.front() : 0ul;
+        return nind ? m_shape.front()*m_strides.front() : 1ul;
     }
 
     std::array<std::string, nind> make_default_dim_names() const {
