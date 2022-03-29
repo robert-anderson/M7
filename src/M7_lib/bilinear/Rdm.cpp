@@ -182,7 +182,7 @@ bool Rdms::takes_contribs_from(const size_t &exsig) const {
 
 void Rdms::make_contribs(const Mbf &src_onv, const conn::Mbf &conn, const com_ops::Mbf &com, const wf_t &contrib) {
     auto exsig = conn.exsig();
-    if (!exsig) m_total_norm.m_local+=std::abs(contrib);
+    if (!exsig) m_total_norm.m_local+=contrib;
     for (auto ranksig: m_exsig_ranks[exsig]) m_rdms[ranksig]->make_contribs(src_onv, conn, com, contrib);
 }
 
@@ -238,10 +238,10 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam* ham) const {
     for (row.restart(); row.in_range(); row.step()){
         const size_t i=row.m_inds.m_frm.m_cre[0];
         const size_t j=row.m_inds.m_frm.m_cre[1];
-        ASSERT(i<j);
+        DEBUG_ASSERT_LT(i, j, "spin orbital creation indices should be ordered");
         const size_t k=row.m_inds.m_frm.m_ann[0];
         const size_t l=row.m_inds.m_frm.m_ann[1];
-        ASSERT(k<l);
+        DEBUG_ASSERT_LT(k, l, "spin orbital annihilation indices should be ordered");
         const auto rdm_element = row.m_values[0];
         e2 += rdm_element*ham->get_coeff_2200(i, j, k, l);
         /*
@@ -260,7 +260,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam* ham) const {
     e1 = mpi::all_sum(e1);
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
-    DEBUG_ASSERT_NEARLY_NE(std::abs(trace), 0.0, 1e-14, "RDM trace should be non-zero");
+    DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
     const auto norm = consts::real(trace) / integer_utils::combinatorial(ham->m_nelec, 2);
     REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
                  "2RDM norm should match total of sampled diagonal contributions");
@@ -304,7 +304,7 @@ defs::ham_comp_t Rdms::get_energy(const LadderHam *ham, size_t nelec, size_t exs
 }
 
 defs::ham_comp_t Rdms::get_energy(const BosHam *ham) const {
-    if (!ham) return 0.0;
+    if (ham->disabled()) return 0.0;
     auto& rdm = m_rdms[exsig_utils::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");
     defs::ham_t e = 0.0;

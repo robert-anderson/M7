@@ -60,7 +60,7 @@ class Rdms : public Archivable {
 public:
     const bool m_explicit_ref_conns;
     const Epoch &m_accum_epoch;
-    Reduction<defs::wf_comp_t> m_total_norm;
+    Reduction<defs::wf_t> m_total_norm;
 
     Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisData bd, size_t nelec, const Epoch &accum_epoch);
 
