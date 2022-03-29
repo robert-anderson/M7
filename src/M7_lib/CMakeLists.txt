@@ -1,7 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/build_or_find_hdf5.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/build_or_find_arpack.cmake)
 
-add_library(M7_lib defs.h foreach/MbfForeach.cpp foreach/MbfForeach.h)
+add_library(M7_lib defs.h)
 target_include_directories(M7_lib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/..
