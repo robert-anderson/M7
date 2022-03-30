@@ -18,6 +18,8 @@ struct LadderHoppingPc : public LadderHoppingUniform {
 
     LadderHoppingPc(const Hamiltonian &h, PRNG &prng);
 
+    std::string description() const override;
+
     bool draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs,
               defs::prob_t &prob, conn::FrmBosOnv &conn) override;
 };

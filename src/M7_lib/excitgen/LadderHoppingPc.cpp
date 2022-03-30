@@ -58,3 +58,7 @@ bool LadderHoppingPc::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, Cac
     prob *= std::abs(m_h.m_ladder->get_coeff_1101(n, p, q)) / (m_pick_n_given_pq.norm(pq));
     return true;
 }
+
+std::string LadderHoppingPc::description() const {
+    return "precomputed heat-bath ladder hopping";
+}
