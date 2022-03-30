@@ -40,7 +40,7 @@ void EbdumpFileReader::convert_inds(defs::inds &inds) {
     if (!m_header.m_uhf || m_spin_major) return;
     auto fn = [&inds, this](size_t i){
         auto &ind = inds[i];
-        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + (ind & 1ul) ? m_header.m_nsite : 0);
+        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_header.m_nsite : 0));
     };
     // this conversion only applies to the fermion indices
     fn(1);

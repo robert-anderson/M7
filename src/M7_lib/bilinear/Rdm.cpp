@@ -193,10 +193,12 @@ void Rdms::make_contribs(const Mbf &src_onv, const Mbf &dst_onv, const wf_t &con
 
 void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &dst_row, const Propagator &prop) {
     DEBUG_ASSERT_EQ(recv_row.m_dst_mbf, dst_row.m_mbf, "found row doesn't correspond to spawned dst");
-    defs::wf_t contrib = dst_row.m_weight[recv_row.m_ipart_dst];
+    auto ipart_replica = dst_row.ipart_replica(recv_row.m_ipart_dst);
+    defs::wf_t contrib = dst_row.m_weight[ipart_replica];
+    // recover pre-death value of replica population (on average)
+    contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_replica]);
     contrib = consts::conj(contrib);
-    contrib *= recv_row.m_src_weight[0];
-    contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[recv_row.m_ipart_dst]);
+    contrib *= recv_row.m_src_weight;
     make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
 }
 

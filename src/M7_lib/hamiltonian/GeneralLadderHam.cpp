@@ -4,7 +4,7 @@
 
 #include "GeneralLadderHam.h"
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max) :
+GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max, bool spin_major) :
         LadderHam({header.m_nsite, header.m_nmode}, nboson_max),
         m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_nmode, 0.0) {
     if (!m_nboson_max || !(m_bd.m_nsite || m_bd.m_nmode)) return;
@@ -14,7 +14,7 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max
 
     defs::inds inds(3);
     defs::ham_t value;
-    EbdumpFileReader file_reader(header.m_fname);
+    EbdumpFileReader file_reader(header.m_fname, spin_major);
 
     log::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -34,6 +34,9 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max
     }
     log_data();
 }
+
+GeneralLadderHam::GeneralLadderHam(const fciqmc_config::LadderHamiltonian &opts) :
+        GeneralLadderHam(EbdumpHeader(opts.m_ebdump.m_path), opts.m_nboson_max, opts.m_ebdump.m_spin_major){}
 
 defs::ham_t GeneralLadderHam::get_coeff_0010(size_t imode) const {
     return m_v_unc[imode];

@@ -104,10 +104,10 @@ defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ip
 References::References(const fciqmc_config::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
                        std::vector<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
-    ASSERT(locs.size()==wf.m_format.m_nelement);
+    DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,
+                    "there should be a parallel table location specifying each reference row");
     m_refs.reserve(wf.m_format.m_nelement);
     for (size_t ipart=0ul; ipart<wf.m_format.m_nelement; ++ipart) m_refs.emplace_back(opts, ham, wf, ipart, locs[ipart]);
-    ASSERT(m_refs.size()==wf.npart());
 }
 
 const Reference &References::operator[](const size_t &ipart) const {

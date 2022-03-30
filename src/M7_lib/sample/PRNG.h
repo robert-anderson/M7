@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <complex>
 #include <M7_lib/defs.h>
+#include <M7_lib/parallel/MPIAssert.h>
 
 class PRNG {
     typedef std::vector<uint32_t> U;
@@ -36,30 +37,75 @@ public:
 
     double draw_float();
 
+    /**
+     * @tparam T
+     *  non-complex floating point type to round
+     * @param v
+     *  value to round
+     * @param magnitude
+     *  scalar about which to round v
+     * @param prob
+     *  probability of the lower magnitude outcome
+     * @return
+     *  the lower magnitude result with probability given by prob, or the higher magnitude result with probability given
+     *  by 1-prob
+     */
     template<typename T>
-    T stochastic_round(const T &v, const double &magnitude) {
-        ASSERT(magnitude > 0);
-        static_assert(std::is_floating_point<T>::value, "Stochastic round is only applicable to floating point types");
-        const double ratio = v / magnitude;
-        const long int_ratio = ratio;
-        if (ratio >= 0) {
-            if (draw_float() < (ratio - int_ratio)) return (int_ratio + 1) * magnitude;
-            else return int_ratio * magnitude;
-        } else {
-            if (draw_float() < (int_ratio - ratio)) return (int_ratio - 1) * magnitude;
-            else return int_ratio * magnitude;
+    T stochastic_round(const T &v, const T &magnitude, defs::prob_t& prob) {
+        static_assert(std::is_floating_point<T>::value, "stochastic round is only applicable to floating point types");
+        DEBUG_ASSERT_GE(magnitude, 1e-14, "magnitude should be non-negative and non-zero");
+        prob = v / magnitude;
+        const long int_ratio = prob;
+        if (v >= 0) {
+            prob = prob - double(int_ratio);
+            return double(draw_float() < prob ? (int_ratio + 1) : int_ratio) * magnitude;
+        }
+        else {
+            prob = double(int_ratio) - prob;
+            return (draw_float() < prob ? (int_ratio - 1) : int_ratio) * magnitude;
         }
     }
 
     template<typename T>
-    std::complex<T> stochastic_round(const std::complex<T> &v, const double &magnitude) {
-        return stochastic_round(std::abs(v), magnitude) * v / std::abs(v);
+    std::complex<T> stochastic_round(const std::complex<T> &v, const T &magnitude, defs::prob_t& prob) {
+        return stochastic_round(std::abs(v), magnitude, prob) * v / std::abs(v);
     }
 
+    /**
+     * overload for situations where the probability is not required by the calling scope
+     */
     template<typename T>
-    T stochastic_threshold(const T &v, const double &magnitude) {
-        if (std::abs(v) < magnitude) return stochastic_round(v, magnitude);
+    T stochastic_round(const T &v, const consts::comp_t<T> &magnitude) {
+        defs::prob_t prob;
+        return stochastic_round(v, magnitude, prob);
+    }
+
+    /**
+     * @tparam T
+     *  non-complex floating point type to round
+     * @param v
+     *  value to round
+     * @param magnitude
+     *  scalar about which to round v
+     * @param prob
+     *  probability that the result is rounded up or unmodified
+     * @return
+     *  result of stochastic_round only if |v| is less than magnitude, else return v unmodified with certainty
+     */
+    template<typename T>
+    T stochastic_threshold(const T &v, const consts::comp_t<T> &magnitude, defs::prob_t& prob) {
+        if (std::abs(v) < magnitude) return stochastic_round(v, magnitude, prob);
+        prob = 1.0;
         return v;
+    }
+
+    /**
+     * overload for situations where the probability is not required by the calling scope
+     */
+    template<typename T>
+    T stochastic_threshold(const T &v, const consts::comp_t<T> &magnitude) {
+        defs::prob_t prob;
+        return stochastic_threshold(v, magnitude, prob);
     }
 
 };

@@ -175,10 +175,12 @@ void Annihilator::handle_src_block(SpawnTableRow &block_begin, WalkerTableRow &d
         if (dst_row.m_mbf == m_refs[ipart_dst].get_mbf()) return;
         if (block_begin.m_src_mbf == m_refs[m_wf.ipart_replica(ipart_dst)].get_mbf()) return;
     }
+    auto iroot = m_wf.iroot_part(ipart_dst);
     /*
      * or if they already take contributions from deterministic subspace connections.
+     * i.e. the src MBF is a deterministic subspace member for this root index, and so too is the dst MBF
      */
-    if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(m_wf.iroot_part(ipart_dst))) return;
+    if (block_begin.m_src_deterministic && dst_row.m_deterministic.get(iroot)) return;
 
     m_rdms.make_contribs(block_begin, dst_row, m_prop);
 }

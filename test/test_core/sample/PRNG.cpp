@@ -55,6 +55,9 @@ TEST(PRNG, StochasticThreshold) {
     PRNG prng(0, 1000);
     double rounding_magnitude = 2.7;
     ASSERT_EQ(prng.stochastic_threshold(123.34, rounding_magnitude), 123.34);
+    defs::prob_t accept_prob;
+    prng.stochastic_threshold(2.5, rounding_magnitude, accept_prob);
+    ASSERT_FLOAT_EQ(accept_prob, 2.5 / 2.7);
 
     const size_t n=20000000;
     double v = -0.14;
@@ -77,12 +80,12 @@ TEST(PRNG, ModularBase){
 }
 
 TEST(PRNG, InRange) {
-    PRNG prng(0, 1000);
+    PRNG prng(0, 100000);
     const uint32_t min = 5, max = 10;
-    const size_t n = 10000000;
+    const size_t n = 100000000;
     size_t tot = 0ul;
     for (size_t i = 0; i < n; ++i) {
         tot += prng.draw_uint(min, max);
     }
-    ASSERT_LT(std::abs(tot / n - (max-min-1)/2.0), 1e-4);
+    ASSERT_LT(std::abs(tot / double(n) - (max+min-1)/2.0), 1e-4);
 }

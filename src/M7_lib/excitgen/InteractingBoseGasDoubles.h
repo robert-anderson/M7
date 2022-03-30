@@ -26,6 +26,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
     bool draw_h_bos(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
                     conn::BosOnv &conn) override {
         auto h = h_cast();
+        DEBUG_ONLY(h);
         DEBUG_ASSERT_TRUE(h, "Boson hamiltonian couldn't be cast to InteractingBosGasBosHam");
         auto& bos_op_inds = orbs.bos_op_inds(src);
         DEBUG_ASSERT_EQ(bos_op_inds.size(), m_h.nboson(),

@@ -8,7 +8,7 @@ fciqmc_config::Fcidump::Fcidump(config::Group *parent) :
         config::Section(parent, "fcidump", "options relating to the FCIDUMP file"),
         m_path(this, "path", "", "path to file defining fermionic Hamiltonian"),
         m_spin_major(this, "spin_major", false,
-                     "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... if false.") {}
+                     "if true, spin-resolved FCIDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
 bool fciqmc_config::Fcidump::enabled() const {
     return !m_path.get().empty();
@@ -26,7 +26,9 @@ bool fciqmc_config::Bosdump::enabled() const {
 fciqmc_config::Ebdump::Ebdump(config::Group *parent) :
         config::Section(parent, "ebdump",
                         "options relating to 3-indexed text file defining arbitrary couplings between electron hopping (and one-electron density) and boson (de-)excitations"),
-        m_path(this, "path", "", "path to EBDUMP format file") {}
+        m_path(this, "path", "", "path to EBDUMP format file"),
+        m_spin_major(this, "spin_major", false,
+                     "if true, spin-resolved EBDUMP orders the spin orbitals aaa...bbb..., and ababab... otherwise.") {}
 
 bool fciqmc_config::Ebdump::enabled() const {
     return !m_path.get().empty();

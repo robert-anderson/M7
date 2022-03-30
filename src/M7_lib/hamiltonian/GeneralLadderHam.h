@@ -27,10 +27,9 @@ struct GeneralLadderHam : LadderHam {
      */
     std::vector<defs::ham_t> m_v_unc;
 
-    GeneralLadderHam(const EbdumpHeader& header, size_t nboson_max);
+    GeneralLadderHam(const EbdumpHeader& header, size_t nboson_max, bool spin_major=false);
 
-    GeneralLadderHam(const fciqmc_config::LadderHamiltonian &opts) :
-        GeneralLadderHam(EbdumpHeader(opts.m_ebdump.m_path), opts.m_nboson_max){}
+    GeneralLadderHam(const fciqmc_config::LadderHamiltonian &opts);
 
     defs::ham_t get_coeff_0010(size_t imode) const override;
 
