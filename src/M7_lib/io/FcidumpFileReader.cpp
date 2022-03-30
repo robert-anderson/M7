@@ -53,7 +53,8 @@ bool FcidumpFileReader::spin_conserving() const {
 
 void FcidumpFileReader::convert_inds(defs::inds &inds) {
     if (!m_header.m_spin_resolved || m_spin_major) return;
-    for (auto &i:inds) i = ((i == ~0ul) ? ~0ul : (i / 2 + (i & 1ul) ? m_header.m_nsite : 0));
+    for (auto &ind: inds)
+        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_header.m_nsite : 0));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) {

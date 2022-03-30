@@ -28,6 +28,7 @@ namespace fciqmc_config {
 
     struct Ebdump : config::Section {
         config::Param<std::string> m_path;
+        config::Param<bool> m_spin_major;
 
         explicit Ebdump(config::Group *parent);
 
