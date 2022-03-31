@@ -46,12 +46,12 @@ defs::ham_t GeneralLadderHam::get_coeff_0001(size_t imode) const {
     return m_v_unc[imode];
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_1110(size_t imode, size_t j, size_t i) const {
+defs::ham_t GeneralLadderHam::get_coeff_1110(size_t imode, size_t i, size_t j) const {
     return m_v.get(imode, i, j);
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_1101(size_t imode, size_t j, size_t i) const {
-    return m_v.get(imode, i, j);
+defs::ham_t GeneralLadderHam::get_coeff_1101(size_t imode, size_t i, size_t j) const {
+    return m_v.get(imode, j, i);
 }
 
 defs::ham_t GeneralLadderHam::get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const {

@@ -137,9 +137,8 @@ DeterministicSubspaces::operator bool() const {
     return m_opts.m_size && m_epoch;
 }
 
-void
-DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears, Wavefunction &wf,
-                                                 size_t icycle) {
+void DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, const Bilinears &bilinears,
+                                                 Wavefunction &wf, size_t icycle) {
     m_detsubs.resize(wf.nroot());
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
     for (size_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {

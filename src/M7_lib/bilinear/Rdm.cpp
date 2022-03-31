@@ -90,10 +90,8 @@ void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &
     if (decode_nbos(exsig)==1) {
         // "ladder" contribution
         m_lookup_inds = conn.m_bos;
-        size_t nboson_common = 1ul;
-        if (exsig_utils::decode_nbos_cre(exsig)) nboson_common = src_onv.m_bos[conn.m_bos.m_cre[0].m_imode] + 1;
-        else if (exsig_utils::decode_nbos_ann(exsig)) nboson_common = src_onv.m_bos[conn.m_bos.m_ann[0].m_imode];
-        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * std::sqrt(nboson_common));
+        auto occ_fac = conn.m_bos.occ_fac(src_onv.m_bos);
+        make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * occ_fac);
     }
 
     m_lookup_inds.m_frm.zero();
@@ -280,20 +278,18 @@ defs::ham_comp_t Rdms::get_energy(const LadderHam *ham, size_t nelec, size_t exs
     auto& row = rdm->m_store.m_row;
     bool cre = exsig_utils::decode_nbos_cre(exsig);
 
-    const auto& nsite = rdm->m_bd.m_nsite;
     for (row.restart(); row.in_range(); row.step()){
         const size_t p=row.m_inds.m_frm.m_cre[0];
         const size_t q=row.m_inds.m_frm.m_ann[0];
         const size_t n=cre ? row.m_inds.m_bos.m_cre[0] : row.m_inds.m_bos.m_ann[0];
 
         const auto rdm_element = row.m_values[0];
-        auto psite = FrmOnv::isite(p, nsite);
-        auto qsite = FrmOnv::isite(q, nsite);
         /*
          * default definition is the creation ladder operator, so the fermion indices must be interchanged if computing
          * the energy of the boson-annihilating RDM
          */
-        e_coupled += rdm_element* ham->get_coeff_1101(n, cre ? psite : qsite, cre ? qsite : psite);
+        const auto coeff = cre ? ham->get_coeff_1110(n, p, q) : ham->get_coeff_1101(n, p, q);
+        e_coupled += rdm_element * coeff;
 
         if (p == q) e_uncoupled += rdm_element*ham->get_coeff_0001(n);
     }

@@ -35,9 +35,9 @@ struct GeneralLadderHam : LadderHam {
 
     defs::ham_t get_coeff_0001(size_t imode) const override;
 
-    defs::ham_t get_coeff_1110(size_t imode, size_t j, size_t i) const override;
+    defs::ham_t get_coeff_1110(size_t imode, size_t i, size_t j) const override;
 
-    defs::ham_t get_coeff_1101(size_t imode, size_t j, size_t i) const override;
+    defs::ham_t get_coeff_1101(size_t imode, size_t i, size_t j) const override;
 
     defs::ham_t get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
 

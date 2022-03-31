@@ -124,7 +124,7 @@ fciqmc_config::Semistochastic::Semistochastic(config::Group *parent) :
 
 void fciqmc_config::Semistochastic::verify() {
     REQUIRE_NE_ALL(bool(m_size), m_l1_fraction_cutoff == 1.0, "incompatible methods of subspace selection specified");
-    REQUIRE_LE_ALL(m_l1_fraction_cutoff, 1.0, "cutoff cannot exceed 1.0");
+    REQUIRE_LE_ALL(m_l1_fraction_cutoff, 1.0, "cutoff must not exceed 1.0");
 }
 
 fciqmc_config::Stats::Stats(config::Group *parent) :
