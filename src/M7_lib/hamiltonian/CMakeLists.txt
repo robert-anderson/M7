@@ -29,4 +29,6 @@ target_sources(M7_lib
         SumFrmHam.h
         SpinSquareFrmHam.cpp
         SpinSquareFrmHam.h
+        TcFrmHam.cpp
+        TcFrmHam.h
 )

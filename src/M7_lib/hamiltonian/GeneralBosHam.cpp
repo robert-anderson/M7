@@ -65,6 +65,7 @@ defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn
     // this Hamiltonian conserves boson number
     if (conn.m_ann.size() != conn.m_cre.size()) return 0.0;
     // single number-conserving boson operators not implemented;
+
     if(conn.size() == 2) return 0.0;
     if (!conn.size()) return get_element(onv);
     if (conn.size() == 4) {

@@ -47,11 +47,13 @@ struct FrmHam {
     virtual defs::ham_t get_coeff_1100(size_t i, size_t j) const {return 0;}
     virtual defs::ham_t get_coeff_2200(size_t i, size_t j,
                                        size_t k, size_t l) const {return 0;}
+    virtual defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c,
+                                       size_t i, size_t j, size_t k) const {return 0;}
 
     virtual defs::ham_t get_element_0000(const field::FrmOnv &onv) const {return 0;}
     virtual defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {return 0;}
     virtual defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {return 0;}
-    //virtual defs::ham_t get_element_3300(const field::FrmOnv &onv, const conn::FrmOnv &conn) const = 0;
+    virtual defs::ham_t get_element_3300(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {return 0;}
 
     defs::ham_t get_element(const field::FrmOnv &onv) const;
 
