@@ -83,6 +83,38 @@ TEST(FrmOnvField, ForeachSetBitPair) {
     ASSERT_EQ(it, setbit_pairs.cend());
 }
 
+TEST(FrmOnvField, ForeachSetBitTriple) {
+    const size_t nsite = 123;
+    buffered::FrmOnv mbf(nsite);
+    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_nspinorb, true);
+    mbf = setbits;
+
+    /*
+     * set up checking vectors for the pairs of set bits that should be found
+     * the order of set bit pairs returned should match that of the ascending-ordered basic foreach pair iterator
+     */
+    using namespace basic_foreach;
+    std::vector<ctnd::inds_t<3>> setbit_triples;
+    {
+        auto fn = [&](const ctnd::inds_t<3>& inds) {
+            setbit_triples.push_back({setbits[inds[0]], setbits[inds[1]], setbits[inds[2]]});
+        };
+        ctnd::Ordered<3, true, true> foreach(setbits.size());
+        foreach.loop(fn);
+    }
+
+    auto it = setbit_triples.cbegin();
+    auto fn = [&it](size_t ibit, size_t jbit, size_t kbit){
+        ASSERT_EQ(ibit, (*it)[0]);
+        ASSERT_EQ(jbit, (*it)[1]);
+        ASSERT_EQ(kbit, (*it)[2]);
+        ++it;
+    };
+    mbf.foreach_setbit_triple(fn);
+    // make sure all bits were iterated over
+    ASSERT_EQ(it, setbit_triples.cend());
+}
+
 
 TEST(FrmOnvField, ForeachSetBitInSpinChannel) {
     auto test_fn = [](const size_t& nsite, const size_t& nset) {
