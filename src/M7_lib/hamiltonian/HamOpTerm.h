@@ -18,6 +18,7 @@
  */
 struct HamOpTerm {
 
+    HamOpTerm(){}
     virtual ~HamOpTerm(){}
 
     virtual void add_excitgens(){

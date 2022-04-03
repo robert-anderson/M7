@@ -37,6 +37,7 @@ struct GeneralFrmHam : FrmHam {
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
+    /*
     void add_excitgens() override {
         HamOpTerm::add_excitgens();
     }
@@ -48,6 +49,7 @@ struct GeneralFrmHam : FrmHam {
         }
         return list;
     }
+     */
 
 private:
     /**
