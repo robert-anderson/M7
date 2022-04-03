@@ -5,9 +5,9 @@
 #ifndef M7_HEISENBERGFRMHAM_H
 #define M7_HEISENBERGFRMHAM_H
 
-#include <M7_lib/basis/Lattice.h>
+#include "M7_lib/basis/Lattice.h"
 
-#include "FrmHam.h"
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
 
 /**
  * N-dimensional Quantum Heisenberg model with nearest neighbor-only exchange interactions and no external field. J

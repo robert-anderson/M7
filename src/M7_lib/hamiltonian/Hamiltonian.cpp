@@ -3,9 +3,9 @@
 //
 
 #include "Hamiltonian.h"
-#include "GeneralFrmHam.h"
-#include "GeneralLadderHam.h"
-#include "InteractingBoseGasBosHam.h"
+#include "M7_lib/hamiltonian/frm/GeneralFrmHam.h"
+#include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
+#include "M7_lib/hamiltonian/frmbos/InteractingBoseGasBosHam.h"
 
 BasisData Hamiltonian::make_bd() const {
     if (m_ladder->enabled()) return m_ladder->m_bd;

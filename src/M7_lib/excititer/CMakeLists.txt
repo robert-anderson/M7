@@ -1,6 +1,8 @@
 target_sources(M7_lib
     PRIVATE
         BodyFnTypes.h
+        ConnForeachGroup.cpp
+        ConnForeachGroup.h
         ExcitIter.cpp
         ExcitIter.h
         ExcitIterGroup.cpp

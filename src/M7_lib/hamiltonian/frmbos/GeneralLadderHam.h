@@ -5,9 +5,9 @@
 #ifndef M7_GENERALLADDERHAM_H
 #define M7_GENERALLADDERHAM_H
 
-#include <M7_lib/io/EbdumpFileReader.h>
-#include <M7_lib/integrals/FrmBosCoupledCoeffs.h>
-#include <M7_lib/config/Hamiltonian.h>
+#include "M7_lib/io/EbdumpFileReader.h"
+#include "M7_lib/integrals/FrmBosCoupledCoeffs.h"
+#include "M7_lib/config/Hamiltonian.h"
 
 #include "LadderHam.h"
 

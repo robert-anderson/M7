@@ -7,7 +7,7 @@
 
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/linalg/Sparse.h>
-#include <M7_lib/hamiltonian/FrmHam.h>
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
 #include <M7_lib/field/Fields.h>
 
 #include "WalkerTable.h"

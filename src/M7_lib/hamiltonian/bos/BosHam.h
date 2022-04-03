@@ -5,14 +5,14 @@
 #ifndef M7_BOSHAM_H
 #define M7_BOSHAM_H
 
-#include <M7_lib/integrals/BosonCoeffs_1.h>
-#include <M7_lib/integrals/BosonCoeffs_2.h>
-#include <M7_lib/io/BosdumpFileReader.h>
-#include <M7_lib/connection/Connections.h>
-#include <M7_lib/parallel/SharedArray.h>
-#include <M7_lib/field/Fields.h>
+#include "M7_lib/integrals/BosonCoeffs_1.h"
+#include "M7_lib/integrals/BosonCoeffs_2.h"
+#include "M7_lib/io/BosdumpFileReader.h"
+#include "M7_lib/connection/Connections.h"
+#include "M7_lib/parallel/SharedArray.h"
+#include "M7_lib/field/Fields.h"
 
-#include "HamiltonianData.h"
+#include "M7_lib/hamiltonian/HamiltonianData.h"
 
 struct BosHam {
     const size_t m_nmode, m_nboson;

@@ -3,7 +3,7 @@
 //
 
 #include <M7_lib/excitgen/LadderPureHolstein.h>
-#include <M7_lib/hamiltonian/GeneralLadderHam.h>
+#include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 #include "M7_lib/excititer/LadderPure.h"
 #include "gtest/gtest.h"
 #include "ExcitGenTester.h"

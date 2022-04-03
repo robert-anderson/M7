@@ -5,7 +5,7 @@
 #ifndef M7_INTERACTINGBOSEGASDOUBLES_H
 #define M7_INTERACTINGBOSEGASDOUBLES_H
 
-#include <M7_lib/hamiltonian/InteractingBoseGasBosHam.h>
+#include "M7_lib/hamiltonian/frmbos/InteractingBoseGasBosHam.h"
 
 #include "ExcitGen.h"
 

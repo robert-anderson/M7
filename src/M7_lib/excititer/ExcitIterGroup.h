@@ -7,6 +7,7 @@
 
 #include "ExcitIters.h"
 #include "BodyFnTypes.h"
+#include "M7_lib/foreach/ConnForeach.h"
 
 using namespace exsig_utils;
 using namespace body_fn_types;

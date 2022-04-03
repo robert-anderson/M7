@@ -5,12 +5,12 @@
 #ifndef M7_LADDERHAM_H
 #define M7_LADDERHAM_H
 
-#include <M7_lib/io/EbdumpFileReader.h>
-#include <M7_lib/integrals/FrmBosCoupledCoeffs.h>
-#include <M7_lib/connection/Connections.h>
-#include <M7_lib/field/Fields.h>
+#include "M7_lib/io/EbdumpFileReader.h"
+#include "M7_lib/integrals/FrmBosCoupledCoeffs.h"
+#include "M7_lib/connection/Connections.h"
+#include "M7_lib/field/Fields.h"
 
-#include "HamiltonianData.h"
+#include "M7_lib/hamiltonian/HamiltonianData.h"
 
 struct LadderHam {
 

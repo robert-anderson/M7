@@ -37,6 +37,18 @@ struct GeneralFrmHam : FrmHam {
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
+    void add_excitgens() override {
+        HamOpTerm::add_excitgens();
+    }
+
+    conn_foreach_ptr_list_t conn_foreach() override {
+        conn_foreach_ptr_list_t list;
+        if (m_kramers_attrs.m_conserving_singles) {
+            //list.push_front(new conn_foreach::frm::General<>{})
+        }
+        return list;
+    }
+
 private:
     /**
      * if electrons are disabled, the m_nsite members of the integrals will be set to zero so as

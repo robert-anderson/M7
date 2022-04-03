@@ -10,17 +10,17 @@
 #include <M7_lib/basis/Suites.h>
 #include <M7_lib/nd/NdArray.h>
 
-#include "FrmHam.h"
-#include "BosHam.h"
-#include "LadderHam.h"
-#include "HubbardFrmHam.h"
-#include "GeneralFrmHam.h"
-#include "HolsteinLadderHam.h"
-#include "HolsteinBosHam.h"
-#include "GeneralBosHam.h"
-#include "HeisenbergFrmHam.h"
-#include "SumFrmHam.h"
-#include "SpinSquareFrmHam.h"
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
+#include "M7_lib/hamiltonian/bos/BosHam.h"
+#include "M7_lib/hamiltonian/frmbos/LadderHam.h"
+#include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
+#include "M7_lib/hamiltonian/frm/GeneralFrmHam.h"
+#include "M7_lib/hamiltonian/frmbos/HolsteinLadderHam.h"
+#include "M7_lib/hamiltonian/bos/HolsteinBosHam.h"
+#include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
+#include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
+#include "M7_lib/hamiltonian/frm/SumFrmHam.h"
+#include "M7_lib/hamiltonian/frm/SpinSquareFrmHam.h"
 
 
 using namespace field;

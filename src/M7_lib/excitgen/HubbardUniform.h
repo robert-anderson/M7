@@ -5,7 +5,7 @@
 #ifndef M7_HUBBARDUNIFORM_H
 #define M7_HUBBARDUNIFORM_H
 
-#include <M7_lib/hamiltonian/HubbardFrmHam.h>
+#include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
 
 #include "UniformSingles.h"
 

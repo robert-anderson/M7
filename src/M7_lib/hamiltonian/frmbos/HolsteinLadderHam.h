@@ -5,7 +5,7 @@
 #ifndef M7_HOLSTEINLADDERHAM_H
 #define M7_HOLSTEINLADDERHAM_H
 
-#include "LadderHam.h"
+#include "M7_lib/hamiltonian/frmbos/LadderHam.h"
 
 struct HolsteinLadderHam : LadderHam {
 

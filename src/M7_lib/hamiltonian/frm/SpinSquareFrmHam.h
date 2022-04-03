@@ -5,7 +5,7 @@
 #ifndef M7_SPINSQUAREFRMHAM_H
 #define M7_SPINSQUAREFRMHAM_H
 
-#include "FrmHam.h"
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
 
 struct SpinSquareFrmHam : FrmHam {
 

@@ -1,0 +1,9 @@
+target_sources(M7_lib
+    PRIVATE
+        BosHam.cpp
+        BosHam.h
+        GeneralBosHam.cpp
+        GeneralBosHam.h
+        HolsteinBosHam.cpp
+        HolsteinBosHam.h
+)

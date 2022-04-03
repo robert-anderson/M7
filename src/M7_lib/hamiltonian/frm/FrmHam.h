@@ -7,20 +7,21 @@
 
 #include <cstddef>
 
-#include <M7_lib/caches/DecodedDeterminants.h>
-#include <M7_lib/connection/Connections.h>
-#include <M7_lib/io/Options.h>
-#include <M7_lib/config/FciqmcConfig.h>
-#include <M7_lib/integrals/Integrals_1e.h>
-#include <M7_lib/integrals/Integrals_2e.h>
-#include <M7_lib/table/BufferedFields.h>
+#include "M7_lib/hamiltonian/HamOpTerm.h"
+#include "M7_lib/connection/Connections.h"
+#include "M7_lib/io/Options.h"
+#include "M7_lib/config/FciqmcConfig.h"
+#include "M7_lib/integrals/Integrals_1e.h"
+#include "M7_lib/integrals/Integrals_2e.h"
+#include "M7_lib/table/BufferedFields.h"
 
-#include "HamiltonianData.h"
+#include "M7_lib/hamiltonian/HamiltonianData.h"
+#include "M7_lib/excititer/ConnForeachGroup.h"
 
 /**
  * All interactions between the fermionic parts of MBFs are described in this class.
  */
-struct FrmHam {
+struct FrmHam : HamOpTerm {
 
     const size_t m_nelec;
     const size_t m_nsite;

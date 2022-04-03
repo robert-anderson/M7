@@ -4,7 +4,7 @@
 
 #include <M7_lib/field/Mbf.h>
 #include "gtest/gtest.h"
-#include "M7_lib/hamiltonian/HeisenbergFrmHam.h"
+#include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 
 namespace heisenberg_test {
     static std::vector<defs::inds> spinvecs() {

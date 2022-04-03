@@ -5,7 +5,7 @@
 #ifndef M7_HOLSTEINBOSHAM_H
 #define M7_HOLSTEINBOSHAM_H
 
-#include "BosHam.h"
+#include "M7_lib/hamiltonian/bos/BosHam.h"
 
 struct HolsteinBosHam : BosHam {
     defs::ham_comp_t m_omega;

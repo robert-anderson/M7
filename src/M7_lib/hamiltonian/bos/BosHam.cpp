@@ -2,7 +2,7 @@
 // Created by rja on 26/07/2021.
 //
 
-#include <M7_lib/io/BosdumpFileReader.h>
+#include "M7_lib/io/BosdumpFileReader.h"
 
 #include "BosHam.h"
 

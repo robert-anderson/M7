@@ -5,7 +5,7 @@
 #ifndef M7_SUMFRMHAM_H
 #define M7_SUMFRMHAM_H
 
-#include "FrmHam.h"
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
 
 /**
  * Implementation of h1 + J*h2 where h1 and h2 are arbitrary subclasses of FrmHam

@@ -2,7 +2,7 @@
 // Created by rja on 21/11/2021.
 //
 
-#include <M7_lib/hamiltonian/GeneralBosHam.h>
+#include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
 #include "M7_lib/config/FciqmcConfig.h"
 #include "M7_lib/hamiltonian/Hamiltonian.h"
 #include "gtest/gtest.h"

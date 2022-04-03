@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include <M7_lib/hamiltonian/SpinSquareFrmHam.h>
+#include "M7_lib/hamiltonian/frm/SpinSquareFrmHam.h"
 #include <M7_lib/table/BufferedFields.h>
 #include <M7_lib/connection/Connections.h>
 

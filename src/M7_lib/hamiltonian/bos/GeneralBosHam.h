@@ -5,9 +5,9 @@
 #ifndef M7_GENERALBOSHAM_H
 #define M7_GENERALBOSHAM_H
 
-#include <M7_lib/config/Hamiltonian.h>
+#include "M7_lib/config/Hamiltonian.h"
 
-#include "BosHam.h"
+#include "M7_lib/hamiltonian/bos/BosHam.h"
 
 struct GeneralBosHam : BosHam {
     BosonCoeffs_1 m_coeffs_1;
