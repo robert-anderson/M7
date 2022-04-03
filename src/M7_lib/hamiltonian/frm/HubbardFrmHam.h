@@ -9,6 +9,7 @@
 #include "M7_lib/nd/NdFormatD.h"
 #include "M7_lib/basis/Lattice.h"
 #include "M7_lib/linalg/Dense.h"
+#include "M7_lib/foreach/ConnForeach.h"
 
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 
@@ -56,6 +57,10 @@ public:
     defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
     void log_data() const override;
+
+    excit_gen_list_t make_excit_gens(PRNG& prng) override;
+
+    conn_iter_ptr_list_t make_conn_iters() override;
 };
 
 

@@ -3,7 +3,7 @@
 //
 
 #include "HubbardFrmHam.h"
-
+#include "M7_lib/excitgen2/frm/HubbardUniform2.h"
 
 bool HubbardFrmHam::sign_problem() const {
     // can only be SPF in 1D
@@ -65,7 +65,18 @@ defs::ham_t HubbardFrmHam::get_coeff_1100(size_t i, size_t j) const {
     return -m_lattice.m_dense(i, j);
 }
 
-defs::ham_t HubbardFrmHam::get_coeff_2200(size_t i, size_t j,
-                                               size_t k, size_t l) const {
+defs::ham_t HubbardFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
     return 0.0;
+}
+
+HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng) {
+    excit_gen_list_t list;
+    list.emplace_front(new HubbardUniform2(*this, prng));
+    return list;
+}
+
+HamOpTerm::conn_iter_ptr_list_t HubbardFrmHam::make_conn_iters() {
+    conn_iter_ptr_list_t list;
+    list.emplace_front(new conn_foreach::frm::Hubbard(m_lattice));
+    return list;
 }

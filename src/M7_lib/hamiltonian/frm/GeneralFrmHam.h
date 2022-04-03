@@ -37,19 +37,9 @@ struct GeneralFrmHam : FrmHam {
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
-    /*
-    void add_excitgens() override {
-        HamOpTerm::add_excitgens();
-    }
+    excit_gen_list_t make_excit_gens(PRNG &prng) override;
 
-    conn_foreach_ptr_list_t conn_foreach() override {
-        conn_foreach_ptr_list_t list;
-        if (m_kramers_attrs.m_conserving_singles) {
-            //list.push_front(new conn_foreach::frm::General<>{})
-        }
-        return list;
-    }
-     */
+    conn_iter_ptr_list_t make_conn_iters() override;
 
 private:
     /**

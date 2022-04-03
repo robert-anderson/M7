@@ -7,6 +7,7 @@
 
 #include "BasicForeach.h"
 #include "M7_lib/basis/Suites.h"
+#include "M7_lib/basis/Lattice.h"
 
 namespace conn_foreach {
     using namespace basic_foreach;
@@ -157,6 +158,33 @@ namespace conn_foreach {
         protected:
             void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t <conn::FrmOnv> &fn) override {
                 Base::frm_loop(conn, src, fn);
+            }
+        };
+
+
+        struct Hubbard : Base {
+            const Lattice& m_lattice;
+            Hubbard(const Lattice& lattice): Base(exsig_utils::ex_single, lattice.nsite()), m_lattice(lattice){}
+
+            template<typename fn_t>
+            void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+                const auto& occs = src.m_decoded.m_simple_occs.get();
+                for (const auto& occ: occs){
+                    conn.m_ann.clear();
+                    conn.m_ann.add(occ);
+                    auto coordinated_spinorbs = m_lattice.m_sparse[occ].first;
+                    for (const auto& i : coordinated_spinorbs){
+                        if (src.get(i)) continue;
+                        conn.m_cre.clear();
+                        conn.m_ann.add(i);
+                        fn(conn);
+                    }
+                }
+            }
+
+        protected:
+            void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t <conn::FrmOnv> &fn) override {
+                loop_fn(conn, src, fn);
             }
         };
     }

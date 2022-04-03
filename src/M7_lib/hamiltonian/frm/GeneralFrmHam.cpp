@@ -99,3 +99,20 @@ defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn
     const auto element = m_int_2.phys_antisym_element(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;
 }
+
+HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng) {
+    return HamOpTerm::make_excit_gens(prng);
+}
+
+HamOpTerm::conn_iter_ptr_list_t GeneralFrmHam::make_conn_iters() {
+    conn_iter_ptr_list_t list;
+    if (m_kramers_attrs.m_conserving_singles)
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_nsite));
+    else
+        list.emplace_front(new conn_foreach::frm::General<1>(m_nsite));
+    if (m_kramers_attrs.m_conserving_doubles)
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_nsite));
+    else
+        list.emplace_front(new conn_foreach::frm::General<2>(m_nsite));
+    return list;
+}

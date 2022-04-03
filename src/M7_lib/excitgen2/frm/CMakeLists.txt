@@ -1,0 +1,9 @@
+target_sources(M7_lib
+    PRIVATE
+        FrmExcitGen2.cpp
+        FrmExcitGen2.h
+        HubbardUniform2.cpp
+        HubbardUniform2.h
+        PchbDoubles2.cpp
+        PchbDoubles2.h
+)
