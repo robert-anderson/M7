@@ -9,6 +9,7 @@
 #include <forward_list>
 #include "M7_lib/foreach/ConnForeach.h"
 #include "M7_lib/excitgen2/ExcitGen2.h"
+#include "M7_lib/config/FciqmcConfig.h"
 
 /**
  * base class for the three currently implemented kinds of hamiltonian term based on the second quantised operators
@@ -24,12 +25,28 @@ struct HamOpTerm {
 
     typedef std::unique_ptr<ExcitGen2> excit_gen_ptr_t;
     typedef std::forward_list<excit_gen_ptr_t> excit_gen_list_t;
-    virtual excit_gen_list_t make_excit_gens(PRNG& prng){
+
+    /**
+     * @param prng
+     *  pseudorandom number generator to pass to the ctors of all associated excit gens
+     * @param opts
+     *  some derived classes of HamOpTerm may be compatible with multiple excitation generation methods, these can be
+     *  are configured at input
+     * @return
+     *  forward linked list of excitation generators applicable to this HamOpTerm
+     */
+    virtual excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts){
         return {};
     }
 
+
     typedef std::unique_ptr<conn_foreach::Base> conn_iter_ptr_t;
     typedef std::forward_list<conn_iter_ptr_t> conn_iter_ptr_list_t;
+
+    /**
+     * @return
+     *  forward linked list of foreach iterators over the connections of a given MBF
+     */
     virtual conn_iter_ptr_list_t make_conn_iters(){
         return {};
     }

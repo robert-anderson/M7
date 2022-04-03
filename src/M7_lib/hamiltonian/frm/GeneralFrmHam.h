@@ -37,7 +37,7 @@ struct GeneralFrmHam : FrmHam {
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
-    excit_gen_list_t make_excit_gens(PRNG &prng) override;
+    excit_gen_list_t make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) override;
 
     conn_iter_ptr_list_t make_conn_iters() override;
 

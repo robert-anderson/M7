@@ -69,7 +69,7 @@ defs::ham_t HubbardFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l
     return 0.0;
 }
 
-HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng) {
+HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) {
     excit_gen_list_t list;
     list.emplace_front(new HubbardUniform2(*this, prng));
     return list;
