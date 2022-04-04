@@ -157,7 +157,7 @@ namespace conn_foreach {
 
         protected:
             void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t <conn::FrmOnv> &fn) override {
-                Base::frm_loop(conn, src, fn);
+                loop_fn(conn, src, fn);
             }
         };
 

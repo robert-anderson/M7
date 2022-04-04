@@ -30,12 +30,12 @@ namespace excit_gen_tester {
     typedef BufferedTable<ResultRow, true> result_table_t;
 
     struct ExcitGenTester {
-        const Hamiltonian& m_h;
+        const Hamiltonian &m_h;
         ExcitGen2 &m_excit_gen;
         conn_foreach::Base &m_conn_iter;
         result_table_t m_results;
 
-        ExcitGenTester(const Hamiltonian& h, ExcitGen2 &excit_gen, conn_foreach::Base &conn_iter) :
+        ExcitGenTester(const Hamiltonian &h, ExcitGen2 &excit_gen, conn_foreach::Base &conn_iter) :
                 m_h(h), m_excit_gen(excit_gen), m_conn_iter(conn_iter),
                 m_results("excit gen test results", {{conn_iter.m_exsig}}) {
             m_results.set_expansion_factor(1.5);
@@ -52,6 +52,8 @@ namespace excit_gen_tester {
             m_results.clear();
 
             auto body_fn = [&](const conn_t &conn) {
+                auto helem = m_h.get_element(src_mbf, conn);
+                if (consts::nearly_zero(helem)) return;
                 work_inds = conn;
                 // if this key is already in the table then the iterator is emitting duplicate connections!
                 DEBUG_ASSERT_EQ(*m_results[work_inds], ~0ul, "row should not already be mapped");
@@ -60,7 +62,7 @@ namespace excit_gen_tester {
                 row.jump(irow);
                 row.m_occur = 0;
                 row.m_weight = 0.0;
-                row.m_helem = m_h.get_element(src_mbf, conn);
+                row.m_helem = helem;
             };
             m_conn_iter.loop(src_mbf, body_fn);
         }
@@ -114,7 +116,7 @@ namespace excit_gen_tester {
          * @return
          *  true if all weights are correct within tolerance
          */
-        bool all_correct_weights(size_t ndraw, double cutoff= 1e-2, defs::prob_t tol= 1e-2) const;
+        bool all_correct_weights(size_t ndraw, double cutoff = 1e-2, defs::prob_t tol = 1e-2) const;
 
         /**
          * @param ndraw
