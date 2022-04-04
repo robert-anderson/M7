@@ -50,12 +50,6 @@ struct HamOpTerm {
     virtual conn_iter_ptr_list_t make_conn_iters(){
         return {};
     }
-
-    template<typename ham_t>
-    static const ham_t* cast(const HamOpTerm* h) {
-        static_assert(std::is_base_of<HamOpTerm, ham_t>::value, "template arg must be derived from HamOpTerm");
-        return dynamic_cast<const ham_t*>(h);
-    }
 };
 
 

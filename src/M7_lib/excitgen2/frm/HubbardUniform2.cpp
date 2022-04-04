@@ -6,11 +6,11 @@
 
 HubbardUniform2::HubbardUniform2(const FrmHam &h, PRNG &prng) :
     FrmExcitGen2(h, prng, {exsig_utils::ex_single}, "hubbard hopping"){
-    REQUIRE_TRUE(HamOpTerm::cast<HubbardFrmHam>(&m_h), "given hamiltonian is not of HubbardFrmHam type");
+    REQUIRE_TRUE(h_cast(), "given hamiltonian is not of HubbardFrmHam type");
 }
 
 bool HubbardUniform2::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
-    const auto h = HamOpTerm::cast<HubbardFrmHam>(&m_h);
+    const auto h = h_cast();
     /*
      * the number of neighboring sites accessible is not decided till the occupied index has been chosen. If the integer
      * picked is an integral multiple of all possible numbers of accessible sites, then in any case the modular

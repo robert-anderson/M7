@@ -172,11 +172,13 @@ namespace conn_foreach {
                 for (const auto& occ: occs){
                     conn.m_ann.clear();
                     conn.m_ann.add(occ);
-                    auto coordinated_spinorbs = m_lattice.m_sparse[occ].first;
-                    for (const auto& i : coordinated_spinorbs){
-                        if (src.get(i)) continue;
+                    auto ispin_occ = src.ispin(occ);
+                    auto isite_occ = src.isite(occ);
+                    auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
+                    for (const auto& i : coordinated_sites){
+                        if (src.get({ispin_occ, i})) continue;
                         conn.m_cre.clear();
-                        conn.m_ann.add(i);
+                        conn.m_cre.add({ispin_occ, i});
                         fn(conn);
                     }
                 }
