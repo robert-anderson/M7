@@ -800,16 +800,10 @@ namespace nd_utils {
 
 namespace tags {
     template<typename T>
-    struct Type {
-    };
+    struct Type {};
 
-    template<size_t ind>
-    struct Ind {
-    };
-
-    template<bool t>
-    struct Bool {
-    };
+    template<size_t n>
+    struct Int {};
 }
 
 namespace array_utils {

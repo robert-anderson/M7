@@ -74,8 +74,8 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
     defs::inds beta_setbits = {3, 4, 7};
     buffered::FrmOnv mbf(nsite);
     mbf = {alpha_setbits, beta_setbits};
-    auto &occs = mbf.m_decoded.m_spin_occs.get();
-    auto &vacs = mbf.m_decoded.m_spin_vacs.get();
+    const auto &occs = mbf.m_decoded.m_spin_occs.get();
+    const auto &vacs = mbf.m_decoded.m_spin_vacs.get();
 
     const auto nalpha_setbit = alpha_setbits.size();
     const auto nalpha_clrbit = nsite - nalpha_setbit;

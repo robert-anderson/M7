@@ -129,14 +129,14 @@ namespace conn_foreach {
             }
 
             template<size_t nbeta, typename fn_t>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Bool<false>) {
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<0>) {
                 loop_one_beta_fn<nbeta, fn_t>(conn, src, fn);
                 constexpr bool exit = nbeta == nop;
-                loop_all_nbeta_fn<nbeta + 1, fn_t>(conn, src, fn, tags::Bool<exit>());
+                loop_all_nbeta_fn<nbeta + 1, fn_t>(conn, src, fn, tags::Int<exit>());
             }
 
             template<size_t nbeta, typename fn_t>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Bool<true>) {}
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<1>) {}
 
         public:
 
@@ -147,7 +147,7 @@ namespace conn_foreach {
                  * electrons created, so we need an outer loop over all numbers of betas, this is implemented in
                  * compile-time recursion
                  */
-                loop_all_nbeta_fn<0, fn_t>(conn, src, fn, tags::Bool<false>());
+                //loop_all_nbeta_fn<0, fn_t>(conn, src, fn, tags::Bool<false>());
             }
 
             template<typename fn_t>

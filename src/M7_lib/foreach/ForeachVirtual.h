@@ -113,12 +113,12 @@ namespace foreach_virtual {
              *  current level (position in the m_value array)
              */
             template<size_t ilevel>
-            void level_loop(tags::Ind<ilevel>) {
+            void level_loop(tags::Int<ilevel>) {
                 constexpr size_t iind = ilevel - 1;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto &extent = m_shape[iind];
                 for (ind = 0ul; ind < extent; ++ind) {
-                    try { level_loop(tags::Ind<ilevel + 1>()); }
+                    try { level_loop(tags::Int<ilevel + 1>()); }
                     catch (const ExitLoop &ex) { throw ex; }
                 }
             }
@@ -126,7 +126,7 @@ namespace foreach_virtual {
             /**
              * overload for when the last index has been reached
              */
-            void level_loop(tags::Ind<nind>) {
+            void level_loop(tags::Int<nind>) {
                 constexpr size_t iind = nind - 1;
                 auto &ind = m_value[iind];
                 const auto &extent = m_shape[iind];
@@ -140,15 +140,15 @@ namespace foreach_virtual {
             /**
              * in the edge case that the nind is 0, do nothing but set the iteration counter
              */
-            void top_loop(tags::Bool<true>) {
+            void top_loop(tags::Int<true>) {
                 m_iiter = 0ul;
             }
 
             /**
              * if nind is nonzero, start at the first index
              */
-            void top_loop(tags::Bool<false>) {
-                try { level_loop(tags::Ind<1>()); }
+            void top_loop(tags::Int<false>) {
+                try { level_loop(tags::Int<1>()); }
                 catch (const ExitLoop &ex) {throw ex;}
             }
 
@@ -162,7 +162,7 @@ namespace foreach_virtual {
         protected:
             void throwing_loop() override {
                 m_iiter = ~0ul;
-                top_loop(tags::Bool<nind == 0>());
+                top_loop(tags::Int<nind == 0>());
             }
         };
 
@@ -183,18 +183,18 @@ namespace foreach_virtual {
             }
 
             template<size_t ilevel>
-            void level_loop(tags::Ind<ilevel>) {
+            void level_loop(tags::Int<ilevel>) {
                 constexpr size_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
                 for (ind = 0ul; ind < extent; ++ind) {
-                    try { level_loop(tags::Ind<ilevel + 1>()); }
+                    try { level_loop(tags::Int<ilevel + 1>()); }
                     catch (const ExitLoop &ex) { throw ex; }
                 }
             }
 
-            void level_loop(tags::Ind<nind>) {
+            void level_loop(tags::Int<nind>) {
                 constexpr size_t iind = ascending ? 0 : nind - 1;
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
@@ -206,10 +206,10 @@ namespace foreach_virtual {
                 }
             }
 
-            void top_loop(tags::Bool<true>) {}
+            void top_loop(tags::Int<true>) {}
 
-            void top_loop(tags::Bool<false>) {
-                try { level_loop(tags::Ind<1>()); }
+            void top_loop(tags::Int<false>) {
+                try { level_loop(tags::Int<1>()); }
                 catch (const ExitLoop &ex) {throw ex;}
             }
 
@@ -220,7 +220,7 @@ namespace foreach_virtual {
         protected:
             void throwing_loop() override {
                 m_iiter = ~0ul;
-                top_loop(tags::Bool<nind == 0>());
+                top_loop(tags::Int<nind == 0>());
             }
         };
 
