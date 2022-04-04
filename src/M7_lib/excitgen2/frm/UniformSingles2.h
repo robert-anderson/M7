@@ -11,8 +11,7 @@ struct UniformSingles2 : FrmExcitGen2 {
     UniformSingles2(const FrmHam &h, PRNG &prng):
         FrmExcitGen2(h, prng, {exsig_utils::ex_single}, "uniform"){}
 
-    bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, defs::ham_t &helem,
-                    conn::FrmOnv &conn) override;
+    bool draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) override;
 
     size_t approx_nconn() const override;
 };

@@ -27,6 +27,7 @@ const defs::inds &decoded_mbf::frmbos::OccSitesNonzeroBosons::get() {
     if (!empty()) return validated();
     const auto& occ = m_mbf.m_frm.m_decoded.m_occ_sites.get();
     for (auto& imode: occ) if (m_mbf.m_bos[imode]) m_inds.push_back(imode);
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 

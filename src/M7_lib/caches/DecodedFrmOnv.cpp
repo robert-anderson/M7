@@ -147,6 +147,7 @@ const defs::inds &decoded_mbf::frm::NonEmptyPairLabels::get() {
     for (size_t i = 0ul; i < occ.m_format.m_nelement; ++i) {
         if (!occ[i].empty() && !vac[i].empty()) m_inds.push_back(i);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -157,6 +158,7 @@ const defs::inds &decoded_mbf::frm::OccSites::get() {
     for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
         if (m_mbf.site_nocc(isite)) m_inds.push_back(isite);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -167,6 +169,7 @@ const defs::inds &decoded_mbf::frm::DoublyOccSites::get() {
     for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
         if (m_mbf.site_nocc(isite)==2) m_inds.push_back(isite);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -177,6 +180,7 @@ const defs::inds &decoded_mbf::frm::NotSinglyOccSites::get() {
     for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
         if (m_mbf.site_nocc(isite)!=1) m_inds.push_back(isite);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 

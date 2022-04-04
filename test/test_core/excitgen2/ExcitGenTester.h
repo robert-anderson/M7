@@ -53,7 +53,7 @@ namespace excit_gen_tester {
 
             auto body_fn = [&](const conn_t &conn) {
                 auto helem = m_h.get_element(src_mbf, conn);
-                if (consts::nearly_zero(helem)) return;
+                if (consts::nearly_zero(helem, defs::helem_tol)) return;
                 work_inds = conn;
                 // if this key is already in the table then the iterator is emitting duplicate connections!
                 DEBUG_ASSERT_EQ(*m_results[work_inds], ~0ul, "row should not already be mapped");

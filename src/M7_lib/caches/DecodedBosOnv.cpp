@@ -28,6 +28,7 @@ const defs::inds &decoded_mbf::bos::Expanded::get() {
             m_inds.push_back(imode);
         }
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -38,6 +39,7 @@ const defs::inds &decoded_mbf::bos::OccModes::get() {
     for (size_t imode = 0ul; imode < m_mbf.m_nelement; ++imode) {
         if (m_mbf[imode]) m_inds.push_back(imode);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 

@@ -4,8 +4,7 @@
 
 #include "UniformSingles2.h"
 
-bool UniformSingles2::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, defs::ham_t &helem,
-                                 conn::FrmOnv &conn) {
+bool UniformSingles2::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
     DEBUG_ASSERT_EQ(exsig, exsig_utils::ex_single, "this excitation generator is only suitable for exsig 1100");
 
     auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
