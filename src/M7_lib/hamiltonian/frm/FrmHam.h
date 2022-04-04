@@ -16,7 +16,6 @@
 #include "M7_lib/table/BufferedFields.h"
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
-#include "M7_lib/excititer/ConnForeachGroup.h"
 
 /**
  * All interactions between the fermionic parts of MBFs are described in this class.
