@@ -62,7 +62,7 @@ public:
         auto conjd_value = (isym == 2 && i > j) ? consts::conj(value) : value;
         if (consts::nearly_zero(m_data[iflat])) m_data[iflat] = conjd_value;
         else {
-            DEBUG_ASSERT_NEARLY_EQ(m_data[iflat], conjd_value, defs::integral_tol,
+            DEBUG_ASSERT_NEARLY_EQ(m_data[iflat], conjd_value, defs::helem_tol,
                                    "conjugated value conflicts with current non-zero value");
         }
     }

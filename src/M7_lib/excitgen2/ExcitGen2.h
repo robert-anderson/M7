@@ -60,17 +60,13 @@ struct ExcitGen2 {
     }
 
     bool draw(const size_t &exsig, const field::FrmOnv &src,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
-        return draw_h_frm(exsig, src, prob, helem, conn);
-    }
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
+
     bool draw(const size_t &exsig, const field::FrmBosOnv &src,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
-        return draw_h_frmbos(exsig, src, prob, helem, conn);
-    }
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
+
     bool draw(const size_t &exsig, const field::BosOnv &src,
-              defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn) {
-        return draw_h_bos(exsig, src, prob, helem, conn);
-    }
+              defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
 
     virtual size_t approx_nconn() const {
         return 1ul;

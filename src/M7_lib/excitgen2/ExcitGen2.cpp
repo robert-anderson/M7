@@ -18,3 +18,21 @@ bool ExcitGen2::draw_bos(const size_t &exsig, const field::BosOnv &src, defs::pr
     prob = 0.0;
     return false;
 }
+
+bool ExcitGen2::draw(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, defs::ham_t &helem,
+                     conn::FrmOnv &conn) {
+    auto success = draw_h_frm(exsig, src, prob, helem, conn);
+    return success &! consts::nearly_zero(helem, defs::helem_tol);
+}
+
+bool ExcitGen2::draw(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob, defs::ham_t &helem,
+                     conn::FrmBosOnv &conn) {
+    auto success = draw_h_frmbos(exsig, src, prob, helem, conn);
+    return success &! consts::nearly_zero(helem, defs::helem_tol);
+}
+
+bool ExcitGen2::draw(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, defs::ham_t &helem,
+                     conn::BosOnv &conn) {
+    auto success = draw_h_bos(exsig, src, prob, helem, conn);
+    return success &! consts::nearly_zero(helem, defs::helem_tol);
+}

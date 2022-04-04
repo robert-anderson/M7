@@ -77,7 +77,7 @@ public:
         if (mpi::on_node_i_am_root()) {
             if (consts::nearly_zero(m_data[iflat])) m_data.set(iflat, conjd_value);
             else {
-                DEBUG_ASSERT_NEARLY_EQ(m_data[iflat], conjd_value, defs::integral_tol,
+                DEBUG_ASSERT_NEARLY_EQ(m_data[iflat], conjd_value, defs::helem_tol,
                                        "conjugated value conflicts with current non-zero value");
             }
         }

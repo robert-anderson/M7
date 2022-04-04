@@ -85,7 +85,7 @@ namespace conn_foreach {
 
         protected:
             void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t <conn::FrmOnv> &fn) override {
-                Base::frm_loop(conn, src, fn);
+                loop_fn(conn, src, fn);
             }
         };
 
@@ -96,11 +96,11 @@ namespace conn_foreach {
 
         private:
 
-            template<size_t nbeta, typename fn_t>
-            void loop_one_beta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+            template<typename fn_t, size_t nbeta, size_t nalpha>
+            void loop_one_beta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn,
+                                  tags::Int<nbeta>, tags::Int<nalpha>) {
                 const auto& occs = src.m_decoded.m_spin_occs.get();
                 const auto& vacs = src.m_decoded.m_spin_vacs.get();
-                constexpr auto nalpha = nop - nbeta;
 
                 auto ann_alpha_fn = [&](const ctnd::inds_t<nalpha>& ann_alpha_ops) {
                     auto ann_beta_fn = [&](const ctnd::inds_t<nbeta> &ann_beta_ops) {
@@ -128,15 +128,15 @@ namespace conn_foreach {
                 nalpha ? ann_alpha_foreach.loop(ann_alpha_fn) : ann_alpha_fn({});
             }
 
-            template<size_t nbeta, typename fn_t>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<0>) {
-                loop_one_beta_fn<nbeta, fn_t>(conn, src, fn);
-                constexpr bool exit = nbeta == nop;
-                loop_all_nbeta_fn<nbeta + 1, fn_t>(conn, src, fn, tags::Int<exit>());
+            template<typename fn_t, size_t nbeta>
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<nbeta> tag) {
+                static_assert(nop>=nbeta, "number of beta-spin operators cannot exceed excit level");
+                loop_one_beta_fn<fn_t>(conn, src, fn, tag, tags::Int<nop-nbeta>());
+                loop_all_nbeta_fn<fn_t>(conn, src, fn, tags::Int<nbeta+1>());
             }
 
-            template<size_t nbeta, typename fn_t>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<1>) {}
+            template<typename fn_t>
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<nop+1> tag) {}
 
         public:
 
@@ -147,7 +147,7 @@ namespace conn_foreach {
                  * electrons created, so we need an outer loop over all numbers of betas, this is implemented in
                  * compile-time recursion
                  */
-                //loop_all_nbeta_fn<0, fn_t>(conn, src, fn, tags::Bool<false>());
+                loop_all_nbeta_fn<fn_t>(conn, src, fn, tags::Int<0>());
             }
 
             template<typename fn_t>

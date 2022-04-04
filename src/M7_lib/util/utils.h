@@ -803,7 +803,9 @@ namespace tags {
     struct Type {};
 
     template<size_t n>
-    struct Int {};
+    struct Int {
+        static constexpr size_t value(){return n;}
+    };
 }
 
 namespace array_utils {

@@ -6,4 +6,6 @@ target_sources(M7_lib
         HubbardUniform2.h
         PchbDoubles2.cpp
         PchbDoubles2.h
+        UniformSingles2.cpp
+        UniformSingles2.h
 )

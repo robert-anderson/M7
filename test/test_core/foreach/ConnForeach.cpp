@@ -5,9 +5,6 @@
 #include "gtest/gtest.h"
 #include "M7_lib/foreach/ConnForeach.h"
 
-namespace conn_foreach_test {
-
-}
 
 TEST(ConnForeach, FrmGeneralEx1100) {
     const size_t nsite = 8;
