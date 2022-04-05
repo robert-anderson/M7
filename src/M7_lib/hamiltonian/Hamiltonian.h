@@ -12,7 +12,7 @@
 
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 #include "M7_lib/hamiltonian/bos/BosHam.h"
-#include "M7_lib/hamiltonian/frmbos/LadderHam.h"
+#include "M7_lib/hamiltonian/frmbos/FrmBosHam.h"
 #include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
 #include "M7_lib/hamiltonian/frm/GeneralFrmHam.h"
 #include "M7_lib/hamiltonian/frmbos/HolsteinLadderHam.h"
@@ -34,12 +34,11 @@ struct Hamiltonian {
      */
     std::unique_ptr<FrmHam> m_frm;
     /**
-     * hamiltonian encapsulating all terms involving a single boson creation or annihilation operator
-     * i.e. ranksigs 0010, 0001, 1110, 1101
+     * hamiltonian encapsulating all terms involving products of fermion and boson operators
      */
-    std::unique_ptr<LadderHam> m_ladder;
+    std::unique_ptr<FrmBosHam> m_frmbos;
     /**
-     * purely bosonic number-conserving terms in the Hamiltonian
+     * purely bosonic number-conserving and non-conserving terms in the Hamiltonian
      */
     std::unique_ptr<BosHam> m_bos;
     /**
@@ -88,7 +87,7 @@ private:
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts);
 
-    std::unique_ptr<LadderHam> make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite);
+    std::unique_ptr<FrmBosHam> make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite);
 
     std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts, size_t nsite);
 
@@ -143,7 +142,7 @@ public:
         defs::ham_t helement_bos = 0.0;
         if (!conn.m_bos.size()) helement_frm = m_frm->get_element(onv.m_frm, conn.m_frm);
         if (!conn.m_frm.size()) helement_bos = m_bos->get_element(onv.m_bos, conn.m_bos);
-        defs::ham_t helement_ladder = m_ladder->get_element(onv, conn);
+        defs::ham_t helement_ladder = m_frmbos->get_element(onv, conn);
         return helement_frm + helement_bos + helement_ladder;
     }
 

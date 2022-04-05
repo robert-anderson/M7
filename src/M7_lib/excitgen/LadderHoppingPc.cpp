@@ -18,7 +18,7 @@ LadderHoppingPc::LadderHoppingPc(const Hamiltonian &h, PRNG &prng) :
                 weights.assign(nmode, 0.0);
                 if (p!=q) {
                     for (size_t n = 0ul; n < nmode; ++n) {
-                        auto element = m_h.m_ladder->get_coeff_1101(n, p, q);
+                        auto element = m_h.m_frmbos->get_coeff_1101(n, p, q);
                         weights[n] = std::abs(element);
                     }
                 }
@@ -55,7 +55,7 @@ bool LadderHoppingPc::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, Cac
         if (src.m_bos[n] == 0ul) return false;
         conn.m_bos.m_ann.set({n, 1});
     };
-    prob *= std::abs(m_h.m_ladder->get_coeff_1101(n, p, q)) / (m_pick_n_given_pq.norm(pq));
+    prob *= std::abs(m_h.m_frmbos->get_coeff_1101(n, p, q)) / (m_pick_n_given_pq.norm(pq));
     return true;
 }
 

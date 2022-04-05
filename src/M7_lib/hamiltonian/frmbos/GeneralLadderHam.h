@@ -9,9 +9,9 @@
 #include "M7_lib/integrals/FrmBosCoupledCoeffs.h"
 #include "M7_lib/config/Hamiltonian.h"
 
-#include "LadderHam.h"
+#include "FrmBosHam.h"
 
-struct GeneralLadderHam : LadderHam {
+struct GeneralLadderHam : FrmBosHam {
     /**
      * coefficients for "coupled" ranksigs 1110, 1101. contributing exsigs are either:
      *  "density coupled" (0010, 0001), or

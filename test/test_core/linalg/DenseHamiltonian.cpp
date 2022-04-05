@@ -152,11 +152,11 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
             for (size_t q = 0ul; q < ham_src.m_bd.m_nspinorb; ++q) {
                 const auto qsite = FrmOnvField::isite(q, ham_src.m_bd.m_nsite);
                 if (n == psite && psite == qsite) {
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1101(n, p, q)), 1.4);
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1110(n, p, q)), 1.4);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1101(n, p, q)), 1.4);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1110(n, p, q)), 1.4);
                 } else {
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1101(n, p, q)), 0.0);
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_ladder->get_coeff_1110(n, p, q)), 0.0);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1101(n, p, q)), 0.0);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1110(n, p, q)), 0.0);
                 }
             }
         }

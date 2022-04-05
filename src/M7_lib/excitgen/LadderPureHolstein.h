@@ -10,11 +10,11 @@
 
 struct LadderPureHolstein : public LadderPureUniform {
     LadderPureHolstein(const Hamiltonian &h, PRNG &prng, size_t exsig) : LadderPureUniform(h, prng, {exsig}) {
-        REQUIRE_TRUE(h.m_ladder.get(), "holstein excit gen requires defined ladder hamiltonian");
-        REQUIRE_TRUE(dynamic_cast<const HolsteinLadderHam*>(h.m_ladder.get()),
+        REQUIRE_TRUE(h.m_frmbos.get(), "holstein excit gen requires defined ladder hamiltonian");
+        REQUIRE_TRUE(dynamic_cast<const HolsteinLadderHam*>(h.m_frmbos.get()),
                      "holstein excit gen requires holstein hamiltonian");
-        REQUIRE_EQ(h.m_ladder->m_bd.m_nsite, h.m_ladder->m_bd.m_nmode,
-                        "holstein excit gen assumes one boson mode per fermion site");
+        REQUIRE_EQ(h.m_frmbos->m_bd.m_nsite, h.m_frmbos->m_bd.m_nmode,
+                   "holstein excit gen assumes one boson mode per fermion site");
     }
 
     std::string description() const override;

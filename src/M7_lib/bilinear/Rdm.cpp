@@ -216,10 +216,10 @@ bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
     if (ham.m_bos->m_contribs_0011.is_nonzero(0ul)){
         if (!m_rdms[exsig_utils::ex_0011]) return false;
     }
-    if (ham.m_ladder->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)){
+    if (ham.m_frmbos->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)){
         if (!m_rdms[exsig_utils::ex_0010]) return false;
     }
-    if (ham.m_ladder->m_contribs_0001.is_nonzero(exsig_utils::ex_0001)){
+    if (ham.m_frmbos->m_contribs_0001.is_nonzero(exsig_utils::ex_0001)){
         if (!m_rdms[exsig_utils::ex_0001]) return false;
     }
     if (!m_rdms[exsig_utils::ex_double]) return false;
@@ -267,7 +267,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam* ham) const {
     return consts::real(ham->m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
 }
 
-defs::ham_comp_t Rdms::get_energy(const LadderHam *ham, size_t nelec, size_t exsig) const {
+defs::ham_comp_t Rdms::get_energy(const FrmBosHam *ham, size_t nelec, size_t exsig) const {
     if (!ham->m_nboson_max) return 0.0;
     auto& rdm = m_rdms[exsig];
     REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,

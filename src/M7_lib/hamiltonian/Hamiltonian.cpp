@@ -8,7 +8,7 @@
 #include "M7_lib/hamiltonian/frmbos/InteractingBoseGasBosHam.h"
 
 BasisData Hamiltonian::make_bd() const {
-    if (m_ladder->enabled()) return m_ladder->m_bd;
+    if (m_frmbos->enabled()) return m_frmbos->m_bd;
     return {m_frm->m_nsite, m_bos->m_nmode};
 }
 
@@ -22,14 +22,14 @@ std::unique_ptr<FrmHam> Hamiltonian::make_frm(const fciqmc_config::FermionHamilt
     return std::unique_ptr<FrmHam>(new NullFrmHam);
 }
 
-std::unique_ptr<LadderHam> Hamiltonian::make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite) {
+std::unique_ptr<FrmBosHam> Hamiltonian::make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite) {
     if (opts.m_holstein_coupling) {
         auto nboson_max = opts.m_nboson_max.get();
         auto g = opts.m_holstein_coupling.get();
-        return std::unique_ptr<LadderHam>(new HolsteinLadderHam(nsite, nboson_max, g));
+        return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(nsite, nboson_max, g));
     }
-    else if (opts.m_ebdump.enabled()) return std::unique_ptr<LadderHam>(new GeneralLadderHam(opts));
-    return std::unique_ptr<LadderHam>(new NullLadderHam);
+    else if (opts.m_ebdump.enabled()) return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts));
+    return std::unique_ptr<FrmBosHam>(new NullLadderHam);
 }
 
 std::unique_ptr<BosHam> Hamiltonian::make_bos(const fciqmc_config::BosonHamiltonian &opts, size_t nsite) {
@@ -46,14 +46,14 @@ std::unique_ptr<BosHam> Hamiltonian::make_bos(const fciqmc_config::BosonHamilton
 
 Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
         m_frm(make_frm(opts.m_fermion)),
-        m_ladder(make_ladder(opts.m_ladder, m_frm->m_nsite)),
+        m_frmbos(make_ladder(opts.m_ladder, m_frm->m_nsite)),
         m_bos(make_bos(opts.m_boson, m_frm->m_nsite)),
-        m_nboson_max(m_ladder->m_nboson_max),
+        m_nboson_max(m_frmbos->m_nboson_max),
         m_bd(make_bd()), m_work_conn(m_bd){
     REQUIRE_TRUE(m_bd.m_nsite || m_bd.m_nmode, "No system defined");
     if (m_frm->disabled()) log::info("Fermion Hamiltonian is disabled");
     if (defs::enable_bosons) {
-        if (m_ladder->disabled()) log::info("Fermion-boson ladder Hamiltonian is disabled");
+        if (m_frmbos->disabled()) log::info("Fermion-boson ladder Hamiltonian is disabled");
         if (m_bos->disabled()) log::info("Number-conserving boson Hamiltonian is disabled");
     }
 }

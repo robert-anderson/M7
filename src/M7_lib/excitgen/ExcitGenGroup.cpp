@@ -91,15 +91,15 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
             }
         }
     }
-    if (ham.m_ladder->enabled()) {
-        bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_ladder.get());
+    if (ham.m_frmbos->enabled()) {
+        bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_frmbos.get());
         /*
          * first, the "pure" boson exsigs 0010 and 0001
          */
         defs::inds exsigs;
-        if (ham.m_ladder->m_contribs_0010.is_nonzero(ex_0010) || ham.m_ladder->m_contribs_1110.is_nonzero(ex_0010))
+        if (ham.m_frmbos->m_contribs_0010.is_nonzero(ex_0010) || ham.m_frmbos->m_contribs_1110.is_nonzero(ex_0010))
             exsigs.push_back(ex_0010);
-        if (ham.m_ladder->m_contribs_0001.is_nonzero(ex_0001) || ham.m_ladder->m_contribs_1101.is_nonzero(ex_0001))
+        if (ham.m_frmbos->m_contribs_0001.is_nonzero(ex_0001) || ham.m_frmbos->m_contribs_1101.is_nonzero(ex_0001))
             exsigs.push_back(ex_0001);
         if (!exsigs.empty()) {
             /*
@@ -116,8 +116,8 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
          * then the "hopping" type exsigs 1110 and 1101
          */
         exsigs.clear();
-        if (ham.m_ladder->m_contribs_1110.is_nonzero(ex_1110)) exsigs.push_back(ex_1110);
-        if (ham.m_ladder->m_contribs_1101.is_nonzero(ex_1101)) exsigs.push_back(ex_1101);
+        if (ham.m_frmbos->m_contribs_1110.is_nonzero(ex_1110)) exsigs.push_back(ex_1110);
+        if (ham.m_frmbos->m_contribs_1101.is_nonzero(ex_1101)) exsigs.push_back(ex_1101);
         if (!exsigs.empty()) {
             /*
              * hamiltonian has non-zero off-diagonal elements of one or both of the "pure" ladder operator type

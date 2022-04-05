@@ -5,14 +5,14 @@
 #ifndef M7_HOLSTEINLADDERHAM_H
 #define M7_HOLSTEINLADDERHAM_H
 
-#include "M7_lib/hamiltonian/frmbos/LadderHam.h"
+#include "M7_lib/hamiltonian/frmbos/FrmBosHam.h"
 
-struct HolsteinLadderHam : LadderHam {
+struct HolsteinLadderHam : FrmBosHam {
 
     const defs::ham_t m_g;
 
     HolsteinLadderHam(size_t nsite, size_t nboson_max, defs::ham_t g):
-        LadderHam({nsite, nsite}, nboson_max), m_g(g){
+        FrmBosHam({nsite, nsite}, nboson_max), m_g(g){
         m_contribs_0001.set_nonzero(exsig_utils::ex_0001);
         m_contribs_0010.set_nonzero(exsig_utils::ex_0010);
     }

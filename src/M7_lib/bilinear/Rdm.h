@@ -134,9 +134,9 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const LadderHam *ham, size_t nelec, size_t exsig) const;
+    defs::ham_comp_t get_energy(const FrmBosHam *ham, size_t nelec, size_t exsig) const;
 
-    defs::ham_comp_t get_energy(const LadderHam *ham, size_t nelec) const {
+    defs::ham_comp_t get_energy(const FrmBosHam *ham, size_t nelec) const {
         return get_energy(ham, nelec, exsig_utils::ex_1101) + get_energy(ham, nelec, exsig_utils::ex_1110);
     }
 
@@ -156,7 +156,7 @@ public:
      */
     defs::ham_comp_t get_energy(const Hamiltonian &ham) const {
         if (!is_energy_sufficient(ham)) return 0.0;
-        return get_energy(ham.m_frm.get()) + get_energy(ham.m_ladder.get(), ham.nelec()) + get_energy(ham.m_bos.get());
+        return get_energy(ham.m_frm.get()) + get_energy(ham.m_frmbos.get(), ham.nelec()) + get_energy(ham.m_bos.get());
     }
 
 private:

@@ -51,11 +51,11 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         }
     }
 
-    if (ham.m_ladder->enabled()) {
-        bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_ladder.get());
+    if (ham.m_frmbos->enabled()) {
+        bool is_holstein = dynamic_cast<const HolsteinLadderHam*>(ham.m_frmbos.get());
         bool any_pures;
-        any_pures = ham.m_ladder->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)
-                    || ham.m_ladder->m_contribs_1110.is_nonzero(exsig_utils::ex_0010);
+        any_pures = ham.m_frmbos->m_contribs_0010.is_nonzero(exsig_utils::ex_0010)
+                    || ham.m_frmbos->m_contribs_1110.is_nonzero(exsig_utils::ex_0010);
         if (any_pures) {
             if (is_holstein) {
                 add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0010)));
@@ -64,8 +64,8 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
                 add(std::unique_ptr<ExcitIter>(new excititers::LadderPure(ham, exsig_utils::ex_0010)));
             }
         }
-        any_pures = ham.m_ladder->m_contribs_0001.is_nonzero(exsig_utils::ex_0001)
-                    || ham.m_ladder->m_contribs_1101.is_nonzero(exsig_utils::ex_0001);
+        any_pures = ham.m_frmbos->m_contribs_0001.is_nonzero(exsig_utils::ex_0001)
+                    || ham.m_frmbos->m_contribs_1101.is_nonzero(exsig_utils::ex_0001);
         if (any_pures) {
             if (is_holstein)
                 add(std::unique_ptr<ExcitIter>(new excititers::LadderPureHolstein(ham, exsig_utils::ex_0001)));
@@ -74,10 +74,10 @@ ExcitIterGroup::ExcitIterGroup(const Hamiltonian &ham) {
         }
 
         bool any_hopping;
-        any_hopping = ham.m_ladder->m_contribs_1110.is_nonzero(exsig_utils::ex_1110);
+        any_hopping = ham.m_frmbos->m_contribs_1110.is_nonzero(exsig_utils::ex_1110);
         if (any_hopping)
             add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1110)));
-        any_hopping = ham.m_ladder->m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
+        any_hopping = ham.m_frmbos->m_contribs_1101.is_nonzero(exsig_utils::ex_1101);
         if (any_hopping)
             add(std::unique_ptr<ExcitIter>(new excititers::LadderHopping(ham, exsig_utils::ex_1101)));
     }

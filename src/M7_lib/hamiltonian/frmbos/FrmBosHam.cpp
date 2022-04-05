@@ -2,9 +2,9 @@
 // Created by rja on 05/11/2020.
 //
 
-#include "LadderHam.h"
+#include "FrmBosHam.h"
 
-LadderHam::LadderHam(const BasisData &bd, size_t nboson_max) :
+FrmBosHam::FrmBosHam(const BasisData &bd, size_t nboson_max) :
         m_bd(bd), m_nboson_max(nboson_max),
         m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
         m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
@@ -14,7 +14,7 @@ LadderHam::LadderHam(const BasisData &bd, size_t nboson_max) :
     log_data();
 }
 
-void LadderHam::log_data() const {
+void FrmBosHam::log_data() const {
     if (disabled()) return;
     if (!m_contribs_0010.is_nonzero(exsig_utils::ex_0010))
         log::info("0010 uncoupled boson ladder hamiltonian term has no contributions");

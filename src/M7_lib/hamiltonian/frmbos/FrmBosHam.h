@@ -2,8 +2,8 @@
 // Created by rja on 05/11/2020.
 //
 
-#ifndef M7_LADDERHAM_H
-#define M7_LADDERHAM_H
+#ifndef M7_FRMBOSHAM_H
+#define M7_FRMBOSHAM_H
 
 #include "M7_lib/io/EbdumpFileReader.h"
 #include "M7_lib/integrals/FrmBosCoupledCoeffs.h"
@@ -12,7 +12,7 @@
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 
-struct LadderHam {
+struct FrmBosHam {
 
     const BasisData m_bd;
     const size_t m_nboson_max;
@@ -22,8 +22,8 @@ struct LadderHam {
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    LadderHam(const BasisData &bd, size_t nboson_max);
-	virtual ~LadderHam(){}
+    FrmBosHam(const BasisData &bd, size_t nboson_max);
+	virtual ~FrmBosHam(){}
 
     virtual defs::ham_t get_coeff_0010(size_t imode) const {return 0;}
     virtual defs::ham_t get_coeff_0001(size_t imode) const {return 0;}
@@ -70,8 +70,8 @@ struct LadderHam {
     }
 };
 
-struct NullLadderHam: LadderHam {
-    NullLadderHam() : LadderHam({0, 0}, 0){}
+struct NullLadderHam: FrmBosHam {
+    NullLadderHam() : FrmBosHam({0, 0}, 0){}
 
     bool enabled() const override {
         return false;
@@ -79,4 +79,4 @@ struct NullLadderHam: LadderHam {
 };
 
 
-#endif //M7_LADDERHAM_H
+#endif //M7_FRMBOSHAM_H

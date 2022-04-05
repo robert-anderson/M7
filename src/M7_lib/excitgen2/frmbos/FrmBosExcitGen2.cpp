@@ -4,7 +4,7 @@
 
 #include "FrmBosExcitGen2.h"
 
-FrmBosExcitGen2::FrmBosExcitGen2(const LadderHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
+FrmBosExcitGen2::FrmBosExcitGen2(const FrmBosHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen2(prng, std::move(exsigs), std::move(description)), m_h(h) {
     for (auto exsig: m_exsigs)
         REQUIRE_TRUE(exsig_utils::decode_nfrm(exsig) && exsig_utils::decode_nbos(exsig),

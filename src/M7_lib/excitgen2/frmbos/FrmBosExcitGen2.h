@@ -5,16 +5,16 @@
 #ifndef M7_FRMBOSEXCITGEN2_H
 #define M7_FRMBOSEXCITGEN2_H
 
-#include "M7_lib/hamiltonian/frmbos/LadderHam.h"
+#include "M7_lib/hamiltonian/frmbos/FrmBosHam.h"
 #include "M7_lib/excitgen2/ExcitGen2.h"
 
 #include <utility>
 
 struct FrmBosExcitGen2 : ExcitGen2 {
 
-    const LadderHam& m_h;
+    const FrmBosHam& m_h;
 
-    FrmBosExcitGen2(const LadderHam& h, PRNG &prng, defs::inds exsigs, std::string description);
+    FrmBosExcitGen2(const FrmBosHam& h, PRNG &prng, defs::inds exsigs, std::string description);
 
     bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, defs::ham_t &helem,
                     conn::FrmOnv &conn) override;
