@@ -9,12 +9,12 @@
 #include "M7_lib/sample/Aliaser.h"
 #include "M7_lib/parallel/MPIAssert.h"
 
-struct PchbDoubles2 : FrmExcitGen2 {
+struct Pchb2200 : FrmExcitGen2 {
 private:
     Aliaser m_pick_ab_given_ij;
 
 public:
-    PchbDoubles2(const FrmHam &h, PRNG &prng);
+    Pchb2200(const FrmHam &h, PRNG &prng);
 
     bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
                     defs::ham_t &helem, conn::FrmOnv &conn) override;

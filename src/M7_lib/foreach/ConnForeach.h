@@ -184,6 +184,11 @@ namespace conn_foreach {
                 }
             }
 
+            template<typename fn_t>
+            void loop_fn(const field::FrmOnv &src, const fn_t &fn) {
+                loop_fn(m_conns.m_frmonv, src, fn);
+            }
+
         protected:
             void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t <conn::FrmOnv> &fn) override {
                 loop_fn(conn, src, fn);

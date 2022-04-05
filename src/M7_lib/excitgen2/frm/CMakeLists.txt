@@ -6,8 +6,8 @@ target_sources(M7_lib
         HeisenbergExchange2.cpp
         HubbardUniform2.cpp
         HubbardUniform2.h
-        PchbDoubles2.cpp
-        PchbDoubles2.h
+        Pchb2200.cpp
+        Pchb2200.h
         UniformSingles2.cpp
         UniformSingles2.h
 )

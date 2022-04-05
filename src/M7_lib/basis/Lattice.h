@@ -70,7 +70,7 @@ public:
 
     void add(size_t irow, const defs::inds& icols, const std::vector<int>& coeffs);
 
-    Lattice(size_t nsite, Spec spec);
+    Lattice(Spec spec);
 
 };
 

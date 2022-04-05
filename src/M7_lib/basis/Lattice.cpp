@@ -42,9 +42,9 @@ void Lattice::add(size_t irow, const defs::inds &icols, const std::vector<int> &
     }
 }
 
-Lattice::Lattice(size_t nsite, Lattice::Spec spec) :
-        m_dense(nsite), m_spec(std::move(spec)) {
-    m_sparse.resize(nsite);
+Lattice::Lattice(Lattice::Spec spec) :
+        m_dense(spec.m_format.m_nelement), m_spec(std::move(spec)) {
+    m_sparse.resize(nsite());
 }
 
 Lattice::Spec::Spec(Lattice::Topology topo, const defs::inds &shape, std::vector<int> bcs) :
@@ -93,7 +93,7 @@ std::pair<size_t, int> OrthoLattice::get_coordination(const defs::inds &site_ind
     return {get_coord_index(site_inds, idim, dim_ind), sign};
 }
 
-OrthoLattice::OrthoLattice(Lattice::Spec spec) : Lattice(spec.m_format.m_nelement, spec){
+OrthoLattice::OrthoLattice(Lattice::Spec spec) : Lattice(spec){
     /*
      * set up loop for orthogonally-coordinated lattice
      */
@@ -126,7 +126,7 @@ Lattice lattice::make(const Lattice::Spec &spec) {
         case Lattice::NullTopology:
             ABORT("invalid lattice topology given");
     }
-    return {0, Lattice::Spec(Lattice::NullTopology, {}, {})};
+    return {Lattice::Spec(Lattice::NullTopology, {}, {})};
 }
 
 Lattice lattice::make(const fciqmc_config::LatticeModel &opts) {

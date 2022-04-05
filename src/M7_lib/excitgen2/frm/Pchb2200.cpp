@@ -2,9 +2,9 @@
 // Created by rja on 04/04/2022.
 //
 
-#include "PchbDoubles2.h"
+#include "Pchb2200.h"
 
-PchbDoubles2::PchbDoubles2(const FrmHam &h, PRNG &prng) :
+Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng) :
         FrmExcitGen2(h, prng, {exsig_utils::ex_double}, "precomputed heat-bath fermion doubles"),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
     std::vector<defs::prob_t> weights(m_nspinorb_pair, 0.0);
@@ -35,8 +35,8 @@ PchbDoubles2::PchbDoubles2(const FrmHam &h, PRNG &prng) :
     mpi::barrier();
 }
 
-bool PchbDoubles2::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
-                             defs::ham_t &helem, conn::FrmOnv &conn) {
+bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
+                          defs::ham_t &helem, conn::FrmOnv &conn) {
     DEBUG_ASSERT_EQ(exsig, exsig_utils::ex_double, "this excitation generator is only suitable for exsig 2200");
     size_t i, j, a, b;
     size_t ij = m_prng.draw_uint(m_nelec_pair);
@@ -74,7 +74,7 @@ bool PchbDoubles2::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, def
     return true;
 }
 
-bool PchbDoubles2::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
+bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
     /*
      * need the helement to compute the probability so if it isn't actually needed, just dispose of it
      * in contrast to the generic case where it is not assumed that the helement must be computed to get the prob,
@@ -84,6 +84,6 @@ bool PchbDoubles2::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs:
     return draw_h_frm(exsig, src, prob, helem, conn);
 }
 
-size_t PchbDoubles2::approx_nconn() const {
+size_t Pchb2200::approx_nconn() const {
     return m_nelec_pair * m_nspinorb_pair;
 }

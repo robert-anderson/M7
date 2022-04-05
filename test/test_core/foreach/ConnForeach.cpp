@@ -5,6 +5,22 @@
 #include "gtest/gtest.h"
 #include "M7_lib/foreach/ConnForeach.h"
 
+namespace conn_foreach_test {
+    struct Result{
+        const defs::inds m_ann, m_cre;
+        Result(defs::inds ann, defs::inds cre): m_ann(std::move(ann)), m_cre(std::move(cre)){}
+        Result(size_t ann, size_t cre): m_ann({ann}), m_cre({cre}){}
+    };
+    typedef std::vector<Result> results_t;
+    results_t product_results(const std::vector<defs::inds>& anns, const std::vector<defs::inds>& cres) {
+        results_t results;
+        results.reserve(anns.size()*cres.size());
+        for(auto &ann: anns)
+            for (auto& cre: cres)
+                results.push_back({ann, cre});
+        return results;
+    }
+}
 
 TEST(ConnForeach, FrmGeneralEx1100) {
     const size_t nsite = 8;
@@ -36,34 +52,66 @@ TEST(ConnForeach, FrmGeneralEx2200) {
     mbf = setbits;
     defs::inds clrbits = {0, 2, 4, 7};
     ASSERT_EQ(mbf.m_decoded.m_simple_vacs.get(), clrbits);
-    std::vector<defs::inds> setbit_pairs = {
-            {1, 3},
-            {1, 5},
-            {3, 5},
-            {1, 6},
-            {3, 6},
-            {5, 6}};
-    std::vector<defs::inds> clrbit_pairs = {
-            {0, 2},
-            {0, 4},
-            {2, 4},
-            {0, 7},
-            {2, 7},
-            {4, 7}};
+    std::vector<defs::inds> setbit_pairs = {{1, 3}, {1, 5}, {3, 5}, {1, 6}, {3, 6}, {5, 6}};
+    std::vector<defs::inds> clrbit_pairs = {{0, 2}, {0, 4}, {2, 4}, {0, 7}, {2, 7}, {4, 7}};
+    auto results = conn_foreach_test::product_results(setbit_pairs, clrbit_pairs);
 
-    size_t iiter = 0ul;
-    auto fn = [&](const conn::FrmOnv &conn) {
-        const auto iann_pair = iiter / clrbit_pairs.size();
-        const auto icre_pair = iiter - iann_pair * clrbit_pairs.size();
-        ASSERT_EQ(conn.m_cre, clrbit_pairs[icre_pair]);
-        ASSERT_EQ(conn.m_ann, setbit_pairs[iann_pair]);
-        ++iiter;
+    auto result = results.cbegin();
+    auto fn = [&result](const conn::FrmOnv &conn) {
+
+        ASSERT_EQ(conn.m_ann, result->m_ann);
+        ASSERT_EQ(conn.m_cre, result->m_cre);
+        ++result;
     };
     conn_foreach::frm::General<2> foreach(nsite);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
     foreach.loop_fn(mbf, fn);
-    ASSERT_EQ(iiter, setbit_pairs.size() * clrbit_pairs.size());
+    ASSERT_EQ(result, results.cend());
 }
+
+TEST(ConnForeach, FrmHubbardEx1100) {
+    /*
+     * 2d hubbard model example det      site indices (irow*4+icol)
+     *  x o x o                          0 1 2 3
+     *  o o o x                          4 5 6 7
+     *  x x o o                          8 ...
+     *  periodic BCs top to bottom (major dimension: "row")
+     *  open BCs left to right (minor dimension: "col")
+     */
+    const size_t nrow=3, ncol=4;
+    auto lattice = lattice::make({Lattice::Ortho, {nrow, ncol}, {1, 0}});
+    buffered::FrmOnv onv(lattice.nsite());
+    onv = {0, 2, 7, 8, 9};
+    // horizontal neighbors
+    ASSERT_TRUE(lattice.m_dense(1, 2));
+    ASSERT_TRUE(lattice.m_dense(2, 1));
+    // vertical neighbors
+    ASSERT_TRUE(lattice.m_dense(1, 5));
+    ASSERT_TRUE(lattice.m_dense(5, 1));
+    // periodic vertical nerighbors
+    ASSERT_TRUE(lattice.m_dense(1, 9));
+    ASSERT_TRUE(lattice.m_dense(9, 1));
+    // horizontal neighbors
+    ASSERT_TRUE(lattice.m_dense(4, 5));
+    ASSERT_TRUE(lattice.m_dense(5, 4));
+    // NOT periodic horizontal neighbors
+    ASSERT_FALSE(lattice.m_dense(4, 7));
+    ASSERT_FALSE(lattice.m_dense(7, 4));
+
+    conn_foreach_test::results_t results = {
+            {0, 4}, {0, 1}, {2, 10}, {2, 6}, {2, 1}, {2, 3}, {7, 3}, {7, 11}, {7, 6}, {8, 4}, {9, 5}, {9, 1}, {9, 10}};
+
+    auto result = results.cbegin();
+    auto fn = [&result](const conn::FrmOnv& conn){
+        ASSERT_EQ(conn.m_cre, result->m_cre);
+        ASSERT_EQ(conn.m_ann, result->m_ann);
+        ++result;
+    };
+    conn_foreach::frm::Hubbard foreach(lattice);
+    foreach.loop_fn(onv, fn);
+    ASSERT_EQ(result, results.cend());
+}
+
 
 TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const size_t nsite = 8;

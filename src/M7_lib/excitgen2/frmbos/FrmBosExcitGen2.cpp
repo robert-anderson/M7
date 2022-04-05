@@ -5,11 +5,7 @@
 #include "FrmBosExcitGen2.h"
 
 FrmBosExcitGen2::FrmBosExcitGen2(const FrmBosHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
-        ExcitGen2(prng, std::move(exsigs), std::move(description)), m_h(h) {
-    for (auto exsig: m_exsigs)
-        REQUIRE_TRUE(exsig_utils::decode_nfrm(exsig) && exsig_utils::decode_nbos(exsig),
-                     "excitations must be expressed in terms of both fermion and boson operators");
-}
+        ExcitGen2(prng, std::move(exsigs), std::move(description)), m_h(h) {}
 
 bool FrmBosExcitGen2::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
                                  defs::ham_t &helem, conn::FrmOnv &conn) {

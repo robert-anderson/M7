@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "test_core/excitgen2/ExcitGenTester.h"
 #include "M7_lib/field/Mbf.h"
-#include "M7_lib/excitgen2/frm/PchbDoubles2.h"
+#include "M7_lib/excitgen2/frm/Pchb2200.h"
 
 TEST(HeatBathDoubles, FromHFDeterminant) {
     PRNG prng(14, 1000000);
@@ -13,7 +13,7 @@ TEST(HeatBathDoubles, FromHFDeterminant) {
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_LiH_STO-3G/FCIDUMP";
     opts.verify();
     Hamiltonian h(opts);
-    PchbDoubles2 excit_gen(*h.m_frm, prng);
+    Pchb2200 excit_gen(*h.m_frm, prng);
     conn_foreach::frm::Ms2Conserve<2> conn_iter(10);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_bd);
@@ -36,7 +36,7 @@ TEST(HeatBathDoubles, FromExcited){
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();
     Hamiltonian h(opts);
-    PchbDoubles2 excit_gen(*h.m_frm, prng);
+    Pchb2200 excit_gen(*h.m_frm, prng);
     conn_foreach::frm::Ms2Conserve<2> excit_iter(h.m_bd.m_nsite);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_bd);
