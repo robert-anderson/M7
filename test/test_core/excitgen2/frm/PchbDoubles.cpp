@@ -26,7 +26,7 @@ TEST(HeatBathDoubles, FromHFDeterminant) {
     auto av_err1 = tester.mean_abs_error(ndraw);
     tester.run(src_mbf, ndraw);
     auto av_err2 = tester.mean_abs_error(2 * ndraw);
-    ASSERT_LT(av_err2, av_err1);
+    ASSERT_LE(av_err2, av_err1);
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
 }
 

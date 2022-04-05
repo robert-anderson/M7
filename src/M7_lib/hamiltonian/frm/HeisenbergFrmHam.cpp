@@ -24,6 +24,17 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_
      */
     auto isite = field::FrmOnv::isite(i, m_nsite);
     auto jsite = field::FrmOnv::isite(j, m_nsite);
+    auto ksite = field::FrmOnv::isite(k, m_nsite);
+    auto lsite = field::FrmOnv::isite(l, m_nsite);
+    if (isite == ksite){
+        if (jsite != lsite) return 0.0;
+    }
+    else if (jsite == ksite) {
+        if (isite != lsite) return 0.0;
+    }
+    else {
+        return 0.0;
+    }
     // fermi phase not included here, minus sign is due to product of opposite spins
     return -m_j * m_lattice.m_dense(isite, jsite)/2.0;
 }
@@ -57,6 +68,7 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
 
 defs::ham_t HeisenbergFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "expected 2200 (aka fermion double) exsig");
+    if (!conn.kramers_conserve()) return 0;
     // fermi phase is always negative
     return -HeisenbergFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[1], conn.m_ann[0]);
 }
