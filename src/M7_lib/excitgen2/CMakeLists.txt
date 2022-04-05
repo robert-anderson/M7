@@ -3,4 +3,6 @@ target_sources(M7_lib
         ExcitGen2.cpp
         ExcitGen2.h
 )
+add_subdirectory(bos)
 add_subdirectory(frm)
+add_subdirectory(frmbos)

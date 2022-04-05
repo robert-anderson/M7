@@ -7,15 +7,14 @@
 FrmExcitGen2::FrmExcitGen2(const FrmHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen2(prng, std::move(exsigs), std::move(description)),
         m_h(h), m_nelec_pair(integer_utils::nspair(h.m_nelec)),
-        m_nspinorb_pair(integer_utils::nspair(2*h.m_nsite)) {}
+        m_nspinorb_pair(integer_utils::nspair(2*h.m_nsite)) {
+    for (auto exsig: m_exsigs)
+        REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
+}
 
 bool FrmExcitGen2::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
                                defs::prob_t &prob, conn::FrmBosOnv &conn) {
     return draw_frm(exsig, src.m_frm, prob, conn.m_frm);
-}
-
-bool FrmExcitGen2::draw_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) {
-    return ExcitGen2::draw_bos(exsig, src, prob, conn);
 }
 
 bool FrmExcitGen2::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
@@ -23,7 +22,7 @@ bool FrmExcitGen2::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, def
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem);
+    return !consts::nearly_zero(helem, defs::helem_tol);
 }
 
 bool FrmExcitGen2::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob,
@@ -31,7 +30,7 @@ bool FrmExcitGen2::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &sr
     auto result = draw(exsig, src.m_frm, prob, conn.m_frm);
     if (!result) return false;
     helem = m_h.get_element(src.m_frm, conn.m_frm);
-    return !consts::nearly_zero(helem);
+    return !consts::nearly_zero(helem, defs::helem_tol);
 }
 
 bool FrmExcitGen2::draw_h_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob,

@@ -189,6 +189,38 @@ namespace conn_foreach {
                 loop_fn(conn, src, fn);
             }
         };
+
+
+        /*
+        struct Heisenberg : Base {
+            const Lattice& m_lattice;
+            Heisenberg(const Lattice& lattice):
+                Base(exsig_utils::ex_single, lattice.nsite()), m_lattice(lattice){}
+
+            template<typename fn_t>
+            void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+                const auto& occs = src.m_decoded.m_simple_occs.get();
+                for (const auto& occ: occs){
+                    conn.m_ann.clear();
+                    conn.m_ann.add(occ);
+                    auto ispin_occ = src.ispin(occ);
+                    auto isite_occ = src.isite(occ);
+                    auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
+                    for (const auto& i : coordinated_sites){
+                        if (src.get({ispin_occ, i})) continue;
+                        conn.m_cre.clear();
+                        conn.m_cre.add({ispin_occ, i});
+                        fn(conn);
+                    }
+                }
+            }
+
+        protected:
+            void frm_loop(conn::FrmOnv &conn, const field::FrmOnv &src, const function_t <conn::FrmOnv> &fn) override {
+                loop_fn(conn, src, fn);
+            }
+        };
+         */
     }
 
     namespace bos {

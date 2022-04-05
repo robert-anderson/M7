@@ -2,6 +2,8 @@ target_sources(M7_lib
     PRIVATE
         FrmExcitGen2.cpp
         FrmExcitGen2.h
+        HeisenbergExchange2.h
+        HeisenbergExchange2.cpp
         HubbardUniform2.cpp
         HubbardUniform2.h
         PchbDoubles2.cpp

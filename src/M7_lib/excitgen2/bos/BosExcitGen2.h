@@ -1,26 +1,20 @@
 //
-// Created by rja on 03/04/2022.
+// Created by rja on 05/04/2022.
 //
 
-#ifndef M7_FRMEXCITGEN2_H
-#define M7_FRMEXCITGEN2_H
+#ifndef M7_BOSEXCITGEN2_H
+#define M7_BOSEXCITGEN2_H
 
+#include "M7_lib/hamiltonian/bos/BosHam.h"
 #include "M7_lib/excitgen2/ExcitGen2.h"
-#include "M7_lib/hamiltonian/frm/FrmHam.h"
 
-struct FrmExcitGen2 : ExcitGen2 {
+#include <utility>
 
-    const FrmHam &m_h;
-    /**
-     * number of pairs of electrons in the system (FrmHam conserves fermion number)
-     */
-    const size_t m_nelec_pair;
-    /**
-     * number of pairs of fermionic degrees of freedom in the system
-     */
-    const size_t m_nspinorb_pair;
+struct BosExcitGen2 : ExcitGen2 {
 
-    FrmExcitGen2(const FrmHam &h, PRNG &prng, defs::inds exsigs, std::string description);
+    const BosHam &m_h;
+
+    BosExcitGen2(const BosHam &h, PRNG &prng, defs::inds exsigs, std::string description);
 
     bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
                      defs::prob_t &prob, conn::FrmBosOnv &conn) override;
@@ -37,4 +31,4 @@ struct FrmExcitGen2 : ExcitGen2 {
 };
 
 
-#endif //M7_FRMEXCITGEN2_H
+#endif //M7_BOSEXCITGEN2_H
