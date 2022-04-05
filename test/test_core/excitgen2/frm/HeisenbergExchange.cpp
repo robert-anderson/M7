@@ -15,7 +15,7 @@ TEST(HeisenbergExchange, Pbc2D) {
     opts.verify();
     Hamiltonian h(opts);
     HeisenbergExchange2 excit_gen(*h.m_frm, prng);
-    conn_foreach::frm::Ms2Conserve<2> conn_iter(h.m_bd.m_nsite);
+    conn_foreach::frm::Heisenberg conn_iter(excit_gen.h_cast()->m_lattice);
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_bd);

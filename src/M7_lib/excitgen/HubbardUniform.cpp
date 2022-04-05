@@ -26,7 +26,8 @@ bool HubbardUniform::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs
     auto vac = src.m_format.flatten({ispin, t_mat_row.first[rand%nvac]});
     if (src.get(vac)) return false;
     prob = 1.0 / double (m_nelec * nvac);
-    conn.set(occ, vac);
+    conn.m_ann.set(occ);
+    conn.m_cre.set(vac);
     return true;
 }
 

@@ -72,20 +72,51 @@ public:
         add(FrmOnvField::ibit(pair.first, pair.second, m_nsite));
     }
 
-    void set(const defs::inds& orbs, const defs::inds& inds){
+//    void set(const defs::inds& orbs, const defs::inds& inds){
+//        clear();
+//        for (const auto& ind: inds) add(orbs[ind]);
+//        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
+//    }
+
+    void set(size_t ibit){
         clear();
-        for (const auto& ind: inds) add(orbs[ind]);
-        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
+        add(ibit);
     }
 
-    void add(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
-        add(pair1);
-        add(pair2);
+    void set(size_t ibit1, size_t ibit2){
+        clear();
+        add(ibit1);
+        add(ibit2);
+    }
+
+    void set_in_order(size_t ibit1, size_t ibit2){
+        clear();
+        DEBUG_ASSERT_NE(ibit1, ibit2, "fermion indices in connection product may not coincide");
+        if (ibit1 < ibit2) {
+            add(ibit1);
+            add(ibit2);
+        }
+        else {
+            add(ibit2);
+            add(ibit1);
+        }
+    }
+
+    void set(std::pair<size_t, size_t> pair){
+        clear();
+        add(pair);
     }
 
     void set(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
         clear();
-        add(pair1, pair2);
+        add(pair1);
+        add(pair2);
+    }
+
+    void set_in_order(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
+        auto ibit1 = FrmOnvField::ibit(pair1.first, pair1.second, m_nsite);
+        auto ibit2 = FrmOnvField::ibit(pair2.first, pair2.second, m_nsite);
+        set_in_order(ibit1, ibit2);
     }
 
     defs::inds::const_iterator cbegin() const {
@@ -210,95 +241,6 @@ public:
      * reset the internal state that to of a null excitation
      */
     void clear();
-    /**
-     * convenient wrapper for a fermion number-conserving single excitation
-     * @param ann
-     *  spin orbital index to annihilate from a src determinant
-     * @param cre
-     *  spin orbital index to create in a dst determinant
-     */
-    void add(const size_t &ann, const size_t &cre);
-    /**
-     * convenient wrapper for a fermion number-conserving double excitation
-     * @param ann1
-     *  first spin orbital index to annihilate from a src determinant
-     * @param ann2
-     *  second spin orbital index to annihilate from a src determinant
-     * @param cre1
-     *  first spin orbital index to create in a dst determinant
-     * @param cre2
-     *  second spin orbital index to create in a dst determinant
-     */
-    void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2);
-
-    void set(const size_t &ann, const size_t &cre) {
-        clear();
-        add(ann, cre);
-    }
-    void set(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2){
-        clear();
-        add(ann1, ann2, cre1, cre2);
-    }
-
-    /**
-     * convenient wrapper for a fermion number-conserving single excitation
-     *
-     * The pairs are denoting {spin index, site index} to directly index spin orbitals
-     * @param ann
-     *  first spin orbital index pair to annihilate from a src determinant
-     * @param cre
-     *  first spin orbital index pair to create in a dst determinant
-     */
-    void add(
-        std::pair<size_t, size_t> ann,
-        std::pair<size_t, size_t> cre
-    ) {
-        m_ann.add(ann);
-        m_cre.add(cre);
-    };
-
-
-    void set(
-        std::pair<size_t, size_t> ann,
-        std::pair<size_t, size_t> cre
-    ) {
-        clear();
-        add(ann, cre);
-    };
-
-    /**
-     * convenient wrapper for a fermion number-conserving double excitation
-     *
-     * The pairs are denoting {spin index, site index} to directly index spin orbitals
-     * @param ann1
-     *  first spin orbital index pair to annihilate from a src determinant
-     * @param ann2
-     *  second spin orbital index pair to annihilate from a src determinant
-     * @param cre1
-     *  first spin orbital index pair to create in a dst determinant
-     * @param cre2
-     *  second spin orbital index pair to create in a dst determinant
-     */
-    void add(
-        std::pair<size_t, size_t> ann1,
-        std::pair<size_t, size_t> ann2,
-        std::pair<size_t, size_t> cre1,
-        std::pair<size_t, size_t> cre2
-    ) {
-        m_ann.add(ann1, ann2);
-        m_cre.add(cre1, cre2);
-    };
-
-
-    void set(
-        std::pair<size_t, size_t> ann1,
-        std::pair<size_t, size_t> ann2,
-        std::pair<size_t, size_t> cre1,
-        std::pair<size_t, size_t> cre2
-    ) {
-        clear();
-        add(ann1, ann2, cre1, cre2);
-    };
 
     /**
      * @return

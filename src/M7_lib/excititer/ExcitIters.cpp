@@ -23,12 +23,12 @@ excititers::Frm::Frm(const Hamiltonian &ham, size_t exsig) :
 void excititers::Frm::foreach(const FrmOnv &src, conn::FrmOnv &conn, const fn_c_t<FrmOnv> &body) {
     conn.clear();
     auto inner = [&](){
-        conn.m_ann.set(m_work_orbs.occ(src).m_flat.inds(), m_ann_loop.inds());
+        //conn.m_ann.set(m_work_orbs.occ(src).m_flat.inds(), m_ann_loop.inds());
         if (!set_helement(src, conn)) return;
         body(conn);
     };
     auto outer = [&](){
-        conn.m_cre.set(m_work_orbs.vac(src).m_flat.inds(), m_cre_loop.inds());
+        //conn.m_cre.set(m_work_orbs.vac(src).m_flat.inds(), m_cre_loop.inds());
         m_ann_loop(inner);
     };
     m_cre_loop(outer);

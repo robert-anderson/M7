@@ -196,28 +196,36 @@ namespace conn_foreach {
         };
 
 
-        /*
         struct Heisenberg : Base {
             const Lattice& m_lattice;
             Heisenberg(const Lattice& lattice):
-                Base(exsig_utils::ex_single, lattice.nsite()), m_lattice(lattice){}
+                Base(exsig_utils::ex_double, lattice.nsite()), m_lattice(lattice){}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+                // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
                 const auto& occs = src.m_decoded.m_simple_occs.get();
                 for (const auto& occ: occs){
-                    conn.m_ann.clear();
-                    conn.m_ann.add(occ);
                     auto ispin_occ = src.ispin(occ);
+                    if (ispin_occ) return; // all alpha bits have been dealt with
                     auto isite_occ = src.isite(occ);
+                    // cannot exchange if the site is doubly occupied:
+                    if (src.get({!ispin_occ, isite_occ})) continue;
                     auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
                     for (const auto& i : coordinated_sites){
                         if (src.get({ispin_occ, i})) continue;
-                        conn.m_cre.clear();
-                        conn.m_cre.add({ispin_occ, i});
+                        if (!src.get({!ispin_occ, i})) continue;
+                        conn.m_ann.set({0, isite_occ}, {1, i});
+                        conn.m_cre.set({0, i}, {1, isite_occ});
+                        DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "incorrect excitation level");
                         fn(conn);
                     }
                 }
+            }
+
+            template<typename fn_t>
+            void loop_fn(const field::FrmOnv &src, const fn_t &fn) {
+                loop_fn(m_conns.m_frmonv, src, fn);
             }
 
         protected:
@@ -225,7 +233,6 @@ namespace conn_foreach {
                 loop_fn(conn, src, fn);
             }
         };
-         */
     }
 
     namespace bos {

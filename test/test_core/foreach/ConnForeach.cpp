@@ -112,6 +112,33 @@ TEST(ConnForeach, FrmHubbardEx1100) {
     ASSERT_EQ(result, results.cend());
 }
 
+TEST(ConnForeach, FrmHeisenbergEx2200) {
+    /*
+     * 2d heisenberg model example alphas
+     *  1 0 0 1 0 1 1 0
+     *  periodic BCs
+     */
+    const size_t nsite=8;
+    auto lattice = lattice::make({Lattice::Ortho, {nsite}, {1}});
+    buffered::FrmOnv onv(lattice.nsite());
+    onv.set_spins({0, 3, 5});
+
+    conn_foreach_test::results_t results = {
+            {{0, 15}, {7, 8}}, {{0, 9}, {1, 8}}, {{3, 10}, {2, 11}}, {{3, 12}, {4, 11}}, {{5, 12}, {4, 13}}, {{5, 14}, {6, 13}}};
+
+    auto result = results.cbegin();
+    auto fn = [&result](const conn::FrmOnv& conn){
+        ASSERT_EQ(conn.exsig(), exsig_utils::ex_double);
+        ASSERT_EQ(conn.m_cre, result->m_cre);
+        ASSERT_EQ(conn.m_ann, result->m_ann);
+        ++result;
+    };
+    conn_foreach::frm::Heisenberg foreach(lattice);
+    ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
+    foreach.loop_fn(onv, fn);
+    ASSERT_EQ(result, results.cend());
+}
+
 
 TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const size_t nsite = 8;

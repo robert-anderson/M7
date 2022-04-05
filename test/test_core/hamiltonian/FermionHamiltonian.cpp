@@ -81,8 +81,8 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
         const auto &occ = occs[iocc];
         for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
             const auto &vac = vacs[iocc];
-            conn.clear();
-            conn.add(occ, vac);
+            conn.m_ann.set(occ);
+            conn.m_cre.set(vac);
             ASSERT_FLOAT_EQ(ham.m_frm->get_element_1100(onv, conn), 0.0);
         }
     }

@@ -37,8 +37,8 @@ bool HeisenbergExchange2::draw_frm(const size_t &exsig, const field::FrmOnv &src
     const auto j = src.ibit(jspin, jsite);
     const auto a = src.ibit(ispin, jsite);
     const auto b = src.ibit(jspin, isite);
-    if (jspin) conn.set(i, j, a, b);
-    else conn.set(j, i, b, a);
+    conn.m_ann.set_in_order(i, j);
+    conn.m_cre.set_in_order(a, b);
     return true;
 }
 

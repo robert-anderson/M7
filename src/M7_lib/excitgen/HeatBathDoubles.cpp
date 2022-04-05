@@ -63,7 +63,8 @@ bool HeatBathDoubles::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, 
     if (std::any_of(occs.inds().cbegin(), occs.inds().end(), either_vac_in_array)) {
         return false;
     }
-    conn.set(i, j, a, b);
+    conn.m_ann.set(i, j);
+    conn.m_cre.set(a, b);
     helem = m_h.m_frm->get_element_2200(src, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");

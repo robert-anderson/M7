@@ -39,7 +39,8 @@ bool UniformSingles2::draw_spin_conserve_fn(PRNG &prng, const field::FrmOnv &src
     DEBUG_ASSERT_LT(i, nocc, "drawn occupied OOB");
     DEBUG_ASSERT_LT(a, nvac, "drawn vacant OOB");
 
-    conn.set(occs[i], vacs[a]);
+    conn.m_ann.set(occs[i]);
+    conn.m_cre.set(vacs[a]);
     DEBUG_ASSERT_TRUE(conn.kramers_conserve(), "spin not conserved");
     prob = 1.0 / (nonempty_pairs.size() * nocc * nvac);
     return true;
@@ -54,6 +55,7 @@ bool UniformSingles2::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &
     auto ia = prng.draw_uint(ncases);
     size_t i, a;
     integer_utils::inv_rectmap(i, a, src.m_nspinorb - nelec, ia);
-    conn.set(occs[i], vacs[a]);
+    conn.m_ann.set(occs[i]);
+    conn.m_cre.set(vacs[a]);
     return true;
 }

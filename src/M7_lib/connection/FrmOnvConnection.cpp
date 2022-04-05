@@ -152,22 +152,6 @@ void FrmOnvConnection::clear() {
     m_ann.clear();
 }
 
-void FrmOnvConnection::add(const size_t &ann, const size_t &cre) {
-    m_ann.add(ann);
-    m_cre.add(cre);
-    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
-    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
-}
-
-void FrmOnvConnection::add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2) {
-    m_ann.add(ann1);
-    m_ann.add(ann2);
-    m_cre.add(cre1);
-    m_cre.add(cre2);
-    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
-    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
-}
-
 const defs::inds &FrmOnvConnection::ann() const {
     return m_ann.inds();
 }

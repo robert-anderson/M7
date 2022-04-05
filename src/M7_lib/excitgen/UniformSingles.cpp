@@ -43,7 +43,8 @@ bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, Cac
         else { DEBUG_ASSERT_GE(a, m_h.m_bd.m_nsite, "spin not conserved"); }
     }
 #endif
-    conn.set(i, a);
+    conn.m_ann.set(i);
+    conn.m_cre.set(a);
     prob = 1.0 / ncases;
     return true;
 }
