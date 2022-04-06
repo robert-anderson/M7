@@ -13,8 +13,9 @@
 #include "M7_lib/field/Fields.h"
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
+#include "M7_lib/hamiltonian/HamOpTerm.h"
 
-struct BosHam {
+struct BosHam : HamOpTerm {
     const size_t m_nmode, m_nboson;
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;

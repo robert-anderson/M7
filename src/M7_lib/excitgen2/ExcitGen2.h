@@ -71,6 +71,9 @@ struct ExcitGen2 {
     virtual size_t approx_nconn() const {
         return 1ul;
     }
+
+    typedef std::unique_ptr<ExcitGen2> excit_gen_ptr_t;
+    typedef std::forward_list<excit_gen_ptr_t> excit_gen_list_t;
 };
 
 

@@ -11,8 +11,9 @@
 #include "M7_lib/field/Fields.h"
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
+#include "M7_lib/hamiltonian/HamOpTerm.h"
 
-struct FrmBosHam {
+struct FrmBosHam : HamOpTerm {
 
     const BasisData m_bd;
     const size_t m_nboson_max;

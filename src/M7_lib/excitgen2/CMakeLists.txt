@@ -2,6 +2,8 @@ target_sources(M7_lib
     PRIVATE
         ExcitGen2.cpp
         ExcitGen2.h
+        ExcitGenGroup2.cpp
+        ExcitGenGroup2.h
 )
 add_subdirectory(bos)
 add_subdirectory(frm)

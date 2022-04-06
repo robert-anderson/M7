@@ -21,7 +21,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
 
     const BasisData m_bd;
     const size_t m_nsite;
-    const size_t& m_nspinorb;
+    const size_t m_nspinorb;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */

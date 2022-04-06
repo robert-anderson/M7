@@ -23,9 +23,8 @@ struct HamOpTerm {
     HamOpTerm(){}
     virtual ~HamOpTerm(){}
 
-    typedef std::unique_ptr<ExcitGen2> excit_gen_ptr_t;
-    typedef std::forward_list<excit_gen_ptr_t> excit_gen_list_t;
-
+    using excit_gen_ptr_t = ExcitGen2::excit_gen_ptr_t;
+    using excit_gen_list_t = ExcitGen2::excit_gen_list_t;
     /**
      * @param prng
      *  pseudorandom number generator to pass to the ctors of all associated excit gens
