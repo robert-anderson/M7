@@ -18,8 +18,8 @@ bool LadderPureUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, C
     DEBUG_ASSERT_LE(size_t(curr_occ + cre), m_h.m_nboson_max, "generated boson occupation exceeds cutoff");
 
     conn.clear();
-    if (cre) conn.m_bos.m_cre.add({imode, 1ul});
-    else conn.m_bos.m_ann.add({imode, 1ul});
+    if (cre) conn.m_bos.m_cre.set(imode);
+    else conn.m_bos.m_ann.set(imode);
     prob = 1.0/src.m_bos.m_nelement;
     return true;
 }

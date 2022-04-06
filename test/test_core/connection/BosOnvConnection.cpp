@@ -57,7 +57,7 @@ namespace bos_onv_connection_test {
                 ianns.erase(ann_it);
                 ++noccur;
             }
-            if (noccur) com.add({imode, noccur});
+            if (noccur) com.add(imode, noccur);
         }
         conn.m_cre.from_vector(icres);
         conn.m_ann.from_vector(ianns);

@@ -49,11 +49,11 @@ bool LadderHoppingPc::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, Cac
     conn.m_bos.clear();
     if (cre) {
         if (src.m_bos[n] == m_h.m_nboson_max) return false;
-        conn.m_bos.m_cre.set({n, 1});
+        conn.m_bos.m_cre.set(n);
     }
     else {
         if (src.m_bos[n] == 0ul) return false;
-        conn.m_bos.m_ann.set({n, 1});
+        conn.m_bos.m_ann.set(n);
     };
     prob *= std::abs(m_h.m_frmbos->get_coeff_1101(n, p, q)) / (m_pick_n_given_pq.norm(pq));
     return true;

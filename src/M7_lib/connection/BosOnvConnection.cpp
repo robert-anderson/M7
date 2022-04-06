@@ -8,7 +8,7 @@ BosOpPair::BosOpPair(size_t imode, size_t nop) : m_imode(imode), m_nop(nop){
     DEBUG_ASSERT_GT(m_nop, 0ul, "mode with no associated operators should not appear in operator product")
 }
 
-BosOps::BosOps(size_t nmode){
+BosOps::BosOps(size_t nmode): m_pair_ptrs(nmode, nullptr){
     m_pairs.reserve(nmode);
 }
 
@@ -32,15 +32,16 @@ void BosOps::from_vector(const defs::inds &imodes) {
     size_t istart = 0;
     for(size_t i = 1; i<imodes.size(); ++i){
         if (imodes[istart]!=imodes[i]) {
-            add({imodes[istart], i - istart});
+            add(imodes[istart], i - istart);
             istart = i;
         }
     }
-    add({imodes[istart], imodes.size()-istart});
+    add(imodes[istart], imodes.size()-istart);
 }
 
 void BosOps::clear() {
     m_pairs.clear();
+    m_pair_ptrs.assign(m_pair_ptrs.size(), nullptr);
     m_nop = 0ul;
 }
 
@@ -48,30 +49,32 @@ size_t BosOps::size() const {
     return m_nop;
 }
 
-void BosOps::add(BosOpPair &&pair) {
-    DEBUG_ASSERT_TRUE(m_pairs.empty() || pair.m_imode > m_pairs.back().m_imode,
+void BosOps::add(size_t imode, size_t nop){
+    DEBUG_ASSERT_TRUE(m_pairs.empty() || imode > m_pairs.back().m_imode,
                       "bosonic mode indices should be added in ascending order");
-    DEBUG_ASSERT_LT(pair.m_imode, m_pairs.capacity(), "bosonic mode index is OOB");
+    DEBUG_ASSERT_LT(imode, m_pairs.capacity(), "bosonic mode index is OOB");
     DEBUG_ASSERT_LT(m_pairs.size(), m_pairs.capacity(),
                     "should never have more distinct boson operators than modes");
-    m_pairs.push_back(pair);
-    m_nop += pair.m_nop;
+    m_pairs.emplace_back(imode, nop);
+    /*
+     * this is fine, since the pairs array is sufficiently large at initialization, so we don't have to worry about
+     * this pointer being invalided by a reallocation
+     */
+    m_pair_ptrs[imode] = &m_pairs.back();
+    m_nop += nop;
 }
 
-void BosOps::set(BosOpPair &&pair) {
-    clear();
-    add(std::forward<BosOpPair>(pair));
-}
 void BosOps::set(const size_t &imode) {
-    set({imode, 1ul});
+    clear();
+    add(imode, 1ul);
 }
 
 void BosOps::set(const size_t &imode, const size_t &jmode) {
     clear();
-    if (imode==jmode) add({imode, 2ul});
+    if (imode==jmode) add(imode, 2ul);
     else {
-        add({imode, 1l});
-        add({jmode, 1l});
+        add(imode, 1l);
+        add(jmode, 1l);
     };
 }
 
@@ -88,6 +91,7 @@ size_t BosOps::get_imode(size_t iop) const {
     }
     return ~0ul;
 }
+
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
 
 BosOnvConnection::BosOnvConnection(BasisData bd) : BosOnvConnection(bd.m_nmode){}
@@ -107,8 +111,8 @@ void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst) {
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
     for (size_t imode=0ul; imode<src.nelement(); ++imode){
-        if (src[imode] > dst[imode]) m_ann.add({imode, size_t(src[imode]-dst[imode])});
-        else if (src[imode] < dst[imode]) m_cre.add({imode, size_t(dst[imode]-src[imode])});
+        if (src[imode] > dst[imode]) m_ann.add(imode, size_t(src[imode]-dst[imode]));
+        else if (src[imode] < dst[imode]) m_cre.add(imode, size_t(dst[imode]-src[imode]));
     }
 }
 
@@ -116,9 +120,9 @@ void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst, B
     DEBUG_ASSERT_EQ(src.nelement(), dst.nelement(), "src and dst ONVs are incompatible");
     clear();
     for (size_t imode=0ul; imode<src.nelement(); ++imode){
-        if (src[imode] > dst[imode]) m_ann.add({imode, size_t(src[imode]-dst[imode])});
-        else if (src[imode] < dst[imode]) m_cre.add({imode, size_t(dst[imode]-src[imode])});
-        else com.add({imode, src[imode]});
+        if (src[imode] > dst[imode]) m_ann.add(imode, size_t(src[imode]-dst[imode]));
+        else if (src[imode] < dst[imode]) m_cre.add(imode, size_t(dst[imode]-src[imode]));
+        else com.add(imode, src[imode]);
     }
 }
 
@@ -134,8 +138,8 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOps &com) const {
     auto ann_end = m_ann.pairs().cend();
     for (size_t imode=0ul; imode<src.nelement(); ++imode) {
         if (ann_iter!=ann_end && ann_iter->m_imode==imode)
-            com.add({imode, src[imode]-ann_iter->m_nop});
-        else com.add({imode, src[imode]});
+            com.add(imode, src[imode]-ann_iter->m_nop);
+        else com.add(imode, src[imode]);
     }
 }
 

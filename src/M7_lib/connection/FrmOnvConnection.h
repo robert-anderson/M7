@@ -312,9 +312,9 @@ public:
      * Let m be the number of creation ops, and n the number of annihilation ops, then the total number of exchanges
      * entailed in the above process is the sum (or, equivalently the difference) of the two numbers of pairs:
      *
-     * nexchange = npair(m+n) - npair(n)
+     * nexchange = npair(m+n) - nmode(n)
      * i.e. 2*nexchange = (m+n)*(m+n-1) - n^2 + n = m^2 - m + 2mn
-     * i.e. nexchange = npair(m) + mn
+     * i.e. nexchange = nmode(m) + mn
      *
      * The numbers of pairs alternate between odd and even with a period of 2:
      * 0->0   1->0   2->1   3->3   4->6   5->10   6->15

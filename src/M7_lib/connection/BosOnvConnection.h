@@ -10,12 +10,16 @@
 
 struct BosOpPair {
     const size_t m_imode;
-    const size_t m_nop;
+    size_t m_nop;
     BosOpPair(size_t imode, size_t nop);
 };
 
 class BosOps {
     std::vector<BosOpPair> m_pairs;
+    /**
+     * vector of length nmode which enables constant-time access to a pair
+     */
+    std::vector<BosOpPair*> m_pair_ptrs;
     size_t m_nop = 0ul;
 public:
     BosOps(size_t nmode);
@@ -30,9 +34,33 @@ public:
 
     size_t size() const;
 
-    void add(BosOpPair&& pair);
+    void add(size_t imode, size_t nop);
 
-    void set(BosOpPair&& pair);
+    /**
+     * add the given number of operators
+     * @param imode
+     *  mode index which is taken to be already occupied in the connection: error if not
+     * @param nop
+     *  number of operators to add
+     * @return
+     *  new total nop of imode
+     */
+    size_t add_to_nonempty(size_t imode, size_t nop=1ul) {
+        auto ptr = m_pair_ptrs[imode];
+        DEBUG_ASSERT_TRUE(ptr, "mode is not already part of the boson operator product");
+        m_nop+=nop;
+        return ptr->m_nop+=nop;
+    }
+
+    size_t add_to(size_t imode, size_t nop=1ul) {
+        auto ptr = m_pair_ptrs[imode];
+        if (ptr) {
+            m_nop+=nop;
+            return ptr->m_nop+=nop;
+        }
+        add(imode, nop);
+        return nop;
+    }
 
     void set(const size_t& imode);
 

@@ -13,11 +13,17 @@ namespace conn_foreach_test {
     };
     typedef std::vector<Result> results_t;
     results_t product_results(const std::vector<defs::inds>& anns, const std::vector<defs::inds>& cres) {
+        const std::vector<defs::inds> default_ops = {{}};
+        const auto& anns_ref = anns.empty() ? default_ops : anns;
+        const auto& cres_ref = cres.empty() ? default_ops : cres;
+
         results_t results;
-        results.reserve(anns.size()*cres.size());
-        for(auto &ann: anns)
-            for (auto& cre: cres)
+        results.reserve(anns_ref.size() * cres_ref.size());
+        for(auto &ann: anns_ref) {
+            for (auto &cre: cres_ref) {
                 results.push_back({ann, cre});
+            }
+        }
         return results;
     }
 }
@@ -225,4 +231,59 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
+}
+
+TEST(ConnForeach, BosGeneralEx0001) {
+    const size_t nmode = 6;
+    defs::inds occs = {0, 2, 0, 1, 5, 1};
+    buffered::BosOnv mbf(nmode);
+    mbf = occs;
+    auto& chk_modes = mbf.m_decoded.m_occ_modes.get();
+
+    auto iiter = 0ul;
+    auto fn = [&](const conn::BosOnv &conn) {
+        ASSERT_EQ(conn.m_ann[0].m_imode, chk_modes[iiter]);
+        ASSERT_FALSE(conn.m_cre.size());
+        ++iiter;
+    };
+    conn_foreach::bos::Ann foreach(nmode, 10);
+    ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0001);
+    foreach.loop_fn(mbf, fn);
+    ASSERT_EQ(iiter, chk_modes.size());
+}
+
+TEST(ConnForeach, BosGeneralEx0010) {
+    const size_t nmode = 6;
+    defs::inds occs = {0, 2, 0, 1, 5, 1};
+    buffered::BosOnv mbf(nmode);
+    mbf = occs;
+
+    {
+        defs::inds chk_modes = {0, 1, 2, 3, 4, 5};
+        auto iiter = 0ul;
+        auto fn = [&](const conn::BosOnv &conn) {
+            ASSERT_FALSE(conn.m_ann.size());
+            ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
+            ++iiter;
+        };
+        conn_foreach::bos::Cre foreach(nmode, 10);
+        ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
+        foreach.loop_fn(mbf, fn);
+        ASSERT_EQ(iiter, chk_modes.size());
+    }
+
+    {
+        // lower maximum occupation
+        defs::inds chk_modes = {0, 1, 2, 3, 5};
+        auto iiter = 0ul;
+        auto fn = [&](const conn::BosOnv &conn) {
+            ASSERT_FALSE(conn.m_ann.size());
+            ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
+            ++iiter;
+        };
+        conn_foreach::bos::Cre foreach(nmode, 5);
+        ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
+        foreach.loop_fn(mbf, fn);
+        ASSERT_EQ(iiter, chk_modes.size());
+    }
 }

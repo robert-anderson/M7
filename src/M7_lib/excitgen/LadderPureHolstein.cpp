@@ -25,7 +25,7 @@ bool LadderHolsteinCre::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, C
     if (curr_occ == m_h.m_nboson_max) return false;
 
     conn.clear();
-    conn.m_bos.m_cre.add({imode, 1ul});
+    conn.m_bos.m_cre.set(imode);
     return true;
 }
 
@@ -44,6 +44,6 @@ bool LadderHolsteinAnn::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, C
     prob = 1.0/occs.size();
 
     conn.clear();
-    conn.m_bos.m_ann.add({imode, 1ul});
+    conn.m_bos.m_ann.set(imode);
     return true;
 }

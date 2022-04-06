@@ -237,11 +237,106 @@ namespace conn_foreach {
 
     namespace bos {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, size_t nmode) :
-                    conn_foreach::Base(exsig, {0ul, nmode}) {
+            const size_t m_nboson_max;
+            Base(size_t exsig, size_t nmode, size_t nboson_max) :
+                    conn_foreach::Base(exsig, {0ul, nmode}), m_nboson_max(nboson_max) {
                 REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature has fermion operators");
             }
         };
+
+        struct Ann : Base {
+            Ann(size_t nmode, size_t nboson_max): Base(exsig_utils::ex_0001, nmode, nboson_max){}
+
+            template<typename fn_t>
+            void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
+                conn.clear();
+                const auto& occs = src.m_decoded.m_occ_modes.get();
+                for (auto& imode : occs) {
+                    conn.m_ann.set(imode);
+                    fn(conn);
+                }
+            }
+
+            template<typename fn_t>
+            void loop_fn(const field::BosOnv &src, const fn_t &fn) {
+                loop_fn(m_conns.m_bosonv, src, fn);
+            }
+
+        protected:
+            void bos_loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t<conn::BosOnv> &fn) override {
+                loop_fn(conn, src, fn);
+            }
+        };
+
+        struct Cre : Base {
+            Cre(size_t nmode, size_t nboson_max): Base(exsig_utils::ex_0010, nmode, nboson_max){}
+
+            template<typename fn_t>
+            void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
+                conn.clear();
+                for (size_t imode=0ul; imode < src.m_nmode; ++imode){
+                    if (size_t(src[imode]+1) > m_nboson_max) continue;
+                    conn.m_cre.set(imode);
+                    fn(conn);
+                }
+            }
+
+            template<typename fn_t>
+            void loop_fn(const field::BosOnv &src, const fn_t &fn) {
+                loop_fn(m_conns.m_bosonv, src, fn);
+            }
+
+        protected:
+            void bos_loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t<conn::BosOnv> &fn) override {
+                loop_fn(conn, src, fn);
+            }
+        };
+
+#if 0
+        template<size_t nop_cre, size_t nop_ann>
+        struct General : Base {
+
+            General(size_t nmode, size_t nboson_max):
+                Base(exsig_utils::encode(0, 0, nop_cre, nop_ann), nmode){}
+
+            template<typename fn_t>
+            void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
+                const auto& occs = src.m_decoded.m_occ_modes.get();
+
+                auto nboson_max = m_nboson_max;
+                auto ann_fn = [&](const ctnd::inds_t<nop_ann>& occ_inds) {
+                    conn.m_ann.clear();
+                    for (auto &ind: occ_inds) {
+                        auto imode = occs[ind];
+                        auto nop = conn.m_ann.add_to(imode);
+                        // if the number of annihilations on the mode exceeds the occupation of the mode, then return
+                        if (nop > src[imode]) return;
+                    }
+                    auto cre_fn = [&](const ctnd::inds_t<nop_ann> &mode_inds) {
+                        conn.m_cre.clear();
+                        for (auto &ind: mode_inds) {
+                            auto imode = occs[ind];
+                            auto nop = conn.m_ann.add_to(imode);
+                            // if the number of annihilations on the mode exceeds the occupation of the mode, then return
+                            if (nop + src[imode] > nboson_max) return;
+                        }
+                    };
+                };
+                ctnd::Ordered<nop_ann, false, true> ann_foreach(occs.size());
+            }
+
+            template<typename fn_t>
+            void loop_fn(const field::BosOnv &src, const fn_t &fn) {
+                loop_fn(m_conns.m_bosonv, src, fn);
+            }
+
+        protected:
+            void bos_loop(conn::BosOnv &conn, const field::BosOnv &src, const function_t<conn::BosOnv> &fn) override {
+                loop_fn(conn, src, fn);
+            }
+        };
+
+#endif
 
 #if 0
         template<size_t nop>
