@@ -43,7 +43,7 @@ void WeightedTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, const fi
 
 defs::ham_t WeightedTwf::evaluate_static_twf(const field::FrmOnv &onv) const {
     size_t num_double_occ_sites = 0;
-    for (size_t isite = 0; isite < onv.m_nsite; isite++) {
+    for (size_t isite = 0; isite < onv.m_bd.m_nsite; isite++) {
         num_double_occ_sites += (onv.get({0, isite}) and onv.get({1, isite}));
     }
     return std::exp(-m_frm_doub_occ_penalty_factor * num_double_occ_sites);
@@ -51,7 +51,7 @@ defs::ham_t WeightedTwf::evaluate_static_twf(const field::FrmOnv &onv) const {
 
 defs::ham_t WeightedTwf::evaluate_static_twf(const field::FrmBosOnv &onv) const {
     size_t total_boson_occ = 0;
-    for (size_t isite = 0; isite < onv.m_frm.m_nsite; isite++) {
+    for (size_t isite = 0; isite < onv.m_frm.m_bd.m_nsite; isite++) {
         total_boson_occ += onv.m_bos[isite];
     }
     return std::exp(-m_bos_occ_penalty_factor * total_boson_occ) + evaluate_static_twf(onv.m_frm);

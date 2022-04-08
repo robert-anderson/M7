@@ -13,7 +13,7 @@ struct LadderPureHolstein : public LadderPureUniform {
         REQUIRE_TRUE(h.m_frmbos.get(), "holstein excit gen requires defined ladder hamiltonian");
         REQUIRE_TRUE(dynamic_cast<const HolsteinLadderHam*>(h.m_frmbos.get()),
                      "holstein excit gen requires holstein hamiltonian");
-        REQUIRE_EQ(h.m_frmbos->m_bd.m_nsite, h.m_frmbos->m_bd.m_nmode,
+        REQUIRE_EQ(h.m_frmbos->m_bd.m_frm.m_nsite, h.m_frmbos->m_bd.m_bos.m_nmode,
                    "holstein excit gen assumes one boson mode per fermion site");
     }
 

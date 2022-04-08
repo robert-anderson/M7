@@ -8,7 +8,7 @@
 #include "M7_lib/connection/Connections.h"
 
 TEST(FrmBosOnvConnection, DetectExsig) {
-    buffered::FrmBosOnv src({6, 6});
+    buffered::FrmBosOnv src(6, 6);
     src.m_frm = {{0, 1, 2}, {0, 1, 2}};
     auto dst = src;
     dst.m_bos[5] = 1;

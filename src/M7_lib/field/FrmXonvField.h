@@ -11,9 +11,9 @@
 struct FrmXonvField : CompositeField<FrmOnvField, FrmOnvField> {
     FrmOnvField m_ket, m_bra;
 
-    FrmXonvField(Row* row, size_t nsite, std::string name="");
+    FrmXonvField(Row* row, const FrmBasisData& bd, std::string name="");
 
-    FrmXonvField(Row* row, BasisData bd, std::string name="");
+    FrmXonvField(Row* row, const BasisData& bd, std::string name="");
 
     FrmXonvField(const FrmXonvField& other);
 

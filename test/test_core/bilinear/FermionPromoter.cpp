@@ -18,7 +18,7 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 3, 4, 6, 7, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     ASSERT_FALSE(conn.phase(in));
@@ -48,7 +48,7 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 3, 4, 6, 7, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     ASSERT_FALSE(conn.phase(in));
@@ -86,7 +86,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 4, 6, 7, 8, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     // 3 -> 8 excitation moves through 3 occupied SQ op inds => fermi phase -1
@@ -151,7 +151,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 2, 4, 6, 8, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ op inds => fermi phase +1

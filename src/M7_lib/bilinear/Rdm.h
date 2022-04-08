@@ -22,7 +22,7 @@ class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const size_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
     std::vector<FermionPromoter> m_frm_promoters;
     buffered::MaeInds m_lookup_inds;
-    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisData bd);
+    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, const BasisData& bd);
 
     static size_t nrow_estimate(size_t exsig, BasisData bd);
 

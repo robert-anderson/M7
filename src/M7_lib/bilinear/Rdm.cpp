@@ -4,12 +4,12 @@
 
 #include "Rdm.h"
 
-size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisData bd) {
+size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, const BasisData& bd) {
     double nrow = 1.0;
-    nrow *= integer_utils::combinatorial(2 * bd.m_nsite, nfrm_cre);
-    nrow *= integer_utils::combinatorial(2 * bd.m_nsite, nfrm_ann);
-    nrow *= integer_utils::combinatorial(bd.m_nmode, nbos_cre);
-    nrow *= integer_utils::combinatorial(bd.m_nmode, nbos_ann);
+    nrow *= integer_utils::combinatorial(bd.m_frm.m_nspinorb, nfrm_cre);
+    nrow *= integer_utils::combinatorial(bd.m_frm.m_nspinorb, nfrm_ann);
+    nrow *= integer_utils::combinatorial(bd.m_bos.m_nmode, nbos_cre);
+    nrow *= integer_utils::combinatorial(bd.m_bos.m_nmode, nbos_ann);
     nrow /= integer_utils::factorial(nfrm_cre + nfrm_ann);
     nrow /= integer_utils::factorial(nbos_cre + nbos_ann);
     return nrow;

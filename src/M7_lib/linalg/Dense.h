@@ -135,6 +135,17 @@ namespace dense {
             return *this;
         }
 
+        /**
+         * byte-wise equality
+         * @param other
+         *  matrix to compare against
+         * @return
+         *  true only if both buffers are identical
+         */
+        bool operator==(const Matrix<T>& other) const {
+            return !std::memcmp(ptr(), other.ptr(), sizeof(T)*m_ncol*m_nrow);
+        }
+
         const size_t& nrow() const {return m_nrow;}
         const size_t& ncol() const {return m_ncol;}
         std::pair<size_t, size_t> dims() const {return {nrow(), ncol()};}

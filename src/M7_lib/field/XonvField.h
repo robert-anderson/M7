@@ -17,15 +17,24 @@ template<typename T>
 struct XonvField : CompositeField<T, T> {
     using CompositeFieldBase::prefix;
     T m_ket, m_bra;
-    XonvField(Row* row, BasisData bd, std::string name): CompositeField<T, T>(m_ket, m_bra),
-            m_ket(row, bd, prefix("ket", name)), m_bra(row, bd, prefix("bra", name)){}
+
+    XonvField(Row *row, BasisData bd, std::string name) : CompositeField<T, T>(m_ket, m_bra),
+                                                          m_ket(row, bd, prefix("ket", name)),
+                                                          m_bra(row, bd, prefix("bra", name)) {}
 };
 
 
 struct FrmXonvField : XonvField<FrmOnvField> {
-    FrmXonvField(Row *row, BasisData bd, std::string name = ""): XonvField<FrmOnvField>(row, bd, name){}
-    FrmXonvField(Row *row, size_t nsite, std::string name = ""): FrmXonvField(row, {nsite, 0ul}, name){}
-    FrmXonvField& operator=(const std::pair<defs::inds, defs::inds>& inds) {
+    FrmXonvField(Row *row, const BasisData &bd, std::string name = "") :
+            XonvField<FrmOnvField>(row, bd, name) {}
+
+    FrmXonvField(Row *row, const FrmBasisData &bd, std::string name = "") :
+            FrmXonvField(row, {bd, {}}, name) {}
+
+    FrmXonvField(Row *row, size_t nmode, std::string name = "") :
+            FrmXonvField(row, {FrmBasisData(nmode), {}}, name) {}
+
+    FrmXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;
@@ -34,9 +43,16 @@ struct FrmXonvField : XonvField<FrmOnvField> {
 
 
 struct BosXonvField : XonvField<BosOnvField> {
-    BosXonvField(Row *row, BasisData bd, std::string name = ""): XonvField<BosOnvField>(row, bd, name){}
-    BosXonvField(Row *row, size_t nmode, std::string name = ""): BosXonvField(row, {0ul, nmode}, name){}
-    BosXonvField& operator=(const std::pair<defs::inds, defs::inds>& inds) {
+    BosXonvField(Row *row, const BasisData &bd, std::string name = "") :
+            XonvField<BosOnvField>(row, bd, name) {}
+
+    BosXonvField(Row *row, size_t nmode, size_t nboson_max=defs::max_bos_occ):
+            BosXonvField(row, BosBasisData{nmode, nboson_max}){}
+
+    BosXonvField(Row *row, const BosBasisData &bd, std::string name = "") :
+            BosXonvField(row, {{}, bd}, name) {}
+
+    BosXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;
@@ -44,8 +60,10 @@ struct BosXonvField : XonvField<BosOnvField> {
 };
 
 struct FrmBosXonvField : XonvField<FrmBosOnvField> {
-    FrmBosXonvField(Row *row, BasisData bd, std::string name = ""): XonvField<FrmBosOnvField>(row, bd, name){}
-    FrmBosXonvField& operator=(const std::pair<std::pair<defs::inds, defs::inds>, std::pair<defs::inds, defs::inds>>& inds) {
+    FrmBosXonvField(Row *row, BasisData bd, std::string name = "") : XonvField<FrmBosOnvField>(row, bd, name) {}
+
+    FrmBosXonvField &
+    operator=(const std::pair<std::pair<defs::inds, defs::inds>, std::pair<defs::inds, defs::inds>> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;

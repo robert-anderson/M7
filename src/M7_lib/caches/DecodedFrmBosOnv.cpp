@@ -22,7 +22,7 @@ decoded_mbf::frmbos::SimpleBase::SimpleBase(const FrmBosOnvField &mbf) : Base(mb
 decoded_mbf::frmbos::OccSitesNonzeroBosons::OccSitesNonzeroBosons(const FrmBosOnvField &mbf) : SimpleBase(mbf){}
 
 const defs::inds &decoded_mbf::frmbos::OccSitesNonzeroBosons::get() {
-    DEBUG_ASSERT_EQ(m_mbf.m_frm.m_nsite, m_mbf.m_bos.m_nmode,
+    DEBUG_ASSERT_EQ(m_mbf.m_frm.m_bd.m_nsite, m_mbf.m_bos.m_bd.m_nmode,
                     "this cache only makes sense with a 1-to-1 correspondence between modes and sites");
     if (!empty()) return validated();
     const auto& occ = m_mbf.m_frm.m_decoded.m_occ_sites.get();

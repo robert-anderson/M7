@@ -96,7 +96,7 @@ TEST(DenseHamiltonian, Hubbard4Site) {
     opts.verify();
     Hamiltonian ham_src(opts);
     ASSERT_EQ(ham_src.nelec(), 4);
-    ASSERT_EQ(ham_src.m_bd.m_nsite, 4);
+    ASSERT_EQ(ham_src.m_bd.m_frm.m_nsite, 4);
     DenseHamiltonian ham(ham_src);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -111,7 +111,7 @@ TEST(DenseHamiltonian, Hubbard6Site) {
     opts.verify();
     Hamiltonian ham_src(opts);
     ASSERT_EQ(ham_src.nelec(), 6);
-    ASSERT_EQ(ham_src.m_bd.m_nsite, 6);
+    ASSERT_EQ(ham_src.m_bd.m_frm.m_nsite, 6);
     DenseHamiltonian ham(ham_src);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -146,11 +146,11 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
     opts.m_boson.m_holstein_omega = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
-    for (size_t n = 0ul; n < ham_src.m_bd.m_nmode; ++n) {
-        for (size_t p = 0ul; p < ham_src.m_bd.m_nspinorb; ++p) {
-            const auto psite = FrmOnvField::isite(p, ham_src.m_bd.m_nsite);
-            for (size_t q = 0ul; q < ham_src.m_bd.m_nspinorb; ++q) {
-                const auto qsite = FrmOnvField::isite(q, ham_src.m_bd.m_nsite);
+    for (size_t n = 0ul; n < ham_src.m_bd.m_bos.m_nmode; ++n) {
+        for (size_t p = 0ul; p < ham_src.m_bd.m_frm.m_nspinorb; ++p) {
+            const auto psite = FrmOnvField::isite(p, ham_src.m_bd.m_frm.m_nsite);
+            for (size_t q = 0ul; q < ham_src.m_bd.m_frm.m_nspinorb; ++q) {
+                const auto qsite = FrmOnvField::isite(q, ham_src.m_bd.m_frm.m_nsite);
                 if (n == psite && psite == qsite) {
                     ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1101(n, p, q)), 1.4);
                     ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1110(n, p, q)), 1.4);
@@ -243,8 +243,8 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_nmode, ham_src.m_nboson_max, false);
+    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite, ham_src.nelec(), 0);
+    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.m_nboson_max, false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -259,8 +259,10 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc2) {
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_nmode, ham_src.m_nboson_max, false);
+    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite,
+                                         ham_src.nelec(), 0);
+    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode,
+                                         ham_src.m_nboson_max, false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -275,8 +277,8 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_nmode, ham_src.m_nboson_max, false);
+    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite, ham_src.nelec(), 0);
+    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.m_nboson_max, false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);

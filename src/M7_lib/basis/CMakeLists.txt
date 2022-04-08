@@ -2,6 +2,7 @@ target_sources(M7_lib
     PRIVATE
         AbelianGroup.cpp
         AbelianGroup.h
+        BasisData.cpp
         BasisData.h
         CiSpaces.cpp
         CiSpaces.h

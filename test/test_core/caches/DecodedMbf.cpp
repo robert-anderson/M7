@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 TEST(DecodedMbf, Simple){
-    buffered::FrmOnv mbf({50, 0});
+    buffered::FrmOnv mbf(50);
     defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     mbf = setbits;
     defs::inds clrbits;
@@ -34,7 +34,7 @@ TEST(DecodedMbf, Simple){
         auto& occ_simple_inds = mbf.m_decoded.m_simple_occs.get();
         ASSERT_EQ(occ_simple_inds, value);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_nspinorb, noccorb);
+    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_bd.m_nspinorb, noccorb);
     occ_foreach.loop();
 
     /*
@@ -48,7 +48,7 @@ TEST(DecodedMbf, Simple){
         auto& vac_simple_inds = mbf.m_decoded.m_simple_vacs.get();
         ASSERT_EQ(vac_simple_inds, value);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_nspinorb, nvacorb);
+    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_bd.m_nspinorb, nvacorb);
     vac_foreach.loop();
 }
 
@@ -100,7 +100,7 @@ TEST(DecodedMbf, Labelled){
      *  4("Wb"): 2, 5("Xb"): 1, 6("Yb"): 0, 7("Zb"): 1
      */
 
-    buffered::FrmOnv mbf({10, 0, grp_map});
+    buffered::FrmOnv mbf({10, grp_map});
     mbf = {alpha_occ, beta_occ};
     ASSERT_EQ(mbf.nsetbit(), alpha_occ.size() + beta_occ.size());
 
@@ -208,7 +208,7 @@ TEST(DecodedMbf, Bosons) {
 
 TEST(DecodedMbf, Holstein) {
     const size_t nmode = 8;
-    buffered::FrmBosOnv mbf({nmode, nmode});
+    buffered::FrmBosOnv mbf({FrmBasisData(nmode), BosBasisData(nmode)});
     mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
     mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};
 

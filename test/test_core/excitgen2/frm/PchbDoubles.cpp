@@ -14,7 +14,7 @@ TEST(HeatBathDoubles, FromHFDeterminant) {
     opts.verify();
     Hamiltonian h(opts);
     Pchb2200 excit_gen(*h.m_frm, prng);
-    conn_foreach::frm::Ms2Conserve<2> conn_iter(10);
+    conn_foreach::frm::Ms2Conserve<2> conn_iter(FrmBasisData(10));
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_bd);
     mbf::set_aufbau_mbf(src_mbf, h);
@@ -37,7 +37,7 @@ TEST(HeatBathDoubles, FromExcited){
     opts.verify();
     Hamiltonian h(opts);
     Pchb2200 excit_gen(*h.m_frm, prng);
-    conn_foreach::frm::Ms2Conserve<2> excit_iter(h.m_bd.m_nsite);
+    conn_foreach::frm::Ms2Conserve<2> excit_iter(FrmBasisData(h.m_bd.m_frm.m_nsite));
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_bd);
     src_mbf = {{0, 1, 3}, {1, 2, 4}};

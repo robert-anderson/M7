@@ -53,7 +53,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
     defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
     ASSERT_EQ(ham.m_frm->m_point_group_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_frm->m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_bd.m_nsite);
+    buffered::FrmOnv onv(ham.m_bd);
     mbf::set_aufbau_mbf(onv, ham);
     auto elem = ham.get_element(onv);
     ASSERT_FLOAT_EQ(consts::real(elem), benchmark);
@@ -67,15 +67,14 @@ TEST(FermionHamiltonian, RhfBrillouinTheorem) {
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
     ASSERT_TRUE(ham.m_frm->m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_bd.m_nsite);
+    buffered::FrmOnv onv(ham.m_bd);
     mbf::set_aufbau_mbf(onv, ham);
 
     OccOrbs occs(onv);
     VacOrbs vacs(onv);
 
-    buffered::FrmOnv excited(ham.m_bd.m_nsite);
-
-    conn::FrmOnv conn(onv.m_nsite);
+    buffered::FrmOnv excited(ham.m_bd);
+    conn::FrmOnv conn(onv);
 
     for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
         const auto &occ = occs[iocc];

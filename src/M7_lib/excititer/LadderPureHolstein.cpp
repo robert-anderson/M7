@@ -13,7 +13,7 @@ void excititers::LadderPureHolstein::foreach(const FrmBosOnv &src, conn::FrmBosO
         conn.clear();
         auto imode = src.m_frm.isite(occ);
         // skip if we reach an alpha orbital whose corresponding beta will produce a call to body
-        if (occ < src.nsite() && src.m_frm.get({1, imode})) continue;
+        if (occ < src.m_frm.m_bd.m_nsite && src.m_frm.get({1, imode})) continue;
         if (m_cre) {
             if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
             conn.m_bos.m_cre.set(imode);

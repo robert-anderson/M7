@@ -72,7 +72,7 @@ struct FrmBosHam : HamOpTerm {
 };
 
 struct NullLadderHam: FrmBosHam {
-    NullLadderHam() : FrmBosHam({0, 0}, 0){}
+    NullLadderHam() : FrmBosHam({{}, {}}, 0){}
 
     bool enabled() const override {
         return false;

@@ -8,21 +8,26 @@
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/connection/Connections.h>
 
+/**
+ * classes for "workspace" objects that are MBF type dependent. Objects for every implemented MBF type are allocated as
+ * fields in a row, and then the appropriate object for the MBF type in use can be either accessed directly from these
+ * fields, or by overloading
+ */
+//TODO (RJA): rename to "working"
 namespace suite {
-
     struct MbfsRow : Row {
         field::FrmOnv m_frm;
         field::FrmBosOnv m_frmbos;
         field::BosOnv m_bos;
-        MbfsRow(BasisData bd):
-            m_frm(this, bd.m_nsite, "fermion ONV"),
+        MbfsRow(const BasisData& bd):
+            m_frm(this, bd.m_frm, "fermion ONV"),
             m_frmbos(this, bd, "fermion-boson ONV"),
-            m_bos(this, bd.m_nmode, "boson ONV"){}
+            m_bos(this, bd.m_bos, "boson ONV"){}
     };
 
     struct Mbfs : BufferedTable<MbfsRow>{
 
-        Mbfs(BasisData bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
+        Mbfs(const BasisData& bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
             m_row.push_back_jump();
         }
 
@@ -41,7 +46,7 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        Conns(BasisData bd): m_frmonv(bd.m_nsite), m_bosonv(bd.m_nmode), m_frmbosonv(bd){}
+        Conns(const BasisData& bd): m_frmonv(bd.m_frm), m_bosonv(bd.m_bos), m_frmbosonv(bd){}
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
@@ -58,7 +63,7 @@ namespace suite {
         com_ops::Frm m_frm;
         com_ops::FrmBos m_frmbos;
         com_ops::Bos m_bos;
-        ComOps(BasisData bd): m_frm(bd.m_nsite), m_frmbos(bd), m_bos(bd.m_nmode){}
+        ComOps(const BasisData& bd): m_frm(bd.m_frm.m_nsite), m_frmbos(bd), m_bos(bd.m_bos.m_nmode){}
 
         com_ops::Frm& operator[](const field::FrmOnv& mbf){
             return m_frm;

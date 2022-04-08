@@ -7,7 +7,7 @@
 
 TEST(FermionBosonEnumerator, SpinNonCon){
     const size_t nsite=4, nelec=4, nmode=4, occ_cutoff=3;
-    const BasisData bd = {nsite, nmode};
+    const BasisData bd(FrmBasisData(nsite), {nmode, occ_cutoff});
     FrmBosOnvEnumerator enumerator(bd, nelec, occ_cutoff);
     size_t i = ~0ul;
     buffered::FrmBosOnv mbf(bd);
@@ -17,7 +17,7 @@ TEST(FermionBosonEnumerator, SpinNonCon){
 
 TEST(FermionBosonEnumerator, SpinCon){
     const size_t nsite=4, nelec=4, nmode=4, occ_cutoff=3;
-    const BasisData bd = {nsite, nmode};
+    const BasisData bd(FrmBasisData(nsite), {nmode, occ_cutoff});
     int spin=0;
     FrmBosOnvEnumerator enumerator(bd, nelec, spin, occ_cutoff);
     size_t i = ~0ul;

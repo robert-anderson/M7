@@ -19,9 +19,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::operator=;
     using base_t::inds_t;
 
-    const BasisData m_bd;
-    const size_t m_nsite;
-    const size_t m_nspinorb;
+    const FrmBasisData m_bd;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
@@ -39,9 +37,9 @@ private:
 
 public:
 
-    FrmOnvField(Row* row, BasisData bd, std::string name="");
+    FrmOnvField(Row* row, const FrmBasisData& bd, std::string name="");
     FrmOnvField(Row* row, size_t nsite, std::string name="");
-
+    FrmOnvField(Row* row, const BasisData& bd, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {
@@ -111,9 +109,6 @@ public:
     bool all_sites_single_occ() const;
 
     std::string to_string() const override;
-
-    const size_t& nsite() const;
-
 
     static size_t isite(const size_t& ibit, const size_t& nsite);
 

@@ -12,7 +12,7 @@ TEST(BosonHamiltonian, Coefficients) {
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
-    ASSERT_EQ(ham.m_bd.m_nmode, 5ul);
+    ASSERT_EQ(ham.m_bd.m_bos.m_nmode, 5ul);
     ASSERT_EQ(ham.nboson(), 5ul);
     //0.2209708691 2 4 5 3
     auto& bos_ham = dynamic_cast<const GeneralBosHam&>(*ham.m_bos);

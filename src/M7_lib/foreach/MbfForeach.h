@@ -91,11 +91,11 @@ namespace mbf_foreach {
         Pair(const foreach_t &foreach) :
                 PairBase(static_cast<const mbf_foreach::Base &>(foreach).m_niter),
                 m_foreach_outer(foreach), m_foreach_inner(foreach) {
-            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_nsite,
-                            m_foreach_outer.m_mbfs.m_row.m_frmbos.m_frm.m_nsite,
+            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
+                            m_foreach_outer.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
                             "MBFs not reproduced properly by copy");
-            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_nsite,
-                            m_foreach_inner.m_mbfs.m_row.m_frmbos.m_frm.m_nsite,
+            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
+                            m_foreach_inner.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
                             "MBFs not reproduced properly by copy");
         }
 
@@ -196,7 +196,7 @@ namespace mbf_foreach {
                     mbf.set(0, alpha_inds);
                     auto beta_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &beta_inds) {
                         mbf.put_spin_channel(1, false);
-                        mbf.set(mbf.m_nsite, beta_inds);
+                        mbf.set(mbf.m_bd.m_nsite, beta_inds);
                         fn(mbf);
                     };
                     m_beta_foreach.loop(beta_fn);
@@ -320,19 +320,20 @@ namespace mbf_foreach {
             bos_foreach_t m_bos_foreach;
 
         private:
-            static std::pair<const frm::Base &, const bos::Base &> cast_to_bases(
-                    const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
-                return {frm_foreach, bos_foreach};
-            }
+            struct Bases {
+                const frm::Base & m_frm;
+                const bos::Base & m_bos;
+                Bases (const frm_foreach_t &frm, const bos_foreach_t &bos): m_frm(frm), m_bos(bos){}
+            };
 
             static BasisData make_bd(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
-                auto bases = cast_to_bases(frm_foreach, bos_foreach);
-                return {bases.first.m_bd.m_nsite, bases.second.m_bd.m_nmode};
+                Bases bases(frm_foreach, bos_foreach);
+                return {bases.m_frm.m_bd.m_frm, bases.m_bos.m_bd.m_bos};
             }
 
             static size_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
-                auto bases = cast_to_bases(frm_foreach, bos_foreach);
-                return bases.first.m_niter * bases.second.m_niter;
+                Bases bases(frm_foreach, bos_foreach);
+                return bases.m_frm.m_niter * bases.m_bos.m_niter;
             }
 
         public:

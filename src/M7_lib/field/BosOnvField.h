@@ -15,15 +15,17 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     /**
      * alias for the number of elements in the 1D numeric array
      */
-    const size_t& m_nmode;
+    const BosBasisData& m_bd;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
     mutable decoded_mbf::BosOnv m_decoded;
 
-    BosOnvField(Row *row, size_t nmode, std::string name = "");
+    BosOnvField(Row *row, const BosBasisData& bd, std::string name = "");
 
-    BosOnvField(Row *row, BasisData bd, std::string name = "");
+    BosOnvField(Row *row, size_t nmode, size_t nboson_max=defs::max_bos_occ, std::string name = "");
+
+    BosOnvField(Row *row, const BasisData& bd, std::string name = "");
 
     BosOnvField(const BosOnvField &other);
 

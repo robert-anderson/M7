@@ -92,11 +92,13 @@ size_t BosOps::get_imode(size_t iop) const {
     return ~0ul;
 }
 
-BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
+BosOnvConnection::BosOnvConnection(const BosBasisData& bd) : m_ann(bd.m_nmode), m_cre(bd.m_nmode){}
 
-BosOnvConnection::BosOnvConnection(BasisData bd) : BosOnvConnection(bd.m_nmode){}
+BosOnvConnection::BosOnvConnection(const BasisData& bd) : BosOnvConnection(bd.m_bos){
+    bd.require_pure_bos();
+}
 
-BosOnvConnection::BosOnvConnection(const BosOnvField &mbf) : BosOnvConnection(mbf.nelement()){}
+BosOnvConnection::BosOnvConnection(const BosOnvField &mbf) : BosOnvConnection(mbf.m_bd){}
 
 void BosOnvConnection::clear() {
     m_ann.clear();

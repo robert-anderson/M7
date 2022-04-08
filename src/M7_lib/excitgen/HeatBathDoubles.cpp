@@ -10,11 +10,11 @@ HeatBathDoubles::HeatBathDoubles(const Hamiltonian &h, PRNG &prng) :
     size_t ij = 0ul;
     log::info("Initializing pre-computed heat bath sampling weights for doubles...");
     if (mpi::on_node_i_am_root()) {
-        for (size_t i = 0ul; i < m_bd.m_nspinorb; ++i) {
+        for (size_t i = 0ul; i < m_bd.m_frm.m_nspinorb; ++i) {
             for (size_t j = 0ul; j < i; ++j) {
                 weights.assign(m_norb_pair, 0.0);
                 size_t ab = 0ul;
-                for (size_t a = 0ul; a < m_bd.m_nspinorb; ++a) {
+                for (size_t a = 0ul; a < m_bd.m_frm.m_nspinorb; ++a) {
                     for (size_t b = 0ul; b < a; ++b) {
                         //if (a!=i && a!=j && b!=i && b!=j) { !TODO why does this restriction fail?
                         auto element = m_h.m_frm->get_coeff_2200(i, j, a, b);

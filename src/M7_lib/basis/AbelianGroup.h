@@ -88,6 +88,9 @@ struct AbelianGroup {
                  return g1.m_products(iirrep1, jirrep1) * g2.nirrep() + g2.m_products(iirrep2, jirrep2);
              }) {};
 
+    bool operator==(const AbelianGroup& other) const {
+        return m_labels==other.m_labels && m_products==other.m_products;
+    }
 };
 
 /**
@@ -113,6 +116,10 @@ struct AbelianGroupMap {
     }
 
     AbelianGroupMap(size_t nsite): AbelianGroupMap({}, defs::inds(nsite, 0)){}
+
+    bool operator==(const AbelianGroupMap& other) const {
+        return m_grp==other.m_grp && m_site_irreps==other.m_site_irreps && m_nsite==other.m_nsite;
+    }
 };
 
 #endif //M7_ABELIANGROUP_H

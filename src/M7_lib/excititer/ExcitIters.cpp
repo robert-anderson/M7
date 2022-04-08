@@ -15,7 +15,7 @@ excititers::Frm::convert(conn::FrmBosOnv &work_conn, const fn_c_t<FrmBosOnv> &fn
 
 excititers::Frm::Frm(const Hamiltonian &ham, size_t exsig) :
         ExcitIter(ham, exsig),
-        m_cre_loop(m_bd.m_nspinorb-ham.nelec(), exsig_utils::decode_nfrm_cre(exsig)),
+        m_cre_loop(m_bd.m_frm.m_nspinorb-ham.nelec(), exsig_utils::decode_nfrm_cre(exsig)),
         m_ann_loop(ham.nelec(), exsig_utils::decode_nfrm_ann(exsig)){
     REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature should not have bosonic operators")
 }

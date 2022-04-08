@@ -51,10 +51,10 @@ bool UniformSingles2::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &
     const auto &occs = src.m_decoded.m_simple_occs.get();
     const auto &vacs = src.m_decoded.m_simple_vacs.get();
     const auto nelec = occs.size();
-    const auto ncases = nelec * (src.m_nspinorb - nelec);
+    const auto ncases = nelec * (src.m_bd.m_nspinorb - nelec);
     auto ia = prng.draw_uint(ncases);
     size_t i, a;
-    integer_utils::inv_rectmap(i, a, src.m_nspinorb - nelec, ia);
+    integer_utils::inv_rectmap(i, a, src.m_bd.m_nspinorb - nelec, ia);
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
     return true;

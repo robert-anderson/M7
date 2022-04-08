@@ -13,8 +13,8 @@ struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {
     field::BosOnv m_bos;
     DetPerm(Row* row, BasisData bd, std::string prefix):
         base_t(m_frm, m_bos),
-        m_frm(row, bd.m_nsite, prefix+" fermions"),
-        m_bos(row, bd.m_nmode, prefix+" bosons"){}
+        m_frm(row, bd.m_frm, prefix+" fermions"),
+        m_bos(row, bd.m_bos, prefix+" bosons"){}
 
     DetPerm(const DetPerm& other): base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos){}
 
@@ -47,12 +47,12 @@ struct CompFieldTestRow : Row {
     OuterDetPerm m_dmbas;
     CompFieldTestRow() :
             m_frm_onv(this, 6, "alfa"),
-            m_dmbas(this, {8, 4}){}
+            m_dmbas(this, {FrmBasisData(8), BosBasisData(4)}){}
 };
 
 struct DetPermTestRow : Row {
     DetPerm m_dp;
-    DetPermTestRow() : m_dp(this, {6, 4}, "www"){}
+    DetPermTestRow() : m_dp(this, {FrmBasisData(6), BosBasisData(4)}, "www"){}
 };
 
 //struct NestedCompFieldTestRow : Row {

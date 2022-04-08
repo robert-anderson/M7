@@ -4,13 +4,13 @@
 
 #include "FrmXonvField.h"
 
-FrmXonvField::FrmXonvField(Row *row, size_t nsite, std::string name) :
+FrmXonvField::FrmXonvField(Row *row, const FrmBasisData& frm, std::string name) :
         CompositeField(m_ket, m_bra),
-        m_ket(row, nsite, prefix("ket", name)),
-        m_bra(row, nsite, prefix("bra", name)) {}
+        m_ket(row, frm.m_nsite, prefix("ket", name)),
+        m_bra(row, frm.m_nsite, prefix("bra", name)) {}
 
-FrmXonvField::FrmXonvField(Row *row, BasisData bd, std::string name) :
-        FrmXonvField(row, bd.m_nsite, name) {}
+FrmXonvField::FrmXonvField(Row *row, const BasisData& bd, std::string name) :
+        FrmXonvField(row, bd.m_frm, name) {}
 
 FrmXonvField::FrmXonvField(const FrmXonvField &other) :
         CompositeField(m_ket, m_bra), m_ket(other.m_ket), m_bra(other.m_bra) {}

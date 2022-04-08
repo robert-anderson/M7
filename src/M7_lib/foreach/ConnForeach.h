@@ -49,15 +49,16 @@ namespace conn_foreach {
 
     namespace frm {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, size_t nsite) :
-                    conn_foreach::Base(exsig, {nsite, 0ul}) {
+            Base(size_t exsig, const FrmBasisData& bd) :
+                    conn_foreach::Base(exsig, {bd, {}}) {
                 REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature has boson operators");
             }
         };
 
         template<size_t nop>
         struct General : Base {
-            General(size_t nsite) : Base(exsig_utils::encode(nop, nop, 0, 0), nsite) {}
+            General(const FrmBasisData& bd) :
+                Base(exsig_utils::encode(nop, nop, 0, 0), bd) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
@@ -91,8 +92,8 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct Ms2Conserve : Base {
-            Ms2Conserve(size_t nsite) :
-                    Base(exsig_utils::encode(nop, nop, 0, 0), nsite) {}
+            Ms2Conserve(const FrmBasisData& bd):
+                    Base(exsig_utils::encode(nop, nop, 0, 0), bd) {}
 
         private:
 
@@ -166,7 +167,8 @@ namespace conn_foreach {
         struct Hubbard : Base {
             const Lattice &m_lattice;
 
-            Hubbard(const Lattice &lattice) : Base(exsig_utils::ex_single, lattice.nsite()), m_lattice(lattice) {}
+            Hubbard(const Lattice &lattice) : Base(exsig_utils::ex_single, FrmBasisData(lattice.nsite())),
+                m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
@@ -202,7 +204,7 @@ namespace conn_foreach {
             const Lattice &m_lattice;
 
             Heisenberg(const Lattice &lattice) :
-                    Base(exsig_utils::ex_double, lattice.nsite()), m_lattice(lattice) {}
+                    Base(exsig_utils::ex_double, FrmBasisData(lattice.nsite())), m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
@@ -240,14 +242,14 @@ namespace conn_foreach {
 
     namespace bos {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, size_t nmode) :
-                    conn_foreach::Base(exsig, {0ul, nmode}) {
+            Base(size_t exsig, const BosBasisData& bd) :
+                    conn_foreach::Base(exsig, {{}, bd}){
                 REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature has fermion operators");
             }
         };
 
         struct Ann : Base {
-            Ann(size_t nmode) : Base(exsig_utils::ex_0001, nmode) {}
+            Ann(const BosBasisData& bd) : Base(exsig_utils::ex_0001, bd) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
@@ -271,16 +273,13 @@ namespace conn_foreach {
         };
 
         struct Cre : Base {
-            const size_t m_nboson_max;
-
-            Cre(size_t nmode, size_t nboson_max) :
-                Base(exsig_utils::ex_0010, nmode), m_nboson_max(nboson_max) {}
+            Cre(const BosBasisData& bd) : Base(exsig_utils::ex_0010, bd) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
                 conn.clear();
-                for (size_t imode = 0ul; imode < src.m_nmode; ++imode) {
-                    if (size_t(src[imode] + 1) > m_nboson_max) continue;
+                for (size_t imode = 0ul; imode < src.m_bd.m_nmode; ++imode) {
+                    if (size_t(src[imode] + 1) > m_bd.m_bos.m_nboson_max) continue;
                     conn.m_cre.set(imode);
                     fn(conn);
                 }
@@ -419,7 +418,7 @@ namespace conn_foreach {
             static BasisData combined_bd(const frm_t& frm, const bos_t& bos) {
                 const frm::Base& frm_base = as_base(frm);
                 const bos::Base& bos_base = as_base(bos);
-                return {frm_base.m_bd.m_nsite, bos_base.m_bd.m_nmode, frm_base.m_bd.m_frm_abgrp_map};
+                return {frm_base.m_bd.m_frm, bos_base.m_bd.m_bos};
             }
 
         public:

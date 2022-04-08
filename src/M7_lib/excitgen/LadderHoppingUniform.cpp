@@ -18,7 +18,7 @@ bool LadderHoppingUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src
      * draw a random boson mode
      */
     const bool cre = exsig_utils::decode_nbos_cre(exsig);
-    auto n = m_prng.draw_uint(m_bd.m_nmode);
+    auto n = m_prng.draw_uint(m_bd.m_bos.m_nmode);
     conn.m_bos.clear();
     if (cre) {
         if (src.m_bos[n] == m_h.m_nboson_max) return false;
@@ -28,7 +28,7 @@ bool LadderHoppingUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src
         if (src.m_bos[n] == 0ul) return false;
         conn.m_bos.m_ann.set(n);
     };
-    prob /= m_bd.m_nmode;
+    prob /= m_bd.m_bos.m_nmode;
     return true;
 }
 
@@ -37,5 +37,5 @@ std::string LadderHoppingUniform::description() const {
 }
 
 size_t LadderHoppingUniform::approx_nconn() const {
-    return m_nelec*(m_bd.m_nspinorb-m_nelec)*m_bd.m_nspinorb;
+    return m_nelec*(m_bd.m_frm.m_nspinorb-m_nelec)*m_bd.m_frm.m_nspinorb;
 }

@@ -9,7 +9,9 @@
 
 BasisData Hamiltonian::make_bd() const {
     if (m_frmbos->enabled()) return m_frmbos->m_bd;
-    return {m_frm->m_nsite, m_bos->m_nmode};
+    FrmBasisData frm_bd(m_frm->m_nsite, m_frm->m_point_group_map);
+    BosBasisData bos_bd(m_bos->m_nmode, m_nboson_max);
+    return {frm_bd, bos_bd};
 }
 
 std::unique_ptr<FrmHam> Hamiltonian::make_frm(const fciqmc_config::FermionHamiltonian &opts) {
@@ -50,7 +52,7 @@ Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
         m_bos(make_bos(opts.m_boson, m_frm->m_nsite)),
         m_nboson_max(m_frmbos->m_nboson_max),
         m_bd(make_bd()), m_work_conn(m_bd){
-    REQUIRE_TRUE(m_bd.m_nsite || m_bd.m_nmode, "No system defined");
+    REQUIRE_TRUE(m_bd.m_frm.m_nsite || m_bd.m_bos.m_nmode, "No system defined");
     if (m_frm->disabled()) log::info("Fermion Hamiltonian is disabled");
     if (defs::enable_bosons) {
         if (m_frmbos->disabled()) log::info("Fermion-boson ladder Hamiltonian is disabled");

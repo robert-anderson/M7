@@ -72,12 +72,6 @@ public:
         add(FrmOnvField::ibit(pair.first, pair.second, m_nsite));
     }
 
-//    void set(const defs::inds& orbs, const defs::inds& inds){
-//        clear();
-//        for (const auto& ind: inds) add(orbs[ind]);
-//        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
-//    }
-
     void set(size_t ibit){
         clear();
         add(ibit);
@@ -180,9 +174,9 @@ private:
     mutable std::vector<bool> m_dataword_phases;
 public:
 
-    explicit FrmOnvConnection(size_t nsite);
+    explicit FrmOnvConnection(const FrmBasisData& bd);
 
-    explicit FrmOnvConnection(BasisData bd);
+    explicit FrmOnvConnection(const BasisData& bd);
 
     explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**

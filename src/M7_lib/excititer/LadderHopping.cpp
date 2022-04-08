@@ -14,7 +14,7 @@ void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &c
     const auto &occs = m_work_orbs.occ(src.m_frm).m_flat.inds();
     const auto &vacs = m_work_orbs.vac(src.m_frm).m_flat.inds();
 
-    for (size_t imode = 0ul; imode < m_bd.m_nmode; ++imode) {
+    for (size_t imode = 0ul; imode < m_bd.m_bos.m_nmode; ++imode) {
         if (m_cre) {
             if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
             conn.m_bos.m_cre.set(imode);

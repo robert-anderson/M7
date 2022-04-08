@@ -300,8 +300,6 @@ namespace decoded_mbf {
          */
         frm::NotSinglyOccSites m_not_singly_occ_sites;
 
-        FrmOnv(const FrmOnvField &mbf, const AbelianGroupMap &grp_map);
-
         FrmOnv(const FrmOnvField &mbf);
 
         /**

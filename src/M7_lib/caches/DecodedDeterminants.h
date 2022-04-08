@@ -26,12 +26,12 @@ public:
     }
 
     explicit FlatOrbs(const field::FrmOnv &mbf) :
-            FlatOrbs(mbf.nsite()) {
+            FlatOrbs(mbf.m_bd.m_nsite) {
         update(mbf);
     }
 
     explicit FlatOrbs(const field::FrmBosOnv &mbf) :
-            FlatOrbs(mbf.nsite()) {
+            FlatOrbs(mbf.m_frm.m_bd.m_nsite) {
         update(mbf);
     }
 
@@ -108,12 +108,12 @@ struct NdOrbs__ {
     }
 
     NdOrbs__(std::array<size_t, nind> shape, const field::FrmOnv &mbf, const defs::inds& map) :
-            NdOrbs__(shape, mbf.m_nsite, map) {
+            NdOrbs__(shape, mbf.m_bd.m_nsite, map) {
         update(mbf);
     }
 
     NdOrbs__(std::array<size_t, nind> shape, const field::FrmBosOnv &mbf, const defs::inds& map) :
-            NdOrbs__(shape, mbf.m_frm.m_nsite, map) {}
+            NdOrbs__(shape, mbf.m_frm.m_bd.m_nsite, map) {}
 
 
     NdOrbs__(const NdOrbs__& other):

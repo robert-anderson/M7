@@ -38,7 +38,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &
     REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
     mbf.zero();
     auto& definds = def[idef];
-    if (definds.size() == mbf.m_nspinorb) {
+    if (definds.size() == mbf.m_bd.m_nspinorb) {
         // assume the determinant is specified as a bit string
         for (size_t i=0ul; i<definds.size(); ++i) {
             auto flag = definds[i];
@@ -49,7 +49,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &
     else {
         // assume the determinant is specified as a vector of set spin orbital indices
         for (auto& ind: definds){
-            REQUIRE_LT(ind, mbf.m_nspinorb, "spin orbital index OOB");
+            REQUIRE_LT(ind, mbf.m_bd.m_nspinorb, "spin orbital index OOB");
             mbf.set(ind);
         }
     }

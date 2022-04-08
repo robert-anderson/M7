@@ -13,7 +13,7 @@ TEST(Wavefunction, DynamicRowSet){
     opts.verify();
     const size_t nsite = 6;
     const size_t nelec = 6;
-    const BasisData bd = {nsite, 0};
+    const BasisData bd = {FrmBasisData(nsite), {}};
     Wavefunction wf(opts, bd);
     ci_gen::SpinSym gen(bd, nelec, 0, ci_gen::default_include_fn(wf));
 

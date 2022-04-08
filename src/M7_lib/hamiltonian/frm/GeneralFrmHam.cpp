@@ -6,7 +6,7 @@
 
 
 buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const {
-    buffered::FrmOnv ref({m_nsite, 0ul});
+    buffered::FrmOnv ref(m_nsite);
     REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_nelec % 2,
                "Sz quantum number given incompatible with nelec");
     size_t n_spin_0 = (m_nelec + spin_restrict) / 2;
@@ -116,13 +116,14 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fci
 
 HamOpTerm::conn_iter_ptr_list_t GeneralFrmHam::make_conn_iters() {
     conn_iter_ptr_list_t list;
+    FrmBasisData bd(m_nsite);
     if (m_kramers_attrs.m_conserving_singles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_nsite));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(bd));
     else
-        list.emplace_front(new conn_foreach::frm::General<1>(m_nsite));
+        list.emplace_front(new conn_foreach::frm::General<1>(bd));
     if (m_kramers_attrs.m_conserving_doubles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_nsite));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(bd));
     else
-        list.emplace_front(new conn_foreach::frm::General<2>(m_nsite));
+        list.emplace_front(new conn_foreach::frm::General<2>(bd));
     return list;
 }

@@ -6,9 +6,9 @@
 
 LadderHoppingPc::LadderHoppingPc(const Hamiltonian &h, PRNG &prng) :
         LadderHoppingUniform(h, prng),
-        m_pick_n_given_pq(h.m_bd.m_nspinorb*h.m_bd.m_nspinorb, h.m_bd.m_nmode) {
-    const auto nmode = m_bd.m_nmode;
-    const auto nspinorb = m_bd.m_nspinorb;
+        m_pick_n_given_pq(std::pow(h.m_bd.m_frm.m_nspinorb, 2), h.m_bd.m_bos.m_nmode) {
+    const auto nmode = m_bd.m_bos.m_nmode;
+    const auto nspinorb = m_bd.m_frm.m_nspinorb;
     std::vector<defs::prob_t> weights(nmode, 0.0);
     size_t pq = 0ul;
     log::info("Initializing pre-computed samplers for fermion-boson kinetic term...");
@@ -44,7 +44,7 @@ bool LadderHoppingPc::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, Cac
     const bool cre = exsig_utils::decode_nbos_cre(exsig);
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
     const auto q = cre ? conn.m_frm.m_ann[0]: conn.m_frm.m_cre[0];
-    const auto pq = p*m_h.m_bd.m_nspinorb+q;
+    const auto pq = p*m_h.m_bd.m_frm.m_nspinorb+q;
     auto n = m_pick_n_given_pq.draw(pq, m_prng);
     conn.m_bos.clear();
     if (cre) {

@@ -75,7 +75,7 @@ const defs::inds &CachedOrbs::nonempty_pair_labels(const field::FrmOnv &mbf) {
 
 const defs::inds &CachedOrbs::occ_sites(const field::FrmOnv &mbf) {
     if (m_occ_sites.empty()) {
-        for (size_t isite = 0ul; isite < mbf.nsite(); ++isite) {
+        for (size_t isite = 0ul; isite < mbf.m_bd.m_nsite; ++isite) {
             if (mbf.site_nocc(isite)) m_occ_sites.push_back(isite);
         }
     }
@@ -92,7 +92,7 @@ const defs::inds &CachedOrbs::occ_sites_nonzero_bosons(const field::FrmBosOnv &m
 
 const defs::inds &CachedOrbs::doubly_occ_sites(const field::FrmOnv &mbf) {
     if (m_doubly_occ_sites.empty()) {
-        for (size_t isite = 0ul; isite < mbf.nsite(); ++isite) {
+        for (size_t isite = 0ul; isite < mbf.m_bd.m_nsite; ++isite) {
             if (mbf.site_nocc(isite)==2) m_doubly_occ_sites.push_back(isite);
         }
     }
@@ -101,7 +101,7 @@ const defs::inds &CachedOrbs::doubly_occ_sites(const field::FrmOnv &mbf) {
 
 const defs::inds &CachedOrbs::not_singly_occ_sites(const field::FrmOnv &mbf) {
     if (m_not_singly_occ_sites.empty()) {
-        for (size_t isite = 0ul; isite < mbf.nsite(); ++isite) {
+        for (size_t isite = 0ul; isite < mbf.m_bd.m_nsite; ++isite) {
             if (mbf.site_nocc(isite)!=1) m_not_singly_occ_sites.push_back(isite);
         }
     }

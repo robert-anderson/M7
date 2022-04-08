@@ -11,36 +11,59 @@
 #include "AbelianGroup.h"
 
 /**
- * admits a common interface for all initialisations of MBFs
+ * specification of the extents and properties of the fermionic single particle basis
  */
-struct BasisData {
+struct FrmBasisData {
     /**
-     * number of fermionic sites or orbitals
+     * number of sites or orbitals
      */
-    size_t m_nsite;
-    /**
-     * number of bosonic modes
-     */
-    size_t m_nmode;
+    const size_t m_nsite;
     /**
      * number of fermionic degrees of freedom (2*nsite)
      */
-    size_t m_nspinorb;
+    const size_t m_nspinorb;
     /**
-     * mapping from fermion site indices to abelian group labels
+     * mapping from fermion site indices to Abelian group labels
      */
-    AbelianGroupMap m_frm_abgrp_map;
-    BasisData(size_t nsite, size_t nmode, AbelianGroupMap frm_abgrp_map):
-        m_nsite(nsite), m_nmode(nmode), m_nspinorb(nsite*2), m_frm_abgrp_map(std::move(frm_abgrp_map)){}
+    const AbelianGroupMap m_abgrp_map;
 
-    BasisData(size_t nsite, size_t nmode): BasisData(nsite, nmode, {nsite}){}
+    FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map);
+    explicit FrmBasisData(size_t nsite);
+    FrmBasisData();
+    bool operator==(const FrmBasisData& other) const;
+};
 
-    void require_pure_frm() const {
-        REQUIRE_FALSE(m_nmode, "MBF specification is not purely fermionic");
-    }
-    void require_pure_bos() const {
-        REQUIRE_FALSE(m_nsite, "MBF specification is not purely bosonic");
-    }
+/**
+ * specification of the extents and properties of the bosonic single particle basis
+ */
+struct BosBasisData {
+    /**
+     * number of bosonic modes
+     */
+    const size_t m_nmode;
+    /**
+     * maximum allowed occupation of each bosonic mode
+     */
+    const defs::bos_occ_t m_nboson_max;
+
+    BosBasisData(size_t nmode, size_t nboson_max);
+    explicit BosBasisData(size_t nmode): BosBasisData(nmode, defs::max_bos_occ){}
+    BosBasisData(): BosBasisData(0ul){}
+    bool operator==(const BosBasisData& other) const;
+};
+
+/**
+ * admits a common interface for all initialisations of MBFs
+ */
+struct BasisData {
+    const FrmBasisData m_frm;
+    const BosBasisData m_bos;
+
+    BasisData(FrmBasisData frm, BosBasisData bos);
+
+    void require_pure_frm() const;
+    void require_pure_bos() const;
+    bool operator==(const BasisData& other) const;
 };
 
 

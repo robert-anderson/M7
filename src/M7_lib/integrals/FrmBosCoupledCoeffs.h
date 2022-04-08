@@ -37,7 +37,7 @@ public:
      */
     SharedArray<defs::ham_t> m_v;
 
-    FrmBosCoupledCoeffs(BasisData bd, bool spin_resolved);
+    FrmBosCoupledCoeffs(const BasisData& bd, bool spin_resolved);
 
     /**
      * assign a value to the indexed element (should only be called on the root rank of each node)

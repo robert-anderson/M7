@@ -80,9 +80,9 @@ public:
 struct BosOnvConnection {
     BosOps m_ann, m_cre;
 
-    explicit BosOnvConnection(size_t nmode);
+    explicit BosOnvConnection(const BosBasisData& bd);
 
-    explicit BosOnvConnection(BasisData bd);
+    explicit BosOnvConnection(const BasisData& bd);
 
     explicit BosOnvConnection(const BosOnvField& mbf);
 
