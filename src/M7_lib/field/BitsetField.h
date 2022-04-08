@@ -228,6 +228,18 @@ struct BitsetField : FieldBase {
         setbit_foreach::pair<T>(m_dsize, fn_inner, get_work_fn);
     }
 
+    template<typename fn_1_t, typename fn_2_t, typename fn_3_t>
+    void foreach_setbit_triple(const fn_1_t& fn_1, const fn_2_t& fn_2, const fn_3_t& fn_3) const {
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::triple<T>(m_dsize, fn_1, fn_2, fn_3, get_work_fn);
+    }
+
+    template<typename fn_inner_t>
+    void foreach_setbit_triple(const fn_inner_t& fn_inner) const {
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::triple<T>(m_dsize, fn_inner, get_work_fn);
+    }
+
     size_t nsetbit() const {
         size_t result = 0;
         for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
