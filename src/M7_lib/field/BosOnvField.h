@@ -23,8 +23,6 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
 
     BosOnvField(Row *row, const BosBasisData& bd, std::string name = "");
 
-    BosOnvField(Row *row, size_t nmode, size_t nboson_max=defs::max_bos_occ, std::string name = "");
-
     BosOnvField(Row *row, const BasisData& bd, std::string name = "");
 
     BosOnvField(const BosOnvField &other);

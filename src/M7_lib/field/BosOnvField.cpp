@@ -8,9 +8,6 @@ BosOnvField::BosOnvField(Row *row, const BosBasisData& bd, std::string name) :
         base_t(row, {{bd.m_nmode}, {"boson mode occupations"}}, name),
         m_bd(bd), m_decoded(*this) {}
 
-BosOnvField::BosOnvField(Row *row, size_t nmode, size_t nboson_max, std::string name) :
-        BosOnvField(row, {nmode, nboson_max}, name){}
-
 BosOnvField::BosOnvField(Row *row, const BasisData& bd, std::string name) : BosOnvField(row, bd.m_bos, name) {
     bd.require_pure_bos();
 }

@@ -130,7 +130,6 @@ namespace buffered {
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
         FrmOnv(const FrmBasisData& bd) : BufferedField<field::FrmOnv>(bd){}
-        FrmOnv(size_t nsite) : BufferedField<field::FrmOnv>(nsite){}
         FrmOnv(const BasisData& bd) : FrmOnv(bd.m_frm){}
 
         FrmOnv(const FrmOnv& other) : FrmOnv(other.m_bd){
@@ -149,7 +148,6 @@ namespace buffered {
         using field::BosOnv::operator=;
         using field::BosOnv::operator==;
         BosOnv(BosBasisData bd) : BufferedField<field::BosOnv>(bd){}
-        BosOnv(size_t nmode, size_t nboson_max=defs::max_bos_occ) : BufferedField<field::BosOnv>({nmode, nboson_max}){}
         BosOnv(BasisData bd) : BufferedField<field::BosOnv>(bd){}
         BosOnv(const BosOnv& other) : BosOnv(other.m_bd){
             *this = other;
@@ -166,8 +164,6 @@ namespace buffered {
     struct FrmBosOnv : BufferedField<field::FrmBosOnv> {
         using field::FrmBosOnv::operator=;
         FrmBosOnv(const BasisData& bd): BufferedField<field::FrmBosOnv>(bd){}
-        FrmBosOnv(size_t nsite, size_t nmode, size_t nboson_max=defs::max_bos_occ):
-            FrmBosOnv({FrmBasisData(nsite), {nmode, nboson_max}}){}
         FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv({other.m_frm.m_bd, other.m_bos.m_bd}){
             *this = other;
         }
