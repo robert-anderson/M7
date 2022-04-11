@@ -57,7 +57,7 @@ TEST(ConnForeach, FrmGeneralEx1100) {
         ASSERT_EQ(ann, setbits[iann]);
         ++iiter;
     };
-    conn_foreach::frm::General<1> foreach(FrmBasisData{nsite});
+    conn_foreach::frm::General<1> foreach(nsite);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
@@ -80,7 +80,7 @@ TEST(ConnForeach, FrmGeneralEx2200) {
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ++result;
     };
-    conn_foreach::frm::General<2> foreach(FrmBasisData{nsite});
+    conn_foreach::frm::General<2> foreach(nsite);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(result, results.cend());
@@ -192,7 +192,7 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
         }
         ++iiter;
     };
-    conn_foreach::frm::Ms2Conserve<1> foreach(FrmBasisData{nsite});
+    conn_foreach::frm::Ms2Conserve<1> foreach(nsite);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, nalpha_pair + nbeta_pair);
@@ -238,7 +238,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
         }
         ++iiter;
     };
-    conn_foreach::frm::Ms2Conserve<2> foreach(FrmBasisData{nsite});
+    conn_foreach::frm::Ms2Conserve<2> foreach(nsite);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
@@ -257,7 +257,7 @@ TEST(ConnForeach, BosEx0001) {
         ASSERT_FALSE(conn.m_cre.size());
         ++iiter;
     };
-    conn_foreach::bos::Ann foreach(BosBasisData{nmode});
+    conn_foreach::bos::Ann foreach(nmode);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0001);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, chk_modes.size());
@@ -313,7 +313,7 @@ TEST(ConnForeach, FrmBosEx1110) {
         auto fn = [&frm_results](const conn::FrmOnv& conn){
             frm_results.emplace_back(conn.m_ann.inds(), conn.m_cre.inds());
         };
-        frm::Ms2Conserve<1> foreach(FrmBasisData{nsite});
+        frm::Ms2Conserve<1> foreach(nsite);
         foreach.loop_fn(mbf.m_frm, fn);
     }
 
@@ -328,7 +328,7 @@ TEST(ConnForeach, FrmBosEx1110) {
             ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, mode_inds[imode]);
             ++iiter;
         };
-        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach({FrmBasisData{nsite}}, {{nmode, nboson_max}});
+        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach({nsite}, {{nmode, nboson_max}});
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_1110);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());

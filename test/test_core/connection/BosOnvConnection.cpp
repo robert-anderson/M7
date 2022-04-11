@@ -41,7 +41,7 @@ namespace bos_onv_connection_test {
 
     bool one_conn(const field::BosOnv& src, defs::inds icres, defs::inds ianns){
         auto chk = chk_occ_fac_square(src, icres, ianns);
-        conn::BosOnv conn(BosBasisData(src.m_bd.m_nmode));
+        conn::BosOnv conn(src.m_bd.m_nmode);
         BosOps com(src.m_bd.m_nmode);
         /*
          * remove common indices from the creation and annihilation vectors and place them in the common operators object

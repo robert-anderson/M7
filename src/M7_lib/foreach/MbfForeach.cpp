@@ -38,7 +38,7 @@ void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::
 void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) { frmbos_loop(fn); }
 
 mbf_foreach::frm::Base::Base(size_t nsite, size_t niter) :
-    mbf_foreach::Base({FrmBasisData(nsite), {}}, niter) {}
+    mbf_foreach::Base({nsite, {}}, niter) {}
 
 mbf_foreach::frm::NumberConserve::NumberConserve(size_t nsite, size_t nelec, size_t niter) : Base(nsite, niter), m_nelec(nelec) {}
 
@@ -74,7 +74,7 @@ void mbf_foreach::frm::Ms2Conserve::frm_loop(field::FrmOnv& mbf, const std::func
 }
 
 mbf_foreach::bos::Base::Base(size_t nmode, size_t niter) :
-    mbf_foreach::Base({{}, BosBasisData(nmode)}, niter){}
+    mbf_foreach::Base({{}, nmode}, niter){}
 
 mbf_foreach::bos::NumberConserve::NumberConserve(size_t nmode, size_t nboson, size_t niter) : Base(nmode, niter), m_nboson(nboson) {}
 

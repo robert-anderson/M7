@@ -13,7 +13,7 @@ TEST(UniformSingles, FromExcited){
     opts.verify();
     Hamiltonian h(opts);
     UniformSingles2 excit_gen(*h.m_frm, prng);
-    conn_foreach::frm::Ms2Conserve<1> excit_iter(FrmBasisData(h.m_bd.m_frm.m_nsite));
+    conn_foreach::frm::Ms2Conserve<1> excit_iter(h.m_bd.m_frm.m_nsite);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_bd);
     src_mbf = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 5}};

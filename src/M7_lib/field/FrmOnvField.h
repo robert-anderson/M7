@@ -38,7 +38,6 @@ private:
 public:
 
     FrmOnvField(Row* row, const FrmBasisData& bd, std::string name="");
-    FrmOnvField(Row* row, size_t nsite, std::string name="");
     FrmOnvField(Row* row, const BasisData& bd, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 

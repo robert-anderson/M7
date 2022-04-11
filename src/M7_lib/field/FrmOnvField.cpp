@@ -11,9 +11,6 @@ FrmOnvField::FrmOnvField(Row *row, const FrmBasisData& bd, std::string name) :
         m_dsize_spin_channel(integer_utils::divceil(m_bd.m_nsite, defs::nbit_word)),
         m_nbit_in_last_alpha_dataword(m_bd.m_nsite%defs::nbit_word){}
 
-FrmOnvField::FrmOnvField(Row *row, size_t nsite, std::string name) :
-    FrmOnvField(row, FrmBasisData(nsite), name){}
-
 FrmOnvField::FrmOnvField(Row *row, const BasisData& bd, std::string name) : FrmOnvField(row, bd.m_frm, name){
     bd.require_pure_frm();
 }

@@ -45,14 +45,12 @@ struct OuterDetPerm : CompositeField<DetPerm, DetPerm> {
 struct CompFieldTestRow : Row {
     field::FrmOnv m_frm_onv;
     OuterDetPerm m_dmbas;
-    CompFieldTestRow() :
-            m_frm_onv(this, 6, "alfa"),
-            m_dmbas(this, {FrmBasisData(8), BosBasisData(4)}){}
+    CompFieldTestRow() : m_frm_onv(this, 6, "alfa"), m_dmbas(this, {8, 4}){}
 };
 
 struct DetPermTestRow : Row {
     DetPerm m_dp;
-    DetPermTestRow() : m_dp(this, {FrmBasisData(6), BosBasisData(4)}, "www"){}
+    DetPermTestRow() : m_dp(this, {6, 4}, "www"){}
 };
 
 //struct NestedCompFieldTestRow : Row {

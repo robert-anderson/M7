@@ -9,7 +9,7 @@
 TEST(Suites, Copy){
     const size_t nsite = 6;
     const size_t nmode = 3;
-    suite::Mbfs mbfs({FrmBasisData(nsite), BosBasisData(nmode)});
+    suite::Mbfs mbfs({nsite, nmode});
     auto copy_mbfs = mbfs;
     ASSERT_NE(mbfs.m_row.m_table, copy_mbfs.m_row.m_table);
     ASSERT_EQ(copy_mbfs.m_row.m_frm.m_bd.m_nsite, nsite);

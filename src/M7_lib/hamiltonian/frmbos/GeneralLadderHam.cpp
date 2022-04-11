@@ -5,7 +5,7 @@
 #include "GeneralLadderHam.h"
 
 GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max, bool spin_major) :
-        FrmBosHam({FrmBasisData(header.m_nsite), {header.m_nmode, nboson_max}}, nboson_max),
+        FrmBosHam({header.m_nsite, {header.m_nmode, nboson_max}}, nboson_max),
         m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_bos.m_nmode, 0.0) {
     if (!m_nboson_max || !(m_bd.m_frm.m_nsite || m_bd.m_bos.m_nmode)) return;
     REQUIRE_EQ(m_bd.m_frm.m_nsite == 0, m_bd.m_bos.m_nmode == 0,

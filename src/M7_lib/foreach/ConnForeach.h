@@ -167,7 +167,7 @@ namespace conn_foreach {
         struct Hubbard : Base {
             const Lattice &m_lattice;
 
-            Hubbard(const Lattice &lattice) : Base(exsig_utils::ex_single, FrmBasisData(lattice.nsite())),
+            Hubbard(const Lattice &lattice) : Base(exsig_utils::ex_single, {lattice.nsite()}),
                 m_lattice(lattice) {}
 
             template<typename fn_t>
@@ -204,7 +204,7 @@ namespace conn_foreach {
             const Lattice &m_lattice;
 
             Heisenberg(const Lattice &lattice) :
-                    Base(exsig_utils::ex_double, FrmBasisData(lattice.nsite())), m_lattice(lattice) {}
+                    Base(exsig_utils::ex_double, {lattice.nsite()}), m_lattice(lattice) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
