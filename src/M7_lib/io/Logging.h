@@ -74,13 +74,9 @@ struct log {
 #endif
     }
 
-    static void info_lines(const std::vector<std::string>& lines) {
-        for (const auto& line: lines) info(line);
-    }
+    static void info_lines(const std::vector<std::string>& lines);
 
-    static void info_lines_(const std::vector<std::string>& lines) {
-        for (const auto& line: lines) info_(line);
-    }
+    static void info_lines_(const std::vector<std::string>& lines);
 
     /**
      * make a pretty table
@@ -93,15 +89,21 @@ struct log {
      * @return
      *  a vector of strings which when printed will display a table in which the rows are vertically aligned
      */
-    static std::vector<std::string> make_table(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+    static std::vector<std::string> make_table(const std::vector<std::vector<std::string>>& rows,
+                                               bool header=false, size_t padding=2);
 
-    static void info_table(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2) {
-        info_lines(make_table(rows, header, padding));
-    }
+    static std::vector<std::string> make_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+                                               bool header=false, size_t padding=2);
 
-    static void info_table_(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2) {
-        info_lines_(make_table(rows, header, padding));
-    }
+    static void info_table(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+
+    static void info_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+                           bool header=false, size_t padding=2);
+
+    static void info_table_(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+
+    static void info_table_(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+                            bool header=false, size_t padding=2);
 
     template<typename ...Args>
     static void warn(const std::string& fmt_string, Args&&... args){

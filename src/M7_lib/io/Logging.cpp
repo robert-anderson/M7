@@ -142,3 +142,49 @@ std::vector<std::string> log::make_table(const std::vector<std::vector<std::stri
     }
     return row_strs;
 }
+
+std::vector<std::string> log::make_table(const std::string &title, const std::vector<std::vector<std::string>> &rows,
+                bool header, size_t padding) {
+    if (rows.empty()) return {};
+    std::vector<std::string> table;
+    auto body = make_table(rows, header, padding);
+    table.push_back(body.front());
+    std::string title_str = "|";
+    const size_t titlebar_size = body.front().size()-2;
+    const size_t nspace_left = titlebar_size < title.size() ? 0ul : (titlebar_size - title.size()) / 2;
+    const size_t nspace_right = titlebar_size < title.size() ? 0ul : titlebar_size - (title.size() + nspace_left);
+    title_str.append(nspace_left, ' ');
+    title_str.insert(title_str.cend(), title.cbegin(),
+                     nspace_right ? title.cend() : title.cbegin() + titlebar_size);
+    title_str.append(nspace_right, ' ');
+    title_str.append(1, '|');
+    table.push_back(title_str);
+    table.insert(table.end(), body.cbegin(), body.cend());
+    return table;
+}
+
+void log::info_lines(const std::vector<std::string> &lines) {
+    for (const auto& line: lines) info(line);
+}
+
+void log::info_lines_(const std::vector<std::string> &lines) {
+    for (const auto& line: lines) info_(line);
+}
+
+void log::info_table(const std::vector<std::vector<std::string>> &rows, bool header, size_t padding) {
+    info_lines(make_table(rows, header, padding));
+}
+
+void log::info_table(const std::string &title, const std::vector<std::vector<std::string>> &rows, bool header,
+                     size_t padding) {
+    info_lines(make_table(title, rows, header, padding));
+}
+
+void log::info_table_(const std::vector<std::vector<std::string>> &rows, bool header, size_t padding) {
+    info_lines_(make_table(rows, header, padding));
+}
+
+void log::info_table_(const std::string &title, const std::vector<std::vector<std::string>> &rows, bool header,
+                      size_t padding) {
+    info_lines_(make_table(title, rows, header, padding));
+}

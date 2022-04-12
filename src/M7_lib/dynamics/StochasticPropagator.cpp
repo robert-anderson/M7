@@ -10,6 +10,7 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_
                                            const NdFormat<defs::ndim_wf> &wf_fmt) :
         Propagator(opts, ham, wf_fmt), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gens(ham, opts.m_propagator, m_prng),
+        m_excit_gen_group(ham, opts.m_propagator, m_prng),
         m_mag_log(opts.m_propagator.m_max_bloom,
                   opts.m_propagator.m_ndraw_min_for_dynamic,
                   m_excit_gens.size(),
@@ -21,6 +22,9 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_
                   opts.m_propagator.m_period),
         m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {
     m_excit_gens.log_breakdown();
+    m_excit_gen_group.log();
+
+    exit(0);
 }
 
 

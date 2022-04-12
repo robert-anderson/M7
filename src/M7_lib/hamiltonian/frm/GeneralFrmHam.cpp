@@ -3,7 +3,8 @@
 //
 
 #include "GeneralFrmHam.h"
-
+#include "M7_lib/excitgen2/frm/UniformSingles2.h"
+#include "M7_lib/excitgen2/frm/Pchb2200.h"
 
 buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const {
     buffered::FrmOnv ref(m_nsite);
@@ -101,17 +102,13 @@ defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) {
+    using namespace exsig_utils;
     excit_gen_list_t list;
-//    if (m_kramers_attrs.m_conserving_singles)
-//        list.emplace_front(new Frm::frm::Ms2Conserve<1>(m_nsite));
-//    else
-//        list.emplace_front(new conn_foreach::frm::General<1>(m_nsite));
-//    if (m_kramers_attrs.m_conserving_doubles)
-//        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_nsite));
-//    else
-//        list.emplace_front(new conn_foreach::frm::General<2>(m_nsite));
+    bool any_singles = m_contribs_1100.is_nonzero(ex_single) || m_contribs_2200.is_nonzero(ex_single);
+    if (any_singles) list.emplace_front(new UniformSingles2(*this, prng));
+    bool any_doubles = m_contribs_2200.is_nonzero(ex_double);
+    if (any_doubles) list.emplace_front(new Pchb2200(*this, prng));
     return list;
-
 }
 
 HamOpTerm::conn_iter_ptr_list_t GeneralFrmHam::make_conn_iters() {

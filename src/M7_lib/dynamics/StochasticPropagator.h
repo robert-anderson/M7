@@ -10,6 +10,7 @@
 #include <M7_lib/excitgen/UniformSingles.h>
 #include <M7_lib/excitgen/HeatBathDoubles.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
+#include <M7_lib/excitgen2/ExcitGenGroup2.h>
 
 #include "Propagator.h"
 
@@ -17,6 +18,7 @@ class StochasticPropagator : public Propagator {
 protected:
     PRNG m_prng;
     ExcitGenGroup m_excit_gens;
+    ExcitGenGroup2 m_excit_gen_group;
     MagnitudeLogger m_mag_log;
     const double &m_min_spawn_mag;
 
