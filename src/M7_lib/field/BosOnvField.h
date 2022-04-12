@@ -15,7 +15,7 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     /**
      * alias for the number of elements in the 1D numeric array
      */
-    const BosBasisData& m_bd;
+    const BosBasisData m_bd;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */

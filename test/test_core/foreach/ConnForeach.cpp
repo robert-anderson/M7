@@ -27,9 +27,13 @@ namespace conn_foreach_test {
         return results;
     }
 
-    static defs::inds creatable_mode_indices(const field::BosOnv& mbf, size_t nboson_max) {
+    static defs::inds creatable_mode_indices(const field::BosOnv& mbf) {
         defs::inds inds;
-        for (size_t imode=0ul; imode<mbf.m_bd.m_nmode; ++imode) if (size_t(mbf[imode]) < nboson_max) inds.push_back(imode);
+        auto nboson_max = mbf.m_bd.m_nboson_max;
+        for (size_t imode=0ul; imode<mbf.m_bd.m_nmode; ++imode) {
+            size_t nocc = mbf[imode];
+            if (nocc < nboson_max) inds.push_back(imode);
+        }
         return inds;
     }
 
@@ -266,10 +270,10 @@ TEST(ConnForeach, BosEx0001) {
 TEST(ConnForeach, BosEx0010) {
     const size_t nmode = 6;
     defs::inds occs = {0, 2, 0, 1, 5, 1};
-    buffered::BosOnv mbf(nmode);
-    mbf = occs;
 
     {
+        buffered::BosOnv mbf(nmode, 10);
+        mbf = occs;
         defs::inds chk_modes = {0, 1, 2, 3, 4, 5};
         auto iiter = 0ul;
         auto fn = [&](const conn::BosOnv &conn) {
@@ -277,7 +281,7 @@ TEST(ConnForeach, BosEx0010) {
             ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
             ++iiter;
         };
-        conn_foreach::bos::Cre foreach({nmode, 10});
+        conn_foreach::bos::Cre foreach(mbf.m_bd);
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
@@ -285,6 +289,8 @@ TEST(ConnForeach, BosEx0010) {
 
     {
         // lower maximum occupation
+        buffered::BosOnv mbf(nmode, 5);
+        mbf = occs;
         defs::inds chk_modes = {0, 1, 2, 3, 5};
         auto iiter = 0ul;
         auto fn = [&](const conn::BosOnv &conn) {
@@ -292,7 +298,7 @@ TEST(ConnForeach, BosEx0010) {
             ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
             ++iiter;
         };
-        conn_foreach::bos::Cre foreach({nmode, 5});
+        conn_foreach::bos::Cre foreach(mbf.m_bd);
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
@@ -301,24 +307,28 @@ TEST(ConnForeach, BosEx0010) {
 
 TEST(ConnForeach, FrmBosEx1110) {
     const size_t nsite=6, nmode=8;
-    buffered::FrmBosOnv mbf({nsite, nmode});
-    mbf = {{0, 4, 6, 8, 11}, {2, 0, 1, 0, 1, 4, 0, 5}};
-    using namespace conn_foreach;
-    /*
-     * first, do the product manually. The two components of this product iterator are already tested above, here we
-     * only need to ensure that the nested loop is performed as required
-     */
-    conn_foreach_test::results_t frm_results;
-    {
-        auto fn = [&frm_results](const conn::FrmOnv& conn){
-            frm_results.emplace_back(conn.m_ann.inds(), conn.m_cre.inds());
-        };
-        frm::Ms2Conserve<1> foreach(nsite);
-        foreach.loop_fn(mbf.m_frm, fn);
-    }
+    for (size_t nboson_max =0ul; nboson_max < 6; ++nboson_max) {
+        buffered::FrmBosOnv mbf({nsite, nmode, nboson_max});
 
-    for (size_t nboson_max =0ul; nboson_max < 6; ++nboson_max){
-        auto mode_inds = conn_foreach_test::creatable_mode_indices(mbf.m_bos, nboson_max);
+        ASSERT_EQ(mbf.m_bos.m_bd.m_nmode, nmode);
+        ASSERT_EQ(mbf.m_bos.m_bd.m_nboson_max, nboson_max);
+        mbf = {{0, 4, 6, 8, 11},
+               {2, 0, 1, 0, 1, 4, 0, 5}};
+        using namespace conn_foreach;
+        /*
+         * first, do the product manually. The two components of this product iterator are already tested above, here we
+         * only need to ensure that the nested loop is performed as required
+         */
+        conn_foreach_test::results_t frm_results;
+        {
+            auto fn = [&frm_results](const conn::FrmOnv &conn) {
+                frm_results.emplace_back(conn.m_ann.inds(), conn.m_cre.inds());
+            };
+            frm::Ms2Conserve<1> foreach(nsite);
+            foreach.loop_fn(mbf.m_frm, fn);
+        }
+
+        auto mode_inds = conn_foreach_test::creatable_mode_indices(mbf.m_bos);
         size_t iiter = 0ul;
         auto fn = [&](const conn::FrmBosOnv &conn) {
             auto ifrm_result = iiter / mode_inds.size();
@@ -328,7 +338,7 @@ TEST(ConnForeach, FrmBosEx1110) {
             ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, mode_inds[imode]);
             ++iiter;
         };
-        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach({nsite}, {{nmode, nboson_max}});
+        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach(mbf.m_frm.m_bd, mbf.m_bos.m_bd);
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_1110);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());

@@ -148,6 +148,8 @@ namespace buffered {
         using field::BosOnv::operator=;
         using field::BosOnv::operator==;
         BosOnv(BosBasisData bd) : BufferedField<field::BosOnv>(bd){}
+        BosOnv(size_t nmode, size_t nboson_max=defs::max_bos_occ) :
+            BufferedField<field::BosOnv>(BosBasisData(nmode, nboson_max)){}
         BosOnv(BasisData bd) : BufferedField<field::BosOnv>(bd){}
         BosOnv(const BosOnv& other) : BosOnv(other.m_bd){
             *this = other;
