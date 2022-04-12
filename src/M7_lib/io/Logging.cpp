@@ -100,3 +100,45 @@ void log::error_backtrace_(size_t depth) {
     error_("Printing backtrace (maximum call depth {}):", depth);
     for (const auto& line: tmp) if (!line.empty()) error_(line);
 }
+
+std::vector<std::string> log::make_table(const std::vector<std::vector<std::string>> &rows, bool header, size_t padding) {
+    if (rows.empty()) return {};
+    auto fn = [](const std::vector<std::string>& row1, const std::vector<std::string>& row2){
+        return row1.size() < row2.size();
+    };
+
+    auto max_it = std::max_element(rows.cbegin(), rows.cend(), fn);
+    const size_t ncol = max_it->size();
+    defs::inds max_sizes(ncol, 0ul);
+    for (auto& row: rows) {
+        for (auto it=row.cbegin(); it!=row.cend(); ++it) {
+            auto icol = std::distance(row.cbegin(), it);
+            max_sizes[icol] = std::max(max_sizes[icol], it->size());
+        }
+    }
+    std::string hline{'+'};
+    std::string header_hline{'+'};
+    for (auto& max_size: max_sizes) {
+        hline.append(max_size+2*padding,'-');
+        hline.append(1, '+');
+        if (header) {
+            header_hline.append(max_size + 2 * padding, '=');
+            header_hline.append(1, '+');
+        }
+    }
+    std::vector<std::string> row_strs;
+    row_strs.reserve(2*rows.size()+1);
+    row_strs.push_back(hline);
+    for (auto& row: rows) {
+        std::string row_str = "|";
+        for (size_t icol=0ul; icol<ncol; ++icol){
+            row_str.append(padding, ' ');
+            row_str.append(icol<row.size() ? row[icol] : "");
+            row_str.append(padding + max_sizes[icol]-(icol<row.size() ? row[icol].size() : 0ul), ' ');
+            row_str.append(1, '|');
+        }
+        row_strs.push_back(row_str);
+        row_strs.push_back((row_strs.size()==2 && header) ? header_hline : hline);
+    }
+    return row_strs;
+}
