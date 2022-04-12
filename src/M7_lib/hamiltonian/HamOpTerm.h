@@ -8,7 +8,7 @@
 
 #include <forward_list>
 #include "M7_lib/foreach/ConnForeach.h"
-#include "M7_lib/excitgen2/ExcitGen2.h"
+#include "M7_lib/excitgen/ExcitGen.h"
 #include "M7_lib/config/FciqmcConfig.h"
 
 /**
@@ -23,8 +23,8 @@ struct HamOpTerm {
     HamOpTerm(){}
     virtual ~HamOpTerm(){}
 
-    using excit_gen_ptr_t = ExcitGen2::excit_gen_ptr_t;
-    using excit_gen_list_t = ExcitGen2::excit_gen_list_t;
+    using excit_gen_ptr_t = ExcitGen::excit_gen_ptr_t;
+    using excit_gen_list_t = ExcitGen::excit_gen_list_t;
     /**
      * @param prng
      *  pseudorandom number generator to pass to the ctors of all associated excit gens

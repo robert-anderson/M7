@@ -1,0 +1,13 @@
+target_sources(M7_lib
+    PRIVATE
+        FrmExcitGen.cpp
+        FrmExcitGen.h
+        HeisenbergExchange.h
+        HeisenbergExchange.cpp
+        HubbardUniform.cpp
+        HubbardUniform.h
+        Pchb2200.cpp
+        Pchb2200.h
+        UniformSingles.cpp
+        UniformSingles.h
+)

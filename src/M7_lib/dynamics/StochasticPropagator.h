@@ -6,18 +6,14 @@
 #define M7_STOCHASTICPROPAGATOR_H
 
 #include <M7_lib/sample/PRNG.h>
-#include <M7_lib/excitgen/ExcitGen.h>
-#include <M7_lib/excitgen/UniformSingles.h>
-#include <M7_lib/excitgen/HeatBathDoubles.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
-#include <M7_lib/excitgen2/ExcitGenGroup2.h>
 
 #include "Propagator.h"
 
 class StochasticPropagator : public Propagator {
 protected:
     PRNG m_prng;
-    ExcitGenGroup2 m_excit_gen_group;
+    ExcitGenGroup m_excit_gen_group;
     MagnitudeLogger m_mag_log;
     const double &m_min_spawn_mag;
 

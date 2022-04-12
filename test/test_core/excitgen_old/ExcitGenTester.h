@@ -6,8 +6,7 @@
 #define M7_EXCITGENTESTER_H
 
 #include "M7_lib/excitgen/ExcitGen.h"
-#include "M7_lib/foreach/ConnForeach.h"
-#include "M7_lib/hamiltonian/Hamiltonian.h"
+#include "M7_lib/excititer/ExcitIter.h"
 
 namespace excit_gen_tester {
     struct ResultRow : Row {
@@ -30,14 +29,12 @@ namespace excit_gen_tester {
     typedef BufferedTable<ResultRow, true> result_table_t;
 
     struct ExcitGenTester {
-        const Hamiltonian &m_h;
-        ExcitGen& m_excit_gen;
-        conn_foreach::Base &m_conn_iter;
+        ExcitGen &m_gen;
+        ExcitIter &m_iter;
         result_table_t m_results;
 
-        ExcitGenTester(const Hamiltonian &h, ExcitGen &excit_gen, conn_foreach::Base &conn_iter) :
-                m_h(h), m_excit_gen(excit_gen), m_conn_iter(conn_iter),
-                m_results("excit gen test results", {{conn_iter.m_exsig}}) {
+        ExcitGenTester(ExcitGen &gen, ExcitIter &iter) :
+                m_gen(gen), m_iter(iter), m_results("excit gen test results", {{iter.m_exsig}}) {
             m_results.set_expansion_factor(1.5);
             m_results.resize(1000);
         }
@@ -48,12 +45,10 @@ namespace excit_gen_tester {
         template<typename mbf_t>
         void fill_results_table(const mbf_t &src_mbf) {
             typedef conn::from_field_t<mbf_t> conn_t;
-            buffered::MaeInds work_inds(m_conn_iter.m_exsig);
+            buffered::MaeInds work_inds(m_iter.m_exsig);
             m_results.clear();
 
-            auto body_fn = [&](const conn_t &conn) {
-                auto helem = m_h.get_element(src_mbf, conn);
-                if (consts::nearly_zero(helem, defs::helem_tol)) return;
+            auto body_fn = [&](const conn_t &conn, defs::ham_t helem) {
                 work_inds = conn;
                 // if this key is already in the table then the iterator is emitting duplicate connections!
                 DEBUG_ASSERT_EQ(*m_results[work_inds], ~0ul, "row should not already be mapped");
@@ -64,15 +59,16 @@ namespace excit_gen_tester {
                 row.m_weight = 0.0;
                 row.m_helem = helem;
             };
-            m_conn_iter.loop(src_mbf, body_fn);
+            m_iter.foreach(src_mbf, body_fn, true);
         }
 
         template<typename mbf_t>
         size_t run(const mbf_t &src_mbf, size_t ndraw) {
             typedef conn::from_field_t<mbf_t> conn_t;
+            CachedOrbs orbs(m_iter.m_ham.m_frm->m_point_group_map);
             conn_t conn(src_mbf);
-            size_t exsig = m_conn_iter.m_exsig;
-            buffered::MaeInds work_inds(m_conn_iter.m_exsig);
+            size_t exsig = m_iter.m_exsig;
+            buffered::MaeInds work_inds(m_iter.m_exsig);
             size_t nnull = 0ul;
 
             DEBUG_ASSERT_FALSE(m_results.is_cleared(), "no connections were found by the excitation iterator");
@@ -80,7 +76,7 @@ namespace excit_gen_tester {
             defs::ham_t helem = 0.0;
             auto &row = m_results.m_row;
             for (size_t idraw = 0ul; idraw < ndraw; ++idraw) {
-                auto success = m_excit_gen.draw(exsig, src_mbf, prob, helem, conn);
+                auto success = m_gen.draw(exsig, src_mbf, orbs, prob, helem, conn);
                 if (!success) {
                     ++nnull;
                     continue;
@@ -116,7 +112,7 @@ namespace excit_gen_tester {
          * @return
          *  true if all weights are correct within tolerance
          */
-        bool all_correct_weights(size_t ndraw, double cutoff = 1e-2, defs::prob_t tol = 1e-2) const;
+        bool all_correct_weights(size_t ndraw, double cutoff= 1e-2, defs::prob_t tol= 1e-2) const;
 
         /**
          * @param ndraw

@@ -10,7 +10,7 @@
 
 #include <M7_lib/defs.h>
 #include <M7_lib/parallel/Reduction.h>
-#include <M7_lib/excitgen2/ExcitGenGroup2.h>
+#include <M7_lib/excitgen/ExcitGenGroup.h>
 #include <M7_lib/config/FciqmcConfig.h>
 
 struct MagnitudeLogger {
@@ -86,7 +86,7 @@ public:
      * @param excit_gens
      *  reference to group of excitation generators to update probabilities for
      */
-    void update(size_t icycle, double& tau, ExcitGenGroup2& excit_gens);
+    void update(size_t icycle, double& tau, ExcitGenGroup& excit_gens);
 };
 
 #endif //M7_MAGNITUDELOGGER_H

@@ -2,9 +2,7 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
-#include <M7_lib/excitgen/HubbardUniform.h>
 #include "StochasticPropagator.h"
-
 
 StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
                                            const NdFormat<defs::ndim_wf> &wf_fmt) :

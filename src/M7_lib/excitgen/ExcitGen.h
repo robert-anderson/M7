@@ -1,54 +1,46 @@
 //
-// Created by rja on 04/06/2020.
+// Created by rja on 03/04/2022.
 //
 
 #ifndef M7_EXCITGEN_H
 #define M7_EXCITGEN_H
 
-#include <M7_lib/hamiltonian/Hamiltonian.h>
-#include <M7_lib/connection/Connections.h>
-#include <M7_lib/caches/CachedOrbsOld.h>
-#include <M7_lib/sample/PRNG.h>
+#include <utility>
+
+#include "M7_lib/sample/PRNG.h"
+#include "M7_lib/field/Fields.h"
+#include "M7_lib/connection/Connections.h"
 
 struct ExcitGen {
-
-protected:
-    const Hamiltonian &m_h;
     PRNG &m_prng;
-    const BasisData m_bd;
-    const size_t m_nelec;
-    const size_t m_norb_pair;
-    const size_t m_nelec_pair;
-public:
     const defs::inds m_exsigs;
+    const std::string m_description;
+    ExcitGen(PRNG &prng, defs::inds exsigs, std::string description):
+        m_prng(prng), m_exsigs(std::move(exsigs)), m_description(std::move(description)){}
 
-    ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs);
-
+    virtual ~ExcitGen() = default;
 
     /*
      * when the H matrix element is not necessary:
      */
-    virtual bool draw_frm(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
-                      defs::prob_t &prob, conn::FrmOnv &conn);
+    virtual bool draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn);
 
-    virtual bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
-                      defs::prob_t &prob, conn::FrmBosOnv &conn);
+    virtual bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob, conn::FrmBosOnv &conn);
 
-    virtual bool draw_bos(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs,
-                      defs::prob_t &prob, conn::BosOnv &conn);
+    virtual bool draw_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn);
 
     /*
      * when the H matrix element is necessary. these can delegate the above methods in this base class, but in derived
      * classes it may make more sense to call specific methods to compute the matrix element in a more efficient way
      */
-    virtual bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
-                            defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
+    virtual bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src,
+                            defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) = 0;
 
-    virtual bool draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
-                               defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
+    virtual bool draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
+                               defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) = 0;
 
-    virtual bool draw_h_bos(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs,
-                            defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
+    virtual bool draw_h_bos(const size_t &exsig, const field::BosOnv &src,
+                            defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn) = 0;
 
 
     /*
@@ -57,70 +49,32 @@ public:
      * not for the standard requirement that methods cannot be partially overridden. This dispatcher approach helps
      * cut down on clutter in the derived classes
      */
-    bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob, conn::FrmOnv &conn) {
-        return draw_frm(exsig, src, orbs, prob, conn);
+    bool draw(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
+        return draw_frm(exsig, src, prob, conn);
     }
-    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, conn::FrmBosOnv &conn) {
-        return draw_frmbos(exsig, src, orbs, prob, conn);
+    bool draw(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob, conn::FrmBosOnv &conn) {
+        return draw_frmbos(exsig, src, prob, conn);
     }
-    bool draw(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob, conn::BosOnv &conn) {
-        return draw_bos(exsig, src, orbs, prob, conn);
+    bool draw(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) {
+        return draw_bos(exsig, src, prob, conn);
     }
 
-    bool draw(const size_t &exsig, const field::FrmOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn) {
-        return draw_h_frm(exsig, src, orbs, prob, helem, conn);
-    }
-    bool draw(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn) {
-        return draw_h_frmbos(exsig, src, orbs, prob, helem, conn);
-    }
-    bool draw(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn) {
-        return draw_h_bos(exsig, src, orbs, prob, helem, conn);
-    }
+    bool draw(const size_t &exsig, const field::FrmOnv &src,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
+
+    bool draw(const size_t &exsig, const field::FrmBosOnv &src,
+              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
+
+    bool draw(const size_t &exsig, const field::BosOnv &src,
+              defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
 
     virtual size_t approx_nconn() const {
         return 1ul;
     }
 
-    virtual std::string description() const = 0;
-
-    virtual ~ExcitGen() {}
+    typedef std::unique_ptr<ExcitGen> excit_gen_ptr_t;
+    typedef std::forward_list<excit_gen_ptr_t> excit_gen_list_t;
 };
 
-/**
- * Base class for stochastic Fermion sector excitations
- */
-struct FrmExcitGen : public ExcitGen {
-    using ExcitGen::draw;
-protected:
-    const bool m_spin_conserving;
-public:
-    FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig);
-
-    bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs,
-              defs::prob_t &prob, conn::FrmBosOnv &conn) override {
-        return draw(exsig, src.m_frm, orbs, prob, conn.m_frm);
-    }
-};
-
-/**
- * Base class for stochastic excitations which involve single boson creation or annihilation operators
- */
-struct LadderExcitGen : public ExcitGen {
-    LadderExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs) :
-            ExcitGen(h, prng, exsigs) {}
-};
-
-
-/**
- * Base class for stochastic Boson number-conserving excitations
- */
-struct BosExcitGen : public ExcitGen {
-    BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig);
-
-    size_t approx_nconn() const override;
-};
 
 #endif //M7_EXCITGEN_H

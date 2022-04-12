@@ -3,7 +3,7 @@
 //
 
 #include "HubbardFrmHam.h"
-#include "M7_lib/excitgen2/frm/HubbardUniform2.h"
+#include "M7_lib/excitgen/frm/HubbardUniform.h"
 
 bool HubbardFrmHam::sign_problem() const {
     // can only be SPF in 1D
@@ -71,7 +71,7 @@ defs::ham_t HubbardFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j
 
 HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) {
     excit_gen_list_t list;
-    list.emplace_front(new HubbardUniform2(*this, prng));
+    list.emplace_front(new HubbardUniform(*this, prng));
     return list;
 }
 
