@@ -17,7 +17,6 @@
 class StochasticPropagator : public Propagator {
 protected:
     PRNG m_prng;
-    ExcitGenGroup m_excit_gens;
     ExcitGenGroup2 m_excit_gen_group;
     MagnitudeLogger m_mag_log;
     const double &m_min_spawn_mag;
@@ -50,9 +49,9 @@ public:
 
     void off_diagonal(Wavefunction &wf, const size_t& ipart) override;
 
-    size_t nexcit_gen() const override;
+    size_t ncase_excit_gen() const override;
 
-    std::vector<defs::prob_t> exlvl_probs() const override;
+    std::vector<defs::prob_t> excit_gen_case_probs() const override;
 
     void update(const size_t &icycle, const Wavefunction &wf) override;
 

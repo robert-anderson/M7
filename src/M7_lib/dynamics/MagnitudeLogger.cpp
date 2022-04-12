@@ -39,7 +39,7 @@ void MagnitudeLogger::update(size_t icycle, double &tau) {
     update_tau(tau, m_gamma.m_reduced.sum());
 }
 
-void MagnitudeLogger::update(size_t icycle, double &tau, ExcitGenGroup &excit_gens) {
+void MagnitudeLogger::update(size_t icycle, double &tau, ExcitGenGroup2 &excit_gens) {
     if (!icycle || icycle%m_period) return;
     m_gamma.all_max();
     auto gamma_sum = m_gamma.m_reduced.sum();

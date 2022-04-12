@@ -56,6 +56,8 @@ public:
 
     defs::prob_t get_prob(const size_t &icase) const;
 
+    const std::vector<defs::prob_t>& get_probs() const;
+
     bool draw(const size_t &icase, const FrmOnv &src, prob_t &prob, ham_t &helem, conn::FrmOnv &conn);
 
     bool draw(const size_t &icase, const FrmBosOnv &src, prob_t &prob, ham_t &helem, conn::FrmBosOnv &conn);

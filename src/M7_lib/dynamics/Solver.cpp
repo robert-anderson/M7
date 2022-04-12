@@ -14,10 +14,10 @@ Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefuncti
         m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
 
     log::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
-    if (m_wf.nreplica() == 2 && !m_prop.nexcit_gen())
+    if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.nexcit_gen())
+    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
         log::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
@@ -308,7 +308,7 @@ void Solver::output_stats() {
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
-        if (m_prop.nexcit_gen()) stats.m_exlvl_probs = m_prop.exlvl_probs();
+        if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         stats.m_reweighting_factor = m_prop.m_shift.m_reweighter.m_total;
         m_stats->commit();
 

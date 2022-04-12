@@ -56,11 +56,11 @@ public:
 
     virtual void update(const size_t &icycle, const Wavefunction &wf);
 
-    virtual size_t nexcit_gen() const {
+    virtual size_t ncase_excit_gen() const {
         return 0;
     }
 
-    virtual std::vector<defs::prob_t> exlvl_probs() const {
+    virtual std::vector<defs::prob_t> excit_gen_case_probs() const {
         return {};
     }
 

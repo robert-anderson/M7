@@ -20,8 +20,8 @@ FciqmcStatsRow::FciqmcStatsRow(Propagator& prop) :
         m_ninitiator(this, m_wf_format, "Initiator ONVs"),
         m_nocc_mbf(this, m_wf_format, "Occupied ONVs"),
         m_delta_nocc_mbf(this, m_wf_format, "Change in number of occupied ONVs"),
-        m_exlvl_probs(prop.nexcit_gen() ? this : nullptr,
-                      {{prop.nexcit_gen()}, {"excitation generator index"}},
+        m_exlvl_probs(prop.ncase_excit_gen() ? this : nullptr,
+                      {{prop.ncase_excit_gen()}, {"excitation generator index"}},
                       "Probability of attempting to draw excitation level"),
         m_reweighting_factor(this, m_wf_format, "Reweighting factor for population control unbiasing")
 {}
