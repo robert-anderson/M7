@@ -37,12 +37,12 @@ struct SumFrmHam : FrmHam {
         m_kramers_attrs = ham_data::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
     }
 
-    defs::ham_t get_coeff_1100(size_t i, size_t j) const override {
-        return m_h1.get_coeff_1100(i, j) + m_weight * m_h2.get_coeff_1100(i, j);
+    defs::ham_t get_coeff_1100(size_t a, size_t i) const override {
+        return m_h1.get_coeff_1100(a, i) + m_weight * m_h2.get_coeff_1100(a, i);
     }
 
-    defs::ham_t get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const override {
-        return m_h1.get_coeff_2200(i, j, k, l) + m_weight * m_h2.get_coeff_2200(i, j, k, l);
+    defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override {
+        return m_h1.get_coeff_2200(a, b, i, j) + m_weight * m_h2.get_coeff_2200(a, b, i, j);
     }
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override {

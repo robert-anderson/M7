@@ -36,24 +36,24 @@ defs::ham_t SpinSquareFrmHam::get_element_2200(const field::FrmOnv &onv, const c
     return conn.phase(onv) ? -element : element;
 }
 
-defs::ham_t SpinSquareFrmHam::get_coeff_1100(size_t i, size_t j) const {
+defs::ham_t SpinSquareFrmHam::get_coeff_1100(size_t a, size_t i) const {
     return 0.0;
 }
 
-defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
-    auto get_spin = [this](size_t i)
+defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
+    auto get_spin = [this](size_t k)
     {
-        return field::FrmOnv::ispin(i, m_nsite);
+        return field::FrmOnv::ispin(k, m_nsite);
     };
-    auto spatial_orbital = [this](size_t i)
+    auto spatial_orbital = [this](size_t k)
     {
-        return field::FrmOnv::isite(i, m_nsite);
+        return field::FrmOnv::isite(k, m_nsite);
     };
     // We have to determine if it is an exchange.
-    return get_spin(i) != get_spin(j)
-        && get_spin(k) != get_spin(l)
+    return get_spin(a) != get_spin(b)
+        && get_spin(i) != get_spin(j)
+        && spatial_orbital(a) != spatial_orbital(b)
         && spatial_orbital(i) != spatial_orbital(j)
-        && spatial_orbital(k) != spatial_orbital(l)
-        && spatial_orbital(i) == spatial_orbital(l)
-        && spatial_orbital(j) == spatial_orbital(k);
+        && spatial_orbital(a) == spatial_orbital(j)
+        && spatial_orbital(b) == spatial_orbital(i);
 }

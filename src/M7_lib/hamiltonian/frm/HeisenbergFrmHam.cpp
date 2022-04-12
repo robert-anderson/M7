@@ -14,7 +14,7 @@ HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice) :
 HeisenbergFrmHam::HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
         HeisenbergFrmHam(opts.m_heisenberg.m_coupling, lattice::make(opts.m_heisenberg)){}
 
-defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
+defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
     /*
      * normal-ordered SQ operators are:
      *      pa+  qb+  qa   pb
@@ -22,21 +22,21 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_
      *      pb+  qa+  qb   pa
      *
      */
+    auto asite = field::FrmOnv::isite(a, m_nsite);
+    auto bsite = field::FrmOnv::isite(b, m_nsite);
     auto isite = field::FrmOnv::isite(i, m_nsite);
     auto jsite = field::FrmOnv::isite(j, m_nsite);
-    auto ksite = field::FrmOnv::isite(k, m_nsite);
-    auto lsite = field::FrmOnv::isite(l, m_nsite);
-    if (isite == ksite){
-        if (jsite != lsite) return 0.0;
+    if (asite == isite){
+        if (bsite != jsite) return 0.0;
     }
-    else if (jsite == ksite) {
-        if (isite != lsite) return 0.0;
+    else if (bsite == isite) {
+        if (asite != jsite) return 0.0;
     }
     else {
         return 0.0;
     }
     // fermi phase not included here, minus sign is due to product of opposite spins
-    return -m_j * m_lattice.m_dense(isite, jsite)/2.0;
+    return -m_j * m_lattice.m_dense(asite, bsite) / 2.0;
 }
 
 defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {

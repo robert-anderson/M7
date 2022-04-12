@@ -16,9 +16,9 @@ struct SpinSquareFrmHam : FrmHam {
 
     explicit SpinSquareFrmHam(const FrmHam &in_ham);;
 
-    defs::ham_t get_coeff_1100(size_t i, size_t j) const override;
+    defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 
-    defs::ham_t get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const override;
+    defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override;
 
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
 

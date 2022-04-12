@@ -22,14 +22,14 @@ defs::ham_comp_t FrmHam::get_energy(const field::FrmOnv &onv) const {
     return consts::real(get_element_0000(onv));
 }
 
-defs::ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
+defs::ham_t FrmHam::get_element(const field::FrmOnv &ket, const conn::FrmOnv &conn) const {
     switch (conn.size()) {
         case 0:
-            return get_element_0000(onv);
+            return get_element_0000(ket);
         case 2:
-            return get_element_1100(onv, conn);
+            return get_element_1100(ket, conn);
         case 4:
-            return get_element_2200(onv, conn);
+            return get_element_2200(ket, conn);
         default:
             return 0.0;
     }

@@ -63,12 +63,12 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
 }
 
 
-defs::ham_t GeneralFrmHam::get_coeff_1100(size_t i, size_t j) const {
-    return m_int_1(i, j);
+defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
+    return m_int_1(a, i);
 }
 
-defs::ham_t GeneralFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
-    return m_int_2.phys_antisym_element(i, j, k, l);
+defs::ham_t GeneralFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
+    return m_int_2.phys_antisym_element(a, b, i, j);
 }
 
 defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
