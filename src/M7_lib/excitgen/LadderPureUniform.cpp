@@ -6,16 +6,16 @@
 
 bool LadderPureUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
                                     conn::FrmBosOnv &conn) {
-    if (!m_h.m_nboson_max) return false;
+    if (!m_h.nboson_max()) return false;
 
     bool cre = exsig_utils::decode_nbos_cre(exsig);
     auto imode = m_prng.draw_uint(src.m_bos.m_nelement);
 
     size_t curr_occ = src.m_bos[imode];
-    if (cre && curr_occ == m_h.m_nboson_max) return false;
+    if (cre && curr_occ == m_h.nboson_max()) return false;
     if (!cre && curr_occ == 0) return false;
 
-    DEBUG_ASSERT_LE(size_t(curr_occ + cre), m_h.m_nboson_max, "generated boson occupation exceeds cutoff");
+    DEBUG_ASSERT_LE(size_t(curr_occ + cre), m_h.nboson_max(), "generated boson occupation exceeds cutoff");
 
     conn.clear();
     if (cre) conn.m_bos.m_cre.set(imode);

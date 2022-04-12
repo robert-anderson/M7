@@ -244,7 +244,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
     auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.m_nboson_max, false);
+    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.nboson_max(), false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -261,8 +261,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc2) {
     DenseHamiltonian ham(ham_src);
     auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite,
                                          ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode,
-                                         ham_src.m_nboson_max, false);
+    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.nboson_max(), false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -278,7 +277,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
     auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.m_nboson_max, false);
+    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.nboson_max(), false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);

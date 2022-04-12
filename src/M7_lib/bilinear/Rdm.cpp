@@ -268,7 +268,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam* ham) const {
 }
 
 defs::ham_comp_t Rdms::get_energy(const FrmBosHam *ham, size_t nelec, size_t exsig) const {
-    if (!ham->m_nboson_max) return 0.0;
+    if (!ham->m_bd.m_bos.m_nboson_max) return 0.0;
     auto& rdm = m_rdms[exsig];
     REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,
                      "currently only supporting linear boson operators in the ladder term");

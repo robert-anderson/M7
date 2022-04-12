@@ -40,11 +40,11 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
         if (dynamic_cast<const SpinModelFrmHam *>(h.m_frm.get())) {
             typedef frm_bos::OpenProduct<frm::Spins> foreach_t;
             return unique_t(new frm_bos::Pair<foreach_t>({{h.m_bd.m_frm.m_nsite, h.m_frm->m_ms2_restrict},
-                                                          h.m_bd.m_bos.m_nmode, h.m_nboson_max}));
+                                                          h.m_bd.m_bos.m_nmode, h.nboson_max()}));
         } else if (h.m_frm->m_kramers_attrs.conserving()) {
             typedef frm_bos::OpenProduct<frm::Ms2Conserve> foreach_t;
             return unique_t(new frm_bos::Pair<foreach_t>({{h.m_bd.m_frm.m_nsite, h.nelec(), h.m_frm->m_ms2_restrict},
-                                                          h.m_bd.m_bos.m_nmode, h.m_nboson_max}));
+                                                          h.m_bd.m_bos.m_nmode, h.nboson_max()}));
         }
     }
     /*
@@ -66,7 +66,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
         if (h.m_bos->m_nboson)
             return unique_t(new bos::Pair<bos::GeneralClosed>({h.m_bd.m_bos.m_nmode, h.m_bos->m_nboson}));
         else
-            return unique_t(new bos::Pair<bos::GeneralOpen>({h.m_bd.m_bos.m_nmode, h.m_nboson_max}));
+            return unique_t(new bos::Pair<bos::GeneralOpen>({h.m_bd.m_bos.m_nmode, h.nboson_max()}));
     } else {
         if (h.m_bos->m_nboson) {
             typedef frm_bos::OpenProduct<frm::General> single_t;
@@ -77,7 +77,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
             typedef frm_bos::ClosedProduct<frm::General> single_t;
             typedef frm_bos::Pair<single_t> pair_t;
             return unique_t(new pair_t({{h.m_bd.m_frm.m_nsite, h.nelec()},
-                                        h.m_bd.m_bos.m_nmode, h.m_nboson_max}));
+                                        h.m_bd.m_bos.m_nmode, h.nboson_max()}));
         }
     }
     ABORT("pair iterator not assigned");

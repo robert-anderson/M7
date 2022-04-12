@@ -11,7 +11,7 @@ void excititers::LadderPure::foreach(const FrmBosOnv &src, conn::FrmBosOnv &conn
     conn.clear();
     for (size_t imode=0ul; imode<src.m_bos.m_nelement; ++imode){
         if (m_cre) {
-            if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
+            if (src.m_bos[imode] == m_ham.nboson_max()) continue;
             conn.m_bos.m_cre.set(imode);
         }
         else {

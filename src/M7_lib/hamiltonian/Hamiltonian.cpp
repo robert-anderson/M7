@@ -10,7 +10,7 @@
 BasisData Hamiltonian::make_bd() const {
     if (m_frmbos->enabled()) return m_frmbos->m_bd;
     FrmBasisData frm_bd(m_frm->m_nsite, m_frm->m_point_group_map);
-    BosBasisData bos_bd(m_bos->m_nmode, m_nboson_max);
+    BosBasisData bos_bd(m_bos->m_nmode, nboson_max());
     return {frm_bd, bos_bd};
 }
 
@@ -28,7 +28,7 @@ std::unique_ptr<FrmBosHam> Hamiltonian::make_ladder(const fciqmc_config::LadderH
     if (opts.m_holstein_coupling) {
         auto nboson_max = opts.m_nboson_max.get();
         auto g = opts.m_holstein_coupling.get();
-        return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(nsite, nboson_max, g));
+        return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam({nsite, {nsite, nboson_max}}, g));
     }
     else if (opts.m_ebdump.enabled()) return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts));
     return std::unique_ptr<FrmBosHam>(new NullLadderHam);
@@ -50,7 +50,6 @@ Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
         m_frm(make_frm(opts.m_fermion)),
         m_frmbos(make_ladder(opts.m_ladder, m_frm->m_nsite)),
         m_bos(make_bos(opts.m_boson, m_frm->m_nsite)),
-        m_nboson_max(m_frmbos->m_nboson_max),
         m_bd(make_bd()), m_work_conn(m_bd){
     REQUIRE_TRUE(m_bd.m_frm.m_nsite || m_bd.m_bos.m_nmode, "No system defined");
     if (m_frm->disabled()) log::info("Fermion Hamiltonian is disabled");
@@ -70,6 +69,10 @@ size_t Hamiltonian::nelec() const {
 
 size_t Hamiltonian::nboson() const {
     return m_bos->m_nboson;
+}
+
+size_t Hamiltonian::nboson_max() const {
+    return m_bd.m_bos.m_nboson_max;
 }
 
 bool Hamiltonian::complex_valued() const {

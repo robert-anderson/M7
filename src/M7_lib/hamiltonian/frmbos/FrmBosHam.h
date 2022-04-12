@@ -16,14 +16,13 @@
 struct FrmBosHam : HamOpTerm {
 
     const BasisData m_bd;
-    const size_t m_nboson_max;
 
     ham_data::TermContribs m_contribs_0010;
     ham_data::TermContribs m_contribs_0001;
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    FrmBosHam(const BasisData &bd, size_t nboson_max);
+    explicit FrmBosHam(BasisData bd);
 	virtual ~FrmBosHam(){}
 
     virtual defs::ham_t get_coeff_0010(size_t imode) const {return 0;}
@@ -72,7 +71,7 @@ struct FrmBosHam : HamOpTerm {
 };
 
 struct NullLadderHam: FrmBosHam {
-    NullLadderHam() : FrmBosHam({{}, {}}, 0){}
+    NullLadderHam() : FrmBosHam({{}, {}}){}
 
     bool enabled() const override {
         return false;

@@ -16,7 +16,7 @@ void excititers::LadderHopping::foreach(const FrmBosOnv &src, conn::FrmBosOnv &c
 
     for (size_t imode = 0ul; imode < m_bd.m_bos.m_nmode; ++imode) {
         if (m_cre) {
-            if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
+            if (src.m_bos[imode] == m_ham.nboson_max()) continue;
             conn.m_bos.m_cre.set(imode);
         } else {
             if (src.m_bos[imode] == 0ul) continue;

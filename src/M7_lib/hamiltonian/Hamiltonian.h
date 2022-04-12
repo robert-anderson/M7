@@ -42,11 +42,7 @@ struct Hamiltonian {
      */
     std::unique_ptr<BosHam> m_bos;
     /**
-     * the maximum number of bosons permitted to occupy any mode
-     */
-    const size_t m_nboson_max;
-    /**
-     * specifies number of fermion sites and boson modes defining the single-particle basis
+     * specifies number of fermion sites and boson modes along with other attributes defining the single-particle basis
      */
     const BasisData m_bd;
 
@@ -100,6 +96,8 @@ public:
     size_t nelec() const;
 
     size_t nboson() const;
+
+    size_t nboson_max() const;
 
     /*
      * pure fermion matrix elements
