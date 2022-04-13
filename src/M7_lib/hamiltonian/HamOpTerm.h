@@ -25,6 +25,8 @@ struct HamOpTerm {
 
     using excit_gen_ptr_t = ExcitGen::excit_gen_ptr_t;
     using excit_gen_list_t = ExcitGen::excit_gen_list_t;
+    using conn_foreach_ptr_t = conn_foreach::base_ptr_t;
+    using conn_foreach_list_t = conn_foreach::base_list_t;
     /**
      * @param prng
      *  pseudorandom number generator to pass to the ctors of all associated excit gens
@@ -38,15 +40,11 @@ struct HamOpTerm {
         return {};
     }
 
-
-    typedef std::unique_ptr<conn_foreach::Base> conn_iter_ptr_t;
-    typedef std::forward_list<conn_iter_ptr_t> conn_iter_ptr_list_t;
-
     /**
      * @return
      *  forward linked list of foreach iterators over the connections of a given MBF
      */
-    virtual conn_iter_ptr_list_t make_conn_iters(){
+    virtual conn_foreach::base_list_t make_foreach_iters(){
         return {};
     }
 };

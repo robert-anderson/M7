@@ -47,6 +47,9 @@ namespace conn_foreach {
     };
 
 
+    typedef std::unique_ptr<Base> base_ptr_t;
+    typedef std::forward_list<base_ptr_t> base_list_t;
+
     namespace frm {
         struct Base : conn_foreach::Base {
             Base(size_t exsig, const FrmBasisData& bd) :

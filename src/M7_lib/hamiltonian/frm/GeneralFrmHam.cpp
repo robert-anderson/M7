@@ -111,8 +111,8 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fci
     return list;
 }
 
-HamOpTerm::conn_iter_ptr_list_t GeneralFrmHam::make_conn_iters() {
-    conn_iter_ptr_list_t list;
+conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() {
+    conn_foreach::base_list_t list;
     FrmBasisData bd(m_nsite);
     if (m_kramers_attrs.m_conserving_singles)
         list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(bd));

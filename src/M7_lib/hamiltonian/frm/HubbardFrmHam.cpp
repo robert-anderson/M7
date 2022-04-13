@@ -75,8 +75,8 @@ HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const fci
     return list;
 }
 
-HamOpTerm::conn_iter_ptr_list_t HubbardFrmHam::make_conn_iters() {
-    conn_iter_ptr_list_t list;
+HamOpTerm::conn_foreach_list_t HubbardFrmHam::make_foreach_iters() {
+    conn_foreach_list_t list;
     list.emplace_front(new conn_foreach::frm::Hubbard(m_lattice));
     return list;
 }
