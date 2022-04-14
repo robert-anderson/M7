@@ -35,6 +35,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propag
     }
     for (auto &prob: m_probs) prob /= norm;
     update_cumprobs();
+    log();
 }
 
 size_t ExcitGenGroup::ncase() const {

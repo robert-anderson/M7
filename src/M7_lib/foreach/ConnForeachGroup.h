@@ -14,6 +14,7 @@ class ConnForeachGroup {
      */
     conn_foreach::base_list_t m_list;
 
+public:
     explicit ConnForeachGroup(const Hamiltonian &ham);
 
     template<typename conn_t>
@@ -28,6 +29,9 @@ class ConnForeachGroup {
     void loop(const mbf_t &src, const function_t<conn::from_field_t<mbf_t>> &fn) {
         for(const auto& foreach : m_list) foreach->loop(src, fn);
     }
+
+    void log() const;
+
 };
 
 #endif //M7_CONNFOREACHGROUP_H

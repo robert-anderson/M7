@@ -9,6 +9,7 @@
 #include <M7_lib/excititer/ExcitIterGroup.h>
 
 #include "Propagator.h"
+#include "M7_lib/foreach/ConnForeachGroup.h"
 
 class ExactPropagator : public Propagator {
     /**
@@ -16,7 +17,7 @@ class ExactPropagator : public Propagator {
      * rank-2 RDMs since these spawns will make the exact contributions.
      */
     const bool m_only_nonzero_h_spawns;
-    ExcitIterGroup m_excit_iters;
+    ConnForeachGroup m_conn_iters;
     MagnitudeLogger m_mag_log;
 
 public:

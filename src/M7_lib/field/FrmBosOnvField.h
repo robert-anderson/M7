@@ -21,6 +21,9 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     mutable decoded_mbf::FrmBosOnv m_decoded;
     FrmBosOnvField(Row* row, BasisData bd, std::string name="");
 
+    FrmBosOnvField(Row* row, const FrmBasisData& frm, const BosBasisData& bos, std::string name=""):
+        FrmBosOnvField(row, BasisData(frm, bos), name){}
+
     FrmBosOnvField(Row *row, size_t nsite, size_t nmode, size_t nboson_max=defs::max_bos_occ, std::string name = "");
 
     FrmBosOnvField(const FrmBosOnvField& other);

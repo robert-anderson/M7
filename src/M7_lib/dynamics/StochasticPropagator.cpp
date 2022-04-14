@@ -17,9 +17,7 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_
                   opts.m_propagator.m_tau_max,
                   opts.m_propagator.m_min_exlvl_prob,
                   opts.m_propagator.m_period),
-        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {
-    m_excit_gen_group.log();
-}
+        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {}
 
 
 void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {

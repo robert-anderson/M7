@@ -30,3 +30,11 @@ void conn_foreach::Base::loop(conn::FrmBosOnv &conn, const field::FrmBosOnv& src
 void conn_foreach::Base::loop(const field::FrmBosOnv& src, const conn_foreach::Base::function_t<conn::FrmBosOnv> &fn) {
     loop(m_conns.m_frmbosonv, src, fn);
 }
+
+void conn_foreach::frm::Base::frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src,
+                                          const function_t<conn::FrmBosOnv> &fn) {
+    auto frm_fn = [&conn, &fn](const conn::FrmOnv& frm_conn) {
+        fn(conn);
+    };
+    frm_loop(conn.m_frm, src.m_frm, frm_fn);
+}

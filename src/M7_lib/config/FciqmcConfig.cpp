@@ -218,7 +218,7 @@ fciqmc_config::Propagator::Propagator(config::Group *parent) :
         m_stochastic(this, "stochastic", true,
                      "if false, perform exact projective FCI (only practical for debugging in small systems)"),
         m_excit_gen(this, "excit_gen", "pchb", "excitation generation algorithm to use"),
-        m_nw_target(this, "nw_target", 0ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
+        m_nw_target(this, "nw_target", 10000ul, "the L1 norm of the wavefunction at which the shift should begin to vary"),
         m_max_bloom(this, "max_bloom", 0.0,
                     "the maximum acceptable magnitude for an off-diagonal propagated contribution. If tau is dynamic, it is updated to keep spawned contributions below this magnitude"),
         m_nadd(this, "nadd", 3.0, "MBFs with weight above this value are granted initiator status"),

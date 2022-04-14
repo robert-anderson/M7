@@ -166,7 +166,11 @@ namespace buffered {
     struct FrmBosOnv : BufferedField<field::FrmBosOnv> {
         using field::FrmBosOnv::operator=;
         FrmBosOnv(const BasisData& bd): BufferedField<field::FrmBosOnv>(bd){}
-        FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv({other.m_frm.m_bd, other.m_bos.m_bd}){
+        FrmBosOnv(const FrmBasisData& frm, const BosBasisData& bos): BufferedField<field::FrmBosOnv>(frm, bos){}
+        FrmBosOnv(size_t nsite, size_t nmode, size_t nboson_max=defs::max_bos_occ):
+            BufferedField<field::FrmBosOnv>(nsite, nmode, nboson_max){}
+
+        FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv(other.m_frm.m_bd, other.m_bos.m_bd){
             *this = other;
         }
         FrmBosOnv(const FrmBosOnv& other): FrmBosOnv(static_cast<const field::FrmBosOnv&>(other)){}

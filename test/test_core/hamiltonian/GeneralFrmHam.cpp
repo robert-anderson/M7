@@ -44,7 +44,32 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 }
 #endif
 
-TEST(FermionHamiltonian, RhfEnergy) {
+
+TEST(GeneralFrmHam, Elements) {
+    const auto benchmark = 0.01759459248922075;
+    fciqmc_config::Document opts;
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
+    opts.verify();
+    Hamiltonian h(opts.m_hamiltonian);
+    {
+        buffered::FrmOnv src(h.m_bd);
+        src = {{0, 1, 4}, {0, 2, 4}};
+        buffered::FrmOnv dst(h.m_bd);
+        dst = {{0, 1, 3}, {0, 1, 4}};
+        auto helem = h.get_element(src, dst);
+        ASSERT_FLOAT_EQ(benchmark, helem);
+    }
+    {
+        buffered::FrmBosOnv src(h.m_bd);
+        src.m_frm = {{0, 1, 4}, {0, 2, 4}};
+        buffered::FrmBosOnv dst(h.m_bd);
+        dst.m_frm = {{0, 1, 3}, {0, 1, 4}};
+        auto helem = h.get_element(src, dst);
+        ASSERT_FLOAT_EQ(benchmark, helem);
+    }
+}
+
+TEST(GeneralFrmHam, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
     fciqmc_config::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
@@ -61,7 +86,7 @@ TEST(FermionHamiltonian, RhfEnergy) {
     ASSERT_FLOAT_EQ(ham.get_energy(onv), benchmark);
 }
 
-TEST(FermionHamiltonian, RhfBrillouinTheorem) {
+TEST(GeneralFrmHam, RhfBrillouinTheorem) {
     fciqmc_config::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();

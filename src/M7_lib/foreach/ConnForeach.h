@@ -56,6 +56,9 @@ namespace conn_foreach {
                     conn_foreach::Base(exsig, {bd, {}}) {
                 REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature has boson operators");
             }
+
+        protected:
+            void frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src, const function_t <conn::FrmBosOnv> &fn) override;
         };
 
         template<size_t nop>
@@ -248,6 +251,16 @@ namespace conn_foreach {
             Base(size_t exsig, const BosBasisData& bd) :
                     conn_foreach::Base(exsig, {{}, bd}){
                 REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature has fermion operators");
+            }
+
+        protected:
+            void frmbos_loop(conn::FrmBosOnv &conn, const field::FrmBosOnv &src,
+                             const function_t <conn::FrmBosOnv> &fn) override {
+                auto bos_fn = [&conn, &fn](const conn::BosOnv &bos_conn) {
+                    fn(conn);
+                };
+                bos_loop(conn.m_bos, src.m_bos, bos_fn);
+
             }
         };
 

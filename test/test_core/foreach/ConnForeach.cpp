@@ -44,7 +44,7 @@ namespace conn_foreach_test {
     }
 }
 
-TEST(ConnForeach, FrmGeneralEx1100) {
+TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
     const size_t nsite = 8;
     defs::inds setbits = {1, 4, 6, 9, 12};
     buffered::FrmOnv mbf(nsite);
@@ -64,6 +64,29 @@ TEST(ConnForeach, FrmGeneralEx1100) {
     conn_foreach::frm::General<1> foreach(nsite);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
     foreach.loop_fn(mbf, fn);
+    ASSERT_EQ(iiter, setbits.size() * clrbits.size());
+}
+
+TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
+    const size_t nsite = 8;
+    defs::inds setbits = {1, 4, 6, 9, 12};
+    buffered::FrmBosOnv mbf(nsite, 0ul);
+    mbf.m_frm = setbits;
+    auto &clrbits = mbf.m_frm.m_decoded.m_simple_vacs.get();
+
+    size_t iiter = 0ul;
+    auto fn = [&](const conn::FrmBosOnv &conn) {
+        const auto cre = conn.m_frm.m_cre[0];
+        const auto ann = conn.m_frm.m_ann[0];
+        const auto iann = iiter / clrbits.size();
+        const auto icre = iiter - iann * clrbits.size();
+        ASSERT_EQ(cre, clrbits[icre]);
+        ASSERT_EQ(ann, setbits[iann]);
+        ++iiter;
+    };
+    conn_foreach::frm::General<1> foreach(nsite);
+    ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
+    foreach.loop(mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
 }
 
@@ -267,7 +290,7 @@ TEST(ConnForeach, BosEx0001) {
     ASSERT_EQ(iiter, chk_modes.size());
 }
 
-TEST(ConnForeach, BosEx0010) {
+TEST(ConnForeach, BosEx0010BosOnv) {
     const size_t nmode = 6;
     defs::inds occs = {0, 2, 0, 1, 5, 1};
 
@@ -305,10 +328,29 @@ TEST(ConnForeach, BosEx0010) {
     }
 }
 
+TEST(ConnForeach, BosEx0010FrmBosOnv) {
+    const size_t nmode = 6;
+    defs::inds occs = {0, 2, 0, 1, 5, 1};
+    // lower maximum occupation
+    buffered::FrmBosOnv mbf(0ul, {nmode, 5});
+    mbf.m_bos = occs;
+    defs::inds chk_modes = {0, 1, 2, 3, 5};
+    auto iiter = 0ul;
+    auto fn = [&](const conn::FrmBosOnv &conn) {
+        ASSERT_FALSE(conn.m_bos.m_ann.size());
+        ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, chk_modes[iiter]);
+        ++iiter;
+    };
+    conn_foreach::bos::Cre foreach(mbf.m_bos.m_bd);
+    ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
+    foreach.loop(mbf, fn);
+    ASSERT_EQ(iiter, chk_modes.size());
+}
+
 TEST(ConnForeach, FrmBosEx1110) {
     const size_t nsite=6, nmode=8;
     for (size_t nboson_max =0ul; nboson_max < 6; ++nboson_max) {
-        buffered::FrmBosOnv mbf({nsite, nmode, nboson_max});
+        buffered::FrmBosOnv mbf(nsite, nmode, nboson_max);
 
         ASSERT_EQ(mbf.m_bos.m_bd.m_nmode, nmode);
         ASSERT_EQ(mbf.m_bos.m_bd.m_nboson_max, nboson_max);
@@ -347,7 +389,7 @@ TEST(ConnForeach, FrmBosEx1110) {
 
 TEST(ConnForeach, FrmBosEx1101) {
     const size_t nsite=6, nmode=8;
-    buffered::FrmBosOnv mbf({nsite, nmode});
+    buffered::FrmBosOnv mbf(nsite, nmode);
     mbf = {{0, 4, 6, 8, 11}, {2, 0, 1, 0, 1, 4, 0, 5}};
     using namespace conn_foreach;
     /*

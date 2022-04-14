@@ -208,7 +208,7 @@ TEST(DecodedMbf, Bosons) {
 
 TEST(DecodedMbf, Holstein) {
     const size_t nsite = 8;
-    buffered::FrmBosOnv mbf({nsite, nsite});
+    buffered::FrmBosOnv mbf(nsite, nsite);
     mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
     mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};
 

@@ -73,7 +73,7 @@ TEST(CompositeField, Test) {
 //    b = {1, 5, 6, 9, 19};
 //    buffered::BosOnv c(5);
 //    c = static_cast<const field::BosOnv&>(b);
-    buffered::FrmBosOnv b({6, 4});
+    buffered::FrmBosOnv b(6, 4);
     //buffered::FrmBosOnv c({6, 4});
     field::FrmBosOnv& bref(b);
     b = {{1, 5, 7}, {1, 5, 6, 9}};
