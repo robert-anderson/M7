@@ -9,7 +9,6 @@
 #include <M7_lib/util/Timer.h>
 #include <M7_lib/observables/RefExcits.h>
 #include <M7_lib/observables/UniformTwf.h>
-#include <M7_lib/observables/WeightedTwf.h>
 #include <M7_lib/observables/RefExcits.h>
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/io/FciqmcStats.h>

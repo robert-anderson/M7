@@ -6,7 +6,6 @@
 #define M7_EXACTPROPAGATOR_H
 
 #include <M7_lib/config/FciqmcConfig.h>
-#include <M7_lib/excititer/ExcitIterGroup.h>
 
 #include "Propagator.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"
