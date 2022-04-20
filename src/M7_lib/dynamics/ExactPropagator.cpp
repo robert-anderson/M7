@@ -2,8 +2,6 @@
 // Created by rja on 27/02/2020.
 //
 
-#include <M7_lib/enumerator/ContainerCombinationEnumerator.h>
-
 #include "ExactPropagator.h"
 
 ExactPropagator::ExactPropagator(

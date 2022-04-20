@@ -4,8 +4,6 @@ target_sources(M7_lib
         AbelianGroup.h
         BasisData.cpp
         BasisData.h
-        CiSpaces.cpp
-        CiSpaces.h
         HilbertData.cpp
         HilbertData.h
         Lattice.cpp

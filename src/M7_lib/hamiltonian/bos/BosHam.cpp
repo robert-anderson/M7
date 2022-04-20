@@ -7,10 +7,6 @@
 #include "BosHam.h"
 
 
-BosHam::BosHam(const BosBasisData &bd, size_t nboson, size_t nboson_max) :
-        m_bd(bd), m_nboson(nboson), m_nboson_max(nboson_max),
-        m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
-
 void BosHam::log_data() const {
     if (disabled()) return;
     if (!m_contribs_0011.is_nonzero(0ul))

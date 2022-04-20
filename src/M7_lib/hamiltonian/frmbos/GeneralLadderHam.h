@@ -27,9 +27,10 @@ struct GeneralLadderHam : FrmBosHam {
      */
     std::vector<defs::ham_t> m_v_unc;
 
-    GeneralLadderHam(const EbdumpHeader& header, bool spin_major=false);
+    GeneralLadderHam(const EbdumpHeader& header, const FrmHam& frm, const BosHam& bos, bool spin_major=false);
 
-    GeneralLadderHam(const fciqmc_config::FrmBosHamiltonian &opts);
+    GeneralLadderHam(const fciqmc_config::FrmBosHamiltonian &opts, const FrmHam& frm, const BosHam& bos):
+            GeneralLadderHam(EbdumpHeader(opts.m_ebdump.m_path), frm, bos, opts.m_ebdump.m_spin_major){}
 
     defs::ham_t get_coeff_0010(size_t imode) const override;
 

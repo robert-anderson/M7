@@ -10,10 +10,10 @@
 
 
 TEST(SpinSquareFrmHam, Elements) {
-    SpinSquareFrmHam s2(8, 6, 2);
+    SpinSquareFrmHam s2(8, {6, 2});
 
     {
-        buffered::FrmOnv det(s2.m_nsite);
+        buffered::FrmOnv det(s2.m_bd);
         det = {{0, 1, 2, 3}, {0, 1, 2, 4}};
 
         ASSERT_EQ(s2.get_element_0000(det), 3);
@@ -49,7 +49,7 @@ TEST(SpinSquareFrmHam, Elements) {
     }
 
     {
-        buffered::FrmOnv det(s2.m_nsite);
+        buffered::FrmOnv det(s2.m_bd);
         det = {{0, 1, 2, 4}, {0, 1, 2, 3}};
 
         ASSERT_EQ(s2.get_element_0000(det), 3);

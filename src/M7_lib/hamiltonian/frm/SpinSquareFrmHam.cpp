@@ -5,8 +5,7 @@
 #include "SpinSquareFrmHam.h"
 
 
-SpinSquareFrmHam::SpinSquareFrmHam(size_t nelec, size_t nsite, int ms2_restrict)
-        : FrmHam(nelec, nsite, ms2_restrict){}
+SpinSquareFrmHam::SpinSquareFrmHam(size_t nsite, const FrmHilbertData& hd): FrmHam({nsite}, hd){}
 
 SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &in_ham) : FrmHam(in_ham){
     REQUIRE_TRUE(in_ham.m_kramers_attrs.conserving(),

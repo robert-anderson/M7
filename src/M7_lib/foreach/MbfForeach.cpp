@@ -58,16 +58,16 @@ void mbf_foreach::frm::Spins::frm_loop(field::FrmOnv& mbf, const std::function<v
     loop_fn(mbf, fn);
 }
 
-size_t mbf_foreach::frm::Ms2Conserve::niter(size_t nsite, size_t nelec, int ms2) {
-    auto na = foreach_t::niter(nsite, ci_utils::nalpha(nelec, ms2));
-    auto nb = foreach_t::niter(nsite, ci_utils::nbeta(nelec, ms2));
+size_t mbf_foreach::frm::Ms2Conserve::niter(size_t nsite, const FrmHilbertData& hd) {
+    auto na = foreach_t::niter(nsite, hd.m_nalpha);
+    auto nb = foreach_t::niter(nsite, hd.m_nbeta);
     return na * nb;
 }
 
-mbf_foreach::frm::Ms2Conserve::Ms2Conserve(size_t nsite, size_t nelec, int ms2) :
-        NumberConserve(nsite, nelec, niter(nsite, nelec, ms2)), m_ms2(ms2),
-        m_alpha_foreach(m_bd.m_frm.m_nsite, ci_utils::nalpha(m_nelec, m_ms2)),
-        m_beta_foreach(m_bd.m_frm.m_nsite, ci_utils::nbeta(m_nelec, m_ms2)) {}
+mbf_foreach::frm::Ms2Conserve::Ms2Conserve(size_t nsite, const FrmHilbertData& hd) :
+        NumberConserve(nsite, hd.m_nelec, niter(nsite, hd)), m_ms2(hd.m_ms2_restrict),
+        m_alpha_foreach(m_bd.m_frm.m_nsite, hd.m_nalpha),
+        m_beta_foreach(m_bd.m_frm.m_nsite, hd.m_nbeta){}
 
 void mbf_foreach::frm::Ms2Conserve::frm_loop(field::FrmOnv& mbf, const std::function<void(const field::FrmOnv &)> &fn) {
     loop_fn(mbf, fn);

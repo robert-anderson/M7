@@ -5,8 +5,10 @@
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
-#include <M7_lib/enumerator/Enumerator.h>
 #include <M7_lib/defs.h>
+#include <M7_lib/util/utils.h>
+#include <M7_lib/parallel/MPIAssert.h>
+#include <M7_lib/foreach/BasicForeach.h>
 #include "array"
 #include "algorithm"
 
@@ -277,14 +279,15 @@ struct NdEnumeration : NdFormat<nind>{
     const std::vector<std::array<size_t, nind>> m_inds;
 
     static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
+        using namespace basic_foreach::ctnd;
         std::vector<std::array<size_t, nind>> out(format.m_nelement);
-        enums::PermutationsWithRepetition e(format.shape_vector());
-        size_t iinds = 0ul;
-        while (e.next()){
-            for (size_t i=0; i!=nind; ++i) out[iinds][i] = e[i];
-            ++iinds;
-        }
-        ASSERT(iinds==format.m_nelement);
+        size_t i=0ul;
+        auto fn = [&out, &i](const inds_t<nind>& inds){
+            out[i] = inds;
+            ++i;
+        };
+        Unrestricted<nind>(format.m_shape).loop(fn);
+        DEBUG_ASSERT_EQ(i, format.m_nelement, "not all index arrays generated");
         return out;
     }
 
@@ -295,6 +298,5 @@ struct NdEnumeration : NdFormat<nind>{
     }
 
 };
-
 
 #endif //M7_NDFORMAT_H

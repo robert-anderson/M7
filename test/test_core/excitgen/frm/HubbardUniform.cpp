@@ -15,7 +15,8 @@ TEST(HubbardUniform, ObcFromNeel1D) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.verify();
     Hamiltonian h(opts);
-    HubbardUniform excit_gen(*h.m_frm, prng);
+    ASSERT_TRUE(dynamic_cast<const HubbardFrmHam*>(&h.m_frm));
+    HubbardUniform excit_gen(h.m_frm, prng);
     ASSERT_FALSE(excit_gen.h_cast()->m_bcs[0]);
     conn_foreach::frm::Hubbard conn_iter(excit_gen.h_cast()->m_lattice);
 
@@ -41,7 +42,8 @@ TEST(HubbardUniform, PbcFromNeel2D) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {-1, 1};
     opts.verify();
     Hamiltonian h(opts);
-    HubbardUniform excit_gen(*h.m_frm, prng);
+    ASSERT_TRUE(dynamic_cast<const HubbardFrmHam*>(&h.m_frm));
+    HubbardUniform excit_gen(h.m_frm, prng);
     conn_foreach::frm::Hubbard conn_iter(excit_gen.h_cast()->m_lattice);
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);

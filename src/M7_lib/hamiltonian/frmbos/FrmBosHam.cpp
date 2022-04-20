@@ -6,16 +6,6 @@
 
 #include <utility>
 
-FrmBosHam::FrmBosHam(const BasisData& bd, const HilbertData& hd) :
-        m_bd(bd), m_hd(hd),
-        m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
-        m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
-    if (!(m_bd.m_frm.m_nsite || m_bd.m_bos.m_nmode)) return;
-    REQUIRE_EQ(m_bd.m_frm.m_nsite == 0, m_bd.m_bos.m_nmode == 0,
-               "if the number of sites is non-zero, so also must be the number of boson modes. ");
-    log_data();
-}
-
 void FrmBosHam::log_data() const {
     if (disabled()) return;
     if (!m_contribs_0010.is_nonzero(exsig_utils::ex_0010))

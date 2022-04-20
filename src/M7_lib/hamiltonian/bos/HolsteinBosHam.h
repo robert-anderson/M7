@@ -9,7 +9,9 @@
 
 struct HolsteinBosHam : BosHam {
     defs::ham_comp_t m_omega;
-    HolsteinBosHam(const BosBasisData& bd, size_t nboson, defs::ham_comp_t omega): BosHam(bd, nboson), m_omega(omega){}
+
+    HolsteinBosHam(size_t nmode, const BosHilbertData& hd, defs::ham_comp_t omega):
+        BosHam(BosBasisData{nmode}, hd), m_omega(omega){}
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
         return i==j ? m_omega : 0;

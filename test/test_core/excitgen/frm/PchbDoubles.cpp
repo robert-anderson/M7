@@ -13,7 +13,8 @@ TEST(HeatBathDoubles, FromHFDeterminant) {
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_LiH_STO-3G/FCIDUMP";
     opts.verify();
     Hamiltonian h(opts);
-    Pchb2200 excit_gen(*h.m_frm, prng);
+    ASSERT_TRUE(dynamic_cast<const GeneralFrmHam*>(&h.m_frm));
+    Pchb2200 excit_gen(h.m_frm, prng);
     conn_foreach::frm::Ms2Conserve<2> conn_iter(10);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
     buffered::FrmOnv src_mbf(h.m_bd);
@@ -36,7 +37,8 @@ TEST(HeatBathDoubles, FromExcited){
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();
     Hamiltonian h(opts);
-    Pchb2200 excit_gen(*h.m_frm, prng);
+    ASSERT_TRUE(dynamic_cast<const GeneralFrmHam*>(&h.m_frm));
+    Pchb2200 excit_gen(h.m_frm, prng);
     conn_foreach::frm::Ms2Conserve<2> excit_iter(h.m_bd.m_frm.m_nsite);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_bd);

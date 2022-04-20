@@ -3,9 +3,9 @@
 //
 
 #include <M7_lib/wavefunction/Wavefunction.h>
-#include <M7_lib/basis/CiSpaces.h>
 #include "gtest/gtest.h"
 
+#if 0
 TEST(Subspace, Test){
     fciqmc_config::Document opts;
     opts.m_propagator.m_nw_target = 1000;
@@ -39,3 +39,4 @@ TEST(Subspace, Test){
         rowset.add_(row);
     }
 }
+#endif

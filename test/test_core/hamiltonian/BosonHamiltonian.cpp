@@ -15,7 +15,7 @@ TEST(BosonHamiltonian, Coefficients) {
     ASSERT_EQ(ham.m_bd.m_bos.m_nmode, 5ul);
     ASSERT_EQ(ham.nboson(), 5ul);
     //0.2209708691 2 4 5 3
-    auto& bos_ham = dynamic_cast<const GeneralBosHam&>(*ham.m_bos);
+    auto& bos_ham = dynamic_cast<const GeneralBosHam&>(ham.m_bos);
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
     //0.1530931089 5 3 1 3

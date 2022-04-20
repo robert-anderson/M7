@@ -125,7 +125,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     opts.m_fermion.m_charge = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 0.0;
-    opts.m_ladder.m_nboson_max = 0;
+    opts.m_boson.m_nboson_max = 0;
     opts.m_boson.m_holstein_omega = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -142,7 +142,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
     opts.m_fermion.m_charge = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_ladder.m_nboson_max = 2;
+    opts.m_boson.m_nboson_max = 2;
     opts.m_boson.m_holstein_omega = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -152,11 +152,11 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
             for (size_t q = 0ul; q < ham_src.m_bd.m_frm.m_nspinorb; ++q) {
                 const auto qsite = FrmOnvField::isite(q, ham_src.m_bd.m_frm.m_nsite);
                 if (n == psite && psite == qsite) {
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1101(n, p, q)), 1.4);
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1110(n, p, q)), 1.4);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 1.4);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 1.4);
                 } else {
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1101(n, p, q)), 0.0);
-                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos->get_coeff_1110(n, p, q)), 0.0);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 0.0);
+                    ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 0.0);
                 }
             }
         }
@@ -174,7 +174,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc3) {
     opts.m_fermion.m_charge = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_ladder.m_nboson_max = 3;
+    opts.m_boson.m_nboson_max = 3;
     opts.m_boson.m_holstein_omega = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -191,7 +191,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc2) {
     opts.m_fermion.m_charge = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_ladder.m_nboson_max = 2;
+    opts.m_boson.m_nboson_max = 2;
     opts.m_boson.m_holstein_omega = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -208,7 +208,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc1) {
     opts.m_fermion.m_charge = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_ladder.m_nboson_max = 1;
+    opts.m_boson.m_nboson_max = 1;
     opts.m_boson.m_holstein_omega = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -225,7 +225,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc3) {
     opts.m_fermion.m_charge = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_ladder.m_nboson_max = 3;
+    opts.m_boson.m_nboson_max = 3;
     opts.m_boson.m_holstein_omega = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -239,12 +239,12 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    opts.m_ladder.m_nboson_max = 1;
+    opts.m_boson.m_nboson_max = 1;
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.nboson_max(), false);
+    auto frm_dim = ham_src.m_frm.m_hd.nci(ham_src.m_bd.m_frm.m_nsite, true);
+    auto bos_dim = ham_src.m_bos.m_hd.nci(ham_src.m_bd.m_bos.m_nmode, false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -255,13 +255,12 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc2) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    opts.m_ladder.m_nboson_max = 2;
+    opts.m_boson.m_nboson_max = 2;
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite,
-                                         ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.nboson_max(), false);
+    auto frm_dim = ham_src.m_frm.m_hd.nci(ham_src.m_bd.m_frm.m_nsite, true);
+    auto bos_dim = ham_src.m_bos.m_hd.nci(ham_src.m_bd.m_bos.m_nmode, false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -272,12 +271,12 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    opts.m_ladder.m_nboson_max = 3;
+    opts.m_boson.m_nboson_max = 3;
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ci_utils::fermion_dim(ham_src.m_bd.m_frm.m_nsite, ham_src.nelec(), 0);
-    const auto bos_dim = ci_utils::boson_dim(ham_src.m_bd.m_bos.m_nmode, ham_src.nboson_max(), false);
+    auto frm_dim = ham_src.m_frm.m_hd.nci(ham_src.m_bd.m_frm.m_nsite, true);
+    auto bos_dim = ham_src.m_bos.m_hd.nci(ham_src.m_bd.m_bos.m_nmode, false);
     ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);

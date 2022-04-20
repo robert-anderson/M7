@@ -53,7 +53,7 @@ namespace conn_foreach {
     namespace frm {
         struct Base : conn_foreach::Base {
             Base(size_t exsig, const FrmBasisData& bd) :
-                    conn_foreach::Base(exsig, {bd, {}}) {
+                    conn_foreach::Base(exsig, {bd, BosBasisData()}) {
                 REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature has boson operators");
             }
 
@@ -249,7 +249,7 @@ namespace conn_foreach {
     namespace bos {
         struct Base : conn_foreach::Base {
             Base(size_t exsig, const BosBasisData& bd) :
-                    conn_foreach::Base(exsig, {{}, bd}){
+                    conn_foreach::Base(exsig, {FrmBasisData(), bd}){
                 REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature has fermion operators");
             }
 

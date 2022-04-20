@@ -4,15 +4,16 @@
 
 #include "HeisenbergFrmHam.h"
 
-HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice) :
-        SpinModelFrmHam(lattice.nsite(), lattice.nsite(), 0), m_j(j), m_lattice(std::move(lattice)){
+HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2_restrict) :
+        SpinModelFrmHam(lattice.nsite(), {lattice.nsite()+ms2_restrict, ms2_restrict}),
+        m_j(j), m_lattice(std::move(lattice)){
     m_contribs_2200.set_nonzero(exsig_utils::ex_double);
     m_contribs_2200.set_nonzero(0);
     log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice.info());
 }
 
 HeisenbergFrmHam::HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
-        HeisenbergFrmHam(opts.m_heisenberg.m_coupling, lattice::make(opts.m_heisenberg)){}
+        HeisenbergFrmHam(opts.m_heisenberg.m_coupling, lattice::make(opts.m_heisenberg), opts.m_ms2_restrict){}
 
 defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
     /*

@@ -626,6 +626,7 @@ namespace complex_utils {
     }
 }
 
+#if 0
 namespace ci_utils {
     /**
      * @param nelec
@@ -635,22 +636,24 @@ namespace ci_utils {
      * @return
      *  number of alpha (spin channel 0) electrons
      */
-    static size_t nalpha(size_t nelec, int ms2) {
+    static size_t nalpha(const FrmHilbertData& hd){
+        auto nelec = hd.m_nelec;
+        auto ms2 = hd.m_ms2_restrict;
         size_t spin_odd = std::abs(ms2) % 2;
         ASSERT(nelec % 2 == spin_odd);
         size_t nalpha = nelec / 2 + (std::abs(ms2)) / 2 + spin_odd;
         return ms2 >= 0 ? nalpha : nelec - nalpha;
     }
 
-    static size_t nbeta(size_t nelec, int ms2) {
-        return nelec - nalpha(nelec, ms2);
+    static size_t nbeta(const FrmHilbertData& hd){
+        return hd.m_nelec - nalpha(hd);
     }
 
     static size_t fermion_dim(size_t nsite, size_t nelec) {
         return integer_utils::combinatorial(2 * nsite, nelec);
     }
 
-    static size_t fermion_dim(size_t nsite, size_t nelec, int ms2_restrict) {
+    static size_t fermion_dim(size_t nsite, const FrmHilbertData& hd){
         ASSERT(static_cast<size_t>(ms2_restrict) % 2 == nelec % 2)
         auto na = integer_utils::combinatorial(nsite, nalpha(nelec, ms2_restrict));
         auto nb = integer_utils::combinatorial(nsite, nbeta(nelec, ms2_restrict));
@@ -672,6 +675,7 @@ namespace ci_utils {
         else return std::pow(nboson + 1, nmode);
     }
 }
+#endif
 
 namespace mem_utils {
 

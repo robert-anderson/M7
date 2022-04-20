@@ -8,10 +8,10 @@
 
 buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const {
     buffered::FrmOnv ref(m_bd.m_nsite);
-    REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_nelec % 2,
+    REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_hd.m_nelec % 2,
                "Sz quantum number given incompatible with nelec");
-    size_t n_spin_0 = (m_nelec + spin_restrict) / 2;
-    size_t n_spin_1 = m_nelec - n_spin_0;
+    size_t n_spin_0 = (m_hd.m_nelec + spin_restrict) / 2;
+    size_t n_spin_1 = m_hd.m_nelec - n_spin_0;
     for (size_t i = 0ul; i < n_spin_0; ++i) ref.set({0, i});
     for (size_t i = 0ul; i < n_spin_1; ++i) ref.set({1, i});
     DEBUG_ASSERT_EQ(ref.ms2(), spin_restrict, "constructed fermion ONV does not have expected Sz");
@@ -27,8 +27,8 @@ buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const 
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const FrmBasisData &bd, size_t nelec, int ms2_restrict) :
-    FrmHam(bd, nelec, ms2_restrict),
+GeneralFrmHam::GeneralFrmHam(const FrmBasisData &bd, const FrmHilbertData& hd):
+    FrmHam(bd, hd),
     m_int_1(m_bd.m_nsite, m_bd.m_spin_resolved), m_int_2(m_bd.m_nsite, m_bd.m_spin_resolved) {
     if (!m_bd.m_nsite) return;
     REQUIRE_EQ(m_bd.m_abgrp_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
@@ -36,7 +36,7 @@ GeneralFrmHam::GeneralFrmHam(const FrmBasisData &bd, size_t nelec, int ms2_restr
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
         GeneralFrmHam({header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved},
-                      header.m_nelec - charge, ms2_restrict){
+                      {header.m_nelec - charge, ms2_restrict}){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -46,7 +46,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
     defs::ham_t value;
 
     // assume no contribution cases to be nonzero unless a counterexample is found
-    REQUIRE_LE_ALL(m_nelec, m_bd.m_nspinorb,
+    REQUIRE_LE_ALL(m_hd.m_nelec, m_bd.m_nspinorb,
                    "unphysical number of electrons specified by FCIDUMP file header and charge parameter");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");

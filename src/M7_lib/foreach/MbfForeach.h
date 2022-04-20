@@ -6,6 +6,7 @@
 #define M7_MBFFOREACH_H
 
 #include <utility>
+#include <M7_lib/basis/HilbertData.h>
 
 #include "BasicForeach.h"
 #include "M7_lib/field/Fields.h"
@@ -105,7 +106,7 @@ namespace mbf_foreach {
             size_t iouter = 0ul;
             auto outer_fn = [this, &fn, &iouter](const mbf_t &outer) {
                 size_t iinner = 0ul;
-                auto inner_fn = [this, &fn, &outer, &iouter, &iinner](const mbf_t &inner) {
+                auto inner_fn = [&fn, &outer, &iouter, &iinner](const mbf_t &inner) {
                     fn(outer, iouter, inner, iinner);
                     ++iinner;
                 };
@@ -183,9 +184,9 @@ namespace mbf_foreach {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_alpha_foreach, m_beta_foreach;
 
-            static size_t niter(size_t nsite, size_t nelec, int ms2);
+            static size_t niter(size_t nsite, const FrmHilbertData& hd);
 
-            Ms2Conserve(size_t nsite, size_t nelec, int ms2);
+            Ms2Conserve(size_t nsite, const FrmHilbertData& hd);
 
         public:
             template<typename fn_t>

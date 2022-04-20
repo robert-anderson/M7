@@ -88,10 +88,12 @@ struct HamiltonianTerms {
         return std::unique_ptr<FrmHam>(new NullFrmHam);
     }
 
-    std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts, const FrmHam* frm){
+    std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts){
+        const auto nsite = m_frm->m_bd.m_nsite;
+        const BosHilbertData hd(opts.m_nboson, opts.m_nboson_max);
         if (opts.m_holstein_omega) {
             auto omega = opts.m_holstein_omega.get();
-            return std::unique_ptr<BosHam>(new HolsteinBosHam(frm->m_bd.m_nsite, opts.m_nboson, omega));
+            return std::unique_ptr<BosHam>(new HolsteinBosHam(nsite, hd, omega));
         }
         else if (opts.m_interacting_bose_gas.enabled())
             return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
@@ -100,23 +102,22 @@ struct HamiltonianTerms {
         return std::unique_ptr<BosHam>(new NullBosHam);
     }
 
-    std::unique_ptr<FrmBosHam> make_frmbos(const fciqmc_config::FrmBosHamiltonian &opts,
-                                           const FrmHam* frm, const BosHam* bos) {
+    std::unique_ptr<FrmBosHam> make_frmbos(const fciqmc_config::FrmBosHamiltonian &opts) {
         if (opts.m_holstein_coupling) {
-            REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(frm),
+            REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(m_frm.get()),
                          "Holstein coupling requires Hubbard-type fermion Hamiltonian");
-            auto nsite = frm->m_bd.m_nsite;
+            auto nsite = m_frm->m_bd.m_nsite;
             auto g = opts.m_holstein_coupling.get();
-            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam({nsite, nsite}, g));
+            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(nsite, *m_frm, *m_bos, g));
         }
-        else if (opts.m_ebdump.enabled()) return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts));
+        else if (opts.m_ebdump.enabled()) {
+            return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts, *m_frm, *m_bos));
+        }
         return std::unique_ptr<FrmBosHam>(new NullLadderHam);
     }
 
     HamiltonianTerms(const fciqmc_config::Hamiltonian &opts):
-        m_frm(make_frm(opts.m_fermion)),
-        m_bos(make_bos(opts.m_boson, m_frm.get())),
-        m_frmbos(make_frmbos(opts.m_ladder, m_frm.get(), m_bos.get())){}
+        m_frm(make_frm(opts.m_fermion)), m_bos(make_bos(opts.m_boson)), m_frmbos(make_frmbos(opts.m_ladder)){}
 };
 
 
@@ -128,7 +129,7 @@ struct Hamiltonian {
 
 public:
     /*
-     * term ptrs are always dereferencable, so they are exposed as public const refs to the base classes:
+     * term ptrs are always dereferencable, so they are exposed as public const refs to the term base classes:
      */
     const FrmHam& m_frm;
     const BosHam& m_bos;

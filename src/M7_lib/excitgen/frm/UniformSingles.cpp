@@ -14,9 +14,9 @@ bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, def
 size_t UniformSingles::approx_nconn() const {
     auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
     if (spin_conserving) {
-        return 2 * (m_h.m_nelec / 2) * ((m_h.m_bd.m_nspinorb - m_h.m_nelec) / 2);
+        return 2 * (m_h.m_hd.m_nelec / 2) * ((m_h.m_bd.m_nspinorb - m_h.m_hd.m_nelec) / 2);
     } else {
-        return m_h.m_nelec * (m_h.m_bd.m_nspinorb - m_h.m_nelec);
+        return m_h.m_hd.m_nelec * (m_h.m_bd.m_nspinorb - m_h.m_hd.m_nelec);
     }
 }
 

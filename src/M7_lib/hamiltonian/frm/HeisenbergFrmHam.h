@@ -36,7 +36,7 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
     const defs::ham_t m_j;
     Lattice m_lattice;
 
-    HeisenbergFrmHam(defs::ham_t j, Lattice lattice);
+    HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2_restrict);
 
     explicit HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts);
 

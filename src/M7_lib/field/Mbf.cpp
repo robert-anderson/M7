@@ -5,9 +5,8 @@
 #include "Mbf.h"
 
 void mbf::set_aufbau_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
-    const auto ms2_restrict = ham.m_frm.m_ms2_restrict;
-    const auto nalpha = ci_utils::nalpha(ham.nelec(), ms2_restrict);
-    const auto nbeta = ci_utils::nbeta(ham.nelec(), ms2_restrict);
+    const auto nalpha = ham.m_frm.m_hd.m_nalpha;
+    const auto nbeta = ham.m_frm.m_hd.m_nbeta;
     DEBUG_ASSERT_EQ(nalpha + nbeta, ham.nelec(), "inconsistent na, nb, nelec");
     onv.zero();
     for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
@@ -30,7 +29,7 @@ void mbf::set_neel_mbf(FrmOnv &onv, size_t nelec) {
 }
 
 void mbf::set_neel_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
-    REQUIRE_EQ(ham.m_frm.m_ms2_restrict, 0, "Neel state requires zero overall spin");
+    REQUIRE_EQ(ham.m_frm.m_hd.m_ms2_restrict, 0, "Neel state requires zero overall spin");
     set_neel_mbf(onv, ham.nelec());
 }
 
@@ -72,7 +71,7 @@ void mbf::set(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, const Hamilt
     else if (def.m_neel) set_neel_mbf(mbf, ham);
     else set_aufbau_mbf(mbf, ham);
     REQUIRE_EQ(mbf.nsetbit(), ham.nelec(), "too many electrons in MBF");
-    REQUIRE_EQ(mbf.ms2(), ham.m_frm.m_ms2_restrict, "MBF has incorrect total Ms");
+    REQUIRE_EQ(mbf.ms2(), ham.m_frm.m_hd.m_ms2_restrict, "MBF has incorrect total Ms");
 }
 
 void mbf::set(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, const Hamiltonian& ham, size_t idef) {

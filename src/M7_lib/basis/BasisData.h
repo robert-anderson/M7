@@ -32,9 +32,15 @@ struct FrmBasisData {
     const AbelianGroupMap m_abgrp_map;
 
     FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
+    FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map);
     FrmBasisData(size_t nsite);
     FrmBasisData();
+
     bool operator==(const FrmBasisData& other) const;
+
+    operator bool() const {
+        return m_nsite;
+    }
 };
 
 /**
@@ -49,6 +55,10 @@ struct BosBasisData {
     BosBasisData(size_t nmode);
     BosBasisData(): BosBasisData(0ul){}
     bool operator==(const BosBasisData& other) const;
+
+    operator bool() const {
+        return m_nmode;
+    }
 };
 
 /**
@@ -60,10 +70,15 @@ struct BasisData {
 
     BasisData(FrmBasisData frm, BosBasisData bos);
     BasisData(size_t nsite, size_t nmode): m_frm(nsite), m_bos(nmode){}
+    BasisData(): BasisData(0,0){}
 
     void require_pure_frm() const;
     void require_pure_bos() const;
     bool operator==(const BasisData& other) const;
+
+    operator bool() const {
+        return m_frm || m_bos;
+    }
 };
 
 #endif //M7_BASISDATA_H

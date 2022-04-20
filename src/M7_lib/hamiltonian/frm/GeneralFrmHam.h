@@ -14,7 +14,7 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(const FrmBasisData& bd, size_t nelec, int ms2_restrict=0);
+    GeneralFrmHam(const FrmBasisData& bd, const FrmHilbertData& hd);
 
     GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
 

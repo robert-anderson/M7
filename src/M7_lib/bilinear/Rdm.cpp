@@ -257,12 +257,12 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
         if ((i==k) && (j==l)) trace+=rdm_element;
     }
     // scale the one-body contribution by the number of two-body contributions
-    e1 /= ham.m_nelec-1;
+    e1 /= ham.m_hd.m_nelec-1;
     e1 = mpi::all_sum(e1);
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
-    const auto norm = consts::real(trace) / integer_utils::nspair(ham.m_nelec);
+    const auto norm = consts::real(trace) / integer_utils::nspair(ham.m_hd.m_nelec);
     REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
                  "2RDM norm should match total of sampled diagonal contributions");
     return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;

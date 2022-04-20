@@ -2,7 +2,6 @@
 // Created by rja on 27/02/2020.
 //
 
-#include "M7_lib/enumerator/ContainerCombinationEnumerator.h"
 #include "M7_lib/caches/DecodedDeterminants.h"
 #include "M7_lib/parallel/RankAllocator.h"
 

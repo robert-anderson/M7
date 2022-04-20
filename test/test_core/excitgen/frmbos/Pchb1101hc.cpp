@@ -14,8 +14,8 @@ TEST(Pchb1101hc, Test){
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
     opts.verify();
     Hamiltonian h(opts);
-    ASSERT_TRUE(dynamic_cast<const GeneralLadderHam*>(h.m_frmbos.get()));
-    Pchb1101hc excit_gen(*h.m_frmbos, prng);
+    ASSERT_TRUE(dynamic_cast<const GeneralLadderHam*>(&h.m_frmbos));
+    Pchb1101hc excit_gen(h.m_frmbos, prng);
     buffered::FrmOnv src_mbf(h.m_bd);
     mbf::set_aufbau_mbf(src_mbf, h);
     conn_foreach::frm::Ms2Conserve<2> conn_iter(src_mbf.m_bd);

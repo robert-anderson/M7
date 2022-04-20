@@ -30,7 +30,7 @@ struct FrmXonvField : XonvField<FrmOnvField> {
             XonvField<FrmOnvField>(row, bd, name) {}
 
     FrmXonvField(Row *row, const FrmBasisData &bd, std::string name = "") :
-            FrmXonvField(row, {bd, {}}, name) {}
+            FrmXonvField(row, {bd, BosBasisData()}, name) {}
 
     FrmXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
@@ -45,7 +45,7 @@ struct BosXonvField : XonvField<BosOnvField> {
             XonvField<BosOnvField>(row, bd, name) {}
 
     BosXonvField(Row *row, const BosBasisData &bd, std::string name = "") :
-            BosXonvField(row, {{}, bd}, name) {}
+            BosXonvField(row, {FrmBasisData(), bd}, name) {}
 
     BosXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;

@@ -11,8 +11,8 @@ bool HubbardFrmHam::sign_problem() const {
     // open boundary conditions is always SPF
     auto bc = m_bcs[0];
     if (!bc) return true;
-    auto odd_nalpha = ci_utils::nalpha(m_nelec, m_ms2_restrict) & 1ul;
-    auto odd_nbeta = ci_utils::nbeta(m_nelec, m_ms2_restrict) & 1ul;
+    auto odd_nalpha = m_hd.m_nalpha & 1ul;
+    auto odd_nbeta = m_hd.m_nbeta & 1ul;
     // we have (anti-)periodic BCs: if alpha and beta oddness is different, there is a sign problem
     if (odd_nalpha != odd_nbeta) return false;
     // if nalpha is odd, then boundary excitation does not pick up a factor of -1 from the fermi phase => PBC
@@ -21,7 +21,7 @@ bool HubbardFrmHam::sign_problem() const {
 }
 
 HubbardFrmHam::HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2_restrict, int charge) :
-        FrmHam(lattice.nsite()-charge, lattice.nsite(), ms2_restrict),
+        FrmHam({lattice.nsite()}, {lattice.nsite()-charge, ms2_restrict}),
         m_u(u), m_lattice(std::move(lattice)), m_format(m_lattice.m_spec.m_format),
         m_bcs(m_lattice.m_spec.m_bcs), m_spf(sign_problem()){
     m_contribs_1100.set_nonzero(exsig_utils::ex_single);

@@ -4,8 +4,8 @@
 
 #include "Pchb1101hc.h"
 
-Pchb1101hc::Pchb1101hc(const FrmBosHam &h, size_t nboson_max, PRNG &prng) :
-        FrmBosOpenExcitGen(h, nboson_max, prng, {exsig_utils::ex_1101, exsig_utils::ex_1110}, "precomputed heatbath"),
+Pchb1101hc::Pchb1101hc(const FrmBosHam &h, PRNG &prng) :
+        FrmBosExcitGen(h, prng, {exsig_utils::ex_1101, exsig_utils::ex_1110}, "precomputed heatbath"),
         m_pick_n_given_pq(utils::pow<2>(h.m_bd.m_frm.m_nspinorb), h.m_bd.m_bos.m_nmode) {
     const auto nmode = m_h.m_bd.m_bos.m_nmode;
     const auto nspinorb = m_h.m_bd.m_frm.m_nspinorb;
@@ -49,7 +49,7 @@ bool Pchb1101hc::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
     auto n = m_pick_n_given_pq.draw(pq, m_prng);
     conn.m_bos.clear();
     if (cre) {
-        if (src.m_bos[n] == m_nboson_max) return false;
+        if (src.m_bos[n] == m_h.m_hd.m_bos.m_nboson_max) return false;
         conn.m_bos.m_cre.set(n);
     }
     else {

@@ -76,8 +76,8 @@ TEST(GeneralFrmHam, RhfEnergy) {
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
     defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
-    ASSERT_EQ(ham.m_frm->m_point_group_map.m_site_irreps, chk_orbsyms);
-    ASSERT_TRUE(ham.m_frm->m_kramers_attrs.conserving());
+    ASSERT_EQ(ham.m_frm.m_bd.m_abgrp_map.m_site_irreps, chk_orbsyms);
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_bd);
     mbf::set_aufbau_mbf(onv, ham);
     auto elem = ham.get_element(onv);
@@ -91,7 +91,7 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
-    ASSERT_TRUE(ham.m_frm->m_kramers_attrs.conserving());
+    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
     buffered::FrmOnv onv(ham.m_bd);
     mbf::set_aufbau_mbf(onv, ham);
 
@@ -107,7 +107,7 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
             const auto &vac = vacs[iocc];
             conn.m_ann.set(occ);
             conn.m_cre.set(vac);
-            ASSERT_FLOAT_EQ(ham.m_frm->get_element_1100(onv, conn), 0.0);
+            ASSERT_FLOAT_EQ(ham.m_frm.get_element_1100(onv, conn), 0.0);
         }
     }
 }

@@ -14,6 +14,7 @@
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 #include "M7_lib/hamiltonian/HamOpTerm.h"
+#include "M7_lib/basis/HilbertData.h"
 
 struct BosHam : HamOpTerm {
     /**
@@ -24,14 +25,7 @@ struct BosHam : HamOpTerm {
      * properties of the many-body basis
      */
     const BosHilbertData m_hd;
-    /**
-     * total number of bosons in the system (only respected if H is number conserving)
-     */
-    const size_t m_nboson;
-    /**
-     * total number of bosons permitted to occupy any given mode
-     */
-    const size_t m_nboson_max;
+
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
@@ -42,17 +36,10 @@ struct BosHam : HamOpTerm {
     bool number_conserving() const {
         return true;
     }
-    /**
-     * @param bd
-     *  parameters of the bosonic single-particle basis. Just as in FrmHam, nboson and nboson_max are not included in
-     *  the definition of this object, since they are properties of the many-body basis
-     * @param nboson
-     *  number of bosons in the system (only respected if the Hamiltonian is boson-number conserving, else it is only
-     *  referenced in setting initial or reference BosonONVs
-     * @param nboson_max
-     *  number of bosons permitted to occupy any given mode
-     */
-    BosHam(const BosBasisData& bd, size_t nboson, size_t nboson_max=defs::max_bos_occ);
+
+    BosHam(const BosBasisData& bd, const BosHilbertData& hd):
+            m_bd(bd), m_hd(hd),
+            m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
 	virtual ~BosHam(){}
 
     virtual defs::ham_t get_coeff_0011(size_t i, size_t j) const {return 0;}

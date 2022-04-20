@@ -42,7 +42,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
     const auto &occs = src.m_decoded.m_simple_occs.get();
-    DEBUG_ASSERT_EQ(occs.size(), m_h.m_nelec, "incorrect number of electrons")
+    DEBUG_ASSERT_EQ(occs.size(), m_h.m_hd.m_nelec, "incorrect number of electrons")
     // i and j are positions in the occ list, convert to orb inds:
     i = occs[i];
     j = occs[j];

@@ -54,17 +54,6 @@ struct FrmHam : HamOpTerm {
      */
     const FrmHilbertData m_hd;
     /**
-     * although the absolute number of electrons in a number-conserving system is not strictly speaking a property of
-     * the Hamiltonian, whether or not the system is number-conserving is determined by the non-zero contributions to
-     * terms with rank signature of the form xy00 where x!=y. Thus, the electron number is stored here, and not in the
-     * basis data structure.
-     */
-    const size_t m_nelec;
-    /**
-     * the nalpha-nbeta sector into which the Hamiltonian is projected
-     */
-    const int m_ms2_restrict;
-    /**
      * core energy
      */
     defs::ham_t m_e_core = 0.0;
@@ -93,19 +82,6 @@ struct FrmHam : HamOpTerm {
      */
     bool m_complex_valued = false;
 
-    /**
-     * @param bd
-     *  parameters of the fermionic single-particle basis. nelec and ms2_restrict are not included in the definition of
-     *  this object, since they do not pertain to the single particle basis, but are attributes of the many-body basis.
-     *  If such parameters become numerous through future feature additions, then these could be wrapped up in another
-     *  new "data" class, but for now they are stored as direct members of the FrmHam
-     * @param nelec
-     *  electron number sector in which the fermionic ONVs are restricted (fermion number non-conservation is not
-     *  implemented)
-     * @param ms2_restrict
-     *  nalpha-nbeta sector in which the fermionic ONVs are restricted (this is only respected if the Hamiltonian
-     *  commutes with Sz, as signalled by the kramers_attrs members.
-     */
     FrmHam(const FrmBasisData& bd, const FrmHilbertData& hd);
 
     FrmHam(const FrmHam& other): FrmHam(other.m_bd, other.m_hd){}

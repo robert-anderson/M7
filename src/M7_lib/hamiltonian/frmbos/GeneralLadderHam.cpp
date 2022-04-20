@@ -4,9 +4,10 @@
 
 #include "GeneralLadderHam.h"
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max, bool spin_major) :
-        FrmBosHam({header.m_nsite, header.m_nmode}),
-        m_v(m_bd, header.m_uhf), m_v_unc(m_bd.m_bos.m_nmode, 0.0) {
+
+GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, const FrmHam &frm, const BosHam &bos, bool spin_major) :
+        FrmBosHam({header.m_nsite, header.m_nmode}, frm, bos), m_v(m_bd, header.m_uhf),
+        m_v_unc(m_bd.m_bos.m_nmode, 0.0) {
     if (!m_bd.m_frm.m_nsite && !m_bd.m_bos.m_nmode) return;
     REQUIRE_EQ(m_bd.m_frm.m_nsite == 0, m_bd.m_bos.m_nmode == 0,
                "if the number of sites is non-zero, so also must be the number of boson modes. "
@@ -34,9 +35,6 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, size_t nboson_max
     }
     log_data();
 }
-
-GeneralLadderHam::GeneralLadderHam(const fciqmc_config::FrmBosHamiltonian &opts) :
-        GeneralLadderHam(EbdumpHeader(opts.m_ebdump.m_path), opts.m_nboson_max, opts.m_ebdump.m_spin_major){}
 
 defs::ham_t GeneralLadderHam::get_coeff_0010(size_t imode) const {
     return m_v_unc[imode];

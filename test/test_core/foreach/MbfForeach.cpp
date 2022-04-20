@@ -140,7 +140,7 @@ TEST(MbfForeach, FrmMs2Conserve) {
         ASSERT_EQ(mbf, chk_inds[iiter]);
         ++iiter;
     };
-    mbf_foreach::frm::Ms2Conserve foreach(nsite, nelec, ms2);
+    mbf_foreach::frm::Ms2Conserve foreach(nsite, {nelec, ms2});
     ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, chk_inds.size());
     ASSERT_EQ(foreach.m_niter, chk_inds.size());
@@ -297,7 +297,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
         ASSERT_TRUE(field.m_bos == bos_chk_inds[iiter_bos]);
         ++iiter;
     };
-    mbf_foreach::frm::Ms2Conserve outer(nsite, nelec, ms2);
+    mbf_foreach::frm::Ms2Conserve outer(nsite, {nelec, ms2});
     mbf_foreach::bos::GeneralOpen inner(nmode, nboson_max);
     mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
     ASSERT_NO_THROW(foreach.loop_fn(fn));
@@ -329,7 +329,7 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
         ASSERT_TRUE(inner.m_bos == bos_chk_inds[iinner_bos]);
     };
     typedef mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> product_t;
-    mbf_foreach::frm_bos::Pair<product_t> foreach({{nsite, nelec, ms2}, {nmode, nboson_max}});
+    mbf_foreach::frm_bos::Pair<product_t> foreach({{nsite, {nelec, ms2}}, {nmode, nboson_max}});
     ASSERT_NO_THROW(foreach.loop_fn(fn));
     auto n = frm_chk_inds.size()*bos_chk_inds.size();
     ASSERT_EQ(foreach.m_niter, n*n);
