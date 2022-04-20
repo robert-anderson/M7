@@ -6,19 +6,15 @@
 
 #include <utility>
 
-FrmBasisData::FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved) :
-        m_nsite(nsite), m_nspinorb(nsite*2), m_spin_resolved(spin_resolved), m_abgrp_map(std::move(abgrp_map)){}
+FrmBasisData::FrmBasisData(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2,
+                           bool ms2_conserve) :
+        m_nelec(nelec), m_nsite(nsite), m_nspinorb(2*nsite), m_spin_resolved(spin_resolved),
+        m_abgrp_map(std::move(abgrp_map)), m_ms2(ms2), m_ms2_conserve(ms2_conserve){}
 
-FrmBasisData::FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map) : FrmBasisData(nsite, abgrp_map, false){}
-
-FrmBasisData::FrmBasisData(size_t nsite) : FrmBasisData(nsite, {nsite}, false){}
-
-FrmBasisData::FrmBasisData() : FrmBasisData(0ul){}
 
 bool FrmBasisData::operator==(const FrmBasisData &other) const {
     return m_nsite==other.m_nsite && m_abgrp_map==other.m_abgrp_map;
 }
-
 
 BosBasisData::BosBasisData(size_t nmode) : m_nmode(nmode){}
 
