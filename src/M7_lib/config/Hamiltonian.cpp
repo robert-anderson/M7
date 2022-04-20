@@ -82,26 +82,14 @@ bool fciqmc_config::FermionHamiltonian::enabled() const {
     return m_fcidump.enabled() || m_hubbard.enabled();
 }
 
-fciqmc_config::LadderHamiltonian::LadderHamiltonian(config::Group *parent) :
+fciqmc_config::FrmBosHamiltonian::FrmBosHamiltonian(config::Group *parent) :
         config::Section(parent, "ladder",
                         "options relating to the \"ladder\" hamiltonian term, which couples number-conserving electronic single excitations to boson (de-)excitations"),
         m_ebdump(this),
         m_holstein_coupling(this, "holstein_coupling", 0.0,
-                            "constant coupling between the electronic density and the boson (de-)excitation operators"),
-        m_nboson_max(this, "nboson_max", 0ul,
-                     "maximum allowed occupation of bosonic modes. Disregard bosonic operators entirely in the Hamiltonian if set to 0") {}
+                            "constant coupling between the electronic density and the boson (de-)excitation operators"){}
 
-void fciqmc_config::LadderHamiltonian::verify() {
-    if (defs::enable_fermions && !defs::enable_bosons && m_nboson_max) {
-        log::warn("Maximum boson number per mode is non-zero but bosons are compile time disabled.");
-        log::warn("Set CMake variable -DMBF_TYPE to \"fermion-boson\" and recompile else propagation will only involve the fermion sector");
-    }
-    REQUIRE_LE_ALL(m_nboson_max, defs::max_bos_occ,
-                   log::format("Maximum boson number mustn't exceed the capacity of the integer container ({})",
-                               defs::max_bos_occ));
-}
-
-bool fciqmc_config::LadderHamiltonian::enabled() const {
+bool fciqmc_config::FrmBosHamiltonian::enabled() const {
     return m_ebdump.enabled() || m_holstein_coupling.get()!=0.0;
 }
 
@@ -119,6 +107,7 @@ fciqmc_config::BosonHamiltonian::BosonHamiltonian(config::Group *parent) :
         config::Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
         m_bosdump(this),
         m_nboson(this, "nboson", 0ul, "number of bosons in the system. if zero, the the Hamiltonian is not assumed to conserve boson number"),
+        m_nboson_max(this, "nboson_max", defs::max_bos_occ, "maximum allowed occupation of bosonic modes."),
         m_holstein_omega(this, "holstein_omega", 0.0, "constant frequency of the boson modes in the Holstein model"),
         m_interacting_bose_gas(this){}
 

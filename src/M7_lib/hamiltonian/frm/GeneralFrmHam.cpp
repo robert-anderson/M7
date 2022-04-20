@@ -7,7 +7,7 @@
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
 buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const {
-    buffered::FrmOnv ref(m_nsite);
+    buffered::FrmOnv ref(m_bd.m_nsite);
     REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_nelec % 2,
                "Sz quantum number given incompatible with nelec");
     size_t n_spin_0 = (m_nelec + spin_restrict) / 2;
@@ -17,16 +17,26 @@ buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const 
     DEBUG_ASSERT_EQ(ref.ms2(), spin_restrict, "constructed fermion ONV does not have expected Sz");
     return ref;
 }
+/*
+ *
+    GeneralFrmHam(const FrmBasisData& bd, bool spin_resolved, int ms2_restrict, defs::inds site_irreps = {});
 
-GeneralFrmHam::GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict, defs::inds site_irreps) :
-        FrmHam(nelec, nsite, ms2_restrict, site_irreps),
-        m_int_1(nsite, spin_resolved), m_int_2(nsite, spin_resolved) {
-    if (!nsite) return;
-    REQUIRE_EQ(m_point_group_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
+    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
+
+    GeneralFrmHam(std::string fname, bool spin_major, int charge = 0):
+            GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
+ */
+
+GeneralFrmHam::GeneralFrmHam(const FrmBasisData &bd, size_t nelec, int ms2_restrict) :
+    FrmHam(bd, nelec, ms2_restrict),
+    m_int_1(m_bd.m_nsite, m_bd.m_spin_resolved), m_int_2(m_bd.m_nsite, m_bd.m_spin_resolved) {
+    if (!m_bd.m_nsite) return;
+    REQUIRE_EQ(m_bd.m_abgrp_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
 }
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
-        GeneralFrmHam(header.m_nelec - charge, header.m_nsite, header.m_spin_resolved, ms2_restrict, header.m_orbsym) {
+        GeneralFrmHam({header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved},
+                      header.m_nelec - charge, ms2_restrict){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -36,7 +46,8 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
     defs::ham_t value;
 
     // assume no contribution cases to be nonzero unless a counterexample is found
-    REQUIRE_LE_ALL(m_nelec, 2 * m_nsite, "unphysical number of electrons specified in FCIDUMP file");
+    REQUIRE_LE_ALL(m_nelec, m_bd.m_nspinorb,
+                   "unphysical number of electrons specified by FCIDUMP file header and charge parameter");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -101,7 +112,7 @@ defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn
     return conn.phase(onv) ? -element : element;
 }
 
-HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) {
+HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) const {
     using namespace exsig_utils;
     excit_gen_list_t list;
     bool any_singles = m_contribs_1100.is_nonzero(ex_single) || m_contribs_2200.is_nonzero(ex_single);
@@ -111,16 +122,15 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fci
     return list;
 }
 
-conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() {
+conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {
     conn_foreach::base_list_t list;
-    FrmBasisData bd(m_nsite);
     if (m_kramers_attrs.m_conserving_singles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(bd));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_bd));
     else
-        list.emplace_front(new conn_foreach::frm::General<1>(bd));
+        list.emplace_front(new conn_foreach::frm::General<1>(m_bd));
     if (m_kramers_attrs.m_conserving_doubles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(bd));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_bd));
     else
-        list.emplace_front(new conn_foreach::frm::General<2>(bd));
+        list.emplace_front(new conn_foreach::frm::General<2>(m_bd));
     return list;
 }

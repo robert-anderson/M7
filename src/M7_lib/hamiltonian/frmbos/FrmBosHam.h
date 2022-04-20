@@ -12,18 +12,37 @@
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 #include "M7_lib/hamiltonian/HamOpTerm.h"
+#include "M7_lib/basis/HilbertData.h"
+#include "M7_lib/hamiltonian/frm/FrmHam.h"
+#include "M7_lib/hamiltonian/bos/BosHam.h"
 
+/**
+ * base class for all Hamiltonians expressed in terms of products of fermionic and bosonic second-quantised operators
+ */
 struct FrmBosHam : HamOpTerm {
-
     const BasisData m_bd;
+    const HilbertData m_hd;
 
     ham_data::TermContribs m_contribs_0010;
     ham_data::TermContribs m_contribs_0001;
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
-    explicit FrmBosHam(BasisData bd);
-	virtual ~FrmBosHam(){}
+    /**
+     * @param bd
+     *  basis data determined by the information available to the derived class ctors. its compatibility with any
+     *  defined fermion or boson ham is checked here by referencing the frm and bos arguments in contrast, the
+     *  fermion-boson product term does not determine anything about the Hilbert space, and so these attributes are
+     *  brought in directly from the fermion and boson parts.
+     * @param frm
+     *  fermionic part of H, from which the fermionic Hilbert space attributes are copied
+     * @param bos
+     *  bosonic part of H, from which the bosonic Hilbert space attributes are copied
+     */
+    explicit FrmBosHam(const BasisData& bd, const FrmHam& frm, const BosHam& bos):
+            m_bd(bd), m_hd({frm.m_hd, bos.m_hd}){}
+
+    virtual ~FrmBosHam(){}
 
     virtual defs::ham_t get_coeff_0010(size_t imode) const {return 0;}
     virtual defs::ham_t get_coeff_0001(size_t imode) const {return 0;}
@@ -71,7 +90,7 @@ struct FrmBosHam : HamOpTerm {
 };
 
 struct NullLadderHam: FrmBosHam {
-    NullLadderHam() : FrmBosHam({{}, {}}){}
+    NullLadderHam() : FrmBosHam({{}, {}}, {{0, 0}, {0, 0}}){}
 
     bool enabled() const override {
         return false;

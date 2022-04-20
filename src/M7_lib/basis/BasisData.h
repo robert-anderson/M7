@@ -23,11 +23,15 @@ struct FrmBasisData {
      */
     const size_t m_nspinorb;
     /**
+     * true if the two spin orbitals corresponding to the same site have identical functional form e.g. in UHF basis
+     */
+    const bool m_spin_resolved;
+    /**
      * mapping from fermion site indices to Abelian group labels
      */
     const AbelianGroupMap m_abgrp_map;
 
-    FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map);
+    FrmBasisData(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
     FrmBasisData(size_t nsite);
     FrmBasisData();
     bool operator==(const FrmBasisData& other) const;
@@ -41,13 +45,8 @@ struct BosBasisData {
      * number of bosonic modes
      */
     const size_t m_nmode;
-    /**
-     * maximum allowed occupation of each bosonic mode
-     */
-    const defs::bos_occ_t m_nboson_max;
 
-    BosBasisData(size_t nmode, size_t nboson_max);
-    BosBasisData(size_t nmode): BosBasisData(nmode, defs::max_bos_occ){}
+    BosBasisData(size_t nmode);
     BosBasisData(): BosBasisData(0ul){}
     bool operator==(const BosBasisData& other) const;
 };
@@ -61,12 +60,10 @@ struct BasisData {
 
     BasisData(FrmBasisData frm, BosBasisData bos);
     BasisData(size_t nsite, size_t nmode): m_frm(nsite), m_bos(nmode){}
-    BasisData(size_t nsite, size_t nmode, size_t nboson_max): m_frm(nsite), m_bos(nmode, nboson_max){}
 
     void require_pure_frm() const;
     void require_pure_bos() const;
     bool operator==(const BasisData& other) const;
 };
-
 
 #endif //M7_BASISDATA_H

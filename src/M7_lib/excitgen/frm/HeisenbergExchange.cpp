@@ -21,7 +21,7 @@ bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
      * remainder will provide an unbiased index - saving a PRNG call
      */
     const auto& nconn_product = h->m_lattice.m_unique_nconn_product;
-    const auto rand = m_prng.draw_uint(h->m_nsite*nconn_product);
+    const auto rand = m_prng.draw_uint(h->m_bd.m_nsite*nconn_product);
     const auto isite = src.isite(rand / nconn_product);
     const auto ispin = src.get({1, isite});
     const auto& row = h->m_lattice.m_sparse[isite];
@@ -31,7 +31,7 @@ bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
     if (jspin == ispin) return false; // no exchange
     DEBUG_ASSERT_NE(src.get({0, isite}), src.get({0, jsite}), "sites do not have opposite spins");
     // numerator of 2 since the exchange can be drawn in two ways
-    prob = 2.0 / double (h->m_nsite * nvac);
+    prob = 2.0 / double (h->m_bd.m_nsite * nvac);
     //    <i  j  |  a  b>
     const auto i = src.ibit(ispin, isite);
     const auto j = src.ibit(jspin, jsite);

@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "M7_lib/hamiltonian/frmbos/InteractingBoseGasBosHam.h"
+#include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 #include "M7_lib/hamiltonian/Hamiltonian.h"
 
 TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {

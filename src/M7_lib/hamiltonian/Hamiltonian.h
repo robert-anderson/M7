@@ -21,36 +21,33 @@
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SumFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SpinSquareFrmHam.h"
+#include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
+#include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 
 
 using namespace field;
 
+
 /**
- * generalized Hamiltonian class for fermionic, bosonic, and fermion-boson coupled interactions
+ * to employ polymorphism in the fermion, boson, and fermion-boson product terms of the hamiltonian must be
+ * dynamically allocated and stored as a pointer to the appropriate base class. these are managed as unique_ptrs
+ *
+ * FrmHam is set up first, so BosHam initialization can make read-only reference to it.
+ * FrmBosHam is set up last, so its initialization can make read-only reference to both the FrmHam and BosHam.
  */
-struct Hamiltonian {
+struct HamiltonianTerms {
     /**
      * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
-    std::unique_ptr<FrmHam> m_frm;
-    /**
-     * hamiltonian encapsulating all terms involving products of fermion and boson operators
-     */
-    std::unique_ptr<FrmBosHam> m_frmbos;
+    std::unique_ptr<FrmHam> m_frm = nullptr;
     /**
      * purely bosonic number-conserving and non-conserving terms in the Hamiltonian
      */
-    std::unique_ptr<BosHam> m_bos;
+    std::unique_ptr<BosHam> m_bos = nullptr;
     /**
-     * specifies number of fermion sites and boson modes along with other attributes defining the single-particle basis
+     * hamiltonian encapsulating all terms involving products of fermion and boson operators
      */
-    const BasisData m_bd;
-
-private:
-    mutable suite::Conns m_work_conn;
-
-    BasisData make_bd() const;
-
+    std::unique_ptr<FrmBosHam> m_frmbos = nullptr;
     /**
      * make the type of fermion Hamiltonian called for by the configuration, Then either return it directly, or combine
      * it with the spin penalty if this modification is specified in the options
@@ -81,38 +78,91 @@ private:
         return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinSquareFrmHam>(std::move(bare_ham), std::move(spin_ham), j));
     }
 
-    std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts);
+    std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
+        if (opts.m_hubbard.enabled())
+            return make_frm<HubbardFrmHam>(opts);
+        else if (opts.m_heisenberg.enabled())
+            return make_frm<HeisenbergFrmHam>(opts);
+        else if (opts.m_fcidump.enabled())
+            return make_frm<GeneralFrmHam>(opts);
+        return std::unique_ptr<FrmHam>(new NullFrmHam);
+    }
 
-    std::unique_ptr<FrmBosHam> make_ladder(const fciqmc_config::LadderHamiltonian &opts, size_t nsite);
+    std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts, const FrmHam* frm){
+        if (opts.m_holstein_omega) {
+            auto omega = opts.m_holstein_omega.get();
+            return std::unique_ptr<BosHam>(new HolsteinBosHam(frm->m_bd.m_nsite, opts.m_nboson, omega));
+        }
+        else if (opts.m_interacting_bose_gas.enabled())
+            return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
+        else if (opts.m_bosdump.enabled())
+            return std::unique_ptr<BosHam>(new GeneralBosHam(opts));
+        return std::unique_ptr<BosHam>(new NullBosHam);
+    }
 
-    std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts, size_t nsite);
+    std::unique_ptr<FrmBosHam> make_frmbos(const fciqmc_config::FrmBosHamiltonian &opts,
+                                           const FrmHam* frm, const BosHam* bos) {
+        if (opts.m_holstein_coupling) {
+            REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(frm),
+                         "Holstein coupling requires Hubbard-type fermion Hamiltonian");
+            auto nsite = frm->m_bd.m_nsite;
+            auto g = opts.m_holstein_coupling.get();
+            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam({nsite, nsite}, g));
+        }
+        else if (opts.m_ebdump.enabled()) return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts));
+        return std::unique_ptr<FrmBosHam>(new NullLadderHam);
+    }
+
+    HamiltonianTerms(const fciqmc_config::Hamiltonian &opts):
+        m_frm(make_frm(opts.m_fermion)),
+        m_bos(make_bos(opts.m_boson, m_frm.get())),
+        m_frmbos(make_frmbos(opts.m_ladder, m_frm.get(), m_bos.get())){}
+};
+
+
+/**
+ * generalized Hamiltonian class for fermionic, bosonic, and fermion-boson coupled interactions
+ */
+struct Hamiltonian {
+    HamiltonianTerms m_terms;
+
+public:
+    /*
+     * term ptrs are always dereferencable, so they are exposed as public const refs to the base classes:
+     */
+    const FrmHam& m_frm;
+    const BosHam& m_bos;
+    const FrmBosHam& m_frmbos;
+    /**
+     * specifies number of fermion sites and boson modes along with other attributes defining the single-particle basis
+     */
+    const BasisData m_bd;
+
+private:
+    mutable suite::Conns m_work_conn;
 
 public:
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
 
-    size_t nci() const;
-
     size_t nelec() const;
 
     size_t nboson() const;
-
-    size_t nboson_max() const;
 
     /*
      * pure fermion matrix elements
      */
 
     defs::ham_t get_element(const FrmOnv &onv, const conn::FrmOnv &conn) const {
-        return m_frm->get_element(onv, conn);
+        return m_frm.get_element(onv, conn);
     }
 
     defs::ham_t get_element(const FrmOnv &onv) const {
-        return m_frm->get_element_0000(onv);
+        return m_frm.get_element_0000(onv);
     }
 
     defs::ham_comp_t get_energy(const FrmOnv &onv) const {
-        return m_frm->get_energy(onv);
+        return m_frm.get_energy(onv);
     }
 
     /*
@@ -120,15 +170,15 @@ public:
      */
 
     defs::ham_t get_element(const BosOnv &onv, const conn::BosOnv &conn) const {
-        return m_bos->get_element(onv, conn);
+        return m_bos.get_element(onv, conn);
     }
 
     defs::ham_t get_element(const BosOnv &onv) const {
-        return m_bos->get_element(onv);
+        return m_bos.get_element(onv);
     }
 
     defs::ham_comp_t get_energy(const BosOnv &onv) const {
-        return m_bos->get_energy(onv);
+        return m_bos.get_energy(onv);
     }
 
     /*
@@ -138,9 +188,9 @@ public:
     defs::ham_t get_element(const FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
         defs::ham_t helement_frm = 0.0;
         defs::ham_t helement_bos = 0.0;
-        if (!conn.m_bos.size()) helement_frm = m_frm->get_element(onv.m_frm, conn.m_frm);
-        if (!conn.m_frm.size()) helement_bos = m_bos->get_element(onv.m_bos, conn.m_bos);
-        defs::ham_t helement_ladder = m_frmbos->get_element(onv, conn);
+        if (!conn.m_bos.size()) helement_frm = m_frm.get_element(onv.m_frm, conn.m_frm);
+        if (!conn.m_frm.size()) helement_bos = m_bos.get_element(onv.m_bos, conn.m_bos);
+        defs::ham_t helement_ladder = m_frmbos.get_element(onv, conn);
         return helement_frm + helement_bos + helement_ladder;
     }
 

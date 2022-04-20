@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "M7_lib/field/Mbf.h"
 #include "M7_lib/excitgen/frmbos/Pchb1101hc.h"
+#include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
 #include "test_core/excitgen/ExcitGenTester.h"
 
 TEST(Pchb1101hc, Test){
@@ -13,6 +14,7 @@ TEST(Pchb1101hc, Test){
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
     opts.verify();
     Hamiltonian h(opts);
+    ASSERT_TRUE(dynamic_cast<const GeneralLadderHam*>(h.m_frmbos.get()));
     Pchb1101hc excit_gen(*h.m_frmbos, prng);
     buffered::FrmOnv src_mbf(h.m_bd);
     mbf::set_aufbau_mbf(src_mbf, h);

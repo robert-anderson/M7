@@ -6,13 +6,16 @@
 
 BosOnvField::BosOnvField(Row *row, const BosBasisData& bd, std::string name) :
         base_t(row, {{bd.m_nmode}, {"boson mode occupations"}}, name),
-        m_bd(bd), m_decoded(*this) {}
+        m_bd(bd), m_decoded(*this) {
+}
 
-BosOnvField::BosOnvField(Row *row, const BasisData& bd, std::string name) : BosOnvField(row, bd.m_bos, name) {
+BosOnvField::BosOnvField(Row *row, const BasisData& bd, std::string name) :
+    BosOnvField(row, bd.m_bos, name) {
     bd.require_pure_bos();
 }
 
-BosOnvField::BosOnvField(const BosOnvField &other) : base_t(other), m_bd(other.m_bd), m_decoded(*this) {}
+BosOnvField::BosOnvField(const BosOnvField &other) :
+    base_t(other), m_bd(other.m_bd), m_decoded(*this) {}
 
 BosOnvField &BosOnvField::operator=(const defs::inds &inds) {
     DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");

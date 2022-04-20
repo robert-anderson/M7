@@ -14,7 +14,7 @@ FrmBosOnvField::FrmBosOnvField(Row *row, BasisData bd, std::string name) :
 }
 
 FrmBosOnvField::FrmBosOnvField(Row *row, size_t nsite, size_t nmode, size_t nboson_max, std::string name) :
-        FrmBosOnvField(row, {nsite, {nmode, nboson_max}}){}
+        FrmBosOnvField(row, {nsite, nmode}){}
 
 FrmBosOnvField::FrmBosOnvField(const FrmBosOnvField &other) :
     base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos), m_decoded(*this){}

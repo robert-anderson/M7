@@ -35,7 +35,7 @@ HubbardFrmHam::HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
 
 defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;
-    for (size_t isite = 0ul; isite < m_nsite; ++isite)
+    for (size_t isite = 0ul; isite < m_bd.m_nsite; ++isite)
         if (onv.get({0, isite}) && onv.get({1, isite})) h += m_u;
     return h;
 }
@@ -69,13 +69,13 @@ defs::ham_t HubbardFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j
     return 0.0;
 }
 
-HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) {
+HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) const {
     excit_gen_list_t list;
     list.emplace_front(new HubbardUniform(*this, prng));
     return list;
 }
 
-HamOpTerm::conn_foreach_list_t HubbardFrmHam::make_foreach_iters() {
+HamOpTerm::conn_foreach_list_t HubbardFrmHam::make_foreach_iters() const {
     conn_foreach_list_t list;
     list.emplace_front(new conn_foreach::frm::Hubbard(m_lattice));
     return list;

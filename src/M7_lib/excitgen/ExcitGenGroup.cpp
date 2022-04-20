@@ -14,11 +14,11 @@ void ExcitGenGroup::update_cumprobs() {
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
         m_prng(prng) {
     ExcitGen::excit_gen_list_t list;
-    list = ham.m_frm->make_excit_gens(prng, opts);
+    list = ham.m_frm.make_excit_gens(prng, opts);
     m_list.merge(list);
-    list = ham.m_frmbos->make_excit_gens(prng, opts);
+    list = ham.m_frmbos.make_excit_gens(prng, opts);
     m_list.merge(list);
-    list = ham.m_bos->make_excit_gens(prng, opts);
+    list = ham.m_bos.make_excit_gens(prng, opts);
     m_list.merge(list);
     REQUIRE_FALSE(m_list.empty(), "there should be at least one active excitation case");
     /*

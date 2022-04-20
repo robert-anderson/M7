@@ -7,13 +7,9 @@
 #include "BosHam.h"
 
 
-BosHam::BosHam(size_t nmode, size_t nboson):
-        m_nmode(nmode), m_nboson(nboson),
+BosHam::BosHam(const BosBasisData &bd, size_t nboson, size_t nboson_max) :
+        m_bd(bd), m_nboson(nboson), m_nboson_max(nboson_max),
         m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
-
-size_t BosHam::nci() const {
-    return ci_utils::boson_dim(m_nmode, m_nboson, true);
-}
 
 void BosHam::log_data() const {
     if (disabled()) return;

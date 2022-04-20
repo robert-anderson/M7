@@ -289,13 +289,15 @@ namespace conn_foreach {
         };
 
         struct Cre : Base {
-            Cre(const BosBasisData& bd) : Base(exsig_utils::ex_0010, bd) {}
+            const size_t m_nboson_max;
+            Cre(const BosBasisData& bd, size_t nboson_max) :
+                Base(exsig_utils::ex_0010, bd), m_nboson_max(nboson_max) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
                 conn.clear();
                 for (size_t imode = 0ul; imode < src.m_bd.m_nmode; ++imode) {
-                    if (size_t(src[imode] + 1) > m_bd.m_bos.m_nboson_max) continue;
+                    if (size_t(src[imode] + 1) > m_nboson_max) continue;
                     conn.m_cre.set(imode);
                     fn(conn);
                 }

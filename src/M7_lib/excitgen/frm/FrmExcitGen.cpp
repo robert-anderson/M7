@@ -7,7 +7,7 @@
 FrmExcitGen::FrmExcitGen(const FrmHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)),
         m_h(h), m_nelec_pair(integer_utils::nspair(h.m_nelec)),
-        m_nspinorb_pair(integer_utils::nspair(2*h.m_nsite)) {
+        m_nspinorb_pair(integer_utils::nspair(h.m_bd.m_nspinorb)) {
     for (auto exsig: m_exsigs)
         REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
 }

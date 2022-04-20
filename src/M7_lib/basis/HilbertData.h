@@ -1,0 +1,59 @@
+//
+// Created by rja on 19/04/2022.
+//
+
+#ifndef M7_HILBERTDATA_H
+#define M7_HILBERTDATA_H
+
+#include "M7_lib/defs.h"
+
+/**
+ * information relating to the many-body attributes of the fermionic sector
+ */
+struct FrmHilbertData {
+    /**
+     * electron number sector in which the fermionic ONVs are restricted (fermion number non-conservation is not
+     * implemented)
+     */
+    const size_t m_nelec;
+    /**
+     * nalpha-nbeta sector in which the fermionic ONVs are restricted (this is only respected if the Hamiltonian
+     * commutes with Sz, as signalled by the kramers_attrs members.
+     */
+    const int m_ms2_restrict;
+    FrmHilbertData(size_t nelec, int ms2_restrict=0): m_nelec(nelec), m_ms2_restrict(ms2_restrict){}
+};
+
+/**
+ * information relating to the many-body attributes of the bosonic sector
+ */
+struct BosHilbertData {
+    /**
+     * number of bosons in the system (only respected if the Hamiltonian is boson-number conserving, else it is only
+     * referenced in setting initial or reference BosonONVs
+     */
+    const size_t m_nboson;
+    /**
+     *  number of bosons permitted to occupy any given mode
+     */
+    const size_t m_nboson_max;
+    BosHilbertData(size_t nboson, size_t nboson_max=defs::max_bos_occ): m_nboson(nboson), m_nboson_max(nboson_max){}
+};
+
+/**
+ * combines information relating to many-body attributes of the fermionic and bosonic sectors
+ */
+struct HilbertData {
+    /**
+     * fermion sector attributes
+     */
+    FrmHilbertData m_frm;
+    /**
+     * boson sector attributes
+     */
+    BosHilbertData m_bos;
+    //HilbertData(FrmHilbertData&& frm, BosHilbertData&& bos): m_frm(frm), m_bos(bos){}
+};
+
+
+#endif //M7_HILBERTDATA_H

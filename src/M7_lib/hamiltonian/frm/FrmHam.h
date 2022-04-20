@@ -16,6 +16,7 @@
 #include "M7_lib/table/BufferedFields.h"
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
+#include "M7_lib/basis/HilbertData.h"
 
 /**
  * All interactions between the fermionic parts of MBFs are described in this class.
@@ -32,35 +33,82 @@
  * overview of "get" methods:
  *
  * 1. get_coeff_xx00
- *  these refer to the retrieval of the elements of the H-parametrising arrays (T, U, etc.) where xx00 is a rank signature
+ *  these refer to the retrieval of the elements of the H-parametrising arrays (T, U, etc.) where xx00 is a rank
+ *  signature
  *
  * 2. get_element_xx00
  *  these refer to "promotions" of excitations, in which Wick-contractions over occupied spin orbitals are computed.
  *  and the sum is multiplied by the +/- 1 Fermi phase due to antisymmetry of the determinant basis. The sums include
  *  coeffs of rank signature yy00 where y >= x e.g.
- *      - the "single-replacement matrix element" takes contributions from T, U and L if defined (but obviously not the 
- *      core energy, which has rank 0).
+ *      - the "single-replacement matrix element" takes contributions from T, U and L if defined (but obviously not the
+ *        core energy, which has rank 0).
  *      - the "double-replacement contraction" takes contributions only from U, and L.
  */
 struct FrmHam : HamOpTerm {
-
+    /**
+     * properties of the single-particle basis
+     */
+    const FrmBasisData m_bd;
+    /**
+     * properties of the many-body basis
+     */
+    const FrmHilbertData m_hd;
+    /**
+     * although the absolute number of electrons in a number-conserving system is not strictly speaking a property of
+     * the Hamiltonian, whether or not the system is number-conserving is determined by the non-zero contributions to
+     * terms with rank signature of the form xy00 where x!=y. Thus, the electron number is stored here, and not in the
+     * basis data structure.
+     */
     const size_t m_nelec;
-    const size_t m_nsite;
+    /**
+     * the nalpha-nbeta sector into which the Hamiltonian is projected
+     */
     const int m_ms2_restrict;
-
-    AbelianGroupMap m_point_group_map;
-
+    /**
+     * core energy
+     */
     defs::ham_t m_e_core = 0.0;
-
+    /**
+     * zero or non-zero status of exsig contributions (0000, 1100) to the term of ranksig 1100 i.e. whether the
+     * one-electron Hamiltonian has non-zero coefficients corresponding to diagonal elements, and/or single excitations
+     */
     ham_data::TermContribs m_contribs_1100;
+    /**
+     * zero or non-zero status of exsig contributions (0000, 1100, 2200) to the term of ranksig 2200 i.e. whether the
+     * two-electron Hamiltonian has non-zero coefficients corresponding to diagonal elements, and/or single excitations,
+     * and/or double excitations
+     */
     ham_data::TermContribs m_contribs_2200;
+    /**
+     * Time reversal symmetry by term rank in the many-body Hamiltonian
+     */
     ham_data::KramersAttributes m_kramers_attrs;
+    /**
+     * the only compile time constant depended upon by the Hamiltonian is ENABLE_COMPLEX. The program should still
+     * behave properly if a real-valued Hamiltonian is provided to a binary with defs::ham_t compiled as a complex type.
+     * this flag indicates whether complex arithmetic is required in order to correctly express the coefficients of the
+     * fermion Hamiltonian.
+     * An error is thrown if the data source for the coefficients is complex valued but the code is compiled for real-
+     * valued hamiltonian matrix elements
+     */
     bool m_complex_valued = false;
 
-    FrmHam(size_t nelec, size_t nsite, int ms2_restrict, const defs::inds& site_irreps = {});
+    /**
+     * @param bd
+     *  parameters of the fermionic single-particle basis. nelec and ms2_restrict are not included in the definition of
+     *  this object, since they do not pertain to the single particle basis, but are attributes of the many-body basis.
+     *  If such parameters become numerous through future feature additions, then these could be wrapped up in another
+     *  new "data" class, but for now they are stored as direct members of the FrmHam
+     * @param nelec
+     *  electron number sector in which the fermionic ONVs are restricted (fermion number non-conservation is not
+     *  implemented)
+     * @param ms2_restrict
+     *  nalpha-nbeta sector in which the fermionic ONVs are restricted (this is only respected if the Hamiltonian
+     *  commutes with Sz, as signalled by the kramers_attrs members.
+     */
+    FrmHam(const FrmBasisData& bd, const FrmHilbertData& hd);
 
-    FrmHam(const FrmHam& other): FrmHam(other.m_nelec, other.m_nsite, other.m_ms2_restrict,
-                                        other.m_point_group_map.m_site_irreps){}
+    FrmHam(const FrmHam& other): FrmHam(other.m_bd, other.m_hd){}
 
     FrmHam& operator=(const FrmHam& other){return *this;}
 
@@ -129,8 +177,6 @@ struct FrmHam : HamOpTerm {
 
     defs::ham_t get_element(const field::FrmOnv &ket, const conn::FrmOnv &conn) const;
 
-    size_t nci() const;
-
     /**
      * output some useful logs identifying the kind of H detected
      */
@@ -146,7 +192,7 @@ struct FrmHam : HamOpTerm {
 };
 
 struct NullFrmHam : FrmHam {
-    NullFrmHam() : FrmHam(0, 0, true, {}){}
+    NullFrmHam() : FrmHam({}, 0){}
 
     bool enabled() const override {
         return false;
@@ -157,7 +203,7 @@ struct NullFrmHam : FrmHam {
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
 struct SpinModelFrmHam : FrmHam {
-    SpinModelFrmHam(size_t nelec, size_t nsite, int ms2_restrict): FrmHam(nelec, nsite, ms2_restrict){}
+    SpinModelFrmHam(size_t nsite, const FrmHilbertData& hd): FrmHam(nsite, hd){}
 };
 
 #endif //M7_FRMHAM_H

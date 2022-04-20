@@ -22,10 +22,11 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_
      *      pb+  qa+  qb   pa
      *
      */
-    auto asite = field::FrmOnv::isite(a, m_nsite);
-    auto bsite = field::FrmOnv::isite(b, m_nsite);
-    auto isite = field::FrmOnv::isite(i, m_nsite);
-    auto jsite = field::FrmOnv::isite(j, m_nsite);
+    const auto nsite = m_bd.m_nsite;
+    auto asite = field::FrmOnv::isite(a, nsite);
+    auto bsite = field::FrmOnv::isite(b, nsite);
+    auto isite = field::FrmOnv::isite(i, nsite);
+    auto jsite = field::FrmOnv::isite(j, nsite);
     if (asite == isite){
         if (bsite != jsite) return 0.0;
     }
@@ -47,7 +48,7 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
      * finally, return the accumulation scaled by J
      */
     int si_sj_tot = 0;
-    for (size_t isite=0ul; isite<m_nsite; ++isite){
+    for (size_t isite=0ul; isite<m_bd.m_nsite; ++isite){
         DEBUG_ASSERT_EQ(onv.site_nocc(isite), 1ul,
                         "spin system is assumed, must not have unoccupied or doubly occupied sites");
         auto row = m_lattice.m_sparse[isite];

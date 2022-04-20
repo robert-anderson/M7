@@ -10,7 +10,7 @@ Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng) :
     std::vector<defs::prob_t> weights(m_nspinorb_pair, 0.0);
     size_t ij = 0ul;
     log::info("Initializing pre-computed heat bath sampling weights for doubles...");
-    const auto nspinorb = 2 * m_h.m_nsite;
+    const auto nspinorb = m_h.m_bd.m_nspinorb;
     if (mpi::on_node_i_am_root()) {
         for (size_t i = 0ul; i < nspinorb; ++i) {
             for (size_t j = 0ul; j < i; ++j) {

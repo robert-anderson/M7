@@ -4,8 +4,8 @@ target_sources(M7_lib
         GeneralLadderHam.h
         HolsteinLadderHam.cpp
         HolsteinLadderHam.h
-        InteractingBoseGasBosHam.cpp
-        InteractingBoseGasBosHam.h
+        ../bos/InteractingBoseGasBosHam.cpp
+        ../bos/InteractingBoseGasBosHam.h
         FrmBosHam.cpp
         FrmBosHam.h
 )

@@ -15,16 +15,8 @@ struct InteractingBoseGasBosHam : BosHam {
     const Planewaves m_planewaves;
     const defs::ham_t m_ek_scale;
 
-protected:
-    /**
-     * working arrays into which the mode indices are decoded
-     */
-    //mutable std::vector<int> m_ikpoints_i_work, m_ikpoints_j_work, m_ikpoints_k_work, m_ikpoints_l_work;
-
-public:
-
     InteractingBoseGasBosHam(size_t nboson, size_t ndim, size_t nwave, defs::ham_t ek_scale):
-            BosHam(Planewaves::size(ndim, nwave), nboson), m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
+            BosHam({Planewaves::size(ndim, nwave)}, nboson), m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
 
     InteractingBoseGasBosHam(const fciqmc_config::BosonHamiltonian &opts):
             InteractingBoseGasBosHam(opts.m_nboson, opts.m_interacting_bose_gas.m_ndim,
@@ -42,7 +34,7 @@ public:
     defs::ham_t get_element_0000(const field::BosOnv &onv) const override {
         // total linear momentum
         defs::ham_t tot = 0.0;
-        for (size_t imode=0ul; imode<m_nmode; ++imode){
+        for (size_t imode=0ul; imode<m_bd.m_nmode; ++imode){
             if (!onv[imode]) continue;
             tot+=m_planewaves.kinetic_energy(imode)*onv[imode];
             //tot+=0.5*onv[imode]*(onv[imode]-1);

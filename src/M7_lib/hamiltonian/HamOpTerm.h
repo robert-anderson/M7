@@ -36,7 +36,7 @@ struct HamOpTerm {
      * @return
      *  forward linked list of excitation generators applicable to this HamOpTerm
      */
-    virtual excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts){
+    virtual excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) const {
         return {};
     }
 
@@ -44,7 +44,7 @@ struct HamOpTerm {
      * @return
      *  forward linked list of foreach iterators over the connections of a given MBF
      */
-    virtual conn_foreach::base_list_t make_foreach_iters(){
+    virtual conn_foreach::base_list_t make_foreach_iters() const {
         return {};
     }
 };

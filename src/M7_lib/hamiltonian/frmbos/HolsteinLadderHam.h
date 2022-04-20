@@ -11,8 +11,8 @@ struct HolsteinLadderHam : FrmBosHam {
 
     const defs::ham_t m_g;
 
-    HolsteinLadderHam(BasisData bd, defs::ham_t g):
-        FrmBosHam(std::move(bd)), m_g(g){
+    HolsteinLadderHam(size_t nsite, const HilbertData& hd, defs::ham_t g) :
+        FrmBosHam({nsite, nsite}, hd), m_g(g) {
         m_contribs_0001.set_nonzero(exsig_utils::ex_0001);
         m_contribs_0010.set_nonzero(exsig_utils::ex_0010);
     }

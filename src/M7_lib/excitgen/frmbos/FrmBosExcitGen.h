@@ -27,4 +27,10 @@ struct FrmBosExcitGen : ExcitGen {
 };
 
 
+struct FrmBosOpenExcitGen : FrmBosExcitGen  {
+    const size_t m_nboson_max;
+    FrmBosOpenExcitGen(const FrmBosHam& h, size_t nboson_max, PRNG &prng, defs::inds exsigs, std::string description):
+        FrmBosExcitGen(h, prng, std::move(exsigs), std::move(description)), m_nboson_max(nboson_max){}
+};
+
 #endif //M7_FRMBOSEXCITGEN_H

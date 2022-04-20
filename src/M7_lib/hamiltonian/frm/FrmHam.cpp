@@ -8,11 +8,9 @@
 
 #include "FrmHam.h"
 
-FrmHam::FrmHam(size_t nelec, size_t nsite, int ms2_restrict, const defs::inds& site_irreps):
-        m_nelec(nelec), m_nsite(nsite), m_ms2_restrict(ms2_restrict),
-        m_point_group_map(PointGroup(), site_irreps.empty() ? defs::inds(nsite, 0ul) : site_irreps),
-        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {
-}
+FrmHam::FrmHam(const FrmBasisData& bd, const FrmHilbertData& hd):
+        m_bd(bd), m_hd(hd),
+        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);
@@ -33,10 +31,6 @@ defs::ham_t FrmHam::get_element(const field::FrmOnv &ket, const conn::FrmOnv &co
         default:
             return 0.0;
     }
-}
-
-size_t FrmHam::nci() const {
-    return ci_utils::fermion_dim(m_nsite, m_nelec);
 }
 
 void FrmHam::log_data() const {

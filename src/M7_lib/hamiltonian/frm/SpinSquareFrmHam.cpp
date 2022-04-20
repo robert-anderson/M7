@@ -16,7 +16,7 @@ SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &in_ham) : FrmHam(in_ham){
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     uint n_os_a = 0;
     auto count_n_OS_a = [&](size_t i) {
-        if (i < m_nsite) {
+        if (i < m_bd.m_nsite) {
             n_os_a += onv.get({1, i});
         };
     };
@@ -43,11 +43,11 @@ defs::ham_t SpinSquareFrmHam::get_coeff_1100(size_t a, size_t i) const {
 defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
     auto get_spin = [this](size_t k)
     {
-        return field::FrmOnv::ispin(k, m_nsite);
+        return field::FrmOnv::ispin(k, m_bd.m_nsite);
     };
     auto spatial_orbital = [this](size_t k)
     {
-        return field::FrmOnv::isite(k, m_nsite);
+        return field::FrmOnv::isite(k, m_bd.m_nsite);
     };
     // We have to determine if it is an exchange.
     return get_spin(a) != get_spin(b)

@@ -14,7 +14,7 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(size_t nelec, size_t nsite, bool spin_resolved, int ms2_restrict, defs::inds site_irreps = {});
+    GeneralFrmHam(const FrmBasisData& bd, size_t nelec, int ms2_restrict=0);
 
     GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
 
@@ -37,9 +37,9 @@ struct GeneralFrmHam : FrmHam {
 
     buffered::FrmOnv guess_reference(const int &spin_level) const;
 
-    excit_gen_list_t make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) override;
+    excit_gen_list_t make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) const override;
 
-    conn_foreach_list_t make_foreach_iters() override;
+    conn_foreach_list_t make_foreach_iters() const override;
 
 private:
     /**
@@ -49,7 +49,7 @@ private:
      * number of distinctly specified (spin-)orbitals in the Hamiltonian defintion
      */
     size_t norb_distinct() const {
-        return (1ul + m_int_1.m_spin_res) * m_nsite;
+        return (1ul + m_int_1.m_spin_res) * m_bd.m_nsite;
     }
 };
 

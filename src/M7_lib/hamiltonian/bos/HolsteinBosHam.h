@@ -9,8 +9,7 @@
 
 struct HolsteinBosHam : BosHam {
     defs::ham_comp_t m_omega;
-    HolsteinBosHam(size_t nmode, defs::ham_comp_t omega):
-        BosHam(nmode, 0ul), m_omega(omega){}
+    HolsteinBosHam(const BosBasisData& bd, size_t nboson, defs::ham_comp_t omega): BosHam(bd, nboson), m_omega(omega){}
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
         return i==j ? m_omega : 0;
@@ -22,7 +21,7 @@ struct HolsteinBosHam : BosHam {
 
     defs::ham_t get_element_0000(const field::BosOnv &onv) const override {
         defs::ham_t h = 0;
-        for (size_t imode = 0ul; imode < m_nmode; ++imode) h+= onv[imode];
+        for (size_t imode = 0ul; imode < m_bd.m_nmode; ++imode) h+= onv[imode];
         return h*m_omega;
     }
 
