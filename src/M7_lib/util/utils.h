@@ -284,6 +284,28 @@ namespace integer_utils {
     size_t combinatorial(const size_t &n, const size_t &r);
 
     size_t combinatorial_with_repetition(const size_t &n, const size_t &r);
+
+    /**
+     * exact integer power by recursive squaring
+     * @tparam T
+     *  integer type
+     * @param x
+     *  number being exponentiated
+     * @param y
+     *  exponent
+     * @return
+     *  x to the power y
+     */
+    template<typename T>
+    T pow(T x, T y){
+        static_assert(std::is_integral<T>::value, "template arg must be integral type");
+        if (!y) return 1;
+        if (y == 1) return x;
+
+        auto tmp = pow(x, y / 2);
+        if (y & T(1)) return x * tmp * tmp;
+        return tmp * tmp;
+    }
 }
 
 namespace bit_utils {

@@ -5,7 +5,7 @@
 #include "HeisenbergFrmHam.h"
 
 HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2_restrict) :
-        SpinModelFrmHam(lattice.nsite(), {lattice.nsite()+ms2_restrict, ms2_restrict}),
+        SpinModelFrmHam(lattice.nsite(), {lattice.nsite(), ms2_restrict}),
         m_j(j), m_lattice(std::move(lattice)){
     m_contribs_2200.set_nonzero(exsig_utils::ex_double);
     m_contribs_2200.set_nonzero(0);

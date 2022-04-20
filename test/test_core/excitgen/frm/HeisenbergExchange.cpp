@@ -12,6 +12,7 @@ TEST(HeisenbergExchange, Pbc2D) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_heisenberg.m_site_shape = {3, 3};
     opts.m_fermion.m_heisenberg.m_boundary_conds = {1, 1};
+    opts.m_fermion.m_ms2_restrict = 1;
     opts.verify();
     Hamiltonian h(opts);
     ASSERT_TRUE(dynamic_cast<const HeisenbergFrmHam*>(&h.m_frm));

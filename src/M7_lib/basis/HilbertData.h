@@ -62,7 +62,7 @@ struct BosHilbertData {
 
     size_t nci(size_t nmode, bool number_conserve) const {
         if (number_conserve) return integer_utils::combinatorial_with_repetition(nmode, m_nboson);
-        else return std::pow(m_nboson_max + 1, nmode);
+        else return integer_utils::pow(m_nboson_max + 1, nmode);
     }
 };
 

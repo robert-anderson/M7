@@ -29,7 +29,8 @@ void mbf::set_neel_mbf(FrmOnv &onv, size_t nelec) {
 }
 
 void mbf::set_neel_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
-    REQUIRE_EQ(ham.m_frm.m_hd.m_ms2_restrict, 0, "Neel state requires zero overall spin");
+    REQUIRE_LE(std::abs(ham.m_frm.m_hd.m_ms2_restrict), 1,
+               "Neel state requires overall spin of -1, 0, or 1");
     set_neel_mbf(onv, ham.nelec());
 }
 
