@@ -18,19 +18,19 @@ struct XonvField : CompositeField<T, T> {
     using CompositeFieldBase::prefix;
     T m_ket, m_bra;
 
-    XonvField(Row *row, BasisData bd, std::string name) :
+    XonvField(Row *row, HilbertSpace hs, std::string name) :
         CompositeField<T, T>(m_ket, m_bra),
-        m_ket(row, bd, prefix("ket", name)),
-        m_bra(row, bd, prefix("bra", name)) {}
+        m_ket(row, hs, prefix("ket", name)),
+        m_bra(row, hs, prefix("bra", name)) {}
 };
 
 
 struct FrmXonvField : XonvField<FrmOnvField> {
-    FrmXonvField(Row *row, const BasisData &bd, std::string name = "") :
-            XonvField<FrmOnvField>(row, bd, name) {}
+    FrmXonvField(Row *row, const HilbertSpace &hs, std::string name = "") :
+            XonvField<FrmOnvField>(row, hs, name) {}
 
-    FrmXonvField(Row *row, const FrmBasisData &bd, std::string name = "") :
-            FrmXonvField(row, {bd, BosBasisData()}, name) {}
+    FrmXonvField(Row *row, const FrmHilbertSpace &hs, std::string name = "") :
+            FrmXonvField(row, HilbertSpace(hs, {0ul}), name) {}
 
     FrmXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
@@ -41,11 +41,11 @@ struct FrmXonvField : XonvField<FrmOnvField> {
 
 
 struct BosXonvField : XonvField<BosOnvField> {
-    BosXonvField(Row *row, const BasisData &bd, std::string name = "") :
-            XonvField<BosOnvField>(row, bd, name) {}
+    BosXonvField(Row *row, const HilbertSpace &hs, std::string name = "") :
+            XonvField<BosOnvField>(row, hs, name) {}
 
-    BosXonvField(Row *row, const BosBasisData &bd, std::string name = "") :
-            BosXonvField(row, {FrmBasisData(), bd}, name) {}
+    BosXonvField(Row *row, const BosHilbertSpace &hs, std::string name = "") :
+            BosXonvField(row, HilbertSpace({0ul, 0ul}, hs), name) {}
 
     BosXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
@@ -55,7 +55,8 @@ struct BosXonvField : XonvField<BosOnvField> {
 };
 
 struct FrmBosXonvField : XonvField<FrmBosOnvField> {
-    FrmBosXonvField(Row *row, BasisData bd, std::string name = "") : XonvField<FrmBosOnvField>(row, bd, name) {}
+    FrmBosXonvField(Row *row, const HilbertSpace& hs, std::string name = "") :
+        XonvField<FrmBosOnvField>(row, hs, name) {}
 
     FrmBosXonvField &
     operator=(const std::pair<std::pair<defs::inds, defs::inds>, std::pair<defs::inds, defs::inds>> &inds) {

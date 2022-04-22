@@ -14,17 +14,12 @@
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 #include "M7_lib/hamiltonian/HamOpTerm.h"
-#include "M7_lib/basis/HilbertData.h"
 
 struct BosHam : HamOpTerm {
     /**
-     * properties of the single-particle basis
-     */
-    const BosBasisData m_bd;
-    /**
      * properties of the many-body basis
      */
-    const BosHilbertData m_hd;
+    const BosHilbertSpace m_hs;
 
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
@@ -37,9 +32,7 @@ struct BosHam : HamOpTerm {
         return true;
     }
 
-    BosHam(const BosBasisData& bd, const BosHilbertData& hd):
-            m_bd(bd), m_hd(hd),
-            m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
+    BosHam(const BosHilbertSpace& hs);
 	virtual ~BosHam(){}
 
     virtual defs::ham_t get_coeff_0011(size_t i, size_t j) const {return 0;}
@@ -79,7 +72,7 @@ struct BosHam : HamOpTerm {
 };
 
 struct NullBosHam : BosHam {
-    NullBosHam() : BosHam({0ul, 0ul}){}
+    NullBosHam() : BosHam(0ul){}
 
     bool enabled() const override {
         return false;

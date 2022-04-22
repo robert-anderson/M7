@@ -36,9 +36,9 @@ void RefExcitsOneExsig::make_contribs(const conn::FrmOnv &conn, const defs::wf_t
     m_row.m_values[iroot]+=contrib;
 }
 
-RefExcits::RefExcits(const fciqmc_config::RefExcits &opts, BasisData bd, size_t nroot) :
+RefExcits::RefExcits(const fciqmc_config::RefExcits &opts, BasisExtents extents, size_t nroot) :
         Archivable("ref_excits", opts.m_archivable),
-        m_opts(opts), m_av_ref({nroot}), m_conn(bd) {
+        m_opts(opts), m_av_ref({nroot}), m_conn(extents) {
     REQUIRE_EQ_ALL(nroot, 1ul, "reference excitation averaging currently only implemented for a single root");
     for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
         auto exsig = exsig_utils::encode(iexlvl, iexlvl, 0, 0);

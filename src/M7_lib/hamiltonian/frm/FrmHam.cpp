@@ -7,9 +7,8 @@
 
 #include "FrmHam.h"
 
-FrmHam::FrmHam(const FrmBasisData& bd, const FrmHilbertData& hd):
-        m_bd(bd), m_hd(hd),
-        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
+FrmHam::FrmHam(const FrmHilbertSpace& hs):
+        m_hs(hs), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);

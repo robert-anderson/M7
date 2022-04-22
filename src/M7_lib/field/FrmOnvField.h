@@ -19,7 +19,8 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::operator=;
     using base_t::inds_t;
 
-    const FrmBasisData m_bd;
+    const FrmHilbertSpace m_hs;
+    const FrmSites m_sites;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
@@ -37,8 +38,8 @@ private:
 
 public:
 
-    FrmOnvField(Row* row, const FrmBasisData& bd, std::string name="");
-    FrmOnvField(Row* row, const BasisData& bd, std::string name="");
+    FrmOnvField(Row* row, const FrmHilbertSpace& hs, std::string name="");
+    FrmOnvField(Row* row, const HilbertSpace& hs, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {
@@ -108,43 +109,6 @@ public:
     bool all_sites_single_occ() const;
 
     std::string to_string() const override;
-
-    static size_t isite(const size_t& ibit, const size_t& nsite);
-
-    static size_t ispin(const size_t& ibit, const size_t& nsite);
-
-    static size_t ibit(const size_t& ispin, const size_t& isite, const size_t& nsite);
-
-    static size_t ibit(std::pair<size_t, size_t> pair, const size_t& nsite);;
-
-    /**
-     * convenient conversion between spin-site and site indices
-     * @param ibit
-     *  bit index
-     * @return
-     *  associated site index
-     */
-    size_t isite(const size_t& ibit) const;
-    /**
-     * convenient conversion between spin-site and spin indices
-     * @param ibit
-     *  bit index
-     * @return
-     *  associated spin index (0 or 1)
-     */
-    size_t ispin(const size_t& ibit) const;
-    /**
-     * convenient conversion between spin and site indices and the flat "bit" index
-     * @param ispin
-     *  spin channel index
-     * @param isite
-     *  site index
-     * @return
-     *  flat index od spin-site
-     */
-    size_t ibit(const size_t& ispin, const size_t& isite) const;
-
-    size_t ibit(std::pair<size_t, size_t>& pair) const;
 
     /**
      * @param idataword

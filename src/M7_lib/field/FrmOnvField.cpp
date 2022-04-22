@@ -5,18 +5,19 @@
 #include "FrmOnvField.h"
 
 
-FrmOnvField::FrmOnvField(Row *row, const FrmBasisData& bd, std::string name) :
-        base_t(row, {{2, bd.m_nsite},{"spin channel", "site"}}, name),
-        m_bd(bd), m_decoded(*this),
-        m_dsize_spin_channel(integer_utils::divceil(m_bd.m_nsite, defs::nbit_word)),
-        m_nbit_in_last_alpha_dataword(m_bd.m_nsite%defs::nbit_word){}
+FrmOnvField::FrmOnvField(Row *row, const FrmHilbertSpace& hs, std::string name) :
+        base_t(row, {{2, hs.m_sites},{"spin channel", "site"}}, name),
+        m_hs(hs), m_sites(hs.m_sites), m_decoded(*this),
+        m_dsize_spin_channel(integer_utils::divceil(size_t(m_hs.m_sites), defs::nbit_word)),
+        m_nbit_in_last_alpha_dataword(m_hs.m_sites % defs::nbit_word){}
 
-FrmOnvField::FrmOnvField(Row *row, const BasisData& bd, std::string name) : FrmOnvField(row, bd.m_frm, name){
-    bd.require_pure_frm();
+FrmOnvField::FrmOnvField(Row *row, const HilbertSpace& hs, std::string name) :
+    FrmOnvField(row, hs.m_frm, name){
+    hs.require_pure_frm();
 }
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
-        base_t(other), m_bd(other.m_bd), m_decoded(*this),
+        base_t(other), m_hs(other.m_hs), m_sites(m_hs.m_sites), m_decoded(*this),
         m_dsize_spin_channel(other.m_dsize_spin_channel),
         m_nbit_in_last_alpha_dataword(other.m_nbit_in_last_alpha_dataword){}
 
@@ -24,7 +25,7 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::in
     // prezero the element
     zero();
     for (const auto &ind: setbits.first) set(ind);
-    for (const auto &ind: setbits.second) set(ind+m_bd.m_nsite);
+    for (const auto &ind: setbits.second) set(ind+m_hs.m_sites);
     return *this;
 }
 
@@ -35,18 +36,17 @@ bool FrmOnvField::operator==(const defs::inds &inds) const {
 }
 
 int FrmOnvField::ms2() const {
-    int spin = 0;
+    int ms2 = 0;
     size_t work;
     for (size_t idataword = 0; idataword < m_dsize; ++idataword) {
         work = get_dataword(idataword);
         while (work) {
             size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            if (ibit < m_bd.m_nsite) ++spin;
-            else if (ibit >= nbit()) return spin;
-            else --spin;
+            if (ibit >= nbit()) return ms2;
+            ms2 += m_hs.m_sites.ms2(ibit);
         }
     }
-    return spin;
+    return ms2;
 }
 
 int FrmOnvField::nalpha() const {
@@ -57,7 +57,7 @@ int FrmOnvField::nalpha() const {
         work = get_dataword(idataword);
         while (work) {
             size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            if (ibit >= m_bd.m_nsite) return nalpha;
+            if (m_hs.m_sites.ispin(ibit)) return nalpha;
             nalpha++;
         }
     }
@@ -69,7 +69,7 @@ size_t FrmOnvField::site_nocc(const size_t &isite) const {
 }
 
 bool FrmOnvField::all_sites_single_occ() const {
-    for (size_t isite = 0ul; isite<m_bd.m_nsite; ++isite) if (site_nocc(isite)!=1ul) return false;
+    for (size_t isite = 0ul; isite<m_hs.m_sites; ++isite) if (site_nocc(isite)!=1ul) return false;
     return true;
 }
 
@@ -78,46 +78,13 @@ std::string FrmOnvField::to_string() const {
     res += "(";
     res.reserve(nbit() + 3);
     size_t i = 0ul;
-    for (; i < m_bd.m_nsite; ++i)
+    for (; i < m_hs.m_sites; ++i)
         res += get(i) ? "1" : "0";
     res += ","; // spin channel delimiter
     for (; i < nbit(); ++i)
         res += get(i) ? "1" : "0";
     res += ")";
     return res;
-}
-
-size_t FrmOnvField::isite(const size_t &ibit, const size_t &nsite) {
-    return ibit < nsite ? ibit : ibit - nsite;
-}
-
-size_t FrmOnvField::ispin(const size_t &ibit, const size_t &nsite) {
-    return ibit >= nsite;
-}
-
-size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite, const size_t &nsite) {
-    return ispin ? nsite+isite : isite;
-}
-
-size_t FrmOnvField::ibit(std::pair<size_t, size_t> pair, const size_t &nsite) {
-    return ibit(pair.first, pair.second, nsite);
-}
-
-
-size_t FrmOnvField::isite(const size_t &ibit) const {
-    return isite(ibit, m_bd.m_nsite);
-}
-
-size_t FrmOnvField::ispin(const size_t &ibit) const {
-    return ispin(ibit, m_bd.m_nsite);
-}
-
-size_t FrmOnvField::ibit(const size_t &ispin, const size_t &isite) const {
-    return ibit(ispin, isite, m_bd.m_nsite);
-}
-
-size_t FrmOnvField::ibit(std::pair<size_t, size_t> &pair) const {
-    return ibit(pair.first, pair.second);
 }
 
 void FrmOnvField::set(const size_t &bit_offset, const defs::inds &setbits) {
@@ -139,7 +106,7 @@ void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
     DEBUG_ASSERT_LE(alpha_sites.size(), m_bd.m_nsite, "can't have more spins than sites");
     zero();
     auto it = alpha_sites.cbegin();
-    for (size_t isite=0ul; isite<m_bd.m_nsite; ++isite){
+    for (size_t isite=0ul; isite<m_hs.m_sites; ++isite){
         if (it==alpha_sites.cend() || *it>isite) set({1, isite});
         else {
             set({0, isite});
@@ -150,7 +117,7 @@ void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
 
 void FrmOnvField::put_spin_channel(const size_t &ispin, bool set) {
     auto ibegin = ibit(ispin, 0);
-    put_range(ibegin, ibegin+m_bd.m_nsite, set);
+    put_range(ibegin, ibegin+m_hs.m_sites, set);
 }
 
 void FrmOnvField::clr(const size_t &bit_offset, const defs::inds &clrbits) {

@@ -14,10 +14,9 @@ namespace conn_foreach {
 
     struct Base {
         const size_t m_exsig;
-        const BasisData m_bd;
         suite::Conns m_conns;
 
-        Base(size_t exsig, const BasisData &bd);
+        Base(size_t exsig, BasisExtents extents);
 
         virtual ~Base() {}
 
@@ -52,8 +51,8 @@ namespace conn_foreach {
 
     namespace frm {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, const FrmBasisData& bd) :
-                    conn_foreach::Base(exsig, {bd, BosBasisData()}) {
+            Base(size_t exsig, size_t nsite) :
+                    conn_foreach::Base(exsig, {nsite, 0ul}) {
                 REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature has boson operators");
             }
 
@@ -63,8 +62,8 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct General : Base {
-            General(const FrmBasisData& bd) :
-                Base(exsig_utils::encode(nop, nop, 0, 0), bd) {}
+            General(const FrmHilbertSpace& hs) :
+                Base(exsig_utils::encode(nop, nop, 0, 0), hs) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
@@ -98,8 +97,8 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct Ms2Conserve : Base {
-            Ms2Conserve(const FrmBasisData& bd):
-                    Base(exsig_utils::encode(nop, nop, 0, 0), bd) {}
+            Ms2Conserve(size_t nsite):
+                    Base(exsig_utils::encode(nop, nop, 0, 0), nsite) {}
 
         private:
 
@@ -143,8 +142,8 @@ namespace conn_foreach {
             }
 
             template<typename fn_t>
-            void
-            loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<nop + 1> tag) {}
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src,
+                                   const fn_t &fn, tags::Int<nop + 1> tag) {}
 
         public:
 
@@ -182,8 +181,8 @@ namespace conn_foreach {
                 for (const auto &occ: occs) {
                     conn.m_ann.clear();
                     conn.m_ann.add(occ);
-                    auto ispin_occ = src.ispin(occ);
-                    auto isite_occ = src.isite(occ);
+                    auto ispin_occ = src.m_sites.ispin(occ);
+                    auto isite_occ = src.m_sites.isite(occ);
                     auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
                     for (const auto &i: coordinated_sites) {
                         if (src.get({ispin_occ, i})) continue;
@@ -217,9 +216,9 @@ namespace conn_foreach {
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
                 const auto &occs = src.m_decoded.m_simple_occs.get();
                 for (const auto &occ: occs) {
-                    auto ispin_occ = src.ispin(occ);
+                    auto ispin_occ = src.m_sites.ispin(occ);
                     if (ispin_occ) return; // all alpha bits have been dealt with
-                    auto isite_occ = src.isite(occ);
+                    auto isite_occ = src.m_sites.isite(occ);
                     // cannot exchange if the site is doubly occupied:
                     if (src.get({!ispin_occ, isite_occ})) continue;
                     auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
@@ -248,8 +247,8 @@ namespace conn_foreach {
 
     namespace bos {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, const BosBasisData& bd) :
-                    conn_foreach::Base(exsig, {FrmBasisData(), bd}){
+            Base(size_t exsig, size_t nmode):
+                    conn_foreach::Base(exsig, {0ul, nmode}){
                 REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitation signature has fermion operators");
             }
 
@@ -265,7 +264,7 @@ namespace conn_foreach {
         };
 
         struct Ann : Base {
-            Ann(const BosBasisData& bd) : Base(exsig_utils::ex_0001, bd) {}
+            Ann(size_t nmode) : Base(exsig_utils::ex_0001, nmode) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
@@ -290,13 +289,13 @@ namespace conn_foreach {
 
         struct Cre : Base {
             const size_t m_nboson_max;
-            Cre(const BosBasisData& bd, size_t nboson_max) :
-                Base(exsig_utils::ex_0010, bd), m_nboson_max(nboson_max) {}
+            Cre(size_t nmode, size_t nboson_max) :
+                Base(exsig_utils::ex_0010, nmode), m_nboson_max(nboson_max) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
                 conn.clear();
-                for (size_t imode = 0ul; imode < src.m_bd.m_nmode; ++imode) {
+                for (size_t imode = 0ul; imode < src.m_size; ++imode) {
                     if (size_t(src[imode] + 1) > m_nboson_max) continue;
                     conn.m_cre.set(imode);
                     fn(conn);
@@ -399,10 +398,8 @@ namespace conn_foreach {
 
     namespace frmbos {
         struct Base : conn_foreach::Base {
-            const BasisData m_bd;
-
-            Base(size_t exsig, const BasisData& bd) :
-                    conn_foreach::Base(exsig, bd), m_bd(bd) {
+            Base(size_t exsig, const BasisExtents& extents) :
+                    conn_foreach::Base(exsig, extents) {
                 REQUIRE_TRUE(exsig_utils::decode_nfrm(exsig) && exsig_utils::decode_nbos(exsig),
                              "excitation signature is not that of a fermion-boson product");
             }
@@ -433,15 +430,18 @@ namespace conn_foreach {
                 auto nbos_ann = exsig_utils::decode_nbos_ann(bos_base.m_exsig);
                 return exsig_utils::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
             }
-            static BasisData combined_bd(const frm_t& frm, const bos_t& bos) {
+            static BasisExtents combined_extents(const frm_t& frm, const bos_t& bos) {
                 const frm::Base& frm_base = as_base(frm);
                 const bos::Base& bos_base = as_base(bos);
-                return {frm_base.m_bd.m_frm, bos_base.m_bd.m_bos};
+                /*
+                 * extent data is available from the working connection objects of each component
+                 */
+                return {frm_base.m_conns.m_frmonv.nsite(), bos_base.m_conns.m_bosonv.nmode()};
             }
 
         public:
             Product(frm_t &&frm_foreach, bos_t &&bos_foreach) :
-                    Base(combined_exsig(frm_foreach, bos_foreach), combined_bd(frm_foreach, bos_foreach)),
+                    Base(combined_exsig(frm_foreach, bos_foreach), combined_extents(frm_foreach, bos_foreach)),
                     m_frm_foreach(std::move(frm_foreach)), m_bos_foreach(std::move(bos_foreach)) {
             }
 

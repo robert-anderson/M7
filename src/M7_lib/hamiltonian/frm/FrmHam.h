@@ -16,7 +16,6 @@
 #include "M7_lib/table/BufferedFields.h"
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
-#include "M7_lib/basis/HilbertData.h"
 
 /**
  * All interactions between the fermionic parts of MBFs are described in this class.
@@ -46,13 +45,9 @@
  */
 struct FrmHam : HamOpTerm {
     /**
-     * properties of the single-particle basis
-     */
-    const FrmBasisData m_bd;
-    /**
      * properties of the many-body basis
      */
-    const FrmHilbertData m_hd;
+    const FrmHilbertSpace m_hs;
     /**
      * core energy
      */
@@ -82,9 +77,9 @@ struct FrmHam : HamOpTerm {
      */
     bool m_complex_valued = false;
 
-    FrmHam(const FrmBasisData& bd, const FrmHilbertData& hd);
+    FrmHam(const FrmHilbertSpace& hs);
 
-    FrmHam(const FrmHam& other): FrmHam(other.m_bd, other.m_hd){}
+    FrmHam(const FrmHam& other): FrmHam(other.m_hs){}
 
     FrmHam& operator=(const FrmHam& other){return *this;}
 
@@ -168,7 +163,7 @@ struct FrmHam : HamOpTerm {
 };
 
 struct NullFrmHam : FrmHam {
-    NullFrmHam() : FrmHam({}, 0){}
+    NullFrmHam() : FrmHam({0, 0}){}
 
     bool enabled() const override {
         return false;
@@ -179,7 +174,7 @@ struct NullFrmHam : FrmHam {
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
 struct SpinModelFrmHam : FrmHam {
-    SpinModelFrmHam(size_t nsite, const FrmHilbertData& hd): FrmHam(nsite, hd){}
+    SpinModelFrmHam(const FrmHilbertSpace& hs): FrmHam(hs){}
 };
 
 #endif //M7_FRMHAM_H

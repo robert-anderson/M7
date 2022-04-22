@@ -19,15 +19,15 @@ namespace suite {
         field::FrmOnv m_frm;
         field::FrmBosOnv m_frmbos;
         field::BosOnv m_bos;
-        MbfsRow(const BasisData& bd):
-            m_frm(this, bd.m_frm, "fermion ONV"),
-            m_frmbos(this, bd, "fermion-boson ONV"),
-            m_bos(this, bd.m_bos, "boson ONV"){}
+        MbfsRow(const HilbertSpace& hs):
+            m_frm(this, hs, "fermion ONV"),
+            m_frmbos(this, hs, "fermion-boson ONV"),
+            m_bos(this, hs, "boson ONV"){}
     };
 
     struct Mbfs : BufferedTable<MbfsRow>{
 
-        Mbfs(const BasisData& bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
+        Mbfs(const HilbertSpace& bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
             m_row.push_back_jump();
         }
 
@@ -46,7 +46,7 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        Conns(const BasisData& bd): m_frmonv(bd.m_frm), m_bosonv(bd.m_bos), m_frmbosonv(bd){}
+        Conns(const BasisExtents& extents): m_frmonv(extents), m_bosonv(extents), m_frmbosonv(extents){}
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
@@ -63,7 +63,7 @@ namespace suite {
         com_ops::Frm m_frm;
         com_ops::FrmBos m_frmbos;
         com_ops::Bos m_bos;
-        ComOps(const BasisData& bd): m_frm(bd.m_frm.m_nsite), m_frmbos(bd), m_bos(bd.m_bos.m_nmode){}
+        ComOps(const BasisExtents& extents): m_frm(extents.m_sites), m_frmbos(extents), m_bos(extents.m_nmode){}
 
         com_ops::Frm& operator[](const field::FrmOnv& mbf){
             return m_frm;

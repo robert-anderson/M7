@@ -15,7 +15,7 @@ struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;
     BosOnvConnection m_bos;
 
-    explicit FrmBosOnvConnection(const BasisData& bd);
+    explicit FrmBosOnvConnection(BasisExtents extents);
 
     explicit FrmBosOnvConnection(const FrmBosOnvField& mbf);
 

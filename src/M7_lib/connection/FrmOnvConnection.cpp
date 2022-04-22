@@ -4,18 +4,18 @@
 
 #include "FrmOnvConnection.h"
 
-FrmOnvConnection::FrmOnvConnection(const FrmBasisData& bd):
-        m_ann(bd.m_nsite), m_cre(bd.m_nsite),
-        m_ndataword(integer_utils::divceil(bd.m_nspinorb, defs::nbit_word)),
+FrmOnvConnection::FrmOnvConnection(const FrmSites& sites):
+        m_ann(sites), m_cre(sites),
+        m_ndataword(integer_utils::divceil(sites.m_nspinorb, defs::nbit_word)),
         m_dataword_phases(m_ndataword){
     if (m_ndataword) m_dataword_phases[0] = false;
 }
 
-FrmOnvConnection::FrmOnvConnection(const BasisData& bd) : FrmOnvConnection(bd.m_frm){
-    bd.require_pure_frm();
+FrmOnvConnection::FrmOnvConnection(BasisExtents extents) : FrmOnvConnection(extents.m_sites) {
+    extents.require_pure_frm();
 }
 
-FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_bd){}
+FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_hs.m_sites){}
 
 void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
     DEBUG_ASSERT_EQ(src.m_bd.m_nsite, dst.m_bd.m_nsite, "src and dst ONVs are incompatible");

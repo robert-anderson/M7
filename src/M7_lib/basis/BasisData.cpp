@@ -6,32 +6,54 @@
 
 #include <utility>
 
-FrmBasisData::FrmBasisData(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2,
-                           bool ms2_conserve) :
-        m_nelec(nelec), m_nsite(nsite), m_nspinorb(2*nsite), m_spin_resolved(spin_resolved),
-        m_abgrp_map(std::move(abgrp_map)), m_ms2(ms2), m_ms2_conserve(ms2_conserve){}
+FrmSites::FrmSites(size_t nsite) : m_nsite(nsite), m_nspinorb(2 * nsite){}
 
-
-bool FrmBasisData::operator==(const FrmBasisData &other) const {
-    return m_nsite==other.m_nsite && m_abgrp_map==other.m_abgrp_map;
+size_t FrmSites::ncoeff_ind(bool spin_resolved) const {
+    return spin_resolved ? m_nspinorb : m_nsite;
 }
 
-BosBasisData::BosBasisData(size_t nmode) : m_nmode(nmode){}
+BasisExtents::BasisExtents(size_t nsite, size_t nmode) : m_sites(nsite), m_nmode(nmode){}
 
-bool BosBasisData::operator==(const BosBasisData &other) const {
+void BasisExtents::require_pure_frm() const {
+    REQUIRE_FALSE(m_nmode, "Single particle basis specification is not purely fermionic");
+}
+
+void BasisExtents::require_pure_bos() const {
+    REQUIRE_FALSE(m_sites, "Single particle basis specification is not purely bosonic");
+}
+
+FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2,
+                                 bool ms2_conserve) :
+        m_nelec(nelec), m_sites(nsite), m_spin_resolved(spin_resolved),
+        m_abgrp_map(std::move(abgrp_map)), m_ms2(ms2), m_ms2_conserve(ms2_conserve){}
+
+FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite) :
+        FrmHilbertSpace(nelec, nsite, {nsite}, false, 0, false){}
+
+bool FrmHilbertSpace::operator==(const FrmHilbertSpace &other) const {
+    return m_sites==other.m_sites && m_abgrp_map==other.m_abgrp_map;
+}
+
+BosHilbertSpace::BosHilbertSpace(size_t nmode, size_t nboson, bool nboson_conserve, size_t occ_cutoff) :
+        m_nmode(nmode), m_nboson(nboson), m_nboson_conserve(nboson_conserve), m_occ_cutoff(occ_cutoff){}
+
+BosHilbertSpace::BosHilbertSpace(size_t nmode) : BosHilbertSpace(nmode, 0ul, false, defs::max_bos_occ){}
+
+bool BosHilbertSpace::operator==(const BosHilbertSpace &other) const {
     return m_nmode==other.m_nmode;
 }
 
-BasisData::BasisData(FrmBasisData frm, BosBasisData bos) : m_frm(std::move(frm)), m_bos(std::move(bos)){}
+HilbertSpace::HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos) :
+        m_frm(frm), m_bos(bos), m_extents(frm.m_sites, bos.m_nmode){}
 
-void BasisData::require_pure_frm() const {
-    REQUIRE_FALSE(m_bos.m_nmode, "MBF specification is not purely fermionic");
-}
-
-void BasisData::require_pure_bos() const {
-    REQUIRE_FALSE(m_frm.m_nsite, "MBF specification is not purely bosonic");
-}
-
-bool BasisData::operator==(const BasisData &other) const {
+bool HilbertSpace::operator==(const HilbertSpace &other) const {
     return m_frm==other.m_frm && m_bos==other.m_bos;
+}
+
+void HilbertSpace::require_pure_frm() const {
+    m_extents.require_pure_frm();
+}
+
+void HilbertSpace::require_pure_bos() const {
+    m_extents.require_pure_bos();
 }

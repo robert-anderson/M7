@@ -80,15 +80,17 @@ public:
 struct BosOnvConnection {
     BosOps m_ann, m_cre;
 
-    explicit BosOnvConnection(const BosBasisData& bd);
+    explicit BosOnvConnection(size_t nmode);
 
-    explicit BosOnvConnection(const BasisData& bd);
+    explicit BosOnvConnection(BasisExtents extents);
 
     explicit BosOnvConnection(const BosOnvField& mbf);
 
     void clear();
 
     size_t size() const;
+
+    size_t nmode() const;
 
     void connect(const BosOnvField& src, const BosOnvField& dst);
 

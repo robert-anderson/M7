@@ -14,7 +14,7 @@ namespace com_ops {
     struct FrmBos {
         FrmOps m_frm;
         BosOps m_bos;
-        FrmBos(BasisData bd) : m_frm(bd.m_frm.m_nsite), m_bos(bd.m_bos.m_nmode) {}
+        FrmBos(BasisExtents extents) : m_frm(extents.m_sites), m_bos(extents.m_nmode) {}
     };
 
     typedef std::tuple<Frm, FrmBos, Bos> mbf_tup_t;

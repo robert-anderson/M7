@@ -5,10 +5,11 @@
 #include "FrmBosOnvConnection.h"
 #include "ComOps.h"
 
-FrmBosOnvConnection::FrmBosOnvConnection(const BasisData& bd) : m_frm(bd.m_frm), m_bos(bd.m_bos){}
+FrmBosOnvConnection::FrmBosOnvConnection(BasisExtents extents) :
+    m_frm(extents.m_sites), m_bos(extents.m_nmode){}
 
 FrmBosOnvConnection::FrmBosOnvConnection(const FrmBosOnvField &mbf) :
-        FrmBosOnvConnection({mbf.m_frm.m_bd, mbf.m_bos.m_bd}){}
+        FrmBosOnvConnection({mbf.m_frm.m_hs.m_sites, mbf.m_bos.m_hs.m_nmode}){}
 
 
 void FrmBosOnvConnection::clear() {

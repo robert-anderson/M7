@@ -92,13 +92,13 @@ size_t BosOps::get_imode(size_t iop) const {
     return ~0ul;
 }
 
-BosOnvConnection::BosOnvConnection(const BosBasisData& bd) : m_ann(bd.m_nmode), m_cre(bd.m_nmode){}
+BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
 
-BosOnvConnection::BosOnvConnection(const BasisData& bd) : BosOnvConnection(bd.m_bos){
+BosOnvConnection::BosOnvConnection(BasisExtents bd) : BosOnvConnection(bd.m_nmode){
     bd.require_pure_bos();
 }
 
-BosOnvConnection::BosOnvConnection(const BosOnvField &mbf) : BosOnvConnection(mbf.m_bd){}
+BosOnvConnection::BosOnvConnection(const BosOnvField &mbf) : BosOnvConnection(mbf.m_hs.m_nmode){}
 
 void BosOnvConnection::clear() {
     m_ann.clear();
@@ -107,6 +107,10 @@ void BosOnvConnection::clear() {
 
 size_t BosOnvConnection::size() const {
     return m_ann.size()+m_cre.size();
+}
+
+size_t BosOnvConnection::nmode() const {
+    return m_cre.pairs().capacity();
 }
 
 void BosOnvConnection::connect(const BosOnvField &src, const BosOnvField &dst) {

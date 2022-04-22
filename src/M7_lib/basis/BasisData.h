@@ -10,22 +10,66 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include "AbelianGroup.h"
 
+
+class FrmSites {
+    const size_t m_nsite;
+public:
+    const size_t m_nspinorb;
+    FrmSites(size_t nsite);
+
+    operator const size_t& () const {
+        return m_nsite;
+    }
+
+    size_t isite(size_t ispinorb) const {
+        DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
+        return ispinorb < m_nsite ? ispinorb : ispinorb-m_nsite;
+    }
+    size_t ispin(size_t ispinorb) const {
+        DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
+        return ispinorb >= m_nsite;
+    }
+    size_t ispinorb(size_t ispin, size_t isite) const {
+        DEBUG_ASSERT_LT(ispin, 2, "spin channel index OOB");
+        DEBUG_ASSERT_LT(isite, 2, "site index OOB");
+        return ispin ? isite + m_nsite : isite;
+    }
+    size_t ispinorb(std::pair<size_t, size_t> pair) const {
+        return ispinorb(pair.first, pair.second);
+    }
+    int ms2(size_t ispinorb) const {
+        DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
+        return ispinorb < m_nsite ? 1 : -1;
+    }
+    /**
+     * @param spin_resolved
+     *  true if the basis is spin-resolved e.g. UHF
+     * @return
+     *  number of indices needed in the access of coefficients
+     */
+    size_t ncoeff_ind(bool spin_resolved) const;
+};
+
+struct BasisExtents {
+    const FrmSites m_sites;
+    const size_t m_nmode;
+    BasisExtents(size_t nsite, size_t nmode);
+    void require_pure_frm() const;
+    void require_pure_bos() const;
+};
+
 /**
- * specification of the extents and properties of the fermionic single particle basis
+ * properties of the fermionic Hilbert space
  */
-struct FrmBasisData {
+struct FrmHilbertSpace {
     /**
      * number of electrons in the system
      */
     const size_t m_nelec;
     /**
-     * number of sites or orbitals
+     * number of sites and spin orbitals
      */
-    const size_t m_nsite;
-    /**
-     * number of fermionic degrees of freedom (2*nsite)
-     */
-    const size_t m_nspinorb;
+    const FrmSites m_sites;
     /**
      * true if the two spin orbitals corresponding to the same site have identical functional form e.g. in UHF basis
      */
@@ -44,24 +88,23 @@ struct FrmBasisData {
      */
     const bool m_ms2_conserve;
 
-    FrmBasisData(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2, bool ms2_conserve);
+    FrmHilbertSpace(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2, bool ms2_conserve);
     /*
-     * default ctor: non-resolved spin, and no Ms2 restriction
+     * non-resolved spin, and no Ms2 restriction
      */
-    FrmBasisData(size_t nelec, size_t nsite):
-        FrmBasisData(nelec, nsite, {nsite}, false, 0, false){}
+    FrmHilbertSpace(size_t nelec, size_t nsite);
 
-    bool operator==(const FrmBasisData& other) const;
+    bool operator==(const FrmHilbertSpace& other) const;
 
     operator bool() const {
-        return m_nsite;
+        return m_sites;
     }
 };
 
 /**
- * specification of the extents and properties of the bosonic single particle basis
+ * properties of the bosonic Hilbert space
  */
-struct BosBasisData {
+struct BosHilbertSpace {
     /**
      * number of bosonic modes
      */
@@ -80,10 +123,11 @@ struct BosBasisData {
      */
     const size_t m_occ_cutoff;
 
-    BosBasisData(size_t nmode, size_t nboson, bool nboson_conserve, size_t occ_cutoff):
-            m_nmode(nmode), m_nboson(nboson), m_nboson_conserve(nboson_conserve), m_occ_cutoff(occ_cutoff){}
-    BosBasisData(size_t nmode): BosBasisData(nmode, 0ul, false, defs::max_bos_occ){}
-    bool operator==(const BosBasisData& other) const;
+    BosHilbertSpace(size_t nmode, size_t nboson, bool nboson_conserve, size_t occ_cutoff);
+
+    BosHilbertSpace(size_t nmode);
+
+    bool operator==(const BosHilbertSpace& other) const;
 
     operator bool() const {
         return m_nmode;
@@ -93,17 +137,17 @@ struct BosBasisData {
 /**
  * admits a common interface for all initialisations of MBFs
  */
-struct BasisData {
-    const FrmBasisData m_frm;
-    const BosBasisData m_bos;
+struct HilbertSpace {
+    const FrmHilbertSpace m_frm;
+    const BosHilbertSpace m_bos;
+    const BasisExtents m_extents;
 
-    BasisData(FrmBasisData frm, BosBasisData bos);
-    BasisData(size_t nsite, size_t nmode): m_frm(nsite), m_bos(nmode){}
-    BasisData(): BasisData(0,0){}
+    HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos);
+
+    bool operator==(const HilbertSpace& other) const;
 
     void require_pure_frm() const;
     void require_pure_bos() const;
-    bool operator==(const BasisData& other) const;
 
     operator bool() const {
         return m_frm || m_bos;

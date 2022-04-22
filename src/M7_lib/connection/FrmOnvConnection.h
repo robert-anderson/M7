@@ -13,14 +13,14 @@
  * the underlying index vector
  */
 class FrmOps {
-    const size_t m_nsite;
+    const FrmSites m_sites;
     defs::inds m_inds;
 public:
-    FrmOps(size_t nsite): m_nsite(nsite) {
-        m_inds.reserve(2*nsite);
+    FrmOps(size_t nsite): m_sites(nsite) {
+        m_inds.reserve(2*m_sites);
     }
 
-    FrmOps(const FrmOps& other): FrmOps(other.m_nsite){}
+    FrmOps(const FrmOps& other): FrmOps(other.m_sites){}
 
     FrmOps& operator=(const FrmOps& other){
         DEBUG_ASSERT_EQ(other.m_inds.capacity(), m_inds.capacity(), "incompatible FrmOps instances");
@@ -69,7 +69,7 @@ public:
     }
 
     void add(std::pair<size_t, size_t> pair) {
-        add(FrmOnvField::ibit(pair.first, pair.second, m_nsite));
+        add(m_sites.ispinorb(pair));
     }
 
     void set(size_t ibit){
@@ -108,9 +108,7 @@ public:
     }
 
     void set_in_order(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
-        auto ibit1 = FrmOnvField::ibit(pair1.first, pair1.second, m_nsite);
-        auto ibit2 = FrmOnvField::ibit(pair2.first, pair2.second, m_nsite);
-        set_in_order(ibit1, ibit2);
+        set_in_order(m_sites.ispinorb(pair1), m_sites.ispinorb(pair2));
     }
 
     defs::inds::const_iterator cbegin() const {
@@ -151,7 +149,7 @@ public:
 
     size_t nalpha() const {
         size_t n=0ul;
-        for (auto i: m_inds) n+=i<m_nsite;
+        for (auto i: m_inds) n+=!m_sites.ispin(i);
         return n;
     }
 };
@@ -174,9 +172,12 @@ private:
     mutable std::vector<bool> m_dataword_phases;
 public:
 
-    explicit FrmOnvConnection(const FrmBasisData& bd);
+    explicit FrmOnvConnection(const FrmSites& sites);
 
-    explicit FrmOnvConnection(const BasisData& bd);
+    /*
+     * universal interface (works with any compile-time value "MBF_TYPE")
+     */
+    explicit FrmOnvConnection(BasisExtents extents);
 
     explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**
@@ -253,6 +254,10 @@ public:
      */
     size_t size() const {
         return m_cre.size()+m_ann.size();
+    }
+
+    size_t nsite() const {
+        return m_cre.capacity() / 2;
     }
 
     bool kramers_conserve() const {

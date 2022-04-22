@@ -12,7 +12,6 @@
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 #include "M7_lib/hamiltonian/HamOpTerm.h"
-#include "M7_lib/basis/HilbertData.h"
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 #include "M7_lib/hamiltonian/bos/BosHam.h"
 
@@ -20,8 +19,8 @@
  * base class for all Hamiltonians expressed in terms of products of fermionic and bosonic second-quantised operators
  */
 struct FrmBosHam : HamOpTerm {
-    const BasisData m_bd;
-    const HilbertData m_hd;
+
+    const HilbertSpace m_hs;
 
     ham_data::TermContribs m_contribs_0010;
     ham_data::TermContribs m_contribs_0001;
@@ -39,7 +38,7 @@ struct FrmBosHam : HamOpTerm {
      * @param bos
      *  bosonic part of H, from which the bosonic Hilbert space attributes are copied
      */
-    explicit FrmBosHam(const BasisData& bd, const FrmHam& frm, const BosHam& bos):
+    explicit FrmBosHam(const HilbertSpace& hs, const FrmHam& frm, const BosHam& bos):
             m_bd({frm.m_bd ? frm.m_bd : bd.m_frm}, {bos.m_bd ? bos.m_bd : bd.m_bos}),
             m_hd({frm.m_hd, bos.m_hd}),
             m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),

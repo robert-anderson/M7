@@ -23,21 +23,21 @@ class FrmBosCoupledCoeffs {
     size_t index(size_t n, size_t p, size_t q) const;
 
 public:
-    const BasisData m_bd;
+    const BasisExtents m_extents;
     /**
      * the extent of the fermion indices in the array and its square to give the stride between consecutive mode indices
      */
-    const size_t m_nintind_frm, m_nintind_frm2;
+    const size_t m_ncoeff_ind_frm, m_ncoeff_ind_frm2;
     /**
      * the extent of the boson indices (always the number of modes since boson indices are never spin resolved)
      */
-    const size_t m_nintind_bos;
+    const size_t m_ncoeff_ind_bos;
     /**
      * array of "integrals" only stored on the root-rank of each node
      */
     SharedArray<defs::ham_t> m_v;
 
-    FrmBosCoupledCoeffs(const BasisData& bd, bool spin_resolved);
+    FrmBosCoupledCoeffs(BasisExtents extents, bool spin_resolved);
 
     /**
      * assign a value to the indexed element (should only be called on the root rank of each node)

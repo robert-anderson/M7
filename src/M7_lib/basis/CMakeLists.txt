@@ -4,8 +4,6 @@ target_sources(M7_lib
         AbelianGroup.h
         BasisData.cpp
         BasisData.h
-        HilbertData.cpp
-        HilbertData.h
         Lattice.cpp
         Lattice.h
         MappedDeterminantList.cpp
