@@ -14,7 +14,7 @@ TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     opts.m_boson.m_interacting_bose_gas.m_ek_scale = 1.0;
     opts.m_boson.m_nboson = 3;
     Hamiltonian ham_src(opts);
-    buffered::BosOnv mbf(ham_src.m_bd);
+    buffered::BosOnv mbf(ham_src.m_hs);
     mbf = {0, 0, 0, 0, 0, 0, 3};
     defs::ham_t helem;
     helem = ham_src.get_element(mbf);

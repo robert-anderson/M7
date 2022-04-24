@@ -10,37 +10,42 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include "AbelianGroup.h"
 
-
 class FrmSites {
     const size_t m_nsite;
 public:
     const size_t m_nspinorb;
+
     FrmSites(size_t nsite);
 
-    operator const size_t& () const {
+    operator const size_t &() const {
         return m_nsite;
     }
 
     size_t isite(size_t ispinorb) const {
         DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
-        return ispinorb < m_nsite ? ispinorb : ispinorb-m_nsite;
+        return ispinorb < m_nsite ? ispinorb : ispinorb - m_nsite;
     }
+
     size_t ispin(size_t ispinorb) const {
         DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
         return ispinorb >= m_nsite;
     }
+
     size_t ispinorb(size_t ispin, size_t isite) const {
         DEBUG_ASSERT_LT(ispin, 2ul, "spin channel index OOB");
         DEBUG_ASSERT_LT(isite, m_nsite, "site index OOB");
         return ispin ? isite + m_nsite : isite;
     }
+
     size_t ispinorb(std::pair<size_t, size_t> pair) const {
         return ispinorb(pair.first, pair.second);
     }
+
     int ms2(size_t ispinorb) const {
         DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
         return ispinorb < m_nsite ? 1 : -1;
     }
+
     /**
      * @param restricted_orbs
      *  true if the basis is spin-resolved e.g. UHF
@@ -63,7 +68,7 @@ struct BasisExtents {
  */
 struct FrmHilbertSpace {
     /**
-     * number of electrons in the system
+     * number of electrons in the system (0ul if not conserved)
      */
     const size_t m_nelec;
     /**
@@ -104,6 +109,11 @@ struct FrmHilbertSpace {
      * non-resolved spin, C1 point group (no spatial symmetry), and undefined Ms2 restriction
      */
     FrmHilbertSpace(size_t nelec, size_t nsite);
+    /*
+     * non-conserved nelec, non-resolved spin, C1 point group (no spatial symmetry), and undefined Ms2 restriction
+     */
+    FrmHilbertSpace(size_t nsite);
+
     FrmHilbertSpace();
 
     /*

@@ -20,10 +20,10 @@
  */
 defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bool explicit_hf_conns){
     Hamiltonian ham(opts.m_hamiltonian);
-    buffered::Mbf ref_onv(ham.m_bd);
-    mbf::set_aufbau_mbf(ref_onv, ham);
+    buffered::Mbf ref_onv(ham.m_hs);
+    mbf::set_aufbau_mbf(ref_onv);
 
-    Wavefunction wf(opts, ham.m_bd);
+    Wavefunction wf(opts, ham.m_hs);
     ExactPropagator prop(ham, opts, wf.m_format, explicit_hf_conns);
     auto ref_energy = ham.get_energy(ref_onv);
 

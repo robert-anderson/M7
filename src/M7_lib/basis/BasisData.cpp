@@ -39,7 +39,10 @@ FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite, int ms2) :
 FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite) :
         FrmHilbertSpace(nelec, nsite, {nsite}, false, ~0){}
 
-FrmHilbertSpace::FrmHilbertSpace() : FrmHilbertSpace(0ul, 0ul){}
+FrmHilbertSpace::FrmHilbertSpace(size_t nsite) :
+        FrmHilbertSpace(0ul, nsite){}
+
+FrmHilbertSpace::FrmHilbertSpace() : FrmHilbertSpace(0ul){}
 
 FrmHilbertSpace::FrmHilbertSpace(const FrmHilbertSpace &hs1, const FrmHilbertSpace &hs2) :
         FrmHilbertSpace(hs1.m_nelec ? hs1.m_nelec : hs2.m_nelec,

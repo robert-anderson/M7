@@ -6,8 +6,8 @@
 #include "M7_lib/wavefunction/WalkerTable.h"
 
 TEST(WalkerTable, Fields){
-    BasisData bd (0, 5);
-    WalkerTable table(WalkerTableRow(bd, 1, 1, false));
+    HilbertSpace hs(5, 7);
+    WalkerTable table(WalkerTableRow(hs, 1, 1, false));
     auto& row = table.m_row;
 
     /**

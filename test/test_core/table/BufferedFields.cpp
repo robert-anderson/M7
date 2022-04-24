@@ -204,10 +204,11 @@ TEST(BufferedFields, Bitset){
 TEST(BufferedFields, FrmOnv){
     const size_t nsite = 6;
     defs::inds frm_inds = {0, 2, 4, 5, 7, 9};
+    const FrmHilbertSpace hs(frm_inds.size(), nsite);
 
     //  1. constructable via argument forwarding to T::T
-    buffered::FrmOnv direct(nsite);
-    ASSERT_EQ(direct.m_bd.m_nsite, nsite);
+    buffered::FrmOnv direct(hs);
+    ASSERT_EQ(direct.m_hs, hs);
 
     //  2. compatible with a call to any public method of T without cast to T&
     ASSERT_EQ(direct.nalpha(), 0ul);
@@ -215,7 +216,7 @@ TEST(BufferedFields, FrmOnv){
     //  3. copy-constructable from const B<T>&
     direct = frm_inds;
     auto direct_cpy = direct;
-    ASSERT_EQ(direct_cpy.m_bd.m_nsite, direct.m_bd.m_nsite);
+    ASSERT_EQ(direct_cpy.m_hs, direct.m_hs);
     ASSERT_EQ(direct_cpy.nsetbit(), frm_inds.size());
     ASSERT_EQ(direct, direct_cpy);
 
@@ -223,7 +224,7 @@ TEST(BufferedFields, FrmOnv){
     const field::FrmOnv& base_cref = direct;
     ASSERT_EQ(base_cref.nsetbit(), frm_inds.size());
     buffered::FrmOnv base_cref_cpy(base_cref);
-    ASSERT_EQ(base_cref_cpy.m_bd.m_nsite, direct.m_bd.m_nsite);
+    ASSERT_EQ(base_cref_cpy.m_hs, direct.m_hs);
     ASSERT_EQ(base_cref_cpy.nsetbit(), frm_inds.size());
     ASSERT_EQ(direct, base_cref_cpy);
 
@@ -249,10 +250,11 @@ TEST(BufferedFields, BosOnv){
     const size_t nmode = 5;
     defs::inds zero_inds(nmode, 0);
     defs::inds bos_inds = {3, 1, 2, 4, 9};
+    const BosHilbertSpace hs(0ul, nmode, false, defs::max_bos_occ);
 
     //  1. constructable via argument forwarding to T::T
     buffered::BosOnv direct(nmode);
-    ASSERT_EQ(direct.m_bd.m_nmode, nmode);
+    ASSERT_EQ(direct.m_hs.m_nmode, nmode);
     ASSERT_EQ(direct.to_vector<size_t>(), zero_inds);
 
     //  2. compatible with a call to any public method of T without cast to T&
@@ -261,14 +263,14 @@ TEST(BufferedFields, BosOnv){
     //  3. copy-constructable from const B<T>&
     direct = bos_inds;
     auto direct_cpy = direct;
-    ASSERT_EQ(direct_cpy.m_bd.m_nmode, direct.m_bd.m_nmode);
+    ASSERT_EQ(direct_cpy.m_hs, direct.m_hs);
     ASSERT_EQ(direct_cpy.to_vector<size_t>(), bos_inds);
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
     const field::BosOnv& base_cref = direct;
     buffered::BosOnv base_cref_cpy(base_cref);
-    ASSERT_EQ(base_cref_cpy.m_bd.m_nmode, direct.m_bd.m_nmode);
+    ASSERT_EQ(base_cref_cpy.m_hs, direct.m_hs);
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
@@ -290,32 +292,34 @@ TEST(BufferedFields, BosOnv){
 }
 
 TEST(BufferedFields, FrmBosOnv){
-    const BasisData bd = {4, 5};
     defs::inds frm_inds = {0, 2, 4, 5, 7};
     defs::inds bos_inds = {3, 1, 2, 4, 9};
+    const FrmHilbertSpace frm_hs(frm_inds.size(), 4);
+    const BosHilbertSpace bos_hs(0ul, 5, false, defs::max_bos_occ);
+    const HilbertSpace hs = {frm_hs, bos_hs};
 
     //  1. constructable via argument forwarding to T::T
-    buffered::FrmBosOnv direct(bd);
-    ASSERT_EQ(direct.m_frm.m_bd, bd.m_frm);
-    ASSERT_EQ(direct.m_bos.m_bd, bd.m_bos);
+    buffered::FrmBosOnv direct(hs);
+    ASSERT_EQ(direct.m_frm.m_hs, frm_hs);
+    ASSERT_EQ(direct.m_bos.m_hs, bos_hs);
 
     //  2. compatible with a call to any public method of T without cast to T&
-    ASSERT_EQ(direct.m_bos.m_nelement, bd.m_bos.m_nmode);
+    ASSERT_EQ(direct.m_bos.m_nelement, bos_hs.m_nmode);
     ASSERT_EQ(direct.m_frm.nalpha(), 0ul);
 
     //  3. copy-constructable from const B<T>&
     direct.m_frm = frm_inds;
     direct.m_bos = bos_inds;
     auto direct_cpy = direct;
-    ASSERT_EQ(direct_cpy.m_frm.m_bd, direct.m_frm.m_bd);
-    ASSERT_EQ(direct_cpy.m_bos.m_bd, direct.m_bos.m_bd);
+    ASSERT_EQ(direct_cpy.m_frm.m_hs, direct.m_frm.m_hs);
+    ASSERT_EQ(direct_cpy.m_bos.m_hs, direct.m_bos.m_hs);
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
     const field::FrmBosOnv& base_cref = direct;
     buffered::FrmBosOnv base_cref_cpy(base_cref);
-    ASSERT_EQ(base_cref_cpy.m_frm.m_bd, direct.m_frm.m_bd);
-    ASSERT_EQ(base_cref_cpy.m_bos.m_bd, direct.m_bos.m_bd);
+    ASSERT_EQ(base_cref_cpy.m_frm.m_hs, direct.m_frm.m_hs);
+    ASSERT_EQ(base_cref_cpy.m_bos.m_hs, direct.m_bos.m_hs);
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
@@ -340,11 +344,12 @@ TEST(BufferedFields, FrmXonv){
     const size_t nsite = 5;
     defs::inds ket_inds = {0, 2, 4, 5, 9};
     defs::inds bra_inds = {1, 2, 3, 7};
+    const FrmHilbertSpace hs(nsite);
 
     //  1. constructable via argument forwarding to T::T
-    buffered::FrmXonv direct(nsite);
-    ASSERT_EQ(direct.m_ket.m_bd.m_nsite, nsite);
-    ASSERT_EQ(direct.m_bra.m_bd.m_nsite, nsite);
+    buffered::FrmXonv direct(hs);
+    ASSERT_EQ(direct.m_ket.m_hs, hs);
+    ASSERT_EQ(direct.m_bra.m_hs, hs);
 
     //  2. compatible with a call to any public method of T without cast to T&
     ASSERT_EQ(direct.m_ket.nalpha(), 0ul);
@@ -354,15 +359,15 @@ TEST(BufferedFields, FrmXonv){
     direct.m_ket = ket_inds;
     direct.m_bra = bra_inds;
     auto direct_cpy = direct;
-    ASSERT_EQ(direct_cpy.m_ket.m_bd, direct.m_ket.m_bd);
-    ASSERT_EQ(direct_cpy.m_bra.m_bd, direct.m_ket.m_bd);
+    ASSERT_EQ(direct_cpy.m_ket.m_hs, direct.m_ket.m_hs);
+    ASSERT_EQ(direct_cpy.m_bra.m_hs, direct.m_ket.m_hs);
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
     const field::FrmXonv& base_cref = direct;
     buffered::FrmXonv base_cref_cpy(base_cref);
-    ASSERT_EQ(base_cref_cpy.m_ket.m_bd, direct.m_ket.m_bd);
-    ASSERT_EQ(base_cref_cpy.m_bra.m_bd, direct.m_bra.m_bd);
+    ASSERT_EQ(base_cref_cpy.m_ket.m_hs, direct.m_ket.m_hs);
+    ASSERT_EQ(base_cref_cpy.m_bra.m_hs, direct.m_bra.m_hs);
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
@@ -387,11 +392,12 @@ TEST(BufferedFields, BosXonv){
     const size_t nmode = 5;
     defs::inds ket_inds = {3, 1, 2, 4, 9};
     defs::inds bra_inds = {2, 4, 9, 3, 1};
+    const BosHilbertSpace hs(nmode);
 
     //  1. constructable via argument forwarding to T::T
     buffered::BosXonv direct(nmode);
-    ASSERT_EQ(direct.m_ket.m_bd.m_nmode, nmode);
-    ASSERT_EQ(direct.m_bra.m_bd.m_nmode, nmode);
+    ASSERT_EQ(direct.m_ket.m_hs, hs);
+    ASSERT_EQ(direct.m_bra.m_hs, hs);
 
     //  2. compatible with a call to any public method of T without cast to T&
     ASSERT_EQ(direct.m_ket.m_nelement, nmode);
@@ -401,15 +407,15 @@ TEST(BufferedFields, BosXonv){
     direct.m_ket = ket_inds;
     direct.m_bra = bra_inds;
     auto direct_cpy = direct;
-    ASSERT_EQ(direct_cpy.m_ket.m_bd, direct.m_ket.m_bd);
-    ASSERT_EQ(direct_cpy.m_bra.m_bd, direct.m_bra.m_bd);
+    ASSERT_EQ(direct_cpy.m_ket.m_hs, direct.m_ket.m_hs);
+    ASSERT_EQ(direct_cpy.m_bra.m_hs, direct.m_bra.m_hs);
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
     const field::BosXonv& base_cref = direct;
     buffered::BosXonv base_cref_cpy(base_cref);
-    ASSERT_EQ(base_cref_cpy.m_ket.m_bd, direct.m_ket.m_bd);
-    ASSERT_EQ(base_cref_cpy.m_bra.m_bd, direct.m_bra.m_bd);
+    ASSERT_EQ(base_cref_cpy.m_ket.m_hs, direct.m_ket.m_hs);
+    ASSERT_EQ(base_cref_cpy.m_bra.m_hs, direct.m_bra.m_hs);
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&
@@ -431,23 +437,25 @@ TEST(BufferedFields, BosXonv){
 }
 
 TEST(BufferedFields, FrmBosXonv){
-    const BasisData bd = {4, 5};
     defs::inds ket_frm_inds = {0, 2, 4, 5, 7};
     defs::inds ket_bos_inds = {3, 1, 2, 4, 9};
     defs::inds bra_frm_inds = {1, 2, 3, 7};
     defs::inds bra_bos_inds = {2, 4, 9, 3, 1};
+    const FrmHilbertSpace frm_hs(0, 4);
+    const BosHilbertSpace bos_hs(0ul, 5, false, defs::max_bos_occ);
+    const HilbertSpace hs = {frm_hs, bos_hs};
 
     //  1. constructable via argument forwarding to T::T
-    buffered::FrmBosXonv direct(bd);
-    ASSERT_EQ(direct.m_ket.m_frm.m_bd, bd.m_frm);
-    ASSERT_EQ(direct.m_ket.m_bos.m_bd, bd.m_bos);
-    ASSERT_EQ(direct.m_bra.m_frm.m_bd, bd.m_frm);
-    ASSERT_EQ(direct.m_bra.m_bos.m_bd, bd.m_bos);
+    buffered::FrmBosXonv direct(hs);
+    ASSERT_EQ(direct.m_ket.m_frm.m_hs, hs.m_frm);
+    ASSERT_EQ(direct.m_ket.m_bos.m_hs, hs.m_bos);
+    ASSERT_EQ(direct.m_bra.m_frm.m_hs, hs.m_frm);
+    ASSERT_EQ(direct.m_bra.m_bos.m_hs, hs.m_bos);
 
     //  2. compatible with a call to any public method of T without cast to T&
-    ASSERT_EQ(direct.m_ket.m_bos.m_nelement, bd.m_bos.m_nmode);
+    ASSERT_EQ(direct.m_ket.m_bos.m_nelement, hs.m_bos.m_nmode);
     ASSERT_EQ(direct.m_ket.m_frm.nalpha(), 0ul);
-    ASSERT_EQ(direct.m_bra.m_bos.m_nelement, bd.m_bos.m_nmode);
+    ASSERT_EQ(direct.m_bra.m_bos.m_nelement, hs.m_bos.m_nmode);
     ASSERT_EQ(direct.m_bra.m_frm.nalpha(), 0ul);
 
     //  3. copy-constructable from const B<T>&
@@ -456,19 +464,19 @@ TEST(BufferedFields, FrmBosXonv){
     direct.m_bra.m_frm = bra_frm_inds;
     direct.m_bra.m_bos = bra_bos_inds;
     auto direct_cpy = direct;
-    ASSERT_EQ(direct_cpy.m_ket.m_frm.m_bd, direct.m_ket.m_frm.m_bd);
-    ASSERT_EQ(direct_cpy.m_ket.m_bos.m_bd, direct.m_ket.m_bos.m_bd);
-    ASSERT_EQ(direct_cpy.m_bra.m_frm.m_bd, direct.m_bra.m_frm.m_bd);
-    ASSERT_EQ(direct_cpy.m_bra.m_bos.m_bd, direct.m_bra.m_bos.m_bd);
+    ASSERT_EQ(direct_cpy.m_ket.m_frm.m_hs, direct.m_ket.m_frm.m_hs);
+    ASSERT_EQ(direct_cpy.m_ket.m_bos.m_hs, direct.m_ket.m_bos.m_hs);
+    ASSERT_EQ(direct_cpy.m_bra.m_frm.m_hs, direct.m_bra.m_frm.m_hs);
+    ASSERT_EQ(direct_cpy.m_bra.m_bos.m_hs, direct.m_bra.m_bos.m_hs);
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
     const field::FrmBosXonv& base_cref = direct;
     buffered::FrmBosXonv base_cref_cpy(base_cref);
-    ASSERT_EQ(base_cref_cpy.m_ket.m_frm.m_bd, direct.m_ket.m_frm.m_bd);
-    ASSERT_EQ(base_cref_cpy.m_ket.m_bos.m_bd, direct.m_ket.m_bos.m_bd);
-    ASSERT_EQ(base_cref_cpy.m_bra.m_frm.m_bd, direct.m_bra.m_frm.m_bd);
-    ASSERT_EQ(base_cref_cpy.m_bra.m_bos.m_bd, direct.m_bra.m_bos.m_bd);
+    ASSERT_EQ(base_cref_cpy.m_ket.m_frm.m_hs, direct.m_ket.m_frm.m_hs);
+    ASSERT_EQ(base_cref_cpy.m_ket.m_bos.m_hs, direct.m_ket.m_bos.m_hs);
+    ASSERT_EQ(base_cref_cpy.m_bra.m_frm.m_hs, direct.m_bra.m_frm.m_hs);
+    ASSERT_EQ(base_cref_cpy.m_bra.m_bos.m_hs, direct.m_bra.m_bos.m_hs);
     ASSERT_EQ(direct, base_cref_cpy);
 
     //  5. copy-assignable from const B<T>&

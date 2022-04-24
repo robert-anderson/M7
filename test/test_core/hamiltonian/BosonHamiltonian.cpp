@@ -12,10 +12,10 @@ TEST(BosonHamiltonian, Coefficients) {
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
-    ASSERT_EQ(ham.m_bd.m_bos.m_nmode, 5ul);
-    ASSERT_EQ(ham.nboson(), 5ul);
+    ASSERT_EQ(ham.m_hs.m_bos.m_nmode, 5ul);
+    ASSERT_EQ(ham.m_hs.m_bos.m_nboson, 5ul);
     //0.2209708691 2 4 5 3
-    auto& bos_ham = dynamic_cast<const GeneralBosHam&>(ham.m_bos);
+    auto& bos_ham = *ham.m_bos.as<GeneralBosHam>();
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
     //0.1530931089 5 3 1 3
@@ -40,7 +40,7 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
-    buffered::BosOnv onv(ham.m_bd);
+    buffered::BosOnv onv(ham.m_hs);
     onv = {0, 0, 0, 5, 0};
     ASSERT_FLOAT_EQ(ham.get_element(onv), 3.125);
     onv = {0, 0, 1, 3, 1};
@@ -76,8 +76,8 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
-    buffered::BosOnv src(ham.m_bd);
-    buffered::BosOnv dst(ham.m_bd);
+    buffered::BosOnv src(ham.m_hs);
+    buffered::BosOnv dst(ham.m_hs);
     conn::BosOnv conn(src);
 
     std::vector<defs::inds> basis =

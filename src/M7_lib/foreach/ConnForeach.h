@@ -265,6 +265,7 @@ namespace conn_foreach {
 
         struct Ann : Base {
             Ann(size_t nmode) : Base(exsig_utils::ex_0001, nmode) {}
+                Ann(const BosHilbertSpace& hs): Ann(hs.m_nmode){}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
@@ -288,15 +289,17 @@ namespace conn_foreach {
         };
 
         struct Cre : Base {
-            const size_t m_nboson_max;
-            Cre(size_t nmode, size_t nboson_max) :
-                Base(exsig_utils::ex_0010, nmode), m_nboson_max(nboson_max) {}
+            const size_t m_occ_cutoff;
+            Cre(size_t nmode, size_t occ_cutoff) :
+                    Base(exsig_utils::ex_0010, nmode), m_occ_cutoff(occ_cutoff) {}
+
+            Cre(const BosHilbertSpace& hs): Cre(hs.m_nmode, hs.m_occ_cutoff){}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
                 conn.clear();
                 for (size_t imode = 0ul; imode < src.m_size; ++imode) {
-                    if (size_t(src[imode] + 1) > m_nboson_max) continue;
+                    if (size_t(src[imode] + 1) > m_occ_cutoff) continue;
                     conn.m_cre.set(imode);
                     fn(conn);
                 }
@@ -324,7 +327,7 @@ namespace conn_foreach {
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
                 const auto& occs = src.m_decoded.m_occ_modes.get();
 
-                auto nboson_max = m_nboson_max;
+                auto nboson_max = m_occ_cutoff;
                 auto ann_fn = [&](const ctnd::inds_t<nop_ann>& occ_inds) {
                     conn.m_ann.clear();
                     for (auto &ind: occ_inds) {

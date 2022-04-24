@@ -81,7 +81,7 @@ TEST(DenseHamiltonian, Hubbard3Site) {
     opts.m_fermion.m_charge = -1;
     opts.verify();
     Hamiltonian ham_src(opts);
-    ASSERT_EQ(ham_src.nelec(), 4);
+    ASSERT_EQ(ham_src.m_hs.m_frm.m_nelec, 4);
     DenseHamiltonian ham(ham_src);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -95,8 +95,8 @@ TEST(DenseHamiltonian, Hubbard4Site) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.verify();
     Hamiltonian ham_src(opts);
-    ASSERT_EQ(ham_src.nelec(), 4);
-    ASSERT_EQ(ham_src.m_bd.m_frm.m_nsite, 4);
+    ASSERT_EQ(ham_src.m_hs.m_frm.m_nelec, 4);
+    ASSERT_EQ(ham_src.m_hs.m_frm.m_sites, 4);
     DenseHamiltonian ham(ham_src);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -110,8 +110,8 @@ TEST(DenseHamiltonian, Hubbard6Site) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.verify();
     Hamiltonian ham_src(opts);
-    ASSERT_EQ(ham_src.nelec(), 6);
-    ASSERT_EQ(ham_src.m_bd.m_frm.m_nsite, 6);
+    ASSERT_EQ(ham_src.m_hs.m_frm.m_nelec, 6);
+    ASSERT_EQ(ham_src.m_hs.m_frm.m_sites, 6);
     DenseHamiltonian ham(ham_src);
     std::vector<double> evals;
     dense::diag(ham, evals);
@@ -146,11 +146,13 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
     opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
-    for (size_t n = 0ul; n < ham_src.m_bd.m_bos.m_nmode; ++n) {
-        for (size_t p = 0ul; p < ham_src.m_bd.m_frm.m_nspinorb; ++p) {
-            const auto psite = FrmOnvField::isite(p, ham_src.m_bd.m_frm.m_nsite);
-            for (size_t q = 0ul; q < ham_src.m_bd.m_frm.m_nspinorb; ++q) {
-                const auto qsite = FrmOnvField::isite(q, ham_src.m_bd.m_frm.m_nsite);
+    const auto nmode = ham_src.m_hs.m_bos.m_nmode;
+    const auto& sites = ham_src.m_hs.m_frm.m_sites;
+    for (size_t n = 0ul; n < nmode; ++n) {
+        for (size_t p = 0ul; p < sites.m_nspinorb; ++p) {
+            const auto psite = sites.isite(p);
+            for (size_t q = 0ul; q < sites.m_nspinorb; ++q) {
+                const auto qsite = sites.isite(q);
                 if (n == psite && psite == qsite) {
                     ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos.get_coeff_1101(n, p, q)), 1.4);
                     ASSERT_FLOAT_EQ(consts::real(ham_src.m_frmbos.get_coeff_1110(n, p, q)), 1.4);
@@ -243,9 +245,6 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ham_src.m_frm.m_hd.nci(ham_src.m_bd.m_frm.m_nsite, true);
-    auto bos_dim = ham_src.m_bos.m_hd.nci(ham_src.m_bd.m_bos.m_nmode, false);
-    ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], 0.5090148148366922, 1e-10));
@@ -259,9 +258,6 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc2) {
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ham_src.m_frm.m_hd.nci(ham_src.m_bd.m_frm.m_nsite, true);
-    auto bos_dim = ham_src.m_bos.m_hd.nci(ham_src.m_bd.m_bos.m_nmode, false);
-    ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], -0.38125085248276913, 1e-10));
@@ -275,9 +271,6 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
-    auto frm_dim = ham_src.m_frm.m_hd.nci(ham_src.m_bd.m_frm.m_nsite, true);
-    auto bos_dim = ham_src.m_bos.m_hd.nci(ham_src.m_bd.m_bos.m_nmode, false);
-    ASSERT_EQ(ham.ncol(), frm_dim * bos_dim);
     std::vector<double> evals;
     dense::diag(ham, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], -0.9998830020871416, 1e-10));

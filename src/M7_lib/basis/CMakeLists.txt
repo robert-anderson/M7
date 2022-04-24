@@ -10,5 +10,6 @@ target_sources(M7_lib
         MappedDeterminantList.h
         Planewaves.cpp
         Planewaves.h
+        Suites.cpp
         Suites.h
 )

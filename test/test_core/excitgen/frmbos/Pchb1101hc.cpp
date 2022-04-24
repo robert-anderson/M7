@@ -14,11 +14,11 @@ TEST(Pchb1101hc, Test){
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
     opts.verify();
     Hamiltonian h(opts);
-    ASSERT_TRUE(dynamic_cast<const GeneralLadderHam*>(&h.m_frmbos));
+    ASSERT_TRUE(h.m_frmbos.is<GeneralLadderHam>());
     Pchb1101hc excit_gen(h.m_frmbos, prng);
-    buffered::FrmOnv src_mbf(h.m_bd);
-    mbf::set_aufbau_mbf(src_mbf, h);
-    conn_foreach::frm::Ms2Conserve<2> conn_iter(src_mbf.m_bd);
+    buffered::FrmOnv src_mbf(h.m_hs);
+    mbf::set_aufbau_mbf(src_mbf);
+    conn_foreach::frm::Ms2Conserve<2> conn_iter(src_mbf.m_hs.m_sites);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
 
     tester.fill_results_table(src_mbf);

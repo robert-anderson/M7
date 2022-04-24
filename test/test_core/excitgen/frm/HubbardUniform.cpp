@@ -15,14 +15,14 @@ TEST(HubbardUniform, ObcFromNeel1D) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.verify();
     Hamiltonian h(opts);
-    ASSERT_TRUE(dynamic_cast<const HubbardFrmHam*>(&h.m_frm));
+    ASSERT_TRUE(h.m_frm.is<HubbardFrmHam>());
     HubbardUniform excit_gen(h.m_frm, prng);
-    ASSERT_FALSE(excit_gen.h_cast()->m_bcs[0]);
-    conn_foreach::frm::Hubbard conn_iter(excit_gen.h_cast()->m_lattice);
+    ASSERT_FALSE(h.m_frm.as<HubbardFrmHam>()->m_bcs[0]);
+    conn_foreach::frm::Hubbard conn_iter(h.m_frm.as<HubbardFrmHam>()->m_lattice);
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    buffered::FrmOnv src_mbf(h.m_bd);
-    mbf::set_neel_mbf(src_mbf, h);
+    buffered::FrmOnv src_mbf(h.m_hs);
+    mbf::set_neel_mbf(src_mbf);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
     tester.run(src_mbf, ndraw);
@@ -42,13 +42,13 @@ TEST(HubbardUniform, PbcFromNeel2D) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {-1, 1};
     opts.verify();
     Hamiltonian h(opts);
-    ASSERT_TRUE(dynamic_cast<const HubbardFrmHam*>(&h.m_frm));
+    ASSERT_TRUE(h.m_frm.is<HubbardFrmHam>());
     HubbardUniform excit_gen(h.m_frm, prng);
-    conn_foreach::frm::Hubbard conn_iter(excit_gen.h_cast()->m_lattice);
+    conn_foreach::frm::Hubbard conn_iter(h.m_frm.as<HubbardFrmHam>()->m_lattice);
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    buffered::FrmOnv src_mbf(h.m_bd);
-    mbf::set_neel_mbf(src_mbf, h);
+    buffered::FrmOnv src_mbf(h.m_hs);
+    mbf::set_neel_mbf(src_mbf);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 3000000;
     tester.run(src_mbf, ndraw);

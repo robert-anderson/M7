@@ -15,13 +15,13 @@ TEST(HeisenbergExchange, Pbc2D) {
     opts.m_fermion.m_ms2_restrict = 1;
     opts.verify();
     Hamiltonian h(opts);
-    ASSERT_TRUE(dynamic_cast<const HeisenbergFrmHam*>(&h.m_frm));
+    ASSERT_TRUE(h.m_frm.is<HeisenbergFrmHam>());
     HeisenbergExchange excit_gen(h.m_frm, prng);
-    conn_foreach::frm::Heisenberg conn_iter(excit_gen.h_cast()->m_lattice);
+    conn_foreach::frm::Heisenberg conn_iter(h.m_frm.as<HeisenbergFrmHam>()->m_lattice);
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    buffered::FrmOnv src_mbf(h.m_bd);
-    mbf::set_neel_mbf(src_mbf, h);
+    buffered::FrmOnv src_mbf(h.m_hs);
+    mbf::set_neel_mbf(src_mbf);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 1000000;
     tester.run(src_mbf, ndraw);

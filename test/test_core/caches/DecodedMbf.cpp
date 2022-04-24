@@ -8,7 +8,7 @@
 
 TEST(DecodedMbf, Simple){
     const defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
-    buffered::FrmOnv mbf({setbits.size(), 50});
+    buffered::FrmOnv mbf(50);
     mbf = setbits;
     defs::inds clrbits;
     auto iter = setbits.begin();

@@ -6,20 +6,24 @@
 #include "M7_lib/foreach/ConnForeach.h"
 
 namespace conn_foreach_test {
-    struct Result{
+    struct Result {
         const defs::inds m_ann, m_cre;
-        Result(defs::inds ann, defs::inds cre): m_ann(std::move(ann)), m_cre(std::move(cre)){}
-        Result(size_t ann, size_t cre): m_ann({ann}), m_cre({cre}){}
+
+        Result(defs::inds ann, defs::inds cre) : m_ann(std::move(ann)), m_cre(std::move(cre)) {}
+
+        Result(size_t ann, size_t cre) : m_ann({ann}), m_cre({cre}) {}
     };
+
     typedef std::vector<Result> results_t;
-    results_t product_results(const std::vector<defs::inds>& anns, const std::vector<defs::inds>& cres) {
+
+    results_t product_results(const std::vector<defs::inds> &anns, const std::vector<defs::inds> &cres) {
         const std::vector<defs::inds> default_ops = {{}};
-        const auto& anns_ref = anns.empty() ? default_ops : anns;
-        const auto& cres_ref = cres.empty() ? default_ops : cres;
+        const auto &anns_ref = anns.empty() ? default_ops : anns;
+        const auto &cres_ref = cres.empty() ? default_ops : cres;
 
         results_t results;
         results.reserve(anns_ref.size() * cres_ref.size());
-        for(auto &ann: anns_ref) {
+        for (auto &ann: anns_ref) {
             for (auto &cre: cres_ref) {
                 results.push_back({ann, cre});
             }
@@ -27,18 +31,18 @@ namespace conn_foreach_test {
         return results;
     }
 
-    static defs::inds creatable_mode_indices(const field::BosOnv& mbf, size_t nboson_max) {
+    static defs::inds creatable_mode_indices(const field::BosOnv &mbf, size_t nboson_max) {
         defs::inds inds;
-        for (size_t imode=0ul; imode<mbf.m_bd.m_nmode; ++imode) {
+        for (size_t imode = 0ul; imode < mbf.m_hs.m_nmode; ++imode) {
             size_t nocc = mbf[imode];
             if (nocc < nboson_max) inds.push_back(imode);
         }
         return inds;
     }
 
-    static defs::inds annihilatable_mode_indices(const field::BosOnv& mbf) {
+    static defs::inds annihilatable_mode_indices(const field::BosOnv &mbf) {
         defs::inds inds;
-        for (size_t imode=0ul; imode<mbf.m_bd.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
+        for (size_t imode = 0ul; imode < mbf.m_hs.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
         return inds;
     }
 }
@@ -96,8 +100,18 @@ TEST(ConnForeach, FrmGeneralEx2200) {
     mbf = setbits;
     defs::inds clrbits = {0, 2, 4, 7};
     ASSERT_EQ(mbf.m_decoded.m_simple_vacs.get(), clrbits);
-    std::vector<defs::inds> setbit_pairs = {{1, 3}, {1, 5}, {3, 5}, {1, 6}, {3, 6}, {5, 6}};
-    std::vector<defs::inds> clrbit_pairs = {{0, 2}, {0, 4}, {2, 4}, {0, 7}, {2, 7}, {4, 7}};
+    std::vector<defs::inds> setbit_pairs = {{1, 3},
+                                            {1, 5},
+                                            {3, 5},
+                                            {1, 6},
+                                            {3, 6},
+                                            {5, 6}};
+    std::vector<defs::inds> clrbit_pairs = {{0, 2},
+                                            {0, 4},
+                                            {2, 4},
+                                            {0, 7},
+                                            {2, 7},
+                                            {4, 7}};
     auto results = conn_foreach_test::product_results(setbit_pairs, clrbit_pairs);
 
     auto result = results.cbegin();
@@ -121,7 +135,7 @@ TEST(ConnForeach, FrmHubbardEx1100) {
      *  periodic BCs top to bottom (major dimension: "row")
      *  open BCs left to right (minor dimension: "col")
      */
-    const size_t nrow=3, ncol=4;
+    const size_t nrow = 3, ncol = 4;
     auto lattice = lattice::make({Lattice::Ortho, {nrow, ncol}, {1, 0}});
     buffered::FrmOnv onv(lattice.nsite());
     onv = {0, 2, 7, 8, 9};
@@ -142,10 +156,22 @@ TEST(ConnForeach, FrmHubbardEx1100) {
     ASSERT_FALSE(lattice.m_dense(7, 4));
 
     conn_foreach_test::results_t results = {
-            {0, 4}, {0, 1}, {2, 10}, {2, 6}, {2, 1}, {2, 3}, {7, 3}, {7, 11}, {7, 6}, {8, 4}, {9, 5}, {9, 1}, {9, 10}};
+            {0, 4},
+            {0, 1},
+            {2, 10},
+            {2, 6},
+            {2, 1},
+            {2, 3},
+            {7, 3},
+            {7, 11},
+            {7, 6},
+            {8, 4},
+            {9, 5},
+            {9, 1},
+            {9, 10}};
 
     auto result = results.cbegin();
-    auto fn = [&result](const conn::FrmOnv& conn){
+    auto fn = [&result](const conn::FrmOnv &conn) {
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ASSERT_EQ(conn.m_ann, result->m_ann);
         ++result;
@@ -161,16 +187,21 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
      *  1 0 0 1 0 1 1 0
      *  periodic BCs
      */
-    const size_t nsite=8;
+    const size_t nsite = 8;
     auto lattice = lattice::make({Lattice::Ortho, {nsite}, {1}});
     buffered::FrmOnv onv(lattice.nsite());
     onv.set_spins({0, 3, 5});
 
     conn_foreach_test::results_t results = {
-            {{0, 15}, {7, 8}}, {{0, 9}, {1, 8}}, {{3, 10}, {2, 11}}, {{3, 12}, {4, 11}}, {{5, 12}, {4, 13}}, {{5, 14}, {6, 13}}};
+            {{0, 15}, {7, 8}},
+            {{0, 9},  {1, 8}},
+            {{3, 10}, {2, 11}},
+            {{3, 12}, {4, 11}},
+            {{5, 12}, {4, 13}},
+            {{5, 14}, {6, 13}}};
 
     auto result = results.cbegin();
-    auto fn = [&result](const conn::FrmOnv& conn){
+    auto fn = [&result](const conn::FrmOnv &conn) {
         ASSERT_EQ(conn.exsig(), exsig_utils::ex_double);
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ASSERT_EQ(conn.m_ann, result->m_ann);
@@ -275,7 +306,7 @@ TEST(ConnForeach, BosEx0001) {
     defs::inds occs = {0, 2, 0, 1, 5, 1};
     buffered::BosOnv mbf(nmode);
     mbf = occs;
-    auto& chk_modes = mbf.m_decoded.m_occ_modes.get();
+    auto &chk_modes = mbf.m_decoded.m_occ_modes.get();
 
     auto iiter = 0ul;
     auto fn = [&](const conn::BosOnv &conn) {
@@ -294,8 +325,8 @@ TEST(ConnForeach, BosEx0010BosOnv) {
     defs::inds occs = {0, 2, 0, 1, 5, 1};
 
     {
-        const size_t nboson_max = 10;
-        buffered::BosOnv mbf({nmode});
+        const size_t occ_cutoff = 10;
+        buffered::BosOnv mbf({0ul, nmode, false, occ_cutoff});
         mbf = occs;
         defs::inds chk_modes = {0, 1, 2, 3, 4, 5};
         auto iiter = 0ul;
@@ -304,7 +335,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
             ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
             ++iiter;
         };
-        conn_foreach::bos::Cre foreach(mbf.m_bd, nboson_max);
+        conn_foreach::bos::Cre foreach(mbf.m_hs.m_nmode, occ_cutoff);
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
@@ -322,7 +353,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
             ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
             ++iiter;
         };
-        conn_foreach::bos::Cre foreach(mbf.m_bd, nboson_max);
+        conn_foreach::bos::Cre foreach(mbf.m_hs.m_nmode, nboson_max);
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
@@ -343,18 +374,18 @@ TEST(ConnForeach, BosEx0010FrmBosOnv) {
         ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, chk_modes[iiter]);
         ++iiter;
     };
-    conn_foreach::bos::Cre foreach(mbf.m_bos.m_bd, nboson_max);
+    conn_foreach::bos::Cre foreach(mbf.m_bos.m_hs.m_nmode, nboson_max);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
     foreach.loop(mbf, fn);
     ASSERT_EQ(iiter, chk_modes.size());
 }
 
 TEST(ConnForeach, FrmBosEx1110) {
-    const size_t nsite=6, nmode=8;
-    for (size_t nboson_max =0ul; nboson_max < 6; ++nboson_max) {
-        buffered::FrmBosOnv mbf(nsite, nmode, nboson_max);
+    const size_t nsite = 6, nmode = 8;
+    for (size_t nboson_max = 0ul; nboson_max < 6; ++nboson_max) {
+        buffered::FrmBosOnv mbf(nsite, {0ul, nmode, false, nboson_max});
 
-        ASSERT_EQ(mbf.m_bos.m_bd.m_nmode, nmode);
+        ASSERT_EQ(mbf.m_bos.m_hs.m_nmode, nmode);
         mbf = {{0, 4, 6, 8, 11},
                {2, 0, 1, 0, 1, 4, 0, 5}};
         using namespace conn_foreach;
@@ -381,7 +412,7 @@ TEST(ConnForeach, FrmBosEx1110) {
             ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, mode_inds[imode]);
             ++iiter;
         };
-        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach(mbf.m_frm.m_bd, {mbf.m_bos.m_bd, nboson_max});
+        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach(mbf.m_frm.m_hs.m_sites, mbf.m_bos.m_hs);
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_1110);
         foreach.loop_fn(mbf, fn);
         ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
@@ -389,9 +420,10 @@ TEST(ConnForeach, FrmBosEx1110) {
 }
 
 TEST(ConnForeach, FrmBosEx1101) {
-    const size_t nsite=6, nmode=8;
+    const size_t nsite = 6, nmode = 8;
     buffered::FrmBosOnv mbf(nsite, nmode);
-    mbf = {{0, 4, 6, 8, 11}, {2, 0, 1, 0, 1, 4, 0, 5}};
+    mbf = {{0, 4, 6, 8, 11},
+           {2, 0, 1, 0, 1, 4, 0, 5}};
     using namespace conn_foreach;
     /*
      * first, do the product manually. The two components of this product iterator are already tested above, here we
@@ -399,10 +431,10 @@ TEST(ConnForeach, FrmBosEx1101) {
      */
     conn_foreach_test::results_t frm_results;
     {
-        auto fn = [&frm_results](const conn::FrmOnv& conn){
+        auto fn = [&frm_results](const conn::FrmOnv &conn) {
             frm_results.emplace_back(conn.m_ann.inds(), conn.m_cre.inds());
         };
-        frm::Ms2Conserve<1> foreach(mbf.m_frm.m_bd);
+        frm::Ms2Conserve<1> foreach(mbf.m_frm.m_hs.m_sites);
         foreach.loop_fn(mbf.m_frm, fn);
     }
 
@@ -416,7 +448,7 @@ TEST(ConnForeach, FrmBosEx1101) {
         ASSERT_EQ(conn.m_bos.m_ann[0].m_imode, mode_inds[imode]);
         ++iiter;
     };
-    frmbos::Product<frm::Ms2Conserve<1>, bos::Ann> foreach(mbf.m_frm.m_bd, mbf.m_bos.m_bd);
+    frmbos::Product<frm::Ms2Conserve<1>, bos::Ann> foreach(mbf.m_frm.m_hs.m_sites, mbf.m_bos.m_hs);
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_1101);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());

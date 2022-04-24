@@ -52,17 +52,17 @@ TEST(GeneralFrmHam, Elements) {
     opts.verify();
     Hamiltonian h(opts.m_hamiltonian);
     {
-        buffered::FrmOnv src(h.m_bd);
+        buffered::FrmOnv src(h.m_hs);
         src = {{0, 1, 4}, {0, 2, 4}};
-        buffered::FrmOnv dst(h.m_bd);
+        buffered::FrmOnv dst(h.m_hs);
         dst = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
         ASSERT_FLOAT_EQ(benchmark, helem);
     }
     {
-        buffered::FrmBosOnv src(h.m_bd);
+        buffered::FrmBosOnv src(h.m_hs);
         src.m_frm = {{0, 1, 4}, {0, 2, 4}};
-        buffered::FrmBosOnv dst(h.m_bd);
+        buffered::FrmBosOnv dst(h.m_hs);
         dst.m_frm = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
         ASSERT_FLOAT_EQ(benchmark, helem);
@@ -76,10 +76,10 @@ TEST(GeneralFrmHam, RhfEnergy) {
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
     defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
-    ASSERT_EQ(ham.m_frm.m_bd.m_abgrp_map.m_site_irreps, chk_orbsyms);
+    ASSERT_EQ(ham.m_frm.m_hs.m_abgrp_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_bd);
-    mbf::set_aufbau_mbf(onv, ham);
+    buffered::FrmOnv onv(ham.m_hs);
+    mbf::set_aufbau_mbf(onv);
     auto elem = ham.get_element(onv);
     ASSERT_FLOAT_EQ(consts::real(elem), benchmark);
     ASSERT_FLOAT_EQ(consts::imag(elem), 1e-14);
@@ -92,19 +92,17 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_bd);
-    mbf::set_aufbau_mbf(onv, ham);
+    buffered::FrmOnv onv(ham.m_hs);
+    mbf::set_aufbau_mbf(onv);
 
-    OccOrbs occs(onv);
-    VacOrbs vacs(onv);
+    decoded_mbf::frm::SimpleOccs occs(onv);
+    decoded_mbf::frm::SimpleVacs vacs(onv);
 
-    buffered::FrmOnv excited(ham.m_bd);
+    buffered::FrmOnv excited(ham.m_hs);
     conn::FrmOnv conn(onv);
 
-    for (size_t iocc = 0ul; iocc < occs.size(); ++iocc) {
-        const auto &occ = occs[iocc];
-        for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
-            const auto &vac = vacs[iocc];
+    for (size_t occ : occs.get()){
+        for (size_t vac : vacs.get()){
             conn.m_ann.set(occ);
             conn.m_cre.set(vac);
             ASSERT_FLOAT_EQ(ham.m_frm.get_element_1100(onv, conn), 0.0);
