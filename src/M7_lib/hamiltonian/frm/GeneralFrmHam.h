@@ -16,13 +16,9 @@ struct GeneralFrmHam : FrmHam {
 
     GeneralFrmHam(const FrmHilbertSpace& hs);
 
-    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge = 0);
+    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict=~0, size_t nelec=0);
 
-    GeneralFrmHam(std::string fname, bool spin_major, int charge = 0):
-            GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
-
-    explicit GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
-            GeneralFrmHam(opts.m_fcidump.m_path, opts.m_fcidump.m_spin_major, opts.m_charge) {}
+    explicit GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 

@@ -31,7 +31,7 @@ HubbardFrmHam::HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2, int charge
 }
 
 HubbardFrmHam::HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
-        HubbardFrmHam(opts.m_hubbard.m_repulsion, lattice::make(opts.m_hubbard), opts.m_ms2_restrict, opts.m_charge){}
+        HubbardFrmHam(opts.m_hubbard.m_repulsion, lattice::make(opts.m_hubbard), opts.m_ms2, opts.m_nelec){}
 
 defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;

@@ -65,8 +65,8 @@ namespace fciqmc_config {
         Fcidump m_fcidump;
         Hubbard m_hubbard;
         Heisenberg m_heisenberg;
-        config::Param<int> m_charge;
-        config::Param<int> m_ms2_restrict;
+        config::Param<size_t> m_nelec;
+        config::Param<int> m_ms2;
         config::Param<double> m_spin_penalty_j;
 
         explicit FermionHamiltonian(config::Group *parent);

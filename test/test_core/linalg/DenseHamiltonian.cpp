@@ -78,7 +78,7 @@ TEST(DenseHamiltonian, Hubbard3Site) {
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.verify();
     Hamiltonian ham_src(opts);
     ASSERT_EQ(ham_src.m_hs.m_frm.m_nelec, 4);
@@ -122,7 +122,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 0.0;
     opts.m_boson.m_nboson_max = 0;
@@ -139,7 +139,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 2;
@@ -173,7 +173,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc3) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 3;
@@ -190,7 +190,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc2) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 2;
@@ -207,7 +207,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc1) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 1;
@@ -224,7 +224,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc3) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {3};
-    opts.m_fermion.m_charge = -1;
+    opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 3;

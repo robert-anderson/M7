@@ -28,6 +28,7 @@ static constexpr std::array<std::array<size_t, 4>, 8> orderings{
 struct FcidumpHeader : public FortranNamelistReader {
     const bool m_uhf, m_relativistic, m_spin_resolved;
     const size_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
+    const int m_ms2;
     const defs::inds m_orbsym;
 
     FcidumpHeader(const std::string& fname);

@@ -648,7 +648,7 @@ namespace ci_utils {
      */
     static size_t nalpha(const FrmHilbertData& hd){
         auto nelec = hd.m_nelec;
-        auto ms2 = hd.m_ms2_restrict;
+        auto ms2 = hd.m_ms2;
         size_t spin_odd = std::abs(ms2) % 2;
         ASSERT(nelec % 2 == spin_odd);
         size_t nalpha = nelec / 2 + (std::abs(ms2)) / 2 + spin_odd;

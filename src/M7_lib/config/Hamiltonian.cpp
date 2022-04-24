@@ -67,10 +67,10 @@ fciqmc_config::Heisenberg::Heisenberg(config::Group *parent) :
 fciqmc_config::FermionHamiltonian::FermionHamiltonian(config::Group *parent) :
         config::Section(parent, "fermion", "options relating to the fermion hamiltonian terms"),
         m_fcidump(this), m_hubbard(this), m_heisenberg(this),
-        m_charge(this, "charge", 0,
-                 "electron deficit relative to the default value in the FCIDUMP file or that assumed by the model system (positive value to remove elecs)"),
-        m_ms2_restrict(this, "ms2_restrict", 0,
-                       "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number"),
+        m_nelec(this, "nelec", 0ul,
+                "number of electrons in the system (overrides any value determined by FCIDUMP or model system)"),
+        m_ms2(this, "ms2", 0,
+              "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number"),
         m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
 void fciqmc_config::FermionHamiltonian::verify() {

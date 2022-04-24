@@ -14,6 +14,7 @@ FcidumpHeader::FcidumpHeader(const std::string& fname):
     m_nsite(read_uint("NORB")),
     m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
     m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
+    m_ms2(read_int("MS2", ~0)),
     m_orbsym(read_uints("ORBSYM", -1, defs::inds(m_nsite, 1ul))){
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }

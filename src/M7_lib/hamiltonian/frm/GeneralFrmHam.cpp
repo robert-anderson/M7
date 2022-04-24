@@ -38,9 +38,14 @@ GeneralFrmHam::GeneralFrmHam(const FrmHilbertSpace &hs):
                "site map size incorrect");
 }
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2, int charge) :
-        GeneralFrmHam({header.m_nelec-charge, header.m_nsite,
-                       {PointGroup(), header.m_orbsym}, header.m_spin_resolved, ms2}){
+GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2, size_t nelec) :
+        GeneralFrmHam({
+            nelec ? nelec : header.m_nelec,
+            header.m_nsite,
+            {PointGroup(), header.m_orbsym},
+            header.m_spin_resolved,
+            ms2==~0 ? header.m_ms2 : ms2
+        }){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -78,6 +83,8 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
     log_data();
 }
 
+GeneralFrmHam::GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
+        GeneralFrmHam({opts.m_fcidump.m_path}, opts.m_fcidump.m_spin_major, opts.m_ms2, opts.m_nelec) {}
 
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
     return m_int_1(a, i);
