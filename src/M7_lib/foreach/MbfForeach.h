@@ -6,7 +6,6 @@
 #define M7_MBFFOREACH_H
 
 #include <utility>
-#include <M7_lib/basis/HilbertData.h>
 
 #include "BasicForeach.h"
 #include "M7_lib/field/Fields.h"
@@ -23,11 +22,11 @@ namespace mbf_foreach {
      * untemplated, polymorphic base class
      */
     struct Base {
-        const BasisData m_bd;
+        const HilbertSpace m_hs;
         const size_t m_niter;
         suite::Mbfs m_mbfs;
 
-        Base(BasisData bd, size_t niter);
+        Base(const HilbertSpace& hs, size_t niter);
 
         virtual ~Base() {}
 
@@ -92,12 +91,12 @@ namespace mbf_foreach {
         Pair(const foreach_t &foreach) :
                 PairBase(static_cast<const mbf_foreach::Base &>(foreach).m_niter),
                 m_foreach_outer(foreach), m_foreach_inner(foreach) {
-            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
-                            m_foreach_outer.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
-                            "MBFs not reproduced properly by copy");
-            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
-                            m_foreach_inner.m_mbfs.m_row.m_frmbos.m_frm.m_bd.m_nsite,
-                            "MBFs not reproduced properly by copy");
+            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
+                            m_foreach_outer.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
+                            "outer MBFs not reproduced properly by copy");
+            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
+                            m_foreach_inner.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
+                            "inner MBFs not reproduced properly by copy");
         }
 
         template<typename fn_t>
@@ -120,20 +119,14 @@ namespace mbf_foreach {
     namespace frm {
 
         struct Base : mbf_foreach::Base {
-            Base(size_t nsite, size_t niter);
+            Base(const FrmHilbertSpace& hs, size_t niter);
         };
 
-        struct NumberConserve : Base {
-            const size_t m_nelec;
-
-            NumberConserve(size_t nsite, size_t nelec, size_t niter);
-        };
-
-        struct General : NumberConserve {
+        struct General : Base {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_foreach;
 
-            General(size_t nsite, size_t nelec);
+            General(const FrmHilbertSpace& hs);
 
             template<typename fn_t>
             void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
@@ -153,12 +146,11 @@ namespace mbf_foreach {
         };
 
 
-        struct Spins : NumberConserve {
-            const int m_ms2;
+        struct Spins : Base {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_foreach;
 
-            Spins(size_t nsite, int ms2);
+            Spins(const FrmHilbertSpace& hs);
 
         public:
             template<typename fn_t>
@@ -179,14 +171,13 @@ namespace mbf_foreach {
         };
 
 
-        struct Ms2Conserve : NumberConserve {
-            const int m_ms2;
+        struct Ms2Conserve : Base {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_alpha_foreach, m_beta_foreach;
 
-            static size_t niter(size_t nsite, const FrmHilbertData& hd);
+            static size_t niter(const FrmHilbertSpace& hd);
 
-            Ms2Conserve(size_t nsite, const FrmHilbertData& hd);
+            Ms2Conserve(const FrmHilbertSpace& hs);
 
         public:
             template<typename fn_t>
@@ -197,7 +188,7 @@ namespace mbf_foreach {
                     mbf.set(0, alpha_inds);
                     auto beta_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &beta_inds) {
                         mbf.put_spin_channel(1, false);
-                        mbf.set(mbf.m_bd.m_nsite, beta_inds);
+                        mbf.set(mbf.m_hs.m_sites, beta_inds);
                         fn(mbf);
                     };
                     m_beta_foreach.loop(beta_fn);
@@ -230,20 +221,14 @@ namespace mbf_foreach {
 
     namespace bos {
         struct Base : mbf_foreach::Base {
-            Base(size_t nmode, size_t niter);
+            Base(const BosHilbertSpace& hs, size_t niter);
         };
 
-        struct NumberConserve : Base {
-            const size_t m_nboson;
-
-            NumberConserve(size_t nmode, size_t nboson, size_t niter);
-        };
-
-        struct GeneralClosed : NumberConserve {
+        struct GeneralClosed : Base {
             typedef basic_foreach::rtnd::Ordered<false, true> foreach_t;
             foreach_t m_foreach;
 
-            GeneralClosed(size_t nmode, size_t nboson);
+            GeneralClosed(const BosHilbertSpace& hs);
 
         public:
             template<typename fn_t>
@@ -267,7 +252,7 @@ namespace mbf_foreach {
             typedef basic_foreach::rtnd::Unrestricted foreach_t;
             foreach_t m_foreach;
 
-            GeneralOpen(size_t nmode, size_t nboson_max);
+            GeneralOpen(const BosHilbertSpace& hs);
 
         public:
             template<typename fn_t>
@@ -308,7 +293,7 @@ namespace mbf_foreach {
 
     namespace frm_bos {
         struct Base : mbf_foreach::Base {
-            Base(BasisData bd, size_t niter);
+            Base(const HilbertSpace& hs, size_t niter);
         };
 
         template<typename frm_foreach_t, typename bos_foreach_t>
@@ -327,9 +312,9 @@ namespace mbf_foreach {
                 Bases (const frm_foreach_t &frm, const bos_foreach_t &bos): m_frm(frm), m_bos(bos){}
             };
 
-            static BasisData make_bd(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
+            static HilbertSpace make_hs(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 Bases bases(frm_foreach, bos_foreach);
-                return {bases.m_frm.m_bd.m_frm, bases.m_bos.m_bd.m_bos};
+                return {bases.m_frm.m_hs.m_frm, bases.m_bos.m_hs.m_bos};
             }
 
             static size_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
@@ -339,7 +324,7 @@ namespace mbf_foreach {
 
         public:
             Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) :
-                    Base(make_bd(frm_foreach, bos_foreach), make_niter(frm_foreach, bos_foreach)),
+                    Base(make_hs(frm_foreach, bos_foreach), make_niter(frm_foreach, bos_foreach)),
                     m_frm_foreach(frm_foreach), m_bos_foreach(bos_foreach) {}
 
 
@@ -372,8 +357,8 @@ namespace mbf_foreach {
          */
         template<typename frm_foreach_t>
         struct ClosedProduct : Product<frm_foreach_t, bos::GeneralClosed> {
-            ClosedProduct(const frm_foreach_t &frm_foreach, size_t nmode, size_t nboson) :
-                    Product<frm_foreach_t, bos::GeneralClosed>(frm_foreach, {nmode, nboson}) {}
+            ClosedProduct(const frm_foreach_t &frm_foreach, const BosHilbertSpace& hs) :
+                    Product<frm_foreach_t, bos::GeneralClosed>(frm_foreach, hs) {}
         };
 
         /**
@@ -383,8 +368,8 @@ namespace mbf_foreach {
          */
         template<typename frm_foreach_t>
         struct OpenProduct : Product<frm_foreach_t, bos::GeneralOpen> {
-            OpenProduct(const frm_foreach_t &frm_foreach, size_t nmode, size_t nboson_max) :
-                    Product<frm_foreach_t, bos::GeneralOpen>(frm_foreach, {nmode, nboson_max}) {}
+            OpenProduct(const frm_foreach_t &frm_foreach, const BosHilbertSpace& hs) :
+                    Product<frm_foreach_t, bos::GeneralOpen>(frm_foreach, hs) {}
         };
 
         template<typename foreach_t>

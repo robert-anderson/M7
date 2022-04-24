@@ -38,7 +38,7 @@ public:
             m_ham(ham),
             m_opts(opts),
             m_shift(opts, wf_fmt),
-            m_dst(ham.m_bd), m_conn(ham.m_bd) {}
+            m_dst(ham.m_hs), m_conn(ham.m_hs.m_extents) {}
 
     virtual ~Propagator() {}
 

@@ -33,7 +33,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     typedef GlobalExtremalRows<WalkerTableRow, defs::wf_t, defs::ndim_wf> weights_gxr_t;
 
     const fciqmc_config::Document &m_opts;
-    const BasisData m_bd;
+    const HilbertSpace m_hs;
 
     /**
      * all multidimensional array indices of the multidimensional fields of the m_store row
@@ -86,7 +86,7 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
-    Wavefunction(const fciqmc_config::Document &opts, BasisData bd);
+    Wavefunction(const fciqmc_config::Document &opts, HilbertSpace hs);
 
     ~Wavefunction();
 

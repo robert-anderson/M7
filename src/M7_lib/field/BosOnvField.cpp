@@ -27,3 +27,7 @@ void BosOnvField::set_ops(const defs::inds &iops) {
     zero();
     for (auto& iop: iops) (*this)[iop]++;
 }
+
+size_t BosOnvField::nboson() const {
+    return this->sum();
+}

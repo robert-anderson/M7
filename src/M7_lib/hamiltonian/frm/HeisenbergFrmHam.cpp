@@ -4,8 +4,8 @@
 
 #include "HeisenbergFrmHam.h"
 
-HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2_restrict) :
-        SpinModelFrmHam(lattice.nsite(), {lattice.nsite(), ms2_restrict}),
+HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2) :
+        SpinModelFrmHam({lattice.nsite(), lattice.nsite(),ms2}),
         m_j(j), m_lattice(std::move(lattice)){
     m_contribs_2200.set_nonzero(exsig_utils::ex_double);
     m_contribs_2200.set_nonzero(0);
@@ -23,11 +23,11 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_
      *      pb+  qa+  qb   pa
      *
      */
-    const auto nsite = m_bd.m_nsite;
-    auto asite = field::FrmOnv::isite(a, nsite);
-    auto bsite = field::FrmOnv::isite(b, nsite);
-    auto isite = field::FrmOnv::isite(i, nsite);
-    auto jsite = field::FrmOnv::isite(j, nsite);
+    const auto& sites = m_hs.m_sites;
+    const auto asite = sites.isite(a);
+    const auto bsite = sites.isite(b);
+    const auto isite = sites.isite(i);
+    const auto jsite = sites.isite(j);
     if (asite == isite){
         if (bsite != jsite) return 0.0;
     }
@@ -49,7 +49,7 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
      * finally, return the accumulation scaled by J
      */
     int si_sj_tot = 0;
-    for (size_t isite=0ul; isite<m_bd.m_nsite; ++isite){
+    for (size_t isite=0ul; isite<m_hs.m_sites; ++isite){
         DEBUG_ASSERT_EQ(onv.site_nocc(isite), 1ul,
                         "spin system is assumed, must not have unoccupied or doubly occupied sites");
         auto row = m_lattice.m_sparse[isite];

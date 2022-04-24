@@ -9,11 +9,11 @@
 #include "Propagators.h"
 
 FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
-        m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.m_bd),
+        m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.m_hs),
         m_prop(props::get(m_ham, opts, m_wf.m_format)) {
-    buffered::Mbf ref_mbf(m_ham.m_bd);
+    buffered::Mbf ref_mbf(m_ham.m_hs);
 
-    mbf::set(ref_mbf, opts.m_reference.m_mbf_init, m_ham, 0ul);
+    mbf::set(ref_mbf, opts.m_reference.m_mbf_init, 0ul);
 
     auto ref_energy = m_ham.get_energy(ref_mbf);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_mbf), 0ul};

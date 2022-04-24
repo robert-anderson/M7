@@ -6,10 +6,11 @@
 
 
 GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, const FrmHam &frm, const BosHam &bos, bool spin_major) :
-        FrmBosHam({header.m_nsite, header.m_nmode}, frm, bos), m_v(m_bd, header.m_uhf),
-        m_v_unc(m_bd.m_bos.m_nmode, 0.0) {
-    if (!m_bd.m_frm.m_nsite && !m_bd.m_bos.m_nmode) return;
-    REQUIRE_EQ(m_bd.m_frm.m_nsite == 0, m_bd.m_bos.m_nmode == 0,
+        FrmBosHam({{0ul, header.m_nsite}, {0ul, header.m_nmode}}, frm, bos),
+        m_v(m_hs.m_extents, header.m_uhf),
+        m_v_unc(m_hs.m_bos.m_nmode, 0.0) {
+    if (!m_hs) return;
+    REQUIRE_EQ(m_hs.m_frm, m_hs.m_bos,
                "if the number of sites is non-zero, so also must be the number of boson modes. "
                "NMODE definition may be missing from EBDUMP file header");
 

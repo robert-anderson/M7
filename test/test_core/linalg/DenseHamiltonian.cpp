@@ -126,7 +126,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 0.0;
     opts.m_boson.m_nboson_max = 0;
-    opts.m_boson.m_holstein_omega = 0.0;
+    opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
@@ -143,7 +143,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 2;
-    opts.m_boson.m_holstein_omega = 0.0;
+    opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
     for (size_t n = 0ul; n < ham_src.m_bd.m_bos.m_nmode; ++n) {
@@ -175,7 +175,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc3) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 3;
-    opts.m_boson.m_holstein_omega = 0.0;
+    opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
@@ -192,7 +192,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc2) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 2;
-    opts.m_boson.m_holstein_omega = 0.3;
+    opts.m_boson.m_num_op_weight = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
@@ -209,7 +209,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc1) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 1;
-    opts.m_boson.m_holstein_omega = 0.3;
+    opts.m_boson.m_num_op_weight = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
@@ -226,7 +226,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc3) {
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
     opts.m_boson.m_nboson_max = 3;
-    opts.m_boson.m_holstein_omega = 0.3;
+    opts.m_boson.m_num_op_weight = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);

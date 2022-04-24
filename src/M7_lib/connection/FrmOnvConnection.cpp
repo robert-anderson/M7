@@ -18,7 +18,7 @@ FrmOnvConnection::FrmOnvConnection(BasisExtents extents) : FrmOnvConnection(exte
 FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_hs.m_sites){}
 
 void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
-    DEBUG_ASSERT_EQ(src.m_bd.m_nsite, dst.m_bd.m_nsite, "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_EQ(src.m_hs.m_sites, dst.m_hs.m_sites, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");
     clear();
@@ -38,7 +38,7 @@ void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
 }
 
 bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, FrmOps &com) {
-    DEBUG_ASSERT_EQ(src.m_bd.m_nsite, dst.m_bd.m_nsite, "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_EQ(src.m_hs.m_sites, dst.m_hs.m_sites, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     connect(src, dst);
@@ -85,7 +85,7 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
 
 
 void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
-    DEBUG_ASSERT_EQ(src.m_bd.m_nsite, dst.m_bd.m_nsite, "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_EQ(src.m_hs.m_sites, dst.m_hs.m_sites, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");

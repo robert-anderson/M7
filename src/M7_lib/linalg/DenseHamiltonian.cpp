@@ -7,25 +7,22 @@
 #include "DenseHamiltonian.h"
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, bool force_general) {
-    const auto nsite = h.m_bd.m_frm.m_nsite;
-    const auto nelec = h.m_frm.m_hd.m_nelec;
-    const auto ms2_restrict = h.m_frm.m_hd.m_ms2_restrict;
-    const auto nmode = h.m_bd.m_bos.m_nmode;
-    const auto nboson = h.m_bos.m_hd.m_nboson;
-    const auto nboson_max = h.m_bos.m_hd.m_nboson_max;
+    const auto& frm_hs = h.m_hs.m_frm;
+    const auto& bos_hs = h.m_hs.m_bos;
+    const auto nboson_conserve = bos_hs.m_nboson_conserve;
 
     if (force_general) return make_pair_iterator(h);
-    if (!nmode) {
+    if (!bos_hs) {
         /*
          * hamiltonian is boson operator-free, can work in determinants: a.k.a. FrmOnvs
          */
-        if (dynamic_cast<const SpinModelFrmHam *>(&h.m_frm)) {
-            return unique_t(new frm::Pair<frm::Spins>({nsite, ms2_restrict}));
-        } else if (h.m_frm.m_kramers_attrs.conserving()) {
-            return unique_t(new frm::Pair<frm::Ms2Conserve>({nsite, h.m_frm.m_hd}));
+        if (h.m_frm.is<SpinModelFrmHam>()){
+            return unique_t(new frm::Pair<frm::Spins>(frm_hs));
+        } else if (frm_hs.ms2_conserved()){
+            return unique_t(new frm::Pair<frm::Ms2Conserve>(frm_hs));
         }
-        return unique_t(new frm::Pair<frm::General>({nsite, nelec}));
-    } else if (!nsite) {
+        return unique_t(new frm::Pair<frm::General>(frm_hs));
+    } else if (!frm_hs) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
          */
@@ -33,22 +30,26 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
         /*
          * hamiltonian is expressed in terms of fermion and boson operators, or it is assumed to be for testing purposes
          */
-        if (!nboson) {
-            // open system in the boson sector
-            if (dynamic_cast<const SpinModelFrmHam *>(&h.m_frm)) {
-                return unique_t(new frm::Pair<frm::Spins>({nsite, ms2_restrict}));
-            }
-        } else {
+        if (nboson_conserve) {
             // closed system in the boson sector
+        } else {
+            // open system in the boson sector
+            if (h.m_frm.is<SpinModelFrmHam>()) {
+                return unique_t(new frm::Pair<frm::Spins>(frm_hs));
+            }
 
-        }
-
-        if (dynamic_cast<const SpinModelFrmHam *>(&h.m_frm)) {
-            typedef frm_bos::OpenProduct<frm::Spins> foreach_t;
-            return unique_t(new frm_bos::Pair<foreach_t>({{nsite, ms2_restrict}, nmode, nboson_max}));
-        } else if (h.m_frm.m_kramers_attrs.conserving()) {
-            typedef frm_bos::OpenProduct<frm::Ms2Conserve> foreach_t;
-            return unique_t(new frm_bos::Pair<foreach_t>({{nsite, h.m_frm.m_hd}, nmode, nboson_max}));
+            if (h.m_frm.is<SpinModelFrmHam>()) {
+                typedef frm_bos::OpenProduct<frm::Spins> single_t;
+                typedef frm_bos::Pair<single_t> pair_t;
+                single_t foreach({frm_hs}, bos_hs);
+                return unique_t(new pair_t(foreach));
+            }
+            else if (frm_hs.ms2_conserved()) {
+                typedef frm_bos::OpenProduct<frm::Ms2Conserve> single_t;
+                typedef frm_bos::Pair<single_t> pair_t;
+                single_t foreach({frm_hs}, bos_hs);
+                return unique_t(new pair_t(foreach));
+            }
         }
     }
     /*
@@ -58,33 +59,34 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
 }
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h) {
-    const auto nsite = h.m_bd.m_frm.m_nsite;
-    const auto nelec = h.m_frm.m_hd.m_nelec;
-    const auto nmode = h.m_bd.m_bos.m_nmode;
-    const auto nboson = h.m_bos.m_hd.m_nboson;
-    const auto nboson_max = h.m_bos.m_hd.m_nboson_max;
-    if (!nmode) {
+    const auto& frm_hs = h.m_hs.m_frm;
+    const auto& bos_hs = h.m_hs.m_bos;
+    const auto nboson_conserve = bos_hs.m_nboson_conserve;
+    if (!bos_hs) {
         /*
          * hamiltonian is boson operator-free, can work in determinants: a.k.a. FrmOnvs
          */
-        return unique_t(new frm::Pair<frm::General>({nsite, nelec}));
-    } else if (!nsite) {
+        return unique_t(new frm::Pair<frm::General>(frm_hs));
+    } else if (!frm_hs) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
          */
-        if (nboson)
-            return unique_t(new bos::Pair<bos::GeneralClosed>({nmode, nboson}));
+        if (nboson_conserve)
+            return unique_t(new bos::Pair<bos::GeneralClosed>(bos_hs));
         else
-            return unique_t(new bos::Pair<bos::GeneralOpen>({nmode, nboson_max}));
+            return unique_t(new bos::Pair<bos::GeneralOpen>(bos_hs));
     } else {
-        if (nboson) {
-            typedef frm_bos::OpenProduct<frm::General> single_t;
-            typedef frm_bos::Pair<single_t> pair_t;
-            return unique_t(new pair_t({{nsite, nelec}, nmode, nboson}));
-        } else {
+        if (nboson_conserve) {
             typedef frm_bos::ClosedProduct<frm::General> single_t;
             typedef frm_bos::Pair<single_t> pair_t;
-            return unique_t(new pair_t({{nsite, nelec}, nmode, nboson_max}));
+            single_t foreach({frm_hs}, bos_hs);
+            return unique_t(new pair_t(foreach));
+        }
+        else {
+            typedef frm_bos::OpenProduct<frm::General> single_t;
+            typedef frm_bos::Pair<single_t> pair_t;
+            single_t foreach({frm_hs}, bos_hs);
+            return unique_t(new pair_t(foreach));
         }
     }
     ABORT("pair iterator not assigned");
@@ -105,4 +107,3 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, bool force_general) :
     loop_over_pair_iterator<field::BosOnv>(ptr.get(), h);
     loop_over_pair_iterator<field::FrmBosOnv>(ptr.get(), h);
 }
-

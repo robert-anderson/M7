@@ -11,8 +11,8 @@ bool HubbardFrmHam::sign_problem() const {
     // open boundary conditions is always SPF
     auto bc = m_bcs[0];
     if (!bc) return true;
-    auto odd_nalpha = m_hd.m_nalpha & 1ul;
-    auto odd_nbeta = m_hd.m_nbeta & 1ul;
+    auto odd_nalpha = m_hs.m_nelec_alpha & 1ul;
+    auto odd_nbeta = m_hs.m_nelec_beta & 1ul;
     // we have (anti-)periodic BCs: if alpha and beta oddness is different, there is a sign problem
     if (odd_nalpha != odd_nbeta) return false;
     // if nalpha is odd, then boundary excitation does not pick up a factor of -1 from the fermi phase => PBC
@@ -20,8 +20,8 @@ bool HubbardFrmHam::sign_problem() const {
     return odd_nalpha == (bc > 0);
 }
 
-HubbardFrmHam::HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2_restrict, int charge) :
-        FrmHam({lattice.nsite()}, {lattice.nsite()-charge, ms2_restrict}),
+HubbardFrmHam::HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2, int charge) :
+        FrmHam({lattice.nsite()-charge, lattice.nsite(), ms2}),
         m_u(u), m_lattice(std::move(lattice)), m_format(m_lattice.m_spec.m_format),
         m_bcs(m_lattice.m_spec.m_bcs), m_spf(sign_problem()){
     m_contribs_1100.set_nonzero(exsig_utils::ex_single);
@@ -35,16 +35,16 @@ HubbardFrmHam::HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
 
 defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t h = 0.0;
-    for (size_t isite = 0ul; isite < m_bd.m_nsite; ++isite)
+    for (size_t isite = 0ul; isite < m_hs.m_sites; ++isite)
         if (onv.get({0, isite}) && onv.get({1, isite})) h += m_u;
     return h;
 }
 
 defs::ham_t HubbardFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     DEBUG_ASSERT_EQ(conn.size(), 2ul, "incorrect connection exsig");
-    auto isite = onv.isite(conn.m_ann[0]);
-    auto jsite = onv.isite(conn.m_cre[0]);
-    if (onv.ispin(conn.m_ann[0])!=onv.ispin(conn.m_cre[0])) return 0.0;
+    auto isite = m_hs.m_sites.isite(conn.m_ann[0]);
+    auto jsite = m_hs.m_sites.isite(conn.m_cre[0]);
+    if (m_hs.m_sites.ispin(conn.m_ann[0])!=m_hs.m_sites.ispin(conn.m_cre[0])) return 0.0;
     int t_mat_element = -m_lattice.m_dense(isite, jsite);
     if (!t_mat_element) return 0.0;
     // don't need to compute fermi phase if the model meets the SPF conditions

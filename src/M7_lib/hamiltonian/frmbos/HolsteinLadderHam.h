@@ -6,13 +6,15 @@
 #define M7_HOLSTEINLADDERHAM_H
 
 #include "M7_lib/hamiltonian/frmbos/FrmBosHam.h"
+#include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
 
 struct HolsteinLadderHam : FrmBosHam {
 
     const defs::ham_t m_g;
 
-    HolsteinLadderHam(size_t nsite, const FrmHam& frm, const BosHam& bos, defs::ham_t g) :
-        FrmBosHam({nsite, nsite}, frm, bos), m_g(g) {
+    HolsteinLadderHam(const FrmHam& frm, const BosHam& bos, defs::ham_t g) :
+        FrmBosHam(frm, bos), m_g(g) {
+        REQUIRE_TRUE(frm.is<HubbardFrmHam>(), "Holstein term requires fermion H to be of Hubbard type");
         m_contribs_0001.set_nonzero(exsig_utils::ex_0001);
         m_contribs_0010.set_nonzero(exsig_utils::ex_0010);
     }

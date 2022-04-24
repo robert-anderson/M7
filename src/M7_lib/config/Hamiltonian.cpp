@@ -108,7 +108,7 @@ fciqmc_config::BosonHamiltonian::BosonHamiltonian(config::Group *parent) :
         m_bosdump(this),
         m_nboson(this, "nboson", 0ul, "number of bosons in the system. if zero, the the Hamiltonian is not assumed to conserve boson number"),
         m_nboson_max(this, "nboson_max", defs::max_bos_occ, "maximum allowed occupation of bosonic modes."),
-        m_holstein_omega(this, "holstein_omega", 0.0, "constant frequency of the boson modes in the Holstein model"),
+        m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
         m_interacting_bose_gas(this){}
 
 bool fciqmc_config::BosonHamiltonian::enabled() const {

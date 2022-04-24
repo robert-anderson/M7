@@ -5,24 +5,26 @@
 #include "SpinSquareFrmHam.h"
 
 
-SpinSquareFrmHam::SpinSquareFrmHam(size_t nsite, const FrmHilbertData& hd): FrmHam({nsite}, hd){}
+SpinSquareFrmHam::SpinSquareFrmHam(const FrmHilbertSpace &hs): FrmHam(hs),
+    m_sz_term(0.25 * m_hs.m_ms2 * (m_hs.m_ms2 - 2)){
+    REQUIRE_NE(m_hs.m_ms2, ~0, "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
+}
 
-SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &in_ham) : FrmHam(in_ham){
-    REQUIRE_TRUE(in_ham.m_kramers_attrs.conserving(),
+SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &h) : SpinSquareFrmHam(h.m_hs){
+    REQUIRE_TRUE(h.m_kramers_attrs.conserving(),
                  "spin square operator inconsistent with Kramers non-conservation");
 }
 
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     uint n_os_a = 0;
-    auto count_n_OS_a = [&](size_t i) {
-        if (i < m_bd.m_nsite) {
+    auto count_n_os_a = [&](size_t i) {
+        if (i < m_hs.m_sites) {
             n_os_a += onv.get({1, i});
         };
     };
-    onv.foreach_setbit(count_n_OS_a);
-    return m_Sz_term + n_os_a;
+    onv.foreach_setbit(count_n_os_a);
+    return m_sz_term + n_os_a;
 }
-
 
 defs::ham_t SpinSquareFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     return 0.0;
@@ -40,19 +42,12 @@ defs::ham_t SpinSquareFrmHam::get_coeff_1100(size_t a, size_t i) const {
 }
 
 defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
-    auto get_spin = [this](size_t k)
-    {
-        return field::FrmOnv::ispin(k, m_bd.m_nsite);
-    };
-    auto spatial_orbital = [this](size_t k)
-    {
-        return field::FrmOnv::isite(k, m_bd.m_nsite);
-    };
+    const auto& sites = m_hs.m_sites;
     // We have to determine if it is an exchange.
-    return get_spin(a) != get_spin(b)
-        && get_spin(i) != get_spin(j)
-        && spatial_orbital(a) != spatial_orbital(b)
-        && spatial_orbital(i) != spatial_orbital(j)
-        && spatial_orbital(a) == spatial_orbital(j)
-        && spatial_orbital(b) == spatial_orbital(i);
+    return sites.ispin(a) != sites.ispin(b)
+        && sites.ispin(i) != sites.ispin(j)
+        && sites.isite(a) != sites.isite(b)
+        && sites.isite(i) != sites.isite(j)
+        && sites.isite(a) == sites.isite(j)
+        && sites.isite(b) == sites.isite(i);
 }

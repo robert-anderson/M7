@@ -12,11 +12,11 @@ bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, def
 }
 
 size_t UniformSingles::approx_nconn() const {
-    auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
-    if (spin_conserving) {
-        return 2 * (m_h.m_hd.m_nelec / 2) * ((m_h.m_bd.m_nspinorb - m_h.m_hd.m_nelec) / 2);
+    const auto& hs = m_h.m_hs;
+    if (hs.ms2_conserved()) {
+        return hs.m_nelec_alpha * hs.m_nvac_alpha + hs.m_nelec_beta * hs.m_nvac_beta;
     } else {
-        return m_h.m_hd.m_nelec * (m_h.m_bd.m_nspinorb - m_h.m_hd.m_nelec);
+        return hs.m_nelec * hs.m_nvac;
     }
 }
 
@@ -51,10 +51,11 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &s
     const auto &occs = src.m_decoded.m_simple_occs.get();
     const auto &vacs = src.m_decoded.m_simple_vacs.get();
     const auto nelec = occs.size();
-    const auto ncases = nelec * (src.m_bd.m_nspinorb - nelec);
+    DEBUG_ASSERT_EQ(nelec, src.m_hs.m_nelec, "unexpected number of electrons");
+    const auto ncases = nelec * src.m_hs.m_nvac;
     auto ia = prng.draw_uint(ncases);
     size_t i, a;
-    integer_utils::inv_rectmap(i, a, src.m_bd.m_nspinorb - nelec, ia);
+    integer_utils::inv_rectmap(i, a, src.m_sites.m_nspinorb - nelec, ia);
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
     return true;

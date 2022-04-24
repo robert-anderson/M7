@@ -41,7 +41,7 @@ private:
 
 public:
 
-    HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2_restrict, int charge);
+    HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2, int charge);
 
     HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts);
 

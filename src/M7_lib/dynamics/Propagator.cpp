@@ -11,19 +11,20 @@ void Propagator::update(const size_t& icycle, const Wavefunction& wf) {
 }
 
 void Propagator::load_fn(hdf5::GroupReader &parent) {
-    REQUIRE_EQ_ALL(parent.load<size_t>("nsite"), m_ham.m_bd.m_frm.m_nsite,
+    REQUIRE_EQ_ALL(parent.load<size_t>("nsite"), m_ham.m_hs.m_frm.m_sites,
                    "number of fermion sites is not consistent with HDF5 archive");
-    REQUIRE_EQ_ALL(parent.load<size_t>("nmode"), m_ham.m_bd.m_bos.m_nmode,
+    REQUIRE_EQ_ALL(parent.load<size_t>("nmode"), m_ham.m_hs.m_bos.m_nmode,
                    "number of boson modes is not consistent with HDF5 archive");
-    REQUIRE_EQ_ALL(parent.load<size_t>("nelec"), m_ham.nelec(),
+    REQUIRE_EQ_ALL(parent.load<size_t>("nelec"), m_ham.m_hs.m_frm.m_nelec,
                    "number of electrons is not consistent with HDF5 archive");
 }
 
 void Propagator::save_fn(hdf5::GroupWriter &parent) {
     hdf5::GroupWriter gw("propagator", parent);
-    gw.save("nsite", m_ham.m_bd.m_frm.m_nsite);
-    gw.save("nmode", m_ham.m_bd.m_bos.m_nmode);
-    gw.save("nelec", m_ham.nelec());
+    const auto& hs = m_ham.m_hs;
+    gw.save("nsite", size_t(hs.m_frm.m_sites));
+    gw.save("nmode", hs.m_bos.m_nmode);
+    gw.save("nelec", hs.m_frm.m_nelec);
     //gw.save("shift", m_shift.m_values);
     gw.save("tau", m_tau);
     //gw.save("psingle", m_magnitude_logger.m_psingle);

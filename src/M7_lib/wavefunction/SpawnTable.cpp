@@ -4,10 +4,10 @@
 
 #include "SpawnTable.h"
 
-SpawnTableRow::SpawnTableRow(BasisData bd, bool send_parents) :
+SpawnTableRow::SpawnTableRow(HilbertSpace hs, bool send_parents) :
         m_send_parents(send_parents),
-        m_src_mbf(send_parents ? this : nullptr, bd, "source MBF"),
-        m_dst_mbf(this, bd, "destination MBF"),
+        m_src_mbf(send_parents ? this : nullptr, hs, "source MBF"),
+        m_dst_mbf(this, hs, "destination MBF"),
         m_src_weight(send_parents ? this : nullptr, "source weight"),
         m_delta_weight(this, "spawned walker weight"),
         m_src_initiator(this, "source initiator flag"),

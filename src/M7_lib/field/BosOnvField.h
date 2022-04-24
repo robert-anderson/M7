@@ -41,6 +41,8 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      */
     void set_ops(const defs::inds &iops);
 
+    size_t nboson() const;
+
 };
 
 

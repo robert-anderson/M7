@@ -163,7 +163,7 @@ struct FrmHam : HamOpTerm {
 };
 
 struct NullFrmHam : FrmHam {
-    NullFrmHam() : FrmHam({0, 0}){}
+    NullFrmHam() : FrmHam({}){}
 
     bool enabled() const override {
         return false;

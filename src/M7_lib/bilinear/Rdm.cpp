@@ -4,32 +4,32 @@
 
 #include "Rdm.h"
 
-size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, const BasisData& bd) {
+size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisExtents extents) {
     double nrow = 1.0;
-    nrow *= integer_utils::combinatorial(bd.m_frm.m_nspinorb, nfrm_cre);
-    nrow *= integer_utils::combinatorial(bd.m_frm.m_nspinorb, nfrm_ann);
-    nrow *= integer_utils::combinatorial(bd.m_bos.m_nmode, nbos_cre);
-    nrow *= integer_utils::combinatorial(bd.m_bos.m_nmode, nbos_ann);
+    nrow *= integer_utils::combinatorial(extents.m_sites.m_nspinorb, nfrm_cre);
+    nrow *= integer_utils::combinatorial(extents.m_sites.m_nspinorb, nfrm_ann);
+    nrow *= integer_utils::combinatorial(extents.m_nmode, nbos_cre);
+    nrow *= integer_utils::combinatorial(extents.m_nmode, nbos_ann);
     nrow /= integer_utils::factorial(nfrm_cre + nfrm_ann);
     nrow /= integer_utils::factorial(nbos_cre + nbos_ann);
     return nrow;
 }
 
-size_t Rdm::nrow_estimate(size_t exsig, BasisData bd) {
+size_t Rdm::nrow_estimate(size_t exsig, BasisExtents extents) {
     return nrow_estimate(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig),
-                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), bd);
+                         decode_nbos_cre(exsig), decode_nbos_ann(exsig), extents);
 }
 
-Rdm::Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisData bd, size_t nelec, size_t nvalue) :
+Rdm::Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisExtents extents, size_t nelec, size_t nvalue) :
         Communicator<MaeRow, MaeRow, true>(
-                "rdm_" + to_string(ranksig), nrow_estimate(ranksig, bd),
-                nrow_estimate(ranksig, bd), opts.m_buffers, opts.m_load_balancing,
+                "rdm_" + to_string(ranksig), nrow_estimate(ranksig, extents),
+                nrow_estimate(ranksig, extents), opts.m_buffers, opts.m_load_balancing,
                 {{ranksig, nvalue}}, {{ranksig, nvalue}}
         ),
         m_ranksig(ranksig), m_rank(decode_nfrm_cre(ranksig)),
         m_nfrm_cre(decode_nfrm_cre(ranksig)), m_nfrm_ann(decode_nfrm_ann(ranksig)),
         m_nbos_cre(decode_nbos_cre(ranksig)), m_nbos_ann(decode_nbos_ann(ranksig)),
-        m_lookup_inds(ranksig), m_bd(bd) {
+        m_lookup_inds(ranksig), m_extents(extents) {
 
     /*
      * if contributing exsig != ranksig, there is promotion to do
@@ -151,10 +151,11 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisData bd, size_t nelec, const Epoch &accum_epoch) :
+Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs,
+           BasisExtents extents, size_t nelec, const Epoch &accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),
-        m_work_conns(bd), m_work_com_ops(bd), m_explicit_ref_conns(opts.m_explicit_ref_conns),
+        m_work_conns(extents), m_work_com_ops(extents), m_explicit_ref_conns(opts.m_explicit_ref_conns),
         m_accum_epoch(accum_epoch) {
     for (const auto &ranksig: m_active_ranksigs) {
         REQUIRE_TRUE(ranksig, "multidimensional estimators require a nonzero number of SQ operator indices");
@@ -164,7 +165,7 @@ Rdms::Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisData bd, s
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
         REQUIRE_TRUE(m_rdms[ranksig] == nullptr, "No RDM rank should appear more than once in the specification");
-        m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, bd, nelec, 1ul);
+        m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, extents, nelec, 1ul);
     }
     m_total_norm.m_local = 0.0;
 }
@@ -257,12 +258,13 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
         if ((i==k) && (j==l)) trace+=rdm_element;
     }
     // scale the one-body contribution by the number of two-body contributions
-    e1 /= ham.m_hd.m_nelec-1;
+    const auto nelec = ham.m_hs.m_nelec;
+    e1 /= nelec-1;
     e1 = mpi::all_sum(e1);
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
-    const auto norm = consts::real(trace) / integer_utils::nspair(ham.m_hd.m_nelec);
+    const auto norm = consts::real(trace) / integer_utils::nspair(nelec);
     REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
                  "2RDM norm should match total of sampled diagonal contributions");
     return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;

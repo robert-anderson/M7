@@ -10,10 +10,6 @@
 
 struct HubbardUniform : FrmExcitGen {
 
-    const HubbardFrmHam* h_cast() const {
-        return dynamic_cast<const HubbardFrmHam*>(&m_h);
-    }
-
     HubbardUniform(const FrmHam& h, PRNG& prng);
 
     virtual ~HubbardUniform(){}

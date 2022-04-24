@@ -6,6 +6,13 @@
 
 #include <utility>
 
+FrmBosHam::FrmBosHam(const HilbertSpace &hs, const FrmHam &frm, const BosHam &bos) :
+        m_hs(FrmHilbertSpace(hs.m_frm, frm.m_hs), BosHilbertSpace(hs.m_bos, bos.m_hs)),
+        m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
+        m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {}
+
+FrmBosHam::FrmBosHam(const FrmHam &frm, const BosHam &bos) : FrmBosHam({frm.m_hs, bos.m_hs}, frm, bos){}
+
 void FrmBosHam::log_data() const {
     if (disabled()) return;
     if (!m_contribs_0010.is_nonzero(exsig_utils::ex_0010))

@@ -10,11 +10,11 @@
 struct SpinSquareFrmHam : FrmHam {
 
     // This is Sz * (Sz - 1) which stays constant
-    const defs::ham_comp_t m_Sz_term = 0.25 * m_hd.m_ms2_restrict * (m_hd.m_ms2_restrict - 2);
+    const defs::ham_comp_t m_sz_term;
 
-    SpinSquareFrmHam(size_t nsite, const FrmHilbertData& hd);
+    SpinSquareFrmHam(const FrmHilbertSpace& hs);
 
-    explicit SpinSquareFrmHam(const FrmHam &in_ham);
+    explicit SpinSquareFrmHam(const FrmHam &h);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 

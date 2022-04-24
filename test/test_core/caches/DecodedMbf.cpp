@@ -7,8 +7,8 @@
 #include "gtest/gtest.h"
 
 TEST(DecodedMbf, Simple){
-    buffered::FrmOnv mbf(50);
-    defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
+    const defs::inds setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
+    buffered::FrmOnv mbf({setbits.size(), 50});
     mbf = setbits;
     defs::inds clrbits;
     auto iter = setbits.begin();
@@ -34,7 +34,7 @@ TEST(DecodedMbf, Simple){
         auto& occ_simple_inds = mbf.m_decoded.m_simple_occs.get();
         ASSERT_EQ(occ_simple_inds, value);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_bd.m_nspinorb, noccorb);
+    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_hs.m_sites.m_nspinorb, noccorb);
     occ_foreach.loop();
 
     /*
@@ -48,7 +48,7 @@ TEST(DecodedMbf, Simple){
         auto& vac_simple_inds = mbf.m_decoded.m_simple_vacs.get();
         ASSERT_EQ(vac_simple_inds, value);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_bd.m_nspinorb, nvacorb);
+    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_hs.m_sites.m_nspinorb, nvacorb);
     vac_foreach.loop();
 }
 

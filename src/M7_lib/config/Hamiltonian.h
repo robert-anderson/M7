@@ -99,7 +99,7 @@ namespace fciqmc_config {
         Bosdump m_bosdump;
         config::Param<size_t> m_nboson;
         config::Param<size_t> m_nboson_max;
-        config::Param<defs::ham_comp_t> m_holstein_omega;
+        config::Param<defs::ham_comp_t> m_num_op_weight;
         InteractingBoseGas m_interacting_bose_gas;
 
         explicit BosonHamiltonian(config::Group *parent);

@@ -166,9 +166,6 @@ namespace buffered {
         FrmBosOnv(const HilbertSpace& hs): BufferedField<field::FrmBosOnv>(hs){}
         FrmBosOnv(const FrmHilbertSpace& frm_hs, const BosHilbertSpace& bos_hs):
             BufferedField<field::FrmBosOnv>(frm_hs, bos_hs){}
-        FrmBosOnv(size_t nsite, size_t nmode, size_t nboson_max=defs::max_bos_occ):
-            BufferedField<field::FrmBosOnv>(nsite, nmode, nboson_max){}
-
         FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv(other.m_frm.m_hs, other.m_bos.m_hs){
             *this = other;
         }

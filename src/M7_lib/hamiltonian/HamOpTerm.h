@@ -23,6 +23,21 @@ struct HamOpTerm {
     HamOpTerm(){}
     virtual ~HamOpTerm(){}
 
+    template<typename T>
+    const T* as() const {
+        return dynamic_cast<const T*>(this);
+    }
+
+    template<typename T>
+    T* as() {
+        return dynamic_cast<T*>(this);
+    }
+
+    template<typename T>
+    bool is() const {
+        return as<T>();
+    }
+
     using excit_gen_ptr_t = ExcitGen::excit_gen_ptr_t;
     using excit_gen_list_t = ExcitGen::excit_gen_list_t;
     using conn_foreach_ptr_t = conn_foreach::base_ptr_t;
@@ -39,7 +54,6 @@ struct HamOpTerm {
     virtual excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) const {
         return {};
     }
-
     /**
      * @return
      *  forward linked list of foreach iterators over the connections of a given MBF

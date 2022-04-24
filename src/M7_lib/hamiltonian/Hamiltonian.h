@@ -16,7 +16,7 @@
 #include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
 #include "M7_lib/hamiltonian/frm/GeneralFrmHam.h"
 #include "M7_lib/hamiltonian/frmbos/HolsteinLadderHam.h"
-#include "M7_lib/hamiltonian/bos/HolsteinBosHam.h"
+#include "M7_lib/hamiltonian/bos/NumOpBosHam.h"
 #include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 #include "M7_lib/hamiltonian/frm/SumFrmHam.h"
@@ -89,11 +89,11 @@ struct HamiltonianTerms {
     }
 
     std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts){
-        const auto nsite = m_frm->m_bd.m_nsite;
-        const BosHilbertData hd(opts.m_nboson, opts.m_nboson_max);
-        if (opts.m_holstein_omega) {
-            auto omega = opts.m_holstein_omega.get();
-            return std::unique_ptr<BosHam>(new HolsteinBosHam(nsite, hd, omega));
+        if (opts.m_num_op_weight) {
+            const size_t nsite = m_frm->m_hs.m_sites;
+            const BosHilbertSpace hs(opts.m_nboson, nsite, true, opts.m_nboson_max);
+            const auto omega = opts.m_num_op_weight.get();
+            return std::unique_ptr<BosHam>(new NumOpBosHam(hs, omega));
         }
         else if (opts.m_interacting_bose_gas.enabled())
             return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
@@ -106,9 +106,8 @@ struct HamiltonianTerms {
         if (opts.m_holstein_coupling) {
             REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(m_frm.get()),
                          "Holstein coupling requires Hubbard-type fermion Hamiltonian");
-            auto nsite = m_frm->m_bd.m_nsite;
-            auto g = opts.m_holstein_coupling.get();
-            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(nsite, *m_frm, *m_bos, g));
+            const auto g = opts.m_holstein_coupling.get();
+            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(*m_frm, *m_bos, g));
         }
         else if (opts.m_ebdump.enabled()) {
             return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts, *m_frm, *m_bos));
@@ -137,7 +136,7 @@ public:
     /**
      * specifies number of fermion sites and boson modes along with other attributes defining the single-particle basis
      */
-    const BasisData m_bd;
+    const HilbertSpace m_hs;
 
 private:
     mutable suite::Conns m_work_conn;
@@ -145,10 +144,6 @@ private:
 public:
 
     explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
-
-    size_t nelec() const;
-
-    size_t nboson() const;
 
     /*
      * pure fermion matrix elements

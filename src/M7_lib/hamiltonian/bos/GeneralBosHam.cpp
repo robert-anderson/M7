@@ -5,9 +5,9 @@
 #include "GeneralBosHam.h"
 
 
-GeneralBosHam::GeneralBosHam(const BosdumpHeader &header) :
-        BosHam(header.m_nmode, header.m_nboson),
-        m_coeffs_1(m_bd.m_nmode), m_coeffs_2(m_bd.m_nmode) {
+GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
+        BosHam({header.m_nboson, header.m_nmode, true, occ_cutoff}),
+        m_coeffs_1(m_hs.m_nmode), m_coeffs_2(m_hs.m_nmode) {
 
     BosdumpFileReader file_reader(header.m_fname);
     defs::inds inds(4);
@@ -31,6 +31,9 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header) :
     log_data();
 }
 
+GeneralBosHam::GeneralBosHam(const fciqmc_config::BosonHamiltonian &opts) :
+        GeneralBosHam(BosdumpHeader(opts.m_bosdump.m_path), opts.m_nboson_max){}
+
 defs::ham_t GeneralBosHam::get_coeff_0011(size_t i, size_t j) const {
     return m_coeffs_1.get(i, j);
 }
@@ -41,7 +44,7 @@ defs::ham_t GeneralBosHam::get_coeff_0022(size_t i, size_t j, size_t k, size_t l
 
 defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
     defs::ham_t h = 0;
-    for (size_t imode = 0ul; imode < m_bd.m_nmode; ++imode) {
+    for (size_t imode = 0ul; imode < m_hs.m_nmode; ++imode) {
         if (!onv[imode]) continue;
         defs::ham_comp_t occi = onv[imode];
         h += m_coeffs_1.get(imode, imode) * occi;

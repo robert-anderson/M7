@@ -4,6 +4,6 @@ target_sources(M7_lib
         BosHam.h
         GeneralBosHam.cpp
         GeneralBosHam.h
-        HolsteinBosHam.cpp
-        HolsteinBosHam.h
+        NumOpBosHam.cpp
+        NumOpBosHam.h
 )

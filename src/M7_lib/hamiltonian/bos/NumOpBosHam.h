@@ -2,19 +2,23 @@
 // Created by anderson on 12/9/21.
 //
 
-#ifndef M7_HOLSTEINBOSHAM_H
-#define M7_HOLSTEINBOSHAM_H
+#ifndef M7_NUMOPBOSHAM_H
+#define M7_NUMOPBOSHAM_H
 
 #include "M7_lib/hamiltonian/bos/BosHam.h"
 
-struct HolsteinBosHam : BosHam {
-    defs::ham_comp_t m_omega;
+/**
+ * simply the bosonic number operator w * sum_i b_i+ b_i
+ * where w is the m_weight scalar member
+ */
+struct NumOpBosHam : BosHam {
+    const defs::ham_comp_t m_weight;
 
-    HolsteinBosHam(size_t nmode, const BosHilbertData& hd, defs::ham_comp_t omega):
-        BosHam(BosBasisData{nmode}, hd), m_omega(omega){}
+    NumOpBosHam(const BosHilbertSpace& hs, defs::ham_comp_t weight):
+            BosHam(hs), m_weight(weight){}
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
-        return i==j ? m_omega : 0;
+        return i==j ? m_weight : 0;
     }
 
     defs::ham_t get_coeff_0022(size_t i, size_t j, size_t k, size_t l) const override {
@@ -22,9 +26,7 @@ struct HolsteinBosHam : BosHam {
     }
 
     defs::ham_t get_element_0000(const field::BosOnv &onv) const override {
-        defs::ham_t h = 0;
-        for (size_t imode = 0ul; imode < m_bd.m_nmode; ++imode) h+= onv[imode];
-        return h*m_omega;
+        return onv.nboson() * m_weight;
     }
 
     defs::ham_t get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const override {
@@ -37,4 +39,4 @@ struct HolsteinBosHam : BosHam {
 };
 
 
-#endif //M7_HOLSTEINBOSHAM_H
+#endif //M7_NUMOPBOSHAM_H

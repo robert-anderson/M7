@@ -6,15 +6,16 @@
 #include "M7_lib/excitgen/frm/UniformSingles.h"
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
-buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const {
-    buffered::FrmOnv ref(m_bd.m_nsite);
-    REQUIRE_EQ(size_t(std::abs(spin_restrict) % 2), m_hd.m_nelec % 2,
-               "Sz quantum number given incompatible with nelec");
-    size_t n_spin_0 = (m_hd.m_nelec + spin_restrict) / 2;
-    size_t n_spin_1 = m_hd.m_nelec - n_spin_0;
-    for (size_t i = 0ul; i < n_spin_0; ++i) ref.set({0, i});
-    for (size_t i = 0ul; i < n_spin_1; ++i) ref.set({1, i});
-    DEBUG_ASSERT_EQ(ref.ms2(), spin_restrict, "constructed fermion ONV does not have expected Sz");
+buffered::FrmOnv GeneralFrmHam::guess_reference() const {
+    buffered::FrmOnv ref(m_hs);
+    size_t nalpha = m_hs.m_nelec/2;
+    size_t nbeta = m_hs.m_nelec - nalpha;
+    if (m_hs.ms2_conserved()){
+        nalpha = m_hs.m_nelec_alpha;
+        nbeta = m_hs.m_nelec_beta;
+    }
+    for (size_t i = 0ul; i < nalpha; ++i) ref.set({0, i});
+    for (size_t i = 0ul; i < nbeta; ++i) ref.set({1, i});
     return ref;
 }
 /*
@@ -27,16 +28,19 @@ buffered::FrmOnv GeneralFrmHam::guess_reference(const int &spin_restrict) const 
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const FrmBasisData &bd, const FrmHilbertData& hd):
-    FrmHam(bd, hd),
-    m_int_1(m_bd.m_nsite, m_bd.m_spin_resolved), m_int_2(m_bd.m_nsite, m_bd.m_spin_resolved) {
-    if (!m_bd.m_nsite) return;
-    REQUIRE_EQ(m_bd.m_abgrp_map.m_site_irreps.size(), norb_distinct(), "site map size incorrect");
+GeneralFrmHam::GeneralFrmHam(const FrmHilbertSpace &hs):
+        FrmHam(hs),
+        m_int_1(m_hs.m_sites, m_hs.m_restricted_orbs),
+        m_int_2(m_hs.m_sites, m_hs.m_restricted_orbs) {
+    if (!m_hs.m_sites) return;
+    REQUIRE_EQ(m_hs.m_abgrp_map.m_site_irreps.size(),
+               m_hs.m_sites.ncoeff_ind(m_hs.m_restricted_orbs),
+               "site map size incorrect");
 }
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict, int charge) :
-        GeneralFrmHam({header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved},
-                      {header.m_nelec - charge, ms2_restrict}){
+GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2, int charge) :
+        GeneralFrmHam({header.m_nelec-charge, header.m_nsite,
+                       {PointGroup(), header.m_orbsym}, header.m_spin_resolved, ms2}){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -46,7 +50,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
     defs::ham_t value;
 
     // assume no contribution cases to be nonzero unless a counterexample is found
-    REQUIRE_LE_ALL(m_hd.m_nelec, m_bd.m_nspinorb,
+    REQUIRE_LE_ALL(m_hs.m_nelec, m_hs.m_sites.m_nspinorb,
                    "unphysical number of electrons specified by FCIDUMP file header and charge parameter");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
@@ -125,12 +129,12 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fci
 conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {
     conn_foreach::base_list_t list;
     if (m_kramers_attrs.m_conserving_singles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_bd));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_hs.m_sites));
     else
-        list.emplace_front(new conn_foreach::frm::General<1>(m_bd));
+        list.emplace_front(new conn_foreach::frm::General<1>(m_hs.m_sites));
     if (m_kramers_attrs.m_conserving_doubles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_bd));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_hs.m_sites));
     else
-        list.emplace_front(new conn_foreach::frm::General<2>(m_bd));
+        list.emplace_front(new conn_foreach::frm::General<2>(m_hs.m_sites));
     return list;
 }

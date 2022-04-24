@@ -13,8 +13,8 @@ defs::ham_t HolsteinLadderHam::get_coeff_0001(size_t imode) const {
 }
 
 defs::ham_t HolsteinLadderHam::get_coeff_1110(size_t imode, size_t i, size_t j) const {
-    if (imode != field::FrmOnv::isite(i, m_bd.m_frm.m_nsite)) return 0;
-    if (imode != field::FrmOnv::isite(j, m_bd.m_frm.m_nsite)) return 0;
+    if (imode != m_hs.m_frm.m_sites.isite(i)) return 0;
+    if (imode != m_hs.m_frm.m_sites.isite(j)) return 0;
     return m_g;
 }
 

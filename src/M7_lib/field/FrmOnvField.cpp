@@ -103,7 +103,7 @@ void FrmOnvField::set(const defs::inds &setbits_alpha, const defs::inds &setbits
 }
 
 void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
-    DEBUG_ASSERT_LE(alpha_sites.size(), m_bd.m_nsite, "can't have more spins than sites");
+    DEBUG_ASSERT_LE(alpha_sites.size(), m_sites, "can't have more spins than sites");
     zero();
     auto it = alpha_sites.cbegin();
     for (size_t isite=0ul; isite<m_hs.m_sites; ++isite){
@@ -116,7 +116,7 @@ void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
 }
 
 void FrmOnvField::put_spin_channel(const size_t &ispin, bool set) {
-    auto ibegin = ibit(ispin, 0);
+    auto ibegin = m_hs.m_sites.ispinorb(ispin, 0);
     put_range(ibegin, ibegin+m_hs.m_sites, set);
 }
 

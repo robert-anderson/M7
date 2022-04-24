@@ -10,7 +10,7 @@ Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng) :
     std::vector<defs::prob_t> weights(m_nspinorb_pair, 0.0);
     size_t ij = 0ul;
     log::info("Initializing pre-computed heat bath sampling weights for doubles...");
-    const auto nspinorb = m_h.m_bd.m_nspinorb;
+    const auto nspinorb = m_h.m_hs.m_sites.m_nspinorb;
     if (mpi::on_node_i_am_root()) {
         for (size_t i = 0ul; i < nspinorb; ++i) {
             for (size_t j = 0ul; j < i; ++j) {
@@ -42,7 +42,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     size_t ij = m_prng.draw_uint(m_nelec_pair);
     integer_utils::inv_strigmap(j, i, ij);
     const auto &occs = src.m_decoded.m_simple_occs.get();
-    DEBUG_ASSERT_EQ(occs.size(), m_h.m_hd.m_nelec, "incorrect number of electrons")
+    DEBUG_ASSERT_EQ(occs.size(), m_h.m_hs.m_nelec, "incorrect number of electrons")
     // i and j are positions in the occ list, convert to orb inds:
     i = occs[i];
     j = occs[j];

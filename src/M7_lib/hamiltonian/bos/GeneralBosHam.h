@@ -13,9 +13,9 @@ struct GeneralBosHam : BosHam {
     BosonCoeffs_1 m_coeffs_1;
     BosonCoeffs_2 m_coeffs_2;
 
-    GeneralBosHam(const BosdumpHeader &header);
+    GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff);
 
-    GeneralBosHam(const fciqmc_config::BosonHamiltonian &opts) : GeneralBosHam(BosdumpHeader(opts.m_bosdump.m_path)){}
+    GeneralBosHam(const fciqmc_config::BosonHamiltonian &opts);
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override;
 

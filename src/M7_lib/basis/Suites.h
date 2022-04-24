@@ -27,7 +27,7 @@ namespace suite {
 
     struct Mbfs : BufferedTable<MbfsRow>{
 
-        Mbfs(const HilbertSpace& bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
+        Mbfs(const HilbertSpace& hs): BufferedTable<MbfsRow>("Work space for MBFs", {{hs}}){
             m_row.push_back_jump();
         }
 

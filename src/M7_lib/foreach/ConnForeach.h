@@ -51,8 +51,8 @@ namespace conn_foreach {
 
     namespace frm {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, size_t nsite) :
-                    conn_foreach::Base(exsig, {nsite, 0ul}) {
+            Base(size_t exsig, FrmSites sites) :
+                    conn_foreach::Base(exsig, {sites, 0ul}) {
                 REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature has boson operators");
             }
 
@@ -62,8 +62,8 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct General : Base {
-            General(const FrmHilbertSpace& hs) :
-                Base(exsig_utils::encode(nop, nop, 0, 0), hs) {}
+            General(FrmSites sites) :
+                Base(exsig_utils::encode(nop, nop, 0, 0), sites) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
@@ -97,8 +97,8 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct Ms2Conserve : Base {
-            Ms2Conserve(size_t nsite):
-                    Base(exsig_utils::encode(nop, nop, 0, 0), nsite) {}
+            Ms2Conserve(FrmSites sites):
+                    Base(exsig_utils::encode(nop, nop, 0, 0), sites) {}
 
         private:
 

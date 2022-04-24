@@ -38,14 +38,11 @@ struct FrmBosHam : HamOpTerm {
      * @param bos
      *  bosonic part of H, from which the bosonic Hilbert space attributes are copied
      */
-    explicit FrmBosHam(const HilbertSpace& hs, const FrmHam& frm, const BosHam& bos):
-            m_bd({frm.m_bd ? frm.m_bd : bd.m_frm}, {bos.m_bd ? bos.m_bd : bd.m_bos}),
-            m_hd({frm.m_hd, bos.m_hd}),
-            m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
-            m_contribs_1110(exsig_utils::ex_1110), m_contribs_1101(exsig_utils::ex_1101) {
-        REQUIRE_EQ(bd.m_frm.m_nsite, frm.m_bd.m_nsite, "conflicting number of sites");
-        REQUIRE_EQ(bd.m_bos.m_nmode, bos.m_bd.m_nmode, "conflicting number of modes");
-    }
+    FrmBosHam(const HilbertSpace& hs, const FrmHam& frm, const BosHam& bos);
+    /*
+     * all Hilbert space info is taken directly from the FrmHam and BosHam
+     */
+    FrmBosHam(const FrmHam& frm, const BosHam& bos);
 
     virtual ~FrmBosHam(){}
 

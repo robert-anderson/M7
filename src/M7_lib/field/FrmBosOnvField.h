@@ -24,8 +24,6 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     FrmBosOnvField(Row* row, const FrmHilbertSpace& frm_hs, const BosHilbertSpace& bos_hs, std::string name=""):
         FrmBosOnvField(row, HilbertSpace(frm_hs, bos_hs), name){}
 
-    FrmBosOnvField(Row *row, size_t nsite, size_t nmode, size_t nboson_max=defs::max_bos_occ, std::string name = "");
-
     FrmBosOnvField(const FrmBosOnvField& other);
 
     FrmBosOnvField& operator=(const FrmBosOnvField& other) {

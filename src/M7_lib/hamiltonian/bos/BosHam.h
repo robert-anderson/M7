@@ -72,7 +72,7 @@ struct BosHam : HamOpTerm {
 };
 
 struct NullBosHam : BosHam {
-    NullBosHam() : BosHam(0ul){}
+    NullBosHam() : BosHam({}){}
 
     bool enabled() const override {
         return false;
