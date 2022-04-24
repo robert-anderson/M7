@@ -61,7 +61,7 @@ PointGroup::PointGroup() : AbelianGroup({"0", "1", "2", "3", "4", "5", "6", "7"}
 
 AbelianGroupMap::AbelianGroupMap(AbelianGroup grp, defs::inds site_irreps) :
         m_grp(grp), m_site_irreps(site_irreps), m_nsite(m_site_irreps.size()) {
-    DEBUG_ASSERT_TRUE(std::all_of(m_site_irreps.cbegin(), m_site_irreps.cend(),
+    REQUIRE_TRUE(std::all_of(m_site_irreps.cbegin(), m_site_irreps.cend(),
                        [&](size_t i){return i<m_grp.nirrep();}), "irrep label OOB");
 }
 

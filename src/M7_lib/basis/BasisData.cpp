@@ -37,7 +37,7 @@ FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite, int ms2) :
         FrmHilbertSpace(nelec, nsite, {nsite}, false, ms2){}
 
 FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite) :
-        FrmHilbertSpace(nelec, nsite, {nsite}, false, ~0){}
+        FrmHilbertSpace(nelec, nsite, ~0){}
 
 FrmHilbertSpace::FrmHilbertSpace(size_t nsite) :
         FrmHilbertSpace(0ul, nsite){}
@@ -47,7 +47,7 @@ FrmHilbertSpace::FrmHilbertSpace() : FrmHilbertSpace(0ul){}
 FrmHilbertSpace::FrmHilbertSpace(const FrmHilbertSpace &hs1, const FrmHilbertSpace &hs2) :
         FrmHilbertSpace(hs1.m_nelec ? hs1.m_nelec : hs2.m_nelec,
                         hs1.m_sites ? hs1.m_sites : hs2.m_sites,
-                        hs1.m_abgrp_map ? hs2.m_abgrp_map : hs1.m_abgrp_map,
+                        hs1.m_abgrp_map ? hs1.m_abgrp_map : hs2.m_abgrp_map,
                         hs1.m_restricted_orbs || hs2.m_restricted_orbs,
                         hs1.m_ms2 != ~0 ? hs1.m_ms2 : hs2.m_ms2) {
     if (hs1 && hs2) {

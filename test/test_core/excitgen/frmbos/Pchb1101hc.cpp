@@ -15,10 +15,15 @@ TEST(Pchb1101hc, Test){
     opts.verify();
     Hamiltonian h(opts);
     ASSERT_TRUE(h.m_frmbos.is<GeneralLadderHam>());
+    ASSERT_FALSE(h.m_hs.m_frm.m_abgrp_map.m_site_irreps.empty());
     Pchb1101hc excit_gen(h.m_frmbos, prng);
-    buffered::FrmOnv src_mbf(h.m_hs);
-    mbf::set_aufbau_mbf(src_mbf);
-    conn_foreach::frm::Ms2Conserve<2> conn_iter(src_mbf.m_hs.m_sites);
+    buffered::FrmBosOnv src_mbf(h.m_hs);
+    mbf::set_aufbau_mbf(src_mbf.m_frm);
+    typedef conn_foreach::frm::Ms2Conserve<1> frm_foreach_t;
+    typedef conn_foreach::bos::Cre bos_foreach_t;
+    typedef conn_foreach::frmbos::Product<frm_foreach_t, bos_foreach_t> foreach_t;
+
+    foreach_t conn_iter(h.m_hs.m_frm.m_sites, h.m_hs.m_bos);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
 
     tester.fill_results_table(src_mbf);

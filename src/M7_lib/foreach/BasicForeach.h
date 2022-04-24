@@ -108,7 +108,7 @@ namespace basic_foreach {
             using Base<nind>::m_niter;
 
             static size_t niter(size_t n) {
-                if (!nind) return 0ul;
+                if (!nind || !n) return 0ul;
                 return integer_utils::combinatorial(strict ? n : (n + nind) - 1, nind);
             }
         protected:
