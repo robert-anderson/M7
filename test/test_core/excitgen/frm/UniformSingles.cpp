@@ -15,7 +15,7 @@ TEST(UniformSingles, FromExcited){
     Hamiltonian h(opts);
     ASSERT_TRUE(dynamic_cast<const GeneralFrmHam*>(&h.m_frm));
     UniformSingles excit_gen(h.m_frm, prng);
-    conn_foreach::frm::Ms2Conserve<1> excit_iter(h.m_hs.m_extents.m_sites);
+    conn_foreach::frm::Ms2Conserve<1> excit_iter(h.m_hs.m_frm.m_sites);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_hs);
     src_mbf = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 5}};

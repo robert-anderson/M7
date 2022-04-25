@@ -9,7 +9,7 @@
 
 Hamiltonian::Hamiltonian(const fciqmc_config::Hamiltonian &opts) :
         m_terms(opts), m_frm(*m_terms.m_frm), m_bos(*m_terms.m_bos), m_frmbos(*m_terms.m_frmbos),
-        m_hs(m_frmbos.m_hs, HilbertSpace{m_frm.m_hs, m_bos.m_hs}), m_work_conn(m_hs.m_extents){
+        m_hs(m_frmbos.m_hs, HilbertSpace{m_frm.m_hs, m_bos.m_hs}), m_work_conn(m_hs){
     REQUIRE_TRUE(m_hs.m_frm || m_hs.m_bos, "No system defined");
     if (m_frm.disabled()) log::info("Fermion Hamiltonian is disabled");
     if (defs::enable_bosons) {

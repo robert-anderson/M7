@@ -180,7 +180,6 @@ struct BosHilbertSpace {
 struct HilbertSpace {
     const FrmHilbertSpace m_frm;
     const BosHilbertSpace m_bos;
-    const BasisExtents m_extents;
 
     HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos);
     HilbertSpace();
@@ -190,6 +189,8 @@ struct HilbertSpace {
     explicit HilbertSpace(const HilbertSpace& hs1, const HilbertSpace& hs2);
 
     bool operator==(const HilbertSpace& other) const;
+
+    BasisExtents extents() const;
 
     void require_pure_frm() const;
     void require_pure_bos() const;

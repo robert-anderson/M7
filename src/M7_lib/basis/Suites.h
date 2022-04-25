@@ -41,7 +41,8 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        Conns(const BasisExtents& extents);
+        explicit Conns(const BasisExtents& extents);
+        explicit Conns(const HilbertSpace& hs);
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
@@ -59,6 +60,7 @@ namespace suite {
         com_ops::FrmBos m_frmbos;
         com_ops::Bos m_bos;
         ComOps(const BasisExtents& extents);
+        ComOps(const HilbertSpace& hs);
 
         com_ops::Frm& operator[](const field::FrmOnv& mbf){
             return m_frm;

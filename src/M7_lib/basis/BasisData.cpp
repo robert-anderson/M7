@@ -104,8 +104,7 @@ BosHilbertSpace::operator bool() const {
     return m_nmode;
 }
 
-HilbertSpace::HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos) :
-        m_frm(frm), m_bos(bos), m_extents(frm.m_sites, bos.m_nmode){}
+HilbertSpace::HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos) : m_frm(frm), m_bos(bos){}
 
 HilbertSpace::HilbertSpace() : HilbertSpace(FrmHilbertSpace(), BosHilbertSpace()){}
 
@@ -117,12 +116,16 @@ bool HilbertSpace::operator==(const HilbertSpace &other) const {
     return m_frm==other.m_frm && m_bos==other.m_bos;
 }
 
+BasisExtents HilbertSpace::extents() const {
+    return {m_frm.m_sites, m_bos.m_nmode};
+}
+
 void HilbertSpace::require_pure_frm() const {
-    m_extents.require_pure_frm();
+    extents().require_pure_frm();
 }
 
 void HilbertSpace::require_pure_bos() const {
-    m_extents.require_pure_bos();
+    extents().require_pure_bos();
 }
 
 HilbertSpace::operator bool() const {

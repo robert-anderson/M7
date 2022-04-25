@@ -16,4 +16,8 @@ suite::Mbfs::Mbfs(const HilbertSpace &hs) : BufferedTable<MbfsRow>("Work space f
 suite::Conns::Conns(const BasisExtents &extents) :
         m_frmonv(extents.m_sites), m_bosonv(extents.m_nmode), m_frmbosonv(extents){}
 
+suite::Conns::Conns(const HilbertSpace &hs) : Conns(hs.extents()){}
+
 suite::ComOps::ComOps(const BasisExtents &extents) : m_frm(extents.m_sites), m_frmbos(extents), m_bos(extents.m_nmode){}
+
+suite::ComOps::ComOps(const HilbertSpace &hs) : ComOps(hs.extents()){}

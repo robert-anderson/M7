@@ -73,7 +73,7 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, co
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
     RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
-    suite::Conns conn(m_hs.m_extents);
+    suite::Conns conn(m_hs);
 
     row_reader.restart();
     DEBUG_ASSERT_EQ(row_reader.m_weight.nelement(), m_format.m_nelement, "row reader has incompatible dimensionality");
