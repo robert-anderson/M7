@@ -32,7 +32,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
 }
 
 GeneralBosHam::GeneralBosHam(const fciqmc_config::BosonHamiltonian &opts) :
-        GeneralBosHam(BosdumpHeader(opts.m_bosdump.m_path), opts.m_nboson_max){}
+        GeneralBosHam(BosdumpHeader(opts.m_bosdump.m_path), opts.m_bos_occ_cutoff){}
 
 defs::ham_t GeneralBosHam::get_coeff_0011(size_t i, size_t j) const {
     return m_coeffs_1.get(i, j);

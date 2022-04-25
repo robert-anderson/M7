@@ -98,7 +98,7 @@ namespace fciqmc_config {
     struct BosonHamiltonian : config::Section {
         Bosdump m_bosdump;
         config::Param<size_t> m_nboson;
-        config::Param<size_t> m_nboson_max;
+        config::Param<size_t> m_bos_occ_cutoff;
         config::Param<defs::ham_comp_t> m_num_op_weight;
         InteractingBoseGas m_interacting_bose_gas;
 
@@ -107,8 +107,8 @@ namespace fciqmc_config {
         bool enabled() const override;
 
         void verify() override {
-            REQUIRE_LE(m_nboson_max, defs::max_bos_occ, log::format("given nboson_max exceeds limit of {}", defs::max_bos_occ));
-            REQUIRE_LE(m_nboson, m_nboson_max, "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
+            REQUIRE_LE(m_bos_occ_cutoff, defs::max_bos_occ, log::format("given nboson_max exceeds limit of {}", defs::max_bos_occ));
+            REQUIRE_LE(m_nboson, m_bos_occ_cutoff, "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
         }
     };
 
@@ -116,6 +116,7 @@ namespace fciqmc_config {
         FermionHamiltonian m_fermion;
         FrmBosHamiltonian m_ladder;
         BosonHamiltonian m_boson;
+        
 
         explicit Hamiltonian(config::Group *parent);
     };

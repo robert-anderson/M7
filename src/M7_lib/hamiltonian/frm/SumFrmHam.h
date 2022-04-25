@@ -25,8 +25,17 @@ struct SumFrmHam : FrmHam {
      */
     defs::ham_t m_weight;
 
+private:
+    /**
+     * make combined FrmHilbertSpace of components
+     */
+    static FrmHilbertSpace hs(const FrmHam& h1, const FrmHam& h2) {
+        return FrmHilbertSpace(h1.m_hs, h2.m_hs);
+    }
+public:
+
     SumFrmHam(ham_t1&& h1, ham_t2&& h2, defs::ham_t weight):
-            FrmHam(h1), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
+            FrmHam(hs(h1, h2)), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
         /*
          * combine attributes of the components
          */

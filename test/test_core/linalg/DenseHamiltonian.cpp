@@ -125,7 +125,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 0.0;
-    opts.m_boson.m_nboson_max = 0;
+    opts.m_boson.m_bos_occ_cutoff = 0;
     opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -142,7 +142,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc2) {
     opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_boson.m_nboson_max = 2;
+    opts.m_boson.m_bos_occ_cutoff = 2;
     opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -176,7 +176,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyMaxOcc3) {
     opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_boson.m_nboson_max = 3;
+    opts.m_boson.m_bos_occ_cutoff = 3;
     opts.m_boson.m_num_op_weight = 0.0;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -193,7 +193,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc2) {
     opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_boson.m_nboson_max = 2;
+    opts.m_boson.m_bos_occ_cutoff = 2;
     opts.m_boson.m_num_op_weight = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -210,7 +210,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc1) {
     opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_boson.m_nboson_max = 1;
+    opts.m_boson.m_bos_occ_cutoff = 1;
     opts.m_boson.m_num_op_weight = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -227,7 +227,7 @@ TEST(DenseHamiltonian, HubbardHolsteinMaxOcc3) {
     opts.m_fermion.m_nelec = -1;
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
     opts.m_ladder.m_holstein_coupling = 1.4;
-    opts.m_boson.m_nboson_max = 3;
+    opts.m_boson.m_bos_occ_cutoff = 3;
     opts.m_boson.m_num_op_weight = 0.3;
     opts.verify();
     Hamiltonian ham_src(opts);
@@ -241,7 +241,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc1) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    opts.m_boson.m_nboson_max = 1;
+    opts.m_boson.m_bos_occ_cutoff = 1;
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
@@ -254,7 +254,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc2) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    opts.m_boson.m_nboson_max = 2;
+    opts.m_boson.m_bos_occ_cutoff = 2;
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);
@@ -267,7 +267,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralMaxOcc3) {
     fciqmc_config::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL";
-    opts.m_boson.m_nboson_max = 3;
+    opts.m_boson.m_bos_occ_cutoff = 3;
     opts.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL";
     Hamiltonian ham_src(opts);
     DenseHamiltonian ham(ham_src);

@@ -107,7 +107,7 @@ fciqmc_config::BosonHamiltonian::BosonHamiltonian(config::Group *parent) :
         config::Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
         m_bosdump(this),
         m_nboson(this, "nboson", 0ul, "number of bosons in the system. if zero, the the Hamiltonian is not assumed to conserve boson number"),
-        m_nboson_max(this, "nboson_max", defs::max_bos_occ, "maximum allowed occupation of bosonic modes."),
+        m_bos_occ_cutoff(this, "nboson_max", defs::max_bos_occ, "maximum allowed occupation of bosonic modes."),
         m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
         m_interacting_bose_gas(this){}
 

@@ -29,8 +29,11 @@ using namespace field;
 
 
 /**
- * to employ polymorphism in the fermion, boson, and fermion-boson product terms of the hamiltonian must be
- * dynamically allocated and stored as a pointer to the appropriate base class. these are managed as unique_ptrs
+ * to employ polymorphism in the fermion, boson, and fermion-boson product terms of the hamiltonian, these must be
+ * dynamically allocated and stored as pointers to the appropriate base classes. these are managed as unique_ptrs
+ *
+ * Precedence is always given to the FrmHam component, which never makes reference to the Bos or FrmBos components in
+ * its creation
  *
  * FrmHam is set up first, so BosHam initialization can make read-only reference to it.
  * FrmBosHam is set up last, so its initialization can make read-only reference to both the FrmHam and BosHam.
@@ -91,7 +94,7 @@ struct HamiltonianTerms {
     std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts){
         if (opts.m_num_op_weight) {
             const size_t nsite = m_frm->m_hs.m_sites;
-            const BosHilbertSpace hs(opts.m_nboson, nsite, true, opts.m_nboson_max);
+            const BosHilbertSpace hs(opts.m_nboson, nsite, true, opts.m_bos_occ_cutoff);
             const auto omega = opts.m_num_op_weight.get();
             return std::unique_ptr<BosHam>(new NumOpBosHam(hs, omega));
         }
