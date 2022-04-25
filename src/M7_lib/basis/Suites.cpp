@@ -3,6 +3,7 @@
 //
 
 #include "Suites.h"
+#include "BasisData.h"
 
 suite::MbfsRow::MbfsRow(const HilbertSpace &hs) :
         m_frm(this, hs, "fermion ONV"),
@@ -13,11 +14,11 @@ suite::Mbfs::Mbfs(const HilbertSpace &hs) : BufferedTable<MbfsRow>("Work space f
     m_row.push_back_jump();
 }
 
-suite::Conns::Conns(const BasisExtents &extents) :
+suite::Conns::Conns(const sys::Size &extents) :
         m_frmonv(extents.m_sites), m_bosonv(extents.m_nmode), m_frmbosonv(extents){}
 
 suite::Conns::Conns(const HilbertSpace &hs) : Conns(hs.extents()){}
 
-suite::ComOps::ComOps(const BasisExtents &extents) : m_frm(extents.m_sites), m_frmbos(extents), m_bos(extents.m_nmode){}
+suite::ComOps::ComOps(const sys::Size &extents) : m_frm(extents.m_sites), m_frmbos(extents), m_bos(extents.m_nmode){}
 
 suite::ComOps::ComOps(const HilbertSpace &hs) : ComOps(hs.extents()){}

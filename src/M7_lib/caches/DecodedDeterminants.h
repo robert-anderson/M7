@@ -23,7 +23,7 @@ struct FlatOrbs {
     defs::inds m_inds;
 
 public:
-    explicit FlatOrbs(FrmSites sites) {
+    explicit FlatOrbs(Size sites) {
         m_inds.reserve(sites.m_nspinorb);
     }
 

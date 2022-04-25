@@ -4,14 +4,14 @@
 
 #include "FrmOnvConnection.h"
 
-FrmOnvConnection::FrmOnvConnection(const FrmSites& sites):
+FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& sites):
         m_ann(sites), m_cre(sites),
         m_ndataword(integer_utils::divceil(sites.m_nspinorb, defs::nbit_word)),
         m_dataword_phases(m_ndataword){
     if (m_ndataword) m_dataword_phases[0] = false;
 }
 
-FrmOnvConnection::FrmOnvConnection(BasisExtents extents) : FrmOnvConnection(extents.m_sites) {
+FrmOnvConnection::FrmOnvConnection(sys::Size extents) : FrmOnvConnection(extents.m_sites) {
     extents.require_pure_frm();
 }
 

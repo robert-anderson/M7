@@ -12,7 +12,7 @@ struct SpinSquareFrmHam : FrmHam {
     // This is Sz * (Sz - 1) which stays constant
     const defs::ham_comp_t m_sz_term;
 
-    SpinSquareFrmHam(const FrmHilbertSpace& hs);
+    SpinSquareFrmHam(const sys::frm::Basis& hs);
 
     explicit SpinSquareFrmHam(const FrmHam &h);
 

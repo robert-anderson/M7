@@ -19,8 +19,8 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::operator=;
     using base_t::inds_t;
 
-    const FrmHilbertSpace m_hs;
-    const FrmSites m_sites;
+    const sys::frm::Basis m_hs;
+    const sys::frm::Size m_sites;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
@@ -38,7 +38,7 @@ private:
 
 public:
 
-    FrmOnvField(Row* row, const FrmHilbertSpace& hs, std::string name="");
+    FrmOnvField(Row* row, const sys::frm::Basis& hs, std::string name="");
     FrmOnvField(Row* row, const HilbertSpace& hs, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 

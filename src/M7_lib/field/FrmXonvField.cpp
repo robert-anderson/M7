@@ -4,7 +4,7 @@
 
 #include "FrmXonvField.h"
 
-FrmXonvField::FrmXonvField(Row *row, const FrmHilbertSpace& hs, std::string name) :
+FrmXonvField::FrmXonvField(Row *row, const sys::frm::Basis& hs, std::string name) :
         CompositeField(m_ket, m_bra),
         m_ket(row, hs, prefix("ket", name)),
         m_bra(row, hs, prefix("bra", name)) {}

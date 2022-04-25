@@ -4,8 +4,7 @@
 
 #include "FrmOnvField.h"
 
-
-FrmOnvField::FrmOnvField(Row *row, const FrmHilbertSpace& hs, std::string name) :
+FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& hs, std::string name) :
         base_t(row, {{2, hs.m_sites},{"spin channel", "site"}}, name),
         m_hs(hs), m_sites(hs.m_sites), m_decoded(*this),
         m_dsize_spin_channel(integer_utils::divceil(size_t(m_hs.m_sites), defs::nbit_word)),

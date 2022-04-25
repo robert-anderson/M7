@@ -119,14 +119,14 @@ namespace mbf_foreach {
     namespace frm {
 
         struct Base : mbf_foreach::Base {
-            Base(const FrmHilbertSpace& hs, size_t niter);
+            Base(const sys::frm::Basis& hs, size_t niter);
         };
 
         struct General : Base {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_foreach;
 
-            General(const FrmHilbertSpace& hs);
+            General(const sys::frm::Basis& hs);
 
             template<typename fn_t>
             void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
@@ -150,7 +150,7 @@ namespace mbf_foreach {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_foreach;
 
-            Spins(const FrmHilbertSpace& hs);
+            Spins(const sys::frm::Basis& hs);
 
         public:
             template<typename fn_t>
@@ -175,9 +175,9 @@ namespace mbf_foreach {
             typedef basic_foreach::rtnd::Ordered<true, true> foreach_t;
             foreach_t m_alpha_foreach, m_beta_foreach;
 
-            static size_t niter(const FrmHilbertSpace& hd);
+            static size_t niter(const sys::frm::Basis& hd);
 
-            Ms2Conserve(const FrmHilbertSpace& hs);
+            Ms2Conserve(const sys::frm::Basis& hs);
 
         public:
             template<typename fn_t>

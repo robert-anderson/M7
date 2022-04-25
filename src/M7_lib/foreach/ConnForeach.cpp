@@ -4,7 +4,7 @@
 
 #include "ConnForeach.h"
 
-conn_foreach::Base::Base(size_t exsig, BasisExtents extents) : m_exsig(exsig), m_conns(extents){}
+conn_foreach::Base::Base(size_t exsig, sys::Size extents) : m_exsig(exsig), m_conns(extents){}
 
 void conn_foreach::Base::loop(conn::FrmOnv &conn, const field::FrmOnv& src, const conn_foreach::Base::function_t<conn::FrmOnv> &fn) {
     frm_loop(conn, src, fn);

@@ -7,6 +7,7 @@
 
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/connection/Connections.h>
+#include "BasisData.h"
 
 /**
  * classes for "workspace" objects that are MBF type dependent. Objects for every implemented MBF type are allocated as
@@ -41,7 +42,7 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        explicit Conns(const BasisExtents& extents);
+        explicit Conns(const sys::Size& extents);
         explicit Conns(const HilbertSpace& hs);
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
@@ -59,7 +60,7 @@ namespace suite {
         com_ops::Frm m_frm;
         com_ops::FrmBos m_frmbos;
         com_ops::Bos m_bos;
-        ComOps(const BasisExtents& extents);
+        ComOps(const sys::Size& extents);
         ComOps(const HilbertSpace& hs);
 
         com_ops::Frm& operator[](const field::FrmOnv& mbf){

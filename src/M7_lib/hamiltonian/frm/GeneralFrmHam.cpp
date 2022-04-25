@@ -28,7 +28,7 @@ buffered::FrmOnv GeneralFrmHam::guess_reference() const {
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const FrmHilbertSpace &hs):
+GeneralFrmHam::GeneralFrmHam(const sys::frm::Basis &hs):
         FrmHam(hs),
         m_int_1(m_hs.m_sites, m_hs.m_restricted_orbs),
         m_int_2(m_hs.m_sites, m_hs.m_restricted_orbs) {

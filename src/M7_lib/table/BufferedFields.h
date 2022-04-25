@@ -129,7 +129,7 @@ namespace buffered {
 
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
-        FrmOnv(const FrmHilbertSpace& hs) : BufferedField<field::FrmOnv>(hs){}
+        FrmOnv(const sys::frm::Basis& hs) : BufferedField<field::FrmOnv>(hs){}
         FrmOnv(const HilbertSpace& hs) : FrmOnv(hs.m_frm){}
 
         FrmOnv(const FrmOnv& other) : FrmOnv(other.m_hs){
@@ -164,7 +164,7 @@ namespace buffered {
     struct FrmBosOnv : BufferedField<field::FrmBosOnv> {
         using field::FrmBosOnv::operator=;
         FrmBosOnv(const HilbertSpace& hs): BufferedField<field::FrmBosOnv>(hs){}
-        FrmBosOnv(const FrmHilbertSpace& frm_hs, const BosHilbertSpace& bos_hs):
+        FrmBosOnv(const sys::frm::Basis& frm_hs, const BosHilbertSpace& bos_hs):
             BufferedField<field::FrmBosOnv>(frm_hs, bos_hs){}
         FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv(other.m_frm.m_hs, other.m_bos.m_hs){
             *this = other;
@@ -178,7 +178,7 @@ namespace buffered {
 
     struct FrmXonv : BufferedField<field::FrmXonv> {
         using field::FrmXonv::operator=;
-        FrmXonv(const FrmHilbertSpace& hs): BufferedField<field::FrmXonv>(hs){}
+        FrmXonv(const sys::frm::Basis& hs): BufferedField<field::FrmXonv>(hs){}
         FrmXonv(const HilbertSpace& hs): FrmXonv(hs.m_frm){}
         FrmXonv(const field::FrmXonv& other): FrmXonv(other.m_ket.m_hs){
             *this = other;

@@ -4,9 +4,8 @@
 
 #include "SpinSquareFrmHam.h"
 
-
-SpinSquareFrmHam::SpinSquareFrmHam(const FrmHilbertSpace &hs): FrmHam(hs),
-    m_sz_term(0.25 * m_hs.m_ms2 * (m_hs.m_ms2 - 2)){
+SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Basis &hs):
+    FrmHam(hs), m_sz_term(0.25 * m_hs.m_ms2 * (m_hs.m_ms2 - 2)){
     REQUIRE_NE(m_hs.m_ms2, ~0, "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
 }
 

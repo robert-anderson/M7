@@ -16,7 +16,7 @@ namespace conn_foreach {
         const size_t m_exsig;
         suite::Conns m_conns;
 
-        Base(size_t exsig, BasisExtents extents);
+        Base(size_t exsig, sys::Size extents);
 
         virtual ~Base() {}
 
@@ -51,7 +51,7 @@ namespace conn_foreach {
 
     namespace frm {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, FrmSites sites) :
+            Base(size_t exsig, sys::frm::Size sites) :
                     conn_foreach::Base(exsig, {sites, 0ul}) {
                 REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitation signature has boson operators");
             }
@@ -62,7 +62,7 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct General : Base {
-            General(FrmSites sites) :
+            General(sys::frm::Size sites) :
                 Base(exsig_utils::encode(nop, nop, 0, 0), sites) {}
 
             template<typename fn_t>
@@ -97,7 +97,7 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct Ms2Conserve : Base {
-            Ms2Conserve(FrmSites sites):
+            Ms2Conserve(sys::frm::Size sites):
                     Base(exsig_utils::encode(nop, nop, 0, 0), sites) {}
 
         private:
@@ -401,7 +401,7 @@ namespace conn_foreach {
 
     namespace frmbos {
         struct Base : conn_foreach::Base {
-            Base(size_t exsig, const BasisExtents& extents) :
+            Base(size_t exsig, const sys::Size& extents) :
                     conn_foreach::Base(exsig, extents) {
                 REQUIRE_TRUE(exsig_utils::decode_nfrm(exsig) && exsig_utils::decode_nbos(exsig),
                              "excitation signature is not that of a fermion-boson product");
@@ -433,7 +433,7 @@ namespace conn_foreach {
                 auto nbos_ann = exsig_utils::decode_nbos_ann(bos_base.m_exsig);
                 return exsig_utils::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
             }
-            static BasisExtents combined_extents(const frm_t& frm, const bos_t& bos) {
+            static sys::Size combined_extents(const frm_t& frm, const bos_t& bos) {
                 const frm::Base& frm_base = as_base(frm);
                 const bos::Base& bos_base = as_base(bos);
                 /*

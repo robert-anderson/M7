@@ -47,7 +47,7 @@ struct FrmHam : HamOpTerm {
     /**
      * properties of the many-body basis
      */
-    const FrmHilbertSpace m_hs;
+    const sys::frm::Basis m_hs;
     /**
      * core energy
      */
@@ -77,7 +77,7 @@ struct FrmHam : HamOpTerm {
      */
     bool m_complex_valued = false;
 
-    FrmHam(const FrmHilbertSpace& hs);
+    FrmHam(const sys::frm::Basis& hs);
 
     FrmHam(const FrmHam& other): FrmHam(other.m_hs){}
 
@@ -166,7 +166,7 @@ struct NullFrmHam : FrmHam {
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
 struct SpinModelFrmHam : FrmHam {
-    SpinModelFrmHam(const FrmHilbertSpace& hs): FrmHam(hs){}
+    SpinModelFrmHam(const sys::frm::Basis& hs): FrmHam(hs){}
 };
 
 #endif //M7_FRMHAM_H

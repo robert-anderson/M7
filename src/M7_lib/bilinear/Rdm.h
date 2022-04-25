@@ -22,14 +22,14 @@ class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const size_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
     std::vector<FermionPromoter> m_frm_promoters;
     buffered::MaeInds m_lookup_inds;
-    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisExtents extents);
+    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, sys::Size extents);
 
-    static size_t nrow_estimate(size_t exsig, BasisExtents extents);
+    static size_t nrow_estimate(size_t exsig, sys::Size extents);
 
 public:
-    const BasisExtents m_extents;
+    const sys::Size m_extents;
 
-    Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisExtents extents, size_t nelec, size_t nvalue);
+    Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, sys::Size extents, size_t nelec, size_t nvalue);
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
                        const com_ops::Frm &com, const defs::wf_t &contrib);
@@ -63,7 +63,7 @@ public:
     Reduction<defs::wf_t> m_total_norm;
 
     Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs,
-         BasisExtents extents, size_t nelec, const Epoch &accum_epoch);
+         sys::Size extents, size_t nelec, const Epoch &accum_epoch);
 
     operator bool() const;
 

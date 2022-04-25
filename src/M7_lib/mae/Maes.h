@@ -17,7 +17,7 @@ struct Maes {
     size_t m_icycle_period_start = ~0ul;
     std::unique_ptr<MaeStats> m_stats = nullptr;
 
-    Maes(const fciqmc_config::AvEsts &opts, BasisExtents extents, size_t nelec, size_t nroot);
+    Maes(const fciqmc_config::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot);
 
     operator bool() const;
 

@@ -29,7 +29,7 @@ struct FrmXonvField : XonvField<FrmOnvField> {
     FrmXonvField(Row *row, const HilbertSpace &hs, std::string name = "") :
             XonvField<FrmOnvField>(row, hs, name) {}
 
-    FrmXonvField(Row *row, const FrmHilbertSpace &hs, std::string name = "") :
+    FrmXonvField(Row *row, const sys::frm::Basis &hs, std::string name = "") :
             FrmXonvField(row, HilbertSpace(hs, {0ul}), name) {}
 
     FrmXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {

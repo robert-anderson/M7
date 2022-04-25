@@ -82,7 +82,7 @@ struct BosOnvConnection {
 
     explicit BosOnvConnection(size_t nmode);
 
-    explicit BosOnvConnection(BasisExtents extents);
+    explicit BosOnvConnection(sys::Size extents);
 
     explicit BosOnvConnection(const BosOnvField& mbf);
 

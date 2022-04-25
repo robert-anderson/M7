@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "M7_lib/table/BufferedFields.h"
+#include "BasisData.h"
 
 
 /*
@@ -204,7 +205,7 @@ TEST(BufferedFields, Bitset){
 TEST(BufferedFields, FrmOnv){
     const size_t nsite = 6;
     defs::inds frm_inds = {0, 2, 4, 5, 7, 9};
-    const FrmHilbertSpace hs(frm_inds.size(), nsite);
+    const sys::frm::Basis hs(frm_inds.size(), nsite);
 
     //  1. constructable via argument forwarding to T::T
     buffered::FrmOnv direct(hs);
@@ -294,7 +295,7 @@ TEST(BufferedFields, BosOnv){
 TEST(BufferedFields, FrmBosOnv){
     defs::inds frm_inds = {0, 2, 4, 5, 7};
     defs::inds bos_inds = {3, 1, 2, 4, 9};
-    const FrmHilbertSpace frm_hs(frm_inds.size(), 4);
+    const sys::frm::Basis frm_hs(frm_inds.size(), 4);
     const BosHilbertSpace bos_hs(0ul, 5, false, defs::max_bos_occ);
     const HilbertSpace hs = {frm_hs, bos_hs};
 
@@ -344,7 +345,7 @@ TEST(BufferedFields, FrmXonv){
     const size_t nsite = 5;
     defs::inds ket_inds = {0, 2, 4, 5, 9};
     defs::inds bra_inds = {1, 2, 3, 7};
-    const FrmHilbertSpace hs(nsite);
+    const sys::frm::Basis hs(nsite);
 
     //  1. constructable via argument forwarding to T::T
     buffered::FrmXonv direct(hs);
@@ -441,7 +442,7 @@ TEST(BufferedFields, FrmBosXonv){
     defs::inds ket_bos_inds = {3, 1, 2, 4, 9};
     defs::inds bra_frm_inds = {1, 2, 3, 7};
     defs::inds bra_bos_inds = {2, 4, 9, 3, 1};
-    const FrmHilbertSpace frm_hs(0, 4);
+    const sys::frm::Basis frm_hs(0, 4);
     const BosHilbertSpace bos_hs(0ul, 5, false, defs::max_bos_occ);
     const HilbertSpace hs = {frm_hs, bos_hs};
 

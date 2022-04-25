@@ -13,7 +13,7 @@
  * the underlying index vector
  */
 class FrmOps {
-    const FrmSites m_sites;
+    const sys::frm::Size m_sites;
     defs::inds m_inds;
 public:
     FrmOps(size_t nsite): m_sites(nsite) {
@@ -172,12 +172,12 @@ private:
     mutable std::vector<bool> m_dataword_phases;
 public:
 
-    explicit FrmOnvConnection(const FrmSites& sites);
+    explicit FrmOnvConnection(const sys::frm::Size& sites);
 
     /*
      * universal interface (works with any compile-time value "MBF_TYPE")
      */
-    explicit FrmOnvConnection(BasisExtents extents);
+    explicit FrmOnvConnection(sys::Size extents);
 
     explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**

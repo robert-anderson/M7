@@ -7,7 +7,7 @@
 #include "M7_lib/basis/Suites.h"
 
 TEST(Suites, Copy){
-    const FrmHilbertSpace frm_hs(6, 7, 2);
+    const sys::frm::Basis frm_hs(6, 7, 2);
     const BosHilbertSpace bos_hs(4, 8);
     suite::Mbfs mbfs({frm_hs, bos_hs});
     auto copy_mbfs = mbfs;

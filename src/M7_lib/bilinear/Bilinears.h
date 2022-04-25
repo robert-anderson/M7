@@ -108,11 +108,11 @@ public:
     }
 
     Bilinears(const fciqmc_config::AvEsts &opts, defs::inds rdm_ranksigs, defs::inds specmom_exsigs,
-              BasisExtents extents, size_t nelec, const Epoch &epoch) :
+              sys::Size extents, size_t nelec, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, extents, nelec, epoch),
             m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}
 
-    Bilinears(const fciqmc_config::AvEsts &opts, BasisExtents extents, size_t nelec, const Epoch &epoch) :
+    Bilinears(const fciqmc_config::AvEsts &opts, sys::Size extents, size_t nelec, const Epoch &epoch) :
             Bilinears(opts, parse_exsigs(opts.m_rdm.m_ranks),
                       parse_exsigs(opts.m_spec_mom.m_ranks), extents, nelec, epoch) {}
 

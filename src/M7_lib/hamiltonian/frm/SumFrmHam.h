@@ -27,10 +27,10 @@ struct SumFrmHam : FrmHam {
 
 private:
     /**
-     * make combined FrmHilbertSpace of components
+     * make combined Basis of components
      */
-    static FrmHilbertSpace hs(const FrmHam& h1, const FrmHam& h2) {
-        return FrmHilbertSpace(h1.m_hs, h2.m_hs);
+    static sys::frm::Basis hs(const FrmHam& h1, const FrmHam& h2) {
+        return sys::frm::Basis(h1.m_hs, h2.m_hs);
     }
 public:
 

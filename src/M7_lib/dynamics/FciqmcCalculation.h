@@ -14,9 +14,21 @@
 
 class FciqmcCalculation {
 public:
+    /**
+     * configuration document specifying the calculation to be performed
+     */
     const fciqmc_config::Document& m_opts;
-    Hamiltonian m_ham;
+    /**
+     * sum of weighted many-body operator products determining the energies and transition amplitudes between MBFs
+     */
+    const Hamiltonian m_ham;
+    /**
+     * distributed solution vectors
+     */
     Wavefunction m_wf;
+    /**
+     * propagates the system, either exactly or stochastically
+     */
     std::unique_ptr<Propagator> m_prop;
 
     explicit FciqmcCalculation(const fciqmc_config::Document& opts);

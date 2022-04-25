@@ -6,6 +6,7 @@
 
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/foreach/MbfForeach.h"
+#include "BasisData.h"
 
 namespace mbf_foreach_test {
     namespace frm {
@@ -63,7 +64,7 @@ namespace mbf_foreach_test {
 TEST(MbfForeach, FrmGeneral) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const FrmHilbertSpace hs(4, 3);
+    const sys::frm::Basis hs(4, 3);
     buffered::FrmOnv mbf(hs);
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
@@ -79,7 +80,7 @@ TEST(MbfForeach, FrmGeneral) {
 TEST(MbfForeach, FrmGeneralEarlyExit) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const FrmHilbertSpace hs(4, 3);
+    const sys::frm::Basis hs(4, 3);
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
         ASSERT_EQ(mbf, chk_inds[iiter]);
@@ -96,7 +97,7 @@ TEST(MbfForeach, FrmGeneralEarlyExit) {
 TEST(MbfForeach, FrmGeneralPair) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const FrmHilbertSpace hs(4, 3);
+    const sys::frm::Basis hs(4, 3);
     buffered::FrmOnv mbf(hs);
 
     auto fn = [&chk_inds](
@@ -112,7 +113,7 @@ TEST(MbfForeach, FrmGeneralPair) {
 TEST(MbfForeach, FrmSpins) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::spins::chk_inds();
-    const FrmHilbertSpace hs(4, 4, 0);
+    const sys::frm::Basis hs(4, 4, 0);
     buffered::FrmOnv mbf(hs);
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
@@ -128,7 +129,7 @@ TEST(MbfForeach, FrmSpins) {
 TEST(MbfForeach, FrmMs2Conserve) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::ms2_conserve::chk_inds();
-    const FrmHilbertSpace hs(5, 4, 1);
+    const sys::frm::Basis hs(5, 4, 1);
     buffered::FrmOnv mbf(hs);
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
@@ -191,7 +192,7 @@ TEST(MbfForeach, FrmBosGeneralOpen) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::general::chk_inds();
     const auto bos_chk_inds = bos::general_open::chk_inds();
-    const FrmHilbertSpace frm_hs(4, 3);
+    const sys::frm::Basis frm_hs(4, 3);
     const BosHilbertSpace bos_hs(0, 3, false, 2);
 
     size_t iiter = 0ul;
@@ -215,7 +216,7 @@ TEST(MbfForeach, FrmBosSpins) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::spins::chk_inds();
     const auto bos_chk_inds = bos::general_open::chk_inds();
-    const FrmHilbertSpace frm_hs(4, 4, 0);
+    const sys::frm::Basis frm_hs(4, 4, 0);
     const BosHilbertSpace bos_hs(0, 3, false, 2);
 
     size_t iiter = 0ul;
@@ -239,7 +240,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::spins::chk_inds();
     const auto bos_chk_inds = bos::general_open::chk_inds();
-    const FrmHilbertSpace frm_hs(4, 4, 0);
+    const sys::frm::Basis frm_hs(4, 4, 0);
     const BosHilbertSpace bos_hs(0, 3, false, 2);
 
     size_t iiter = 0ul;
@@ -266,7 +267,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::ms2_conserve::chk_inds();
     const auto bos_chk_inds = bos::general_open::chk_inds();
-    const FrmHilbertSpace frm_hs(5, 4, 1);
+    const sys::frm::Basis frm_hs(5, 4, 1);
     const BosHilbertSpace bos_hs(0, 3, false, 2);
 
     size_t iiter = 0ul;
@@ -290,7 +291,7 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
     using namespace mbf_foreach_test;
     const auto frm_chk_inds = frm::ms2_conserve::chk_inds();
     const auto bos_chk_inds = bos::general_open::chk_inds();
-    const FrmHilbertSpace frm_hs(5, 4, 1);
+    const sys::frm::Basis frm_hs(5, 4, 1);
     const BosHilbertSpace bos_hs(0, 3, false, 2);
 
     auto fn = [&frm_chk_inds, &bos_chk_inds]

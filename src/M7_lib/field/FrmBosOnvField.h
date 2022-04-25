@@ -21,7 +21,7 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
     mutable decoded_mbf::FrmBosOnv m_decoded;
     FrmBosOnvField(Row* row, HilbertSpace hs, std::string name="");
 
-    FrmBosOnvField(Row* row, const FrmHilbertSpace& frm_hs, const BosHilbertSpace& bos_hs, std::string name=""):
+    FrmBosOnvField(Row* row, const sys::frm::Basis& frm_hs, const BosHilbertSpace& bos_hs, std::string name=""):
         FrmBosOnvField(row, HilbertSpace(frm_hs, bos_hs), name){}
 
     FrmBosOnvField(const FrmBosOnvField& other);

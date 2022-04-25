@@ -6,23 +6,23 @@
 
 #include <utility>
 
-FrmSites::FrmSites(size_t nsite) : m_nsite(nsite), m_nspinorb(2 * nsite){}
+sys::frm::Size::Size(size_t nsite) : m_nsite(nsite), m_nspinorb(2 * nsite){}
 
-size_t FrmSites::ncoeff_ind(bool restricted_orbs) const {
+size_t sys::frm::Size::ncoeff_ind(bool restricted_orbs) const {
     return restricted_orbs ? m_nspinorb : m_nsite;
 }
 
-BasisExtents::BasisExtents(size_t nsite, size_t nmode) : m_sites(nsite), m_nmode(nmode){}
+sys::Size::Size(size_t nsite, size_t nmode) : m_sites(nsite), m_nmode(nmode){}
 
-void BasisExtents::require_pure_frm() const {
+void sys::Size::require_pure_frm() const {
     REQUIRE_FALSE(m_nmode, "Single particle basis specification is not purely fermionic");
 }
 
-void BasisExtents::require_pure_bos() const {
+void sys::Size::require_pure_bos() const {
     REQUIRE_FALSE(m_sites, "Single particle basis specification is not purely bosonic");
 }
 
-FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2) :
+sys::frm::Basis::Basis(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2) :
         m_nelec(nelec), m_sites(nsite), m_nvac(m_sites.m_nspinorb - nelec), m_restricted_orbs(spin_resolved),
         m_abgrp_map(std::move(abgrp_map)), m_ms2(ms2),
         m_nelec_alpha(ms2_conserved() ? (m_nelec+m_ms2)/2 : 0ul),
@@ -33,19 +33,19 @@ FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite, AbelianGroupMap abg
         REQUIRE_EQ(size_t(std::abs(m_ms2) % 2), m_nelec % 2, "2*Ms quantum number given incompatible with nelec");
 }
 
-FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite, int ms2) :
-        FrmHilbertSpace(nelec, nsite, {nsite}, false, ms2){}
+sys::frm::Basis::Basis(size_t nelec, size_t nsite, int ms2) :
+        sys::frm::Basis(nelec, nsite, {nsite}, false, ms2){}
 
-FrmHilbertSpace::FrmHilbertSpace(size_t nelec, size_t nsite) :
-        FrmHilbertSpace(nelec, nsite, ~0){}
+sys::frm::Basis::Basis(size_t nelec, size_t nsite) :
+        sys::frm::Basis(nelec, nsite, ~0){}
 
-FrmHilbertSpace::FrmHilbertSpace(size_t nsite) :
-        FrmHilbertSpace(0ul, nsite){}
+sys::frm::Basis::Basis(size_t nsite) :
+        sys::frm::Basis(0ul, nsite){}
 
-FrmHilbertSpace::FrmHilbertSpace() : FrmHilbertSpace(0ul){}
+sys::frm::Basis::Basis() : sys::frm::Basis(0ul){}
 
-FrmHilbertSpace::FrmHilbertSpace(const FrmHilbertSpace &hs1, const FrmHilbertSpace &hs2) :
-        FrmHilbertSpace(hs1.m_nelec ? hs1.m_nelec : hs2.m_nelec,
+sys::frm::Basis::Basis(const sys::frm::Basis &hs1, const sys::frm::Basis &hs2) :
+        sys::frm::Basis(hs1.m_nelec ? hs1.m_nelec : hs2.m_nelec,
                         hs1.m_sites ? hs1.m_sites : hs2.m_sites,
                         hs1.m_abgrp_map ? hs1.m_abgrp_map : hs2.m_abgrp_map,
                         hs1.m_restricted_orbs || hs2.m_restricted_orbs,
@@ -67,7 +67,7 @@ FrmHilbertSpace::FrmHilbertSpace(const FrmHilbertSpace &hs1, const FrmHilbertSpa
     }
 }
 
-bool FrmHilbertSpace::operator==(const FrmHilbertSpace &other) const {
+bool sys::frm::Basis::operator==(const sys::frm::Basis &other) const {
     return m_sites==other.m_sites && m_abgrp_map==other.m_abgrp_map;
 }
 
@@ -104,19 +104,19 @@ BosHilbertSpace::operator bool() const {
     return m_nmode;
 }
 
-HilbertSpace::HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos) : m_frm(frm), m_bos(bos){}
+HilbertSpace::HilbertSpace(sys::frm::Basis frm, BosHilbertSpace bos) : m_frm(frm), m_bos(bos){}
 
-HilbertSpace::HilbertSpace() : HilbertSpace(FrmHilbertSpace(), BosHilbertSpace()){}
+HilbertSpace::HilbertSpace() : HilbertSpace(sys::frm::Basis(), BosHilbertSpace()){}
 
 HilbertSpace::HilbertSpace(const HilbertSpace &hs1, const HilbertSpace &hs2) :
-        HilbertSpace(FrmHilbertSpace(hs1.m_frm, hs2.m_frm), BosHilbertSpace(hs1.m_bos, hs2.m_bos)){}
+        HilbertSpace(sys::frm::Basis(hs1.m_frm, hs2.m_frm), BosHilbertSpace(hs1.m_bos, hs2.m_bos)){}
 
 
 bool HilbertSpace::operator==(const HilbertSpace &other) const {
     return m_frm==other.m_frm && m_bos==other.m_bos;
 }
 
-BasisExtents HilbertSpace::extents() const {
+sys::Size HilbertSpace::extents() const {
     return {m_frm.m_sites, m_bos.m_nmode};
 }
 

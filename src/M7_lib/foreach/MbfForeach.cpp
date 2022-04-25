@@ -37,9 +37,9 @@ void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::
 
 void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) { frmbos_loop(fn); }
 
-mbf_foreach::frm::Base::Base(const FrmHilbertSpace& hs, size_t niter): mbf_foreach::Base({hs, {}}, niter) {}
+mbf_foreach::frm::Base::Base(const sys::frm::Basis& hs, size_t niter): mbf_foreach::Base({hs, {}}, niter) {}
 
-mbf_foreach::frm::General::General(const FrmHilbertSpace& hs):
+mbf_foreach::frm::General::General(const sys::frm::Basis& hs):
         Base(hs, foreach_t::niter(hs.m_sites.m_nspinorb, hs.m_nelec)),
         m_foreach(hs.m_sites.m_nspinorb, hs.m_nelec) {}
 
@@ -47,7 +47,7 @@ void mbf_foreach::frm::General::frm_loop(field::FrmOnv& mbf, const std::function
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::frm::Spins::Spins(const FrmHilbertSpace& hs) :
+mbf_foreach::frm::Spins::Spins(const sys::frm::Basis& hs) :
         Base(hs, foreach_t::niter(hs.m_sites, hs.m_nelec_alpha)),
         m_foreach(hs.m_sites, hs.m_nelec_alpha){}
 
@@ -55,13 +55,13 @@ void mbf_foreach::frm::Spins::frm_loop(field::FrmOnv& mbf, const std::function<v
     loop_fn(mbf, fn);
 }
 
-size_t mbf_foreach::frm::Ms2Conserve::niter(const FrmHilbertSpace& hs) {
+size_t mbf_foreach::frm::Ms2Conserve::niter(const sys::frm::Basis& hs) {
     auto na = foreach_t::niter(hs.m_sites, hs.m_nelec_alpha);
     auto nb = foreach_t::niter(hs.m_sites, hs.m_nelec_beta);
     return na * nb;
 }
 
-mbf_foreach::frm::Ms2Conserve::Ms2Conserve(const FrmHilbertSpace& hs) :
+mbf_foreach::frm::Ms2Conserve::Ms2Conserve(const sys::frm::Basis& hs) :
     Base(hs, niter(hs)),
     m_alpha_foreach(hs.m_sites, hs.m_nelec_alpha), m_beta_foreach(hs.m_sites, hs.m_nelec_beta){}
 

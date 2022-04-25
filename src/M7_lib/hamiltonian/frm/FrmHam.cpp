@@ -3,11 +3,10 @@
 //
 
 #include "M7_lib/caches/DecodedDeterminants.h"
-#include "M7_lib/parallel/RankAllocator.h"
 
 #include "FrmHam.h"
 
-FrmHam::FrmHam(const FrmHilbertSpace& hs):
+FrmHam::FrmHam(const sys::frm::Basis& hs):
         m_hs(hs), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {

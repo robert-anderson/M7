@@ -5,7 +5,7 @@
 #include "FrmBosOnvConnection.h"
 #include "ComOps.h"
 
-FrmBosOnvConnection::FrmBosOnvConnection(BasisExtents extents) :
+FrmBosOnvConnection::FrmBosOnvConnection(sys::Size extents) :
     m_frm(extents.m_sites), m_bos(extents.m_nmode){}
 
 FrmBosOnvConnection::FrmBosOnvConnection(const FrmBosOnvField &mbf) :

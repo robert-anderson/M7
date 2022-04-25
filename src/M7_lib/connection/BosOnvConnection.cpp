@@ -94,7 +94,7 @@ size_t BosOps::get_imode(size_t iop) const {
 
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
 
-BosOnvConnection::BosOnvConnection(BasisExtents bd) : BosOnvConnection(bd.m_nmode){
+BosOnvConnection::BosOnvConnection(sys::Size bd) : BosOnvConnection(bd.m_nmode){
     bd.require_pure_bos();
 }
 
