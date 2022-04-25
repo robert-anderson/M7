@@ -38,6 +38,14 @@ struct HamOpTerm {
         return as<T>();
     }
 
+    virtual bool enabled() const {
+        return true;
+    }
+
+    bool disabled() const {
+        return !enabled();
+    }
+
     using excit_gen_ptr_t = ExcitGen::excit_gen_ptr_t;
     using excit_gen_list_t = ExcitGen::excit_gen_list_t;
     using conn_foreach_ptr_t = conn_foreach::base_ptr_t;

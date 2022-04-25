@@ -62,13 +62,6 @@ struct BosHam : HamOpTerm {
 
     virtual void log_data() const;
 
-    virtual bool enabled() const {
-        return true;
-    }
-
-    bool disabled() const {
-        return !enabled();
-    }
 };
 
 struct NullBosHam : BosHam {

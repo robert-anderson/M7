@@ -11,6 +11,7 @@
 TEST(Pchb1101hc, Test){
     PRNG prng(14, 1000000);
     fciqmc_config::Hamiltonian opts(nullptr);
+    opts.m_fermion.m_nelec = 6;
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
     opts.verify();
     Hamiltonian h(opts);
@@ -19,6 +20,7 @@ TEST(Pchb1101hc, Test){
     Pchb1101hc excit_gen(h.m_frmbos, prng);
     buffered::FrmBosOnv src_mbf(h.m_hs);
     mbf::set_aufbau_mbf(src_mbf.m_frm);
+    ASSERT_EQ(src_mbf.m_frm.nsetbit(), h.m_hs.m_frm.m_nelec);
     typedef conn_foreach::frm::Ms2Conserve<1> frm_foreach_t;
     typedef conn_foreach::bos::Cre bos_foreach_t;
     typedef conn_foreach::frmbos::Product<frm_foreach_t, bos_foreach_t> foreach_t;

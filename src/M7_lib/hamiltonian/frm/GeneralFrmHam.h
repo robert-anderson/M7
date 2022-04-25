@@ -33,6 +33,18 @@ struct GeneralFrmHam : FrmHam {
 
     buffered::FrmOnv guess_reference() const;
 
+    /**
+     * @param prng
+     *  random number generator
+     * @param opts
+     *  propagator options (so excitation generation settings can be read from the configuration document)
+     * @param h
+     *  Fermion H object to be **treated** as a GeneralFrmHam
+     * @return
+     *  list of excit gens required to stochastically propagate the given h
+     */
+    static excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts, const FrmHam& h);
+
     excit_gen_list_t make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) const override;
 
     conn_foreach_list_t make_foreach_iters() const override;

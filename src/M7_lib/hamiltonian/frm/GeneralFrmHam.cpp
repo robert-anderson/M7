@@ -123,14 +123,20 @@ defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn
     return conn.phase(onv) ? -element : element;
 }
 
-HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) const {
+HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
+        PRNG &prng, const fciqmc_config::Propagator &opts, const FrmHam &h) {
     using namespace exsig_utils;
     excit_gen_list_t list;
-    bool any_singles = m_contribs_1100.is_nonzero(ex_single) || m_contribs_2200.is_nonzero(ex_single);
-    if (any_singles) list.emplace_front(new UniformSingles(*this, prng));
-    bool any_doubles = m_contribs_2200.is_nonzero(ex_double);
-    if (any_doubles) list.emplace_front(new Pchb2200(*this, prng));
+    bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
+    if (any_singles) list.emplace_front(new UniformSingles(h, prng));
+    bool any_doubles = h.m_contribs_2200.is_nonzero(ex_double);
+    if (any_doubles) list.emplace_front(new Pchb2200(h, prng));
     return list;
+}
+
+HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
+        PRNG &prng, const fciqmc_config::Propagator &opts) const {
+    return make_excit_gens(prng, opts, *this);
 }
 
 conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {

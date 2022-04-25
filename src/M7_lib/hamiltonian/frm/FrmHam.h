@@ -152,14 +152,6 @@ struct FrmHam : HamOpTerm {
      * output some useful logs identifying the kind of H detected
      */
     virtual void log_data() const;
-
-    virtual bool enabled() const {
-        return true;
-    }
-
-    bool disabled() const {
-        return !enabled();
-    }
 };
 
 struct NullFrmHam : FrmHam {

@@ -28,11 +28,8 @@ struct FrmBosHam : HamOpTerm {
     ham_data::TermContribs m_contribs_1101;
 
     /**
-     * @param bd
-     *  basis data determined by the information available to the derived class ctors. its compatibility with any
-     *  defined fermion or boson ham is checked here by referencing the frm and bos arguments in contrast, the
-     *  fermion-boson product term does not determine anything about the Hilbert space, and so these attributes are
-     *  brought in directly from the fermion and boson parts.
+     * @param hs
+     *  Hilbert space specification determined by the information available to the derived class ctors.
      * @param frm
      *  fermionic part of H, from which the fermionic Hilbert space attributes are copied
      * @param bos
@@ -82,13 +79,6 @@ struct FrmBosHam : HamOpTerm {
      */
     void log_data() const;
 
-    virtual bool enabled() const {
-        return true;
-    }
-
-    bool disabled() const {
-        return !enabled();
-    }
 };
 
 struct NullLadderHam: FrmBosHam {

@@ -119,7 +119,7 @@ struct FrmHilbertSpace {
     /*
      * combine the properties of two Hilbert spaces
      */
-    FrmHilbertSpace(const FrmHilbertSpace& hs1, const FrmHilbertSpace& hs2);
+    explicit FrmHilbertSpace(const FrmHilbertSpace& hs1, const FrmHilbertSpace& hs2);
 
     bool operator==(const FrmHilbertSpace& other) const;
 
@@ -156,6 +156,10 @@ struct BosHilbertSpace {
 
     BosHilbertSpace(size_t nboson, size_t nmode, bool nboson_conserve, size_t occ_cutoff);
     /*
+     * number conserved
+     */
+    BosHilbertSpace(size_t nboson, size_t nmode);
+    /*
      * number non-conserved, maximum occupation cutoff
      */
     BosHilbertSpace(size_t nmode);
@@ -163,7 +167,7 @@ struct BosHilbertSpace {
     /*
      * combine the properties of two Hilbert spaces
      */
-    BosHilbertSpace(const BosHilbertSpace& hs1, const BosHilbertSpace& hs2);
+    explicit BosHilbertSpace(const BosHilbertSpace& hs1, const BosHilbertSpace& hs2);
 
     bool operator==(const BosHilbertSpace& other) const;
 
@@ -183,7 +187,7 @@ struct HilbertSpace {
     /*
      * combine the properties of two Hilbert spaces
      */
-    HilbertSpace(const HilbertSpace& hs1, const HilbertSpace& hs2);
+    explicit HilbertSpace(const HilbertSpace& hs1, const HilbertSpace& hs2);
 
     bool operator==(const HilbertSpace& other) const;
 

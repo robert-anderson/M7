@@ -123,8 +123,8 @@ struct HamiltonianTerms {
 /**
  * generalized Hamiltonian class for fermionic, bosonic, and fermion-boson coupled interactions
  */
-struct Hamiltonian {
-    HamiltonianTerms m_terms;
+class Hamiltonian {
+    const HamiltonianTerms m_terms;
 
 public:
     /*

@@ -74,14 +74,16 @@ bool FrmHilbertSpace::operator==(const FrmHilbertSpace &other) const {
 BosHilbertSpace::BosHilbertSpace(size_t nboson, size_t nmode, bool nboson_conserve, size_t occ_cutoff) :
         m_nboson(nboson), m_nmode(nmode), m_nboson_conserve(nboson_conserve), m_occ_cutoff(occ_cutoff){}
 
+BosHilbertSpace::BosHilbertSpace(size_t nboson, size_t nmode) : BosHilbertSpace(nboson, nmode, true, defs::max_bos_occ){}
+
 BosHilbertSpace::BosHilbertSpace(size_t nmode) : BosHilbertSpace(0ul, nmode, false, defs::max_bos_occ){}
 
 BosHilbertSpace::BosHilbertSpace() : BosHilbertSpace(0ul){}
 
 BosHilbertSpace::BosHilbertSpace(const BosHilbertSpace &hs1, const BosHilbertSpace &hs2) :
         BosHilbertSpace(
-                hs1.m_nmode ? hs1.m_nmode : hs2.m_nmode,
                 hs1.m_nboson ? hs1.m_nboson : hs2.m_nboson,
+                hs1.m_nmode ? hs1.m_nmode : hs2.m_nmode,
                 hs1.m_nboson_conserve && hs2.m_nboson_conserve,
                 hs1.m_occ_cutoff ? hs1.m_occ_cutoff : hs2.m_occ_cutoff) {
     if (hs1 && hs2){
@@ -108,7 +110,7 @@ HilbertSpace::HilbertSpace(FrmHilbertSpace frm, BosHilbertSpace bos) :
 HilbertSpace::HilbertSpace() : HilbertSpace(FrmHilbertSpace(), BosHilbertSpace()){}
 
 HilbertSpace::HilbertSpace(const HilbertSpace &hs1, const HilbertSpace &hs2) :
-        HilbertSpace({hs1.m_frm, hs2.m_frm}, {hs1.m_bos, hs2.m_bos}){}
+        HilbertSpace(FrmHilbertSpace(hs1.m_frm, hs2.m_frm), BosHilbertSpace(hs1.m_bos, hs2.m_bos)){}
 
 
 bool HilbertSpace::operator==(const HilbertSpace &other) const {
