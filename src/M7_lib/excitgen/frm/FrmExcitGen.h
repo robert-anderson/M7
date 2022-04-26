@@ -13,7 +13,7 @@ struct FrmExcitGen : ExcitGen {
     const FrmHam &m_h;
     const sys::frm::Sector m_sector;
 
-    FrmExcitGen(const FrmHam &h, sys::frm::Sector sector, PRNG &prng, defs::inds exsigs, std::string description);
+    FrmExcitGen(const FrmHam &h, sys::frm::Electrons elecs, PRNG &prng, defs::inds exsigs, std::string description);
 
     bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
                      defs::prob_t &prob, conn::FrmBosOnv &conn) override;

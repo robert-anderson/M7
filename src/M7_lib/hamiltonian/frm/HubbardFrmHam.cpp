@@ -11,8 +11,9 @@ bool HubbardFrmHam::sign_problem() const {
     // open boundary conditions is always SPF
     auto bc = m_bcs[0];
     if (!bc) return true;
-    auto odd_nalpha = m_hs.m_nelec_alpha & 1ul;
-    auto odd_nbeta = m_hs.m_nelec_beta & 1ul;
+    // TODO: pass basis / hilbert opts
+    auto odd_nalpha = true; //m_hs.m_nelec_alpha & 1ul;
+    auto odd_nbeta = true; //m_hs.m_nelec_beta & 1ul;
     // we have (anti-)periodic BCs: if alpha and beta oddness is different, there is a sign problem
     if (odd_nalpha != odd_nbeta) return false;
     // if nalpha is odd, then boundary excitation does not pick up a factor of -1 from the fermi phase => PBC
@@ -69,9 +70,10 @@ defs::ham_t HubbardFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j
     return 0.0;
 }
 
-HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) const {
+HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(
+        PRNG& prng, sys::frm::Electrons elecs, const fciqmc_config::Propagator& opts) const {
     excit_gen_list_t list;
-    list.emplace_front(new HubbardUniform(*this, prng));
+    list.emplace_front(new HubbardUniform(*this, elecs, prng));
     return list;
 }
 

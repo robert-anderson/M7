@@ -6,13 +6,13 @@
 
 Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefunction &wf,
                std::vector<TableBase::Loc> ref_locs) :
-        m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
+        m_prop(prop), m_opts(opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),
-        m_maes(m_opts.m_av_ests, m_prop.m_ham.m_basis.size(),
-               m_wf.m_sector.m_frm.m_nelec, m_wf.nroot()),
+        m_maes(opts.m_av_ests, m_prop.m_ham.m_basis.size(),
+               m_wf.m_sector.m_frm.m_elecs, m_wf.nroot()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
-        m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
+        m_archive(opts), m_detsubs(opts.m_propagator.m_semistochastic) {
 
     log::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
     if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())

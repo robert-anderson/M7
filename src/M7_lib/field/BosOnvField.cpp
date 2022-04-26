@@ -18,7 +18,7 @@ BosOnvField::BosOnvField(Row *row, const sys::Basis &basis, std::string name) : 
 BosOnvField::BosOnvField(Row *row, const sys::Sector &hs, std::string name) : BosOnvField(row, hs.basis(), name){}
 
 BosOnvField::BosOnvField(const BosOnvField &other) :
-    base_t(other), m_hs(other.m_hs), m_decoded(*this) {}
+    base_t(other), m_basis(other.m_basis), m_decoded(*this) {}
 
 BosOnvField &BosOnvField::operator=(const defs::inds &inds) {
     DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");

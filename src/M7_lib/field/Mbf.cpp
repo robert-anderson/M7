@@ -4,28 +4,25 @@
 
 #include "Mbf.h"
 
-void mbf::set_aufbau_mbf(field::FrmOnv &onv) {
-    const auto nalpha = onv.m_hs.m_nelec_alpha;
-    const auto nbeta = onv.m_hs.m_nelec_beta;
-    DEBUG_ASSERT_EQ(nalpha + nbeta, onv.m_hs.m_nelec, "inconsistent na, nb, nelec");
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
     onv.zero();
-    for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
-    for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
+    for (size_t i = 0ul; i < elecs.m_nalpha; ++i) onv.set({0, i});
+    for (size_t i = 0ul; i < elecs.m_nbeta; ++i) onv.set({1, i});
 }
 
-void mbf::set_aufbau_mbf(field::BosOnv &onv) {
+void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons) {
     if (!onv.nelement()) return;
     onv.zero();
-    onv[0] = onv.m_hs.m_nboson;
+    onv[0] = bosons;
 }
 
-void mbf::set_neel_mbf(field::FrmOnv &onv) {
-    REQUIRE_TRUE(onv.m_hs.ms2_conserved(), "Neel state requires conserved 2*Ms");
-    REQUIRE_LE(std::abs(onv.m_hs.m_ms2), 1,
+void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
+    REQUIRE_TRUE(elecs.m_ms2.conserve(), "Neel state requires conserved 2*Ms");
+    REQUIRE_LE(std::abs(elecs.m_ms2), 1,
                "Neel state requires overall spin of -1, 0, or 1");
     onv.zero();
-    size_t ispin = 0;
-    for (size_t isite = 0ul; isite < onv.m_hs.m_nelec; ++isite) {
+    size_t ispin = elecs.m_ms2 >= 1;
+    for (size_t isite = 0ul; isite < elecs; ++isite) {
         onv.set({ispin, isite});
         ispin = !ispin;
     }
@@ -36,7 +33,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &
     REQUIRE_LT(idef, def.size(), "MBF definition index OOB");
     mbf.zero();
     auto& definds = def[idef];
-    if (definds.size() == mbf.m_hs.m_sites.m_nspinorb) {
+    if (definds.size() == mbf.m_basis.m_nspinorb) {
         // assume the determinant is specified as a bit string
         for (size_t i=0ul; i<definds.size(); ++i) {
             auto flag = definds[i];
@@ -47,7 +44,7 @@ void mbf::set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &
     else {
         // assume the determinant is specified as a vector of set spin orbital indices
         for (auto& ind: definds){
-            REQUIRE_LT(ind, mbf.m_sites.m_nspinorb, "spin orbital index OOB");
+            REQUIRE_LT(ind, mbf.m_basis.m_nspinorb, "spin orbital index OOB");
             mbf.set(ind);
         }
     }
@@ -64,21 +61,22 @@ void mbf::set_from_def_array(field::BosOnv &mbf, const std::vector<defs::inds> &
     for (auto &occ: definds) mbf[i++] = occ;
 }
 
-void mbf::set(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef) {
+void mbf::set(field::FrmOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef) {
+    auto elecs = particles.m_frm;
     if (!def.m_frm.get().empty()) set_from_def_array(mbf, def.m_frm, idef);
-    else if (def.m_neel) set_neel_mbf(mbf);
-    else set_aufbau_mbf(mbf);
-    REQUIRE_EQ(mbf.nsetbit(), mbf.m_hs.m_nelec, "too many electrons in MBF");
-    if (mbf.m_hs.ms2_conserved())
-        REQUIRE_EQ(mbf.ms2(), mbf.m_hs.m_ms2, "MBF has incorrect total Ms");
+    else if (def.m_neel) set_neel_mbf(mbf, elecs);
+    else set_aufbau_mbf(mbf, elecs);
+    REQUIRE_EQ(mbf.nsetbit(), elecs, "too many electrons in MBF");
+    if (elecs.m_ms2.conserve())
+        REQUIRE_EQ(mbf.ms2(), elecs.m_ms2, "MBF has incorrect total 2*Ms");
 }
 
-void mbf::set(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef) {
+void mbf::set(field::BosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef) {
     if (!def.m_bos.get().empty()) set_from_def_array(mbf, def.m_bos, idef);
-    else set_aufbau_mbf(mbf);
+    else set_aufbau_mbf(mbf, particles.m_bos);
 }
 
-void mbf::set(field::FrmBosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef) {
-    set(mbf.m_frm, def, idef);
-    set(mbf.m_bos, def, idef);
+void mbf::set(field::FrmBosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef) {
+    set(mbf.m_frm, particles, def, idef);
+    set(mbf.m_bos, particles, def, idef);
 }

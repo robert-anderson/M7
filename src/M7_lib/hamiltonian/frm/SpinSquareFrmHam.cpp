@@ -4,20 +4,21 @@
 
 #include "SpinSquareFrmHam.h"
 
-SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Basis &hs):
-    FrmHam(hs), m_sz_term(0.25 * m_hs.m_ms2 * (m_hs.m_ms2 - 2)){
-    REQUIRE_NE(m_hs.m_ms2, ~0, "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
+SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Sector &sector):
+        FrmHam(sector.m_basis), m_sz_term(0.25 * sector.m_elecs.m_ms2 * (sector.m_elecs.m_ms2 - 2)){
+    REQUIRE_TRUE(sector.m_elecs.m_ms2.conserve(),
+                 "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
 }
 
-SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &h) : SpinSquareFrmHam(h.m_hs){
-    REQUIRE_TRUE(h.m_kramers_attrs.conserving(),
-                 "spin square operator inconsistent with Kramers non-conservation");
-}
+//SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &h) : SpinSquareFrmHam(h.m_hs){
+//    REQUIRE_TRUE(h.m_kramers_attrs.conserving(),
+//                 "spin square operator inconsistent with Kramers non-conservation");
+//}
 
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     uint n_os_a = 0;
     auto count_n_os_a = [&](size_t i) {
-        if (i < m_hs.m_sites) {
+        if (i < m_basis.m_nsite) {
             n_os_a += onv.get({1, i});
         };
     };
@@ -41,12 +42,11 @@ defs::ham_t SpinSquareFrmHam::get_coeff_1100(size_t a, size_t i) const {
 }
 
 defs::ham_t SpinSquareFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
-    const auto& sites = m_hs.m_sites;
     // We have to determine if it is an exchange.
-    return sites.ispin(a) != sites.ispin(b)
-        && sites.ispin(i) != sites.ispin(j)
-        && sites.isite(a) != sites.isite(b)
-        && sites.isite(i) != sites.isite(j)
-        && sites.isite(a) == sites.isite(j)
-        && sites.isite(b) == sites.isite(i);
+    return m_basis.ispin(a) != m_basis.ispin(b)
+        && m_basis.ispin(i) != m_basis.ispin(j)
+        && m_basis.isite(a) != m_basis.isite(b)
+        && m_basis.isite(i) != m_basis.isite(j)
+        && m_basis.isite(a) == m_basis.isite(j)
+        && m_basis.isite(b) == m_basis.isite(i);
 }

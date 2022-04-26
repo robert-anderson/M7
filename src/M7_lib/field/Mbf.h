@@ -16,31 +16,32 @@
 namespace mbf {
 
     /**
-     * set the referenced ONV object to the assumed Hartree--Fock determinant within the given sector
+     * set the referenced ONV object to the assumed Hartree--Fock determinant within the sector specified by the
+     * elecs argument
      */
-    void set_aufbau_mbf(field::FrmOnv &onv);
+    void set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs);
 
     /**
      * there is no proper aufbau principle for bosons, so fill from the 0 mode until max nbosons is reached, then
-     * advance to the next mode
+     * advance to the next mode until the number of quanta specified by the bosons argument has been reached
      */
-    void set_aufbau_mbf(field::BosOnv &onv);
+    void set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons);
 
 
     /**
      * set the referenced ONV object to the "anti-ferromagnetic" configuration
      */
-    void set_neel_mbf(field::FrmOnv &onv);
+    void set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs);
 
     void set_from_def_array(field::FrmOnv &mbf, const std::vector<defs::inds> &def, size_t idef);
 
     void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::inds> &def, size_t idef);
 
-    void set(field::FrmOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef);
+    void set(field::FrmOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef);
 
-    void set(field::BosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef);
+    void set(field::BosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef);
 
-    void set(field::FrmBosOnv &mbf, const fciqmc_config::MbfDef &def, size_t idef);
+    void set(field::FrmBosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef);
 };
 
 

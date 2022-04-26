@@ -20,23 +20,28 @@ namespace sys {
     class OptionallyConserved {
         const T m_v;
         const std::string m_name;
-    public:
         const bool m_conserve;
+    public:
         OptionallyConserved(T v, bool conserve, std::string name):
             m_v(v), m_name(std::move(name)), m_conserve(conserve){}
         /*
          * set an undefined value
          */
-        OptionallyConserved(): OptionallyConserved(std::numeric_limits<T>::max(), false){}
-        OptionallyConserved(const OptionallyConserved& oc1, const OptionallyConserved& oc2) :
+        explicit OptionallyConserved(std::string name): OptionallyConserved(std::numeric_limits<T>::max(), false, name){}
+        explicit OptionallyConserved(const OptionallyConserved& oc1, const OptionallyConserved& oc2) :
             OptionallyConserved(oc1.defined() ? oc1 : oc2){
             if (oc1.defined() && oc2.defined())
                 REQUIRE_EQ(oc1, oc2, "incompatible "+m_name+" values");
         }
-        operator int() const {
+        operator T() const {
             // accesses should be guarded by checking if the quantity is defined first
             DEBUG_ASSERT_TRUE(defined(), "accessing undefined "+m_name+" value");
             return m_v;
+        }
+        bool conserve() const {
+            // accesses should be guarded by checking if the quantity is defined first
+            DEBUG_ASSERT_TRUE(defined(), "accessing undefined "+m_name+" value");
+            return m_conserve;
         }
         bool defined() const {
             return m_v!=std::numeric_limits<T>::max();
@@ -178,6 +183,7 @@ namespace sys {
                  * set either 0 or 1 based on the evenness of the electron number
                  */
                 Ms2(size_t nelec): Ms2(!(nelec&1ul), false){}
+                Ms2(): OptionallyConserved<int>("2*Ms"){}
             };
             const Ms2 m_ms2;
             /**
@@ -186,9 +192,8 @@ namespace sys {
             const size_t m_nalpha, m_nbeta;
 
             Electrons(size_t n, Ms2 ms2): m_n(n), m_npair(integer_utils::nspair(m_n)), m_ms2(ms2),
-                m_nalpha(m_ms2.m_conserve ? (m_n+m_ms2)/2 : 0ul), m_nbeta(m_n-m_nalpha) {
-                REQUIRE_TRUE(m_ms2.defined(), "cannot initialise electrons with undefined Ms2 object");
-                if (m_ms2.m_conserve && m_n)
+                                          m_nalpha(m_ms2.conserve() ? (m_n+m_ms2)/2 : 0ul), m_nbeta(m_n-m_nalpha) {
+                if (m_ms2.conserve() && m_n)
                     REQUIRE_EQ(size_t(std::abs(m_ms2) % 2), m_n % 2,
                                "2*Ms quantum number given incompatible with number of electrons");
             }
@@ -196,7 +201,7 @@ namespace sys {
             Electrons(size_t n): Electrons(n, Ms2(n)){}
 
             Electrons(const Electrons& e1, const Electrons& e2):
-                Electrons(e1.m_n ? e1.m_n : e2.m_n, Ms2(e1.m_ms2, e2.m_ms2)){
+                    Electrons(e1.m_n ? e1.m_n : e2.m_n, Ms2(e1.m_ms2, e2.m_ms2)){
                 if (e1 && e2) REQUIRE_EQ(e1, e2, "incompatible numbers of electrons");
             }
 
@@ -223,8 +228,8 @@ namespace sys {
             explicit Sector(Basis basis, Electrons elecs):
                 m_basis(basis), m_elecs(elecs),
                 m_nvac(m_basis.m_nspinorb - m_elecs),
-                m_nvac_alpha(m_elecs.m_ms2.m_conserve ? m_basis.m_nsite - m_elecs.m_nalpha : 0ul),
-                m_nvac_beta(m_elecs.m_ms2.m_conserve ? m_basis.m_nsite - m_elecs.m_nbeta : 0ul){}
+                m_nvac_alpha(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nalpha : 0ul),
+                m_nvac_beta(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nbeta : 0ul){}
 
             /*
              * combine the properties of two Hilbert space sectors
@@ -239,6 +244,15 @@ namespace sys {
 
             operator bool() const {
                 return m_basis;
+            }
+
+            size_t size() const {
+                if (m_elecs.m_ms2.conserve()) {
+                    const auto na = integer_utils::combinatorial(m_basis.m_nsite, m_elecs.m_nalpha);
+                    const auto nb = integer_utils::combinatorial(m_basis.m_nsite, m_elecs.m_nbeta);
+                    return na * nb;
+                }
+                return integer_utils::combinatorial(m_basis.m_nspinorb, m_elecs);
             }
         };
     }
@@ -287,6 +301,7 @@ namespace sys {
 
         struct Bosons : public OptionallyConserved<size_t> {
             Bosons(size_t v, bool conserve): OptionallyConserved<size_t>(v, conserve, "nboson"){}
+            Bosons(): OptionallyConserved<size_t>("nboson"){}
         };
 
         struct Sector {
@@ -339,9 +354,13 @@ namespace sys {
         Size size() const {
             return {m_frm.m_nsite, m_bos.m_nmode};
         }
+
+        operator bool() const {
+            return m_frm || m_bos;
+        }
     };
 
-    struct Quanta {
+    struct Particles {
         const frm::Electrons m_frm;
         const bos::Bosons m_bos;
     };
@@ -351,8 +370,10 @@ namespace sys {
         const bos::Sector m_bos;
 
         Sector(frm::Sector frm, bos::Sector bos): m_frm(std::move(frm)), m_bos(std::move(bos)){}
-        Sector(Basis basis, Quanta quanta):
-            Sector(frm::Sector(basis.m_frm, quanta.m_frm), bos::Sector(basis.m_bos, quanta.m_bos)){}
+        explicit Sector(frm::Sector frm): Sector(frm, bos::Sector({0ul}, {})){}
+        explicit Sector(bos::Sector bos): Sector(frm::Sector({0ul}, {0ul}), bos){}
+        Sector(Basis basis, Particles particles):
+            Sector(frm::Sector(basis.m_frm, particles.m_frm), bos::Sector(basis.m_bos, particles.m_bos)){}
 
         Basis basis() const {
             return {m_frm.m_basis, m_bos.m_basis};
@@ -360,6 +381,10 @@ namespace sys {
 
         Size size() const {
             return basis().size();
+        }
+
+        Particles particles() const {
+            return {m_frm.m_elecs, m_bos.m_bosons};
         }
     };
 }

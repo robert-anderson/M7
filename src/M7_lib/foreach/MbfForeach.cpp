@@ -4,8 +4,8 @@
 
 #include "MbfForeach.h"
 
-mbf_foreach::Base::Base(const HilbertSpace& hs, size_t niter) :
-    m_hs(hs), m_niter(niter), m_mbfs(m_hs) {}
+mbf_foreach::Base::Base(const sys::Sector& sector, size_t niter) :
+    m_sector(sector), m_niter(niter), m_mbfs(m_sector) {}
 
 void mbf_foreach::Base::loop(field::FrmOnv &mbf, const mbf_foreach::Base::function_t<field::FrmOnv> &fn) {
     frm_loop(mbf, fn);
@@ -37,56 +37,59 @@ void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::
 
 void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) { frmbos_loop(fn); }
 
-mbf_foreach::frm::Base::Base(const sys::frm::Basis& hs, size_t niter): mbf_foreach::Base({hs, {}}, niter) {}
+mbf_foreach::frm::Base::Base(const sys::frm::Sector& sector, size_t niter):
+    mbf_foreach::Base(sys::Sector(sector), niter) {}
 
-mbf_foreach::frm::General::General(const sys::frm::Basis& hs):
-        Base(hs, foreach_t::niter(hs.m_sites.m_nspinorb, hs.m_nelec)),
-        m_foreach(hs.m_sites.m_nspinorb, hs.m_nelec) {}
+mbf_foreach::frm::General::General(const sys::frm::Sector& sector):
+        Base(sector, foreach_t::niter(sector.m_basis.m_nspinorb, sector.m_elecs)),
+        m_foreach(sector.m_basis.m_nspinorb, sector.m_elecs) {}
 
 void mbf_foreach::frm::General::frm_loop(field::FrmOnv& mbf, const std::function<void(const field::FrmOnv &)> &fn) {
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::frm::Spins::Spins(const sys::frm::Basis& hs) :
-        Base(hs, foreach_t::niter(hs.m_sites, hs.m_nelec_alpha)),
-        m_foreach(hs.m_sites, hs.m_nelec_alpha){}
+mbf_foreach::frm::Spins::Spins(const sys::frm::Sector& sector) :
+        Base(sector, foreach_t::niter(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha)),
+        m_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha){}
 
 void mbf_foreach::frm::Spins::frm_loop(field::FrmOnv& mbf, const std::function<void(const field::FrmOnv &)> &fn) {
     loop_fn(mbf, fn);
 }
 
-size_t mbf_foreach::frm::Ms2Conserve::niter(const sys::frm::Basis& hs) {
-    auto na = foreach_t::niter(hs.m_sites, hs.m_nelec_alpha);
-    auto nb = foreach_t::niter(hs.m_sites, hs.m_nelec_beta);
-    return na * nb;
+size_t mbf_foreach::frm::Ms2Conserve::niter(const sys::frm::Sector& sector) {
+    return sector.size();
 }
 
-mbf_foreach::frm::Ms2Conserve::Ms2Conserve(const sys::frm::Basis& hs) :
-    Base(hs, niter(hs)),
-    m_alpha_foreach(hs.m_sites, hs.m_nelec_alpha), m_beta_foreach(hs.m_sites, hs.m_nelec_beta){}
+mbf_foreach::frm::Ms2Conserve::Ms2Conserve(const sys::frm::Sector& sector) :
+    Base(sector, niter(sector)),
+    m_alpha_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha),
+    m_beta_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nbeta){
+    REQUIRE_TRUE(sector.m_elecs.m_ms2.conserve(), "2*Ms must be conserved");
+}
 
 void mbf_foreach::frm::Ms2Conserve::frm_loop(field::FrmOnv& mbf, const std::function<void(const field::FrmOnv &)> &fn) {
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::bos::Base::Base(const BosHilbertSpace& hs, size_t niter) :
-    mbf_foreach::Base({{}, hs}, niter){}
+mbf_foreach::bos::Base::Base(const sys::bos::Sector& sector, size_t niter) :
+    mbf_foreach::Base(sys::Sector(sector), niter){}
 
-mbf_foreach::bos::GeneralClosed::GeneralClosed(const BosHilbertSpace& hs) :
-        Base(hs, foreach_t::niter(hs.m_nmode, hs.m_nboson)), m_foreach(hs.m_nmode, hs.m_nboson) {
-    REQUIRE_TRUE(hs.m_nboson_conserve, "Not a closed quantum system in the bosonic sector");
+mbf_foreach::bos::GeneralClosed::GeneralClosed(const sys::bos::Sector& sector) :
+        Base(sector, foreach_t::niter(sector.m_basis.m_nmode, sector.m_bosons)),
+        m_foreach(sector.m_basis.m_nmode, sector.m_bosons) {
+    REQUIRE_TRUE(sector.m_bosons.conserve(), "Not a closed quantum system in the bosonic sector");
 }
 
 void mbf_foreach::bos::GeneralClosed::bos_loop(field::BosOnv &mbf, const std::function<void(const field::BosOnv &)> &fn) {
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::bos::GeneralOpen::GeneralOpen(const BosHilbertSpace& hs):
-        Base(hs, foreach_t::niter(hs.m_nmode, hs.m_occ_cutoff + 1)),
-        m_foreach(hs.m_nmode, hs.m_occ_cutoff + 1) {}
+mbf_foreach::bos::GeneralOpen::GeneralOpen(const sys::bos::Sector& sector):
+        Base(sector, foreach_t::niter(sector.m_basis.m_nmode, sector.m_basis.m_occ_cutoff + 1)),
+        m_foreach(sector.m_basis.m_nmode, sector.m_basis.m_occ_cutoff + 1) {}
 
 void mbf_foreach::bos::GeneralOpen::bos_loop(field::BosOnv &mbf, const std::function<void(const field::BosOnv &)> &fn) {
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::frm_bos::Base::Base(const HilbertSpace& hs, size_t niter) : mbf_foreach::Base(hs, niter) {}
+mbf_foreach::frm_bos::Base::Base(const sys::Sector& sector, size_t niter) : mbf_foreach::Base(sector, niter) {}

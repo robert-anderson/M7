@@ -69,6 +69,8 @@ struct HamiltonianTerms {
          * if the scalar of the spin square operator is zero, just return the bare hamiltonian
          */
         if (j==0.0) return std::unique_ptr<FrmHam>(new ham_t(opts));
+        //TODO: pass basis / hilbert config section
+#if 0
         /*
          * build the bare hamiltonian and let a spin square hamiltonian instance be created by read-only access to the
          * bare hamiltonian
@@ -79,6 +81,7 @@ struct HamiltonianTerms {
          * now the sum can be cheaply created by moving these two components
          */
         return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinSquareFrmHam>(std::move(bare_ham), std::move(spin_ham), j));
+#endif
     }
 
     std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
@@ -222,7 +225,7 @@ public:
      * @return
      *  electron and boson number data
      */
-    sys::Quanta get_quanta(const fciqmc_config::Hamiltonian &opts) const {
+    sys::Particles get_quanta(const fciqmc_config::Hamiltonian &opts) const {
         // TODO: move config opts around
         sys::frm::Electrons elecs(0ul);
         sys::bos::Bosons bosons(0ul, true);

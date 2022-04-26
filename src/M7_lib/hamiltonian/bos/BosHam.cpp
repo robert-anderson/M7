@@ -6,8 +6,8 @@
 
 #include "BosHam.h"
 
-BosHam::BosHam(const BosHilbertSpace &hs) :
-        m_hs(hs), m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
+BosHam::BosHam(const sys::bos::Basis &basis) :
+        m_basis(basis), m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
 
 void BosHam::log_data() const {
     if (disabled()) return;

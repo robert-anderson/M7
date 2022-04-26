@@ -6,9 +6,9 @@
 
 #include <utility>
 
-FrmExcitGen::FrmExcitGen(const FrmHam &h, sys::frm::Sector sector, PRNG &prng, defs::inds exsigs, std::string description) :
+FrmExcitGen::FrmExcitGen(const FrmHam &h, sys::frm::Electrons elecs, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)),
-        m_h(h), m_sector(std::move(sector)){
+        m_h(h), m_sector(h.m_basis, std::move(elecs)){
     for (auto exsig: m_exsigs)
         REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
 }

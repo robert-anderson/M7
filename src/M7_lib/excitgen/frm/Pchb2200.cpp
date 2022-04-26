@@ -4,8 +4,9 @@
 
 #include "Pchb2200.h"
 
-Pchb2200::Pchb2200(const FrmHam &h, size_t nelec, PRNG &prng) :
-        FrmExcitGen(h, nelec, prng, {exsig_utils::ex_double}, "precomputed heat-bath fermion doubles"),
+Pchb2200::Pchb2200(const FrmHam &h, sys::frm::Electrons elecs, PRNG &prng):
+        FrmExcitGen(h, elecs, prng, {exsig_utils::ex_double}, "precomputed heat-bath fermion doubles"),
+        m_nspinorb_pair(m_sector.m_basis.m_nspinorb_pair),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
     std::vector<defs::prob_t> weights(m_nspinorb_pair, 0.0);
     size_t ij = 0ul;
@@ -39,7 +40,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
                           defs::ham_t &helem, conn::FrmOnv &conn) {
     DEBUG_ASSERT_EQ(exsig, exsig_utils::ex_double, "this excitation generator is only suitable for exsig 2200");
     size_t i, j, a, b;
-    size_t ij = m_prng.draw_uint(m_nelec_pair);
+    size_t ij = m_prng.draw_uint(m_sector.m_elecs.m_npair);
     integer_utils::inv_strigmap(j, i, ij);
     const auto &occs = src.m_decoded.m_simple_occs.get();
     // i and j are positions in the occ list, convert to orb inds:
@@ -66,7 +67,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     conn.m_ann.set(i, j);
     conn.m_cre.set(a, b);
     helem = m_h.get_element_2200(src, conn);
-    prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_nelec_pair);
+    prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * m_sector.m_elecs.m_npair);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
     if (consts::nearly_zero(prob, 1e-14)) {
         return false;
@@ -85,5 +86,5 @@ bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::pro
 }
 
 size_t Pchb2200::approx_nconn() const {
-    return m_nelec_pair * m_nspinorb_pair;
+    return m_sector.m_elecs.m_npair * m_nspinorb_pair;
 }
