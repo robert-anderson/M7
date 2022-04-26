@@ -15,7 +15,8 @@ protected:
     PRNG m_prng;
     ExcitGenGroup m_excit_gen_group;
     MagnitudeLogger m_mag_log;
-    const double &m_min_spawn_mag;
+    const double m_min_spawn_mag;
+    const double m_min_death_mag;
 
     template<typename T>
     static T phase(const T& weight) {
@@ -28,9 +29,9 @@ protected:
     }
 
 public:
-    StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
+    StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const Wavefunction& wf);
 
-    void diagonal(Wavefunction &m_wf, const size_t& ipart) override;
+    void diagonal(Wavefunction &wf, const size_t& ipart) override;
 
     template<typename T>
     size_t get_nattempt(const T &weight) {

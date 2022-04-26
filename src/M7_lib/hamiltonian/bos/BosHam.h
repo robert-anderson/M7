@@ -19,7 +19,7 @@ struct BosHam : HamOpTerm {
     /**
      * properties of the many-body basis
      */
-    const BosHilbertSpace m_hs;
+    const sys::bos::Basis m_basis;
 
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
@@ -32,7 +32,7 @@ struct BosHam : HamOpTerm {
         return true;
     }
 
-    BosHam(const BosHilbertSpace& hs);
+    BosHam(const sys::bos::Basis& basis);
 	virtual ~BosHam(){}
 
     virtual defs::ham_t get_coeff_0011(size_t i, size_t j) const {return 0;}
@@ -65,7 +65,7 @@ struct BosHam : HamOpTerm {
 };
 
 struct NullBosHam : BosHam {
-    NullBosHam() : BosHam({}){}
+    NullBosHam() : BosHam(sys::bos::Basis(0ul)){}
 
     bool enabled() const override {
         return false;

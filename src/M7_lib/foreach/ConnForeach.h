@@ -181,8 +181,8 @@ namespace conn_foreach {
                 for (const auto &occ: occs) {
                     conn.m_ann.clear();
                     conn.m_ann.add(occ);
-                    auto ispin_occ = src.m_sites.ispin(occ);
-                    auto isite_occ = src.m_sites.isite(occ);
+                    auto ispin_occ = src.m_basis.ispin(occ);
+                    auto isite_occ = src.m_basis.isite(occ);
                     auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
                     for (const auto &i: coordinated_sites) {
                         if (src.get({ispin_occ, i})) continue;
@@ -216,9 +216,9 @@ namespace conn_foreach {
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
                 const auto &occs = src.m_decoded.m_simple_occs.get();
                 for (const auto &occ: occs) {
-                    auto ispin_occ = src.m_sites.ispin(occ);
+                    auto ispin_occ = src.m_basis.ispin(occ);
                     if (ispin_occ) return; // all alpha bits have been dealt with
-                    auto isite_occ = src.m_sites.isite(occ);
+                    auto isite_occ = src.m_basis.isite(occ);
                     // cannot exchange if the site is doubly occupied:
                     if (src.get({!ispin_occ, isite_occ})) continue;
                     auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
@@ -265,7 +265,7 @@ namespace conn_foreach {
 
         struct Ann : Base {
             Ann(size_t nmode) : Base(exsig_utils::ex_0001, nmode) {}
-                Ann(const BosHilbertSpace& hs): Ann(hs.m_nmode){}
+                Ann(const sys::bos::Basis& basis): Ann(basis.m_nmode){}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
@@ -293,7 +293,7 @@ namespace conn_foreach {
             Cre(size_t nmode, size_t occ_cutoff) :
                     Base(exsig_utils::ex_0010, nmode), m_occ_cutoff(occ_cutoff) {}
 
-            Cre(const BosHilbertSpace& hs): Cre(hs.m_nmode, hs.m_occ_cutoff){}
+            Cre(const sys::bos::Basis& basis): Cre(basis.m_nmode, basis.m_occ_cutoff){}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {

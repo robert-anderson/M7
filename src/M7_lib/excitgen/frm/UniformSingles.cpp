@@ -12,7 +12,7 @@ bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, def
 }
 
 size_t UniformSingles::approx_nconn() const {
-    const auto& hs = m_h.m_hs;
+    const auto& hs = m_h.m_basis;
     if (hs.ms2_conserved()) {
         return hs.m_nelec_alpha * hs.m_nvac_alpha + hs.m_nelec_beta * hs.m_nvac_beta;
     } else {

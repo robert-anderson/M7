@@ -4,21 +4,21 @@
 
 #include "FrmOnvConnection.h"
 
-FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& sites):
-        m_ann(sites), m_cre(sites),
-        m_ndataword(integer_utils::divceil(sites.m_nspinorb, defs::nbit_word)),
+FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& size):
+        m_ann(size), m_cre(size),
+        m_ndataword(integer_utils::divceil(size.m_nspinorb, defs::nbit_word)),
         m_dataword_phases(m_ndataword){
     if (m_ndataword) m_dataword_phases[0] = false;
 }
 
-FrmOnvConnection::FrmOnvConnection(sys::Size extents) : FrmOnvConnection(extents.m_sites) {
-    extents.require_pure_frm();
+FrmOnvConnection::FrmOnvConnection(sys::Size size) : FrmOnvConnection(size.m_frm) {
+    size.require_pure_frm();
 }
 
-FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_hs.m_sites){}
+FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_basis){}
 
 void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
-    DEBUG_ASSERT_EQ(src.m_hs.m_sites, dst.m_hs.m_sites, "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");
     clear();
@@ -38,7 +38,7 @@ void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
 }
 
 bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, FrmOps &com) {
-    DEBUG_ASSERT_EQ(src.m_hs.m_sites, dst.m_hs.m_sites, "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
                     "common operator string capacity does not match that of excitation arrays");
     connect(src, dst);
@@ -85,7 +85,7 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
 
 
 void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
-    DEBUG_ASSERT_EQ(src.m_hs.m_sites, dst.m_hs.m_sites, "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");

@@ -6,8 +6,8 @@
 
 ExactPropagator::ExactPropagator(
         const Hamiltonian &ham, const fciqmc_config::Document &opts,
-        const NdFormat<defs::ndim_wf> &wf_fmt, bool only_nonzero_h_spawns) :
-        Propagator(opts, ham, wf_fmt), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
+        const Wavefunction& wf, bool only_nonzero_h_spawns) :
+        Propagator(opts, ham, wf), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
         m_conn_iters(ham),
         m_mag_log(opts.m_propagator.m_max_bloom, 0, 1, opts.m_propagator.m_static_tau, true,
                   opts.m_propagator.m_tau_min, opts.m_propagator.m_tau_max, 0.0, opts.m_propagator.m_period) {}

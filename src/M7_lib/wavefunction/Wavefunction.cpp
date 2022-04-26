@@ -5,7 +5,7 @@
 #include <M7_lib/basis/Suites.h>
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const fciqmc_config::Document &opts, HilbertSpace hs) :
+Wavefunction::Wavefunction(const fciqmc_config::Document &opts, const sys::Sector& sector) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
                 opts.m_propagator.m_nw_target,

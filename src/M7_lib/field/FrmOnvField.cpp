@@ -4,19 +4,23 @@
 
 #include "FrmOnvField.h"
 
-FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& hs, std::string name) :
-        base_t(row, {{2, hs.m_sites},{"spin channel", "site"}}, name),
-        m_hs(hs), m_sites(hs.m_sites), m_decoded(*this),
-        m_dsize_spin_channel(integer_utils::divceil(size_t(m_hs.m_sites), defs::nbit_word)),
-        m_nbit_in_last_alpha_dataword(m_hs.m_sites % defs::nbit_word){}
+FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, std::string name) :
+        base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name),
+        m_basis(basis), m_decoded(*this),
+        m_dsize_spin_channel(integer_utils::divceil(size_t(m_basis.m_nsite), defs::nbit_word)),
+        m_nbit_in_last_alpha_dataword(m_basis.m_nsite % defs::nbit_word){}
 
-FrmOnvField::FrmOnvField(Row *row, const HilbertSpace& hs, std::string name) :
-    FrmOnvField(row, hs.m_frm, name){
-    hs.require_pure_frm();
+FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, std::string name) :
+    FrmOnvField(row, basis.m_frm, std::move(name)){
+    basis.require_pure_frm();
+}
+
+FrmOnvField::FrmOnvField(Row *row, const sys::Sector& sector, std::string name) :
+    FrmOnvField(row, sector.basis(), name){
 }
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
-        base_t(other), m_hs(other.m_hs), m_sites(m_hs.m_sites), m_decoded(*this),
+        base_t(other), m_basis(other.m_basis), m_decoded(*this),
         m_dsize_spin_channel(other.m_dsize_spin_channel),
         m_nbit_in_last_alpha_dataword(other.m_nbit_in_last_alpha_dataword){}
 
@@ -24,7 +28,7 @@ FrmOnvField &FrmOnvField::operator=(std::pair<const defs::inds &, const defs::in
     // prezero the element
     zero();
     for (const auto &ind: setbits.first) set(ind);
-    for (const auto &ind: setbits.second) set(ind+m_hs.m_sites);
+    for (const auto &ind: setbits.second) set(ind+m_basis.m_nsite);
     return *this;
 }
 
@@ -42,7 +46,7 @@ int FrmOnvField::ms2() const {
         while (work) {
             size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
             if (ibit >= nbit()) return ms2;
-            ms2 += m_hs.m_sites.ms2(ibit);
+            ms2 += m_basis.ms2(ibit);
         }
     }
     return ms2;
@@ -56,7 +60,7 @@ int FrmOnvField::nalpha() const {
         work = get_dataword(idataword);
         while (work) {
             size_t ibit = idataword * base_t::nbit_dword() + bit_utils::next_setbit(work);
-            if (m_hs.m_sites.ispin(ibit)) return nalpha;
+            if (m_basis.ispin(ibit)) return nalpha;
             nalpha++;
         }
     }
@@ -68,7 +72,7 @@ size_t FrmOnvField::site_nocc(const size_t &isite) const {
 }
 
 bool FrmOnvField::all_sites_single_occ() const {
-    for (size_t isite = 0ul; isite<m_hs.m_sites; ++isite) if (site_nocc(isite)!=1ul) return false;
+    for (size_t isite = 0ul; isite<m_basis.m_nsite; ++isite) if (site_nocc(isite)!=1ul) return false;
     return true;
 }
 
@@ -77,7 +81,7 @@ std::string FrmOnvField::to_string() const {
     res += "(";
     res.reserve(nbit() + 3);
     size_t i = 0ul;
-    for (; i < m_hs.m_sites; ++i)
+    for (; i < m_basis.m_nsite; ++i)
         res += get(i) ? "1" : "0";
     res += ","; // spin channel delimiter
     for (; i < nbit(); ++i)
@@ -102,10 +106,10 @@ void FrmOnvField::set(const defs::inds &setbits_alpha, const defs::inds &setbits
 }
 
 void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
-    DEBUG_ASSERT_LE(alpha_sites.size(), m_sites, "can't have more spins than sites");
+    DEBUG_ASSERT_LE(alpha_sites.size(), m_basis.m_nsite, "can't have more spins than sites");
     zero();
     auto it = alpha_sites.cbegin();
-    for (size_t isite=0ul; isite<m_hs.m_sites; ++isite){
+    for (size_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         if (it==alpha_sites.cend() || *it>isite) set({1, isite});
         else {
             set({0, isite});
@@ -115,8 +119,8 @@ void FrmOnvField::set_spins(const defs::inds &alpha_sites) {
 }
 
 void FrmOnvField::put_spin_channel(const size_t &ispin, bool set) {
-    auto ibegin = m_hs.m_sites.ispinorb(ispin, 0);
-    put_range(ibegin, ibegin+m_hs.m_sites, set);
+    auto ibegin = m_basis.ispinorb(ispin, 0);
+    put_range(ibegin, ibegin+m_basis.m_nsite, set);
 }
 
 void FrmOnvField::clr(const size_t &bit_offset, const defs::inds &clrbits) {

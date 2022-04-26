@@ -6,7 +6,9 @@
 
 #include <utility>
 
-sys::frm::Size::Size(size_t nsite) : m_nsite(nsite), m_nspinorb(2 * nsite){}
+
+#if 0
+//sys::frm::Size::Size(size_t nsite)
 
 size_t sys::frm::Size::ncoeff_ind(bool restricted_orbs) const {
     return restricted_orbs ? m_nspinorb : m_nsite;
@@ -131,3 +133,5 @@ void HilbertSpace::require_pure_bos() const {
 HilbertSpace::operator bool() const {
     return m_frm || m_bos;
 }
+
+#endif

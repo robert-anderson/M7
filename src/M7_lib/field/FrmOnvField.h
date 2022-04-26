@@ -19,8 +19,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::operator=;
     using base_t::inds_t;
 
-    const sys::frm::Basis m_hs;
-    const sys::frm::Size m_sites;
+    const sys::frm::Basis m_basis;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
@@ -38,8 +37,16 @@ private:
 
 public:
 
-    FrmOnvField(Row* row, const sys::frm::Basis& hs, std::string name="");
-    FrmOnvField(Row* row, const HilbertSpace& hs, std::string name="");
+    FrmOnvField(Row* row, const sys::frm::Basis& basis, std::string name="");
+    /*
+     * all ONVs implement the following ctor
+     */
+    FrmOnvField(Row* row, const sys::Basis& basis, std::string name="");
+    /*
+     * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
+     * a common interface is realised by implementing a ctor of the following form in all MBFs
+     */
+    FrmOnvField(Row* row, const sys::Sector& sector, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {

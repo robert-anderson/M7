@@ -11,16 +11,9 @@
 struct FrmExcitGen : ExcitGen {
 
     const FrmHam &m_h;
-    /**
-     * number of pairs of electrons in the system (FrmHam conserves fermion number)
-     */
-    const size_t m_nelec_pair;
-    /**
-     * number of pairs of fermionic degrees of freedom in the system
-     */
-    const size_t m_nspinorb_pair;
+    const sys::frm::Sector m_sector;
 
-    FrmExcitGen(const FrmHam &h, PRNG &prng, defs::inds exsigs, std::string description);
+    FrmExcitGen(const FrmHam &h, sys::frm::Sector sector, PRNG &prng, defs::inds exsigs, std::string description);
 
     bool draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
                      defs::prob_t &prob, conn::FrmBosOnv &conn) override;

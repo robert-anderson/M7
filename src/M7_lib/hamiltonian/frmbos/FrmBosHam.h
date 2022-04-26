@@ -20,7 +20,7 @@
  */
 struct FrmBosHam : HamOpTerm {
 
-    const HilbertSpace m_hs;
+    const sys::Basis m_basis;
 
     ham_data::TermContribs m_contribs_0010;
     ham_data::TermContribs m_contribs_0001;
@@ -28,14 +28,14 @@ struct FrmBosHam : HamOpTerm {
     ham_data::TermContribs m_contribs_1101;
 
     /**
-     * @param hs
-     *  Hilbert space specification determined by the information available to the derived class ctors.
+     * @param basis
+     *  Single-particle basis specification determined by the information available to the derived class ctors.
      * @param frm
      *  fermionic part of H, from which the fermionic Hilbert space attributes are copied
      * @param bos
      *  bosonic part of H, from which the bosonic Hilbert space attributes are copied
      */
-    FrmBosHam(const HilbertSpace& hs, const FrmHam& frm, const BosHam& bos);
+    FrmBosHam(const sys::Basis& basis, const FrmHam& frm, const BosHam& bos);
     /*
      * all Hilbert space info is taken directly from the FrmHam and BosHam
      */
@@ -82,7 +82,7 @@ struct FrmBosHam : HamOpTerm {
 };
 
 struct NullLadderHam: FrmBosHam {
-    NullLadderHam() : FrmBosHam({}, NullFrmHam(), NullBosHam()){}
+    NullLadderHam() : FrmBosHam(sys::Basis({0ul}, {0ul}), NullFrmHam(), NullBosHam()){}
 
     bool enabled() const override {
         return false;

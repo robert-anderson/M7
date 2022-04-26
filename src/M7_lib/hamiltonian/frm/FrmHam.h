@@ -47,7 +47,7 @@ struct FrmHam : HamOpTerm {
     /**
      * properties of the many-body basis
      */
-    const sys::frm::Basis m_hs;
+    const sys::frm::Basis m_basis;
     /**
      * core energy
      */
@@ -77,9 +77,9 @@ struct FrmHam : HamOpTerm {
      */
     bool m_complex_valued = false;
 
-    FrmHam(const sys::frm::Basis& hs);
+    FrmHam(const sys::frm::Basis& basis);
 
-    FrmHam(const FrmHam& other): FrmHam(other.m_hs){}
+    FrmHam(const FrmHam& other): FrmHam(other.m_basis){}
 
     FrmHam& operator=(const FrmHam& other){return *this;}
 
@@ -155,7 +155,7 @@ struct FrmHam : HamOpTerm {
 };
 
 struct NullFrmHam : FrmHam {
-    NullFrmHam() : FrmHam({}){}
+    NullFrmHam() : FrmHam(sys::frm::Basis(0ul)){}
 
     bool enabled() const override {
         return false;

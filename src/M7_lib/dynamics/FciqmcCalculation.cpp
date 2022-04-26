@@ -9,9 +9,9 @@
 #include "Propagators.h"
 
 FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
-        m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.m_hs),
+        m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.get_sector(opts.m_hamiltonian)),
         m_prop(props::get(m_ham, opts, m_wf.m_format)) {
-    buffered::Mbf ref_mbf(m_ham.m_hs);
+    buffered::Mbf ref_mbf(m_ham.m_basis);
 
     mbf::set(ref_mbf, opts.m_reference.m_mbf_init, 0ul);
 

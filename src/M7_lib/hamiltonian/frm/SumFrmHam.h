@@ -30,7 +30,7 @@ private:
      * make combined Basis of components
      */
     static sys::frm::Basis hs(const FrmHam& h1, const FrmHam& h2) {
-        return sys::frm::Basis(h1.m_hs, h2.m_hs);
+        return sys::frm::Basis(h1.m_basis, h2.m_basis);
     }
 public:
 

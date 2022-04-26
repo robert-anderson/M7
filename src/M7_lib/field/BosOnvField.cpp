@@ -4,15 +4,18 @@
 
 #include "BosOnvField.h"
 
-BosOnvField::BosOnvField(Row *row, const BosHilbertSpace& hs, std::string name) :
-        base_t(row, {{hs.m_nmode}, {"boson mode occupations"}}, name),
-        m_hs(hs), m_decoded(*this) {
+#include <utility>
+
+BosOnvField::BosOnvField(Row *row, const sys::bos::Basis& basis, std::string name) :
+        base_t(row, {{basis.m_nmode}, {"boson mode occupations"}}, std::move(name)),
+        m_basis(basis), m_decoded(*this) {
 }
 
-BosOnvField::BosOnvField(Row *row, const HilbertSpace& hs, std::string name) :
-    BosOnvField(row, hs.m_bos, name) {
-    hs.require_pure_bos();
+BosOnvField::BosOnvField(Row *row, const sys::Basis &basis, std::string name) : BosOnvField(row, basis.m_bos, name) {
+    basis.require_pure_bos();
 }
+
+BosOnvField::BosOnvField(Row *row, const sys::Sector &hs, std::string name) : BosOnvField(row, hs.basis(), name){}
 
 BosOnvField::BosOnvField(const BosOnvField &other) :
     base_t(other), m_hs(other.m_hs), m_decoded(*this) {}

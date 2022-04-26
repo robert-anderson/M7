@@ -8,8 +8,8 @@
 #include "FrmExcitGen.h"
 
 struct UniformSingles : FrmExcitGen {
-    UniformSingles(const FrmHam &h, PRNG &prng):
-            FrmExcitGen(h, prng, {exsig_utils::ex_single}, "uniform"){}
+    UniformSingles(const FrmHam &h, size_t nelec, PRNG &prng):
+            FrmExcitGen(h, nelec, prng, {exsig_utils::ex_single}, "uniform"){}
 
     bool draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) override;
 

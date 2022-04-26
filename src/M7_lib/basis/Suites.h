@@ -20,12 +20,12 @@ namespace suite {
         field::FrmOnv m_frm;
         field::FrmBosOnv m_frmbos;
         field::BosOnv m_bos;
-        MbfsRow(const HilbertSpace& hs);
+        MbfsRow(const sys::Sector& sector);
     };
 
     struct Mbfs : BufferedTable<MbfsRow>{
 
-        Mbfs(const HilbertSpace& hs);
+        Mbfs(const sys::Sector& sector);
 
         field::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_row.m_frm;
@@ -42,8 +42,7 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        explicit Conns(const sys::Size& extents);
-        explicit Conns(const HilbertSpace& hs);
+        explicit Conns(const sys::Size& size);
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
@@ -60,8 +59,7 @@ namespace suite {
         com_ops::Frm m_frm;
         com_ops::FrmBos m_frmbos;
         com_ops::Bos m_bos;
-        ComOps(const sys::Size& extents);
-        ComOps(const HilbertSpace& hs);
+        ComOps(const sys::Size& size);
 
         com_ops::Frm& operator[](const field::FrmOnv& mbf){
             return m_frm;

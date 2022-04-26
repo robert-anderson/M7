@@ -19,10 +19,17 @@ struct FrmBosOnvField : CompositeField<FrmOnvField, BosOnvField> {
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
     mutable decoded_mbf::FrmBosOnv m_decoded;
-    FrmBosOnvField(Row* row, HilbertSpace hs, std::string name="");
 
-    FrmBosOnvField(Row* row, const sys::frm::Basis& frm_hs, const BosHilbertSpace& bos_hs, std::string name=""):
-        FrmBosOnvField(row, HilbertSpace(frm_hs, bos_hs), name){}
+    FrmBosOnvField(Row* row, const sys::frm::Basis& frm_basis, const sys::bos::Basis& bos_basis, std::string name="");
+    /*
+     * all ONVs implement the following ctor
+     */
+    FrmBosOnvField(Row* row, const sys::Basis& basis, std::string name="");
+    /*
+     * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
+     * a common interface is realised by implementing a ctor of the following form in all MBFs
+     */
+    FrmBosOnvField(Row* row, const sys::Sector& sector, std::string name="");
 
     FrmBosOnvField(const FrmBosOnvField& other);
 

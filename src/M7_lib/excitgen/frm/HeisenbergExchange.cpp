@@ -4,8 +4,8 @@
 
 #include "HeisenbergExchange.h"
 
-HeisenbergExchange::HeisenbergExchange(const FrmHam &h, PRNG &prng) :
-        FrmExcitGen(h, prng, {exsig_utils::ex_double}, "lattice local exchange"){
+HeisenbergExchange::HeisenbergExchange(const FrmHam &h, size_t nelec, PRNG &prng) :
+        FrmExcitGen(h, nelec, prng, {exsig_utils::ex_double}, "lattice local exchange"){
     REQUIRE_TRUE(h.is<HeisenbergFrmHam>(), "given hamiltonian is not of HeisenbergFrmHam type");
 }
 
@@ -19,8 +19,8 @@ bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
      * remainder will provide an unbiased index - saving a PRNG call
      */
     const auto& nconn_product = lattice.m_unique_nconn_product;
-    const auto rand = m_prng.draw_uint(m_h.m_hs.m_sites*nconn_product);
-    const auto isite = m_h.m_hs.m_sites.isite(rand / nconn_product);
+    const auto rand = m_prng.draw_uint(m_h.m_basis.m_nsite*nconn_product);
+    const auto isite = m_h.m_basis.isite(rand / nconn_product);
     const auto ispin = src.get({1, isite});
     const auto& row = lattice.m_sparse[isite];
     const auto nvac = row.first.size();
@@ -29,12 +29,12 @@ bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
     if (jspin == ispin) return false; // no exchange
     DEBUG_ASSERT_NE(src.get({0, isite}), src.get({0, jsite}), "sites do not have opposite spins");
     // numerator of 2 since the exchange can be drawn in two ways
-    prob = 2.0 / double (m_h.m_hs.m_sites * nvac);
+    prob = 2.0 / double (m_h.m_basis.m_nsite * nvac);
     //    <i  j  |  a  b>
-    const auto i = m_h.m_hs.m_sites.ispinorb(ispin, isite);
-    const auto j = m_h.m_hs.m_sites.ispinorb(jspin, jsite);
-    const auto a = m_h.m_hs.m_sites.ispinorb(ispin, jsite);
-    const auto b = m_h.m_hs.m_sites.ispinorb(jspin, isite);
+    const auto i = m_h.m_basis.ispinorb(ispin, isite);
+    const auto j = m_h.m_basis.ispinorb(jspin, jsite);
+    const auto a = m_h.m_basis.ispinorb(ispin, jsite);
+    const auto b = m_h.m_basis.ispinorb(jspin, isite);
     conn.m_ann.set_in_order(i, j);
     conn.m_cre.set_in_order(a, b);
     return true;

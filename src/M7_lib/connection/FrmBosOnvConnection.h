@@ -15,7 +15,7 @@ struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;
     BosOnvConnection m_bos;
 
-    explicit FrmBosOnvConnection(sys::Size extents);
+    explicit FrmBosOnvConnection(sys::Size size);
 
     explicit FrmBosOnvConnection(const FrmBosOnvField& mbf);
 

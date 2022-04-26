@@ -35,7 +35,7 @@ struct InteractingBoseGasBosHam : BosHam {
     defs::ham_t get_element_0000(const field::BosOnv &onv) const override {
         // total linear momentum
         defs::ham_t tot = 0.0;
-        for (size_t imode=0ul; imode<m_hs.m_nmode; ++imode){
+        for (size_t imode=0ul; imode<m_basis.m_nmode; ++imode){
             if (!onv[imode]) continue;
             tot+=m_planewaves.kinetic_energy(imode)*onv[imode];
             //tot+=0.5*onv[imode]*(onv[imode]-1);

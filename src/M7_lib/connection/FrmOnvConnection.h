@@ -172,12 +172,12 @@ private:
     mutable std::vector<bool> m_dataword_phases;
 public:
 
-    explicit FrmOnvConnection(const sys::frm::Size& sites);
+    explicit FrmOnvConnection(const sys::frm::Size& size);
 
     /*
      * universal interface (works with any compile-time value "MBF_TYPE")
      */
-    explicit FrmOnvConnection(sys::Size extents);
+    explicit FrmOnvConnection(sys::Size size);
 
     explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**

@@ -129,13 +129,14 @@ namespace buffered {
 
     struct FrmOnv : BufferedField<field::FrmOnv> {
         using field::FrmOnv::operator=;
-        FrmOnv(const sys::frm::Basis& hs) : BufferedField<field::FrmOnv>(hs){}
-        FrmOnv(const HilbertSpace& hs) : FrmOnv(hs.m_frm){}
+        FrmOnv(const sys::frm::Basis& basis) : BufferedField<field::FrmOnv>(basis){}
+        FrmOnv(const sys::Basis& basis) : BufferedField<field::FrmOnv>(basis){}
+        FrmOnv(const sys::Sector& sector) : BufferedField<field::FrmOnv>(sector){}
 
-        FrmOnv(const FrmOnv& other) : FrmOnv(other.m_hs){
+        FrmOnv(const FrmOnv& other) : FrmOnv(other.m_basis){
             *this = other;
         }
-        FrmOnv(const field::FrmOnv& other) : FrmOnv(other.m_hs){
+        FrmOnv(const field::FrmOnv& other) : FrmOnv(other.m_basis){
             *this = other;
         }
         FrmOnv& operator=(const FrmOnv& field){
@@ -147,12 +148,14 @@ namespace buffered {
     struct BosOnv : BufferedField<field::BosOnv> {
         using field::BosOnv::operator=;
         using field::BosOnv::operator==;
-        BosOnv(const BosHilbertSpace& hs) : BufferedField<field::BosOnv>(hs){}
-        BosOnv(const HilbertSpace& hs) : BufferedField<field::BosOnv>(hs){}
-        BosOnv(const BosOnv& other) : BosOnv(other.m_hs){
+        BosOnv(const sys::bos::Basis& basis) : BufferedField<field::BosOnv>(basis){}
+        BosOnv(const sys::Basis& basis) : BufferedField<field::BosOnv>(basis){}
+        BosOnv(const sys::Sector& sector) : BufferedField<field::BosOnv>(sector){}
+
+        BosOnv(const BosOnv& other) : BosOnv(other.m_basis){
             *this = other;
         }
-        BosOnv(const field::BosOnv& other) : BosOnv(other.m_hs){
+        BosOnv(const field::BosOnv& other) : BosOnv(other.m_basis){
             *this = other;
         }
         BosOnv& operator=(const BosOnv& field){
@@ -163,10 +166,12 @@ namespace buffered {
 
     struct FrmBosOnv : BufferedField<field::FrmBosOnv> {
         using field::FrmBosOnv::operator=;
-        FrmBosOnv(const HilbertSpace& hs): BufferedField<field::FrmBosOnv>(hs){}
-        FrmBosOnv(const sys::frm::Basis& frm_hs, const BosHilbertSpace& bos_hs):
-            BufferedField<field::FrmBosOnv>(frm_hs, bos_hs){}
-        FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv(other.m_frm.m_hs, other.m_bos.m_hs){
+        FrmBosOnv(const sys::frm::Basis& frm_basis, const sys::bos::Basis& bos_basis):
+            BufferedField<field::FrmBosOnv>(frm_basis, bos_basis){}
+        FrmBosOnv(const sys::Basis& basis): BufferedField<field::FrmBosOnv>(basis){}
+        FrmBosOnv(const sys::Sector& sector): BufferedField<field::FrmBosOnv>(sector){}
+
+        FrmBosOnv(const field::FrmBosOnv& other): FrmBosOnv(other.m_frm.m_basis, other.m_bos.m_basis){
             *this = other;
         }
         FrmBosOnv(const FrmBosOnv& other): FrmBosOnv(static_cast<const field::FrmBosOnv&>(other)){}
@@ -178,9 +183,11 @@ namespace buffered {
 
     struct FrmXonv : BufferedField<field::FrmXonv> {
         using field::FrmXonv::operator=;
-        FrmXonv(const sys::frm::Basis& hs): BufferedField<field::FrmXonv>(hs){}
-        FrmXonv(const HilbertSpace& hs): FrmXonv(hs.m_frm){}
-        FrmXonv(const field::FrmXonv& other): FrmXonv(other.m_ket.m_hs){
+        FrmXonv(const sys::frm::Basis& basis): BufferedField<field::FrmXonv>(basis){}
+        FrmXonv(const sys::Basis& basis): BufferedField<field::FrmXonv>(basis){}
+        FrmXonv(const sys::Sector& sector): BufferedField<field::FrmXonv>(sector){}
+
+        FrmXonv(const field::FrmXonv& other): FrmXonv(other.m_ket.m_basis){
             *this = other;
         }
         FrmXonv(const FrmXonv& other): FrmXonv(static_cast<const field::FrmXonv&>(other)){}
@@ -192,9 +199,11 @@ namespace buffered {
 
     struct BosXonv : BufferedField<field::BosXonv> {
         using field::BosXonv::operator=;
-        BosXonv(const BosHilbertSpace& hs): BufferedField<field::BosXonv>(hs){}
-        BosXonv(const HilbertSpace& hs): BosXonv(hs.m_bos){}
-        BosXonv(const field::BosXonv& other): BosXonv(other.m_ket.m_hs){
+        BosXonv(const sys::bos::Basis& basis): BufferedField<field::BosXonv>(basis){}
+        BosXonv(const sys::Basis& basis): BufferedField<field::BosXonv>(basis){}
+        BosXonv(const sys::Sector& sector): BufferedField<field::BosXonv>(sector){}
+
+        BosXonv(const field::BosXonv& other): BosXonv(other.m_ket.m_basis){
             *this = other;
         }
         BosXonv(const BosXonv& other): BosXonv(static_cast<const field::BosXonv&>(other)){}
@@ -207,8 +216,12 @@ namespace buffered {
 
     struct FrmBosXonv : BufferedField<field::FrmBosXonv> {
         using field::FrmBosXonv::operator=;
-        FrmBosXonv(const HilbertSpace& hs): BufferedField<field::FrmBosXonv>(hs){}
-        FrmBosXonv(const field::FrmBosXonv& other): FrmBosXonv({other.m_ket.m_frm.m_hs, other.m_ket.m_bos.m_hs}){
+        FrmBosXonv(const sys::frm::Basis& frm_basis, const sys::bos::Basis& bos_basis):
+                BufferedField<field::FrmBosXonv>(frm_basis, bos_basis){}
+        FrmBosXonv(const sys::Basis& basis): BufferedField<field::FrmBosXonv>(basis){}
+        FrmBosXonv(const sys::Sector& sector): BufferedField<field::FrmBosXonv>(sector){}
+
+        FrmBosXonv(const field::FrmBosXonv& other): FrmBosXonv(other.m_ket.m_frm.m_basis, other.m_ket.m_bos.m_basis){
             *this = other;
         }
         FrmBosXonv(const FrmBosXonv& other): FrmBosXonv(static_cast<const field::FrmBosXonv&>(other)){}

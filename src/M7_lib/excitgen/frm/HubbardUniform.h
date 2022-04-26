@@ -10,7 +10,7 @@
 
 struct HubbardUniform : FrmExcitGen {
 
-    HubbardUniform(const FrmHam& h, PRNG& prng);
+    HubbardUniform(const FrmHam& h, size_t nelec, PRNG& prng);
 
     virtual ~HubbardUniform(){}
 

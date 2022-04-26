@@ -13,17 +13,24 @@
 struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
     typedef NdNumberField<defs::bos_occ_t, 1> base_t;
     /**
-     * alias for the number of elements in the 1D numeric array
+     * single-particle basis data is all the system-related data that this class needs to retain
      */
-    const BosHilbertSpace m_hs;
+    const sys::bos::Basis m_basis;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
     mutable decoded_mbf::BosOnv m_decoded;
 
-    BosOnvField(Row *row, const BosHilbertSpace& hs, std::string name = "");
-
-    BosOnvField(Row *row, const HilbertSpace& hs, std::string name = "");
+    BosOnvField(Row *row, const sys::bos::Basis& basis, std::string name = "");
+    /*
+     * all ONVs implement the following ctor
+     */
+    BosOnvField(Row* row, const sys::Basis& basis, std::string name="");
+    /*
+     * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
+     * a common interface is realised by implementing a ctor of the following form in all MBFs
+     */
+    BosOnvField(Row *row, const sys::Sector& hs, std::string name = "");
 
     BosOnvField(const BosOnvField &other);
 

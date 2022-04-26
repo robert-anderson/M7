@@ -4,10 +4,11 @@
 
 #include "FrmExcitGen.h"
 
-FrmExcitGen::FrmExcitGen(const FrmHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
+#include <utility>
+
+FrmExcitGen::FrmExcitGen(const FrmHam &h, sys::frm::Sector sector, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)),
-        m_h(h), m_nelec_pair(integer_utils::nspair(h.m_hs.m_nelec)),
-        m_nspinorb_pair(integer_utils::nspair(h.m_hs.m_sites.m_nspinorb)) {
+        m_h(h), m_sector(std::move(sector)){
     for (auto exsig: m_exsigs)
         REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
 }

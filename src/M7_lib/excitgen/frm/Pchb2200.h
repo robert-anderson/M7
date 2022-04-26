@@ -14,7 +14,7 @@ private:
     Aliaser m_pick_ab_given_ij;
 
 public:
-    Pchb2200(const FrmHam &h, PRNG &prng);
+    Pchb2200(const FrmHam &h, size_t nelec, PRNG &prng);
 
     bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
                     defs::ham_t &helem, conn::FrmOnv &conn) override;

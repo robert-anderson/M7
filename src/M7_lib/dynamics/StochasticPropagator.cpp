@@ -5,8 +5,8 @@
 #include "StochasticPropagator.h"
 
 StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
-                                           const NdFormat<defs::ndim_wf> &wf_fmt) :
-        Propagator(opts, ham, wf_fmt), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
+                                           const Wavefunction &wf) :
+        Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gen_group(ham, opts.m_propagator, m_prng),
         m_mag_log(opts.m_propagator.m_max_bloom,
                   opts.m_propagator.m_ndraw_min_for_dynamic,
@@ -17,7 +17,8 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_
                   opts.m_propagator.m_tau_max,
                   opts.m_propagator.m_min_exlvl_prob,
                   opts.m_propagator.m_period),
-        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {}
+        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag),
+        m_min_death_mag(opts.m_propagator.m_min_death_mag){}
 
 
 void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
@@ -67,8 +68,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than
          * the minimum magnitude, otherwise it is stochastically rounded with respect to that magnitude
          */
-        auto thresh_delta = m_prng.stochastic_threshold(
-                delta, m_opts.m_propagator.m_min_spawn_mag, prob_thresh_accept);
+        auto thresh_delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag, prob_thresh_accept);
         if (thresh_delta==0.0) continue;
 
         if (wf.recv().m_row.m_send_parents) {
@@ -118,13 +118,12 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift[ipart]) * tau();
         if (death_rate == 0.0) return;
-        if (death_rate < 0.0 || death_rate > 1.0 || m_opts.m_propagator.m_min_spawn_mag == 0.0) {
+        if (death_rate < 0.0 || death_rate > 1.0 || m_min_spawn_mag == 0.0) {
             // clone / create antiwalkers continuously
             wf.scale_weight(ipart, 1 - death_rate);
         } else {
             // kill stochastically
-            wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate),
-                                                         m_opts.m_propagator.m_min_death_mag));
+            wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_min_death_mag));
         }
     }
 }

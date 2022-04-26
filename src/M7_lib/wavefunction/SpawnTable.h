@@ -18,7 +18,7 @@ struct SpawnTableRow : public Row {
     field::Flag m_src_deterministic;
     field::Number<uint8_t> m_ipart_dst;
 
-    SpawnTableRow(HilbertSpace hs, bool send_parents);
+    SpawnTableRow(const sys::Sector& sector, bool send_parents);
 };
 
 #endif //M7_SPAWNTABLE_H

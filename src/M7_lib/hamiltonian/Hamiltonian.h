@@ -93,10 +93,10 @@ struct HamiltonianTerms {
 
     std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts){
         if (opts.m_num_op_weight) {
-            const size_t nsite = m_frm->m_hs.m_sites;
-            const BosHilbertSpace hs(opts.m_nboson, nsite, true, opts.m_bos_occ_cutoff);
+            const size_t nsite = m_frm->m_basis.m_nsite;
+            const sys::bos::Basis basis(nsite, opts.m_bos_occ_cutoff);
             const auto omega = opts.m_num_op_weight.get();
-            return std::unique_ptr<BosHam>(new NumOpBosHam(hs, omega));
+            return std::unique_ptr<BosHam>(new NumOpBosHam(basis, omega));
         }
         else if (opts.m_interacting_bose_gas.enabled())
             return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
@@ -133,13 +133,13 @@ public:
     /*
      * term ptrs are always dereferencable, so they are exposed as public const refs to the term base classes:
      */
-    const FrmHam& m_frm;
-    const BosHam& m_bos;
-    const FrmBosHam& m_frmbos;
+    const FrmHam &m_frm;
+    const BosHam &m_bos;
+    const FrmBosHam &m_frmbos;
     /**
-     * specifies number of fermion sites and boson modes along with other attributes defining the single-particle basis
+     * properties of the single-particle basis
      */
-    const HilbertSpace m_hs;
+    const sys::Basis m_basis;
 
 private:
     mutable suite::Conns m_work_conn;
@@ -206,12 +206,32 @@ public:
      */
     template<typename mbf_t>
     defs::ham_t get_element(const mbf_t &src, const mbf_t &dst) const {
-        auto& conn = m_work_conn[src];
+        auto &conn = m_work_conn[src];
         conn.connect(src, dst);
         return get_element(src, conn);
     }
 
     bool complex_valued() const;
+
+    /**
+     * due the FCIDUMP format and default definitions of model Hamiltoniansm, the number of particles in the system and
+     * their constraints are determined partly by this class, and partly by the user in the configuration document, this
+     * function decides those parameters and raises errors when faced with any inconsistencies.
+     * @param opts
+     *  configuration document section
+     * @return
+     *  electron and boson number data
+     */
+    sys::Quanta get_quanta(const fciqmc_config::Hamiltonian &opts) const {
+        // TODO: move config opts around
+        sys::frm::Electrons elecs(0ul);
+        sys::bos::Bosons bosons(0ul, true);
+        return {elecs, bosons};
+    }
+
+    sys::Sector get_sector(const fciqmc_config::Hamiltonian &opts) const {
+        return {m_basis, get_quanta(opts)};
+    }
 };
 
 #endif //M7_HAMILTONIAN_H
