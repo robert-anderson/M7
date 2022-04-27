@@ -1,5 +1,5 @@
 //
-// Created by RJA on 26/10/2020.
+// Created by Robert J. Anderson on 26/10/2020.
 //
 
 #include "Buffer.h"

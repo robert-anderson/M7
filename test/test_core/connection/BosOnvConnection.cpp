@@ -1,5 +1,5 @@
 //
-// Created by RJA on 24/09/2020.
+// Created by Robert J. Anderson on 24/09/2020.
 //
 
 #include <M7_lib/foreach/ForeachVirtual.h>

@@ -1,5 +1,5 @@
 //
-// Created by RJA on 20/11/2020.
+// Created by Robert J. Anderson on 20/11/2020.
 //
 
 #ifndef M7_UNIFORMSINGLES_H
