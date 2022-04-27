@@ -12,7 +12,7 @@
 
 #ifdef ENABLE_BOSONS
 TEST(ExactPropagator, BosonTest) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_wavefunction.m_nw_init = 100;
@@ -53,7 +53,7 @@ TEST(ExactPropagator, BosonTest) {
 #else
 
 TEST(ExactPropagator, DeterministicSubspace) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.05;
@@ -82,7 +82,7 @@ TEST(ExactPropagator, DeterministicSubspace) {
 
 
 TEST(ExactPropagator, Test) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nroot = 3;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
@@ -134,7 +134,7 @@ TEST(ExactPropagator, Test) {
 }
 
 TEST(ExactPropagator, RdmTest) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.05;
@@ -163,7 +163,7 @@ TEST(ExactPropagator, RdmTest) {
 
 
 TEST(ExactPropagator, Hubbard) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.01;
@@ -202,7 +202,7 @@ TEST(ExactPropagator, Hubbard) {
 }
 
 TEST(ExactPropagator, Cr2Test) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_reference.m_redef_thresh = 2.0;
     opts.m_propagator.m_nadd = 0.0;

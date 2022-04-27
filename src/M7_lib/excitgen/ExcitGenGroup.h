@@ -44,7 +44,7 @@ class ExcitGenGroup {
     void update_cumprobs();
 
 public:
-    ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng);
+    ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng);
 
     size_t ncase() const;
 

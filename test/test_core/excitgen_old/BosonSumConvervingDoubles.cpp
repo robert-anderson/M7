@@ -9,7 +9,7 @@
 
 TEST(BosonSumConservingDoubles, LandauLevels) {
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_6_8_14/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);

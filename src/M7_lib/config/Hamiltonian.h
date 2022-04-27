@@ -7,40 +7,42 @@
 
 #include "Parameters.h"
 
-namespace fciqmc_config {
+namespace conf {
 
-    struct Fcidump : config::Section {
-        config::Param<std::string> m_path;
-        config::Param<bool> m_spin_major;
+    using namespace conf_components;
 
-        explicit Fcidump(config::Group *parent);
+    struct Fcidump : Section {
+        Param<std::string> m_path;
+        Param<bool> m_spin_major;
 
-        bool enabled() const override;
-    };
-
-    struct Bosdump : config::Section {
-        config::Param<std::string> m_path;
-
-        explicit Bosdump(config::Group *parent);
+        explicit Fcidump(Group *parent);
 
         bool enabled() const override;
     };
 
-    struct Ebdump : config::Section {
-        config::Param<std::string> m_path;
-        config::Param<bool> m_spin_major;
+    struct Bosdump : Section {
+        Param<std::string> m_path;
 
-        explicit Ebdump(config::Group *parent);
+        explicit Bosdump(Group *parent);
 
         bool enabled() const override;
     };
 
-    struct LatticeModel : config::Section {
-        config::Param<std::string> m_topology;
-        config::Param<defs::inds> m_site_shape;
-        config::Param<std::vector<int>> m_boundary_conds;
+    struct Ebdump : Section {
+        Param<std::string> m_path;
+        Param<bool> m_spin_major;
 
-        LatticeModel(config::Group *parent, std::string name, std::string description);
+        explicit Ebdump(Group *parent);
+
+        bool enabled() const override;
+    };
+
+    struct LatticeModel : Section {
+        Param<std::string> m_topology;
+        Param<defs::inds> m_site_shape;
+        Param<std::vector<int>> m_boundary_conds;
+
+        LatticeModel(Group *parent, std::string name, std::string description);
 
         void verify() override;
 
@@ -48,61 +50,61 @@ namespace fciqmc_config {
     };
 
     struct Hubbard : LatticeModel {
-        config::Param<defs::ham_comp_t> m_repulsion;
+        Param<defs::ham_comp_t> m_repulsion;
 
-        explicit Hubbard(config::Group *parent);
+        explicit Hubbard(Group *parent);
     };
 
 
     struct Heisenberg : LatticeModel {
-        config::Param<defs::ham_comp_t> m_coupling;
+        Param<defs::ham_comp_t> m_coupling;
 
-        explicit Heisenberg(config::Group *parent);
+        explicit Heisenberg(Group *parent);
     };
 
 
-    struct FermionHamiltonian : config::Section {
+    struct FrmHam : Section {
         Fcidump m_fcidump;
         Hubbard m_hubbard;
         Heisenberg m_heisenberg;
-        config::Param<size_t> m_nelec;
-        config::Param<int> m_ms2;
-        config::Param<double> m_spin_penalty_j;
+        Param<size_t> m_nelec;
+        Param<int> m_ms2;
+        Param<double> m_spin_penalty_j;
 
-        explicit FermionHamiltonian(config::Group *parent);
+        explicit FrmHam(Group *parent);
 
         void verify() override;
 
         bool enabled() const override;
     };
 
-    struct FrmBosHamiltonian : config::Section {
+    struct FrmBosHam : Section {
         Ebdump m_ebdump;
-        config::Param<defs::ham_t> m_holstein_coupling;
+        Param<defs::ham_t> m_holstein_coupling;
 
-        explicit FrmBosHamiltonian(config::Group *parent);
-
-        bool enabled() const override;
-    };
-
-    struct InteractingBoseGas : config::Section {
-        config::Param<size_t> m_ndim;
-        config::Param<size_t> m_nwave;
-        config::Param<defs::ham_t> m_ek_scale;
-
-        explicit InteractingBoseGas(config::Group *parent);
+        explicit FrmBosHam(Group *parent);
 
         bool enabled() const override;
     };
 
-    struct BosonHamiltonian : config::Section {
+    struct InteractingBoseGas : Section {
+        Param<size_t> m_ndim;
+        Param<size_t> m_nwave;
+        Param<defs::ham_t> m_ek_scale;
+
+        explicit InteractingBoseGas(Group *parent);
+
+        bool enabled() const override;
+    };
+
+    struct BosHam : Section {
         Bosdump m_bosdump;
-        config::Param<size_t> m_nboson;
-        config::Param<size_t> m_bos_occ_cutoff;
-        config::Param<defs::ham_comp_t> m_num_op_weight;
+        Param<size_t> m_nboson;
+        Param<size_t> m_bos_occ_cutoff;
+        Param<defs::ham_comp_t> m_num_op_weight;
         InteractingBoseGas m_interacting_bose_gas;
 
-        explicit BosonHamiltonian(config::Group *parent);
+        explicit BosHam(Group *parent);
 
         bool enabled() const override;
 
@@ -112,13 +114,13 @@ namespace fciqmc_config {
         }
     };
 
-    struct Hamiltonian : config::Section {
-        FermionHamiltonian m_fermion;
-        FrmBosHamiltonian m_ladder;
-        BosonHamiltonian m_boson;
+    struct Hamiltonian : Section {
+        FrmHam m_fermion;
+        FrmBosHam m_ladder;
+        BosHam m_boson;
         
 
-        explicit Hamiltonian(config::Group *parent);
+        explicit Hamiltonian(Group *parent);
     };
 
 }

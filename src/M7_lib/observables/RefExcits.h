@@ -36,7 +36,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 
 
 struct RefExcits : Archivable {
-    const fciqmc_config::RefExcits& m_opts;
+    const conf::RefExcits& m_opts;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
     std::array<std::unique_ptr<RefExcitsOneExsig>, defs::nexsig> m_ref_excits;
     defs::inds m_active_exsigs;
@@ -45,7 +45,7 @@ struct RefExcits : Archivable {
      */
     conn::Mbf m_conn;
 
-    RefExcits(const fciqmc_config::RefExcits& opts, sys::Size extents, size_t nroot);
+    RefExcits(const conf::RefExcits& opts, sys::Size extents, size_t nroot);
 
     void make_contribs(const conn::FrmOnv& conn, const defs::wf_t& contrib, const size_t& iroot);
 

@@ -38,7 +38,7 @@ struct Maes {
      */
     std::unique_ptr<MaeStats> m_stats = nullptr;
 
-    Maes(const fciqmc_config::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot);
+    Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot);
 
     operator bool() const;
 

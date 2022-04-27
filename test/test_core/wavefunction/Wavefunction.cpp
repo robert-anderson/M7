@@ -7,7 +7,7 @@
 
 #if 0
 TEST(Wavefunction, DynamicRowSet){
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_propagator.m_nw_target = 1000;
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 3;
     opts.verify();

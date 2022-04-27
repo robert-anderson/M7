@@ -62,7 +62,7 @@ struct HamiltonianTerms {
      *  unique pointer to the polymorphic base class, FrmHam
      */
     template<typename ham_t>
-    std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
+    std::unique_ptr<FrmHam> make_frm(const conf::FrmHam &opts) {
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
         auto j = opts.m_spin_penalty_j.get();
         /*
@@ -84,7 +84,7 @@ struct HamiltonianTerms {
 #endif
     }
 
-    std::unique_ptr<FrmHam> make_frm(const fciqmc_config::FermionHamiltonian &opts) {
+    std::unique_ptr<FrmHam> make_frm(const conf::FrmHam &opts) {
         if (opts.m_hubbard.enabled())
             return make_frm<HubbardFrmHam>(opts);
         else if (opts.m_heisenberg.enabled())
@@ -94,7 +94,7 @@ struct HamiltonianTerms {
         return std::unique_ptr<FrmHam>(new NullFrmHam);
     }
 
-    std::unique_ptr<BosHam> make_bos(const fciqmc_config::BosonHamiltonian &opts){
+    std::unique_ptr<BosHam> make_bos(const conf::BosHam &opts){
         if (opts.m_num_op_weight) {
             const size_t nsite = m_frm->m_basis.m_nsite;
             const sys::bos::Basis basis(nsite, opts.m_bos_occ_cutoff);
@@ -108,7 +108,7 @@ struct HamiltonianTerms {
         return std::unique_ptr<BosHam>(new NullBosHam);
     }
 
-    std::unique_ptr<FrmBosHam> make_frmbos(const fciqmc_config::FrmBosHamiltonian &opts) {
+    std::unique_ptr<FrmBosHam> make_frmbos(const conf::FrmBosHam &opts) {
         if (opts.m_holstein_coupling) {
             REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(m_frm.get()),
                          "Holstein coupling requires Hubbard-type fermion Hamiltonian");
@@ -121,7 +121,7 @@ struct HamiltonianTerms {
         return std::unique_ptr<FrmBosHam>(new NullLadderHam);
     }
 
-    HamiltonianTerms(const fciqmc_config::Hamiltonian &opts):
+    HamiltonianTerms(const conf::Hamiltonian &opts):
         m_frm(make_frm(opts.m_fermion)), m_bos(make_bos(opts.m_boson)), m_frmbos(make_frmbos(opts.m_ladder)){}
 };
 
@@ -149,7 +149,7 @@ private:
 
 public:
 
-    explicit Hamiltonian(const fciqmc_config::Hamiltonian &opts);
+    explicit Hamiltonian(const conf::Hamiltonian &opts);
 
     /*
      * pure fermion matrix elements
@@ -225,14 +225,14 @@ public:
      * @return
      *  electron and boson number data
      */
-    sys::Particles get_quanta(const fciqmc_config::Hamiltonian &opts) const {
+    sys::Particles get_quanta(const conf::Hamiltonian &opts) const {
         // TODO: move config opts around
         sys::frm::Electrons elecs(0ul);
         sys::bos::Bosons bosons(0ul, true);
         return {elecs, bosons};
     }
 
-    sys::Sector get_sector(const fciqmc_config::Hamiltonian &opts) const {
+    sys::Sector get_sector(const conf::Hamiltonian &opts) const {
         return {m_basis, get_quanta(opts)};
     }
 };

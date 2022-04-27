@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 
 TEST(BosonHamiltonian, Coefficients) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
@@ -36,7 +36,7 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
      *  [0. 1. 1. 0. 3.] 3.9140625
      *  [1. 0. 0. 1. 3.] 3.0859375
      */
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
@@ -72,7 +72,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         1.08253175 0.66291261 3.9140625  0.4330127 ]
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);

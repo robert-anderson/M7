@@ -32,7 +32,7 @@
 struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
     typedef GlobalExtremalRows<WalkerTableRow, defs::wf_t, defs::ndim_wf> weights_gxr_t;
 
-    const fciqmc_config::Document &m_opts;
+    const conf::Document &m_opts;
     const sys::Sector m_sector;
 
     /**
@@ -86,17 +86,17 @@ struct Wavefunction : Communicator<WalkerTableRow, SpawnTableRow>, Archivable {
      */
     NdReduction<defs::wf_comp_t, defs::ndim_wf> m_nannihilated;
 
-    Wavefunction(const fciqmc_config::Document &opts, const sys::Sector& sector);
+    Wavefunction(const conf::Document &opts, const sys::Sector& sector);
 
     ~Wavefunction();
 
     void log_top_weighted(size_t ipart, size_t nrow=20);
 
-    static bool need_send_parents(const fciqmc_config::Document &opts) {
+    static bool need_send_parents(const conf::Document &opts) {
         return opts.m_av_ests.m_rdm.m_ranks.get().size();
     }
 
-    static bool need_av_weights(const fciqmc_config::Document &opts) {
+    static bool need_av_weights(const conf::Document &opts) {
         if (need_send_parents(opts)) return true;
         return opts.m_av_ests.m_ref_excits.m_max_exlvl > 0;
     }

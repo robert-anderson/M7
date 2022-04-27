@@ -8,7 +8,7 @@
 
 TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     const size_t nwave = 3;
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_boson.m_interacting_bose_gas.m_ndim = 1;
     opts.m_boson.m_interacting_bose_gas.m_nwave = nwave;
     opts.m_boson.m_interacting_bose_gas.m_ek_scale = 1.0;

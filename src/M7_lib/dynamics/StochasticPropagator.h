@@ -29,7 +29,7 @@ protected:
     }
 
 public:
-    StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const Wavefunction& wf);
+    StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;
 

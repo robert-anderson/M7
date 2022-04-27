@@ -35,7 +35,7 @@ struct DeterministicSubspace : Wavefunction::PartSharedRowSet<DeterministicDataR
     /**
      * options from the configuration object
      */
-    const fciqmc_config::Semistochastic &m_opts;
+    const conf::Semistochastic &m_opts;
     /**
      * the deterministic subspace is just a selection of rows from an MPI-distributed wavefunction object
      */
@@ -72,7 +72,7 @@ private:
 
 public:
 
-    DeterministicSubspace(const fciqmc_config::Semistochastic &opts, Wavefunction &wf, size_t iroot);
+    DeterministicSubspace(const conf::Semistochastic &opts, Wavefunction &wf, size_t iroot);
 
     virtual ~DeterministicSubspace() {}
 
@@ -101,7 +101,7 @@ struct DeterministicSubspaces {
     /**
      * options from the configuration object
      */
-    const fciqmc_config::Semistochastic &m_opts;
+    const conf::Semistochastic &m_opts;
     /**
      * epoch for all deterministic subspaces. not used beyond the provision of logging
      */
@@ -111,7 +111,7 @@ struct DeterministicSubspaces {
      */
     std::vector<std::unique_ptr<DeterministicSubspace>> m_detsubs;
 
-    DeterministicSubspaces(const fciqmc_config::Semistochastic &opts);
+    DeterministicSubspaces(const conf::Semistochastic &opts);
 
     operator bool() const;
 

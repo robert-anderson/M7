@@ -59,7 +59,7 @@ struct HamOpTerm {
      * @return
      *  forward linked list of excitation generators applicable to this HamOpTerm
      */
-    virtual excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts) const {
+    virtual excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& opts) const {
         return {};
     }
     /**

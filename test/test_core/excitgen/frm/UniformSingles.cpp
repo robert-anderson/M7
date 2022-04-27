@@ -9,7 +9,7 @@
 
 TEST(UniformSingles, FromExcited){
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/H2O_RHF/FCIDUMP";
     opts.verify();
     Hamiltonian h(opts);

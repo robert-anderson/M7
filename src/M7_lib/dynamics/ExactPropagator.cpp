@@ -5,7 +5,7 @@
 #include "ExactPropagator.h"
 
 ExactPropagator::ExactPropagator(
-        const Hamiltonian &ham, const fciqmc_config::Document &opts,
+        const Hamiltonian &ham, const conf::Document &opts,
         const Wavefunction& wf, bool only_nonzero_h_spawns) :
         Propagator(opts, ham, wf), m_only_nonzero_h_spawns(only_nonzero_h_spawns),
         m_conn_iters(ham),

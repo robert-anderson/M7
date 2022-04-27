@@ -10,7 +10,7 @@
 
 TEST(LadderPure, Uniform0001){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4_WITH_UNC";
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
@@ -40,7 +40,7 @@ TEST(LadderPure, Uniform0001){
 
 TEST(LadderPure, Uniform0010){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HH_V1.4_WITH_UNC";
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";

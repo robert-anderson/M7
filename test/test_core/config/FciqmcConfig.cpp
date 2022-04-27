@@ -6,7 +6,7 @@
 #include "M7_lib/config/FciqmcConfig.h"
 
 TEST(FciqmcConfig, Test){
-    fciqmc_config::Document doc(nullptr);
+    conf::Document doc(nullptr);
     std::cout <<
               doc.help_string()
             << std::endl;

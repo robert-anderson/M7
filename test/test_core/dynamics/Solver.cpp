@@ -8,7 +8,7 @@
 
 #if 0
 TEST(Solver, RecvSort) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_propagator.m_nw_target = 1000;
     opts.m_propagator.m_consolidate_spawns = true;
     opts.m_wavefunction.m_nw_init = 10;
@@ -38,7 +38,7 @@ TEST(Solver, RecvSort) {
 }
 
 TEST(Solver, Consolidation) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_propagator.m_nw_target = 1000;
     opts.m_propagator.m_consolidate_spawns = true;
     opts.m_wavefunction.m_nw_init = 10;

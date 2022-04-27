@@ -10,7 +10,7 @@
 
 TEST(Pchb1101hc, Test){
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_nelec = 6;
     opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
     opts.verify();

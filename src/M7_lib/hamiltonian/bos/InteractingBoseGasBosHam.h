@@ -19,7 +19,7 @@ struct InteractingBoseGasBosHam : BosHam {
             BosHam({nboson, Planewaves::size(ndim, nwave)}),
             m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
 
-    InteractingBoseGasBosHam(const fciqmc_config::BosonHamiltonian &opts):
+    InteractingBoseGasBosHam(const conf::BosHam &opts):
             InteractingBoseGasBosHam(opts.m_nboson, opts.m_interacting_bose_gas.m_ndim,
                                      opts.m_interacting_bose_gas.m_nwave, opts.m_interacting_bose_gas.m_ek_scale){}
 

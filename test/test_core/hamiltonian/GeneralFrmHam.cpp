@@ -47,7 +47,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
 TEST(GeneralFrmHam, Elements) {
     const auto benchmark = 0.01759459248922075;
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();
     Hamiltonian h(opts.m_hamiltonian);
@@ -71,7 +71,7 @@ TEST(GeneralFrmHam, Elements) {
 
 TEST(GeneralFrmHam, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
@@ -87,7 +87,7 @@ TEST(GeneralFrmHam, RhfEnergy) {
 }
 
 TEST(GeneralFrmHam, RhfBrillouinTheorem) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);

@@ -43,7 +43,7 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const 
 }
 
 DeterministicSubspace::DeterministicSubspace(
-        const fciqmc_config::Semistochastic &opts, Wavefunction &wf, size_t iroot) :
+        const conf::Semistochastic &opts, Wavefunction &wf, size_t iroot) :
         Wavefunction::PartSharedRowSet<DeterministicDataRow>(
                 wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_iparts(make_iparts()) {}
@@ -129,7 +129,7 @@ void DeterministicSubspace::project(double tau) {
     }
 }
 
-DeterministicSubspaces::DeterministicSubspaces(const fciqmc_config::Semistochastic &opts) :
+DeterministicSubspaces::DeterministicSubspaces(const conf::Semistochastic &opts) :
         m_opts(opts), m_epoch("semistochastic") {
 }
 

@@ -129,6 +129,6 @@ Lattice lattice::make(const Lattice::Spec &spec) {
     return {Lattice::Spec(Lattice::NullTopology, {}, {})};
 }
 
-Lattice lattice::make(const fciqmc_config::LatticeModel &opts) {
+Lattice lattice::make(const conf::LatticeModel &opts) {
     return make({opts.m_topology, opts.m_site_shape, opts.m_boundary_conds});
 }

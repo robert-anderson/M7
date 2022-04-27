@@ -31,7 +31,7 @@ HubbardFrmHam::HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2, int charge
     log::info("This model {} sign problem-free", m_spf ? "is" : "is not");
 }
 
-HubbardFrmHam::HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
+HubbardFrmHam::HubbardFrmHam(const conf::FrmHam &opts) :
         HubbardFrmHam(opts.m_hubbard.m_repulsion, lattice::make(opts.m_hubbard), opts.m_ms2, opts.m_nelec){}
 
 defs::ham_t HubbardFrmHam::get_element_0000(const field::FrmOnv &onv) const {
@@ -71,7 +71,7 @@ defs::ham_t HubbardFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j
 }
 
 HamOpTerm::excit_gen_list_t HubbardFrmHam::make_excit_gens(
-        PRNG& prng, sys::frm::Electrons elecs, const fciqmc_config::Propagator& opts) const {
+        PRNG& prng, sys::frm::Electrons elecs, const conf::Propagator& opts) const {
     excit_gen_list_t list;
     list.emplace_front(new HubbardUniform(*this, elecs, prng));
     return list;

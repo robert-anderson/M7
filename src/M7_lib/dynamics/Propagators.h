@@ -15,7 +15,7 @@ namespace props {
     typedef ExactPropagator Exact;
     typedef StochasticPropagator Stoch;
 
-    static std::unique_ptr<Propagator> get(const Hamiltonian &ham, const fciqmc_config::Document &opts,
+    static std::unique_ptr<Propagator> get(const Hamiltonian &ham, const conf::Document &opts,
                                            const Wavefunction &wf) {
         /*
          * if the RDM contributions due to connections of the reference are not to be explicitly included on average,

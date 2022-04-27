@@ -10,7 +10,7 @@
 
 TEST(LadderPureHolstein, HolsteinAnn){
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {6};
     opts.m_fermion.m_hubbard.m_boundary_conds = {1};
@@ -40,7 +40,7 @@ TEST(LadderPureHolstein, HolsteinAnn){
 
 TEST(LadderPureHolstein, HolsteinCre){
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_fermion.m_hubbard.m_site_shape = {6};
     opts.m_fermion.m_hubbard.m_boundary_conds = {1};

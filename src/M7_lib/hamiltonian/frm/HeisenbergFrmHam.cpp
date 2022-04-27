@@ -12,7 +12,7 @@ HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2) :
     log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice.info());
 }
 
-HeisenbergFrmHam::HeisenbergFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
+HeisenbergFrmHam::HeisenbergFrmHam(const conf::FrmHam &opts) :
         HeisenbergFrmHam(opts.m_heisenberg.m_coupling, lattice::make(opts.m_heisenberg), opts.m_ms2){}
 
 defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {

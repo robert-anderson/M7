@@ -4,7 +4,7 @@
 
 #include "Maes.h"
 
-Maes::Maes(const fciqmc_config::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot) :
+Maes::Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot) :
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, extents, nelec, m_accum_epoch),
         m_ref_excits(opts.m_ref_excits, extents, nroot), m_period(opts.m_stats_period) {
     if (*this) {

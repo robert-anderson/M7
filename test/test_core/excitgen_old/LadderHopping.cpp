@@ -9,7 +9,7 @@
 
 TEST(LadderHopping, HubbardUniform1101){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
     opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
@@ -38,7 +38,7 @@ TEST(LadderHopping, HubbardUniform1101){
 
 TEST(LadderHopping, HubbardUniform1110){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_hubbard.m_repulsion = 4;
     opts.m_hamiltonian.m_fermion.m_hubbard.m_site_shape = {3};
     opts.m_hamiltonian.m_fermion.m_hubbard.m_boundary_conds = {0};
@@ -67,7 +67,7 @@ TEST(LadderHopping, HubbardUniform1110){
 
 TEST(LadderHopping, HubbardPc1101){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";
@@ -94,7 +94,7 @@ TEST(LadderHopping, HubbardPc1101){
 
 TEST(LadderHopping, HubbardPc1110){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/Hubbard_U4_3site/FCIDUMP";
     opts.m_hamiltonian.m_ladder.m_ebdump.m_path = defs::assets_root + "/Hubbard_U4_3site/EBDUMP_HOPPING";
     opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_NULL";

@@ -18,7 +18,7 @@ struct GeneralFrmHam : FrmHam {
 
     GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict=~0, size_t nelec=0);
 
-    explicit GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts);
+    explicit GeneralFrmHam(const conf::FrmHam &opts);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 
@@ -43,9 +43,9 @@ struct GeneralFrmHam : FrmHam {
      * @return
      *  list of excit gens required to stochastically propagate the given h
      */
-    static excit_gen_list_t make_excit_gens(PRNG& prng, const fciqmc_config::Propagator& opts, const FrmHam& h);
+    static excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& opts, const FrmHam& h);
 
-    excit_gen_list_t make_excit_gens(PRNG &prng, const fciqmc_config::Propagator& opts) const override;
+    excit_gen_list_t make_excit_gens(PRNG &prng, const conf::Propagator& opts) const override;
 
     conn_foreach_list_t make_foreach_iters() const override;
 };

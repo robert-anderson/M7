@@ -37,11 +37,11 @@ namespace mbf {
 
     void set_from_def_array(field::BosOnv &mbf, const std::vector<defs::inds> &def, size_t idef);
 
-    void set(field::FrmOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef);
+    void set(field::FrmOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
 
-    void set(field::BosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef);
+    void set(field::BosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
 
-    void set(field::FrmBosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef);
+    void set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef);
 };
 
 

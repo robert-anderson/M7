@@ -11,7 +11,7 @@
 #if 0
 
 TEST(Propagators, BasicTest) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
@@ -39,7 +39,7 @@ TEST(Propagators, BasicTest) {
 }
 
 TEST(Propagators, RefExcitTest) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_stochastic = false;
     opts.m_propagator.m_nadd = 0.0;

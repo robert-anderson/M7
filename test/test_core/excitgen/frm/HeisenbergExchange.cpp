@@ -9,7 +9,7 @@
 
 TEST(HeisenbergExchange, Pbc2D) {
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_heisenberg.m_site_shape = {3, 3};
     opts.m_fermion.m_heisenberg.m_boundary_conds = {1, 1};
     opts.m_fermion.m_ms2 = 1;

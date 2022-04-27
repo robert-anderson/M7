@@ -94,7 +94,7 @@ private:
 
 public:
 
-    excit_gen_list_t make_excit_gens(PRNG &prng, const fciqmc_config::Propagator &opts) const override {
+    excit_gen_list_t make_excit_gens(PRNG &prng, const conf::Propagator &opts) const override {
         if (any_component_general(*this)){
             /*
              * some component of this sum takes the most general form, so let the general excitation generator include

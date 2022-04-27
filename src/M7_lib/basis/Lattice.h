@@ -91,6 +91,6 @@ namespace lattice {
 
     Lattice make(const Lattice::Spec &spec);
 
-    Lattice make(const fciqmc_config::LatticeModel& opts);
+    Lattice make(const conf::LatticeModel& opts);
 }
 #endif //M7_LATTICE_H

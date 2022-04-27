@@ -35,8 +35,8 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
 
     static size_t nrow_estimate(size_t nann, size_t ncre, size_t nsite);
 
-    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec);
-    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec):
+    FermionRdm(const conf::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec);
+    FermionRdm(const conf::FermionRdm &opts, size_t nsite, size_t nelec):
     FermionRdm(opts, nrow_estimate(opts.m_rank, opts.m_rank, nsite), nsite, nelec){}
 
     void make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
@@ -116,7 +116,7 @@ struct RdmGroup {
     // particle number-conserving, fermion RDMs
     std::array<std::unique_ptr<FermionRdm>, defs::exsig_nop_mask_frm> m_frm_rdms;
 
-    RdmGroup(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec){
+    RdmGroup(const conf::FermionRdm &opts, size_t nsite, size_t nelec){
         for (auto rank: opts.m_ranks.get())
             m_frm_rdms[rank] = std::unique_ptr<FermionRdm>(new FermionRdm(opts, nsite, nelec));
     }

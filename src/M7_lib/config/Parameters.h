@@ -7,7 +7,7 @@
 
 #include <M7_lib/io/YamlWrapper.h>
 
-namespace config {
+namespace conf_components {
 
     struct Node {
         const Node *m_parent;
@@ -190,7 +190,7 @@ namespace config {
 }
 
 template<typename T>
-static std::ostream &operator<<(std::ostream &os, const config::Param<T> &v) {
+static std::ostream &operator<<(std::ostream &os, const conf_components::Param<T> &v) {
     os << v.get();
     return os;
 }

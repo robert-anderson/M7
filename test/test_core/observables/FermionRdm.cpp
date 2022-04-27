@@ -18,7 +18,7 @@
  * @return
  *  2RDM energy estimate
  */
-defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bool explicit_hf_conns){
+defs::ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_conns){
     Hamiltonian ham(opts.m_hamiltonian);
     buffered::Mbf ref_onv(ham.m_hs);
     mbf::set_aufbau_mbf(ref_onv);
@@ -41,7 +41,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const fciqmc_config::Document& opts, bo
 }
 
 
-void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
+void fermion_rdm_energy_opts(conf::Document& opts){
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/HF_RDMs/FCIDUMP";
     opts.m_hamiltonian.m_fermion.m_fcidump.m_spin_major = false;
     opts.m_archive.m_save_path = "M7.save";
@@ -59,7 +59,7 @@ void fermion_rdm_energy_opts(fciqmc_config::Document& opts){
 }
 
 TEST(FermionRdm, EnergyExactAverageEveryCycle) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     fermion_rdm_energy_opts(opts);
     // accumulate the average coefficient values every cycle
     opts.m_av_ests.m_stats_period = 1;
@@ -68,7 +68,7 @@ TEST(FermionRdm, EnergyExactAverageEveryCycle) {
 }
 
 TEST(FermionRdm, EnergyExactAverageDivisibleNCycles) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     fermion_rdm_energy_opts(opts);
     // accumulate the average coefficient values every 10 cycles (100%10=0 so no need for finalization)
     opts.verify();
@@ -76,7 +76,7 @@ TEST(FermionRdm, EnergyExactAverageDivisibleNCycles) {
 }
 
 TEST(FermionRdm, EnergyExactAllLeftoverIters) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     fermion_rdm_energy_opts(opts);
     opts.m_av_ests.m_stats_period = 300;
     opts.verify();
@@ -85,7 +85,7 @@ TEST(FermionRdm, EnergyExactAllLeftoverIters) {
 }
 
 TEST(FermionRdm, EnergyExactLeftoverIters) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     fermion_rdm_energy_opts(opts);
     opts.m_av_ests.m_stats_period = 13;
     /*

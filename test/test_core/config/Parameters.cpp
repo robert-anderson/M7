@@ -7,36 +7,36 @@
 
 namespace parameters_test {
 
-    struct Section1 : config::Section {
-        config::Param<std::vector<size_t>> m_some_numbers;
-        config::Param<std::vector<size_t>> m_some_unspecified_numbers;
-        config::Param<std::string> m_a_string;
+    struct Section1 : conf_components::Section {
+        conf_components::Param<std::vector<size_t>> m_some_numbers;
+        conf_components::Param<std::vector<size_t>> m_some_unspecified_numbers;
+        conf_components::Param<std::string> m_a_string;
 
-        struct SubSection1 : config::Section {
-            config::Param<size_t> m_a_number;
-            config::Param<double> m_a_float;
-            config::Param<size_t> m_another_number;
+        struct SubSection1 : conf_components::Section {
+            conf_components::Param<size_t> m_a_number;
+            conf_components::Param<double> m_a_float;
+            conf_components::Param<size_t> m_another_number;
 
-            SubSection1(config::Group *parent) :
-                    config::Section(parent, "subsection1", "minor options"),
+            SubSection1(conf_components::Group *parent) :
+                    conf_components::Section(parent, "subsection1", "minor options"),
                     m_a_number(this, "a_number", 0ul, "bla blah minor number"),
                     m_a_float(this, "a_float", 0.0, "bla blah minor float"),
                     m_another_number(this, "another_number", 6ul, "bla blah another minor number") {}
         };
 
-        struct SubSection2 : config::Section {
-            config::Param<size_t> m_a_number;
+        struct SubSection2 : conf_components::Section {
+            conf_components::Param<size_t> m_a_number;
 
-            SubSection2(config::Group *parent) :
-                    config::Section(parent, "subsection2", "different minor options"),
+            SubSection2(conf_components::Group *parent) :
+                    conf_components::Section(parent, "subsection2", "different minor options"),
                     m_a_number(this, "a_number", 0ul, "bla blah different minor number") {}
         };
 
         SubSection1 m_subsection1;
         SubSection2 m_subsection2;
 
-        Section1(config::Group *parent) :
-                config::Section(parent, "section1", "parameter nodes relating to section1"),
+        Section1(conf_components::Group *parent) :
+                conf_components::Section(parent, "section1", "parameter nodes relating to section1"),
                 m_some_numbers(this, "some_numbers", {3, 4, 6, 9}, "blah blah numbers"),
                 m_some_unspecified_numbers(this, "some_unspecified_numbers", {3, 4, 6},
                                            "these numbers are not in the YAML file, and so the default value should be assigned"),
@@ -44,27 +44,27 @@ namespace parameters_test {
                 m_subsection1(this), m_subsection2(this) {}
     };
 
-    struct Section2 : config::Section {
-        Section2(config::Group *parent) : config::Section(parent, "section2", "blah blah empty section") {}
+    struct Section2 : conf_components::Section {
+        Section2(conf_components::Group *parent) : conf_components::Section(parent, "section2", "blah blah empty section") {}
     };
 
-    struct Section3 : config::Section {
-        config::Param <std::vector<double>> m_some_numbers;
-        config::Param<bool> m_some_flag;
+    struct Section3 : conf_components::Section {
+        conf_components::Param <std::vector<double>> m_some_numbers;
+        conf_components::Param<bool> m_some_flag;
 
-        Section3(config::Group *parent) :
-                config::Section(parent, "section3", "blah blah final section"),
+        Section3(conf_components::Group *parent) :
+                conf_components::Section(parent, "section3", "blah blah final section"),
                 m_some_numbers(this, "some_numbers", {3, 4, 6}, "blah blah final section numbers"),
                 m_some_flag(this, "some_flag", false, "blah blah final section flag") {}
     };
 
-    struct TestDocument : config::Document {
+    struct TestDocument : conf_components::Document {
         Section1 m_section1;
         Section2 m_section2;
         Section3 m_section3;
 
         explicit TestDocument(const yaml::File *yf) :
-                config::Document(yf, "FCIQMC options", "options describing the behavior of something"),
+                conf_components::Document(yf, "FCIQMC options", "options describing the behavior of something"),
                 m_section1(this), m_section2(this), m_section3(this) {}
     };
 }

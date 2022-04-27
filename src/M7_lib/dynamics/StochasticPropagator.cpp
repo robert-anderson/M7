@@ -4,7 +4,7 @@
 
 #include "StochasticPropagator.h"
 
-StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
+StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts,
                                            const Wavefunction &wf) :
         Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
         m_excit_gen_group(ham, opts.m_propagator, m_prng),

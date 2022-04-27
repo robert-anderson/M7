@@ -30,7 +30,7 @@ public:
     const sys::Size m_basis_size;
     const size_t m_nelec;
 
-    Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue);
+    Rdm(const conf::Rdms &opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue);
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
                        const com_ops::Frm &com, const defs::wf_t &contrib);
@@ -64,7 +64,7 @@ public:
     Reduction<defs::wf_t> m_total_norm;
     const size_t m_nelec;
 
-    Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs,
+    Rdms(const conf::Rdms &opts, defs::inds ranksigs,
          sys::Size extents, size_t nelec, const Epoch &accum_epoch);
 
     operator bool() const;

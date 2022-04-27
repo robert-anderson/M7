@@ -12,7 +12,7 @@
 
 #ifndef ENABLE_BOSONS
 TEST(StochasticPropagator, Test) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 100;
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
@@ -45,7 +45,7 @@ TEST(StochasticPropagator, Test) {
 }
 
 TEST(StochasticPropagator, RdmTest) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 300.0;
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
@@ -83,7 +83,7 @@ TEST(StochasticPropagator, RdmTest) {
 }
 
 TEST(StochasticPropagator, Hdf5) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 10.0;
     opts.m_propagator.m_nadd = 3.0;
     opts.m_propagator.m_tau_init = 0.01;
@@ -121,7 +121,7 @@ TEST(StochasticPropagator, Hdf5) {
 }
 
 TEST(StochasticPropagator, Hubbard) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 1;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.01;
@@ -160,7 +160,7 @@ TEST(StochasticPropagator, Hubbard) {
 }
 
 TEST(StochasticPropagator, ExcitedStates) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nroot = 3;
     opts.m_wavefunction.m_nw_init = 10;
     opts.m_propagator.m_nadd = 3.0;
@@ -210,7 +210,7 @@ TEST(StochasticPropagator, ExcitedStates) {
 #else
 
 TEST(StochasticPropagator, BosonTest) {
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_wavefunction.m_nw_init = 100;
     opts.m_propagator.m_nadd = 0.0;
     opts.m_propagator.m_tau_init = 0.001;

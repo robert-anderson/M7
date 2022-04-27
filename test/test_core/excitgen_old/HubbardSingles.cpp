@@ -10,7 +10,7 @@
 
 TEST(HubbardUniform, ObcFromNeel1D) {
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4.0;
     opts.m_fermion.m_hubbard.m_site_shape = {6};
     opts.m_fermion.m_hubbard.m_boundary_conds = {0};
@@ -35,7 +35,7 @@ TEST(HubbardUniform, ObcFromNeel1D) {
 
 TEST(HubbardUniform, PbcFromNeel1D) {
     PRNG prng(14, 1000000);
-    fciqmc_config::Hamiltonian opts(nullptr);
+    conf::Hamiltonian opts(nullptr);
     opts.m_fermion.m_hubbard.m_repulsion = 4.0;
     opts.m_fermion.m_hubbard.m_site_shape = {6};
     opts.m_fermion.m_hubbard.m_boundary_conds = {1};

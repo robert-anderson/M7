@@ -11,7 +11,7 @@ void ExcitGenGroup::update_cumprobs() {
     DEBUG_ASSERT_NEARLY_EQ(m_cumprobs.back(), 1.0, consts::eps<prob_t>(), "cumulative probability should be 1.0");
 }
 
-ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng) :
+ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng) :
         m_prng(prng) {
     ExcitGen::excit_gen_list_t list;
     list = ham.m_frm.make_excit_gens(prng, opts);

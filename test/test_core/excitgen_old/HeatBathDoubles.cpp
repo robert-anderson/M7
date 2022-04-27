@@ -10,7 +10,7 @@
 
 TEST(HeatBathDoubles, SmallFromHFDeterminant){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_LiH_STO-3G/FCIDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);
@@ -33,7 +33,7 @@ TEST(HeatBathDoubles, SmallFromHFDeterminant){
 
 TEST(HeatBathDoubles, LargeFromHFDeterminant){
     PRNG prng(14, 1000000);
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_CCPVDZ/FCIDUMP";
     opts.verify();
     Hamiltonian ham(opts.m_hamiltonian);

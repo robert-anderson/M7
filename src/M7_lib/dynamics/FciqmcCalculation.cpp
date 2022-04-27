@@ -8,7 +8,7 @@
 #include "FciqmcCalculation.h"
 #include "Propagators.h"
 
-FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
+FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
         m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.get_sector(opts.m_hamiltonian)),
         m_prop(props::get(m_ham, opts, m_wf)) {
     buffered::Mbf ref_mbf(m_ham.m_basis);

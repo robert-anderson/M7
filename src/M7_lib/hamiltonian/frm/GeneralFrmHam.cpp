@@ -83,7 +83,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int m
     log_data();
 }
 
-GeneralFrmHam::GeneralFrmHam(const fciqmc_config::FermionHamiltonian &opts) :
+GeneralFrmHam::GeneralFrmHam(const conf::FrmHam &opts) :
         GeneralFrmHam({opts.m_fcidump.m_path}, opts.m_fcidump.m_spin_major, opts.m_ms2, opts.m_nelec) {}
 
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
@@ -124,7 +124,7 @@ defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
-        PRNG &prng, const fciqmc_config::Propagator &opts, const FrmHam &h) {
+        PRNG &prng, const conf::Propagator &opts, const FrmHam &h) {
     using namespace exsig_utils;
     excit_gen_list_t list;
     bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
@@ -135,7 +135,7 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
-        PRNG &prng, const fciqmc_config::Propagator &opts) const {
+        PRNG &prng, const conf::Propagator &opts) const {
     return make_excit_gens(prng, opts, *this);
 }
 

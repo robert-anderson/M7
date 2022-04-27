@@ -17,7 +17,7 @@ public:
     /**
      * configuration document specifying the calculation to be performed
      */
-    const fciqmc_config::Document& m_opts;
+    const conf::Document& m_opts;
     /**
      * sum of weighted many-body operator products determining the energies and transition amplitudes between MBFs
      */
@@ -31,7 +31,7 @@ public:
      */
     std::unique_ptr<Propagator> m_prop;
 
-    explicit FciqmcCalculation(const fciqmc_config::Document& opts);
+    explicit FciqmcCalculation(const conf::Document& opts);
 };
 
 

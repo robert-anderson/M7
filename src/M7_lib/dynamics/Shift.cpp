@@ -4,7 +4,7 @@
 
 #include "Shift.h"
 
-Reweighter::Reweighter(const fciqmc_config::Shift &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
+Reweighter::Reweighter(const conf::Shift &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
         m_const_shift(wf_fmt.m_shape, opts.m_init),
         m_active("accumulating reweighting statistics", wf_fmt.m_nelement, "WF part"),
@@ -55,7 +55,7 @@ bool Reweighter::product_chk() const {
     return true;
 }
 
-Shift::Shift(const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
+Shift::Shift(const conf::Document &opts, const NdFormat<defs::ndim_wf> &wf_fmt) :
         m_opts(opts),
         m_nwalker_last_period(wf_fmt.m_shape, std::numeric_limits<defs::wf_comp_t>::max()),
         m_values(wf_fmt.m_shape, opts.m_shift.m_init),

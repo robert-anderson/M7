@@ -43,7 +43,7 @@ public:
 
     HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2, int charge);
 
-    HubbardFrmHam(const fciqmc_config::FermionHamiltonian &opts);
+    HubbardFrmHam(const conf::FrmHam &opts);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 
@@ -59,7 +59,7 @@ public:
     void log_data() const override;
 
     excit_gen_list_t make_excit_gens(
-            PRNG& prng, sys::Particles particles, const fciqmc_config::Propagator& opts) const override;
+            PRNG& prng, sys::Particles particles, const conf::Propagator& opts) const override;
 
     conn_foreach_list_t make_foreach_iters() const override;
 };

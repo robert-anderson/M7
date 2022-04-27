@@ -61,7 +61,7 @@ void mbf::set_from_def_array(field::BosOnv &mbf, const std::vector<defs::inds> &
     for (auto &occ: definds) mbf[i++] = occ;
 }
 
-void mbf::set(field::FrmOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef) {
+void mbf::set(field::FrmOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef) {
     auto elecs = particles.m_frm;
     if (!def.m_frm.get().empty()) set_from_def_array(mbf, def.m_frm, idef);
     else if (def.m_neel) set_neel_mbf(mbf, elecs);
@@ -71,12 +71,12 @@ void mbf::set(field::FrmOnv &mbf, sys::Particles particles, const fciqmc_config:
         REQUIRE_EQ(mbf.ms2(), elecs.m_ms2, "MBF has incorrect total 2*Ms");
 }
 
-void mbf::set(field::BosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef) {
+void mbf::set(field::BosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef) {
     if (!def.m_bos.get().empty()) set_from_def_array(mbf, def.m_bos, idef);
     else set_aufbau_mbf(mbf, particles.m_bos);
 }
 
-void mbf::set(field::FrmBosOnv &mbf, sys::Particles particles, const fciqmc_config::MbfDef &def, size_t idef) {
+void mbf::set(field::FrmBosOnv &mbf, sys::Particles particles, const conf::MbfDef &def, size_t idef) {
     set(mbf.m_frm, particles, def, idef);
     set(mbf.m_bos, particles, def, idef);
 }

@@ -4,38 +4,38 @@
 
 #include "Parameters.h"
 
-config::Node::Node(config::Node *parent, std::string name, std::string description) :
+conf_components::Node::Node(conf_components::Node *parent, std::string name, std::string description) :
         m_parent(parent), m_yaml_path(parent ? yaml::Path(parent->m_yaml_path + name) : yaml::Path(name)),
         m_description(description), m_indent(2 * m_yaml_path.depth(), ' ') {
 }
 
-config::Node::Node(std::string description) : Node(nullptr, "", description){}
+conf_components::Node::Node(std::string description) : Node(nullptr, "", description){}
 
-std::string config::Node::help_string() const {
+std::string conf_components::Node::help_string() const {
     return "";
 }
 
-const yaml::File *config::Node::get_file() const {
+const yaml::File *conf_components::Node::get_file() const {
     if (!m_parent) return nullptr;
     return m_parent->get_file();
 }
 
-std::string config::Node::invalid_file_key() const {
+std::string conf_components::Node::invalid_file_key() const {
     return "";
 }
 
-const std::string &config::Node::name() const {
+const std::string &conf_components::Node::name() const {
     return m_yaml_path.m_name_list.back();
 }
 
-bool config::Node::parents_enabled() const {
+bool conf_components::Node::parents_enabled() const {
     for (auto node = m_parent; node!= nullptr; node=node->m_parent){
         if (!node->enabled()) return false;
     }
     return true;
 }
 
-std::set<std::string> config::Group::make_file_keys() const {
+std::set<std::string> conf_components::Group::make_file_keys() const {
     std::set<std::string> file_keys;
     auto yf = get_file();
     if (!yf) return file_keys;
@@ -45,7 +45,7 @@ std::set<std::string> config::Group::make_file_keys() const {
     return file_keys;
 }
 
-std::set<std::string> config::Group::make_child_keys() const {
+std::set<std::string> conf_components::Group::make_child_keys() const {
     std::set<std::string> child_keys;
     for (auto child: m_children) {
         auto child_key = child->name();
@@ -55,18 +55,18 @@ std::set<std::string> config::Group::make_child_keys() const {
     return child_keys;
 }
 
-config::Group::Group(config::Group *parent, std::string name, std::string description) :
+conf_components::Group::Group(conf_components::Group *parent, std::string name, std::string description) :
         Node(parent, name, description) {
     if (parent) parent->add_child(this);
 }
 
-config::Group::Group(std::string description) : Node(description) {}
+conf_components::Group::Group(std::string description) : Node(description) {}
 
-void config::Group::add_child(config::Node *child) {
+void conf_components::Group::add_child(conf_components::Node *child) {
     m_children.push_back(child);
 }
 
-std::string config::Group::invalid_file_key() const {
+std::string conf_components::Group::invalid_file_key() const {
     if (get_file()) {
         auto file_keys = make_file_keys();
         auto child_keys = make_child_keys();
@@ -80,10 +80,10 @@ std::string config::Group::invalid_file_key() const {
     return "";
 }
 
-config::Section::Section(config::Group *parent, std::string name, std::string description) :
+conf_components::Section::Section(conf_components::Group *parent, std::string name, std::string description) :
         Group(parent, name, description) {}
 
-std::string config::Section::help_string() const {
+std::string conf_components::Section::help_string() const {
     std::string str;
     str.append(log::format("{}Section:       {}\n", m_indent, log::bold_format(m_yaml_path.to_string())));
     str.append(log::format("{}Description:   {}\n\n", m_indent, m_description));
@@ -91,14 +91,14 @@ std::string config::Section::help_string() const {
     return str;
 }
 
-config::Document::Document(const yaml::File *file, std::string name, std::string description) :
+conf_components::Document::Document(const yaml::File *file, std::string name, std::string description) :
         Group(description), m_name(name), m_file(file) {}
 
-const yaml::File *config::Document::get_file() const {
+const yaml::File *conf_components::Document::get_file() const {
     return m_file;
 }
 
-std::string config::Document::help_string() const {
+std::string conf_components::Document::help_string() const {
     REQUIRE_FALSE(m_file, "Help string should only be generated when it has not been filled by a YAML file");
     std::string str = string_utils::boxed(log::format("Configuration document \"{}\"", m_name));
     str.append(log::format("Description: {}\n\n", m_description));
@@ -106,7 +106,7 @@ std::string config::Document::help_string() const {
     return str;
 }
 
-void config::Document::verify() {
+void conf_components::Document::verify() {
     Group::verify();
     if (m_file) {
         auto invalid = invalid_file_key();
@@ -115,15 +115,15 @@ void config::Document::verify() {
     }
 }
 
-config::ParamBase::ParamBase(config::Group *parent, std::string name, std::string description,
+conf_components::ParamBase::ParamBase(conf_components::Group *parent, std::string name, std::string description,
                              std::string v_default_str, std::string dim_type_str) :
         Node(parent, name, description), m_v_default_str(v_default_str),
         m_dim_type_str(dim_type_str) {
-    REQUIRE_TRUE(m_parent, "Non-root config::Nodes must have a parent");
+    REQUIRE_TRUE(m_parent, "Non-root conf_components::Nodes must have a parent");
     parent->add_child(this);
 }
 
-std::string config::ParamBase::help_string() const {
+std::string conf_components::ParamBase::help_string() const {
     std::string str;
     str.append(log::format("{}Parameter:       {}\n", m_indent, log::bold_format(name())));
     str.append(log::format("{}Type:            {}\n", m_indent, m_dim_type_str));

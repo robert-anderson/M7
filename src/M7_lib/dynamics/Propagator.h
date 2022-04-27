@@ -35,7 +35,7 @@ public:
     mutable suite::Mbfs m_dst;
     mutable suite::Conns m_conn;
 
-    Propagator(const fciqmc_config::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
+    Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
             Archivable("propagator", opts.m_archive),
             m_tau(opts.m_propagator.m_tau_init),
             m_wf_fmt(wf.m_format),

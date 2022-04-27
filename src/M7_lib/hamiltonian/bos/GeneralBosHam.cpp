@@ -31,7 +31,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
     log_data();
 }
 
-GeneralBosHam::GeneralBosHam(const fciqmc_config::BosonHamiltonian &opts) :
+GeneralBosHam::GeneralBosHam(const conf::BosHam &opts) :
         GeneralBosHam(BosdumpHeader(opts.m_bosdump.m_path), opts.m_bos_occ_cutoff){}
 
 defs::ham_t GeneralBosHam::get_coeff_0011(size_t i, size_t j) const {
