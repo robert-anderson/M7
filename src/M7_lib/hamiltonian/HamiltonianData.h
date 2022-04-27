@@ -1,5 +1,5 @@
 //
-// Created by rja on 21/08/2021.
+// Created by Robert J. Anderson on 21/08/2021.
 //
 
 #ifndef M7_HAMILTONIANDATA_H

@@ -1,5 +1,5 @@
 //
-// Created by rja on 04/08/2020.
+// Created by Robert J. Anderson on 04/08/2020.
 //
 
 #ifndef M7_UNIFORMSAMPLER_H

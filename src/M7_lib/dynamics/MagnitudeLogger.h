@@ -1,5 +1,5 @@
 //
-// Created by rja on 18/05/2020.
+// Created by Robert J. Anderson on 18/05/2020.
 //
 
 #ifndef M7_MAGNITUDELOGGER_H

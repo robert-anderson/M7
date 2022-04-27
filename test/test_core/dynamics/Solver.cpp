@@ -1,5 +1,5 @@
 //
-// Created by rja on 14/07/2021.
+// Created by Robert J. Anderson on 14/07/2021.
 //
 
 #include <M7_lib/dynamics/Propagators.h>

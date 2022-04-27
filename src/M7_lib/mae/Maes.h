@@ -1,5 +1,5 @@
 //
-// Created by rja on 15/08/2021.
+// Created by Robert J. Anderson on 15/08/2021.
 //
 
 #ifndef M7_MAES_H

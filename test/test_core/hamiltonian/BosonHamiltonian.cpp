@@ -1,5 +1,5 @@
 //
-// Created by rja on 21/11/2021.
+// Created by Robert J. Anderson on 21/11/2021.
 //
 
 #include "M7_lib/hamiltonian/bos/GeneralBosHam.h"

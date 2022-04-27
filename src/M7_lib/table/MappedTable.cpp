@@ -1,5 +1,5 @@
 //
-// Created by rja on 18/02/2021.
+// Created by Robert J. Anderson on 18/02/2021.
 //
 
 #include "MappedTable.h"

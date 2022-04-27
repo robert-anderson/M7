@@ -1,5 +1,5 @@
 //
-// Created by rja on 07/03/2022.
+// Created by Robert J. Anderson on 07/03/2022.
 //
 
 #ifndef M7_INTERACTINGBOSEGASBOSHAM_H

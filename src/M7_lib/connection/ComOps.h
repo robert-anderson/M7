@@ -1,5 +1,5 @@
 //
-// Created by anderson on 12/5/21.
+// Created by Robert J. Anderson on 12/5/21.
 //
 
 #ifndef M7_COMOPS_H

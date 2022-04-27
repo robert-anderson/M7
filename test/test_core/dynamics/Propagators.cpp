@@ -1,5 +1,5 @@
 //
-// Created by rja on 29/06/2021.
+// Created by Robert J. Anderson on 29/06/2021.
 //
 
 #include <M7_lib/dynamics/Solver.h>

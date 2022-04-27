@@ -1,5 +1,5 @@
 //
-// Created by rja on 26/01/2021.
+// Created by Robert J. Anderson on 26/01/2021.
 //
 
 #include "Logging.h"

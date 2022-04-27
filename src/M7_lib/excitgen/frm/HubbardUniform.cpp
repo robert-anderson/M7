@@ -1,5 +1,5 @@
 //
-// Created by rja on 04/04/2022.
+// Created by Robert J. Anderson on 04/04/2022.
 //
 
 #include "HubbardUniform.h"

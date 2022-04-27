@@ -1,5 +1,5 @@
 //
-// Created by rja on 12/10/2020.
+// Created by Robert J. Anderson on 12/10/2020.
 //
 
 #ifndef M7_NDACCESSOR_H

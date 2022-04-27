@@ -1,5 +1,5 @@
 //
-// Created by rja on 29/11/2020.
+// Created by Robert J. Anderson on 29/11/2020.
 //
 
 #ifndef M7_QUICKSORTER_H

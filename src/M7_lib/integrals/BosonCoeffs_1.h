@@ -1,5 +1,5 @@
 //
-// Created by rja on 02/09/2021.
+// Created by Robert J. Anderson on 02/09/2021.
 //
 
 #ifndef M7_BOSONCOEFFS_1_H

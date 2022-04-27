@@ -1,5 +1,5 @@
 //
-// Created by rja on 19/01/2021.
+// Created by Robert J. Anderson on 19/01/2021.
 //
 
 #ifndef M7_TABLE_TEST_H

@@ -1,5 +1,5 @@
 //
-// Created by rja on 16/12/2021.
+// Created by Robert J. Anderson on 16/12/2021.
 //
 
 #include <M7_lib/excitgen/LadderPureHolstein.h>

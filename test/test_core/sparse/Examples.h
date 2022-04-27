@@ -1,5 +1,5 @@
 //
-// Created by anderson on 1/10/22.
+// Created by Robert J. Anderson on 1/10/22.
 //
 
 #ifndef M7_SPARSE_EXAMPLES_H

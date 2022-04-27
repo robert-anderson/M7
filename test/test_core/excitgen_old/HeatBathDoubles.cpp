@@ -1,5 +1,5 @@
 //
-// Created by rja on 09/05/2020.
+// Created by Robert J. Anderson on 09/05/2020.
 //
 
 #include <M7_lib/excititer/ExcitIters.h>

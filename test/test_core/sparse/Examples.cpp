@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/01/2022.
+// Created by Robert J. Anderson on 10/01/2022.
 //
 
 #include "Examples.h"

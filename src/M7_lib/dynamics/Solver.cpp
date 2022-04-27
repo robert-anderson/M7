@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/11/2020.
+// Created by Robert J. Anderson on 10/11/2020.
 //
 
 #include "Solver.h"

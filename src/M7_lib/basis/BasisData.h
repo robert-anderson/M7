@@ -1,5 +1,5 @@
 //
-// Created by rja on 14/09/2021.
+// Created by Robert J. Anderson on 14/09/2021.
 //
 
 #ifndef M7_BASISDATA_H

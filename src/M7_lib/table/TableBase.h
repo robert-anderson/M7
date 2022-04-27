@@ -1,5 +1,5 @@
 //
-// Created by rja on 08/05/2021.
+// Created by Robert J. Anderson on 08/05/2021.
 //
 
 #ifndef M7_TABLEBASE_H

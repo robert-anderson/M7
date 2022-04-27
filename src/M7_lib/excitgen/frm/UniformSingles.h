@@ -1,5 +1,5 @@
 //
-// Created by anderson on 04/04/2022.
+// Created by Robert J. Anderson on 04/04/2022.
 //
 
 #ifndef M7_UNIFORMSINGLES_H

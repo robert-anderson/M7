@@ -1,5 +1,5 @@
 //
-// Created by rja on 17/08/2020.
+// Created by Robert J. Anderson on 17/08/2020.
 //
 
 #include "KramersSectorOccupation.h"

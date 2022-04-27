@@ -1,5 +1,5 @@
 //
-// Created by rja on 03/06/2021.
+// Created by Robert J. Anderson on 03/06/2021.
 //
 
 #include "Shift.h"

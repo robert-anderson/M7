@@ -1,5 +1,5 @@
 //
-// Created by anderson on 25/03/2022.
+// Created by Robert J. Anderson on 25/03/2022.
 //
 
 #ifndef M7_SETBITFOREACH_H

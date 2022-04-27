@@ -1,5 +1,5 @@
 //
-// Created by rja on 24/05/2020.
+// Created by Robert J. Anderson on 24/05/2020.
 //
 
 #include <M7_lib/dynamics/StochasticPropagator.h>

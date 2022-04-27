@@ -1,5 +1,5 @@
 //
-// Created by rja on 13/04/2021.
+// Created by Robert J. Anderson on 13/04/2021.
 //
 
 #ifndef M7_REDUCTION_H

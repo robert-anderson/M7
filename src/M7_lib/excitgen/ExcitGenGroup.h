@@ -1,5 +1,5 @@
 //
-// Created by rja on 06/04/2022.
+// Created by Robert J. Anderson on 06/04/2022.
 //
 
 #ifndef M7_EXCITGENGROUP_H

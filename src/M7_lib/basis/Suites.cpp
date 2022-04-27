@@ -1,5 +1,5 @@
 //
-// Created by rja on 24/04/22.
+// Created by Robert J. Anderson on 24/04/22.
 //
 
 #include "Suites.h"

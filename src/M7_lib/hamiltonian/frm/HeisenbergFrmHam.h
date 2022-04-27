@@ -1,5 +1,5 @@
 //
-// Created by anderson on 2/5/22.
+// Created by Robert J. Anderson on 2/5/22.
 //
 
 #ifndef M7_HEISENBERGFRMHAM_H

@@ -1,5 +1,5 @@
 //
-// Created by rja on 28/08/2021.
+// Created by Robert J. Anderson on 28/08/2021.
 //
 
 #ifndef M7_LADDERPUREUNIFORM_H

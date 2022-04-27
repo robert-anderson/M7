@@ -1,5 +1,5 @@
 //
-// Created by anderson on 2/6/22.
+// Created by Robert J. Anderson on 2/6/22.
 //
 
 #include "HeisenbergUniform.h"

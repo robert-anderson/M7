@@ -1,5 +1,5 @@
 //
-// Created by rja on 28/07/2021.
+// Created by Robert J. Anderson on 28/07/2021.
 //
 
 #include "Hamiltonian.h"

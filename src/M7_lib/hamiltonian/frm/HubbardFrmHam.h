@@ -1,5 +1,5 @@
 //
-// Created by anderson on 12/8/21.
+// Created by Robert J. Anderson on 12/8/21.
 //
 
 #ifndef M7_HUBBARDFRMHAM_H
