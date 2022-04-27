@@ -10,7 +10,7 @@
 #include "M7_lib/hamiltonian/HamOpTerm.h"
 #include "M7_lib/connection/Connections.h"
 #include "M7_lib/io/Options.h"
-#include "M7_lib/config/FciqmcConfig.h"
+#include "M7_lib/conf/Conf.h"
 #include "M7_lib/integrals/Integrals_1e.h"
 #include "M7_lib/integrals/Integrals_2e.h"
 #include "M7_lib/table/BufferedFields.h"

@@ -2,7 +2,7 @@
 // Created by rja on 25/06/2021.
 //
 
-#include "FciqmcConfig.h"
+#include "Conf.h"
 
 
 conf::HashMapping::HashMapping(Group *parent) :

@@ -6,7 +6,7 @@
 #define M7_REFEXCITS_H
 
 #include <M7_lib/connection/Connections.h>
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/io/Archivable.h>
 #include <M7_lib/basis/Suites.h>
 #include <M7_lib/field/Fields.h>

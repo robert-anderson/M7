@@ -2,7 +2,7 @@
 // Created by rja on 25/06/2021.
 //
 
-#include "Parameters.h"
+#include "ConfComponents.h"
 
 conf_components::Node::Node(conf_components::Node *parent, std::string name, std::string description) :
         m_parent(parent), m_yaml_path(parent ? yaml::Path(parent->m_yaml_path + name) : yaml::Path(name)),

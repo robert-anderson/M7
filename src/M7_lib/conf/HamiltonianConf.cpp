@@ -2,7 +2,7 @@
 // Created by anderson on 12/8/21.
 //
 
-#include "Hamiltonian.h"
+#include "HamiltonianConf.h"
 
 conf::Fcidump::Fcidump(Group *parent) :
         Section(parent, "fcidump", "options relating to the FCIDUMP file"),

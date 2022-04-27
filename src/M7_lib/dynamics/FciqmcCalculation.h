@@ -6,7 +6,7 @@
 #define M7_FCIQMCCALCULATION_H
 
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/wavefunction/Wavefunction.h>
 
 #include "StochasticPropagator.h"

@@ -10,7 +10,7 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/RankAllocator.h>
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 
 #include "BufferedTable.h"
 #include "BufferedTableArray.h"

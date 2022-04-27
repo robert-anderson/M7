@@ -11,7 +11,7 @@
 #include <M7_lib/defs.h>
 #include <M7_lib/parallel/Reduction.h>
 #include <M7_lib/excitgen/ExcitGenGroup.h>
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 
 struct MagnitudeLogger {
     /**

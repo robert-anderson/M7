@@ -5,7 +5,7 @@
 #ifndef M7_GENERALBOSHAM_H
 #define M7_GENERALBOSHAM_H
 
-#include "M7_lib/config/Hamiltonian.h"
+#include "M7_lib/conf/HamiltonianConf.h"
 
 #include "M7_lib/hamiltonian/bos/BosHam.h"
 

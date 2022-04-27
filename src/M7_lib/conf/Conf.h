@@ -2,12 +2,12 @@
 // Created by rja on 25/06/2021.
 //
 
-#ifndef M7_FCIQMCCONFIG_H
-#define M7_FCIQMCCONFIG_H
+#ifndef M7_CONF_H
+#define M7_CONF_H
 
 
-#include "Parameters.h"
-#include "Hamiltonian.h"
+#include "ConfComponents.h"
+#include "HamiltonianConf.h"
 
 namespace conf {
     
@@ -259,4 +259,4 @@ namespace conf {
 }
 
 
-#endif //M7_FCIQMCCONFIG_H
+#endif //M7_CONF_H

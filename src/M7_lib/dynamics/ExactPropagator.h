@@ -5,7 +5,7 @@
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 
 #include "Propagator.h"
 #include "M7_lib/foreach/ConnForeachGroup.h"

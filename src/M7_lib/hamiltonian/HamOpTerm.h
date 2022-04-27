@@ -9,7 +9,7 @@
 #include <forward_list>
 #include "M7_lib/foreach/ConnForeach.h"
 #include "M7_lib/excitgen/ExcitGen.h"
-#include "M7_lib/config/FciqmcConfig.h"
+#include "M7_lib/conf/Conf.h"
 
 /**
  * base class for the three currently implemented kinds of hamiltonian term based on the second quantised operators

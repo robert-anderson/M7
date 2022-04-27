@@ -5,7 +5,7 @@
 #ifndef M7_INTERACTINGBOSEGASBOSHAM_H
 #define M7_INTERACTINGBOSEGASBOSHAM_H
 
-#include "M7_lib/config/Hamiltonian.h"
+#include "M7_lib/conf/HamiltonianConf.h"
 #include "M7_lib/basis/Planewaves.h"
 #include "M7_lib/nd/NdFormatD.h"
 

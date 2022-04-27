@@ -5,7 +5,7 @@
 #ifndef M7_ARCHIVABLE_H
 #define M7_ARCHIVABLE_H
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/util/Timer.h>
 
 #include "HDF5Wrapper.h"

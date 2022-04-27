@@ -2,10 +2,10 @@
 // Created by anderson on 12/8/21.
 //
 
-#ifndef M7_CONFIG_HAMILTONIAN_H
-#define M7_CONFIG_HAMILTONIAN_H
+#ifndef M7_HAMILTONIAN_CONF_H
+#define M7_HAMILTONIAN_CONF_H
 
-#include "Parameters.h"
+#include "ConfComponents.h"
 
 namespace conf {
 
@@ -125,5 +125,4 @@ namespace conf {
 
 }
 
-
-#endif //M7_CONFIG_HAMILTONIAN_H
+#endif //M7_HAMILTONIAN_CONF_H

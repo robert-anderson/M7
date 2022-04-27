@@ -3,7 +3,7 @@
 //
 
 #include "M7_lib/hamiltonian/bos/GeneralBosHam.h"
-#include "M7_lib/config/FciqmcConfig.h"
+#include "M7_lib/conf/Conf.h"
 #include "M7_lib/hamiltonian/Hamiltonian.h"
 #include "gtest/gtest.h"
 

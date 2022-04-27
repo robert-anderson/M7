@@ -5,7 +5,7 @@
 #ifndef M7_MBF_H
 #define M7_MBF_H
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 
 #include "Fields.h"
 

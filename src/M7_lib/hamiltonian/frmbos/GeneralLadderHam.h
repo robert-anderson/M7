@@ -7,7 +7,7 @@
 
 #include "M7_lib/io/EbdumpFileReader.h"
 #include "M7_lib/integrals/FrmBosCoupledCoeffs.h"
-#include "M7_lib/config/Hamiltonian.h"
+#include "M7_lib/conf/HamiltonianConf.h"
 
 #include "FrmBosHam.h"
 

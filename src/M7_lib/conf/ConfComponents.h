@@ -2,8 +2,8 @@
 // Created by rja on 25/06/2021.
 //
 
-#ifndef M7_PARAMETERS_H
-#define M7_PARAMETERS_H
+#ifndef M7_CONF_COMPONENTS_H
+#define M7_CONF_COMPONENTS_H
 
 #include <M7_lib/io/YamlWrapper.h>
 
@@ -195,4 +195,4 @@ static std::ostream &operator<<(std::ostream &os, const conf_components::Param<T
     return os;
 }
 
-#endif //M7_PARAMETERS_H
+#endif //M7_CONF_COMPONENTS_H

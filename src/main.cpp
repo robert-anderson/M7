@@ -3,7 +3,7 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/dynamics/FciqmcCalculation.h>
 #include <M7_lib/io/YamlWrapper.h>
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 
 int main(int argc, char **argv) {
 
