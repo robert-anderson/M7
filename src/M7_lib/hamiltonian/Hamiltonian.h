@@ -64,11 +64,12 @@ struct HamiltonianTerms {
     template<typename ham_t>
     std::unique_ptr<FrmHam> make_frm(const conf::FrmHam &opts) {
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
-        auto j = opts.m_spin_penalty_j.get();
+        return std::unique_ptr<FrmHam>(new ham_t(opts));
+        //auto j = opts.m_spin_penalty_j.get();
         /*
          * if the scalar of the spin square operator is zero, just return the bare hamiltonian
          */
-        if (j==0.0) return std::unique_ptr<FrmHam>(new ham_t(opts));
+        //if (j==0.0) return std::unique_ptr<FrmHam>(new ham_t(opts));
         //TODO: pass basis / hilbert config section
 #if 0
         /*

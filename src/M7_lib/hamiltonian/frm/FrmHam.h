@@ -45,9 +45,16 @@
  */
 struct FrmHam : HamOpTerm {
     /**
-     * properties of the many-body basis
+     * properties of a many-body Hilbert space sector.
+     * although this will often be the particle sector into which H is projected, it is not necessarily the case, and no
+     * enforcement or assumption is made that the particle sector is respected by the MBFs.
      */
-    const sys::frm::Basis m_basis;
+    const sys::frm::Sector m_sector;
+    /*
+     * shortcuts to commonly-accessed sector members
+     */
+    const sys::frm::Basis& m_basis;
+    const sys::frm::Electrons& m_elecs;
     /**
      * core energy
      */
@@ -77,9 +84,36 @@ struct FrmHam : HamOpTerm {
      */
     bool m_complex_valued = false;
 
-    FrmHam(const sys::frm::Basis& basis);
+    FrmHam(const sys::frm::Sector& sector);
 
-    FrmHam(const FrmHam& other): FrmHam(other.m_basis){}
+private:
+    /**
+     * particle sector information can derive from the hamiltonian definition or from the configuration document, and
+     * sometimes these can differ. the configuration document is treated as the authority, and any definitions it makes
+     * override any that may have already been inferred from the hamiltonian definition
+     * @param from_ham
+     *  electrons inferred from the H definition
+     * @param from_conf
+     *  electrons provided in the configuration document (authoritative)
+     * @return
+     *  combined electrons object
+     */
+    static sys::frm::Electrons make_elecs(
+            const sys::frm::Electrons& from_ham, const sys::frm::Electrons& from_conf) {
+        const size_t nelec = from_conf ? from_conf : from_ham;
+        const int ms2 = conf.m_ms2.defined() ? conf.m_ms2 : ham.m_ms2;
+        const bool ms2_conserve = ham.m_ms2.conserve();.m_ms2.defined() ? conf.m_ms2 : ham.m_ms2;
+    }
+
+public:
+//
+//    FrmHam(const sys::frm::Sector& sector, const sys::frm::Electrons& overrides) :
+//            FrmHam(sys::frm::Sector(sector.m_basis,
+//                sys::frm::Electrons(overrides ? overrides : sector.m_elecs,
+//                                    overrides.m_ms2.defined() : sec
+//                                    ))){}
+
+    FrmHam(const FrmHam& other): FrmHam(other.m_sector){}
 
     FrmHam& operator=(const FrmHam& other){return *this;}
 
@@ -155,7 +189,7 @@ struct FrmHam : HamOpTerm {
 };
 
 struct NullFrmHam : FrmHam {
-    NullFrmHam() : FrmHam(sys::frm::Basis(0ul)){}
+    NullFrmHam() : FrmHam(sys::frm::Sector(0ul, 0ul)){}
 
     bool enabled() const override {
         return false;
@@ -166,7 +200,7 @@ struct NullFrmHam : FrmHam {
  * fermion sites may not be doubly occupied or unoccupied in spin systems
  */
 struct SpinModelFrmHam : FrmHam {
-    SpinModelFrmHam(const sys::frm::Basis& hs): FrmHam(hs){}
+    SpinModelFrmHam(const sys::frm::Sector& sector): FrmHam(sector){}
 };
 
 #endif //M7_FRMHAM_H

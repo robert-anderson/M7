@@ -7,12 +7,12 @@
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
 buffered::FrmOnv GeneralFrmHam::guess_reference() const {
-    buffered::FrmOnv ref(m_hs);
-    size_t nalpha = m_hs.m_nelec/2;
-    size_t nbeta = m_hs.m_nelec - nalpha;
-    if (m_hs.ms2_conserved()){
-        nalpha = m_hs.m_nelec_alpha;
-        nbeta = m_hs.m_nelec_beta;
+    buffered::FrmOnv ref(m_basis);
+    size_t nalpha = m_sector.m_elecs/2;
+    size_t nbeta = m_sector.m_elecs - nalpha;
+    if (m_elecs.m_ms2.conserve()){
+        nalpha = m_elecs.m_nalpha;
+        nbeta = m_elecs.m_nbeta;
     }
     for (size_t i = 0ul; i < nalpha; ++i) ref.set({0, i});
     for (size_t i = 0ul; i < nbeta; ++i) ref.set({1, i});
@@ -28,21 +28,20 @@ buffered::FrmOnv GeneralFrmHam::guess_reference() const {
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const sys::frm::Basis &hs):
-        FrmHam(hs),
-        m_int_1(m_hs.m_sites, m_hs.m_restricted_orbs),
-        m_int_2(m_hs.m_sites, m_hs.m_restricted_orbs) {
-    if (!m_hs.m_sites) return;
-    REQUIRE_EQ(m_hs.m_abgrp_map.m_site_irreps.size(),
-               m_hs.m_sites.ncoeff_ind(m_hs.m_restricted_orbs),
-               "site map size incorrect");
+GeneralFrmHam::GeneralFrmHam(const sys::frm::Sector &sector):
+        FrmHam(sector),
+        m_int_1(m_basis.m_nsite, m_basis.m_spin_resolved),
+        m_int_2(m_basis.m_nsite, m_basis.m_spin_resolved) {
+    if (!m_basis.m_nsite) return;
+    REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
 }
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2, size_t nelec) :
-        GeneralFrmHam({
+GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons elecs):
+        GeneralFrmHam(sys::frm::Sector(
+                sys::frm::Basis{header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved}, elecs)){}
             nelec ? nelec : header.m_nelec,
             header.m_nsite,
-            {PointGroup(), header.m_orbsym},
+            ,
             header.m_spin_resolved,
             ms2==~0 ? header.m_ms2 : ms2
         }){

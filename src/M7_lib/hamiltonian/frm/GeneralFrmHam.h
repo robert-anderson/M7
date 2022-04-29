@@ -14,9 +14,9 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(const sys::frm::Basis& hs);
+    GeneralFrmHam(const sys::frm::Sector& sector);
 
-    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, int ms2_restrict=~0, size_t nelec=0);
+    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons elecs);
 
     explicit GeneralFrmHam(const conf::FrmHam &opts);
 

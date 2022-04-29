@@ -10,46 +10,73 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include "AbelianGroup.h"
 
-
-namespace sys {
+namespace conservation {
+    enum State {Undefined, Yes, No, Hint};
     /**
-     * 2*Ms value to which the fermionic many-body basis is constrained if conserved, else the value only serves
-     * as a hint for the purpose of reference / initial MBF selection
+     * wrapper class to handle physical values that are allowed to be in the following states:
+     *  - undefined
+     *  - conserved with a defined value
+     *  - unconserved with a defined value (value can be used as a hint when "slight" symmetry breaking occurs)
+     *  - unconserved without a defined value
      */
     template<typename T>
-    class OptionallyConserved {
-        const T m_v;
+    class Optional {
+        const T m_value;
         const std::string m_name;
         const bool m_conserve;
     public:
-        OptionallyConserved(T v, bool conserve, std::string name):
-            m_v(v), m_name(std::move(name)), m_conserve(conserve){}
+        Optional(T v, bool conserve, std::string name): m_value(v), m_name(std::move(name)), m_conserve(conserve){}
         /*
-         * set an undefined value
+         * set an undefined value (but state is defined if conserve is false)
          */
-        explicit OptionallyConserved(std::string name): OptionallyConserved(std::numeric_limits<T>::max(), false, name){}
-        explicit OptionallyConserved(const OptionallyConserved& oc1, const OptionallyConserved& oc2) :
-            OptionallyConserved(oc1.defined() ? oc1 : oc2){
-            if (oc1.defined() && oc2.defined())
-                REQUIRE_EQ(oc1, oc2, "incompatible "+m_name+" values");
+        explicit Optional(bool conserve, std::string name): Optional(std::numeric_limits<T>::max(), conserve, name){}
+        /*
+         * set an undefined state
+         */
+        explicit Optional(std::string name): Optional(true, name){}
+        explicit Optional(const Optional& o1, const Optional& o2) : Optional(o1.defined() ? o1 : o2){
+            if (o1.defined() && o2.defined()) {
+                REQUIRE_EQ(o1, o2, "incompatible "+m_name+" values");
+                REQUIRE_EQ(o1.m_conserve, o2.m_conserve, "incompatible "+m_name+" conservation statuses");
+            }
         }
-        operator T() const {
-            // accesses should be guarded by checking if the quantity is defined first
-            DEBUG_ASSERT_TRUE(defined(), "accessing undefined "+m_name+" value");
-            return m_v;
+
+        State state() const {
+            if (m_value==std::numeric_limits<T>::max()) return m_conserve ? Undefined : No;
+            else return m_conserve ? Yes : Hint;
         }
-        bool conserve() const {
-            // accesses should be guarded by checking if the quantity is defined first
-            DEBUG_ASSERT_TRUE(defined(), "accessing undefined "+m_name+" value");
-            return m_conserve;
+        bool has_value() const {
+            auto tmp = state();
+            return tmp==Yes || tmp==Hint;
         }
         bool defined() const {
-            return m_v!=std::numeric_limits<T>::max();
+            return state()!=Undefined;
         }
-        bool operator==(const OptionallyConserved& other) const {
-            return m_v==other.m_v && m_conserve==other.m_conserve;
+
+        operator T() const {
+            // value accesses should be guarded by checking if the quantity is defined first
+            DEBUG_ASSERT_TRUE(has_value(), "accessing undefined "+m_name+" value");
+            return m_value;
+        }
+        bool conserve() const {
+            DEBUG_ASSERT_NE(state(), Undefined, "accessing "+m_name+" in undefined state");
+            return m_conserve;
+        }
+        bool operator==(const Optional& other) const {
+            return m_value==other.m_value && m_conserve==other.m_conserve;
         }
     };
+};
+
+namespace sys {
+    /**
+     * optionally conservable physical values are allowed to be in the following states:
+     *  - undefined
+     *  - conserved with a defined value
+     *  - unconserved without a defined value
+     *  - unconserved with a defined value (value can be used as a hint when "slight" symmetry breaking occurs)
+     */
+
 
     namespace frm {
         /**
@@ -96,13 +123,13 @@ namespace sys {
             }
 
             /**
-             * @param restricted_orbs
+             * @param spin_resolved
              *  true if the basis is spin-resolved e.g. UHF
              * @return
              *  number of indices needed in the access of coefficients
              */
-            size_t ncoeff_ind(bool restricted_orbs) const {
-                return restricted_orbs ? m_nspinorb : m_nsite;
+            size_t ncoeff_ind(bool spin_resolved) const {
+                return spin_resolved ? m_nspinorb : m_nsite;
             }
         };
 
@@ -117,7 +144,7 @@ namespace sys {
             /**
              * true if the two spin orbitals corresponding to the same site have identical functional form e.g. in UHF basis
              */
-            const bool m_restricted_orbs;
+            const bool m_spin_resolved;
 
         private:
             operator size_t() const {
@@ -128,8 +155,8 @@ namespace sys {
                 return m_nsite;
             }
 
-            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool restricted_orbs):
-                Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_restricted_orbs(restricted_orbs){}
+            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved):
+                    Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved){}
             /*
              * non-resolved spin, C1 point group (no spatial symmetry)
              */
@@ -141,7 +168,7 @@ namespace sys {
             explicit Basis(const Basis& basis1, const Basis& basis2):
                 Basis(basis1.m_nsite ? basis1.m_nsite : basis2.m_nsite,
                       basis1.m_abgrp_map ? basis1.m_abgrp_map : basis2.m_abgrp_map,
-                      basis1.m_restricted_orbs && basis2.m_restricted_orbs) {
+                      basis1.m_spin_resolved && basis2.m_spin_resolved) {
                 if (basis1 && basis2) {
                     REQUIRE_EQ(basis1.m_nsite, basis2.m_nsite, "incompatible numbers of sites");
                     if (basis1.m_abgrp_map && basis2.m_abgrp_map) {
@@ -154,11 +181,11 @@ namespace sys {
             bool operator==(const Basis& other) const {
                 return m_nsite==other.m_nsite &&
                         m_abgrp_map==other.m_abgrp_map &&
-                        m_restricted_orbs==other.m_restricted_orbs;
+                       m_spin_resolved == other.m_spin_resolved;
             }
 
             size_t ncoeff_ind() const {
-                return Size::ncoeff_ind(m_restricted_orbs);
+                return Size::ncoeff_ind(m_spin_resolved);
             }
         };
 
@@ -177,13 +204,13 @@ namespace sys {
              * 2*Ms value to which the fermionic many-body basis is constrained if conserved, else the value only serves
              * as a hint for the purpose of reference / initial MBF selection
              */
-            struct Ms2 : public OptionallyConserved<int>{
-                Ms2(int v, bool conserve): OptionallyConserved<int>(v, conserve, "2*Ms"){}
+            struct Ms2 : public conservation::Optional<int>{
+                Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
                 /*
                  * set either 0 or 1 based on the evenness of the electron number
                  */
                 Ms2(size_t nelec): Ms2(!(nelec&1ul), false){}
-                Ms2(): OptionallyConserved<int>("2*Ms"){}
+                Ms2(): conservation::Optional<int>("2*Ms"){}
             };
             const Ms2 m_ms2;
             /**
@@ -299,9 +326,9 @@ namespace sys {
             }
         };
 
-        struct Bosons : public OptionallyConserved<size_t> {
-            Bosons(size_t v, bool conserve): OptionallyConserved<size_t>(v, conserve, "nboson"){}
-            Bosons(): OptionallyConserved<size_t>("nboson"){}
+        struct Bosons : public conservation::Optional<size_t> {
+            Bosons(size_t v, bool conserve): conservation::Optional<size_t>(v, conserve, "nboson"){}
+            Bosons(): conservation::Optional<size_t>("nboson"){}
         };
 
         struct Sector {
@@ -312,8 +339,7 @@ namespace sys {
              * combine the properties of two Hilbert space sectors
              */
             explicit Sector(const Sector& sector1, const Sector& sector2):
-                Sector(Basis(sector1.m_basis, sector2.m_basis),
-                       Bosons(sector1.m_bosons, sector2.m_bosons)){}
+                Sector(Basis(sector1.m_basis, sector2.m_basis), Bosons(sector1.m_bosons, sector2.m_bosons)){}
 
             bool operator==(const Sector& other) const {
                 return m_basis==other.m_basis && m_bosons==other.m_bosons;

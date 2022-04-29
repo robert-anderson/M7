@@ -58,8 +58,7 @@ public:
 
     void log_data() const override;
 
-    excit_gen_list_t make_excit_gens(
-            PRNG& prng, sys::Particles particles, const conf::Propagator& opts) const override;
+    excit_gen_list_t make_excit_gens(PRNG& prng, const conf::Propagator& opts) const override;
 
     conn_foreach_list_t make_foreach_iters() const override;
 };

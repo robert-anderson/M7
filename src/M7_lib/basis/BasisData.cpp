@@ -25,7 +25,7 @@ void sys::Size::require_pure_bos() const {
 }
 
 sys::frm::Basis::Basis(size_t nelec, size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, int ms2) :
-        m_nelec(nelec), m_sites(nsite), m_nvac(m_sites.m_nspinorb - nelec), m_restricted_orbs(spin_resolved),
+        m_nelec(nelec), m_sites(nsite), m_nvac(m_sites.m_nspinorb - nelec), m_spin_resolved(spin_resolved),
         m_abgrp_map(std::move(abgrp_map)), m_ms2(ms2),
         m_nelec_alpha(ms2_conserved() ? (m_nelec+m_ms2)/2 : 0ul),
         m_nelec_beta(ms2_conserved() ? m_nelec - m_nelec_alpha : 0ul),
@@ -50,7 +50,7 @@ sys::frm::Basis::Basis(const sys::frm::Basis &hs1, const sys::frm::Basis &hs2) :
         sys::frm::Basis(hs1.m_nelec ? hs1.m_nelec : hs2.m_nelec,
                         hs1.m_sites ? hs1.m_sites : hs2.m_sites,
                         hs1.m_abgrp_map ? hs1.m_abgrp_map : hs2.m_abgrp_map,
-                        hs1.m_restricted_orbs || hs2.m_restricted_orbs,
+                        hs1.m_spin_resolved || hs2.m_spin_resolved,
                         hs1.m_ms2 != ~0 ? hs1.m_ms2 : hs2.m_ms2) {
     if (hs1 && hs2) {
         /*

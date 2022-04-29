@@ -6,8 +6,9 @@
 
 #include "FrmHam.h"
 
-FrmHam::FrmHam(const sys::frm::Basis& basis):
-        m_basis(basis), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
+FrmHam::FrmHam(const sys::frm::Sector& sector):
+        m_sector(sector), m_basis(m_sector.m_basis), m_elecs(m_sector.m_elecs),
+        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);
