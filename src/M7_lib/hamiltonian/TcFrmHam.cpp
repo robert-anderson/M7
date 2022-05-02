@@ -17,8 +17,13 @@ defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv, const conn::Frm
 }
 
 defs::ham_t TcFrmHam::get_element_0000(const field::FrmOnv &onv) const {
-    return GeneralFrmHam::get_element_0000(onv);
-    // TODO stub requires a sum over bit triples
+    auto element = GeneralFrmHam::get_element_0000(onv);
+    auto triples_fn = [&](size_t i, size_t j, size_t k) {
+        // CHECK I don't think one must check the indices
+        element += get_coeff_3300(i, j, k, i, j, k);
+    };
+    onv.foreach_setbit_triple(triples_fn);
+    return element; // not entirely sure why no phase here
 }
 
 defs::ham_t TcFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
