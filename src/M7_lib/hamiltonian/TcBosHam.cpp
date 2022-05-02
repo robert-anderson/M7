@@ -20,11 +20,26 @@ defs::ham_t TcBosHam::get_coeff_0033(size_t a, size_t b, size_t c,
 defs::ham_t TcBosHam::get_element_0000(const field::BosOnv &onv) const {
     auto element = GeneralBosHam::get_element_0000(onv);
     // @todo stub requires sum over triples
+    for(size_t imode=0; imode < onv.m_nmode; ++imode) {
+        for(size_t jmode=0; jmode < onv.m_nmode; ++jmode) {
+            for(size_t kmode=0; kmode < onv.m_nmode; ++kmode) {
+                element += get_coeff_0033(imode, jmode, kmode,
+                                          imode, jmode, kmode);
+            }
+        }
+    }
 }
 
 defs::ham_t TcBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     auto element = GeneralBosHam::get_element_0011(onv, conn);
-    // TODO stub
+    for(size_t imode=0; imode < onv.m_nmode; ++imode) {
+        for(size_t jmode=0; jmode < onv.m_nmode; ++jmode) {
+            // CHECK am I double counting here?
+            element += get_coeff_0033(conn.m_cre.get_imode(0), imode, jmode,
+                                      conn.m_ann.get_imode(0), imode, jmode);
+            // CHECK are other permutations necessary to add?
+        }
+    }
 }
 
 defs::ham_t TcBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {

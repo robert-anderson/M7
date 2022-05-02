@@ -30,3 +30,14 @@ struct GeneralBosHam : BosHam {
 };
 
 #endif //M7_GENERALBOSHAM_H
+
+// todo remove comments below
+// const, const ref, method const
+// move semantics e.g. && -> might solve copy problem
+// smart pointers
+// garbage collection
+// smart pointers
+// **std::unique_ptr** (for polymorphic obj, singular ownership)
+// std::share_ptr (not useful here? but useful in genreal, shared ownership)
+// use standard template library e.g. std::vector
+// virtual methods
