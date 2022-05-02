@@ -28,6 +28,7 @@ defs::ham_t TcBosHam::get_element_0000(const field::BosOnv &onv) const {
             }
         }
     }
+    return element;
 }
 
 defs::ham_t TcBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
@@ -40,6 +41,7 @@ defs::ham_t TcBosHam::get_element_0011(const field::BosOnv &onv, const conn::Bos
             // CHECK are other permutations necessary to add?
         }
     }
+    return element;
 }
 
 defs::ham_t TcBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
@@ -50,11 +52,13 @@ defs::ham_t TcBosHam::get_element_0022(const field::BosOnv &onv, const conn::Bos
                                   conn.m_ann.get_imode(0), conn.m_ann.get_imode(1), imode);
         // CHECK not sure if need to add other repeated versions, like if two m_cre objects are repeated
     }
+    return element;
 }
 
 defs::ham_t TcBosHam::get_element_0033(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     auto element = get_coeff_0033(conn.m_cre.get_imode(0), conn.m_cre.get_imode(1), conn.m_cre.get_imode(2),
                                   conn.m_ann.get_imode(0), conn.m_ann.get_imode(1), conn.m_ann.get_imode(2));
     element *= conn.occ_fac(onv);
+    return element;
 }
 
