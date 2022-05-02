@@ -5,7 +5,8 @@
 #include "TcFrmHam.h"
 
 defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const {
-    const int ia=i, ib=b, ic=c, ii=i, ij=j, ik=k;
+    const int ia=a, ib=b, ic=c, ii=i, ij=j, ik=k;
+    // the function below returns a float
     return three_body_coeff(&ia, &ib, &ic, &ii, &ij, &ik);
 }
 
@@ -15,12 +16,9 @@ defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv, const conn::Frm
     return conn.phase(onv) ? -element : element;
 }
 
-defs::ham_t TcFrmHam::get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const {
-    return 0.0;
-}
-
 defs::ham_t TcFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     return GeneralFrmHam::get_element_0000(onv);
+    // TODO stub requires a sum over bit triples
 }
 
 defs::ham_t TcFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
