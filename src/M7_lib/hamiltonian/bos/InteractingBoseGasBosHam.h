@@ -16,7 +16,7 @@ struct InteractingBoseGasBosHam : BosHam {
     const defs::ham_t m_ek_scale;
 
     InteractingBoseGasBosHam(size_t nboson, size_t ndim, size_t nwave, defs::ham_t ek_scale):
-            BosHam({nboson, Planewaves::size(ndim, nwave)}),
+            BosHam(sys::bos::Sector({Planewaves::size(ndim, nwave)}, {nboson, true, }),
             m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
 
     InteractingBoseGasBosHam(const conf::BosHam &opts):

@@ -28,7 +28,7 @@ buffered::FrmOnv GeneralFrmHam::guess_reference() const {
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const sys::frm::Sector &sector):
+GeneralFrmHam::GeneralFrmHam(const sys::frm::Sector &sector, sys::frm::Electrons conf_elecs):
         FrmHam(sector),
         m_int_1(m_basis.m_nsite, m_basis.m_spin_resolved),
         m_int_2(m_basis.m_nsite, m_basis.m_spin_resolved) {
@@ -36,15 +36,8 @@ GeneralFrmHam::GeneralFrmHam(const sys::frm::Sector &sector):
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
 }
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons elecs):
-        GeneralFrmHam(sys::frm::Sector(
-                sys::frm::Basis{header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved}, elecs)){}
-            nelec ? nelec : header.m_nelec,
-            header.m_nsite,
-            ,
-            header.m_spin_resolved,
-            ms2==~0 ? header.m_ms2 : ms2
-        }){
+GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons conf_elecs):
+        GeneralFrmHam(sector(header), conf_elecs){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -52,10 +45,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::
     using namespace ham_data;
     defs::inds inds(4);
     defs::ham_t value;
-
     // assume no contribution cases to be nonzero unless a counterexample is found
-    REQUIRE_LE_ALL(m_hs.m_nelec, m_hs.m_sites.m_nspinorb,
-                   "unphysical number of electrons specified by FCIDUMP file header and charge parameter");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {

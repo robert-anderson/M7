@@ -67,10 +67,6 @@ conf::Heisenberg::Heisenberg(Group *parent) :
 conf::FrmHam::FrmHam(Group *parent) :
         Section(parent, "fermion", "options relating to the fermion hamiltonian terms"),
         m_fcidump(this), m_hubbard(this), m_heisenberg(this),
-        m_nelec(this, "nelec", 0ul,
-                "number of electrons in the system (overrides any value determined by FCIDUMP or model system)"),
-        m_ms2(this, "ms2", 0,
-              "2Ms value in which to restrict the fermion sector if the Hamiltonian conserves z-axis projection of spin quantum number"),
         m_spin_penalty_j(this, "spin_penalty_j", 0.0, "scalar multiple of the total spin operator used in the spin penalty fermion Hamiltonian modification"){}
 
 void conf::FrmHam::verify() {
@@ -106,8 +102,6 @@ bool conf::InteractingBoseGas::enabled() const {
 conf::BosHam::BosHam(Group *parent) :
         Section(parent, "boson", "options relating to the number-conserving boson hamiltonian terms"),
         m_bosdump(this),
-        m_nboson(this, "nboson", 0ul, "number of bosons in the system. if zero, the the Hamiltonian is not assumed to conserve boson number"),
-        m_bos_occ_cutoff(this, "nboson_max", defs::max_bos_occ, "maximum allowed occupation of bosonic modes."),
         m_num_op_weight(this, "num_op_weight", 0.0, "scalar factor of the bosonic number operator"),
         m_interacting_bose_gas(this){}
 

@@ -67,8 +67,6 @@ namespace conf {
         Fcidump m_fcidump;
         Hubbard m_hubbard;
         Heisenberg m_heisenberg;
-        Param<size_t> m_nelec;
-        Param<int> m_ms2;
         Param<double> m_spin_penalty_j;
 
         explicit FrmHam(Group *parent);
@@ -99,26 +97,18 @@ namespace conf {
 
     struct BosHam : Section {
         Bosdump m_bosdump;
-        Param<size_t> m_nboson;
-        Param<size_t> m_bos_occ_cutoff;
         Param<defs::ham_comp_t> m_num_op_weight;
         InteractingBoseGas m_interacting_bose_gas;
 
         explicit BosHam(Group *parent);
 
         bool enabled() const override;
-
-        void verify() override {
-            REQUIRE_LE(m_bos_occ_cutoff, defs::max_bos_occ, log::format("given nboson_max exceeds limit of {}", defs::max_bos_occ));
-            REQUIRE_LE(m_nboson, m_bos_occ_cutoff, "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
-        }
     };
 
     struct Hamiltonian : Section {
         FrmHam m_fermion;
         FrmBosHam m_ladder;
         BosHam m_boson;
-        
 
         explicit Hamiltonian(Group *parent);
     };

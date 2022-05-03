@@ -14,8 +14,8 @@
 struct NumOpBosHam : BosHam {
     const defs::ham_comp_t m_weight;
 
-    NumOpBosHam(const sys::bos::Basis& basis, defs::ham_comp_t weight):
-            BosHam(basis), m_weight(weight){}
+    NumOpBosHam(const sys::bos::Basis& basis, defs::ham_comp_t weight, const sys::bos::Bosons& from_conf):
+            BosHam(sys::bos::Sector(basis, from_conf)), m_weight(weight){}
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
         return i==j ? m_weight : 0;

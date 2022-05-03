@@ -293,8 +293,6 @@ namespace conn_foreach {
             Cre(size_t nmode, size_t occ_cutoff) :
                     Base(exsig_utils::ex_0010, nmode), m_occ_cutoff(occ_cutoff) {}
 
-            Cre(const sys::bos::Basis& basis): Cre(basis.m_nmode, basis.m_occ_cutoff){}
-
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
                 conn.clear();

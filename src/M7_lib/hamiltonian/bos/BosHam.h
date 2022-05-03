@@ -19,20 +19,38 @@ struct BosHam : HamOpTerm {
     /**
      * properties of the many-body basis
      */
-    const sys::bos::Basis m_basis;
+    const sys::bos::Sector m_sector;
 
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
+    BosHam(const sys::bos::Sector& sector):
+            m_sector(sector), m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
+
+private:
     /**
+     * particle sector information can derive from the hamiltonian definition or from the configuration document, and
+     * sometimes these can differ. the configuration document is treated as the authority, and any definitions it makes
+     * override any that may have already been inferred from the hamiltonian definition
+     * @param ham_elecs
+     *  bosons inferred from the H definition
+     * @param conf_elecs
+     *  bosons provided in the configuration document (authoritative)
      * @return
-     *  true if H only consists of nonzero terms with rank signatures of the form 00xx
+     *  combined bosons object
      */
-    bool number_conserving() const {
-        return true;
+    static sys::bos::Bosons make_bosons(const sys::bos::Bosons& from_ham, const sys::bos::Bosons& from_conf){
+        const size_t nboson = from_conf.has_value() ? from_conf : from_ham;
+        const bool conserve = from_ham.conserve();
+        const size_t occ_cutoff = from_conf.m_occ_cutoff;
+        return {nboson, conserve, occ_cutoff};
     }
 
-    BosHam(const sys::bos::Basis& basis);
+public:
+
+    BosHam(const sys::bos::Sector& sector, const sys::bos::Bosons& from_conf) :
+            BosHam(sys::bos::Sector(sector.m_basis, make_bosons(sector.m_bosons, from_conf))){}
+
 	virtual ~BosHam(){}
 
     virtual defs::ham_t get_coeff_0011(size_t i, size_t j) const {return 0;}
@@ -65,7 +83,7 @@ struct BosHam : HamOpTerm {
 };
 
 struct NullBosHam : BosHam {
-    NullBosHam() : BosHam(sys::bos::Basis(0ul)){}
+    NullBosHam() : BosHam(sys::bos::Sector({0ul}, {0ul, true, 0ul})){}
 
     bool enabled() const override {
         return false;

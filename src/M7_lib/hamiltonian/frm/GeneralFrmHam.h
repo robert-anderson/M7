@@ -14,8 +14,16 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(const sys::frm::Sector& sector);
+    GeneralFrmHam(const sys::frm::Sector& sector, sys::frm::Electrons conf_elecs);
 
+private:
+    static sys::frm::Sector sector(const FcidumpHeader& header) {
+        sys::frm::Basis basis(header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved);
+        sys::frm::Electrons elecs(header.m_nelec, {header.m_ms2, header.m_relativistic});
+        return sys::frm::Sector(basis, elecs);
+    }
+
+public:
     GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons elecs);
 
     explicit GeneralFrmHam(const conf::FrmHam &opts);

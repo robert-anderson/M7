@@ -256,7 +256,9 @@ namespace sys {
                 m_basis(basis), m_elecs(elecs),
                 m_nvac(m_basis.m_nspinorb - m_elecs),
                 m_nvac_alpha(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nalpha : 0ul),
-                m_nvac_beta(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nbeta : 0ul){}
+                m_nvac_beta(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nbeta : 0ul){
+                REQUIRE_LE_ALL(m_elecs, m_basis.m_nspinorb, "unphysical number of electrons");
+            }
 
             /*
              * combine the properties of two Hilbert space sectors
@@ -296,39 +298,25 @@ namespace sys {
             operator size_t() const {
                 return m_nmode;
             }
-        };
-
-        struct Basis : Size {
-            const size_t m_occ_cutoff;
-        private:
-            operator size_t() const {
-                return 0ul;
-            }
-        public:
-            operator bool() const {
-                return m_nmode;
-            }
-            Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ): Size(nmode), m_occ_cutoff(occ_cutoff){}
 
             /*
              * combine the properties of two single-particle bases
              */
-            explicit Basis(const Basis& basis1, const Basis& basis2):
-                    Basis(basis1.m_nmode ? basis1.m_nmode : basis2.m_nmode, basis1.m_occ_cutoff){
-                if (basis1 && basis2) {
-                    REQUIRE_EQ(basis1.m_nmode, basis2.m_nmode, "incompatible numbers of modes");
-                    REQUIRE_EQ(basis1.m_occ_cutoff, basis2.m_occ_cutoff, "incompatible occupation cutoffs");
+            explicit Size(const Size& size1, const Size& size2): Size(size1 ? size1 : size2){
+                if (size1 && size2) {
+                    REQUIRE_EQ(size1.m_nmode, size2.m_nmode, "incompatible numbers of modes");
                 }
-            }
-
-            bool operator==(const Basis& other) const {
-                return m_nmode==other.m_nmode && m_occ_cutoff==other.m_occ_cutoff;
             }
         };
 
+        using Basis = Size;
+
         struct Bosons : public conservation::Optional<size_t> {
-            Bosons(size_t v, bool conserve): conservation::Optional<size_t>(v, conserve, "nboson"){}
-            Bosons(): conservation::Optional<size_t>("nboson"){}
+            const size_t m_occ_cutoff;
+            Bosons(size_t v, bool conserve, size_t occ_cutoff):
+                conservation::Optional<size_t>(v, conserve, "nboson"), m_occ_cutoff(occ_cutoff){}
+            Bosons(): Bosons(~0ul, true, defs::max_bos_occ){}
+            Bosons(const Bosons& b1, const Bosons& b2): Bosons(b1.defined() ? b1 : b2){}
         };
 
         struct Sector {

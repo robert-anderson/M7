@@ -91,27 +91,19 @@ private:
      * particle sector information can derive from the hamiltonian definition or from the configuration document, and
      * sometimes these can differ. the configuration document is treated as the authority, and any definitions it makes
      * override any that may have already been inferred from the hamiltonian definition
-     * @param from_ham
+     * @param ham_elecs
      *  electrons inferred from the H definition
-     * @param from_conf
+     * @param conf_elecs
      *  electrons provided in the configuration document (authoritative)
      * @return
      *  combined electrons object
      */
-    static sys::frm::Electrons make_elecs(
-            const sys::frm::Electrons& from_ham, const sys::frm::Electrons& from_conf) {
-        const size_t nelec = from_conf ? from_conf : from_ham;
-        const int ms2 = conf.m_ms2.defined() ? conf.m_ms2 : ham.m_ms2;
-        const bool ms2_conserve = ham.m_ms2.conserve();.m_ms2.defined() ? conf.m_ms2 : ham.m_ms2;
-    }
+    static sys::frm::Electrons make_elecs(const sys::frm::Electrons& ham_elecs, const sys::frm::Electrons& conf_elecs);
 
 public:
-//
-//    FrmHam(const sys::frm::Sector& sector, const sys::frm::Electrons& overrides) :
-//            FrmHam(sys::frm::Sector(sector.m_basis,
-//                sys::frm::Electrons(overrides ? overrides : sector.m_elecs,
-//                                    overrides.m_ms2.defined() : sec
-//                                    ))){}
+
+    FrmHam(const sys::frm::Sector& sector, const sys::frm::Electrons& from_conf) :
+            FrmHam(sys::frm::Sector(sector.m_basis, make_elecs(sector.m_elecs, from_conf))){}
 
     FrmHam(const FrmHam& other): FrmHam(other.m_sector){}
 
