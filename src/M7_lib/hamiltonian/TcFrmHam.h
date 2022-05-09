@@ -11,12 +11,15 @@
 // use precision, only: dp
 // dp => real64
 // @todo this will actually come from an external module (tchint)
+// TcHam should have a new constructor -> get multiple inheritance
 extern double three_body_coeff(const int* ida, const int* idb, const int* idc, \
                               const int* idi, const int* idj, const int* idk);
 
 
 struct TcFrmHam : GeneralFrmHam {
-    explicit TcFrmHam(const fciqmc_config::FermionHamiltonian &opts) : GeneralFrmHam(opts) {}
+    explicit TcFrmHam(const fciqmc_config::FermionHamiltonian &opts) : GeneralFrmHam(opts) {
+        // TODO tchint_init
+    }
 
     defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const override;
 
@@ -29,6 +32,8 @@ struct TcFrmHam : GeneralFrmHam {
     defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
     defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
+
+    // TODO also need a destructor for tchint finalise
 
 };
 
