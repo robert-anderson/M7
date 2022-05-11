@@ -22,7 +22,7 @@ struct TcHam {
     // Would there be any members? I guess not really
     TcHam();  // constructor
 
-    ~TcHam();  // desctructor
+    ~TcHam();  // destructor
 
    protected:
     defs::ham_t get_lmat_coeff(size_t a, size_t b, size_t c, size_t i, size_t j,

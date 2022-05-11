@@ -20,7 +20,8 @@
 //
 // [ ] maybe also do a "ui test" as done in TCHINT
 
-#ifdef ENABLE_TCHINT
+#ifdef ENABLE_TCHINT // TODO
+// this part is not compiled for some reason...
 /**
  * @brief checks if get_coeff_element3300 and get_coeff_element3300 are the same
  *        up to parity
@@ -28,5 +29,21 @@
  */
 TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // TODO stub
+    ASSERT_TRUE(false);
 }
+TEST(TranscorrelatedFermionHamiltonian, test_inside_braces2) {
+    // TODO stub
+    ASSERT_TRUE(false);
+}
+
 #endif // ENABLE_TCHINT
+
+TEST(TranscorrelatedFermionHamiltonian, test_outside_braces) {
+    // TODO stub
+    ASSERT_TRUE(false);
+}
+
+TEST(TranscorrelatedFermionHamiltonian, test_outside_braces3) {
+    // TODO stub
+    ASSERT_TRUE(false);
+}
