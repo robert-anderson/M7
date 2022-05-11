@@ -13,11 +13,10 @@
 
 defs::ham_t TcBosHam::get_coeff_0033(size_t a, size_t b, size_t c, size_t i,
                                      size_t j, size_t k) const {
-    const int ia = i, ib = b, ic = c, ii = i, ij = j, ik = k;  // convert to int
-    return three_body_coeff(&ia, &ib, &ic, &ii, &ij, &ik);
+    return get_lmat_coeff(a, b, c, i, j, k);
 }
 
-defs::ham_t TcBosHam::get_element_0000(const field::BosOnv& onv) const {
+defs::ham_t TcBosHam::get_element_0000(const field::BosOnv &onv) const {
     auto element = GeneralBosHam::get_element_0000(onv);
     for (size_t imode = 0; imode < onv.m_nmode; ++imode) {
         for (size_t jmode = 0; jmode < onv.m_nmode; ++jmode) {
@@ -30,8 +29,8 @@ defs::ham_t TcBosHam::get_element_0000(const field::BosOnv& onv) const {
     return element;
 }
 
-defs::ham_t TcBosHam::get_element_0011(const field::BosOnv& onv,
-                                       const conn::BosOnv& conn) const {
+defs::ham_t TcBosHam::get_element_0011(const field::BosOnv &onv,
+                                       const conn::BosOnv &conn) const {
     auto element = GeneralBosHam::get_element_0011(onv, conn);
     for (size_t imode = 0; imode < onv.m_nmode; ++imode) {
         for (size_t jmode = 0; jmode < onv.m_nmode; ++jmode) {
@@ -44,8 +43,8 @@ defs::ham_t TcBosHam::get_element_0011(const field::BosOnv& onv,
     return element;
 }
 
-defs::ham_t TcBosHam::get_element_0022(const field::BosOnv& onv,
-                                       const conn::BosOnv& conn) const {
+defs::ham_t TcBosHam::get_element_0022(const field::BosOnv &onv,
+                                       const conn::BosOnv &conn) const {
     auto element = GeneralBosHam::get_element_0022(onv, conn);
     for (size_t imode = 0; imode < onv.m_nmode; ++imode) {
         // no need to check operators like in Fermi case
@@ -58,8 +57,8 @@ defs::ham_t TcBosHam::get_element_0022(const field::BosOnv& onv,
     return element;
 }
 
-defs::ham_t TcBosHam::get_element_0033(const field::BosOnv& onv,
-                                       const conn::BosOnv& conn) const {
+defs::ham_t TcBosHam::get_element_0033(const field::BosOnv &onv,
+                                       const conn::BosOnv &conn) const {
     auto element =
         get_coeff_0033(conn.m_cre.get_imode(0), conn.m_cre.get_imode(1),
                        conn.m_cre.get_imode(2), conn.m_ann.get_imode(0),
