@@ -6,13 +6,17 @@
  *
  */
 
-#include <gtest/gtest.h>
-#include <M7_lib/hamiltonian/Hamiltonian.h>
+#include <M7_lib/hamiltonian/TcFrmHam.h> // what's being tested
 #include <M7_lib/field/Mbf.h>
-#include "M7_lib/caches/DecodedDeterminants.h"
+#include <M7_lib/hamiltonian/Hamiltonian.h>
+#include <gtest/gtest.h>
 
+#include "M7_lib/caches/DecodedDeterminants.h"
+#include "M7_lib/field/Mbf.h"
+
+#include <iomanip>
 // TODO:
-// [ ] put appropriate TCDUMP(s) into the assets folder
+// [x] put appropriate TCDUMP(s) into the assets folder
 // [ ] get_coeff2200 check for non-Hermiticity (should be handled fine)
 // [ ] get_coeff3300 same as get_element3300 up to sign
 //          test with and without the parity
@@ -20,30 +24,66 @@
 //
 // [ ] maybe also do a "ui test" as done in TCHINT
 
-#ifdef ENABLE_TCHINT // TODO
-// this part is not compiled for some reason...
+#ifdef ENABLE_TCHINT
+
+
 /**
  * @brief checks if get_coeff_element3300 and get_coeff_element3300 are the same
  *        up to parity
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
-    // TODO stub
-    ASSERT_TRUE(false);
-}
-TEST(TranscorrelatedFermionHamiltonian, test_inside_braces2) {
-    // TODO stub
-    ASSERT_TRUE(false);
+    // TC Fermion Hamiltonian to be tested
+    TcFrmHam ham("FCIDUMP", false, 0);
+    buffered::FrmOnv onv(ham.m_nsite);
+    onv = {{0, 1},{0, 1}};
+    conn::FrmOnv conn(onv);
+    // spin-orbital indices to annihilate
+    // (one integer -> spin-orbital; pair -> spin, spatial orbital)
+    conn.m_cre.add({0, 2});
+    conn.m_cre.add({0, 3});
+    conn.m_cre.add({1, 9});
+    conn.m_ann.add({0, 0}); // alpha electron in spatial orbital 0 to be annihilated
+    conn.m_ann.add({0, 1}); // alpha e in spatial orb 1
+    conn.m_ann.add({1, 0}); // beta e in spatial orb 0
+    auto other = onv;
+    conn.apply(onv, other);
+    std::cout << other << std::endl;
+
+    defs::ham_t matel33 = ham.get_element_3300(onv, conn);
+    // must /3 if the TCDUMP input is in ASCII format
+    // expect element (1,2,1|3,4,10)=(1,1,1|3,10,4) (1-based indexing)
+    // Also has a phase of -1
+    ASSERT_FLOAT_EQ(-matel33/3.0, -0.20360278843803472E-006);
+    // also test spin-non-conserving excitation (should give 0 for Fermions):
+    onv = {{0, 1},{0, 1}};
+    // conn::FrmOnv conn(onv);
+    // conn.m_ann = {};
+    // conn.m_cre = {};
+    conn.clear();
+    conn.m_ann.add({0, 0});
+    conn.m_ann.add({0, 1});
+    conn.m_ann.add({1, 0});
+    conn.m_cre.add({1, 2});
+    conn.m_cre.add({1, 3});
+    conn.m_cre.add({1, 9});
+    matel33 = ham.get_element_3300(onv, conn);
+    // does not conserve spin, ipso facto = 0
+    ASSERT_FLOAT_EQ(matel33/3.0, 0.0);
+
+    onv = {{0, 1},{0, 13}};
+    conn.clear();
+    // (one integer -> spin-orbital; pair -> spin, spatial orbital)
+    conn.m_cre.add({0, 2});
+    conn.m_cre.add({0, 3});
+    conn.m_cre.add({1, 9});
+    conn.m_ann.add({0, 0});
+    conn.m_ann.add({0, 1});
+    conn.m_ann.add({1, 0});
+    matel33 = ham.get_element_3300(onv, conn);
+    // same test as the first one but with positive phase
+    ASSERT_FLOAT_EQ(matel33/3.0, -0.20360278843803472E-006);
 }
 
-#endif // ENABLE_TCHINT
+#endif  // ENABLE_TCHINT
 
-TEST(TranscorrelatedFermionHamiltonian, test_outside_braces) {
-    // TODO stub
-    ASSERT_TRUE(false);
-}
-
-TEST(TranscorrelatedFermionHamiltonian, test_outside_braces3) {
-    // TODO stub
-    ASSERT_TRUE(false);
-}

@@ -6,12 +6,25 @@
 
 defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i,
                                      size_t j, size_t k) const {
-    // TODO I believe we need spin-orbital to spatial orbital conversion here
-    return get_lmat_coeff(a, b, c, i, j, k);
+    auto ia = FrmOnvField::isite(a, m_nsite);
+    auto ib = FrmOnvField::isite(b, m_nsite);
+    auto ic = FrmOnvField::isite(c, m_nsite);
+    auto ii = FrmOnvField::isite(i, m_nsite);
+    auto ij = FrmOnvField::isite(j, m_nsite);
+    auto ik = FrmOnvField::isite(k, m_nsite);
+    // check spin conservation
+    auto ma = FrmOnvField::ispin(a, m_nsite);
+    auto mb = FrmOnvField::ispin(b, m_nsite);
+    auto mc = FrmOnvField::ispin(c, m_nsite);
+    auto mi = FrmOnvField::ispin(i, m_nsite);
+    auto mj = FrmOnvField::ispin(j, m_nsite);
+    auto mk = FrmOnvField::ispin(k, m_nsite);
+    return ma+mb+mc==mi+mj+mk ? get_lmat_coeff(ia, ib, ic, ii, ij, ik) : 0.0;
 }
 
 defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv,
                                        const conn::FrmOnv &conn) const {
+    // TODO check spin conservation
     auto element = get_coeff_3300(conn.m_cre[0], conn.m_cre[1], conn.m_cre[2],
                                   conn.m_ann[0], conn.m_ann[1], conn.m_ann[2]);
     return conn.phase(onv) ? -element : element;

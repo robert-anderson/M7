@@ -16,6 +16,10 @@
 
 namespace mbf {
 
+    void set_aufbau_mbf(field::FrmOnv &onv, const FrmHam& ham);
+
+    void set_aufbau_mbf(field::BosOnv &onv, const BosHam& ham);
+
     /**
      * set the referenced ONV object to the assumed Hartree--Fock determinant within the given sector
      */
@@ -26,7 +30,6 @@ namespace mbf {
      * advance to the next mode
      */
     void set_aufbau_mbf(field::BosOnv &onv, const Hamiltonian& ham);
-
 
     /**
      * set the referenced ONV object to the "anti-ferromagnetic" configuration

@@ -72,7 +72,7 @@ public:
         add(FrmOnvField::ibit(pair.first, pair.second, m_nsite));
     }
 
-    void set(const defs::inds& orbs, const defs::inds& inds){
+    void set(const defs::inds& orbs, const defs::inds& inds) {
         clear();
         for (const auto& ind: inds) add(orbs[ind]);
         DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");

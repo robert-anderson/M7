@@ -4,19 +4,27 @@
 
 #include "Mbf.h"
 
-void mbf::set_aufbau_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
-    auto nalpha = ci_utils::nalpha(ham.nelec(), ham.m_frm->m_ms2_restrict);
-    auto nbeta = ci_utils::nbeta(ham.nelec(), ham.m_frm->m_ms2_restrict);
-    DEBUG_ASSERT_EQ(nalpha + nbeta, ham.nelec(), "inconsistent na, nb, nelec");
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, const FrmHam& ham) {
+    auto nalpha = ci_utils::nalpha(ham.m_nelec, ham.m_ms2_restrict);
+    auto nbeta = ci_utils::nbeta(ham.m_nelec, ham.m_ms2_restrict);
+    DEBUG_ASSERT_EQ(nalpha + nbeta, ham.m_nelec, "inconsistent na, nb, nelec");
     onv.zero();
     for (size_t i = 0ul; i < nalpha; ++i) onv.set({0, i});
     for (size_t i = 0ul; i < nbeta; ++i) onv.set({1, i});
 }
 
-void mbf::set_aufbau_mbf(field::BosOnv &onv, const Hamiltonian& ham) {
+void mbf::set_aufbau_mbf(field::BosOnv &onv, const BosHam& ham) {
     if (!onv.nelement()) return;
     onv.zero();
-    onv[0] = ham.nboson();
+    onv[0] = ham.m_nboson;
+}
+
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
+    set_aufbau_mbf(onv, *ham.m_frm);
+}
+
+void mbf::set_aufbau_mbf(field::BosOnv &onv, const Hamiltonian& ham) {
+    set_aufbau_mbf(onv, *ham.m_bos);
 }
 
 void mbf::set_neel_mbf(FrmOnv &onv, size_t nelec) {

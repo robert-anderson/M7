@@ -34,5 +34,5 @@ target_sources(M7_lib
         TcBosHam.cpp
         TcBosHam.h
         TcHam.h
-        # TcHam.cpp
+        TcHam.cpp
 )

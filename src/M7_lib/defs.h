@@ -80,7 +80,7 @@ namespace defs {
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     const size_t isym_1e = 2;
-    const size_t isym_2e = 8;
+    const size_t isym_2e = 1;
     constexpr ham_comp_t integral_tol = 1e-9;
 
     /**

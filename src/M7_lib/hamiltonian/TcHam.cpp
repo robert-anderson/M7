@@ -32,8 +32,9 @@ TcHam::~TcHam() {
 defs::ham_t TcHam::get_lmat_coeff(size_t a, size_t b, size_t c, size_t i,
                                   size_t j, size_t k) const {
 #ifdef ENABLE_TCHINT
-    const int ia = i, ib = b, ic = c, ii = i, ij = j, ik = k;  // convert to int
+    const int ia = a+1, ib = b+1, ic = c+1, ii = i+1, ij = j+1, ik = k+1;  // convert to int
     return three_body_matel(&ia, &ib, &ic, &ii, &ij, &ik);
+    // return 2.71;
 #else
     return 0.0
 #endif
