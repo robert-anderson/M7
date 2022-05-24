@@ -68,6 +68,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // must /3 if the TCDUMP input is in ASCII format
     // expect element (1,2,1|3,4,10)=(1,1,1|3,10,4) (1-based indexing)
     // Also has a phase of -1
+    // TODO fix these -- they are now antisymmetrised!
     ASSERT_FLOAT_EQ(-matel33/3.0, -0.20360278843803472E-006);
     // also test spin-non-conserving excitation (should give 0 for Fermions):
     onv = {{0, 1},{0, 1}};
