@@ -68,8 +68,22 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // must /3 if the TCDUMP input is in ASCII format
     // expect element (1,2,1|3,4,10)=(1,1,1|3,10,4) (1-based indexing)
     // Also has a phase of -1
-    // TODO fix these -- they are now antisymmetrised!
-    ASSERT_FLOAT_EQ(-matel33/3.0, -0.20360278843803472E-006);
+    std::cout << "lmat:" << std::endl;
+    auto tmp = ham.get_lmat_coeff(1,0,0,3,2,9)/3;
+    std::cout << tmp << std::endl;
+    //   1 1 2 3 10 4 + 2 1 1 4 3 10 + 1 2 1 10 4 3
+    // - 1 1 2 10 3 4 - 1 2 1 4 10 3 - 2 1 1 3 4 10
+    // =
+    //   1 1 2 3 10 4 + 1 1 2 10 3 4 + 1 1 2 10 3 4
+    // - 1 1 2 10 3 4 - 1 1 2 3 4 10 - 1 1 2 4 10 3
+    // all but the last two are zero as far as I can tell
+    auto benchmark = -0.20360278843803472E-006
+                   + 0.0
+                   + 0.0
+                   - 0.0
+                   - 0.0
+                   - -0.20360278843803271E-006;
+    ASSERT_FLOAT_EQ(-matel33/3.0, benchmark);
     // also test spin-non-conserving excitation (should give 0 for Fermions):
     onv = {{0, 1},{0, 1}};
     // conn::FrmOnv conn(onv);
@@ -97,7 +111,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     conn.m_ann.add({1, 0});
     matel33 = ham.get_element_3300(onv, conn);
     // same test as the first one but with positive phase
-    ASSERT_FLOAT_EQ(matel33/3.0, -0.20360278843803472E-006);
+    ASSERT_FLOAT_EQ(matel33/3.0, benchmark);
 }
 
 #endif  // ENABLE_TCHINT
