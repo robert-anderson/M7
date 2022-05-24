@@ -7,12 +7,8 @@
  */
 
 #include <M7_lib/hamiltonian/TcFrmHam.h> // what's being tested
-#include <M7_lib/field/Mbf.h>
-#include <M7_lib/hamiltonian/Hamiltonian.h>
+#include <M7_lib/util/consts.h>
 #include <gtest/gtest.h>
-
-#include "M7_lib/caches/DecodedDeterminants.h"
-#include "M7_lib/field/Mbf.h"
 
 #include <iomanip>
 // TODO:
@@ -26,6 +22,23 @@
 
 #ifdef ENABLE_TCHINT
 
+/**
+ * @brief checks if nonhermiticity is handled fine. Constructs a Fermion
+ *        Hamiltonian with transcorrelation and checks that it can have
+ *        non-Hermitian elements
+ *        Note only the 2-body terms are non-Hermitian
+ *        [ij|kl] = [ji|lk] from hermiticity
+ */
+TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
+    // TODO stub
+    TcFrmHam ham("FCIDUMP", false, 0);
+    // test e.g.
+    // [94|12] /= [49|21] (in this case, true)
+    auto el1 = ham.get_coeff_2200(9, 4, 1, 2);
+    auto el2 = ham.get_coeff_2200(4, 9, 2, 1);
+    std::cout << "els:\n" << el1 << std::endl << el2 << std::endl;
+    ASSERT_FALSE(consts::nearly_equal(el1, el2));
+}
 
 /**
  * @brief checks if get_coeff_element3300 and get_coeff_element3300 are the same
