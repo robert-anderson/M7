@@ -10,7 +10,7 @@
 #include <M7_lib/util/consts.h>
 #include <gtest/gtest.h>
 
-#include <iomanip>
+// #include <iomanip>
 // TODO:
 // [x] put appropriate TCDUMP(s) into the assets folder
 // [ ] get_coeff2200 check for non-Hermiticity (should be handled fine)
@@ -36,8 +36,9 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // [94|12] /= [49|21] (in this case, true)
     auto el1 = ham.get_coeff_2200(9, 4, 1, 2);
     auto el2 = ham.get_coeff_2200(4, 9, 2, 1);
-    std::cout << "els:\n" << el1 << std::endl << el2 << std::endl;
+    std::cout << "els:\n" << el1/3.0 << std::endl << el2/3.0 << std::endl;
     ASSERT_FALSE(consts::nearly_equal(el1, el2));
+    ASSERT(false);
 }
 
 /**

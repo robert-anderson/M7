@@ -19,7 +19,23 @@ defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i,
     auto mi = FrmOnvField::ispin(i, m_nsite);
     auto mj = FrmOnvField::ispin(j, m_nsite);
     auto mk = FrmOnvField::ispin(k, m_nsite);
-    return ma+mb+mc==mi+mj+mk ? get_lmat_coeff(ia, ib, ic, ii, ij, ik) : 0.0;
+    defs::ham_t coeff = 0.0;
+    auto add_contrib = [&](size_t mp, size_t mq, size_t mr, size_t ip,
+                           size_t iq, size_t ir, int sgn) {
+        if (mp == ma && mq == mb && mr == mc) {
+            coeff += sgn * get_lmat_coeff(ia, ib, ic, ip, iq, ir);
+        }
+    };
+    // add all exchange terms
+    // note this is basically copied from the TCHInt code
+    add_contrib(mi, mj, mk, ii, ij, ik, 1);
+    add_contrib(mj, mk, mi, ij, ik, ii, 1);
+    add_contrib(mk, mi, mj, ik, ii, ij, 1);
+    add_contrib(mj, mi, mk, ij, ii, ik, -1);
+    add_contrib(mi, mk, mj, ii, ik, ij, -1);
+    add_contrib(mk, mj, mi, ik, ij, ii, -1);
+
+    return coeff;
 }
 
 defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv,

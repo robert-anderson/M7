@@ -24,7 +24,7 @@ struct TcHam {
 
     ~TcHam();  // destructor
 
-   protected:
+    //    protected:
     defs::ham_t get_lmat_coeff(size_t a, size_t b, size_t c, size_t i, size_t j,
                                size_t k) const;
 };
