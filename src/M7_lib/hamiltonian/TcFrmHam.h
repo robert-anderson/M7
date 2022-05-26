@@ -33,7 +33,6 @@ struct TcFrmHam : TcHam, GeneralFrmHam {
     defs::ham_t get_element_2200(const field::FrmOnv &onv,
                                  const conn::FrmOnv &conn) const override;
 
-    // TODO also need a destructor for tchint finalise
 };
 
 #endif  // M7_TCFRMHAM_H
