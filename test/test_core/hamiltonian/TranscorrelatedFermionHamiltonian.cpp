@@ -13,14 +13,42 @@
 // #include <iomanip>
 // TODO:
 // [x] put appropriate TCDUMP(s) into the assets folder
-// [ ] get_coeff2200 check for non-Hermiticity (should be handled fine)
-// [ ] get_coeff3300 same as get_element3300 up to sign
+// [x] get_coeff2200 check for non-Hermiticity (should be handled fine)
+// [x] get_coeff3300 same as get_element3300 up to sign
 //          test with and without the parity
 // [ ] contracted elements (get_element{00,11,22}00)
 //
 // [ ] maybe also do a "ui test" as done in TCHINT
 
 #ifdef ENABLE_TCHINT
+
+/**
+ * @brief check the get_element_0000 method, esp testing contraction
+ *
+ */
+TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
+    // TODO stub
+    ASSERT(false);
+}
+
+
+/**
+ * @brief check the get_element_0011 method, esp testing contraction
+ *
+ */
+TEST(TranscorrelatedFermionHamiltonian, test_get_element_0011) {
+    // TODO stub
+    ASSERT(false);
+}
+
+/**
+ * @brief check the get_element_0022 method, esp testing contraction
+ *
+ */
+TEST(TranscorrelatedFermionHamiltonian, test_get_element_0022) {
+    // TODO stub
+    ASSERT(false);
+}
 
 /**
  * @brief checks if nonhermiticity is handled fine. Constructs a Fermion
@@ -31,65 +59,20 @@
  */
 TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // [ij|kl]=[ji|lk] if Hermitian (chemist notation)
-    // remember we antisymmetrise: [ij|kl] - [ik|jl]
+    // remember we antisymmetrise: [ij|kl] - [il|kj]
     // (see FCIDUMP file)
     // the FCIDUMP is in chemist notation but the code is in physicist notations
     TcFrmHam ham("FCIDUMP", false, 0);
-    // buffered::FrmOnv src(ham.m_nsite);
-    // src = {{0, 1},{0, 1}};
-    // conn::FrmOnv conn(src);
-    // // spin-orbital indices to annihilate
-    // // (one integer -> spin-orbital; pair -> spin, spatial orbital)
-    // conn.m_cre.add({0, 2});
-    // conn.m_cre.add({0, 3});
-    // conn.m_cre.add({1, 9});
-    // conn.m_ann.add({0, 0});
-    // conn.m_ann.add({0, 1});
-    // conn.m_ann.add({1, 0});
-    // auto tgt = src;
-    // conn.apply(src, tgt);
-    // conn::FrmOnv conn_rev(tgt);
-    // // conn_rev.m_ann = conn.m_cre;
-    // // conn_rev.m_cre = conn.m_ann;
-    // conn_rev.m_ann.add({0, 2});
-    // conn_rev.m_ann.add({0, 3});
-    // conn_rev.m_ann.add({1, 9});
-    // conn_rev.m_cre.add({0, 0});
-    // conn_rev.m_cre.add({0, 1});
-    // conn_rev.m_cre.add({1, 0});
-    // // tgt with conn_rev should give back src
-    // auto tgt_rev = tgt;
-    // conn_rev.apply(tgt, tgt_rev);
-    // // auto tmp = conn.m_ann;
-    // // conn.m_ann = conn.m_cre;
-    // // conn.m_cre = tmp;
-    // // auto tgt2 = tgt;
-    // // conn.apply(tgt, tgt2);
-    // // std::cout << src << std::endl;
-    // // std::cout << tgt << std::endl;
-    // // std::cout << tgt_rev << std::endl;
-    // auto matel = ham.get_element_3300(src, conn);
-    // auto matel_rev = ham.get_element_3300(tgt, conn_rev);
-    // std::cout << matel << std::endl;
-    // std::cout << matel_rev << std::endl;
-
     // these two would be the same assuming Hermiticity, but not in this FCIDUMP
-    // 1212 - 1212
-    // 0.10952135830294392E-001 - 0.24497672174460135E-001
-    // in physicist notation: 1122 - 1122
-    // auto el1 = ham.get_coeff_2200(0, 0, 1, 1);
-    // chemist 1237 - 1732
+    // chemist notation: 1237 - 1732
     // -0.37788782091129145E-003 - -0.40412978632087910E-003
     auto el1 = ham.get_coeff_2200(0,2,1,6);
-    // 2121 - 2121; physicist: 2211 - 2211 ... woops
-    // 0.38043208518625880E-001 - 0.24497672174460135E-001
-    // chemist 2173 - 7123
+    // chemist notation: 2173 - 7123
     // 0.19621434645836822E-002 - -0.63747363394572173E-002
     auto el2 = ham.get_coeff_2200(1,6,0,2);
 
     std::cout << "els:\n" << el1 << std::endl << el2 << std::endl;
     ASSERT_FALSE(consts::nearly_equal(el1, el2));
-    // ASSERT(false);
 }
 
 /**
