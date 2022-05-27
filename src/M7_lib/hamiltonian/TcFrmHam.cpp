@@ -40,7 +40,6 @@ defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i,
 
 defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv,
                                        const conn::FrmOnv &conn) const {
-    // TODO check spin conservation
     auto element = get_coeff_3300(conn.m_cre[0], conn.m_cre[1], conn.m_cre[2],
                                   conn.m_ann[0], conn.m_ann[1], conn.m_ann[2]);
     return conn.phase(onv) ? -element : element;
@@ -49,11 +48,10 @@ defs::ham_t TcFrmHam::get_element_3300(const field::FrmOnv &onv,
 defs::ham_t TcFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     auto element = GeneralFrmHam::get_element_0000(onv);
     auto triples_fn = [&](size_t i, size_t j, size_t k) {
-        // CHECK I don't think one must check the indices
         element += get_coeff_3300(i, j, k, i, j, k);
     };
     onv.foreach_setbit_triple(triples_fn);
-    return element;  // not entirely sure why no phase here
+    return element;
 }
 
 defs::ham_t TcFrmHam::get_element_1100(const field::FrmOnv &onv,

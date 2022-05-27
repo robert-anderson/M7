@@ -20,7 +20,7 @@ TEST(TranscorrelatedHamiltonian, get_coeff3300_test) {
     // remember 1-based: becomes (1,1,1,1,1,1)
     ASSERT_FLOAT_EQ(ham.get_lmat_coeff(0,0,0,0,0,0)/3., -0.13564812863025142E-001);
     // (2, 2, 2, 2, 4, 4)
-    ASSERT_FLOAT_EQ(ham.get_lmat_coeff(1,1,3,1,3,1)/3., -0.74599783654206124E-004 );
+    ASSERT_FLOAT_EQ(ham.get_lmat_coeff(1,1,3,1,3,1)/3., -0.74599783654206124E-004);
     // 1 2 1 1 2 5 -> 1 1 2 1 5 2 -> 2 2 3 2 6 3
     ASSERT_FLOAT_EQ(ham.get_lmat_coeff(1,2,1,5,2,1)/3., 0.80828847497582549E-003);
     // 3 2 6 2 7 3 -> 2 3 6 7 2 3 -> 2 2 3 7 3 6 (=0 in this case)

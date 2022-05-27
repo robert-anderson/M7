@@ -22,9 +22,6 @@ struct TcFrmHam : TcHam, GeneralFrmHam {
     defs::ham_t get_element_3300(const field::FrmOnv &onv,
                                  const conn::FrmOnv &conn) const override;
 
-    // defs::ham_t get_coeff_2200(size_t i, size_t j, size_t k, size_t l) const
-    // override;
-
     defs::ham_t get_element_0000(const field::FrmOnv &onv) const override;
 
     defs::ham_t get_element_1100(const field::FrmOnv &onv,
