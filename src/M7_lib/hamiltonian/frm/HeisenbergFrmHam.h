@@ -36,9 +36,9 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
     const defs::ham_t m_j;
     Lattice m_lattice;
 
-    HeisenbergFrmHam(defs::ham_t j, Lattice lattice, int ms2);
+    HeisenbergFrmHam(defs::ham_t j, Lattice lattice);
 
-    explicit HeisenbergFrmHam(const conf::FrmHam &opts);
+    explicit HeisenbergFrmHam(FrmHam::opt_pair_t opts);
 
     defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const override;
 

@@ -26,16 +26,11 @@ struct SumFrmHam : FrmHam {
     defs::ham_t m_weight;
 
 private:
-    /**
-     * make combined Sector of components
-     */
-    static sys::frm::Sector sector(const FrmHam& h1, const FrmHam& h2) {
-        return sys::frm::Sector(h1.m_sector, h2.m_sector);
-    }
+
 public:
 
     SumFrmHam(ham_t1&& h1, ham_t2&& h2, defs::ham_t weight):
-            FrmHam(sector(h1, h2)), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
+            FrmHam(static_cast<const FrmHam&>(h1).m_basis), m_h1(std::move(h1)), m_h2(std::move(h2)), m_weight(weight){
         /*
          * combine attributes of the components
          */

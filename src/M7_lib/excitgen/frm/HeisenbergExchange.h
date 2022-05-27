@@ -10,7 +10,7 @@
 
 struct HeisenbergExchange : FrmExcitGen {
 
-    HeisenbergExchange(const FrmHam &h, size_t nelec, PRNG &prng);
+    HeisenbergExchange(const FrmHam &h, PRNG &prng);
 
     virtual ~HeisenbergExchange() {}
 

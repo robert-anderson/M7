@@ -4,8 +4,8 @@
 
 #include "HeisenbergExchange.h"
 
-HeisenbergExchange::HeisenbergExchange(const FrmHam &h, size_t nelec, PRNG &prng) :
-        FrmExcitGen(h, nelec, prng, {exsig_utils::ex_double}, "lattice local exchange"){
+HeisenbergExchange::HeisenbergExchange(const FrmHam &h, PRNG &prng) :
+        FrmExcitGen(h, prng, {exsig_utils::ex_double}, "lattice local exchange"){
     REQUIRE_TRUE(h.is<HeisenbergFrmHam>(), "given hamiltonian is not of HeisenbergFrmHam type");
 }
 

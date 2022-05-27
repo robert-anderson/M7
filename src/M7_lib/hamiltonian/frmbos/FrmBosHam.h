@@ -19,6 +19,10 @@
  * base class for all Hamiltonians expressed in terms of products of fermionic and bosonic second-quantised operators
  */
 struct FrmBosHam : HamOpTerm {
+    /**
+     * a convenient pair of references to the relevant Hamiltonian section and the Basis configuration section
+     */
+    typedef HamOpTerm::OptPair<conf::FrmBosHam> opt_pair_t;
 
     const sys::Basis m_basis;
 

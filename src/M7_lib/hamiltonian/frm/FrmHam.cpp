@@ -6,6 +6,7 @@
 
 #include "FrmHam.h"
 
+/*
 sys::frm::Electrons FrmHam::make_elecs(const sys::frm::Electrons &ham_elecs, const sys::frm::Electrons &conf_elecs) {
     const size_t nelec = conf_elecs ? conf_elecs : ham_elecs;
     const int ms2 = conf_elecs.m_ms2.has_value() ? conf_elecs.m_ms2 : ham_elecs.m_ms2;
@@ -13,10 +14,10 @@ sys::frm::Electrons FrmHam::make_elecs(const sys::frm::Electrons &ham_elecs, con
     const bool ms2_conserve = ham_elecs.m_ms2.conserve();
     return {nelec, {ms2, ms2_conserve}};
 }
+*/
 
-FrmHam::FrmHam(const sys::frm::Sector& sector):
-        m_sector(sector), m_basis(m_sector.m_basis), m_elecs(m_sector.m_elecs),
-        m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
+FrmHam::FrmHam(const sys::frm::Basis& basis):
+        m_basis(basis), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);

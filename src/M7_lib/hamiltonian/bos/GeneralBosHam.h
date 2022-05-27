@@ -15,7 +15,7 @@ struct GeneralBosHam : BosHam {
 
     GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff);
 
-    GeneralBosHam(const conf::BosHam &opts);
+    GeneralBosHam(opt_pair_t opts);
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override;
 

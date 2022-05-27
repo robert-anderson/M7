@@ -259,7 +259,8 @@ void conf::Propagator::verify() {
 conf::Document::Document(const yaml::File *file) :
         conf_components::Document(file, "FCIQMC options",
                          "Configuration document prescribing the behavior of an FCIQMC calculation in M7"),
-        m_prng(this), m_archive(this), m_wavefunction(this), m_reference(this),
+        m_prng(this), m_archive(this), m_basis(this), m_particles(this),
+        m_wavefunction(this), m_reference(this),
         m_shift(this), m_propagator(this),
         m_hamiltonian(this), m_stats(this), m_inst_ests(this), m_av_ests(this) {}
 
@@ -271,6 +272,8 @@ void conf::Document::verify() {
         m_wavefunction.m_nw_init = m_propagator.m_nadd.get();
         log::warn("initial number of walkers must be at least the initiator threshold");
     }
+    REQUIRE_LE(m_particles.m_nboson, m_basis.m_bos_occ_cutoff,
+               "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
 }
 
 conf::MbfDef::MbfDef(Group *parent, std::string name) :

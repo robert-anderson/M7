@@ -99,23 +99,27 @@ namespace conf {
         explicit Reference(Group *parent);
     };
 
-    struct Sector : Section {
-        Param<size_t> m_nelec;
-        Param<int> m_ms2;
-        Param<size_t> m_nboson;
+    struct Basis : Section {
         Param<size_t> m_bos_occ_cutoff;
-
-        explicit Sector(Group *parent):
-            Section(parent, "sector", "options relating to the particle number sector"),
-            m_nelec(this, "nelec", 0ul, "number of electrons in the system (conserved)"),
-            m_ms2(this, "ms2", ~0, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
-            m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"),
-            m_bos_occ_cutoff(this, "bos_occ_cutoff", defs::max_bos_occ, "maximum allowed occupation of each boson mode"){}
+        explicit Basis(Group *parent):
+        Section(parent, "basis", "options relating to the single particle basis functions and subsets thereof"),
+        m_bos_occ_cutoff(this, "bos_occ_cutoff", defs::max_bos_occ, "maximum allowed occupation of each boson mode"){}
 
         void verify() override {
             REQUIRE_LE(m_bos_occ_cutoff, defs::max_bos_occ, log::format("given nboson_max exceeds limit of {}", defs::max_bos_occ));
-            REQUIRE_LE(m_nboson, m_bos_occ_cutoff, "number of bosons in a number-conserving system mustn't exceed the maximum occupation cutoff");
         }
+    };
+
+    struct Particles : Section {
+        Param<size_t> m_nelec;
+        Param<int> m_ms2;
+        Param<size_t> m_nboson;
+
+        explicit Particles(Group *parent):
+            Section(parent, "particles", "options relating to the particle number sector"),
+            m_nelec(this, "nelec", 0ul, "number of electrons in the system (conserved)"),
+            m_ms2(this, "ms2", ~0, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
+            m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"){}
     };
 
     struct Wavefunction : Section {
@@ -262,6 +266,8 @@ namespace conf {
     struct Document : conf_components::Document {
         Prng m_prng;
         Archive m_archive;
+        Basis m_basis;
+        Particles m_particles;
         Wavefunction m_wavefunction;
         Reference m_reference;
         Shift m_shift;

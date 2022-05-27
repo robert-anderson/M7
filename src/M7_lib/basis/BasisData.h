@@ -101,10 +101,18 @@ namespace sys {
                 DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
                 return ispinorb < m_nsite ? ispinorb : ispinorb - m_nsite;
             }
+            static size_t isite(size_t ispinorb, size_t nsite) {
+                DEBUG_ASSERT_LT(ispinorb, 2*nsite, "spin orbital index OOB");
+                return ispinorb < nsite ? ispinorb : ispinorb - nsite;
+            }
 
             size_t ispin(size_t ispinorb) const {
                 DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
                 return ispinorb >= m_nsite;
+            }
+            static size_t ispin(size_t ispinorb, size_t nsite) {
+                DEBUG_ASSERT_LT(ispinorb, 2*nsite, "spin orbital index OOB");
+                return ispinorb >= nsite;
             }
 
             size_t ispinorb(size_t ispin, size_t isite) const {
@@ -112,14 +120,26 @@ namespace sys {
                 DEBUG_ASSERT_LT(isite, m_nsite, "site index OOB");
                 return ispin ? isite + m_nsite : isite;
             }
+            static size_t ispinorb(size_t ispin, size_t isite, size_t nsite) {
+                DEBUG_ASSERT_LT(ispin, 2ul, "spin channel index OOB");
+                DEBUG_ASSERT_LT(isite, nsite, "site index OOB");
+                return ispin ? isite + nsite : isite;
+            }
 
             size_t ispinorb(std::pair<size_t, size_t> pair) const {
                 return ispinorb(pair.first, pair.second);
+            }
+            static size_t ispinorb(std::pair<size_t, size_t> pair, size_t nsite) {
+                return ispinorb(pair.first, pair.second, nsite);
             }
 
             int ms2(size_t ispinorb) const {
                 DEBUG_ASSERT_LT(ispinorb, m_nspinorb, "spin orbital index OOB");
                 return ispinorb < m_nsite ? 1 : -1;
+            }
+            static int ms2(size_t ispinorb, size_t nsite) {
+                DEBUG_ASSERT_LT(ispinorb, 2*nsite, "spin orbital index OOB");
+                return ispinorb < nsite ? 1 : -1;
             }
 
             /**
@@ -130,6 +150,9 @@ namespace sys {
              */
             size_t ncoeff_ind(bool spin_resolved) const {
                 return spin_resolved ? m_nspinorb : m_nsite;
+            }
+            static size_t ncoeff_ind(bool spin_resolved, size_t nsite) {
+                return spin_resolved ? 2*nsite : nsite;
             }
         };
 
@@ -189,6 +212,19 @@ namespace sys {
             }
         };
 
+        /**
+         * 2*Ms value to which the fermionic many-body basis is constrained if conserved, else the value only serves
+         * as a hint for the purpose of reference / initial MBF selection
+         */
+        struct Ms2 : public conservation::Optional<int>{
+            Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
+            /*
+             * set either 0 or 1 based on the evenness of the electron number
+             */
+            Ms2(size_t nelec): Ms2(!(nelec&1ul), false){}
+            Ms2(): conservation::Optional<int>("2*Ms"){}
+        };
+
         struct Electrons {
         private:
             /**
@@ -200,18 +236,6 @@ namespace sys {
              * number of pairs of distinct electrons in the system (0ul if not conserved)
              */
             const size_t m_npair;
-            /**
-             * 2*Ms value to which the fermionic many-body basis is constrained if conserved, else the value only serves
-             * as a hint for the purpose of reference / initial MBF selection
-             */
-            struct Ms2 : public conservation::Optional<int>{
-                Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
-                /*
-                 * set either 0 or 1 based on the evenness of the electron number
-                 */
-                Ms2(size_t nelec): Ms2(!(nelec&1ul), false){}
-                Ms2(): conservation::Optional<int>("2*Ms"){}
-            };
             const Ms2 m_ms2;
             /**
              * numbers of occupied alpha and beta electrons (0 if spin unconserved)
@@ -309,13 +333,14 @@ namespace sys {
             }
         };
 
-        using Basis = Size;
+        struct Basis : Size {
+            const size_t m_occ_cutoff;
+            Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ): Size(nmode), m_occ_cutoff(occ_cutoff){}
+        };
 
         struct Bosons : public conservation::Optional<size_t> {
-            const size_t m_occ_cutoff;
-            Bosons(size_t v, bool conserve, size_t occ_cutoff):
-                conservation::Optional<size_t>(v, conserve, "nboson"), m_occ_cutoff(occ_cutoff){}
-            Bosons(): Bosons(~0ul, true, defs::max_bos_occ){}
+            Bosons(size_t v, bool conserve): conservation::Optional<size_t>(v, conserve, "nboson"){}
+            Bosons(): Bosons(~0ul, true){}
             Bosons(const Bosons& b1, const Bosons& b2): Bosons(b1.defined() ? b1 : b2){}
         };
 

@@ -17,15 +17,19 @@
 
 struct BosHam : HamOpTerm {
     /**
+     * a convenient pair of references to the relevant Hamiltonian section and the Basis configuration section
+     */
+    typedef HamOpTerm::OptPair<conf::BosHam> opt_pair_t;
+    /**
      * properties of the many-body basis
      */
-    const sys::bos::Sector m_sector;
+    const sys::bos::Basis m_basis;
 
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
-    BosHam(const sys::bos::Sector& sector):
-            m_sector(sector), m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
+    BosHam(const sys::bos::Basis& basis):
+            m_basis(basis), m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
 
 private:
     /**
@@ -39,17 +43,17 @@ private:
      * @return
      *  combined bosons object
      */
-    static sys::bos::Bosons make_bosons(const sys::bos::Bosons& from_ham, const sys::bos::Bosons& from_conf){
-        const size_t nboson = from_conf.has_value() ? from_conf : from_ham;
-        const bool conserve = from_ham.conserve();
-        const size_t occ_cutoff = from_conf.m_occ_cutoff;
-        return {nboson, conserve, occ_cutoff};
-    }
+//    static sys::bos::Bosons make_bosons(const sys::bos::Bosons& from_ham, const sys::bos::Bosons& from_conf){
+//        const size_t nboson = from_conf.has_value() ? from_conf : from_ham;
+//        const bool conserve = from_ham.conserve();
+//        const size_t occ_cutoff = from_conf.m_occ_cutoff;
+//        return {nboson, conserve, occ_cutoff};
+//    }
 
 public:
 
-    BosHam(const sys::bos::Sector& sector, const sys::bos::Bosons& from_conf) :
-            BosHam(sys::bos::Sector(sector.m_basis, make_bosons(sector.m_bosons, from_conf))){}
+//    BosHam(const sys::bos::Basis& sector, const sys::bos::Bosons& from_conf) :
+//            BosHam(sys::bos::Particles(sector.m_basis, make_bosons(sector.m_bosons, from_conf))){}
 
 	virtual ~BosHam(){}
 
@@ -80,10 +84,14 @@ public:
 
     virtual void log_data() const;
 
+    virtual sys::bos::Bosons default_bosons() const {
+        return {0ul, false};
+    }
+
 };
 
 struct NullBosHam : BosHam {
-    NullBosHam() : BosHam(sys::bos::Sector({0ul}, {0ul, true, 0ul})){}
+    NullBosHam() : BosHam(0ul){}
 
     bool enabled() const override {
         return false;

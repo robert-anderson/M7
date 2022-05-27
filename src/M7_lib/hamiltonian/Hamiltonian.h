@@ -39,6 +39,7 @@ using namespace field;
  * FrmBosHam is set up last, so its initialization can make read-only reference to both the FrmHam and BosHam.
  */
 struct HamiltonianTerms {
+    typedef HamOpTerm::OptPair<conf::Hamiltonian> opt_pair_t;
     /**
      * purely fermionic number-conserving terms in the Hamiltonian for traditional electronic structure calculations
      */
@@ -62,7 +63,7 @@ struct HamiltonianTerms {
      *  unique pointer to the polymorphic base class, FrmHam
      */
     template<typename ham_t>
-    std::unique_ptr<FrmHam> make_frm(const conf::FrmHam &opts) {
+    std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
         return std::unique_ptr<FrmHam>(new ham_t(opts));
         //auto j = opts.m_spin_penalty_j.get();
@@ -85,45 +86,47 @@ struct HamiltonianTerms {
 #endif
     }
 
-    std::unique_ptr<FrmHam> make_frm(const conf::FrmHam &opts) {
-        if (opts.m_hubbard.enabled())
+    std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
+        if (opts.m_ham.m_hubbard.enabled())
             return make_frm<HubbardFrmHam>(opts);
-        else if (opts.m_heisenberg.enabled())
+        else if (opts.m_ham.m_heisenberg.enabled())
             return make_frm<HeisenbergFrmHam>(opts);
-        else if (opts.m_fcidump.enabled())
+        else if (opts.m_ham.m_fcidump.enabled())
             return make_frm<GeneralFrmHam>(opts);
         return std::unique_ptr<FrmHam>(new NullFrmHam);
     }
 
-    std::unique_ptr<BosHam> make_bos(const conf::BosHam &opts){
-        if (opts.m_num_op_weight) {
+    std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
+        if (opts.m_ham.m_num_op_weight) {
             const size_t nsite = m_frm->m_basis.m_nsite;
-            const sys::bos::Basis basis(nsite, opts.m_bos_occ_cutoff);
-            const auto omega = opts.m_num_op_weight.get();
+            const sys::bos::Basis basis(nsite);
+            const auto omega = opts.m_ham.m_num_op_weight.get();
             return std::unique_ptr<BosHam>(new NumOpBosHam(basis, omega));
         }
-        else if (opts.m_interacting_bose_gas.enabled())
+        else if (opts.m_ham.m_interacting_bose_gas.enabled())
             return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
-        else if (opts.m_bosdump.enabled())
+        else if (opts.m_ham.m_bosdump.enabled())
             return std::unique_ptr<BosHam>(new GeneralBosHam(opts));
         return std::unique_ptr<BosHam>(new NullBosHam);
     }
 
-    std::unique_ptr<FrmBosHam> make_frmbos(const conf::FrmBosHam &opts) {
-        if (opts.m_holstein_coupling) {
+    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
+        if (opts.m_ham.m_holstein_coupling) {
             REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(m_frm.get()),
                          "Holstein coupling requires Hubbard-type fermion Hamiltonian");
-            const auto g = opts.m_holstein_coupling.get();
+            const auto g = opts.m_ham.m_holstein_coupling.get();
             return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(*m_frm, *m_bos, g));
         }
-        else if (opts.m_ebdump.enabled()) {
+        else if (opts.m_ham.m_ebdump.enabled()) {
             return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts, *m_frm, *m_bos));
         }
         return std::unique_ptr<FrmBosHam>(new NullLadderHam);
     }
 
-    HamiltonianTerms(const conf::Hamiltonian &opts):
-        m_frm(make_frm(opts.m_fermion)), m_bos(make_bos(opts.m_boson)), m_frmbos(make_frmbos(opts.m_ladder)){}
+    HamiltonianTerms(opt_pair_t opts):
+        m_frm(make_frm({opts.m_ham.m_fermion, opts.m_basis})),
+        m_bos(make_bos({opts.m_ham.m_boson, opts.m_basis})),
+        m_frmbos(make_frmbos({opts.m_ham.m_ladder, opts.m_basis})){}
 };
 
 
@@ -131,6 +134,8 @@ struct HamiltonianTerms {
  * generalized Hamiltonian class for fermionic, bosonic, and fermion-boson coupled interactions
  */
 class Hamiltonian {
+    typedef HamiltonianTerms::opt_pair_t opt_pair_t;
+
     const HamiltonianTerms m_terms;
 
 public:
@@ -150,7 +155,7 @@ private:
 
 public:
 
-    explicit Hamiltonian(const conf::Hamiltonian &opts);
+    explicit Hamiltonian(opt_pair_t opts);
 
     /*
      * pure fermion matrix elements
@@ -226,15 +231,15 @@ public:
      * @return
      *  electron and boson number data
      */
-    sys::Particles get_quanta(const conf::Hamiltonian &opts) const {
-        // TODO: move config opts around
-        sys::frm::Electrons elecs(0ul);
-        sys::bos::Bosons bosons(0ul, true);
-        return {elecs, bosons};
-    }
+//    sys::Particles get_quanta(const conf::Hamiltonian &opts) const {
+//        // TODO: move config opts around
+//        sys::frm::Electrons elecs(0ul);
+//        sys::bos::Bosons bosons(0ul);
+//        return {elecs, bosons};
+//    }
 
     sys::Sector get_sector(const conf::Hamiltonian &opts) const {
-        return {m_basis, get_quanta(opts)};
+        return {m_basis, {m_frm.default_electrons(), m_bos.default_bosons()}};
     }
 };
 

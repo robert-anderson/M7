@@ -24,26 +24,10 @@ struct HubbardFrmHam : FrmHam {
     Lattice m_lattice;
     const NdFormatD& m_format;
     const std::vector<int>& m_bcs;
-    /**
-     * whether the model meets the sign problem-free conditions
-     */
-    const bool m_spf;
 
-private:
+    HubbardFrmHam(defs::ham_t u, Lattice lattice);
 
-    /**
-     * determine whether this hubbard hamiltonian is sign-problematic
-     * @return
-     *  true if the model is sign problem-free
-     */
-    bool sign_problem() const;
-
-
-public:
-
-    HubbardFrmHam(defs::ham_t u, Lattice lattice, int ms2, int charge);
-
-    HubbardFrmHam(const conf::FrmHam &opts);
+    HubbardFrmHam(opt_pair_t opts);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 

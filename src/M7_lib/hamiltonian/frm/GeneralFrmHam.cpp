@@ -6,18 +6,6 @@
 #include "M7_lib/excitgen/frm/UniformSingles.h"
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
-buffered::FrmOnv GeneralFrmHam::guess_reference() const {
-    buffered::FrmOnv ref(m_basis);
-    size_t nalpha = m_sector.m_elecs/2;
-    size_t nbeta = m_sector.m_elecs - nalpha;
-    if (m_elecs.m_ms2.conserve()){
-        nalpha = m_elecs.m_nalpha;
-        nbeta = m_elecs.m_nbeta;
-    }
-    for (size_t i = 0ul; i < nalpha; ++i) ref.set({0, i});
-    for (size_t i = 0ul; i < nbeta; ++i) ref.set({1, i});
-    return ref;
-}
 /*
  *
     GeneralFrmHam(const FrmBasisData& bd, bool spin_resolved, int ms2_restrict, defs::inds site_irreps = {});
@@ -28,16 +16,16 @@ buffered::FrmOnv GeneralFrmHam::guess_reference() const {
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const sys::frm::Sector &sector, sys::frm::Electrons conf_elecs):
-        FrmHam(sector),
+GeneralFrmHam::GeneralFrmHam(const sys::frm::Basis &basis):
+        FrmHam(basis),
         m_int_1(m_basis.m_nsite, m_basis.m_spin_resolved),
         m_int_2(m_basis.m_nsite, m_basis.m_spin_resolved) {
     if (!m_basis.m_nsite) return;
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
 }
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons conf_elecs):
-        GeneralFrmHam(sector(header), conf_elecs){
+GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major):
+        GeneralFrmHam(sector(header)){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -72,8 +60,8 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::
     log_data();
 }
 
-GeneralFrmHam::GeneralFrmHam(const conf::FrmHam &opts) :
-        GeneralFrmHam({opts.m_fcidump.m_path}, opts.m_fcidump.m_spin_major, opts.m_ms2, opts.m_nelec) {}
+GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
+        GeneralFrmHam({opts.m_ham.m_fcidump.m_path}, opts.m_ham.m_fcidump.m_spin_major, opts.m_ms2, opts.m_nelec) {}
 
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
     return m_int_1(a, i);

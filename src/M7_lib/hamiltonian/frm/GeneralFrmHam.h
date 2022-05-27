@@ -14,7 +14,7 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(const sys::frm::Sector& sector, sys::frm::Electrons conf_elecs);
+    GeneralFrmHam(const sys::frm::Basis& basis);
 
 private:
     static sys::frm::Sector sector(const FcidumpHeader& header) {
@@ -24,9 +24,9 @@ private:
     }
 
 public:
-    GeneralFrmHam(const FcidumpHeader& header, bool spin_major, sys::frm::Electrons elecs);
+    GeneralFrmHam(const FcidumpHeader& header, bool spin_major);
 
-    explicit GeneralFrmHam(const conf::FrmHam &opts);
+    explicit GeneralFrmHam(opt_pair_t opts);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 
@@ -38,8 +38,6 @@ public:
     defs::ham_t get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
 
     defs::ham_t get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const override;
-
-    buffered::FrmOnv guess_reference() const;
 
     /**
      * @param prng

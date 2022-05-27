@@ -68,7 +68,7 @@ struct ExcitGen {
     bool draw(const size_t &exsig, const field::BosOnv &src,
               defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
 
-    virtual size_t approx_nconn() const {
+    virtual size_t approx_nconn(const sys::Particles& particles) const {
         return 1ul;
     }
 

@@ -15,14 +15,14 @@ struct InteractingBoseGasBosHam : BosHam {
     const Planewaves m_planewaves;
     const defs::ham_t m_ek_scale;
 
-    InteractingBoseGasBosHam(size_t nboson, size_t ndim, size_t nwave, defs::ham_t ek_scale):
-            BosHam(sys::bos::Sector({Planewaves::size(ndim, nwave)}, {nboson, true, }),
-            m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
+    InteractingBoseGasBosHam(size_t ndim, size_t nwave, defs::ham_t ek_scale):
+        BosHam(Planewaves::size(ndim, nwave)), m_planewaves(ndim, nwave), m_ek_scale(ek_scale){}
 
-    InteractingBoseGasBosHam(const conf::BosHam &opts):
-            InteractingBoseGasBosHam(opts.m_nboson, opts.m_interacting_bose_gas.m_ndim,
-                                     opts.m_interacting_bose_gas.m_nwave, opts.m_interacting_bose_gas.m_ek_scale){}
-
+    InteractingBoseGasBosHam(opt_pair_t opts):
+            InteractingBoseGasBosHam(
+                    opts.m_ham.m_interacting_bose_gas.m_ndim,
+                    opts.m_ham.m_interacting_bose_gas.m_nwave,
+                    opts.m_ham.m_interacting_bose_gas.m_ek_scale){}
 
     defs::ham_t get_coeff_0011(size_t i, size_t j) const override {
         return 0.0;
