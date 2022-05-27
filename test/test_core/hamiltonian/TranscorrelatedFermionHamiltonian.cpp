@@ -50,6 +50,21 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     // TODO stub
+//      D1=           1           2           3           4
+//  excit1=           4          12
+//   -2.0033789485348489E-003
+    TcFrmHam ham("FCIDUMP", false, 0);
+    GeneralFrmHam helperHam("FCIDUMP", false, 0);
+    buffered::FrmOnv onv(ham.m_nsite);
+    mbf::set_aufbau_mbf(onv, ham);
+    conn::FrmOnv conn(onv);
+    // (one integer -> spin-orbital; pair -> spin, spatial orbital)
+    // (spin-minor) spin-orbital 3 goes to spin-orbital 11
+    conn.m_ann.add(3);
+    conn.m_cre.add(11);
+    auto elem = ham.get_element_1100(onv, conn);
+    auto benchmark = helperHam.get_element_1100(onv, conn) + -2.0033789485348489E-003;
+    ASSERT_FLOAT_EQ(elem, benchmark);
     ASSERT(false);
 }
 
@@ -61,6 +76,10 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     // TODO stub
     // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
+//  tc_2_matel...
+//  D2=           1           2           3           4
+//  excit2=           1           9           4          16
+//   -2.2700965657479885E-005
     TcFrmHam ham("FCIDUMP", false, 0);
     GeneralFrmHam helperHam("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
