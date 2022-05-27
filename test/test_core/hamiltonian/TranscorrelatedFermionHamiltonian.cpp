@@ -10,6 +10,7 @@
 #include <M7_lib/hamiltonian/GeneralFrmHam.h>
 #include <M7_lib/hamiltonian/TcFrmHam.h>  // what's being tested
 #include <M7_lib/util/consts.h>
+#include <M7_lib/io/Symlink.h>
 #include <gtest/gtest.h>
 
 #ifdef ENABLE_TCHINT
@@ -20,6 +21,7 @@
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
+    AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     // 2.3545134053388529E-002 for 1,2,3,4 (this is only the lmat part)
     // assuming GeneralFrmHam is working properly
     TcFrmHam ham("FCIDUMP", false, 0);
@@ -37,6 +39,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
+    AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     // TCHInt benchmark:
     //      D1=           1           2           3           4
     //  excit1=           4          12
@@ -64,6 +67,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
+    AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     // TCHInt benchmark:
     //  D2=           1           2           3           4
     //  excit2=           1           9           4          16
@@ -97,6 +101,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
  *        [ij|kl] = [ji|lk] from hermiticity
  */
 TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
+    AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     // [ij|kl]=[ji|lk] if Hermitian (chemist notation)
     // remember we antisymmetrise: [ij|kl] - [il|kj]
     // (see FCIDUMP file)
@@ -119,6 +124,7 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
+    AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     // TC Fermion Hamiltonian to be tested
     TcFrmHam ham("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
