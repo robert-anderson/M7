@@ -58,23 +58,29 @@ defs::ham_t TcFrmHam::get_element_0000(const field::FrmOnv &onv) const {
 
 defs::ham_t TcFrmHam::get_element_1100(const field::FrmOnv &onv,
                                        const conn::FrmOnv &conn) const {
-    auto element = GeneralFrmHam::get_element_1100(onv, conn);
+    auto general_element = GeneralFrmHam::get_element_1100(onv, conn);
+    defs::ham_t tc_element = 0.0;
     auto doubles_fn = [&](size_t i, size_t j) {
         if (i == conn.m_ann[0] || j == conn.m_ann[0]) return;
-        element += get_coeff_3300(conn.m_cre[0], i, j, conn.m_ann[0], i, j);
+        tc_element += get_coeff_3300(conn.m_cre[0], i, j, conn.m_ann[0], i, j);
     };
     onv.foreach_setbit_pair(doubles_fn);
-    return conn.phase(onv) ? -element : element;
+    // inelegant way to get around using the phase twice
+    // TODO modify to calculate phase only once
+    return general_element + (conn.phase(onv) ? -tc_element : tc_element);
 }
 
 defs::ham_t TcFrmHam::get_element_2200(const field::FrmOnv &onv,
                                        const conn::FrmOnv &conn) const {
-    auto element = GeneralFrmHam::get_element_2200(onv, conn);
+    auto general_element = GeneralFrmHam::get_element_2200(onv, conn);
+    defs::ham_t tc_element = 0.0;
     auto fn = [&](size_t i) {
         if (i == conn.m_ann[0] || i == conn.m_ann[1]) return;
-        element += get_coeff_3300(conn.m_cre[0], conn.m_cre[1], i,
+        tc_element += get_coeff_3300(conn.m_cre[0], conn.m_cre[1], i,
                                   conn.m_ann[0], conn.m_ann[1], i);
     };
     onv.foreach_setbit(fn);
-    return conn.phase(onv) ? -element : element;
+    // inelegant way to get around using the phase twice
+    // TODO modify to calculate phase only once
+    return general_element + (conn.phase(onv) ? -tc_element : tc_element);
 }
