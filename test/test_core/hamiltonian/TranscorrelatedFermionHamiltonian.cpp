@@ -49,7 +49,6 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
-    // TODO stub
 //      D1=           1           2           3           4
 //  excit1=           4          12
 //   -2.0033789485348489E-003
@@ -57,13 +56,19 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     GeneralFrmHam helperHam("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
     mbf::set_aufbau_mbf(onv, ham);
+    std::cout << onv << std::endl;
     conn::FrmOnv conn(onv);
     // (one integer -> spin-orbital; pair -> spin, spatial orbital)
     // (spin-minor) spin-orbital 3 goes to spin-orbital 11
     // conn.m_ann.add(3);
-    conn.m_ann.add({1, 1});
+    // spinorb 4 -> (orb,spin)=(2,0) -> {0,1}
+    conn.m_ann.add({0, 1});
     // conn.m_cre.add(11);
-    conn.m_cre.add({1, 6});
+    // spinorb 12 -> (orb,spin)=(6,0) -> {0,5}
+    conn.m_cre.add({1, 5});
+    auto other = onv;
+    conn.apply(onv, other);
+    std::cout << other << std::endl;
     auto elem = ham.get_element_1100(onv, conn);
     auto benchmark = helperHam.get_element_1100(onv, conn) + -2.0033789485348489E-003;
     ASSERT_FLOAT_EQ(elem, benchmark);
@@ -75,7 +80,6 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
-    // TODO stub
     // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
 //  tc_2_matel...
 //  D2=           1           2           3           4
@@ -85,9 +89,23 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     GeneralFrmHam helperHam("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
     mbf::set_aufbau_mbf(onv, ham);
-    // TODO
-    // auto elem = ham.get_element_0022()
-    ASSERT(false);
+    std::cout << onv << std::endl;
+    conn::FrmOnv conn(onv);
+    // (one integer -> spin-orbital; pair -> spin, spatial orbital)
+    // spinorb 4 -> (orb,spin)=(2,0) -> {0, 1}
+    conn.m_ann.add({0, 1});
+    // spinorb 16 -> (orb,spin)=(8,0) -> {0,7}
+    conn.m_cre.add({0, 7});
+    // spinorb 1 -> (orb,spin)=(1,1) -> {1, 0}
+    conn.m_ann.add({1, 0});
+    // spinorb 9 -> (orb,spin)=(5,1) -> {1,4}
+    conn.m_cre.add({1, 4});
+    auto other = onv;
+    conn.apply(onv, other);
+    std::cout << other << std::endl;
+    auto elem = ham.get_element_2200(onv, conn);
+    auto benchmark = helperHam.get_element_2200(onv, conn) + -2.2700965657479885E-005;
+    ASSERT_FLOAT_EQ(elem, benchmark);
 }
 
 /**
