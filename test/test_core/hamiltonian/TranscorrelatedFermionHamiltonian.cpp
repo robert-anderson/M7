@@ -7,7 +7,9 @@
  */
 
 #include <M7_lib/hamiltonian/TcFrmHam.h> // what's being tested
+#include <M7_lib/hamiltonian/GeneralFrmHam.h>
 #include <M7_lib/util/consts.h>
+#include <M7_lib/field/Mbf.h>
 #include <gtest/gtest.h>
 
 // #include <iomanip>
@@ -24,29 +26,47 @@
 
 /**
  * @brief check the get_element_0000 method, esp testing contraction
+ * (fermion one-particle)
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
-    // TODO stub
-    ASSERT(false);
+    // 2.3545134053388529E-002 for 1,2,3,4 (I think this is only the lmat part)
+    // I think I will assume GeneralFrmHam is working properly
+    // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
+    TcFrmHam ham("FCIDUMP", false, 0);
+    GeneralFrmHam helperHam("FCIDUMP", false, 0);
+    buffered::FrmOnv onv(ham.m_nsite);
+    mbf::set_aufbau_mbf(onv, ham);
+    auto elem = ham.get_element_0000(onv);
+    auto benchmark = helperHam.get_element_0000(onv) + 2.3545134053388529E-002;
+    ASSERT_FLOAT_EQ(elem, benchmark);
 }
 
 
 /**
- * @brief check the get_element_0011 method, esp testing contraction
+ * @brief check the get_element_1100 method, esp testing contraction
+ * (fermion single excitation)
  *
  */
-TEST(TranscorrelatedFermionHamiltonian, test_get_element_0011) {
+TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     // TODO stub
     ASSERT(false);
 }
 
 /**
- * @brief check the get_element_0022 method, esp testing contraction
+ * @brief check the get_element_2200 method, esp testing contraction
+ * (fermion double excitation)
  *
  */
-TEST(TranscorrelatedFermionHamiltonian, test_get_element_0022) {
+TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     // TODO stub
+    // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
+    TcFrmHam ham("FCIDUMP", false, 0);
+    GeneralFrmHam helperHam("FCIDUMP", false, 0);
+    buffered::FrmOnv onv(ham.m_nsite);
+    mbf::set_aufbau_mbf(onv, ham);
+    // TODO
+    // auto elem = ham.get_element_0022()
     ASSERT(false);
 }
 
