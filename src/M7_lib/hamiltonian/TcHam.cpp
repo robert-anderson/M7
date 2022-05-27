@@ -36,6 +36,6 @@ defs::ham_t TcHam::get_lmat_coeff(size_t a, size_t b, size_t c, size_t i,
     return three_body_matel(&ia, &ib, &ic, &ii, &ij, &ik);
     // return 2.71;
 #else
-    return 0.0
+    return 0.0;
 #endif
 }
