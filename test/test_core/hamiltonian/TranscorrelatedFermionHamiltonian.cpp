@@ -6,10 +6,10 @@
  *
  */
 
-#include <M7_lib/hamiltonian/TcFrmHam.h> // what's being tested
-#include <M7_lib/hamiltonian/GeneralFrmHam.h>
-#include <M7_lib/util/consts.h>
 #include <M7_lib/field/Mbf.h>
+#include <M7_lib/hamiltonian/GeneralFrmHam.h>
+#include <M7_lib/hamiltonian/TcFrmHam.h>  // what's being tested
+#include <M7_lib/util/consts.h>
 #include <gtest/gtest.h>
 
 // #include <iomanip>
@@ -42,16 +42,15 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
     ASSERT_FLOAT_EQ(elem, benchmark);
 }
 
-
 /**
  * @brief check the get_element_1100 method, esp testing contraction
  * (fermion single excitation)
  *
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
-//      D1=           1           2           3           4
-//  excit1=           4          12
-//   -2.0033789485348489E-003
+    //      D1=           1           2           3           4
+    //  excit1=           4          12
+    //   -2.0033789485348489E-003
     TcFrmHam ham("FCIDUMP", false, 0);
     GeneralFrmHam helperHam("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
@@ -69,7 +68,8 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     auto other = onv;
     conn.apply(onv, other);
     std::cout << other << std::endl;
-    auto elemdiff = ham.get_element_1100(onv, conn) - helperHam.get_element_1100(onv, conn);
+    auto elemdiff =
+        ham.get_element_1100(onv, conn) - helperHam.get_element_1100(onv, conn);
     auto benchmark = -2.0033789485348489E-003;
     ASSERT_FLOAT_EQ(elemdiff, benchmark);
 }
@@ -81,10 +81,10 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
  */
 TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
-//  tc_2_matel...
-//  D2=           1           2           3           4
-//  excit2=           1           9           4          16
-//   -2.2700965657479885E-005
+    //  tc_2_matel...
+    //  D2=           1           2           3           4
+    //  excit2=           1           9           4          16
+    //   -2.2700965657479885E-005
     TcFrmHam ham("FCIDUMP", false, 0);
     GeneralFrmHam helperHam("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
@@ -102,9 +102,11 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     auto other = onv;
     conn.apply(onv, other);
     std::cout << other << std::endl;
-    auto elemdiff = ham.get_element_2200(onv, conn) - helperHam.get_element_2200(onv, conn);
+    auto elemdiff =
+        ham.get_element_2200(onv, conn) - helperHam.get_element_2200(onv, conn);
     auto benchmark = -2.2700965657479885E-005;
-    ASSERT_FLOAT_EQ(elemdiff, benchmark);
+    // we also pick up a phase, hence -benchmark
+    ASSERT_FLOAT_EQ(elemdiff, -benchmark);
 }
 
 /**
@@ -123,10 +125,10 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // these two would be the same assuming Hermiticity, but not in this FCIDUMP
     // chemist notation: 1237 - 1732
     // -0.37788782091129145E-003 - -0.40412978632087910E-003
-    auto el1 = ham.get_coeff_2200(0,2,1,6);
+    auto el1 = ham.get_coeff_2200(0, 2, 1, 6);
     // chemist notation: 2173 - 7123
     // 0.19621434645836822E-002 - -0.63747363394572173E-002
-    auto el2 = ham.get_coeff_2200(1,6,0,2);
+    auto el2 = ham.get_coeff_2200(1, 6, 0, 2);
 
     std::cout << "els:\n" << el1 << std::endl << el2 << std::endl;
     ASSERT_FALSE(consts::nearly_equal(el1, el2));
@@ -141,16 +143,17 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // TC Fermion Hamiltonian to be tested
     TcFrmHam ham("FCIDUMP", false, 0);
     buffered::FrmOnv onv(ham.m_nsite);
-    onv = {{0, 1},{0, 1}};
+    onv = {{0, 1}, {0, 1}};
     conn::FrmOnv conn(onv);
     // spin-orbital indices to annihilate
     // (one integer -> spin-orbital; pair -> spin, spatial orbital)
     conn.m_cre.add({0, 2});
     conn.m_cre.add({0, 3});
     conn.m_cre.add({1, 9});
-    conn.m_ann.add({0, 0}); // alpha electron in spatial orbital 0 to be annihilated
-    conn.m_ann.add({0, 1}); // alpha e in spatial orb 1
-    conn.m_ann.add({1, 0}); // beta e in spatial orb 0
+    conn.m_ann.add(
+        {0, 0});  // alpha electron in spatial orbital 0 to be annihilated
+    conn.m_ann.add({0, 1});  // alpha e in spatial orb 1
+    conn.m_ann.add({1, 0});  // beta e in spatial orb 0
     auto other = onv;
     conn.apply(onv, other);
     std::cout << other << std::endl;
@@ -160,7 +163,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     // expect element (1,2,1|3,4,10)=(1,1,1|3,10,4) (1-based indexing)
     // Also has a phase of -1
     std::cout << "lmat:" << std::endl;
-    auto tmp = ham.get_lmat_coeff(1,0,0,3,2,9)/3;
+    auto tmp = ham.get_lmat_coeff(1, 0, 0, 3, 2, 9) / 3;
     std::cout << tmp << std::endl;
     //   1 1 2 3 10 4 + 2 1 1 4 3 10 + 1 2 1 10 4 3
     // - 1 1 2 10 3 4 - 1 2 1 4 10 3 - 2 1 1 3 4 10
@@ -168,15 +171,11 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     //   1 1 2 3 10 4 + 1 1 2 10 3 4 + 1 1 2 10 3 4
     // - 1 1 2 10 3 4 - 1 1 2 3 4 10 - 1 1 2 4 10 3
     // all but the last two are zero as far as I can tell
-    auto benchmark = -0.20360278843803472E-006
-                   + 0.0
-                   + 0.0
-                   - 0.0
-                   - 0.0
-                   - -0.20360278843803271E-006;
-    ASSERT_FLOAT_EQ(-matel33/3.0, benchmark);
+    auto benchmark = -0.20360278843803472E-006 + 0.0 + 0.0 - 0.0 - 0.0 -
+                     -0.20360278843803271E-006;
+    ASSERT_FLOAT_EQ(-matel33 / 3.0, benchmark);
     // also test spin-non-conserving excitation (should give 0 for Fermions):
-    onv = {{0, 1},{0, 1}};
+    onv = {{0, 1}, {0, 1}};
     // conn::FrmOnv conn(onv);
     // conn.m_ann = {};
     // conn.m_cre = {};
@@ -189,9 +188,9 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     conn.m_cre.add({1, 9});
     matel33 = ham.get_element_3300(onv, conn);
     // does not conserve spin, ipso facto = 0
-    ASSERT_FLOAT_EQ(matel33/3.0, 0.0);
+    ASSERT_FLOAT_EQ(matel33 / 3.0, 0.0);
 
-    onv = {{0, 1},{0, 13}};
+    onv = {{0, 1}, {0, 13}};
     conn.clear();
     // (one integer -> spin-orbital; pair -> spin, spatial orbital)
     conn.m_cre.add({0, 2});
@@ -202,8 +201,7 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     conn.m_ann.add({1, 0});
     matel33 = ham.get_element_3300(onv, conn);
     // same test as the first one but with positive phase
-    ASSERT_FLOAT_EQ(matel33/3.0, benchmark);
+    ASSERT_FLOAT_EQ(matel33 / 3.0, benchmark);
 }
 
 #endif  // ENABLE_TCHINT
-
