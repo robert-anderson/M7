@@ -60,12 +60,13 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     conn::FrmOnv conn(onv);
     // (one integer -> spin-orbital; pair -> spin, spatial orbital)
     // (spin-minor) spin-orbital 3 goes to spin-orbital 11
-    conn.m_ann.add(3);
-    conn.m_cre.add(11);
+    // conn.m_ann.add(3);
+    conn.m_ann.add({1, 1});
+    // conn.m_cre.add(11);
+    conn.m_cre.add({1, 6});
     auto elem = ham.get_element_1100(onv, conn);
     auto benchmark = helperHam.get_element_1100(onv, conn) + -2.0033789485348489E-003;
     ASSERT_FLOAT_EQ(elem, benchmark);
-    ASSERT(false);
 }
 
 /**
