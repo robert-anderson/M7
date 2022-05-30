@@ -7,6 +7,7 @@
  */
 
 #include <M7_lib/hamiltonian/TcHam.h> // what's being tested
+#include <M7_lib/io/Symlink.h>
 #include <gtest/gtest.h>
 
 #ifdef ENABLE_TCHINT
@@ -15,6 +16,8 @@
  *
  */
 TEST(TranscorrelatedHamiltonian, get_coeff3300_test) {
+    AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
+    AssetSymlink fcidump("TC_Be_CCPVDZ/FCIDUMP", "FCIDUMP");
     // General Hamiltonian to be tested
     TcHam ham;
     // remember 1-based: becomes (1,1,1,1,1,1)
