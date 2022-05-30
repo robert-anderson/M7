@@ -169,15 +169,6 @@ namespace sys {
              */
             const bool m_spin_resolved;
 
-        private:
-            operator size_t() const {
-                return 0ul;
-            }
-        public:
-            operator bool() const {
-                return m_nsite;
-            }
-
             Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved):
                     Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved){}
             /*
@@ -425,6 +416,7 @@ namespace sys {
             return {m_frm.m_basis, m_bos.m_basis};
         }
 
+        // TODO: rename - "size" makes it sound like the hilbert space dimension is returned
         Size size() const {
             return basis().size();
         }
@@ -435,5 +427,15 @@ namespace sys {
     };
 }
 
+static std::ostream &operator<<(std::ostream &os, const sys::frm::Basis &v) {
+    os << log::format("[nsite: {}, spin resolved: {}, site irreps: {}]",
+                      v.m_nsite, v.m_spin_resolved, utils::to_string(v.m_abgrp_map.m_site_irreps));
+    return os;
+}
+
+static std::ostream &operator<<(std::ostream &os, const sys::bos::Basis &v) {
+    os << log::format("[nmode: {}, max mode occ: {}]", v.m_nmode, v.m_occ_cutoff);
+    return os;
+}
 
 #endif //M7_BASISDATA_H

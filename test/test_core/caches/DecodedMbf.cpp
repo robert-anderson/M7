@@ -34,7 +34,7 @@ TEST(DecodedMbf, Simple){
         auto& occ_simple_inds = mbf.m_decoded.m_simple_occs.get();
         ASSERT_EQ(occ_simple_inds, value);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_hs.m_sites.m_nspinorb, noccorb);
+    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_basis.m_nspinorb, noccorb);
     occ_foreach.loop();
 
     /*
@@ -48,7 +48,7 @@ TEST(DecodedMbf, Simple){
         auto& vac_simple_inds = mbf.m_decoded.m_simple_vacs.get();
         ASSERT_EQ(vac_simple_inds, value);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_hs.m_sites.m_nspinorb, nvacorb);
+    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_basis.m_nspinorb, nvacorb);
     vac_foreach.loop();
 }
 
@@ -100,7 +100,7 @@ TEST(DecodedMbf, Labelled){
      *  4("Wb"): 2, 5("Xb"): 1, 6("Yb"): 0, 7("Zb"): 1
      */
 
-    buffered::FrmOnv mbf({10, grp_map});
+    buffered::FrmOnv mbf({10, grp_map, false});
     mbf = {alpha_occ, beta_occ};
     ASSERT_EQ(mbf.nsetbit(), alpha_occ.size() + beta_occ.size());
 

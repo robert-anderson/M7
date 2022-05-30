@@ -10,9 +10,9 @@
 
 FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
         m_opts(opts), m_ham({opts.m_hamiltonian, opts.m_basis}),
-        m_wf(opts, m_ham.get_default_sector(opts.m_particles)),
+        m_wf(opts, {m_ham.m_basis, m_ham.default_particles(opts.m_particles)}),
         m_prop(props::get(m_ham, opts, m_wf)) {
-    buffered::Mbf ref_mbf(m_ham.basis());
+    buffered::Mbf ref_mbf(m_wf.m_sector);
 
     mbf::set(ref_mbf, m_wf.m_sector.particles(), opts.m_reference.m_mbf_init, 0ul);
 

@@ -8,11 +8,11 @@
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
         const Hamiltonian &h, sys::Particles particles, bool force_general) {
-    const sys::frm::Sector frm_sector(h.m_frm.m_basis, particles.m_frm);
-    const sys::bos::Sector bos_sector(h.m_bos.m_basis, particles.m_bos);
+    const sys::frm::Sector frm_sector(h.m_basis.m_frm, particles.m_frm);
+    const sys::bos::Sector bos_sector(h.m_basis.m_bos, particles.m_bos);
 
     if (force_general) return make_pair_iterator(h, particles);
-    if (!h.m_bos.is_nonzero()){
+    if (!bos_sector){
         /*
          * hamiltonian is boson operator-free, so can work in determinants: a.k.a. FrmOnvs
          */
@@ -22,7 +22,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
             return unique_t(new frm::Pair<frm::Ms2Conserve>(frm_sector));
         }
         return unique_t(new frm::Pair<frm::General>(frm_sector));
-    } else if (!frm_hs) {
+    } else if (!frm_sector) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
          */
@@ -30,24 +30,24 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
         /*
          * hamiltonian is expressed in terms of fermion and boson operators, or it is assumed to be for testing purposes
          */
-        if (nboson_conserve) {
+        if (h.m_boson_number_conserve) {
             // closed system in the boson sector
         } else {
             // open system in the boson sector
             if (h.m_frm.is<SpinModelFrmHam>()) {
-                return unique_t(new frm::Pair<frm::Spins>(frm_hs));
+                return unique_t(new frm::Pair<frm::Spins>(frm_sector));
             }
 
             if (h.m_frm.is<SpinModelFrmHam>()) {
                 typedef frm_bos::OpenProduct<frm::Spins> single_t;
                 typedef frm_bos::Pair<single_t> pair_t;
-                single_t foreach({frm_hs}, bos_hs);
+                single_t foreach({frm_sector}, bos_sector);
                 return unique_t(new pair_t(foreach));
             }
-            else if (frm_hs.ms2_conserved()) {
+            else if (frm_sector.m_elecs.m_ms2.conserve()) {
                 typedef frm_bos::OpenProduct<frm::Ms2Conserve> single_t;
                 typedef frm_bos::Pair<single_t> pair_t;
-                single_t foreach({frm_hs}, bos_hs);
+                single_t foreach({frm_sector}, bos_sector);
                 return unique_t(new pair_t(foreach));
             }
         }
@@ -55,12 +55,12 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
     /*
      * the iterator has not already been returned, so make with the force_general case appropriate for the basis dimensions
      */
-    return make_pair_iterator(h);
+    return make_pair_iterator(h, particles);
 }
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, sys::Particles particles) {
-    const sys::frm::Sector frm_sector(h.m_frm.m_basis, particles.m_frm);
-    const sys::bos::Sector bos_sector(h.m_bos.m_basis, particles.m_bos);
+    const sys::frm::Sector frm_sector(h.m_basis.m_frm, particles.m_frm);
+    const sys::bos::Sector bos_sector(h.m_basis.m_bos, particles.m_bos);
 
     if (h.m_bos) {
         /*
@@ -76,30 +76,31 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
         else
             return unique_t(new bos::Pair<bos::GeneralOpen>(bos_sector));
     } else {
-        if (nboson_conserve) {
+        if (bos_sector.m_bosons.conserve()) {
             typedef frm_bos::ClosedProduct<frm::General> single_t;
             typedef frm_bos::Pair<single_t> pair_t;
-            single_t foreach({frm_hs}, bos_hs);
+            single_t foreach({frm_sector}, bos_sector);
             return unique_t(new pair_t(foreach));
         }
         else {
             typedef frm_bos::OpenProduct<frm::General> single_t;
             typedef frm_bos::Pair<single_t> pair_t;
-            single_t foreach({frm_hs}, bos_hs);
+            single_t foreach({frm_sector}, bos_sector);
             return unique_t(new pair_t(foreach));
         }
     }
     ABORT("pair iterator not assigned");
+    return nullptr;
 }
 
-size_t DenseHamiltonian::nrow(const Hamiltonian &h, bool force_general) {
-    auto ptr = make_pair_iterator(h, force_general);
+size_t DenseHamiltonian::nrow(const Hamiltonian &h, sys::Particles particles, bool force_general) {
+    auto ptr = make_pair_iterator(h, particles, force_general);
     return ptr->m_nrow;
 }
 
-DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, bool force_general) :
-        dense::SquareMatrix<defs::ham_t>(nrow(h, force_general)) {
-    auto ptr = make_pair_iterator(h, force_general);
+DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, sys::Particles particles, bool force_general) :
+        dense::SquareMatrix<defs::ham_t>(nrow(h, particles, force_general)) {
+    auto ptr = make_pair_iterator(h, particles, force_general);
     /*
      * only one of the virtual methods will be overridden to a non-empty loop so they can all be called
      */

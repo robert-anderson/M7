@@ -177,9 +177,9 @@ public:
         return m_basis.m_nsite;
     }
 
-    virtual sys::frm::Ms2 default_ms2(size_t nelec) const {
+    virtual int default_ms2_value() const {
         // assume 1/2-filling
-        return {sys::frm::Ms2::lowest_value(nelec), m_kramers_attrs.conserving()};
+        return defs::undefined_ms2;
     }
 };
 

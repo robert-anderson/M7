@@ -20,11 +20,13 @@ namespace suite {
         field::FrmOnv m_frm;
         field::FrmBosOnv m_frmbos;
         field::BosOnv m_bos;
+        MbfsRow(const sys::Basis& basis);
         MbfsRow(const sys::Sector& sector);
     };
 
     struct Mbfs : BufferedTable<MbfsRow>{
 
+        Mbfs(const sys::Basis& basis);
         Mbfs(const sys::Sector& sector);
 
         field::FrmOnv& operator[](const field::FrmOnv& mbf){

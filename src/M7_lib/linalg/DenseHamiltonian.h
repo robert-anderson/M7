@@ -32,7 +32,17 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
      */
     std::unique_ptr<PairBase> make_pair_iterator(const Hamiltonian& h, sys::Particles particles);
 
-    size_t nrow(const Hamiltonian& h, bool force_general);
+    /**
+     * @param h
+     *  hamiltonian object
+     * @param particles
+     *  particle number sector in which to construct the CI matrix
+     * @param force_general
+     *  if true, use the full combinatorial basis with no symmetries assumed or imposed (for testing)
+     * @return
+     *  number of rows (and columns) in the matrix representation of H
+     */
+    size_t nrow(const Hamiltonian& h, sys::Particles particles, bool force_general);
 
     template<typename mbf_t>
     void loop_over_pair_iterator(PairBase* foreach, const Hamiltonian& h){
@@ -43,7 +53,7 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
     }
 
 public:
-    DenseHamiltonian(const Hamiltonian& h, bool force_general=false);
+    DenseHamiltonian(const Hamiltonian& h, sys::Particles particles, bool force_general=false);
 };
 
 #endif //M7_DENSEHAMILTONIAN_H

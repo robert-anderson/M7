@@ -93,8 +93,8 @@ public:
 
     virtual void log_data() const;
 
-    virtual sys::bos::Bosons default_bosons() const {
-        return {0ul, false};
+    virtual size_t default_nboson() const {
+        return 0ul;
     }
 
 };

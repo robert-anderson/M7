@@ -41,7 +41,7 @@ defs::ham_t FrmHam::get_element(const field::FrmOnv &ket, const conn::FrmOnv &co
 }
 
 void FrmHam::log_data() const {
-    if (disabled()) return;
+    if (!*this) return;
     if (!m_contribs_1100.is_nonzero(0ul))
         log::info("1-electron term has no diagonal contributions");
     if (!m_contribs_1100.is_nonzero(exsig_utils::ex_single))

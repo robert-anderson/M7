@@ -8,7 +8,7 @@
 
 
 void BosHam::log_data() const {
-    if (disabled()) return;
+    if (*this) return;
     if (!m_contribs_0011.is_nonzero(0ul))
         log::info("1-boson (0011) term has no diagonal (0000) contributions");
     if (!m_contribs_0011.is_nonzero(exsig_utils::ex_0011))

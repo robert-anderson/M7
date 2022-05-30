@@ -130,6 +130,9 @@ struct HamiltonianTerms {
         if (*m_bos && *m_frmbos)
             REQUIRE_TRUE(m_bos->m_basis==m_frmbos->m_basis.m_bos, "incompatible boson basis definitions");
     }
+
+    HamiltonianTerms(): m_frm(new NullFrmHam), m_bos(new NullBosHam), m_frmbos(new NullFrmBosHam){}
+
 };
 
 
@@ -148,6 +151,8 @@ public:
     const FrmHam &m_frm;
     const BosHam &m_bos;
     const FrmBosHam &m_frmbos;
+
+    const sys::Basis m_basis;
     /**
      * true if the Hamiltonian describes a close quantum system in the bosonic sector
      */
@@ -163,9 +168,47 @@ private:
         return false;
     }
 
+    /**
+     * basic ctor kept private. this enables the flexibility to allow the FrmHam, BosHam, and FrmBosHam terms to be
+     * owned either by the m_terms member or externally
+     * @param terms
+     *  moving reference to the terms object. can be trivially constructed in the case of external ownership
+     * @param frm
+     *  nullptr if m_terms.m_frm is to be dereferenced, else this points to an externally allocated FrmHam
+     * @param bos
+     *  nullptr if m_terms.m_bos is to be dereferenced, else this points to an externally allocated BosHam
+     * @param frmbos
+     *  nullptr if m_terms.m_frmbos is to be dereferenced, else this points to an externally allocated FrmBosHam
+     */
+    explicit Hamiltonian(HamiltonianTerms&& terms, const FrmHam* frm, const BosHam* bos, const FrmBosHam* frmbos):
+            m_terms(std::move(terms)),
+            m_frm(frm ? *frm : *m_terms.m_frm),
+            m_bos(bos ? *bos : *m_terms.m_bos),
+            m_frmbos(frmbos ? *frmbos : *m_terms.m_frmbos),
+            m_basis(m_frmbos ? m_frmbos.m_basis : sys::Basis(m_frm.m_basis, m_bos.m_basis)),
+            m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
+        REQUIRE_TRUE(m_basis, "No system defined");
+        if (!m_frm) log::info("Fermion Hamiltonian is disabled");
+        if (defs::enable_bosons) {
+            if (!m_frmbos) log::info("Fermion-boson ladder Hamiltonian is disabled");
+            if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
+        }
+    }
+
 public:
 
+    /**
+     * initialize based on the contents of a configuration document
+     * @param opts
+     *  pair of Sections from the configuration document: hamiltonian and basis
+     */
     explicit Hamiltonian(opt_pair_t opts);
+
+    /*
+     * ctors for initialization using externally-owned term objects (m_terms is initialized to nulls and referred to for
+     * the terms
+     */
+    explicit Hamiltonian(const FrmHam& frm);
 
     /*
      * pure fermion matrix elements
@@ -248,6 +291,7 @@ public:
 //        return {elecs, bosons};
 //    }
 
+    // TODO: rename
     sys::Particles default_particles(const conf::Particles &opts) const {
         auto nelec = opts.m_nelec.get();
         // give precedence to nelec value given by FrmHam
@@ -258,29 +302,21 @@ public:
         if (m_frm) ms2_conserve = m_frm.m_kramers_attrs.conserving();
         // currently only FrmHam can break Kramers symmetry (FrmBosHam always commutes with Sz)
 
-        int ms2_value = sys::frm::Ms2::lowest_value(nelec);
-        if (m_frm) ms2_value = m_frm.default_ms2()
-
-        auto ms2 = (opts.m_ms2.get()==~0) ?
-                   default_ms2(nelec) : sys::frm::Ms2(opts.m_ms2.get(), m_kramers_attrs.conserving());
-        return {nelec, ms2};
-
-
-        auto frm_particles = m_frm.default_particles(opts);
-        auto frmbos_particles = m_frmbos.default_particles(opts);
-        auto bos_particles = m_bos.default_particles(opts);
-
+        int ms2_value = opts.m_ms2.get();
+        if (m_frm && ms2_value==defs::undefined_ms2) ms2_value = m_frm.default_ms2_value();
+        if (m_frmbos && ms2_value==defs::undefined_ms2) ms2_value = m_frmbos.default_ms2_value();
+        if (ms2_value==defs::undefined_ms2) {
+            log::info("2*Ms value not defined by configuration document or Hamiltonian, "
+                      "defaulting to lowest valid positive value");
+            ms2_value = sys::frm::Ms2::lowest_value(nelec);
+        }
 
         auto nboson = opts.m_nboson.get();
+        // give precedence to nboson value given by BosHam
         if (!nboson) nboson = m_bos.default_nboson();
-        return {{nelec, ms2}, {nboson, m_boson_number_conserve}};
-    }
+        if (!nboson) nboson = m_frmbos.default_nboson();
 
-    sys::Basis basis() const {
-        return {m_frm.m_basis, m_bos.m_basis};
-    }
-    sys::Size basis_size() const {
-        return {m_frm.m_basis.m_nsite, m_bos.m_basis.m_nmode};
+        return {{nelec, {ms2_value, ms2_conserve}}, {nboson, m_boson_number_conserve}};
     }
 };
 

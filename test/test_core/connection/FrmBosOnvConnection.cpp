@@ -11,9 +11,9 @@ TEST(FrmBosOnvConnection, DetectExsig) {
     const size_t nelec = 6;
     const size_t nsite = 6;
     const size_t nmode = 6;
-    const sys::frm::Basis frm_hs(nelec, nsite);
-    const BosHilbertSpace bos_hs(nmode);
-    buffered::FrmBosOnv src(frm_hs, bos_hs);
+    const sys::frm::Basis frm_basis(nelec, nsite);
+    const sys::bos::Basis bos_basis(nmode);
+    buffered::FrmBosOnv src(frm_basis, bos_basis);
     src.m_frm = {{0, 1, 2}, {0, 1, 2}};
     auto dst = src;
     dst.m_bos[5] = 1;

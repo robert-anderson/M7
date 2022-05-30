@@ -91,11 +91,11 @@ namespace mbf_foreach {
         Pair(const foreach_t &foreach) :
                 PairBase(static_cast<const mbf_foreach::Base &>(foreach).m_niter),
                 m_foreach_outer(foreach), m_foreach_inner(foreach) {
-            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
-                            m_foreach_outer.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
+            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_basis,
+                            m_foreach_outer.m_mbfs.m_row.m_frmbos.m_frm.m_basis,
                             "outer MBFs not reproduced properly by copy");
-            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
-                            m_foreach_inner.m_mbfs.m_row.m_frmbos.m_frm.m_hs,
+            DEBUG_ASSERT_EQ(foreach.m_mbfs.m_row.m_frmbos.m_frm.m_basis,
+                            m_foreach_inner.m_mbfs.m_row.m_frmbos.m_frm.m_basis,
                             "inner MBFs not reproduced properly by copy");
         }
 
@@ -314,7 +314,7 @@ namespace mbf_foreach {
 
             static sys::Sector make_sector(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {
                 Bases bases(frm_foreach, bos_foreach);
-                return {bases.m_frm.m_sector, bases.m_bos.m_sector};
+                return {bases.m_frm.m_sector.m_frm, bases.m_bos.m_sector.m_bos};
             }
 
             static size_t make_niter(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) {

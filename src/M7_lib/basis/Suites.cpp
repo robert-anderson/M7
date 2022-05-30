@@ -5,14 +5,19 @@
 #include "Suites.h"
 #include "BasisData.h"
 
-suite::MbfsRow::MbfsRow(const sys::Sector &sector) :
-        m_frm(this, sector, "fermion ONV"),
-        m_frmbos(this, sector, "fermion-boson ONV"),
-        m_bos(this, sector, "boson ONV"){}
+suite::MbfsRow::MbfsRow(const sys::Basis &basis) :
+        m_frm(this, basis, "fermion ONV"),
+        m_frmbos(this, basis, "fermion-boson ONV"),
+        m_bos(this, basis, "boson ONV"){}
 
-suite::Mbfs::Mbfs(const sys::Sector &sector) : BufferedTable<MbfsRow>("Work space for MBFs", {{sector}}){
+suite::MbfsRow::MbfsRow(const sys::Sector &sector) : MbfsRow(sector.basis()){}
+
+
+suite::Mbfs::Mbfs(const sys::Basis &basis) : BufferedTable<MbfsRow>("Work space for MBFs", {{basis}}){
     m_row.push_back_jump();
 }
+
+suite::Mbfs::Mbfs(const sys::Sector &sector) : Mbfs(sector.basis()){}
 
 suite::Conns::Conns(const sys::Size &size) :
         m_frmonv(size.m_frm), m_bosonv(size.m_bos), m_frmbosonv(size){}

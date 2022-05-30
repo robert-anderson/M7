@@ -7,7 +7,7 @@
 Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
                      const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
         Wavefunction::SharedRow(wf, loc, "reference"),
-        m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_hs),
+        m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     log::info("Initial reference ONV for WF part {} is {} with energy {}",

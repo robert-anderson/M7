@@ -76,6 +76,18 @@ struct FrmBosHam : HamOpTerm {
      */
     void log_data() const;
 
+    virtual size_t default_nelec() const {
+        // assume 1/2-filling
+        return m_basis.m_frm.m_nsite;
+    }
+
+    virtual int default_ms2_value() const {
+        return defs::undefined_ms2;
+    }
+
+    virtual size_t default_nboson() const {
+        return 0ul;
+    }
 };
 
 /**

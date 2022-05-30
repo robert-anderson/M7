@@ -118,7 +118,7 @@ namespace conf {
         explicit Particles(Group *parent):
             Section(parent, "particles", "options relating to the particle number sector"),
             m_nelec(this, "nelec", 0ul, "number of electrons in the system (conserved)"),
-            m_ms2(this, "ms2", ~0, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
+            m_ms2(this, "ms2", defs::undefined_ms2, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
             m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"){}
     };
 
