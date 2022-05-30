@@ -173,19 +173,21 @@ public:
      */
     virtual void log_data() const;
 
-    virtual sys::frm::Electrons default_electrons() const {
-        const auto nelec = m_basis.m_nsite;
+    virtual size_t default_nelec() const {
+        return m_basis.m_nsite;
+    }
+
+    virtual sys::frm::Ms2 default_ms2(size_t nelec) const {
         // assume 1/2-filling
-        return {nelec, sys::frm::Ms2(nelec)};
+        return {sys::frm::Ms2::lowest_value(nelec), m_kramers_attrs.conserving()};
     }
 };
 
-struct NullFrmHam : FrmHam {
+/**
+ * fermion hamiltonian which can be defined in a non-zero number of sites, but with no non-zero term coefficients
+ */
+struct NullFrmHam : FrmHam, NullOpTerm {
     NullFrmHam() : FrmHam(0ul){}
-
-    bool enabled() const override {
-        return false;
-    }
 };
 
 /**

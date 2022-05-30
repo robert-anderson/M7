@@ -12,11 +12,10 @@ struct HolsteinLadderHam : FrmBosHam {
 
     const defs::ham_t m_g;
 
-    HolsteinLadderHam(const FrmHam& frm, const BosHam& bos, defs::ham_t g) :
-        FrmBosHam(frm, bos), m_g(g) {
-        REQUIRE_TRUE(frm.is<HubbardFrmHam>(), "Holstein term requires fermion H to be of Hubbard type");
-        m_contribs_0001.set_nonzero(exsig_utils::ex_0001);
-        m_contribs_0010.set_nonzero(exsig_utils::ex_0010);
+    HolsteinLadderHam(const sys::frm::Basis& frm_basis, defs::ham_t g, size_t bos_occ_cutoff=defs::max_bos_occ) :
+        FrmBosHam({frm_basis, {frm_basis.m_nsite, bos_occ_cutoff}}), m_g(g) {
+        m_contribs_1101.set_nonzero(exsig_utils::ex_0001);
+        m_contribs_1110.set_nonzero(exsig_utils::ex_0010);
     }
 
     defs::ham_t get_coeff_0010(size_t imode) const override;

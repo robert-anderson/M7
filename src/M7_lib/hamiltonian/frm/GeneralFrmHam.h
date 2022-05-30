@@ -17,11 +17,11 @@ struct GeneralFrmHam : FrmHam {
     GeneralFrmHam(const sys::frm::Basis& basis);
 
 private:
-    static sys::frm::Sector sector(const FcidumpHeader& header) {
-        sys::frm::Basis basis(header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved);
-        sys::frm::Electrons elecs(header.m_nelec, {header.m_ms2, header.m_relativistic});
-        return sys::frm::Sector(basis, elecs);
-    }
+//    static sys::frm::Sector sector(const FcidumpHeader& header) {
+//        sys::frm::Basis basis(header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved);
+//        sys::frm::Electrons elecs(header.m_nelec, {header.m_ms2, header.m_relativistic});
+//        return sys::frm::Sector(basis, elecs);
+//    }
 
 public:
     GeneralFrmHam(const FcidumpHeader& header, bool spin_major);

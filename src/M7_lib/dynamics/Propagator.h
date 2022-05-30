@@ -44,7 +44,7 @@ public:
             m_sector(wf.m_sector),
             m_imp_samp_exp(opts.m_propagator.m_imp_samp_exp),
             m_dst(m_sector),
-            m_conn(ham.m_basis.size()){}
+            m_conn(ham.basis_size()){}
 
     virtual ~Propagator() {}
 

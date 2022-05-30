@@ -11,6 +11,8 @@
 #include "M7_lib/excitgen/ExcitGen.h"
 #include "M7_lib/conf/Conf.h"
 
+struct NullOpTerm {};
+
 /**
  * base class for the three currently implemented kinds of hamiltonian term based on the second quantised operators
  * which appear in their definitions
@@ -46,12 +48,8 @@ struct HamOpTerm {
         return as<T>();
     }
 
-    virtual bool enabled() const {
-        return true;
-    }
-
-    bool disabled() const {
-        return !enabled();
+    operator bool () const {
+        return !is<NullOpTerm>();
     }
 
     using excit_gen_ptr_t = ExcitGen::excit_gen_ptr_t;

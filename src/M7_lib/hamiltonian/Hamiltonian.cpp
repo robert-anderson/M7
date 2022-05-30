@@ -10,7 +10,8 @@
 Hamiltonian::Hamiltonian(opt_pair_t opts):
         m_terms(opts), m_frm(*m_terms.m_frm), m_bos(*m_terms.m_bos), m_frmbos(*m_terms.m_frmbos),
         m_basis(sys::frm::Basis(m_frmbos.m_basis.m_frm, m_frm.m_basis),
-                sys::bos::Basis(m_frmbos.m_basis.m_bos, m_bos.m_basis)), m_work_conn(m_basis.size()){
+                sys::bos::Basis(m_frmbos.m_basis.m_bos, m_bos.m_basis)),
+        m_boson_number_conserve(boson_number_conserve()), m_work_conn(m_basis.size()){
     REQUIRE_TRUE(m_basis, "No system defined");
     if (m_frm.disabled()) log::info("Fermion Hamiltonian is disabled");
     if (defs::enable_bosons) {

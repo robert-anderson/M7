@@ -217,11 +217,11 @@ bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
     if (ham.m_bos.m_contribs_0011.is_nonzero(0ul)){
         if (!m_rdms[exsig_utils::ex_0011]) return false;
     }
-    if (ham.m_frmbos.m_contribs_0010.is_nonzero(exsig_utils::ex_0010)){
-        if (!m_rdms[exsig_utils::ex_0010]) return false;
+    if (ham.m_frmbos.m_contribs_1101.is_nonzero(exsig_utils::ex_1101)){
+        if (!m_rdms[exsig_utils::ex_1101]) return false;
     }
-    if (ham.m_frmbos.m_contribs_0001.is_nonzero(exsig_utils::ex_0001)){
-        if (!m_rdms[exsig_utils::ex_0001]) return false;
+    if (ham.m_frmbos.m_contribs_1110.is_nonzero(exsig_utils::ex_1110)){
+        if (!m_rdms[exsig_utils::ex_1110]) return false;
     }
     if (!m_rdms[exsig_utils::ex_double]) return false;
     return true;
@@ -229,7 +229,7 @@ bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
 
 
 defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
-    if (ham.disabled()) return 0.0;
+    if (!ham) return 0.0;
     auto& rdm2 = m_rdms[ex_2200];
     REQUIRE_TRUE_ALL(rdm2!=nullptr, "cannot compute energy without the 2RDM");
     defs::ham_t e1 = 0.0;
@@ -270,7 +270,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
 }
 
 defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const {
-    if (ham.disabled()) return 0.0;
+    if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig];
     REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,
                      "currently only supporting linear boson operators in the ladder term");
@@ -304,7 +304,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exs
 }
 
 defs::ham_comp_t Rdms::get_energy(const BosHam &ham) const {
-    if (ham.disabled()) return 0.0;
+    if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig_utils::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");
     defs::ham_t e = 0.0;

@@ -6,22 +6,22 @@
 
 #include "DenseHamiltonian.h"
 
-std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, bool force_general) {
-    const auto& frm_hs = h.m_hs.m_frm;
-    const auto& bos_hs = h.m_hs.m_bos;
-    const auto nboson_conserve = bos_hs.m_nboson_conserve;
+std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
+        const Hamiltonian &h, sys::Particles particles, bool force_general) {
+    const sys::frm::Sector frm_sector(h.m_frm.m_basis, particles.m_frm);
+    const sys::bos::Sector bos_sector(h.m_bos.m_basis, particles.m_bos);
 
-    if (force_general) return make_pair_iterator(h);
-    if (!bos_hs) {
+    if (force_general) return make_pair_iterator(h, particles);
+    if (!h.m_bos.is_nonzero()){
         /*
-         * hamiltonian is boson operator-free, can work in determinants: a.k.a. FrmOnvs
+         * hamiltonian is boson operator-free, so can work in determinants: a.k.a. FrmOnvs
          */
         if (h.m_frm.is<SpinModelFrmHam>()){
-            return unique_t(new frm::Pair<frm::Spins>(frm_hs));
-        } else if (frm_hs.ms2_conserved()){
-            return unique_t(new frm::Pair<frm::Ms2Conserve>(frm_hs));
+            return unique_t(new frm::Pair<frm::Spins>(frm_sector));
+        } else if (h.m_frm.m_kramers_attrs.conserving()){
+            return unique_t(new frm::Pair<frm::Ms2Conserve>(frm_sector));
         }
-        return unique_t(new frm::Pair<frm::General>(frm_hs));
+        return unique_t(new frm::Pair<frm::General>(frm_sector));
     } else if (!frm_hs) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
@@ -58,23 +58,23 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
     return make_pair_iterator(h);
 }
 
-std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h) {
-    const auto& frm_hs = h.m_hs.m_frm;
-    const auto& bos_hs = h.m_hs.m_bos;
-    const auto nboson_conserve = bos_hs.m_nboson_conserve;
-    if (!bos_hs) {
+std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, sys::Particles particles) {
+    const sys::frm::Sector frm_sector(h.m_frm.m_basis, particles.m_frm);
+    const sys::bos::Sector bos_sector(h.m_bos.m_basis, particles.m_bos);
+
+    if (h.m_bos) {
         /*
          * hamiltonian is boson operator-free, can work in determinants: a.k.a. FrmOnvs
          */
-        return unique_t(new frm::Pair<frm::General>(frm_hs));
-    } else if (!frm_hs) {
+        return unique_t(new frm::Pair<frm::General>(frm_sector));
+    } else if (!h.m_frm) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
          */
-        if (nboson_conserve)
-            return unique_t(new bos::Pair<bos::GeneralClosed>(bos_hs));
+        if (particles.m_bos.conserve())
+            return unique_t(new bos::Pair<bos::GeneralClosed>(bos_sector));
         else
-            return unique_t(new bos::Pair<bos::GeneralOpen>(bos_hs));
+            return unique_t(new bos::Pair<bos::GeneralOpen>(bos_sector));
     } else {
         if (nboson_conserve) {
             typedef frm_bos::ClosedProduct<frm::General> single_t;

@@ -5,12 +5,12 @@
 #include "GeneralLadderHam.h"
 
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, const FrmHam &frm, const BosHam &bos, bool spin_major) :
-        FrmBosHam({{header.m_nsite}, {0ul, header.m_nmode}}, frm, bos),
-        m_v(m_hs.extents(), header.m_uhf),
-        m_v_unc(m_hs.m_bos.m_nmode, 0.0) {
-    if (!m_hs) return;
-    REQUIRE_EQ(m_hs.m_frm, m_hs.m_bos,
+GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, bool spin_major) :
+        FrmBosHam({{header.m_nsite}, {0ul, header.m_nmode}}),
+        m_v(m_basis.size(), header.m_uhf),
+        m_v_unc(m_basis.m_bos.m_nmode, 0.0) {
+    if (!m_basis) return;
+    REQUIRE_EQ(bool(m_basis.m_frm), bool(m_basis.m_bos),
                "if the number of sites is non-zero, so also must be the number of boson modes. "
                "NMODE definition may be missing from EBDUMP file header");
 
@@ -23,16 +23,13 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, const FrmHam &frm
         if (consts::nearly_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        if (ranksig == exsig_utils::ex_0010) {
-            m_contribs_0010.set_nonzero(exsig);
-            m_contribs_0001.set_nonzero(exsig_utils::hermconj(exsig));
-            m_v_unc[inds[0]] = value;
-        } else {
+        if (ranksig == exsig_utils::ex_1110 || ranksig == exsig_utils::ex_1101) {
             DEBUG_ASSERT_EQ(ranksig, exsig_utils::ex_1110, "ranksig should be either 0010 or 1110");
             m_contribs_1110.set_nonzero(exsig);
             m_contribs_1101.set_nonzero(exsig_utils::hermconj(exsig));
             m_v.set(inds[0], inds[1], inds[2], value);
         }
+        // else, ignore any 0001 or 0010 coefficients here - they belong in the BosHam
     }
     log_data();
 }

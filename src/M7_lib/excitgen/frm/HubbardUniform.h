@@ -16,7 +16,7 @@ struct HubbardUniform : FrmExcitGen {
 
     bool draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) override;
 
-    size_t approx_nconn(const sys::Particles& particles) const override;
+    size_t approx_nconn(size_t exsig, sys::Particles particles) const override;
 
 };
 

@@ -25,12 +25,12 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
      * @return
      *  a type-agnostic iterator which fills the dense matrix representation on a call to its loop method
      */
-    std::unique_ptr<PairBase> make_pair_iterator(const Hamiltonian& h, bool force_general);
+    std::unique_ptr<PairBase> make_pair_iterator(const Hamiltonian& h, sys::Particles particles, bool force_general);
 
     /**
      * fall-through case if no specific iterator is found or if general iterator is requested
      */
-    std::unique_ptr<PairBase> make_pair_iterator(const Hamiltonian& h);
+    std::unique_ptr<PairBase> make_pair_iterator(const Hamiltonian& h, sys::Particles particles);
 
     size_t nrow(const Hamiltonian& h, bool force_general);
 

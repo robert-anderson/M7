@@ -62,6 +62,10 @@ bool ham_data::TermContribs::is_nonzero(size_t exsig) const {
     return m_exsig_nonzero[i];
 }
 
+bool ham_data::TermContribs::any_nonzero() const {
+    return std::any_of(m_exsig_nonzero.cbegin(), m_exsig_nonzero.cend(), [](bool b){return b;});
+}
+
 bool ham_data::KramersAttributes::conserving() const {
     return m_conserving_singles && m_conserving_doubles;
 }

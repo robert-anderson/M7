@@ -11,15 +11,6 @@ bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, def
     return draw_spin_nonconserve_fn(m_prng, src, prob, conn);
 }
 
-size_t UniformSingles::approx_nconn() const {
-    const auto& elecs = m_sector.m_elecs;
-    if (elecs.m_ms2.conserve()){
-        return elecs.m_nalpha * m_sector.m_nvac_alpha + elecs.m_nbeta * m_sector.m_nvac_beta;
-    } else {
-        return elecs * m_sector.m_nvac;
-    }
-}
-
 bool UniformSingles::draw_spin_conserve_fn(PRNG &prng, const field::FrmOnv &src,
                                            defs::prob_t &prob, conn::FrmOnv &conn) {
     const auto &nonempty_pairs = src.m_decoded.m_nonempty_pair_labels.get();
@@ -59,4 +50,14 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &s
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
     return true;
+}
+
+size_t UniformSingles::approx_nconn(size_t exsig, sys::Particles particles) const {
+    const auto& elecs = particles.m_frm;
+    sys::frm::Sector sector(m_h.m_basis, particles.m_frm);
+    if (elecs.m_ms2.conserve()){
+        return elecs.m_nalpha * sector.m_nvac_alpha + elecs.m_nbeta * sector.m_nvac_beta;
+    } else {
+        return elecs * sector.m_nvac;
+    }
 }

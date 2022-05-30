@@ -24,12 +24,21 @@ struct BosHam : HamOpTerm {
      * properties of the many-body basis
      */
     const sys::bos::Basis m_basis;
-
+    /**
+     * term contributions. the four digit represent the rank signature.
+     * e.g. hamiltonian term of rank 0001 can only take contributions from excitations of exsig 0001.
+     * on the other hand, terms of rank 0022 can take contributions from exsigs 0000 (diagonals), 0011, and 0022
+     * these objects keep track of which of these exsigs are non-zero and which may contribute to matrix elements
+     */
+    ham_data::TermContribs m_contribs_0010;
+    ham_data::TermContribs m_contribs_0001;
     ham_data::TermContribs m_contribs_0011;
     ham_data::TermContribs m_contribs_0022;
 
     BosHam(const sys::bos::Basis& basis):
-            m_basis(basis), m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
+            m_basis(basis),
+            m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
+            m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
 
 private:
     /**
@@ -90,13 +99,11 @@ public:
 
 };
 
-struct NullBosHam : BosHam {
+/**
+ * boson hamiltonian which can be defined in a non-zero number of modes, but with no non-zero term coefficients
+ */
+struct NullBosHam : BosHam, NullOpTerm {
     NullBosHam() : BosHam(0ul){}
-
-    bool enabled() const override {
-        return false;
-    }
 };
-
 
 #endif //M7_BOSHAM_H

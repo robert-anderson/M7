@@ -16,14 +16,14 @@ private:
     Aliaser m_pick_ab_given_ij;
 
 public:
-    Pchb2200(const FrmHam &h, sys::frm::Electrons elecs, PRNG &prng);
+    Pchb2200(const FrmHam &h, PRNG &prng);
 
     bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
                     defs::ham_t &helem, conn::FrmOnv &conn) override;
 
     bool draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) override;
 
-    size_t approx_nconn() const override;
+    size_t approx_nconn(size_t exsig, sys::Particles particles) const override;
 
 };
 

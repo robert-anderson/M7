@@ -40,6 +40,6 @@ bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
     return true;
 }
 
-size_t HeisenbergExchange::approx_nconn() const {
+size_t HeisenbergExchange::approx_nconn(size_t exsig, sys::Particles particles) const {
     return 1ul<<m_h.as<HeisenbergFrmHam>()->m_lattice.m_spec.m_format.m_nind;
 }

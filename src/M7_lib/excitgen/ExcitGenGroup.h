@@ -45,6 +45,13 @@ class ExcitGenGroup {
 
 public:
     ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng);
+    /*
+     * ctor which also sets heterogeneous initial probabilities to cases by calling the approx_nconn method of exgens
+     */
+    ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng, sys::Particles particles):
+            ExcitGenGroup(ham, opts, prng) {
+        set_probs(particles);
+    }
 
     size_t ncase() const;
 
@@ -52,7 +59,19 @@ public:
     
     ExcitCase& operator[](size_t icase);
 
+    /**
+     * set the m_probs and m_cumprobs arrays
+     * @param probs
+     */
     void set_probs(const std::vector<defs::prob_t> &probs);
+
+    /**
+     * set probs in accordance with the approximate number of connections of each excitation case.
+     * useful for initialization
+     * @param particles
+     *  particle number data on which to base the approximate number of connections
+     */
+    void set_probs(const sys::Particles& particles);
 
     defs::prob_t get_prob(const size_t &icase) const;
 

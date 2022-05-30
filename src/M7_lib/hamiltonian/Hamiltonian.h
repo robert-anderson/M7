@@ -63,7 +63,7 @@ struct HamiltonianTerms {
      *  unique pointer to the polymorphic base class, FrmHam
      */
     template<typename ham_t>
-    std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
+    static std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
         return std::unique_ptr<FrmHam>(new ham_t(opts));
         //auto j = opts.m_spin_penalty_j.get();
@@ -96,6 +96,17 @@ struct HamiltonianTerms {
         return std::unique_ptr<FrmHam>(new NullFrmHam);
     }
 
+    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
+        if (opts.m_ham.m_holstein_coupling) {
+            const auto g = opts.m_ham.m_holstein_coupling.get();
+            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(m_frm->m_basis, g, opts.m_basis.m_bos_occ_cutoff));
+        }
+        else if (opts.m_ham.m_ebdump.enabled()) {
+            return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts));
+        }
+        return std::unique_ptr<FrmBosHam>(new NullFrmBosHam);
+    }
+
     std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
         if (opts.m_ham.m_num_op_weight) {
             const size_t nsite = m_frm->m_basis.m_nsite;
@@ -110,23 +121,15 @@ struct HamiltonianTerms {
         return std::unique_ptr<BosHam>(new NullBosHam);
     }
 
-    std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
-        if (opts.m_ham.m_holstein_coupling) {
-            REQUIRE_TRUE(dynamic_cast<const HubbardFrmHam*>(m_frm.get()),
-                         "Holstein coupling requires Hubbard-type fermion Hamiltonian");
-            const auto g = opts.m_ham.m_holstein_coupling.get();
-            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(*m_frm, *m_bos, g));
-        }
-        else if (opts.m_ham.m_ebdump.enabled()) {
-            return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts, *m_frm, *m_bos));
-        }
-        return std::unique_ptr<FrmBosHam>(new NullLadderHam);
-    }
-
     HamiltonianTerms(opt_pair_t opts):
         m_frm(make_frm({opts.m_ham.m_fermion, opts.m_basis})),
         m_bos(make_bos({opts.m_ham.m_boson, opts.m_basis})),
-        m_frmbos(make_frmbos({opts.m_ham.m_ladder, opts.m_basis})){}
+        m_frmbos(make_frmbos({opts.m_ham.m_ladder, opts.m_basis})){
+        if (*m_frm && *m_frmbos)
+            REQUIRE_TRUE(m_frm->m_basis==m_frmbos->m_basis.m_frm, "incompatible fermion basis definitions");
+        if (*m_bos && *m_frmbos)
+            REQUIRE_TRUE(m_bos->m_basis==m_frmbos->m_basis.m_bos, "incompatible boson basis definitions");
+    }
 };
 
 
@@ -146,12 +149,19 @@ public:
     const BosHam &m_bos;
     const FrmBosHam &m_frmbos;
     /**
-     * properties of the single-particle basis
+     * true if the Hamiltonian describes a close quantum system in the bosonic sector
      */
-    const sys::Basis m_basis;
+    const bool m_boson_number_conserve;
 
 private:
+
     mutable suite::Conns m_work_conn;
+
+    bool boson_number_conserve() const {
+        if (m_frmbos.m_contribs_1101.any_nonzero()) return true;
+        if (m_frmbos.m_contribs_1110.any_nonzero()) return true;
+        return false;
+    }
 
 public:
 
@@ -238,8 +248,39 @@ public:
 //        return {elecs, bosons};
 //    }
 
-    sys::Sector get_sector(const conf::Hamiltonian &opts) const {
-        return {m_basis, {m_frm.default_electrons(), m_bos.default_bosons()}};
+    sys::Particles default_particles(const conf::Particles &opts) const {
+        auto nelec = opts.m_nelec.get();
+        // give precedence to nelec value given by FrmHam
+        if (!nelec && m_frm) nelec = m_frm.default_nelec();
+        if (!nelec && m_frmbos) nelec = m_frmbos.default_nelec();
+
+        bool ms2_conserve = true;
+        if (m_frm) ms2_conserve = m_frm.m_kramers_attrs.conserving();
+        // currently only FrmHam can break Kramers symmetry (FrmBosHam always commutes with Sz)
+
+        int ms2_value = sys::frm::Ms2::lowest_value(nelec);
+        if (m_frm) ms2_value = m_frm.default_ms2()
+
+        auto ms2 = (opts.m_ms2.get()==~0) ?
+                   default_ms2(nelec) : sys::frm::Ms2(opts.m_ms2.get(), m_kramers_attrs.conserving());
+        return {nelec, ms2};
+
+
+        auto frm_particles = m_frm.default_particles(opts);
+        auto frmbos_particles = m_frmbos.default_particles(opts);
+        auto bos_particles = m_bos.default_particles(opts);
+
+
+        auto nboson = opts.m_nboson.get();
+        if (!nboson) nboson = m_bos.default_nboson();
+        return {{nelec, ms2}, {nboson, m_boson_number_conserve}};
+    }
+
+    sys::Basis basis() const {
+        return {m_frm.m_basis, m_bos.m_basis};
+    }
+    sys::Size basis_size() const {
+        return {m_frm.m_basis.m_nsite, m_bos.m_basis.m_nmode};
     }
 };
 

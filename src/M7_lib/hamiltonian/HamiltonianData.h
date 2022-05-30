@@ -44,6 +44,8 @@ namespace ham_data {
 
         bool is_nonzero(size_t exsig) const;
 
+        bool any_nonzero() const;
+
     };
 
     /**

@@ -217,11 +217,14 @@ namespace sys {
          * as a hint for the purpose of reference / initial MBF selection
          */
         struct Ms2 : public conservation::Optional<int>{
-            Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
-            /*
-             * set either 0 or 1 based on the evenness of the electron number
+            /**
+             * either 0 or 1 based on the evenness of the electron number
              */
-            Ms2(size_t nelec): Ms2(!(nelec&1ul), false){}
+            static int lowest_value(size_t nelec){
+                return !(nelec&1ul);
+            }
+            Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
+            Ms2(size_t nelec): Ms2(lowest_value(nelec), false){}
             Ms2(): conservation::Optional<int>("2*Ms"){}
         };
 
@@ -258,6 +261,10 @@ namespace sys {
 
             operator size_t () const {
                 return m_n;
+            }
+
+            bool operator==(const Electrons& other){
+                return m_n==other.m_n && m_ms2==other.m_ms2;
             }
         };
 

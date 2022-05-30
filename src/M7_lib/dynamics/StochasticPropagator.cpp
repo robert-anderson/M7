@@ -7,7 +7,7 @@
 StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts,
                                            const Wavefunction &wf) :
         Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
-        m_excit_gen_group(ham, opts.m_propagator, m_prng),
+        m_excit_gen_group(ham, opts.m_propagator, m_prng, wf.m_sector.particles()),
         m_mag_log(opts.m_propagator.m_max_bloom,
                   opts.m_propagator.m_ndraw_min_for_dynamic,
                   m_excit_gen_group.ncase(),
@@ -18,7 +18,8 @@ StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const conf::D
                   opts.m_propagator.m_min_exlvl_prob,
                   opts.m_propagator.m_period),
         m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag),
-        m_min_death_mag(opts.m_propagator.m_min_death_mag){}
+        m_min_death_mag(opts.m_propagator.m_min_death_mag){
+}
 
 
 void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {

@@ -12,8 +12,6 @@
 
 #include "M7_lib/hamiltonian/HamiltonianData.h"
 #include "M7_lib/hamiltonian/HamOpTerm.h"
-#include "M7_lib/hamiltonian/frm/FrmHam.h"
-#include "M7_lib/hamiltonian/bos/BosHam.h"
 
 /**
  * base class for all Hamiltonians expressed in terms of products of fermionic and bosonic second-quantised operators
@@ -26,24 +24,19 @@ struct FrmBosHam : HamOpTerm {
 
     const sys::Basis m_basis;
 
-    ham_data::TermContribs m_contribs_0010;
-    ham_data::TermContribs m_contribs_0001;
+    /**
+     * term contributions. the four digit represent the rank signature.
+     * e.g. hamiltonian term of rank 1101 can take contributions from excitations of exsig 0001 and 1101.
+     * these objects keep track of which of these exsigs are non-zero and which may contribute to matrix elements
+     */
     ham_data::TermContribs m_contribs_1110;
     ham_data::TermContribs m_contribs_1101;
 
     /**
      * @param basis
      *  Single-particle basis specification determined by the information available to the derived class ctors.
-     * @param frm
-     *  fermionic part of H, from which the fermionic Hilbert space attributes are copied
-     * @param bos
-     *  bosonic part of H, from which the bosonic Hilbert space attributes are copied
      */
-    FrmBosHam(const sys::Basis& basis, const FrmHam& frm, const BosHam& bos);
-    /*
-     * all Hilbert space info is taken directly from the FrmHam and BosHam
-     */
-    FrmBosHam(const FrmHam& frm, const BosHam& bos);
+    FrmBosHam(const sys::Basis& basis);
 
     virtual ~FrmBosHam(){}
 
@@ -85,13 +78,12 @@ struct FrmBosHam : HamOpTerm {
 
 };
 
-struct NullLadderHam: FrmBosHam {
-    NullLadderHam() : FrmBosHam(sys::Basis({0ul}, {0ul}), NullFrmHam(), NullBosHam()){}
-
-    bool enabled() const override {
-        return false;
-    }
+/**
+ * fermion-boson hamiltonian which can be defined in non-zero numbers of sites and modes, but with no non-zero term
+ * coefficients
+ */
+struct NullFrmBosHam : FrmBosHam, NullOpTerm {
+    NullFrmBosHam() : FrmBosHam({0ul, 0ul}){}
 };
-
 
 #endif //M7_FRMBOSHAM_H

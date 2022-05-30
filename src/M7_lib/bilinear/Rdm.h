@@ -117,6 +117,13 @@ public:
 
     void end_cycle();
 
+    /**
+     * @param ham
+     *  hamiltonian corresponding to the evolution of the wavefunction(s) used in the RDM estimation
+     * @return
+     *  true only if the ranks of RDMs estimated are sufficient for pseudo-variational energy estimation via contraction
+     *  of the RDMs with the Hamiltonian coefficients.
+     */
     bool is_energy_sufficient(const Hamiltonian &ham) const;
 
     /**

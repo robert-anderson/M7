@@ -25,7 +25,7 @@ GeneralFrmHam::GeneralFrmHam(const sys::frm::Basis &basis):
 }
 
 GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major):
-        GeneralFrmHam(sector(header)){
+        GeneralFrmHam({header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved}){
 
     FcidumpFileReader file_reader(header.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
@@ -61,7 +61,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major):
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
-        GeneralFrmHam({opts.m_ham.m_fcidump.m_path}, opts.m_ham.m_fcidump.m_spin_major, opts.m_ms2, opts.m_nelec) {}
+        GeneralFrmHam({opts.m_ham.m_fcidump.m_path}, opts.m_ham.m_fcidump.m_spin_major) {}
 
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
     return m_int_1(a, i);
@@ -119,12 +119,12 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
 conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {
     conn_foreach::base_list_t list;
     if (m_kramers_attrs.m_conserving_singles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_hs.m_sites));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_basis));
     else
-        list.emplace_front(new conn_foreach::frm::General<1>(m_hs.m_sites));
+        list.emplace_front(new conn_foreach::frm::General<1>(m_basis));
     if (m_kramers_attrs.m_conserving_doubles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_hs.m_sites));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_basis));
     else
-        list.emplace_front(new conn_foreach::frm::General<2>(m_hs.m_sites));
+        list.emplace_front(new conn_foreach::frm::General<2>(m_basis));
     return list;
 }

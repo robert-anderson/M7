@@ -33,6 +33,6 @@ bool HubbardUniform::draw_frm(const size_t &exsig, const field::FrmOnv &src, def
     return true;
 }
 
-size_t HubbardUniform::approx_nconn(const sys::Particles& particles) const {
+size_t HubbardUniform::approx_nconn(size_t exsig, sys::Particles particles) const {
     return particles.m_frm;
 }

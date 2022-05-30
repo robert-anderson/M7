@@ -25,16 +25,14 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opt
      * exsigs have a many-to-many relationship with excitation generators.
      */
     m_probs.clear();
-    defs::prob_t norm = 0.0;
     for (const auto& excit_gen: m_list) {
         for (auto& exsig: excit_gen->m_exsigs){
             m_excit_cases.push_back({exsig, excit_gen.get()});
-            m_probs.push_back(defs::prob_t(m_excit_cases.back().m_excit_gen->approx_nconn()));
-            norm+=m_probs.back();
+            // let all cases be equally likely
+            m_probs.push_back(1.0);
         }
     }
-    for (auto &prob: m_probs) prob /= norm;
-    update_cumprobs();
+    set_probs(m_probs);
     log();
 }
 
@@ -56,7 +54,13 @@ ExcitCase &ExcitGenGroup::operator[](size_t icase) {
 
 void ExcitGenGroup::set_probs(const std::vector<defs::prob_t> &probs) {
     DEBUG_ASSERT_EQ(probs.size(), ncase(), "incorrect number of probabilities given");
+    defs::prob_t norm = std::accumulate(probs.cbegin(), probs.cend(), 0.0);
+    DEBUG_ASSERT_GE(norm, 1e-8, "prob vector norm is too small");
     m_probs = probs;
+    for (auto& prob : m_probs) {
+        DEBUG_ASSERT_GE(prob, 0.0, "no element of the (un-)normalized prob vector can be negative");
+        prob/=norm;
+    }
     update_cumprobs();
 }
 
@@ -92,4 +96,12 @@ void ExcitGenGroup::log() const {
         rows.push_back({exsig_str, m_excit_cases[icase].m_excit_gen->m_description, prob_str});
     }
     log::info_table("Excitation generation breakdown", rows, true);
+}
+
+void ExcitGenGroup::set_probs(const sys::Particles &particles) {
+    std::vector<defs::prob_t> probs;
+    probs.reserve(ncase());
+    for (const auto& excase: m_excit_cases)
+        probs.push_back(excase.m_excit_gen->approx_nconn(excase.m_exsig, particles));
+    set_probs(probs);
 }
