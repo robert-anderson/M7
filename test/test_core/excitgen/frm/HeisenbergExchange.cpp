@@ -9,19 +9,14 @@
 
 TEST(HeisenbergExchange, Pbc2D) {
     PRNG prng(14, 1000000);
-    conf::Hamiltonian opts(nullptr);
-    opts.m_fermion.m_heisenberg.m_site_shape = {3, 3};
-    opts.m_fermion.m_heisenberg.m_boundary_conds = {1, 1};
-    opts.m_fermion.m_ms2 = 1;
-    opts.verify();
-    Hamiltonian h(opts);
-    ASSERT_TRUE(h.m_frm.is<HeisenbergFrmHam>());
-    HeisenbergExchange excit_gen(h.m_frm, prng);
-    conn_foreach::frm::Heisenberg conn_iter(h.m_frm.as<HeisenbergFrmHam>()->m_lattice);
+    HeisenbergFrmHam frm_ham(1.0, {{Lattice::Ortho, {3, 3}, {1, 1}}});
+    Hamiltonian h(&frm_ham);
+    HeisenbergExchange excit_gen(frm_ham, prng);
+    conn_foreach::frm::Heisenberg conn_iter(frm_ham.m_lattice);
 
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
-    buffered::FrmOnv src_mbf(h.m_hs);
-    mbf::set_neel_mbf(src_mbf);
+    buffered::FrmOnv src_mbf(h.m_basis);
+    mbf::set_neel_mbf(src_mbf, h.default_particles().m_frm);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 1000000;
     tester.run(src_mbf, ndraw);

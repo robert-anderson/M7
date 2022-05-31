@@ -9,8 +9,20 @@
 
 Hamiltonian::Hamiltonian(opt_pair_t opts): Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr){}
 
+Hamiltonian::Hamiltonian(const FrmHam *frm): Hamiltonian({}, frm, nullptr, nullptr){
+    require_non_null(frm);
+}
 
-Hamiltonian::Hamiltonian(const FrmHam &frm): Hamiltonian({}, &frm, nullptr, nullptr){}
+Hamiltonian::Hamiltonian(const BosHam *bos) : Hamiltonian({}, nullptr, bos, nullptr){
+    require_non_null(bos);
+}
+
+Hamiltonian::Hamiltonian(const FrmHam *frm, const FrmBosHam *frmbos, const BosHam *bos) :
+        Hamiltonian({}, frm, bos, frmbos){
+    require_non_null(frm);
+    require_non_null(frmbos);
+    require_non_null(bos);
+}
 
 
 bool Hamiltonian::complex_valued() const {

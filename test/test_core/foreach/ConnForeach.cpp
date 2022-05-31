@@ -33,7 +33,7 @@ namespace conn_foreach_test {
 
     static defs::inds creatable_mode_indices(const field::BosOnv &mbf, size_t nboson_max) {
         defs::inds inds;
-        for (size_t imode = 0ul; imode < mbf.m_hs.m_nmode; ++imode) {
+        for (size_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) {
             size_t nocc = mbf[imode];
             if (nocc < nboson_max) inds.push_back(imode);
         }
@@ -42,7 +42,7 @@ namespace conn_foreach_test {
 
     static defs::inds annihilatable_mode_indices(const field::BosOnv &mbf) {
         defs::inds inds;
-        for (size_t imode = 0ul; imode < mbf.m_hs.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
+        for (size_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
         return inds;
     }
 }

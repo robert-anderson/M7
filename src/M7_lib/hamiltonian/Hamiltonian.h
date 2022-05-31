@@ -195,6 +195,10 @@ private:
         }
     }
 
+    static void require_non_null(const HamOpTerm* ptr) {
+        REQUIRE_TRUE(ptr, "pointer to externally-allocated term Hamiltonian must be non-null");
+    }
+
 public:
 
     /**
@@ -208,7 +212,10 @@ public:
      * ctors for initialization using externally-owned term objects (m_terms is initialized to nulls and referred to for
      * the terms
      */
-    explicit Hamiltonian(const FrmHam& frm);
+    explicit Hamiltonian(const FrmHam* frm_ham);
+    explicit Hamiltonian(const BosHam* bos_ham);
+    Hamiltonian(const FrmHam* frm_ham, const FrmBosHam* frmbos_ham, const BosHam *bos_ham);
+
 
     /*
      * pure fermion matrix elements
@@ -292,9 +299,8 @@ public:
 //    }
 
     // TODO: rename
-    sys::Particles default_particles(const conf::Particles &opts) const {
-        auto nelec = opts.m_nelec.get();
-        // give precedence to nelec value given by FrmHam
+    sys::Particles default_particles(size_t nelec=0ul, int ms2=defs::undefined_ms2, size_t nboson=0ul) const {
+        // if nelec is not already set, give precedence to nelec value given by FrmHam
         if (!nelec && m_frm) nelec = m_frm.default_nelec();
         if (!nelec && m_frmbos) nelec = m_frmbos.default_nelec();
 
@@ -302,21 +308,23 @@ public:
         if (m_frm) ms2_conserve = m_frm.m_kramers_attrs.conserving();
         // currently only FrmHam can break Kramers symmetry (FrmBosHam always commutes with Sz)
 
-        int ms2_value = opts.m_ms2.get();
-        if (m_frm && ms2_value==defs::undefined_ms2) ms2_value = m_frm.default_ms2_value();
-        if (m_frmbos && ms2_value==defs::undefined_ms2) ms2_value = m_frmbos.default_ms2_value();
-        if (ms2_value==defs::undefined_ms2) {
+        if (m_frm && ms2==defs::undefined_ms2) ms2 = m_frm.default_ms2_value();
+        if (m_frmbos && ms2==defs::undefined_ms2) ms2 = m_frmbos.default_ms2_value();
+        if (ms2==defs::undefined_ms2) {
             log::info("2*Ms value not defined by configuration document or Hamiltonian, "
                       "defaulting to lowest valid positive value");
-            ms2_value = sys::frm::Ms2::lowest_value(nelec);
+            ms2 = sys::frm::Ms2::lowest_value(nelec);
         }
 
-        auto nboson = opts.m_nboson.get();
         // give precedence to nboson value given by BosHam
         if (!nboson) nboson = m_bos.default_nboson();
         if (!nboson) nboson = m_frmbos.default_nboson();
 
-        return {{nelec, {ms2_value, ms2_conserve}}, {nboson, m_boson_number_conserve}};
+        return {{nelec, {ms2, ms2_conserve}}, {nboson, m_boson_number_conserve}};
+    }
+
+    sys::Particles default_particles(const conf::Particles &opts) const {
+        return default_particles(opts.m_nelec, opts.m_ms2, opts.m_nboson);
     }
 };
 

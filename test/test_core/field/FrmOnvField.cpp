@@ -12,7 +12,7 @@ TEST(FrmOnvField, SetFromInds) {
     buffered::FrmOnv mbf(nsite);
     defs::inds setbits = {1, 90, nsite-1, nsite, 2*nsite-1};
     mbf = setbits;
-    for (size_t ibit=0ul; ibit<mbf.m_sites.m_nspinorb; ++ibit){
+    for (size_t ibit=0ul; ibit<mbf.m_basis.m_nspinorb; ++ibit){
         bool is_set = std::find(setbits.cbegin(), setbits.cend(), ibit)!=setbits.cend();
         ASSERT_EQ(mbf.get(ibit), is_set);
     }
@@ -40,7 +40,7 @@ TEST(FrmOnvField, ClrSpinChannel) {
 TEST(FrmOnvField, ForeachSetBit) {
     const size_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_sites.m_nspinorb, true);
+    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
     mbf = setbits;
 
     auto it = setbits.cbegin();
@@ -55,7 +55,7 @@ TEST(FrmOnvField, ForeachSetBit) {
 TEST(FrmOnvField, ForeachSetBitPair) {
     const size_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_sites.m_nspinorb, true);
+    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
     mbf = setbits;
 
     /*
@@ -86,7 +86,7 @@ TEST(FrmOnvField, ForeachSetBitPair) {
 TEST(FrmOnvField, ForeachSetBitTriple) {
     const size_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_sites.m_nspinorb, true);
+    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
     mbf = setbits;
 
     /*

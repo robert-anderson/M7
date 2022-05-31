@@ -6,7 +6,7 @@
 
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/foreach/MbfForeach.h"
-#include "BasisData.h"
+#include "M7_lib/basis/BasisData.h"
 
 namespace mbf_foreach_test {
     namespace frm {
@@ -64,14 +64,14 @@ namespace mbf_foreach_test {
 TEST(MbfForeach, FrmGeneral) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const sys::frm::Basis hs(4, 3);
-    buffered::FrmOnv mbf(hs);
+    const sys::frm::Sector sector({4}, {1});
+    buffered::FrmOnv mbf(sector.m_basis);
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
         ASSERT_EQ(mbf, chk_inds[iiter]);
         ++iiter;
     };
-    mbf_foreach::frm::General foreach(hs);
+    mbf_foreach::frm::General foreach(sector);
     ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(iiter, chk_inds.size());
     ASSERT_EQ(foreach.m_niter, chk_inds.size());

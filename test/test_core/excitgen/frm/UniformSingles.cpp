@@ -9,15 +9,12 @@
 
 TEST(UniformSingles, FromExcited){
     PRNG prng(14, 1000000);
-    conf::Hamiltonian opts(nullptr);
-    opts.m_fermion.m_fcidump.m_path = defs::assets_root + "/H2O_RHF/FCIDUMP";
-    opts.verify();
-    Hamiltonian h(opts);
-    ASSERT_TRUE(dynamic_cast<const GeneralFrmHam*>(&h.m_frm));
-    UniformSingles excit_gen(h.m_frm, prng);
-    conn_foreach::frm::Ms2Conserve<1> excit_iter(h.m_hs.m_frm.m_sites);
+    GeneralFrmHam frm_ham({defs::assets_root + "/H2O_RHF/FCIDUMP"}, true);
+    Hamiltonian h(&frm_ham);
+    UniformSingles excit_gen(frm_ham, prng);
+    conn_foreach::frm::Ms2Conserve<1> excit_iter(frm_ham.m_basis);
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
-    buffered::FrmOnv src_mbf(h.m_hs);
+    buffered::FrmOnv src_mbf(h.m_basis);
     src_mbf = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 5}};
     tester.fill_results_table(src_mbf);
     tester.run(src_mbf, 10000000);
