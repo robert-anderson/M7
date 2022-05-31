@@ -119,12 +119,12 @@ HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
 conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {
     conn_foreach::base_list_t list;
     if (m_kramers_attrs.m_conserving_singles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>(m_basis));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<1>);
     else
-        list.emplace_front(new conn_foreach::frm::General<1>(m_basis));
+        list.emplace_front(new conn_foreach::frm::General<1>);
     if (m_kramers_attrs.m_conserving_doubles)
-        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>(m_basis));
+        list.emplace_front(new conn_foreach::frm::Ms2Conserve<2>);
     else
-        list.emplace_front(new conn_foreach::frm::General<2>(m_basis));
+        list.emplace_front(new conn_foreach::frm::General<2>);
     return list;
 }

@@ -64,8 +64,7 @@ namespace mbf_foreach_test {
 TEST(MbfForeach, FrmGeneral) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const sys::frm::Sector sector({4}, {1});
-    buffered::FrmOnv mbf(sector.m_basis);
+    const sys::frm::Sector sector({3}, {4});
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
         ASSERT_EQ(mbf, chk_inds[iiter]);
@@ -80,14 +79,14 @@ TEST(MbfForeach, FrmGeneral) {
 TEST(MbfForeach, FrmGeneralEarlyExit) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const sys::frm::Basis hs(4, 3);
+    const sys::frm::Sector sector({3}, {4});
     size_t iiter = 0ul;
     auto fn = [&](const field::FrmOnv &mbf) {
         ASSERT_EQ(mbf, chk_inds[iiter]);
         if (iiter == 8) throw ExitLoop();
         ++iiter;
     };
-    mbf_foreach::frm::General foreach(hs);
+    mbf_foreach::frm::General foreach(sector);
     try { ASSERT_ANY_THROW(foreach.loop_fn(fn)); }
     catch (const ExitLoop &) {}
     ASSERT_EQ(iiter, 8);
@@ -97,15 +96,14 @@ TEST(MbfForeach, FrmGeneralEarlyExit) {
 TEST(MbfForeach, FrmGeneralPair) {
     using namespace mbf_foreach_test;
     const auto chk_inds = frm::general::chk_inds();
-    const sys::frm::Basis hs(4, 3);
-    buffered::FrmOnv mbf(hs);
+    const sys::frm::Sector sector({3}, {4});
 
     auto fn = [&chk_inds](
             const field::FrmOnv &outer, size_t iouter, const field::FrmOnv &inner, size_t iinner) {
         ASSERT_EQ(outer, chk_inds[iouter]);
         ASSERT_EQ(inner, chk_inds[iinner]);
     };
-    mbf_foreach::frm::Pair<mbf_foreach::frm::General> foreach(hs);
+    mbf_foreach::frm::Pair<mbf_foreach::frm::General> foreach;
     ASSERT_NO_THROW(foreach.loop_fn(fn));
     ASSERT_EQ(foreach.m_niter, chk_inds.size()*chk_inds.size());
 }

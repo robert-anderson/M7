@@ -214,6 +214,7 @@ public:
      */
     explicit Hamiltonian(const FrmHam* frm_ham);
     explicit Hamiltonian(const BosHam* bos_ham);
+    explicit Hamiltonian(const FrmBosHam* bos_ham);
     Hamiltonian(const FrmHam* frm_ham, const FrmBosHam* frmbos_ham, const BosHam *bos_ham);
 
 

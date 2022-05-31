@@ -10,23 +10,19 @@
 
 TEST(Pchb1101hc, Test){
     PRNG prng(14, 1000000);
-    conf::Hamiltonian opts(nullptr);
-    opts.m_fermion.m_nelec = 6;
-    opts.m_ladder.m_ebdump.m_path = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
-    opts.verify();
-    Hamiltonian h(opts);
-    ASSERT_TRUE(h.m_frmbos.is<GeneralLadderHam>());
-    ASSERT_FALSE(h.m_hs.m_frm.m_abgrp_map.m_site_irreps.empty());
+    GeneralLadderHam frmbos_ham({defs::assets_root + "/SpinResolvedEbdump/EBDUMP"}, true);
+    Hamiltonian h(&frmbos_ham);
+    auto particles = h.default_particles(6);
+    ASSERT_TRUE(frmbos_ham.m_basis.m_frm.m_abgrp_map);
     Pchb1101hc excit_gen(h.m_frmbos, prng);
-    buffered::FrmBosOnv src_mbf(h.m_hs);
-    mbf::set_aufbau_mbf(src_mbf.m_frm);
-    std::cout << src_mbf << std::endl;
-    ASSERT_EQ(src_mbf.m_frm.nsetbit(), h.m_hs.m_frm.m_nelec);
+    buffered::FrmBosOnv src_mbf(h.m_basis);
+    mbf::set_aufbau_mbf(src_mbf.m_frm, particles.m_frm);
+    ASSERT_EQ(src_mbf.m_frm.nsetbit(), particles.m_frm);
     typedef conn_foreach::frm::Ms2Conserve<1> frm_foreach_t;
     typedef conn_foreach::bos::Cre bos_foreach_t;
     typedef conn_foreach::frmbos::Product<frm_foreach_t, bos_foreach_t> foreach_t;
 
-    foreach_t conn_iter(h.m_hs.m_frm.m_sites, h.m_hs.m_bos);
+    foreach_t conn_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
 
     tester.fill_results_table(src_mbf);

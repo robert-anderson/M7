@@ -9,12 +9,16 @@
 
 Hamiltonian::Hamiltonian(opt_pair_t opts): Hamiltonian(HamiltonianTerms(opts), nullptr, nullptr, nullptr){}
 
-Hamiltonian::Hamiltonian(const FrmHam *frm): Hamiltonian({}, frm, nullptr, nullptr){
-    require_non_null(frm);
+Hamiltonian::Hamiltonian(const FrmHam *ham): Hamiltonian({}, ham, nullptr, nullptr){
+    require_non_null(ham);
 }
 
-Hamiltonian::Hamiltonian(const BosHam *bos) : Hamiltonian({}, nullptr, bos, nullptr){
-    require_non_null(bos);
+Hamiltonian::Hamiltonian(const BosHam *ham) : Hamiltonian({}, nullptr, ham, nullptr){
+    require_non_null(ham);
+}
+
+Hamiltonian::Hamiltonian(const FrmBosHam *ham) : Hamiltonian({}, nullptr, nullptr, ham){
+    require_non_null(ham);
 }
 
 Hamiltonian::Hamiltonian(const FrmHam *frm, const FrmBosHam *frmbos, const BosHam *bos) :

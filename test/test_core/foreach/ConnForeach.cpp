@@ -64,7 +64,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
         ASSERT_EQ(ann, setbits[iann]);
         ++iiter;
     };
-    conn_foreach::frm::General<1> foreach(nsite);
+    conn_foreach::frm::General<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
@@ -87,7 +87,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
         ASSERT_EQ(ann, setbits[iann]);
         ++iiter;
     };
-    conn_foreach::frm::General<1> foreach(nsite);
+    conn_foreach::frm::General<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
     foreach.loop(mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
@@ -120,7 +120,7 @@ TEST(ConnForeach, FrmGeneralEx2200) {
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ++result;
     };
-    conn_foreach::frm::General<2> foreach(nsite);
+    conn_foreach::frm::General<2> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(result, results.cend());
@@ -249,7 +249,7 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
         }
         ++iiter;
     };
-    conn_foreach::frm::Ms2Conserve<1> foreach(nsite);
+    conn_foreach::frm::Ms2Conserve<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, nalpha_pair + nbeta_pair);
@@ -295,7 +295,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
         }
         ++iiter;
     };
-    conn_foreach::frm::Ms2Conserve<2> foreach(nsite);
+    conn_foreach::frm::Ms2Conserve<2> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
@@ -314,7 +314,7 @@ TEST(ConnForeach, BosEx0001) {
         ASSERT_FALSE(conn.m_cre.size());
         ++iiter;
     };
-    conn_foreach::bos::Ann foreach(nmode);
+    conn_foreach::bos::Ann foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0001);
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, chk_modes.size());

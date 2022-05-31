@@ -12,7 +12,7 @@ TEST(UniformSingles, FromExcited){
     GeneralFrmHam frm_ham({defs::assets_root + "/H2O_RHF/FCIDUMP"}, true);
     Hamiltonian h(&frm_ham);
     UniformSingles excit_gen(frm_ham, prng);
-    conn_foreach::frm::Ms2Conserve<1> excit_iter(frm_ham.m_basis);
+    conn_foreach::frm::Ms2Conserve<1> excit_iter;
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, excit_iter);
     buffered::FrmOnv src_mbf(h.m_basis);
     src_mbf = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 5}};
