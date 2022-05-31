@@ -108,3 +108,6 @@ DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, sys::Particles particle
     loop_over_pair_iterator<field::BosOnv>(ptr.get(), h);
     loop_over_pair_iterator<field::FrmBosOnv>(ptr.get(), h);
 }
+
+DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, bool force_general) :
+        DenseHamiltonian(h, h.default_particles(), force_general){}

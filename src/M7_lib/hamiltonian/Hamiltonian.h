@@ -159,7 +159,9 @@ public:
     const bool m_boson_number_conserve;
 
 private:
-
+    /**
+     * workspace for computing connections
+     */
     mutable suite::Conns m_work_conn;
 
     bool boson_number_conserve() const {
@@ -193,6 +195,11 @@ private:
             if (!m_frmbos) log::info("Fermion-boson ladder Hamiltonian is disabled");
             if (!m_bos) log::info("Number-conserving boson Hamiltonian is disabled");
         }
+
+        if (m_frm && m_frmbos) REQUIRE_EQ(m_frm.m_basis, m_frmbos.m_basis.m_frm,
+               "Frm and FrmBos H terms do not have the same fermionic basis definition");
+        if (m_bos && m_frmbos) REQUIRE_EQ(m_bos.m_basis, m_frmbos.m_basis.m_bos,
+              "Bos and FrmBos H terms do not have the same bosonic basis definition");
     }
 
     static void require_non_null(const HamOpTerm* ptr) {

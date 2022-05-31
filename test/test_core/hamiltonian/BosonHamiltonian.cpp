@@ -8,14 +8,9 @@
 #include "gtest/gtest.h"
 
 TEST(BosonHamiltonian, Coefficients) {
-    conf::Document opts;
-    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
-    opts.verify();
-    Hamiltonian ham(opts.m_hamiltonian);
-    ASSERT_EQ(ham.m_hs.m_bos.m_nmode, 5ul);
-    ASSERT_EQ(ham.m_hs.m_bos.m_nboson, 5ul);
+    GeneralBosHam bos_ham({defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP"}, defs::max_bos_occ);
+    ASSERT_EQ(bos_ham.m_basis.m_nmode, 5ul);
     //0.2209708691 2 4 5 3
-    auto& bos_ham = *ham.m_bos.as<GeneralBosHam>();
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.phys_element(1, 4, 3, 2), 0.2209708691);
     //0.1530931089 5 3 1 3
@@ -36,11 +31,9 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
      *  [0. 1. 1. 0. 3.] 3.9140625
      *  [1. 0. 0. 1. 3.] 3.0859375
      */
-    conf::Document opts;
-    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
-    opts.verify();
-    Hamiltonian ham(opts.m_hamiltonian);
-    buffered::BosOnv onv(ham.m_hs);
+    GeneralBosHam bos_ham({defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP"}, defs::max_bos_occ);
+    Hamiltonian ham(&bos_ham);
+    buffered::BosOnv onv(ham.m_basis);
     onv = {0, 0, 0, 5, 0};
     ASSERT_FLOAT_EQ(ham.get_element(onv), 3.125);
     onv = {0, 0, 1, 3, 1};
@@ -73,11 +66,10 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
     conf::Document opts;
-    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP";
-    opts.verify();
-    Hamiltonian ham(opts.m_hamiltonian);
-    buffered::BosOnv src(ham.m_hs);
-    buffered::BosOnv dst(ham.m_hs);
+    GeneralBosHam bos_ham({defs::assets_root + "/LandauLevels_5_5_15/BOSDUMP"}, defs::max_bos_occ);
+    Hamiltonian ham(&bos_ham);
+    buffered::BosOnv src(ham.m_basis);
+    buffered::BosOnv dst(ham.m_basis);
     conn::BosOnv conn(src);
 
     std::vector<defs::inds> basis =

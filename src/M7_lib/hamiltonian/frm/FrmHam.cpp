@@ -6,18 +6,10 @@
 
 #include "FrmHam.h"
 
-/*
-sys::frm::Electrons FrmHam::make_elecs(const sys::frm::Electrons &ham_elecs, const sys::frm::Electrons &conf_elecs) {
-    const size_t nelec = conf_elecs ? conf_elecs : ham_elecs;
-    const int ms2 = conf_elecs.m_ms2.has_value() ? conf_elecs.m_ms2 : ham_elecs.m_ms2;
-    // hamiltonian always determines whether 2*Ms is conserved
-    const bool ms2_conserve = ham_elecs.m_ms2.conserve();
-    return {nelec, {ms2, ms2_conserve}};
-}
-*/
 
 FrmHam::FrmHam(const sys::frm::Basis& basis):
-        m_basis(basis), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double) {}
+        m_basis(basis), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double),
+        m_work_conn({99, 99}){}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
     return get_element_0000(onv);
@@ -27,14 +19,14 @@ defs::ham_comp_t FrmHam::get_energy(const field::FrmOnv &onv) const {
     return consts::real(get_element_0000(onv));
 }
 
-defs::ham_t FrmHam::get_element(const field::FrmOnv &ket, const conn::FrmOnv &conn) const {
+defs::ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
     switch (conn.size()) {
         case 0:
-            return get_element_0000(ket);
+            return get_element_0000(onv);
         case 2:
-            return get_element_1100(ket, conn);
+            return get_element_1100(onv, conn);
         case 4:
-            return get_element_2200(ket, conn);
+            return get_element_2200(onv, conn);
         default:
             return 0.0;
     }

@@ -84,18 +84,11 @@ struct FrmHam : HamOpTerm {
     FrmHam(const sys::frm::Basis& basis);
 
 private:
+
     /**
-     * particle sector information can derive from the hamiltonian definition or from the configuration document, and
-     * sometimes these can differ. the configuration document is treated as the authority, and any definitions it makes
-     * override any that may have already been inferred from the hamiltonian definition
-     * @param ham_elecs
-     *  electrons inferred from the H definition
-     * @param conf_elecs
-     *  electrons provided in the configuration document (authoritative)
-     * @return
-     *  combined electrons object
+     * workspace for computing connections
      */
-//    static sys::frm::Electrons make_elecs(const sys::frm::Electrons& ham_elecs, const sys::frm::Electrons& conf_elecs);
+    mutable suite::Conns m_work_conn;
 
 public:
 
@@ -166,7 +159,7 @@ public:
 
     defs::ham_comp_t get_energy(const field::FrmOnv &onv) const;
 
-    defs::ham_t get_element(const field::FrmOnv &ket, const conn::FrmOnv &conn) const;
+    defs::ham_t get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const;
 
     /**
      * output some useful logs identifying the kind of H detected

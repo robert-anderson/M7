@@ -8,13 +8,9 @@
 
 TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     const size_t nwave = 3;
-    conf::Hamiltonian opts(nullptr);
-    opts.m_boson.m_interacting_bose_gas.m_ndim = 1;
-    opts.m_boson.m_interacting_bose_gas.m_nwave = nwave;
-    opts.m_boson.m_interacting_bose_gas.m_ek_scale = 1.0;
-    opts.m_boson.m_nboson = 3;
-    Hamiltonian ham_src(opts);
-    buffered::BosOnv mbf(ham_src.m_hs);
+    InteractingBoseGasBosHam bos_ham(1, nwave, 1.0);
+    Hamiltonian ham_src(&bos_ham);
+    buffered::BosOnv mbf(ham_src.m_basis);
     mbf = {0, 0, 0, 0, 0, 0, 3};
     defs::ham_t helem;
     helem = ham_src.get_element(mbf);

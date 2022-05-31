@@ -8,6 +8,7 @@
 #include "M7_lib/foreach/MbfForeach.h"
 #include "M7_lib/basis/BasisData.h"
 
+#if 0
 namespace mbf_foreach_test {
     namespace frm {
         namespace general {
@@ -311,3 +312,4 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
     auto n = frm_chk_inds.size()*bos_chk_inds.size();
     ASSERT_EQ(foreach.m_niter, n*n);
 }
+#endif

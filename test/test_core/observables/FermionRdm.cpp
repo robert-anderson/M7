@@ -19,12 +19,13 @@
  *  2RDM energy estimate
  */
 defs::ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explicit_hf_conns){
-    Hamiltonian ham(opts.m_hamiltonian);
-    buffered::Mbf ref_onv(ham.m_hs);
-    mbf::set_aufbau_mbf(ref_onv);
+    Hamiltonian ham({opts.m_hamiltonian, opts.m_basis});
+    auto particles = ham.default_particles();
+    buffered::Mbf ref_onv(ham.m_basis);
+    mbf::set_aufbau_mbf(ref_onv, particles);
 
-    Wavefunction wf(opts, ham.m_hs);
-    ExactPropagator prop(ham, opts, wf.m_format, explicit_hf_conns);
+    Wavefunction wf(opts, {ham.m_basis, particles});
+    ExactPropagator prop(ham, opts, wf, explicit_hf_conns);
     auto ref_energy = ham.get_energy(ref_onv);
 
     auto ref_loc = wf.create_row(0, ref_onv, ref_energy, 1);

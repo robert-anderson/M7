@@ -13,7 +13,7 @@ Wavefunction::Wavefunction(const conf::Document &opts, const sys::Sector& sector
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {
-                        {sector, opts.m_wavefunction.m_nroot,
+                        {sector.basis(), opts.m_wavefunction.m_nroot,
                          opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)},
                         MappedTableBase::nbucket_guess(
                                 opts.m_propagator.m_nw_target / mpi::nrank(),
@@ -21,7 +21,7 @@ Wavefunction::Wavefunction(const conf::Document &opts, const sys::Sector& sector
                         opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
                         opts.m_wavefunction.m_hash_mapping.m_remap_ratio
                 },
-                {{sector, need_send_parents(opts)}}),
+                {{sector.basis(), need_send_parents(opts)}}),
         Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
         m_sector(sector),

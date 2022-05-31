@@ -7,18 +7,15 @@
 
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 
-struct SpinSquareFrmHam : FrmHam {
+struct SpinSquareFrmHam : FrmHam, ElecSpecTerm {
 
     // This is Sz * (Sz - 1) which stays constant
     const defs::ham_comp_t m_sz_term;
 
     /*
-     * sector information is required in order to store the required conserved m_sz_term
+     * electron number and Sz sector information is required in order to store the required conserved m_sz_term
      */
-    SpinSquareFrmHam(const sys::frm::Sector& sector);
-
-    // TODO: pass basis / hilbert opts opts
-    //explicit SpinSquareFrmHam(const FrmHam &h);
+    SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm::Electrons& elecs);
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override;
 

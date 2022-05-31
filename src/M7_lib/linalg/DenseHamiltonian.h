@@ -54,6 +54,7 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
 
 public:
     DenseHamiltonian(const Hamiltonian& h, sys::Particles particles, bool force_general=false);
+    DenseHamiltonian(const Hamiltonian& h, bool force_general=false);
 };
 
 #endif //M7_DENSEHAMILTONIAN_H

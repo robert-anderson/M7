@@ -5,8 +5,8 @@
 #include "GeneralLadderHam.h"
 
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, bool spin_major) :
-        FrmBosHam({{header.m_nsite}, {0ul, header.m_nmode}}),
+GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, bool spin_major, size_t bos_occ_cutoff) :
+        FrmBosHam({{header.m_nsite}, {header.m_nmode, bos_occ_cutoff}}),
         m_v(m_basis.size(), header.m_uhf),
         m_v_unc(m_basis.m_bos.m_nmode, 0.0) {
     if (!m_basis) return;

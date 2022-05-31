@@ -20,12 +20,14 @@ namespace mbf {
      * elecs argument
      */
     void set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs);
+    void set_aufbau_mbf(field::FrmOnv &onv, sys::Particles particles);
 
     /**
      * there is no proper aufbau principle for bosons, so fill from the 0 mode until max nbosons is reached, then
      * advance to the next mode until the number of quanta specified by the bosons argument has been reached
      */
     void set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons);
+    void set_aufbau_mbf(field::BosOnv &onv, sys::Particles particles);
 
 
     /**

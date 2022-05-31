@@ -11,7 +11,19 @@
 #include "M7_lib/excitgen/ExcitGen.h"
 #include "M7_lib/conf/Conf.h"
 
+/**
+ * for multiple inheritance indicating that all elements of the HamOpTerm are zero
+ */
 struct NullOpTerm {};
+
+/**
+ * some Hamiltonian terms are only valid for expectation values computed between MBFs in a specific electron number
+ * sector. This is indicated by multiple inheritance with SectoredTerm as a superclass
+ */
+struct ElecSpecTerm {
+    sys::frm::Electrons m_elecs;
+    ElecSpecTerm(sys::frm::Electrons elecs): m_elecs(std::move(elecs)){}
+};
 
 /**
  * base class for the three currently implemented kinds of hamiltonian term based on the second quantised operators
@@ -48,8 +60,12 @@ struct HamOpTerm {
         return as<T>();
     }
 
-    operator bool () const {
+    operator bool() const {
         return !is<NullOpTerm>();
+    }
+
+    bool is_elec_spec() const {
+        return is<ElecSpecTerm>();
     }
 
     using excit_gen_ptr_t = ExcitGen::excit_gen_ptr_t;

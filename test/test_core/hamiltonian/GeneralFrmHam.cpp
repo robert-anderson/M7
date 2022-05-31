@@ -47,22 +47,20 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 
 TEST(GeneralFrmHam, Elements) {
     const auto benchmark = 0.01759459248922075;
-    conf::Document opts;
-    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
-    opts.verify();
-    Hamiltonian h(opts.m_hamiltonian);
+    GeneralFrmHam frm_ham({defs::assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
+    Hamiltonian h(&frm_ham);
     {
-        buffered::FrmOnv src(h.m_hs);
+        buffered::FrmOnv src(h.m_basis);
         src = {{0, 1, 4}, {0, 2, 4}};
-        buffered::FrmOnv dst(h.m_hs);
+        buffered::FrmOnv dst(h.m_basis);
         dst = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
         ASSERT_FLOAT_EQ(benchmark, helem);
     }
     {
-        buffered::FrmBosOnv src(h.m_hs);
+        buffered::FrmBosOnv src(h.m_basis);
         src.m_frm = {{0, 1, 4}, {0, 2, 4}};
-        buffered::FrmBosOnv dst(h.m_hs);
+        buffered::FrmBosOnv dst(h.m_basis);
         dst.m_frm = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
         ASSERT_FLOAT_EQ(benchmark, helem);
@@ -71,15 +69,13 @@ TEST(GeneralFrmHam, Elements) {
 
 TEST(GeneralFrmHam, RhfEnergy) {
     const auto benchmark = -108.76171800006861;
-    conf::Document opts;
-    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
-    opts.verify();
-    Hamiltonian ham(opts.m_hamiltonian);
+    GeneralFrmHam frm_ham({defs::assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
+    Hamiltonian ham(&frm_ham);
     defs::inds chk_orbsyms = {0, 2, 1, 5, 6, 4};
-    ASSERT_EQ(ham.m_frm.m_hs.m_abgrp_map.m_site_irreps, chk_orbsyms);
+    ASSERT_EQ(ham.m_basis.m_frm.m_abgrp_map.m_site_irreps, chk_orbsyms);
     ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_hs);
-    mbf::set_aufbau_mbf(onv);
+    buffered::FrmOnv onv(ham.m_basis);
+    mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
     auto elem = ham.get_element(onv);
     ASSERT_FLOAT_EQ(consts::real(elem), benchmark);
     ASSERT_FLOAT_EQ(consts::imag(elem), 1e-14);
@@ -87,25 +83,22 @@ TEST(GeneralFrmHam, RhfEnergy) {
 }
 
 TEST(GeneralFrmHam, RhfBrillouinTheorem) {
-    conf::Document opts;
-    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::assets_root + "/RHF_N2_6o6e/FCIDUMP";
-    opts.verify();
-    Hamiltonian ham(opts.m_hamiltonian);
-    ASSERT_TRUE(ham.m_frm.m_kramers_attrs.conserving());
-    buffered::FrmOnv onv(ham.m_hs);
-    mbf::set_aufbau_mbf(onv);
+    GeneralFrmHam ham({defs::assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
+    ASSERT_TRUE(ham.m_kramers_attrs.conserving());
+    buffered::FrmOnv onv(ham.m_basis);
+    mbf::set_aufbau_mbf(onv, ham.default_nelec());
 
     decoded_mbf::frm::SimpleOccs occs(onv);
     decoded_mbf::frm::SimpleVacs vacs(onv);
 
-    buffered::FrmOnv excited(ham.m_hs);
+    buffered::FrmOnv excited(ham.m_basis);
     conn::FrmOnv conn(onv);
 
     for (size_t occ : occs.get()){
         for (size_t vac : vacs.get()){
             conn.m_ann.set(occ);
             conn.m_cre.set(vac);
-            ASSERT_FLOAT_EQ(ham.m_frm.get_element_1100(onv, conn), 0.0);
+            ASSERT_FLOAT_EQ(ham.get_element_1100(onv, conn), 0.0);
         }
     }
 }

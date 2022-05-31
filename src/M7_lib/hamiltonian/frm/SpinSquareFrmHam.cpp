@@ -4,16 +4,11 @@
 
 #include "SpinSquareFrmHam.h"
 
-SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Sector &sector):
-        FrmHam(sector.m_basis), m_sz_term(0.25 * sector.m_elecs.m_ms2 * (sector.m_elecs.m_ms2 - 2)){
-    REQUIRE_TRUE(sector.m_elecs.m_ms2.conserve(),
+SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm::Electrons& elecs):
+        FrmHam(basis), ElecSpecTerm(elecs), m_sz_term(0.25 * elecs.m_ms2 * (elecs.m_ms2 - 2)){
+    REQUIRE_TRUE(elecs.m_ms2.conserve(),
                  "spin square operator requires a Hilbert space restricted to a given 2*Ms sector");
 }
-
-//SpinSquareFrmHam::SpinSquareFrmHam(const FrmHam &h) : SpinSquareFrmHam(h.m_hs){
-//    REQUIRE_TRUE(h.m_kramers_attrs.conserving(),
-//                 "spin square operator inconsistent with Kramers non-conservation");
-//}
 
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     uint n_os_a = 0;

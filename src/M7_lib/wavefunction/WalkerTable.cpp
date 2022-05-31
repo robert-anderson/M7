@@ -8,10 +8,10 @@ field::Mbf &WalkerTableRow::key_field() {
     return m_mbf;
 }
 
-WalkerTableRow::WalkerTableRow(const sys::Sector& sector, size_t nroot, size_t nreplica, bool average_weights) :
+WalkerTableRow::WalkerTableRow(const sys::Basis& basis, size_t nroot, size_t nreplica, bool average_weights) :
         m_wf_format({nroot, nreplica}, {"nroot", "nreplica"}),
         m_root_format({nroot}, {"nroot"}),
-        m_mbf(this, sector, "many-body basis function"),
+        m_mbf(this, basis, "many-body basis function"),
         m_weight(this, m_wf_format, "weight"),
         m_hdiag(this, "diagonal H element"),
         m_initiator(this, m_wf_format, "initiator status flag"),

@@ -10,10 +10,18 @@ void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
     for (size_t i = 0ul; i < elecs.m_nbeta; ++i) onv.set({1, i});
 }
 
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::Particles particles) {
+    set_aufbau_mbf(onv, particles.m_frm);
+}
+
 void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons) {
     if (!onv.nelement()) return;
     onv.zero();
     onv[0] = bosons;
+}
+
+void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::Particles particles) {
+    set_aufbau_mbf(onv, particles.m_bos);
 }
 
 void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {

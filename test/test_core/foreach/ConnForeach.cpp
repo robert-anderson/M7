@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "M7_lib/foreach/ConnForeach.h"
 
+#if 0
 namespace conn_foreach_test {
     struct Result {
         const defs::inds m_ann, m_cre;
@@ -453,3 +454,4 @@ TEST(ConnForeach, FrmBosEx1101) {
     foreach.loop_fn(mbf, fn);
     ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
 }
+#endif

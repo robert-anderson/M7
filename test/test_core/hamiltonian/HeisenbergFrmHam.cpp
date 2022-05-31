@@ -33,9 +33,9 @@ TEST(HeisenbergFrmHam, LocalExchangeOnly){
     for (size_t irow=0ul; irow<lattice.nsite(); ++irow) {
         ASSERT_EQ(lattice.m_sparse.nentry(irow), 2);
     }
-    HeisenbergFrmHam ham(1, lattice, 0);
-    buffered::FrmOnv src(ham.m_hs);
-    buffered::FrmOnv dst(ham.m_hs);
+    HeisenbergFrmHam ham(1, lattice);
+    buffered::FrmOnv src(ham.m_basis);
+    buffered::FrmOnv dst(ham.m_basis);
     conn::FrmOnv conn(src);
 
     using namespace heisenberg_test;
@@ -62,9 +62,9 @@ TEST(HeisenbergFrmHam, Elements){
     for (size_t irow=0ul; irow<lattice.nsite(); ++irow) {
         ASSERT_EQ(lattice.m_sparse.nentry(irow), 2);
     }
-    HeisenbergFrmHam ham(1, lattice, 0);
-    buffered::FrmOnv src(ham.m_hs);
-    buffered::FrmOnv dst(ham.m_hs);
+    HeisenbergFrmHam ham(1, lattice);
+    buffered::FrmOnv src(ham.m_basis);
+    buffered::FrmOnv dst(ham.m_basis);
     conn::FrmOnv conn(src);
 
     auto spinvecs = heisenberg_test::spinvecs();
