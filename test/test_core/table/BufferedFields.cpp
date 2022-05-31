@@ -296,7 +296,7 @@ TEST(BufferedFields, BosOnv){
 TEST(BufferedFields, FrmBosOnv){
     defs::inds frm_inds = {0, 2, 4, 5, 7};
     defs::inds bos_inds = {3, 1, 2, 4, 9};
-    const sys::frm::Basis frm_basis(frm_inds.size(), 4);
+    const sys::frm::Basis frm_basis(4);
     const sys::bos::Basis bos_basis(5, defs::max_bos_occ);
 
     //  1. constructable via argument forwarding to T::T

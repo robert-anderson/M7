@@ -174,23 +174,7 @@ namespace sys {
             /*
              * non-resolved spin, C1 point group (no spatial symmetry)
              */
-            Basis(size_t nsite): Basis(nsite, {nsite}, false){}
-
-            /*
-             * combine the properties of two single-particle bases
-             */
-            explicit Basis(const Basis& basis1, const Basis& basis2):
-                Basis(basis1.m_nsite ? basis1.m_nsite : basis2.m_nsite,
-                      basis1.m_abgrp_map ? basis1.m_abgrp_map : basis2.m_abgrp_map,
-                      basis1.m_spin_resolved && basis2.m_spin_resolved) {
-                if (basis1 && basis2) {
-                    REQUIRE_EQ(basis1.m_nsite, basis2.m_nsite, "incompatible numbers of sites");
-                    if (basis1.m_abgrp_map && basis2.m_abgrp_map) {
-                        // both Hilbert spaces define point groups, so check compatibility
-                        REQUIRE_EQ(basis1.m_abgrp_map, basis2.m_abgrp_map, "incompatible Abelian group maps");
-                    }
-                }
-            }
+            Basis(size_t nsite): Basis(nsite, {nsite}, false) {}
 
             bool operator==(const Basis& other) const {
                 return m_nsite==other.m_nsite &&
@@ -285,10 +269,6 @@ namespace sys {
             /*
              * combine the properties of two Hilbert space sectors
              */
-            explicit Sector(const Sector& sector1, const Sector& sector2):
-                    Sector(Basis(sector1.m_basis, sector2.m_basis),
-                           Electrons(sector1.m_elecs, sector2.m_elecs)){}
-
             bool operator==(const Sector& other) const {
                 return m_basis==other.m_basis && m_elecs==other.m_elecs;
             }
@@ -320,15 +300,6 @@ namespace sys {
             operator size_t() const {
                 return m_nmode;
             }
-
-            /*
-             * combine the properties of two single-particle bases
-             */
-            explicit Size(const Size& size1, const Size& size2): Size(size1 ? size1 : size2){
-                if (size1 && size2) {
-                    REQUIRE_EQ(size1.m_nmode, size2.m_nmode, "incompatible numbers of modes");
-                }
-            }
         };
 
         struct Basis : Size {
@@ -346,11 +317,6 @@ namespace sys {
             const Basis m_basis;
             const Bosons m_bosons;
             explicit Sector(Basis basis, Bosons bosons): m_basis(basis), m_bosons(bosons){}
-            /*
-             * combine the properties of two Hilbert space sectors
-             */
-            explicit Sector(const Sector& sector1, const Sector& sector2):
-                Sector(Basis(sector1.m_basis, sector2.m_basis), Bosons(sector1.m_bosons, sector2.m_bosons)){}
 
             bool operator==(const Sector& other) const {
                 return m_basis==other.m_basis && m_bosons==other.m_bosons;

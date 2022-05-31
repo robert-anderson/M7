@@ -8,11 +8,8 @@
 #include "M7_lib/connection/Connections.h"
 
 TEST(FrmBosOnvConnection, DetectExsig) {
-    const size_t nelec = 6;
-    const size_t nsite = 6;
-    const size_t nmode = 6;
-    const sys::frm::Basis frm_basis(nelec, nsite);
-    const sys::bos::Basis bos_basis(nmode);
+    const sys::frm::Basis frm_basis(6);
+    const sys::bos::Basis bos_basis(6);
     buffered::FrmBosOnv src(frm_basis, bos_basis);
     src.m_frm = {{0, 1, 2}, {0, 1, 2}};
     auto dst = src;
