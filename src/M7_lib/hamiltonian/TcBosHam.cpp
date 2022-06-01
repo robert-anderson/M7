@@ -35,7 +35,10 @@ defs::ham_t TcBosHam::get_element_0011(const field::BosOnv &onv,
     for (size_t imode = 0; imode < onv.m_nmode; ++imode) {
         for (size_t jmode = 0; jmode < onv.m_nmode; ++jmode) {
             // CHECK am I double counting here?
-            element += get_coeff_0033(conn.m_cre.get_imode(0), imode, jmode,
+            BosOps com(2);
+            com.from_vector({imode, jmode});
+            element += conn.occ_fac(onv, com) *
+                       get_coeff_0033(conn.m_cre.get_imode(0), imode, jmode,
                                       conn.m_ann.get_imode(0), imode, jmode);
             // CHECK are other permutations necessary to add?
         }
@@ -48,9 +51,12 @@ defs::ham_t TcBosHam::get_element_0022(const field::BosOnv &onv,
     auto element = GeneralBosHam::get_element_0022(onv, conn);
     for (size_t imode = 0; imode < onv.m_nmode; ++imode) {
         // no need to check operators like in Fermi case
-        element += get_coeff_0033(
-            conn.m_cre.get_imode(0), conn.m_cre.get_imode(1), imode,
-            conn.m_ann.get_imode(0), conn.m_ann.get_imode(1), imode);
+        BosOps com(1);
+        com.from_vector({imode});
+        element += conn.occ_fac(onv, com) *
+                   get_coeff_0033(
+                       conn.m_cre.get_imode(0), conn.m_cre.get_imode(1), imode,
+                       conn.m_ann.get_imode(0), conn.m_ann.get_imode(1), imode);
         // CHECK not sure if need to add other repeated versions, like if two
         // m_cre objects are repeated
     }
