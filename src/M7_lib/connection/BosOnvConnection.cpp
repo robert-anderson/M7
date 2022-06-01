@@ -169,9 +169,25 @@ double BosOnvConnection::occ_fac(const BosOnvField &src) const {
     return std::sqrt(double(occ_fac_square(src)));
 }
 
-size_t BosOnvConnection::occ_fac_square_com(const size_t &occ, const size_t &nop_com) {
+size_t BosOnvConnection::occ_fac_square_ann(size_t occ, size_t nop) {
     size_t fac = 1;
-    for (size_t i=0ul; i<nop_com; ++i){
+    for (size_t i=0ul; i<nop; ++i){
+        fac*=occ-i;
+    }
+    return fac;
+}
+
+size_t BosOnvConnection::occ_fac_square_cre(size_t occ, size_t nop) {
+    size_t fac = 1;
+    for (size_t i=1ul; i<=nop; ++i){
+        fac*=occ+i;
+    }
+    return fac;
+}
+
+size_t BosOnvConnection::occ_fac_square_com(size_t occ, size_t nop) {
+    size_t fac = 1;
+    for (size_t i=0ul; i<nop; ++i){
         auto com_fac = occ-i;
         fac*=com_fac*com_fac;
     }
@@ -186,33 +202,30 @@ size_t BosOnvConnection::occ_fac_square(const BosOnvField &src, const BosOps &co
      * loop over bosonic annihilations
      */
     for (auto& pair : m_ann.pairs()) {
-        for (size_t i=0ul; i<pair.m_nop; ++i) {
-            fac*= src[pair.m_imode] - i;
-            if (icom<ncom){
-                // there are common operator modes remaining
-                if (com[icom].m_imode==pair.m_imode) {
-                    // the current common operator mode is the same as the one just annihilated
-                    fac*= occ_fac_square_com((src[pair.m_imode] - i) - 1, com[icom].m_nop);
-                    ++icom;
-                }
-                else if (com[icom].m_imode<pair.m_imode) {
-                    // the current common operator mode can't be in the annihilated array, since it's been skipped over
-                    fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
-                    ++icom;
-                }
+        const size_t occ = src[pair.m_imode];
+        // if there are more annihilations than particles, the state is destroyed by the operator acting on it:
+        if (pair.m_nop > occ) return 0;
+        fac*= occ_fac_square_ann(occ, pair.m_nop);
+        while (icom < ncom && com[icom].m_imode <= pair.m_imode){
+            /*
+             * there are common operator modes remaining and the current common mode index is not highter than the
+             * current annihilation mode index
+             */
+            if (com[icom].m_imode == pair.m_imode) {
+                // the current common operator mode is the same as the one just annihilated so deduct annihilated ops
+                fac*= occ_fac_square_com(occ - pair.m_nop, com[icom].m_nop);
             }
+            else {
+                // the current common operator mode can't be in the annihilated array, since it's just been skipped over
+                fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
+            }
+            ++icom;
         }
     }
     // only the annihilation part is affected by the common operators in normal ordering: do the creation ops as normal
-    for (auto& pair : m_cre.pairs()) {
-        for (size_t i=1ul; i<=pair.m_nop; ++i) {
-            fac*= src[pair.m_imode] + i;
-        }
-    }
+    for (auto& pair : m_cre.pairs()) fac*= occ_fac_square_cre(src[pair.m_imode], pair.m_nop);
     // do the rest of the common orbs that were not reached in the loop over annihilations
-    for (;icom < ncom; ++icom) {
-        fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
-    }
+    for (;icom < ncom; ++icom) fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
     return fac;
 }
 

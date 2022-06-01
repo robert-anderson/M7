@@ -91,7 +91,33 @@ struct BosOnvConnection {
     double occ_fac(const BosOnvField& src) const;
 
 private:
-    static size_t occ_fac_square_com(const size_t& occ, const size_t& nop_com);
+    /**
+     * @param occ
+     *  occupation of the mode
+     * @param nop
+     *  power of the annihilation operator acting on the mode
+     * @return
+     *  square of the occupation factor associated with the annihilation
+     */
+    static size_t occ_fac_square_ann(size_t occ, size_t nop);
+    /**
+     * @param occ
+     *  occupation of the mode
+     * @param nop
+     *  power of the creation operator acting on the mode
+     * @return
+     *  square of the occupation factor associated with the creation
+     */
+    static size_t occ_fac_square_cre(size_t occ, size_t nop);
+    /**
+     * @param occ
+     *  occupation of the mode
+     * @param nop
+     *  power of the number operator acting on the mode
+     * @return
+     *  square of the occupation factor associated with the number operator
+     */
+    static size_t occ_fac_square_com(size_t occ, size_t nop);
 
 public:
 
