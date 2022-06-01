@@ -62,7 +62,7 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian
     const sys::frm::Sector frm_sector(h.m_basis.m_frm, particles.m_frm);
     const sys::bos::Sector bos_sector(h.m_basis.m_bos, particles.m_bos);
 
-    if (h.m_bos) {
+    if (!h.m_bos) {
         /*
          * hamiltonian is boson operator-free, can work in determinants: a.k.a. FrmOnvs
          */

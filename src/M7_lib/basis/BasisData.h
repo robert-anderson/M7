@@ -169,6 +169,15 @@ namespace sys {
              */
             const bool m_spin_resolved;
 
+        private:
+            using Size::operator unsigned long;
+
+        public:
+
+            explicit operator bool() const {
+                return m_nsite;
+            }
+
             Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved):
                     Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved){}
             /*
@@ -177,9 +186,7 @@ namespace sys {
             Basis(size_t nsite): Basis(nsite, {nsite}, false) {}
 
             bool operator==(const Basis& other) const {
-                return m_nsite==other.m_nsite &&
-                        m_abgrp_map==other.m_abgrp_map &&
-                       m_spin_resolved == other.m_spin_resolved;
+                return (m_nsite == other.m_nsite) && (m_abgrp_map == other.m_abgrp_map) && (m_spin_resolved == other.m_spin_resolved);
             }
 
             size_t ncoeff_ind() const {
@@ -196,7 +203,7 @@ namespace sys {
              * either 0 or 1 based on the evenness of the electron number
              */
             static int lowest_value(size_t nelec){
-                return !(nelec&1ul);
+                return nelec&1ul;
             }
             Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
             Ms2(size_t nelec): Ms2(lowest_value(nelec), false){}
@@ -274,7 +281,7 @@ namespace sys {
             }
 
             operator bool() const {
-                return m_basis;
+                return m_basis.m_nsite;
             }
 
             size_t size() const {
@@ -304,7 +311,17 @@ namespace sys {
 
         struct Basis : Size {
             const size_t m_occ_cutoff;
+        private:
+            using Size::operator unsigned long;
+        public:
+            explicit operator bool() const {
+                return m_nmode;
+            }
             Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ): Size(nmode), m_occ_cutoff(occ_cutoff){}
+
+            bool operator==(const Basis& other) const {
+                return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
+            }
         };
 
         struct Bosons : public conservation::Optional<size_t> {
@@ -323,7 +340,7 @@ namespace sys {
             }
 
             operator bool() const {
-                return m_basis;
+                return bool(m_basis);
             }
         };
 
@@ -355,11 +372,11 @@ namespace sys {
         }
 
         Size size() const {
-            return {m_frm.m_nsite, m_bos.m_nmode};
+            return {static_cast<const frm::Size&>(m_frm), static_cast<const bos::Size&>(m_bos)};
         }
 
         operator bool() const {
-            return m_frm || m_bos;
+            return bool(m_frm) || bool(m_bos);
         }
     };
 

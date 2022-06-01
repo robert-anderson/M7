@@ -6,8 +6,7 @@
 
 
 EbdumpHeader::EbdumpHeader(const std::string &fname) :
-        FortranNamelistReader(fname), m_nmode(read_int("NMODE")), m_nsite(read_int("NORB")), m_uhf(read_bool("UHF")) {}
-
+        FcidumpHeader(fname), m_nmode(read_int("NMODE")) {}
 
 EbdumpFileReader::EbdumpFileReader(const std::string &fname, bool spin_major) :
         HamiltonianFileReader(fname, 3),

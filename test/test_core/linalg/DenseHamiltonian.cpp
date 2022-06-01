@@ -36,10 +36,11 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
     for (size_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];
         auto energy = energies[i];
-        HeisenbergFrmHam frm_ham(1.0, lattice::make({Lattice::Ortho, {nsite}, {0}}));
+        HeisenbergFrmHam frm_ham(1.0, lattice::make({Lattice::Ortho, {nsite}, {1}}));
         Hamiltonian ham(&frm_ham);
         std::vector<double> evals;
-        DenseHamiltonian hmat(ham);
+        auto particles = ham.default_particles();
+        DenseHamiltonian hmat(ham, particles);
         dense::diag(hmat, evals);
         ASSERT_TRUE(consts::nearly_equal(evals[0], energy, 1e-8));
     }
@@ -180,9 +181,11 @@ TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff1) {
     GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
     GeneralBosHam bos_ham({defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
-    DenseHamiltonian ham(ham_src);
+    auto particles = ham_src.default_particles(4);
+    DenseHamiltonian ham(ham_src, particles);
     std::vector<double> evals;
     dense::diag(ham, evals);
+    std::cout << evals[0] << std::endl;
     ASSERT_TRUE(consts::nearly_equal(evals[0], 0.5090148148366922, 1e-10));
 }
 
@@ -192,7 +195,8 @@ TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff2) {
     GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
     GeneralBosHam bos_ham({defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
-    DenseHamiltonian ham(ham_src);
+    auto particles = ham_src.default_particles(4);
+    DenseHamiltonian ham(ham_src, particles);
     std::vector<double> evals;
     dense::diag(ham, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], -0.38125085248276913, 1e-10));

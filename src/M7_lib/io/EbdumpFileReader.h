@@ -5,12 +5,10 @@
 #ifndef M7_EBDUMPFILEREADER_H
 #define M7_EBDUMPFILEREADER_H
 
-#include "HamiltonianFileReader.h"
-#include "FortranNamelistReader.h"
+#include "FcidumpFileReader.h"
 
-struct EbdumpHeader : FortranNamelistReader {
-    const size_t m_nmode, m_nsite;
-    const bool m_uhf;
+struct EbdumpHeader : FcidumpHeader {
+    const size_t m_nmode;
     EbdumpHeader(const std::string& fname);
 };
 

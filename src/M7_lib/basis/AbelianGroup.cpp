@@ -68,7 +68,7 @@ AbelianGroupMap::AbelianGroupMap(AbelianGroup grp, defs::inds site_irreps) :
 AbelianGroupMap::AbelianGroupMap(size_t nsite) : AbelianGroupMap({}, defs::inds(nsite, 0)){}
 
 bool AbelianGroupMap::operator==(const AbelianGroupMap &other) const {
-    return m_grp==other.m_grp && m_site_irreps==other.m_site_irreps && m_nsite==other.m_nsite;
+    return (m_grp == other.m_grp) && (m_site_irreps == other.m_site_irreps) && (m_nsite == other.m_nsite);
 }
 
 AbelianGroupMap::operator bool() const {

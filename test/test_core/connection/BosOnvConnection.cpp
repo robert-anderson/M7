@@ -41,12 +41,12 @@ namespace bos_onv_connection_test {
 
     bool one_conn(const field::BosOnv& src, defs::inds icres, defs::inds ianns){
         auto chk = chk_occ_fac_square(src, icres, ianns);
-        conn::BosOnv conn(src.m_basis);
+        conn::BosOnv conn(src.m_basis.m_nmode);
         BosOps com(src.m_basis.m_nmode);
         /*
          * remove common indices from the creation and annihilation vectors and place them in the common operators object
          */
-        for (size_t imode=0ul; imode<src.m_basis; ++imode){
+        for (size_t imode=0ul; imode<src.m_basis.m_nmode; ++imode){
             size_t noccur = 0;
             while (true) {
                 auto cre_it = std::find(icres.begin(), icres.end(), imode);

@@ -6,9 +6,9 @@
 #include "BasisData.h"
 
 suite::MbfsRow::MbfsRow(const sys::Basis &basis) :
-        m_frm(this, basis, "fermion ONV"),
+        m_frm(this, basis.m_frm, "fermion ONV"),
         m_frmbos(this, basis, "fermion-boson ONV"),
-        m_bos(this, basis, "boson ONV"){}
+        m_bos(this, basis.m_bos, "boson ONV"){}
 
 suite::MbfsRow::MbfsRow(const sys::Sector &sector) : MbfsRow(sector.basis()){}
 
