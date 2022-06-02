@@ -5,18 +5,18 @@
 #include "GeneralLadderHam.h"
 
 
-GeneralLadderHam::GeneralLadderHam(const EbdumpHeader &header, bool spin_major, size_t bos_occ_cutoff) :
-        FrmBosHam({{header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved}, {header.m_nmode, bos_occ_cutoff}}),
-        m_v(m_basis.size(), header.m_uhf),
+GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, size_t bos_occ_cutoff) :
+        FrmBosHam({{info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}, {info.m_nmode, bos_occ_cutoff}}),
+        m_v(m_basis.size(), info.m_uhf),
         m_v_unc(m_basis.m_bos.m_nmode, 0.0) {
     if (!m_basis) return;
     REQUIRE_EQ(bool(m_basis.m_frm), bool(m_basis.m_bos),
                "if the number of sites is non-zero, so also must be the number of boson modes. "
-               "NMODE definition may be missing from EBDUMP file header");
+               "NMODE definition may be missing from EBDUMP file info");
 
     defs::inds inds(3);
     defs::ham_t value;
-    EbdumpFileReader file_reader(header.m_fname, spin_major);
+    EbdumpFileReader file_reader(info.m_fname, spin_major);
 
     log::info("Reading boson ladder coupled and uncoupled coefficients from file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {

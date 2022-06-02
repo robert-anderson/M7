@@ -8,8 +8,7 @@ const std::string FortranNamelistReader::c_header_terminator = "&END";
 
 FortranNamelistReader::FortranNamelistReader(std::string fname):
         m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){
-    if (!m_exists)
-        REQUIRE_TRUE(m_fname.empty(), "cannot read Fortran namelist header from non-existent file: "+m_fname);
+    if (!m_exists) REQUIRE_TRUE(m_fname.empty(), "cannot read Fortran namelist header from non-existent file: "+m_fname);
 }
 
 std::string FortranNamelistReader::isolate_value(const std::string &line, const std::string &label) {
@@ -42,7 +41,7 @@ std::vector<std::string> FortranNamelistReader::read(const std::string &line, co
     return tokens;
 }
 
-std::vector<std::string> FortranNamelistReader::read(const std::string &label) {
+std::vector<std::string> FortranNamelistReader::read(const std::string &label) const {
     if (!m_exists) return {};
     FileReader file_reader(m_fname);
     std::string line;
@@ -54,45 +53,47 @@ std::vector<std::string> FortranNamelistReader::read(const std::string &label) {
     return {};
 }
 
-std::vector<long> FortranNamelistReader::read_ints(const std::string &label, long offset, std::vector<long> default_) {
+std::vector<long> FortranNamelistReader::read_ints(const std::string &label,
+                                                   long offset, std::vector<long> default_) const {
     std::vector<long> tmp;
     read(tmp, label, offset, default_);
     return tmp;
 }
 
 std::vector<size_t>
-FortranNamelistReader::read_uints(const std::string &label, long offset, std::vector<size_t> default_) {
+FortranNamelistReader::read_uints(const std::string &label, long offset, std::vector<size_t> default_) const {
     std::vector<size_t> tmp;
     read(tmp, label, offset, default_);
     return tmp;
 }
 
-std::vector<bool> FortranNamelistReader::read_bools(const std::string &label, long offset, std::vector<bool> default_) {
+std::vector<bool> FortranNamelistReader::read_bools(const std::string &label,
+                                                    long offset, std::vector<bool> default_) const {
     std::vector<bool> tmp;
     read(tmp, label, offset, default_);
     return tmp;
 }
 
-long FortranNamelistReader::read_int(const std::string &label, long default_) {
+long FortranNamelistReader::read_int(const std::string &label, long default_) const {
     auto tmp = read_ints(label, 0, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];
 }
 
-size_t FortranNamelistReader::read_uint(const std::string &label, size_t default_) {
+size_t FortranNamelistReader::read_uint(const std::string &label, size_t default_) const {
     auto tmp = read_uints(label, 0, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];
 }
 
-bool FortranNamelistReader::read_bool(const std::string &label, bool default_) {
+bool FortranNamelistReader::read_bool(const std::string &label, bool default_) const {
     auto tmp = read_bools(label, 0, {default_});
     REQUIRE_EQ(tmp.size(), 1ul, "found more than one value for scalar");
     return tmp[0];
 }
 
 void FortranNamelistReader::read(std::vector<bool> &v, const std::string &label,
-                                 long offset, std::vector<bool> default_) {
+                                 long offset, std::vector<bool> default_) const {
     v = default_;
     auto tokens = read(label);
     if (tokens.empty()) return;

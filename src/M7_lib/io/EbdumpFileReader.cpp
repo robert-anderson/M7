@@ -5,12 +5,10 @@
 #include "EbdumpFileReader.h"
 
 
-EbdumpHeader::EbdumpHeader(const std::string &fname) :
-        FcidumpHeader(fname), m_nmode(read_int("NMODE")) {}
-
 EbdumpFileReader::EbdumpFileReader(const std::string &fname, bool spin_major) :
         HamiltonianFileReader(fname, 3),
-        m_header(fname), m_norb_distinct((m_header.m_uhf ? 2 : 1)*m_header.m_nsite), m_spin_major(spin_major){}
+        m_info(FortranNamelistReader(fname)),
+        m_norb_distinct((m_info.m_uhf ? 2 : 1)*m_info.m_nsite), m_spin_major(spin_major){}
 
 size_t EbdumpFileReader::ranksig(const defs::inds &inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
@@ -32,14 +30,14 @@ size_t EbdumpFileReader::exsig(const defs::inds &inds, const size_t &ranksig) co
 }
 
 bool EbdumpFileReader::inds_in_range(const defs::inds &inds) const {
-    return inds[0] <= m_header.m_nmode && inds[1] <= m_norb_distinct && inds[2] <= m_norb_distinct;
+    return inds[0] <= m_info.m_nmode && inds[1] <= m_norb_distinct && inds[2] <= m_norb_distinct;
 }
 
 void EbdumpFileReader::convert_inds(defs::inds &inds) {
-    if (!m_header.m_uhf || m_spin_major) return;
+    if (!m_info.m_spin_resolved || m_spin_major) return;
     auto fn = [&inds, this](size_t i){
         auto &ind = inds[i];
-        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_header.m_nsite : 0));
+        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
     };
     // this conversion only applies to the fermion indices
     fn(1);

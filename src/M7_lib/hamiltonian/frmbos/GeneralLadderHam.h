@@ -26,10 +26,10 @@ struct GeneralLadderHam : FrmBosHam {
      */
     std::vector<defs::ham_t> m_v_unc;
 
-    GeneralLadderHam(const EbdumpHeader& header, bool spin_major, size_t bos_occ_cutoff=defs::max_bos_occ);
+    GeneralLadderHam(const EbdumpInfo& info, bool spin_major, size_t bos_occ_cutoff=defs::max_bos_occ);
 
     GeneralLadderHam(opt_pair_t opts):
-        GeneralLadderHam(EbdumpHeader(opts.m_ham.m_ebdump.m_path),
+        GeneralLadderHam(EbdumpInfo(opts.m_ham.m_ebdump.m_path),
                 opts.m_ham.m_ebdump.m_spin_major, opts.m_basis.m_bos_occ_cutoff){}
 
     defs::ham_t get_coeff_0010(size_t imode) const override;

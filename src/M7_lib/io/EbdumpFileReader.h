@@ -7,13 +7,15 @@
 
 #include "FcidumpFileReader.h"
 
-struct EbdumpHeader : FcidumpHeader {
+struct EbdumpInfo : FcidumpInfo {
     const size_t m_nmode;
-    EbdumpHeader(const std::string& fname);
+    EbdumpInfo(const FortranNamelistReader& reader):
+        FcidumpInfo(reader), m_nmode(reader.read_int("NMODE")){}
+    EbdumpInfo(std::string fname): EbdumpInfo(FortranNamelistReader(fname)){}
 };
 
 struct EbdumpFileReader : HamiltonianFileReader {
-    const EbdumpHeader m_header;
+    const EbdumpInfo m_info;
     const size_t m_norb_distinct;
     const bool m_spin_major;
 

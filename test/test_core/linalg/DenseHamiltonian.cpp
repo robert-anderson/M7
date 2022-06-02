@@ -49,7 +49,9 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
 TEST(DenseHamiltonian, HF) {
     GeneralFrmHam frm_ham({defs::assets_root + "/HF_RDMs/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
-    DenseHamiltonian hmat(ham);
+    auto particles = ham.default_particles();
+    ASSERT_EQ(particles.m_frm, 6ul);
+    DenseHamiltonian hmat(ham, particles);
     std::vector<double> evals;
     dense::diag(hmat, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], -99.9421389039332, 1e-8));

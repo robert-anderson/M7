@@ -14,17 +14,11 @@ struct GeneralFrmHam : FrmHam {
     ints1_t m_int_1;
     ints2_t m_int_2;
 
-    GeneralFrmHam(const sys::frm::Basis& basis);
-
 private:
-//    static sys::frm::Sector sector(const FcidumpHeader& header) {
-//        sys::frm::Basis basis(header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved);
-//        sys::frm::Electrons elecs(header.m_nelec, {header.m_ms2, header.m_relativistic});
-//        return sys::frm::Sector(basis, elecs);
-//    }
+    const FcidumpInfo m_info;
 
 public:
-    GeneralFrmHam(const FcidumpHeader& header, bool spin_major);
+    GeneralFrmHam(const FcidumpInfo& info, bool spin_major);
 
     explicit GeneralFrmHam(opt_pair_t opts);
 
@@ -54,6 +48,10 @@ public:
     excit_gen_list_t make_excit_gens(PRNG &prng, const conf::Propagator& opts) const override;
 
     conn_foreach_list_t make_foreach_iters() const override;
+
+    size_t default_nelec() const override;
+
+    int default_ms2_value() const override;
 };
 
 

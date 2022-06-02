@@ -5,28 +5,28 @@
 #include "FcidumpFileReader.h"
 
 
-FcidumpHeader::FcidumpHeader(const std::string& fname):
-    FortranNamelistReader(fname),
-    m_uhf(read_bool("UHF")),
-    m_relativistic(read_bool("TREL")),
-    m_spin_resolved(m_uhf || m_relativistic),
-    m_nelec(read_uint("NELEC")),
-    m_nsite(read_uint("NORB")),
-    m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
-    m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
-    m_ms2(read_int("MS2", ~0)),
-    m_orbsym(read_uints("ORBSYM", -1, defs::inds(m_nsite, 1ul))){
+FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::inds orbsym):
+        m_fname(fname), m_uhf(uhf), m_relativistic(relativistic), m_spin_resolved(m_uhf || m_relativistic),
+        m_nelec(nelec), m_nsite(nsite), m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
+        m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
+        m_ms2(ms2), m_orbsym(orbsym.empty() ? defs::inds(m_nsite, 1) : orbsym){
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }
 
+FcidumpInfo::FcidumpInfo(const FortranNamelistReader &reader) :
+        FcidumpInfo(reader.m_fname, reader.read_bool("UHF"), reader.read_bool("TREL"),
+                    reader.read_uint("NELEC"), reader.read_uint("NORB"),
+                    reader.read_int("MS2", defs::undefined_ms2),
+                    reader.read_uints("ORBSYM", -1, {})){}
 
+FcidumpInfo::FcidumpInfo(std::string fname) : FcidumpInfo(FortranNamelistReader(fname)){}
 
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
-        HamiltonianFileReader(fname, 4), m_header(fname), m_spin_major(spin_major) {
+        HamiltonianFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
     set_symm_and_rank();
 
-    auto nsite = m_header.m_nsite;
-    if (m_header.m_spin_resolved) {
+    auto nsite = m_info.m_nsite;
+    if (m_info.m_spin_resolved) {
         defs::inds inds(4);
         defs::ham_t v;
         while (next(inds, v)) {
@@ -53,9 +53,9 @@ bool FcidumpFileReader::spin_conserving() const {
 }
 
 void FcidumpFileReader::convert_inds(defs::inds &inds) {
-    if (!m_header.m_spin_resolved || m_spin_major) return;
+    if (!m_info.m_spin_resolved || m_spin_major) return;
     for (auto &ind: inds)
-        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_header.m_nsite : 0));
+        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) {
@@ -143,5 +143,5 @@ size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) c
 }
 
 bool FcidumpFileReader::inds_in_range(const defs::inds &inds) const {
-    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_header.m_norb_distinct;});
+    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_info.m_norb_distinct;});
 }

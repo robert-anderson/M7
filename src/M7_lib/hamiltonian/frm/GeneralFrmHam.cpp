@@ -16,18 +16,15 @@
             GeneralFrmHam(FcidumpHeader(fname), spin_major, charge){}
  */
 
-GeneralFrmHam::GeneralFrmHam(const sys::frm::Basis &basis):
-        FrmHam(basis),
+GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
+        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}),
         m_int_1(m_basis.m_nsite, m_basis.m_spin_resolved),
-        m_int_2(m_basis.m_nsite, m_basis.m_spin_resolved) {
+        m_int_2(m_basis.m_nsite, m_basis.m_spin_resolved), m_info(info) {
     if (!m_basis.m_nsite) return;
+
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
-}
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major):
-        GeneralFrmHam({header.m_nsite, {PointGroup(), header.m_orbsym}, header.m_spin_resolved}){
-
-    FcidumpFileReader file_reader(header.m_fname, spin_major);
+    FcidumpFileReader file_reader(info.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
 
     using namespace ham_data;
@@ -61,7 +58,7 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpHeader& header, bool spin_major):
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
-        GeneralFrmHam({opts.m_ham.m_fcidump.m_path}, opts.m_ham.m_fcidump.m_spin_major) {}
+        GeneralFrmHam({FortranNamelistReader(opts.m_ham.m_fcidump.m_path)}, opts.m_ham.m_fcidump.m_spin_major) {}
 
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
     return m_int_1(a, i);
@@ -127,4 +124,12 @@ conn_foreach::base_list_t GeneralFrmHam::make_foreach_iters() const {
     else
         list.emplace_front(new conn_foreach::frm::General<2>);
     return list;
+}
+
+size_t GeneralFrmHam::default_nelec() const {
+    return m_info.m_nelec;
+}
+
+int GeneralFrmHam::default_ms2_value() const {
+    return m_info.m_ms2;
 }
