@@ -165,9 +165,9 @@ private:
     mutable suite::Conns m_work_conn;
 
     bool boson_number_conserve() const {
-        if (m_frmbos.m_contribs_1101.any_nonzero()) return true;
-        if (m_frmbos.m_contribs_1110.any_nonzero()) return true;
-        return false;
+        if (m_frmbos.m_contribs_1101.any_nonzero()) return false;
+        if (m_frmbos.m_contribs_1110.any_nonzero()) return false;
+        return true;
     }
 
     /**

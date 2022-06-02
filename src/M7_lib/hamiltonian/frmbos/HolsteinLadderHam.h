@@ -18,21 +18,9 @@ struct HolsteinLadderHam : FrmBosHam {
         m_contribs_1110.set_nonzero(exsig_utils::ex_0010);
     }
 
-    defs::ham_t get_coeff_0010(size_t imode) const override;
-
-    defs::ham_t get_coeff_0001(size_t imode) const override;
-
     defs::ham_t get_coeff_1110(size_t imode, size_t i, size_t j) const override;
 
     defs::ham_t get_coeff_1101(size_t imode, size_t i, size_t j) const override;
-
-    defs::ham_t get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
-
-    defs::ham_t get_element_0001(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
-
-    defs::ham_t get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
-
-    defs::ham_t get_element_0001(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 
     defs::ham_t get_element_1110(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const override;
 

@@ -96,10 +96,13 @@ TEST(DenseHamiltonian, Hubbard6Site) {
 
 TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
     HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    ASSERT_EQ(frm_ham.m_basis.m_nsite, 3ul);
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 0.0, 0);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.0);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
-    DenseHamiltonian ham(ham_src);
+    ASSERT_EQ(ham_src.m_basis.m_frm.m_nsite, 3ul);
+    auto particles = ham_src.default_particles(4);
+    DenseHamiltonian ham(ham_src, particles);
     std::vector<double> evals;
     dense::diag(ham, evals);
     ASSERT_TRUE(consts::nearly_equal(evals[0], 2.0, 1e-10));
