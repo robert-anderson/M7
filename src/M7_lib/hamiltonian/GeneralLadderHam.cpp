@@ -55,11 +55,11 @@ defs::ham_t GeneralLadderHam::get_coeff_1101(size_t imode, size_t i, size_t j) c
 }
 
 defs::ham_t GeneralLadderHam::get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    return m_v_unc[conn.m_cre[0].m_imode] * conn.occ_fac(onv);
+    return m_v_unc[conn.m_cre[0].m_imode] * onv.occ_fac(conn);
 }
 
 defs::ham_t GeneralLadderHam::get_element_0001(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    return m_v_unc[conn.m_ann[0].m_imode] * conn.occ_fac(onv);
+    return m_v_unc[conn.m_ann[0].m_imode] * onv.occ_fac(conn);
 }
 
 defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, size_t imode, bool cre) const {

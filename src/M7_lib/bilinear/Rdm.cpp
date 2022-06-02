@@ -90,7 +90,7 @@ void Rdm::make_contribs(const field::FrmBosOnv &src_onv, const conn::FrmBosOnv &
     if (decode_nbos(exsig)==1) {
         // "ladder" contribution
         m_lookup_inds = conn.m_bos;
-        auto occ_fac = conn.m_bos.occ_fac(src_onv.m_bos);
+        auto occ_fac = src_onv.m_bos.occ_fac(conn.m_bos);
         make_contribs(src_onv.m_frm, conn.m_frm, com.m_frm, contrib * occ_fac);
     }
 
