@@ -24,6 +24,7 @@ TEST(DenseHamiltonian, N2Rhf) {
     DenseHamiltonian hmat(ham);
     std::vector<defs::ham_t> evals;
     dense::diag(hmat, evals);
+    std::cout << evals[0] << std::endl;
     ASSERT_TRUE(consts::nearly_equal(evals[0], -108.916561245585, 1e-8));
 }
 

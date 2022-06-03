@@ -1,3 +1,4 @@
+target_sources(unittest PRIVATE defs.h)
 add_subdirectory(arnoldi)
 add_subdirectory(basis)
 add_subdirectory(bilinear)

@@ -6,6 +6,8 @@
 #define M7_GENERALFRMHAM_H
 
 #include "FrmHam.h"
+#include "M7_lib/integrals/Integrals_1e.h"
+#include "M7_lib/integrals/Integrals_2e.h"
 
 struct GeneralFrmHam : FrmHam {
 

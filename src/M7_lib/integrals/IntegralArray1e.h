@@ -9,20 +9,23 @@
 #include <M7_lib/defs.h>
 #include "IntegralArray.h"
 
-struct IntegralArray1e : IntegralArray {
-    std::vector<defs::ham_t> m_data;
+template<typename T>
+struct IntegralArray1e : IntegralArray<T> {
+    using typename IntegralArray<T>::real_t;
+    using typename IntegralArray<T>::cmplx_t;
+    typedef std::vector<real_t> real_array_t;
+    typedef std::vector<cmplx_t> cmplx_array_t;
+    std::vector<T> m_data;
 
-    IntegralArray1e(size_t norb, size_t size) :
-            IntegralArray(norb), m_data(size, 0.0) {}
+    IntegralArray1e(size_t norb, size_t size) : IntegralArray<T>(norb), m_data(size, 0.0) {}
 
 protected:
-    template<typename T>
-    static const T &get_data(const std::vector<T> &data, const size_t &iflat) {
+    static T get_data(const std::vector<T> &data, size_t iflat) {
         DEBUG_ASSERT_LT(iflat, data.size(), "flat 1e integral index OOB");
         return data[iflat];
     }
-    template<typename T>
-    void set_data(std::vector<T> &data, const size_t &iflat, const T& elem) {
+
+    void set_data(std::vector<T> &data, size_t iflat, T elem) {
         DEBUG_ASSERT_LT(iflat, data.size(), "flat 1e integral index OOB");
         auto& existing = data[iflat];
         REQUIRE_TRUE(existing==0.0 || consts::nearly_equal(existing, elem),
@@ -32,79 +35,90 @@ protected:
 
 
 private:
-    virtual void get(const size_t &i, const size_t &j,
-                     const std::vector<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const = 0;
+    virtual void ref_get(size_t i, size_t j, const real_array_t &data, real_t &elem) const = 0;
 
-    virtual void get(const size_t &i, const size_t &j,
-                     const std::vector<std::complex<defs::ham_comp_t>> &data,
-                     std::complex<defs::ham_comp_t> &elem) const = 0;
+    virtual void ref_get(size_t i, size_t j, const cmplx_array_t &data, cmplx_t &elem) const = 0;
 
-    virtual void set(const size_t &i, const size_t &j,
-                     std::vector<defs::ham_comp_t> &data, const defs::ham_comp_t &elem) = 0;
+    virtual void ref_set(size_t i, size_t j, real_array_t &data, const real_t &elem) = 0;
 
-    virtual void set(const size_t &i, const size_t &j,
-                     std::vector<std::complex<defs::ham_comp_t>> &data,
-                     const std::complex<defs::ham_comp_t> &elem) = 0;
+    virtual void ref_set(size_t i, size_t j, cmplx_array_t& data, const cmplx_array_t &elem) = 0;
 
 public:
-    defs::ham_t get(const size_t &i, const size_t &j) const {
+    T get(size_t i, size_t j) const {
         defs::ham_t elem;
-        get(i, j, m_data, elem);
+        ref_get(i, j, m_data, elem);
         return elem;
     }
 
-    void set(const size_t &i, const size_t &j, const defs::ham_t &elem) {
-        set(i, j, m_data, elem);
+    void set(size_t i, size_t j, const defs::ham_t &elem) {
+        ref_set(i, j, m_data, elem);
     }
 };
 
-struct IntegralArray1e_1fold : IntegralArray1e {
-    IntegralArray1e_1fold(size_t norb) : IntegralArray1e(norb, utils::pow<2>(norb)) {}
+template<typename T>
+struct IntegralArray1e_nosym : IntegralArray1e<T> {
+    using IntegralArray1e<T>::m_norb;
+    using typename IntegralArray1e<T>::real_t;
+    using typename IntegralArray1e<T>::real_array_t;
+    using typename IntegralArray1e<T>::cmplx_t;
+    using typename IntegralArray1e<T>::cmplx_array_t;
 
-    void get(const size_t &i, const size_t &j,
-             const std::vector<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const override {
-        elem = get_data(data, i * m_norb + j);
+    IntegralArray1e_nosym(size_t norb) : IntegralArray1e<T>(norb, utils::pow<2>(norb)) {}
+
+private:
+    size_t flatten(size_t i, size_t j) const {
+        return i * m_norb + j;
+    }
+protected:
+
+    void get(size_t i, size_t j, const real_array_t &data, real_t &elem) const override {
+        elem = get_data(data, flatten(i, j));
     }
 
-    void get(const size_t &i, const size_t &j,
-             const std::vector<std::complex<defs::ham_comp_t>> &data,
-             std::complex<defs::ham_comp_t> &elem) const override {
-        elem = get_data(data, i * m_norb + j);
+    void get(size_t i, size_t j, const cmplx_array_t &data, cmplx_t &elem) const override {
+        elem = get_data(data, flatten(i, j));
     }
 
-    void set(const size_t &i, const size_t &j, std::vector<defs::ham_comp_t> &data,
-             const defs::ham_comp_t &elem) override {
-        set_data(data, i * m_norb + j, elem);
+    void set(size_t i, size_t j, real_array_t &data, const real_t &elem) override {
+        set_data(data, flatten(i, j));
     }
 
-    void set(const size_t &i, const size_t &j, std::vector<std::complex<defs::ham_comp_t>> &data,
-             const std::complex<defs::ham_comp_t> &elem) override {
-        set_data(data, i * m_norb + j, elem);
+    void set(size_t i, size_t j, cmplx_array_t& data, const cmplx_t &elem) override {
+        set_data(data, flatten(i, j));
     }
 };
 
-struct IntegralArray1e_2fold : IntegralArray1e {
-    IntegralArray1e_2fold(size_t norb) : IntegralArray1e(norb, IntegralArray::trig(norb, 0)) {}
+template<typename T>
+struct IntegralArray1e_h : IntegralArray1e<T> {
+    using IntegralArrayBase::trig;
+    using IntegralArray1e<T>::m_norb;
+    using typename IntegralArray1e<T>::real_t;
+    using typename IntegralArray1e<T>::real_array_t;
+    using typename IntegralArray1e<T>::cmplx_t;
+    using typename IntegralArray1e<T>::cmplx_array_t;
 
-    void get(const size_t &i, const size_t &j,
-             const std::vector<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const override {
-        elem = get_data(data, i >= j ? trig(i, j) : trig(j, i));
+    IntegralArray1e_h(size_t norb) : IntegralArray1e<T>(norb, IntegralArrayBase::trig(norb, 0)) {}
+
+private:
+    size_t flatten(size_t i, size_t j) const {
+        return i >= j ? trig(i, j) : trig(j, i);
+    }
+protected:
+
+    void get(size_t i, size_t j, const real_array_t &data, real_t &elem) const override {
+        elem = get_data(data, flatten(i, j));
     }
 
-    void get(const size_t &i, const size_t &j,
-             const std::vector<std::complex<defs::ham_comp_t>> &data,
-             std::complex<defs::ham_comp_t> &elem) const override {
-        elem = (i >= j) ? get_data(data, trig(i, j)) : std::conj(get_data(data, trig(j, i)));
+    void get(size_t i, size_t j, const cmplx_array_t &data, cmplx_t &elem) const override {
+        elem = get_data(data, flatten(i, j));
     }
 
-    void set(const size_t &i, const size_t &j, std::vector<defs::ham_comp_t> &data,
-             const defs::ham_comp_t &elem) override {
-        i>=j ? set_data(data, trig(i, j), elem): set_data(data, trig(j, i), elem);
+    void set(size_t i, size_t j, real_array_t &data, const real_t &elem) override {
+        set_data(data, flatten(i, j), elem);
     }
 
-    void set(const size_t &i, const size_t &j, std::vector<std::complex<defs::ham_comp_t>> &data,
-             const std::complex<defs::ham_comp_t> &elem) override {
-        i>=j ? set_data(data, trig(i, j), elem): set_data(data, trig(j, i), std::conj(elem));
+    void set(size_t i, size_t j, cmplx_array_t &data, const cmplx_t &elem) override {
+        set_data(data, flatten(i, j), elem);
     }
 };
 

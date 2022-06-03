@@ -6,8 +6,9 @@
 #define M7_INTEGRALARRAY_H
 
 #include <cstdlib>
+#include "M7_lib/defs.h"
 
-struct IntegralArray {
+struct IntegralArrayBase {
     /**
      * "triangular" index mapping
      * @param i
@@ -52,7 +53,15 @@ struct IntegralArray {
      */
     const size_t m_norb;
 protected:
-    IntegralArray(size_t norb) : m_norb(norb){}
+    IntegralArrayBase(size_t norb) : m_norb(norb){}
+};
+
+
+template<typename T>
+struct IntegralArray: IntegralArrayBase {
+    typedef consts::comp_t<T> real_t;
+    typedef std::complex<real_t> cmplx_t;
+    IntegralArray(size_t norb): IntegralArrayBase(norb) {}
 };
 
 #endif //M7_INTEGRALARRAY_H
