@@ -59,13 +59,16 @@ namespace bos_onv_connection_test {
             }
             if (noccur) com.add(imode, noccur);
         }
-        conn.m_cre.from_vector(icres);
-        conn.m_ann.from_vector(ianns);
-        DEBUG_ASSERT_EQ(conn.m_cre.to_vector(), icres, "incorrect connection encoding");
-        DEBUG_ASSERT_EQ(conn.m_ann.to_vector(), ianns, "incorrect connection encoding");
+        conn.m_cre.set(icres);
+        conn.m_ann.set(ianns);
+        DEBUG_ASSERT_EQ(conn.m_cre.get(), icres, "incorrect connection encoding");
+        DEBUG_ASSERT_EQ(conn.m_ann.get(), ianns, "incorrect connection encoding");
 
-        auto occ_fac = conn.occ_fac_square(src, com);
-        //DEBUG_ASSERT_EQ(chk, occ_fac, "occ fac mismatch");
+        auto occ_fac = src.occ_fac_square(conn, com);
+        if (!conn.size()) {
+            // diagonal occ facs have another method which doesn't require the BosOnvConnection:
+            return (chk==occ_fac) && (chk==src.occ_fac_square(com));
+        }
         return chk==occ_fac;
     }
 
@@ -172,6 +175,16 @@ TEST(BosonOnvConnection, DoubleChange) {
             }
         }
     }
+}
+
+TEST(BosonOnvConnection, OccFac_0000) {
+    const size_t nmode = 8;
+    buffered::BosOnv mbf(nmode);
+    mbf = {3, 4, 1, 2, 0, 5, 0, 2};
+    conn::BosOnv conn(nmode);
+    using namespace bos_onv_connection_test;
+    CreForeach foreach(nmode, 0, 0, mbf);
+    foreach.loop();
 }
 
 TEST(BosonOnvConnection, OccFac_0001) {

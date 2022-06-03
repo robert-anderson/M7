@@ -30,3 +30,4 @@ struct GeneralBosHam : BosHam {
 };
 
 #endif //M7_GENERALBOSHAM_H
+

@@ -7,7 +7,9 @@
 
 #include <array>
 
+#ifndef OMPI_SKIP_MPICXX
 #define OMPI_SKIP_MPICXX
+#endif
 
 #include <mpi.h>
 // we don't use the C++ MPI bindings

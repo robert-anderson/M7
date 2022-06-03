@@ -4,24 +4,27 @@
 
 #include "Mbf.h"
 
-void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, const FrmHam& ham) {
+    auto nalpha = ci_utils::nalpha(ham.m_nelec, ham.m_ms2_restrict);
+    auto nbeta = ci_utils::nbeta(ham.m_nelec, ham.m_ms2_restrict);
+    DEBUG_ASSERT_EQ(nalpha + nbeta, ham.m_nelec, "inconsistent na, nb, nelec");
     onv.zero();
     for (size_t i = 0ul; i < elecs.m_nalpha; ++i) onv.set({0, i});
     for (size_t i = 0ul; i < elecs.m_nbeta; ++i) onv.set({1, i});
 }
 
-void mbf::set_aufbau_mbf(field::FrmOnv &onv, sys::Particles particles) {
-    set_aufbau_mbf(onv, particles.m_frm);
-}
-
-void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons) {
+void mbf::set_aufbau_mbf(field::BosOnv &onv, const BosHam& ham) {
     if (!onv.nelement()) return;
     onv.zero();
-    onv[0] = bosons;
+    onv[0] = ham.m_nboson;
 }
 
-void mbf::set_aufbau_mbf(field::BosOnv &onv, sys::Particles particles) {
-    set_aufbau_mbf(onv, particles.m_bos);
+void mbf::set_aufbau_mbf(field::FrmOnv &onv, const Hamiltonian& ham) {
+    set_aufbau_mbf(onv, *ham.m_frm);
+}
+
+void mbf::set_aufbau_mbf(field::BosOnv &onv, const Hamiltonian& ham) {
+    set_aufbau_mbf(onv, *ham.m_bos);
 }
 
 void mbf::set_neel_mbf(field::FrmOnv &onv, sys::frm::Electrons elecs) {

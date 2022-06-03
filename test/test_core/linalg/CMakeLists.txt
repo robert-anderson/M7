@@ -4,4 +4,5 @@ target_sources(unittest
         DenseHamiltonian.cpp
         DistMvProd.cpp
         Sparse.cpp
+        DenseTcFermionHamiltonian.cpp
 )

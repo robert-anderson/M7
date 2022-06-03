@@ -21,7 +21,6 @@ bool LadderHoppingUniform::draw_frmbos(const size_t &exsig, const FrmBosOnv &src
     auto n = m_prng.draw_uint(m_bd.m_bos.m_nmode);
     conn.m_bos.clear();
     if (cre) {
-        if (src.m_bos[n] == m_h.nboson_max()) return false;
         conn.m_bos.m_cre.set(n);
     }
     else {

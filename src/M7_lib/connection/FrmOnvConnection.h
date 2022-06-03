@@ -72,6 +72,12 @@ public:
         add(m_sites.ispinorb(pair));
     }
 
+    void set(const defs::inds& orbs, const defs::inds& inds) {
+        clear();
+        for (const auto& ind: inds) add(orbs[ind]);
+        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
+    }
+
     void set(size_t ibit){
         clear();
         add(ibit);

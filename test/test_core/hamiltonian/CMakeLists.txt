@@ -7,4 +7,6 @@ target_sources(unittest
         HeisenbergFrmHam.cpp
         InteractingBoseGasBosHam.cpp
         SpinSquareFrmHam.cpp
+        TranscorrelatedFermionHamiltonian.cpp
+        TranscorrelatedHamiltonian.cpp
 )

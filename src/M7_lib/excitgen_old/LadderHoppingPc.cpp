@@ -48,7 +48,6 @@ bool LadderHoppingPc::draw_frmbos(const size_t &exsig, const FrmBosOnv &src, Cac
     auto n = m_pick_n_given_pq.draw(pq, m_prng);
     conn.m_bos.clear();
     if (cre) {
-        if (src.m_bos[n] == m_h.m_bd.m_bos.m_nboson_max) return false;
         conn.m_bos.m_cre.set(n);
     }
     else {

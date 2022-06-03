@@ -7,7 +7,6 @@ target_sources(M7_lib
         HamOpTerm.cpp
         HamOpTerm.h
 )
-
 add_subdirectory(bos)
 add_subdirectory(frm)
 add_subdirectory(frmbos)

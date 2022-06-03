@@ -81,7 +81,7 @@ namespace defs {
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     const size_t isym_1e = 2;
-    const size_t isym_2e = 8;
+    const size_t isym_2e = 1;
     /**
      * Hamiltonian-parametrising coefficients with magnitude below this value are considered to be zero, and wherever
      * equality between such values is to be asserted, this same tolerance is applied

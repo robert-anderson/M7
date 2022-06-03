@@ -16,7 +16,7 @@ const std::vector<BosOpPair> &BosOps::pairs() const {
     return m_pairs;
 }
 
-defs::inds BosOps::to_vector() const {
+defs::inds BosOps::get() const {
     defs::inds vec;
     vec.reserve(size());
     for (auto& pair: m_pairs) {
@@ -26,7 +26,7 @@ defs::inds BosOps::to_vector() const {
     return vec;
 }
 
-void BosOps::from_vector(const defs::inds &imodes) {
+void BosOps::set(const defs::inds &imodes) {
     clear();
     if (imodes.empty()) return;
     size_t istart = 0;
@@ -69,15 +69,6 @@ void BosOps::set(const size_t &imode) {
     add(imode, 1ul);
 }
 
-void BosOps::set(const size_t &imode, const size_t &jmode) {
-    clear();
-    if (imode==jmode) add(imode, 2ul);
-    else {
-        add(imode, 1l);
-        add(jmode, 1l);
-    };
-}
-
 const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
     return m_pairs[ipair];
@@ -90,6 +81,47 @@ size_t BosOps::get_imode(size_t iop) const {
         iop-=pair.m_nop;
     }
     return ~0ul;
+}
+
+void BosOps::set(size_t i) {
+    clear();
+    add({i, 1ul});
+}
+
+void BosOps::set(size_t i, size_t j) {
+    clear();
+    DEBUG_ASSERT_LE(i, j, "ops must be in ascending order");
+    if (i==j) add({i, 2});
+    else {
+        add({i, 1});
+        add({j, 1});
+    }
+}
+
+void BosOps::set(size_t i, size_t j, size_t k) {
+    clear();
+    DEBUG_ASSERT_LE(i, j, "ops must be in ascending order");
+    DEBUG_ASSERT_LE(j, k, "ops must be in ascending order");
+    if (i==j) {
+        if (j==k) {
+            add({i, 3});
+        }
+        else {
+            add({i, 2});
+            add({k, 1});
+        }
+    }
+    else {
+        if (j==k) {
+            add({i, 1});
+            add({j, 2});
+        }
+        else {
+            add({i, 1});
+            add({j, 1});
+            add({k, 1});
+        }
+    }
 }
 
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
@@ -228,4 +260,3 @@ size_t BosOnvConnection::occ_fac_square(const BosOnvField &src, const BosOps &co
 
 double BosOnvConnection::occ_fac(const BosOnvField &src, const BosOps &com) const {
     return std::sqrt(double(occ_fac_square(src, com)));
-}

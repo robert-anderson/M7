@@ -15,6 +15,10 @@
 
 namespace mbf {
 
+    void set_aufbau_mbf(field::FrmOnv &onv, const FrmHam& ham);
+
+    void set_aufbau_mbf(field::BosOnv &onv, const BosHam& ham);
+
     /**
      * set the referenced ONV object to the assumed Hartree--Fock determinant within the sector specified by the
      * elecs argument
@@ -28,7 +32,6 @@ namespace mbf {
      */
     void set_aufbau_mbf(field::BosOnv &onv, sys::bos::Bosons bosons);
     void set_aufbau_mbf(field::BosOnv &onv, sys::Particles particles);
-
 
     /**
      * set the referenced ONV object to the "anti-ferromagnetic" configuration
