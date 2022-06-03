@@ -77,7 +77,7 @@ TEST(DenseHamiltonian, Hubbard3Site) {
 }
 
 TEST(DenseHamiltonian, Hubbard4Site) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {4}, {0}}));
     Hamiltonian ham(&frm_ham);
     std::vector<double> evals;
     DenseHamiltonian hmat(ham);

@@ -18,13 +18,6 @@ struct GeneralLadderHam : FrmBosHam {
      *  "hopping coupled" (1110, 1101)
      */
     FrmBosCoupledCoeffs m_v;
-    /**
-     * coefficients for "uncoupled" ranksigs 0010, 0001. only contributing exsigs are "uncoupled" (0010, 0001)
-     *
-     * density-coupled and uncoupled excitations have the same exsig, collectively they will be called "pure" bosonic
-     * excitations / de-excitations, as opposed to the fermion-coupled "hopping" exsigs
-     */
-    std::vector<defs::ham_t> m_v_unc;
 
     GeneralLadderHam(const EbdumpInfo& info, bool spin_major, size_t bos_occ_cutoff=defs::max_bos_occ);
 
@@ -32,17 +25,9 @@ struct GeneralLadderHam : FrmBosHam {
         GeneralLadderHam(EbdumpInfo(opts.m_ham.m_ebdump.m_path),
                 opts.m_ham.m_ebdump.m_spin_major, opts.m_basis.m_bos_occ_cutoff){}
 
-    defs::ham_t get_coeff_0010(size_t imode) const override;
-
-    defs::ham_t get_coeff_0001(size_t imode) const override;
-
     defs::ham_t get_coeff_1110(size_t imode, size_t i, size_t j) const override;
 
     defs::ham_t get_coeff_1101(size_t imode, size_t i, size_t j) const override;
-
-    defs::ham_t get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
-
-    defs::ham_t get_element_0001(const field::BosOnv &onv, const conn::BosOnv &conn) const override;
 
 
     defs::ham_t get_element_pure(const field::FrmBosOnv &onv, size_t imode, bool cre) const;

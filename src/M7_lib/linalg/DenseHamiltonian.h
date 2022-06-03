@@ -45,11 +45,11 @@ class DenseHamiltonian : public dense::SquareMatrix<defs::ham_t> {
     size_t nrow(const Hamiltonian& h, sys::Particles particles, bool force_general);
 
     template<typename mbf_t>
-    void loop_over_pair_iterator(PairBase* foreach, const Hamiltonian& h){
+    void loop_over_pair_iterator(PairBase* foreach, const Hamiltonian& h, mbf_t& work_bra, mbf_t& work_ket){
         auto fn = [this, &h](const mbf_t &bra, size_t ibra, const mbf_t &ket, size_t iket) {
             (*this)(ibra, iket) = h.get_element(bra, ket);
         };
-        foreach->loop(fn);
+        foreach->loop(work_bra, work_ket, fn);
     }
 
 public:

@@ -4,41 +4,39 @@
 
 #include "MbfForeach.h"
 
-mbf_foreach::Base::Base(const sys::Sector& sector, size_t niter) :
-    m_sector(sector), m_niter(niter), m_mbfs(m_sector) {}
+mbf_foreach::Base::Base(size_t niter) : m_niter(niter) {}
 
 void mbf_foreach::Base::loop(field::FrmOnv &mbf, const mbf_foreach::Base::function_t<field::FrmOnv> &fn) {
     frm_loop(mbf, fn);
 }
 
-void mbf_foreach::Base::loop(const mbf_foreach::Base::function_t<field::FrmOnv> &fn) {
-    loop(m_mbfs.m_row.m_frm, fn);
-}
-
 void mbf_foreach::Base::loop(field::BosOnv& mbf, const mbf_foreach::Base::function_t<field::BosOnv> &fn) {
     bos_loop(mbf, fn);
-}
-void mbf_foreach::Base::loop(const mbf_foreach::Base::function_t<field::BosOnv> &fn) {
-    loop(m_mbfs.m_row.m_bos, fn);
 }
 
 void mbf_foreach::Base::loop(field::FrmBosOnv& mbf, const mbf_foreach::Base::function_t<field::FrmBosOnv> &fn) {
     frmbos_loop(mbf, fn);
 }
-void mbf_foreach::Base::loop(const mbf_foreach::Base::function_t<field::FrmBosOnv> &fn) {
-    loop(m_mbfs.m_row.m_frmbos, fn);
-}
 
 mbf_foreach::PairBase::PairBase(size_t nrow) : m_nrow(nrow), m_niter(nrow * nrow) {}
 
-void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::FrmOnv> &fn) { frm_loop(fn); }
+void mbf_foreach::PairBase::loop(field::FrmOnv &bra, field::FrmOnv &ket,
+                                 const mbf_foreach::PairBase::function_t<field::FrmOnv> &fn) {
+    frm_loop(bra, ket   , fn);
+}
 
-void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::BosOnv> &fn) { bos_loop(fn); }
+void mbf_foreach::PairBase::loop(field::BosOnv &bra, field::BosOnv &ket,
+                                 const mbf_foreach::PairBase::function_t<field::BosOnv> &fn) {
+    bos_loop(bra, ket, fn);
+}
 
-void mbf_foreach::PairBase::loop(const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) { frmbos_loop(fn); }
+void mbf_foreach::PairBase::loop(field::FrmBosOnv &bra, field::FrmBosOnv &ket,
+                                 const mbf_foreach::PairBase::function_t<field::FrmBosOnv> &fn) {
+    frmbos_loop(bra, ket, fn);
+}
 
 mbf_foreach::frm::Base::Base(const sys::frm::Sector& sector, size_t niter):
-    mbf_foreach::Base(sys::Sector(sector), niter) {}
+    mbf_foreach::Base(niter), m_sector(sector) {}
 
 mbf_foreach::frm::General::General(const sys::frm::Sector& sector):
         Base(sector, foreach_t::niter(sector.m_basis.m_nspinorb, sector.m_elecs)),
@@ -72,7 +70,7 @@ void mbf_foreach::frm::Ms2Conserve::frm_loop(field::FrmOnv& mbf, const std::func
 }
 
 mbf_foreach::bos::Base::Base(const sys::bos::Sector& sector, size_t niter) :
-    mbf_foreach::Base(sys::Sector(sector), niter){}
+    mbf_foreach::Base(niter), m_sector(sector){}
 
 mbf_foreach::bos::GeneralClosed::GeneralClosed(const sys::bos::Sector& sector) :
         Base(sector, foreach_t::niter(sector.m_basis.m_nmode, sector.m_bosons)),
@@ -92,4 +90,4 @@ void mbf_foreach::bos::GeneralOpen::bos_loop(field::BosOnv &mbf, const std::func
     loop_fn(mbf, fn);
 }
 
-mbf_foreach::frm_bos::Base::Base(const sys::Sector& sector, size_t niter) : mbf_foreach::Base(sector, niter) {}
+mbf_foreach::frm_bos::Base::Base(const sys::Sector& sector, size_t niter) : mbf_foreach::Base(niter) {}

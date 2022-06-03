@@ -7,8 +7,7 @@
 
 GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, size_t bos_occ_cutoff) :
         FrmBosHam({{info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}, {info.m_nmode, bos_occ_cutoff}}),
-        m_v(m_basis.size(), info.m_uhf),
-        m_v_unc(m_basis.m_bos.m_nmode, 0.0) {
+        m_v(m_basis.size(), info.m_uhf) {
     if (!m_basis) return;
     REQUIRE_EQ(bool(m_basis.m_frm), bool(m_basis.m_bos),
                "if the number of sites is non-zero, so also must be the number of boson modes. "
@@ -34,14 +33,6 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, size
     log_data();
 }
 
-defs::ham_t GeneralLadderHam::get_coeff_0010(size_t imode) const {
-    return m_v_unc[imode];
-}
-
-defs::ham_t GeneralLadderHam::get_coeff_0001(size_t imode) const {
-    return m_v_unc[imode];
-}
-
 defs::ham_t GeneralLadderHam::get_coeff_1110(size_t imode, size_t i, size_t j) const {
     return m_v.get(imode, i, j);
 }
@@ -50,23 +41,15 @@ defs::ham_t GeneralLadderHam::get_coeff_1101(size_t imode, size_t i, size_t j) c
     return m_v.get(imode, j, i);
 }
 
-defs::ham_t GeneralLadderHam::get_element_0010(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    return m_v_unc[conn.m_cre[0].m_imode] * conn.occ_fac(onv);
-}
-
-defs::ham_t GeneralLadderHam::get_element_0001(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    return m_v_unc[conn.m_ann[0].m_imode] * conn.occ_fac(onv);
-}
-
 defs::ham_t GeneralLadderHam::get_element_pure(const field::FrmBosOnv &onv, size_t imode, bool cre) const {
     const auto occ_fac = std::sqrt(size_t(onv.m_bos[imode]) + cre);
-    defs::ham_t res = m_v_unc[imode];
+    defs::ham_t helem = 0.0;
     // fermion ONVs do not differ, so sum over occupied spin orbitals
     auto fn = [&](size_t i) {
-        res += m_v.get(imode, i, i);
+        helem += m_v.get(imode, i, i);
     };
     onv.m_frm.foreach_setbit(fn);
-    return res * occ_fac;
+    return helem * occ_fac;
 }
 
 defs::ham_t GeneralLadderHam::get_element_0010(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {

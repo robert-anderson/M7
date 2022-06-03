@@ -101,12 +101,22 @@ size_t DenseHamiltonian::nrow(const Hamiltonian &h, sys::Particles particles, bo
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, sys::Particles particles, bool force_general) :
         dense::SquareMatrix<defs::ham_t>(nrow(h, particles, force_general)) {
     auto ptr = make_pair_iterator(h, particles, force_general);
-    /*
-     * only one of the virtual methods will be overridden to a non-empty loop so they can all be called
-     */
-    loop_over_pair_iterator<field::FrmOnv>(ptr.get(), h);
-    loop_over_pair_iterator<field::BosOnv>(ptr.get(), h);
-    loop_over_pair_iterator<field::FrmBosOnv>(ptr.get(), h);
+
+    if (h.m_basis.m_frm && h.m_basis.m_bos) {
+        buffered::FrmBosOnv bra(h.m_basis);
+        auto ket = bra;
+        loop_over_pair_iterator(ptr.get(), h, bra, ket);
+    }
+    else if (h.m_basis.m_frm) {
+        buffered::FrmOnv bra(h.m_basis.m_frm);
+        auto ket = bra;
+        loop_over_pair_iterator(ptr.get(), h, bra, ket);
+    }
+    else if (h.m_basis.m_bos) {
+        buffered::BosOnv bra(h.m_basis.m_bos);
+        auto ket = bra;
+        loop_over_pair_iterator(ptr.get(), h, bra, ket);
+    }
 }
 
 DenseHamiltonian::DenseHamiltonian(const Hamiltonian &h, bool force_general) :

@@ -270,6 +270,9 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
 }
 
 defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const {
+    return 0.0;
+    // TODO: update for new HamOpTerm partitioning
+#if 0
     if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig];
     REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,
@@ -301,6 +304,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exs
     auto e = (e_uncoupled + e_coupled) / m_total_norm.m_reduced;
     REQUIRE_NEARLY_EQ(consts::imag(e), 0.0, 1e-12, "energy should be purely real");
     return consts::real(e);
+#endif
 }
 
 defs::ham_comp_t Rdms::get_energy(const BosHam &ham) const {
