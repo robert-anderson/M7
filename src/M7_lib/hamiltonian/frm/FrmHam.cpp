@@ -27,6 +27,8 @@ defs::ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &co
             return get_element_1100(onv, conn);
         case 4:
             return get_element_2200(onv, conn);
+        case 6:
+            return get_element_3300(onv, conn);
         default:
             return 0.0;
     }

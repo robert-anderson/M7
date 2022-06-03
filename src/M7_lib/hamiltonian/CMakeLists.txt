@@ -6,6 +6,8 @@ target_sources(M7_lib
         HamiltonianData.h
         HamOpTerm.cpp
         HamOpTerm.h
+        TcHam.cpp
+        TcHam.h
 )
 add_subdirectory(bos)
 add_subdirectory(frm)

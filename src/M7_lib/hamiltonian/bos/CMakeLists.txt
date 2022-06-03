@@ -6,4 +6,6 @@ target_sources(M7_lib
         GeneralBosHam.h
         NumOpBosHam.cpp
         NumOpBosHam.h
+        TcBosHam.cpp
+        TcBosHam.h
 )

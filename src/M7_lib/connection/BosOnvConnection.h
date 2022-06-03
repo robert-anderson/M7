@@ -69,8 +69,6 @@ public:
      */
     void set(size_t i, size_t j, size_t k);
 
-    void add(BosOpPair&& pair);
-
     void add(size_t imode, size_t nop);
 
     /**

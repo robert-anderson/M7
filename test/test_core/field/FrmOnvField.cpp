@@ -86,11 +86,7 @@ TEST(FrmOnvField, ForeachSetBitPair) {
 TEST(FrmOnvField, ForeachSetBitTriple) {
     const size_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-<<<<<<< HEAD
     auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_basis.m_nspinorb, true);
-=======
-    auto setbits = hashing::unique_in_range(0, 64, 0, mbf.m_nspinorb, true);
->>>>>>> tchint_plugin
     mbf = setbits;
 
     /*

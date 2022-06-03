@@ -99,6 +99,7 @@ public:
 	virtual ~FrmHam(){}
 
     /**
+     * coefficient of the "1-body" term
      * @param a
      *  creation spin orbital index
      * @param i
@@ -108,6 +109,7 @@ public:
      */
     virtual defs::ham_t get_coeff_1100(size_t a, size_t i) const {return 0;}
     /**
+     * coefficient of the "2-body" term
      * @param a
      *  creation spin orbital index
      * @param b
@@ -120,6 +122,24 @@ public:
      *  two-electron coefficient of H given by the 4D array U
      */
     virtual defs::ham_t get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {return 0;}
+    /**
+     * coefficient of the "3-body" term
+     * @param a
+     *  creation spin orbital index
+     * @param b
+     *  creation spin orbital index (b > a)
+     * @param c
+     *  creation spin orbital index (c > b)
+     * @param i
+     *  annihilation spin orbital index
+     * @param j
+     *  annihilation spin orbital index (j > i)
+     * @param k
+     *  annihilation spin orbital index (k > j)
+     * @return
+     *  three-electron coefficient of H given by the 6D array L
+     */
+    virtual defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const {return 0;}
     /**
      * @param onv
      *  fermionic occupation number vector (Slater determinant)

@@ -64,11 +64,6 @@ void BosOps::add(size_t imode, size_t nop){
     m_nop += nop;
 }
 
-void BosOps::set(const size_t &imode) {
-    clear();
-    add(imode, 1ul);
-}
-
 const BosOpPair &BosOps::operator[](const size_t &ipair) const {
     DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
     return m_pairs[ipair];
@@ -85,16 +80,16 @@ size_t BosOps::get_imode(size_t iop) const {
 
 void BosOps::set(size_t i) {
     clear();
-    add({i, 1ul});
+    add(i, 1ul);
 }
 
 void BosOps::set(size_t i, size_t j) {
     clear();
     DEBUG_ASSERT_LE(i, j, "ops must be in ascending order");
-    if (i==j) add({i, 2});
+    if (i==j) add(i, 2);
     else {
-        add({i, 1});
-        add({j, 1});
+        add(i, 1);
+        add(j, 1);
     }
 }
 
@@ -104,22 +99,22 @@ void BosOps::set(size_t i, size_t j, size_t k) {
     DEBUG_ASSERT_LE(j, k, "ops must be in ascending order");
     if (i==j) {
         if (j==k) {
-            add({i, 3});
+            add(i, 3);
         }
         else {
-            add({i, 2});
-            add({k, 1});
+            add(i, 2);
+            add(k, 1);
         }
     }
     else {
         if (j==k) {
-            add({i, 1});
-            add({j, 2});
+            add(i, 1);
+            add(j, 2);
         }
         else {
-            add({i, 1});
-            add({j, 1});
-            add({k, 1});
+            add(i, 1);
+            add(j, 1);
+            add(k, 1);
         }
     }
 }
@@ -195,68 +190,3 @@ bool BosOnvConnection::respects_occ_range(const BosOnvField &src, size_t nboson_
     for (auto& pair: m_ann.pairs()) if (src[pair.m_imode] < pair.m_nop) return false;
     return true;
 }
-
-size_t BosOnvConnection::occ_fac_square(const BosOnvField &src) const {
-    size_t fac = 1;
-    for (auto& pair : m_ann.pairs()) {
-        for (size_t i=0ul; i<pair.m_nop; ++i) fac*= src[pair.m_imode] - i;
-    }
-    for (auto& pair : m_cre.pairs()) {
-        for (size_t i=1ul; i<=pair.m_nop; ++i) fac*= src[pair.m_imode] + i;
-    }
-    return fac;
-}
-
-double BosOnvConnection::occ_fac(const BosOnvField &src) const {
-    return std::sqrt(double(occ_fac_square(src)));
-}
-
-size_t BosOnvConnection::occ_fac_square_com(const size_t &occ, const size_t &nop_com) {
-    size_t fac = 1;
-    for (size_t i=0ul; i<nop_com; ++i){
-        auto com_fac = occ-i;
-        fac*=com_fac*com_fac;
-    }
-    return fac;
-}
-
-size_t BosOnvConnection::occ_fac_square(const BosOnvField &src, const BosOps &com) const {
-    size_t fac = 1;
-    size_t icom = 0;
-    auto ncom = com.pairs().size();
-    /*
-     * loop over bosonic annihilations
-     */
-    for (auto& pair : m_ann.pairs()) {
-        for (size_t i=0ul; i<pair.m_nop; ++i) {
-            fac*= src[pair.m_imode] - i;
-            if (icom<ncom){
-                // there are common operator modes remaining
-                if (com[icom].m_imode==pair.m_imode) {
-                    // the current common operator mode is the same as the one just annihilated
-                    fac*= occ_fac_square_com((src[pair.m_imode] - i) - 1, com[icom].m_nop);
-                    ++icom;
-                }
-                else if (com[icom].m_imode<pair.m_imode) {
-                    // the current common operator mode can't be in the annihilated array, since it's been skipped over
-                    fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
-                    ++icom;
-                }
-            }
-        }
-    }
-    // only the annihilation part is affected by the common operators in normal ordering: do the creation ops as normal
-    for (auto& pair : m_cre.pairs()) {
-        for (size_t i=1ul; i<=pair.m_nop; ++i) {
-            fac*= src[pair.m_imode] + i;
-        }
-    }
-    // do the rest of the common orbs that were not reached in the loop over annihilations
-    for (;icom < ncom; ++icom) {
-        fac*= occ_fac_square_com(src[com[icom].m_imode], com[icom].m_nop);
-    }
-    return fac;
-}
-
-double BosOnvConnection::occ_fac(const BosOnvField &src, const BosOps &com) const {
-    return std::sqrt(double(occ_fac_square(src, com)));

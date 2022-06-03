@@ -6,18 +6,16 @@
 #define M7_TCFRMHAM_H
 
 #include "GeneralFrmHam.h"
-#include "TcHam.h"
+#include "M7_lib/hamiltonian/TcHam.h"
 
 
 struct TcFrmHam : TcHam, GeneralFrmHam {
-    explicit TcFrmHam(const fciqmc_config::FermionHamiltonian &opts)
-        : TcHam(), GeneralFrmHam(opts) {}
 
-    TcFrmHam(std::string fcidump_fname, bool spin_major, int charge = 0)
-        : TcHam(), GeneralFrmHam(fcidump_fname, spin_major, charge) {};
+    TcFrmHam(const FcidumpInfo& info, bool spin_major): TcHam(), GeneralFrmHam(info, spin_major) {};
 
-    defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c, size_t i,
-                               size_t j, size_t k) const override;
+    explicit TcFrmHam(opt_pair_t opts): TcHam(), GeneralFrmHam(opts) {}
+
+    defs::ham_t get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const override;
 
     defs::ham_t get_element_3300(const field::FrmOnv &onv,
                                  const conn::FrmOnv &conn) const override;

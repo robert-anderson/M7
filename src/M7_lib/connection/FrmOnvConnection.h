@@ -72,9 +72,19 @@ public:
         add(m_sites.ispinorb(pair));
     }
 
-    void set(const defs::inds& orbs, const defs::inds& inds) {
+    /**
+     * set a selection of spin orbital indices
+     * @param orbs
+     *  spin orbital indices
+     * @param inds
+     *  positions in the orbs vector of the selected spin orbitals
+     */
+    void set_selection(const defs::inds& orbs, const defs::inds& inds) {
         clear();
-        for (const auto& ind: inds) add(orbs[ind]);
+        for (const auto& ind: inds) {
+            DEBUG_ASSERT_LT(ind, orbs.size(), "index OOB");
+            add(orbs[ind]);
+        }
         DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
     }
 

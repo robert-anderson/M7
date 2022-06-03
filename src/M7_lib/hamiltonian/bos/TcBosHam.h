@@ -10,7 +10,7 @@
 #define M7_TCBOSHAM_H
 
 #include "GeneralBosHam.h"
-#include "TcHam.h"
+#include "M7_lib/hamiltonian/TcHam.h"
 
 struct TcBosHam : TcHam, GeneralBosHam {
     // as in the Fermion case, need to write a get_coeff_0033 method and also
@@ -18,8 +18,7 @@ struct TcBosHam : TcHam, GeneralBosHam {
     // "folded in"
     // note we do not ned to rewrite the get_coeff methods as we have a K+U
     // FCIDUMP file
-    explicit TcBosHam(const fciqmc_config::BosonHamiltonian &opts)
-        : TcHam(), GeneralBosHam(opts) {}
+    explicit TcBosHam(opt_pair_t opts) : TcHam(), GeneralBosHam(opts) {}
 
     /**
      * @brief Get the coeff of type 0033 (Bosonic "triple excitation")

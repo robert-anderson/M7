@@ -4,21 +4,20 @@
 
 #include "TcFrmHam.h"
 
-defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i,
-                                     size_t j, size_t k) const {
-    auto ia = FrmOnvField::isite(a, m_nsite);
-    auto ib = FrmOnvField::isite(b, m_nsite);
-    auto ic = FrmOnvField::isite(c, m_nsite);
-    auto ii = FrmOnvField::isite(i, m_nsite);
-    auto ij = FrmOnvField::isite(j, m_nsite);
-    auto ik = FrmOnvField::isite(k, m_nsite);
+defs::ham_t TcFrmHam::get_coeff_3300(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const {
+    auto ia = m_basis.isite(a);
+    auto ib = m_basis.isite(b);
+    auto ic = m_basis.isite(c);
+    auto ii = m_basis.isite(i);
+    auto ij = m_basis.isite(j);
+    auto ik = m_basis.isite(k);
     // check spin conservation
-    auto ma = FrmOnvField::ispin(a, m_nsite);
-    auto mb = FrmOnvField::ispin(b, m_nsite);
-    auto mc = FrmOnvField::ispin(c, m_nsite);
-    auto mi = FrmOnvField::ispin(i, m_nsite);
-    auto mj = FrmOnvField::ispin(j, m_nsite);
-    auto mk = FrmOnvField::ispin(k, m_nsite);
+    auto ma = m_basis.ispin(a);
+    auto mb = m_basis.ispin(b);
+    auto mc = m_basis.ispin(c);
+    auto mi = m_basis.ispin(i);
+    auto mj = m_basis.ispin(j);
+    auto mk = m_basis.ispin(k);
     defs::ham_t coeff = 0.0;
     auto add_contrib = [&](size_t mp, size_t mq, size_t mr, size_t ip,
                            size_t iq, size_t ir, int sgn) {

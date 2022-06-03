@@ -28,16 +28,18 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      */
     mutable decoded_mbf::BosOnv m_decoded;
 
-    BosOnvField(Row *row, const sys::bos::Basis& basis, std::string name = "");
+    BosOnvField(Row *row, const sys::bos::Basis &basis, std::string name = "");
+
     /*
      * all ONVs implement the following ctor
      */
-    BosOnvField(Row* row, const sys::Basis& basis, std::string name="");
+    BosOnvField(Row *row, const sys::Basis &basis, std::string name = "");
+
     /*
      * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
      * a common interface is realised by implementing a ctor of the following form in all MBFs
      */
-    BosOnvField(Row *row, const sys::Sector& hs, std::string name = "");
+    BosOnvField(Row *row, const sys::Sector &hs, std::string name = "");
 
     BosOnvField(const BosOnvField &other);
 
@@ -67,9 +69,9 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      * @param src
      * @return
      */
-    size_t occ_fac_square(const BosOnvConnection& conn) const;
+    size_t occ_fac_square(const BosOnvConnection &conn) const;
 
-    double occ_fac(const BosOnvConnection& conn) const;
+    double occ_fac(const BosOnvConnection &conn) const;
 
 private:
     /**
@@ -81,6 +83,7 @@ private:
      *  square of the occupation factor associated with the annihilation
      */
     static size_t occ_fac_square_ann(size_t occ, size_t nop);
+
     /**
      * @param occ
      *  occupation of the mode
@@ -90,6 +93,7 @@ private:
      *  square of the occupation factor associated with the creation
      */
     static size_t occ_fac_square_cre(size_t occ, size_t nop);
+
     /**
      * @param occ
      *  occupation of the mode
@@ -114,9 +118,9 @@ public:
      * @param com
      * @return
      */
-    size_t occ_fac_square(const BosOnvConnection& conn, const BosOps& com) const;
+    size_t occ_fac_square(const BosOnvConnection &conn, const BosOps &com) const;
 
-    double occ_fac(const BosOnvConnection& conn, const BosOps& com) const;
+    double occ_fac(const BosOnvConnection &conn, const BosOps &com) const;
 
     /**
      * same as calling occ_fac_square on an empty BosOnvConnection (but avoids the need to allocate the connection)
@@ -125,9 +129,10 @@ public:
      * @return
      *  diagonal occupation factor
      */
-    size_t occ_fac_square(const BosOps& com) const;
+    size_t occ_fac_square(const BosOps &com) const;
 
-    double occ_fac(const BosOps& com) const;
+    double occ_fac(const BosOps &com) const;
+};
 
 
 #endif //M7_BOSONVFIELD_H

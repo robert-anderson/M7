@@ -7,8 +7,8 @@
  */
 
 #include <M7_lib/field/Mbf.h>
-#include <M7_lib/hamiltonian/GeneralFrmHam.h>
-#include <M7_lib/hamiltonian/TcFrmHam.h>  // what's being tested
+#include <M7_lib/hamiltonian/frm/GeneralFrmHam.h>
+#include <M7_lib/hamiltonian/frm/TcFrmHam.h>  // what's being tested
 #include <M7_lib/util/consts.h>
 #include <M7_lib/io/Symlink.h>
 #include <gtest/gtest.h>
@@ -25,12 +25,12 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_0000) {
     AssetSymlink fcidump("TC_Be_CCPVDZ/FCIDUMP", "FCIDUMP");
     // 2.3545134053388529E-002 for 1,2,3,4 (this is only the lmat part)
     // assuming GeneralFrmHam is working properly
-    TcFrmHam ham("FCIDUMP", false, 0);
-    GeneralFrmHam helperHam("FCIDUMP", false, 0);
-    buffered::FrmOnv onv(ham.m_nsite);
-    mbf::set_aufbau_mbf(onv, ham);
+    TcFrmHam ham({"FCIDUMP"}, false);
+    GeneralFrmHam two_body_ham({"FCIDUMP"}, false);
+    buffered::FrmOnv onv(ham.m_basis);
+    mbf::set_aufbau_mbf(onv, ham.default_nelec());
     auto elem = ham.get_element_0000(onv);
-    auto benchmark = helperHam.get_element_0000(onv) + 2.3545134053388529E-002;
+    auto benchmark = two_body_ham.get_element_0000(onv) + 2.3545134053388529E-002;
     ASSERT_FLOAT_EQ(elem, benchmark);
 }
 
@@ -46,10 +46,10 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     //      D1=           1           2           3           4
     //  excit1=           4          12
     //   -2.0033789485348489E-003
-    TcFrmHam ham("FCIDUMP", false, 0);
-    GeneralFrmHam helperHam("FCIDUMP", false, 0);
-    buffered::FrmOnv onv(ham.m_nsite);
-    mbf::set_aufbau_mbf(onv, ham);
+    TcFrmHam ham({"FCIDUMP"}, false);
+    GeneralFrmHam two_body_ham({"FCIDUMP"}, false);
+    buffered::FrmOnv onv(ham.m_basis);
+    mbf::set_aufbau_mbf(onv, ham.default_nelec());
     conn::FrmOnv conn(onv);
     // (one integer -> spin-orbital; pair -> spin, spatial orbital)
     // (spin-minor) spin-orbital 3 goes to spin-orbital 11
@@ -58,7 +58,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_1100) {
     // spinorb 12 -> (orb,spin)=(6,0) -> {0,5}
     conn.m_cre.add({0, 5});
     auto elemdiff =
-        ham.get_element_1100(onv, conn) - helperHam.get_element_1100(onv, conn);
+        ham.get_element_1100(onv, conn) - two_body_ham.get_element_1100(onv, conn);
     auto benchmark = -2.0033789485348489E-003;
     ASSERT_FLOAT_EQ(elemdiff, benchmark);
 }
@@ -76,10 +76,10 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     //  excit2=           1           9           4          16
     //   -2.2700965657479885E-005
     // TcFrmHam with spin *minor* ordering, i.e. mirroring NECI & TCHInt
-    TcFrmHam ham("FCIDUMP", false, 0);
-    GeneralFrmHam helperHam("FCIDUMP", false, 0);
-    buffered::FrmOnv onv(ham.m_nsite);
-    mbf::set_aufbau_mbf(onv, ham);
+    TcFrmHam ham({"FCIDUMP"}, false);
+    GeneralFrmHam two_body_ham({"FCIDUMP"}, false);
+    buffered::FrmOnv onv(ham.m_basis);
+    mbf::set_aufbau_mbf(onv, ham.default_nelec());
     conn::FrmOnv conn(onv);
     // spinorb 4 -> (orb,spin)=(2,0) -> {0, 1}
     conn.m_ann.add({0, 1});
@@ -90,7 +90,7 @@ TEST(TranscorrelatedFermionHamiltonian, test_get_element_2200) {
     // spinorb 9 -> (orb,spin)=(5,1) -> {1, 4}
     conn.m_cre.add({1, 4});
     auto elemdiff =
-        ham.get_element_2200(onv, conn) - helperHam.get_element_2200(onv, conn);
+        ham.get_element_2200(onv, conn) - two_body_ham.get_element_2200(onv, conn);
     auto benchmark = -2.2700965657479885E-005;
     // we also pick up a phase, hence -benchmark
     ASSERT_FLOAT_EQ(elemdiff, -benchmark);
@@ -110,7 +110,7 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // remember we antisymmetrise: [ij|kl] - [il|kj]
     // (see FCIDUMP file)
     // the FCIDUMP is in chemist notation but the code is in physicist notations
-    TcFrmHam ham("FCIDUMP", false, 0);
+    TcFrmHam ham({"FCIDUMP"}, false);
     // these two would be the same assuming Hermiticity, but not in this FCIDUMP
     // chemist notation: 1237 - 1732
     // -0.37788782091129145E-003 - -0.40412978632087910E-003
@@ -131,8 +131,8 @@ TEST(TranscorrelatedFermionHamiltonian, coeff_element3300_parity) {
     AssetSymlink tcdump("TC_Be_CCPVDZ/TCDUMP", "TCDUMP");
     AssetSymlink fcidump("TC_Be_CCPVDZ/FCIDUMP", "FCIDUMP");
     // TC Fermion Hamiltonian to be tested
-    TcFrmHam ham("FCIDUMP", false, 0);
-    buffered::FrmOnv onv(ham.m_nsite);
+    TcFrmHam ham({"FCIDUMP"}, false);
+    buffered::FrmOnv onv(ham.default_nelec());
     onv = {{0, 1}, {0, 1}};
     conn::FrmOnv conn(onv);
     // spin-orbital indices to annihilate
