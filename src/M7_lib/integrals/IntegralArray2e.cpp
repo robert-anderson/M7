@@ -3,3 +3,176 @@
 //
 
 #include "IntegralArray2e.h"
+
+integrals_2e::IndexerSymNone::IndexerSymNone(size_t norb) :
+    IntegralIndexer(norb, pow(norb, 4ul)), m_norb2(norb * norb), m_norb3(norb * m_norb2) {}
+
+size_t integrals_2e::IndexerSymNone::index_only(size_t a, size_t b, size_t i, size_t j) const {
+    return a * m_norb3 + b * m_norb2 + i * m_norb + j;
+}
+
+std::pair<size_t, bool> integrals_2e::IndexerSymNone::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+    return {index_only(a, b, i, j), false};
+}
+
+integrals_2e::IndexerSymH::IndexerSymH(size_t norb) : IntegralIndexer(norb, npair(norb*norb)) {}
+
+size_t integrals_2e::IndexerSymH::index_only(size_t a, size_t b, size_t i, size_t j) const {
+    const auto ab = a*m_norb+b;
+    const auto ij = i*m_norb+j;
+    return (ab>=ij) ? trigmap(ab, ij) : trigmap(ij, ab);
+}
+
+std::pair<size_t, bool> integrals_2e::IndexerSymH::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+    const auto ab = a*m_norb+b;
+    const auto ij = i*m_norb+j;
+    if (ab>=ij) return {trigmap(ab, ij), true};
+    else return {trigmap(ij, ab), false};
+}
+
+size_t integrals_2e::IndexerSymD::index_only(size_t a, size_t b, size_t i, size_t j) const {
+    return m_sym_h.index_only(a, i, b, j);
+}
+
+integrals_2e::IndexerSymDH::IndexerSymDH(size_t norb) :
+    IntegralIndexer(norb, 2*npair(npair(norb))), m_hir_size(m_size/2){}
+
+std::pair<size_t, bool> integrals_2e::IndexerSymD::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+    return {index_only(a, b, i, j), false};
+}
+
+integrals_2e::IndexerSymD::IndexerSymD(size_t norb) : IntegralIndexer(norb, npair(norb*norb)), m_sym_h(norb){}
+
+std::pair<size_t, bool> integrals_2e::IndexerSymDH::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+    // let y = <ab|ij>, correct order is x
+    if (b >= j){
+        const auto bj = trigmap(b, j);
+        if (a >= i) {
+            const auto ai= trigmap(a, i);
+            if (bj >= ai) {
+                // x = y
+                return {trigmap(bj, ai), false};
+            }
+            else {
+                // x = Dy i.e. y = Dx
+                return {trigmap(ai, bj), false};
+            }
+        }
+        else {
+            const auto ai= trigmap(i, a);
+            if (bj >= ai) {
+                // x = KHRy i.e. y = RHKx = HRKx
+                return {trigmap(bj, ai)+m_hir_size, true};
+            }
+            else {
+                // x = DKHRy i.e. y = RHDKx = DRx
+                return {trigmap(ai, bj)+m_hir_size, false};
+            }
+        }
+    }
+    else {
+        const auto bj = trigmap(j, b);
+        if (a >= i){
+            const auto ai= trigmap(a, i);
+            if (bj>=ai) {
+                // x = Ry i.e. y = Rx
+                return {trigmap(bj, ai)+m_hir_size, false};
+            }
+            else {
+                // x = DRy i.e. y = RDx = HDRKx
+                return {trigmap(ai, bj)+m_hir_size, true};
+            }
+        }
+        else {
+            const auto ai= trigmap(i, a);
+            if (bj>=ai) {
+                // x = KHRRy i.e. y = HKx
+                return {trigmap(bj, ai), true};
+            }
+            else {
+                // x = DKHRRy i.e. y = HDKx
+                return {trigmap(ai, bj), true};
+            }
+        }
+    }
+    return {};
+}
+
+size_t integrals_2e::IndexerSymDH::index_only(size_t a, size_t b, size_t i, size_t j) const {
+    return index_and_conj(a, b, i, j).first;
+}
+
+integrals_2e::IndexerSymDR::IndexerSymDR(size_t norb) :
+    IntegralIndexer(norb, 2*npair(npair(norb))), m_hir_size(m_size/2){}
+
+size_t integrals_2e::IndexerSymDR::index_only(size_t a, size_t b, size_t i, size_t j) const {
+    // let y = <ab|ij>, correct order is x
+    if (b >= j){
+        const auto bj = trigmap(b, j);
+        if (a >= i) {
+            const auto ai= trigmap(a, i);
+            if (bj >= ai) {
+                // x = y
+                return trigmap(bj, ai);
+            }
+            else {
+                // x = Dy i.e. y = Dx
+                return trigmap(ai, bj);
+            }
+        }
+        else {
+            const auto ai= trigmap(i, a);
+            if (bj >= ai) {
+                // x = KHRy i.e. y = RHKx = HRKx
+                return trigmap(bj, ai)+m_hir_size;
+            }
+            else {
+                // x = DKHRy i.e. y = RHDKx = DRx
+                return trigmap(ai, bj);
+            }
+        }
+    }
+    else {
+        const auto bj = trigmap(j, b);
+        if (a >= i){
+            const auto ai= trigmap(a, i);
+            if (bj>=ai) {
+                // x = Ry i.e. y = Rx
+                return trigmap(bj, ai);
+            }
+            else {
+                // x = DRy i.e. y = RDx = HDRKx
+                return trigmap(ai, bj)+m_hir_size;
+            }
+        }
+        else {
+            const auto ai= trigmap(i, a);
+            if (bj>=ai) {
+                // x = KHRRy i.e. y = HKx
+                return trigmap(bj, ai)+m_hir_size;
+            }
+            else {
+                // x = DKHRRy i.e. y = HDKx
+                return trigmap(ai, bj)+m_hir_size;
+            }
+        }
+    }
+    return {};
+}
+
+std::pair<size_t, bool> integrals_2e::IndexerSymDR::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+    return {index_only(a, b, i, j), false};
+}
+
+integrals_2e::IndexerSymDHR::IndexerSymDHR(size_t norb) : IntegralIndexer(norb, npair(npair(norb))){}
+
+size_t integrals_2e::IndexerSymDHR::index_only(size_t a, size_t b, size_t i, size_t j) const {
+    const auto bj = (b>=j) ? trigmap(b, j) : trigmap(j, b);
+    const auto ai = (a>=i) ? trigmap(a, i) : trigmap(i, a);
+    return (bj>=ai) ? trigmap(bj, ai) : trigmap(ai, bj);
+}
+
+std::pair<size_t, bool> integrals_2e::IndexerSymDHR::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
+    // always have real orbitals so never any conjugation
+    return {index_only(a, b, i, j), false};
+}

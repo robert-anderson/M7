@@ -11,45 +11,21 @@
 
 namespace integrals_1e {
     struct IndexerSymNone : IntegralIndexer {
-        IndexerSymNone(size_t norb) : IntegralIndexer(norb, norb * norb) {}
+        IndexerSymNone(size_t norb);
 
-        size_t index_only(size_t a, size_t i) const {
-            return a * m_norb + i;
-        }
+        size_t index_only(size_t a, size_t i) const;
 
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const {
-            return {index_only(a, i), false};
-        }
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
     };
 
     using namespace integer_utils;
 
     struct IndexerSymH : IntegralIndexer {
-        IndexerSymH(size_t norb) : IntegralIndexer(norb, npair(norb)) {}
+        IndexerSymH(size_t norb);
 
-        size_t get_case(size_t a, size_t i) const {
-            return a >= i;
-        }
+        size_t index_only(size_t a, size_t i) const;
 
-        size_t index_only(size_t a, size_t i) const {
-            switch (get_case(a, i)) {
-                case 0:
-                    return trigmap(i, a);
-                case 1:
-                    return trigmap(a, i);
-            }
-            return ~0ul;
-        }
-
-        std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const {
-            switch (get_case(a, i)) {
-                case 0:
-                    return {trigmap(i, a), true};
-                case 1:
-                    return {trigmap(a, i), false};
-            }
-            return {~0ul, false};
-        }
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
     };
 
     template<typename T>
@@ -67,8 +43,7 @@ namespace integrals_1e {
         indexer_t m_indexer;
         PrivateIntegralStorage<T> m_data;
 
-        IndexedArray(size_t norb) : m_indexer(norb),
-                                              m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
+        IndexedArray(size_t norb) : m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
 
         bool set(size_t a, size_t i, T elem) override {
             // any compiler should statically execute this conditional
