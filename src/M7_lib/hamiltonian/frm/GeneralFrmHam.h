@@ -6,15 +6,19 @@
 #define M7_GENERALFRMHAM_H
 
 #include "FrmHam.h"
-#include "M7_lib/integrals/Integrals_1e.h"
-#include "M7_lib/integrals/Integrals_2e.h"
+#include "M7_lib/integrals/IntegralArray1e.h"
+#include "M7_lib/integrals/IntegralArray2e.h"
+#include "M7_lib/io/FcidumpFileReader.h"
 
 struct GeneralFrmHam : FrmHam {
 
-    typedef Integrals_1e<defs::ham_t, defs::isym_1e> ints1_t;
-    typedef Integrals_2e<defs::ham_t, defs::isym_2e> ints2_t;
-    ints1_t m_int_1;
-    ints2_t m_int_2;
+    typedef integrals_1e::Array<defs::ham_t> ints_1e_t;
+    typedef integrals_2e::Array<defs::ham_t> ints_2e_t;
+    typedef std::unique_ptr<ints_1e_t> ints_1e_ptr_t;
+    typedef std::unique_ptr<ints_2e_t> ints_2e_ptr_t;
+
+    ints_1e_ptr_t m_ints_1e = nullptr;
+    ints_2e_ptr_t m_ints_2e = nullptr;
 
 private:
     const FcidumpInfo m_info;

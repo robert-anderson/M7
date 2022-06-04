@@ -6,13 +6,9 @@ target_sources(M7_lib
         BosonCoeffs_2.h
         FrmBosCoupledCoeffs.cpp
         FrmBosCoupledCoeffs.h
-        IntegralArray.cpp
         IntegralStorage.h
         IntegralArray1e.cpp
         IntegralArray1e.h
         IntegralArray2e.cpp
         IntegralArray2e.h
-        Integrals.h
-        Integrals_1e.h
-        Integrals_2e.h
 )

@@ -7,14 +7,13 @@
 
 #include <M7_lib/parallel/SharedArray.h>
 
-#include "Integrals.h"
-
 class BosonCoeffs_2 {
 
     size_t index(const size_t &i, const size_t &j, const size_t& k, const size_t& l) const {
+        using namespace integer_utils;
         auto ij = i*m_nmode+j;
         auto kl = k*m_nmode+l;
-        return ij<=kl ? trig(ij, kl) : trig(kl, ij);
+        return ij>=kl ? trigmap(ij, kl) : trigmap(kl, ij);
     }
 
     const size_t m_nmode;

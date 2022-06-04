@@ -6,7 +6,6 @@
 #define M7_FCIDUMPFILEREADER_H
 
 #include <M7_lib/defs.h>
-#include <M7_lib/integrals/Integrals_1e.h>
 #include <M7_lib/io/Logging.h>
 
 #include "HamiltonianFileReader.h"

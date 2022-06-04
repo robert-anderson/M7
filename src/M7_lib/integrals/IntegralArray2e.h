@@ -163,6 +163,9 @@ namespace integrals_2e {
 
     template<typename T>
     struct Array {
+        Array() = default;
+        virtual ~Array() = default;
+
         virtual bool set(size_t a, size_t b, size_t i, size_t j, T elem) = 0;
 
         virtual T get(size_t a, size_t b, size_t i, size_t j) const = 0;
@@ -206,6 +209,50 @@ namespace integrals_2e {
     template<typename T> using SymDH = IndexedArray<IndexerSymDH, T>;
     template<typename T> using SymDR = IndexedArray<IndexerSymDR, T>;
     template<typename T> using SymDHR = IndexedArray<IndexerSymDHR, T>;
+
+    namespace syms {
+        enum Sym {
+            Null, None, H, D, DH, DR, DHR
+        };
+    }
+
+    /**
+     * when attempting to fill the integral arrays, the highest symmetry is assumed at first. when a counter example to
+     * that symmetry assumption is reached, the parse is restarted with the next lower symmetry until the entire
+     * integral array can be stored without contradiction
+     * @tparam T
+     *  matrix element type
+     * @param norb
+     *  number of one-electron (spinorbitals if spin resolved basis) functions in each dimension of the integral arrays
+     * @param ptr
+     *  smart pointer to the currently-allocated array
+     * @param sym
+     *  the symmetry to use in the new allocation (decremented at output)
+     */
+    template<typename T>
+    void next_sym_attempt(size_t norb, std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
+        typedef std::unique_ptr<Array<T>> ptr_t;
+        using namespace syms;
+        switch (sym) {
+            case(Null):
+                ptr = nullptr;
+                return;
+            case(None):
+                ptr = ptr_t(new SymNone<defs::ham_t>(norb));
+            case(H):
+                ptr = ptr_t(new SymH<defs::ham_t>(norb));
+            case D:
+                ptr = ptr_t(new SymD<defs::ham_t>(norb));
+            case DH:
+                ptr = ptr_t(new SymDH<defs::ham_t>(norb));
+            case DR:
+                ptr = ptr_t(new SymDR<defs::ham_t>(norb));
+            case DHR:
+                ptr = ptr_t(new SymDHR<defs::ham_t>(norb));
+        }
+        sym = Sym(sym-1);
+    }
+
 }
 
 #endif //M7_INTEGRALARRAY2E_H

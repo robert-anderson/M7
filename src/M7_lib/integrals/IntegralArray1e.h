@@ -30,6 +30,9 @@ namespace integrals_1e {
 
     template<typename T>
     struct Array {
+        Array() = default;
+        virtual ~Array() = default;
+
         virtual bool set(size_t a, size_t i, T elem) = 0;
 
         virtual T get(size_t a, size_t i) const = 0;
@@ -70,6 +73,40 @@ namespace integrals_1e {
     template<typename T> using SymNone = IndexedArray<IndexerSymNone, T>;
     template<typename T> using SymH = IndexedArray<IndexerSymH, T>;
 
+    namespace syms {
+        enum Sym {
+            Null, None, H
+        };
+    }
+
+    /**
+     * when attempting to fill the integral arrays, the highest symmetry is assumed at first. when a counter example to
+     * that symmetry assumption is reached, the parse is restarted with the next lower symmetry until the entire
+     * integral array can be stored without contradiction
+     * @tparam T
+     *  matrix element type
+     * @param norb
+     *  number of one-electron (spinorbitals if spin resolved basis) functions in each dimension of the integral arrays
+     * @param ptr
+     *  smart pointer to the currently-allocated array
+     * @param sym
+     *  the symmetry to use in the new allocation (decremented at output)
+     */
+    template<typename T>
+    void next_sym_attempt(size_t norb, std::unique_ptr<Array<T>>& ptr, syms::Sym sym){
+        typedef std::unique_ptr<Array<T>> ptr_t;
+        using namespace syms;
+        switch (sym) {
+            case(Null):
+                ptr = nullptr;
+                return;
+            case(None):
+                ptr = ptr_t(new SymNone<T>(norb));
+            case(H):
+                ptr = ptr_t(new SymH<T>(norb));
+        }
+        sym = Sym(sym-1);
+    }
 }
 
 #endif //M7_INTEGRALARRAY1E_H
