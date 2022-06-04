@@ -77,6 +77,14 @@ namespace integrals_1e {
         enum Sym {
             Null, None, H
         };
+
+        std::string name(Sym sym){
+            switch (sym) {
+                case Null: return "NULL";
+                case None: return "none";
+                case H: return "hermiticity";
+            }
+        }
     }
 
     /**

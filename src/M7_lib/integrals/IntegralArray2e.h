@@ -214,6 +214,31 @@ namespace integrals_2e {
         enum Sym {
             Null, None, H, D, DH, DR, DHR
         };
+
+        std::string name(Sym sym){
+            switch (sym) {
+                case Null: return "NULL";
+                case None: return "none";
+                case H: return "2-fold (hermiticity)";
+                case D: return "2-fold (dummy integration variable interchange)";
+                case DH: return "4-fold (complex orbitals)";
+                case DR: return "4-fold (non-hermitian)";
+                case DHR: return "8-fold";
+            }
+        }
+
+        std::vector<std::string> equivalences(Sym sym){
+            switch (sym) {
+                case Null: return {};
+                case None: return {"<ab|ij>"};
+                case H: return {"<ab|ij>", "<ij|ab>"};
+                case D: return {"<ab|ij>", "<ba|ji>"};
+                case DH: return {"<ab|ij>", "<ba|ji>", "<ij|ab>*", "<ji|ba>*"};
+                case DR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>"};
+                case DHR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>",
+                                  "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"};
+            }
+        }
     }
 
     /**
