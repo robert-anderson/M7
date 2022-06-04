@@ -7,7 +7,7 @@ target_sources(M7_lib
         FrmBosCoupledCoeffs.cpp
         FrmBosCoupledCoeffs.h
         IntegralArray.cpp
-        IntegralArray.h
+        IntegralStorage.h
         IntegralArray1e.cpp
         IntegralArray1e.h
         IntegralArray2e.cpp

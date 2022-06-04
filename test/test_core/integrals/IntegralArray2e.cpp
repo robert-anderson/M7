@@ -5,109 +5,196 @@
 #include "test_core/defs.h"
 #include "M7_lib/integrals/IntegralArray2e.h"
 
-TEST(IntegralArray2e_i, Sym2Fold_i_real) {
-    typedef double T;
-    IntegralArray2e_i<T> array(4);
-    const std::array<T, 4> values = {0.123, 0.234, 0.345, 0.456};
-    // -
-    array.set(0, 1, 2, 3, values[0]);
-    // r
-    array.set(0, 1, 3, 2, values[1]);
-    // rh
-    array.set(2, 3, 0, 1, values[2]);
-    // h
-    array.set(3, 2, 0, 1, values[3]);
 
-    // 0
-    ASSERT_NEARLY_EQ(array.get(0, 1, 2, 3), values[0]);
-    // i 0
-    ASSERT_NEARLY_EQ(array.get(1, 0, 3, 2), values[0]);
-    // 1
-    ASSERT_NEARLY_EQ(array.get(0, 1, 3, 2), values[1]);
-    // i 1
-    ASSERT_NEARLY_EQ(array.get(1, 0, 2, 3), values[1]);
-    // 2
-    ASSERT_NEARLY_EQ(array.get(2, 3, 0, 1), values[2]);
-    // i 2
-    ASSERT_NEARLY_EQ(array.get(3, 2, 1, 0), values[2]);
-    // 3
-    ASSERT_NEARLY_EQ(array.get(3, 2, 0, 1), values[3]);
-    // i 3
-    ASSERT_NEARLY_EQ(array.get(2, 3, 1, 0), values[3]);
+TEST(IntegralArray2e, SymNone_real) {
+    typedef double T;
+    integrals_2e::SymNone<T> ints(6);
+    const std::array<T, 8> v = {0.123, 0.234, 0.345, 0.456, 0.567, 0.678, 0.789, 0.890};
+    // -
+    ASSERT_TRUE(ints.set(0, 1, 2, 3, v[0]));
+    // I
+    ASSERT_TRUE(ints.set(1, 0, 3, 2, v[1]));
+    // R
+    ASSERT_TRUE(ints.set(0, 1, 3, 2, v[2]));
+    // RI
+    ASSERT_TRUE(ints.set(1, 0, 2, 3, v[3]));
+    // H
+    ASSERT_TRUE(ints.set(2, 3, 0, 1, v[4]));
+    // HI
+    ASSERT_TRUE(ints.set(3, 2, 1, 0, v[5]));
+    // HR
+    ASSERT_TRUE(ints.set(3, 2, 0, 1, v[6]));
+    // HRI
+    ASSERT_TRUE(ints.set(2, 3, 1, 0, v[7]));
+
+    // -
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 2, 3), v[0]);
+    // I
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 3, 2), v[1]);
+    // R
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 3, 2), v[2]);
+    // RI
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 2, 3), v[3]);
+    // H
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 0, 1), v[4]);
+    // HI
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 1, 0), v[5]);
+    // HR
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 0, 1), v[6]);
+    // HRI
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 1, 0), v[7]);
 }
 
-TEST(IntegralArray2e_i, Sym2Fold_i_complex) {
+TEST(IntegralArray2e, SymH_real) {
+    typedef double T;
+    integrals_2e::SymH<T> ints(6);
+    const std::array<T, 4> v = {0.123, 0.234, 0.345, 0.456};
+    // -
+    ASSERT_TRUE(ints.set(0, 1, 2, 3, v[0]));
+    // I
+    ASSERT_TRUE(ints.set(1, 0, 3, 2, v[1]));
+    // R
+    ASSERT_TRUE(ints.set(0, 1, 3, 2, v[2]));
+    // RI
+    ASSERT_TRUE(ints.set(1, 0, 2, 3, v[3]));
+
+    // -
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 2, 3), v[0]);
+    // I
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 3, 2), v[1]);
+    // R
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 3, 2), v[2]);
+    // RI
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 2, 3), v[3]);
+    // H
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 0, 1), v[0]);
+    // HI
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 1, 0), v[1]);
+    // HR
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 0, 1), v[2]);
+    // HRI
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 1, 0), v[3]);
+}
+
+TEST(IntegralArray2e, SymI_real) {
+    typedef double T;
+    integrals_2e::SymI<T> ints(6);
+    const std::array<T, 4> v = {0.123, 0.234, 0.345, 0.456};
+    // -
+    ASSERT_TRUE(ints.set(0, 1, 2, 3, v[0]));
+    // R
+    ASSERT_TRUE(ints.set(0, 1, 3, 2, v[1]));
+    // H
+    ASSERT_TRUE(ints.set(2, 3, 0, 1, v[2]));
+    // HR
+    ASSERT_TRUE(ints.set(3, 2, 0, 1, v[3]));
+
+    // -
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 2, 3), v[0]);
+    // I
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 3, 2), v[0]);
+    // R
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 3, 2), v[1]);
+    // RI
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 2, 3), v[1]);
+    // H
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 0, 1), v[2]);
+    // HI
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 1, 0), v[2]);
+    // HR
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 0, 1), v[3]);
+    // HRI
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 1, 0), v[3]);
+}
+
+TEST(IntegralArray2e, SymDH_real) {
+    typedef double T;
+    integrals_2e::SymDH<T> ints(6);
+    const std::array<T, 2> v = {0.123, 0.234};
+    // -
+    ASSERT_TRUE(ints.set(0, 1, 2, 3, v[0]));
+    // R
+    ASSERT_TRUE(ints.set(0, 1, 3, 2, v[1]));
+
+    // -
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 2, 3), v[0]);
+    // I
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 3, 2), v[0]);
+    // R
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 3, 2), v[1]);
+    // RI
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 2, 3), v[1]);
+    // H
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 0, 1), v[0]);
+    // HI
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 1, 0), v[0]);
+    // HR
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 0, 1), v[1]);
+    // HRI
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 1, 0), v[1]);
+}
+
+TEST(IntegralArray2e, SymDR_real) {
+    typedef double T;
+    integrals_2e::SymDR<T> ints(6);
+    const std::array<T, 2> v = {0.123, 0.234};
+    // -
+    ASSERT_TRUE(ints.set(0, 1, 2, 3, v[0]));
+    // H
+    ASSERT_TRUE(ints.set(2, 3, 0, 1, v[1]));
+
+    // -
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 2, 3), v[0]);
+    // I
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 3, 2), v[0]);
+    // R
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 3, 2), v[0]);
+    // RI
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 2, 3), v[0]);
+    // H
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 0, 1), v[1]);
+    // HI
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 1, 0), v[1]);
+    // HR
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 0, 1), v[1]);
+    // HRI
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 1, 0), v[1]);
+}
+
+
+
+
+
+
+
+TEST(IntegralArray2e, SymH_complex) {
     typedef std::complex<double> T;
-    IntegralArray2e_i<T> array(4);
-    const std::array<T, 4> values = {T{0.123, 9.0}, T{0.234, -2.0}, T{0.345, -1.0}, T{0.456, 7.0}};
+    integrals_2e::SymH<T> ints(6);
+    const std::array<T, 4> v = {T(0.123, -1), T(0.234, 2), T(0.345, -3), T(0.456, 4)};
+    const std::array<T, 4> vc = {T(0.123, 1), T(0.234, -2), T(0.345, 3), T(0.456, -4)};
     // -
-    array.set(0, 1, 2, 3, values[0]);
-    // r
-    array.set(0, 1, 3, 2, values[1]);
-    // rh
-    array.set(2, 3, 0, 1, values[2]);
-    // h
-    array.set(3, 2, 0, 1, values[3]);
+    ASSERT_TRUE(ints.set(0, 1, 2, 3, v[0]));
+    // I
+    ASSERT_TRUE(ints.set(1, 0, 3, 2, v[1]));
+    // R
+    ASSERT_TRUE(ints.set(0, 1, 3, 2, v[2]));
+    // RI
+    ASSERT_TRUE(ints.set(1, 0, 2, 3, v[3]));
 
-    // 0
-    ASSERT_NEARLY_EQ(array.get(0, 1, 2, 3), values[0]);
-    // i 0
-    ASSERT_NEARLY_EQ(array.get(1, 0, 3, 2), values[0]);
-    // 1
-    ASSERT_NEARLY_EQ(array.get(0, 1, 3, 2), values[1]);
-    // i 1
-    ASSERT_NEARLY_EQ(array.get(1, 0, 2, 3), values[1]);
-    // 2
-    ASSERT_NEARLY_EQ(array.get(2, 3, 0, 1), values[2]);
-    // i 2
-    ASSERT_NEARLY_EQ(array.get(3, 2, 1, 0), values[2]);
-    // 3
-    ASSERT_NEARLY_EQ(array.get(3, 2, 0, 1), values[3]);
-    // i 3
-    ASSERT_NEARLY_EQ(array.get(2, 3, 1, 0), values[3]);
-}
-
-TEST(IntegralArray2e_ih, Sym4Fold_ih_real) {
-    typedef double T;
-    IntegralArray2e_i<T> array(4);
-    const std::array<T, 2> values = {0.123, 0.234};
     // -
-    array.set(0, 1, 2, 3, values[0]);
-    // r
-    array.set(0, 1, 3, 2, values[1]);
-
-    // 0
-    ASSERT_NEARLY_EQ(array.get(0, 1, 2, 3), values[0]);
-    // i 0
-    ASSERT_NEARLY_EQ(array.get(1, 0, 3, 2), values[0]);
-    // 1
-    ASSERT_NEARLY_EQ(array.get(0, 1, 3, 2), values[1]);
-    // i 1
-    ASSERT_NEARLY_EQ(array.get(1, 0, 2, 3), values[1]);
-    // h 0
-    ASSERT_NEARLY_EQ(array.get(2, 3, 0, 1), values[0]);
-    // ih 0
-    ASSERT_NEARLY_EQ(array.get(3, 2, 1, 0), values[0]);
-    // h 1
-    ASSERT_NEARLY_EQ(array.get(3, 2, 0, 1), values[1]);
-    // ih 1
-    ASSERT_NEARLY_EQ(array.get(2, 3, 1, 0), values[1]);
-}
-
-
-
-TEST(IntegralArray2e_ihr, Sym8Fold_real) {
-    IntegralArray2e_ihr<double> array(4);
-    const std::array<defs::ham_t, 1> values = {0.123};
-    // -
-    array.set(0, 1, 2, 3, values[0]);
-
-    ASSERT_NEARLY_EQ(array.get(0, 1, 2, 3), values[0]);
-    ASSERT_NEARLY_EQ(array.get(1, 0, 3, 2), values[0]);
-    ASSERT_NEARLY_EQ(array.get(0, 1, 3, 2), values[0]);
-    ASSERT_NEARLY_EQ(array.get(1, 0, 2, 3), values[0]);
-    ASSERT_NEARLY_EQ(array.get(2, 3, 0, 1), values[0]);
-    ASSERT_NEARLY_EQ(array.get(3, 2, 1, 0), values[0]);
-    ASSERT_NEARLY_EQ(array.get(3, 2, 0, 1), values[0]);
-    ASSERT_NEARLY_EQ(array.get(2, 3, 1, 0), values[0]);
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 2, 3), v[0]);
+    // I
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 3, 2), v[1]);
+    // R
+    ASSERT_NEARLY_EQ(ints.get(0, 1, 3, 2), v[2]);
+    // RI
+    ASSERT_NEARLY_EQ(ints.get(1, 0, 2, 3), v[3]);
+    // H
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 0, 1), vc[0]);
+    // HI
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 1, 0), vc[1]);
+    // HR
+    ASSERT_NEARLY_EQ(ints.get(3, 2, 0, 1), vc[2]);
+    // HRI
+    ASSERT_NEARLY_EQ(ints.get(2, 3, 1, 0), vc[3]);
 }
