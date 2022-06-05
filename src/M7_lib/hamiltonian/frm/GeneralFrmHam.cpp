@@ -20,11 +20,17 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
     using namespace ham_data;
     defs::inds inds(4);
     defs::ham_t value;
-    // assume no contribution cases to be nonzero unless a counterexample is found
+
+    /*
+     * initialize permutational symmetries.
+     * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
+     */
+    auto ints_1e_sym = integrals_1e::syms::H;
+    auto ints_2e_sym = m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR;
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
-        if (consts::nearly_zero(value)) continue;
+        if (consts::nearly_zero(value, defs::helem_tol)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
 
@@ -37,9 +43,19 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
         rank_contrib.set_nonzero(exsig);
 
         if (ranksig == ex_single) {
-//            m_int_1.set(inds, value);
+            bool success = false;
+            while (!success) {
+                success = m_ints_1e->set(inds[0], inds[1], value);
+                if (!success) integrals_1e::next_sym_attempt(m_ints_1e, ints_1e_sym);
+            }
         } else if (ranksig == ex_double) {
-//            m_int_2.set(inds, value);
+            bool success = false;
+            while (!success) {
+                // FCIDUMP integral indices are in chemists' ordering
+                success = m_ints_2e->set(inds[0], inds[2], inds[1], inds[3], value);
+                if (!success) integrals_2e::next_sym_attempt(m_ints_2e, ints_2e_sym);
+            }
+
         } else MPI_ABORT("File reader error");
     }
     mpi::barrier();

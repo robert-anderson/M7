@@ -57,11 +57,26 @@
 namespace integrals_2e {
     using namespace integer_utils;
 
+    typedef std::function<void(size_t, size_t, size_t, size_t)> foreach_fn_t;
+
+    struct Indexer : IntegralIndexer {
+        Indexer(size_t norb, size_t size): IntegralIndexer(norb, size){}
+
+        /**
+         * currently this is just a general (assuming no symmetry) iterator, and could be overridden in derived classes,
+         * but since this is not currently used in any performance-critical sector of the code, these symmetry-aware
+         * overloads are not implemented
+         * @param fn
+         *  function to execute on each quadruplet of integral indices
+         */
+        virtual void foreach(const foreach_fn_t& fn) const;
+    };
+
     /**
      * basic (practically unused) indexing scheme which assumes no permutational symmetries.
      * this is actually an unphysical assumption, since any two-electron integrals will have D symmetry to exploit
      */
-    struct IndexerSymNone : IntegralIndexer {
+    struct IndexerSymNone : Indexer {
         const size_t m_norb2, m_norb3;
 
         IndexerSymNone(size_t norb);
@@ -69,23 +84,25 @@ namespace integrals_2e {
         size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
 
         std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+
     };
 
     /**
      * indexing scheme which only assumes hermiticity. this is another unphysical scheme for the same reason as above
      */
-    struct IndexerSymH : IntegralIndexer {
+    struct IndexerSymH : Indexer {
         IndexerSymH(size_t norb);
 
         size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
 
         std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+
     };
 
     /**
      * lowest-symmetry conceivably useful indexing scheme. for use when orbitals are complex, and H is non-hermitian
      */
-    struct IndexerSymD : IntegralIndexer {
+    struct IndexerSymD : Indexer {
         IndexerSymH m_sym_h;
         IndexerSymD(size_t norb);
 
@@ -111,7 +128,7 @@ namespace integrals_2e {
      *  of which of the permuting operations (H, I, R) are required to bring the given indices to the canonical ordering
      *  i.e. b>=j, a>=i, bj>=ai
      */
-    struct IndexerSymDH : IntegralIndexer {
+    struct IndexerSymDH : Indexer {
         const size_t m_hir_size;
         IndexerSymDH(size_t norb);
 
@@ -138,7 +155,7 @@ namespace integrals_2e {
      *  of which of the permuting operations (H, I, R) are required to bring the given indices to the canonical ordering
      *  i.e. b>=j, a>=i, bj>=ai
      */
-    struct IndexerSymDR : IntegralIndexer {
+    struct IndexerSymDR : Indexer {
         const size_t m_hir_size;
         IndexerSymDR(size_t norb);
 
@@ -152,7 +169,7 @@ namespace integrals_2e {
      *  - real orbitals
      *  - Hermitian H
      */
-    struct IndexerSymDHR : IntegralIndexer {
+    struct IndexerSymDHR : Indexer {
         IndexerSymDHR(size_t norb);
 
         size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
@@ -163,12 +180,15 @@ namespace integrals_2e {
 
     template<typename T>
     struct Array {
-        Array() = default;
+        const size_t m_norb;
+        Array(size_t norb): m_norb(norb){}
         virtual ~Array() = default;
 
         virtual bool set(size_t a, size_t b, size_t i, size_t j, T elem) = 0;
 
         virtual T get(size_t a, size_t b, size_t i, size_t j) const = 0;
+
+        virtual void transfer(const Array<T>* higher_sym) = 0;
     };
 
     template<typename indexer_t, typename T>
@@ -179,7 +199,8 @@ namespace integrals_2e {
         indexer_t m_indexer;
         SharedIntegralStorage<T> m_data;
 
-        IndexedArray(size_t norb) : m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
+        IndexedArray(size_t norb) :
+            Array<T>(norb), m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
 
         bool set(size_t a, size_t b, size_t i, size_t j, T elem) override {
             // any compiler should statically execute this conditional
@@ -201,6 +222,14 @@ namespace integrals_2e {
                 return pair.second ? consts::conj(element) : element;
             }
         }
+
+        void transfer(const Array<T> *higher_sym) override {
+            auto fn = [&](size_t a, size_t b, size_t i, size_t j) {
+                bool success = set(a, b, i, j, higher_sym->get(a, b, i, j));
+                REQUIRE_TRUE(success, "error in transferring integral array");
+            };
+            static_cast<const Indexer&>(m_indexer).foreach(fn);
+        }
     };
 
     template<typename T> using SymNone = IndexedArray<IndexerSymNone, T>;
@@ -215,30 +244,9 @@ namespace integrals_2e {
             Null, None, H, D, DH, DR, DHR
         };
 
-        std::string name(Sym sym){
-            switch (sym) {
-                case Null: return "NULL";
-                case None: return "none";
-                case H: return "2-fold (hermiticity)";
-                case D: return "2-fold (dummy integration variable interchange)";
-                case DH: return "4-fold (complex orbitals)";
-                case DR: return "4-fold (non-hermitian)";
-                case DHR: return "8-fold";
-            }
-        }
+        static std::string name(Sym sym);
 
-        std::vector<std::string> equivalences(Sym sym){
-            switch (sym) {
-                case Null: return {};
-                case None: return {"<ab|ij>"};
-                case H: return {"<ab|ij>", "<ij|ab>"};
-                case D: return {"<ab|ij>", "<ba|ji>"};
-                case DH: return {"<ab|ij>", "<ba|ji>", "<ij|ab>*", "<ji|ba>*"};
-                case DR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>"};
-                case DHR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>",
-                                  "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"};
-            }
-        }
+        static std::vector<std::string> equivalences(Sym sym);
     }
 
     /**
@@ -247,34 +255,42 @@ namespace integrals_2e {
      * integral array can be stored without contradiction
      * @tparam T
      *  matrix element type
-     * @param norb
-     *  number of one-electron (spinorbitals if spin resolved basis) functions in each dimension of the integral arrays
      * @param ptr
      *  smart pointer to the currently-allocated array
      * @param sym
      *  the symmetry to use in the new allocation (decremented at output)
      */
     template<typename T>
-    void next_sym_attempt(size_t norb, std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
+    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
         typedef std::unique_ptr<Array<T>> ptr_t;
+        ptr_t new_ptr = nullptr;
         using namespace syms;
+        const auto norb = ptr->m_norb;
         switch (sym) {
             case(Null):
                 ptr = nullptr;
                 return;
             case(None):
-                ptr = ptr_t(new SymNone<defs::ham_t>(norb));
+                new_ptr = ptr_t(new SymNone<defs::ham_t>(norb));
+                break;
             case(H):
-                ptr = ptr_t(new SymH<defs::ham_t>(norb));
+                new_ptr = ptr_t(new SymH<defs::ham_t>(norb));
+                break;
             case D:
-                ptr = ptr_t(new SymD<defs::ham_t>(norb));
+                new_ptr = ptr_t(new SymD<defs::ham_t>(norb));
+                break;
             case DH:
-                ptr = ptr_t(new SymDH<defs::ham_t>(norb));
+                new_ptr = ptr_t(new SymDH<defs::ham_t>(norb));
+                break;
             case DR:
-                ptr = ptr_t(new SymDR<defs::ham_t>(norb));
+                new_ptr = ptr_t(new SymDR<defs::ham_t>(norb));
+                break;
             case DHR:
-                ptr = ptr_t(new SymDHR<defs::ham_t>(norb));
+                new_ptr = ptr_t(new SymDHR<defs::ham_t>(norb));
+                break;
         }
+        new_ptr->transfer(ptr.get());
+        ptr = std::move(new_ptr);
         sym = Sym(sym-1);
     }
 

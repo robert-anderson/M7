@@ -10,43 +10,66 @@
 #include "IntegralStorage.h"
 
 namespace integrals_1e {
-    struct IndexerSymNone : IntegralIndexer {
+
+    struct Indexer : IntegralIndexer {
+        Indexer(size_t norb, size_t size): IntegralIndexer(norb, size){}
+        virtual void foreach(const std::function<void(size_t, size_t)>& fn) const = 0;
+    };
+
+    struct IndexerSymNone : Indexer {
         IndexerSymNone(size_t norb);
 
         size_t index_only(size_t a, size_t i) const;
 
         std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
+
+        void foreach(const std::function<void(size_t, size_t)> &fn) const override;
     };
 
     using namespace integer_utils;
 
-    struct IndexerSymH : IntegralIndexer {
+    struct IndexerSymH : Indexer {
         IndexerSymH(size_t norb);
 
         size_t index_only(size_t a, size_t i) const;
 
         std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
+
+        void foreach(const std::function<void(size_t, size_t)> &fn) const override;
     };
 
     template<typename T>
     struct Array {
-        Array() = default;
+        const size_t m_norb;
+        Array(size_t norb): m_norb(norb){}
         virtual ~Array() = default;
 
         virtual bool set(size_t a, size_t i, T elem) = 0;
 
         virtual T get(size_t a, size_t i) const = 0;
+
+        virtual void transfer(const Array<T>* higher_sym) = 0;
+
     };
 
     template<typename indexer_t, typename T>
     struct IndexedArray : Array<T> {
-        static_assert(std::is_base_of<IntegralIndexer, indexer_t>::value, "invalid template class");
+        static_assert(std::is_base_of<Indexer, indexer_t>::value, "invalid template class");
         using Array<T>::set;
         using Array<T>::get;
         indexer_t m_indexer;
         PrivateIntegralStorage<T> m_data;
 
-        IndexedArray(size_t norb) : m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
+        IndexedArray(size_t norb) : Array<T>(norb), m_indexer(norb),
+            m_data(static_cast<const Indexer&>(m_indexer).m_size) {}
+
+        void transfer(const Array<T>* higher_sym) override {
+            auto fn = [&](size_t a, size_t i){
+                bool success = set(a, i, higher_sym->get(a, i));
+                REQUIRE_TRUE(success, "error in transferring 2e integral array");
+            };
+            static_cast<const Indexer&>(m_indexer).foreach(fn);
+        }
 
         bool set(size_t a, size_t i, T elem) override {
             // any compiler should statically execute this conditional
@@ -78,13 +101,7 @@ namespace integrals_1e {
             Null, None, H
         };
 
-        std::string name(Sym sym){
-            switch (sym) {
-                case Null: return "NULL";
-                case None: return "none";
-                case H: return "hermiticity";
-            }
-        }
+        static std::string name(Sym sym);
     }
 
     /**
@@ -93,26 +110,30 @@ namespace integrals_1e {
      * integral array can be stored without contradiction
      * @tparam T
      *  matrix element type
-     * @param norb
-     *  number of one-electron (spinorbitals if spin resolved basis) functions in each dimension of the integral arrays
      * @param ptr
      *  smart pointer to the currently-allocated array
      * @param sym
      *  the symmetry to use in the new allocation (decremented at output)
      */
     template<typename T>
-    void next_sym_attempt(size_t norb, std::unique_ptr<Array<T>>& ptr, syms::Sym sym){
+    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
         typedef std::unique_ptr<Array<T>> ptr_t;
+        ptr_t new_ptr = nullptr;
         using namespace syms;
+        const auto norb = ptr->m_norb;
         switch (sym) {
             case(Null):
                 ptr = nullptr;
                 return;
             case(None):
-                ptr = ptr_t(new SymNone<T>(norb));
+                new_ptr = ptr_t(new SymNone<T>(norb));
+                break;
             case(H):
-                ptr = ptr_t(new SymH<T>(norb));
+                new_ptr = ptr_t(new SymH<T>(norb));
+                break;
         }
+        new_ptr->transfer(ptr.get());
+        ptr = std::move(new_ptr);
         sym = Sym(sym-1);
     }
 }
