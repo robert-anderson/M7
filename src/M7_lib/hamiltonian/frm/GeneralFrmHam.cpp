@@ -6,7 +6,6 @@
 #include "M7_lib/excitgen/frm/UniformSingles.h"
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
-
 void GeneralFrmHam::log_ints_sym(integrals_1e::syms::Sym sym, bool initial) {
     const std::string context_str = initial ? "initially" : "conflict detected:";
     log::info("{} assuming {} permutational symmetry for 1e integrals",
@@ -17,14 +16,13 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
     const std::string context_str = initial ? "initially" : "conflict detected:";
     log::info("{} assuming {} permutational symmetry for 2e integrals",
               context_str, integrals_2e::syms::name(sym));
-    log::info("this storage scheme assumes that {} integrals are equivalent",
-              utils::to_string(integrals_2e::syms::equivalences(sym)));
+    const auto equivs = integrals_2e::syms::equivalences(sym);
+    if (equivs.size()<2) return;
+    log::info("this storage scheme assumes that {} integrals are equivalent", utils::to_string(equivs));
 }
 
-GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
-        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}),
-        m_info(info) {
-    if (!m_basis.m_nsite) return;
+GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool spin_major) {
+    if (!m_basis.m_nsite) return {nullptr, nullptr};
 
     REQUIRE_EQ(m_basis.m_abgrp_map.m_site_irreps.size(),m_basis.ncoeff_ind(),"site map size incorrect");
 
@@ -41,8 +39,12 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
      */
     auto ints_1e_sym = integrals_1e::syms::H;
     log_ints_sym(ints_1e_sym, true);
+    auto ints_1e = integrals_1e::make<defs::ham_t>(m_basis.ncoeff_ind(), ints_1e_sym);
+    REQUIRE_TRUE(ints_1e.get(), "1e integral array object unallocated");
     auto ints_2e_sym = m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR;
     log_ints_sym(ints_2e_sym, true);
+    auto ints_2e = integrals_2e::make<defs::ham_t>(m_basis.ncoeff_ind(), ints_2e_sym);
+    REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -61,9 +63,10 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
         if (ranksig == ex_single) {
             bool success = false;
             while (!success) {
-                success = m_ints_1e->set(inds[0], inds[1], value);
+                success = ints_1e->set(inds[0], inds[1], value);
                 if (!success) {
-                    integrals_1e::next_sym_attempt(m_ints_1e, ints_1e_sym);
+                    integrals_1e::next_sym_attempt(ints_1e, ints_1e_sym);
+                    REQUIRE_FALSE(ints_1e_sym==integrals_1e::syms::Null, "inconsistent element(s) in FCIDUMP");
                     log_ints_sym(ints_1e_sym, false);
                 }
             }
@@ -71,9 +74,10 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
             bool success = false;
             while (!success) {
                 // FCIDUMP integral indices are in chemists' ordering
-                success = m_ints_2e->set(inds[0], inds[2], inds[1], inds[3], value);
+                success = ints_2e->set(inds[0], inds[2], inds[1], inds[3], value);
                 if (!success) {
-                    integrals_2e::next_sym_attempt(m_ints_2e, ints_2e_sym);
+                    integrals_2e::next_sym_attempt(ints_2e, ints_2e_sym);
+                    REQUIRE_FALSE(ints_2e_sym==integrals_2e::syms::Null, "inconsistent element(s) in FCIDUMP");
                     log_ints_sym(ints_2e_sym, false);
                 }
             }
@@ -83,22 +87,45 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
     mpi::barrier();
     log::info("FCIDUMP loading complete.");
     log_data();
+    return {std::move(ints_1e), std::move(ints_2e)};
+}
+
+
+
+GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
+        FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}),
+        m_info(info), m_ints(make_ints(m_info, spin_major)){
 }
 
 GeneralFrmHam::GeneralFrmHam(opt_pair_t opts):
-        GeneralFrmHam({FortranNamelistReader(opts.m_ham.m_fcidump.m_path)}, opts.m_ham.m_fcidump.m_spin_major) {}
+        GeneralFrmHam({FortranNamelistReader(opts.m_ham.m_fcidump.m_path)},
+                      opts.m_ham.m_fcidump.m_spin_major) {}
 
 defs::ham_t GeneralFrmHam::get_coeff_1100(size_t a, size_t i) const {
-    return m_ints_1e->get(a, i);
+    if (m_basis.m_spin_resolved) return m_ints.m_1e->get(a, i);
+    if (m_basis.ispin(i)!=m_basis.ispin(a)) return 0.0;
+    return m_ints.m_1e->get(m_basis.isite(a), m_basis.isite(i));
 }
 
 defs::ham_t GeneralFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_t j) const {
-    return m_ints_2e->get(a, b, i, j)-m_ints_2e->get(a, b, j, i);
+    if (m_basis.m_spin_resolved) return m_ints.m_2e->get(a, b, i, j)-m_ints.m_2e->get(a, b, j, i);
+    const auto aspin = m_basis.ispin(a);
+    const auto bspin = m_basis.ispin(b);
+    const auto ispin = m_basis.ispin(i);
+    const auto jspin = m_basis.ispin(j);
+    if ((aspin + bspin) != (ispin + jspin)) return 0.0;
+    a = m_basis.isite(a);
+    b = m_basis.isite(b);
+    i = m_basis.isite(i);
+    j = m_basis.isite(j);
+    if (ispin==jspin) return m_ints.m_2e->get(a, b, i, j)-m_ints.m_2e->get(a, b, j, i);
+    if (ispin == aspin) return m_ints.m_2e->get(a, b, i, j);
+    return -m_ints.m_2e->get(a, b, j, i);
 }
 
 defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     defs::ham_t element = m_e_core;
-    auto singles_fn = [&](size_t i) { element += m_ints_1e->get(i, i); };
+    auto singles_fn = [&](size_t i) { element += GeneralFrmHam::get_coeff_1100(i, i); };
     auto doubles_fn = [&](size_t i, size_t j) {
         element += GeneralFrmHam::get_coeff_2200(i, j, i, j);
     };
@@ -111,7 +138,7 @@ defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
     const auto &ann = conn.m_ann[0];
     const auto &cre = conn.m_cre[0];
 
-    defs::ham_t element = m_ints_1e->get(cre, ann);
+    defs::ham_t element = GeneralFrmHam::get_coeff_1100(cre, ann);
     auto fn = [&](size_t ibit) {
         if (ibit != ann) element += GeneralFrmHam::get_coeff_2200(cre, ibit, ann, ibit);
     };

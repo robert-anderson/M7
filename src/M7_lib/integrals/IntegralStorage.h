@@ -27,14 +27,14 @@ private:
     bool set_data(std::vector<T>& data, size_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
         auto& ref = data[iflat];
-        if (ref!=T(0) && !consts::nearly_equal(elem, ref)) return false;
+        if (ref!=T(0) && !consts::nearly_equal(elem, ref, defs::helem_tol)) return false;
         ref = elem;
         return true;
     }
 
     bool set_data(SharedArray<T>& data, size_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
-        if (data[iflat]!=T(0) && !consts::nearly_equal(elem, data[iflat])) return false;
+        if (data[iflat]!=T(0) && !consts::nearly_equal(elem, data[iflat], defs::helem_tol)) return false;
         data.set(iflat, elem);
         return true;
     }

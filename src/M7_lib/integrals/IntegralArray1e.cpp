@@ -44,8 +44,8 @@ void integrals_1e::IndexerSymH::foreach(const std::function<void(size_t, size_t)
 std::string integrals_1e::syms::name(integrals_1e::syms::Sym sym) {
     switch (sym) {
         case Null: return "NULL";
-        case None: return "none";
-        case H: return "hermiticity";
+        case None: return "no";
+        case H: return "hermitian";
     }
     return {};
 }

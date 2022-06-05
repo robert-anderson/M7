@@ -17,8 +17,10 @@ struct GeneralFrmHam : FrmHam {
     typedef std::unique_ptr<ints_1e_t> ints_1e_ptr_t;
     typedef std::unique_ptr<ints_2e_t> ints_2e_ptr_t;
 
-    ints_1e_ptr_t m_ints_1e = nullptr;
-    ints_2e_ptr_t m_ints_2e = nullptr;
+    struct Integrals {
+        ints_1e_ptr_t m_1e;
+        ints_2e_ptr_t m_2e;
+    };
 
 private:
     const FcidumpInfo m_info;
@@ -27,7 +29,12 @@ private:
 
     static void log_ints_sym(integrals_2e::syms::Sym sym, bool initial);
 
+    Integrals make_ints(const FcidumpInfo& info, bool spin_major);
+
 public:
+
+    const Integrals m_ints;
+
     GeneralFrmHam(const FcidumpInfo& info, bool spin_major);
 
     explicit GeneralFrmHam(opt_pair_t opts);

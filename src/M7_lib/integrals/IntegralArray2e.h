@@ -59,8 +59,19 @@ namespace integrals_2e {
 
     typedef std::function<void(size_t, size_t, size_t, size_t)> foreach_fn_t;
 
+    namespace syms {
+        enum Sym {
+            Null, None, H, D, DH, DR, DHR
+        };
+
+        std::string name(Sym sym);
+
+        std::vector<std::string> equivalences(Sym sym);
+    }
+
     struct Indexer : IntegralIndexer {
-        Indexer(size_t norb, size_t size): IntegralIndexer(norb, size){}
+        const syms::Sym m_sym;
+        Indexer(size_t norb, size_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
 
         /**
          * currently this is just a general (assuming no symmetry) iterator, and could be overridden in derived classes,
@@ -189,6 +200,8 @@ namespace integrals_2e {
         virtual T get(size_t a, size_t b, size_t i, size_t j) const = 0;
 
         virtual void transfer(const Array<T>* higher_sym) = 0;
+
+        virtual syms::Sym sym() const = 0;
     };
 
     template<typename indexer_t, typename T>
@@ -230,6 +243,10 @@ namespace integrals_2e {
             };
             static_cast<const Indexer&>(m_indexer).foreach(fn);
         }
+
+        syms::Sym sym() const override {
+            return static_cast<const Indexer&>(m_indexer).m_sym;
+        }
     };
 
     template<typename T> using SymNone = IndexedArray<IndexerSymNone, T>;
@@ -239,14 +256,38 @@ namespace integrals_2e {
     template<typename T> using SymDR = IndexedArray<IndexerSymDR, T>;
     template<typename T> using SymDHR = IndexedArray<IndexerSymDHR, T>;
 
-    namespace syms {
-        enum Sym {
-            Null, None, H, D, DH, DR, DHR
-        };
-
-        std::string name(Sym sym);
-
-        std::vector<std::string> equivalences(Sym sym);
+    /**
+     * @tparam T
+     *  matrix element type
+     * @param norb
+     *  number of orbitals to pass to ctor
+     * @param sym
+     *  the symmetry to use in the new allocation (decremented at output)
+     * @return
+     *  new instance of the type corresponding to the requested symmetry
+     */
+    template<typename T>
+    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym& sym){
+        typedef std::unique_ptr<Array<T>> ptr_t;
+        using namespace syms;
+        switch (sym) {
+            case(Null):
+                return {};
+            case(None):
+                return ptr_t(new SymNone<T>(norb));
+            case(H):
+                return ptr_t(new SymH<T>(norb));
+            case D:
+                return ptr_t(new SymD<T>(norb));
+            case DH:
+                return ptr_t(new SymDH<T>(norb));
+            case DR:
+                return ptr_t(new SymDR<T>(norb));
+            case DHR:
+                return ptr_t(new SymDHR<T>(norb));
+            default:
+                return {};
+        }
     }
 
     /**
@@ -262,36 +303,15 @@ namespace integrals_2e {
      */
     template<typename T>
     void next_sym_attempt(std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
-        typedef std::unique_ptr<Array<T>> ptr_t;
-        ptr_t new_ptr = nullptr;
-        using namespace syms;
-        const auto norb = ptr->m_norb;
-        switch (sym) {
-            case(Null):
-                ptr = nullptr;
-                return;
-            case(None):
-                new_ptr = ptr_t(new SymNone<defs::ham_t>(norb));
-                break;
-            case(H):
-                new_ptr = ptr_t(new SymH<defs::ham_t>(norb));
-                break;
-            case D:
-                new_ptr = ptr_t(new SymD<defs::ham_t>(norb));
-                break;
-            case DH:
-                new_ptr = ptr_t(new SymDH<defs::ham_t>(norb));
-                break;
-            case DR:
-                new_ptr = ptr_t(new SymDR<defs::ham_t>(norb));
-                break;
-            case DHR:
-                new_ptr = ptr_t(new SymDHR<defs::ham_t>(norb));
-                break;
+        if (!ptr) return;
+        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, sym);
+        if (!new_ptr) {
+            ptr = nullptr;
+            return;
         }
         new_ptr->transfer(ptr.get());
         ptr = std::move(new_ptr);
-        sym = Sym(sym-1);
+        sym = syms::Sym(sym-1);
     }
 
 }

@@ -105,6 +105,32 @@ namespace integrals_1e {
     }
 
     /**
+     * @tparam T
+     *  matrix element type
+     * @param norb
+     *  number of orbitals to pass to ctor
+     * @param sym
+     *  the symmetry to use in the new allocation (decremented at output)
+     * @return
+     *  new instance of the type corresponding to the requested symmetry
+     */
+    template<typename T>
+    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym sym){
+        typedef std::unique_ptr<Array<T>> ptr_t;
+        using namespace syms;
+        switch (sym) {
+            case(Null):
+                return {};
+            case(None):
+                return ptr_t(new SymNone<T>(norb));
+            case(H):
+                return ptr_t(new SymH<T>(norb));
+            default:
+                return {};
+        }
+    }
+
+    /**
      * when attempting to fill the integral arrays, the highest symmetry is assumed at first. when a counter example to
      * that symmetry assumption is reached, the parse is restarted with the next lower symmetry until the entire
      * integral array can be stored without contradiction
@@ -117,24 +143,15 @@ namespace integrals_1e {
      */
     template<typename T>
     void next_sym_attempt(std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
-        typedef std::unique_ptr<Array<T>> ptr_t;
-        ptr_t new_ptr = nullptr;
-        using namespace syms;
-        const auto norb = ptr->m_norb;
-        switch (sym) {
-            case(Null):
-                ptr = nullptr;
-                return;
-            case(None):
-                new_ptr = ptr_t(new SymNone<T>(norb));
-                break;
-            case(H):
-                new_ptr = ptr_t(new SymH<T>(norb));
-                break;
+        if (!ptr) return;
+        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, sym);
+        if (!new_ptr) {
+            ptr = nullptr;
+            return;
         }
         new_ptr->transfer(ptr.get());
         ptr = std::move(new_ptr);
-        sym = Sym(sym-1);
+        sym = syms::Sym(sym-1);
     }
 }
 

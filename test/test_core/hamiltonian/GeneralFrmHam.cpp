@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
-#include <gtest/gtest.h>
+#include <test_core/defs.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/field/Mbf.h>
 #include "M7_lib/caches/DecodedDeterminants.h"
@@ -48,6 +48,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
 TEST(GeneralFrmHam, Elements) {
     const auto benchmark = 0.01759459248922075;
     GeneralFrmHam frm_ham({defs::assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
+    ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::DHR);
     Hamiltonian h(&frm_ham);
     {
         buffered::FrmOnv src(h.m_basis);
@@ -77,8 +78,7 @@ TEST(GeneralFrmHam, RhfEnergy) {
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
     auto elem = ham.get_element(onv);
-    ASSERT_FLOAT_EQ(consts::real(elem), benchmark);
-    ASSERT_FLOAT_EQ(consts::imag(elem), 1e-14);
+    ASSERT_NEARLY_EQ(elem, benchmark);
     ASSERT_FLOAT_EQ(ham.get_energy(onv), benchmark);
 }
 
@@ -101,4 +101,10 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
             ASSERT_FLOAT_EQ(ham.get_element_1100(onv, conn), 0.0);
         }
     }
+}
+
+
+TEST(GeneralFrmHam, NonHermitian) {
+    GeneralFrmHam frm_ham({defs::assets_root + "/TC_Be_6-31G/FCIDUMP"}, true);
+    ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::DR);
 }

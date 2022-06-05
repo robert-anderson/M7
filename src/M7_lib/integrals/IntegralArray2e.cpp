@@ -6,8 +6,35 @@
 #include "M7_lib/foreach/BasicForeach.h"
 
 
+std::string integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
+    switch (sym) {
+        case Null: return "NULL";
+        case None: return "no";
+        case H: return "2-fold (hermiticity)";
+        case D: return "2-fold (dummy integration variable interchange)";
+        case DH: return "4-fold (complex orbitals)";
+        case DR: return "4-fold (non-hermitian)";
+        case DHR: return "8-fold";
+    }
+    return {};
+}
+
+std::vector<std::string> integrals_2e::syms::equivalences(integrals_2e::syms::Sym sym) {
+    switch (sym) {
+        case Null: return {};
+        case None: return {"<ab|ij>"};
+        case H: return {"<ab|ij>", "<ij|ab>"};
+        case D: return {"<ab|ij>", "<ba|ji>"};
+        case DH: return {"<ab|ij>", "<ba|ji>", "<ij|ab>*", "<ji|ba>*"};
+        case DR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>"};
+        case DHR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>",
+                          "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"};
+    }
+    return {};
+}
+
 integrals_2e::IndexerSymNone::IndexerSymNone(size_t norb) :
-        Indexer(norb, pow(norb, 4ul)), m_norb2(norb * norb), m_norb3(norb * m_norb2) {}
+        Indexer(norb, pow(norb, 4ul), syms::None), m_norb2(norb * norb), m_norb3(norb * m_norb2) {}
 
 size_t integrals_2e::IndexerSymNone::index_only(size_t a, size_t b, size_t i, size_t j) const {
     return a * m_norb3 + b * m_norb2 + i * m_norb + j;
@@ -24,7 +51,7 @@ void integrals_2e::Indexer::foreach(const integrals_2e::foreach_fn_t &fn) const 
 }
 
 
-integrals_2e::IndexerSymH::IndexerSymH(size_t norb) : Indexer(norb, npair(norb*norb)) {}
+integrals_2e::IndexerSymH::IndexerSymH(size_t norb) : Indexer(norb, npair(norb*norb), syms::H) {}
 
 size_t integrals_2e::IndexerSymH::index_only(size_t a, size_t b, size_t i, size_t j) const {
     const auto ab = a*m_norb+b;
@@ -44,13 +71,13 @@ size_t integrals_2e::IndexerSymD::index_only(size_t a, size_t b, size_t i, size_
 }
 
 integrals_2e::IndexerSymDH::IndexerSymDH(size_t norb) :
-        Indexer(norb, 2*npair(npair(norb))), m_hir_size(m_size/2){}
+        Indexer(norb, 2*npair(npair(norb)), syms::DH), m_hir_size(m_size/2){}
 
 std::pair<size_t, bool> integrals_2e::IndexerSymD::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
     return {index_only(a, b, i, j), false};
 }
 
-integrals_2e::IndexerSymD::IndexerSymD(size_t norb) : Indexer(norb, npair(norb*norb)), m_sym_h(norb){}
+integrals_2e::IndexerSymD::IndexerSymD(size_t norb) : Indexer(norb, npair(norb*norb), syms::D), m_sym_h(norb){}
 
 std::pair<size_t, bool> integrals_2e::IndexerSymDH::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
     // let y = <ab|ij>, correct order is x
@@ -112,7 +139,7 @@ size_t integrals_2e::IndexerSymDH::index_only(size_t a, size_t b, size_t i, size
 }
 
 integrals_2e::IndexerSymDR::IndexerSymDR(size_t norb) :
-        Indexer(norb, 2*npair(npair(norb))), m_hir_size(m_size/2){}
+        Indexer(norb, 2*npair(npair(norb)), syms::DR), m_hir_size(m_size/2){}
 
 size_t integrals_2e::IndexerSymDR::index_only(size_t a, size_t b, size_t i, size_t j) const {
     // let y = <ab|ij>, correct order is x
@@ -173,7 +200,7 @@ std::pair<size_t, bool> integrals_2e::IndexerSymDR::index_and_conj(size_t a, siz
     return {index_only(a, b, i, j), false};
 }
 
-integrals_2e::IndexerSymDHR::IndexerSymDHR(size_t norb) : Indexer(norb, npair(npair(norb))){}
+integrals_2e::IndexerSymDHR::IndexerSymDHR(size_t norb) : Indexer(norb, npair(npair(norb)), syms::DHR){}
 
 size_t integrals_2e::IndexerSymDHR::index_only(size_t a, size_t b, size_t i, size_t j) const {
     const auto bj = (b>=j) ? trigmap(b, j) : trigmap(j, b);
@@ -184,31 +211,4 @@ size_t integrals_2e::IndexerSymDHR::index_only(size_t a, size_t b, size_t i, siz
 std::pair<size_t, bool> integrals_2e::IndexerSymDHR::index_and_conj(size_t a, size_t b, size_t i, size_t j) const {
     // always have real orbitals so never any conjugation
     return {index_only(a, b, i, j), false};
-}
-
-std::string integrals_2e::syms::name(integrals_2e::syms::Sym sym) {
-    switch (sym) {
-        case Null: return "NULL";
-        case None: return "none";
-        case H: return "2-fold (hermiticity)";
-        case D: return "2-fold (dummy integration variable interchange)";
-        case DH: return "4-fold (complex orbitals)";
-        case DR: return "4-fold (non-hermitian)";
-        case DHR: return "8-fold";
-    }
-    return {};
-}
-
-std::vector<std::string> integrals_2e::syms::equivalences(integrals_2e::syms::Sym sym) {
-    switch (sym) {
-        case Null: return {};
-        case None: return {"<ab|ij>"};
-        case H: return {"<ab|ij>", "<ij|ab>"};
-        case D: return {"<ab|ij>", "<ba|ji>"};
-        case DH: return {"<ab|ij>", "<ba|ji>", "<ij|ab>*", "<ji|ba>*"};
-        case DR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>"};
-        case DHR: return {"<ab|ij>", "<aj|ib>", "<ba|ji>", "<ja|bi>",
-                          "<aj|ib>", "<ab|ij>", "<bi|ja>", "<ji|ba>"};
-    }
-    return {};
 }
