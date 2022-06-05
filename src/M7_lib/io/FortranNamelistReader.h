@@ -20,11 +20,13 @@ class FortranNamelistReader {
     const bool m_exists;
 
 public:
-    static const std::string c_header_terminator;
+
     const std::string m_fname;
     explicit FortranNamelistReader(std::string fname);
 
     static std::string isolate_value(const std::string &line, const std::string &label);
+
+    static bool contains_terminator(const std::string &line);
 
     static std::vector<std::string> read(const std::string &line, const std::string &label);
 

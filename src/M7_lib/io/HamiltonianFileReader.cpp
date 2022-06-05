@@ -10,7 +10,7 @@ size_t HamiltonianFileReader::iline_fn(const std::string &fname) {
     size_t iline=0ul;
     while (file_reader.next(line)){
         ++iline;
-        if (line.find(FortranNamelistReader::c_header_terminator) < line.size()) return iline;
+        if (FortranNamelistReader::contains_terminator(line)) return iline;
     }
     return ~0ul;
 }

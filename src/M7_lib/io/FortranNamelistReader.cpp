@@ -4,8 +4,6 @@
 
 #include "FortranNamelistReader.h"
 
-const std::string FortranNamelistReader::c_header_terminator = "&END";
-
 FortranNamelistReader::FortranNamelistReader(std::string fname):
         m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){
     if (!m_exists) REQUIRE_TRUE(m_fname.empty(), "cannot read Fortran namelist header from non-existent file: "+m_fname);
@@ -33,6 +31,12 @@ std::string FortranNamelistReader::isolate_value(const std::string &line, const 
     return substring.substr(0, iend);
 }
 
+bool FortranNamelistReader::contains_terminator(const std::string &line) {
+    if (line.find('/')<line.size()) return true;
+    if (line.find("&END")<line.size()) return true;
+    if (line.find("$END")<line.size()) return true;
+    return false;
+}
 
 std::vector<std::string> FortranNamelistReader::read(const std::string &line, const std::string &label) {
     std::vector<std::string> tokens;
@@ -48,7 +52,7 @@ std::vector<std::string> FortranNamelistReader::read(const std::string &label) c
     while (file_reader.next(line)) {
         auto tokens = read(line, label);
         if (!tokens.empty()) return tokens;
-        if (line.find(c_header_terminator)<line.size()) break;
+        if (contains_terminator(line)) break;
     }
     return {};
 }
