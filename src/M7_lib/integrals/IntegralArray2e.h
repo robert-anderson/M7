@@ -244,9 +244,9 @@ namespace integrals_2e {
             Null, None, H, D, DH, DR, DHR
         };
 
-        static std::string name(Sym sym);
+        std::string name(Sym sym);
 
-        static std::vector<std::string> equivalences(Sym sym);
+        std::vector<std::string> equivalences(Sym sym);
     }
 
     /**

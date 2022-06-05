@@ -101,7 +101,7 @@ namespace integrals_1e {
             Null, None, H
         };
 
-        static std::string name(Sym sym);
+        std::string name(Sym sym);
     }
 
     /**

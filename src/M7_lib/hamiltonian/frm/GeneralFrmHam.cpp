@@ -7,6 +7,20 @@
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
 
+void GeneralFrmHam::log_ints_sym(integrals_1e::syms::Sym sym, bool initial) {
+    const std::string context_str = initial ? "initially" : "conflict detected:";
+    log::info("{} assuming {} permutational symmetry for 1e integrals",
+              context_str, integrals_1e::syms::name(sym));
+}
+
+void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
+    const std::string context_str = initial ? "initially" : "conflict detected:";
+    log::info("{} assuming {} permutational symmetry for 2e integrals",
+              context_str, integrals_2e::syms::name(sym));
+    log::info("this storage scheme assumes that {} integrals are equivalent",
+              utils::to_string(integrals_2e::syms::equivalences(sym)));
+}
+
 GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
         FrmHam({info.m_nsite, {PointGroup(), info.m_orbsym}, info.m_spin_resolved}),
         m_info(info) {
@@ -26,7 +40,9 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
      * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
      */
     auto ints_1e_sym = integrals_1e::syms::H;
+    log_ints_sym(ints_1e_sym, true);
     auto ints_2e_sym = m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR;
+    log_ints_sym(ints_2e_sym, true);
 
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
     while (file_reader.next(inds, value)) {
@@ -46,14 +62,20 @@ GeneralFrmHam::GeneralFrmHam(const FcidumpInfo& info, bool spin_major):
             bool success = false;
             while (!success) {
                 success = m_ints_1e->set(inds[0], inds[1], value);
-                if (!success) integrals_1e::next_sym_attempt(m_ints_1e, ints_1e_sym);
+                if (!success) {
+                    integrals_1e::next_sym_attempt(m_ints_1e, ints_1e_sym);
+                    log_ints_sym(ints_1e_sym, false);
+                }
             }
         } else if (ranksig == ex_double) {
             bool success = false;
             while (!success) {
                 // FCIDUMP integral indices are in chemists' ordering
                 success = m_ints_2e->set(inds[0], inds[2], inds[1], inds[3], value);
-                if (!success) integrals_2e::next_sym_attempt(m_ints_2e, ints_2e_sym);
+                if (!success) {
+                    integrals_2e::next_sym_attempt(m_ints_2e, ints_2e_sym);
+                    log_ints_sym(ints_2e_sym, false);
+                }
             }
 
         } else MPI_ABORT("File reader error");

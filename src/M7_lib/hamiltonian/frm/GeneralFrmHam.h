@@ -23,6 +23,10 @@ struct GeneralFrmHam : FrmHam {
 private:
     const FcidumpInfo m_info;
 
+    static void log_ints_sym(integrals_1e::syms::Sym sym, bool initial);
+
+    static void log_ints_sym(integrals_2e::syms::Sym sym, bool initial);
+
 public:
     GeneralFrmHam(const FcidumpInfo& info, bool spin_major);
 
