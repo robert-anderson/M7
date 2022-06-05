@@ -199,8 +199,6 @@ namespace integrals_2e {
 
         virtual T get(size_t a, size_t b, size_t i, size_t j) const = 0;
 
-        virtual void transfer(const Array<T>* higher_sym) = 0;
-
         virtual syms::Sym sym() const = 0;
     };
 
@@ -236,14 +234,6 @@ namespace integrals_2e {
             }
         }
 
-        void transfer(const Array<T> *higher_sym) override {
-            auto fn = [&](size_t a, size_t b, size_t i, size_t j) {
-                bool success = set(a, b, i, j, higher_sym->get(a, b, i, j));
-                REQUIRE_TRUE(success, "error in transferring integral array");
-            };
-            static_cast<const Indexer&>(m_indexer).foreach(fn);
-        }
-
         syms::Sym sym() const override {
             return static_cast<const Indexer&>(m_indexer).m_sym;
         }
@@ -267,7 +257,7 @@ namespace integrals_2e {
      *  new instance of the type corresponding to the requested symmetry
      */
     template<typename T>
-    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym& sym){
+    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym sym){
         typedef std::unique_ptr<Array<T>> ptr_t;
         using namespace syms;
         switch (sym) {
@@ -298,22 +288,17 @@ namespace integrals_2e {
      *  matrix element type
      * @param ptr
      *  smart pointer to the currently-allocated array
-     * @param sym
-     *  the symmetry to use in the new allocation (decremented at output)
      */
     template<typename T>
-    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
+    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr){
         if (!ptr) return;
-        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, sym);
+        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, syms::Sym(ptr->sym()-1));
         if (!new_ptr) {
             ptr = nullptr;
             return;
         }
-        new_ptr->transfer(ptr.get());
         ptr = std::move(new_ptr);
-        sym = syms::Sym(sym-1);
     }
-
 }
 
 #endif //M7_INTEGRALARRAY2E_H

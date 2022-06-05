@@ -10,10 +10,23 @@
 #include "IntegralStorage.h"
 
 namespace integrals_1e {
+    using namespace integer_utils;
+
+    typedef std::function<void(size_t, size_t)> foreach_fn_t;
+
+    namespace syms {
+        enum Sym {
+            Null, None, H
+        };
+
+        std::string name(Sym sym);
+    }
+
 
     struct Indexer : IntegralIndexer {
-        Indexer(size_t norb, size_t size): IntegralIndexer(norb, size){}
-        virtual void foreach(const std::function<void(size_t, size_t)>& fn) const = 0;
+        const syms::Sym m_sym;
+        Indexer(size_t norb, size_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
+        virtual void foreach(const foreach_fn_t& fn) const = 0;
     };
 
     struct IndexerSymNone : Indexer {
@@ -23,7 +36,7 @@ namespace integrals_1e {
 
         std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
 
-        void foreach(const std::function<void(size_t, size_t)> &fn) const override;
+        void foreach(const foreach_fn_t &fn) const override;
     };
 
     using namespace integer_utils;
@@ -35,7 +48,7 @@ namespace integrals_1e {
 
         std::pair<size_t, bool> index_and_conj(size_t a, size_t i) const;
 
-        void foreach(const std::function<void(size_t, size_t)> &fn) const override;
+        void foreach(const foreach_fn_t &fn) const override;
     };
 
     template<typename T>
@@ -48,8 +61,7 @@ namespace integrals_1e {
 
         virtual T get(size_t a, size_t i) const = 0;
 
-        virtual void transfer(const Array<T>* higher_sym) = 0;
-
+        virtual syms::Sym sym() const = 0;
     };
 
     template<typename indexer_t, typename T>
@@ -62,14 +74,6 @@ namespace integrals_1e {
 
         IndexedArray(size_t norb) : Array<T>(norb), m_indexer(norb),
             m_data(static_cast<const Indexer&>(m_indexer).m_size) {}
-
-        void transfer(const Array<T>* higher_sym) override {
-            auto fn = [&](size_t a, size_t i){
-                bool success = set(a, i, higher_sym->get(a, i));
-                REQUIRE_TRUE(success, "error in transferring 2e integral array");
-            };
-            static_cast<const Indexer&>(m_indexer).foreach(fn);
-        }
 
         bool set(size_t a, size_t i, T elem) override {
             // any compiler should statically execute this conditional
@@ -91,18 +95,15 @@ namespace integrals_1e {
                 return pair.second ? consts::conj(element) : element;
             }
         }
+
+        syms::Sym sym() const override {
+            return static_cast<const Indexer&>(m_indexer).m_sym;
+        }
+
     };
 
     template<typename T> using SymNone = IndexedArray<IndexerSymNone, T>;
     template<typename T> using SymH = IndexedArray<IndexerSymH, T>;
-
-    namespace syms {
-        enum Sym {
-            Null, None, H
-        };
-
-        std::string name(Sym sym);
-    }
 
     /**
      * @tparam T
@@ -138,20 +139,16 @@ namespace integrals_1e {
      *  matrix element type
      * @param ptr
      *  smart pointer to the currently-allocated array
-     * @param sym
-     *  the symmetry to use in the new allocation (decremented at output)
      */
     template<typename T>
-    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr, syms::Sym& sym){
+    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr){
         if (!ptr) return;
-        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, sym);
+        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, syms::Sym(ptr->sym()-1));
         if (!new_ptr) {
             ptr = nullptr;
             return;
         }
-        new_ptr->transfer(ptr.get());
         ptr = std::move(new_ptr);
-        sym = syms::Sym(sym-1);
     }
 }
 

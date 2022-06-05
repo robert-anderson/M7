@@ -37,17 +37,20 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool 
      * initialize permutational symmetries.
      * if the source is complex-valued, then it cannot have DHR symmetry (and still represent a physical Hamiltonian)
      */
-    auto ints_1e_sym = integrals_1e::syms::H;
-    log_ints_sym(ints_1e_sym, true);
-    auto ints_1e = integrals_1e::make<defs::ham_t>(m_basis.ncoeff_ind(), ints_1e_sym);
+    auto ints_1e = integrals_1e::make<defs::ham_t>(m_basis.ncoeff_ind(), integrals_1e::syms::H);
+    log_ints_sym(ints_1e->sym(), true);
     REQUIRE_TRUE(ints_1e.get(), "1e integral array object unallocated");
-    auto ints_2e_sym = m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR;
-    log_ints_sym(ints_2e_sym, true);
-    auto ints_2e = integrals_2e::make<defs::ham_t>(m_basis.ncoeff_ind(), ints_2e_sym);
+    auto ints_2e = integrals_2e::make<defs::ham_t>(m_basis.ncoeff_ind(), m_complex_valued ? integrals_2e::syms::DR : integrals_2e::syms::DHR);
+    log_ints_sym(ints_2e->sym(), true);
     REQUIRE_TRUE(ints_2e.get(), "2e integral array object unallocated");
 
+    size_t iline_first_2e = ~0ul;
+    size_t iline_first_1e = ~0ul;
+
     log::info("Reading fermion Hamiltonian coefficients from FCIDUMP file \"" + file_reader.m_fname + "\"...");
+    size_t iline = ~0ul;
     while (file_reader.next(inds, value)) {
+        ++iline;
         if (consts::nearly_zero(value, defs::helem_tol)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
@@ -61,24 +64,28 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool 
         rank_contrib.set_nonzero(exsig);
 
         if (ranksig == ex_single) {
+            if (iline_first_1e==~0ul) iline_first_1e = iline;
             bool success = false;
             while (!success) {
                 success = ints_1e->set(inds[0], inds[1], value);
                 if (!success) {
-                    integrals_1e::next_sym_attempt(ints_1e, ints_1e_sym);
-                    REQUIRE_FALSE(ints_1e_sym==integrals_1e::syms::Null, "inconsistent element(s) in FCIDUMP");
-                    log_ints_sym(ints_1e_sym, false);
+                    integrals_1e::next_sym_attempt(ints_1e);
+                    file_reader.reset(iline_first_1e);
+                    iline = iline_first_1e-1;
+                    log_ints_sym(ints_1e->sym(), false);
                 }
             }
         } else if (ranksig == ex_double) {
+            if (iline_first_2e==~0ul) iline_first_2e = iline;
             bool success = false;
             while (!success) {
                 // FCIDUMP integral indices are in chemists' ordering
                 success = ints_2e->set(inds[0], inds[2], inds[1], inds[3], value);
                 if (!success) {
-                    integrals_2e::next_sym_attempt(ints_2e, ints_2e_sym);
-                    REQUIRE_FALSE(ints_2e_sym==integrals_2e::syms::Null, "inconsistent element(s) in FCIDUMP");
-                    log_ints_sym(ints_2e_sym, false);
+                    integrals_2e::next_sym_attempt(ints_2e);
+                    file_reader.reset(iline_first_2e);
+                    iline = iline_first_2e-1;
+                    log_ints_sym(ints_2e->sym(), false);
                 }
             }
 

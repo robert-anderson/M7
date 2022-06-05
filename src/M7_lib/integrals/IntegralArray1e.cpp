@@ -4,7 +4,17 @@
 
 #include "IntegralArray1e.h"
 
-integrals_1e::IndexerSymNone::IndexerSymNone(size_t norb) : Indexer(norb, norb * norb) {}
+
+std::string integrals_1e::syms::name(integrals_1e::syms::Sym sym) {
+    switch (sym) {
+        case Null: return "NULL";
+        case None: return "no";
+        case H: return "hermitian";
+    }
+    return {};
+}
+
+integrals_1e::IndexerSymNone::IndexerSymNone(size_t norb) : Indexer(norb, norb * norb, syms::None) {}
 
 size_t integrals_1e::IndexerSymNone::index_only(size_t a, size_t i) const {
     return a * m_norb + i;
@@ -22,7 +32,7 @@ void integrals_1e::IndexerSymNone::foreach(const std::function<void(size_t, size
     }
 }
 
-integrals_1e::IndexerSymH::IndexerSymH(size_t norb) : Indexer(norb, npair(norb)) {}
+integrals_1e::IndexerSymH::IndexerSymH(size_t norb) : Indexer(norb, npair(norb), syms::H) {}
 
 size_t integrals_1e::IndexerSymH::index_only(size_t a, size_t i) const {
     return a>=i ? trigmap(a, i) : trigmap(i, a);
@@ -39,13 +49,4 @@ void integrals_1e::IndexerSymH::foreach(const std::function<void(size_t, size_t)
             fn(a, i);
         }
     }
-}
-
-std::string integrals_1e::syms::name(integrals_1e::syms::Sym sym) {
-    switch (sym) {
-        case Null: return "NULL";
-        case None: return "no";
-        case H: return "hermitian";
-    }
-    return {};
 }

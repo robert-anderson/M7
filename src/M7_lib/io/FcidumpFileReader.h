@@ -47,7 +47,6 @@ struct FcidumpFileReader : public HamiltonianFileReader {
 
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
-    size_t m_isymm, m_int_2e_rank;
 
     FcidumpFileReader(const std::string &fname, bool spin_major);
 
@@ -62,8 +61,6 @@ struct FcidumpFileReader : public HamiltonianFileReader {
     void convert_inds(defs::inds &inds);
 
     bool next(defs::inds &inds, defs::ham_t &v);
-
-    void set_symm_and_rank();
 
     size_t ranksig(const defs::inds &inds) const override;
 

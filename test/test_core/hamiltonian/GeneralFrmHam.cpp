@@ -106,5 +106,5 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
 
 TEST(GeneralFrmHam, NonHermitian) {
     GeneralFrmHam frm_ham({defs::assets_root + "/TC_Be_6-31G/FCIDUMP"}, true);
-    ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::DR);
+    ASSERT_EQ(frm_ham.m_ints.m_2e->sym(), integrals_2e::syms::D);
 }
