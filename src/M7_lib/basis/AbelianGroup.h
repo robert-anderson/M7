@@ -83,6 +83,7 @@ struct AbelianGroupMap {
     bool operator==(const AbelianGroupMap& other) const;
 
     operator bool() const;
+    
 };
 
 #endif //M7_ABELIANGROUP_H

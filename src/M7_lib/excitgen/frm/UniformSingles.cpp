@@ -49,7 +49,14 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &s
     integer_utils::inv_rectmap(i, a, nvac, ia);
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
+    prob = 1.0 / ncases;
     return true;
+}
+
+defs::prob_t UniformSingles::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+    auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
+    if (spin_conserving) return prob_spin_conserve_fn(src, conn);
+    return prob_spin_nonconserve_fn(src, conn);
 }
 
 size_t UniformSingles::approx_nconn(size_t exsig, sys::Particles particles) const {

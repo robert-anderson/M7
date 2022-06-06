@@ -89,6 +89,8 @@ namespace decoded_mbf {
             void clear();
 
             bool empty();
+
+            size_t label(size_t ispinorb) const;
         };
 
         /**

@@ -76,6 +76,11 @@ bool decoded_mbf::frm::LabelledBase::empty() {
     return m_simple_inds.empty();
 }
 
+size_t decoded_mbf::frm::LabelledBase::label(size_t ispinorb) const {
+    DEBUG_ASSERT_LT(ispinorb, m_map.size(), "spin orbital index OOB");
+    return m_map[ispinorb];
+}
+
 decoded_mbf::frm::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
