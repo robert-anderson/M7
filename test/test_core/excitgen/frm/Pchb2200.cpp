@@ -7,7 +7,7 @@
 #include "M7_lib/field/Mbf.h"
 #include "M7_lib/excitgen/frm/Pchb2200.h"
 
-TEST(HeatBathDoubles, FromHFDeterminant) {
+TEST(Pchb2200, FromHFDeterminant) {
     PRNG prng(14, 1000000);
     GeneralFrmHam frm_ham({defs::assets_root + "/RHF_LiH_STO-3G/FCIDUMP"}, true);
     Hamiltonian h(&frm_ham);
@@ -28,7 +28,7 @@ TEST(HeatBathDoubles, FromHFDeterminant) {
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
 }
 
-TEST(HeatBathDoubles, FromExcited){
+TEST(Pchb2200, FromExcited){
     PRNG prng(14, 1000000);
     GeneralFrmHam frm_ham({defs::assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
     Hamiltonian h(&frm_ham);
