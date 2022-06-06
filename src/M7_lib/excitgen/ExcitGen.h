@@ -46,9 +46,16 @@ struct ExcitGen {
     /*
      * get the probability of the excitgen drawing conn given the src MBF
      */
-    virtual defs::prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn){return 0.0;}
-    virtual defs::prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn){return 0.0;}
-    virtual defs::prob_t prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn){return 0.0;}
+    virtual defs::prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {return 0.0;}
+    virtual defs::prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const {return 0.0;}
+    virtual defs::prob_t prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const {return 0.0;}
+
+    /*
+     * get the probability of the excitgen drawing conn given the src MBF and the ham matrix element already computed
+     */
+    virtual defs::prob_t prob_h_frm(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const;
+    virtual defs::prob_t prob_h_bos(const field::BosOnv &src, const conn::BosOnv &conn, defs::ham_t helem) const;
+    virtual defs::prob_t prob_h_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const ;
 
     /*
      * here are defined homogeneously-named, statically defined dispatchers for the heterogeneously-named virtual
@@ -76,9 +83,13 @@ struct ExcitGen {
               defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
 
 
-    virtual defs::prob_t prob(const field::FrmOnv &src, const conn::FrmOnv &conn);
-    virtual defs::prob_t prob(const field::BosOnv &src, const conn::BosOnv &conn);
-    virtual defs::prob_t prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn);
+    defs::prob_t prob(const field::FrmOnv &src, const conn::FrmOnv &conn) const;
+    defs::prob_t prob(const field::BosOnv &src, const conn::BosOnv &conn) const;
+    defs::prob_t prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const;
+
+    defs::prob_t prob(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const;
+    defs::prob_t prob(const field::BosOnv &src, const conn::BosOnv &conn, defs::ham_t helem) const;
+    defs::prob_t prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const;
 
     virtual size_t approx_nconn(size_t exsig, sys::Particles particles) const {
         return 1ul;

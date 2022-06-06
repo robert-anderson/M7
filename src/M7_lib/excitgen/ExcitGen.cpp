@@ -37,8 +37,40 @@ bool ExcitGen::draw(const size_t &exsig, const field::BosOnv &src, defs::prob_t 
     return success &! consts::nearly_zero(helem, defs::helem_tol);
 }
 
-defs::prob_t ExcitGen::prob(const field::FrmOnv &src, const conn::FrmOnv &conn) {return prob_frm(src, conn);}
 
-defs::prob_t ExcitGen::prob(const field::BosOnv &src, const conn::BosOnv &conn) {return prob_bos(src, conn);}
+defs::prob_t ExcitGen::prob_h_frm(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const  {
+    return prob_frm(src, conn);
+}
 
-defs::prob_t ExcitGen::prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) {return prob_frmbos(src, conn);}
+defs::prob_t ExcitGen::prob_h_bos(const field::BosOnv &src, const conn::BosOnv &conn, defs::ham_t helem) const  {
+    return prob_bos(src, conn);
+}
+
+defs::prob_t ExcitGen::prob_h_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const  {
+    return prob_frmbos(src, conn);
+}
+
+
+defs::prob_t ExcitGen::prob(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+    return prob_frm(src, conn);
+}
+
+defs::prob_t ExcitGen::prob(const field::BosOnv &src, const conn::BosOnv &conn)  const {
+    return prob_bos(src, conn);
+}
+
+defs::prob_t ExcitGen::prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const  {
+    return prob_frmbos(src, conn);
+}
+
+defs::prob_t ExcitGen::prob(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const  {
+    return prob_h_frm(src, conn, helem);
+}
+
+defs::prob_t ExcitGen::prob(const field::BosOnv &src, const conn::BosOnv &conn, defs::ham_t helem) const  {
+    return prob_h_bos(src, conn, helem);
+}
+
+defs::prob_t ExcitGen::prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const  {
+    return prob_h_frmbos(src, conn, helem);
+}

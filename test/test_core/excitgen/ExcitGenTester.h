@@ -29,6 +29,14 @@ namespace excit_gen_tester {
 
     typedef BufferedTable<ResultRow, true> result_table_t;
 
+
+    struct RunStatus {
+        const size_t m_nnull;
+        const std::string m_error_message;
+        RunStatus(size_t nnull): m_nnull(nnull){}
+        RunStatus(std::string error_message): m_nnull(~0ul), m_error_message(std::move(error_message)){}
+    };
+
     struct ExcitGenTester {
         const Hamiltonian &m_h;
         ExcitGen& m_excit_gen;
@@ -68,14 +76,14 @@ namespace excit_gen_tester {
         }
 
         template<typename mbf_t>
-        size_t run(const mbf_t &src_mbf, size_t ndraw) {
+        RunStatus run(const mbf_t &src_mbf, size_t ndraw) {
             typedef conn::from_field_t<mbf_t> conn_t;
             conn_t conn(src_mbf);
             size_t exsig = m_conn_iter.m_exsig;
             buffered::MaeInds work_inds(m_conn_iter.m_exsig);
             size_t nnull = 0ul;
 
-            DEBUG_ASSERT_FALSE(m_results.is_cleared(), "no connections were found by the excitation iterator");
+            REQUIRE_FALSE(m_results.is_cleared(), "no connections were found by the excitation iterator");
             defs::prob_t prob = 0.0;
             defs::ham_t helem = 0.0;
             auto &row = m_results.m_row;
@@ -85,18 +93,22 @@ namespace excit_gen_tester {
                     ++nnull;
                     continue;
                 }
-                DEBUG_ASSERT_FALSE(consts::nearly_zero(prob), "non-null excitation generated with zero prob!");
-                DEBUG_ASSERT_EQ(conn.exsig(), exsig, "generated excitation has the wrong exsig");
+                if (consts::nearly_zero(prob)) return {"non-null excitation generated with zero prob!"};
+                if (!consts::nearly_equal(prob, m_excit_gen.prob(src_mbf, conn)))
+                    return {"prob of connection doesn't match prob resulting from the draw method"};
+                if (!consts::nearly_equal(prob, m_excit_gen.prob(src_mbf, conn, helem)))
+                    return {"prob of connection doesn't match prob resulting from the draw method given helem"};
+                if (conn.exsig()!=exsig) return {"generated excitation has the wrong exsig"};
                 work_inds = conn;
                 auto irow = *m_results[work_inds];
-                DEBUG_ASSERT_NE(irow, ~0ul, "excit generated that was not found in deterministic enumeration");
+                if (irow==~0ul) return {"excit generated that was not found in deterministic enumeration"};
                 row.jump(irow);
                 row.m_occur++;
                 row.m_weight += 1 / prob;
-                DEBUG_ASSERT_TRUE(consts::nearly_equal(defs::ham_t(row.m_helem), helem),
-                                  "excit gen returned the wrong H matrix element");
+                if (!consts::nearly_equal(defs::ham_t(row.m_helem), helem))
+                    return {"excit gen returned the wrong H matrix element"};
             }
-            return nnull;
+            return {nnull};
         }
 
         /**

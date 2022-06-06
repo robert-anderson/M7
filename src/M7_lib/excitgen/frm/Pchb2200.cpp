@@ -86,6 +86,17 @@ bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::pro
     return draw_h_frm(exsig, src, prob, helem, conn);
 }
 
+defs::prob_t Pchb2200::prob_h_frm(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const {
+    const auto &occs = src.m_decoded.m_simple_occs.get();
+    const auto npair_elec = integer_utils::nspair(occs.size());
+    auto ij = integer_utils::strigmap(conn.m_ann[1], conn.m_ann[0]);
+    return std::abs(helem) / (m_pick_ab_given_ij.norm(ij)*npair_elec);
+}
+
+defs::prob_t Pchb2200::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+    return prob_h_frm(src, conn, m_h.get_element_2200(src, conn));
+}
+
 size_t Pchb2200::approx_nconn(size_t exsig, sys::Particles particles) const {
     return particles.m_frm.m_npair * m_nspinorb_pair;
 }

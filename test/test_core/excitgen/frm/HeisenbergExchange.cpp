@@ -19,10 +19,10 @@ TEST(HeisenbergExchange, Pbc2D) {
     mbf::set_neel_mbf(src_mbf, h.default_particles().m_frm);
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 1000000;
-    tester.run(src_mbf, ndraw);
+    ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);
-    tester.run(src_mbf, ndraw);
+    ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     auto av_err2 = tester.mean_abs_error(2 * ndraw);
     ASSERT_LE(av_err2, av_err1);
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));

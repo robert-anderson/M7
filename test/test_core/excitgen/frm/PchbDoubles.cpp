@@ -19,10 +19,10 @@ TEST(HeatBathDoubles, FromHFDeterminant) {
 
     tester.fill_results_table(src_mbf);
     const size_t ndraw = 10000000;
-    tester.run(src_mbf, ndraw);
+    ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);
-    tester.run(src_mbf, ndraw);
+    ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     auto av_err2 = tester.mean_abs_error(2 * ndraw);
     ASSERT_LE(av_err2, av_err1);
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
@@ -38,6 +38,6 @@ TEST(HeatBathDoubles, FromExcited){
     buffered::FrmOnv src_mbf(frm_ham.m_basis);
     src_mbf = {{0, 1, 3}, {1, 2, 4}};
     tester.fill_results_table(src_mbf);
-    tester.run(src_mbf, 50000000);
+    ASSERT_EQ(tester.run(src_mbf, 50000000).m_error_message, "");
     ASSERT_TRUE(tester.all_drawn_at_least_once());
 }
