@@ -24,8 +24,9 @@
 namespace lattice {
 
     struct AdjElement {
-        const size_t m_isite;
-        const int m_phase;
+        size_t m_isite;
+        int m_phase;
+        bool operator==(const AdjElement& other) const;
     };
     typedef std::vector<AdjElement> adj_row_t;
 

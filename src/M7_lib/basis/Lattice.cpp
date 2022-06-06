@@ -4,6 +4,11 @@
 
 #include "Lattice.h"
 
+
+bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
+    return m_isite==other.m_isite && m_phase==other.m_phase;
+}
+
 lattice::Base::Base(const defs::inds &nadjs) :
         m_nsite(nadjs.size()), m_nadjs(nadjs), m_unique_nadj_product(make_unique_nadj_product()),
         m_nadj_max(make_nadj_max()){}
@@ -74,16 +79,16 @@ void lattice::OrthoTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) 
         const auto bc = m_bcs[idim];
         if (!max_ind) continue;
         if (max_ind == 1ul) {
-            row.push_back({isite_adj(iinds, idim, !max_ind), 1});
+            row.push_back({isite_adj(iinds, idim, !ind), 1});
             continue;
         }
         if (ind == 0) {
+            if (bc) row.push_back({isite_adj(iinds, idim, max_ind), bc});
             row.push_back({isite_adj(iinds, idim, 1ul), 1});
-            if (!bc) row.push_back({isite_adj(iinds, idim, max_ind), bc});
         }
         else if (ind == max_ind) {
             row.push_back({isite_adj(iinds, idim, max_ind - 1), 1});
-            if (!bc) row.push_back({isite_adj(iinds, idim, 0ul), bc});
+            if (bc) row.push_back({isite_adj(iinds, idim, 0ul), bc});
         }
         else {
             row.push_back({isite_adj(iinds, idim, ind - 1), 1});
