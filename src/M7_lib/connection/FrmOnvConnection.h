@@ -23,14 +23,12 @@ public:
     FrmOps(const FrmOps& other): FrmOps(other.m_sites){}
 
     FrmOps& operator=(const FrmOps& other){
-        DEBUG_ASSERT_EQ(other.m_inds.capacity(), m_inds.capacity(), "incompatible FrmOps instances");
-        m_inds.assign(other.m_inds.cbegin(), other.m_inds.cend());
+        m_inds = other.m_inds;
         return *this;
     }
 
     FrmOps& operator=(const defs::inds& inds){
-        DEBUG_ASSERT_LT(inds.size(), m_inds.capacity(), "incompatible FrmOps instances");
-        m_inds.assign(inds.cbegin(), inds.cend());
+        m_inds = inds;
         return *this;
     }
 
@@ -55,16 +53,9 @@ public:
         return m_inds.size();
     }
 
-    size_t capacity() const {
-        return m_inds.capacity();
-    }
-
     void add(const size_t &i) {
         DEBUG_ASSERT_TRUE(m_inds.empty() || i > m_inds.back(),
                           "spin orbital indices should be added in ascending order");
-        DEBUG_ASSERT_LT(i, capacity(), "spin orbital index is OOB");
-        DEBUG_ASSERT_LT(size(), capacity(),
-                        "should never have more fermion operators than spin orbitals");
         m_inds.push_back(i);
     }
 
@@ -270,10 +261,6 @@ public:
      */
     size_t size() const {
         return m_cre.size()+m_ann.size();
-    }
-
-    size_t nsite() const {
-        return m_cre.capacity() / 2;
     }
 
     bool kramers_conserve() const {

@@ -36,3 +36,9 @@ bool ExcitGen::draw(const size_t &exsig, const field::BosOnv &src, defs::prob_t 
     auto success = draw_h_bos(exsig, src, prob, helem, conn);
     return success &! consts::nearly_zero(helem, defs::helem_tol);
 }
+
+defs::prob_t ExcitGen::prob(const field::FrmOnv &src, const conn::FrmOnv &conn) {return prob_frm(src, conn);}
+
+defs::prob_t ExcitGen::prob(const field::BosOnv &src, const conn::BosOnv &conn) {return prob_bos(src, conn);}
+
+defs::prob_t ExcitGen::prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) {return prob_frmbos(src, conn);}

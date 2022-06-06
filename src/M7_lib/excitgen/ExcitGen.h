@@ -44,6 +44,13 @@ struct ExcitGen {
 
 
     /*
+     * get the probability of the excitgen drawing conn given the src MBF
+     */
+    virtual defs::prob_t prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn){return 0.0;}
+    virtual defs::prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn){return 0.0;}
+    virtual defs::prob_t prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn){return 0.0;}
+
+    /*
      * here are defined homogeneously-named, statically defined dispatchers for the heterogeneously-named virtual
      * functions above. all draw_* functions could have been implemented as an overloaded virtual draw method if it were
      * not for the standard requirement that methods cannot be partially overridden. This dispatcher approach helps
@@ -67,6 +74,11 @@ struct ExcitGen {
 
     bool draw(const size_t &exsig, const field::BosOnv &src,
               defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
+
+
+    virtual defs::prob_t prob(const field::FrmOnv &src, const conn::FrmOnv &conn);
+    virtual defs::prob_t prob(const field::BosOnv &src, const conn::BosOnv &conn);
+    virtual defs::prob_t prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn);
 
     virtual size_t approx_nconn(size_t exsig, sys::Particles particles) const {
         return 1ul;

@@ -39,8 +39,6 @@ void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
 
 bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, FrmOps &com) {
     DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
-    DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
-                    "common operator string capacity does not match that of excitation arrays");
     connect(src, dst);
     com.clear();
     size_t nperm = 0ul;
@@ -103,8 +101,6 @@ void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
 }
 
 bool FrmOnvConnection::apply(const FrmOnvField &src, FrmOps &com) const {
-    DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
-                    "common operator string capacity does not match that of excitation arrays");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     com.clear();
@@ -169,9 +165,9 @@ void FrmOnvConnection::update_dataword_phases(const FrmOnvField &src) const {
 }
 
 bool FrmOnvConnection::independent_phase(const FrmOnvField &src, const size_t &ibit) const {
-    DEBUG_ASSERT_TRUE(ibit<m_cre.capacity(), "spin orbital index is OOB");
+    DEBUG_ASSERT_LT(ibit, src.m_basis.m_nspinorb, "spin orbital index OOB");
     auto idataword = ibit / defs::nbit_word;
-    DEBUG_ASSERT_TRUE(idataword<m_ndataword, "dataword index is OOB");
+    DEBUG_ASSERT_LT(idataword, m_ndataword, "dataword index OOB");
     auto ibit_in_word = ibit - idataword * defs::nbit_word;
     return m_dataword_phases[idataword] ^
            (bit_utils::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);
