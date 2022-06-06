@@ -168,23 +168,25 @@ namespace conn_foreach {
 
 
         struct Hubbard : Base {
-            const Lattice &m_lattice;
-
-            Hubbard(const Lattice &lattice) : Base(exsig_utils::ex_single), m_lattice(lattice) {}
+            Hubbard() : Base(exsig_utils::ex_single) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
+                const auto lattice = src.m_basis.m_lattice;
+                REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
+                lattice::adj_row_t adj_row;
                 for (const auto &occ: occs) {
                     conn.m_ann.clear();
                     conn.m_ann.add(occ);
                     auto ispin_occ = src.m_basis.ispin(occ);
                     auto isite_occ = src.m_basis.isite(occ);
-                    auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
-                    for (const auto &i: coordinated_sites) {
-                        if (src.get({ispin_occ, i})) continue;
+                    lattice->get_adj_row(isite_occ, adj_row);
+                    for (const auto &adj_elem: adj_row) {
+                        auto vac = src.m_basis.ispinorb(ispin_occ, adj_elem.m_isite);
+                        if (src.get(vac)) continue;
                         conn.m_cre.clear();
-                        conn.m_cre.add({ispin_occ, i});
+                        conn.m_cre.add(vac);
                         fn(conn);
                     }
                 }
@@ -203,22 +205,24 @@ namespace conn_foreach {
 
 
         struct Heisenberg : Base {
-            const Lattice &m_lattice;
-
-            Heisenberg(const Lattice &lattice) : Base(exsig_utils::ex_double), m_lattice(lattice) {}
+            Heisenberg() : Base(exsig_utils::ex_double) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
+                const auto lattice = src.m_basis.m_lattice;
+                REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
+                lattice::adj_row_t adj_row;
                 for (const auto &occ: occs) {
                     auto ispin_occ = src.m_basis.ispin(occ);
                     if (ispin_occ) return; // all alpha bits have been dealt with
                     auto isite_occ = src.m_basis.isite(occ);
                     // cannot exchange if the site is doubly occupied:
                     if (src.get({!ispin_occ, isite_occ})) continue;
-                    auto coordinated_sites = m_lattice.m_sparse[isite_occ].first;
-                    for (const auto &i: coordinated_sites) {
+                    lattice->get_adj_row(isite_occ, adj_row);
+                    for (const auto &adj_elem: adj_row) {
+                        const auto i = adj_elem.m_isite;
                         if (src.get({ispin_occ, i})) continue;
                         if (!src.get({!ispin_occ, i})) continue;
                         conn.m_ann.set({0, isite_occ}, {1, i});

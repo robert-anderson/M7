@@ -9,6 +9,7 @@
 
 #include <M7_lib/parallel/MPIAssert.h>
 #include "AbelianGroup.h"
+#include "Lattice.h"
 
 namespace conservation {
     enum State {Undefined, Yes, No, Hint};
@@ -168,6 +169,10 @@ namespace sys {
              * true if the two spin orbitals corresponding to the same site have identical functional form e.g. in UHF basis
              */
             const bool m_spin_resolved;
+            /**
+             * set to non-null if the basis has lattice structure
+             */
+            const std::shared_ptr<lattice::Base> m_lattice;
 
         private:
             using Size::operator unsigned long;
@@ -178,8 +183,14 @@ namespace sys {
                 return m_nsite;
             }
 
+            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Base> lattice):
+                    Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved), m_lattice(lattice){}
+
+            Basis(std::shared_ptr<lattice::Base> lattice):
+                Basis(lattice->m_nsite, {lattice->m_nsite}, false, lattice){}
+
             Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved):
-                    Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved){}
+                Basis(nsite, abgrp_map, spin_resolved, nullptr){}
             /*
              * non-resolved spin, C1 point group (no spatial symmetry)
              */

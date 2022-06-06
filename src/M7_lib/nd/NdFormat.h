@@ -276,6 +276,7 @@ public:
 
 template <size_t nind>
 struct NdEnumeration : NdFormat<nind>{
+private:
     const std::vector<std::array<size_t, nind>> m_inds;
 
     static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
@@ -291,9 +292,10 @@ struct NdEnumeration : NdFormat<nind>{
         return out;
     }
 
+public:
     NdEnumeration(const NdFormat<nind>& format): NdFormat<nind>(format), m_inds(make_inds(format)){}
 
-    const std::array<size_t, nind>& operator[](const size_t& i){
+    const std::array<size_t, nind>& operator[](const size_t& i) const {
         return m_inds[i];
     }
 

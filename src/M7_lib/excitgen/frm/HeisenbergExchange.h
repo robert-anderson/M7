@@ -8,8 +8,7 @@
 #include "FrmExcitGen.h"
 #include "M7_lib/hamiltonian/frm/HeisenbergFrmHam.h"
 
-struct HeisenbergExchange : FrmExcitGen {
-
+struct HeisenbergExchange : FrmLatticeExcitGen {
     HeisenbergExchange(const FrmHam &h, PRNG &prng);
 
     virtual ~HeisenbergExchange() {}

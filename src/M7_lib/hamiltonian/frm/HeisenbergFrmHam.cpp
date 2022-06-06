@@ -4,12 +4,14 @@
 
 #include "HeisenbergFrmHam.h"
 
-HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, Lattice lattice) :
-        SpinModelFrmHam(lattice.nsite()), m_j(j), m_lattice(std::move(lattice)){
+
+HeisenbergFrmHam::HeisenbergFrmHam(defs::ham_t j, const std::shared_ptr<lattice::Base> &lattice) :
+    SpinModelFrmHam(lattice), m_j(j){
     m_contribs_2200.set_nonzero(exsig_utils::ex_double);
     m_contribs_2200.set_nonzero(0);
-    log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_lattice.info());
+    log::info("Heisenberg Hamiltonian initialized with J={}; {}", m_j, m_basis.m_lattice->info());
 }
+
 
 HeisenbergFrmHam::HeisenbergFrmHam(FrmHam::opt_pair_t opts) :
         HeisenbergFrmHam(opts.m_ham.m_heisenberg.m_coupling, lattice::make(opts.m_ham.m_heisenberg)){}
@@ -36,7 +38,7 @@ defs::ham_t HeisenbergFrmHam::get_coeff_2200(size_t a, size_t b, size_t i, size_
         return 0.0;
     }
     // fermi phase not included here, minus sign is due to product of opposite spins
-    return -m_j * m_lattice.m_dense(asite, bsite) / 2.0;
+    return -m_j * m_basis.m_lattice->phase(asite, bsite) / 2.0;
 }
 
 defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
@@ -50,14 +52,13 @@ defs::ham_t HeisenbergFrmHam::get_element_0000(const field::FrmOnv &onv) const {
     for (size_t isite=0ul; isite<m_basis.m_nsite; ++isite){
         DEBUG_ASSERT_EQ(onv.site_nocc(isite), 1ul,
                         "spin system is assumed, must not have unoccupied or doubly occupied sites");
-        auto row = m_lattice.m_sparse[isite];
-        auto nneigh = row.first.size();
+        m_basis.m_lattice->get_adj_row(isite, m_work_adj_row);
         int sj_tot = 0;
-        for (size_t ineigh=0ul; ineigh<nneigh; ++ineigh) {
-            auto jsite = row.first[ineigh];
+        for (const auto& elem: m_work_adj_row){
+            auto jsite = elem.m_isite;
             if (jsite<isite) continue; // don't double count contributions
             int jspin = onv.get({0, jsite}) ? 1: -1;
-            sj_tot+= row.second[ineigh]*jspin;
+            sj_tot+= elem.m_phase*jspin;
         }
         int ispin = onv.get({0, isite}) ? 1: -1;
         si_sj_tot+=sj_tot*ispin;

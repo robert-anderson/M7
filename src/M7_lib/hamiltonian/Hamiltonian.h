@@ -334,6 +334,7 @@ public:
     sys::Particles default_particles(const conf::Particles &opts) const {
         return default_particles(opts.m_nelec, opts.m_ms2, opts.m_nboson);
     }
+
 };
 
 #endif //M7_HAMILTONIAN_H

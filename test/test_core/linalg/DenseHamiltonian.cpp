@@ -37,7 +37,7 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
     for (size_t i=0ul; i<nsites.size(); ++i){
         auto nsite = nsites[i];
         auto energy = energies[i];
-        HeisenbergFrmHam frm_ham(1.0, lattice::make({Lattice::Ortho, {nsite}, {1}}));
+        HeisenbergFrmHam frm_ham(1.0, lattice::make("ortho", {nsite}, {1}));
         Hamiltonian ham(&frm_ham);
         std::vector<double> evals;
         auto particles = ham.default_particles();
@@ -69,7 +69,7 @@ TEST(DenseHamiltonian, PyscfX2cCheck) {
 }
 
 TEST(DenseHamiltonian, Hubbard3Site) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     Hamiltonian ham(&frm_ham);
     std::vector<double> evals;
     DenseHamiltonian hmat(ham, ham.default_particles(4));
@@ -78,7 +78,7 @@ TEST(DenseHamiltonian, Hubbard3Site) {
 }
 
 TEST(DenseHamiltonian, Hubbard4Site) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {4}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {4}, {0}));
     Hamiltonian ham(&frm_ham);
     std::vector<double> evals;
     DenseHamiltonian hmat(ham);
@@ -87,7 +87,7 @@ TEST(DenseHamiltonian, Hubbard4Site) {
 }
 
 TEST(DenseHamiltonian, Hubbard6Site) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {6}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {6}, {0}));
     Hamiltonian ham(&frm_ham);
     std::vector<double> evals;
     DenseHamiltonian hmat(ham);
@@ -96,7 +96,7 @@ TEST(DenseHamiltonian, Hubbard6Site) {
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     ASSERT_EQ(frm_ham.m_basis.m_nsite, 3ul);
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 0.0, 0);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.0);
@@ -110,7 +110,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoCoupling) {
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff2) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 2);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.0);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -138,7 +138,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff2) {
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff3) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 3);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.0);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -149,7 +149,7 @@ TEST(DenseHamiltonian, HubbardHolsteinNoFrequencyOccCutoff3) {
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff2) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 2);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.3);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -160,7 +160,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff2) {
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff1) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 1);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.3);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
@@ -171,7 +171,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff1) {
 }
 
 TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
-    HubbardFrmHam frm_ham(4.0, lattice::make({Lattice::Ortho, {3}, {0}}));
+    HubbardFrmHam frm_ham(4.0, lattice::make("ortho", {3}, {0}));
     HolsteinLadderHam frmbos_ham(frm_ham.m_basis, 1.4, 3);
     NumOpBosHam bos_ham(frmbos_ham.m_basis.m_bos, 0.3);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);

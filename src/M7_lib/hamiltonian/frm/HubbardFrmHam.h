@@ -18,14 +18,8 @@ struct HubbardFrmHam : FrmHam {
      * on-site repulsion scalar in units of the hopping
      */
     const defs::ham_t m_u;
-    /**
-     * encodes all connection information between the flattened indices of the Hubbard lattice sites
-     */
-    Lattice m_lattice;
-    const NdFormatD& m_format;
-    const std::vector<int>& m_bcs;
 
-    HubbardFrmHam(defs::ham_t u, Lattice lattice);
+    HubbardFrmHam(defs::ham_t u, const std::shared_ptr<lattice::Base>& lattice);
 
     HubbardFrmHam(opt_pair_t opts);
 

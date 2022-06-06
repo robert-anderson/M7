@@ -6,7 +6,6 @@
 #define M7_HEISENBERGFRMHAM_H
 
 #include "M7_lib/basis/Lattice.h"
-
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 
 /**
@@ -34,9 +33,8 @@ struct HeisenbergFrmHam : SpinModelFrmHam {
      * interaction strength
      */
     const defs::ham_t m_j;
-    Lattice m_lattice;
 
-    HeisenbergFrmHam(defs::ham_t j, Lattice lattice);
+    HeisenbergFrmHam(defs::ham_t j, const std::shared_ptr<lattice::Base>& lattice);
 
     explicit HeisenbergFrmHam(FrmHam::opt_pair_t opts);
 

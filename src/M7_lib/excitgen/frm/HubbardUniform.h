@@ -8,7 +8,7 @@
 #include "FrmExcitGen.h"
 #include "M7_lib/hamiltonian/frm/HubbardFrmHam.h"
 
-struct HubbardUniform : FrmExcitGen {
+struct HubbardUniform : FrmLatticeExcitGen {
 
     HubbardUniform(const FrmHam& h, PRNG& prng);
 
