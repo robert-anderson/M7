@@ -15,22 +15,24 @@ void UniformTwf::add(const Numbers<defs::wf_t, defs::ndim_wf> &weight, defs::ham
 void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const field::FrmOnv &onv) {
     defs::ham_t helem_sum = m_ham.get_element(onv);
-    auto fn = [&](const conn::FrmOnv& conn){
+    conn::FrmOnv conn(m_ham.m_basis.size());
+    auto fn = [&](){
         auto helem = m_ham.get_element(onv, conn);
         helem_sum-=std::abs(helem);
     };
-    m_conn_iters.loop(onv, fn);
+    m_conn_iters.loop(conn, onv, fn);
     add(weight, helem_sum);
 }
 
 void UniformTwf::add(const field::Numbers<defs::wf_t, defs::ndim_wf> &weight,
                      const field::FrmBosOnv &onv) {
     defs::ham_t helem_sum = m_ham.get_element(onv);
-    auto fn = [&](const conn::FrmBosOnv& conn){
+    conn::FrmBosOnv conn(m_ham.m_basis.size());
+    auto fn = [&](){
         auto helem = m_ham.get_element(onv, conn);
         helem_sum-=std::abs(helem);
     };
-    m_conn_iters.loop(onv, fn);
+    m_conn_iters.loop(conn, onv, fn);
     add(weight, helem_sum);
 }
 

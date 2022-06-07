@@ -4,9 +4,9 @@
 
 #include "FrmOnvConnection.h"
 
-FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& size):
-        m_ann(size), m_cre(size),
-        m_ndataword(integer_utils::divceil(size.m_nspinorb, defs::nbit_word)),
+FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& sites):
+        m_ann(sites), m_cre(sites),
+        m_ndataword(integer_utils::divceil(sites.m_nspinorb, defs::nbit_word)),
         m_dataword_phases(m_ndataword){
     if (m_ndataword) m_dataword_phases[0] = false;
 }

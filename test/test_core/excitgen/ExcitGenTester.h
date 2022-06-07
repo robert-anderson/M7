@@ -58,8 +58,8 @@ namespace excit_gen_tester {
             typedef conn::from_field_t<mbf_t> conn_t;
             buffered::MaeInds work_inds(m_conn_iter.m_exsig);
             m_results.clear();
-
-            auto body_fn = [&](const conn_t &conn) {
+            conn_t conn(m_h.m_basis.size());
+            auto body_fn = [&]() {
                 auto helem = m_h.get_element(src_mbf, conn);
                 if (consts::nearly_zero(helem, defs::helem_tol)) return;
                 work_inds = conn;
@@ -72,7 +72,7 @@ namespace excit_gen_tester {
                 row.m_weight = 0.0;
                 row.m_helem = helem;
             };
-            m_conn_iter.loop(src_mbf, body_fn);
+            m_conn_iter.loop(conn, src_mbf, body_fn);
         }
 
         template<typename mbf_t>

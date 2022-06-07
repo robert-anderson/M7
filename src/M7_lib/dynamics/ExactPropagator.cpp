@@ -21,8 +21,8 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     src_mbf.m_decoded.clear();
 
     DEBUG_ASSERT_TRUE(weight,"shouldn't be trying to propagate off-diagonal from zero weight");
-
-    auto body = [&](const conn::Mbf &conn) {
+    conn::Mbf conn(src_mbf.m_basis);
+    auto body = [&]() {
         DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
         auto helement = m_ham.get_element(src_mbf, conn);
         if (m_only_nonzero_h_spawns && consts::nearly_zero(helement, helem_tol)) return;
@@ -31,10 +31,9 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
         m_mag_log.log(0, helement, 1.0);
         auto delta = -weight * tau() * helement;
         imp_samp_delta(delta, src_mbf, dst_mbf, row.m_hdiag);
-        //std::cout << 123 << std::endl; exit(0);
         wf.add_spawn(dst_mbf, delta, src_initiator, src_deterministic, ipart, src_mbf, weight);
     };
-    m_conn_iters.loop(src_mbf, body);
+    m_conn_iters.loop(conn, src_mbf, body);
 }
 
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {

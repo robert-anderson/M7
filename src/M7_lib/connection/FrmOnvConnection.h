@@ -40,7 +40,7 @@ public:
         return m_inds==v;
     }
 
-    const size_t &operator[](const size_t &i) const {
+    const size_t &operator[](size_t i) const {
         DEBUG_ASSERT_LT(i, m_inds.size(), "operator index is OOB");
         return m_inds[i];
     }
@@ -53,10 +53,11 @@ public:
         return m_inds.size();
     }
 
-    void add(const size_t &i) {
-        DEBUG_ASSERT_TRUE(m_inds.empty() || i > m_inds.back(),
+    void add(size_t ispinorb) {
+        DEBUG_ASSERT_TRUE(m_inds.empty() || ispinorb > m_inds.back(),
                           "spin orbital indices should be added in ascending order");
-        m_inds.push_back(i);
+        DEBUG_ASSERT_LT(ispinorb, m_sites.m_nspinorb, "spin orbital index OOB");
+        m_inds.push_back(ispinorb);
     }
 
     void add(std::pair<size_t, size_t> pair) {
@@ -79,27 +80,27 @@ public:
         DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
     }
 
-    void set(size_t ibit){
+    void set(size_t ispinorb){
         clear();
-        add(ibit);
+        add(ispinorb);
     }
 
-    void set(size_t ibit1, size_t ibit2){
+    void set(size_t ispinorb1, size_t ispinorb2){
         clear();
-        add(ibit1);
-        add(ibit2);
+        add(ispinorb1);
+        add(ispinorb2);
     }
 
-    void set_in_order(size_t ibit1, size_t ibit2){
+    void set_in_order(size_t ispinorb1, size_t ispinorb2){
         clear();
-        DEBUG_ASSERT_NE(ibit1, ibit2, "fermion indices in connection product may not coincide");
-        if (ibit1 < ibit2) {
-            add(ibit1);
-            add(ibit2);
+        DEBUG_ASSERT_NE(ispinorb1, ispinorb2, "fermion indices in connection product may not coincide");
+        if (ispinorb1 < ispinorb2) {
+            add(ispinorb1);
+            add(ispinorb2);
         }
         else {
-            add(ibit2);
-            add(ibit1);
+            add(ispinorb2);
+            add(ispinorb1);
         }
     }
 
