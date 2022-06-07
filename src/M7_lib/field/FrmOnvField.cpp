@@ -15,9 +15,11 @@ FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, std::string name) :
     basis.require_pure_frm();
 }
 
+FrmOnvField::FrmOnvField(Row *row, const sys::frm::Sector& sector, std::string name) :
+    FrmOnvField(row, sector.m_basis, name) {}
+
 FrmOnvField::FrmOnvField(Row *row, const sys::Sector& sector, std::string name) :
-    FrmOnvField(row, sector.basis(), name){
-}
+    FrmOnvField(row, sector.m_frm, name){}
 
 FrmOnvField::FrmOnvField(const FrmOnvField &other) :
         base_t(other), m_basis(other.m_basis), m_decoded(*this),

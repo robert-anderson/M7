@@ -46,6 +46,7 @@ public:
      * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
      * a common interface is realised by implementing a ctor of the following form in all MBFs
      */
+    FrmOnvField(Row* row, const sys::frm::Sector& sector, std::string name="");
     FrmOnvField(Row* row, const sys::Sector& sector, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 

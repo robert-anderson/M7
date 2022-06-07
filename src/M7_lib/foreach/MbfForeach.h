@@ -110,7 +110,7 @@ namespace mbf_foreach {
         void loop_fn(mbf_t& outer, mbf_t& inner, const fn_t &fn) {
             functor_utils::assert_prototype<prototype_t>(fn);
             size_t iouter = 0ul;
-            auto outer_fn = [this, &outer, &inner, &fn, &iouter]() {
+            auto outer_fn = [this, &inner, &fn, &iouter]() {
                 size_t iinner = 0ul;
                 auto inner_fn = [&fn, &iouter, &iinner]() {
                     fn(iouter, iinner);
@@ -338,7 +338,7 @@ namespace mbf_foreach {
             void loop_fn(field::FrmBosOnv &mbf, const fn_t &fn) {
                 functor_utils::assert_prototype<prototype_t>(fn);
                 auto frm_loop_fn = [this, &mbf, &fn]() {
-                    auto bos_loop_fn = [&mbf, &fn]() {
+                    auto bos_loop_fn = [&fn]() {
                         fn();
                     };
                     m_bos_foreach.loop(mbf.m_bos, bos_loop_fn);

@@ -131,6 +131,7 @@ namespace buffered {
         using field::FrmOnv::operator=;
         FrmOnv(const sys::frm::Basis& basis) : BufferedField<field::FrmOnv>(basis){}
         FrmOnv(const sys::Basis& basis) : BufferedField<field::FrmOnv>(basis){}
+        FrmOnv(const sys::frm::Sector& sector) : BufferedField<field::FrmOnv>(sector){}
         FrmOnv(const sys::Sector& sector) : BufferedField<field::FrmOnv>(sector){}
 
         FrmOnv(const FrmOnv& other) : FrmOnv(other.m_basis){
@@ -150,6 +151,7 @@ namespace buffered {
         using field::BosOnv::operator==;
         BosOnv(const sys::bos::Basis& basis) : BufferedField<field::BosOnv>(basis){}
         BosOnv(const sys::Basis& basis) : BufferedField<field::BosOnv>(basis){}
+        BosOnv(const sys::bos::Sector& sector) : BufferedField<field::BosOnv>(sector){}
         BosOnv(const sys::Sector& sector) : BufferedField<field::BosOnv>(sector){}
 
         BosOnv(const BosOnv& other) : BosOnv(other.m_basis){

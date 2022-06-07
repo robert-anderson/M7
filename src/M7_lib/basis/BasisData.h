@@ -216,8 +216,7 @@ namespace sys {
             static int lowest_value(size_t nelec){
                 return nelec&1ul;
             }
-            Ms2(int v, bool conserve): conservation::Optional<int>(v, conserve, "2*Ms"){}
-            Ms2(size_t nelec): Ms2(lowest_value(nelec), false){}
+            Ms2(int v, bool conserve=true): conservation::Optional<int>(v, conserve, "2*Ms"){}
             Ms2(): conservation::Optional<int>("2*Ms"){}
         };
 
@@ -227,6 +226,7 @@ namespace sys {
              * number of electrons in the system (0ul if not conserved)
              */
             const size_t m_n;
+
         public:
             /**
              * number of pairs of distinct electrons in the system (0ul if not conserved)
@@ -239,13 +239,14 @@ namespace sys {
             const size_t m_nalpha, m_nbeta;
 
             Electrons(size_t n, Ms2 ms2): m_n(n), m_npair(integer_utils::nspair(m_n)), m_ms2(ms2),
-                                          m_nalpha(m_ms2.conserve() ? (m_n+m_ms2)/2 : 0ul), m_nbeta(m_n-m_nalpha) {
+                                          m_nalpha(m_ms2.conserve() ? (m_n+m_ms2)/2 : 0ul),
+                                          m_nbeta(m_ms2.conserve() ? m_n-m_nalpha : 0ul) {
                 if (m_ms2.conserve() && m_n)
                     REQUIRE_EQ(size_t(std::abs(m_ms2) % 2), m_n % 2,
                                "2*Ms quantum number given incompatible with number of electrons");
             }
 
-            Electrons(size_t n): Electrons(n, Ms2(n)){}
+            Electrons(size_t n): Electrons(n, Ms2(Ms2::lowest_value(n))){}
 
             Electrons(const Electrons& e1, const Electrons& e2):
                     Electrons(e1.m_n ? e1.m_n : e2.m_n, Ms2(e1.m_ms2, e2.m_ms2)){

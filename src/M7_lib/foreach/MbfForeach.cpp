@@ -21,7 +21,9 @@ void mbf_foreach::frm::General::frm_loop(field::FrmOnv& mbf, const function_t &f
 
 mbf_foreach::frm::Spins::Spins(const sys::frm::Sector& sector) :
         Base(sector, foreach_t::niter(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha)),
-        m_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha){}
+        m_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha){
+    REQUIRE_TRUE(sector.m_elecs.m_ms2.conserve(), "spin basis requires conserved 2*Ms");
+}
 
 void mbf_foreach::frm::Spins::frm_loop(field::FrmOnv& mbf, const function_t &fn) {
     loop_fn(mbf, fn);
@@ -35,7 +37,7 @@ mbf_foreach::frm::Ms2Conserve::Ms2Conserve(const sys::frm::Sector& sector) :
     Base(sector, niter(sector)),
     m_alpha_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nalpha),
     m_beta_foreach(sector.m_basis.m_nsite, sector.m_elecs.m_nbeta){
-    REQUIRE_TRUE(sector.m_elecs.m_ms2.conserve(), "2*Ms must be conserved");
+    REQUIRE_TRUE(sector.m_elecs.m_ms2.conserve(), "requires conserved 2*Ms");
 }
 
 void mbf_foreach::frm::Ms2Conserve::frm_loop(field::FrmOnv& mbf, const function_t &fn) {

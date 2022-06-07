@@ -39,7 +39,8 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
      * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
      * a common interface is realised by implementing a ctor of the following form in all MBFs
      */
-    BosOnvField(Row *row, const sys::Sector &hs, std::string name = "");
+    BosOnvField(Row *row, const sys::bos::Sector &sector, std::string name = "");
+    BosOnvField(Row *row, const sys::Sector &sector, std::string name = "");
 
     BosOnvField(const BosOnvField &other);
 

@@ -16,7 +16,11 @@ BosOnvField::BosOnvField(Row *row, const sys::Basis &basis, std::string name) : 
     basis.require_pure_bos();
 }
 
-BosOnvField::BosOnvField(Row *row, const sys::Sector &hs, std::string name) : BosOnvField(row, hs.basis(), name){}
+BosOnvField::BosOnvField(Row *row, const sys::bos::Sector &sector, std::string name) :
+    BosOnvField(row, sector.m_basis, name){}
+
+BosOnvField::BosOnvField(Row *row, const sys::Sector &sector, std::string name) :
+    BosOnvField(row, sector.m_bos, name){}
 
 BosOnvField::BosOnvField(const BosOnvField &other) :
     base_t(other), m_basis(other.m_basis), m_decoded(*this) {}
