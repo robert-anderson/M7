@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 #include "M7_lib/foreach/ConnForeach.h"
 
-#if 0
 namespace conn_foreach_test {
     struct Result {
         const defs::inds m_ann, m_cre;
@@ -55,8 +54,9 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
     mbf = setbits;
     auto &clrbits = mbf.m_decoded.m_simple_vacs.get();
 
+    conn::FrmOnv conn(mbf.m_basis);
     size_t iiter = 0ul;
-    auto fn = [&](const conn::FrmOnv &conn) {
+    auto fn = [&]() {
         const auto cre = conn.m_cre[0];
         const auto ann = conn.m_ann[0];
         const auto iann = iiter / clrbits.size();
@@ -67,10 +67,11 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
     };
     conn_foreach::frm::General<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
-    foreach.loop_fn(mbf, fn);
+    foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
 }
 
+#if 0
 TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
     const size_t nsite = 8;
     defs::inds setbits = {1, 4, 6, 9, 12};
