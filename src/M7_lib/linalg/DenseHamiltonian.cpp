@@ -8,21 +8,20 @@
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
         const Hamiltonian &h, sys::Particles particles, bool force_general) {
-    const sys::frm::Sector frm_sector(h.m_basis.m_frm, particles.m_frm);
-    const sys::bos::Sector bos_sector(h.m_basis.m_bos, particles.m_bos);
+    const sys::Sector sector(h.m_basis, particles);
 
     if (force_general) return make_pair_iterator(h, particles);
-    if (!bos_sector){
+    if (!sector.m_bos){
         /*
          * hamiltonian is boson operator-free, so can work in determinants: a.k.a. FrmOnvs
          */
         if (h.m_frm.is<SpinModelFrmHam>()){
-            return unique_t(new frm::Pair<frm::Spins>(frm_sector));
+            return unique_t(new frm::Pair<frm::Spins>(sector.m_frm));
         } else if (h.m_frm.m_kramers_attrs.conserving()){
-            return unique_t(new frm::Pair<frm::Ms2Conserve>(frm_sector));
+            return unique_t(new frm::Pair<frm::Ms2Conserve>(sector.m_frm));
         }
-        return unique_t(new frm::Pair<frm::General>(frm_sector));
-    } else if (!frm_sector) {
+        return unique_t(new frm::Pair<frm::General>(sector.m_frm));
+    } else if (!sector.m_frm) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
          */
@@ -35,20 +34,14 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
         } else {
             // open system in the boson sector
             if (h.m_frm.is<SpinModelFrmHam>()) {
-                return unique_t(new frm::Pair<frm::Spins>(frm_sector));
-            }
-
-            if (h.m_frm.is<SpinModelFrmHam>()) {
                 typedef frm_bos::OpenProduct<frm::Spins> single_t;
                 typedef frm_bos::Pair<single_t> pair_t;
-                single_t foreach({frm_sector}, bos_sector);
-                return unique_t(new pair_t(foreach));
+                return unique_t(new pair_t(sector));
             }
-            else if (frm_sector.m_elecs.m_ms2.conserve()) {
+            else if (sector.m_frm.m_elecs.m_ms2.conserve()) {
                 typedef frm_bos::OpenProduct<frm::Ms2Conserve> single_t;
                 typedef frm_bos::Pair<single_t> pair_t;
-                single_t foreach({frm_sector}, bos_sector);
-                return unique_t(new pair_t(foreach));
+                return unique_t(new pair_t(sector));
             }
         }
     }
@@ -59,34 +52,31 @@ std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(
 }
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(const Hamiltonian &h, sys::Particles particles) {
-    const sys::frm::Sector frm_sector(h.m_basis.m_frm, particles.m_frm);
-    const sys::bos::Sector bos_sector(h.m_basis.m_bos, particles.m_bos);
 
-    if (!h.m_bos) {
+    const sys::Sector sector(h.m_basis, particles);
+    if (!sector.m_bos) {
         /*
          * hamiltonian is boson operator-free, can work in determinants: a.k.a. FrmOnvs
          */
-        return unique_t(new frm::Pair<frm::General>(frm_sector));
-    } else if (!h.m_frm) {
+        return unique_t(new frm::Pair<frm::General>(sector.m_frm));
+    } else if (!sector.m_frm) {
         /*
          * hamiltonian is fermion operator-free, can work in permanents: a.k.a. BosOnvs
          */
         if (particles.m_bos.conserve())
-            return unique_t(new bos::Pair<bos::GeneralClosed>(bos_sector));
+            return unique_t(new bos::Pair<bos::GeneralClosed>(sector.m_bos));
         else
-            return unique_t(new bos::Pair<bos::GeneralOpen>(bos_sector));
+            return unique_t(new bos::Pair<bos::GeneralOpen>(sector.m_bos));
     } else {
-        if (bos_sector.m_bosons.conserve()) {
+        if (sector.m_bos.m_bosons.conserve()) {
             typedef frm_bos::ClosedProduct<frm::General> single_t;
             typedef frm_bos::Pair<single_t> pair_t;
-            single_t foreach({frm_sector}, bos_sector);
-            return unique_t(new pair_t(foreach));
+            return unique_t(new pair_t(sector));
         }
         else {
             typedef frm_bos::OpenProduct<frm::General> single_t;
             typedef frm_bos::Pair<single_t> pair_t;
-            single_t foreach({frm_sector}, bos_sector);
-            return unique_t(new pair_t(foreach));
+            return unique_t(new pair_t(sector));
         }
     }
     ABORT("pair iterator not assigned");

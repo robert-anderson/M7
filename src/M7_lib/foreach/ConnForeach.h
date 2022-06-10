@@ -9,6 +9,20 @@
 #include "M7_lib/basis/Suites.h"
 #include "M7_lib/basis/Lattice.h"
 
+/**
+ * A collection of iterators over connections with different constraints. These are divided into those which loop over
+ * purely fermionic (frm), purely bosonic (bos), and fermion-boson product (frmbos).
+ *
+ * The foreach iterators defined here are run time polymorphic, and all reference to the MBF type is missing from the
+ * base class so that the MBF type only needs to be specified in the calling scope when calling the overloaded loop
+ * methods of the polymorphic conn_foreach::Base class.
+ *
+ * The derived classes are also compile time polymorphic through the definition of "loop_fn" templated methods, to which
+ * the virtual methods should delegate. This means that when the calling scope has access to a specific derived type of
+ * conn_foreach::Base, it can call the functor-parametrised loop_fn directly, which should exhibit performance benefits
+ * over the runtime polymorphic use of "loop" (which delegates to the the virtual "frm_loop", "bos_loop", "frmbos_loop"
+ * methods).
+ */
 namespace conn_foreach {
     using namespace basic_foreach;
 

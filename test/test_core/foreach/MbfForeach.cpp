@@ -196,7 +196,8 @@ TEST(MbfForeach, FrmBosGeneralOpen) {
     const auto bos_chk_inds = bos::general_open::chk_inds();
     const sys::frm::Sector frm_sector({3}, {4});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
-    buffered::FrmBosOnv mbf({frm_sector, bos_sector});
+    const sys::Sector sector(frm_sector, bos_sector);
+    buffered::FrmBosOnv mbf(sector);
     size_t iiter = 0ul;
     auto fn = [&]() {
         ASSERT_LT(iiter, frm_chk_inds.size() * bos_chk_inds.size());
@@ -206,9 +207,7 @@ TEST(MbfForeach, FrmBosGeneralOpen) {
         ASSERT_TRUE(mbf.m_bos == bos_chk_inds[iiter_bos]);
         ++iiter;
     };
-    mbf_foreach::frm::General outer(frm_sector);
-    mbf_foreach::bos::GeneralOpen inner(bos_sector);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::General, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::General, mbf_foreach::bos::GeneralOpen> foreach(sector);
     ASSERT_NO_THROW(foreach.loop_fn(mbf, fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
@@ -220,6 +219,7 @@ TEST(MbfForeach, FrmBosSpins) {
     const auto bos_chk_inds = bos::general_open::chk_inds();
     const sys::frm::Sector frm_sector({4}, {4, 0});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
+    const sys::Sector sector(frm_sector, bos_sector);
     buffered::FrmBosOnv mbf({frm_sector, bos_sector});
     size_t iiter = 0ul;
     auto fn = [&]() {
@@ -230,9 +230,7 @@ TEST(MbfForeach, FrmBosSpins) {
         ASSERT_TRUE(mbf.m_bos == bos_chk_inds[iiter_bos]);
         ++iiter;
     };
-    mbf_foreach::frm::Spins outer(frm_sector);
-    mbf_foreach::bos::GeneralOpen inner(bos_sector);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(sector);
     ASSERT_NO_THROW(foreach.loop_fn(mbf, fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
@@ -244,6 +242,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
     const auto bos_chk_inds = bos::general_open::chk_inds();
     const sys::frm::Sector frm_sector({4}, {4, 0});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
+    const sys::Sector sector(frm_sector, bos_sector);
     buffered::FrmBosOnv mbf({frm_sector, bos_sector});
     size_t iiter = 0ul;
     auto fn = [&]() {
@@ -255,10 +254,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
         ASSERT_TRUE(mbf.m_bos == bos_chk_inds[iiter_bos]);
         ++iiter;
     };
-    mbf_foreach::frm::Spins outer(frm_sector);
-    mbf_foreach::bos::GeneralOpen inner(bos_sector);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
-
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Spins, mbf_foreach::bos::GeneralOpen> foreach(sector);
     try { ASSERT_ANY_THROW(foreach.loop_fn(mbf, fn)); }
     catch (const ExitLoop &) {}
     ASSERT_EQ(iiter, 32);
@@ -271,6 +267,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
     const auto bos_chk_inds = bos::general_open::chk_inds();
     const sys::frm::Sector frm_sector({4}, {5});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
+    const sys::Sector sector(frm_sector, bos_sector);
     buffered::FrmBosOnv mbf({frm_sector, bos_sector});
     size_t iiter = 0ul;
     auto fn = [&]() {
@@ -281,9 +278,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
         ASSERT_TRUE(mbf.m_bos == bos_chk_inds[iiter_bos]);
         ++iiter;
     };
-    mbf_foreach::frm::Ms2Conserve outer(frm_sector);
-    mbf_foreach::bos::GeneralOpen inner(bos_sector);
-    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> foreach(outer, inner);
+    mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> foreach(sector);
     ASSERT_NO_THROW(foreach.loop_fn(mbf, fn));
     ASSERT_EQ(iiter, frm_chk_inds.size() * bos_chk_inds.size());
     ASSERT_EQ(foreach.m_niter, frm_chk_inds.size()*bos_chk_inds.size());
@@ -295,6 +290,7 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
     const auto bos_chk_inds = bos::general_open::chk_inds();
     const sys::frm::Sector frm_sector({4}, {5});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
+    const sys::Sector sector(frm_sector, bos_sector);
     buffered::FrmBosOnv outer({frm_sector, bos_sector});
     buffered::FrmBosOnv inner({frm_sector, bos_sector});
 
@@ -311,7 +307,7 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
         ASSERT_TRUE(inner.m_bos == bos_chk_inds[iinner_bos]);
     };
     typedef mbf_foreach::frm_bos::Product<mbf_foreach::frm::Ms2Conserve, mbf_foreach::bos::GeneralOpen> product_t;
-    mbf_foreach::frm_bos::Pair<product_t> foreach({frm_sector, bos_sector});
+    mbf_foreach::frm_bos::Pair<product_t> foreach(sector);
     ASSERT_NO_THROW(foreach.loop_fn(outer, inner, fn));
     auto n = frm_chk_inds.size()*bos_chk_inds.size();
     ASSERT_EQ(foreach.m_niter, n*n);

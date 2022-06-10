@@ -102,9 +102,12 @@ namespace mbf_foreach {
         foreach_t m_foreach_outer;
         foreach_t m_foreach_inner;
 
-        Pair(const foreach_t &foreach) :
+    protected:
+        explicit Pair(const foreach_t &foreach) :
                 PairBase(static_cast<const mbf_foreach::Base &>(foreach).m_niter),
                 m_foreach_outer(foreach), m_foreach_inner(foreach) {}
+
+    public:
 
         template<typename fn_t>
         void loop_fn(mbf_t& outer, mbf_t& inner, const fn_t &fn) {
@@ -218,7 +221,7 @@ namespace mbf_foreach {
                           "template arg must be derived from mbf_foreach::frm::Base");
             typedef mbf_foreach::Pair<field::FrmOnv, foreach_t> base_t;
 
-            Pair(const foreach_t &foreach) : base_t(foreach) {}
+            Pair(const sys::frm::Sector &sector) : base_t(foreach_t(sector)) {}
 
         protected:
             void frm_loop(field::FrmOnv &bra, field::FrmOnv &ket, const PairBase::function_t &fn) override {
@@ -288,7 +291,7 @@ namespace mbf_foreach {
                           "template arg must be derived from mbf_foreach::bos::Base");
             typedef mbf_foreach::Pair<field::BosOnv, foreach_t> base_t;
 
-            Pair(const foreach_t &foreach) : base_t(foreach) {}
+            Pair(const sys::bos::Sector &sector) : base_t(foreach_t(sector)) {}
 
         protected:
             void bos_loop(field::BosOnv &bra, field::BosOnv &ket, const PairBase::function_t &fn) override {
@@ -328,10 +331,13 @@ namespace mbf_foreach {
                 return bases.m_frm.m_niter * bases.m_bos.m_niter;
             }
 
-        public:
             Product(const frm_foreach_t &frm_foreach, const bos_foreach_t &bos_foreach) :
                     Base(make_sector(frm_foreach, bos_foreach), make_niter(frm_foreach, bos_foreach)),
                     m_frm_foreach(frm_foreach), m_bos_foreach(bos_foreach) {}
+
+        public:
+
+            Product(const sys::Sector& sector): Product({sector.m_frm}, {sector.m_bos}){}
 
 
             template<typename fn_t>
@@ -359,8 +365,7 @@ namespace mbf_foreach {
          */
         template<typename frm_foreach_t>
         struct ClosedProduct : Product<frm_foreach_t, bos::GeneralClosed> {
-            ClosedProduct(const frm_foreach_t &frm_foreach, const sys::bos::Sector& sector) :
-                    Product<frm_foreach_t, bos::GeneralClosed>(frm_foreach, sector) {}
+            ClosedProduct(const sys::Sector& sector) : Product<frm_foreach_t, bos::GeneralClosed>(sector) {}
         };
 
         /**
@@ -370,8 +375,7 @@ namespace mbf_foreach {
          */
         template<typename frm_foreach_t>
         struct OpenProduct : Product<frm_foreach_t, bos::GeneralOpen> {
-            OpenProduct(const frm_foreach_t &frm_foreach, const sys::bos::Sector& sector) :
-                    Product<frm_foreach_t, bos::GeneralOpen>(frm_foreach, sector) {}
+            OpenProduct(const sys::Sector& sector) : Product<frm_foreach_t, bos::GeneralOpen>(sector) {}
         };
 
         template<typename foreach_t>
@@ -380,7 +384,7 @@ namespace mbf_foreach {
                           "template arg must be derived from mbf_foreach::frm_bos::Base");
             typedef mbf_foreach::Pair<field::FrmBosOnv, foreach_t> base_t;
 
-            Pair(const foreach_t &foreach) : base_t(foreach) {}
+            Pair(const sys::Sector& sector) : base_t(foreach_t(sector)) {}
 
         protected:
             void frmbos_loop(field::FrmBosOnv &bra, field::FrmBosOnv &ket, const PairBase::function_t &fn) override {

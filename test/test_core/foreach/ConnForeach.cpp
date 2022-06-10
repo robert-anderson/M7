@@ -67,8 +67,14 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
     };
     conn_foreach::frm::General<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
+    // first, the compile time polymorphic loop:
     foreach.loop_fn(conn, mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
+    // then, the run time polymorphic loop:
+    iiter = 0;
+    foreach.loop(conn, mbf, fn);
+    ASSERT_EQ(iiter, setbits.size() * clrbits.size());
+
 }
 
 #if 0
