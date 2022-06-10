@@ -91,8 +91,7 @@ namespace sys {
              */
             const size_t m_nspinorb_pair;
 
-            Size(size_t nsite):
-                m_nsite(nsite), m_nspinorb(2 * nsite), m_nspinorb_pair(integer_utils::nspair(m_nspinorb)){}
+            Size(size_t nsite);
 
             operator size_t () const {
                 return m_nsite;
@@ -149,12 +148,8 @@ namespace sys {
              * @return
              *  number of indices needed in the access of coefficients
              */
-            size_t ncoeff_ind(bool spin_resolved) const {
-                return spin_resolved ? m_nspinorb : m_nsite;
-            }
-            static size_t ncoeff_ind(bool spin_resolved, size_t nsite) {
-                return spin_resolved ? 2*nsite : nsite;
-            }
+            size_t ncoeff_ind(bool spin_resolved) const;
+            static size_t ncoeff_ind(bool spin_resolved, size_t nsite);
         };
 
         /**
@@ -183,26 +178,19 @@ namespace sys {
                 return m_nsite;
             }
 
-            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Base> lattice):
-                    Size(nsite), m_abgrp_map(std::move(abgrp_map)), m_spin_resolved(spin_resolved), m_lattice(lattice){}
+            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved, std::shared_ptr<lattice::Base> lattice);
 
-            Basis(std::shared_ptr<lattice::Base> lattice):
-                Basis(lattice->m_nsite, {lattice->m_nsite}, false, lattice){}
+            Basis(std::shared_ptr<lattice::Base> lattice);
 
-            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved):
-                Basis(nsite, abgrp_map, spin_resolved, nullptr){}
+            Basis(size_t nsite, AbelianGroupMap abgrp_map, bool spin_resolved);
             /*
              * non-resolved spin, C1 point group (no spatial symmetry)
              */
             Basis(size_t nsite): Basis(nsite, {nsite}, false) {}
 
-            bool operator==(const Basis& other) const {
-                return (m_nsite == other.m_nsite) && (m_abgrp_map == other.m_abgrp_map) && (m_spin_resolved == other.m_spin_resolved);
-            }
+            bool operator==(const Basis& other) const;
 
-            size_t ncoeff_ind() const {
-                return Size::ncoeff_ind(m_spin_resolved);
-            }
+            size_t ncoeff_ind() const;
         };
 
         /**
@@ -213,11 +201,9 @@ namespace sys {
             /**
              * either 0 or 1 based on the evenness of the electron number
              */
-            static int lowest_value(size_t nelec){
-                return nelec&1ul;
-            }
-            Ms2(int v, bool conserve=true): conservation::Optional<int>(v, conserve, "2*Ms"){}
-            Ms2(): conservation::Optional<int>("2*Ms"){}
+            static int lowest_value(size_t nelec);
+            Ms2(int v, bool conserve=true);
+            Ms2();
         };
 
         struct Electrons {
@@ -238,28 +224,17 @@ namespace sys {
              */
             const size_t m_nalpha, m_nbeta;
 
-            Electrons(size_t n, Ms2 ms2): m_n(n), m_npair(integer_utils::nspair(m_n)), m_ms2(ms2),
-                                          m_nalpha(m_ms2.conserve() ? (m_n+m_ms2)/2 : 0ul),
-                                          m_nbeta(m_ms2.conserve() ? m_n-m_nalpha : 0ul) {
-                if (m_ms2.conserve() && m_n)
-                    REQUIRE_EQ(size_t(std::abs(m_ms2) % 2), m_n % 2,
-                               "2*Ms quantum number given incompatible with number of electrons");
-            }
+            Electrons(size_t n, Ms2 ms2);
 
             Electrons(size_t n): Electrons(n, Ms2(Ms2::lowest_value(n))){}
 
-            Electrons(const Electrons& e1, const Electrons& e2):
-                    Electrons(e1.m_n ? e1.m_n : e2.m_n, Ms2(e1.m_ms2, e2.m_ms2)){
-                if (e1 && e2) REQUIRE_EQ(e1, e2, "incompatible numbers of electrons");
-            }
+            Electrons(const Electrons& e1, const Electrons& e2);
 
             operator size_t () const {
                 return m_n;
             }
 
-            bool operator==(const Electrons& other){
-                return m_n==other.m_n && m_ms2==other.m_ms2;
-            }
+            bool operator==(const Electrons& other);
         };
 
         /**
@@ -277,33 +252,18 @@ namespace sys {
              */
             const size_t m_nvac_alpha, m_nvac_beta;
 
-            explicit Sector(Basis basis, Electrons elecs):
-                m_basis(basis), m_elecs(elecs),
-                m_nvac(m_basis.m_nspinorb - m_elecs),
-                m_nvac_alpha(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nalpha : 0ul),
-                m_nvac_beta(m_elecs.m_ms2.conserve() ? m_basis.m_nsite - m_elecs.m_nbeta : 0ul){
-                REQUIRE_LE_ALL(m_elecs, m_basis.m_nspinorb, "unphysical number of electrons");
-            }
+            explicit Sector(Basis basis, Electrons elecs);
 
             /*
              * combine the properties of two Hilbert space sectors
              */
-            bool operator==(const Sector& other) const {
-                return m_basis==other.m_basis && m_elecs==other.m_elecs;
-            }
+            bool operator==(const Sector& other) const;
 
             operator bool() const {
                 return m_basis.m_nsite;
             }
 
-            size_t size() const {
-                if (m_elecs.m_ms2.conserve()) {
-                    const auto na = integer_utils::combinatorial(m_basis.m_nsite, m_elecs.m_nalpha);
-                    const auto nb = integer_utils::combinatorial(m_basis.m_nsite, m_elecs.m_nbeta);
-                    return na * nb;
-                }
-                return integer_utils::combinatorial(m_basis.m_nspinorb, m_elecs);
-            }
+            size_t size() const;
         };
     }
 
@@ -314,7 +274,7 @@ namespace sys {
         struct Size {
             const size_t m_nmode;
 
-            Size(size_t nmode) : m_nmode(nmode){}
+            Size(size_t nmode);
 
             operator size_t() const {
                 return m_nmode;
@@ -329,27 +289,23 @@ namespace sys {
             explicit operator bool() const {
                 return m_nmode;
             }
-            Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ): Size(nmode), m_occ_cutoff(occ_cutoff){}
+            Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ);
 
-            bool operator==(const Basis& other) const {
-                return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
-            }
+            bool operator==(const Basis& other) const;
         };
 
         struct Bosons : public conservation::Optional<size_t> {
-            Bosons(size_t v, bool conserve): conservation::Optional<size_t>(v, conserve, "nboson"){}
-            Bosons(): Bosons(~0ul, true){}
-            Bosons(const Bosons& b1, const Bosons& b2): Bosons(b1.defined() ? b1 : b2){}
+            Bosons(size_t v, bool conserve);
+            Bosons();
+            Bosons(const Bosons& b1, const Bosons& b2);
         };
 
         struct Sector {
             const Basis m_basis;
             const Bosons m_bosons;
-            explicit Sector(Basis basis, Bosons bosons): m_basis(basis), m_bosons(bosons){}
+            explicit Sector(Basis basis, Bosons bosons);
 
-            bool operator==(const Sector& other) const {
-                return m_basis==other.m_basis && m_bosons==other.m_bosons;
-            }
+            bool operator==(const Sector& other) const;
 
             operator bool() const {
                 return bool(m_basis);
@@ -361,31 +317,21 @@ namespace sys {
     struct Size {
         const frm::Size m_frm;
         const bos::Size m_bos;
-        Size(size_t nsite, size_t nmode): m_frm(nsite), m_bos(nmode){}
-        void require_pure_frm() const {
-            REQUIRE_FALSE(m_bos, "Single particle basis specification is not purely fermionic");
-        }
-        void require_pure_bos() const {
-            REQUIRE_FALSE(m_frm, "Single particle basis specification is not purely bosonic");
-        }
+        Size(size_t nsite, size_t nmode);
+        void require_pure_frm() const;
+        void require_pure_bos() const;
     };
 
     struct Basis {
         const frm::Basis m_frm;
         const bos::Basis m_bos;
 
-        Basis(frm::Basis frm, bos::Basis bos): m_frm(std::move(frm)), m_bos(bos){}
+        Basis(frm::Basis frm, bos::Basis bos);
 
-        void require_pure_frm() const {
-            size().require_pure_frm();
-        }
-        void require_pure_bos() const {
-            size().require_pure_bos();
-        }
+        void require_pure_frm() const;
+        void require_pure_bos() const;
 
-        Size size() const {
-            return {static_cast<const frm::Size&>(m_frm), static_cast<const bos::Size&>(m_bos)};
-        }
+        Size size() const;
 
         operator bool() const {
             return bool(m_frm) || bool(m_bos);
@@ -401,24 +347,17 @@ namespace sys {
         const frm::Sector m_frm;
         const bos::Sector m_bos;
 
-        Sector(frm::Sector frm, bos::Sector bos): m_frm(std::move(frm)), m_bos(std::move(bos)){}
-        explicit Sector(frm::Sector frm): Sector(frm, bos::Sector({0ul}, {})){}
-        explicit Sector(bos::Sector bos): Sector(frm::Sector({0ul}, {0ul}), bos){}
-        Sector(Basis basis, Particles particles):
-            Sector(frm::Sector(basis.m_frm, particles.m_frm), bos::Sector(basis.m_bos, particles.m_bos)){}
+        Sector(frm::Sector frm, bos::Sector bos);
+        explicit Sector(frm::Sector frm);
+        explicit Sector(bos::Sector bos);
+        Sector(Basis basis, Particles particles);
 
-        Basis basis() const {
-            return {m_frm.m_basis, m_bos.m_basis};
-        }
+        Basis basis() const;
 
         // TODO: rename - "size" makes it sound like the hilbert space dimension is returned
-        Size size() const {
-            return basis().size();
-        }
+        Size size() const;
 
-        Particles particles() const {
-            return {m_frm.m_elecs, m_bos.m_bosons};
-        }
+        Particles particles() const;
     };
 }
 

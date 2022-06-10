@@ -64,11 +64,49 @@ namespace lattice {
             return dynamic_cast<const T*>(this);
         }
 
+        operator bool() const {
+            return m_nsite;
+        }
+
     private:
         size_t make_unique_nadj_product();
         size_t make_nadj_max();
     };
 
+    struct OrthoTopology {
+        const NdEnumerationD m_inds;
+        const std::vector<int> m_bcs;
+        const std::string m_info_string;
+
+        OrthoTopology(const defs::inds &shape, const std::vector<int> &bcs);
+
+    private:
+        int one_dim_phase(size_t iind, size_t jind, size_t idim) const;
+
+    public:
+        size_t isite_adj(const defs::inds &inds, size_t idim, size_t value) const;
+
+        size_t nsite() const;
+
+        int phase(size_t isite, size_t jsite) const;
+
+        void get_adj_row(size_t isite, lattice::adj_row_t &row) const;
+    };
+
+    /**
+     * use when there is no lattice structure
+     */
+    struct NullTopology {
+        const std::string m_info_string = "null";
+
+        size_t isite_adj(const defs::inds &inds, size_t idim, size_t value) const;
+
+        size_t nsite() const;
+
+        int phase(size_t isite, size_t jsite) const;
+
+        void get_adj_row(size_t isite, lattice::adj_row_t &row) const;
+    };
 
     template<typename topo_t>
     struct Lattice : Base {
@@ -105,26 +143,14 @@ namespace lattice {
         }
     };
 
-    struct OrthoTopology {
-        const NdEnumerationD m_inds;
-        const std::vector<int> m_bcs;
-        const std::string m_info_string;
-
-        OrthoTopology(const defs::inds &shape, const std::vector<int> &bcs);
-
-        int one_dim_phase(size_t iind, size_t jind, size_t idim) const;
-
-        size_t isite_adj(const defs::inds &inds, size_t idim, size_t value) const;
-
-        size_t nsite() const;
-
-        int phase(size_t isite, size_t jsite) const;
-
-        void get_adj_row(size_t isite, lattice::adj_row_t &row) const;
-    };
-
     typedef Lattice<OrthoTopology> Ortho;
+    typedef Lattice<NullTopology> Null;
 
+    /**
+     * @return
+     *  shared pointer to a null lattice
+     */
+    std::shared_ptr<Base> make();
     std::shared_ptr<Base> make(std::string topo, defs::inds site_shape, std::vector<int> bcs);
     std::shared_ptr<Base> make(const conf::LatticeModel& opts);
 }

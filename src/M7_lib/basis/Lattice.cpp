@@ -23,6 +23,7 @@ size_t lattice::Base::make_unique_nadj_product() {
 }
 
 size_t lattice::Base::make_nadj_max() {
+    if (!*this) return 0ul;
     REQUIRE_FALSE(m_nadjs.empty(), "number of adjacent sites vector is not set");
     return *std::max_element(m_nadjs.cbegin(), m_nadjs.cend());
 }
@@ -63,8 +64,10 @@ int lattice::OrthoTopology::phase(size_t isite, size_t jsite) const {
     for (size_t idim = 0ul; idim < ndim; ++idim) {
         auto adj = one_dim_phase(iinds[idim], jinds[idim], idim);
         // only return non-zero if adjacent in a single dimension
-        if (adj && res) return 0;
-        res = adj;
+        if (adj) {
+            if (res) return 0;
+            else res = adj;
+        }
     }
     return res;
 }
@@ -97,10 +100,30 @@ void lattice::OrthoTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) 
     }
 }
 
+size_t lattice::NullTopology::isite_adj(const defs::inds &inds, size_t idim, size_t value) const {
+    return ~0ul;
+}
+
+size_t lattice::NullTopology::nsite() const {
+    return 0ul;
+}
+
+int lattice::NullTopology::phase(size_t isite, size_t jsite) const {
+    return 0;
+}
+
+void lattice::NullTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) const {
+    row.clear();
+}
+
+std::shared_ptr<lattice::Base> lattice::make() {
+    return std::shared_ptr<Base>(new Null({}));
+}
+
 std::shared_ptr<lattice::Base> lattice::make(std::string topo, defs::inds site_shape, std::vector<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
         return std::shared_ptr<Base>(new Ortho({site_shape, bcs}));
-    return nullptr;
+    return make();
 }
 
 std::shared_ptr<lattice::Base> lattice::make(const conf::LatticeModel &opts) {

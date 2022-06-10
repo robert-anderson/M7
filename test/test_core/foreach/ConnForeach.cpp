@@ -77,16 +77,16 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
 
 }
 
-#if 0
 TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
     const size_t nsite = 8;
     defs::inds setbits = {1, 4, 6, 9, 12};
     buffered::FrmBosOnv mbf(nsite, 0ul);
     mbf.m_frm = setbits;
     auto &clrbits = mbf.m_frm.m_decoded.m_simple_vacs.get();
+    conn::FrmBosOnv conn(mbf);
 
     size_t iiter = 0ul;
-    auto fn = [&](const conn::FrmBosOnv &conn) {
+    auto fn = [&]() {
         const auto cre = conn.m_frm.m_cre[0];
         const auto ann = conn.m_frm.m_ann[0];
         const auto iann = iiter / clrbits.size();
@@ -97,7 +97,12 @@ TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
     };
     conn_foreach::frm::General<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
-    foreach.loop(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn.m_frm, mbf.m_frm, fn);
+    ASSERT_EQ(iiter, setbits.size() * clrbits.size());
+    // then, the run time polymorphic loop:
+    iiter = 0;
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, setbits.size() * clrbits.size());
 }
 
@@ -122,15 +127,21 @@ TEST(ConnForeach, FrmGeneralEx2200) {
                                             {4, 7}};
     auto results = conn_foreach_test::product_results(setbit_pairs, clrbit_pairs);
 
+    conn::FrmOnv conn(mbf);
     auto result = results.cbegin();
-    auto fn = [&result](const conn::FrmOnv &conn) {
+    auto fn = [&]() {
         ASSERT_EQ(conn.m_ann, result->m_ann);
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ++result;
     };
     conn_foreach::frm::General<2> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
-    foreach.loop_fn(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(result, results.cend());
+    // then, the run time polymorphic loop:
+    result = results.cbegin();
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(result, results.cend());
 }
 
@@ -144,24 +155,25 @@ TEST(ConnForeach, FrmHubbardEx1100) {
      *  open BCs left to right (minor dimension: "col")
      */
     const size_t nrow = 3, ncol = 4;
-    auto lattice = lattice::make({Lattice::Ortho, {nrow, ncol}, {1, 0}});
-    buffered::FrmOnv onv(lattice.nsite());
-    onv = {0, 2, 7, 8, 9};
+    const sys::frm::Basis basis(lattice::make("ortho", {nrow, ncol}, {1, 0}));
     // horizontal neighbors
-    ASSERT_TRUE(lattice.m_dense(1, 2));
-    ASSERT_TRUE(lattice.m_dense(2, 1));
+    ASSERT_TRUE(basis.m_lattice->phase(1, 2));
+    ASSERT_TRUE(basis.m_lattice->phase(2, 1));
     // vertical neighbors
-    ASSERT_TRUE(lattice.m_dense(1, 5));
-    ASSERT_TRUE(lattice.m_dense(5, 1));
-    // periodic vertical nerighbors
-    ASSERT_TRUE(lattice.m_dense(1, 9));
-    ASSERT_TRUE(lattice.m_dense(9, 1));
+    ASSERT_TRUE(basis.m_lattice->phase(1, 5));
+    ASSERT_TRUE(basis.m_lattice->phase(5, 1));
+    // periodic vertical neighbors
+    ASSERT_TRUE(basis.m_lattice->phase(1, 9));
+    ASSERT_TRUE(basis.m_lattice->phase(9, 1));
     // horizontal neighbors
-    ASSERT_TRUE(lattice.m_dense(4, 5));
-    ASSERT_TRUE(lattice.m_dense(5, 4));
+    ASSERT_TRUE(basis.m_lattice->phase(4, 5));
+    ASSERT_TRUE(basis.m_lattice->phase(5, 4));
     // NOT periodic horizontal neighbors
-    ASSERT_FALSE(lattice.m_dense(4, 7));
-    ASSERT_FALSE(lattice.m_dense(7, 4));
+    ASSERT_FALSE(basis.m_lattice->phase(4, 7));
+    ASSERT_FALSE(basis.m_lattice->phase(7, 4));
+
+    buffered::FrmOnv mbf(basis);
+    mbf = {0, 2, 7, 8, 9};
 
     conn_foreach_test::results_t results = {
             {0, 4},
@@ -177,15 +189,20 @@ TEST(ConnForeach, FrmHubbardEx1100) {
             {9, 5},
             {9, 1},
             {9, 10}};
-
+    conn::FrmOnv conn(basis);
     auto result = results.cbegin();
-    auto fn = [&result](const conn::FrmOnv &conn) {
+    auto fn = [&]() {
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ASSERT_EQ(conn.m_ann, result->m_ann);
         ++result;
     };
-    conn_foreach::frm::Hubbard foreach(lattice);
-    foreach.loop_fn(onv, fn);
+    conn_foreach::frm::Hubbard foreach;
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(result, results.cend());
+    // then, the run time polymorphic loop:
+    result = results.cbegin();
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(result, results.cend());
 }
 
@@ -196,9 +213,9 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
      *  periodic BCs
      */
     const size_t nsite = 8;
-    auto lattice = lattice::make({Lattice::Ortho, {nsite}, {1}});
-    buffered::FrmOnv onv(lattice.nsite());
-    onv.set_spins({0, 3, 5});
+    const sys::frm::Basis basis(lattice::make("ortho", {nsite}, {1}));
+    buffered::FrmOnv mbf(basis);
+    mbf.set_spins({0, 3, 5});
 
     conn_foreach_test::results_t results = {
             {{0, 15}, {7, 8}},
@@ -209,18 +226,23 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
             {{5, 14}, {6, 13}}};
 
     auto result = results.cbegin();
-    auto fn = [&result](const conn::FrmOnv &conn) {
+    conn::FrmOnv conn(mbf);
+    auto fn = [&]() {
         ASSERT_EQ(conn.exsig(), exsig_utils::ex_double);
         ASSERT_EQ(conn.m_cre, result->m_cre);
         ASSERT_EQ(conn.m_ann, result->m_ann);
         ++result;
     };
-    conn_foreach::frm::Heisenberg foreach(lattice);
+    conn_foreach::frm::Heisenberg foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
-    foreach.loop_fn(onv, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(result, results.cend());
+    // then, the run time polymorphic loop:
+    result = results.cbegin();
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(result, results.cend());
 }
-
 
 TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const size_t nsite = 8;
@@ -240,7 +262,8 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const auto nbeta_pair = nbeta_setbit * nbeta_clrbit;
 
     size_t iiter = 0ul;
-    auto fn = [&](const conn::FrmOnv &conn) {
+    conn::FrmOnv conn(mbf);
+    auto fn = [&]() {
         if (iiter < nalpha_pair) {
             // a -> a sector
             const auto iann = iiter / nalpha_clrbit;
@@ -259,10 +282,14 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
     };
     conn_foreach::frm::Ms2Conserve<1> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_single);
-    foreach.loop_fn(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, nalpha_pair + nbeta_pair);
+    // then, the run time polymorphic loop:
+    iiter = 0;
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, nalpha_pair + nbeta_pair);
 }
-
 
 TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const size_t nsite = 8;
@@ -287,7 +314,8 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const size_t nabab = nalpha_setbit * nalpha_clrbit * nbeta_setbit * nbeta_clrbit;
     const size_t nbbbb = npair_beta_clrbit * npair_beta_setbit;
 
-    auto fn = [&](const conn::FrmOnv &conn) {
+    conn::FrmOnv conn(mbf);
+    auto fn = [&]() {
         if (iiter < naaaa) {
             // aa -> aa
             ASSERT_EQ(conn.m_cre.nalpha(), 2);
@@ -305,7 +333,12 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     };
     conn_foreach::frm::Ms2Conserve<2> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_double);
-    foreach.loop_fn(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
+    // then, the run time polymorphic loop:
+    iiter = 0ul;
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, naaaa + nabab + nbbbb);
 }
 
@@ -317,14 +350,20 @@ TEST(ConnForeach, BosEx0001) {
     auto &chk_modes = mbf.m_decoded.m_occ_modes.get();
 
     auto iiter = 0ul;
-    auto fn = [&](const conn::BosOnv &conn) {
+    conn::BosOnv conn(mbf);
+    auto fn = [&]() {
         ASSERT_EQ(conn.m_ann[0].m_imode, chk_modes[iiter]);
         ASSERT_FALSE(conn.m_cre.size());
         ++iiter;
     };
     conn_foreach::bos::Ann foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0001);
-    foreach.loop_fn(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, chk_modes.size());
+    // then, the run time polymorphic loop:
+    iiter = 0ul;
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, chk_modes.size());
 }
 
@@ -334,66 +373,84 @@ TEST(ConnForeach, BosEx0010BosOnv) {
 
     {
         const size_t occ_cutoff = 10;
-        buffered::BosOnv mbf({0ul, nmode, false, occ_cutoff});
+        buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
         defs::inds chk_modes = {0, 1, 2, 3, 4, 5};
         auto iiter = 0ul;
-        auto fn = [&](const conn::BosOnv &conn) {
+        conn::BosOnv conn(mbf);
+        auto fn = [&]() {
             ASSERT_FALSE(conn.m_ann.size());
             ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
             ++iiter;
         };
-        conn_foreach::bos::Cre foreach(mbf.m_hs.m_nmode, occ_cutoff);
+        conn_foreach::bos::Cre foreach;
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
-        foreach.loop_fn(mbf, fn);
+        // first, the compile time polymorphic loop:
+        foreach.loop_fn(conn, mbf, fn);
+        ASSERT_EQ(iiter, chk_modes.size());
+        // then, the run time polymorphic loop:
+        iiter = 0ul;
+        foreach.loop(conn, mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
     }
 
     {
-        const size_t nboson_max = 5;
+        const size_t occ_cutoff = 5;
         // lower maximum occupation
-        buffered::BosOnv mbf(nmode);
+        buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
         defs::inds chk_modes = {0, 1, 2, 3, 5};
         auto iiter = 0ul;
-        auto fn = [&](const conn::BosOnv &conn) {
+        conn::BosOnv conn(mbf);
+        auto fn = [&]() {
             ASSERT_FALSE(conn.m_ann.size());
             ASSERT_EQ(conn.m_cre[0].m_imode, chk_modes[iiter]);
             ++iiter;
         };
-        conn_foreach::bos::Cre foreach(mbf.m_hs.m_nmode, nboson_max);
+        conn_foreach::bos::Cre foreach;
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
-        foreach.loop_fn(mbf, fn);
+        // first, the compile time polymorphic loop:
+        foreach.loop_fn(conn, mbf, fn);
+        ASSERT_EQ(iiter, chk_modes.size());
+        // then, the run time polymorphic loop:
+        iiter = 0ul;
+        foreach.loop(conn, mbf, fn);
         ASSERT_EQ(iiter, chk_modes.size());
     }
 }
 
 TEST(ConnForeach, BosEx0010FrmBosOnv) {
     const size_t nmode = 6;
-    const size_t nboson_max = 5;
+    const size_t bos_occ_cutoff = 5;
     defs::inds occs = {0, 2, 0, 1, 5, 1};
     // lower maximum occupation
-    buffered::FrmBosOnv mbf(0ul, nmode);
+    buffered::FrmBosOnv mbf(0ul, nmode, bos_occ_cutoff);
     mbf.m_bos = occs;
     defs::inds chk_modes = {0, 1, 2, 3, 5};
     auto iiter = 0ul;
-    auto fn = [&](const conn::FrmBosOnv &conn) {
+    conn::FrmBosOnv conn(mbf);
+    auto fn = [&]() {
         ASSERT_FALSE(conn.m_bos.m_ann.size());
         ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, chk_modes[iiter]);
         ++iiter;
     };
-    conn_foreach::bos::Cre foreach(mbf.m_bos.m_hs.m_nmode, nboson_max);
+    conn_foreach::bos::Cre foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_0010);
-    foreach.loop(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn.m_bos, mbf.m_bos, fn);
+    ASSERT_EQ(iiter, chk_modes.size());
+    // then, the run time polymorphic loop:
+    iiter = 0ul;
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, chk_modes.size());
 }
 
 TEST(ConnForeach, FrmBosEx1110) {
     const size_t nsite = 6, nmode = 8;
-    for (size_t nboson_max = 0ul; nboson_max < 6; ++nboson_max) {
-        buffered::FrmBosOnv mbf(nsite, {0ul, nmode, false, nboson_max});
+    for (size_t bos_occ_cutoff = 0ul; bos_occ_cutoff < 6; ++bos_occ_cutoff) {
+        buffered::FrmBosOnv mbf(nsite, nmode, bos_occ_cutoff);
 
-        ASSERT_EQ(mbf.m_bos.m_hs.m_nmode, nmode);
+        ASSERT_EQ(mbf.m_bos.m_basis.m_nmode, nmode);
         mbf = {{0, 4, 6, 8, 11},
                {2, 0, 1, 0, 1, 4, 0, 5}};
         using namespace conn_foreach;
@@ -403,16 +460,18 @@ TEST(ConnForeach, FrmBosEx1110) {
          */
         conn_foreach_test::results_t frm_results;
         {
-            auto fn = [&frm_results](const conn::FrmOnv &conn) {
+            conn::FrmOnv conn(mbf.m_frm);
+            auto fn = [&]() {
                 frm_results.emplace_back(conn.m_ann.inds(), conn.m_cre.inds());
             };
-            frm::Ms2Conserve<1> foreach(nsite);
-            foreach.loop_fn(mbf.m_frm, fn);
+            frm::Ms2Conserve<1> foreach;
+            foreach.loop_fn(conn, mbf.m_frm, fn);
         }
 
-        auto mode_inds = conn_foreach_test::creatable_mode_indices(mbf.m_bos, nboson_max);
+        auto mode_inds = conn_foreach_test::creatable_mode_indices(mbf.m_bos, bos_occ_cutoff);
         size_t iiter = 0ul;
-        auto fn = [&](const conn::FrmBosOnv &conn) {
+        conn::FrmBosOnv conn(mbf);
+        auto fn = [&]() {
             auto ifrm_result = iiter / mode_inds.size();
             ASSERT_EQ(conn.m_frm.m_ann, frm_results[ifrm_result].m_ann);
             ASSERT_EQ(conn.m_frm.m_cre, frm_results[ifrm_result].m_cre);
@@ -420,9 +479,14 @@ TEST(ConnForeach, FrmBosEx1110) {
             ASSERT_EQ(conn.m_bos.m_cre[0].m_imode, mode_inds[imode]);
             ++iiter;
         };
-        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach(mbf.m_frm.m_hs.m_sites, mbf.m_bos.m_hs);
+        frmbos::Product<frm::Ms2Conserve<1>, bos::Cre> foreach;
         ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_1110);
-        foreach.loop_fn(mbf, fn);
+        // first, the compile time polymorphic loop:
+        foreach.loop_fn(conn, mbf, fn);
+        ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
+        // then, the run time polymorphic loop:
+        iiter = 0ul;
+        foreach.loop(conn, mbf, fn);
         ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
     }
 }
@@ -439,16 +503,18 @@ TEST(ConnForeach, FrmBosEx1101) {
      */
     conn_foreach_test::results_t frm_results;
     {
-        auto fn = [&frm_results](const conn::FrmOnv &conn) {
+        conn::FrmOnv conn(mbf.m_frm);
+        auto fn = [&]() {
             frm_results.emplace_back(conn.m_ann.inds(), conn.m_cre.inds());
         };
-        frm::Ms2Conserve<1> foreach(mbf.m_frm.m_hs.m_sites);
-        foreach.loop_fn(mbf.m_frm, fn);
+        frm::Ms2Conserve<1> foreach;
+        foreach.loop_fn(conn, mbf.m_frm, fn);
     }
 
     auto mode_inds = conn_foreach_test::annihilatable_mode_indices(mbf.m_bos);
     size_t iiter = 0ul;
-    auto fn = [&](const conn::FrmBosOnv &conn) {
+    conn::FrmBosOnv conn(mbf);
+    auto fn = [&]() {
         auto ifrm_result = iiter / mode_inds.size();
         ASSERT_EQ(conn.m_frm.m_ann, frm_results[ifrm_result].m_ann);
         ASSERT_EQ(conn.m_frm.m_cre, frm_results[ifrm_result].m_cre);
@@ -456,9 +522,13 @@ TEST(ConnForeach, FrmBosEx1101) {
         ASSERT_EQ(conn.m_bos.m_ann[0].m_imode, mode_inds[imode]);
         ++iiter;
     };
-    frmbos::Product<frm::Ms2Conserve<1>, bos::Ann> foreach(mbf.m_frm.m_hs.m_sites, mbf.m_bos.m_hs);
+    frmbos::Product<frm::Ms2Conserve<1>, bos::Ann> foreach;
     ASSERT_EQ(foreach.m_exsig, exsig_utils::ex_1101);
-    foreach.loop_fn(mbf, fn);
+    // first, the compile time polymorphic loop:
+    foreach.loop_fn(conn, mbf, fn);
+    ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
+    // then, the run time polymorphic loop:
+    iiter = 0ul;
+    foreach.loop(conn, mbf, fn);
     ASSERT_EQ(iiter, frm_results.size() * mode_inds.size());
 }
-#endif

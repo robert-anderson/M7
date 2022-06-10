@@ -58,7 +58,7 @@ const std::vector<defs::inds> &decoded_mbf::frm::LabelledBase::validated() const
 
 defs::inds decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::inds &site_irreps, size_t nirrep) {
     auto nsite = site_irreps.size();
-    REQUIRE_TRUE(nsite, "cannot make spinorb irrep map from a zero-site fermion basis");
+    if (!nsite) return {};
     defs::inds out(2*nsite, 0);
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin());
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin()+nsite);

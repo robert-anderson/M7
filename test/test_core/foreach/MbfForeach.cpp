@@ -220,7 +220,7 @@ TEST(MbfForeach, FrmBosSpins) {
     const sys::frm::Sector frm_sector({4}, {4, 0});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
     const sys::Sector sector(frm_sector, bos_sector);
-    buffered::FrmBosOnv mbf({frm_sector, bos_sector});
+    buffered::FrmBosOnv mbf(sector);
     size_t iiter = 0ul;
     auto fn = [&]() {
         ASSERT_LT(iiter, frm_chk_inds.size() * bos_chk_inds.size());
@@ -243,7 +243,7 @@ TEST(MbfForeach, FrmBosSpinsEarlyExit) {
     const sys::frm::Sector frm_sector({4}, {4, 0});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
     const sys::Sector sector(frm_sector, bos_sector);
-    buffered::FrmBosOnv mbf({frm_sector, bos_sector});
+    buffered::FrmBosOnv mbf(sector);
     size_t iiter = 0ul;
     auto fn = [&]() {
         if (iiter==32) throw ExitLoop();
@@ -268,7 +268,7 @@ TEST(MbfForeach, FrmBosMs2Conserve) {
     const sys::frm::Sector frm_sector({4}, {5});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
     const sys::Sector sector(frm_sector, bos_sector);
-    buffered::FrmBosOnv mbf({frm_sector, bos_sector});
+    buffered::FrmBosOnv mbf(sector);
     size_t iiter = 0ul;
     auto fn = [&]() {
         ASSERT_LT(iiter, frm_chk_inds.size() * bos_chk_inds.size());
@@ -291,8 +291,8 @@ TEST(MbfForeach, FrmBosMs2ConservePair) {
     const sys::frm::Sector frm_sector({4}, {5});
     const sys::bos::Sector bos_sector({3, 2}, {0, false});
     const sys::Sector sector(frm_sector, bos_sector);
-    buffered::FrmBosOnv outer({frm_sector, bos_sector});
-    buffered::FrmBosOnv inner({frm_sector, bos_sector});
+    buffered::FrmBosOnv outer(sector);
+    buffered::FrmBosOnv inner(sector);
 
     auto fn = [&] (size_t iouter, size_t iinner) {
         ASSERT_LT(iouter, frm_chk_inds.size() * bos_chk_inds.size());
