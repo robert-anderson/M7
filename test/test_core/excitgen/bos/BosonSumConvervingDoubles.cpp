@@ -2,16 +2,14 @@
 // Created by Robert J. Anderson on 26/11/2021.
 //
 
-#include <M7_lib/excititer/ExcitIters.h>
 #include "gtest/gtest.h"
-#include "ExcitGenTester.h"
-#include "M7_lib/excitgen/BosonSumConservingDoubles.h"
+#include "M7_lib/excitgen/bos/BosonSumConservingDoubles.h"
+#include "test_core/excitgen/ExcitGenTester.h"
 
+/*
 TEST(BosonSumConservingDoubles, LandauLevels) {
     PRNG prng(14, 1000000);
-    conf::Document opts;
-    opts.m_hamiltonian.m_boson.m_bosdump.m_path = defs::assets_root + "/LandauLevels_6_8_14/BOSDUMP";
-    opts.verify();
+    BosHam
     Hamiltonian ham(opts.m_hamiltonian);
     BosonSumConservingDoubles excit_gen(ham, prng);
     excititers::Bos excit_iter(ham, exsig_utils::ex_0022);
@@ -29,3 +27,4 @@ TEST(BosonSumConservingDoubles, LandauLevels) {
     ASSERT_LT(av_err2, av_err1);
     ASSERT_TRUE(tester.all_correct_weights(2 * ndraw));
 }
+*/

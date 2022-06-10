@@ -6,9 +6,9 @@
 #define M7_INTERACTINGBOSEGASDOUBLES_H
 
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
+#include "BosExcitGen.h"
 
-#include "ExcitGen.h"
-
+#if 0
 class InteractingBoseGasDoubles : BosExcitGen {
     const size_t m_nbos_pair;
     /**
@@ -57,6 +57,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
     }
 
 };
+#endif
 
 
 #endif //M7_INTERACTINGBOSEGASDOUBLES_H

@@ -1,7 +1,7 @@
 target_sources(M7_lib
     PRIVATE
-        BosonSumConservingDoubles.cpp
-        BosonSumConservingDoubles.h
+        ../excitgen/bos/BosonSumConservingDoubles.cpp
+        ../excitgen/bos/BosonSumConservingDoubles.h
         ExcitGen.cpp
         ExcitGen.h
         HeatBathDoubles.cpp
@@ -10,8 +10,8 @@ target_sources(M7_lib
         HeisenbergUniform.h
         HubbardUniform.cpp
         HubbardUniform.h
-        InteractingBoseGasDoubles.cpp
-        InteractingBoseGasDoubles.h
+        ../excitgen/bos/InteractingBoseGasDoubles.cpp
+        ../excitgen/bos/InteractingBoseGasDoubles.h
         LadderHoppingPc.cpp
         LadderHoppingPc.h
         LadderHoppingUniform.cpp

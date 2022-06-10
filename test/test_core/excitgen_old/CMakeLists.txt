@@ -1,6 +1,6 @@
 target_sources(unittest
     PRIVATE
-        BosonSumConvervingDoubles.cpp
+        ../excitgen/bos/BosonSumConvervingDoubles.cpp
         ExcitGenTester.cpp
         ExcitGenTester.h
         HeatBathDoubles.cpp
