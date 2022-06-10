@@ -10,7 +10,7 @@
 
 TEST(Pchb1101hc, Test){
     PRNG prng(14, 1000000);
-    GeneralLadderHam frmbos_ham({defs::assets_root + "/SpinResolvedEbdump/EBDUMP"}, true);
+    GeneralLadderHam frmbos_ham({defs::assets_root + "/SpinResolvedEbdump/EBDUMP"}, false);
     Hamiltonian h(&frmbos_ham);
     auto particles = h.default_particles(6);
     ASSERT_TRUE(frmbos_ham.m_basis.m_frm.m_abgrp_map);
@@ -26,7 +26,7 @@ TEST(Pchb1101hc, Test){
     excit_gen_tester::ExcitGenTester tester(h, excit_gen, conn_iter);
 
     tester.fill_results_table(src_mbf);
-    const size_t ndraw = 10000000;
+    const size_t ndraw = 5000000;
     ASSERT_EQ(tester.run(src_mbf, ndraw).m_error_message, "");
     ASSERT_TRUE(tester.all_drawn_at_least_once());
     auto av_err1 = tester.mean_abs_error(ndraw);

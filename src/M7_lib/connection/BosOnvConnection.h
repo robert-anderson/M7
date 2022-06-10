@@ -110,6 +110,8 @@ public:
      *  mode index corresponding to the operator index
      */
     size_t get_imode(size_t iop) const;
+
+    std::string to_string() const;
 };
 
 struct BosOnvConnection {
@@ -143,5 +145,14 @@ struct BosOnvConnection {
 
 };
 
+static std::ostream &operator<<(std::ostream &os, const BosOps &ops) {
+    os << ops.to_string();
+    return os;
+}
+
+static std::ostream &operator<<(std::ostream &os, const BosOnvConnection &conn) {
+    os << conn.m_ann << "->" << conn.m_cre;
+    return os;
+}
 
 #endif //M7_BOSONVCONNECTION_H

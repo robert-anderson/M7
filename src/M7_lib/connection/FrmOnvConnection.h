@@ -323,7 +323,7 @@ public:
      * 0->0   1->0   2->1   3->3   4->6   5->10   6->15
      *   E      E      O      O      E      E       O    ....
      *
-     * so it is quick to compute whether these exchanges implies an inversion in the phase computed from the connection
+     * so it is quick to compute whether these exchanges imply an inversion in the phase computed from the connection
      * indices, and this is done at the end of the implementation of this method
      *
      * @param src
@@ -343,6 +343,11 @@ public:
      */
     size_t exsig(const size_t& nop_insert) const;
 };
+
+static std::ostream &operator<<(std::ostream &os, const FrmOnvConnection &conn) {
+    os << conn.m_ann.inds() << "->" << conn.m_cre.inds();
+    return os;
+}
 
 
 #endif //M7_FRMONVCONNECTION_H

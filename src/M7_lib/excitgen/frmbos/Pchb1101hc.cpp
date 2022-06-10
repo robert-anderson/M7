@@ -18,7 +18,7 @@ Pchb1101hc::Pchb1101hc(const FrmBosHam &h, PRNG &prng) :
                 weights.assign(nmode, 0.0);
                 if (p!=q) {
                     for (size_t n = 0ul; n < nmode; ++n) {
-                        auto element = m_h.get_coeff_1101(n, p, q);
+                        auto element = m_h.get_coeff_1110(n, p, q);
                         weights[n] = std::abs(element);
                     }
                 }
@@ -56,6 +56,24 @@ bool Pchb1101hc::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
         if (src.m_bos[n] == 0ul) return false;
         conn.m_bos.m_ann.set(n);
     };
-    prob *= std::abs(m_h.get_coeff_1101(n, p, q)) / (m_pick_n_given_pq.norm(pq));
+    prob *= std::abs(m_h.get_coeff_1110(n, p, q)) / (m_pick_n_given_pq.norm(pq));
     return true;
+}
+
+defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv &src,
+                                       const conn::FrmBosOnv &conn, defs::ham_t helem) const {
+    auto prob = UniformSingles::prob_spin_conserve_fn(src.m_frm, conn.m_frm);
+    const bool cre = exsig_utils::decode_nbos_cre(conn.exsig());
+    const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
+    const auto q = cre ? conn.m_frm.m_ann[0]: conn.m_frm.m_cre[0];
+    const auto pq = p*m_h.m_basis.m_frm.m_nspinorb+q;
+    return prob * std::abs(helem) / (m_pick_n_given_pq.norm(pq));
+}
+
+defs::prob_t Pchb1101hc::prob_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const {
+    return prob_h_frmbos(src, conn, m_h.get_element(src, conn));
+}
+
+size_t Pchb1101hc::approx_nconn(size_t exsig, sys::Particles particles) const {
+    return m_h.m_basis.m_frm.m_nsite*m_h.m_basis.m_bos.m_nmode;
 }

@@ -1,12 +1,9 @@
 target_sources(unittest
     PRIVATE
         BosonCouplings.cpp
-        BosonHamiltonian.cpp
-        GeneralFrmHam.cpp
-        ForeachConnection.cpp
-        HeisenbergFrmHam.cpp
-        InteractingBoseGasBosHam.cpp
-        SpinSquareFrmHam.cpp
-        TranscorrelatedFermionHamiltonian.cpp
         TranscorrelatedHamiltonian.cpp
 )
+
+add_subdirectory(bos)
+add_subdirectory(frm)
+add_subdirectory(frmbos)

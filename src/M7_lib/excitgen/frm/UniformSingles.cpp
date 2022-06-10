@@ -53,6 +53,25 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &s
     return true;
 }
 
+defs::prob_t UniformSingles::prob_spin_conserve_fn(const field::FrmOnv &src, const conn::FrmOnv &conn) {
+    const auto &nonempty_pairs = src.m_decoded.m_nonempty_pair_labels.get();
+    if (nonempty_pairs.empty()) return 0.0;
+    const auto label = src.m_decoded.m_spin_sym_occs.label(conn.m_cre[0]);
+    const auto &occs = src.m_decoded.m_spin_sym_occs.get()[label];
+    const auto &vacs = src.m_decoded.m_spin_sym_vacs.get()[label];
+    return 1.0 / (nonempty_pairs.size() * occs.size() * vacs.size());
+}
+
+defs::prob_t UniformSingles::prob_spin_nonconserve_fn(const field::FrmOnv &src, const conn::FrmOnv &conn) {
+    const auto nocc = src.m_decoded.m_simple_occs.get().size();
+    const auto nvac = src.m_basis.m_nspinorb - nocc;
+    return 1.0/(nocc*nvac);
+}
+
+defs::prob_t UniformSingles::prob_fn(const field::FrmOnv &src, const conn::FrmOnv &conn, bool spin_conserve) {
+    return spin_conserve ? prob_spin_conserve_fn(src, conn) : prob_spin_nonconserve_fn(src, conn);
+}
+
 defs::prob_t UniformSingles::prob_frm(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
     auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
     if (spin_conserving) return prob_spin_conserve_fn(src, conn);

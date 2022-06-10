@@ -181,7 +181,7 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
     ASSERT_TRUE(consts::nearly_equal(evals[0], -9.423844225360671, 1e-10));
 }
 
-TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff1) {
+TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
     conf::Hamiltonian opts(nullptr);
     GeneralFrmHam frm_ham({defs::assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
     GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
@@ -191,11 +191,10 @@ TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff1) {
     DenseHamiltonian ham(ham_src, particles);
     std::vector<double> evals;
     dense::diag(ham, evals);
-    std::cout << evals[0] << std::endl;
     ASSERT_TRUE(consts::nearly_equal(evals[0], 0.5090148148366922, 1e-10));
 }
 
-TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff2) {
+TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
     conf::Hamiltonian opts(nullptr);
     GeneralFrmHam frm_ham({defs::assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
     GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
@@ -208,7 +207,7 @@ TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff2) {
     ASSERT_TRUE(consts::nearly_equal(evals[0], -0.38125085248276913, 1e-10));
 }
 
-TEST(DenseHamiltonian, BosonCouplingGeneralOccCutoff3) {
+TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
     conf::Hamiltonian opts(nullptr);
     GeneralFrmHam frm_ham({defs::assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
     GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 3);

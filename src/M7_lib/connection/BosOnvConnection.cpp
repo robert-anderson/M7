@@ -49,35 +49,6 @@ size_t BosOps::size() const {
     return m_nop;
 }
 
-void BosOps::add(size_t imode, size_t nop){
-    DEBUG_ASSERT_TRUE(m_pairs.empty() || imode > m_pairs.back().m_imode,
-                      "bosonic mode indices should be added in ascending order");
-    DEBUG_ASSERT_LT(imode, m_pairs.capacity(), "bosonic mode index is OOB");
-    DEBUG_ASSERT_LT(m_pairs.size(), m_pairs.capacity(),
-                    "should never have more distinct boson operators than modes");
-    m_pairs.emplace_back(imode, nop);
-    /*
-     * this is fine, since the pairs array is sufficiently large at initialization, so we don't have to worry about
-     * this pointer being invalided by a reallocation
-     */
-    m_pair_ptrs[imode] = &m_pairs.back();
-    m_nop += nop;
-}
-
-const BosOpPair &BosOps::operator[](const size_t &ipair) const {
-    DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
-    return m_pairs[ipair];
-}
-
-size_t BosOps::get_imode(size_t iop) const {
-    DEBUG_ASSERT_LT(iop, m_nop, "Boson operator index OOB");
-    for (const auto& pair: m_pairs) {
-        if (iop<pair.m_nop) return pair.m_imode;
-        iop-=pair.m_nop;
-    }
-    return ~0ul;
-}
-
 void BosOps::set(size_t i) {
     clear();
     add(i, 1ul);
@@ -117,6 +88,47 @@ void BosOps::set(size_t i, size_t j, size_t k) {
             add(k, 1);
         }
     }
+}
+
+void BosOps::add(size_t imode, size_t nop){
+    DEBUG_ASSERT_TRUE(m_pairs.empty() || imode > m_pairs.back().m_imode,
+                      "bosonic mode indices should be added in ascending order");
+    DEBUG_ASSERT_LT(imode, m_pairs.capacity(), "bosonic mode index is OOB");
+    DEBUG_ASSERT_LT(m_pairs.size(), m_pairs.capacity(),
+                    "should never have more distinct boson operators than modes");
+    m_pairs.emplace_back(imode, nop);
+    /*
+     * this is fine, since the pairs array is sufficiently large at initialization, so we don't have to worry about
+     * this pointer being invalided by a reallocation
+     */
+    m_pair_ptrs[imode] = &m_pairs.back();
+    m_nop += nop;
+}
+
+const BosOpPair &BosOps::operator[](const size_t &ipair) const {
+    DEBUG_ASSERT_LT(ipair, m_pairs.size(), "boson operator index OOB");
+    return m_pairs[ipair];
+}
+
+size_t BosOps::get_imode(size_t iop) const {
+    DEBUG_ASSERT_LT(iop, m_nop, "Boson operator index OOB");
+    for (const auto& pair: m_pairs) {
+        if (iop<pair.m_nop) return pair.m_imode;
+        iop-=pair.m_nop;
+    }
+    return ~0ul;
+}
+
+std::string BosOps::to_string() const {
+    std::vector<std::string> out;
+    for (auto pair : m_pairs) {
+        if (pair.m_nop>1){
+            // repeated operators are represented as being raised to a power
+            out.push_back(std::to_string(pair.m_imode)+"^"+std::to_string(pair.m_nop));
+        }
+        else out.push_back(std::to_string(pair.m_imode));
+    }
+    return utils::to_string(out);
 }
 
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}

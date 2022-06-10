@@ -32,5 +32,9 @@ struct FrmBosOnvConnection {
     bool respects_occ_range(const FrmBosOnvField& src, size_t nboson_max) const;
 };
 
+static std::ostream &operator<<(std::ostream &os, const FrmBosOnvConnection &conn) {
+    os << conn.m_frm << conn.m_bos;
+    return os;
+}
 
 #endif //M7_FRMBOSONVCONNECTION_H
