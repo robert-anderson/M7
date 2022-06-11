@@ -137,7 +137,7 @@ size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
     const auto ibit_in_word_begin = ibit_begin-iword_begin*defs::nbit_word;
     const auto iword_end = ibit_end/defs::nbit_word;
     const auto ibit_in_word_end = ibit_end-iword_end*defs::nbit_word;
-    auto dptr = reinterpret_cast<size_t *>(begin());//+nsite/defs::nbit_word;
+    auto dptr = reinterpret_cast<size_t *>(begin());
     if (iword_begin==iword_end){
         auto mask = bit_utils::make_range_mask<size_t>(ibit_in_word_begin, ibit_in_word_end);
         return (dptr[iword_begin] & mask) >> ibit_in_word_begin;

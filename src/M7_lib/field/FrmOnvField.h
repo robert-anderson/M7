@@ -184,9 +184,10 @@ public:
     }
 
     size_t nopen_shell_alpha() const;
+
     /**
-     * efficiently iterate over the indices of those sites where the alpha spin orbital is occupied but the beta spin
-     * orbital is vacant
+     * efficiently iterate over the indices of those sites where the alpha spin vacant is occupied but the beta spin
+     * orbital is occupied
      * @tparam body_fn_t
      *  functor to call each time an alpha-occupied, beta-vacant site is found
      * @param fn
@@ -220,7 +221,7 @@ public:
     size_t nclosed_shell() const;
 
     /**
-     * efficiently iterate over the site indices with any occupation
+     * efficiently iterate over the site indices with any non-zero occupation
      * @tparam body_fn_t
      *  functor to call each time an occupied site is found
      * @param fn
