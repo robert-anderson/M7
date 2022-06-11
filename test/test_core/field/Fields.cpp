@@ -72,7 +72,7 @@ TEST(Fields, HashUniformityLowIndexMoreLikely){
         auto ibucket = fonv.hash()%nbucket;
         freqs[ibucket]++;
     }
-    auto tot = std::accumulate(freqs.begin(), freqs.end(), 0);
+    auto tot = std::accumulate(freqs.begin(), freqs.end(), 0ul);
     // check that the hash is uniform within 1%
     for (const auto& freq: freqs) ASSERT_LT(std::abs(1.0-nbucket*freq/double(tot)), 0.01);
 }

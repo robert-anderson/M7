@@ -5,145 +5,117 @@
 #include "gtest/gtest.h"
 #include "M7_lib/field/CompositeField.h"
 #include "M7_lib/table/BufferedFields.h"
+#include "M7_lib/table/BufferedTable.h"
 
 
-struct DetPerm : CompositeField<field::FrmOnv, field::BosOnv> {
-    typedef CompositeField<field::FrmOnv, field::BosOnv> base_t;
-    field::FrmOnv m_frm;
-    field::BosOnv m_bos;
-    DetPerm(Row* row, sys::Basis basis, std::string prefix):
-        base_t(m_frm, m_bos),
-        m_frm(row, basis, prefix+" fermions"),
-        m_bos(row, basis, prefix+" bosons"){}
+namespace composite_field_test {
+    struct BitsAndInts : CompositeField<field::Bitset<uint16_t>, field::Numbers<int, 2>> {
+        typedef CompositeField<field::Bitset<uint16_t>, field::Numbers<int, 2>> base_t;
+        field::Bitset<uint16_t> m_bitset;
+        field::Numbers<int, 2> m_ints;
 
-    DetPerm(const DetPerm& other): base_t(m_frm, m_bos), m_frm(other.m_frm), m_bos(other.m_bos){}
+        BitsAndInts(Row *row, size_t nbit, std::array<size_t, 2> ints_shape, std::string prefix) :
+                base_t(m_bitset, m_ints),
+                m_bitset(row, nbit, prefix + " bitset"),
+                m_ints(row, ints_shape, prefix + " ints") {}
 
-    DetPerm& operator=(const DetPerm& other) {
-        m_frm = other.m_frm;
-        m_bos = other.m_bos;
-        return *this;
-    }
-};
+        BitsAndInts(const BitsAndInts &other) :
+            base_t(m_bitset, m_ints), m_bitset(other.m_bitset), m_ints(other.m_ints) {}
 
-struct OuterDetPerm : CompositeField<DetPerm, DetPerm> {
-    typedef CompositeField<DetPerm, DetPerm> base_t;
-    DetPerm m_ket;
-    DetPerm m_bra;
-    OuterDetPerm(Row* row, sys::Basis basis): base_t(m_ket, m_bra),
-        m_ket(row, basis, "ket"), m_bra(row, basis, "bra"){}
+        BitsAndInts &operator=(const BitsAndInts &other) {
+            m_bitset = other.m_bitset;
+            m_ints = other.m_ints;
+            return *this;
+        }
+    };
 
-    OuterDetPerm(const OuterDetPerm& other): base_t(m_ket, m_bra), m_ket(other.m_ket), m_bra(other.m_bra){}
+    /**
+     * composite fields are nestable to arbitrary depth
+     */
+    struct BitsAndIntsPair : CompositeField<BitsAndInts, BitsAndInts> {
+        typedef CompositeField<BitsAndInts, BitsAndInts> base_t;
+        BitsAndInts m_first;
+        BitsAndInts m_second;
+        BitsAndIntsPair(Row* row, size_t nbit, std::array<size_t, 2> ints_shape, std::string prefix):
+            base_t(m_first, m_second),
+            m_first(row, nbit, ints_shape, prefix + " first"),
+            m_second(row, nbit, ints_shape, prefix + " second"){}
 
-    OuterDetPerm& operator=(const OuterDetPerm& other) {
-        m_ket = other.m_ket;
-        m_bra = other.m_bra;
-        return *this;
-    }
+        BitsAndIntsPair(const BitsAndIntsPair& other):
+            base_t(m_first, m_second), m_first(other.m_first), m_second(other.m_second){}
 
-};
+        BitsAndIntsPair& operator=(const BitsAndIntsPair& other) {
+            m_first = other.m_first;
+            m_second = other.m_second;
+            return *this;
+        }
+    };
 
-struct CompFieldTestRow : Row {
-    field::FrmOnv m_frm_onv;
-    OuterDetPerm m_dmbas;
-    CompFieldTestRow() : m_frm_onv(this, 6, "alfa"), m_dmbas(this, {8, 4}){}
-};
-
-struct DetPermTestRow : Row {
-    DetPerm m_dp;
-    DetPermTestRow() : m_dp(this, {6, 4}, "www"){}
-};
-
-//struct NestedCompFieldTestRow : Row {
-//    field::FrmOnv m_frm_onv;
-//    typedef CompositeField<field::FrmOnv, field::FrmOnv> frm_onv_pair_t;
-//    frm_onv_pair_t m_comp_field;
-//    CompositeField<frm_onv_pair_t, field::BosOnv> m_nested_field;
-//
-//    NestedCompFieldTestRow() :
-//            m_frm_onv({this, 6, "alfa"}),
-//            m_comp_field({this, 6, "bravo"}, {this, 8, "charlie"}),
-//            m_nested_field({{this, 10, "delta"}, {this, 5, "echo"}},
-//                           {this, 9, "foxtrot"}){}
-//};
-
-
-TEST(CompositeField, Test) {
-
-//    buffered::BosOnv b(5);
-//    b = {1, 5, 6, 9, 19};
-//    buffered::BosOnv c(5);
-//    c = static_cast<const field::BosOnv&>(b);
-    buffered::FrmBosOnv b(6, 4);
-    //buffered::FrmBosOnv c({6, 4});
-    field::FrmBosOnv& bref(b);
-    const defs::inds frm_inds = {1, 5, 7};
-    const defs::inds bos_inds = {1, 5, 6, 9};
-    b = {frm_inds, bos_inds};
-    buffered::FrmBosOnv c(bref);
-    std::cout << b.to_string() << std::endl;
-    std::cout << c.to_string() << std::endl;
-    c = b;
-    std::cout << c.to_string() << std::endl;
-
-
-
-//    DetPermTestRow row;
-//    ASSERT_EQ(&row.m_dp.m_frm, &row.m_dp.get<0>());
+    struct TestRow : Row {
+        BitsAndInts m_single;
+        BitsAndIntsPair m_pair;
+        TestRow(size_t nbit, std::array<size_t, 2> ints_shape):
+            m_single(this, nbit, ints_shape, "single"), m_pair(this, nbit, ints_shape, "pair"){}
+    };
 }
 
-#if 0
+TEST(CompositeField, DataIntegrity) {
+    using namespace composite_field_test;
+    const size_t nbit = 9;
+    const std::array<size_t, 2> ints_shape = {4, 3};
 
-TEST(CompositeField, CopyMoveSemantics) {
+    TestRow row(nbit, ints_shape);
+    ASSERT_EQ(&row.m_single.m_bitset, &row.m_single.get<0>());
+    ASSERT_EQ(row.m_single.m_bitset.m_format.m_nelement, nbit);
+    ASSERT_EQ(&row.m_single.m_ints, &row.m_single.get<1>());
+    ASSERT_EQ(row.m_single.m_ints.m_format.m_shape, ints_shape);
+    ASSERT_EQ(&row.m_pair.m_first.m_bitset, &row.m_pair.get<0>().get<0>());
+    ASSERT_EQ(&row.m_pair.m_first.m_ints, &row.m_pair.get<0>().get<1>());
+    ASSERT_EQ(&row.m_pair.m_second.m_bitset, &row.m_pair.get<1>().get<0>());
+    ASSERT_EQ(row.m_pair.m_second.m_bitset.m_format.m_nelement, nbit);
+    ASSERT_EQ(&row.m_pair.m_second.m_ints, &row.m_pair.get<1>().get<1>());
+    ASSERT_EQ(row.m_pair.m_second.m_ints.m_format.m_shape, ints_shape);
 
-    CompFieldTestRow row;
-    ASSERT_EQ(&row.m_dmbas.m_ket.m_frm, &row.m_dmbas.m_ket.get<0>());
-
-    ASSERT_EQ(row.nfield(), 5ul);
+    ASSERT_EQ(row.nfield(), 6ul);
     for (size_t i=0ul; i<row.nfield(); ++i) ASSERT_EQ(row.m_fields[i]->m_row, &row);
     ASSERT_EQ(row.m_child, nullptr);
 
     auto row_copy = row;
     for (size_t i=0ul; i<row_copy.nfield(); ++i) ASSERT_EQ(row_copy.m_fields[i]->m_row, &row_copy);
 
-    BufferedTable<CompFieldTestRow> bt("test table", {{}});
+    BufferedTable<TestRow> bt("test table", {{nbit, ints_shape}});
     bt.resize(10);
     bt.push_back(4);
 
     auto r1 = bt.m_row;
     r1.restart();
-    r1.m_dmbas.m_ket.m_frm = {0, 1, 2, 3};
-    r1.m_dmbas.m_bra.m_bos = {1, 2, 3, 7};
+    r1.m_single.m_bitset = {0, 1, 3, 6, 7};
+    r1.m_single.m_ints = {-1, 1, -2, 2, -3, 3, -4, -4, -5, 5, -6, 6};
+    r1.m_pair.m_first.m_bitset = {0, 2, 4, 6};
+    r1.m_pair.m_first.m_ints = {-6, 6, -5, 5, -4, 4, -3, -3, -2, 2, -1, 1};
+    r1.m_pair.m_second.m_bitset = {5, 6, 8};
+    r1.m_pair.m_second.m_ints = {-7, 7, -6, 6, -5, 5, -4, -4, -3, 3, -2, 2};
     auto r2 = bt.m_row;
     r2.jump(2);
-    r2.m_dmbas = r1.m_dmbas;
+    r2.m_single = r1.m_single;
+    r2.m_pair = r1.m_pair;
     ASSERT_TRUE(r1.begin());
     ASSERT_TRUE(r2.begin());
 
-    ASSERT_EQ(r1.m_frm_onv.m_row, &r1);
-    ASSERT_EQ(r1.m_dmbas.m_ket.m_frm.m_row, &r1);
-    ASSERT_EQ(r2.m_frm_onv.m_row, &r2);
-    ASSERT_EQ(r2.m_dmbas.m_ket.m_frm.m_row, &r2);
+    ASSERT_EQ(r1.m_single.m_bitset.m_row, &r1);
+    ASSERT_EQ(r1.m_single.m_ints.m_row, &r1);
+    ASSERT_EQ(r1.m_pair.m_first.m_ints.m_row, &r1);
+    ASSERT_EQ(r1.m_pair.m_first.m_bitset.m_row, &r1);
+    ASSERT_EQ(r1.m_pair.m_second.m_ints.m_row, &r1);
+    ASSERT_EQ(r1.m_pair.m_second.m_bitset.m_row, &r1);
 
-    ASSERT_EQ(&r2.m_dmbas.m_ket.m_frm, &r2.m_dmbas.m_ket.get<0>());
+    ASSERT_EQ(r2.m_single.m_bitset.m_row, &r2);
+    ASSERT_EQ(r2.m_single.m_ints.m_row, &r2);
+    ASSERT_EQ(r2.m_pair.m_first.m_ints.m_row, &r2);
+    ASSERT_EQ(r2.m_pair.m_first.m_bitset.m_row, &r2);
+    ASSERT_EQ(r2.m_pair.m_second.m_ints.m_row, &r2);
+    ASSERT_EQ(r2.m_pair.m_second.m_bitset.m_row, &r2);
 
-    std::cout << (r2.m_frm_onv==r1.m_frm_onv) << std::endl;
-    std::cout << (r2.m_dmbas==r1.m_dmbas) << std::endl;
-    std::cout << (r2.m_dmbas!=r1.m_dmbas) << std::endl;
+    ASSERT_EQ(r2.m_single, r1.m_single);
+    ASSERT_EQ(r2.m_pair, r1.m_pair);
 }
-
-//TEST(CompositeField, NestedCopyMoveSemantics) {
-//
-//    //NestedCompFieldTestRow row;
-//
-//    BufferedTable<NestedCompFieldTestRow> bt("test table", {{}});
-//    std::cout << bt.m_row.m_fields.size() << std::endl;
-//    bt.resize(10);
-//    bt.push_back(4);
-//
-//    auto row = bt.m_row;
-//    row.restart();
-//    row.m_nested_field.get<0>().get<0>() = {1, 3, 5};
-//    std::cout << bt.to_string() << std::endl;
-//
-//}
-#endif
