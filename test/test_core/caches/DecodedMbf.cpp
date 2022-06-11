@@ -3,7 +3,6 @@
 //
 
 #include <M7_lib/table/BufferedFields.h>
-#include <M7_lib/foreach/ForeachVirtual.h>
 #include "gtest/gtest.h"
 
 TEST(DecodedMbf, Simple){
@@ -23,33 +22,34 @@ TEST(DecodedMbf, Simple){
     auto& vacs = mbf.m_decoded.m_simple_vacs.get();
     ASSERT_TRUE(std::equal(vacs.cbegin(), vacs.cend(), clrbits.cbegin()));
 
+    using namespace basic_foreach::rtnd;
     /*
      * for a small number of occupied orbs, run through all possible arrangements
      */
     const size_t noccorb = 3;
-    auto occ_fn = [&mbf](const defs::inds &value, size_t iiter) {
+    auto occ_fn = [&mbf](const inds_t& inds) {
         mbf.zero();
-        mbf = value;
+        mbf = inds;
         mbf.m_decoded.clear();
         auto& occ_simple_inds = mbf.m_decoded.m_simple_occs.get();
-        ASSERT_EQ(occ_simple_inds, value);
+        ASSERT_EQ(occ_simple_inds, inds);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> occ_foreach(occ_fn, mbf.m_basis.m_nspinorb, noccorb);
-    occ_foreach.loop();
+    Ordered<> occ_foreach(mbf.m_basis.m_nspinorb, noccorb);
+    occ_foreach.loop(occ_fn);
 
     /*
      * for a small number of vacant orbs, run through all possible arrangements
      */
     const size_t nvacorb = 3;
-    auto vac_fn = [&mbf](const defs::inds &value, size_t iiter) {
+    auto vac_fn = [&mbf](const defs::inds &inds) {
         mbf.set();
-        for (auto i: value) mbf.clr(i);
+        for (auto i: inds) mbf.clr(i);
         mbf.m_decoded.clear();
         auto& vac_simple_inds = mbf.m_decoded.m_simple_vacs.get();
-        ASSERT_EQ(vac_simple_inds, value);
+        ASSERT_EQ(vac_simple_inds, inds);
     };
-    foreach_virtual::rtnd::lambda::Ordered<> vac_foreach(vac_fn, mbf.m_basis.m_nspinorb, nvacorb);
-    vac_foreach.loop();
+    Ordered<> vac_foreach(mbf.m_basis.m_nspinorb, nvacorb);
+    vac_foreach.loop(vac_fn);
 }
 
 TEST(DecodedMbf, SingleMultipleOccupation) {

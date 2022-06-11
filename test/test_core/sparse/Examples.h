@@ -10,6 +10,7 @@
 namespace sparse_matrix_examples {
 
     sparse::Matrix<double> rect_double(const size_t &nrow, const size_t &ncol, const size_t &nnonzero_per_row);
+    sparse::Matrix<std::complex<double>> rect_double_complex(const size_t &nrow, const size_t &ncol, const size_t &nnonzero_per_row);
 
 }
 

@@ -90,15 +90,12 @@ TEST(Parameters, DefaultValues) {
     TestDocument doc(nullptr);
     ASSERT_EQ(doc.m_section1.m_some_unspecified_numbers.get(), defs::inds({3, 4, 6}));
     auto str = doc.help_string();
-    std::cout << str << std::endl;
 }
 
 TEST(Parameters, ParameterGroups) {
     yaml::File yf(defs::assets_root + "/yaml_test/example.yaml");
     using namespace parameters_test;
     TestDocument doc(&yf);
-
     auto invalid = doc.invalid_file_key();
-    std::cout << "invalid key: " << invalid << std::endl;
     ASSERT_EQ(doc.m_section1.m_some_numbers.get(), defs::inds({2, 3, 5, 1}));
 }

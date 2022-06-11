@@ -25,3 +25,18 @@ sparse_matrix_examples::rect_double(const size_t &nrow, const size_t &ncol, cons
 
     return out;
 }
+
+sparse::Matrix<std::complex<double>>
+sparse_matrix_examples::rect_double_complex(const size_t &nrow, const size_t &ncol, const size_t &nnonzero_per_row) {
+    auto real = rect_double(nrow, ncol, nnonzero_per_row);
+    sparse::Matrix<std::complex<double>> out;
+    out.resize(nrow);
+    for (size_t irow=0ul; irow<nrow; ++irow) {
+        const auto real_row = real[irow];
+        for (size_t ielem=0ul; ielem<real_row.first.size(); ++ielem){
+            double imag = hashing::in_range({irow, ielem}, 0, 4);
+            out.add(irow, {real_row.first[ielem], {real_row.second[ielem], imag}});
+        }
+    }
+    return out;
+}

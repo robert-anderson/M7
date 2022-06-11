@@ -2,7 +2,6 @@
 // Created by Robert J. Anderson on 07/06/2021.
 //
 
-#include <M7_lib/foreach/Foreach.h>
 #include "gtest/gtest.h"
 #include "M7_lib/basis/AbelianGroup.h"
 
@@ -32,18 +31,4 @@ TEST(AbelianGroup, D2h){
     ASSERT_EQ(d2h.product(iirrep, B1u), A1u);
     ASSERT_EQ(d2h.product(iirrep, B2u), B3u);
     ASSERT_EQ(d2h.product(iirrep, B3u), B2u);
-}
-TEST(AbelianGroup, Loop) {
-    std::vector<std::string> labels = {"A1g", "B1g", "B2g", "B3g", "A1u", "B1u", "B2u", "B3u"};
-    AbelianGroup d2h(labels, [](const size_t& iirrep, const size_t& jirrep){return iirrep^jirrep;});
-    foreach::ctnd::Ordered<2, false, true> cre_pg(d2h.nirrep());
-    foreach::ctnd::Ordered<2, false, true> ann_pg(d2h.nirrep());
-    foreach::ctnd::Unrestricted<2> cre_spin(2);
-    foreach::ctnd::Unrestricted<2> ann_spin(2);
-    auto fn = [&](){
-        if (d2h.is_conservative(cre_pg.inds(), ann_pg.inds()) && (cre_spin.sum() == ann_spin.sum())) {
-            //std::cout << labels[cre_pg[0]] << " " << labels[cre_pg[1]] << " " << labels[ann_pg[0]] << " " << labels[ann_pg[1]] << " " << cre_spin.inds() << " " << ann_spin.inds() << std::endl;
-        }
-    };
-    foreach::ctnd::chain(fn, cre_pg, ann_pg, cre_spin, ann_spin);
 }

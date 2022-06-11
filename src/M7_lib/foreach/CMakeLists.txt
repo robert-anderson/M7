@@ -5,9 +5,6 @@ target_sources(M7_lib
         ConnForeach.h
         ConnForeachGroup.cpp
         ConnForeachGroup.h
-        Foreach.h
-        ForeachVirtual.cpp
-        ForeachVirtual.h
         MbfForeach.cpp
         MbfForeach.h
 )

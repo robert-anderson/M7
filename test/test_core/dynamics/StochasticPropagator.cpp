@@ -7,7 +7,7 @@
 #include "M7_lib/dynamics/StochasticPropagator.h"
 #include "M7_lib/dynamics/Solver.h"
 
-// tests of propagators should be done in the verification suite
+//
 #if 0
 
 #ifndef ENABLE_BOSONS

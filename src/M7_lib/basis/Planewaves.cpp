@@ -13,14 +13,14 @@ std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::inds &wave_sh
     std::vector<std::vector<int>> momvecs;
     auto momentum_shape = make_momentum_shape(wave_shape);
     momvecs.reserve(size(wave_shape));
-    auto fn = [&wave_shape, &momvecs](const defs::inds& inds, size_t iiter){
+    auto fn = [&wave_shape, &momvecs](const defs::inds& inds){
         momvecs.emplace_back();
         for (size_t idim=0ul; idim < wave_shape.size(); ++idim){
             momvecs.back().push_back(int(inds[idim]) - wave_shape[idim]);
         }
     };
-    foreach_virtual::rtnd::lambda::Unrestricted foreach(fn, momentum_shape);
-    foreach.loop();
+    basic_foreach::rtnd::Unrestricted foreach(momentum_shape);
+    foreach.loop(fn);
     DEBUG_ASSERT_EQ(momvecs.size(), momvecs.capacity(), "incorrect number of momentum vectors generated");
     return momvecs;
 }

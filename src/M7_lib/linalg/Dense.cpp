@@ -44,7 +44,7 @@ char dense::GemmWrapper::valid_trans(char t) {
     return valid_chars[2*(i/2)];
 }
 
-void dense::diag(const dense::SquareMatrix<float> &mat, std::vector<float> &evals) {
+bool dense::diag(const dense::SquareMatrix<float> &mat, std::vector<float> &evals) {
     const int n = mat.nrow();
     const int lwork = std::max(1, 3 * n - 1);
     std::vector<float> work(lwork);
@@ -52,9 +52,10 @@ void dense::diag(const dense::SquareMatrix<float> &mat, std::vector<float> &eval
     evals.resize(n);
     auto a = mat;
     ssyev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    return !info;
 }
 
-void dense::diag(const dense::SquareMatrix<float> &mat, dense::SquareMatrix<float> &evecs, std::vector<float> &evals) {
+bool dense::diag(const dense::SquareMatrix<float> &mat, dense::SquareMatrix<float> &evecs, std::vector<float> &evals) {
     REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
     const int n = mat.nrow();
     const int lwork = std::max(1, 3 * n - 1);
@@ -63,11 +64,12 @@ void dense::diag(const dense::SquareMatrix<float> &mat, dense::SquareMatrix<floa
     evals.resize(n);
     evecs = mat;
     ssyev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    return !info;
 }
 
-void dense::diag(const dense::SquareMatrix<float> &mat, std::vector<std::complex<float>> &evals) {
+bool dense::diag(const dense::SquareMatrix<float> &mat, std::vector<std::complex<float>> &evals) {
     const int n = mat.nrow();
-    const int lwork = std::max(1, 3 * n - 1);
+    const int lwork = std::max(1, 4*n);
     std::vector<float> work(lwork);
     int info;
     std::vector<float> real_evals(n, 0.0);
@@ -76,9 +78,10 @@ void dense::diag(const dense::SquareMatrix<float> &mat, std::vector<std::complex
     sgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
     complex_utils::combine(real_evals, imag_evals, evals);
+    return !info;
 }
 
-void dense::diag(const dense::SquareMatrix<double> &mat, std::vector<double> &evals) {
+bool dense::diag(const dense::SquareMatrix<double> &mat, std::vector<double> &evals) {
     const int n = mat.nrow();
     const int lwork = std::max(1, 3 * n - 1);
     std::vector<double> work(lwork);
@@ -86,9 +89,10 @@ void dense::diag(const dense::SquareMatrix<double> &mat, std::vector<double> &ev
     evals.resize(n);
     auto a = mat;
     dsyev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    return !info;
 }
 
-void dense::diag(const dense::SquareMatrix<double> &mat, dense::SquareMatrix<double> &evecs, std::vector<double> &evals) {
+bool dense::diag(const dense::SquareMatrix<double> &mat, dense::SquareMatrix<double> &evecs, std::vector<double> &evals) {
     REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
     const int n = mat.nrow();
     const int lwork = std::max(1, 3 * n - 1);
@@ -97,9 +101,24 @@ void dense::diag(const dense::SquareMatrix<double> &mat, dense::SquareMatrix<dou
     evals.resize(n);
     evecs = mat;
     dsyev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, &info);
+    return !info;
 }
 
-void dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, std::vector<double> &evals) {
+bool dense::diag(const dense::SquareMatrix<double> &mat, std::vector<std::complex<double>> &evals) {
+    const int n = mat.nrow();
+    const int lwork = std::max(1, 4*n);
+    std::vector<double> work(lwork);
+    int info;
+    std::vector<double> real_evals(n, 0.0);
+    std::vector<double> imag_evals(n, 0.0);
+    auto a = mat;
+    dgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
+           nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
+    complex_utils::combine(real_evals, imag_evals, evals);
+    return !info;
+}
+
+bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, std::vector<double> &evals) {
     const int n = mat.nrow();
     const int lwork = std::max(1, 2 * n - 1);
     const int lrwork = std::max(1, 3 * n - 1);
@@ -109,9 +128,10 @@ void dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, std::vect
     evals.resize(n);
     auto a = mat;
     zheev_("N", "U", &n, a.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
+    return !info;
 }
 
-void dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::SquareMatrix<std::complex<double>> &evecs,
+bool dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::SquareMatrix<std::complex<double>> &evecs,
                  std::vector<double> &evals) {
     REQUIRE_TRUE(mat.dims()==evecs.dims(), "shape conflict between matrix and eigenvectors");
     const int n = mat.nrow();
@@ -123,4 +143,5 @@ void dense::diag(const dense::SquareMatrix<std::complex<double>> &mat, dense::Sq
     evals.resize(n);
     evecs = mat;
     zheev_("V", "U", &n, evecs.ptr(), &n, evals.data(), work.data(), &lwork, rwork.data(), &info);
+    return !info;
 }

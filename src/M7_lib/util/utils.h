@@ -728,6 +728,69 @@ namespace sort_utils {
                 };
         }
     }
+
+    template<typename T>
+    defs::inds inds(const std::vector<T>& v, bool max, bool abs_val) {
+        defs::inds out(v.size());
+        std::iota(out.begin(), out.end(), 0);
+        if (max) {
+            if (abs_val) std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){
+                    return std::abs(v[i]) < std::abs(v[j]);});
+            else std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){return v[i] < v[j];});
+        } else {
+            if (abs_val) std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){
+                    return std::abs(v[i]) > std::abs(v[j]);});
+            else std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){return v[i] > v[j];});
+        }
+        return out;
+    }
+
+    template<typename T>
+    defs::inds inds(const std::vector<std::complex<T>>& v, bool max, bool abs_val) {
+        // TODO: add warning if attempting to sort complex numbers without abs_val
+        defs::inds out(v.size());
+        std::iota(out.begin(), out.end(), 0);
+        if (max) {
+            std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){ return std::abs(v[i]) < std::abs(v[j]);});
+        } else {
+            std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){ return std::abs(v[i]) > std::abs(v[j]);});
+        }
+        return out;
+    }
+
+    template<typename T>
+    defs::inds inds(const std::vector<std::complex<T>>& v, bool max) {
+        return inds(v, max, true);
+    }
+
+    template<typename T>
+    void inplace(std::vector<T>& v, bool max, bool abs_val) {
+        typedef const T& cr_t;
+        if (max) {
+            if (abs_val) std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) < std::abs(v2);});
+            else std::sort(v.begin(), v.end(), [&v](cr_t v1, cr_t v2){ return v1 < v2;});
+        } else {
+            if (abs_val) std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) > std::abs(v2);});
+            else std::sort(v.begin(), v.end(), [&v](cr_t v1, cr_t v2){ return v1 > v2;});
+        }
+    }
+
+    template<typename T>
+    void inplace(std::vector<std::complex<T>>& v, bool max, bool abs_val) {
+        // TODO: add warning if attempting to sort complex numbers without abs_val
+        typedef const std::complex<T>& cr_t;
+        if (max) {
+            std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) < std::abs(v2);});
+        } else {
+            std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) > std::abs(v2);});
+        }
+    }
+
+    template<typename T>
+    void inplace(std::vector<std::complex<T>>& v, bool max) {
+        inplace(v, max, true);
+    }
+
 }
 
 namespace tuple_utils {

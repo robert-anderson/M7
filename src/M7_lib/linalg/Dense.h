@@ -361,6 +361,8 @@ namespace dense {
      * this namespace make a copy to pass to the solver and so do not modify the given matrix. Functions are not
      * provided for the complex-symmetric case, only the hermitian case.
      *
+     * diag methods return true if LAPACK call was successful
+     *
      *    A (matrix)      R (right evecs)  L (left evecs)  D (evals)       Routine
      *    float           -                -               float           ssyev
      *    float           float            -               float           ssyev
@@ -383,23 +385,28 @@ namespace dense {
      *    complex double  complex double   complex double  complex double  zgeev
      */
 
-    void diag(const SquareMatrix<float>& mat, std::vector<float>& evals);
+    bool diag(const SquareMatrix<float>& mat, std::vector<float>& evals);
 
-    void diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, std::vector<float>& evals);
+    bool diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, std::vector<float>& evals);
 
-    void diag(const SquareMatrix<float>& mat, std::vector<std::complex<float>>& evals);
-
-
-    void diag(const SquareMatrix<double>& mat, std::vector<double>& evals);
-
-    void diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, std::vector<double>& evals);
+    bool diag(const SquareMatrix<float>& mat, std::vector<std::complex<float>>& evals);
 
 
-    void diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+    bool diag(const SquareMatrix<double>& mat, std::vector<double>& evals);
+
+    bool diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, std::vector<double>& evals);
+
+    bool diag(const SquareMatrix<double>& mat, std::vector<std::complex<double>>& evals);
 
 
-    void diag(const SquareMatrix<std::complex<double>>& mat,
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat,
               SquareMatrix<std::complex<double>>& evecs, std::vector<double>& evals);
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
 }
 
 #endif //M7_DENSE_H

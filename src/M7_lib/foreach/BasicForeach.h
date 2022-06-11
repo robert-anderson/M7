@@ -230,8 +230,6 @@ namespace basic_foreach {
         private:
             const size_t m_n;
 
-
-
             template<typename fn_t>
             void level_loop(const fn_t &fn, size_t ilevel) {
                 const size_t iind = ascending ? (m_nind - ilevel) : (ilevel - 1);

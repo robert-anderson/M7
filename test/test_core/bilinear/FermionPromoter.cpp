@@ -4,7 +4,6 @@
 
 #include <M7_lib/connection/Connections.h>
 #include "M7_lib/bilinear/FermionPromoter.h"
-#include <M7_lib/foreach/Foreach.h>
 #include "gtest/gtest.h"
 #include "M7_lib/table/BufferedFields.h"
 
@@ -60,19 +59,21 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
      */
-    foreach::rtnd::Ordered<> foreach_comb(com.size(), nop_insert);
+    using namespace basic_foreach::rtnd;
+    Ordered<> foreach_comb(com.size(), nop_insert);
     size_t icomb = 0ul;
-    auto fn = [&]() {
+    auto fn = [&](const inds_t& insert_inds) {
+        // enumerates all ways to choose nop_insert elements of the common array
         auto phase = fp.apply(icomb, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
         // since this is a diagonal element, all indices are "inserted" and should be found in order in the com array
         for (size_t iop = 0ul; iop < inds.m_frm.m_cre.size(); ++iop)
-            ASSERT_EQ(inds.m_frm.m_cre[iop], com[foreach_comb[iop]]);
+            ASSERT_EQ(inds.m_frm.m_cre[iop], com[insert_inds[iop]]);
         for (size_t iop = 0ul; iop < inds.m_frm.m_ann.size(); ++iop)
-            ASSERT_EQ(inds.m_frm.m_ann[iop], com[foreach_comb[iop]]);
+            ASSERT_EQ(inds.m_frm.m_ann[iop], com[insert_inds[iop]]);
         ++icomb;
     };
-    foreach_comb(fn);
+    foreach_comb.loop(fn);
 }
 
 

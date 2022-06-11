@@ -78,7 +78,7 @@ TEST(GeneralFrmHam, RhfEnergy) {
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
     auto elem = ham.get_element(onv);
-    ASSERT_NEARLY_EQ(elem, benchmark);
+    ASSERT_COMPLEX_EQ(elem, benchmark);
     ASSERT_FLOAT_EQ(ham.get_energy(onv), benchmark);
 }
 

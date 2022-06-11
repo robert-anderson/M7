@@ -5,12 +5,6 @@
 #ifndef M7_HUBBARDFRMHAM_H
 #define M7_HUBBARDFRMHAM_H
 
-#include "M7_lib/foreach/Foreach.h"
-#include "M7_lib/nd/NdFormatD.h"
-#include "M7_lib/basis/Lattice.h"
-#include "M7_lib/linalg/Dense.h"
-#include "M7_lib/foreach/ConnForeach.h"
-
 #include "M7_lib/hamiltonian/frm/FrmHam.h"
 
 struct HubbardFrmHam : FrmHam {

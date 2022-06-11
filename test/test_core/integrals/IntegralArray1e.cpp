@@ -12,10 +12,10 @@ TEST(IntegralArray1e, SymNone_real) {
     ASSERT_TRUE(ints.set(2, 5, 0.123));
     ASSERT_TRUE(ints.set(2, 5, 0.123));
     ASSERT_FALSE(ints.set(2, 5, 0.1234));
-    ASSERT_NEARLY_EQ(ints.get(2, 5), 0.123);
-    ASSERT_NEARLY_EQ(ints.get(5, 2), 0.0);
+    ASSERT_COMPLEX_EQ(ints.get(2, 5), 0.123);
+    ASSERT_COMPLEX_EQ(ints.get(5, 2), 0.0);
     ASSERT_TRUE(ints.set(5, 2, 0.234));
-    ASSERT_NEARLY_EQ(ints.get(5, 2), 0.234);
+    ASSERT_COMPLEX_EQ(ints.get(5, 2), 0.234);
 }
 
 TEST(IntegralArray1e, SymNone_complex) {
@@ -25,8 +25,8 @@ TEST(IntegralArray1e, SymNone_complex) {
     ASSERT_TRUE(ints.set(2, 5, v));
     ASSERT_TRUE(ints.set(2, 5, v));
     ASSERT_FALSE(ints.set(2, 5, {0.1234, 0.2345}));
-    ASSERT_NEARLY_EQ(ints.get(2, 5), v);
-    ASSERT_NEARLY_EQ(ints.get(5, 2), 0.0);
+    ASSERT_COMPLEX_EQ(ints.get(2, 5), v);
+    ASSERT_COMPLEX_EQ(ints.get(5, 2), 0.0);
 }
 
 TEST(IntegralArray1e, SymH_real) {
@@ -35,10 +35,10 @@ TEST(IntegralArray1e, SymH_real) {
     ASSERT_TRUE(ints.set(2, 5, 0.123));
     ASSERT_TRUE(ints.set(2, 5, 0.123));
     ASSERT_FALSE(ints.set(2, 5, 0.1234));
-    ASSERT_NEARLY_EQ(ints.get(2, 5), 0.123);
-    ASSERT_NEARLY_EQ(ints.get(5, 2), 0.123);
+    ASSERT_COMPLEX_EQ(ints.get(2, 5), 0.123);
+    ASSERT_COMPLEX_EQ(ints.get(5, 2), 0.123);
     ASSERT_FALSE(ints.set(5, 2, 0.234));
-    ASSERT_NEARLY_EQ(ints.get(5, 2), 0.123);
+    ASSERT_COMPLEX_EQ(ints.get(5, 2), 0.123);
 }
 
 TEST(IntegralArray1e, SymH_complex) {
@@ -49,8 +49,8 @@ TEST(IntegralArray1e, SymH_complex) {
     ASSERT_TRUE(ints.set(2, 5, v));
     ASSERT_TRUE(ints.set(2, 5, v));
     ASSERT_FALSE(ints.set(2, 5, {0.1234, 0.2345}));
-    ASSERT_NEARLY_EQ(ints.get(2, 5), v);
-    ASSERT_NEARLY_EQ(ints.get(5, 2), vc);
+    ASSERT_COMPLEX_EQ(ints.get(2, 5), v);
+    ASSERT_COMPLEX_EQ(ints.get(5, 2), vc);
     ASSERT_FALSE(ints.set(5, 2, v));
     ASSERT_TRUE(ints.set(5, 2, vc));
 }

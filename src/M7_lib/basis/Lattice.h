@@ -9,7 +9,6 @@
 
 #include <M7_lib/linalg/Dense.h>
 #include <M7_lib/nd/NdFormatD.h>
-#include <M7_lib/foreach/Foreach.h>
 #include <M7_lib/conf/HamiltonianConf.h>
 #include <M7_lib/linalg/Sparse.h>
 

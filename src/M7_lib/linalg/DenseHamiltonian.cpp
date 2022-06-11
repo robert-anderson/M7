@@ -2,8 +2,6 @@
 // Created by Robert John Anderson on 2020-01-18.
 //
 
-#include <M7_lib/foreach/Foreach.h>
-
 #include "DenseHamiltonian.h"
 
 std::unique_ptr<PairBase> DenseHamiltonian::make_pair_iterator(

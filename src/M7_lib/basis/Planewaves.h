@@ -6,7 +6,6 @@
 #define M7_PLANEWAVES_H
 
 #include <M7_lib/nd/NdFormatD.h>
-#include <M7_lib/foreach/ForeachVirtual.h>
 
 /**
  * generic to fermionic and bosonic degrees of freedom
