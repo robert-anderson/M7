@@ -11,14 +11,7 @@ SpinSquareFrmHam::SpinSquareFrmHam(const sys::frm::Basis& basis, const sys::frm:
 }
 
 defs::ham_t SpinSquareFrmHam::get_element_0000(const field::FrmOnv &onv) const {
-    uint n_os_a = 0;
-    auto count_n_os_a = [&](size_t i) {
-        if (i < m_basis.m_nsite) {
-            n_os_a += onv.get({1, i});
-        };
-    };
-    onv.foreach_setbit(count_n_os_a);
-    return m_sz_term + n_os_a;
+    return m_sz_term + onv.nopen_shell_beta();
 }
 
 defs::ham_t SpinSquareFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
