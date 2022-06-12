@@ -12,7 +12,7 @@ void ExcitGenGroup::update_cumprobs() {
 }
 
 ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng) :
-        m_prng(prng) {
+        m_prng(prng){
     ExcitGen::excit_gen_list_t list;
     list = ham.m_frm.make_excit_gens(prng, opts);
     m_list.merge(list);
@@ -25,6 +25,7 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opt
      * exsigs have a many-to-many relationship with excitation generators.
      */
     m_probs.clear();
+
     for (const auto& excit_gen: m_list) {
         for (auto& exsig: excit_gen->m_exsigs){
             m_excit_cases.push_back({exsig, excit_gen.get()});
@@ -32,6 +33,9 @@ ExcitGenGroup::ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opt
             m_probs.push_back(1.0);
         }
     }
+    m_exsig_icases.resize(defs::nexsig, defs::inds());
+    // fill the map from exsigs to exgens
+    for (size_t icase=0ul; icase<m_excit_cases.size(); ++icase) m_exsig_icases[m_excit_cases[icase].m_exsig].push_back(icase);
     set_probs(m_probs);
     log();
 }
@@ -64,28 +68,13 @@ void ExcitGenGroup::set_probs(const std::vector<defs::prob_t> &probs) {
     update_cumprobs();
 }
 
-defs::prob_t ExcitGenGroup::get_prob(const size_t &icase) const {
+defs::prob_t ExcitGenGroup::get_prob(size_t icase) const {
     DEBUG_ASSERT_LT(icase, ncase(), "excit gen case index OOB");
     return m_probs[icase];
 }
 
 const std::vector<defs::prob_t>& ExcitGenGroup::get_probs() const {
     return m_probs;
-}
-
-bool ExcitGenGroup::draw(const size_t &icase, const FrmOnv &src, prob_t &prob, ham_t &helem, conn::FrmOnv &conn) {
-    auto& excase = m_excit_cases[icase];
-    return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
-}
-
-bool ExcitGenGroup::draw(const size_t &icase, const FrmBosOnv &src, prob_t &prob, ham_t &helem, conn::FrmBosOnv &conn) {
-    auto& excase = m_excit_cases[icase];
-    return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
-}
-
-bool ExcitGenGroup::draw(const size_t &icase, const BosOnv &src, prob_t &prob, ham_t &helem, conn::BosOnv &conn) {
-    auto& excase = m_excit_cases[icase];
-    return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
 }
 
 void ExcitGenGroup::log() const {

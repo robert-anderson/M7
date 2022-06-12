@@ -58,8 +58,16 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
             // null excitation generated
             continue;
         }
+        /*
+         * the magnitude logging is case-resolved, so the relevant magnitude is the one scaled by the reciprocal of the
+         * probability that conn was drawn from src given that the case was picked
+         */
         m_mag_log.log(icase, helem, prob_gen);
-        prob_gen *= m_excit_gen_group.get_prob(icase);
+        /*
+         * scale by the probability of drawing this case (and add probs of other cases which could have produced the
+         * same connection if required)
+         */
+        m_excit_gen_group.update_prob(icase, src_mbf, prob_gen, conn);
 
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob_gen;

@@ -33,6 +33,10 @@ class ExcitGenGroup {
      */
     std::vector<ExcitCase> m_excit_cases;
     /**
+     * mapping from the excitation signature to a vector case indices that can generate it
+     */
+    std::vector<defs::inds> m_exsig_icases;
+    /**
      * probability of attempting to draw from each of the active excitation cases
      */
     std::vector<defs::prob_t> m_probs;
@@ -73,15 +77,37 @@ public:
      */
     void set_probs(const sys::Particles& particles);
 
-    defs::prob_t get_prob(const size_t &icase) const;
+    defs::prob_t get_prob(size_t icase) const;
 
     const std::vector<defs::prob_t>& get_probs() const;
 
-    bool draw(const size_t &icase, const FrmOnv &src, prob_t &prob, ham_t &helem, conn::FrmOnv &conn);
+    /**
+     * when there is strictly one excitation generator per exsig, the probability of drawing the connection is
+     * p(conn|exsig) p(exsig)
+     * in general, however there's more than one way to draw the same connection
+     * p(conn) = sum_case p(conn|case) p(case)
+     * this is the update performed here.
+     * Naturally if there is only one case for the given exsig, the probability is scaled by the probability of the case.
+     */
+    template<typename mbf_t>
+    void update_prob(size_t icase, const mbf_t &src, prob_t &prob, const conn::from_field_t<mbf_t> &conn) {
+        const auto exsig = m_excit_cases[icase].m_exsig;
+        DEBUG_ASSERT_EQ(exsig, conn.exsig(), "exsig of case does not match with that of connection");
+        const auto& jcases = m_exsig_icases[exsig];
+        DEBUG_ASSERT_FALSE(jcases.empty(), "there should be at least one case associated with this exsig");
+        prob *= m_probs[icase];
+        if (jcases.size()==1) return;
+        for (const auto& jcase: jcases) {
+            if (jcase==icase) continue; // already included above
+            prob += m_excit_cases[icase].m_excit_gen->prob(src, conn)*m_probs[icase];
+        }
+    }
 
-    bool draw(const size_t &icase, const FrmBosOnv &src, prob_t &prob, ham_t &helem, conn::FrmBosOnv &conn);
-
-    bool draw(const size_t &icase, const BosOnv &src, prob_t &prob, ham_t &helem, conn::BosOnv &conn);
+    template<typename mbf_t>
+    bool draw(size_t icase, const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn) {
+        auto& excase = m_excit_cases[icase];
+        return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
+    }
 
     void log() const;
 
