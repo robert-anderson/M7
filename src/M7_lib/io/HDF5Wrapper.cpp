@@ -11,7 +11,7 @@ hdf5::Group hdf5::File::subgroup(std::string name) {
 hdf5::AttributeWriterBase::AttributeWriterBase(hid_t parent_handle, std::string name, const defs::inds &shape,
                                                hid_t h5type) :
         m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
-        m_nelement(nd_utils::nelement(shape)) {
+        m_nelement(utils::nd::nelement(shape)) {
     auto shape_tmp = convert_dims(shape);
     m_memspace_handle = H5Screate_simple(shape.size(), shape_tmp.data(), nullptr);
     m_handle = H5Acreate(m_parent_handle, name.c_str(), h5type, m_memspace_handle, H5P_DEFAULT, H5P_DEFAULT);

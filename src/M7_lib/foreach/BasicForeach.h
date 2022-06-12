@@ -8,7 +8,7 @@
 #include <utility>
 
 #include <M7_lib/parallel/MPIAssert.h>
-#include <M7_lib/util/utils.h>
+#include <M7_lib/util/Nd.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {
@@ -88,7 +88,7 @@ namespace basic_foreach {
         public:
 
             static size_t niter(const inds_t<nind> &shape){
-                return nind ? nd_utils::nelement(array_utils::to_vector(shape)) : 0ul;
+                return nind ? utils::nd::nelement(array_utils::to_vector(shape)) : 0ul;
             }
 
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(niter(shape)), m_shape(shape) {}
@@ -198,7 +198,7 @@ namespace basic_foreach {
         public:
 
             static size_t niter(const inds_t& shape) {
-                return shape.empty() ? 0ul : nd_utils::nelement(shape);
+                return shape.empty() ? 0ul : utils::nd::nelement(shape);
             }
 
             static size_t niter(size_t nind, size_t extent){
