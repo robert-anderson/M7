@@ -11,6 +11,7 @@
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/RankAllocator.h>
 #include <M7_lib/conf/Conf.h>
+#include <M7_lib/util/String.h>
 
 #include "BufferedTable.h"
 #include "BufferedTableArray.h"
@@ -61,7 +62,7 @@ public:
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                  string_utils::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
+                  utils::string::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
         m_send.resize(comm_nrow_est, 0.0);
         m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
         m_send.set_expansion_factor(exp_fac);
@@ -544,7 +545,7 @@ struct Communicator {
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
         log::info("Initially allocating {} per rank for store buffer of \"{}\" ",
-                  string_utils::memsize(store_nrow_est*m_store.row_size()), name);
+                  utils::string::memsize(store_nrow_est*m_store.row_size()), name);
         m_store.resize(store_nrow_est, 0.0);
         m_store.set_expansion_factor(store_exp_fac);
     }

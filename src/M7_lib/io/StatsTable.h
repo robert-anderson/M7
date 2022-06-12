@@ -11,6 +11,7 @@
 #include <M7_lib/field/Row.h>
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/util/String.h>
 
 struct StatsRow : Row {};
 
@@ -112,7 +113,7 @@ struct StatsTable : BufferedTable<row_t> {
             auto it = m_format_strings.find(format_string);
             if (it == m_format_strings.end()) m_format_strings[format_string] = nformat++;
         }
-        *m_file << string_utils::boxed(m_description + " Stats File") <<
+        *m_file << utils::string::boxed(m_description + " Stats File") <<
                 "# Number of statistics output: " << row.m_fields.size() <<
                 "\n# Number of columns: " << ncolumn <<
                 "\n# Distinct multidimensional formats: " << m_format_strings.size() << "\n#" <<

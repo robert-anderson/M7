@@ -3,6 +3,7 @@
 //
 
 #include "Sparse.h"
+#include "M7_lib/util/String.h"
 
 void sparse::Network::resize(const size_t& nrow) {
     if (nrow > m_rows_icols.size()) m_rows_icols.resize(nrow);
@@ -76,7 +77,7 @@ std::string sparse::Network::to_string() const {
     std::string out;
     for (size_t irow=0ul; irow<nrow(); ++irow) {
         if (m_rows_icols[irow].empty()) continue;
-        out+= std::to_string(irow) + ": " + string_utils::join(row_to_strings(irow), ", ")+"\n";
+        out+= std::to_string(irow) + ": " + utils::string::join(row_to_strings(irow), ", ")+"\n";
     }
     return out;
 }

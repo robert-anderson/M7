@@ -1,10 +1,12 @@
 target_sources(M7_lib
     PRIVATE
+        Bit.h
         consts.h
-        Nd.cpp
         Nd.h
         ProgressMonitor.cpp
         ProgressMonitor.h
+        String.cpp
+        String.h
         Ternary.h
         Timer.cpp
         Timer.h

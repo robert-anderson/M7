@@ -3,6 +3,7 @@
 //
 
 #include "FortranNamelistReader.h"
+#include "M7_lib/util/String.h"
 
 FortranNamelistReader::FortranNamelistReader(std::string fname):
         m_exists(FileReader::exists(fname)), m_fname(std::move(fname)){
@@ -41,7 +42,7 @@ bool FortranNamelistReader::contains_terminator(const std::string &line) {
 std::vector<std::string> FortranNamelistReader::read(const std::string &line, const std::string &label) {
     std::vector<std::string> tokens;
     auto value = isolate_value(line, label);
-    string_utils::split(value, tokens, ", ");
+    utils::string::split(value, tokens, ", ");
     return tokens;
 }
 

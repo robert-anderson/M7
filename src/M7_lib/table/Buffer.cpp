@@ -5,6 +5,8 @@
 #include "Buffer.h"
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/MPIAssert.h>
+#include "M7_lib/util/String.h"
+
 
 Buffer::Window::Window(Buffer *buffer, size_t row_size): Window(row_size) {
     ASSERT(buffer);
@@ -122,9 +124,9 @@ void Buffer::resize(size_t size, double factor) {
 std::string Buffer::capacity_string(size_t size) const {
     const auto ntable = " x " + std::to_string(m_windows.size()) + " tables";
     if (m_windows.size() == 1)
-        return string_utils::memsize(size);
+        return utils::string::memsize(size);
     else
-        return string_utils::memsize(size / m_nwindow_max) + ntable + " = " + string_utils::memsize(size);
+        return utils::string::memsize(size / m_nwindow_max) + ntable + " = " + utils::string::memsize(size);
 }
 
 std::string Buffer::capacity_string() const {
