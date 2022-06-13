@@ -9,7 +9,7 @@
 
 struct BosonSumConservingDoubles : public BosExcitGen {
     BosonSumConservingDoubles(const BosHam &h, PRNG &prng):
-        BosExcitGen(h, prng, {exsig_utils::ex_0022}, "boson mode index sum conserving") {}
+        BosExcitGen(h, prng, {utils::exsig::ex_0022}, "boson mode index sum conserving") {}
 
 private:
     /**

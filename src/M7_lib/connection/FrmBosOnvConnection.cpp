@@ -4,6 +4,7 @@
 
 #include "FrmBosOnvConnection.h"
 #include "ComOps.h"
+#include "M7_lib/util/Exsig.h"
 
 FrmBosOnvConnection::FrmBosOnvConnection(sys::Size size) :
     m_frm(size.m_frm), m_bos(size.m_bos){}
@@ -34,7 +35,7 @@ void FrmBosOnvConnection::apply(const FrmBosOnvField &src, FrmBosOnvField &dst) 
 }
 
 size_t FrmBosOnvConnection::exsig() const {
-    return exsig_utils::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
+    return utils::exsig::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
 }
 
 bool FrmBosOnvConnection::respects_occ_range(const FrmBosOnvField &src, size_t nboson_max) const {

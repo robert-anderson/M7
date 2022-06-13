@@ -8,7 +8,7 @@
 
 
 FrmHam::FrmHam(const sys::frm::Basis& basis):
-        m_basis(basis), m_contribs_1100(exsig_utils::ex_single), m_contribs_2200(exsig_utils::ex_double),
+        m_basis(basis), m_contribs_1100(utils::exsig::ex_single), m_contribs_2200(utils::exsig::ex_double),
         m_work_conn({99, 99}){}
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
@@ -38,12 +38,12 @@ void FrmHam::log_data() const {
     if (!*this) return;
     if (!m_contribs_1100.is_nonzero(0ul))
         log::info("1-electron term has no diagonal contributions");
-    if (!m_contribs_1100.is_nonzero(exsig_utils::ex_single))
+    if (!m_contribs_1100.is_nonzero(utils::exsig::ex_single))
         log::info("1-electron term has no single-excitation contributions");
     if (!m_contribs_2200.is_nonzero(0ul))
         log::info("2-electron term has no diagonal contributions");
-    if (!m_contribs_2200.is_nonzero(exsig_utils::ex_single))
+    if (!m_contribs_2200.is_nonzero(utils::exsig::ex_single))
         log::info("2-electron term has no single-excitation contributions");
-    if (!m_contribs_2200.is_nonzero(exsig_utils::ex_double))
+    if (!m_contribs_2200.is_nonzero(utils::exsig::ex_double))
         log::info("2-electron term has no double-excitation contributions");
 }

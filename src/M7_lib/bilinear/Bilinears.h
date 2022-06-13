@@ -56,7 +56,7 @@ private:
         if (string.size() == 1) {
             size_t rank = utils::string::parse_decimal_digit(string.c_str());
             REQUIRE_LE_ALL(rank, defs::exsig_nop_mask_frm, "number of fermion operators exceeds limit");
-            return exsig_utils::encode(rank, rank, 0, 0);
+            return utils::exsig::encode(rank, rank, 0, 0);
         }
         size_t nfrm_cre = utils::string::parse_decimal_digit(string.c_str());
         REQUIRE_LE_ALL(nfrm_cre, defs::exsig_nop_mask_frm, "number of fermion creation operators exceeds limit");
@@ -66,7 +66,7 @@ private:
         REQUIRE_LE_ALL(nbos_cre, defs::exsig_nop_mask_bos, "number of boson creation operators exceeds limit");
         size_t nbos_ann = utils::string::parse_decimal_digit(string.c_str()+3);
         REQUIRE_LE_ALL(nbos_ann, defs::exsig_nop_mask_bos, "number of boson annihilation operators exceeds limit");
-        return exsig_utils::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
+        return utils::exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
     }
     /**
      * @param strings

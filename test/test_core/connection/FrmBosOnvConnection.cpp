@@ -6,6 +6,7 @@
 
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/connection/Connections.h"
+#include "M7_lib/util/Exsig.h"
 
 TEST(FrmBosOnvConnection, DetectExsig) {
     const sys::frm::Basis frm_basis(6);
@@ -17,7 +18,7 @@ TEST(FrmBosOnvConnection, DetectExsig) {
     conn::FrmBosOnv conn(src);
     ASSERT_EQ(conn.exsig(), 0ul);
     conn.connect(src, dst);
-    ASSERT_EQ(conn.exsig(), exsig_utils::ex_0010);
+    ASSERT_EQ(conn.exsig(), utils::exsig::ex_0010);
     conn.connect(dst, src);
-    ASSERT_EQ(conn.exsig(), exsig_utils::ex_0001);
+    ASSERT_EQ(conn.exsig(), utils::exsig::ex_0001);
 }

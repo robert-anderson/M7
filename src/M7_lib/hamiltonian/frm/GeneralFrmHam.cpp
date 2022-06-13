@@ -141,7 +141,7 @@ defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
 }
 
 defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_single, "expected 1100 (aka fermion single) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), utils::exsig::ex_single, "expected 1100 (aka fermion single) exsig");
     const auto &ann = conn.m_ann[0];
     const auto &cre = conn.m_cre[0];
 
@@ -154,14 +154,14 @@ defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
 }
 
 defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), exsig_utils::ex_double, "expected 2200 (aka fermion double) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), utils::exsig::ex_double, "expected 2200 (aka fermion double) exsig");
     const auto element = GeneralFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
         PRNG &prng, const conf::Propagator &opts, const FrmHam &h) {
-    using namespace exsig_utils;
+    using namespace utils::exsig;
     excit_gen_list_t list;
     bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
     if (any_singles) list.emplace_front(new UniformSingles(h, prng));

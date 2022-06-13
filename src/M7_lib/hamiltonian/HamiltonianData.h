@@ -6,12 +6,12 @@
 #define M7_HAMILTONIANDATA_H
 
 
-#include <M7_lib/util/utils.h>
+#include "M7_lib/util/Exsig.h"
 #include <M7_lib/parallel/MPIAssert.h>
 
 
 namespace ham_data {
-    using namespace exsig_utils;
+    using namespace utils::exsig;
 
     class TermContribs {
 

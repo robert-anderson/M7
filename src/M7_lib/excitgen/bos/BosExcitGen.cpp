@@ -7,7 +7,7 @@
 BosExcitGen::BosExcitGen(const BosHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h) {
     for (auto exsig: m_exsigs)
-        REQUIRE_TRUE(exsig_utils::is_pure_bos(exsig), "excitations must be expressed in terms of boson operators only");
+        REQUIRE_TRUE(utils::exsig::is_pure_bos(exsig), "excitations must be expressed in terms of boson operators only");
 }
 
 bool BosExcitGen::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,

@@ -37,8 +37,8 @@ struct BosHam : HamOpTerm {
 
     BosHam(const sys::bos::Basis& basis):
             m_basis(basis),
-            m_contribs_0010(exsig_utils::ex_0010), m_contribs_0001(exsig_utils::ex_0001),
-            m_contribs_0011(exsig_utils::ex_0011), m_contribs_0022(exsig_utils::ex_0022) {}
+            m_contribs_0010(utils::exsig::ex_0010), m_contribs_0001(utils::exsig::ex_0001),
+            m_contribs_0011(utils::exsig::ex_0011), m_contribs_0022(utils::exsig::ex_0022) {}
 
 private:
     /**

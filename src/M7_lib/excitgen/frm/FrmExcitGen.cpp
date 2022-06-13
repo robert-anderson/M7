@@ -9,7 +9,7 @@
 FrmExcitGen::FrmExcitGen(const FrmHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h){
     for (auto exsig: m_exsigs)
-        REQUIRE_TRUE(exsig_utils::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
+        REQUIRE_TRUE(utils::exsig::is_pure_frm(exsig), "excitations must be expressed in terms of fermion operators only");
 }
 
 bool FrmExcitGen::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
