@@ -15,5 +15,5 @@
  *
  */
 
-#include <M7_lib/hamiltonian/TcBosHam.h>
+#include <M7_lib/hamiltonian/bos/TcBosHam.h>
 #include <M7_lib/io/Symlink.h>
