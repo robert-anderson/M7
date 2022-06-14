@@ -59,7 +59,7 @@ defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 
 defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
-    DEBUG_ASSERT_EQ(conn.size(), 2, "incorrectly sized connection passed to get_element_0011");
+    DEBUG_ASSERT_EQ(conn.size(), size_t(2), "incorrectly sized connection passed to get_element_0011");
     // get mode indices
     auto a = conn.m_cre[0].m_imode;
     auto i = conn.m_ann[0].m_imode;
@@ -74,9 +74,9 @@ defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn
 
 defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
     DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
-    DEBUG_ASSERT_NE(conn.size(), 2, "single number-conserving boson operator passed to get_element_0022");
-    DEBUG_ASSERT_NE(conn.size(), 0, "empty connection passed to get_element_0022");
-    DEBUG_ASSERT_EQ(conn.size(), 4, "incorrectly sized connection passed to get_element_0022");
+    DEBUG_ASSERT_NE(conn.size(), size_t(2), "single number-conserving boson operator passed to get_element_0022");
+    DEBUG_ASSERT_NE(conn.size(), size_t(0), "empty connection passed to get_element_0022");
+    DEBUG_ASSERT_EQ(conn.size(), size_t(4), "incorrectly sized connection passed to get_element_0022");
     // get mode indices
     auto i = conn.m_cre[0].m_imode;
     auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;
