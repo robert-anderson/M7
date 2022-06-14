@@ -8,5 +8,6 @@ target_sources(unittest
         Integer.cpp
         Math.cpp
         String.cpp
+        Tuple.cpp
         utils.cpp
 )
