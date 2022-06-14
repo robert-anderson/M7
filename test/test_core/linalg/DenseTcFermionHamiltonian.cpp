@@ -21,9 +21,9 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     AssetSymlink tcdump("TC_Be_6-31G/TCDUMP", "TCDUMP");
     AssetSymlink fcidump("TC_Be_6-31G/FCIDUMP", "FCIDUMP");
     TcFrmHam ham_src("FCIDUMP", false, 0);
-    DenseHamiltonian ham(ham_src);
-    std::vector<defs::ham_t> evals;
-    dense::diag(ham, evals);
+    // DenseHamiltonian ham(ham_src);
+    // std::vector<defs::ham_t> evals;
+    // dense::diag(ham, evals);
     // TODO stub
     ASSERT(false);
 }

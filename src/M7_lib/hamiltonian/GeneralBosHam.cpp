@@ -58,46 +58,55 @@ defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 }
 
 defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
+    // TODO stub
+    // TODO a bunch of asserts
+    // get mode indices
+    auto a = conn.m_cre[0].m_imode;
+    auto i = conn.m_ann[0].m_imode;
+    // get occupation at each index
+    auto n = onv[a];
+    auto i = onv[i];
+
+    defs::ham_comp_t occ_fac = 1.0;
+    // TODO
     return 0.0;
 }
 
 defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    // this Hamiltonian conserves boson number
-    if (conn.m_ann.size() != conn.m_cre.size()) return 0.0;
-    // single number-conserving boson operators not implemented;
+    DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
+    DEBUG_ASSERT_NE(conn.size(), 2, "single number-conserving boson operator passed to get_element_0022");
+    DEBUG_ASSERT_NE(conn.size(), 0, "empty connection passed to get_element_0022");
+    DEBUG_ASSERT_EQ(conn.size(), 4, "incorrectly sized connection passed to get_element_0022");
+    // get mode indices
+    auto i = conn.m_cre[0].m_imode;
+    auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;
+    auto k = conn.m_ann[0].m_imode;
+    auto l = conn.m_ann[0].m_nop == 2 ? k : conn.m_ann[1].m_imode;
+    // get occupation of mode at each index
+    size_t ni = onv[i];
+    size_t nj = onv[j];
+    size_t nk = onv[k];
+    size_t nl = onv[l];
 
-    if(conn.size() == 2) return 0.0;
-    if (!conn.size()) return get_element(onv);
-    if (conn.size() == 4) {
-        auto i = conn.m_cre[0].m_imode;
-        auto j = conn.m_cre[0].m_nop == 2 ? i : conn.m_cre[1].m_imode;
-        auto k = conn.m_ann[0].m_imode;
-        auto l = conn.m_ann[0].m_nop == 2 ? k : conn.m_ann[1].m_imode;
-        size_t ni = onv[i];
-        size_t nj = onv[j];
-        size_t nk = onv[k];
-        size_t nl = onv[l];
-
-        defs::ham_comp_t occ_fac = 1.0;
-        if (i == j) {
-            if (k == l) {
-                DEBUG_ASSERT_NE(i, k, "ii <- ii case implies diagonal element, not double excitation");
-                // ii <- kk
-                occ_fac = 0.5*std::sqrt((ni + 2) * (ni + 1) * nk * (nk - 1));
-            } else {
-                // ii <- kl
-                occ_fac = std::sqrt((ni + 2) * (ni + 1) * nk * nl);
-            }
+    defs::ham_comp_t occ_fac = 1.0;
+    if (i == j) {
+        if (k == l) {
+            DEBUG_ASSERT_NE(i, k, "ii <- ii case implies diagonal element, not double excitation");
+            // ii <- kk
+            occ_fac = 0.5*std::sqrt((ni + 2) * (ni + 1) * nk * (nk - 1));
         } else {
-            if (k == l) {
-                // ij <- kk
-                occ_fac = std::sqrt((ni + 1) * (nj + 1) * nk * (nk - 1));
-            } else {
-                // ij <- kl
-                occ_fac = 2*std::sqrt((ni + 1) * (nj + 1) * nk * nl);
-            }
+            // ii <- kl
+            occ_fac = std::sqrt((ni + 2) * (ni + 1) * nk * nl);
         }
-        return m_coeffs_2.phys_element(i, j, k, l) * occ_fac;
+    } else {
+        if (k == l) {
+            // ij <- kk
+            occ_fac = std::sqrt((ni + 1) * (nj + 1) * nk * (nk - 1));
+        } else {
+            // ij <- kl
+            occ_fac = 2*std::sqrt((ni + 1) * (nj + 1) * nk * nl);
+        }
     }
-    return 0.0;
+    return m_coeffs_2.phys_element(i, j, k, l) * occ_fac;
+    // return 0.0;
 }

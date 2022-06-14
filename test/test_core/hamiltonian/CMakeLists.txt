@@ -9,4 +9,5 @@ target_sources(unittest
         SpinSquareFrmHam.cpp
         TranscorrelatedFermionHamiltonian.cpp
         TranscorrelatedHamiltonian.cpp
+        TranscorrelatedBosonHamiltonian.cpp
 )
