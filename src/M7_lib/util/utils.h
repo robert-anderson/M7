@@ -322,57 +322,6 @@ namespace complex_utils {
     }
 }
 
-#if 0
-namespace ci_utils {
-    /**
-     * @param nelec
-     *  total number of electrons in determinant
-     * @param ms2
-     *  total z component of spin 2*(nalpha-nbeta)
-     * @return
-     *  number of alpha (spin channel 0) electrons
-     */
-    static size_t nalpha(const FrmHilbertData& hd){
-        auto nelec = hd.m_nelec;
-        auto ms2 = hd.m_ms2;
-        size_t spin_odd = std::abs(ms2) % 2;
-        ASSERT(nelec % 2 == spin_odd);
-        size_t nalpha = nelec / 2 + (std::abs(ms2)) / 2 + spin_odd;
-        return ms2 >= 0 ? nalpha : nelec - nalpha;
-    }
-
-    static size_t nbeta(const FrmHilbertData& hd){
-        return hd.m_nelec - nalpha(hd);
-    }
-
-    static size_t fermion_dim(size_t nsite, size_t nelec) {
-        return utils::integer::combinatorial(2 * nsite, nelec);
-    }
-
-    static size_t fermion_dim(size_t nsite, const FrmHilbertData& hd){
-        ASSERT(static_cast<size_t>(ms2_restrict) % 2 == nelec % 2)
-        auto na = utils::integer::combinatorial(nsite, nalpha(nelec, ms2_restrict));
-        auto nb = utils::integer::combinatorial(nsite, nbeta(nelec, ms2_restrict));
-        return na*nb;
-    }
-
-    /**
-     * @param nmode
-     *  number of boson modes
-     * @param nboson
-     *  total number of bosons if number conserving, else the cutoff occupation for each mode
-     * @param number_conserve
-     *  true if the hamiltonian is boson number-conserving (no ladder terms)
-     * @return
-     *  dimension of the bosonic sector of the Hilbert space
-     */
-    static size_t boson_dim(size_t nmode, size_t nboson, bool number_conserve) {
-        if (number_conserve) return utils::integer::combinatorial_with_repetition(nmode, nboson);
-        else return std::pow(nboson + 1, nmode);
-    }
-}
-#endif
-
 namespace mem_utils {
 
     template<typename T, typename... Args>
@@ -577,20 +526,6 @@ namespace array_utils {
         return tmp;
     }
 }
-
-
-namespace functor_utils {
-    template<typename signature_t, typename T>
-    void assert_prototype(){
-        static_assert(std::is_convertible<T, std::function<signature_t>>::value,
-                      "body function does not conform to required prototype");
-    }
-    template<typename signature_t, typename T>
-    void assert_prototype(const T& t){
-        assert_prototype<signature_t, T>();
-    }
-}
-
 
 template<typename T>
 static std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {

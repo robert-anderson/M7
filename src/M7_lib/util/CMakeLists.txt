@@ -2,6 +2,7 @@ target_sources(M7_lib
     PRIVATE
         Bit.h
         consts.h
+        Functor.h
         Integer.cpp
         Integer.h
         Nd.h

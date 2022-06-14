@@ -10,6 +10,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/Nd.h>
 #include <M7_lib/util/Integer.h>
+#include <M7_lib/util/Functor.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {
@@ -98,7 +99,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
                 top_loop(fn, tags::Int<nind == 0>());
             }
         };
@@ -149,7 +150,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
                 top_loop(fn, tags::Int<nind == 0>());
             }
         };
@@ -214,7 +215,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                functor_utils::assert_prototype<void(const inds_t &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
                 level_loop(fn, 1);
             }
@@ -249,7 +250,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t& fn) {
-                functor_utils::assert_prototype<void(const inds_t &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
                 level_loop(fn, 1);
             }

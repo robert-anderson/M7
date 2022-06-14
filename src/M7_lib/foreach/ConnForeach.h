@@ -148,7 +148,7 @@ namespace conn_foreach {
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                functor_utils::assert_prototype<void()>(fn);
+                utils::functor::assert_prototype<void()>(fn);
 
                 /*
                  * to conserve 2*Ms, the number of beta electrons annihilated should equal the number of beta
@@ -170,7 +170,7 @@ namespace conn_foreach {
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                functor_utils::assert_prototype<void()>(fn);
+                utils::functor::assert_prototype<void()>(fn);
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
@@ -203,7 +203,7 @@ namespace conn_foreach {
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                functor_utils::assert_prototype<void()>(fn);
+                utils::functor::assert_prototype<void()>(fn);
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
@@ -254,7 +254,7 @@ namespace conn_foreach {
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
-                functor_utils::assert_prototype<void()>(fn);
+                utils::functor::assert_prototype<void()>(fn);
                 conn.clear();
                 const auto &occs = src.m_decoded.m_occ_modes.get();
                 for (auto &imode: occs) {
@@ -274,7 +274,7 @@ namespace conn_foreach {
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
-                functor_utils::assert_prototype<void()>(fn);
+                utils::functor::assert_prototype<void()>(fn);
                 conn.clear();
                 for (size_t imode = 0ul; imode < src.m_size; ++imode) {
                     if (size_t(src[imode] + 1) > src.m_basis.m_occ_cutoff) continue;

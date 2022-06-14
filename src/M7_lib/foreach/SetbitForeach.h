@@ -27,8 +27,8 @@ namespace setbit_foreach {
     template<typename T, typename body_fn_t, typename get_work_fn_t>
     static void single(size_t dsize, const body_fn_t& fn, const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor_utils::assert_prototype<void(size_t), body_fn_t>();
-        functor_utils::assert_prototype<T(size_t), get_work_fn_t>();
+        utils::functor::assert_prototype<void(size_t), body_fn_t>();
+        utils::functor::assert_prototype<T(size_t), get_work_fn_t>();
         T work;
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
@@ -60,8 +60,8 @@ namespace setbit_foreach {
     template<typename T, typename body_fn_t, typename get_work_fn_t>
     static void pair_inner(size_t dsize, size_t ibit, const body_fn_t &fn, const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor_utils::assert_prototype<void(size_t, size_t), body_fn_t>();
-        functor_utils::assert_prototype<T(size_t), get_work_fn_t>();
+        utils::functor::assert_prototype<void(size_t, size_t), body_fn_t>();
+        utils::functor::assert_prototype<T(size_t), get_work_fn_t>();
         T work;
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
@@ -96,9 +96,9 @@ namespace setbit_foreach {
     static void pair(size_t dsize, const body_fn_outer_t& fn_outer, const body_fn_inner_t& fn_inner,
                      const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor_utils::assert_prototype<void(size_t), body_fn_outer_t>();
-        functor_utils::assert_prototype<void(size_t, size_t), body_fn_inner_t>();
-        functor_utils::assert_prototype<T(size_t), get_work_fn_t>();
+        utils::functor::assert_prototype<void(size_t), body_fn_outer_t>();
+        utils::functor::assert_prototype<void(size_t, size_t), body_fn_inner_t>();
+        utils::functor::assert_prototype<T(size_t), get_work_fn_t>();
         T work;
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
@@ -125,8 +125,8 @@ namespace setbit_foreach {
     static void triple_2(size_t dsize, size_t ibit, size_t jbit, const body_fn_3_t& fn_3,
                          const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor_utils::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
-        functor_utils::assert_prototype<T(size_t), get_work_fn_t>();
+        utils::functor::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
+        utils::functor::assert_prototype<T(size_t), get_work_fn_t>();
         DEBUG_ASSERT_LT(jbit, ibit, "triplet should be strictly ordered");
 
         T work;
@@ -144,9 +144,9 @@ namespace setbit_foreach {
     static void triple_1(size_t dsize, size_t ibit, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
                        const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor_utils::assert_prototype<void(size_t, size_t), body_fn_2_t>();
-        functor_utils::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
-        functor_utils::assert_prototype<T(size_t), get_work_fn_t>();
+        utils::functor::assert_prototype<void(size_t, size_t), body_fn_2_t>();
+        utils::functor::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
+        utils::functor::assert_prototype<T(size_t), get_work_fn_t>();
 
         T work;
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
@@ -164,10 +164,10 @@ namespace setbit_foreach {
     static void triple(size_t dsize, const body_fn_1_t& fn_1, const body_fn_2_t& fn_2, const body_fn_3_t& fn_3,
                      const get_work_fn_t& get_work_fn) {
         static_assert(std::is_integral<T>::value, "buffer type must be integral");
-        functor_utils::assert_prototype<void(size_t), body_fn_1_t>();
-        functor_utils::assert_prototype<void(size_t, size_t), body_fn_2_t>();
-        functor_utils::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
-        functor_utils::assert_prototype<T(size_t), get_work_fn_t>();
+        utils::functor::assert_prototype<void(size_t), body_fn_1_t>();
+        utils::functor::assert_prototype<void(size_t, size_t), body_fn_2_t>();
+        utils::functor::assert_prototype<void(size_t, size_t, size_t), body_fn_3_t>();
+        utils::functor::assert_prototype<T(size_t), get_work_fn_t>();
         T work;
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
