@@ -8,7 +8,7 @@
 
 FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
     m_nop_insert(nop_insert),
-    m_ncomb(integer_utils::combinatorial(ncom, nop_insert)),
+    m_ncomb(utils::integer::combinatorial(ncom, nop_insert)),
     m_all_combs(nop_insert * m_ncomb){
     if (!nop_insert) return;
 

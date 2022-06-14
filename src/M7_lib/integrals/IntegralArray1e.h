@@ -8,9 +8,10 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/defs.h>
 #include "IntegralStorage.h"
+#include <M7_lib/util/Integer.h>
 
 namespace integrals_1e {
-    using namespace integer_utils;
+    using namespace utils::integer;
 
     typedef std::function<void(size_t, size_t)> foreach_fn_t;
 
@@ -39,7 +40,7 @@ namespace integrals_1e {
         void foreach(const foreach_fn_t &fn) const override;
     };
 
-    using namespace integer_utils;
+    using namespace utils::integer;
 
     struct IndexerSymH : Indexer {
         IndexerSymH(size_t norb);

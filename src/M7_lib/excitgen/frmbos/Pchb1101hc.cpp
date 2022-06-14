@@ -3,10 +3,11 @@
 //
 
 #include "Pchb1101hc.h"
+#include "M7_lib/util/Math.h"
 
 Pchb1101hc::Pchb1101hc(const FrmBosHam &h, PRNG &prng) :
         FrmBosExcitGen(h, prng, {utils::exsig::ex_1101, utils::exsig::ex_1110}, "precomputed heatbath"),
-        m_pick_n_given_pq(utils::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
+        m_pick_n_given_pq(utils::math::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
     std::vector<defs::prob_t> weights(nmode, 0.0);

@@ -41,9 +41,9 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     DEBUG_ASSERT_EQ(exsig, utils::exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     size_t i, j, a, b;
     const auto &occs = src.m_decoded.m_simple_occs.get();
-    const auto npair_elec = integer_utils::nspair(occs.size());
+    const auto npair_elec = utils::integer::nspair(occs.size());
     size_t ij = m_prng.draw_uint(npair_elec);
-    integer_utils::inv_strigmap(j, i, ij);
+    utils::integer::inv_strigmap(j, i, ij);
     // i and j are positions in the occ list, convert to orb inds:
     i = occs[i];
     j = occs[j];
@@ -51,14 +51,14 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     DEBUG_ASSERT_LT(i, j, "drawn indices should be strictly ordered");
 
     // re-pack the selected indices into the flat index of the aliser row
-    ij = integer_utils::strigmap(j, i); // i and j are orbital indices
+    ij = utils::integer::strigmap(j, i); // i and j are orbital indices
     if (consts::nearly_zero(m_pick_ab_given_ij.norm(ij))) {
         // can't have a valid excitation if the row norm is zero
         return false;
     }
 
     size_t ab = m_pick_ab_given_ij.draw(ij, m_prng);
-    integer_utils::inv_strigmap(b, a, ab); // a and b are spin orbital indices
+    utils::integer::inv_strigmap(b, a, ab); // a and b are spin orbital indices
     //ASSERT(i!=a && i!=b && j!=a && j!=b)
 
     // reject the excitation if the creation indices are already occupied
@@ -88,8 +88,8 @@ bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::pro
 
 defs::prob_t Pchb2200::prob_h_frm(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const {
     const auto &occs = src.m_decoded.m_simple_occs.get();
-    const auto npair_elec = integer_utils::nspair(occs.size());
-    auto ij = integer_utils::strigmap(conn.m_ann[1], conn.m_ann[0]);
+    const auto npair_elec = utils::integer::nspair(occs.size());
+    auto ij = utils::integer::strigmap(conn.m_ann[1], conn.m_ann[0]);
     return std::abs(helem) / (m_pick_ab_given_ij.norm(ij)*npair_elec);
 }
 

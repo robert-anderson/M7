@@ -45,10 +45,10 @@ public:
     bool draw_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) override {
         const auto &op_inds = src.m_decoded.m_expanded.get();
         const auto nmode = src.m_nelement;
-        const auto nboson_pair = integer_utils::nspair(op_inds.size());
+        const auto nboson_pair = utils::integer::nspair(op_inds.size());
         size_t ij = m_prng.draw_uint(nboson_pair);
         size_t i, j;
-        integer_utils::inv_strigmap(j, i, ij);
+        utils::integer::inv_strigmap(j, i, ij);
         // i and j are positions in the occ list, convert to orb inds:
         DEBUG_ASSERT_LT(i, j, "picked i, j should be in ascending order");
         DEBUG_ASSERT_LT(i, op_inds.size(), "i index OOB");
@@ -87,7 +87,7 @@ public:
     }
 
     defs::prob_t prob_bos(const field::BosOnv &src, const conn::BosOnv &conn) const override {
-        const auto nboson_pair = integer_utils::nspair(src.m_decoded.m_expanded.get().size());
+        const auto nboson_pair = utils::integer::nspair(src.m_decoded.m_expanded.get().size());
         const auto i = conn.m_ann[0].m_imode;
         const auto j = conn.m_ann[0].m_imode==1 ? conn.m_ann[1].m_imode : i;
         defs::prob_t prob;

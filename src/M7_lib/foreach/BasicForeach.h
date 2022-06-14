@@ -9,6 +9,7 @@
 
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/util/Nd.h>
+#include <M7_lib/util/Integer.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {
@@ -109,7 +110,7 @@ namespace basic_foreach {
 
             static size_t niter(size_t n) {
                 if (!nind || !n) return 0ul;
-                return integer_utils::combinatorial(strict ? n : (n + nind) - 1, nind);
+                return utils::integer::combinatorial(strict ? n : (n + nind) - 1, nind);
             }
         protected:
             size_t m_n;
@@ -224,7 +225,7 @@ namespace basic_foreach {
 
             static size_t niter(size_t n, size_t r) {
                 if (!r) return 0ul;
-                return integer_utils::combinatorial(strict ? n : (n + r) - 1, r);
+                return utils::integer::combinatorial(strict ? n : (n + r) - 1, r);
             }
 
         private:

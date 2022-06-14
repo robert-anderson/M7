@@ -6,6 +6,7 @@
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include "M7_lib/util/String.h"
+#include <M7_lib/util/Integer.h>
 
 
 Buffer::Window::Window(Buffer *buffer, size_t row_size): Window(row_size) {
@@ -89,7 +90,7 @@ void Buffer::resize(size_t size, double factor) {
     }
     size*=1.0+factor;
     // always allocate an integral number of words
-    size = integer_utils::divceil(size, defs::nbyte_word)*defs::nbyte_word;
+    size = utils::integer::divceil(size, defs::nbyte_word)*defs::nbyte_word;
     DEBUG_ASSERT_TRUE(size, "New size must be non-zero");
     if (!m_name.empty()) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",

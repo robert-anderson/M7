@@ -2,6 +2,8 @@ target_sources(M7_lib
     PRIVATE
         Bit.h
         consts.h
+        Integer.cpp
+        Integer.h
         Nd.h
         ProgressMonitor.cpp
         ProgressMonitor.h

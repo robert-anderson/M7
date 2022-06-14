@@ -299,14 +299,14 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
     mbf = {alpha_setbits, beta_setbits};
 
     const auto nalpha_setbit = alpha_setbits.size();
-    const auto npair_alpha_setbit = integer_utils::nspair(nalpha_setbit);
+    const auto npair_alpha_setbit = utils::integer::nspair(nalpha_setbit);
     const auto nalpha_clrbit = nsite - nalpha_setbit;
-    const auto npair_alpha_clrbit = integer_utils::nspair(nalpha_clrbit);
+    const auto npair_alpha_clrbit = utils::integer::nspair(nalpha_clrbit);
 
     const auto nbeta_setbit = beta_setbits.size();
-    const auto npair_beta_setbit = integer_utils::nspair(nbeta_setbit);
+    const auto npair_beta_setbit = utils::integer::nspair(nbeta_setbit);
     const auto nbeta_clrbit = nsite - nbeta_setbit;
-    const auto npair_beta_clrbit = integer_utils::nspair(nbeta_clrbit);
+    const auto npair_beta_clrbit = utils::integer::nspair(nbeta_clrbit);
 
     size_t iiter = 0ul;
 

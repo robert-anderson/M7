@@ -7,6 +7,7 @@
 
 #include <M7_lib/defs.h>
 #include "IntegralStorage.h"
+#include <M7_lib/util/Integer.h>
 
 /**
  * all two-electron integrals are denoted in physicists' ordering: <ab|ij>
@@ -55,7 +56,7 @@
  *
  */
 namespace integrals_2e {
-    using namespace integer_utils;
+    using namespace utils::integer;
 
     typedef std::function<void(size_t, size_t, size_t, size_t)> foreach_fn_t;
 

@@ -211,100 +211,12 @@ namespace utils {
         return narrows;
     }
 
-    template<size_t exp, typename T=void>
-    static typename std::enable_if<exp == 0, T>::type
-    pow(const T &v) {
-        return 1ul;
-    }
-
-    template<size_t exp, typename T=void>
-    static typename std::enable_if<exp != 0, T>::type
-    pow(const T &v) {
-        return v * pow<exp - 1, T>(v);
-    }
-
-    template<size_t n>
-    static typename std::enable_if<n == 0ul, size_t>::type
-    ntup_num(size_t extent) {
-        return 1ul;
-    }
-
-    template<size_t n>
-    static typename std::enable_if<n != 0ul, size_t>::type
-    ntup_num(size_t extent) {
-        return extent * ntup_num<n - 1>(extent - 1);
-    }
-
-    template<size_t n>
-    static size_t ntup(size_t extent) {
-        return ntup_num<n>(extent) / ntup_num<n>(n);
-    }
-
     template<typename T1, typename T2>
     static void convert(const std::vector<T1>& v1, std::vector<T2>& v2){
         static_assert(std::is_convertible<T1, T2>::value, "incompatible types");
         v2.clear();
         v2.reserve(v1.size());
         for (auto& i: v1) v2.push_back(i);
-    }
-}
-
-namespace integer_utils {
-
-    template<typename T>
-    static typename std::enable_if<std::is_integral<T>::value, T>::type
-    divceil(const T &num, const T &denom) {
-        return num % denom ? num / denom + 1 : num / denom;
-    }
-
-    template<typename T>
-    static typename std::enable_if<std::is_integral<T>::value, T>::type
-    round_up(const T &num, const T &modulo) {
-        return divceil(num, modulo) * modulo;
-    }
-
-    size_t rectmap(const size_t &irow, const size_t &icol, const size_t &ncol);
-
-    void inv_rectmap(size_t &irow, size_t &icol, const size_t &ncol, const size_t &flat);
-
-    size_t trigmap(const size_t &i, const size_t &j);
-
-    size_t npair(const size_t &ndim);
-
-    void inv_trigmap(size_t &i, size_t &j, const size_t &n);
-
-    size_t strigmap(const size_t &i, const size_t &j);
-
-    void inv_strigmap(size_t &i, size_t &j, const size_t &n);
-
-    size_t nspair(const size_t &ndim);
-
-    size_t factorial(const size_t &n);
-
-    size_t combinatorial(const size_t &n, const size_t &r);
-
-    size_t combinatorial_with_repetition(const size_t &n, const size_t &r);
-
-    /**
-     * exact integer power by recursive squaring
-     * @tparam T
-     *  integer type
-     * @param x
-     *  number being exponentiated
-     * @param y
-     *  exponent
-     * @return
-     *  x to the power y
-     */
-    template<typename T>
-    T pow(T x, T y){
-        static_assert(std::is_integral<T>::value, "template arg must be integral type");
-        if (!y) return 1;
-        if (y == 1) return x;
-
-        auto tmp = pow(x, y / 2);
-        if (y & T(1)) return x * tmp * tmp;
-        return tmp * tmp;
     }
 }
 
@@ -434,13 +346,13 @@ namespace ci_utils {
     }
 
     static size_t fermion_dim(size_t nsite, size_t nelec) {
-        return integer_utils::combinatorial(2 * nsite, nelec);
+        return utils::integer::combinatorial(2 * nsite, nelec);
     }
 
     static size_t fermion_dim(size_t nsite, const FrmHilbertData& hd){
         ASSERT(static_cast<size_t>(ms2_restrict) % 2 == nelec % 2)
-        auto na = integer_utils::combinatorial(nsite, nalpha(nelec, ms2_restrict));
-        auto nb = integer_utils::combinatorial(nsite, nbeta(nelec, ms2_restrict));
+        auto na = utils::integer::combinatorial(nsite, nalpha(nelec, ms2_restrict));
+        auto nb = utils::integer::combinatorial(nsite, nbeta(nelec, ms2_restrict));
         return na*nb;
     }
 
@@ -455,7 +367,7 @@ namespace ci_utils {
      *  dimension of the bosonic sector of the Hilbert space
      */
     static size_t boson_dim(size_t nmode, size_t nboson, bool number_conserve) {
-        if (number_conserve) return integer_utils::combinatorial_with_repetition(nmode, nboson);
+        if (number_conserve) return utils::integer::combinatorial_with_repetition(nmode, nboson);
         else return std::pow(nboson + 1, nmode);
     }
 }

@@ -17,7 +17,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
     mutable std::vector<int> m_ikpoints_i_work, m_ikpoints_j_work;//, m_ikpoints_k_work, m_ikpoints_l_work;
     InteractingBoseGasDoubles(const Hamiltonian& h, PRNG& prng) :
         BosExcitGen(h, prng, utils::exsig::ex_0022),
-        m_nbos_pair(integer_utils::combinatorial(h.nboson(), 2)){}
+        m_nbos_pair(utils::integer::combinatorial(h.nboson(), 2)){}
 
     const InteractingBoseGasBosHam* h_cast() const {
         return dynamic_cast<const InteractingBoseGasBosHam*>(m_h.m_bos.get());
@@ -33,7 +33,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
                         "boson ONV does not hold expected number of particles");
         auto ipair_occ = m_prng.draw_uint(m_nbos_pair);
         size_t imode, jmode;
-        integer_utils::inv_strigmap(imode, jmode, ipair_occ);
+        utils::integer::inv_strigmap(imode, jmode, ipair_occ);
         imode = bos_op_inds[imode];
         jmode = bos_op_inds[jmode];
 //        h->get_ikpoints(imode, m_ikpoints_i_work);
