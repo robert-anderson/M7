@@ -58,18 +58,18 @@ defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
 }
 
 defs::ham_t GeneralBosHam::get_element_0011(const field::BosOnv &onv, const conn::BosOnv &conn) const {
-    // TODO stub
-    // TODO a bunch of asserts
+    DEBUG_ASSERT_NE(conn.m_ann.size(), conn.m_cre.size(), "this Hamiltonian conserves boson number");
+    DEBUG_ASSERT_EQ(conn.size(), 2, "incorrectly sized connection passed to get_element_0011");
     // get mode indices
     auto a = conn.m_cre[0].m_imode;
     auto i = conn.m_ann[0].m_imode;
     // get occupation at each index
-    auto n = onv[a];
-    auto i = onv[i];
+    auto na = onv[a];
+    auto ni = onv[i];
 
-    defs::ham_comp_t occ_fac = 1.0;
-    // TODO
-    return 0.0;
+    // I think we cannot have i==a otherwise we are in a diagonal
+    DEBUG_ASSERT_NE(i, a, "a <- i case implies a diagonal element, not a single excitation");
+    return std::sqrt((na+1)*ni);
 }
 
 defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn::BosOnv &conn) const {
@@ -108,5 +108,4 @@ defs::ham_t GeneralBosHam::get_element_0022(const field::BosOnv &onv, const conn
         }
     }
     return m_coeffs_2.phys_element(i, j, k, l) * occ_fac;
-    // return 0.0;
 }
