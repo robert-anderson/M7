@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/08/2021.
+// Created by Robert J. Anderson on 10/08/2021.
 //
 
 #ifndef M7_FRMBOSONVCONNECTION_H
@@ -14,7 +14,8 @@
 struct FrmBosOnvConnection {
     FrmOnvConnection m_frm;
     BosOnvConnection m_bos;
-    explicit FrmBosOnvConnection(BasisData bd);
+
+    explicit FrmBosOnvConnection(sys::Size size);
 
     explicit FrmBosOnvConnection(const FrmBosOnvField& mbf);
 
@@ -31,5 +32,9 @@ struct FrmBosOnvConnection {
     bool respects_occ_range(const FrmBosOnvField& src, size_t nboson_max) const;
 };
 
+static std::ostream &operator<<(std::ostream &os, const FrmBosOnvConnection &conn) {
+    os << conn.m_frm << conn.m_bos;
+    return os;
+}
 
 #endif //M7_FRMBOSONVCONNECTION_H

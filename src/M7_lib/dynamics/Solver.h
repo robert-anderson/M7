@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/11/2020.
+// Created by Robert J. Anderson on 10/11/2020.
 //
 
 #ifndef M7_SOLVER_H
@@ -9,7 +9,6 @@
 #include <M7_lib/util/Timer.h>
 #include <M7_lib/observables/RefExcits.h>
 #include <M7_lib/observables/UniformTwf.h>
-#include <M7_lib/observables/WeightedTwf.h>
 #include <M7_lib/observables/RefExcits.h>
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/io/FciqmcStats.h>
@@ -57,7 +56,7 @@ class Solver {
 
     size_t m_icycle = 0ul;
     Propagator &m_prop;
-    const fciqmc_config::Document &m_opts;
+    const conf::Document &m_opts;
     Wavefunction &m_wf;
     References m_refs;
 
@@ -98,9 +97,9 @@ private:
 
 public:
 
-    Solver(const fciqmc_config::Document& opts, Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs);
+    Solver(const conf::Document& opts, Propagator &prop, Wavefunction &wf, std::vector<TableBase::Loc> ref_locs);
 
-    Solver(const fciqmc_config::Document& opts, Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc):
+    Solver(const conf::Document& opts, Propagator &prop, Wavefunction &wf, TableBase::Loc ref_loc):
         Solver(opts, prop, wf, std::vector<TableBase::Loc>(wf.npart(), ref_loc)){}
 
     /**

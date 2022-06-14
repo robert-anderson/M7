@@ -1,41 +1,38 @@
 //
-// Created by rja on 05/11/2020.
+// Created by Robert J. Anderson on 05/11/2020.
 //
 
 #include "FcidumpFileReader.h"
 
 
-FcidumpHeader::FcidumpHeader(const std::string& fname):
-    FortranNamelistReader(fname),
-    m_uhf(read_bool("UHF")),
-    m_relativistic(read_bool("TREL")),
-    m_spin_resolved(m_uhf || m_relativistic),
-    m_nelec(read_uint("NELEC")),
-    m_nsite(read_uint("NORB")),
-    m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
-    m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
-    m_orbsym(read_uints("ORBSYM", -1, defs::inds(m_nsite, 1ul))){
+FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::inds orbsym):
+        m_fname(fname), m_uhf(uhf), m_relativistic(relativistic), m_spin_resolved(m_uhf || m_relativistic),
+        m_nelec(nelec), m_nsite(nsite), m_nspinorb(m_spin_resolved ? m_nsite*2 : m_nsite),
+        m_norb_distinct(m_spin_resolved ? m_nspinorb : m_nsite),
+        m_ms2(ms2), m_orbsym(orbsym.empty() ? defs::inds(m_nsite, 1) : orbsym){
     REQUIRE_EQ(m_orbsym.size(), m_nsite, "invalid ORBSYM specified in FCIDUMP file");
 }
 
+FcidumpInfo::FcidumpInfo(const FortranNamelistReader &reader) :
+        FcidumpInfo(reader.m_fname, reader.read_bool("UHF"), reader.read_bool("TREL"),
+                    reader.read_uint("NELEC"), reader.read_uint("NORB"),
+                    reader.read_int("MS2", defs::undefined_ms2),
+                    reader.read_uints("ORBSYM", -1, {})){}
 
+FcidumpInfo::FcidumpInfo(std::string fname) : FcidumpInfo(FortranNamelistReader(fname)){}
 
 FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) :
-        HamiltonianFileReader(fname, 4), m_header(fname), m_spin_major(spin_major) {
-    set_symm_and_rank();
-
-    auto nsite = m_header.m_nsite;
-    if (m_header.m_spin_resolved) {
+        HamiltonianFileReader(fname, 4), m_info(FortranNamelistReader(fname)), m_spin_major(spin_major) {
+    auto nsite = m_info.m_nsite;
+    if (m_info.m_spin_resolved) {
         defs::inds inds(4);
         defs::ham_t v;
         while (next(inds, v)) {
-            if (!consts::nearly_zero(v)) {
-                if (((inds[0] < nsite) != (inds[1] < nsite)) ||
-                    ((inds[2] < nsite) != (inds[3] < nsite))) {
-                    // spin non-conserving example found
-                    if (nset_ind(inds)==2) m_spin_conserving_1e = false;
-                    else m_spin_conserving_2e = false;
-                }
+            if (consts::nearly_zero(v)) continue;
+            if (((inds[0] < nsite) != (inds[1] < nsite)) || ((inds[2] < nsite) != (inds[3] < nsite))) {
+                // spin non-conserving example found
+                if (nset_ind(inds)==2) m_spin_conserving_1e = false;
+                else m_spin_conserving_2e = false;
             }
         }
         FileReader::reset(); // go back to beginning of entries
@@ -44,7 +41,6 @@ FcidumpFileReader::FcidumpFileReader(const std::string &fname, bool spin_major) 
     else log::info("FCIDUMP file does NOT conserve spin in 1 particle integrals");
     if (m_spin_conserving_2e) log::info("FCIDUMP file conserves spin in 2 particle integrals");
     else log::info("FCIDUMP file does NOT conserve spin in 2 particle integrals");
-    log::info("FCIDUMP file contains 2 particle integrals of maximum excitation rank " + std::to_string(m_int_2e_rank));
 }
 
 bool FcidumpFileReader::spin_conserving() const {
@@ -52,74 +48,15 @@ bool FcidumpFileReader::spin_conserving() const {
 }
 
 void FcidumpFileReader::convert_inds(defs::inds &inds) {
-    if (!m_header.m_spin_resolved || m_spin_major) return;
+    if (!m_info.m_spin_resolved || m_spin_major) return;
     for (auto &ind: inds)
-        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_header.m_nsite : 0));
+        ind = (ind == ~0ul) ? ~0ul : (ind / 2 + ((ind & 1ul) ? m_info.m_nsite : 0));
 }
 
 bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) {
     if (!HamiltonianFileReader::next(inds, v)) return false;
     convert_inds(inds);
     return true;
-}
-
-void FcidumpFileReader::set_symm_and_rank() {
-    m_int_2e_rank = 0;
-    auto get_rank = [](const defs::inds& inds){
-        // [ij|kl]
-        const size_t i=std::min(inds[0], inds[1]);
-        const size_t j=std::max(inds[0], inds[1]);
-        const size_t k=std::min(inds[2], inds[3]);
-        const size_t l=std::max(inds[2], inds[3]);
-        if (i==k && j==l) return 0ul;
-        else if (i!=k && j!=l) return 2ul;
-        else return 1ul;
-    };
-
-    log::info("Determining permutational symmetry of integral file entries");
-    defs::inds inds(4);
-    defs::ham_t value;
-    // this will eventually hold all orderings of the first example of an
-    // integral with 4 distinct indices
-    std::array<defs::inds, 8> inds_distinct;
-    m_isymm = 0ul;
-    while (next(inds, value)) {
-        if (std::all_of(inds.begin(), inds.end(), [](size_t i){return i>0;})) {
-            // we have a two body integral
-            if (m_int_2e_rank<2) {
-                size_t rank = get_rank(inds);
-                if (rank > m_int_2e_rank) m_int_2e_rank = rank;
-            }
-
-            if (!m_isymm) {
-                inds_distinct[0].assign(inds.begin(), inds.end());
-                std::sort(inds.begin(), inds.end());
-                // still looking for an example of four distinct indices
-                if (std::adjacent_find(inds.begin(), inds.end()) == inds.end()) {
-                    for (size_t i = 1ul; i < orderings.size(); ++i) {
-                        for (size_t j = 0ul; j < 4; ++j)
-                            inds_distinct[i].push_back(inds_distinct[0][orderings[i][j]]);
-                    }
-                    m_isymm++;
-                }
-            } else {
-                for (auto tmp : inds_distinct) {
-                    if (std::equal(inds.begin(), inds.end(), tmp.begin())){
-                        m_isymm++;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    if (!m_isymm){
-        log::info("Permutational symmetry of integral file could not be determined");
-        m_isymm = 1;
-    } else {
-        log::info("Permutational symmetry of integral file found to be {}", 8/m_isymm);
-        m_isymm/=8;    // 8->1; 4->2; 2->4; 1->8
-    }
-    reset();
 }
 
 size_t FcidumpFileReader::ranksig(const defs::inds &inds) const {
@@ -142,5 +79,5 @@ size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) c
 }
 
 bool FcidumpFileReader::inds_in_range(const defs::inds &inds) const {
-    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_header.m_norb_distinct;});
+    return std::all_of(inds.cbegin(), inds.cend(), [this](size_t i){return i<=m_info.m_norb_distinct;});
 }

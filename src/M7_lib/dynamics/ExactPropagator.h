@@ -1,14 +1,14 @@
 //
-// Created by rja on 27/02/2020.
+// Created by Robert J. Anderson on 27/02/2020.
 //
 
 #ifndef M7_EXACTPROPAGATOR_H
 #define M7_EXACTPROPAGATOR_H
 
-#include <M7_lib/config/FciqmcConfig.h>
-#include <M7_lib/excititer/ExcitIterGroup.h>
+#include <M7_lib/conf/Conf.h>
 
 #include "Propagator.h"
+#include "M7_lib/foreach/ConnForeachGroup.h"
 
 class ExactPropagator : public Propagator {
     /**
@@ -16,11 +16,11 @@ class ExactPropagator : public Propagator {
      * rank-2 RDMs since these spawns will make the exact contributions.
      */
     const bool m_only_nonzero_h_spawns;
-    ExcitIterGroup m_excit_iters;
+    ConnForeachGroup m_conn_iters;
     MagnitudeLogger m_mag_log;
 
 public:
-    ExactPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt,
+    ExactPropagator(const Hamiltonian &ham, const conf::Document &opts, const Wavefunction& wf,
                     bool only_nonzero_h_spawns=true);
 
     void diagonal(Wavefunction &wf, const size_t& ipart) override;

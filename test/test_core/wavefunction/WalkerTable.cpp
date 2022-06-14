@@ -1,12 +1,13 @@
 //
-// Created by rja on 25/11/2021.
+// Created by Robert J. Anderson on 25/11/2021.
 //
 
 #include "gtest/gtest.h"
 #include "M7_lib/wavefunction/WalkerTable.h"
 
 TEST(WalkerTable, Fields){
-    WalkerTable table(WalkerTableRow({0, 5}, 1, 1, false));
+    sys::Basis basis(5, 7);
+    WalkerTable table(WalkerTableRow(basis, 1, 1, false));
     auto& row = table.m_row;
 
     /**

@@ -1,18 +1,29 @@
 //
-// Created by rja on 27/09/2021.
+// Created by Robert J. Anderson on 27/09/2021.
 //
 
 #include "BosOnvField.h"
 #include "M7_lib/connection/BosOnvConnection.h"
 
-BosOnvField::BosOnvField(Row *row, size_t nmode, std::string name) :
-        base_t(row, {{nmode}, {"boson mode occupations"}}, name), m_nmode(m_nelement), m_decoded(*this) {}
+#include <utility>
 
-BosOnvField::BosOnvField(Row *row, BasisData bd, std::string name) : BosOnvField(row, bd.m_nmode, name) {
-    bd.require_pure_bos();
+BosOnvField::BosOnvField(Row *row, const sys::bos::Basis& basis, std::string name) :
+        base_t(row, {{basis.m_nmode}, {"boson mode occupations"}}, std::move(name)),
+        m_basis(basis), m_decoded(*this) {
 }
 
-BosOnvField::BosOnvField(const BosOnvField &other) : base_t(other), m_nmode(m_nelement), m_decoded(*this) {}
+BosOnvField::BosOnvField(Row *row, const sys::Basis &basis, std::string name) : BosOnvField(row, basis.m_bos, name) {
+    basis.require_pure_bos();
+}
+
+BosOnvField::BosOnvField(Row *row, const sys::bos::Sector &sector, std::string name) :
+    BosOnvField(row, sector.m_basis, name){}
+
+BosOnvField::BosOnvField(Row *row, const sys::Sector &sector, std::string name) :
+    BosOnvField(row, sector.m_bos, name){}
+
+BosOnvField::BosOnvField(const BosOnvField &other) :
+    base_t(other), m_basis(other.m_basis), m_decoded(*this) {}
 
 BosOnvField &BosOnvField::operator=(const defs::inds &inds) {
     DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");
@@ -25,6 +36,9 @@ void BosOnvField::set_ops(const defs::inds &iops) {
     for (auto& iop: iops) (*this)[iop]++;
 }
 
+size_t BosOnvField::nboson() const {
+    return this->sum();
+}
 size_t BosOnvField::occ_fac_square(const BosOnvConnection &conn) const {
     size_t fac = 1ul;
     for (auto& pair : conn.m_ann.pairs()) {

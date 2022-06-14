@@ -1,5 +1,5 @@
 //
-// Created by rja on 24/07/2021.
+// Created by Robert J. Anderson on 24/07/2021.
 //
 
 #include <M7_lib/table/BufferedFields.h>
@@ -9,39 +9,39 @@
 
 namespace frm_onv_connection_test {
     static bool phase_direct(const field::FrmOnv& src, const field::FrmOnv& dst){
-        FrmOnvConnection connection(src.m_nsite);
+        FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return connection.phase(src);
     }
     static bool phase_connect(const field::FrmOnv& src, const field::FrmOnv& dst){
-        FrmOnvConnection connection(src.m_nsite);
-        FrmOps com(src.m_nsite);
+        FrmOnvConnection connection(src);
+        FrmOps com(src.m_basis.m_nsite);
         return connection.connect(src, dst, com);
     }
     static bool phase_apply(const field::FrmOnv& src, const field::FrmOnv& dst){
-        FrmOnvConnection connection(src.m_nsite);
+        FrmOnvConnection connection(src);
         connection.connect(src, dst);
-        FrmOps com(src.m_nsite);
+        FrmOps com(src.m_basis.m_nsite);
         return connection.apply(src, com);
     }
     static size_t ncre(const field::FrmOnv& src, const field::FrmOnv& dst){
-        FrmOnvConnection connection(src.m_nsite);
+        FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return connection.m_cre.size();
     }
     static size_t nann(const field::FrmOnv& src, const field::FrmOnv& dst){
-        FrmOnvConnection connection(src.m_nsite);
+        FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return connection.m_ann.size();
     }
     static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::inds ann, defs::inds cre){
-        FrmOnvConnection connection(src.m_nsite);
+        FrmOnvConnection connection(src);
         connection.connect(src, dst);
         return (connection.m_ann == ann) && (connection.m_cre == cre);
     }
     static size_t string_chk(const field::FrmOnv& src, const field::FrmOnv& dst, defs::inds ann, defs::inds cre, defs::inds com){
-        FrmOnvConnection connection(src.m_nsite);
-        FrmOps com_chk(src.m_nsite);
+        FrmOnvConnection connection(src);
+        FrmOps com_chk(src.m_basis.m_nsite);
         connection.connect(src, dst, com_chk);
         return (connection.m_ann == ann) && (connection.m_cre == cre) && (com_chk==com);
     }

@@ -1,5 +1,5 @@
 //
-// Created by rja on 15/08/2021.
+// Created by Robert J. Anderson on 15/08/2021.
 //
 
 #ifndef M7_MAES_H
@@ -9,15 +9,36 @@
 #include <M7_lib/bilinear/Bilinears.h>
 #include <M7_lib/observables/RefExcits.h>
 
+/**
+ * A group of all Multidimensional Averaging Estimators needed for a calculation
+ */
 struct Maes {
+    /**
+     * changes state on the cycle on which accumulation (making contributions) begins
+     */
     Epoch m_accum_epoch;
+    /**
+     * group of MAEs that are bilinear in the wavefunction (e.g. RDMs, MPRT2 intermediates, spectral moments)
+     */
     Bilinears m_bilinears;
+    /**
+     * averaged amplitudes of MBFs that are excitations of the reference MBF
+     */
     RefExcits m_ref_excits;
+    /**
+     * number of cycles between consecutive averaging operations and stats output
+     */
     const size_t m_period;
+    /**
+     * cycle on which the current period started
+     */
     size_t m_icycle_period_start = ~0ul;
+    /**
+     * stats output object
+     */
     std::unique_ptr<MaeStats> m_stats = nullptr;
 
-    Maes(const fciqmc_config::AvEsts &opts, BasisData bd, size_t nelec, size_t nroot);
+    Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot);
 
     operator bool() const;
 

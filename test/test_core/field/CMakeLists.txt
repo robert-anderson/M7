@@ -4,5 +4,4 @@ target_sources(unittest
         CompositeField.cpp
         Fields.cpp
         FrmOnvField.cpp
-        NdFieldBase.cpp
 )

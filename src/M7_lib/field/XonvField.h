@@ -1,5 +1,5 @@
 //
-// Created by anderson on 1/30/22.
+// Created by Robert J. Anderson on 1/30/22.
 //
 
 #ifndef M7_XONVFIELD_H
@@ -17,15 +17,26 @@ template<typename T>
 struct XonvField : CompositeField<T, T> {
     using CompositeFieldBase::prefix;
     T m_ket, m_bra;
-    XonvField(Row* row, BasisData bd, std::string name): CompositeField<T, T>(m_ket, m_bra),
-            m_ket(row, bd, prefix("ket", name)), m_bra(row, bd, prefix("bra", name)){}
+    /*
+     * all ONVs implement a ctor parametrised by sys::Basis
+     */
+    XonvField(Row *row, const sys::Basis& basis, std::string name) :
+            CompositeField<T, T>(m_ket, m_bra),
+            m_ket(row, basis, prefix("ket", name)),
+            m_bra(row, basis, prefix("bra", name)) {}
+
+    XonvField(Row *row, const sys::Sector& sector, std::string name) : XonvField(row, sector.basis(), name){}
 };
 
 
 struct FrmXonvField : XonvField<FrmOnvField> {
-    FrmXonvField(Row *row, BasisData bd, std::string name = ""): XonvField<FrmOnvField>(row, bd, name){}
-    FrmXonvField(Row *row, size_t nsite, std::string name = ""): FrmXonvField(row, {nsite, 0ul}, name){}
-    FrmXonvField& operator=(const std::pair<defs::inds, defs::inds>& inds) {
+    FrmXonvField(Row *row, const sys::Basis& basis, std::string name = ""): XonvField<FrmOnvField>(row, basis, name){}
+    FrmXonvField(Row *row, const sys::frm::Basis& basis, std::string name = ""):
+            FrmXonvField(row, sys::Basis(basis, {0ul}), std::move(name)){}
+    FrmXonvField(Row *row, const sys::Sector& sector, std::string name = "") :
+            FrmXonvField(row, sector.basis(), std::move(name)){}
+
+    FrmXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;
@@ -34,9 +45,14 @@ struct FrmXonvField : XonvField<FrmOnvField> {
 
 
 struct BosXonvField : XonvField<BosOnvField> {
-    BosXonvField(Row *row, BasisData bd, std::string name = ""): XonvField<BosOnvField>(row, bd, name){}
-    BosXonvField(Row *row, size_t nmode, std::string name = ""): BosXonvField(row, {0ul, nmode}, name){}
-    BosXonvField& operator=(const std::pair<defs::inds, defs::inds>& inds) {
+
+    BosXonvField(Row *row, const sys::Basis& basis, std::string name = ""): XonvField<BosOnvField>(row, basis, name){}
+    BosXonvField(Row *row, const sys::bos::Basis& basis, std::string name = ""):
+            BosXonvField(row, sys::Basis({0ul}, basis), std::move(name)){}
+    BosXonvField(Row *row, const sys::Sector& sector, std::string name = "") :
+            BosXonvField(row, sector.basis(), std::move(name)){}
+
+    BosXonvField &operator=(const std::pair<defs::inds, defs::inds> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;
@@ -44,8 +60,17 @@ struct BosXonvField : XonvField<BosOnvField> {
 };
 
 struct FrmBosXonvField : XonvField<FrmBosOnvField> {
-    FrmBosXonvField(Row *row, BasisData bd, std::string name = ""): XonvField<FrmBosOnvField>(row, bd, name){}
-    FrmBosXonvField& operator=(const std::pair<std::pair<defs::inds, defs::inds>, std::pair<defs::inds, defs::inds>>& inds) {
+    FrmBosXonvField(Row *row, const sys::Basis& basis, std::string name = ""):
+            XonvField<FrmBosOnvField>(row, basis, std::move(name)){}
+
+    FrmBosXonvField(Row *row, const sys::frm::Basis& frm_basis, const sys::bos::Basis& bos_basis, std::string name = ""):
+            XonvField<FrmBosOnvField>(row, sys::Basis(frm_basis, bos_basis), std::move(name)){}
+
+    FrmBosXonvField(Row *row, const sys::Sector& sector, std::string name = "") :
+            FrmBosXonvField(row, sector.basis(), std::move(name)){}
+
+    typedef std::pair<defs::inds, defs::inds> pair_t;
+    FrmBosXonvField& operator=(const std::pair<pair_t, pair_t> &inds) {
         m_ket = inds.first;
         m_bra = inds.second;
         return *this;

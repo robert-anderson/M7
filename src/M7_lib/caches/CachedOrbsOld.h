@@ -1,5 +1,5 @@
 //
-// Created by rja on 02/03/2022.
+// Created by Robert J. Anderson on 02/03/2022.
 //
 
 #ifndef M7_CACHEDORBSOLD_H
@@ -7,6 +7,7 @@
 
 #include "DecodedDeterminants.h"
 
+#if 0
 /**
  * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbital indices when
  * needed
@@ -160,4 +161,5 @@ public:
 };
 
 
+#endif //M7_CACHEDORBSOLD_H
 #endif //M7_CACHEDORBSOLD_H

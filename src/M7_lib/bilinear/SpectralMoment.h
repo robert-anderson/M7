@@ -1,5 +1,5 @@
 //
-// Created by rja on 11/08/2021.
+// Created by Robert J. Anderson on 11/08/2021.
 //
 
 #ifndef M7_SPECTRALMOMENT_H
@@ -24,7 +24,7 @@ class SpecMoms : public Archivable {
 
 public:
 
-    SpecMoms(const fciqmc_config::SpecMoms& opts): Archivable("spec_moms", opts.m_archivable){}
+    SpecMoms(const conf::SpecMoms& opts): Archivable("spec_moms", opts.m_archivable){}
 
     operator bool() const {
         return false;//!m_active_ranksigs.empty();

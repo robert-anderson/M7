@@ -74,6 +74,37 @@ struct log {
 #endif
     }
 
+    static void info_lines(const std::vector<std::string>& lines);
+
+    static void info_lines_(const std::vector<std::string>& lines);
+
+    /**
+     * make a pretty table
+     * @param rows
+     *  vectors of string vectors, each string being a cell in the table. Rows do not have to be the same length
+     * @param header
+     *  if true, the initial row of the table is treated as a header and a special underline is applied
+     * @param padding
+     *  minimum whitespace between the text of a cell and the vertical divider character '|'
+     * @return
+     *  a vector of strings which when printed will display a table in which the rows are vertically aligned
+     */
+    static std::vector<std::string> make_table(const std::vector<std::vector<std::string>>& rows,
+                                               bool header=false, size_t padding=2);
+
+    static std::vector<std::string> make_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+                                               bool header=false, size_t padding=2);
+
+    static void info_table(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+
+    static void info_table(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+                           bool header=false, size_t padding=2);
+
+    static void info_table_(const std::vector<std::vector<std::string>>& rows, bool header=false, size_t padding=2);
+
+    static void info_table_(const std::string& title, const std::vector<std::vector<std::string>>& rows,
+                            bool header=false, size_t padding=2);
+
     template<typename ...Args>
     static void warn(const std::string& fmt_string, Args&&... args){
         if (!mpi::i_am_root()) return;

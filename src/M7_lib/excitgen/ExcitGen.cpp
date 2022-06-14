@@ -1,75 +1,76 @@
 //
-// Created by rja on 04/06/2020.
+// Created by Robert J. Anderson on 03/04/2022.
 //
 
 #include "ExcitGen.h"
 
-ExcitGen::ExcitGen(const Hamiltonian &h, PRNG &prng, defs::inds exsigs) :
-        m_h(h), m_prng(prng),
-        m_bd(m_h.m_bd),
-        m_nelec(m_h.nelec()),
-        m_norb_pair(integer_utils::nspair(m_bd.m_nspinorb)),
-        m_nelec_pair(integer_utils::nspair(m_nelec)), m_exsigs(std::move(exsigs)) {}
-
-bool ExcitGen::draw_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs,
-                        defs::prob_t &prob, conn::FrmOnv &conn) {
+bool ExcitGen::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
     prob = 0.0;
     return false;
 }
 
-bool ExcitGen::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                           conn::FrmBosOnv &conn) {
+bool ExcitGen::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob, conn::FrmBosOnv &conn) {
     prob = 0.0;
     return false;
 }
 
-bool ExcitGen::draw_bos(const size_t &exsig, const BosOnv &src, CachedOrbs &orbs,
-                        defs::prob_t &prob, conn::BosOnv &conn) {
+bool ExcitGen::draw_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, conn::BosOnv &conn) {
     prob = 0.0;
     return false;
 }
 
-bool ExcitGen::draw_h_frm(const size_t &exsig, const FrmOnv &src, CachedOrbs &orbs, defs::prob_t &prob, defs::ham_t &helem,
-                          conn::FrmOnv &conn) {
-    auto result = draw(exsig, src, orbs, prob, conn);
-    if (!result) return false;
-    helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem);
+bool ExcitGen::draw(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, defs::ham_t &helem,
+                    conn::FrmOnv &conn) {
+    auto success = draw_h_frm(exsig, src, prob, helem, conn);
+    return success &! consts::nearly_zero(helem, defs::helem_tol);
 }
 
-bool ExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                             defs::ham_t &helem, conn::FrmBosOnv &conn) {
-    auto result = draw(exsig, src, orbs, prob, conn);
-    if (!result) return false;
-    helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem);
+bool ExcitGen::draw(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob, defs::ham_t &helem,
+                    conn::FrmBosOnv &conn) {
+    auto success = draw_h_frmbos(exsig, src, prob, helem, conn);
+    return success &! consts::nearly_zero(helem, defs::helem_tol);
 }
 
-bool ExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, CachedOrbs &orbs, defs::prob_t &prob,
-                          defs::ham_t &helem, conn::BosOnv &conn) {
-    auto result = draw(exsig, src, orbs, prob, conn);
-    if (!result) return false;
-    helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem);
+bool ExcitGen::draw(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, defs::ham_t &helem,
+                    conn::BosOnv &conn) {
+    auto success = draw_h_bos(exsig, src, prob, helem, conn);
+    return success &! consts::nearly_zero(helem, defs::helem_tol);
 }
 
 
-FrmExcitGen::FrmExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
-        ExcitGen(h, prng, {exsig}),
-        m_spin_conserving(exsig == exsig_utils::ex_single ?
-                          h.m_frm->m_kramers_attrs.m_conserving_singles : h.m_frm->m_kramers_attrs.m_conserving_doubles) {
-    DEBUG_ASSERT_TRUE(exsig_utils::is_pure_frm(exsig),
-                      "fermion excitation generator is not applicable to exsigs with bosonic operators");
-    DEBUG_ASSERT_EQ(exsig_utils::decode_nfrm_cre(exsig), exsig_utils::decode_nfrm_ann(exsig),
-                    "fermion number non-conservation is not currently supported");
+defs::prob_t ExcitGen::prob_h_frm(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const  {
+    return prob_frm(src, conn);
 }
 
-BosExcitGen::BosExcitGen(const Hamiltonian &h, PRNG &prng, size_t exsig) :
-        ExcitGen(h, prng, {exsig}) {
-    DEBUG_ASSERT_TRUE(exsig_utils::is_pure_bos(exsig),
-                      "boson excitation generator is not applicable to exsigs with fermionic operators");
+defs::prob_t ExcitGen::prob_h_bos(const field::BosOnv &src, const conn::BosOnv &conn, defs::ham_t helem) const  {
+    return prob_bos(src, conn);
 }
 
-size_t BosExcitGen::approx_nconn() const {
-    return m_h.m_bos->m_nboson * 2;
+defs::prob_t ExcitGen::prob_h_frmbos(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const  {
+    return prob_frmbos(src, conn);
+}
+
+
+defs::prob_t ExcitGen::prob(const field::FrmOnv &src, const conn::FrmOnv &conn) const {
+    return prob_frm(src, conn);
+}
+
+defs::prob_t ExcitGen::prob(const field::BosOnv &src, const conn::BosOnv &conn)  const {
+    return prob_bos(src, conn);
+}
+
+defs::prob_t ExcitGen::prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn) const  {
+    return prob_frmbos(src, conn);
+}
+
+defs::prob_t ExcitGen::prob(const field::FrmOnv &src, const conn::FrmOnv &conn, defs::ham_t helem) const  {
+    return prob_h_frm(src, conn, helem);
+}
+
+defs::prob_t ExcitGen::prob(const field::BosOnv &src, const conn::BosOnv &conn, defs::ham_t helem) const  {
+    return prob_h_bos(src, conn, helem);
+}
+
+defs::prob_t ExcitGen::prob(const field::FrmBosOnv &src, const conn::FrmBosOnv &conn, defs::ham_t helem) const  {
+    return prob_h_frmbos(src, conn, helem);
 }

@@ -1,5 +1,5 @@
 //
-// Created by rja on 16/06/2020.
+// Created by Robert J. Anderson on 16/06/2020.
 //
 
 #include "DeterministicSubspace.h"
@@ -9,7 +9,7 @@ field::Mbf &DeterministicDataRow::key_field() {
 }
 
 DeterministicDataRow::DeterministicDataRow(const Wavefunction &wf) :
-        m_mbf(this, wf.m_bd, "mbf"),
+        m_mbf(this, wf.m_sector, "mbf"),
         m_weight(this, wf.m_store.m_row.m_weight.m_format, "weight") {}
 
 void DeterministicDataRow::load_fn(const WalkerTableRow &source, DeterministicDataRow &local) {
@@ -43,7 +43,7 @@ void DeterministicSubspace::make_rdm_contribs(Rdms &rdms, const Mbf &ref, const 
 }
 
 DeterministicSubspace::DeterministicSubspace(
-        const fciqmc_config::Semistochastic &opts, Wavefunction &wf, size_t iroot) :
+        const conf::Semistochastic &opts, Wavefunction &wf, size_t iroot) :
         Wavefunction::PartSharedRowSet<DeterministicDataRow>(
                 wf, "semistochastic", {wf}, DeterministicDataRow::load_fn),
         m_opts(opts), m_wf(wf), m_iroot(iroot), m_iparts(make_iparts()) {}
@@ -67,7 +67,7 @@ void DeterministicSubspace::build_from_most_occupied(const Hamiltonian &ham, con
 void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bilinears &bilinears) {
     update();
     log::info("Forming a deterministic subspace with {} ONVs", m_global.m_hwm);
-    suite::Conns conns_work(m_wf.m_bd);
+    suite::Conns conns_work(m_wf.m_sector.size());
     auto &row_local = m_local.m_row;
     auto &conn_work = conns_work[row_local.m_mbf];
     size_t n_hconn = 0ul;
@@ -129,7 +129,7 @@ void DeterministicSubspace::project(double tau) {
     }
 }
 
-DeterministicSubspaces::DeterministicSubspaces(const fciqmc_config::Semistochastic &opts) :
+DeterministicSubspaces::DeterministicSubspaces(const conf::Semistochastic &opts) :
         m_opts(opts), m_epoch("semistochastic") {
 }
 

@@ -1,6 +1,6 @@
 target_sources(unittest
     PRIVATE
-        Foreach.cpp
+        BasicForeach.cpp
         ForeachVirtual.cpp
         utils.cpp
 )

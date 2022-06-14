@@ -1,131 +1,116 @@
 //
-// Created by rja on 04/08/2021.
+// Created by Robert J. Anderson on 06/04/2022.
 //
 
 #ifndef M7_EXCITGENGROUP_H
 #define M7_EXCITGENGROUP_H
 
-#include <M7_lib/parallel/Reduction.h>
-
-#include "HubbardUniform.h"
-#include "HeatBathDoubles.h"
+#include "M7_lib/hamiltonian/Hamiltonian.h"
 
 using namespace exsig_utils;
+
 /**
- * dynamically constructs an array of those excitation generators required for the stochastic propagation of the given
- * Hamiltonian. All excitation signatures which in general give rise to non-zero H matrix elements are called "active"
- * exsigs, and are conventionally indexed with the symbol iex.
- * E.g.
- * The ab-initio fermionic many-body Hamiltonian has two such active exsigs: 0 (1100), 1 (2200)
- * whereas the 1d site-basis Hubbard-Holstein model has three active exsigs: 0 (1100), 1 (0010), 2 (0001)
+ * excitation generator objects can (if uncommonly) be used to generate excitations of many different signatures. e.g.
+ * a fermion-boson excitation generator from which an excitation of exsigs 1101 or 1110 may be requested. This struct
+ * packages the polymorphic excitation generator base class pointer with one of the exsigs it is able to produce
  */
+struct ExcitCase {
+    const size_t m_exsig;
+    ExcitGen* m_excit_gen;
+};
+
 class ExcitGenGroup {
-    PRNG &m_prng;
     /**
-     * an excitation generator may be invoked for more than one exsig, so here we store all active excitation generators
-     * to be pointed to possibly many times by the m_exsigs_to_exgens array
+     * random number generator used to select which excitation case to attempt
      */
-    std::forward_list<std::unique_ptr<ExcitGen>> m_exgens;
+    PRNG& m_prng;
+    /**
+     * forward list containing all excitation generators for all hamiltonian terms
+     */
+    ExcitGen::excit_gen_list_t m_list;
     /**
      * one dynamically-constructed excitation generator can be used to generate excitations of many different exsigs
      */
-    std::array<ExcitGen*, defs::nexsig> m_exsigs_to_exgens;
+    std::vector<ExcitCase> m_excit_cases;
     /**
-     * vector storing all active exsigs consecutively (i.e. those elements of m_exsigs_to_exgens which are non-null
-     * pointers to ExcitGen objects)
+     * mapping from the excitation signature to a vector case indices that can generate it
      */
-    defs::inds m_active_exsigs;
+    std::vector<defs::inds> m_exsig_icases;
     /**
-     * probability of attempting to draw from each of the active exsigs
+     * probability of attempting to draw from each of the active excitation cases
      */
     std::vector<defs::prob_t> m_probs;
     /**
-     * cached cumulative probability for all the active exsigs for slight performance benefit
+     * cached cumulative probability for all the active excitation cases for slight performance benefit
      */
     std::vector<defs::prob_t> m_cumprobs;
 
-    /**
-     * indices which point to positions in m_active_exsigs corresponding to purely fermionic excitations
-     */
-    defs::inds m_frm_inds;
-    /**
-     * probabilities for each purely fermionic active encode_exsig
-     */
-    std::vector<defs::prob_t> m_frm_probs;
-    std::vector<defs::prob_t> m_frm_cumprobs;
-    /**
-     * normalization for the fermionic active exsigs
-     */
-    defs::prob_t m_frm_norm = 1.0;
-    /**
-     *
-     */
-    CachedOrbs m_cached_orbs;
-
-    /**
-     * initialize vectors of exsigs and pointers to excitation generators in general. Also initialize the vector
-     * m_frm_inds, which identifies positions of purely fermionic excitation generators from the general vector
-     */
-    void init();
-
-    /**
-     * given only the current value of m_probs, update the probability of purely fermionic exctiation generations and
-     * update the cumulative probability vectors for all excitations and for fermionic excitations only
-     */
     void update_cumprobs();
 
-    void add(std::unique_ptr<ExcitGen> &&exgen, const defs::inds &exsigs);
-
-    void add(std::unique_ptr<ExcitGen> &&exgen);
-
 public:
-    /**
-     * infer from the given Hamiltonian exactly which excitation generators are required, and initialize them
-     * @param ham
-     *  general Hamiltonian object whose excitation level information is queried to determine the required exsig-specific
-     *  excitation generation objects
-     * @param opts
-     *  config options for propagator to enable the user to specify particular excitgen implementations
-     * @param prng
-     *  random number generator needed to construct the required exsig-specific excitation generators and decide which
-     *  exsig to attempt to draw
+    ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng);
+    /*
+     * ctor which also sets heterogeneous initial probabilities to cases by calling the approx_nconn method of exgens
      */
-    ExcitGenGroup(const Hamiltonian &ham, const fciqmc_config::Propagator &opts, PRNG &prng);
+    ExcitGenGroup(const Hamiltonian &ham, const conf::Propagator &opts, PRNG &prng, sys::Particles particles):
+            ExcitGenGroup(ham, opts, prng) {
+        set_probs(particles);
+    }
+
+    size_t ncase() const;
+
+    size_t draw_icase();
+    
+    ExcitCase& operator[](size_t icase);
 
     /**
-     * @result
-     *  the number of active exsigs
+     * set the m_probs and m_cumprobs arrays
+     * @param probs
      */
-    size_t size() const;
-
     void set_probs(const std::vector<defs::prob_t> &probs);
 
-    defs::prob_t get_prob(const size_t &iex) const;
+    /**
+     * set probs in accordance with the approximate number of connections of each excitation case.
+     * useful for initialization
+     * @param particles
+     *  particle number data on which to base the approximate number of connections
+     */
+    void set_probs(const sys::Particles& particles);
 
-    defs::prob_t get_prob_frm(const size_t &iex) const;
+    defs::prob_t get_prob(size_t icase) const;
 
-    const std::vector<defs::prob_t> &get_probs() const;
+    const std::vector<defs::prob_t>& get_probs() const;
 
-    ExcitGen &operator[](const size_t &iex);
+    /**
+     * when there is strictly one excitation generator per exsig, the probability of drawing the connection is
+     * p(conn|exsig) p(exsig)
+     * in general, however there's more than one way to draw the same connection
+     * p(conn) = sum_case p(conn|case) p(case)
+     * this is the update performed here.
+     * Naturally if there is only one case for the given exsig, the probability is scaled by the probability of the case.
+     */
+    template<typename mbf_t>
+    void update_prob(size_t icase, const mbf_t &src, prob_t &prob, const conn::from_field_t<mbf_t> &conn) {
+        const auto exsig = m_excit_cases[icase].m_exsig;
+        DEBUG_ASSERT_EQ(exsig, conn.exsig(), "exsig of case does not match with that of connection");
+        const auto& jcases = m_exsig_icases[exsig];
+        DEBUG_ASSERT_FALSE(jcases.empty(), "there should be at least one case associated with this exsig");
+        prob *= m_probs[icase];
+        if (jcases.size()==1) return;
+        for (const auto& jcase: jcases) {
+            if (jcase==icase) continue; // already included above
+            prob += m_excit_cases[icase].m_excit_gen->prob(src, conn)*m_probs[icase];
+        }
+    }
 
-    const ExcitGen &operator[](const size_t &iex) const;
+    template<typename mbf_t>
+    bool draw(size_t icase, const mbf_t &src, prob_t &prob, ham_t &helem, conn::from_field_t<mbf_t> &conn) {
+        auto& excase = m_excit_cases[icase];
+        return excase.m_excit_gen->draw(excase.m_exsig, src, prob, helem, conn);
+    }
 
-    size_t draw_iex();
+    void log() const;
 
-    size_t draw_iex_frm();
-
-    bool draw(const size_t &iex, const field::FrmOnv &src,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmOnv &conn);
-
-    bool draw(const size_t &iex, const field::FrmBosOnv &src,
-              defs::prob_t &prob, defs::ham_t &helem, conn::FrmBosOnv &conn);
-
-    bool draw(const size_t &iex, const field::BosOnv &src,
-              defs::prob_t &prob, defs::ham_t &helem, conn::BosOnv &conn);
-
-    void clear_cached_orbs();
-
-    void log_breakdown() const;
 };
 
 

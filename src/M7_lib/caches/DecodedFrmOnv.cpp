@@ -1,5 +1,5 @@
 //
-// Created by rja on 04/03/2022.
+// Created by Robert J. Anderson on 04/03/2022.
 //
 
 #include <M7_lib/field/FrmOnvField.h>
@@ -45,7 +45,7 @@ const defs::inds& decoded_mbf::frm::SimpleVacs::get() {
 
 decoded_mbf::frm::LabelledBase::LabelledBase(size_t nelement, const defs::inds &map, const FrmOnvField &mbf) :
         Base(mbf), m_inds(nelement), m_map(map) {
-    if (mbf.m_nsite) {
+    if (mbf.m_basis.m_nsite){
         REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
                    "not allocating enough elements in ragged array to accommodate label map");
     }
@@ -58,6 +58,7 @@ const std::vector<defs::inds> &decoded_mbf::frm::LabelledBase::validated() const
 
 defs::inds decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::inds &site_irreps, size_t nirrep) {
     auto nsite = site_irreps.size();
+    if (!nsite) return {};
     defs::inds out(2*nsite, 0);
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin());
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin()+nsite);
@@ -73,6 +74,11 @@ void decoded_mbf::frm::LabelledBase::clear() {
 
 bool decoded_mbf::frm::LabelledBase::empty() {
     return m_simple_inds.empty();
+}
+
+size_t decoded_mbf::frm::LabelledBase::label(size_t ispinorb) const {
+    DEBUG_ASSERT_LT(ispinorb, m_map.size(), "spin orbital index OOB");
+    return m_map[ispinorb];
 }
 
 decoded_mbf::frm::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
@@ -124,10 +130,10 @@ const defs::inds &decoded_mbf::frm::LabelledVacs::simple() {
 }
 
 decoded_mbf::frm::SpinOccs::SpinOccs(const FrmOnvField &mbf):
-        NdLabelledOccs<1>({2}, make_spinorb_map(defs::inds(mbf.nsite(), 0), 1), mbf){}
+        NdLabelledOccs<1>({2}, make_spinorb_map(defs::inds(mbf.m_basis.m_nsite, 0), 1), mbf){}
 
 decoded_mbf::frm::SpinVacs::SpinVacs(const FrmOnvField &mbf):
-        NdLabelledVacs<1>({2}, make_spinorb_map(defs::inds(mbf.nsite(), 0), 1), mbf){}
+        NdLabelledVacs<1>({2}, make_spinorb_map(defs::inds(mbf.m_basis.m_nsite, 0), 1), mbf){}
 
 decoded_mbf::frm::SpinSymOccs::SpinSymOccs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf) :
         NdLabelledOccs<2>({2, grp_map.m_grp.nirrep()},
@@ -147,6 +153,7 @@ const defs::inds &decoded_mbf::frm::NonEmptyPairLabels::get() {
     for (size_t i = 0ul; i < occ.m_format.m_nelement; ++i) {
         if (!occ[i].empty() && !vac[i].empty()) m_inds.push_back(i);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -154,9 +161,10 @@ decoded_mbf::frm::OccSites::OccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
 
 const defs::inds &decoded_mbf::frm::OccSites::get() {
     if (!empty()) return validated();
-    for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
+    for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)) m_inds.push_back(isite);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -164,9 +172,10 @@ decoded_mbf::frm::DoublyOccSites::DoublyOccSites(const FrmOnvField &mbf) : Simpl
 
 const defs::inds &decoded_mbf::frm::DoublyOccSites::get() {
     if (!empty()) return validated();
-    for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
+    for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)==2) m_inds.push_back(isite);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
@@ -174,24 +183,24 @@ decoded_mbf::frm::NotSinglyOccSites::NotSinglyOccSites(const FrmOnvField &mbf) :
 
 const defs::inds &decoded_mbf::frm::NotSinglyOccSites::get() {
     if (!empty()) return validated();
-    for (size_t isite = 0ul; isite < m_mbf.nsite(); ++isite) {
+    for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)!=1) m_inds.push_back(isite);
     }
+    m_last_update_hash = m_mbf.hash();
     return m_inds;
 }
 
 
 
-decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf, const AbelianGroupMap& grp_map):
+decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf):
         m_simple_occs(mbf), m_simple_vacs(mbf),
         m_spin_occs(mbf), m_spin_vacs(mbf),
-        m_spin_sym_occs(grp_map, mbf), m_spin_sym_vacs(grp_map, mbf),
+        m_spin_sym_occs(mbf.m_basis.m_abgrp_map, mbf),
+        m_spin_sym_vacs(mbf.m_basis.m_abgrp_map, mbf),
         m_nonempty_pair_labels(mbf), m_occ_sites(mbf),
         m_doubly_occ_sites(mbf), m_not_singly_occ_sites(mbf){
     clear();
 }
-
-decoded_mbf::FrmOnv::FrmOnv(const FrmOnvField& mbf): FrmOnv(mbf, {mbf.m_nsite}){}
 
 void decoded_mbf::FrmOnv::clear() {
     m_simple_occs.clear();

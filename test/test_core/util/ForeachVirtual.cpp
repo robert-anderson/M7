@@ -1,7 +1,8 @@
 //
-// Created by rja on 07/06/2021.
+// Created by Robert J. Anderson on 07/06/2021.
 //
 
+#if 0
 #include "gtest/gtest.h"
 #include "M7_lib/foreach/ForeachVirtual.h"
 
@@ -650,3 +651,4 @@ TEST(ForeachVirtual, RtndOrderedDesc3) {
     ASSERT_EQ(foreach.iiter()+1, foreach.niter());
     ASSERT_TRUE(foreach.m_pass);
 }
+#endif

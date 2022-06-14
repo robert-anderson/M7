@@ -6,7 +6,7 @@
 #define M7_FCIQMCCALCULATION_H
 
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/wavefunction/Wavefunction.h>
 
 #include "StochasticPropagator.h"
@@ -14,12 +14,24 @@
 
 class FciqmcCalculation {
 public:
-    const fciqmc_config::Document& m_opts;
-    Hamiltonian m_ham;
+    /**
+     * configuration document specifying the calculation to be performed
+     */
+    const conf::Document& m_opts;
+    /**
+     * sum of weighted many-body operator products determining the energies and transition amplitudes between MBFs
+     */
+    const Hamiltonian m_ham;
+    /**
+     * distributed solution vectors
+     */
     Wavefunction m_wf;
+    /**
+     * propagates the system, either exactly or stochastically
+     */
     std::unique_ptr<Propagator> m_prop;
 
-    explicit FciqmcCalculation(const fciqmc_config::Document& opts);
+    explicit FciqmcCalculation(const conf::Document& opts);
 };
 
 

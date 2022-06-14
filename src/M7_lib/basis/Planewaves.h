@@ -1,12 +1,11 @@
 //
-// Created by rja on 08/03/2022.
+// Created by Robert J. Anderson on 08/03/2022.
 //
 
 #ifndef M7_PLANEWAVES_H
 #define M7_PLANEWAVES_H
 
 #include <M7_lib/nd/NdFormatD.h>
-#include <M7_lib/foreach/ForeachVirtual.h>
 
 /**
  * generic to fermionic and bosonic degrees of freedom

@@ -1,0 +1,9 @@
+target_sources(M7_lib
+    PRIVATE
+        ConfComponents.cpp
+        ConfComponents.h
+        Conf.cpp
+        Conf.h
+        HamiltonianConf.cpp
+        HamiltonianConf.h
+)

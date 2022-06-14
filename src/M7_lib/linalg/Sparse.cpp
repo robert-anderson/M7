@@ -1,5 +1,5 @@
 //
-// Created by rja on 14/06/2020.
+// Created by Robert J. Anderson on 14/06/2020.
 //
 
 #include "Sparse.h"

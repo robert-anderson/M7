@@ -1,38 +1,14 @@
 target_sources(M7_lib
     PRIVATE
-        BosHam.cpp
-        BosHam.h
-        FrmHam.cpp
-        FrmHam.h
-        GeneralBosHam.cpp
-        GeneralBosHam.h
-        GeneralFrmHam.cpp
-        GeneralFrmHam.h
-        GeneralLadderHam.cpp
-        GeneralLadderHam.h
         Hamiltonian.cpp
         Hamiltonian.h
         HamiltonianData.cpp
         HamiltonianData.h
-        HeisenbergFrmHam.cpp
-        HeisenbergFrmHam.h
-        HolsteinBosHam.cpp
-        HolsteinBosHam.h
-        HolsteinLadderHam.cpp
-        HolsteinLadderHam.h
-        HubbardFrmHam.cpp
-        HubbardFrmHam.h
-        InteractingBoseGasBosHam.cpp
-        InteractingBoseGasBosHam.h
-        LadderHam.cpp
-        LadderHam.h
-        SumFrmHam.h
-        SpinSquareFrmHam.cpp
-        SpinSquareFrmHam.h
-        TcFrmHam.cpp
-        TcFrmHam.h
-        TcBosHam.cpp
-        TcBosHam.h
-        TcHam.h
+        HamOpTerm.cpp
+        HamOpTerm.h
         TcHam.cpp
+        TcHam.h
 )
+add_subdirectory(bos)
+add_subdirectory(frm)
+add_subdirectory(frmbos)

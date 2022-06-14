@@ -1,12 +1,14 @@
 //
-// Created by rja on 02/10/2020.
+// Created by Robert J. Anderson on 02/10/2020.
 //
 
 #ifndef M7_NDFORMAT_H
 #define M7_NDFORMAT_H
 
-#include <M7_lib/enumerator/Enumerator.h>
 #include <M7_lib/defs.h>
+#include <M7_lib/util/utils.h>
+#include <M7_lib/parallel/MPIAssert.h>
+#include <M7_lib/foreach/BasicForeach.h>
 #include "array"
 #include "algorithm"
 
@@ -274,27 +276,29 @@ public:
 
 template <size_t nind>
 struct NdEnumeration : NdFormat<nind>{
+private:
     const std::vector<std::array<size_t, nind>> m_inds;
 
     static std::vector<std::array<size_t, nind>> make_inds(const NdFormat<nind>& format) {
+        using namespace basic_foreach::ctnd;
         std::vector<std::array<size_t, nind>> out(format.m_nelement);
-        enums::PermutationsWithRepetition e(format.shape_vector());
-        size_t iinds = 0ul;
-        while (e.next()){
-            for (size_t i=0; i!=nind; ++i) out[iinds][i] = e[i];
-            ++iinds;
-        }
-        ASSERT(iinds==format.m_nelement);
+        size_t i=0ul;
+        auto fn = [&out, &i](const inds_t<nind>& inds){
+            out[i] = inds;
+            ++i;
+        };
+        Unrestricted<nind>(format.m_shape).loop(fn);
+        DEBUG_ASSERT_EQ(i, format.m_nelement, "not all index arrays generated");
         return out;
     }
 
+public:
     NdEnumeration(const NdFormat<nind>& format): NdFormat<nind>(format), m_inds(make_inds(format)){}
 
-    const std::array<size_t, nind>& operator[](const size_t& i){
+    const std::array<size_t, nind>& operator[](const size_t& i) const {
         return m_inds[i];
     }
 
 };
-
 
 #endif //M7_NDFORMAT_H

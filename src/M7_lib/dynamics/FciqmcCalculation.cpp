@@ -8,12 +8,13 @@
 #include "FciqmcCalculation.h"
 #include "Propagators.h"
 
-FciqmcCalculation::FciqmcCalculation(const fciqmc_config::Document &opts) :
-        m_opts(opts), m_ham(opts.m_hamiltonian), m_wf(opts, m_ham.m_bd),
-        m_prop(props::get(m_ham, opts, m_wf.m_format)) {
-    buffered::Mbf ref_mbf(m_ham.m_bd);
+FciqmcCalculation::FciqmcCalculation(const conf::Document &opts) :
+        m_opts(opts), m_ham({opts.m_hamiltonian, opts.m_basis}),
+        m_wf(opts, {m_ham.m_basis, m_ham.default_particles(opts.m_particles)}),
+        m_prop(props::get(m_ham, opts, m_wf)) {
+    buffered::Mbf ref_mbf(m_wf.m_sector);
 
-    mbf::set(ref_mbf, opts.m_reference.m_mbf_init, m_ham, 0ul);
+    mbf::set(ref_mbf, m_wf.m_sector.particles(), opts.m_reference.m_mbf_init, 0ul);
 
     auto ref_energy = m_ham.get_energy(ref_mbf);
     TableBase::Loc ref_loc = {m_wf.get_rank(ref_mbf), 0ul};

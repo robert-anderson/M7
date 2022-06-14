@@ -1,12 +1,11 @@
 //
-// Created by rja on 15/07/2020.
+// Created by Robert J. Anderson on 15/07/2020.
 //
 
 #ifndef M7_FCIDUMPFILEREADER_H
 #define M7_FCIDUMPFILEREADER_H
 
 #include <M7_lib/defs.h>
-#include <M7_lib/integrals/Integrals_1e.h>
 #include <M7_lib/io/Logging.h>
 
 #include "HamiltonianFileReader.h"
@@ -25,14 +24,17 @@ static constexpr std::array<std::array<size_t, 4>, 8> orderings{
         }
 };
 
-struct FcidumpHeader : public FortranNamelistReader {
+struct FcidumpInfo {
+    const std::string m_fname;
     const bool m_uhf, m_relativistic, m_spin_resolved;
     const size_t m_nelec, m_nsite, m_nspinorb, m_norb_distinct;
+    const int m_ms2;
     const defs::inds m_orbsym;
+    FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::inds orbsym);
+    FcidumpInfo(const FortranNamelistReader& reader);
 
-    FcidumpHeader(const std::string& fname);
+    FcidumpInfo(std::string fname);
 };
-
 
 struct FcidumpFileReader : public HamiltonianFileReader {
     /**
@@ -40,12 +42,11 @@ struct FcidumpFileReader : public HamiltonianFileReader {
      * were generated for. E.g. NECI assumes spin-minor ordering, so if the FCIDUMP supplied was intended for use with
      * NECI, m_spin_major should be false.
      */
-    const FcidumpHeader m_header;
+    const FcidumpInfo m_info;
     const bool m_spin_major;
 
     bool m_spin_conserving_1e = true;
     bool m_spin_conserving_2e = true;
-    size_t m_isymm, m_int_2e_rank;
 
     FcidumpFileReader(const std::string &fname, bool spin_major);
 
@@ -60,8 +61,6 @@ struct FcidumpFileReader : public HamiltonianFileReader {
     void convert_inds(defs::inds &inds);
 
     bool next(defs::inds &inds, defs::ham_t &v);
-
-    void set_symm_and_rank();
 
     size_t ranksig(const defs::inds &inds) const override;
 

@@ -1,5 +1,5 @@
 //
-// Created by rja on 07/07/2020.
+// Created by Robert J. Anderson on 07/07/2020.
 //
 
 #include "MappedDeterminantList.h"

@@ -284,6 +284,28 @@ namespace integer_utils {
     size_t combinatorial(const size_t &n, const size_t &r);
 
     size_t combinatorial_with_repetition(const size_t &n, const size_t &r);
+
+    /**
+     * exact integer power by recursive squaring
+     * @tparam T
+     *  integer type
+     * @param x
+     *  number being exponentiated
+     * @param y
+     *  exponent
+     * @return
+     *  x to the power y
+     */
+    template<typename T>
+    T pow(T x, T y){
+        static_assert(std::is_integral<T>::value, "template arg must be integral type");
+        if (!y) return 1;
+        if (y == 1) return x;
+
+        auto tmp = pow(x, y / 2);
+        if (y & T(1)) return x * tmp * tmp;
+        return tmp * tmp;
+    }
 }
 
 namespace bit_utils {
@@ -334,10 +356,6 @@ namespace bit_utils {
         return x & (T(1) << T(i));
     }
 
-    template<typename T>
-    static inline size_t next_setbit(T &work);
-
-    template<>
     inline size_t next_setbit(unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         size_t result = __tzcnt_u64(work);
@@ -345,7 +363,6 @@ namespace bit_utils {
         return result;
     }
 
-    template<>
     inline size_t next_setbit(unsigned long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         size_t result = __tzcnt_u64(work);
@@ -353,7 +370,6 @@ namespace bit_utils {
         return result;
     }
 
-    template<>
     inline size_t next_setbit(unsigned &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
         size_t result = __tzcnt_u32(work);
@@ -361,22 +377,16 @@ namespace bit_utils {
         return result;
     }
 
-    template<typename T>
-    inline size_t nsetbit(const T &work);
-
-    template<>
     inline size_t nsetbit(const unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         return _popcnt64(work);
     }
 
-    template<>
     inline size_t nsetbit(const unsigned long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         return _popcnt64(work);
     }
 
-    template<>
     inline size_t nsetbit(const unsigned &work) {
         static_assert(sizeof(work) == 4, "Data length not supported");
         return _popcnt32(work);
@@ -626,6 +636,7 @@ namespace complex_utils {
     }
 }
 
+#if 0
 namespace ci_utils {
     /**
      * @param nelec
@@ -635,22 +646,24 @@ namespace ci_utils {
      * @return
      *  number of alpha (spin channel 0) electrons
      */
-    static size_t nalpha(size_t nelec, int ms2) {
+    static size_t nalpha(const FrmHilbertData& hd){
+        auto nelec = hd.m_nelec;
+        auto ms2 = hd.m_ms2;
         size_t spin_odd = std::abs(ms2) % 2;
         ASSERT(nelec % 2 == spin_odd);
         size_t nalpha = nelec / 2 + (std::abs(ms2)) / 2 + spin_odd;
         return ms2 >= 0 ? nalpha : nelec - nalpha;
     }
 
-    static size_t nbeta(size_t nelec, int ms2) {
-        return nelec - nalpha(nelec, ms2);
+    static size_t nbeta(const FrmHilbertData& hd){
+        return hd.m_nelec - nalpha(hd);
     }
 
     static size_t fermion_dim(size_t nsite, size_t nelec) {
         return integer_utils::combinatorial(2 * nsite, nelec);
     }
 
-    static size_t fermion_dim(size_t nsite, size_t nelec, int ms2_restrict) {
+    static size_t fermion_dim(size_t nsite, const FrmHilbertData& hd){
         ASSERT(static_cast<size_t>(ms2_restrict) % 2 == nelec % 2)
         auto na = integer_utils::combinatorial(nsite, nalpha(nelec, ms2_restrict));
         auto nb = integer_utils::combinatorial(nsite, nbeta(nelec, ms2_restrict));
@@ -672,6 +685,7 @@ namespace ci_utils {
         else return std::pow(nboson + 1, nmode);
     }
 }
+#endif
 
 namespace mem_utils {
 
@@ -714,6 +728,69 @@ namespace sort_utils {
                 };
         }
     }
+
+    template<typename T>
+    defs::inds inds(const std::vector<T>& v, bool max, bool abs_val) {
+        defs::inds out(v.size());
+        std::iota(out.begin(), out.end(), 0);
+        if (max) {
+            if (abs_val) std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){
+                    return std::abs(v[i]) < std::abs(v[j]);});
+            else std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){return v[i] < v[j];});
+        } else {
+            if (abs_val) std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){
+                    return std::abs(v[i]) > std::abs(v[j]);});
+            else std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){return v[i] > v[j];});
+        }
+        return out;
+    }
+
+    template<typename T>
+    defs::inds inds(const std::vector<std::complex<T>>& v, bool max, bool abs_val) {
+        // TODO: add warning if attempting to sort complex numbers without abs_val
+        defs::inds out(v.size());
+        std::iota(out.begin(), out.end(), 0);
+        if (max) {
+            std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){ return std::abs(v[i]) < std::abs(v[j]);});
+        } else {
+            std::sort(out.begin(), out.end(), [&v](size_t i, size_t j){ return std::abs(v[i]) > std::abs(v[j]);});
+        }
+        return out;
+    }
+
+    template<typename T>
+    defs::inds inds(const std::vector<std::complex<T>>& v, bool max) {
+        return inds(v, max, true);
+    }
+
+    template<typename T>
+    void inplace(std::vector<T>& v, bool max, bool abs_val) {
+        typedef const T& cr_t;
+        if (max) {
+            if (abs_val) std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) < std::abs(v2);});
+            else std::sort(v.begin(), v.end(), [&v](cr_t v1, cr_t v2){ return v1 < v2;});
+        } else {
+            if (abs_val) std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) > std::abs(v2);});
+            else std::sort(v.begin(), v.end(), [&v](cr_t v1, cr_t v2){ return v1 > v2;});
+        }
+    }
+
+    template<typename T>
+    void inplace(std::vector<std::complex<T>>& v, bool max, bool abs_val) {
+        // TODO: add warning if attempting to sort complex numbers without abs_val
+        typedef const std::complex<T>& cr_t;
+        if (max) {
+            std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) < std::abs(v2);});
+        } else {
+            std::sort(v.begin(), v.end(), [](cr_t v1, cr_t v2){ return std::abs(v1) > std::abs(v2);});
+        }
+    }
+
+    template<typename T>
+    void inplace(std::vector<std::complex<T>>& v, bool max) {
+        inplace(v, max, true);
+    }
+
 }
 
 namespace tuple_utils {
@@ -800,15 +877,11 @@ namespace nd_utils {
 
 namespace tags {
     template<typename T>
-    struct Type {
-    };
+    struct Type {};
 
-    template<size_t ind>
-    struct Ind {
-    };
-
-    template<bool t>
-    struct Bool {
+    template<size_t n>
+    struct Int {
+        static constexpr size_t value(){return n;}
     };
 }
 

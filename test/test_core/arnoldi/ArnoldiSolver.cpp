@@ -1,12 +1,13 @@
 //
-// Created by rja on 09/01/2022.
+// Created by Robert J. Anderson on 09/01/2022.
 //
 
 #include <test_core/sparse/Examples.h>
 #include <M7_lib/linalg/Dense.h>
 #include "M7_lib/arnoldi/ArnoldiSolver.h"
-#include "gtest/gtest.h"
+#include "test_core/defs.h"
 
+static const double arnodli_eval_tol = 1e-13;
 TEST(ArnoldiSolver, SymNonDist) {
     const size_t nrow = 20;
     const size_t nroot = 3;
@@ -25,7 +26,7 @@ TEST(ArnoldiSolver, SymNonDist) {
     // Arnoldi finds the extremal eigenvalue. in this case, the most positive
     auto dense_eval_it = evals.cbegin()+(nrow-nroot);
     for (size_t iroot=0ul; iroot<nroot; ++iroot){
-        ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
+        ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
     }
 }
 
@@ -48,10 +49,11 @@ TEST(ArnoldiSolver, SymDist) {
         dense::diag(dense, evals);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
-            ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
+            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
         }
     }
 }
+
 TEST(ArnoldiSolver, NonSymNonDist) {
     const size_t nrow = 20;
     const size_t nroot = 3;
@@ -63,12 +65,15 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
-    //EigenSolver<double> dense_solver(mat.to_dense());
-    std::cout << dense::SquareMatrix<double>(mat).to_string() << std::endl;
-    //auto dense_eval_it = dense_solver.m_evals.cbegin()+(nrow-nroot);
-    for (size_t iroot=0ul; iroot<nroot; ++iroot){
-        std::cout << arnoldi_problem.real_eigenvalue(iroot) << std::endl;
-        //ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
+    dense::SquareMatrix<double> dense(mat);
+    // complex eigenvalues required for non-symmetric matrix diagonalization
+    std::vector<std::complex<double>> evals;
+    ASSERT_TRUE(dense::diag(dense, evals));
+    // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
+    sort_utils::inplace(evals, true);
+    auto dense_eval_it = evals.cbegin() + (nrow - nroot);
+    for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
+        ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
     }
 }
 
@@ -76,22 +81,23 @@ TEST(ArnoldiSolver, NonSymDist) {
     const size_t nrow = 20;
     const size_t nroot = 3;
     auto mat = sparse_matrix_examples::rect_double(nrow, nrow, 2);
-    auto sym = mat.get_symmetrized(false);
-    dist_mv_prod::Sparse<double> prod(sym);
+    dist_mv_prod::Sparse<double> prod(mat);
 
-    ArnoldiProblemSym<double> arnoldi_problem(nroot);
+    ArnoldiProblemNonSym<double> arnoldi_problem(nroot);
     arnoldi_problem.solve(prod);
 
     /*
      * check Arnoldi solution against dense LAPACK full diagonalization
      */
     if (mpi::i_am_root()) {
-        dense::SquareMatrix<double> dense(sym);
-        std::vector<double> evals;
+        dense::SquareMatrix<double> dense(mat);
+        std::vector<std::complex<double>> evals;
         dense::diag(dense, evals);
+        // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
+        sort_utils::inplace(evals, true);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
-            ASSERT_FLOAT_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
+            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
         }
     }
 }

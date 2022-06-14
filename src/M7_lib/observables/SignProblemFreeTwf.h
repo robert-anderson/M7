@@ -5,13 +5,13 @@
 #ifndef M7_SIGNPROBLEMFREETWF_H
 #define M7_SIGNPROBLEMFREETWF_H
 
-#include <M7_lib/wavefunction/WalkerTable.h>
-#include <M7_lib/excititer/ExcitIterGroup.h>
+#include "M7_lib/wavefunction/WalkerTable.h"
+#include "M7_lib/foreach/ConnForeachGroup.h"
 
 class SpfTwfBase {
 protected:
     const Hamiltonian& m_ham;
-    ExcitIterGroup m_excit_iters;
+    ConnForeachGroup m_conn_iters;
     std::vector<defs::ham_t> m_numerator;
     std::vector<defs::ham_t> m_denominator;
 

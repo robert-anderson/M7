@@ -1,5 +1,5 @@
 //
-// Created by rja on 02/07/2020.
+// Created by Robert J. Anderson on 02/07/2020.
 //
 
 #ifndef M7_TIMER_H

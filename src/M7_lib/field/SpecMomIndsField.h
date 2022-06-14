@@ -1,5 +1,5 @@
 //
-// Created by rja on 12/08/2021.
+// Created by Robert J. Anderson on 12/08/2021.
 //
 
 #ifndef M7_SPECMOMINDSFIELD_H

@@ -1,5 +1,5 @@
 //
-// Created by RJA on 19/11/2020.
+// Created by Robert J. Anderson on 19/11/2020.
 //
 
 #include <M7_lib/table/BufferedFields.h>

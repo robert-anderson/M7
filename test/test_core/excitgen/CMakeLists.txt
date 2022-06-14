@@ -1,11 +1,8 @@
 target_sources(unittest
     PRIVATE
-        BosonSumConvervingDoubles.cpp
         ExcitGenTester.cpp
         ExcitGenTester.h
-        HeatBathDoubles.cpp
-        HubbardSingles.cpp
-        LadderHopping.cpp
-        LadderPure.cpp
-        LadderPureHolstein.cpp
 )
+add_subdirectory(bos)
+add_subdirectory(frm)
+add_subdirectory(frmbos)

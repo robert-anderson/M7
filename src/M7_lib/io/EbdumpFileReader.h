@@ -1,21 +1,21 @@
 //
-// Created by rja on 22/08/2021.
+// Created by Robert J. Anderson on 22/08/2021.
 //
 
 #ifndef M7_EBDUMPFILEREADER_H
 #define M7_EBDUMPFILEREADER_H
 
-#include "HamiltonianFileReader.h"
-#include "FortranNamelistReader.h"
+#include "FcidumpFileReader.h"
 
-struct EbdumpHeader : FortranNamelistReader {
-    const size_t m_nmode, m_nsite;
-    const bool m_uhf;
-    EbdumpHeader(const std::string& fname);
+struct EbdumpInfo : FcidumpInfo {
+    const size_t m_nmode;
+    EbdumpInfo(const FortranNamelistReader& reader):
+        FcidumpInfo(reader), m_nmode(reader.read_int("NMODE")){}
+    EbdumpInfo(std::string fname): EbdumpInfo(FortranNamelistReader(fname)){}
 };
 
 struct EbdumpFileReader : HamiltonianFileReader {
-    const EbdumpHeader m_header;
+    const EbdumpInfo m_info;
     const size_t m_norb_distinct;
     const bool m_spin_major;
 

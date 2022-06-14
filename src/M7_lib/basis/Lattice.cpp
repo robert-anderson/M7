@@ -1,134 +1,131 @@
 //
-// Created by anderson on 2/3/22.
+// Created by Robert J. Anderson on 2/3/22.
 //
 
 #include "Lattice.h"
 
-Lattice::Topology Lattice::topology(const std::string &str) {
-    if (str=="ortho") return Ortho;
-    if (str=="orthogonal") return Ortho;
-    ABORT("invalid name given for lattice topology");
-    return NullTopology;
+
+bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
+    return m_isite==other.m_isite && m_phase==other.m_phase;
 }
 
-std::string Lattice::topo_string(Lattice::Topology topo) {
-    switch (topo) {
-        case Ortho: return "orthogonal";
-        case NullTopology: return "null";
+lattice::Base::Base(const defs::inds &nadjs) :
+        m_nsite(nadjs.size()), m_nadjs(nadjs), m_unique_nadj_product(make_unique_nadj_product()),
+        m_nadj_max(make_nadj_max()){}
+
+size_t lattice::Base::make_unique_nadj_product() {
+    size_t out = 1ul;
+    for (size_t nadj: m_nadjs) {
+        if (!nadj) continue;
+        if ((out/nadj)*nadj != out) out*=nadj;
     }
-    return {};
+    return out;
 }
 
-const size_t &Lattice::nsite() const {
-    return m_dense.nrow();
+size_t lattice::Base::make_nadj_max() {
+    if (!*this) return 0ul;
+    REQUIRE_FALSE(m_nadjs.empty(), "number of adjacent sites vector is not set");
+    return *std::max_element(m_nadjs.cbegin(), m_nadjs.cend());
 }
 
-std::string Lattice::info() const {
-    return log::format("{} lattice with site shape: {}, boundary conds {}",
-                       topo_string(m_spec.m_topo), utils::to_string(m_spec.m_format.m_shape),
-                       utils::to_string(m_spec.m_bcs));
+lattice::OrthoTopology::OrthoTopology(const defs::inds &shape, const std::vector<int> &bcs) :
+    m_inds(shape), m_bcs(bcs),
+    m_info_string(log::format("orthogonal lattice with shape {} and boundary conds {}",
+                              utils::to_string(m_inds.m_shape), utils::to_string(m_bcs))) {}
+
+int lattice::OrthoTopology::one_dim_phase(size_t iind, size_t jind, size_t idim) const {
+    if ((iind + 1 == jind) || (iind - 1 == jind)) return 1;
+    auto bc = m_bcs[idim];
+    if (!bc) return 0;
+    auto max_ind = m_inds.m_shape[idim] - 1;
+    if ((iind == 0 && jind == max_ind) || (jind == 0 && iind == max_ind)) return bc;
+    return 0;
 }
 
-void Lattice::add(size_t irow, const defs::inds &icols, const std::vector<int> &coeffs) {
-    REQUIRE_TRUE(m_sparse.empty(irow), "row already added");
-    REQUIRE_EQ(icols.size(), coeffs.size(), "unequal lengths of column indices and values");
-    auto ncol = icols.size();
-    if ((m_unique_nconn_product/ncol)*ncol != m_unique_nconn_product) m_unique_nconn_product*=ncol;
-    for (size_t iicol=0ul; iicol<ncol; ++iicol) {
-        auto icol = icols[iicol];
-        auto coeff = coeffs[iicol];
-        m_sparse.add(irow, {icol, coeff});
-        m_dense(irow, icol) = coeff;
-    }
-}
-
-Lattice::Lattice(size_t nsite, Lattice::Spec spec) :
-        m_dense(nsite), m_spec(std::move(spec)) {
-    m_sparse.resize(nsite);
-}
-
-Lattice::Spec::Spec(Lattice::Topology topo, const defs::inds &shape, std::vector<int> bcs) :
-        m_topo(topo), m_format(shape), m_bcs(std::move(bcs)){
-    REQUIRE_EQ(m_format.m_nind, m_bcs.size(),
-               "site shape and boundary conds should be the same length");
-}
-
-Lattice::Spec::Spec(const std::string &topo, const defs::inds &shape, std::vector<int> bcs) :
-        Spec(topology(topo), shape, std::move(bcs)){}
-
-size_t OrthoLattice::get_coord_index(const defs::inds &site_inds, size_t idim, size_t value) const {
-    DEBUG_ASSERT_LT(value, m_spec.m_format.m_shape[idim], "site inds value OOB");
-    auto orig_value = site_inds[idim];
-    auto &inds = const_cast<defs::inds &>(site_inds);
-    inds[idim] = value;
-    auto i = m_spec.m_format.flatten(inds);
+size_t lattice::OrthoTopology::isite_adj(const defs::inds &inds, size_t idim, size_t value) const {
+    auto orig_value = inds[idim];
+    auto &mutable_inds = const_cast<defs::inds &>(inds);
+    mutable_inds[idim] = value;
+    auto i = m_inds.flatten(mutable_inds);
     // leave inds unchanged
-    inds[idim] = orig_value;
+    mutable_inds[idim] = orig_value;
     return i;
 }
 
-std::pair<size_t, int> OrthoLattice::get_coordination(const defs::inds &site_inds, size_t idim, bool inc) const {
-    auto &format = m_spec.m_format;
-    auto &bcs = m_spec.m_bcs;
-    size_t dim_ind = ~0ul;
-    int sign = 0;
-    if (!inc && site_inds[idim] == 0) {
-        // lower boundary
-        if (bcs[idim]) {
-            dim_ind = format.m_shape[idim] - 1;
-            sign = bcs[idim];
+size_t lattice::OrthoTopology::nsite() const {
+    return m_inds.m_nelement;
+}
+
+int lattice::OrthoTopology::phase(size_t isite, size_t jsite) const {
+    const auto &iinds = m_inds[isite];
+    const auto &jinds = m_inds[jsite];
+    int res = 0;
+    const auto ndim = m_inds.m_nind;
+    for (size_t idim = 0ul; idim < ndim; ++idim) {
+        auto adj = one_dim_phase(iinds[idim], jinds[idim], idim);
+        // only return non-zero if adjacent in a single dimension
+        if (adj) {
+            if (res) return 0;
+            else res = adj;
         }
-    } else if (inc && (site_inds[idim] + 1 == format.m_shape[idim])) {
-        // upper boundary
-        if (bcs[idim]) {
-            dim_ind = 0ul;
-            sign = bcs[idim];
-        }
-    } else {
-        // not at a boundary
-        dim_ind = site_inds[idim] + (inc ? 1 : -1);
-        sign = 1;
     }
-    if (dim_ind == ~0ul) return {~0ul, 0};
-    return {get_coord_index(site_inds, idim, dim_ind), sign};
+    return res;
 }
 
-OrthoLattice::OrthoLattice(Lattice::Spec spec) : Lattice(spec.m_format.m_nelement, spec){
-    /*
-     * set up loop for orthogonally-coordinated lattice
-     */
-    foreach::rtnd::Unrestricted loop(m_spec.m_format.m_shape);
-    defs::inds cols;
-    std::vector<int> signs;
-    auto fn = [&]() {
-        auto &inds = loop.m_inds;
-        cols.clear();
-        signs.clear();
-        for (size_t idim = 0ul; idim < inds.size(); ++idim) {
-            for (bool inc : {false, true}){
-                auto pair = get_coordination(inds, idim, inc);
-                if (pair.first != ~0ul) {
-                    cols.push_back(pair.first);
-                    signs.push_back(pair.second);
-                }
-            }
+void lattice::OrthoTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) const {
+    row.clear();
+    const auto &iinds = m_inds[isite];
+    const auto ndim = m_inds.m_nind;
+    for (size_t idim = 0ul; idim < ndim; ++idim) {
+        const auto ind = iinds[idim];
+        const auto max_ind = m_inds.m_shape[idim] - 1;
+        const auto bc = m_bcs[idim];
+        if (!max_ind) continue;
+        if (max_ind == 1ul) {
+            row.push_back({isite_adj(iinds, idim, !ind), 1});
+            continue;
         }
-        auto irow = m_spec.m_format.flatten(inds);
-        add(irow, cols, signs);
-    };
-    loop(fn);
-}
-
-Lattice lattice::make(const Lattice::Spec &spec) {
-    switch (spec.m_topo) {
-        case Lattice::Ortho:
-            return OrthoLattice(spec);
-        case Lattice::NullTopology:
-            ABORT("invalid lattice topology given");
+        if (ind == 0) {
+            if (bc) row.push_back({isite_adj(iinds, idim, max_ind), bc});
+            row.push_back({isite_adj(iinds, idim, 1ul), 1});
+        }
+        else if (ind == max_ind) {
+            row.push_back({isite_adj(iinds, idim, max_ind - 1), 1});
+            if (bc) row.push_back({isite_adj(iinds, idim, 0ul), bc});
+        }
+        else {
+            row.push_back({isite_adj(iinds, idim, ind - 1), 1});
+            row.push_back({isite_adj(iinds, idim, ind + 1), 1});
+        }
     }
-    return {0, Lattice::Spec(Lattice::NullTopology, {}, {})};
 }
 
-Lattice lattice::make(const fciqmc_config::LatticeModel &opts) {
-    return make({opts.m_topology, opts.m_site_shape, opts.m_boundary_conds});
+size_t lattice::NullTopology::isite_adj(const defs::inds &inds, size_t idim, size_t value) const {
+    return ~0ul;
+}
+
+size_t lattice::NullTopology::nsite() const {
+    return 0ul;
+}
+
+int lattice::NullTopology::phase(size_t isite, size_t jsite) const {
+    return 0;
+}
+
+void lattice::NullTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) const {
+    row.clear();
+}
+
+std::shared_ptr<lattice::Base> lattice::make() {
+    return std::shared_ptr<Base>(new Null({}));
+}
+
+std::shared_ptr<lattice::Base> lattice::make(std::string topo, defs::inds site_shape, std::vector<int> bcs) {
+    if (topo == "ortho" || topo == "orthogonal")
+        return std::shared_ptr<Base>(new Ortho({site_shape, bcs}));
+    return make();
+}
+
+std::shared_ptr<lattice::Base> lattice::make(const conf::LatticeModel &opts) {
+    return make(opts.m_topology, opts.m_site_shape, opts.m_boundary_conds);
 }

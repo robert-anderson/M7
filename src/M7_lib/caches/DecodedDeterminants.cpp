@@ -4,6 +4,7 @@
 
 #include "DecodedDeterminants.h"
 
+#if 0
 void OccupiedUpdater::operator()(const field::FrmOnv &onv, defs::inds &inds) {
     DEBUG_ASSERT_LE(onv.nbit(), inds.capacity(), "occupied updater inds not large enough for ONV");
     inds.clear();
@@ -51,3 +52,4 @@ void NdVacantUpdater::operator()(const field::FrmOnv &onv, const defs::inds& map
         }
     }
 }
+#endif

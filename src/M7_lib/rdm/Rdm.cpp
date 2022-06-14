@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/08/2021.
+// Created by Robert J. Anderson on 10/08/2021.
 //
 
 #include "Rdm.h"
@@ -17,7 +17,7 @@ size_t FermionRdm::nrow_estimate(size_t nann, size_t ncre, size_t nsite) {
     return nrow;
 }
 
-FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec) :
+FermionRdm::FermionRdm(const conf::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec) :
 base_t(
         log::format("{}-body RDM", opts.m_rank),
         nrow_crude_est / mpi::nrank(),

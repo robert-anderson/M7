@@ -1,13 +1,13 @@
 //
-// Created by rja on 03/07/2020.
+// Created by Robert J. Anderson on 03/07/2020.
 //
 
 #include "Reference.h"
 
-Reference::Reference(const fciqmc_config::Reference &opts, const Hamiltonian &ham,
+Reference::Reference(const conf::Reference &opts, const Hamiltonian &ham,
                      const Wavefunction &wf, size_t ipart, TableBase::Loc loc) :
         Wavefunction::SharedRow(wf, loc, "reference"),
-        m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_bd),
+        m_ham(ham), m_wf(wf), m_ipart(ipart), m_conn(ham.m_basis.size()),
         m_redefinition_thresh(opts.m_redef_thresh){
     m_summables.add_members(m_proj_energy_num, m_nwalker_at_doubles);
     log::info("Initial reference ONV for WF part {} is {} with energy {}",
@@ -101,7 +101,7 @@ defs::wf_t Reference::norm_average_weight(const size_t& icycle, const size_t& ip
     return unnorm/static_cast<defs::wf_comp_t>(m_global.m_row.occupied_ncycle(icycle));
 }
 
-References::References(const fciqmc_config::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
+References::References(const conf::Reference &opts, const Hamiltonian &ham, const Wavefunction &wf,
                        std::vector<TableBase::Loc> locs) :
         m_proj_energy_nums(wf.m_format.m_shape), m_weights(wf.m_format.m_shape){
     DEBUG_ASSERT_EQ(locs.size(), wf.m_format.m_nelement,

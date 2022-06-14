@@ -1,5 +1,5 @@
 //
-// Created by rja on 04/03/2022.
+// Created by Robert J. Anderson on 04/03/2022.
 //
 
 #ifndef M7_DECODEDFRMONV_H
@@ -89,6 +89,8 @@ namespace decoded_mbf {
             void clear();
 
             bool empty();
+
+            size_t label(size_t ispinorb) const;
         };
 
         /**
@@ -299,8 +301,6 @@ namespace decoded_mbf {
          * site indices with 0 or 2 electrons
          */
         frm::NotSinglyOccSites m_not_singly_occ_sites;
-
-        FrmOnv(const FrmOnvField &mbf, const AbelianGroupMap &grp_map);
 
         FrmOnv(const FrmOnvField &mbf);
 

@@ -1,5 +1,5 @@
 //
-// Created by rja on 27/09/2021.
+// Created by Robert J. Anderson on 27/09/2021.
 //
 
 #include <M7_lib/parallel/MPIAssert.h>

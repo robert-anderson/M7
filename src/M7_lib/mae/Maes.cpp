@@ -1,12 +1,12 @@
 //
-// Created by rja on 15/08/2021.
+// Created by Robert J. Anderson on 15/08/2021.
 //
 
 #include "Maes.h"
 
-Maes::Maes(const fciqmc_config::AvEsts &opts, BasisData bd, size_t nelec, size_t nroot) :
-        m_accum_epoch("MAE accumulation"), m_bilinears(opts, bd, nelec, m_accum_epoch),
-        m_ref_excits(opts.m_ref_excits, bd, nroot), m_period(opts.m_stats_period) {
+Maes::Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nroot) :
+        m_accum_epoch("MAE accumulation"), m_bilinears(opts, extents, nelec, m_accum_epoch),
+        m_ref_excits(opts.m_ref_excits, extents, nroot), m_period(opts.m_stats_period) {
     if (*this) {
         m_stats = std::unique_ptr<MaeStats>(new MaeStats("M7.maes.stats",
                 "FCIQMC Multidimensional Averaged Estimators",

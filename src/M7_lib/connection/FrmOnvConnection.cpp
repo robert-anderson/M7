@@ -1,24 +1,24 @@
 //
-// Created by rja on 23/07/2021.
+// Created by Robert J. Anderson on 23/07/2021.
 //
 
 #include "FrmOnvConnection.h"
 
-FrmOnvConnection::FrmOnvConnection(size_t nsite) :
-        m_ann(nsite), m_cre(nsite),
-        m_ndataword(integer_utils::divceil(nsite * 2, defs::nbit_word)),
+FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& sites):
+        m_ann(sites), m_cre(sites),
+        m_ndataword(integer_utils::divceil(sites.m_nspinorb, defs::nbit_word)),
         m_dataword_phases(m_ndataword){
     if (m_ndataword) m_dataword_phases[0] = false;
 }
 
-FrmOnvConnection::FrmOnvConnection(BasisData bd) : FrmOnvConnection(bd.m_nsite){
-    bd.require_pure_frm();
+FrmOnvConnection::FrmOnvConnection(sys::Size size) : FrmOnvConnection(size.m_frm) {
+    size.require_pure_frm();
 }
 
-FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.nsite()){}
+FrmOnvConnection::FrmOnvConnection(const FrmOnvField &mbf) : FrmOnvConnection(mbf.m_basis){}
 
 void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
-    DEBUG_ASSERT_EQ(src.nsite(), dst.nsite(), "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_FALSE(dst.is_zero(), "should not be computing connection to zero ONV");
     clear();
@@ -38,9 +38,7 @@ void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
 }
 
 bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, FrmOps &com) {
-    DEBUG_ASSERT_EQ(src.nsite(), dst.nsite(), "src and dst ONVs are incompatible");
-    DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
-                    "common operator string capacity does not match that of excitation arrays");
+    DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     connect(src, dst);
     com.clear();
     size_t nperm = 0ul;
@@ -85,7 +83,7 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
 
 
 void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
-    DEBUG_ASSERT_EQ(src.nsite(), dst.nsite(), "src and dst ONVs are incompatible");
+    DEBUG_ASSERT_TRUE(src.m_basis==dst.m_basis, "src and dst ONVs are incompatible");
     DEBUG_ASSERT_FALSE(src.is_zero(), "should not be computing connection from zero ONV");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
@@ -103,8 +101,6 @@ void FrmOnvConnection::apply(const FrmOnvField &src, FrmOnvField &dst) const {
 }
 
 bool FrmOnvConnection::apply(const FrmOnvField &src, FrmOps &com) const {
-    DEBUG_ASSERT_EQ(m_cre.capacity(), com.capacity(),
-                    "common operator string capacity does not match that of excitation arrays");
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
     com.clear();
@@ -152,22 +148,6 @@ void FrmOnvConnection::clear() {
     m_ann.clear();
 }
 
-void FrmOnvConnection::add(const size_t &ann, const size_t &cre) {
-    m_ann.add(ann);
-    m_cre.add(cre);
-    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
-    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
-}
-
-void FrmOnvConnection::add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2) {
-    m_ann.add(ann1);
-    m_ann.add(ann2);
-    m_cre.add(cre1);
-    m_cre.add(cre2);
-    DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
-    DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
-}
-
 const defs::inds &FrmOnvConnection::ann() const {
     return m_ann.inds();
 }
@@ -185,9 +165,9 @@ void FrmOnvConnection::update_dataword_phases(const FrmOnvField &src) const {
 }
 
 bool FrmOnvConnection::independent_phase(const FrmOnvField &src, const size_t &ibit) const {
-    DEBUG_ASSERT_TRUE(ibit<m_cre.capacity(), "spin orbital index is OOB");
+    DEBUG_ASSERT_LT(ibit, src.m_basis.m_nspinorb, "spin orbital index OOB");
     auto idataword = ibit / defs::nbit_word;
-    DEBUG_ASSERT_TRUE(idataword<m_ndataword, "dataword index is OOB");
+    DEBUG_ASSERT_LT(idataword, m_ndataword, "dataword index OOB");
     auto ibit_in_word = ibit - idataword * defs::nbit_word;
     return m_dataword_phases[idataword] ^
            (bit_utils::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);

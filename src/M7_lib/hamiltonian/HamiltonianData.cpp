@@ -1,5 +1,5 @@
 //
-// Created by rja on 21/08/2021.
+// Created by Robert J. Anderson on 21/08/2021.
 //
 
 #include "HamiltonianData.h"
@@ -60,6 +60,10 @@ bool ham_data::TermContribs::is_nonzero(size_t exsig) const {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
     return m_exsig_nonzero[i];
+}
+
+bool ham_data::TermContribs::any_nonzero() const {
+    return std::any_of(m_exsig_nonzero.cbegin(), m_exsig_nonzero.cend(), [](bool b){return b;});
 }
 
 bool ham_data::KramersAttributes::conserving() const {

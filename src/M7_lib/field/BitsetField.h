@@ -1,5 +1,5 @@
 //
-// Created by rja on 06/04/2021.
+// Created by Robert J. Anderson on 06/04/2021.
 //
 
 #ifndef M7_BITSETFIELD_H

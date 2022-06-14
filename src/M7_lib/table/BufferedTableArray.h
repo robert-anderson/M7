@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/02/2021.
+// Created by Robert J. Anderson on 10/02/2021.
 //
 
 #ifndef M7_BUFFEREDTABLEARRAY_H

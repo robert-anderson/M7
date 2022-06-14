@@ -1,8 +1,8 @@
 //
-// Created by rja on 10/08/2021.
+// Created by Robert J. Anderson on 10/08/2021.
 //
 
-#include <M7_lib/foreach/Foreach.h>
+#include <M7_lib/foreach/BasicForeach.h>
 #include "FermionPromoter.h"
 
 
@@ -12,17 +12,17 @@ FermionPromoter::FermionPromoter(size_t ncom, size_t nop_insert) :
     m_all_combs(nop_insert * m_ncomb){
     if (!nop_insert) return;
 
-    foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
+    basic_foreach::rtnd::Ordered<> foreach_comb(ncom, nop_insert);
     size_t icomb = 0ul;
-    auto fn = [&]() {
+    auto fn = [&](const defs::inds& inds) {
         for (size_t i = 0ul; i < nop_insert; ++i) {
             auto j = icomb * nop_insert + i;
             ASSERT(j < m_all_combs.size());
-            m_all_combs[j] = foreach_comb[i];
+            m_all_combs[j] = inds[i];
         }
         ++icomb;
     };
-    foreach_comb(fn);
+    foreach_comb.loop(fn);
 }
 
 const defs::mev_ind_t *FermionPromoter::begin(const size_t &icomb) const {
