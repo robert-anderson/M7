@@ -2,7 +2,6 @@ target_sources(unittest
     PRIVATE
         BosonCouplings.cpp
         TranscorrelatedHamiltonian.cpp
-        TranscorrelatedBosonHamiltonian.cpp
 )
 
 add_subdirectory(bos)
