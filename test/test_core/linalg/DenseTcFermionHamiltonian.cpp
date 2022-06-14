@@ -17,6 +17,7 @@
  * @brief exact diagonalisation of dense TC Be atom in 6-31G basis
  *
  */
+ /*
 TEST(DenseTcFermionHamiltonian, TcBe631G) {
     AssetSymlink tcdump("TC_Be_6-31G/TCDUMP", "TCDUMP");
     AssetSymlink fcidump("TC_Be_6-31G/FCIDUMP", "FCIDUMP");
@@ -27,5 +28,6 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     // TODO stub
     ASSERT(false);
 }
+  */
 
 #endif // ENABLE_TCHINT
