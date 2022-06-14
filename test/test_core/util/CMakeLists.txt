@@ -1,5 +1,6 @@
 target_sources(unittest
     PRIVATE
+        Array.cpp
         BasicForeach.cpp
         Bit.cpp
         Exsig.cpp

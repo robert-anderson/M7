@@ -86,7 +86,7 @@ public:
      * @param extent
      *  value to copy to all elements of the shape
      */
-    NdFormat(size_t extent): NdFormat(array_utils::filled<size_t, nind>(extent)){}
+    NdFormat(size_t extent): NdFormat(utils::array::filled<size_t, nind>(extent)){}
 
     NdFormat(const NdFormat<nind>& other) : NdFormat(other.m_shape, other.m_dim_names){}
 
@@ -142,7 +142,7 @@ public:
      *  the shape array converted to a vector instance
      */
     defs::inds shape_vector() const {
-        return array_utils::to_vector(m_shape);
+        return utils::array::to_vector(m_shape);
     }
 
     /**
@@ -150,7 +150,7 @@ public:
      *  the dim_names array converted to a vector instance
      */
     std::vector<std::string> dim_names_vector() const {
-        return array_utils::to_vector(m_dim_names);
+        return utils::array::to_vector(m_dim_names);
     }
 
     /**

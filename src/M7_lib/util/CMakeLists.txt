@@ -1,5 +1,6 @@
 target_sources(M7_lib
     PRIVATE
+        Array.h
         Bit.h
         consts.h
         Functor.h

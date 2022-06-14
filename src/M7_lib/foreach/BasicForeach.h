@@ -11,6 +11,7 @@
 #include <M7_lib/util/Nd.h>
 #include <M7_lib/util/Integer.h>
 #include <M7_lib/util/Functor.h>
+#include <M7_lib/util/Array.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {
@@ -90,12 +91,12 @@ namespace basic_foreach {
         public:
 
             static size_t niter(const inds_t<nind> &shape){
-                return nind ? utils::nd::nelement(array_utils::to_vector(shape)) : 0ul;
+                return nind ? utils::nd::nelement(utils::array::to_vector(shape)) : 0ul;
             }
 
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(niter(shape)), m_shape(shape) {}
 
-            Unrestricted(size_t extent = 0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
+            Unrestricted(size_t extent = 0ul) : Unrestricted(utils::array::filled<size_t, nind>(extent)) {}
 
             template<typename fn_t>
             void loop(const fn_t &fn) {

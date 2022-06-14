@@ -511,32 +511,11 @@ namespace tags {
     };
 }
 
-namespace array_utils {
-    template<typename T, size_t nind>
-    static std::array<T, nind> filled(const T &v) {
-        std::array<T, nind> tmp;
-        tmp.fill(v);
-        return tmp;
-    }
-
-    template<typename T, size_t nind>
-    static std::vector<T> to_vector(const std::array<T, nind> &array) {
-        std::vector<T> tmp;
-        tmp.assign(array.cbegin(), array.cend());
-        return tmp;
-    }
-}
-
 template<typename T>
 static std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
     os << utils::to_string(v);
     return os;
 }
 
-template<typename T, size_t nind>
-static std::ostream &operator<<(std::ostream &os, const std::array<T, nind> &a) {
-    os << utils::to_string(array_utils::to_vector(a));
-    return os;
-}
 
 #endif //M7_UTILS_H
