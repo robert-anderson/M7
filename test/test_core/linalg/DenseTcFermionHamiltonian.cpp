@@ -6,7 +6,7 @@
  *
  */
 
-#include <gtest/gtest.h>
+#include <test_core/defs.h>
 #include "M7_lib/linalg/DenseHamiltonian.h"
 #include "M7_lib/io/Symlink.h"
 #include "M7_lib/hamiltonian/frm/TcFrmHam.h"
@@ -30,8 +30,8 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     sort_utils::inplace(evals, false, false);
     std::cout << evals[0] << std::endl; // print ground state
     // compare to NECI calculation
-    ASSERT_DOUBLE_EQ(evals[0].real(), -14.6663);
-    ASSERT_DOUBLE_EQ(evals[0].imag(), 0.0);
+    ASSERT_NEARLY_EQ(evals[0].real(), -14.6663, 1e-4);
+    ASSERT_NEARLY_EQ(evals[0].imag(), 0.0, 1e-10);
 }
 
 #endif // ENABLE_TCHINT
