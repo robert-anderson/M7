@@ -25,14 +25,6 @@
 
 namespace utils {
 
-    static constexpr size_t min(size_t i, size_t j) {
-        return i < j ? i : j;
-    }
-
-    static constexpr size_t max(size_t i, size_t j) {
-        return i > j ? i : j;
-    }
-
     /*
      * tests whether all bytes are zero.
      * This is slow, only use for checking that memsets and other zeroing operations

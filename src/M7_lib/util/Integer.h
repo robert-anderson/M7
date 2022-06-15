@@ -11,6 +11,20 @@ namespace utils {
 
     namespace integer {
 
+        /**
+         * std::min is not constexpr in C++11 so implement it here
+         */
+        static constexpr size_t min(size_t i, size_t j) {
+            return i < j ? i : j;
+        }
+
+        /**
+         * std::max is not constexpr in C++11 so implement it here
+         */
+        static constexpr size_t max(size_t i, size_t j) {
+            return i > j ? i : j;
+        }
+
         template<typename T>
         T divceil(T num, T denom) {
             static_assert(std::is_integral<T>::value, "only applicable to integral types");
