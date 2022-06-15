@@ -26,8 +26,8 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     // non-symmetric real matrices have complex eigenvalues
     std::vector<std::complex<defs::ham_t>> evals;
     dense::diag(ham, evals); // dense diagonalisation
-    // unlike hermitian case, we need to sort the eigenvalue array by magnitude
-    sort_utils::inplace(evals, true);
+    // unlike hermitian case, we need to sort the eigenvalue array by the real part (lowest first)
+    sort_utils::inplace(evals, false, false);
     std::cout << evals[0] << std::endl; // print ground state
     // compare to NECI calculation
     ASSERT_DOUBLE_EQ(evals[0].real(), -14.6663);
