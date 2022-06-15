@@ -28,10 +28,13 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     dense::diag(ham, evals); // dense diagonalisation
     // unlike hermitian case, we need to sort the eigenvalue array by the real part (lowest first)
     sort_utils::inplace(evals, false, false);
-    std::cout << evals[0] << std::endl; // print ground state
+    // std::cout << evals[0] << std::endl; // print ground state
     // compare to NECI calculation
     ASSERT_NEARLY_EQ(evals[0].real(), -14.6663, 1e-4);
-    ASSERT_NEARLY_EQ(evals[0].imag(), 0.0, 1e-10);
+    // check that all eigenvalues have zero imaginary component
+    for (unsigned int i=0; i < evals.size(); ++i) {
+        ASSERT_NEARLY_EQ(evals[i].imag(), 0.0, 1e-10);
+    }
 }
 
 #endif // ENABLE_TCHINT
