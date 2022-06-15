@@ -21,12 +21,13 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     AssetSymlink tcdump("TC_Be_6-31G/TCDUMP", "TCDUMP");
     AssetSymlink fcidump("TC_Be_6-31G/FCIDUMP", "FCIDUMP");
     TcFrmHam ham_src({"FCIDUMP"}, false);
-    // the following line throws an error at compilation:
-    // DenseHamiltonian ham(ham_src);
-    // std::vector<defs::ham_t> evals;
-    // dense::diag(ham, evals);
-    // TODO stub
-    ASSERT(false);
+    Hamiltonian gham(&ham_src);
+    DenseHamiltonian ham(gham);
+    std::vector<defs::ham_t> evals;
+    dense::diag(ham, evals); // dense diagonalisation
+    std::cout << evals[0] << std::endl; // print ground state
+    // compare to NECI calculation
+    ASSERT_DOUBLE_EQ(evals[0], -14.6663);
 }
 
 #endif // ENABLE_TCHINT
