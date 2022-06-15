@@ -13,7 +13,14 @@
 
 defs::ham_t TcBosHam::get_coeff_0033(size_t a, size_t b, size_t c, size_t i,
                                      size_t j, size_t k) const {
-    return get_lmat_coeff(a, b, c, i, j, k);
+    // symmetrise
+    defs::ham_t coeff = get_lmat_coeff(a, b, c, i, j, k)
+                      + get_lmat_coeff(a, b, c, j, k, i)
+                      + get_lmat_coeff(a, b, c, k, i, j)
+                      + get_lmat_coeff(a, b, c, j, i, k)
+                      + get_lmat_coeff(a, b, c, i, k, j)
+                      + get_lmat_coeff(a, b, c, k, j, i);
+    return coeff;
 }
 
 defs::ham_t TcBosHam::get_element_0000(const field::BosOnv &onv) const {

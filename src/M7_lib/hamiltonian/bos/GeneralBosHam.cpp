@@ -39,7 +39,7 @@ defs::ham_t GeneralBosHam::get_coeff_0011(size_t i, size_t j) const {
 }
 
 defs::ham_t GeneralBosHam::get_coeff_0022(size_t i, size_t j, size_t k, size_t l) const {
-    return m_coeffs_2.get(i, j, k, l);
+    return m_coeffs_2.get(i, j, k, l) + m_coeffs_2.get(i, j, l, k);
 }
 
 defs::ham_t GeneralBosHam::get_element_0000(const field::BosOnv &onv) const {
