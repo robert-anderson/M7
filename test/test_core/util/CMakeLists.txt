@@ -7,6 +7,7 @@ target_sources(unittest
         ForeachVirtual.cpp
         Integer.cpp
         Math.cpp
+        Sort.cpp
         String.cpp
         Tuple.cpp
         utils.cpp

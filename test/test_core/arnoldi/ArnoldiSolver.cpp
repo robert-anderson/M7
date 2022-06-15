@@ -2,10 +2,11 @@
 // Created by Robert J. Anderson on 09/01/2022.
 //
 
+#include "test_core/defs.h"
 #include <test_core/sparse/Examples.h>
 #include <M7_lib/linalg/Dense.h>
 #include "M7_lib/arnoldi/ArnoldiSolver.h"
-#include "test_core/defs.h"
+#include "M7_lib/util/Sort.h"
 
 static const double arnodli_eval_tol = 1e-13;
 TEST(ArnoldiSolver, SymNonDist) {
@@ -70,7 +71,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     std::vector<std::complex<double>> evals;
     ASSERT_TRUE(dense::diag(dense, evals));
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
-    sort_utils::inplace(evals, true);
+    utils::sort::inplace(evals, false, true);
     auto dense_eval_it = evals.cbegin() + (nrow - nroot);
     for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
         ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
@@ -94,7 +95,7 @@ TEST(ArnoldiSolver, NonSymDist) {
         std::vector<std::complex<double>> evals;
         dense::diag(dense, evals);
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
-        sort_utils::inplace(evals, true);
+        utils::sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);

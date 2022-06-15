@@ -27,7 +27,7 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     std::vector<std::complex<defs::ham_t>> evals;
     dense::diag(ham, evals); // dense diagonalisation
     // unlike hermitian case, we need to sort the eigenvalue array by the real part (lowest first)
-    sort_utils::inplace(evals, false, false);
+    utils::sort::inplace(evals, false, false);
     // std::cout.precision(17);
     // std::cout << evals[0] << std::endl; // print ground state
     // compare to NECI calculation

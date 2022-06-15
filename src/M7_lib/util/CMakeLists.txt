@@ -9,6 +9,7 @@ target_sources(M7_lib
         Nd.h
         ProgressMonitor.cpp
         ProgressMonitor.h
+        Sort.h
         String.cpp
         String.h
         Ternary.h
