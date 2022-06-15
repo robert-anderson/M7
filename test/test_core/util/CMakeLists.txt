@@ -1,6 +1,13 @@
 target_sources(unittest
     PRIVATE
+        Array.cpp
         BasicForeach.cpp
+        Bit.cpp
+        Exsig.cpp
         ForeachVirtual.cpp
+        Integer.cpp
+        Math.cpp
+        String.cpp
+        Tuple.cpp
         utils.cpp
 )

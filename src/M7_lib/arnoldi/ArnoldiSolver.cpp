@@ -3,6 +3,7 @@
 //
 
 #include "ArnoldiSolver.h"
+#include "M7_lib/util/String.h"
 
 bool ArnoldiProblemBase::solve_base(const std::function<void()> &product_fn, bool dist) {
     bool i_am_solver_rank = mpi::i_am_root() || !dist;
@@ -22,8 +23,8 @@ bool ArnoldiProblemBase::solve_base(const std::function<void()> &product_fn, boo
     // Finding eigenvalues and eigenvectors.
     if (i_am_solver_rank) find_eigenvalues();
     log::info("{} converged after {} {}distributed matrix-vector multiplication{}",
-              string_utils::plural("eigenpair", m_nroot),
+              utils::string::plural("eigenpair", m_nroot),
               nmv_call, dist ? "" : "non-",
-              string_utils::plural(nmv_call));
+              utils::string::plural(nmv_call));
     return true;
 }

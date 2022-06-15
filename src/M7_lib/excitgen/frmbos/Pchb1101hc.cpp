@@ -3,10 +3,11 @@
 //
 
 #include "Pchb1101hc.h"
+#include "M7_lib/util/Math.h"
 
 Pchb1101hc::Pchb1101hc(const FrmBosHam &h, PRNG &prng) :
-        FrmBosExcitGen(h, prng, {exsig_utils::ex_1101, exsig_utils::ex_1110}, "precomputed heatbath"),
-        m_pick_n_given_pq(utils::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
+        FrmBosExcitGen(h, prng, {utils::exsig::ex_1101, utils::exsig::ex_1110}, "precomputed heatbath"),
+        m_pick_n_given_pq(utils::math::pow<2>(h.m_basis.m_frm.m_nspinorb), h.m_basis.m_bos.m_nmode) {
     const auto nmode = m_h.m_basis.m_bos.m_nmode;
     const auto nspinorb = m_h.m_basis.m_frm.m_nspinorb;
     std::vector<defs::prob_t> weights(nmode, 0.0);
@@ -42,7 +43,7 @@ bool Pchb1101hc::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
     /*
      * the fermion-boson coupling V_npq is defined with precedence to the "bosonic excitation" case (exsig 1110)
      */
-    const bool cre = exsig_utils::decode_nbos_cre(exsig);
+    const bool cre = utils::exsig::decode_nbos_cre(exsig);
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
     const auto q = cre ? conn.m_frm.m_ann[0]: conn.m_frm.m_cre[0];
     const auto pq = p*m_h.m_basis.m_frm.m_nspinorb+q;
@@ -63,7 +64,7 @@ bool Pchb1101hc::draw_frmbos(const size_t &exsig, const field::FrmBosOnv &src,
 defs::prob_t Pchb1101hc::prob_h_frmbos(const field::FrmBosOnv &src,
                                        const conn::FrmBosOnv &conn, defs::ham_t helem) const {
     auto prob = UniformSingles::prob_spin_conserve_fn(src.m_frm, conn.m_frm);
-    const bool cre = exsig_utils::decode_nbos_cre(conn.exsig());
+    const bool cre = utils::exsig::decode_nbos_cre(conn.exsig());
     const auto p = cre ? conn.m_frm.m_cre[0]: conn.m_frm.m_ann[0];
     const auto q = cre ? conn.m_frm.m_ann[0]: conn.m_frm.m_cre[0];
     const auto pq = p*m_h.m_basis.m_frm.m_nspinorb+q;

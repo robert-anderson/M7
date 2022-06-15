@@ -11,9 +11,9 @@ const size_t &FermionRdm::nop() const {
 
 size_t FermionRdm::nrow_estimate(size_t nann, size_t ncre, size_t nsite) {
     double nrow = 1.0;
-    nrow *= integer_utils::combinatorial(2 * nsite, nann);
-    nrow *= integer_utils::combinatorial(2 * nsite, ncre);
-    nrow /= integer_utils::factorial(nann + ncre);
+    nrow *= utils::integer::combinatorial(2 * nsite, nann);
+    nrow *= utils::integer::combinatorial(2 * nsite, ncre);
+    nrow /= utils::integer::factorial(nann + ncre);
     return nrow;
 }
 

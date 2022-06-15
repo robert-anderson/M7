@@ -18,12 +18,12 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
         if (consts::nearly_zero(value)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
-        DEBUG_ASSERT_TRUE(exsig_utils::contribs_to(exsig, ranksig),
+        DEBUG_ASSERT_TRUE(utils::exsig::contribs_to(exsig, ranksig),
                           "excitation does not contribute to this operator rank");
-        if (ranksig == exsig_utils::ex_0011) {
+        if (ranksig == utils::exsig::ex_0011) {
             m_contribs_0011.set_nonzero(exsig);
             m_coeffs_1.set(inds[0], inds[1], value);
-        } else if (ranksig == exsig_utils::ex_0022) {
+        } else if (ranksig == utils::exsig::ex_0022) {
             m_contribs_0022.set_nonzero(exsig);
             m_coeffs_2.set(inds[0], inds[1], inds[2], inds[3], value);
         }

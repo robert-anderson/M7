@@ -3,6 +3,7 @@
 //
 
 #include "BosdumpFileReader.h"
+#include <M7_lib/util/Exsig.h>
 
 BosdumpHeader::BosdumpHeader(const std::string &fname) :
         FortranNamelistReader(fname), m_nmode(read_int("NMODE")), m_nboson(read_int("NBOSON")) {}
@@ -12,7 +13,7 @@ BosdumpFileReader::BosdumpFileReader(const std::string &fname) :
 
 size_t BosdumpFileReader::ranksig(const defs::inds &inds) const {
     DEBUG_ASSERT_EQ(inds.size(), 4ul, "incorrect maximum number of SQ operator indices");
-    return inds[2] == ~0ul ? exsig_utils::ex_0011 : exsig_utils::ex_0022;
+    return inds[2] == ~0ul ? utils::exsig::ex_0011 : utils::exsig::ex_0022;
 }
 
 size_t BosdumpFileReader::exsig(const defs::inds &inds, const size_t &ranksig) const {
@@ -20,12 +21,12 @@ size_t BosdumpFileReader::exsig(const defs::inds &inds, const size_t &ranksig) c
     switch (ranksig) {
         case 0ul:
             return 0ul;
-        case exsig_utils::ex_0011:
-            return inds[0] == inds[1] ? 0ul : exsig_utils::ex_0011;
-        case exsig_utils::ex_0022:
+        case utils::exsig::ex_0011:
+            return inds[0] == inds[1] ? 0ul : utils::exsig::ex_0011;
+        case utils::exsig::ex_0022:
             return inds[0] == inds[1] ?
-                   (inds[2] == inds[3] ? 0ul : exsig_utils::ex_0011) :
-                   (inds[2] == inds[3] ? exsig_utils::ex_0011 : exsig_utils::ex_0022);
+                   (inds[2] == inds[3] ? 0ul : utils::exsig::ex_0011) :
+                   (inds[2] == inds[3] ? utils::exsig::ex_0011 : utils::exsig::ex_0022);
         default:
             return ~0ul;
     }

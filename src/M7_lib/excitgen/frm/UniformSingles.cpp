@@ -5,7 +5,7 @@
 #include "UniformSingles.h"
 
 bool UniformSingles::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {
-    DEBUG_ASSERT_EQ(exsig, exsig_utils::ex_single, "this excitation generator is only suitable for exsig 1100");
+    DEBUG_ASSERT_EQ(exsig, utils::exsig::ex_single, "this excitation generator is only suitable for exsig 1100");
     auto spin_conserving = m_h.m_kramers_attrs.m_conserving_singles;
     if (spin_conserving) return draw_spin_conserve_fn(m_prng, src, prob, conn);
     return draw_spin_nonconserve_fn(m_prng, src, prob, conn);
@@ -26,7 +26,7 @@ bool UniformSingles::draw_spin_conserve_fn(PRNG &prng, const field::FrmOnv &src,
 
     size_t ia = prng.draw_uint(nocc * nvac);
     size_t i, a;
-    integer_utils::inv_rectmap(i, a, nvac, ia);
+    utils::integer::inv_rectmap(i, a, nvac, ia);
     DEBUG_ASSERT_LT(i, nocc, "drawn occupied OOB");
     DEBUG_ASSERT_LT(a, nvac, "drawn vacant OOB");
 
@@ -46,7 +46,7 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &s
     const auto ncases = nelec * nvac;
     auto ia = prng.draw_uint(ncases);
     size_t i, a;
-    integer_utils::inv_rectmap(i, a, nvac, ia);
+    utils::integer::inv_rectmap(i, a, nvac, ia);
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
     prob = 1.0 / ncases;

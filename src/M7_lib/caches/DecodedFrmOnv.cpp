@@ -25,7 +25,7 @@ const defs::inds& decoded_mbf::frm::SimpleOccs::get() {
     if (!empty()) return validated();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
-        while (work) m_inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
+        while (work) m_inds.push_back(utils::bit::next_setbit(work) + idataword * defs::nbit_word);
     }
     m_last_update_hash = m_mbf.hash();
     return m_inds;
@@ -37,7 +37,7 @@ const defs::inds& decoded_mbf::frm::SimpleVacs::get() {
     if (!empty()) return validated();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
-        while (work) m_inds.push_back(bit_utils::next_setbit(work) + idataword * defs::nbit_word);
+        while (work) m_inds.push_back(utils::bit::next_setbit(work) + idataword * defs::nbit_word);
     }
     m_last_update_hash = m_mbf.hash();
     return m_inds;
@@ -91,7 +91,7 @@ const std::vector<defs::inds>& decoded_mbf::frm::LabelledOccs::get() {
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
         while (work) {
-            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
+            auto ibit = utils::bit::next_setbit(work) + idataword * defs::nbit_word;
             m_inds[m_map[ibit]].push_back(ibit);
             m_simple_inds.push_back(ibit);
         }
@@ -115,7 +115,7 @@ const std::vector<defs::inds>& decoded_mbf::frm::LabelledVacs::get() {
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
         while (work) {
-            auto ibit = bit_utils::next_setbit(work) + idataword * defs::nbit_word;
+            auto ibit = utils::bit::next_setbit(work) + idataword * defs::nbit_word;
             m_inds[m_map[ibit]].push_back(ibit);
             m_simple_inds.push_back(ibit);
         }

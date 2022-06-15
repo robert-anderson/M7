@@ -6,12 +6,12 @@
 
 size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, sys::Size basis_size) {
     double nrow = 1.0;
-    nrow *= integer_utils::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_cre);
-    nrow *= integer_utils::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
-    nrow *= integer_utils::combinatorial(basis_size.m_bos, nbos_cre);
-    nrow *= integer_utils::combinatorial(basis_size.m_bos, nbos_ann);
-    nrow /= integer_utils::factorial(nfrm_cre + nfrm_ann);
-    nrow /= integer_utils::factorial(nbos_cre + nbos_ann);
+    nrow *= utils::integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_cre);
+    nrow *= utils::integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
+    nrow *= utils::integer::combinatorial(basis_size.m_bos, nbos_cre);
+    nrow *= utils::integer::combinatorial(basis_size.m_bos, nbos_ann);
+    nrow /= utils::integer::factorial(nfrm_cre + nfrm_ann);
+    nrow /= utils::integer::factorial(nbos_cre + nbos_ann);
     return nrow;
 }
 
@@ -215,15 +215,15 @@ void Rdms::end_cycle() {
 
 bool Rdms::is_energy_sufficient(const Hamiltonian &ham) const {
     if (ham.m_bos.m_contribs_0011.is_nonzero(0ul)){
-        if (!m_rdms[exsig_utils::ex_0011]) return false;
+        if (!m_rdms[utils::exsig::ex_0011]) return false;
     }
-    if (ham.m_frmbos.m_contribs_1101.is_nonzero(exsig_utils::ex_1101)){
-        if (!m_rdms[exsig_utils::ex_1101]) return false;
+    if (ham.m_frmbos.m_contribs_1101.is_nonzero(utils::exsig::ex_1101)){
+        if (!m_rdms[utils::exsig::ex_1101]) return false;
     }
-    if (ham.m_frmbos.m_contribs_1110.is_nonzero(exsig_utils::ex_1110)){
-        if (!m_rdms[exsig_utils::ex_1110]) return false;
+    if (ham.m_frmbos.m_contribs_1110.is_nonzero(utils::exsig::ex_1110)){
+        if (!m_rdms[utils::exsig::ex_1110]) return false;
     }
-    if (!m_rdms[exsig_utils::ex_double]) return false;
+    if (!m_rdms[utils::exsig::ex_double]) return false;
     return true;
 }
 
@@ -263,7 +263,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
-    const auto norm = consts::real(trace) / integer_utils::nspair(m_nelec);
+    const auto norm = consts::real(trace) / utils::integer::nspair(m_nelec);
     REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
                  "2RDM norm should match total of sampled diagonal contributions");
     return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
@@ -275,13 +275,13 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exs
 #if 0
     if (!ham) return 0.0;
     auto& rdm = m_rdms[exsig];
-    REQUIRE_TRUE_ALL(exsig_utils::decode_nbos(exsig)==1,
+    REQUIRE_TRUE_ALL(utils::exsig::decode_nbos(exsig)==1,
                      "currently only supporting linear boson operators in the ladder term");
-    REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the "+exsig_utils::to_string(exsig)+"-RDM");
+    REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the "+utils::exsig::to_string(exsig)+"-RDM");
     defs::ham_t e_uncoupled = 0.0; // 0001 and 0010
     defs::ham_t e_coupled = 0.0; // 1101 and 1110
     auto& row = rdm->m_store.m_row;
-    bool cre = exsig_utils::decode_nbos_cre(exsig);
+    bool cre = utils::exsig::decode_nbos_cre(exsig);
 
     for (row.restart(); row.in_range(); row.step()){
         const size_t p=row.m_inds.m_frm.m_cre[0];
@@ -309,7 +309,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exs
 
 defs::ham_comp_t Rdms::get_energy(const BosHam &ham) const {
     if (!ham) return 0.0;
-    auto& rdm = m_rdms[exsig_utils::ex_0011];
+    auto& rdm = m_rdms[utils::exsig::ex_0011];
     REQUIRE_TRUE_ALL(rdm!=nullptr, "cannot compute energy without the 0011-RDM");
     defs::ham_t e = 0.0;
     auto& row = rdm->m_store.m_row;

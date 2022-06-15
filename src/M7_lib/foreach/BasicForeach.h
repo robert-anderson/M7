@@ -8,7 +8,10 @@
 #include <utility>
 
 #include <M7_lib/parallel/MPIAssert.h>
-#include <M7_lib/util/utils.h>
+#include <M7_lib/util/Nd.h>
+#include <M7_lib/util/Integer.h>
+#include <M7_lib/util/Functor.h>
+#include <M7_lib/util/Array.h>
 
 class ExitLoop : public std::exception {
     virtual const char *what() const throw() {
@@ -88,16 +91,16 @@ namespace basic_foreach {
         public:
 
             static size_t niter(const inds_t<nind> &shape){
-                return nind ? nd_utils::nelement(array_utils::to_vector(shape)) : 0ul;
+                return nind ? utils::nd::nelement(utils::array::to_vector(shape)) : 0ul;
             }
 
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(niter(shape)), m_shape(shape) {}
 
-            Unrestricted(size_t extent = 0ul) : Unrestricted(array_utils::filled<size_t, nind>(extent)) {}
+            Unrestricted(size_t extent = 0ul) : Unrestricted(utils::array::filled<size_t, nind>(extent)) {}
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
                 top_loop(fn, tags::Int<nind == 0>());
             }
         };
@@ -109,7 +112,7 @@ namespace basic_foreach {
 
             static size_t niter(size_t n) {
                 if (!nind || !n) return 0ul;
-                return integer_utils::combinatorial(strict ? n : (n + nind) - 1, nind);
+                return utils::integer::combinatorial(strict ? n : (n + nind) - 1, nind);
             }
         protected:
             size_t m_n;
@@ -148,7 +151,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                functor_utils::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
                 top_loop(fn, tags::Int<nind == 0>());
             }
         };
@@ -198,7 +201,7 @@ namespace basic_foreach {
         public:
 
             static size_t niter(const inds_t& shape) {
-                return shape.empty() ? 0ul : nd_utils::nelement(shape);
+                return shape.empty() ? 0ul : utils::nd::nelement(shape);
             }
 
             static size_t niter(size_t nind, size_t extent){
@@ -213,7 +216,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                functor_utils::assert_prototype<void(const inds_t &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
                 level_loop(fn, 1);
             }
@@ -224,7 +227,7 @@ namespace basic_foreach {
 
             static size_t niter(size_t n, size_t r) {
                 if (!r) return 0ul;
-                return integer_utils::combinatorial(strict ? n : (n + r) - 1, r);
+                return utils::integer::combinatorial(strict ? n : (n + r) - 1, r);
             }
 
         private:
@@ -248,7 +251,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t& fn) {
-                functor_utils::assert_prototype<void(const inds_t &), fn_t>();
+                utils::functor::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
                 level_loop(fn, 1);
             }

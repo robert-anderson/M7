@@ -3,6 +3,7 @@
 //
 
 #include "FcidumpFileReader.h"
+#include "M7_lib/util/Exsig.h"
 
 
 FcidumpInfo::FcidumpInfo(std::string fname, bool uhf, bool relativistic, size_t nelec, size_t nsite, int ms2, defs::inds orbsym):
@@ -61,18 +62,18 @@ bool FcidumpFileReader::next(defs::inds &inds, defs::ham_t &v) {
 
 size_t FcidumpFileReader::ranksig(const defs::inds &inds) const {
     auto nset_inds = HamiltonianFileReader::nset_ind(inds);
-    return exsig_utils::encode(nset_inds/2, nset_inds/2, 0, 0);
+    return utils::exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
 size_t FcidumpFileReader::exsig(const defs::inds &inds, const size_t& ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
-        case exsig_utils::ex_single:
-            return inds[0]==inds[1] ? 0ul : exsig_utils::ex_single;
-            case exsig_utils::ex_double:
+        case utils::exsig::ex_single:
+            return inds[0]==inds[1] ? 0ul : utils::exsig::ex_single;
+            case utils::exsig::ex_double:
             return inds[0]==inds[2] ?
-                (inds[1]==inds[3] ? 0ul : exsig_utils::ex_single):
-                (inds[1]==inds[3] ? exsig_utils::ex_single : exsig_utils::ex_double);
+                (inds[1]==inds[3] ? 0ul : utils::exsig::ex_single):
+                (inds[1]==inds[3] ? utils::exsig::ex_single : utils::exsig::ex_double);
         default:
             return ~0ul;
     }

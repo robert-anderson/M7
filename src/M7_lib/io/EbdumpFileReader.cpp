@@ -3,6 +3,7 @@
 //
 
 #include "EbdumpFileReader.h"
+#include "M7_lib/util/Exsig.h"
 
 
 EbdumpFileReader::EbdumpFileReader(const std::string &fname, bool spin_major) :
@@ -15,9 +16,9 @@ size_t EbdumpFileReader::ranksig(const defs::inds &inds) const {
     switch (nset_ind(inds)) {
         case 1ul:
             DEBUG_ASSERT_NE(inds[0], ~0ul, "set index should be the first one: the boson mode index");
-            return exsig_utils::ex_0010;
+            return utils::exsig::ex_0010;
         case 3ul:
-            return exsig_utils::ex_1110;
+            return utils::exsig::ex_1110;
         default:
             return ~0ul;
     }
@@ -25,8 +26,8 @@ size_t EbdumpFileReader::ranksig(const defs::inds &inds) const {
 
 size_t EbdumpFileReader::exsig(const defs::inds &inds, const size_t &ranksig) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
-    if (inds[1] == inds[2]) return exsig_utils::ex_0010;
-    else return exsig_utils::ex_1110;
+    if (inds[1] == inds[2]) return utils::exsig::ex_0010;
+    else return utils::exsig::ex_1110;
 }
 
 bool EbdumpFileReader::inds_in_range(const defs::inds &inds) const {
