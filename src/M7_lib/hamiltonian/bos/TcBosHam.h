@@ -13,6 +13,9 @@
 #include "M7_lib/hamiltonian/TcHam.h"
 
 struct TcBosHam : TcHam, GeneralBosHam {
+
+    TcBosHam(const BosdumpHeader &header, size_t occ_cutoff) : TcHam(), GeneralBosHam(header, occ_cutoff) {};
+
     // as in the Fermion case, need to write a get_coeff_0033 method and also
     // need to rewrite the get_element methods as they get the 0033 coeffs
     // "folded in"
