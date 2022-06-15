@@ -23,11 +23,15 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     TcFrmHam ham_src({"FCIDUMP"}, false);
     Hamiltonian gham(&ham_src);
     DenseHamiltonian ham(gham);
-    std::vector<defs::ham_t> evals;
+    // non-symmetric real matrices have complex eigenvalues
+    std::vector<std::complex<defs::ham_t>> evals;
     dense::diag(ham, evals); // dense diagonalisation
+    // unlike hermitian case, we need to sort the eigenvalue array by magnitude
+    sort_utils::inplace(evals, true);
     std::cout << evals[0] << std::endl; // print ground state
     // compare to NECI calculation
-    ASSERT_DOUBLE_EQ(evals[0], -14.6663);
+    ASSERT_DOUBLE_EQ(evals[0].real(), -14.6663);
+    ASSERT_DOUBLE_EQ(evals[0].imag(), 0.0);
 }
 
 #endif // ENABLE_TCHINT
