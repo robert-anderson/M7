@@ -1,5 +1,5 @@
 //
-// Created by rja on 26/01/2021.
+// Created by Robert J. Anderson on 26/01/2021.
 //
 
 #include "Logging.h"
@@ -99,4 +99,92 @@ void log::error_backtrace_(size_t depth) {
     std::string str;
     error_("Printing backtrace (maximum call depth {}):", depth);
     for (const auto& line: tmp) if (!line.empty()) error_(line);
+}
+
+std::vector<std::string> log::make_table(const std::vector<std::vector<std::string>> &rows, bool header, size_t padding) {
+    if (rows.empty()) return {};
+    auto fn = [](const std::vector<std::string>& row1, const std::vector<std::string>& row2){
+        return row1.size() < row2.size();
+    };
+
+    auto max_it = std::max_element(rows.cbegin(), rows.cend(), fn);
+    const size_t ncol = max_it->size();
+    defs::inds max_sizes(ncol, 0ul);
+    for (auto& row: rows) {
+        for (auto it=row.cbegin(); it!=row.cend(); ++it) {
+            auto icol = std::distance(row.cbegin(), it);
+            max_sizes[icol] = std::max(max_sizes[icol], it->size());
+        }
+    }
+    std::string hline{'+'};
+    std::string header_hline{'+'};
+    for (auto& max_size: max_sizes) {
+        hline.append(max_size+2*padding,'-');
+        hline.append(1, '+');
+        if (header) {
+            header_hline.append(max_size + 2 * padding, '=');
+            header_hline.append(1, '+');
+        }
+    }
+    std::vector<std::string> row_strs;
+    row_strs.reserve(2*rows.size()+1);
+    row_strs.push_back(hline);
+    for (auto& row: rows) {
+        std::string row_str = "|";
+        for (size_t icol=0ul; icol<ncol; ++icol){
+            row_str.append(padding, ' ');
+            row_str.append(icol<row.size() ? row[icol] : "");
+            row_str.append(padding + max_sizes[icol]-(icol<row.size() ? row[icol].size() : 0ul), ' ');
+            row_str.append(1, '|');
+        }
+        row_strs.push_back(row_str);
+        row_strs.push_back((row_strs.size()==2 && header) ? header_hline : hline);
+    }
+    return row_strs;
+}
+
+std::vector<std::string> log::make_table(const std::string &title, const std::vector<std::vector<std::string>> &rows,
+                bool header, size_t padding) {
+    if (rows.empty()) return {};
+    std::vector<std::string> table;
+    auto body = make_table(rows, header, padding);
+    table.push_back(body.front());
+    std::string title_str = "|";
+    const size_t titlebar_size = body.front().size()-2;
+    const size_t nspace_left = titlebar_size < title.size() ? 0ul : (titlebar_size - title.size()) / 2;
+    const size_t nspace_right = titlebar_size < title.size() ? 0ul : titlebar_size - (title.size() + nspace_left);
+    title_str.append(nspace_left, ' ');
+    title_str.insert(title_str.cend(), title.cbegin(),
+                     nspace_right ? title.cend() : title.cbegin() + titlebar_size);
+    title_str.append(nspace_right, ' ');
+    title_str.append(1, '|');
+    table.push_back(title_str);
+    table.insert(table.end(), body.cbegin(), body.cend());
+    return table;
+}
+
+void log::info_lines(const std::vector<std::string> &lines) {
+    for (const auto& line: lines) info(line);
+}
+
+void log::info_lines_(const std::vector<std::string> &lines) {
+    for (const auto& line: lines) info_(line);
+}
+
+void log::info_table(const std::vector<std::vector<std::string>> &rows, bool header, size_t padding) {
+    info_lines(make_table(rows, header, padding));
+}
+
+void log::info_table(const std::string &title, const std::vector<std::vector<std::string>> &rows, bool header,
+                     size_t padding) {
+    info_lines(make_table(title, rows, header, padding));
+}
+
+void log::info_table_(const std::vector<std::vector<std::string>> &rows, bool header, size_t padding) {
+    info_lines_(make_table(rows, header, padding));
+}
+
+void log::info_table_(const std::string &title, const std::vector<std::vector<std::string>> &rows, bool header,
+                      size_t padding) {
+    info_lines_(make_table(title, rows, header, padding));
 }

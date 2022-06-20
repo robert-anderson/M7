@@ -1,5 +1,5 @@
 //
-// Created by rja on 09/11/2020.
+// Created by Robert J. Anderson on 09/11/2020.
 //
 
 #ifndef M7_NDARRAY_H

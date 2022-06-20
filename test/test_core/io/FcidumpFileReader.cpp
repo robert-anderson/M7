@@ -1,12 +1,12 @@
 //
-// Created by rja on 06/06/2020.
+// Created by Robert J. Anderson on 06/06/2020.
 //
 
 #include "gtest/gtest.h"
 #include "M7_lib/io/FcidumpFileReader.h"
 
-TEST(FcidumpHeader, EmptyFilename) {
-    FcidumpHeader header("");
+TEST(FcidumpInfo, EmptyFilename) {
+    FcidumpInfo header("");
     ASSERT_EQ(header.m_nsite, 0ul);
     ASSERT_EQ(header.m_nelec, 0ul);
     ASSERT_EQ(header.m_spin_resolved, false);
@@ -17,9 +17,9 @@ TEST(FcidumpHeader, EmptyFilename) {
 
 TEST(FcidumpFileReader, Real_6orb) {
     FcidumpFileReader file_reader(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
-    ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
+    ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
-    ASSERT_EQ(file_reader.m_header.m_nsite, 6);
+    ASSERT_EQ(file_reader.m_info.m_nsite, 6);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);
@@ -42,9 +42,9 @@ TEST(FcidumpFileReader, Real_6orb) {
 
 TEST(FcidumpFileReader, Integer_8orb) {
     FcidumpFileReader file_reader(defs::assets_root + "/Hubbard_U4_8site/FCIDUMP", false);
-    ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
+    ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
-    ASSERT_EQ(file_reader.m_header.m_nsite, 8);
+    ASSERT_EQ(file_reader.m_info.m_nsite, 8);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);
@@ -67,9 +67,9 @@ TEST(FcidumpFileReader, Integer_8orb) {
 
 TEST(FcidumpFileReader, Molcas) {
     FcidumpFileReader file_reader(defs::assets_root + "/O2_Molcas/FCIDUMP", false);
-    ASSERT_FALSE(file_reader.m_header.m_spin_resolved);
+    ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
-    ASSERT_EQ(file_reader.m_header.m_nsite, 6);
+    ASSERT_EQ(file_reader.m_info.m_nsite, 6);
     defs::inds inds(4);
     defs::ham_t v;
     file_reader.next(inds, v);

@@ -32,6 +32,8 @@ target_sources(M7_lib
         ProgressBar.h
         StatsTable.cpp
         StatsTable.h
+        Symlink.cpp
+        Symlink.h
         TimingStats.cpp
         TimingStats.h
         YamlWrapper.cpp

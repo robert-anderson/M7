@@ -1,5 +1,5 @@
 //
-// Created by rja on 26/07/2021.
+// Created by Robert J. Anderson on 26/07/2021.
 //
 
 #ifndef M7_SUITES_H
@@ -7,24 +7,27 @@
 
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/connection/Connections.h>
+#include "BasisData.h"
 
+/**
+ * classes for "workspace" objects that are MBF type dependent. Objects for every implemented MBF type are allocated as
+ * fields in a row, and then the appropriate object for the MBF type in use can be either accessed directly from these
+ * fields, or by overloading
+ */
+//TODO (RJA): rename to "working"
 namespace suite {
-
     struct MbfsRow : Row {
         field::FrmOnv m_frm;
         field::FrmBosOnv m_frmbos;
         field::BosOnv m_bos;
-        MbfsRow(BasisData bd):
-            m_frm(this, bd.m_nsite, "fermion ONV"),
-            m_frmbos(this, bd, "fermion-boson ONV"),
-            m_bos(this, bd.m_nmode, "boson ONV"){}
+        MbfsRow(const sys::Basis& basis);
+        MbfsRow(const sys::Sector& sector);
     };
 
     struct Mbfs : BufferedTable<MbfsRow>{
 
-        Mbfs(BasisData bd): BufferedTable<MbfsRow>("Work space for MBFs", {{bd}}){
-            m_row.push_back_jump();
-        }
+        Mbfs(const sys::Basis& basis);
+        Mbfs(const sys::Sector& sector);
 
         field::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_row.m_frm;
@@ -41,7 +44,7 @@ namespace suite {
         conn::FrmOnv m_frmonv;
         conn::BosOnv m_bosonv;
         conn::FrmBosOnv m_frmbosonv;
-        Conns(BasisData bd): m_frmonv(bd.m_nsite), m_bosonv(bd.m_nmode), m_frmbosonv(bd){}
+        explicit Conns(const sys::Size& size);
 
         conn::FrmOnv& operator[](const field::FrmOnv& mbf){
             return m_frmonv;
@@ -58,7 +61,7 @@ namespace suite {
         com_ops::Frm m_frm;
         com_ops::FrmBos m_frmbos;
         com_ops::Bos m_bos;
-        ComOps(BasisData bd): m_frm(bd.m_nsite), m_frmbos(bd), m_bos(bd.m_nmode){}
+        ComOps(const sys::Size& size);
 
         com_ops::Frm& operator[](const field::FrmOnv& mbf){
             return m_frm;

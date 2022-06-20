@@ -1,23 +1,24 @@
 //
-// Created by rja on 10/11/2020.
+// Created by Robert J. Anderson on 10/11/2020.
 //
 
 #include "Solver.h"
 
-Solver::Solver(const fciqmc_config::Document &opts, Propagator &prop, Wavefunction &wf,
+Solver::Solver(const conf::Document &opts, Propagator &prop, Wavefunction &wf,
                std::vector<TableBase::Loc> ref_locs) :
-        m_prop(prop), m_opts(prop.m_opts), m_wf(wf),
+        m_prop(prop), m_opts(opts), m_wf(wf),
         m_refs(m_opts.m_reference, m_prop.m_ham, m_wf, ref_locs),
         m_exit("exit"),
-        m_maes(m_opts.m_av_ests, m_prop.m_ham.m_bd, m_prop.m_ham.nelec(), m_wf.nroot()),
+        m_maes(opts.m_av_ests, m_prop.m_ham.m_basis.size(),
+               m_wf.m_sector.m_frm.m_elecs, m_wf.nroot()),
         m_annihilator(m_wf, m_prop, m_refs, m_maes.m_bilinears.m_rdms, m_icycle, opts.m_propagator.m_nadd),
-        m_archive(opts), m_detsubs(m_opts.m_propagator.m_semistochastic) {
+        m_archive(opts), m_detsubs(opts.m_propagator.m_semistochastic) {
 
     log::info("Replicating walker populations: {}", m_wf.nreplica() == 2);
-    if (m_wf.nreplica() == 2 && !m_prop.nexcit_gen())
+    if (m_wf.nreplica() == 2 && !m_prop.ncase_excit_gen())
         log::warn("Replica populations are redundant when doing exact propagation");
 
-    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.nexcit_gen())
+    if (m_maes.m_bilinears && m_wf.nreplica() == 1 && m_prop.ncase_excit_gen())
         log::warn("Attempting a stochastic propagation estimation of bilinear MAEs without replication, "
                   "this is biased");
 
@@ -308,7 +309,7 @@ void Solver::output_stats() {
         stats.m_ninitiator = m_wf.m_ninitiator.m_reduced;
         stats.m_nocc_mbf = m_wf.m_nocc_mbf.m_reduced;
         stats.m_delta_nocc_mbf = m_wf.m_delta_nocc_mbf.m_reduced;
-        if (m_prop.nexcit_gen()) stats.m_exlvl_probs = m_prop.exlvl_probs();
+        if (m_prop.ncase_excit_gen()) stats.m_exlvl_probs = m_prop.excit_gen_case_probs();
         stats.m_reweighting_factor = m_prop.m_shift.m_reweighter.m_total;
         m_stats->commit();
 

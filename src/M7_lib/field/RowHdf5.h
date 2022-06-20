@@ -1,5 +1,5 @@
 //
-// Created by rja on 17/03/2021.
+// Created by Robert J. Anderson on 17/03/2021.
 //
 
 #ifndef M7_ROWHDF5_H

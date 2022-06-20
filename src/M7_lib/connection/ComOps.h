@@ -1,5 +1,5 @@
 //
-// Created by anderson on 12/5/21.
+// Created by Robert J. Anderson on 12/5/21.
 //
 
 #ifndef M7_COMOPS_H
@@ -14,7 +14,7 @@ namespace com_ops {
     struct FrmBos {
         FrmOps m_frm;
         BosOps m_bos;
-        FrmBos(BasisData bd) : m_frm(bd.m_nsite), m_bos(bd.m_nmode) {}
+        FrmBos(sys::Size size) : m_frm(size.m_frm), m_bos(size.m_bos) {}
     };
 
     typedef std::tuple<Frm, FrmBos, Bos> mbf_tup_t;

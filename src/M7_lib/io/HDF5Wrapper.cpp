@@ -1,5 +1,5 @@
 //
-// Created by rja on 13/12/2020.
+// Created by Robert J. Anderson on 13/12/2020.
 //
 
 #include "HDF5Wrapper.h"
@@ -11,7 +11,7 @@ hdf5::Group hdf5::File::subgroup(std::string name) {
 hdf5::AttributeWriterBase::AttributeWriterBase(hid_t parent_handle, std::string name, const defs::inds &shape,
                                                hid_t h5type) :
         m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
-        m_nelement(nd_utils::nelement(shape)) {
+        m_nelement(utils::nd::nelement(shape)) {
     auto shape_tmp = convert_dims(shape);
     m_memspace_handle = H5Screate_simple(shape.size(), shape_tmp.data(), nullptr);
     m_handle = H5Acreate(m_parent_handle, name.c_str(), h5type, m_memspace_handle, H5P_DEFAULT, H5P_DEFAULT);
@@ -252,7 +252,7 @@ hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, cons
 void hdf5::NdDistListBase::select_hyperslab(const size_t &iitem) {
     if (iitem < m_nitem_local) {
         m_hyperslab_offsets[0] = m_item_offset + iitem;
-        log::debug_("selecting hyperslab with offsets: {}", utils::to_string(m_hyperslab_offsets));
+        log::debug_("selecting hyperslab with offsets: {}", utils::convert::to_string(m_hyperslab_offsets));
         auto status = H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
                                           nullptr, m_hyperslab_counts.data(), nullptr);
         DEBUG_ONLY(status);

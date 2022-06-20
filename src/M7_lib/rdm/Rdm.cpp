@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/08/2021.
+// Created by Robert J. Anderson on 10/08/2021.
 //
 
 #include "Rdm.h"
@@ -11,13 +11,13 @@ const size_t &FermionRdm::nop() const {
 
 size_t FermionRdm::nrow_estimate(size_t nann, size_t ncre, size_t nsite) {
     double nrow = 1.0;
-    nrow *= integer_utils::combinatorial(2 * nsite, nann);
-    nrow *= integer_utils::combinatorial(2 * nsite, ncre);
-    nrow /= integer_utils::factorial(nann + ncre);
+    nrow *= utils::integer::combinatorial(2 * nsite, nann);
+    nrow *= utils::integer::combinatorial(2 * nsite, ncre);
+    nrow /= utils::integer::factorial(nann + ncre);
     return nrow;
 }
 
-FermionRdm::FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec) :
+FermionRdm::FermionRdm(const conf::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec) :
 base_t(
         log::format("{}-body RDM", opts.m_rank),
         nrow_crude_est / mpi::nrank(),

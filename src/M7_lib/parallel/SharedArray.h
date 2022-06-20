@@ -1,5 +1,5 @@
 //
-// Created by rja on 13/07/2020.
+// Created by Robert J. Anderson on 13/07/2020.
 //
 
 #ifndef M7_SHAREDARRAY_H

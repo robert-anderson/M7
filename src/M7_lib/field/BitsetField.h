@@ -1,5 +1,5 @@
 //
-// Created by rja on 06/04/2021.
+// Created by Robert J. Anderson on 06/04/2021.
 //
 
 #ifndef M7_BITSETFIELD_H
@@ -42,7 +42,7 @@ struct BitsetField : FieldBase {
     using FieldBase::begin;
 
     BitsetField(Row *row, NdFormat<nind> format, std::string name="") :
-        FieldBase(row, integer_utils::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
+        FieldBase(row, utils::integer::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
         m_format(format), m_dsize(m_size / sizeof(T)), m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {}
 
     BitsetField(const BitsetField &other) : FieldBase(other),
@@ -88,7 +88,7 @@ struct BitsetField : FieldBase {
 
     bool get(const T *dptr, const size_t &ibit) const {
         ASSERT(ibit < nbit());
-        return bit_utils::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        return utils::bit::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     bool get(const size_t &ibit) const {
@@ -105,7 +105,7 @@ struct BitsetField : FieldBase {
 
     void set(T *dptr, const size_t &ibit) {
         ASSERT(ibit < nbit());
-        bit_utils::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        utils::bit::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void set(const size_t &ibit) {
@@ -128,18 +128,18 @@ struct BitsetField : FieldBase {
         auto ibitword_end = iend-iword_end*nbit_dword();
         if (iword_begin==iword_end) {
             // begin and end bits are in the same word, so apply mask and return
-            bit_utils::apply_mask(dbegin()[iword_begin], ibitword_begin, ibitword_end, set);
+            utils::bit::apply_mask(dbegin()[iword_begin], ibitword_begin, ibitword_end, set);
             return;
         }
         // begin part: act from first bit to end of its word
-        bit_utils::apply_mask(dbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
+        utils::bit::apply_mask(dbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
         // end part: act to the last bit from the beginning of its word
-        bit_utils::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
+        utils::bit::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
         // make the all-bits mask
-        bit_utils::make_range_mask(mask, 0, nbit_dword());
+        utils::bit::make_range_mask(mask, 0, nbit_dword());
         for (size_t iword=iword_begin+1; iword<iword_end; ++iword){
             // apply it to all words between begin and end
-            bit_utils::apply_mask(dbegin()[iword], mask, set);
+            utils::bit::apply_mask(dbegin()[iword], mask, set);
         }
     }
 
@@ -157,7 +157,7 @@ struct BitsetField : FieldBase {
 
     void clr(T *dptr, const size_t &ibit) {
         ASSERT(ibit < nbit());
-        bit_utils::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        utils::bit::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void clr(const size_t &ibit) {
@@ -193,9 +193,9 @@ struct BitsetField : FieldBase {
         auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = dptr[idataword];
         if (idataword + 1 == m_dsize) {
-            DEBUG_ASSERT_EQ(tmp, bit_utils::truncate(tmp, m_nbit_in_last_dword),
+            DEBUG_ASSERT_EQ(tmp, utils::bit::truncate(tmp, m_nbit_in_last_dword),
                        "trailing bits were not clear: possible corruption");
-            tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
+            tmp = utils::bit::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
@@ -205,7 +205,7 @@ struct BitsetField : FieldBase {
         auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = ~dptr[idataword];
         if ((idataword + 1) == m_dsize) {
-            tmp = bit_utils::truncate(tmp, m_nbit_in_last_dword);
+            tmp = utils::bit::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
@@ -228,10 +228,22 @@ struct BitsetField : FieldBase {
         setbit_foreach::pair<T>(m_dsize, fn_inner, get_work_fn);
     }
 
+    template<typename fn_1_t, typename fn_2_t, typename fn_3_t>
+    void foreach_setbit_triple(const fn_1_t& fn_1, const fn_2_t& fn_2, const fn_3_t& fn_3) const {
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::triple<T>(m_dsize, fn_1, fn_2, fn_3, get_work_fn);
+    }
+
+    template<typename fn_inner_t>
+    void foreach_setbit_triple(const fn_inner_t& fn_inner) const {
+        auto get_work_fn = [this](size_t idataword){return get_dataword(idataword);};
+        setbit_foreach::triple<T>(m_dsize, fn_inner, get_work_fn);
+    }
+
     size_t nsetbit() const {
         size_t result = 0;
         for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
-            result += bit_utils::nsetbit(get_dataword(idataword));
+            result += utils::bit::nsetbit(get_dataword(idataword));
         }
         return result;
     }

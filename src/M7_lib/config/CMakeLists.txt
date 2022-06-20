@@ -1,9 +1,0 @@
-target_sources(M7_lib
-    PRIVATE
-        FciqmcConfig.cpp
-        FciqmcConfig.h
-        Hamiltonian.cpp
-        Hamiltonian.h
-        Parameters.cpp
-        Parameters.h
-)

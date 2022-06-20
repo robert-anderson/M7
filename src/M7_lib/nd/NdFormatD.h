@@ -1,5 +1,5 @@
 //
-// Created by rja on 30/03/2021.
+// Created by Robert J. Anderson on 30/03/2021.
 //
 
 #ifndef M7_NDFORMATD_H
@@ -61,12 +61,38 @@ struct NdFormatD {
         static_assert(std::is_integral<T>::value, "index type must be integral");
         inds.clear();
         size_t remainder = iflat;
-        for (size_t i=0ul; i!=m_nind; ++i){
-            inds.push_back(remainder/m_strides[i]);
-            remainder-=inds.back()*m_strides[i];
+        for (size_t i = 0ul; i != m_nind; ++i) {
+            inds.push_back(remainder / m_strides[i]);
+            remainder -= inds.back() * m_strides[i];
         }
     }
+};
 
+
+struct NdEnumerationD : NdFormatD {
+private:
+    const std::vector<defs::inds> m_inds;
+
+    static std::vector<defs::inds> make_inds(const NdFormatD& format) {
+        using namespace basic_foreach::rtnd;
+        std::vector<defs::inds> out(format.m_nelement);
+        size_t i=0ul;
+        auto fn = [&out, &i](const defs::inds& inds){
+            out[i] = inds;
+            ++i;
+        };
+        Unrestricted(format.m_shape).loop(fn);
+        DEBUG_ASSERT_EQ(i, format.m_nelement, "not all index arrays generated");
+        return out;
+    }
+
+public:
+    NdEnumerationD(const NdFormatD& format): NdFormatD(format), m_inds(make_inds(format)){}
+
+    const defs::inds& operator[](size_t i) const {
+        DEBUG_ASSERT_LT(i, m_inds.size(), "index OOB");
+        return m_inds[i];
+    }
 
 };
 

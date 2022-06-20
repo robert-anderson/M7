@@ -1,5 +1,5 @@
 //
-// Created by anderson on 1/7/22.
+// Created by Robert J. Anderson on 1/7/22.
 //
 
 #include <M7_lib/hash/Hashing.h>
@@ -20,7 +20,7 @@ TEST(DistMvProd, SparseRealSym) {
     ASSERT_EQ(mpi::all_sum(local_mat.nrow()), nrow);
 
     std::vector<T> in, out, out_chk;
-    if (mpi::i_am_root()) utils::convert(hashing::in_range(0, nrow, 0, 12, false), in);
+    if (mpi::i_am_root()) utils::convert::vector(hashing::in_range(0, nrow, 0, 12, false), in);
 
     dist_mv_prod::Sparse<T> prod(local_mat);
     prod.parallel_multiply(in, out);

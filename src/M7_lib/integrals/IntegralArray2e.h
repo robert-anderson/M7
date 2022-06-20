@@ -1,332 +1,305 @@
 //
-// Created by rja on 08/08/2021.
+// Created by Robert J. Anderson on 08/08/2021.
 //
 
 #ifndef M7_INTEGRALARRAY2E_H
 #define M7_INTEGRALARRAY2E_H
 
 #include <M7_lib/defs.h>
-#include <M7_lib/parallel/SharedArray.h>
-
-#include "IntegralArray.h"
+#include "IntegralStorage.h"
+#include <M7_lib/util/Integer.h>
 
 /**
- * store two-electron integrals with the chemists' notation (ij|kl) where the integrand is i*(x1)j(x1) 1/r12 k*(x2)l(x2)
- * such quantities admit varying levels of permutational symmetry whereby an integral indexed by (ij|kl) is equal (up to
- * a complex conjugation) to any of the following
+ * all two-electron integrals are denoted in physicists' ordering: <ab|ij>
+ * there are three permutational operators associated with symmetry in these objects:
+ *  - D: interchange of dummy variables of integration I <ab|ij> = <ba|ji>
+ *  - H: hermitian transposition H <ab|ij> = K <ij|ab> where K is the complex conjugation operator
+ *  - R: conjugation of one-electron functions of one dummy variable R <ab|ij> = <aj|ib>. R is chosen to act
+ *       on the second pair of functions, so KHR acts on the first
+ * all operators are their own inverses
  *
- *  (kl|ji)     (fermion indistinguishability "I")
- *  (ji|lk)     (hermiticity "H")
- *  (ij|lk)     (real orbitals "R")
+ * as shown below, all commutators are zero with the exception of [R, D].
  *
- * The assumption of:
- *  - none of the above is called "1-fold" symmetry,
- *  - of "I" only is called "2-fold" symmetry,
- *  - of "IH" is called "4 fold" symmetry,
- *  - and of "IHR" is called "8 fold symmetry"
+ * HR <ab|ij> = H <aj|ib> = K <ib|aj>
+ * DR <ab|ij> = D <aj|ib> = <ja|bi>
+ * RD <ab|ij> = R <ba|ji> = <bi|ja>
+ * DRD <ab|ij> = <ib|aj>
+ * KHR <ab|ij> = <ib|aj>
  *
- *  1 fold makes no saving in terms of memory overhead, and thus places no constraints on the indices stored
- *  2 fold computes combined ij and kl indices, and only stores the elements with ij>=kl
- *  8 fold only stores the elements with i>=j and k>=l and ij>=kl
- *  4 fold is a slightly more complicated case, which is important in situations where the integrals correspond to
- *      complex-valued orbitals. the full explanation is given in the subclass docs
+ * i.e. [R, D] != 0
+ * RDR <ab|ij> = <ji|ba>
+ * DRDR <ab|ij> = <ij|ab>
+ * HDRDR <ab|ij> = K <ab|ij>
+ *
+ * i.e. KHDRDR = 1
+ *
+ * K <ab|ij> = H <ij|ab>
+ * HK <ab|ij> = HH <ij|ab> = <ij|ab>
+ * KH <ab|ij> = KK<ij|ab> = <ij|ab>
+ * so [H, K] = 0
+ *
+ * DKH <ab|ij> = D <ij|ab> = <ji|ba>
+ * KHD <ab|ij> = KH <ba|ji> = <ji|ba>
+ *
+ * i.e. [KH, D] = 0
+ *  in general [AB, C] = [A, B]C + B[A, C]
+ *  [KH, D] = [K, H]D + H[K, D]
+ *  0 = 0 + H[K, D]
+ * i.e. [K, D] = 0
+ *
+ * KHR <ab|ij> = KH <aj|ib> = <ib|aj>
+ * RKH <ab|ij> = R <ij|ab> = <ib|aj>
+ *
+ * i.e. [KH, R] = 0
+ *  [KH, R] = [K, H]R + H[K, R]
+ * i.e. [K, R] = [R, H] = 0
+ *
  */
-struct IntegralArray2e : IntegralArray {
-    SharedArray<defs::ham_t> m_data;
-    IntegralArray2e(size_t norb, size_t size):
-        IntegralArray(norb), m_data(size){}
+namespace integrals_2e {
+    using namespace utils::integer;
 
-private:
-    virtual void get(const size_t& i, const size_t& j, const size_t& k, const size_t& l,
-                     const SharedArray<defs::ham_comp_t> &data, defs::ham_comp_t& elem) const = 0;
-    virtual void get(const size_t& i, const size_t& j, const size_t& k, const size_t& l,
-                     const SharedArray<std::complex<defs::ham_comp_t>> &data, std::complex<defs::ham_comp_t>& elem) const = 0;
-    virtual void set(const size_t& i, const size_t& j, const size_t& k, const size_t& l,
-                     SharedArray<defs::ham_comp_t> &data, const defs::ham_comp_t& elem) const = 0;
-    virtual void set(const size_t& i, const size_t& j, const size_t& k, const size_t& l,
-                     SharedArray<std::complex<defs::ham_comp_t>> &data, const std::complex<defs::ham_comp_t>& elem) const = 0;
+    typedef std::function<void(size_t, size_t, size_t, size_t)> foreach_fn_t;
 
-public:
-    defs::ham_t get(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const {
-        defs::ham_t elem;
-        get(i, j, k, l, m_data, elem);
-        return elem;
+    namespace syms {
+        enum Sym {
+            Null, None, H, D, DH, DR, DHR
+        };
+
+        std::string name(Sym sym);
+
+        std::vector<std::string> equivalences(Sym sym);
     }
 
-    void set(const size_t& i, const size_t& j, const size_t& k, const size_t& l, defs::ham_t elem) {
-        set(i, j, k, l, m_data, elem);
-    }
-};
+    struct Indexer : IntegralIndexer {
+        const syms::Sym m_sym;
+        Indexer(size_t norb, size_t size, syms::Sym sym): IntegralIndexer(norb, size), m_sym(sym){}
 
-struct IntegralArray2e_1fold : IntegralArray2e {
-    const size_t m_norb2, m_norb_3;
-    IntegralArray2e_1fold(size_t norb) : IntegralArray2e(norb, utils::pow<4>(norb)),
-                                         m_norb2(norb*norb), m_norb_3(m_norb2*norb){}
+        /**
+         * currently this is just a general (assuming no symmetry) iterator, and could be overridden in derived classes,
+         * but since this is not currently used in any performance-critical sector of the code, these symmetry-aware
+         * overloads are not implemented
+         * @param fn
+         *  function to execute on each quadruplet of integral indices
+         */
+        virtual void foreach(const foreach_fn_t& fn) const;
+    };
 
-private:
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const override {
-        elem = data[i*m_norb_3+j*m_norb2+k*m_norb+l];
-    }
+    /**
+     * basic (practically unused) indexing scheme which assumes no permutational symmetries.
+     * this is actually an unphysical assumption, since any two-electron integrals will have D symmetry to exploit
+     */
+    struct IndexerSymNone : Indexer {
+        const size_t m_norb2, m_norb3;
 
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<std::complex<defs::ham_comp_t>> &data, std::complex<defs::ham_comp_t> &elem) const override {
-        elem = data[i*m_norb_3+j*m_norb2+k*m_norb+l];
-    }
+        IndexerSymNone(size_t norb);
 
-    void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l, SharedArray<defs::ham_comp_t> &data,
-             const defs::ham_comp_t &elem) const override {
-        data.set(i*m_norb_3+j*m_norb2+k*m_norb+l, elem);
-    }
+        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
 
-    void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             SharedArray<std::complex<defs::ham_comp_t>> &data,
-             const std::complex<defs::ham_comp_t> &elem) const override {
-        data.set(i*m_norb_3+j*m_norb2+k*m_norb+l, elem);
-    }
-};
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
 
-struct IntegralArray2e_2fold : IntegralArray2e {
-    IntegralArray2e_2fold(size_t norb) : IntegralArray2e(norb, trig(norb*norb, 0)){}
+    };
 
-private:
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const override {
-        auto ij = i*m_norb+j;
-        auto kl = k*m_norb+l;
-        elem = ij>=kl ? data[trig(ij, kl)] : data[trig(kl, ij)];
-    }
+    /**
+     * indexing scheme which only assumes hermiticity. this is another unphysical scheme for the same reason as above
+     */
+    struct IndexerSymH : Indexer {
+        IndexerSymH(size_t norb);
 
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<std::complex<defs::ham_comp_t>> &data, std::complex<defs::ham_comp_t> &elem) const override {
-        auto ij = i*m_norb+j;
-        auto kl = k*m_norb+l;
-        elem = ij>=kl ? data[trig(ij, kl)] : data[trig(kl, ij)];
-    }
+        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
 
-    void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l, SharedArray<defs::ham_comp_t> &data,
-             const defs::ham_comp_t &elem) const override {
-        auto ij = i*m_norb+j;
-        auto kl = k*m_norb+l;
-        data.set(ij>=kl ? trig(ij, kl) : trig(kl, ij), elem);
-    }
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
 
-    void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             SharedArray<std::complex<defs::ham_comp_t>> &data,
-             const std::complex<defs::ham_comp_t> &elem) const override {
-        auto ij = i*m_norb+j;
-        auto kl = k*m_norb+l;
-        data.set(ij>=kl ? trig(ij, kl) : trig(kl, ij), elem);
-    }
-};
+    };
+
+    /**
+     * lowest-symmetry conceivably useful indexing scheme. for use when orbitals are complex, and H is non-hermitian
+     */
+    struct IndexerSymD : Indexer {
+        IndexerSymH m_sym_h;
+        IndexerSymD(size_t norb);
+
+        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+    };
+
+    /**
+     * Indexing scheme which does not assume real orbitals, but assumes hermiticity.
+     * 4-fold permutational symmetry is treated as though we have two tandem 8-fold arrays.
+     * in the DH case, we have one eightfold array corresponding to elements equivalent to:
+     *    (x)         (Dx)       (HKx)      (HDKx)
+     *  <ab|ij>  =  <ba|ji>  =  <ij|ab>  =  <ji|ba>
+     *
+     *  and another corresponding to elements equivalent to:
+     *    (Rx)       (DRx)      (HRKx)      (HDRKx)
+     *  <aj|ib>  =  <ja|bi>  =  <ib|aj>  =  <bi|ja>
+     *
+     *  we have to fuse index pairs which can be reversed under the application of R and DR: (bj, ai)
+     *
+     *  determining the index (data offset) and whether to apply complex conjugation is simply a case of keeping track
+     *  of which of the permuting operations (H, I, R) are required to bring the given indices to the canonical ordering
+     *  i.e. b>=j, a>=i, bj>=ai
+     */
+    struct IndexerSymDH : Indexer {
+        const size_t m_hir_size;
+        IndexerSymDH(size_t norb);
+
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+
+        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+
+    };
+
+    /**
+     * Indexing scheme which does not assume hermiticity, but assumes real orbitals.
+     * 4-fold permutational symmetry is treated as though we have two tandem 8-fold arrays.
+     * in the DR case, we have one eightfold array corresponding to elements equivalent to:
+     *    (x)         (Rx)       (Dx)        (DRx)
+     *  <ab|ij>  =  <aj|ib>  =  <ba|ji>  =  <ja|bi>
+     *
+     *  and another corresponding to elements equivalent to:
+     *   (HKx)      (HRKx)      (HDKx)      (HDRKx)
+     *  <ij|ab>  =  <ib|aj>  =  <ji|ba>  =  <bi|ja>
+     *
+     *  we have to fuse index pairs which can be reversed under the application of R and DR: (bj, ai)
+     *
+     *  determining the index (data offset) and whether to apply complex conjugation is simply a case of keeping track
+     *  of which of the permuting operations (H, I, R) are required to bring the given indices to the canonical ordering
+     *  i.e. b>=j, a>=i, bj>=ai
+     */
+    struct IndexerSymDR : Indexer {
+        const size_t m_hir_size;
+        IndexerSymDR(size_t norb);
+
+        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+    };
+
+    /**
+     * indexer with full "8-fold" symmetry. for use with most non-relativistic ab-initio Hamiltonians:
+     *  - real orbitals
+     *  - Hermitian H
+     */
+    struct IndexerSymDHR : Indexer {
+        IndexerSymDHR(size_t norb);
+
+        size_t index_only(size_t a, size_t b, size_t i, size_t j) const;
+
+        std::pair<size_t, bool> index_and_conj(size_t a, size_t b, size_t i, size_t j) const;
+    };
 
 
-struct IntegralArray2e_8fold : IntegralArray2e {
-    IntegralArray2e_8fold(size_t norb): IntegralArray2e(norb, trig(trig(norb, 0), trig(norb, 0))){}
+    template<typename T>
+    struct Array {
+        const size_t m_norb;
+        Array(size_t norb): m_norb(norb){}
+        virtual ~Array() = default;
 
-private:
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const override {
-        if (i>=j){
-            auto ij = trig(i, j);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ij|kl)               (kl|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
+        virtual bool set(size_t a, size_t b, size_t i, size_t j, T elem) = 0;
+
+        virtual T get(size_t a, size_t b, size_t i, size_t j) const = 0;
+
+        virtual syms::Sym sym() const = 0;
+    };
+
+    template<typename indexer_t, typename T>
+    struct IndexedArray : Array<T> {
+        static_assert(std::is_base_of<IntegralIndexer, indexer_t>::value, "invalid template class");
+        using Array<T>::set;
+        using Array<T>::get;
+        indexer_t m_indexer;
+        SharedIntegralStorage<T> m_data;
+
+        IndexedArray(size_t norb) :
+            Array<T>(norb), m_indexer(norb), m_data(static_cast<const IntegralIndexer &>(m_indexer).m_size) {}
+
+        bool set(size_t a, size_t b, size_t i, size_t j, T elem) override {
+            // any compiler should statically execute this conditional
+            if (!consts::is_complex<T>())
+                return m_data.set_data(m_indexer.index_only(a, b, i, j), elem);
             else {
-                auto kl = trig(l, k);
-                //                      (ij|lk)               (lk|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
+                const auto pair = m_indexer.index_and_conj(a, b, i, j);
+                return m_data.set_data(pair.first, pair.second ? consts::conj(elem) : elem);
             }
         }
-        else {
-            auto ij = trig(j, i);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ji|kl)               (kl|ji)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
+
+        T get(size_t a, size_t b, size_t i, size_t j) const override {
+            // any compiler should statically execute this conditional
+            if (!consts::is_complex<T>())
+                return m_data.get_data(m_indexer.index_only(a, b, i, j));
             else {
-                auto kl = trig(l, k);
-                //                      (ji|lk)               (lk|ji)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
+                const auto pair = m_indexer.index_and_conj(a, b, i, j);
+                const auto element = m_data.get_data(pair.first);
+                return pair.second ? consts::conj(element) : element;
             }
+        }
+
+        syms::Sym sym() const override {
+            return static_cast<const Indexer&>(m_indexer).m_sym;
+        }
+    };
+
+    template<typename T> using SymNone = IndexedArray<IndexerSymNone, T>;
+    template<typename T> using SymH = IndexedArray<IndexerSymH, T>;
+    template<typename T> using SymD = IndexedArray<IndexerSymD, T>;
+    template<typename T> using SymDH = IndexedArray<IndexerSymDH, T>;
+    template<typename T> using SymDR = IndexedArray<IndexerSymDR, T>;
+    template<typename T> using SymDHR = IndexedArray<IndexerSymDHR, T>;
+
+    /**
+     * @tparam T
+     *  matrix element type
+     * @param norb
+     *  number of orbitals to pass to ctor
+     * @param sym
+     *  the symmetry to use in the new allocation (decremented at output)
+     * @return
+     *  new instance of the type corresponding to the requested symmetry
+     */
+    template<typename T>
+    std::unique_ptr<Array<T>> make(size_t norb, syms::Sym sym){
+        typedef std::unique_ptr<Array<T>> ptr_t;
+        using namespace syms;
+        switch (sym) {
+            case(Null):
+                return {};
+            case(None):
+                return ptr_t(new SymNone<T>(norb));
+            case(H):
+                return ptr_t(new SymH<T>(norb));
+            case D:
+                return ptr_t(new SymD<T>(norb));
+            case DH:
+                return ptr_t(new SymDH<T>(norb));
+            case DR:
+                return ptr_t(new SymDR<T>(norb));
+            case DHR:
+                return ptr_t(new SymDHR<T>(norb));
+            default:
+                return {};
         }
     }
 
     /**
-     * it's impossible for real orbitals to yield integrals with non-zero imaginary part, so in this case it must be
-     * assumed that we are (wastefully) using a complex container for real-valued integrals
+     * when attempting to fill the integral arrays, the highest symmetry is assumed at first. when a counter example to
+     * that symmetry assumption is reached, the parse is restarted with the next lower symmetry until the entire
+     * integral array can be stored without contradiction
+     * @tparam T
+     *  matrix element type
+     * @param ptr
+     *  smart pointer to the currently-allocated array
      */
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<std::complex<defs::ham_comp_t>> &data, std::complex<defs::ham_comp_t> &elem) const override {
-        if (i>=j){
-            auto ij = trig(i, j);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ij|kl)               (kl|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ij|lk)               (lk|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
+    template<typename T>
+    void next_sym_attempt(std::unique_ptr<Array<T>>& ptr){
+        if (!ptr) return;
+        std::unique_ptr<Array<T>> new_ptr = make<T>(ptr->m_norb, syms::Sym(ptr->sym()-1));
+        if (!new_ptr) {
+            ptr = nullptr;
+            return;
         }
-        else {
-            auto ij = trig(j, i);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ji|kl)               (kl|ji)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ji|lk)               (lk|ji)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
-        }
+        ptr = std::move(new_ptr);
     }
-
-    void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l, SharedArray<defs::ham_comp_t> &data,
-             const defs::ham_comp_t &elem) const override {
-        if (i>=j){
-            auto ij = trig(i, j);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ij|kl)               (kl|ij)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ij|lk)               (lk|ij)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-        }
-        else {
-            auto ij = trig(j, i);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ji|kl)               (kl|ji)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ji|lk)               (lk|ji)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-        }
-    }
-
-    void set(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             SharedArray<std::complex<defs::ham_comp_t>> &data,
-             const std::complex<defs::ham_comp_t> &elem) const override {
-        if (i>=j){
-            auto ij = trig(i, j);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ij|kl)               (kl|ij)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ij|lk)               (lk|ij)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-        }
-        else {
-            auto ij = trig(j, i);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ji|kl)               (kl|ji)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ji|lk)               (lk|ji)
-                data.set(ij>=kl ? trig(ij, kl): trig(kl, ij), elem);
-            }
-        }
-    }
-};
-
-/**
- * 4-fold permutational symmetry is treated as though we have two tandem 8-fold arrays,
- *                                                    "I"     "H"          "IH"
- * one for the indices equivalent to (ij|kl), i.e. (kl|ij), (ji|lk), and (lk|ji)
- * and another for those equivalent to (ij|lk) i.e. (lk|ij), (ji|kl), and (kl|ji)
- */
-struct IntegralArray2e_4fold : IntegralArray2e {
-    const size_t m_n8fold;
-    IntegralArray2e_4fold(size_t norb):
-        IntegralArray2e(norb, 2*trig(trig(norb, 0), trig(norb, 0))),
-        m_n8fold(m_data.size()/2){}
-
-private:
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<defs::ham_comp_t> &data, defs::ham_comp_t &elem) const override {
-        if (i>=j){
-            auto ij = trig(i, j);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ij|kl)               (kl|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ij|lk)                        (lk|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)+m_n8fold]: data[trig(kl, ij)+m_n8fold];
-            }
-        }
-        else {
-            auto ij = trig(j, i);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ji|kl)                        (kl|ji)
-                elem = (ij>=kl) ? data[trig(ij, kl)+m_n8fold]: data[trig(kl, ij)+m_n8fold];
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ji|lk)               (lk|ji)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
-        }
-    }
-
-    void get(const size_t &i, const size_t &j, const size_t &k, const size_t &l,
-             const SharedArray<std::complex<defs::ham_comp_t>> &data, std::complex<defs::ham_comp_t> &elem) const override {
-        if (i>=j){
-            auto ij = trig(i, j);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                      (ij|kl)               (kl|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)]: data[trig(kl, ij)];
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ij|lk)                        (lk|ij)
-                elem = (ij>=kl) ? data[trig(ij, kl)+m_n8fold]: data[trig(kl, ij)+m_n8fold];
-            }
-        }
-        else {
-            auto ij = trig(j, i);
-            if (k>=l){
-                auto kl = trig(k, l);
-                //                     (ji|kl) = (ij|lk)*                     (kl|ji) = (lk|ij)* = (ij|lk)*
-                elem = std::conj((ij>=kl) ? data[trig(ij, kl)+m_n8fold]: data[trig(kl, ij)+m_n8fold]);
-            }
-            else {
-                auto kl = trig(l, k);
-                //                      (ji|lk) = (ij|kl)*               (lk|ji) = (kl|ij)* = (ij|kl)*
-                elem =  std::conj((ij>=kl) ? data[trig(ij, kl)]: std::conj(data[trig(kl, ij)]));
-            }
-        }
-    }
-};
-
-
-
-
+}
 
 #endif //M7_INTEGRALARRAY2E_H

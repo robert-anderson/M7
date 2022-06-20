@@ -5,7 +5,7 @@
 #include <M7_lib/basis/Suites.h>
 #include "Wavefunction.h"
 
-Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisData bd) :
+Wavefunction::Wavefunction(const conf::Document &opts, const sys::Sector& sector) :
         Communicator<WalkerTableRow, SpawnTableRow, false>(
                 "wavefunction",
                 opts.m_propagator.m_nw_target,
@@ -13,7 +13,7 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisData bd) :
                 opts.m_wavefunction.m_buffers,
                 opts.m_wavefunction.m_load_balancing,
                 {
-                        {bd, opts.m_wavefunction.m_nroot,
+                        {sector.basis(), opts.m_wavefunction.m_nroot,
                          opts.m_av_ests.any_bilinears() ? 2ul:1ul, need_av_weights(opts)},
                         MappedTableBase::nbucket_guess(
                                 opts.m_propagator.m_nw_target / mpi::nrank(),
@@ -21,10 +21,10 @@ Wavefunction::Wavefunction(const fciqmc_config::Document &opts, BasisData bd) :
                         opts.m_wavefunction.m_hash_mapping.m_remap_nlookup,
                         opts.m_wavefunction.m_hash_mapping.m_remap_ratio
                 },
-                {{bd, need_send_parents(opts)}}),
+                {{sector.basis(), need_send_parents(opts)}}),
         Archivable("wavefunction", opts.m_wavefunction.m_archivable),
         m_opts(opts),
-        m_bd(bd),
+        m_sector(sector),
         m_format(m_store.m_row.m_weight.m_format),
         m_ninitiator(m_format),
         m_delta_ninitiator(m_format),
@@ -73,7 +73,7 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, co
     BufferedTable<WalkerTableRow> m_buffer("", {m_store.m_row});
     m_buffer.push_back();
     RowHdf5Reader<WalkerTableRow> row_reader(m_buffer.m_row, parent, name, h5_field_names());
-    suite::Conns conn(m_bd);
+    suite::Conns conn(m_sector.size());
 
     row_reader.restart();
     DEBUG_ASSERT_EQ(row_reader.m_weight.nelement(), m_format.m_nelement, "row reader has incompatible dimensionality");

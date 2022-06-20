@@ -1,5 +1,5 @@
 //
-// Created by rja on 10/08/2021.
+// Created by Robert J. Anderson on 10/08/2021.
 //
 
 #ifndef M7_RDM_H
@@ -35,8 +35,8 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
 
     static size_t nrow_estimate(size_t nann, size_t ncre, size_t nsite);
 
-    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec);
-    FermionRdm(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec):
+    FermionRdm(const conf::FermionRdm &opts, size_t nrow_crude_est, size_t nsite, size_t nelec);
+    FermionRdm(const conf::FermionRdm &opts, size_t nsite, size_t nelec):
     FermionRdm(opts, nrow_estimate(opts.m_rank, opts.m_rank, nsite), nsite, nelec){}
 
     void make_contribs(const fields::FrmOnv &src_onv, const conn::FrmOnv &conn, const FrmOps &com,
@@ -116,7 +116,7 @@ struct RdmGroup {
     // particle number-conserving, fermion RDMs
     std::array<std::unique_ptr<FermionRdm>, defs::exsig_nop_mask_frm> m_frm_rdms;
 
-    RdmGroup(const fciqmc_config::FermionRdm &opts, size_t nsite, size_t nelec){
+    RdmGroup(const conf::FermionRdm &opts, size_t nsite, size_t nelec){
         for (auto rank: opts.m_ranks.get())
             m_frm_rdms[rank] = std::unique_ptr<FermionRdm>(new FermionRdm(opts, nsite, nelec));
     }
@@ -163,7 +163,7 @@ struct RdmGroup {
         e2 = mpi::all_sum(e2);
         trace = mpi::all_sum(trace);
         ASSERT(!consts::nearly_zero(std::abs(trace), 1e-14));
-        const auto norm = consts::real(trace) / integer_utils::combinatorial(ham.nelec(), 2);
+        const auto norm = consts::real(trace) / utils::integer::combinatorial(ham.nelec(), 2);
         return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2))/norm;
     }
 

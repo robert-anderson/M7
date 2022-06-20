@@ -1,11 +1,11 @@
 //
-// Created by rja on 05/07/2021.
+// Created by Robert J. Anderson on 05/07/2021.
 //
 
 #ifndef M7_ARCHIVABLE_H
 #define M7_ARCHIVABLE_H
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/util/Timer.h>
 
 #include "HDF5Wrapper.h"
@@ -27,7 +27,7 @@ struct Archivable {
 
     Archivable(std::string name, bool load, bool save, bool chkpt);
 
-    Archivable(std::string name, const fciqmc_config::Archivable &opts);
+    Archivable(std::string name, const conf::Archivable &opts);
 
     /**
      * ctor for object which are not optionally archivable
@@ -36,7 +36,7 @@ struct Archivable {
      * @param archive_opts
      *  Global options for the archive
      */
-    Archivable(std::string name, const fciqmc_config::Archive &archive_opts);
+    Archivable(std::string name, const conf::Archive &archive_opts);
 
     virtual ~Archivable() {}
 
@@ -66,7 +66,7 @@ struct Metadata : Archivable {
  * creates and manages the lifetimes of HDF5 archives
  */
 struct Archive {
-    const fciqmc_config::Document m_opts;
+    const conf::Document m_opts;
     const bool m_do_load, m_do_save, m_do_chkpts;
     size_t m_nchkpt = 0ul;
     size_t m_icycle_last_chkpt = 0ul;
@@ -76,7 +76,7 @@ struct Archive {
      */
     std::list<Archivable *> m_members;
 
-    explicit Archive(const fciqmc_config::Document &opts);
+    explicit Archive(const conf::Document &opts);
 
     ~Archive();
 

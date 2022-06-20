@@ -1,5 +1,5 @@
 //
-// Created by rja on 25/06/2021.
+// Created by Robert J. Anderson on 25/06/2021.
 //
 
 #ifndef M7_YAMLWRAPPER_H

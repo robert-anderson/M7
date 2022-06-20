@@ -1,15 +1,15 @@
 //
-// Created by rja on 18/05/2020.
+// Created by Robert J. Anderson on 18/05/2020.
 //
 
 #include "MagnitudeLogger.h"
 
-MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, size_t nexlvl, bool static_tau,
+MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, size_t nexcase, bool static_tau,
                                  bool static_probs, double tau_min, double tau_max, double prob_min, size_t period) :
         m_max_bloom(max_bloom), m_ndraw_min(ndraw_min), m_static_tau(static_tau), m_static_probs(static_probs),
-        m_tau_min(tau_min), m_tau_max(tau_max), m_prob_min(prob_min), m_period(period), m_ndraw({nexlvl}),
-        m_gamma({nexlvl}), m_new_probs(nexlvl){
-    log::info("Initializing magnitude logger with max_bloom {} for {} excitation levels", max_bloom, nexlvl);
+        m_tau_min(tau_min), m_tau_max(tau_max), m_prob_min(prob_min), m_period(period), m_ndraw({nexcase}),
+        m_gamma({nexcase}), m_new_probs(nexcase){
+    log::info("Initializing magnitude logger with max_bloom {} for {} excitation levels", max_bloom, nexcase);
     log::info("Dynamic tau optimization: {}", !m_static_tau);
     if (!m_static_tau)
         log::info("Dynamic tau to be kept above {} and below {}", m_tau_min, m_tau_max);
@@ -18,12 +18,12 @@ MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, s
         log::info("Dynamic excitation level probabilities to be kept above {}", m_prob_min);
 }
 
-void MagnitudeLogger::log(const size_t &iexlvl, const defs::ham_t &helem, const defs::prob_t &prob) {
+void MagnitudeLogger::log(size_t icase, const defs::ham_t &helem, const defs::prob_t &prob) {
     DEBUG_ASSERT_NE(prob, 0.0, "null draw should never be logged");
-    auto& hi = m_gamma.m_local[iexlvl];
+    auto& hi = m_gamma.m_local[icase];
     auto mag = std::abs(helem) / prob;
     if (mag > hi) hi = mag;
-    ++m_ndraw.m_local[iexlvl];
+    ++m_ndraw.m_local[icase];
 }
 
 void MagnitudeLogger::update_tau(double &tau, const defs::ham_comp_t &gamma_sum) {

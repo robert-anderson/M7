@@ -1,5 +1,5 @@
 //
-// Created by rja on 07/01/2022.
+// Created by Robert J. Anderson on 07/01/2022.
 //
 
 #include "M7_lib/linalg/Sparse.h"

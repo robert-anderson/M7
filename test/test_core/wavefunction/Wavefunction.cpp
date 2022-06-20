@@ -1,19 +1,19 @@
 //
-// Created by rja on 18/05/2021.
+// Created by Robert J. Anderson on 18/05/2021.
 //
 
 #include <M7_lib/wavefunction/Wavefunction.h>
-#include <M7_lib/basis/CiSpaces.h>
 #include "gtest/gtest.h"
 
+#if 0
 TEST(Wavefunction, DynamicRowSet){
-    fciqmc_config::Document opts;
+    conf::Document opts;
     opts.m_propagator.m_nw_target = 1000;
     opts.m_wavefunction.m_load_balancing.m_nblock_per_rank = 3;
     opts.verify();
     const size_t nsite = 6;
     const size_t nelec = 6;
-    const BasisData bd = {nsite, 0};
+    const BasisData bd = {nsite, {}};
     Wavefunction wf(opts, bd);
     ci_gen::SpinSym gen(bd, nelec, 0, ci_gen::default_include_fn(wf));
 
@@ -39,3 +39,4 @@ TEST(Wavefunction, DynamicRowSet){
         rowset.add_(row);
     }
 }
+#endif

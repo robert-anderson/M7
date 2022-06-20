@@ -1,5 +1,5 @@
 //
-// Created by rja on 04/03/2022.
+// Created by Robert J. Anderson on 04/03/2022.
 //
 
 #ifndef M7_DECODEDBOSONV_H

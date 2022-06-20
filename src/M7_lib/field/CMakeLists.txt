@@ -12,8 +12,6 @@ target_sources(M7_lib
         FrmBosOnvField.h
         FrmOnvField.cpp
         FrmOnvField.h
-        FrmXonvField.cpp
-        FrmXonvField.h
         MaeIndsField.cpp
         MaeIndsField.h
         Mbf.cpp

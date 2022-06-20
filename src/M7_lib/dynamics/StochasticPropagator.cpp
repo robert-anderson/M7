@@ -2,25 +2,23 @@
 // Created by Robert John Anderson on 2020-04-11.
 //
 
-#include <M7_lib/excitgen/HubbardUniform.h>
 #include "StochasticPropagator.h"
 
-
-StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const fciqmc_config::Document &opts,
-                                           const NdFormat<defs::ndim_wf> &wf_fmt) :
-        Propagator(opts, ham, wf_fmt), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
-        m_excit_gens(ham, opts.m_propagator, m_prng),
+StochasticPropagator::StochasticPropagator(const Hamiltonian &ham, const conf::Document &opts,
+                                           const Wavefunction &wf) :
+        Propagator(opts, ham, wf), m_prng(opts.m_prng.m_seed, opts.m_prng.m_ngen_block),
+        m_excit_gen_group(ham, opts.m_propagator, m_prng, wf.m_sector.particles()),
         m_mag_log(opts.m_propagator.m_max_bloom,
                   opts.m_propagator.m_ndraw_min_for_dynamic,
-                  m_excit_gens.size(),
+                  m_excit_gen_group.ncase(),
                   opts.m_propagator.m_static_tau,
                   opts.m_propagator.m_static_probs,
                   opts.m_propagator.m_tau_min,
                   opts.m_propagator.m_tau_max,
                   opts.m_propagator.m_min_exlvl_prob,
                   opts.m_propagator.m_period),
-        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag) {
-    m_excit_gens.log_breakdown();
+        m_min_spawn_mag(opts.m_propagator.m_min_spawn_mag),
+        m_min_death_mag(opts.m_propagator.m_min_death_mag){
 }
 
 
@@ -45,21 +43,31 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
     auto nattempt = size_t(m_prng.stochastic_round(abs_weight, 1.0, prob_nattempt_floor));
     if (!nattempt) return;
-
-    m_excit_gens.clear_cached_orbs();
+    /*
+     * clear the cached-orbital representations of the current MBF
+     */
+    src_mbf.m_decoded.clear();
 
     auto &conn = m_conn[src_mbf];
     auto &dst_mbf = m_dst[src_mbf];
     for (size_t iattempt = 0ul; iattempt < nattempt; ++iattempt) {
 
         conn.clear();
-        auto iex = m_excit_gens.draw_iex();
-        if (!m_excit_gens.draw(iex, src_mbf, prob_gen, helem, conn)) {
+        auto icase = m_excit_gen_group.draw_icase();
+        if (!m_excit_gen_group.draw(icase, src_mbf, prob_gen, helem, conn)) {
             // null excitation generated
             continue;
         }
-        m_mag_log.log(iex, helem, prob_gen);
-        prob_gen *= m_excit_gens.get_prob(iex);
+        /*
+         * the magnitude logging is case-resolved, so the relevant magnitude is the one scaled by the reciprocal of the
+         * probability that conn was drawn from src given that the case was picked
+         */
+        m_mag_log.log(icase, helem, prob_gen);
+        /*
+         * scale by the probability of drawing this case (and add probs of other cases which could have produced the
+         * same connection if required)
+         */
+        m_excit_gen_group.update_prob(icase, src_mbf, prob_gen, conn);
 
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob_gen;
@@ -69,8 +77,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than
          * the minimum magnitude, otherwise it is stochastically rounded with respect to that magnitude
          */
-        auto thresh_delta = m_prng.stochastic_threshold(
-                delta, m_opts.m_propagator.m_min_spawn_mag, prob_thresh_accept);
+        auto thresh_delta = m_prng.stochastic_threshold(delta, m_min_spawn_mag, prob_thresh_accept);
         if (thresh_delta==0.0) continue;
 
         if (wf.recv().m_row.m_send_parents) {
@@ -120,26 +127,25 @@ void StochasticPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
         // the probability that each unit walker will die
         auto death_rate = (hdiag - m_shift[ipart]) * tau();
         if (death_rate == 0.0) return;
-        if (death_rate < 0.0 || death_rate > 1.0 || m_opts.m_propagator.m_min_spawn_mag == 0.0) {
+        if (death_rate < 0.0 || death_rate > 1.0 || m_min_spawn_mag == 0.0) {
             // clone / create antiwalkers continuously
             wf.scale_weight(ipart, 1 - death_rate);
         } else {
             // kill stochastically
-            wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate),
-                                                         m_opts.m_propagator.m_min_death_mag));
+            wf.set_weight(ipart, m_prng.stochastic_round(row.m_weight[ipart] * (1 - death_rate), m_min_death_mag));
         }
     }
 }
 
-size_t StochasticPropagator::nexcit_gen() const {
-    return m_excit_gens.size();
+size_t StochasticPropagator::ncase_excit_gen() const {
+    return m_excit_gen_group.ncase();
 }
 
-std::vector<defs::prob_t> StochasticPropagator::exlvl_probs() const {
-    return m_excit_gens.get_probs();
+std::vector<defs::prob_t> StochasticPropagator::excit_gen_case_probs() const {
+    return m_excit_gen_group.get_probs();
 }
 
 void StochasticPropagator::update(const size_t &icycle, const Wavefunction &wf) {
     Propagator::update(icycle, wf);
-    m_mag_log.update(icycle, m_tau, m_excit_gens);
+    m_mag_log.update(icycle, m_tau, m_excit_gen_group);
 }

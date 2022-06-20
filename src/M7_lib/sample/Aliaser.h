@@ -14,32 +14,36 @@
 #include <M7_lib/parallel/MPIAssert.h>
 #include "PRNG.h"
 
-class Aliaser {
+struct Aliaser {
     const size_t m_nrow, m_nprob;
+private:
     SharedMatrix<defs::prob_t> m_prob_table;
     SharedMatrix<size_t> m_alias_table;
     SharedArray<defs::prob_t> m_norm;
 
 public:
-    Aliaser(const size_t &nrow, const size_t &nprob);
+    Aliaser(size_t nrow, size_t nprob);
 
-    Aliaser(const size_t &nprob) : Aliaser(1, nprob) {}
+    void update(size_t irow, const defs::prob_t *probs, size_t nprob);
 
-    Aliaser(const std::vector<defs::prob_t> &probs);
+    void update(size_t irow, const std::vector<defs::prob_t> &probs);
 
-    void update(const size_t &irow, const defs::prob_t *probs, const size_t nprob);
+    size_t draw(size_t irow, PRNG &prng) const;
 
-    void update(const size_t &irow, const std::vector<defs::prob_t> &probs);
+    defs::prob_t norm(size_t irow) const;
+};
+
+class SingleAliaser : public Aliaser {
+public:
+    SingleAliaser(size_t nprob);
+
+    SingleAliaser(const std::vector<defs::prob_t> &probs);
 
     void update(const std::vector<defs::prob_t> &probs);
 
-    size_t draw(const size_t &irow, PRNG &prng) const;
-
     size_t draw(PRNG &prng) const;
 
-    const defs::prob_t &norm(const size_t &irow) const;
-
-    const size_t &nprob() const;
+    defs::prob_t norm() const;
 };
 
 #endif //M7_ALIASER_H

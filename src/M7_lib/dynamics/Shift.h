@@ -1,5 +1,5 @@
 //
-// Created by rja on 03/06/2021.
+// Created by Robert J. Anderson on 03/06/2021.
 //
 
 #ifndef M7_SHIFT_H
@@ -18,7 +18,7 @@
  * population control bias as described in Phys. Rev. B 103, 155135
  */
 struct Reweighter {
-    const fciqmc_config::Shift &m_opts;
+    const conf::Shift &m_opts;
     buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_const_shift;
     /**
      * the reweighting epochs begin some specified number of cycles after variable shift mode begins
@@ -33,7 +33,7 @@ struct Reweighter {
      * products over all histories
      */
     buffered::Numbers<defs::ham_comp_t, defs::ndim_wf> m_total;
-    Reweighter(const fciqmc_config::Shift& opts, const NdFormat<defs::ndim_wf>& wf_fmt);
+    Reweighter(const conf::Shift& opts, const NdFormat<defs::ndim_wf>& wf_fmt);
     /**
      * decide whether the reweighting epoch should begin, and if it should, fix the constant shift to the current
      * average shift value
@@ -82,7 +82,7 @@ private:
  * propagation
  */
 struct Shift {
-    const fciqmc_config::Document &m_opts;
+    const conf::Document &m_opts;
     /**
      * the numbers of walkers on each WF part in the last period is stored so that the growth rate can be computed
      */
@@ -112,7 +112,7 @@ struct Shift {
     InteractiveVariable<defs::wf_comp_t> m_nwalker_target;
     Reweighter m_reweighter;
 
-    Shift(const fciqmc_config::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
+    Shift(const conf::Document &opts, const NdFormat<defs::ndim_wf>& wf_fmt);
 
     const defs::ham_comp_t & operator[](const size_t& ipart);
 

@@ -1,5 +1,5 @@
 //
-// Created by rja on 25/05/2021.
+// Created by Robert J. Anderson on 25/05/2021.
 //
 
 #include "ProgressMonitor.h"

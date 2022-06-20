@@ -1,5 +1,5 @@
 //
-// Created by rja on 13/07/2021.
+// Created by Robert J. Anderson on 13/07/2021.
 //
 
 #include "M7_lib/sort/Comparators.h"

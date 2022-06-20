@@ -1,5 +1,5 @@
 //
-// Created by rja on 13/12/2020.
+// Created by Robert J. Anderson on 13/12/2020.
 //
 
 #ifndef M7_HDF5WRAPPER_H
@@ -168,7 +168,7 @@ namespace hdf5 {
 
         AttributeReaderBase(hid_t parent_handle, std::string name, const defs::inds &shape, hid_t h5type) :
                 m_parent_handle(parent_handle), m_h5type(h5type), m_shape(shape),
-                m_nelement(nd_utils::nelement(shape)) {
+                m_nelement(utils::nd::nelement(shape)) {
             m_handle = H5Aopen_name(m_parent_handle, name.c_str());
         }
 
@@ -389,7 +389,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         save(std::string name, const std::vector<T>& v, const defs::inds& shape, std::vector<std::string> dim_labels={}, size_t irank=0ul){
-            REQUIRE_EQ_ALL(v.size(), nd_utils::nelement(shape), "vector and shape are incompatible");
+            REQUIRE_EQ_ALL(v.size(), utils::nd  ::nelement(shape), "vector and shape are incompatible");
             save(name, v.data(), shape, {}, irank);
         }
 
@@ -545,7 +545,7 @@ namespace hdf5 {
         template<typename T>
         typename std::enable_if<type_ind<T>() != ~0ul, void>::type
         load(std::string name, std::vector<T>& v, const defs::inds& shape){
-            REQUIRE_EQ_ALL(v.size(), nd_utils::nelement(shape), "vector and shape are incompatible");
+            REQUIRE_EQ_ALL(v.size(), utils::nd::nelement(shape), "vector and shape are incompatible");
             load(name, v.data(), shape);
         }
 
@@ -573,7 +573,7 @@ namespace hdf5 {
          */
         template<typename T>
         std::vector<T> load_vector(std::string name) {
-            auto nelement = nd_utils::nelement(get_dataset_shape(name));
+            auto nelement = utils::nd::nelement(get_dataset_shape(name));
             std::vector<T> tmp(nelement);
             load(name, tmp);
             return tmp;

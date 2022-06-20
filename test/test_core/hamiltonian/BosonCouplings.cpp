@@ -4,8 +4,8 @@
 
 #include <M7_lib/table/BufferedFields.h>
 #include "gtest/gtest.h"
-#include "M7_lib/hamiltonian/LadderHam.h"
-#include "M7_lib/hamiltonian/BosHam.h"
+#include "M7_lib/hamiltonian/frmbos/FrmBosHam.h"
+#include "M7_lib/hamiltonian/bos/BosHam.h"
 
 #if 0
 TEST(BosonCouplings, Element_b0) {

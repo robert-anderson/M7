@@ -1,15 +1,16 @@
 //
-// Created by anderson on 12/3/21.
+// Created by Robert J. Anderson on 12/3/21.
 //
 
 #include "CsvFileReader.h"
+#include "M7_lib/util/String.h"
 
 CsvFileReader::CsvFileReader(const std::string &fname, std::string delimiters, size_t iline) :
         FileReader(fname, iline), m_delimiters(std::move(delimiters)) {}
 
 bool CsvFileReader::next(std::vector<std::string> &tokens) {
     if (!FileReader::next(m_work_line)) return false;
-    string_utils::split(m_work_line, tokens, m_delimiters);
+    utils::string::split(m_work_line, tokens, m_delimiters);
     return true;
 }
 

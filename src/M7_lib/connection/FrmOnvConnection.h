@@ -1,5 +1,5 @@
 //
-// Created by rja on 23/07/2021.
+// Created by Robert J. Anderson on 23/07/2021.
 //
 
 #ifndef M7_FRMONVCONNECTION_H
@@ -13,24 +13,22 @@
  * the underlying index vector
  */
 class FrmOps {
-    const size_t m_nsite;
+    const sys::frm::Size m_sites;
     defs::inds m_inds;
 public:
-    FrmOps(size_t nsite): m_nsite(nsite) {
-        m_inds.reserve(2*nsite);
+    FrmOps(size_t nsite): m_sites(nsite) {
+        m_inds.reserve(2*m_sites);
     }
 
-    FrmOps(const FrmOps& other): FrmOps(other.m_nsite){}
+    FrmOps(const FrmOps& other): FrmOps(other.m_sites){}
 
     FrmOps& operator=(const FrmOps& other){
-        DEBUG_ASSERT_EQ(other.m_inds.capacity(), m_inds.capacity(), "incompatible FrmOps instances");
-        m_inds.assign(other.m_inds.cbegin(), other.m_inds.cend());
+        m_inds = other.m_inds;
         return *this;
     }
 
     FrmOps& operator=(const defs::inds& inds){
-        DEBUG_ASSERT_LT(inds.size(), m_inds.capacity(), "incompatible FrmOps instances");
-        m_inds.assign(inds.cbegin(), inds.cend());
+        m_inds = inds;
         return *this;
     }
 
@@ -42,7 +40,7 @@ public:
         return m_inds==v;
     }
 
-    const size_t &operator[](const size_t &i) const {
+    const size_t &operator[](size_t i) const {
         DEBUG_ASSERT_LT(i, m_inds.size(), "operator index is OOB");
         return m_inds[i];
     }
@@ -55,37 +53,70 @@ public:
         return m_inds.size();
     }
 
-    size_t capacity() const {
-        return m_inds.capacity();
-    }
-
-    void add(const size_t &i) {
-        DEBUG_ASSERT_TRUE(m_inds.empty() || i > m_inds.back(),
+    void add(size_t ispinorb) {
+        DEBUG_ASSERT_TRUE(m_inds.empty() || ispinorb > m_inds.back(),
                           "spin orbital indices should be added in ascending order");
-        DEBUG_ASSERT_LT(i, capacity(), "spin orbital index is OOB");
-        DEBUG_ASSERT_LT(size(), capacity(),
-                        "should never have more fermion operators than spin orbitals");
-        m_inds.push_back(i);
+        DEBUG_ASSERT_LT(ispinorb, m_sites.m_nspinorb, "spin orbital index OOB");
+        m_inds.push_back(ispinorb);
     }
 
     void add(std::pair<size_t, size_t> pair) {
-        add(FrmOnvField::ibit(pair.first, pair.second, m_nsite));
+        add(m_sites.ispinorb(pair));
     }
 
-    void set(const defs::inds& orbs, const defs::inds& inds){
+    /**
+     * set a selection of spin orbital indices
+     * @param orbs
+     *  spin orbital indices
+     * @param inds
+     *  positions in the orbs vector of the selected spin orbitals
+     */
+    void set_selection(const defs::inds& orbs, const defs::inds& inds) {
         clear();
-        for (const auto& ind: inds) add(orbs[ind]);
+        for (const auto& ind: inds) {
+            DEBUG_ASSERT_LT(ind, orbs.size(), "index OOB");
+            add(orbs[ind]);
+        }
         DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
     }
 
-    void add(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
-        add(pair1);
-        add(pair2);
+    void set(size_t ispinorb){
+        clear();
+        add(ispinorb);
+    }
+
+    void set(size_t ispinorb1, size_t ispinorb2){
+        clear();
+        add(ispinorb1);
+        add(ispinorb2);
+    }
+
+    void set_in_order(size_t ispinorb1, size_t ispinorb2){
+        clear();
+        DEBUG_ASSERT_NE(ispinorb1, ispinorb2, "fermion indices in connection product may not coincide");
+        if (ispinorb1 < ispinorb2) {
+            add(ispinorb1);
+            add(ispinorb2);
+        }
+        else {
+            add(ispinorb2);
+            add(ispinorb1);
+        }
+    }
+
+    void set(std::pair<size_t, size_t> pair){
+        clear();
+        add(pair);
     }
 
     void set(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
         clear();
-        add(pair1, pair2);
+        add(pair1);
+        add(pair2);
+    }
+
+    void set_in_order(std::pair<size_t, size_t> pair1, std::pair<size_t, size_t> pair2){
+        set_in_order(m_sites.ispinorb(pair1), m_sites.ispinorb(pair2));
     }
 
     defs::inds::const_iterator cbegin() const {
@@ -126,7 +157,7 @@ public:
 
     size_t nalpha() const {
         size_t n=0ul;
-        for (auto i: m_inds) n+=i<m_nsite;
+        for (auto i: m_inds) n+=!m_sites.ispin(i);
         return n;
     }
 };
@@ -149,9 +180,12 @@ private:
     mutable std::vector<bool> m_dataword_phases;
 public:
 
-    explicit FrmOnvConnection(size_t nsite);
+    explicit FrmOnvConnection(const sys::frm::Size& size);
 
-    explicit FrmOnvConnection(BasisData bd);
+    /*
+     * universal interface (works with any compile-time value "MBF_TYPE")
+     */
+    explicit FrmOnvConnection(sys::Size size);
 
     explicit FrmOnvConnection(const FrmOnvField& mbf);
     /**
@@ -210,95 +244,6 @@ public:
      * reset the internal state that to of a null excitation
      */
     void clear();
-    /**
-     * convenient wrapper for a fermion number-conserving single excitation
-     * @param ann
-     *  spin orbital index to annihilate from a src determinant
-     * @param cre
-     *  spin orbital index to create in a dst determinant
-     */
-    void add(const size_t &ann, const size_t &cre);
-    /**
-     * convenient wrapper for a fermion number-conserving double excitation
-     * @param ann1
-     *  first spin orbital index to annihilate from a src determinant
-     * @param ann2
-     *  second spin orbital index to annihilate from a src determinant
-     * @param cre1
-     *  first spin orbital index to create in a dst determinant
-     * @param cre2
-     *  second spin orbital index to create in a dst determinant
-     */
-    void add(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2);
-
-    void set(const size_t &ann, const size_t &cre) {
-        clear();
-        add(ann, cre);
-    }
-    void set(const size_t &ann1, const size_t &ann2, const size_t &cre1, const size_t &cre2){
-        clear();
-        add(ann1, ann2, cre1, cre2);
-    }
-
-    /**
-     * convenient wrapper for a fermion number-conserving single excitation
-     *
-     * The pairs are denoting {spin index, site index} to directly index spin orbitals
-     * @param ann
-     *  first spin orbital index pair to annihilate from a src determinant
-     * @param cre
-     *  first spin orbital index pair to create in a dst determinant
-     */
-    void add(
-        std::pair<size_t, size_t> ann,
-        std::pair<size_t, size_t> cre
-    ) {
-        m_ann.add(ann);
-        m_cre.add(cre);
-    };
-
-
-    void set(
-        std::pair<size_t, size_t> ann,
-        std::pair<size_t, size_t> cre
-    ) {
-        clear();
-        add(ann, cre);
-    };
-
-    /**
-     * convenient wrapper for a fermion number-conserving double excitation
-     *
-     * The pairs are denoting {spin index, site index} to directly index spin orbitals
-     * @param ann1
-     *  first spin orbital index pair to annihilate from a src determinant
-     * @param ann2
-     *  second spin orbital index pair to annihilate from a src determinant
-     * @param cre1
-     *  first spin orbital index pair to create in a dst determinant
-     * @param cre2
-     *  second spin orbital index pair to create in a dst determinant
-     */
-    void add(
-        std::pair<size_t, size_t> ann1,
-        std::pair<size_t, size_t> ann2,
-        std::pair<size_t, size_t> cre1,
-        std::pair<size_t, size_t> cre2
-    ) {
-        m_ann.add(ann1, ann2);
-        m_cre.add(cre1, cre2);
-    };
-
-
-    void set(
-        std::pair<size_t, size_t> ann1,
-        std::pair<size_t, size_t> ann2,
-        std::pair<size_t, size_t> cre1,
-        std::pair<size_t, size_t> cre2
-    ) {
-        clear();
-        add(ann1, ann2, cre1, cre2);
-    };
 
     /**
      * @return
@@ -370,15 +315,15 @@ public:
      * Let m be the number of creation ops, and n the number of annihilation ops, then the total number of exchanges
      * entailed in the above process is the sum (or, equivalently the difference) of the two numbers of pairs:
      *
-     * nexchange = npair(m+n) - npair(n)
+     * nexchange = npair(m+n) - nmode(n)
      * i.e. 2*nexchange = (m+n)*(m+n-1) - n^2 + n = m^2 - m + 2mn
-     * i.e. nexchange = npair(m) + mn
+     * i.e. nexchange = nmode(m) + mn
      *
      * The numbers of pairs alternate between odd and even with a period of 2:
      * 0->0   1->0   2->1   3->3   4->6   5->10   6->15
      *   E      E      O      O      E      E       O    ....
      *
-     * so it is quick to compute whether these exchanges implies an inversion in the phase computed from the connection
+     * so it is quick to compute whether these exchanges imply an inversion in the phase computed from the connection
      * indices, and this is done at the end of the implementation of this method
      *
      * @param src
@@ -398,6 +343,11 @@ public:
      */
     size_t exsig(const size_t& nop_insert) const;
 };
+
+static std::ostream &operator<<(std::ostream &os, const FrmOnvConnection &conn) {
+    os << conn.m_ann.inds() << "->" << conn.m_cre.inds();
+    return os;
+}
 
 
 #endif //M7_FRMONVCONNECTION_H

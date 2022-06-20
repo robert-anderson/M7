@@ -1,5 +1,5 @@
 //
-// Created by rja on 09/11/2020.
+// Created by Robert J. Anderson on 09/11/2020.
 //
 
 #ifndef M7_COMMUNICATOR_H
@@ -10,7 +10,8 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/RankAllocator.h>
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
+#include <M7_lib/util/String.h>
 
 #include "BufferedTable.h"
 #include "BufferedTableArray.h"
@@ -61,7 +62,7 @@ public:
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                  string_utils::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
+                  utils::string::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
         m_send.resize(comm_nrow_est, 0.0);
         m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
         m_send.set_expansion_factor(exp_fac);
@@ -324,7 +325,7 @@ struct Communicator {
                             nrow_transfer, m_name, irank_recv, irank_send);
                 m_idrows.resize(nrow_transfer, ~0ul);
                 mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
-                log::debug_("idrows: {}", utils::to_string(m_idrows));
+                log::debug_("idrows: {}", utils::convert::to_string(m_idrows));
             }
         }
 
@@ -544,7 +545,7 @@ struct Communicator {
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
         log::info("Initially allocating {} per rank for store buffer of \"{}\" ",
-                  string_utils::memsize(store_nrow_est*m_store.row_size()), name);
+                  utils::string::memsize(store_nrow_est*m_store.row_size()), name);
         m_store.resize(store_nrow_est, 0.0);
         m_store.set_expansion_factor(store_exp_fac);
     }
@@ -568,7 +569,7 @@ struct Communicator {
      *  send table instance
      */
     Communicator(std::string name, size_t store_nrow_crude_est, size_t comm_nrow_crude_est,
-                 const fciqmc_config::Buffers &buf_opts, const fciqmc_config::LoadBalancing &ra_opts,
+                 const conf::Buffers &buf_opts, const conf::LoadBalancing &ra_opts,
                  const store_table_t &store, const send_table_t &send) :
             Communicator(name, std::max(1ul, store_nrow_crude_est) * buf_opts.m_store_fac_init, buf_opts.m_store_exp_fac,
                          std::max(1ul, comm_nrow_crude_est) * buf_opts.m_comm_fac_init, buf_opts.m_comm_exp_fac,

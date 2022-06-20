@@ -1,0 +1,11 @@
+target_sources(M7_lib
+    PRIVATE
+        BosHam.cpp
+        BosHam.h
+        GeneralBosHam.cpp
+        GeneralBosHam.h
+        NumOpBosHam.cpp
+        NumOpBosHam.h
+        TcBosHam.cpp
+        TcBosHam.h
+)

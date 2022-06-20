@@ -1,14 +1,15 @@
 //
-// Created by rja on 25/06/2021.
+// Created by Robert J. Anderson on 25/06/2021.
 //
 
 #include "YamlWrapper.h"
+#include "M7_lib/util/String.h"
 
 yaml::Path::Path(std::list<std::string> name_list) : m_name_list(std::move(name_list)) {}
 
 yaml::Path::Path(std::vector<std::string> name_list) : m_name_list(name_list.cbegin(), name_list.cend()) {}
 
-yaml::Path::Path(std::string name) : Path(string_utils::split(name, '.')) {}
+yaml::Path::Path(std::string name) : Path(utils::string::split(name, '.')) {}
 
 yaml::Path::Path(const yaml::Path &other) : m_name_list(other.m_name_list) {}
 

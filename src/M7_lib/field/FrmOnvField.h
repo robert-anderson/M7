@@ -1,5 +1,5 @@
 //
-// Created by rja on 07/04/2021.
+// Created by Robert J. Anderson on 07/04/2021.
 //
 
 #ifndef M7_FRMONVFIELD_H
@@ -19,9 +19,7 @@ struct FrmOnvField : BitsetField<size_t, 2> {
     using base_t::operator=;
     using base_t::inds_t;
 
-    const BasisData m_bd;
-    const size_t m_nsite;
-    const size_t& m_nspinorb;
+    const sys::frm::Basis m_basis;
     /**
      * a refreshable cache of useful representations for excitation generation and enumeration
      */
@@ -32,16 +30,20 @@ private:
      * number of data words required for the storage of a single spin channel (alpha, beta)
      */
     const size_t m_dsize_spin_channel;
-    /**
-     * alpha and beta strings in general share a dataword, so store the bit position which marks the interface
-     */
-    const size_t m_nbit_in_last_alpha_dataword;
 
 public:
 
-    FrmOnvField(Row* row, BasisData bd, std::string name="");
-    FrmOnvField(Row* row, size_t nsite, std::string name="");
-
+    FrmOnvField(Row* row, const sys::frm::Basis& basis, std::string name="");
+    /*
+     * all ONVs implement the following ctor
+     */
+    FrmOnvField(Row* row, const sys::Basis& basis, std::string name="");
+    /*
+     * this particular MBF only needs the basis, but future MBF types might need the full sector information, and so
+     * a common interface is realised by implementing a ctor of the following form in all MBFs
+     */
+    FrmOnvField(Row* row, const sys::frm::Sector& sector, std::string name="");
+    FrmOnvField(Row* row, const sys::Sector& sector, std::string name="");
     FrmOnvField(const FrmOnvField& other);
 
     FrmOnvField& operator=(const FrmOnvField& other) {
@@ -104,53 +106,11 @@ public:
      */
     int ms2() const;
 
-    int nalpha() const;
-
     size_t site_nocc(const size_t& isite) const;
 
     bool all_sites_single_occ() const;
 
     std::string to_string() const override;
-
-    const size_t& nsite() const;
-
-
-    static size_t isite(const size_t& ibit, const size_t& nsite);
-
-    static size_t ispin(const size_t& ibit, const size_t& nsite);
-
-    static size_t ibit(const size_t& ispin, const size_t& isite, const size_t& nsite);
-
-    static size_t ibit(std::pair<size_t, size_t> pair, const size_t& nsite);;
-
-    /**
-     * convenient conversion between spin-site and site indices
-     * @param ibit
-     *  bit index
-     * @return
-     *  associated site index
-     */
-    size_t isite(const size_t& ibit) const;
-    /**
-     * convenient conversion between spin-site and spin indices
-     * @param ibit
-     *  bit index
-     * @return
-     *  associated spin index (0 or 1)
-     */
-    size_t ispin(const size_t& ibit) const;
-    /**
-     * convenient conversion between spin and site indices and the flat "bit" index
-     * @param ispin
-     *  spin channel index
-     * @param isite
-     *  site index
-     * @return
-     *  flat index od spin-site
-     */
-    size_t ibit(const size_t& ispin, const size_t& isite) const;
-
-    size_t ibit(std::pair<size_t, size_t>& pair) const;
 
     /**
      * @param idataword
@@ -178,6 +138,7 @@ public:
         };
         setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
+    size_t nalpha() const;
 
     template<typename body_fn_t>
     void foreach_beta(const body_fn_t& fn) const {
@@ -186,6 +147,7 @@ public:
         };
         setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
+    size_t nbeta() const;
 
 
     /**
@@ -196,12 +158,14 @@ public:
      *  body_fn_t instance
      */
     template<typename body_fn_t>
-    void foreach_openshell(const body_fn_t& fn) const {
+    void foreach_open_shell(const body_fn_t& fn) const {
         auto get_work_fn = [&](size_t idataword){
             return get_alpha_dataword(idataword) ^ get_beta_dataword(idataword);
         };
         setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
+
+    size_t nopen_shell() const;
 
     /**
      * efficiently iterate over the indices of those sites where the alpha spin orbital is occupied but the beta spin
@@ -212,16 +176,93 @@ public:
      *  body_fn_t instance
      */
     template<typename body_fn_t>
-    void foreach_openshell_alpha(const body_fn_t& fn) const {
+    void foreach_open_shell_alpha(const body_fn_t& fn) const {
         auto get_work_fn = [&](size_t idataword){
             return get_alpha_dataword(idataword) &~ get_beta_dataword(idataword);
         };
         setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
     }
 
-    size_t nopenshell() const;
+    size_t nopen_shell_alpha() const;
 
-    size_t nopenshell_alpha() const;
+    /**
+     * efficiently iterate over the indices of those sites where the alpha spin vacant is occupied but the beta spin
+     * orbital is occupied
+     * @tparam body_fn_t
+     *  functor to call each time an alpha-occupied, beta-vacant site is found
+     * @param fn
+     *  body_fn_t instance
+     */
+    template<typename body_fn_t>
+    void foreach_open_shell_beta(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return ~get_alpha_dataword(idataword) & get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+
+    size_t nopen_shell_beta() const;
+
+    /**
+     * efficiently iterate over the doubly-occupied site indices
+     * @tparam body_fn_t
+     *  functor to call each time a doubly-occupied site is found
+     * @param fn
+     *  body_fn_t instance
+     */
+    template<typename body_fn_t>
+    void foreach_closed_shell(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return get_alpha_dataword(idataword) & get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+
+    size_t nclosed_shell() const;
+
+    /**
+     * efficiently iterate over the site indices with any non-zero occupation
+     * @tparam body_fn_t
+     *  functor to call each time an occupied site is found
+     * @param fn
+     *  body_fn_t instance
+     */
+    template<typename body_fn_t>
+    void foreach_occupied_site(const body_fn_t& fn) const {
+        auto get_work_fn = [&](size_t idataword){
+            return get_alpha_dataword(idataword) | get_beta_dataword(idataword);
+        };
+        setbit_foreach::single<size_t>(m_dsize_spin_channel, fn, get_work_fn);
+    }
+
+    size_t noccupied_site() const;
+
+    /**
+     * efficiently iterate over the unoccupied site indices
+     * @tparam body_fn_t
+     *  functor to call each time a unoccupied site is found
+     * @param fn
+     *  body_fn_t instance
+     */
+    template<typename body_fn_t>
+    void foreach_unoccupied_site(const body_fn_t& fn) const {
+        size_t isite = 0ul;
+        auto tmp = [&isite, &fn](size_t iocc_site){
+            for (; isite<iocc_site; ++isite){
+                fn(isite);
+            }
+            // step over the occupied site
+            ++isite;
+        };
+        foreach_occupied_site(tmp);
+        // the remaining sites are also unoccupied
+        for (;isite<m_basis.m_nsite; ++isite){
+            fn(isite);
+        }
+    }
+
+    size_t nunoccupied_site() const;
+
 };
 
 

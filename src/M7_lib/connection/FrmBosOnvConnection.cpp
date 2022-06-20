@@ -1,14 +1,16 @@
 //
-// Created by rja on 10/08/2021.
+// Created by Robert J. Anderson on 10/08/2021.
 //
 
 #include "FrmBosOnvConnection.h"
 #include "ComOps.h"
+#include "M7_lib/util/Exsig.h"
 
-FrmBosOnvConnection::FrmBosOnvConnection(BasisData bd) : m_frm(bd.m_nsite), m_bos(bd.m_nmode){}
+FrmBosOnvConnection::FrmBosOnvConnection(sys::Size size) :
+    m_frm(size.m_frm), m_bos(size.m_bos){}
 
 FrmBosOnvConnection::FrmBosOnvConnection(const FrmBosOnvField &mbf) :
-        FrmBosOnvConnection({mbf.m_frm.m_nsite, mbf.m_bos.m_nelement}){}
+        FrmBosOnvConnection({mbf.m_frm.m_basis.m_nsite, mbf.m_bos.m_basis.m_nmode}){}
 
 
 void FrmBosOnvConnection::clear() {
@@ -33,7 +35,7 @@ void FrmBosOnvConnection::apply(const FrmBosOnvField &src, FrmBosOnvField &dst) 
 }
 
 size_t FrmBosOnvConnection::exsig() const {
-    return exsig_utils::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
+    return utils::exsig::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
 }
 
 bool FrmBosOnvConnection::respects_occ_range(const FrmBosOnvField &src, size_t nboson_max) const {

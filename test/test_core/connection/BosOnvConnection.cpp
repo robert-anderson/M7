@@ -1,8 +1,7 @@
 //
-// Created by RJA on 24/09/2020.
+// Created by Robert J. Anderson on 24/09/2020.
 //
 
-#include <M7_lib/foreach/ForeachVirtual.h>
 #include "gtest/gtest.h"
 #include "M7_lib/table/BufferedFields.h"
 #include "M7_lib/connection/Connections.h"
@@ -41,12 +40,12 @@ namespace bos_onv_connection_test {
 
     bool one_conn(const field::BosOnv& src, defs::inds icres, defs::inds ianns){
         auto chk = chk_occ_fac_square(src, icres, ianns);
-        conn::BosOnv conn(src.m_nmode);
-        BosOps com(src.m_nmode);
+        conn::BosOnv conn(src.m_basis.m_nmode);
+        BosOps com(src.m_basis.m_nmode);
         /*
          * remove common indices from the creation and annihilation vectors and place them in the common operators object
          */
-        for (size_t imode=0ul; imode<src.m_nmode; ++imode){
+        for (size_t imode=0ul; imode<src.m_basis.m_nmode; ++imode){
             size_t noccur = 0;
             while (true) {
                 auto cre_it = std::find(icres.begin(), icres.end(), imode);
@@ -57,44 +56,33 @@ namespace bos_onv_connection_test {
                 ianns.erase(ann_it);
                 ++noccur;
             }
-            if (noccur) com.add({imode, noccur});
+            if (noccur) com.add(imode, noccur);
         }
-        conn.m_cre.from_vector(icres);
-        conn.m_ann.from_vector(ianns);
-        DEBUG_ASSERT_EQ(conn.m_cre.to_vector(), icres, "incorrect connection encoding");
-        DEBUG_ASSERT_EQ(conn.m_ann.to_vector(), ianns, "incorrect connection encoding");
+        conn.m_cre.set(icres);
+        conn.m_ann.set(ianns);
+        DEBUG_ASSERT_EQ(conn.m_cre.get(), icres, "incorrect connection encoding");
+        DEBUG_ASSERT_EQ(conn.m_ann.get(), ianns, "incorrect connection encoding");
 
-        auto occ_fac = conn.occ_fac_square(src, com);
-        //DEBUG_ASSERT_EQ(chk, occ_fac, "occ fac mismatch");
+        auto occ_fac = src.occ_fac_square(conn, com);
+        if (!conn.size()) {
+            // diagonal occ facs have another method which doesn't require the BosOnvConnection:
+            return (chk==occ_fac) && (chk==src.occ_fac_square(com));
+        }
         return chk==occ_fac;
     }
 
-    struct ForeachBase : foreach_virtual::rtnd::Ordered<false, true>{
-        ForeachBase(size_t nmode, size_t nop): foreach_virtual::rtnd::Ordered<false, true>(nmode, nop){}
-    };
-
-    struct AnnForeach : ForeachBase {
-        const field::BosOnv& m_src;
-        const defs::inds& m_cre_inds;
-        AnnForeach(size_t nmode, size_t nop, const defs::inds& cre_inds, const field::BosOnv& src):
-            ForeachBase(nmode, nop), m_src(src), m_cre_inds(cre_inds){}
-
-        void body(const foreach_virtual::rtnd::inds_t &value, size_t iiter) override {
-            ASSERT_TRUE(one_conn(m_src, m_cre_inds, value));
-        }
-    };
-
-    struct CreForeach : ForeachBase {
-        const field::BosOnv& m_src;
-        const size_t m_nmode, m_nann;
-        CreForeach(size_t nmode, size_t ncre, size_t nann, const field::BosOnv& src):
-            ForeachBase(nmode, ncre), m_src(src), m_nmode(nmode), m_nann(nann){}
-
-        void body(const foreach_virtual::rtnd::inds_t &value, size_t iiter) override {
-            AnnForeach foreach(m_nmode, m_nann, value, m_src);
-            foreach.loop();
-        }
-    };
+    void foreach(size_t nmode, size_t ncre, size_t nann, const field::BosOnv& src) {
+        using namespace basic_foreach::rtnd;
+        auto cre_foreach = basic_foreach::rtnd::Ordered<false, true>(nmode, ncre);
+        auto fn = [&](const inds_t& cre_inds) {
+            auto ann_foreach = basic_foreach::rtnd::Ordered<false, true>(nmode, nann);
+            auto fn = [&](const inds_t& ann_inds) {
+                ASSERT_TRUE(one_conn(src, cre_inds, ann_inds));
+            };
+            ann_foreach.loop(fn);            
+        };
+        cre_foreach.loop(fn);
+    }
 }
 
 TEST(BosonOnvConnection, NoChange) {
@@ -106,7 +94,7 @@ TEST(BosonOnvConnection, NoChange) {
     ket = defs::inds{2, 4, 0, 1};
     bra =  defs::inds{2, 4, 0, 1};
 
-    conn::BosOnv pc(nmode);
+    conn::BosOnv pc(ket);
     pc.connect(ket, bra);
 
     ASSERT_EQ(pc.size(), 0);
@@ -122,7 +110,7 @@ TEST(BosonOnvConnection, SingleChange) {
 
     for (size_t imode = 0; imode < nmode; ++imode) {
         for (size_t idelta = 1; idelta < occ_cutoff; ++idelta) {
-            BosOnvConnection conn(nmode);
+            BosOnvConnection conn(ket);
 
             ket = {2, 4, 0, 1};
             bra = {2, 4, 0, 1};
@@ -156,7 +144,7 @@ TEST(BosonOnvConnection, DoubleChange) {
                     ket = {2, 4, 0, 1};
                     bra = {2, 4, 0, 1};
 
-                    BosOnvConnection pc(nmode);
+                    BosOnvConnection pc(ket);
                     bra[imode0] += idelta0;
                     bra[imode1] += idelta1;
                     pc.connect(ket, bra);
@@ -174,85 +162,75 @@ TEST(BosonOnvConnection, DoubleChange) {
     }
 }
 
-TEST(BosonOnvConnection, OccFac_0001) {
+TEST(BosonOnvConnection, OccFac_0000) {
     const size_t nmode = 8;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 1, 2, 0, 5, 0, 2};
     conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 0, 1, mbf);
-    foreach.loop();
+    bos_onv_connection_test::foreach(nmode, 0, 0, mbf);
+}
+
+TEST(BosonOnvConnection, OccFac_0001) {
+    const size_t nmode = 8;
+    buffered::BosOnv mbf(nmode);
+    mbf = {3, 4, 1, 2, 0, 5, 0, 2};
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 0, 1, mbf);
 }
 
 TEST(BosonOnvConnection, OccFac_0010) {
     const size_t nmode = 8;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 1, 2, 0, 5, 0, 2};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 1, 0, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 1, 0, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0020) {
     const size_t nmode = 8;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 1, 2, 0, 5, 0, 2};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 2, 0, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 2, 0, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0002) {
     const size_t nmode = 8;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 1, 2, 0, 5, 0, 2};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 0, 2, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 0, 2, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0022) {
     const size_t nmode = 6;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 1, 2, 0, 5};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 2, 2, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 2, 2, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0012) {
     const size_t nmode = 6;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 1, 2, 0, 5};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 1, 2, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 1, 2, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0033) {
     const size_t nmode = 5;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 0, 2, 5};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 3, 3, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 3, 3, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0032) {
     const size_t nmode = 5;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 0, 2, 5};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 3, 2, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 3, 2, mbf);
 }
 TEST(BosonOnvConnection, OccFac_0031) {
     const size_t nmode = 5;
     buffered::BosOnv mbf(nmode);
     mbf = {3, 4, 0, 2, 5};
-    conn::BosOnv conn(nmode);
-    using namespace bos_onv_connection_test;
-    CreForeach foreach(nmode, 3, 1, mbf);
-    foreach.loop();
+    conn::BosOnv conn(mbf);
+    bos_onv_connection_test::foreach(nmode, 3, 1, mbf);
 }

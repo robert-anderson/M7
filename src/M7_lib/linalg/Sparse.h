@@ -1,5 +1,5 @@
 //
-// Created by rja on 14/06/2020.
+// Created by Robert J. Anderson on 14/06/2020.
 //
 
 #ifndef M7_SPARSE_H
@@ -10,6 +10,7 @@
 
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/io/Logging.h>
+#include "M7_lib/util/Convert.h"
 
 namespace sparse {
 
@@ -47,7 +48,7 @@ namespace sparse {
 
         const defs::inds &operator[](const size_t &irow) const;
 
-        virtual std::vector<std::string> row_to_strings(size_t irow) const;
+        virtual std::string row_to_string(size_t irow) const;
 
         std::string to_string() const;
 
@@ -130,14 +131,14 @@ namespace sparse {
             return {m_rows_icols[irow], m_rows_values[irow]};
         }
 
-        std::vector<std::string> row_to_strings(size_t irow) const override {
+        std::string row_to_string(size_t irow) const override {
             std::vector<std::string> out;
             for (size_t ientry = 0ul; ientry < m_rows_icols[irow].size(); ++ientry) {
                 size_t icol = m_rows_icols[irow][ientry];
                 auto v = m_rows_values[irow][ientry];
-                out.push_back("(" + utils::to_string(icol) + " -> " + utils::to_string(v) + ")");
+                out.push_back("(" + utils::convert::to_string(icol) + " -> " + utils::convert::to_string(v) + ")");
             }
-            return out;
+            return utils::convert::to_string(out);
         }
 
         Matrix<T> get_symmetrized(bool conj) const {

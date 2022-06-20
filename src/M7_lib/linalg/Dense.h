@@ -136,6 +136,17 @@ namespace dense {
             return *this;
         }
 
+        /**
+         * byte-wise equality
+         * @param other
+         *  matrix to compare against
+         * @return
+         *  true only if both buffers are identical
+         */
+        bool operator==(const Matrix<T>& other) const {
+            return !std::memcmp(ptr(), other.ptr(), sizeof(T)*m_ncol*m_nrow);
+        }
+
         const size_t& nrow() const {return m_nrow;}
         const size_t& ncol() const {return m_ncol;}
         std::pair<size_t, size_t> dims() const {return {nrow(), ncol()};}
@@ -232,7 +243,7 @@ namespace dense {
             std::string out;
             for (size_t irow = 0ul; irow < m_nrow; ++irow) {
                 for (size_t icol = 0ul; icol < m_ncol; ++icol) {
-                    out+=utils::to_string((*this)(irow, icol))+"  ";
+                    out+=utils::convert::to_string((*this)(irow, icol))+"  ";
                 }
                 out+="\n";
             }
@@ -358,6 +369,8 @@ namespace dense {
      * this namespace make a copy to pass to the solver and so do not modify the given matrix. Functions are not
      * provided for the complex-symmetric case, only the hermitian case.
      *
+     * diag methods return true if LAPACK call was successful
+     *
      *    A (matrix)      R (right evecs)  L (left evecs)  D (evals)       Routine
      *    float           -                -               float           ssyev
      *    float           float            -               float           ssyev
@@ -380,23 +393,28 @@ namespace dense {
      *    complex double  complex double   complex double  complex double  zgeev
      */
 
-    void diag(const SquareMatrix<float>& mat, std::vector<float>& evals);
+    bool diag(const SquareMatrix<float>& mat, std::vector<float>& evals);
 
-    void diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, std::vector<float>& evals);
+    bool diag(const SquareMatrix<float>& mat, SquareMatrix<float>& evecs, std::vector<float>& evals);
 
-    void diag(const SquareMatrix<float>& mat, std::vector<std::complex<float>>& evals);
-
-
-    void diag(const SquareMatrix<double>& mat, std::vector<double>& evals);
-
-    void diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, std::vector<double>& evals);
+    bool diag(const SquareMatrix<float>& mat, std::vector<std::complex<float>>& evals);
 
 
-    void diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+    bool diag(const SquareMatrix<double>& mat, std::vector<double>& evals);
+
+    bool diag(const SquareMatrix<double>& mat, SquareMatrix<double>& evecs, std::vector<double>& evals);
+
+    bool diag(const SquareMatrix<double>& mat, std::vector<std::complex<double>>& evals);
 
 
-    void diag(const SquareMatrix<std::complex<double>>& mat,
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
+
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat,
               SquareMatrix<std::complex<double>>& evecs, std::vector<double>& evals);
+
+    bool diag(const SquareMatrix<std::complex<double>>& mat, std::vector<double>& evals);
 }
 
 #endif //M7_DENSE_H

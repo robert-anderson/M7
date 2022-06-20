@@ -1,15 +1,17 @@
 //
-// Created by rja on 12/08/2021.
+// Created by Robert J. Anderson on 12/08/2021.
 //
 
 #include "MaeIndsField.h"
+#include <M7_lib/util/Exsig.h>
+
 
 std::array<size_t, 4> MaeIndsField::make_nops() const {
     std::array<size_t, 4> nops{};
-    nops[0] = exsig_utils::decode_nfrm_cre(m_exsig);
-    nops[1] = exsig_utils::decode_nfrm_ann(m_exsig);
-    nops[2] = exsig_utils::decode_nbos_cre(m_exsig);
-    nops[3] = exsig_utils::decode_nbos_ann(m_exsig);
+    nops[0] = utils::exsig::decode_nfrm_cre(m_exsig);
+    nops[1] = utils::exsig::decode_nfrm_ann(m_exsig);
+    nops[2] = utils::exsig::decode_nbos_cre(m_exsig);
+    nops[3] = utils::exsig::decode_nbos_ann(m_exsig);
     return nops;
 }
 
@@ -20,7 +22,7 @@ std::array<size_t, 4> MaeIndsField::make_nop_offsets() const {
 }
 
 MaeIndsField::MaeIndsField(Row *row, size_t exsig, std::string name) :
-    NdNumberField<defs::mev_ind_t, 1>(row, {exsig_utils::decode_nop(exsig)}, name),
+    NdNumberField<defs::mev_ind_t, 1>(row, {utils::exsig::decode_nop(exsig)}, name),
     m_exsig(exsig), m_nops(make_nops()), m_nop_offsets(make_nop_offsets()),
     m_frm(*this, m_nop_offsets[0], m_nops[0], m_nop_offsets[1], m_nops[1]),
     m_bos(*this, m_nop_offsets[2], m_nops[2], m_nop_offsets[3], m_nops[3]){}

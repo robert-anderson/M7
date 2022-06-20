@@ -1,12 +1,12 @@
 //
-// Created by rja on 14/04/2021.
+// Created by Robert J. Anderson on 14/04/2021.
 //
 
 #include <M7_lib/connection/Connections.h>
 #include "M7_lib/bilinear/FermionPromoter.h"
-#include <M7_lib/foreach/Foreach.h>
 #include "gtest/gtest.h"
 #include "M7_lib/table/BufferedFields.h"
+#include "M7_lib/util/Exsig.h"
 
 TEST(FermionPromoter, Promoter1BodyDiagonal) {
     const size_t nsite = 5;
@@ -18,14 +18,14 @@ TEST(FermionPromoter, Promoter1BodyDiagonal) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 3, 4, 6, 7, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     ASSERT_FALSE(conn.phase(in));
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, exsig_utils::ex_1100);
+    ASSERT_EQ(exsig, utils::exsig::ex_1100);
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
@@ -48,31 +48,33 @@ TEST(FermionPromoter, Promoter2BodyDiagonal) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 3, 4, 6, 7, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     ASSERT_FALSE(conn.phase(in));
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, exsig_utils::ex_2200);
+    ASSERT_EQ(exsig, utils::exsig::ex_2200);
     buffered::MaeInds inds(exsig);
     /*
      * all diagonal promotion phases should be false (i.e. no fermi phase change)
      */
-    foreach::rtnd::Ordered<> foreach_comb(com.size(), nop_insert);
+    using namespace basic_foreach::rtnd;
+    Ordered<> foreach_comb(com.size(), nop_insert);
     size_t icomb = 0ul;
-    auto fn = [&]() {
+    auto fn = [&](const inds_t& insert_inds) {
+        // enumerates all ways to choose nop_insert elements of the common array
         auto phase = fp.apply(icomb, conn, com, inds.m_frm);
         ASSERT_FALSE(phase);
         // since this is a diagonal element, all indices are "inserted" and should be found in order in the com array
         for (size_t iop = 0ul; iop < inds.m_frm.m_cre.size(); ++iop)
-            ASSERT_EQ(inds.m_frm.m_cre[iop], com[foreach_comb[iop]]);
+            ASSERT_EQ(inds.m_frm.m_cre[iop], com[insert_inds[iop]]);
         for (size_t iop = 0ul; iop < inds.m_frm.m_ann.size(); ++iop)
-            ASSERT_EQ(inds.m_frm.m_ann[iop], com[foreach_comb[iop]]);
+            ASSERT_EQ(inds.m_frm.m_ann[iop], com[insert_inds[iop]]);
         ++icomb;
     };
-    foreach_comb(fn);
+    foreach_comb.loop(fn);
 }
 
 
@@ -86,7 +88,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 4, 6, 7, 8, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     // 3 -> 8 excitation moves through 3 occupied SQ op inds => fermi phase -1
@@ -96,7 +98,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, exsig_utils::ex_double);
+    ASSERT_EQ(exsig, utils::exsig::ex_double);
     buffered::MaeInds inds(exsig);
 
     // common: 1 4 6 7 9
@@ -151,7 +153,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     in = {1, 3, 4, 6, 7, 9};
     out = {1, 2, 4, 6, 8, 9};
 
-    conn::FrmOnv conn(nsite);
+    conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
     // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ op inds => fermi phase +1
@@ -163,7 +165,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     FermionPromoter fp(com.size(), nop_insert);
 
     const auto exsig = conn.exsig(nop_insert);
-    ASSERT_EQ(exsig, exsig_utils::ex_2200);
+    ASSERT_EQ(exsig, utils::exsig::ex_2200);
     ASSERT_EQ(exsig, conn.exsig());
     buffered::MaeInds inds(exsig);
 

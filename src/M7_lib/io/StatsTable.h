@@ -1,5 +1,5 @@
 //
-// Created by rja on 12/04/2021.
+// Created by Robert J. Anderson on 12/04/2021.
 //
 
 #ifndef M7_STATSTABLE_H
@@ -11,6 +11,7 @@
 #include <M7_lib/field/Row.h>
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/table/BufferedFields.h>
+#include <M7_lib/util/String.h>
 
 struct StatsRow : Row {};
 
@@ -25,12 +26,12 @@ namespace statistic {
 
         template<typename T>
         static std::string stats_string_element(const T &v, size_t denom) {
-            return utils::num_to_string(v / denom);
+            return utils::convert::to_string(v / denom);
         }
 
         template<typename T>
         static std::string stats_string_element(const std::complex<T> &v, size_t denom) {
-            return utils::num_to_string(v.real() / denom) + " " + utils::num_to_string(v.imag() / denom);
+            return utils::convert::to_string(v.real() / denom) + " " + utils::convert::to_string(v.imag() / denom);
         }
     };
 
@@ -112,7 +113,7 @@ struct StatsTable : BufferedTable<row_t> {
             auto it = m_format_strings.find(format_string);
             if (it == m_format_strings.end()) m_format_strings[format_string] = nformat++;
         }
-        *m_file << string_utils::boxed(m_description + " Stats File") <<
+        *m_file << utils::string::boxed(m_description + " Stats File") <<
                 "# Number of statistics output: " << row.m_fields.size() <<
                 "\n# Number of columns: " << ncolumn <<
                 "\n# Distinct multidimensional formats: " << m_format_strings.size() << "\n#" <<

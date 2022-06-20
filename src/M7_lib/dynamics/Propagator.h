@@ -5,7 +5,7 @@
 #ifndef M7_PROPAGATOR_H
 #define M7_PROPAGATOR_H
 
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 #include <M7_lib/io/Archivable.h>
 #include <M7_lib/basis/Suites.h>
 
@@ -21,24 +21,30 @@ class Propagator : public Archivable {
 protected:
     double m_tau;
 public:
-    const NdFormat<defs::ndim_wf> &m_wf_fmt;
+    const NdFormat<defs::ndim_wf> m_wf_fmt;
     const Hamiltonian &m_ham;
-    const fciqmc_config::Document &m_opts;
     Shift m_shift;
+    const sys::Sector m_sector;
+    /**
+     * exponent in the Gutzwiller-like importance sampling
+     */
+    const double m_imp_samp_exp;
     /*
      * working objects
      */
     mutable suite::Mbfs m_dst;
     mutable suite::Conns m_conn;
 
-    Propagator(const fciqmc_config::Document &opts, const Hamiltonian &ham, const NdFormat<defs::ndim_wf> &wf_fmt) :
+    Propagator(const conf::Document &opts, const Hamiltonian &ham, const Wavefunction &wf) :
             Archivable("propagator", opts.m_archive),
             m_tau(opts.m_propagator.m_tau_init),
-            m_wf_fmt(wf_fmt),
+            m_wf_fmt(wf.m_format),
             m_ham(ham),
-            m_opts(opts),
-            m_shift(opts, wf_fmt),
-            m_dst(ham.m_bd), m_conn(ham.m_bd) {}
+            m_shift(opts, wf.m_format),
+            m_sector(wf.m_sector),
+            m_imp_samp_exp(opts.m_propagator.m_imp_samp_exp),
+            m_dst(m_sector),
+            m_conn(ham.m_basis.size()){}
 
     virtual ~Propagator() {}
 
@@ -56,11 +62,11 @@ public:
 
     virtual void update(const size_t &icycle, const Wavefunction &wf);
 
-    virtual size_t nexcit_gen() const {
+    virtual size_t ncase_excit_gen() const {
         return 0;
     }
 
-    virtual std::vector<defs::prob_t> exlvl_probs() const {
+    virtual std::vector<defs::prob_t> excit_gen_case_probs() const {
         return {};
     }
 

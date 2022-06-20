@@ -1,17 +1,17 @@
 //
-// Created by rja on 21/08/2021.
+// Created by Robert J. Anderson on 21/08/2021.
 //
 
 #ifndef M7_HAMILTONIANDATA_H
 #define M7_HAMILTONIANDATA_H
 
 
-#include <M7_lib/util/utils.h>
+#include "M7_lib/util/Exsig.h"
 #include <M7_lib/parallel/MPIAssert.h>
 
 
 namespace ham_data {
-    using namespace exsig_utils;
+    using namespace utils::exsig;
 
     class TermContribs {
 
@@ -44,8 +44,20 @@ namespace ham_data {
 
         bool is_nonzero(size_t exsig) const;
 
+        bool any_nonzero() const;
+
     };
 
+    /**
+     * Scalar wavefunction theories are made compatible with the double degeneracy of electronic wavefunctions by
+     * the ad hoc separation into two components with alpha and beta z-axis projection of spin, making the total Sz
+     * trivially conserved. In relativistic theories however, terms expressed in terms of spin and spatial degrees of
+     * freedom are not multiplicatively separable, and so Sz is not conserved. A notion of double degeneracy is
+     * recovered by the Kramers time reversal symmetry operation, and in a Kramers-restricted basis (subject to certain
+     * double point group symmetry considerations) the 4-component analogue of many body 2*Sz i.e. (Kramers+ - Kramers-)
+     * can in some cases be conserved, but this is on a per-excitation signature basis.
+     * see https://aip.scitation.org/doi/pdf/10.1063/5.0029863, Table 1 for a breakdown of these cases
+     */
     struct KramersAttributes {
         bool m_conserving_singles = true;
         bool m_conserving_doubles = true;

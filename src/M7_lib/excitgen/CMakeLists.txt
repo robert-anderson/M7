@@ -1,27 +1,10 @@
 target_sources(M7_lib
     PRIVATE
-        BosonSumConservingDoubles.cpp
-        BosonSumConservingDoubles.h
         ExcitGen.cpp
         ExcitGen.h
         ExcitGenGroup.cpp
         ExcitGenGroup.h
-        HeatBathDoubles.cpp
-        HeatBathDoubles.h
-        HeisenbergUniform.cpp
-        HeisenbergUniform.h
-        HubbardUniform.cpp
-        HubbardUniform.h
-        InteractingBoseGasDoubles.cpp
-        InteractingBoseGasDoubles.h
-        LadderHoppingPc.cpp
-        LadderHoppingPc.h
-        LadderHoppingUniform.cpp
-        LadderHoppingUniform.h
-        LadderPureHolstein.cpp
-        LadderPureHolstein.h
-        LadderPureUniform.cpp
-        LadderPureUniform.h
-        UniformSingles.cpp
-        UniformSingles.h
 )
+add_subdirectory(bos)
+add_subdirectory(frm)
+add_subdirectory(frmbos)

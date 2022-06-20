@@ -1,0 +1,11 @@
+target_sources(M7_lib
+    PRIVATE
+        GeneralLadderHam.cpp
+        GeneralLadderHam.h
+        HolsteinLadderHam.cpp
+        HolsteinLadderHam.h
+        ../bos/InteractingBoseGasBosHam.cpp
+        ../bos/InteractingBoseGasBosHam.h
+        FrmBosHam.cpp
+        FrmBosHam.h
+)

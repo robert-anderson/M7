@@ -6,6 +6,7 @@
 #define M7_DEFS_H
 
 #include <string>
+#include <map>
 #include <complex>
 #include <iostream>
 #include <vector>
@@ -70,18 +71,22 @@ namespace defs {
     typedef double ham_comp_t;
     typedef ham_comp_t wf_comp_t;
     typedef std::conditional<enable_complex, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
+    typedef std::map<std::string, std::string> info_map_t;
     typedef ham_t wf_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef char buf_t;
     typedef unsigned char mev_ind_t;
     typedef unsigned char bos_occ_t;
+    constexpr int undefined_ms2 = std::numeric_limits<int>::max();
     constexpr size_t max_bos_occ = std::numeric_limits<bos_occ_t>::max();
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
-    const size_t isym_1e = 2;
-    const size_t isym_2e = 8;
-    constexpr ham_comp_t integral_tol = 1e-9;
+    /**
+     * Hamiltonian-parametrising coefficients with magnitude below this value are considered to be zero, and wherever
+     * equality between such values is to be asserted, this same tolerance is applied
+     */
+    constexpr ham_comp_t helem_tol = 1e-9;
 
     /**
      * "exsigs", short for "excitation signatures", encode in a single word the number of each type of second-quantised

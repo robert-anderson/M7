@@ -2,14 +2,14 @@ target_sources(M7_lib
     PRIVATE
         AbelianGroup.cpp
         AbelianGroup.h
+        BasisData.cpp
         BasisData.h
-        CiSpaces.cpp
-        CiSpaces.h
         Lattice.cpp
         Lattice.h
         MappedDeterminantList.cpp
         MappedDeterminantList.h
         Planewaves.cpp
         Planewaves.h
+        Suites.cpp
         Suites.h
 )

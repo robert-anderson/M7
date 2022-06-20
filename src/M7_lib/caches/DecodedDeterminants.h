@@ -9,6 +9,8 @@
 #include <M7_lib/field/Fields.h>
 #include <M7_lib/basis/AbelianGroup.h>
 
+#if 0
+
 /*
  * void updater_fn (const views::FermionOnv&, defs::inds&)
  */
@@ -21,17 +23,15 @@ struct FlatOrbs {
     defs::inds m_inds;
 
 public:
-    explicit FlatOrbs(size_t nsite) {
-        m_inds.reserve(2*nsite);
+    explicit FlatOrbs(Size sites) {
+        m_inds.reserve(sites.m_nspinorb);
     }
 
-    explicit FlatOrbs(const field::FrmOnv &mbf) :
-            FlatOrbs(mbf.nsite()) {
+    explicit FlatOrbs(const field::FrmOnv &mbf) : FlatOrbs(mbf.m_hs.m_sites) {
         update(mbf);
     }
 
-    explicit FlatOrbs(const field::FrmBosOnv &mbf) :
-            FlatOrbs(mbf.nsite()) {
+    explicit FlatOrbs(const field::FrmBosOnv &mbf) : FlatOrbs(mbf.m_frm.m_hs.m_sites) {
         update(mbf);
     }
 
@@ -108,12 +108,12 @@ struct NdOrbs__ {
     }
 
     NdOrbs__(std::array<size_t, nind> shape, const field::FrmOnv &mbf, const defs::inds& map) :
-            NdOrbs__(shape, mbf.m_nsite, map) {
+            NdOrbs__(shape, mbf.m_bd.m_nsite, map) {
         update(mbf);
     }
 
     NdOrbs__(std::array<size_t, nind> shape, const field::FrmBosOnv &mbf, const defs::inds& map) :
-            NdOrbs__(shape, mbf.m_frm.m_nsite, map) {}
+            NdOrbs__(shape, mbf.m_frm.m_bd.m_nsite, map) {}
 
 
     NdOrbs__(const NdOrbs__& other):
@@ -241,4 +241,5 @@ typedef SpinSymNdOrbs__<NdOccupiedUpdater> SpinSymOccOrbs__;
 typedef SpinSymNdOrbs__<NdVacantUpdater> SpinSymVacOrbs__;
 
 
+#endif //M7_DECODEDDETERMINANTS_H
 #endif //M7_DECODEDDETERMINANTS_H

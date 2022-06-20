@@ -1,11 +1,11 @@
 //
-// Created by anderson on 1/25/22.
+// Created by Robert J. Anderson on 1/25/22.
 //
 
 #ifndef M7_COMPOSITEFIELD_H
 #define M7_COMPOSITEFIELD_H
 
-#include <M7_lib/util/utils.h>
+#include <M7_lib/util/Tuple.h>
 
 #include "FieldBase.h"
 
@@ -84,7 +84,7 @@ struct CompositeField : CompositeFieldBase {
 
     bool operator==(const CompositeField &other) const {
         EqFn fn;
-        tuple_utils::for_each_pair(m_refs, other.m_refs, fn);
+        utils::tuple::foreach(m_refs, other.m_refs, fn);
         return fn.m_and;
     }
 
@@ -94,13 +94,13 @@ struct CompositeField : CompositeFieldBase {
 
     bool operator<(const CompositeField &other) const{
         IneqFn fn;
-        tuple_utils::for_each_pair(m_refs, other.m_refs, fn);
+        utils::tuple::foreach(m_refs, other.m_refs, fn);
         return fn.m_lt_found_first;
     }
 
     bool operator<=(const CompositeField &other) const {
         IneqFn fn;
-        tuple_utils::for_each_pair(m_refs, other.m_refs, fn);
+        utils::tuple::foreach(m_refs, other.m_refs, fn);
         return fn.m_lt_found_first || (!fn.m_lt_found_first && !fn.m_gt_found_first);
     }
 
@@ -114,24 +114,24 @@ struct CompositeField : CompositeFieldBase {
 
     std::string to_string() const {
         ToStringFn fn;
-        tuple_utils::for_each(m_refs, fn);
+        utils::tuple::foreach(m_refs, fn);
         return fn.m_str;
     }
 
     void zero() {
         ZeroFn fn;
-        tuple_utils::for_each(m_refs, fn);
+        utils::tuple::foreach(m_refs, fn);
     }
 
     bool is_zero() const {
         IsZeroFn fn;
-        tuple_utils::for_each(m_refs, fn);
+        utils::tuple::foreach(m_refs, fn);
         return fn.m_and;
     }
 
     defs::hash_t hash() const {
         HashFn fn;
-        tuple_utils::for_each(m_refs, fn);
+        utils::tuple::foreach(m_refs, fn);
         return fn.m_hash;
     }
 

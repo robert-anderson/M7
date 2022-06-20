@@ -10,6 +10,4 @@ target_sources(M7_lib
         TrialWavefunction.h
         UniformTwf.cpp
         UniformTwf.h
-        WeightedTwf.cpp
-        WeightedTwf.h
 )

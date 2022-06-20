@@ -3,7 +3,7 @@
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/dynamics/FciqmcCalculation.h>
 #include <M7_lib/io/YamlWrapper.h>
-#include <M7_lib/config/FciqmcConfig.h>
+#include <M7_lib/conf/Conf.h>
 
 int main(int argc, char **argv) {
 
@@ -20,13 +20,13 @@ int main(int argc, char **argv) {
 
     if (argc == 1) {
         // input file not provided, print out help string
-        std::cout << fciqmc_config::Document(nullptr).help_string() << std::endl;
+        std::cout << conf::Document(nullptr).help_string() << std::endl;
         mpi::finalize();
         return 0;
     }
 
     auto yf = yaml::File(std::string(argv[1]));
-    fciqmc_config::Document opts(&yf);
+    conf::Document opts(&yf);
     opts.verify();
     opts.log_value();
 

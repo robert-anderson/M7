@@ -1,5 +1,5 @@
 //
-// Created by rja on 09/10/2020.
+// Created by Robert J. Anderson on 09/10/2020.
 //
 
 #ifndef M7_TERNARY_H

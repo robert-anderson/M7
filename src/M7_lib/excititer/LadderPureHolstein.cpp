@@ -16,11 +16,11 @@ void excititers::LadderPureHolstein::foreach(const FrmBosOnv &src, conn::FrmBosO
         if (occ < src.nsite() && src.m_frm.get({1, imode})) continue;
         if (m_cre) {
             if (src.m_bos[imode] == m_ham.m_nboson_max) continue;
-            conn.m_bos.m_cre.set({imode, 1});
+            conn.m_bos.m_cre.set(imode);
         }
         else {
             if (src.m_bos[imode] == 0ul) continue;
-            conn.m_bos.m_ann.set({imode, 1});
+            conn.m_bos.m_ann.set(imode);
         }
         set_helement(src, conn);
         body(conn);

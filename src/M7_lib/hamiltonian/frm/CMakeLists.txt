@@ -1,0 +1,16 @@
+target_sources(M7_lib
+    PRIVATE
+        FrmHam.cpp
+        FrmHam.h
+        GeneralFrmHam.cpp
+        GeneralFrmHam.h
+        HeisenbergFrmHam.cpp
+        HeisenbergFrmHam.h
+        HubbardFrmHam.cpp
+        HubbardFrmHam.h
+        SpinSquareFrmHam.cpp
+        SpinSquareFrmHam.h
+        SumFrmHam.h
+        TcFrmHam.cpp
+        TcFrmHam.h
+)

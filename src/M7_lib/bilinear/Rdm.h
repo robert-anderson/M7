@@ -1,5 +1,5 @@
 //
-// Created by rja on 11/08/2021.
+// Created by Robert J. Anderson on 11/08/2021.
 //
 
 #ifndef M7_RDM_H
@@ -15,21 +15,22 @@
 
 #include "FermionPromoter.h"
 
-using namespace exsig_utils;
+using namespace utils::exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const size_t m_ranksig;
     const size_t m_rank, m_nfrm_cre, m_nfrm_ann, m_nbos_cre, m_nbos_ann;
     std::vector<FermionPromoter> m_frm_promoters;
     buffered::MaeInds m_lookup_inds;
-    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, BasisData bd);
+    static size_t nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, sys::Size basis_size);
 
-    static size_t nrow_estimate(size_t exsig, BasisData bd);
+    static size_t nrow_estimate(size_t exsig, sys::Size extents);
 
 public:
-    const BasisData m_bd;
+    const sys::Size m_basis_size;
+    const size_t m_nelec;
 
-    Rdm(const fciqmc_config::Rdms &opts, size_t ranksig, BasisData bd, size_t nelec, size_t nvalue);
+    Rdm(const conf::Rdms &opts, size_t ranksig, sys::Size basis_size, size_t nelec, size_t nvalue);
 
     void make_contribs(const field::FrmOnv &src_onv, const conn::FrmOnv &conn,
                        const com_ops::Frm &com, const defs::wf_t &contrib);
@@ -61,8 +62,10 @@ public:
     const bool m_explicit_ref_conns;
     const Epoch &m_accum_epoch;
     Reduction<defs::wf_t> m_total_norm;
+    const size_t m_nelec;
 
-    Rdms(const fciqmc_config::Rdms &opts, defs::inds ranksigs, BasisData bd, size_t nelec, const Epoch &accum_epoch);
+    Rdms(const conf::Rdms &opts, defs::inds ranksigs,
+         sys::Size extents, size_t nelec, const Epoch &accum_epoch);
 
     operator bool() const;
 
@@ -114,6 +117,13 @@ public:
 
     void end_cycle();
 
+    /**
+     * @param ham
+     *  hamiltonian corresponding to the evolution of the wavefunction(s) used in the RDM estimation
+     * @return
+     *  true only if the ranks of RDMs estimated are sufficient for pseudo-variational energy estimation via contraction
+     *  of the RDMs with the Hamiltonian coefficients.
+     */
     bool is_energy_sufficient(const Hamiltonian &ham) const;
 
     /**
@@ -126,7 +136,7 @@ public:
      *
      *  rdm1[i,j] = sum_k rdm2[i,k,j,k] / (n_elec - 1)
      */
-    defs::ham_comp_t get_energy(const FrmHam *ham) const;
+    defs::ham_comp_t get_energy(const FrmHam &ham) const;
 
     /**
      * compute the RDM energy contribution from the boson number-nonconserving terms
@@ -134,10 +144,10 @@ public:
      *  boson ladder-operator (pure and coupled) hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const LadderHam *ham, size_t nelec, size_t exsig) const;
+    defs::ham_comp_t get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const;
 
-    defs::ham_comp_t get_energy(const LadderHam *ham, size_t nelec) const {
-        return get_energy(ham, nelec, exsig_utils::ex_1101) + get_energy(ham, nelec, exsig_utils::ex_1110);
+    defs::ham_comp_t get_energy(const FrmBosHam &ham, size_t nelec) const {
+        return get_energy(ham, nelec, utils::exsig::ex_1101) + get_energy(ham, nelec, utils::exsig::ex_1110);
     }
 
     /**
@@ -146,7 +156,7 @@ public:
      *  boson number conserving hamiltonian
      * @return
      */
-    defs::ham_comp_t get_energy(const BosHam *ham) const;
+    defs::ham_comp_t get_energy(const BosHam &ham) const;
 
     /**
      * @param ham
@@ -156,7 +166,7 @@ public:
      */
     defs::ham_comp_t get_energy(const Hamiltonian &ham) const {
         if (!is_energy_sufficient(ham)) return 0.0;
-        return get_energy(ham.m_frm.get()) + get_energy(ham.m_ladder.get(), ham.nelec()) + get_energy(ham.m_bos.get());
+        return get_energy(ham.m_frm) + get_energy(ham.m_frmbos, m_nelec) + get_energy(ham.m_bos);
     }
 
 private:
