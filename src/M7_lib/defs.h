@@ -6,6 +6,7 @@
 #define M7_DEFS_H
 
 #include <string>
+#include <map>
 #include <complex>
 #include <iostream>
 #include <vector>
@@ -70,6 +71,7 @@ namespace defs {
     typedef double ham_comp_t;
     typedef ham_comp_t wf_comp_t;
     typedef std::conditional<enable_complex, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
+    typedef std::map<std::string, std::string> info_map_t;
     typedef ham_t wf_t;
     typedef double prob_t;
     typedef uint64_t hash_t;

@@ -3,6 +3,7 @@ target_sources(M7_lib
         Array.h
         Bit.h
         consts.h
+        Convert.h
         Functor.h
         Integer.cpp
         Integer.h
@@ -12,6 +13,7 @@ target_sources(M7_lib
         Sort.h
         String.cpp
         String.h
+        Tag.h
         Ternary.h
         Timer.cpp
         Timer.h

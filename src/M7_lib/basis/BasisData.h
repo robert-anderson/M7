@@ -66,6 +66,14 @@ namespace conservation {
         bool operator==(const Optional& other) const {
             return m_value==other.m_value && m_conserve==other.m_conserve;
         }
+
+        defs::info_map_t info() const {
+            return {{"value", m_value}, {"conserved", m_conserve}};
+        }
+
+        std::string to_string() const {
+            return utils::convert::to_string(info());
+        }
     };
 };
 
@@ -191,6 +199,10 @@ namespace sys {
             bool operator==(const Basis& other) const;
 
             size_t ncoeff_ind() const;
+
+            defs::info_map_t info() const;
+
+            std::string to_string() const;
         };
 
         /**
@@ -234,7 +246,10 @@ namespace sys {
                 return m_n;
             }
 
-            bool operator==(const Electrons& other);
+            bool operator==(const Electrons& other) const;
+
+            defs::info_map_t info() const;
+            std::string to_string() const;
         };
 
         /**
@@ -292,6 +307,10 @@ namespace sys {
             Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ);
 
             bool operator==(const Basis& other) const;
+            
+            defs::info_map_t info() const;
+
+            std::string to_string() const;
         };
 
         struct Bosons : public conservation::Optional<size_t> {
@@ -361,9 +380,10 @@ namespace sys {
     };
 }
 
+/*
 static std::ostream &operator<<(std::ostream &os, const sys::frm::Basis &v) {
     os << log::format("[nsite: {}, spin resolved: {}, site irreps: {}]",
-                      v.m_nsite, v.m_spin_resolved, utils::to_string(v.m_abgrp_map.m_site_irreps));
+                      v.m_nsite, v.m_spin_resolved, utils::convert::to_string(v.m_abgrp_map.m_site_irreps));
     return os;
 }
 
@@ -371,5 +391,6 @@ static std::ostream &operator<<(std::ostream &os, const sys::bos::Basis &v) {
     os << log::format("[nmode: {}, max mode occ: {}]", v.m_nmode, v.m_occ_cutoff);
     return os;
 }
+ */
 
 #endif //M7_BASISDATA_H

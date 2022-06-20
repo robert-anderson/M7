@@ -6,9 +6,26 @@
 #define M7_UTIL_STRING_H
 
 #include "utils.h"
+#include "Functor.h"
 
 namespace utils {
     namespace string {
+
+        template<typename fn_t>
+        std::string join(const fn_t& word_getter_fn, const std::string &divider) {
+            utils::functor::assert_prototype<bool(size_t, std::string&)>(word_getter_fn);
+            std::string out;
+            std::string tmp;
+            if (!word_getter_fn(0ul, tmp)) return {};
+            out.insert(out.end(), tmp.cbegin(), tmp.cend());
+            for (size_t i = 1ul;; ++i) {
+                if (!word_getter_fn(i, tmp)) return out;
+                out.insert(out.end(), divider.cbegin(), divider.cend());
+                out.insert(out.end(), tmp.cbegin(), tmp.cend());
+            }
+            // shouldn't reach here
+        }
+
         std::string join(const std::vector<std::string> &words, const std::string &divider);
 
         std::string join(const std::vector<std::string> &words);

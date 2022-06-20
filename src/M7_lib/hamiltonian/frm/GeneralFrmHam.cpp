@@ -18,7 +18,7 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
               context_str, integrals_2e::syms::name(sym));
     const auto equivs = integrals_2e::syms::equivalences(sym);
     if (equivs.size()<2) return;
-    log::info("this storage scheme assumes that {} integrals are equivalent", utils::to_string(equivs));
+    log::info("this storage scheme assumes that {} integrals are equivalent", utils::convert::to_string(equivs));
 }
 
 GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool spin_major) {

@@ -9,5 +9,4 @@ TEST(InteractiveVariable, Test){
     InteractiveVariableFile iv("some_uint");
     std::vector<float> i(4);
     iv.read(i);
-    utils::print(i);
 }

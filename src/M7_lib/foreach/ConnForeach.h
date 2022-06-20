@@ -103,7 +103,7 @@ namespace conn_foreach {
 
             template<typename fn_t, size_t nbeta, size_t nalpha>
             void loop_one_beta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn,
-                                  tags::Int<nbeta>, tags::Int<nalpha>) {
+                                  utils::tag::Int<nbeta>, utils::tag::Int<nalpha>) {
                 const auto &occs = src.m_decoded.m_spin_occs.get();
                 const auto &vacs = src.m_decoded.m_spin_vacs.get();
 
@@ -134,15 +134,15 @@ namespace conn_foreach {
             }
 
             template<typename fn_t, size_t nbeta>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tags::Int<nbeta> tag) {
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, utils::tag::Int<nbeta> tag) {
                 static_assert(nop >= nbeta, "number of beta-spin operators cannot exceed excit level");
-                loop_one_beta_fn<fn_t>(conn, src, fn, tag, tags::Int<nop - nbeta>());
-                loop_all_nbeta_fn<fn_t>(conn, src, fn, tags::Int<nbeta + 1>());
+                loop_one_beta_fn<fn_t>(conn, src, fn, tag, utils::tag::Int<nop - nbeta>());
+                loop_all_nbeta_fn<fn_t>(conn, src, fn, utils::tag::Int<nbeta + 1>());
             }
 
             template<typename fn_t>
             void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src,
-                                   const fn_t &fn, tags::Int<nop + 1> tag) {}
+                                   const fn_t &fn, utils::tag::Int<nop + 1> tag) {}
 
         public:
 
@@ -155,7 +155,7 @@ namespace conn_foreach {
                  * electrons created, so we need an outer loop over all numbers of betas, this is implemented in
                  * compile-time recursion
                  */
-                loop_all_nbeta_fn<fn_t>(conn, src, fn, tags::Int<0>());
+                loop_all_nbeta_fn<fn_t>(conn, src, fn, utils::tag::Int<0>());
             }
 
         protected:

@@ -171,6 +171,19 @@ size_t sys::frm::Basis::ncoeff_ind() const {
     return Size::ncoeff_ind(m_spin_resolved);
 }
 
+defs::info_map_t sys::frm::Basis::info() const {
+    defs::info_map_t map;
+    map.insert({"nsite", utils::convert::to_string(m_nsite)});
+    map.insert({"point group irreps", utils::convert::to_string(m_abgrp_map.m_site_irreps)});
+    map.insert({"spin resolved", utils::convert::to_string(m_spin_resolved)});
+    map.insert({"lattice", utils::convert::to_string(m_lattice->info())});
+    return map;
+}
+
+std::string sys::frm::Basis::to_string() const {
+    return utils::convert::to_string(info());
+}
+
 int sys::frm::Ms2::lowest_value(size_t nelec) {
     return nelec&1ul;
 }
@@ -192,8 +205,19 @@ sys::frm::Electrons::Electrons(const sys::frm::Electrons &e1, const sys::frm::El
     if (e1 && e2) REQUIRE_EQ(e1, e2, "incompatible numbers of electrons");
 }
 
-bool sys::frm::Electrons::operator==(const sys::frm::Electrons &other) {
+bool sys::frm::Electrons::operator==(const sys::frm::Electrons &other) const {
     return m_n==other.m_n && m_ms2==other.m_ms2;
+}
+
+std::map<std::string, std::string> sys::frm::Electrons::info() const {
+    std::map<std::string, std::string> map;
+    map.insert({"number", utils::convert::to_string(m_n)});
+    map.insert({"ms2", utils::convert::to_string(m_ms2)});
+    return map;
+}
+
+std::string sys::frm::Electrons::to_string() const {
+    return utils::convert::to_string(info());
 }
 
 sys::frm::Sector::Sector(sys::frm::Basis basis, sys::frm::Electrons elecs) :
@@ -223,6 +247,17 @@ sys::bos::Basis::Basis(size_t nmode, size_t occ_cutoff) : Size(nmode), m_occ_cut
 
 bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
     return (m_occ_cutoff == other.m_occ_cutoff) && (m_nmode == other.m_nmode);
+}
+
+defs::info_map_t sys::bos::Basis::info() const {
+    return {
+            {"nmode",      utils::convert::to_string(m_nmode)},
+            {"occ_cutoff", utils::convert::to_string(m_occ_cutoff)}
+    };
+}
+
+std::string sys::bos::Basis::to_string() const {
+    return utils::convert::to_string(info());
 }
 
 sys::bos::Bosons::Bosons(size_t v, bool conserve) : conservation::Optional<size_t>(v, conserve, "nboson"){}

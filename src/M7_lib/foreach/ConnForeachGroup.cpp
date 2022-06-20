@@ -19,5 +19,5 @@ ConnForeachGroup::ConnForeachGroup(const Hamiltonian &ham) {
 void ConnForeachGroup::log() const {
     std::vector<std::string> exsigs;
     for (auto& it : m_list) exsigs.emplace_back(utils::exsig::to_string(it->m_exsig));
-    log::info("Connection iterator excitation signatures: {}", utils::to_string(exsigs));
+    log::info("Connection iterator excitation signatures: {}", utils::convert::to_string(exsigs));
 }

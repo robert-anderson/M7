@@ -3,6 +3,7 @@ target_sources(unittest
         Array.cpp
         BasicForeach.cpp
         Bit.cpp
+        Convert.cpp
         Exsig.cpp
         ForeachVirtual.cpp
         Integer.cpp

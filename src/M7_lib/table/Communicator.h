@@ -325,7 +325,7 @@ struct Communicator {
                             nrow_transfer, m_name, irank_recv, irank_send);
                 m_idrows.resize(nrow_transfer, ~0ul);
                 mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
-                log::debug_("idrows: {}", utils::to_string(m_idrows));
+                log::debug_("idrows: {}", utils::convert::to_string(m_idrows));
             }
         }
 

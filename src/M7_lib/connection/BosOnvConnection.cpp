@@ -129,7 +129,7 @@ std::string BosOps::to_string() const {
         }
         else out.push_back(std::to_string(pair.m_imode));
     }
-    return utils::to_string(out);
+    return utils::convert::to_string(out);
 }
 
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}

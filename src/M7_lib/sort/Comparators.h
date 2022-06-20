@@ -15,7 +15,7 @@
  * algorithms.
  */
 namespace comparators {
-    using namespace tags;
+    using namespace utils::tag;
     /**
      * the optionality of ordering based on absolute values if not universal,
      * for some types we have the option,

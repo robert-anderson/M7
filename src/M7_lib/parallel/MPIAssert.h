@@ -46,15 +46,15 @@ namespace asserts {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
                 log::error("{} {} failed", kind, op);
-                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::to_string(lhs));
-                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::to_string(rhs));
+                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::convert::to_string(lhs));
+                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
                 log::error_("{} {} failed", kind, op);
-                log::error_("{} value is: {}", lhs_sym, utils::to_string(lhs));
-                log::error_("{} value is: {}", rhs_sym, utils::to_string(rhs));
+                log::error_("{} value is: {}", lhs_sym, utils::convert::to_string(lhs));
+                log::error_("{} value is: {}", rhs_sym, utils::convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }
@@ -68,15 +68,15 @@ namespace asserts {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
                 log::error("{} {} failed with tolerance of {}", kind, op, tol);
-                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::to_string(lhs));
-                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::to_string(rhs));
+                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::convert::to_string(lhs));
+                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
                 log::error_("{} {} failed with tolerance of {}", kind, op, tol);
-                log::error_("{} value is: {}", lhs_sym, utils::to_string(lhs));
-                log::error_("{} value is: {}", rhs_sym, utils::to_string(rhs));
+                log::error_("{} value is: {}", lhs_sym, utils::convert::to_string(lhs));
+                log::error_("{} value is: {}", rhs_sym, utils::convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }

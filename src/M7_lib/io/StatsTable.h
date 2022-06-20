@@ -26,12 +26,12 @@ namespace statistic {
 
         template<typename T>
         static std::string stats_string_element(const T &v, size_t denom) {
-            return utils::num_to_string(v / denom);
+            return utils::convert::to_string(v / denom);
         }
 
         template<typename T>
         static std::string stats_string_element(const std::complex<T> &v, size_t denom) {
-            return utils::num_to_string(v.real() / denom) + " " + utils::num_to_string(v.imag() / denom);
+            return utils::convert::to_string(v.real() / denom) + " " + utils::convert::to_string(v.imag() / denom);
         }
     };
 

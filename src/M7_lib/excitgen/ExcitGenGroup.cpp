@@ -81,7 +81,7 @@ void ExcitGenGroup::log() const {
     std::vector<std::vector<std::string>> rows = {{"Excitation Signature", "Description", "Probability"}};
     for (size_t icase=0ul; icase<ncase(); ++icase){
         auto exsig_str = utils::exsig::to_string(m_excit_cases[icase].m_exsig);
-        auto prob_str = utils::to_string(get_prob(icase));
+        auto prob_str = utils::convert::to_string(get_prob(icase));
         rows.push_back({exsig_str, m_excit_cases[icase].m_excit_gen->m_description, prob_str});
     }
     log::info_table("Excitation generation breakdown", rows, true);

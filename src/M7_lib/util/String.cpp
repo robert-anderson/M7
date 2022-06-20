@@ -5,12 +5,12 @@
 #include "String.h"
 
 std::string utils::string::join(const std::vector<std::string> &words, const std::string &divider) {
-    std::string out;
-    for (size_t i = 0ul; i < words.size() - 1; ++i) {
-        out += (words[i] + divider);
-    }
-    out += words[words.size() - 1];
-    return out;
+    auto fn = [&words](size_t i, std::string& word) {
+        if (i >= words.size()) return false;
+        word = words[i];
+        return true;
+    };
+    return join(fn, divider);
 }
 
 std::string utils::string::join(const std::vector<std::string> &words) {

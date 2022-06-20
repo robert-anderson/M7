@@ -112,7 +112,7 @@ void RankAllocatorBase::update(size_t icycle) {
     auto it_busy = std::max_element(m_gathered_total_times.begin(), m_gathered_total_times.end());
     if (*it_lazy==0.0) {
         log::warn("The most idle rank appears to have done no work at all");
-        log::debug("Gathered times: {}", utils::to_string(m_gathered_total_times));
+        log::debug("Gathered times: {}", utils::convert::to_string(m_gathered_total_times));
     }
     REQUIRE_GT_ALL(*it_busy, 0.0, "The busiest rank appears to have done no work. "
                                   "record_work_time must be called by application");

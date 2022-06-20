@@ -252,7 +252,7 @@ hdf5::NdDistListBase::NdDistListBase(hid_t parent_handle, std::string name, cons
 void hdf5::NdDistListBase::select_hyperslab(const size_t &iitem) {
     if (iitem < m_nitem_local) {
         m_hyperslab_offsets[0] = m_item_offset + iitem;
-        log::debug_("selecting hyperslab with offsets: {}", utils::to_string(m_hyperslab_offsets));
+        log::debug_("selecting hyperslab with offsets: {}", utils::convert::to_string(m_hyperslab_offsets));
         auto status = H5Sselect_hyperslab(m_filespace_handle, H5S_SELECT_SET, m_hyperslab_offsets.data(),
                                           nullptr, m_hyperslab_counts.data(), nullptr);
         DEBUG_ONLY(status);

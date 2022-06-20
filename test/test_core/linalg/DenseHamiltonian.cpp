@@ -51,7 +51,7 @@ TEST(DenseHamiltonian, HF) {
     GeneralFrmHam frm_ham({defs::assets_root + "/HF_RDMs/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     auto particles = ham.default_particles();
-    ASSERT_EQ(particles.m_frm, 6ul);
+    ASSERT_EQ(size_t(particles.m_frm), 6ul);
     DenseHamiltonian hmat(ham, particles);
     std::vector<double> evals;
     dense::diag(hmat, evals);
