@@ -10,6 +10,7 @@
 #include "M7_lib/linalg/DenseHamiltonian.h"
 #include "M7_lib/io/Symlink.h"
 #include "M7_lib/hamiltonian/frm/TcFrmHam.h"
+#include "M7_lib/util/Sort.h"
 
 #ifdef ENABLE_TCHINT
 
