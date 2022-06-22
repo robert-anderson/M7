@@ -15,12 +15,12 @@ namespace global_extremal_rows_test {
     }
 
     static size_t get_nrow(size_t irank) {
-        return utils::hash::in_range(irank, 0, 26);
+        return hash::in_range(irank, 0, 26);
     }
 
     static bool skip(size_t irank, size_t i){
         // clear one row in every 10
-        return !utils::hash::in_range({irank, i}, 0, 10);
+        return !hash::in_range({irank, i}, 0, 10);
     }
 
     static size_t get_nrow_nonzero(size_t irank) {
@@ -36,7 +36,7 @@ namespace global_extremal_rows_test {
         out.reserve(nrow);
         const int vmax = 20;
         for (size_t i = 0ul; i < nrow; ++i)
-            out.push_back(-vmax + int(utils::hash::in_range({i, irank}, 0, 2 * vmax)));
+            out.push_back(-vmax + int(hash::in_range({i, irank}, 0, 2 * vmax)));
         return out;
     }
 

@@ -7,14 +7,13 @@
 
 #include <M7_lib/defs.h>
 #include <cstring>
-#include <M7_lib/util/Hashing.h>
+#include <M7_lib/util/Hash.h>
 #include <M7_lib/nd/NdArrayList.h>
 #include <M7_lib/io/HDF5Wrapper.h>
 
 #include "Row.h"
 
 using namespace defs;
-using namespace utils;
 
 /**
  * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.

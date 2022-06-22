@@ -9,7 +9,7 @@
 #include <M7_lib/basis/AbelianGroup.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/nd/NdFormat.h>
-#include <M7_lib/util/Hashing.h>
+#include <M7_lib/util/Hash.h>
 #include <M7_lib/defs.h>
 
 struct FrmOnvField;
@@ -17,7 +17,6 @@ struct BosOnvField;
 struct FrmBosOnvField;
 
 using namespace defs;
-using namespace utils;
 
 /**
  * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbital indices when

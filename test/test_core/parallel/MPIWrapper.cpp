@@ -2,7 +2,7 @@
 // Created by Robert John Anderson on 2020-04-15.
 //
 
-#include <M7_lib/util/Hashing.h>
+#include <M7_lib/util/Hash.h>
 #include "gtest/gtest.h"
 #include "M7_lib/parallel/MPIWrapper.h"
 

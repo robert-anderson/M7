@@ -6,25 +6,27 @@
 
 #include <M7_lib/parallel/MPIAssert.h>
 
-#include "Hashing.h"
+#include "Hash.h"
 
-using namespace utils::hash;
+#include <set>
 
-digest_t utils::hash::in_range(digest_t v, digest_t lo, digest_t hi) {
+using namespace hash;
+
+digest_t hash::in_range(digest_t v, digest_t lo, digest_t hi) {
     REQUIRE_GT(hi, lo, "upper hash value does not exceed lower value");
     v = fnv(v + 312194ul);
     v %= hi - lo;
     return v + lo;
 }
 
-digest_t utils::hash::in_range(const std::vector<digest_t> &v, digest_t lo, digest_t hi) {
+digest_t hash::in_range(const std::vector<digest_t> &v, digest_t lo, digest_t hi) {
     REQUIRE_FALSE(v.empty(), "there must be as least one hashing value");
     auto out = in_range(v[0], lo, hi);
     for (size_t i = 1ul; i < v.size(); ++i) out = in_range(out + 4321 * v[i], lo, hi);
     return out;
 }
 
-std::vector<digest_t> utils::hash::in_range(const std::vector<digest_t> &v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
+std::vector<digest_t> hash::in_range(const std::vector<digest_t> &v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
     std::vector<digest_t> out;
     out.reserve(ngen);
     auto vatt = v;
@@ -38,12 +40,12 @@ std::vector<digest_t> utils::hash::in_range(const std::vector<digest_t> &v, size
     return out;
 }
 
-std::vector<digest_t> utils::hash::in_range(digest_t v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
+std::vector<digest_t> hash::in_range(digest_t v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
     return in_range(std::vector<digest_t>{v}, ngen, lo, hi, sorted);
 }
 
 
-std::vector<digest_t> utils::hash::unique_in_range(const std::vector<digest_t> &v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
+std::vector<digest_t> hash::unique_in_range(const std::vector<digest_t> &v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
     REQUIRE_LE(lo + ngen, hi, "number of unique values can't exceed the range of allowed values");
     std::vector<digest_t> out;
     out.reserve(ngen);
@@ -61,6 +63,6 @@ std::vector<digest_t> utils::hash::unique_in_range(const std::vector<digest_t> &
     return out;
 }
 
-std::vector<digest_t> utils::hash::unique_in_range(digest_t v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
+std::vector<digest_t> hash::unique_in_range(digest_t v, size_t ngen, digest_t lo, digest_t hi, bool sorted) {
     return unique_in_range(std::vector<digest_t>{v}, ngen, lo, hi, sorted);
 }

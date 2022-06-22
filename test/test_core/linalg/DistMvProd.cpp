@@ -2,7 +2,7 @@
 // Created by Robert J. Anderson on 1/7/22.
 //
 
-#include <M7_lib/util/Hashing.h>
+#include <M7_lib/util/Hash.h>
 #include <M7_lib/linalg/DistMvProd.h>
 #include <test_core/sparse/Examples.h>
 #include "gtest/gtest.h"

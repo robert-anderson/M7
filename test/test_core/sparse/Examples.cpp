@@ -3,7 +3,7 @@
 //
 
 #include "Examples.h"
-#include "M7_lib/util/Hashing.h"
+#include "M7_lib/util/Hash.h"
 #include "M7_lib/parallel/MPIAssert.h"
 
 using namespace utils;
