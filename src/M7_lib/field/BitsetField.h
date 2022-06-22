@@ -88,7 +88,7 @@ struct BitsetField : FieldBase {
 
     bool get(const T *dptr, const size_t &ibit) const {
         ASSERT(ibit < nbit());
-        return utils::bit::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        return bit::get(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     bool get(const size_t &ibit) const {
@@ -105,7 +105,7 @@ struct BitsetField : FieldBase {
 
     void set(T *dptr, const size_t &ibit) {
         ASSERT(ibit < nbit());
-        utils::bit::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        bit::set(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void set(const size_t &ibit) {
@@ -128,18 +128,18 @@ struct BitsetField : FieldBase {
         auto ibitword_end = iend-iword_end*nbit_dword();
         if (iword_begin==iword_end) {
             // begin and end bits are in the same word, so apply mask and return
-            utils::bit::apply_mask(dbegin()[iword_begin], ibitword_begin, ibitword_end, set);
+            bit::apply_mask(dbegin()[iword_begin], ibitword_begin, ibitword_end, set);
             return;
         }
         // begin part: act from first bit to end of its word
-        utils::bit::apply_mask(dbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
+        bit::apply_mask(dbegin()[iword_begin], ibitword_begin, nbit_dword(), set);
         // end part: act to the last bit from the beginning of its word
-        utils::bit::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
+        bit::apply_mask(dbegin()[iword_end], 0, ibitword_end, set);
         // make the all-bits mask
-        utils::bit::make_range_mask(mask, 0, nbit_dword());
+        bit::make_range_mask(mask, 0, nbit_dword());
         for (size_t iword=iword_begin+1; iword<iword_end; ++iword){
             // apply it to all words between begin and end
-            utils::bit::apply_mask(dbegin()[iword], mask, set);
+            bit::apply_mask(dbegin()[iword], mask, set);
         }
     }
 
@@ -157,7 +157,7 @@ struct BitsetField : FieldBase {
 
     void clr(T *dptr, const size_t &ibit) {
         ASSERT(ibit < nbit());
-        utils::bit::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
+        bit::clr(dptr[ibit / nbit_dword()], ibit % nbit_dword());
     }
 
     void clr(const size_t &ibit) {
@@ -193,9 +193,9 @@ struct BitsetField : FieldBase {
         auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = dptr[idataword];
         if (idataword + 1 == m_dsize) {
-            DEBUG_ASSERT_EQ(tmp, utils::bit::truncate(tmp, m_nbit_in_last_dword),
+            DEBUG_ASSERT_EQ(tmp, bit::truncate(tmp, m_nbit_in_last_dword),
                        "trailing bits were not clear: possible corruption");
-            tmp = utils::bit::truncate(tmp, m_nbit_in_last_dword);
+            tmp = bit::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
@@ -205,7 +205,7 @@ struct BitsetField : FieldBase {
         auto *dptr = reinterpret_cast<T *>(begin());
         auto tmp = ~dptr[idataword];
         if ((idataword + 1) == m_dsize) {
-            tmp = utils::bit::truncate(tmp, m_nbit_in_last_dword);
+            tmp = bit::truncate(tmp, m_nbit_in_last_dword);
         }
         return tmp;
     }
@@ -243,7 +243,7 @@ struct BitsetField : FieldBase {
     size_t nsetbit() const {
         size_t result = 0;
         for (size_t idataword = 0ul; idataword < m_dsize; ++idataword) {
-            result += utils::bit::nsetbit(get_dataword(idataword));
+            result += bit::nsetbit(get_dataword(idataword));
         }
         return result;
     }

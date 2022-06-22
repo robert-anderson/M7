@@ -30,9 +30,9 @@ void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
         src_work = src.get_dataword(idataword);
         dst_work = dst.get_dataword(idataword);
         work = src_work & ~dst_work;
-        while (work) m_ann.add(utils::bit::next_setbit(work) + bit_offset);
+        while (work) m_ann.add(bit::next_setbit(work) + bit_offset);
         work = dst_work & ~src_work;
-        while (work) m_cre.add(utils::bit::next_setbit(work) + bit_offset);
+        while (work) m_cre.add(bit::next_setbit(work) + bit_offset);
     }
     DEBUG_ASSERT_TRUE(m_cre.is_valid(), "creation operators are not unique and in ascending order");
     DEBUG_ASSERT_TRUE(m_ann.is_valid(), "annihilation operators are not unique and in ascending order");
@@ -55,7 +55,7 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
         dst_work = dst.get_dataword(idataword);
         work = src_work & dst_work;
         while (work) {
-            auto setbit = utils::bit::next_setbit(work) + idataword * defs::nbit_word;
+            auto setbit = bit::next_setbit(work) + idataword * defs::nbit_word;
             while (ann_iter != ann_end && *ann_iter < setbit) {
                 // an annihilation operator has been passed in the iteration over common indices
                 ann_iter++;
@@ -115,7 +115,7 @@ bool FrmOnvConnection::apply(const FrmOnvField &src, FrmOps &com) const {
     for (size_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
         auto work = src.get_dataword(idataword);
         while (work) {
-            auto setbit = utils::bit::next_setbit(work) + idataword * defs::nbit_word;
+            auto setbit = bit::next_setbit(work) + idataword * defs::nbit_word;
             if (ann_iter != ann_end && setbit == *ann_iter) {
                 ann_iter++;
                 nperm += com.size();
@@ -160,7 +160,7 @@ const defs::inds_t &FrmOnvConnection::cre() const {
 void FrmOnvConnection::update_dataword_phases(const FrmOnvField &src) const {
     for (size_t idataword = 1ul; idataword < m_ndataword; ++idataword) {
         auto prev_dataword = src.get_dataword(idataword - 1);
-        bool phase = utils::bit::nsetbit(prev_dataword) & 1ul;
+        bool phase = bit::nsetbit(prev_dataword) & 1ul;
         m_dataword_phases[idataword] = (m_dataword_phases[idataword - 1] != phase);
     }
 }
@@ -171,7 +171,7 @@ bool FrmOnvConnection::independent_phase(const FrmOnvField &src, const size_t &i
     DEBUG_ASSERT_LT(idataword, m_ndataword, "dataword index OOB");
     auto ibit_in_word = ibit - idataword * defs::nbit_word;
     return m_dataword_phases[idataword] ^
-           (utils::bit::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);
+           (bit::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);
 }
 
 bool FrmOnvConnection::phase(const FrmOnvField &src) const {

@@ -33,7 +33,7 @@ namespace setbit_foreach {
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + utils::bit::next_setbit(work);
+                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 fn(ibit);
             }
         }
@@ -66,7 +66,7 @@ namespace setbit_foreach {
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + utils::bit::next_setbit(work);
+                size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
                 fn(jbit, ibit);
             }
@@ -103,7 +103,7 @@ namespace setbit_foreach {
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + utils::bit::next_setbit(work);
+                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 fn_outer(ibit);
                 pair_inner<T>(dsize, ibit, fn_inner, get_work_fn);
             }
@@ -133,7 +133,7 @@ namespace setbit_foreach {
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t kbit = idataword * (CHAR_BIT*sizeof(T)) + utils::bit::next_setbit(work);
+                size_t kbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (kbit==jbit) return;
                 fn_3(kbit, jbit, ibit);
             }
@@ -152,7 +152,7 @@ namespace setbit_foreach {
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + utils::bit::next_setbit(work);
+                size_t jbit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 if (jbit==ibit) return;
                 triple_2<T>(dsize, ibit, jbit, fn_3, get_work_fn);
             }
@@ -172,7 +172,7 @@ namespace setbit_foreach {
         for (size_t idataword = 0; idataword < dsize; ++idataword) {
             work = get_work_fn(idataword);
             while (work) {
-                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + utils::bit::next_setbit(work);
+                size_t ibit = idataword * (CHAR_BIT*sizeof(T)) + bit::next_setbit(work);
                 fn_1(ibit);
                 triple_1<T>(dsize, ibit, fn_2, fn_3, get_work_fn);
             }
