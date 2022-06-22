@@ -129,8 +129,8 @@ void Rdm::save(hdf5::GroupWriter &gw) const {
     m_store.save(gw, to_string(m_ranksig));
 }
 
-std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
-    std::array<defs::inds, defs::nexsig> exsig_ranks;
+std::array<defs::inds_t, defs::nexsig> Rdms::make_exsig_ranks() const {
+    std::array<defs::inds_t, defs::nexsig> exsig_ranks;
     for (const auto &ranksig: m_active_ranksigs) {
         auto nfrm_cre = decode_nfrm_cre(ranksig);
         auto nfrm_ann = decode_nfrm_cre(ranksig);
@@ -151,7 +151,7 @@ std::array<defs::inds, defs::nexsig> Rdms::make_exsig_ranks() const {
     return exsig_ranks;
 }
 
-Rdms::Rdms(const conf::Rdms &opts, defs::inds ranksigs,
+Rdms::Rdms(const conf::Rdms &opts, defs::inds_t ranksigs,
            sys::Size extents, size_t nelec, const Epoch &accum_epoch) :
         Archivable("rdms", opts.m_archivable),
         m_active_ranksigs(std::move(ranksigs)), m_exsig_ranks(make_exsig_ranks()),

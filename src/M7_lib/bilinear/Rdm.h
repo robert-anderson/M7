@@ -50,13 +50,13 @@ public:
 
 class Rdms : public Archivable {
     std::array<std::unique_ptr<Rdm>, defs::nexsig> m_rdms;
-    const defs::inds m_active_ranksigs;
-    const std::array<defs::inds, defs::nexsig> m_exsig_ranks;
+    const defs::inds_t m_active_ranksigs;
+    const std::array<defs::inds_t, defs::nexsig> m_exsig_ranks;
 
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
 
-    std::array<defs::inds, defs::nexsig> make_exsig_ranks() const;
+    std::array<defs::inds_t, defs::nexsig> make_exsig_ranks() const;
 
 public:
     const bool m_explicit_ref_conns;
@@ -64,7 +64,7 @@ public:
     Reduction<defs::wf_t> m_total_norm;
     const size_t m_nelec;
 
-    Rdms(const conf::Rdms &opts, defs::inds ranksigs,
+    Rdms(const conf::Rdms &opts, defs::inds_t ranksigs,
          sys::Size extents, size_t nelec, const Epoch &accum_epoch);
 
     operator bool() const;

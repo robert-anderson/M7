@@ -49,7 +49,7 @@ public:
         size_t ij = m_prng.draw_uint(nboson_pair);
         size_t i, j;
         utils::integer::inv_strigmap(j, i, ij);
-        // i and j are positions in the occ list, convert to orb inds:
+        // i and j are positions in the occ list, convert to orb inds_t:
         DEBUG_ASSERT_LT(i, j, "picked i, j should be in ascending order");
         DEBUG_ASSERT_LT(i, op_inds.size(), "i index OOB");
         DEBUG_ASSERT_LT(j, op_inds.size(), "j index OOB");

@@ -141,7 +141,7 @@ public:
      * @return
      *  the shape array converted to a vector instance
      */
-    defs::inds shape_vector() const {
+    defs::inds_t shape_vector() const {
         return utils::array::to_vector(m_shape);
     }
 
@@ -250,7 +250,7 @@ public:
      *            |-------------|
      *   shape:    X  X  X  X  X
      *
-     *   inds:     X  X  /  /  /
+     *   inds_t:     X  X  /  /  /
      *            |----|
      *            nind spec
      *

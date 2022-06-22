@@ -25,13 +25,13 @@ BosOnvField::BosOnvField(Row *row, const sys::Sector &sector, std::string name) 
 BosOnvField::BosOnvField(const BosOnvField &other) :
     base_t(other), m_basis(other.m_basis), m_decoded(*this) {}
 
-BosOnvField &BosOnvField::operator=(const defs::inds &inds) {
+BosOnvField &BosOnvField::operator=(const defs::inds_t &inds) {
     DEBUG_ASSERT_EQ(inds.size(), nelement(), "Vector is not the correct size");
     for (size_t i = 0ul; i < inds.size(); ++i) (*this)[i] = inds[i];
     return *this;
 }
 
-void BosOnvField::set_ops(const defs::inds &iops) {
+void BosOnvField::set_ops(const defs::inds_t &iops) {
     zero();
     for (auto& iop: iops) (*this)[iop]++;
 }

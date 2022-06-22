@@ -123,7 +123,7 @@ public:
         gr.load(m_name, begin(), {m_size});
     }
 
-    virtual defs::inds h5_shape() const {
+    virtual defs::inds_t h5_shape() const {
         return {};
     }
 

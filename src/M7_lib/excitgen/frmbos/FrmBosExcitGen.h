@@ -14,7 +14,7 @@ struct FrmBosExcitGen : ExcitGen {
 
     const FrmBosHam& m_h;
 
-    FrmBosExcitGen(const FrmBosHam& h, PRNG &prng, defs::inds exsigs, std::string description);
+    FrmBosExcitGen(const FrmBosHam& h, PRNG &prng, defs::inds_t exsigs, std::string description);
 
     bool draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, defs::ham_t &helem,
                     conn::FrmOnv &conn) override;

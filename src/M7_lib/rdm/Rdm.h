@@ -84,7 +84,7 @@ struct FermionRdm : Communicator<MaeRow<defs::wf_t>, MaeRow<defs::wf_t>, true>, 
         for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
             row_reader.read(iitem);
             auto &send_table = send(m_ra.get_rank(row_reader.m_inds));
-            // should never read in the same inds twice
+            // should never read in the same inds_t twice
             ASSERT(!send_table[row_reader.m_inds]);
             auto irow = send_table.insert(row_reader.m_inds);
             send_table.m_row.jump(irow);

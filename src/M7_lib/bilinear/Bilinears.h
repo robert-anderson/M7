@@ -42,7 +42,7 @@ struct Bilinears {
     //const bool m_explicit_hf_conns;
 
     //std::array<std::unique_ptr<SpectralMoment>, defs::nexsig> m_specmoms;
-    //const defs::inds m_specmom_exsigs;
+    //const defs::inds_t m_specmom_exsigs;
 
 private:
     /**
@@ -74,8 +74,8 @@ private:
      * @return
      *  integer excitation signatures
      */
-    static defs::inds parse_exsigs(const std::vector<std::string> &strings) {
-        defs::inds out;
+    static defs::inds_t parse_exsigs(const std::vector<std::string> &strings) {
+        defs::inds_t out;
         for (auto &string: strings) out.push_back(parse_exsig(string));
         DEBUG_ASSERT_EQ(out.size(), strings.size(),
                         "output should have the same number of exsigs as specification");
@@ -107,7 +107,7 @@ public:
         return m_rdms;
     }
 
-    Bilinears(const conf::AvEsts &opts, defs::inds rdm_ranksigs, defs::inds specmom_exsigs,
+    Bilinears(const conf::AvEsts &opts, defs::inds_t rdm_ranksigs, defs::inds_t specmom_exsigs,
               sys::Size extents, size_t nelec, const Epoch &epoch) :
             m_rdms(opts.m_rdm, rdm_ranksigs, extents, nelec, epoch),
             m_spec_moms(opts.m_spec_mom), m_total_norm({1}) {}

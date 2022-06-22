@@ -29,13 +29,13 @@ struct ReductionMember : FormattedNdAccessor<T, nind>, ReductionMemberBase<T> {
     }
 
     template<typename ...Args>
-    const T &reduced(Args... inds) const {
-        return m_reduced(inds...);
+    const T &reduced(Args... inds_t) const {
+        return m_reduced(inds_t...);
     }
 
     template<typename ...Args>
-    const size_t &rank_index(Args... inds) const {
-        return m_rank_indices(inds...);
+    const size_t &rank_index(Args... inds_t) const {
+        return m_rank_indices(inds_t...);
     }
 };
 

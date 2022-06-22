@@ -178,7 +178,7 @@ TEST(Table, PointToPointTransfer) {
     bt.push_back(ngen);
     for (size_t i=0ul; i<ngen; ++i) bt.m_shorts(i, 0) = 55*(i+1)+mpi::irank();
     bt.print_contents();
-    defs::inds send;
+    defs::inds_t send;
     if (mpi::i_am(0)) send = {1, 2, 4};
     bt.transfer_rows(send, 0, 1);
     if (mpi::i_am(1)) {

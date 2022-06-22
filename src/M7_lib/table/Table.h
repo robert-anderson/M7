@@ -31,7 +31,7 @@ struct Table : TableBase {
 
     virtual ~Table(){}
 
-    std::string to_string(const defs::inds *ordering = nullptr) const override {
+    std::string to_string(const defs::inds_t *ordering = nullptr) const override {
         std::string tmp = m_row.field_names_string();
         if (!m_hwm) return tmp;
         const auto n = ordering ? std::min(ordering->size(), m_hwm) : m_hwm;

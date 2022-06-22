@@ -12,7 +12,7 @@ bool decoded_mbf::frm::Base::is_valid() const {
     return !defs::enable_debug || (m_mbf.hash()==m_last_update_hash);
 }
 
-const defs::inds &decoded_mbf::frm::SimpleBase::validated() const {
+const defs::inds_t &decoded_mbf::frm::SimpleBase::validated() const {
     DEBUG_ASSERT_TRUE(is_valid(), "cache is not in sync with current MBF value");
     return m_inds;
 }
@@ -21,7 +21,7 @@ decoded_mbf::frm::SimpleBase::SimpleBase(const FrmOnvField &mbf) : Base(mbf) {}
 
 decoded_mbf::frm::SimpleOccs::SimpleOccs(const FrmOnvField &mbf) : SimpleBase(mbf) {}
 
-const defs::inds& decoded_mbf::frm::SimpleOccs::get() {
+const defs::inds_t& decoded_mbf::frm::SimpleOccs::get() {
     if (!empty()) return validated();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
@@ -33,7 +33,7 @@ const defs::inds& decoded_mbf::frm::SimpleOccs::get() {
 
 decoded_mbf::frm::SimpleVacs::SimpleVacs(const FrmOnvField &mbf) : SimpleBase(mbf) {}
 
-const defs::inds& decoded_mbf::frm::SimpleVacs::get() {
+const defs::inds_t& decoded_mbf::frm::SimpleVacs::get() {
     if (!empty()) return validated();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
@@ -43,7 +43,7 @@ const defs::inds& decoded_mbf::frm::SimpleVacs::get() {
     return m_inds;
 }
 
-decoded_mbf::frm::LabelledBase::LabelledBase(size_t nelement, const defs::inds &map, const FrmOnvField &mbf) :
+decoded_mbf::frm::LabelledBase::LabelledBase(size_t nelement, const defs::inds_t &map, const FrmOnvField &mbf) :
         Base(mbf), m_inds(nelement), m_map(map) {
     if (mbf.m_basis.m_nsite){
         REQUIRE_LT(*std::max_element(map.cbegin(), map.cend()), nelement,
@@ -51,15 +51,15 @@ decoded_mbf::frm::LabelledBase::LabelledBase(size_t nelement, const defs::inds &
     }
 }
 
-const std::vector<defs::inds> &decoded_mbf::frm::LabelledBase::validated() const {
+const std::vector<defs::inds_t> &decoded_mbf::frm::LabelledBase::validated() const {
     DEBUG_ASSERT_TRUE(is_valid(), "cache is not in sync with current MBF value");
     return m_inds;
 }
 
-defs::inds decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::inds &site_irreps, size_t nirrep) {
+defs::inds_t decoded_mbf::frm::LabelledBase::make_spinorb_map(const defs::inds_t &site_irreps, size_t nirrep) {
     auto nsite = site_irreps.size();
     if (!nsite) return {};
-    defs::inds out(2*nsite, 0);
+    defs::inds_t out(2 * nsite, 0);
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin());
     std::copy(site_irreps.cbegin(), site_irreps.cend(), out.begin()+nsite);
     for (size_t i=nsite; i<nsite*2; ++i) out[i]+=nirrep;
@@ -81,12 +81,12 @@ size_t decoded_mbf::frm::LabelledBase::label(size_t ispinorb) const {
     return m_map[ispinorb];
 }
 
-decoded_mbf::frm::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
+decoded_mbf::frm::LabelledOccs::LabelledOccs(size_t nelement, const defs::inds_t &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
-const std::vector<defs::inds>& decoded_mbf::frm::LabelledOccs::get() {
+const std::vector<defs::inds_t>& decoded_mbf::frm::LabelledOccs::get() {
     if (!empty()) return validated();
-    // simple inds are all ready cleared
+    // simple inds_t are all ready cleared
     for (auto& v : m_inds) v.clear();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_dataword(idataword);
@@ -100,17 +100,17 @@ const std::vector<defs::inds>& decoded_mbf::frm::LabelledOccs::get() {
     return m_inds;
 }
 
-const defs::inds &decoded_mbf::frm::LabelledOccs::simple() {
+const defs::inds_t &decoded_mbf::frm::LabelledOccs::simple() {
     get();
     return m_simple_inds;
 }
 
-decoded_mbf::frm::LabelledVacs::LabelledVacs(size_t nelement, const defs::inds &map, const FrmOnvField& mbf) :
+decoded_mbf::frm::LabelledVacs::LabelledVacs(size_t nelement, const defs::inds_t &map, const FrmOnvField& mbf) :
         LabelledBase(nelement, map, mbf){}
 
-const std::vector<defs::inds>& decoded_mbf::frm::LabelledVacs::get() {
+const std::vector<defs::inds_t>& decoded_mbf::frm::LabelledVacs::get() {
     if (!empty()) return validated();
-    // simple inds are all ready cleared
+    // simple inds_t are all ready cleared
     for (auto& v : m_inds) v.clear();
     for (size_t idataword = 0ul; idataword < m_mbf.m_dsize; ++idataword) {
         auto work = m_mbf.get_antidataword(idataword);
@@ -124,16 +124,16 @@ const std::vector<defs::inds>& decoded_mbf::frm::LabelledVacs::get() {
     return m_inds;
 }
 
-const defs::inds &decoded_mbf::frm::LabelledVacs::simple() {
+const defs::inds_t &decoded_mbf::frm::LabelledVacs::simple() {
     get();
     return m_simple_inds;
 }
 
 decoded_mbf::frm::SpinOccs::SpinOccs(const FrmOnvField &mbf):
-        NdLabelledOccs<1>({2}, make_spinorb_map(defs::inds(mbf.m_basis.m_nsite, 0), 1), mbf){}
+        NdLabelledOccs<1>({2}, make_spinorb_map(defs::inds_t(mbf.m_basis.m_nsite, 0), 1), mbf){}
 
 decoded_mbf::frm::SpinVacs::SpinVacs(const FrmOnvField &mbf):
-        NdLabelledVacs<1>({2}, make_spinorb_map(defs::inds(mbf.m_basis.m_nsite, 0), 1), mbf){}
+        NdLabelledVacs<1>({2}, make_spinorb_map(defs::inds_t(mbf.m_basis.m_nsite, 0), 1), mbf){}
 
 decoded_mbf::frm::SpinSymOccs::SpinSymOccs(const AbelianGroupMap &grp_map, const FrmOnvField &mbf) :
         NdLabelledOccs<2>({2, grp_map.m_grp.nirrep()},
@@ -146,7 +146,7 @@ decoded_mbf::frm::SpinSymVacs::SpinSymVacs(const AbelianGroupMap &grp_map, const
 
 decoded_mbf::frm::NonEmptyPairLabels::NonEmptyPairLabels(const FrmOnvField &mbf) : SimpleBase(mbf){}
 
-const defs::inds &decoded_mbf::frm::NonEmptyPairLabels::get() {
+const defs::inds_t &decoded_mbf::frm::NonEmptyPairLabels::get() {
     if (!empty()) return validated();
     auto &occ = m_mbf.m_decoded.m_spin_sym_occs.get();
     auto &vac = m_mbf.m_decoded.m_spin_sym_vacs.get();
@@ -159,7 +159,7 @@ const defs::inds &decoded_mbf::frm::NonEmptyPairLabels::get() {
 
 decoded_mbf::frm::OccSites::OccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
 
-const defs::inds &decoded_mbf::frm::OccSites::get() {
+const defs::inds_t &decoded_mbf::frm::OccSites::get() {
     if (!empty()) return validated();
     for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)) m_inds.push_back(isite);
@@ -170,7 +170,7 @@ const defs::inds &decoded_mbf::frm::OccSites::get() {
 
 decoded_mbf::frm::DoublyOccSites::DoublyOccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
 
-const defs::inds &decoded_mbf::frm::DoublyOccSites::get() {
+const defs::inds_t &decoded_mbf::frm::DoublyOccSites::get() {
     if (!empty()) return validated();
     for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)==2) m_inds.push_back(isite);
@@ -181,7 +181,7 @@ const defs::inds &decoded_mbf::frm::DoublyOccSites::get() {
 
 decoded_mbf::frm::NotSinglyOccSites::NotSinglyOccSites(const FrmOnvField &mbf) : SimpleBase(mbf){}
 
-const defs::inds &decoded_mbf::frm::NotSinglyOccSites::get() {
+const defs::inds_t &decoded_mbf::frm::NotSinglyOccSites::get() {
     if (!empty()) return validated();
     for (size_t isite = 0ul; isite < m_mbf.m_basis.m_nsite; ++isite) {
         if (m_mbf.site_nocc(isite)!=1) m_inds.push_back(isite);

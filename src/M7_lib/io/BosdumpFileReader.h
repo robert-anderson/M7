@@ -18,11 +18,11 @@ struct BosdumpFileReader : HamiltonianFileReader {
 
     BosdumpFileReader(const std::string &fname);
 
-    size_t ranksig(const defs::inds &inds) const override;
+    size_t ranksig(const defs::inds_t &inds) const override;
 
-    size_t exsig(const defs::inds &inds, const size_t& ranksig) const override;
+    size_t exsig(const defs::inds_t &inds, const size_t& ranksig) const override;
 
-    bool inds_in_range(const defs::inds &inds) const override;
+    bool inds_in_range(const defs::inds_t &inds) const override;
 };
 
 

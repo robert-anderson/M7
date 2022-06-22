@@ -6,7 +6,7 @@
 #include "M7_lib/basis/Planewaves.h"
 
 TEST(Planewaves, HeterogeneousExtents) {
-    defs::inds shape = {3, 5, 2};
+    defs::inds_t shape = {3, 5, 2};
     Planewaves planewaves(shape);
     size_t chk_size = 1;
     for (auto &extent: shape) chk_size*=(2*extent+1);

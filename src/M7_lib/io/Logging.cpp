@@ -109,7 +109,7 @@ std::vector<std::string> log::make_table(const std::vector<std::vector<std::stri
 
     auto max_it = std::max_element(rows.cbegin(), rows.cend(), fn);
     const size_t ncol = max_it->size();
-    defs::inds max_sizes(ncol, 0ul);
+    defs::inds_t max_sizes(ncol, 0ul);
     for (auto& row: rows) {
         for (auto it=row.cbegin(); it!=row.cend(); ++it) {
             auto icol = std::distance(row.cbegin(), it);

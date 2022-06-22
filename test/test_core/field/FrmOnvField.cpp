@@ -17,7 +17,7 @@ namespace frm_onv_field_test {
         auto test_fn = [&](size_t nsite, size_t nset) {
             buffered::FrmOnv mbf(nsite);
             size_t nsetbit_chk = 0ul;
-            defs::inds alpha_setbits(nsite);
+            defs::inds_t alpha_setbits(nsite);
             if (fill_alpha) {
                 std::iota(alpha_setbits.begin(), alpha_setbits.end(), 0);
                 nsetbit_chk+=nsite;
@@ -26,7 +26,7 @@ namespace frm_onv_field_test {
                 alpha_setbits = hashing::unique_in_range(0, nset, 0, nsite, true);
                 nsetbit_chk+=nset;
             }
-            defs::inds beta_setbits(nsite);
+            defs::inds_t beta_setbits(nsite);
             if (fill_beta) {
                 std::iota(beta_setbits.begin(), beta_setbits.end(), 0);
                 nsetbit_chk+=nsite;
@@ -38,7 +38,7 @@ namespace frm_onv_field_test {
 
             mbf = {alpha_setbits, beta_setbits};
             ASSERT_EQ(mbf.nsetbit(), nsetbit_chk);
-            defs::inds isites_included;
+            defs::inds_t isites_included;
             for (size_t isite=0ul; isite<nsite; ++isite){
                 if (include_fn(mbf.get({0, isite}), mbf.get({1, isite})))
                     isites_included.push_back(isite);
@@ -73,7 +73,7 @@ namespace frm_onv_field_test {
 TEST(FrmOnvField, SetFromInds) {
     const size_t nsite = 123;
     buffered::FrmOnv mbf(nsite);
-    defs::inds setbits = {1, 90, nsite-1, nsite, 2*nsite-1};
+    defs::inds_t setbits = {1, 90, nsite - 1, nsite, 2 * nsite - 1};
     mbf = setbits;
     for (size_t ibit=0ul; ibit<mbf.m_basis.m_nspinorb; ++ibit){
         bool is_set = std::find(setbits.cbegin(), setbits.cend(), ibit)!=setbits.cend();

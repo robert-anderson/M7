@@ -431,7 +431,7 @@ TEST(ForeachVirtual, RtndUnrestricted3) {
     ASSERT_TRUE(foreach.m_pass);
 
     // testing lambda wrapper
-    auto fn = [&chk_inds](const defs::inds& value, size_t iiter){
+    auto fn = [&chk_inds](const defs::inds_t& value, size_t iiter){
         ASSERT_EQ(chk_inds[iiter], value);
     };
     rtnd::lambda::Unrestricted lambda_foreach(fn, shape);
@@ -505,7 +505,7 @@ TEST(ForeachVirtual, RtndOrderedStrictAsc3) {
     ASSERT_TRUE(foreach.m_pass);
 
     // testing lambda wrapper
-    auto fn = [&chk_inds](const defs::inds& value, size_t iiter){
+    auto fn = [&chk_inds](const defs::inds_t& value, size_t iiter){
         ASSERT_EQ(chk_inds[iiter], value);
     };
     rtnd::lambda::Ordered<true, true> lambda_foreach(fn, n, 3);

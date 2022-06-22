@@ -10,7 +10,7 @@ GeneralBosHam::GeneralBosHam(const BosdumpHeader &header, size_t occ_cutoff) :
         m_coeffs_1(m_basis.m_nmode), m_coeffs_2(m_basis.m_nmode) {
 
     BosdumpFileReader file_reader(header.m_fname);
-    defs::inds inds(4);
+    defs::inds_t inds(4);
     defs::ham_t value;
 
     log::info("Reading Boson Hamiltonian coefficients from file \"" + file_reader.m_fname + "\"...");

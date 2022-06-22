@@ -38,14 +38,14 @@ public:
     }
 
     /**
-     * can't simply copy inds since the mev_ind_t is not the same as size_t in general, so must do a narrowing loop
+     * can't simply copy inds_t since the mev_ind_t is not the same as size_t in general, so must do a narrowing loop
      * @param inds
      *  indices in unsigned system words
      * @return
      *  reference to this
      */
-    MaeIndsPartition &operator=(const defs::inds &inds) {
-        DEBUG_ASSERT_EQ(inds.size(), m_size, "inds vector size incompatible");
+    MaeIndsPartition &operator=(const defs::inds_t &inds) {
+        DEBUG_ASSERT_EQ(inds.size(), m_size, "inds_t vector size incompatible");
         size_t iind = 0ul;
         for (auto &ind: inds) (*this)[iind++] = ind;
         return *this;
@@ -64,7 +64,7 @@ struct MaeIndsPair {
             m_cre(field, cre_offset, cre_size),
             m_ann(field, ann_offset, ann_size) {}
 
-    MaeIndsPair &operator=(const std::pair<defs::inds, defs::inds> &inds) {
+    MaeIndsPair &operator=(const std::pair<defs::inds_t, defs::inds_t> &inds) {
         m_cre = inds.first;
         m_ann = inds.second;
         return *this;
@@ -114,7 +114,7 @@ private:
 public:
     bool is_ordered() const;
 
-    void common_frm_inds(defs::inds &common) const;
+    void common_frm_inds(defs::inds_t &common) const;
 
     std::string get_exsig_string() const;
 };

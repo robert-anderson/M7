@@ -44,7 +44,7 @@ namespace decoded_mbf {
      */
     struct SimpleContainer {
     protected:
-        defs::inds m_inds;
+        defs::inds_t m_inds;
 
     public:
 

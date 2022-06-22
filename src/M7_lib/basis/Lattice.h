@@ -34,7 +34,7 @@ namespace lattice {
         /**
          * number of adjacent sites for each site
          */
-        const defs::inds m_nadjs;
+        const defs::inds_t m_nadjs;
         /**
          * to help with excitation generation. The number of connections possible from a site i cannot be known before i is
          * selected, and it is efficient to select i and a connected j in a single random number draw. If the random number
@@ -52,7 +52,7 @@ namespace lattice {
          */
         const size_t m_nadj_max;
 
-        Base(const defs::inds& nadjs);
+        Base(const defs::inds_t& nadjs);
         virtual ~Base() = default;
         virtual int phase(size_t isite, size_t jsite) const = 0;
         virtual void get_adj_row(size_t isite, adj_row_t &row) const = 0;
@@ -77,13 +77,13 @@ namespace lattice {
         const std::vector<int> m_bcs;
         const std::string m_info_string;
 
-        OrthoTopology(const defs::inds &shape, const std::vector<int> &bcs);
+        OrthoTopology(const defs::inds_t &shape, const std::vector<int> &bcs);
 
     private:
         int one_dim_phase(size_t iind, size_t jind, size_t idim) const;
 
     public:
-        size_t isite_adj(const defs::inds &inds, size_t idim, size_t value) const;
+        size_t isite_adj(const defs::inds_t &inds, size_t idim, size_t value) const;
 
         size_t nsite() const;
 
@@ -98,7 +98,7 @@ namespace lattice {
     struct NullTopology {
         const std::string m_info_string = "null";
 
-        size_t isite_adj(const defs::inds &inds, size_t idim, size_t value) const;
+        size_t isite_adj(const defs::inds_t &inds, size_t idim, size_t value) const;
 
         size_t nsite() const;
 
@@ -114,9 +114,9 @@ namespace lattice {
          */
         const topo_t m_topo;
     protected:
-        static defs::inds make_nadjs(const topo_t& topo) {
+        static defs::inds_t make_nadjs(const topo_t& topo) {
             const auto nsite = topo.nsite();
-            defs::inds out;
+            defs::inds_t out;
             out.reserve(nsite);
             adj_row_t row;
             for (size_t isite=0; isite < nsite; ++isite) {
@@ -150,7 +150,7 @@ namespace lattice {
      *  shared pointer to a null lattice
      */
     std::shared_ptr<Base> make();
-    std::shared_ptr<Base> make(std::string topo, defs::inds site_shape, std::vector<int> bcs);
+    std::shared_ptr<Base> make(std::string topo, defs::inds_t site_shape, std::vector<int> bcs);
     std::shared_ptr<Base> make(const conf::LatticeModel& opts);
 }
 

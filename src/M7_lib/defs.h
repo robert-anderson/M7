@@ -51,7 +51,7 @@ namespace defs {
     constexpr bool enable_debug = false;
 #endif
     const std::string assets_root = PROJECT_ROOT"/assets";
-    typedef std::vector<size_t> inds;
+    typedef std::vector<size_t> inds_t;
 
     typedef int mpi_count;
     typedef std::vector<mpi_count> mpi_counts;

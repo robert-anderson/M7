@@ -7,17 +7,17 @@
 
 namespace conn_foreach_test {
     struct Result {
-        const defs::inds m_ann, m_cre;
+        const defs::inds_t m_ann, m_cre;
 
-        Result(defs::inds ann, defs::inds cre) : m_ann(std::move(ann)), m_cre(std::move(cre)) {}
+        Result(defs::inds_t ann, defs::inds_t cre) : m_ann(std::move(ann)), m_cre(std::move(cre)) {}
 
         Result(size_t ann, size_t cre) : m_ann({ann}), m_cre({cre}) {}
     };
 
     typedef std::vector<Result> results_t;
 
-    results_t product_results(const std::vector<defs::inds> &anns, const std::vector<defs::inds> &cres) {
-        const std::vector<defs::inds> default_ops = {{}};
+    results_t product_results(const std::vector<defs::inds_t> &anns, const std::vector<defs::inds_t> &cres) {
+        const std::vector<defs::inds_t> default_ops = {{}};
         const auto &anns_ref = anns.empty() ? default_ops : anns;
         const auto &cres_ref = cres.empty() ? default_ops : cres;
 
@@ -31,8 +31,8 @@ namespace conn_foreach_test {
         return results;
     }
 
-    static defs::inds creatable_mode_indices(const field::BosOnv &mbf, size_t nboson_max) {
-        defs::inds inds;
+    static defs::inds_t creatable_mode_indices(const field::BosOnv &mbf, size_t nboson_max) {
+        defs::inds_t inds;
         for (size_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) {
             size_t nocc = mbf[imode];
             if (nocc < nboson_max) inds.push_back(imode);
@@ -40,8 +40,8 @@ namespace conn_foreach_test {
         return inds;
     }
 
-    static defs::inds annihilatable_mode_indices(const field::BosOnv &mbf) {
-        defs::inds inds;
+    static defs::inds_t annihilatable_mode_indices(const field::BosOnv &mbf) {
+        defs::inds_t inds;
         for (size_t imode = 0ul; imode < mbf.m_basis.m_nmode; ++imode) if (mbf[imode]) inds.push_back(imode);
         return inds;
     }
@@ -49,7 +49,7 @@ namespace conn_foreach_test {
 
 TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
     const size_t nsite = 8;
-    defs::inds setbits = {1, 4, 6, 9, 12};
+    defs::inds_t setbits = {1, 4, 6, 9, 12};
     buffered::FrmOnv mbf(nsite);
     mbf = setbits;
     auto &clrbits = mbf.m_decoded.m_simple_vacs.get();
@@ -79,7 +79,7 @@ TEST(ConnForeach, FrmGeneralEx1100FrmOnv) {
 
 TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
     const size_t nsite = 8;
-    defs::inds setbits = {1, 4, 6, 9, 12};
+    defs::inds_t setbits = {1, 4, 6, 9, 12};
     buffered::FrmBosOnv mbf(nsite, 0ul);
     mbf.m_frm = setbits;
     auto &clrbits = mbf.m_frm.m_decoded.m_simple_vacs.get();
@@ -108,18 +108,18 @@ TEST(ConnForeach, FrmGeneralEx1100FrmBosOnv) {
 
 TEST(ConnForeach, FrmGeneralEx2200) {
     const size_t nsite = 4;
-    defs::inds setbits = {1, 3, 5, 6};
+    defs::inds_t setbits = {1, 3, 5, 6};
     buffered::FrmOnv mbf(nsite);
     mbf = setbits;
-    defs::inds clrbits = {0, 2, 4, 7};
+    defs::inds_t clrbits = {0, 2, 4, 7};
     ASSERT_EQ(mbf.m_decoded.m_simple_vacs.get(), clrbits);
-    std::vector<defs::inds> setbit_pairs = {{1, 3},
+    std::vector<defs::inds_t> setbit_pairs = {{1, 3},
                                             {1, 5},
                                             {3, 5},
                                             {1, 6},
                                             {3, 6},
                                             {5, 6}};
-    std::vector<defs::inds> clrbit_pairs = {{0, 2},
+    std::vector<defs::inds_t> clrbit_pairs = {{0, 2},
                                             {0, 4},
                                             {2, 4},
                                             {0, 7},
@@ -246,8 +246,8 @@ TEST(ConnForeach, FrmHeisenbergEx2200) {
 
 TEST(ConnForeach, FrmMs2ConserveEx1100) {
     const size_t nsite = 8;
-    defs::inds alpha_setbits = {1, 4, 6};
-    defs::inds beta_setbits = {3, 4, 7};
+    defs::inds_t alpha_setbits = {1, 4, 6};
+    defs::inds_t beta_setbits = {3, 4, 7};
     buffered::FrmOnv mbf(nsite);
     mbf = {alpha_setbits, beta_setbits};
     const auto &occs = mbf.m_decoded.m_spin_occs.get();
@@ -293,8 +293,8 @@ TEST(ConnForeach, FrmMs2ConserveEx1100) {
 
 TEST(ConnForeach, FrmMs2ConserveEx2200) {
     const size_t nsite = 8;
-    defs::inds alpha_setbits = {1, 2, 5};
-    defs::inds beta_setbits = {0, 2, 4, 6};
+    defs::inds_t alpha_setbits = {1, 2, 5};
+    defs::inds_t beta_setbits = {0, 2, 4, 6};
     buffered::FrmOnv mbf(nsite);
     mbf = {alpha_setbits, beta_setbits};
 
@@ -344,7 +344,7 @@ TEST(ConnForeach, FrmMs2ConserveEx2200) {
 
 TEST(ConnForeach, BosEx0001) {
     const size_t nmode = 6;
-    defs::inds occs = {0, 2, 0, 1, 5, 1};
+    defs::inds_t occs = {0, 2, 0, 1, 5, 1};
     buffered::BosOnv mbf(nmode);
     mbf = occs;
     auto &chk_modes = mbf.m_decoded.m_occ_modes.get();
@@ -369,13 +369,13 @@ TEST(ConnForeach, BosEx0001) {
 
 TEST(ConnForeach, BosEx0010BosOnv) {
     const size_t nmode = 6;
-    defs::inds occs = {0, 2, 0, 1, 5, 1};
+    defs::inds_t occs = {0, 2, 0, 1, 5, 1};
 
     {
         const size_t occ_cutoff = 10;
         buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
-        defs::inds chk_modes = {0, 1, 2, 3, 4, 5};
+        defs::inds_t chk_modes = {0, 1, 2, 3, 4, 5};
         auto iiter = 0ul;
         conn::BosOnv conn(mbf);
         auto fn = [&]() {
@@ -399,7 +399,7 @@ TEST(ConnForeach, BosEx0010BosOnv) {
         // lower maximum occupation
         buffered::BosOnv mbf(nmode, occ_cutoff);
         mbf = occs;
-        defs::inds chk_modes = {0, 1, 2, 3, 5};
+        defs::inds_t chk_modes = {0, 1, 2, 3, 5};
         auto iiter = 0ul;
         conn::BosOnv conn(mbf);
         auto fn = [&]() {
@@ -422,11 +422,11 @@ TEST(ConnForeach, BosEx0010BosOnv) {
 TEST(ConnForeach, BosEx0010FrmBosOnv) {
     const size_t nmode = 6;
     const size_t bos_occ_cutoff = 5;
-    defs::inds occs = {0, 2, 0, 1, 5, 1};
+    defs::inds_t occs = {0, 2, 0, 1, 5, 1};
     // lower maximum occupation
     buffered::FrmBosOnv mbf(0ul, nmode, bos_occ_cutoff);
     mbf.m_bos = occs;
-    defs::inds chk_modes = {0, 1, 2, 3, 5};
+    defs::inds_t chk_modes = {0, 1, 2, 3, 5};
     auto iiter = 0ul;
     conn::FrmBosOnv conn(mbf);
     auto fn = [&]() {

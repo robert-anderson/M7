@@ -24,7 +24,7 @@ namespace decoded_mbf {
          */
         struct SimpleBase : Base, SimpleContainer {
         protected:
-            const defs::inds &validated() const;
+            const defs::inds_t &validated() const;
 
         public:
             explicit SimpleBase(const FrmBosOnvField &mbf);
@@ -36,7 +36,7 @@ namespace decoded_mbf {
         struct OccSitesNonzeroBosons : SimpleBase {
             explicit OccSitesNonzeroBosons(const FrmBosOnvField &mbf);
 
-            const defs::inds &get();
+            const defs::inds_t &get();
 
         };
     }

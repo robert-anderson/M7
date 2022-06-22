@@ -204,7 +204,7 @@ TEST(BufferedFields, Bitset){
 
 TEST(BufferedFields, FrmOnv){
     const size_t nsite = 6;
-    defs::inds frm_inds = {0, 2, 4, 5, 7, 9};
+    defs::inds_t frm_inds = {0, 2, 4, 5, 7, 9};
     const sys::frm::Basis basis(nsite);
 
     //  1. constructable via argument forwarding to T::T
@@ -250,8 +250,8 @@ TEST(BufferedFields, FrmOnv){
 TEST(BufferedFields, BosOnv){
     const size_t nmode = 5;
     const size_t bos_occ_cutoff = 10;
-    defs::inds zero_inds(nmode, 0);
-    defs::inds bos_inds = {3, 1, 2, 4, 9};
+    defs::inds_t zero_inds(nmode, 0);
+    defs::inds_t bos_inds = {3, 1, 2, 4, 9};
     const sys::bos::Basis basis(nmode, bos_occ_cutoff);
 
     //  1. constructable via argument forwarding to T::T
@@ -294,8 +294,8 @@ TEST(BufferedFields, BosOnv){
 }
 
 TEST(BufferedFields, FrmBosOnv){
-    defs::inds frm_inds = {0, 2, 4, 5, 7};
-    defs::inds bos_inds = {3, 1, 2, 4, 9};
+    defs::inds_t frm_inds = {0, 2, 4, 5, 7};
+    defs::inds_t bos_inds = {3, 1, 2, 4, 9};
     const sys::frm::Basis frm_basis(4);
     const sys::bos::Basis bos_basis(5, defs::max_bos_occ);
 
@@ -343,8 +343,8 @@ TEST(BufferedFields, FrmBosOnv){
 
 TEST(BufferedFields, FrmXonv){
     const size_t nsite = 5;
-    defs::inds ket_inds = {0, 2, 4, 5, 9};
-    defs::inds bra_inds = {1, 2, 3, 7};
+    defs::inds_t ket_inds = {0, 2, 4, 5, 9};
+    defs::inds_t bra_inds = {1, 2, 3, 7};
     const sys::frm::Basis basis(nsite);
 
     //  1. constructable via argument forwarding to T::T
@@ -391,8 +391,8 @@ TEST(BufferedFields, FrmXonv){
 
 TEST(BufferedFields, BosXonv){
     const size_t nmode = 5;
-    defs::inds ket_inds = {3, 1, 2, 4, 9};
-    defs::inds bra_inds = {2, 4, 9, 3, 1};
+    defs::inds_t ket_inds = {3, 1, 2, 4, 9};
+    defs::inds_t bra_inds = {2, 4, 9, 3, 1};
     const sys::bos::Basis basis(nmode);
 
     //  1. constructable via argument forwarding to T::T
@@ -438,10 +438,10 @@ TEST(BufferedFields, BosXonv){
 }
 
 TEST(BufferedFields, FrmBosXonv){
-    defs::inds ket_frm_inds = {0, 2, 4, 5, 7};
-    defs::inds ket_bos_inds = {3, 1, 2, 4, 9};
-    defs::inds bra_frm_inds = {1, 2, 3, 7};
-    defs::inds bra_bos_inds = {2, 4, 9, 3, 1};
+    defs::inds_t ket_frm_inds = {0, 2, 4, 5, 7};
+    defs::inds_t ket_bos_inds = {3, 1, 2, 4, 9};
+    defs::inds_t bra_frm_inds = {1, 2, 3, 7};
+    defs::inds_t bra_bos_inds = {2, 4, 9, 3, 1};
     const sys::frm::Basis frm_basis(4);
     const sys::bos::Basis bos_basis(5);
 

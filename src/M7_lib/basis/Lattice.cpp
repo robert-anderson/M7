@@ -9,7 +9,7 @@ bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
     return m_isite==other.m_isite && m_phase==other.m_phase;
 }
 
-lattice::Base::Base(const defs::inds &nadjs) :
+lattice::Base::Base(const defs::inds_t &nadjs) :
         m_nsite(nadjs.size()), m_nadjs(nadjs), m_unique_nadj_product(make_unique_nadj_product()),
         m_nadj_max(make_nadj_max()){}
 
@@ -28,7 +28,7 @@ size_t lattice::Base::make_nadj_max() {
     return *std::max_element(m_nadjs.cbegin(), m_nadjs.cend());
 }
 
-lattice::OrthoTopology::OrthoTopology(const defs::inds &shape, const std::vector<int> &bcs) :
+lattice::OrthoTopology::OrthoTopology(const defs::inds_t &shape, const std::vector<int> &bcs) :
     m_inds(shape), m_bcs(bcs),
     m_info_string(log::format("orthogonal lattice with shape {} and boundary conds {}",
                               utils::convert::to_string(m_inds.m_shape), utils::convert::to_string(m_bcs))) {}
@@ -42,12 +42,12 @@ int lattice::OrthoTopology::one_dim_phase(size_t iind, size_t jind, size_t idim)
     return 0;
 }
 
-size_t lattice::OrthoTopology::isite_adj(const defs::inds &inds, size_t idim, size_t value) const {
+size_t lattice::OrthoTopology::isite_adj(const defs::inds_t &inds, size_t idim, size_t value) const {
     auto orig_value = inds[idim];
-    auto &mutable_inds = const_cast<defs::inds &>(inds);
+    auto &mutable_inds = const_cast<defs::inds_t &>(inds);
     mutable_inds[idim] = value;
     auto i = m_inds.flatten(mutable_inds);
-    // leave inds unchanged
+    // leave inds_t unchanged
     mutable_inds[idim] = orig_value;
     return i;
 }
@@ -100,7 +100,7 @@ void lattice::OrthoTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) 
     }
 }
 
-size_t lattice::NullTopology::isite_adj(const defs::inds &inds, size_t idim, size_t value) const {
+size_t lattice::NullTopology::isite_adj(const defs::inds_t &inds, size_t idim, size_t value) const {
     return ~0ul;
 }
 
@@ -120,7 +120,7 @@ std::shared_ptr<lattice::Base> lattice::make() {
     return std::shared_ptr<Base>(new Null({}));
 }
 
-std::shared_ptr<lattice::Base> lattice::make(std::string topo, defs::inds site_shape, std::vector<int> bcs) {
+std::shared_ptr<lattice::Base> lattice::make(std::string topo, defs::inds_t site_shape, std::vector<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
         return std::shared_ptr<Base>(new Ortho({site_shape, bcs}));
     return make();

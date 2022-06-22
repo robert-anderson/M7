@@ -20,7 +20,7 @@ namespace sparse {
         size_t m_max_icol = 0ul;
 
     protected:
-        std::vector<defs::inds> m_rows_icols;
+        std::vector<defs::inds_t> m_rows_icols;
 
     public:
 
@@ -38,15 +38,15 @@ namespace sparse {
 
         size_t insert(const size_t &irow, const size_t &icol);
 
-        void add(const size_t &irow, const defs::inds &icols);
+        void add(const size_t &irow, const defs::inds_t &icols);
 
-        void insert(const size_t &irow, const defs::inds &icols);
+        void insert(const size_t &irow, const defs::inds_t &icols);
 
         bool empty() const;
 
         bool empty(const size_t& irow) const;
 
-        const defs::inds &operator[](const size_t &irow) const;
+        const defs::inds_t &operator[](const size_t &irow) const;
 
         virtual std::string row_to_string(size_t irow) const;
 
@@ -87,12 +87,12 @@ namespace sparse {
             return i;
         }
 
-        void add(const size_t &irow, const defs::inds &icols, const std::vector<T> &vs) {
+        void add(const size_t &irow, const defs::inds_t &icols, const std::vector<T> &vs) {
             REQUIRE_EQ(icols.size(), vs.size(), "must have same number of column indices and values");
             for (size_t i = 0ul; i < icols.size(); ++i) add(irow, icols[i], vs[i]);
         }
 
-        void insert(const size_t &irow, const defs::inds &icols, const std::vector<T> &vs) {
+        void insert(const size_t &irow, const defs::inds_t &icols, const std::vector<T> &vs) {
             REQUIRE_EQ(icols.size(), vs.size(), "must have same number of column indices and values");
             for (size_t i = 0ul; i < icols.size(); ++i) insert(irow, icols[i], vs[i]);
         }
@@ -126,7 +126,7 @@ namespace sparse {
             multiply(v.data(), mv.data(), mv.size());
         }
 
-        std::pair<const defs::inds &, const std::vector<T> &> operator[](const size_t &irow) const {
+        std::pair<const defs::inds_t &, const std::vector<T> &> operator[](const size_t &irow) const {
             DEBUG_ASSERT_LT(irow, nrow(), "row index OOB");
             return {m_rows_icols[irow], m_rows_values[irow]};
         }
@@ -161,8 +161,8 @@ namespace sparse {
         Matrix<T> get_row_subset(size_t count, size_t displ) const {
             Matrix<T> submat;
             Network::get_row_subset(submat, count, displ);
-            auto begin = m_rows_values.cbegin()+defs::inds::difference_type(displ);
-            auto end = begin + defs::inds::difference_type(count);
+            auto begin = m_rows_values.cbegin()+defs::inds_t::difference_type(displ);
+            auto end = begin + defs::inds_t::difference_type(count);
             REQUIRE_GE(std::distance(end, m_rows_values.cend()), 0, "end iterator OOB");
             submat.m_rows_values = std::vector<std::vector<T>>(begin, end);
             return submat;

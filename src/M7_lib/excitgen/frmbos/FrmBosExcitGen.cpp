@@ -4,7 +4,7 @@
 
 #include "FrmBosExcitGen.h"
 
-FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam &h, PRNG &prng, defs::inds exsigs, std::string description) :
+FrmBosExcitGen::FrmBosExcitGen(const FrmBosHam &h, PRNG &prng, defs::inds_t exsigs, std::string description) :
         ExcitGen(prng, std::move(exsigs), std::move(description)), m_h(h) {}
 
 bool FrmBosExcitGen::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,

@@ -48,8 +48,8 @@ namespace utils {
          *  index vector which would sort v to the desired ordering
          */
         template<typename T>
-        defs::inds inds(const std::vector<T>& v, bool asc, bool abs_val) {
-            defs::inds out(v.size());
+        defs::inds_t inds(const std::vector<T>& v, bool asc, bool abs_val) {
+            defs::inds_t out(v.size());
             std::iota(out.begin(), out.end(), 0);
             if (asc) {
                 if (abs_val) std::stable_sort(out.begin(), out.end(), [&v](size_t i, size_t j){
@@ -76,8 +76,8 @@ namespace utils {
          *  index vector which would sort v to the desired ordering
          */
         template<typename T>
-        defs::inds inds(const std::vector<std::complex<T>>& v, bool asc, bool abs_val) {
-            defs::inds out(v.size());
+        defs::inds_t inds(const std::vector<std::complex<T>>& v, bool asc, bool abs_val) {
+            defs::inds_t out(v.size());
             std::iota(out.begin(), out.end(), 0);
             if (asc) {
                 if (abs_val) std::stable_sort(out.begin(), out.end(), [&v](size_t i, size_t j){

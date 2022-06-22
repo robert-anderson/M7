@@ -48,11 +48,11 @@ size_t sparse::Network::insert(const size_t &irow, const size_t &icol) {
     return std::distance(row.begin(), element);
 }
 
-void sparse::Network::add(const size_t &irow, const defs::inds &icols) {
+void sparse::Network::add(const size_t &irow, const defs::inds_t &icols) {
     for (auto &icol: icols) add(irow, icol);
 }
 
-void sparse::Network::insert(const size_t &irow, const defs::inds &icols) {
+void sparse::Network::insert(const size_t &irow, const defs::inds_t &icols) {
     for (auto &icol: icols) insert(irow, icol);
 }
 
@@ -64,7 +64,7 @@ bool sparse::Network::empty(const size_t &irow) const {
     return (*this)[irow].empty();
 }
 
-const defs::inds &sparse::Network::operator[](const size_t &irow) const{
+const defs::inds_t &sparse::Network::operator[](const size_t &irow) const{
     ASSERT(irow<nrow());
     return m_rows_icols[irow];
 }
@@ -101,9 +101,9 @@ void sparse::Network::get_row_subset(Network &subnet, size_t count, size_t displ
     REQUIRE_LE(displ, nrow(), "row offset OOB");
     REQUIRE_LE(displ+count, nrow(), "row offset+count OOB");
     subnet.resize(count);
-    auto begin = m_rows_icols.cbegin()+defs::inds::difference_type(displ);
-    auto end = begin + defs::inds::difference_type(count);
-    subnet.m_rows_icols = std::vector<defs::inds>(begin, end);
+    auto begin = m_rows_icols.cbegin()+defs::inds_t::difference_type(displ);
+    auto end = begin + defs::inds_t::difference_type(count);
+    subnet.m_rows_icols = std::vector<defs::inds_t>(begin, end);
     // data is now copied, now update metadata
     for (const auto& row: subnet.m_rows_icols){
         if (row.empty()) continue;

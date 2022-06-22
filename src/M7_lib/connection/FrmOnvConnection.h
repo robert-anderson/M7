@@ -14,7 +14,7 @@
  */
 class FrmOps {
     const sys::frm::Size m_sites;
-    defs::inds m_inds;
+    defs::inds_t m_inds;
 public:
     FrmOps(size_t nsite): m_sites(nsite) {
         m_inds.reserve(2*m_sites);
@@ -27,16 +27,16 @@ public:
         return *this;
     }
 
-    FrmOps& operator=(const defs::inds& inds){
+    FrmOps& operator=(const defs::inds_t& inds){
         m_inds = inds;
         return *this;
     }
 
-    const defs::inds & inds() const {
+    const defs::inds_t & inds() const {
         return m_inds;
     }
 
-    bool operator==(const defs::inds &v) const {
+    bool operator==(const defs::inds_t &v) const {
         return m_inds==v;
     }
 
@@ -71,13 +71,13 @@ public:
      * @param inds
      *  positions in the orbs vector of the selected spin orbitals
      */
-    void set_selection(const defs::inds& orbs, const defs::inds& inds) {
+    void set_selection(const defs::inds_t& orbs, const defs::inds_t& inds) {
         clear();
         for (const auto& ind: inds) {
             DEBUG_ASSERT_LT(ind, orbs.size(), "index OOB");
             add(orbs[ind]);
         }
-        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds were added");
+        DEBUG_ASSERT_EQ(inds.size(), size(), "not all selected inds_t were added");
     }
 
     void set(size_t ispinorb){
@@ -119,11 +119,11 @@ public:
         set_in_order(m_sites.ispinorb(pair1), m_sites.ispinorb(pair2));
     }
 
-    defs::inds::const_iterator cbegin() const {
+    defs::inds_t::const_iterator cbegin() const {
         return m_inds.cbegin();
     }
 
-    defs::inds::const_iterator cend() const {
+    defs::inds_t::const_iterator cend() const {
         return m_inds.cend();
     }
     /**
@@ -249,12 +249,12 @@ public:
      * @return
      *  the annihilation string cast to a vector
      */
-    const defs::inds& ann() const;
+    const defs::inds_t& ann() const;
     /**
      * @return
      *  the creation string cast to a vector
      */
-    const defs::inds& cre() const;
+    const defs::inds_t& cre() const;
 
     /**
      * @return

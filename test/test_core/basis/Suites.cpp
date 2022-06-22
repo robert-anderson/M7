@@ -17,10 +17,10 @@ TEST(Suites, Copy){
     ASSERT_EQ(copy_mbfs.m_row.m_frmbos.m_frm.m_basis, frm_basis);
     ASSERT_EQ(copy_mbfs.m_row.m_frmbos.m_bos.m_basis, bos_basis);
     ASSERT_TRUE(copy_mbfs.m_row.in_range());
-    defs::inds frm_inds = {1, 3, 5};
+    defs::inds_t frm_inds = {1, 3, 5};
     copy_mbfs.m_row.m_frm = frm_inds;
     ASSERT_EQ(copy_mbfs.m_row.m_frm, frm_inds);
-    defs::inds bos_inds = {4, 1, 2};
+    defs::inds_t bos_inds = {4, 1, 2};
     copy_mbfs.m_row.m_bos = bos_inds;
     ASSERT_EQ(copy_mbfs.m_row.m_bos, bos_inds);
     copy_mbfs.m_row.m_frmbos = {frm_inds, bos_inds};

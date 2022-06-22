@@ -4,16 +4,16 @@
 
 #include "Planewaves.h"
 
-defs::inds Planewaves::make_momentum_shape(const defs::inds &wave_shape) {
-    defs::inds shape;
+defs::inds_t Planewaves::make_momentum_shape(const defs::inds_t &wave_shape) {
+    defs::inds_t shape;
     for (auto extent: wave_shape) shape.push_back(2*extent+1);
     return shape;
 }
-std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::inds &wave_shape) {
+std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::inds_t &wave_shape) {
     std::vector<std::vector<int>> momvecs;
     auto momentum_shape = make_momentum_shape(wave_shape);
     momvecs.reserve(size(wave_shape));
-    auto fn = [&wave_shape, &momvecs](const defs::inds& inds){
+    auto fn = [&wave_shape, &momvecs](const defs::inds_t& inds){
         momvecs.emplace_back();
         for (size_t idim=0ul; idim < wave_shape.size(); ++idim){
             momvecs.back().push_back(int(inds[idim]) - wave_shape[idim]);
@@ -25,21 +25,21 @@ std::vector<std::vector<int>> Planewaves::make_momvecs(const defs::inds &wave_sh
     return momvecs;
 }
 
-size_t Planewaves::size(const defs::inds &wave_shape) {
+size_t Planewaves::size(const defs::inds_t &wave_shape) {
     const auto shape = make_momentum_shape(wave_shape);
     return NdFormatD(shape).m_nelement;
 }
 
 size_t Planewaves::size(size_t ndim, size_t nwave) {
-    return size(defs::inds(ndim, nwave));
+    return size(defs::inds_t(ndim, nwave));
 }
 
-Planewaves::Planewaves(const defs::inds& wave_shape) :
+Planewaves::Planewaves(const defs::inds_t& wave_shape) :
     m_wave_format(wave_shape), m_momentum_format(make_momentum_shape(wave_shape)),
     m_size(m_momentum_format.m_nelement), m_ndim(m_momentum_format.m_nind),
     m_momvecs(make_momvecs(wave_shape)){}
 
-Planewaves::Planewaves(size_t ndim, size_t nwave) : Planewaves(defs::inds(ndim, nwave)){}
+Planewaves::Planewaves(size_t ndim, size_t nwave) : Planewaves(defs::inds_t(ndim, nwave)){}
 
 const std::vector<int> &Planewaves::operator[](const size_t &i) const {
     DEBUG_ASSERT_LT(i, m_size, "basis function index OOB");
