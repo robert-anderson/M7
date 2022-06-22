@@ -70,7 +70,7 @@ namespace parameters_test {
 }
 
 TEST(Parameters, ParsingYaml) {
-    yaml::File yf(defs::c_assets_root + "/yaml_test/example.yaml");
+    yaml::File yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     ASSERT_TRUE(yf.exists("section1"));
     ASSERT_TRUE(yf.exists("section1.some_numbers"));
     ASSERT_EQ(yf.get_as<defs::inds_t>("section1.some_numbers"), defs::inds_t({2, 3, 5, 1}));
@@ -93,7 +93,7 @@ TEST(Parameters, DefaultValues) {
 }
 
 TEST(Parameters, ParameterGroups) {
-    yaml::File yf(defs::c_assets_root + "/yaml_test/example.yaml");
+    yaml::File yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     using namespace parameters_test;
     TestDocument doc(&yf);
     auto invalid = doc.invalid_file_key();

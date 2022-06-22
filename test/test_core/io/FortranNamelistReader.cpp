@@ -14,7 +14,7 @@ TEST(FortranNamelistReader, IsolateValue) {
 }
 
 TEST(FortranNamelistReader, FromFile) {
-    FortranNamelistReader header(defs::c_assets_root + "/RHF_N2_6o6e/FCIDUMP");
+    FortranNamelistReader header(PROJECT_ROOT"/assets/RHF_N2_6o6e/FCIDUMP");
     /*
      * &FCI NORB=   6,NELEC= 6,MS2=0,
      * ORBSYM=1,3,2,6,7,5

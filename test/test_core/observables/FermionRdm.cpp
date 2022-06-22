@@ -43,7 +43,7 @@ defs::ham_comp_t fermion_rdm_energy_test(const conf::Document& opts, bool explic
 
 
 void fermion_rdm_energy_opts(conf::Document& opts){
-    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = defs::c_assets_root + "/HF_RDMs/FCIDUMP";
+    opts.m_hamiltonian.m_fermion.m_fcidump.m_path = PROJECT_ROOT"/assets/HF_RDMs/FCIDUMP";
     opts.m_hamiltonian.m_fermion.m_fcidump.m_spin_major = false;
     opts.m_archive.m_save_path = "M7.save";
     opts.m_wavefunction.m_nw_init = 10;

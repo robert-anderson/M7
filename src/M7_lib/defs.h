@@ -42,21 +42,33 @@ namespace defs {
 #else
     constexpr bool c_enable_debug = false;
 #endif
-    const std::string c_assets_root = PROJECT_ROOT"/assets";
     typedef uint64_t ind_t;
     typedef std::vector<ind_t> inds_t;
     typedef std::pair<ind_t, ind_t> ipair_t;
-#ifdef ENABLE_COMPLEX
-    constexpr bool enable_complex = true;
+
+#ifdef ENABLE_COMPLEX_HAM
+    constexpr bool c_enable_complex_ham = true;
 #else
-    constexpr bool enable_complex = false;
+    constexpr bool c_enable_complex_ham = false;
 #endif
 
+#ifdef ENABLE_COMPLEX_WF
+    constexpr bool c_enable_complex_wf = true;
+#else
+    constexpr bool c_enable_complex_wf = false;
+#endif
+
+    // type of each arithmetic component of the Hamiltonian matrix elements
     typedef double ham_comp_t;
+    // overall type of the Hamiltonian matrix elements (taking possible complex enabling into account)
+    typedef std::conditional<c_enable_complex_ham, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
+
+    // type of each arithmetic component of the wavefunctions (also MAEs and spawns emitted by the propagators)
     typedef ham_comp_t wf_comp_t;
-    typedef std::conditional<enable_complex, std::complex<ham_comp_t>, ham_comp_t>::type ham_t;
+    // overall type of the wavefunction elements (taking possible complex enabling into account)
+    typedef std::conditional<c_enable_complex_wf, std::complex<wf_comp_t>, wf_comp_t>::type wf_t;
+
     typedef std::map<std::string, std::string> info_map_t;
-    typedef ham_t wf_t;
     typedef double prob_t;
     typedef uint64_t hash_t;
     typedef char buf_t;

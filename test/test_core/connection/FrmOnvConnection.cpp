@@ -190,7 +190,7 @@ TEST(Connection, EntireCiPhases) {
     /**
      * this file enumerates all determinantal connections in a small CI space along with their associated phases
      */
-    NumericCsvFileReader file_reader(defs::c_assets_root + "/parity_test/parity_8.txt", 17);
+    NumericCsvFileReader file_reader(PROJECT_ROOT"/assets/parity_test/parity_8.txt", 17);
     defs::inds_t inds(16);
     int value;
 
