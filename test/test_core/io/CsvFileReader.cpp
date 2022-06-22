@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 
 TEST(CsvFileReader, Fcidump){
-    CsvFileReader file_reader(defs::assets_root+"/RHF_Cr2_12o12e/FCIDUMP");
+    CsvFileReader file_reader(defs::c_assets_root + "/RHF_Cr2_12o12e/FCIDUMP");
     std::vector<std::string> split_line;
     file_reader.next(split_line);
     std::vector<std::string> chk_line;
@@ -20,7 +20,7 @@ TEST(CsvFileReader, Fcidump){
 }
 
 TEST(NumericCsvFileReader, Fcidump){
-    NumericCsvFileReader file_reader(defs::assets_root+"/RHF_Cr2_12o12e/FCIDUMP", 5);
+    NumericCsvFileReader file_reader(defs::c_assets_root + "/RHF_Cr2_12o12e/FCIDUMP", 5);
     std::vector<std::string> split_line;
     file_reader.next(split_line);
     std::vector<std::string> chk_line;

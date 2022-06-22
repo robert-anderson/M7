@@ -38,23 +38,14 @@
 namespace defs {
 
 #ifndef NDEBUG
-    constexpr bool enable_debug = true;
+    constexpr bool c_enable_debug = true;
 #else
-    constexpr bool enable_debug = false;
+    constexpr bool c_enable_debug = false;
 #endif
-    const std::string assets_root = PROJECT_ROOT"/assets";
+    const std::string c_assets_root = PROJECT_ROOT"/assets";
     typedef uint64_t ind_t;
     typedef std::vector<ind_t> inds_t;
-
-    typedef int mpi_count;
-    typedef std::vector<mpi_count> mpi_counts;
-    /*
-     * determinant decoding / sampling requires statically allocated arrays.
-     * since the exact size of the determinant is not known at compile time,
-     * this constant should be set to ensure plenty of space for the storage
-     * of set/clear bit positions
-     */
-    typedef std::pair<size_t, size_t> pair;
+    typedef std::pair<ind_t, ind_t> ipair_t;
 #ifdef ENABLE_COMPLEX
     constexpr bool enable_complex = true;
 #else

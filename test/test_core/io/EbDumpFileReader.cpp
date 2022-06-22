@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 
 TEST(EbDumpFileReader, ReadFile){
-    std::string fname = defs::assets_root + "/Hubbard_U4_4site/EBDUMP";
+    std::string fname = defs::c_assets_root + "/Hubbard_U4_4site/EBDUMP";
     EbdumpFileReader file_reader(fname);
     ASSERT_FALSE(file_reader.m_info.m_uhf);
     ASSERT_EQ(file_reader.m_info.m_nmode, 4ul);
@@ -34,7 +34,7 @@ TEST(EbDumpFileReader, ReadFile){
 }
 
 TEST(EbDumpFileReader, SpinResolved){
-    std::string fname = defs::assets_root + "/SpinResolvedEbdump/EBDUMP";
+    std::string fname = defs::c_assets_root + "/SpinResolvedEbdump/EBDUMP";
     EbdumpFileReader file_reader(fname);
     ASSERT_TRUE(file_reader.m_info.m_uhf);
     ASSERT_EQ(file_reader.m_info.m_nmode, 6ul);

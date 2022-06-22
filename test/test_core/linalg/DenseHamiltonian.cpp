@@ -11,7 +11,7 @@
 
 #ifdef ENABLE_COMPLEX
 TEST(DenseHamiltonian, FciEnergyCheck4c) {
-    DenseHamiltonian ham(Hamiltonian(defs::assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
+    DenseHamiltonian ham(Hamiltonian(defs::c_assets_root + "/DHF_Be_STO-3G/FCIDUMP", false));
     auto solver = ham.diagonalize();
     // compare the ground and first excited states to BAGEL's values
     ASSERT_TRUE(consts::floats_nearly_equal(solver.m_evals[0], -14.40597603432, 1e-10));
@@ -19,7 +19,7 @@ TEST(DenseHamiltonian, FciEnergyCheck4c) {
 }
 #endif
 TEST(DenseHamiltonian, N2Rhf) {
-    GeneralFrmHam frm_ham({defs::assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({defs::c_assets_root + "/RHF_N2_6o6e/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
     std::vector<defs::ham_t> evals;
@@ -48,7 +48,7 @@ TEST(DenseHamiltonian, HeisenbergFrmHam) {
 }
 
 TEST(DenseHamiltonian, HF) {
-    GeneralFrmHam frm_ham({defs::assets_root + "/HF_RDMs/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({defs::c_assets_root + "/HF_RDMs/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     auto particles = ham.default_particles();
     ASSERT_EQ(size_t(particles.m_frm), 6ul);
@@ -59,7 +59,7 @@ TEST(DenseHamiltonian, HF) {
 }
 
 TEST(DenseHamiltonian, PyscfX2cCheck) {
-    GeneralFrmHam frm_ham({defs::assets_root + "/H2O_X2C/FCIDUMP"}, true);
+    GeneralFrmHam frm_ham({defs::c_assets_root + "/H2O_X2C/FCIDUMP"}, true);
     Hamiltonian ham(&frm_ham);
     DenseHamiltonian hmat(ham);
     std::vector<double> evals;
@@ -183,9 +183,9 @@ TEST(DenseHamiltonian, HubbardHolsteinOccCutoff3) {
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
     conf::Hamiltonian opts(nullptr);
-    GeneralFrmHam frm_ham({defs::assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
-    GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
-    GeneralBosHam bos_ham({defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
+    GeneralFrmHam frm_ham({defs::c_assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
+    GeneralLadderHam frmbos_ham({defs::c_assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 1);
+    GeneralBosHam bos_ham({defs::c_assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     auto particles = ham_src.default_particles(4);
     DenseHamiltonian ham(ham_src, particles);
@@ -196,9 +196,9 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff1) {
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
     conf::Hamiltonian opts(nullptr);
-    GeneralFrmHam frm_ham({defs::assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
-    GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
-    GeneralBosHam bos_ham({defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
+    GeneralFrmHam frm_ham({defs::c_assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
+    GeneralLadderHam frmbos_ham({defs::c_assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 2);
+    GeneralBosHam bos_ham({defs::c_assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     auto particles = ham_src.default_particles(4);
     DenseHamiltonian ham(ham_src, particles);
@@ -209,9 +209,9 @@ TEST(DenseHamiltonian, GeneralFrmBosOccCutoff2) {
 
 TEST(DenseHamiltonian, GeneralFrmBosOccCutoff3) {
     conf::Hamiltonian opts(nullptr);
-    GeneralFrmHam frm_ham({defs::assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
-    GeneralLadderHam frmbos_ham({defs::assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 3);
-    GeneralBosHam bos_ham({defs::assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
+    GeneralFrmHam frm_ham({defs::c_assets_root + "/Hubbard_U4_3site/FCIDUMP"}, true);
+    GeneralLadderHam frmbos_ham({defs::c_assets_root + "/Hubbard_U4_3site/EBDUMP_GENERAL"}, true, 3);
+    GeneralBosHam bos_ham({defs::c_assets_root + "/Hubbard_U4_3site/BOSDUMP_GENERAL"}, frmbos_ham.m_basis.m_bos.m_occ_cutoff);
     Hamiltonian ham_src(&frm_ham, &frmbos_ham, &bos_ham);
     DenseHamiltonian ham(ham_src);
     std::vector<double> evals;

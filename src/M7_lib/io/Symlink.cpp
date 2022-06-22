@@ -14,4 +14,4 @@ Symlink::~Symlink() {
     REQUIRE_EQ(unlink(m_fname.c_str()), 0, "Error deleting symbolic link");
 }
 
-AssetSymlink::AssetSymlink(std::string src, std::string dst) : Symlink(defs::assets_root+"/"+src, dst){}
+AssetSymlink::AssetSymlink(std::string src, std::string dst) : Symlink(defs::c_assets_root + "/" + src, dst){}

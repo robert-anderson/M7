@@ -9,7 +9,7 @@
 decoded_mbf::frm::Base::Base(const FrmOnvField &mbf) : m_mbf(mbf){}
 
 bool decoded_mbf::frm::Base::is_valid() const {
-    return !defs::enable_debug || (m_mbf.hash()==m_last_update_hash);
+    return !defs::c_enable_debug || (m_mbf.hash() == m_last_update_hash);
 }
 
 const defs::inds_t &decoded_mbf::frm::SimpleBase::validated() const {

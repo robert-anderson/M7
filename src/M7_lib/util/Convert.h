@@ -209,7 +209,7 @@ namespace utils {
         static std::vector<narrow_t> safe_narrow(const std::vector<wide_t> &wides) {
             std::vector<narrow_t> narrows;
             narrows.reserve(wides.size());
-            for (auto &it : wides) narrows.push_back(utils::convert::safe_narrow<defs::mpi_count>(it));
+            for (auto &it : wides) narrows.push_back(utils::convert::safe_narrow<narrow_t>(it));
             return narrows;
         }
 

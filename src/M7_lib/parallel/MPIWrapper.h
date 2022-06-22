@@ -32,13 +32,13 @@
  * usage, such an overflow is fairly unlikely. But we do not leave it to chance that such a
  * large number of words will never be communicated in practice.
  *
- * defs::mpi_count and defs::mpi_counts are the scalar and vector typedefs for the MPI integer
+ * count_t and counts_t are the scalar and vector typedefs for the MPI integer
  *
  * The cleanest way to achieve this aim is to expose only the overloads that use size_t and
- * std::vector<size_t> (defs::inds_t) to define counts and displs. if sizeof(defs::mpi_count)
+ * std::vector<size_t> (defs::inds_t) to define counts and displs. if sizeof(count_t)
  * is less than sizeof(size_t), a narrowing conversion is required, but since this is at the
  * level of communication, and not inside a main loop, this minor overhead will more than
- * pay for itself in code clarity. Hence, **defs::mpi_count and defs::mpi_counts should never
+ * pay for itself in code clarity. Hence, **count_t and counts_t should never
  * be seen outside this module**.
  *
  * It is worth pointing out that the MPI shared memory windows employed in SharedArray.h and
@@ -167,6 +167,9 @@ extern int g_p2p_tag;
 
 namespace mpi {
 
+    typedef int count_t;
+    typedef std::vector<count_t> counts_t;
+
     void setup_mpi_globals();
 
     static const size_t &nrank() {
@@ -197,12 +200,12 @@ namespace mpi {
 
     void barrier_on_node();
 
-    static defs::mpi_count snrw(const size_t &i) {
-        return utils::convert::safe_narrow<defs::mpi_count>(i);
+    static count_t snrw(const size_t &i) {
+        return utils::convert::safe_narrow<count_t>(i);
     }
 
-    static defs::mpi_counts snrw(const std::vector<size_t> &v) {
-        return utils::convert::safe_narrow<defs::mpi_count>(v);
+    static counts_t snrw(const std::vector<size_t> &v) {
+        return utils::convert::safe_narrow<count_t>(v);
     }
 
     /**
@@ -225,13 +228,13 @@ namespace mpi {
      * @param nitem_global
      * @return
      */
-    defs::mpi_count evenly_shared_count(size_t nitem_global, size_t irank);
-    defs::mpi_count evenly_shared_count(size_t nitem_global);
-    defs::mpi_counts evenly_shared_counts(size_t nitem_global);
+    count_t evenly_shared_count(size_t nitem_global, size_t irank);
+    count_t evenly_shared_count(size_t nitem_global);
+    counts_t evenly_shared_counts(size_t nitem_global);
 
     size_t evenly_shared_displ(size_t nitem_global, size_t irank);
     size_t evenly_shared_displ(size_t nitem_global);
-    defs::mpi_counts evenly_shared_displs(size_t nitem_global);
+    counts_t evenly_shared_displs(size_t nitem_global);
 
     template<typename T>
     static void counts_to_displs_consec(const std::vector<T> &counts, std::vector<T> &displs) {
@@ -264,11 +267,11 @@ namespace mpi {
                            std::pair<T, size_t> *recv,
                            MpiPairOp op, size_t ndata = 1) {
         static_assert(mpi_type_ind<T>() != ~0ul, "Not a valid MPI type");
-        std::vector<std::pair<T, defs::mpi_count>> tmp_send;
+        std::vector<std::pair<T, count_t>> tmp_send;
         tmp_send.reserve(ndata);
         for (size_t idata = 0ul; idata < ndata; ++idata)
             tmp_send.push_back({send[idata].first, snrw(send[idata].second)});
-        std::vector<std::pair<T, defs::mpi_count>> tmp_recv;
+        std::vector<std::pair<T, count_t>> tmp_recv;
         tmp_recv.reserve(ndata);
         auto res = MPI_Allreduce(tmp_send.data(), tmp_recv.data(), ndata, mpi_pair_type<T>(),
                                  pair_op_map[op], MPI_COMM_WORLD) == MPI_SUCCESS;
@@ -589,8 +592,8 @@ namespace mpi {
 
     template<typename T>
     static bool gatherv(
-            const T *send, const defs::mpi_count &sendcount,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls, const size_t &iroot) {
+            const T *send, const count_t &sendcount,
+            T *recv, const count_t *recvcounts, const count_t *recvdispls, const size_t &iroot) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Gatherv(
@@ -600,8 +603,8 @@ namespace mpi {
 
     template<typename T>
     static bool all_gatherv(
-            const T *send, const defs::mpi_count &sendcount,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
+            const T *send, const count_t &sendcount,
+            T *recv, const count_t *recvcounts, const count_t *recvdispls) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Allgatherv(
@@ -648,8 +651,8 @@ namespace mpi {
 
     template<typename T>
     static bool scatterv(
-            const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
-            T *recv, const defs::mpi_count &recvcount, const size_t &iroot) {
+            const T *send, const count_t *sendcounts, const count_t *senddispls,
+            T *recv, const count_t &recvcount, const size_t &iroot) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Scatterv(
@@ -685,8 +688,8 @@ namespace mpi {
 
     template<typename T>
     static bool all_to_allv(
-            const T *send, const defs::mpi_count *sendcounts, const defs::mpi_count *senddispls,
-            T *recv, const defs::mpi_count *recvcounts, const defs::mpi_count *recvdispls) {
+            const T *send, const count_t *sendcounts, const count_t *senddispls,
+            T *recv, const count_t *recvcounts, const count_t *recvdispls) {
         auto send_ptr = reinterpret_cast<const void *>(send);
         auto recv_ptr = reinterpret_cast<void *>(recv);
         return MPI_Alltoallv(

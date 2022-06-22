@@ -16,7 +16,7 @@ TEST(FcidumpInfo, EmptyFilename) {
 }
 
 TEST(FcidumpFileReader, Real_6orb) {
-    FcidumpFileReader file_reader(defs::assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
+    FcidumpFileReader file_reader(defs::c_assets_root + "/RHF_N2_6o6e/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
@@ -41,7 +41,7 @@ TEST(FcidumpFileReader, Real_6orb) {
 }
 
 TEST(FcidumpFileReader, Integer_8orb) {
-    FcidumpFileReader file_reader(defs::assets_root + "/Hubbard_U4_8site/FCIDUMP", false);
+    FcidumpFileReader file_reader(defs::c_assets_root + "/Hubbard_U4_8site/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 8);
@@ -66,7 +66,7 @@ TEST(FcidumpFileReader, Integer_8orb) {
 }
 
 TEST(FcidumpFileReader, Molcas) {
-    FcidumpFileReader file_reader(defs::assets_root + "/O2_Molcas/FCIDUMP", false);
+    FcidumpFileReader file_reader(defs::c_assets_root + "/O2_Molcas/FCIDUMP", false);
     ASSERT_FALSE(file_reader.m_info.m_spin_resolved);
     ASSERT_TRUE(file_reader.spin_conserving());
     ASSERT_EQ(file_reader.m_info.m_nsite, 6);
@@ -86,7 +86,7 @@ TEST(FcidumpFileReader, Molcas) {
 
 #ifdef ENABLE_COMPLEX
 TEST(FcidumpFileReader, Complex_10orb){
-    FcidumpFileReader file_reader(defs::assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
+    FcidumpFileReader file_reader(defs::c_assets_root+"/DHF_Be_STO-3G/FCIDUMP", false);
     ASSERT_EQ(file_reader.m_nspatorb, 5);
     defs::inds_t inds_t(4);
     defs::ham_t v;

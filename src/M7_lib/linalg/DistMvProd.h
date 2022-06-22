@@ -28,11 +28,11 @@ namespace dist_mv_prod {
         /**
          * m_nrow_local values for all ranks
          */
-        const defs::mpi_counts m_counts;
+        const mpi::counts_t m_counts;
         /**
          * cumulative counts
          */
-        const defs::mpi_counts m_displs;
+        const mpi::counts_t m_displs;
         /**
          * input vector buffer whose size is given by the number of columns of M. This size is not assumed to be known
          * until an input vector is passed to the multiply method, whereupon all m_in_vecs are resized accordingly
@@ -44,9 +44,9 @@ namespace dist_mv_prod {
         std::vector<T> m_partial_mv;
 
     private:
-        defs::mpi_counts make_counts() const {
-            defs::mpi_counts counts(mpi::nrank());
-            defs::mpi_count tmp = m_nrow_local;
+        mpi::counts_t make_counts() const {
+            mpi::counts_t counts(mpi::nrank());
+            mpi::count_t tmp = m_nrow_local;
             return mpi::all_gathered(tmp);
         }
 
