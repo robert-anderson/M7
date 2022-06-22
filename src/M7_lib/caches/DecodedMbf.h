@@ -9,6 +9,7 @@
 #include <M7_lib/basis/AbelianGroup.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/nd/NdFormat.h>
+#include <M7_lib/hash/Hashing.h>
 #include <M7_lib/defs.h>
 
 struct FrmOnvField;
@@ -36,7 +37,7 @@ namespace decoded_mbf {
         /**
          * should be updated only in the debug build any time an update is performed
          */
-        defs::hash_t m_last_update_hash = 0;
+        hashing::hash_t m_last_update_hash = 0;
     };
 
     /**

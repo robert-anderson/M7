@@ -28,7 +28,7 @@ TEST(BufferedFields, Numbers){
     const auto elements = hashing::unique_in_range(0, nelement, 0, hi, true);
 
     //  1. constructable via argument forwarding to T::T
-    buffered::Numbers<defs::hash_t, 3> direct(shape);
+    buffered::Numbers<hashing::hash_t, 3> direct(shape);
     ASSERT_EQ(direct.m_format.m_nelement, nelement);
 
     //  2. compatible with a call to any public method of T without cast to T&
@@ -41,8 +41,8 @@ TEST(BufferedFields, Numbers){
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
-    const field::Numbers<defs::hash_t, 3>& base_cref = direct;
-    buffered::Numbers<defs::hash_t, 3> base_cref_cpy(base_cref);
+    const field::Numbers<hashing::hash_t, 3>& base_cref = direct;
+    buffered::Numbers<hashing::hash_t, 3> base_cref_cpy(base_cref);
     ASSERT_EQ(base_cref_cpy.m_format.m_shape, shape);
     ASSERT_EQ(base_cref_cpy.to_vector(), elements);
     ASSERT_EQ(direct, base_cref_cpy);

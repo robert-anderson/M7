@@ -99,7 +99,7 @@ public:
 
     bool operator>=(const FieldBase &other) const;
 
-    defs::hash_t hash() const;
+    hashing::hash_t hash() const;
 
     virtual std::string to_string() const = 0;
 

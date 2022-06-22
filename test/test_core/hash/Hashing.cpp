@@ -8,7 +8,7 @@
 TEST(Hashing, Determinism){
     const size_t nattempt = 10;
 
-    defs::hash_t benchmark;
+    hashing::hash_t benchmark;
     size_t key = 99ul;
     benchmark = hashing::fnv_hash((char*)&key, sizeof(key));
     for (size_t i=0ul; i<nattempt; ++i){

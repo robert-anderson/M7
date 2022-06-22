@@ -91,6 +91,6 @@ bool FieldBase::operator>=(const FieldBase &other) const {
     return cmp(other) >= 0;
 }
 
-defs::hash_t FieldBase::hash() const {
+hashing::hash_t FieldBase::hash() const {
     return hashing::fnv_hash(begin(), m_size);
 }

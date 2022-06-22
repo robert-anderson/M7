@@ -113,7 +113,7 @@ TEST(HDF5Wrapper, ComplexArray) {
 
 
 TEST(HDF5Wrapper, NumberDistributed) {
-    BufferedTable<SingleFieldRow<field::Number<defs::hash_t>>> write_table("test int table", {{"integer_field"}});
+    BufferedTable<SingleFieldRow<field::Number<hashing::hash_t>>> write_table("test int table", {{"integer_field"}});
     auto read_table = write_table;
     const auto nrow = hashing::in_range(mpi::irank() + 1, 10, 20);
     log::debug_("number of local rows {}", nrow);
@@ -121,7 +121,7 @@ TEST(HDF5Wrapper, NumberDistributed) {
     auto row = write_table.m_row;
     for (row.restart(); row.in_range(); row.step()) {
         row.m_field = hashing::in_range((row.index() + 1) * (mpi::irank() + 1), 4, 123);
-        log::debug_("writing value: {}", defs::hash_t(row.m_field));
+        log::debug_("writing value: {}", hashing::hash_t(row.m_field));
     }
     {
         hdf5::FileWriter fw("table_test.h5");

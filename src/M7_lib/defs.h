@@ -70,7 +70,6 @@ namespace defs {
 
     typedef std::map<std::string, std::string> info_map_t;
     typedef double prob_t;
-    typedef uint64_t hash_t;
     typedef char buf_t;
     typedef unsigned char mev_ind_t;
     typedef unsigned char bos_occ_t;
