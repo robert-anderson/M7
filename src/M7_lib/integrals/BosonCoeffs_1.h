@@ -9,7 +9,7 @@
 
 class BosonCoeffs_1 {
 
-    size_t index(const size_t &n, const size_t &m) const {
+    size_t index(size_t n, size_t m) const {
         return n * m_nmode + m;
     }
 
@@ -19,9 +19,9 @@ public:
 
     BosonCoeffs_1(size_t nmode);
 
-    void set(const size_t& n, const size_t& m, const defs::ham_t& value);
+    void set(size_t n, size_t m, defs::ham_t value);
 
-    const defs::ham_t& get(const size_t& n, const size_t& m) const;
+    defs::ham_t get(size_t n, size_t m) const;
 };
 
 

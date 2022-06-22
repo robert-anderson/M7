@@ -53,7 +53,7 @@ public:
      * @param value
      *  coefficient value
      */
-    void set(const size_t& n, const size_t& p, const size_t& q, const defs::ham_t& value);
+    void set(size_t n, size_t p, size_t q, defs::ham_t value);
 
     /**
      * access the coefficient value (called on any rank)
@@ -66,7 +66,7 @@ public:
      * @return
      *  coefficient value
      */
-    const defs::ham_t& get(const size_t& n, const size_t& p, const size_t& q) const;
+    defs::ham_t get(size_t n, size_t p, size_t q) const;
 
 };
 

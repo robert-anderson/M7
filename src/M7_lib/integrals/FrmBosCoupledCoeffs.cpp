@@ -19,10 +19,10 @@ FrmBosCoupledCoeffs::FrmBosCoupledCoeffs(sys::Size sizes, bool spin_resolved):
         m_ncoeff_ind_frm2(m_ncoeff_ind_frm * m_ncoeff_ind_frm), m_ncoeff_ind_bos(m_sizes.m_bos.m_nmode),
         m_v(m_ncoeff_ind_bos * m_ncoeff_ind_frm2){}
 
-void FrmBosCoupledCoeffs::set(const size_t &n, const size_t &p, const size_t &q, const defs::ham_t &value) {
+void FrmBosCoupledCoeffs::set(size_t n, size_t p, size_t q, defs::ham_t value) {
     m_v.set(index(n, p, q), value);
 }
 
-const defs::ham_t &FrmBosCoupledCoeffs::get(const size_t &n, const size_t &p, const size_t &q) const {
+defs::ham_t FrmBosCoupledCoeffs::get(size_t n, size_t p, size_t q) const {
     return m_v[index(n, p, q)];
 }

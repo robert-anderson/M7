@@ -10,7 +10,7 @@
 
 class BosonCoeffs_2 {
 
-    size_t index(const size_t &i, const size_t &j, const size_t& k, const size_t& l) const {
+    size_t index(size_t i, size_t j, size_t k, size_t l) const {
         using namespace utils::integer;
         auto ij = i*m_nmode+j;
         auto kl = k*m_nmode+l;
@@ -23,11 +23,11 @@ public:
 
     BosonCoeffs_2(size_t nmode);
 
-    void set(const size_t& i, const size_t& j, const size_t& k, const size_t& l, const defs::ham_t& value);
+    void set(size_t i, size_t j, size_t k, size_t l, defs::ham_t value);
 
-    const defs::ham_t& get(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const;
+    defs::ham_t get(size_t i, size_t j, size_t k, size_t l) const;
 
-    const defs::ham_t& phys_element(const size_t& i, const size_t& j, const size_t& k, const size_t& l) const;
+    defs::ham_t phys_element(size_t i, size_t j, size_t k, size_t l) const;
 };
 
 
