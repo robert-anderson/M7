@@ -7,13 +7,13 @@
 
 TEST(UtilArray, ToVector){
     std::array<float, 5> a = {4.5, -3.4, 3.5, 0.2, -5.6};
-    auto v = utils::array::to_vector(a);
+    auto v = array::to_vector(a);
     std::vector<float> v_chk = {4.5, -3.4, 3.5, 0.2, -5.6};
     ASSERT_EQ(v, v_chk);
 }
 
 TEST(UtilArray, Filled){
-    auto a = utils::array::filled<float, 5>(6.7);
+    auto a = array::filled<float, 5>(6.7);
     std::array<float, 5> a_chk = {6.7, 6.7, 6.7, 6.7, 6.7};
     ASSERT_EQ(a, a_chk);
 }
