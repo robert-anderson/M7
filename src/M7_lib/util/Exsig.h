@@ -153,11 +153,11 @@ namespace utils {
         }
 
         static constexpr size_t ncontrib_frm(size_t exsig) {
-            return utils::integer::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig)) + 1;
+            return integer::min(decode_nfrm_cre(exsig), decode_nfrm_ann(exsig)) + 1;
         }
 
         static constexpr size_t ncontrib_bos(size_t exsig) {
-            return utils::integer::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig)) + 1;
+            return integer::min(decode_nbos_cre(exsig), decode_nbos_ann(exsig)) + 1;
         }
 
         static constexpr size_t base_exsig(size_t exsig) {

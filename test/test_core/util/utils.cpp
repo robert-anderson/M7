@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include <M7_lib/util/Integer.h>
 
-using namespace utils::integer;
+using namespace integer;
 
 TEST(utils, Factorial) {
     ASSERT_EQ(factorial(0), 1ul);

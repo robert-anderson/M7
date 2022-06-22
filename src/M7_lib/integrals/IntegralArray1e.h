@@ -11,7 +11,7 @@
 #include <M7_lib/util/Integer.h>
 
 namespace integrals_1e {
-    using namespace utils::integer;
+    using namespace integer;
 
     typedef std::function<void(size_t, size_t)> foreach_fn_t;
 
@@ -40,7 +40,7 @@ namespace integrals_1e {
         void foreach(const foreach_fn_t &fn) const override;
     };
 
-    using namespace utils::integer;
+    using namespace integer;
 
     struct IndexerSymH : Indexer {
         IndexerSymH(size_t norb);

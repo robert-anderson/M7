@@ -11,7 +11,7 @@
 class BosonCoeffs_2 {
 
     size_t index(size_t i, size_t j, size_t k, size_t l) const {
-        using namespace utils::integer;
+        using namespace integer;
         auto ij = i*m_nmode+j;
         auto kl = k*m_nmode+l;
         return ij>=kl ? trigmap(ij, kl) : trigmap(kl, ij);

@@ -137,7 +137,7 @@ HilbertSpace::operator bool() const {
 #endif
 
 sys::frm::Size::Size(size_t nsite) :
-        m_nsite(nsite), m_nspinorb(2 * nsite), m_nspinorb_pair(utils::integer::nspair(m_nspinorb)){}
+        m_nsite(nsite), m_nspinorb(2 * nsite), m_nspinorb_pair(integer::nspair(m_nspinorb)){}
 
 size_t sys::frm::Size::ncoeff_ind(bool spin_resolved) const {
     return spin_resolved ? m_nspinorb : m_nsite;
@@ -192,7 +192,7 @@ sys::frm::Ms2::Ms2(int v, bool conserve) : conservation::Optional<int>(v, conser
 
 sys::frm::Ms2::Ms2() : conservation::Optional<int>("2*Ms"){}
 
-sys::frm::Electrons::Electrons(size_t n, sys::frm::Ms2 ms2) : m_n(n), m_npair(utils::integer::nspair(m_n)), m_ms2(ms2),
+sys::frm::Electrons::Electrons(size_t n, sys::frm::Ms2 ms2) : m_n(n), m_npair(integer::nspair(m_n)), m_ms2(ms2),
                                                               m_nalpha(m_ms2.conserve() ? (m_n+m_ms2)/2 : 0ul),
                                                               m_nbeta(m_ms2.conserve() ? m_n-m_nalpha : 0ul) {
     if (m_ms2.conserve() && m_n)
@@ -234,11 +234,11 @@ bool sys::frm::Sector::operator==(const sys::frm::Sector &other) const {
 
 size_t sys::frm::Sector::size() const {
     if (m_elecs.m_ms2.conserve()) {
-        const auto na = utils::integer::combinatorial(m_basis.m_nsite, m_elecs.m_nalpha);
-        const auto nb = utils::integer::combinatorial(m_basis.m_nsite, m_elecs.m_nbeta);
+        const auto na = integer::combinatorial(m_basis.m_nsite, m_elecs.m_nalpha);
+        const auto nb = integer::combinatorial(m_basis.m_nsite, m_elecs.m_nbeta);
         return na * nb;
     }
-    return utils::integer::combinatorial(m_basis.m_nspinorb, m_elecs);
+    return integer::combinatorial(m_basis.m_nspinorb, m_elecs);
 }
 
 sys::bos::Size::Size(size_t nmode) : m_nmode(nmode){}

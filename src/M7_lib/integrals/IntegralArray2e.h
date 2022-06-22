@@ -56,7 +56,7 @@
  *
  */
 namespace integrals_2e {
-    using namespace utils::integer;
+    using namespace integer;
 
     typedef std::function<void(size_t, size_t, size_t, size_t)> foreach_fn_t;
 

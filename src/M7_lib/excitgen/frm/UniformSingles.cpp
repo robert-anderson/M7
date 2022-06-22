@@ -26,7 +26,7 @@ bool UniformSingles::draw_spin_conserve_fn(PRNG &prng, const field::FrmOnv &src,
 
     size_t ia = prng.draw_uint(nocc * nvac);
     size_t i, a;
-    utils::integer::inv_rectmap(i, a, nvac, ia);
+    integer::inv_rectmap(i, a, nvac, ia);
     DEBUG_ASSERT_LT(i, nocc, "drawn occupied OOB");
     DEBUG_ASSERT_LT(a, nvac, "drawn vacant OOB");
 
@@ -46,7 +46,7 @@ bool UniformSingles::draw_spin_nonconserve_fn(PRNG &prng, const field::FrmOnv &s
     const auto ncases = nelec * nvac;
     auto ia = prng.draw_uint(ncases);
     size_t i, a;
-    utils::integer::inv_rectmap(i, a, nvac, ia);
+    integer::inv_rectmap(i, a, nvac, ia);
     conn.m_ann.set(occs[i]);
     conn.m_cre.set(vacs[a]);
     prob = 1.0 / ncases;

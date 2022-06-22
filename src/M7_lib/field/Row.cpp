@@ -28,12 +28,12 @@ size_t Row::add_field(FieldBase *field) {
         offset = m_fields.back()->m_row_offset + m_fields.back()->m_size;
         if (!(m_fields.back()->m_type_info == field->m_type_info)) {
             // go to next whole system word
-            offset = utils::integer::divceil(offset, defs::nbyte_word) * defs::nbyte_word;
+            offset = integer::divceil(offset, defs::nbyte_word) * defs::nbyte_word;
         }
     }
 
     m_current_offset = offset + field->m_size;
-    m_size = utils::integer::divceil(m_current_offset, defs::nbyte_word) * defs::nbyte_word;
+    m_size = integer::divceil(m_current_offset, defs::nbyte_word) * defs::nbyte_word;
 
     m_fields.push_back(field);
     return offset;

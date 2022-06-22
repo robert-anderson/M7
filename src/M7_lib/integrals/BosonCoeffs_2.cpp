@@ -4,7 +4,7 @@
 
 #include "BosonCoeffs_2.h"
 
-BosonCoeffs_2::BosonCoeffs_2(size_t nmode) : m_nmode(nmode), m_v(utils::integer::npair(nmode*nmode)){}
+BosonCoeffs_2::BosonCoeffs_2(size_t nmode) : m_nmode(nmode), m_v(integer::npair(nmode*nmode)){}
 
 void BosonCoeffs_2::set(size_t i, size_t j, size_t k, size_t l, defs::ham_t value) {
     m_v.set(index(i, j, k, l), value);

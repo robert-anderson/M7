@@ -42,7 +42,7 @@ struct BitsetField : FieldBase {
     using FieldBase::begin;
 
     BitsetField(Row *row, NdFormat<nind> format, std::string name="") :
-        FieldBase(row, utils::integer::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
+        FieldBase(row, integer::divceil(format.m_nelement, nbit_dword()) * sizeof(T), typeid(T), name),
         m_format(format), m_dsize(m_size / sizeof(T)), m_nbit_in_last_dword(nbit() - (m_dsize - 1) * nbit_dword()) {}
 
     BitsetField(const BitsetField &other) : FieldBase(other),

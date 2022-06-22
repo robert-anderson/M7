@@ -6,12 +6,12 @@
 
 size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, sys::Size basis_size) {
     double nrow = 1.0;
-    nrow *= utils::integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_cre);
-    nrow *= utils::integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
-    nrow *= utils::integer::combinatorial(basis_size.m_bos, nbos_cre);
-    nrow *= utils::integer::combinatorial(basis_size.m_bos, nbos_ann);
-    nrow /= utils::integer::factorial(nfrm_cre + nfrm_ann);
-    nrow /= utils::integer::factorial(nbos_cre + nbos_ann);
+    nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_cre);
+    nrow *= integer::combinatorial(basis_size.m_frm.m_nspinorb, nfrm_ann);
+    nrow *= integer::combinatorial(basis_size.m_bos, nbos_cre);
+    nrow *= integer::combinatorial(basis_size.m_bos, nbos_ann);
+    nrow /= integer::factorial(nfrm_cre + nfrm_ann);
+    nrow /= integer::factorial(nbos_cre + nbos_ann);
     return nrow;
 }
 
@@ -263,7 +263,7 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
-    const auto norm = consts::real(trace) / utils::integer::nspair(m_nelec);
+    const auto norm = consts::real(trace) / integer::nspair(m_nelec);
     REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
                  "2RDM norm should match total of sampled diagonal contributions");
     return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;

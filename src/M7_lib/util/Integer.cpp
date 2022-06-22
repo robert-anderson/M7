@@ -5,7 +5,7 @@
 #include "Integer.h"
 
 
-size_t utils::integer::rectmap(size_t irow, size_t icol, size_t ncol) {
+size_t integer::rectmap(size_t irow, size_t icol, size_t ncol) {
     // rectangular map
     /*
      * n         i,j
@@ -16,12 +16,12 @@ size_t utils::integer::rectmap(size_t irow, size_t icol, size_t ncol) {
     return irow * ncol + icol;
 }
 
-void utils::integer::inv_rectmap(size_t &irow, size_t &icol, size_t ncol, size_t flat) {
+void integer::inv_rectmap(size_t &irow, size_t &icol, size_t ncol, size_t flat) {
     irow = flat / ncol;
     icol = flat - irow * ncol;
 }
 
-size_t utils::integer::trigmap(size_t i, size_t j) {
+size_t integer::trigmap(size_t i, size_t j) {
     ASSERT(i >= j);
     /*
      * n        i,j
@@ -34,16 +34,16 @@ size_t utils::integer::trigmap(size_t i, size_t j) {
     return (i * (i + 1)) / 2 + j;
 }
 
-size_t utils::integer::npair(size_t ndim) {
+size_t integer::npair(size_t ndim) {
     return trigmap(ndim, 0);
 }
 
-void utils::integer::inv_trigmap(size_t &i, size_t &j, size_t n) {
+void integer::inv_trigmap(size_t &i, size_t &j, size_t n) {
     i = (size_t) ((std::sqrt(1 + 8 * (double) n) - 1) / 2);
     j = n - (i * (i + 1)) / 2;
 }
 
-size_t utils::integer::strigmap(size_t i, size_t j) {
+size_t integer::strigmap(size_t i, size_t j) {
     ASSERT(i > j);
     // strict triangular map i>j
     /*
@@ -57,17 +57,17 @@ size_t utils::integer::strigmap(size_t i, size_t j) {
     return (i * (i - 1)) / 2 + j;
 }
 
-void utils::integer::inv_strigmap(size_t &i, size_t &j, size_t n) {
+void integer::inv_strigmap(size_t &i, size_t &j, size_t n) {
     i = (size_t) ((std::sqrt(1 + 8 * (double) n) + 1) / 2);
     j = n - (i * (i - 1)) / 2;
 }
 
-size_t utils::integer::nspair(size_t ndim) {
+size_t integer::nspair(size_t ndim) {
     if (!ndim) return 0ul;
     return strigmap(ndim, 0);
 }
 
-size_t utils::integer::factorial(size_t n) {
+size_t integer::factorial(size_t n) {
     ASSERT(n < ((size_t) -1) / 2);
     size_t out = 1ul;
     if (n < 1) return 1ul;
@@ -75,7 +75,7 @@ size_t utils::integer::factorial(size_t n) {
     return out;
 }
 
-size_t utils::integer::combinatorial(size_t n, size_t r) {
+size_t integer::combinatorial(size_t n, size_t r) {
     /*
      * n choose r = n! / ((n-r)!r!)
      * compute numerator and denominator simultaneously whenever an
@@ -98,6 +98,6 @@ size_t utils::integer::combinatorial(size_t n, size_t r) {
     }
 }
 
-size_t utils::integer::combinatorial_with_repetition(size_t n, size_t r) {
+size_t integer::combinatorial_with_repetition(size_t n, size_t r) {
     return combinatorial(n + r - 1, r);
 }

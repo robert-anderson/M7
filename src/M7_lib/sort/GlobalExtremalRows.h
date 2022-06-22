@@ -158,7 +158,7 @@ private:
          * IIIIIXXXXXXXXXXXXXOOOOOOO|
          * the number of rows we want to make available for comparison in the next iteration is:
          */
-        auto nfind_local = utils::integer::divceil(nrow - m_ninclude.m_reduced, nrank_with_remainder);
+        auto nfind_local = integer::divceil(nrow - m_ninclude.m_reduced, nrank_with_remainder);
         /*
          * but this would find new locally extreme rows from X/O threshold, whereas we really want to find these from
          * the I/X threshold, since it doesn't make sense to find more rows on a process with few already included, thus

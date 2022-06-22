@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "M7_lib/util/Integer.h"
 
-using namespace utils::integer;
+using namespace integer;
 
 TEST(UtilInteger, Factorial) {
     ASSERT_EQ(factorial(0), 1ul);
@@ -79,7 +79,7 @@ TEST(UtilInteger, MeanAndStd) {
 }
 
 TEST(UtilInteger, CompileTimeNtup) {
-    ASSERT_EQ(ntup<4>(15), utils::integer::combinatorial(15, 4));
+    ASSERT_EQ(ntup<4>(15), integer::combinatorial(15, 4));
     ASSERT_EQ(ntup<1>(15), 15);
     ASSERT_EQ(ntup<1>(1), 1);
     ASSERT_EQ(ntup<0>(1), 1);

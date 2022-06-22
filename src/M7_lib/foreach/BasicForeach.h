@@ -112,7 +112,7 @@ namespace basic_foreach {
 
             static size_t niter(size_t n) {
                 if (!nind || !n) return 0ul;
-                return utils::integer::combinatorial(strict ? n : (n + nind) - 1, nind);
+                return integer::combinatorial(strict ? n : (n + nind) - 1, nind);
             }
         protected:
             size_t m_n;
@@ -227,7 +227,7 @@ namespace basic_foreach {
 
             static size_t niter(size_t n, size_t r) {
                 if (!r) return 0ul;
-                return utils::integer::combinatorial(strict ? n : (n + r) - 1, r);
+                return integer::combinatorial(strict ? n : (n + r) - 1, r);
             }
 
         private:

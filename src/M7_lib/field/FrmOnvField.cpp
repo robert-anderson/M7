@@ -7,7 +7,7 @@
 FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, std::string name) :
         base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name),
         m_basis(basis), m_decoded(*this),
-        m_dsize_spin_channel(utils::integer::divceil(size_t(m_basis.m_nsite), defs::nbit_word)){}
+        m_dsize_spin_channel(integer::divceil(size_t(m_basis.m_nsite), defs::nbit_word)){}
 
 FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, std::string name) :
     FrmOnvField(row, basis.m_frm, std::move(name)){
