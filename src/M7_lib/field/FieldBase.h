@@ -7,11 +7,14 @@
 
 #include <M7_lib/defs.h>
 #include <cstring>
-#include <M7_lib/hash/Hashing.h>
+#include <M7_lib/util/Hashing.h>
 #include <M7_lib/nd/NdArrayList.h>
 #include <M7_lib/io/HDF5Wrapper.h>
 
 #include "Row.h"
+
+using namespace defs;
+using namespace utils;
 
 /**
  * Base class for the basic containers of data within Rows, which in turn reference locations within a Buffer via Table.
@@ -99,7 +102,7 @@ public:
 
     bool operator>=(const FieldBase &other) const;
 
-    hashing::hash_t hash() const;
+    hash::digest_t hash() const;
 
     virtual std::string to_string() const = 0;
 
@@ -123,7 +126,7 @@ public:
         gr.load(m_name, begin(), {m_size});
     }
 
-    virtual defs::inds_t h5_shape() const {
+    virtual inds_t h5_shape() const {
         return {};
     }
 

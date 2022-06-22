@@ -9,12 +9,15 @@
 #include <M7_lib/basis/AbelianGroup.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/nd/NdFormat.h>
-#include <M7_lib/hash/Hashing.h>
+#include <M7_lib/util/Hashing.h>
 #include <M7_lib/defs.h>
 
 struct FrmOnvField;
 struct BosOnvField;
 struct FrmBosOnvField;
+
+using namespace defs;
+using namespace utils;
 
 /**
  * provides a store which only updates the flat and spin/sym-partitioned occupied and vacant spin orbital indices when
@@ -37,7 +40,7 @@ namespace decoded_mbf {
         /**
          * should be updated only in the debug build any time an update is performed
          */
-        hashing::hash_t m_last_update_hash = 0;
+        hash::digest_t m_last_update_hash = 0;
     };
 
     /**

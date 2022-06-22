@@ -2,9 +2,11 @@
 // Created by Robert John Anderson on 2020-04-15.
 //
 
-#include <M7_lib/hash/Hashing.h>
+#include <M7_lib/util/Hashing.h>
 #include "gtest/gtest.h"
 #include "M7_lib/parallel/MPIWrapper.h"
+
+using namespace utils;
 
 TEST(MPIWrapper, AllSum){
     size_t i = mpi::irank()+1;
@@ -13,19 +15,19 @@ TEST(MPIWrapper, AllSum){
 }
 
 TEST(MPIWrapper, AllMax){
-    size_t i = hashing::in_range(mpi::irank(), 5, 19);
+    size_t i = hash::in_range(mpi::irank(), 5, 19);
     size_t res = mpi::all_max(i);
     defs::inds_t chk(mpi::nrank());
-    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hashing::in_range(irank, 5, 19);
+    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
     std::sort(chk.begin(), chk.end());
     ASSERT_EQ(res, chk.back());
 }
 
 TEST(MPIWrapper, AllMin){
-    size_t i = hashing::in_range(mpi::irank(), 5, 19);
+    size_t i = hash::in_range(mpi::irank(), 5, 19);
     size_t res = mpi::all_min(i);
     defs::inds_t chk(mpi::nrank());
-    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hashing::in_range(irank, 5, 19);
+    for (size_t irank=0ul; irank<mpi::nrank(); ++irank) chk[irank] = hash::in_range(irank, 5, 19);
     std::sort(chk.begin(), chk.end());
     ASSERT_EQ(res, chk.front());
 }
@@ -34,11 +36,11 @@ TEST(MPIWrapper, Alltoall){
     defs::inds_t send(mpi::nrank(), 0ul);
     defs::inds_t recv(mpi::nrank(), 0ul);
     for (size_t irecv=0ul; irecv<mpi::nrank(); ++irecv){
-        send[irecv] = hashing::in_range({irecv, mpi::irank()}, 3, 123);
+        send[irecv] = hash::in_range({irecv, mpi::irank()}, 3, 123);
     }
     mpi::all_to_all(send, recv);
     for (size_t isent=0ul; isent<mpi::nrank(); ++isent){
-        ASSERT_EQ(recv[isent], hashing::in_range({mpi::irank(), isent}, 3, 123));
+        ASSERT_EQ(recv[isent], hash::in_range({mpi::irank(), isent}, 3, 123));
     }
 }
 
@@ -47,7 +49,7 @@ TEST(MPIWrapper, Allgatherv){
     defs::inds_t send(n, 0ul);
     defs::inds_t recv(n * mpi::nrank(), 0ul);
     for (size_t i=0ul; i<n; ++i){
-        send[i] = hashing::in_range({mpi::irank(), i}, 3, 123);
+        send[i] = hash::in_range({mpi::irank(), i}, 3, 123);
     }
     defs::inds_t recvcounts(mpi::nrank(), n);
     defs::inds_t displs(mpi::nrank(), 0);
@@ -57,23 +59,23 @@ TEST(MPIWrapper, Allgatherv){
     size_t iflat = 0ul;
     for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
         for (size_t i=0ul; i<n; ++i){
-            ASSERT_EQ(recv[iflat], hashing::in_range({isrc, i}, 3, 123));
+            ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
         }
     }
 }
 
 TEST(MPIWrapper, AllgathervRagged){
-    const size_t nsend=hashing::in_range(mpi::irank(), 5, 17);
+    const size_t nsend=hash::in_range(mpi::irank(), 5, 17);
     defs::inds_t send(nsend, 0ul);
     for (size_t i=0ul; i<nsend; ++i){
-        send[i] = hashing::in_range({mpi::irank(), i}, 3, 123);
+        send[i] = hash::in_range({mpi::irank(), i}, 3, 123);
     }
 
     defs::inds_t recvcounts(mpi::nrank(), 0);
     mpi::all_gather(nsend, recvcounts);
     for (size_t i=0ul; i<mpi::nrank(); ++i){
-        ASSERT_EQ(recvcounts[i], hashing::in_range(i, 5, 17));
+        ASSERT_EQ(recvcounts[i], hash::in_range(i, 5, 17));
     }
 
     defs::inds_t displs(mpi::nrank(), 0);
@@ -87,7 +89,7 @@ TEST(MPIWrapper, AllgathervRagged){
     size_t iflat = 0ul;
     for (size_t isrc=0ul; isrc<mpi::nrank(); ++isrc){
         for (size_t i=0ul; i<recvcounts[isrc]; ++i){
-            ASSERT_EQ(recv[iflat], hashing::in_range({isrc, i}, 3, 123));
+            ASSERT_EQ(recv[iflat], hash::in_range({isrc, i}, 3, 123));
             ++iflat;
         }
     }

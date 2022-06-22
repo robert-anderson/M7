@@ -3,8 +3,10 @@
 //
 
 #include "Examples.h"
-#include "M7_lib/hash/Hashing.h"
+#include "M7_lib/util/Hashing.h"
 #include "M7_lib/parallel/MPIAssert.h"
+
+using namespace utils;
 
 sparse::Matrix<double>
 sparse_matrix_examples::rect_double(const size_t &nrow, const size_t &ncol, const size_t &nnonzero_per_row) {
@@ -18,8 +20,8 @@ sparse_matrix_examples::rect_double(const size_t &nrow, const size_t &ncol, cons
     std::vector<double> values;
 
     for (size_t irow = 0ul; irow < nrow; ++irow) {
-        utils::convert::vector(hashing::unique_in_range(irow, nnonzero_per_row, 0, ncol, true), icols);
-        utils::convert::vector(hashing::in_range(irow, nnonzero_per_row, 1, v_hi, true), values);
+        utils::convert::vector(hash::unique_in_range(irow, nnonzero_per_row, 0, ncol, true), icols);
+        utils::convert::vector(hash::in_range(irow, nnonzero_per_row, 1, v_hi, true), values);
         out.insert(irow, icols, values);
     }
 
@@ -34,7 +36,7 @@ sparse_matrix_examples::rect_double_complex(const size_t &nrow, const size_t &nc
     for (size_t irow=0ul; irow<nrow; ++irow) {
         const auto real_row = real[irow];
         for (size_t ielem=0ul; ielem<real_row.first.size(); ++ielem){
-            double imag = hashing::in_range({irow, ielem}, 0, 4);
+            double imag = hash::in_range({irow, ielem}, 0, 4);
             out.add(irow, {real_row.first[ielem], {real_row.second[ielem], imag}});
         }
     }

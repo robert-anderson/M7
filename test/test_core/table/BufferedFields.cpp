@@ -25,10 +25,10 @@ TEST(BufferedFields, Numbers){
     const std::array<size_t, 3> shape {4, 3, 2};
     const size_t nelement = 4*3*2;
     const size_t hi = nelement*4;
-    const auto elements = hashing::unique_in_range(0, nelement, 0, hi, true);
+    const auto elements = utils::hash::unique_in_range(0, nelement, 0, hi, true);
 
     //  1. constructable via argument forwarding to T::T
-    buffered::Numbers<hashing::hash_t, 3> direct(shape);
+    buffered::Numbers<utils::hash::digest_t, 3> direct(shape);
     ASSERT_EQ(direct.m_format.m_nelement, nelement);
 
     //  2. compatible with a call to any public method of T without cast to T&
@@ -41,8 +41,8 @@ TEST(BufferedFields, Numbers){
     ASSERT_EQ(direct, direct_cpy);
 
     //  4. copy-constructable from const T&
-    const field::Numbers<hashing::hash_t, 3>& base_cref = direct;
-    buffered::Numbers<hashing::hash_t, 3> base_cref_cpy(base_cref);
+    const field::Numbers<utils::hash::digest_t, 3>& base_cref = direct;
+    buffered::Numbers<utils::hash::digest_t, 3> base_cref_cpy(base_cref);
     ASSERT_EQ(base_cref_cpy.m_format.m_shape, shape);
     ASSERT_EQ(base_cref_cpy.to_vector(), elements);
     ASSERT_EQ(direct, base_cref_cpy);
@@ -114,7 +114,7 @@ TEST(BufferedFields, NdBitset){
     const std::array<size_t, 3> shape {4, 3, 2};
     const size_t nbit = 4*3*2;
     const size_t nsetbit = 8;
-    const auto setbits = hashing::unique_in_range(0, nsetbit, 0, nbit, true);
+    const auto setbits = utils::hash::unique_in_range(0, nsetbit, 0, nbit, true);
 
     //  1. constructable via argument forwarding to T::T
     buffered::NdBitset<size_t, 3> direct(shape);
@@ -159,7 +159,7 @@ TEST(BufferedFields, NdBitset){
 TEST(BufferedFields, Bitset){
     const size_t nbit = 20;
     const size_t nsetbit = 8;
-    auto setbits = hashing::unique_in_range(0, nsetbit, 0, nbit, true);
+    auto setbits = utils::hash::unique_in_range(0, nsetbit, 0, nbit, true);
 
     //  1. constructable via argument forwarding to T::T
     buffered::Bitset<size_t> direct(nbit);

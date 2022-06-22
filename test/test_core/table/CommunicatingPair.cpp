@@ -18,7 +18,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     for (size_t irank = 0ul; irank < mpi::nrank(); ++irank) {
         auto& row = comm_pair.send(irank).m_row;
         row.push_back_jump();
-        row.m_field = hashing::in_range({irank, mpi::irank()}, hash_lo, hash_hi);
+        row.m_field = utils::hash::in_range({irank, mpi::irank()}, hash_lo, hash_hi);
     }
 
     for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
@@ -26,7 +26,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
         ASSERT_EQ(std::distance(comm_pair.send(idst - 1).begin(), comm_pair.send(idst).begin()), bw_size);
         // check send values by pointer dereference relative to entire send table array
         auto v_send = *reinterpret_cast<size_t*>(comm_pair.send().begin()[idst*bw_size]);
-        ASSERT_EQ(v_send, hashing::in_range({idst, mpi::irank()}, hash_lo, hash_hi));
+        ASSERT_EQ(v_send, utils::hash::in_range({idst, mpi::irank()}, hash_lo, hash_hi));
     }
 
     comm_pair.communicate();
@@ -34,7 +34,7 @@ TEST(CommunicatingPair, CommunicateSingleElement) {
     auto& row = comm_pair.recv().m_row;
     for (row.restart(); row.in_range(); row.step()) {
         auto irank_src = row.index();
-        ASSERT_EQ(row.m_field, hashing::in_range({mpi::irank(), irank_src}, hash_lo, hash_hi));
+        ASSERT_EQ(row.m_field, utils::hash::in_range({mpi::irank(), irank_src}, hash_lo, hash_hi));
     }
 }
 
@@ -52,7 +52,7 @@ TEST(CommunicatingPair, CommunicateVectors){
         auto& row = comm_pair.send(irank).m_row;
         row.push_back_jump();
         for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
-            row.m_field[ielement] = hashing::in_range({irank, mpi::irank(), ielement}, hash_lo, hash_hi);
+            row.m_field[ielement] = utils::hash::in_range({irank, mpi::irank(), ielement}, hash_lo, hash_hi);
     }
 
     for (size_t idst = 1ul; idst < mpi::nrank(); ++idst) {
@@ -61,7 +61,7 @@ TEST(CommunicatingPair, CommunicateVectors){
         for (size_t ielement=0ul; ielement<nelement_vector; ++ielement) {
             // check send values by pointer dereference relative to entire send table array
             auto v_send = *reinterpret_cast<size_t*>(comm_pair.send().begin()[idst * bw_size + ielement]);
-            ASSERT_EQ(v_send,hashing::in_range({idst, mpi::irank(), ielement}, hash_lo, hash_hi));
+            ASSERT_EQ(v_send,utils::hash::in_range({idst, mpi::irank(), ielement}, hash_lo, hash_hi));
         }
     }
 
@@ -72,7 +72,7 @@ TEST(CommunicatingPair, CommunicateVectors){
         auto irank_src = row.index();
         for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
             ASSERT_EQ(row.m_field[ielement],
-                      hashing::in_range({mpi::irank(), irank_src, ielement}, hash_lo, hash_hi));
+                      utils::hash::in_range({mpi::irank(), irank_src, ielement}, hash_lo, hash_hi));
     }
 }
 
@@ -81,7 +81,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
     const double expansion_factor = 0.5;
     const size_t nelement_vector = 5;
     const size_t nrow_rank_lo = 6, nrow_rank_hi = 15;
-    const size_t nrow_this_rank = hashing::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
+    const size_t nrow_this_rank = utils::hash::in_range(mpi::irank(), nrow_rank_lo, nrow_rank_hi);
     CommunicatingPair<row_t> comm_pair("Test pair", nrow_this_rank, expansion_factor, {{nelement_vector}});
     const size_t hash_lo = 123, hash_hi = 789;
 
@@ -90,7 +90,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
     std::vector<size_t> nrows_expect;
     nrows_expect.reserve(mpi::nrank());
     for (auto irank=0ul; irank<mpi::nrank(); ++irank)
-        nrows_expect.push_back(hashing::in_range(irank, nrow_rank_lo, nrow_rank_hi));
+        nrows_expect.push_back(utils::hash::in_range(irank, nrow_rank_lo, nrow_rank_hi));
     ASSERT_EQ(*std::max_element(nrows_expect.cbegin(), nrows_expect.cend()), nrow_max);
     auto nrow_displs_expect = mpi::counts_to_displs_consec(nrows_expect);
 
@@ -100,7 +100,7 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
         for (size_t irow_send = 0ul; irow_send < nrow_this_rank; ++irow_send) {
             row.push_back_jump();
             for (size_t ielement = 0ul; ielement < nelement_vector; ++ielement)
-                row.m_field[ielement] = hashing::in_range({irank, mpi::irank(), irow_send, ielement}, hash_lo, hash_hi);
+                row.m_field[ielement] = utils::hash::in_range({irank, mpi::irank(), irow_send, ielement}, hash_lo, hash_hi);
         }
     }
 
@@ -115,6 +115,6 @@ TEST(CommunicatingPair, CommunicateMultipleVectors){
         auto irow_send = row.index()-nrow_displs_expect[irank_src];
         for (size_t ielement=0ul; ielement<nelement_vector; ++ielement)
             ASSERT_EQ(row.m_field[ielement],
-                      hashing::in_range({mpi::irank(), irank_src, irow_send, ielement}, hash_lo, hash_hi));
+                      utils::hash::in_range({mpi::irank(), irank_src, irow_send, ielement}, hash_lo, hash_hi));
     }
 }

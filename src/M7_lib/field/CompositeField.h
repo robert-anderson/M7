@@ -52,7 +52,7 @@ protected:
     };
 
     struct HashFn {
-        hashing::hash_t m_hash = 0;
+        hash::digest_t m_hash = 0;
         template<typename T>
         void operator()(const T &v) { m_hash ^= v.hash(); }
     };
@@ -129,7 +129,7 @@ struct CompositeField : CompositeFieldBase {
         return fn.m_and;
     }
 
-    hashing::hash_t hash() const {
+    hash::digest_t hash() const {
         HashFn fn;
         utils::tuple::foreach(m_refs, fn);
         return fn.m_hash;

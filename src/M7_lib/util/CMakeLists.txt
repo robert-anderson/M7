@@ -5,6 +5,8 @@ target_sources(M7_lib
         consts.h
         Convert.h
         Functor.h
+        Hashing.cpp
+        Hashing.h
         Integer.cpp
         Integer.h
         Nd.h

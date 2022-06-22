@@ -332,7 +332,7 @@ public:
     template<typename T>
     inline typename std::enable_if<std::is_same<key_field_t, field::Number<T>>::value, size_t>::type
     get_block(const T& key) {
-        return hashing::fnv_hash(key) % m_nblock;
+        return hash::fnv(key) % m_nblock;
     }
 
     /**

@@ -28,13 +28,14 @@ TEST(BufferedTable, AllGathervEmpty) {
 }
 
 TEST(BufferedTable, AllGatherv) {
+    using namespace utils;
     /*
      * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
      * gathering functionality to deal with nullptr buffer dbegins.
      */
     const size_t irank_empty = mpi::nrank()==1 ? ~0ul: 1ul;
-    auto get_nrow = [irank_empty](size_t irank){return irank==irank_empty ? 0ul : hashing::in_range(irank, 3, 10);};
-    auto get_value = [](size_t irank, size_t irow){return int(hashing::in_range(irow * (irank+1), 0, 100));};
+    auto get_nrow = [irank_empty](size_t irank){return irank==irank_empty ? 0ul : hash::in_range(irank, 3, 10);};
+    auto get_value = [](size_t irank, size_t irow){return int(hash::in_range(irow * (irank+1), 0, 100));};
     const size_t nrow_local = get_nrow(mpi::irank());
     size_t nrow_global = 0ul;
     for (size_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
@@ -62,13 +63,14 @@ TEST(BufferedTable, AllGatherv) {
 }
 
 TEST(BufferedTable, Gatherv) {
+    using namespace utils;
     /*
      * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
      * gathering functionality to deal with nullptr buffer dbegins.
      */
     const size_t irank_empty = mpi::nrank()==1 ? ~0ul: 1ul;
-    auto get_nrow = [irank_empty](size_t irank){return irank==irank_empty ? 0ul : hashing::in_range(irank, 3, 10);};
-    auto get_value = [](size_t irank, size_t irow){return int(hashing::in_range(irow * (irank+1), 0, 100));};
+    auto get_nrow = [irank_empty](size_t irank){return irank==irank_empty ? 0ul : hash::in_range(irank, 3, 10);};
+    auto get_value = [](size_t irank, size_t irow){return int(hash::in_range(irow * (irank+1), 0, 100));};
     const size_t nrow_local = get_nrow(mpi::irank());
     size_t nrow_global = 0ul;
     for (size_t irank=0ul; irank<mpi::nrank(); ++irank) nrow_global+=get_nrow(irank);
