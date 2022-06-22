@@ -35,14 +35,6 @@
 }
 #endif
 
-#define HERE() std::cout << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
-
-#ifdef NDEBUG
-#define DBVAR(v)
-#else
-#define DBVAR(v) std::cout << "variable " << #v << " = " << v << " in " << "file\""<<__FILE__<<"\", line " << __LINE__ << std::endl;
-#endif
-
 namespace defs {
 
 #ifndef NDEBUG
@@ -51,7 +43,8 @@ namespace defs {
     constexpr bool enable_debug = false;
 #endif
     const std::string assets_root = PROJECT_ROOT"/assets";
-    typedef std::vector<size_t> inds_t;
+    typedef uint64_t ind_t;
+    typedef std::vector<ind_t> inds_t;
 
     typedef int mpi_count;
     typedef std::vector<mpi_count> mpi_counts;
@@ -78,8 +71,11 @@ namespace defs {
     typedef char buf_t;
     typedef unsigned char mev_ind_t;
     typedef unsigned char bos_occ_t;
+
+
     constexpr int undefined_ms2 = std::numeric_limits<int>::max();
     constexpr size_t max_bos_occ = std::numeric_limits<bos_occ_t>::max();
+
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
     /**
