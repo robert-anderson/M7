@@ -8,7 +8,6 @@
 #include <M7_lib/observables/RefExcits.h>
 #include <M7_lib/basis/Suites.h>
 #include <M7_lib/parallel/RankAllocator.h>
-#include <M7_lib/parallel/ReductionMember.h>
 #include <M7_lib/hamiltonian/Hamiltonian.h>
 #include <M7_lib/nd/NdArray.h>
 

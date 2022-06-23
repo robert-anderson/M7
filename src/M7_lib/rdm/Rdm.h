@@ -118,7 +118,7 @@ struct RdmGroup {
 
     RdmGroup(const conf::FermionRdm &opts, size_t nsite, size_t nelec){
         for (auto rank: opts.m_ranks.get())
-            m_frm_rdms[rank] = std::unique_ptr<FermionRdm>(new FermionRdm(opts, nsite, nelec));
+            m_frm_rdms[rank] = smart_ptr::make_unique<FermionRdm>(opts, nsite, nelec);
     }
 
     /**

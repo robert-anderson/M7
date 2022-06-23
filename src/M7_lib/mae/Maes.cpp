@@ -8,9 +8,9 @@ Maes::Maes(const conf::AvEsts &opts, sys::Size extents, size_t nelec, size_t nro
         m_accum_epoch("MAE accumulation"), m_bilinears(opts, extents, nelec, m_accum_epoch),
         m_ref_excits(opts.m_ref_excits, extents, nroot), m_period(opts.m_stats_period) {
     if (*this) {
-        m_stats = std::unique_ptr<MaeStats>(new MaeStats("M7.maes.stats",
-                "FCIQMC Multidimensional Averaged Estimators",
-                {m_bilinears.m_rdms, m_bilinears.m_spec_moms}, 1));
+        m_stats = smart_ptr::make_unique<MaeStats>(
+                "M7.maes.stats", "FCIQMC Multidimensional Averaged Estimators",
+                MaeStatsRow(m_bilinears.m_rdms, m_bilinears.m_spec_moms), 1ul);
     }
 }
 

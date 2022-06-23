@@ -23,6 +23,7 @@
 #include "M7_lib/hamiltonian/frm/SpinSquareFrmHam.h"
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 #include "M7_lib/hamiltonian/frmbos/GeneralLadderHam.h"
+#include "M7_lib/util/SmartPtr.h"
 
 
 using namespace field;
@@ -64,13 +65,14 @@ struct HamiltonianTerms {
      */
     template<typename ham_t>
     static std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
+        using namespace smart_ptr;
         static_assert(std::is_base_of<FrmHam, ham_t>::value, "template arg must be derived from FrmHam");
-        return std::unique_ptr<FrmHam>(new ham_t(opts));
+        return make_poly_unique<FrmHam, ham_t>(opts);
         //auto j = opts.m_spin_penalty_j.get();
         /*
          * if the scalar of the spin square operator is zero, just return the bare hamiltonian
          */
-        //if (j==0.0) return std::unique_ptr<FrmHam>(new ham_t(opts));
+        //if (j==0.0) return make_poly_unique<FrmHam, ham_t>(opts);
         //TODO: pass basis / hilbert config section
 #if 0
         /*
@@ -82,43 +84,46 @@ struct HamiltonianTerms {
         /*
          * now the sum can be cheaply created by moving these two components
          */
-        return std::unique_ptr<FrmHam>(new SumFrmHam<ham_t, SpinSquareFrmHam>(std::move(bare_ham), std::move(spin_ham), j));
+        return make_poly_unique<FrmHam, SumFrmHam<ham_t, SpinSquareFrmHam>>(std::move(bare_ham), std::move(spin_ham), j);
 #endif
     }
 
     std::unique_ptr<FrmHam> make_frm(FrmHam::opt_pair_t opts) {
+        using namespace smart_ptr;
         if (opts.m_ham.m_hubbard.enabled())
             return make_frm<HubbardFrmHam>(opts);
         else if (opts.m_ham.m_heisenberg.enabled())
             return make_frm<HeisenbergFrmHam>(opts);
         else if (opts.m_ham.m_fcidump.enabled())
             return make_frm<GeneralFrmHam>(opts);
-        return std::unique_ptr<FrmHam>(new NullFrmHam);
+        return make_poly_unique<FrmHam, NullFrmHam>();
     }
 
     std::unique_ptr<FrmBosHam> make_frmbos(FrmBosHam::opt_pair_t opts) {
+        using namespace smart_ptr;
         if (opts.m_ham.m_holstein_coupling) {
             const auto g = opts.m_ham.m_holstein_coupling.get();
-            return std::unique_ptr<FrmBosHam>(new HolsteinLadderHam(m_frm->m_basis, g, opts.m_basis.m_bos_occ_cutoff));
+            return make_poly_unique<FrmBosHam, HolsteinLadderHam>(m_frm->m_basis, g, opts.m_basis.m_bos_occ_cutoff);
         }
         else if (opts.m_ham.m_ebdump.enabled()) {
-            return std::unique_ptr<FrmBosHam>(new GeneralLadderHam(opts));
+            return make_poly_unique<FrmBosHam, GeneralLadderHam>(opts);
         }
-        return std::unique_ptr<FrmBosHam>(new NullFrmBosHam);
+        return make_poly_unique<FrmBosHam, NullFrmBosHam>();
     }
 
     std::unique_ptr<BosHam> make_bos(BosHam::opt_pair_t opts){
+        using namespace smart_ptr;
         if (opts.m_ham.m_num_op_weight) {
             const size_t nsite = m_frm->m_basis.m_nsite;
             const sys::bos::Basis basis(nsite);
             const auto omega = opts.m_ham.m_num_op_weight.get();
-            return std::unique_ptr<BosHam>(new NumOpBosHam(basis, omega));
+            return make_poly_unique<BosHam, NumOpBosHam>(basis, omega);
         }
         else if (opts.m_ham.m_interacting_bose_gas.enabled())
-            return std::unique_ptr<BosHam>(new InteractingBoseGasBosHam(opts));
+            return make_poly_unique<BosHam, InteractingBoseGasBosHam>(opts);
         else if (opts.m_ham.m_bosdump.enabled())
-            return std::unique_ptr<BosHam>(new GeneralBosHam(opts));
-        return std::unique_ptr<BosHam>(new NullBosHam);
+            return make_poly_unique<BosHam, GeneralBosHam>(opts);
+        return make_poly_unique<BosHam, NullBosHam>();
     }
 
     HamiltonianTerms(opt_pair_t opts):

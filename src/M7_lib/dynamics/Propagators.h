@@ -9,6 +9,7 @@
 
 #include "ExactPropagator.h"
 #include "StochasticPropagator.h"
+#include "M7_lib/util/SmartPtr.h"
 
 namespace props {
 
@@ -23,9 +24,9 @@ namespace props {
          */
         bool only_nonzero_h_spawns = opts.m_av_ests.m_rdm.m_explicit_ref_conns;
         if (!opts.m_propagator.m_stochastic)
-            return std::unique_ptr<Exact>(new Exact{ham, opts, wf, only_nonzero_h_spawns});
+            return smart_ptr::make_unique<Exact>(ham, opts, wf, only_nonzero_h_spawns);
         else
-            return std::unique_ptr<Stoch>(new Stoch{ham, opts, wf});
+            return smart_ptr::make_unique<Stoch>(ham, opts, wf);
     }
 
 }

@@ -3,6 +3,5 @@ target_sources(unittest
         Gatherable.cpp
         MPIWrapper.cpp
         Reduction.cpp
-        ReductionSyndicate.cpp
         SharedArray.cpp
 )

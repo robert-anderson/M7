@@ -112,7 +112,7 @@ void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::
 }
 void TableBase::transfer_rows(const defs::inds_t &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){
     DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
-    if (!m_transfer) m_transfer = std::unique_ptr<RowTransfer>(new RowTransfer(m_bw.name()));
+    if (!m_transfer) m_transfer = smart_ptr::make_unique<RowTransfer>(m_bw.name());
     size_t nrow = 0;
     if (mpi::i_am(irank_send)){
         auto& send_bw = m_transfer->m_send_bw;

@@ -11,10 +11,6 @@ target_sources(M7_lib
         RankAllocator.cpp
         RankAllocator.h
         Reduction.h
-        ReductionMember.h
-        ReductionMemberBase.h
-        ReductionSyndicate.cpp
-        ReductionSyndicate.h
         SharedArray.h
         SharedMatrix.h
 )
