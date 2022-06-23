@@ -10,7 +10,7 @@ CsvFileReader::CsvFileReader(const std::string &fname, std::string delimiters, s
 
 bool CsvFileReader::next(std::vector<std::string> &tokens) {
     if (!FileReader::next(m_work_line)) return false;
-    utils::string::split(m_work_line, tokens, m_delimiters);
+    string::split(m_work_line, tokens, m_delimiters);
     return true;
 }
 

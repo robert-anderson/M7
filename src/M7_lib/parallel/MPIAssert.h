@@ -47,15 +47,15 @@ namespace asserts {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
                 log::error("{} {} failed", kind, op);
-                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::convert::to_string(lhs));
-                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::convert::to_string(rhs));
+                log::error("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                log::error("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
                 log::error_("{} {} failed", kind, op);
-                log::error_("{} value is: {}", lhs_sym, utils::convert::to_string(lhs));
-                log::error_("{} value is: {}", rhs_sym, utils::convert::to_string(rhs));
+                log::error_("{} value is: {}", lhs_sym, convert::to_string(lhs));
+                log::error_("{} value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }
@@ -70,15 +70,15 @@ namespace asserts {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
                 log::error("{} {} failed with rtol={}, atol={}", kind, op, rtol, atol);
-                log::error("LHS \"{}\" value is: {}", lhs_sym, utils::convert::to_string(lhs));
-                log::error("RHS \"{}\" value is: {}", rhs_sym, utils::convert::to_string(rhs));
+                log::error("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                log::error("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
                 log::error_("{} {} failed with rtol={}, atol={}", kind, op, rtol, atol);
-                log::error_("LHS \"{}\" value is: {}", lhs_sym, utils::convert::to_string(lhs));
-                log::error_("RHS \"{}\" value is: {}", rhs_sym, utils::convert::to_string(rhs));
+                log::error_("LHS \"{}\" value is: {}", lhs_sym, convert::to_string(lhs));
+                log::error_("RHS \"{}\" value is: {}", rhs_sym, convert::to_string(rhs));
                 abort(file, line, collective, reason);
             }
         }
@@ -92,13 +92,13 @@ namespace asserts {
             outcome = mpi::all_land(outcome);
             if (!outcome) {
                 log::error("{} zero failed with atol={}", kind, atol);
-                log::error("\"{}\" value is: {}", sym, utils::convert::to_string(v));
+                log::error("\"{}\" value is: {}", sym, convert::to_string(v));
                 abort(file, line, collective, reason);
             }
         } else {
             if (!outcome) {
                 log::error_("{} zero failed with atol={}", kind, atol);
-                log::error_("\"{}\" value is: {}", sym, utils::convert::to_string(v));
+                log::error_("\"{}\" value is: {}", sym, convert::to_string(v));
                 abort(file, line, collective, reason);
             }
         }

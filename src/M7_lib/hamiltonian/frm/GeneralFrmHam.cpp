@@ -18,7 +18,7 @@ void GeneralFrmHam::log_ints_sym(integrals_2e::syms::Sym sym, bool initial) {
               context_str, integrals_2e::syms::name(sym));
     const auto equivs = integrals_2e::syms::equivalences(sym);
     if (equivs.size()<2) return;
-    log::info("this storage scheme assumes that {} integrals are equivalent", utils::convert::to_string(equivs));
+    log::info("this storage scheme assumes that {} integrals are equivalent", convert::to_string(equivs));
 }
 
 GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool spin_major) {
@@ -140,7 +140,7 @@ defs::ham_t GeneralFrmHam::get_element_0000(const field::FrmOnv &onv) const {
 }
 
 defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), utils::exsig::ex_single, "expected 1100 (aka fermion single) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_single, "expected 1100 (aka fermion single) exsig");
     const auto &ann = conn.m_ann[0];
     const auto &cre = conn.m_cre[0];
 
@@ -153,14 +153,14 @@ defs::ham_t GeneralFrmHam::get_element_1100(const field::FrmOnv &onv, const conn
 }
 
 defs::ham_t GeneralFrmHam::get_element_2200(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {
-    DEBUG_ASSERT_EQ(conn.exsig(), utils::exsig::ex_double, "expected 2200 (aka fermion double) exsig");
+    DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "expected 2200 (aka fermion double) exsig");
     const auto element = GeneralFrmHam::get_coeff_2200(conn.m_cre[0], conn.m_cre[1], conn.m_ann[0], conn.m_ann[1]);
     return conn.phase(onv) ? -element : element;
 }
 
 HamOpTerm::excit_gen_list_t GeneralFrmHam::make_excit_gens(
         PRNG &prng, const conf::Propagator &opts, const FrmHam &h) {
-    using namespace utils::exsig;
+    using namespace exsig;
     excit_gen_list_t list;
     bool any_singles = h.m_contribs_1100.is_nonzero(ex_single) || h.m_contribs_2200.is_nonzero(ex_single);
     if (any_singles) list.emplace_front(new UniformSingles(h, prng));

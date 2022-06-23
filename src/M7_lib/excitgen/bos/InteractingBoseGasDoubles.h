@@ -16,7 +16,7 @@ class InteractingBoseGasDoubles : BosExcitGen {
      */
     mutable std::vector<int> m_ikpoints_i_work, m_ikpoints_j_work;//, m_ikpoints_k_work, m_ikpoints_l_work;
     InteractingBoseGasDoubles(const Hamiltonian& h, PRNG& prng) :
-        BosExcitGen(h, prng, utils::exsig::ex_0022),
+        BosExcitGen(h, prng, exsig::ex_0022),
         m_nbos_pair(utils::integer::combinatorial(h.nboson(), 2)){}
 
     const InteractingBoseGasBosHam* h_cast() const {

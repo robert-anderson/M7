@@ -5,7 +5,6 @@
 #ifndef M7_ARRAY_H
 #define M7_ARRAY_H
 
-#include "utils.h"
 #include "Convert.h"
 
 namespace array {
@@ -26,7 +25,7 @@ namespace array {
 
 template<typename T, size_t nind>
 static std::ostream &operator<<(std::ostream &os, const std::array<T, nind> &a) {
-    os << utils::convert::to_string(array::to_vector(a));
+    os << convert::to_string(array::to_vector(a));
     return os;
 }
 

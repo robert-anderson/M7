@@ -27,7 +27,7 @@
  * words (over 17GB worth of doubles). M7 uses unsigned longs (size_t) throughout for
  * integer offsets, indices, and sizes - a mismatch this wrapper must gracefully resolve.
  *
- * The utils::convert::safe_narrow methods will raise a runtime exception if a narrowing conversion
+ * The convert::safe_narrow methods will raise a runtime exception if a narrowing conversion
  * would result in a loss of information if the SAFE_NARROWING macro is defined. In normal
  * usage, such an overflow is fairly unlikely. But we do not leave it to chance that such a
  * large number of words will never be communicated in practice.
@@ -201,11 +201,11 @@ namespace mpi {
     void barrier_on_node();
 
     static count_t snrw(const size_t &i) {
-        return utils::convert::safe_narrow<count_t>(i);
+        return convert::safe_narrow<count_t>(i);
     }
 
     static counts_t snrw(const std::vector<size_t> &v) {
-        return utils::convert::safe_narrow<count_t>(v);
+        return convert::safe_narrow<count_t>(v);
     }
 
     /**

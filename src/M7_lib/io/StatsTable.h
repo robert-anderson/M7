@@ -26,12 +26,12 @@ namespace statistic {
 
         template<typename T>
         static std::string stats_string_element(const T &v, size_t denom) {
-            return utils::convert::to_string(v / denom);
+            return convert::to_string(v / denom);
         }
 
         template<typename T>
         static std::string stats_string_element(const std::complex<T> &v, size_t denom) {
-            return utils::convert::to_string(v.real() / denom) + " " + utils::convert::to_string(v.imag() / denom);
+            return convert::to_string(v.real() / denom) + " " + convert::to_string(v.imag() / denom);
         }
     };
 
@@ -113,7 +113,7 @@ struct StatsTable : BufferedTable<row_t> {
             auto it = m_format_strings.find(format_string);
             if (it == m_format_strings.end()) m_format_strings[format_string] = nformat++;
         }
-        *m_file << utils::string::boxed(m_description + " Stats File") <<
+        *m_file << string::boxed(m_description + " Stats File") <<
                 "# Number of statistics output: " << row.m_fields.size() <<
                 "\n# Number of columns: " << ncolumn <<
                 "\n# Distinct multidimensional formats: " << m_format_strings.size() << "\n#" <<

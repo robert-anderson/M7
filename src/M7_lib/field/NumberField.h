@@ -270,7 +270,7 @@ public:
         std::string tmp;
         if (nind > 0) tmp += "[";
         for (size_t ielement = 0ul; ielement < nelement(); ++ielement)
-            tmp += utils::convert::to_string((*this)[ielement]) + " ";
+            tmp += convert::to_string((*this)[ielement]) + " ";
         if (nind > 0) tmp += "]";
         return tmp;
     }

@@ -16,9 +16,9 @@ size_t EbdumpFileReader::ranksig(const defs::inds_t &inds) const {
     switch (nset_ind(inds)) {
         case 1ul:
             DEBUG_ASSERT_NE(inds[0], ~0ul, "set index should be the first one: the boson mode index");
-            return utils::exsig::ex_0010;
+            return exsig::ex_0010;
         case 3ul:
-            return utils::exsig::ex_1110;
+            return exsig::ex_1110;
         default:
             return ~0ul;
     }
@@ -26,8 +26,8 @@ size_t EbdumpFileReader::ranksig(const defs::inds_t &inds) const {
 
 size_t EbdumpFileReader::exsig(const defs::inds_t &inds, const size_t &ranksig) const {
     DEBUG_ASSERT_EQ(inds.size(), 3ul, "incorrect maximum number of SQ operator indices");
-    if (inds[1] == inds[2]) return utils::exsig::ex_0010;
-    else return utils::exsig::ex_1110;
+    if (inds[1] == inds[2]) return exsig::ex_0010;
+    else return exsig::ex_1110;
 }
 
 bool EbdumpFileReader::inds_in_range(const defs::inds_t &inds) const {

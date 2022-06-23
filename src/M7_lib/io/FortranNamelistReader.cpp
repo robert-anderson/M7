@@ -42,7 +42,7 @@ bool FortranNamelistReader::contains_terminator(const std::string &line) {
 std::vector<std::string> FortranNamelistReader::read(const std::string &line, const std::string &label) {
     std::vector<std::string> tokens;
     auto value = isolate_value(line, label);
-    utils::string::split(value, tokens, ", ");
+    string::split(value, tokens, ", ");
     return tokens;
 }
 

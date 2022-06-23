@@ -243,7 +243,7 @@ namespace dense {
             std::string out;
             for (size_t irow = 0ul; irow < m_nrow; ++irow) {
                 for (size_t icol = 0ul; icol < m_ncol; ++icol) {
-                    out+=utils::convert::to_string((*this)(irow, icol))+"  ";
+                    out+=convert::to_string((*this)(irow, icol))+"  ";
                 }
                 out+="\n";
             }

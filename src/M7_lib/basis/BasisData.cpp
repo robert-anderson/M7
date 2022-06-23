@@ -173,15 +173,15 @@ size_t sys::frm::Basis::ncoeff_ind() const {
 
 defs::info_map_t sys::frm::Basis::info() const {
     defs::info_map_t map;
-    map.insert({"nsite", utils::convert::to_string(m_nsite)});
-    map.insert({"point group irreps", utils::convert::to_string(m_abgrp_map.m_site_irreps)});
-    map.insert({"spin resolved", utils::convert::to_string(m_spin_resolved)});
-    map.insert({"lattice", utils::convert::to_string(m_lattice->info())});
+    map.insert({"nsite", convert::to_string(m_nsite)});
+    map.insert({"point group irreps", convert::to_string(m_abgrp_map.m_site_irreps)});
+    map.insert({"spin resolved", convert::to_string(m_spin_resolved)});
+    map.insert({"lattice", convert::to_string(m_lattice->info())});
     return map;
 }
 
 std::string sys::frm::Basis::to_string() const {
-    return utils::convert::to_string(info());
+    return convert::to_string(info());
 }
 
 int sys::frm::Ms2::lowest_value(size_t nelec) {
@@ -211,13 +211,13 @@ bool sys::frm::Electrons::operator==(const sys::frm::Electrons &other) const {
 
 std::map<std::string, std::string> sys::frm::Electrons::info() const {
     std::map<std::string, std::string> map;
-    map.insert({"number", utils::convert::to_string(m_n)});
-    map.insert({"ms2", utils::convert::to_string(m_ms2)});
+    map.insert({"number", convert::to_string(m_n)});
+    map.insert({"ms2", convert::to_string(m_ms2)});
     return map;
 }
 
 std::string sys::frm::Electrons::to_string() const {
-    return utils::convert::to_string(info());
+    return convert::to_string(info());
 }
 
 sys::frm::Sector::Sector(sys::frm::Basis basis, sys::frm::Electrons elecs) :
@@ -251,13 +251,13 @@ bool sys::bos::Basis::operator==(const sys::bos::Basis &other) const {
 
 defs::info_map_t sys::bos::Basis::info() const {
     return {
-            {"nmode",      utils::convert::to_string(m_nmode)},
-            {"occ_cutoff", utils::convert::to_string(m_occ_cutoff)}
+            {"nmode",      convert::to_string(m_nmode)},
+            {"occ_cutoff", convert::to_string(m_occ_cutoff)}
     };
 }
 
 std::string sys::bos::Basis::to_string() const {
-    return utils::convert::to_string(info());
+    return convert::to_string(info());
 }
 
 sys::bos::Bosons::Bosons(size_t v, bool conserve) : conservation::Optional<size_t>(v, conserve, "nboson"){}

@@ -6,7 +6,7 @@
 #include "M7_lib/util/Exsig.h"
 
 TEST(UtilExsig, EncodeDecode) {
-    using namespace utils::exsig;
+    using namespace exsig;
     /*
      * assert that all excitation signatures are encoded and decoded correctly
      */
@@ -35,7 +35,7 @@ TEST(UtilExsig, EncodeDecode) {
 }
 
 TEST(UtilExsig, RanksigContribs) {
-    using namespace utils::exsig;
+    using namespace exsig;
     auto ranksig = encode(4, 7, 3, 2);
     ASSERT_NE(ranksig, ~0ul);
     ASSERT_EQ(ncontrib_frm(ranksig), 5); // 4732, 3632, 2532, 1432, 0332

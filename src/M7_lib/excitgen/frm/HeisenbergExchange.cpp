@@ -5,13 +5,13 @@
 #include "HeisenbergExchange.h"
 
 HeisenbergExchange::HeisenbergExchange(const FrmHam &h, PRNG &prng) :
-        FrmLatticeExcitGen(h, prng, {utils::exsig::ex_double}, "lattice local exchange"){
+        FrmLatticeExcitGen(h, prng, {exsig::ex_double}, "lattice local exchange"){
     REQUIRE_TRUE(h.is<HeisenbergFrmHam>(), "given hamiltonian is not of HeisenbergFrmHam type");
 }
 
 bool HeisenbergExchange::draw_frm(const size_t &exsig, const field::FrmOnv &src,
                                   defs::prob_t &prob, conn::FrmOnv &conn) {
-    DEBUG_ASSERT_EQ(exsig, utils::exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
+    DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     const auto& lattice = m_h.m_basis.m_lattice;
     /*
      * the number of neighboring sites accessible is not decided till the occupied index has been chosen. If the integer

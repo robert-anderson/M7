@@ -125,9 +125,9 @@ void Buffer::resize(size_t size, double factor) {
 std::string Buffer::capacity_string(size_t size) const {
     const auto ntable = " x " + std::to_string(m_windows.size()) + " tables";
     if (m_windows.size() == 1)
-        return utils::string::memsize(size);
+        return string::memsize(size);
     else
-        return utils::string::memsize(size / m_nwindow_max) + ntable + " = " + utils::string::memsize(size);
+        return string::memsize(size / m_nwindow_max) + ntable + " = " + string::memsize(size);
 }
 
 std::string Buffer::capacity_string() const {

@@ -16,7 +16,7 @@ struct RowTransfer {
     Buffer m_send_buffer, m_recv_buffer;
     Buffer::Window m_send_bw, m_recv_bw;
     /**
-     * need to get a unique pair of P2P utils::tag from global variables
+     * need to get a unique pair of P2P tag from global variables
      */
     const int m_nrow_p2p_tag = mpi::new_p2p_tag();
     const int m_irows_p2p_tag = mpi::new_p2p_tag();

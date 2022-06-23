@@ -5,10 +5,13 @@
 #ifndef M7_UTIL_BIT_H
 #define M7_UTIL_BIT_H
 
-#include "utils.h"
+#include <x86intrin.h>
+#include "M7_lib/defs.h"
 
+/**
+ * utilities relating to the manipulation of integral types as bitsets
+ */
 namespace bit {
-
     /**
      * masks whose ith elements retain i bits when bitwise and-ed with another value of the same size (4 or 8 bytes)
      */
@@ -40,21 +43,32 @@ namespace bit {
              0x1fffffffffffffff, 0x3fffffffffffffff, 0x7fffffffffffffff,
              0xffffffffffffffff};
 
+    /**
+     * clear the bit in x at position i
+     */
     template<typename T>
     static inline void clr(T &x, const size_t &i) {
         x &= ~(T(1) << T(i));
     }
-
+    /**
+     * set the bit in x at position i
+     */
     template<typename T>
     static inline void set(T &x, const size_t &i) {
         x |= (T(1) << T(i));
     }
-
+    /**
+     * return true if the bit in x at position i is set, else false
+     */
     template<typename T>
     static inline bool get(const T &x, const size_t &i) {
         return x & (T(1) << T(i));
     }
-
+    /**
+     * use architecture dependent intrinsic to go to the next set bit position without looping
+     * TODO: generalize for the absence of x86 instruction set with the BMI, SSE4.2, ABM etc (the exact set to which
+     *  these instructions are taken to belong is vendor specific) extension e.g. ARM
+     */
     inline size_t next_setbit(unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         size_t result = __tzcnt_u64(work);
@@ -75,7 +89,10 @@ namespace bit {
         bit::clr(work, result);
         return result;
     }
-
+    /**
+     * use architecture dependent intrinsic to count the number of set bits in the word
+     * TODO: see next_setbit
+     */
     inline size_t nsetbit(const unsigned long long &work) {
         static_assert(sizeof(work) == 8, "Data length not supported");
         return _popcnt64(work);
@@ -91,6 +108,9 @@ namespace bit {
         return _popcnt32(work);
     }
 
+    /**
+     * return v with the first n bits cleared
+     */
     static uint8_t truncate(const uint8_t &v, const size_t &n) {
         return v & c_trunc_mask_8[n];
     }
@@ -123,6 +143,9 @@ namespace bit {
         return truncate(uint64_t(v), n);
     }
 
+    /**
+     * make a mask which is set (1) in the range [ibegin, iend), and clear (0) elsewhere
+     */
     static void make_range_mask(uint8_t &v, const size_t &ibegin, const size_t &iend) {
         v = c_trunc_mask_8[iend] & ~c_trunc_mask_8[ibegin];
     }

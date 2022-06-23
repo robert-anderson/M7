@@ -27,13 +27,13 @@ struct NdReduction : ReductionBase<T> {
     using ReductionBase<T>::m_nelement;
 
 private:
-    NdReduction(const NdFormat<nind> &format, utils::tag::Int<1>) :
+    NdReduction(const NdFormat<nind> &format, tag::Int<1>) :
             ReductionBase<T>(1) {
         m_local_ptr = &m_local;
         m_reduced_ptr = &m_reduced;
     }
 
-    NdReduction(const NdFormat<nind> &format, utils::tag::Int<0>) :
+    NdReduction(const NdFormat<nind> &format, tag::Int<0>) :
             ReductionBase<T>(format.m_nelement), m_local(format.m_shape), m_reduced(format.m_shape) {
         m_local_ptr = reinterpret_cast<T *>(m_local.begin());
         m_reduced_ptr = reinterpret_cast<T *>(m_reduced.begin());
@@ -41,9 +41,9 @@ private:
 
 public:
     NdReduction(const std::array<size_t, nind> &shape) :
-            NdReduction({shape}, utils::tag::Int<nind == 0>()){}
+            NdReduction({shape}, tag::Int<nind == 0>()){}
 
-    NdReduction() : NdReduction({}, utils::tag::Int<nind == 0>()){
+    NdReduction() : NdReduction({}, tag::Int<nind == 0>()){
         static_assert(!nind, "This ctor is only valid in the scalar case");
     }
 

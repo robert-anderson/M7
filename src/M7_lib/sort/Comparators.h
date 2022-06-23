@@ -6,7 +6,6 @@
 #define M7_COMPARATORS_H
 
 
-#include <M7_lib/util/utils.h>
 #include <M7_lib/field/Row.h>
 #include <M7_lib/field/Fields.h>
 
@@ -15,7 +14,7 @@
  * algorithms.
  */
 namespace comparators {
-    using namespace utils::tag;
+    using namespace tag;
     /**
      * the optionality of ordering based on absolute values if not universal,
      * for some types we have the option,

@@ -6,8 +6,6 @@
 #include "M7_lib/util/Hash.h"
 #include "M7_lib/parallel/MPIAssert.h"
 
-using namespace utils;
-
 sparse::Matrix<double>
 sparse_matrix_examples::rect_double(const size_t &nrow, const size_t &ncol, const size_t &nnonzero_per_row) {
     REQUIRE_LE(nnonzero_per_row, ncol,
@@ -20,8 +18,8 @@ sparse_matrix_examples::rect_double(const size_t &nrow, const size_t &ncol, cons
     std::vector<double> values;
 
     for (size_t irow = 0ul; irow < nrow; ++irow) {
-        utils::convert::vector(hash::unique_in_range(irow, nnonzero_per_row, 0, ncol, true), icols);
-        utils::convert::vector(hash::in_range(irow, nnonzero_per_row, 1, v_hi, true), values);
+        convert::vector(hash::unique_in_range(irow, nnonzero_per_row, 0, ncol, true), icols);
+        convert::vector(hash::in_range(irow, nnonzero_per_row, 1, v_hi, true), values);
         out.insert(irow, icols, values);
     }
 

@@ -25,6 +25,4 @@ target_sources(M7_lib
         Ternary.h
         Timer.cpp
         Timer.h
-        utils.cpp
-        utils.h
 )

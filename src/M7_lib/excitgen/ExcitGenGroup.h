@@ -7,7 +7,7 @@
 
 #include "M7_lib/hamiltonian/Hamiltonian.h"
 
-using namespace utils::exsig;
+using namespace exsig;
 
 /**
  * excitation generator objects can (if uncommonly) be used to generate excitations of many different signatures. e.g.

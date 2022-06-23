@@ -8,7 +8,7 @@
 
 HubbardFrmHam::HubbardFrmHam(defs::ham_t u, const std::shared_ptr<lattice::Base>& lattice) :
         FrmHam(lattice), m_u(u){
-    m_contribs_1100.set_nonzero(utils::exsig::ex_single);
+    m_contribs_1100.set_nonzero(exsig::ex_single);
     m_contribs_2200.set_nonzero(0);
     log::info("Hubbard Hamiltonian initialized with U={}; {}", m_u, m_basis.m_lattice->info());
 }

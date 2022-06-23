@@ -7,7 +7,6 @@
 
 #include <algorithm>
 
-#include <M7_lib/util/utils.h>
 #include <M7_lib/parallel/MPIAssert.h>
 
 #include "FileReader.h"

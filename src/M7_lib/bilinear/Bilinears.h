@@ -54,19 +54,19 @@ private:
     static size_t parse_exsig(const std::string &string) {
         REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
         if (string.size() == 1) {
-            size_t rank = utils::string::parse_decimal_digit(string.c_str());
+            size_t rank = string::parse_decimal_digit(string.c_str());
             REQUIRE_LE_ALL(rank, defs::exsig_nop_mask_frm, "number of fermion operators exceeds limit");
-            return utils::exsig::encode(rank, rank, 0, 0);
+            return exsig::encode(rank, rank, 0, 0);
         }
-        size_t nfrm_cre = utils::string::parse_decimal_digit(string.c_str());
+        size_t nfrm_cre = string::parse_decimal_digit(string.c_str());
         REQUIRE_LE_ALL(nfrm_cre, defs::exsig_nop_mask_frm, "number of fermion creation operators exceeds limit");
-        size_t nfrm_ann = utils::string::parse_decimal_digit(string.c_str()+1);
+        size_t nfrm_ann = string::parse_decimal_digit(string.c_str()+1);
         REQUIRE_LE_ALL(nfrm_ann, defs::exsig_nop_mask_frm, "number of fermion annihilation operators exceeds limit");
-        size_t nbos_cre = utils::string::parse_decimal_digit(string.c_str()+2);
+        size_t nbos_cre = string::parse_decimal_digit(string.c_str()+2);
         REQUIRE_LE_ALL(nbos_cre, defs::exsig_nop_mask_bos, "number of boson creation operators exceeds limit");
-        size_t nbos_ann = utils::string::parse_decimal_digit(string.c_str()+3);
+        size_t nbos_ann = string::parse_decimal_digit(string.c_str()+3);
         REQUIRE_LE_ALL(nbos_ann, defs::exsig_nop_mask_bos, "number of boson annihilation operators exceeds limit");
-        return utils::exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
+        return exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
     }
     /**
      * @param strings

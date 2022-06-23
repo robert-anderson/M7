@@ -2,6 +2,7 @@
 // Created by Robert J. Anderson on 08/05/2021.
 //
 
+#include <numeric>
 #include <M7_lib/io/Logging.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/sort/ExtremalIndices.h>

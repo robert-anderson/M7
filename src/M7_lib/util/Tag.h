@@ -5,19 +5,15 @@
 #ifndef M7_TAG_H
 #define M7_TAG_H
 
-#include "utils.h"
+namespace tag {
+    template<typename T>
+    struct Type {
+    };
 
-namespace utils {
-    namespace tag {
-        template<typename T>
-        struct Type {
-        };
-
-        template<size_t n>
-        struct Int {
-            static constexpr size_t value() { return n; }
-        };
-    }
+    template<size_t n>
+    struct Int {
+        static constexpr size_t value() { return n; }
+    };
 }
 
 

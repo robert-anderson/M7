@@ -5,7 +5,7 @@
 #include "Pchb2200.h"
 
 Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng):
-        FrmExcitGen(h, prng, {utils::exsig::ex_double}, "precomputed heat-bath fermion doubles"),
+        FrmExcitGen(h, prng, {exsig::ex_double}, "precomputed heat-bath fermion doubles"),
         m_nspinorb_pair(m_h.m_basis.m_nspinorb_pair),
         m_pick_ab_given_ij(m_nspinorb_pair, m_nspinorb_pair) {
     std::vector<defs::prob_t> weights(m_nspinorb_pair, 0.0);
@@ -38,7 +38,7 @@ Pchb2200::Pchb2200(const FrmHam &h, PRNG &prng):
 
 bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob,
                           defs::ham_t &helem, conn::FrmOnv &conn) {
-    DEBUG_ASSERT_EQ(exsig, utils::exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
+    DEBUG_ASSERT_EQ(exsig, exsig::ex_double, "this excitation generator is only suitable for exsig 2200");
     size_t i, j, a, b;
     const auto &occs = src.m_decoded.m_simple_occs.get();
     const auto npair_elec = integer::nspair(occs.size());

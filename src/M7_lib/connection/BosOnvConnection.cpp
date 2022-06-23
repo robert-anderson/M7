@@ -129,7 +129,7 @@ std::string BosOps::to_string() const {
         }
         else out.push_back(std::to_string(pair.m_imode));
     }
-    return utils::convert::to_string(out);
+    return convert::to_string(out);
 }
 
 BosOnvConnection::BosOnvConnection(size_t nmode) : m_ann(nmode), m_cre(nmode){}
@@ -195,7 +195,7 @@ void BosOnvConnection::apply(const BosOnvField &src, BosOnvField &dst, BosOps &c
 }
 
 size_t BosOnvConnection::exsig() const {
-    return utils::exsig::encode(0, 0, m_cre.size(), m_ann.size());
+    return exsig::encode(0, 0, m_cre.size(), m_ann.size());
 }
 
 bool BosOnvConnection::respects_occ_range(const BosOnvField &src, size_t nboson_max) const {

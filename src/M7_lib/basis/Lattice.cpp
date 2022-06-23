@@ -31,7 +31,7 @@ size_t lattice::Base::make_nadj_max() {
 lattice::OrthoTopology::OrthoTopology(const defs::inds_t &shape, const std::vector<int> &bcs) :
     m_inds(shape), m_bcs(bcs),
     m_info_string(log::format("orthogonal lattice with shape {} and boundary conds {}",
-                              utils::convert::to_string(m_inds.m_shape), utils::convert::to_string(m_bcs))) {}
+                              convert::to_string(m_inds.m_shape), convert::to_string(m_bcs))) {}
 
 int lattice::OrthoTopology::one_dim_phase(size_t iind, size_t jind, size_t idim) const {
     if ((iind + 1 == jind) || (iind - 1 == jind)) return 1;

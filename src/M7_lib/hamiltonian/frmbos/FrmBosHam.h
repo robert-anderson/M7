@@ -55,10 +55,10 @@ struct FrmBosHam : HamOpTerm {
 
     defs::ham_t get_element(const field::FrmBosOnv &onv, const conn::FrmBosOnv &conn) const {
         switch (conn.exsig()) {
-            case utils::exsig::ex_0001: return get_element_0001(onv, conn);
-            case utils::exsig::ex_0010: return get_element_0010(onv, conn);
-            case utils::exsig::ex_1101: return get_element_1101(onv, conn);
-            case utils::exsig::ex_1110: return get_element_1110(onv, conn);
+            case exsig::ex_0001: return get_element_0001(onv, conn);
+            case exsig::ex_0010: return get_element_0010(onv, conn);
+            case exsig::ex_1101: return get_element_1101(onv, conn);
+            case exsig::ex_1110: return get_element_1110(onv, conn);
         }
         return 0.0;
     }

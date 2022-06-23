@@ -8,12 +8,12 @@
 dense::GemmWrapper::GemmWrapper(size_t nrowp, size_t ncolp, size_t nrowq, size_t ncolq,
                                 char transp, char transq, size_t nrowr, size_t ncolr) :
         m_transa(valid_trans(transq)), m_transb(valid_trans(transp)),
-        m_m(utils::convert::safe_narrow<int>((m_transa=='N') ? ncolq : nrowq)),
-        m_n(utils::convert::safe_narrow<int>((m_transb=='N') ? nrowp : ncolp)),
-        m_k(utils::convert::safe_narrow<int>((m_transa=='N') ? nrowq : ncolq)),
-        m_nrow_opb(utils::convert::safe_narrow<int>((m_transb=='N') ? ncolp : nrowp)),
-        m_lda(utils::convert::safe_narrow<int>(ncolq)), m_ldb(utils::convert::safe_narrow<int>(ncolp)),
-        m_ldc(utils::convert::safe_narrow<int>(ncolr)){
+        m_m(convert::safe_narrow<int>((m_transa=='N') ? ncolq : nrowq)),
+        m_n(convert::safe_narrow<int>((m_transb=='N') ? nrowp : ncolp)),
+        m_k(convert::safe_narrow<int>((m_transa=='N') ? nrowq : ncolq)),
+        m_nrow_opb(convert::safe_narrow<int>((m_transb=='N') ? ncolp : nrowp)),
+        m_lda(convert::safe_narrow<int>(ncolq)), m_ldb(convert::safe_narrow<int>(ncolp)),
+        m_ldc(convert::safe_narrow<int>(ncolr)){
             REQUIRE_EQ(m_k, m_nrow_opb, "mismatch of contracted dimensions");
             REQUIRE_EQ(nrowr, (m_transb=='N') ? nrowp: ncolp, "incompatible result dimension");
             REQUIRE_EQ(ncolr, (m_transa=='N') ? ncolq: nrowq, "incompatible result dimension");

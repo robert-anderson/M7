@@ -136,9 +136,9 @@ namespace sparse {
             for (size_t ientry = 0ul; ientry < m_rows_icols[irow].size(); ++ientry) {
                 size_t icol = m_rows_icols[irow][ientry];
                 auto v = m_rows_values[irow][ientry];
-                out.push_back("(" + utils::convert::to_string(icol) + " -> " + utils::convert::to_string(v) + ")");
+                out.push_back("(" + convert::to_string(icol) + " -> " + convert::to_string(v) + ")");
             }
-            return utils::convert::to_string(out);
+            return convert::to_string(out);
         }
 
         Matrix<T> get_symmetrized(bool conj) const {

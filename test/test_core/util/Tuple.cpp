@@ -29,7 +29,7 @@ TEST(Tuple, ForeachSingle) {
     std::tuple<std::string, int, float> tup = {"example", 4, -1.5};
     std::tuple<std::string, int, float> tup_chk = {"examplf", 5, -0.5};
     tuple_test::PlusOneFn fn;
-    utils::tuple::foreach(tup, fn);
+    tuple::foreach(tup, fn);
     ASSERT_EQ(tup, tup_chk);
 }
 
@@ -37,5 +37,5 @@ TEST(Tuple, ForeachPair) {
     std::tuple<std::string, int, float> tup = {"example", 4, -1.5};
     std::tuple<std::string, int, float> tup_chk = {"examplf", 5, -0.5};
     tuple_test::PlusOneChkFn fn;
-    utils::tuple::foreach(tup, tup_chk, fn);
+    tuple::foreach(tup, tup_chk, fn);
 }

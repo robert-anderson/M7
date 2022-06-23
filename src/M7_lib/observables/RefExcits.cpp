@@ -8,7 +8,7 @@
 
 RefExcitsOneExsig::RefExcitsOneExsig(size_t exsig, size_t nroot, size_t nbucket) :
         BufferedTable<MaeRow, true>(
-                log::format("average {} reference excitation coefficients", utils::exsig::to_string(exsig)),
+                log::format("average {} reference excitation coefficients", exsig::to_string(exsig)),
                 {{exsig, nroot}, nbucket}),
         m_working_inds(exsig) {}
 
@@ -27,7 +27,7 @@ std::vector<std::string> RefExcitsOneExsig::h5_field_names() const {
 }
 
 void RefExcitsOneExsig::save(hdf5::GroupWriter &gw) const {
-    Table<MaeRow>::save(gw, utils::exsig::to_string(m_working_inds.m_exsig), h5_field_names());
+    Table<MaeRow>::save(gw, exsig::to_string(m_working_inds.m_exsig), h5_field_names());
 }
 
 void RefExcitsOneExsig::make_contribs(const conn::FrmOnv &conn, const defs::wf_t &contrib, const size_t &iroot) {
@@ -43,7 +43,7 @@ RefExcits::RefExcits(const conf::RefExcits &opts, sys::Size extents, size_t nroo
         m_opts(opts), m_av_ref({nroot}), m_conn(extents) {
     REQUIRE_EQ_ALL(nroot, 1ul, "reference excitation averaging currently only implemented for a single root");
     for (size_t iexlvl=1ul; iexlvl<=opts.m_max_exlvl; ++iexlvl){
-        auto exsig = utils::exsig::encode(iexlvl, iexlvl, 0, 0);
+        auto exsig = exsig::encode(iexlvl, iexlvl, 0, 0);
         m_active_exsigs.push_back(exsig);
         m_ref_excits[exsig] = smart_ptr::make_unique<RefExcitsOneExsig>(exsig, nroot);
     }

@@ -15,7 +15,7 @@
 
 #include "FermionPromoter.h"
 
-using namespace utils::exsig;
+using namespace exsig;
 
 class Rdm : public Communicator<MaeRow, MaeRow, true> {
     const size_t m_ranksig;
@@ -147,7 +147,7 @@ public:
     defs::ham_comp_t get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const;
 
     defs::ham_comp_t get_energy(const FrmBosHam &ham, size_t nelec) const {
-        return get_energy(ham, nelec, utils::exsig::ex_1101) + get_energy(ham, nelec, utils::exsig::ex_1110);
+        return get_energy(ham, nelec, exsig::ex_1101) + get_energy(ham, nelec, exsig::ex_1110);
     }
 
     /**

@@ -13,5 +13,4 @@ target_sources(unittest
         Sort.cpp
         String.cpp
         Tuple.cpp
-        utils.cpp
 )

@@ -6,7 +6,6 @@
 #define M7_NDFORMAT_H
 
 #include <M7_lib/defs.h>
-#include <M7_lib/util/utils.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include <M7_lib/foreach/BasicForeach.h>
 #include "array"

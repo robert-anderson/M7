@@ -6,6 +6,7 @@
 #define M7_COMMUNICATOR_H
 
 #include <set>
+#include <numeric>
 
 #include <M7_lib/parallel/MPIWrapper.h>
 #include <M7_lib/io/Logging.h>
@@ -62,7 +63,7 @@ public:
             m_send(name + " send", mpi::nrank(), send),
             m_recv(name + " recv", recv_table_t(send.m_row)) {
         log::info("Initially allocating {} per rank for each communicating buffer of \"{}\" (send and recv)",
-                  utils::string::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
+                  string::memsize(mpi::nrank() * comm_nrow_est*m_recv.row_size()), name);
         m_send.resize(comm_nrow_est, 0.0);
         m_recv.resize(mpi::nrank() * comm_nrow_est, 0.0);
         m_send.set_expansion_factor(exp_fac);
@@ -325,7 +326,7 @@ struct Communicator {
                             nrow_transfer, m_name, irank_recv, irank_send);
                 m_idrows.resize(nrow_transfer, ~0ul);
                 mpi::recv(m_idrows.data(), nrow_transfer, irank_send, m_itrows_to_track_p2p_tag);
-                log::debug_("idrows: {}", utils::convert::to_string(m_idrows));
+                log::debug_("idrows: {}", convert::to_string(m_idrows));
             }
         }
 
@@ -545,7 +546,7 @@ struct Communicator {
             m_ra(name, m_store, nblock_ra, period_ra, acceptable_imbalance, nnull_updates_deactivate),
             m_name(name) {
         log::info("Initially allocating {} per rank for store buffer of \"{}\" ",
-                  utils::string::memsize(store_nrow_est*m_store.row_size()), name);
+                  string::memsize(store_nrow_est*m_store.row_size()), name);
         m_store.resize(store_nrow_est, 0.0);
         m_store.set_expansion_factor(store_exp_fac);
     }

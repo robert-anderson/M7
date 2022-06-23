@@ -35,7 +35,7 @@ void FrmBosOnvConnection::apply(const FrmBosOnvField &src, FrmBosOnvField &dst) 
 }
 
 size_t FrmBosOnvConnection::exsig() const {
-    return utils::exsig::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
+    return exsig::encode(m_frm.m_cre.size(), m_frm.m_ann.size(), m_bos.m_cre.size(), m_bos.m_ann.size());
 }
 
 bool FrmBosOnvConnection::respects_occ_range(const FrmBosOnvField &src, size_t nboson_max) const {

@@ -84,7 +84,7 @@ struct CompositeField : CompositeFieldBase {
 
     bool operator==(const CompositeField &other) const {
         EqFn fn;
-        utils::tuple::foreach(m_refs, other.m_refs, fn);
+        tuple::foreach(m_refs, other.m_refs, fn);
         return fn.m_and;
     }
 
@@ -94,13 +94,13 @@ struct CompositeField : CompositeFieldBase {
 
     bool operator<(const CompositeField &other) const{
         IneqFn fn;
-        utils::tuple::foreach(m_refs, other.m_refs, fn);
+        tuple::foreach(m_refs, other.m_refs, fn);
         return fn.m_lt_found_first;
     }
 
     bool operator<=(const CompositeField &other) const {
         IneqFn fn;
-        utils::tuple::foreach(m_refs, other.m_refs, fn);
+        tuple::foreach(m_refs, other.m_refs, fn);
         return fn.m_lt_found_first || (!fn.m_lt_found_first && !fn.m_gt_found_first);
     }
 
@@ -114,24 +114,24 @@ struct CompositeField : CompositeFieldBase {
 
     std::string to_string() const {
         ToStringFn fn;
-        utils::tuple::foreach(m_refs, fn);
+        tuple::foreach(m_refs, fn);
         return fn.m_str;
     }
 
     void zero() {
         ZeroFn fn;
-        utils::tuple::foreach(m_refs, fn);
+        tuple::foreach(m_refs, fn);
     }
 
     bool is_zero() const {
         IsZeroFn fn;
-        utils::tuple::foreach(m_refs, fn);
+        tuple::foreach(m_refs, fn);
         return fn.m_and;
     }
 
     hash::digest_t hash() const {
         HashFn fn;
-        utils::tuple::foreach(m_refs, fn);
+        tuple::foreach(m_refs, fn);
         return fn.m_hash;
     }
 

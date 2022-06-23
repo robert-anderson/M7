@@ -12,7 +12,7 @@ TEST(BosonSumConservingDoubles, LandauLevels) {
     BosHam
     Hamiltonian ham(opts.m_hamiltonian);
     BosonSumConservingDoubles excit_gen(ham, prng);
-    excititers::Bos excit_iter(ham, utils::exsig::ex_0022);
+    excititers::Bos excit_iter(ham, exsig::ex_0022);
     excit_gen_tester::ExcitGenTester tester(excit_gen, excit_iter);
     buffered::BosOnv src_mbf(ham.m_bd);
     src_mbf = {2, 0, 1, 2, 0, 0, 1, 0};

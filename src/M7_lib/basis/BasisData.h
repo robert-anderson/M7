@@ -72,7 +72,7 @@ namespace conservation {
         }
 
         std::string to_string() const {
-            return utils::convert::to_string(info());
+            return convert::to_string(info());
         }
     };
 };
@@ -383,7 +383,7 @@ namespace sys {
 /*
 static std::ostream &operator<<(std::ostream &os, const sys::frm::Basis &v) {
     os << log::format("[nsite: {}, spin resolved: {}, site irreps: {}]",
-                      v.m_nsite, v.m_spin_resolved, utils::convert::to_string(v.m_abgrp_map.m_site_irreps));
+                      v.m_nsite, v.m_spin_resolved, convert::to_string(v.m_abgrp_map.m_site_irreps));
     return os;
 }
 

@@ -70,7 +70,7 @@ const defs::inds_t &sparse::Network::operator[](const size_t &irow) const{
 }
 
 std::string sparse::Network::row_to_string(size_t irow) const {
-    return utils::convert::to_string(m_rows_icols[irow]);
+    return convert::to_string(m_rows_icols[irow]);
 }
 
 std::string sparse::Network::to_string() const {

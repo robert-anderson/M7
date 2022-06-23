@@ -28,7 +28,6 @@ TEST(BufferedTable, AllGathervEmpty) {
 }
 
 TEST(BufferedTable, AllGatherv) {
-    using namespace utils;
     /*
      * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
      * gathering functionality to deal with nullptr buffer dbegins.
@@ -63,7 +62,6 @@ TEST(BufferedTable, AllGatherv) {
 }
 
 TEST(BufferedTable, Gatherv) {
-    using namespace utils;
     /*
      * if there is more than one rank, have the second one (arbitrary choice) be empty to test the ability of the
      * gathering functionality to deal with nullptr buffer dbegins.

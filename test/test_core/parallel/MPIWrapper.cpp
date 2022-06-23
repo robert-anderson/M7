@@ -3,10 +3,9 @@
 //
 
 #include <M7_lib/util/Hash.h>
+#include <algorithm>
 #include "gtest/gtest.h"
 #include "M7_lib/parallel/MPIWrapper.h"
-
-using namespace utils;
 
 TEST(MPIWrapper, AllSum){
     size_t i = mpi::irank()+1;

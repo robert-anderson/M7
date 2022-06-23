@@ -2,21 +2,13 @@
 // Created by Robert J. Anderson on 13/12/2020.
 //
 
+#include "gtest/gtest.h"
+
 #include <M7_lib/util/Hash.h>
 #include <M7_lib/field/Row.h>
 #include <M7_lib/field/Fields.h>
-#include <M7_lib/table/Table.h>
 #include <M7_lib/table/BufferedTable.h>
-#include <M7_lib/table/BufferedFields.h>
-#include "gtest/gtest.h"
 #include "M7_lib/io/HDF5Wrapper.h"
-
-using namespace utils;
-
-
-namespace hdf5_wrapper_test {
-
-}
 
 TEST(HDF5Wrapper, StringVector) {
     auto definitive_irank = hash::in_range(99, 0, mpi::nrank());
@@ -53,7 +45,7 @@ TEST(HDF5Wrapper, FloatArray) {
     {
         hdf5::FileReader fr("table_test.h5");
         hdf5::GroupReader gr("container", fr);
-        auto nelement = utils::nd::nelement(shape);
+        auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         std::vector<float> v_read(nelement);
         ASSERT_TRUE(gr.child_exists("a_float_array"));
@@ -79,7 +71,7 @@ TEST(HDF5Wrapper, ComplexArray) {
     {
         hdf5::FileReader fr("table_test.h5");
         hdf5::GroupReader gr("container", fr);
-        auto nelement = utils::nd::nelement(shape);
+        auto nelement = nd::nelement(shape);
         ASSERT_EQ(nelement, v.size());
         std::vector<std::complex<float>> v_read(nelement);
         gr.load("a_complex_array", v_read.data(), shape);

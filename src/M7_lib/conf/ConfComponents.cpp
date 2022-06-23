@@ -101,7 +101,7 @@ const yaml::File *conf_components::Document::get_file() const {
 
 std::string conf_components::Document::help_string() const {
     REQUIRE_FALSE(m_file, "Help string should only be generated when it has not been filled by a YAML file");
-    std::string str = utils::string::boxed(log::format("Configuration document \"{}\"", m_name));
+    std::string str = string::boxed(log::format("Configuration document \"{}\"", m_name));
     str.append(log::format("Description: {}\n\n", m_description));
     for (auto child: m_children) str.append(child->help_string());
     return str;

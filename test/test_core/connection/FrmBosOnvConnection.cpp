@@ -18,7 +18,7 @@ TEST(FrmBosOnvConnection, DetectExsig) {
     conn::FrmBosOnv conn(src);
     ASSERT_EQ(conn.exsig(), 0ul);
     conn.connect(src, dst);
-    ASSERT_EQ(conn.exsig(), utils::exsig::ex_0010);
+    ASSERT_EQ(conn.exsig(), exsig::ex_0010);
     conn.connect(dst, src);
-    ASSERT_EQ(conn.exsig(), utils::exsig::ex_0001);
+    ASSERT_EQ(conn.exsig(), exsig::ex_0001);
 }

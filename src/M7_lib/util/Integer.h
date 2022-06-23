@@ -5,7 +5,7 @@
 #ifndef M7_UTIL_INTEGER_H
 #define M7_UTIL_INTEGER_H
 
-#include "utils.h"
+#include "M7_lib/defs.h"
 
 namespace integer {
 

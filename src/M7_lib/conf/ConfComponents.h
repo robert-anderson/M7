@@ -153,7 +153,7 @@ namespace conf_components {
 
     public:
         Param(Group *parent, std::string name, const T &v_default, std::string description) :
-                ParamBase(parent, name, description, utils::convert::to_string(v_default), dim_str(v_default)),
+                ParamBase(parent, name, description, convert::to_string(v_default), dim_str(v_default)),
                 m_v_default(v_default) {
             auto file = parent->get_file();
             if (file) {
@@ -179,7 +179,7 @@ namespace conf_components {
         }
 
         void log_value() const override {
-            log::info("{}: {}", m_yaml_path.to_string(), utils::convert::to_string(m_v));
+            log::info("{}: {}", m_yaml_path.to_string(), convert::to_string(m_v));
         }
 
         Param& operator=(const T& v){

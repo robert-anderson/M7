@@ -5,7 +5,7 @@
 #include "HubbardUniform.h"
 
 HubbardUniform::HubbardUniform(const FrmHam &h, PRNG &prng) :
-        FrmLatticeExcitGen(h, prng, {utils::exsig::ex_single}, "hubbard hopping") {
+        FrmLatticeExcitGen(h, prng, {exsig::ex_single}, "hubbard hopping") {
     REQUIRE_TRUE(h.is<HubbardFrmHam>(), "given hamiltonian is not of HubbardFrmHam type");
 }
 

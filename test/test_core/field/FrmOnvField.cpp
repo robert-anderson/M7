@@ -2,14 +2,14 @@
 // Created by Robert J. Anderson on 09/02/2022.
 //
 
-#include "gtest/gtest.h"
+#include <numeric>
 
+#include "gtest/gtest.h"
 #include <M7_lib/foreach/BasicForeach.h>
 #include "M7_lib/table/BufferedFields.h"
 
 
 namespace frm_onv_field_test {
-    using namespace utils;
     typedef const std::function<bool(bool, bool)>& include_fn_t;
     typedef const std::function<size_t(const field::FrmOnv&)>& count_fn_t;
     template<typename foreach_fn_t>

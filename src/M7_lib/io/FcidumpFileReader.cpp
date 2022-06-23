@@ -62,18 +62,18 @@ bool FcidumpFileReader::next(defs::inds_t &inds, defs::ham_t &v) {
 
 size_t FcidumpFileReader::ranksig(const defs::inds_t &inds) const {
     auto nset_inds = HamiltonianFileReader::nset_ind(inds);
-    return utils::exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
+    return exsig::encode(nset_inds/2, nset_inds/2, 0, 0);
 }
 
 size_t FcidumpFileReader::exsig(const defs::inds_t &inds, const size_t& ranksig) const {
     switch (ranksig) {
         case 0ul: return 0ul;
-        case utils::exsig::ex_single:
-            return inds[0]==inds[1] ? 0ul : utils::exsig::ex_single;
-            case utils::exsig::ex_double:
+        case exsig::ex_single:
+            return inds[0]==inds[1] ? 0ul : exsig::ex_single;
+            case exsig::ex_double:
             return inds[0]==inds[2] ?
-                (inds[1]==inds[3] ? 0ul : utils::exsig::ex_single):
-                (inds[1]==inds[3] ? utils::exsig::ex_single : utils::exsig::ex_double);
+                (inds[1]==inds[3] ? 0ul : exsig::ex_single):
+                (inds[1]==inds[3] ? exsig::ex_single : exsig::ex_double);
         default:
             return ~0ul;
     }

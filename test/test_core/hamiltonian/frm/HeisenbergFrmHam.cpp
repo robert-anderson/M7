@@ -75,7 +75,7 @@ TEST(HeisenbergFrmHam, Elements){
         for (auto & dst_spinvec : spinvecs) {
             heisenberg_test::set_onv_from_spinvec(dst, dst_spinvec);
             conn.connect(src, dst);
-            if (conn.exsig()!=utils::exsig::ex_double) continue;
+            if (conn.exsig()!=exsig::ex_double) continue;
             auto helem = ham.get_element_2200(src, conn);
             if (!helem) continue;
             ASSERT_FLOAT_EQ(helem, 0.5);

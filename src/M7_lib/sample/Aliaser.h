@@ -9,7 +9,6 @@
 #include <M7_lib/defs.h>
 #include <stack>
 #include <iostream>
-#include <M7_lib/util/utils.h>
 #include <M7_lib/parallel/SharedMatrix.h>
 #include <M7_lib/parallel/MPIAssert.h>
 #include "PRNG.h"

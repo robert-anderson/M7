@@ -23,8 +23,8 @@ bool ArnoldiProblemBase::solve_base(const std::function<void()> &product_fn, boo
     // Finding eigenvalues and eigenvectors.
     if (i_am_solver_rank) find_eigenvalues();
     log::info("{} converged after {} {}distributed matrix-vector multiplication{}",
-              utils::string::plural("eigenpair", m_nroot),
+              string::plural("eigenpair", m_nroot),
               nmv_call, dist ? "" : "non-",
-              utils::string::plural(nmv_call));
+              string::plural(nmv_call));
     return true;
 }

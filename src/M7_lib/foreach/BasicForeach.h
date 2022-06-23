@@ -56,18 +56,18 @@ namespace basic_foreach {
              *  current level (position in the m_value array)
              */
             template<size_t ilevel, typename fn_t>
-            void level_loop(const fn_t &fn, utils::tag::Int<ilevel>) {
+            void level_loop(const fn_t &fn, tag::Int<ilevel>) {
                 constexpr size_t iind = ilevel - 1;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto &extent = m_shape[iind];
-                for (ind = 0ul; ind < extent; ++ind) level_loop(fn, utils::tag::Int<ilevel + 1>());
+                for (ind = 0ul; ind < extent; ++ind) level_loop(fn, tag::Int<ilevel + 1>());
             }
 
             /**
              * overload for when the last index has been reached
              */
             template<typename fn_t>
-            void level_loop(const fn_t &fn, utils::tag::Int<nind>) {
+            void level_loop(const fn_t &fn, tag::Int<nind>) {
                 constexpr size_t iind = nind - 1;
                 auto &ind = m_value[iind];
                 const auto &extent = m_shape[iind];
@@ -78,20 +78,20 @@ namespace basic_foreach {
              * in the edge case that the nind is 0, do nothing
              */
             template<typename fn_t>
-            void top_loop(const fn_t &fn, utils::tag::Int<true>) {}
+            void top_loop(const fn_t &fn, tag::Int<true>) {}
 
             /**
              * if nind is nonzero, start at the first index
              */
             template<typename fn_t>
-            void top_loop(const fn_t &fn, utils::tag::Int<false>) {
-                level_loop(fn, utils::tag::Int<1>());
+            void top_loop(const fn_t &fn, tag::Int<false>) {
+                level_loop(fn, tag::Int<1>());
             }
 
         public:
 
             static size_t niter(const inds_t<nind> &shape){
-                return nind ? utils::nd::nelement(array::to_vector(shape)) : 0ul;
+                return nind ? nd::nelement(array::to_vector(shape)) : 0ul;
             }
 
             Unrestricted(const inds_t<nind> &shape) : Base<nind>(niter(shape)), m_shape(shape) {}
@@ -100,8 +100,8 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                utils::functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
-                top_loop(fn, utils::tag::Int<nind == 0>());
+                functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                top_loop(fn, tag::Int<nind == 0>());
             }
         };
 
@@ -120,16 +120,16 @@ namespace basic_foreach {
         private:
 
             template<size_t ilevel, typename fn_t>
-            void level_loop(const fn_t &fn, utils::tag::Int<ilevel>) {
+            void level_loop(const fn_t &fn, tag::Int<ilevel>) {
                 constexpr size_t iind = ascending ? (nind - ilevel) : (ilevel - 1);
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
                 const auto extent = iind == iind_unrestrict ? m_n : m_value[ascending ? iind + 1 : iind - 1] + !strict;
-                for (ind = 0ul; ind < extent; ++ind) level_loop(fn, utils::tag::Int<ilevel + 1>());
+                for (ind = 0ul; ind < extent; ++ind) level_loop(fn, tag::Int<ilevel + 1>());
             }
 
             template<typename fn_t>
-            void level_loop(const fn_t &fn, utils::tag::Int<nind>) {
+            void level_loop(const fn_t &fn, tag::Int<nind>) {
                 constexpr size_t iind = ascending ? 0 : nind - 1;
                 constexpr size_t iind_unrestrict = ascending ? nind - 1 : 0;
                 auto &ind = Base<nind>::m_value[iind];
@@ -138,11 +138,11 @@ namespace basic_foreach {
             }
 
             template<typename fn_t>
-            void top_loop(const fn_t &fn, utils::tag::Int<true>) {}
+            void top_loop(const fn_t &fn, tag::Int<true>) {}
 
             template<typename fn_t>
-            void top_loop(const fn_t &fn, utils::tag::Int<false>) {
-                level_loop(fn, utils::tag::Int<1>());
+            void top_loop(const fn_t &fn, tag::Int<false>) {
+                level_loop(fn, tag::Int<1>());
             }
 
         public:
@@ -151,8 +151,8 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                utils::functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
-                top_loop(fn, utils::tag::Int<nind == 0>());
+                functor::assert_prototype<void(const inds_t<nind> &), fn_t>();
+                top_loop(fn, tag::Int<nind == 0>());
             }
         };
     }
@@ -201,7 +201,7 @@ namespace basic_foreach {
         public:
 
             static size_t niter(const inds_t& shape) {
-                return shape.empty() ? 0ul : utils::nd::nelement(shape);
+                return shape.empty() ? 0ul : nd::nelement(shape);
             }
 
             static size_t niter(size_t nind, size_t extent){
@@ -216,7 +216,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t &fn) {
-                utils::functor::assert_prototype<void(const inds_t &), fn_t>();
+                functor::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
                 level_loop(fn, 1);
             }
@@ -251,7 +251,7 @@ namespace basic_foreach {
 
             template<typename fn_t>
             void loop(const fn_t& fn) {
-                utils::functor::assert_prototype<void(const inds_t &), fn_t>();
+                functor::assert_prototype<void(const inds_t &), fn_t>();
                 if (!m_nind) return;
                 level_loop(fn, 1);
             }

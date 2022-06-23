@@ -59,7 +59,7 @@ namespace conn_foreach {
     namespace frm {
         struct Base : conn_foreach::Base {
             Base(size_t exsig) : conn_foreach::Base(exsig) {
-                REQUIRE_TRUE(utils::exsig::is_pure_frm(exsig), "excitation signature has boson operators");
+                REQUIRE_TRUE(exsig::is_pure_frm(exsig), "excitation signature has boson operators");
             }
 
         protected:
@@ -68,7 +68,7 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct General : Base {
-            General() : Base(utils::exsig::encode(nop, nop, 0, 0)) {}
+            General() : Base(exsig::encode(nop, nop, 0, 0)) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
@@ -97,13 +97,13 @@ namespace conn_foreach {
 
         template<size_t nop>
         struct Ms2Conserve : Base {
-            Ms2Conserve(): Base(utils::exsig::encode(nop, nop, 0, 0)) {}
+            Ms2Conserve(): Base(exsig::encode(nop, nop, 0, 0)) {}
 
         private:
 
             template<typename fn_t, size_t nbeta, size_t nalpha>
             void loop_one_beta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn,
-                                  utils::tag::Int<nbeta>, utils::tag::Int<nalpha>) {
+                                  tag::Int<nbeta>, tag::Int<nalpha>) {
                 const auto &occs = src.m_decoded.m_spin_occs.get();
                 const auto &vacs = src.m_decoded.m_spin_vacs.get();
 
@@ -134,28 +134,28 @@ namespace conn_foreach {
             }
 
             template<typename fn_t, size_t nbeta>
-            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, utils::tag::Int<nbeta> tag) {
+            void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn, tag::Int<nbeta> tag) {
                 static_assert(nop >= nbeta, "number of beta-spin operators cannot exceed excit level");
-                loop_one_beta_fn<fn_t>(conn, src, fn, tag, utils::tag::Int<nop - nbeta>());
-                loop_all_nbeta_fn<fn_t>(conn, src, fn, utils::tag::Int<nbeta + 1>());
+                loop_one_beta_fn<fn_t>(conn, src, fn, tag, tag::Int<nop - nbeta>());
+                loop_all_nbeta_fn<fn_t>(conn, src, fn, tag::Int<nbeta + 1>());
             }
 
             template<typename fn_t>
             void loop_all_nbeta_fn(conn::FrmOnv &conn, const field::FrmOnv &src,
-                                   const fn_t &fn, utils::tag::Int<nop + 1> tag) {}
+                                   const fn_t &fn, tag::Int<nop + 1> tag) {}
 
         public:
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                utils::functor::assert_prototype<void()>(fn);
+                functor::assert_prototype<void()>(fn);
 
                 /*
                  * to conserve 2*Ms, the number of beta electrons annihilated should equal the number of beta
                  * electrons created, so we need an outer loop over all numbers of betas, this is implemented in
                  * compile-time recursion
                  */
-                loop_all_nbeta_fn<fn_t>(conn, src, fn, utils::tag::Int<0>());
+                loop_all_nbeta_fn<fn_t>(conn, src, fn, tag::Int<0>());
             }
 
         protected:
@@ -166,11 +166,11 @@ namespace conn_foreach {
 
 
         struct Hubbard : Base {
-            Hubbard() : Base(utils::exsig::ex_single) {}
+            Hubbard() : Base(exsig::ex_single) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                utils::functor::assert_prototype<void()>(fn);
+                functor::assert_prototype<void()>(fn);
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
                 const auto &occs = src.m_decoded.m_simple_occs.get();
@@ -199,11 +199,11 @@ namespace conn_foreach {
 
 
         struct Heisenberg : Base {
-            Heisenberg() : Base(utils::exsig::ex_double) {}
+            Heisenberg() : Base(exsig::ex_double) {}
 
             template<typename fn_t>
             void loop_fn(conn::FrmOnv &conn, const field::FrmOnv &src, const fn_t &fn) {
-                utils::functor::assert_prototype<void()>(fn);
+                functor::assert_prototype<void()>(fn);
                 // TODO: rewrite with m_decoded.m_alpha_only_occs when implemented
                 const auto lattice = src.m_basis.m_lattice;
                 REQUIRE_TRUE(lattice.get(), "Hubbard model requires the basis to have a lattice defined");
@@ -222,7 +222,7 @@ namespace conn_foreach {
                         if (!src.get({!ispin_occ, i})) continue;
                         conn.m_ann.set({0, isite_occ}, {1, i});
                         conn.m_cre.set({0, i}, {1, isite_occ});
-                        DEBUG_ASSERT_EQ(conn.exsig(), utils::exsig::ex_double, "incorrect excitation level");
+                        DEBUG_ASSERT_EQ(conn.exsig(), exsig::ex_double, "incorrect excitation level");
                         fn();
                     }
                 }
@@ -239,7 +239,7 @@ namespace conn_foreach {
     namespace bos {
         struct Base : conn_foreach::Base {
             Base(size_t exsig): conn_foreach::Base(exsig){
-                REQUIRE_TRUE(utils::exsig::is_pure_bos(exsig), "excitation signature has fermion operators");
+                REQUIRE_TRUE(exsig::is_pure_bos(exsig), "excitation signature has fermion operators");
             }
 
         protected:
@@ -250,11 +250,11 @@ namespace conn_foreach {
         };
 
         struct Ann : Base {
-            Ann() : Base(utils::exsig::ex_0001) {}
+            Ann() : Base(exsig::ex_0001) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
-                utils::functor::assert_prototype<void()>(fn);
+                functor::assert_prototype<void()>(fn);
                 conn.clear();
                 const auto &occs = src.m_decoded.m_occ_modes.get();
                 for (auto &imode: occs) {
@@ -270,11 +270,11 @@ namespace conn_foreach {
         };
 
         struct Cre : Base {
-            Cre(): Base(utils::exsig::ex_0010) {}
+            Cre(): Base(exsig::ex_0010) {}
 
             template<typename fn_t>
             void loop_fn(conn::BosOnv &conn, const field::BosOnv &src, const fn_t &fn) {
-                utils::functor::assert_prototype<void()>(fn);
+                functor::assert_prototype<void()>(fn);
                 conn.clear();
                 for (size_t imode = 0ul; imode < src.m_size; ++imode) {
                     if (size_t(src[imode] + 1) > src.m_basis.m_occ_cutoff) continue;
@@ -293,7 +293,7 @@ namespace conn_foreach {
     namespace frmbos {
         struct Base : conn_foreach::Base {
             Base(size_t exsig) : conn_foreach::Base(exsig) {
-                REQUIRE_TRUE(utils::exsig::decode_nfrm(exsig) && utils::exsig::decode_nbos(exsig),
+                REQUIRE_TRUE(exsig::decode_nfrm(exsig) && exsig::decode_nbos(exsig),
                              "excitation signature is not that of a fermion-boson product");
             }
         };
@@ -310,12 +310,12 @@ namespace conn_foreach {
 
             static size_t combined_exsig() {
                 const frm::Base frm = frm_t();
-                auto nfrm_cre = utils::exsig::decode_nfrm_cre(frm.m_exsig);
-                auto nfrm_ann = utils::exsig::decode_nfrm_ann(frm.m_exsig);
+                auto nfrm_cre = exsig::decode_nfrm_cre(frm.m_exsig);
+                auto nfrm_ann = exsig::decode_nfrm_ann(frm.m_exsig);
                 const bos::Base bos = bos_t();
-                auto nbos_cre = utils::exsig::decode_nbos_cre(bos.m_exsig);
-                auto nbos_ann = utils::exsig::decode_nbos_ann(bos.m_exsig);
-                return utils::exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
+                auto nbos_cre = exsig::decode_nbos_cre(bos.m_exsig);
+                auto nbos_ann = exsig::decode_nbos_ann(bos.m_exsig);
+                return exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
             }
 
         public:

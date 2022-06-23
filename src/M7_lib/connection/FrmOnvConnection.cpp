@@ -204,9 +204,9 @@ bool FrmOnvConnection::phase(const FrmOnvField &src) const {
 }
 
 size_t FrmOnvConnection::exsig() const {
-    return utils::exsig::encode(m_cre.size(), m_ann.size(), 0ul, 0ul);
+    return exsig::encode(m_cre.size(), m_ann.size(), 0ul, 0ul);
 }
 
 size_t FrmOnvConnection::exsig(const size_t& nop_insert) const {
-    return utils::exsig::encode(m_cre.size() + nop_insert, m_ann.size() + nop_insert, 0ul, 0ul);
+    return exsig::encode(m_cre.size() + nop_insert, m_ann.size() + nop_insert, 0ul, 0ul);
 }

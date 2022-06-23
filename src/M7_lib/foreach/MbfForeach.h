@@ -42,19 +42,19 @@ namespace mbf_foreach {
     public:
         template<typename fn_t>
         void loop(field::FrmOnv &mbf, const fn_t &fn) {
-            utils::functor::assert_prototype<void()>(fn);
+            functor::assert_prototype<void()>(fn);
             frm_loop(mbf, fn);
         }
 
         template<typename fn_t>
         void loop(field::BosOnv &mbf, const fn_t &fn) {
-            utils::functor::assert_prototype<void()>(fn);
+            functor::assert_prototype<void()>(fn);
             bos_loop(mbf, fn);
         }
 
         template<typename fn_t>
         void loop(field::FrmBosOnv &mbf, const fn_t &fn) {
-            utils::functor::assert_prototype<void()>(fn);
+            functor::assert_prototype<void()>(fn);
             frmbos_loop(mbf, fn);
         }
     };
@@ -78,19 +78,19 @@ namespace mbf_foreach {
 
         template<typename fn_t>
         void loop(field::FrmOnv &bra, field::FrmOnv &ket, const fn_t &fn) {
-            utils::functor::assert_prototype<prototype_t>(fn);
+            functor::assert_prototype<prototype_t>(fn);
             frm_loop(bra, ket, fn);
         }
 
         template<typename fn_t>
         void loop(field::BosOnv &bra, field::BosOnv &ket, const fn_t &fn) {
-            utils::functor::assert_prototype<prototype_t>(fn);
+            functor::assert_prototype<prototype_t>(fn);
             bos_loop(bra, ket, fn);
         }
 
         template<typename fn_t>
         void loop(field::FrmBosOnv &bra, field::FrmBosOnv &ket, const fn_t &fn) {
-            utils::functor::assert_prototype<prototype_t>(fn);
+            functor::assert_prototype<prototype_t>(fn);
             frmbos_loop(bra, ket, fn);
         }
     };
@@ -111,7 +111,7 @@ namespace mbf_foreach {
 
         template<typename fn_t>
         void loop_fn(mbf_t& outer, mbf_t& inner, const fn_t &fn) {
-            utils::functor::assert_prototype<prototype_t>(fn);
+            functor::assert_prototype<prototype_t>(fn);
             size_t iouter = 0ul;
             auto outer_fn = [this, &inner, &fn, &iouter]() {
                 size_t iinner = 0ul;
@@ -147,7 +147,7 @@ namespace mbf_foreach {
 
             template<typename fn_t>
             void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
-                utils::functor::assert_prototype<prototype_t>(fn);
+                functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto loop_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
                     mbf = inds;
@@ -170,7 +170,7 @@ namespace mbf_foreach {
         public:
             template<typename fn_t>
             void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
-                utils::functor::assert_prototype<prototype_t>(fn);
+                functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto loop_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
                     mbf.set_spins(inds);
@@ -195,7 +195,7 @@ namespace mbf_foreach {
         public:
             template<typename fn_t>
             void loop_fn(field::FrmOnv &mbf, const fn_t &fn) {
-                utils::functor::assert_prototype<prototype_t>(fn);
+                functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto alpha_fn = [this, &mbf, &fn](const basic_foreach::rtnd::inds_t &alpha_inds) {
                     mbf.put_spin_channel(0, false);
@@ -249,7 +249,7 @@ namespace mbf_foreach {
         public:
             template<typename fn_t>
             void loop_fn(field::BosOnv &mbf, const fn_t &fn) {
-                utils::functor::assert_prototype<prototype_t>(fn);
+                functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto basic_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
                     mbf.set_ops(inds);
@@ -271,7 +271,7 @@ namespace mbf_foreach {
         public:
             template<typename fn_t>
             void loop_fn(field::BosOnv &mbf, const fn_t &fn) {
-                utils::functor::assert_prototype<prototype_t>(fn);
+                functor::assert_prototype<prototype_t>(fn);
                 verify_mbf(mbf);
                 auto basic_fn = [&mbf, &fn](const basic_foreach::rtnd::inds_t &inds) {
                     mbf = inds;
@@ -342,7 +342,7 @@ namespace mbf_foreach {
 
             template<typename fn_t>
             void loop_fn(field::FrmBosOnv &mbf, const fn_t &fn) {
-                utils::functor::assert_prototype<prototype_t>(fn);
+                functor::assert_prototype<prototype_t>(fn);
                 auto frm_loop_fn = [this, &mbf, &fn]() {
                     auto bos_loop_fn = [&fn]() {
                         fn();

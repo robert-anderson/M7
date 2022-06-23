@@ -11,7 +11,7 @@
 
 
 namespace ham {
-    using namespace utils::exsig;
+    using namespace exsig;
 
     class TermContribs {
 

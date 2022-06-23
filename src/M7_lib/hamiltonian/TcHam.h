@@ -16,7 +16,6 @@
 #endif
 
 #include <M7_lib/parallel/MPIAssert.h>
-#include <M7_lib/util/utils.h>
 
 struct TcHam {
     // Would there be any members? I guess not really
@@ -25,8 +24,7 @@ struct TcHam {
     ~TcHam();  // destructor
 
     // protected:
-    defs::ham_t get_lmat_coeff(size_t a, size_t b, size_t c, size_t i, size_t j,
-                               size_t k) const;
+    defs::ham_t get_lmat_coeff(size_t a, size_t b, size_t c, size_t i, size_t j, size_t k) const;
 };
 
 #endif  // M7_TCHAM_H
