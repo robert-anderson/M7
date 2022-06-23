@@ -66,7 +66,7 @@ namespace frm_onv_field_test {
         // multiple datawords per channel, unaligned
         test_fn(235, 145);
         // multiple datawords per channel, aligned
-        test_fn(3 * defs::nbit_word, defs::nbit_word);
+        test_fn(3 * Buffer::c_nbit_word, Buffer::c_nbit_word);
     }
 }
 

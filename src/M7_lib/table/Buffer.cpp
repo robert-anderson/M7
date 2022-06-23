@@ -90,7 +90,7 @@ void Buffer::resize(size_t size, double factor) {
     }
     size*=1.0+factor;
     // always allocate an integral number of words
-    size = integer::divceil(size, defs::nbyte_word)*defs::nbyte_word;
+    size = integer::divceil(size, Buffer::c_nbyte_word)*Buffer::c_nbyte_word;
     DEBUG_ASSERT_TRUE(size, "New size must be non-zero");
     if (!m_name.empty()) {
         log::info_("Reallocating buffer \"{}\" {} -> {}",

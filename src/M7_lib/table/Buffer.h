@@ -13,8 +13,15 @@
 
 
 class Buffer {
-
 public:
+    /**
+     * number of bytes in the system word
+     */
+    static constexpr size_t c_nbyte_word = sizeof(size_t);
+    /**
+     * number of bits in the system word
+     */
+    static constexpr size_t c_nbit_word = CHAR_BIT * c_nbyte_word;
     class Window {
         friend class Buffer;
         /**

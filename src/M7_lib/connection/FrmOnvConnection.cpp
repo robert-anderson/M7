@@ -7,7 +7,7 @@
 
 FrmOnvConnection::FrmOnvConnection(const sys::frm::Size& sites):
         m_ann(sites), m_cre(sites),
-        m_ndataword(integer::divceil(sites.m_nspinorb, defs::nbit_word)),
+        m_ndataword(integer::divceil(sites.m_nspinorb, Buffer::c_nbit_word)),
         m_dataword_phases(m_ndataword){
     if (m_ndataword) m_dataword_phases[0] = false;
 }
@@ -26,7 +26,7 @@ void FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst) {
 
     size_t src_work, dst_work, work;
     for (size_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
-        const auto bit_offset = idataword * defs::nbit_word;
+        const auto bit_offset = idataword * Buffer::c_nbit_word;
         src_work = src.get_dataword(idataword);
         dst_work = dst.get_dataword(idataword);
         work = src_work & ~dst_work;
@@ -55,7 +55,7 @@ bool FrmOnvConnection::connect(const FrmOnvField &src, const FrmOnvField &dst, F
         dst_work = dst.get_dataword(idataword);
         work = src_work & dst_work;
         while (work) {
-            auto setbit = bit::next_setbit(work) + idataword * defs::nbit_word;
+            auto setbit = bit::next_setbit(work) + idataword * Buffer::c_nbit_word;
             while (ann_iter != ann_end && *ann_iter < setbit) {
                 // an annihilation operator has been passed in the iteration over common indices
                 ann_iter++;
@@ -115,7 +115,7 @@ bool FrmOnvConnection::apply(const FrmOnvField &src, FrmOps &com) const {
     for (size_t idataword = 0ul; idataword < src.m_dsize; ++idataword) {
         auto work = src.get_dataword(idataword);
         while (work) {
-            auto setbit = bit::next_setbit(work) + idataword * defs::nbit_word;
+            auto setbit = bit::next_setbit(work) + idataword * Buffer::c_nbit_word;
             if (ann_iter != ann_end && setbit == *ann_iter) {
                 ann_iter++;
                 nperm += com.size();
@@ -167,9 +167,9 @@ void FrmOnvConnection::update_dataword_phases(const FrmOnvField &src) const {
 
 bool FrmOnvConnection::independent_phase(const FrmOnvField &src, const size_t &ibit) const {
     DEBUG_ASSERT_LT(ibit, src.m_basis.m_nspinorb, "spin orbital index OOB");
-    auto idataword = ibit / defs::nbit_word;
+    auto idataword = ibit / Buffer::c_nbit_word;
     DEBUG_ASSERT_LT(idataword, m_ndataword, "dataword index OOB");
-    auto ibit_in_word = ibit - idataword * defs::nbit_word;
+    auto ibit_in_word = ibit - idataword * Buffer::c_nbit_word;
     return m_dataword_phases[idataword] ^
            (bit::nsetbit_before(src.get_dataword(idataword), ibit_in_word) & 1ul);
 }

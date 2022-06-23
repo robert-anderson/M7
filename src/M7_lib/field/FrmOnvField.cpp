@@ -7,7 +7,7 @@
 FrmOnvField::FrmOnvField(Row *row, const sys::frm::Basis& basis, std::string name) :
         base_t(row, {{2, basis.m_nsite},{"spin channel", "site"}}, name),
         m_basis(basis), m_decoded(*this),
-        m_dsize_spin_channel(integer::divceil(size_t(m_basis.m_nsite), defs::nbit_word)){}
+        m_dsize_spin_channel(integer::divceil(size_t(m_basis.m_nsite), Buffer::c_nbit_word)){}
 
 FrmOnvField::FrmOnvField(Row *row, const sys::Basis &basis, std::string name) :
     FrmOnvField(row, basis.m_frm, std::move(name)){
@@ -122,31 +122,32 @@ size_t FrmOnvField::get_alpha_dataword(size_t idataword) const {
     auto dptr = reinterpret_cast<size_t *>(begin());
     auto tmp = dptr[idataword];
     if (idataword + 1 == m_dsize_spin_channel) {
-        auto n = nsite-(idataword)*defs::nbit_word;
+        auto n = nsite-(idataword)*Buffer::c_nbit_word;
         tmp = bit::truncate(tmp, n);
     }
     return tmp;
 }
 
 size_t FrmOnvField::get_beta_dataword(size_t idataword) const {
+    constexpr auto c_nbit_word = Buffer::c_nbit_word;
     DEBUG_ASSERT_LT(idataword, m_dsize_spin_channel, "dataword index OOB");
     const auto nsite = m_format.m_shape[1];
-    const auto ibit_begin = nsite+idataword*defs::nbit_word;
-    const auto ibit_end = std::min(2*nsite, ibit_begin+defs::nbit_word);
-    const auto iword_begin = ibit_begin/defs::nbit_word;
-    const auto ibit_in_word_begin = ibit_begin-iword_begin*defs::nbit_word;
-    const auto iword_end = ibit_end/defs::nbit_word;
-    const auto ibit_in_word_end = ibit_end-iword_end*defs::nbit_word;
+    const auto ibit_begin = nsite+idataword*c_nbit_word;
+    const auto ibit_end = std::min(2*nsite, ibit_begin+c_nbit_word);
+    const auto iword_begin = ibit_begin/c_nbit_word;
+    const auto ibit_in_word_begin = ibit_begin-iword_begin*c_nbit_word;
+    const auto iword_end = ibit_end/c_nbit_word;
+    const auto ibit_in_word_end = ibit_end-iword_end*c_nbit_word;
     auto dptr = reinterpret_cast<size_t *>(begin());
     if (iword_begin==iword_end){
         auto mask = bit::make_range_mask<size_t>(ibit_in_word_begin, ibit_in_word_end);
         return (dptr[iword_begin] & mask) >> ibit_in_word_begin;
     }
     else {
-        auto mask1 = bit::make_range_mask<size_t>(ibit_in_word_begin, defs::nbit_word);
+        auto mask1 = bit::make_range_mask<size_t>(ibit_in_word_begin, c_nbit_word);
         auto mask2 = bit::make_range_mask<size_t>(0, ibit_in_word_end);
         auto shift1 = ibit_in_word_begin;
-        auto shift2 = defs::nbit_word-ibit_in_word_begin;
+        auto shift2 = c_nbit_word-ibit_in_word_begin;
         return ((dptr[iword_begin] & mask1) >> shift1) | ((dptr[iword_end] & mask2) << shift2);
     }
 }

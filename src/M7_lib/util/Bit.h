@@ -47,21 +47,21 @@ namespace bit {
      * clear the bit in x at position i
      */
     template<typename T>
-    static inline void clr(T &x, const size_t &i) {
+    static inline void clr(T &x, size_t i) {
         x &= ~(T(1) << T(i));
     }
     /**
      * set the bit in x at position i
      */
     template<typename T>
-    static inline void set(T &x, const size_t &i) {
+    static inline void set(T &x, size_t i) {
         x |= (T(1) << T(i));
     }
     /**
      * return true if the bit in x at position i is set, else false
      */
     template<typename T>
-    static inline bool get(const T &x, const size_t &i) {
+    static inline bool get(const T &x, size_t i) {
         return x & (T(1) << T(i));
     }
     /**
@@ -111,59 +111,59 @@ namespace bit {
     /**
      * return v with the first n bits cleared
      */
-    static uint8_t truncate(const uint8_t &v, const size_t &n) {
+    static uint8_t truncate(const uint8_t &v, size_t n) {
         return v & c_trunc_mask_8[n];
     }
 
-    static uint16_t truncate(const uint16_t &v, const size_t &n) {
+    static uint16_t truncate(const uint16_t &v, size_t n) {
         return v & c_trunc_mask_16[n];
     }
 
-    static uint32_t truncate(const uint32_t &v, const size_t &n) {
+    static uint32_t truncate(const uint32_t &v, size_t n) {
         return v & c_trunc_mask_32[n];
     }
 
-    static uint64_t truncate(const uint64_t &v, const size_t &n) {
+    static uint64_t truncate(const uint64_t &v, size_t n) {
         return v & c_trunc_mask_64[n];
     }
 
-    static int8_t truncate(const int8_t &v, const size_t &n) {
+    static int8_t truncate(const int8_t &v, size_t n) {
         return truncate(uint8_t(v), n);
     }
 
-    static int16_t truncate(const int16_t &v, const size_t &n) {
+    static int16_t truncate(const int16_t &v, size_t n) {
         return truncate(uint16_t(v), n);
     }
 
-    static int32_t truncate(const int32_t &v, const size_t &n) {
+    static int32_t truncate(const int32_t &v, size_t n) {
         return truncate(uint32_t(v), n);
     }
 
-    static int64_t truncate(const int64_t &v, const size_t &n) {
+    static int64_t truncate(const int64_t &v, size_t n) {
         return truncate(uint64_t(v), n);
     }
 
     /**
      * make a mask which is set (1) in the range [ibegin, iend), and clear (0) elsewhere
      */
-    static void make_range_mask(uint8_t &v, const size_t &ibegin, const size_t &iend) {
+    static void make_range_mask(uint8_t &v, size_t ibegin, size_t iend) {
         v = c_trunc_mask_8[iend] & ~c_trunc_mask_8[ibegin];
     }
 
-    static void make_range_mask(uint16_t &v, const size_t &ibegin, const size_t &iend) {
+    static void make_range_mask(uint16_t &v, size_t ibegin, size_t iend) {
         v = c_trunc_mask_16[iend] & ~c_trunc_mask_16[ibegin];
     }
 
-    static void make_range_mask(uint32_t &v, const size_t &ibegin, const size_t &iend) {
+    static void make_range_mask(uint32_t &v, size_t ibegin, size_t iend) {
         v = c_trunc_mask_32[iend] & ~c_trunc_mask_32[ibegin];
     }
 
-    static void make_range_mask(uint64_t &v, const size_t &ibegin, const size_t &iend) {
+    static void make_range_mask(uint64_t &v, size_t ibegin, size_t iend) {
         v = c_trunc_mask_64[iend] & ~c_trunc_mask_64[ibegin];
     }
 
     template<typename T>
-    static T make_range_mask(const size_t &ibegin, const size_t &iend) {
+    static T make_range_mask(size_t ibegin, size_t iend) {
         T v;
         make_range_mask(v, ibegin, iend);
         return v;
@@ -196,7 +196,7 @@ namespace bit {
      * make the range mask word then apply it
      */
     template<typename T>
-    void apply_mask(T &v, const size_t &ibegin, const size_t &iend, bool set) {
+    void apply_mask(T &v, size_t ibegin, size_t iend, bool set) {
         T mask;
         make_range_mask(mask, ibegin, iend);
         apply_mask(v, mask, set);

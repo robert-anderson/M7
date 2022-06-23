@@ -35,14 +35,38 @@ using namespace defs;
  * their own members, and so the initializing ctor is sufficient.
  */
 struct FieldBase {
+    /**
+     * Row object to which this field belongs, and has been apportioned a range of bytes within
+     */
     Row *m_row = nullptr;
+    /**
+     * the derived classes which implement the features of particular types of Fields will carry type information, this
+     * is passed in std::type_info form to the base class for logging purposes
+     */
     const std::type_info &m_type_info;
+    /**
+     * number of bytes required to store the field
+     * not necessarily an integral multiple of c_nbyte_word, although a field added to a row after another of a
+     * different type will always begin on a word boundary
+     */
     const size_t m_size;
+    /**
+     * string identifier for logging purposes
+     */
     const std::string m_name;
 
 private:
+    /**
+     * a zero-valued string so that memory can be cleared by copy
+     */
     std::vector<char> m_null_string;
+    /**
+     * number of bytes by which Field is offset from the beginning of the Row (first Field to be added has offset 0)
+     */
     size_t m_row_offset = ~0ul;
+    /**
+     * index within m_fields vector of m_row
+     */
     size_t m_row_index = ~0ul;
     friend Row;
 

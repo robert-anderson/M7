@@ -23,10 +23,14 @@ namespace integer {
         return i > j ? i : j;
     }
 
+    /**
+     * the "ceiling" of an integral division. if the remainder is zero, return the quotient, else return quotient + 1
+     */
     template<typename T>
     T divceil(T num, T denom) {
         static_assert(std::is_integral<T>::value, "only applicable to integral types");
-        return num % denom ? num / denom + 1 : num / denom;
+        const auto quot = num / denom;
+        return quot + ((quot*denom)!=num);
     }
 
     template<typename T>
