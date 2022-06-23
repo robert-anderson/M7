@@ -6,7 +6,7 @@
 #define M7_TEST_DEFS_H
 
 #include "gtest/gtest.h"
-#include "M7_lib/util/consts.h"
+#include "M7_lib/util/FpTol.h"
 #include "M7_lib/io/Logging.h"
 
 namespace test_defs {

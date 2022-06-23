@@ -12,7 +12,7 @@
 #include <cstring>
 
 #include <M7_lib/parallel/MPIAssert.h>
-#include <M7_lib/util/consts.h>
+#include <M7_lib/util/FpTol.h>
 #include <M7_lib/defs.h>
 #include <M7_lib/io/HDF5Wrapper.h>
 #include "Sparse.h"
@@ -80,15 +80,15 @@ namespace dense {
 
     using namespace fptol;
     template<typename T>
-    static bool nearly_equal(const T* v1, const T* v2, size_t size, comp_t<T> atol = default_atol_near<T>()) {
+    static bool nearly_equal(const T* v1, const T* v2, size_t size, arith::comp_t<T> atol = default_atol_near<T>()) {
         for (size_t i = 0ul; i < size; ++i) {
-            if (!fptol::nearly_equal(v1[i], v2[i], comp_t<T>(0), atol)) return false;
+            if (!fptol::nearly_equal(v1[i], v2[i], arith::comp_t<T>(0), atol)) return false;
         }
         return true;
     }
 
     template<typename T>
-    static bool nearly_equal(const std::vector<T> v1, const std::vector<T> v2, comp_t<T> atol = default_atol_near<T>()) {
+    static bool nearly_equal(const std::vector<T> v1, const std::vector<T> v2, arith::comp_t<T> atol = default_atol_near<T>()) {
         REQUIRE_EQ(v1.size(), v2.size(), "vectors must have same number of elements to be compared");
         return nearly_equal(v1.data(), v2.data(), v1.size(), atol);
     }

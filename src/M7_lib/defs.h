@@ -8,14 +8,9 @@
 #include <string>
 #include <map>
 #include <complex>
-#include <iostream>
 #include <vector>
-#include <queue>
-#include <exception>
-#include <array>
 #include <climits>
-#include <cstdlib>
-#include <M7_lib/util/consts.h>
+#include <limits>
 
 /**
  * basic debugging macro for verification of low-level functionality, in general prefer the macros MpiAssert.h defines

@@ -9,7 +9,7 @@
 #include <M7_lib/field/Mbf.h>
 #include <M7_lib/hamiltonian/frm/GeneralFrmHam.h>
 #include <M7_lib/hamiltonian/frm/TcFrmHam.h>  // what's being tested
-#include <M7_lib/util/consts.h>
+#include <M7_lib/util/FpTol.h>
 #include <M7_lib/io/Symlink.h>
 #include <gtest/gtest.h>
 

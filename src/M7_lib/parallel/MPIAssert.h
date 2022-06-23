@@ -6,6 +6,7 @@
 #define M7_MPIASSERT_H
 
 #include "MPIWrapper.h"
+#include <M7_lib/util/FpTol.h>
 #include <M7_lib/io/Logging.h>
 
 /**

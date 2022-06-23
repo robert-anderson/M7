@@ -70,7 +70,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     std::vector<std::complex<double>> evals;
     ASSERT_TRUE(dense::diag(dense, evals));
     // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
-    utils::sort::inplace(evals, false, true);
+    sort::inplace(evals, false, true);
     auto dense_eval_it = evals.cbegin() + (nrow - nroot);
     for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
         ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot]);
@@ -94,7 +94,7 @@ TEST(ArnoldiSolver, NonSymDist) {
         std::vector<std::complex<double>> evals;
         dense::diag(dense, evals);
         // sort the eigenvalues by magnitude, largest first, since this is the order found by ARPACK
-        utils::sort::inplace(evals, false, true);
+        sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
             ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), arith::real(dense_eval_it[iroot]));

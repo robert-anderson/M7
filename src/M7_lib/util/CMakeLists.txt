@@ -1,9 +1,11 @@
 target_sources(M7_lib
     PRIVATE
+        Arith.h
         Array.h
         Bit.h
-        consts.h
+        FpTol.h
         Convert.h
+        Datatype.h
         Functor.h
         Hash.cpp
         Hash.h

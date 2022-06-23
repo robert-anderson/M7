@@ -6,6 +6,7 @@
 #define M7_DISTRIBUTED_H
 
 #include "MPIWrapper.h"
+#include "M7_lib/util/Datatype.h"
 
 template<typename T>
 class Distributed {
