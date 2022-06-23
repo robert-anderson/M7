@@ -286,7 +286,10 @@ namespace sys {
     }
 
     namespace bos {
-        static constexpr size_t c_max_bos_occ = std::numeric_limits<bos_occ_t>::max();
+        /**
+         * maximum occupation supported by the mode occupation type
+         */
+        static constexpr size_t c_max_occ = std::numeric_limits<bos_occ_t>::max();
         /**
          * extent of the bosonic single particle basis
          */
@@ -308,7 +311,7 @@ namespace sys {
             explicit operator bool() const {
                 return m_nmode;
             }
-            Basis(size_t nmode, size_t occ_cutoff=c_max_bos_occ);
+            Basis(size_t nmode, size_t occ_cutoff=c_max_occ);
 
             bool operator==(const Basis& other) const;
             

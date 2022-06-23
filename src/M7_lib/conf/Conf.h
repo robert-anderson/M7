@@ -104,12 +104,12 @@ namespace conf {
         Param<size_t> m_bos_occ_cutoff;
         explicit Basis(Group *parent):
         Section(parent, "basis", "options relating to the single particle basis functions and subsets thereof"),
-        m_bos_occ_cutoff(this, "bos_occ_cutoff", sys::bos::c_max_bos_occ,
+        m_bos_occ_cutoff(this, "bos_occ_cutoff", sys::bos::c_max_occ,
                          "maximum allowed occupation of each boson mode"){}
 
         void verify() override {
-            REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_bos_occ,
-                       log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_bos_occ));
+            REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_occ,
+                       log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_occ));
         }
     };
 

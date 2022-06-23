@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 
 TEST(BosonHamiltonian, Coefficients) {
-    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_bos_occ);
+    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_occ);
     ASSERT_EQ(bos_ham.m_basis.m_nmode, 5ul);
     //0.2209708691 2 4 5 3
     ASSERT_FLOAT_EQ(bos_ham.m_coeffs_2.get(1, 3, 4, 2), 0.2209708691);
@@ -31,7 +31,7 @@ TEST(BosonHamiltonian, DiagonalMatrixElements) {
      *  [0. 1. 1. 0. 3.] 3.9140625
      *  [1. 0. 0. 1. 3.] 3.0859375
      */
-    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_bos_occ);
+    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_occ);
     Hamiltonian ham(&bos_ham);
     buffered::BosOnv onv(ham.m_basis);
     onv = {0, 0, 0, 5, 0};
@@ -66,7 +66,7 @@ TEST(BosonHamiltonian, OffDiagonalMatrixElements) {
      *  [0.         0.         0.375      0.61237244 0.4330127  3.0859375 ]]
      */
     conf::Document opts;
-    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_bos_occ);
+    GeneralBosHam bos_ham({PROJECT_ROOT"/assets/LandauLevels_5_5_15/BOSDUMP"}, sys::bos::c_max_occ);
     Hamiltonian ham(&bos_ham);
     buffered::BosOnv src(ham.m_basis);
     buffered::BosOnv dst(ham.m_basis);

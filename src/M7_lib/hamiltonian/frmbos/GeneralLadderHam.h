@@ -19,7 +19,7 @@ struct GeneralLadderHam : FrmBosHam {
      */
     FrmBosCoupledCoeffs m_v;
 
-    GeneralLadderHam(const EbdumpInfo& info, bool spin_major, size_t bos_occ_cutoff=sys::bos::c_max_bos_occ);
+    GeneralLadderHam(const EbdumpInfo& info, bool spin_major, size_t bos_occ_cutoff=sys::bos::c_max_occ);
 
     GeneralLadderHam(opt_pair_t opts):
         GeneralLadderHam(EbdumpInfo(opts.m_ham.m_ebdump.m_path),

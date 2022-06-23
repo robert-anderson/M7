@@ -297,7 +297,7 @@ TEST(BufferedFields, FrmBosOnv){
     defs::ivec_t frm_inds = {0, 2, 4, 5, 7};
     defs::ivec_t bos_inds = {3, 1, 2, 4, 9};
     const sys::frm::Basis frm_basis(4);
-    const sys::bos::Basis bos_basis(5, sys::bos::c_max_bos_occ);
+    const sys::bos::Basis bos_basis(5, sys::bos::c_max_occ);
 
     //  1. constructable via argument forwarding to T::T
     buffered::FrmBosOnv direct(frm_basis, bos_basis);
