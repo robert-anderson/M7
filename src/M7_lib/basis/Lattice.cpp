@@ -3,7 +3,7 @@
 //
 
 #include "Lattice.h"
-
+#include "M7_lib/util/SmartPtr.h"
 
 bool lattice::AdjElement::operator==(const lattice::AdjElement &other) const {
     return m_isite==other.m_isite && m_phase==other.m_phase;
@@ -117,12 +117,12 @@ void lattice::NullTopology::get_adj_row(size_t isite, lattice::adj_row_t &row) c
 }
 
 std::shared_ptr<lattice::Base> lattice::make() {
-    return std::shared_ptr<Base>(new Null({}));
+    return smart_ptr::make_poly_shared<Base, Null>(NullTopology());
 }
 
 std::shared_ptr<lattice::Base> lattice::make(std::string topo, defs::inds_t site_shape, std::vector<int> bcs) {
     if (topo == "ortho" || topo == "orthogonal")
-        return std::shared_ptr<Base>(new Ortho({site_shape, bcs}));
+        return smart_ptr::make_poly_shared<Base, Ortho>(OrthoTopology(site_shape, bcs));
     return make();
 }
 

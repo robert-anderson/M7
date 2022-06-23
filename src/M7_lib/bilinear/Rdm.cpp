@@ -3,6 +3,7 @@
 //
 
 #include "Rdm.h"
+#include "M7_lib/util/SmartPtr.h"
 
 size_t Rdm::nrow_estimate(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann, sys::Size basis_size) {
     double nrow = 1.0;
@@ -165,7 +166,7 @@ Rdms::Rdms(const conf::Rdms &opts, defs::inds_t ranksigs,
         REQUIRE_LE(decode_nbos_ann(ranksig), 1ul,
                    "RDMs with more than one boson annihilation operator are not yet supported");
         REQUIRE_TRUE(m_rdms[ranksig] == nullptr, "No RDM rank should appear more than once in the specification");
-        m_rdms[ranksig] = mem_utils::make_unique<Rdm>(opts, ranksig, extents, nelec, 1ul);
+        m_rdms[ranksig] = smart_ptr::make_unique<Rdm>(opts, ranksig, extents, nelec, 1ul);
     }
     m_total_norm.m_local = 0.0;
 }

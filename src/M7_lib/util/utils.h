@@ -23,9 +23,6 @@
 #include <functional>
 #include <list>
 
-namespace utils {
-}
-
 namespace prob_utils {
 
     static void normalize(std::vector<defs::prob_t> &v, defs::prob_t norm = 1.0) {
@@ -85,21 +82,6 @@ namespace stat_utils {
         };
     }
 
-}
-
-namespace mem_utils {
-
-    template<typename T, typename... Args>
-    static std::unique_ptr<T> make_unique(Args &&... args) {
-        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-    }
-
-    static void print_cmp(char *c1, char *c2, size_t n) {
-        for (size_t i = 0; i < n; ++i) {
-            std::cout << int(c1[i]) << " " << int(c2[i]) << std::endl;
-        }
-        std::cout << std::endl;
-    }
 }
 
 #endif //M7_UTILS_H

@@ -6,6 +6,7 @@
 #define M7_ARNOLDISOLVER_H
 
 #include <M7_lib/linalg/DistMvProd.h>
+#include <M7_lib/util/SmartPtr.h>
 
 #include <arpackf.h>
 #include <arrssym.h>
@@ -103,7 +104,7 @@ private:
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
     void setup(size_t nrow, bool dist) override {
-        if (mpi::i_am_root() || !dist) m_solver = mem_utils::make_unique<ARrcSymStdEig<T>>(nrow, m_nroot);
+        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcSymStdEig<T>>(nrow, m_nroot);
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {
@@ -172,7 +173,7 @@ private:
     void find_eigenvalues() override { m_solver->FindEigenvalues(); }
 
     void setup(size_t nrow, bool dist) override {
-        if (mpi::i_am_root() || !dist) m_solver = mem_utils::make_unique<ARrcNonSymStdEig<T>>(nrow, m_nroot);
+        if (mpi::i_am_root() || !dist) m_solver = smart_ptr::make_unique<ARrcNonSymStdEig<T>>(nrow, m_nroot);
     }
 
     void product(dist_mv_prod::Base<T> &mv_prod) override {

@@ -3,6 +3,7 @@
 //
 
 #include "DeterministicSubspace.h"
+#include "M7_lib/util/SmartPtr.h"
 
 field::Mbf &DeterministicDataRow::key_field() {
     return m_mbf;
@@ -143,7 +144,7 @@ void DeterministicSubspaces::build_from_most_occupied(const Hamiltonian &ham, co
     REQUIRE_FALSE_ALL(bool(*this), "epoch should not be started when building deterministic subspaces");
     for (size_t iroot = 0ul; iroot < wf.nroot(); ++iroot) {
         REQUIRE_TRUE_ALL(m_detsubs[iroot] == nullptr, "detsubs should not already be allocated");
-        m_detsubs[iroot] = mem_utils::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
+        m_detsubs[iroot] = smart_ptr::make_unique<DeterministicSubspace>(m_opts, wf, iroot);
         m_detsubs[iroot]->build_from_most_occupied(ham, bilinears);
     }
     m_epoch.update(icycle, true);
