@@ -51,27 +51,27 @@ public:
         return *this;
     }
 
-    FrmOnvField &operator=(std::pair<const defs::inds_t &, const defs::inds_t &> setbits);
+    FrmOnvField &operator=(std::pair<const defs::ivec_t &, const defs::ivec_t &> setbits);
 
     bool operator==(const FrmOnvField& other) const {
         return base_t::operator==(other);
     }
 
-    bool operator==(const defs::inds_t& inds) const;
+    bool operator==(const defs::ivec_t& inds) const;
 
-    void set(const size_t& bit_offset, const defs::inds_t& setbits);
+    void set(const size_t& bit_offset, const defs::ivec_t& setbits);
 
-    void set(const size_t& site_offset, const defs::inds_t& setbits_alpha, const defs::inds_t& setbits_beta);
+    void set(const size_t& site_offset, const defs::ivec_t& setbits_alpha, const defs::ivec_t& setbits_beta);
 
-    void set(const defs::inds_t& setbits_alpha, const defs::inds_t& setbits_beta);
+    void set(const defs::ivec_t& setbits_alpha, const defs::ivec_t& setbits_beta);
 
-    void set_spins(const defs::inds_t& alpha_sites);
+    void set_spins(const defs::ivec_t& alpha_sites);
 
     void put_spin_channel(const size_t& ispin, bool set);
 
-    void clr(const size_t& bit_offset, const defs::inds_t& clrbits);
+    void clr(const size_t& bit_offset, const defs::ivec_t& clrbits);
 
-    void clr(const size_t& site_offset, const defs::inds_t& clrbits_alpha, const defs::inds_t& clrbits_beta);
+    void clr(const size_t& site_offset, const defs::ivec_t& clrbits_alpha, const defs::ivec_t& clrbits_beta);
 
     void excite(const size_t &i, const size_t &j) {
         auto* dptr = reinterpret_cast<size_t *>(begin());

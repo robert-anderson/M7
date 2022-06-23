@@ -12,7 +12,7 @@ TEST(Aliaser, DistributionCheck) {
     std::vector<defs::prob_t> probs =
         {0, 0.648, 0.025, 0.035, 0.036, 0, 0.0648, 0.053, 0.0723, 0.1234};
     SingleAliaser aliaser(probs);
-    defs::inds_t results(probs.size(), 0ul);
+    defs::ivec_t results(probs.size(), 0ul);
 
     const size_t n_attempts = 20000000;
     for (size_t i = 0ul; i < n_attempts; ++i) {

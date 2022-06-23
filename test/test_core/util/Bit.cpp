@@ -6,7 +6,7 @@
 #include "M7_lib/util/Bit.h"
 
 TEST(UtilBit, SetBits) {
-    defs::inds_t setbits;
+    defs::ivec_t setbits;
     std::string bitstr;
 
     bitstr = "10011110"; // 158
@@ -40,7 +40,7 @@ TEST(UtilBit, SetBits) {
 
 
 TEST(UtilBit, ClrBits) {
-    defs::inds_t clrbits;
+    defs::ivec_t clrbits;
     std::string bitstr;
 
     bitstr = "10011110"; // 158

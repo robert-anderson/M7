@@ -21,15 +21,15 @@ struct EbdumpFileReader : HamiltonianFileReader {
 
     EbdumpFileReader(const std::string &fname, bool spin_major=false);
 
-    size_t ranksig(const defs::inds_t &inds) const override;
+    size_t ranksig(const defs::ivec_t &inds) const override;
 
-    size_t exsig(const defs::inds_t &inds, const size_t &ranksig) const override;
+    size_t exsig(const defs::ivec_t &inds, const size_t &ranksig) const override;
 
-    bool inds_in_range(const defs::inds_t &inds) const override;
+    bool inds_in_range(const defs::ivec_t &inds) const override;
 
-    void convert_inds(defs::inds_t &inds);
+    void convert_inds(defs::ivec_t &inds);
 
-    bool next(defs::inds_t &inds, defs::ham_t &v);
+    bool next(defs::ivec_t &inds, defs::ham_t &v);
 
 };
 

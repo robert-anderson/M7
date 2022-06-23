@@ -35,7 +35,7 @@
  * count_t and counts_t are the scalar and vector typedefs for the MPI integer
  *
  * The cleanest way to achieve this aim is to expose only the overloads that use size_t and
- * std::vector<size_t> (defs::inds_t) to define counts and displs. if sizeof(count_t)
+ * std::vector<size_t> (defs::ivec_t) to define counts and displs. if sizeof(count_t)
  * is less than sizeof(size_t), a narrowing conversion is required, but since this is at the
  * level of communication, and not inside a main loop, this minor overhead will more than
  * pay for itself in code clarity. Hence, **count_t and counts_t should never
@@ -614,7 +614,7 @@ namespace mpi {
 
     template<typename T>
     static bool gatherv(const T *send, size_t sendcount, T *recv,
-                        const defs::inds_t &recvcounts, const defs::inds_t &recvdispls, const size_t &iroot) {
+                        const defs::ivec_t &recvcounts, const defs::ivec_t &recvdispls, const size_t &iroot) {
         auto tmp_recvcounts = snrw(recvcounts);
         auto tmp_recvdispls = snrw(recvdispls);
         return gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data(), iroot);
@@ -623,7 +623,7 @@ namespace mpi {
     template<typename T>
     static bool all_gatherv(
             const T *send, size_t sendcount,
-            T *recv, const defs::inds_t &recvcounts, const defs::inds_t &recvdispls) {
+            T *recv, const defs::ivec_t &recvcounts, const defs::ivec_t &recvdispls) {
         auto tmp_recvcounts = snrw(recvcounts);
         auto tmp_recvdispls = snrw(recvdispls);
         return all_gatherv(send, snrw(sendcount), recv, tmp_recvcounts.data(), tmp_recvdispls.data());
@@ -661,7 +661,7 @@ namespace mpi {
     }
 
     template<typename T>
-    static bool scatterv(const T *send, const defs::inds_t sendcounts, const defs::inds_t &senddispls,
+    static bool scatterv(const T *send, const defs::ivec_t sendcounts, const defs::ivec_t &senddispls,
                          T *recv, const size_t &recvcount, const size_t &iroot) {
         auto tmp_sendcounts = snrw(sendcounts);
         auto tmp_senddispls = snrw(senddispls);
@@ -699,8 +699,8 @@ namespace mpi {
 
     template<typename T>
     static bool all_to_allv(
-            const T *send, const defs::inds_t &sendcounts, const defs::inds_t &senddispls,
-            T *recv, const defs::inds_t &recvcounts, const defs::inds_t &recvdispls) {
+            const T *send, const defs::ivec_t &sendcounts, const defs::ivec_t &senddispls,
+            T *recv, const defs::ivec_t &recvcounts, const defs::ivec_t &recvdispls) {
         auto tmp_sendcounts = snrw(sendcounts);
         auto tmp_senddispls = snrw(senddispls);
         auto tmp_recvcounts = snrw(recvcounts);

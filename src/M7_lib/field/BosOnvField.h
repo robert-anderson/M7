@@ -49,14 +49,14 @@ struct BosOnvField : NdNumberField<defs::bos_occ_t, 1> {
         return *this;
     }
 
-    BosOnvField &operator=(const defs::inds_t &inds);
+    BosOnvField &operator=(const defs::ivec_t &inds);
 
     /**
      * set based on the (repeated) boson operator indices
      * @param iops
      *  operator indices (one for each boson in the state)
      */
-    void set_ops(const defs::inds_t &iops);
+    void set_ops(const defs::ivec_t &iops);
 
     size_t nboson() const;
 

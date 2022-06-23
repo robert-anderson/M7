@@ -95,7 +95,7 @@ void TableBase::expand(size_t nrow, double factor) {
     resize(this->nrow()+nrow, factor);
 }
 
-void TableBase::clear_rows(const defs::inds_t &irows) {
+void TableBase::clear_rows(const defs::ivec_t &irows) {
     for (auto irow : irows) {
         clear(irow);
     }
@@ -111,7 +111,7 @@ void TableBase::insert_rows(const Buffer::Window &recv, size_t nrow, const std::
         for (auto f: callbacks) f(irow);
     }
 }
-void TableBase::transfer_rows(const defs::inds_t &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){
+void TableBase::transfer_rows(const defs::ivec_t &irows, size_t irank_send, size_t irank_recv, const std::list<recv_cb_t>& callbacks){
     DEBUG_ASSERT_NE_ALL(irank_recv, irank_send, "sending and recving ranks should never be the same");
     if (!m_transfer) m_transfer = smart_ptr::make_unique<RowTransfer>(m_bw.name());
     size_t nrow = 0;
@@ -167,7 +167,7 @@ void TableBase::swap_rows(const size_t &irow, const size_t &jrow) {
     std::swap_ranges(iptr, iptr+row_size(), jptr);
 }
 
-std::string TableBase::to_string(const defs::inds_t *ordering) const {
+std::string TableBase::to_string(const defs::ivec_t *ordering) const {
     std::string out;
     auto row_ptr = begin();
     for (size_t irow=0ul; irow<m_hwm; ++irow){
@@ -182,9 +182,9 @@ std::string TableBase::to_string(const defs::inds_t *ordering) const {
 
 void TableBase::all_gatherv(const TableBase &src) {
     clear();
-    defs::inds_t nrows(mpi::nrank());
-    defs::inds_t counts(mpi::nrank());
-    defs::inds_t displs(mpi::nrank());
+    defs::ivec_t nrows(mpi::nrank());
+    defs::ivec_t counts(mpi::nrank());
+    defs::ivec_t displs(mpi::nrank());
     DEBUG_ASSERT_EQ(src.row_size(), row_size(),
                     "the size of rows being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrows);
@@ -199,9 +199,9 @@ void TableBase::all_gatherv(const TableBase &src) {
 
 void TableBase::gatherv(const TableBase &src, size_t irank) {
     if (mpi::i_am(irank)) clear();
-    defs::inds_t nrows(mpi::nrank());
-    defs::inds_t counts(mpi::nrank());
-    defs::inds_t displs(mpi::nrank());
+    defs::ivec_t nrows(mpi::nrank());
+    defs::ivec_t counts(mpi::nrank());
+    defs::ivec_t displs(mpi::nrank());
     DEBUG_ASSERT_EQ(src.row_size(), row_size(),
                     "the size of rows being gathered does not match that stored in the gathering table");
     mpi::all_gather(src.m_hwm, nrows);

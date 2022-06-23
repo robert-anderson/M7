@@ -12,7 +12,7 @@ struct HolsteinLadderHam : FrmBosHam {
 
     const defs::ham_t m_g;
 
-    HolsteinLadderHam(const sys::frm::Basis& frm_basis, defs::ham_t g, size_t bos_occ_cutoff=defs::max_bos_occ) :
+    HolsteinLadderHam(const sys::frm::Basis& frm_basis, defs::ham_t g, size_t bos_occ_cutoff=sys::bos::c_max_occ) :
         FrmBosHam({frm_basis, {frm_basis.m_nsite, bos_occ_cutoff}}), m_g(g) {
         m_contribs_1101.set_nonzero(exsig::ex_0001);
         m_contribs_1110.set_nonzero(exsig::ex_0010);

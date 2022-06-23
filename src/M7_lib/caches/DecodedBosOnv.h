@@ -21,7 +21,7 @@ namespace decoded_mbf {
 
         struct SimpleBase : Base, SimpleContainer {
         protected:
-            const defs::inds_t &validated() const;
+            const defs::ivec_t &validated() const;
 
         public:
             explicit SimpleBase(const BosOnvField &mbf);
@@ -35,7 +35,7 @@ namespace decoded_mbf {
         struct Expanded : SimpleBase {
             Expanded(const BosOnvField &mbf);
 
-            const defs::inds_t &get();
+            const defs::ivec_t &get();
         };
 
         /**
@@ -46,7 +46,7 @@ namespace decoded_mbf {
         struct OccModes : SimpleBase {
             OccModes(const BosOnvField &mbf);
 
-            const defs::inds_t &get();
+            const defs::ivec_t &get();
         };
     }
 

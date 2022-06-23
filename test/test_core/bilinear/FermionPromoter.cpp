@@ -91,7 +91,7 @@ TEST(FermionPromoter, Promoter2BodySingle) {
     conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
-    // 3 -> 8 excitation moves through 3 occupied SQ op inds_t => fermi phase -1
+    // 3 -> 8 excitation moves through 3 occupied SQ op ivec_t => fermi phase -1
     ASSERT_TRUE(conn.phase(in));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_cre[0], 8);
@@ -156,7 +156,7 @@ TEST(FermionPromoter, Promoter2BodyDouble) {
     conn::FrmOnv conn(in);
     conn.connect(in, out, com);
 
-    // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ op inds_t => fermi phase +1
+    // 3, 7 -> 2, 8 excitation moves through 0 occupied SQ op ivec_t => fermi phase +1
     ASSERT_FALSE(conn.phase(in));
     ASSERT_EQ(conn.m_ann[0], 3);
     ASSERT_EQ(conn.m_ann[1], 7);

@@ -151,7 +151,7 @@ namespace buffered {
         using field::BosOnv::operator=;
         using field::BosOnv::operator==;
         explicit BosOnv(const sys::bos::Basis& basis) : BufferedField<field::BosOnv>(basis){}
-        BosOnv(size_t nmode, size_t occ_cutoff=defs::max_bos_occ) : BosOnv(sys::bos::Basis(nmode, occ_cutoff)){}
+        BosOnv(size_t nmode, size_t occ_cutoff=sys::bos::c_max_occ) : BosOnv(sys::bos::Basis(nmode, occ_cutoff)){}
         explicit BosOnv(const sys::Basis& basis) : BosOnv(basis.m_bos){}
         explicit BosOnv(const sys::bos::Sector& sector) : BosOnv(sector.m_basis){}
         explicit BosOnv(const sys::Sector& sector) : BosOnv(sector.m_bos){}
@@ -172,7 +172,7 @@ namespace buffered {
         using field::FrmBosOnv::operator=;
         explicit FrmBosOnv(const sys::frm::Basis& frm_basis, const sys::bos::Basis& bos_basis):
             BufferedField<field::FrmBosOnv>(frm_basis, bos_basis){}
-        FrmBosOnv(size_t nsite, size_t nmode, size_t bos_occ_cutoff=defs::max_bos_occ):
+        FrmBosOnv(size_t nsite, size_t nmode, size_t bos_occ_cutoff=sys::bos::c_max_occ):
             FrmBosOnv(sys::frm::Basis(nsite), sys::bos::Basis(nmode, bos_occ_cutoff)){}
         explicit FrmBosOnv(const sys::Basis& basis): FrmBosOnv(basis.m_frm, basis.m_bos){}
         explicit FrmBosOnv(const sys::Sector& sector): FrmBosOnv(sector.basis()){}
