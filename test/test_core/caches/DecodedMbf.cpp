@@ -6,10 +6,10 @@
 #include "gtest/gtest.h"
 
 TEST(DecodedMbf, Simple){
-    const defs::inds_t setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
+    const defs::ivec_t setbits{0, 1, 4, 7, 32, 50, 51, 54, 60, 89, 99};
     buffered::FrmOnv mbf(50);
     mbf = setbits;
-    defs::inds_t clrbits;
+    defs::ivec_t clrbits;
     auto iter = setbits.begin();
     for (size_t i=0ul; i < mbf.nbit(); ++i){
         if (iter!=setbits.end() && i==*iter) iter++;
@@ -41,7 +41,7 @@ TEST(DecodedMbf, Simple){
      * for a small number of vacant orbs, run through all possible arrangements
      */
     const size_t nvacorb = 3;
-    auto vac_fn = [&mbf](const defs::inds_t &inds) {
+    auto vac_fn = [&mbf](const defs::ivec_t &inds) {
         mbf.set();
         for (auto i: inds) mbf.clr(i);
         mbf.m_decoded.clear();
@@ -54,11 +54,11 @@ TEST(DecodedMbf, Simple){
 
 TEST(DecodedMbf, SingleMultipleOccupation) {
     const size_t nsite = 8;
-    defs::inds_t alpha_inds = {0, 4, 5, 7};
-    defs::inds_t beta_inds = {0, 1, 2, 5};
+    defs::ivec_t alpha_inds = {0, 4, 5, 7};
+    defs::ivec_t beta_inds = {0, 1, 2, 5};
     buffered::FrmOnv mbf(nsite);
     mbf = {alpha_inds, beta_inds};
-    defs::inds_t chk_inds;
+    defs::ivec_t chk_inds;
 
     chk_inds = {0, 1, 2, 4, 5, 7};
     ASSERT_EQ(mbf.m_decoded.m_occ_sites.get(), chk_inds);
@@ -76,8 +76,8 @@ TEST(DecodedMbf, Labelled){
         return (iirrep+jirrep)%4;
     });
 
-    defs::inds_t alpha_occ{0, 1, 2, 4, 7, 9};
-    defs::inds_t beta_occ{2, 4, 5, 6, 7, 8};
+    defs::ivec_t alpha_occ{0, 1, 2, 4, 7, 9};
+    defs::ivec_t beta_occ{2, 4, 5, 6, 7, 8};
     /*                                         0  1  2  3  4  5  6  7  8  9
      * occupied orbitals (alpha):              o  o  o  /  o  /  /  o  /  o
      * occupied orbitals (beta ):              /  /  o  /  o  o  o  o  o  /
@@ -104,7 +104,7 @@ TEST(DecodedMbf, Labelled){
     mbf = {alpha_occ, beta_occ};
     ASSERT_EQ(mbf.nsetbit(), alpha_occ.size() + beta_occ.size());
 
-    defs::inds_t chk_inds;
+    defs::ivec_t chk_inds;
 
     auto& occs = mbf.m_decoded.m_spin_sym_occs.get();
     auto& vacs = mbf.m_decoded.m_spin_sym_vacs.get();
@@ -113,38 +113,38 @@ TEST(DecodedMbf, Labelled){
      */
     ASSERT_EQ(occs.size({0, 0}), 3);
     chk_inds = occs[{0, 0}];
-    ASSERT_EQ(chk_inds, defs::inds_t({0, 4, 9}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({0, 4, 9}));
 
     ASSERT_EQ(occs.size({0, 1}), 2);
     chk_inds = occs[{0, 1}];
-    ASSERT_EQ(chk_inds, defs::inds_t({1, 2}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({1, 2}));
 
     ASSERT_EQ(occs.size({0, 2}), 0);
     chk_inds = occs[{0, 2}];
-    ASSERT_EQ(chk_inds, defs::inds_t({}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({}));
 
     ASSERT_EQ(occs.size({0, 3}), 1);
     chk_inds = occs[{0, 3}];
-    ASSERT_EQ(chk_inds, defs::inds_t({7}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({7}));
 
     /*
      * alpha vacant
      */
     ASSERT_EQ(vacs.size({0, 0}), 1);
     chk_inds = vacs[{0, 0}];
-    ASSERT_EQ(chk_inds, defs::inds_t({5}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({5}));
 
     ASSERT_EQ(vacs.size({0, 1}), 2);
     chk_inds = vacs[{0, 1}];
-    ASSERT_EQ(chk_inds, defs::inds_t({6, 8}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({6, 8}));
 
     ASSERT_EQ(vacs.size({0, 2}), 0);
     chk_inds = vacs[{0, 2}];
-    ASSERT_EQ(chk_inds, defs::inds_t({}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({}));
 
     ASSERT_EQ(vacs.size({0, 3}), 1);
     chk_inds = vacs[{0, 3}];
-    ASSERT_EQ(chk_inds, defs::inds_t({3}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({3}));
 
     /*
      * beta occupied
@@ -152,38 +152,38 @@ TEST(DecodedMbf, Labelled){
      */
     ASSERT_EQ(occs.size({1, 0}), 2);
     chk_inds = occs[{1, 0}];
-    ASSERT_EQ(chk_inds, defs::inds_t({14, 15}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({14, 15}));
 
     ASSERT_EQ(occs.size({1, 1}), 3);
     chk_inds = occs[{1, 1}];
-    ASSERT_EQ(chk_inds, defs::inds_t({12, 16, 18}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({12, 16, 18}));
 
     ASSERT_EQ(occs.size({1, 2}), 0);
     chk_inds = occs[{1, 2}];
-    ASSERT_EQ(chk_inds, defs::inds_t({}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({}));
 
     ASSERT_EQ(occs.size({1, 3}), 1);
     chk_inds = occs[{1, 3}];
-    ASSERT_EQ(chk_inds, defs::inds_t({17}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({17}));
 
     /*
      * beta vacant
      */
     ASSERT_EQ(vacs.size({1, 0}), 2);
     chk_inds = vacs[{1, 0}];
-    ASSERT_EQ(chk_inds, defs::inds_t({10, 19}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({10, 19}));
 
     ASSERT_EQ(vacs.size({1, 1}), 1);
     chk_inds = vacs[{1, 1}];
-    ASSERT_EQ(chk_inds, defs::inds_t({11}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({11}));
 
     ASSERT_EQ(vacs.size({1, 2}), 0);
     chk_inds = vacs[{1, 2}];
-    ASSERT_EQ(chk_inds, defs::inds_t({}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({}));
 
     ASSERT_EQ(vacs.size({1, 3}), 1);
     chk_inds = vacs[{1, 3}];
-    ASSERT_EQ(chk_inds, defs::inds_t({13}));
+    ASSERT_EQ(chk_inds, defs::ivec_t({13}));
 
     /*
      * all spinorb labels except those correcsponing to irrep "Y" have nonempty pairs
@@ -197,7 +197,7 @@ TEST(DecodedMbf, Bosons) {
     const size_t nmode = 8;
     buffered::BosOnv mbf(nmode);
     mbf = {0, 1, 0, 3, 1, 0, 1, 2};
-    defs::inds_t chk_inds;
+    defs::ivec_t chk_inds;
 
     chk_inds = {1, 3, 3, 3, 4, 6, 7, 7};
     ASSERT_EQ(mbf.m_decoded.m_expanded.get(), chk_inds);
@@ -212,6 +212,6 @@ TEST(DecodedMbf, Holstein) {
     mbf.m_frm = {{0, 1, 5, 7}, {0, 3, 6, 7}};
     mbf.m_bos = {0, 1, 2, 3, 1, 0, 1, 2};
 
-    defs::inds_t chk_inds = {1, 3, 6, 7};
+    defs::ivec_t chk_inds = {1, 3, 6, 7};
     ASSERT_EQ(mbf.m_decoded.m_occ_sites_nonzero_bosons.get(), chk_inds);
 }

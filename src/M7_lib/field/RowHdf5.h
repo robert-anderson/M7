@@ -37,7 +37,7 @@ struct RowHdf5Base {
      * field names are used to extract the positions in the Row::m_fields member, and then subsequent accesses to
      * selected fields are made via this resulting index vector.
      */
-    const defs::inds_t m_selected_field_inds;
+    const defs::ivec_t m_selected_field_inds;
     /**
      * index of next item to be read or written
      */
@@ -47,7 +47,7 @@ struct RowHdf5Base {
 
 protected:
 
-    defs::inds_t make_selected_field_inds(const std::vector<FieldBase *> &fields) const;
+    defs::ivec_t make_selected_field_inds(const std::vector<FieldBase *> &fields) const;
 
 };
 

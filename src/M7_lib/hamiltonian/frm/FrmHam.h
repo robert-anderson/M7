@@ -189,8 +189,7 @@ public:
     }
 
     virtual int default_ms2_value() const {
-        // assume 1/2-filling
-        return defs::undefined_ms2;
+        return sys::frm::c_undefined_ms2;
     }
 };
 

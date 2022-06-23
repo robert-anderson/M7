@@ -44,7 +44,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     const auto npair_elec = integer::nspair(occs.size());
     size_t ij = m_prng.draw_uint(npair_elec);
     integer::inv_strigmap(j, i, ij);
-    // i and j are positions in the occ list, convert to orb inds_t:
+    // i and j are positions in the occ list, convert to orb ivec_t:
     i = occs[i];
     j = occs[j];
 

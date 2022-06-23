@@ -8,6 +8,7 @@
 
 #include "ConfComponents.h"
 #include "HamiltonianConf.h"
+#include "M7_lib/basis/BasisData.h"
 
 namespace conf {
     
@@ -82,10 +83,10 @@ namespace conf {
     };
 
     struct MbfDef : Section {
-        Param<std::vector<defs::inds_t>> m_frm;
-        Param<std::vector<defs::inds_t>> m_bos;
+        Param<std::vector<defs::ivec_t>> m_frm;
+        Param<std::vector<defs::ivec_t>> m_bos;
         Param<bool> m_neel;
-        //Param<std::vector<defs::inds_t>> m_csf;
+        //Param<std::vector<defs::ivec_t>> m_csf;
 
         explicit MbfDef(Group *parent, std::string name);
 
@@ -103,10 +104,12 @@ namespace conf {
         Param<size_t> m_bos_occ_cutoff;
         explicit Basis(Group *parent):
         Section(parent, "basis", "options relating to the single particle basis functions and subsets thereof"),
-        m_bos_occ_cutoff(this, "bos_occ_cutoff", defs::max_bos_occ, "maximum allowed occupation of each boson mode"){}
+        m_bos_occ_cutoff(this, "bos_occ_cutoff", sys::bos::c_max_bos_occ,
+                         "maximum allowed occupation of each boson mode"){}
 
         void verify() override {
-            REQUIRE_LE(m_bos_occ_cutoff, defs::max_bos_occ, log::format("given nboson_max exceeds limit of {}", defs::max_bos_occ));
+            REQUIRE_LE(m_bos_occ_cutoff, sys::bos::c_max_bos_occ,
+                       log::format("given nboson_max exceeds limit of {}", sys::bos::c_max_bos_occ));
         }
     };
 
@@ -118,7 +121,7 @@ namespace conf {
         explicit Particles(Group *parent):
             Section(parent, "particles", "options relating to the particle number sector"),
             m_nelec(this, "nelec", 0ul, "number of electrons in the system (conserved)"),
-            m_ms2(this, "ms2", defs::undefined_ms2, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
+            m_ms2(this, "ms2", sys::frm::c_undefined_ms2, "2*Ms sector in which the system is to be restricted (taken as reference hint if H does not conserve Sz"),
             m_nboson(this, "nboson", 0ul, "number of bosons in the system (taken as reference hint if H does not conserve boson number"){}
     };
 

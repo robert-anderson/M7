@@ -73,7 +73,7 @@ TEST(Parameters, ParsingYaml) {
     yaml::File yf(PROJECT_ROOT"/assets/yaml_test/example.yaml");
     ASSERT_TRUE(yf.exists("section1"));
     ASSERT_TRUE(yf.exists("section1.some_numbers"));
-    ASSERT_EQ(yf.get_as<defs::inds_t>("section1.some_numbers"), defs::inds_t({2, 3, 5, 1}));
+    ASSERT_EQ(yf.get_as<defs::ivec_t>("section1.some_numbers"), defs::ivec_t({2, 3, 5, 1}));
     ASSERT_EQ(yf.get_as<std::string>("section1.a_string"), "this is just a string");
     ASSERT_TRUE(yf.exists("section1.subsection1"));
     ASSERT_TRUE(yf.exists("section1.subsection1.a_number"));
@@ -88,7 +88,7 @@ TEST(Parameters, ParsingYaml) {
 TEST(Parameters, DefaultValues) {
     using namespace parameters_test;
     TestDocument doc(nullptr);
-    ASSERT_EQ(doc.m_section1.m_some_unspecified_numbers.get(), defs::inds_t({3, 4, 6}));
+    ASSERT_EQ(doc.m_section1.m_some_unspecified_numbers.get(), defs::ivec_t({3, 4, 6}));
     auto str = doc.help_string();
 }
 
@@ -97,5 +97,5 @@ TEST(Parameters, ParameterGroups) {
     using namespace parameters_test;
     TestDocument doc(&yf);
     auto invalid = doc.invalid_file_key();
-    ASSERT_EQ(doc.m_section1.m_some_numbers.get(), defs::inds_t({2, 3, 5, 1}));
+    ASSERT_EQ(doc.m_section1.m_some_numbers.get(), defs::ivec_t({2, 3, 5, 1}));
 }

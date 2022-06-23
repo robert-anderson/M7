@@ -74,7 +74,7 @@ struct FrmBosHam : HamOpTerm {
     }
 
     virtual int default_ms2_value() const {
-        return defs::undefined_ms2;
+        return sys::frm::c_undefined_ms2;
     }
 
     virtual size_t default_nboson() const {

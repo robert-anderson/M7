@@ -13,7 +13,7 @@ GeneralLadderHam::GeneralLadderHam(const EbdumpInfo &info, bool spin_major, size
                "if the number of sites is non-zero, so also must be the number of boson modes. "
                "NMODE definition may be missing from EBDUMP file info");
 
-    defs::inds_t inds(3);
+    defs::ivec_t inds(3);
     defs::ham_t value;
     EbdumpFileReader file_reader(info.m_fname, spin_major);
 

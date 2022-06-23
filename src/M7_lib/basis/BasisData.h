@@ -11,6 +11,8 @@
 #include "AbelianGroup.h"
 #include "Lattice.h"
 
+using namespace defs;
+
 namespace conservation {
     enum State {Undefined, Yes, No, Hint};
     /**
@@ -88,6 +90,7 @@ namespace sys {
 
 
     namespace frm {
+        static constexpr int c_undefined_ms2 = std::numeric_limits<int>::max();
         /**
          * extent of the fermionic single particle basis
          */
@@ -283,6 +286,7 @@ namespace sys {
     }
 
     namespace bos {
+        static constexpr size_t c_max_bos_occ = std::numeric_limits<bos_occ_t>::max();
         /**
          * extent of the bosonic single particle basis
          */
@@ -304,7 +308,7 @@ namespace sys {
             explicit operator bool() const {
                 return m_nmode;
             }
-            Basis(size_t nmode, size_t occ_cutoff=defs::max_bos_occ);
+            Basis(size_t nmode, size_t occ_cutoff=c_max_bos_occ);
 
             bool operator==(const Basis& other) const;
             

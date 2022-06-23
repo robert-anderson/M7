@@ -18,7 +18,7 @@
  * RDM is due for each of the (N_site-N) choose (R-N) occupied indices in common between the contributing bra and ket.
  *
  * elements of the m_cre and m_ann members of both fields::FermionMevInds conn::FrmOnv alike must be stored in
- * ascending order. However, whereas the connection arrays must not have any elements in common, the MEV inds_t in general
+ * ascending order. However, whereas the connection arrays must not have any elements in common, the MEV ivec_t in general
  * do have elements in common, this is brought about by promotion.
  *
  * e.g.
@@ -65,7 +65,7 @@ private:
 
 public:
     /**
-     * apply the icomb-th promotion to the connection given and store the result inds_t
+     * apply the icomb-th promotion to the connection given and store the result ivec_t
      * @param icomb
      *  combination index
      * @param conn

@@ -12,7 +12,7 @@ bool decoded_mbf::frmbos::Base::is_valid() const {
     return !defs::c_enable_debug || (m_mbf.hash() == m_last_update_hash);
 }
 
-const defs::inds_t &decoded_mbf::frmbos::SimpleBase::validated() const {
+const defs::ivec_t &decoded_mbf::frmbos::SimpleBase::validated() const {
     DEBUG_ASSERT_TRUE(is_valid(), "cache is not in sync with current MBF value");
     return m_inds;
 }
@@ -21,7 +21,7 @@ decoded_mbf::frmbos::SimpleBase::SimpleBase(const FrmBosOnvField &mbf) : Base(mb
 
 decoded_mbf::frmbos::OccSitesNonzeroBosons::OccSitesNonzeroBosons(const FrmBosOnvField &mbf) : SimpleBase(mbf){}
 
-const defs::inds_t &decoded_mbf::frmbos::OccSitesNonzeroBosons::get() {
+const defs::ivec_t &decoded_mbf::frmbos::OccSitesNonzeroBosons::get() {
     DEBUG_ASSERT_EQ(m_mbf.m_frm.m_basis.m_nsite, m_mbf.m_bos.m_basis.m_nmode,
                     "this cache only makes sense with a 1-to-1 correspondence between modes and sites");
     if (!empty()) return validated();

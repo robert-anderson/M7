@@ -37,9 +37,18 @@ namespace defs {
 #else
     constexpr bool c_enable_debug = false;
 #endif
-    typedef uint64_t ind_t;
-    typedef std::vector<ind_t> inds_t;
-    typedef std::pair<ind_t, ind_t> ipair_t;
+    /**
+     * the integral type used throughout the code to count and number items. thus, it is unsigned
+     */
+    typedef uint64_t i_t;
+    /**
+     * vector of such integers
+     */
+    typedef std::vector<i_t> ivec_t;
+    /**
+     * pair of such integers
+     */
+    typedef std::pair<i_t, i_t> ipair_t;
 
 #ifdef ENABLE_COMPLEX_HAM
     constexpr bool c_enable_complex_ham = true;
@@ -68,11 +77,6 @@ namespace defs {
     typedef char buf_t;
     typedef unsigned char mev_ind_t;
     typedef unsigned char bos_occ_t;
-
-
-    constexpr int undefined_ms2 = std::numeric_limits<int>::max();
-    constexpr size_t max_bos_occ = std::numeric_limits<bos_occ_t>::max();
-
 
     enum MbfTypeInd {Frm, FrmBos, Bos};
     /**
