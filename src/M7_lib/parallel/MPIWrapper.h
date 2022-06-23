@@ -200,7 +200,7 @@ namespace mpi {
 
     void barrier_on_node();
 
-    static count_t snrw(const size_t &i) {
+    static count_t snrw(size_t i) {
         return convert::safe_narrow<count_t>(i);
     }
 

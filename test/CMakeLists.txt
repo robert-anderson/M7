@@ -22,7 +22,27 @@ if (ENABLE_PROFILING)
     target_link_options(unittest PRIVATE -pg)
 endif()
 
+# compile and link options are compiler-dependent, so each vendor must be dealt with separately
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(unittest
+        PUBLIC
+            -g
+        PRIVATE
+            -Wno-unused-function -Wno-unused-parameter
+            -rdynamic
+            -Wall -Wextra
+    )
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    elseif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        target_compile_options(unittest
+            PRIVATE
+                -Werror
+        )
+    else ()
+        message(FATAL_ERROR "Specified CMAKE_BUILD_TYPE is invalid")
+    endif()
+
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(unittest
         PUBLIC
             -g
