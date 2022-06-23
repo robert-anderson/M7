@@ -76,30 +76,6 @@ namespace defs {
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
 
-    /**
-     * "exsigs", short for "excitation signatures", encode in a single word the number of each type of second-quantised
-     * operator in an operator product.
-     */
-    /**
-     * number of bits in the signature representing each number of fermion SQ operators
-     */
-    static constexpr size_t nbit_exsig_nop_frm = 3;
-    /**
-     * number of bits in the signature representing each number of boson SQ operators
-     */
-    static constexpr size_t nbit_exsig_nop_bos = 2;
-    /**
-     * mask and max value for extraction of a number of fermion SQ operators
-     */
-    static constexpr size_t exsig_nop_mask_frm = (1 << nbit_exsig_nop_frm)-1;
-    /**
-     * mask and max value for extraction of a number of boson SQ operators
-     */
-    static constexpr size_t exsig_nop_mask_bos = (1 << nbit_exsig_nop_bos)-1;
-    /**
-     * total number of distinct excitation signatures that can be stored
-     */
-    static constexpr size_t nexsig = (1 << (2 * nbit_exsig_nop_frm + 2*nbit_exsig_nop_bos));
 
     enum MbfTypeInd {Frm, FrmBos, Bos};
     /**

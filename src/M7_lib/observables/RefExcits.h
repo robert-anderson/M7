@@ -13,6 +13,7 @@
 #include <M7_lib/table/BufferedTable.h>
 #include <M7_lib/table/BufferedFields.h>
 #include <M7_lib/mae/MaeTable.h>
+#include <M7_lib/util/Exsig.h>
 
 struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
     /**
@@ -38,7 +39,7 @@ struct RefExcitsOneExsig : BufferedTable<MaeRow, true> {
 struct RefExcits : Archivable {
     const conf::RefExcits& m_opts;
     buffered::Numbers<defs::wf_t, 1> m_av_ref;
-    std::array<std::unique_ptr<RefExcitsOneExsig>, defs::nexsig> m_ref_excits;
+    std::array<std::unique_ptr<RefExcitsOneExsig>, exsig::c_ndistinct> m_ref_excits;
     defs::inds_t m_active_exsigs;
     /**
      * work space for computing connections between reference and contributing ONVs

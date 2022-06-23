@@ -130,8 +130,8 @@ void Rdm::save(hdf5::GroupWriter &gw) const {
     m_store.save(gw, to_string(m_ranksig));
 }
 
-std::array<defs::inds_t, defs::nexsig> Rdms::make_exsig_ranks() const {
-    std::array<defs::inds_t, defs::nexsig> exsig_ranks;
+std::array<defs::inds_t, exsig::c_ndistinct> Rdms::make_exsig_ranks() const {
+    std::array<defs::inds_t, exsig::c_ndistinct> exsig_ranks;
     for (const auto &ranksig: m_active_ranksigs) {
         auto nfrm_cre = decode_nfrm_cre(ranksig);
         auto nfrm_ann = decode_nfrm_cre(ranksig);
@@ -140,7 +140,7 @@ std::array<defs::inds_t, defs::nexsig> Rdms::make_exsig_ranks() const {
             auto nbos_ann = decode_nbos_ann(ranksig);
             while (nbos_cre != ~0ul && nbos_ann != ~0ul) {
                 auto exsig = encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
-                DEBUG_ASSERT_LT(exsig, defs::nexsig, "exsig OOB");
+                DEBUG_ASSERT_LT(exsig, exsig::c_ndistinct, "exsig OOB");
                 exsig_ranks[exsig].push_back(ranksig);
                 --nbos_cre;
                 --nbos_ann;
@@ -176,7 +176,7 @@ Rdms::operator bool() const {
 }
 
 bool Rdms::takes_contribs_from(const size_t &exsig) const {
-    if (exsig > defs::nexsig) return false;
+    if (exsig > exsig::c_ndistinct) return false;
     return !m_exsig_ranks[exsig].empty();
 }
 

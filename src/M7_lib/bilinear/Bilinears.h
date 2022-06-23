@@ -41,7 +41,7 @@ struct Bilinears {
     buffered::Numbers<defs::wf_t, defs::ndim_root> m_total_norm;
     //const bool m_explicit_hf_conns;
 
-    //std::array<std::unique_ptr<SpectralMoment>, defs::nexsig> m_specmoms;
+    //std::array<std::unique_ptr<SpectralMoment>, defs::c_ndistinct> m_specmoms;
     //const defs::inds_t m_specmom_exsigs;
 
 private:
@@ -55,17 +55,17 @@ private:
         REQUIRE_TRUE_ALL(string.size() == 1 || string.size() == 4, "invalid exsig string specification");
         if (string.size() == 1) {
             size_t rank = string::parse_decimal_digit(string.c_str());
-            REQUIRE_LE_ALL(rank, defs::exsig_nop_mask_frm, "number of fermion operators exceeds limit");
+            REQUIRE_LE_ALL(rank, exsig::c_nop_mask_frm, "number of fermion operators exceeds limit");
             return exsig::encode(rank, rank, 0, 0);
         }
         size_t nfrm_cre = string::parse_decimal_digit(string.c_str());
-        REQUIRE_LE_ALL(nfrm_cre, defs::exsig_nop_mask_frm, "number of fermion creation operators exceeds limit");
+        REQUIRE_LE_ALL(nfrm_cre, exsig::c_nop_mask_frm, "number of fermion creation operators exceeds limit");
         size_t nfrm_ann = string::parse_decimal_digit(string.c_str()+1);
-        REQUIRE_LE_ALL(nfrm_ann, defs::exsig_nop_mask_frm, "number of fermion annihilation operators exceeds limit");
+        REQUIRE_LE_ALL(nfrm_ann, exsig::c_nop_mask_frm, "number of fermion annihilation operators exceeds limit");
         size_t nbos_cre = string::parse_decimal_digit(string.c_str()+2);
-        REQUIRE_LE_ALL(nbos_cre, defs::exsig_nop_mask_bos, "number of boson creation operators exceeds limit");
+        REQUIRE_LE_ALL(nbos_cre, exsig::c_nop_mask_bos, "number of boson creation operators exceeds limit");
         size_t nbos_ann = string::parse_decimal_digit(string.c_str()+3);
-        REQUIRE_LE_ALL(nbos_ann, defs::exsig_nop_mask_bos, "number of boson annihilation operators exceeds limit");
+        REQUIRE_LE_ALL(nbos_ann, exsig::c_nop_mask_bos, "number of boson annihilation operators exceeds limit");
         return exsig::encode(nfrm_cre, nfrm_ann, nbos_cre, nbos_ann);
     }
     /**

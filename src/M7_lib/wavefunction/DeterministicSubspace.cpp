@@ -83,7 +83,7 @@ void DeterministicSubspace::build_connections(const Hamiltonian &ham, const Bili
             // only add to sparse H if dets are connected
             conn_work.connect(row_local.m_mbf, row_global.m_mbf);
             const auto exsig = conn_work.exsig();
-            if (!exsig || exsig > defs::nexsig) continue; // diagonal
+            if (!exsig || exsig > exsig::c_ndistinct) continue; // diagonal
             auto helem = ham.get_element(row_local.m_mbf, conn_work);
             if (ham::is_significant(helem)) {
                 m_ham_matrix.add(row_local.index(), row_global.index(), helem);

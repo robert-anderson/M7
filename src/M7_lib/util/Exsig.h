@@ -11,11 +11,35 @@
 using namespace defs;
 /**
  * functions related to "excitation signatures" of connections between many-body basis functions
+ * "exsigs" encode in a single word the number of each type of second-quantised operator in an operator product.
  */
 namespace exsig {
+
+    /**
+     * number of bits in the signature representing each number of fermion SQ operators
+     */
+    static constexpr size_t c_nbit_nop_frm = 3;
+    /**
+     * number of bits in the signature representing each number of boson SQ operators
+     */
+    static constexpr size_t c_nbit_nop_bos = 2;
+    /**
+     * mask and max value for extraction of a number of fermion SQ operators
+     */
+    static constexpr size_t c_nop_mask_frm = (1 << c_nbit_nop_frm) - 1;
+    /**
+     * mask and max value for extraction of a number of boson SQ operators
+     */
+    static constexpr size_t c_nop_mask_bos = (1 << c_nbit_nop_bos) - 1;
+    /**
+     * total number of distinct excitation signatures that can be stored
+     */
+    static constexpr size_t c_ndistinct = (1 << (2 * c_nbit_nop_frm + 2 * c_nbit_nop_bos));
+
+
     /**
      * compactly expresses an arbitrary SQ operator product as a single integer given some compile-time constant numbers
-     * of bits for each element. e.g. if nbit_exsig_nop_frm = 3 and nbit_exsig_nop_bos = 1, then 2x3+2x1 = 8 bits are
+     * of bits for each element. e.g. if c_nbit_nop_frm = 3 and c_nbit_nop_bos = 1, then 2x3+2x1 = 8 bits are
      * required to store a connection excitation level as an exsig (excitation signature) with upto 7 fermion creation
      * operators, 7 fermion annihilation operators and 1 each of boson creation and annihilation operators, this limit
      * should be sufficient for all foreseeable applications, but these bit segment lengths are not hardcoded.
@@ -31,11 +55,11 @@ namespace exsig {
      *  the excitation signature
      */
     static constexpr size_t encode(size_t nfrm_cre, size_t nfrm_ann, size_t nbos_cre, size_t nbos_ann) {
-        return (nfrm_cre > exsig_nop_mask_frm || nfrm_ann > exsig_nop_mask_frm ||
-                nbos_cre > exsig_nop_mask_bos || nbos_ann > exsig_nop_mask_bos) ?
-               ~0ul : nfrm_cre | (nfrm_ann << nbit_exsig_nop_frm) |
-                      (nbos_cre << (2 * nbit_exsig_nop_frm)) |
-                      (nbos_ann << (2 * nbit_exsig_nop_frm + nbit_exsig_nop_bos));
+        return (nfrm_cre > c_nop_mask_frm || nfrm_ann > c_nop_mask_frm ||
+                nbos_cre > c_nop_mask_bos || nbos_ann > c_nop_mask_bos) ?
+               ~0ul : nfrm_cre | (nfrm_ann << c_nbit_nop_frm) |
+                      (nbos_cre << (2 * c_nbit_nop_frm)) |
+                      (nbos_ann << (2 * c_nbit_nop_frm + c_nbit_nop_bos));
     }
 
     /**
@@ -45,7 +69,7 @@ namespace exsig {
      *  the number of fermion creation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nfrm_cre(size_t exsig) {
-        return exsig_nop_mask_frm & exsig;
+        return c_nop_mask_frm & exsig;
     }
 
     /**
@@ -55,7 +79,7 @@ namespace exsig {
      *  the number of fermion annihilation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nfrm_ann(size_t exsig) {
-        return exsig_nop_mask_frm & (exsig >> nbit_exsig_nop_frm);
+        return c_nop_mask_frm & (exsig >> c_nbit_nop_frm);
     }
 
     /**
@@ -65,7 +89,7 @@ namespace exsig {
      *  the number of boson creation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nbos_cre(size_t exsig) {
-        return exsig_nop_mask_bos & (exsig >> (2 * nbit_exsig_nop_frm));
+        return c_nop_mask_bos & (exsig >> (2 * c_nbit_nop_frm));
     }
 
     /**
@@ -75,7 +99,7 @@ namespace exsig {
      *  the number of boson annihilation indices in the SQ operator product encoded within exsig
      */
     static constexpr size_t decode_nbos_ann(size_t exsig) {
-        return exsig_nop_mask_bos & (exsig >> (2 * nbit_exsig_nop_frm + nbit_exsig_nop_bos));
+        return c_nop_mask_bos & (exsig >> (2 * c_nbit_nop_frm + c_nbit_nop_bos));
     }
 
     /**
@@ -196,7 +220,7 @@ namespace exsig {
     }
 
     static std::string to_string(size_t exsig) {
-        if (exsig > nexsig) return "invalid";
+        if (exsig > c_ndistinct) return "invalid";
         return std::to_string(decode_nfrm_cre(exsig)) + std::to_string(decode_nfrm_ann(exsig)) +
                std::to_string(decode_nbos_cre(exsig)) + std::to_string(decode_nbos_ann(exsig));
     }

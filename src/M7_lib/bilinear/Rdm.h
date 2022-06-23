@@ -49,14 +49,14 @@ public:
 };
 
 class Rdms : public Archivable {
-    std::array<std::unique_ptr<Rdm>, defs::nexsig> m_rdms;
+    std::array<std::unique_ptr<Rdm>, exsig::c_ndistinct> m_rdms;
     const defs::inds_t m_active_ranksigs;
-    const std::array<defs::inds_t, defs::nexsig> m_exsig_ranks;
+    const std::array<defs::inds_t, exsig::c_ndistinct> m_exsig_ranks;
 
     suite::Conns m_work_conns;
     suite::ComOps m_work_com_ops;
 
-    std::array<defs::inds_t, defs::nexsig> make_exsig_ranks() const;
+    std::array<defs::inds_t, exsig::c_ndistinct> make_exsig_ranks() const;
 
 public:
     const bool m_explicit_ref_conns;

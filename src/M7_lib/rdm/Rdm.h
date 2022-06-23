@@ -114,7 +114,7 @@ public:
 
 struct RdmGroup {
     // particle number-conserving, fermion RDMs
-    std::array<std::unique_ptr<FermionRdm>, defs::exsig_nop_mask_frm> m_frm_rdms;
+    std::array<std::unique_ptr<FermionRdm>, defs::c_nop_mask_frm> m_frm_rdms;
 
     RdmGroup(const conf::FermionRdm &opts, size_t nsite, size_t nelec){
         for (auto rank: opts.m_ranks.get())
