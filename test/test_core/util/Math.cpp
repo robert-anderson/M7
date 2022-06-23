@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 #include "M7_lib/util/Math.h"
 
-using namespace utils::math;
+using namespace math;
 
 TEST(UtilMath, CompileTimePow) {
     ASSERT_EQ(pow<3>(5), 5 * 5 * 5);

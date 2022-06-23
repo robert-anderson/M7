@@ -70,11 +70,3 @@ TEST(utils, PairMaps) {
         }
     }
 }
-
-TEST(utils, MeanAndStd) {
-    std::vector<double> v = {1, 2, 3.8, 4, -0.35, 0.6};
-    auto mean_std = stat_utils::mean_std<double>(v.cbegin(), v.cend());
-    ASSERT_FLOAT_EQ(mean_std.first, 1.8416666666666668);
-    ASSERT_FLOAT_EQ(mean_std.second, 1.6110081384717527);
-}
-

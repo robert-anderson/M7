@@ -9,6 +9,7 @@ target_sources(unittest
         Hashing.cpp
         Integer.cpp
         Math.cpp
+        MeanStd.cpp
         Sort.cpp
         String.cpp
         Tuple.cpp

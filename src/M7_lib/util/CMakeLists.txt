@@ -12,6 +12,9 @@ target_sources(M7_lib
         Integer.cpp
         Integer.h
         Nd.h
+        Math.h
+        MeanStd.h
+        Probability.h
         ProgressMonitor.cpp
         ProgressMonitor.h
         SmartPtr.h

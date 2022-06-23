@@ -2,6 +2,7 @@
 // Created by Robert J. Anderson on 18/05/2020.
 //
 
+#include "M7_lib/util/Probability.h"
 #include "MagnitudeLogger.h"
 
 MagnitudeLogger::MagnitudeLogger(defs::ham_comp_t max_bloom, size_t ndraw_min, size_t nexcase, bool static_tau,
@@ -49,7 +50,7 @@ void MagnitudeLogger::update(size_t icycle, double &tau, ExcitGenGroup &excit_ge
     if (!m_static_probs){
         m_new_probs.assign(m_gamma.m_reduced.dbegin(), m_gamma.m_reduced.dend());
         for (auto& new_prob : m_new_probs) new_prob /= gamma_sum;
-        prob_utils::rectify(m_new_probs, m_prob_min);
+        prob::rectify(m_new_probs, m_prob_min);
         excit_gens.set_probs(m_new_probs);
         m_gamma.m_local.zero();
     }

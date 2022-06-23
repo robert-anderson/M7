@@ -23,65 +23,6 @@
 #include <functional>
 #include <list>
 
-namespace prob_utils {
 
-    static void normalize(std::vector<defs::prob_t> &v, defs::prob_t norm = 1.0) {
-        auto tot = std::accumulate(v.begin(), v.end(), 0.0);
-        auto fac = norm / tot;
-        for (auto &i:v) i *= fac;
-    }
-
-    static void rectify(std::vector<defs::prob_t> &v, defs::prob_t min) {
-        for (auto &prob: v) if (prob < min) prob = min;
-        normalize(v);
-    }
-
-    static defs::prob_t linear_bias_prob(const size_t &n, const size_t &i) {
-        return (2 * i + 1) / defs::prob_t(n * n);
-    }
-}
-
-namespace stat_utils {
-
-    template<typename T>
-    std::pair<T, T> mean_std(
-            typename std::vector<T>::const_iterator begin,
-            typename std::vector<T>::const_iterator end) {
-        T mean = 0.0;
-        T sq_mean = 0.0;
-        for (auto i = begin; i != end; i++) {
-            mean += *i;
-            sq_mean += (*i) * (*i);
-        }
-        mean /= std::distance(begin, end);
-        sq_mean /= std::distance(begin, end);
-        return {mean, std::sqrt(std::abs(sq_mean - mean * mean))};
-    }
-
-    template<typename T>
-    std::pair<T, T> product(const std::pair<T, T> &a, const std::pair<T, T> &b) {
-        /*
-         * combine statistics in quadrature for product of random variables
-         * a and b assuming no covariance
-         */
-        return {
-                a.first * b.first, std::abs(a.first * b.first) *
-                                   std::sqrt(std::pow(a.second / a.first, 2.0) + std::pow(b.second / b.first, 2.0))
-        };
-    }
-
-    template<typename T>
-    std::pair<T, T> quotient(const std::pair<T, T> &a, const std::pair<T, T> &b) {
-        /*
-         * combine statistics in quadrature for quotient of random variables
-         * a and b assuming no covariance
-         */
-        return {
-                a.first / b.first, std::abs(a.first / b.first) *
-                                   std::sqrt(std::pow(a.second / a.first, 2.0) + std::pow(b.second / b.first, 2.0))
-        };
-    }
-
-}
 
 #endif //M7_UTILS_H
