@@ -75,7 +75,7 @@ namespace hdf5 {
 
     template<typename T>
     const hid_t &type() {
-        typedef consts::comp_t<T> comp_t;
+        typedef arith::comp_t<T> comp_t;
         static_assert(type_ind<comp_t>(), "type has no HDF5 equivalent");
         return types[type_ind<comp_t>()];
     }

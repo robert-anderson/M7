@@ -52,7 +52,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
 
     // re-pack the selected indices into the flat index of the aliser row
     ij = integer::strigmap(j, i); // i and j are orbital indices
-    if (consts::nearly_zero(m_pick_ab_given_ij.norm(ij))) {
+    if (fptol::numeric_zero(m_pick_ab_given_ij.norm(ij))) {
         // can't have a valid excitation if the row norm is zero
         return false;
     }
@@ -70,10 +70,7 @@ bool Pchb2200::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs::p
     helem = m_h.get_element_2200(src, conn);
     prob = std::abs(helem) / (m_pick_ab_given_ij.norm(ij) * npair_elec);
     DEBUG_ASSERT_LE(prob, 1.0, "excitation drawn with invalid probability");
-    if (consts::nearly_zero(prob, 1e-14)) {
-        return false;
-    }
-    return true;
+    return !fptol::numeric_zero(prob);
 }
 
 bool Pchb2200::draw_frm(const size_t &exsig, const field::FrmOnv &src, defs::prob_t &prob, conn::FrmOnv &conn) {

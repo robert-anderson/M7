@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
      * log compile-time defintions
      */
     log::info("M7 {} build", defs::c_enable_debug ? "DEBUG" : "RELEASE");
-    log::info("Many-body basis definition: {}", consts::mbf_type_name<defs::mbf_type_ind>());
+    log::info("Many-body basis definition: {}", datatype::mbf_type_name<defs::mbf_type_ind>());
     log::info("Walker arithmetic type: {}", defs::c_enable_complex_wf ? "complex" : "real");
 
     if (argc == 1) {

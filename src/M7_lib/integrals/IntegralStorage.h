@@ -21,20 +21,34 @@ struct IntegralStorage {
             std::is_same<storage_t, SharedArray<T>>::value, "storage class must be either private or shared");
     storage_t m_data;
     const size_t m_size;
+    static constexpr arith::comp_t<T> c_coeff_atol = 1e-9;
+
     IntegralStorage(size_t size): m_data(size), m_size(size){}
 
 private:
+    /**
+     * @param elem
+     *  coefficient element
+     * @return
+     *  true if the magnitude of elem exceeds minimum
+     */
+    static bool is_significant(T elem) {
+        return std::abs(elem) >= c_coeff_atol;
+    }
+
     bool set_data(std::vector<T>& data, size_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
+        if (!is_significant(elem)) return true;
         auto& ref = data[iflat];
-        if (ref!=T(0) && !consts::nearly_equal(elem, ref, defs::helem_tol)) return false;
+        if (ref!=T(0) && !fptol::numeric_equal(elem, ref)) return false;
         ref = elem;
         return true;
     }
 
     bool set_data(SharedArray<T>& data, size_t iflat, T elem){
         DEBUG_ASSERT_LT(iflat, m_size, "flat index OOB");
-        if (data[iflat]!=T(0) && !consts::nearly_equal(elem, data[iflat], defs::helem_tol)) return false;
+        if (!is_significant(elem)) return true;
+        if (data[iflat]!=T(0) && !fptol::numeric_equal(elem, data[iflat])) return false;
         data.set(iflat, elem);
         return true;
     }

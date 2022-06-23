@@ -80,7 +80,7 @@ void Wavefunction::h5_read(hdf5::GroupReader &parent, const Hamiltonian &ham, co
     for (size_t iitem = 0ul; iitem < row_reader.m_nitem; ++iitem) {
         row_reader.read(iitem);
         conn[ref].connect(ref, row_reader.m_mbf);
-        bool ref_conn = !consts::nearly_zero(ham.get_element(ref, conn[ref]));
+        bool ref_conn = ham::is_significant(ham.get_element(ref, conn[ref]));
         create_row(0ul, row_reader.m_mbf, ham.get_energy(row_reader.m_mbf), std::vector<bool>(npart(), ref_conn));
         set_weight(row_reader.m_weight);
     }

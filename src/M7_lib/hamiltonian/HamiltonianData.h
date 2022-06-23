@@ -10,7 +10,7 @@
 #include <M7_lib/parallel/MPIAssert.h>
 
 
-namespace ham_data {
+namespace ham {
     using namespace utils::exsig;
 
     class TermContribs {
@@ -75,6 +75,17 @@ namespace ham_data {
 
         bool conserving() const;
     };
+
+    static constexpr double element_tol() {return 1e-12;}
+    /**
+     * @param elem
+     *  hamiltonian matrix element
+     * @return
+     *  true if the magnitude of elem exceeds hard-coded minimum
+     */
+    static bool is_significant(defs::ham_t elem) {
+        return fptol::nearly_zero(elem, element_tol());
+    }
 }
 
 #endif //M7_HAMILTONIANDATA_H

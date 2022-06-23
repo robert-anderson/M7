@@ -275,7 +275,7 @@ public:
     }
 
     defs::ham_comp_t get_energy(const FrmBosOnv &onv) const {
-        return consts::real(get_element(onv));
+        return arith::real(get_element(onv));
     }
 
     /*

@@ -15,9 +15,9 @@ TEST(FermionHamiltonian, DhfEnergy) {
     buffered::FrmOnv onv(ham.m_nsite);
     onv = {0, 1, ham.m_nsite, ham.m_nsite + 1};
     auto elem = ham.get_element(onv);
-    ASSERT_TRUE(consts::floats_equal(consts::real(elem), benchmark));
-    ASSERT_TRUE(consts::float_nearly_zero(consts::imag(elem), 1e-14));
-    ASSERT_TRUE(consts::floats_equal(ham.get_energy(onv), benchmark));
+    ASSERT_TRUE(datatype::floats_equal(datatype::real(elem), benchmark));
+    ASSERT_TRUE(datatype::float_nearly_zero(datatype::imag(elem), 1e-14));
+    ASSERT_TRUE(datatype::floats_equal(ham.get_energy(onv), benchmark));
 }
 
 TEST(FermionHamiltonian, DhfBrillouinTheorem) {
@@ -38,7 +38,7 @@ TEST(FermionHamiltonian, DhfBrillouinTheorem) {
         for (size_t ivac = 0ul; ivac < vacs.size(); ++ivac) {
             const auto &vac = vacs[iocc];
             conn.set(occ, vac);
-            ASSERT_TRUE(consts::float_is_zero(ham.get_element(hf_det, conn)));
+            ASSERT_TRUE(datatype::float_is_zero(ham.get_element(hf_det, conn)));
         }
     }
 }
@@ -56,7 +56,7 @@ TEST(GeneralFrmHam, Elements) {
         buffered::FrmOnv dst(h.m_basis);
         dst = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
-        ASSERT_FLOAT_EQ(benchmark, helem);
+        ASSERT_NEARLY_EQ(benchmark, helem);
     }
     {
         buffered::FrmBosOnv src(h.m_basis);
@@ -64,7 +64,7 @@ TEST(GeneralFrmHam, Elements) {
         buffered::FrmBosOnv dst(h.m_basis);
         dst.m_frm = {{0, 1, 3}, {0, 1, 4}};
         auto helem = h.get_element(src, dst);
-        ASSERT_FLOAT_EQ(benchmark, helem);
+        ASSERT_NEARLY_EQ(benchmark, helem);
     }
 }
 
@@ -78,8 +78,8 @@ TEST(GeneralFrmHam, RhfEnergy) {
     buffered::FrmOnv onv(ham.m_basis);
     mbf::set_aufbau_mbf(onv, ham.default_particles().m_frm);
     auto elem = ham.get_element(onv);
-    ASSERT_COMPLEX_EQ(elem, benchmark);
-    ASSERT_FLOAT_EQ(ham.get_energy(onv), benchmark);
+    ASSERT_NEARLY_EQ(elem, benchmark);
+    ASSERT_NEARLY_EQ(ham.get_energy(onv), benchmark);
 }
 
 TEST(GeneralFrmHam, RhfBrillouinTheorem) {
@@ -98,7 +98,7 @@ TEST(GeneralFrmHam, RhfBrillouinTheorem) {
         for (size_t vac : vacs.get()){
             conn.m_ann.set(occ);
             conn.m_cre.set(vac);
-            ASSERT_FLOAT_EQ(ham.get_element_1100(onv, conn), 0.0);
+            ASSERT_NEARLY_EQ(ham.get_element_1100(onv, conn), 0.0);
         }
     }
 }

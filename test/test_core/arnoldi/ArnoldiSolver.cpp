@@ -8,7 +8,6 @@
 #include "M7_lib/arnoldi/ArnoldiSolver.h"
 #include "M7_lib/util/Sort.h"
 
-static const double arnodli_eval_tol = 1e-13;
 TEST(ArnoldiSolver, SymNonDist) {
     const size_t nrow = 20;
     const size_t nroot = 3;
@@ -27,7 +26,7 @@ TEST(ArnoldiSolver, SymNonDist) {
     // Arnoldi finds the extremal eigenvalue. in this case, the most positive
     auto dense_eval_it = evals.cbegin()+(nrow-nroot);
     for (size_t iroot=0ul; iroot<nroot; ++iroot){
-        ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
+        ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
     }
 }
 
@@ -50,7 +49,7 @@ TEST(ArnoldiSolver, SymDist) {
         dense::diag(dense, evals);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
-            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
+            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot]);
         }
     }
 }
@@ -74,7 +73,7 @@ TEST(ArnoldiSolver, NonSymNonDist) {
     utils::sort::inplace(evals, false, true);
     auto dense_eval_it = evals.cbegin() + (nrow - nroot);
     for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
-        ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
+        ASSERT_NEARLY_EQ(arnoldi_problem.complex_eigenvalue(iroot), dense_eval_it[iroot]);
     }
 }
 
@@ -98,7 +97,7 @@ TEST(ArnoldiSolver, NonSymDist) {
         utils::sort::inplace(evals, false, true);
         auto dense_eval_it = evals.cbegin() + (nrow - nroot);
         for (size_t iroot = 0ul; iroot < nroot; ++iroot) {
-            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), dense_eval_it[iroot], arnodli_eval_tol);
+            ASSERT_NEARLY_EQ(arnoldi_problem.real_eigenvalue(iroot), arith::real(dense_eval_it[iroot]));
         }
     }
 }

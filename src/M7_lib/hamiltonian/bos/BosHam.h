@@ -30,10 +30,10 @@ struct BosHam : HamOpTerm {
      * on the other hand, terms of rank 0022 can take contributions from exsigs 0000 (diagonals), 0011, and 0022
      * these objects keep track of which of these exsigs are non-zero and which may contribute to matrix elements
      */
-    ham_data::TermContribs m_contribs_0010;
-    ham_data::TermContribs m_contribs_0001;
-    ham_data::TermContribs m_contribs_0011;
-    ham_data::TermContribs m_contribs_0022;
+    ham::TermContribs m_contribs_0010;
+    ham::TermContribs m_contribs_0001;
+    ham::TermContribs m_contribs_0011;
+    ham::TermContribs m_contribs_0022;
 
     BosHam(const sys::bos::Basis& basis):
             m_basis(basis),
@@ -79,7 +79,7 @@ public:
     }
 
     defs::ham_comp_t get_energy(const field::BosOnv &onv) const {
-        return consts::real(get_element(onv));
+        return arith::real(get_element(onv));
     }
 
     defs::ham_t get_element(const field::BosOnv &src, const conn::BosOnv& conn) const {

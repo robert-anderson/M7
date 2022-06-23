@@ -255,12 +255,12 @@ private:
         const auto ipart_src = m_format.flatten({iroot, ireplica});
         const auto ipart_dst = m_format.flatten({jroot, ireplica});
         overlaps.m_local[{iroot, jroot, ireplica}] +=
-                consts::conj(row.m_weight[ipart_src])*row.m_weight[ipart_dst];
+                arith::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_dst];
         if (jroot+1<nroot()) {
             // there is another part to project onto
             const auto ipart_next = m_format.flatten({jroot+1, ireplica});
             overlaps.m_local[{iroot, jroot + 1, ireplica}] +=
-                    consts::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_next];
+                    arith::conj(row.m_weight[ipart_src]) * row.m_weight[ipart_next];
         }
         if (iroot<jroot){
             const auto& overlap = overlaps.m_reduced[{iroot, jroot, ireplica}];

@@ -69,7 +69,7 @@ void Reference::end_cycle() {
 
 bool Reference::is_connected(const field::Mbf &mbf) const {
     m_conn[mbf].connect(get_mbf(), mbf);
-    return !consts::nearly_zero(m_ham.get_element(get_mbf(), m_conn[mbf]));
+    return ham::is_significant(m_ham.get_element(get_mbf(), m_conn[mbf]));
 }
 
 size_t Reference::exsig(const field::Mbf &mbf) const {

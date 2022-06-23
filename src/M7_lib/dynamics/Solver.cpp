@@ -264,7 +264,7 @@ void Solver::propagate_row(const size_t &ipart) {
 
     if (row.is_cleared()) return;
 
-    if (consts::nearly_zero(row.m_weight[ipart], 1e-14)) return;
+    if (fptol::numeric_zero(row.m_weight[ipart])) return;
 
     m_prop.off_diagonal(m_wf, ipart);
     m_prop.diagonal(m_wf, ipart);
@@ -275,9 +275,9 @@ void Solver::end_cycle() {
      * TODO: make these checks compatible with dynamic rank allocation
      */
 //    double chk_ratio;
-    if (!consts::nearly_zero(m_wf.m_nwalker.m_local[{0, 0}])) {
+    if (!fptol::numeric_zero(m_wf.m_nwalker.m_local[{0, 0}])) {
 //        chk_ratio = m_chk_nwalker_local / m_wf.m_nwalker(0, 0);
-//        bool chk = m_chk_nwalker_local == 0.0 || consts::nearly_equal(chk_ratio, 1.0);
+//        bool chk = m_chk_nwalker_local == 0.0 || datatype::nearly_equal(chk_ratio, 1.0);
 //        if (!chk) std::cout << "discrepancy: " << m_chk_nwalker_local-m_wf.m_nwalker(0, 0) << std::endl;
 //        MPI_REQUIRE(chk,"Unlogged walker population changes have occurred");
     }

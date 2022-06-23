@@ -31,7 +31,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     defs::prob_t p_succeed_at_least_once = 1.0;
 
     DEBUG_ASSERT_NE(weight, 0.0, "should not attempt off-diagonal propagation from zero weight");
-    DEBUG_ASSERT_TRUE(consts::imag(weight) == 0.0 || m_ham.complex_valued(),
+    DEBUG_ASSERT_TRUE(m_ham.complex_valued() || fptol::numeric_real(weight),
                       "real-valued hamiltonian should never result in non-zero imaginary walker component")
     const auto &src_mbf = row.m_mbf;
     bool flag_initiator = row.m_initiator.get(ipart);
@@ -71,7 +71,7 @@ void StochasticPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 
         conn.apply(src_mbf, dst_mbf);
         auto delta = -tau() * phase(weight) * helem / prob_gen;
-        if (consts::nearly_zero(delta, 1e-14)) continue;
+        if (fptol::numeric_zero(delta)) continue;
         imp_samp_delta(delta, src_mbf, dst_mbf, row.m_hdiag);
         /*
          * the stochastically-realized spawned contribution is equal to delta if delta is not lower in magnitude than

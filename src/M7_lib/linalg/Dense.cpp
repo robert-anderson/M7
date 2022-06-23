@@ -77,7 +77,7 @@ bool dense::diag(const dense::SquareMatrix<float> &mat, std::vector<std::complex
     auto a = mat;
     sgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
-    complex_utils::combine(real_evals, imag_evals, evals);
+    arith::zip(real_evals, imag_evals, evals);
     return !info;
 }
 
@@ -114,7 +114,7 @@ bool dense::diag(const dense::SquareMatrix<double> &mat, std::vector<std::comple
     auto a = mat;
     dgeev_("N", "N", &n, a.ptr(), &n, real_evals.data(), imag_evals.data(),
            nullptr, &n, nullptr, &n, work.data(), &lwork, &info);
-    complex_utils::combine(real_evals, imag_evals, evals);
+    arith::zip(real_evals, imag_evals, evals);
     return !info;
 }
 

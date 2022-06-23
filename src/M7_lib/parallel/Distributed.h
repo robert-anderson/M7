@@ -9,7 +9,7 @@
 
 template<typename T>
 class Distributed {
-    static_assert(consts::is_arithmetic<T>(), "template type must be arithmetic.");
+    static_assert(datatype::is_arithmetic<T>(), "template type must be arithmetic.");
 protected:
     T m_local{}; // value on this process
 

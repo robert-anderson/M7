@@ -29,7 +29,7 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool 
     FcidumpFileReader file_reader(info.m_fname, spin_major);
     m_complex_valued = file_reader.m_complex_valued;
 
-    using namespace ham_data;
+    using namespace ham;
     defs::inds_t inds(4);
     defs::ham_t value;
 
@@ -51,7 +51,6 @@ GeneralFrmHam::Integrals GeneralFrmHam::make_ints(const FcidumpInfo &info, bool 
     size_t iline = ~0ul;
     while (file_reader.next(inds, value)) {
         ++iline;
-        if (consts::nearly_zero(value, defs::helem_tol)) continue;
         auto ranksig = file_reader.ranksig(inds);
         auto exsig = file_reader.exsig(inds, ranksig);
 

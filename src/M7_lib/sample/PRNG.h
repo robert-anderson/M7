@@ -75,7 +75,7 @@ public:
      * overload for situations where the probability is not required by the calling scope
      */
     template<typename T>
-    T stochastic_round(const T &v, const consts::comp_t<T> &magnitude) {
+    T stochastic_round(const T &v, const arith::comp_t<T> &magnitude) {
         defs::prob_t prob;
         return stochastic_round(v, magnitude, prob);
     }
@@ -93,7 +93,7 @@ public:
      *  result of stochastic_round only if |v| is less than magnitude, else return v unmodified with certainty
      */
     template<typename T>
-    T stochastic_threshold(const T &v, const consts::comp_t<T> &magnitude, defs::prob_t& prob) {
+    T stochastic_threshold(const T &v, const arith::comp_t<T> &magnitude, defs::prob_t& prob) {
         if (std::abs(v) < magnitude) return stochastic_round(v, magnitude, prob);
         prob = 1.0;
         return v;
@@ -103,7 +103,7 @@ public:
      * overload for situations where the probability is not required by the calling scope
      */
     template<typename T>
-    T stochastic_threshold(const T &v, const consts::comp_t<T> &magnitude) {
+    T stochastic_threshold(const T &v, const arith::comp_t<T> &magnitude) {
         defs::prob_t prob;
         return stochastic_threshold(v, magnitude, prob);
     }

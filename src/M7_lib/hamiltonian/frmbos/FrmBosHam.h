@@ -29,8 +29,8 @@ struct FrmBosHam : HamOpTerm {
      * e.g. hamiltonian term of rank 1101 can take contributions from excitations of exsig 0001 and 1101.
      * these objects keep track of which of these exsigs are non-zero and which may contribute to matrix elements
      */
-    ham_data::TermContribs m_contribs_1110;
-    ham_data::TermContribs m_contribs_1101;
+    ham::TermContribs m_contribs_1110;
+    ham::TermContribs m_contribs_1101;
 
     /**
      * @param basis

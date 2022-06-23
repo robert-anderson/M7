@@ -196,7 +196,7 @@ void Rdms::make_contribs(const SpawnTableRow &recv_row, const WalkerTableRow &ds
     defs::wf_t contrib = dst_row.m_weight[ipart_replica];
     // recover pre-death value of replica population (on average)
     contrib /= 1.0 - prop.tau() * (dst_row.m_hdiag - prop.m_shift.m_values[ipart_replica]);
-    contrib = consts::conj(contrib);
+    contrib = arith::conj(contrib);
     contrib *= recv_row.m_src_weight;
     make_contribs(recv_row.m_src_mbf, dst_row.m_mbf, contrib);
 }
@@ -263,10 +263,9 @@ defs::ham_comp_t Rdms::get_energy(const FrmHam& ham) const {
     e2 = mpi::all_sum(e2);
     trace = mpi::all_sum(trace);
     DEBUG_ASSERT_GT(std::abs(trace), 1e-14, "RDM trace should be non-zero");
-    const auto norm = consts::real(trace) / integer::nspair(m_nelec);
-    REQUIRE_NEARLY_EQ(norm / m_total_norm.m_reduced, 1.0, 1e-8,
-                 "2RDM norm should match total of sampled diagonal contributions");
-    return consts::real(ham.m_e_core) + (consts::real(e1) + consts::real(e2)) / norm;
+    const auto norm = arith::real(trace) / integer::nspair(m_nelec);
+    REQUIRE_NEARLY_EQ(norm, m_total_norm.m_reduced, "2RDM norm should match total of sampled diagonal contributions");
+    return arith::real(ham.m_e_core) + (arith::real(e1) + arith::real(e2)) / norm;
 }
 
 defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exsig) const {
@@ -302,8 +301,8 @@ defs::ham_comp_t Rdms::get_energy(const FrmBosHam &ham, size_t nelec, size_t exs
     e_uncoupled/=nelec;
     e_coupled = mpi::all_sum(e_coupled);
     auto e = (e_uncoupled + e_coupled) / m_total_norm.m_reduced;
-    REQUIRE_NEARLY_EQ(consts::imag(e), 0.0, 1e-12, "energy should be purely real");
-    return consts::real(e);
+    REQUIRE_NEARLY_EQ(datatype::imag(e), 0.0, 1e-12, "energy should be purely real");
+    return datatype::real(e);
 #endif
 }
 
@@ -322,6 +321,6 @@ defs::ham_comp_t Rdms::get_energy(const BosHam &ham) const {
         e += rdm_element*ham.get_coeff_0011(n, m);
     }
     e = mpi::all_sum(e) / m_total_norm.m_reduced;
-    REQUIRE_TRUE(consts::nearly_zero(consts::imag(e), 1e-12), "energy should be purely real")
-    return consts::real(e);
+    REQUIRE_TRUE(fptol::numeric_real(e), "energy should be purely real")
+    return arith::real(e);
 }

@@ -107,7 +107,7 @@ namespace comparators {
     template<typename T>
     static std::function<bool(const T &, const T &)> make_value_cmp_fn(bool absval, bool largest) {
         // decide category of the given type:
-        constexpr size_t category = consts::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
+        constexpr size_t category = datatype::is_complex<T>() ? Only : (std::is_unsigned<T>::value ? Invalid : Any);
         // use this category for tagged dispatch
         return make_value_cmp_fn<T>(absval, largest, Int<category>());
     }

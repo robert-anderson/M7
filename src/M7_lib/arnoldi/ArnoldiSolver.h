@@ -208,9 +208,9 @@ public:
 
     T real_eigenvalue(size_t i) override {
         auto z = complex_eigenvalue(i);
-        if (!consts::nearly_zero(z.imag()))
+        if (!fptol::numeric_zero(z.imag()))
             log::warn("taking real part of eigenvalue with non-zero imaginary part");
-        return consts::real(complex_eigenvalue(i));
+        return arith::real(complex_eigenvalue(i));
     }
 
     std::complex<T> complex_eigenvalue(size_t i) override {

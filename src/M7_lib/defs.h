@@ -80,11 +80,6 @@ namespace defs {
 
     constexpr size_t nbyte_word = sizeof(size_t);
     constexpr size_t nbit_word = CHAR_BIT * nbyte_word;
-    /**
-     * Hamiltonian-parametrising coefficients with magnitude below this value are considered to be zero, and wherever
-     * equality between such values is to be asserted, this same tolerance is applied
-     */
-    constexpr ham_comp_t helem_tol = 1e-9;
 
     /**
      * "exsigs", short for "excitation signatures", encode in a single word the number of each type of second-quantised

@@ -18,7 +18,7 @@ bool FrmBosExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem, defs::helem_tol);
+    return ham::is_significant(helem);
 }
 
 bool FrmBosExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob,

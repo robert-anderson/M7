@@ -16,7 +16,9 @@ defs::ham_t FrmHam::get_element(const field::FrmOnv &onv) const {
 }
 
 defs::ham_comp_t FrmHam::get_energy(const field::FrmOnv &onv) const {
-    return consts::real(get_element_0000(onv));
+    auto elem = get_element_0000(onv);
+    DEBUG_ASSERT_TRUE(fptol::numeric_real(elem), "energies should be purely real");
+    return arith::real(elem);
 }
 
 defs::ham_t FrmHam::get_element(const field::FrmOnv &onv, const conn::FrmOnv &conn) const {

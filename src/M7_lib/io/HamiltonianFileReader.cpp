@@ -20,7 +20,7 @@ HamiltonianFileReader::HamiltonianFileReader(const std::string &fname, size_t ni
         m_complex_valued(m_ncolumn==nind+2) {
     REQUIRE_GT(m_ncolumn, nind, "not enough columns in body of file "+fname);
     REQUIRE_LE(m_ncolumn, nind+2, "too many columns in body of file "+fname);
-    if (!consts::is_complex<defs::ham_t>()){
+    if (!datatype::is_complex<defs::ham_t>()){
         REQUIRE_FALSE(m_complex_valued, "can't read complex-valued array into a real container");
     }
 }

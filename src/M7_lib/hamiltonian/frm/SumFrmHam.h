@@ -36,9 +36,9 @@ public:
          */
         auto& h1_base = static_cast<const FrmHam&>(m_h1);
         auto& h2_base = static_cast<const FrmHam&>(m_h2);
-        m_contribs_1100 = ham_data::TermContribs(h1_base.m_contribs_1100, h2_base.m_contribs_1100);
-        m_contribs_2200 = ham_data::TermContribs(h1_base.m_contribs_2200, h2_base.m_contribs_2200);
-        m_kramers_attrs = ham_data::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
+        m_contribs_1100 = ham::TermContribs(h1_base.m_contribs_1100, h2_base.m_contribs_1100);
+        m_contribs_2200 = ham::TermContribs(h1_base.m_contribs_2200, h2_base.m_contribs_2200);
+        m_kramers_attrs = ham::KramersAttributes(h1_base.m_kramers_attrs, h2_base.m_kramers_attrs);
     }
 
     defs::ham_t get_coeff_1100(size_t a, size_t i) const override {

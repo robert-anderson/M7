@@ -61,7 +61,7 @@ namespace excit_gen_tester {
             conn_t conn(m_h.m_basis.size());
             auto body_fn = [&]() {
                 auto helem = m_h.get_element(src_mbf, conn);
-                if (consts::nearly_zero(helem, defs::helem_tol)) return;
+                if (!ham::is_significant(helem)) return;
                 work_inds = conn;
                 // if this key is already in the table then the iterator is emitting duplicate connections!
                 DEBUG_ASSERT_EQ(*m_results[work_inds], ~0ul, "row should not already be mapped");
@@ -93,10 +93,10 @@ namespace excit_gen_tester {
                     ++nnull;
                     continue;
                 }
-                if (consts::nearly_zero(prob)) return {"non-null excitation generated with zero prob!"};
-                if (!consts::nearly_equal(prob, m_excit_gen.prob(src_mbf, conn)))
+                if (fptol::numeric_zero(prob)) return {"non-null excitation generated with zero prob!"};
+                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn)))
                     return {"prob of connection doesn't match prob resulting from the draw method"};
-                if (!consts::nearly_equal(prob, m_excit_gen.prob(src_mbf, conn, helem)))
+                if (!fptol::numeric_equal(prob, m_excit_gen.prob(src_mbf, conn, helem)))
                     return {"prob of connection doesn't match prob resulting from the draw method given helem"};
                 if (conn.exsig()!=exsig) return {"generated excitation has the wrong exsig"};
                 work_inds = conn;
@@ -105,7 +105,7 @@ namespace excit_gen_tester {
                 row.jump(irow);
                 row.m_occur++;
                 row.m_weight += 1 / prob;
-                if (!consts::nearly_equal(defs::ham_t(row.m_helem), helem))
+                if (!fptol::numeric_equal(defs::ham_t(row.m_helem), helem))
                     return {"excit gen returned the wrong H matrix element"};
             }
             return {nnull};

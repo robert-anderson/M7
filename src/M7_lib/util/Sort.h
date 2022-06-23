@@ -21,7 +21,7 @@ namespace utils {
                     };
                 else
                     return [getter_fn](size_t i1, size_t i2) {
-                        return consts::real(getter_fn(i1)) < consts::real(getter_fn(i2));
+                        return arith::real(getter_fn(i1)) < arith::real(getter_fn(i2));
                     };
             } else {
                 if (abs_val)
@@ -30,7 +30,7 @@ namespace utils {
                     };
                 else
                     return [getter_fn](size_t i1, size_t i2) {
-                        return consts::real(getter_fn(i1)) > consts::real(getter_fn(i2));
+                        return arith::real(getter_fn(i1)) > arith::real(getter_fn(i2));
                     };
             }
         }

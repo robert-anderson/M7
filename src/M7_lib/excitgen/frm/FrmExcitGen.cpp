@@ -22,7 +22,7 @@ bool FrmExcitGen::draw_h_frm(const size_t &exsig, const field::FrmOnv &src, defs
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem, defs::helem_tol);
+    return ham::is_significant(helem);
 }
 
 bool FrmExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src, defs::prob_t &prob,
@@ -30,7 +30,7 @@ bool FrmExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src
     auto result = draw(exsig, src.m_frm, prob, conn.m_frm);
     if (!result) return false;
     helem = m_h.get_element(src.m_frm, conn.m_frm);
-    return !consts::nearly_zero(helem, defs::helem_tol);
+    return ham::is_significant(helem);
 }
 
 bool FrmExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob,

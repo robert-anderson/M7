@@ -216,22 +216,22 @@ namespace integrals_2e {
 
         bool set(size_t a, size_t b, size_t i, size_t j, T elem) override {
             // any compiler should statically execute this conditional
-            if (!consts::is_complex<T>())
+            if (!datatype::is_complex<T>())
                 return m_data.set_data(m_indexer.index_only(a, b, i, j), elem);
             else {
                 const auto pair = m_indexer.index_and_conj(a, b, i, j);
-                return m_data.set_data(pair.first, pair.second ? consts::conj(elem) : elem);
+                return m_data.set_data(pair.first, pair.second ? arith::conj(elem) : elem);
             }
         }
 
         T get(size_t a, size_t b, size_t i, size_t j) const override {
             // any compiler should statically execute this conditional
-            if (!consts::is_complex<T>())
+            if (!datatype::is_complex<T>())
                 return m_data.get_data(m_indexer.index_only(a, b, i, j));
             else {
                 const auto pair = m_indexer.index_and_conj(a, b, i, j);
                 const auto element = m_data.get_data(pair.first);
-                return pair.second ? consts::conj(element) : element;
+                return pair.second ? arith::conj(element) : element;
             }
         }
 

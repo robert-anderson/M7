@@ -2,7 +2,7 @@
 // Created by Robert J. Anderson on 08/03/2022.
 //
 
-#include "gtest/gtest.h"
+#include "test_core/defs.h"
 #include "M7_lib/hamiltonian/bos/InteractingBoseGasBosHam.h"
 #include "M7_lib/hamiltonian/Hamiltonian.h"
 
@@ -14,5 +14,5 @@ TEST(InteractingBosGasBosHam, DiagonalMatrixElements) {
     mbf = {0, 0, 0, 0, 0, 0, 3};
     defs::ham_t helem;
     helem = ham_src.get_element(mbf);
-    ASSERT_TRUE(consts::nearly_equal(helem, 5.07));
+    ASSERT_NEARLY_EQ(helem, 5.07);
 }

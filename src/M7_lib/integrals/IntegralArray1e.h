@@ -78,22 +78,22 @@ namespace integrals_1e {
 
         bool set(size_t a, size_t i, T elem) override {
             // any compiler should statically execute this conditional
-            if (!consts::is_complex<T>())
+            if (!datatype::is_complex<T>())
                 return m_data.set_data(m_indexer.index_only(a, i), elem);
             else {
                 const auto pair = m_indexer.index_and_conj(a, i);
-                return m_data.set_data(pair.first, pair.second ? consts::conj(elem) : elem);
+                return m_data.set_data(pair.first, pair.second ? arith::conj(elem) : elem);
             }
         }
 
         T get(size_t a, size_t i) const override {
             // any compiler should statically execute this conditional
-            if (!consts::is_complex<T>())
+            if (!datatype::is_complex<T>())
                 return m_data.get_data(m_indexer.index_only(a, i));
             else {
                 const auto pair = m_indexer.index_and_conj(a, i);
                 const auto element = m_data.get_data(pair.first);
-                return pair.second ? consts::conj(element) : element;
+                return pair.second ? arith::conj(element) : element;
             }
         }
 

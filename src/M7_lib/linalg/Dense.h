@@ -78,19 +78,19 @@ extern "C" void zgemm_(const char *transa, const char *transb,
 
 namespace dense {
 
-
+    using namespace fptol;
     template<typename T>
-    static bool nearly_equal(const T* v1, const T* v2, size_t size, consts::comp_t<T> eps=consts::eps<T>()){
-        for (size_t i=0ul; i<size; ++i) {
-            if (!consts::nearly_equal(v1[i], v2[i], eps)) return false;
+    static bool nearly_equal(const T* v1, const T* v2, size_t size, comp_t<T> atol = default_atol_near<T>()) {
+        for (size_t i = 0ul; i < size; ++i) {
+            if (!fptol::nearly_equal(v1[i], v2[i], comp_t<T>(0), atol)) return false;
         }
         return true;
     }
 
     template<typename T>
-    static bool nearly_equal(const std::vector<T> v1, const std::vector<T> v2, consts::comp_t<T> eps=consts::eps<T>()){
+    static bool nearly_equal(const std::vector<T> v1, const std::vector<T> v2, comp_t<T> atol = default_atol_near<T>()) {
         REQUIRE_EQ(v1.size(), v2.size(), "vectors must have same number of elements to be compared");
-        return nearly_equal(v1.data(), v2.data(), v1.size(), eps);
+        return nearly_equal(v1.data(), v2.data(), v1.size(), atol);
     }
 
 
@@ -181,10 +181,10 @@ namespace dense {
             m_buffer.assign(m_buffer.size(), 0);
         }
 
-        bool nearly_equal(const Matrix<T>& other, consts::comp_t<T> eps=consts::eps<T>()) const {
+        bool nearly_equal(const Matrix<T>& other, arith::comp_t<T> atol= fptol::default_atol_near<T>()) const {
             REQUIRE_TRUE(m_buffer.size()==other.m_buffer.size(),
                          "matrices must have same number of elements to be compared");
-            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), eps);
+            return dense::nearly_equal(ptr(), other.ptr(), m_buffer.size(), atol);
         }
 
     protected:
@@ -218,7 +218,7 @@ namespace dense {
          * in-place complex conjugation
          */
         void conj() {
-            for (auto& v: m_buffer) v = consts::conj(v);
+            for (auto& v: m_buffer) v = arith::conj(v);
         }
 
         /**

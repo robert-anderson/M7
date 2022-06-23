@@ -26,7 +26,7 @@ bool BosExcitGen::draw_h_frmbos(const size_t &exsig, const field::FrmBosOnv &src
     auto result = draw(exsig, src.m_bos, prob, conn.m_bos);
     if (!result) return false;
     helem = m_h.get_element(src.m_bos, conn.m_bos);
-    return !consts::nearly_zero(helem, defs::helem_tol);
+    return ham::is_significant(helem);
 }
 
 bool BosExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, defs::prob_t &prob, defs::ham_t &helem,
@@ -34,5 +34,5 @@ bool BosExcitGen::draw_h_bos(const size_t &exsig, const field::BosOnv &src, defs
     auto result = draw(exsig, src, prob, conn);
     if (!result) return false;
     helem = m_h.get_element(src, conn);
-    return !consts::nearly_zero(helem, defs::helem_tol);
+    return ham::is_significant(helem);
 }

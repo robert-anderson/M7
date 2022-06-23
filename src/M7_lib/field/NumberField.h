@@ -53,7 +53,7 @@ struct NdNumberField : NumberFieldBase {
 
     NdNumberField(Row *row, NdFormat<nind> format, std::string name = "") :
             NumberFieldBase(row, sizeof(T), format.m_nelement,
-                            consts::is_complex<T>(), typeid(T), name), m_format(format) {}
+                            datatype::is_complex<T>(), typeid(T), name), m_format(format) {}
 
     NdNumberField(const NdNumberField &other) : NumberFieldBase(other), m_format(other.m_format){}
 

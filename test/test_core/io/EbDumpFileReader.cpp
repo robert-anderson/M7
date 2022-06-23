@@ -4,6 +4,7 @@
 
 #include "M7_lib/io/EbdumpFileReader.h"
 #include "gtest/gtest.h"
+#include "test_core/defs.h"
 
 TEST(EbDumpFileReader, ReadFile){
     std::string fname = PROJECT_ROOT"/assets/Hubbard_U4_4site/EBDUMP";
@@ -18,19 +19,19 @@ TEST(EbDumpFileReader, ReadFile){
     test_inds = {0, 0, 0};
     file_reader.next(inds, value);
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(value), -0.01832284815866287);
+    ASSERT_NEARLY_EQ(value, -0.01832284815866287);
 
     // scan to arbitrary element
     for (size_t i=0; i<18; ++i) file_reader.next(inds, value);
     test_inds = {1, 0, 2};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(value), -0.009244953059296356);
+    ASSERT_NEARLY_EQ(value, -0.009244953059296356);
 
     // scan to final element
     while(file_reader.next(inds, value)){}
     test_inds = {3, 3, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(value), -0.09669569380966529);
+    ASSERT_NEARLY_EQ(value, -0.09669569380966529);
 }
 
 TEST(EbDumpFileReader, SpinResolved){
@@ -48,19 +49,19 @@ TEST(EbDumpFileReader, SpinResolved){
     test_inds = {0, 0, 3};
     file_reader.next(inds, value);
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(value), 0.07953916361235415);
+    ASSERT_NEARLY_EQ(value, 0.07953916361235415);
 
     // scan to arbitrary element
     for (size_t i=0; i<18; ++i) file_reader.next(inds, value);
     // 3 1 7 -> 2 0 6 -> 2 0 3
     test_inds = {2, 0, 3};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(value), 0.1575692477527167);
+    ASSERT_NEARLY_EQ(value, 0.1575692477527167);
 
     // scan to final element
     while(file_reader.next(inds, value)){}
     // 6 12 6 -> 5 11 5 -> 5 11 8
     test_inds = {5, 11, 8};
     ASSERT_TRUE(std::equal(inds.begin(), inds.end(), test_inds.begin()));
-    ASSERT_FLOAT_EQ(consts::real(value), -0.03197691666078238);
+    ASSERT_NEARLY_EQ(value, -0.03197691666078238);
 }

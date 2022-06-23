@@ -20,7 +20,7 @@ TEST(Aliaser, DistributionCheck) {
     }
     auto norm = std::accumulate(probs.begin(), probs.end(), 0.0);
     for (size_t i = 0ul; i < probs.size(); ++i) {
-        if (consts::nearly_zero(probs[i])) ASSERT_EQ(results[i], 0);
+        if (fptol::numeric_zero(probs[i])) ASSERT_EQ(results[i], 0);
         else ASSERT_LT(std::abs(1.0 - (float(results[i]) / float(n_attempts)) / (probs[i] / norm)), 0.01);
     }
 }

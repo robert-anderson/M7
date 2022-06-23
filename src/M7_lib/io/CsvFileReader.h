@@ -57,9 +57,9 @@ public:
     template<typename T>
     static void parse(c_iter_token_t begin, c_iter_token_t end, std::complex<T>& v){
         static_assert(std::is_arithmetic<T>::value, "can only parse arithmetic types");
-        parse(*begin, consts::real_ref(v));
+        parse(*begin, arith::real_ref(v));
         if (begin+1==end) return;
-        parse(*(begin+1), consts::imag_ref(v));
+        parse(*(begin+1), arith::imag_ref(v));
     }
 
     template<typename T>
@@ -78,9 +78,9 @@ public:
         v.clear();
         for (auto it = begin; it != end; ++it) {
             v.emplace_back();
-            parse(*it, consts::real_ref(v.back()));
+            parse(*it, arith::real_ref(v.back()));
             if (++it == end) return;
-            parse(*it, consts::imag_ref(v.back()));
+            parse(*it, arith::imag_ref(v.back()));
         }
     }
 

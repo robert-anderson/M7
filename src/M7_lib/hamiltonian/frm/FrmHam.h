@@ -58,17 +58,17 @@ struct FrmHam : HamOpTerm {
      * zero or non-zero status of exsig contributions (0000, 1100) to the term of ranksig 1100 i.e. whether the
      * one-electron Hamiltonian has non-zero coefficients corresponding to diagonal elements, and/or single excitations
      */
-    ham_data::TermContribs m_contribs_1100;
+    ham::TermContribs m_contribs_1100;
     /**
      * zero or non-zero status of exsig contributions (0000, 1100, 2200) to the term of ranksig 2200 i.e. whether the
      * two-electron Hamiltonian has non-zero coefficients corresponding to diagonal elements, and/or single excitations,
      * and/or double excitations
      */
-    ham_data::TermContribs m_contribs_2200;
+    ham::TermContribs m_contribs_2200;
     /**
      * Time reversal symmetry by term rank in the many-body Hamiltonian
      */
-    ham_data::KramersAttributes m_kramers_attrs;
+    ham::KramersAttributes m_kramers_attrs;
     /**
      * the only compile time constant depended upon by the Hamiltonian is ENABLE_COMPLEX. The program should still
      * behave properly if a real-valued Hamiltonian is provided to a binary with defs::ham_t compiled as a complex type.

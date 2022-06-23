@@ -4,7 +4,7 @@
 
 #include "HamiltonianData.h"
 
-size_t ham_data::TermContribs::ind(size_t exsig) const {
+size_t ham::TermContribs::ind(size_t exsig) const {
     if (!contribs_to(exsig, m_ranksig)) return ~0ul;
     size_t ifrm = decode_nfrm_cre(exsig);
     DEBUG_ASSERT_LE(ifrm, m_nexsig_contrib_frm, "invalid number of like-indexed fermion operators");
@@ -13,21 +13,21 @@ size_t ham_data::TermContribs::ind(size_t exsig) const {
     return ifrm * m_nexsig_contrib_bos + ibos;
 }
 
-ham_data::TermContribs::TermContribs(size_t ranksig) :
+ham::TermContribs::TermContribs(size_t ranksig) :
         m_ranksig(ranksig), m_basesig(base_exsig(ranksig)),
         m_nexsig_contrib_frm(ncontrib_frm(ranksig)), m_nexsig_contrib_bos(ncontrib_bos(ranksig)),
         m_exsig_nonzero(m_nexsig_contrib_frm * m_nexsig_contrib_bos, false) {}
 
-ham_data::TermContribs::TermContribs(const ham_data::TermContribs &other) : TermContribs(other.m_ranksig){}
+ham::TermContribs::TermContribs(const ham::TermContribs &other) : TermContribs(other.m_ranksig){}
 
-ham_data::TermContribs &ham_data::TermContribs::operator=(const ham_data::TermContribs &other) {
+ham::TermContribs &ham::TermContribs::operator=(const ham::TermContribs &other) {
     REQUIRE_EQ(other.m_ranksig, m_ranksig, "incompatible ranks");
     REQUIRE_EQ(other.m_basesig, m_basesig, "incompatible base signatures");
     m_exsig_nonzero = other.m_exsig_nonzero;
     return *this;
 }
 
-ham_data::TermContribs::TermContribs(const ham_data::TermContribs &contribs_1, const ham_data::TermContribs &contribs_2)
+ham::TermContribs::TermContribs(const ham::TermContribs &contribs_1, const ham::TermContribs &contribs_2)
         : TermContribs(contribs_1.m_ranksig){
     REQUIRE_EQ(contribs_1.m_ranksig, contribs_2.m_ranksig, "incompatible ranks");
     auto base_nfrm_cre = decode_nfrm_cre(m_basesig);
@@ -50,28 +50,28 @@ ham_data::TermContribs::TermContribs(const ham_data::TermContribs &contribs_1, c
     }
 }
 
-void ham_data::TermContribs::set_nonzero(size_t exsig) {
+void ham::TermContribs::set_nonzero(size_t exsig) {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
     m_exsig_nonzero[i] = true;
 }
 
-bool ham_data::TermContribs::is_nonzero(size_t exsig) const {
+bool ham::TermContribs::is_nonzero(size_t exsig) const {
     auto i = ind(exsig);
     REQUIRE_NE(i, ~0ul, "exsig doesn't contribute to this ranksig");
     return m_exsig_nonzero[i];
 }
 
-bool ham_data::TermContribs::any_nonzero() const {
+bool ham::TermContribs::any_nonzero() const {
     return std::any_of(m_exsig_nonzero.cbegin(), m_exsig_nonzero.cend(), [](bool b){return b;});
 }
 
-bool ham_data::KramersAttributes::conserving() const {
+bool ham::KramersAttributes::conserving() const {
     return m_conserving_singles && m_conserving_doubles;
 }
 
-ham_data::KramersAttributes::KramersAttributes(const ham_data::KramersAttributes &attrs_1,
-                                               const ham_data::KramersAttributes &attrs_2) {
+ham::KramersAttributes::KramersAttributes(const ham::KramersAttributes &attrs_1,
+                                          const ham::KramersAttributes &attrs_2) {
     m_conserving_singles = attrs_1.m_conserving_singles && attrs_2.m_conserving_singles;
     m_conserving_doubles = attrs_1.m_conserving_doubles && attrs_2.m_conserving_doubles;
 }

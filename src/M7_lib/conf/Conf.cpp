@@ -243,12 +243,12 @@ conf::Propagator::Propagator(Group *parent) :
         m_semistochastic(this) {}
 
 void conf::Propagator::verify() {
-    if (consts::nearly_zero(m_min_death_mag.get())) {
+    if (m_min_death_mag.get()==0.0) {
         m_min_death_mag = m_min_spawn_mag.get();
         log::warn("{} was zero, defaulting to the specified value of {}",
                   m_min_death_mag.m_yaml_path.to_string(), m_min_spawn_mag.m_yaml_path.to_string());
     }
-    if (consts::nearly_zero(m_max_bloom.get())) {
+    if (m_max_bloom.get()==0.0) {
         m_max_bloom = m_nadd.get();
         log::warn("{} was zero, defaulting to the specified value of {}",
                   m_max_bloom.m_yaml_path.to_string(), m_nadd.m_yaml_path.to_string());

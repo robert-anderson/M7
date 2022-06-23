@@ -32,10 +32,10 @@ TEST(DenseTcFermionHamiltonian, TcBe631G) {
     // std::cout.precision(17);
     // std::cout << evals[0] << std::endl; // print ground state
     // compare to NECI calculation
-    ASSERT_NEARLY_EQ(evals[0].real(), -14.666331930789127, 1e-8);
+    ASSERT_NEARLY_EQ_TOL(evals[0].real(), -14.666331930789127, 1e-8);
     // check that all eigenvalues have zero imaginary component
     for (unsigned int i=0; i < evals.size(); ++i) {
-        ASSERT_NEARLY_EQ(evals[i].imag(), 0.0, 1e-10);
+        ASSERT_NEARLY_EQ_TOL(evals[i].imag(), 0.0, 1e-10);
     }
 }
 

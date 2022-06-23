@@ -25,7 +25,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
     auto body = [&]() {
         DEBUG_ASSERT_NE(conn.exsig(), 0ul, "diagonal connection generated");
         auto helement = m_ham.get_element(src_mbf, conn);
-        if (m_only_nonzero_h_spawns && consts::nearly_zero(helement, helem_tol)) return;
+        if (m_only_nonzero_h_spawns && ! ham::is_significant(helement)) return;
         auto& dst_mbf = m_dst[src_mbf];
         conn.apply(src_mbf, dst_mbf);
         m_mag_log.log(0, helement, 1.0);
@@ -39,7 +39,7 @@ void ExactPropagator::off_diagonal(Wavefunction &wf, const size_t &ipart) {
 void ExactPropagator::diagonal(Wavefunction &wf, const size_t &ipart) {
     auto &row = wf.m_store.m_row;
     const defs::ham_comp_t &hdiag = row.m_hdiag;
-    DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(row.m_mbf), consts::eps(hdiag), "incorrect diagonal H element cached");
+    DEBUG_ASSERT_NEARLY_EQ(hdiag, m_ham.get_energy(row.m_mbf), "incorrect diagonal H element cached");
     wf.scale_weight(ipart, 1 - (hdiag - m_shift[ipart]) * tau());
 }
 

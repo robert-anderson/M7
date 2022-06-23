@@ -119,7 +119,7 @@ TEST(TranscorrelatedFermionHamiltonian, check_nonhermiticity) {
     // 0.19621434645836822E-002 - -0.63747363394572173E-002
     auto el2 = ham.get_coeff_2200(1, 6, 0, 2);
 
-    ASSERT_FALSE(consts::nearly_equal(el1, el2));
+    ASSERT_FALSE(datatype::nearly_equal(el1, el2));
 }
 
 /**

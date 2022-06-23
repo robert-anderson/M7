@@ -2,7 +2,7 @@
 // Created by Robert J. Anderson on 16/06/2020.
 //
 
-#include <gtest/gtest.h>
+#include <test_core/defs.h>
 #include "M7_lib/linalg/Dense.h"
 
 TEST(Dense, Transpose) {
@@ -373,7 +373,7 @@ TEST(Dense, SingleInnerProduct) {
     const T tol = 1e-5;
     std::vector<T> p = {0.7, 3. , 2.8, 2.9, 3.7};
     std::vector<T> q = {0.6, 0.8, 0. , 2.6, 4. };
-    ASSERT_TRUE(consts::nearly_equal(dense::inner_product(p, q), T(25.16), tol));
+    ASSERT_NEARLY_EQ_TOL(dense::inner_product(p, q), T(25.16), T(0.0), tol);
 }
 
 TEST(Dense, DoubleInnerProduct) {
@@ -381,7 +381,7 @@ TEST(Dense, DoubleInnerProduct) {
     const T tol = 1e-11;
     std::vector<T> p = {0.7, 3. , 2.8, 2.9, 3.7};
     std::vector<T> q = {0.6, 0.8, 0. , 2.6, 4. };
-    ASSERT_TRUE(consts::nearly_equal(dense::inner_product(p, q), T(25.16), tol));
+    ASSERT_NEARLY_EQ_TOL(dense::inner_product(p, q), T(25.16), T(0.0), tol);
 }
 
 TEST(Dense, ComplexSingleInnerProduct) {
@@ -390,11 +390,9 @@ TEST(Dense, ComplexSingleInnerProduct) {
     std::vector<std::complex<T>> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
     std::vector<std::complex<T>> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_TRUE(consts::nearly_equal(r.real(), T(-0.41), tol));
-    ASSERT_TRUE(consts::nearly_equal(r.imag(), T(51.24), tol));
+    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(-0.41, 51.24), T(0.0), tol);
     r = dense::inner_product(p, q, true);
-    ASSERT_TRUE(consts::nearly_equal(r.real(), T(50.73), tol));
-    ASSERT_TRUE(consts::nearly_equal(r.imag(), T(10.48), tol));
+    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(50.73, 10.48), T(0.0), tol);
 }
 
 TEST(Dense, ComplexDoubleInnerProduct) {
@@ -403,11 +401,9 @@ TEST(Dense, ComplexDoubleInnerProduct) {
     std::vector<std::complex<T>> p = {{0.7, 1.6}, {3.0, 0.1}, {2.8, 3.0}, {2.9, 1.9}, {3.7, 3.6}};
     std::vector<std::complex<T>> q = {{0.6, 4.0}, {0.8, 2.9}, {0.0, 3.5}, {2.6, 1.0}, {4.0, 1.8}};
     auto r = dense::inner_product(p, q);
-    ASSERT_TRUE(consts::nearly_equal(r.real(), T(-0.41), tol));
-    ASSERT_TRUE(consts::nearly_equal(r.imag(), T(51.24), tol));
+    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(-0.41, 51.24), T(0.0), tol);
     r = dense::inner_product(p, q, true);
-    ASSERT_TRUE(consts::nearly_equal(r.real(), T(50.73), tol));
-    ASSERT_TRUE(consts::nearly_equal(r.imag(), T(10.48), tol));
+    ASSERT_NEARLY_EQ_TOL(r, std::complex<T>(50.73, 10.48), T(0.0), tol);
 }
 
 
@@ -432,7 +428,7 @@ TEST(Dense, RealSymEig) {
 
     std::vector<T> evals_chk = {-2.84695223, -0.7346574, 4.90333541, 8.67827421};
 
-    for (size_t i = 0ul; i < n; ++i) ASSERT_FLOAT_EQ(evals[i], evals_chk[i]);
+    for (size_t i = 0ul; i < n; ++i) ASSERT_NEARLY_EQ(evals[i], evals_chk[i]);
     /*
      * [[ 0.42674891, -0.30080954, -0.59964891, -0.6064818 ],
        [ 0.81540297, -0.2009709 ,  0.51855174,  0.16072585],
